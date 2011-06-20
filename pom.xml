@@ -7,13 +7,39 @@
   <groupId>de.ecsec.ecard.client</groupId>
   <artifactId>ecard-client</artifactId>
   <packaging>pom</packaging>
-  <version>0.1</version>
+  <version>0.1-SNAPSHOT</version>
   <name>eCard Client</name>
 
   <modules>
     <module>event-manager</module>
     <module>applet</module>
   </modules>
+
+  <distributionManagement>
+    <repository>
+      <id>ecsec-repos</id>
+      <name>Ecsec Release Repo</name>
+      <url>http://mvn.vserver-001.urospace.de/content/repositories/releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>ecsec-repos</id>
+      <name>Ecsec Snapshot Repo</name>
+      <url>http://mvn.vserver-001.urospace.de/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+  <repositories>
+    <repository>
+      <id>ecsec-repos</id>
+      <name>Ecsec Repos</name>
+      <url>http://mvn.vserver-001.urospace.de/content/groups/public</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>ecsec-repos</id>
+      <url>http://mvn.vserver-001.urospace.de/content/groups/public</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <build>
     <pluginManagement>

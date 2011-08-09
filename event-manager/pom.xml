@@ -14,4 +14,16 @@
   <artifactId>event-manager</artifactId>
   <name>Event Manager</name>
 
+  <dependencies>
+    <dependency>
+      <groupId>de.ecsec.core</groupId>
+      <artifactId>common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>de.ecsec.core</groupId>
+      <artifactId>recognition</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
 </project>

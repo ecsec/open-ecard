@@ -13,5 +13,99 @@
   <groupId>de.ecsec.ecard.client</groupId>
   <artifactId>applet</artifactId>
   <name>Applet</name>
+  
+  <build>
+    <plugins>
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-dependency-plugin</artifactId>
+	<executions>
+	  <execution>
+	    <id>unpack-dependencies</id>
+	    <phase>process-test-resources</phase>
+	    <goals>
+	      <goal>unpack-dependencies</goal>
+	    </goals>
+	    <configuration>
+	      <!-- <includes>**/*.class</includes> -->
+	      <!-- <excludes></excludes> -->
+	      <!-- <excludeGroupIds></excludeGroupIds> -->
+	      <includeGroupIds>de.ecsec.core,de.ecsec.core.environment,de.ecsec.core.wsdef,de.ecsec.ecard.client,de.ecsec.core.transport,org.safehaus.jug</includeGroupIds>
+	      <outputDirectory>${project.build.directory}/classes</outputDirectory>
+	      <overWriteReleases>false</overWriteReleases>
+	      <overWriteSnapshots>true</overWriteSnapshots>
+	    </configuration>
+	  </execution>
+	</executions>
+      </plugin>
+
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-jar-plugin</artifactId>
+        <version>2.3.1</version>
+	<configuration>
+	  <keystore>src/main/resources/keystore/ecStore</keystore>
+	  <storepass>DgN1CB0Ywy2W</storepass>
+          <alias>applet</alias>
+          <keypass>bHrjoV3j7ucq</keypass>
+	  <verify>true</verify>
+	  <jarPath>${project.build.directory}/${project.build.FinalName}.${project.packaging}</jarPath>
+	</configuration>
+	<executions>
+	  <execution>
+	    <phase>verify</phase>
+	    <goals>
+	      <goal>sign</goal>
+	    </goals>
+	  </execution>
+	</executions>
+      </plugin>
+    </plugins>
+  </build>
+  
+  <dependencies>
+    <dependency>
+      <groupId>de.ecsec.core</groupId>
+      <artifactId>common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>de.ecsec.core</groupId>
+      <artifactId>ifd</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>de.ecsec.core.sal</groupId>
+      <artifactId>micro-sal</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>de.ecsec.core.environment</groupId>
+      <artifactId>client</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>de.ecsec.core.wsdef</groupId>
+      <artifactId>wsdef-client</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>de.ecsec.ecard.client</groupId>
+      <artifactId>event-manager</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>de.ecsec.core.transport</groupId>
+      <artifactId>paos</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>java</groupId>
+      <artifactId>java-plugin</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${java.home}/lib/plugin.jar</systemPath>
+    </dependency>
+  </dependencies>
 
 </project>

@@ -29,6 +29,7 @@ import javax.swing.JApplet;
 public class ECardApplet extends JApplet {
 
     private static final Logger _logger = LogManager.getLogger(ECardApplet.class.getName());
+    
     private Thread worker;
     private ClientEnv env;
     private MicroSAL sal;
@@ -37,13 +38,17 @@ public class ECardApplet extends JApplet {
     private EventManager em;
     private PAOS paos;
     private JSEventCallback jsec;
+    
     private byte[] ctx;
     private boolean initialized;
     private boolean paramsPresent;
+    
     // applet parameters
     private String sessionId;
+    private String reportId;
     private String endpointUrl;
     private String redirectUrl;
+    private boolean recognizeCard;
     private boolean waitForCard;
 
     /**
@@ -88,7 +93,7 @@ public class ECardApplet extends JApplet {
         System.out.println("ECardApplet :: add PAOS to ClientEnv");
         env.addTransport("0", paos);
         System.out.println("ECardApplet :: create EventManager");
-        em = new EventManager(recognition, env, sessionId, ctx);
+        em = new EventManager(recognition, env, sessionId, ctx, recognizeCard);
         System.out.println("ECardApplet :: set EventManager in ClientEnv");
         env.setEventManager(em);
         System.out.println("ECardApplet :: create MicroSAL");
@@ -179,6 +184,10 @@ public class ECardApplet extends JApplet {
     public String getSessionId() {
         return sessionId;
     }
+    
+    public String getReportId() {
+        return reportId;
+    }
 
     public String getEndpointUrl() {
         return endpointUrl;
@@ -188,6 +197,10 @@ public class ECardApplet extends JApplet {
         return redirectUrl;
     }
 
+    public boolean recognizeCard() {
+        return recognizeCard;
+    }
+    
     public boolean waitForCard() {
         return waitForCard;
     }
@@ -204,8 +217,9 @@ public class ECardApplet extends JApplet {
         if (_logger.isLoggable(Level.FINER)) {
             _logger.entering(this.getClass().getName(), "setParams()");
         }
+        
+        // session Id
         String param = getParameter("sessionId");
-        // Session Id
         if (param != null) {
             sessionId = param;
             if (_logger.isLoggable(Level.CONFIG)) {
@@ -215,7 +229,21 @@ public class ECardApplet extends JApplet {
             paramsPresent = false;
             _logger.logp(Level.SEVERE, this.getClass().getName(), "setParams()", "sessionId not set.");
         }
-        // Endpoint URL
+        
+        // report Id, needed in CIF-TEST
+        param = getParameter("reportId");
+        if (param != null) {
+            reportId = param;
+            if (_logger.isLoggable(Level.CONFIG)) {
+                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "reportId set to " + param + ".", param);
+            }
+        } else {
+            if (_logger.isLoggable(Level.CONFIG)) {
+                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "reportId not set.");
+            }
+        }
+        
+        // endpoint URL
         param = getParameter("endpointUrl");
         if (param != null) {
             endpointUrl = param;
@@ -226,7 +254,8 @@ public class ECardApplet extends JApplet {
             paramsPresent = false;
             _logger.logp(Level.SEVERE, this.getClass().getName(), "setParams()", "endpointUrl not set.");
         }
-        // Redirect URL
+        
+        // redirect URL
         param = getParameter("redirectUrl");
         if (param != null) {
             redirectUrl = param;
@@ -238,11 +267,34 @@ public class ECardApplet extends JApplet {
                 _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "redirectUrl not set.");
             }
         }
-        // wait for card
+        
+        // enable or disable card recognition
+        param = getParameter("recognizeCard");
+        if (param != null) {
+            recognizeCard = Boolean.parseBoolean(param);
+            if (_logger.isLoggable(Level.CONFIG)) {
+                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "recognizeCard set to " + param + ".", param);
+            } else {
+                recognizeCard = true;
+                if (_logger.isLoggable(Level.CONFIG)) {
+                    _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "recognizeCard set to " + recognizeCard + ".");
+                }
+            }
+        }
+        
+        // enable or disable old SAL behaviour
         param = getParameter("waitForCard");
         if (param != null) {
             waitForCard = Boolean.parseBoolean(param);
+            if (_logger.isLoggable(Level.CONFIG)) {
+                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "waitForCard set to " + param + ".", param);
+            } else {
+                if (_logger.isLoggable(Level.CONFIG)) {
+                    _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "waitForCard not set.");
+                }
+            }
         }
+        
         if (_logger.isLoggable(Level.FINER)) {
             _logger.exiting(this.getClass().getName(), "setParams()");
         }

@@ -67,7 +67,7 @@ public class AppletWorker implements Runnable {
         }
         List<ConnectionHandleType> cHandles = applet.getMicroSAL().getConnectionHandles();
 
-        // TODO: Refactor - use EventManager
+        // TODO: use event system instead of polling mechanism
         if (applet.waitForCard()) {
             boolean cardPresent = false;
             while (!cardPresent) {

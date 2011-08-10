@@ -48,14 +48,17 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
     private Environment env;
     private String sessionId;
     private byte[] ctx;
+    private boolean recognize;
+    
     private ConcurrentSkipListMap<String, IFDStatusType> statusList;
     private EnumMap<EventType, Event> events;
     
-    public EventManager(CardRecognition cr, Environment env, String sessionId, byte[] ctx) {
+    public EventManager(CardRecognition cr, Environment env, String sessionId, byte[] ctx, boolean recognize) {
         this.cr = cr;
         this.env = env;
         this.sessionId = sessionId;
         this.ctx = ctx;
+        this.recognize = recognize;
         statusList = new ConcurrentSkipListMap<String, IFDStatusType>();
         events = new EnumMap<EventType, Event>(EventType.class);
         for (EventType type : EventType.values()) {
@@ -220,15 +223,19 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
     private ConnectionHandleType recognize(String ifdName, SlotStatusType slotStatus) {
         System.out.println("EventManager :: enter recognize(...)");
         ConnectionHandleType cHandle = null;
-        try {
-            RecognitionInfo info = cr.recognizeCard(ifdName, slotStatus.getIndex());
-            cHandle = makeConnectionHandle(ifdName, slotStatus.getIndex(), info);
-            notify(EventType.CARD_RECOGNIZED, cHandle);
-        } catch (RecognitionException ex) {
-            RecognitionInfo info = makeRecognitionInfo(ECardConstants.UNKNOWN_CARD, slotStatus.getATRorATS());
-            cHandle = makeConnectionHandle(ifdName, slotStatus.getIndex(), info);
-            notify(EventType.CARD_RECOGNIZED, cHandle);
-        }
+        if (recognize) {
+            try {
+                RecognitionInfo info = cr.recognizeCard(ifdName, slotStatus.getIndex());
+                cHandle = makeConnectionHandle(ifdName, slotStatus.getIndex(), info);
+                notify(EventType.CARD_RECOGNIZED, cHandle);
+                return cHandle;
+            } catch (RecognitionException ex) {
+                // do nothing here...
+            }
+        } 
+        RecognitionInfo info = makeRecognitionInfo(ECardConstants.UNKNOWN_CARD, slotStatus.getATRorATS());
+        cHandle = makeConnectionHandle(ifdName, slotStatus.getIndex(), info);
+        notify(EventType.CARD_RECOGNIZED, cHandle);
         System.out.println("EventManager :: exit recognize(...)");
         return cHandle;
     }
@@ -317,14 +324,6 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
         if (r.getResultMajor().equals(ECardConstants.Major.ERROR)) {
             throw new EventException(r);
         }
-    }
-    
-    public CardRecognition getCardRecognition() {
-        return cr;
-    }
-    
-    public String getSessionId() {
-        return sessionId;
     }
     
     public byte[] getContext() {

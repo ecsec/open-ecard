@@ -8,7 +8,6 @@ import iso.std.iso_iec._24727.tech.schema.WaitResponse;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.bind.JAXBException;
 
 /**
  *

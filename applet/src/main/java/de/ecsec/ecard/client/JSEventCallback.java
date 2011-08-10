@@ -4,7 +4,6 @@ import de.ecsec.core.common.enums.EventType;
 import de.ecsec.core.common.interfaces.EventCallback;
 import de.ecsec.core.common.util.Helper;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import java.applet.Applet;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import netscape.javascript.JSObject;
@@ -16,9 +15,11 @@ import netscape.javascript.JSObject;
  */
 public class JSEventCallback implements EventCallback {
 
+    private ECardApplet applet;
     private JSObject jso;
     
-    public JSEventCallback(Applet applet) {
+    public JSEventCallback(ECardApplet applet) {
+        this.applet = applet;
         jso = JSObject.getWindow(applet);
     }
     
@@ -44,6 +45,7 @@ public class JSEventCallback implements EventCallback {
         sb.append("\"").append("name").append("\"").append(":").append("\"").append(ifdName).append("\"").append(",");
         sb.append("\"").append("cardType").append("\"").append(":").append("\"").append(cardType).append("\"").append(",");
         sb.append("\"").append("eventType").append("\"").append(":").append("\"").append(eventType).append("\"");
+        sb.append("\"").append("reportId").append("\"").append(":").append("\"").append(applet.getReportId()).append("\"");
         sb.append("}");
         
         return sb.toString();

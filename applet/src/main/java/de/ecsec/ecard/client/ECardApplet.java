@@ -218,7 +218,10 @@ public class ECardApplet extends JApplet {
             _logger.entering(this.getClass().getName(), "setParams()");
         }
         
-        // session Id
+        //
+        // mandatory parameters
+        //
+        
         String param = getParameter("sessionId");
         if (param != null) {
             sessionId = param;
@@ -226,11 +229,26 @@ public class ECardApplet extends JApplet {
                 _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "sessionId set to " + param + ".", param);
             }
         } else {
-            paramsPresent = false;
             _logger.logp(Level.SEVERE, this.getClass().getName(), "setParams()", "sessionId not set.");
+            paramsPresent = false;
+            return;
+        }
+        param = getParameter("endpointUrl");
+        if (param != null) {
+            endpointUrl = param;
+            if (_logger.isLoggable(Level.CONFIG)) {
+                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "endpointUrl set to " + param + ".", param);
+            }
+        } else {
+            _logger.logp(Level.SEVERE, this.getClass().getName(), "setParams()", "endpointUrl not set.");
+            paramsPresent = false;
+            return;
         }
         
-        // report Id, needed in CIF-TEST
+        //
+        // optional parameters
+        //
+        
         param = getParameter("reportId");
         if (param != null) {
             reportId = param;
@@ -242,20 +260,6 @@ public class ECardApplet extends JApplet {
                 _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "reportId not set.");
             }
         }
-        
-        // endpoint URL
-        param = getParameter("endpointUrl");
-        if (param != null) {
-            endpointUrl = param;
-            if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "endpointUrl set to " + param + ".", param);
-            }
-        } else {
-            paramsPresent = false;
-            _logger.logp(Level.SEVERE, this.getClass().getName(), "setParams()", "endpointUrl not set.");
-        }
-        
-        // redirect URL
         param = getParameter("redirectUrl");
         if (param != null) {
             redirectUrl = param;
@@ -267,31 +271,27 @@ public class ECardApplet extends JApplet {
                 _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "redirectUrl not set.");
             }
         }
-        
-        // enable or disable card recognition
         param = getParameter("recognizeCard");
         if (param != null) {
             recognizeCard = Boolean.parseBoolean(param);
             if (_logger.isLoggable(Level.CONFIG)) {
                 _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "recognizeCard set to " + param + ".", param);
-            } else {
-                recognizeCard = true;
-                if (_logger.isLoggable(Level.CONFIG)) {
-                    _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "recognizeCard set to " + recognizeCard + ".");
-                }
+            }
+        } else {
+            recognizeCard = true;
+            if (_logger.isLoggable(Level.CONFIG)) {
+                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "recognizeCard set to " + recognizeCard + ".");
             }
         }
-        
-        // enable or disable old SAL behaviour
         param = getParameter("waitForCard");
         if (param != null) {
             waitForCard = Boolean.parseBoolean(param);
             if (_logger.isLoggable(Level.CONFIG)) {
                 _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "waitForCard set to " + param + ".", param);
-            } else {
-                if (_logger.isLoggable(Level.CONFIG)) {
-                    _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "waitForCard not set.");
-                }
+            }
+        } else {
+            if (_logger.isLoggable(Level.CONFIG)) {
+                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "waitForCard not set.");
             }
         }
         

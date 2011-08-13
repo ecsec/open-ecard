@@ -62,17 +62,11 @@ public class ECardApplet extends JApplet {
         }
         initialized = false;
         paramsPresent = true;
-        System.out.println("ECardApplet :: setParams()");
         setParams();
-        System.out.println("ECardApplet :: params present ? " + paramsPresent);
         worker = null;
-        System.out.println("ECardApplet :: create ClientEnv");
         env = new ClientEnv();
-        System.out.println("ECardApplet :: create IFD");
         ifd = new IFD();
-        System.out.println("ECardApplet :: set IFD in ClientEnv");
         env.setIFD(ifd);
-        System.out.println("ECardApplet :: establish Context");
         EstablishContext ecRequest = new EstablishContext();
         EstablishContextResponse ecResponse = ifd.establishContext(ecRequest);
         if (ecResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
@@ -81,35 +75,23 @@ public class ECardApplet extends JApplet {
                 initialized = true;
             }
         }
-        System.out.println("ECardApplet :: create CardRecognition");
         try {
             recognition = new CardRecognition(ifd, ctx);
         } catch (Exception ex) {
             _logger.logp(Level.SEVERE, this.getClass().getName(), "init()", ex.getMessage(), ex);
             initialized = false;
         }
-        System.out.println("ECardApplet :: create PAOS");
         paos = new PAOS(endpointUrl);
-        System.out.println("ECardApplet :: add PAOS to ClientEnv");
         env.addTransport("0", paos);
-        System.out.println("ECardApplet :: create EventManager");
         em = new EventManager(recognition, env, sessionId, ctx, recognizeCard);
-        System.out.println("ECardApplet :: set EventManager in ClientEnv");
         env.setEventManager(em);
-        System.out.println("ECardApplet :: create MicroSAL");
         sal = new MicroSAL(env);
-        System.out.println("ECardApplet :: register MicroSAL in EventManager");
         em.registerAllEvents(sal);
-        System.out.println("ECardApplet :: create JSEventCallback");
         jsec = new JSEventCallback(this);
-        System.out.println("ECardApplet :: register JSEventCallback in EventManager");
-        em.registerAllEvents(jsec);
-        System.out.println("ECardApplet :: initialize MicroSAL");
         InitializeResponse initResponse = sal.initialize(new Initialize());
         if (initResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
             initialized = false;
         }
-        System.out.println("ECardApplet :: get ConnectionHandles from MicroSAL");
         List<ConnectionHandleType> cHandles = sal.getConnectionHandles();
         ConnectionHandleType cHandle;
         for (Iterator<ConnectionHandleType> iter = cHandles.iterator(); iter.hasNext(); ) {
@@ -119,7 +101,7 @@ public class ECardApplet extends JApplet {
                 jsec.signalEvent(EventType.CARD_INSERTED, cHandle);
             }
         }
-        System.out.println("ECardApplet :: initialized ? " + initialized);
+        em.registerAllEvents(jsec);
         if (_logger.isLoggable(Level.FINER)) {
             _logger.exiting(this.getClass().getName(), "init()");
         }
@@ -132,11 +114,8 @@ public class ECardApplet extends JApplet {
         }
         if (paramsPresent && initialized) {
             if (worker == null) {
-                System.out.println("ECardApplet :: create AppletWorker");
                 worker = new Thread(new AppletWorker(this));
-                System.out.println("ECardApplet :: start AppletWorker");
                 worker.start();
-                System.out.println("ECardApplet :: AppletWorker started");
             }
         }
         if (_logger.isLoggable(Level.FINER)) {

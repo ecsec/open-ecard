@@ -15,11 +15,9 @@ import iso.std.iso_iec._24727.tech.schema.GetStatus;
 import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
 import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
-import iso.std.iso_iec._24727.tech.schema.WaitResponse;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.EnumMap;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
@@ -66,26 +64,7 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
         }
     }
     
-    private void dumpStatus() {
-        Collection<IFDStatusType> c = statusList.values();
-        WaitResponse res = new WaitResponse();
-        for (IFDStatusType status : c) {
-            res.getIFDEvent().add(status);
-        }
-        dumpData(res);
-    }
-    
-    private void dumpData(Object obj) {
-        try {
-            System.out.println(m.doc2str(m.marshal(obj)));
-        } catch (Exception ex) {
-            System.out.println("Cannot dump data structure...");
-        }
-    }
-    
     protected List<ConnectionHandleType> process() {
-        System.out.println("EventManager :: enter process()");
-        dumpStatus();
         List<ConnectionHandleType> cHandles = new LinkedList<ConnectionHandleType>();
         Map<String, IFDStatusType> tmpStatusList = copy(statusList);
         try {
@@ -95,9 +74,6 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
             GetStatus gsRequest = new GetStatus();
             gsRequest.setContextHandle(ctx);
             GetStatusResponse gsResponse = env.getIFD().getStatus(gsRequest);
-            
-            dumpData(gsResponse);
-            
             checkResult(gsResponse.getResult());
             // process GetStatusResponse
             List<IFDStatusType> currStatuses = gsResponse.getIFDStatus();
@@ -105,8 +81,6 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
                 for (IFDStatusType status : currStatuses) {
                     cHandles.addAll(newTerminal(status));
                 }
-                dumpStatus();
-                System.out.println("EventManager :: exit process()");
                 return cHandles;
             } else {
                 IFDStatusType oldStatus;
@@ -123,31 +97,24 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
                 if (!tmpStatusList.isEmpty()) {
                     clear(tmpStatusList);
                 }
-                dumpStatus();
-                System.out.println("EventManager :: exit process()");
                 return cHandles;
             }
         } catch (EventException ex) {
             if (_logger.isLoggable(Level.WARNING)) {
                 _logger.logp(Level.WARNING, this.getClass().getName(), "process()", ex.getResultMessage(), ex);
             }
-            dumpStatus();
-            System.out.println("EventManager :: exit process()");
             return cHandles;
         }
     }
     
     private void clear(Map<String, IFDStatusType> map) {
-        System.out.println("EventManager :: enter clear(...)");
         for (IFDStatusType status : map.values()) {
             notify(EventType.TERMINAL_REMOVED, makeConnectionHandle(status.getIFDName()));
             updateStatus(status.getIFDName(), status, true);
         }
-        System.out.println("EventManager :: exit clear(...)");
     }
     
     private List<ConnectionHandleType> diff(IFDStatusType currStatus, IFDStatusType oldStatus) {
-        System.out.println("EventManager :: enter diff(...)");
         List<ConnectionHandleType> cHandles = new LinkedList<ConnectionHandleType>();
         List<SlotStatusType> currSlotStatuses = currStatus.getSlotStatus();
         List<SlotStatusType> oldSlotStatuses = oldStatus.getSlotStatus();
@@ -182,15 +149,12 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
                 // nothing changed
             }
         }
-        System.out.println("EventManager :: exit diff(...)");
         return cHandles;
     }
     
     private SlotStatusType match(BigInteger slotIdx, List<SlotStatusType> slotStatuses) {
-        System.out.println("EventManager :: enter match(...)");
         for (SlotStatusType slotStatus : slotStatuses) {
             if (slotStatus.getIndex().equals(slotIdx)) {
-                System.out.println("EventManager :: exit match(...)");
                 return slotStatus;
             }
         }
@@ -198,12 +162,10 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
             _logger.logp(Level.WARNING, this.getClass().getName(), "match(BigInteger slotIdx, List<SlotStatusType> slotStatuses)", "No matching slot index found.");
         }
         // no matching slot index found
-        System.out.println("EventManager :: exit match(...)");
         return null;
     }
     
     private List<ConnectionHandleType> newTerminal(IFDStatusType status) {
-        System.out.println("EventManager :: enter newTerminal(...)");
         notify(EventType.TERMINAL_ADDED, makeConnectionHandle(status.getIFDName()));
         updateStatus(status.getIFDName(), status);
         List<SlotStatusType> slotStatuses = status.getSlotStatus();
@@ -216,12 +178,10 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
                 cHandles.add(makeConnectionHandle(status.getIFDName()));
             }
         }
-        System.out.println("EventManager :: exit newTerminal(...)");
         return cHandles;
     }
     
     private ConnectionHandleType recognize(String ifdName, SlotStatusType slotStatus) {
-        System.out.println("EventManager :: enter recognize(...)");
         ConnectionHandleType cHandle = null;
         if (recognize) {
             try {
@@ -236,27 +196,22 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
         RecognitionInfo info = makeRecognitionInfo(ECardConstants.UNKNOWN_CARD, slotStatus.getATRorATS());
         cHandle = makeConnectionHandle(ifdName, slotStatus.getIndex(), info);
         notify(EventType.CARD_RECOGNIZED, cHandle);
-        System.out.println("EventManager :: exit recognize(...)");
         return cHandle;
     }
     
     private Map<String, IFDStatusType> copy(Map<String, IFDStatusType> original) {
-        System.out.println("EventManager :: enter copy(...)");
         ConcurrentSkipListMap<String, IFDStatusType> copy = new ConcurrentSkipListMap<String, IFDStatusType>();
         if (!original.isEmpty()) {
             for (Entry<String, IFDStatusType> entry : original.entrySet()) {
                 copy.put(entry.getKey(), entry.getValue());
             }
         }
-        System.out.println("EventManager :: exit copy(...)");
         return copy;
     }
     
     private void doWait() {
-        System.out.println("EventManager :: enter doWait()");
         Thread t = new Thread(new WaitHandler(this, env));
         t.start();
-        System.out.println("EventManager :: exit doWait()");
     }
 
     private void updateStatus(String ifdName, IFDStatusType status) {
@@ -264,13 +219,11 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
     }
     
     private void updateStatus(String ifdName, IFDStatusType status, boolean remove) {
-        System.out.println("EventManager :: enter updateStatus(...)");
         if (remove) {
             statusList.remove(ifdName);
         } else {
             statusList.put(ifdName, status);
         }
-        System.out.println("EventManager :: exit updateStatus(...)");
     }
     
     private RecognitionInfo makeRecognitionInfo(String cardType, byte[] cardIdentifier) {
@@ -313,11 +266,9 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
     }
     
     private void notify(EventType eventType, Object eventData) {
-        System.out.println("EventManager :: enter notify(...)");
         Event event = events.get(eventType);
         Thread t = new Thread(new EventHandler(event, eventData));
         t.start();
-        System.out.println("EventManager :: exit notify(...)");
     }
     
     protected void checkResult(Result r) throws EventException {

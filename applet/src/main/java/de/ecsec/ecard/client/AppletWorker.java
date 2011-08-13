@@ -86,7 +86,6 @@ public class AppletWorker implements Runnable {
             }
         }
 
-        System.out.println("AppletWorker :: create StartPAOS");
         StartPAOS sp = new StartPAOS();
         sp.getConnectionHandle().addAll(cHandles);
         sp.setSessionIdentifier(applet.getSessionId());

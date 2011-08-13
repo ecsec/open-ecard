@@ -25,9 +25,6 @@ public class JSEventCallback implements EventCallback {
     
     @Override
     public void signalEvent(EventType eventType, Object eventData) {
-        System.out.println("JSEventCallback :: signalEvent(...) " + eventType.name());
-        jso.call("showMessage", new String[]{"JSEventCallback :: signalEvent(...) <br> Event: " + eventType.name()});
-        
         if (eventData instanceof ConnectionHandleType) {
             String args = toJSON(eventType, (ConnectionHandleType) eventData);
             jso.call("signalEvent", new String[]{args});

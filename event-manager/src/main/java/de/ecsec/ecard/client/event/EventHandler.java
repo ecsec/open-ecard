@@ -1,7 +1,5 @@
 package de.ecsec.ecard.client.event;
 
-import java.util.Date;
-
 /**
  *
  * @author Johannes.Schmoelz <johannes.schmoelz@ecsec.de>
@@ -18,11 +16,7 @@ public class EventHandler implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("EventHandler :: run (" + Thread.currentThread().getName() + ")");
-        System.out.println("EventHandler :: start @ " + new Date(System.currentTimeMillis()));
         event.notify(eventData);
-        System.out.println("EventHandler :: end @ " + new Date(System.currentTimeMillis()));
-        System.out.println("EventHandler :: run (" + Thread.currentThread().getName() + ")");
     }
     
     

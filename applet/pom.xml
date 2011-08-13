@@ -100,11 +100,9 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>java</groupId>
+      <groupId>openjdk</groupId>
       <artifactId>java-plugin</artifactId>
-      <version>1.0</version>
-      <scope>system</scope>
-      <systemPath>${java.home}/lib/plugin.jar</systemPath>
+      <version>1.6.0.26</version>
     </dependency>
   </dependencies>
 

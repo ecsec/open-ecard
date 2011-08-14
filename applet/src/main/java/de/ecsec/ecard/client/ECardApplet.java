@@ -88,20 +88,24 @@ public class ECardApplet extends JApplet {
         sal = new MicroSAL(env);
         em.registerAllEvents(sal);
         jsec = new JSEventCallback(this);
+        em.registerAllEvents(jsec);
         InitializeResponse initResponse = sal.initialize(new Initialize());
         if (initResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
             initialized = false;
         }
         List<ConnectionHandleType> cHandles = sal.getConnectionHandles();
-        ConnectionHandleType cHandle;
-        for (Iterator<ConnectionHandleType> iter = cHandles.iterator(); iter.hasNext(); ) {
-            cHandle = iter.next();
-            jsec.signalEvent(EventType.TERMINAL_ADDED, cHandle);
-            if (cHandle.getRecognitionInfo() != null) {
-                jsec.signalEvent(EventType.CARD_INSERTED, cHandle);
+        if (cHandles.isEmpty()) {
+            jsec.showMessage("Please connect Terminal.");
+        } else {
+            ConnectionHandleType cHandle;
+            for (Iterator<ConnectionHandleType> iter = cHandles.iterator(); iter.hasNext();) {
+                cHandle = iter.next();
+                jsec.signalEvent(EventType.TERMINAL_ADDED, cHandle);
+                if (cHandle.getRecognitionInfo() != null) {
+                    jsec.signalEvent(EventType.CARD_INSERTED, cHandle);
+                }
             }
         }
-        em.registerAllEvents(jsec);
         if (_logger.isLoggable(Level.FINER)) {
             _logger.exiting(this.getClass().getName(), "init()");
         }

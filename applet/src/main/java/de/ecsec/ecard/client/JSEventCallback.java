@@ -31,6 +31,10 @@ public class JSEventCallback implements EventCallback {
         }
     }
     
+    public void showMessage(String message) {
+        jso.call("showMessage", new String[]{message});
+    }
+    
     private String toJSON(EventType type, ConnectionHandleType cHandle) {
         String ifdName = cHandle.getIFDName();
         String cardType = cHandle.getRecognitionInfo() != null ? cHandle.getRecognitionInfo().getCardType() : null;

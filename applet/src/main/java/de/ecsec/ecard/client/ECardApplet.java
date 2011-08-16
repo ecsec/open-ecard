@@ -66,6 +66,7 @@ public class ECardApplet extends JApplet {
         worker = null;
         env = new ClientEnv();
         ifd = new IFD();
+        ifd.setVirtualTerminal(new SwingTerminal());
         env.setIFD(ifd);
         EstablishContext ecRequest = new EstablishContext();
         EstablishContextResponse ecResponse = ifd.establishContext(ecRequest);

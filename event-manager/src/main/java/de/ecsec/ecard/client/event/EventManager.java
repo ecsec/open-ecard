@@ -51,6 +51,8 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
     private ConcurrentSkipListMap<String, IFDStatusType> statusList;
     private EnumMap<EventType, Event> events;
 
+    private boolean running = false; // indicator whether to spawn new thread on return of wait
+
 
     public EventManager(Environment env, String sessionId, byte[] ctx) {
         this(null, env, sessionId, ctx);
@@ -214,9 +216,11 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
         return copy;
     }
     
-    private void doWait() {
-        Thread t = new Thread(new WaitHandler(this, env));
-        t.start();
+    private synchronized void doWait() {
+        if (running) {
+            Thread t = new Thread(new WaitHandler(this, env));
+            t.start();
+        }
     }
 
     private void updateStatus(String ifdName, IFDStatusType status) {
@@ -287,8 +291,15 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
     }
 
     @Override
-    public Object initialize() {
+    public synchronized Object initialize() {
+        running = true;
         return process();
+    }
+
+    @Override
+    public synchronized void terminate() {
+        running = false;
+        // TODO: call cancel on ifd
     }
     
     @Override

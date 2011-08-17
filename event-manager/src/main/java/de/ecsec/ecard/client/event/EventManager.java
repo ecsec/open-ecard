@@ -50,7 +50,12 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
     
     private ConcurrentSkipListMap<String, IFDStatusType> statusList;
     private EnumMap<EventType, Event> events;
-    
+
+
+    public EventManager(Environment env, String sessionId, byte[] ctx) {
+        this(null, env, sessionId, ctx);
+    }
+
     public EventManager(CardRecognition cr, Environment env, String sessionId, byte[] ctx) {
         this.cr = cr;
         this.recognize = cr != null;

@@ -76,15 +76,19 @@ public class ECardApplet extends JApplet {
                 initialized = true;
             }
         }
-        try {
-            recognition = new CardRecognition(ifd, ctx);
-        } catch (Exception ex) {
-            _logger.logp(Level.SEVERE, this.getClass().getName(), "init()", ex.getMessage(), ex);
-            initialized = false;
+        if (recognizeCard) {
+            try {
+                recognition = new CardRecognition(ifd, ctx);
+            } catch (Exception ex) {
+                _logger.logp(Level.SEVERE, this.getClass().getName(), "init()", ex.getMessage(), ex);
+                initialized = false;
+            }
+        } else {
+            recognition = null;
         }
         paos = new PAOS(endpointUrl);
         env.addTransport("0", paos);
-        em = new EventManager(recognition, env, sessionId, ctx, recognizeCard);
+        em = new EventManager(recognition, env, sessionId, ctx);
         env.setEventManager(em);
         sal = new MicroSAL(env);
         em.registerAllEvents(sal);

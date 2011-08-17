@@ -2,10 +2,12 @@ package de.ecsec.ecard.client.event;
 
 import de.ecsec.core.common.interfaces.Environment;
 import de.ecsec.core.common.logging.LogManager;
+import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.Wait;
 import iso.std.iso_iec._24727.tech.schema.WaitResponse;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 /**
  *
@@ -26,6 +28,9 @@ public class WaitHandler implements Runnable {
     public void run() {
         try {
             Wait wRequest = new Wait();
+            ChannelHandleType cHandle = new ChannelHandleType();
+            cHandle.setSessionIdentifier(manager.getSessionId()); // session needed for cancel
+            wRequest.setCallback(cHandle);
             wRequest.setContextHandle(manager.getContext());
             WaitResponse wResponse = env.getIFD().wait(wRequest);
             manager.checkResult(wResponse.getResult());

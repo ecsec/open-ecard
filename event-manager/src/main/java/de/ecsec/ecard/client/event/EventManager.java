@@ -8,6 +8,8 @@ import de.ecsec.core.common.logging.LogManager;
 import de.ecsec.core.recognition.CardRecognition;
 import de.ecsec.core.recognition.RecognitionException;
 import de.ecsec.core.ws.WSMarshaller;
+import iso.std.iso_iec._24727.tech.schema.Cancel;
+import iso.std.iso_iec._24727.tech.schema.CancelResponse;
 import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
@@ -31,6 +33,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import oasis.names.tc.dss._1_0.core.schema.Result;
+
 
 /**
  *
@@ -279,15 +282,19 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
         Thread t = new Thread(new EventHandler(event, eventData));
         t.start();
     }
-    
+
     protected void checkResult(Result r) throws EventException {
         if (r.getResultMajor().equals(ECardConstants.Major.ERROR)) {
             throw new EventException(r);
         }
     }
-    
+
     public byte[] getContext() {
         return ctx;
+    }
+
+    public String getSessionId() {
+        return this.sessionId;
     }
 
     @Override
@@ -299,9 +306,14 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
     @Override
     public synchronized void terminate() {
         running = false;
-        // TODO: call cancel on ifd
+        // call cancel on ifd
+        Cancel c = new Cancel();
+        c.setContextHandle(ctx);
+        c.setIFDName("some dummy value");
+        c.setSessionIdentifier(sessionId);
+        CancelResponse cr = this.env.getIFD().cancel(c);
     }
-    
+
     @Override
     public void register(EventType type, EventCallback callback) {
         Event event = events.get(type);

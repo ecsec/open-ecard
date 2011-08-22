@@ -7,7 +7,6 @@ import de.ecsec.core.common.interfaces.EventCallback;
 import de.ecsec.core.common.logging.LogManager;
 import de.ecsec.core.recognition.CardRecognition;
 import de.ecsec.core.recognition.RecognitionException;
-import de.ecsec.core.ws.WSMarshaller;
 import iso.std.iso_iec._24727.tech.schema.Cancel;
 import iso.std.iso_iec._24727.tech.schema.CancelResponse;
 import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
@@ -43,8 +42,6 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
 
     private static final Logger _logger = LogManager.getLogger(EventManager.class.getPackage().getName());
     
-    private WSMarshaller m = new WSMarshaller();
-    
     private CardRecognition cr;
     private Environment env;
     private String sessionId;
@@ -55,7 +52,6 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
     private EnumMap<EventType, Event> events;
 
     private boolean running = false; // indicator whether to spawn new thread on return of wait
-
 
     public EventManager(Environment env, String sessionId, byte[] ctx) {
         this(null, env, sessionId, ctx);

@@ -14,6 +14,7 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.Initialize;
 import iso.std.iso_iec._24727.tech.schema.InitializeResponse;
+import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import java.awt.Container;
 import java.awt.Frame;
 import java.util.Iterator;
@@ -45,9 +46,9 @@ public class ECardApplet extends JApplet {
     
     // applet parameters
     private String sessionId;
-    private String reportId;
     private String endpointUrl;
     private String redirectUrl;
+    private String reportId;
     private boolean recognizeCard;
     private boolean waitForCard;
 
@@ -141,9 +142,28 @@ public class ECardApplet extends JApplet {
             worker.interrupt();
             worker = null;
         }
+        paos = null;
+        if (em != null) {
+            em.terminate();
+            em = null;
+        }
+        sal = null;
+        recognition = null;
+        if (ifd != null) {
+            ReleaseContext rcRequest = new ReleaseContext();
+            rcRequest.setContextHandle(ctx);
+            // Since JVM will be shut down after destroy method has been called by the browser,
+            // evaluation of ReleaseContextResponse is not necessary.
+            ifd.releaseContext(rcRequest);
+            ifd = null;
+        }
+        env = null;
+        jsec = null;
+        ctx = null;
         sessionId = null;
         endpointUrl = null;
         redirectUrl = null;
+        reportId = null;
         if (_logger.isLoggable(Level.FINER)) {
             _logger.exiting(this.getClass().getName(), "destroy()");
         }

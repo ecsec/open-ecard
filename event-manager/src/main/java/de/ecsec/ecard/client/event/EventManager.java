@@ -289,10 +289,6 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
         return ctx;
     }
 
-    public String getSessionId() {
-        return this.sessionId;
-    }
-
     @Override
     public synchronized Object initialize() {
         running = true;
@@ -302,11 +298,12 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
     @Override
     public synchronized void terminate() {
         running = false;
+        // TODO: correct this stuff when cancel has been updated to reflect the needs of actually working
         // call cancel on ifd
         Cancel c = new Cancel();
         c.setContextHandle(ctx);
         c.setIFDName("some dummy value");
-        c.setSessionIdentifier(sessionId);
+        //c.setSessionIdentifier(sessionId); // session only needed for termination of async wait, this is the wrong session anyways
         CancelResponse cr = this.env.getIFD().cancel(c);
     }
 

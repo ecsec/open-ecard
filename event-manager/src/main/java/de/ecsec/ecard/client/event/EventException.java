@@ -1,6 +1,6 @@
 package de.ecsec.ecard.client.event;
 
-import de.ecsec.core.common.ECardConstants;
+import de.ecsec.core.common.ECardException;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 
 
@@ -8,46 +8,24 @@ import oasis.names.tc.dss._1_0.core.schema.Result;
  *
  * @author Johannes.Schmoelz <johannes.schmoelz@ecsec.de>
  */
-public class EventException extends Exception {
-    
-    private String resultMajor;
-    private String resultMinor;
-    
-    public EventException() {}
-    
+public class EventException extends ECardException {
+
+    private EventException() {}
+
     public EventException(String message) {
-        super(message);
+	makeException(this, message);
     }
-    
+
     public EventException(String message, Throwable cause) {
-        super(message, cause);
+	makeException(this, cause, message);
     }
-    
+
     public EventException(Throwable cause) {
-        super(cause);
+	makeException(this, cause);
     }
-    
+
     public EventException(Result r) {
-        super(r.getResultMessage() != null ? r.getResultMessage().getValue() : "Unknown IFD exception occurred.");
-        resultMajor = r.getResultMajor() != null ? r.getResultMajor() : ECardConstants.Major.ERROR;
-        resultMinor = r.getResultMinor() != null ? r.getResultMinor() : ECardConstants.Minor.App.UNKNOWN_ERROR;
+	makeException(this, r);
     }
-    
-    public String getResultMajor() {
-        if (resultMajor == null) {
-            resultMajor = new String();
-        }
-        return resultMajor;
-    }
-    
-    public String getResultMinor() {
-        if (resultMinor == null) {
-            resultMinor = new String();
-        }
-        return resultMinor;
-    }
-    
-    public String getResultMessage() {
-        return getMessage();
-    }
+
 }

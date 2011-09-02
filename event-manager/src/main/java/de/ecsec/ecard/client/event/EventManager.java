@@ -1,14 +1,14 @@
 package de.ecsec.ecard.client.event;
 
 import de.ecsec.core.common.ECardConstants;
+import de.ecsec.core.common.WSHelper;
+import de.ecsec.core.common.WSHelper.WSException;
 import de.ecsec.core.common.enums.EventType;
 import de.ecsec.core.common.interfaces.Environment;
 import de.ecsec.core.common.interfaces.EventCallback;
 import de.ecsec.core.common.logging.LogManager;
 import de.ecsec.core.recognition.CardRecognition;
 import de.ecsec.core.recognition.RecognitionException;
-import iso.std.iso_iec._24727.tech.schema.Cancel;
-import iso.std.iso_iec._24727.tech.schema.CancelResponse;
 import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
@@ -20,314 +20,225 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import oasis.names.tc.dss._1_0.core.schema.Result;
 
 
 /**
  *
- * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class EventManager implements de.ecsec.core.common.interfaces.EventManager {
 
     private static final Logger _logger = LogManager.getLogger(EventManager.class.getPackage().getName());
-    
-    private CardRecognition cr;
-    private Environment env;
-    private String sessionId;
-    private byte[] ctx;
-    private boolean recognize;
-    
-    private ConcurrentSkipListMap<String, IFDStatusType> statusList;
-    private EnumMap<EventType, Event> events;
 
-    private boolean running = false; // indicator whether to spawn new thread on return of wait
+    protected final CardRecognition cr;
+    protected final Environment env;
+    protected final String sessionId;
+    protected final byte[] ctx;
+    protected final boolean recognize;
 
-    public EventManager(Environment env, String sessionId, byte[] ctx) {
-        this(null, env, sessionId, ctx);
-    }
+    private final EnumMap<EventType, Event> events;
+
+    protected ExecutorService threadPool;
+    private Future watcher;
+
 
     public EventManager(CardRecognition cr, Environment env, String sessionId, byte[] ctx) {
-        this.cr = cr;
-        this.recognize = cr != null;
-        this.env = env;
-        this.sessionId = sessionId;
-        this.ctx = ctx;
-        statusList = new ConcurrentSkipListMap<String, IFDStatusType>();
-        events = new EnumMap<EventType, Event>(EventType.class);
-        for (EventType type : EventType.values()) {
-            events.put(type, new Event(type));
-        }
-    }
-    
-    protected List<ConnectionHandleType> process() {
-        List<ConnectionHandleType> cHandles = new LinkedList<ConnectionHandleType>();
-        Map<String, IFDStatusType> tmpStatusList = copy(statusList);
-        try {
-            // start looking for changes
-            doWait();
-            // get current status from IFD
-            GetStatus gsRequest = new GetStatus();
-            gsRequest.setContextHandle(ctx);
-            GetStatusResponse gsResponse = env.getIFD().getStatus(gsRequest);
-            checkResult(gsResponse.getResult());
-            // process GetStatusResponse
-            List<IFDStatusType> currStatuses = gsResponse.getIFDStatus();
-            if (statusList.isEmpty()) {
-                for (IFDStatusType status : currStatuses) {
-                    cHandles.addAll(newTerminal(status));
-                }
-                return cHandles;
-            } else {
-                IFDStatusType oldStatus;
-                for (IFDStatusType currStatus : currStatuses) {
-                    oldStatus = tmpStatusList.get(currStatus.getIFDName());
-                    if (oldStatus != null) {
-                        cHandles.addAll(diff(currStatus, oldStatus));
-                        tmpStatusList.remove(oldStatus.getIFDName());
-                    } else {
-                        // new terminal added
-                        cHandles.addAll(newTerminal(currStatus));
-                    }
-                }
-                if (!tmpStatusList.isEmpty()) {
-                    clear(tmpStatusList);
-                }
-                return cHandles;
-            }
-        } catch (EventException ex) {
-            if (_logger.isLoggable(Level.WARNING)) {
-                _logger.logp(Level.WARNING, this.getClass().getName(), "process()", ex.getResultMessage(), ex);
-            }
-            return cHandles;
-        }
-    }
-    
-    private void clear(Map<String, IFDStatusType> map) {
-        for (IFDStatusType status : map.values()) {
-            notify(EventType.TERMINAL_REMOVED, makeConnectionHandle(status.getIFDName()));
-            updateStatus(status.getIFDName(), status, true);
-        }
-    }
-    
-    private List<ConnectionHandleType> diff(IFDStatusType currStatus, IFDStatusType oldStatus) {
-        List<ConnectionHandleType> cHandles = new LinkedList<ConnectionHandleType>();
-        List<SlotStatusType> currSlotStatuses = currStatus.getSlotStatus();
-        List<SlotStatusType> oldSlotStatuses = oldStatus.getSlotStatus();
-        SlotStatusType oldSlotStatus = null;
-        for (SlotStatusType currSlotStatus : currSlotStatuses) {
-            oldSlotStatus = match(currSlotStatus.getIndex(), oldSlotStatuses);
-            // since slots can not be added to or removed from a terminal,
-            // the slot status should never be null
-            if (oldSlotStatus == null) {
-                continue;
-            }
-            if (currSlotStatus.isCardAvailable() && oldSlotStatus.isCardAvailable()) {
-                byte[] currATR = currSlotStatus.getATRorATS();
-                byte[] oldATR = oldSlotStatus.getATRorATS();
-                if (currATR != null && oldATR != null) {
-                    // old card removed, new card inserted
-                    if (!Arrays.equals(currATR, oldATR)) {
-                        notify(EventType.CARD_REMOVED, makeConnectionHandle(currStatus.getIFDName()));
-                        notify(EventType.CARD_INSERTED, makeConnectionHandle(currStatus.getIFDName(), currSlotStatus.getIndex()));
-                        updateStatus(currStatus.getIFDName(), currStatus);
-                        cHandles.add(recognize(currStatus.getIFDName(), currSlotStatus));
-                    } 
-                }
-            } else if (currSlotStatus.isCardAvailable() && !oldSlotStatus.isCardAvailable()) {
-                notify(EventType.CARD_INSERTED, makeConnectionHandle(currStatus.getIFDName(), currSlotStatus.getIndex()));
-                updateStatus(currStatus.getIFDName(), currStatus);
-                cHandles.add(recognize(currStatus.getIFDName(), currSlotStatus));
-            } else if (!currSlotStatus.isCardAvailable() && oldSlotStatus.isCardAvailable()) {
-                notify(EventType.CARD_REMOVED, makeConnectionHandle(currStatus.getIFDName()));
-                updateStatus(currStatus.getIFDName(), currStatus, true);
-            } else {
-                // nothing changed
-            }
-        }
-        return cHandles;
-    }
-    
-    private SlotStatusType match(BigInteger slotIdx, List<SlotStatusType> slotStatuses) {
-        for (SlotStatusType slotStatus : slotStatuses) {
-            if (slotStatus.getIndex().equals(slotIdx)) {
-                return slotStatus;
-            }
-        }
-        if (_logger.isLoggable(Level.WARNING)) {
-            _logger.logp(Level.WARNING, this.getClass().getName(), "match(BigInteger slotIdx, List<SlotStatusType> slotStatuses)", "No matching slot index found.");
-        }
-        // no matching slot index found
-        return null;
-    }
-    
-    private List<ConnectionHandleType> newTerminal(IFDStatusType status) {
-        notify(EventType.TERMINAL_ADDED, makeConnectionHandle(status.getIFDName()));
-        updateStatus(status.getIFDName(), status);
-        List<SlotStatusType> slotStatuses = status.getSlotStatus();
-        List<ConnectionHandleType> cHandles = new ArrayList<ConnectionHandleType>(slotStatuses.size());
-        for (SlotStatusType slotStatus : slotStatuses) {
-            if (slotStatus.isCardAvailable()) {
-                notify(EventType.CARD_INSERTED, makeConnectionHandle(status.getIFDName(), slotStatus.getIndex()));
-                cHandles.add(recognize(status.getIFDName(), slotStatus));
-            } else {
-                cHandles.add(makeConnectionHandle(status.getIFDName()));
-            }
-        }
-        return cHandles;
-    }
-    
-    private ConnectionHandleType recognize(String ifdName, SlotStatusType slotStatus) {
-        ConnectionHandleType cHandle = null;
-        if (recognize) {
-            try {
-                RecognitionInfo info = cr.recognizeCard(ifdName, slotStatus.getIndex());
-                cHandle = makeConnectionHandle(ifdName, slotStatus.getIndex(), info);
-                notify(EventType.CARD_RECOGNIZED, cHandle);
-                return cHandle;
-            } catch (RecognitionException ex) {
-                // do nothing here...
-            }
-        } 
-        RecognitionInfo info = makeRecognitionInfo(ECardConstants.UNKNOWN_CARD, slotStatus.getATRorATS());
-        cHandle = makeConnectionHandle(ifdName, slotStatus.getIndex(), info);
-        notify(EventType.CARD_RECOGNIZED, cHandle);
-        return cHandle;
-    }
-    
-    private Map<String, IFDStatusType> copy(Map<String, IFDStatusType> original) {
-        ConcurrentSkipListMap<String, IFDStatusType> copy = new ConcurrentSkipListMap<String, IFDStatusType>();
-        if (!original.isEmpty()) {
-            for (Entry<String, IFDStatusType> entry : original.entrySet()) {
-                copy.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return copy;
-    }
-    
-    private synchronized void doWait() {
-        if (running) {
-            Thread t = new Thread(new WaitHandler(this, env));
-            t.start();
-        }
+	this.cr = cr;
+	this.recognize = cr != null;
+	this.env = env;
+	this.sessionId = sessionId;
+	this.ctx = ctx;
+	this.events = new EnumMap<EventType, Event>(EventType.class);
+	for (EventType type : EventType.values()) {
+	    events.put(type, new Event(type));
+	}
     }
 
-    private void updateStatus(String ifdName, IFDStatusType status) {
-        updateStatus(ifdName, status, false);
+
+    protected List<IFDStatusType> ifdStatus() {
+	GetStatus status = new GetStatus();
+	status.setContextHandle(ctx);
+	GetStatusResponse statusResponse = env.getIFD().getStatus(status);
+	List<IFDStatusType> result;
+	try {
+	    WSHelper.checkResult(statusResponse);
+	    result = statusResponse.getIFDStatus();
+	} catch (WSException ex) {
+	    _logger.log(Level.WARNING, "GetStatus returned with error.", ex);
+	    result = new LinkedList();
+	}
+	return result;
     }
-    
-    private void updateStatus(String ifdName, IFDStatusType status, boolean remove) {
-        if (remove) {
-            statusList.remove(ifdName);
-        } else {
-            statusList.put(ifdName, status);
-        }
-    }
-    
-    private RecognitionInfo makeRecognitionInfo(String cardType, byte[] cardIdentifier) {
-        RecognitionInfo info = new RecognitionInfo();
-        XMLGregorianCalendar cal = null;
-        try {
-            DatatypeFactory factory = DatatypeFactory.newInstance();
-            cal = factory.newXMLGregorianCalendar(new GregorianCalendar());
-        } catch (DatatypeConfigurationException ex) {
-            // do nothing here
-        }
-        info.setCaptureTime(cal);
-        info.setCardType(cardType);
-        info.setCardIdentifier(cardIdentifier);
-        return info;
-    }
+
 
     private ConnectionHandleType makeConnectionHandle(String ifdName) {
-        return makeConnectionHandle(ifdName, null, null);
+	return makeConnectionHandle(ifdName, null, null);
     }
-    
+
     private ConnectionHandleType makeConnectionHandle(String ifdName, BigInteger slotIdx) {
-        return makeConnectionHandle(ifdName, slotIdx, null);
+	return makeConnectionHandle(ifdName, slotIdx, null);
     }
-    
+
     private ConnectionHandleType makeConnectionHandle(String ifdName, RecognitionInfo info) {
-        return makeConnectionHandle(ifdName, null, info);
+	return makeConnectionHandle(ifdName, null, info);
     }
-    
+
     private ConnectionHandleType makeConnectionHandle(String ifdName, BigInteger slotIdx, RecognitionInfo info) {
-        ChannelHandleType chan = new ChannelHandleType();
-        chan.setSessionIdentifier(sessionId);
-        ConnectionHandleType cHandle = new ConnectionHandleType();
-        cHandle.setChannelHandle(chan);
-        cHandle.setContextHandle(ctx);
-        cHandle.setIFDName(ifdName);
-        cHandle.setSlotIndex(slotIdx);
-        cHandle.setRecognitionInfo(info);
-        return cHandle;
-    }
-    
-    private void notify(EventType eventType, Object eventData) {
-        Event event = events.get(eventType);
-        Thread t = new Thread(new EventHandler(event, eventData));
-        t.start();
+	ChannelHandleType chan = new ChannelHandleType();
+	chan.setSessionIdentifier(sessionId);
+	ConnectionHandleType cHandle = new ConnectionHandleType();
+	cHandle.setChannelHandle(chan);
+	cHandle.setContextHandle(ctx);
+	cHandle.setIFDName(ifdName);
+	cHandle.setSlotIndex(slotIdx);
+	cHandle.setRecognitionInfo(info);
+	return cHandle;
     }
 
-    protected void checkResult(Result r) throws EventException {
-        if (r.getResultMajor().equals(ECardConstants.Major.ERROR)) {
-            throw new EventException(r);
-        }
+    private ConnectionHandleType recognizeSlot(String ifdName, SlotStatusType status) {
+	// build recognition info in any way
+	RecognitionInfo rInfo = null;
+	if (recognize) {
+	    try {
+		rInfo = cr.recognizeCard(ifdName, status.getIndex());
+	    } catch (RecognitionException ex) {
+		// ignore, card is just unknown
+	    }
+	    // no card found build unknown structure
+	}
+	// in case recognition is off, or unkown card
+	if (rInfo == null) {
+	    rInfo = new RecognitionInfo();
+	    rInfo.setCardType(ECardConstants.UNKNOWN_CARD);
+	    rInfo.setCardIdentifier(status.getATRorATS());
+	    XMLGregorianCalendar cal = null;
+	    try {
+		cal = DatatypeFactory.newInstance().newXMLGregorianCalendar();
+	    } catch (DatatypeConfigurationException ex) {
+		// ignore error
+	    }
+	    rInfo.setCaptureTime(cal);
+	}
+	return makeConnectionHandle(ifdName, status.getIndex(), rInfo);
     }
 
-    public byte[] getContext() {
-        return ctx;
+
+    private IFDStatusType getCorresponding(String ifdName, List<IFDStatusType> stati) {
+	for (IFDStatusType next : stati) {
+	    if (next.getIFDName().equals(ifdName)) {
+		return next;
+	    }
+	}
+	return null;
     }
+    private SlotStatusType getCorresponding(BigInteger idx, List<SlotStatusType> stati) {
+	for (SlotStatusType next : stati) {
+	    if (next.getIndex().equals(idx)) {
+		return next;
+	    }
+	}
+	return null;
+    }
+
+    protected void sendEvents(List<IFDStatusType> oldS, List<IFDStatusType> changed) {
+	for (IFDStatusType next : changed) {
+	    IFDStatusType counterPart = getCorresponding(next.getIFDName(), oldS);
+	    // next is completely new
+	    if (counterPart == null) {
+		notify(EventType.TERMINAL_ADDED, makeConnectionHandle(next.getIFDName()));
+		// create empty counterPart so all slots raise events
+		counterPart = new IFDStatusType();
+		counterPart.setIFDName(next.getIFDName());
+	    }
+	    // inspect every slot
+	    for (SlotStatusType nextSlot : next.getSlotStatus()) {
+		SlotStatusType counterPartSlot = getCorresponding(nextSlot.getIndex(), counterPart.getSlotStatus());
+		if (counterPartSlot == null) {
+		    // slot is new, send event when card is present
+		    if (nextSlot.isCardAvailable()) {
+			ConnectionHandleType conHandle = recognizeSlot(next.getIFDName(), nextSlot);
+			notify(EventType.CARD_INSERTED, conHandle);
+			notify(EventType.CARD_RECOGNIZED, conHandle);
+		    }
+		} else {
+		    // compare slot for difference
+		    if (nextSlot.isCardAvailable() != counterPartSlot.isCardAvailable()) {
+			if (nextSlot.isCardAvailable()) {
+			    ConnectionHandleType conHandle = recognizeSlot(next.getIFDName(), nextSlot);
+			    notify(EventType.CARD_INSERTED, conHandle);
+			    notify(EventType.CARD_RECOGNIZED, conHandle);
+			} else {
+			    notify(EventType.CARD_REMOVED, makeConnectionHandle(next.getIFDName(), nextSlot.getIndex()));
+			}
+		    } else {
+			// compare atr
+			if (nextSlot.isCardAvailable()) {
+			    if (! Arrays.equals(nextSlot.getATRorATS(), counterPartSlot.getATRorATS())) {
+				ConnectionHandleType conHandle = recognizeSlot(next.getIFDName(), nextSlot);
+				notify(EventType.CARD_RECOGNIZED, conHandle);
+			    }
+			}
+		    }
+		}
+	    }
+	    // remove terminal
+	    if (! next.isConnected()) {
+		notify(EventType.TERMINAL_REMOVED, makeConnectionHandle(next.getIFDName()));
+	    }
+	}
+    }
+
 
     @Override
     public synchronized Object initialize() {
-        running = true;
-        return process();
+	this.threadPool = Executors.newCachedThreadPool();
+	// start watcher thread
+	watcher = threadPool.submit(new EventRunner(this));
+	// TODO: remove return value altogether
+	return new ArrayList<ConnectionHandleType>();
     }
 
     @Override
     public synchronized void terminate() {
-        running = false;
-        // TODO: correct this stuff when cancel has been updated to reflect the needs of actually working
-        // call cancel on ifd
-        Cancel c = new Cancel();
-        c.setContextHandle(ctx);
-        c.setIFDName("some dummy value");
-        //c.setSessionIdentifier(sessionId); // session only needed for termination of async wait, this is the wrong session anyways
-        CancelResponse cr = this.env.getIFD().cancel(c);
+	watcher.cancel(true);
+	this.threadPool.shutdown();
+    }
+
+    private synchronized void notify(EventType eventType, Object eventData) {
+	Event event = events.get(eventType);
+	this.threadPool.submit(new EventHandler(event, eventData));
     }
 
     @Override
-    public void register(EventType type, EventCallback callback) {
-        Event event = events.get(type);
-        event.addListener(callback);
+    public synchronized void register(EventType type, EventCallback callback) {
+	Event event = events.get(type);
+	event.addListener(callback);
     }
 
     @Override
-    public void register(List<EventType> types, EventCallback callback) {
-        Event event;
-        for (EventType type : types) {
-            event = events.get(type);
-            event.addListener(callback);
-        }
+    public synchronized void register(List<EventType> types, EventCallback callback) {
+	for (EventType type : types) {
+	    Event event = events.get(type);
+	    event.addListener(callback);
+	}
     }
 
     @Override
-    public void registerAllEvents(EventCallback callback) {
-        Event event;
-        for (EventType type : EventType.values()) {
-            event = events.get(type);
-            event.addListener(callback);
-        }
+    public synchronized void registerAllEvents(EventCallback callback) {
+	for (EventType type : EventType.values()) {
+	    Event event = events.get(type);
+	    event.addListener(callback);
+	}
     }
+
 }

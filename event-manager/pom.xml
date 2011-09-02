@@ -25,5 +25,11 @@
       <artifactId>recognition</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>de.ecsec.core</groupId>
+      <artifactId>ifd</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

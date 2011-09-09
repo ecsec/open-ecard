@@ -89,7 +89,7 @@ public class ECardApplet extends JApplet {
         }
         paos = new PAOS(endpointUrl);
         env.addTransport("0", paos);
-        em = new EventManager(recognition, env, sessionId, ctx);
+        em = new EventManager(recognition, env, ctx);
         env.setEventManager(em);
         sal = new MicroSAL(env);
         em.registerAllEvents(sal);

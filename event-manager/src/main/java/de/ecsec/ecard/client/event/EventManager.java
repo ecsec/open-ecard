@@ -7,6 +7,7 @@ import de.ecsec.core.common.enums.EventType;
 import de.ecsec.core.common.interfaces.Environment;
 import de.ecsec.core.common.interfaces.EventCallback;
 import de.ecsec.core.common.logging.LogManager;
+import de.ecsec.core.common.util.ValueGenerators;
 import de.ecsec.core.recognition.CardRecognition;
 import de.ecsec.core.recognition.RecognitionException;
 import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
@@ -42,7 +43,6 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
 
     protected final CardRecognition cr;
     protected final Environment env;
-    protected final String sessionId;
     protected final byte[] ctx;
     protected final boolean recognize;
 
@@ -52,11 +52,10 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
     private Future watcher;
 
 
-    public EventManager(CardRecognition cr, Environment env, String sessionId, byte[] ctx) {
+    public EventManager(CardRecognition cr, Environment env, byte[] ctx) {
 	this.cr = cr;
 	this.recognize = cr != null;
 	this.env = env;
-	this.sessionId = sessionId;
 	this.ctx = ctx;
 	this.events = new EnumMap<EventType, Event>(EventType.class);
 	for (EventType type : EventType.values()) {
@@ -95,7 +94,7 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
 
     private ConnectionHandleType makeConnectionHandle(String ifdName, BigInteger slotIdx, RecognitionInfo info) {
 	ChannelHandleType chan = new ChannelHandleType();
-	chan.setSessionIdentifier(sessionId);
+	chan.setSessionIdentifier(ValueGenerators.generateSessionID());
 	ConnectionHandleType cHandle = new ConnectionHandleType();
 	cHandle.setChannelHandle(chan);
 	cHandle.setContextHandle(ctx);

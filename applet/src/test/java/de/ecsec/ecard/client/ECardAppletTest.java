@@ -87,7 +87,7 @@ public class ECardAppletTest {
         System.out.println("done.");
 
         System.out.print("Create EventManager... ");
-        manager = new EventManager(cr, env, sessionId, ctx);
+        manager = new EventManager(cr, env, ctx);
         System.out.println("done.");
         
         System.out.print("Create SAL... ");

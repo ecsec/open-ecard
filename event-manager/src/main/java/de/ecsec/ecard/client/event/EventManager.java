@@ -20,7 +20,6 @@ import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -46,7 +45,7 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
     protected final byte[] ctx;
     protected final boolean recognize;
 
-    private final EnumMap<EventType, Event> events;
+    private final Dispatcher dispatcher;
 
     protected ExecutorService threadPool;
     private Future watcher;
@@ -57,10 +56,7 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
 	this.recognize = cr != null;
 	this.env = env;
 	this.ctx = ctx;
-	this.events = new EnumMap<EventType, Event>(EventType.class);
-	for (EventType type : EventType.values()) {
-	    events.put(type, new Event(type));
-	}
+	this.dispatcher = new Dispatcher(this);
     }
 
 
@@ -214,30 +210,22 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
     }
 
     private synchronized void notify(EventType eventType, Object eventData) {
-	Event event = events.get(eventType);
-	this.threadPool.submit(new EventHandler(event, eventData));
+        dispatcher.notify(eventType, eventData);
     }
 
     @Override
     public synchronized void register(EventType type, EventCallback callback) {
-	Event event = events.get(type);
-	event.addListener(callback);
+        dispatcher.add(callback, type);
     }
 
     @Override
     public synchronized void register(List<EventType> types, EventCallback callback) {
-	for (EventType type : types) {
-	    Event event = events.get(type);
-	    event.addListener(callback);
-	}
+	dispatcher.add(callback, (EventType[])types.toArray());
     }
 
     @Override
     public synchronized void registerAllEvents(EventCallback callback) {
-	for (EventType type : EventType.values()) {
-	    Event event = events.get(type);
-	    event.addListener(callback);
-	}
+        dispatcher.add(callback);
     }
 
 }

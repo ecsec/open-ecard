@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JApplet;
 
+
 /**
  *
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
@@ -82,6 +83,7 @@ public class ECardApplet extends JApplet {
                 recognition = new CardRecognition(ifd, ctx);
             } catch (Exception ex) {
                 _logger.logp(Level.SEVERE, this.getClass().getName(), "init()", ex.getMessage(), ex);
+                recognition = null;
                 initialized = false;
             }
         } else {

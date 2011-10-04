@@ -100,10 +100,10 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
 	return cHandle;
     }
 
-    private ConnectionHandleType recognizeSlot(String ifdName, SlotStatusType status) {
+    protected ConnectionHandleType recognizeSlot(String ifdName, SlotStatusType status, boolean withRecognition) {
 	// build recognition info in any way
 	RecognitionInfo rInfo = null;
-	if (recognize) {
+	if (recognize && withRecognition) {
 	    try {
 		rInfo = cr.recognizeCard(ifdName, status.getIndex());
 	    } catch (RecognitionException ex) {
@@ -145,6 +145,10 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
 	return null;
     }
 
+    private void sendAsyncEvents(String ifdName, SlotStatusType nextSlot, EventType... types) {
+        threadPool.submit(new Recognizer(this, ifdName, nextSlot, types));
+    }
+
     protected void sendEvents(List<IFDStatusType> oldS, List<IFDStatusType> changed) {
 	for (IFDStatusType next : changed) {
 	    IFDStatusType counterPart = getCorresponding(next.getIFDName(), oldS);
@@ -161,17 +165,13 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
 		if (counterPartSlot == null) {
 		    // slot is new, send event when card is present
 		    if (nextSlot.isCardAvailable()) {
-			ConnectionHandleType conHandle = recognizeSlot(next.getIFDName(), nextSlot);
-			notify(EventType.CARD_INSERTED, conHandle);
-			notify(EventType.CARD_RECOGNIZED, conHandle);
+                        sendAsyncEvents(next.getIFDName(), nextSlot, EventType.CARD_INSERTED, EventType.CARD_RECOGNIZED);
 		    }
 		} else {
 		    // compare slot for difference
 		    if (nextSlot.isCardAvailable() != counterPartSlot.isCardAvailable()) {
 			if (nextSlot.isCardAvailable()) {
-			    ConnectionHandleType conHandle = recognizeSlot(next.getIFDName(), nextSlot);
-			    notify(EventType.CARD_INSERTED, conHandle);
-			    notify(EventType.CARD_RECOGNIZED, conHandle);
+			    sendAsyncEvents(next.getIFDName(), nextSlot, EventType.CARD_INSERTED, EventType.CARD_RECOGNIZED);
 			} else {
 			    notify(EventType.CARD_REMOVED, makeConnectionHandle(next.getIFDName(), nextSlot.getIndex()));
 			}
@@ -179,8 +179,7 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
 			// compare atr
 			if (nextSlot.isCardAvailable()) {
 			    if (! Arrays.equals(nextSlot.getATRorATS(), counterPartSlot.getATRorATS())) {
-				ConnectionHandleType conHandle = recognizeSlot(next.getIFDName(), nextSlot);
-				notify(EventType.CARD_RECOGNIZED, conHandle);
+                                sendAsyncEvents(next.getIFDName(), nextSlot, EventType.CARD_RECOGNIZED);
 			    }
 			}
 		    }
@@ -209,7 +208,7 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
 	this.threadPool.shutdown();
     }
 
-    private synchronized void notify(EventType eventType, Object eventData) {
+    protected synchronized void notify(EventType eventType, Object eventData) {
         dispatcher.notify(eventType, eventData);
     }
 

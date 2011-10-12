@@ -6,6 +6,7 @@ import de.ecsec.core.common.WSHelper.WSException;
 import de.ecsec.core.common.enums.EventType;
 import de.ecsec.core.common.interfaces.Environment;
 import de.ecsec.core.common.interfaces.EventCallback;
+import de.ecsec.core.common.interfaces.EventFilter;
 import de.ecsec.core.common.logging.LogManager;
 import de.ecsec.core.common.util.ValueGenerators;
 import de.ecsec.core.recognition.CardRecognition;
@@ -213,18 +214,28 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
     }
 
     @Override
-    public synchronized void register(EventType type, EventCallback callback) {
+    public void register(EventCallback callback, EventFilter filter) {
+        dispatcher.add(callback, filter);
+    }
+
+    @Override
+    public void register(EventCallback callback, EventType type) {
         dispatcher.add(callback, type);
     }
 
     @Override
-    public synchronized void register(List<EventType> types, EventCallback callback) {
-	dispatcher.add(callback, (EventType[])types.toArray());
+    public void register(EventCallback callback, List<EventType> types) {
+        dispatcher.add(callback, (EventType[])types.toArray());
     }
 
     @Override
     public synchronized void registerAllEvents(EventCallback callback) {
         dispatcher.add(callback);
+    }
+    
+    @Override
+    public void unregister(EventCallback callback) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

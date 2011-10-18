@@ -75,6 +75,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>de.ecsec.core</groupId>
+      <artifactId>scio-pcsc</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>de.ecsec.core.sal</groupId>
       <artifactId>micro-sal</artifactId>
       <version>${project.version}</version>

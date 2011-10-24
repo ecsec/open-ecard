@@ -1,8 +1,8 @@
 package de.ecsec.ecard.client;
 
-import de.ecsec.core.ifd.virt.VirtualPinResult;
-import de.ecsec.core.ifd.virt.VirtualPinResultType;
-import de.ecsec.core.ifd.virt.VirtualTerminal;
+import de.ecsec.core.common.ifd.VirtualPinResult;
+import de.ecsec.core.common.ifd.VirtualPinResultType;
+import de.ecsec.core.common.ifd.VirtualTerminal;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;

@@ -9,7 +9,6 @@ import de.ecsec.core.common.enums.EventType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import de.ecsec.ecard.client.event.EnvStub;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
-import iso.std.iso_iec._24727.tech.schema.IFD;
 import de.ecsec.core.recognition.CardRecognition;
 import de.ecsec.ecard.client.event.EventManager;
 import de.ecsec.core.sal.MicroSAL;
@@ -20,6 +19,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openecard.ws.IFD;
 import static org.junit.Assert.*;
 
 

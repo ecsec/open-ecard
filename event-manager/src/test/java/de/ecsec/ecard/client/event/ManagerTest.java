@@ -19,12 +19,12 @@ public class ManagerTest {
     private class Env implements Environment {
 	private IFD ifd;
 	@Override
-	public void setIFD(iso.std.iso_iec._24727.tech.schema.IFD ifd) {
+	public void setIFD(org.openecard.ws.IFD ifd) {
 	    this.ifd = (IFD) ifd;
 	}
 
 	@Override
-	public iso.std.iso_iec._24727.tech.schema.IFD getIFD() {
+	public org.openecard.ws.IFD getIFD() {
 	    return this.ifd;
 	}
 

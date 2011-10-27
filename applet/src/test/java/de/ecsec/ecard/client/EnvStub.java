@@ -3,9 +3,9 @@ package de.ecsec.ecard.client.event;
 import de.ecsec.core.common.interfaces.Environment;
 import de.ecsec.core.common.interfaces.EventManager;
 import de.ecsec.core.common.interfaces.Transport;
-import iso.std.iso_iec._24727.tech.schema.IFD;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
+import org.openecard.ws.IFD;
 
 
 /**

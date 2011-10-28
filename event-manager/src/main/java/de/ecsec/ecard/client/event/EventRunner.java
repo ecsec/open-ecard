@@ -1,5 +1,6 @@
 package de.ecsec.ecard.client.event;
 
+import de.ecsec.core.common.WSHelper.WSException;
 import de.ecsec.core.common.logging.LogManager;
 import de.ecsec.core.common.util.IFDStatusDiff;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -33,13 +35,17 @@ public class EventRunner implements Callable<Void> {
 	try {
 	    while (true) {
 		wait = evtManager.threadPool.submit(new WaitFuture(evtManager));
-		List<IFDStatusType> newStati = evtManager.ifdStatus();
-		IFDStatusDiff diff = new IFDStatusDiff(oldStati);
-		diff.diff(newStati, true);
-		if (diff.hasChanges()) {
-		    evtManager.sendEvents(oldStati, diff.result());
+		try {
+		    List<IFDStatusType> newStati = evtManager.ifdStatus();
+		    IFDStatusDiff diff = new IFDStatusDiff(oldStati);
+		    diff.diff(newStati, true);
+		    if (diff.hasChanges()) {
+			evtManager.sendEvents(oldStati, diff.result());
+		    }
+		    oldStati = newStati;
+		} catch (WSException ex) {
+		    _logger.log(Level.WARNING, "GetStatus returned with error.", ex);
 		}
-		oldStati = newStati;
 		// wait for change if it hasn't already happened
 		wait.get();
 	    }

@@ -21,12 +21,10 @@ import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -61,19 +59,15 @@ public class EventManager implements de.ecsec.core.common.interfaces.EventManage
     }
 
 
-    protected List<IFDStatusType> ifdStatus() {
+    protected List<IFDStatusType> ifdStatus() throws WSException {
 	GetStatus status = new GetStatus();
 	status.setContextHandle(ctx);
 	GetStatusResponse statusResponse = env.getIFD().getStatus(status);
 	List<IFDStatusType> result;
-	try {
-	    WSHelper.checkResult(statusResponse);
-	    result = statusResponse.getIFDStatus();
-	} catch (WSException ex) {
-	    _logger.log(Level.WARNING, "GetStatus returned with error.", ex);
-	    result = new LinkedList();
-	}
-	return result;
+
+        WSHelper.checkResult(statusResponse);
+        result = statusResponse.getIFDStatus();
+        return result;
     }
 
 

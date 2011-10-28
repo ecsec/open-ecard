@@ -6,6 +6,7 @@ import de.ecsec.core.ifd.IFD;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import java.util.Map;
+import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -55,7 +56,8 @@ public class ManagerTest {
 
     }
 
-    //@Test
+    @Ignore
+    @Test
     public void runManager() throws InterruptedException {
 	IFD ifd = new IFD();
 	EstablishContext ctx = new EstablishContext();
@@ -65,12 +67,8 @@ public class ManagerTest {
 	EventManager evt = new EventManager(null, env, ctxR.getContextHandle());
 	evt.initialize();
 	Thread.sleep(1000);
-	evt.terminate();
+	//evt.terminate();
 	Thread.sleep(1000000);
-    }
-
-    @Test
-    public void dummy() {
     }
 
 }

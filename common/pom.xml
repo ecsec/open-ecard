@@ -13,7 +13,7 @@
   <groupId>org.openecard.client</groupId>
   <artifactId>common</artifactId>
   <packaging>jar</packaging>
-  <name>Common Libs</name>
+  <name>openecard Common Libs</name>
   
   <dependencies>
     <dependency>

@@ -12,7 +12,7 @@
   <groupId>org.openecard.client</groupId>
   <artifactId>wsdef</artifactId>
   <packaging>pom</packaging>
-  <name>Webservice Definitions</name>
+  <name>openecard Webservice Definitions</name>
 
   <modules>
     <module>webservicedefs-client</module>

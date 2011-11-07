@@ -13,7 +13,7 @@
   <groupId>org.openecard.client.wsdef</groupId>
   <artifactId>wsdef-server</artifactId>
   <packaging>pom</packaging>
-  <name>Webservice Definitions with jaxws-Engine</name>
+  <name>openecard Webservice Definitions with jaxws-Engine</name>
 
   <dependencies>
     <dependency>

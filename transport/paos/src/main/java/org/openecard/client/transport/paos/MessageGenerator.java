@@ -26,7 +26,8 @@ public class MessageGenerator {
     }
 
     public static String createNewId() {
-	myMsg = UUID.randomUUID().toString();
+	String newMsg = UUID.randomUUID().toString();
+	myMsg = "urn:uuid:" + newMsg;
 	return myMsg;
     }
 

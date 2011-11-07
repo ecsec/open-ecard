@@ -5,37 +5,44 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.ecsec.ecard.client</groupId>
-    <artifactId>ecard-client</artifactId>
+    <groupId>org.openecard</groupId>
+    <artifactId>client</artifactId>
     <version>0.0.2-SNAPSHOT</version>
   </parent>
 
-  <groupId>de.ecsec.ecard.client</groupId>
+  <groupId>org.openecard.client</groupId>
   <artifactId>event-manager</artifactId>
   <name>Event Manager</name>
 
   <dependencies>
     <dependency>
-      <groupId>de.ecsec.core</groupId>
+      <groupId>org.openecard.client</groupId>
       <artifactId>common</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>de.ecsec.core</groupId>
+      <groupId>org.openecard.client</groupId>
       <artifactId>recognition</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>de.ecsec.core</groupId>
+      <groupId>org.openecard.client</groupId>
       <artifactId>ifd</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>de.ecsec.core</groupId>
+      <groupId>org.openecard.client</groupId>
       <artifactId>scio-pcsc</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.openecard.client.wsdef</groupId>
+      <artifactId>wsdef-client</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
+
 </project>

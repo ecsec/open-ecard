@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<include schemaLocation="ISO24727-3.xsd" />
+	<include schemaLocation="StatefulConnectionHandleType.xsd" />
+
+
+	<element name="SubscribeRequest">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="TimeOut" type="positiveInteger"
+							maxOccurs="1" minOccurs="0" />
+						<element name="Event"
+							type="iso:StatefulConnectionHandleType" maxOccurs="unbounded"
+							minOccurs="1" />
+						<element name="Callback"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="SubscribeResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence minOccurs="0" maxOccurs="unbounded">
+						<!-- reflect status of all currently known cards, else there might be a state change going by unknown -->
+						<element name="Event"
+							type="iso:StatefulConnectionHandleType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<element name="PublishRequest">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence minOccurs="1" maxOccurs="unbounded">
+						<!-- at least one event must have been occured -->
+						<element name="Event"
+							type="iso:StatefulConnectionHandleType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="PublishResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+</schema>

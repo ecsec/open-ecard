@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions
+	targetNamespace="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+
+	<!-- =================== -->
+	<!-- Definition of types -->
+	<!-- (only include XSDs) -->
+	<!-- =================== -->
+
+	<wsdl:types>
+		<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified"
+			targetNamespace="urn:iso:std:iso-iec:24727:tech:schema">
+			<xsd:include schemaLocation="ISOIFD-Extension.xsd" />
+		</xsd:schema>
+		<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+	</wsdl:types>
+
+	<!-- ====================== -->
+	<!-- Definition of messages -->
+	<!-- ====================== -->
+
+	<!-- EstablishChannel -->
+	<wsdl:message name="EstablishChannel">
+		<wsdl:part name="parameters" element="iso:EstablishChannel" />
+	</wsdl:message>
+	<wsdl:message name="EstablishChannelResponse">
+		<wsdl:part name="parameters"
+			element="iso:EstablishChannelResponse" />
+	</wsdl:message>
+
+	<!-- DestroyChannel -->
+	<wsdl:message name="DestroyChannel">
+		<wsdl:part name="parameters" element="iso:DestroyChannel" />
+	</wsdl:message>
+	<wsdl:message name="DestroyChannelResponse">
+		<wsdl:part name="parameters"
+			element="iso:DestroyChannelResponse" />
+	</wsdl:message>
+
+
+	<!-- ====================== -->
+	<!-- Definition of portType -->
+	<!-- ====================== -->
+
+	<wsdl:portType name="IFD-Extension">
+
+		<!-- =============================== -->
+		<!-- Card terminal related functions -->
+		<!-- (portType)                      -->
+		<!-- =============================== -->
+
+		<!-- EstablishChannel -->
+		<wsdl:operation name="EstablishChannel">
+			<wsdl:input message="iso:EstablishChannel" />
+			<wsdl:output message="iso:EstablishChannelResponse" />
+		</wsdl:operation>
+
+		<!-- DestroyChannel -->
+		<wsdl:operation name="DestroyChannel">
+			<wsdl:input message="iso:DestroyChannel" />
+			<wsdl:output message="iso:DestroyChannelResponse" />
+		</wsdl:operation>
+
+	</wsdl:portType>
+
+
+
+	<!-- ===================== -->
+	<!-- Definition of Binding -->
+	<!-- ===================== -->
+
+	<wsdl:binding name="IFD-Extension" type="iso:IFD-Extension">
+		<soap:binding style="document"
+			transport="http://schemas.xmlsoap.org/soap/http" />
+
+
+		<!-- =============================== -->
+		<!-- IFD-Extension                   -->
+		<!-- (binding)                       -->
+		<!-- =============================== -->
+
+		<!-- EstablishChannel -->
+		<wsdl:operation name="EstablishChannel">
+			<soap:operation
+				soapAction="urn:iso:std:iso-iec:24727:tech:schema:EstablishChannel" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+
+		<!-- DestroyChannel -->
+		<wsdl:operation name="DestroyChannel">
+			<soap:operation
+				soapAction="urn:iso:std:iso-iec:24727:tech:schema:DestroyChannel" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+
+	</wsdl:binding>
+
+
+	<!-- Definition of IFD-Extension-Service -->
+
+	<wsdl:service name="IFD-Extension">
+		<wsdl:port name="IFDExtensionPort" binding="iso:IFD-Extension">
+			<soap:address location="http://127.0.0.1:18080" />
+		</wsdl:port>
+	</wsdl:service>
+
+</wsdl:definitions>

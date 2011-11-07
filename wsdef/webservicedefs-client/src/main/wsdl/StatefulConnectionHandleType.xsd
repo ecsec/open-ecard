@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<include schemaLocation="ISOCommon.xsd" />
+	<include schemaLocation="ISOIFD.xsd"></include>
+	<include schemaLocation="ISO24727-3.xsd"></include>
+
+
+	<complexType name="StatefulConnectionHandleType">
+		<sequence>
+			<element name="ChannelHandle" type="iso:ChannelHandleType"
+				maxOccurs="1" minOccurs="0" />
+			<element name="ContextHandle" type="iso:ContextHandleType"
+				maxOccurs="1" minOccurs="0" />
+			<element name="IFDName" maxOccurs="1" minOccurs="0"
+				type="string">
+			</element>
+			<element name="SlotIndex" type="nonNegativeInteger"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="SlotHandle" type="iso:SlotHandleType"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="CardType" type="anyURI" maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="CardIdentifier" type="hexBinary" maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="CardApplication" maxOccurs="1" minOccurs="0"
+				type="iso:ApplicationIdentifierType">
+			</element>
+			<element name="DIDAuthentication"
+				type="iso:DIDAuthenticationStateType" maxOccurs="unbounded"
+				minOccurs="0">
+			</element>
+			<element name="DataSetName" type="iso:DataSetNameType"
+				maxOccurs="1" minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+</schema>

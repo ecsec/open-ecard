@@ -1,0 +1,762 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<include schemaLocation="ISO24727-3.xsd" />
+
+	<include schemaLocation="ISO24727-Protocols.xsd" />
+
+	<import namespace="http://www.w3.org/2000/09/xmldsig#"
+		schemaLocation="xmldsig-core-schema.xsd" />
+
+	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
+		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
+
+
+	<!-- ================================       
+		CardInfo-element       
+		=================================      
+		The CardInfo-element contains 
+		the necessary information for 
+		the mapping of generic requests 
+		at the Service Access Layer to 
+		card-specific APDUs in case there 
+		is no appropriate CIA according 
+		to ISO/IEC 7816-15 available on 
+		the card. Furthermore this 
+		structure may be used to specify 
+		card profiles. 
+		==================================  -->
+
+
+	<element name="CardInfo">
+		<complexType>
+			<complexContent>
+				<extension base="iso:CardInfoType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+
+	<complexType name="CardInfoType">
+		<sequence>
+			<!-- 
+				The CardType-element contains a unique
+				identifier for the card type and 
+				optionally further links to specification
+				documents. 
+			-->
+			<element name="CardType" type="iso:CardTypeType" />
+
+			<!-- 
+				The CardIdentification-element 
+				allows to determine the type of 
+				a given card by walking through
+				the decision tree and checking 
+				whether the characteristic features
+				are as expected. 
+			-->
+			<element name="CardIdentification"
+				type="iso:CardIdentificationType" />
+
+
+			<!-- 
+				The CardCapabilities-element 
+				specifies the general capabilities 
+				of the card and may be omitted, if
+				the card fully complies to ISO/IEC 7816-4.
+			-->
+			<element name="CardCapabilities"
+				type="iso:CardCapabilitiesType" maxOccurs="1" minOccurs="0" />
+
+			<!-- 
+				The ApplicationCapabilities-element 
+				provides detailled information about the
+				card applications available on the card.
+			-->
+			<element name="ApplicationCapabilities"
+				type="iso:ApplicationCapabilitiesType" maxOccurs="1" minOccurs="0" />
+
+			<!-- 
+				The Signature-elements may be used to 
+				protect the integrity and authenticity 
+				of (parts of) the CardInfo-element.
+			-->
+			<element name="Signature" type="ds:SignatureType"
+				maxOccurs="unbounded" minOccurs="0" />
+		</sequence>
+		<attribute name="Id" type="ID" use="optional" />
+	</complexType>
+
+
+	<!-- ============================       
+		ApplicationInfo-element       
+		============================      
+		The ApplicationInfo-element
+		allows to specify card applications
+		which may be downloaded to a card
+		by a Card Application Management System.
+		============================  -->
+
+	<element name="ApplicationInfo" type="iso:CardApplicationType" />
+
+
+	<!-- ============================  -->
+	<!-- Definition of basic types in  -->
+	<!--       alphabetic order		   -->
+	<!-- ============================  -->
+
+
+	<complexType name="ApplicationCapabilitiesType">
+		<sequence>
+			<element name="ImplicitlySelectedApplication"
+				type="iso:ApplicationIdentifierType" maxOccurs="1" minOccurs="0" />
+
+			<element name="CardApplication"
+				type="iso:CardApplicationType" maxOccurs="unbounded" minOccurs="0" />
+			<element name="Other" type="dss:AnyType" minOccurs="0" />
+		</sequence>
+		<attribute name="Id" type="ID" use="optional" />
+	</complexType>
+
+
+	<complexType name="ApplicationDataRefType">
+		<complexContent>
+			<extension base="iso:DataRefType">
+				<sequence>
+					<element name="Application"
+						type="iso:ApplicationIdentifierType" maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="ATRInterfaceBytesType">
+		<sequence>
+			<element name="TAi" type="iso:ByteMaskType" maxOccurs="1"
+				minOccurs="0" />
+			<element name="TBi" type="iso:ByteMaskType" maxOccurs="1"
+				minOccurs="0" />
+
+			<element name="TCi" type="iso:ByteMaskType" maxOccurs="1"
+				minOccurs="0" />
+
+			<element name="TDi" type="iso:ByteMaskType" maxOccurs="1"
+				minOccurs="0" />
+
+		</sequence>
+	</complexType>
+
+	<complexType name="ATRType">
+		<sequence>
+			<element name="TS" type="iso:ByteMaskType" maxOccurs="1"
+				minOccurs="1" />
+			<element name="T0" type="iso:ByteMaskType" maxOccurs="1"
+				minOccurs="1" />
+
+			<element name="InterfaceBytes">
+				<complexType>
+					<sequence>
+						<element name="Tx1"
+							type="iso:ATRInterfaceBytesType" />
+
+						<element name="Tx2"
+							type="iso:ATRInterfaceBytesType" />
+
+						<element name="Tx3"
+							type="iso:ATRInterfaceBytesType" />
+
+						<element name="Tx4"
+							type="iso:ATRInterfaceBytesType" />
+
+					</sequence>
+				</complexType>
+			</element>
+			<element name="HistoricalBytes" maxOccurs="1"
+				minOccurs="0">
+				<complexType>
+					<sequence maxOccurs="15" minOccurs="0">
+						<element name="Ti" type="iso:ByteMaskType" />
+
+					</sequence>
+				</complexType>
+			</element>
+			<element name="TCK" type="iso:ByteMaskType" maxOccurs="1"
+				minOccurs="0" />
+		</sequence>
+	</complexType>
+
+
+	<complexType name="ATSInterfaceBytesType">
+		<sequence>
+			<element name="TA1" type="iso:ByteMaskType" maxOccurs="1"
+				minOccurs="0" />
+			<element name="TB1" type="iso:ByteMaskType" maxOccurs="1"
+				minOccurs="0" />
+
+			<element name="TC1" type="iso:ByteMaskType" maxOccurs="1"
+				minOccurs="0" />
+
+		</sequence>
+	</complexType>
+
+	<complexType name="ATSType">
+		<sequence>
+			<element name="TL" type="iso:ByteMaskType" maxOccurs="1"
+				minOccurs="1" />
+			<element name="T0" type="iso:ByteMaskType" maxOccurs="1"
+				minOccurs="1" />
+
+			<element name="InterfaceBytes"
+				type="iso:ATSInterfaceBytesType" />
+
+			<element name="HistoricalBytes">
+				<complexType>
+					<sequence maxOccurs="15" minOccurs="0">
+						<element name="Ti" type="iso:ByteMaskType" />
+
+					</sequence>
+				</complexType>
+			</element>
+			<element name="CRC1" type="iso:ByteMaskType" maxOccurs="1"
+				minOccurs="1" />
+
+			<element name="CRC2" type="iso:ByteMaskType" />
+		</sequence>
+	</complexType>
+
+
+	<simpleType name="BasicRequirementsType">
+		<restriction base="string">
+			<enumeration value="PlatformMandatory" />
+			<enumeration value="PlatformOptional" />
+			<enumeration value="PersonalizationMandatory" />
+			<enumeration value="PersonalizationOptional" />
+		</restriction>
+	</simpleType>
+
+	<complexType name="BitReqType">
+		<complexContent>
+			<extension base="iso:RequirementsType">
+				<sequence>
+					<element name="Bit" type="boolean" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="ByteMaskType">
+		<sequence>
+			<element name="Value" type="iso:ByteType" />
+			<element name="Mask" type="iso:ByteType" />
+	
+		</sequence>
+	</complexType>
+
+	<complexType name="CardApplicationServiceType">
+		<complexContent>
+
+			<extension base="iso:RequirementsType">
+				<sequence>
+					<element name="CardApplicationServiceName"
+						type="string" />
+					<element name="CardApplicationServiceDescription"
+						maxOccurs="1" minOccurs="0"
+						type="iso:CardApplicationServiceDescriptionType" />
+					<element name="Other" type="dss:AnyType" minOccurs="0" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="CardApplicationType">
+		<complexContent>
+			<extension base="iso:RequirementsType">
+				<sequence>
+					<element name="InterfaceProtocol" type="anyURI"
+						maxOccurs="unbounded" minOccurs="0" />
+					<element name="ApplicationIdentifier"
+						type="iso:ApplicationIdentifierType" maxOccurs="1" minOccurs="1" />
+					<element name="ApplicationName" type="string"
+						maxOccurs="1" minOccurs="0" />
+					<element name="LocalApplicationName" type="dss:InternationalStringType" maxOccurs="unbounded" minOccurs="0">
+					</element>
+					<element name="CardApplicationServiceInfo"
+						type="iso:CardApplicationServiceType" maxOccurs="unbounded"
+						minOccurs="0" />
+					<element name="CardApplicationACL" type="iso:AccessControlListType" />
+					<element name="DIDInfo" type="iso:DIDInfoType"
+						maxOccurs="unbounded" minOccurs="0" />
+					<element name="DataSetInfo" maxOccurs="unbounded"
+						minOccurs="0" type="iso:DataSetInfoType" />
+					<element name="Other" type="dss:AnyType" minOccurs="0" />
+				</sequence>
+				<attribute name="Id" type="ID" use="optional" />
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="CardCapabilitiesType">
+		<sequence>
+			<element name="Interface" maxOccurs="unbounded"
+				minOccurs="0">
+				<complexType>
+					<complexContent>
+						<extension base="iso:RequirementsType">
+							<sequence>
+								<element name="Protocol" type="anyURI" />
+							</sequence>
+						</extension>
+					</complexContent>
+				</complexType>
+			</element>
+			<element name="EF.DIR" maxOccurs="1" minOccurs="0"
+				type="iso:FileRefReqType" />
+			<element name="EF.ATRorINFO" maxOccurs="1" minOccurs="0"
+				type="iso:EFATRorINFOType" />
+			<element name="Other" type="dss:AnyType" minOccurs="0" />
+		</sequence>
+		<attribute name="Id" type="ID" use="optional" />
+	</complexType>
+
+
+	<complexType name="CardIdentificationType">
+		<sequence>
+			<element name="ATR" maxOccurs="unbounded" minOccurs="0"
+				type="iso:ATRType" />
+			<element name="ATS" type="iso:ATSType" maxOccurs="1"
+				minOccurs="0" />
+			<element name="CharacteristicFeature" maxOccurs="unbounded"
+				minOccurs="0" type="iso:CardCallSequenceType">
+			</element>
+			<element name="Other" type="dss:AnyType" minOccurs="0" />
+		</sequence>
+		<attribute name="Id" type="ID" use="optional" />
+	</complexType>
+
+
+	<complexType name="CardTypeType">
+		<sequence>
+			<element name="ProfilingInfo" maxOccurs="1" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="BasisSpecification"
+							type="anyURI" />
+
+						<element name="ProfilingRelation"
+							type="iso:ProfilingType" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="ObjectIdentifier" type="anyURI" />
+			<element name="SpecificationBodyOrIssuer" type="string"
+				maxOccurs="1" minOccurs="0" />
+			<element name="CardTypeName"
+				type="dss:InternationalStringType" maxOccurs="unbounded"
+				minOccurs="0" />
+			<element name="Version" maxOccurs="1" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="Major" type="string" />
+						<element name="Minor" type="string"
+							maxOccurs="1" minOccurs="0" />
+						<element name="SubMinor" type="string"
+							maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="Status" type="string" maxOccurs="1"
+				minOccurs="0" />
+			<element name="Date" type="date" maxOccurs="1"
+				minOccurs="0" />
+			<element name="CardInfoRepository" type="anyURI"
+				maxOccurs="1" minOccurs="0" />
+			<element name="Other" type="dss:AnyType" minOccurs="0" />
+		</sequence>
+		<attribute name="Id" type="ID" use="optional" />
+	</complexType>
+
+	<complexType name="DataSetInfoType">
+		<complexContent>
+
+			<extension base="iso:RequirementsType">
+				<sequence>
+					<element name="DataSetName"
+						type="iso:DataSetNameType" />
+					<element name="LocalDataSetName" type="dss:InternationalStringType" maxOccurs="unbounded" minOccurs="0">
+					</element>
+					<element name="DataSetACL"
+						type="iso:AccessControlListType" />
+					<element name="DataSetPath" type="iso:PathType"
+						maxOccurs="1" minOccurs="1" />
+
+					<element name="DSI" type="iso:DSIType"
+						maxOccurs="unbounded" minOccurs="0" />
+					<element name="Other" type="dss:AnyType" minOccurs="0" />
+				</sequence>
+				<attribute name="Id" type="ID" use="optional" />
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="DIDInfoType">
+		<complexContent>
+			<extension base="iso:RequirementsType">
+				<sequence>
+					<element name="DifferentialIdentity"
+						type="iso:DifferentialIdentityType" />
+					<element name="DIDACL"
+						type="iso:AccessControlListType" />
+					<element name="Other" type="dss:AnyType" minOccurs="0" />
+				</sequence>
+				<attribute name="Id" type="ID" use="optional" />
+			</extension>
+		</complexContent>
+	</complexType>
+
+
+	<complexType name="DifferentialIdentityType">
+		<sequence>
+			<element name="DIDName" type="iso:DIDNameType" />
+			<element name="LocalDIDName" type="dss:InternationalStringType" maxOccurs="unbounded" minOccurs="0">
+			</element>
+			<element name="DIDProtocol" type="anyURI" />
+			<element name="DIDMarker" type="iso:DIDMarkerType" />
+			<element name="DIDScope" minOccurs="0"
+				type="iso:DIDScopeType" />
+			<element name="DIDQualifier" minOccurs="0"
+				type="iso:DIDQualifierType" maxOccurs="1" />
+		</sequence>
+	</complexType>
+
+
+	<complexType name="DSIType">
+		<complexContent>
+			<extension base="iso:RequirementsType">
+				<sequence>
+					<element name="DSIName" type="iso:DSINameType" />
+					<element name="DSIPath" type="iso:PathType" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+
+	<complexType name="EFATRorINFOType">
+		<complexContent>
+			<extension base="iso:FileRefReqType">
+				<sequence>
+					<element name="ISO7816-4-CardServiceData"
+						maxOccurs="1" minOccurs="0"
+						type="iso:ISO7816-4-CardServiceDataType" />
+
+					<element name="Pre-Issuing-DO"
+						type="iso:FileRefReqType" maxOccurs="1" minOccurs="0" />
+
+					<element name="ISO7816-4-CardCapabilities"
+						maxOccurs="1" minOccurs="0"
+						type="iso:ISO7816-4-CardCapabilitiesType" />
+
+					<element name="ImplicitlySelectedApplication"
+						type="iso:FileRefReqType" maxOccurs="1" minOccurs="0" />
+
+					<element name="ExtendedLengthInfo" maxOccurs="1"
+						minOccurs="0" type="iso:ExtendedLengthInfoType" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="ExtendedLengthInfoType">
+		<complexContent>
+			<extension base="iso:RequirementsType">
+				<sequence>
+					<element name="GlobalLengthInfo"
+						type="iso:LengthInfoType" />
+					<element name="CommandSpecificLengthInfo"
+						type="iso:CommandSpecificLengthInfoType" maxOccurs="unbounded"
+						minOccurs="0" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="LengthInfoType">
+		<sequence>
+			<element name="MaxNc" type="positiveInteger" />
+			<element name="MaxNe" type="positiveInteger" />
+		</sequence>
+	</complexType>
+
+	<complexType name="CommandSpecificLengthInfoType">
+		<sequence>
+			<element name="Tag" type="byte" />
+			<element name="Command" type="hexBinary" />
+			<element name="LengthInfo" type="iso:LengthInfoType" />
+		</sequence>
+	</complexType>
+
+
+	<complexType name="FileRefReqType">
+		<complexContent>
+			<extension base="iso:RequirementsType">
+				<sequence>
+					<element name="Path" type="iso:PathType"
+						maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+
+	<complexType name="ISO7816-4-CardCapabilitiesType">
+		<complexContent>
+			<extension base="iso:FileRefReqType">
+				<sequence>
+					<element name="FirstSoftwareFunctionTable"
+						maxOccurs="1" minOccurs="1">
+						<complexType>
+							<sequence>
+								<element name="DF-selection"
+									maxOccurs="1" minOccurs="0">
+									<complexType>
+										<sequence>
+											<element
+												name="by-full-DF-name" type="iso:BitReqType" maxOccurs="1"
+												minOccurs="0" />
+											<element
+												name="by-partial-DF-name" type="iso:BitReqType"
+												maxOccurs="1" minOccurs="0" />
+											<element name="by-path"
+												type="iso:BitReqType" maxOccurs="1" minOccurs="0" />
+											<element
+												name="by-file-identifier" type="iso:BitReqType"
+												maxOccurs="1" minOccurs="0" />
+											<element name="implicit"
+												type="iso:BitReqType" maxOccurs="1" minOccurs="0" />
+										</sequence>
+									</complexType>
+								</element>
+								<element name="Short-EF-identifier"
+									type="iso:BitReqType" maxOccurs="1" minOccurs="0" />
+								<element name="Record-number"
+									type="iso:BitReqType" maxOccurs="1" minOccurs="0" />
+								<element name="Record-identifier"
+									type="iso:BitReqType" maxOccurs="1" minOccurs="0" />
+							</sequence>
+						</complexType>
+					</element>
+					<element name="SecondSoftwareFunctionTable">
+						<complexType>
+							<sequence>
+								<element name="EFs-of-TLV-structure"
+									type="iso:BitReqType" maxOccurs="1" minOccurs="0" />
+								<element
+									name="Behaviour-of-write-functions" maxOccurs="1"
+									minOccurs="0">
+
+									<complexType>
+										<complexContent>
+											<extension
+												base="iso:RequirementsType">
+												<sequence>
+													<element
+														name="Behaviour" type="iso:WriteBehaviourType" />
+
+												</sequence>
+											</extension>
+										</complexContent>
+									</complexType>
+								</element>
+								<element
+									name="Data-unit-size-in-quartets" maxOccurs="1"
+									minOccurs="0">
+									<complexType>
+										<complexContent>
+											<extension
+												base="iso:RequirementsType">
+												<sequence>
+													<element
+														name="Exponent">
+														<simpleType>
+															<restriction
+																base="integer">
+																<minInclusive
+																	value="1" />
+																<maxInclusive
+																	value="31" />
+															</restriction>
+														</simpleType>
+													</element>
+												</sequence>
+											</extension>
+										</complexContent>
+									</complexType>
+								</element>
+								<element
+									name="Value-FF-for-first-byte-of-BER-TLV-valid"
+									type="iso:BitReqType" maxOccurs="1" minOccurs="0" />
+							</sequence>
+						</complexType>
+					</element>
+					<element name="ThirdSoftwareFunctionTable">
+						<complexType>
+							<sequence>
+								<element name="Command-chaining"
+									type="iso:BitReqType" maxOccurs="1" minOccurs="0" />
+								<element
+									name="Extended-Lc-and-Le-fields" type="iso:BitReqType"
+									maxOccurs="1" minOccurs="0" />
+								<element name="Logical-Channel-support"
+									maxOccurs="1" minOccurs="0">
+									<complexType>
+										<sequence>
+											<element
+												name="LC-Number-by-Card" type="iso:BitReqType" />
+
+											<element
+												name="LC-Number-by-IFD" type="iso:BitReqType" />
+											<element
+												name="Number-of-Logical-Channels" maxOccurs="1"
+												minOccurs="1">
+												<complexType>
+													<complexContent>
+														<extension
+															base="iso:RequirementsType">
+															<sequence>
+																<element
+																	name="Maxium-Number">
+																	<simpleType>
+																		<restriction
+																			base="integer">
+																			<minInclusive
+																				value="1" />
+																			<maxInclusive
+																				value="8" />
+																		</restriction>
+																	</simpleType>
+																</element>
+															</sequence>
+														</extension>
+													</complexContent>
+												</complexType>
+											</element>
+										</sequence>
+									</complexType>
+								</element>
+							</sequence>
+						</complexType>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+
+	<complexType name="ISO7816-4-CardServiceDataType">
+		<complexContent>
+			<extension base="iso:FileRefReqType">
+				<sequence>
+					<element name="Application-selection" maxOccurs="1"
+						minOccurs="0">
+						<complexType>
+							<sequence>
+								<element name="by-full-DF-name"
+									type="iso:BitReqType" />
+
+								<element name="by-partial-DF-name"
+									type="iso:BitReqType" />
+
+							</sequence>
+						</complexType>
+					</element>
+					<element name="BER-TLV-data-objects-available"
+						maxOccurs="1" minOccurs="0">
+						<complexType>
+							<sequence>
+								<element name="in-EF.DIR"
+									type="iso:BitReqType" />
+
+								<element name="in-EF.ATR"
+									type="iso:BitReqType" />
+
+							</sequence>
+						</complexType>
+					</element>
+					<element name="EF.x-access-services" maxOccurs="1"
+						minOccurs="0">
+						<complexType>
+							<choice>
+								<element name="ReadBinary"
+									type="iso:BasicRequirementsType" />
+
+								<element name="ReadRecord"
+									type="iso:BasicRequirementsType" />
+
+								<element name="GetData"
+									type="iso:BasicRequirementsType" />
+
+							</choice>
+						</complexType>
+					</element>
+					<element name="Root" maxOccurs="1" minOccurs="0">
+						<complexType>
+							<choice>
+								<element name="Card-with-MF"
+									type="iso:BasicRequirementsType" />
+
+								<element name="Card-without-MF"
+									type="iso:BasicRequirementsType" />
+
+							</choice>
+						</complexType>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+
+	<simpleType name="ProfilingType">
+		<restriction base="string">
+			<enumeration value="extends" />
+			<enumeration value="redefines" />
+		</restriction>
+	</simpleType>
+
+
+	<complexType name="RequirementsType">
+		<sequence maxOccurs="1" minOccurs="1">
+			<element name="RequirementLevel"
+				type="iso:BasicRequirementsType" maxOccurs="1" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+
+	<simpleType name="VariantIndicatorType">
+		<restriction base="string">
+			<enumeration value="CommandWithoutSM" />
+			<enumeration value="ResponseWithoutSM" />
+			<enumeration value="CommandWithSM" />
+			<enumeration value="ResponseWithSM" />
+		</restriction>
+	</simpleType>
+
+
+	<simpleType name="WriteBehaviourType">
+		<restriction base="string">
+			<enumeration value="One-time-write" />
+			<enumeration value="Proprietary" />
+			<enumeration value="Write-OR" />
+			<enumeration value="Write-AND" />
+		</restriction>
+	</simpleType>
+
+</schema>

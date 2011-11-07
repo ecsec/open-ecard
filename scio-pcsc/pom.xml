@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	 xmlns="http://maven.apache.org/POM/4.0.0"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.openecard</groupId>
+    <artifactId>client</artifactId>
+    <version>0.0.2-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.openecard.client</groupId>
+  <artifactId>scio-pcsc</artifactId>
+  <packaging>jar</packaging>
+  <name>PCSC SmartcardIO Provider</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>common</artifactId>
+      <version>${project.version}</version>
+      <!-- I suppose provided is ok, because in all cases I can imagine, the interface gets pulled in correctly -->
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+</project>

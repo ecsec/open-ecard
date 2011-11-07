@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+		  xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+		  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+		  targetNamespace="urn:iso:std:iso-iec:24727:tech:schema">
+
+
+  <!-- =================== -->
+  <!-- Definition of types -->
+  <!-- (only include XSDs) -->
+  <!-- =================== -->
+
+  <wsdl:types>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		elementFormDefault="qualified"
+		targetNamespace="urn:iso:std:iso-iec:24727:tech:schema">
+      <xsd:include schemaLocation="ISOSALCallback.xsd" />
+    </xsd:schema>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    </xsd:schema>
+  </wsdl:types>
+
+
+  <!-- ====================== -->
+  <!-- Definition of messages -->
+  <!-- ====================== -->
+
+  <wsdl:message name="SubscribeRequest">
+    <wsdl:part name="parameters" element="iso:SubscribeRequest" />
+  </wsdl:message>
+
+  <wsdl:message name="SubscribeResponse">
+    <wsdl:part name="parameters" element="iso:SubscribeResponse" />
+  </wsdl:message>
+
+
+  <!-- ====================== -->
+  <!-- Definition of portType -->
+  <!-- ====================== -->
+
+  <wsdl:portType name="Subscribe">
+    <wsdl:operation name="Subscribe">
+      <wsdl:input message="iso:SubscribeRequest" />
+      <wsdl:output message="iso:SubscribeResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+
+
+  <!-- ===================== -->
+  <!-- Definition of Binding -->
+  <!-- ===================== -->
+
+  <wsdl:binding name="Subscribe" type="iso:Subscribe">
+    <soap:binding style="document"
+		  transport="http://schemas.xmlsoap.org/soap/http" />
+
+    <wsdl:operation name="Subscribe">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Subscribe" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+
+
+  <!-- Definition of Subscribe-Service -->
+
+  <wsdl:service name="Subscribe">
+    <wsdl:port name="Subscribe" binding="iso:Subscribe">
+      <soap:address location="http://127.0.0.1:18080" />
+    </wsdl:port>
+  </wsdl:service>
+
+</wsdl:definitions>

@@ -5,15 +5,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.ecsec.ecard.client</groupId>
-    <artifactId>ecard-client</artifactId>
+    <groupId>org.openecard</groupId>
+    <artifactId>client</artifactId>
     <version>0.0.2-SNAPSHOT</version>
   </parent>
 
-  <groupId>de.ecsec.ecard.client</groupId>
+  <groupId>org.openecard.client</groupId>
   <artifactId>applet</artifactId>
   <name>Applet</name>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -30,7 +30,7 @@
 	      <!-- <includes>**/*.class</includes> -->
 	      <!-- <excludes></excludes> -->
 	      <!-- <excludeGroupIds></excludeGroupIds> -->
-	      <includeGroupIds>de.ecsec.core,de.ecsec.core.environment,de.ecsec.core.wsdef,de.ecsec.ecard.client,de.ecsec.core.transport,org.safehaus.jug</includeGroupIds>
+	      <includeGroupIds>org.openecard.client,org.openecard.client-env,org.openecard.client.wsdef,org.openecard.client,org.openecard.client.transport,org.safehaus.jug</includeGroupIds>
 	      <outputDirectory>${project.build.directory}/classes</outputDirectory>
 	      <overWriteReleases>false</overWriteReleases>
 	      <overWriteSnapshots>true</overWriteSnapshots>
@@ -65,42 +65,37 @@
   
   <dependencies>
     <dependency>
-      <groupId>de.ecsec.core</groupId>
+      <groupId>org.openecard.client</groupId>
       <artifactId>common</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>de.ecsec.core</groupId>
+      <groupId>org.openecard.client</groupId>
       <artifactId>ifd</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>de.ecsec.core</groupId>
+      <groupId>org.openecard.client</groupId>
       <artifactId>scio-pcsc</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>de.ecsec.core.sal</groupId>
+      <groupId>org.openecard.client.sal</groupId>
       <artifactId>micro-sal</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>de.ecsec.core.environment</groupId>
-      <artifactId>client</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>de.ecsec.core.wsdef</groupId>
+      <groupId>org.openecard.client.wsdef</groupId>
       <artifactId>wsdef-client</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>de.ecsec.ecard.client</groupId>
+      <groupId>org.openecard.client</groupId>
       <artifactId>event-manager</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>de.ecsec.core.transport</groupId>
+      <groupId>org.openecard.client.transport</groupId>
       <artifactId>paos</artifactId>
       <version>${project.version}</version>
     </dependency>

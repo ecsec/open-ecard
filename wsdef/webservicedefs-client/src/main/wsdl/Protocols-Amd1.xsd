@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.bsi.bund.de/ecard/api/1.1"
+	xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:ec="http://www.bsi.bund.de/ecard/api/1.1"
+	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<include schemaLocation="eCard.xsd"></include>
+	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
+		schemaLocation="ISO24727-Protocols.xsd" />
+	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
+		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
+
+
+
+	<!-- =============================== -->
+	<!--   Protocols for GetCertificate  -->
+	<!-- =============================== -->
+
+	<!-- GetCertificate with eID-SSCD Activation Protocol -->
+
+
+	<complexType name="eIDSSCDActivationInputType">
+		<complexContent>
+			<restriction base="ec:ProtocolDataType">
+				<sequence>
+					<element name="ConnectionHandle"
+						type="iso:ConnectionHandleType" />
+					<element name="DIDName" type="iso:DIDNameType"
+						minOccurs="1" maxOccurs="1" />
+					<element name="DIDScope" type="iso:DIDScopeType"
+						maxOccurs="1" minOccurs="0">
+					</element>
+					<element name="DIDCreationData"
+						type="iso:CryptoMarkerType" maxOccurs="1" minOccurs="0" />
+					<element name="RequestPseudonymCertificate"
+						minOccurs="0" maxOccurs="1" type="boolean">
+					</element>
+					<element name="StoreCertificateOnCard" type="iso:DataRefType" maxOccurs="1" minOccurs="0"></element>
+					<element name="MakeCertificateRetrievable"
+						type="boolean" maxOccurs="1" minOccurs="0">
+					</element>
+					<element name="CertificationAuthority"
+						type="iso:ChannelHandleType">
+					</element>
+					<element name="TransactionIdentifier" type="string"
+						maxOccurs="1" minOccurs="0">
+					</element>				
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="eIDSSCDActivationOutputType">
+		<complexContent>
+			<restriction base="ec:ProtocolDataType">
+				<sequence>
+					<element name="TransactionIdentifier" type="string"
+						maxOccurs="1" minOccurs="0">
+					</element>
+					<element ref="dss:Base64Data" maxOccurs="1"
+						minOccurs="0">
+					</element>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+</schema>

@@ -1,0 +1,810 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+
+	<!-- Definition of Basic Types -->
+
+	<include schemaLocation="ISOCommon.xsd"></include>
+
+	<!-- Card terminal related functions -->
+
+	<!-- EstablishContext  -->
+
+	<element name="EstablishContext">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="EstablishContextResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="ContextHandle"
+							type="iso:ContextHandleType" maxOccurs="1" minOccurs="0">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- ReleaseContext  -->
+
+	<element name="ReleaseContext">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ContextHandle"
+							type="iso:ContextHandleType" maxOccurs="1" minOccurs="1" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="ReleaseContextResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+
+	<!-- ListIFDs  -->
+
+	<element name="ListIFDs">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ContextHandle"
+							type="iso:ContextHandleType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="ListIFDsResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="IFDName" maxOccurs="unbounded"
+							minOccurs="0" type="string" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- GetIFDCapabilities  -->
+
+	<element name="GetIFDCapabilities">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ContextHandle"
+							type="iso:ContextHandleType" />
+						<element name="IFDName" type="string" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="GetIFDCapabilitiesResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="0">
+						<element name="IFDCapabilities" maxOccurs="1"
+							minOccurs="1" type="iso:IFDCapabilitiesType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="IFDCapabilitiesType">
+		<sequence>
+			<element name="SlotCapability" type="iso:SlotCapabilityType"
+				maxOccurs="unbounded" minOccurs="1" />
+			<element name="DisplayCapability"
+				type="iso:DisplayCapabilityType" maxOccurs="unbounded"
+				minOccurs="0" />
+			<element name="KeyPadCapability"
+				type="iso:KeyPadCapabilityType" maxOccurs="unbounded"
+				minOccurs="0">
+			</element>
+			<element name="BioSensorCapability"
+				type="iso:BioSensorCapabilityType" maxOccurs="unbounded"
+				minOccurs="0">
+			</element>
+			<element name="OpticalSignalUnit" type="boolean"></element>
+			<element name="AcousticSignalUnit" type="boolean"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="SlotCapabilityType">
+		<sequence>
+			<element name="Index" type="nonNegativeInteger"
+				maxOccurs="1" minOccurs="1" />
+			<element name="Protocol" type="anyURI" maxOccurs="unbounded"
+				minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="DisplayCapabilityType">
+		<sequence>
+			<element name="Index" type="nonNegativeInteger"
+				maxOccurs="1" minOccurs="1" />
+			<element minOccurs="1" maxOccurs="1" name="Lines"
+				type="nonNegativeInteger" />
+			<element name="Columns" type="nonNegativeInteger" />
+			<element name="VirtualLines" type="nonNegativeInteger"
+				maxOccurs="1" minOccurs="0" />
+			<element name="VirtualColumns" type="nonNegativeInteger"
+				maxOccurs="1" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<complexType name="KeyPadCapabilityType">
+		<sequence>
+			<element name="Index" type="nonNegativeInteger"
+				maxOccurs="1" minOccurs="1" />
+			<element minOccurs="1" maxOccurs="1" name="Keys"
+				type="positiveInteger" />
+		</sequence>
+	</complexType>
+
+	<complexType name="BioSensorCapabilityType">
+		<sequence>
+			<element name="Index" type="nonNegativeInteger"
+				maxOccurs="1" minOccurs="1" />
+			<element minOccurs="1" maxOccurs="1" name="BiometricType"
+				type="nonNegativeInteger" />
+		</sequence>
+	</complexType>
+
+	<!-- GetStatus  -->
+
+	<element name="GetStatus">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ContextHandle"
+							type="iso:ContextHandleType" maxOccurs="1" minOccurs="1" />
+						<element name="IFDName" type="string"
+							maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="GetStatusResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="IFDStatus" maxOccurs="unbounded"
+							minOccurs="0" type="iso:IFDStatusType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="IFDStatusType">
+		<sequence>
+			<element name="IFDName" type="string" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="Connected" type="boolean" maxOccurs="1"
+				minOccurs="0" />
+			<element minOccurs="1" maxOccurs="unbounded"
+				name="SlotStatus" type="iso:SlotStatusType">
+				<annotation>
+					<documentation>Index of the slot.</documentation>
+				</annotation>
+			</element>
+			<element name="ActiveAntenna" type="boolean" maxOccurs="1"
+				minOccurs="0" />
+			<element minOccurs="0" maxOccurs="unbounded"
+				name="DisplayStatus" type="iso:SimpleFUStatusType">
+				<annotation>
+					<documentation>Index of the display.</documentation>
+				</annotation>
+			</element>
+			<element minOccurs="0" maxOccurs="unbounded"
+				name="KeyPadStatus" type="iso:SimpleFUStatusType">
+				<annotation>
+					<documentation>Index of the keypad.</documentation>
+				</annotation>
+			</element>
+			<element minOccurs="0" maxOccurs="unbounded"
+				name="BioSensorStatus" type="iso:SimpleFUStatusType" />
+		</sequence>
+	</complexType>
+
+	<complexType name="SlotStatusType">
+		<sequence>
+			<element name="Index" type="nonNegativeInteger"
+				maxOccurs="1" minOccurs="1" />
+			<element minOccurs="1" maxOccurs="1" name="CardAvailable"
+				type="boolean" />
+			<element name="ATRorATS" type="hexBinary" maxOccurs="1"
+				minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+
+
+	<complexType name="SimpleFUStatusType">
+		<sequence>
+			<element name="Index" type="nonNegativeInteger" />
+			<element name="Available" type="boolean" />
+		</sequence>
+	</complexType>
+
+	<!-- Wait -->
+
+	<element name="Wait">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ContextHandle"
+							type="iso:ContextHandleType" maxOccurs="1" minOccurs="1" />
+						<element name="TimeOut" type="positiveInteger"
+							maxOccurs="1" minOccurs="0" />
+						<element name="IFDStatus"
+							type="iso:IFDStatusType" maxOccurs="unbounded" minOccurs="0" />
+						<element name="Callback"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="WaitResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="IFDEvent"
+							type="iso:IFDStatusType" maxOccurs="unbounded" minOccurs="0">
+						</element>
+						<element name="SessionIdentifier" type="string"
+							maxOccurs="1" minOccurs="0">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- Cancel  -->
+
+	<element name="Cancel">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ContextHandle"
+							type="iso:ContextHandleType" maxOccurs="1" minOccurs="1" />
+						<element name="IFDName" type="string" />
+						<element name="SessionIdentifier" type="string"
+							maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CancelResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- ControlIFD  -->
+
+	<element name="ControlIFD">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ContextHandle"
+							type="iso:ContextHandleType" maxOccurs="1" minOccurs="1" />
+						<element name="IFDName" type="string" />
+						<element name="Command" type="hexBinary" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="ControlIFDResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="Response" type="hexBinary" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- Card related functions -->
+
+
+	<!-- Connect -->
+
+	<element name="Connect">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ContextHandle"
+							type="iso:ContextHandleType" maxOccurs="1" minOccurs="1" />
+						<element name="IFDName" type="string" />
+						<element name="Slot" type="nonNegativeInteger" />
+						<element name="Exclusive" type="boolean"
+							maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="ConnectResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="SlotHandle"
+							type="iso:SlotHandleType" maxOccurs="1" minOccurs="0">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- Disconnect -->
+
+	<element name="Disconnect">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="SlotHandle"
+							type="iso:SlotHandleType" />
+						<element name="Action" type="iso:ActionType"
+							maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DisconnectResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<simpleType name="ActionType">
+		<restriction base="string">
+			<enumeration value="Reset" />
+			<enumeration value="Unpower" />
+			<enumeration value="Eject" />
+			<enumeration value="Confiscate" />
+		</restriction>
+	</simpleType>
+
+
+	<!-- BeginTransaction -->
+	<element name="BeginTransaction">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="SlotHandle"
+							type="iso:SlotHandleType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="BeginTransactionResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- EndTransaction -->
+	<element name="EndTransaction">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="SlotHandle"
+							type="iso:SlotHandleType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="EndTransactionResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- Transmit -->
+	<element name="Transmit">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="SlotHandle"
+							type="iso:SlotHandleType" />
+						<element name="InputAPDUInfo"
+							type="iso:InputAPDUInfoType" maxOccurs="unbounded"
+							minOccurs="1">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="InputAPDUInfoType">
+		<sequence>
+			<element name="InputAPDU" type="hexBinary"></element>
+			<element name="AcceptableStatusCode" type="hexBinary"
+				maxOccurs="unbounded" minOccurs="0">
+			</element>
+
+		</sequence>
+	</complexType>
+
+
+
+	<element name="TransmitResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="OutputAPDU" type="hexBinary"
+							maxOccurs="unbounded" minOccurs="1">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!--User related functions  -->
+
+	<!-- VerifyUser -->
+	<element name="VerifyUser">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="SlotHandle"
+							type="iso:SlotHandleType" />
+						<element name="InputUnit"
+							type="iso:InputUnitType" />
+						<element name="DisplayIndex"
+							type="nonNegativeInteger" maxOccurs="1" minOccurs="0">
+						</element>
+						<element name="AltVUMessages"
+							type="iso:AltVUMessagesType" maxOccurs="1" minOccurs="0" />
+						<element name="TimeoutUntilFirstKey"
+							type="positiveInteger" maxOccurs="1" minOccurs="0" />
+						<element name="TimeoutAfterFirstKey"
+							type="positiveInteger" maxOccurs="1" minOccurs="0" />
+						<element name="Template" type="hexBinary" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="VerifyUserResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="Response" type="hexBinary"
+							maxOccurs="1" minOccurs="1" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="InputUnitType">
+		<choice>
+			<element name="PinInput" type="iso:PinInputType"></element>
+			<element name="BiometricInput"
+				type="iso:BiometricInputType">
+			</element>
+		</choice>
+	</complexType>
+
+	<complexType name="PinInputType">
+		<sequence>
+			<element name="Index" type="nonNegativeInteger" />
+			<element name="PasswordAttributes"
+				type="iso:PasswordAttributesType" />
+		</sequence>
+	</complexType>
+
+	<simpleType name="PadCharType">
+		<restriction base="hexBinary">
+			<length value="1" fixed="true" />
+		</restriction>
+	</simpleType>
+
+	<complexType name="PasswordAttributesType">
+		<sequence>
+			<element name="pwdFlags" type="iso:PasswordFlagsType">
+			</element>
+			<element name="pwdType" type="iso:PasswordTypeType">
+			</element>
+			<element name="minLength" type="nonNegativeInteger">
+			</element>
+			<element name="storedLength" type="nonNegativeInteger">
+			</element>
+			<element name="maxLength" type="nonNegativeInteger"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="padChar" type="iso:PadCharType" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="lastPasswordChange" type="dateTime"
+				maxOccurs="1" minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<simpleType name="PasswordFlagsType">
+		<union memberTypes="iso:BitString">
+			<simpleType>
+				<list>
+					<simpleType>
+						<restriction base="token">
+							<enumeration value="case-sensitive" />
+							<enumeration value="local" />
+							<enumeration value="change-disabled" />
+							<enumeration value="unblock-disabled" />
+							<enumeration value="initialized" />
+							<enumeration value="needs-padding" />
+							<enumeration value="unblockingPassword" />
+							<enumeration value="soPassword" />
+							<enumeration value="disable-allowed" />
+							<enumeration value="integrity-protected" />
+							<enumeration
+								value="confidentiality-protected" />
+							<enumeration value="exchangeRefData" />
+							<enumeration value="resetRetryCounter1" />
+							<enumeration value="resetRetryCounter2" />
+						</restriction>
+					</simpleType>
+				</list>
+			</simpleType>
+		</union>
+	</simpleType>
+
+	<simpleType name="PasswordTypeType">
+		<restriction base="string">
+			<enumeration value="bcd" />
+			<enumeration value="ascii-numeric" />
+			<enumeration value="utf8" />
+			<enumeration value="half-nibble-bcd" />
+			<enumeration value="iso9564-1" />
+		</restriction>
+	</simpleType>
+
+
+	<simpleType name="BitString">
+		<restriction base="string">
+			<pattern value="[0-1]{0,}" />
+		</restriction>
+	</simpleType>
+
+	<complexType name="BiometricInputType">
+		<sequence>
+			<element name="Index" type="nonNegativeInteger" />
+			<element name="BiometricSubtype" type="nonNegativeInteger" />
+		</sequence>
+	</complexType>
+
+	<complexType name="AltVUMessagesType">
+		<sequence>
+			<element name="AuthenticationRequestMessage" type="string"
+				maxOccurs="1" minOccurs="0" />
+			<element name="SuccessMessage" type="string" maxOccurs="1"
+				minOccurs="0" />
+			<element name="AuthenticationFailedMessage" type="string"
+				maxOccurs="1" minOccurs="0" />
+			<element name="RequestConfirmationMessage" type="string"
+				maxOccurs="1" minOccurs="0" />
+			<element name="CancelMessage" type="string" maxOccurs="1"
+				minOccurs="0" />
+		</sequence>
+	</complexType>
+
+
+
+	<!--ModifyVerificationData  -->
+
+	<element name="ModifyVerificationData">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="SlotHandle"
+							type="iso:SlotHandleType" maxOccurs="1" minOccurs="1" />
+						<element name="InputUnit"
+							type="iso:InputUnitType" maxOccurs="1" minOccurs="1" />
+						<element name="DisplayIndex"
+							type="nonNegativeInteger" maxOccurs="1" minOccurs="0">
+						</element>
+						<element name="AltMVDMessages"
+							type="iso:AltMVDMessagesType" maxOccurs="1" minOccurs="0">
+						</element>						<element name="OldReferenceData"
+							type="hexBinary" maxOccurs="1" minOccurs="0" />
+						<element name="TimeoutUntilFirstKey"
+							type="positiveInteger" maxOccurs="1" minOccurs="0">
+						</element>
+						<element name="TimeoutAfterFirstKey"
+							type="positiveInteger" maxOccurs="1" minOccurs="0">
+						</element>
+						<element name="RepeatInput" type="boolean"
+							maxOccurs="1" minOccurs="0" />
+						<element name="Template" type="hexBinary"
+							maxOccurs="1" minOccurs="1" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="AltMVDMessagesType">
+		<sequence>
+			<element name="AuthenticationRequestMessage" type="string"
+				maxOccurs="1" minOccurs="0" />
+
+			<element name="SuccessMessage" type="string" maxOccurs="1"
+				minOccurs="0" />
+
+			<element name="AuthenticationFailedMessage" type="string"
+				maxOccurs="1" minOccurs="0" />
+
+			<element name="EnterNewAuthenticationDataMessage"
+				type="string" maxOccurs="1" minOccurs="0" />
+
+			<element name="RepeatInputMessage" type="string"
+				maxOccurs="1" minOccurs="0" />
+
+			<element name="ComparisonOfRepeatedDataFailed" type="string"
+				maxOccurs="1" minOccurs="0" />
+
+			<element name="RequestConfirmationMessage" type="string"
+				maxOccurs="1" minOccurs="0" />
+			<element name="CancelMessage" type="string" maxOccurs="1"
+				minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<element name="ModifyVerificationDataResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="Response" type="hexBinary"
+							maxOccurs="1" minOccurs="1">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+
+	<!-- Output -->
+
+
+	<element name="Output">
+		<complexType>
+			<sequence>
+				<element name="ContextHandle"
+					type="iso:ContextHandleType" maxOccurs="1" minOccurs="1" />
+				<element name="IFDName" type="string" />
+				<element name="OutputInfo" type="iso:OutputInfoType" />
+			</sequence>
+		</complexType>
+	</element>
+
+	<complexType name="OutputInfoType">
+		<sequence>
+			<element name="Timeout" type="positiveInteger" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="DisplayIndex" type="nonNegativeInteger"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="Message" type="string" maxOccurs="1"
+				minOccurs="0" />
+
+			<element name="AcousticalSignal" type="boolean"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="OpticalSignal" type="boolean" maxOccurs="1"
+				minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+
+	<element name="OutputResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+</schema>

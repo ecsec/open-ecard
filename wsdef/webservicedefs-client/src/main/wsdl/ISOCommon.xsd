@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
+		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd">
+	</import>
+
+	<!-- Definition of Basic Types -->
+
+	<simpleType name="SlotHandleType">
+		<restriction base="hexBinary"></restriction>
+	</simpleType>
+
+	<complexType name="ChannelHandleType">
+		<sequence>
+			<element name="ProtocolTerminationPoint" type="anyURI"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="SessionIdentifier" type="string"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="Binding" type="anyURI" maxOccurs="1"
+				minOccurs="0" default="http://schemas.xmlsoap.org/soap/http">
+			</element>
+			<element name="PathSecurity" type="iso:PathSecurityType"
+				maxOccurs="1" minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="PathSecurityType">
+		<sequence>
+			<element name="Protocol" type="anyURI"></element>
+			<element name="Parameters" type="anyType" maxOccurs="1"
+				minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<simpleType name="ContextHandleType">
+		<restriction base="hexBinary"></restriction>
+	</simpleType>
+
+
+
+
+
+	<!-- Define Response Type -->
+
+
+	<complexType name="RequestType">
+		<complexContent>
+			<restriction base="dss:RequestBaseType"></restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="ResponseType">
+		<complexContent>
+			<restriction base="dss:ResponseBaseType">
+				<sequence>
+					<element ref="dss:Result" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+</schema>

@@ -1,0 +1,1689 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<include schemaLocation="ISOCommon.xsd" />
+
+
+	<include schemaLocation="ISOIFD.xsd" />
+
+
+	<!-- Define names of card application services -->
+
+
+	<!-- Define actions within card application services -->
+
+
+	<complexType name="ActionNameType">
+		<choice>
+			<element name="APIAccessEntryPoint"
+				type="iso:APIAccessEntryPointName" />
+			<element name="ConnectionServiceAction"
+				type="iso:ConnectionServiceActionName" />
+			<element name="CardApplicationServiceAction"
+				type="iso:CardApplicationServiceActionName" />
+			<element name="NamedDataServiceAction"
+				type="iso:NamedDataServiceActionName" />
+			<element name="CryptographicServiceAction"
+				type="iso:CryptographicServiceActionName" />
+			<element name="DifferentialIdentityServiceAction"
+				type="iso:DifferentialIdentityServiceActionName" />
+			<element name="AuthorizationServiceAction"
+				type="iso:AuthorizationServiceActionName" />
+			<element name="LoadedAction" type="string" />
+		</choice>
+	</complexType>
+
+
+	<simpleType name="APIAccessEntryPointName">
+		<restriction base="string">
+			<enumeration value="Initialize" />
+			<enumeration value="Terminate" />
+			<enumeration value="CardApplicationPath" />
+		</restriction>
+	</simpleType>
+
+
+	<simpleType name="ConnectionServiceActionName">
+		<restriction base="string">
+			<enumeration value="CardApplicationConnect" />
+			<enumeration value="CardApplicationDisconnect" />
+			<enumeration value="CardApplicationStartSession" />
+			<enumeration value="CardApplicationEndSession" />
+		</restriction>
+	</simpleType>
+
+
+	<simpleType name="CardApplicationServiceActionName">
+		<restriction base="string">
+			<enumeration value="CardApplicationList" />
+			<enumeration value="CardApplicationCreate" />
+			<enumeration value="CardApplicationDelete" />
+			<enumeration value="CardApplicationServiceList" />
+			<enumeration value="CardApplicationServiceCreate" />
+			<enumeration value="CardApplicationServiceLoad" />
+			<enumeration value="CardApplicationServiceDelete" />
+			<enumeration value="CardApplicationServiceDescribe" />
+			<enumeration value="ExecuteAction" />
+		</restriction>
+	</simpleType>
+
+
+	<simpleType name="NamedDataServiceActionName">
+		<restriction base="string">
+			<enumeration value="DataSetList" />
+			<enumeration value="DataSetCreate" />
+			<enumeration value="DataSetSelect" />
+			<enumeration value="DataSetDelete" />
+			<enumeration value="DSIList" />
+			<enumeration value="DSICreate" />
+			<enumeration value="DSIDelete" />
+			<enumeration value="DSIRead" />
+			<enumeration value="DSIWrite" />
+		</restriction>
+	</simpleType>
+
+
+	<simpleType name="CryptographicServiceActionName">
+		<restriction base="string">
+			<enumeration value="Encipher" />
+			<enumeration value="Decipher" />
+			<enumeration value="GetRandom" />
+			<enumeration value="Hash" />
+			<enumeration value="Sign" />
+			<enumeration value="VerifySignature" />
+			<enumeration value="VerifyCertificate" />
+		</restriction>
+	</simpleType>
+
+
+	<simpleType name="DifferentialIdentityServiceActionName">
+		<restriction base="string">
+			<enumeration value="DIDList" />
+			<enumeration value="DIDCreate" />
+			<enumeration value="DIDGet" />
+			<enumeration value="DIDUpdate" />
+			<enumeration value="DIDDelete" />
+			<enumeration value="DIDAuthenticate" />
+		</restriction>
+	</simpleType>
+
+
+	<simpleType name="AuthorizationServiceActionName">
+		<restriction base="string">
+			<enumeration value="ACLList" />
+			<enumeration value="ACLModify" />
+		</restriction>
+	</simpleType>
+
+
+	<!-- Define other basic types -->
+
+
+	<complexType name="AccessControlListType">
+		<sequence minOccurs="1" maxOccurs="1">
+			<element name="AccessRule" type="iso:AccessRuleType"
+				maxOccurs="unbounded" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<complexType name="AccessRuleType">
+		<sequence>
+			<element name="CardApplicationServiceName" type="string" />
+			<element name="Action" type="iso:ActionNameType" />
+			<element name="SecurityCondition"
+				type="iso:SecurityConditionType" />
+		</sequence>
+	</complexType>
+
+	<simpleType name="ApplicationIdentifierType">
+		<restriction base="hexBinary" />
+	</simpleType>
+
+	<simpleType name="CardApplicationServiceLoadPackageType">
+		<restriction base="hexBinary" />
+	</simpleType>
+
+	<complexType name="CardApplicationPathType">
+		<sequence>
+			<element name="ChannelHandle" type="iso:ChannelHandleType"
+				maxOccurs="1" minOccurs="0" />
+			<element name="ContextHandle" type="iso:ContextHandleType"
+				maxOccurs="1" minOccurs="0" />
+			<element name="IFDName" maxOccurs="1" minOccurs="0"
+				type="string" />
+
+			<element name="SlotIndex" type="nonNegativeInteger"
+				maxOccurs="1" minOccurs="0" />
+
+			<element name="CardApplication" maxOccurs="1" minOccurs="0"
+				type="iso:ApplicationIdentifierType" />
+
+		</sequence>
+	</complexType>
+
+	<complexType name="CardApplicationServiceDescriptionType">
+		<choice>
+			<element name="ServiceDescriptionText" type="string" />
+			<element name="ServiceDescriptionURL" type="anyURI" />
+		</choice>
+	</complexType>
+
+	<complexType name="ConnectionHandleType">
+		<complexContent>
+			<extension base="iso:CardApplicationPathType">
+				<sequence>
+					<element name="SlotHandle" type="iso:SlotHandleType"
+						maxOccurs="1" minOccurs="0" />
+
+
+					<element name="RecognitionInfo" maxOccurs="1"
+						minOccurs="0">
+						<complexType>
+							<sequence>
+								<element name="CardType" type="anyURI"
+									maxOccurs="1" minOccurs="0" />
+
+								<element name="CardIdentifier"
+									type="hexBinary" maxOccurs="1" minOccurs="0" />
+
+								<element name="CaptureTime"
+									type="dateTime" maxOccurs="1" minOccurs="0" />
+
+							</sequence>
+						</complexType>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+
+	<complexType name="DataSetNameListType">
+		<sequence>
+			<element name="DataSetName" type="iso:DataSetNameType"
+				maxOccurs="unbounded" minOccurs="0" />
+
+		</sequence>
+	</complexType>
+
+	<simpleType name="DataSetNameType">
+		<restriction base="iso:NameType" />
+	</simpleType>
+
+
+	<complexType name="DIDAbstractMarkerType">
+		<complexContent>
+			<extension base="anyType">
+				<attribute name="Protocol" type="anyURI" use="required" />
+			</extension>
+		</complexContent>
+	</complexType>
+
+
+	<complexType name="DIDAuthenticationDataType">
+		<complexContent>
+			<extension base="anyType">
+				<attribute name="Protocol" type="anyURI" use="required" />
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="DIDAuthenticationStateType">
+		<sequence>
+			<element name="DIDName" type="iso:NameType" />
+			<element name="DIDScope" type="iso:DIDScopeType"
+				maxOccurs="1" minOccurs="0" />
+			<element name="DIDState" type="boolean" />
+			<element name="DIDStateQualifier" type="hexBinary"
+				maxOccurs="1" minOccurs="0" />
+
+		</sequence>
+	</complexType>
+
+	<simpleType name="DIDNameType">
+		<restriction base="iso:NameType" />
+	</simpleType>
+
+	<complexType name="DIDNameListType">
+		<sequence>
+			<element name="DIDName" type="iso:DIDNameType"
+				maxOccurs="unbounded" minOccurs="0" />
+
+		</sequence>
+	</complexType>
+
+
+	<complexType name="DIDQualifierType">
+		<choice>
+			<element name="ApplicationIdentifier"
+				type="iso:ApplicationIdentifierType" />
+			<element name="ObjectIdentifier" type="anyURI" />
+			<element name="ApplicationFunction" type="iso:BitString" />
+		</choice>
+	</complexType>
+
+
+	<complexType name="DIDStructureType">
+		<sequence>
+			<element name="DIDName" type="iso:DIDNameType" />
+			<element name="DIDScope" type="iso:DIDScopeType" />
+			<element name="Authenticated" type="boolean" />
+			<element name="DIDMarker" type="iso:DIDAbstractMarkerType" />
+			<element name="DIDQualifier" type="iso:DIDQualifierType"
+				minOccurs="0" maxOccurs="1" />
+		</sequence>
+	</complexType>
+
+
+	<simpleType name="DIDScopeType">
+		<restriction base="string">
+			<enumeration value="local" />
+			<enumeration value="global" />
+		</restriction>
+	</simpleType>
+
+
+
+	<complexType name="DIDUpdateDataType" abstract="true">
+		<complexContent>
+			<extension base="anyType">
+				<attribute name="Protocol" type="anyURI" use="required" />
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<simpleType name="DSINameType">
+		<restriction base="iso:NameType" />
+	</simpleType>
+
+	<complexType name="DSINameListType">
+		<sequence>
+			<element name="DSIName" type="iso:DSINameType"
+				maxOccurs="unbounded" minOccurs="0" />
+
+		</sequence>
+	</complexType>
+
+
+	<simpleType name="ExecuteActionConfirmationType">
+		<restriction base="hexBinary" />
+	</simpleType>
+
+
+	<simpleType name="ExecuteActionRequestType">
+		<restriction base="hexBinary" />
+	</simpleType>
+
+
+	<simpleType name="FalseType">
+		<restriction base="boolean">
+			<pattern value='false' />
+		</restriction>
+	</simpleType>
+
+	<simpleType name="NameType">
+		<restriction base="normalizedString">
+			<minLength value="1" />
+			<maxLength value="255" />
+			<whiteSpace value='collapse' />
+		</restriction>
+	</simpleType>
+
+	<complexType name="NULL" final="#all" />
+
+
+	<complexType name="PathType">
+		<sequence>
+			<choice>
+				<element name="efIdOrPath" type="hexBinary" />
+				<element name="TagRef">
+					<complexType>
+						<sequence>
+							<element name="tag" type="hexBinary" />
+							<element name="efIdOrPath" type="hexBinary"
+								maxOccurs="1" minOccurs="0" />
+
+						</sequence>
+					</complexType>
+				</element>
+				<element name="AppFileRef">
+					<complexType>
+						<sequence>
+							<element name="aid" type="hexBinary" />
+							<element name="efIDOrPath" type="hexBinary" />
+
+						</sequence>
+					</complexType>
+				</element>
+				<element name="AppTagRef">
+					<complexType>
+						<sequence>
+							<element name="aid" type="hexBinary" />
+							<element name="tag" type="string" />
+							<element name="efIdOrPath" type="hexBinary"
+								maxOccurs="1" minOccurs="0" />
+
+						</sequence>
+					</complexType>
+				</element>
+			</choice>
+			<element name="Index" type="hexBinary" maxOccurs="1"
+				minOccurs="0" />
+			<element name="Length" type="hexBinary" maxOccurs="1"
+				minOccurs="0" />
+		</sequence>
+	</complexType>
+
+
+	<complexType name="SecurityConditionType">
+		<choice>
+			<element name="DIDAuthentication"
+				type="iso:DIDAuthenticationStateType" />
+
+			<element name="always" type="iso:TrueType" />
+			<element name="never" type="iso:FalseType" />
+			<element name="not" type="iso:SecurityConditionType" />
+			<element name="and">
+				<complexType>
+					<sequence minOccurs="1" maxOccurs="255">
+						<element name="SecurityCondition"
+							type="iso:SecurityConditionType" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="or">
+				<complexType>
+					<sequence minOccurs="1" maxOccurs="255">
+						<element name="SecurityCondition"
+							type="iso:SecurityConditionType" />
+					</sequence>
+				</complexType>
+			</element>
+		</choice>
+	</complexType>
+
+
+	<complexType name="TargetNameType">
+		<choice>
+			<element name="DataSetName" type="iso:DataSetNameType" />
+			<element name="DIDName" type="iso:DIDNameType" />
+			<element name="CardApplicationName"
+				type="iso:ApplicationIdentifierType" />
+
+		</choice>
+	</complexType>
+
+
+	<simpleType name="TrueType">
+		<restriction base="boolean">
+			<pattern value='true' />
+		</restriction>
+	</simpleType>
+
+
+	<!-- =============================== -->
+	<!-- Card-application-service access -->
+	<!-- =============================== -->
+	<!--            Section 6            -->
+	<!-- =============================== -->
+
+	<!-- 6.1 Initialize -->
+
+	<element name="Initialize">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="InitializeResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 6.2 Terminate -->
+
+	<element name="Terminate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="TerminateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<!-- 6.3 CardApplicationPath -->
+
+
+	<element name="CardApplicationPath">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="CardAppPathRequest"
+							type="iso:CardApplicationPathType" maxOccurs="1" minOccurs="1" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CardApplicationPathResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="CardAppPathResultSet">
+							<complexType>
+								<sequence maxOccurs="unbounded"
+									minOccurs="0">
+									<element
+										name="CardApplicationPathResult"
+										type="iso:CardApplicationPathType" />
+
+								</sequence>
+							</complexType>
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- ================== -->
+	<!-- Connection Service -->
+	<!-- ================== -->
+	<!--     Section 7      -->
+	<!-- ================== -->
+
+	<!-- 7.2 CardApplicationConnect -->
+
+	<element name="CardApplicationConnect">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="CardApplicationPath"
+							type="iso:CardApplicationPathType" maxOccurs="1" minOccurs="1" />
+						<element name="Output" type="iso:OutputInfoType"
+							maxOccurs="1" minOccurs="0" />
+
+						<element name="ExclusiveUse" type="boolean"
+							maxOccurs="1" minOccurs="0" default="false" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CardApplicationConnectResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="0">
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 7.3 CardApplicationDisconnect -->
+
+	<element name="CardApplicationDisconnect">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="Action" type="iso:ActionType"
+							maxOccurs="1" minOccurs="0" />
+
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CardApplicationDisconnectResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 7.4 CardApplicationStartSession -->
+
+	<element name="CardApplicationStartSession">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType"
+							maxOccurs="1" minOccurs="0" />
+						<element name="DIDName" type="iso:NameType" />
+						<element name="AuthenticationProtocolData"
+							type="iso:DIDAuthenticationDataType" />
+						<element name="SAMConnectionHandle"
+							type="iso:ConnectionHandleType" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CardApplicationStartSessionResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="AuthenticationProtocolData"
+							type="iso:DIDAuthenticationDataType" />
+
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 7.5 CardApplicationEndSession -->
+
+	<element name="CardApplicationEndSession">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CardApplicationEndSessionResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- ======================== -->
+	<!-- Card-application service -->
+	<!-- ======================== -->
+	<!--         Section 8        -->
+	<!-- ======================== -->
+
+	<!-- 8.2 CardApplicationList -->
+
+
+	<element name="CardApplicationList">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CardApplicationListResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="CardApplicationNameList">
+							<complexType>
+								<sequence maxOccurs="unbounded"
+									minOccurs="1">
+									<element name="CardApplicationName"
+										type="iso:ApplicationIdentifierType" maxOccurs="1"
+										minOccurs="1" />
+
+								</sequence>
+							</complexType>
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 8.3 CardApplicationCreate -->
+
+	<element name="CardApplicationCreate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="CardApplicationName"
+							type="iso:ApplicationIdentifierType" />
+						<element name="CardApplicationACL"
+							type="iso:AccessControlListType" />
+
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CardApplicationCreateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 8.4 CardApplicationDelete -->
+
+	<element name="CardApplicationDelete">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="CardApplicationName"
+							type="iso:ApplicationIdentifierType" />
+
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CardApplicationDeleteResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 8.5 CardApplicationServiceList -->
+
+	<element name="CardApplicationServiceList">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CardApplicationServiceListResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="CardApplicationServiceNameList"
+							maxOccurs="1" minOccurs="1">
+							<complexType>
+								<sequence>
+									<element
+										name="CardApplicationServiceName" type="string"
+										maxOccurs="unbounded" minOccurs="0" />
+
+								</sequence>
+							</complexType>
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 8.6 CardApplicationServiceCreate -->
+
+	<element name="CardApplicationServiceCreate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="CardApplicationServiceName"
+							type="string" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CardApplicationServiceCreateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 8.7 CardApplicationServiceLoad -->
+
+	<element name="CardApplicationServiceLoad">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="CardApplicationServiceName"
+							type="string" />
+						<element name="Code"
+							type="iso:CardApplicationServiceLoadPackageType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CardApplicationServiceLoadResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 8.8 CardApplicationServiceDelete -->
+
+
+	<element name="CardApplicationServiceDelete">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="CardApplicationServiceName"
+							type="string" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CardApplicationServiceDeleteResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 8.9 CardApplicationServiceDescribe -->
+
+	<element name="CardApplicationServiceDescribe">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="CardApplicationServiceName"
+							type="string" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CardApplicationServiceDescribeResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="ServiceDescription"
+							type="iso:CardApplicationServiceDescriptionType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 8.10 ExecuteAction -->
+
+	<element name="ExecuteAction">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="CardApplicationServiceName"
+							type="string" />
+
+						<element name="ActionName"
+							type="iso:ActionNameType" />
+						<element name="Request"
+							type="iso:ExecuteActionRequestType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="ExecuteActionResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="0">
+						<element name="Confirmation"
+							type="iso:ExecuteActionConfirmationType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- ======================== -->
+	<!--    Named data service    -->
+	<!-- ======================== -->
+	<!--         Section 9        -->
+	<!-- ======================== -->
+
+	<!-- 9.2 DataSetList -->
+
+	<element name="DataSetList">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DataSetListResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="DataSetNameList"
+							type="iso:DataSetNameListType" />
+
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<!-- 9.3 DataSetCreate -->
+
+	<element name="DataSetCreate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DataSetName"
+							type="iso:DataSetNameType" />
+						<element name="DataSetACL"
+							type="iso:AccessControlListType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DataSetCreateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 9.4 DataSetSelect -->
+
+	<element name="DataSetSelect">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DataSetName"
+							type="iso:DataSetNameType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DataSetSelectResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 9.5 DataSetDelete -->
+
+	<element name="DataSetDelete">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DataSetName"
+							type="iso:DataSetNameType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DataSetDeleteResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 9.6 DSIList -->
+
+	<element name="DSIList">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DSIListResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="DSINameList"
+							type="iso:DSINameListType" />
+
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 9.7 DSICreate -->
+
+	<element name="DSICreate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DSIName" type="iso:DSINameType" />
+						<element name="DSIContent" type="hexBinary" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DSICreateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 9.8 DSIDelete -->
+
+	<element name="DSIDelete">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DSIName" type="iso:DSINameType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DSIDeleteResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 9.9 DSIWrite -->
+
+	<element name="DSIWrite">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DSIName" type="iso:DSINameType" />
+						<element name="DSIContent" type="hexBinary" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DSIWriteResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 9.10 DSIRead -->
+
+	<element name="DSIRead">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DSIName" type="iso:DSINameType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DSIReadResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="DSIContent" type="hexBinary"
+							maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+
+	<!-- =========================== -->
+	<!--    Cryptographic service    -->
+	<!-- =========================== -->
+	<!--         Section 10          -->
+	<!-- =========================== -->
+
+	<!-- 10.2 Encipher -->
+
+	<element name="Encipher">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType"
+							maxOccurs="1" minOccurs="0" />
+						<element name="DIDName" type="iso:NameType" />
+						<element name="PlainText" type="hexBinary" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="EncipherResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="CipherText" type="hexBinary"
+							maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 10.3 Decipher -->
+
+	<element name="Decipher">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType"
+							maxOccurs="1" minOccurs="0" />
+						<element name="DIDName" type="iso:NameType" />
+						<element name="CipherText" type="hexBinary" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DecipherResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="PlainText" type="hexBinary"
+							maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 10.4 GetRandom -->
+
+	<element name="GetRandom">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType"
+							maxOccurs="1" minOccurs="0" />
+						<element name="DIDName" type="iso:NameType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="GetRandomResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="Random" type="hexBinary"
+							maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 10.5 Hash -->
+
+	<element name="Hash">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType"
+							maxOccurs="1" minOccurs="0" />
+						<element name="DIDName" type="iso:NameType" />
+						<element name="Message" type="hexBinary"
+							maxOccurs="1" minOccurs="1" />
+
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="HashResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="Hash" type="hexBinary"
+							maxOccurs="1" minOccurs="0" />
+
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 10.6 Sign -->
+
+
+	<element name="Sign">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType"
+							maxOccurs="1" minOccurs="0" />
+						<element name="DIDName" type="iso:NameType" />
+						<element name="Message" type="hexBinary" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="SignResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="Signature" type="hexBinary"
+							maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<!-- 10.7 VerifySignature -->
+
+	<element name="VerifySignature">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType"
+							maxOccurs="1" minOccurs="0" />
+						<element name="DIDName" type="iso:NameType" />
+						<element name="Signature" type="hexBinary" />
+						<element name="Message" type="hexBinary"
+							maxOccurs="1" minOccurs="0" />
+
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="VerifySignatureResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 10.8 VerifyCertificate -->
+
+	<element name="VerifyCertificate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType"
+							maxOccurs="1" minOccurs="0" />
+
+						<element name="RootCert" type="iso:DIDNameType"
+							maxOccurs="1" minOccurs="0" />
+						<element name="CertificateType" type="anyURI"
+							maxOccurs="1" minOccurs="0" />
+
+						<element name="Certificate" type="hexBinary"
+							maxOccurs="1" minOccurs="1" />
+
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="VerifyCertificateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+
+	<!-- =================================== -->
+	<!--    Differential-Identity service    -->
+	<!-- =================================== -->
+	<!--             Section 11              -->
+	<!-- =================================== -->
+
+	<!-- 11.2 DIDList -->
+
+	<element name="DIDList">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="Filter"
+							type="iso:DIDQualifierType" maxOccurs="1" minOccurs="0" />
+
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DIDListResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="DIDNameList"
+							type="iso:DIDNameListType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 11.3 DIDCreate -->
+
+	<element name="DIDCreate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DIDName" type="iso:DIDNameType" />
+						<element name="DIDUpdateData"
+							type="iso:DIDUpdateDataType" />
+						<element name="DIDACL"
+							type="iso:AccessControlListType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<element name="DIDCreateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 11.4 DIDGet -->
+
+	<element name="DIDGet">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType"
+							maxOccurs="1" minOccurs="0" />
+						<element name="DIDName" type="iso:NameType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DIDGetResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="DIDStructure"
+							type="iso:DIDStructureType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 11.5 DIDUpdate -->
+
+	<element name="DIDUpdate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DIDName" type="iso:NameType" />
+						<element name="DIDUpdateData"
+							type="iso:DIDUpdateDataType" />
+
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DIDUpdateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 11.6 DIDDelete -->
+
+	<element name="DIDDelete">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DIDName" type="iso:NameType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DIDDeleteResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 11.7 DIDAuthenticate -->
+
+	<element name="DIDAuthenticate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType"
+							maxOccurs="1" minOccurs="0" />
+						<element name="DIDName" type="iso:NameType" />
+						<element name="AuthenticationProtocolData"
+							type="iso:DIDAuthenticationDataType" />
+						<element name="SAMConnectionHandle"
+							type="iso:ConnectionHandleType" maxOccurs="1" minOccurs="0" />
+
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DIDAuthenticateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="AuthenticationProtocolData"
+							type="iso:DIDAuthenticationDataType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- =================================== -->
+	<!--        Authorization service        -->
+	<!-- =================================== -->
+	<!--               Section 12            -->
+	<!-- =================================== -->
+
+	<!-- 12.2 ACLList -->
+
+	<element name="ACLList">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" maxOccurs="1" minOccurs="1" />
+						<element name="TargetName"
+							type="iso:TargetNameType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="ACLListResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="TargetACL"
+							type="iso:AccessControlListType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 12.3 ACLModify -->
+
+	<element name="ACLModify">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+						<element name="TargetName"
+							type="iso:TargetNameType" />
+						<element name="CardApplicationServiceName"
+							type="string" maxOccurs="1" minOccurs="1" />
+						<element name="ActionName"
+							type="iso:ActionNameType" />
+						<element name="SecurityCondition"
+							type="iso:SecurityConditionType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="ACLModifyResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+</schema>

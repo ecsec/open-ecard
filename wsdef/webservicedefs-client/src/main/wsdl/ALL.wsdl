@@ -1,0 +1,3118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="Combined_eCard"
+		  xmlns:oec="http://ws.openecard.org"
+		  targetNamespace="http://ws.openecard.org"
+		  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+		  xmlns:ec="http://www.bsi.bund.de/ecard/api/1.1"
+		  xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+		  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+
+  <!-- =============================== -->
+  <!--        Version / Date           -->
+  <!-- =============================== -->
+  <!--            25.10.2011           -->
+  <!-- =============================== -->
+
+  <!-- =================== -->
+  <!-- Definition of types -->
+  <!-- (only include XSDs) -->
+  <!-- =================== -->
+
+
+  <wsdl:types>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		elementFormDefault="qualified">
+      <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="CardInfoRepository.xsd" />
+      <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="ISO24727-3.xsd" />
+      <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="ISO24727-Protocols.xsd" />
+      <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="ISOIFDCallback.xsd" />
+      <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="ISOIFD-Extension.xsd" />
+      <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="ISOIFD.xsd" />
+      <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="ISOSALCallback.xsd" />
+      <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="RecognitionTreeRepository.xsd" />
+    </xsd:schema>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		elementFormDefault="qualified">
+      <xsd:import namespace="http://www.bsi.bund.de/ecard/api/1.1" schemaLocation="Management.xsd" />
+    </xsd:schema>
+  </wsdl:types>
+
+
+
+
+
+  <!-- ====================== -->
+  <!-- Definition of messages -->
+  <!-- ====================== -->
+
+  <!-- Management -->
+  <wsdl:message name="InitializeFramework">
+    <wsdl:part name="parameters" element="ec:InitializeFramework" />
+  </wsdl:message>
+  <wsdl:message name="InitializeFrameworkResponse">
+    <wsdl:part name="parameters"
+	       element="ec:InitializeFrameworkResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="TerminateFramework">
+    <wsdl:part name="parameters" element="ec:TerminateFramework" />
+  </wsdl:message>
+  <wsdl:message name="TerminateFrameworkResponse">
+    <wsdl:part name="parameters"
+	       element="ec:TerminateFrameworkResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="APIACLList">
+    <wsdl:part name="parameters" element="ec:APIACLList" />
+  </wsdl:message>
+  <wsdl:message name="APIACLListResponse">
+    <wsdl:part name="parameters" element="ec:APIACLListResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="APIACLModify">
+    <wsdl:part name="parameters" element="ec:APIACLModify" />
+  </wsdl:message>
+  <wsdl:message name="APIACLModifyResponse">
+    <wsdl:part name="parameters" element="ec:APIACLModifyResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="FrameworkUpdate">
+    <wsdl:part name="parameters" element="ec:FrameworkUpdate" />
+  </wsdl:message>
+  <wsdl:message name="FrameworkUpdateResponse">
+    <wsdl:part name="parameters"
+	       element="ec:FrameworkUpdateResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="GetDefaultParameters">
+    <wsdl:part name="parameters" element="ec:GetDefaultParameters" />
+  </wsdl:message>
+  <wsdl:message name="GetDefaultParametersResponse">
+    <wsdl:part name="parameters"
+	       element="ec:GetDefaultParametersResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="SetDefaultParameters">
+    <wsdl:part name="parameters" element="ec:SetDefaultParameters" />
+  </wsdl:message>
+  <wsdl:message name="SetDefaultParametersResponse">
+    <wsdl:part name="parameters"
+	       element="ec:SetDefaultParametersResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="GetCardInfoList">
+    <wsdl:part name="parameters" element="ec:GetCardInfoList" />
+  </wsdl:message>
+  <wsdl:message name="GetCardInfoListResponse">
+    <wsdl:part name="parameters"
+	       element="ec:GetCardInfoListResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="SetCardInfoList">
+    <wsdl:part name="parameters" element="ec:SetCardInfoList" />
+  </wsdl:message>
+  <wsdl:message name="SetCardInfoListResponse">
+    <wsdl:part name="parameters"
+	       element="ec:SetCardInfoListResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="AddCardInfoFiles">
+    <wsdl:part name="parameters" element="ec:AddCardInfoFiles" />
+  </wsdl:message>
+  <wsdl:message name="AddCardInfoFilesResponse">
+    <wsdl:part name="parameters"
+	       element="ec:AddCardInfoFilesResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="DeleteCardInfoFiles">
+    <wsdl:part name="parameters" element="ec:DeleteCardInfoFiles" />
+  </wsdl:message>
+  <wsdl:message name="DeleteCardInfoFilesResponse">
+    <wsdl:part name="parameters"
+	       element="ec:DeleteCardInfoFilesResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="RegisterIFD">
+    <wsdl:part name="parameters" element="ec:RegisterIFD" />
+  </wsdl:message>
+  <wsdl:message name="RegisterIFDResponse">
+    <wsdl:part name="parameters" element="ec:RegisterIFDResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="UnregisterIFD">
+    <wsdl:part name="parameters" element="ec:UnregisterIFD" />
+  </wsdl:message>
+  <wsdl:message name="UnregisterIFDResponse">
+    <wsdl:part name="parameters" element="ec:UnregisterIFDResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="GetTrustedViewerList">
+    <wsdl:part name="parameters" element="ec:GetTrustedViewerList" />
+  </wsdl:message>
+  <wsdl:message name="GetTrustedViewerListResponse">
+    <wsdl:part name="parameters"
+	       element="ec:GetTrustedViewerListResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="GetTrustedViewerConfiguration">
+    <wsdl:part name="parameters"
+	       element="ec:GetTrustedViewerConfiguration" />
+  </wsdl:message>
+  <wsdl:message name="GetTrustedViewerConfigurationResponse">
+    <wsdl:part name="parameters"
+	       element="ec:GetTrustedViewerConfigurationResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="SetTrustedViewerConfiguration">
+    <wsdl:part name="parameters"
+	       element="ec:SetTrustedViewerConfiguration" />
+  </wsdl:message>
+  <wsdl:message name="SetTrustedViewerConfigurationResponse">
+    <wsdl:part name="parameters"
+	       element="ec:SetTrustedViewerConfigurationResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="AddTrustedViewer">
+    <wsdl:part name="parameters" element="ec:AddTrustedViewer" />
+  </wsdl:message>
+  <wsdl:message name="AddTrustedViewerResponse">
+    <wsdl:part name="parameters"
+	       element="ec:AddTrustedViewerResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="DeleteTrustedViewer">
+    <wsdl:part name="parameters" element="ec:DeleteTrustedViewer" />
+  </wsdl:message>
+  <wsdl:message name="DeleteTrustedViewerResponse">
+    <wsdl:part name="parameters"
+	       element="ec:DeleteTrustedViewerResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="GetTrustedIdentities">
+    <wsdl:part name="parameters" element="ec:GetTrustedIdentities" />
+  </wsdl:message>
+  <wsdl:message name="GetTrustedIdentitiesResponse">
+    <wsdl:part name="parameters"
+	       element="ec:GetTrustedIdentitiesResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="AddTrustedCertificate">
+    <wsdl:part name="parameters" element="ec:AddTrustedCertificate" />
+  </wsdl:message>
+  <wsdl:message name="AddTrustedCertificateResponse">
+    <wsdl:part name="parameters"
+	       element="ec:AddTrustedCertificateResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="AddCertificate">
+    <wsdl:part name="parameters" element="ec:AddCertificate" />
+  </wsdl:message>
+  <wsdl:message name="AddCertificateResponse">
+    <wsdl:part name="parameters"
+	       element="ec:AddCertificateResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="DeleteCertificate">
+    <wsdl:part name="parameters" element="ec:DeleteCertificate" />
+  </wsdl:message>
+  <wsdl:message name="DeleteCertificateResponse">
+    <wsdl:part name="parameters"
+	       element="ec:DeleteCertificateResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="AddTSL">
+    <wsdl:part name="parameters" element="ec:AddTSL" />
+  </wsdl:message>
+  <wsdl:message name="AddTSLResponse">
+    <wsdl:part name="parameters" element="ec:AddTSLResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="DeleteTSL">
+    <wsdl:part name="parameters" element="ec:DeleteTSL" />
+  </wsdl:message>
+  <wsdl:message name="DeleteTSLResponse">
+    <wsdl:part name="parameters" element="ec:DeleteTSLResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="ExportTSL">
+    <wsdl:part name="parameters" element="ec:ExportTSL" />
+  </wsdl:message>
+  <wsdl:message name="ExportTSLResponse">
+    <wsdl:part name="parameters" element="ec:ExportTSLResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="ExportCertificate">
+    <wsdl:part name="parameters" element="ec:ExportCertificate" />
+  </wsdl:message>
+  <wsdl:message name="ExportCertificateResponse">
+    <wsdl:part name="parameters"
+	       element="ec:ExportCertificateResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="GetOCSPServices">
+    <wsdl:part name="parameters" element="ec:GetOCSPServices" />
+  </wsdl:message>
+  <wsdl:message name="GetOCSPServicesResponse">
+    <wsdl:part name="parameters"
+	       element="ec:GetOCSPServicesResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="SetOCSPServices">
+    <wsdl:part name="parameters" element="ec:SetOCSPServices" />
+  </wsdl:message>
+  <wsdl:message name="SetOCSPServicesResponse">
+    <wsdl:part name="parameters"
+	       element="ec:SetOCSPServicesResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="GetDirectoryServices">
+    <wsdl:part name="parameters" element="ec:GetDirectoryServices" />
+  </wsdl:message>
+  <wsdl:message name="GetDirectoryServicesResponse">
+    <wsdl:part name="parameters"
+	       element="ec:GetDirectoryServicesResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="SetDirectoryServices">
+    <wsdl:part name="parameters" element="ec:SetDirectoryServices" />
+  </wsdl:message>
+  <wsdl:message name="SetDirectoryServicesResponse">
+    <wsdl:part name="parameters"
+	       element="ec:SetDirectoryServicesResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="GetTSServices">
+    <wsdl:part name="parameters" element="ec:GetTSServices" />
+  </wsdl:message>
+  <wsdl:message name="GetTSServicesResponse">
+    <wsdl:part name="parameters" element="ec:GetTSServicesResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="SetTSServices">
+    <wsdl:part name="parameters" element="ec:SetTSServices" />
+  </wsdl:message>
+  <wsdl:message name="SetTSServicesResponse">
+    <wsdl:part name="parameters" element="ec:SetTSServicesResponse" />
+  </wsdl:message>
+
+
+  <!-- CardInfo Repository -->
+
+  <wsdl:message name="GetCardInfoOrACDRequest">
+    <wsdl:part name="parameters" element="iso:GetCardInfoOrACD" />
+  </wsdl:message>
+  <wsdl:message name="GetCardInfoOrACDResponse">
+    <wsdl:part name="parameters"
+	       element="iso:GetCardInfoOrACDResponse" />
+  </wsdl:message>
+
+
+  <!-- ISO24727-3 -->
+
+  <wsdl:message name="InitializeRequest">
+    <wsdl:part name="parameters" element="iso:Initialize" />
+  </wsdl:message>
+  <wsdl:message name="InitializeResponse">
+    <wsdl:part name="parameters" element="iso:InitializeResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="TerminateRequest">
+    <wsdl:part name="parameters" element="iso:Terminate" />
+  </wsdl:message>
+  <wsdl:message name="TerminateResponse">
+    <wsdl:part name="parameters" element="iso:TerminateResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="CardApplicationPathRequest">
+    <wsdl:part name="parameters" element="iso:CardApplicationPath" />
+  </wsdl:message>
+  <wsdl:message name="CardApplicationPathResponse">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationPathResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="CardApplicationConnectRequest">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationConnect">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="CardApplicationConnectResponse">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationConnectResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="CardApplicationDisconnectRequest">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationDisconnect">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="CardApplicationDisconnectResponse">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationDisconnectResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="CardApplicationStartSessionRequest">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationStartSession">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="CardApplicationStartSessionResponse">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationStartSessionResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="CardApplicationEndSessionRequest">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationEndSession">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="CardApplicationEndSessionResponse">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationEndSessionResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="CardApplicationListRequest">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationList">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="CardApplicationListResponse">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationListResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="CardApplicationCreateRequest">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationCreate">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="CardApplicationCreateResponse">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationCreateResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="CardApplicationDeleteRequest">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationDelete">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="CardApplicationDeleteResponse">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationDeleteResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="CardApplicationServiceListRequest">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationServiceList">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="CardApplicationServiceListResponse">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationServiceListResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="CardApplicationServiceCreateRequest">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationServiceCreate">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="CardApplicationServiceCreateResponse">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationServiceCreateResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="CardApplicationServiceLoadRequest">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationServiceLoad">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="CardApplicationServiceLoadResponse">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationServiceLoadResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="CardApplicationServiceDeleteRequest">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationServiceDelete">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="CardApplicationServiceDeleteResponse">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationServiceDeleteResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="CardApplicationServiceDescribeRequest">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationServiceDescribe">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="CardApplicationServiceDescribeResponse">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationServiceDescribeResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="ExecuteActionRequest">
+    <wsdl:part name="parameters" element="iso:ExecuteAction"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="ExecuteActionResponse">
+    <wsdl:part name="parameters"
+	       element="iso:ExecuteActionResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DataSetListRequest">
+    <wsdl:part name="parameters" element="iso:DataSetList"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DataSetListResponse">
+    <wsdl:part name="parameters"
+	       element="iso:DataSetListResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DataSetCreateRequest">
+    <wsdl:part name="parameters" element="iso:DataSetCreate"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DataSetCreateResponse">
+    <wsdl:part name="parameters"
+	       element="iso:DataSetCreateResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DataSetSelectRequest">
+    <wsdl:part name="parameters" element="iso:DataSetSelect"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DataSetSelectResponse">
+    <wsdl:part name="parameters"
+	       element="iso:DataSetSelectResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DataSetDeleteRequest">
+    <wsdl:part name="parameters" element="iso:DataSetDelete"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DataSetDeleteResponse">
+    <wsdl:part name="parameters"
+	       element="iso:DataSetDeleteResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DSIListRequest">
+    <wsdl:part name="parameters" element="iso:DSIList"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DSIListResponse">
+    <wsdl:part name="parameters" element="iso:DSIListResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DSICreateRequest">
+    <wsdl:part name="parameters" element="iso:DSICreate"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DSICreateResponse">
+    <wsdl:part name="parameters" element="iso:DSICreateResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DSIDeleteRequest">
+    <wsdl:part name="parameters" element="iso:DSIDelete"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DSIDeleteResponse">
+    <wsdl:part name="parameters" element="iso:DSIDeleteResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DSIWriteRequest">
+    <wsdl:part name="parameters" element="iso:DSIWrite"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DSIWriteResponse">
+    <wsdl:part name="parameters" element="iso:DSIWriteResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DSIReadRequest">
+    <wsdl:part name="parameters" element="iso:DSIRead"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DSIReadResponse">
+    <wsdl:part name="parameters" element="iso:DSIReadResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="EncipherRequest">
+    <wsdl:part name="parameters" element="iso:Encipher"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="EncipherResponse">
+    <wsdl:part name="parameters" element="iso:EncipherResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DecipherRequest">
+    <wsdl:part name="parameters" element="iso:Decipher"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DecipherResponse">
+    <wsdl:part name="parameters" element="iso:DecipherResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="GetRandomRequest">
+    <wsdl:part name="parameters" element="iso:GetRandom"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="GetRandomResponse">
+    <wsdl:part name="parameters" element="iso:GetRandomResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="HashRequest">
+    <wsdl:part name="parameters" element="iso:Hash"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="HashResponse">
+    <wsdl:part name="parameters" element="iso:HashResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="SignRequest">
+    <wsdl:part name="parameters" element="iso:Sign"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="SignResponse">
+    <wsdl:part name="parameters" element="iso:SignResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="VerifySignatureRequest">
+    <wsdl:part name="parameters" element="iso:VerifySignature"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="VerifySignatureResponse">
+    <wsdl:part name="parameters"
+	       element="iso:VerifySignatureResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="VerifyCertificateRequest">
+    <wsdl:part name="parameters" element="iso:VerifyCertificate"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="VerifyCertificateResponse">
+    <wsdl:part name="parameters"
+	       element="iso:VerifyCertificateResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DIDListRequest">
+    <wsdl:part name="parameters" element="iso:DIDList"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DIDListResponse">
+    <wsdl:part name="parameters" element="iso:DIDListResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DIDCreateRequest">
+    <wsdl:part name="parameters" element="iso:DIDCreate"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DIDCreateResponse">
+    <wsdl:part name="parameters" element="iso:DIDCreateResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DIDGetRequest">
+    <wsdl:part name="parameters" element="iso:DIDGet"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DIDGetResponse">
+    <wsdl:part name="parameters" element="iso:DIDGetResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DIDUpdateRequest">
+    <wsdl:part name="parameters" element="iso:DIDUpdate"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DIDUpdateResponse">
+    <wsdl:part name="parameters" element="iso:DIDUpdateResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DIDDeleteRequest">
+    <wsdl:part name="parameters" element="iso:DIDDelete"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DIDDeleteResponse">
+    <wsdl:part name="parameters" element="iso:DIDDeleteResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="DIDAuthenticateRequest">
+    <wsdl:part name="parameters" element="iso:DIDAuthenticate"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="DIDAuthenticateResponse">
+    <wsdl:part name="parameters"
+	       element="iso:DIDAuthenticateResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="ACLListRequest">
+    <wsdl:part name="parameters" element="iso:ACLList"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="ACLListResponse">
+    <wsdl:part name="parameters" element="iso:ACLListResponse"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="ACLModifyRequest">
+    <wsdl:part name="parameters" element="iso:ACLModify"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="ACLModifyResponse">
+    <wsdl:part name="parameters" element="iso:ACLModifyResponse"></wsdl:part>
+  </wsdl:message>
+
+
+  <!-- ISO24727-Protocols -->
+
+  <!-- TC_API_Open -->
+  <wsdl:message name="TC_API_Open">
+    <wsdl:part name="parameters" element="iso:TC_API_Open" />
+  </wsdl:message>
+  <wsdl:message name="TC_API_OpenResponse">
+    <wsdl:part name="parameters" element="iso:TC_API_OpenResponse" />
+  </wsdl:message>
+
+  <!-- TC_API_Close -->
+  <wsdl:message name="TC_API_Close">
+    <wsdl:part name="parameters" element="iso:TC_API_Close" />
+  </wsdl:message>
+  <wsdl:message name="TC_API_CloseResponse">
+    <wsdl:part name="parameters" element="iso:TC_API_CloseResponse" />
+  </wsdl:message>
+
+  <!-- StartPAOS -->
+  <wsdl:message name="StartPAOS">
+    <wsdl:part name="parameters" element="iso:StartPAOS" />
+  </wsdl:message>
+  <wsdl:message name="StartPAOSResponse">
+    <wsdl:part name="parameters" element="iso:StartPAOSResponse" />
+  </wsdl:message>
+
+
+
+
+  <!-- IFD Callback -->
+  <wsdl:message name="SignalEvent">
+    <wsdl:part name="parameters" element="iso:SignalEvent" />
+  </wsdl:message>
+  <wsdl:message name="SignalEventResponse">
+    <wsdl:part name="parameters" element="iso:SignalEventResponse" />
+  </wsdl:message>
+
+  <!-- IFD Extension -->
+  <wsdl:message name="EstablishChannel">
+    <wsdl:part name="parameters" element="iso:EstablishChannel" />
+  </wsdl:message>
+  <wsdl:message name="EstablishChannelResponse">
+    <wsdl:part name="parameters"
+	       element="iso:EstablishChannelResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="DestroyChannel">
+    <wsdl:part name="parameters" element="iso:DestroyChannel" />
+  </wsdl:message>
+  <wsdl:message name="DestroyChannelResponse">
+    <wsdl:part name="parameters"
+	       element="iso:DestroyChannelResponse" />
+  </wsdl:message>
+
+
+
+  <!-- IFD -->
+  <!-- EstablishContext -->
+  <wsdl:message name="EstablishContext">
+    <wsdl:part name="parameters" element="iso:EstablishContext" />
+  </wsdl:message>
+  <wsdl:message name="EstablishContextResponse">
+    <wsdl:part name="parameters"
+	       element="iso:EstablishContextResponse" />
+  </wsdl:message>
+
+  <!-- ReleaseContext -->
+  <wsdl:message name="ReleaseContext">
+    <wsdl:part name="parameters" element="iso:ReleaseContext" />
+  </wsdl:message>
+  <wsdl:message name="ReleaseContextResponse">
+    <wsdl:part name="parameters"
+	       element="iso:ReleaseContextResponse" />
+  </wsdl:message>
+
+  <!-- ListIFDs -->
+  <wsdl:message name="ListIFDs">
+    <wsdl:part name="parameters" element="iso:ListIFDs" />
+  </wsdl:message>
+  <wsdl:message name="ListIFDsResponse">
+    <wsdl:part name="parameters" element="iso:ListIFDsResponse" />
+  </wsdl:message>
+
+  <!-- 	GetIFDCapabilities -->
+  <wsdl:message name="GetIFDCapabilities">
+    <wsdl:part name="parameters" element="iso:GetIFDCapabilities" />
+  </wsdl:message>
+  <wsdl:message name="GetIFDCapabilitiesResponse">
+    <wsdl:part name="parameters"
+	       element="iso:GetIFDCapabilitiesResponse" />
+  </wsdl:message>
+
+
+  <!-- GetStatus -->
+  <wsdl:message name="GetStatus">
+    <wsdl:part name="parameters" element="iso:GetStatus" />
+  </wsdl:message>
+  <wsdl:message name="GetStatusResponse">
+    <wsdl:part name="parameters" element="iso:GetStatusResponse" />
+  </wsdl:message>
+
+  <!-- Wait -->
+  <wsdl:message name="Wait">
+    <wsdl:part name="parameters" element="iso:Wait" />
+  </wsdl:message>
+  <wsdl:message name="WaitResponse">
+    <wsdl:part name="parameters" element="iso:WaitResponse" />
+  </wsdl:message>
+
+  <!-- Cancel -->
+  <wsdl:message name="Cancel">
+    <wsdl:part name="parameters" element="iso:Cancel" />
+  </wsdl:message>
+  <wsdl:message name="CancelResponse">
+    <wsdl:part name="parameters" element="iso:CancelResponse" />
+  </wsdl:message>
+
+  <!-- ControlIFD -->
+  <wsdl:message name="ControlIFD">
+    <wsdl:part name="parameters" element="iso:ControlIFD" />
+  </wsdl:message>
+  <wsdl:message name="ControlIFDResponse">
+    <wsdl:part name="parameters" element="iso:ControlIFDResponse" />
+  </wsdl:message>
+
+
+  <!-- ====================== -->
+  <!-- Card related functions -->
+  <!-- (messages)             -->
+  <!-- ====================== -->
+
+  <!-- Connect -->
+  <wsdl:message name="Connect">
+    <wsdl:part name="parameters" element="iso:Connect" />
+  </wsdl:message>
+  <wsdl:message name="ConnectResponse">
+    <wsdl:part name="parameters" element="iso:ConnectResponse" />
+  </wsdl:message>
+
+  <!-- Disconnect -->
+  <wsdl:message name="Disconnect">
+    <wsdl:part name="parameters" element="iso:Disconnect" />
+  </wsdl:message>
+  <wsdl:message name="DisconnectResponse">
+    <wsdl:part name="parameters" element="iso:DisconnectResponse" />
+  </wsdl:message>
+
+  <!-- BeginTransaction -->
+  <wsdl:message name="BeginTransaction">
+    <wsdl:part name="BeginTransaction"
+	       element="iso:BeginTransaction" />
+  </wsdl:message>
+  <wsdl:message name="BeginTransactionResponse">
+    <wsdl:part name="BeginTransactionResponse"
+	       element="iso:BeginTransactionResponse" />
+  </wsdl:message>
+
+  <!-- EndTransaction -->
+  <wsdl:message name="EndTransaction">
+    <wsdl:part name="parameters" element="iso:EndTransaction" />
+  </wsdl:message>
+  <wsdl:message name="EndTransactionResponse">
+    <wsdl:part name="parameters"
+	       element="iso:EndTransactionResponse" />
+  </wsdl:message>
+
+  <!-- Transmit -->
+  <wsdl:message name="Transmit">
+    <wsdl:part name="parameters" element="iso:Transmit" />
+  </wsdl:message>
+  <wsdl:message name="TransmitResponse">
+    <wsdl:part name="parameters" element="iso:TransmitResponse" />
+  </wsdl:message>
+
+
+  <!-- ====================== -->
+  <!-- User related functions -->
+  <!-- (messages)             -->
+  <!-- ====================== -->
+
+  <!-- VerifyUser -->
+  <wsdl:message name="VerifyUser">
+    <wsdl:part name="parameters" element="iso:VerifyUser" />
+  </wsdl:message>
+  <wsdl:message name="VerifyUserResponse">
+    <wsdl:part name="parameters" element="iso:VerifyUserResponse" />
+  </wsdl:message>
+
+  <!-- ModifyVerificationData -->
+  <wsdl:message name="ModifyVerificationData">
+    <wsdl:part name="parameters"
+	       element="iso:ModifyVerificationData" />
+  </wsdl:message>
+  <wsdl:message name="ModifyVerificationDataResponse">
+    <wsdl:part name="parameters"
+	       element="iso:ModifyVerificationDataResponse" />
+  </wsdl:message>
+
+  <!-- Output -->
+  <wsdl:message name="Output">
+    <wsdl:part name="parameters" element="iso:Output" />
+  </wsdl:message>
+  <wsdl:message name="OutputResponse">
+    <wsdl:part name="parameters" element="iso:OutputResponse" />
+  </wsdl:message>
+
+
+
+  <!-- Publish, Subscribe -->
+  <wsdl:message name="PublishRequest">
+    <wsdl:part name="parameters" element="iso:PublishRequest" />
+  </wsdl:message>
+
+  <wsdl:message name="PublishResponse">
+    <wsdl:part name="parameters" element="iso:PublishResponse" />
+  </wsdl:message>
+
+  <wsdl:message name="SubscribeRequest">
+    <wsdl:part name="parameters" element="iso:SubscribeRequest" />
+  </wsdl:message>
+
+  <wsdl:message name="SubscribeResponse">
+    <wsdl:part name="parameters" element="iso:SubscribeResponse" />
+  </wsdl:message>
+
+
+
+  <!-- Recognition Tree -->
+  <wsdl:message name="RecognitionTreeRequest">
+    <wsdl:part name="parameters" element="iso:GetRecognitionTree" />
+  </wsdl:message>
+
+  <wsdl:message name="RecognitionTreeResponse">
+    <wsdl:part name="parameters" element="iso:GetRecognitionTreeResponse" />
+  </wsdl:message>
+
+
+
+  <!-- Update Service -->
+  <wsdl:message name="CheckFrameworkUpdate">
+    <wsdl:part name="parameters" element="ec:CheckFrameworkUpdate" />
+  </wsdl:message>
+  <wsdl:message name="CheckFrameworkUpdateResponse">
+    <wsdl:part name="parameters"
+	       element="ec:CheckFrameworkUpdateResponse" />
+  </wsdl:message>
+
+
+
+
+
+
+  <!-- ====================== -->
+  <!-- Definition of portType -->
+  <!-- ====================== -->
+
+  <wsdl:portType name="Management">
+
+    <!-- InitializeFramework -->
+    <wsdl:operation name="InitializeFramework">
+      <wsdl:input message="oec:InitializeFramework" />
+      <wsdl:output message="oec:InitializeFrameworkResponse" />
+    </wsdl:operation>
+
+    <!-- TerminateFramework -->
+    <wsdl:operation name="TerminateFramework">
+      <wsdl:input message="oec:TerminateFramework" />
+      <wsdl:output message="oec:TerminateFrameworkResponse" />
+    </wsdl:operation>
+
+    <!-- APIACLList -->
+    <wsdl:operation name="APIACLList">
+      <wsdl:input message="oec:APIACLList" />
+      <wsdl:output message="oec:APIACLListResponse" />
+    </wsdl:operation>
+
+    <!-- APIACLModify -->
+    <wsdl:operation name="APIACLModify">
+      <wsdl:input message="oec:APIACLModify" />
+      <wsdl:output message="oec:APIACLModifyResponse" />
+    </wsdl:operation>
+
+    <!-- FrameworkUpdate -->
+    <wsdl:operation name="FrameworkUpdate">
+      <wsdl:input message="oec:FrameworkUpdate" />
+      <wsdl:output message="oec:FrameworkUpdateResponse" />
+    </wsdl:operation>
+
+    <!-- GetDefaultParameters -->
+    <wsdl:operation name="GetDefaultParameters">
+      <wsdl:input message="oec:GetDefaultParameters" />
+      <wsdl:output message="oec:GetDefaultParametersResponse" />
+    </wsdl:operation>
+
+    <!-- SetDefaultParameters -->
+    <wsdl:operation name="SetDefaultParameters">
+      <wsdl:input message="oec:SetDefaultParameters" />
+      <wsdl:output message="oec:SetDefaultParametersResponse" />
+    </wsdl:operation>
+
+    <!-- GetCardInfoList -->
+    <wsdl:operation name="GetCardInfoList">
+      <wsdl:input message="oec:GetCardInfoList" />
+      <wsdl:output message="oec:GetCardInfoListResponse" />
+    </wsdl:operation>
+
+    <!-- SetCardInfoList -->
+    <wsdl:operation name="SetCardInfoList">
+      <wsdl:input message="oec:SetCardInfoList" />
+      <wsdl:output message="oec:SetCardInfoListResponse" />
+    </wsdl:operation>
+
+    <!-- AddCardInfoFiles -->
+    <wsdl:operation name="AddCardInfoFiles">
+      <wsdl:input message="oec:AddCardInfoFiles" />
+      <wsdl:output message="oec:AddCardInfoFilesResponse" />
+    </wsdl:operation>
+
+    <!-- DeleteCardInfoFiles -->
+    <wsdl:operation name="DeleteCardInfoFiles">
+      <wsdl:input message="oec:DeleteCardInfoFiles" />
+      <wsdl:output message="oec:DeleteCardInfoFilesResponse" />
+    </wsdl:operation>
+
+    <!-- RegisterIFD -->
+    <wsdl:operation name="RegisterIFD">
+      <wsdl:input message="oec:RegisterIFD" />
+      <wsdl:output message="oec:RegisterIFDResponse" />
+    </wsdl:operation>
+
+    <!-- UnregisterIFD -->
+    <wsdl:operation name="UnregisterIFD">
+      <wsdl:input message="oec:UnregisterIFD" />
+      <wsdl:output message="oec:UnregisterIFDResponse" />
+    </wsdl:operation>
+
+    <!-- GetTrustedViewerList -->
+    <wsdl:operation name="GetTrustedViewerList">
+      <wsdl:input message="oec:GetTrustedViewerList" />
+      <wsdl:output message="oec:GetTrustedViewerListResponse" />
+    </wsdl:operation>
+
+    <!-- GetTrustedViewerConfiguration -->
+    <wsdl:operation name="GetTrustedViewerConfiguration">
+      <wsdl:input message="oec:GetTrustedViewerConfiguration" />
+      <wsdl:output
+	  message="oec:GetTrustedViewerConfigurationResponse" />
+    </wsdl:operation>
+
+    <!-- SetTrustedViewerConfiguration -->
+    <wsdl:operation name="SetTrustedViewerConfiguration">
+      <wsdl:input message="oec:SetTrustedViewerConfiguration" />
+      <wsdl:output
+	  message="oec:SetTrustedViewerConfigurationResponse" />
+    </wsdl:operation>
+
+    <!-- AddTrustedViewer -->
+    <wsdl:operation name="AddTrustedViewer">
+      <wsdl:input message="oec:AddTrustedViewer" />
+      <wsdl:output message="oec:AddTrustedViewerResponse" />
+    </wsdl:operation>
+
+    <!-- DeleteTrustedViewer -->
+    <wsdl:operation name="DeleteTrustedViewer">
+      <wsdl:input message="oec:DeleteTrustedViewer" />
+      <wsdl:output message="oec:DeleteTrustedViewerResponse" />
+    </wsdl:operation>
+
+    <!-- GetTrustedIdentities -->
+    <wsdl:operation name="GetTrustedIdentities">
+      <wsdl:input message="oec:GetTrustedIdentities" />
+      <wsdl:output message="oec:GetTrustedIdentitiesResponse" />
+    </wsdl:operation>
+
+    <!-- AddTrustedCertificate -->
+    <wsdl:operation name="AddTrustedCertificate">
+      <wsdl:input message="oec:AddTrustedCertificate" />
+      <wsdl:output message="oec:AddTrustedCertificateResponse" />
+    </wsdl:operation>
+
+    <!-- AddCertificate -->
+    <wsdl:operation name="AddCertificate">
+      <wsdl:input message="oec:AddCertificate" />
+      <wsdl:output message="oec:AddCertificateResponse" />
+    </wsdl:operation>
+
+
+    <!-- DeleteCertificate -->
+    <wsdl:operation name="DeleteCertificate">
+      <wsdl:input message="oec:DeleteCertificate" />
+      <wsdl:output message="oec:DeleteCertificateResponse" />
+    </wsdl:operation>
+
+    <!-- AddTSL -->
+    <wsdl:operation name="AddTSL">
+      <wsdl:input message="oec:AddTSL" />
+      <wsdl:output message="oec:AddTSLResponse" />
+    </wsdl:operation>
+
+    <!-- DeleteTSL -->
+    <wsdl:operation name="DeleteTSL">
+      <wsdl:input message="oec:DeleteTSL" />
+      <wsdl:output message="oec:DeleteTSLResponse" />
+    </wsdl:operation>
+
+    <!-- ExportTSL -->
+    <wsdl:operation name="ExportTSL">
+      <wsdl:input message="oec:ExportTSL" />
+      <wsdl:output message="oec:ExportTSLResponse" />
+    </wsdl:operation>
+
+    <!-- ExportCertificate -->
+    <wsdl:operation name="ExportCertificate">
+      <wsdl:input message="oec:ExportCertificate" />
+      <wsdl:output message="oec:ExportCertificateResponse" />
+    </wsdl:operation>
+
+    <!-- GetOCSPServices -->
+    <wsdl:operation name="GetOCSPServices">
+      <wsdl:input message="oec:GetOCSPServices" />
+      <wsdl:output message="oec:GetOCSPServicesResponse" />
+    </wsdl:operation>
+
+    <!-- SetOCSPServices -->
+    <wsdl:operation name="SetOCSPServices">
+      <wsdl:input message="oec:SetOCSPServices" />
+      <wsdl:output message="oec:SetOCSPServicesResponse" />
+    </wsdl:operation>
+
+    <!-- GetDirectoryServices -->
+    <wsdl:operation name="GetDirectoryServices">
+      <wsdl:input message="oec:GetDirectoryServices" />
+      <wsdl:output message="oec:GetDirectoryServicesResponse" />
+    </wsdl:operation>
+
+    <!-- SetDirectoryService -->
+    <wsdl:operation name="SetDirectoryServices">
+      <wsdl:input message="oec:SetDirectoryServices" />
+      <wsdl:output message="oec:SetDirectoryServicesResponse" />
+    </wsdl:operation>
+
+    <!-- GetTSServices -->
+    <wsdl:operation name="GetTSServices">
+      <wsdl:input message="oec:GetTSServices" />
+      <wsdl:output message="oec:GetTSServicesResponse" />
+    </wsdl:operation>
+
+    <!-- SetTSServices -->
+    <wsdl:operation name="SetTSServices">
+      <wsdl:input message="oec:SetTSServices" />
+      <wsdl:output message="oec:SetTSServicesResponse" />
+    </wsdl:operation>
+
+  </wsdl:portType>
+
+
+  <wsdl:portType name="GetCardInfoOrACD">
+    <wsdl:operation name="GetCardInfoOrACD">
+      <wsdl:input message="oec:GetCardInfoOrACDRequest" />
+      <wsdl:output message="oec:GetCardInfoOrACDResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+
+
+
+  <wsdl:portType name="SAL">
+
+    <!-- ================================== -->
+    <!-- 6. Card-application-service access -->
+    <!-- (portType)                         -->
+    <!-- ================================== -->
+
+    <!-- 6.2 Initialize -->
+
+    <wsdl:operation name="Initialize">
+      <wsdl:input message="oec:InitializeRequest" />
+      <wsdl:output message="oec:InitializeResponse" />
+    </wsdl:operation>
+
+    <!-- 6.3 Terminate -->
+
+    <wsdl:operation name="Terminate">
+      <wsdl:input message="oec:TerminateRequest" />
+      <wsdl:output message="oec:TerminateResponse" />
+    </wsdl:operation>
+
+    <!-- 6.4 CardApplicationPath -->
+
+    <wsdl:operation name="CardApplicationPath">
+      <wsdl:input message="oec:CardApplicationPathRequest" />
+      <wsdl:output message="oec:CardApplicationPathResponse" />
+    </wsdl:operation>
+
+    <!-- ===================== -->
+    <!-- 7. Connection service -->
+    <!-- (portType)            -->
+    <!-- ===================== -->
+
+    <!-- 7.2 CardApplicationConnect -->
+
+    <wsdl:operation name="CardApplicationConnect">
+      <wsdl:input message="oec:CardApplicationConnectRequest"></wsdl:input>
+      <wsdl:output message="oec:CardApplicationConnectResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 7.3 CardApplicationDisconnect -->
+
+    <wsdl:operation name="CardApplicationDisconnect">
+      <wsdl:input
+	  message="oec:CardApplicationDisconnectRequest">
+      </wsdl:input>
+      <wsdl:output
+	  message="oec:CardApplicationDisconnectResponse">
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 7.4 CardApplicationStartSession -->
+
+    <wsdl:operation name="CardApplicationStartSession">
+      <wsdl:input
+	  message="oec:CardApplicationStartSessionRequest">
+      </wsdl:input>
+      <wsdl:output
+	  message="oec:CardApplicationStartSessionResponse">
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 7.5 CardApplicationEndSession -->
+
+    <wsdl:operation name="CardApplicationEndSession">
+      <wsdl:input
+	  message="oec:CardApplicationEndSessionRequest">
+      </wsdl:input>
+      <wsdl:output
+	  message="oec:CardApplicationEndSessionResponse">
+      </wsdl:output>
+    </wsdl:operation>
+
+
+    <!-- =========================== -->
+    <!-- 8. Card-application service -->
+    <!-- (portType)                  -->
+    <!-- =========================== -->
+
+    <!-- 8.2 CardApplicationList -->
+
+    <wsdl:operation name="CardApplicationList">
+      <wsdl:input message="oec:CardApplicationListRequest"></wsdl:input>
+      <wsdl:output message="oec:CardApplicationListResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.3 CardApplicationCreate -->
+
+    <wsdl:operation name="CardApplicationCreate">
+      <wsdl:input message="oec:CardApplicationCreateRequest"></wsdl:input>
+      <wsdl:output message="oec:CardApplicationCreateResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.4 CardApplicationDelete -->
+
+    <wsdl:operation name="CardApplicationDelete">
+      <wsdl:input message="oec:CardApplicationDeleteRequest"></wsdl:input>
+      <wsdl:output message="oec:CardApplicationDeleteResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.5 CardApplicationServiceList -->
+
+    <wsdl:operation name="CardApplicationServiceList">
+      <wsdl:input
+	  message="oec:CardApplicationServiceListRequest">
+      </wsdl:input>
+      <wsdl:output
+	  message="oec:CardApplicationServiceListResponse">
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.6 CardApplicationServiceCreate -->
+
+    <wsdl:operation name="CardApplicationServiceCreate">
+      <wsdl:input
+	  message="oec:CardApplicationServiceCreateRequest">
+      </wsdl:input>
+      <wsdl:output
+	  message="oec:CardApplicationServiceCreateResponse">
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.7 CardApplicationServiceLoad -->
+
+    <wsdl:operation name="CardApplicationServiceLoad">
+      <wsdl:input
+	  message="oec:CardApplicationServiceLoadRequest">
+      </wsdl:input>
+      <wsdl:output
+	  message="oec:CardApplicationServiceLoadResponse">
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.8 CardApplicationServiceDelete -->
+
+    <wsdl:operation name="CardApplicationServiceDelete">
+      <wsdl:input
+	  message="oec:CardApplicationServiceDeleteRequest">
+      </wsdl:input>
+      <wsdl:output
+	  message="oec:CardApplicationServiceDeleteResponse">
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.9 CardApplicationServiceDescribe -->
+
+    <wsdl:operation name="CardApplicationServiceDescribe">
+      <wsdl:input
+	  message="oec:CardApplicationServiceDescribeRequest">
+      </wsdl:input>
+      <wsdl:output
+	  message="oec:CardApplicationServiceDescribeResponse">
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.10 ExecuteAction -->
+
+    <wsdl:operation name="ExecuteAction">
+      <wsdl:input message="oec:ExecuteActionRequest"></wsdl:input>
+      <wsdl:output message="oec:ExecuteActionResponse"></wsdl:output>
+    </wsdl:operation>
+
+
+    <!-- ====================== -->
+    <!-- 9. Named data service  -->
+    <!-- (portType)             -->
+    <!-- ====================== -->
+
+    <!-- 9.2 DataSetList -->
+
+    <wsdl:operation name="DataSetList">
+      <wsdl:input message="oec:DataSetListRequest"></wsdl:input>
+      <wsdl:output message="oec:DataSetListResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.3 DataSetCreate -->
+
+    <wsdl:operation name="DataSetCreate">
+      <wsdl:input message="oec:DataSetCreateRequest"></wsdl:input>
+      <wsdl:output message="oec:DataSetCreateResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.4 DataSetSelect -->
+
+    <wsdl:operation name="DataSetSelect">
+      <wsdl:input message="oec:DataSetSelectRequest"></wsdl:input>
+      <wsdl:output message="oec:DataSetSelectResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.5 DataSetDelete -->
+
+    <wsdl:operation name="DataSetDelete">
+      <wsdl:input message="oec:DataSetDeleteRequest"></wsdl:input>
+      <wsdl:output message="oec:DataSetDeleteResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.6 DSIList -->
+
+    <wsdl:operation name="DSIList">
+      <wsdl:input message="oec:DSIListRequest"></wsdl:input>
+      <wsdl:output message="oec:DSIListResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.7 DSICreate -->
+
+    <wsdl:operation name="DSICreate">
+      <wsdl:input message="oec:DSICreateRequest"></wsdl:input>
+      <wsdl:output message="oec:DSICreateResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.8 DSIDelete -->
+
+    <wsdl:operation name="DSIDelete">
+      <wsdl:input message="oec:DSIDeleteRequest"></wsdl:input>
+      <wsdl:output message="oec:DSIDeleteResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.9 DSIWrite -->
+
+    <wsdl:operation name="DSIWrite">
+      <wsdl:input message="oec:DSIWriteRequest"></wsdl:input>
+      <wsdl:output message="oec:DSIWriteResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.10 DSIRead -->
+
+    <wsdl:operation name="DSIRead">
+      <wsdl:input message="oec:DSIReadRequest"></wsdl:input>
+      <wsdl:output message="oec:DSIReadResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- ========================== -->
+    <!-- 10. Cryptographic service  -->
+    <!-- (portType)                 -->
+    <!-- ========================== -->
+
+    <!-- 10.2 Encipher -->
+
+    <wsdl:operation name="Encipher">
+      <wsdl:input message="oec:EncipherRequest"></wsdl:input>
+      <wsdl:output message="oec:EncipherResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 10.3 Decipher -->
+
+    <wsdl:operation name="Decipher">
+      <wsdl:input message="oec:DecipherRequest"></wsdl:input>
+      <wsdl:output message="oec:DecipherResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 10.4 GetRandom -->
+
+    <wsdl:operation name="GetRandom">
+      <wsdl:input message="oec:GetRandomRequest"></wsdl:input>
+      <wsdl:output message="oec:GetRandomResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 10.5 Hash -->
+
+    <wsdl:operation name="Hash">
+      <wsdl:input message="oec:HashRequest"></wsdl:input>
+      <wsdl:output message="oec:HashResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 10.6 Sign -->
+
+    <wsdl:operation name="Sign">
+      <wsdl:input message="oec:SignRequest"></wsdl:input>
+      <wsdl:output message="oec:SignResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 10.7 VerifySignature -->
+
+    <wsdl:operation name="VerifySignature">
+      <wsdl:input message="oec:VerifySignatureRequest"></wsdl:input>
+      <wsdl:output message="oec:VerifySignatureResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 10.8 VerifyCertificate -->
+
+    <wsdl:operation name="VerifyCertificate">
+      <wsdl:input message="oec:VerifyCertificateRequest"></wsdl:input>
+      <wsdl:output message="oec:VerifyCertificateResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- ================================== -->
+    <!-- 11. Differential-identity service  -->
+    <!-- (portType)                         -->
+    <!-- ================================== -->
+
+    <!-- 11.2 DIDList -->
+
+    <wsdl:operation name="DIDList">
+      <wsdl:input message="oec:DIDListRequest"></wsdl:input>
+      <wsdl:output message="oec:DIDListResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 11.3 DIDCreate -->
+
+    <wsdl:operation name="DIDCreate">
+      <wsdl:input message="oec:DIDCreateRequest"></wsdl:input>
+      <wsdl:output message="oec:DIDCreateResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 11.4 DIDGet -->
+
+    <wsdl:operation name="DIDGet">
+      <wsdl:input message="oec:DIDGetRequest"></wsdl:input>
+      <wsdl:output message="oec:DIDGetResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 11.5 DIDUpdate -->
+
+    <wsdl:operation name="DIDUpdate">
+      <wsdl:input message="oec:DIDUpdateRequest"></wsdl:input>
+      <wsdl:output message="oec:DIDUpdateResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 11.6 DIDDelete -->
+
+    <wsdl:operation name="DIDDelete">
+      <wsdl:input message="oec:DIDDeleteRequest"></wsdl:input>
+      <wsdl:output message="oec:DIDDeleteResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 11.7 DIDAuthenticate -->
+
+    <wsdl:operation name="DIDAuthenticate">
+      <wsdl:input message="oec:DIDAuthenticateRequest"></wsdl:input>
+      <wsdl:output message="oec:DIDAuthenticateResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- ========================== -->
+    <!-- 12. Authorization service  -->
+    <!-- (portType)                 -->
+    <!-- ========================== -->
+
+    <!-- 12.2 DIDAuthenticate -->
+
+    <wsdl:operation name="ACLList">
+      <wsdl:input message="oec:ACLListRequest"></wsdl:input>
+      <wsdl:output message="oec:ACLListResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- 12.3 ACLModify -->
+
+    <wsdl:operation name="ACLModify">
+      <wsdl:input message="oec:ACLModifyRequest"></wsdl:input>
+      <wsdl:output message="oec:ACLModifyResponse"></wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+
+
+
+  <wsdl:portType name="ISO24727-Protocols">
+    <!-- TC_API_Open -->
+    <wsdl:operation name="TC_API_Open">
+      <wsdl:input message="oec:TC_API_Open" />
+      <wsdl:output message="oec:TC_API_OpenResponse" />
+    </wsdl:operation>
+
+    <!-- TC_API_Close -->
+    <wsdl:operation name="TC_API_Close">
+      <wsdl:input message="oec:TC_API_Close" />
+      <wsdl:output message="oec:TC_API_CloseResponse" />
+    </wsdl:operation>
+
+    <!-- StartPAOS -->
+    <wsdl:operation name="StartPAOS">
+      <wsdl:input message="oec:StartPAOS" />
+      <wsdl:output message="oec:StartPAOSResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+
+
+
+
+  <wsdl:portType name="IFDCallback">
+
+    <wsdl:operation name="SignalEvent">
+      <wsdl:input message="oec:SignalEvent" />
+      <wsdl:output message="oec:SignalEventResponse" />
+    </wsdl:operation>
+
+  </wsdl:portType>
+
+
+
+
+  <!-- <wsdl:portType name="IFD-Extension"> -->
+  <!-- </wsdl:portType> -->
+
+
+
+
+  <wsdl:portType name="IFD">
+    <!-- IFD Extension for secure messaging -->
+    <!-- EstablishChannel -->
+    <wsdl:operation name="EstablishChannel">
+      <wsdl:input message="oec:EstablishChannel" />
+      <wsdl:output message="oec:EstablishChannelResponse" />
+    </wsdl:operation>
+
+    <!-- DestroyChannel -->
+    <wsdl:operation name="DestroyChannel">
+      <wsdl:input message="oec:DestroyChannel" />
+      <wsdl:output message="oec:DestroyChannelResponse" />
+    </wsdl:operation>
+
+    <!-- =============================== -->
+    <!-- Card terminal related functions -->
+    <!-- (portType)                      -->
+    <!-- =============================== -->
+
+    <!-- EstablishContext -->
+    <wsdl:operation name="EstablishContext">
+      <wsdl:input message="oec:EstablishContext" />
+      <wsdl:output message="oec:EstablishContextResponse" />
+    </wsdl:operation>
+
+    <!-- ReleaseContext -->
+    <wsdl:operation name="ReleaseContext">
+      <wsdl:input message="oec:ReleaseContext" />
+      <wsdl:output message="oec:ReleaseContextResponse" />
+    </wsdl:operation>
+
+    <!-- ListIFDs -->
+    <wsdl:operation name="ListIFDs">
+      <wsdl:input message="oec:ListIFDs" />
+      <wsdl:output message="oec:ListIFDsResponse" />
+    </wsdl:operation>
+
+    <!-- GetIFDCapabilities -->
+    <wsdl:operation name="GetIFDCapabilities">
+      <wsdl:input message="oec:GetIFDCapabilities" />
+      <wsdl:output message="oec:GetIFDCapabilitiesResponse" />
+    </wsdl:operation>
+
+
+    <!-- GetStatus -->
+    <wsdl:operation name="GetStatus">
+      <wsdl:input message="oec:GetStatus" />
+      <wsdl:output message="oec:GetStatusResponse" />
+    </wsdl:operation>
+
+    <!-- Wait -->
+    <wsdl:operation name="Wait">
+      <wsdl:input message="oec:Wait" />
+      <wsdl:output message="oec:WaitResponse" />
+    </wsdl:operation>
+
+    <!-- Cancel -->
+    <wsdl:operation name="Cancel">
+      <wsdl:input message="oec:Cancel" />
+      <wsdl:output message="oec:CancelResponse" />
+    </wsdl:operation>
+
+    <!-- ControlIFD -->
+    <wsdl:operation name="ControlIFD">
+      <wsdl:input message="oec:ControlIFD" />
+      <wsdl:output message="oec:ControlIFDResponse" />
+    </wsdl:operation>
+
+    <!-- ====================== -->
+    <!-- Card related functions -->
+    <!-- (portType)             -->
+    <!-- ====================== -->
+
+    <!-- Connect -->
+    <wsdl:operation name="Connect">
+      <wsdl:input message="oec:Connect" />
+      <wsdl:output message="oec:ConnectResponse" />
+    </wsdl:operation>
+
+    <!-- Disconnect -->
+    <wsdl:operation name="Disconnect">
+      <wsdl:input message="oec:Disconnect" />
+      <wsdl:output message="oec:DisconnectResponse" />
+    </wsdl:operation>
+
+    <!-- BeginTransaction -->
+    <wsdl:operation name="BeginTransaction">
+      <wsdl:input message="oec:BeginTransaction" />
+      <wsdl:output message="oec:BeginTransactionResponse" />
+    </wsdl:operation>
+
+    <!-- EndTransaction -->
+    <wsdl:operation name="EndTransaction">
+      <wsdl:input message="oec:EndTransaction" />
+      <wsdl:output message="oec:EndTransactionResponse" />
+    </wsdl:operation>
+
+    <!-- Transmit -->
+    <wsdl:operation name="Transmit">
+      <wsdl:input message="oec:Transmit" />
+      <wsdl:output message="oec:TransmitResponse" />
+    </wsdl:operation>
+
+    <!-- ====================== -->
+    <!-- User related functions -->
+    <!-- (portType)             -->
+    <!-- ====================== -->
+
+    <!-- VerifyUser -->
+    <wsdl:operation name="VerifyUser">
+      <wsdl:input message="oec:VerifyUser" />
+      <wsdl:output message="oec:VerifyUserResponse" />
+    </wsdl:operation>
+
+    <!-- ModifyVerificationData -->
+    <wsdl:operation name="ModifyVerificationData">
+      <wsdl:input message="oec:ModifyVerificationData" />
+      <wsdl:output message="oec:ModifyVerificationDataResponse" />
+    </wsdl:operation>
+
+    <!-- Output -->
+    <wsdl:operation name="Output">
+      <wsdl:input message="oec:Output" />
+      <wsdl:output message="oec:OutputResponse" />
+    </wsdl:operation>
+
+  </wsdl:portType>
+
+
+  <wsdl:portType name="Publish">
+    <wsdl:operation name="Publish">
+      <wsdl:input message="oec:PublishRequest" />
+      <wsdl:output message="oec:PublishResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="Subscribe">
+    <wsdl:operation name="Subscribe">
+      <wsdl:input message="oec:SubscribeRequest" />
+      <wsdl:output message="oec:SubscribeResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+
+
+
+  <wsdl:portType name="GetRecognitionTree">
+    <wsdl:operation name="GetRecognitionTree">
+      <wsdl:input message="oec:RecognitionTreeRequest" />
+      <wsdl:output message="oec:RecognitionTreeResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+
+
+
+  <wsdl:portType name="UpdateService">
+    <!-- CheckFrameworkUpdate -->
+    <wsdl:operation name="CheckFrameworkUpdate">
+      <wsdl:input message="oec:CheckFrameworkUpdate" />
+      <wsdl:output message="oec:CheckFrameworkUpdateResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+
+
+
+
+
+
+  <!-- ===================== -->
+  <!-- Definition of Binding -->
+  <!-- ===================== -->
+
+  <wsdl:binding name="Management" type="oec:Management">
+    <soap:binding style="document"
+		  transport="http://schemas.xmlsoap.org/soap/http" />
+
+    <!-- InitializeFramework -->
+    <wsdl:operation name="InitializeFramework">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#InitializeFramework" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- TerminateFramework -->
+    <wsdl:operation name="TerminateFramework">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#TerminateFramework" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- APIACLList -->
+    <wsdl:operation name="APIACLList">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#APIACLList" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- APIACLModify -->
+    <wsdl:operation name="APIACLModify">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#APIACLModify" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- FrameworkUpdate -->
+    <wsdl:operation name="FrameworkUpdate">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#FrameworkUpdate" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- GetDefaultParameters -->
+    <wsdl:operation name="GetDefaultParameters">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#GetDefaultParameters" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- SetDefaultParameters -->
+    <wsdl:operation name="SetDefaultParameters">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#SetDefaultParameters" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- GetCardInfoList -->
+    <wsdl:operation name="GetCardInfoList">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#GetCardInfoList" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- SetCardInfoList -->
+    <wsdl:operation name="SetCardInfoList">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#SetCardInfoList" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+
+    <!-- AddCardInfoFiles -->
+    <wsdl:operation name="AddCardInfoFiles">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#AddCardInfoFiles" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+
+    <!-- DeleteCardInfoFiles -->
+    <wsdl:operation name="DeleteCardInfoFiles">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#DeleteCardInfoFiles" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- RegisterIFD -->
+    <wsdl:operation name="RegisterIFD">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#RegisterIFD" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- UnregisterIFD -->
+    <wsdl:operation name="UnregisterIFD">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#UnregisterIFD" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- GetTrustedViewerList -->
+    <wsdl:operation name="GetTrustedViewerList">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#GetTrustedViewerList" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- GetTrustedViewerConfiguration -->
+    <wsdl:operation name="GetTrustedViewerConfiguration">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#GetTrustedViewerConfiguration" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- SetTrustedViewerConfiguration -->
+    <wsdl:operation name="SetTrustedViewerConfiguration">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#SetTrustedViewerConfiguration" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- AddTrustedViewer -->
+    <wsdl:operation name="AddTrustedViewer">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#AddTrustedViewer" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- DeleteTrustedViewer -->
+    <wsdl:operation name="DeleteTrustedViewer">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#DeleteTrustedViewer" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- GetTrustedIdentities -->
+    <wsdl:operation name="GetTrustedIdentities">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#GetTrustedIdentities" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- AddTrustedCertificate -->
+    <wsdl:operation name="AddTrustedCertificate">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#AddTrustedCertificate" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- AddCertificate -->
+    <wsdl:operation name="AddCertificate">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#AddCertificate" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- DeleteCertificate -->
+    <wsdl:operation name="DeleteCertificate">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#DeleteCertificate" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- AddTSL -->
+    <wsdl:operation name="AddTSL">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#AddTSL" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- DeleteTSL -->
+    <wsdl:operation name="DeleteTSL">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#DeleteTSL" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- ExportTSL -->
+    <wsdl:operation name="ExportTSL">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#ExportTSL" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- ExportCertificate -->
+    <wsdl:operation name="ExportCertificate">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#ExportCertificate" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- GetOCSPServices -->
+    <wsdl:operation name="GetOCSPServices">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#GetOCSPServices" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- SetOCSPService -->
+    <wsdl:operation name="SetOCSPServices">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#SetOCSPServices" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- GetDirectoryServices -->
+    <wsdl:operation name="GetDirectoryServices">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#GetDirectoryServices" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- SetDirectoryServices -->
+    <wsdl:operation name="SetDirectoryServices">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#SetDirectoryServices" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- GetTSServices -->
+    <wsdl:operation name="GetTSServices">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#GetTSServices" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- SetTSServices -->
+    <wsdl:operation name="SetTSServices">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#SetTSServices" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+  </wsdl:binding>
+
+
+
+  <wsdl:binding name="GetCardInfoOrACD" type="oec:GetCardInfoOrACD">
+    <soap:binding style="document"
+		  transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetCardInfoOrACD">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:GetCardInfoOrACD" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+
+
+
+
+  <wsdl:binding name="SAL" type="oec:SAL">
+    <soap:binding style="document"
+		  transport="http://schemas.xmlsoap.org/soap/http" />
+
+    <!-- ================================== -->
+    <!-- 6. Card-application-service access -->
+    <!-- (binding)                          -->
+    <!-- ================================== -->
+
+    <!-- 6.2 Initialize -->
+
+    <wsdl:operation name="Initialize">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Initialize" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 6.3 Terminate -->
+
+    <wsdl:operation name="Terminate">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Terminate" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 6.4 CardApplicationPath -->
+
+    <wsdl:operation name="CardApplicationPath">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationPath" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- ===================== -->
+    <!-- 7. Connection service -->
+    <!-- (binding)             -->
+    <!-- ===================== -->
+
+    <!-- 7.2 CardApplicationConnect -->
+
+    <wsdl:operation name="CardApplicationConnect">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationConnect" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 7.3 CardApplicationDisconnect -->
+
+    <wsdl:operation name="CardApplicationDisconnect">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationDisconnect" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 7.4 CardApplicationStartSession -->
+
+    <wsdl:operation name="CardApplicationStartSession">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:StartSession" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 7.5 CardApplicationEndSession -->
+
+    <wsdl:operation name="CardApplicationEndSession">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationEndSession" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- =========================== -->
+    <!-- 8. Card-application service -->
+    <!-- (binding)                   -->
+    <!-- =========================== -->
+
+    <!-- 8.2 CardApplicationList -->
+
+    <wsdl:operation name="CardApplicationList">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationList" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.3 CardApplicationCreate -->
+
+    <wsdl:operation name="CardApplicationCreate">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationCreate" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.4 CardApplicationDelete -->
+
+    <wsdl:operation name="CardApplicationDelete">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationDelete" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.5 CardApplicationServiceList -->
+
+    <wsdl:operation name="CardApplicationServiceList">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationServiceList" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.6 CardApplicationServiceCreate -->
+
+    <wsdl:operation name="CardApplicationServiceCreate">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationServiceCreate" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.7 CardApplicationServiceLoad -->
+
+    <wsdl:operation name="CardApplicationServiceLoad">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationServiceLoad" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.8 CardApplicationServiceDelete -->
+
+    <wsdl:operation name="CardApplicationServiceDelete">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationServiceDelete" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.9 CardApplicationServiceDescribe -->
+
+    <wsdl:operation name="CardApplicationServiceDescribe">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationServiceDescribe" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 8.10 ExecuteAction -->
+
+    <wsdl:operation name="ExecuteAction">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:ExecuteAction" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- ===================== -->
+    <!-- 9. Named data service -->
+    <!-- (binding)             -->
+    <!-- ===================== -->
+
+    <!-- 9.2 DataSetList -->
+
+    <wsdl:operation name="DataSetList">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DataSetList" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.3 DataSetCreate -->
+
+    <wsdl:operation name="DataSetCreate">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DataSetCreate" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.4 DataSetSelect -->
+
+    <wsdl:operation name="DataSetSelect">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DataSetSelect" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.5 DataSetDelete -->
+
+    <wsdl:operation name="DataSetDelete">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DataSetDelete" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.6 DSIList -->
+
+    <wsdl:operation name="DSIList">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DSIList" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.7 DSICreate -->
+
+    <wsdl:operation name="DSICreate">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DSICreate" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.8 DSIDelete -->
+
+    <wsdl:operation name="DSIDelete">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DSIDelete" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.9 DSIWrite -->
+
+    <wsdl:operation name="DSIWrite">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DSIWrite" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 9.9 DSIWrite -->
+
+    <wsdl:operation name="DSIRead">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DSIRead" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- ========================= -->
+    <!-- 10. Cryptographic service -->
+    <!-- (binding)                 -->
+    <!-- ========================= -->
+
+    <!-- 10.2 Encipher -->
+
+    <wsdl:operation name="Encipher">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Encipher" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 10.3 Decipher -->
+
+    <wsdl:operation name="Decipher">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Decipher" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 10.4 GetRandom -->
+
+    <wsdl:operation name="GetRandom">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:GetRandom" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 10.5 Hash -->
+
+    <wsdl:operation name="Hash">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Hash" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 10.6 Sign -->
+
+    <wsdl:operation name="Sign">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Sign" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 10.7 VerifySignature -->
+
+    <wsdl:operation name="VerifySignature">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:VerifySignature" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 10.8 VerifyCertificate -->
+
+    <wsdl:operation name="VerifyCertificate">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:VerifyCertificate" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- ================================= -->
+    <!-- 11. Differential-identity service -->
+    <!-- (binding)                         -->
+    <!-- ================================= -->
+
+    <!-- 11.2 DIDList -->
+
+    <wsdl:operation name="DIDList">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DIDList" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 11.3 DIDCreate -->
+
+    <wsdl:operation name="DIDCreate">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DIDCreate" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 11.4 DIDGet -->
+
+    <wsdl:operation name="DIDGet">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DIDGet" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 11.5 DIDUpdate -->
+
+    <wsdl:operation name="DIDUpdate">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DIDUpdate" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 11.6 DIDDelete -->
+
+    <wsdl:operation name="DIDDelete">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DIDDelete" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 11.7 DIDAuthenticate -->
+
+    <wsdl:operation name="DIDAuthenticate">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DIDAuthenticate" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- ========================= -->
+    <!-- 12. Authorization service -->
+    <!-- (binding)                 -->
+    <!-- ========================= -->
+
+    <!-- 12.2 ACLList -->
+
+    <wsdl:operation name="ACLList">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:ACLList" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- 12.3 ACLModify -->
+
+    <wsdl:operation name="ACLModify">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:ACLModify" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+
+
+
+
+  <wsdl:binding name="ISO24727-Protocols" type="oec:ISO24727-Protocols">
+    <soap:binding style="document"
+		  transport="http://schemas.xmlsoap.org/soap/http" />
+    <!-- TC_API_Open -->
+    <wsdl:operation name="TC_API_Open">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:TC_API_Open" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- TC_API_Close -->
+    <wsdl:operation name="TC_API_Close">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:TC_API_Close" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- StartPAOS -->
+    <wsdl:operation name="StartPAOS">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:StartPAOS" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+
+
+
+  <wsdl:binding name="IFDCallback" type="oec:IFDCallback">
+    <soap:binding style="document"
+		  transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="SignalEvent">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:SignalEvent" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+
+
+
+
+
+
+  <wsdl:binding name="IFD" type="oec:IFD">
+    <soap:binding style="document"
+		  transport="http://schemas.xmlsoap.org/soap/http" />
+
+
+    <!-- EstablishChannel -->
+    <wsdl:operation name="EstablishChannel">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:EstablishChannel" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- DestroyChannel -->
+    <wsdl:operation name="DestroyChannel">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:DestroyChannel" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+
+
+    <!-- =============================== -->
+    <!-- Card terminal related functions -->
+    <!-- (binding)                       -->
+    <!-- =============================== -->
+
+    <!-- EstablishContext -->
+    <wsdl:operation name="EstablishContext">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:EstablishContext" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- ReleaseContext -->
+    <wsdl:operation name="ReleaseContext">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:ReleaseContext" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- ListIFDs -->
+    <wsdl:operation name="ListIFDs">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:ListIFDs" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+
+    <!-- GetIFDCapabilities -->
+    <wsdl:operation name="GetIFDCapabilities">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:GetIFDCapabilities" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+
+    <!-- GetStatus -->
+    <wsdl:operation name="GetStatus">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:GetStatus" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+
+    <!-- Wait -->
+    <wsdl:operation name="Wait">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Wait" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+
+    <!-- Cancel -->
+    <wsdl:operation name="Cancel">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Cancel" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+
+    <!-- ControlIFD -->
+    <wsdl:operation name="ControlIFD">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:ControlIFD" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+
+    <!-- ====================== -->
+    <!-- Card related functions -->
+    <!-- (binding)              -->
+    <!-- ====================== -->
+
+    <!-- Connect -->
+    <wsdl:operation name="Connect">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Connect" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+
+    <!-- Disconnect -->
+    <wsdl:operation name="Disconnect">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Disconnect" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+
+    <!-- BeginTransaction -->
+    <wsdl:operation name="BeginTransaction">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:BeginTransaction" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+
+    <!-- EndTransaction -->
+    <wsdl:operation name="EndTransaction">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:EndTransaction" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+
+    <!-- Transmit -->
+    <wsdl:operation name="Transmit">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Transmit" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+
+    <!-- ====================== -->
+    <!-- User related functions -->
+    <!-- (binding)              -->
+    <!-- ====================== -->
+
+    <!-- VerifyUser -->
+    <wsdl:operation name="VerifyUser">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:VerifyUser" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- ModifyVerificationData -->
+    <wsdl:operation name="ModifyVerificationData">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:ModifyVerificationData" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- Output -->
+    <wsdl:operation name="Output">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Output" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+  </wsdl:binding>
+
+
+
+  <wsdl:binding name="Publish" type="oec:Publish">
+    <soap:binding style="document"
+		  transport="http://schemas.xmlsoap.org/soap/http" />
+
+    <wsdl:operation name="Publish">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Publish" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="Subscribe" type="oec:Subscribe">
+    <soap:binding style="document"
+		  transport="http://schemas.xmlsoap.org/soap/http" />
+
+    <wsdl:operation name="Subscribe">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Subscribe" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+
+
+
+  <wsdl:binding name="GetRecognitionTree" type="oec:GetRecognitionTree">
+    <soap:binding style="document"
+		  transport="http://schemas.xmlsoap.org/soap/http" />
+
+    <wsdl:operation name="GetRecognitionTree">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:GetRecognitionTree" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+
+
+  <wsdl:binding name="UpdateService" type="oec:UpdateService">
+    <soap:binding style="document"
+		  transport="http://schemas.xmlsoap.org/soap/http" />
+    <!-- CheckFrameworkUpdate -->
+    <wsdl:operation name="CheckFrameworkUpdate">
+      <soap:operation
+	  soapAction="http://www.bsi.bund.de/ecard/api/1.0#CheckFrameworkUpdate" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+
+
+
+
+
+  <!-- Service Definitions -->
+
+  <wsdl:service name="Management">
+    <wsdl:port name="ManagementPort" binding="oec:Management">
+      <soap:address location="http://127.0.0.1:18080" />
+    </wsdl:port>
+  </wsdl:service>
+
+  <wsdl:service name="GetCardInfoOrACD">
+    <wsdl:port name="GetCardInfoOrACD"
+	       binding="oec:GetCardInfoOrACD">
+      <soap:address location="http://127.0.0.1:18080" />
+    </wsdl:port>
+  </wsdl:service>
+
+  <wsdl:service name="SAL">
+    <wsdl:port name="SALPort" binding="oec:SAL">
+      <soap:address location="http://127.0.0.1:18080" />
+    </wsdl:port>
+  </wsdl:service>
+
+  <wsdl:service name="ISO24727-Protocols">
+    <wsdl:port name="ISO24727-ProtocolsPort" binding="oec:ISO24727-Protocols">
+      <soap:address location="http://127.0.0.1:18080" />
+    </wsdl:port>
+  </wsdl:service>
+
+  <wsdl:service name="IFDCallback">
+    <wsdl:port name="IFDCallbackPort" binding="oec:IFDCallback">
+      <soap:address location="http://127.0.0.1:18080" />
+    </wsdl:port>
+  </wsdl:service>
+
+  <!-- <wsdl:service name="IFD-Extension"> -->
+  <!--   <wsdl:port name="IFDExtensionPort" binding="oec:IFD-Extension"> -->
+  <!--     <soap:address location="http://127.0.0.1:18080" /> -->
+  <!--   </wsdl:port> -->
+  <!-- </wsdl:service> -->
+
+  <wsdl:service name="IFD">
+    <wsdl:port name="IFDPort" binding="oec:IFD">
+      <soap:address location="http://127.0.0.1:18080" />
+    </wsdl:port>
+  </wsdl:service>
+
+  <wsdl:service name="Publish">
+    <wsdl:port name="Publish" binding="oec:Publish">
+      <soap:address location="http://127.0.0.1:18080" />
+    </wsdl:port>
+  </wsdl:service>
+  <wsdl:service name="Subscribe">
+    <wsdl:port name="Subscribe" binding="oec:Subscribe">
+      <soap:address location="http://127.0.0.1:18080" />
+    </wsdl:port>
+  </wsdl:service>
+
+  <wsdl:service name="GetRecognitionTree">
+    <wsdl:port name="GetRecognitionTree" binding="oec:GetRecognitionTree">
+      <soap:address location="http://127.0.0.1:18080" />
+    </wsdl:port>
+  </wsdl:service>
+
+  <wsdl:service name="UpdateService">
+    <wsdl:port name="UpdateServicePort"
+	       binding="oec:UpdateService">
+      <soap:address location="http://127.0.0.1:18080" />
+    </wsdl:port>
+  </wsdl:service>
+
+</wsdl:definitions>

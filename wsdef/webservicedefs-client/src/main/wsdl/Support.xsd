@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.bsi.bund.de/ecard/api/1.1"
+	xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:ec="http://www.bsi.bund.de/ecard/api/1.1"
+	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
+		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
+
+	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
+		schemaLocation="ISOCommon.xsd" />
+
+
+	<!-- 3.1 Encode -->
+
+	<element name="Encode">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0">
+						</element>
+						<element name="Data" type="hexBinary" />
+						<element name="EncodingMethod" type="anyURI" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="EncodeResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="EncodedData" type="hexBinary"
+							maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.2 Decode -->
+
+	<element name="Decode">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0">
+						</element>
+						<element name="EncodedData" type="hexBinary" />
+						<element name="EncodingMethod" type="anyURI" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+
+	</element>
+
+	<element name="DecodeResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="DecodedData" type="hexBinary"
+							maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+
+	</element>
+
+	<!-- 3.3 ValidateXMLDocument -->
+
+	<element name="ValidateXMLDocument">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0">
+						</element>
+						<element name="XMLDocument"
+							type="dss:DocumentType" />
+						<element name="Schemas" type="dss:SchemasType"
+							maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="ValidateXMLDocumentResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+</schema>

@@ -4,14 +4,22 @@
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>de.ecsec.ecard.client</groupId>
-  <artifactId>ecard-client</artifactId>
+  <groupId>org.openecard</groupId>
+  <artifactId>client</artifactId>
   <packaging>pom</packaging>
   <version>0.0.2-SNAPSHOT</version>
   <name>eCard Client</name>
 
   <modules>
+    <module>wsdef</module>
+    <module>common</module>
+    <module>scio-pcsc</module>
+    <module>transport</module>
+    <module>ifd</module>
+    <module>sal</module>
+    <module>recognition</module>
     <module>event-manager</module>
+    <!-- client assemblies -->
     <module>applet</module>
   </modules>
 
@@ -68,7 +76,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.1</version>
+      <version>4.10</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

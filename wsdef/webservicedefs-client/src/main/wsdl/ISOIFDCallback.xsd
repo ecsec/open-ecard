@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<!-- Definition of Basic Types -->
+
+	<include schemaLocation="ISOCommon.xsd"></include>
+	<include schemaLocation="ISOIFD.xsd"></include>
+
+	<element name="SignalEvent">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ContextHandle"
+							type="iso:ContextHandleType">
+						</element>
+						<element name="SessionIdentifier" type="string"
+							maxOccurs="1" minOccurs="0" />
+						<element name="IFDEvent"
+							type="iso:IFDStatusType" maxOccurs="unbounded" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="SignalEventResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence/>
+				</extension>
+			</complexContent>
+		</complexType>
+        </element>
+
+</schema>

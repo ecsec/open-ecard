@@ -1,6 +1,5 @@
 package org.openecard.client.common.util;
 
-import org.openecard.client.common.util.Helper;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

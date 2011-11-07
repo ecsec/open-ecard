@@ -1,6 +1,8 @@
 package org.openecard.client.common.util;
 
 import java.util.Random;
+import java.util.UUID;
+
 
 /**
  *
@@ -27,6 +29,11 @@ public class ValueGenerators {
 	    result.append(c);
 	}
 	return result.toString();
+    }
+
+    public static String generateUUID() {
+        String uuid = UUID.randomUUID().toString();
+        return "urn:uuid:" + uuid;
     }
 
 }

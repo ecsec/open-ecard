@@ -1,6 +1,6 @@
 package org.openecard.client.transport.paos;
 
-import java.util.UUID;
+import org.openecard.client.common.util.ValueGenerators;
 
 
 /**
@@ -26,8 +26,7 @@ public class MessageGenerator {
     }
 
     public static String createNewId() {
-	String newMsg = UUID.randomUUID().toString();
-	myMsg = "urn:uuid:" + newMsg;
+	myMsg = ValueGenerators.generateUUID();
 	return myMsg;
     }
 

@@ -30,7 +30,7 @@
 	      <!-- <includes>**/*.class</includes> -->
 	      <!-- <excludes></excludes> -->
 	      <!-- <excludeGroupIds></excludeGroupIds> -->
-	      <includeGroupIds>org.openecard.client,org.openecard.client-env,org.openecard.client.wsdef,org.openecard.client,org.openecard.client.transport,org.safehaus.jug</includeGroupIds>
+	      <includeGroupIds>org.openecard.client,org.openecard.client-env,org.openecard.client.wsdef,org.openecard.client,org.openecard.client.transport,org.openecard.client.scio.pcsc,org.safehaus.jug</includeGroupIds>
 	      <outputDirectory>${project.build.directory}/classes</outputDirectory>
 	      <overWriteReleases>false</overWriteReleases>
 	      <overWriteSnapshots>true</overWriteSnapshots>
@@ -75,8 +75,8 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openecard.client</groupId>
-      <artifactId>scio-pcsc</artifactId>
+      <groupId>org.openecard.client.scio</groupId>
+      <artifactId>pcsc</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

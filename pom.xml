@@ -13,7 +13,7 @@
   <modules>
     <module>wsdef</module>
     <module>common</module>
-    <module>scio-pcsc</module>
+    <module>scio</module>
     <module>transport</module>
     <module>ifd</module>
     <module>sal</module>

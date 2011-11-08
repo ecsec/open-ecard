@@ -27,8 +27,8 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.openecard.client</groupId>
-      <artifactId>scio-pcsc</artifactId>
+      <groupId>org.openecard.client.scio</groupId>
+      <artifactId>pcsc</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

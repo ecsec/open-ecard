@@ -21,7 +21,7 @@
     	<directory>src/main/wsdl</directory>
     	<includes>
     	  <include>**/ALL.wsdl</include>
-    	  <!-- <include>**/*.xsd</include> -->
+    	  <include>**/*.xsd</include>
     	</includes>
       </resource>
     </resources>

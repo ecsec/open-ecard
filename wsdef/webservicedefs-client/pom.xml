@@ -42,7 +42,7 @@
 	      <wsdlDirectory>${basedir}/src/main/wsdl</wsdlDirectory>
 	      <wsdlFiles><wsdlFile>ALL.wsdl</wsdlFile></wsdlFiles>
 	      <sourceDestDir>${project.build.directory}/generated-sources/jaxws</sourceDestDir>
-	      <target>2.1</target>
+	      <target>2.2</target>
 	      <xjcArgs>
 		<xjcArg>-npa</xjcArg>
 	      </xjcArgs>
@@ -52,6 +52,13 @@
 	    </configuration>
 	  </execution>
 	</executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-tools</artifactId>
+            <version>2.2.5</version>
+          </dependency>
+        </dependencies>
       </plugin>
 
       <plugin>

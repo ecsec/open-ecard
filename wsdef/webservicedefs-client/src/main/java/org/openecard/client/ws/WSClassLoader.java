@@ -77,6 +77,12 @@ public class WSClassLoader {
 
 	serviceClasses.put("GetRecognitionTree", "org.openecard.ws.GetRecognitionTree_Service");
 	servicePorts  .put("GetRecognitionTree", "GetRecognitionTree");
+
+	serviceClasses.put("Management", "org.openecard.ws.Management_Service");
+	servicePorts  .put("Management", "ManagementPort");
+
+	serviceClasses.put("UpdateService", "org.openecard.ws.UpdateService_Service");
+	servicePorts  .put("UpdateService", "UpdateServicePort");
     }
 
     private static javax.xml.ws.WebServiceClient getClientAnnotation(Class clazz) {

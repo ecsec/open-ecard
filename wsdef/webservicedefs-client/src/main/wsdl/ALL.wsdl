@@ -21,8 +21,8 @@
 
 
   <wsdl:types>
-    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-		elementFormDefault="qualified">
+    <!-- Import schemas needed for SOAP services -->
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
       <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="CardInfoRepository.xsd" />
       <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="ISO24727-3.xsd" />
       <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="ISO24727-Protocols.xsd" />
@@ -31,10 +31,12 @@
       <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="ISOIFD.xsd" />
       <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="ISOSALCallback.xsd" />
       <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="RecognitionTreeRepository.xsd" />
+      <xsd:import namespace="http://www.bsi.bund.de/ecard/api/1.1"  schemaLocation="Management.xsd" />
     </xsd:schema>
-    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-		elementFormDefault="qualified">
-      <xsd:import namespace="http://www.bsi.bund.de/ecard/api/1.1" schemaLocation="Management.xsd" />
+
+    <!-- Import other schemas whose types need to be built -->
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+      <xsd:import namespace="http://ws.openecard.org/gui/v1.0" schemaLocation="GUI.xsd" />
     </xsd:schema>
   </wsdl:types>
 

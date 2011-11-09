@@ -1071,7 +1071,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    if (this.protocolFactories.contains(protocol)) {
 		ProtocolFactory factory = this.protocolFactories.get(protocol);
 		Protocol protoImpl = factory.createInstance();
-		EstablishChannelResponse response = protoImpl.establish(parameters, this, vTerminal, slotHandle);
+		EstablishChannelResponse response = protoImpl.establish(parameters, this, null); // TODO: hand over GUI implementation
 		// register protocol instance for secure messaging when protocol was processed successful
 		if (response.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
 		    // TODO: register sm in SCCard

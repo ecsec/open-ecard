@@ -9,7 +9,6 @@ import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ifd.Protocol;
 import org.openecard.client.common.ifd.ProtocolFactory;
 import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.common.util.Helper;
 import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.ifd.scio.SCCard;
 import org.openecard.client.ifd.scio.SCChannel;
@@ -51,6 +50,7 @@ import iso.std.iso_iec._24727.tech.schema.ModifyVerificationDataResponse;
 import iso.std.iso_iec._24727.tech.schema.Output;
 import iso.std.iso_iec._24727.tech.schema.OutputInfoType;
 import iso.std.iso_iec._24727.tech.schema.OutputResponse;
+import iso.std.iso_iec._24727.tech.schema.PACEInputType;
 import iso.std.iso_iec._24727.tech.schema.PACEOutputType;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContextResponse;
@@ -1011,10 +1011,10 @@ public class IFD implements org.openecard.ws.IFD {
 	    SCCard card = this.scwrapper.getCard(slotHandle);
 	    DIDAuthenticationDataType protoParam = parameters.getAuthenticationProtocolData();
 	    String protocol = protoParam.getProtocol();
-	    AuthDataMap inputDataMap = new AuthDataMap(protoParam);
 
 	    // check if it is PACE and try to perform native implementation
-	    if (protocol.equals(ECardConstants.Protocol.PACE)) {
+	    if (protoParam instanceof PACEInputType) {
+                PACEInputType paceParam = (PACEInputType) protoParam;
 		// get pace capabilities
 		int ctrlCode = term.getPaceCtrlCode();
 		List<Long> paceCapabilities = term.getPACECapabilities();
@@ -1023,14 +1023,14 @@ public class IFD implements org.openecard.ws.IFD {
 		if (!supportedProtos.isEmpty() && supportedProtos.get(0).startsWith(protocol)) { // i don't care which type is supported, i try it anyways
 		    // yeah, PACE seems to be supported by the reader, big win
 		    // extract variables needed for pace
-		    byte pinID      = inputDataMap.getContentAsBytes("PinID")[0];
+		    byte pinID      = paceParam.getPinID()[0];
 		    // optional elements
-		    byte[] chat     = inputDataMap.getContentAsBytes("CHAT");
-		    String pin      = inputDataMap.getContentAsString("PIN");
-		    byte[] certDesc = inputDataMap.getContentAsBytes("CertificateDescription");
+		    byte[] chat     = paceParam.getCHAT();
+		    String pin      = paceParam.getPIN();
+		    byte[] certDesc = paceParam.getCertificateDescription();
 
 		    // prepare pace data structures
-		    EstablishPACERequest estPaceReq = new EstablishPACERequest(pinID, chat, chat, certDesc);
+		    EstablishPACERequest estPaceReq = new EstablishPACERequest(pinID, chat, null, certDesc); // TODO: add supplied PIN
 		    ExecutePACERequest  execPaceReq = new ExecutePACERequest(ExecutePACERequest.Function.EstablishPACEChannel, estPaceReq.toBytes());
 		    // see if PACE type demanded for this input value combination is supported
 		    if (estPaceReq.isSupportedType(paceCapabilities)) {
@@ -1044,24 +1044,23 @@ public class IFD implements org.openecard.ws.IFD {
 			}
 			EstablishPACEResponse estPaceRes = new EstablishPACEResponse(execPaceRes.getData());
 			// get values and prepare response
-			PACEOutputType resultContent = new PACEOutputType();
-                        AuthDataResponse authDataResponse = inputDataMap.createResponse(resultContent);
+			PACEOutputType authDataResponse = new PACEOutputType();
                         // mandatory fields
-                        authDataResponse.addElement("Statusbytes", Helper.convByteArrayToString(estPaceRes.getStatus()));
-                        authDataResponse.addElement("EF_CardAccess", Helper.convByteArrayToString(estPaceRes.getCardAccess()));
+                        authDataResponse.setStatusbytes(estPaceRes.getStatus());
+                        authDataResponse.setEFCardAccess(estPaceRes.getCardAccess());
                         // optional fields
 			if (estPaceRes.hasCar()) {
-                            authDataResponse.addElement("CAR", Helper.convByteArrayToString(estPaceRes.getCar()));
+                            authDataResponse.setCAR(estPaceRes.getCar());
 			}
 			if (estPaceRes.hasCarPrev()) {
-                            authDataResponse.addElement("CARprev", Helper.convByteArrayToString(estPaceRes.getCarPrev()));
+                            authDataResponse.setCARprev(estPaceRes.getCarPrev());
 			}
 			if (estPaceRes.hasIDicc()) {
-                            authDataResponse.addElement("IDicc", Helper.convByteArrayToString(estPaceRes.getIDicc()));
+                            authDataResponse.setIDicc(estPaceRes.getIDicc());
 			}
 			// create response type and return
 			EstablishChannelResponse response = WSHelper.makeResponse(EstablishChannelResponse.class, WSHelper.makeResultOK());
-			response.setAuthenticationProtocolData(authDataResponse.getResponse());
+			response.setAuthenticationProtocolData(authDataResponse);
 			return response;
 		    }
 		}

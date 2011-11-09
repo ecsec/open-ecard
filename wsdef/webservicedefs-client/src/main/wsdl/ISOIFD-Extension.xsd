@@ -45,7 +45,7 @@
 
 	<complexType name="PACEInputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="PinID" type="iso:ByteType" />
 					<element name="CHAT" type="hexBinary" maxOccurs="1" minOccurs="0"/>
@@ -53,13 +53,13 @@
 					<element name="CertificateDescription" type="hexBinary"
 						maxOccurs="1" minOccurs="0" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="PACEOutputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="Statusbytes" type="hexBinary" />
 					<element name="EF_CardAccess" type="hexBinary" />
@@ -67,7 +67,7 @@
 					<element name="CARprev" type="hexBinary" maxOccurs="1" minOccurs="0" />
 					<element name="IDicc" type="hexBinary" maxOccurs="1" minOccurs="0" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 

@@ -277,7 +277,7 @@
 
 	<complexType name="StartSessionInputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="SharedSecurityState" type="boolean"
 						maxOccurs="1" minOccurs="0" />
@@ -286,19 +286,19 @@
 						type="boolean" maxOccurs="1" minOccurs="0" />
 
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 
 	<complexType name="StartSessionOutputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="ConnectionHandle"
 						type="iso:ConnectionHandleType" maxOccurs="1" minOccurs="0" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -417,7 +417,7 @@
 
 	<complexType name="PinCompareMarkerType">
 		<complexContent>
-			<restriction base="iso:DIDAbstractMarkerType">
+			<extension base="iso:DIDAbstractMarkerType">
 				<sequence>
 					<element name="PinRef" type="iso:KeyRefType" />
 					<element name="PinValue" type="string" maxOccurs="1"
@@ -426,7 +426,7 @@
 						type="iso:PasswordAttributesType" maxOccurs="1" minOccurs="0" />
 					<element ref="iso:StateInfo" maxOccurs="1" minOccurs="0" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -439,14 +439,14 @@
 
 	<complexType name="PinCompareDIDUpdateDataType">
 		<complexContent>
-			<restriction base="iso:DIDUpdateDataType">
+			<extension base="iso:DIDUpdateDataType">
 				<sequence>
 					<element name="OldPinOrPUK" type="string"
 						maxOccurs="1" minOccurs="0" />
 					<element name="Marker"
 						type="iso:PinCompareMarkerType" maxOccurs="1" minOccurs="1" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -463,23 +463,23 @@
 
 	<complexType name="PinCompareDIDAuthenticateInputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="Pin" type="string" maxOccurs="1"
 						minOccurs="0" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="PinCompareDIDAuthenticateOutputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="RetryCounter"
 						type="nonNegativeInteger" maxOccurs="1" minOccurs="0" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -498,7 +498,7 @@
 
 	<complexType name="MutualAuthMarkerType">
 		<complexContent>
-			<restriction base="iso:DIDAbstractMarkerType">
+			<extension base="iso:DIDAbstractMarkerType">
 				<sequence>
 
 					<element name="EncryptionAlgorithm" type="anyURI" maxOccurs="1" minOccurs="0"/>
@@ -524,7 +524,7 @@
 					<element name="ICCSNRef" type="iso:DataRefType"
 						maxOccurs="1" minOccurs="0" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -538,12 +538,12 @@
 
 	<complexType name="MutualAuthDIDUpdateDataType">
 		<complexContent>
-			<restriction base="iso:DIDUpdateDataType">
+			<extension base="iso:DIDUpdateDataType">
 				<sequence>
 					<element name="Marker"
 						type="iso:MutualAuthMarkerType" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -560,31 +560,31 @@
 
 	<complexType name="MutualAuthDIDAuthInternalAuthType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="Challenge" type="hexBinary" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="MutualAuthDIDAuthMutualAuthType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="InternalCryptogram" type="hexBinary" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="MutualAuthDIDAuthExternalAuthType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="MutualCryptogram" type="hexBinary" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -602,7 +602,7 @@
 
 	<complexType name="EACMarkerType">
 		<complexContent>
-			<restriction base="iso:DIDAbstractMarkerType">
+			<extension base="iso:DIDAbstractMarkerType">
 				<sequence>
 					<element name="PACEDID" type="iso:DIDNameType"
 						maxOccurs="1" minOccurs="0" />
@@ -612,7 +612,7 @@
 					<element name="RIDID" type="iso:DIDNameType"
 						maxOccurs="1" minOccurs="0" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -623,7 +623,7 @@
 
 	<complexType name="EACSessionInputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="RequiredAge" type="positiveInteger"
 						maxOccurs="1" minOccurs="0" />
@@ -647,13 +647,13 @@
 						type="iso:DataSetNameType" maxOccurs="unbounded" minOccurs="0" />
 					<element name="TransactionInfo" type="string" maxOccurs="1" minOccurs="0"></element>
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="EACSessionOutputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="AgeVerification" type="anyURI"
 						maxOccurs="1" minOccurs="0" />
@@ -693,7 +693,7 @@
 						</complexType>
 					</element>
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -704,7 +704,7 @@
 
 	<complexType name="EAC1InputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="Certificate" type="hexBinary"
 						maxOccurs="unbounded" minOccurs="1" />
@@ -721,13 +721,13 @@
 						type="hexBinary" maxOccurs="1" minOccurs="0" />
 					<element name="TransactionInfo" type="string" maxOccurs="1" minOccurs="0"></element>
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="EAC1OutputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="RetryCounter"
 						type="nonNegativeInteger" maxOccurs="1" minOccurs="0" />
@@ -745,13 +745,13 @@
 					<element name="Challenge" type="hexBinary"
 						maxOccurs="1" minOccurs="0" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="EAC2InputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<sequence maxOccurs="unbounded" minOccurs="0">
 						<element name="Certificate" type="hexBinary"
@@ -764,13 +764,13 @@
 						maxOccurs="1" minOccurs="0" />
 
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="EAC2OutputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<choice>
 					<sequence>
 						<element name="EFCardSecurity" type="hexBinary" />
@@ -781,19 +781,19 @@
 					<element name="Challenge" type="hexBinary" />
 
 				</choice>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="EACAdditionalInputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="Signature" type="hexBinary"
 						maxOccurs="1" minOccurs="1" />
 
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -818,7 +818,7 @@
 
 	<complexType name="PACEMarkerType">
 		<complexContent>
-			<restriction base="iso:DIDAbstractMarkerType">
+			<extension base="iso:DIDAbstractMarkerType">
 				<sequence>
 					<element name="PasswordRef" type="iso:KeyRefType" />
 
@@ -829,7 +829,7 @@
 					<element name="maxLength" type="nonNegativeInteger" maxOccurs="1" minOccurs="0" />
 					<element ref="iso:StateInfo" maxOccurs="1" minOccurs="0" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -842,13 +842,13 @@
 
 	<complexType name="PACEDIDUpdateDataType">
 		<complexContent>
-			<restriction base="iso:DIDUpdateDataType">
+			<extension base="iso:DIDUpdateDataType">
 				<sequence>
 					<element name="PasswordValue" type="string"
 						maxOccurs="1" minOccurs="0" />
 					<element name="Marker" type="iso:PACEMarkerType" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -859,7 +859,7 @@
 
 	<complexType name="PACEDIDAuthenticateInputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="Password" type="string" maxOccurs="1"
 						minOccurs="0" />
@@ -873,13 +873,13 @@
 						maxOccurs="1" minOccurs="0" />
 
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="PACEDIDAuthenticateOutputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="RetryCounter"
 						type="nonNegativeInteger" maxOccurs="1" minOccurs="0" />
@@ -891,7 +891,7 @@
 					<element name="EFCardAccess" type="hexBinary"
 						maxOccurs="1" minOccurs="0" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -926,13 +926,13 @@
 
 	<complexType name="CAMarkerType">
 		<complexContent>
-			<restriction base="iso:DIDAbstractMarkerType">
+			<extension base="iso:DIDAbstractMarkerType">
 				<sequence>
 					<element name="KeyId" type="integer" maxOccurs="1"
 						minOccurs="0">
 					</element>
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -943,7 +943,7 @@
 
 	<complexType name="CADIDCreateDataType">
 		<complexContent>
-			<restriction base="iso:DIDUpdateDataType">
+			<extension base="iso:DIDUpdateDataType">
 				<sequence>
 					<element name="KeyInfo" maxOccurs="1" minOccurs="1"
 						type="iso:CAKeyInfoType" />
@@ -951,7 +951,7 @@
 					<element name="Marker" type="iso:CAMarkerType"
 						maxOccurs="1" minOccurs="1" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -971,12 +971,12 @@
 
 	<complexType name="CADIDUpdateDataType">
 		<complexContent>
-			<restriction base="iso:DIDUpdateDataType">
+			<extension base="iso:DIDUpdateDataType">
 				<sequence>
 					<element name="KeyInfo" maxOccurs="1" minOccurs="1"
 						type="iso:CAKeyInfoType" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -990,24 +990,24 @@
 
 	<complexType name="CAInputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="PublicKey"
 						type="iso:SubjectPublicKeyInfoType" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="CAAuthenticationTokenType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="AuthenticationToken"
 						type="hexBinary" />
 					<element name="Nonce" type="hexBinary" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -1026,8 +1026,8 @@
 
 	<complexType name="TAMarkerType">
 		<complexContent>
-			<restriction base="iso:DIDAbstractMarkerType">
-			</restriction>
+			<extension base="iso:DIDAbstractMarkerType">
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -1042,12 +1042,12 @@
 
 	<complexType name="TADIDUpdateDataType">
 		<complexContent>
-			<restriction base="iso:DIDUpdateDataType">
+			<extension base="iso:DIDUpdateDataType">
 				<sequence>
 					<element name="RootKey"
 						type="iso:SubjectPublicKeyInfoType" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -1059,7 +1059,7 @@
 
 	<complexType name="TADIDAuthInputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<sequence maxOccurs="unbounded" minOccurs="0">
 						<element name="Certificate" type="hexBinary"
@@ -1073,41 +1073,41 @@
 						type="hexBinary" maxOccurs="1" minOccurs="0" />
 
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="TADIDAuthOutputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="Challenge" type="hexBinary" />
 					<element name="IDPICC" type="hexBinary"
 						maxOccurs="1" minOccurs="0" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 
 	<complexType name="TADIDAuthExternalAuthType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="Signature" type="hexBinary" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="TAAuxInputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="AuthenticatedAuxiliaryData"
 						type="hexBinary" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -1126,13 +1126,13 @@
 
 	<complexType name="RIMarkerType">
 		<complexContent>
-			<restriction base="iso:DIDAbstractMarkerType">
+			<extension base="iso:DIDAbstractMarkerType">
 				<sequence>
 					<element name="KeyId" type="integer" maxOccurs="1"
 						minOccurs="0">
 					</element>
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -1146,12 +1146,12 @@
 
 	<complexType name="RIDIDUpdateDataType">
 		<complexContent>
-			<restriction base="iso:DIDUpdateDataType">
+			<extension base="iso:DIDUpdateDataType">
 				<sequence>
 					<element name="KeyInfo" type="iso:CAKeyInfoType" />
 					<element name="Marker" type="iso:RIMarkerType" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -1163,23 +1163,23 @@
 
 	<complexType name="RIDIDAuthInputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="SectorPublicKey" type="hexBinary" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 
 	<complexType name="RIDIDAuthOutputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="SectorSpecificIdentifier"
 						type="hexBinary" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -1198,7 +1198,7 @@
 
 	<complexType name="RSAAuthMarkerType">
 		<complexContent>
-			<restriction base="iso:DIDAbstractMarkerType">
+			<extension base="iso:DIDAbstractMarkerType">
 				<sequence>
 					<element name="EncryptionAlgorithm" type="anyURI"
 						maxOccurs="1" minOccurs="0" />
@@ -1239,7 +1239,7 @@
 					<element name="LegacyKeyName" type="string"
 						maxOccurs="1" minOccurs="0" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -1252,12 +1252,12 @@
 
 	<complexType name="RSAAuthDIDUpdateDataType">
 		<complexContent>
-			<restriction base="iso:DIDUpdateDataType">
+			<extension base="iso:DIDUpdateDataType">
 				<sequence>
 					<element name="Marker"
 						type="iso:RSAAuthMarkerType" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -1275,7 +1275,7 @@
 
 	<complexType name="RSAAuthDIDAuthVerifyCertsType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence maxOccurs="unbounded" minOccurs="0">
 					<element name="Certificate" type="hexBinary"
 						maxOccurs="1" minOccurs="1" />
@@ -1283,47 +1283,47 @@
 						maxOccurs="1" minOccurs="0" />
 
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="RSAAuthDIDAuthInternalAuthType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="ExternalPublicKeyRef"
 						type="hexBinary" maxOccurs="1" minOccurs="1" />
 
 					<element name="Challenge" type="hexBinary" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="RSAAuthDIDAuthMutualAuthType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="Signature" type="hexBinary" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="RSAAuthDIDAuthExternalAuthType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="MutualCryptogram" type="hexBinary" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 	<complexType name="EmptyResponseDataType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
-			</restriction>
+			<extension base="iso:DIDAuthenticationDataType">
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -1454,7 +1454,7 @@
 
 	<complexType name="CryptoMarkerType">
 		<complexContent>
-			<restriction base="iso:DIDAbstractMarkerType">
+			<extension base="iso:DIDAbstractMarkerType">
 				<sequence>
 					<element name="AlgorithmInfo"
 						type="iso:AlgorithmInfoType" />
@@ -1470,7 +1470,7 @@
 						minOccurs="0">
 					</element>
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -1484,12 +1484,12 @@
 
 	<complexType name="CryptoDIDUpdateDataType">
 		<complexContent>
-			<restriction base="iso:DIDUpdateDataType">
+			<extension base="iso:DIDUpdateDataType">
 				<sequence>
 					<element name="Marker"
 						type="iso:CryptoMarkerType" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -1506,7 +1506,7 @@
 
 	<complexType name="HashInputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="Data" type="hexBinary" />
 					<element name="HashHandle" type="iso:HashHandleType"
@@ -1514,20 +1514,20 @@
 					<element name="More" maxOccurs="1" minOccurs="0"
 						type="boolean" />
 				</sequence>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 
 
 	<complexType name="HashOutputType">
 		<complexContent>
-			<restriction base="iso:DIDAuthenticationDataType">
+			<extension base="iso:DIDAuthenticationDataType">
 				<choice>
 					<element name="HashValue" type="hexBinary" />
 					<element name="HashHandle"
 						type="iso:HashHandleType" />
 				</choice>
-			</restriction>
+			</extension>
 		</complexContent>
 	</complexType>
 

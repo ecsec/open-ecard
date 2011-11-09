@@ -215,20 +215,12 @@
 
 
 	<complexType name="DIDAbstractMarkerType">
-		<complexContent>
-			<extension base="anyType">
-				<attribute name="Protocol" type="anyURI" use="required" />
-			</extension>
-		</complexContent>
+            <attribute name="Protocol" type="anyURI" use="required" />
 	</complexType>
 
 
 	<complexType name="DIDAuthenticationDataType">
-		<complexContent>
-			<extension base="anyType">
-				<attribute name="Protocol" type="anyURI" use="required" />
-			</extension>
-		</complexContent>
+		<attribute name="Protocol" type="anyURI" use="required" />
 	</complexType>
 
 	<complexType name="DIDAuthenticationStateType">
@@ -288,11 +280,7 @@
 
 
 	<complexType name="DIDUpdateDataType" abstract="true">
-		<complexContent>
-			<extension base="anyType">
-				<attribute name="Protocol" type="anyURI" use="required" />
-			</extension>
-		</complexContent>
+		<attribute name="Protocol" type="anyURI" use="required" />
 	</complexType>
 
 	<simpleType name="DSINameType">

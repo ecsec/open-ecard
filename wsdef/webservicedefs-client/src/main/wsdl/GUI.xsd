@@ -85,7 +85,7 @@
 	<element name="BoxItem">
 		<complexType>
 	        <attribute name="text" type="string"/>
-	        <attribute name="name" type="string"/>
+	        <attribute name="name" type="string" use="required"/>
 	        <attribute name="checked" type="boolean" use="required"/>
 	        <attribute name="disabled" type="boolean" default="false" />
 		</complexType>
@@ -102,7 +102,7 @@
 	<element name="TextInput">
 		<complexType>
 	        <attribute name="text" type="string"/>
-	        <attribute name="name" type="string"/>
+	        <attribute name="name" type="string" use="required"/>
 	        <attribute name="value" type="string"/>
 		    <attribute name="minlength" type="nonNegativeInteger"/>
 		    <attribute name="maxlength" type="nonNegativeInteger"/>
@@ -112,7 +112,7 @@
 	<element name="PasswordInput">
 		<complexType>
 	        <attribute name="text" type="string"/>
-	        <attribute name="name" type="string"/>
+	        <attribute name="name" type="string" use="required"/>
 	        <attribute name="value" type="string" />
 		    <attribute name="minlength" type="nonNegativeInteger"/>
 		    <attribute name="maxlength" type="nonNegativeInteger"/>

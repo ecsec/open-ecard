@@ -1,6 +1,5 @@
 package org.openecard.client.recognition;
 
-import org.openecard.client.recognition.CardRecognition;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;

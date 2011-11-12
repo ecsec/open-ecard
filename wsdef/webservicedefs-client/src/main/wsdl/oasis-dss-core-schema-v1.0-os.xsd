@@ -83,35 +83,33 @@
 		<xs:attribute name="ignoreComments" type="xs:boolean"
 			use="optional" default="true" />
 	</xs:complexType>
-	<xs:element name="TransformedData">
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="dss:DocumentBaseType">
-					<xs:sequence>
-						<xs:element ref="ds:Transforms" minOccurs="0" />
-						<xs:element ref="dss:Base64Data" />
-					</xs:sequence>
-					<xs:attribute name="WhichReference"
-						type="xs:integer" use="optional" />
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="DocumentHash">
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="dss:DocumentBaseType">
-					<xs:sequence>
-						<xs:element ref="ds:Transforms" minOccurs="0" />
-						<xs:element ref="ds:DigestMethod" minOccurs="0" />
-						<xs:element ref="ds:DigestValue" />
-					</xs:sequence>
-					<xs:attribute name="WhichReference"
-						type="xs:integer" use="optional" />
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
+        <xs:element name="TransformedData" type="dss:TransformedDataType"/>
+        <xs:complexType name="TransformedDataType">
+                <xs:complexContent>
+                        <xs:extension base="dss:DocumentBaseType">
+                                <xs:sequence>
+                                        <xs:element ref="ds:Transforms" minOccurs="0" />
+                                        <xs:element ref="dss:Base64Data" />
+                                </xs:sequence>
+                                <xs:attribute name="WhichReference"
+                                        type="xs:integer" use="optional" />
+                        </xs:extension>
+                </xs:complexContent>
+        </xs:complexType>
+	<xs:element name="DocumentHash" type="dss:DocumentHashType"/>
+        <xs:complexType name="DocumentHashType">
+                <xs:complexContent>
+                        <xs:extension base="dss:DocumentBaseType">
+                                <xs:sequence>
+                                        <xs:element ref="ds:Transforms" minOccurs="0" />
+                                        <xs:element ref="ds:DigestMethod" minOccurs="0" />
+                                        <xs:element ref="ds:DigestValue" />
+                                </xs:sequence>
+                                <xs:attribute name="WhichReference"
+                                        type="xs:integer" use="optional" />
+                        </xs:extension>
+                </xs:complexContent>
+        </xs:complexType>
 	<xs:element name="SignatureObject">
 		<xs:complexType>
 			<xs:sequence>

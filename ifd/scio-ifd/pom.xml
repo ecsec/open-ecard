@@ -4,15 +4,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.openecard</groupId>
-    <artifactId>client</artifactId>
+    <groupId>org.openecard.client</groupId>
+    <artifactId>ifd</artifactId>
     <version>0.0.2-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.openecard.client</groupId>
-  <artifactId>recognition</artifactId>
+  <groupId>org.openecard.client.ifd</groupId>
+  <artifactId>scio-ifd</artifactId>
   <packaging>jar</packaging>
-  <name>Card Recognition</name>
+  <name>IFD</name>
 
   <dependencies>
     <dependency>
@@ -25,12 +25,6 @@
       <artifactId>wsdef-client</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.ifd</groupId>
-      <artifactId>scio-ifd</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.openecard.client.scio</groupId>

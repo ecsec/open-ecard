@@ -26,8 +26,8 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openecard.client</groupId>
-      <artifactId>ifd</artifactId>
+      <groupId>org.openecard.client.ifd</groupId>
+      <artifactId>scio-ifd</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

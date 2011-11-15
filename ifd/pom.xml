@@ -11,27 +11,11 @@
 
   <groupId>org.openecard.client</groupId>
   <artifactId>ifd</artifactId>
-  <packaging>jar</packaging>
-  <name>IFD</name>
+  <packaging>pom</packaging>
+  <name>IFD implementations</name>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.openecard.client</groupId>
-      <artifactId>common</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.wsdef</groupId>
-      <artifactId>wsdef-client</artifactId>
-      <version>${project.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.scio</groupId>
-      <artifactId>pcsc</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <modules>
+    <module>scio-ifd</module>
+  </modules>
 
 </project>

@@ -1,10 +1,10 @@
-package org.openecard.client.ifd;
+package org.openecard.client.ifd.scio;
 
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ifd.TerminalFactory;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.IFDStatusDiff;
-import org.openecard.client.ifd.scio.IFDTerminalFactory;
+import org.openecard.client.ifd.scio.wrapper.IFDTerminalFactory;
 import org.openecard.client.ws.WSClassLoader;
 import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.GetStatus;

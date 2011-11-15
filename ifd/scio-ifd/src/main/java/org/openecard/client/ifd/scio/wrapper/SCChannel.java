@@ -1,9 +1,9 @@
-package org.openecard.client.ifd.scio;
+package org.openecard.client.ifd.scio.wrapper;
 
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.CardCommandStatus;
-import org.openecard.client.ifd.IFDException;
-import org.openecard.client.ifd.TransmitException;
+import org.openecard.client.ifd.scio.IFDException;
+import org.openecard.client.ifd.scio.TransmitException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;

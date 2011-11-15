@@ -1,4 +1,4 @@
-package org.openecard.client.ifd.reader;
+package org.openecard.client.ifd.scio.reader;
 
 import java.util.Arrays;
 import oasis.names.tc.dss._1_0.core.schema.Result;

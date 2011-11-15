@@ -1,4 +1,4 @@
-package org.openecard.client.ifd.reader;
+package org.openecard.client.ifd.scio.reader;
 
 import org.openecard.client.common.util.Helper;
 import java.io.ByteArrayOutputStream;

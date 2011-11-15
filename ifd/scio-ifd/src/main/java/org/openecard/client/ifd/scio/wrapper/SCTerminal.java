@@ -1,14 +1,14 @@
-package org.openecard.client.ifd.scio;
+package org.openecard.client.ifd.scio.wrapper;
 
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.Helper;
-import org.openecard.client.ifd.reader.PCSCFeatures;
-import org.openecard.client.ifd.reader.ExecutePACERequest;
-import org.openecard.client.ifd.reader.ExecutePACEResponse;
-import org.openecard.client.ifd.IFDException;
-import org.openecard.client.ifd.IFDUtils;
-import org.openecard.client.ifd.reader.PACECapabilities;
+import org.openecard.client.ifd.scio.reader.PCSCFeatures;
+import org.openecard.client.ifd.scio.reader.ExecutePACERequest;
+import org.openecard.client.ifd.scio.reader.ExecutePACEResponse;
+import org.openecard.client.ifd.scio.IFDException;
+import org.openecard.client.ifd.scio.IFDUtils;
+import org.openecard.client.ifd.scio.reader.PACECapabilities;
 import iso.std.iso_iec._24727.tech.schema.DisplayCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
 import iso.std.iso_iec._24727.tech.schema.KeyPadCapabilityType;

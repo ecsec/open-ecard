@@ -1,4 +1,4 @@
-package org.openecard.client.ifd;
+package org.openecard.client.ifd.scio;
 
 import org.openecard.client.common.ECardException;
 import oasis.names.tc.dss._1_0.core.schema.Result;

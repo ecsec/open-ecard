@@ -1,9 +1,9 @@
-package org.openecard.client.ifd.reader;
+package org.openecard.client.ifd.scio.reader;
 
 import org.openecard.client.common.USBLangID;
 import org.openecard.client.common.util.Helper;
-import org.openecard.client.ifd.IFDException;
-import org.openecard.client.ifd.IFDUtils;
+import org.openecard.client.ifd.scio.IFDException;
+import org.openecard.client.ifd.scio.IFDUtils;
 import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
 import iso.std.iso_iec._24727.tech.schema.PasswordTypeType;
 import java.io.ByteArrayOutputStream;

@@ -1,4 +1,4 @@
-package org.openecard.client.ifd;
+package org.openecard.client.ifd.scio;
 
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.logging.LogManager;

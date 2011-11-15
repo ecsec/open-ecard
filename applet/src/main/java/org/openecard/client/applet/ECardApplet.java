@@ -4,7 +4,7 @@ import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.ifd.IFD;
+import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.sal.MicroSAL;
 import org.openecard.client.transport.paos.PAOS;

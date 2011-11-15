@@ -1,4 +1,4 @@
-package org.openecard.client.ifd;
+package org.openecard.client.ifd.scio;
 
 
 /**

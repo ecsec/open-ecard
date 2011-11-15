@@ -1,15 +1,15 @@
-package org.openecard.client.ifd;
+package org.openecard.client.ifd.scio;
 
-import org.openecard.client.ifd.reader.PCSCPinVerify;
+import org.openecard.client.ifd.scio.reader.PCSCPinVerify;
 import org.openecard.client.common.ifd.VirtualTerminal;
 import org.openecard.client.common.ifd.VirtualPinResult;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.CardCommandStatus;
 import org.openecard.client.common.util.Helper;
-import org.openecard.client.ifd.scio.SCCard;
-import org.openecard.client.ifd.scio.SCTerminal;
-import org.openecard.client.ifd.scio.SCWrapper;
+import org.openecard.client.ifd.scio.wrapper.SCCard;
+import org.openecard.client.ifd.scio.wrapper.SCTerminal;
+import org.openecard.client.ifd.scio.wrapper.SCWrapper;
 import iso.std.iso_iec._24727.tech.schema.AltVUMessagesType;
 import iso.std.iso_iec._24727.tech.schema.DisplayCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities;

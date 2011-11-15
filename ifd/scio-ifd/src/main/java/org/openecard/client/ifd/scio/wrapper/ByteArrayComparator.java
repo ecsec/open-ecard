@@ -1,4 +1,4 @@
-package org.openecard.client.ifd.scio;
+package org.openecard.client.ifd.scio.wrapper;
 
 import java.util.Comparator;
 

@@ -1,4 +1,4 @@
-package org.openecard.client.ifd.reader;
+package org.openecard.client.ifd.scio.reader;
 
 import java.util.ArrayList;
 import java.util.Arrays;

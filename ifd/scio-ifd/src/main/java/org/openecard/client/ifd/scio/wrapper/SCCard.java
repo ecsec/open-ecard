@@ -1,9 +1,9 @@
-package org.openecard.client.ifd.scio;
+package org.openecard.client.ifd.scio.wrapper;
 
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.ifd.reader.PCSCFeatures;
-import org.openecard.client.ifd.IFDException;
+import org.openecard.client.ifd.scio.reader.PCSCFeatures;
+import org.openecard.client.ifd.scio.IFDException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Level;

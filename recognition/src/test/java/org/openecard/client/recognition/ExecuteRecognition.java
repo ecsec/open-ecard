@@ -19,7 +19,7 @@ public class ExecuteRecognition {
 
     @Test
     public void testExecute() throws Exception {
-	IFD ifd = new org.openecard.client.ifd.IFD();
+	IFD ifd = new org.openecard.client.ifd.scio.IFD();
 	byte[] ctx;
 	// establish context
 	EstablishContext eCtx = new EstablishContext();

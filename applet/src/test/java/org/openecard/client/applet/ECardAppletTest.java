@@ -57,7 +57,7 @@ public class ECardAppletTest {
     @Before
     public void setUp() {
         System.out.print("Create IFD... ");
-        ifd = new org.openecard.client.ifd.IFD();
+        ifd = new org.openecard.client.ifd.scio.IFD();
         System.out.println("done.");
 
         System.out.print("Establish context... ");

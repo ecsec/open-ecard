@@ -3,7 +3,7 @@ package org.openecard.client.event;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.common.interfaces.Environment;
 import org.openecard.client.common.interfaces.Transport;
-import org.openecard.client.ifd.IFD;
+import org.openecard.client.ifd.scio.IFD;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import java.util.Map;

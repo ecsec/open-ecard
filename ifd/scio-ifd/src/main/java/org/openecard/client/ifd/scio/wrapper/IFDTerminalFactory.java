@@ -1,7 +1,7 @@
-package org.openecard.client.ifd.scio;
+package org.openecard.client.ifd.scio.wrapper;
 
-import org.openecard.client.ifd.IFDException;
-import org.openecard.client.ifd.IFDProperties;
+import org.openecard.client.ifd.scio.IFDException;
+import org.openecard.client.ifd.scio.IFDProperties;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import org.openecard.client.common.ifd.TerminalFactory;

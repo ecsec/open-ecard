@@ -1,4 +1,4 @@
-package org.openecard.client.ifd;
+package org.openecard.client.ifd.scio;
 
 import org.openecard.client.common.ECardConstants;
 import iso.std.iso_iec._24727.tech.schema.ListIFDs;

@@ -1,6 +1,6 @@
-package org.openecard.client.ifd;
+package org.openecard.client.ifd.scio;
 
-import org.openecard.client.ifd.reader.PCSCPinVerify;
+import org.openecard.client.ifd.scio.reader.PCSCPinVerify;
 import org.openecard.client.common.util.Helper;
 import org.openecard.client.ws.WSMarshaller;
 import iso.std.iso_iec._24727.tech.schema.Connect;

@@ -1,9 +1,9 @@
-package org.openecard.client.ifd.scio;
+package org.openecard.client.ifd.scio.wrapper;
 
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ifd.TerminalFactory;
 import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.ifd.IFDException;
+import org.openecard.client.ifd.scio.IFDException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;

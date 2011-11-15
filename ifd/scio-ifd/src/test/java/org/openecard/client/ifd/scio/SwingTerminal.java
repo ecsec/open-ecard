@@ -1,4 +1,4 @@
-package org.openecard.client.ifd;
+package org.openecard.client.ifd.scio;
 
 import org.openecard.client.common.ifd.VirtualPinResult;
 import org.openecard.client.common.ifd.VirtualPinResultType;

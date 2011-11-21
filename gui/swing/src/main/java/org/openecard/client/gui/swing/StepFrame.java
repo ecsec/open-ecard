@@ -1,5 +1,6 @@
 package org.openecard.client.gui.swing;
 
+import org.openecard.client.gui.swing.components.StepComponent;
 import org.openecard.client.gui.swing.components.Radiobutton;
 import org.openecard.client.gui.swing.components.Passwordinput;
 import org.openecard.client.gui.swing.components.Hyperlink;

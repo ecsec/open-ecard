@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
-import org.openecard.client.gui.swing.StepComponent;
 import org.openecard.ws.gui.v1.BoxItem;
 import org.openecard.ws.gui.v1.CheckBox;
 import org.openecard.ws.gui.v1.InfoUnitType;

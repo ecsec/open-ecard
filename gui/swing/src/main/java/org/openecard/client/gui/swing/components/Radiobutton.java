@@ -7,7 +7,6 @@ import java.util.List;
 import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import org.openecard.client.gui.swing.StepComponent;
 import org.openecard.ws.gui.v1.BoxItem;
 import org.openecard.ws.gui.v1.InfoUnitType;
 import org.openecard.ws.gui.v1.Radio;

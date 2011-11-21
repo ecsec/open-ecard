@@ -7,7 +7,6 @@ import java.math.BigInteger;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.text.JTextComponent;
-import org.openecard.client.gui.swing.StepComponent;
 import org.openecard.ws.gui.v1.InfoUnitType;
 import org.openecard.ws.gui.v1.PasswordInput;
 import org.openecard.ws.gui.v1.TextInput;

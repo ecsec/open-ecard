@@ -1,4 +1,4 @@
-package org.openecard.client.gui.swing;
+package org.openecard.client.gui.swing.components;
 
 import java.awt.Component;
 import org.openecard.ws.gui.v1.InfoUnitType;

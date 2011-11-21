@@ -2,7 +2,6 @@ package org.openecard.client.gui.swing.components;
 
 import java.awt.Component;
 import javax.swing.JLabel;
-import org.openecard.client.gui.swing.StepComponent;
 import org.openecard.ws.gui.v1.InfoUnitType;
 
 

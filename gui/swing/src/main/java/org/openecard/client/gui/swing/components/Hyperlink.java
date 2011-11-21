@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.swing.JLabel;
-import org.openecard.client.gui.swing.StepComponent;
 import org.openecard.ws.gui.v1.HyperLink;
 import org.openecard.ws.gui.v1.InfoUnitType;
 

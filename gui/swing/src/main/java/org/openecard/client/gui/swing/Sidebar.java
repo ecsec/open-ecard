@@ -3,8 +3,10 @@ package org.openecard.client.gui.swing;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -18,7 +20,21 @@ import javax.swing.JList;
  */
 public class Sidebar {
 
-    private final Container sidebarPanel;
+    private final static ImageIcon logo;
+    static {
+        // load logo
+        logo = new ImageIcon();
+        URL url = Sidebar.class.getResource("/openecard.gif");
+        if (url != null) {
+            // seems like someone was so kind to bundle an image
+            Toolkit toolkit = Toolkit.getDefaultToolkit();
+            Image image = toolkit.getImage(url);
+            // TODO: size is scaled, when this is known, the size of the image should be correct to save space
+            image = image.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+            logo.setImage(image);
+        }
+    }
+
     private final JList steps;
     private final int numSteps;
 
@@ -29,34 +45,32 @@ public class Sidebar {
      * @param stepNames Names of the steps as they are displayed in the sidebar.
      */
     public Sidebar(Container sidebarPanel, String... stepNames) {
-        // create step components
-        this.sidebarPanel = sidebarPanel;
         this.numSteps = stepNames.length;
-        this.steps = new JList();
-        this.steps.removeAll();
-        this.steps.validate();
-        this.steps.setListData(stepNames);
-        this.steps.setSelectedIndex(0);
+
+        // create step components
+        steps = new JList();
+        steps.removeAll();
+        steps.validate();
+        steps.setListData(stepNames);
+        steps.setSelectedIndex(0);
         BorderLayout layout = new BorderLayout();
-        this.sidebarPanel.setLayout(layout);
-        this.sidebarPanel.add(steps, BorderLayout.CENTER);
-
+        sidebarPanel.setLayout(layout);
+        sidebarPanel.add(steps, BorderLayout.CENTER);
         // add logo
-        ImageIcon logo = new ImageIcon(Sidebar.class.getResource("/openecard.png"));
-        Image scaled = logo.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
-        logo.setImage(scaled);
         JLabel logoLabel = new JLabel(logo);
-        this.sidebarPanel.add(logoLabel, BorderLayout.SOUTH);
+        sidebarPanel.add(logoLabel, BorderLayout.SOUTH);
 
-        // configure steplist
+        // configure steplist (behaviour and style)
         // remove listeners so no selection is possible through the ui
-        for (MouseListener m : this.steps.getMouseListeners()) {
-            this.steps.removeMouseListener(m);
+        for (MouseListener m : steps.getMouseListeners()) {
+            steps.removeMouseListener(m);
         }
-        for (MouseMotionListener m : this.steps.getMouseMotionListeners()) {
+        for (MouseMotionListener m : steps.getMouseMotionListeners()) {
             this.steps.removeMouseMotionListener(m);
         }
-        this.steps.setFocusable(false);
+        steps.setFocusable(false);
+        // TODO: configure style
+
     }
 
 

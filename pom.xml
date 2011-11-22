@@ -27,27 +27,27 @@
 
   <distributionManagement>
     <repository>
-      <id>ecsec-repos</id>
-      <name>Ecsec Release Repo</name>
-      <url>http://mvn.vserver-001.urospace.de/content/repositories/releases</url>
+      <id>openecard-repos</id>
+      <name>Openecard Release Repo</name>
+      <url>http://mvn.vserver-001.urospace.de/content/repositories/openecard-release</url>
     </repository>
     <snapshotRepository>
-      <id>ecsec-repos</id>
-      <name>Ecsec Snapshot Repo</name>
-      <url>http://mvn.vserver-001.urospace.de/content/repositories/snapshots</url>
+      <id>openecard-repos</id>
+      <name>Openecard Snapshot Repo</name>
+      <url>http://mvn.vserver-001.urospace.de/content/repositories/openecard-snapshot</url>
     </snapshotRepository>
   </distributionManagement>
   <repositories>
     <repository>
-      <id>ecsec-repos</id>
-      <name>Ecsec Repos</name>
-      <url>http://mvn.vserver-001.urospace.de/content/groups/public</url>
+      <id>openecard-repos</id>
+      <name>Openecard Repos</name>
+      <url>http://mvn.vserver-001.urospace.de/content/groups/openecard-public</url>
     </repository>
   </repositories>
   <pluginRepositories>
     <pluginRepository>
-      <id>ecsec-repos</id>
-      <url>http://mvn.vserver-001.urospace.de/content/groups/public</url>
+      <id>openecard-repos</id>
+      <url>http://mvn.vserver-001.urospace.de/content/groups/openecard-public</url>
     </pluginRepository>
   </pluginRepositories>
 

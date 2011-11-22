@@ -3,7 +3,6 @@ package org.openecard.client.gui.swing.components;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.util.ArrayList;
-import java.util.List;
 import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -13,6 +12,7 @@ import org.openecard.ws.gui.v1.Radio;
 
 
 /**
+ * Implementation of a radio button group for use in a {@link StepFrame}.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -23,19 +23,18 @@ public class Radiobutton implements StepComponent {
     private final JPanel panel;
 
     public Radiobutton(Radio radio) {
-        this.result = new Radio();
-        this.panel = new JPanel();
+        result = new Radio(); // copy of radio, so result is pre assembled
+        panel = new JPanel();
         GridLayout layout = new GridLayout(0, 1);
-        this.panel.setLayout(layout);
+        panel.setLayout(layout);
 
-        // create buttons, item copies and add to panel
+        // create buttons and add to label, also copy items to result
         ButtonGroup bg = new ButtonGroup();
         buttons = new ArrayList<JRadioButton>(radio.getBoxItem().size());
-        List<BoxItem> boxItems = this.result.getBoxItem();
         for (BoxItem next : radio.getBoxItem()) {
             // copy box item
             BoxItem copy = new BoxItem();
-            boxItems.add(copy);
+            result.getBoxItem().add(copy);
             copy.setName(next.getName());
             copy.setText(next.getText());
             copy.setDisabled(next.isDisabled());
@@ -48,22 +47,22 @@ public class Radiobutton implements StepComponent {
             if (next.isChecked()) {
                 component.setSelected(true);
             }
-            this.panel.add(component);
-            this.buttons.add(component);
+            panel.add(component);
+            buttons.add(component);
         }
     }
 
 
     @Override
     public Component getComponent() {
-        return this.panel;
+        return panel;
     }
 
     @Override
     public boolean validate() {
         // only valid if exactly one button is selected
         int numSelected = 0;
-        for (JRadioButton next : this.buttons) {
+        for (JRadioButton next : buttons) {
             if (next.isSelected()) {
                 numSelected++;
             }
@@ -79,9 +78,9 @@ public class Radiobutton implements StepComponent {
     @Override
     public InfoUnitType getValue() {
         // loop over checkboxes and set checked values in result
-        for (int i=0; i < this.buttons.size(); i++) {
-            JRadioButton component = this.buttons.get(i);
-            this.result.getBoxItem().get(i).setChecked(component.isSelected());
+        for (int i=0; i < buttons.size(); i++) {
+            JRadioButton component = buttons.get(i);
+            result.getBoxItem().get(i).setChecked(component.isSelected());
         }
         // prepare result
         InfoUnitType unit = new InfoUnitType();

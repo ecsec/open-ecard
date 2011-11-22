@@ -13,6 +13,11 @@ import org.openecard.ws.gui.v1.TextInput;
 
 
 /**
+ * <p>Common base for {@link Textinput} and {@link Passwordinput}.<p/>
+ * The casting is ugly, but in the short time no better solution occured to me.
+ * Remind, the problem is that TextInput and PasswordInput are identical but
+ * have no base class. C++ templates would help, but Java generics don't.
+ * Feel free to get rid of this mess.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -28,13 +33,13 @@ public abstract class AbstractInput implements StepComponent {
 
     private final Object result;
 
-    public AbstractInput(Object input, JTextComponent textFieldImpl) {
+    protected AbstractInput(Object input, JTextComponent textFieldImpl) {
         BigInteger min = null;
         BigInteger max = null;
         String value = null;
         String labelText = null;
 
-        // extract values from input and write to output
+        // extract values from input and write to output (depending on actual type)
         if (input instanceof TextInput) {
             TextInput tmp = (TextInput) input;
             this.name = tmp.getName();

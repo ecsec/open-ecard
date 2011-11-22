@@ -6,6 +6,7 @@ import org.openecard.ws.gui.v1.InfoUnitType;
 
 
 /**
+ * Implementation of a simple text component for use in a {@link StepFrame}.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -14,8 +15,12 @@ public class Text implements StepComponent {
     private final JLabel label;
 
     public Text(String text) {
-        String s = "<html>" + text + "</html>";
-        s = s.replace("\n", "<br/>");
+        String s = text;
+        // replace newlines with appropriate html code
+        if (s.contains("\n")) {
+            s = "<html>" + text + "</html>";
+            s = s.replace("\n", "<br/>");
+        }
         this.label = new JLabel(s);
     }
 

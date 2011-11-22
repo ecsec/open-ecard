@@ -11,6 +11,7 @@
   <name>eCard Client</name>
 
   <modules>
+    <module>class-list-plugin</module>
     <module>wsdef</module>
     <module>common</module>
     <module>scio</module>

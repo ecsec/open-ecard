@@ -62,9 +62,9 @@
       </plugin>
 
       <plugin>
-	<groupId>de.ecsec.maven</groupId>
-	<artifactId>class-list</artifactId>
-	<version>0.0.1</version>
+	<groupId>org.openecard.client</groupId>
+	<artifactId>class-list-plugin</artifactId>
+	<version>0.0.2-SNAPSHOT</version>
 	<executions>
 	  <execution>
 	    <phase>process-classes</phase>

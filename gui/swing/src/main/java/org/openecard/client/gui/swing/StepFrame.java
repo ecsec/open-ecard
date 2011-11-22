@@ -1,26 +1,21 @@
 package org.openecard.client.gui.swing;
 
 import org.openecard.client.gui.swing.components.StepComponent;
-import org.openecard.client.gui.swing.components.Radiobutton;
-import org.openecard.client.gui.swing.components.Passwordinput;
-import org.openecard.client.gui.swing.components.Hyperlink;
-import org.openecard.client.gui.swing.components.Checkbox;
-import org.openecard.client.gui.swing.components.Text;
-import org.openecard.client.gui.swing.components.Textinput;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import org.openecard.client.gui.swing.steplayout.StepLayouter;
 import org.openecard.ws.gui.v1.InfoUnitType;
 import org.openecard.ws.gui.v1.Step;
 
 
 /**
+ * The StepFrame class represents a single step. The actual layouting is however
+ * deferred to a layouting component.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -31,15 +26,16 @@ public class StepFrame {
     private final JButton forwardButton;
     private final JButton cancelButton;
 
-    private final ArrayList<StepComponent> components;
+    private final List<StepComponent> components;
 
-    public StepFrame(Step step) {
+    public StepFrame(Step step, String dialogType, int idx) {
+        // create panels
         BorderLayout layout = new BorderLayout();
-        this.rootPanel = new JPanel();
-        this.rootPanel.setLayout(layout);
+        rootPanel = new JPanel(layout);
         FlowLayout buttonLayout = new FlowLayout();
         JPanel buttonPanel = new JPanel(buttonLayout);
-        this.rootPanel.add(buttonPanel, BorderLayout.SOUTH);
+        rootPanel.add(buttonPanel, BorderLayout.SOUTH);
+
         // create button elements
         backButton = new JButton();
         forwardButton = new JButton();
@@ -48,33 +44,11 @@ public class StepFrame {
         buttonPanel.add(forwardButton);
         buttonPanel.add(cancelButton);
 
-        // create content panel
-        JPanel contentPanel = new JPanel();
-        GridLayout contentLayout = new GridLayout(0, 1);
-        contentPanel.setLayout(contentLayout);
-        this.rootPanel.add(contentPanel, BorderLayout.CENTER);
-        // create content
-        List<InfoUnitType> infoUnits = step.getInfoUnit();
-        this.components = new ArrayList<StepComponent>(infoUnits.size());
-        for (InfoUnitType next : infoUnits) {
-            StepComponent nextComponent = null;
-            if (next.getCheckBox() != null) {
-                nextComponent = new Checkbox(next.getCheckBox());
-            } else if (next.getHyperLink() != null) {
-                nextComponent = new Hyperlink(next.getHyperLink());
-            } else if (next.getPasswordInput() != null) {
-                nextComponent = new Passwordinput(next.getPasswordInput());
-            } else if (next.getRadio() != null) {
-                nextComponent = new Radiobutton(next.getRadio());
-            } else if (next.getText() != null) {
-                nextComponent = new Text(next.getText());
-            } else if (next.getTextInput() != null) {
-                nextComponent = new Textinput(next.getTextInput());
-            }
-            // add to list panel
-            this.components.add(nextComponent);
-            contentPanel.add(nextComponent.getComponent());
-        }
+        // fill content panel - this is done with an external class which knows all about the actual layout
+        StepLayouter stepLayouter = StepLayouter.create(step.getInfoUnit(), dialogType, step.getName());
+        Container contentPanel = stepLayouter.getPanel();
+        rootPanel.add(contentPanel, BorderLayout.CENTER);
+        components = stepLayouter.getComponents();
     }
 
     public Container getPanel() {
@@ -91,8 +65,13 @@ public class StepFrame {
         return this.cancelButton;
     }
 
+    /**
+     * Check if all components on the frame are valid. This can be used to see
+     * if a jump to the next frame can be made.
+     * @return True if all components are valid, false otherwise.
+     */
     public boolean validate() {
-        for (StepComponent next : this.components) {
+        for (StepComponent next : components) {
             if (next.isValueType() && ! next.validate()) {
                 return false;
             }
@@ -100,9 +79,13 @@ public class StepFrame {
         return true;
     }
 
+    /**
+     * Get result for all components on the frame that support result values.
+     * @return List containg all result values. As a matter of fact this list can be empty.
+     */
     public List<InfoUnitType> getResultContent() {
-        ArrayList<InfoUnitType> result = new ArrayList<InfoUnitType>(this.components.size());
-        for (StepComponent next : this.components) {
+        ArrayList<InfoUnitType> result = new ArrayList<InfoUnitType>(components.size());
+        for (StepComponent next : components) {
             if (next.isValueType()) {
                 result.add(next.getValue());
             }

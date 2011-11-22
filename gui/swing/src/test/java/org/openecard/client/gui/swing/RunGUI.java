@@ -100,11 +100,6 @@ public class RunGUI {
         }
 
         @Override
-        public String getTitle() {
-            return dialog.getTitle();
-        }
-
-        @Override
         public Container getRootPanel() {
             return dialog.getContentPane();
         }
@@ -121,6 +116,9 @@ public class RunGUI {
 
     }
 
+    /**
+     * Uncomment the <code>@Ignore</code> line to run a demo gui so you can debug it.
+     */
     @Ignore
     @Test
     public void runUC() {

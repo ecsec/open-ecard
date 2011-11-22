@@ -13,17 +13,18 @@ import org.openecard.ws.gui.v1.Step;
 
 
 /**
+ * Container for StepFrames which can switch which frame is active.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class StepFrameContainer {
 
     private final Container stepContainer;
-    private final Container sidebarPanel;
 
+    private final String dialogType;
     private final Sidebar sidebar;
-    private final int numSteps;
     private final ArrayList<StepFrame> stepFrames;
+    private final int numSteps;
 
     private int curStep = 0;
     private boolean cancelled = false;
@@ -31,21 +32,26 @@ public class StepFrameContainer {
     private Exchanger syncPoint = new Exchanger();
 
 
-    public StepFrameContainer(List<Step> steps, Container stepContainer, Container sidebarPanel) {
+    public StepFrameContainer(String dialogType, List<Step> steps, Container stepContainer, Sidebar sidebar) {
         this.stepContainer = stepContainer;
-        this.sidebarPanel = sidebarPanel;
+        this.dialogType = dialogType;
+        this.sidebar = sidebar;
+        this.numSteps = steps.size(); // separate field, otherwise selectIdx fails on first invocation
 
-        this.sidebar = new Sidebar(this.sidebarPanel, stepNames(steps));
-        this.numSteps = steps.size();
         this.stepFrames = createStepFrames(steps);
         selectIdx(0);
     }
 
+    /**
+     * Create StepFrame instances and configure buttons.
+     * @param steps List of steps for which to create the frames.
+     * @return List of frames.
+     */
     private ArrayList<StepFrame> createStepFrames(List<Step> steps) {
         ArrayList<StepFrame> frames = new ArrayList<StepFrame>(steps.size());
         for (int idx=0; idx < steps.size(); idx++) {
             Step s = steps.get(idx);
-            StepFrame sf = new StepFrame(s);
+            StepFrame sf = new StepFrame(s, dialogType, idx);
             frames.add(sf);
             // configure buttons
             JButton back = sf.getBackButton();
@@ -56,7 +62,7 @@ public class StepFrameContainer {
             if (isFirstIdx(idx)) {
                 back.setEnabled(false);
             } else {
-                back.addActionListener(new BackEvent(this, sf));
+                back.addActionListener(new BackEvent(this));
             }
             // forw
             if (isLastIdx(idx)) {
@@ -74,29 +80,24 @@ public class StepFrameContainer {
         return frames;
     }
 
-    private String[] stepNames(List<Step> steps) {
-        ArrayList<String> stepNames = new ArrayList<String>(steps.size());
-        for (Step s : steps) {
-            stepNames.add(s.getName());
-        }
-        return stepNames.toArray(new String[steps.size()]);
-    }
-
     private synchronized void selectIdx(int idx) {
         // sidebar
-        this.sidebar.selectIdx(idx);
+        sidebar.selectIdx(idx);
         // content replacement
-        this.stepContainer.removeAll();
+        stepContainer.removeAll();
         BorderLayout layout = new BorderLayout();
-        this.stepContainer.setLayout(layout);
+        stepContainer.setLayout(layout);
         StepFrame nextStep = stepFrames.get(idx);
         Container nextPanel = nextStep.getPanel();
-        this.stepContainer.add(nextPanel, BorderLayout.CENTER);
-        this.curStep = idx;
-        this.stepContainer.validate();
-        this.stepContainer.repaint();
+        stepContainer.add(nextPanel, BorderLayout.CENTER);
+        curStep = idx;
+        stepContainer.validate();
+        stepContainer.repaint();
     }
 
+    /**
+     * Event class for cancel button clicks.
+     */
     private static class CancelEvent implements ActionListener {
         private final StepFrameContainer outer;
         public CancelEvent(StepFrameContainer outer) {
@@ -115,6 +116,9 @@ public class StepFrameContainer {
             }
         }
     }
+    /**
+     * Event class for forward button clicks.
+     */
     private static class ForwardEvent implements ActionListener {
         private final StepFrameContainer outer;
         private final StepFrame frame;
@@ -129,6 +133,9 @@ public class StepFrameContainer {
             }
         }
     }
+    /**
+     * Event class for finish button clicks.
+     */
     private static class FinishEvent implements ActionListener {
         private final StepFrameContainer outer;
         private final StepFrame frame;
@@ -149,12 +156,13 @@ public class StepFrameContainer {
             }
         }
     }
+    /**
+     * Event class for back button clicks.
+     */
     private static class BackEvent implements ActionListener {
         private final StepFrameContainer outer;
-        private final StepFrame frame;
-        public BackEvent(StepFrameContainer outer, StepFrame frame) {
+        public BackEvent(StepFrameContainer outer) {
             this.outer = outer;
-            this.frame = frame;
         }
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -170,6 +178,11 @@ public class StepFrameContainer {
         return idx == (this.numSteps-1);
     }
 
+    /**
+     * Get result elements for all components on all frames which have a value.<br/>
+     * The call blocks until the user either presses the cancel or finish button.
+     * @return List of component results (may be empty depending on components) or null if dialog has been cancelled.
+     */
     public List<InfoUnitType> getResult() {
         try {
             syncPoint.exchange(null);
@@ -186,6 +199,10 @@ public class StepFrameContainer {
         return result;
     }
 
+    /**
+     * Indicated cancelled status of the container.
+     * @return True when cancelled, false otherwise.
+     */
     public synchronized boolean isCancelled() {
         return this.cancelled;
     }

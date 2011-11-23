@@ -50,8 +50,6 @@ import iso.std.iso_iec._24727.tech.schema.ModifyVerificationDataResponse;
 import iso.std.iso_iec._24727.tech.schema.Output;
 import iso.std.iso_iec._24727.tech.schema.OutputInfoType;
 import iso.std.iso_iec._24727.tech.schema.OutputResponse;
-import iso.std.iso_iec._24727.tech.schema.PACEInputType;
-import iso.std.iso_iec._24727.tech.schema.PACEOutputType;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContextResponse;
 import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
@@ -80,6 +78,8 @@ import javax.jws.WebService;
 import javax.smartcardio.CardException;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.ifd.anytype.PACEInputType;
+import org.openecard.client.common.ifd.anytype.PACEOutputType;
 
 
 /**
@@ -1013,57 +1013,55 @@ public class IFD implements org.openecard.ws.IFD {
 	    String protocol = protoParam.getProtocol();
 
 	    // check if it is PACE and try to perform native implementation
-	    if (protoParam instanceof PACEInputType) {
-                PACEInputType paceParam = (PACEInputType) protoParam;
-		// get pace capabilities
-		int ctrlCode = term.getPaceCtrlCode();
-		List<Long> paceCapabilities = term.getPACECapabilities();
-		List<String> supportedProtos = buildPACEProtocolList(paceCapabilities);
-		// check out if this actually a PACE request
-		if (!supportedProtos.isEmpty() && supportedProtos.get(0).startsWith(protocol)) { // i don't care which type is supported, i try it anyways
-		    // yeah, PACE seems to be supported by the reader, big win
-		    // extract variables needed for pace
-		    byte pinID      = paceParam.getPinID()[0];
-		    // optional elements
-		    byte[] chat     = paceParam.getCHAT();
-		    String pin      = paceParam.getPIN();
-		    byte[] certDesc = paceParam.getCertificateDescription();
+            // get pace capabilities
+            int ctrlCode = term.getPaceCtrlCode();
+            List<Long> paceCapabilities = term.getPACECapabilities();
+            List<String> supportedProtos = buildPACEProtocolList(paceCapabilities);
+            // check out if this actually a PACE request
+            if (!supportedProtos.isEmpty() && supportedProtos.get(0).startsWith(protocol)) { // i don't care which type is supported, i try it anyways
+                // yeah, PACE seems to be supported by the reader, big win
+                PACEInputType paceParam = new PACEInputType(protoParam);
+                // extract variables needed for pace
+                byte pinID      = paceParam.getPinID();
+                // optional elements
+                byte[] chat     = paceParam.getCHAT();
+                String pin      = paceParam.getPIN();
+                byte[] certDesc = paceParam.getCertificateDescription();
 
-		    // prepare pace data structures
-		    EstablishPACERequest estPaceReq = new EstablishPACERequest(pinID, chat, null, certDesc); // TODO: add supplied PIN
-		    ExecutePACERequest  execPaceReq = new ExecutePACERequest(ExecutePACERequest.Function.EstablishPACEChannel, estPaceReq.toBytes());
-		    // see if PACE type demanded for this input value combination is supported
-		    if (estPaceReq.isSupportedType(paceCapabilities)) {
-			byte[] reqData = execPaceReq.toBytes();
-			// execute pace
-			byte[] resData = card.controlCommand(ctrlCode, reqData);
-			// evaluate response
-			ExecutePACEResponse execPaceRes = new ExecutePACEResponse(resData);
-			if (execPaceRes.isError()) {
-			    return WSHelper.makeResponse(EstablishChannelResponse.class, execPaceRes.getResult());
-			}
-			EstablishPACEResponse estPaceRes = new EstablishPACEResponse(execPaceRes.getData());
-			// get values and prepare response
-			PACEOutputType authDataResponse = new PACEOutputType();
-                        // mandatory fields
-                        authDataResponse.setStatusbytes(estPaceRes.getStatus());
-                        authDataResponse.setEFCardAccess(estPaceRes.getCardAccess());
-                        // optional fields
-			if (estPaceRes.hasCar()) {
-                            authDataResponse.setCAR(estPaceRes.getCar());
-			}
-			if (estPaceRes.hasCarPrev()) {
-                            authDataResponse.setCARprev(estPaceRes.getCarPrev());
-			}
-			if (estPaceRes.hasIDicc()) {
-                            authDataResponse.setIDicc(estPaceRes.getIDicc());
-			}
-			// create response type and return
-			EstablishChannelResponse response = WSHelper.makeResponse(EstablishChannelResponse.class, WSHelper.makeResultOK());
-			response.setAuthenticationProtocolData(authDataResponse);
-			return response;
-		    }
-		}
+                // prepare pace data structures
+                EstablishPACERequest estPaceReq = new EstablishPACERequest(pinID, chat, null, certDesc); // TODO: add supplied PIN
+                ExecutePACERequest  execPaceReq = new ExecutePACERequest(ExecutePACERequest.Function.EstablishPACEChannel, estPaceReq.toBytes());
+                // see if PACE type demanded for this input value combination is supported
+                if (estPaceReq.isSupportedType(paceCapabilities)) {
+                    byte[] reqData = execPaceReq.toBytes();
+                    // execute pace
+                    byte[] resData = card.controlCommand(ctrlCode, reqData);
+                    // evaluate response
+                    ExecutePACEResponse execPaceRes = new ExecutePACEResponse(resData);
+                    if (execPaceRes.isError()) {
+                        return WSHelper.makeResponse(EstablishChannelResponse.class, execPaceRes.getResult());
+                    }
+                    EstablishPACEResponse estPaceRes = new EstablishPACEResponse(execPaceRes.getData());
+                    // get values and prepare response
+                    PACEOutputType authDataResponse = paceParam.getOutputType();
+                    // mandatory fields
+                    authDataResponse.setStatusbytes(estPaceRes.getStatus());
+                    authDataResponse.setEF_CardAccess(estPaceRes.getCardAccess());
+                    // optional fields
+                    if (estPaceRes.hasCar()) {
+                        authDataResponse.setCAR(estPaceRes.getCar());
+                    }
+                    if (estPaceRes.hasCarPrev()) {
+                        authDataResponse.setCARprev(estPaceRes.getCarPrev());
+                    }
+                    if (estPaceRes.hasIDicc()) {
+                        authDataResponse.setIDicc(estPaceRes.getIDicc());
+                    }
+                    // create response type and return
+                    EstablishChannelResponse response = WSHelper.makeResponse(EstablishChannelResponse.class, WSHelper.makeResultOK());
+                    response.setAuthenticationProtocolData(authDataResponse.getAuthDataType());
+                    return response;
+                }
 	    } // end native pace support
 
 	    // check out available software protocols

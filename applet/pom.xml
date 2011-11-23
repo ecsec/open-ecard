@@ -80,6 +80,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.openecard.client.gui</groupId>
+      <artifactId>swing</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.openecard.client.sal</groupId>
       <artifactId>micro-sal</artifactId>
       <version>${project.version}</version>

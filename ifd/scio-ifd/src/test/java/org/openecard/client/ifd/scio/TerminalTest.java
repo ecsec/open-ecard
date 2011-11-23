@@ -14,6 +14,7 @@ import java.math.BigInteger;
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.openecard.client.gui.swing.SwingUserConsent;
 import static org.junit.Assert.*;
 
 
@@ -77,7 +78,7 @@ public class TerminalTest {
     @Test
     public void testFeatures() {
         init();
-        ifd.setVirtualTerminal(new SwingTerminal());
+        ifd.setGui(new SwingUserConsent(new SwingDialogWrapper()));
 
         Connect con = new Connect();
         con.setContextHandle(ctxHandle);

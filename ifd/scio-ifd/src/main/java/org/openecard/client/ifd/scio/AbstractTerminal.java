@@ -1,8 +1,6 @@
 package org.openecard.client.ifd.scio;
 
 import org.openecard.client.ifd.scio.reader.PCSCPinVerify;
-import org.openecard.client.common.ifd.VirtualTerminal;
-import org.openecard.client.common.ifd.VirtualPinResult;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.CardCommandStatus;
@@ -30,6 +28,12 @@ import java.util.logging.Logger;
 import javax.smartcardio.CardException;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.interfaces.UserConsent;
+import org.openecard.ws.gui.v1.InfoUnitType;
+import org.openecard.ws.gui.v1.ObtainUserConsent;
+import org.openecard.ws.gui.v1.ObtainUserConsentResponse;
+import org.openecard.ws.gui.v1.PasswordInput;
+import org.openecard.ws.gui.v1.Step;
 
 
 /**
@@ -42,7 +46,7 @@ class AbstractTerminal {
     
     private final IFD ifd;
     private final SCWrapper scwrapper;
-    private final VirtualTerminal vTerminal;
+    private final UserConsent gui;
     private final byte[] ctxHandle;
     private final BigInteger displayIdx;
 
@@ -53,19 +57,19 @@ class AbstractTerminal {
     private Boolean canEnter = null;
     private BigInteger keyIdx = null;
 
-    public AbstractTerminal(IFD ifd, SCWrapper scwrapper, VirtualTerminal vTerminal, byte[] ctxHandle, BigInteger displayIdx) {
+    public AbstractTerminal(IFD ifd, SCWrapper scwrapper, UserConsent gui, byte[] ctxHandle, BigInteger displayIdx) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
 	if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "AbstractTerminal(IFD ifd, SCWrapper scwrapper, VirtualTerminal vTerminal, byte[] ctxHandle, BigInteger displayIdx)", new Object[]{ifd, scwrapper, vTerminal, ctxHandle, displayIdx});
+            _logger.entering(this.getClass().getName(), "AbstractTerminal(IFD ifd, SCWrapper scwrapper, UserConsent gui, byte[] ctxHandle, BigInteger displayIdx)", new Object[]{ifd, scwrapper, gui, ctxHandle, displayIdx});
         } // </editor-fold>
         this.ifd = ifd;
 	this.scwrapper = scwrapper;
-	this.vTerminal = vTerminal;
+	this.gui = gui;
 	this.ctxHandle = ctxHandle;
 	this.displayIdx = displayIdx;
 	// <editor-fold defaultstate="collapsed" desc="log trace">
         if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "AbstractTerminal(IFD ifd, SCWrapper scwrapper, VirtualTerminal vTerminal, byte[] ctxHandle, BigInteger displayIdx)");
+            _logger.exiting(this.getClass().getName(), "AbstractTerminal(IFD ifd, SCWrapper scwrapper, UserConsent gui, byte[] ctxHandle, BigInteger displayIdx)");
         } // </editor-fold>
     }
 
@@ -174,50 +178,28 @@ class AbstractTerminal {
 
             // we have a sophisticated card reader
             if (canNativePinVerify(handle)) {
-                int msgId = 0;
-                if (isVirtual()) {
-                    msgId = vTerminal.displayMessage(allMsgs.getAuthenticationRequestMessage(), BigInteger.valueOf(firstTimeout.longValue()));
-                    vTerminal.waitForMsg(msgId);
-                }
+                // display message instructing user what to do
+                gui.obtainUserConsent(pinUserConsent(allMsgs.getAuthenticationRequestMessage()));
                 // input by user
                 byte[] verifyResponse = nativePinVerify(pinInput, term, template);
                 // evaluate result
                 Result result = checkNativePinVerify(verifyResponse);
-                // display message
-                if (isVirtual()) {
-                    if (result.getResultMajor().equals(ECardConstants.Major.ERROR)) {
-                        if (result.getResultMinor() != null && result.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
-                            vTerminal.waitForMsg(vTerminal.displayMessage(allMsgs.getCancelMessage()));
-                        } else {
-                            vTerminal.waitForMsg(vTerminal.displayMessage(allMsgs.getAuthenticationFailedMessage()));
-                        }
-                    } else {
-                        vTerminal.waitForMsg(vTerminal.displayMessage(allMsgs.getSuccessMessage()));
-                    }
-                }
                 VerifyUserResponse response = WSHelper.makeResponse(VerifyUserResponse.class, result);
                 response.setResponse(verifyResponse);
                 return response;
 
 	    } else if (isVirtual()) { // software method
 		// get pin, encode and send
-		VirtualPinResult rawPin = vTerminal.requestPIN(allMsgs.getAuthenticationRequestMessage(), firstTimeout, otherTimeout);
-		if (rawPin.isCancelled()) {
+                ObtainUserConsentResponse ucr = gui.obtainUserConsent(pinUserConsent(allMsgs.getAuthenticationRequestMessage(), pinInput.getPasswordAttributes().getMinLength(), pinInput.getPasswordAttributes().getMaxLength()));
+                if (! ucr.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
 		    IFDException ex = new IFDException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN entry cancelled by user.");
 		    // <editor-fold defaultstate="collapsed" desc="log trace">
                     if (_logger.isLoggable(Level.WARNING)) {
                         _logger.logp(Level.WARNING, this.getClass().getName(), "verifyUser(VerifyUser verify)", ex.getMessage(), ex);
                     } // </editor-fold>
                     throw ex;
-		} else if (rawPin.isTimeout()) {
-		    IFDException ex = new IFDException(ECardConstants.Minor.IFD.TIMEOUT_ERROR, "PIN entry timed out.");
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-                    if (_logger.isLoggable(Level.WARNING)) {
-                        _logger.logp(Level.WARNING, this.getClass().getName(), "verifyUser(VerifyUser verify)", ex.getMessage(), ex);
-                    } // </editor-fold>
-                    throw ex;
-		}
-		byte[] pin = IFDUtils.encodePin(rawPin.getPin(), pinInput.getPasswordAttributes());
+                }
+		byte[] pin = IFDUtils.encodePin(getPinFromUserConsent(ucr), pinInput.getPasswordAttributes());
 
 		// send to reader
 		byte[] pinCmd = Helper.concatenate(template, (byte)pin.length);
@@ -231,9 +213,6 @@ class AbstractTerminal {
 
 		// produce messages
 		if (transResp.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
-		    int procNum = vTerminal.displayMessage(allMsgs.getAuthenticationFailedMessage(), BigInteger.valueOf(15000));
-		    vTerminal.waitForMsg(procNum);
-
 		    if (transResp.getOutputAPDU().isEmpty()) {
 			IFDException ex = new IFDException(transResp.getResult());
 			// <editor-fold defaultstate="collapsed" desc="log trace">
@@ -251,9 +230,6 @@ class AbstractTerminal {
                         return response;
 		    }
 		} else {
-		    int procNum = vTerminal.displayMessage(allMsgs.getSuccessMessage(), BigInteger.valueOf(15000));
-		    vTerminal.waitForMsg(procNum);
-
 		    VerifyUserResponse response = WSHelper.makeResponse(VerifyUserResponse.class, transResp.getResult());
 		    response.setResponse(transResp.getOutputAPDU().get(0));
 		    // <editor-fold defaultstate="collapsed" desc="log trace">
@@ -321,8 +297,6 @@ class AbstractTerminal {
         } // </editor-fold>
         if (canBeep()) {
 	    // TODO: implement
-	} else if (isVirtual()) {
-	    vTerminal.beep();
 	}
 	// <editor-fold defaultstate="collapsed" desc="log trace">
         if (_logger.isLoggable(Level.FINER)) {
@@ -337,8 +311,6 @@ class AbstractTerminal {
         } // </editor-fold>
 	if (canBlink()) {
 	    // TODO: implement
-	} else if (isVirtual()) {
-	    vTerminal.blink();
 	}
 	// <editor-fold defaultstate="collapsed" desc="log trace">
         if (_logger.isLoggable(Level.FINER)) {
@@ -353,14 +325,6 @@ class AbstractTerminal {
         } // </editor-fold>
         if (canDisplay()) {
 	    // TODO: implement
-	} else if (isVirtual()) {
-	    if (timeout == null) {
-		int procNum = vTerminal.displayMessage(msg);
-		vTerminal.waitForMsg(procNum);
-	    } else {
-		int procNum = vTerminal.displayMessage(msg, timeout);
-		vTerminal.waitForMsg(procNum);
-	    }
 	}
 	// <editor-fold defaultstate="collapsed" desc="log trace">
         if (_logger.isLoggable(Level.FINER)) {
@@ -525,7 +489,7 @@ class AbstractTerminal {
     }
 
     private boolean isVirtual() {
-	return vTerminal != null;
+	return gui != null;
     }
 
     private boolean canNativePinVerify(byte[] slotHandle) {
@@ -601,6 +565,45 @@ class AbstractTerminal {
         if (_logger.isLoggable(Level.FINER)) {
             _logger.exiting(this.getClass().getName(), "getCapabilities(String ifdName)");
         } // </editor-fold>
+    }
+
+
+    private static ObtainUserConsent pinUserConsent(String title, BigInteger minLength, BigInteger maxLength) {
+        ObtainUserConsent uc = new ObtainUserConsent();
+        uc.setTitle(title);
+        // create step
+        Step s = new Step();
+        uc.getStep().add(s);
+        s.setName("Enter PIN");
+        // add text instructing user
+        InfoUnitType i1 = new InfoUnitType();
+        s.getInfoUnit().add(i1);
+        PasswordInput p = new PasswordInput();
+        i1.setPasswordInput(p);
+        p.setName("pin");
+        p.setText("PIN:");
+        p.setMinlength(minLength);
+        p.setMaxlength(maxLength);
+
+        return uc;
+    }
+    private static ObtainUserConsent pinUserConsent(String title) {
+        ObtainUserConsent uc = new ObtainUserConsent();
+        uc.setTitle(title);
+        // create step
+        Step s = new Step();
+        uc.getStep().add(s);
+        s.setName("Enter PIN");
+        // add text instructing user
+        InfoUnitType i1 = new InfoUnitType();
+        s.getInfoUnit().add(i1);
+        i1.setText("Enter your secret.");
+
+        return uc;
+    }
+
+    private static String getPinFromUserConsent(ObtainUserConsentResponse response) {
+        return response.getOutput().get(0).getPasswordInput().getValue();
     }
 
 }

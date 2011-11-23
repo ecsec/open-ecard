@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JApplet;
+import org.openecard.client.gui.swing.SwingUserConsent;
 
 
 /**
@@ -68,7 +69,7 @@ public class ECardApplet extends JApplet {
         worker = null;
         env = new ClientEnv();
         ifd = new IFD();
-        ifd.setVirtualTerminal(new SwingTerminal());
+        ifd.setGui(new SwingUserConsent(new SwingDialogWrapper()));
         env.setIFD(ifd);
         EstablishContext ecRequest = new EstablishContext();
         EstablishContextResponse ecResponse = ifd.establishContext(ecRequest);

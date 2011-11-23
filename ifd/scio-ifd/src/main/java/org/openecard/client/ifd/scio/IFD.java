@@ -4,7 +4,6 @@ import org.openecard.client.ifd.scio.reader.ExecutePACEResponse;
 import org.openecard.client.ifd.scio.reader.EstablishPACEResponse;
 import org.openecard.client.ifd.scio.reader.EstablishPACERequest;
 import org.openecard.client.ifd.scio.reader.ExecutePACERequest;
-import org.openecard.client.common.ifd.VirtualTerminal;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ifd.Protocol;
 import org.openecard.client.common.ifd.ProtocolFactory;
@@ -80,6 +79,7 @@ import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.ifd.anytype.PACEInputType;
 import org.openecard.client.common.ifd.anytype.PACEOutputType;
+import org.openecard.client.common.interfaces.UserConsent;
 
 
 /**
@@ -93,7 +93,7 @@ public class IFD implements org.openecard.ws.IFD {
 
     private byte[] ctxHandle = null;
     private SCWrapper scwrapper;
-    private VirtualTerminal vTerminal = null;
+    private UserConsent gui = null;
     private ProtocolFactories protocolFactories = new ProtocolFactories();
 
     private AtomicInteger numClients;
@@ -128,8 +128,8 @@ public class IFD implements org.openecard.ws.IFD {
 	return hasContext.booleanValue();
     }
 
-    public void setVirtualTerminal(VirtualTerminal vTerminal) {
-	this.vTerminal = vTerminal;
+    public void setGui(UserConsent gui) {
+	this.gui = gui;
     }
 
     public boolean addProtocol(String proto, ProtocolFactory factory) {
@@ -311,7 +311,7 @@ public class IFD implements org.openecard.ws.IFD {
 		    cap.getSlotCapability().add(slotCap);
 		    // detect PACE capability, start by virtual terminal which is needed for that task
 		    // then ask whether the reader can do it or a software solution exists
-		    if (vTerminal != null) {
+		    if (gui != null) {
 			if (t.supportsPace()) {
 			    List<Long> capabilities = t.getPACECapabilities();
 			    List<String> protos = buildPACEProtocolList(capabilities);
@@ -319,7 +319,7 @@ public class IFD implements org.openecard.ws.IFD {
 			}
 		    }
 		    // detect PinCompare capabilities
-		    if (vTerminal != null) {
+		    if (gui != null) {
 			slotCap.getProtocol().add(ECardConstants.Protocol.PIN_COMPARE);
 		    } else if (t.supportsPinCompare()) {
 			slotCap.getProtocol().add(ECardConstants.Protocol.PIN_COMPARE);
@@ -913,7 +913,7 @@ public class IFD implements org.openecard.ws.IFD {
 		return response;
 	    }
 
-	    AbstractTerminal aTerm = new AbstractTerminal(this, scwrapper, vTerminal, ctxHandle, parameters.getDisplayIndex());
+	    AbstractTerminal aTerm = new AbstractTerminal(this, scwrapper, gui, ctxHandle, parameters.getDisplayIndex());
 	    try {
 		response = aTerm.verifyUser(parameters);
 		// <editor-fold defaultstate="collapsed" desc="log trace">
@@ -975,7 +975,7 @@ public class IFD implements org.openecard.ws.IFD {
 		String ifdName = parameters.getIFDName();
 		OutputInfoType outInfo = parameters.getOutputInfo();
 
-		AbstractTerminal aTerm = new AbstractTerminal(this, scwrapper, vTerminal, ctxHandle, outInfo.getDisplayIndex());
+		AbstractTerminal aTerm = new AbstractTerminal(this, scwrapper, gui, ctxHandle, outInfo.getDisplayIndex());
 		try {
 		    aTerm.output(ifdName, outInfo);
 		} catch (IFDException ex) {

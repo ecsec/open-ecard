@@ -21,6 +21,7 @@ import org.junit.Ignore;
 import static org.junit.Assert.*;
 import static iso.std.iso_iec._24727.tech.schema.PasswordTypeType.*;
 import org.junit.Test;
+import org.openecard.client.gui.swing.SwingUserConsent;
 import org.xml.sax.SAXException;
 
 
@@ -131,7 +132,7 @@ public class PINTest {
     @Test
     public void verifyeGK() {
 	IFD ifd = new IFD();
-	ifd.setVirtualTerminal(new SwingTerminal());
+	ifd.setGui(new SwingUserConsent(new SwingDialogWrapper()));
 	EstablishContext eCtx = new EstablishContext();
 	byte[] ctxHandle = ifd.establishContext(eCtx).getContextHandle();
 
@@ -162,7 +163,7 @@ public class PINTest {
     @Test
     public void executePACE_PIN() throws UnsupportedDataTypeException, JAXBException, SAXException {
 	IFD ifd = new IFD();
-	ifd.setVirtualTerminal(new SwingTerminal());
+	ifd.setGui(new SwingUserConsent(new SwingDialogWrapper()));
 	EstablishContext eCtx = new EstablishContext();
 	byte[] ctxHandle = ifd.establishContext(eCtx).getContextHandle();
 

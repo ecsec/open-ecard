@@ -2,7 +2,6 @@ package org.openecard.client.ifd.scio;
 
 import org.openecard.client.ifd.scio.reader.PCSCPinVerify;
 import org.openecard.client.common.util.Helper;
-import org.openecard.client.ws.WSMarshaller;
 import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
@@ -22,6 +21,7 @@ import static org.junit.Assert.*;
 import static iso.std.iso_iec._24727.tech.schema.PasswordTypeType.*;
 import org.junit.Test;
 import org.openecard.client.gui.swing.SwingUserConsent;
+import org.openecard.client.ws.WSMarshaller;
 import org.xml.sax.SAXException;
 
 

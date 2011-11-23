@@ -179,7 +179,15 @@ class AbstractTerminal {
             // we have a sophisticated card reader
             if (canNativePinVerify(handle)) {
                 // display message instructing user what to do
-                gui.obtainUserConsent(pinUserConsent(allMsgs.getAuthenticationRequestMessage()));
+                ObtainUserConsentResponse ucr = gui.obtainUserConsent(pinUserConsent(allMsgs.getAuthenticationRequestMessage()));
+                if (! ucr.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
+		    IFDException ex = new IFDException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN entry cancelled by user.");
+		    // <editor-fold defaultstate="collapsed" desc="log trace">
+                    if (_logger.isLoggable(Level.WARNING)) {
+                        _logger.logp(Level.WARNING, this.getClass().getName(), "verifyUser(VerifyUser verify)", ex.getMessage(), ex);
+                    } // </editor-fold>
+                    throw ex;
+                }
                 // input by user
                 byte[] verifyResponse = nativePinVerify(pinInput, term, template);
                 // evaluate result
@@ -597,7 +605,7 @@ class AbstractTerminal {
         // add text instructing user
         InfoUnitType i1 = new InfoUnitType();
         s.getInfoUnit().add(i1);
-        i1.setText("Enter your secret.");
+        i1.setText("Enter your secret after closing this dialog.");
 
         return uc;
     }

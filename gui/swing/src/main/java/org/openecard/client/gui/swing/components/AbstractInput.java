@@ -92,6 +92,7 @@ public abstract class AbstractInput implements StepComponent {
         this.label = new JLabel();
         this.label.setMinimumSize(new Dimension(100, 0));
         this.label.setMaximumSize(new Dimension(100, 50));
+        this.label.setSize(100, this.label.getSize().height);
         if (labelText != null) {
             this.label.setText(labelText);
         }
@@ -117,7 +118,8 @@ public abstract class AbstractInput implements StepComponent {
             textValue = "";
         }
         BigInteger textSize = BigInteger.valueOf(textValue.length());
-        if (minLength.compareTo(textSize) != 1 && maxLength.compareTo(textSize) != 1) {
+        // min <= text && text <= max
+        if (minLength.compareTo(textSize) != 1 && textSize.compareTo(maxLength) != 1) {
             return true;
         } else {
             return false;

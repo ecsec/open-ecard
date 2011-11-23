@@ -12,7 +12,7 @@ import org.openecard.ws.gui.v1.PasswordInput;
 public class Passwordinput extends AbstractInput {
 
     public Passwordinput(PasswordInput input) {
-        super(input, new JPasswordField());
+        super(input, new JPasswordField(12));
     }
 
 }

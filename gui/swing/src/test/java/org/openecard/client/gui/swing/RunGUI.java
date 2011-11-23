@@ -10,8 +10,10 @@ import org.openecard.ws.gui.v1.CheckBox;
 import org.openecard.ws.gui.v1.HyperLink;
 import org.openecard.ws.gui.v1.InfoUnitType;
 import org.openecard.ws.gui.v1.ObtainUserConsent;
+import org.openecard.ws.gui.v1.PasswordInput;
 import org.openecard.ws.gui.v1.Radio;
 import org.openecard.ws.gui.v1.Step;
+import org.openecard.ws.gui.v1.TextInput;
 import static org.junit.Assert.*;
 
 
@@ -39,6 +41,18 @@ public class RunGUI {
         hl1.setHref("http://www.cardinfo.eu");
         h1.setHyperLink(hl1);
         s1.getInfoUnit().add(h1);
+        InfoUnitType t1 = new InfoUnitType();
+        s1.getInfoUnit().add(t1);
+        TextInput ti1 = new TextInput();
+        t1.setTextInput(ti1);
+        ti1.setName("text input1");
+        ti1.setText("Hello World input.");
+        InfoUnitType p1 = new InfoUnitType();
+        s1.getInfoUnit().add(p1);
+        PasswordInput pi1 = new PasswordInput();
+        p1.setPasswordInput(pi1);
+        pi1.setName("pass input1");
+        pi1.setText("PIN:");
 
         Step s2 = new Step();
         uc.getStep().add(s2);

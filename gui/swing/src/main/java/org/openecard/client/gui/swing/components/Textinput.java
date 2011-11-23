@@ -11,7 +11,7 @@ import org.openecard.ws.gui.v1.TextInput;
 public class Textinput extends AbstractInput {
 
     public Textinput(TextInput input) {
-        super(input, new JTextField());
+        super(input, new JTextField(20));
    }
 
 }

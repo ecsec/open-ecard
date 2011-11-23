@@ -91,6 +91,7 @@ public class RunGUI {
             this.dialog = new JDialog();
             this.dialog.setSize(800, 600);
             this.dialog.setVisible(false);
+            this.dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         }
 
 

@@ -9,7 +9,7 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import org.openecard.client.gui.swing.steplayout.StepLayouter;
-import org.openecard.ws.gui.v1.InfoUnitType;
+import org.openecard.ws.gui.v1.OutputInfoUnitType;
 import org.openecard.ws.gui.v1.Step;
 
 
@@ -83,8 +83,8 @@ public class StepFrame {
      * Get result for all components on the frame that support result values.
      * @return List containg all result values. As a matter of fact this list can be empty.
      */
-    public List<InfoUnitType> getResultContent() {
-        ArrayList<InfoUnitType> result = new ArrayList<InfoUnitType>(components.size());
+    public List<OutputInfoUnitType> getResultContent() {
+        ArrayList<OutputInfoUnitType> result = new ArrayList<OutputInfoUnitType>(components.size());
         for (StepComponent next : components) {
             if (next.isValueType()) {
                 result.add(next.getValue());

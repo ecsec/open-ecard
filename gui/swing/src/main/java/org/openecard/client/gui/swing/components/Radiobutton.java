@@ -7,7 +7,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import org.openecard.ws.gui.v1.BoxItem;
-import org.openecard.ws.gui.v1.InfoUnitType;
+import org.openecard.ws.gui.v1.OutputInfoUnitType;
 import org.openecard.ws.gui.v1.Radio;
 
 
@@ -76,14 +76,14 @@ public class Radiobutton implements StepComponent {
     }
 
     @Override
-    public InfoUnitType getValue() {
+    public OutputInfoUnitType getValue() {
         // loop over checkboxes and set checked values in result
         for (int i=0; i < buttons.size(); i++) {
             JRadioButton component = buttons.get(i);
             result.getBoxItem().get(i).setChecked(component.isSelected());
         }
         // prepare result
-        InfoUnitType unit = new InfoUnitType();
+        OutputInfoUnitType unit = new OutputInfoUnitType();
         unit.setRadio(result);
         return unit;
     }

@@ -3,13 +3,12 @@ package org.openecard.client.gui.swing.components;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.util.ArrayList;
-import java.util.List;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import org.openecard.client.gui.swing.StepFrame;
 import org.openecard.ws.gui.v1.BoxItem;
 import org.openecard.ws.gui.v1.CheckBox;
-import org.openecard.ws.gui.v1.InfoUnitType;
+import org.openecard.ws.gui.v1.OutputInfoUnitType;
 
 
 /**
@@ -68,14 +67,14 @@ public class Checkbox implements StepComponent {
     }
 
     @Override
-    public InfoUnitType getValue() {
+    public OutputInfoUnitType getValue() {
         // loop over checkboxes and set checked values in result
         for (int i=0; i < boxButtons.size(); i++) {
             JCheckBox component = boxButtons.get(i);
             this.result.getBoxItem().get(i).setChecked(component.isSelected());
         }
         // prepare result
-        InfoUnitType unit = new InfoUnitType();
+        OutputInfoUnitType unit = new OutputInfoUnitType();
         unit.setCheckBox(result);
         return unit;
     }

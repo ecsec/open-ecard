@@ -10,8 +10,8 @@ import javax.swing.JScrollPane;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.interfaces.UserConsent;
-import org.openecard.ws.gui.v1.InfoUnitType;
 import org.openecard.ws.gui.v1.ObtainUserConsentResponse;
+import org.openecard.ws.gui.v1.OutputInfoUnitType;
 import org.openecard.ws.gui.v1.Step;
 
 
@@ -58,7 +58,7 @@ public class SwingUserConsent implements UserConsent {
         rootPanel.validate();
         rootPanel.repaint();
         dialogWrapper.showDialog();
-        List<InfoUnitType> outputInfo = container.getResult();
+        List<OutputInfoUnitType> outputInfo = container.getResult();
         dialogWrapper.hideDialog();
 
         // create result element depending on outcome
@@ -90,6 +90,11 @@ public class SwingUserConsent implements UserConsent {
             stepNames.add(s.getName());
         }
         return stepNames.toArray(new String[steps.size()]);
+    }
+
+    @Override
+    public void cancel() {
+        // TODO: implement
     }
 
 }

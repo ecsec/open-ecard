@@ -6,8 +6,11 @@ import java.awt.FlowLayout;
 import java.math.BigInteger;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
-import org.openecard.ws.gui.v1.InfoUnitType;
+import org.openecard.ws.gui.v1.AbstractInputType;
+import org.openecard.ws.gui.v1.OutputInfoUnitType;
 import org.openecard.ws.gui.v1.PasswordInput;
 import org.openecard.ws.gui.v1.TextInput;
 
@@ -21,7 +24,7 @@ import org.openecard.ws.gui.v1.TextInput;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public abstract class AbstractInput implements StepComponent {
+public class AbstractInput implements StepComponent {
 
     private final String name;
     private final BigInteger minLength;
@@ -33,44 +36,32 @@ public abstract class AbstractInput implements StepComponent {
 
     private final Object result;
 
-    protected AbstractInput(Object input, JTextComponent textFieldImpl) {
+    public AbstractInput(TextInput input) {
+        this(input, new JTextField(20));
+    }
+    public AbstractInput(PasswordInput input) {
+        this(input, new JPasswordField(12));
+    }
+
+    private AbstractInput(AbstractInputType input, JTextComponent textFieldImpl) {
         BigInteger min = null;
         BigInteger max = null;
         String value = null;
         String labelText = null;
 
         // extract values from input and write to output (depending on actual type)
-        if (input instanceof TextInput) {
-            TextInput tmp = (TextInput) input;
-            this.name = tmp.getName();
-            min = tmp.getMinlength();
-            max = tmp.getMaxlength();
-            value = tmp.getValue();
-            labelText = tmp.getText();
-            // create result element
-            TextInput resultImpl = new TextInput();
-            resultImpl.setMinlength(min);
-            resultImpl.setMaxlength(max);
-            resultImpl.setName(this.name);
-            resultImpl.setText(labelText);
-            result = resultImpl;
-        } else if (input instanceof PasswordInput) {
-            PasswordInput tmp = (PasswordInput) input;
-            this.name = tmp.getName();
-            min = tmp.getMinlength();
-            max = tmp.getMaxlength();
-            value = tmp.getValue();
-            labelText = tmp.getText();
-            // create result element
-            PasswordInput resultImpl = new PasswordInput();
-            resultImpl.setMinlength(min);
-            resultImpl.setMaxlength(max);
-            resultImpl.setName(this.name);
-            resultImpl.setText(labelText);
-            result = resultImpl;
-        } else {
-            throw new RuntimeException("Invalid class.");
-        }
+        this.name = input.getName();
+        min = input.getMinlength();
+        max = input.getMaxlength();
+        value = input.getValue();
+        labelText = input.getText();
+        // create result element
+        TextInput resultImpl = new TextInput();
+        resultImpl.setMinlength(min);
+        resultImpl.setMaxlength(max);
+        resultImpl.setName(this.name);
+        resultImpl.setText(labelText);
+        result = resultImpl;
 
         // correct values
         if (min != null) {
@@ -132,13 +123,13 @@ public abstract class AbstractInput implements StepComponent {
     }
 
     @Override
-    public InfoUnitType getValue() {
+    public OutputInfoUnitType getValue() {
         String textValue = this.textField.getText();
         if (textValue == null) {
             textValue = "";
         }
 
-        InfoUnitType unit = new InfoUnitType();
+        OutputInfoUnitType unit = new OutputInfoUnitType();
         if (result instanceof TextInput) {
             ((TextInput)result).setValue(textValue);
             unit.setTextInput((TextInput)result);

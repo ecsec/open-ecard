@@ -10,7 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import javax.swing.JLabel;
 import org.openecard.ws.gui.v1.HyperLink;
-import org.openecard.ws.gui.v1.InfoUnitType;
+import org.openecard.ws.gui.v1.OutputInfoUnitType;
 
 
 /**
@@ -55,7 +55,7 @@ public class Hyperlink implements StepComponent {
     }
 
     @Override
-    public InfoUnitType getValue() {
+    public OutputInfoUnitType getValue() {
         return null;
     }
 

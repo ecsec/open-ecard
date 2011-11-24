@@ -2,7 +2,7 @@ package org.openecard.client.gui.swing.components;
 
 import java.awt.Component;
 import javax.swing.JLabel;
-import org.openecard.ws.gui.v1.InfoUnitType;
+import org.openecard.ws.gui.v1.OutputInfoUnitType;
 
 
 /**
@@ -41,7 +41,7 @@ public class Text implements StepComponent {
     }
 
     @Override
-    public InfoUnitType getValue() {
+    public OutputInfoUnitType getValue() {
         return null;
     }
 

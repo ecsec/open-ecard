@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Exchanger;
 import javax.swing.JButton;
-import org.openecard.ws.gui.v1.InfoUnitType;
+import org.openecard.ws.gui.v1.OutputInfoUnitType;
 import org.openecard.ws.gui.v1.Step;
 
 
@@ -183,7 +183,7 @@ public class StepFrameContainer {
      * The call blocks until the user either presses the cancel or finish button.
      * @return List of component results (may be empty depending on components) or null if dialog has been cancelled.
      */
-    public List<InfoUnitType> getResult() {
+    public List<OutputInfoUnitType> getResult() {
         try {
             syncPoint.exchange(null);
         } catch (InterruptedException ex) {
@@ -192,7 +192,7 @@ public class StepFrameContainer {
             return null;
         }
         // create return value
-        ArrayList<InfoUnitType> result = new ArrayList<InfoUnitType>();
+        ArrayList<OutputInfoUnitType> result = new ArrayList<OutputInfoUnitType>();
         for (StepFrame next : this.stepFrames) {
             result.addAll(next.getResultContent());
         }

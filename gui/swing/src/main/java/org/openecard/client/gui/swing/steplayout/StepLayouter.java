@@ -3,7 +3,7 @@ package org.openecard.client.gui.swing.steplayout;
 import java.awt.Container;
 import java.util.List;
 import org.openecard.client.gui.swing.components.StepComponent;
-import org.openecard.ws.gui.v1.InfoUnitType;
+import org.openecard.ws.gui.v1.InputInfoUnitType;
 
 
 /**
@@ -23,7 +23,7 @@ public abstract class StepLayouter {
      * @param stepName Name of the step. This can be used to have a different layouter for disclaimer and pin entry step for example.
      * @return Layouter which can return panel and components list.
      */
-    public static StepLayouter create(List<InfoUnitType> infoUnits, String dialogType, String stepName) {
+    public static StepLayouter create(List<InputInfoUnitType> infoUnits, String dialogType, String stepName) {
         StepLayouter layouter = null;
 
         // select method to create components

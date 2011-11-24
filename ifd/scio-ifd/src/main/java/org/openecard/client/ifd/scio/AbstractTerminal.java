@@ -29,7 +29,7 @@ import javax.smartcardio.CardException;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.interfaces.UserConsent;
-import org.openecard.ws.gui.v1.InfoUnitType;
+import org.openecard.ws.gui.v1.InputInfoUnitType;
 import org.openecard.ws.gui.v1.ObtainUserConsent;
 import org.openecard.ws.gui.v1.ObtainUserConsentResponse;
 import org.openecard.ws.gui.v1.PasswordInput;
@@ -584,7 +584,7 @@ class AbstractTerminal {
         uc.getStep().add(s);
         s.setName("Enter PIN");
         // add text instructing user
-        InfoUnitType i1 = new InfoUnitType();
+        InputInfoUnitType i1 = new InputInfoUnitType();
         s.getInfoUnit().add(i1);
         PasswordInput p = new PasswordInput();
         i1.setPasswordInput(p);
@@ -603,7 +603,7 @@ class AbstractTerminal {
         uc.getStep().add(s);
         s.setName("Enter PIN");
         // add text instructing user
-        InfoUnitType i1 = new InfoUnitType();
+        InputInfoUnitType i1 = new InputInfoUnitType();
         s.getInfoUnit().add(i1);
         i1.setText("Enter your secret after closing this dialog.");
 

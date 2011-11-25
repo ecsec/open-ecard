@@ -1,6 +1,7 @@
 package org.openecard.client.applet;
 
 import java.awt.Container;
+import java.awt.Frame;
 import javax.swing.JDialog;
 import org.openecard.client.gui.swing.DialogWrapper;
 
@@ -13,11 +14,15 @@ public class SwingDialogWrapper implements DialogWrapper {
 
     private JDialog dialog;
 
-    public SwingDialogWrapper() {
-        this.dialog = new JDialog();
-        this.dialog.setSize(640, 480);
-        this.dialog.setVisible(false);
-        this.dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+    public SwingDialogWrapper(Frame parent) { // parent should propably be a RootPaneContainer (the applet instance itself)
+        // ATTENTION: a modal dialog blocks the rest of the application, be really sure that this is the intended behaviour
+        // modality is disabled for that reason, enable it with the boolean switch if needed
+        // but maybe the glass pane from the applet can be used to shield the website from user input
+        dialog = new JDialog(parent, false);
+        dialog.setSize(640, 480);
+        dialog.setLocationRelativeTo(null); // center on screen
+        dialog.setVisible(false);
+        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
     }
 
 
@@ -33,12 +38,12 @@ public class SwingDialogWrapper implements DialogWrapper {
 
     @Override
     public void showDialog() {
-        this.dialog.setVisible(true);
+        dialog.setVisible(true);
     }
 
     @Override
     public void hideDialog() {
-        this.dialog.setVisible(false);
+        dialog.setVisible(false);
     }
 
 }

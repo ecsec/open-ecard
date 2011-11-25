@@ -54,12 +54,10 @@ public class SwingUserConsent implements UserConsent {
         dialogType = dialogType==null ? "" : dialogType;
         List<Step> steps = parameters.getStep();
         Sidebar sidebar = new Sidebar(sidebarPanel, stepNames(steps));
-        StepFrameContainer container = new StepFrameContainer(dialogType, steps, stepContainer, sidebar);
+        StepFrameContainer container = new StepFrameContainer(dialogWrapper, dialogType, steps, stepContainer, sidebar);
         rootPanel.validate();
         rootPanel.repaint();
-        dialogWrapper.showDialog();
         List<OutputInfoUnitType> outputInfo = container.getResult();
-        dialogWrapper.hideDialog();
 
         // create result element depending on outcome
         Result result = new Result();

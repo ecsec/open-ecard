@@ -20,6 +20,7 @@ import org.openecard.ws.gui.v1.Step;
 public class StepFrameContainer {
 
     private final Container stepContainer;
+    private final DialogWrapper dialogWrapper;
 
     private final String dialogType;
     private final Sidebar sidebar;
@@ -32,7 +33,8 @@ public class StepFrameContainer {
     private Exchanger syncPoint = new Exchanger();
 
 
-    public StepFrameContainer(String dialogType, List<Step> steps, Container stepContainer, Sidebar sidebar) {
+    public StepFrameContainer(DialogWrapper dialogWrapper, String dialogType, List<Step> steps, Container stepContainer, Sidebar sidebar) {
+        this.dialogWrapper = dialogWrapper;
         this.stepContainer = stepContainer;
         this.dialogType = dialogType;
         this.sidebar = sidebar;
@@ -148,6 +150,8 @@ public class StepFrameContainer {
             synchronized (outer) {
                 if (!outer.finished && frame.validate()) {
                     outer.finished = true;
+                    // close dialog befor sync point, so that the rest of the application gets responsive again when modal
+                    outer.dialogWrapper.hideDialog();
                     try {
                         outer.syncPoint.exchange(null);
                     } catch (InterruptedException ex) {
@@ -184,6 +188,7 @@ public class StepFrameContainer {
      * @return List of component results (may be empty depending on components) or null if dialog has been cancelled.
      */
     public List<OutputInfoUnitType> getResult() {
+        dialogWrapper.showDialog();
         try {
             syncPoint.exchange(null);
         } catch (InterruptedException ex) {

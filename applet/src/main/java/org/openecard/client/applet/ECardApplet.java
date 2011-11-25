@@ -69,7 +69,7 @@ public class ECardApplet extends JApplet {
         worker = null;
         env = new ClientEnv();
         ifd = new IFD();
-        ifd.setGui(new SwingUserConsent(new SwingDialogWrapper()));
+        ifd.setGui(new SwingUserConsent(new SwingDialogWrapper(findParentFrame())));
         env.setIFD(ifd);
         EstablishContext ecRequest = new EstablishContext();
         EstablishContextResponse ecResponse = ifd.establishContext(ecRequest);

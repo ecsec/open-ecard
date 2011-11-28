@@ -34,7 +34,23 @@ import org.openecard.ws.IFDCallback;
  */
 public class EventListener implements Callable<List<IFDStatusType>> {
 
-    private static final Logger _logger = LogManager.getLogger(EventListener.class.getName());
+    private static final Logger _logger;
+    private static final long pollDelay;
+
+    static {
+        _logger = LogManager.getLogger(EventListener.class.getName());
+        String delayStr = IFDProperties.getProperty("org.openecard.ifd.wait.delay");
+        long delay = 500;
+        if (delayStr != null) {
+            try {
+                delay = Long.parseLong(delayStr);
+            } catch (NumberFormatException ex) {
+                _logger.warning("Property 'org.openecard.ifd.wait.delay' contains a misformed number.");
+            }
+        }
+        pollDelay = delay;
+    }
+
 
     private final IFD ifd;
     private final byte[] ctxHandle;
@@ -280,7 +296,7 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 			return null;
 		    }
 
-		    change = terminals.waitForChange(100); // in millis
+		    change = terminals.waitForChange(pollDelay); // in millis
 
 		} catch (CardException ex) {
 		    try {
@@ -292,7 +308,7 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 		} catch (IllegalStateException ex) {
 		    try {
 			// no terminals in list triggered this error
-			Thread.sleep(100); // repeat wait from above
+			Thread.sleep(pollDelay); // repeat wait from above
 		    } catch (InterruptedException exc) {
 			throw exc; // somebody wants me to quit, so i do it.
 		    }

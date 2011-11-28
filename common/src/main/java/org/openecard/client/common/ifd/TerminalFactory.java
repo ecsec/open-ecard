@@ -8,7 +8,7 @@ import javax.smartcardio.CardTerminals;
  * the static factory elements which are not present in systems like Android.<br/>
  * The ecsec IFD contains a generic loader class which takes a class name from a config file
  * and executes a method with the following signature:<br/>
- * <code>public static de.ecsec.core.common.ifd.TerminalFactory getInstance();</code>
+ * <code>public static TerminalFactory getInstance();</code>
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */

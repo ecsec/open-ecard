@@ -55,7 +55,7 @@ public class IFDTerminalFactory {
     }
 
     private static String getClassName() {
-	return IFDProperties.getProperty("de.ecsec.ifd.scio.factory.impl");
+	return IFDProperties.getProperty("org.openecard.ifd.scio.factory.impl");
     }
 
 }

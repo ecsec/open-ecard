@@ -34,16 +34,16 @@ public class AbstractInput implements StepComponent {
     private final JLabel label;
     private final JTextComponent textField;
 
-    private final Object result;
+    private final AbstractInputType result;
 
     public AbstractInput(TextInput input) {
-        this(input, new JTextField(20));
+        this(input, new TextInput(), new JTextField(20));
     }
     public AbstractInput(PasswordInput input) {
-        this(input, new JPasswordField(12));
+        this(input, new PasswordInput(), new JPasswordField(12));
     }
 
-    private AbstractInput(AbstractInputType input, JTextComponent textFieldImpl) {
+    private AbstractInput(AbstractInputType input, AbstractInputType output, JTextComponent textFieldImpl) {
         BigInteger min = null;
         BigInteger max = null;
         String value = null;
@@ -56,12 +56,11 @@ public class AbstractInput implements StepComponent {
         value = input.getValue();
         labelText = input.getText();
         // create result element
-        TextInput resultImpl = new TextInput();
-        resultImpl.setMinlength(min);
-        resultImpl.setMaxlength(max);
-        resultImpl.setName(this.name);
-        resultImpl.setText(labelText);
-        result = resultImpl;
+        result = output;
+        result.setMinlength(min);
+        result.setMaxlength(max);
+        result.setName(this.name);
+        result.setText(labelText);
 
         // correct values
         if (min != null) {
@@ -130,16 +129,15 @@ public class AbstractInput implements StepComponent {
         }
 
         OutputInfoUnitType unit = new OutputInfoUnitType();
+        result.setValue(textValue);
         if (result instanceof TextInput) {
-            ((TextInput)result).setValue(textValue);
             unit.setTextInput((TextInput)result);
         } else if (result instanceof PasswordInput) {
-            ((PasswordInput)result).setValue(textValue);
             unit.setPasswordInput((PasswordInput)result);
         } else {
             throw new RuntimeException("Invalid class.");
         }
-        
+
         return unit;
     }
 

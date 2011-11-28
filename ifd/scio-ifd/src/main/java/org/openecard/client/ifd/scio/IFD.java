@@ -60,6 +60,7 @@ import iso.std.iso_iec._24727.tech.schema.Wait;
 import iso.std.iso_iec._24727.tech.schema.WaitResponse;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -80,6 +81,7 @@ import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.ifd.anytype.PACEInputType;
 import org.openecard.client.common.ifd.anytype.PACEOutputType;
 import org.openecard.client.common.interfaces.UserConsent;
+import org.openecard.client.ifd.scio.reader.PCSCFeatures;
 
 
 /**
@@ -612,13 +614,53 @@ public class IFD implements org.openecard.ws.IFD {
     }
 
     @Override
+    /**
+     * Note: the first byte of the command data is the control code.
+     */
     public ControlIFDResponse controlIFD(ControlIFD parameters) {
 	try {
-	    throw new UnsupportedOperationException("Not supported yet.");
+            // <editor-fold defaultstate="collapsed" desc="log trace">
+	    if (_logger.isLoggable(Level.FINER)) {
+		_logger.entering(this.getClass().getName(), "controlIFD(ControlIFD parameters)", parameters);
+	    } // </editor-fold>
+            ControlIFDResponse response;
+            if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
+                response = WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
+                // <editor-fold defaultstate="collapsed" desc="log trace">
+                if (_logger.isLoggable(Level.FINER)) {
+                    _logger.exiting(this.getClass().getName(), "controlIFD(ControlIFD parameters)", response);
+                } // </editor-fold>
+                return response;
+            } else {
+                try {
+                    SCTerminal t = scwrapper.getTerminal(parameters.getIFDName());
+                    byte[] command = parameters.getCommand();
+                    byte ctrlCode = command[0];
+                    command = Arrays.copyOfRange(command, 1, command.length);
+                    // check if the code is present
+                    byte[] resultCommand = t.executeCtrlCode(ctrlCode, command);
+                    // TODO: evaluate result
+                    response = WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResultOK());
+                    response.setResponse(resultCommand);
+                    // <editor-fold defaultstate="collapsed" desc="log trace">
+                    if (_logger.isLoggable(Level.FINER)) {
+                        _logger.exiting(this.getClass().getName(), "controlIFD(ControlIFD parameters)", response);
+                    } // </editor-fold>
+                    return response;
+
+                } catch (IFDException ex) {
+                    response = WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResult(ex));
+                    // <editor-fold defaultstate="collapsed" desc="log trace">
+                    if (_logger.isLoggable(Level.FINER)) {
+                        _logger.exiting(this.getClass().getName(), "controlIFD(ControlIFD parameters)", response);
+                    } // </editor-fold>
+                    return response;
+                }
+            }
 	} catch (Throwable t) {
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
 	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "controlIFD(ControlIFD parameters)", t.getMessage(), t);
+		_logger.logp(Level.WARNING, this.getClass().getName(), "connect(Connect parameters)", t.getMessage(), t);
 	    } // </editor-fold>
 	    return WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResult(t));
 	}
@@ -1014,7 +1056,6 @@ public class IFD implements org.openecard.ws.IFD {
 
 	    // check if it is PACE and try to perform native implementation
             // get pace capabilities
-            int ctrlCode = term.getPaceCtrlCode();
             List<Long> paceCapabilities = term.getPACECapabilities();
             List<String> supportedProtos = buildPACEProtocolList(paceCapabilities);
             // check out if this actually a PACE request
@@ -1035,7 +1076,7 @@ public class IFD implements org.openecard.ws.IFD {
                 if (estPaceReq.isSupportedType(paceCapabilities)) {
                     byte[] reqData = execPaceReq.toBytes();
                     // execute pace
-                    byte[] resData = card.controlCommand(ctrlCode, reqData);
+                    byte[] resData = term.executeCtrlCode(PCSCFeatures.EXECUTE_PACE, reqData);
                     // evaluate response
                     ExecutePACEResponse execPaceRes = new ExecutePACEResponse(resData);
                     if (execPaceRes.isError()) {

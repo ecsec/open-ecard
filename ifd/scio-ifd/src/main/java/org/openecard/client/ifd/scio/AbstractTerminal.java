@@ -5,7 +5,6 @@ import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.CardCommandStatus;
 import org.openecard.client.common.util.Helper;
-import org.openecard.client.ifd.scio.wrapper.SCCard;
 import org.openecard.client.ifd.scio.wrapper.SCTerminal;
 import org.openecard.client.ifd.scio.wrapper.SCWrapper;
 import iso.std.iso_iec._24727.tech.schema.AltVUMessagesType;
@@ -25,10 +24,10 @@ import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse;
 import java.math.BigInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.smartcardio.CardException;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.interfaces.UserConsent;
+import org.openecard.client.ifd.scio.reader.PCSCFeatures;
 import org.openecard.ws.gui.v1.InputInfoUnitType;
 import org.openecard.ws.gui.v1.ObtainUserConsent;
 import org.openecard.ws.gui.v1.ObtainUserConsentResponse;
@@ -513,15 +512,8 @@ class AbstractTerminal {
         // get data for verify command and perform it
         PCSCPinVerify verifyStruct = new PCSCPinVerify(pinInput.getPasswordAttributes(), template);
         byte[] verifyStructData = verifyStruct.toBytes();
-        int ctrlCode = term.getPinCompareCtrlCode();
-        try {
-            SCCard card = term.getCard();
-            byte[] result = card.controlCommand(ctrlCode, verifyStructData);
-            return result;
-        } catch (CardException cardEx) {
-            IFDException ex = new IFDException(cardEx);
-            throw ex;
-        }
+        byte[] result = term.executeCtrlCode(PCSCFeatures.VERIFY_PIN_DIRECT, verifyStructData);
+        return result;
     }
 
     private static Result checkNativePinVerify(byte[] response) {

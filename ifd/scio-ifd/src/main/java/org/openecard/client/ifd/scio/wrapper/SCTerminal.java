@@ -373,7 +373,25 @@ public class SCTerminal {
 	return keyCap;
     }
 
-    public synchronized Integer getPaceCtrlCode() throws IFDException {
+    public synchronized byte[] executeCtrlCode(int featureCode, byte[] command) throws IFDException {
+        if (isConnected()) {
+	    try {
+		Map<Integer,Integer> features = getCard().getFeatureCodes();
+		if (features.containsKey(featureCode)) {
+		    Integer code = features.get(featureCode);
+                    byte[] result = getCard().controlCommand(code, command);
+                    return result;
+		} else {
+                    throw new IFDException("The requested control code is not supported by the terminal");
+                }
+	    } catch (CardException ex) {
+		throw new IFDException(ex);
+	    }
+        }
+        throw new IFDException(ECardConstants.Minor.Disp.INVALID_CHANNEL_HANDLE, "No connection is established with the reader.");
+    }
+
+    private synchronized Integer getPaceCtrlCode() throws IFDException {
 	if (isConnected()) {
 	    try {
 		Map<Integer,Integer> features = getCard().getFeatureCodes();
@@ -421,7 +439,7 @@ public class SCTerminal {
 	return Collections.unmodifiableList(result);
     }
 
-    public synchronized Integer getPinCompareCtrlCode() throws IFDException {
+    private synchronized Integer getPinCompareCtrlCode() throws IFDException {
 	if (isConnected()) {
 	    try {
 		Map<Integer,Integer> features = getCard().getFeatureCodes();
@@ -438,6 +456,5 @@ public class SCTerminal {
     public synchronized boolean supportsPinCompare() throws IFDException {
 	return getPinCompareCtrlCode() != null;
     }
-
 
 }

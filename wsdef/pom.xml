@@ -16,8 +16,7 @@
 
   <modules>
     <module>class-list-plugin</module>
-    <module>webservicedefs-client</module>
-    <module>webservicedefs-server</module>
+    <module>wsdef-client</module>
   </modules>
 
 </project>

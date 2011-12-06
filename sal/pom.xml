@@ -15,7 +15,7 @@
   <name>SAL</name>
 
   <modules>
-    <module>micro-sal</module>
+    <module>simple-sal</module>
   </modules>
 
 </project>

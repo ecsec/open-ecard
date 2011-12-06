@@ -5,12 +5,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.openecard.client</groupId>
-    <artifactId>scio</artifactId>
+    <groupId>org.openecard.client.ifd</groupId>
+    <artifactId>scio-backend</artifactId>
     <version>0.0.2-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.openecard.client.scio</groupId>
+  <groupId>org.openecard.client.ifd.scio-backend</groupId>
   <artifactId>pcsc</artifactId>
   <packaging>jar</packaging>
   <name>PCSC SmartcardIO</name>

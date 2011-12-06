@@ -4,13 +4,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.openecard</groupId>
-    <artifactId>client</artifactId>
+    <groupId>org.openecard.client</groupId>
+    <artifactId>ifd</artifactId>
     <version>0.0.2-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.openecard.client</groupId>
-  <artifactId>scio</artifactId>
+  <groupId>org.openecard.client.ifd</groupId>
+  <artifactId>scio-backend</artifactId>
   <packaging>pom</packaging>
   <name>SmartcardIO implementations</name>
 

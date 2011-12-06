@@ -75,7 +75,7 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openecard.client.scio</groupId>
+      <groupId>org.openecard.client.ifd.scio-backend</groupId>
       <artifactId>pcsc</artifactId>
       <version>${project.version}</version>
     </dependency>

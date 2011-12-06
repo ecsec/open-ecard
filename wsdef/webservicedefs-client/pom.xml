@@ -63,7 +63,7 @@
       </plugin>
 
       <plugin>
-	<groupId>org.openecard.client</groupId>
+	<groupId>org.openecard.client.wsdef</groupId>
 	<artifactId>class-list-plugin</artifactId>
 	<version>0.0.2-SNAPSHOT</version>
 	<executions>

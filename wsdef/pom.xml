@@ -15,6 +15,7 @@
   <name>openecard Webservice Definitions</name>
 
   <modules>
+    <module>class-list-plugin</module>
     <module>webservicedefs-client</module>
     <module>webservicedefs-server</module>
   </modules>

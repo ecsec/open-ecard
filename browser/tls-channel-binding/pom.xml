@@ -11,7 +11,7 @@
   </parent>
 
   <groupId>org.openecard.client.browser</groupId>
-  <artifactId>tls-cha-bind</artifactId>
-  <name>TLS Certificate Binding</name>
+  <artifactId>tls-channel-binding</artifactId>
+  <name>TLS Channel Binding</name>
 
 </project>

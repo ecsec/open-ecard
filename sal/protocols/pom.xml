@@ -16,6 +16,7 @@
 
   <modules>
     <module>eac</module>
+    <module>crypto-lite</module>
   </modules>
 
   <dependencies>

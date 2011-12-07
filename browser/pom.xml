@@ -17,7 +17,7 @@
   <modules>
     <module>object-handler</module>
     <module>pkcs11</module>
-    <module>tls-cha-bind</module>
+    <module>tls-channel-binding</module>
   </modules>
 
 </project>

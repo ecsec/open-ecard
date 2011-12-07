@@ -15,7 +15,9 @@
   <name>Transport Modules</name>
 
   <modules>
+    <module>dispatcher</module>
     <module>paos</module>
+    <module>tls</module>
   </modules>
 
 </project>

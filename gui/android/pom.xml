@@ -5,24 +5,19 @@
 
   <parent>
     <groupId>org.openecard.client</groupId>
-    <artifactId>ifd</artifactId>
+    <artifactId>gui</artifactId>
     <version>0.0.2-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.openecard.client.ifd</groupId>
-  <artifactId>scio-backend</artifactId>
-  <packaging>pom</packaging>
-  <name>SmartcardIO implementations</name>
-
-  <modules>
-    <module>pcsc</module>
-    <module>android-nfc</module>
-  </modules>
+  <groupId>org.openecard.client.gui</groupId>
+  <artifactId>android</artifactId>
+  <packaging>jar</packaging>
+  <name>Android GUI</name>
 
   <dependencies>
     <dependency>
-      <groupId>org.openecard.client.ifd</groupId>
-      <artifactId>ifd-common</artifactId>
+      <groupId>org.openecard.client.gui</groupId>
+      <artifactId>gui-common</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

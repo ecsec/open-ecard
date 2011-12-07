@@ -27,7 +27,7 @@
     </dependency>
     <dependency>
       <groupId>org.openecard.client.ifd</groupId>
-      <artifactId>scio-ifd</artifactId>
+      <artifactId>ifd-core</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

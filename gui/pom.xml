@@ -17,6 +17,7 @@
   <modules>
     <module>gui-common</module>
     <module>swing</module>
+    <module>android</module>
   </modules>
 
   <dependencies>

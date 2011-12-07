@@ -10,9 +10,9 @@
   </parent>
 
   <groupId>org.openecard.client.ifd</groupId>
-  <artifactId>scio-ifd</artifactId>
+  <artifactId>ifd-core</artifactId>
   <packaging>jar</packaging>
-  <name>SCIO IFD</name>
+  <name>IFD core</name>
 
   <dependencies>
     <dependency>

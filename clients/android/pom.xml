@@ -25,6 +25,11 @@
       <artifactId>scio-ifd</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.openecard.client.crypto</groupId>
+      <artifactId>bouncy-android</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <!-- <dependency> -->
     <!--   <groupId>org.openecard.client.ifd.scio-backend</groupId> -->
     <!--   <artifactId>pcsc</artifactId> -->

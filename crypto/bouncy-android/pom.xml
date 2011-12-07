@@ -1,0 +1,79 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.openecard.client</groupId>
+    <artifactId>crypto</artifactId>
+    <version>0.0.2-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.openecard.client.crypto</groupId>
+  <artifactId>bouncy-android</artifactId>
+  <packaging>jar</packaging>
+  <name>Android Bouncy Castle</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk16</artifactId>
+      <version>1.46</version>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+	<artifactId>maven-assembly-plugin</artifactId>
+	<executions>
+	  <execution>
+	    <phase>package</phase>
+	    <goals>
+	      <goal>single</goal>
+	    </goals>
+	    <configuration>
+	      <descriptorRefs>
+		<descriptorRef>jar-with-dependencies</descriptorRef>
+	      </descriptorRefs>
+	    </configuration>
+	  </execution>
+	</executions>
+      </plugin>
+      <plugin>
+	<artifactId>maven-antrun-plugin</artifactId>
+	<version>1.1</version>
+	<executions>
+	  <execution>
+	    <phase>package</phase>
+	    <configuration>
+	      <tasks>
+		<!-- move everything from org.bouncycastle to org.openecard.android.bouncycastle -->
+		<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" />
+		<jarjar destfile="${project.build.directory}/${project.build.finalName}-jar-with-dependencies.jar"
+			update="true">
+		  <rule pattern="org.bouncycastle.**" result="org.openecard.android.bouncycastle.@1" />
+		</jarjar>
+		<delete file="${project.build.directory}/${project.build.finalName}.jar" />
+		<copy file="${project.build.directory}/${project.build.finalName}-jar-with-dependencies.jar"
+		      tofile="${project.build.directory}/${project.build.finalName}.jar" />
+	      </tasks>
+	    </configuration>
+	    <goals>
+	      <goal>run</goal>
+	    </goals>
+	  </execution>
+	</executions>
+	<dependencies>
+	  <dependency>
+	    <groupId>com.googlecode.jarjar</groupId>
+	    <artifactId>jarjar</artifactId>
+	    <version>1.1</version>
+	  </dependency>
+	</dependencies>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

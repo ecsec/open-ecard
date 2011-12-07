@@ -15,14 +15,4 @@
   <packaging>jar</packaging>
   <name>PCSC SmartcardIO</name>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.openecard.client</groupId>
-      <artifactId>common</artifactId>
-      <version>${project.version}</version>
-      <!-- I suppose provided is ok, because in all cases I can imagine, the interface gets pulled in correctly -->
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
-
 </project>

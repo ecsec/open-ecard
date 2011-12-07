@@ -16,7 +16,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.openecard.client</groupId>
+      <groupId>org.openecard.client.ifd</groupId>
       <artifactId>common</artifactId>
       <version>${project.version}</version>
     </dependency>

@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	 xmlns="http://maven.apache.org/POM/4.0.0"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.openecard.client</groupId>
+    <artifactId>clients</artifactId>
+    <version>0.0.2-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.openecard.client.clients</groupId>
+  <artifactId>android</artifactId>
+  <name>Andoid Client</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.openecard.client</groupId>
+      <artifactId>common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openecard.client.ifd</groupId>
+      <artifactId>scio-ifd</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- <dependency> -->
+    <!--   <groupId>org.openecard.client.ifd.scio-backend</groupId> -->
+    <!--   <artifactId>pcsc</artifactId> -->
+    <!--   <version>${project.version}</version> -->
+    <!-- </dependency> -->
+    <!-- <dependency> -->
+    <!--   <groupId>org.openecard.client.gui</groupId> -->
+    <!--   <artifactId>swing</artifactId> -->
+    <!--   <version>${project.version}</version> -->
+    <!-- </dependency> -->
+    <dependency>
+      <groupId>org.openecard.client.sal</groupId>
+      <artifactId>micro-sal</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openecard.client.wsdef</groupId>
+      <artifactId>wsdef-client</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openecard.client</groupId>
+      <artifactId>event-manager</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openecard.client.transport</groupId>
+      <artifactId>paos</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+</project>

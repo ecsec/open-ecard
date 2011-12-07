@@ -10,14 +10,14 @@
   </parent>
 
   <groupId>org.openecard.client</groupId>
-  <artifactId>sal</artifactId>
+  <artifactId>browser</artifactId>
   <packaging>pom</packaging>
-  <name>SAL</name>
+  <name>Browser integration</name>
 
   <modules>
-    <module>common</module>
-    <module>protocols</module>
-    <module>simple-sal</module>
+    <module>object-handler</module>
+    <module>pkcs11</module>
+    <module>tls-cha-bind</module>
   </modules>
 
 </project>

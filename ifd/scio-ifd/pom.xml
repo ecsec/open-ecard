@@ -17,7 +17,7 @@
   <dependencies>
     <dependency>
       <groupId>org.openecard.client.ifd</groupId>
-      <artifactId>common</artifactId>
+      <artifactId>ifd-common</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

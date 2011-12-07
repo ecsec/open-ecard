@@ -10,9 +10,9 @@
   </parent>
 
   <groupId>org.openecard.client.sal</groupId>
-  <artifactId>simple-sal</artifactId>
+  <artifactId>tiny-sal</artifactId>
   <packaging>jar</packaging>
-  <name>simple SAL</name>
+  <name>tiny SAL</name>
 
   <dependencies>
     <dependency>

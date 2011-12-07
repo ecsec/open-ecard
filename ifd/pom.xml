@@ -15,7 +15,7 @@
   <name>IFD implementations</name>
 
   <modules>
-    <module>common</module>
+    <module>ifd-common</module>
     <module>scio-backend</module>
     <module>scio-ifd</module>
   </modules>

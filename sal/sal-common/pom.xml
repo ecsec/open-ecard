@@ -6,25 +6,19 @@
 
   <parent>
     <groupId>org.openecard.client</groupId>
-    <artifactId>ifd</artifactId>
+    <artifactId>sal</artifactId>
     <version>0.0.2-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.openecard.client.ifd</groupId>
-  <artifactId>common</artifactId>
-  <name>IFD common</name>
+  <groupId>org.openecard.client.sal</groupId>
+  <artifactId>sal-common</artifactId>
+  <name>SAL common</name>
   
   <dependencies>
     <dependency>
       <groupId>org.openecard.client</groupId>
       <artifactId>common</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.wsdef</groupId>
-      <artifactId>wsdef-client</artifactId>
-      <version>${project.version}</version>
-      <scope>provided</scope>
     </dependency>
   </dependencies>
 

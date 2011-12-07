@@ -21,7 +21,7 @@
   <dependencies>
     <dependency>
       <groupId>org.openecard.client.sal</groupId>
-      <artifactId>common</artifactId>
+      <artifactId>sal-common</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

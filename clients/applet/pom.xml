@@ -86,7 +86,7 @@
     </dependency>
     <dependency>
       <groupId>org.openecard.client.sal</groupId>
-      <artifactId>micro-sal</artifactId>
+      <artifactId>tiny-sal</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

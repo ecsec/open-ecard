@@ -15,6 +15,7 @@
   <name>GUI implementations</name>
 
   <modules>
+    <module>gui-common</module>
     <module>swing</module>
   </modules>
 

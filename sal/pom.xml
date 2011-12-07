@@ -15,9 +15,9 @@
   <name>SAL</name>
 
   <modules>
-    <module>common</module>
+    <module>sal-common</module>
     <module>protocols</module>
-    <module>simple-sal</module>
+    <module>tiny-sal</module>
   </modules>
 
 </project>

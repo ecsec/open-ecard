@@ -11,7 +11,7 @@
   </parent>
 
   <groupId>org.openecard.client.gui</groupId>
-  <artifactId>common</artifactId>
+  <artifactId>gui-common</artifactId>
   <name>GUI common</name>
   
   <dependencies>

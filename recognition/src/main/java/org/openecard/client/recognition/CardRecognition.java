@@ -6,7 +6,6 @@ import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.util.CardCommands;
 import org.openecard.client.common.util.Helper;
-import org.openecard.client.ws.WSClassLoader;
 import iso.std.iso_iec._24727.tech.schema.CardCall;
 import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
@@ -39,23 +38,19 @@ public class CardRecognition {
 
     private static final Logger _logger = LogManager.getLogger(CardRecognition.class.getName());
 
-    private final Conf conf;
     private final RecognitionTree tree;
 
     private final IFD ifd;
     private final byte[] ctx;
 
 
-    public CardRecognition(IFD ifd, byte[] ctx) throws Exception {
+    public CardRecognition(IFD ifd, byte[] ctx, GetRecognitionTree client) throws Exception {
 	this.ifd = ifd;
 	this.ctx = ctx;
-	this.conf = new Conf();
-	this.conf.readConfiguration();
 
 	// load tree service
-	GetRecognitionTree client = (GetRecognitionTree) WSClassLoader.getClientService(conf.getServiceName(), conf.getServiceAddr());
 	iso.std.iso_iec._24727.tech.schema.GetRecognitionTree req = new iso.std.iso_iec._24727.tech.schema.GetRecognitionTree();
-	req.setAction(this.conf.getAction());
+	req.setAction(RecognitionProperties.getAction());
 	GetRecognitionTreeResponse resp = client.getRecognitionTree(req);
 	checkResult(resp.getResult());
 	this.tree = resp.getRecognitionTree();

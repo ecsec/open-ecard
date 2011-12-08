@@ -8,6 +8,8 @@ import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
 import java.math.BigInteger;
 import org.junit.Test;
+import org.openecard.client.ws.WSClassLoader;
+import org.openecard.ws.GetRecognitionTree;
 import org.openecard.ws.IFD;
 
 
@@ -31,7 +33,8 @@ public class ExecuteRecognition {
 	GetStatusResponse statusR = ifd.getStatus(status);
 
 	if (statusR.getIFDStatus().size() > 0 && statusR.getIFDStatus().get(0).getSlotStatus().get(0).isCardAvailable()) {
-	    CardRecognition recog = new CardRecognition(ifd, ctx);
+            GetRecognitionTree client = (GetRecognitionTree) WSClassLoader.getClientService(RecognitionProperties.getServiceName(), RecognitionProperties.getServiceAddr());
+	    CardRecognition recog = new CardRecognition(ifd, ctx, client);
 	    IFDStatusType stat = statusR.getIFDStatus().get(0);
 	    RecognitionInfo info = recog.recognizeCard(stat.getIFDName(), BigInteger.ZERO);
 	    if (info == null) {

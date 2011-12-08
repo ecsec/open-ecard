@@ -18,6 +18,9 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openecard.client.recognition.RecognitionProperties;
+import org.openecard.client.ws.WSClassLoader;
+import org.openecard.ws.GetRecognitionTree;
 import org.openecard.ws.IFD;
 import static org.junit.Assert.*;
 
@@ -69,7 +72,8 @@ public class ECardAppletTest {
 
         System.out.print("Create CardRecognition... ");
         try {
-            cr = new CardRecognition(ifd, ctx);
+            GetRecognitionTree client = (GetRecognitionTree) WSClassLoader.getClientService(RecognitionProperties.getServiceName(), RecognitionProperties.getServiceAddr());
+            cr = new CardRecognition(ifd, ctx, client);
             crInitialized = true;
             System.out.println("done.");
         } catch (Exception ex) {

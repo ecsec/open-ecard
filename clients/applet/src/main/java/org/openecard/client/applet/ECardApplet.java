@@ -23,6 +23,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JApplet;
 import org.openecard.client.gui.swing.SwingUserConsent;
+import org.openecard.client.recognition.RecognitionProperties;
+import org.openecard.client.ws.WSClassLoader;
+import org.openecard.ws.GetRecognitionTree;
 
 
 /**
@@ -81,7 +84,8 @@ public class ECardApplet extends JApplet {
         }
         if (recognizeCard) {
             try {
-                recognition = new CardRecognition(ifd, ctx);
+                GetRecognitionTree client = (GetRecognitionTree) WSClassLoader.getClientService(RecognitionProperties.getServiceName(), RecognitionProperties.getServiceAddr());
+                recognition = new CardRecognition(ifd, ctx, client);
             } catch (Exception ex) {
                 _logger.logp(Level.SEVERE, this.getClass().getName(), "init()", ex.getMessage(), ex);
                 recognition = null;

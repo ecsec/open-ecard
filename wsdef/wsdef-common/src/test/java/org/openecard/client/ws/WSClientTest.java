@@ -1,6 +1,5 @@
 package org.openecard.client.ws;
 
-import org.openecard.client.ws.WSClassLoader;
 import java.lang.reflect.InvocationTargetException;
 import org.junit.Test;
 import static junit.framework.Assert.*;

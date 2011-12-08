@@ -16,7 +16,10 @@
 
   <modules>
     <module>class-list-plugin</module>
+    <module>wsdef-common</module>
     <module>wsdef-client</module>
+    <module>jaxb-marshaller</module>
+    <module>android-marshaller</module>
   </modules>
 
 </project>

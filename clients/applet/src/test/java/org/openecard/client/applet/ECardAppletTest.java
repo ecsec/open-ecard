@@ -7,7 +7,6 @@ import java.util.List;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.enums.EventType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
-import org.openecard.client.applet.EnvStub;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.event.EventManager;

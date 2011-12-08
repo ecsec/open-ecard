@@ -22,6 +22,8 @@ import static iso.std.iso_iec._24727.tech.schema.PasswordTypeType.*;
 import org.junit.Test;
 import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.ws.WSMarshaller;
+import org.openecard.client.ws.WSMarshallerException;
+import org.openecard.client.ws.WSMarshallerFactory;
 import org.xml.sax.SAXException;
 
 
@@ -161,7 +163,7 @@ public class PINTest {
 
     @Ignore
     @Test
-    public void executePACE_PIN() throws UnsupportedDataTypeException, JAXBException, SAXException {
+    public void executePACE_PIN() throws UnsupportedDataTypeException, JAXBException, SAXException, WSMarshallerException {
 	IFD ifd = new IFD();
 	ifd.setGui(new SwingUserConsent(new SwingDialogWrapper()));
 	EstablishContext eCtx = new EstablishContext();
@@ -185,7 +187,7 @@ public class PINTest {
 		"    <iso:PinID>03</iso:PinID>\n" +
 		"  </iso:AuthenticationProtocolData>\n" +
 		"</iso:EstablishChannel>";
-	WSMarshaller m = new WSMarshaller();
+	WSMarshaller m = WSMarshallerFactory.createInstance();
 	EstablishChannel eCh = (EstablishChannel) m.unmarshal(m.str2doc(xmlCall));
 
 	// send pace call

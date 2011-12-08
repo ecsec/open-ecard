@@ -15,7 +15,7 @@ public class IFDTerminalFactory {
 
     private GenericFactory<TerminalFactory> factory;
 
-    public IFDTerminalFactory() throws IFDException {
+    private IFDTerminalFactory() throws IFDException {
         try {
             factory = new GenericFactory<TerminalFactory>(IFDProperties.properties(), "org.openecard.ifd.scio.factory.impl");
         } catch (GenericFactoryException ex) {

@@ -3,6 +3,8 @@ package org.openecard.client.transport.paos;
 import org.openecard.client.common.interfaces.Transport;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.ws.WSMarshaller;
+import org.openecard.client.ws.WSMarshallerException;
+import org.openecard.client.ws.WSMarshallerFactory;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import java.io.BufferedReader;
@@ -31,13 +33,21 @@ import org.w3c.dom.Document;
  */
 public class PAOS implements Transport {
 
-    private static final WSMarshaller m = new WSMarshaller();;
+    static {
+        try {
+            m = WSMarshallerFactory.createInstance();
+        } catch (WSMarshallerException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private static final WSMarshaller m;
     private String endpoint;
     
     public PAOS(String endpoint) {
         this.endpoint = endpoint;
     }
-    
+
     private String getRelatesTo(SOAPMessage msg) throws SOAPException {
 	return getHeaderElemStr(msg, new QName(ECardConstants.WS_ADDRESSING, "RelatesTo"));
     }

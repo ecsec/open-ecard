@@ -1,4 +1,4 @@
-package org.openecard.client.ws;
+package org.openecard.client.ws.jaxb;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -70,7 +70,7 @@ public class MarshalTest {
 
     @Test
     public void testConversion() throws ParserConfigurationException, JAXBException, SAXException, IOException, XPathExpressionException, TransformerConfigurationException, TransformerException, SOAPException {
-	WSMarshaller m = new WSMarshaller();
+	JAXBMarshaller m = new JAXBMarshaller();
 	Document doc = m.str2doc(xmlStr);
 
 	SOAPMessage msg = m.doc2soap(doc);
@@ -86,7 +86,7 @@ public class MarshalTest {
 
     @Test
     public void testSOAPMarshal() throws ParserConfigurationException, JAXBException, TransformerConfigurationException, SOAPException, SAXException, IOException {
-	WSMarshaller m = new WSMarshaller();
+	JAXBMarshaller m = new JAXBMarshaller();
     	Document doc = m.str2doc(xmlStr);
 	SOAPMessage msg = m.doc2soap(doc);
 
@@ -101,7 +101,7 @@ public class MarshalTest {
 
     @Test
     public void testSoapHeaderAdd() throws ParserConfigurationException, JAXBException, TransformerConfigurationException, SOAPException, SAXException, IOException, TransformerException {
-	WSMarshaller m = new WSMarshaller();
+	JAXBMarshaller m = new JAXBMarshaller();
     	Document doc = m.str2doc(xmlStr);
 	SOAPMessage msg = m.doc2soap(doc);
 

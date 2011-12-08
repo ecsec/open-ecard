@@ -6,6 +6,8 @@ import org.openecard.client.ws.WSMarshaller;
 import java.util.Date;
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.TransformerException;
+import org.openecard.client.ws.WSMarshallerException;
+import org.openecard.client.ws.WSMarshallerFactory;
 
 /**
  *
@@ -13,7 +15,15 @@ import javax.xml.transform.TransformerException;
  */
 public class DummyCallback implements EventCallback {
 
-    private static final WSMarshaller m = new WSMarshaller();
+    static {
+        try {
+            m = WSMarshallerFactory.createInstance();
+        } catch (WSMarshallerException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private static final WSMarshaller m;
     
     @Override
     public void signalEvent(EventType eventType, Object eventData) {

@@ -1,4 +1,4 @@
-package org.openecard.client.ws;
+package org.openecard.client.ws.jaxb;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,6 +29,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.openecard.client.ws.WSMarshaller;
+import org.openecard.client.ws.WhitespaceFilter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -40,7 +42,7 @@ import org.xml.sax.SAXException;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public final class WSMarshaller implements WSMarshallerInterface {
+public final class JAXBMarshaller implements WSMarshaller {
 
     private final JAXBContext jaxbCtx;
     private final Marshaller marshaller;
@@ -54,10 +56,10 @@ public final class WSMarshaller implements WSMarshallerInterface {
     // soap
     private final MessageFactory soapFactory;
 
-    public WSMarshaller() {
+    public JAXBMarshaller() {
 	this(new Class[0]);
     }
-    public WSMarshaller(Class... additionalClasses) {
+    public JAXBMarshaller(Class... additionalClasses) {
 	JAXBContext tmpJaxbCtx = null;
 	Marshaller tmpMarshaller = null;
 	Unmarshaller tmpUnmarshaller = null;
@@ -153,6 +155,7 @@ public final class WSMarshaller implements WSMarshallerInterface {
 	return soapFactory;
     }
 
+    @Override
     public synchronized Document str2doc(String docStr) throws SAXException {
         try {
             // read dom as w3
@@ -168,6 +171,7 @@ public final class WSMarshaller implements WSMarshallerInterface {
         }
     }
 
+    @Override
     public synchronized Document str2doc(InputStream docStr) throws SAXException, IOException {
 	// read dom as w3
 	Document doc = w3Builder.parse(docStr);
@@ -177,6 +181,7 @@ public final class WSMarshaller implements WSMarshallerInterface {
 	return doc;
     }
 
+    @Override
     public synchronized String doc2str(Node doc) throws TransformerException {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	serializer.transform(new DOMSource(doc), new StreamResult(out));
@@ -189,6 +194,7 @@ public final class WSMarshaller implements WSMarshallerInterface {
         return result;
     }
 
+    @Override
     public synchronized Object unmarshal(Node n) throws UnsupportedDataTypeException, JAXBException {
 	Document newDoc = null;
 	if (n instanceof Document) {
@@ -205,12 +211,14 @@ public final class WSMarshaller implements WSMarshallerInterface {
 	return result;
     }
 
+    @Override
     public synchronized Document marshal(Object o) throws JAXBException {
 	Document doc = w3Builder.newDocument();
 	marshaller.marshal(o, doc);
 	return doc;
     }
 
+    @Override
     public synchronized SOAPMessage doc2soap(Document envDoc) throws SOAPException {
 	SOAPMessage msg = soapFactory.createMessage();
 	Source source = new javax.xml.transform.dom.DOMSource(envDoc.getDocumentElement());
@@ -220,6 +228,7 @@ public final class WSMarshaller implements WSMarshallerInterface {
 	return msg;
     }
 
+    @Override
     public synchronized SOAPMessage add2soap(Document content) throws SOAPException {
 	SOAPMessage msg = soapFactory.createMessage();
 	SOAPBody body = msg.getSOAPBody();

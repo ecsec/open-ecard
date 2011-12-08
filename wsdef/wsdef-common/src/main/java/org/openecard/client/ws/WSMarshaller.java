@@ -2,9 +2,6 @@ package org.openecard.client.ws;
 
 import java.io.IOException;
 import java.io.InputStream;
-import javax.activation.UnsupportedDataTypeException;
-import javax.xml.bind.JAXBException;
-import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
 import org.w3c.dom.Document;
@@ -22,8 +19,8 @@ public interface WSMarshaller {
     public Document str2doc(InputStream docStr) throws SAXException, IOException;
     public String doc2str(Node doc) throws TransformerException;
 
-    public Object unmarshal(Node n) throws UnsupportedDataTypeException, JAXBException;
-    public Document marshal(Object o) throws JAXBException;
+    public Object unmarshal(Node n) throws MarshallingTypeException, WSMarshallerException;
+    public Document marshal(Object o) throws MarshallingTypeException;
 
     public SOAPMessage doc2soap(Document envDoc) throws SOAPException;
     public SOAPMessage add2soap(Document content) throws SOAPException;

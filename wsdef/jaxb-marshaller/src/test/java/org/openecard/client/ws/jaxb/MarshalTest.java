@@ -1,21 +1,13 @@
 package org.openecard.client.ws.jaxb;
 
-import java.io.IOException;
 import java.util.Iterator;
-import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.xpath.XPathExpressionException;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 import static junit.framework.Assert.*;
 
 
@@ -69,7 +61,7 @@ public class MarshalTest {
 	+ "</soap11:Envelope>";
 
     @Test
-    public void testConversion() throws ParserConfigurationException, JAXBException, SAXException, IOException, XPathExpressionException, TransformerConfigurationException, TransformerException, SOAPException {
+    public void testConversion() throws Exception {
 	JAXBMarshaller m = new JAXBMarshaller();
 	Document doc = m.str2doc(xmlStr);
 
@@ -85,7 +77,7 @@ public class MarshalTest {
     }
 
     @Test
-    public void testSOAPMarshal() throws ParserConfigurationException, JAXBException, TransformerConfigurationException, SOAPException, SAXException, IOException {
+    public void testSOAPMarshal() throws Exception {
 	JAXBMarshaller m = new JAXBMarshaller();
     	Document doc = m.str2doc(xmlStr);
 	SOAPMessage msg = m.doc2soap(doc);
@@ -100,7 +92,7 @@ public class MarshalTest {
     }
 
     @Test
-    public void testSoapHeaderAdd() throws ParserConfigurationException, JAXBException, TransformerConfigurationException, SOAPException, SAXException, IOException, TransformerException {
+    public void testSoapHeaderAdd() throws Exception {
 	JAXBMarshaller m = new JAXBMarshaller();
     	Document doc = m.str2doc(xmlStr);
 	SOAPMessage msg = m.doc2soap(doc);

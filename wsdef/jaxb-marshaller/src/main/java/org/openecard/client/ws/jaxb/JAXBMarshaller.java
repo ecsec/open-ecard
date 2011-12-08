@@ -10,7 +10,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import javax.activation.UnsupportedDataTypeException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -20,7 +19,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -29,7 +27,10 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.openecard.client.ws.MarshallingTypeException;
+import org.openecard.client.ws.SOAPException;
 import org.openecard.client.ws.WSMarshaller;
+import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.WhitespaceFilter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -195,7 +196,7 @@ public final class JAXBMarshaller implements WSMarshaller {
     }
 
     @Override
-    public synchronized Object unmarshal(Node n) throws UnsupportedDataTypeException, JAXBException {
+    public synchronized Object unmarshal(Node n) throws MarshallingTypeException, WSMarshallerException {
 	Document newDoc = null;
 	if (n instanceof Document) {
 	    newDoc = (Document) n;
@@ -204,37 +205,54 @@ public final class JAXBMarshaller implements WSMarshaller {
 	    Node root = newDoc.importNode(n, true);
 	    newDoc.appendChild(root);
 	} else {
-	    throw new UnsupportedDataTypeException("Only w3c Document and Element are accepted.");
+	    throw new WSMarshallerException("Only w3c Document and Element are accepted.");
 	}
 
-	Object result = unmarshaller.unmarshal(newDoc); //NOI18N
+	Object result;
+        try {
+            result = unmarshaller.unmarshal(newDoc); //NOI18N
+        } catch (JAXBException ex) {
+            throw new MarshallingTypeException(ex);
+        }
 	return result;
     }
 
     @Override
-    public synchronized Document marshal(Object o) throws JAXBException {
+    public synchronized Document marshal(Object o) throws MarshallingTypeException {
 	Document doc = w3Builder.newDocument();
-	marshaller.marshal(o, doc);
+        try {
+            marshaller.marshal(o, doc);
+        } catch (JAXBException ex) {
+            throw new MarshallingTypeException(ex);
+        }
 	return doc;
     }
 
     @Override
     public synchronized SOAPMessage doc2soap(Document envDoc) throws SOAPException {
-	SOAPMessage msg = soapFactory.createMessage();
-	Source source = new javax.xml.transform.dom.DOMSource(envDoc.getDocumentElement());
-	msg.getSOAPPart().setContent(source);//appendChild(env);
-	msg.saveChanges();
+        try {
+            SOAPMessage msg = soapFactory.createMessage();
+            Source source = new javax.xml.transform.dom.DOMSource(envDoc.getDocumentElement());
+            msg.getSOAPPart().setContent(source);//appendChild(env);
+            msg.saveChanges();
 
-	return msg;
+            return msg;
+        } catch (javax.xml.soap.SOAPException ex) {
+            throw new SOAPException(ex);
+        }
     }
 
     @Override
     public synchronized SOAPMessage add2soap(Document content) throws SOAPException {
-	SOAPMessage msg = soapFactory.createMessage();
-	SOAPBody body = msg.getSOAPBody();
-	body.addDocument(content);
+        try {
+            SOAPMessage msg = soapFactory.createMessage();
+            SOAPBody body = msg.getSOAPBody();
+            body.addDocument(content);
 
-	return msg;
+            return msg;
+        } catch (javax.xml.soap.SOAPException ex) {
+            throw new SOAPException(ex);
+        }
     }
 
 }

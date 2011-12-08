@@ -1,9 +1,7 @@
 package org.openecard.client.scio;
 
-import java.security.NoSuchAlgorithmException;
-
 import javax.smartcardio.CardTerminals;
-
+import org.openecard.client.common.ifd.TerminalFactory;
 
 
 /**
@@ -11,25 +9,16 @@ import javax.smartcardio.CardTerminals;
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  *
  */
-public class NFCFactory implements org.openecard.client.common.ifd.TerminalFactory {
-	
-	 public static org.openecard.client.common.ifd.TerminalFactory getInstance() throws NoSuchAlgorithmException {
-			return new NFCFactory();
-		    }
-	 
+public class NFCFactory implements TerminalFactory {
 
-	    private NFCFactory() {
+    @Override
+    public String getType() {
+	return "NFC";
+    }
 
-	    }
-	 
-	 
-	public String getType() {
-		return "NFC";
-	}
-	
-	public CardTerminals terminals() {
-		return new NFCCardTerminals();
-	}
-	
+    @Override
+    public CardTerminals terminals() {
+	return new NFCCardTerminals();
+    }
+
 }
-

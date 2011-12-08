@@ -1,9 +1,9 @@
 package org.openecard.client.ifd.scio.wrapper;
 
+import org.openecard.client.common.GenericFactoryException;
 import org.openecard.client.ifd.scio.IFDException;
 import org.openecard.client.ifd.scio.IFDProperties;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import org.openecard.client.common.GenericFactory;
 import org.openecard.client.common.ifd.TerminalFactory;
 
 
@@ -13,49 +13,29 @@ import org.openecard.client.common.ifd.TerminalFactory;
  */
 public class IFDTerminalFactory {
 
-    private static Class factoryImplClass = null;
-    private static Method factoryImplMethod = null;
+    private GenericFactory<TerminalFactory> factory;
+
+    public IFDTerminalFactory() throws IFDException {
+        try {
+            factory = new GenericFactory<TerminalFactory>(IFDProperties.properties(), "org.openecard.ifd.scio.factory.impl");
+        } catch (GenericFactoryException ex) {
+            throw new IFDException(ex);
+        }
+    }
+
+
+    private static IFDTerminalFactory factoryInst = null;
 
     public static TerminalFactory getInstance() throws IFDException {
-	try {
-	    if (factoryImplClass == null || !factoryImplClass.getName().equals(getClassName())) {
-		loadClass();
-	    }
+        if (factoryInst == null) {
+            factoryInst = new IFDTerminalFactory();
+        }
 
-	    Object o = factoryImplMethod.invoke(null); // null because it is static
-	    if (o != null) {
-		return (TerminalFactory) o; // type is asserted by method definition
-	    } else {
-		throw new NullPointerException("TerminalFactory creation method returned null.");
-	    }
-	} catch (Throwable t) {
-	    throw new IFDException(t);
-	}
-    }
-
-    private static void loadClass() throws ClassNotFoundException, NoSuchMethodException {
-	factoryImplClass = null;
-	factoryImplMethod = null;
-
-	String typeName = getClassName();
-	ClassLoader cl = IFDTerminalFactory.class.getClassLoader();
-	Class c = cl.loadClass(typeName);
-	Method m = c.getMethod("getInstance", new Class[0]);
-	if (Modifier.isStatic(m.getModifiers()) && Modifier.isPublic(m.getModifiers())) {
-	    Class returnClass = m.getReturnType();
-	    if (TerminalFactory.class.isAssignableFrom(returnClass)) {
-		factoryImplClass = c;
-		factoryImplMethod = m;
-	    } else {
-		throw new NoSuchMethodException("getInstance method of class " + typeName + " has a return value which is incompatible with class " + TerminalFactory.class.getName() + ".");
-	    }
-	} else {
-	    throw new NoSuchMethodException("getInstance method of class " + typeName + " is not static.");
-	}
-    }
-
-    private static String getClassName() {
-	return IFDProperties.getProperty("org.openecard.ifd.scio.factory.impl");
+        try {
+            return factoryInst.factory.getInstance();
+        } catch (GenericFactoryException ex) {
+            throw new IFDException(ex);
+        }
     }
 
 }

@@ -2,6 +2,7 @@ package org.openecard.client.ifd.scio;
 
 import org.openecard.client.common.OverridingProperties;
 import java.io.IOException;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,6 +37,10 @@ public class IFDProperties {
 
     public static Object setProperty(String key, String value) {
         return properties.setProperty(key, value);
+    }
+
+    public static Properties properties() {
+        return properties.properties();
     }
 
 }

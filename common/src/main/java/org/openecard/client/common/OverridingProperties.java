@@ -57,4 +57,8 @@ public class OverridingProperties {
 	return properties.setProperty(key, value);
     }
 
+    public final Properties properties() {
+        return new Properties(properties);
+    }
+
 }

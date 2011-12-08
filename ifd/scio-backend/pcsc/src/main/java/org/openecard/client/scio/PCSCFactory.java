@@ -12,15 +12,12 @@ import javax.smartcardio.TerminalFactory;
  */
 public class PCSCFactory implements org.openecard.client.common.ifd.TerminalFactory {
 
-    public static org.openecard.client.common.ifd.TerminalFactory getInstance() throws NoSuchAlgorithmException {
-	return new PCSCFactory(TerminalFactory.getInstance("PC/SC", null));
-    }
-
     private final TerminalFactory factory;
 
-    private PCSCFactory(TerminalFactory factory) {
-	this.factory = factory;
+    public PCSCFactory() throws NoSuchAlgorithmException {
+        factory = TerminalFactory.getInstance("PC/SC", null);
     }
+
 
     @Override
     public String getType() {

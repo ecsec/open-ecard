@@ -52,7 +52,9 @@ import javax.xml.transform.stream.StreamResult;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 
 import org.openecard.client.common.util.Helper;
+import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.WSMarshaller;
+import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.WhitespaceFilter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -109,7 +111,7 @@ public class AndroidMarshaller implements WSMarshaller {
 	}
 
 	@Override
-	public synchronized Document marshal(Object o) throws JAXBException {
+	public synchronized Document marshal(Object o)  throws MarshallingTypeException {
 
 		
 		Document document = documentBuilder.newDocument();
@@ -352,7 +354,7 @@ public class AndroidMarshaller implements WSMarshaller {
 	}
 
 	@Override
-	public synchronized Object unmarshal(Node n) throws UnsupportedDataTypeException, JAXBException {
+	public synchronized Object unmarshal(Node n) throws MarshallingTypeException, WSMarshallerException {
 		
 		Document newDoc = null;
 		if (n instanceof Document) {
@@ -362,7 +364,7 @@ public class AndroidMarshaller implements WSMarshaller {
 			Node root = newDoc.importNode(n, true);
 			newDoc.appendChild(root);
 		} else {
-			throw new UnsupportedDataTypeException("Only w3c Document and Element are accepted.");
+			throw new WSMarshallerException("Only w3c Document and Element are accepted.");
 		}
 		try {
 			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
@@ -378,7 +380,7 @@ public class AndroidMarshaller implements WSMarshaller {
 			}
 			return null;
 		} catch (Exception e) {
-			throw new JAXBException("");
+			 throw new MarshallingTypeException(e);
 		}
 
 	}
@@ -758,13 +760,13 @@ public class AndroidMarshaller implements WSMarshaller {
 	}
 
 	@Override
-	public SOAPMessage doc2soap(Document envDoc) throws SOAPException {
+	public SOAPMessage doc2soap(Document envDoc) {
 		// TODO
 		return null;
 	}
 
 	@Override
-	public SOAPMessage add2soap(Document content) throws SOAPException {
+	public SOAPMessage add2soap(Document content) {
 		// TODO
 		return null;
 	}

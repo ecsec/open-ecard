@@ -4,8 +4,8 @@ import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.ws.WSMarshaller;
 import java.util.Date;
-import javax.xml.bind.JAXBException;
 import javax.xml.transform.TransformerException;
+import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.WSMarshallerFactory;
 
@@ -30,7 +30,7 @@ public class DummyCallback implements EventCallback {
         String data = null;
         try {
             data = m.doc2str(m.marshal(eventData));
-        } catch (JAXBException ex) {
+        } catch (MarshallingTypeException ex) {
             System.err.println(ex.getMessage());
         } catch (TransformerException ex) {
             System.err.println(ex.getMessage());

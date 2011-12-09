@@ -2,6 +2,7 @@ package org.openecard.client.transport.paos;
 
 import org.openecard.client.common.interfaces.Transport;
 import org.openecard.client.common.ECardConstants;
+import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.WSMarshallerFactory;
@@ -16,7 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
@@ -134,13 +134,13 @@ public class PAOS implements Transport {
 	throw new PAOSException(e.getMessage(), e);
     }
 
-    public String createPAOSResponse(Object obj) throws TransformerException, JAXBException, SOAPException {
+    public String createPAOSResponse(Object obj) throws MarshallingTypeException, org.openecard.client.ws.SOAPException, SOAPException, TransformerException {
 	SOAPMessage msg = createSOAPMessage(obj);
 	String result = m.doc2str(msg.getSOAPPart());
 	return result;
     }
 
-    public String createStartPAOS(String sessionIdentifier, List<ConnectionHandleType> connectionHandles) throws TransformerException, JAXBException, SOAPException {
+    public String createStartPAOS(String sessionIdentifier, List<ConnectionHandleType> connectionHandles) throws MarshallingTypeException, org.openecard.client.ws.SOAPException, SOAPException, TransformerException {
 	StartPAOS startPAOS = new StartPAOS();
 	startPAOS.setSessionIdentifier(sessionIdentifier);
 	startPAOS.setProfile(ECardConstants.Profile.ECARD_1_1);
@@ -153,7 +153,7 @@ public class PAOS implements Transport {
 	return responseStr;
     }
 
-    private SOAPMessage createSOAPMessage(Object content) throws JAXBException, SOAPException {
+    private SOAPMessage createSOAPMessage(Object content) throws MarshallingTypeException, org.openecard.client.ws.SOAPException, SOAPException {
 	Document contentDoc = m.marshal(content);
 	SOAPMessage msg = m.add2soap(contentDoc);
 	SOAPHeader header = msg.getSOAPHeader();

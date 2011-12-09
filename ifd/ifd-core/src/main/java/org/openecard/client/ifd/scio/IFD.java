@@ -1051,6 +1051,7 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    SCTerminal term = this.scwrapper.getTerminal(slotHandle);
 	    SCCard card = this.scwrapper.getCard(slotHandle);
+            SCChannel channel = card.getChannel(slotHandle);
 	    DIDAuthenticationDataType protoParam = parameters.getAuthenticationProtocolData();
 	    String protocol = protoParam.getProtocol();
 
@@ -1112,7 +1113,7 @@ public class IFD implements org.openecard.ws.IFD {
 		EstablishChannelResponse response = protoImpl.establish(parameters, this, null); // TODO: hand over GUI implementation
 		// register protocol instance for secure messaging when protocol was processed successful
 		if (response.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
-		    // TODO: register sm in SCCard
+                    channel.addSecureMessaging(protoImpl);
 		}
 		return response;
 	    }

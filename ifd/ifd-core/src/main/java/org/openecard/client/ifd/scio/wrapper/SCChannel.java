@@ -1,9 +1,5 @@
 package org.openecard.client.ifd.scio.wrapper;
 
-import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.common.util.CardCommandStatus;
-import org.openecard.client.ifd.scio.IFDException;
-import org.openecard.client.ifd.scio.TransmitException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
@@ -12,6 +8,11 @@ import javax.smartcardio.CardChannel;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CommandAPDU;
 import javax.smartcardio.ResponseAPDU;
+import org.openecard.client.common.ifd.Protocol;
+import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.common.util.CardCommandStatus;
+import org.openecard.client.ifd.scio.IFDException;
+import org.openecard.client.ifd.scio.TransmitException;
 
 
 /**
@@ -24,6 +25,9 @@ public class SCChannel {
     
     private final CardChannel channel;
     private final byte[] handle;
+
+    /** Currently active secure messaging protocol. */
+    private Protocol smProtocol = null;
 
     public SCChannel(CardChannel channel, byte[] handle) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
@@ -73,13 +77,20 @@ public class SCChannel {
 	}
 
 	try {
-            CommandAPDU capdu = new CommandAPDU(input);
+            byte[] inputAPDU = input;
+            if (isSM()) {
+                inputAPDU = smProtocol.applySM(inputAPDU);
+            }
+            CommandAPDU capdu = new CommandAPDU(inputAPDU);
 	    ResponseAPDU rapdu = channel.transmit(capdu);
 	    byte[] result = rapdu.getBytes();
+            if (isSM()) {
+                result = smProtocol.removeSM(result);
+            }
 	    // get status word
 	    byte[] sw = new byte[2];
-	    sw[0] = (byte) rapdu.getSW1();
-	    sw[1] = (byte) rapdu.getSW2();
+	    sw[0] = (byte) result[result.length-2];
+	    sw[1] = (byte) result[result.length-1];
 
 	    // verify result
 	    for (byte[] expected : responses) {
@@ -114,6 +125,19 @@ public class SCChannel {
             } // </editor-fold>
             throw ifdex;
 	}
+    }
+
+
+    private synchronized boolean isSM() {
+        return this.smProtocol != null;
+    }
+
+    public synchronized void addSecureMessaging(Protocol protocol) {
+        this.smProtocol = protocol;
+    }
+
+    public synchronized void removeSecureMessaging() {
+        this.smProtocol = null;
     }
 
 }

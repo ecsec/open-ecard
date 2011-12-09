@@ -69,8 +69,9 @@ public class NFCCardTerminal extends CardTerminal{
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-
-		return (this.nfcCard!=null && this.nfcCard.isodep!=null && this.nfcCard.isodep.isConnected());
+boolean ret =  (this.nfcCard!=null && this.nfcCard.isodep!=null && this.nfcCard.isodep.isConnected());
+if(!ret && this.nfcCard!=null) {this.nfcCard.isodep = null;}
+		return ret;
 			
 	}
 

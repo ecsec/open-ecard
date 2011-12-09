@@ -24,8 +24,22 @@
       <groupId>org.openecard.client.wsdef</groupId>
       <artifactId>wsdef-client</artifactId>
       <version>${project.version}</version>
-      <scope>provided</scope>
+      <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.openecard.client</groupId>
+      <artifactId>common</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+     <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>android</artifactId>
+            <version>
+             2.3.3
+                        </version>
+            <scope>provided</scope>
+        </dependency>
   </dependencies>
 
 </project>

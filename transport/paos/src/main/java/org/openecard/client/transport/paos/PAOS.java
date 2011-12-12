@@ -1,5 +1,6 @@
 package org.openecard.client.transport.paos;
 
+import org.openecard.client.common.interfaces.AsyncTransportCallback;
 import org.openecard.client.common.interfaces.Transport;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.ws.MarshallingTypeException;
@@ -198,6 +199,11 @@ public class PAOS implements Transport {
             // something went horribly wrong
         } 
         return null;
+    }
+
+    @Override
+    public void registerCallback(AsyncTransportCallback callback) {
+        // no async communication
     }
 
 }

@@ -8,4 +8,6 @@ package org.openecard.client.common.interfaces;
 public interface Transport {
     
     public Object send(Object message);
+    
+    public void registerCallback(AsyncTransportCallback callback);
 }

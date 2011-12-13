@@ -13,5 +13,13 @@
   <groupId>org.openecard.client.ifd.protocols</groupId>
   <artifactId>pace</artifactId>
   <name>PACE protocol</name>
-  
+
+  <dependencies>
+    <dependency>
+      <groupId>org.openecard.client.gui</groupId>
+      <artifactId>gui-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
 </project>

@@ -2,7 +2,7 @@ package org.openecard.client.gui.swing.components;
 
 import java.awt.Component;
 import javax.swing.JLabel;
-import org.openecard.ws.gui.v1.OutputInfoUnitType;
+import org.openecard.client.gui.definition.OutputInfoUnit;
 
 
 /**
@@ -14,35 +14,35 @@ public class Text implements StepComponent {
 
     private final JLabel label;
 
-    public Text(String text) {
-        String s = text;
-        // replace newlines with appropriate html code
-        if (s.contains("\n")) {
-            s = "<html>" + text + "</html>";
-            s = s.replace("\n", "<br/>");
-        }
-        this.label = new JLabel(s);
+    public Text(org.openecard.client.gui.definition.Text text) {
+	String s = text.getText();
+	// replace newlines with appropriate html code
+	if (s.contains("\n")) {
+	    s = "<html>" + s + "</html>";
+	    s = s.replace("\n", "<br/>");
+	}
+	this.label = new JLabel(s);
     }
 
 
     @Override
     public Component getComponent() {
-        return label;
+	return label;
     }
 
     @Override
     public boolean validate() {
-        return true;
+	return true;
     }
 
     @Override
     public boolean isValueType() {
-        return false;
+	return false;
     }
 
     @Override
-    public OutputInfoUnitType getValue() {
-        return null;
+    public OutputInfoUnit getValue() {
+	return null;
     }
 
 }

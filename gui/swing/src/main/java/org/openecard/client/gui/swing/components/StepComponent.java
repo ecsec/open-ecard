@@ -1,7 +1,7 @@
 package org.openecard.client.gui.swing.components;
 
 import java.awt.Component;
-import org.openecard.ws.gui.v1.OutputInfoUnitType;
+import org.openecard.client.gui.definition.OutputInfoUnit;
 
 
 /**
@@ -40,6 +40,6 @@ public interface StepComponent {
      * @return Value for use in UserConsentResponse when StepComponent.isValueType()
      *         returns true, undefined (also null possible) otherwise.
      */
-    public OutputInfoUnitType getValue();
+    public OutputInfoUnit getValue();
 
 }

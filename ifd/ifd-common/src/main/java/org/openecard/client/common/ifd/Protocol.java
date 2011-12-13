@@ -2,7 +2,7 @@ package org.openecard.client.common.ifd;
 
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
-import org.openecard.client.common.interfaces.UserConsent;
+import org.openecard.client.gui.UserConsent;
 import org.openecard.ws.IFD;
 
 

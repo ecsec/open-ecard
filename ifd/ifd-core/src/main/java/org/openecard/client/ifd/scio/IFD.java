@@ -13,51 +13,7 @@ import org.openecard.client.ifd.scio.wrapper.SCCard;
 import org.openecard.client.ifd.scio.wrapper.SCChannel;
 import org.openecard.client.ifd.scio.wrapper.SCTerminal;
 import org.openecard.client.ifd.scio.wrapper.SCWrapper;
-import iso.std.iso_iec._24727.tech.schema.BeginTransaction;
-import iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse;
-import iso.std.iso_iec._24727.tech.schema.Cancel;
-import iso.std.iso_iec._24727.tech.schema.CancelResponse;
-import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
-import iso.std.iso_iec._24727.tech.schema.Connect;
-import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.ControlIFD;
-import iso.std.iso_iec._24727.tech.schema.ControlIFDResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
-import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
-import iso.std.iso_iec._24727.tech.schema.DestroyChannelResponse;
-import iso.std.iso_iec._24727.tech.schema.Disconnect;
-import iso.std.iso_iec._24727.tech.schema.DisconnectResponse;
-import iso.std.iso_iec._24727.tech.schema.DisplayCapabilityType;
-import iso.std.iso_iec._24727.tech.schema.EndTransaction;
-import iso.std.iso_iec._24727.tech.schema.EndTransactionResponse;
-import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
-import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
-import iso.std.iso_iec._24727.tech.schema.EstablishContext;
-import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
-import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities;
-import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse;
-import iso.std.iso_iec._24727.tech.schema.GetStatus;
-import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
-import iso.std.iso_iec._24727.tech.schema.IFDCapabilitiesType;
-import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
-import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
-import iso.std.iso_iec._24727.tech.schema.KeyPadCapabilityType;
-import iso.std.iso_iec._24727.tech.schema.ListIFDs;
-import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
-import iso.std.iso_iec._24727.tech.schema.ModifyVerificationData;
-import iso.std.iso_iec._24727.tech.schema.ModifyVerificationDataResponse;
-import iso.std.iso_iec._24727.tech.schema.Output;
-import iso.std.iso_iec._24727.tech.schema.OutputInfoType;
-import iso.std.iso_iec._24727.tech.schema.OutputResponse;
-import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
-import iso.std.iso_iec._24727.tech.schema.ReleaseContextResponse;
-import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
-import iso.std.iso_iec._24727.tech.schema.Transmit;
-import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
-import iso.std.iso_iec._24727.tech.schema.VerifyUser;
-import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse;
-import iso.std.iso_iec._24727.tech.schema.Wait;
-import iso.std.iso_iec._24727.tech.schema.WaitResponse;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,7 +36,7 @@ import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.ifd.anytype.PACEInputType;
 import org.openecard.client.common.ifd.anytype.PACEOutputType;
-import org.openecard.client.common.interfaces.UserConsent;
+import org.openecard.client.gui.UserConsent;
 import org.openecard.client.ifd.scio.reader.PCSCFeatures;
 
 
@@ -105,16 +61,16 @@ public class IFD implements org.openecard.ws.IFD {
 
 
     protected synchronized void removeAsnycTerminal(String session) {
-        if (asyncWaitThreads != null) { // be sure the list still exists
-            asyncWaitThreads.remove(session);
-        }
+	if (asyncWaitThreads != null) { // be sure the list still exists
+	    asyncWaitThreads.remove(session);
+	}
     }
 
     protected Future runThread(Runnable r) {
-        return threadPool.submit(r);
+	return threadPool.submit(r);
     }
     protected Future runCallable(Callable c) {
-        return threadPool.submit(c);
+	return threadPool.submit(c);
     }
 
     private boolean hasContext() {
@@ -135,7 +91,7 @@ public class IFD implements org.openecard.ws.IFD {
     }
 
     public boolean addProtocol(String proto, ProtocolFactory factory) {
-        return protocolFactories.add(proto, factory);
+	return protocolFactories.add(proto, factory);
     }
 
 
@@ -150,13 +106,13 @@ public class IFD implements org.openecard.ws.IFD {
 	    if (ctxHandle == null) {
 		scwrapper = new SCWrapper();
 		ctxHandle = scwrapper.createHandle(ECardConstants.CONTEXT_HANDLE_DEFAULT_SIZE);
-                numClients = new AtomicInteger(1);
-                threadPool = Executors.newCachedThreadPool();
-                asyncWaitThreads = new ConcurrentSkipListMap<String, Future>();
+		numClients = new AtomicInteger(1);
+		threadPool = Executors.newCachedThreadPool();
+		asyncWaitThreads = new ConcurrentSkipListMap<String, Future>();
 	    } else {
-                // on second or further calls, increment usage counter
-                numClients.incrementAndGet();
-            }
+		// on second or further calls, increment usage counter
+		numClients.incrementAndGet();
+	    }
 
 	    // prepare response
 	    EstablishContextResponse response = WSHelper.makeResponse(EstablishContextResponse.class, WSHelper.makeResultOK());
@@ -183,18 +139,18 @@ public class IFD implements org.openecard.ws.IFD {
 	    } // </editor-fold>
 	    ReleaseContextResponse response;
 	    if (IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
-                if (numClients.decrementAndGet() == 0) { // last client detaches
-                    ctxHandle = null;
-                    numClients = null;
-                    // terminate thread pool
-                    threadPool.shutdown(); // wait for threads to die and block new requests
-                    if (! threadPool.isTerminated()) {
-                        threadPool.awaitTermination(10, TimeUnit.SECONDS); // wait for a clean shutdown
-                        threadPool.shutdownNow(); // force shutdown
-                    }
-                    threadPool = null;
-                    asyncWaitThreads = null;
-                }
+		if (numClients.decrementAndGet() == 0) { // last client detaches
+		    ctxHandle = null;
+		    numClients = null;
+		    // terminate thread pool
+		    threadPool.shutdown(); // wait for threads to die and block new requests
+		    if (! threadPool.isTerminated()) {
+			threadPool.awaitTermination(10, TimeUnit.SECONDS); // wait for a clean shutdown
+			threadPool.shutdownNow(); // force shutdown
+		    }
+		    threadPool = null;
+		    asyncWaitThreads = null;
+		}
 
 		response = WSHelper.makeResponse(ReleaseContextResponse.class, WSHelper.makeResultOK());
 		// <editor-fold defaultstate="collapsed" desc="log trace">
@@ -528,7 +484,7 @@ public class IFD implements org.openecard.ws.IFD {
 		    return response;
 		} else {
 		    // run wait in a future so it can be easily interrupted
-                    syncWaitThread = future;
+		    syncWaitThread = future;
 		    threadPool.execute(future);
 
 		    // get results from the future
@@ -544,7 +500,7 @@ public class IFD implements org.openecard.ws.IFD {
 		    return response;
 		}
 	    }
-        } catch (ExecutionException ex) { // this is the exception from within the future
+	} catch (ExecutionException ex) { // this is the exception from within the future
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
 	    if (_logger.isLoggable(Level.WARNING)) {
 		_logger.logp(Level.WARNING, this.getClass().getName(), "wait(Wait parameters)", ex.getMessage(), ex);
@@ -572,38 +528,38 @@ public class IFD implements org.openecard.ws.IFD {
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
 		response = WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
 	    } else {
-                if (parameters.getSessionIdentifier() != null) {
-                    // async wait
-                    String session = parameters.getSessionIdentifier();
-                    Future f = this.asyncWaitThreads.get(session);
-                    if (f != null) {
-                        f.cancel(true);
-                        response = WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResultOK());
-                    }
-                } else {
-                    // sync wait
-                    synchronized (this) {
-                        if (syncWaitThread != null) {
-                            syncWaitThread.cancel(true);
-                            syncWaitThread = null; // not really needed but seems cleaner
-                            response = WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResultOK());
-                        } else {
-                            response = WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.IO.CANCEL_NOT_POSSIBLE, "No synchronous Wait to cancel."));
-                        }
-                    }
-                }
-                // TODO: other cancel cases
-            }
+		if (parameters.getSessionIdentifier() != null) {
+		    // async wait
+		    String session = parameters.getSessionIdentifier();
+		    Future f = this.asyncWaitThreads.get(session);
+		    if (f != null) {
+			f.cancel(true);
+			response = WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResultOK());
+		    }
+		} else {
+		    // sync wait
+		    synchronized (this) {
+			if (syncWaitThread != null) {
+			    syncWaitThread.cancel(true);
+			    syncWaitThread = null; // not really needed but seems cleaner
+			    response = WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResultOK());
+			} else {
+			    response = WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.IO.CANCEL_NOT_POSSIBLE, "No synchronous Wait to cancel."));
+			}
+		    }
+		}
+		// TODO: other cancel cases
+	    }
 
-            if (response == null) {
-                // nothing to cancel
-                response = WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResultUnknownError("No cancelable command matches the given parameters."));
-            }
-            // <editor-fold defaultstate="collapsed" desc="log trace">
+	    if (response == null) {
+		// nothing to cancel
+		response = WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResultUnknownError("No cancelable command matches the given parameters."));
+	    }
+	    // <editor-fold defaultstate="collapsed" desc="log trace">
 		if (_logger.isLoggable(Level.FINER)) {
 		    _logger.exiting(this.getClass().getName(), "cancel(Cancel parameters)", response);
 		} // </editor-fold>
-            return response;
+	    return response;
 	} catch (Throwable t) {
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
 	    if (_logger.isLoggable(Level.WARNING)) {
@@ -619,44 +575,44 @@ public class IFD implements org.openecard.ws.IFD {
      */
     public ControlIFDResponse controlIFD(ControlIFD parameters) {
 	try {
-            // <editor-fold defaultstate="collapsed" desc="log trace">
+	    // <editor-fold defaultstate="collapsed" desc="log trace">
 	    if (_logger.isLoggable(Level.FINER)) {
 		_logger.entering(this.getClass().getName(), "controlIFD(ControlIFD parameters)", parameters);
 	    } // </editor-fold>
-            ControlIFDResponse response;
-            if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
-                response = WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
-                // <editor-fold defaultstate="collapsed" desc="log trace">
-                if (_logger.isLoggable(Level.FINER)) {
-                    _logger.exiting(this.getClass().getName(), "controlIFD(ControlIFD parameters)", response);
-                } // </editor-fold>
-                return response;
-            } else {
-                try {
-                    SCTerminal t = scwrapper.getTerminal(parameters.getIFDName());
-                    byte[] command = parameters.getCommand();
-                    byte ctrlCode = command[0];
-                    command = Arrays.copyOfRange(command, 1, command.length);
-                    // check if the code is present
-                    byte[] resultCommand = t.executeCtrlCode(ctrlCode, command);
-                    // TODO: evaluate result
-                    response = WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResultOK());
-                    response.setResponse(resultCommand);
-                    // <editor-fold defaultstate="collapsed" desc="log trace">
-                    if (_logger.isLoggable(Level.FINER)) {
-                        _logger.exiting(this.getClass().getName(), "controlIFD(ControlIFD parameters)", response);
-                    } // </editor-fold>
-                    return response;
+	    ControlIFDResponse response;
+	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
+		response = WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
+		// <editor-fold defaultstate="collapsed" desc="log trace">
+		if (_logger.isLoggable(Level.FINER)) {
+		    _logger.exiting(this.getClass().getName(), "controlIFD(ControlIFD parameters)", response);
+		} // </editor-fold>
+		return response;
+	    } else {
+		try {
+		    SCTerminal t = scwrapper.getTerminal(parameters.getIFDName());
+		    byte[] command = parameters.getCommand();
+		    byte ctrlCode = command[0];
+		    command = Arrays.copyOfRange(command, 1, command.length);
+		    // check if the code is present
+		    byte[] resultCommand = t.executeCtrlCode(ctrlCode, command);
+		    // TODO: evaluate result
+		    response = WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResultOK());
+		    response.setResponse(resultCommand);
+		    // <editor-fold defaultstate="collapsed" desc="log trace">
+		    if (_logger.isLoggable(Level.FINER)) {
+			_logger.exiting(this.getClass().getName(), "controlIFD(ControlIFD parameters)", response);
+		    } // </editor-fold>
+		    return response;
 
-                } catch (IFDException ex) {
-                    response = WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResult(ex));
-                    // <editor-fold defaultstate="collapsed" desc="log trace">
-                    if (_logger.isLoggable(Level.FINER)) {
-                        _logger.exiting(this.getClass().getName(), "controlIFD(ControlIFD parameters)", response);
-                    } // </editor-fold>
-                    return response;
-                }
-            }
+		} catch (IFDException ex) {
+		    response = WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResult(ex));
+		    // <editor-fold defaultstate="collapsed" desc="log trace">
+		    if (_logger.isLoggable(Level.FINER)) {
+			_logger.exiting(this.getClass().getName(), "controlIFD(ControlIFD parameters)", response);
+		    } // </editor-fold>
+		    return response;
+		}
+	    }
 	} catch (Throwable t) {
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
 	    if (_logger.isLoggable(Level.WARNING)) {
@@ -1051,59 +1007,59 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    SCTerminal term = this.scwrapper.getTerminal(slotHandle);
 	    SCCard card = this.scwrapper.getCard(slotHandle);
-            SCChannel channel = card.getChannel(slotHandle);
+	    SCChannel channel = card.getChannel(slotHandle);
 	    DIDAuthenticationDataType protoParam = parameters.getAuthenticationProtocolData();
 	    String protocol = protoParam.getProtocol();
 
 	    // check if it is PACE and try to perform native implementation
-            // get pace capabilities
-            List<Long> paceCapabilities = term.getPACECapabilities();
-            List<String> supportedProtos = buildPACEProtocolList(paceCapabilities);
-            // check out if this actually a PACE request
-            if (!supportedProtos.isEmpty() && supportedProtos.get(0).startsWith(protocol)) { // i don't care which type is supported, i try it anyways
-                // yeah, PACE seems to be supported by the reader, big win
-                PACEInputType paceParam = new PACEInputType(protoParam);
-                // extract variables needed for pace
-                byte pinID      = paceParam.getPinID();
-                // optional elements
-                byte[] chat     = paceParam.getCHAT();
-                String pin      = paceParam.getPIN();
-                byte[] certDesc = paceParam.getCertificateDescription();
+	    // get pace capabilities
+	    List<Long> paceCapabilities = term.getPACECapabilities();
+	    List<String> supportedProtos = buildPACEProtocolList(paceCapabilities);
+	    // check out if this actually a PACE request
+	    if (!supportedProtos.isEmpty() && supportedProtos.get(0).startsWith(protocol)) { // i don't care which type is supported, i try it anyways
+		// yeah, PACE seems to be supported by the reader, big win
+		PACEInputType paceParam = new PACEInputType(protoParam);
+		// extract variables needed for pace
+		byte pinID      = paceParam.getPinID();
+		// optional elements
+		byte[] chat     = paceParam.getCHAT();
+		String pin      = paceParam.getPIN();
+		byte[] certDesc = paceParam.getCertificateDescription();
 
-                // prepare pace data structures
-                EstablishPACERequest estPaceReq = new EstablishPACERequest(pinID, chat, null, certDesc); // TODO: add supplied PIN
-                ExecutePACERequest  execPaceReq = new ExecutePACERequest(ExecutePACERequest.Function.EstablishPACEChannel, estPaceReq.toBytes());
-                // see if PACE type demanded for this input value combination is supported
-                if (estPaceReq.isSupportedType(paceCapabilities)) {
-                    byte[] reqData = execPaceReq.toBytes();
-                    // execute pace
-                    byte[] resData = term.executeCtrlCode(PCSCFeatures.EXECUTE_PACE, reqData);
-                    // evaluate response
-                    ExecutePACEResponse execPaceRes = new ExecutePACEResponse(resData);
-                    if (execPaceRes.isError()) {
-                        return WSHelper.makeResponse(EstablishChannelResponse.class, execPaceRes.getResult());
-                    }
-                    EstablishPACEResponse estPaceRes = new EstablishPACEResponse(execPaceRes.getData());
-                    // get values and prepare response
-                    PACEOutputType authDataResponse = paceParam.getOutputType();
-                    // mandatory fields
-                    authDataResponse.setStatusbytes(estPaceRes.getStatus());
-                    authDataResponse.setEF_CardAccess(estPaceRes.getCardAccess());
-                    // optional fields
-                    if (estPaceRes.hasCar()) {
-                        authDataResponse.setCAR(estPaceRes.getCar());
-                    }
-                    if (estPaceRes.hasCarPrev()) {
-                        authDataResponse.setCARprev(estPaceRes.getCarPrev());
-                    }
-                    if (estPaceRes.hasIDicc()) {
-                        authDataResponse.setIDicc(estPaceRes.getIDicc());
-                    }
-                    // create response type and return
-                    EstablishChannelResponse response = WSHelper.makeResponse(EstablishChannelResponse.class, WSHelper.makeResultOK());
-                    response.setAuthenticationProtocolData(authDataResponse.getAuthDataType());
-                    return response;
-                }
+		// prepare pace data structures
+		EstablishPACERequest estPaceReq = new EstablishPACERequest(pinID, chat, null, certDesc); // TODO: add supplied PIN
+		ExecutePACERequest  execPaceReq = new ExecutePACERequest(ExecutePACERequest.Function.EstablishPACEChannel, estPaceReq.toBytes());
+		// see if PACE type demanded for this input value combination is supported
+		if (estPaceReq.isSupportedType(paceCapabilities)) {
+		    byte[] reqData = execPaceReq.toBytes();
+		    // execute pace
+		    byte[] resData = term.executeCtrlCode(PCSCFeatures.EXECUTE_PACE, reqData);
+		    // evaluate response
+		    ExecutePACEResponse execPaceRes = new ExecutePACEResponse(resData);
+		    if (execPaceRes.isError()) {
+			return WSHelper.makeResponse(EstablishChannelResponse.class, execPaceRes.getResult());
+		    }
+		    EstablishPACEResponse estPaceRes = new EstablishPACEResponse(execPaceRes.getData());
+		    // get values and prepare response
+		    PACEOutputType authDataResponse = paceParam.getOutputType();
+		    // mandatory fields
+		    authDataResponse.setStatusbytes(estPaceRes.getStatus());
+		    authDataResponse.setEF_CardAccess(estPaceRes.getCardAccess());
+		    // optional fields
+		    if (estPaceRes.hasCar()) {
+			authDataResponse.setCAR(estPaceRes.getCar());
+		    }
+		    if (estPaceRes.hasCarPrev()) {
+			authDataResponse.setCARprev(estPaceRes.getCarPrev());
+		    }
+		    if (estPaceRes.hasIDicc()) {
+			authDataResponse.setIDicc(estPaceRes.getIDicc());
+		    }
+		    // create response type and return
+		    EstablishChannelResponse response = WSHelper.makeResponse(EstablishChannelResponse.class, WSHelper.makeResultOK());
+		    response.setAuthenticationProtocolData(authDataResponse.getAuthDataType());
+		    return response;
+		}
 	    } // end native pace support
 
 	    // check out available software protocols
@@ -1113,7 +1069,7 @@ public class IFD implements org.openecard.ws.IFD {
 		EstablishChannelResponse response = protoImpl.establish(parameters, this, null); // TODO: hand over GUI implementation
 		// register protocol instance for secure messaging when protocol was processed successful
 		if (response.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
-                    channel.addSecureMessaging(protoImpl);
+		    channel.addSecureMessaging(protoImpl);
 		}
 		return response;
 	    }

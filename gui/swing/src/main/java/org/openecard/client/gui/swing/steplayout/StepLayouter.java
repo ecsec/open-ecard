@@ -2,8 +2,8 @@ package org.openecard.client.gui.swing.steplayout;
 
 import java.awt.Container;
 import java.util.List;
+import org.openecard.client.gui.definition.InputInfoUnit;
 import org.openecard.client.gui.swing.components.StepComponent;
-import org.openecard.ws.gui.v1.InputInfoUnitType;
 
 
 /**
@@ -23,21 +23,21 @@ public abstract class StepLayouter {
      * @param stepName Name of the step. This can be used to have a different layouter for disclaimer and pin entry step for example.
      * @return Layouter which can return panel and components list.
      */
-    public static StepLayouter create(List<InputInfoUnitType> infoUnits, String dialogType, String stepName) {
-        StepLayouter layouter = null;
+    public static StepLayouter create(List<InputInfoUnit> infoUnits, String dialogType, String stepName) {
+	StepLayouter layouter = null;
 
-        // select method to create components
-        // it is even possible to use different layouters for the individual steps (see stepName)
-        if (dialogType.equals("somefancy dialog type like nPa-eID")) {
-            // TODO: create and return
-        }
+	// select method to create components
+	// it is even possible to use different layouters for the individual steps (see stepName)
+	if (dialogType.equals("somefancy dialog type like nPa-eID")) {
+	    // TODO: create and return
+	}
 
-        // default type if nothing happened so far
-        if (layouter == null) {
-            layouter = new DefaultStepLayouter(infoUnits);
-        }
+	// default type if nothing happened so far
+	if (layouter == null) {
+	    layouter = new DefaultStepLayouter(infoUnits);
+	}
 
-        return layouter;
+	return layouter;
     }
 
 

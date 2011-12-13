@@ -16,7 +16,7 @@
 
   <modules>
     <module>ifd-common</module>
-    <module>protocols</module>
+    <module>ifd-protocols</module>
     <module>scio-backend</module>
     <module>ifd-core</module>
   </modules>

@@ -12,7 +12,7 @@
   <groupId>org.openecard.client.sal</groupId>
   <artifactId>tiny-sal</artifactId>
   <packaging>jar</packaging>
-  <name>tiny SAL</name>
+  <name>Tiny SAL</name>
 
   <dependencies>
     <dependency>

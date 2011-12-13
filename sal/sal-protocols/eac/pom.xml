@@ -6,12 +6,12 @@
 
   <parent>
     <groupId>org.openecard.client.sal</groupId>
-    <artifactId>protocols</artifactId>
+    <artifactId>sal-protocols</artifactId>
     <version>0.0.2-SNAPSHOT</version>
   </parent>
 
   <groupId>org.openecard.client.sal.protocols</groupId>
-  <artifactId>crypto-lite</artifactId>
-  <name>Crypto-lite protocol</name>
+  <artifactId>eac</artifactId>
+  <name>EAC protocol</name>
   
 </project>

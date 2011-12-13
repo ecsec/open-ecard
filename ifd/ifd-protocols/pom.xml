@@ -5,24 +5,23 @@
 
   <parent>
     <groupId>org.openecard.client</groupId>
-    <artifactId>sal</artifactId>
+    <artifactId>ifd</artifactId>
     <version>0.0.2-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.openecard.client.sal</groupId>
-  <artifactId>protocols</artifactId>
+  <groupId>org.openecard.client.ifd</groupId>
+  <artifactId>ifd-protocols</artifactId>
   <packaging>pom</packaging>
-  <name>SAL protocols</name>
+  <name>IFD protocols</name>
 
   <modules>
-    <module>eac</module>
-    <module>crypto-lite</module>
+    <module>pace</module>
   </modules>
 
   <dependencies>
     <dependency>
-      <groupId>org.openecard.client.sal</groupId>
-      <artifactId>sal-common</artifactId>
+      <groupId>org.openecard.client.ifd</groupId>
+      <artifactId>ifd-common</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

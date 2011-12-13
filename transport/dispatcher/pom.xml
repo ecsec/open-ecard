@@ -12,7 +12,7 @@
   <groupId>org.openecard.client.transport</groupId>
   <artifactId>dispatcher</artifactId>
   <packaging>jar</packaging>
-  <name>dispatcher</name>
+  <name>Dispatcher</name>
 
   <dependencies>
     <dependency>

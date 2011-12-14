@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.interfaces.Environment;
 import org.openecard.client.common.logging.LogManager;
 
@@ -18,7 +19,7 @@ import org.openecard.client.common.logging.LogManager;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class MessageDispatcher {
+public class MessageDispatcher implements Dispatcher {
 
     private static final Logger _logger = LogManager.getLogger(MessageDispatcher.class.getName());
 
@@ -35,6 +36,7 @@ public class MessageDispatcher {
     }
 
 
+    @Override
     public Object deliver(Object req) throws IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 	Class reqClass = req.getClass();
 	Service s = getService(reqClass);

@@ -1,7 +1,5 @@
 package org.openecard.client.transport.paos;
 
-import org.openecard.client.common.interfaces.AsyncTransportCallback;
-import org.openecard.client.common.interfaces.Transport;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.WSMarshaller;
@@ -9,6 +7,7 @@ import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.WSMarshallerFactory;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
+import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -25,6 +24,8 @@ import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
+import org.openecard.client.common.interfaces.Dispatcher;
+import org.openecard.client.common.logging.LogManager;
 import org.w3c.dom.Document;
 
 
@@ -32,7 +33,7 @@ import org.w3c.dom.Document;
  *
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>, Tobias Wich <tobias.wich@ecsec.de>
  */
-public class PAOS implements Transport {
+public class PAOS {
 
     static {
         try {
@@ -42,11 +43,14 @@ public class PAOS implements Transport {
         }
     }
 
+    private static final Logger _logger = LogManager.getLogger(PAOS.class.getName());
     private static final WSMarshaller m;
-    private String endpoint;
+    private final String endpoint;
+    private final Dispatcher dispatcher;
     
-    public PAOS(String endpoint) {
+    public PAOS(String endpoint, Dispatcher dispatcher) {
         this.endpoint = endpoint;
+        this.dispatcher = dispatcher;
     }
 
     private String getRelatesTo(SOAPMessage msg) throws SOAPException {
@@ -169,10 +173,12 @@ public class PAOS implements Transport {
 	return msg;
     }
 
-    @Override
-    public Object send(Object message) {
-        try {
-            String s = createPAOSResponse(message);
+    public StartPAOSResponse sendStartPAOS(StartPAOS message) throws Exception {
+        Object msg = message;
+
+        // loop and send makes a computer happy
+        do {
+            String s = createPAOSResponse(msg);
             System.out.println(s);
             URL url = new URL(endpoint);
             HttpURLConnection httpPost = (HttpURLConnection) url.openConnection();
@@ -194,16 +200,12 @@ public class PAOS implements Transport {
             }
             writer.close();
             reader.close();
-            return processPAOSRequest(result.toString());
-        } catch (Exception ex) {
-            // something went horribly wrong
-        } 
-        return null;
-    }
-
-    @Override
-    public void registerCallback(AsyncTransportCallback callback) {
-        // no async communication
+            Object requestObj = processPAOSRequest(result.toString());
+            // send via dispatcher
+            msg = dispatcher.deliver(requestObj);
+        } while (! (msg instanceof StartPAOSResponse));
+        // after loop is finished, msg is StartPAOSResponse
+        return (StartPAOSResponse) msg;
     }
 
 }

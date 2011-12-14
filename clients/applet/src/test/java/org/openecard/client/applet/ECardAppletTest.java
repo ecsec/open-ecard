@@ -10,15 +10,14 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.event.EventManager;
-import org.openecard.client.sal.MicroSAL;
 import iso.std.iso_iec._24727.tech.schema.Initialize;
 import iso.std.iso_iec._24727.tech.schema.InitializeResponse;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openecard.client.common.ClientEnv;
 import org.openecard.client.recognition.RecognitionProperties;
+import org.openecard.client.sal.TinySAL;
 import org.openecard.client.ws.WSClassLoader;
 import org.openecard.ws.GetRecognitionTree;
 import org.openecard.ws.IFD;
@@ -33,29 +32,19 @@ public class ECardAppletTest {
     
     private IFD ifd;
     private CardRecognition cr;
-    private EnvStub env;
+    private ClientEnv env;
     private EventManager manager;
-    private MicroSAL sal;
+    private TinySAL sal;
     private DummyCallback cb;
-    
+
     private byte[] ctx;
     private String sessionId;
-    
+
     private boolean ctxEstablished;
     private boolean salInitialized;
     private boolean crInitialized;
-    
-    public ECardAppletTest() {
-    }
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
 
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
-    
     @Before
     public void setUp() {
         System.out.print("Create IFD... ");
@@ -82,7 +71,7 @@ public class ECardAppletTest {
         }
 
         System.out.print("Create Environment... ");
-        env = new EnvStub();
+        env = new ClientEnv();
         System.out.println("done.");
 
         System.out.print("Set SessionId... ");
@@ -94,7 +83,7 @@ public class ECardAppletTest {
         System.out.println("done.");
         
         System.out.print("Create SAL... ");
-        sal = new MicroSAL(env);
+        sal = new TinySAL(env);
         System.out.println("done.");
         
         System.out.print("Register SAL for all events... ");
@@ -156,7 +145,7 @@ public class ECardAppletTest {
         }
         
     }
-    
+
     private boolean establishContext() {
         EstablishContext req = new EstablishContext();
         EstablishContextResponse res = ifd.establishContext(req);
@@ -166,7 +155,7 @@ public class ECardAppletTest {
         }
         return false;
     }
-    
+
     private boolean initializeSAL() {
         InitializeResponse initResponse = sal.initialize(new Initialize());
         if (initResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
@@ -174,4 +163,5 @@ public class ECardAppletTest {
         }
         return false;
     }
+
 }

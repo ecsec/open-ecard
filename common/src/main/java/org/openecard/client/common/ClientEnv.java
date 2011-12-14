@@ -1,11 +1,12 @@
 package org.openecard.client.common;
 
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.interfaces.Environment;
 import org.openecard.client.common.interfaces.EventManager;
-import org.openecard.client.common.interfaces.Transport;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 import org.openecard.ws.IFD;
+import org.openecard.ws.SAL;
 
 
 /**
@@ -15,18 +16,15 @@ import org.openecard.ws.IFD;
 public class ClientEnv implements Environment {
 
     private IFD ifd;
+    private SAL sal;
     private EventManager manager;
-    private Map<String, Transport> transports;
-    
+    private Dispatcher dispatcher;
+    private Map<String, Object> genericComponents;
+
     public ClientEnv() {
-        transports = new ConcurrentSkipListMap<String, Transport>();
+        genericComponents = new ConcurrentSkipListMap<String, Object>();
     }
-    
-    public ClientEnv(IFD ifd, EventManager manager) {
-        this.ifd = ifd;
-        this.manager = manager;
-        transports = new ConcurrentSkipListMap<String, Transport>();
-    }
+
 
     @Override
     public void setIFD(IFD ifd) {
@@ -49,18 +47,33 @@ public class ClientEnv implements Environment {
     }
 
     @Override
-    public void addTransport(String id, Transport transport) {
-        transports.put(id, transport);
+    public void setSAL(SAL sal) {
+        this.sal = sal;
     }
 
     @Override
-    public Transport getTransport(String id) {
-        return transports.get(id);
+    public SAL getSAL() {
+        return sal;
     }
 
     @Override
-    public Map<String, Transport> getAllTransports() {
-        return transports;
+    public void setDispatcher(Dispatcher dispatcher) {
+        this.dispatcher = dispatcher;
+    }
+
+    @Override
+    public Dispatcher getDispatcher() {
+        return dispatcher;
+    }
+
+    @Override
+    public void setGenericComponent(String id, Object component) {
+        genericComponents.put(id, component);
+    }
+
+    @Override
+    public Object getGenericComponent(String id) {
+        return genericComponents.get(id);
     }
     
 }

@@ -6,7 +6,6 @@ import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.recognition.CardRecognition;
-import org.openecard.client.sal.MicroSAL;
 import org.openecard.client.transport.paos.PAOS;
 import org.openecard.client.event.EventManager;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
@@ -24,6 +23,8 @@ import java.util.logging.Logger;
 import javax.swing.JApplet;
 import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.recognition.RecognitionProperties;
+import org.openecard.client.sal.TinySAL;
+import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.ws.WSClassLoader;
 import org.openecard.ws.GetRecognitionTree;
 
@@ -38,7 +39,7 @@ public class ECardApplet extends JApplet {
     
     private Thread worker;
     private ClientEnv env;
-    private MicroSAL sal;
+    private TinySAL sal;
     private IFD ifd;
     private CardRecognition recognition;
     private EventManager em;
@@ -71,6 +72,7 @@ public class ECardApplet extends JApplet {
         setParams();
         worker = null;
         env = new ClientEnv();
+        env.setDispatcher(new MessageDispatcher(env));
         ifd = new IFD();
         ifd.setGui(new SwingUserConsent(new SwingDialogWrapper(findParentFrame())));
         env.setIFD(ifd);
@@ -94,11 +96,10 @@ public class ECardApplet extends JApplet {
         } else {
             recognition = null;
         }
-        paos = new PAOS(endpointUrl);
-        env.addTransport("0", paos);
+        paos = new PAOS(endpointUrl, env.getDispatcher());
         em = new EventManager(recognition, env, ctx);
         env.setEventManager(em);
-        sal = new MicroSAL(env);
+        sal = new TinySAL(env);
         em.registerAllEvents(sal);
         jsec = new JSEventCallback(this);
         em.registerAllEvents(jsec);
@@ -224,8 +225,12 @@ public class ECardApplet extends JApplet {
         return env;
     }
 
-    public MicroSAL getMicroSAL() {
+    public TinySAL getTinySAL() {
         return sal;
+    }
+
+    public PAOS getPAOS() {
+        return paos;
     }
 
     private void setParams() {

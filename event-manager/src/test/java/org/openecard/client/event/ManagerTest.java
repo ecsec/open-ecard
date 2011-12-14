@@ -1,14 +1,12 @@
 package org.openecard.client.event;
 
-import org.openecard.client.event.EventManager;
 import org.openecard.client.common.interfaces.Environment;
-import org.openecard.client.common.interfaces.Transport;
 import org.openecard.client.ifd.scio.IFD;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
-import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.openecard.client.common.ClientEnv;
 import static org.junit.Assert.*;
 
 
@@ -18,52 +16,13 @@ import static org.junit.Assert.*;
  */
 public class ManagerTest {
 
-    private class Env implements Environment {
-	private IFD ifd;
-	@Override
-	public void setIFD(org.openecard.ws.IFD ifd) {
-	    this.ifd = (IFD) ifd;
-	}
-
-	@Override
-	public org.openecard.ws.IFD getIFD() {
-	    return this.ifd;
-	}
-
-	@Override
-	public void setEventManager(org.openecard.client.common.interfaces.EventManager manager) {
-	    throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	@Override
-	public org.openecard.client.common.interfaces.EventManager getEventManager() {
-	    throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	@Override
-	public void addTransport(String id, Transport transport) {
-	    throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	@Override
-	public Transport getTransport(String id) {
-	    throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	@Override
-	public Map<String, Transport> getAllTransports() {
-	    throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-    }
-
     @Ignore
     @Test
     public void runManager() throws InterruptedException {
 	IFD ifd = new IFD();
 	EstablishContext ctx = new EstablishContext();
 	EstablishContextResponse ctxR = ifd.establishContext(ctx);
-	Environment env = new Env();
+	Environment env = new ClientEnv();
 	env.setIFD(ifd);
 	EventManager evt = new EventManager(null, env, ctxR.getContextHandle());
 	evt.initialize();

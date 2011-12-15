@@ -2,6 +2,8 @@ package org.openecard.client.common;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Properties;
 
 
@@ -19,6 +21,7 @@ public class OverridingProperties {
 	if (in == null) {
 	    in = OverridingProperties.class.getResourceAsStream(fName);
 	}
+        Reader r = new InputStreamReader(in, "utf-8");
 	properties = new Properties();
 	properties.load(in);
 	init();

@@ -201,11 +201,13 @@ public class PAOS {
             writer.close();
             reader.close();
             Object requestObj = processPAOSRequest(result.toString());
+            // break when message is startpaosresponse
+            if (requestObj instanceof StartPAOSResponse) {
+                return (StartPAOSResponse) requestObj;
+            }
             // send via dispatcher
             msg = dispatcher.deliver(requestObj);
-        } while (! (msg instanceof StartPAOSResponse));
-        // after loop is finished, msg is StartPAOSResponse
-        return (StartPAOSResponse) msg;
+        } while (true);
     }
 
 }

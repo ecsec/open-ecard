@@ -12,7 +12,7 @@
   <groupId>org.openecard.client.crypto</groupId>
   <artifactId>bouncy-android</artifactId>
   <packaging>jar</packaging>
-  <name>Android Bouncy Castle</name>
+  <name>openecard Bouncy Castle</name>
 
   <dependencies>
     <dependency>
@@ -53,7 +53,7 @@
 		<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" />
 		<jarjar destfile="${project.build.directory}/${project.build.finalName}-jar-with-dependencies.jar"
 			update="true">
-		  <rule pattern="org.bouncycastle.**" result="org.openecard.android.bouncycastle.@1" />
+		  <rule pattern="org.bouncycastle.**" result="org.openecard.bouncycastle.@1" />
 		</jarjar>
 		<delete file="${project.build.directory}/${project.build.finalName}.jar" />
 		<copy file="${project.build.directory}/${project.build.finalName}-jar-with-dependencies.jar"

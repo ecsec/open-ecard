@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://ws.openecard.org/protocols/tls/v1.0"
+	xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:tls="http://ws.openecard.org/protocols/tls/v1.0"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<!-- ============================================== -->
+	<!--                   09.12.2011                   -->
+	<!-- ============================================== -->
+
+	
+
+	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
+		schemaLocation="ISO24727-Protocols.xsd" />
+
+	<!-- ============================================== -->
+	<!--          Definition of common types            -->
+	<!-- ============================================== -->
+
+
+	<!-- ============================================== -->
+	<!--                     TLS                        -->
+	<!-- ============================================== -->
+	<!--   URI = http://ws.openecard.org/protocols/tls  -->
+	<!-- ============================================== -->
+
+
+	<!-- ============================================== -->
+	<!--                     Marker                     -->
+	<!-- ============================================== -->
+
+	<complexType name="TLSMarkerType">
+		<complexContent>
+			<restriction base="iso:DIDAbstractMarkerType">
+				<sequence>
+					<element name="Key" type="tls:KeyType"/>
+					<element name="Pin" type="tls:PinType" maxOccurs="1" minOccurs="0"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<complexType name="KeyType">
+		<sequence>
+			<element name="ApplicationIdentifier" type="hexBinary"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="CardAlgRef" type="hexBinary" maxOccurs="1" minOccurs="0"></element>
+			<element name="HashAlgRef" type="hexBinary" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="KeyRef" type="hexBinary"></element>
+			<element name="SignatureGenerationInfo"
+				type="iso:SignatureGenerationType" maxOccurs="1" minOccurs="0" />
+			<element name="Certificate" type="iso:PathType"
+				maxOccurs="unbounded" minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+
+	<complexType name="PinType">
+		<sequence>
+			<element name="PinRef" type="hexBinary"></element>
+			<element name="PasswordAttributes"
+				type="iso:PasswordAttributesType" maxOccurs="1" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+
+</schema>

@@ -1,5 +1,6 @@
 package org.openecard.client.recognition;
 
+import java.util.Iterator;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.tlv.TLV;
@@ -7,6 +8,7 @@ import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.util.CardCommands;
 import org.openecard.client.common.util.Helper;
 import iso.std.iso_iec._24727.tech.schema.CardCall;
+import iso.std.iso_iec._24727.tech.schema.Conclusion;
 import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
@@ -22,12 +24,26 @@ import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Logger;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
 import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.openecard.client.recognition.statictree.LocalFileTree;
+import org.openecard.client.ws.WSMarshaller;
+import org.openecard.client.ws.WSMarshallerFactory;
 import org.openecard.ws.GetRecognitionTree;
 import org.openecard.ws.IFD;
+import org.openecard.ws.protocols.tls.v1.TLSMarkerType;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 
 /**
@@ -37,23 +53,87 @@ import org.openecard.ws.IFD;
 public class CardRecognition {
 
     private static final Logger _logger = LogManager.getLogger(CardRecognition.class.getName());
+    private static final NamespaceContext nsCtx = new NamespaceContext() {
+        Map<String, String> nsMap = Collections.unmodifiableMap(new TreeMap<String, String>() {
+            {
+                put("iso", "urn:iso:std:iso-iec:24727:tech:schema");
+                put("tls", "http://ws.openecard.org/protocols/tls/v1.0");
+            }
+        });
+        @Override
+        public String getNamespaceURI(String prefix) {
+            return nsMap.get(prefix);
+        }
+        @Override
+        public String getPrefix(String namespaceURI) {
+            for (Map.Entry<String,String> e : nsMap.entrySet()) {
+                if (e.getValue().equals(namespaceURI)) {
+                    return e.getKey();
+                }
+            }
+            return null;
+        }
+        @Override
+        public Iterator getPrefixes(String namespaceURI) {
+            return nsMap.keySet().iterator();
+        }
+    };
 
     private final RecognitionTree tree;
+    // TODO: replace with custom TLSMarkerType
+    private final TreeMap<String,TLSMarkerType> tlsMarkers = new TreeMap<String, TLSMarkerType>();
 
     private final IFD ifd;
     private final byte[] ctx;
 
 
+    /**
+     * Create recognizer with tree from local (file based) repository.
+     * @param ifd
+     * @param ctx
+     * @throws Exception
+     */
+    public CardRecognition(IFD ifd, byte[] ctx) throws Exception {
+        this(ifd, ctx, null);
+    }
+
     public CardRecognition(IFD ifd, byte[] ctx, GetRecognitionTree client) throws Exception {
 	this.ifd = ifd;
 	this.ctx = ctx;
 
-	// load tree service
+        // load alternative tree service if needed
+        WSMarshaller marshaller = WSMarshallerFactory.createInstance();
+        if (client == null) {
+            client = new LocalFileTree(marshaller);
+        }
+
+	// request tree from service
 	iso.std.iso_iec._24727.tech.schema.GetRecognitionTree req = new iso.std.iso_iec._24727.tech.schema.GetRecognitionTree();
 	req.setAction(RecognitionProperties.getAction());
 	GetRecognitionTreeResponse resp = client.getRecognitionTree(req);
 	checkResult(resp.getResult());
 	this.tree = resp.getRecognitionTree();
+
+        // find markers in tree
+        Document d = marshaller.marshal(this.tree);
+        XPath xpath = XPathFactory.newInstance().newXPath();
+        // set namespace context needed in xpath expression
+        xpath.setNamespaceContext(nsCtx);
+
+        // compile xpath and get results
+        XPathExpression expr = xpath.compile("//iso:Conclusion[iso:TLSMarker]");
+        NodeList nodes = (NodeList) expr.evaluate(d, XPathConstants.NODESET);
+        for (int i=0; i < nodes.getLength(); i++) {
+            Conclusion c = (Conclusion) marshaller.unmarshal(nodes.item(i));
+            String type = c.getRecognizedCardType();
+            TLSMarkerType marker = c.getTLSMarker();
+            tlsMarkers.put(type, marker);
+        }
+    }
+
+
+    public TLSMarkerType getTLSMarker(String cardType) {
+        return tlsMarkers.get(cardType);
     }
 
 

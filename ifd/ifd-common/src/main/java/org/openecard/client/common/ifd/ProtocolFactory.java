@@ -19,5 +19,4 @@ public interface ProtocolFactory {
      * @return instance of the protocol which can be used for one connection
      */
     public Protocol createInstance();
-
 }

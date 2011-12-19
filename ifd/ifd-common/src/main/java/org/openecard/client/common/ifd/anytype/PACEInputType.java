@@ -3,7 +3,6 @@ package org.openecard.client.common.ifd.anytype;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import javax.xml.parsers.ParserConfigurationException;
 
-
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
@@ -11,31 +10,33 @@ import javax.xml.parsers.ParserConfigurationException;
 public class PACEInputType {
 
     private final AuthDataMap authMap;
-
-    private final byte pinID;
+    private final byte passwordType;
     private final byte[] chat;
-    private final String pin;
+    private final String password;
     private final byte[] certDesc;
 
     public PACEInputType(DIDAuthenticationDataType baseType) throws ParserConfigurationException {
         authMap = new AuthDataMap(baseType);
 
-        pinID      = authMap.getContentAsBytes("PinID")[0];
+        passwordType = authMap.getContentAsBytes("PasswordType")[0];
         // optional elements
-        chat     = authMap.getContentAsBytes("CHAT");
-        pin      = authMap.getContentAsString("PIN");
+        chat = authMap.getContentAsBytes("CHAT");
+        password = authMap.getContentAsString("Password");
         certDesc = authMap.getContentAsBytes("CertificateDescription");
     }
 
-    public byte getPinID() {
-        return pinID;
+    public byte getPasswordType() {
+        return passwordType;
     }
+
     public byte[] getCHAT() {
         return chat;
     }
-    public String getPIN() {
-        return pin;
+
+    public String getPassword() {
+        return password;
     }
+
     public byte[] getCertificateDescription() {
         return certDesc;
     }
@@ -43,5 +44,4 @@ public class PACEInputType {
     public PACEOutputType getOutputType() {
         return new PACEOutputType(authMap);
     }
-
 }

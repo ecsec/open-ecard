@@ -78,7 +78,7 @@ public class TerminalTest {
     @Test
     public void testFeatures() {
         init();
-        ifd.setGui(new SwingUserConsent(new SwingDialogWrapper()));
+        ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
 
         Connect con = new Connect();
         con.setContextHandle(ctxHandle);

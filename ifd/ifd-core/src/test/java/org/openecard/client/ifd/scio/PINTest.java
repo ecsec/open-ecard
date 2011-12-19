@@ -134,7 +134,7 @@ public class PINTest {
     @Test
     public void verifyeGK() {
 	IFD ifd = new IFD();
-	ifd.setGui(new SwingUserConsent(new SwingDialogWrapper()));
+	ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
 	EstablishContext eCtx = new EstablishContext();
 	byte[] ctxHandle = ifd.establishContext(eCtx).getContextHandle();
 
@@ -165,7 +165,7 @@ public class PINTest {
     @Test
     public void executePACE_PIN() throws UnsupportedDataTypeException, JAXBException, SAXException, WSMarshallerException {
 	IFD ifd = new IFD();
-	ifd.setGui(new SwingUserConsent(new SwingDialogWrapper()));
+	ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
 	EstablishContext eCtx = new EstablishContext();
 	byte[] ctxHandle = ifd.establishContext(eCtx).getContextHandle();
 

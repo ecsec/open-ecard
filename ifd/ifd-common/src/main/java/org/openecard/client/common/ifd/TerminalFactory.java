@@ -2,7 +2,6 @@ package org.openecard.client.common.ifd;
 
 import javax.smartcardio.CardTerminals;
 
-
 /**
  * TerminalFactory interface similar to javax.smartcardio.TerminalFactory, but without
  * the static factory elements which are not present in systems like Android.<br/>
@@ -31,5 +30,4 @@ public interface TerminalFactory {
      * supported by this factory.
      */
     public CardTerminals terminals();
-
 }

@@ -86,7 +86,7 @@ public class IFD implements org.openecard.ws.IFD {
 	return hasContext.booleanValue();
     }
 
-    public void setGui(UserConsent gui) {
+    public void setGUI(UserConsent gui) {
 	this.gui = gui;
     }
 
@@ -325,6 +325,7 @@ public class IFD implements org.openecard.ws.IFD {
 		_logger.entering(this.getClass().getName(), "getStatus(GetStatus parameters)", parameters);
 	    } // </editor-fold>
 	    GetStatusResponse response;
+            //FIXME
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
 		response = WSHelper.makeResponse(GetStatusResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
 		// <editor-fold defaultstate="collapsed" desc="log trace">
@@ -639,6 +640,7 @@ public class IFD implements org.openecard.ws.IFD {
 		return response;
 	    } else {
 		try {
+                    //FIXME
 		    if (!IFDUtils.getSlotIndex(parameters.getIFDName()).equals(parameters.getSlot())) {
 			response = WSHelper.makeResponse(ConnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Invalid slot handle."));
 			// <editor-fold defaultstate="collapsed" desc="log trace">
@@ -1020,14 +1022,14 @@ public class IFD implements org.openecard.ws.IFD {
 		// yeah, PACE seems to be supported by the reader, big win
 		PACEInputType paceParam = new PACEInputType(protoParam);
 		// extract variables needed for pace
-		byte pinID      = paceParam.getPinID();
+		byte passwordType = paceParam.getPasswordType();
 		// optional elements
-		byte[] chat     = paceParam.getCHAT();
-		String pin      = paceParam.getPIN();
+		byte[] chat = paceParam.getCHAT();
+		String password = paceParam.getPassword();
 		byte[] certDesc = paceParam.getCertificateDescription();
 
 		// prepare pace data structures
-		EstablishPACERequest estPaceReq = new EstablishPACERequest(pinID, chat, null, certDesc); // TODO: add supplied PIN
+		EstablishPACERequest estPaceReq = new EstablishPACERequest(passwordType, chat, null, certDesc); // TODO: add supplied PIN
 		ExecutePACERequest  execPaceReq = new ExecutePACERequest(ExecutePACERequest.Function.EstablishPACEChannel, estPaceReq.toBytes());
 		// see if PACE type demanded for this input value combination is supported
 		if (estPaceReq.isSupportedType(paceCapabilities)) {
@@ -1044,16 +1046,16 @@ public class IFD implements org.openecard.ws.IFD {
 		    PACEOutputType authDataResponse = paceParam.getOutputType();
 		    // mandatory fields
 		    authDataResponse.setStatusbytes(estPaceRes.getStatus());
-		    authDataResponse.setEF_CardAccess(estPaceRes.getCardAccess());
+		    authDataResponse.setEF_CardAccess(estPaceRes.getEFCardAccess());
 		    // optional fields
-		    if (estPaceRes.hasCar()) {
-			authDataResponse.setCAR(estPaceRes.getCar());
+		    if (estPaceRes.hasCurrentCAR()) {
+			authDataResponse.setCurrentCAR(estPaceRes.getCurrentCAR());
 		    }
-		    if (estPaceRes.hasCarPrev()) {
-			authDataResponse.setCARprev(estPaceRes.getCarPrev());
+		    if (estPaceRes.hasPreviousCAR()) {
+			authDataResponse.setPreviousCAR(estPaceRes.getPreviousCAR());
 		    }
-		    if (estPaceRes.hasIDicc()) {
-			authDataResponse.setIDicc(estPaceRes.getIDicc());
+		    if (estPaceRes.hasIDPICC()) {
+			authDataResponse.setIDPICC(estPaceRes.getIDPICC());
 		    }
 		    // create response type and return
 		    EstablishChannelResponse response = WSHelper.makeResponse(EstablishChannelResponse.class, WSHelper.makeResultOK());

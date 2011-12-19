@@ -7,6 +7,7 @@ import iso.std.iso_iec._24727.tech.schema.GetStatus;
 import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
 import java.math.BigInteger;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openecard.client.ws.WSClassLoader;
 import org.openecard.ws.GetRecognitionTree;
@@ -19,6 +20,7 @@ import org.openecard.ws.IFD;
  */
 public class ExecuteRecognition {
 
+    @Ignore
     @Test
     public void testExecute() throws Exception {
 	IFD ifd = new org.openecard.client.ifd.scio.IFD();

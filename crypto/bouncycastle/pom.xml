@@ -10,7 +10,7 @@
   </parent>
 
   <groupId>org.openecard.client.crypto</groupId>
-  <artifactId>bouncy-android</artifactId>
+  <artifactId>bouncycastle</artifactId>
   <packaging>jar</packaging>
   <name>openecard Bouncy Castle</name>
 
@@ -18,7 +18,7 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk16</artifactId>
-      <version>1.46</version>
+      <version>1.47b14</version>
       <scope>runtime</scope>
     </dependency>
   </dependencies>

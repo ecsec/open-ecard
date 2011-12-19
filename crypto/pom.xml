@@ -15,7 +15,7 @@
   <name>Crypto packages</name>
 
   <modules>
-    <module>bouncy-android</module>
+    <module>bouncycastle</module>
   </modules>
 
 </project>

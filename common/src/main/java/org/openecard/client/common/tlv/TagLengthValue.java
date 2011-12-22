@@ -1,8 +1,6 @@
 package org.openecard.client.common.tlv;
 
 import org.openecard.client.common.util.Helper;
-
-import java.awt.image.ConvolveOp;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -154,11 +152,12 @@ class TagLengthValue {
 		    } else if (data.length < numOctets+i+1) {
 			throw new TLVException("Not enough bytes in input to read TLV length.");
 		    }
-		    if(data[numOctets+i]<0){
-		    	dataLength = (dataLength << 8) | (256+data[numOctets+i]);
-			}else {
-				dataLength = (dataLength << 8) | data[numOctets+i];
-			}
+		    if (data[numOctets+i] < 0) {
+			// correct bytes wich are interpreted as negative numbers by java
+			dataLength = (dataLength << 8) | (256+data[numOctets+i]);
+		    } else {
+			dataLength = (dataLength << 8) | data[numOctets+i];
+		    }
 		    i++;
 		}
 		numOctets += i;

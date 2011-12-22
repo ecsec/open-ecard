@@ -47,9 +47,9 @@
 		<complexContent>
 			<restriction base="iso:DIDAuthenticationDataType">
 				<sequence>
-					<element name="PasswordType" type="iso:ByteType" />
+					<element name="PinID" type="iso:ByteType" />
 					<element name="CHAT" type="hexBinary" maxOccurs="1" minOccurs="0"/>
-					<element name="Password" type="string" maxOccurs="1" minOccurs="0" />
+					<element name="PIN" type="string" maxOccurs="1" minOccurs="0" />
 					<element name="CertificateDescription" type="hexBinary"
 						maxOccurs="1" minOccurs="0" />
 				</sequence>
@@ -62,10 +62,10 @@
 			<restriction base="iso:DIDAuthenticationDataType">
 				<sequence>
 					<element name="Statusbytes" type="hexBinary" />
-					<element name="EFCardAccess" type="hexBinary" />
-					<element name="CurrentCAR" type="hexBinary" maxOccurs="1" minOccurs="0" />
-					<element name="PreviousCAR" type="hexBinary" maxOccurs="1" minOccurs="0" />
-					<element name="IDPICC" type="hexBinary" maxOccurs="1" minOccurs="0" />
+					<element name="EF_CardAccess" type="hexBinary" />
+					<element name="CARcurr" type="hexBinary" maxOccurs="1" minOccurs="0" />
+					<element name="CARprev" type="hexBinary" maxOccurs="1" minOccurs="0" />
+					<element name="IDicc" type="hexBinary" maxOccurs="1" minOccurs="0" />
 				</sequence>
 			</restriction>
 		</complexContent>

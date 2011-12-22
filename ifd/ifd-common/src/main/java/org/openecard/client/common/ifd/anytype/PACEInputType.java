@@ -10,31 +10,31 @@ import javax.xml.parsers.ParserConfigurationException;
 public class PACEInputType {
 
     private final AuthDataMap authMap;
-    private final byte passwordType;
+    private final byte pinID;
     private final byte[] chat;
-    private final String password;
+    private final String pin;
     private final byte[] certDesc;
 
     public PACEInputType(DIDAuthenticationDataType baseType) throws ParserConfigurationException {
         authMap = new AuthDataMap(baseType);
 
-        passwordType = authMap.getContentAsBytes("PasswordType")[0];
+        pinID = authMap.getContentAsBytes("PinID")[0];
         // optional elements
         chat = authMap.getContentAsBytes("CHAT");
-        password = authMap.getContentAsString("Password");
+        pin = authMap.getContentAsString("PIN");
         certDesc = authMap.getContentAsBytes("CertificateDescription");
     }
 
-    public byte getPasswordType() {
-        return passwordType;
+    public byte getPINID() {
+        return pinID;
     }
 
     public byte[] getCHAT() {
         return chat;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPIN() {
+        return pin;
     }
 
     public byte[] getCertificateDescription() {

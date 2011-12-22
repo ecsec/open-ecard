@@ -1022,14 +1022,14 @@ public class IFD implements org.openecard.ws.IFD {
 		// yeah, PACE seems to be supported by the reader, big win
 		PACEInputType paceParam = new PACEInputType(protoParam);
 		// extract variables needed for pace
-		byte passwordType = paceParam.getPasswordType();
+		byte pinID = paceParam.getPINID();
 		// optional elements
 		byte[] chat = paceParam.getCHAT();
-		String password = paceParam.getPassword();
+		String pin = paceParam.getPIN();
 		byte[] certDesc = paceParam.getCertificateDescription();
 
 		// prepare pace data structures
-		EstablishPACERequest estPaceReq = new EstablishPACERequest(passwordType, chat, null, certDesc); // TODO: add supplied PIN
+		EstablishPACERequest estPaceReq = new EstablishPACERequest(pinID, chat, null, certDesc); // TODO: add supplied PIN
 		ExecutePACERequest  execPaceReq = new ExecutePACERequest(ExecutePACERequest.Function.EstablishPACEChannel, estPaceReq.toBytes());
 		// see if PACE type demanded for this input value combination is supported
 		if (estPaceReq.isSupportedType(paceCapabilities)) {
@@ -1046,7 +1046,7 @@ public class IFD implements org.openecard.ws.IFD {
 		    PACEOutputType authDataResponse = paceParam.getOutputType();
 		    // mandatory fields
 		    authDataResponse.setStatusbytes(estPaceRes.getStatus());
-		    authDataResponse.setEF_CardAccess(estPaceRes.getEFCardAccess());
+		    authDataResponse.setEFCardAccess(estPaceRes.getEFCardAccess());
 		    // optional fields
 		    if (estPaceRes.hasCurrentCAR()) {
 			authDataResponse.setCurrentCAR(estPaceRes.getCurrentCAR());
@@ -1054,8 +1054,8 @@ public class IFD implements org.openecard.ws.IFD {
 		    if (estPaceRes.hasPreviousCAR()) {
 			authDataResponse.setPreviousCAR(estPaceRes.getPreviousCAR());
 		    }
-		    if (estPaceRes.hasIDPICC()) {
-			authDataResponse.setIDPICC(estPaceRes.getIDPICC());
+		    if (estPaceRes.hasIDICC()) {
+			authDataResponse.setIDICC(estPaceRes.getIDICC());
 		    }
 		    // create response type and return
 		    EstablishChannelResponse response = WSHelper.makeResponse(EstablishChannelResponse.class, WSHelper.makeResultOK());

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
@@ -18,6 +19,7 @@ import java.util.logging.Logger;
 public class IFDStatusDiff {
 
     private static final Logger _logger = LogManager.getLogger(IFDStatusDiff.class.getName());
+    
     private final List<IFDStatusType> expected;
     private List<IFDStatusType> result;
     private List<IFDStatusType> deleted;
@@ -26,6 +28,7 @@ public class IFDStatusDiff {
         this.expected = expected;
     }
 
+    
     public static IFDStatusDiff diff(List<IFDStatusType> expected, List<IFDStatusType> others, boolean withNew) {
         IFDStatusDiff diff = new IFDStatusDiff(expected);
         diff.diff(others, withNew);
@@ -141,6 +144,7 @@ public class IFDStatusDiff {
         return b.booleanValue();
     }
 
+    
     private List<IFDStatusType> merge(List<IFDStatusType> deleted) {
         ArrayList<IFDStatusType> states = new ArrayList<IFDStatusType>(result.size() + deleted.size());
         states.addAll(result);

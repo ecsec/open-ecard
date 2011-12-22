@@ -11,7 +11,7 @@ public class PACEOutputType {
 
     private final AuthDataMap authMap;
     private byte[] statusBytes;
-    private byte[] ef_cardaccess;
+    private byte[] efCardAccess;
     private byte[] currentCAR;
     private byte[] previousCAR;
     private byte[] idpicc;
@@ -24,8 +24,8 @@ public class PACEOutputType {
         this.statusBytes = statusBytes;
     }
 
-    public void setEF_CardAccess(byte[] ef_cardaccess) {
-        this.ef_cardaccess = ef_cardaccess;
+    public void setEFCardAccess(byte[] efCardAccess) {
+        this.efCardAccess = efCardAccess;
     }
 
     public void setCurrentCAR(byte[] car) {
@@ -36,22 +36,22 @@ public class PACEOutputType {
         this.previousCAR = car;
     }
 
-    public void setIDPICC(byte[] idicc) {
+    public void setIDICC(byte[] idicc) {
         this.idpicc = idicc;
     }
 
     public DIDAuthenticationDataType getAuthDataType() {
         AuthDataResponse authResponse = authMap.createResponse(new iso.std.iso_iec._24727.tech.schema.PACEOutputType());
         authResponse.addElement("StatusBytes", Helper.convByteArrayToString(statusBytes));
-        authResponse.addElement("EFCardAccess", Helper.convByteArrayToString(ef_cardaccess));
+        authResponse.addElement("EF_CardAccess", Helper.convByteArrayToString(efCardAccess));
         if (currentCAR != null) {
-            authResponse.addElement("CurrentCAR", Helper.convByteArrayToString(currentCAR));
+            authResponse.addElement("CARcurr", Helper.convByteArrayToString(currentCAR));
         }
         if (previousCAR != null) {
-            authResponse.addElement("PreviousCAR", Helper.convByteArrayToString(previousCAR));
+            authResponse.addElement("CARprev", Helper.convByteArrayToString(previousCAR));
         }
         if (idpicc != null) {
-            authResponse.addElement("IDPICC", Helper.convByteArrayToString(idpicc));
+            authResponse.addElement("IDicc", Helper.convByteArrayToString(idpicc));
         }
         return authResponse.getResponse();
     }

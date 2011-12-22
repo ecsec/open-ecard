@@ -12,7 +12,9 @@ import org.w3c.dom.Element;
 public class AuthDataResponse {
 
     private static final String isoNs = "urn:iso:std:iso-iec:24727:tech:schema";
+    
     private DIDAuthenticationDataType responseObj;
+    
     private final Document xmlDoc;
 
     protected AuthDataResponse(Document xmlDoc, DIDAuthenticationDataType responseObj) {

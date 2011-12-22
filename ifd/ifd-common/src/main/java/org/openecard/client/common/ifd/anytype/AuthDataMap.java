@@ -19,6 +19,7 @@ import org.w3c.dom.Element;
 public class AuthDataMap {
 
     private static final String isoNs = "urn:iso:std:iso-iec:24727:tech:schema";
+
     private final String protocol;
     private final HashMap<QName, Element> contentMap = new HashMap<QName, Element>();
     private final HashMap<QName, String> attributeMap;
@@ -59,11 +60,9 @@ public class AuthDataMap {
     public boolean containsContent(QName qname) {
         return contentMap.containsKey(qname);
     }
-
     public boolean containsContent(String ns, String localName) {
         return containsContent(new QName(ns, localName));
     }
-
     public boolean containsContent(String localName) {
         return containsContent(new QName(isoNs, localName));
     }
@@ -71,11 +70,9 @@ public class AuthDataMap {
     public Element getContent(QName qname) {
         return contentMap.get(qname);
     }
-
     public Element getContent(String ns, String localName) {
         return getContent(new QName(ns, localName));
     }
-
     public Element getContent(String localName) {
         return getContent(new QName(isoNs, localName));
     }
@@ -89,11 +86,9 @@ public class AuthDataMap {
             return null;
         }
     }
-
     public String getContentAsString(String ns, String localName) {
         return getContentAsString(new QName(ns, localName));
     }
-
     public String getContentAsString(String localName) {
         return getContentAsString(new QName(isoNs, localName));
     }
@@ -107,23 +102,19 @@ public class AuthDataMap {
             return null;
         }
     }
-
     public byte[] getContentAsBytes(String ns, String localName) {
         return getContentAsBytes(new QName(ns, localName));
     }
-
     public byte[] getContentAsBytes(String localName) {
         return getContentAsBytes(new QName(isoNs, localName));
     }
-
+    
     public boolean containsAttribute(QName qname) {
         return attributeMap.containsKey(qname);
     }
-
     public boolean containsAttribute(String ns, String name) {
         return containsAttribute(new QName(ns, name));
     }
-
     public boolean containsAttribute(String name) {
         return containsAttribute(new QName(isoNs, name));
     }
@@ -131,11 +122,9 @@ public class AuthDataMap {
     public String getAttribute(QName qname) {
         return attributeMap.get(qname);
     }
-
     public String getAttribute(String ns, String name) {
         return getAttribute(new QName(ns, name));
     }
-
     public String getAttribute(String name) {
         return getAttribute(new QName(isoNs, name));
     }

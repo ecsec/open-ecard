@@ -16,8 +16,8 @@ public class EstablishPACEResponse {
     private byte[] currentCAR;
     private byte previousCARLength;
     private byte[] previousCAR;
-    private short idpiccLength;
-    private byte[] idpicc;
+    private short idiccLength;
+    private byte[] idicc;
 
     public EstablishPACEResponse(byte[] response) {
         int dataLen = response.length;
@@ -52,11 +52,11 @@ public class EstablishPACEResponse {
         }
         // read id icc
         if (dataLen > idx + 2) {
-            idpiccLength = (short) (response[idx] + (response[idx + 1] << 8));
+            idiccLength = (short) (response[idx] + (response[idx + 1] << 8));
             idx += 2;
-            if (idpiccLength > 0) {
-                idpicc = Arrays.copyOfRange(response, idx, idx + idpiccLength);
-                idx += idpiccLength;
+            if (idiccLength > 0) {
+                idicc = Arrays.copyOfRange(response, idx, idx + idiccLength);
+                idx += idiccLength;
             }
         }
     }
@@ -68,7 +68,6 @@ public class EstablishPACEResponse {
     public boolean hasEFCardAccess() {
         return efCardAccessLength > 0;
     }
-
     public byte[] getEFCardAccess() {
         return this.efCardAccess;
     }
@@ -76,7 +75,6 @@ public class EstablishPACEResponse {
     public boolean hasCurrentCAR() {
         return currentCARLength > 0;
     }
-
     public byte[] getCurrentCAR() {
         return this.currentCAR;
     }
@@ -84,16 +82,14 @@ public class EstablishPACEResponse {
     public boolean hasPreviousCAR() {
         return previousCARLength > 0;
     }
-
     public byte[] getPreviousCAR() {
         return previousCAR;
     }
 
-    public boolean hasIDPICC() {
-        return idpiccLength > 0;
+    public boolean hasIDICC() {
+        return idiccLength > 0;
     }
-
-    public byte[] getIDPICC() {
-        return idpicc;
+    public byte[] getIDICC() {
+        return idicc;
     }
 }

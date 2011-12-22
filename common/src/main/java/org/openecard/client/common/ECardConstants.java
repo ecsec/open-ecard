@@ -132,6 +132,9 @@ public class ECardConstants {
 	    public static final String UNKNOWN_HANDLE = SAL_PREFIX + "#unknownConnectionHandle";
 	    public static final String UNKNOWN_CARDTYPE = SAL_PREFIX + "#unknownCardType";
 
+	    public static final String PROTOCOL_NOT_RECOGNIZED = SAL_PREFIX + "#protocolNotRecognized";
+	    public static final String INAPPROPRIATE_PROTOCOL_FOR_ACTION = SAL_PREFIX + "#inappropriateProtocolForAction";
+
 	    public static final String REPO_UNREACHABLE = SAL_PREFIX + "/support#cardInfoRepositoryUnreachable";
 
 	};

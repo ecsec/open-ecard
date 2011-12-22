@@ -26,8 +26,8 @@ public class WSClassLoader {
 
     public static final ClassLoader inst = WSClassLoader.class.getClassLoader();
 
-    private static final Map<String,String> serviceClasses;
-    private static final Map<String,String> servicePorts;
+    protected static final Map<String,String> serviceClasses;
+    protected static final Map<String,String> servicePorts;
 
     private static Class loadClass(String serviceName) throws ClassNotFoundException {
         String className = serviceClasses.get(serviceName);

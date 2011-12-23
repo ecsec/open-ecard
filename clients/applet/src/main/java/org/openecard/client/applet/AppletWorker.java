@@ -20,10 +20,14 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openecard.client.common.ClientEnv;
+import org.openecard.client.common.enums.EventType;
+import org.openecard.client.common.interfaces.EventCallback;
+import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.logging.LogManager;
 
 
@@ -31,32 +35,29 @@ import org.openecard.client.common.logging.LogManager;
  *
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
  */
-public class AppletWorker implements Runnable {
+public class AppletWorker extends Thread implements EventCallback {
 
     private static final Logger _logger = LogManager.getLogger(AppletWorker.class.getName());
+
     private ECardApplet applet;
-    private ClientEnv env;
-    private boolean isRunning;
+    private String selection;
+    private boolean eventOccurred;
 
     public AppletWorker(ECardApplet applet) {
         if (_logger.isLoggable(Level.FINER)) {
             _logger.entering(this.getClass().getName(), "AppletWorker(ECardApplet applet)", applet);
         }
         this.applet = applet;
-        env = applet.getEnv();
-        isRunning = true;
+        eventOccurred = false;
         if (_logger.isLoggable(Level.FINER)) {
             _logger.exiting(this.getClass().getName(), "AppletWorker(ECardApplet applet)");
         }
     }
 
-    public void interrupt() {
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "interrupt()");
-        }
-        isRunning = false;
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "interrupt()");
+    public void startPAOS(String ifdName) {
+        synchronized(this) {
+            selection = ifdName;
+            this.notify();
         }
     }
 
@@ -65,31 +66,34 @@ public class AppletWorker implements Runnable {
         if (_logger.isLoggable(Level.FINER)) {
             _logger.entering(this.getClass().getName(), "run()");
         }
-        List<ConnectionHandleType> cHandles = applet.getTinySAL().getConnectionHandles();
+        List<ConnectionHandleType> cHandles = null;
 
-        // TODO: use event system instead of polling mechanism
-        if (applet.waitForCard()) {
-            boolean cardPresent = false;
-            while (!cardPresent) {
-                cHandles = applet.getTinySAL().getConnectionHandles();
-                for (ConnectionHandleType cHandle : cHandles) {
-                    if (cHandle.getRecognitionInfo() != null) {
-                        cardPresent = true;
-                        break;
-                    }
-                }
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException ex) {
-                    // do nothing here...
-                }
+        if (applet.getSpBehavior().equals(ECardApplet.INSTANT)) {
+            cHandles = getConnectionHandles();
+        }
+
+        if (applet.getSpBehavior().equals(ECardApplet.WAIT)) {
+            if (!eventOccurred) {
+                waitForInput();
+            }
+            cHandles = getConnectionHandles();
+        }
+
+        if (applet.getSpBehavior().equals(ECardApplet.CLICK)) {
+            waitForInput();
+            if (selection != null) {
+                cHandles = new ArrayList<ConnectionHandleType>(1);
+                ConnectionHandleType cHandle = getConnectionHandle(selection);
+                cHandles.add(cHandle);
+            } else {
+                cHandles = getConnectionHandles();
             }
         }
 
         StartPAOS sp = new StartPAOS();
         sp.getConnectionHandle().addAll(cHandles);
         sp.setSessionIdentifier(applet.getSessionId());
-        Object message = sp;
+
         try {
             Object result = applet.getPAOS().sendStartPAOS(sp);
 
@@ -115,6 +119,41 @@ public class AppletWorker implements Runnable {
 
         if (_logger.isLoggable(Level.FINER)) {
             _logger.exiting(this.getClass().getName(), "run()");
+        }
+    }
+
+    private void waitForInput() {
+        synchronized (this) {
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                // Oh oh,...
+            }
+        }
+    }
+
+    private ConnectionHandleType getConnectionHandle(String ifdName) {
+        List<ConnectionHandleType> cHandles = getConnectionHandles();
+        for (ConnectionHandleType cHandle : cHandles) {
+            if (ifdName.equals(cHandle.getIFDName())) {
+                return cHandle;
+            }
+        }
+        return null;
+    }
+
+    private List<ConnectionHandleType> getConnectionHandles() {
+        return applet.getTinySAL().getConnectionHandles();
+    }
+
+    @Override
+    public void signalEvent(EventType eventType, Object eventData) {
+        if (eventType.equals(EventType.CARD_INSERTED) || eventType.equals(EventType.CARD_RECOGNIZED)) {
+            applet.getEnv().getEventManager().unregister(this);
+            synchronized(this) {
+                eventOccurred = true;
+            }
+            startPAOS(null);
         }
     }
 

@@ -92,7 +92,7 @@ public class ECardAppletTest {
         System.out.println("done.");
 
         System.out.print("Create EventManager... ");
-        manager = new EventManager(cr, env, ctx);
+        manager = new EventManager(cr, env, ctx, "1234567890");
         System.out.println("done.");
         
         System.out.print("Create SAL... ");

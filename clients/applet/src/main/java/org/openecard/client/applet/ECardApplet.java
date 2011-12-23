@@ -45,7 +45,7 @@ public class ECardApplet extends JApplet {
 
     private static final Logger _logger = LogManager.getLogger(ECardApplet.class.getName());
 
-    private Thread worker;
+    private AppletWorker worker;
     private ClientEnv env;
     private TinySAL sal;
     private IFD ifd;
@@ -63,8 +63,12 @@ public class ECardApplet extends JApplet {
     private String endpointUrl;
     private String redirectUrl;
     private String reportId;
+    private String spBehavior;
     private boolean recognizeCard;
-    private boolean waitForCard;
+
+    protected static final String INSTANT = "instant";
+    protected static final String WAIT = "wait";
+    protected static final String CLICK = "click";
 
     /**
      * Initialization method that will be called after the applet is loaded
@@ -78,7 +82,6 @@ public class ECardApplet extends JApplet {
         initialized = false;
         paramsPresent = true;
         setParams();
-        worker = null;
         env = new ClientEnv();
         env.setDispatcher(new MessageDispatcher(env));
         ifd = new IFD();
@@ -106,12 +109,20 @@ public class ECardApplet extends JApplet {
             recognition = null;
         }
         paos = new PAOS(endpointUrl, env.getDispatcher());
-        em = new EventManager(recognition, env, ctx);
+        em = new EventManager(recognition, env, ctx, sessionId);
         env.setEventManager(em);
         sal = new TinySAL(env);
         em.registerAllEvents(sal);
         jsec = new JSEventCallback(this);
         em.registerAllEvents(jsec);
+        worker = new AppletWorker(this);
+        if (spBehavior.equals(WAIT)) {
+            if (recognizeCard) {
+                em.register(worker, EventType.CARD_RECOGNIZED);
+            } else {
+                em.register(worker, EventType.CARD_INSERTED);
+            }
+        }
         InitializeResponse initResponse = sal.initialize(new Initialize());
         if (initResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
             initialized = false;
@@ -129,6 +140,7 @@ public class ECardApplet extends JApplet {
                 }
             }
         }
+
         if (_logger.isLoggable(Level.FINER)) {
             _logger.exiting(this.getClass().getName(), "init()");
         }
@@ -141,9 +153,9 @@ public class ECardApplet extends JApplet {
         }
         if (paramsPresent && initialized) {
             if (worker == null) {
-                worker = new Thread(new AppletWorker(this));
-                worker.start();
+                worker = new AppletWorker(this);
             }
+            worker.start();
         }
         if (_logger.isLoggable(Level.FINER)) {
             _logger.exiting(this.getClass().getName(), "start()");
@@ -226,10 +238,6 @@ public class ECardApplet extends JApplet {
         return recognizeCard;
     }
 
-    public boolean waitForCard() {
-        return waitForCard;
-    }
-
     public ClientEnv getEnv() {
         return env;
     }
@@ -240,6 +248,23 @@ public class ECardApplet extends JApplet {
 
     public PAOS getPAOS() {
         return paos;
+    }
+
+    public String getSpBehavior() {
+        return spBehavior;
+    }
+
+    public void startPAOS() {
+        startPAOS(null);
+    }
+
+    public void startPAOS(String ifdName) {
+        if (ifdName != null) {
+            // what the hell did I wanted to here?
+        }
+        if (spBehavior.equals(CLICK)) {
+            worker.startPAOS(ifdName);
+        }
     }
 
     private void setParams() {
@@ -312,18 +337,24 @@ public class ECardApplet extends JApplet {
                 _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "recognizeCard set to " + recognizeCard + ".");
             }
         }
-        param = getParameter("waitForCard");
+        param = getParameter("spBehavior");
         if (param != null) {
-            waitForCard = Boolean.parseBoolean(param);
+            if (param.equalsIgnoreCase(WAIT) || param.equalsIgnoreCase(CLICK)) {
+                spBehavior = param;
+            } else {
+                // if param is neither set to WAIT nor set to CLICK, set it to INSTANT
+                spBehavior = INSTANT;
+            }
             if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "waitForCard set to " + param + ".", param);
+                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "spBehavior set to " + spBehavior + ".", param);
             }
         } else {
+            spBehavior = INSTANT;
             if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "waitForCard not set.");
+                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "spBehavior set to " + spBehavior + ".");
             }
         }
-        
+
         if (_logger.isLoggable(Level.FINER)) {
             _logger.exiting(this.getClass().getName(), "setParams()");
         }

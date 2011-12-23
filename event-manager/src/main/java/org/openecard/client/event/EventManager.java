@@ -8,7 +8,6 @@ import org.openecard.client.common.interfaces.Environment;
 import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.common.interfaces.EventFilter;
 import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.recognition.RecognitionException;
 import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
@@ -42,6 +41,7 @@ public class EventManager implements org.openecard.client.common.interfaces.Even
     protected final CardRecognition cr;
     protected final Environment env;
     protected final byte[] ctx;
+    protected final String sessionId;
     protected final boolean recognize;
 
     private final Dispatcher dispatcher;
@@ -50,11 +50,12 @@ public class EventManager implements org.openecard.client.common.interfaces.Even
     private Future watcher;
 
 
-    public EventManager(CardRecognition cr, Environment env, byte[] ctx) {
+    public EventManager(CardRecognition cr, Environment env, byte[] ctx, String sessionId) {
 	this.cr = cr;
 	this.recognize = cr != null;
 	this.env = env;
 	this.ctx = ctx;
+        this.sessionId = sessionId;
 	this.dispatcher = new Dispatcher(this);
     }
 
@@ -85,7 +86,7 @@ public class EventManager implements org.openecard.client.common.interfaces.Even
 
     private ConnectionHandleType makeConnectionHandle(String ifdName, BigInteger slotIdx, RecognitionInfo info) {
 	ChannelHandleType chan = new ChannelHandleType();
-	chan.setSessionIdentifier(ValueGenerators.generateSessionID());
+	chan.setSessionIdentifier(sessionId);
 	ConnectionHandleType cHandle = new ConnectionHandleType();
 	cHandle.setChannelHandle(chan);
 	cHandle.setContextHandle(ctx);
@@ -229,7 +230,7 @@ public class EventManager implements org.openecard.client.common.interfaces.Even
     
     @Override
     public void unregister(EventCallback callback) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        dispatcher.del(callback);
     }
 
 }

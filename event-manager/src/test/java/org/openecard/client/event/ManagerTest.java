@@ -7,7 +7,6 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openecard.client.common.ClientEnv;
-import static org.junit.Assert.*;
 
 
 /**
@@ -24,7 +23,7 @@ public class ManagerTest {
 	EstablishContextResponse ctxR = ifd.establishContext(ctx);
 	Environment env = new ClientEnv();
 	env.setIFD(ifd);
-	EventManager evt = new EventManager(null, env, ctxR.getContextHandle());
+	EventManager evt = new EventManager(null, env, ctxR.getContextHandle(), "1234567890");
 	evt.initialize();
 	Thread.sleep(1000);
 	//evt.terminate();

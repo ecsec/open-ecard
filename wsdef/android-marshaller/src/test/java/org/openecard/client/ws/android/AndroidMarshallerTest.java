@@ -1,10 +1,34 @@
+/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.ws.android;
 
-import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
+import iso.std.iso_iec._24727.tech.schema.Conclusion;
+import iso.std.iso_iec._24727.tech.schema.EstablishContext;
+import iso.std.iso_iec._24727.tech.schema.GetRecognitionTreeResponse;
+import iso.std.iso_iec._24727.tech.schema.GetStatus;
+import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
+import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
+import iso.std.iso_iec._24727.tech.schema.RecognitionTree;
+import iso.std.iso_iec._24727.tech.schema.Wait;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
@@ -13,7 +37,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openecard.client.ws.WSMarshaller;
 import org.w3c.dom.Document;
-
 
 /**
  *
@@ -24,12 +47,13 @@ public class AndroidMarshallerTest {
     private static final String getRecognitionTreeResponseXML;
     private static final String establishContextXML;
     private static final String getStatusResponse;
-
+    private static final String conclusion;
     static {
 	try {
 	    getRecognitionTreeResponseXML = loadXML("GetRecognitionTreeResponse.xml");
 	    establishContextXML = loadXML("EstablishContext.xml");
 	    getStatusResponse = loadXML("GetStatusResponse.xml");
+	    conclusion = loadXML("Conclusion.xml");
 	} catch (IOException ex) {
 	    throw new RuntimeException(ex);
 	}
@@ -74,12 +98,30 @@ public class AndroidMarshallerTest {
 	    StringWriter sw = new StringWriter();
 
 	    JAXB.marshal(tree, sw);
+	    
+	    Document d = m.marshal(tree);
+	    
+	    String s = m.doc2str(d);
+		System.out.println(s);
     	} else {
 	    throw new Exception("Object should be an instace of GetRecognitionTreeResponse");
 	}
     }
 
 
+    @Test
+    public void testConversionOfConclusion() throws Exception {
+    	WSMarshaller m = new AndroidMarshaller();
+    	Object o = m.unmarshal(m.str2doc(conclusion));
+    	Conclusion c = (Conclusion) o;
+    	Assert.assertEquals("http://ws.gematik.de/egk/1.0.0", c.getRecognizedCardType());
+    	Conclusion cc = JAXB.unmarshal(new StringReader(conclusion), Conclusion.class);
+    	//TODO 
+    	//Assert.assertEquals(c.getTLSMarker().getAny().get(0), cc.getTLSMarker().getAny().get(0));
+
+        }
+    
+    
     @Test
     public void testConversionOfGetStatus() throws Exception {
 	WSMarshaller m = new AndroidMarshaller();
@@ -97,7 +139,9 @@ public class AndroidMarshallerTest {
     @Test
     public void testConversionOfGetStatusResponse() throws Exception {
 	WSMarshaller m = new AndroidMarshaller();
-	m.unmarshal(m.str2doc(getStatusResponse));
+	Object o = m.unmarshal(m.str2doc(getStatusResponse));
+	if(!(o instanceof GetStatusResponse))
+		throw new Exception("Object should be an instace of GetStatusResponse");
     }
 
 

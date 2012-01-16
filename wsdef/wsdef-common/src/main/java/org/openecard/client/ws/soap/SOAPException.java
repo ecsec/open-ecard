@@ -1,4 +1,7 @@
-package org.openecard.client.ws;
+package org.openecard.client.ws.soap;
+
+import org.openecard.client.ws.WSMarshallerException;
+
 
 
 /**

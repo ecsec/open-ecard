@@ -1,12 +1,6 @@
 package org.openecard.client.ws.jaxb;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,21 +11,20 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.openecard.client.ws.MarshallingTypeException;
-import org.openecard.client.ws.SOAPException;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.WhitespaceFilter;
+import org.openecard.client.ws.soap.MessageFactory;
+import org.openecard.client.ws.soap.SOAPBody;
+import org.openecard.client.ws.soap.SOAPException;
+import org.openecard.client.ws.soap.SOAPMessage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -125,7 +118,7 @@ public final class JAXBMarshaller implements WSMarshaller {
 
             try {
                 LineNumberReader r = new LineNumberReader(new InputStreamReader(classListStream));
-                String next = null;
+                String next;
                 // read all entries from file
                 while ((next = r.readLine()) != null) {
                     try {
@@ -230,29 +223,17 @@ public final class JAXBMarshaller implements WSMarshaller {
 
     @Override
     public synchronized SOAPMessage doc2soap(Document envDoc) throws SOAPException {
-        try {
-            SOAPMessage msg = soapFactory.createMessage();
-            Source source = new javax.xml.transform.dom.DOMSource(envDoc.getDocumentElement());
-            msg.getSOAPPart().setContent(source);//appendChild(env);
-            msg.saveChanges();
-
-            return msg;
-        } catch (javax.xml.soap.SOAPException ex) {
-            throw new SOAPException(ex);
-        }
+	SOAPMessage msg = soapFactory.createMessage(envDoc);
+	return msg;
     }
 
     @Override
     public synchronized SOAPMessage add2soap(Document content) throws SOAPException {
-        try {
-            SOAPMessage msg = soapFactory.createMessage();
-            SOAPBody body = msg.getSOAPBody();
-            body.addDocument(content);
+	SOAPMessage msg = soapFactory.createMessage();
+	SOAPBody body = msg.getSOAPBody();
+	body.addDocument(content);
 
-            return msg;
-        } catch (javax.xml.soap.SOAPException ex) {
-            throw new SOAPException(ex);
-        }
+	return msg;
     }
 
 }

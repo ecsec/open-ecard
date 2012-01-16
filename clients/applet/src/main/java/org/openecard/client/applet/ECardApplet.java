@@ -1,19 +1,6 @@
 package org.openecard.client.applet;
 
-import org.openecard.client.common.ClientEnv;
-import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.enums.EventType;
-import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.ifd.scio.IFD;
-import org.openecard.client.recognition.CardRecognition;
-import org.openecard.client.transport.paos.PAOS;
-import org.openecard.client.event.EventManager;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.EstablishContext;
-import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
-import iso.std.iso_iec._24727.tech.schema.Initialize;
-import iso.std.iso_iec._24727.tech.schema.InitializeResponse;
-import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.awt.Container;
 import java.awt.Frame;
 import java.util.Iterator;
@@ -21,9 +8,17 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JApplet;
+import org.openecard.client.common.ClientEnv;
+import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.enums.EventType;
+import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingUserConsent;
+import org.openecard.client.ifd.scio.IFD;
+import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.sal.TinySAL;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
+import org.openecard.client.transport.paos.PAOS;
 
 
 /**
@@ -33,7 +28,7 @@ import org.openecard.client.transport.dispatcher.MessageDispatcher;
 public class ECardApplet extends JApplet {
 
     private static final Logger _logger = LogManager.getLogger(ECardApplet.class.getName());
-    
+
     private Thread worker;
     private ClientEnv env;
     private TinySAL sal;
@@ -42,11 +37,11 @@ public class ECardApplet extends JApplet {
     private EventManager em;
     private PAOS paos;
     private JSEventCallback jsec;
-    
+
     private byte[] ctx;
     private boolean initialized;
     private boolean paramsPresent;
-    
+
     // applet parameters
     private String sessionId;
     private String endpointUrl;
@@ -71,7 +66,7 @@ public class ECardApplet extends JApplet {
         env = new ClientEnv();
         env.setDispatcher(new MessageDispatcher(env));
         ifd = new IFD();
-        ifd.setGui(new SwingUserConsent(new SwingDialogWrapper(findParentFrame())));
+        ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper(findParentFrame())));
         env.setIFD(ifd);
         EstablishContext ecRequest = new EstablishContext();
         EstablishContextResponse ecResponse = ifd.establishContext(ecRequest);
@@ -198,7 +193,7 @@ public class ECardApplet extends JApplet {
     public String getSessionId() {
         return sessionId;
     }
-    
+
     public String getReportId() {
         return reportId;
     }
@@ -214,7 +209,7 @@ public class ECardApplet extends JApplet {
     public boolean recognizeCard() {
         return recognizeCard;
     }
-    
+
     public boolean waitForCard() {
         return waitForCard;
     }
@@ -235,11 +230,11 @@ public class ECardApplet extends JApplet {
         if (_logger.isLoggable(Level.FINER)) {
             _logger.entering(this.getClass().getName(), "setParams()");
         }
-        
+
         //
         // mandatory parameters
         //
-        
+
         String param = getParameter("sessionId");
         if (param != null) {
             sessionId = param;
@@ -262,11 +257,11 @@ public class ECardApplet extends JApplet {
             paramsPresent = false;
             return;
         }
-        
+
         //
         // optional parameters
         //
-        
+
         param = getParameter("reportId");
         if (param != null) {
             reportId = param;
@@ -317,4 +312,5 @@ public class ECardApplet extends JApplet {
             _logger.exiting(this.getClass().getName(), "setParams()");
         }
     }
+
 }

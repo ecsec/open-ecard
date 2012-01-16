@@ -1,14 +1,14 @@
 package org.openecard.client.ws.jaxb;
 
-import java.util.Iterator;
 import javax.xml.namespace.QName;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPHeaderElement;
-import javax.xml.soap.SOAPMessage;
+import static junit.framework.Assert.assertNotNull;
 import org.junit.Test;
+import org.openecard.client.ws.soap.MessageFactory;
+import org.openecard.client.ws.soap.SOAPBody;
+import org.openecard.client.ws.soap.SOAPMessage;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import static junit.framework.Assert.*;
 
 
 /**
@@ -65,9 +65,9 @@ public class MarshalTest {
 	JAXBMarshaller m = new JAXBMarshaller();
 	Document doc = m.str2doc(xmlStr);
 
-	SOAPMessage msg = m.doc2soap(doc);
-	Node body = msg.getSOAPBody();
-	Node result = body.getFirstChild();
+	org.openecard.client.ws.soap.SOAPMessage msg = m.doc2soap(doc);
+	SOAPBody body = msg.getSOAPBody();
+	Node result = body.getChildElements().get(0);
 
 	//System.out.println(m.doc2str(result));
 	Object o = m.unmarshal(result);
@@ -82,7 +82,7 @@ public class MarshalTest {
     	Document doc = m.str2doc(xmlStr);
 	SOAPMessage msg = m.doc2soap(doc);
 
-    	Object o = m.unmarshal(msg.getSOAPBody().getFirstChild());
+    	Object o = m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
 	doc = m.marshal(o);
 
 	MessageFactory factory = MessageFactory.newInstance();
@@ -97,23 +97,20 @@ public class MarshalTest {
     	Document doc = m.str2doc(xmlStr);
 	SOAPMessage msg = m.doc2soap(doc);
 
-	SOAPHeaderElement msgId=null;
-
+	Element msgId=null;
 	// check if messageid is present
-	Iterator<SOAPHeaderElement> i = msg.getSOAPHeader().examineAllHeaderElements();
-	while (i.hasNext()) {
-	    SOAPHeaderElement e = i.next();
-	    if (e.getNodeName().equals("MessageID") && e.getNamespaceURI().equals("http://www.w3.org/2005/03/addressing")) {
-		msgId = e;
+	for (Element next : msg.getSOAPHeader().getChildElements()) {
+	    if (next.getNodeName().equals("MessageID") && next.getNamespaceURI().equals("http://www.w3.org/2005/03/addressing")) {
+		msgId = next;
 	    }
 	}
 	assertNotNull(msgId);
 
 	// add relates to
-	SOAPHeaderElement relates = msg.getSOAPHeader().addHeaderElement(new QName("http://www.w3.org/2005/03/addressing", "RelatesTo"));
+	Element relates = msg.getSOAPHeader().addHeaderElement(new QName("http://www.w3.org/2005/03/addressing", "RelatesTo"));
 	relates.setTextContent("relates to fancy id");
 
-	System.out.println(m.doc2str(msg.getSOAPPart()));
+	System.out.println(m.doc2str(msg.getDocument()));
     }
 
 }

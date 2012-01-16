@@ -2,8 +2,9 @@ package org.openecard.client.ws;
 
 import java.io.IOException;
 import java.io.InputStream;
-import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
+import org.openecard.client.ws.soap.SOAPException;
+import org.openecard.client.ws.soap.SOAPMessage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;

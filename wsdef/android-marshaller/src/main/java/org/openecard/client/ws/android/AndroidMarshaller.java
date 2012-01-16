@@ -27,7 +27,6 @@ import java.math.BigInteger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -40,6 +39,10 @@ import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.WhitespaceFilter;
+import org.openecard.client.ws.soap.MessageFactory;
+import org.openecard.client.ws.soap.SOAPBody;
+import org.openecard.client.ws.soap.SOAPException;
+import org.openecard.client.ws.soap.SOAPMessage;
 import org.openecard.ws.protocols.tls.v1.TLSMarkerType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -61,6 +64,7 @@ public class AndroidMarshaller implements WSMarshaller {
 	private DocumentBuilderFactory documentBuilderFactory;
 	private DocumentBuilder documentBuilder;
 	private Transformer transformer;
+	private MessageFactory soapFactory;
 
 	public AndroidMarshaller() {
 		documentBuilderFactory = null;
@@ -75,6 +79,7 @@ public class AndroidMarshaller implements WSMarshaller {
 			transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
 			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+			soapFactory = MessageFactory.newInstance();
 
 		} catch (Exception ex) {
 			ex.printStackTrace(System.err);
@@ -867,15 +872,18 @@ public class AndroidMarshaller implements WSMarshaller {
 	}
 
 	@Override
-	public SOAPMessage doc2soap(Document envDoc) {
-		// TODO
-		return null;
+	public SOAPMessage doc2soap(Document envDoc) throws SOAPException {
+	    SOAPMessage msg = soapFactory.createMessage(envDoc);
+	    return msg;
 	}
 
 	@Override
-	public SOAPMessage add2soap(Document content) {
-		// TODO
-		return null;
+	public SOAPMessage add2soap(Document content) throws SOAPException {
+	    SOAPMessage msg = soapFactory.createMessage();
+	    SOAPBody body = msg.getSOAPBody();
+	    body.addDocument(content);
+
+	    return msg;
 	}
 
 }

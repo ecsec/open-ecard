@@ -16,6 +16,7 @@
 
   <modules>
     <module>bouncycastle</module>
+    <module>crypto-common</module>
   </modules>
 
 </project>

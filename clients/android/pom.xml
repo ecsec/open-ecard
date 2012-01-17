@@ -2,129 +2,106 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	 xmlns="http://maven.apache.org/POM/4.0.0"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.openecard.client</groupId>
-    <artifactId>clients</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
-  </parent>
+    <parent>
+	<groupId>org.openecard.client</groupId>
+	<artifactId>clients</artifactId>
+	<version>0.0.3-SNAPSHOT</version>
+    </parent>
 
-  <groupId>org.openecard.client.clients</groupId>
-  <artifactId>android</artifactId>
-  <name>Andoid Client</name>
-  <packaging>apk</packaging>
+    <groupId>org.openecard.client.clients</groupId>
+    <artifactId>android</artifactId>
+    <name>Andoid Client</name>
+    <packaging>apk</packaging>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.openecard.client</groupId>
-      <artifactId>common</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.ifd</groupId>
-      <artifactId>ifd-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+    <dependencies>
+	<dependency>
+	    <groupId>org.openecard.client</groupId>
+	    <artifactId>common</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.ifd</groupId>
+	    <artifactId>ifd-core</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
    	<dependency>
-	  <groupId>org.openecard.client.crypto</groupId>
-	  <artifactId>bouncy-android</artifactId>
-	  <version>${project.version}</version>
+	    <groupId>org.openecard.client.crypto</groupId>
+	    <artifactId>bouncy-android</artifactId>
+	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	  <groupId>org.openecard.client.wsdef</groupId>
-	  <artifactId>android-marshaller</artifactId>
-	  <version>${project.version}</version>
-	</dependency>
-    <dependency>
-      <groupId>org.openecard.client.ifd.scio-backend</groupId>
-      <artifactId>android-nfc</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <!-- <dependency> -->
-    <!--   <groupId>org.openecard.client.gui</groupId> -->
-    <!--   <artifactId>swing</artifactId> -->
-    <!--   <version>${project.version}</version> -->
-    <!-- </dependency> -->
-    <dependency>
-      <groupId>org.openecard.client.sal</groupId>
-      <artifactId>tiny-sal</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.wsdef</groupId>
-      <artifactId>wsdef-client</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client</groupId>
-      <artifactId>event-manager</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.transport</groupId>
-      <artifactId>paos</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-	  <groupId>com.google.android</groupId>
-	  <artifactId>android</artifactId>
-	  <version>2.3.3</version>
-	  <scope>provided</scope>
+	    <groupId>org.openecard.client.wsdef</groupId>
+	    <artifactId>android-marshaller</artifactId>
+	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	  <groupId>com.google.android</groupId>
-	  <artifactId>android-test</artifactId>
-	  <version>2.3.3</version>
-	  <scope>provided</scope>
+	    <groupId>org.openecard.client.ifd.scio-backend</groupId>
+	    <artifactId>android-nfc</artifactId>
+	    <version>${project.version}</version>
 	</dependency>
-  </dependencies>
+	<!-- <dependency> -->
+	<!--   <groupId>org.openecard.client.gui</groupId> -->
+	<!--   <artifactId>swing</artifactId> -->
+	<!--   <version>${project.version}</version> -->
+	<!-- </dependency> -->
+	<dependency>
+	    <groupId>org.openecard.client.sal</groupId>
+	    <artifactId>tiny-sal</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.wsdef</groupId>
+	    <artifactId>wsdef-client</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client</groupId>
+	    <artifactId>event-manager</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.transport</groupId>
+	    <artifactId>paos</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
 
-  <build>
-	<pluginManagement>
-	  <plugins>
-	    <plugin>
-		  <groupId>com.jayway.maven.plugins.android.generation2</groupId>
-		  <artifactId>android-maven-plugin</artifactId>
-		  <version>3.0.0</version>
-		  <extensions>true</extensions>
-		  <executions>
-  			<execution>
-   			  <id>alignApk</id>
-   			  <phase>install</phase>
-    		  <goals>
-     			<goal>zipalign</goal>
-    		  </goals>
-  			</execution>
-  		  </executions>
-		  <configuration>
-			<zipalign>
-  			  <verbose>true</verbose>
-  			  <skip>false</skip>
-  			  <inputApk>${project.build.directory}/${project.build.finalName}.apk</inputApk>
- 			  <outputApk>${project.build.directory}/${project.build.finalName}-aligned.apk</outputApk>
-			</zipalign>
-			<sdk>
-			  <platform>10</platform>
-			</sdk>
-			<test>
-			  <createReport>true</createReport>
-			</test>
-			<proguard>
-			  <!--  skip as long as problems exist -->
-  			  <skip>true</skip>
-			</proguard>
-		  </configuration>
-		</plugin>
-	  </plugins>
-	</pluginManagement>
+	<dependency>
+	    <groupId>android</groupId>
+	    <artifactId>android</artifactId>
+	    <version>2.3.3_r2</version>
+	    <scope>provided</scope>
+	</dependency>
+    </dependencies>
+
+    <build>
 	<plugins>
-	  <plugin>
+	    <plugin>
 		<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 		<artifactId>android-maven-plugin</artifactId>
-		<configuration />
-	  </plugin>
+		<version>3.0.2</version>
+		<extensions>true</extensions>
+		<configuration>
+		    <zipalign>
+			<verbose>true</verbose>
+			<skip>false</skip>
+			<inputApk>${project.build.directory}/${project.build.finalName}.apk</inputApk>
+			<outputApk>${project.build.directory}/${project.build.finalName}-aligned.apk</outputApk>
+		    </zipalign>
+		    <sdk>
+			<platform>10</platform>
+		    </sdk>
+		    <test>
+			<createReport>true</createReport>
+		    </test>
+		    <proguard>
+			<!--  skip as long as problems exist -->
+			<skip>true</skip>
+		    </proguard>
+		</configuration>
+	    </plugin>
 	</plugins>
-  </build>
-	
+    </build>
+
 </project>

@@ -13,6 +13,7 @@
   <groupId>org.openecard.client.clients</groupId>
   <artifactId>android</artifactId>
   <name>Andoid Client</name>
+  <packaging>apk</packaging>
 
   <dependencies>
     <dependency>
@@ -25,16 +26,21 @@
       <artifactId>ifd-core</artifactId>
       <version>${project.version}</version>
     </dependency>
+   	<dependency>
+	  <groupId>org.openecard.client.crypto</groupId>
+	  <artifactId>bouncy-android</artifactId>
+	  <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	  <groupId>org.openecard.client.wsdef</groupId>
+	  <artifactId>android-marshaller</artifactId>
+	  <version>${project.version}</version>
+	</dependency>
     <dependency>
-      <groupId>org.openecard.client.crypto</groupId>
-      <artifactId>bouncycastle</artifactId>
+      <groupId>org.openecard.client.ifd.scio-backend</groupId>
+      <artifactId>android-nfc</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <!-- <dependency> -->
-    <!--   <groupId>org.openecard.client.ifd.scio-backend</groupId> -->
-    <!--   <artifactId>pcsc</artifactId> -->
-    <!--   <version>${project.version}</version> -->
-    <!-- </dependency> -->
     <!-- <dependency> -->
     <!--   <groupId>org.openecard.client.gui</groupId> -->
     <!--   <artifactId>swing</artifactId> -->
@@ -60,6 +66,65 @@
       <artifactId>paos</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+	  <groupId>com.google.android</groupId>
+	  <artifactId>android</artifactId>
+	  <version>2.3.3</version>
+	  <scope>provided</scope>
+	</dependency>
+	<dependency>
+	  <groupId>com.google.android</groupId>
+	  <artifactId>android-test</artifactId>
+	  <version>2.3.3</version>
+	  <scope>provided</scope>
+	</dependency>
   </dependencies>
 
+  <build>
+	<pluginManagement>
+	  <plugins>
+	    <plugin>
+		  <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+		  <artifactId>android-maven-plugin</artifactId>
+		  <version>3.0.0</version>
+		  <extensions>true</extensions>
+		  <executions>
+  			<execution>
+   			  <id>alignApk</id>
+   			  <phase>install</phase>
+    		  <goals>
+     			<goal>zipalign</goal>
+    		  </goals>
+  			</execution>
+  		  </executions>
+		  <configuration>
+			<zipalign>
+  			  <verbose>true</verbose>
+  			  <skip>false</skip>
+  			  <inputApk>${project.build.directory}/${project.build.finalName}.apk</inputApk>
+ 			  <outputApk>${project.build.directory}/${project.build.finalName}-aligned.apk</outputApk>
+			</zipalign>
+			<sdk>
+			  <platform>10</platform>
+			</sdk>
+			<test>
+			  <createReport>true</createReport>
+			</test>
+			<proguard>
+			  <!--  skip as long as problems exist -->
+  			  <skip>true</skip>
+			</proguard>
+		  </configuration>
+		</plugin>
+	  </plugins>
+	</pluginManagement>
+	<plugins>
+	  <plugin>
+		<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+		<artifactId>android-maven-plugin</artifactId>
+		<configuration />
+	  </plugin>
+	</plugins>
+  </build>
+	
 </project>

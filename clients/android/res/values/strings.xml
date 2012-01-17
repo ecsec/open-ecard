@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">eCardApp</string>
+    <string name="about">About</string>
+    <string name="error_no_nfc">Ihr Android-Gerät ist nicht NFC-fähig. Die Anwendung wurde beendet.</string>
+</resources>

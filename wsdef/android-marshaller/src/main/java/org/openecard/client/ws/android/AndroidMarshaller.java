@@ -15,7 +15,34 @@
 
 package org.openecard.client.ws.android;
 
-import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.CardCall;
+import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
+import iso.std.iso_iec._24727.tech.schema.Conclusion;
+import iso.std.iso_iec._24727.tech.schema.Connect;
+import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
+import iso.std.iso_iec._24727.tech.schema.DataMaskType;
+import iso.std.iso_iec._24727.tech.schema.EstablishContext;
+import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
+import iso.std.iso_iec._24727.tech.schema.GetRecognitionTreeResponse;
+import iso.std.iso_iec._24727.tech.schema.GetStatus;
+import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
+import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
+import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
+import iso.std.iso_iec._24727.tech.schema.ListIFDs;
+import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
+import iso.std.iso_iec._24727.tech.schema.MatchingDataType;
+import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
+import iso.std.iso_iec._24727.tech.schema.RecognitionTree;
+import iso.std.iso_iec._24727.tech.schema.ResponseAPDUType;
+import iso.std.iso_iec._24727.tech.schema.SimpleFUStatusType;
+import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
+import iso.std.iso_iec._24727.tech.schema.StartPAOS;
+import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
+import iso.std.iso_iec._24727.tech.schema.Transmit;
+import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
+import iso.std.iso_iec._24727.tech.schema.Wait;
+import iso.std.iso_iec._24727.tech.schema.WaitResponse;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -24,6 +51,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -33,7 +61,10 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
+import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
+
 import org.openecard.client.common.util.Helper;
 import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.WSMarshaller;
@@ -53,6 +84,9 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import de.bund.bsi.ecard.api._1.InitializeFramework;
+import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
+
 /**
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
@@ -61,6 +95,8 @@ public class AndroidMarshaller implements WSMarshaller {
 
 	private static final String iso = "iso:";
 	private static final String tls = "tls:";
+	private static final String dss = "dss:";
+	private static final String ecapi = "ecapi:"; // xmlns:ecapi="http://www.bsi.bund.de/ecard/api/1.1"
 	private DocumentBuilderFactory documentBuilderFactory;
 	private DocumentBuilder documentBuilder;
 	private Transformer transformer;
@@ -70,17 +106,23 @@ public class AndroidMarshaller implements WSMarshaller {
 		documentBuilderFactory = null;
 		documentBuilder = null;
 		transformer = null;
+		soapFactory = null;
 		try {
 			documentBuilderFactory = DocumentBuilderFactory.newInstance();
 			documentBuilder = documentBuilderFactory.newDocumentBuilder();
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			documentBuilderFactory.setNamespaceAware(true);
+			documentBuilderFactory.setIgnoringComments(true);
 			transformer = transformerFactory.newTransformer();
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
+			// transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION,
+			// "yes");
 			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-			soapFactory = MessageFactory.newInstance();
 
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+
+			soapFactory = MessageFactory.newInstance();
 		} catch (Exception ex) {
 			ex.printStackTrace(System.err);
 			System.exit(1); // non recoverable
@@ -104,12 +146,36 @@ public class AndroidMarshaller implements WSMarshaller {
 	public synchronized Document marshal(Object o) throws MarshallingTypeException {
 		Document document = documentBuilder.newDocument();
 		document.setXmlStandalone(true);
-		Element rootElement = document.createElement(iso + o.getClass().getSimpleName());
-		rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 
-		document.appendChild(rootElement);
+		Element rootElement = null;
 
-		if (o instanceof iso.std.iso_iec._24727.tech.schema.StartPAOS) {
+		if (o instanceof InitializeFrameworkResponse) {
+			InitializeFrameworkResponse initializeFrameworkResponse = (InitializeFrameworkResponse) o;
+			rootElement = document.createElement(ecapi + o.getClass().getSimpleName());
+			rootElement.setAttribute("xmlns:ecapi", "http://www.bsi.bund.de/ecard/api/1.1");
+			rootElement.appendChild(marshalResult(initializeFrameworkResponse.getResult(), document));
+			Element emVersion = document.createElement(ecapi + "Version");
+			Element emMajor = document.createElement(ecapi + "Major");
+			emMajor.appendChild(document.createTextNode(initializeFrameworkResponse.getVersion().getMajor().toString()));
+			emVersion.appendChild(emMajor);
+			Element emMinor = document.createElement(ecapi + "Minor");
+			emMinor.appendChild(document.createTextNode(initializeFrameworkResponse.getVersion().getMinor().toString()));
+			emVersion.appendChild(emMinor);
+			Element emSubMinor = document.createElement(ecapi + "SubMinor");
+			emSubMinor.appendChild(document.createTextNode(initializeFrameworkResponse.getVersion().getSubMinor().toString()));
+			emVersion.appendChild(emSubMinor);
+			rootElement.appendChild(emVersion);
+
+		} else if (o instanceof InternationalStringType) {
+			InternationalStringType internationalStringType = (InternationalStringType) o;
+			rootElement = marshalInternationStringType(internationalStringType, document, internationalStringType.getClass()
+					.getSimpleName());
+		} else if (o instanceof Result) {
+			Result r = (Result) o;
+			rootElement = marshalResult(r, document);
+		} else if (o instanceof iso.std.iso_iec._24727.tech.schema.StartPAOS) {
+			rootElement = document.createElement(iso + o.getClass().getSimpleName());
+			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 			StartPAOS startPAOSPOJO = (StartPAOS) o;
 
 			Element em = document.createElement(iso + "SessionIdentifier");
@@ -117,7 +183,6 @@ public class AndroidMarshaller implements WSMarshaller {
 			rootElement.appendChild(em);
 
 			em = document.createElement(iso + "ConnectionHandle");
-			em.setAttribute("xsi:type", "iso:ConnectionHandleType");
 			Element em2 = document.createElement(iso + "ContextHandle");
 			em2.appendChild(document.createTextNode(Helper.convByteArrayToString(startPAOSPOJO.getConnectionHandle().get(0)
 					.getContextHandle())));
@@ -129,13 +194,11 @@ public class AndroidMarshaller implements WSMarshaller {
 			rootElement.appendChild(em);
 
 		} else if (o instanceof TransmitResponse) {
+			rootElement = document.createElement(iso + o.getClass().getSimpleName());
+			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 			TransmitResponse transmitResponsePOJO = (TransmitResponse) o;
 
-			Element em = document.createElement("Result");
-			Element em2 = document.createElement("ResultMajor");
-			em2.appendChild(document.createTextNode(transmitResponsePOJO.getResult().getResultMajor()));
-			// TODO result minor
-			em.appendChild(em2);
+			Element em = marshalResult(transmitResponsePOJO.getResult(), document);
 			rootElement.appendChild(em);
 
 			for (int i = 0; i < transmitResponsePOJO.getOutputAPDU().size(); i++) {
@@ -145,23 +208,23 @@ public class AndroidMarshaller implements WSMarshaller {
 			}
 
 		} else if (o instanceof EstablishContext) {
-			/* nothing more to do */
-
+			rootElement = document.createElement(iso + o.getClass().getSimpleName());
+			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 		} else if (o instanceof EstablishContextResponse) {
+			rootElement = document.createElement(iso + o.getClass().getSimpleName());
+			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 			EstablishContextResponse establishContextResponse = (EstablishContextResponse) o;
 
 			Element em = document.createElement(iso + "ContextHandle");
 			em.appendChild(document.createTextNode(Helper.convByteArrayToString(establishContextResponse.getContextHandle())));
 			rootElement.appendChild(em);
 
-			em = document.createElement("Result");
-			Element em2 = document.createElement("ResultMajor");
-			em2.appendChild(document.createTextNode(establishContextResponse.getResult().getResultMajor()));
-			// TODO result minor
-			em.appendChild(em2);
+			em = marshalResult(establishContextResponse.getResult(), document);
 			rootElement.appendChild(em);
 
 		} else if (o instanceof GetStatus) {
+			rootElement = document.createElement(iso + o.getClass().getSimpleName());
+			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 			GetStatus getStatus = (GetStatus) o;
 
 			Element em = document.createElement(iso + "ContextHandle");
@@ -174,6 +237,8 @@ public class AndroidMarshaller implements WSMarshaller {
 			}
 
 		} else if (o instanceof Wait) {
+			rootElement = document.createElement(iso + o.getClass().getSimpleName());
+			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 			Wait w = (Wait) o;
 
 			Element em = document.createElement(iso + "ContextHandle");
@@ -223,6 +288,8 @@ public class AndroidMarshaller implements WSMarshaller {
 			}
 
 		} else if (o instanceof Connect) {
+			rootElement = document.createElement(iso + o.getClass().getSimpleName());
+			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 			Connect c = (Connect) o;
 
 			Element em = document.createElement(iso + "ContextHandle");
@@ -243,20 +310,20 @@ public class AndroidMarshaller implements WSMarshaller {
 			}
 
 		} else if (o instanceof ConnectResponse) {
+			rootElement = document.createElement(iso + o.getClass().getSimpleName());
+			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 			ConnectResponse cr = (ConnectResponse) o;
 
 			Element em = document.createElement(iso + "SlotHandle");
 			em.appendChild(document.createTextNode(Helper.convByteArrayToString(cr.getSlotHandle())));
 			rootElement.appendChild(em);
 
-			em = document.createElement("Result");
-			Element em2 = document.createElement("ResultMajor");
-			em2.appendChild(document.createTextNode(cr.getResult().getResultMajor()));
-			// TODO result minor
-			em.appendChild(em2);
+			em = marshalResult(cr.getResult(), document);
 			rootElement.appendChild(em);
 
 		} else if (o instanceof ListIFDs) {
+			rootElement = document.createElement(iso + o.getClass().getSimpleName());
+			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 			ListIFDs c = (ListIFDs) o;
 
 			Element em = document.createElement(iso + "ContextHandle");
@@ -264,6 +331,8 @@ public class AndroidMarshaller implements WSMarshaller {
 			rootElement.appendChild(em);
 
 		} else if (o instanceof ListIFDsResponse) {
+			rootElement = document.createElement(iso + o.getClass().getSimpleName());
+			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 			ListIFDsResponse listIFDsResponse = (ListIFDsResponse) o;
 
 			for (String s : listIFDsResponse.getIFDName()) {
@@ -272,14 +341,12 @@ public class AndroidMarshaller implements WSMarshaller {
 				rootElement.appendChild(em);
 			}
 
-			Element em = document.createElement("Result");
-			Element em2 = document.createElement("ResultMajor");
-			em2.appendChild(document.createTextNode(listIFDsResponse.getResult().getResultMajor()));
-			// TODO result minor
-			em.appendChild(em2);
+			Element em = marshalResult(listIFDsResponse.getResult(), document);
 			rootElement.appendChild(em);
 
 		} else if (o instanceof Transmit) {
+			rootElement = document.createElement(iso + o.getClass().getSimpleName());
+			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 			Transmit t = (Transmit) o;
 
 			Element em = document.createElement(iso + "SlotHandle");
@@ -301,6 +368,8 @@ public class AndroidMarshaller implements WSMarshaller {
 			}
 
 		} else if (o instanceof RecognitionTree) {
+			rootElement = document.createElement(iso + o.getClass().getSimpleName());
+			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 			rootElement.setAttribute("xmlns:tls", "http://ws.openecard.org/protocols/tls/v1.0");
 			RecognitionTree recognitionTree = (RecognitionTree) o;
 			for (CardCall c : recognitionTree.getCardCall()) {
@@ -310,8 +379,34 @@ public class AndroidMarshaller implements WSMarshaller {
 		} else {
 			throw new IllegalArgumentException("Cannot marshal " + o.getClass().getSimpleName());
 		}
+		document.appendChild(rootElement);
 
 		return document;
+	}
+
+	private Element marshalInternationStringType(InternationalStringType internationalStringType, Document document, String name) {
+		Element emInternationStringType = document.createElement(dss + name);
+		emInternationStringType.setAttribute("xmlns:dss", "urn:oasis:names:tc:dss:1.0:core:schema");
+
+		Element em = document.createElement(dss + "ResultMessage");
+		em.appendChild(document.createTextNode(internationalStringType.getValue()));
+		em.setAttribute("xml:lang", internationalStringType.getLang());
+
+		emInternationStringType.appendChild(em);
+		return emInternationStringType;
+	}
+
+	private synchronized Element marshalResult(Result r, Document document) {
+		Element emResult = document.createElement(dss + r.getClass().getSimpleName());
+		emResult.setAttribute("xmlns:dss", "urn:oasis:names:tc:dss:1.0:core:schema");
+		Element em = document.createElement(dss + "ResultMajor");
+		em.appendChild(document.createTextNode(r.getResultMajor()));
+		emResult.appendChild(em);
+		em = document.createElement(dss + "ResultMinor");
+		em.appendChild(document.createTextNode(r.getResultMinor()));
+		emResult.appendChild(em);
+		emResult.appendChild(marshalInternationStringType(r.getResultMessage(), document, "ResultMessage"));
+		return emResult;
 	}
 
 	private synchronized Node marshalCardCall(CardCall c, Document document) {
@@ -607,8 +702,24 @@ public class AndroidMarshaller implements WSMarshaller {
 	}
 
 	private synchronized Object parse(XmlPullParser parser) throws XmlPullParserException, IOException, ParserConfigurationException {
+		if (parser.getName().equals("StartPAOSResponse")) {
+			StartPAOSResponse startPAOSResponse = new StartPAOSResponse();
+			int eventType = parser.getEventType();
+			do {
+				parser.next();
+				eventType = parser.getEventType();
+				if (eventType == XmlPullParser.START_TAG) {
+					if (parser.getName().equals("Result")) {
+						startPAOSResponse.setResult(this.parseResult(parser));
+					}
 
-		if (parser.getName().equals("Conclusion")) {
+				}
+			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("StartPAOSResponse")));
+			return startPAOSResponse;
+		} else if (parser.getName().equals("InitializeFramework")) {
+			InitializeFramework initializeFramework = new InitializeFramework();
+			return initializeFramework;
+		} else if (parser.getName().equals("Conclusion")) {
 			return parseConclusion(parser);
 		} else if (parser.getName().equals("WaitResponse")) {
 			WaitResponse waitResponse = new WaitResponse();
@@ -802,6 +913,33 @@ public class AndroidMarshaller implements WSMarshaller {
 		}
 	}
 
+	private Result parseResult(XmlPullParser parser) throws XmlPullParserException, IOException {
+		Result r = new Result();
+		int eventType = parser.getEventType();
+		do {
+			parser.next();
+			eventType = parser.getEventType();
+			if (eventType == XmlPullParser.START_TAG) {
+				if (parser.getName().equals("ResultMajor")) {
+					r.setResultMajor(parser.nextText());
+				}
+				if (parser.getName().equals("ResultMinor")) {
+					r.setResultMinor(parser.nextText());
+				}
+				if (parser.getName().equals("ResultMessage")) {
+					InternationalStringType internationalStringType = new InternationalStringType();
+
+					internationalStringType.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+
+					internationalStringType.setValue(parser.nextText());
+
+					r.setResultMessage(internationalStringType);
+				}
+			}
+		} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Result")));
+		return r;
+	}
+
 	private IFDStatusType parseIFDStatusType(XmlPullParser parser, String name) throws XmlPullParserException, IOException {
 		IFDStatusType ifdStatusType = new IFDStatusType();
 
@@ -873,17 +1011,17 @@ public class AndroidMarshaller implements WSMarshaller {
 
 	@Override
 	public SOAPMessage doc2soap(Document envDoc) throws SOAPException {
-	    SOAPMessage msg = soapFactory.createMessage(envDoc);
-	    return msg;
+		SOAPMessage msg = soapFactory.createMessage(envDoc);
+		return msg;
 	}
 
 	@Override
 	public SOAPMessage add2soap(Document content) throws SOAPException {
-	    SOAPMessage msg = soapFactory.createMessage();
-	    SOAPBody body = msg.getSOAPBody();
-	    body.addDocument(content);
+		SOAPMessage msg = soapFactory.createMessage();
+		SOAPBody body = msg.getSOAPBody();
+		body.addDocument(content);
 
-	    return msg;
+		return msg;
 	}
 
 }

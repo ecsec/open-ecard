@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns4:StartPAOSResponse xmlns:ns4="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:ns2="urn:oasis:names:tc:dss:1.0:core:schema">
+	<ns2:Result>
+		<ns2:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#error
+		</ns2:ResultMajor>
+		<ns2:ResultMinor>http://www.bsi.bund.de/ecard/api/1.1/resultminor/dp#timeout
+		</ns2:ResultMinor>
+		<ns2:ResultMessage xml:lang="en">WaitStartPAOS timeout
+		</ns2:ResultMessage>
+	</ns2:Result>
+</ns4:StartPAOSResponse>

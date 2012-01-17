@@ -28,6 +28,7 @@ public class SOAPMessage {
 	// add envelope and that stuff
 	Element envElem = doc.createElementNS(namespace, "Envelope");
 	env = new SOAPEnvelope(envElem);
+	doc.appendChild(envElem);
 	Element headElem = env.addChildElement(new QName(namespace, "Header"));
 	head = new SOAPHeader(headElem);
 	Element bodyElem = env.addChildElement(new QName(namespace, "Body"));

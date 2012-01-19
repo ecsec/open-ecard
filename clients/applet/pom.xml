@@ -118,6 +118,7 @@
       <groupId>openjdk</groupId>
       <artifactId>java-plugin</artifactId>
       <version>1.6.0.26</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.openecard.client.gui.android"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk android:minSdkVersion="10" />
+
+    <application>
+        <activity
+            android:name=".StepActivity"
+            android:configChanges="orientation|keyboardHidden" />
+    </application>
+
+</manifest>

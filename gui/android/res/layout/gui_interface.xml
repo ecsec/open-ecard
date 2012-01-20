@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:background="#FFFFFF"
+	android:minWidth="100px">
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical" android:layout_width="fill_parent"
+		android:layout_height="match_parent" android:background="#FFFFFF"
+		android:id="@+id/linearLayoutGUIInterface" android:layout_weight="60" />
+	<View android:layout_height="2dip" android:layout_width="fill_parent"
+		android:layout_marginTop="1dip" android:layout_marginBottom="1dip"
+		android:background="#FF909090" />
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="horizontal" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:background="#FFFFFF"
+		android:gravity="bottom|right">
+		<Button android:text="Zurueck" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:gravity="center"
+			android:minWidth="100px" android:id="@+id/button_back" />
+		<Button android:text="Weiter" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:gravity="center"
+			android:minWidth="100px" android:id="@+id/button_next" />
+		<Button android:text="Abbrechen" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:gravity="center"
+			android:minWidth="100px" android:id="@+id/button_cancel" />
+	</LinearLayout>
+</LinearLayout>  

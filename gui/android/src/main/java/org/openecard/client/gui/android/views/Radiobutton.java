@@ -23,21 +23,21 @@ import org.openecard.client.gui.definition.OutputInfoUnit;
 
 /**
  * Implementation of a radiobox group for use in a {@link StepActivity}.
- *
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class Radiobutton implements StepView {
 
     private GridView gridview;
     private RadioBoxItemAdapter boxItemAdapter;
-    
+
     public Radiobutton(org.openecard.client.gui.definition.Radiobox radiobox, Context ctx) {
-		 gridview = new GridView(ctx);
-		gridview.setColumnWidth(250);
-		gridview.setNumColumns(-1); // auto fit
-		gridview.setStretchMode(2); // stretch column
-		boxItemAdapter = new RadioBoxItemAdapter(ctx, radiobox);
-		gridview.setAdapter(boxItemAdapter);
+	gridview = new GridView(ctx);
+	gridview.setColumnWidth(250);
+	gridview.setNumColumns(-1); // auto fit
+	gridview.setStretchMode(2); // stretch column
+	boxItemAdapter = new RadioBoxItemAdapter(ctx, radiobox);
+	gridview.setAdapter(boxItemAdapter);
     }
 
     @Override
@@ -57,6 +57,6 @@ public class Radiobutton implements StepView {
 
     @Override
     public OutputInfoUnit getValue() {
-    	return boxItemAdapter.getValue();
+	return boxItemAdapter.getValue();
     }
 }

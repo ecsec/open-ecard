@@ -22,19 +22,19 @@ import org.openecard.client.gui.definition.UserConsentDescription;
 /**
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- *
+ * 
  */
-public class AndroidUserConsent implements org.openecard.client.gui.UserConsent{
+public class AndroidUserConsent implements org.openecard.client.gui.UserConsent {
 
-	private Context context;
-	
-	public AndroidUserConsent(Context context){
-		this.context = context;
-	}
+    private Context context;
 
-	@Override
-	public UserConsentNavigator obtainNavigator(UserConsentDescription arg0) {
-		return new AndroidNavigator(arg0.getSteps(), this.context);
-	}
+    public AndroidUserConsent(Context context) {
+	this.context = context;
+    }
+
+    @Override
+    public UserConsentNavigator obtainNavigator(UserConsentDescription arg0) {
+	return new AndroidNavigator(arg0.getSteps(), this.context);
+    }
 
 }

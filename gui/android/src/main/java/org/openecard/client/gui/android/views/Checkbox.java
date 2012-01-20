@@ -28,35 +28,35 @@ import org.openecard.client.gui.definition.OutputInfoUnit;
  */
 public class Checkbox implements StepView {
 
-	private GridView gridview;
-	private CheckBoxItemAdapter boxItemAdapter;
+    private GridView gridview;
+    private CheckBoxItemAdapter boxItemAdapter;
 
-	public Checkbox(org.openecard.client.gui.definition.Checkbox checkbox, Context ctx) {
-		gridview = new GridView(ctx);
-		gridview.setColumnWidth(250);
-		gridview.setNumColumns(-1); // auto fit
-		gridview.setStretchMode(2); // stretch column
-		boxItemAdapter = new CheckBoxItemAdapter(ctx, checkbox);
-		gridview.setAdapter(boxItemAdapter);
-	}
+    public Checkbox(org.openecard.client.gui.definition.Checkbox checkbox, Context ctx) {
+	gridview = new GridView(ctx);
+	gridview.setColumnWidth(250);
+	gridview.setNumColumns(-1); // auto fit
+	gridview.setStretchMode(2); // stretch column
+	boxItemAdapter = new CheckBoxItemAdapter(ctx, checkbox);
+	gridview.setAdapter(boxItemAdapter);
+    }
 
-	@Override
-	public View getView() {
-		return gridview;
-	}
+    @Override
+    public View getView() {
+	return gridview;
+    }
 
-	@Override
-	public boolean validate() {
-		return true;
-	}
+    @Override
+    public boolean validate() {
+	return true;
+    }
 
-	@Override
-	public boolean isValueType() {
-		return true;
-	}
+    @Override
+    public boolean isValueType() {
+	return true;
+    }
 
-	@Override
-	public OutputInfoUnit getValue() {
-		return boxItemAdapter.getValue();
-	}
+    @Override
+    public OutputInfoUnit getValue() {
+	return boxItemAdapter.getValue();
+    }
 }

@@ -37,45 +37,45 @@ import org.openecard.client.gui.definition.Radiobox;
  */
 public class RadioBoxItemAdapter extends BaseAdapter {
 
-	private Context context;
-	private List<BoxItem> boxItems;
+    private Context context;
+    private List<BoxItem> boxItems;
 
-	public RadioBoxItemAdapter(Context c, InputInfoUnit i) {
-		this.context = c;
-		this.boxItems = ((Radiobox) i).getBoxItems();
-	}
+    public RadioBoxItemAdapter(Context c, InputInfoUnit i) {
+	this.context = c;
+	this.boxItems = ((Radiobox) i).getBoxItems();
+    }
 
-	public int getCount() {
-		return boxItems.size();
-	}
+    public int getCount() {
+	return boxItems.size();
+    }
 
-	/* unused */
-	public Object getItem(int position) {
-		return null;
-	}
+    /* unused */
+    public Object getItem(int position) {
+	return null;
+    }
 
-	/* unused */
-	public long getItemId(int position) {
-		return 0;
-	}
+    /* unused */
+    public long getItemId(int position) {
+	return 0;
+    }
 
-	public View getView(final int position, View convertView, ViewGroup parent) {
-		CompoundButton b = new RadioButton(context);
-		b.setTextColor(Color.BLACK);
-		b.setText(boxItems.get(position).getText() != null ? boxItems.get(position).getText() : boxItems.get(position).getName());
-		b.setChecked(boxItems.get(position).isChecked());
-		b.setEnabled(!boxItems.get(position).isDisabled());
-		b.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				boxItems.get(position).setChecked(isChecked);
-			}
-		});
-		return b;
-	}
+    public View getView(final int position, View convertView, ViewGroup parent) {
+	CompoundButton b = new RadioButton(context);
+	b.setTextColor(Color.BLACK);
+	b.setText(boxItems.get(position).getText() != null ? boxItems.get(position).getText() : boxItems.get(position).getName());
+	b.setChecked(boxItems.get(position).isChecked());
+	b.setEnabled(!boxItems.get(position).isDisabled());
+	b.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+	    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		boxItems.get(position).setChecked(isChecked);
+	    }
+	});
+	return b;
+    }
 
-	public OutputInfoUnit getValue() {
-		org.openecard.client.gui.definition.Radiobox result = new org.openecard.client.gui.definition.Radiobox();
-		result.getBoxItems().addAll(boxItems);
-		return result;
-	}
+    public OutputInfoUnit getValue() {
+	org.openecard.client.gui.definition.Radiobox result = new org.openecard.client.gui.definition.Radiobox();
+	result.getBoxItems().addAll(boxItems);
+	return result;
+    }
 }

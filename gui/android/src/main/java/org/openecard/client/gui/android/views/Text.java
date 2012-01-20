@@ -24,17 +24,17 @@ import org.openecard.client.gui.definition.OutputInfoUnit;
 
 /**
  * Implementation of a simple text view for use in a {@link StepActivity}.
- *
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class Text implements StepView {
 
-	private TextView t;
+    private TextView t;
 
     public Text(org.openecard.client.gui.definition.Text text, Context ctx) {
-    	t = new TextView(ctx);
-		t.setTextColor(Color.BLACK);
-		t.setText(text.getText());
+	t = new TextView(ctx);
+	t.setTextColor(Color.BLACK);
+	t.setText(text.getText());
     }
 
     @Override

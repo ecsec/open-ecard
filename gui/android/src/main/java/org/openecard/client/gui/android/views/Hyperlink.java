@@ -45,32 +45,32 @@ import org.openecard.client.gui.definition.OutputInfoUnit;
  */
 public class Hyperlink implements StepView {
 
-	private TextView tvHyperlink;
+    private TextView tvHyperlink;
 
-	public Hyperlink(org.openecard.client.gui.definition.Hyperlink link, Context ctx) {
-		tvHyperlink = new TextView(ctx);
-		tvHyperlink.setText(Html.fromHtml("<a href=\"" + link.getHref() + "\">"
-				+ ((link.getText() != null) ? link.getText() : link.getHref()) + "</a>"));
-		tvHyperlink.setMovementMethod(LinkMovementMethod.getInstance());
-	}
+    public Hyperlink(org.openecard.client.gui.definition.Hyperlink link, Context ctx) {
+	tvHyperlink = new TextView(ctx);
+	tvHyperlink.setText(Html.fromHtml("<a href=\"" + link.getHref() + "\">"
+		+ ((link.getText() != null) ? link.getText() : link.getHref()) + "</a>"));
+	tvHyperlink.setMovementMethod(LinkMovementMethod.getInstance());
+    }
 
-	@Override
-	public View getView() {
-		return tvHyperlink;
-	}
+    @Override
+    public View getView() {
+	return tvHyperlink;
+    }
 
-	@Override
-	public boolean validate() {
-		return true;
-	}
+    @Override
+    public boolean validate() {
+	return true;
+    }
 
-	@Override
-	public boolean isValueType() {
-		return false;
-	}
+    @Override
+    public boolean isValueType() {
+	return false;
+    }
 
-	@Override
-	public OutputInfoUnit getValue() {
-		return null;
-	}
+    @Override
+    public OutputInfoUnit getValue() {
+	return null;
+    }
 }

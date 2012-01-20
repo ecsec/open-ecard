@@ -38,76 +38,76 @@ import org.openecard.client.gui.definition.Textfield;
  */
 public class AbstractInput implements StepView {
 
-	private final AbstractTextfield result;
-	private TableLayout tbl;
-	private TextView tv;
+    private final AbstractTextfield result;
+    private TableLayout tbl;
+    private TextView tv;
 
-	public AbstractInput(AbstractTextfield input, Context ctx) {
-		tv = new TextView(ctx);
-		if (input.getText() != null)
-			tv.setText(input.getText());
-		else
-			tv.setText(input.getName());
-		EditText et = new EditText(ctx);
-		et.setLines(1);
-		if (input.type().equals(InfoUnitElementType.Passwordfield)) {
-			et.setTransformationMethod(new PasswordTransformationMethod());
-		}
-		if (input.getMaxLength() > 0) {
-			InputFilter[] FilterArray = new InputFilter[1];
-			FilterArray[0] = new InputFilter.LengthFilter(input.getMaxLength());
-			et.setFilters(FilterArray);
-		}
-		if (input.getValue() != null) {
-			et.setText(input.getValue());
-		}
-		tbl = new TableLayout(ctx);
-		TableRow tbr = new TableRow(ctx);
-		tbr.addView(tv);
-		tbr.addView(et);
-		tbl.addView(tbr);
-		if (input.type().equals(InfoUnitElementType.Passwordfield)) {
-			result = new Passwordfield();
-		} else {
-			result = new Textfield();
-		}
-		result.setMinLength(input.getMinLength());
-		result.setMaxLength(input.getMaxLength());
-		result.setName(input.getName());
-		result.setText(input.getText());
+    public AbstractInput(AbstractTextfield input, Context ctx) {
+	tv = new TextView(ctx);
+	if (input.getText() != null)
+	    tv.setText(input.getText());
+	else
+	    tv.setText(input.getName());
+	EditText et = new EditText(ctx);
+	et.setLines(1);
+	if (input.type().equals(InfoUnitElementType.Passwordfield)) {
+	    et.setTransformationMethod(new PasswordTransformationMethod());
 	}
+	if (input.getMaxLength() > 0) {
+	    InputFilter[] FilterArray = new InputFilter[1];
+	    FilterArray[0] = new InputFilter.LengthFilter(input.getMaxLength());
+	    et.setFilters(FilterArray);
+	}
+	if (input.getValue() != null) {
+	    et.setText(input.getValue());
+	}
+	tbl = new TableLayout(ctx);
+	TableRow tbr = new TableRow(ctx);
+	tbr.addView(tv);
+	tbr.addView(et);
+	tbl.addView(tbr);
+	if (input.type().equals(InfoUnitElementType.Passwordfield)) {
+	    result = new Passwordfield();
+	} else {
+	    result = new Textfield();
+	}
+	result.setMinLength(input.getMinLength());
+	result.setMaxLength(input.getMaxLength());
+	result.setName(input.getName());
+	result.setText(input.getText());
+    }
 
-	@Override
-	public View getView() {
-		return this.tbl;
-	}
+    @Override
+    public View getView() {
+	return this.tbl;
+    }
 
-	@Override
-	public boolean validate() {
-		/*
-		 * String textValue = this.textField.getText(); if (textValue == null) {
-		 * textValue = ""; } int textSize = textValue.length(); // min <= text
-		 * && text <= max if (minLength <= textSize && textSize <= maxLength) {
-		 * return true; } else { return false; }
-		 */
-		// TODO
-		return true;
-	}
+    @Override
+    public boolean validate() {
+	/*
+	 * String textValue = this.textField.getText(); if (textValue == null) {
+	 * textValue = ""; } int textSize = textValue.length(); // min <= text
+	 * && text <= max if (minLength <= textSize && textSize <= maxLength) {
+	 * return true; } else { return false; }
+	 */
+	// TODO
+	return true;
+    }
 
-	@Override
-	public boolean isValueType() {
-		return true;
-	}
+    @Override
+    public boolean isValueType() {
+	return true;
+    }
 
-	@Override
-	public OutputInfoUnit getValue() {
-		String textValue = null;
-		if (this.tv.getText() != null)
-			textValue = this.tv.getText().toString();
-		if (textValue == null) {
-			textValue = "";
-		}
-		result.setValue(textValue);
-		return result;
+    @Override
+    public OutputInfoUnit getValue() {
+	String textValue = null;
+	if (this.tv.getText() != null)
+	    textValue = this.tv.getText().toString();
+	if (textValue == null) {
+	    textValue = "";
 	}
+	result.setValue(textValue);
+	return result;
+    }
 }

@@ -1,0 +1,122 @@
+/*
+ * Copyright 2012 Moritz Horsch.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.openecard.client.ifd.protocol.pace.crypto;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ */
+public final class KDF {
+
+    private MessageDigest md;
+    private int keyLength;
+
+    /**
+     * Key Derivation Function.
+     */
+    public KDF() {
+        try {
+            md = MessageDigest.getInstance("SHA1");
+            keyLength = 16;
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger("crypto").log(Level.SEVERE, "Exception", ex);
+        }
+    }
+
+    /**
+     * Key Derivation Function.
+     * @param md MessageDigest
+     * @param keyLength Key length
+     */
+    public KDF(MessageDigest md, int keyLength) {
+        this.md = md;
+        this.keyLength = keyLength;
+    }
+
+    /**
+     * Derive key for encryption.
+     * 
+     * @param secret Secret
+     * @return Key_PI
+     */
+    public byte[] derivePI(byte[] secret) {
+        return derive(secret, (byte) 3, null);
+    }
+
+    /**
+     * Derive key for message authentication.
+     * 
+     * @param secret Secret
+     * @return Key_MAC
+     */
+    public byte[] deriveMAC(byte[] secret) {
+        return derive(secret, (byte) 2, null);
+    }
+
+    /**
+     * Derive key for message authentication.
+     * 
+     * @param secret Secret
+     * @param nonce Nonce
+     * @return Key_MAC
+     */
+    public byte[] deriveMAC(byte[] secret, byte[] nonce) {
+        return derive(secret, (byte) 2, nonce);
+    }
+
+    /**
+     * Derive key for message encryption.
+     * 
+     * @param secret Secret
+     * @return Key_ENC
+     */
+    public byte[] deriveENC(byte[] secret) {
+        return derive(secret, (byte) 1, null);
+    }
+
+    /**
+     * Derive key for message encryption.
+     * 
+     * @param secret Secret
+     * @param nonce Nonce
+     * @return Key_ENC
+     */
+    public byte[] deriveENC(byte[] secret, byte[] nonce) {
+        return derive(secret, (byte) 1, nonce);
+    }
+
+    private byte[] derive(byte[] secret, byte counter, byte[] nonce) {
+        final byte[] c = {(byte) 0x00, (byte) 0x00, (byte) 0x00, counter};
+
+        byte[] key = new byte[keyLength];
+
+        md.reset();
+        md.update(secret, 0, secret.length);
+        if (nonce != null) {
+            md.update(nonce, 0, nonce.length);
+        }
+        md.update(c, 0, c.length);
+        byte[] hash = md.digest();
+
+        System.arraycopy(hash, 0, key, 0, key.length);
+
+        return key;
+    }
+}

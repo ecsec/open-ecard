@@ -18,6 +18,7 @@ public class Helper {
      * @param b2 - second byte array
      * @return byte[]
      */
+    @Deprecated
     public static byte[] concatenate(byte[] b1, byte[] b2) {
         byte[] result = new byte[b1.length + b2.length];
         System.arraycopy(b1, 0, result, 0, b1.length);
@@ -31,6 +32,7 @@ public class Helper {
      * @param b2 - byte
      * @return byte[]
      */
+    @Deprecated
     public static byte[] concatenate(byte[] b1, byte b2) {
 	byte[] result = new byte[b1.length + 1];
 	System.arraycopy(b1, 0, result, 0, b1.length);
@@ -44,6 +46,7 @@ public class Helper {
      * @param b2 - byte array
      * @return byte[]
      */
+    @Deprecated
     public static byte[] concatenate(byte b1, byte[] b2) {
         byte[] result = new byte[b2.length + 1];
         result[0] = b1;
@@ -159,6 +162,7 @@ public class Helper {
      * @param buffer - byte array to be converted
      * @return Hex String
      */
+    @Deprecated
     public static String convByteArrayToString(byte[] buffer) {
 	StringWriter writer = new StringWriter(buffer.length);
 	PrintWriter out = new PrintWriter(writer);

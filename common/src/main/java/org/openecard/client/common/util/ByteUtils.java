@@ -253,7 +253,7 @@ public class ByteUtils {
                 if (hex.length() == 1) {
                     hex = "0" + hex;
                 }
-                sb.append("0x").append(hex).append(" ");
+                sb.append("0x").append(hex.toUpperCase()).append(" ");
 
                 if (iByte >= cBytes) {
                     return sb.toString();

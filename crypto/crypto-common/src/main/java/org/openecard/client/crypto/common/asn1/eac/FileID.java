@@ -24,8 +24,8 @@ import org.openecard.bouncycastle.asn1.ASN1Sequence;
  */
 public final class FileID {
 
-    private ASN1OctetString fid;
-    private ASN1OctetString sfid;
+    private byte[] fid;
+    private byte[] sfid;
 
     /**
      * Instantiates a new file id.
@@ -34,11 +34,11 @@ public final class FileID {
      */
     public FileID(ASN1Sequence seq) {
         if (seq.size() == 1) {
-            fid = ASN1OctetString.getInstance(seq.getObjectAt(0));
+            fid = ASN1OctetString.getInstance(seq.getObjectAt(0)).getOctets();
 
         } else if (seq.size() == 2) {
-            fid = ASN1OctetString.getInstance(seq.getObjectAt(0));
-            sfid = ASN1OctetString.getInstance(seq.getObjectAt(1));
+            fid = ASN1OctetString.getInstance(seq.getObjectAt(0)).getOctets();
+            sfid = ASN1OctetString.getInstance(seq.getObjectAt(1)).getOctets();
         } else {
             throw new IllegalArgumentException("Sequence wrong size for FileID");
         }
@@ -65,7 +65,7 @@ public final class FileID {
      *
      * @return the FID
      */
-    public ASN1OctetString getFID() {
+    public byte[] getFID() {
         return fid;
     }
 
@@ -74,7 +74,7 @@ public final class FileID {
      *
      * @return the SFID
      */
-    public ASN1OctetString getSFID() {
+    public byte[] getSFID() {
         return sfid;
     }
 }

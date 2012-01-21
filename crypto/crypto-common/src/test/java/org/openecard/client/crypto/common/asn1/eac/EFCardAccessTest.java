@@ -93,7 +93,7 @@ public class EFCardAccessTest {
         assertEquals(pdp.getProtocol(), "0.4.0.127.0.7.2.2.4.2");
         assertEquals(pdp.getProtocol(), PACEObjectIdentifier.id_PACE_ECDH_GM);
         assertEquals(pdp.getParameterID(), 0);
-        assertEquals(pdp.getDomainParameter().getObjectIdentifier().getId(), "0.4.0.127.0.7.1.1.5.2.2.2");
+        assertEquals(pdp.getDomainParameter().getObjectIdentifier(), "0.4.0.127.0.7.1.1.5.2.2.2");
     }
 
     @Test

@@ -25,8 +25,8 @@ import org.openecard.bouncycastle.asn1.DERIA5String;
  */
 public final class CardInfoLocator {
 
-    private ASN1ObjectIdentifier protocol;
-    private DERIA5String url;
+    private String protocol;
+    private String url;
     private FileID efCardInfo;
 
     /**
@@ -36,12 +36,12 @@ public final class CardInfoLocator {
      */
     public CardInfoLocator(ASN1Sequence seq) {
         if (seq.size() == 2) {
-            protocol = (ASN1ObjectIdentifier) ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
-            url = DERIA5String.getInstance(seq.getObjectAt(1));
+            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
+            url = DERIA5String.getInstance(seq.getObjectAt(1)).getString();
 
         } else if (seq.size() == 3) {
-            protocol = (ASN1ObjectIdentifier) ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
-            url = DERIA5String.getInstance(seq.getObjectAt(1));
+            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
+            url = DERIA5String.getInstance(seq.getObjectAt(1)).getString();
             efCardInfo = FileID.getInstance(seq.getObjectAt(2));
         } else {
             throw new IllegalArgumentException("Sequence wrong size for CardInfoLocator");
@@ -79,7 +79,7 @@ public final class CardInfoLocator {
      * @return the URL
      */
     public String getURL() {
-        return url.getString();
+        return url;
     }
 
     /**

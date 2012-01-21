@@ -51,10 +51,10 @@ public class ProprietaryDomainParameters extends DomainParameters {
             BigInteger r = order.getValue();
             BigInteger f = cofactor.getValue();
 
-            ECCurve curve = new ECCurve.Fp(p, a, b);
+//            ECCurve curve = new ECCurve.Fp(p, a, b);
 
             X9ECParameters ECParameters = X9ECParameters.getInstance(seq);
-            curve = ECParameters.getCurve();
+            ECCurve curve = ECParameters.getCurve();
 
             domainParameter = new ECParameterSpec(curve, ECParameters.getG(), r, f);
 

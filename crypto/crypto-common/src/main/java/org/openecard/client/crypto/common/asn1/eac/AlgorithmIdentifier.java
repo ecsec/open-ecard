@@ -24,7 +24,7 @@ import org.openecard.bouncycastle.asn1.ASN1Sequence;
  */
 public class AlgorithmIdentifier {
 
-    private ASN1ObjectIdentifier algorithm;
+    private String algorithm;
     private ASN1Object parameters;
 
     /**
@@ -34,10 +34,9 @@ public class AlgorithmIdentifier {
      */
     public AlgorithmIdentifier(ASN1Sequence seq) {
         if (seq.size() == 1) {
-            algorithm = (ASN1ObjectIdentifier) ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
-
+            algorithm = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
         } else if (seq.size() == 2) {
-            algorithm = (ASN1ObjectIdentifier) ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
+            algorithm = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
             parameters = (ASN1Object) seq.getObjectAt(1);
         } else {
             throw new IllegalArgumentException("Sequence wrong size for AlgorithmIdentifier");
@@ -66,7 +65,7 @@ public class AlgorithmIdentifier {
      *
      * @return the object identifier
      */
-    public ASN1ObjectIdentifier getObjectIdentifier() {
+    public String getObjectIdentifier() {
         return algorithm;
     }
 

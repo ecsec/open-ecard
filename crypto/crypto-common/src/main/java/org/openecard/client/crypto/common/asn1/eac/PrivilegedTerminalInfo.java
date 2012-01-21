@@ -24,7 +24,7 @@ import org.openecard.bouncycastle.asn1.ASN1Set;
  */
 public final class PrivilegedTerminalInfo {
 
-    private ASN1ObjectIdentifier protocol;
+    private String protocol;
     private SecurityInfos privilegedTerminalInfo;
 
     /**
@@ -34,7 +34,7 @@ public final class PrivilegedTerminalInfo {
      */
     public PrivilegedTerminalInfo(ASN1Sequence seq) {
         if (seq.size() == 2) {
-            protocol = (ASN1ObjectIdentifier) ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
+            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
             privilegedTerminalInfo = SecurityInfos.getInstance((ASN1Set) seq.getObjectAt(1));
         } else {
             throw new IllegalArgumentException("Sequence wrong size for PrivilegedTerminalInfo");
@@ -63,7 +63,7 @@ public final class PrivilegedTerminalInfo {
      * @return the protocol
      */
     public String getProtocol() {
-        return protocol.toString();
+        return protocol;
     }
 
     /**

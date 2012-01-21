@@ -44,7 +44,6 @@ public final class CADomainParameterInfo {
         if (seq.size() == 2) {
             protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
             domainParameter = AlgorithmIdentifier.getInstance(seq.getObjectAt(1));
-
         } else if (seq.size() == 3) {
             protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
             domainParameter = AlgorithmIdentifier.getInstance(seq.getObjectAt(1));

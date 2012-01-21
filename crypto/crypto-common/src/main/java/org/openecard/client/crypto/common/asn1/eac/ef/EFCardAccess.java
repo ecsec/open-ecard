@@ -105,7 +105,7 @@ public final class EFCardAccess {
                 logger.log(Level.FINE, "Found PrivilegedTerminalInfo object identifier");
                 pti = PrivilegedTerminalInfo.getInstance(securityInfo);
             } else {
-                logger.log(Level.FINE, "Found unknown object identifier: {0}", oid.toString());
+                logger.log(Level.WARNING, "Found unknown object identifier: {0}", oid.toString());
             }
         }
     }

@@ -19,21 +19,25 @@ import javax.smartcardio.CardTerminals;
 import org.openecard.client.common.ifd.TerminalFactory;
 
 /**
- * NFC specific implementation of the TerminalFactory
+ * Seek specific implementation of the TerminalFactory
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * 
  */
-public class NFCFactory implements TerminalFactory {
+public class SeekFactory implements TerminalFactory {
 
     @Override
     public String getType() {
-	return "NFC";
+	return "seek for android";
     }
 
     @Override
     public CardTerminals terminals() {
-	return new NFCCardTerminals();
+	try {
+	    return SeekTerminals.getInstance();
+	} catch (Exception e) {
+	    return null;
+	}
     }
 
 }

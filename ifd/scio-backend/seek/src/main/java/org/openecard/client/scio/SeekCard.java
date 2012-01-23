@@ -16,26 +16,35 @@
 package org.openecard.client.scio;
 
 import java.io.IOException;
-
-import android.nfc.tech.IsoDep;
 import javax.smartcardio.ATR;
 import javax.smartcardio.Card;
 import javax.smartcardio.CardChannel;
 import javax.smartcardio.CardException;
+import org.simalliance.openmobileapi.Session;
 
 /**
- * NFC implementation of smartcardio's Card interface.
+ * Seek implementation of smartcardio's Card interface.
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * 
  */
-public class NFCCard extends Card {
+public class SeekCard extends Card {
 
-    protected IsoDep isodep = null;
-    private NFCCardChannel nfcCardChannel = new NFCCardChannel(this);
+    private static byte[] aid = null;
+    private Session session;
 
-    public NFCCard(IsoDep tag) {
-	this.isodep = tag;
+    /*
+     * SELECT-command is not allowed in seek, so we must set the aid beforhand
+     * and use it in getbasicchannel and openlogicalchannel. Cant pass it there
+     * because the smartcardios interface doesnt declare parameters for that
+     * functions.
+     */
+    public static void setAID(byte[] b) {
+	aid = b;
+    }
+
+    public SeekCard(Session s) {
+	this.session = s;
     }
 
     @Override
@@ -45,12 +54,7 @@ public class NFCCard extends Card {
 
     @Override
     public void disconnect(boolean arg0) throws CardException {
-	try {
-	    this.isodep.close();
-	} catch (IOException e) {
-	    throw new CardException("Disconnect failed", e);
-	}
-	return;
+	this.session.close();
     }
 
     @Override
@@ -60,25 +64,31 @@ public class NFCCard extends Card {
 
     @Override
     public ATR getATR() {
-	/* for now theres no way to get the ATR in android nfc api */
-
-	return new ATR(new byte[0]);
+	return new ATR(this.session.getATR());
     }
 
     @Override
     public CardChannel getBasicChannel() {
-	return this.nfcCardChannel;
+	try {
+	    return new SeekChannel(this.session.openBasicChannel(aid));
+	} catch (IOException e) {
+	    return null;
+	}
     }
 
     @Override
     public String getProtocol() {
-	/* for now theres no way to get the used protocol in android nfc api */
+	/* for now theres no way to get the used protocol in seek */
 	return "";
     }
 
     @Override
     public CardChannel openLogicalChannel() throws CardException {
-	return this.nfcCardChannel;
+	try {
+	    return new SeekChannel(this.session.openLogicalChannel(aid));
+	} catch (IOException e) {
+	    throw new CardException(e);
+	}
     }
 
     @Override

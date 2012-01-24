@@ -1,5 +1,6 @@
 package org.openecard.client.common.util;
 
+import java.security.SecureRandom;
 import java.util.Random;
 import java.util.UUID;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 public class ValueGenerators {
 
     public static String generatePSK() {
-	String psk = generateRandomHex(32);
+	String psk = generateSecureRandomHex(32);
 	return psk;
     }
 
@@ -29,6 +30,23 @@ public class ValueGenerators {
 	    result.append(c);
 	}
 	return result.toString();
+    }
+
+    public static String generateSecureSessionID() {
+	String session = generateSecureRandomHex(28);
+	return session;
+    }
+
+    public static String generateSecureRandomHex(int len) {
+	if (len <= 0) {
+	    return "";
+	}
+
+	byte[] randomBytes = new byte[len];
+	SecureRandom rand = new SecureRandom();
+
+	rand.nextBytes(randomBytes);
+	return Helper.convByteArrayToString(randomBytes);
     }
 
     public static String generateUUID() {

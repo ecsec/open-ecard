@@ -1,9 +1,22 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.ifd.scio.wrapper;
 
-import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.ifd.scio.reader.PCSCFeatures;
-import org.openecard.client.ifd.scio.IFDException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Level;
@@ -12,6 +25,10 @@ import javax.smartcardio.ATR;
 import javax.smartcardio.Card;
 import javax.smartcardio.CardChannel;
 import javax.smartcardio.CardException;
+import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.ifd.scio.IFDException;
+import org.openecard.client.ifd.scio.reader.PCSCFeatures;
 
 
 /**
@@ -52,8 +69,14 @@ public class SCCard {
     public Map<Integer,Integer> getFeatureCodes() throws CardException {
         if (featureCodes == null) {
             int code = PCSCFeatures.GET_FEATURE_REQUEST_CTLCODE();
-            byte[] response = controlCommand(code, new byte[0]);
-            featureCodes = PCSCFeatures.featureMapFromRequest(response);
+	    try {
+		byte[] response = controlCommand(code, new byte[0]);
+		featureCodes = PCSCFeatures.featureMapFromRequest(response);
+	    } catch (CardException ex) {
+		// TODO: remove this workaround by supporting feature requests under all systems and all readers
+		_logger.logp(Level.WARNING, this.getClass().getName(), "getFeatureCodes()", "Unable to request features from reader." ,ex);
+		featureCodes = new HashMap<Integer, Integer>();
+	    }
         }
 
         return featureCodes;

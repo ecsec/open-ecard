@@ -59,6 +59,7 @@ public class Helper {
      * @param buffer - byte array to be converted
      * @return int
      */
+    @Deprecated
     public static int convertByteArrayToInt(byte[] buffer) {
 	if (buffer.length > 4 || buffer.length < 1) {
 	    throw new IllegalArgumentException("Size of byte array must be between 1 and 4.");
@@ -77,6 +78,7 @@ public class Helper {
      * @param buffer - byte array to be converted
      * @return int
      */
+    @Deprecated
     public static long convertByteArrayToLong(byte[] buffer) {
 	if (buffer.length > 8 || buffer.length < 1) {
 	    throw new IllegalArgumentException("Size of byte array must be between 1 and 8.");
@@ -96,9 +98,11 @@ public class Helper {
      * @param value - positive integer to be converted
      * @return byte[]
      */
+    @Deprecated
     public static byte[] convertPosIntToByteArray(long value) {
 	return convertPosIntToByteArray(value, 8);
     }
+    @Deprecated
     public static byte[] convertPosIntToByteArray(int value) {
 	return convertPosIntToByteArray(value, 8);
     }
@@ -108,6 +112,7 @@ public class Helper {
      * @param value - positive integer to be converted
      * @return byte[]
      */
+    @Deprecated
     public static byte[] convertPosIntToByteArray(long value, int numBits) {
 	if (value < 0) {
 	    throw new IllegalArgumentException("Value must not be negative.");
@@ -180,6 +185,7 @@ public class Helper {
      * @param s - hex string to be converted
      * @return byte[]
      */
+    @Deprecated
     public static byte[] convStringToByteArray(String s) {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	int value = 0;
@@ -194,6 +200,7 @@ public class Helper {
 	return baos.toByteArray();
     }
     private static final Pattern wsPattern = Pattern.compile("\\s");
+    @Deprecated
     public static byte[] convStringWithWSToByteArray(String s) {
         s = wsPattern.matcher(s).replaceAll("");
         return convStringToByteArray(s);

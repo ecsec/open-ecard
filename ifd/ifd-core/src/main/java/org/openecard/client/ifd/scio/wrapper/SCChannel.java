@@ -80,23 +80,23 @@ public class SCChannel {
             byte[] inputAPDU = input;
             if (isSM()) {
                 // <editor-fold defaultstate="collapsed" desc="log APDU">
-                _logger.log(Level.FINE, "Send APDU: {0}", ByteUtils.toHexString(inputAPDU, true));
+                _logger.log(Level.FINE, "Send APDU: {0}", ByteUtils.formatHexString(inputAPDU, true));
                 // </editor-fold>
                 inputAPDU = smProtocol.applySM(inputAPDU);
             }
             // <editor-fold defaultstate="collapsed" desc="log APDU">
-            _logger.log(Level.FINE, "Send APDU: {0}", ByteUtils.toHexString(inputAPDU));
+            _logger.log(Level.FINE, "Send APDU: {0}", ByteUtils.formatHexString(inputAPDU));
             // </editor-fold>
             CommandAPDU capdu = new CommandAPDU(inputAPDU);
             ResponseAPDU rapdu = channel.transmit(capdu);
             byte[] result = rapdu.getBytes();
             // <editor-fold defaultstate="collapsed" desc="log APDU">
-            _logger.log(Level.FINE, "Receive  APDU: {0}", ByteUtils.toHexString(result));
+            _logger.log(Level.FINE, "Receive  APDU: {0}", ByteUtils.formatHexString(result));
             // </editor-fold>
             if (isSM()) {
                 result = smProtocol.removeSM(result);
                 // <editor-fold defaultstate="collapsed" desc="log APDU">
-                _logger.log(Level.FINE, "Receive  APDU: {0}", ByteUtils.toHexString(result));
+                _logger.log(Level.FINE, "Receive  APDU: {0}", ByteUtils.formatHexString(result));
                 // </editor-fold>
             }
             // get status word

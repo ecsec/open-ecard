@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.openecard.client.common.util;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 
 /**
  * A set of utility functions for Byte and Byte Array.
  *
  * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class ByteUtils {
 
@@ -131,7 +137,7 @@ public class ByteUtils {
     }
 
     /**
-     * Removes leading null bytes from the input byte array.
+     * Removes leading null byte from the input byte array.
      *
      * @param input Byte array
      * @return byte array without leading null bytes
@@ -226,18 +232,18 @@ public class ByteUtils {
      * @param bytes
      * @return hex encoded string
      */
-    public static String toHexString(byte[] bytes) {
-        return toHexString(bytes, false);
+    public static String formatHexString(byte[] bytes) {
+        return formatHexString(bytes, false);
     }
 
     /**
-     * Convert a byte array to a hex string and formated the output to 16 values in a row.
+     * Convert a byte array to a hex string and formated the output to 16 values in a row if addLinebreak is set.
      *
      * @param bytes
-     * @param formatted
+     * @param addLinebreak
      * @return hex encoded string
      */
-    public static String toHexString(byte[] bytes, boolean formatted) {
+    public static String formatHexString(byte[] bytes, boolean addLinebreak) {
         if (bytes == null) {
             return "";
         } else if (bytes.length == 0) {
@@ -247,7 +253,7 @@ public class ByteUtils {
         StringBuilder sb = new StringBuilder();
         int cBytes = bytes.length;
         int iByte = 0;
-        for (;;) {
+        while (true) {
             for (int i = 0; i < 16; i++) {
                 String hex = Integer.toHexString(bytes[iByte++] & 0xff);
                 if (hex.length() == 1) {
@@ -259,9 +265,28 @@ public class ByteUtils {
                     return sb.toString();
                 }
             }
-            if (formatted) {
+            if (addLinebreak) {
                 sb.append("\n");
             }
         }
     }
+
+
+    /**
+     * Convert a byte array to a hex string suitable for use as XML's hexBinary type.
+     *
+     * @param bytes
+     * @return Hex string soley compose of digits, no 0x and no spaces.
+     */
+    public static String toHexString(byte[] bytes) {
+	StringWriter writer = new StringWriter(bytes.length * 2);
+	PrintWriter out = new PrintWriter(writer);
+
+	for (int i = 0; i < bytes.length; i++) {
+	    out.printf("%02X", bytes[i]);
+	}
+
+	return writer.toString();
+    }
+
 }

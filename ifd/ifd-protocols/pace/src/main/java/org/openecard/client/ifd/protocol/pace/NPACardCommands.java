@@ -75,7 +75,7 @@ public class NPACardCommands {
      */
     public static byte[] selectEF(short fileID) {
         byte[] header = new byte[]{NULL, APDUConstants.SELECT_INS, (byte) 0x02, (byte) 0x0C};
-        byte[] data = ShortUtils.toByteArray(fileID);
+        byte[] data = ShortUtils.toByteArray(fileID, true);
         byte lc = (byte) 0x02;
 
         return concatenate(header, lc, data);

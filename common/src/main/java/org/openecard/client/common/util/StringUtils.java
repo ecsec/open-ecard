@@ -15,12 +15,18 @@
  */
 package org.openecard.client.common.util;
 
+import java.util.regex.Pattern;
+
+
 /**
  * A set of utility functions for Strings.
  *
  * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class StringUtils {
+
+    private static final Pattern wsPattern = Pattern.compile("\\s");
 
     /**
      * Convert a hex string to a byte array.
@@ -29,13 +35,29 @@ public class StringUtils {
      * @return Byte array
      */
     public static byte[] toByteArray(String hex) {
-        if ((hex.length() >> 1) << 1 != hex.length()) {
+        if ((hex.length() % 2) != 0) {
             hex = "0" + hex;
         }
-        byte[] ret = new byte[hex.length() >> 1];
+        byte[] ret = new byte[hex.length() / 2];
         for (int i = 0; i < ret.length; i++) {
-            ret[i] = (byte) Integer.parseInt(hex.substring(i << 1, (i << 1) + 2), 16);
+            ret[i] = (byte) Integer.parseInt(hex.substring(i*2, (i*2) + 2), 16);
         }
         return ret;
     }
+
+    /**
+     * Convert a hex string to a byte array.<br/>
+     * Remove all whitespace characters if flag is set.
+     *
+     * @param hex string
+     * @param removeWhitespace
+     * @return Byte array
+     */
+    public static byte[] toByteArray(String hex, boolean removeWhitespace) {
+	if (removeWhitespace) {
+	    hex = wsPattern.matcher(hex).replaceAll("");
+	}
+        return toByteArray(hex);
+    }
+
 }

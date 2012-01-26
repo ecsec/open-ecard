@@ -15,35 +15,64 @@
  */
 package org.openecard.client.common.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-
 
 /**
- * A set of utility functions for Integers.
+ * A set of utility functions for integers.
  *
  * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class IntegerUtils {
 
     /**
-     * Convert a int to a byte array and cut leading null bytes.
+     * Convert an integer to a byte array.
      *
-     * @param i
+     * @param value integer to be converted
      * @return byte[]
      */
-    public static byte[] toByteArray(int i) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(bos);
-        try {
-            dos.writeInt(i);
-            dos.flush();
-        } catch (Throwable ignore) {
-        }
-        if (bos.size() == 1) {
-            return bos.toByteArray();
-        } else {
-            return ByteUtils.cutLeadingNullBytes(bos.toByteArray());
-        }
+    public static byte[] toByteArray(int value) {
+	return toByteArray(value, 8);
     }
+
+    /**
+     * Convert an integer to a byte array with a given bit size per byte.
+     *
+     * @param value integer to be converted
+     * @return byte[]
+     */
+    public static byte[] toByteArray(int value, int numBits) {
+	return LongUtils.toByteArray(value, numBits);
+    }
+
+    /**
+     * Convert an integer to a byte array.<br/>
+     * If the resulting array contains less bytes than 4 bytes, 0 bytes are prepended if the flag is set.
+     *
+     * @param value integer to be converted
+     * @param padArrayToTypeLength
+     * @return byte[]
+     */
+    public static byte[] toByteArray(int value, boolean padArrayToTypeLength) {
+	byte[] result = toByteArray(value, 8);
+	if (padArrayToTypeLength && result.length < 4) {
+	    result = ByteUtils.concatenate(new byte[4 - result.length], result);
+	}
+	return result;
+    }
+
+    /**
+     * Convert a byte array to an  integer.<br/>
+     * Size of byte array must be between 1 and 4.
+     *
+     * @param bytes byte array to be converted
+     * @return int
+     */
+    public static int toInteger(byte[] bytes) {
+	if (bytes.length > 4 || bytes.length < 1) {
+	    throw new IllegalArgumentException("Size of byte array must be between 1 and 4.");
+	}
+
+	return (int) LongUtils.toLong(bytes);
+    }
+
 }

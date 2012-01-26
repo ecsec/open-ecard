@@ -159,16 +159,6 @@ public class HelperTest {
         assertArrayEquals(expResult, result);
     }
 
-    /**
-     * Test of dumpAPDU method, of class Helper.
-     */
-    @Test
-    public void testDumpAPDU() {
-        System.out.print("dumpAPDU: 47110815 == ");
-        byte[] buffer = {(byte) 0x47, (byte) 0x11, (byte) 0x08, (byte) 0x15};
-        Helper.dumpAPDU(buffer);
-    }
-
     @Test
     public void testIntToByteArrayWithBits() {
         long num = 0x61;

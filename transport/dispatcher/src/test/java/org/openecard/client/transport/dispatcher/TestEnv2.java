@@ -28,7 +28,7 @@ import org.openecard.ws.SAL;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class TestEnv implements Environment {
+public class TestEnv2 implements Environment {
 
     private IFD ifd;
 

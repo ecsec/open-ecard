@@ -20,6 +20,9 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import org.openecard.client.common.ClientEnv;
+import org.openecard.client.common.interfaces.Environment;
+import org.openecard.ws.IFD;
 
 
 /**
@@ -29,9 +32,40 @@ import org.junit.Test;
 public class TestDispatcher {
 
     @Test
-    public void testDispatcher() throws Exception {
-	TestIFD ifd = new TestIFD();
-	TestEnv env = new TestEnv();
+    public void testDispatcher1() throws Exception {
+	// test with direct annotation with explicit class specification
+	IFD ifd = new TestIFD();
+	Environment env = new TestEnv1();
+	MessageDispatcher disp = new MessageDispatcher(env);
+
+	env.setIFD(ifd);
+
+	Object req = new EstablishContext();
+	Object res = disp.deliver(req);
+
+	assertTrue(res instanceof EstablishContextResponse);
+    }
+
+    @Test
+    public void testDispatcher2() throws Exception {
+	// test with direct annotation without explicit class specification
+	IFD ifd = new TestIFD();
+	Environment env = new TestEnv2();
+	MessageDispatcher disp = new MessageDispatcher(env);
+
+	env.setIFD(ifd);
+
+	Object req = new EstablishContext();
+	Object res = disp.deliver(req);
+
+	assertTrue(res instanceof EstablishContextResponse);
+    }
+
+    @Test
+    public void testDispatcher3() throws Exception {
+	// test with inherited annotation without explicit class specification
+	IFD ifd = new TestIFD();
+	Environment env = new TestEnv3();
 	MessageDispatcher disp = new MessageDispatcher(env);
 
 	env.setIFD(ifd);

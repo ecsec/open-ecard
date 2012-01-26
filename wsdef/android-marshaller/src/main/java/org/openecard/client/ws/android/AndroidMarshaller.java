@@ -52,939 +52,1008 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+
 /**
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class AndroidMarshaller implements WSMarshaller {
 
-	private static final String iso = "iso:";
-	private static final String tls = "tls:";
-	private static final String dss = "dss:";
-	private static final String ecapi = "ecapi:"; // xmlns:ecapi="http://www.bsi.bund.de/ecard/api/1.1"
-	private DocumentBuilderFactory documentBuilderFactory;
-	private DocumentBuilder documentBuilder;
-	private Transformer transformer;
-	private MessageFactory soapFactory;
+    private static final String iso = "iso:";
+    private static final String tls = "tls:";
+    private static final String dss = "dss:";
+    private static final String ecapi = "ecapi:"; // xmlns:ecapi="http://www.bsi.bund.de/ecard/api/1.1"
+    private DocumentBuilderFactory documentBuilderFactory;
+    private DocumentBuilder documentBuilder;
+    private Transformer transformer;
+    private MessageFactory soapFactory;
 
-	public AndroidMarshaller() {
-		documentBuilderFactory = null;
-		documentBuilder = null;
-		transformer = null;
-		soapFactory = null;
-		try {
-			documentBuilderFactory = DocumentBuilderFactory.newInstance();
-			documentBuilder = documentBuilderFactory.newDocumentBuilder();
-			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			documentBuilderFactory.setNamespaceAware(true);
-			documentBuilderFactory.setIgnoringComments(true);
-			transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
-			// transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION,
-			// "yes");
-			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+    public AndroidMarshaller() {
+	documentBuilderFactory = null;
+	documentBuilder = null;
+	transformer = null;
+	soapFactory = null;
+	try {
+	    documentBuilderFactory = DocumentBuilderFactory.newInstance();
+	    documentBuilderFactory.setNamespaceAware(true);
+	    documentBuilderFactory.setIgnoringComments(true);
+	    documentBuilder = documentBuilderFactory.newDocumentBuilder();
+	    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	    transformer = transformerFactory.newTransformer();
+	    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+	    transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
+	    // transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION,
+	    // "yes");
+	    transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 
-			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+	    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 
-			soapFactory = MessageFactory.newInstance();
-		} catch (Exception ex) {
-			ex.printStackTrace(System.err);
-			System.exit(1); // non recoverable
+	    soapFactory = MessageFactory.newInstance();
+	} catch (Exception ex) {
+	    ex.printStackTrace(System.err);
+	    System.exit(1); // non recoverable
+	}
+    }
+
+    @Override
+    public synchronized String doc2str(Node doc) throws TransformerException {
+	ByteArrayOutputStream out = new ByteArrayOutputStream();
+	transformer.transform(new DOMSource(doc), new StreamResult(out));
+	String result;
+	try {
+	    result = out.toString("UTF-8");
+	} catch (UnsupportedEncodingException ex) {
+	    throw new TransformerException(ex);
+	}
+	return result;
+    }
+
+    @Override
+    public synchronized Document marshal(Object o) throws MarshallingTypeException {
+	Document document = documentBuilder.newDocument();
+	document.setXmlStandalone(true);
+
+	Element rootElement = null;
+
+	if (o instanceof InitializeFrameworkResponse) {
+	    InitializeFrameworkResponse initializeFrameworkResponse = (InitializeFrameworkResponse) o;
+	    rootElement = document.createElement(ecapi + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:ecapi", "http://www.bsi.bund.de/ecard/api/1.1");
+	    rootElement.appendChild(marshalResult(initializeFrameworkResponse.getResult(), document));
+	    Element emVersion = document.createElement(ecapi + "Version");
+	    Element emMajor = document.createElement(ecapi + "Major");
+	    emMajor.appendChild(document.createTextNode(initializeFrameworkResponse.getVersion().getMajor().toString()));
+	    emVersion.appendChild(emMajor);
+	    Element emMinor = document.createElement(ecapi + "Minor");
+	    emMinor.appendChild(document.createTextNode(initializeFrameworkResponse.getVersion().getMinor().toString()));
+	    emVersion.appendChild(emMinor);
+	    Element emSubMinor = document.createElement(ecapi + "SubMinor");
+	    emSubMinor.appendChild(document.createTextNode(initializeFrameworkResponse.getVersion().getSubMinor().toString()));
+	    emVersion.appendChild(emSubMinor);
+	    rootElement.appendChild(emVersion);
+
+	} else if (o instanceof InternationalStringType) {
+	    InternationalStringType internationalStringType = (InternationalStringType) o;
+	    rootElement = marshalInternationStringType(internationalStringType, document, internationalStringType.getClass()
+		    .getSimpleName());
+	} else if (o instanceof Result) {
+	    Result r = (Result) o;
+	    rootElement = marshalResult(r, document);
+	} else if (o instanceof iso.std.iso_iec._24727.tech.schema.StartPAOS) {
+	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
+	    StartPAOS startPAOSPOJO = (StartPAOS) o;
+
+	    Element em = document.createElement(iso + "SessionIdentifier");
+	    em.appendChild(document.createTextNode(startPAOSPOJO.getSessionIdentifier()));
+	    rootElement.appendChild(em);
+
+	    em = document.createElement(iso + "ConnectionHandle");
+	    Element em2 = document.createElement(iso + "ContextHandle");
+	    em2.appendChild(document.createTextNode(ByteUtils.toHexString(startPAOSPOJO.getConnectionHandle().get(0)
+		    .getContextHandle())));
+	    em.appendChild(em2);
+	    if (startPAOSPOJO.getConnectionHandle().get(0).getSlotHandle() != null) {
+		em2 = document.createElement(iso + "SlotHandle");
+		em2.appendChild(document.createTextNode(ByteUtils.toHexString(startPAOSPOJO.getConnectionHandle().get(0)
+			.getSlotHandle())));
+		em.appendChild(em2);
+	    }
+	    rootElement.appendChild(em);
+
+	} else if (o instanceof TransmitResponse) {
+	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
+	    TransmitResponse transmitResponsePOJO = (TransmitResponse) o;
+
+	    Element em = marshalResult(transmitResponsePOJO.getResult(), document);
+	    rootElement.appendChild(em);
+
+	    for (int i = 0; i < transmitResponsePOJO.getOutputAPDU().size(); i++) {
+		em = document.createElement(iso + "OutputAPDU");
+		em.appendChild(document.createTextNode(ByteUtils.toHexString(transmitResponsePOJO.getOutputAPDU().get(i))));
+		rootElement.appendChild(em);
+	    }
+
+	} else if (o instanceof EstablishContext) {
+	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
+	} else if (o instanceof EstablishContextResponse) {
+	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
+	    EstablishContextResponse establishContextResponse = (EstablishContextResponse) o;
+
+	    Element em = document.createElement(iso + "ContextHandle");
+	    em.appendChild(document.createTextNode(ByteUtils.toHexString(establishContextResponse.getContextHandle())));
+	    rootElement.appendChild(em);
+
+	    em = marshalResult(establishContextResponse.getResult(), document);
+	    rootElement.appendChild(em);
+
+	} else if (o instanceof GetStatus) {
+	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
+	    GetStatus getStatus = (GetStatus) o;
+
+	    Element em = document.createElement(iso + "ContextHandle");
+	    em.appendChild(document.createTextNode(ByteUtils.toHexString(getStatus.getContextHandle())));
+	    rootElement.appendChild(em);
+	    if (getStatus.getIFDName() != null) {
+		em = document.createElement(iso + "IFDName");
+		em.appendChild(document.createTextNode(getStatus.getIFDName()));
+		rootElement.appendChild(em);
+	    }
+
+	} else if (o instanceof Wait) {
+	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
+	    Wait w = (Wait) o;
+
+	    Element em = document.createElement(iso + "ContextHandle");
+	    em.appendChild(document.createTextNode(ByteUtils.toHexString(w.getContextHandle())));
+	    rootElement.appendChild(em);
+
+	    if (w.getTimeOut() != null) {
+		em = document.createElement(iso + "TimeOut");
+		em.appendChild(document.createTextNode(w.getTimeOut().toString(16)));
+		rootElement.appendChild(em);
+	    }
+
+	    if (w.getCallback() != null) {
+		ChannelHandleType callback = w.getCallback();
+		em = document.createElement(iso + "Callback");
+
+		if (callback.getBinding() != null) {
+		    Element em2 = document.createElement(iso + "Binding");
+		    em2.appendChild(document.createTextNode(callback.getBinding()));
+		    em.appendChild(em2);
 		}
-	}
-
-	@Override
-	public synchronized String doc2str(Node doc) throws TransformerException {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		transformer.transform(new DOMSource(doc), new StreamResult(out));
-		String result;
-		try {
-			result = out.toString("UTF-8");
-		} catch (UnsupportedEncodingException ex) {
-			throw new TransformerException(ex);
+		if (callback.getSessionIdentifier() != null) {
+		    Element em2 = document.createElement(iso + "SessionIdentifier");
+		    em2.appendChild(document.createTextNode(callback.getSessionIdentifier()));
+		    em.appendChild(em2);
 		}
-		return result;
-	}
-
-	@Override
-	public synchronized Document marshal(Object o) throws MarshallingTypeException {
-		Document document = documentBuilder.newDocument();
-		document.setXmlStandalone(true);
-
-		Element rootElement = null;
-
-		if (o instanceof InitializeFrameworkResponse) {
-			InitializeFrameworkResponse initializeFrameworkResponse = (InitializeFrameworkResponse) o;
-			rootElement = document.createElement(ecapi + o.getClass().getSimpleName());
-			rootElement.setAttribute("xmlns:ecapi", "http://www.bsi.bund.de/ecard/api/1.1");
-			rootElement.appendChild(marshalResult(initializeFrameworkResponse.getResult(), document));
-			Element emVersion = document.createElement(ecapi + "Version");
-			Element emMajor = document.createElement(ecapi + "Major");
-			emMajor.appendChild(document.createTextNode(initializeFrameworkResponse.getVersion().getMajor().toString()));
-			emVersion.appendChild(emMajor);
-			Element emMinor = document.createElement(ecapi + "Minor");
-			emMinor.appendChild(document.createTextNode(initializeFrameworkResponse.getVersion().getMinor().toString()));
-			emVersion.appendChild(emMinor);
-			Element emSubMinor = document.createElement(ecapi + "SubMinor");
-			emSubMinor.appendChild(document.createTextNode(initializeFrameworkResponse.getVersion().getSubMinor().toString()));
-			emVersion.appendChild(emSubMinor);
-			rootElement.appendChild(emVersion);
-
-		} else if (o instanceof InternationalStringType) {
-			InternationalStringType internationalStringType = (InternationalStringType) o;
-			rootElement = marshalInternationStringType(internationalStringType, document, internationalStringType.getClass()
-					.getSimpleName());
-		} else if (o instanceof Result) {
-			Result r = (Result) o;
-			rootElement = marshalResult(r, document);
-		} else if (o instanceof iso.std.iso_iec._24727.tech.schema.StartPAOS) {
-			rootElement = document.createElement(iso + o.getClass().getSimpleName());
-			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
-			StartPAOS startPAOSPOJO = (StartPAOS) o;
-
-			Element em = document.createElement(iso + "SessionIdentifier");
-			em.appendChild(document.createTextNode(startPAOSPOJO.getSessionIdentifier()));
-			rootElement.appendChild(em);
-
-			em = document.createElement(iso + "ConnectionHandle");
-			Element em2 = document.createElement(iso + "ContextHandle");
-			em2.appendChild(document.createTextNode(ByteUtils.toHexString(startPAOSPOJO.getConnectionHandle().get(0)
-					.getContextHandle())));
-			em.appendChild(em2);
-			em2 = document.createElement(iso + "SlotHandle");
-			em2.appendChild(document.createTextNode(ByteUtils.toHexString(startPAOSPOJO.getConnectionHandle().get(0).getSlotHandle())));
-			em.appendChild(em2);
-			rootElement.appendChild(em);
-
-		} else if (o instanceof TransmitResponse) {
-			rootElement = document.createElement(iso + o.getClass().getSimpleName());
-			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
-			TransmitResponse transmitResponsePOJO = (TransmitResponse) o;
-
-			Element em = marshalResult(transmitResponsePOJO.getResult(), document);
-			rootElement.appendChild(em);
-
-			for (int i = 0; i < transmitResponsePOJO.getOutputAPDU().size(); i++) {
-				em = document.createElement(iso + "OutputAPDU");
-				em.appendChild(document.createTextNode(ByteUtils.toHexString(transmitResponsePOJO.getOutputAPDU().get(i))));
-				rootElement.appendChild(em);
-			}
-
-		} else if (o instanceof EstablishContext) {
-			rootElement = document.createElement(iso + o.getClass().getSimpleName());
-			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
-		} else if (o instanceof EstablishContextResponse) {
-			rootElement = document.createElement(iso + o.getClass().getSimpleName());
-			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
-			EstablishContextResponse establishContextResponse = (EstablishContextResponse) o;
-
-			Element em = document.createElement(iso + "ContextHandle");
-			em.appendChild(document.createTextNode(ByteUtils.toHexString(establishContextResponse.getContextHandle())));
-			rootElement.appendChild(em);
-
-			em = marshalResult(establishContextResponse.getResult(), document);
-			rootElement.appendChild(em);
-
-		} else if (o instanceof GetStatus) {
-			rootElement = document.createElement(iso + o.getClass().getSimpleName());
-			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
-			GetStatus getStatus = (GetStatus) o;
-
-			Element em = document.createElement(iso + "ContextHandle");
-			em.appendChild(document.createTextNode(ByteUtils.toHexString(getStatus.getContextHandle())));
-			rootElement.appendChild(em);
-			if (getStatus.getIFDName() != null) {
-				em = document.createElement(iso + "IFDName");
-				em.appendChild(document.createTextNode(getStatus.getIFDName()));
-				rootElement.appendChild(em);
-			}
-
-		} else if (o instanceof Wait) {
-			rootElement = document.createElement(iso + o.getClass().getSimpleName());
-			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
-			Wait w = (Wait) o;
-
-			Element em = document.createElement(iso + "ContextHandle");
-			em.appendChild(document.createTextNode(ByteUtils.toHexString(w.getContextHandle())));
-			rootElement.appendChild(em);
-
-			if (w.getTimeOut() != null) {
-				em = document.createElement(iso + "TimeOut");
-				em.appendChild(document.createTextNode(w.getTimeOut().toString(16)));
-				rootElement.appendChild(em);
-			}
-
-			if (w.getCallback() != null) {
-				ChannelHandleType callback = w.getCallback();
-				em = document.createElement(iso + "Callback");
-
-				if (callback.getBinding() != null) {
-					Element em2 = document.createElement(iso + "Binding");
-					em2.appendChild(document.createTextNode(callback.getBinding()));
-					em.appendChild(em2);
-				}
-				if (callback.getSessionIdentifier() != null) {
-					Element em2 = document.createElement(iso + "SessionIdentifier");
-					em2.appendChild(document.createTextNode(callback.getSessionIdentifier()));
-					em.appendChild(em2);
-				}
-				if (callback.getProtocolTerminationPoint() != null) {
-					Element em2 = document.createElement(iso + "ProtocolTerminationPoint");
-					em2.appendChild(document.createTextNode(callback.getProtocolTerminationPoint()));
-					em.appendChild(em2);
-				}
-				if (callback.getPathSecurity() != null) {
-					PathSecurityType pathSecurityType = callback.getPathSecurity();
-					Element em2 = document.createElement(iso + "PathSecurity");
-					Element em3 = document.createElement(iso + "Protocol");
-
-					em3.appendChild(document.createTextNode(pathSecurityType.getProtocol()));
-					em2.appendChild(em3);
-					if (pathSecurityType.getParameters() != null) {
-						em3 = document.createElement(iso + "Parameters");
-						em3.appendChild(document.createTextNode(pathSecurityType.getParameters().toString()));
-						em2.appendChild(em3);
-					}
-					em.appendChild(em2);
-				}
-				rootElement.appendChild(em);
-			}
-
-		} else if (o instanceof Connect) {
-			rootElement = document.createElement(iso + o.getClass().getSimpleName());
-			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
-			Connect c = (Connect) o;
-
-			Element em = document.createElement(iso + "ContextHandle");
-			em.appendChild(document.createTextNode(ByteUtils.toHexString(c.getContextHandle())));
-			rootElement.appendChild(em);
-
-			em = document.createElement(iso + "IFDName");
-			em.appendChild(document.createTextNode(c.getIFDName()));
-			rootElement.appendChild(em);
-
-			em = document.createElement(iso + "Slot");
-			em.appendChild(document.createTextNode(c.getSlot().toString()));
-			rootElement.appendChild(em);
-			if (c.isExclusive() != null) {
-				em = document.createElement(iso + "Exclusive");
-				em.appendChild(document.createTextNode(c.isExclusive().toString()));
-				rootElement.appendChild(em);
-			}
-
-		} else if (o instanceof ConnectResponse) {
-			rootElement = document.createElement(iso + o.getClass().getSimpleName());
-			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
-			ConnectResponse cr = (ConnectResponse) o;
-
-			Element em = document.createElement(iso + "SlotHandle");
-			em.appendChild(document.createTextNode(ByteUtils.toHexString(cr.getSlotHandle())));
-			rootElement.appendChild(em);
-
-			em = marshalResult(cr.getResult(), document);
-			rootElement.appendChild(em);
-
-		} else if (o instanceof ListIFDs) {
-			rootElement = document.createElement(iso + o.getClass().getSimpleName());
-			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
-			ListIFDs c = (ListIFDs) o;
-
-			Element em = document.createElement(iso + "ContextHandle");
-			em.appendChild(document.createTextNode(ByteUtils.toHexString(c.getContextHandle())));
-			rootElement.appendChild(em);
-
-		} else if (o instanceof ListIFDsResponse) {
-			rootElement = document.createElement(iso + o.getClass().getSimpleName());
-			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
-			ListIFDsResponse listIFDsResponse = (ListIFDsResponse) o;
-
-			for (String s : listIFDsResponse.getIFDName()) {
-				Element em = document.createElement(iso + "IFDName");
-				em.appendChild(document.createTextNode(s));
-				rootElement.appendChild(em);
-			}
-
-			Element em = marshalResult(listIFDsResponse.getResult(), document);
-			rootElement.appendChild(em);
-
-		} else if (o instanceof Transmit) {
-			rootElement = document.createElement(iso + o.getClass().getSimpleName());
-			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
-			Transmit t = (Transmit) o;
-
-			Element em = document.createElement(iso + "SlotHandle");
-			em.appendChild(document.createTextNode(ByteUtils.toHexString(t.getSlotHandle())));
-			rootElement.appendChild(em);
-
-			for (int i = 0; i < t.getInputAPDUInfo().size(); i++) {
-				em = document.createElement(iso + "InputAPDUInfo");
-				rootElement.appendChild(em);
-				Element em2 = document.createElement(iso + "InputAPDU");
-				em2.appendChild(document.createTextNode(ByteUtils.toHexString(t.getInputAPDUInfo().get(i).getInputAPDU())));
-				em.appendChild(em2);
-				for (int y = 0; y < t.getInputAPDUInfo().get(i).getAcceptableStatusCode().size(); y++) {
-					em2 = document.createElement(iso + "AcceptableStatusCode");
-					em2.appendChild(document.createTextNode(ByteUtils.toHexString(t.getInputAPDUInfo().get(i)
-							.getAcceptableStatusCode().get(y))));
-					em.appendChild(em2);
-				}
-			}
-
-		} else if (o instanceof RecognitionTree) {
-			rootElement = document.createElement(iso + o.getClass().getSimpleName());
-			rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
-			rootElement.setAttribute("xmlns:tls", "http://ws.openecard.org/protocols/tls/v1.0");
-			RecognitionTree recognitionTree = (RecognitionTree) o;
-			for (CardCall c : recognitionTree.getCardCall()) {
-				rootElement.appendChild(marshalCardCall(c, document));
-			}
-
-		} else {
-			throw new IllegalArgumentException("Cannot marshal " + o.getClass().getSimpleName());
+		if (callback.getProtocolTerminationPoint() != null) {
+		    Element em2 = document.createElement(iso + "ProtocolTerminationPoint");
+		    em2.appendChild(document.createTextNode(callback.getProtocolTerminationPoint()));
+		    em.appendChild(em2);
 		}
-		document.appendChild(rootElement);
+		if (callback.getPathSecurity() != null) {
+		    PathSecurityType pathSecurityType = callback.getPathSecurity();
+		    Element em2 = document.createElement(iso + "PathSecurity");
+		    Element em3 = document.createElement(iso + "Protocol");
 
-		return document;
-	}
-
-	private Element marshalInternationStringType(InternationalStringType internationalStringType, Document document, String name) {
-		Element emInternationStringType = document.createElement(dss + name);
-		emInternationStringType.setAttribute("xmlns:dss", "urn:oasis:names:tc:dss:1.0:core:schema");
-
-		Element em = document.createElement(dss + "ResultMessage");
-		em.appendChild(document.createTextNode(internationalStringType.getValue()));
-		em.setAttribute("xml:lang", internationalStringType.getLang());
-
-		emInternationStringType.appendChild(em);
-		return emInternationStringType;
-	}
-
-	private synchronized Element marshalResult(Result r, Document document) {
-		Element emResult = document.createElement(dss + r.getClass().getSimpleName());
-		emResult.setAttribute("xmlns:dss", "urn:oasis:names:tc:dss:1.0:core:schema");
-		Element em = document.createElement(dss + "ResultMajor");
-		em.appendChild(document.createTextNode(r.getResultMajor()));
-		emResult.appendChild(em);
-		em = document.createElement(dss + "ResultMinor");
-		em.appendChild(document.createTextNode(r.getResultMinor()));
-		emResult.appendChild(em);
-		emResult.appendChild(marshalInternationStringType(r.getResultMessage(), document, "ResultMessage"));
-		return emResult;
-	}
-
-	private synchronized Node marshalCardCall(CardCall c, Document document) {
-		Element emCardCall = document.createElement(iso + "CardCall");
-		if (c.getCommandAPDU() != null) {
-			Element emCommandAPDU = document.createElement(iso + "CommandAPDU");
-			emCommandAPDU.appendChild(document.createTextNode(ByteUtils.toHexString(c.getCommandAPDU())));
-			emCardCall.appendChild(emCommandAPDU);
+		    em3.appendChild(document.createTextNode(pathSecurityType.getProtocol()));
+		    em2.appendChild(em3);
+		    if (pathSecurityType.getParameters() != null) {
+			em3 = document.createElement(iso + "Parameters");
+			em3.appendChild(document.createTextNode(pathSecurityType.getParameters().toString()));
+			em2.appendChild(em3);
+		    }
+		    em.appendChild(em2);
 		}
-		if (c.getResponseAPDU() != null && c.getResponseAPDU().size() > 0) {
-			for (ResponseAPDUType r : c.getResponseAPDU()) {
-				Element emResponseAPDU = document.createElement(iso + "ResponseAPDU");
+		rootElement.appendChild(em);
+	    }
 
-				if (r.getBody() != null) {
+	} else if (o instanceof Connect) {
+	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
+	    Connect c = (Connect) o;
 
-					Element emBody = document.createElement(iso + "Body");
-					if (r.getBody().getTag() != null) {
-						Element emTag = document.createElement(iso + "Tag");
-						emTag.appendChild(document.createTextNode(ByteUtils.toHexString(r.getBody().getTag())));
-						emBody.appendChild(emTag);
-					}
-					if (r.getBody().getMatchingData() != null) {
-						Element emMatchingData = document.createElement(iso + "MatchingData");
-						if (r.getBody().getMatchingData().getLength() != null) {
-							Element emLength = document.createElement(iso + "Length");
-							emLength.appendChild(document.createTextNode(ByteUtils.toHexString(r.getBody().getMatchingData()
-									.getLength())));
-							emMatchingData.appendChild(emLength);
-						}
-						if (r.getBody().getMatchingData().getOffset() != null) {
-							Element emOffset = document.createElement(iso + "Offset");
-							emOffset.appendChild(document.createTextNode(ByteUtils.toHexString(r.getBody().getMatchingData()
-									.getOffset())));
-							emMatchingData.appendChild(emOffset);
-						}
-						if (r.getBody().getMatchingData().getMask() != null) {
-							Element emMask = document.createElement(iso + "Mask");
-							emMask.appendChild(document.createTextNode(ByteUtils.toHexString(r.getBody().getMatchingData().getMask())));
-							emMatchingData.appendChild(emMask);
-						}
-						if (r.getBody().getMatchingData().getMatchingValue() != null) {
-							Element emMatchingValue = document.createElement(iso + "MatchingValue");
-							emMatchingValue.appendChild(document.createTextNode(ByteUtils.toHexString(r.getBody().getMatchingData()
-									.getMatchingValue())));
-							emMatchingData.appendChild(emMatchingValue);
-						}
-						emBody.appendChild(emMatchingData);
-					}
-					emResponseAPDU.appendChild(emBody);
-				}
-				if (r.getTrailer() != null) {
-					Element emTrailer = document.createElement(iso + "Trailer");
-					emTrailer.appendChild(document.createTextNode(ByteUtils.toHexString(r.getTrailer())));
-					emResponseAPDU.appendChild(emTrailer);
-				}
-				if (r.getConclusion() != null) {
-					Element emConclusion = document.createElement(iso + "Conclusion");
-					if (r.getConclusion().getCardCall() != null) {
-						for (CardCall cc : r.getConclusion().getCardCall()) {
-							emConclusion.appendChild(marshalCardCall(cc, document));
-						}
-					}
-					if (r.getConclusion().getRecognizedCardType() != null) {
-						Element emRecognizedCardType = document.createElement(iso + "RecognizedCardType");
-						emRecognizedCardType.appendChild(document.createTextNode(r.getConclusion().getRecognizedCardType()));
-						emConclusion.appendChild(emRecognizedCardType);
-					}
-					if (r.getConclusion().getTLSMarker() != null) {
-						Element emTLSMarker = document.createElement(iso + "TLSMarker");
-						emTLSMarker.setAttribute("Protocol", "urn:ietf:rfc:5246");
-						Element emKey = document.createElement(tls + "Key");
-						emTLSMarker.appendChild(emKey);
+	    Element em = document.createElement(iso + "ContextHandle");
+	    em.appendChild(document.createTextNode(ByteUtils.toHexString(c.getContextHandle())));
+	    rootElement.appendChild(em);
 
-						for (int i = 0; i < r.getConclusion().getTLSMarker().getAny().get(0).getChildNodes().getLength(); i++) {
-							Node n = r.getConclusion().getTLSMarker().getAny().get(0).getChildNodes().item(i);
-							if (n.getNodeName().equals("Certificate")) {
-								Element elem = document.createElement(tls + n.getNodeName());
-								Element elem2 = document.createElement(iso + "efIdOrPath");
-								elem2.appendChild(document.createTextNode(n.getTextContent()));
-								elem.appendChild(elem2);
-								emKey.appendChild(elem);
-								System.out.println(n.getChildNodes().item(0).getNodeName());
-							} else {
-								Element elem = document.createElement(tls + n.getNodeName());
-								elem.appendChild(document.createTextNode(n.getTextContent()));
-								emKey.appendChild(elem);
-							}
-						}
+	    em = document.createElement(iso + "IFDName");
+	    em.appendChild(document.createTextNode(c.getIFDName()));
+	    rootElement.appendChild(em);
 
-						emConclusion.appendChild(emTLSMarker);
-					}
+	    em = document.createElement(iso + "Slot");
+	    em.appendChild(document.createTextNode(c.getSlot().toString()));
+	    rootElement.appendChild(em);
+	    if (c.isExclusive() != null) {
+		em = document.createElement(iso + "Exclusive");
+		em.appendChild(document.createTextNode(c.isExclusive().toString()));
+		rootElement.appendChild(em);
+	    }
 
-					emResponseAPDU.appendChild(emConclusion);
-				}
-				emCardCall.appendChild(emResponseAPDU);
-			}
+	} else if (o instanceof ConnectResponse) {
+	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
+	    ConnectResponse cr = (ConnectResponse) o;
+
+	    Element em = document.createElement(iso + "SlotHandle");
+	    em.appendChild(document.createTextNode(ByteUtils.toHexString(cr.getSlotHandle())));
+	    rootElement.appendChild(em);
+
+	    em = marshalResult(cr.getResult(), document);
+	    rootElement.appendChild(em);
+
+	} else if (o instanceof ListIFDs) {
+	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
+	    ListIFDs c = (ListIFDs) o;
+
+	    Element em = document.createElement(iso + "ContextHandle");
+	    em.appendChild(document.createTextNode(ByteUtils.toHexString(c.getContextHandle())));
+	    rootElement.appendChild(em);
+
+	} else if (o instanceof ListIFDsResponse) {
+	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
+	    ListIFDsResponse listIFDsResponse = (ListIFDsResponse) o;
+
+	    for (String s : listIFDsResponse.getIFDName()) {
+		Element em = document.createElement(iso + "IFDName");
+		em.appendChild(document.createTextNode(s));
+		rootElement.appendChild(em);
+	    }
+
+	    Element em = marshalResult(listIFDsResponse.getResult(), document);
+	    rootElement.appendChild(em);
+
+	} else if (o instanceof Transmit) {
+	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
+	    Transmit t = (Transmit) o;
+
+	    Element em = document.createElement(iso + "SlotHandle");
+	    em.appendChild(document.createTextNode(ByteUtils.toHexString(t.getSlotHandle())));
+	    rootElement.appendChild(em);
+
+	    for (int i = 0; i < t.getInputAPDUInfo().size(); i++) {
+		em = document.createElement(iso + "InputAPDUInfo");
+		rootElement.appendChild(em);
+		Element em2 = document.createElement(iso + "InputAPDU");
+		em2.appendChild(document.createTextNode(ByteUtils.toHexString(t.getInputAPDUInfo().get(i).getInputAPDU())));
+		em.appendChild(em2);
+		for (int y = 0; y < t.getInputAPDUInfo().get(i).getAcceptableStatusCode().size(); y++) {
+		    em2 = document.createElement(iso + "AcceptableStatusCode");
+		    em2.appendChild(document.createTextNode(ByteUtils.toHexString(t.getInputAPDUInfo().get(i)
+			    .getAcceptableStatusCode().get(y))));
+		    em.appendChild(em2);
 		}
-		return emCardCall;
+	    }
+
+	} else if (o instanceof RecognitionTree) {
+	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
+	    rootElement.setAttribute("xmlns:tls", "http://ws.openecard.org/protocols/tls/v1.0");
+	    RecognitionTree recognitionTree = (RecognitionTree) o;
+	    for (CardCall c : recognitionTree.getCardCall()) {
+		rootElement.appendChild(marshalCardCall(c, document));
+	    }
+
+	} else {
+	    throw new IllegalArgumentException("Cannot marshal " + o.getClass().getSimpleName());
 	}
+	document.appendChild(rootElement);
 
-	@Override
-	public synchronized Document str2doc(String docStr) throws SAXException {
-		try {
-			// read dom as w3
-			StringReader strReader = new StringReader(docStr);
-			InputSource inSrc = new InputSource(strReader);
-			Document doc = documentBuilder.parse(inSrc);
+	return document;
+    }
 
-			WhitespaceFilter.filter(doc);
-			return doc;
-		} catch (IOException ex) {
-			throw new SAXException(ex);
+    private Element marshalInternationStringType(InternationalStringType internationalStringType, Document document, String name) {
+	Element emInternationStringType = document.createElement(dss + name);
+	emInternationStringType.setAttribute("xmlns:dss", "urn:oasis:names:tc:dss:1.0:core:schema");
+
+	Element em = document.createElement(dss + "ResultMessage");
+	em.appendChild(document.createTextNode(internationalStringType.getValue()));
+	em.setAttribute("xml:lang", internationalStringType.getLang());
+
+	emInternationStringType.appendChild(em);
+	return emInternationStringType;
+    }
+
+    private synchronized Element marshalResult(Result r, Document document) {
+	Element emResult = document.createElement(dss + r.getClass().getSimpleName());
+	emResult.setAttribute("xmlns:dss", "urn:oasis:names:tc:dss:1.0:core:schema");
+	Element em = document.createElement(dss + "ResultMajor");
+	em.appendChild(document.createTextNode(r.getResultMajor()));
+	emResult.appendChild(em);
+	if (r.getResultMinor() != null) {
+	    em = document.createElement(dss + "ResultMinor");
+	    em.appendChild(document.createTextNode(r.getResultMinor()));
+	    emResult.appendChild(em);
+	}
+	if (r.getResultMessage() != null) {
+	    emResult.appendChild(marshalInternationStringType(r.getResultMessage(), document, "ResultMessage"));
+	}
+	return emResult;
+    }
+
+    private synchronized Node marshalCardCall(CardCall c, Document document) {
+	Element emCardCall = document.createElement(iso + "CardCall");
+	if (c.getCommandAPDU() != null) {
+	    Element emCommandAPDU = document.createElement(iso + "CommandAPDU");
+	    emCommandAPDU.appendChild(document.createTextNode(ByteUtils.toHexString(c.getCommandAPDU())));
+	    emCardCall.appendChild(emCommandAPDU);
+	}
+	if (c.getResponseAPDU() != null && c.getResponseAPDU().size() > 0) {
+	    for (ResponseAPDUType r : c.getResponseAPDU()) {
+		Element emResponseAPDU = document.createElement(iso + "ResponseAPDU");
+
+		if (r.getBody() != null) {
+
+		    Element emBody = document.createElement(iso + "Body");
+		    if (r.getBody().getTag() != null) {
+			Element emTag = document.createElement(iso + "Tag");
+			emTag.appendChild(document.createTextNode(ByteUtils.toHexString(r.getBody().getTag())));
+			emBody.appendChild(emTag);
+		    }
+		    if (r.getBody().getMatchingData() != null) {
+			Element emMatchingData = document.createElement(iso + "MatchingData");
+			if (r.getBody().getMatchingData().getLength() != null) {
+			    Element emLength = document.createElement(iso + "Length");
+			    emLength.appendChild(document.createTextNode(ByteUtils.toHexString(r.getBody().getMatchingData()
+				    .getLength())));
+			    emMatchingData.appendChild(emLength);
+			}
+			if (r.getBody().getMatchingData().getOffset() != null) {
+			    Element emOffset = document.createElement(iso + "Offset");
+			    emOffset.appendChild(document.createTextNode(ByteUtils.toHexString(r.getBody().getMatchingData()
+				    .getOffset())));
+			    emMatchingData.appendChild(emOffset);
+			}
+			if (r.getBody().getMatchingData().getMask() != null) {
+			    Element emMask = document.createElement(iso + "Mask");
+			    emMask.appendChild(document.createTextNode(ByteUtils.toHexString(r.getBody().getMatchingData().getMask())));
+			    emMatchingData.appendChild(emMask);
+			}
+			if (r.getBody().getMatchingData().getMatchingValue() != null) {
+			    Element emMatchingValue = document.createElement(iso + "MatchingValue");
+			    emMatchingValue.appendChild(document.createTextNode(ByteUtils.toHexString(r.getBody().getMatchingData()
+				    .getMatchingValue())));
+			    emMatchingData.appendChild(emMatchingValue);
+			}
+			emBody.appendChild(emMatchingData);
+		    }
+		    emResponseAPDU.appendChild(emBody);
 		}
-	}
-
-	@Override
-	public synchronized Document str2doc(InputStream docStr) throws SAXException, IOException {
-		// read dom as w3
-		Document doc;
-		try {
-			doc = documentBuilder.parse(docStr);
-			WhitespaceFilter.filter(doc);
-			return doc;
-		} catch (IOException e) {
-			throw new SAXException(e);
+		if (r.getTrailer() != null) {
+		    Element emTrailer = document.createElement(iso + "Trailer");
+		    emTrailer.appendChild(document.createTextNode(ByteUtils.toHexString(r.getTrailer())));
+		    emResponseAPDU.appendChild(emTrailer);
 		}
-	}
+		if (r.getConclusion() != null) {
+		    Element emConclusion = document.createElement(iso + "Conclusion");
+		    if (r.getConclusion().getCardCall() != null) {
+			for (CardCall cc : r.getConclusion().getCardCall()) {
+			    emConclusion.appendChild(marshalCardCall(cc, document));
+			}
+		    }
+		    if (r.getConclusion().getRecognizedCardType() != null) {
+			Element emRecognizedCardType = document.createElement(iso + "RecognizedCardType");
+			emRecognizedCardType.appendChild(document.createTextNode(r.getConclusion().getRecognizedCardType()));
+			emConclusion.appendChild(emRecognizedCardType);
+		    }
+		    if (r.getConclusion().getTLSMarker() != null) {
+			Element emTLSMarker = document.createElement(iso + "TLSMarker");
+			emTLSMarker.setAttribute("Protocol", "urn:ietf:rfc:5246");
+			Element emKey = document.createElement(tls + "Key");
+			emTLSMarker.appendChild(emKey);
 
-	@Override
-	public synchronized Object unmarshal(Node n) throws MarshallingTypeException, WSMarshallerException {
-		Document newDoc = null;
-		if (n instanceof Document) {
-			newDoc = (Document) n;
-		} else if (n instanceof Element) {
-			newDoc = documentBuilder.newDocument();
-			Node root = newDoc.importNode(n, true);
-			newDoc.appendChild(root);
-		} else {
-			throw new WSMarshallerException("Only w3c Document and Element are accepted.");
+			for (int i = 0; i < r.getConclusion().getTLSMarker().getAny().get(0).getChildNodes().getLength(); i++) {
+			    Node n = r.getConclusion().getTLSMarker().getAny().get(0).getChildNodes().item(i);
+			    if (n.getNodeName().equals("Certificate")) {
+				Element elem = document.createElement(tls + n.getNodeName());
+				Element elem2 = document.createElement(iso + "efIdOrPath");
+				elem2.appendChild(document.createTextNode(n.getTextContent()));
+				elem.appendChild(elem2);
+				emKey.appendChild(elem);
+				System.out.println(n.getChildNodes().item(0).getNodeName());
+			    } else {
+				Element elem = document.createElement(tls + n.getNodeName());
+				elem.appendChild(document.createTextNode(n.getTextContent()));
+				emKey.appendChild(elem);
+			    }
+			}
+
+			emConclusion.appendChild(emTLSMarker);
+		    }
+
+		    emResponseAPDU.appendChild(emConclusion);
 		}
-		try {
-			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-			factory.setNamespaceAware(true);
-			XmlPullParser parser = factory.newPullParser();
-			parser.setInput(new InputStreamReader(new ByteArrayInputStream(this.doc2str(newDoc).getBytes("UTF-8"))));
-			int eventType = parser.getEventType();
-			while (eventType != XmlPullParser.END_DOCUMENT) {
-				if (eventType == XmlPullParser.START_TAG) {
-					return parse(parser);
-				}
-				eventType = parser.next();
-			}
-			return null;
-		} catch (Exception e) {
-			throw new MarshallingTypeException(e);
+		emCardCall.appendChild(emResponseAPDU);
+	    }
+	}
+	return emCardCall;
+    }
+
+    @Override
+    public synchronized Document str2doc(String docStr) throws SAXException {
+	try {
+	    // read dom as w3
+	    StringReader strReader = new StringReader(docStr);
+	    InputSource inSrc = new InputSource(strReader);
+	    Document doc = documentBuilder.parse(inSrc);
+
+	    WhitespaceFilter.filter(doc);
+	    return doc;
+	} catch (IOException ex) {
+	    throw new SAXException(ex);
+	}
+    }
+
+    @Override
+    public synchronized Document str2doc(InputStream docStr) throws SAXException, IOException {
+	// read dom as w3
+	Document doc;
+	try {
+	    doc = documentBuilder.parse(docStr);
+	    WhitespaceFilter.filter(doc);
+	    return doc;
+	} catch (IOException e) {
+	    throw new SAXException(e);
+	}
+    }
+
+    @Override
+    public synchronized Object unmarshal(Node n) throws MarshallingTypeException, WSMarshallerException {
+	Document newDoc = null;
+	if (n instanceof Document) {
+	    newDoc = (Document) n;
+	} else if (n instanceof Element) {
+	    newDoc = documentBuilder.newDocument();
+	    Node root = newDoc.importNode(n, true);
+	    newDoc.appendChild(root);
+	} else {
+	    throw new WSMarshallerException("Only w3c Document and Element are accepted.");
+	}
+	try {
+	    XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+	    factory.setNamespaceAware(true);
+	    XmlPullParser parser = factory.newPullParser();
+	    parser.setInput(new InputStreamReader(new ByteArrayInputStream(this.doc2str(newDoc).getBytes("UTF-8"))));
+	    int eventType = parser.getEventType();
+	    while (eventType != XmlPullParser.END_DOCUMENT) {
+		if (eventType == XmlPullParser.START_TAG) {
+		    return parse(parser);
 		}
+		eventType = parser.next();
+	    }
+	    return null;
+	} catch (Exception e) {
+	    throw new MarshallingTypeException(e);
 	}
+    }
 
-	private synchronized ResponseAPDUType parseResponseAPDUType(XmlPullParser parser) throws XmlPullParserException, IOException,
-			ParserConfigurationException {
-		ResponseAPDUType responseAPDUType = new ResponseAPDUType();
+    private synchronized ResponseAPDUType parseResponseAPDUType(XmlPullParser parser) throws XmlPullParserException, IOException,
+	    ParserConfigurationException {
+	ResponseAPDUType responseAPDUType = new ResponseAPDUType();
 
-		int eventType = parser.getEventType();
-		do {
-			parser.next();
-			eventType = parser.getEventType();
-			if (eventType == XmlPullParser.START_TAG) {
-				if (parser.getName().equals("Trailer")) {
-					responseAPDUType.setTrailer(StringUtils.toByteArray(parser.nextText()));
-				} else if (parser.getName().equals("Body")) {
-					responseAPDUType.setBody(this.parseDataMaskType(parser));
-				} else if (parser.getName().equals("Conclusion")) {
-					responseAPDUType.setConclusion(this.parseConclusion(parser));
-				}
-			}
-		} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ResponseAPDU")));
-		return responseAPDUType;
-	}
-
-	private synchronized Conclusion parseConclusion(XmlPullParser parser) throws XmlPullParserException, IOException,
-			ParserConfigurationException {
-		Conclusion conc = new Conclusion();
-
-		int eventType = parser.getEventType();
-		do {
-			parser.next();
-			eventType = parser.getEventType();
-			if (eventType == XmlPullParser.START_TAG) {
-				if (parser.getName().equals("RecognizedCardType")) {
-					conc.setRecognizedCardType(parser.nextText());
-				} else if (parser.getName().equals("CardCall")) {
-					conc.getCardCall().add(this.parseCardCall(parser));
-				} else if (parser.getName().equals("TLSMarker")) {
-					conc.setTLSMarker(this.parseTLSMarker(parser));
-				}
-			}
-
-		} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Conclusion")));
-		return conc;
-	}
-
-	private TLSMarkerType parseTLSMarker(XmlPullParser parser) throws XmlPullParserException, IOException, ParserConfigurationException {
-		TLSMarkerType tlsMarkerType = new TLSMarkerType();
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setNamespaceAware(true);
-		DocumentBuilder builder = factory.newDocumentBuilder();
-		Document d = builder.newDocument();
-		Element emKey = d.createElement("Key");
-		Element emCertificate = d.createElement("Certificate");
-		;
-		int eventType = parser.getEventType();
-		do {
-			parser.next();
-			eventType = parser.getEventType();
-			if (eventType == XmlPullParser.START_TAG) {
-				if (parser.getName().equals("Applicationidentifier") || parser.getName().equals("CardAlgRef")
-						|| parser.getName().equals("KeyRef") || parser.getName().equals("SignatureGenerationInfo")) {
-					Element emApplicationidentifier = d.createElement(parser.getName());
-					emApplicationidentifier.setTextContent(parser.nextText());
-					emKey.appendChild(emApplicationidentifier);
-				} else if (parser.getName().equals("efIdOrPath")) {
-					Element emEfIdOrPath = d.createElement("efIdOrPath");
-					emEfIdOrPath.appendChild(d.createTextNode(parser.nextText()));
-					emCertificate.appendChild(emEfIdOrPath);
-				}
-			}
-
-		} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("TLSMarker")));
-		emKey.appendChild(emCertificate);
-		tlsMarkerType.getAny().add(emKey);
-		return tlsMarkerType;
-
-	}
-
-	private synchronized DataMaskType parseDataMaskType(XmlPullParser parser) throws XmlPullParserException, IOException {
-		DataMaskType dataMaskType = new DataMaskType();
-
-		int eventType = parser.getEventType();
-		do {
-			parser.next();
-			eventType = parser.getEventType();
-			if (eventType == XmlPullParser.START_TAG) {
-				if (parser.getName().equals("Tag")) {
-					dataMaskType.setTag(StringUtils.toByteArray(parser.nextText()));
-				} else if (parser.getName().equals("MatchingData")) {
-					dataMaskType.setMatchingData(this.parseMatchingDataType(parser));
-				}
-
-			}
-		} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Body")));
-		return dataMaskType;
-	}
-
-	private MatchingDataType parseMatchingDataType(XmlPullParser parser) throws XmlPullParserException, IOException {
-		MatchingDataType matchingDataType = new MatchingDataType();
-
-		int eventType = parser.getEventType();
-		do {
-			parser.next();
-			eventType = parser.getEventType();
-			if (eventType == XmlPullParser.START_TAG) {
-				if (parser.getName().equals("Offset")) {
-					matchingDataType.setOffset(StringUtils.toByteArray(parser.nextText()));
-				} else if (parser.getName().equals("Length")) {
-					matchingDataType.setLength(StringUtils.toByteArray(parser.nextText()));
-				} else if (parser.getName().equals("MatchingValue")) {
-					matchingDataType.setMatchingValue(StringUtils.toByteArray(parser.nextText()));
-				}
-			}
-		} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("MatchingData")));
-
-		return matchingDataType;
-	}
-
-	private synchronized CardCall parseCardCall(XmlPullParser parser) throws XmlPullParserException, IOException,
-			ParserConfigurationException {
-		CardCall c = new CardCall();
-
-		int eventType = parser.getEventType();
-		do {
-			parser.next();
-			eventType = parser.getEventType();
-			if (eventType == XmlPullParser.START_TAG) {
-				if (parser.getName().equals("CommandAPDU")) {
-					c.setCommandAPDU(StringUtils.toByteArray(parser.nextText()));
-				} else if (parser.getName().equals("ResponseAPDU")) {
-					c.getResponseAPDU().add(this.parseResponseAPDUType(parser));
-				}
-			}
-		} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("CardCall")));
-		return c;
-	}
-
-	private synchronized Object parse(XmlPullParser parser) throws XmlPullParserException, IOException, ParserConfigurationException {
-		if (parser.getName().equals("StartPAOSResponse")) {
-			StartPAOSResponse startPAOSResponse = new StartPAOSResponse();
-			int eventType = parser.getEventType();
-			do {
-				parser.next();
-				eventType = parser.getEventType();
-				if (eventType == XmlPullParser.START_TAG) {
-					if (parser.getName().equals("Result")) {
-						startPAOSResponse.setResult(this.parseResult(parser));
-					}
-
-				}
-			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("StartPAOSResponse")));
-			return startPAOSResponse;
-		} else if (parser.getName().equals("InitializeFramework")) {
-			InitializeFramework initializeFramework = new InitializeFramework();
-			return initializeFramework;
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("Trailer")) {
+		    responseAPDUType.setTrailer(StringUtils.toByteArray(parser.nextText()));
+		} else if (parser.getName().equals("Body")) {
+		    responseAPDUType.setBody(this.parseDataMaskType(parser));
 		} else if (parser.getName().equals("Conclusion")) {
-			return parseConclusion(parser);
-		} else if (parser.getName().equals("WaitResponse")) {
-			WaitResponse waitResponse = new WaitResponse();
-			int eventType = parser.getEventType();
-			do {
-				parser.next();
-				eventType = parser.getEventType();
-				if (eventType == XmlPullParser.START_TAG) {
-					if (parser.getName().equals("ResultMajor")) {
-						Result r = new Result();
-						r.setResultMajor(parser.nextText());
-						waitResponse.setResult(r);
-					} else if (parser.getName().equals("IFDEvent")) {
-						waitResponse.getIFDEvent().add(parseIFDStatusType(parser, "IFDEvent"));
-					} else if (parser.getName().equals("SessionIdentifier")) {
-						waitResponse.setSessionIdentifier(parser.nextText());
-					}
-				}
-			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("WaitResponse")));
-			return waitResponse;
-
-		} else if (parser.getName().equals("GetStatusResponse")) {
-			GetStatusResponse getStatusResponse = new GetStatusResponse();
-			int eventType = parser.getEventType();
-			do {
-				parser.next();
-				eventType = parser.getEventType();
-				if (eventType == XmlPullParser.START_TAG) {
-					if (parser.getName().equals("ResultMajor")) {
-						Result r = new Result();
-						r.setResultMajor(parser.nextText());
-						getStatusResponse.setResult(r);
-					} else if (parser.getName().equals("IFDStatus")) {
-						getStatusResponse.getIFDStatus().add(parseIFDStatusType(parser, "IFDStatus"));
-					}
-				}
-			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("GetStatusResponse")));
-			return getStatusResponse;
-
-		} else if (parser.getName().equals("ListIFDs")) {
-			ListIFDs listIFDs = new ListIFDs();
-			int eventType = parser.getEventType();
-			do {
-				parser.next();
-				eventType = parser.getEventType();
-				if (eventType == XmlPullParser.START_TAG) {
-					if (parser.getName().equals("ContextHandle")) {
-						listIFDs.setContextHandle(StringUtils.toByteArray(parser.nextText()));
-					}
-				}
-			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ListIFDs")));
-			return listIFDs;
-
-		} else if (parser.getName().equals("GetRecognitionTreeResponse")) {
-			GetRecognitionTreeResponse resp = new GetRecognitionTreeResponse();
-			RecognitionTree recTree = new RecognitionTree();
-			int eventType = parser.getEventType();
-			do {
-				parser.next();
-				eventType = parser.getEventType();
-				if (eventType == XmlPullParser.START_TAG) {
-					if (parser.getName().equals("ResultMajor")) {
-						Result r = new Result();
-						r.setResultMajor(parser.nextText());
-						resp.setResult(r);
-					} else if (parser.getName().equals("CardCall")) {
-						recTree.getCardCall().add(this.parseCardCall(parser));
-					}
-				} else if (eventType == XmlPullParser.END_TAG) {
-					if (parser.getName().equals("CardCall")) {
-
-					}
-				}
-			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("GetRecognitionTreeResponse")));
-			resp.setRecognitionTree(recTree);
-			return resp;
-
-		} else if (parser.getName().equals("EstablishContext")) {
-			EstablishContext establishContext = new EstablishContext();
-			return establishContext;
-
-		} else if (parser.getName().equals("EstablishContextResponse")) {
-			EstablishContextResponse establishContextResponse = new EstablishContextResponse();
-			int eventType = parser.getEventType();
-			do {
-				parser.next();
-				eventType = parser.getEventType();
-				if (eventType == XmlPullParser.START_TAG) {
-					if (parser.getName().equals("ResultMajor")) {
-						Result r = new Result();
-						r.setResultMajor(parser.nextText());
-						establishContextResponse.setResult(r);
-					} else if (parser.getName().equals("ContextHandle")) {
-						establishContextResponse.setContextHandle(StringUtils.toByteArray(parser.nextText()));
-					}
-				}
-			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("EstablishContextResponse")));
-			return establishContextResponse;
-
-		} else if (parser.getName().equals("ListIFDsResponse")) {
-			ListIFDsResponse listIFDsResponse = new ListIFDsResponse();
-			int eventType = parser.getEventType();
-			do {
-				parser.next();
-				eventType = parser.getEventType();
-				if (eventType == XmlPullParser.START_TAG) {
-					if (parser.getName().equals("ResultMajor")) {
-						Result r = new Result();
-						r.setResultMajor(parser.nextText());
-						listIFDsResponse.setResult(r);
-					} else if (parser.getName().equals("IFDName")) {
-						listIFDsResponse.getIFDName().add(parser.nextText());
-					}
-				}
-			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ListIFDsResponse")));
-			return listIFDsResponse;
-
-		} else if (parser.getName().equals("ConnectResponse")) {
-			ConnectResponse connectResponse = new ConnectResponse();
-			int eventType = parser.getEventType();
-			do {
-				parser.next();
-				eventType = parser.getEventType();
-				if (eventType == XmlPullParser.START_TAG) {
-					if (parser.getName().equals("ResultMajor")) {
-						Result r = new Result();
-						r.setResultMajor(parser.nextText());
-						connectResponse.setResult(r);
-					} else if (parser.getName().equals("SlotHandle")) {
-						connectResponse.setSlotHandle(StringUtils.toByteArray(parser.nextText()));
-					}
-				}
-			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ConnectResponse")));
-			return connectResponse;
-
-		} else if (parser.getName().equals("Connect")) {
-			Connect c = new Connect();
-			int eventType = parser.getEventType();
-			do {
-				parser.next();
-				eventType = parser.getEventType();
-				if (eventType == XmlPullParser.START_TAG) {
-					if (parser.getName().equals("IFDName")) {
-						c.setIFDName(parser.nextText());
-					} else if (parser.getName().equals("ContextHandle")) {
-						c.setContextHandle(StringUtils.toByteArray(parser.nextText()));
-					} else if (parser.getName().equals("Slot")) {
-						c.setSlot(new BigInteger(parser.nextText()));
-					} // TODO exclusive
-				}
-			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Connect")));
-			return c;
-
-		} else if (parser.getName().equals("Transmit")) {
-			Transmit t = new Transmit();
-			int eventType = parser.getEventType();
-			do {
-				parser.next();
-				eventType = parser.getEventType();
-				if (eventType == XmlPullParser.START_TAG) {
-					if (parser.getName().equals("InputAPDU")) {
-						InputAPDUInfoType iait = new InputAPDUInfoType();
-						iait.setInputAPDU(StringUtils.toByteArray(parser.nextText()));
-						t.getInputAPDUInfo().add(iait);
-					} else if (parser.getName().equals("SlotHandle")) {
-						t.setSlotHandle(StringUtils.toByteArray(parser.nextText()));
-					} // TODO acceptablestatuscode
-				}
-			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Transmit")));
-			return t;
-
-		} else if (parser.getName().equals("TransmitResponse")) {
-			TransmitResponse transmitResponse = new TransmitResponse();
-			int eventType = parser.getEventType();
-			do {
-				parser.next();
-				eventType = parser.getEventType();
-				if (eventType == XmlPullParser.START_TAG) {
-					if (parser.getName().equals("ResultMajor")) {
-						Result r = new Result();
-						r.setResultMajor(parser.nextText());
-						transmitResponse.setResult(r);
-					} else if (parser.getName().equals("OutputAPDU")) {
-						transmitResponse.getOutputAPDU().add(StringUtils.toByteArray(parser.nextText()));
-					}
-				}
-			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("TransmitResponse")));
-			return transmitResponse;
-		} else {
-			return null;
+		    responseAPDUType.setConclusion(this.parseConclusion(parser));
 		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ResponseAPDU")));
+	return responseAPDUType;
+    }
+
+    private synchronized Conclusion parseConclusion(XmlPullParser parser) throws XmlPullParserException, IOException,
+	    ParserConfigurationException {
+	Conclusion conc = new Conclusion();
+
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("RecognizedCardType")) {
+		    conc.setRecognizedCardType(parser.nextText());
+		} else if (parser.getName().equals("CardCall")) {
+		    conc.getCardCall().add(this.parseCardCall(parser));
+		} else if (parser.getName().equals("TLSMarker")) {
+		    conc.setTLSMarker(this.parseTLSMarker(parser));
+		}
+	    }
+
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Conclusion")));
+	return conc;
+    }
+
+    private TLSMarkerType parseTLSMarker(XmlPullParser parser) throws XmlPullParserException, IOException, ParserConfigurationException {
+	TLSMarkerType tlsMarkerType = new TLSMarkerType();
+	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	factory.setNamespaceAware(true);
+	DocumentBuilder builder = factory.newDocumentBuilder();
+	Document d = builder.newDocument();
+	Element emKey = d.createElement("Key");
+	Element emCertificate = d.createElement("Certificate");
+	;
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("Applicationidentifier") || parser.getName().equals("CardAlgRef")
+			|| parser.getName().equals("KeyRef") || parser.getName().equals("SignatureGenerationInfo")) {
+		    Element emApplicationidentifier = d.createElement(parser.getName());
+		    emApplicationidentifier.setTextContent(parser.nextText());
+		    emKey.appendChild(emApplicationidentifier);
+		} else if (parser.getName().equals("efIdOrPath")) {
+		    Element emEfIdOrPath = d.createElement("efIdOrPath");
+		    emEfIdOrPath.appendChild(d.createTextNode(parser.nextText()));
+		    emCertificate.appendChild(emEfIdOrPath);
+		}
+	    }
+
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("TLSMarker")));
+	emKey.appendChild(emCertificate);
+	tlsMarkerType.getAny().add(emKey);
+	return tlsMarkerType;
+
+    }
+
+    private synchronized DataMaskType parseDataMaskType(XmlPullParser parser) throws XmlPullParserException, IOException {
+	DataMaskType dataMaskType = new DataMaskType();
+
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("Tag")) {
+		    dataMaskType.setTag(StringUtils.toByteArray(parser.nextText()));
+		} else if (parser.getName().equals("MatchingData")) {
+		    dataMaskType.setMatchingData(this.parseMatchingDataType(parser));
+		}
+
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Body")));
+	return dataMaskType;
+    }
+
+    private MatchingDataType parseMatchingDataType(XmlPullParser parser) throws XmlPullParserException, IOException {
+	MatchingDataType matchingDataType = new MatchingDataType();
+
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("Offset")) {
+		    matchingDataType.setOffset(StringUtils.toByteArray(parser.nextText()));
+		} else if (parser.getName().equals("Length")) {
+		    matchingDataType.setLength(StringUtils.toByteArray(parser.nextText()));
+		} else if (parser.getName().equals("MatchingValue")) {
+		    matchingDataType.setMatchingValue(StringUtils.toByteArray(parser.nextText()));
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("MatchingData")));
+
+	return matchingDataType;
+    }
+
+    private synchronized CardCall parseCardCall(XmlPullParser parser) throws XmlPullParserException, IOException,
+	    ParserConfigurationException {
+	CardCall c = new CardCall();
+
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("CommandAPDU")) {
+		    c.setCommandAPDU(StringUtils.toByteArray(parser.nextText()));
+		} else if (parser.getName().equals("ResponseAPDU")) {
+		    c.getResponseAPDU().add(this.parseResponseAPDUType(parser));
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("CardCall")));
+	return c;
+    }
+
+    private synchronized Object parse(XmlPullParser parser) throws XmlPullParserException, IOException, ParserConfigurationException {
+	if (parser.getName().equals("DIDAuthenticate")) {
+	    DIDAuthenticate didAuthenticate = new DIDAuthenticate();
+	    int eventType = parser.getEventType();
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("DIDName")) {
+			didAuthenticate.setDIDName(parser.nextText());
+		    } else if (parser.getName().equals("SlotHandle")) {
+			ConnectionHandleType cht = new ConnectionHandleType();
+			cht.setSlotHandle(StringUtils.toByteArray(parser.nextText()));
+			didAuthenticate.setConnectionHandle(cht);
+		    } else if (parser.getName().equals("AuthenticationProtocolData")) {
+			didAuthenticate.setAuthenticationProtocolData(this.parseDIDAuthenticationDataType(parser));
+		    }
+
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("DIDAuthenticate")));
+	    return didAuthenticate;
 	}
 
-	private Result parseResult(XmlPullParser parser) throws XmlPullParserException, IOException {
-		Result r = new Result();
-		int eventType = parser.getEventType();
-		do {
-			parser.next();
-			eventType = parser.getEventType();
-			if (eventType == XmlPullParser.START_TAG) {
-				if (parser.getName().equals("ResultMajor")) {
-					r.setResultMajor(parser.nextText());
-				}
-				if (parser.getName().equals("ResultMinor")) {
-					r.setResultMinor(parser.nextText());
-				}
-				if (parser.getName().equals("ResultMessage")) {
-					InternationalStringType internationalStringType = new InternationalStringType();
+	else if (parser.getName().equals("StartPAOSResponse")) {
+	    StartPAOSResponse startPAOSResponse = new StartPAOSResponse();
+	    int eventType = parser.getEventType();
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("Result")) {
+			startPAOSResponse.setResult(this.parseResult(parser));
+		    }
 
-					internationalStringType.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("StartPAOSResponse")));
+	    return startPAOSResponse;
+	} else if (parser.getName().equals("InitializeFramework")) {
+	    InitializeFramework initializeFramework = new InitializeFramework();
+	    return initializeFramework;
+	} else if (parser.getName().equals("Conclusion")) {
+	    return parseConclusion(parser);
+	} else if (parser.getName().equals("WaitResponse")) {
+	    WaitResponse waitResponse = new WaitResponse();
+	    int eventType = parser.getEventType();
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("ResultMajor")) {
+			Result r = new Result();
+			r.setResultMajor(parser.nextText());
+			waitResponse.setResult(r);
+		    } else if (parser.getName().equals("IFDEvent")) {
+			waitResponse.getIFDEvent().add(parseIFDStatusType(parser, "IFDEvent"));
+		    } else if (parser.getName().equals("SessionIdentifier")) {
+			waitResponse.setSessionIdentifier(parser.nextText());
+		    }
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("WaitResponse")));
+	    return waitResponse;
 
-					internationalStringType.setValue(parser.nextText());
+	} else if (parser.getName().equals("GetStatusResponse")) {
+	    GetStatusResponse getStatusResponse = new GetStatusResponse();
+	    int eventType = parser.getEventType();
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("ResultMajor")) {
+			Result r = new Result();
+			r.setResultMajor(parser.nextText());
+			getStatusResponse.setResult(r);
+		    } else if (parser.getName().equals("IFDStatus")) {
+			getStatusResponse.getIFDStatus().add(parseIFDStatusType(parser, "IFDStatus"));
+		    }
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("GetStatusResponse")));
+	    return getStatusResponse;
 
-					r.setResultMessage(internationalStringType);
-				}
-			}
-		} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Result")));
-		return r;
+	} else if (parser.getName().equals("ListIFDs")) {
+	    ListIFDs listIFDs = new ListIFDs();
+	    int eventType = parser.getEventType();
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("ContextHandle")) {
+			listIFDs.setContextHandle(StringUtils.toByteArray(parser.nextText()));
+		    }
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ListIFDs")));
+	    return listIFDs;
+
+	} else if (parser.getName().equals("GetRecognitionTreeResponse")) {
+	    GetRecognitionTreeResponse resp = new GetRecognitionTreeResponse();
+	    RecognitionTree recTree = new RecognitionTree();
+	    int eventType = parser.getEventType();
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("ResultMajor")) {
+			Result r = new Result();
+			r.setResultMajor(parser.nextText());
+			resp.setResult(r);
+		    } else if (parser.getName().equals("CardCall")) {
+			recTree.getCardCall().add(this.parseCardCall(parser));
+		    }
+		} else if (eventType == XmlPullParser.END_TAG) {
+		    if (parser.getName().equals("CardCall")) {
+
+		    }
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("GetRecognitionTreeResponse")));
+	    resp.setRecognitionTree(recTree);
+	    return resp;
+
+	} else if (parser.getName().equals("EstablishContext")) {
+	    EstablishContext establishContext = new EstablishContext();
+	    return establishContext;
+
+	} else if (parser.getName().equals("EstablishContextResponse")) {
+	    EstablishContextResponse establishContextResponse = new EstablishContextResponse();
+	    int eventType = parser.getEventType();
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("ResultMajor")) {
+			Result r = new Result();
+			r.setResultMajor(parser.nextText());
+			establishContextResponse.setResult(r);
+		    } else if (parser.getName().equals("ContextHandle")) {
+			establishContextResponse.setContextHandle(StringUtils.toByteArray(parser.nextText()));
+		    }
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("EstablishContextResponse")));
+	    return establishContextResponse;
+
+	} else if (parser.getName().equals("ListIFDsResponse")) {
+	    ListIFDsResponse listIFDsResponse = new ListIFDsResponse();
+	    int eventType = parser.getEventType();
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("ResultMajor")) {
+			Result r = new Result();
+			r.setResultMajor(parser.nextText());
+			listIFDsResponse.setResult(r);
+		    } else if (parser.getName().equals("IFDName")) {
+			listIFDsResponse.getIFDName().add(parser.nextText());
+		    }
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ListIFDsResponse")));
+	    return listIFDsResponse;
+
+	} else if (parser.getName().equals("ConnectResponse")) {
+	    ConnectResponse connectResponse = new ConnectResponse();
+	    int eventType = parser.getEventType();
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("ResultMajor")) {
+			Result r = new Result();
+			r.setResultMajor(parser.nextText());
+			connectResponse.setResult(r);
+		    } else if (parser.getName().equals("SlotHandle")) {
+			connectResponse.setSlotHandle(StringUtils.toByteArray(parser.nextText()));
+		    }
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ConnectResponse")));
+	    return connectResponse;
+
+	} else if (parser.getName().equals("Connect")) {
+	    Connect c = new Connect();
+	    int eventType = parser.getEventType();
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("IFDName")) {
+			c.setIFDName(parser.nextText());
+		    } else if (parser.getName().equals("ContextHandle")) {
+			c.setContextHandle(StringUtils.toByteArray(parser.nextText()));
+		    } else if (parser.getName().equals("Slot")) {
+			c.setSlot(new BigInteger(parser.nextText()));
+		    } // TODO exclusive
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Connect")));
+	    return c;
+
+	} else if (parser.getName().equals("Transmit")) {
+	    Transmit t = new Transmit();
+	    int eventType = parser.getEventType();
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("InputAPDU")) {
+			InputAPDUInfoType iait = new InputAPDUInfoType();
+			iait.setInputAPDU(StringUtils.toByteArray(parser.nextText()));
+			t.getInputAPDUInfo().add(iait);
+		    } else if (parser.getName().equals("SlotHandle")) {
+			t.setSlotHandle(StringUtils.toByteArray(parser.nextText()));
+		    } // TODO acceptablestatuscode
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Transmit")));
+	    return t;
+
+	} else if (parser.getName().equals("TransmitResponse")) {
+	    TransmitResponse transmitResponse = new TransmitResponse();
+	    int eventType = parser.getEventType();
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("ResultMajor")) {
+			Result r = new Result();
+			r.setResultMajor(parser.nextText());
+			transmitResponse.setResult(r);
+		    } else if (parser.getName().equals("OutputAPDU")) {
+			transmitResponse.getOutputAPDU().add(StringUtils.toByteArray(parser.nextText()));
+		    }
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("TransmitResponse")));
+	    return transmitResponse;
+	} else {
+	    return null;
 	}
+    }
 
-	private IFDStatusType parseIFDStatusType(XmlPullParser parser, String name) throws XmlPullParserException, IOException {
-		IFDStatusType ifdStatusType = new IFDStatusType();
-
-		int eventType = parser.getEventType();
-		do {
-			parser.next();
-			eventType = parser.getEventType();
-			if (eventType == XmlPullParser.START_TAG) {
-				if (parser.getName().equals("IFDName")) {
-					ifdStatusType.setIFDName(parser.nextText());
-				} else if (parser.getName().equals("Connected")) {
-					ifdStatusType.setConnected(Boolean.valueOf(parser.nextText()));
-				} else if (parser.getName().equals("ActiveAntenna")) {
-					ifdStatusType.setActiveAntenna(Boolean.valueOf(parser.nextText()));
-				} else if (parser.getName().equals("SlotStatus")) {
-					ifdStatusType.getSlotStatus().add(parseSlotStatusType(parser));
-				} else if (parser.getName().equals("DisplayStatus")) {
-					ifdStatusType.getBioSensorStatus().add(parseSimpleFUStatusType(parser, "DisplayStatus"));
-				} else if (parser.getName().equals("KeyPadStatus")) {
-					ifdStatusType.getBioSensorStatus().add(parseSimpleFUStatusType(parser, "KeyPadStatus"));
-				} else if (parser.getName().equals("BioSensorStatus")) {
-					ifdStatusType.getBioSensorStatus().add(parseSimpleFUStatusType(parser, "BioSensorStatus"));
-				}
-			}
-		} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals(name)));
-
-		return ifdStatusType;
+    private DIDAuthenticationDataType parseDIDAuthenticationDataType(XmlPullParser parser) throws XmlPullParserException, IOException {
+	Document document = documentBuilder.newDocument();
+	DIDAuthenticationDataType didAuthenticationDataType = null;
+	if (parser.getAttributeValue("http://www.w3.org/2001/XMLSchema-instance", "type").contains("EAC1InputType")) {
+	    didAuthenticationDataType = new EAC1InputType();
 	}
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("Certificate")) {
+		    Element emCertificate = document.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "Certificate");
+		    emCertificate.setTextContent(parser.nextText());
+		    didAuthenticationDataType.getAny().add(emCertificate);
+		} else if (parser.getName().equals("CertificateDescription")) {
+		    Element emCertificateDescription = document.createElementNS("urn:iso:std:iso-iec:24727:tech:schema",
+			    "CertificateDescription");
+		    emCertificateDescription.setTextContent(parser.nextText());
+		    didAuthenticationDataType.getAny().add(emCertificateDescription);
+		} else if (parser.getName().equals("RequiredCHAT")) {
+		    Element emCertificateDescription = document.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "RequiredCHAT");
+		    emCertificateDescription.setTextContent(parser.nextText());
+		    didAuthenticationDataType.getAny().add(emCertificateDescription);
+		} else if (parser.getName().equals("OptionalCHAT")) {
+		    Element emCertificateDescription = document.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "OptionalCHAT");
+		    emCertificateDescription.setTextContent(parser.nextText());
+		    didAuthenticationDataType.getAny().add(emCertificateDescription);
+		} else if (parser.getName().equals("AuthenticatedAuxiliaryData")) {
+		    Element emCertificateDescription = document.createElementNS("urn:iso:std:iso-iec:24727:tech:schema",
+			    "AuthenticatedAuxiliaryData");
+		    emCertificateDescription.setTextContent(parser.nextText());
+		    didAuthenticationDataType.getAny().add(emCertificateDescription);
+		}
 
-	private SlotStatusType parseSlotStatusType(XmlPullParser parser) throws XmlPullParserException, IOException {
-		SlotStatusType slotStatusType = new SlotStatusType();
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("AuthenticationProtocolData")));
 
-		int eventType = parser.getEventType();
-		do {
-			parser.next();
-			eventType = parser.getEventType();
-			if (eventType == XmlPullParser.START_TAG) {
-				if (parser.getName().equals("Index")) {
-					slotStatusType.setIndex(new BigInteger(parser.nextText()));
-				} else if (parser.getName().equals("CardAvailable")) {
-					slotStatusType.setCardAvailable(Boolean.valueOf(parser.nextText()));
-				} else if (parser.getName().equals("ATRorATS")) {
-					slotStatusType.setATRorATS(StringUtils.toByteArray(parser.nextText()));
-				}
-			}
-		} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("SlotStatus")));
+	return didAuthenticationDataType;
+    }
 
-		return slotStatusType;
-	}
+    private Result parseResult(XmlPullParser parser) throws XmlPullParserException, IOException {
+	Result r = new Result();
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("ResultMajor")) {
+		    r.setResultMajor(parser.nextText());
+		} else if (parser.getName().equals("ResultMinor")) {
+		    r.setResultMinor(parser.nextText());
+		} else if (parser.getName().equals("ResultMessage")) {
+		    InternationalStringType internationalStringType = new InternationalStringType();
 
-	private SimpleFUStatusType parseSimpleFUStatusType(XmlPullParser parser, String name) throws XmlPullParserException, IOException {
-		SimpleFUStatusType simpleFUStatusType = new SimpleFUStatusType();
+		    internationalStringType.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
 
-		int eventType = parser.getEventType();
-		do {
-			parser.next();
-			eventType = parser.getEventType();
-			if (eventType == XmlPullParser.START_TAG) {
-				if (parser.getName().equals("Index")) {
-					simpleFUStatusType.setIndex(new BigInteger(parser.nextText()));
-				} else if (parser.getName().equals("Available")) {
-					simpleFUStatusType.setAvailable(Boolean.valueOf(parser.nextText()));
-				}
-			}
-		} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals(name)));
+		    internationalStringType.setValue(parser.nextText());
 
-		return simpleFUStatusType;
-	}
+		    r.setResultMessage(internationalStringType);
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Result")));
+	return r;
+    }
 
-	@Override
-	public SOAPMessage doc2soap(Document envDoc) throws SOAPException {
-		SOAPMessage msg = soapFactory.createMessage(envDoc);
-		return msg;
-	}
+    private IFDStatusType parseIFDStatusType(XmlPullParser parser, String name) throws XmlPullParserException, IOException {
+	IFDStatusType ifdStatusType = new IFDStatusType();
 
-	@Override
-	public SOAPMessage add2soap(Document content) throws SOAPException {
-		SOAPMessage msg = soapFactory.createMessage();
-		SOAPBody body = msg.getSOAPBody();
-		body.addDocument(content);
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("IFDName")) {
+		    ifdStatusType.setIFDName(parser.nextText());
+		} else if (parser.getName().equals("Connected")) {
+		    ifdStatusType.setConnected(Boolean.valueOf(parser.nextText()));
+		} else if (parser.getName().equals("ActiveAntenna")) {
+		    ifdStatusType.setActiveAntenna(Boolean.valueOf(parser.nextText()));
+		} else if (parser.getName().equals("SlotStatus")) {
+		    ifdStatusType.getSlotStatus().add(parseSlotStatusType(parser));
+		} else if (parser.getName().equals("DisplayStatus")) {
+		    ifdStatusType.getBioSensorStatus().add(parseSimpleFUStatusType(parser, "DisplayStatus"));
+		} else if (parser.getName().equals("KeyPadStatus")) {
+		    ifdStatusType.getBioSensorStatus().add(parseSimpleFUStatusType(parser, "KeyPadStatus"));
+		} else if (parser.getName().equals("BioSensorStatus")) {
+		    ifdStatusType.getBioSensorStatus().add(parseSimpleFUStatusType(parser, "BioSensorStatus"));
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals(name)));
 
-		return msg;
-	}
+	return ifdStatusType;
+    }
+
+    private SlotStatusType parseSlotStatusType(XmlPullParser parser) throws XmlPullParserException, IOException {
+	SlotStatusType slotStatusType = new SlotStatusType();
+
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("Index")) {
+		    slotStatusType.setIndex(new BigInteger(parser.nextText()));
+		} else if (parser.getName().equals("CardAvailable")) {
+		    slotStatusType.setCardAvailable(Boolean.valueOf(parser.nextText()));
+		} else if (parser.getName().equals("ATRorATS")) {
+		    slotStatusType.setATRorATS(StringUtils.toByteArray(parser.nextText()));
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("SlotStatus")));
+
+	return slotStatusType;
+    }
+
+    private SimpleFUStatusType parseSimpleFUStatusType(XmlPullParser parser, String name) throws XmlPullParserException, IOException {
+	SimpleFUStatusType simpleFUStatusType = new SimpleFUStatusType();
+
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("Index")) {
+		    simpleFUStatusType.setIndex(new BigInteger(parser.nextText()));
+		} else if (parser.getName().equals("Available")) {
+		    simpleFUStatusType.setAvailable(Boolean.valueOf(parser.nextText()));
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals(name)));
+
+	return simpleFUStatusType;
+    }
+
+    @Override
+    public SOAPMessage doc2soap(Document envDoc) throws SOAPException {
+	SOAPMessage msg = soapFactory.createMessage(envDoc);
+	return msg;
+    }
+
+    @Override
+    public SOAPMessage add2soap(Document content) throws SOAPException {
+	SOAPMessage msg = soapFactory.createMessage();
+	SOAPBody body = msg.getSOAPBody();
+	body.addDocument(content);
+
+	return msg;
+    }
 
 }

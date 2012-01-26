@@ -18,6 +18,7 @@ package org.openecard.client.transport.dispatcher;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -83,7 +84,17 @@ public class MessageDispatcher implements Dispatcher {
 	// loop over methods and build index structure
 	for (Method nextAccessor : envMethods) {
 	    // is the method annotated?
-	    if (nextAccessor.isAnnotationPresent(Dispatchable.class)) {
+	    if (nextAccessor.getAnnotation(Dispatchable.class) != null) {
+		// check access rights and stuff
+		int modifier = nextAccessor.getModifiers();
+		if (Modifier.isAbstract(modifier)) {
+		    continue;
+		} else if (! Modifier.isPublic(modifier)) {
+		    continue;
+		} else if (Modifier.isStatic(modifier)) {
+		    continue;
+		}
+
 		// try to read class from annotation, if not take return value
 		Dispatchable methodAnnotation = nextAccessor.getAnnotation(Dispatchable.class);
 		Class returnType = methodAnnotation.interfaceClass();

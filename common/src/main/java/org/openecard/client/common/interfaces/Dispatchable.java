@@ -33,6 +33,6 @@ public @interface Dispatchable {
      *
      * @return Class object representing the actual webservice interface.
      */
-    public Class interfaceClass();
+    public Class interfaceClass() default Object.class;
 
 }

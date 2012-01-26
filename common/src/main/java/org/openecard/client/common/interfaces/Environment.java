@@ -27,11 +27,9 @@ import org.openecard.ws.SAL;
 public interface Environment {
 
     public void setIFD(IFD ifd);
-    @Dispatchable(interfaceClass=IFD.class)
     public IFD getIFD();
 
     public void setSAL(SAL sal);
-    @Dispatchable(interfaceClass=SAL.class)
     public SAL getSAL();
 
     public void setEventManager(EventManager manager);

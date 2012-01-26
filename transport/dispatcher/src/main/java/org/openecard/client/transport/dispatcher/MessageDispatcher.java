@@ -98,7 +98,7 @@ public class MessageDispatcher implements Dispatcher {
 		// try to read class from annotation, if not take return value
 		Dispatchable methodAnnotation = nextAccessor.getAnnotation(Dispatchable.class);
 		Class returnType = methodAnnotation.interfaceClass();
-		if (returnType == null) {
+		if (returnType.equals(Object.class)) {
 		    returnType = nextAccessor.getReturnType();
 		}
 

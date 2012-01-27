@@ -58,6 +58,7 @@ public class SOAPMessage {
 	    throw new SOAPException("No Envelope element in SOAP message.");
 	}
 	env = new SOAPEnvelope(envElem);
+	
 	namespace = MessageFactory.verifyNamespace(envElem.getNamespaceURI());
 
 	// extract envelope and stuff from doc

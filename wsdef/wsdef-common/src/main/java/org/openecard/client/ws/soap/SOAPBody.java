@@ -31,10 +31,9 @@ public class SOAPBody extends SOAPElement {
 	super(element);
     }
 
-
     public void addDocument(Document document) throws SOAPException {
 	Document doc = element.getOwnerDocument();
-	Node newNode = doc.importNode(document.getDocumentElement(), true);
+	Node newNode = doc.adoptNode(document.getDocumentElement());
 	element.appendChild(newNode);
     }
 

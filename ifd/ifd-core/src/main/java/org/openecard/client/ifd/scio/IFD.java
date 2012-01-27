@@ -1,43 +1,48 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.ifd.scio;
 
-import org.openecard.client.ifd.scio.reader.ExecutePACEResponse;
-import org.openecard.client.ifd.scio.reader.EstablishPACEResponse;
-import org.openecard.client.ifd.scio.reader.EstablishPACERequest;
-import org.openecard.client.ifd.scio.reader.ExecutePACERequest;
-import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.ifd.Protocol;
-import org.openecard.client.common.ifd.ProtocolFactory;
-import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.common.util.ValueGenerators;
-import org.openecard.client.ifd.scio.wrapper.SCCard;
-import org.openecard.client.ifd.scio.wrapper.SCChannel;
-import org.openecard.client.ifd.scio.wrapper.SCTerminal;
-import org.openecard.client.ifd.scio.wrapper.SCWrapper;
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jws.WebService;
 import javax.smartcardio.CardException;
 import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.ifd.Protocol;
+import org.openecard.client.common.ifd.ProtocolFactory;
 import org.openecard.client.common.ifd.anytype.PACEInputType;
 import org.openecard.client.common.ifd.anytype.PACEOutputType;
+import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.gui.UserConsent;
-import org.openecard.client.ifd.scio.reader.PCSCFeatures;
+import org.openecard.client.ifd.scio.reader.*;
+import org.openecard.client.ifd.scio.wrapper.SCCard;
+import org.openecard.client.ifd.scio.wrapper.SCChannel;
+import org.openecard.client.ifd.scio.wrapper.SCTerminal;
+import org.openecard.client.ifd.scio.wrapper.SCWrapper;
 
 
 /**
@@ -864,7 +869,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    List<InputAPDUInfoType> apdus = parameters.getInputAPDUInfo();
 
 	    response = WSHelper.makeResponse(TransmitResponse.class, null);
-	    Result result = null;
+	    Result result;
 	    List<byte[]> rapdus = response.getOutputAPDU();
 	    try {
 		SCChannel ch = scwrapper.getChannel(handle);

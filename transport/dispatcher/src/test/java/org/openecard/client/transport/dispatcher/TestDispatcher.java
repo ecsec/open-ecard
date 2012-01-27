@@ -20,7 +20,6 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.interfaces.Environment;
 import org.openecard.ws.IFD;
 

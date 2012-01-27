@@ -1,30 +1,36 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.ifd.scio;
 
+import iso.std.iso_iec._24727.tech.schema.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.smartcardio.CardException;
+import javax.smartcardio.CardTerminal;
+import javax.smartcardio.CardTerminals;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ifd.TerminalFactory;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.IFDStatusDiff;
 import org.openecard.client.ifd.scio.wrapper.IFDTerminalFactory;
 import org.openecard.client.ws.WSClassLoader;
-import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
-import iso.std.iso_iec._24727.tech.schema.GetStatus;
-import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
-import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
-import iso.std.iso_iec._24727.tech.schema.ResponseType;
-import iso.std.iso_iec._24727.tech.schema.SignalEvent;
-import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.smartcardio.CardException;
-import javax.smartcardio.CardTerminal;
-import javax.smartcardio.CardTerminals;
 import org.openecard.ws.IFDCallback;
 
 

@@ -268,7 +268,7 @@ public class PACEImplementation {
                 throw new ProtocolException("Authentication failed");
             }
         } catch (Exception e) {
-            //TODO
+            throw new ProtocolException("Authentication failed");
         }
     }
 

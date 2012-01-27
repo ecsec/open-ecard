@@ -23,6 +23,7 @@ import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.interfaces.Environment;
 import org.openecard.client.common.interfaces.EventManager;
 import org.openecard.ws.IFD;
+import org.openecard.ws.Management;
 import org.openecard.ws.SAL;
 
 
@@ -37,6 +38,7 @@ public class ClientEnv implements Environment {
     private EventManager manager;
     private Dispatcher dispatcher;
     private Map<String, Object> genericComponents;
+    private Management management;
 
     public ClientEnv() {
         genericComponents = new ConcurrentSkipListMap<String, Object>();
@@ -93,6 +95,16 @@ public class ClientEnv implements Environment {
     @Override
     public Object getGenericComponent(String id) {
         return genericComponents.get(id);
+    }
+
+    @Override
+    public void setManagement(Management management) {
+	this.management = management;
+    }
+
+    @Override
+    public Management getManagement() {
+	return management;
     }
     
 }

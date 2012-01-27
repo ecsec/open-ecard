@@ -21,6 +21,7 @@ import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.interfaces.Environment;
 import org.openecard.client.common.interfaces.EventManager;
 import org.openecard.ws.IFD;
+import org.openecard.ws.Management;
 import org.openecard.ws.SAL;
 
 
@@ -80,6 +81,17 @@ public class TestEnv1 implements Environment {
 
     @Override
     public Object getGenericComponent(String id) {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void setManagement(Management m) {
+	throw new UnsupportedOperationException("Not supported yet.");
+	
+    }
+
+    @Override
+    public Management getManagement() {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 

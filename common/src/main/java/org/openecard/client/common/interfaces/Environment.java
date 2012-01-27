@@ -17,6 +17,7 @@
 package org.openecard.client.common.interfaces;
 
 import org.openecard.ws.IFD;
+import org.openecard.ws.Management;
 import org.openecard.ws.SAL;
 
 
@@ -40,5 +41,8 @@ public interface Environment {
 
     public void setGenericComponent(String id, Object component);
     public Object getGenericComponent(String id);
+    
+    public void setManagement(Management management);
+    public Management getManagement();
 
 }

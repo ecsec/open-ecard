@@ -86,8 +86,6 @@ public class PAOS {
     }
 
     private String getHeaderElemStr(SOAPMessage msg, QName elem) throws SOAPException {
-	String result = null;
-	SOAPHeader h = msg.getSOAPHeader();
 	Element headerElem = getHeaderElem(msg, elem, false);
 	return (headerElem == null) ? null : headerElem.getTextContent().trim();
     }
@@ -97,7 +95,7 @@ public class PAOS {
 	SOAPHeader h = msg.getSOAPHeader();
 	// try to find a header
 	for (Element e : h.getChildElements()) {
-	    if (e.getNodeName().equals(elem.getLocalPart()) && e.getNamespaceURI().equals(elem.getNamespaceURI())) {
+	    if (e.getLocalName().equals(elem.getLocalPart()) && e.getNamespaceURI().equals(elem.getNamespaceURI())) {
 		result = e;
 		break;
 	    }
@@ -124,7 +122,7 @@ public class PAOS {
 	try {
 	    String id = getMessageIdentifier(msg);
 	    if (id == null) {
-		//throw new PAOSException("No MessageID in PAOS header.");
+		throw new PAOSException("No MessageID in PAOS header.");
 	    }
 	    if (!MessageGenerator.setRemoteId(id)) {
 		// ids don't match throw exception
@@ -141,7 +139,6 @@ public class PAOS {
 	try {
 	    Document doc = m.str2doc(content);
 	    SOAPMessage msg = m.doc2soap(doc);
-	    System.out.println(m.doc2str(doc));
 	    updateMessageId(msg);
             return m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
 	} catch (Exception ex) {
@@ -162,11 +159,8 @@ public class PAOS {
 	startPAOS.setSessionIdentifier(sessionIdentifier);
 	startPAOS.setProfile(ECardConstants.Profile.ECARD_1_1);
 	startPAOS.getConnectionHandle().addAll(connectionHandles);
-
 	SOAPMessage soapMsg = createSOAPMessage(startPAOS);
 	String responseStr = m.doc2str(soapMsg.getDocument());
-	System.out.println(responseStr);
-
 	return responseStr;
     }
 
@@ -174,12 +168,20 @@ public class PAOS {
 	Document contentDoc = m.marshal(content);
 	SOAPMessage msg = m.add2soap(contentDoc);
 	SOAPHeader header = msg.getSOAPHeader();
+	
 	// fill header with paos stuff
 	Element paos = header.addHeaderElement(new QName(ECardConstants.PAOS_VERSION_20, "PAOS"));
 	paos.setAttributeNS(ECardConstants.SOAP_ENVELOPE, "actor", ECardConstants.ACTOR_NEXT);
 	paos.setAttributeNS(ECardConstants.SOAP_ENVELOPE, "mustUnderstand", "1");
 	Element version = header.addChildElement(paos, new QName(ECardConstants.PAOS_VERSION_20, "Version"));
 	version.setTextContent(ECardConstants.PAOS_VERSION_20);
+	Element endpointReference = header.addChildElement(paos, new QName(ECardConstants.PAOS_VERSION_20, "EndpointReference"));
+    	Element address = 	header.addChildElement(endpointReference, new QName(ECardConstants.PAOS_VERSION_20,"Address"));
+    	address.setTextContent("http://www.projectliberty.org/2006/01/role/paos");
+    	Element metaData = header.addChildElement(endpointReference, new QName(ECardConstants.PAOS_VERSION_20, "MetaData"));
+    	Element serviceType = header.addChildElement(metaData, new QName(ECardConstants.PAOS_VERSION_20, "ServiceType"));
+    	serviceType.setTextContent("http://www.bsi.bund.de/ecard/api/1.0/PAOS/GetNextCommand");
+	
 	// add message ids
 	addMessageIds(msg);
 	return msg;

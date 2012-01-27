@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.openecard.client.ifd.protocol.pace;
 
-import iso.std.iso_iec._24727.tech.schema.Connect;
-import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
-import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
-import iso.std.iso_iec._24727.tech.schema.EstablishContext;
-import iso.std.iso_iec._24727.tech.schema.ListIFDs;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -28,7 +25,7 @@ import javax.activation.UnsupportedDataTypeException;
 import javax.xml.bind.JAXBException;
 import org.junit.Ignore;
 import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.util.Helper;
+import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerException;
@@ -71,7 +68,7 @@ public class PACETest {
         // PinID: 02 = CAN
         String xmlCall = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 + "<iso:EstablishChannel xmlns:iso=\"urn:iso:std:iso-iec:24727:tech:schema\">\n"
-                + "  <iso:SlotHandle>" + Helper.convByteArrayToString(slotHandle) + "</iso:SlotHandle>\n"
+                + "  <iso:SlotHandle>" + ByteUtils.toHexString(slotHandle) + "</iso:SlotHandle>\n"
                 + "  <iso:AuthenticationProtocolData Protocol=\"urn:oid:0.4.0.127.0.7.2.2.4\">\n"
                 + "    <iso:PinID>02</iso:PinID>\n"
                 + "    <iso:CHAT>7f4c12060904007f0007030102025305300301ffb7</iso:CHAT>\n"
@@ -84,4 +81,5 @@ public class PACETest {
         EstablishChannelResponse eChR = ifd.establishChannel(eCh);
         logger.log(Level.INFO, eChR.getResult().getResultMajor());
     }
+
 }

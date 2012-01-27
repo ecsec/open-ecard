@@ -1,34 +1,25 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.recognition;
 
-import java.util.Iterator;
-import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.common.tlv.TLV;
-import org.openecard.client.common.tlv.TLVException;
-import org.openecard.client.common.util.CardCommands;
-import org.openecard.client.common.util.Helper;
-import iso.std.iso_iec._24727.tech.schema.CardCall;
-import iso.std.iso_iec._24727.tech.schema.Conclusion;
-import iso.std.iso_iec._24727.tech.schema.Connect;
-import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
-import iso.std.iso_iec._24727.tech.schema.DataMaskType;
-import iso.std.iso_iec._24727.tech.schema.Disconnect;
-import iso.std.iso_iec._24727.tech.schema.DisconnectResponse;
-import iso.std.iso_iec._24727.tech.schema.GetRecognitionTreeResponse;
-import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
-import iso.std.iso_iec._24727.tech.schema.MatchingDataType;
-import iso.std.iso_iec._24727.tech.schema.RecognitionTree;
-import iso.std.iso_iec._24727.tech.schema.ResponseAPDUType;
-import iso.std.iso_iec._24727.tech.schema.Transmit;
-import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.logging.Logger;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
@@ -36,6 +27,13 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.common.tlv.TLV;
+import org.openecard.client.common.tlv.TLVException;
+import org.openecard.client.common.util.CardCommands;
+import org.openecard.client.common.util.IntegerUtils;
+import org.openecard.client.common.util.LongUtils;
 import org.openecard.client.recognition.statictree.LocalFileTree;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerFactory;
@@ -286,7 +284,7 @@ public class CardRecognition {
 		TLV tlv = TLV.fromBER(result);
 
 		// proceed only if tag matches
-		long tagNum = Helper.convertByteArrayToLong(tag);
+		long tagNum = LongUtils.toLong(tag);
 		while (tlv != null) {
 		    if (tlv.getTagNumWithClass() == tagNum) {
 			// check if we have a DataObject
@@ -318,7 +316,7 @@ public class CardRecognition {
 	byte[] tag = matcher.getTag();
 	long tagNum = 0;
 	if (tag != null) {
-	    tagNum = Helper.convertByteArrayToLong(tag);
+	    tagNum = LongUtils.toLong(tag);
 	}
 
 	// no tag and dataobject is a fail
@@ -352,8 +350,8 @@ public class CardRecognition {
 	if (offsetBytes == null) {
 	    offsetBytes = new byte[] {(byte)0x00, (byte)0x00};
 	}
-	int offset = Helper.convertByteArrayToInt(offsetBytes);
-	int length = Helper.convertByteArrayToInt(lengthBytes);
+	int offset = IntegerUtils.toInteger(offsetBytes);
+	int length = IntegerUtils.toInteger(lengthBytes);
 	if (maskBytes == null) {
 	    maskBytes = new byte[valueBytes.length];
 	    for (int i=0; i < maskBytes.length; i++) {

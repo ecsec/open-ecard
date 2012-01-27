@@ -1,32 +1,39 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.ifd.scio.wrapper;
 
-import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.common.util.Helper;
-import org.openecard.client.ifd.scio.reader.PCSCFeatures;
-import org.openecard.client.ifd.scio.reader.ExecutePACERequest;
-import org.openecard.client.ifd.scio.reader.ExecutePACEResponse;
-import org.openecard.client.ifd.scio.IFDException;
-import org.openecard.client.ifd.scio.IFDUtils;
-import org.openecard.client.ifd.scio.reader.PACECapabilities;
 import iso.std.iso_iec._24727.tech.schema.DisplayCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
 import iso.std.iso_iec._24727.tech.schema.KeyPadCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.smartcardio.ATR;
-import javax.smartcardio.Card;
-import javax.smartcardio.CardException;
-import javax.smartcardio.CardNotPresentException;
-import javax.smartcardio.CardTerminal;
-
+import javax.smartcardio.*;
+import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.common.util.IntegerUtils;
+import org.openecard.client.ifd.scio.IFDException;
+import org.openecard.client.ifd.scio.IFDUtils;
+import org.openecard.client.ifd.scio.reader.ExecutePACERequest;
+import org.openecard.client.ifd.scio.reader.ExecutePACEResponse;
+import org.openecard.client.ifd.scio.reader.PACECapabilities;
+import org.openecard.client.ifd.scio.reader.PCSCFeatures;
 
 
 /**
@@ -329,8 +336,8 @@ public class SCTerminal {
 		    if (features.containsKey(PCSCFeatures.IFD_DISPLAY_PROPERTIES)) {
 			byte[] data = getCard().controlCommand(features.get(PCSCFeatures.IFD_DISPLAY_PROPERTIES), new byte[0]);
 			if (data != null && data.length == 4) {
-			    int lineLength = Helper.convertByteArrayToInt(Arrays.copyOfRange(data, 0, 2));
-			    int numLines   = Helper.convertByteArrayToInt(Arrays.copyOfRange(data, 2, 4));
+			    int lineLength = IntegerUtils.toInteger(Arrays.copyOfRange(data, 0, 2));
+			    int numLines   = IntegerUtils.toInteger(Arrays.copyOfRange(data, 2, 4));
 			    if (lineLength > 0 && numLines > 0) {
 				dispCap = new DisplayCapabilityType();
 				dispCap.setIndex(BigInteger.ZERO);
@@ -357,7 +364,7 @@ public class SCTerminal {
 		    if (features.containsKey(PCSCFeatures.IFD_PIN_PROPERTIES)) {
 			byte[] data = getCard().controlCommand(features.get(PCSCFeatures.IFD_PIN_PROPERTIES), new byte[0]);
 			if (data != null && data.length == 4) {
-			    int wcdLayout = Helper.convertByteArrayToInt(Arrays.copyOfRange(data, 0, 2));
+			    int wcdLayout = IntegerUtils.toInteger(Arrays.copyOfRange(data, 0, 2));
 			    byte entryValidation = data[2];
 			    byte timeOut2 = data[3];
 			    // TODO: extract number of keys somehow

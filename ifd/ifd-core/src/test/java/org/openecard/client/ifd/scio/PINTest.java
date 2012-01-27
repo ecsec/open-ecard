@@ -1,26 +1,34 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.ifd.scio;
 
-import org.openecard.client.ifd.scio.reader.PCSCPinVerify;
-import org.openecard.client.common.util.Helper;
-import iso.std.iso_iec._24727.tech.schema.Connect;
-import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
-import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
-import iso.std.iso_iec._24727.tech.schema.EstablishContext;
-import iso.std.iso_iec._24727.tech.schema.InputUnitType;
-import iso.std.iso_iec._24727.tech.schema.ListIFDs;
-import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
-import iso.std.iso_iec._24727.tech.schema.PasswordTypeType;
-import iso.std.iso_iec._24727.tech.schema.PinInputType;
-import iso.std.iso_iec._24727.tech.schema.VerifyUser;
-import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse;
+import static iso.std.iso_iec._24727.tech.schema.PasswordTypeType.*;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import javax.activation.UnsupportedDataTypeException;
 import javax.xml.bind.JAXBException;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.fail;
 import org.junit.Ignore;
-import static org.junit.Assert.*;
-import static iso.std.iso_iec._24727.tech.schema.PasswordTypeType.*;
 import org.junit.Test;
+import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.gui.swing.SwingUserConsent;
+import org.openecard.client.ifd.scio.reader.PCSCPinVerify;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.WSMarshallerFactory;
@@ -111,22 +119,22 @@ public class PINTest {
     @Test
     public void verifyISO() throws IFDException {
 	PasswordAttributesType pwdAttr = create(true, ISO_9564_1, 4, 8);
-	PCSCPinVerify ctrlStruct = new PCSCPinVerify(pwdAttr, Helper.convStringToByteArray("00200001"));
+	PCSCPinVerify ctrlStruct = new PCSCPinVerify(pwdAttr, StringUtils.toByteArray("00200001"));
 	byte[] structData = ctrlStruct.toBytes();
 	String pinStr = "00 20 00 01 08 20 FF FF FF FF FF FF FF"; // length=13
 	String ctrlStr = "00 0F 89 47 04 0E04 02 FF 0407 00 000000 0D000000";
-	byte[] referenceData = Helper.convStringWithWSToByteArray(ctrlStr + pinStr);
+	byte[] referenceData = StringUtils.toByteArray(ctrlStr + pinStr, true);
 	assertArrayEquals(referenceData, structData);
     }
 
     @Test
     public void verifyASCII() throws IFDException {
 	PasswordAttributesType pwdAttr = create(false, ASCII_NUMERIC, 4, 4);
-	PCSCPinVerify ctrlStruct = new PCSCPinVerify(pwdAttr, Helper.convStringToByteArray("00200001"));
+	PCSCPinVerify ctrlStruct = new PCSCPinVerify(pwdAttr, StringUtils.toByteArray("00200001"));
 	byte[] structData = ctrlStruct.toBytes();
 	String pinStr = "00 20 00 01 04 FF FF FF FF"; // length=9
 	String ctrlStr = "00 0F 82 04 00 0404 02 FF 0407 00 000000 09000000";
-	byte[] referenceData = Helper.convStringWithWSToByteArray(ctrlStr + pinStr);
+	byte[] referenceData = StringUtils.toByteArray(ctrlStr + pinStr, true);
 	assertArrayEquals(referenceData, structData);
     }
 
@@ -156,7 +164,7 @@ public class PINTest {
 	inputUnit.setPinInput(pinInput);
 	pinInput.setIndex(BigInteger.ZERO);
 	pinInput.setPasswordAttributes(create(true, ISO_9564_1, 6, 8, 8));
-	verify.setTemplate(Helper.convStringWithWSToByteArray("00 20 00 01"));
+	verify.setTemplate(StringUtils.toByteArray("00 20 00 01", true));
 	VerifyUserResponse verifyR = ifd.verifyUser(verify);
 	byte[] responseCode = verifyR.getResponse();
     }
@@ -182,7 +190,7 @@ public class PINTest {
 	// prepare pace call
 	String xmlCall = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
 		"<iso:EstablishChannel xmlns:iso=\"urn:iso:std:iso-iec:24727:tech:schema\">\n" +
-		"  <iso:SlotHandle>" + Helper.convByteArrayToString(slotHandle) + "</iso:SlotHandle>\n" +
+		"  <iso:SlotHandle>" + ByteUtils.toHexString(slotHandle) + "</iso:SlotHandle>\n" +
 		"  <iso:AuthenticationProtocolData Protocol=\"urn:oid:0.4.0.127.0.7.2.2.4\">\n" +
 		"    <iso:PinID>03</iso:PinID>\n" +
 		"  </iso:AuthenticationProtocolData>\n" +

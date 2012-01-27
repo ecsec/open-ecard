@@ -1,12 +1,28 @@
+/*
+ * Copyright 2012 Johannes Schmoelz ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.applet;
 
-import org.openecard.client.common.enums.EventType;
-import org.openecard.client.common.interfaces.EventCallback;
-import org.openecard.client.common.util.Helper;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import netscape.javascript.JSObject;
+import org.openecard.client.common.enums.EventType;
+import org.openecard.client.common.interfaces.EventCallback;
+import org.openecard.client.common.util.ByteUtils;
 
 
 /**
@@ -55,9 +71,10 @@ public class JSEventCallback implements EventCallback {
     private String makeId(String input) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA"); 
-            return Helper.convByteArrayToString(md.digest(input.getBytes()));
+            return ByteUtils.toHexString(md.digest(input.getBytes()));
         } catch (NoSuchAlgorithmException ex) {
             return input.replaceAll(" ", "_");
         }
     }
+
 }

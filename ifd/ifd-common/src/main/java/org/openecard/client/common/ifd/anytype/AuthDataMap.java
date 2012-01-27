@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.common.ifd.anytype;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
@@ -7,9 +23,10 @@ import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.openecard.client.common.util.Helper;
+import org.openecard.client.common.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 
 /**
  * Helper class to make life with DIDAuthenticationDataTypes much easier.
@@ -96,7 +113,7 @@ public class AuthDataMap {
     public byte[] getContentAsBytes(QName qname) {
         if (containsContent(qname)) {
             String content = getContentAsString(qname);
-            byte[] contentBytes = Helper.convStringWithWSToByteArray(content);
+            byte[] contentBytes = StringUtils.toByteArray(content, true);
             return contentBytes;
         } else {
             return null;
@@ -128,4 +145,5 @@ public class AuthDataMap {
     public String getAttribute(String name) {
         return getAttribute(new QName(isoNs, name));
     }
+
 }

@@ -1,12 +1,29 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.ifd.scio.reader;
 
-import org.openecard.client.common.USBLangID;
-import org.openecard.client.common.util.Helper;
-import org.openecard.client.ifd.scio.IFDException;
-import org.openecard.client.ifd.scio.IFDUtils;
 import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
 import iso.std.iso_iec._24727.tech.schema.PasswordTypeType;
 import java.io.ByteArrayOutputStream;
+import org.openecard.client.common.USBLangID;
+import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.common.util.IntegerUtils;
+import org.openecard.client.ifd.scio.IFDException;
+import org.openecard.client.ifd.scio.IFDUtils;
 
 
 /**
@@ -42,8 +59,8 @@ public class PCSCPinVerify {
     private void prepareStructure(PasswordAttributesType attributes, byte[] cmdTemplate) throws IFDException {
 	// get apdu and pin template
 	byte[] pinTemplate = IFDUtils.createPinMask(attributes);
-	byte[] template = Helper.concatenate(cmdTemplate, (byte)pinTemplate.length);
-	setData(Helper.concatenate(template, pinTemplate));
+	byte[] template = ByteUtils.concatenate(cmdTemplate, (byte)pinTemplate.length);
+	setData(ByteUtils.concatenate(template, pinTemplate));
 
 	boolean nibbleHandling = pwdType == PasswordTypeType.BCD || pwdType == PasswordTypeType.ISO_9564_1;
 	boolean isoPin = pwdType == PasswordTypeType.ISO_9564_1;
@@ -159,7 +176,7 @@ public class PCSCPinVerify {
 	o.write(lang_low);
 	o.write(bMsgIndex);
 	o.write(bTeoPrologue, 0, bTeoPrologue.length);
-	byte[] ulDataLength_bytes = Helper.convertPosIntToByteArray(ulDataLength);
+	byte[] ulDataLength_bytes = IntegerUtils.toByteArray(ulDataLength);
 	for (int i=ulDataLength_bytes.length-1; i>=0; i--) {
 	    o.write(ulDataLength_bytes[i]);
 	}

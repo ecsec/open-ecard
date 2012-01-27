@@ -1,4 +1,5 @@
-/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg 
+/*
+ * Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,43 +16,11 @@
 
 package org.openecard.client.ws.android;
 
-import iso.std.iso_iec._24727.tech.schema.CardCall;
-import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
-import iso.std.iso_iec._24727.tech.schema.Conclusion;
-import iso.std.iso_iec._24727.tech.schema.Connect;
-import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.DataMaskType;
-import iso.std.iso_iec._24727.tech.schema.EstablishContext;
-import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
-import iso.std.iso_iec._24727.tech.schema.GetRecognitionTreeResponse;
-import iso.std.iso_iec._24727.tech.schema.GetStatus;
-import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
-import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
-import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
-import iso.std.iso_iec._24727.tech.schema.ListIFDs;
-import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
-import iso.std.iso_iec._24727.tech.schema.MatchingDataType;
-import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
-import iso.std.iso_iec._24727.tech.schema.RecognitionTree;
-import iso.std.iso_iec._24727.tech.schema.ResponseAPDUType;
-import iso.std.iso_iec._24727.tech.schema.SimpleFUStatusType;
-import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
-import iso.std.iso_iec._24727.tech.schema.StartPAOS;
-import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
-import iso.std.iso_iec._24727.tech.schema.Transmit;
-import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
-import iso.std.iso_iec._24727.tech.schema.Wait;
-import iso.std.iso_iec._24727.tech.schema.WaitResponse;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
+import de.bund.bsi.ecard.api._1.InitializeFramework;
+import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
+import iso.std.iso_iec._24727.tech.schema.*;
+import java.io.*;
 import java.math.BigInteger;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -61,11 +30,10 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
-
-import org.openecard.client.common.util.Helper;
+import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerException;
@@ -83,9 +51,6 @@ import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
-
-import de.bund.bsi.ecard.api._1.InitializeFramework;
-import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
 
 /**
  * 
@@ -184,12 +149,11 @@ public class AndroidMarshaller implements WSMarshaller {
 
 			em = document.createElement(iso + "ConnectionHandle");
 			Element em2 = document.createElement(iso + "ContextHandle");
-			em2.appendChild(document.createTextNode(Helper.convByteArrayToString(startPAOSPOJO.getConnectionHandle().get(0)
+			em2.appendChild(document.createTextNode(ByteUtils.toHexString(startPAOSPOJO.getConnectionHandle().get(0)
 					.getContextHandle())));
 			em.appendChild(em2);
 			em2 = document.createElement(iso + "SlotHandle");
-			em2.appendChild(document.createTextNode(Helper
-					.convByteArrayToString(startPAOSPOJO.getConnectionHandle().get(0).getSlotHandle())));
+			em2.appendChild(document.createTextNode(ByteUtils.toHexString(startPAOSPOJO.getConnectionHandle().get(0).getSlotHandle())));
 			em.appendChild(em2);
 			rootElement.appendChild(em);
 
@@ -203,7 +167,7 @@ public class AndroidMarshaller implements WSMarshaller {
 
 			for (int i = 0; i < transmitResponsePOJO.getOutputAPDU().size(); i++) {
 				em = document.createElement(iso + "OutputAPDU");
-				em.appendChild(document.createTextNode(Helper.convByteArrayToString(transmitResponsePOJO.getOutputAPDU().get(i))));
+				em.appendChild(document.createTextNode(ByteUtils.toHexString(transmitResponsePOJO.getOutputAPDU().get(i))));
 				rootElement.appendChild(em);
 			}
 
@@ -216,7 +180,7 @@ public class AndroidMarshaller implements WSMarshaller {
 			EstablishContextResponse establishContextResponse = (EstablishContextResponse) o;
 
 			Element em = document.createElement(iso + "ContextHandle");
-			em.appendChild(document.createTextNode(Helper.convByteArrayToString(establishContextResponse.getContextHandle())));
+			em.appendChild(document.createTextNode(ByteUtils.toHexString(establishContextResponse.getContextHandle())));
 			rootElement.appendChild(em);
 
 			em = marshalResult(establishContextResponse.getResult(), document);
@@ -228,7 +192,7 @@ public class AndroidMarshaller implements WSMarshaller {
 			GetStatus getStatus = (GetStatus) o;
 
 			Element em = document.createElement(iso + "ContextHandle");
-			em.appendChild(document.createTextNode(Helper.convByteArrayToString(getStatus.getContextHandle())));
+			em.appendChild(document.createTextNode(ByteUtils.toHexString(getStatus.getContextHandle())));
 			rootElement.appendChild(em);
 			if (getStatus.getIFDName() != null) {
 				em = document.createElement(iso + "IFDName");
@@ -242,7 +206,7 @@ public class AndroidMarshaller implements WSMarshaller {
 			Wait w = (Wait) o;
 
 			Element em = document.createElement(iso + "ContextHandle");
-			em.appendChild(document.createTextNode(Helper.convByteArrayToString(w.getContextHandle())));
+			em.appendChild(document.createTextNode(ByteUtils.toHexString(w.getContextHandle())));
 			rootElement.appendChild(em);
 
 			if (w.getTimeOut() != null) {
@@ -293,7 +257,7 @@ public class AndroidMarshaller implements WSMarshaller {
 			Connect c = (Connect) o;
 
 			Element em = document.createElement(iso + "ContextHandle");
-			em.appendChild(document.createTextNode(Helper.convByteArrayToString(c.getContextHandle())));
+			em.appendChild(document.createTextNode(ByteUtils.toHexString(c.getContextHandle())));
 			rootElement.appendChild(em);
 
 			em = document.createElement(iso + "IFDName");
@@ -315,7 +279,7 @@ public class AndroidMarshaller implements WSMarshaller {
 			ConnectResponse cr = (ConnectResponse) o;
 
 			Element em = document.createElement(iso + "SlotHandle");
-			em.appendChild(document.createTextNode(Helper.convByteArrayToString(cr.getSlotHandle())));
+			em.appendChild(document.createTextNode(ByteUtils.toHexString(cr.getSlotHandle())));
 			rootElement.appendChild(em);
 
 			em = marshalResult(cr.getResult(), document);
@@ -327,7 +291,7 @@ public class AndroidMarshaller implements WSMarshaller {
 			ListIFDs c = (ListIFDs) o;
 
 			Element em = document.createElement(iso + "ContextHandle");
-			em.appendChild(document.createTextNode(Helper.convByteArrayToString(c.getContextHandle())));
+			em.appendChild(document.createTextNode(ByteUtils.toHexString(c.getContextHandle())));
 			rootElement.appendChild(em);
 
 		} else if (o instanceof ListIFDsResponse) {
@@ -350,18 +314,18 @@ public class AndroidMarshaller implements WSMarshaller {
 			Transmit t = (Transmit) o;
 
 			Element em = document.createElement(iso + "SlotHandle");
-			em.appendChild(document.createTextNode(Helper.convByteArrayToString(t.getSlotHandle())));
+			em.appendChild(document.createTextNode(ByteUtils.toHexString(t.getSlotHandle())));
 			rootElement.appendChild(em);
 
 			for (int i = 0; i < t.getInputAPDUInfo().size(); i++) {
 				em = document.createElement(iso + "InputAPDUInfo");
 				rootElement.appendChild(em);
 				Element em2 = document.createElement(iso + "InputAPDU");
-				em2.appendChild(document.createTextNode(Helper.convByteArrayToString(t.getInputAPDUInfo().get(i).getInputAPDU())));
+				em2.appendChild(document.createTextNode(ByteUtils.toHexString(t.getInputAPDUInfo().get(i).getInputAPDU())));
 				em.appendChild(em2);
 				for (int y = 0; y < t.getInputAPDUInfo().get(i).getAcceptableStatusCode().size(); y++) {
 					em2 = document.createElement(iso + "AcceptableStatusCode");
-					em2.appendChild(document.createTextNode(Helper.convByteArrayToString(t.getInputAPDUInfo().get(i)
+					em2.appendChild(document.createTextNode(ByteUtils.toHexString(t.getInputAPDUInfo().get(i)
 							.getAcceptableStatusCode().get(y))));
 					em.appendChild(em2);
 				}
@@ -413,7 +377,7 @@ public class AndroidMarshaller implements WSMarshaller {
 		Element emCardCall = document.createElement(iso + "CardCall");
 		if (c.getCommandAPDU() != null) {
 			Element emCommandAPDU = document.createElement(iso + "CommandAPDU");
-			emCommandAPDU.appendChild(document.createTextNode(Helper.convByteArrayToString(c.getCommandAPDU())));
+			emCommandAPDU.appendChild(document.createTextNode(ByteUtils.toHexString(c.getCommandAPDU())));
 			emCardCall.appendChild(emCommandAPDU);
 		}
 		if (c.getResponseAPDU() != null && c.getResponseAPDU().size() > 0) {
@@ -425,32 +389,31 @@ public class AndroidMarshaller implements WSMarshaller {
 					Element emBody = document.createElement(iso + "Body");
 					if (r.getBody().getTag() != null) {
 						Element emTag = document.createElement(iso + "Tag");
-						emTag.appendChild(document.createTextNode(Helper.convByteArrayToString(r.getBody().getTag())));
+						emTag.appendChild(document.createTextNode(ByteUtils.toHexString(r.getBody().getTag())));
 						emBody.appendChild(emTag);
 					}
 					if (r.getBody().getMatchingData() != null) {
 						Element emMatchingData = document.createElement(iso + "MatchingData");
 						if (r.getBody().getMatchingData().getLength() != null) {
 							Element emLength = document.createElement(iso + "Length");
-							emLength.appendChild(document.createTextNode(Helper.convByteArrayToString(r.getBody().getMatchingData()
+							emLength.appendChild(document.createTextNode(ByteUtils.toHexString(r.getBody().getMatchingData()
 									.getLength())));
 							emMatchingData.appendChild(emLength);
 						}
 						if (r.getBody().getMatchingData().getOffset() != null) {
 							Element emOffset = document.createElement(iso + "Offset");
-							emOffset.appendChild(document.createTextNode(Helper.convByteArrayToString(r.getBody().getMatchingData()
+							emOffset.appendChild(document.createTextNode(ByteUtils.toHexString(r.getBody().getMatchingData()
 									.getOffset())));
 							emMatchingData.appendChild(emOffset);
 						}
 						if (r.getBody().getMatchingData().getMask() != null) {
 							Element emMask = document.createElement(iso + "Mask");
-							emMask.appendChild(document.createTextNode(Helper
-									.convByteArrayToString(r.getBody().getMatchingData().getMask())));
+							emMask.appendChild(document.createTextNode(ByteUtils.toHexString(r.getBody().getMatchingData().getMask())));
 							emMatchingData.appendChild(emMask);
 						}
 						if (r.getBody().getMatchingData().getMatchingValue() != null) {
 							Element emMatchingValue = document.createElement(iso + "MatchingValue");
-							emMatchingValue.appendChild(document.createTextNode(Helper.convByteArrayToString(r.getBody().getMatchingData()
+							emMatchingValue.appendChild(document.createTextNode(ByteUtils.toHexString(r.getBody().getMatchingData()
 									.getMatchingValue())));
 							emMatchingData.appendChild(emMatchingValue);
 						}
@@ -460,7 +423,7 @@ public class AndroidMarshaller implements WSMarshaller {
 				}
 				if (r.getTrailer() != null) {
 					Element emTrailer = document.createElement(iso + "Trailer");
-					emTrailer.appendChild(document.createTextNode(Helper.convByteArrayToString(r.getTrailer())));
+					emTrailer.appendChild(document.createTextNode(ByteUtils.toHexString(r.getTrailer())));
 					emResponseAPDU.appendChild(emTrailer);
 				}
 				if (r.getConclusion() != null) {
@@ -576,7 +539,7 @@ public class AndroidMarshaller implements WSMarshaller {
 			eventType = parser.getEventType();
 			if (eventType == XmlPullParser.START_TAG) {
 				if (parser.getName().equals("Trailer")) {
-					responseAPDUType.setTrailer(Helper.convStringToByteArray(parser.nextText()));
+					responseAPDUType.setTrailer(StringUtils.toByteArray(parser.nextText()));
 				} else if (parser.getName().equals("Body")) {
 					responseAPDUType.setBody(this.parseDataMaskType(parser));
 				} else if (parser.getName().equals("Conclusion")) {
@@ -651,7 +614,7 @@ public class AndroidMarshaller implements WSMarshaller {
 			eventType = parser.getEventType();
 			if (eventType == XmlPullParser.START_TAG) {
 				if (parser.getName().equals("Tag")) {
-					dataMaskType.setTag(Helper.convStringToByteArray(parser.nextText()));
+					dataMaskType.setTag(StringUtils.toByteArray(parser.nextText()));
 				} else if (parser.getName().equals("MatchingData")) {
 					dataMaskType.setMatchingData(this.parseMatchingDataType(parser));
 				}
@@ -670,11 +633,11 @@ public class AndroidMarshaller implements WSMarshaller {
 			eventType = parser.getEventType();
 			if (eventType == XmlPullParser.START_TAG) {
 				if (parser.getName().equals("Offset")) {
-					matchingDataType.setOffset(Helper.convStringToByteArray(parser.nextText()));
+					matchingDataType.setOffset(StringUtils.toByteArray(parser.nextText()));
 				} else if (parser.getName().equals("Length")) {
-					matchingDataType.setLength(Helper.convStringToByteArray(parser.nextText()));
+					matchingDataType.setLength(StringUtils.toByteArray(parser.nextText()));
 				} else if (parser.getName().equals("MatchingValue")) {
-					matchingDataType.setMatchingValue(Helper.convStringToByteArray(parser.nextText()));
+					matchingDataType.setMatchingValue(StringUtils.toByteArray(parser.nextText()));
 				}
 			}
 		} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("MatchingData")));
@@ -692,7 +655,7 @@ public class AndroidMarshaller implements WSMarshaller {
 			eventType = parser.getEventType();
 			if (eventType == XmlPullParser.START_TAG) {
 				if (parser.getName().equals("CommandAPDU")) {
-					c.setCommandAPDU(Helper.convStringToByteArray(parser.nextText()));
+					c.setCommandAPDU(StringUtils.toByteArray(parser.nextText()));
 				} else if (parser.getName().equals("ResponseAPDU")) {
 					c.getResponseAPDU().add(this.parseResponseAPDUType(parser));
 				}
@@ -767,7 +730,7 @@ public class AndroidMarshaller implements WSMarshaller {
 				eventType = parser.getEventType();
 				if (eventType == XmlPullParser.START_TAG) {
 					if (parser.getName().equals("ContextHandle")) {
-						listIFDs.setContextHandle(Helper.convStringToByteArray(parser.nextText()));
+						listIFDs.setContextHandle(StringUtils.toByteArray(parser.nextText()));
 					}
 				}
 			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ListIFDs")));
@@ -813,7 +776,7 @@ public class AndroidMarshaller implements WSMarshaller {
 						r.setResultMajor(parser.nextText());
 						establishContextResponse.setResult(r);
 					} else if (parser.getName().equals("ContextHandle")) {
-						establishContextResponse.setContextHandle(Helper.convStringToByteArray(parser.nextText()));
+						establishContextResponse.setContextHandle(StringUtils.toByteArray(parser.nextText()));
 					}
 				}
 			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("EstablishContextResponse")));
@@ -849,7 +812,7 @@ public class AndroidMarshaller implements WSMarshaller {
 						r.setResultMajor(parser.nextText());
 						connectResponse.setResult(r);
 					} else if (parser.getName().equals("SlotHandle")) {
-						connectResponse.setSlotHandle(Helper.convStringToByteArray(parser.nextText()));
+						connectResponse.setSlotHandle(StringUtils.toByteArray(parser.nextText()));
 					}
 				}
 			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ConnectResponse")));
@@ -865,7 +828,7 @@ public class AndroidMarshaller implements WSMarshaller {
 					if (parser.getName().equals("IFDName")) {
 						c.setIFDName(parser.nextText());
 					} else if (parser.getName().equals("ContextHandle")) {
-						c.setContextHandle(Helper.convStringToByteArray(parser.nextText()));
+						c.setContextHandle(StringUtils.toByteArray(parser.nextText()));
 					} else if (parser.getName().equals("Slot")) {
 						c.setSlot(new BigInteger(parser.nextText()));
 					} // TODO exclusive
@@ -882,10 +845,10 @@ public class AndroidMarshaller implements WSMarshaller {
 				if (eventType == XmlPullParser.START_TAG) {
 					if (parser.getName().equals("InputAPDU")) {
 						InputAPDUInfoType iait = new InputAPDUInfoType();
-						iait.setInputAPDU(Helper.convStringToByteArray(parser.nextText()));
+						iait.setInputAPDU(StringUtils.toByteArray(parser.nextText()));
 						t.getInputAPDUInfo().add(iait);
 					} else if (parser.getName().equals("SlotHandle")) {
-						t.setSlotHandle(Helper.convStringToByteArray(parser.nextText()));
+						t.setSlotHandle(StringUtils.toByteArray(parser.nextText()));
 					} // TODO acceptablestatuscode
 				}
 			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Transmit")));
@@ -903,7 +866,7 @@ public class AndroidMarshaller implements WSMarshaller {
 						r.setResultMajor(parser.nextText());
 						transmitResponse.setResult(r);
 					} else if (parser.getName().equals("OutputAPDU")) {
-						transmitResponse.getOutputAPDU().add(Helper.convStringToByteArray(parser.nextText()));
+						transmitResponse.getOutputAPDU().add(StringUtils.toByteArray(parser.nextText()));
 					}
 				}
 			} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("TransmitResponse")));
@@ -982,7 +945,7 @@ public class AndroidMarshaller implements WSMarshaller {
 				} else if (parser.getName().equals("CardAvailable")) {
 					slotStatusType.setCardAvailable(Boolean.valueOf(parser.nextText()));
 				} else if (parser.getName().equals("ATRorATS")) {
-					slotStatusType.setATRorATS(Helper.convStringToByteArray(parser.nextText()));
+					slotStatusType.setATRorATS(StringUtils.toByteArray(parser.nextText()));
 				}
 			}
 		} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("SlotStatus")));

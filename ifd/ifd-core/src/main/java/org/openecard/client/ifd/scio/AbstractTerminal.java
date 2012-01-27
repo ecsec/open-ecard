@@ -1,49 +1,43 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.ifd.scio;
 
-import java.util.Map;
-import org.openecard.client.gui.StepResult;
-import org.openecard.client.gui.executor.ExecutionResults;
-import org.openecard.client.gui.executor.StepActionResult;
-import org.openecard.client.ifd.scio.reader.PCSCPinVerify;
-import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.common.util.CardCommandStatus;
-import org.openecard.client.common.util.Helper;
-import org.openecard.client.ifd.scio.wrapper.SCTerminal;
-import org.openecard.client.ifd.scio.wrapper.SCWrapper;
-import iso.std.iso_iec._24727.tech.schema.AltVUMessagesType;
-import iso.std.iso_iec._24727.tech.schema.DisplayCapabilityType;
-import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities;
-import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse;
-import iso.std.iso_iec._24727.tech.schema.IFDCapabilitiesType;
-import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
-import iso.std.iso_iec._24727.tech.schema.InputUnitType;
-import iso.std.iso_iec._24727.tech.schema.KeyPadCapabilityType;
-import iso.std.iso_iec._24727.tech.schema.OutputInfoType;
-import iso.std.iso_iec._24727.tech.schema.PinInputType;
-import iso.std.iso_iec._24727.tech.schema.Transmit;
-import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
-import iso.std.iso_iec._24727.tech.schema.VerifyUser;
-import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.common.util.CardCommandStatus;
 import org.openecard.client.gui.ResultStatus;
+import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.UserConsent;
 import org.openecard.client.gui.UserConsentNavigator;
-import org.openecard.client.gui.definition.InfoUnitElementType;
-import org.openecard.client.gui.definition.OutputInfoUnit;
-import org.openecard.client.gui.definition.Passwordfield;
-import org.openecard.client.gui.definition.Step;
-import org.openecard.client.gui.definition.Text;
-import org.openecard.client.gui.definition.UserConsentDescription;
-import org.openecard.client.gui.executor.ExecutionEngine;
-import org.openecard.client.gui.executor.StepAction;
-import org.openecard.client.gui.executor.StepActionResultStatus;
+import org.openecard.client.gui.definition.*;
+import org.openecard.client.gui.executor.*;
 import org.openecard.client.ifd.scio.reader.PCSCFeatures;
+import org.openecard.client.ifd.scio.reader.PCSCPinVerify;
+import org.openecard.client.ifd.scio.wrapper.SCTerminal;
+import org.openecard.client.ifd.scio.wrapper.SCWrapper;
 
 
 /**
@@ -234,8 +228,8 @@ class AbstractTerminal {
 		byte[] pin = IFDUtils.encodePin(getPinFromUserConsent(exec), pinInput.getPasswordAttributes());
 
 		// send to reader
-		byte[] pinCmd = Helper.concatenate(template, (byte)pin.length);
-		pinCmd = Helper.concatenate(pinCmd, pin);
+		byte[] pinCmd = ByteUtils.concatenate(template, (byte)pin.length);
+		pinCmd = ByteUtils.concatenate(pinCmd, pin);
 		Transmit transmit = new Transmit();
 		transmit.setSlotHandle(handle);
 		InputAPDUInfoType pinApdu = new InputAPDUInfoType();

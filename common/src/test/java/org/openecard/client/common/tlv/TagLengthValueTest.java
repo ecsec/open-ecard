@@ -1,10 +1,26 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.common.tlv;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import org.junit.Test;
-import org.openecard.client.common.util.Helper;
 import static org.junit.Assert.*;
+import org.junit.Test;
+import org.openecard.client.common.util.StringUtils;
 
 
 /**
@@ -125,7 +141,7 @@ public class TagLengthValueTest {
 		  "8A 01 05" +
 		  "8B 0A 00 0A 01 08 02 08 03 00 04 00" +
 		  "A0 00";
-	byte[] input = Helper.convStringWithWSToByteArray(inputStr);
+	byte[] input = StringUtils.toByteArray(inputStr, true);
 
 	TLV t = TLV.fromBER(input);
 

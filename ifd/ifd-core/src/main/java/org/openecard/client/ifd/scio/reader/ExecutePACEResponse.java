@@ -1,11 +1,28 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.ifd.scio.reader;
 
 import java.util.Arrays;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.util.CardCommandStatus;
-import org.openecard.client.common.util.Helper;
 import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.util.CardCommandStatus;
+import org.openecard.client.common.util.IntegerUtils;
+import org.openecard.client.common.util.ShortUtils;
 
 
 /**
@@ -19,8 +36,8 @@ public class ExecutePACEResponse {
     final byte[] data;
 
     public ExecutePACEResponse(byte[] response) {
-	result = Helper.convertByteArrayToInt(Arrays.copyOfRange(response, 0, 4));
-	length = (short) Helper.convertByteArrayToInt(new byte[]{response[5], response[4]});
+	result = IntegerUtils.toInteger(Arrays.copyOfRange(response, 0, 4));
+	length = ShortUtils.toShort(new byte[]{response[5], response[4]});
 	data   = Arrays.copyOfRange(response, 6, 6+length);
     }
 

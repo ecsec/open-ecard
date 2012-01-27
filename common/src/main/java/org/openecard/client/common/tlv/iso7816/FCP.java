@@ -1,11 +1,28 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.common.tlv.iso7816;
 
+import java.util.LinkedList;
+import java.util.List;
 import org.openecard.client.common.tlv.Parser;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
-import org.openecard.client.common.util.Helper;
-import java.util.LinkedList;
-import java.util.List;
+import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.common.util.LongUtils;
 
 
 /**
@@ -51,11 +68,11 @@ public class FCP {
 	while ((next = p.next(0)) != null) {
 	    // num bytes
 	    if (next.getTagNumWithClass() == 0x80) {
-		numBytes = new Long(Helper.convertByteArrayToLong(next.getValue()));
+		numBytes = new Long(LongUtils.toLong(next.getValue()));
 	    }
 	    if (next.getTagNumWithClass() == 0x81) {
 		// length == 2
-		numBytesStructure = new Long(Helper.convertByteArrayToLong(next.getValue()));
+		numBytesStructure = new Long(LongUtils.toLong(next.getValue()));
 	    }
 	    // descriptor bytes
 	    if (next.getTagNumWithClass() == 0x82) {
@@ -191,13 +208,13 @@ public class FCP {
         b.append("File-Identifiers:\n");
         for (byte[] next : fileIdentifiers) {
             b.append(subindent);
-            b.append(Helper.convByteArrayToString(next));
+            b.append(ByteUtils.toHexString(next));
             b.append("\n");
         }
         b.append("DF-Names:\n");
         for (byte[] next : dfNames) {
             b.append(subindent);
-            b.append(Helper.convByteArrayToString(next));
+            b.append(ByteUtils.toHexString(next));
             b.append("\n");
         }
         // proprietaryInformationNoTLV
@@ -207,7 +224,7 @@ public class FCP {
         if (shortEfIdentifier != null) {
             b.append(indent);
             b.append("short-EF-identifier: ");
-            b.append(Helper.convByteArrayToString(shortEfIdentifier));
+            b.append(ByteUtils.toHexString(shortEfIdentifier));
             b.append("\n");
         }
         // lifeCycleStatusByte

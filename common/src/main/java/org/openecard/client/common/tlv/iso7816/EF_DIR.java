@@ -1,13 +1,21 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.common.tlv.iso7816;
 
-import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.WSHelper.WSException;
-import org.openecard.client.common.tlv.Parser;
-import org.openecard.client.common.tlv.TLV;
-import org.openecard.client.common.tlv.TLVException;
-import org.openecard.client.common.tlv.Tag;
-import org.openecard.client.common.util.CardCommands;
-import org.openecard.client.common.util.Helper;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +23,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.tlv.Parser;
+import org.openecard.client.common.tlv.TLV;
+import org.openecard.client.common.tlv.TLVException;
+import org.openecard.client.common.tlv.Tag;
+import org.openecard.client.common.util.CardCommands;
+import org.openecard.client.common.util.StringUtils;
 import org.openecard.ws.IFD;
 
 
@@ -56,7 +72,7 @@ public class EF_DIR {
 
     public static EF_DIR selectAndRead(IFD ifd, byte[] slotHandle) throws WSException, TLVException {
 	// select EF.DIR and eval FCP
-	Transmit t = CardCommands.Select.makeTransmit(slotHandle, CardCommands.Select.EF_FCP(Helper.convStringToByteArray("2F00")));
+	Transmit t = CardCommands.Select.makeTransmit(slotHandle, CardCommands.Select.EF_FCP(StringUtils.toByteArray("2F00")));
 	TransmitResponse tr = ifd.transmit(t);
 	WSHelper.checkResult(tr);
 

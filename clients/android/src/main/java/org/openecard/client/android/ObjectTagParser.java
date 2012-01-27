@@ -18,12 +18,11 @@ package org.openecard.client.android;
 import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
 import iso.std.iso_iec._24727.tech.schema.TCAPIOpen;
-
 import java.io.IOException;
 import java.io.StringReader;
-
 import org.openecard.client.common.ClientEnv;
-import org.openecard.client.common.util.Helper;
+import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.common.util.StringUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -76,7 +75,7 @@ public class ObjectTagParser {
 						binding = parser.getAttributeValue(null, "value");
 					} else if(parser.getAttributeValue(null, "name").equals("PathSecurity-Parameters")){
 						pathSecurityParameters = parser.getAttributeValue(null, "value");
-						 psk = Helper.convStringToByteArray(pathSecurityParameters.substring(5, pathSecurityParameters.length() - 6));
+						 psk = StringUtils.toByteArray(pathSecurityParameters.substring(5, pathSecurityParameters.length() - 6));
 					}
 				}
 				eventType = parser.next();
@@ -88,7 +87,7 @@ public class ObjectTagParser {
 			System.out.println("PathSecurity-Protocol: " + pathSecurityProtocol);
 			System.out.println("Binding: "  + binding);
 			System.out.println("PathSecurity-Parameters: " + pathSecurityParameters);
-			System.out.println("PSK: " + Helper.convByteArrayToString(psk));
+			System.out.println("PSK: " + ByteUtils.toHexString(psk));
 			  
 			ChannelHandleType cht = new ChannelHandleType();
 			cht.setSessionIdentifier(sessionIdentifier);

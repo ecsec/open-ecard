@@ -1,6 +1,23 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.common.tlv;
 
-import org.openecard.client.common.util.Helper;
+import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.common.util.LongUtils;
 
 
 /**
@@ -91,7 +108,7 @@ public class Tag {
 	return this.tagNumWithClass;
     }
     public void setTagNumWithClass(long tagNumWithClass) throws TLVException {
-	Tag newTag = Tag.fromBER(Helper.convertPosIntToByteArray(tagNumWithClass));
+	Tag newTag = Tag.fromBER(LongUtils.toByteArray(tagNumWithClass));
 	this.tagClass = newTag.tagClass;
 	this.primitive = newTag.primitive;
 	this.tagNum = newTag.tagNum;
@@ -107,7 +124,7 @@ public class Tag {
 	if (this.tagNum >= 31) {
 	    // long
 	    leading = (byte) ((leading << 5) | 0x1F);
-	    rest = Helper.convertPosIntToByteArray(this.tagNum, 7);
+	    rest = LongUtils.toByteArray(this.tagNum, 7);
 	    for (int i=0; i < rest.length-1; i++) {
 		rest[i] |= 0x80;
 	    }
@@ -117,8 +134,8 @@ public class Tag {
 	    rest = new byte[0];
 	}
 
-	byte[] resultBytes = Helper.concatenate(leading, rest);
-	this.tagNumWithClass = Helper.convertByteArrayToLong(resultBytes);
+	byte[] resultBytes = ByteUtils.concatenate(leading, rest);
+	this.tagNumWithClass = LongUtils.toLong(resultBytes);
     }
 
 
@@ -161,7 +178,7 @@ public class Tag {
     }
 
     public byte[] toBER() {
-	return Helper.convertPosIntToByteArray(tagNumWithClass);
+	return LongUtils.toByteArray(tagNumWithClass);
     }
 
     @Override

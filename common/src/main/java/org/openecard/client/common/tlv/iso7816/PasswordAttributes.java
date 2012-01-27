@@ -1,11 +1,23 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.common.tlv.iso7816;
 
-import org.openecard.client.common.tlv.Parser;
-import org.openecard.client.common.tlv.TLV;
-import org.openecard.client.common.tlv.TLVException;
-import org.openecard.client.common.tlv.Tag;
-import org.openecard.client.common.tlv.TagClass;
-import org.openecard.client.common.util.Helper;
+import org.openecard.client.common.tlv.*;
+import org.openecard.client.common.util.IntegerUtils;
 
 
 /**
@@ -36,25 +48,25 @@ public class PasswordAttributes extends TLVType {
 	    throw new TLVException("passwordFlags element missing.");
 	}
 	if (p.match(Tag.EnumeratedTag)) {
-	    passwordType = Helper.convertByteArrayToInt(p.next(0).getValue());
+	    passwordType = IntegerUtils.toInteger(p.next(0).getValue());
 	} else {
 	    throw new TLVException("passwordType element missing.");
 	}
 	if (p.match(Tag.IntegerTag)) {
-	    minLength = Helper.convertByteArrayToInt(p.next(0).getValue());
+	    minLength = IntegerUtils.toInteger(p.next(0).getValue());
 	} else {
 	    throw new TLVException("minLength element missing.");
 	}
 	if (p.match(Tag.IntegerTag)) {
-	    storedLength = Helper.convertByteArrayToInt(p.next(0).getValue());
+	    storedLength = IntegerUtils.toInteger(p.next(0).getValue());
 	} else {
 	    throw new TLVException("storedLength element missing.");
 	}
 	if (p.match(Tag.IntegerTag)) {
-	    maxLength = Helper.convertByteArrayToInt(p.next(0).getValue());
+	    maxLength = IntegerUtils.toInteger(p.next(0).getValue());
 	}
 	if (p.match(new Tag(TagClass.CONTEXT, true, 0))) {
-	    passwordReference = Helper.convertByteArrayToInt(p.next(0).getValue());
+	    passwordReference = IntegerUtils.toInteger(p.next(0).getValue());
 	}
 	if (p.match(Tag.OctetstringTag)) {
 	    padChar = p.next(0).getValue()[0];

@@ -1,11 +1,26 @@
+/*
+ * Copyright 2012 Johannes Schmoelz, Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.common.util;
 
 import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-import static org.openecard.client.common.util.Helper.concatenate;
+import java.util.List;
 
 
 /**
@@ -66,10 +81,11 @@ public class CardCommands {
      * @param data - data which originates from an external entity (e.g. another smart card)
      * @return APDU as byte array
      */
+    @Deprecated
     public static byte[] externalAuthenticate(byte[] data) {
-	byte lc1 = (byte) 0x00;
-	byte lc2 = (byte) 0x00;
-	byte[] apduStub = null;
+	byte lc1;
+	byte lc2;
+	byte[] apduStub;
 	if (data.length <= 0xFF) {
 	    lc2 = (byte) data.length;
 	    apduStub = new byte[]{CLASS_BYTE, COMMAND_EXTERNAL_AUTHENTICATE, (byte) 0x00, (byte) 0x00, lc2};
@@ -78,7 +94,7 @@ public class CardCommands {
 	    lc2 = (byte) (data.length);
 	    apduStub = new byte[]{CLASS_BYTE, COMMAND_EXTERNAL_AUTHENTICATE, (byte) 0x00, (byte) 0x00, (byte) 0x00, lc1, lc2};
 	}
-	return concatenate(apduStub, data);
+	return ByteUtils.concatenate(apduStub, data);
     }
 
     /**
@@ -87,6 +103,7 @@ public class CardCommands {
      * The created APDU is a case 2 short command APDU.
      * @return APDU as byte array
      */
+    @Deprecated
     public static byte[] getChallenge() {
 	byte[] apdu = {CLASS_BYTE, COMMAND_GET_CHALLENGE, (byte) 0x00, (byte) 0x00, 0x08};
 	return apdu;
@@ -98,6 +115,7 @@ public class CardCommands {
      * @param le - size of requested challenge
      * @return APDU as byte array
      */
+    @Deprecated
     public static byte[] getChallenge(byte le) {
 	byte[] apdu = {CLASS_BYTE, COMMAND_GET_CHALLENGE, (byte) 0x00, (byte) 0x00, le};
 	return apdu;
@@ -110,9 +128,10 @@ public class CardCommands {
      * @param le - expected length of answer
      * @return APDU as byte array
      */
+    @Deprecated
     public static byte[] internalAuthenticate(byte[] data, byte le) {
 	byte[] apduStub = {CLASS_BYTE, COMMAND_INTERNAL_AUTHENTICATE, (byte) 0x00, (byte) 0x00, (byte) data.length};
-	return concatenate(concatenate(apduStub, data), new byte[]{le});
+	return ByteUtils.concatenate(ByteUtils.concatenate(apduStub, data), new byte[]{le});
     }
 
     /**
@@ -123,17 +142,19 @@ public class CardCommands {
      * @param le2 - second byte of expected length
      * @return APDU as byte array
      */
+    @Deprecated
     public static byte[] internalAuthenticate(byte[] data, byte le1, byte le2) {
-	byte lc1 = (byte) 0x00;
-	byte lc2 = (byte) 0x00;
+	byte lc1;
+	byte lc2;
 	if (data.length <= 0xFF) {
+	    lc1 = (byte) 0x00;
 	    lc2 = (byte) data.length;
 	} else {
 	    lc1 = (byte) (data.length >>> 8);
 	    lc2 = (byte) (data.length);
 	}
 	byte[] apduStub = {CLASS_BYTE, COMMAND_INTERNAL_AUTHENTICATE, (byte) 0x00, (byte) 0x00, (byte) 0x00, lc1, lc2};
-	return concatenate(concatenate(apduStub, data), new byte[]{le1, le2});
+	return ByteUtils.concatenate(ByteUtils.concatenate(apduStub, data), new byte[]{le1, le2});
     }
 
     /**
@@ -144,10 +165,11 @@ public class CardCommands {
      * @param algId - algorithm identifier
      * @return APDU as byte array
      */
+    @Deprecated
     public static byte[] mseSelectPrKeyIntAuth(byte keyRef, byte algId) {
-	byte[] data = concatenate(new byte[]{(byte) 0x84, (byte) 0x01, keyRef}, new byte[]{(byte) 0x80, (byte) 0x01, algId});
+	byte[] data = ByteUtils.concatenate(new byte[]{(byte) 0x84, (byte) 0x01, keyRef}, new byte[]{(byte) 0x80, (byte) 0x01, algId});
 	byte[] apduStub = {CLASS_BYTE, COMMAND_MANAGE_SECURITY_ENVIRONMENT, (byte) 0x41, (byte) 0xA4, (byte) data.length};
-	return concatenate(apduStub, data);
+	return ByteUtils.concatenate(apduStub, data);
     }
 
     /**
@@ -157,9 +179,10 @@ public class CardCommands {
      * @param keyRef - key reference
      * @return APDU as byte array
      */
+    @Deprecated
     public static byte[] mseSelectPubKeyCertVerification(byte[] keyRef) {
 	byte[] apduStub = {CLASS_BYTE, COMMAND_MANAGE_SECURITY_ENVIRONMENT, (byte) 0x81, (byte) 0xB6, (byte) 0x0A, (byte) 0x83, (byte) 0x08};
-	return concatenate(apduStub, keyRef);
+	return ByteUtils.concatenate(apduStub, keyRef);
     }
 
     /**
@@ -170,11 +193,12 @@ public class CardCommands {
      * @param algId - algorithm identifier
      * @return APDU as byte array
      */
+    @Deprecated
     public static byte[] mseSelectPubKeyExtAuth(byte[] keyRef, byte algId) {
 	byte length = (byte) keyRef.length;
-	byte[] data = concatenate(concatenate(new byte[]{(byte) 0x83, length}, keyRef), new byte[]{(byte) 0x80, (byte) 0x01, algId});
+	byte[] data = ByteUtils.concatenate(ByteUtils.concatenate(new byte[]{(byte) 0x83, length}, keyRef), new byte[]{(byte) 0x80, (byte) 0x01, algId});
 	byte[] apduStub = {CLASS_BYTE, COMMAND_MANAGE_SECURITY_ENVIRONMENT, (byte) 0x81, (byte) 0xA4, (byte) data.length};
-	return concatenate(apduStub, data);
+	return ByteUtils.concatenate(apduStub, data);
     }
 
     /**
@@ -185,10 +209,11 @@ public class CardCommands {
      * @param data - CVC to be verified
      * @return APDU as byte array
      */
+    @Deprecated
     public static byte[] psoVerifyCertificate(byte[] data) {
-	byte lc1 = (byte) 0x00;
-	byte lc2 = (byte) 0x00;
-	byte[] apduStub = null;
+	byte lc1;
+	byte lc2;
+	byte[] apduStub;
 	if (data.length <= 0xFF) {
 	    lc2 = (byte) data.length;
 	    apduStub = new byte[]{CLASS_BYTE, COMMAND_PERFORM_SECURITY_OPERATION, (byte) 0x00, (byte) 0xAE, lc2};
@@ -197,7 +222,7 @@ public class CardCommands {
 	    lc2 = (byte) (data.length);
 	    apduStub = new byte[]{CLASS_BYTE, COMMAND_PERFORM_SECURITY_OPERATION, (byte) 0x00, (byte) 0xAE, (byte) 0x00, lc1, lc2};
 	}
-	return concatenate(apduStub, data);
+	return ByteUtils.concatenate(apduStub, data);
     }
 
 
@@ -209,21 +234,22 @@ public class CardCommands {
      * @param data - data to be verified
      * @return APDU as byte array
      */
+    @Deprecated
     public static byte[] verify(byte p1, byte p2, byte[] data) {
 	byte lc = (byte) data.length;
 	byte[] apduStub = {CLASS_BYTE, COMMAND_VERIFY, p1, p2, lc};
-	return concatenate(apduStub, data);
+	return ByteUtils.concatenate(apduStub, data);
     }
 
 
 
     private static byte[] buildContent(byte[] content) {
 	// create lc and make it extended if needed
-	byte[] lc = Helper.convertPosIntToByteArray(content.length);
+	byte[] lc = IntegerUtils.toByteArray(content.length);
         if (lc.length == 2) {
-            lc = Helper.concatenate((byte)0, lc);
+            lc = ByteUtils.concatenate((byte)0, lc);
         }
-	content = Helper.concatenate(lc, content);
+	content = ByteUtils.concatenate(lc, content);
 	return content;
     }
     private static byte[] buildLength(short length, byte[] content) {
@@ -239,43 +265,43 @@ public class CardCommands {
             data = new byte[0];
         }
         if (length > 0xFF) { // Lc + extended length
-            data = Helper.concatenate(data, Helper.convertPosIntToByteArray(length));
+            data = ByteUtils.concatenate(data, ShortUtils.toByteArray(length));
             return data;
         } else { // Lc + short length
-            data = Helper.concatenate(data, (byte)length);
+            data = ByteUtils.concatenate(data, (byte)length);
             return data;
         }
     }
 
     public static byte[] genericCommand(byte cmd, byte[] p12, byte[] content) {
 	byte[] apdu = {CLASS_BYTE, cmd};
-	apdu = Helper.concatenate(apdu, p12);
+	apdu = ByteUtils.concatenate(apdu, p12);
 	content = buildContent(content);
-	apdu = Helper.concatenate(apdu, content);
+	apdu = ByteUtils.concatenate(apdu, content);
 	return apdu;
     }
 
     public static byte[] genericCommand(byte cmd, byte[] p12, byte[] content, short length) {
 	byte[] apdu = {CLASS_BYTE, cmd};
-	apdu = Helper.concatenate(apdu, p12);
+	apdu = ByteUtils.concatenate(apdu, p12);
 	content = buildContent(content);
-	apdu = Helper.concatenate(apdu, content);
+	apdu = ByteUtils.concatenate(apdu, content);
 	byte[] lenBytes = buildLength(length, content);
-	apdu = Helper.concatenate(apdu, lenBytes);
+	apdu = ByteUtils.concatenate(apdu, lenBytes);
 	return apdu;
     }
 
     public static byte[] genericCommand(byte cmd, byte[] p12) {
 	byte[] apdu = {CLASS_BYTE, cmd};
-	apdu = Helper.concatenate(apdu, p12);
+	apdu = ByteUtils.concatenate(apdu, p12);
 	return apdu;
     }
 
     public static byte[] genericCommand(byte cmd, byte[] p12, short length) {
 	byte[] apdu = {CLASS_BYTE, cmd};
-	apdu = Helper.concatenate(apdu, p12);
+	apdu = ByteUtils.concatenate(apdu, p12);
 	byte[] lenBytes = buildLength(length, null);
-	apdu = Helper.concatenate(apdu, lenBytes);
+	apdu = ByteUtils.concatenate(apdu, lenBytes);
 	return apdu;
     }
 
@@ -303,7 +329,7 @@ public class CardCommands {
 	private static byte[] genericBinary(byte cmd, byte[] p12, byte[] content, short length) {
 	    // fix p12 if one byte missing
 	    if (p12.length == 1) {
-		p12 = Helper.concatenate((byte)0x00, p12);
+		p12 = ByteUtils.concatenate((byte)0x00, p12);
 	    }
 	    byte[] apdu;
 	    if (content == null) {
@@ -317,13 +343,13 @@ public class CardCommands {
 
 	public static byte[] binaryWithShortId(byte shortId, short offset, short len) {
             if (offset > 0xFF) {
-                byte[] dataBytes = Helper.convertPosIntToByteArray(offset);
+                byte[] dataBytes = ShortUtils.toByteArray(offset);
                 // write length tag
-                dataBytes = Helper.concatenate((byte)dataBytes.length, dataBytes);
-                dataBytes = Helper.concatenate((byte)0x54, dataBytes);
+                dataBytes = ByteUtils.concatenate((byte)dataBytes.length, dataBytes);
+                dataBytes = ByteUtils.concatenate((byte)0x54, dataBytes);
                 // write discretionary data tag
-                dataBytes = Helper.concatenate((byte)dataBytes.length, dataBytes);
-                dataBytes = Helper.concatenate((byte)0x53, dataBytes);
+                dataBytes = ByteUtils.concatenate((byte)dataBytes.length, dataBytes);
+                dataBytes = ByteUtils.concatenate((byte)0x53, dataBytes);
                 return genericBinary(COMMAND_READ_BINARY2, new byte[]{0,shortId}, dataBytes, len);
             } else {
                 byte p1 = (byte) ((0x1F & shortId) | 0x80); // first bit set and 5 to 1 is id
@@ -335,7 +361,7 @@ public class CardCommands {
 	}
 
 	public static byte[] binary(short offset, short len) {
-	    byte[] p12 = Helper.convertPosIntToByteArray(offset);
+	    byte[] p12 = ShortUtils.toByteArray(offset);
 	    if (p12.length == 2) {
 		p12[0] &= 0x7F; // make sure bit 8 is 0
 	    }
@@ -349,11 +375,11 @@ public class CardCommands {
 	}
 
 	public static byte[] binaryWithExtraOffset(short fileId, short offset, short len) {
-	    byte[] p12 = Helper.convertPosIntToByteArray(fileId);
+	    byte[] p12 = ShortUtils.toByteArray(fileId);
 	    // build offset tag structure
-	    byte[] content = Helper.convertPosIntToByteArray(offset);
-	    content = Helper.concatenate((byte)content.length, content);
-	    content = Helper.concatenate((byte)0x54, content); // returns tag 0x53 or 0x73
+	    byte[] content = ShortUtils.toByteArray(offset);
+	    content = ByteUtils.concatenate((byte)content.length, content);
+	    content = ByteUtils.concatenate((byte)0x54, content); // returns tag 0x53 or 0x73
 	    return genericBinary(COMMAND_READ_BINARY2, p12, content, len);
 	}
 	public static byte[] binaryWithExtraOffset(short fileId, short offset) {
@@ -375,9 +401,9 @@ public class CardCommands {
 	    byte p1 = record;
 	    byte p2 = (byte) (shortId << 3);
 	    p2 |= readType & 0x07;
-	    byte[] content = Helper.convertPosIntToByteArray(offset);
-	    content = Helper.concatenate((byte)content.length, content);
-	    content = Helper.concatenate((byte)0x54, content);
+	    byte[] content = ShortUtils.toByteArray(offset);
+	    content = ByteUtils.concatenate((byte)content.length, content);
+	    content = ByteUtils.concatenate((byte)0x54, content);
 	    byte[] apdu = genericCommand(COMMAND_READ_RECORD1, new byte[] {p1, p2}, length);
 	    return apdu;
 	}

@@ -1,10 +1,26 @@
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.common.tlv;
 
-import org.openecard.client.common.util.Helper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import org.openecard.client.common.util.ByteUtils;
 
 
 /**
@@ -167,7 +183,7 @@ public class TLV {
 	TLV last = first;
 	// build as long as there is input left
 	while (rest.length > 0) {
-	    TLV next = null;
+	    TLV next;
 	    if (isFirst) {
 		next = first;
 	    } else {
@@ -241,7 +257,7 @@ public class TLV {
 	String result = prefix + String.format("%02X", getTagNumWithClass());
 
 	if (! hasChild()) {
-	    result += " " + tag.getValueLength() + " " + Helper.convByteArrayToString(tag.getValue());
+	    result += " " + tag.getValueLength() + " " + ByteUtils.toHexString(tag.getValue());
 	} else {
 	    result += "\n" + getChild().toString(prefix + "  ");
 	}

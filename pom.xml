@@ -27,6 +27,7 @@
     <module>gui</module>
     <module>ifd</module>
     <module>sal</module>
+	<module>management</module>
     <module>recognition</module>
     <module>event-manager</module>
     <!-- browser artifacts -->

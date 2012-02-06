@@ -24,11 +24,15 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import javax.xml.bind.JAXB;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.sal.anytype.AuthDataMap;
+import org.openecard.client.common.sal.anytype.AuthDataResponse;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.soap.SOAPHeader;
@@ -49,7 +53,10 @@ public class AndroidMarshallerTest {
     private static final String conclusion;
     private static final String initializeFramework;
     private static final String startPAOSResponse;
-    private static final String didAuthenticate;
+    private static final String didAuthenticatePACE;
+    private static final String didAuthenticateTA;
+    private static final String didAuthenticateCA;
+    private static final String didAuthenticateResponse;
     static {
 	try {
 	    getRecognitionTreeResponseXML = loadXML("GetRecognitionTreeResponse.xml");
@@ -58,7 +65,10 @@ public class AndroidMarshallerTest {
 	    conclusion = loadXML("Conclusion.xml");
 	    initializeFramework = loadXML("InitializeFramework.xml");
 	    startPAOSResponse = loadXML("StartPAOSResponse.xml");
-	    didAuthenticate = loadXML("DIDAuthenticate.xml");
+	    didAuthenticatePACE = loadXML("DIDAuthenticatePACE.xml");
+	    didAuthenticateTA = loadXML("DIDAuthenticateTA.xml");
+	    didAuthenticateCA = loadXML("DIDAuthenticateCA.xml");
+	    didAuthenticateResponse = loadXML("DIDAuthenticateResponse.xml");
 	} catch (IOException ex) {
 	    throw new RuntimeException(ex);
 	}
@@ -204,10 +214,190 @@ public class AndroidMarshallerTest {
     	System.out.println(s);
     }
     
+    @Test 
+    public void testConversionOfEstablishChannelResponse() throws Exception {
+	EstablishChannelResponse establishChannelResponse = new EstablishChannelResponse();
+	Result r = new Result();
+	r.setResultMajor("major");
+	r.setResultMinor("minor");
+	InternationalStringType internationalStringType = new InternationalStringType();
+	internationalStringType.setLang("en");
+	internationalStringType.setValue("message");
+	r.setResultMessage(internationalStringType);
+	establishChannelResponse.setResult(r);
+	
+	
+	
+    }
+    
+    
+    @Test 
+    public void testConversionOfEstablishChannel() throws Exception {
+	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	    factory.setNamespaceAware(true);
+	    DocumentBuilder builder = factory.newDocumentBuilder();
+	    Document d = builder.newDocument();
+    EstablishChannel establishChannel = new EstablishChannel();
+    establishChannel.setSlotHandle(new byte[] {0x0, 0x1, 0x02});
+    DIDAuthenticationDataType establishChannelInput = new DIDAuthenticationDataType();
+    establishChannelInput.setProtocol(ECardConstants.Protocol.PACE);
+    Element e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "PinID");
+    e.setTextContent("3"); // Personalausweis-PIN
+    establishChannelInput.getAny().add(e);
+
+    e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "PIN");
+    e.setTextContent("123456"); // Personalausweis-PIN
+    establishChannelInput.getAny().add(e);
+    establishChannel.setAuthenticationProtocolData(establishChannelInput);
+    
+    JAXB.marshal(establishChannel, System.out);
+    WSMarshaller m = new AndroidMarshaller();
+    Document doc = m.marshal(establishChannel);
+
+	String s = m.doc2str(doc);
+	System.out.println(s);
+    }
+    
+    @Test 
+    public void testConversionOfDIDAuthenticateResponseCA() throws Exception {
+	WSMarshaller m = new AndroidMarshaller();
+	DIDAuthenticateResponse didAuthenticateResponse = new DIDAuthenticateResponse();
+	Result r = new Result();
+	r.setResultMajor("major");
+	r.setResultMinor("minor");
+	InternationalStringType internationalStringType = new InternationalStringType();
+	internationalStringType.setLang("en");
+	internationalStringType.setValue("message");
+	r.setResultMessage(internationalStringType);
+	didAuthenticateResponse.setResult(r);
+	
+	EAC2OutputType didAuthenticationDataType = new EAC2OutputType();
+
+	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	factory.setNamespaceAware(true);
+	DocumentBuilder builder = factory.newDocumentBuilder();
+	Document d = builder.newDocument();
+	
+	Element e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "Signature");
+	e.setTextContent("7117D7BF95D8D6BD437A0D43DE48F42528273A98F2605758D6A3A2BFC38141E7577CABB4F8FBC8DF152E3A097D1B3A703597331842425FE4A9D0F1C9067AC4A9");
+	didAuthenticationDataType.getAny().add(e);
+		
+	didAuthenticateResponse.setAuthenticationProtocolData(didAuthenticationDataType);
+	
+	JAXB.marshal(didAuthenticateResponse, System.out);
+    
+    	Document doc = m.marshal(didAuthenticateResponse);
+
+    	String s = m.doc2str(doc);
+	System.out.println(s);
+    	StringReader sr = new StringReader(s);
+    	DIDAuthenticateResponse didaresp = JAXB.unmarshal(sr, DIDAuthenticateResponse.class);
+  
+    	JAXB.marshal(didaresp, System.out);    	
+    }
+    
+    
+    
+    @Test 
+    public void testConversionOfDIDAuthenticateResponseTA() throws Exception {
+	WSMarshaller m = new AndroidMarshaller();
+	DIDAuthenticateResponse didAuthenticateResponse = new DIDAuthenticateResponse();
+	Result r = new Result();
+	r.setResultMajor("major");
+	r.setResultMinor("minor");
+	InternationalStringType internationalStringType = new InternationalStringType();
+	internationalStringType.setLang("en");
+	internationalStringType.setValue("message");
+	r.setResultMessage(internationalStringType);
+	didAuthenticateResponse.setResult(r);
+	
+	EAC2OutputType didAuthenticationDataType = new EAC2OutputType();
+
+	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	factory.setNamespaceAware(true);
+	DocumentBuilder builder = factory.newDocumentBuilder();
+	Document d = builder.newDocument();
+	
+	Element e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "Challenge");
+	e.setTextContent("1331F2B1571E6DC2");
+	didAuthenticationDataType.getAny().add(e);
+		
+	didAuthenticateResponse.setAuthenticationProtocolData(didAuthenticationDataType);
+	
+	JAXB.marshal(didAuthenticateResponse, System.out);
+    
+    	Document doc = m.marshal(didAuthenticateResponse);
+
+    	String s = m.doc2str(doc);
+	System.out.println(s);
+    	StringReader sr = new StringReader(s);
+    	DIDAuthenticateResponse didaresp = JAXB.unmarshal(sr, DIDAuthenticateResponse.class);
+  
+    	JAXB.marshal(didaresp, System.out);    	
+    }
+    
+    @Test 
+    public void testConversionOfDIDAuthenticateResponsePACE() throws Exception {
+	WSMarshaller m = new AndroidMarshaller();
+	DIDAuthenticateResponse didAuthenticateResponse = new DIDAuthenticateResponse();
+	Result r = new Result();
+	r.setResultMajor("major");
+	r.setResultMinor("minor");
+	InternationalStringType internationalStringType = new InternationalStringType();
+	internationalStringType.setLang("en");
+	internationalStringType.setValue("message");
+	r.setResultMessage(internationalStringType);
+	didAuthenticateResponse.setResult(r);
+	
+	EAC1OutputType didAuthenticationDataType = new EAC1OutputType();
+
+	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	factory.setNamespaceAware(true);
+	DocumentBuilder builder = factory.newDocumentBuilder();
+	Document d = builder.newDocument();
+	
+	Element e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "RetryCounter");
+	e.setTextContent("3");
+	didAuthenticationDataType.getAny().add(e);
+	
+	e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "CertificateHolderAuthorizationTemplate");
+	e.setTextContent("7F4C12060904007F00070301020253050001009800");
+	didAuthenticationDataType.getAny().add(e);
+	
+	e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "CertificationAuthorityReference");
+	e.setTextContent("ZZCVCAATA0001");
+	didAuthenticationDataType.getAny().add(e);
+		
+	e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "EFCardAccess");
+	e.setTextContent("31820264300D060804007F0007020202020102300F060A04007F00070202030202020102300F060A04007F00070202040202020101302F060804007F0007020206162341775420655041202D2042447220476D6248202D20546573746B617274652076312E303081FE060904007F0007020203023081F0060B04007F00070101050202023081E0020101302C06072A8648CE3D0101022100A9FB57DBA1EEA9BC3E660A909D838D726E3BF623D52620282013481D1F6E537730440420A9FB57DBA1EEA9BC3E660A909D838D726E3BF623D52620282013481D1F6E53740420662C61C430D84EA4FE66A7733D0B76B7BF93EBC4AF2F49256AE58101FEE92B04044104A3E8EB3CC1CFE7B7732213B23A656149AFA142C47AAFBC2B79A191562E1305F42D996C823439C56D7F7B22E14644417E69BCB6DE39D027001DABE8F35B25C9BE022100A9FB57DBA1EEA9BC3E660A909D838D718C397AA3B561A6F7901E0E82974856A70201013081FE060904007F0007020204023081F0060B04007F00070101050202023081E0020101302C06072A8648CE3D0101022100A9FB57DBA1EEA9BC3E660A909D838D726E3BF623D52620282013481D1F6E537730440420A9FB57DBA1EEA9BC3E660A909D838D726E3BF623D52620282013481D1F6E53740420662C61C430D84EA4FE66A7733D0B76B7BF93EBC4AF2F49256AE58101FEE92B04044104A3E8EB3CC1CFE7B7732213B23A656149AFA142C47AAFBC2B79A191562E1305F42D996C823439C56D7F7B22E14644417E69BCB6DE39D027001DABE8F35B25C9BE022100A9FB57DBA1EEA9BC3E660A909D838D718C397AA3B561A6F7901E0E82974856A7020101");
+	didAuthenticationDataType.getAny().add(e);
+		
+	e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "IDPICC");
+	e.setTextContent("4F5311EC8F92D60040EA63365E2B06C832856CDE1CE5F8B3C7E7696DAD7628BD");
+	didAuthenticationDataType.getAny().add(e);
+	
+	didAuthenticateResponse.setAuthenticationProtocolData(didAuthenticationDataType);
+	
+	
+	
+	JAXB.marshal(didAuthenticateResponse, System.out);
+    
+    	Document doc = m.marshal(didAuthenticateResponse);
+
+    	String s = m.doc2str(doc);
+	System.out.println(s);
+    	StringReader sr = new StringReader(s);
+    	DIDAuthenticateResponse didaresp = JAXB.unmarshal(sr, DIDAuthenticateResponse.class);
+  
+    	JAXB.marshal(didaresp, System.out);
+    	
+    	
+    }
+    
     @Test
     public void testConversionOfDIDAutheticate() throws Exception {
 	WSMarshaller m = new AndroidMarshaller();
-	Document d = m.str2doc(didAuthenticate);
+	Document d = m.str2doc(didAuthenticatePACE);
 	
 	Object o = m.unmarshal(d);
 	if (!(o instanceof DIDAuthenticate)) {
@@ -233,6 +423,42 @@ public class AndroidMarshallerTest {
 	    }
 	}
 	
+	d = m.str2doc(didAuthenticateTA);
+	
+	o = m.unmarshal(d);
+	if (!(o instanceof DIDAuthenticate)) {
+	    throw new Exception("Object should be an instace of DIDAuthenticate");
+	}
+	
+	didAuthenticate = (DIDAuthenticate) o;
+	Assert.assertEquals(didAuthenticate.getDIDName(), "PIN");
+	Assert.assertArrayEquals(didAuthenticate.getConnectionHandle().getSlotHandle(), StringUtils.toByteArray("05D4F40AEBD9919383C22216055EA3DB15056C51"));
+	Assert.assertEquals(EAC2InputType.class, didAuthenticate.getAuthenticationProtocolData().getClass());
+	AuthDataMap eac2input = new AuthDataMap(didAuthenticate.getAuthenticationProtocolData());
+	
+	Assert.assertEquals(eac2input.getContentAsString("EphemeralPublicKey"), "8D44E99377DA28436D2F7E8620347D7C08B186B179633E3654842E940AB179B498F974970D990D47C61FE5D4D91EBB10831E824EC6F2600D89D6661CDF47F734");
+	//Assert.assertEquals(eac2input.getContentAsString("Certificate"), "7F2181E47F4E819D5F290100420D5A5A43564341415441303030317F494F060A04007F0007020202020386410452DD32EAFE1FBBB4000CD9CE75F66636CFCF1EDD44F7B1EDAE25B84193DA04A91C77EE87F5C8F959ED276200DE33AB574CE9801135FF4497A37162B7C8548A0C5F200E5A5A4456434141544130303030357F4C12060904007F0007030102025305700301FFB75F25060100000601015F24060100010003015F37406F13AE9A6F4EDDB7839FF3F04D71E0DC377BC4B08FAD295EED241B524328AD0730EB553497B4FB66E9BB7AB90815F04273F09E751D7FD4B861439B4EE65381C3");
+	Assert.assertEquals(eac2input.getContentAsString("Certificate"), "7F218201427F4E81FB5F290100420E5A5A4456434141544130303030357F494F060A04007F0007020202020386410470C07FAA329E927D961F490F5430B395EECF3D2A538194D8B637DE0F8ACF60A9031816AC51B594097EB211FB8F55FAA8507D5800EF7B94E024F9630314116C755F200B5A5A444B423230303033557F4C12060904007F0007030102025305000301DF045F25060100000601085F2406010000070001655E732D060904007F00070301030280207C1901932DB75D08539F2D4A27C938F79E69E083C442C068B299D185BC8AFA78732D060904007F0007030103018020BFD2A6A2E4237948D7DCCF7975D71D40F15307AA59F580A48777CBEED093F54B5F3740618F584E4293F75DDE8977311694B69A3ED73BBE43FDAFEC11B7ECF054F84ACB1231615338CE8D6EC332480883E14E0664950F85134290DD716B7C153232BC96");
+	
+	JAXB.marshal(didAuthenticate, System.out);
+	
+	d = m.str2doc(didAuthenticateCA);
+	
+	o = m.unmarshal(d);
+	if (!(o instanceof DIDAuthenticate)) {
+	    throw new Exception("Object should be an instace of DIDAuthenticate");
+	}
+	
+	didAuthenticate = (DIDAuthenticate) o;
+	Assert.assertEquals(didAuthenticate.getDIDName(), "PIN");
+	Assert.assertArrayEquals(didAuthenticate.getConnectionHandle().getSlotHandle(), StringUtils.toByteArray("05D4F40AEBD9919383C22216055EA3DB15056C51"));
+	Assert.assertEquals(EACAdditionalInputType.class, didAuthenticate.getAuthenticationProtocolData().getClass());
+	AuthDataMap eacadditionalinput = new AuthDataMap(didAuthenticate.getAuthenticationProtocolData());
+	
+	Assert.assertEquals(eacadditionalinput.getContentAsString("Signature"), "7117D7BF95D8D6BD437A0D43DE48F42528273A98F2605758D6A3A2BFC38141E7577CABB4F8FBC8DF152E3A097D1B3A703597331842425FE4A9D0F1C9067AC4A9");
+	//Assert.assertEquals(eac2input.getContentAsString("Certificate"), "7F2181E47F4E819D5F290100420D5A5A43564341415441303030317F494F060A04007F0007020202020386410452DD32EAFE1FBBB4000CD9CE75F66636CFCF1EDD44F7B1EDAE25B84193DA04A91C77EE87F5C8F959ED276200DE33AB574CE9801135FF4497A37162B7C8548A0C5F200E5A5A4456434141544130303030357F4C12060904007F0007030102025305700301FFB75F25060100000601015F24060100010003015F37406F13AE9A6F4EDDB7839FF3F04D71E0DC377BC4B08FAD295EED241B524328AD0730EB553497B4FB66E9BB7AB90815F04273F09E751D7FD4B861439B4EE65381C3");
+	
+	JAXB.marshal(didAuthenticate, System.out);
     }
     
     @Test

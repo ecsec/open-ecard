@@ -36,9 +36,12 @@ public class ECardConstants {
     
     public static final String HEADER_KEY_ACCEPT = "Accept";
     public static final String HEADER_KEY_PAOS = "PAOS";
-    public static final String HEADER_VALUE_ACCEPT = "application/vnd.paos+xml";
-    public static final String HEADER_VALUE_PAOS = "ver=\"urn:liberty:paos:2006-08\"";
-
+    public static final String HEADER_KEY_CONTENT_TYPE = "Content-Type";
+    
+    public static final String HEADER_VALUE_ACCEPT = "text/html; application/vnd.paos+xml";
+    public static final String HEADER_VALUE_PAOS = "ver=\"urn:liberty:2003-08\",\"urn:liberty:2006-08\";" + PAOS_NEXT;
+    public static final String HEADER_VALUE_CONTENT_TYPE = "text/xml";
+    
     public static final String DEFAULT_AUTHENTICATION_REQUEST_MESSAGE = "Please enter your PIN";
     public static final String DEFAULT_SUCCESS_MESSAGE = "PIN entry successful";
     public static final String DEFAULT_AUTHENTICATION_FAILED_MESSAGE = "PIN entry incorrect";

@@ -103,6 +103,7 @@ public class ClientEnv implements Environment {
     }
 
     @Override
+    @Dispatchable
     public Management getManagement() {
 	return management;
     }

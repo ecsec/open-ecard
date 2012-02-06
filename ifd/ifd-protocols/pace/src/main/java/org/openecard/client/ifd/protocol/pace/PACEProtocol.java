@@ -138,7 +138,7 @@ public class PACEProtocol implements Protocol {
     @Override
     public byte[] applySM(byte[] commandAPDU) {
         try {
-            return sm.decrypt(commandAPDU);
+            return sm.encrypt(commandAPDU);
         } catch (Exception ex) {
             logger.log(Level.SEVERE, "Exception", ex);
         }
@@ -148,7 +148,7 @@ public class PACEProtocol implements Protocol {
     @Override
     public byte[] removeSM(byte[] responseAPDU) {
         try {
-            return sm.encrypt(responseAPDU);
+            return sm.decrypt(responseAPDU);
         } catch (Exception ex) {
             logger.log(Level.SEVERE, "Exception", ex);
         }

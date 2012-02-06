@@ -16,19 +16,33 @@
 
 package org.openecard.client.transport.paos;
 
+import de.bund.bsi.ecard.api._1.InitializeFramework;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
-import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerException;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.scheme.SocketFactory;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.message.HeaderGroup;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LogManager;
@@ -42,29 +56,37 @@ import org.openecard.client.ws.soap.SOAPMessage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-
 /**
- *
- * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>, Tobias Wich <tobias.wich@ecsec.de>
+ * 
+ * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>, Tobias Wich
+ *         <tobias.wich@ecsec.de>, Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class PAOS {
 
     static {
-        try {
-            m = WSMarshallerFactory.createInstance();
-        } catch (WSMarshallerException ex) {
-            throw new RuntimeException(ex);
-        }
+	try {
+	    m = WSMarshallerFactory.createInstance();
+	} catch (WSMarshallerException ex) {
+	    throw new RuntimeException(ex);
+	}
     }
 
     private static final Logger _logger = LogManager.getLogger(PAOS.class.getName());
     private static final WSMarshaller m;
     private final String endpoint;
     private final Dispatcher dispatcher;
-    
-    public PAOS(String endpoint, Dispatcher dispatcher) {
-        this.endpoint = endpoint;
-        this.dispatcher = dispatcher;
+    private SocketFactory socketFactory;
+    private PAOSCallback callback;
+    private HeaderGroup hg = new HeaderGroup();
+
+    public PAOS(String endpoint, Dispatcher dispatcher, PAOSCallback callback, SocketFactory sockFac) {
+	this.endpoint = endpoint;
+	this.dispatcher = dispatcher;
+	this.callback = callback;
+	this.socketFactory = sockFac;
+	hg.addHeader(new BasicHeader(ECardConstants.HEADER_KEY_PAOS, ECardConstants.HEADER_VALUE_PAOS));
+	hg.addHeader(new BasicHeader(ECardConstants.HEADER_KEY_CONTENT_TYPE, ECardConstants.HEADER_VALUE_CONTENT_TYPE));
+	hg.addHeader(new BasicHeader(ECardConstants.HEADER_KEY_ACCEPT, ECardConstants.HEADER_VALUE_ACCEPT));
     }
 
     private String getRelatesTo(SOAPMessage msg) throws SOAPException {
@@ -109,7 +131,8 @@ public class PAOS {
 
     private void addMessageIds(SOAPMessage msg) throws SOAPException {
 	String otherId = MessageGenerator.getRemoteId();
-	String newId = MessageGenerator.createNewId(); // also swaps messages in MessageGenerator
+	String newId = MessageGenerator.createNewId(); // also swaps messages in
+						       // MessageGenerator
 	if (otherId != null) {
 	    // add relatesTo element
 	    setRelatesTo(msg, otherId);
@@ -140,7 +163,7 @@ public class PAOS {
 	    Document doc = m.str2doc(content);
 	    SOAPMessage msg = m.doc2soap(doc);
 	    updateMessageId(msg);
-            return m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
+	    return m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
 	} catch (Exception ex) {
 	    Logger.getLogger(PAOS.class.getName()).log(Level.SEVERE, null, ex);
 	    e = ex;
@@ -148,13 +171,15 @@ public class PAOS {
 	throw new PAOSException(e.getMessage(), e);
     }
 
-    public String createPAOSResponse(Object obj) throws MarshallingTypeException, org.openecard.client.ws.soap.SOAPException, SOAPException, TransformerException {
+    public String createPAOSResponse(Object obj) throws MarshallingTypeException, org.openecard.client.ws.soap.SOAPException,
+	    SOAPException, TransformerException {
 	SOAPMessage msg = createSOAPMessage(obj);
 	String result = m.doc2str(msg.getDocument());
 	return result;
     }
 
-    public String createStartPAOS(String sessionIdentifier, List<ConnectionHandleType> connectionHandles) throws MarshallingTypeException, org.openecard.client.ws.soap.SOAPException, SOAPException, TransformerException {
+    public String createStartPAOS(String sessionIdentifier, List<ConnectionHandleType> connectionHandles) throws MarshallingTypeException,
+	    org.openecard.client.ws.soap.SOAPException, SOAPException, TransformerException {
 	StartPAOS startPAOS = new StartPAOS();
 	startPAOS.setSessionIdentifier(sessionIdentifier);
 	startPAOS.setProfile(ECardConstants.Profile.ECARD_1_1);
@@ -164,11 +189,12 @@ public class PAOS {
 	return responseStr;
     }
 
-    private SOAPMessage createSOAPMessage(Object content) throws MarshallingTypeException, org.openecard.client.ws.soap.SOAPException, SOAPException {
+    private SOAPMessage createSOAPMessage(Object content) throws MarshallingTypeException, org.openecard.client.ws.soap.SOAPException,
+	    SOAPException {
 	Document contentDoc = m.marshal(content);
 	SOAPMessage msg = m.add2soap(contentDoc);
 	SOAPHeader header = msg.getSOAPHeader();
-	
+
 	// fill header with paos stuff
 	Element paos = header.addHeaderElement(new QName(ECardConstants.PAOS_VERSION_20, "PAOS"));
 	paos.setAttributeNS(ECardConstants.SOAP_ENVELOPE, "actor", ECardConstants.ACTOR_NEXT);
@@ -176,52 +202,58 @@ public class PAOS {
 	Element version = header.addChildElement(paos, new QName(ECardConstants.PAOS_VERSION_20, "Version"));
 	version.setTextContent(ECardConstants.PAOS_VERSION_20);
 	Element endpointReference = header.addChildElement(paos, new QName(ECardConstants.PAOS_VERSION_20, "EndpointReference"));
-    	Element address = 	header.addChildElement(endpointReference, new QName(ECardConstants.PAOS_VERSION_20,"Address"));
-    	address.setTextContent("http://www.projectliberty.org/2006/01/role/paos");
-    	Element metaData = header.addChildElement(endpointReference, new QName(ECardConstants.PAOS_VERSION_20, "MetaData"));
-    	Element serviceType = header.addChildElement(metaData, new QName(ECardConstants.PAOS_VERSION_20, "ServiceType"));
-    	serviceType.setTextContent("http://www.bsi.bund.de/ecard/api/1.0/PAOS/GetNextCommand");
-	
+	Element address = header.addChildElement(endpointReference, new QName(ECardConstants.PAOS_VERSION_20, "Address"));
+	address.setTextContent("http://www.projectliberty.org/2006/01/role/paos");
+	Element metaData = header.addChildElement(endpointReference, new QName(ECardConstants.PAOS_VERSION_20, "MetaData"));
+	Element serviceType = header.addChildElement(metaData, new QName(ECardConstants.PAOS_VERSION_20, "ServiceType"));
+	serviceType.setTextContent(ECardConstants.PAOS_NEXT);
+	Element replyTo = header.addHeaderElement(new QName(ECardConstants.WS_ADDRESSING, "ReplyTo"));
+	address = header.addChildElement(replyTo, new QName(ECardConstants.WS_ADDRESSING, "Address"));
+	address.setTextContent("http://www.projectliberty.org/2006/02/role/paos");
+
 	// add message ids
 	addMessageIds(msg);
 	return msg;
     }
 
+    @SuppressWarnings("deprecation")
+    // new constructors of Scheme and SingleClientConnManager not available in
+    // android
     public StartPAOSResponse sendStartPAOS(StartPAOS message) throws Exception {
-        Object msg = message;
+	Object msg = message;
+	SchemeRegistry schemeRegistry = new SchemeRegistry();
+	schemeRegistry.register(new Scheme("https", this.socketFactory, 443));
+	HttpParams params = new BasicHttpParams();
+	HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 
-        // loop and send makes a computer happy
-        do {
-            String s = createPAOSResponse(msg);
-            System.out.println(s);
-            URL url = new URL(endpoint);
-            HttpURLConnection httpPost = (HttpURLConnection) url.openConnection();
-            httpPost.setRequestMethod("POST");
-            httpPost.setRequestProperty(ECardConstants.HEADER_KEY_ACCEPT, ECardConstants.HEADER_VALUE_ACCEPT);
-            httpPost.setRequestProperty(ECardConstants.HEADER_KEY_PAOS, ECardConstants.HEADER_VALUE_PAOS);
-            httpPost.setReadTimeout(0); // timeout is configured in paos endpoint
-            // write message
-            httpPost.setDoOutput(true);
-            OutputStreamWriter writer = new OutputStreamWriter(httpPost.getOutputStream());
-            writer.write(s);
-            writer.flush();
-            // read result
-            StringBuilder result = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(httpPost.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                result.append(line);
-            }
-            writer.close();
-            reader.close();
-            Object requestObj = processPAOSRequest(result.toString());
-            // break when message is startpaosresponse
-            if (requestObj instanceof StartPAOSResponse) {
-                return (StartPAOSResponse) requestObj;
-            }
-            // send via dispatcher
-            msg = dispatcher.deliver(requestObj);
-        } while (true);
+	// loop and send makes a computer happy
+	while (true) {
+	    ClientConnectionManager cm = new SingleClientConnManager(params, schemeRegistry);
+	    HttpClient httpClient = new DefaultHttpClient(cm, params);
+	    HttpPost httpPost = new HttpPost(endpoint);
+	    httpPost.setEntity(new StringEntity(this.createPAOSResponse(msg), "UTF-8"));
+	    httpPost.setHeaders(hg.getAllHeaders());
+	    HttpResponse httpresponse = httpClient.execute(httpPost);
+	    InputStreamReader isr = new InputStreamReader(httpresponse.getEntity().getContent());
+	    char[] buf = new char[(int) httpresponse.getEntity().getContentLength()];
+	    isr.read(buf);
+	    Object requestObj = this.processPAOSRequest(new String(buf));
+	    // break when message is startpaosresponse
+	    if (requestObj instanceof StartPAOSResponse) {
+		StartPAOSResponse startPAOSResponse = (StartPAOSResponse) requestObj;
+		return startPAOSResponse;
+	    } else if (requestObj instanceof InitializeFramework) {
+		// connection seems to be successfully established, trigger
+		// loading of refreshAddress (see. BSI TR-03112-7)
+		new Thread(new Runnable() {
+		    @Override
+		    public void run() {
+			callback.loadRefreshAddress();
+		    }
+		}).start();
+	    }
+	    // send via dispatcher
+	    msg = dispatcher.deliver(requestObj);
+	}
     }
-
 }

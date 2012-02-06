@@ -1090,8 +1090,17 @@ public class IFD implements org.openecard.ws.IFD {
 
     @Override
     public DestroyChannelResponse destroyChannel(DestroyChannel parameters) {
+
 	try {
-	    return WSHelper.makeResponse(DestroyChannelResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	    byte[] slotHandle = parameters.getSlotHandle();
+		 SCCard card = this.scwrapper.getCard(slotHandle);
+		 SCChannel channel = card.getChannel(slotHandle);
+		 channel.removeSecureMessaging();
+		 DestroyChannelResponse destroyChannelResponse = new DestroyChannelResponse();
+		 Result r = new Result();
+		 r.setResultMajor(ECardConstants.Major.OK);
+		 destroyChannelResponse.setResult(r);
+		 return destroyChannelResponse;
 	} catch (Throwable t) {
 	    return WSHelper.makeResponse(DestroyChannelResponse.class, WSHelper.makeResult(t));
 	}

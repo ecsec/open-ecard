@@ -29,11 +29,11 @@
 	      </property>
 	  </activation>
 	  <modules>
-	      <module>android</module>
+	      <module>android-gui</module>
 	  </modules>
       </profile>
   </profiles>
-	  
+
   <dependencies>
     <dependency>
       <groupId>org.openecard.client</groupId>

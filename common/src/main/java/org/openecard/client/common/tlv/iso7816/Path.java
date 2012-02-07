@@ -17,7 +17,7 @@
 package org.openecard.client.common.tlv.iso7816;
 
 import org.openecard.client.common.tlv.*;
-import org.openecard.client.common.util.IntegerUtils;
+import org.openecard.client.common.util.ByteUtils;
 
 
 /**
@@ -45,8 +45,8 @@ public class Path {
 	index = null;
 	length = null;
 	if (p.match(new Tag(TagClass.UNIVERSAL, true, 2)) && p.matchLA(1, new Tag(TagClass.CONTEXT, true, 0))) {
-	    index = IntegerUtils.toInteger(p.next(0).getValue());
-	    length = IntegerUtils.toInteger(p.next(0).getValue());
+	    index = ByteUtils.toInteger(p.next(0).getValue());
+	    length = ByteUtils.toInteger(p.next(0).getValue());
 	}
     }
 

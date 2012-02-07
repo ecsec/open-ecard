@@ -19,7 +19,7 @@ package org.openecard.client.common.tlv.iso7816;
 import java.util.LinkedList;
 import java.util.List;
 import org.openecard.client.common.tlv.*;
-import org.openecard.client.common.util.IntegerUtils;
+import org.openecard.client.common.util.ByteUtils;
 
 
 /**
@@ -60,7 +60,7 @@ public class CommonKeyAttributes extends TLVType {
 	    accessFlags = new TLVBitString(p.next(0));
 	}
 	if (p.match(Tag.IntegerTag)) {
-	    keyReference = IntegerUtils.toInteger(p.next(0).getValue());
+	    keyReference = ByteUtils.toInteger(p.next(0).getValue());
 	}
 	if (p.match(new Tag(TagClass.UNIVERSAL, true, 24))) {
 	    startDate = p.next(0);
@@ -72,7 +72,7 @@ public class CommonKeyAttributes extends TLVType {
 	    TLVList list = new TLVList(p.next(0), new Tag(TagClass.CONTEXT, false, 1).getTagNumWithClass());
 	    algRefs = new LinkedList<Integer>();
 	    for (TLV next : list.getContent()) {
-		algRefs.add(IntegerUtils.toInteger(next.getValue()));
+		algRefs.add(ByteUtils.toInteger(next.getValue()));
 	    }
 	}
     }

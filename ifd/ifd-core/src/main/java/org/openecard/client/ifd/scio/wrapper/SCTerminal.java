@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 import javax.smartcardio.*;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.common.util.IntegerUtils;
+import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.ifd.scio.IFDException;
 import org.openecard.client.ifd.scio.IFDUtils;
 import org.openecard.client.ifd.scio.reader.ExecutePACERequest;
@@ -336,8 +336,8 @@ public class SCTerminal {
 		    if (features.containsKey(PCSCFeatures.IFD_DISPLAY_PROPERTIES)) {
 			byte[] data = getCard().controlCommand(features.get(PCSCFeatures.IFD_DISPLAY_PROPERTIES), new byte[0]);
 			if (data != null && data.length == 4) {
-			    int lineLength = IntegerUtils.toInteger(Arrays.copyOfRange(data, 0, 2));
-			    int numLines   = IntegerUtils.toInteger(Arrays.copyOfRange(data, 2, 4));
+			    int lineLength = ByteUtils.toInteger(Arrays.copyOfRange(data, 0, 2));
+			    int numLines   = ByteUtils.toInteger(Arrays.copyOfRange(data, 2, 4));
 			    if (lineLength > 0 && numLines > 0) {
 				dispCap = new DisplayCapabilityType();
 				dispCap.setIndex(BigInteger.ZERO);
@@ -364,7 +364,7 @@ public class SCTerminal {
 		    if (features.containsKey(PCSCFeatures.IFD_PIN_PROPERTIES)) {
 			byte[] data = getCard().controlCommand(features.get(PCSCFeatures.IFD_PIN_PROPERTIES), new byte[0]);
 			if (data != null && data.length == 4) {
-			    int wcdLayout = IntegerUtils.toInteger(Arrays.copyOfRange(data, 0, 2));
+			    int wcdLayout = ByteUtils.toInteger(Arrays.copyOfRange(data, 0, 2));
 			    byte entryValidation = data[2];
 			    byte timeOut2 = data[3];
 			    // TODO: extract number of keys somehow

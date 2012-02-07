@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.common.util;
 
 import java.io.PrintWriter;
@@ -227,66 +226,103 @@ public class ByteUtils {
     }
 
     /**
-     * Convert a byte array to a hex string.
-     *
-     * @param bytes
-     * @return hex encoded string
-     */
-    public static String formatHexString(byte[] bytes) {
-        return formatHexString(bytes, false);
-    }
-
-    /**
-     * Convert a byte array to a hex string and formated the output to 16 values in a row if addLinebreak is set.
-     *
-     * @param bytes
-     * @param addLinebreak
-     * @return hex encoded string
-     */
-    public static String formatHexString(byte[] bytes, boolean addLinebreak) {
-        if (bytes == null) {
-            return "";
-        } else if (bytes.length == 0) {
-            return "";
-        }
-
-        StringBuilder sb = new StringBuilder();
-        int cBytes = bytes.length;
-        int iByte = 0;
-        while (true) {
-            for (int i = 0; i < 16; i++) {
-                String hex = Integer.toHexString(bytes[iByte++] & 0xff);
-                if (hex.length() == 1) {
-                    hex = "0" + hex;
-                }
-                sb.append("0x").append(hex.toUpperCase()).append(" ");
-
-                if (iByte >= cBytes) {
-                    return sb.toString();
-                }
-            }
-            if (addLinebreak) {
-                sb.append("\n");
-            }
-        }
-    }
-
-
-    /**
      * Convert a byte array to a hex string suitable for use as XML's hexBinary type.
      *
-     * @param bytes
-     * @return Hex string soley compose of digits, no 0x and no spaces.
+     * @param bytes Input
+     * @return Hex string only compose of digits, no 0x and no spaces.
      */
     public static String toHexString(byte[] bytes) {
-	StringWriter writer = new StringWriter(bytes.length * 2);
-	PrintWriter out = new PrintWriter(writer);
-
-	for (int i = 0; i < bytes.length; i++) {
-	    out.printf("%02X", bytes[i]);
-	}
-
-	return writer.toString();
+        return toHexString(bytes, "%02X", false);
     }
 
+    /**
+     * Convert a byte array to a hex string.
+     *
+     * @param bytes Input
+     * @param formatted If true the string is formatted to 0xXX presentation
+     * @return Hex string
+     */
+    public static String toHexString(byte[] bytes, boolean formatted) {
+        return toHexString(bytes, formatted, false);
+    }
+
+    /**
+     * Convert a byte array to a hex string.
+     *
+     * @param bytes Input
+     * @param formatted If true the string is formatted to 0xXX presentation
+     * @param addLinebreak If true the string is formatted to 16 value per line
+     * @return Hex string
+     */
+    public static String toHexString(byte[] bytes, boolean formatted, boolean addLinebreak) {
+        if (formatted) {
+            return toHexString(bytes, "0x%02X ", addLinebreak);
+        } else {
+            return toHexString(bytes, "%02X", addLinebreak);
+        }
+    }
+
+    private static String toHexString(byte[] bytes, String format, boolean addLinebreak) {
+        StringWriter writer = new StringWriter(bytes.length * 2);
+        PrintWriter out = new PrintWriter(writer);
+
+        for (int i = 1; i <= bytes.length; i++) {
+            out.printf(format, bytes[i - 1]);
+            if (addLinebreak) {
+                if (i % 16 == 0) {
+                    out.append("\n");
+                }
+            }
+        }
+
+        return writer.toString();
+    }
+
+    /**
+     * Convert a byte array to an integer.<br/> Size of byte array must be between 1 and 4.
+     *
+     * @param bytes byte array to be converted
+     * @return int
+     */
+    public static int toInteger(byte[] bytes) {
+        if (bytes.length > 4 || bytes.length < 1) {
+            throw new IllegalArgumentException("Size of byte array must be between 1 and 4.");
+        }
+
+        return (int) toLong(bytes);
+    }
+
+    /**
+     * Convert a byte array to a long integer.<br/> Size of byte array must be between 1 and 8.
+     *
+     * @param bytes byte array to be converted
+     * @return long
+     */
+    public static long toLong(byte[] bytes) {
+        if (bytes.length > 8 || bytes.length < 1) {
+            throw new IllegalArgumentException("Size of byte array must be between 1 and 8.");
+        }
+
+        long value = 0;
+
+        for (int i = 0; i < bytes.length; i++) {
+            value |= (0xFF & bytes[bytes.length - 1 - i]) << i * 8;
+        }
+
+        return value;
+    }
+
+    /**
+     * Convert a byte array to a short integer.<br/> Size of byte array must be between 1 and 2.
+     *
+     * @param bytes byte array to be converted
+     * @return short
+     */
+    public static short toShort(byte[] bytes) {
+        if (bytes.length > 2 || bytes.length < 1) {
+            throw new IllegalArgumentException("Size of byte array must be between 1 and 2.");
+        }
+
+        return (short) toLong(bytes);
+    }
 }

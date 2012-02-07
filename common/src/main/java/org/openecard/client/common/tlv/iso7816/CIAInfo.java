@@ -20,7 +20,7 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import org.openecard.client.common.tlv.*;
-import org.openecard.client.common.util.LongUtils;
+import org.openecard.client.common.util.ByteUtils;
 
 
 /**
@@ -54,7 +54,7 @@ public class CIAInfo extends TLV {
 	Parser p = new Parser(tlv.getChild());
 	// version
 	if (p.match(new Tag(TagClass.UNIVERSAL, true, 2))) {
-	    version = LongUtils.toLong(p.next(0).getValue());
+	    version = ByteUtils.toLong(p.next(0).getValue());
 	} else {
 	    throw new TLVException("Expected version tag.");
 	}

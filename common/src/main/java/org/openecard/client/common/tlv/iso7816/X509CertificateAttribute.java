@@ -17,7 +17,7 @@
 package org.openecard.client.common.tlv.iso7816;
 
 import org.openecard.client.common.tlv.*;
-import org.openecard.client.common.util.IntegerUtils;
+import org.openecard.client.common.util.ByteUtils;
 
 
 /**
@@ -47,7 +47,7 @@ public class X509CertificateAttribute extends TLVType {
 	    issuer = p.next(0);
 	}
 	if (p.match(Tag.IntegerTag)) {
-	    serialNumber = IntegerUtils.toInteger(p.next(0).getValue());
+	    serialNumber = ByteUtils.toInteger(p.next(0).getValue());
 	}
     }
 

@@ -19,7 +19,7 @@ package org.openecard.client.ifd.scio.reader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import org.openecard.client.common.util.IntegerUtils;
+import org.openecard.client.common.util.ByteUtils;
 
 
 /**
@@ -78,7 +78,7 @@ public class PCSCFeatures {
 		if (nextChunk.length == 6 && nextChunk[1] == 4) {
 		    byte tag = nextChunk[0];
 		    byte[] codeData = Arrays.copyOfRange(nextChunk, 2, 6);
-		    int code = IntegerUtils.toInteger(codeData);
+		    int code = ByteUtils.toInteger(codeData);
 		    result.put(new Integer(tag), code);
 		}
 		i+=6;

@@ -15,7 +15,6 @@
  */
 package org.openecard.client.common.util;
 
-
 /**
  * A set of utility functions for Shorts.
  *
@@ -31,7 +30,7 @@ public class ShortUtils {
      * @return byte[]
      */
     public static byte[] toByteArray(short value) {
-	return toByteArray(value, 8);
+        return toByteArray(value, 8);
     }
 
     /**
@@ -41,11 +40,11 @@ public class ShortUtils {
      * @return byte[]
      */
     public static byte[] toByteArray(short value, int numBits) {
-	return LongUtils.toByteArray(value, numBits);
+        return LongUtils.toByteArray(value, numBits);
     }
 
     /**
-     * Convert a short integer to a byte array.<br/>
+     * Convert a short integer to a byte array.
      * If the resulting array contains less bytes than 2 bytes, a 0 byte is prepended if the flag is set.
      *
      * @param value short integer to be converted
@@ -53,26 +52,10 @@ public class ShortUtils {
      * @return byte[]
      */
     public static byte[] toByteArray(short value, boolean padArrayToTypeLength) {
-	byte[] result = toByteArray(value, 8);
-	if (padArrayToTypeLength && result.length < 2) {
-	    result = ByteUtils.concatenate(new byte[2 - result.length], result);
-	}
-	return result;
+        byte[] result = toByteArray(value, 8);
+        if (padArrayToTypeLength && result.length < 2) {
+            result = ByteUtils.concatenate(new byte[2 - result.length], result);
+        }
+        return result;
     }
-
-    /**
-     * Convert a byte array to a short integer.<br/>
-     * Size of byte array must be between 1 and 2.
-     *
-     * @param bytes byte array to be converted
-     * @return short
-     */
-    public static short toShort(byte[] bytes) {
-	if (bytes.length > 2 || bytes.length < 1) {
-	    throw new IllegalArgumentException("Size of byte array must be between 1 and 2.");
-	}
-
-	return (short) LongUtils.toLong(bytes);
-    }
-
 }

@@ -42,47 +42,47 @@ public class NumUtilsTest {
         // 0 = 0x00
         byte[] buffer = {0x00};
         int expResult = 0;
-        int result = IntegerUtils.toInteger(buffer);
+        int result = ByteUtils.toInteger(buffer);
         assertEquals(expResult, result);
         // 255 = 0xFF
         buffer = new byte[]{(byte) 0xFF};
         expResult = 255;
-        result = IntegerUtils.toInteger(buffer);
+        result = ByteUtils.toInteger(buffer);
         assertEquals(expResult, result);
         // 256 = 0x01, 0x00
         buffer = new byte[]{(byte) 0x01, (byte) 0x00};
         expResult = 256;
-        result = IntegerUtils.toInteger(buffer);
+        result = ByteUtils.toInteger(buffer);
         assertEquals(expResult, result);
         // 65535 = 0xFF, 0xFF
         buffer = new byte[]{(byte) 0xFF, (byte) 0xFF};
         expResult = 65535;
-        result = IntegerUtils.toInteger(buffer);
+        result = ByteUtils.toInteger(buffer);
         assertEquals(expResult, result);
         // 65536 = 0x01, 0x00, 0x00
         buffer = new byte[]{(byte) 0x01, (byte) 0x00, (byte) 0x00};
         expResult = 65536;
-        result = IntegerUtils.toInteger(buffer);
+        result = ByteUtils.toInteger(buffer);
         assertEquals(expResult, result);
         // 16777215 = 0xFF, 0xFF, 0xFF
         buffer = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
         expResult = 16777215;
-        result = IntegerUtils.toInteger(buffer);
+        result = ByteUtils.toInteger(buffer);
         assertEquals(expResult, result);
         // 16777216 = 0x01, 0x00, 0x00, 0x00
         buffer = new byte[]{(byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0x00};
         expResult = 16777216;
-        result = IntegerUtils.toInteger(buffer);
+        result = ByteUtils.toInteger(buffer);
         assertEquals(expResult, result);
         // 2147483647 = 0x7F, 0xFF, 0xFF, 0xFF
         buffer = new byte[]{(byte) 0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
         expResult = 2147483647;
-        result = IntegerUtils.toInteger(buffer);
+        result = ByteUtils.toInteger(buffer);
         assertEquals(expResult, result);
         // -1 = 0xFF, 0xFF, 0xFF, 0xFF
         buffer = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
         expResult = -1;
-        result = IntegerUtils.toInteger(buffer);
+        result = ByteUtils.toInteger(buffer);
         assertEquals(expResult, result);
     }
 

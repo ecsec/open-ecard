@@ -17,7 +17,7 @@
 package org.openecard.client.common.tlv.iso7816;
 
 import org.openecard.client.common.tlv.*;
-import org.openecard.client.common.util.IntegerUtils;
+import org.openecard.client.common.util.ByteUtils;
 
 
 /**
@@ -48,25 +48,25 @@ public class PasswordAttributes extends TLVType {
 	    throw new TLVException("passwordFlags element missing.");
 	}
 	if (p.match(Tag.EnumeratedTag)) {
-	    passwordType = IntegerUtils.toInteger(p.next(0).getValue());
+	    passwordType = ByteUtils.toInteger(p.next(0).getValue());
 	} else {
 	    throw new TLVException("passwordType element missing.");
 	}
 	if (p.match(Tag.IntegerTag)) {
-	    minLength = IntegerUtils.toInteger(p.next(0).getValue());
+	    minLength = ByteUtils.toInteger(p.next(0).getValue());
 	} else {
 	    throw new TLVException("minLength element missing.");
 	}
 	if (p.match(Tag.IntegerTag)) {
-	    storedLength = IntegerUtils.toInteger(p.next(0).getValue());
+	    storedLength = ByteUtils.toInteger(p.next(0).getValue());
 	} else {
 	    throw new TLVException("storedLength element missing.");
 	}
 	if (p.match(Tag.IntegerTag)) {
-	    maxLength = IntegerUtils.toInteger(p.next(0).getValue());
+	    maxLength = ByteUtils.toInteger(p.next(0).getValue());
 	}
 	if (p.match(new Tag(TagClass.CONTEXT, true, 0))) {
-	    passwordReference = IntegerUtils.toInteger(p.next(0).getValue());
+	    passwordReference = ByteUtils.toInteger(p.next(0).getValue());
 	}
 	if (p.match(Tag.OctetstringTag)) {
 	    padChar = p.next(0).getValue()[0];

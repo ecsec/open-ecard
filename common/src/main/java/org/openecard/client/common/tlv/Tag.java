@@ -135,7 +135,7 @@ public class Tag {
 	}
 
 	byte[] resultBytes = ByteUtils.concatenate(leading, rest);
-	this.tagNumWithClass = LongUtils.toLong(resultBytes);
+	this.tagNumWithClass = ByteUtils.toLong(resultBytes);
     }
 
 

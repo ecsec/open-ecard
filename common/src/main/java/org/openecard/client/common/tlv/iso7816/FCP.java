@@ -22,7 +22,6 @@ import org.openecard.client.common.tlv.Parser;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.util.ByteUtils;
-import org.openecard.client.common.util.LongUtils;
 
 
 /**
@@ -68,11 +67,11 @@ public class FCP {
 	while ((next = p.next(0)) != null) {
 	    // num bytes
 	    if (next.getTagNumWithClass() == 0x80) {
-		numBytes = new Long(LongUtils.toLong(next.getValue()));
+		numBytes = new Long(ByteUtils.toLong(next.getValue()));
 	    }
 	    if (next.getTagNumWithClass() == 0x81) {
 		// length == 2
-		numBytesStructure = new Long(LongUtils.toLong(next.getValue()));
+		numBytesStructure = new Long(ByteUtils.toLong(next.getValue()));
 	    }
 	    // descriptor bytes
 	    if (next.getTagNumWithClass() == 0x82) {

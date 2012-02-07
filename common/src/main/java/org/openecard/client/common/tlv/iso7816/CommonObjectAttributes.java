@@ -19,7 +19,7 @@ package org.openecard.client.common.tlv.iso7816;
 import java.nio.charset.Charset;
 import java.util.List;
 import org.openecard.client.common.tlv.*;
-import org.openecard.client.common.util.IntegerUtils;
+import org.openecard.client.common.util.ByteUtils;
 
 
 /**
@@ -50,7 +50,7 @@ public class CommonObjectAttributes extends TLVType {
 	    authId = p.next(0).getValue();
 	}
 	if (p.match(Tag.IntegerTag)) {
-	    userConsent = IntegerUtils.toInteger(p.next(0).getValue());
+	    userConsent = ByteUtils.toInteger(p.next(0).getValue());
 	}
 	if (p.match(Tag.SequenceTag)) {
 	    TLVList list = new TLVList(p.next(0));

@@ -20,9 +20,8 @@ import java.util.Arrays;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.CardCommandStatus;
-import org.openecard.client.common.util.IntegerUtils;
-import org.openecard.client.common.util.ShortUtils;
 
 
 /**
@@ -36,8 +35,8 @@ public class ExecutePACEResponse {
     final byte[] data;
 
     public ExecutePACEResponse(byte[] response) {
-	result = IntegerUtils.toInteger(Arrays.copyOfRange(response, 0, 4));
-	length = ShortUtils.toShort(new byte[]{response[5], response[4]});
+	result = ByteUtils.toInteger(Arrays.copyOfRange(response, 0, 4));
+	length = ByteUtils.toShort(new byte[]{response[5], response[4]});
 	data   = Arrays.copyOfRange(response, 6, 6+length);
     }
 

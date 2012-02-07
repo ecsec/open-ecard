@@ -17,7 +17,7 @@
 package org.openecard.client.common.tlv.iso7816;
 
 import java.util.Arrays;
-import org.openecard.client.common.util.IntegerUtils;
+import org.openecard.client.common.util.ByteUtils;
 
 
 /**
@@ -40,9 +40,9 @@ public class DataElement {
 	    dcb = null;
 	}
 	if (data.length >= 3) {
-	    maxRecordSize = IntegerUtils.toInteger(Arrays.copyOfRange(data, 2, 4));
+	    maxRecordSize = ByteUtils.toInteger(Arrays.copyOfRange(data, 2, 4));
 	    if (data.length > 4) {
-		numRecords = IntegerUtils.toInteger(Arrays.copyOfRange(data, 4, 6));
+		numRecords = ByteUtils.toInteger(Arrays.copyOfRange(data, 4, 6));
 	    } else {
 		numRecords = -1;
 	    }

@@ -32,8 +32,7 @@ import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.util.CardCommands;
-import org.openecard.client.common.util.IntegerUtils;
-import org.openecard.client.common.util.LongUtils;
+import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.recognition.statictree.LocalFileTree;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerFactory;
@@ -284,7 +283,7 @@ public class CardRecognition {
 		TLV tlv = TLV.fromBER(result);
 
 		// proceed only if tag matches
-		long tagNum = LongUtils.toLong(tag);
+		long tagNum = ByteUtils.toLong(tag);
 		while (tlv != null) {
 		    if (tlv.getTagNumWithClass() == tagNum) {
 			// check if we have a DataObject
@@ -316,7 +315,7 @@ public class CardRecognition {
 	byte[] tag = matcher.getTag();
 	long tagNum = 0;
 	if (tag != null) {
-	    tagNum = LongUtils.toLong(tag);
+	    tagNum = ByteUtils.toLong(tag);
 	}
 
 	// no tag and dataobject is a fail
@@ -350,8 +349,8 @@ public class CardRecognition {
 	if (offsetBytes == null) {
 	    offsetBytes = new byte[] {(byte)0x00, (byte)0x00};
 	}
-	int offset = IntegerUtils.toInteger(offsetBytes);
-	int length = IntegerUtils.toInteger(lengthBytes);
+	int offset = ByteUtils.toInteger(offsetBytes);
+	int length = ByteUtils.toInteger(lengthBytes);
 	if (maskBytes == null) {
 	    maskBytes = new byte[valueBytes.length];
 	    for (int i=0; i < maskBytes.length; i++) {

@@ -32,7 +32,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.sal.anytype.AuthDataMap;
-import org.openecard.client.common.sal.anytype.AuthDataResponse;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.soap.SOAPHeader;

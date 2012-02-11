@@ -22,6 +22,7 @@ import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.ifd.scio.IFDProperties;
 import org.openecard.client.recognition.CardRecognition;
@@ -82,8 +83,9 @@ public class ApplicationContext extends Application {
 		}
 
 		System.out.println(recognition==null);
-		em = new EventManager(recognition, env, ctx);
-		
+		// TODO: revisit session id parameter, might better be set from outside, but perhaps it doesn't matter at all
+		em = new EventManager(recognition, env, ctx, ValueGenerators.generateUUID());
+
 		em.registerAllEvents(new ClientEventCallBack());
 		env.setEventManager(em);
 		em.initialize();

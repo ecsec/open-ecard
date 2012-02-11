@@ -21,7 +21,6 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,10 +55,12 @@ import org.openecard.client.ws.soap.SOAPMessage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+
 /**
  * 
- * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>, Tobias Wich
- *         <tobias.wich@ecsec.de>, Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class PAOS {
 
@@ -79,6 +80,7 @@ public class PAOS {
     private PAOSCallback callback;
     private HeaderGroup hg = new HeaderGroup();
 
+
     public PAOS(String endpoint, Dispatcher dispatcher, PAOSCallback callback, SocketFactory sockFac) {
 	this.endpoint = endpoint;
 	this.dispatcher = dispatcher;
@@ -88,6 +90,7 @@ public class PAOS {
 	hg.addHeader(new BasicHeader(ECardConstants.HEADER_KEY_CONTENT_TYPE, ECardConstants.HEADER_VALUE_CONTENT_TYPE));
 	hg.addHeader(new BasicHeader(ECardConstants.HEADER_KEY_ACCEPT, ECardConstants.HEADER_VALUE_ACCEPT));
     }
+
 
     private String getRelatesTo(SOAPMessage msg) throws SOAPException {
 	return getHeaderElemStr(msg, new QName(ECardConstants.WS_ADDRESSING, "RelatesTo"));
@@ -152,7 +155,7 @@ public class PAOS {
 		throw new PAOSException("MessageID from result doesn't match.");
 	    }
 	} catch (SOAPException ex) {
-	    Logger.getLogger(PAOS.class.getName()).log(Level.SEVERE, null, ex);
+	    _logger.log(Level.SEVERE, null, ex);
 	    throw new PAOSException(ex.getMessage(), ex);
 	}
     }
@@ -165,21 +168,20 @@ public class PAOS {
 	    updateMessageId(msg);
 	    return m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
 	} catch (Exception ex) {
-	    Logger.getLogger(PAOS.class.getName()).log(Level.SEVERE, null, ex);
+	    _logger.log(Level.SEVERE, null, ex);
 	    e = ex;
 	}
 	throw new PAOSException(e.getMessage(), e);
     }
 
-    public String createPAOSResponse(Object obj) throws MarshallingTypeException, org.openecard.client.ws.soap.SOAPException,
-	    SOAPException, TransformerException {
+    public String createPAOSResponse(Object obj) throws MarshallingTypeException, SOAPException, TransformerException {
 	SOAPMessage msg = createSOAPMessage(obj);
 	String result = m.doc2str(msg.getDocument());
 	return result;
     }
 
     public String createStartPAOS(String sessionIdentifier, List<ConnectionHandleType> connectionHandles) throws MarshallingTypeException,
-	    org.openecard.client.ws.soap.SOAPException, SOAPException, TransformerException {
+	    SOAPException, TransformerException {
 	StartPAOS startPAOS = new StartPAOS();
 	startPAOS.setSessionIdentifier(sessionIdentifier);
 	startPAOS.setProfile(ECardConstants.Profile.ECARD_1_1);
@@ -189,8 +191,7 @@ public class PAOS {
 	return responseStr;
     }
 
-    private SOAPMessage createSOAPMessage(Object content) throws MarshallingTypeException, org.openecard.client.ws.soap.SOAPException,
-	    SOAPException {
+    private SOAPMessage createSOAPMessage(Object content) throws MarshallingTypeException, SOAPException {
 	Document contentDoc = m.marshal(content);
 	SOAPMessage msg = m.add2soap(contentDoc);
 	SOAPHeader header = msg.getSOAPHeader();
@@ -256,4 +257,5 @@ public class PAOS {
 	    msg = dispatcher.deliver(requestObj);
 	}
     }
+
 }

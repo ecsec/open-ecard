@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JApplet;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.enums.EventType;
@@ -108,7 +109,9 @@ public class ECardApplet extends JApplet {
         } else {
             recognition = null;
         }
-        paos = new PAOS(endpointUrl, env.getDispatcher());
+	// TODO: replace socket factory with this strange psk stuff
+	// TODO: add refresh-addr callback
+        paos = new PAOS(endpointUrl, env.getDispatcher(), null, SSLSocketFactory.getSocketFactory());
         em = new EventManager(recognition, env, ctx, sessionId);
         env.setEventManager(em);
         sal = new TinySAL(env);

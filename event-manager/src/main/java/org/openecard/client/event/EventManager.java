@@ -1,22 +1,7 @@
 package org.openecard.client.event;
 
-import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.WSHelper.WSException;
-import org.openecard.client.common.enums.EventType;
-import org.openecard.client.common.interfaces.Environment;
-import org.openecard.client.common.interfaces.EventCallback;
-import org.openecard.client.common.interfaces.EventFilter;
-import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.recognition.CardRecognition;
-import org.openecard.client.recognition.RecognitionException;
-import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
-import iso.std.iso_iec._24727.tech.schema.GetStatus;
-import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
-import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
-import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +13,16 @@ import java.util.logging.Logger;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.enums.EventType;
+import org.openecard.client.common.interfaces.Environment;
+import org.openecard.client.common.interfaces.EventCallback;
+import org.openecard.client.common.interfaces.EventFilter;
+import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.recognition.CardRecognition;
+import org.openecard.client.recognition.RecognitionException;
 
 
 /**

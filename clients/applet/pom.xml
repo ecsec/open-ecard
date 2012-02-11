@@ -115,6 +115,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.openecard.client.transport</groupId>
+      <artifactId>tls</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>openjdk</groupId>
       <artifactId>java-plugin</artifactId>
       <version>1.6.0.26</version>

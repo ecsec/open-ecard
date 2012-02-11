@@ -66,6 +66,11 @@
 	    <artifactId>paos</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.transport</groupId>
+	    <artifactId>tls</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
 
 	<dependency>
 	    <groupId>android</groupId>

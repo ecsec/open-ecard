@@ -28,7 +28,7 @@
 	</dependency>
    	<dependency>
 	    <groupId>org.openecard.client.crypto</groupId>
-	    <artifactId>bouncy-android</artifactId>
+	    <artifactId>bouncycastle</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>

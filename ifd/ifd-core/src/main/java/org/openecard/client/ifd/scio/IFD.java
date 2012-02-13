@@ -1050,7 +1050,7 @@ public class IFD implements org.openecard.ws.IFD {
 		    // get values and prepare response
 		    PACEOutputType authDataResponse = paceParam.getOutputType();
 		    // mandatory fields
-		    authDataResponse.setStatusbytes(estPaceRes.getStatus());
+		    authDataResponse.setRetryCounter(estPaceRes.getRetryCounter());
 		    authDataResponse.setEFCardAccess(estPaceRes.getEFCardAccess());
 		    // optional fields
 		    if (estPaceRes.hasCurrentCAR()) {
@@ -1060,7 +1060,7 @@ public class IFD implements org.openecard.ws.IFD {
 			authDataResponse.setPreviousCAR(estPaceRes.getPreviousCAR());
 		    }
 		    if (estPaceRes.hasIDICC()) {
-			authDataResponse.setIDICC(estPaceRes.getIDICC());
+			authDataResponse.setIDPICC(estPaceRes.getIDICC());
 		    }
 		    // create response type and return
 		    EstablishChannelResponse response = WSHelper.makeResponse(EstablishChannelResponse.class, WSHelper.makeResultOK());
@@ -1073,7 +1073,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    if (this.protocolFactories.contains(protocol)) {
 		ProtocolFactory factory = this.protocolFactories.get(protocol);
 		Protocol protoImpl = factory.createInstance();
-		EstablishChannelResponse response = protoImpl.establish(parameters, this, null); // TODO: hand over GUI implementation
+		EstablishChannelResponse response = protoImpl.establish(parameters, this, this.gui);
 		// register protocol instance for secure messaging when protocol was processed successful
 		if (response.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
 		    channel.addSecureMessaging(protoImpl);

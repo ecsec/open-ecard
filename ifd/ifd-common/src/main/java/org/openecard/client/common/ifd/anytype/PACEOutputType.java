@@ -27,18 +27,14 @@ import org.openecard.client.common.util.ByteUtils;
 public class PACEOutputType {
 
     private final AuthDataMap authMap;
-    private byte[] statusBytes;
     private byte[] efCardAccess;
     private byte[] currentCAR;
     private byte[] previousCAR;
     private byte[] idpicc;
+    private byte retryCounter;
 
     protected PACEOutputType(AuthDataMap authMap) {
         this.authMap = authMap;
-    }
-
-    public void setStatusbytes(byte[] statusBytes) {
-        this.statusBytes = statusBytes;
     }
 
     public void setEFCardAccess(byte[] efCardAccess) {
@@ -53,14 +49,18 @@ public class PACEOutputType {
         this.previousCAR = car;
     }
 
-    public void setIDICC(byte[] idicc) {
-        this.idpicc = idicc;
+    public void setIDPICC(byte[] idpicc) {
+        this.idpicc = idpicc;
+    }
+    
+    public void setRetryCounter(byte counter){
+	this.retryCounter = counter;
     }
 
     public DIDAuthenticationDataType getAuthDataType() {
         AuthDataResponse authResponse = authMap.createResponse(new iso.std.iso_iec._24727.tech.schema.PACEOutputType());
-        authResponse.addElement("StatusBytes", ByteUtils.toHexString(statusBytes));
-        authResponse.addElement("EF_CardAccess", ByteUtils.toHexString(efCardAccess));
+        authResponse.addElement("RetryCounter", String.valueOf(retryCounter));
+        authResponse.addElement("EFCardAccess", ByteUtils.toHexString(efCardAccess));
         if (currentCAR != null) {
             authResponse.addElement("CARcurr", ByteUtils.toHexString(currentCAR));
         }
@@ -68,7 +68,7 @@ public class PACEOutputType {
             authResponse.addElement("CARprev", ByteUtils.toHexString(previousCAR));
         }
         if (idpicc != null) {
-            authResponse.addElement("IDicc", ByteUtils.toHexString(idpicc));
+            authResponse.addElement("IDPICC", ByteUtils.toHexString(idpicc));
         }
         return authResponse.getResponse();
     }

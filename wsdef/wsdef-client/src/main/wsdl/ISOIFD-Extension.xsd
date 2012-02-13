@@ -61,11 +61,11 @@
 		<complexContent>
 			<restriction base="iso:DIDAuthenticationDataType">
 				<sequence>
-					<element name="Statusbytes" type="hexBinary" />
-					<element name="EF_CardAccess" type="hexBinary" />
+					<element name="RetryCounter" type="nonNegativeInteger" maxOccurs="1" minOccurs="0" />
+					<element name="EFCardAccess" type="hexBinary" maxOccurs="1" minOccurs="0" />
 					<element name="CARcurr" type="hexBinary" maxOccurs="1" minOccurs="0" />
 					<element name="CARprev" type="hexBinary" maxOccurs="1" minOccurs="0" />
-					<element name="IDicc" type="hexBinary" maxOccurs="1" minOccurs="0" />
+					<element name="IDPICC" type="hexBinary" maxOccurs="1" minOccurs="0" />
 				</sequence>
 			</restriction>
 		</complexContent>

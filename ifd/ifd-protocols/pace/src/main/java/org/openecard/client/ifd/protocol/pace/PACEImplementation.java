@@ -45,7 +45,7 @@ public class PACEImplementation {
     private ECPoint keyPKPICC;
     private IFD ifd;
     private byte[] slotHandle;
-    private byte retryCounter;
+    private byte retryCounter = 3;
     private ResponseAPDU response;
 
     /**

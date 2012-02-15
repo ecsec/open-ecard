@@ -17,6 +17,8 @@ package org.openecard.client.gui.android.views;
 
 import android.content.Context;
 import android.view.View;
+import android.view.View.MeasureSpec;
+import android.view.ViewGroup;
 import android.widget.GridView;
 import org.openecard.client.gui.android.CheckBoxItemAdapter;
 import org.openecard.client.gui.definition.OutputInfoUnit;
@@ -32,13 +34,33 @@ public class Checkbox implements StepView {
     private CheckBoxItemAdapter boxItemAdapter;
 
     public Checkbox(org.openecard.client.gui.definition.Checkbox checkbox, Context ctx) {
-	gridview = new GridView(ctx);
+	gridview = new GridView(ctx) {
+	    //workaround to get a gridview displayed in a scrollview
+	    @Override 
+	    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+	                 
+	            // Calculate entire height by providing a very large height hint.
+	            // But do not use the highest 2 bits of this integer; those are
+	            // reserved for the MeasureSpec mode.
+	            int expandSpec = MeasureSpec.makeMeasureSpec(Integer.MAX_VALUE >> 2,
+	                        MeasureSpec.AT_MOST);
+	            super.onMeasure(widthMeasureSpec, expandSpec);
+
+	            android.view.ViewGroup.LayoutParams params = getLayoutParams();
+	            params.height = getMeasuredHeight();
+	        
+	    }
+	};
+	
 	gridview.setColumnWidth(250);
 	gridview.setNumColumns(-1); // auto fit
 	gridview.setStretchMode(2); // stretch column
 	boxItemAdapter = new CheckBoxItemAdapter(ctx, checkbox);
 	gridview.setAdapter(boxItemAdapter);
+	        
     }
+
+    
 
     @Override
     public View getView() {

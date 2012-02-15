@@ -15,19 +15,22 @@
 
 package org.openecard.client.gui.android.views;
 
-import android.content.Context;
-import android.text.InputFilter;
-import android.text.method.PasswordTransformationMethod;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
 import org.openecard.client.gui.definition.AbstractTextfield;
 import org.openecard.client.gui.definition.InfoUnitElementType;
 import org.openecard.client.gui.definition.OutputInfoUnit;
 import org.openecard.client.gui.definition.Passwordfield;
 import org.openecard.client.gui.definition.Textfield;
+
+import android.content.Context;
+import android.graphics.Color;
+import android.text.InputFilter;
+import android.text.method.PasswordTransformationMethod;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.TextView;
 
 /**
  * <p>
@@ -44,12 +47,21 @@ public class AbstractInput implements StepView {
 
     public AbstractInput(AbstractTextfield input, Context ctx) {
 	tv = new TextView(ctx);
+	android.view.Display display = ((android.view.WindowManager)ctx.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+	
 	if (input.getText() != null)
 	    tv.setText(input.getText());
 	else
 	    tv.setText(input.getName());
+	tv.setTextColor(Color.BLACK);
+	tv.setWidth((int)(display.getWidth()/2));
+	tv.setGravity(Gravity.CENTER | Gravity.BOTTOM);
+
 	EditText et = new EditText(ctx);
+	et.setTextColor(Color.BLACK);
 	et.setLines(1);
+	et.setWidth((int)(display.getWidth()/2));
+	et.setMinimumWidth(input.getMinLength()*20);
 	if (input.type().equals(InfoUnitElementType.Passwordfield)) {
 	    et.setTransformationMethod(new PasswordTransformationMethod());
 	}

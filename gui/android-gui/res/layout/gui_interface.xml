@@ -3,10 +3,15 @@
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent" android:background="#FFFFFF"
 	android:minWidth="100px">
+	<ScrollView
+		    android:id="@+id/scrollView1"
+		    android:layout_width="match_parent"
+		    android:layout_height="0dip" android:layout_weight="60">
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:orientation="vertical" android:layout_width="fill_parent"
-		android:layout_height="match_parent" android:background="#FFFFFF"
-		android:id="@+id/linearLayoutGUIInterface" android:layout_weight="60" />
+		android:layout_height="wrap_content" android:background="#FFFFFF"
+		android:id="@+id/linearLayoutGUIInterface" />
+	</ScrollView>
 	<View android:layout_height="2dip" android:layout_width="fill_parent"
 		android:layout_marginTop="1dip" android:layout_marginBottom="1dip"
 		android:background="#FF909090" />

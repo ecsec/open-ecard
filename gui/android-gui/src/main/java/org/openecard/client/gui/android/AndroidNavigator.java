@@ -208,7 +208,7 @@ public class AndroidNavigator implements UserConsentNavigator {
 		}
 	    }
 	    synchronized (this) {
-		if (results == null) {
+		if (results == null && stepResult.results!=null) {
 		    results = Collections.unmodifiableList(stepResult.results);
 		}
 		return results;

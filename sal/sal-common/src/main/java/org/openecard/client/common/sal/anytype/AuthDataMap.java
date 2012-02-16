@@ -59,7 +59,6 @@ public class AuthDataMap {
 	xmlDoc = content.isEmpty() ? loadXMLBuilder() : content.get(0).getOwnerDocument();
     }
 
-
     private Document loadXMLBuilder() throws ParserConfigurationException {
 	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	factory.setNamespaceAware(true);
@@ -72,11 +71,9 @@ public class AuthDataMap {
 	return new AuthDataResponse(xmlDoc, responseObj);
     }
 
-
     public String getProtocol() {
 	return protocol;
     }
-
 
     public boolean containsContent(QName qname) {
 	return contentMap.containsKey(qname);

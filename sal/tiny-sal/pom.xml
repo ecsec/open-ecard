@@ -15,6 +15,11 @@
   <name>Tiny SAL</name>
 
   <dependencies>
+   <dependency>
+   <groupId>org.openecard.client.sal</groupId>
+    <artifactId>sal-common</artifactId>
+    <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.openecard.client</groupId>
       <artifactId>common</artifactId>

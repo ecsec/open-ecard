@@ -17,26 +17,30 @@
   <build>
     <plugins>
       <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-dependency-plugin</artifactId>
-	<executions>
-	  <execution>
-	    <id>unpack-dependencies</id>
-	    <phase>process-test-resources</phase>
-	    <goals>
-	      <goal>unpack-dependencies</goal>
-	    </goals>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>1.5</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
 	    <configuration>
-	      <!-- <includes>**/*.class</includes> -->
-	      <!-- <excludes></excludes> -->
-	      <!-- <excludeGroupIds></excludeGroupIds> -->
-	      <includeGroupIds>org.openecard.client,org.openecard.client-env,org.openecard.client.wsdef,org.openecard.client,org.openecard.client.transport,org.openecard.client.scio.pcsc,org.safehaus.jug</includeGroupIds>
-	      <outputDirectory>${project.build.directory}/classes</outputDirectory>
-	      <overWriteReleases>false</overWriteReleases>
-	      <overWriteSnapshots>true</overWriteSnapshots>
+		<!-- TODO: check if this entry produces runnable jars -->
+		<minimizeJar>true</minimizeJar>
+		<filters>
+		    <filter>
+			<artifact>*:*</artifact>
+			<excludes>
+			    <exclude>META-INF/**/pom.xml</exclude>
+			    <exclude>META-INF/**/pom.properties</exclude>
+			</excludes>
+		    </filter>
+		</filters>
 	    </configuration>
-	  </execution>
-	</executions>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
@@ -44,7 +48,7 @@
 	<artifactId>maven-jar-plugin</artifactId>
         <version>2.3.1</version>
 	<configuration>
-	  <keystore>src/main/resources/keystore/ecStore</keystore>
+	  <keystore>src/package/resources/keystore/ecStore</keystore>
 	  <storepass>DgN1CB0Ywy2W</storepass>
           <alias>applet</alias>
           <keypass>bHrjoV3j7ucq</keypass>

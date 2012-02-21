@@ -27,8 +27,6 @@
               <goal>shade</goal>
             </goals>
 	    <configuration>
-		<!-- TODO: check if this entry produces runnable jars -->
-		<minimizeJar>true</minimizeJar>
 		<filters>
 		    <filter>
 			<artifact>*:*</artifact>

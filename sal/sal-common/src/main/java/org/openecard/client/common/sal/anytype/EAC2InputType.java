@@ -37,10 +37,10 @@ public class EAC2InputType {
 
     public EAC2InputType(DIDAuthenticationDataType baseType) throws ParserConfigurationException, DOMException, TLVException {
 	for (Element elem : baseType.getAny()) {
-	    if (elem.getTagName().equals("EphemeralPublicKey")) {
+	    if (elem.getLocalName().equals("EphemeralPublicKey")) {
 		this.ephemeralPublicKey = StringUtils.toByteArray(elem.getTextContent());
 		this.compressedEphemeralPublicKey = StringUtils.toByteArray(elem.getTextContent().substring(0,64)); //get first 32 Byte == 64 chars
-	    } else if (elem.getTagName().equals("Certificate")) {
+	    } else if (elem.getLocalName().equals("Certificate")) {
 		CardVerifiableCertificate cvc = new CardVerifiableCertificate(TLV.fromBER(StringUtils.toByteArray(elem.getTextContent())));
 		certificates.add(cvc);
 	    }

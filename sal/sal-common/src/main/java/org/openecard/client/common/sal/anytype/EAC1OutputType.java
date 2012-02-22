@@ -32,13 +32,14 @@ public class EAC1OutputType {
     private byte[] idpicc;
     private byte retryCounter;
 
-    public EAC1OutputType(DIDAuthenticationDataType establishChannelOutput, byte[] chat) throws ParserConfigurationException {
-	this.authMap = new AuthDataMap(establishChannelOutput);
-	this.efCardAccess = this.authMap.getContentAsBytes("EFCardAccess");
-	this.certificationAuthorityReference = this.authMap.getContentAsBytes("CARcurr");
+    public EAC1OutputType(DIDAuthenticationDataType didAuthenticationDataType, DIDAuthenticationDataType establishChannelOutput, byte[] chat) throws ParserConfigurationException {
+	this.authMap = new AuthDataMap(didAuthenticationDataType);
+	AuthDataMap authDataEstablishChannel = new AuthDataMap(establishChannelOutput);
+	this.efCardAccess = authDataEstablishChannel.getContentAsBytes("EFCardAccess");
+	this.certificationAuthorityReference = authDataEstablishChannel.getContentAsBytes("CARcurr");
 	this.chat = chat;
-	this.idpicc = this.authMap.getContentAsBytes("IDPICC");
-	this.retryCounter = this.authMap.getContentAsBytes("RetryCounter")[0];
+	this.idpicc = authDataEstablishChannel.getContentAsBytes("IDPICC");
+	this.retryCounter = authDataEstablishChannel.getContentAsBytes("RetryCounter")[0];
     }
 
     protected EAC1OutputType(AuthDataMap authMap) {

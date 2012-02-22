@@ -39,16 +39,16 @@ public class EAC1InputType {
 
     public EAC1InputType(DIDAuthenticationDataType baseType) throws ParserConfigurationException, DOMException, TLVException {
 	for (Element elem : baseType.getAny()) {
-	    if (elem.getTagName().equals("CertificateDescription")) {
+	    if (elem.getLocalName().equals("CertificateDescription")) {
 		this.certificateDescription = StringUtils.toByteArray(elem.getTextContent());
-	    } else if (elem.getTagName().equals("Certificate")) {
+	    } else if (elem.getLocalName().equals("Certificate")) {
 		CardVerifiableCertificate cvc = new CardVerifiableCertificate(TLV.fromBER(StringUtils.toByteArray(elem.getTextContent())));
 		certificates.add(cvc);
-	    } else if (elem.getTagName().equals("RequiredCHAT")) {
+	    } else if (elem.getLocalName().equals("RequiredCHAT")) {
 		this.reuiredCHAT = StringUtils.toByteArray(elem.getTextContent());
-	    } else if (elem.getTagName().equals("OptionalCHAT")) {
+	    } else if (elem.getLocalName().equals("OptionalCHAT")) {
 		this.optionalCHAT = StringUtils.toByteArray(elem.getTextContent());
-	    } else if (elem.getTagName().equals("AuthenticatedAuxiliaryData")) {
+	    } else if (elem.getLocalName().equals("AuthenticatedAuxiliaryData")) {
 		this.authenticatedAuxiliaryData = StringUtils.toByteArray(elem.getTextContent());
 	    }
 	}

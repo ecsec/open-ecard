@@ -116,10 +116,12 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    DIDAuthenticateResponse didAuthenticateResponse = new DIDAuthenticateResponse();
 	    didAuthenticateResponse.setResult(establishChannelResponse.getResult());
 
-	    EAC1OutputType eac1out = new EAC1OutputType(establishChannelResponse.getAuthenticationProtocolData(),
+	    EAC1OutputType eac1out = new EAC1OutputType(didAuthenticate.getAuthenticationProtocolData(),establishChannelResponse.getAuthenticationProtocolData(),
 		    chosenCHAT.getBytes());
+	   
 
 	    didAuthenticateResponse.setAuthenticationProtocolData(eac1out.getAuthDataType());
+	    didAuthenticateResponse.getAuthenticationProtocolData().setProtocol(null);
 
 	    internalData.put("CAR", eac1out.getCertificationAuthorityReference());
 

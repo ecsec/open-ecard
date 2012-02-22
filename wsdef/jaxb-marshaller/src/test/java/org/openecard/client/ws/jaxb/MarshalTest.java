@@ -16,15 +16,35 @@
 
 package org.openecard.client.ws.jaxb;
 
-import javax.xml.namespace.QName;
 import static junit.framework.Assert.assertNotNull;
+
+import java.math.BigInteger;
+
+import iso.std.iso_iec._24727.tech.schema.Connect;
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
+import iso.std.iso_iec._24727.tech.schema.EAC2OutputType;
+
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+
+import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
+import oasis.names.tc.dss._1_0.core.schema.Result;
+
 import org.junit.Test;
+import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.soap.MessageFactory;
 import org.openecard.client.ws.soap.SOAPBody;
+import org.openecard.client.ws.soap.SOAPException;
 import org.openecard.client.ws.soap.SOAPMessage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
+import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse.Version;
 
 
 /**
@@ -107,6 +127,53 @@ public class MarshalTest {
 	//soapMsg.writeTo(System.out);
     }
 
+    @Test
+    public void testConversionOfDIDAuthenticatResponseAndInitializeFrameworkResponse() throws MarshallingTypeException, TransformerException, SOAPException, ParserConfigurationException {
+	JAXBMarshaller m = new JAXBMarshaller();
+	
+	DIDAuthenticateResponse didAuthenticateResponse = new DIDAuthenticateResponse();
+	Result r = new Result();
+	r.setResultMajor("major");
+	r.setResultMinor("minor");
+	InternationalStringType internationalStringType = new InternationalStringType();
+	internationalStringType.setLang("en");
+	internationalStringType.setValue("message");
+	r.setResultMessage(internationalStringType);
+	didAuthenticateResponse.setResult(r);
+	
+	EAC2OutputType didAuthenticationDataType = new EAC2OutputType();
+
+	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	factory.setNamespaceAware(true);
+	DocumentBuilder builder = factory.newDocumentBuilder();
+	Document d = builder.newDocument();
+	
+	Element e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "Signature");
+	e.setTextContent("7117D7BF95D8D6BD437A0D43DE48F42528273A98F2605758D6A3A2BFC38141E7577CABB4F8FBC8DF152E3A097D1B3A703597331842425FE4A9D0F1C9067AC4A9");
+	didAuthenticationDataType.getAny().add(e);
+		
+	didAuthenticateResponse.setAuthenticationProtocolData(didAuthenticationDataType);
+	
+	Document doc = m.marshal(didAuthenticateResponse);
+	
+	System.out.println(m.doc2str(doc)); //test ok if this works
+
+	InitializeFrameworkResponse initializeFrameworkResponse = new InitializeFrameworkResponse();
+    	Version version = new Version();
+    	version.setMajor(new BigInteger("11"));
+    	version.setMinor(new BigInteger("22"));
+    	version.setSubMinor(new BigInteger("33"));
+
+    	initializeFrameworkResponse.setVersion(version);
+    	
+    	r.setResultMessage(internationalStringType);
+    	initializeFrameworkResponse.setResult(r);
+    	
+    	doc = m.marshal(initializeFrameworkResponse);
+		
+	System.out.println(m.doc2str(doc)); //test ok if this works
+    }
+        
     @Test
     public void testSoapHeaderAdd() throws Exception {
 	JAXBMarshaller m = new JAXBMarshaller();

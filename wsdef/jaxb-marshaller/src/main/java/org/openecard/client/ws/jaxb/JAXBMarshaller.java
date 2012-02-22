@@ -16,7 +16,14 @@
 
 package org.openecard.client.ws.jaxb;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +34,8 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -46,7 +55,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
 
 /**
  *
@@ -69,6 +77,7 @@ public final class JAXBMarshaller implements WSMarshaller {
     public JAXBMarshaller() {
 	this(new Class[0]);
     }
+    
     public JAXBMarshaller(Class... additionalClasses) {
 	JAXBContext tmpJaxbCtx = null;
 	Marshaller tmpMarshaller = null;
@@ -228,13 +237,17 @@ public final class JAXBMarshaller implements WSMarshaller {
 
     @Override
     public synchronized Document marshal(Object o) throws MarshallingTypeException {
-	Document doc = w3Builder.newDocument();
-        try {
-            marshaller.marshal(o, doc);
-        } catch (JAXBException ex) {
-            throw new MarshallingTypeException(ex);
-        }
-	return doc;
+	try {
+	    StringWriter sw = new StringWriter();
+	    XMLStreamWriter xmlStreamWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(sw);
+	    //set namespace prefix to iso for fixing BOS-eID-Server crap
+	    xmlStreamWriter.setPrefix("iso", "urn:iso:std:iso-iec:24727:tech:schema");
+	    XMLStreamWriterWrapper xmlwrap = new XMLStreamWriterWrapper(xmlStreamWriter);
+	    marshaller.marshal(o, xmlwrap);
+	    return str2doc(sw.toString());
+	} catch (Exception ex) {
+	    throw new MarshallingTypeException(ex);
+	}
     }
 
     @Override

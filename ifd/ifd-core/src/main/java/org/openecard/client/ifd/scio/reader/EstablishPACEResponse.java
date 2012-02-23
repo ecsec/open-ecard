@@ -82,6 +82,17 @@ public class EstablishPACEResponse {
         return this.statusBytes;
     }
 
+    public byte getRetryCounter() {
+	// TODO: verify that retry counter is extracted from 63CX statusword
+	if (statusBytes[0] == 0x63 && (statusBytes[1] & 0xF0) == 0xC0) {
+	    return (byte) (statusBytes[1] & 0x0F);
+	} else {
+	    // TODO: check if 3 is ok as default and if any other statuswords must be considered here
+	    // default 3 seems to make sense
+	    return 3;
+	}
+    }
+
     public boolean hasEFCardAccess() {
         return efCardAccessLength > 0;
     }

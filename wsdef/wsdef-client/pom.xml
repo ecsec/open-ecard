@@ -65,7 +65,7 @@
       <plugin>
 	<groupId>org.openecard.client.wsdef</groupId>
 	<artifactId>class-list-plugin</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>${project.version}</version>
 	<executions>
 	  <execution>
 	    <phase>process-classes</phase>

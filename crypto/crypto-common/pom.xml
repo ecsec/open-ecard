@@ -15,10 +15,14 @@
     
     <dependencies>
         <dependency>
+            <groupId>org.openecard.client</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.openecard.client.crypto</groupId>
             <artifactId>bouncycastle</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
-            <type>jar</type>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

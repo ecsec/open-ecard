@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.I18n;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
 import org.openecard.client.common.ifd.Protocol;
@@ -60,7 +61,7 @@ public class PACEProtocol implements Protocol {
 
     private static final Logger logger = Logger.getLogger("PACE");
     private SecureMessaging sm;
-
+    I18n i = I18n.getTranslation("ifd");
     @Override
     public EstablishChannelResponse establish(EstablishChannel req, IFD ifd, UserConsent gui) {
         DIDAuthenticationDataType parameter = req.getAuthenticationProtocolData();
@@ -155,20 +156,15 @@ public class PACEProtocol implements Protocol {
     }
 
     private byte[] getPINFromUser(UserConsent gui) {
-	//TODO localization
 	UserConsentDescription uc = new UserConsentDescription("openecard");
-	Step s3 = new Step("PIN-Eingabe");
+	Step s3 = new Step( i.translationForKey("pin_entry"));
 	
 	Text i9 = new Text();
-	i9.setText("Wenn Sie mit der Übermittlung der ausgewählten Daten einverstanden sind, geben Sie bitte Ihre 6-stellige Personalausweis-PIN ein\n");
+	i9.setText( i.translationForKey("pin_agree")+"\n");
 	s3.getInputInfoUnits().add(i9);
-	
-	Text i10 = new Text();
-	i10.setText("Erfolderliche Eingabe: Personalausweis-PIN\nNoch offene Versuche: 3\nKartentyp: Personalausweis\nKartenlesegerät: NFC\n");
-	s3.getInputInfoUnits().add(i10);
-	
+		
 	Textfield f1 = new Textfield();
-	f1.setName("PIN:\t");
+	f1.setName( i.translationForKey("pin"));
 	s3.getInputInfoUnits().add(f1);
 	
 	uc.getSteps().add(s3);
@@ -177,7 +173,7 @@ public class PACEProtocol implements Protocol {
 	ExecutionEngine exec = new ExecutionEngine(navi);
         exec.process();
         
-       Textfield t =  (Textfield) exec.getResults().get("PIN-Eingabe").getResults().get(0);
+       Textfield t =  (Textfield) exec.getResults().get( i.translationForKey("pin_entry")).getResults().get(0);
        //TODO error handling
        return t.getValue().getBytes();
     }

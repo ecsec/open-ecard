@@ -15,6 +15,7 @@
 
 package org.openecard.client.crypto.common.asn1.cvc;
 
+import org.openecard.client.common.I18n;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.util.ByteUtils;
@@ -27,7 +28,7 @@ import org.openecard.client.common.util.StringUtils;
  * 
  */
 public class CHAT {
-
+    
     public enum TerminalType {
 	InspectionSystem, AuthenticationTerminal, SignatureTerminal
     }
@@ -37,15 +38,82 @@ public class CHAT {
     }
 
     public enum SpecialFunction {
-	Install_Qualified_Certificate, Install_Certificate, PIN_Management, CAN_allowed, Privileged_Terminal, Restricted_Identification, Community_ID_Verification, Age_Verification {
+	Install_Qualified_Certificate, 
+	Install_Certificate, 
+	PIN_Management, 
+	CAN_allowed, 
+	Privileged_Terminal, 
+	Restricted_Identification {
+	  public String toString() {
+	      return I18n.getTranslation("sal").translationForKey("restricted_identification");
+	  }
+	},
+	Community_ID_Verification, 
+	Age_Verification {
 	    public String toString() {
-		return "Altersverifikation";
+		return I18n.getTranslation("sal").translationForKey("age_confirmation");
 	    }
 	},
     }
 
     public enum DataGroup {
-	DG1_Document_Type, DG2_Issuing_State, DG3_Date_of_Expiry, DG4_GivenNames, DG5_FamilyNames, DG6_ArtisticName, DG7_AcademicTitle, DG8_DateOfBirth, DG9_PlaceOfBirth, DG10_Nationality, DG11_Sex, DG12_OptionalDataR, DG13_RFU, DG14_RFU, DG15_RFU, DG16_RFU, DG17_PlaceOfResidence, DG18_CommunityID, DG19_ResidencePermitI, DG20_ResidencePermitII, DG21_OptionalDataRW
+	DG1_Document_Type {
+	  public String toString(){
+	      return I18n.getTranslation("sal").translationForKey("type_of_id_card");
+	  }
+	},
+	DG2_Issuing_State {
+		  public String toString(){
+		      return  I18n.getTranslation("sal").translationForKey("issuing_state");
+		  }
+		}, 
+	DG3_Date_of_Expiry, 
+	DG4_GivenNames {
+		  public String toString(){
+		      return  I18n.getTranslation("sal").translationForKey("given_names");
+		  }
+		},
+	DG5_FamilyNames {
+		  public String toString(){
+		      return  I18n.getTranslation("sal").translationForKey("family_names");
+		  }
+		}, 
+	DG6_ArtisticName {
+		  public String toString(){
+		      return  I18n.getTranslation("sal").translationForKey("religious_artistic_name");
+		  }
+		} , 
+	DG7_AcademicTitle {
+		  public String toString(){
+		      return  I18n.getTranslation("sal").translationForKey("doctoral_degree");
+		  }
+		}, 
+	DG8_DateOfBirth{
+		  public String toString(){
+		      return  I18n.getTranslation("sal").translationForKey("date_of_birth");
+		  }
+		}, 
+	DG9_PlaceOfBirth {
+		  public String toString(){
+		      return  I18n.getTranslation("sal").translationForKey("place_of_birth");
+		  }
+		}, 
+	DG10_Nationality, 
+	DG11_Sex, 
+	DG12_OptionalDataR, 
+	DG13_RFU, 
+	DG14_RFU, 
+	DG15_RFU, 
+	DG16_RFU, 
+	DG17_PlaceOfResidence {
+		  public String toString(){
+		      return  I18n.getTranslation("sal").translationForKey("address");
+		  }
+		}, 
+	DG18_CommunityID, 
+	DG19_ResidencePermitI, 
+	DG20_ResidencePermitII, 
+	DG21_OptionalDataRW
     }
 
     private Role role;

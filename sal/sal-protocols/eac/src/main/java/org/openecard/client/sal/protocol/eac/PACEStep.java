@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.I18n;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
@@ -62,6 +63,8 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
     private IFD ifd;
     private UserConsent gui;
+
+    I18n i = I18n.getTranslation("sal");
 
     public PACEStep(IFD ifd, UserConsent gui) {
 	this.ifd = ifd;
@@ -116,9 +119,8 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    DIDAuthenticateResponse didAuthenticateResponse = new DIDAuthenticateResponse();
 	    didAuthenticateResponse.setResult(establishChannelResponse.getResult());
 
-	    EAC1OutputType eac1out = new EAC1OutputType(didAuthenticate.getAuthenticationProtocolData(),establishChannelResponse.getAuthenticationProtocolData(),
-		    chosenCHAT.getBytes());
-	   
+	    EAC1OutputType eac1out = new EAC1OutputType(didAuthenticate.getAuthenticationProtocolData(),
+		    establishChannelResponse.getAuthenticationProtocolData(), chosenCHAT.getBytes());
 
 	    didAuthenticateResponse.setAuthenticationProtocolData(eac1out.getAuthDataType());
 	    didAuthenticateResponse.getAuthenticationProtocolData().setProtocol(null);
@@ -134,16 +136,16 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
     private CHAT showUserConsentAndRetrieveCHAT(CertificateDescription description, CHAT requiredCHAT, CHAT optionalCHAT,
 	    CardVerifiableCertificate cvc) {
-	//TODO localisation
 	UserConsentDescription ucd = new UserConsentDescription("test");
-	Step s1 = new Step("Anbieterinformationen");
+
+	Step s1 = new Step(i.translationForKey("service_providers_statements_title"));
 	ucd.getSteps().add(s1);
 	Text i1 = new Text();
-	i1.setText("Name des Diensteanbieters:\n" + description.getSubjectName() + "\n");
+	i1.setText(i.translationForKey("service_providers_name") + "\n" + description.getSubjectName() + "\n");
 	s1.getInputInfoUnits().add(i1);
 
 	Text i2 = new Text();
-	i2.setText("Internetadresse des Diensteanbieters:");
+	i2.setText(i.translationForKey("service_providers_internetaddress"));
 	s1.getInputInfoUnits().add(i2);
 
 	try {
@@ -151,27 +153,27 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    h1.setHref(description.getSubjectURL());
 	    s1.getInputInfoUnits().add(h1);
 	} catch (MalformedURLException e1) {
-	    // Fallback to Textouput
+	    // Fallback to Textoutput
 	    Text h1 = new Text();
 	    h1.setText(description.getSubjectURL() + "\n");
 	    s1.getInputInfoUnits().add(h1);
 	}
 
 	Text i3 = new Text();
-	i3.setText("\nAngaben des Diensteanbieters:\n" + description.getTermsOfUsage() + "\n");
+	i3.setText("\n" + i.translationForKey("service_providers_statements") + "\n" + description.getTermsOfUsage() + "\n");
 	s1.getInputInfoUnits().add(i3);
 
 	Text i6 = new Text();
-	i6.setText("Die Berechtigung zur Abfrage von Daten ist gültig\nvon: " + cvc.getCertificateEffectiveDate() + "\nbis: "
-		+ cvc.getCertificateExpirationDate() + "\n");
+	i6.setText(i.translationForKey("certificate_effective_date") + "\n" + i.translationForKey("from") + " "
+		+ cvc.getCertificateEffectiveDate() + "\n" + i.translationForKey("to") + " " + cvc.getCertificateExpirationDate() + "\n");
 	s1.getInputInfoUnits().add(i6);
 
 	Text i7 = new Text();
-	i7.setText("Aussteller des Berechtigungszertifikats:\n" + description.getIssuerName() + "\n");
+	i7.setText(i.translationForKey("issuer") + "\n" + description.getIssuerName() + "\n");
 	s1.getInputInfoUnits().add(i7);
 
 	Text i8 = new Text();
-	i8.setText("Internetadresse des Ausstellers:");
+	i8.setText(i.translationForKey("issuers_url"));
 	s1.getInputInfoUnits().add(i8);
 
 	try {
@@ -179,25 +181,24 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    h2.setHref(description.getIssuerURL());
 	    s1.getInputInfoUnits().add(h2);
 	} catch (MalformedURLException e1) {
-	    // Fallback to Textouput
+	    // Fallback to Textoutput
 	    Text h2 = new Text();
 	    h2.setText(description.getIssuerURL() + "\n");
 	    s1.getInputInfoUnits().add(h2);
 	}
 
-	Step s2 = new Step("Angefragte Daten");
+	Step s2 = new Step(i.translationForKey("requested_data"));
 	ucd.getSteps().add(s2);
-	
+
 	Text i9 = new Text();
-	i9.setText("Für den genannten Zweck bitten wir Sie, die folgenden Daten aus Ihrem Personalausweis zu übermitteln:\n");
+	i9.setText(i.translationForKey("purpose") + "\n");
 	s2.getInputInfoUnits().add(i9);
-	
-	
+
 	Checkbox i4 = new Checkbox();
 	s2.getInputInfoUnits().add(i4);
-	
-	for(int i = 0;i< requiredCHAT.getReadAccess().length;i++){
-	    if(requiredCHAT.getReadAccess()[i]){
+
+	for (int i = 0; i < requiredCHAT.getReadAccess().length; i++) {
+	    if (requiredCHAT.getReadAccess()[i]) {
 		BoxItem bi1 = new BoxItem();
 		i4.getBoxItems().add(bi1);
 		bi1.setName(DataGroup.values()[i].name());
@@ -206,10 +207,10 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		bi1.setText(DataGroup.values()[i].toString());
 	    }
 	}
-	
-	for(int i = 0;i< requiredCHAT.getSpecialFunctions().length;i++){
-	    
-	    if(requiredCHAT.getSpecialFunctions()[i]){
+
+	for (int i = 0; i < requiredCHAT.getSpecialFunctions().length; i++) {
+
+	    if (requiredCHAT.getSpecialFunctions()[i]) {
 		BoxItem bi1 = new BoxItem();
 		i4.getBoxItems().add(bi1);
 		bi1.setName(SpecialFunction.values()[i].name());
@@ -218,36 +219,35 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		bi1.setText(SpecialFunction.values()[i].toString());
 	    }
 	}
-	   
-		
+
 	UserConsentNavigator ucn = this.gui.obtainNavigator(ucd);
 	ExecutionEngine exec = new ExecutionEngine(ucn);
 	exec.process();
-	
+
 	CHAT chat = new CHAT(TerminalType.AuthenticationTerminal);
-	boolean[] specialFunctions =new boolean[8];
-	boolean[] readAccess =new boolean[21];
-	
-	for(OutputInfoUnit out : exec.getResults().get("Angefragte Daten").getResults()){
-	    if (out.type().equals(InfoUnitElementType.Checkbox)){
-			Checkbox c = (Checkbox) out;
-			for(BoxItem bi : c.getBoxItems()){
-			    if(bi.isChecked()){
-				if(bi.getName().startsWith("DG")){
-				    readAccess[DataGroup.valueOf(bi.getName()).ordinal()] = true;
-				} else {
-				    specialFunctions[SpecialFunction.valueOf(bi.getName()).ordinal()] = true;
-				}
-			    }
-			    //else do nothing, false is default
+	boolean[] specialFunctions = new boolean[8];
+	boolean[] readAccess = new boolean[21];
+
+	for (OutputInfoUnit out : exec.getResults().get(i.translationForKey("requested_data")).getResults()) {
+	    if (out.type().equals(InfoUnitElementType.Checkbox)) {
+		Checkbox c = (Checkbox) out;
+		for (BoxItem bi : c.getBoxItems()) {
+		    if (bi.isChecked()) {
+			if (bi.getName().startsWith("DG")) {
+			    readAccess[DataGroup.valueOf(bi.getName()).ordinal()] = true;
+			} else {
+			    specialFunctions[SpecialFunction.valueOf(bi.getName()).ordinal()] = true;
 			}
-		} 
-		  //else ignore  
+		    }
+		    // else do nothing, false is default
+		}
+	    }
+	    // else ignore
 	}
-	
+
 	chat.setSpecialFunctions(specialFunctions);
 	chat.setReadAccess(readAccess);
-	    	
+
 	return chat;
 
     }

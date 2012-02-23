@@ -85,8 +85,9 @@ public class ECardApplet extends JApplet {
         setParams();
         env = new ClientEnv();
         env.setDispatcher(new MessageDispatcher(env));
+	SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper(findParentFrame()));
         ifd = new IFD();
-        ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper(findParentFrame())));
+        ifd.setGUI(gui);
         env.setIFD(ifd);
         EstablishContext ecRequest = new EstablishContext();
         EstablishContextResponse ecResponse = ifd.establishContext(ecRequest);
@@ -114,7 +115,8 @@ public class ECardApplet extends JApplet {
         paos = new PAOS(endpointUrl, env.getDispatcher(), null, SSLSocketFactory.getSocketFactory());
         em = new EventManager(recognition, env, ctx, sessionId);
         env.setEventManager(em);
-        sal = new TinySAL(env);
+        sal = new TinySAL(env, sessionId);
+	sal.setGUI(gui);
         em.registerAllEvents(sal);
         jsec = new JSEventCallback(this);
         em.registerAllEvents(jsec);

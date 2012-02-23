@@ -1,94 +1,25 @@
+/*
+ * Copyright 2012 Johannes Schmoelz ecsec GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openecard.client.sal;
 
-import iso.std.iso_iec._24727.tech.schema.ACLList;
-import iso.std.iso_iec._24727.tech.schema.ACLListResponse;
-import iso.std.iso_iec._24727.tech.schema.ACLModify;
-import iso.std.iso_iec._24727.tech.schema.ACLModifyResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationCreate;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationCreateResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationDelete;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationDeleteResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnect;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnectResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationEndSession;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationEndSessionResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationList;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationListResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceCreate;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceCreateResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceDelete;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceDeleteResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceDescribe;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceDescribeResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceList;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceListResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceLoad;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceLoadResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSession;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSessionResponse;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDCreate;
-import iso.std.iso_iec._24727.tech.schema.DIDCreateResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDDelete;
-import iso.std.iso_iec._24727.tech.schema.DIDDeleteResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDGet;
-import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDList;
-import iso.std.iso_iec._24727.tech.schema.DIDListResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDUpdate;
-import iso.std.iso_iec._24727.tech.schema.DIDUpdateResponse;
-import iso.std.iso_iec._24727.tech.schema.DSICreate;
-import iso.std.iso_iec._24727.tech.schema.DSICreateResponse;
-import iso.std.iso_iec._24727.tech.schema.DSIDelete;
-import iso.std.iso_iec._24727.tech.schema.DSIDeleteResponse;
-import iso.std.iso_iec._24727.tech.schema.DSIList;
-import iso.std.iso_iec._24727.tech.schema.DSIListResponse;
-import iso.std.iso_iec._24727.tech.schema.DSIRead;
-import iso.std.iso_iec._24727.tech.schema.DSIReadResponse;
-import iso.std.iso_iec._24727.tech.schema.DSIWrite;
-import iso.std.iso_iec._24727.tech.schema.DSIWriteResponse;
-import iso.std.iso_iec._24727.tech.schema.DataSetCreate;
-import iso.std.iso_iec._24727.tech.schema.DataSetCreateResponse;
-import iso.std.iso_iec._24727.tech.schema.DataSetDelete;
-import iso.std.iso_iec._24727.tech.schema.DataSetDeleteResponse;
-import iso.std.iso_iec._24727.tech.schema.DataSetList;
-import iso.std.iso_iec._24727.tech.schema.DataSetListResponse;
-import iso.std.iso_iec._24727.tech.schema.DataSetSelect;
-import iso.std.iso_iec._24727.tech.schema.DataSetSelectResponse;
-import iso.std.iso_iec._24727.tech.schema.Decipher;
-import iso.std.iso_iec._24727.tech.schema.DecipherResponse;
-import iso.std.iso_iec._24727.tech.schema.EAC1InputType;
-import iso.std.iso_iec._24727.tech.schema.EAC2InputType;
-import iso.std.iso_iec._24727.tech.schema.EACAdditionalInputType;
-import iso.std.iso_iec._24727.tech.schema.Encipher;
-import iso.std.iso_iec._24727.tech.schema.EncipherResponse;
-import iso.std.iso_iec._24727.tech.schema.ExecuteAction;
-import iso.std.iso_iec._24727.tech.schema.ExecuteActionResponse;
-import iso.std.iso_iec._24727.tech.schema.GetRandom;
-import iso.std.iso_iec._24727.tech.schema.GetRandomResponse;
-import iso.std.iso_iec._24727.tech.schema.Hash;
-import iso.std.iso_iec._24727.tech.schema.HashResponse;
-import iso.std.iso_iec._24727.tech.schema.Initialize;
-import iso.std.iso_iec._24727.tech.schema.InitializeResponse;
-import iso.std.iso_iec._24727.tech.schema.Sign;
-import iso.std.iso_iec._24727.tech.schema.SignResponse;
-import iso.std.iso_iec._24727.tech.schema.Terminate;
-import iso.std.iso_iec._24727.tech.schema.TerminateResponse;
-import iso.std.iso_iec._24727.tech.schema.VerifyCertificate;
-import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
-import iso.std.iso_iec._24727.tech.schema.VerifySignature;
-import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
-
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListMap;
-
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.enums.EventType;
@@ -98,6 +29,7 @@ import org.openecard.client.common.sal.Protocol;
 import org.openecard.client.common.sal.ProtocolFactory;
 import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.gui.UserConsent;
+
 
 /**
  * 
@@ -114,19 +46,24 @@ public class TinySAL implements org.openecard.ws.SAL, EventCallback {
     private Protocol eacProtocol;
     private UserConsent userConsent;
     
-    public TinySAL(Environment env, UserConsent uc) {
-	this.userConsent = uc;
+    public TinySAL(Environment env) {
 	this.env = env;
 	sessionId = ValueGenerators.generateSessionID();
 	legacyMode = false;
 	cHandles = new ConcurrentSkipListMap<String, ConnectionHandleType>();
     }
 
+    @Deprecated
     public TinySAL(Environment env, String sessionId) {
 	this.env = env;
 	this.sessionId = sessionId;
 	legacyMode = true;
 	cHandles = new ConcurrentSkipListMap<String, ConnectionHandleType>();
+    }
+
+
+    public void setGUI(UserConsent uc) {
+	this.userConsent = uc;
     }
 
     public List<ConnectionHandleType> getConnectionHandles() {

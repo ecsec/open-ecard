@@ -240,8 +240,7 @@ public final class JAXBMarshaller implements WSMarshaller {
 	try {
 	    StringWriter sw = new StringWriter();
 	    XMLStreamWriter xmlStreamWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(sw);
-	    //set namespace prefix to iso for fixing BOS-eID-Server crap
-	    xmlStreamWriter.setPrefix("iso", "urn:iso:std:iso-iec:24727:tech:schema");
+	    // wrap writer so specific ns prefixes are written out correctly
 	    XMLStreamWriterWrapper xmlwrap = new XMLStreamWriterWrapper(xmlStreamWriter);
 	    marshaller.marshal(o, xmlwrap);
 	    return str2doc(sw.toString());

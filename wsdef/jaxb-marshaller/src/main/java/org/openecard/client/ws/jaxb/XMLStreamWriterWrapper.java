@@ -15,6 +15,7 @@
 
 package org.openecard.client.ws.jaxb;
 
+import java.util.LinkedList;
 import java.util.TreeSet;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
@@ -24,39 +25,71 @@ import javax.xml.stream.XMLStreamWriter;
  * Wraps {@link XMLStreamWriter} to get namespace prefix customization working.
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * 
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class XMLStreamWriterWrapper implements XMLStreamWriter {
 
-    private final XMLStreamWriter writer;
-    private TreeSet<String> alreadyOccurred = new TreeSet<String>();
+    private static class PrefixList {
+	public final String localName;
+	public final TreeSet<String> prefixes = new TreeSet<String>();
 
-    public XMLStreamWriterWrapper(XMLStreamWriter writer) {
+	public PrefixList(String localName) {
+	    this.localName = localName;
+	}
+    }
+
+    private final XMLStreamWriter writer;
+    private LinkedList<PrefixList> hierarchy = new LinkedList<PrefixList>();
+    private TreeSet<String> activePrefixes = new TreeSet<String>();
+
+
+    public XMLStreamWriterWrapper(XMLStreamWriter writer) throws XMLStreamException {
+	writer.setPrefix("iso", "urn:iso:std:iso-iec:24727:tech:schema");
 	this.writer = writer;
     }
 
+
+    private void pop() {
+	PrefixList list = hierarchy.pop();
+	activePrefixes.removeAll(list.prefixes);
+    }
+
+    private void push(String localName) {
+	hierarchy.push(new PrefixList(localName));
+    }
+
+    private void addNS(String prefix, String ns) throws XMLStreamException {
+	if (! activePrefixes.contains(prefix)) {
+	    activePrefixes.add(prefix);
+	    hierarchy.peek().prefixes.add(prefix);
+	    writer.writeNamespace(prefix, ns);
+	}
+    }
+
+
     @Override
     public void writeStartElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
+	push(localName);
 	writer.writeStartElement(prefix, localName, namespaceURI);
-	if (alreadyOccurred.contains(prefix))
-	    return;
-	else { // prefix occurred the first time
-	    alreadyOccurred.add(prefix);
-	    writer.writeNamespace(prefix, namespaceURI);
-	}
+	writeNamespace(prefix, namespaceURI);
+    }
+
+    @Override
+    public void writeEndElement() throws XMLStreamException {
+	pop();
+	writer.writeEndElement();
     }
 
     @Override
     public void writeNamespace(String prefix, String namespaceURI) throws XMLStreamException {
-	if (alreadyOccurred.contains(prefix))
-	    return;
-	else { // prefix occurred the first time
-	    alreadyOccurred.add(prefix);
-	    writer.writeNamespace(prefix, namespaceURI);
-	}
+	addNS(prefix, namespaceURI);
     }
 
-    // all following methods remain unchanged
+
+    ///
+    /// all following methods remain unchanged
+    ///
+
     @Override
     public void writeStartElement(String localName) throws XMLStreamException {
 	writer.writeStartElement(localName);
@@ -80,11 +113,6 @@ public class XMLStreamWriterWrapper implements XMLStreamWriter {
     @Override
     public void writeEmptyElement(String localName) throws XMLStreamException {
 	writer.writeEmptyElement(localName);
-    }
-
-    @Override
-    public void writeEndElement() throws XMLStreamException {
-	writer.writeEndElement();
     }
 
     @Override

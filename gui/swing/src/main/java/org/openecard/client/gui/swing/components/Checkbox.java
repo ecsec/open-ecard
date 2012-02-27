@@ -1,7 +1,9 @@
 package org.openecard.client.gui.swing.components;
 
 import java.awt.Component;
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+//import java.awt.GridLayout;
+import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
@@ -14,6 +16,7 @@ import org.openecard.client.gui.swing.StepFrame;
  * Implementation of a checkbox group for use in a {@link StepFrame}.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @editor Florian Feldmann <florian.feldmann@rub.de>
  */
 public class Checkbox implements StepComponent {
 
@@ -24,8 +27,12 @@ public class Checkbox implements StepComponent {
     public Checkbox(org.openecard.client.gui.definition.Checkbox checkbox) {
 	result = new org.openecard.client.gui.definition.Checkbox(); // copy of checkbox, so result is pre assembled
 	panel = new JPanel();
-	GridLayout layout = new GridLayout(0, 1);
+        
+	//GridLayout layout = new GridLayout(0, 1);
+        GridBagLayout layout = new GridBagLayout();
 	panel.setLayout(layout);
+        GridBagConstraints c = new GridBagConstraints();
+        int alternate = 0;
 
 	// create buttons, item copies and add to panel
 	boxButtons = new ArrayList<JCheckBox>(checkbox.getBoxItems().size());
@@ -44,7 +51,15 @@ public class Checkbox implements StepComponent {
 	    if (next.isChecked()) {
 		component.setSelected(true);
 	    }
-	    panel.add(component);
+            
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.gridx = alternate;
+            c.gridy = GridBagConstraints.RELATIVE;
+            alternate = alternate ^ 1; // alternate checkboxes left and right -
+                                       // disable for vertical layout only
+                    
+	    //panel.add(component);
+            panel.add(component, c);
 	    boxButtons.add(component);
 	}
     }

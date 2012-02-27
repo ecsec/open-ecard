@@ -15,6 +15,7 @@ import java.util.concurrent.Exchanger;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.definition.OutputInfoUnit;
@@ -27,6 +28,7 @@ import org.openecard.client.gui.swing.steplayout.StepLayouter;
  * deferred to a layouting component.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @editor Florian Feldmann <florian.feldmann@rub.de>
  */
 public class StepFrame {
 
@@ -40,6 +42,12 @@ public class StepFrame {
     private final List<StepComponent> components;
 
     private SwingStepResult stepResult;
+    
+    // button descriptors
+    private String TEXT_BACK_BUTTON = "Zurück";
+    private String TEXT_FINISHED_BUTTON = "Fertig";
+    private String TEXT_FORWARD_BUTTON = "Weiter";
+    private String TEXT_CANCEL_BUTTON = "Abbrechen";
 
     public StepFrame(Step step, String dialogType, boolean last) {
 	this.step = step;
@@ -58,25 +66,28 @@ public class StepFrame {
 	buttonPanel.add(forwardButton);
 	buttonPanel.add(cancelButton);
 	// back
-	backButton.setText("Back");
+	backButton.setText(TEXT_BACK_BUTTON);
 	if (! step.isReversible()) {
 	    backButton.setEnabled(false);
 	} else {
 	    backButton.addActionListener(new BackEvent());
 	}
-	// forw
+	// forward
 	if (last) {
-	    forwardButton.setText("Finish");
+	    forwardButton.setText(TEXT_FINISHED_BUTTON);
 	    forwardButton.addActionListener(new ForwardEvent());
 	} else {
-	    forwardButton.setText("Next");
+	    forwardButton.setText(TEXT_FORWARD_BUTTON);
 	    forwardButton.addActionListener(new ForwardEvent());
 	}
 	// cancel
 	cancelButton.removeAll();
-	cancelButton.setText("Cancel");
+	cancelButton.setText(TEXT_CANCEL_BUTTON);
 	cancelButton.addActionListener(new CancelEvent());
 
+        // dummy JLabel for alignment, adjusts free space left of content
+        JLabel dummy = new JLabel("   ");
+        rootPanel.add(dummy, BorderLayout.WEST);
 
 	// fill content panel - this is done with an external class which knows all about the actual layout
 	StepLayouter stepLayouter = StepLayouter.create(step.getInputInfoUnits(), dialogType, step.getName());

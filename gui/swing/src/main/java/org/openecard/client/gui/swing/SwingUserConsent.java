@@ -17,6 +17,7 @@ import org.openecard.client.gui.definition.UserConsentDescription;
  * Swing implementation of the UserConsent interface.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @editor Florian Feldmann <florian.feldmann@rub.de>
  */
 public class SwingUserConsent implements UserConsent {
 
@@ -37,7 +38,7 @@ public class SwingUserConsent implements UserConsent {
 	// prepare root panel for display
 	Container rootPanel = dialogWrapper.getRootPanel();
 	rootPanel.removeAll();
-	BorderLayout layout = new BorderLayout(3, 3);
+        BorderLayout layout = new BorderLayout();
 	rootPanel.setLayout(layout);
 	JPanel stepContainer = new JPanel();
 	JScrollPane scrollpane = new JScrollPane(stepContainer, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -45,7 +46,10 @@ public class SwingUserConsent implements UserConsent {
 	stepContainer.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 	sidebarPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 	rootPanel.add(scrollpane, BorderLayout.CENTER);
-	rootPanel.add(sidebarPanel, BorderLayout.EAST);
+        
+        // FF: Sidebar should be left to be similar to AusweisApp
+	//rootPanel.add(sidebarPanel, BorderLayout.EAST);
+        rootPanel.add(sidebarPanel, BorderLayout.LINE_START);
 
 	// create the step container and display UC
 	String dialogType = parameters.getDialogType();
@@ -68,7 +72,9 @@ public class SwingUserConsent implements UserConsent {
     private static String[] stepNames(List<Step> steps) {
 	ArrayList<String> stepNames = new ArrayList<String>(steps.size());
 	for (Step s : steps) {
-	    stepNames.add(s.getName());
+            // steps are added in HTML format for layout -
+            // <br/><br/> adds a new line between entries in sidebar
+	    stepNames.add("<html>"+s.getName()+"<br/><br/></html>");
 	}
 	return stepNames.toArray(new String[steps.size()]);
     }

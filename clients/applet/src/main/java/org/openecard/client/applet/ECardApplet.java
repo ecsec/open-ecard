@@ -19,10 +19,17 @@ package org.openecard.client.applet;
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.awt.Container;
 import java.awt.Frame;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.swing.JApplet;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.openecard.client.common.ClientEnv;
@@ -66,6 +73,7 @@ public class ECardApplet extends JApplet {
     private String reportId;
     private String spBehavior;
     private boolean recognizeCard;
+    private boolean selfSigned;
 
     protected static final String INSTANT = "instant";
     protected static final String WAIT = "wait";
@@ -112,7 +120,7 @@ public class ECardApplet extends JApplet {
         }
 	// TODO: replace socket factory with this strange psk stuff
 	// TODO: add refresh-addr callback
-        paos = new PAOS(endpointUrl, env.getDispatcher(), null, SSLSocketFactory.getSocketFactory());
+        paos = new PAOS(endpointUrl, env.getDispatcher(), null, createSSLSocketFactory());
         em = new EventManager(recognition, env, ctx, sessionId);
         env.setEventManager(em);
         sal = new TinySAL(env, sessionId);
@@ -202,7 +210,7 @@ public class ECardApplet extends JApplet {
             _logger.exiting(this.getClass().getName(), "destroy()");
         }
     }
-
+    
     public Frame findParentFrame() {
         if (_logger.isLoggable(Level.FINER)) {
             _logger.entering(this.getClass().getName(), "findParentFrame()");
@@ -264,9 +272,6 @@ public class ECardApplet extends JApplet {
     }
 
     public void startPAOS(String ifdName) {
-        if (ifdName != null) {
-            // what the hell did I wanted to here?
-        }
         if (spBehavior.equals(CLICK)) {
             worker.startPAOS(ifdName);
         }
@@ -359,10 +364,73 @@ public class ECardApplet extends JApplet {
                 _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "spBehavior set to " + spBehavior + ".");
             }
         }
+        param = getParameter("selfSigned");
+        if (param != null) {
+            selfSigned = Boolean.parseBoolean(param);
+            if (_logger.isLoggable(Level.CONFIG)) {
+                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "selfSigned set to " + param + ".", param);
+            }
+        } else {
+            selfSigned = false;
+            if (_logger.isLoggable(Level.CONFIG)) {
+                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "selfSigned set to " + selfSigned + ".");
+            }
+        }
 
         if (_logger.isLoggable(Level.FINER)) {
             _logger.exiting(this.getClass().getName(), "setParams()");
         }
     }
 
+    private SSLSocketFactory createSSLSocketFactory() {
+        if (selfSigned) {
+            
+            //
+            // quick and dirty hack to support self-signed certificates
+            //
+            
+            SSLContext sslCtx = null;
+            try {
+                sslCtx = SSLContext.getInstance("TLS");
+            } catch (NoSuchAlgorithmException ex) {
+                if (_logger.isLoggable(Level.WARNING)) {
+                    _logger.logp(Level.WARNING, this.getClass().getName(), "createSSLSocketFactory()", ex.getMessage(), ex);
+                    _logger.logp(Level.WARNING, this.getClass().getName(), "createSSLSocketFactory()", "Support for self-signed certificates disabled. Using default SSLSocketFactory.");
+                }
+                return SSLSocketFactory.getSocketFactory();
+            }
+            X509TrustManager tm = new X509TrustManager() {
+
+                @Override
+                public void checkClientTrusted(X509Certificate[] xcs, String string) throws CertificateException {
+                    // do nothing here...
+                }
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] xcs, String string) throws CertificateException {
+                    // do nothing here...
+                }
+
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+            };
+            try {
+                sslCtx.init(null, new TrustManager[]{tm}, null);
+            } catch (KeyManagementException ex) {
+                if (_logger.isLoggable(Level.WARNING)) {
+                    _logger.logp(Level.WARNING, this.getClass().getName(), "createSSLSocketFactory()", ex.getMessage(), ex);
+                    _logger.logp(Level.WARNING, this.getClass().getName(), "createSSLSocketFactory()", "Support for self-signed certificates disabled. Using default SSLSocketFactory.");
+                }
+                return SSLSocketFactory.getSocketFactory();
+            }
+            SSLSocketFactory fac = new SSLSocketFactory(sslCtx);
+            fac.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+            return fac;
+        } else {
+            return SSLSocketFactory.getSocketFactory();
+        }
+    }
+    
 }

@@ -33,6 +33,7 @@ import android.webkit.WebViewClient;
 import android.widget.TextView;
 import android.widget.Toast;
 import iso.std.iso_iec._24727.tech.schema.Connect;
+import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import java.math.BigInteger;
 import org.openecard.client.android.ApplicationContext;
 import org.openecard.client.android.ObjectTagParser;
@@ -47,98 +48,127 @@ import org.openecard.client.scio.NFCCardTerminal;
  */
 public class MainActivity extends Activity {
 
-	private ApplicationContext appState;
+    private ApplicationContext appState;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
 
-		super.onCreate(savedInstanceState);
+	super.onCreate(savedInstanceState);
 
-		// Set up the window layout and the cusom title
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-		setContentView(R.layout.main);
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
-		TextView mTitle = (TextView) findViewById(R.id.title_left_text);
-		mTitle.setText(R.string.app_name);
-		//mTitle = (TextView) findViewById(R.id.title_right_text);
-		
-		// Set up the webview 
-		WebView mWebView = (WebView) findViewById(R.id.webview);
-		mWebView.getSettings().setJavaScriptEnabled(true);
-		appState = ((ApplicationContext) getApplicationContext());
-		mWebView.addJavascriptInterface(new ObjectTagParser(appState.getEnv()), "HTMLOUT");
-		mWebView.loadUrl("https://www.cosmos-direkt.de/");
-		
-		mWebView.setWebViewClient(new WebViewClient() {
+	// Set up the window layout and the cusom title
+	requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+	setContentView(R.layout.main);
+	getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
+	TextView mTitle = (TextView) findViewById(R.id.title_left_text);
+	mTitle.setText(R.string.app_name);
+	// mTitle = (TextView) findViewById(R.id.title_right_text);
 
-			@Override
-			public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-				// proceed on ssl error, since the webview doesn't show a dialog
-				// for accepting or refusing a certificate
-				handler.proceed();
-			}
+	// Set up the webview
+	WebView mWebView = (WebView) findViewById(R.id.webview);
+	mWebView.getSettings().setJavaScriptEnabled(true);
+	appState = ((ApplicationContext) getApplicationContext());
+	mWebView.addJavascriptInterface(new ObjectTagParser(appState.getEnv(), mWebView), "HTMLOUT");
 
-			@Override
-			public void onPageFinished(WebView view, String url) {
-				super.onPageFinished(view, url);
-				view.loadUrl("javascript:window.HTMLOUT.showHTML(document.getElementsByTagName('object')[0].innerHTML);");
-			}
+	this.appState.setWebView(mWebView);
 
+	/* Testserver */
+	mWebView.loadUrl("https://test.governikus-eid.de/Autent-DemoApplication/"); // funktioniert
+	// mWebView.loadUrl("http://willow.mtg.de/eidavs/static/bigbunny.html");
+	// //funktioniert
+	// mWebView.loadUrl("https://eid.services.ageto.net/gw"); //funktioniert
+	/* Produktivserver */
+	// mWebView.loadUrl("https://www.bos-bremen.de/login/");
+	// mWebView.loadUrl("https://eid.vx4.net/webapp/test.jsp");
+	// mWebView.loadUrl("http://www.mein-cockpit.de");
+
+	mWebView.setWebViewClient(new WebViewClient() {
+
+	    @Override
+	    public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+		// proceed on ssl error, since the webview doesn't show a dialog
+		// for accepting or refusing a certificate
+		handler.proceed();
+	    }
+
+	    @Override
+	    public void onPageFinished(final WebView view, String url) {
+		super.onPageFinished(view, url);
+
+		runOnUiThread(new Runnable() {
+		    @Override
+		    public void run() {
+
+			view.loadUrl("javascript:window.HTMLOUT.showHTML(document.getElementsByTagName('object')[0].innerHTML);");
+		    }
 		});
 
-		// If the adapter is null, then NFC is not supported
-		if (NfcAdapter.getDefaultAdapter(this) == null) {
-			Toast.makeText(this, R.string.error_no_nfc, Toast.LENGTH_LONG).show();
-			finish();
-			return;
-		}
+	    }
+
+	});
+
+	// If the adapter is null, then NFC is not supported
+	if (NfcAdapter.getDefaultAdapter(this) == null) {
+	    Toast.makeText(this, R.string.error_no_nfc, Toast.LENGTH_LONG).show();
+	    finish();
+	    return;
+	}
+    }
+
+    public void onNewIntent(Intent intent) {
+
+	System.out.println("tag discovered");
+	Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+	IsoDep tag = IsoDep.get(tagFromIntent);
+	NFCCardTerminal.getInstance().setTag(tag);
+
+	Connect c = new Connect();
+	c.setContextHandle(appState.getCTX());
+	c.setIFDName("Integrated NFC");
+	c.setSlot(new BigInteger("0"));
+	ConnectResponse cr = appState.getEnv().getIFD().connect(c);
+
+    }
+
+    @Override
+    public synchronized void onResume() {
+	super.onResume();
+	PendingIntent intent = PendingIntent
+		.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+	NfcAdapter.getDefaultAdapter(this).enableForegroundDispatch(this, intent, null, null);
+    }
+
+    @Override
+    public synchronized void onPause() {
+	super.onPause();
+	NfcAdapter.getDefaultAdapter(this).disableForegroundDispatch(this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+	MenuInflater inflater = getMenuInflater();
+	inflater.inflate(R.menu.option_menu, menu);
+	return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+	Intent i;
+	switch (item.getItemId()) {
+	case R.id.about:
+	    i = new Intent(this, AboutActivity.class);
+	    startActivity(i);
+	    return true;
+	case R.id.cardinfo:
+	    i = new Intent(this, CardInfoActivity.class);
+	    startActivity(i);
+	    return true;
+	case R.id.pinmanagement:
+	    i = new Intent(this, PINManagementActivity.class);
+	    startActivity(i);
+	    return true;
 	}
 
-	public void onNewIntent(Intent intent) {
-		System.out.println("tag discovered");
-		Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-		IsoDep tag = IsoDep.get(tagFromIntent);
-		NFCCardTerminal.getInstance().setTag(tag);
-
-		Connect c = new Connect();
-		c.setContextHandle(appState.getCTX());
-		c.setIFDName("Integrated NFC");
-		c.setSlot(new BigInteger("0"));
-		appState.getEnv().getIFD().connect(c);
-	}
-
-	@Override
-	public synchronized void onResume() {
-		super.onResume();
-		PendingIntent intent = PendingIntent
-				.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-		NfcAdapter.getDefaultAdapter(this).enableForegroundDispatch(this, intent, null, null);
-
-		
-		
-	}
-
-	@Override
-	public synchronized void onPause() {
-		super.onPause();
-		NfcAdapter.getDefaultAdapter(this).disableForegroundDispatch(this);
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.option_menu, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.about:
-			// TODO start activity for 'about'-stuff
-			return true;
-		}
-		return false;
-	}
+	return false;
+    }
 
 }

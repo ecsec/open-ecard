@@ -271,6 +271,7 @@ public class AndroidMarshallerTest {
 	didAuthenticateResponse.setResult(r);
 	
 	EAC2OutputType didAuthenticationDataType = new EAC2OutputType();
+	didAuthenticationDataType.setProtocol("urn:....");
 
 	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	factory.setNamespaceAware(true);

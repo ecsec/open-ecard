@@ -21,6 +21,9 @@ import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.io.*;
 import java.math.BigInteger;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -32,6 +35,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.ws.MarshallingTypeException;
@@ -52,7 +56,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-
 /**
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
@@ -67,8 +70,13 @@ public class AndroidMarshaller implements WSMarshaller {
     private DocumentBuilder documentBuilder;
     private Transformer transformer;
     private MessageFactory soapFactory;
+    private static final Logger _logger = LogManager.getLogger(AndroidMarshaller.class.getName());
 
     public AndroidMarshaller() {
+	_logger.setLevel(Level.WARNING);
+	ConsoleHandler handler = new ConsoleHandler();
+	handler.setLevel(_logger.getLevel());
+	_logger.addHandler(handler);
 	documentBuilderFactory = null;
 	documentBuilder = null;
 	transformer = null;
@@ -97,6 +105,10 @@ public class AndroidMarshaller implements WSMarshaller {
 
     @Override
     public synchronized String doc2str(Node doc) throws TransformerException {
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.entering(AndroidMarshaller.class.getName(), "doc2str(Node doc)", doc);
+	} // </editor-fold>
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	transformer.transform(new DOMSource(doc), new StreamResult(out));
 	String result;
@@ -105,11 +117,19 @@ public class AndroidMarshaller implements WSMarshaller {
 	} catch (UnsupportedEncodingException ex) {
 	    throw new TransformerException(ex);
 	}
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.exiting(this.getClass().getName(), "doc2str(Node doc)", result);
+	} // </editor-fold>
 	return result;
     }
 
     @Override
     public synchronized Document marshal(Object o) throws MarshallingTypeException {
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.entering(AndroidMarshaller.class.getName(), "marshal(Object o)", o);
+	} // </editor-fold>
 	Document document = documentBuilder.newDocument();
 	document.setXmlStandalone(true);
 
@@ -149,26 +169,28 @@ public class AndroidMarshaller implements WSMarshaller {
 	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
 	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 	    rootElement.appendChild(marshalResult(didAuthenticateResponse.getResult(), document));
-	    DIDAuthenticationDataType didAuthenticationDataType = didAuthenticateResponse.getAuthenticationProtocolData();
+	    if (didAuthenticateResponse.getAuthenticationProtocolData() != null) {
+		DIDAuthenticationDataType didAuthenticationDataType = didAuthenticateResponse.getAuthenticationProtocolData();
 
-	    Element elemEACOutput = document.createElement(iso + "AuthenticationProtocolData");
-	    elemEACOutput.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-	    if (didAuthenticationDataType instanceof EAC1OutputType) {
-		elemEACOutput.setAttribute("xsi:type", "iso:EAC1OutputType");
-	    } else if (didAuthenticationDataType instanceof EAC2OutputType) {
-		elemEACOutput.setAttribute("xsi:type", "iso:EAC2OutputType");
-	    } else
-		throw new MarshallingTypeException("Marshalling a DIDAuthenticationDataType of "
-			+ didAuthenticationDataType.getClass().getName() + " in DIDAuthentication is not supported");
+		Element elemEACOutput = document.createElement(iso + "AuthenticationProtocolData");
+		elemEACOutput.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		if (didAuthenticationDataType instanceof EAC1OutputType) {
+		    elemEACOutput.setAttribute("xsi:type", "iso:EAC1OutputType");
+		} else if (didAuthenticationDataType instanceof EAC2OutputType) {
+		    elemEACOutput.setAttribute("xsi:type", "iso:EAC2OutputType");
+		} else
+		    throw new MarshallingTypeException("Marshalling a DIDAuthenticationDataType of "
+			    + didAuthenticationDataType.getClass().getName() + " in DIDAuthentication is not supported");
 
-	    for (Element e : didAuthenticationDataType.getAny()) {
-		Element elemCopy = document.createElement(iso + e.getLocalName());
-		elemCopy.setTextContent(e.getTextContent());
-		elemEACOutput.appendChild(elemCopy);
-	    }
+		for (Element e : didAuthenticationDataType.getAny()) {
+		    Element elemCopy = document.createElement(iso + e.getLocalName());
+		    elemCopy.setTextContent(e.getTextContent());
+		    elemEACOutput.appendChild(elemCopy);
+		}
 
-	    rootElement.appendChild(elemEACOutput);
+		rootElement.appendChild(elemEACOutput);
 
+	    } // else only the result (with error) is returned
 	} else if (o instanceof InitializeFrameworkResponse) {
 	    InitializeFrameworkResponse initializeFrameworkResponse = (InitializeFrameworkResponse) o;
 	    rootElement = document.createElement(ecapi + o.getClass().getSimpleName());
@@ -185,7 +207,6 @@ public class AndroidMarshaller implements WSMarshaller {
 	    emSubMinor.appendChild(document.createTextNode(initializeFrameworkResponse.getVersion().getSubMinor().toString()));
 	    emVersion.appendChild(emSubMinor);
 	    rootElement.appendChild(emVersion);
-
 	} else if (o instanceof InternationalStringType) {
 	    InternationalStringType internationalStringType = (InternationalStringType) o;
 	    rootElement = marshalInternationStringType(internationalStringType, document, internationalStringType.getClass()
@@ -400,7 +421,10 @@ public class AndroidMarshaller implements WSMarshaller {
 	    throw new IllegalArgumentException("Cannot marshal " + o.getClass().getSimpleName());
 	}
 	document.appendChild(rootElement);
-
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.exiting(this.getClass().getName(), "marshal(Object o)", document);
+	} // </editor-fold>
 	return document;
     }
 
@@ -558,6 +582,10 @@ public class AndroidMarshaller implements WSMarshaller {
 
     @Override
     public synchronized Object unmarshal(Node n) throws MarshallingTypeException, WSMarshallerException {
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.entering(AndroidMarshaller.class.getName(), "unmarshal(Node n)", n);
+	} // </editor-fold>
 	Document newDoc = null;
 	if (n instanceof Document) {
 	    newDoc = (Document) n;
@@ -568,6 +596,7 @@ public class AndroidMarshaller implements WSMarshaller {
 	} else {
 	    throw new WSMarshallerException("Only w3c Document and Element are accepted.");
 	}
+
 	try {
 	    XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 	    factory.setNamespaceAware(true);
@@ -576,7 +605,12 @@ public class AndroidMarshaller implements WSMarshaller {
 	    int eventType = parser.getEventType();
 	    while (eventType != XmlPullParser.END_DOCUMENT) {
 		if (eventType == XmlPullParser.START_TAG) {
-		    return parse(parser);
+		    Object obj = parse(parser);
+		    // <editor-fold defaultstate="collapsed" desc="log trace">
+		    if (_logger.isLoggable(Level.FINER)) {
+			_logger.exiting(this.getClass().getName(), "unmarshal(Node n)", obj);
+		    } // </editor-fold>
+		    return obj;
 		}
 		eventType = parser.next();
 	    }
@@ -999,6 +1033,10 @@ public class AndroidMarshaller implements WSMarshaller {
 	} else {
 	    didAuthenticationDataType = new DIDAuthenticationDataType();
 	}
+
+	if (parser.getAttributeValue(null, "Protocol") != null && !parser.getAttributeValue(null, "Protocol").isEmpty())
+	    didAuthenticationDataType.setProtocol(parser.getAttributeValue(null, "Protocol"));
+
 	int eventType = parser.getEventType();
 	do {
 	    parser.next();

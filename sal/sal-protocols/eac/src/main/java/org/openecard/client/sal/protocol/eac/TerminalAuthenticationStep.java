@@ -19,13 +19,20 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
+
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.smartcardio.ResponseAPDU;
+
 import oasis.names.tc.dss._1_0.core.schema.Result;
+
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.sal.anytype.EAC2InputType;
@@ -33,13 +40,15 @@ import org.openecard.client.common.sal.anytype.EAC2OutputType;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.CardCommands;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
-import org.openecard.client.ifd.protocol.pace.NPACardCommands;
+import org.openecard.client.crypto.common.asn1.eac.oid.TAObjectIdentifier;
+import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
 import org.openecard.ws.IFD;
 
 public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
     private IFD ifd;
     private byte[] slotHandle;
+    private static final Logger _logger = LogManager.getLogger(TerminalAuthenticationStep.class.getName());
 
     public TerminalAuthenticationStep(IFD ifd) {
 	this.ifd = ifd;
@@ -65,26 +74,32 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)",
+		    new Object[] { didAuthenticate, internalData });
+	} // </editor-fold>
 	try {
 	    this.slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
-	    this.transmitSingleAPDU(NPACardCommands.mseSetDST((byte[]) internalData.get("CAR")));
+	    this.transmitSingleAPDU(CardCommands.ManageSecurityEnvironment.setDST((byte[]) internalData.get("CAR")));
 
 	    EAC2InputType eac2input = new EAC2InputType(didAuthenticate.getAuthenticationProtocolData());
 	    internalData.put("pubkey", ByteUtils.toHexString(eac2input.getEphemeralPublicKey()));
 
 	    for (CardVerifiableCertificate cvc : eac2input.getCertificates()) {
-		this.transmitSingleAPDU(NPACardCommands.psoVerifyCertificate(cvc.getBody()));
-		this.transmitSingleAPDU(NPACardCommands.mseSetDST(cvc.getCertificateHolderReference()));
+		this.transmitSingleAPDU(CardCommands.PerformSecurityOperation.verifySelfDescriptiveCertificate(cvc.getBody()));
+		this.transmitSingleAPDU(CardCommands.ManageSecurityEnvironment.setDST(cvc.getCertificateHolderReference()));
 	    }
 
 	    CardVerifiableCertificate eServiceCertificate = (CardVerifiableCertificate) internalData.get("eServiceCertificate");
-	    this.transmitSingleAPDU(NPACardCommands.psoVerifyCertificate(eServiceCertificate.getBody()));
+	    this.transmitSingleAPDU(CardCommands.PerformSecurityOperation.verifySelfDescriptiveCertificate(eServiceCertificate.getBody()));
 
-	    byte[] apdu = NPACardCommands.mseSetAT(null, eServiceCertificate.getCertificateHolderReference(),
+	    //FIXME oid is fix
+	    byte[] apdu = CardCommands.ManageSecurityEnvironment.setAT.TA(ObjectIdentifierUtils.getValue(TAObjectIdentifier.id_TA_ECDSA_SHA_256), eServiceCertificate.getCertificateHolderReference(),
 		    eac2input.getCompressedEphemeralPublicKey(), (byte[]) internalData.get("authenticatedAuxiliaryData"));
 	    this.transmitSingleAPDU(apdu);
 
-	    apdu = NPACardCommands.getChallenge();
+	    apdu = CardCommands.GetChallenge.generic();
 	    byte[] challenge = this.transmitSingleAPDU(apdu).getData();
 
 	    DIDAuthenticateResponse didAuthenticateResponse = new DIDAuthenticateResponse();
@@ -95,10 +110,17 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    EAC2OutputType eac2output = new EAC2OutputType(didAuthenticate.getAuthenticationProtocolData(), challenge);
 
 	    didAuthenticateResponse.setAuthenticationProtocolData(eac2output.getAuthDataType());
-
+	    // <editor-fold defaultstate="collapsed" desc="log trace">
+	    if (_logger.isLoggable(Level.FINER)) {
+		_logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)",
+			didAuthenticateResponse);
+	    } // </editor-fold>
 	    return didAuthenticateResponse;
 	} catch (Exception ex) {
-	    ex.printStackTrace();
+	    // <editor-fold defaultstate="collapsed" desc="log trace">
+	    if (_logger.isLoggable(Level.WARNING)) {
+		_logger.logp(Level.WARNING, this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", ex.getMessage(), ex);
+	    } // </editor-fold>
 	    return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultUnknownError(ex.getMessage()));
 	}
     }

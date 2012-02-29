@@ -23,9 +23,11 @@ import java.util.logging.Logger;
 import javax.smartcardio.ResponseAPDU;
 import org.openecard.bouncycastle.math.ec.ECPoint;
 import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.CardCommands;
 import org.openecard.client.crypto.common.asn1.eac.PACESecurityInfos;
+import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
 import org.openecard.client.ifd.protocol.exception.ProtocolException;
 import org.openecard.client.ifd.protocol.pace.crypto.KDF;
 import org.openecard.client.ifd.protocol.pace.crypto.PACECryptoSuite;
@@ -47,7 +49,9 @@ public class PACEImplementation {
     private byte[] slotHandle;
     private byte retryCounter = 3;
     private ResponseAPDU response;
-
+    private static final Logger _logger = LogManager.getLogger(PACEImplementation.class.getName());
+    public static final short PASSWORD_DEACTIVATED = (short) 0x6283;
+    
     /**
      *
      * @param connection
@@ -84,7 +88,7 @@ public class PACEImplementation {
         }
         // </editor-fold>
 
-        byte[] apdu = NPACardCommands.mseSetAT(psi, chat, passwordType);
+        byte[] apdu = CardCommands.ManageSecurityEnvironment.setAT.PACE(ObjectIdentifierUtils.getValue(psi.getPACEInfo().getProtocol()), passwordType, chat);
 
         try {
             response = transmit(apdu);
@@ -99,7 +103,7 @@ public class PACEImplementation {
             //TODO ckeck
             int sw = response.getSW();
 
-            if (sw == APDUConstants.PASSWORD_DEACTIVATED) {
+            if (sw == PASSWORD_DEACTIVATED) {
                 // Password is deactivated
                 throw new ProtocolException("Password is deactivated");
             } else if ((sw & (short) 0xFFF0) == (short) 0x63C0) {
@@ -131,7 +135,7 @@ public class PACEImplementation {
         }
         // </editor-fold>
 
-        byte[] gaEncryptedNonce = NPACardCommands.generalAuthenticate();
+        byte[] gaEncryptedNonce = CardCommands.GeneralAuthenticate.getNonce();
         // Derive key PI
         byte[] keyPI = kdf.derivePI(secret);
 
@@ -146,7 +150,12 @@ public class PACEImplementation {
             // Continue with Step 3
             generalAuthenticateMapNonce();
         } catch (WSException ex) {
-            //TODO
+            // <editor-fold defaultstate="collapsed" desc="log trace">
+	    if (_logger.isLoggable(Level.WARNING)) {
+		_logger.logp(Level.WARNING, this.getClass().getName(), "generalAuthenticateEncryptedNonce()", ex.getMessage(), ex);
+	    } // </editor-fold>
+	    
+            //TODO throw ProtocolException
         }
     }
 
@@ -161,7 +170,7 @@ public class PACEImplementation {
         // </editor-fold>
 
         ECPoint keyMapPKPCD = cSuite.getMapPK_PCD();
-        byte[] gaMapNonce = NPACardCommands.generalAuthenticate((byte) 0x81, keyMapPKPCD.getEncoded());
+        byte[] gaMapNonce = CardCommands.GeneralAuthenticate.generic((byte) 0x81, keyMapPKPCD.getEncoded(), true);
 
         try {
             response = transmit(gaMapNonce);
@@ -178,7 +187,12 @@ public class PACEImplementation {
                 throw new SecurityException("PACE security violation: equal keys");
             }
         } catch (WSException ex) {
-            //TODO
+            // <editor-fold defaultstate="collapsed" desc="log trace">
+	    if (_logger.isLoggable(Level.WARNING)) {
+		_logger.logp(Level.WARNING, this.getClass().getName(), "generalAuthenticateMapNonce()", ex.getMessage(), ex);
+	    } // </editor-fold>
+	    
+            //TODO throw ProtocolException
         }
     }
 
@@ -195,7 +209,7 @@ public class PACEImplementation {
         // </editor-fold>
 
         ECPoint keyPKPCD = cSuite.mapGenericMapping(keyMapPKPICC);
-        byte[] gaKeyAgreement = NPACardCommands.generalAuthenticate((byte) 0x83, keyPKPCD.getEncoded());
+        byte[] gaKeyAgreement = CardCommands.GeneralAuthenticate.generic((byte) 0x83, keyPKPCD.getEncoded(), true);
 
         try {
             response = transmit(gaKeyAgreement);
@@ -212,7 +226,12 @@ public class PACEImplementation {
                 throw new SecurityException("PACE security violation: equal keys");
             }
         } catch (WSException ex) {
-            //TODO
+            // <editor-fold defaultstate="collapsed" desc="log trace">
+	    if (_logger.isLoggable(Level.WARNING)) {
+		_logger.logp(Level.WARNING, this.getClass().getName(), "generalAuthenticateKeyAgreement(ECPoint keyMapPKPICC)", ex.getMessage(), ex);
+	    } // </editor-fold>
+	    
+            //TODO throw ProtocolException
         }
     }
 
@@ -233,7 +252,7 @@ public class PACEImplementation {
         keyENC = kdf.deriveENC(k);
         // Calculate token T_PCD
         byte[] tPCD = cSuite.generateAuthenticationToken(keyMAC, keyPKPICC);
-        byte[] gaMutualAuth = NPACardCommands.generalAuthenticate((byte) 0x00, (byte) 0x85, tPCD);
+        byte[] gaMutualAuth = CardCommands.GeneralAuthenticate.generic( (byte) 0x85, tPCD, false);
         // Calculate token T_PICC
         byte[] tPICC = cSuite.generateAuthenticationToken(keyMAC, keyPKPCD);
 

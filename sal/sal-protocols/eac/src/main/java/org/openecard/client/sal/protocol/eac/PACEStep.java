@@ -22,11 +22,14 @@ import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import java.net.MalformedURLException;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.I18n;
 import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.sal.anytype.EAC1InputType;
@@ -65,6 +68,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     private UserConsent gui;
 
     I18n i = I18n.getTranslation("sal");
+    private static final Logger _logger = LogManager.getLogger(PACEStep.class.getName());
 
     public PACEStep(IFD ifd, UserConsent gui) {
 	this.ifd = ifd;
@@ -78,6 +82,11 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)",
+		    new Object[] { didAuthenticate, internalData });
+	} // </editor-fold>
 	try {
 	    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	    factory.setNamespaceAware(true);
@@ -119,23 +128,40 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    DIDAuthenticateResponse didAuthenticateResponse = new DIDAuthenticateResponse();
 	    didAuthenticateResponse.setResult(establishChannelResponse.getResult());
 
-	    EAC1OutputType eac1out = new EAC1OutputType(didAuthenticate.getAuthenticationProtocolData(),
-		    establishChannelResponse.getAuthenticationProtocolData(), chosenCHAT.getBytes());
-
-	    didAuthenticateResponse.setAuthenticationProtocolData(eac1out.getAuthDataType());
-	    didAuthenticateResponse.getAuthenticationProtocolData().setProtocol(null);
-
-	    internalData.put("CAR", eac1out.getCertificationAuthorityReference());
-
+	    if (!establishChannelResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
+		// TODO inform user an error happened while establishment of
+		// pace channel
+	    } else {
+		EAC1OutputType eac1out = new EAC1OutputType(didAuthenticate.getAuthenticationProtocolData(),
+			establishChannelResponse.getAuthenticationProtocolData(), chosenCHAT.getBytes());
+		didAuthenticateResponse.setAuthenticationProtocolData(eac1out.getAuthDataType());
+		didAuthenticateResponse.getAuthenticationProtocolData().setProtocol(null);
+		internalData.put("CAR", eac1out.getCertificationAuthorityReference());
+	    }
+	    // <editor-fold defaultstate="collapsed" desc="log trace">
+	    if (_logger.isLoggable(Level.FINER)) {
+		_logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)",
+			didAuthenticateResponse);
+	    } // </editor-fold>
 	    return didAuthenticateResponse;
 	} catch (Exception e) {
-	    e.printStackTrace();
+	 // <editor-fold defaultstate="collapsed" desc="log trace">
+	    if (_logger.isLoggable(Level.WARNING)) {
+		_logger.logp(Level.WARNING, this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", e.getMessage(), e);
+	    } // </editor-fold>
 	    return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultUnknownError(e.getMessage()));
 	}
     }
 
     private CHAT showUserConsentAndRetrieveCHAT(CertificateDescription description, CHAT requiredCHAT, CHAT optionalCHAT,
 	    CardVerifiableCertificate cvc) {
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.entering(
+		    this.getClass().getName(),
+		    "showUserConsentAndRetrieveCHAT(CertificateDescription description, CHAT requiredCHAT, CHAT optionalCHAT, CardVerifiableCertificate cvc)",
+		    new Object[] { description, requiredCHAT, optionalCHAT, cvc });
+	} // </editor-fold>
 	UserConsentDescription ucd = new UserConsentDescription("test");
 
 	Step s1 = new Step(i.translationForKey("service_providers_statements_title"));
@@ -248,8 +274,13 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	chat.setSpecialFunctions(specialFunctions);
 	chat.setReadAccess(readAccess);
 
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.exiting(
+		    this.getClass().getName(),
+		    "showUserConsentAndRetrieveCHAT(CertificateDescription description, CHAT requiredCHAT, CHAT optionalCHAT, CardVerifiableCertificate cvc)",
+		    chat);
+	} // </editor-fold>
 	return chat;
-
     }
-
 }

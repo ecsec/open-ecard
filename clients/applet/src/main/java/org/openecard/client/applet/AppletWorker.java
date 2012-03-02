@@ -16,18 +16,19 @@
 
 package org.openecard.client.applet;
 
+import iso.std.iso_iec._24727.tech.schema.Connect;
+import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
-import java.net.MalformedURLException;
-import java.net.URL;
+
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openecard.client.common.ClientEnv;
+
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.logging.LogManager;
 
 
@@ -82,9 +83,20 @@ public class AppletWorker extends Thread implements EventCallback {
         if (applet.getSpBehavior().equals(ECardApplet.CLICK)) {
             waitForInput();
             if (selection != null) {
-                cHandles = new ArrayList<ConnectionHandleType>(1);
-                ConnectionHandleType cHandle = getConnectionHandle(selection);
-                cHandles.add(cHandle);
+        	 cHandles = new ArrayList<ConnectionHandleType>(1);
+                 ConnectionHandleType cHandle = getConnectionHandle(selection);
+                 // need a slothandle
+                 Connect c = new Connect();
+                 c.setContextHandle(cHandle.getContextHandle());
+                 c.setExclusive(false);
+                 c.setIFDName(selection);
+                 c.setSlot(new BigInteger("0"));
+                 ConnectResponse cr = this.applet.getEnv().getIFD().connect(c);
+                 cHandle.setSlotHandle(cr.getSlotHandle());
+                 //doesn't work with mtg testserver !? so remove 
+                 cHandle.setRecognitionInfo(null);
+                 cHandle.setChannelHandle(null);
+                 cHandles.add(cHandle);
             } else {
                 cHandles = getConnectionHandles();
             }
@@ -97,7 +109,7 @@ public class AppletWorker extends Thread implements EventCallback {
         try {
             Object result = applet.getPAOS().sendStartPAOS(sp);
 
-            String redirectUrl = applet.getRedirectUrl();
+           /* String redirectUrl = applet.getRedirectUrl();
             if (redirectUrl != null) {
                 try {
                     applet.getAppletContext().showDocument(new URL(redirectUrl), "_top");
@@ -112,7 +124,7 @@ public class AppletWorker extends Thread implements EventCallback {
                     _logger.logp(Level.WARNING, this.getClass().getName(), "run()", "Unknown response type.", result);
                 }
                 return;
-            }
+            }*/
         } catch (Exception ex) {
             _logger.logp(Level.SEVERE, AppletWorker.class.getName(), "run()", "Failure occured while sending or receiving PAOS messages from endpoint " + applet.getEndpointUrl() + ".", ex);
         }

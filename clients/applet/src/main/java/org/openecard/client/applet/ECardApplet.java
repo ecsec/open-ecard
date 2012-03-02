@@ -16,9 +16,17 @@
 
 package org.openecard.client.applet;
 
-import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.EstablishContext;
+import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
+import iso.std.iso_iec._24727.tech.schema.Initialize;
+import iso.std.iso_iec._24727.tech.schema.InitializeResponse;
+import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
+
 import java.awt.Container;
 import java.awt.Frame;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -27,22 +35,31 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.swing.JApplet;
+
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingUserConsent;
+import org.openecard.client.ifd.protocol.pace.PACEProtocolFactory;
 import org.openecard.client.ifd.scio.IFD;
+import org.openecard.client.management.TinyManagement;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.sal.TinySAL;
+import org.openecard.client.sal.protocol.eac.EACProtocolFactory;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.transport.paos.PAOS;
+import org.openecard.client.transport.paos.PAOSCallback;
+import org.openecard.client.transport.tls.PSKTlsClientImpl;
+import org.openecard.client.transport.tls.RSAPSKLayeredSocketFactory;
 
 
 /**
@@ -61,7 +78,8 @@ public class ECardApplet extends JApplet {
     private EventManager em;
     private PAOS paos;
     private JSEventCallback jsec;
-
+    private TinyManagement management;
+    
     private byte[] ctx;
     private boolean initialized;
     private boolean paramsPresent;
@@ -72,6 +90,7 @@ public class ECardApplet extends JApplet {
     private String redirectUrl;
     private String reportId;
     private String spBehavior;
+    private String psk;
     private boolean recognizeCard;
     private boolean selfSigned;
 
@@ -92,9 +111,12 @@ public class ECardApplet extends JApplet {
         paramsPresent = true;
         setParams();
         env = new ClientEnv();
+        management = new TinyManagement(env);
+        env.setManagement(management);
         env.setDispatcher(new MessageDispatcher(env));
 	SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper(findParentFrame()));
         ifd = new IFD();
+        ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
         ifd.setGUI(gui);
         env.setIFD(ifd);
         EstablishContext ecRequest = new EstablishContext();
@@ -119,12 +141,41 @@ public class ECardApplet extends JApplet {
             recognition = null;
         }
 	// TODO: replace socket factory with this strange psk stuff
-	// TODO: add refresh-addr callback
-        paos = new PAOS(endpointUrl, env.getDispatcher(), null, createSSLSocketFactory());
+ PAOSCallback paosCallback = new PAOSCallback() {
+	    
+	    @Override
+	    public void loadRefreshAddress() {
+		
+		new Thread(new Runnable() {
+		    @Override
+		    public void run() {
+			try {
+			    URL url = new URL(redirectUrl);
+			    if(url.getQuery() != null){
+				redirectUrl = redirectUrl + "&ResultMajor=ok";
+			    } else  {
+				redirectUrl = redirectUrl + "?ResultMajor=ok";
+			    }
+			    System.out.println("redirecting to: " + redirectUrl);
+			ECardApplet.this.getAppletContext().showDocument(new URL(redirectUrl), "_blank");
+			} catch (MalformedURLException e) {
+			    // TODO Auto-generated catch block
+			    e.printStackTrace();
+			}
+		    }
+		}).start();	
+	    }
+	};
+	
+	PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionId.getBytes(), Hex.decode(psk));
+        paos = new PAOS(endpointUrl, env.getDispatcher(), paosCallback, new RSAPSKLayeredSocketFactory(tlsClient));
         em = new EventManager(recognition, env, ctx, sessionId);
         env.setEventManager(em);
         sal = new TinySAL(env, sessionId);
 	sal.setGUI(gui);
+	sal.addProtocol(ECardConstants.Protocol.EAC, new EACProtocolFactory());
+	env.setSAL(sal);   
+	
         em.registerAllEvents(sal);
         jsec = new JSEventCallback(this);
         em.registerAllEvents(jsec);
@@ -267,6 +318,14 @@ public class ECardApplet extends JApplet {
         return spBehavior;
     }
 
+    public String getPsk() {
+	return psk;
+    }
+
+    public void setPsk(String psk) {
+	this.psk = psk;
+    }
+
     public void startPAOS() {
         startPAOS(null);
     }
@@ -309,6 +368,18 @@ public class ECardApplet extends JApplet {
             return;
         }
 
+        param = getParameter("PSK");
+        if (param != null) {
+            setPsk(param);
+            if (_logger.isLoggable(Level.CONFIG)) {
+                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "PSK set to " + param + ".", param);
+            }
+        } else {
+            _logger.logp(Level.SEVERE, this.getClass().getName(), "setParams()", "PSK not set.");
+            paramsPresent = false;
+            return;
+        }
+        
         //
         // optional parameters
         //

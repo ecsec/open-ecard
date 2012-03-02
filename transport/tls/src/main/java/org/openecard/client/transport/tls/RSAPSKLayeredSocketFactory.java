@@ -48,15 +48,18 @@ public class RSAPSKLayeredSocketFactory implements LayeredSocketFactory {
 
     @Override
     public Socket createSocket() throws IOException {
-	//unused
-	return null;
+	return new Socket();
     }
 
     @Override
-    public Socket connectSocket(Socket arg0, String arg1, int arg2, InetAddress arg3, int arg4, HttpParams arg5) throws IOException,
+    public Socket connectSocket(Socket sock, String host, int port, InetAddress arg3, int arg4, HttpParams arg5) throws IOException,
 	    UnknownHostException, ConnectTimeoutException {
-	// unused
-	return null;
+	sock = new RSAPSKSocket(host, port);
+	TlsProtocolHandler tlsProtocolHandler = new TlsProtocolHandler(sock.getInputStream(), sock.getOutputStream());
+	tlsProtocolHandler.connect(this.client);
+	((RSAPSKSocket) sock).setInputStream(tlsProtocolHandler.getInputStream());
+	((RSAPSKSocket) sock).setOutputStream(tlsProtocolHandler.getOutputStream());
+	return sock;
     }
 
     @Override

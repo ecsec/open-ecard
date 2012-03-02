@@ -2,170 +2,192 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	 xmlns="http://maven.apache.org/POM/4.0.0"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.openecard.client</groupId>
-    <artifactId>clients</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
-  </parent>
+    <parent>
+	<groupId>org.openecard.client</groupId>
+	<artifactId>clients</artifactId>
+	<version>0.0.3-SNAPSHOT</version>
+    </parent>
 
-  <groupId>org.openecard.client.clients</groupId>
-  <artifactId>applet</artifactId>
-  <name>Applet</name>
+    <groupId>org.openecard.client.clients</groupId>
+    <artifactId>applet</artifactId>
+    <name>Applet</name>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>1.5</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-	    <configuration>
-		<filters>
-		    <filter>
-			<artifact>*:*</artifact>
-			<excludes>
-			    <exclude>META-INF/**/pom.xml</exclude>
-			    <exclude>META-INF/**/pom.properties</exclude>
-			</excludes>
-		    </filter>
-		</filters>
-	    </configuration>
-          </execution>
-        </executions>
-      </plugin>
+    <build>
+	<plugins>
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-shade-plugin</artifactId>
+		<version>1.5</version>
+		<executions>
+		    <execution>
+			<phase>package</phase>
+			<goals>
+			    <goal>shade</goal>
+			</goals>
+			<configuration>
+			    <filters>
+				<filter>
+				    <artifact>*:*</artifact>
+				    <excludes>
+					<exclude>META-INF/**/pom.xml</exclude>
+					<exclude>META-INF/**/pom.properties</exclude>
+				    </excludes>
+				</filter>
+			    </filters>
+			</configuration>
+		    </execution>
+		</executions>
+	    </plugin>
 
-      <!-- Disabled until configured correctly -->
+	    <!-- Disabled until configured correctly -->
 
-      <!-- <plugin> -->
-      <!-- 	  <groupId>com.github.wvengen</groupId> -->
-      <!-- 	  <artifactId>proguard-maven-plugin</artifactId> -->
-      <!-- 	  <version>2.0.5</version> -->
-      <!-- 	  <executions> -->
-      <!-- 	      <execution> -->
-      <!-- 		  <phase>package</phase> -->
-      <!-- 		  <goals><goal>proguard</goal></goals> -->
-      <!-- 	      </execution> -->
-      <!-- 	  </executions> -->
-      <!-- 	  <configuration> -->
-      <!-- 	      <proguardVersion>4.7</proguardVersion> -->
-      <!-- 	      <includeDependency>false</includeDependency> -->
-      <!-- 	      <options> -->
-      		  <!-- don't warn about these packages not being found, because they are not needed anyways -->
-      <!-- 		  <option>-dontwarn org.bouncycastle.**</option> -->
-      <!-- 		  <option>-dontwarn junit.**</option> -->
-      		  <!-- general options -->
-      <!-- 		  <option>-allowaccessmodification</option> -->
-      		  <!-- tell proguard which classes/methods to keep untouched -->
-      <!-- 		  <option>-keep public class * extends java.applet.Applet { *; }</option> -->
-      <!-- 	      </options> -->
-      <!-- 	      <libs> -->
-      <!-- 		  <lib>${java.home}/lib/rt.jar</lib> -->
-      <!-- 		  <lib>${java.home}/lib/jce.jar</lib> -->
-      <!-- 	      </libs> -->
-      <!-- 	  </configuration> -->
-      <!-- 	  <dependencies> -->
-      <!-- 	      <dependency> -->
-      <!-- 		  <groupId>net.sf.proguard</groupId> -->
-      <!-- 		  <artifactId>proguard-base</artifactId> -->
-      <!-- 		  <version>4.7</version> -->
-      <!-- 		  <scope>runtime</scope> -->
-      <!-- 	      </dependency> -->
-      <!-- 	  </dependencies> -->
-      <!-- </plugin> -->
+	    <!-- <plugin> -->
+	    <!-- 	  <groupId>com.github.wvengen</groupId> -->
+	    <!-- 	  <artifactId>proguard-maven-plugin</artifactId> -->
+	    <!-- 	  <version>2.0.5</version> -->
+	    <!-- 	  <executions> -->
+	    <!-- 	      <execution> -->
+	    <!-- 		  <phase>package</phase> -->
+	    <!-- 		  <goals><goal>proguard</goal></goals> -->
+	    <!-- 	      </execution> -->
+	    <!-- 	  </executions> -->
+	    <!-- 	  <configuration> -->
+	    <!-- 	      <proguardVersion>4.7</proguardVersion> -->
+	    <!-- 	      <includeDependency>false</includeDependency> -->
+	    <!-- 	      <options> -->
+	    <!-- don't warn about these packages not being found, because they are not needed anyways -->
+	    <!-- 		  <option>-dontwarn org.bouncycastle.**</option> -->
+	    <!-- 		  <option>-dontwarn junit.**</option> -->
+	    <!-- general options -->
+	    <!-- 		  <option>-allowaccessmodification</option> -->
+	    <!-- tell proguard which classes/methods to keep untouched -->
+	    <!-- 		  <option>-keep public class * extends java.applet.Applet { *; }</option> -->
+	    <!-- 	      </options> -->
+	    <!-- 	      <libs> -->
+	    <!-- 		  <lib>${java.home}/lib/rt.jar</lib> -->
+	    <!-- 		  <lib>${java.home}/lib/jce.jar</lib> -->
+	    <!-- 	      </libs> -->
+	    <!-- 	  </configuration> -->
+	    <!-- 	  <dependencies> -->
+	    <!-- 	      <dependency> -->
+	    <!-- 		  <groupId>net.sf.proguard</groupId> -->
+	    <!-- 		  <artifactId>proguard-base</artifactId> -->
+	    <!-- 		  <version>4.7</version> -->
+	    <!-- 		  <scope>runtime</scope> -->
+	    <!-- 	      </dependency> -->
+	    <!-- 	  </dependencies> -->
+	    <!-- </plugin> -->
 
-      <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-jar-plugin</artifactId>
-        <version>2.3.1</version>
-	<configuration>
-	  <keystore>src/package/resources/keystore/ecStore</keystore>
-	  <storepass>DgN1CB0Ywy2W</storepass>
-          <alias>applet</alias>
-          <keypass>bHrjoV3j7ucq</keypass>
-	  <verify>true</verify>
-	  <jarPath>${project.build.directory}/${project.build.FinalName}.${project.packaging}</jarPath>
-	</configuration>
-	<executions>
-	  <execution>
-	    <phase>verify</phase>
-	    <goals>
-	      <goal>sign</goal>
-	    </goals>
-	  </execution>
-	</executions>
-      </plugin>
-    </plugins>
-  </build>
-  
-  <dependencies>
-    <dependency>
-      <groupId>org.openecard.client</groupId>
-      <artifactId>common</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.ifd</groupId>
-      <artifactId>ifd-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.ifd.scio-backend</groupId>
-      <artifactId>pcsc</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.gui</groupId>
-      <artifactId>swing</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.sal</groupId>
-      <artifactId>tiny-sal</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.wsdef</groupId>
-      <artifactId>wsdef-client</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.wsdef</groupId>
-      <artifactId>jaxb-marshaller</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client</groupId>
-      <artifactId>event-manager</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.transport</groupId>
-      <artifactId>dispatcher</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.transport</groupId>
-      <artifactId>paos</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openecard.client.transport</groupId>
-      <artifactId>tls</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>openjdk</groupId>
-      <artifactId>java-plugin</artifactId>
-      <version>1.6.0.26</version>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-jar-plugin</artifactId>
+		<version>2.3.1</version>
+		<configuration>
+		    <keystore>src/package/resources/keystore/ecStore</keystore>
+		    <storepass>DgN1CB0Ywy2W</storepass>
+		    <alias>applet</alias>
+		    <keypass>bHrjoV3j7ucq</keypass>
+		    <verify>true</verify>
+		    <jarPath>${project.build.directory}/${project.build.FinalName}.${project.packaging}</jarPath>
+		</configuration>
+		<executions>
+		    <execution>
+			<phase>verify</phase>
+			<goals>
+			    <goal>sign</goal>
+			</goals>
+		    </execution>
+		</executions>
+	    </plugin>
+	</plugins>
+    </build>
+
+    <dependencies>
+	<dependency>
+	    <groupId>org.openecard.client</groupId>
+	    <artifactId>common</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.ifd</groupId>
+	    <artifactId>ifd-core</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.ifd.scio-backend</groupId>
+	    <artifactId>pcsc</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.gui</groupId>
+	    <artifactId>swing</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.sal</groupId>
+	    <artifactId>tiny-sal</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.management</groupId>
+	    <artifactId>tiny-management</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.wsdef</groupId>
+	    <artifactId>wsdef-client</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.wsdef</groupId>
+	    <artifactId>jaxb-marshaller</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client</groupId>
+	    <artifactId>event-manager</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.transport</groupId>
+	    <artifactId>dispatcher</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.transport</groupId>
+	    <artifactId>paos</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.transport</groupId>
+	    <artifactId>tls</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.sal.protocols</groupId>
+	    <artifactId>eac</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.ifd.protocols</groupId>
+	    <artifactId>pace</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+
+	<dependency>
+	    <groupId>org.apache.httpcomponents</groupId>
+	    <artifactId>httpclient</artifactId>
+	    <version>4.1.2</version>
+	</dependency>
+
+	<dependency>
+	    <groupId>openjdk</groupId>
+	    <artifactId>java-plugin</artifactId>
+	    <version>1.6.0.26</version>
+	    <scope>provided</scope>
+	</dependency>
+    </dependencies>
 
 </project>

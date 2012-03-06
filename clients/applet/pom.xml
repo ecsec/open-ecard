@@ -177,12 +177,6 @@
 	</dependency>
 
 	<dependency>
-	    <groupId>org.apache.httpcomponents</groupId>
-	    <artifactId>httpclient</artifactId>
-	    <version>4.1.2</version>
-	</dependency>
-
-	<dependency>
 	    <groupId>openjdk</groupId>
 	    <artifactId>java-plugin</artifactId>
 	    <version>1.6.0.26</version>

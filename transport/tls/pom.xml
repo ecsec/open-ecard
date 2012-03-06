@@ -16,11 +16,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.1.2</version>
-		</dependency>
-		<dependency>
 			<groupId>org.openecard.client.crypto</groupId>
 			<artifactId>bouncycastle</artifactId>
 			<version>${project.version}</version>

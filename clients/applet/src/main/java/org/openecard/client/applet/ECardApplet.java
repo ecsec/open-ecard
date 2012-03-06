@@ -37,11 +37,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.swing.JApplet;
 
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
@@ -59,7 +59,7 @@ import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.transport.paos.PAOS;
 import org.openecard.client.transport.paos.PAOSCallback;
 import org.openecard.client.transport.tls.PSKTlsClientImpl;
-import org.openecard.client.transport.tls.RSAPSKLayeredSocketFactory;
+import org.openecard.client.transport.tls.TLSClientSocketFactory;
 
 
 /**
@@ -168,7 +168,7 @@ public class ECardApplet extends JApplet {
 	};
 	
 	PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionId.getBytes(), Hex.decode(psk));
-        paos = new PAOS(endpointUrl, env.getDispatcher(), paosCallback, new RSAPSKLayeredSocketFactory(tlsClient));
+        paos = new PAOS(endpointUrl, env.getDispatcher(), paosCallback, new TLSClientSocketFactory(tlsClient));
         em = new EventManager(recognition, env, ctx, sessionId);
         env.setEventManager(em);
         sal = new TinySAL(env, sessionId);
@@ -453,7 +453,7 @@ public class ECardApplet extends JApplet {
         }
     }
 
-    private SSLSocketFactory createSSLSocketFactory() {
+  /*  private SSLSocketFactory createSSLSocketFactory() {
         if (selfSigned) {
             
             //
@@ -502,6 +502,6 @@ public class ECardApplet extends JApplet {
         } else {
             return SSLSocketFactory.getSocketFactory();
         }
-    }
+    }*/
     
 }

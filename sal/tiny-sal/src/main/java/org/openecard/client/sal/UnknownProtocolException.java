@@ -1,4 +1,5 @@
-/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg 
+/*
+ * Copyright 2012 Tobias Wich ecsec GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +14,16 @@
  * limitations under the License.
  */
 
-package org.openecard.client.sal.protocol.eac;
+package org.openecard.client.sal;
 
-import org.openecard.client.gui.UserConsent;
-import org.openecard.ws.IFD;
+/**
+ *
+ * @author Tobias Wich <tobias.wich@ecsec.de>
+ */
+public class UnknownProtocolException extends Exception {
 
-
-public class EACProtocol extends org.openecard.client.common.sal.Protocol {
-
-    public EACProtocol(IFD ifd, UserConsent gui) {
-	this.steps.add(new PACEStep(ifd, gui));
-	this.steps.add(new TerminalAuthenticationStep(ifd));
-	this.steps.add(new ChipAuthenticationStep(ifd));
+    public UnknownProtocolException(String message) {
+	super(message);
     }
 
-
-    @Override
-    public String toString() {
-	return "EAC";
-    }
-    
 }

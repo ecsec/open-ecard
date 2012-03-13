@@ -19,14 +19,17 @@ package org.openecard.client.sal;
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
-import org.openecard.client.common.ECardConstants;
+import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.Environment;
 import org.openecard.client.common.interfaces.EventCallback;
+import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.Protocol;
 import org.openecard.client.common.sal.ProtocolFactory;
+import org.openecard.client.common.util.SelfCleaningMap;
 import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.gui.UserConsent;
 
@@ -43,14 +46,23 @@ public class TinySAL implements org.openecard.ws.SAL, EventCallback {
     private ConcurrentSkipListMap<String, ConnectionHandleType> cHandles;
     private boolean legacyMode;
     private ProtocolFactories protocolFactories = new ProtocolFactories();
-    private Protocol eacProtocol;
     private UserConsent userConsent;
-    
+
+    private Map<String,Protocol> sessionProtocol;
+
+
     public TinySAL(Environment env) {
 	this.env = env;
 	sessionId = ValueGenerators.generateSessionID();
 	legacyMode = false;
 	cHandles = new ConcurrentSkipListMap<String, ConnectionHandleType>();
+	try {
+	    sessionProtocol = new SelfCleaningMap<String, Protocol>(ConcurrentSkipListMap.class, 5);
+	} catch (Exception ex) {
+	    // TODO: log exception
+	    // fallback to non cleaning version
+	    sessionProtocol = new ConcurrentSkipListMap<String, Protocol>();
+	}
     }
 
     @Deprecated
@@ -59,6 +71,13 @@ public class TinySAL implements org.openecard.ws.SAL, EventCallback {
 	this.sessionId = sessionId;
 	legacyMode = true;
 	cHandles = new ConcurrentSkipListMap<String, ConnectionHandleType>();
+	try {
+	    sessionProtocol = new SelfCleaningMap<String, Protocol>(ConcurrentSkipListMap.class, 5);
+	} catch (Exception ex) {
+	    // TODO: log exception
+	    // fallback to non cleaning version
+	    sessionProtocol = new ConcurrentSkipListMap<String, Protocol>();
+	}
     }
 
 
@@ -81,6 +100,26 @@ public class TinySAL implements org.openecard.ws.SAL, EventCallback {
     }
     
     
+    private Protocol getProtocol(String session, String protoUri) throws UnknownProtocolException {
+        Protocol proto = sessionProtocol.get(session);
+        if (proto == null) {
+            if (protocolFactories.contains(protoUri)) {
+                proto = protocolFactories.get(protoUri).createInstance(this, env.getIFD(), userConsent);
+                sessionProtocol.put(session, proto);
+            } else {
+                throw new UnknownProtocolException("The protocol URI '" + protoUri + "' is not registered in this SAL component.");
+            }
+        }
+        return proto;
+    }
+
+    public void removeFinishedProtocol(String session, Protocol proto) {
+	if (proto.isFinished()) {
+	    sessionProtocol.remove(session);
+	}
+    }
+
+
     @Override
     public InitializeResponse initialize(Initialize parameters) {
 	if (env != null) {
@@ -273,19 +312,25 @@ public class TinySAL implements org.openecard.ws.SAL, EventCallback {
 
     @Override
     public DIDAuthenticateResponse didAuthenticate(DIDAuthenticate didAuthenticate) {
-	if(didAuthenticate.getAuthenticationProtocolData() instanceof EAC1InputType){
-	    this.eacProtocol = this.protocolFactories.get(ECardConstants.Protocol.EAC).createInstance(this, this.env.getIFD(), this.userConsent);
-	    return eacProtocol.didAuthenticate(didAuthenticate);
-	} else if(
-		didAuthenticate.getAuthenticationProtocolData() instanceof EAC2InputType ||
-		didAuthenticate.getAuthenticationProtocolData() instanceof EACAdditionalInputType){
-		return eacProtocol.didAuthenticate(didAuthenticate);
-	} else {
-	    return WSHelper.makeResponse(
-		    DIDAuthenticateResponse.class,
-		    WSHelper.makeResultError("Unsupported Type for DIDAuthenticationProtocolData in DIDAuthenticate", "The Type "
-			    + didAuthenticate.getAuthenticationProtocolData().getClass().getName()
-			    + "for DIDAuthenticationProtocolData in DIDAuthenticate is currently not supported"));
+        String protoUri = didAuthenticate.getAuthenticationProtocolData().getProtocol();
+        String session = didAuthenticate.getConnectionHandle().getChannelHandle().getSessionIdentifier();
+
+	try {
+	    Protocol proto = getProtocol(session, protoUri);
+	    if (proto.hasNextStep(FunctionType.DIDAuthenticate)) {
+		DIDAuthenticateResponse resp = proto.didAuthenticate(didAuthenticate);
+		removeFinishedProtocol(session, proto);
+		return resp;
+	    } else {
+		Result res = WSHelper.makeResultUnknownError("No protocol step available for DIDAuthenticate in protocol " + proto.toString() + ".");
+		DIDAuthenticateResponse resp = WSHelper.makeResponse(DIDAuthenticateResponse.class, res);
+		return resp;
+	    }
+	} catch (UnknownProtocolException ex) {
+	    // TODO: log exception
+	    Result res = WSHelper.makeResult(ex);
+	    DIDAuthenticateResponse resp = WSHelper.makeResponse(DIDAuthenticateResponse.class, res);
+	    return resp;
 	}
     }
 

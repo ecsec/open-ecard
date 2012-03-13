@@ -152,4 +152,19 @@ public class TagLengthValueTest {
 	assertTrue(t.findChildTags(0x8B).get(0).getTagNumWithClass() == 0x8B);
     }
 
+    @Test
+    public void testCreateTLV() throws TLVException {
+	TLV outer = new TLV();
+	outer.setTagNumWithClass(0x7C);
+	TLV inner = new TLV();
+	inner.setTagNumWithClass(0x81);
+	inner.setValue(new byte[]{0x01, 0x02});
+
+	outer.setChild(inner);
+
+	byte[] result = outer.toBER();
+
+	assertArrayEquals(new byte[] {(byte)0x7C, 0x04, (byte)0x81, 0x02, 0x01, 0x02}, result);
+    }
+
 }

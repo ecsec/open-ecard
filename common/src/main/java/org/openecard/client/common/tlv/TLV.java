@@ -227,15 +227,14 @@ public class TLV {
 	return out.toByteArray();
     }
     private void toBER(ByteArrayOutputStream out, boolean withSuccessors) throws TLVException {
-	byte[] childBytes = new byte[]{};
 	if (child != null) {
-	    childBytes = child.toBER();
+	    byte[] childBytes = child.toBER();
 	    tag.setPrimitive(false);
+	    tag.setValue(childBytes);
 	} else {
 	    tag.setPrimitive(true);
 	}
 	// write child to output stream
-	tag.setValue(childBytes);
 	try {
 	    out.write(tag.toBER());
 	} catch (IOException ex) {

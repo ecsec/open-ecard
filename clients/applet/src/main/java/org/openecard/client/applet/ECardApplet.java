@@ -16,32 +16,16 @@
 
 package org.openecard.client.applet;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.EstablishContext;
-import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
-import iso.std.iso_iec._24727.tech.schema.Initialize;
-import iso.std.iso_iec._24727.tech.schema.InitializeResponse;
-import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
-
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.awt.Container;
 import java.awt.Frame;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import javax.swing.JApplet;
-
 import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
@@ -141,7 +125,7 @@ public class ECardApplet extends JApplet {
             recognition = null;
         }
 	// TODO: replace socket factory with this strange psk stuff
- PAOSCallback paosCallback = new PAOSCallback() {
+	PAOSCallback paosCallback = new PAOSCallback() {
 	    
 	    @Override
 	    public void loadRefreshAddress() {
@@ -160,14 +144,20 @@ public class ECardApplet extends JApplet {
 			ECardApplet.this.getAppletContext().showDocument(new URL(redirectUrl), "_blank");
 			} catch (MalformedURLException e) {
 			    // TODO Auto-generated catch block
-			    e.printStackTrace();
+			    e.printStackTrace(System.err);
 			}
 		    }
 		}).start();	
 	    }
 	};
-	
-	PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionId.getBytes(), Hex.decode(psk));
+
+	String hostName = null;
+	try {
+	    hostName = new URL(endpointUrl).getHost();
+	} catch (MalformedURLException ex) {
+	    // TODO: find out what to do in case of this error
+	}
+	PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionId.getBytes(), Hex.decode(psk), hostName);
         paos = new PAOS(endpointUrl, env.getDispatcher(), paosCallback, new TLSClientSocketFactory(tlsClient));
         em = new EventManager(recognition, env, ctx, sessionId);
         env.setEventManager(em);

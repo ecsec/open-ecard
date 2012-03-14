@@ -104,30 +104,28 @@ public class TinySALTest {
     /**
      * Test of cardApplicationPath method, of class TinySAL.
      */
+    @Ignore
     @Test
     public void testCardApplicationPath() {
         System.out.println("cardApplicationPath");
         CardApplicationPath cardApplicationPath = new CardApplicationPath();
-       CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
-       cardApplicationPathType.setCardApplication(Hex.decode("A000000167455349474E")); //DF.ESign
-       EstablishContextResponse ecr = this.env.getIFD().establishContext(new EstablishContext());
-       
-       cardApplicationPathType.setContextHandle(ecr.getContextHandle());
-       
-       ListIFDs listIFDs = new ListIFDs();
-       listIFDs.setContextHandle(ecr.getContextHandle());
-       ListIFDsResponse listIFDsResponse = this.env.getIFD().listIFDs(listIFDs);
-       for(String s : listIFDsResponse.getIFDName())
-	   System.out.println(s);
-       cardApplicationPathType.setIFDName("REINER SCT cyberJack RFID standard USB 52");
-       cardApplicationPathType.setSlotIndex(new BigInteger("0"));
-        
+	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
+	cardApplicationPathType.setCardApplication(Hex.decode("A000000167455349474E")); //DF.ESign
+	EstablishContextResponse ecr = this.env.getIFD().establishContext(new EstablishContext());
+
+	cardApplicationPathType.setContextHandle(ecr.getContextHandle());
+
+	ListIFDs listIFDs = new ListIFDs();
+	listIFDs.setContextHandle(ecr.getContextHandle());
+	ListIFDsResponse listIFDsResponse = this.env.getIFD().listIFDs(listIFDs);
+	for(String s : listIFDsResponse.getIFDName()) {
+	    System.out.println(s);
+	}
+	cardApplicationPathType.setIFDName("REINER SCT cyberJack RFID standard USB 52");
+	cardApplicationPathType.setSlotIndex(new BigInteger("0"));
+
         cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
         CardApplicationPathResponse cardApplicationPathResponse = this.instance.cardApplicationPath(cardApplicationPath);
-        
-//        CardApplicationPath parameters = new CardApplicationPath();
-//        CardApplicationPathResponse result = instance.cardApplicationPath(parameters);
-//        assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
     }
 
     /**
@@ -144,12 +142,13 @@ public class TinySALTest {
     /**
      * Test of cardApplicationDisconnect method, of class TinySAL.
      */
+    @Ignore
     @Test
     public void testCardApplicationDisconnect() {
         System.out.println("cardApplicationDisconnect");
-//        CardApplicationDisconnect parameters = new CardApplicationDisconnect();
-//        CardApplicationDisconnectResponse result = instance.cardApplicationDisconnect(parameters);
-//        assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
+	CardApplicationDisconnect parameters = new CardApplicationDisconnect();
+	CardApplicationDisconnectResponse result = instance.cardApplicationDisconnect(parameters);
+	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
     }
 
     /**
@@ -507,12 +506,13 @@ public class TinySALTest {
     /**
      * Test of didAuthenticate method, of class TinySAL.
      */
+    @Ignore
     @Test
     public void testDidAuthenticate() {
         System.out.println("didAuthenticate");
-       /* DIDAuthenticate parameters = new DIDAuthenticate();
+        DIDAuthenticate parameters = new DIDAuthenticate();
         DIDAuthenticateResponse result = instance.didAuthenticate(parameters);
-        assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());*/
+        assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
     }
 
     /**
@@ -543,7 +543,7 @@ public class TinySALTest {
     @Test
     public void testSingalEvent() {
         System.out.println("singalEvent");
-        // same as getconnectionhandles, so cdall this one instead
+        // same as getconnectionhandles, so call this one instead
         testGetConnectionHandles();
     }
 

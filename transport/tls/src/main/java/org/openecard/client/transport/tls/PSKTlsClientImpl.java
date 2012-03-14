@@ -34,16 +34,16 @@ import org.openecard.bouncycastle.crypto.tls.TlsPSKIdentity;
  */
 public class PSKTlsClientImpl extends PSKTlsClient {
 
-    public PSKTlsClientImpl(TlsCipherFactory cipherFactory, TlsPSKIdentity pskIdentity) {
-	super(cipherFactory, pskIdentity);
+    public PSKTlsClientImpl(TlsCipherFactory cipherFactory, TlsPSKIdentity pskIdentity, String fqdn) {
+	super(cipherFactory, pskIdentity, fqdn);
     }
 
-    public PSKTlsClientImpl(byte[] identity, byte[] psk){
-	super(new TlsPSKIdentityImpl(identity, psk));
+    public PSKTlsClientImpl(byte[] identity, byte[] psk, String fqdn){
+	super(new TlsPSKIdentityImpl(identity, psk), fqdn);
     }
     
-    public PSKTlsClientImpl(TlsPSKIdentity pskIdentity) {
-	super(pskIdentity);
+    public PSKTlsClientImpl(TlsPSKIdentity pskIdentity, String fqdn) {
+	super(pskIdentity, fqdn);
     }
 
     @Override

@@ -8,11 +8,19 @@ import org.openecard.client.common.interfaces.EventCallback;
 
 public class ClientEventCallBack implements EventCallback {
 
+    public static EventType eventType;
+    public static Object eventData;
+    
 	public void signalEvent(EventType eventType, Object eventData) {
+	    		ClientEventCallBack.eventType = eventType;
+		 ClientEventCallBack.eventData = eventData;
 		  System.out.println("signalEvent: Type: " + eventType.toString());
 		  if(eventData instanceof ConnectionHandleType){
 			  ConnectionHandleType ch = (ConnectionHandleType) eventData;
 			 System.out.println("Card recognized as: " + ch.getRecognitionInfo().getCardType());
+			
 		  }
 	}
+	
+	
 }

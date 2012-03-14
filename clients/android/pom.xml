@@ -26,11 +26,6 @@
 	    <artifactId>ifd-core</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
-   	<dependency>
-	    <groupId>org.openecard.client.crypto</groupId>
-	    <artifactId>bouncycastle</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
 	<dependency>
 	    <groupId>org.openecard.client.wsdef</groupId>
 	    <artifactId>android-marshaller</artifactId>
@@ -40,6 +35,11 @@
 	    <groupId>org.openecard.client.ifd.scio-backend</groupId>
 	    <artifactId>android-nfc</artifactId>
 	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	 	<groupId>org.openecard.client.management</groupId>
+  		<artifactId>tiny-management</artifactId>
+    	<version>${project.version}</version>
 	</dependency>
 	<!-- <dependency> -->
 	<!--   <groupId>org.openecard.client.gui</groupId> -->
@@ -62,23 +62,43 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
+		<groupId>org.openecard.client.transport</groupId>
+ 		 <artifactId>dispatcher</artifactId>
+  		 <version>${project.version}</version>
+  	</dependency>
+	<dependency>
 	    <groupId>org.openecard.client.transport</groupId>
 	    <artifactId>paos</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.transport</groupId>
-	    <artifactId>tls</artifactId>
+	    <groupId>org.openecard.client.ifd.protocols</groupId>
+  		<artifactId>pace</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
-
+	<dependency>
+	    <groupId>org.openecard.client.transport</groupId>
+  		<artifactId>tls</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
 	<dependency>
 	    <groupId>android</groupId>
 	    <artifactId>android</artifactId>
 	    <version>2.3.3_r2</version>
 	    <scope>provided</scope>
 	</dependency>
-    </dependencies>
+	<dependency> 
+        <groupId>org.openecard.client.gui</groupId>
+ 	 	<artifactId>android-gui</artifactId>
+       	<version>${project.version}</version> 
+       	<type>apklib</type>
+    </dependency> 
+    <dependency> 
+    	<groupId>org.openecard.client.sal.protocols</groupId>
+  		<artifactId>eac</artifactId>
+   		<version>${project.version}</version> 
+    </dependency> 
+   </dependencies>
 
     <build>
 	<plugins>

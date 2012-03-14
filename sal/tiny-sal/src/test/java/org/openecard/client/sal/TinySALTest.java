@@ -17,13 +17,18 @@
 package org.openecard.client.sal;
 
 import iso.std.iso_iec._24727.tech.schema.*;
+
+import java.math.BigInteger;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.Ignore;
+import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.enums.EventType;
+import org.openecard.client.ifd.scio.IFD;
+
 import static org.junit.Assert.*;
 
 
@@ -39,6 +44,7 @@ public class TinySALTest {
     @Before
     public void setUp() {
         env = new ClientEnv();
+        env.setIFD(new IFD());
         instance = new TinySAL(env, "");
     }
 
@@ -101,9 +107,27 @@ public class TinySALTest {
     @Test
     public void testCardApplicationPath() {
         System.out.println("cardApplicationPath");
-        CardApplicationPath parameters = new CardApplicationPath();
-        CardApplicationPathResponse result = instance.cardApplicationPath(parameters);
-        assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
+        CardApplicationPath cardApplicationPath = new CardApplicationPath();
+       CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
+       cardApplicationPathType.setCardApplication(Hex.decode("A000000167455349474E")); //DF.ESign
+       EstablishContextResponse ecr = this.env.getIFD().establishContext(new EstablishContext());
+       
+       cardApplicationPathType.setContextHandle(ecr.getContextHandle());
+       
+       ListIFDs listIFDs = new ListIFDs();
+       listIFDs.setContextHandle(ecr.getContextHandle());
+       ListIFDsResponse listIFDsResponse = this.env.getIFD().listIFDs(listIFDs);
+       for(String s : listIFDsResponse.getIFDName())
+	   System.out.println(s);
+       cardApplicationPathType.setIFDName("REINER SCT cyberJack RFID standard USB 52");
+       cardApplicationPathType.setSlotIndex(new BigInteger("0"));
+        
+        cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
+        CardApplicationPathResponse cardApplicationPathResponse = this.instance.cardApplicationPath(cardApplicationPath);
+        
+//        CardApplicationPath parameters = new CardApplicationPath();
+//        CardApplicationPathResponse result = instance.cardApplicationPath(parameters);
+//        assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
     }
 
     /**
@@ -123,9 +147,9 @@ public class TinySALTest {
     @Test
     public void testCardApplicationDisconnect() {
         System.out.println("cardApplicationDisconnect");
-        CardApplicationDisconnect parameters = new CardApplicationDisconnect();
-        CardApplicationDisconnectResponse result = instance.cardApplicationDisconnect(parameters);
-        assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
+//        CardApplicationDisconnect parameters = new CardApplicationDisconnect();
+//        CardApplicationDisconnectResponse result = instance.cardApplicationDisconnect(parameters);
+//        assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
     }
 
     /**

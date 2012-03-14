@@ -15,24 +15,52 @@
 
 package org.openecard.client.android;
 
-import android.app.Application;
+import iso.std.iso_iec._24727.tech.schema.Connect;
+import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.CryptoMarkerType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
+import iso.std.iso_iec._24727.tech.schema.Sign;
+
+import java.math.BigInteger;
+import java.util.Locale;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.util.ValueGenerators;
+import org.openecard.client.common.OpenecardProperties;
+import org.openecard.client.common.enums.EventType;
+import org.openecard.client.common.interfaces.Dispatcher;
+import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.event.EventManager;
+import org.openecard.client.gui.android.AndroidUserConsent;
+import org.openecard.client.ifd.BluetoothConnection;
+import org.openecard.client.ifd.SerialConnectionIFD;
 import org.openecard.client.ifd.scio.IFDProperties;
+import org.openecard.client.management.TinyManagement;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.sal.TinySAL;
+import org.openecard.client.sal.protocol.eac.EACProtocolFactory;
+import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.ws.WsdefProperties;
 import org.openecard.ws.IFD;
+import org.openecard.ws.Management;
+
+import sun.misc.CharacterEncoder;
+
+import android.app.Application;
+import android.bluetooth.BluetoothAdapter;
+import android.webkit.WebView;
 
 /**
- * This class is instantiated when the process of this application is created. 
+ * This class is instantiated when the process of this application is created.
  * Therefore the global application state is maintained here.
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class ApplicationContext extends Application {
@@ -45,17 +73,38 @@ public class ApplicationContext extends Application {
 	private byte[] ctx;
 	private boolean initialized = false;
 	private boolean recognizeCard = true;
+	private WebView webView;
+	private static final Logger _logger = LogManager.getLogger(ApplicationContext.class.getName());
+	  
+	public ApplicationContext() throws Throwable {
+	    _logger.setLevel(Level.WARNING);
+	    ConsoleHandler handler = new ConsoleHandler();
+	    handler.setLevel(_logger.getLevel());
+	    _logger.addHandler(handler);
+	    
+		OpenecardProperties.setProperty("org.openecard.lang", Locale.getDefault().toString());
+		
 
-	public ApplicationContext() {
+		IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl",
+				"org.openecard.client.scio.NFCFactory");
+		WsdefProperties.setProperty("org.openecard.client.ws.marshaller.impl",
+				"org.openecard.client.ws.android.AndroidMarshaller");
 
-		IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl", "org.openecard.client.scio.NFCFactory");
-		WsdefProperties.setProperty("org.openecard.client.ws.marshaller.impl", "org.openecard.client.ws.android.AndroidMarshaller");
-		this.ifd = new org.openecard.client.ifd.scio.IFD();
+		
+		/* not usable without nfc/ext apdus
+		 this.ifd = new org.openecard.client.ifd.scio.IFD();
+		ifd.addProtocol(ECardConstants.Protocol.PACE, new
+		PACEProtocolFactory());
+		*/
+		this.ifd = new SerialConnectionIFD(new BluetoothConnection(
+				BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
+						"60:D8:19:C0:73:EF")));
 		this.env = new ClientEnv();
 		env.setIFD(ifd);
 		EstablishContext ecRequest = new EstablishContext();
 		EstablishContextResponse ecResponse = ifd.establishContext(ecRequest);
-		if (ecResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
+		if (ecResponse.getResult().getResultMajor()
+				.equals(ECardConstants.Major.OK)) {
 			if (ecResponse.getContextHandle() != null) {
 				ctx = ecResponse.getContextHandle();
 				initialized = true;
@@ -66,6 +115,19 @@ public class ApplicationContext extends Application {
 		listIFDs.setContextHandle(ctx);
 		ListIFDsResponse listresp = ifd.listIFDs(listIFDs);
 		System.out.println("Listresp: " + listresp.getIFDName().get(0));
+
+		Connect c = new Connect();
+		c.setContextHandle(ecResponse.getContextHandle());
+		c.setExclusive(false);
+		c.setIFDName("SCM Microsystems Inc. SCL011 Contactless Reader 0");
+		c.setSlot(new BigInteger("0"));
+		ConnectResponse cr = ifd.connect(c);
+
+		ConnectionHandleType ch = new ConnectionHandleType();
+		ch.setIFDName("SCM Microsystems Inc. SCL011 Contactless Reader 0");
+		ch.setSlotIndex(new BigInteger("0"));
+		ch.setSlotHandle(cr.getSlotHandle());
+		ch.setContextHandle(ecResponse.getContextHandle());
 
 		if (recognizeCard) {
 			try {
@@ -81,16 +143,28 @@ public class ApplicationContext extends Application {
 		} else {
 			recognition = null;
 		}
+		
+		
+		
+		em = new EventManager(recognition, env, ctx, null);
+		sal = new TinySAL(env);
+		sal.setGUI(new AndroidUserConsent(this));
+		sal.addProtocol(ECardConstants.Protocol.EAC, new EACProtocolFactory());
+		 em.registerAllEvents(sal);
+		 em.registerAllEvents(new ClientEventCallBack());
+		 env.setEventManager(em);
+		env.setSAL(sal);
+		sal.signalEvent(EventType.TERMINAL_ADDED, ch);
+		// Event-Manager doesnt work with Bluetooth-IFD, Wait blocks communication
+		// em.initialize();
+		Management m = new TinyManagement(env);
+		env.setManagement(m);
 
-		System.out.println(recognition==null);
-		// TODO: revisit session id parameter, might better be set from outside, but perhaps it doesn't matter at all
-		em = new EventManager(recognition, env, ctx, ValueGenerators.generateUUID());
+		Dispatcher d = new MessageDispatcher(env);
+		env.setDispatcher(d);
 
-		em.registerAllEvents(new ClientEventCallBack());
-		env.setEventManager(em);
-		em.initialize();
 	}
-	
+
 	public byte[] getCTX() {
 		return ctx;
 	}
@@ -99,4 +173,12 @@ public class ApplicationContext extends Application {
 		return env;
 	}
 
+	public void setWebView(WebView mWebView) {
+		this.webView = mWebView;
+
+	}
+
+	public WebView getWebView() {
+		return this.webView;
+	}
 }

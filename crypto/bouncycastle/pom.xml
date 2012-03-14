@@ -18,7 +18,7 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk16</artifactId>
-      <version>1.47-2012-03-07</version>
+      <version>1.47-RC2</version>
       <scope>runtime</scope>
     </dependency>
   </dependencies>
@@ -43,16 +43,16 @@
                 </relocation>
               </relocations>
               <filters>
-				<filter>
-					<artifact>*:*</artifact>
-					<excludes>
-						<!-- else we get error: JCE cannot authenticate the provider BC -->
-<!-- 						<exclude>META-INF/*.SF</exclude> -->
-<!-- 						<exclude>META-INF/*.DSA</exclude> -->
-<!-- 						<exclude>META-INF/*.RSA</exclude> -->
-					</excludes>
-				</filter>
-			  </filters>
+		  <filter>
+		      <artifact>*:*</artifact>
+		      <excludes>
+			  <!-- else we get error: JCE cannot authenticate the provider BC -->
+			  <!-- <exclude>META-INF/*.SF</exclude> -->
+			  <!-- <exclude>META-INF/*.DSA</exclude> -->
+			  <!-- <exclude>META-INF/*.RSA</exclude> -->
+		      </excludes>
+		  </filter>
+	      </filters>
             </configuration>
           </execution>
         </executions>

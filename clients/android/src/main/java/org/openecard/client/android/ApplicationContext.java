@@ -51,8 +51,6 @@ import org.openecard.client.ws.WsdefProperties;
 import org.openecard.ws.IFD;
 import org.openecard.ws.Management;
 
-import sun.misc.CharacterEncoder;
-
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.webkit.WebView;

@@ -14,7 +14,7 @@ public class OpenecardProperties {
 
     private static class Internal extends OverridingProperties {
 	public Internal() throws IOException {
-	    super("openecard.properties");
+	    super("openecard_config/openecard.properties");
 	}
     }
 

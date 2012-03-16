@@ -53,9 +53,9 @@ public class I18n {
     }
 
     private static Properties loadFile(String name) {
-	InputStream in = I18n.class.getResourceAsStream("i18n/" + name);
+	InputStream in = I18n.class.getResourceAsStream("openecard_config/i18n/" + name);
 	if (in == null) {
-	    in = I18n.class.getResourceAsStream("/i18n/" + name);
+	    in = I18n.class.getResourceAsStream("/openecard_config/i18n/" + name);
 	}
 	// load properties or die tryin'
 	try {

@@ -25,6 +25,9 @@ import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.Locale;
 import java.util.logging.ConsoleHandler;
@@ -55,6 +58,7 @@ import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.webkit.WebView;
 
+
 /**
  * This class is instantiated when the process of this application is created.
  * Therefore the global application state is maintained here.
@@ -62,6 +66,23 @@ import android.webkit.WebView;
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class ApplicationContext extends Application {
+
+    // load logging config
+    static {
+	File conf = new File(LogManager.openecardPath + File.separator + LogManager.openecardConfFileName);
+	boolean success = false;
+	if (conf.isFile()) {
+	    try {
+		success = LogManager.loadConfig(new FileInputStream(conf));
+	    } catch (FileNotFoundException ex) {
+		System.err.println("ERROR: Unable to read logging config file '" + conf.getAbsolutePath() + "'.");
+	    }
+	}
+	if (!success) {
+	    LogManager.loadOpeneCardDefaultConfig();
+	}
+    }
+
 
 	private ClientEnv env;
 	private TinySAL sal;

@@ -19,6 +19,9 @@ package org.openecard.client.applet;
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.awt.Container;
 import java.awt.Frame;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
@@ -51,6 +54,22 @@ import org.openecard.client.transport.tls.TLSClientSocketFactory;
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
  */
 public class ECardApplet extends JApplet {
+    
+    // load logging config
+    static {
+	File conf = new File(LogManager.openecardPath + File.separator + LogManager.openecardConfFileName);
+	boolean success = false;
+	if (conf.isFile()) {
+	    try {
+		success = LogManager.loadConfig(new FileInputStream(conf));
+	    } catch (FileNotFoundException ex) {
+		System.err.println("ERROR: Unable to read logging config file '" + conf.getAbsolutePath() + "'.");
+	    }
+	}
+	if (!success) {
+	    LogManager.loadOpeneCardDefaultConfig();
+	}
+    }
 
     private static final Logger _logger = LogManager.getLogger(ECardApplet.class.getName());
 

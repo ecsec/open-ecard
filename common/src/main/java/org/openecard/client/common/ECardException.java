@@ -179,7 +179,5 @@ public abstract class ECardException extends Exception {
     public void printStackTrace(PrintWriter s) {
         impl.printStackTrace(s);
     }
-    
-    
 
 }

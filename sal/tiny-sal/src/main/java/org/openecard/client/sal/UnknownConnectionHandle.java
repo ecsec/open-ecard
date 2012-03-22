@@ -30,18 +30,20 @@
 
 package org.openecard.client.sal;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ECardException;
+import org.openecard.client.common.sal.state.HandlePrinter;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class UnknownProtocolException extends ECardException {
+public class UnknownConnectionHandle extends ECardException {
 
-    public UnknownProtocolException(String message) {
-	makeException(this, ECardConstants.Minor.SAL.PROTOCOL_NOT_RECOGNIZED, message);
+    public UnknownConnectionHandle(ConnectionHandleType handle) {
+	makeException(this, ECardConstants.Minor.SAL.UNKNOWN_HANDLE, HandlePrinter.printHandle(handle));
     }
 
 }

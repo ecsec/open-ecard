@@ -21,6 +21,11 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
+	    <groupId>org.openecard.client</groupId>
+	    <artifactId>recognition</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
 	    <groupId>org.openecard.client.crypto</groupId>
 	    <artifactId>crypto-common</artifactId>
 	    <version>${project.version}</version>

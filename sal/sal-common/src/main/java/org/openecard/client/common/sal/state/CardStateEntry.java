@@ -36,7 +36,6 @@ import java.math.BigInteger;
 import java.util.Map;
 import java.util.TreeMap;
 import org.openecard.client.common.sal.Protocol;
-import org.openecard.client.common.sal.ProtocolFactory;
 import org.openecard.client.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.ws.protocols.tls.v1.TLSMarkerType;
 

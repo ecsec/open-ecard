@@ -28,6 +28,8 @@ import org.junit.Test;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.enums.EventType;
+import org.openecard.client.common.sal.state.CardStateMap;
+import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.recognition.RecognitionProperties;
@@ -94,15 +96,17 @@ public class ECardAppletTest {
         System.out.print("Create EventManager... ");
         manager = new EventManager(cr, env, ctx, "1234567890");
         System.out.println("done.");
-        
+
         System.out.print("Create SAL... ");
-        sal = new TinySAL(env);
+	CardStateMap cardStates = new CardStateMap();
+	SALStateCallback salCallback = new SALStateCallback(cr, cardStates);
+        sal = new TinySAL(env, cardStates);
         System.out.println("done.");
-        
+
         System.out.print("Register SAL for all events... ");
-        manager.registerAllEvents(sal);
+        manager.registerAllEvents(salCallback);
         System.out.println("done.");
-        
+
         System.out.print("Create DummyCallback... ");
         cb = new DummyCallback();
         System.out.println("done");

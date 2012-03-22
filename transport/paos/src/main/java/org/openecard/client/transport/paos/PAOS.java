@@ -1,18 +1,32 @@
-/*
- * Copyright 2012 Tobias Wich ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard Client.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Open eCard Client is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Open eCard Client is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ * Other Usage
+ *
+ * Alternatively, this file may be used in accordance with the terms and
+ * conditions contained in a signed written agreement between you and ecsec.
+ *
+ ****************************************************************************/
 
 package org.openecard.client.transport.paos;
 
@@ -20,11 +34,9 @@ import de.bund.bsi.ecard.api._1.InitializeFramework;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
@@ -54,25 +66,28 @@ import org.w3c.dom.Element;
  */
 public class PAOS {
 
+    private static final Logger _logger = LogManager.getLogger(PAOS.class.getName());
+
     static {
 	javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(new javax.net.ssl.HostnameVerifier() {
-	    // FIXME
+	    // TODO: verify hostname and whatnot
+	    @Override
 	    public boolean verify(String hostname, javax.net.ssl.SSLSession sslSession) {
 		return true;
 	    }
 	});
     }
 
-    static {
-	try {
-	    m = WSMarshallerFactory.createInstance();
-	} catch (WSMarshallerException ex) {
-	    throw new RuntimeException(ex);
-	}
+
+    /**
+     * Enum listing all EID Servers which need special treatment in PAOS.
+     */
+    public static enum EIDServerTypes {
+	mTG;
     }
 
-    private static final Logger _logger = LogManager.getLogger(PAOS.class.getName());
-    private static final WSMarshaller m;
+
+    private final WSMarshaller m;
     private final String endpoint;
     private final Dispatcher dispatcher;
     private SSLSocketFactory socketFactory;
@@ -83,7 +98,19 @@ public class PAOS {
 	this.dispatcher = dispatcher;
 	this.callback = callback;
 	this.socketFactory = sockFac;
+
+	try {
+	    m = WSMarshallerFactory.createInstance();
+	} catch (WSMarshallerException ex) {
+	    throw new RuntimeException(ex);
+	}
     }
+
+    public PAOS(String endpoint, Dispatcher dispatcher, PAOSCallback callback) {
+	this(endpoint, dispatcher, callback, null);
+    }
+
+
 
 
     private String getRelatesTo(SOAPMessage msg) throws SOAPException {
@@ -154,7 +181,7 @@ public class PAOS {
 	}
     }
 
-    public Object processPAOSRequest(String content) throws PAOSException {
+    public Object processPAOSRequest(InputStream content) throws PAOSException {
 	Exception e;
 	try {
 	    Document doc = m.str2doc(content);
@@ -217,51 +244,35 @@ public class PAOS {
 
 	// loop and send makes a computer happy
 	while (true) {
-	    HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-	    conn.setSSLSocketFactory(this.socketFactory);
-	    conn.setDoOutput(true); // Triggers POST.
+	    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+	    if (socketFactory != null && conn instanceof HttpsURLConnection) {
+		HttpsURLConnection tmpConn = (HttpsURLConnection) url.openConnection();
+		tmpConn.setSSLSocketFactory(socketFactory);
+	    }
+	    conn.setDoInput(true); // http is always input and output
+	    conn.setDoOutput(true);
 	    conn.setRequestProperty(ECardConstants.HEADER_KEY_PAOS, ECardConstants.HEADER_VALUE_PAOS);
 	    conn.setRequestProperty(ECardConstants.HEADER_KEY_CONTENT_TYPE, ECardConstants.HEADER_VALUE_CONTENT_TYPE);
 	    conn.setRequestProperty(ECardConstants.HEADER_KEY_ACCEPT, ECardConstants.HEADER_VALUE_ACCEPT);
+	    conn.connect();
 
 	    OutputStream output = null;
 	    try {
 		output = conn.getOutputStream();
 		output.write(this.createPAOSResponse(msg).getBytes("UTF-8"));
 	    } finally {
-		if (output != null)
-		    try {
-			output.close();
-		    } catch (IOException e) {
-			// <editor-fold defaultstate="collapsed" desc="log trace">
-			if (_logger.isLoggable(Level.WARNING)) {
-			    _logger.logp(Level.WARNING, this.getClass().getName(), "sendStartPAOS(StartPAOS message)", e.getMessage(), e);
-			} // </editor-fold>
-		    }
+		output.close();
 	    }
 
-	    InputStream response = conn.getInputStream();
-	    StringBuffer sb = new StringBuffer();
-
-	    BufferedReader reader = null;
+	    InputStream response = null;
+	    Object requestObj;
 	    try {
-		reader = new BufferedReader(new InputStreamReader(response, "UTF-8"));
-		for (String line; (line = reader.readLine()) != null;) {
-		    sb.append(line);
-		}
+		response = conn.getInputStream();
+		requestObj = this.processPAOSRequest(response);
 	    } finally {
-		if (reader != null)
-		    try {
-			reader.close();
-		    } catch (IOException e) {
-			// <editor-fold defaultstate="collapsed" desc="log trace">
-			if (_logger.isLoggable(Level.WARNING)) {
-			    _logger.logp(Level.WARNING, this.getClass().getName(), "sendStartPAOS(StartPAOS message)", e.getMessage(), e);
-			} // </editor-fold>
-		    }
+		response.close();
 	    }
 
-	    Object requestObj = this.processPAOSRequest(sb.toString());
 	    // break when message is startpaosresponse
 	    if (requestObj instanceof StartPAOSResponse) {
 		StartPAOSResponse startPAOSResponse = (StartPAOSResponse) requestObj;
@@ -269,15 +280,18 @@ public class PAOS {
 	    } else if (requestObj instanceof InitializeFramework) {
 		// connection seems to be successfully established, trigger
 		// loading of refreshAddress (see. BSI TR-03112-7)
-		new Thread(new Runnable() {
+		Thread t = new Thread(new Runnable() {
 		    @Override
 		    public void run() {
 			callback.loadRefreshAddress();
 		    }
-		}).start();
+		});
+		t.start();
 	    }
+
 	    // send via dispatcher
 	    msg = dispatcher.deliver(requestObj);
 	}
     }
+
 }

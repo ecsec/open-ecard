@@ -1,43 +1,57 @@
-/*
- * Copyright 2012 Johannes Schmoelz ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard Client.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Open eCard Client is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Open eCard Client is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ * Other Usage
+ *
+ * Alternatively, this file may be used in accordance with the terms and
+ * conditions contained in a signed written agreement between you and ecsec.
+ *
+ ****************************************************************************/
 
 package org.openecard.client.sal;
 
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse.CardAppPathResultSet;
 import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse.CardAppPathResultSet;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.ECardException;
 import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.Environment;
-import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.Protocol;
 import org.openecard.client.common.sal.ProtocolFactory;
+import org.openecard.client.common.sal.state.CardStateEntry;
+import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.CardCommands;
-import org.openecard.client.common.util.SelfCleaningMap;
 import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.gui.UserConsent;
 
@@ -49,46 +63,34 @@ import org.openecard.client.gui.UserConsent;
  * @author Simon Potzernheim <potzernheim@hs-coburg.de>
  * @author Tobias WIch <tobias.wich@ecsec.de>
  */
-public class TinySAL implements org.openecard.ws.SAL, EventCallback {
+public class TinySAL implements org.openecard.ws.SAL {
+
+    private static final Logger _logger = LogManager.getLogger(TinySAL.class.getName());
 
     private Environment env;
     private String sessionId;
-    private static final Logger _logger = LogManager.getLogger(TinySAL.class.getName());
     private ConcurrentSkipListMap<String, ConnectionHandleType> cHandles;
     private boolean legacyMode;
     private ProtocolFactories protocolFactories = new ProtocolFactories();
     private UserConsent userConsent;
+    private CardStateMap states;
 
-    private Map<String,Protocol> sessionProtocol;
 
-
-    public TinySAL(Environment env) {
+    public TinySAL(Environment env, CardStateMap states) {
 	this.env = env;
+	this.states = states;
 	sessionId = ValueGenerators.generateSessionID();
 	legacyMode = false;
 	cHandles = new ConcurrentSkipListMap<String, ConnectionHandleType>();
-	try {
-	    sessionProtocol = new SelfCleaningMap<String, Protocol>(ConcurrentSkipListMap.class, 5);
-	} catch (Exception ex) {
-	    // TODO: log exception
-	    // fallback to non cleaning version
-	    sessionProtocol = new ConcurrentSkipListMap<String, Protocol>();
-	}
     }
 
     @Deprecated
-    public TinySAL(Environment env, String sessionId) {
+    public TinySAL(Environment env, CardStateMap states, String sessionId) {
 	this.env = env;
+	this.states = states;
 	this.sessionId = sessionId;
 	legacyMode = true;
 	cHandles = new ConcurrentSkipListMap<String, ConnectionHandleType>();
-	try {
-	    sessionProtocol = new SelfCleaningMap<String, Protocol>(ConcurrentSkipListMap.class, 5);
-	} catch (Exception ex) {
-	    // TODO: log exception
-	    // fallback to non cleaning version
-	    sessionProtocol = new ConcurrentSkipListMap<String, Protocol>();
-	}
     }
 
 
@@ -96,11 +98,22 @@ public class TinySAL implements org.openecard.ws.SAL, EventCallback {
 	this.userConsent = uc;
     }
 
+    /**
+     * Get list of all currently known handles, even for unrecognized cards.
+     *
+     * @return
+     */
     public List<ConnectionHandleType> getConnectionHandles() {
-	ArrayList<ConnectionHandleType> list = new ArrayList<ConnectionHandleType>(cHandles.values());
-	return list;
+	ConnectionHandleType handle = new ConnectionHandleType();
+	Set<CardStateEntry> entries = states.getMatchingEntries(handle);
+	ArrayList<ConnectionHandleType> result = new ArrayList<ConnectionHandleType>(entries.size());
+	for (CardStateEntry entry : entries) {
+	    result.add(entry.handleCopy());
+	}
+	return result;
     }
 
+    @Deprecated
     public String getSessionId() {
 	return sessionId;
     }
@@ -111,22 +124,32 @@ public class TinySAL implements org.openecard.ws.SAL, EventCallback {
     }
 
 
-    private Protocol getProtocol(String session, String protoUri) throws UnknownProtocolException {
-	Protocol proto = sessionProtocol.get(session);
-	if (proto == null) {
-	    if (protocolFactories.contains(protoUri)) {
-		proto = protocolFactories.get(protoUri).createInstance(this, env.getIFD(), userConsent);
-		sessionProtocol.put(session, proto);
-	    } else {
-		throw new UnknownProtocolException("The protocol URI '" + protoUri + "' is not registered in this SAL component.");
+    private Protocol getProtocol(ConnectionHandleType handle, String protoUri) throws UnknownProtocolException, UnknownConnectionHandle {
+	CardStateEntry entry = states.getEntry(handle);
+	if (entry == null) {
+	    throw new UnknownConnectionHandle(handle);
+	} else {
+	    Protocol proto = entry.getProtocol(protoUri);
+	    if (proto == null) {
+		if (protocolFactories.contains(protoUri)) {
+		    proto = protocolFactories.get(protoUri).createInstance(this, env.getIFD(), userConsent);
+		    entry.setProtocol(protoUri, proto);
+		} else {
+		    throw new UnknownProtocolException("The protocol URI '" + protoUri + "' is not registered in this SAL component.");
+		}
 	    }
+	    return proto;
 	}
-	return proto;
     }
 
-    public void removeFinishedProtocol(String session, Protocol proto) {
+    public void removeFinishedProtocol(ConnectionHandleType handle, String protoUri, Protocol proto) throws UnknownConnectionHandle {
 	if (proto.isFinished()) {
-	    sessionProtocol.remove(session);
+	    CardStateEntry entry = states.getEntry(handle);
+	    if (entry == null) {
+		throw new UnknownConnectionHandle(handle);
+	    } else {
+		entry.removeProtocol(protoUri);
+	    }
 	}
     }
 
@@ -586,29 +609,35 @@ return res;
 	return WSHelper.makeResponse(DIDDeleteResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
+
     @Override
     public DIDAuthenticateResponse didAuthenticate(DIDAuthenticate didAuthenticate) {
 	String protoUri = didAuthenticate.getAuthenticationProtocolData().getProtocol();
-	String session = didAuthenticate.getConnectionHandle().getChannelHandle().getSessionIdentifier();
+	ConnectionHandleType handle = didAuthenticate.getConnectionHandle();
 
 	try {
-	    Protocol proto = getProtocol(session, protoUri);
+	    Protocol proto = getProtocol(handle, protoUri);
 	    if (proto.hasNextStep(FunctionType.DIDAuthenticate)) {
 		DIDAuthenticateResponse resp = proto.didAuthenticate(didAuthenticate);
-		removeFinishedProtocol(session, proto);
+		removeFinishedProtocol(handle, protoUri, proto);
 		return resp;
 	    } else {
-		Result res = WSHelper.makeResultUnknownError("No protocol step available for DIDAuthenticate in protocol " + proto.toString() + ".");
-		DIDAuthenticateResponse resp = WSHelper.makeResponse(DIDAuthenticateResponse.class, res);
-		return resp;
+		throw new UnknownProtocolException("No protocol step available for DIDAuthenticate in protocol " + proto.toString() + ".");
 	    }
-	} catch (UnknownProtocolException ex) {
+	} catch (ECardException ex) {
 	    // TODO: log exception
 	    Result res = WSHelper.makeResult(ex);
 	    DIDAuthenticateResponse resp = WSHelper.makeResponse(DIDAuthenticateResponse.class, res);
 	    return resp;
+
+	} catch (RuntimeException ex) {
+	    // TODO: log exception
+	    Result res = WSHelper.makeResultUnknownError(ex.getMessage());
+	    DIDAuthenticateResponse resp = WSHelper.makeResponse(DIDAuthenticateResponse.class, res);
+	    return resp;
 	}
     }
+
 
     @Override
     public ACLListResponse aclList(ACLList parameters) {
@@ -618,22 +647,6 @@ return res;
     @Override
     public ACLModifyResponse aclModify(ACLModify parameters) {
 	return WSHelper.makeResponse(ACLModifyResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
-    }
-
-    @Override
-    public void signalEvent(EventType eventType, Object eventData) {
-	if (eventData instanceof ConnectionHandleType) {
-	    ConnectionHandleType cHandle = (ConnectionHandleType) eventData;
-
-	    switch (eventType) {
-	    case TERMINAL_REMOVED:
-		cHandles.remove(cHandle.getIFDName());
-		break;
-	    default:
-		cHandles.put(cHandle.getIFDName(), cHandle);
-	    }
-	}
-
     }
 
 }

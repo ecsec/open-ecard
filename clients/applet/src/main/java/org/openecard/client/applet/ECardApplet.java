@@ -1,18 +1,32 @@
-/*
- * Copyright 2012 Johannes Schmoelz ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard Client.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Open eCard Client is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Open eCard Client is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ * Other Usage
+ *
+ * Alternatively, this file may be used in accordance with the terms and
+ * conditions contained in a signed written agreement between you and ecsec.
+ *
+ ****************************************************************************/
 
 package org.openecard.client.applet;
 
@@ -34,6 +48,8 @@ import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.common.sal.state.CardStateMap;
+import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.ifd.protocol.pace.PACEProtocolFactory;
@@ -160,7 +176,7 @@ public class ECardApplet extends JApplet {
 				redirectUrl = redirectUrl + "?ResultMajor=ok";
 			    }
 			    System.out.println("redirecting to: " + redirectUrl);
-			ECardApplet.this.getAppletContext().showDocument(new URL(redirectUrl), "_blank");
+			    ECardApplet.this.getAppletContext().showDocument(new URL(redirectUrl), "_blank");
 			} catch (MalformedURLException e) {
 			    // TODO Auto-generated catch block
 			    e.printStackTrace(System.err);
@@ -176,16 +192,22 @@ public class ECardApplet extends JApplet {
 	} catch (MalformedURLException ex) {
 	    // TODO: find out what to do in case of this error
 	}
-	PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionId.getBytes(), Hex.decode(psk), hostName);
-        paos = new PAOS(endpointUrl, env.getDispatcher(), paosCallback, new TLSClientSocketFactory(tlsClient));
+	if (psk != null) {
+	    PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionId.getBytes(), Hex.decode(psk), hostName);
+	    paos = new PAOS(endpointUrl, env.getDispatcher(), paosCallback, new TLSClientSocketFactory(tlsClient));
+	} else {
+	    paos = new PAOS(endpointUrl, env.getDispatcher(), paosCallback);
+	}
         em = new EventManager(recognition, env, ctx, sessionId);
         env.setEventManager(em);
-        sal = new TinySAL(env, sessionId);
+	CardStateMap cardStates = new CardStateMap();
+	SALStateCallback salCallback = new SALStateCallback(recognition, cardStates);
+        sal = new TinySAL(env, cardStates, sessionId);
 	sal.setGUI(gui);
 	sal.addProtocol(ECardConstants.Protocol.EAC, new EACProtocolFactory());
 	env.setSAL(sal);   
-	
-        em.registerAllEvents(sal);
+
+        em.registerAllEvents(salCallback);
         jsec = new JSEventCallback(this);
         em.registerAllEvents(jsec);
         worker = new AppletWorker(this);
@@ -385,8 +407,6 @@ public class ECardApplet extends JApplet {
             }
         } else {
             _logger.logp(Level.SEVERE, this.getClass().getName(), "setParams()", "PSK not set.");
-            paramsPresent = false;
-            return;
         }
         
         //
@@ -462,55 +482,4 @@ public class ECardApplet extends JApplet {
         }
     }
 
-  /*  private SSLSocketFactory createSSLSocketFactory() {
-        if (selfSigned) {
-            
-            //
-            // quick and dirty hack to support self-signed certificates
-            //
-            
-            SSLContext sslCtx = null;
-            try {
-                sslCtx = SSLContext.getInstance("TLS");
-            } catch (NoSuchAlgorithmException ex) {
-                if (_logger.isLoggable(Level.WARNING)) {
-                    _logger.logp(Level.WARNING, this.getClass().getName(), "createSSLSocketFactory()", ex.getMessage(), ex);
-                    _logger.logp(Level.WARNING, this.getClass().getName(), "createSSLSocketFactory()", "Support for self-signed certificates disabled. Using default SSLSocketFactory.");
-                }
-                return SSLSocketFactory.getSocketFactory();
-            }
-            X509TrustManager tm = new X509TrustManager() {
-
-                @Override
-                public void checkClientTrusted(X509Certificate[] xcs, String string) throws CertificateException {
-                    // do nothing here...
-                }
-
-                @Override
-                public void checkServerTrusted(X509Certificate[] xcs, String string) throws CertificateException {
-                    // do nothing here...
-                }
-
-                @Override
-                public X509Certificate[] getAcceptedIssuers() {
-                    return null;
-                }
-            };
-            try {
-                sslCtx.init(null, new TrustManager[]{tm}, null);
-            } catch (KeyManagementException ex) {
-                if (_logger.isLoggable(Level.WARNING)) {
-                    _logger.logp(Level.WARNING, this.getClass().getName(), "createSSLSocketFactory()", ex.getMessage(), ex);
-                    _logger.logp(Level.WARNING, this.getClass().getName(), "createSSLSocketFactory()", "Support for self-signed certificates disabled. Using default SSLSocketFactory.");
-                }
-                return SSLSocketFactory.getSocketFactory();
-            }
-            SSLSocketFactory fac = new SSLSocketFactory(sslCtx);
-            fac.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-            return fac;
-        } else {
-            return SSLSocketFactory.getSocketFactory();
-        }
-    }*/
-    
 }

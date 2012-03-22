@@ -57,6 +57,8 @@ import org.openecard.ws.Management;
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.webkit.WebView;
+import org.openecard.client.common.sal.state.CardStateMap;
+import org.openecard.client.common.sal.state.SALStateCallback;
 
 
 /**
@@ -166,14 +168,17 @@ public class ApplicationContext extends Application {
 		
 		
 		em = new EventManager(recognition, env, ctx, null);
-		sal = new TinySAL(env);
+		CardStateMap cardStates = new CardStateMap();
+		SALStateCallback salCallback = new SALStateCallback(recognition, cardStates);
+		sal = new TinySAL(env, cardStates);
 		sal.setGUI(new AndroidUserConsent(this));
 		sal.addProtocol(ECardConstants.Protocol.EAC, new EACProtocolFactory());
-		 em.registerAllEvents(sal);
-		 em.registerAllEvents(new ClientEventCallBack());
-		 env.setEventManager(em);
+		em.registerAllEvents(salCallback);
+		em.registerAllEvents(new ClientEventCallBack());
+		env.setEventManager(em);
 		env.setSAL(sal);
-		sal.signalEvent(EventType.TERMINAL_ADDED, ch);
+		// TODO: SAL only deals with cards, not raw terminals, this call is crap, we need a working event manager
+		//salCallback.signalEvent(EventType.TERMINAL_ADDED, ch);
 		// Event-Manager doesnt work with Bluetooth-IFD, Wait blocks communication
 		// em.initialize();
 		Management m = new TinyManagement(env);

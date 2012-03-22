@@ -1,34 +1,47 @@
-/*
- * Copyright 2012 Johannes Schmoelz ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard Client.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Open eCard Client is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Open eCard Client is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ * Other Usage
+ *
+ * Alternatively, this file may be used in accordance with the terms and
+ * conditions contained in a signed written agreement between you and ecsec.
+ *
+ ****************************************************************************/
 
 package org.openecard.client.sal;
 
 import iso.std.iso_iec._24727.tech.schema.*;
-
 import java.math.BigInteger;
 import java.util.List;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.enums.EventType;
+import org.openecard.client.common.sal.state.CardStateEntry;
+import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.ifd.scio.IFD;
-
 import static org.junit.Assert.*;
 
 
@@ -40,12 +53,14 @@ public class TinySALTest {
     
     private ClientEnv env;
     private TinySAL instance;
+    private CardStateMap states;
 
     @Before
     public void setUp() {
         env = new ClientEnv();
         env.setIFD(new IFD());
-        instance = new TinySAL(env, "");
+	states = new CardStateMap();
+        instance = new TinySAL(env, states);
     }
 
 
@@ -63,15 +78,17 @@ public class TinySALTest {
         ConnectionHandleType cHandle2 = new ConnectionHandleType();
         cHandle2.setIFDName(readers[1]);
         // add connection handles to microSAL
-        instance.signalEvent(EventType.TERMINAL_ADDED, cHandle1);
-        instance.signalEvent(EventType.TERMINAL_ADDED, cHandle2);
+	CardStateEntry entry1 = new CardStateEntry(cHandle1);
+	states.addEntry(entry1);
+	CardStateEntry entry2 = new CardStateEntry(cHandle2);
+	states.addEntry(entry2);
         cHandles = instance.getConnectionHandles();
         assertTrue(cHandles.size() == 2);
         for (int i = 0; i < cHandles.size(); i++) {
             assertEquals(cHandles.get(i).getIFDName(), readers[i]);
         }
         // remove one connection handle from microSAL
-        instance.signalEvent(EventType.TERMINAL_REMOVED, cHandle1);
+	states.removeEntry(cHandle1);
         cHandles = instance.getConnectionHandles();
         assertTrue(cHandles.size() == 1);
         assertEquals(cHandles.get(0).getIFDName(), readers[1]);

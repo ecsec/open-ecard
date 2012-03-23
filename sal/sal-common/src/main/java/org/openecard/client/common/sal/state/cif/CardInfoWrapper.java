@@ -31,7 +31,6 @@
 package org.openecard.client.common.sal.state.cif;
 
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
-import org.openecard.ws.protocols.tls.v1.TLSMarkerType;
 
 
 /**
@@ -44,11 +43,6 @@ public class CardInfoWrapper {
 
     public CardInfoWrapper(CardInfoType cif) {
 	this.cif = cif;
-    }
-
-    public CardInfoWrapper(TLSMarkerType tlsMarker) {
-	// TODO: convert marker to CIF
-	cif = null;
     }
 
 }

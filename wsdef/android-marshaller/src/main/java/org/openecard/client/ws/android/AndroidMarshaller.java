@@ -46,7 +46,6 @@ import org.openecard.client.ws.soap.MessageFactory;
 import org.openecard.client.ws.soap.SOAPBody;
 import org.openecard.client.ws.soap.SOAPException;
 import org.openecard.client.ws.soap.SOAPMessage;
-import org.openecard.ws.protocols.tls.v1.TLSMarkerType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -520,29 +519,6 @@ public class AndroidMarshaller implements WSMarshaller {
 			emRecognizedCardType.appendChild(document.createTextNode(r.getConclusion().getRecognizedCardType()));
 			emConclusion.appendChild(emRecognizedCardType);
 		    }
-		    if (r.getConclusion().getTLSMarker() != null) {
-			Element emTLSMarker = document.createElement(iso + "TLSMarker");
-			emTLSMarker.setAttribute("Protocol", "urn:ietf:rfc:5246");
-			Element emKey = document.createElement(tls + "Key");
-			emTLSMarker.appendChild(emKey);
-
-			for (int i = 0; i < r.getConclusion().getTLSMarker().getAny().get(0).getChildNodes().getLength(); i++) {
-			    Node n = r.getConclusion().getTLSMarker().getAny().get(0).getChildNodes().item(i);
-			    if (n.getNodeName().equals("Certificate")) {
-				Element elem = document.createElement(tls + n.getNodeName());
-				Element elem2 = document.createElement(iso + "efIdOrPath");
-				elem2.appendChild(document.createTextNode(n.getTextContent()));
-				elem.appendChild(elem2);
-				emKey.appendChild(elem);
-			    } else {
-				Element elem = document.createElement(tls + n.getNodeName());
-				elem.appendChild(document.createTextNode(n.getTextContent()));
-				emKey.appendChild(elem);
-			    }
-			}
-
-			emConclusion.appendChild(emTLSMarker);
-		    }
 
 		    emResponseAPDU.appendChild(emConclusion);
 		}
@@ -654,46 +630,11 @@ public class AndroidMarshaller implements WSMarshaller {
 		    conc.setRecognizedCardType(parser.nextText());
 		} else if (parser.getName().equals("CardCall")) {
 		    conc.getCardCall().add(this.parseCardCall(parser));
-		} else if (parser.getName().equals("TLSMarker")) {
-		    conc.setTLSMarker(this.parseTLSMarker(parser));
 		}
 	    }
 
 	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Conclusion")));
 	return conc;
-    }
-
-    private TLSMarkerType parseTLSMarker(XmlPullParser parser) throws XmlPullParserException, IOException, ParserConfigurationException {
-	TLSMarkerType tlsMarkerType = new TLSMarkerType();
-	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-	factory.setNamespaceAware(true);
-	DocumentBuilder builder = factory.newDocumentBuilder();
-	Document d = builder.newDocument();
-	Element emKey = d.createElement("Key");
-	Element emCertificate = d.createElement("Certificate");
-	;
-	int eventType = parser.getEventType();
-	do {
-	    parser.next();
-	    eventType = parser.getEventType();
-	    if (eventType == XmlPullParser.START_TAG) {
-		if (parser.getName().equals("Applicationidentifier") || parser.getName().equals("CardAlgRef")
-			|| parser.getName().equals("KeyRef") || parser.getName().equals("SignatureGenerationInfo")) {
-		    Element emApplicationidentifier = d.createElement(parser.getName());
-		    emApplicationidentifier.setTextContent(parser.nextText());
-		    emKey.appendChild(emApplicationidentifier);
-		} else if (parser.getName().equals("efIdOrPath")) {
-		    Element emEfIdOrPath = d.createElement("efIdOrPath");
-		    emEfIdOrPath.appendChild(d.createTextNode(parser.nextText()));
-		    emCertificate.appendChild(emEfIdOrPath);
-		}
-	    }
-
-	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("TLSMarker")));
-	emKey.appendChild(emCertificate);
-	tlsMarkerType.getAny().add(emKey);
-	return tlsMarkerType;
-
     }
 
     private synchronized DataMaskType parseDataMaskType(XmlPullParser parser) throws XmlPullParserException, IOException {

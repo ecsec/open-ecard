@@ -78,14 +78,14 @@ public class TinySALTest {
         ConnectionHandleType cHandle2 = new ConnectionHandleType();
         cHandle2.setIFDName(readers[1]);
         // add connection handles to microSAL
-	CardStateEntry entry1 = new CardStateEntry(cHandle1);
+	CardStateEntry entry1 = new CardStateEntry(cHandle1, null); // TODO: null works as long as there is no cif support
 	states.addEntry(entry1);
-	CardStateEntry entry2 = new CardStateEntry(cHandle2);
+	CardStateEntry entry2 = new CardStateEntry(cHandle2, null);
 	states.addEntry(entry2);
         cHandles = instance.getConnectionHandles();
         assertTrue(cHandles.size() == 2);
         for (int i = 0; i < cHandles.size(); i++) {
-            assertEquals(cHandles.get(i).getIFDName(), readers[i]);
+            assertEquals(readers[i], cHandles.get(i).getIFDName());
         }
         // remove one connection handle from microSAL
 	states.removeEntry(cHandle1);

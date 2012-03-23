@@ -4,7 +4,6 @@
 	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
 	xmlns:ecdsa="http://www.w3.org/2001/04/xmldsig-more#"
 	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
-	xmlns:tls="http://ws.openecard.org/protocols/tls/v1.0"
 	elementFormDefault="qualified" attributeFormDefault="unqualified">
 
 	<!-- ======================== -->
@@ -21,9 +20,6 @@
 
 	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
 		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
-
-	<import namespace="http://ws.openecard.org/protocols/tls/v1.0"
-		schemaLocation="TLS-Protocol.xsd" />
 
 
 	<!-- ============================== -->
@@ -321,7 +317,6 @@
 			<element name="RecognizedState" type="IDREF" />
 			<sequence>
 				<element name="RecognizedCardType" type="anyURI" />
-				<element name="TLSMarker" type="tls:TLSMarkerType" />
 			</sequence>
 			<element ref="iso:CardCall" maxOccurs="unbounded" minOccurs="1">
 			</element>

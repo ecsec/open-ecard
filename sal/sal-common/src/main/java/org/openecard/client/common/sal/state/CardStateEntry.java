@@ -42,7 +42,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.openecard.client.common.sal.Protocol;
 import org.openecard.client.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.client.common.util.ByteUtils;
-import org.openecard.ws.protocols.tls.v1.TLSMarkerType;
 
 
 /**
@@ -62,12 +61,13 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 
     private final ConnectionHandleType handle;
 
-    private CardInfoWrapper infoObject;
+    private final CardInfoWrapper infoObject;
     private Map<String, Protocol> protoObjects = new TreeMap<String, Protocol>();
 
 
-    public CardStateEntry(ConnectionHandleType handle) {
+    public CardStateEntry(ConnectionHandleType handle, CardInfoType cif) {
 	serialNumber = nextNumber();
+	infoObject = new CardInfoWrapper(cif);
 	this.handle = handle;
     }
 
@@ -141,13 +141,6 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	return handle.getIFDName();
     }
 
-
-    public void setInfo (CardInfoType info) {
-	infoObject = new CardInfoWrapper(info);
-    }
-    public void setInfo (TLSMarkerType info) {
-	infoObject = new CardInfoWrapper(info);
-    }
 
     public CardInfoWrapper getInfo() {
 	return infoObject;

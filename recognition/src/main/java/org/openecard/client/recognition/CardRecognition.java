@@ -16,31 +16,26 @@
 
 package org.openecard.client.recognition;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Logger;
 import javax.xml.namespace.NamespaceContext;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
-import org.openecard.client.common.util.CardCommands;
 import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.common.util.CardCommands;
+import org.openecard.client.recognition.staticrepo.LocalCifRepo;
 import org.openecard.client.recognition.statictree.LocalFileTree;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerFactory;
 import org.openecard.ws.GetRecognitionTree;
 import org.openecard.ws.IFD;
-import org.openecard.ws.protocols.tls.v1.TLSMarkerType;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 
 
 /**
@@ -77,8 +72,9 @@ public class CardRecognition {
     };
 
     private final RecognitionTree tree;
-    // TODO: replace with custom TLSMarkerType
-    private final TreeMap<String,TLSMarkerType> tlsMarkers = new TreeMap<String, TLSMarkerType>();
+
+    private final org.openecard.ws.GetCardInfoOrACD cifRepo;
+    private final ConcurrentSkipListMap<String,CardInfoType> cifCache = new ConcurrentSkipListMap<String, CardInfoType>();
 
     private final IFD ifd;
     private final byte[] ctx;
@@ -91,46 +87,57 @@ public class CardRecognition {
      * @throws Exception
      */
     public CardRecognition(IFD ifd, byte[] ctx) throws Exception {
-        this(ifd, ctx, null);
+        this(ifd, ctx, null, null);
     }
 
-    public CardRecognition(IFD ifd, byte[] ctx, GetRecognitionTree client) throws Exception {
+    public CardRecognition(IFD ifd, byte[] ctx, GetRecognitionTree treeRepo, org.openecard.ws.GetCardInfoOrACD cifRepo) throws Exception {
 	this.ifd = ifd;
 	this.ctx = ctx;
 
         // load alternative tree service if needed
         WSMarshaller marshaller = WSMarshallerFactory.createInstance();
-        if (client == null) {
-            client = new LocalFileTree(marshaller);
+        if (treeRepo == null) {
+            treeRepo = new LocalFileTree(marshaller);
         }
+	if (cifRepo == null) {
+	    cifRepo = new LocalCifRepo(marshaller);
+	}
+	this.cifRepo = cifRepo;
 
 	// request tree from service
 	iso.std.iso_iec._24727.tech.schema.GetRecognitionTree req = new iso.std.iso_iec._24727.tech.schema.GetRecognitionTree();
 	req.setAction(RecognitionProperties.getAction());
-	GetRecognitionTreeResponse resp = client.getRecognitionTree(req);
+	GetRecognitionTreeResponse resp = treeRepo.getRecognitionTree(req);
 	checkResult(resp.getResult());
 	this.tree = resp.getRecognitionTree();
-
-        // find markers in tree
-        Document d = marshaller.marshal(this.tree);
-        XPath xpath = XPathFactory.newInstance().newXPath();
-        // set namespace context needed in xpath expression
-        xpath.setNamespaceContext(nsCtx);
-
-        // compile xpath and get results
-        XPathExpression expr = xpath.compile("//iso:Conclusion[iso:TLSMarker]");
-        NodeList nodes = (NodeList) expr.evaluate(d, XPathConstants.NODESET);
-        for (int i=0; i < nodes.getLength(); i++) {
-            Conclusion c = (Conclusion) marshaller.unmarshal(nodes.item(i));
-            String type = c.getRecognizedCardType();
-            TLSMarkerType marker = c.getTLSMarker();
-            tlsMarkers.put(type, marker);
-        }
     }
 
 
-    public TLSMarkerType getTLSMarker(String cardType) {
-        return tlsMarkers.get(cardType);
+    public CardInfoType getCardInfo(String type) {
+	// only do something when a repo is specified
+	if (cifRepo != null) {
+	    if (cifCache.containsKey(type)) {
+		return cifCache.get(type);
+	    } else {
+		GetCardInfoOrACD req = new GetCardInfoOrACD();
+		req.setAction(ECardConstants.CIF.GET_SPECIFIED);
+		req.getCardTypeIdentifier().add(type);
+		GetCardInfoOrACDResponse res = cifRepo.getCardInfoOrACD(req);
+		// checkout response if it contains our cardinfo
+		List<Object> cifs = res.getCardInfoOrCapabilityInfo();
+		for (Object next : cifs) {
+		    if (next instanceof CardInfoType) {
+			cifCache.put(type, (CardInfoType) next);
+			return (CardInfoType) next;
+		    }
+		}
+		// no valid cardinfo save null to the map to prevent fetching the nonexistant cif again
+		cifCache.put(type, null);
+		return null;
+	    }
+	} else {
+	    return null;
+	}
     }
 
 

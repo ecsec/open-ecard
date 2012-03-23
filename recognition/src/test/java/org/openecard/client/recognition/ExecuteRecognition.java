@@ -47,8 +47,7 @@ public class ExecuteRecognition {
 	GetStatusResponse statusR = ifd.getStatus(status);
 
 	if (statusR.getIFDStatus().size() > 0 && statusR.getIFDStatus().get(0).getSlotStatus().get(0).isCardAvailable()) {
-            GetRecognitionTree client = (GetRecognitionTree) WSClassLoader.getClientService(RecognitionProperties.getServiceName(), RecognitionProperties.getServiceAddr());
-	    CardRecognition recog = new CardRecognition(ifd, ctx, client);
+	    CardRecognition recog = new CardRecognition(ifd, ctx);
 	    IFDStatusType stat = statusR.getIFDStatus().get(0);
 	    RecognitionInfo info = recog.recognizeCard(stat.getIFDName(), BigInteger.ZERO);
 	    if (info == null) {

@@ -77,7 +77,7 @@ public class ECardAppletTest {
         System.out.print("Create CardRecognition... ");
         try {
             GetRecognitionTree client = (GetRecognitionTree) WSClassLoader.getClientService(RecognitionProperties.getServiceName(), RecognitionProperties.getServiceAddr());
-            cr = new CardRecognition(ifd, ctx, client);
+            cr = new CardRecognition(ifd, ctx);
             crInitialized = true;
             System.out.println("done.");
         } catch (Exception ex) {

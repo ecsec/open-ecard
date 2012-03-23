@@ -32,15 +32,12 @@ package org.openecard.client.sal;
 
 import iso.std.iso_iec._24727.tech.schema.*;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse.CardAppPathResultSet;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import oasis.names.tc.dss._1_0.core.schema.Result;
-import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ECardException;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.interfaces.Environment;
@@ -50,8 +47,6 @@ import org.openecard.client.common.sal.Protocol;
 import org.openecard.client.common.sal.ProtocolFactory;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.sal.state.CardStateMap;
-import org.openecard.client.common.util.ByteUtils;
-import org.openecard.client.common.util.CardCommands;
 import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.gui.UserConsent;
 
@@ -69,7 +64,6 @@ public class TinySAL implements org.openecard.ws.SAL {
 
     private Environment env;
     private String sessionId;
-    private ConcurrentSkipListMap<String, ConnectionHandleType> cHandles;
     private boolean legacyMode;
     private ProtocolFactories protocolFactories = new ProtocolFactories();
     private UserConsent userConsent;
@@ -81,7 +75,6 @@ public class TinySAL implements org.openecard.ws.SAL {
 	this.states = states;
 	sessionId = ValueGenerators.generateSessionID();
 	legacyMode = false;
-	cHandles = new ConcurrentSkipListMap<String, ConnectionHandleType>();
     }
 
     @Deprecated
@@ -90,7 +83,6 @@ public class TinySAL implements org.openecard.ws.SAL {
 	this.states = states;
 	this.sessionId = sessionId;
 	legacyMode = true;
-	cHandles = new ConcurrentSkipListMap<String, ConnectionHandleType>();
     }
 
 
@@ -175,207 +167,25 @@ public class TinySAL implements org.openecard.ws.SAL {
 	if (_logger.isLoggable(Level.FINER)) {
 	    _logger.entering(this.getClass().getName(), "cardApplicationPath(CardApplicationPath cardApplicationPath)");
 	} // </editor-fold>
+	// get card handles (not terminals)
+	CardApplicationPathType path = cardApplicationPath.getCardAppPathRequest();
+	Set<CardStateEntry> entries = states.getMatchingEntries(path);
 
-	ChannelHandleType channelHandle = cardApplicationPath.getCardAppPathRequest().getChannelHandle();
-	byte[] contextHandle = cardApplicationPath.getCardAppPathRequest().getContextHandle();
-	String ifdName = cardApplicationPath.getCardAppPathRequest().getIFDName();
-	BigInteger slotIndex = cardApplicationPath.getCardAppPathRequest().getSlotIndex();
-	byte[] cardApplication = cardApplicationPath.getCardAppPathRequest().getCardApplication();
-
-	CardApplicationPathResponse res = new CardApplicationPathResponse();
-	Result result = new Result();
-	result.setResultMajor(org.openecard.client.common.ECardConstants.Major.OK);
-	res.setResult(result);
-	CardAppPathResultSet cardAppPathResultSet =  new CardAppPathResultSet();
-	
-	
-	
-	if(channelHandle!=null){
-	    return WSHelper.makeResponse(CardApplicationPathResponse.class, WSHelper.makeResultUnknownError("Remote frameworks are not yet supported"));
+	// copy entries to result set
+	CardAppPathResultSet resultSet = new CardAppPathResultSet();
+	List<CardApplicationPathType> resultPaths = resultSet.getCardApplicationPathResult();
+	for (CardStateEntry entry : entries) {
+	    resultPaths.add(entry.pathCopy());
 	}
 
-	EstablishContextResponse ecr = this.env.getIFD().establishContext(new EstablishContext());
-	if(!ByteUtils.compare(contextHandle, ecr.getContextHandle())){
-	    return WSHelper.makeResponse(CardApplicationPathResponse.class, WSHelper.makeResultUnknownError("No IFD with the specified ContextHandle available"));
-	}
-
-	if(ifdName!=null){ //Search only this IFD 
-	    Connect c = new Connect();
-	    if(slotIndex==null){ //Search on all slots, but as SMIO creates a new IFD for every Slot there wont be more than the "0"-Slot
-		c.setContextHandle(contextHandle);
-		c.setIFDName(ifdName);
-		c.setSlot(new BigInteger("0"));
-	    } else { //Search only on specific slot
-		c.setContextHandle(contextHandle);
-		c.setIFDName(ifdName);
-		c.setSlot(slotIndex);
-	    }
-	    
-	    ConnectResponse cr = this.env.getIFD().connect(c);
-	    if(!cr.getResult().getResultMajor().equals(ECardConstants.Major.OK)){
-		 CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
-		    cardApplicationPathType.setContextHandle(contextHandle);
-		    cardApplicationPathType.setIFDName(ifdName);
-		    cardApplicationPathType.setSlotIndex(new BigInteger("0"));
-		    cardAppPathResultSet.getCardApplicationPathResult().add(cardApplicationPathType);
-	    }
-
-	    if(cardApplication!=null){
-		   Transmit t = new Transmit();
-		   t.setSlotHandle(cr.getSlotHandle());
-		   InputAPDUInfoType iait = new InputAPDUInfoType();
-		   iait.setInputAPDU(CardCommands.Select.application(cardApplication));
-		   t.getInputAPDUInfo().add(iait);
-		   TransmitResponse tr = this.env.getIFD().transmit(t);
-		   System.out.println(tr.getResult().getResultMajor());
-		   if(ByteUtils.compare(new byte[]{(byte) 0x90,0x00}, tr.getOutputAPDU().get(0))){
-		       CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
-		       cardApplicationPathType.setContextHandle(contextHandle);
-		       cardApplicationPathType.setIFDName(ifdName);
-		       cardApplicationPathType.setSlotIndex(new BigInteger("0"));
-		       cardApplicationPathType.setCardApplication(cardApplication);
-		       cardAppPathResultSet.getCardApplicationPathResult().add(cardApplicationPathType);    
-		   } 
-		} else {
-		//TODO list all applications ..
-		}
-	} else { //Search on all IFDs
-
-	    ListIFDs listIFDs = new ListIFDs();
-	    listIFDs.setContextHandle(contextHandle);
-	    ListIFDsResponse listIFDsResponse = this.env.getIFD().listIFDs(listIFDs);
-
-	    for(String s : listIFDsResponse.getIFDName()){
-		Connect c = new Connect();
-		c.setContextHandle(contextHandle);
-		c.setIFDName(ifdName);
-		c.setSlot(new BigInteger("0"));
-		ConnectResponse cr = this.env.getIFD().connect(c);
-		if(!cr.getResult().getResultMajor().equals(ECardConstants.Major.OK)){ //empty
-		    CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
-		    cardApplicationPathType.setContextHandle(contextHandle);
-		    cardApplicationPathType.setIFDName(s);
-		    cardApplicationPathType.setSlotIndex(new BigInteger("0"));
-		    cardAppPathResultSet.getCardApplicationPathResult().add(cardApplicationPathType);
-		    continue;
-		}
-		
-		if(cardApplication!=null){
-		    Transmit t = new Transmit();
-			   InputAPDUInfoType iait = new InputAPDUInfoType();
-			   iait.setInputAPDU(CardCommands.Select.application(cardApplication));
-			   t.getInputAPDUInfo().add(iait);
-			   TransmitResponse tr = this.env.getIFD().transmit(t);
-			   if(ByteUtils.compare(new byte[]{(byte) 0x90,0x00}, tr.getOutputAPDU().get(0))){
-			       CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
-			       cardApplicationPathType.setContextHandle(contextHandle);
-			       cardApplicationPathType.setIFDName(ifdName);
-			       cardApplicationPathType.setSlotIndex(new BigInteger("0"));
-			       cardApplicationPathType.setCardApplication(cardApplication);
-			       cardAppPathResultSet.getCardApplicationPathResult().add(cardApplicationPathType);    
-			   } 
-		} else {
-		//TODO list all applications ..
-		}
-	    }
-	}
-
-
-	
-
-	//CardAppPathResultSet bla =  new CardAppPathResultSet();
-
-	//bla.getCardApplicationPathResult().add(arg0)
-
-	res.setCardAppPathResultSet(cardAppPathResultSet);
-
-
-
-	//	   env.setIFD(ifd);
-	//	        EstablishContext ecRequest = new EstablishContext();
-	//	        EstablishContextResponse ecResponse = ifd.establishContext(ecRequest);
-	//
-	//	        if (ecResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
-	//	            if (ecResponse.getContextHandle() != null) {
-	//	                ctx = ecResponse.getContextHandle();
-	//	                initialized = true;
-	//	            }
-	//	        } else {
-	//	            System.err.println("NO CONTEXT");
-	//	        }
-	//	        if (recognizeCard) {
-	//	            try {
-	//	                recognition = new CardRecognition(ifd, ctx);
-	//	            } catch (Exception ex) {
-	//	                initialized = false;
-	//	                System.err.println("NO initialized " + ex.getMessage());
-	//	            }
-	//	        } else {
-	//	            recognition = null;
-	//	            System.err.println("NO recognition");
-	//	        }
-	////	        EventManager em = new EventManager(recognition, env, ctx, null);
-	////	        em.initialize();
-	////	        env.setEventManager(em);
-	//
-	//
-	////	        ClientEventCallBack callBack = new ClientEventCallBack();
-	////	        em.registerAllEvents(callBack);
-	//
-
-
-
-
-
-
-
-
-
-	//		CardApplicationPath ::= SEQUENCE {
-	//		    pathSecurity PathSecurityType OPTIONAL,
-	//		    -- The pathSecurity element specifies the protection
-	//		    -- between the local dispatcher and the remote dispatcher
-	//		    -- which is located at channelHandle.protocolTerminationPoint
-	//		    channelHandle ChannelHandleType OPTIONAL,
-	//		    contextHandle ContextHandleType OPTIONAL,
-	//		    iFDName UTF8String OPTIONAL,
-	//		    slotIndex INTEGER OPTIONAL,
-	//		    cardApplication ApplicationIdentifier
-	//		    }
-
-
-	//
-	//	        ListIFDs ifds = new ListIFDs();
-	//	        ifds.setContextHandle(ctx);
-	//	        ListIFDsResponse res3 = ifd.listIFDs(ifds);
-	//
-	//	        System.out.println("ListIfds: " + res3.getResult().getResultMajor());
-	//	        System.out.println("TEST: " + res3.getResult().getResultMajor());
-	//	        List<String> ifdList = res3.getIFDName();
-	//	        System.out.println("size: " + ifdList.size());
-	//	        for (String i : ifdList) {
-	//	            System.out.println("ifd:" + i);
-	//	        }
-	//
-	//
-	//	        path.setSlotIndex(BigInteger.ZERO);
-	//	        path.setIFDName(ifdList.get(0));
-	//
-	//
-	//
-	//	        System.out.println("CTX: " + ByteUtils.toHexString(ctx));
-	//
-	//	        set.getCardApplicationPathResult().add(path);
-	//	        res.setCardAppPathResultSet(set);
-	//	        return res;
-
+	// i don't see how the errors in the spec map to what could have gone wrong here
+	CardApplicationPathResponse res = WSHelper.makeResponse(CardApplicationPathResponse.class, WSHelper.makeResultOK());
+	res.setCardAppPathResultSet(resultSet);
 	// <editor-fold defaultstate="collapsed" desc="log trace">
 	if (_logger.isLoggable(Level.FINER)) {
 	    _logger.exiting(this.getClass().getName(), "cardApplicationPath(CardApplicationPath cardApplicationPath)", res);
 	} // </editor-fold>
-
-return res;
-	//return WSHelper.makeResponse(CardApplicationPathResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	return res;
     }
 
     @Override

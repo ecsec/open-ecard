@@ -30,13 +30,18 @@
 
 package org.openecard.client.common.sal.state;
 
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
+import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.TreeMap;
+import javax.xml.datatype.XMLGregorianCalendar;
 import org.openecard.client.common.sal.Protocol;
 import org.openecard.client.common.sal.state.cif.CardInfoWrapper;
+import org.openecard.client.common.util.ByteUtils;
 import org.openecard.ws.protocols.tls.v1.TLSMarkerType;
 
 
@@ -66,9 +71,58 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	this.handle = handle;
     }
 
+
     public ConnectionHandleType handleCopy() {
-	// TODO: copy handle
-	return handle;
+	ConnectionHandleType result = new ConnectionHandleType();
+	copyPath(result, handle);
+	result.setSlotHandle(ByteUtils.clone(handle.getSlotHandle()));
+	result.setRecognitionInfo(copyRecognition(handle.getRecognitionInfo()));
+	return result;
+    }
+    public CardApplicationPathType pathCopy() {
+	CardApplicationPathType result = new CardApplicationPathType();
+	copyPath(result, handle);
+	return result;
+    }
+
+    private static void copyPath(CardApplicationPathType out, CardApplicationPathType in) {
+	out.setCardApplication(ByteUtils.clone(in.getCardApplication()));
+	out.setChannelHandle(copyChannel(in.getChannelHandle()));
+	out.setContextHandle(ByteUtils.clone(in.getContextHandle()));
+	out.setIFDName(in.getIFDName());
+	out.setSlotIndex(in.getSlotIndex()); // TODO: copy bigint
+    }
+    private static ChannelHandleType copyChannel(ChannelHandleType handle) {
+	if (handle == null) {
+	    return null;
+	}
+	ChannelHandleType result = new ChannelHandleType();
+	result.setBinding(handle.getBinding());
+	result.setPathSecurity(copyPathSec(handle.getPathSecurity()));
+	result.setProtocolTerminationPoint(handle.getProtocolTerminationPoint());
+	result.setSessionIdentifier(handle.getSessionIdentifier());
+	return result;
+    }
+    private static ConnectionHandleType.RecognitionInfo copyRecognition(ConnectionHandleType.RecognitionInfo rec) {
+	if (rec == null) {
+	    return null;
+	}
+	ConnectionHandleType.RecognitionInfo result = new ConnectionHandleType.RecognitionInfo();
+	if (rec.getCaptureTime() != null) {
+	    result.setCaptureTime((XMLGregorianCalendar)rec.getCaptureTime().clone());
+	}
+	result.setCardIdentifier(ByteUtils.clone(rec.getCardIdentifier()));
+	result.setCardType(rec.getCardType());
+	return result;
+    }
+    private static PathSecurityType copyPathSec(PathSecurityType sec) {
+	if (sec == null) {
+	    return null;
+	}
+	PathSecurityType result = new PathSecurityType();
+	result.setParameters(sec.getParameters()); // TODO: copy depending on actual content
+	result.setProtocol(sec.getProtocol());
+	return result;
     }
 
 

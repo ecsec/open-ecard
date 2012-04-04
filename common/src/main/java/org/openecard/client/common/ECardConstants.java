@@ -117,7 +117,7 @@ public class ECardConstants {
 	    public static final String INT_ERROR = APP_PREFIX + "/common#internalError";
 	    public static final String PARM_ERROR = APP_PREFIX + "/common#parameterError";
 	    public static final String UNKNOWN_ERROR = APP_PREFIX + "/common#unknownError";
-
+	    public static final String INCORRECT_PARM = APP_PREFIX + "/common#incorrectParameter";
 	};
 
 	public static class Disp {
@@ -139,6 +139,10 @@ public class ECardConstants {
 	    public static final String INAPPROPRIATE_PROTOCOL_FOR_ACTION = SAL_PREFIX + "#inappropriateProtocolForAction";
 
 	    public static final String REPO_UNREACHABLE = SAL_PREFIX + "/support#cardInfoRepositoryUnreachable";
+
+	    public static final String SECURITY_CONDITINON_NOT_SATISFIED = SAL_PREFIX + "#securityConditionNotSatisfied";
+
+	    public static final String NAMED_ENTITY_NOT_FOUND = SAL_PREFIX + "#namedEntityNotFound";
 
 	};
 

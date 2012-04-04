@@ -346,6 +346,14 @@ public class CardCommands {
 	    return genericCommand(COMMAND_MANAGE_SECURITY_ENVIRONMENT, p12, data);
 	}
 
+	@Deprecated
+	public static byte[] mseSelectPrKeySignature(byte keyRef, byte algId) {
+	    byte[] p12 = new byte[] { (byte) 0x41, (byte) 0xB6 };
+	    byte[] data = new byte[] { (byte) 0x84, (byte) 0x01, (byte) keyRef, (byte) 0x80, (byte) 0x01, algId };
+	    return genericCommand(COMMAND_MANAGE_SECURITY_ENVIRONMENT, p12, data);
+	}
+
+
 	/**
 	 * Creates an APDU that is equivalent to the command
 	 * "MANAGE SECURITY ENVIRONMENT". The command selects a public key for
@@ -427,20 +435,26 @@ public class CardCommands {
 	 * data, the created APDU is either a case 3 short command APDU or a
 	 * case 3 extended command APDU. The command verifies a card verifiable
 	 * certificate (CVC).
-	 * 
+	 *
 	 * @param certificate
 	 *            - CVC to be verified
 	 * @return APDU as byte array
 	 */
 	public static byte[] verifySelfDescriptiveCertificate(byte[] certificate) {
-	    return genericCommand(COMMAND_PERFORM_SECURITY_OPERATION, new byte[] { 0x00, VERIFY_SELF_DESCRIPTIVE_CERTIFICATE }, certificate);
+	    byte[] verifySelfCert = new byte[] { 0x00, VERIFY_SELF_DESCRIPTIVE_CERTIFICATE };
+	    return genericCommand(COMMAND_PERFORM_SECURITY_OPERATION, verifySelfCert, certificate);
 	}
 
 	public static byte[] verifyNotSelfDescriptiveCertificate(byte[] certificate) {
-	    return genericCommand(COMMAND_PERFORM_SECURITY_OPERATION, new byte[] { 0x00, VERIFY_NOT_SELF_DESCRIPTIVE_CERTIFICATE },
-		    certificate);
-
+	    byte[] verifyNotSelfCert = new byte[] { 0x00, VERIFY_NOT_SELF_DESCRIPTIVE_CERTIFICATE };
+	    return genericCommand(COMMAND_PERFORM_SECURITY_OPERATION, verifyNotSelfCert, certificate);
 	}
+
+	public static byte[] computeDigitalSignature(byte[] input) {
+	    byte[] p12 = new byte[]{(byte)0x9E,(byte) 0x9A};
+	    return genericCommand(COMMAND_PERFORM_SECURITY_OPERATION, p12, input, (short) 0x00);
+	}
+
 	// TODO add further pso commands
 
     }

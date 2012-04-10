@@ -155,6 +155,7 @@ public class CardStateMap {
 	byte[] ctx = cHandle.getContextHandle();
 	String ifdname = cHandle.getIFDName();
 	BigInteger slotIdx = cHandle.getSlotIndex();
+	byte[] cardApplication = cHandle.getCardApplication();
 
 	// when nothing has been specified, return all elements
 	Set<CardStateEntry> mergedSets;
@@ -174,7 +175,7 @@ public class CardStateMap {
 	    if (ctx != null) {
 		setsToMerge.add(ctxEntries);
 	    }
-	    if (slothandleEntries != null) {
+	    if (slotHandle != null) {
 		setsToMerge.add(slothandleEntries);
 	    }
 
@@ -187,6 +188,14 @@ public class CardStateMap {
 	}
 	if (ifdname != null) {
 	    filterIfdname(mergedSets, ifdname);
+	}
+
+	if (cardApplication != null) {
+	    filterCardApplication(mergedSets, cardApplication);
+	} else {
+	    // [TR-03112-4] If no card application is specified, paths to all
+	    // available cards (alpha-card applications) and unused card
+	    // terminal slots are returned.
 	}
 
 	return mergedSets;
@@ -229,6 +238,22 @@ public class CardStateMap {
     }
 
     /**
+     * Remove non matching entries (cardApplication) from given list.
+     *
+     * @param entries
+     * @param cardApplication
+     */
+    private void filterCardApplication(Set<CardStateEntry> entries, byte[] cardApplication) {
+	Iterator<CardStateEntry> it = entries.iterator();
+	while (it.hasNext()) {
+	    CardStateEntry next = it.next();
+	    if(next.getInfo().getCardApplication(cardApplication)==null){
+		it.remove();
+	    }
+	}
+    }
+
+    /**
      * Remove non matching entries (ifdName) from given list.
      *
      * @param entries
@@ -239,13 +264,12 @@ public class CardStateMap {
 	while (it.hasNext()) {
 	    CardStateEntry next = it.next();
 	    String otherName = next.getIfdName();
-	    // other index is not equal to this one
+	    // other ifdName is not equal to this one
 	    if (otherName != null && ! otherName.equals(ifdName)) {
 		it.remove();
 	    }
 	}
     }
-
 
     private static Set<CardStateEntry> mergeSets(List<Set<CardStateEntry>> setsToMerge) {
 	TreeSet<CardStateEntry> result = new TreeSet<CardStateEntry>();

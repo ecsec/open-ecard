@@ -41,6 +41,12 @@
 	    <version>${project.version}</version>
 	    <scope>provided</scope>
 	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.wsdef</groupId>
+	    <artifactId>jaxb-marshaller</artifactId>
+	    <version>${project.version}</version>
+	    <scope>test</scope>
+	</dependency>
     </dependencies>
 
 </project>

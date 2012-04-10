@@ -23,6 +23,7 @@ import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -31,8 +32,9 @@ import java.util.logging.Logger;
 import javax.smartcardio.ResponseAPDU;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.WSHelper.WSException;
 import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
@@ -47,17 +49,15 @@ import org.openecard.ws.SAL;
 
 /**
  *
- * @author Dirk Petrautzki <petrautzki at hs-coburg.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class SignStep implements ProtocolStep<Sign, SignResponse> {
 
-    private TinySAL sal;
-    private IFD ifd;
+    private Dispatcher dispatcher;
     private static final Logger _logger = LogManager.getLogger(SignStep.class.getName());
 
-    public SignStep(SAL sal, IFD ifd) {
-	this.ifd = ifd;
-	this.sal = (TinySAL) sal;
+    public SignStep(Dispatcher dispatcher) {
+	this.dispatcher = dispatcher;
     }
 
     @Override
@@ -65,14 +65,14 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	return FunctionType.Sign;
     }
 
-    private ResponseAPDU transmitSingleAPDU(byte[] apdu, byte[] slotHandle, IFD ifd) throws WSException {
+    private ResponseAPDU transmitSingleAPDU(byte[] apdu, byte[] slotHandle) throws WSException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 	ArrayList<byte[]> responses = new ArrayList<byte[]>() {{
 	    add(new byte[] { (byte) 0x90, (byte) 0x00 });
 	    add(new byte[] { (byte) 0x63, (byte) 0xC3 });
 	}};
 
 	Transmit t = CardCommands.makeTransmit(slotHandle, apdu, responses);
-	TransmitResponse tr = (TransmitResponse) WSHelper.checkResult(ifd.transmit(t));
+	TransmitResponse tr = (TransmitResponse) WSHelper.checkResult((TransmitResponse) this.dispatcher.deliver(t));
 	return new ResponseAPDU(tr.getOutputAPDU().get(0));
     }
 
@@ -86,7 +86,7 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	try {
 	    ConnectionHandleType connectionHandle = sign.getConnectionHandle();
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
-	    CardStateEntry cardStateEntry = sal.getStates().getEntry(connectionHandle);
+	    CardStateEntry cardStateEntry = (CardStateEntry) internalData.get("cardState");
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    String didName = sign.getDIDName();
 	    DIDScopeType didScope = sign.getDIDScope();
@@ -107,7 +107,8 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    for (String command : signatureGenerationInfo) {
 		if (command.equals("MSE_KEY")) {
 		    // FIXME how to figure out with type of mse_key to use
-		    rapdu = transmitSingleAPDU(CardCommands.ManageSecurityEnvironment.mseSelectPrKeySignature(localKeyRef, algorithmIdentifier), slotHandle, ifd);
+		    rapdu = transmitSingleAPDU(
+			    CardCommands.ManageSecurityEnvironment.mseSelectPrKeySignature(localKeyRef, algorithmIdentifier), slotHandle);
 		    /*
 		     * rapdu = transmitSingleAPDU(
 		     * CardCommands.ManageSecurityEnvironment
@@ -115,10 +116,9 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 		     * slotHandle, ifd);
 		     */
 		} else if (command.equals("PSO_CDS")) {
-		    rapdu = transmitSingleAPDU(CardCommands.PerformSecurityOperation.computeDigitalSignature(sign.getMessage()),
-					       slotHandle, ifd);
+		    rapdu = transmitSingleAPDU(CardCommands.PerformSecurityOperation.computeDigitalSignature(sign.getMessage()), slotHandle);
 		} else if (command.equals("INT_AUTH")) {
-		    rapdu = transmitSingleAPDU(CardCommands.InternalAuthenticate.generic(sign.getMessage(), (short) 0x0), slotHandle, ifd);
+		    rapdu = transmitSingleAPDU(CardCommands.InternalAuthenticate.generic(sign.getMessage(), (short) 0x0), slotHandle);
 		} else if (command.equals("MSE_RESTORE")) {
 		    WSHelper.makeResultUnknownError("Not yet implemented");
 		} else if (command.equals("MSE_HASH")) {

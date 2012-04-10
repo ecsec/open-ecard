@@ -1,4 +1,4 @@
-/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg 
+/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,17 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
-
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.smartcardio.ResponseAPDU;
-
 import oasis.names.tc.dss._1_0.core.schema.Result;
-
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
@@ -42,16 +40,20 @@ import org.openecard.client.common.util.CardCommands;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.client.crypto.common.asn1.eac.oid.TAObjectIdentifier;
 import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
-import org.openecard.ws.IFD;
 
+
+/**
+ *
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ */
 public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
-    private IFD ifd;
+    private Dispatcher dispatcher;
     private byte[] slotHandle;
     private static final Logger _logger = LogManager.getLogger(TerminalAuthenticationStep.class.getName());
 
-    public TerminalAuthenticationStep(IFD ifd) {
-	this.ifd = ifd;
+    public TerminalAuthenticationStep(Dispatcher dispatcher) {
+	this.dispatcher = dispatcher;
     }
 
     @Override
@@ -59,16 +61,14 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	return FunctionType.DIDAuthenticate;
     }
 
-    private ResponseAPDU transmitSingleAPDU(byte[] apdu) throws WSException {
-	ArrayList<byte[]> responses = new ArrayList<byte[]>() {
-	    {
-		add(new byte[] { (byte) 0x90, (byte) 0x00 });
-		add(new byte[] { 0x6A, (byte) 0x88 });
-	    }
-	};
+    private ResponseAPDU transmitSingleAPDU(byte[] apdu) throws WSException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+	ArrayList<byte[]> responses = new ArrayList<byte[]>() {{
+	    add(new byte[] { (byte) 0x90, (byte) 0x00 });
+	    add(new byte[] { 0x6A, (byte) 0x88 });
+	}};
 
 	Transmit t = CardCommands.makeTransmit(slotHandle, apdu, responses);
-	TransmitResponse tr = (TransmitResponse) WSHelper.checkResult(ifd.transmit(t));
+	TransmitResponse tr = (TransmitResponse) WSHelper.checkResult((TransmitResponse) dispatcher.deliver(t));
 	return new ResponseAPDU(tr.getOutputAPDU().get(0));
     }
 
@@ -76,8 +76,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
 	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)",
-		    new Object[] { didAuthenticate, internalData });
+	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", new Object[] { didAuthenticate, internalData });
 	} // </editor-fold>
 	try {
 	    this.slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
@@ -95,8 +94,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    this.transmitSingleAPDU(CardCommands.PerformSecurityOperation.verifySelfDescriptiveCertificate(eServiceCertificate.getBody()));
 
 	    //FIXME oid is fix
-	    byte[] apdu = CardCommands.ManageSecurityEnvironment.setAT.TA(ObjectIdentifierUtils.getValue(TAObjectIdentifier.id_TA_ECDSA_SHA_256), eServiceCertificate.getCertificateHolderReference(),
-		    eac2input.getCompressedEphemeralPublicKey(), (byte[]) internalData.get("authenticatedAuxiliaryData"));
+	    byte[] apdu = CardCommands.ManageSecurityEnvironment.setAT.TA(ObjectIdentifierUtils.getValue(TAObjectIdentifier.id_TA_ECDSA_SHA_256), eServiceCertificate.getCertificateHolderReference(), eac2input.getCompressedEphemeralPublicKey(), (byte[]) internalData.get("authenticatedAuxiliaryData"));
 	    this.transmitSingleAPDU(apdu);
 
 	    apdu = CardCommands.GetChallenge.generic();
@@ -112,8 +110,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    didAuthenticateResponse.setAuthenticationProtocolData(eac2output.getAuthDataType());
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
 	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)",
-			didAuthenticateResponse);
+		_logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", didAuthenticateResponse);
 	    } // </editor-fold>
 	    return didAuthenticateResponse;
 	} catch (Exception ex) {
@@ -124,4 +121,5 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultUnknownError(ex.getMessage()));
 	}
     }
+
 }

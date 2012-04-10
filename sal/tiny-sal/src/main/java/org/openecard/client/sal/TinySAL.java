@@ -137,7 +137,8 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    Protocol proto = entry.getProtocol(protoUri);
 	    if (proto == null) {
 		if (protocolFactories.contains(protoUri)) {
-		    proto = protocolFactories.get(protoUri).createInstance(this, env.getIFD(), userConsent);
+		    System.out.println(env.getDispatcher() == null);
+		    proto = protocolFactories.get(protoUri).createInstance(env.getDispatcher(), this.userConsent);
 		    entry.setProtocol(protoUri, proto);
 		} else {
 		    throw new UnknownProtocolException("The protocol URI '" + protoUri + "' is not registered in this SAL component.");
@@ -687,7 +688,7 @@ public class TinySAL implements org.openecard.ws.SAL {
     }
 
     @Override
-    public SignResponse sign(Sign sign) {
+	public SignResponse sign(Sign sign) {
 	try {
 	    String didName = sign.getDIDName();
 	    ConnectionHandleType connectionHandle = sign.getConnectionHandle();
@@ -713,9 +714,9 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    }
 	    String protoUri = didStructure.getDIDMarker().getProtocol();
 
-
 	    Protocol proto = getProtocol(connectionHandle, protoUri);
 	    if (proto.hasNextStep(FunctionType.Sign)) {
+		proto.getInternalData().put("cardState", states.getEntry(connectionHandle));
 		SignResponse resp = proto.sign(sign);
 		removeFinishedProtocol(connectionHandle, protoUri, proto);
 		return resp;
@@ -898,6 +899,7 @@ public class TinySAL implements org.openecard.ws.SAL {
 	try {
 	    Protocol proto = getProtocol(connectionHandle, protoUri);
 	    if (proto.hasNextStep(FunctionType.DIDGet)) {
+		proto.getInternalData().put("cardState", states.getEntry(connectionHandle));
 		resp = proto.didGet(didGet);
 		removeFinishedProtocol(connectionHandle, protoUri, proto);
 	    } else {
@@ -956,6 +958,7 @@ public class TinySAL implements org.openecard.ws.SAL {
 	try {
 	    Protocol proto = getProtocol(connectionHandle, protoUri);
 	    if (proto.hasNextStep(FunctionType.DIDAuthenticate)) {
+		proto.getInternalData().put("cardState", states.getEntry(connectionHandle));
 		resp = proto.didAuthenticate(didAuthenticate);
 		removeFinishedProtocol(connectionHandle, protoUri, proto);
 	    } else {
@@ -1025,9 +1028,9 @@ public class TinySAL implements org.openecard.ws.SAL {
 		if (didInfo == null) {
 		    return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, "The did" + didName + "could not be found."));
 		}
-		if (!cardInfoWrapper.checkSecurityCondition(didName, didScope, AuthorizationServiceActionName.ACL_LIST)) {
-		    return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
-		}
+		// if (!cardInfoWrapper.checkSecurityCondition(didName, didScope, AuthorizationServiceActionName.ACL_LIST)) {
+		//     return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
+		// }
 		aclListResponse.setTargetACL(cardInfoWrapper.getDIDInfo(didName, didScope).getDIDACL());
 	    } else if (cardApplicationIdentifier != null) {
 		CardApplicationType cardApplication = cardInfoWrapper.getCardApplication(cardApplicationIdentifier);

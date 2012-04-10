@@ -1,4 +1,4 @@
-/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg 
+/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.I18n;
 import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
@@ -53,25 +54,25 @@ import org.openecard.client.gui.definition.Step;
 import org.openecard.client.gui.definition.Text;
 import org.openecard.client.gui.definition.UserConsentDescription;
 import org.openecard.client.gui.executor.ExecutionEngine;
-import org.openecard.ws.IFD;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+
 /**
- * 
+ *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * 
+ *
  */
 public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
-    private IFD ifd;
+    private Dispatcher dispatcher;
     private UserConsent gui;
 
     I18n i = I18n.getTranslation("sal");
     private static final Logger _logger = LogManager.getLogger(PACEStep.class.getName());
 
-    public PACEStep(IFD ifd, UserConsent gui) {
-	this.ifd = ifd;
+    public PACEStep(Dispatcher dispatcher, UserConsent gui) {
+	this.dispatcher = dispatcher;
 	this.gui = gui;
     }
 
@@ -84,8 +85,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
 	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)",
-		    new Object[] { didAuthenticate, internalData });
+	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", new Object[] { didAuthenticate, internalData });
 	} // </editor-fold>
 	try {
 	    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -98,8 +98,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    CertificateDescription description = new CertificateDescription(TLV.fromBER(eac1input.getCertificateDescription()));
 	    CHAT requiredCHAT = new CHAT(TLV.fromBER(eac1input.getReuiredCHAT()));
 	    CHAT optionalCHAT = new CHAT(TLV.fromBER(eac1input.getOptionalCHAT()));
-	    CHAT chosenCHAT = this.showUserConsentAndRetrieveCHAT(description, requiredCHAT, optionalCHAT,
-		    eac1input.getCertificates().get(0));
+	    CHAT chosenCHAT = this.showUserConsentAndRetrieveCHAT(description, requiredCHAT, optionalCHAT, eac1input.getCertificates().get(0));
 
 	    EstablishChannel establishChannel = new EstablishChannel();
 	    establishChannel.setSlotHandle(didAuthenticate.getConnectionHandle().getSlotHandle());
@@ -124,7 +123,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    internalData.put("eServiceCertificate", eac1input.getCertificates().get(0));
 	    internalData.put("authenticatedAuxiliaryData", eac1input.getAuthenticatedAuxiliaryData());
 
-	    EstablishChannelResponse establishChannelResponse = ifd.establishChannel(establishChannel);
+	    EstablishChannelResponse establishChannelResponse = (EstablishChannelResponse) dispatcher.deliver(establishChannel);
 	    DIDAuthenticateResponse didAuthenticateResponse = new DIDAuthenticateResponse();
 	    didAuthenticateResponse.setResult(establishChannelResponse.getResult());
 
@@ -132,16 +131,14 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		// TODO inform user an error happened while establishment of
 		// pace channel
 	    } else {
-		EAC1OutputType eac1out = new EAC1OutputType(didAuthenticate.getAuthenticationProtocolData(),
-			establishChannelResponse.getAuthenticationProtocolData(), chosenCHAT.getBytes());
+		EAC1OutputType eac1out = new EAC1OutputType(didAuthenticate.getAuthenticationProtocolData(), establishChannelResponse.getAuthenticationProtocolData(), chosenCHAT.getBytes());
 		didAuthenticateResponse.setAuthenticationProtocolData(eac1out.getAuthDataType());
 		didAuthenticateResponse.getAuthenticationProtocolData().setProtocol(null);
 		internalData.put("CAR", eac1out.getCertificationAuthorityReference());
 	    }
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
 	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)",
-			didAuthenticateResponse);
+		_logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", didAuthenticateResponse);
 	    } // </editor-fold>
 	    return didAuthenticateResponse;
 	} catch (Exception e) {
@@ -157,10 +154,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    CardVerifiableCertificate cvc) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
 	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(
-		    this.getClass().getName(),
-		    "showUserConsentAndRetrieveCHAT(CertificateDescription description, CHAT requiredCHAT, CHAT optionalCHAT, CardVerifiableCertificate cvc)",
-		    new Object[] { description, requiredCHAT, optionalCHAT, cvc });
+	    _logger.entering(this.getClass().getName(), "showUserConsentAndRetrieveCHAT(CertificateDescription description, CHAT requiredCHAT, CHAT optionalCHAT, CardVerifiableCertificate cvc)", new Object[] { description, requiredCHAT, optionalCHAT, cvc });
 	} // </editor-fold>
 	UserConsentDescription ucd = new UserConsentDescription("test");
 
@@ -190,8 +184,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	s1.getInputInfoUnits().add(i3);
 
 	Text i6 = new Text();
-	i6.setText(i.translationForKey("certificate_effective_date") + "\n" + i.translationForKey("from") + " "
-		+ cvc.getCertificateEffectiveDate() + "\n" + i.translationForKey("to") + " " + cvc.getCertificateExpirationDate() + "\n");
+	i6.setText(i.translationForKey("certificate_effective_date") + "\n" + i.translationForKey("from") + " " + cvc.getCertificateEffectiveDate() + "\n" + i.translationForKey("to") + " " + cvc.getCertificateExpirationDate() + "\n");
 	s1.getInputInfoUnits().add(i6);
 
 	Text i7 = new Text();
@@ -276,11 +269,9 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 	// <editor-fold defaultstate="collapsed" desc="log trace">
 	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(
-		    this.getClass().getName(),
-		    "showUserConsentAndRetrieveCHAT(CertificateDescription description, CHAT requiredCHAT, CHAT optionalCHAT, CardVerifiableCertificate cvc)",
-		    chat);
+	    _logger.exiting(this.getClass().getName(), "showUserConsentAndRetrieveCHAT(CertificateDescription description, CHAT requiredCHAT, CHAT optionalCHAT, CardVerifiableCertificate cvc)", chat);
 	} // </editor-fold>
 	return chat;
     }
+
 }

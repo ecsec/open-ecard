@@ -1,4 +1,4 @@
-/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg 
+/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,19 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.smartcardio.ResponseAPDU;
-
 import oasis.names.tc.dss._1_0.core.schema.Result;
-
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
@@ -48,21 +46,20 @@ import org.openecard.client.common.util.CardCommands;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.crypto.common.asn1.eac.oid.CAObjectIdentifier;
 import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
-import org.openecard.ws.IFD;
+
 
 /**
- * 
+ *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * 
  */
 public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
-    private IFD ifd;
+    private Dispatcher dispatcher;
     private byte[] slotHandle;
     private static final Logger _logger = LogManager.getLogger(ChipAuthenticationStep.class.getName());
 
-    public ChipAuthenticationStep(IFD ifd) {
-	this.ifd = ifd;
+    public ChipAuthenticationStep(Dispatcher dispatcher) {
+	this.dispatcher = dispatcher;
     }
 
     @Override
@@ -70,19 +67,17 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	return FunctionType.DIDAuthenticate;
     }
 
-    private ResponseAPDU transmitSingleAPDU(byte[] apdu) throws WSException {
-	ArrayList<byte[]> responses = new ArrayList<byte[]>() {
-	    {
-		add(new byte[] { (byte) 0x90, (byte) 0x00 });
-	    }
-	};
+    private ResponseAPDU transmitSingleAPDU(byte[] apdu) throws WSException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+	ArrayList<byte[]> responses = new ArrayList<byte[]>() {{
+	    add(new byte[] { (byte) 0x90, (byte) 0x00 });
+	}};
 
 	Transmit t = CardCommands.makeTransmit(slotHandle, apdu, responses);
-	TransmitResponse tr = (TransmitResponse) WSHelper.checkResult(ifd.transmit(t));
+	TransmitResponse tr = (TransmitResponse) WSHelper.checkResult((TransmitResponse) dispatcher.deliver(t));
 	return new ResponseAPDU(tr.getOutputAPDU().get(0));
     }
 
-    private byte[] readFile(byte[] FID, byte[] slotHandle) throws IOException, TLVException, WSException {
+    private byte[] readFile(byte[] FID, byte[] slotHandle) throws IOException, TLVException, WSException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 	// 1. READ FCP and get length, 2. SELECT FILE, 3. READ IN LOOP
 
 	ResponseAPDU rapdu = this.transmitSingleAPDU(CardCommands.Select.EF_FCP(FID));
@@ -104,8 +99,7 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
 	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)",
-		    new Object[] { didAuthenticate, internalData });
+	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", new Object[] { didAuthenticate, internalData });
 	} // </editor-fold>
 	try {
 	    EACAdditionalInputType eacAddInput = new EACAdditionalInputType(didAuthenticate.getAuthenticationProtocolData());
@@ -113,18 +107,13 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 
 	    this.transmitSingleAPDU(CardCommands.ExternalAuthenticate.generic(eacAddInput.getSignature()));
 
-	    byte[] FID_EFCARDSECURITY = new byte[] { 0x01, 0x1D }; // TODO
-								   // should be
-								   // stored
-								   // somewhere
-								   // else
+	    byte[] FID_EFCARDSECURITY = new byte[] { 0x01, 0x1D }; // TODO: should be stored somewhere else
 	    byte[] efCardSecurity = readFile(FID_EFCARDSECURITY, didAuthenticate.getConnectionHandle().getSlotHandle());
 
-	    //FIXME oid and keyID are fix 
+	    //FIXME oid and keyID are fix
 	    this.transmitSingleAPDU(CardCommands.ManageSecurityEnvironment.setAT.CA(ObjectIdentifierUtils.getValue(CAObjectIdentifier.id_CA_ECDH_AES_CBC_CMAC_128), new byte[] { 0x41 }));
 
-	    ResponseAPDU rapdu = this.transmitSingleAPDU(CardCommands.GeneralAuthenticate.generic((byte) 0x80,
-		    StringUtils.toByteArray("04" + internalData.get("pubkey")), false));
+	    ResponseAPDU rapdu = this.transmitSingleAPDU(CardCommands.GeneralAuthenticate.generic((byte) 0x80, StringUtils.toByteArray("04" + internalData.get("pubkey")), false));
 
 	    TLV tlv = TLV.fromBER(rapdu.getData());
 	    byte[] nonce = tlv.findChildTags(0x81).get(0).getValue();
@@ -136,19 +125,16 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    r.setResultMajor(ECardConstants.Major.OK);
 	    didAuthenticateResponse.setResult(r);
 
-	    EAC2OutputType eacadditionaloutput = new EAC2OutputType(didAuthenticate, ByteUtils.toHexString(efCardSecurity),
-		    ByteUtils.toHexString(token), ByteUtils.toHexString(nonce));
+	    EAC2OutputType eacadditionaloutput = new EAC2OutputType(didAuthenticate, ByteUtils.toHexString(efCardSecurity), ByteUtils.toHexString(token), ByteUtils.toHexString(nonce));
 
 	    didAuthenticateResponse.setAuthenticationProtocolData(eacadditionaloutput.getAuthDataType());
 
-	    DestroyChannel destroyChannel = new DestroyChannel(); // disable
-								  // SecureMessaging
+	    DestroyChannel destroyChannel = new DestroyChannel(); // disable SecureMessaging
 	    destroyChannel.setSlotHandle(didAuthenticate.getConnectionHandle().getSlotHandle());
-	    ifd.destroyChannel(destroyChannel);
+	    dispatcher.deliver(destroyChannel);
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
 	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)",
-			didAuthenticateResponse);
+		_logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", didAuthenticateResponse);
 	    } // </editor-fold>
 	    return didAuthenticateResponse;
 	} catch (Exception e) {

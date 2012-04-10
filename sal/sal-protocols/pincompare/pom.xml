@@ -16,6 +16,11 @@
 
     <dependencies>
 	<dependency>
+	    <groupId>org.openecard.client</groupId>
+	    <artifactId>common</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
 	    <groupId>org.openecard.client.sal</groupId>
 	    <artifactId>tiny-sal</artifactId>
 	    <version>${project.version}</version>
@@ -41,6 +46,12 @@
 	<dependency>
 	    <groupId>org.openecard.client.gui</groupId>
 	    <artifactId>swing</artifactId>
+	    <version>${project.version}</version>
+	    <scope>test</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.transport</groupId>
+	    <artifactId>dispatcher</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>
 	</dependency>

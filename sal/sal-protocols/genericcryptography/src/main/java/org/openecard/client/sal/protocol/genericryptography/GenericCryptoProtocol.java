@@ -15,6 +15,7 @@
 
 package org.openecard.client.sal.protocol.genericryptography;
 
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.ws.IFD;
 import org.openecard.ws.SAL;
@@ -22,9 +23,9 @@ import org.openecard.ws.SAL;
 
 public class GenericCryptoProtocol extends org.openecard.client.common.sal.Protocol {
 
-    public GenericCryptoProtocol(SAL sal, IFD ifd) {
-	this.steps.add(new SignStep(sal, ifd));
-	this.steps.add(new DIDGetStep(sal));
+    public GenericCryptoProtocol(Dispatcher dispatcher) {
+	this.steps.add(new SignStep(dispatcher));
+	this.steps.add(new DIDGetStep(dispatcher));
     }
 
     @Override

@@ -41,11 +41,8 @@ import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
 import iso.std.iso_iec._24727.tech.schema.PinCompareDIDAuthenticateInputType;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
-
 import java.math.BigInteger;
-
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -53,6 +50,7 @@ import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.enums.EventType;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.gui.swing.SwingUserConsent;
@@ -61,14 +59,14 @@ import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.sal.TinySAL;
 import org.openecard.client.sal.protocol.genericryptography.GenericCryptoProtocolFactory;
 import org.openecard.client.sal.protocol.pincompare.PinCompareProtocolFactory;
-import org.openecard.client.sal.protocol.pincompare.SwingDialogWrapper;
+import org.openecard.client.transport.dispatcher.MessageDispatcher;
 
 
 /**
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@Ignore
+//@Ignore
 public class GenericCryptographyProtocolTest {
 
     private static ClientEnv env;
@@ -79,6 +77,8 @@ public class GenericCryptographyProtocolTest {
     @BeforeClass
     public static void setUp() throws Exception {
 	env = new ClientEnv();
+        Dispatcher d = new MessageDispatcher(env);
+        env.setDispatcher(d);
 	IFD ifd = new IFD();
 	ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
 	env.setIFD(ifd);

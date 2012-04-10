@@ -24,19 +24,15 @@ import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.InputUnitType;
 import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
 import iso.std.iso_iec._24727.tech.schema.PinInputType;
-import iso.std.iso_iec._24727.tech.schema.Transmit;
-import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifyUser;
 import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.smartcardio.ResponseAPDU;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
@@ -45,11 +41,7 @@ import org.openecard.client.common.sal.anytype.PinCompareDIDAuthenticateOutputTy
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.client.common.util.ByteUtils;
-import org.openecard.client.common.util.CardCommands;
 import org.openecard.client.common.util.StringUtils;
-import org.openecard.client.sal.TinySAL;
-import org.openecard.ws.IFD;
-import org.openecard.ws.SAL;
 
 
 /**
@@ -58,30 +50,17 @@ import org.openecard.ws.SAL;
  */
 public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
-    private IFD ifd;
-    private TinySAL sal;
     private static final Logger _logger = LogManager.getLogger(DIDAuthenticateStep.class.getName());
 
-    public DIDAuthenticateStep(IFD ifd, SAL sal) {
-	this.ifd = ifd;
-	this.sal = (TinySAL) sal;
+    private final Dispatcher dispatcher;
+
+    public DIDAuthenticateStep(Dispatcher dispatcher) {
+	this.dispatcher = dispatcher;
     }
 
     @Override
     public FunctionType getFunctionType() {
 	return FunctionType.DIDAuthenticate;
-    }
-
-    private ResponseAPDU transmitSingleAPDU(byte[] apdu, byte[] slotHandle, IFD ifd) throws WSException {
-	ArrayList<byte[]> responses = new ArrayList<byte[]>() {{
-	    add(new byte[] { (byte) 0x90, (byte) 0x00 });
-	    add(new byte[] { (byte) 0x63, (byte) 0xC3 });
-	    add(new byte[] { (byte) 0x63, (byte) 0xC2 });
-	}};
-
-	Transmit t = CardCommands.makeTransmit(slotHandle, apdu, responses);
-	TransmitResponse tr = (TransmitResponse) WSHelper.checkResult(ifd.transmit(t));
-	return new ResponseAPDU(tr.getOutputAPDU().get(0));
     }
 
     @Override
@@ -95,7 +74,7 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 	    PinCompareDIDAuthenticateInputType pinCompareDIDAuthenticateInput = new PinCompareDIDAuthenticateInputType(didAuthenticate.getAuthenticationProtocolData());
 	    ConnectionHandleType connectionHandle = didAuthenticate.getConnectionHandle();
 	    DIDScopeType didScope = didAuthenticate.getDIDScope();
-	    CardStateEntry cardStateEntry = sal.getStates().getEntry(connectionHandle);
+	    CardStateEntry cardStateEntry = (CardStateEntry) internalData.get("cardState");
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    if(!cardInfoWrapper.checkSecurityCondition(didName, didScope, DifferentialIdentityServiceActionName.DID_AUTHENTICATE)){
 		return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
@@ -114,7 +93,7 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 	    pinInput.setPasswordAttributes(pinCompareMarker.getPasswordAttributes());
 	    // FIXME
 	    verify.setTemplate(StringUtils.toByteArray("00 20 00 02", true));
-	    VerifyUserResponse verifyR = ifd.verifyUser(verify);
+	    VerifyUserResponse verifyR = (VerifyUserResponse) dispatcher.deliver(verify);
 	    byte[] responseCode = verifyR.getResponse();
 
 	    DIDAuthenticateResponse did = new DIDAuthenticateResponse();

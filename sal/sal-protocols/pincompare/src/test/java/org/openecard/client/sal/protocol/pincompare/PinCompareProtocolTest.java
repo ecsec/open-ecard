@@ -39,18 +39,19 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.enums.EventType;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.sal.TinySAL;
+import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -59,7 +60,6 @@ import org.w3c.dom.Element;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@Ignore
 public class PinCompareProtocolTest {
 
     private static ClientEnv env;
@@ -70,9 +70,10 @@ public class PinCompareProtocolTest {
     @BeforeClass
     public static void setUp() throws Exception {
 	env = new ClientEnv();
+        Dispatcher d = new MessageDispatcher(env);
+        env.setDispatcher(d);
 	IFD ifd = new IFD();
 	ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
-
 	env.setIFD(ifd);
 	states = new CardStateMap();
 

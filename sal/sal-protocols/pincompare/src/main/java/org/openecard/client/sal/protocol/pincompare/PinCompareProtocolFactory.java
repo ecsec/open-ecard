@@ -16,11 +16,10 @@
 package org.openecard.client.sal.protocol.pincompare;
 
 import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.Protocol;
 import org.openecard.client.common.sal.ProtocolFactory;
 import org.openecard.client.gui.UserConsent;
-import org.openecard.ws.IFD;
-import org.openecard.ws.SAL;
 
 
 /**
@@ -35,8 +34,8 @@ public class PinCompareProtocolFactory implements ProtocolFactory {
     }
 
     @Override
-    public Protocol createInstance(SAL sal, IFD ifd, UserConsent gui) {
-	return new PinCompareProtocol(ifd, sal);
+    public Protocol createInstance(Dispatcher dispatcher, UserConsent gui) {
+	return new PinCompareProtocol(dispatcher);
     }
 
 }

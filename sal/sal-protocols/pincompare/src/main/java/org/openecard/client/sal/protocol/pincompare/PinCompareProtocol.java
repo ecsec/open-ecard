@@ -15,20 +15,20 @@
 
 package org.openecard.client.sal.protocol.pincompare;
 
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.FunctionType;
-import org.openecard.ws.IFD;
-import org.openecard.ws.SAL;
 
 
 /**
  *
- * @author Dirk Petrautzki <petrautzki at hs-coburg.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class PinCompareProtocol extends org.openecard.client.common.sal.Protocol {
 
-    public PinCompareProtocol(IFD ifd, SAL sal) {
-	this.steps.add(new DIDAuthenticateStep(ifd, sal));
+    public PinCompareProtocol(Dispatcher dispatcher) {
+	this.steps.add(new DIDAuthenticateStep(dispatcher));
 	this.steps.add(new EnchipherStep());
+	this.steps.add(new DIDGetStep(dispatcher));
     }
 
     @Override

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.openecard.client.sal.protocol.genericryptography;
+package org.openecard.client.sal.protocol.pincompare;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDGet;
@@ -21,9 +21,11 @@ import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
+
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.interfaces.Dispatcher;

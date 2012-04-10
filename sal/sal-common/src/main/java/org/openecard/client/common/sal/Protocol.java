@@ -46,6 +46,10 @@ public class Protocol {
     }
 
 
+    public TreeMap<String, Object> getInternalData() {
+	return internalData;
+    }
+
     private boolean hasNextStep() {
 	return steps.size() > curStep;
     }

@@ -1,8 +1,7 @@
 package org.openecard.client.common.sal;
 
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.gui.UserConsent;
-import org.openecard.ws.IFD;
-import org.openecard.ws.SAL;
 
 
 /**
@@ -23,6 +22,6 @@ public interface ProtocolFactory {
      *
      * @return instance of the protocol which can be used for one connection
      */
-    public Protocol createInstance(SAL sal, IFD ifd, UserConsent gui);
+    public Protocol createInstance(Dispatcher dispatcher, UserConsent gui);
 
 }

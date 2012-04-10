@@ -120,9 +120,9 @@ public class TinySAL implements org.openecard.ws.SAL {
 	return sessionId;
     }
 
-    public CardStateMap getStates() {
-	return states;
-    }
+    // public CardStateMap getStates() {
+    // 	return states;
+    // }
 
 
     public boolean addProtocol(String proto, ProtocolFactory factory) {
@@ -137,13 +137,13 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    Protocol proto = entry.getProtocol(protoUri);
 	    if (proto == null) {
 		if (protocolFactories.contains(protoUri)) {
-		    System.out.println(env.getDispatcher() == null);
 		    proto = protocolFactories.get(protoUri).createInstance(env.getDispatcher(), this.userConsent);
 		    entry.setProtocol(protoUri, proto);
 		} else {
 		    throw new UnknownProtocolException("The protocol URI '" + protoUri + "' is not registered in this SAL component.");
 		}
 	    }
+	    proto.getInternalData().put("cardState", entry);
 	    return proto;
 	}
     }
@@ -688,7 +688,7 @@ public class TinySAL implements org.openecard.ws.SAL {
     }
 
     @Override
-	public SignResponse sign(Sign sign) {
+    public SignResponse sign(Sign sign) {
 	try {
 	    String didName = sign.getDIDName();
 	    ConnectionHandleType connectionHandle = sign.getConnectionHandle();
@@ -716,7 +716,6 @@ public class TinySAL implements org.openecard.ws.SAL {
 
 	    Protocol proto = getProtocol(connectionHandle, protoUri);
 	    if (proto.hasNextStep(FunctionType.Sign)) {
-		proto.getInternalData().put("cardState", states.getEntry(connectionHandle));
 		SignResponse resp = proto.sign(sign);
 		removeFinishedProtocol(connectionHandle, protoUri, proto);
 		return resp;
@@ -899,7 +898,6 @@ public class TinySAL implements org.openecard.ws.SAL {
 	try {
 	    Protocol proto = getProtocol(connectionHandle, protoUri);
 	    if (proto.hasNextStep(FunctionType.DIDGet)) {
-		proto.getInternalData().put("cardState", states.getEntry(connectionHandle));
 		resp = proto.didGet(didGet);
 		removeFinishedProtocol(connectionHandle, protoUri, proto);
 	    } else {
@@ -958,7 +956,6 @@ public class TinySAL implements org.openecard.ws.SAL {
 	try {
 	    Protocol proto = getProtocol(connectionHandle, protoUri);
 	    if (proto.hasNextStep(FunctionType.DIDAuthenticate)) {
-		proto.getInternalData().put("cardState", states.getEntry(connectionHandle));
 		resp = proto.didAuthenticate(didAuthenticate);
 		removeFinishedProtocol(connectionHandle, protoUri, proto);
 	    } else {

@@ -39,6 +39,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
@@ -60,6 +61,7 @@ import org.w3c.dom.Element;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
+@Ignore
 public class PinCompareProtocolTest {
 
     private static ClientEnv env;

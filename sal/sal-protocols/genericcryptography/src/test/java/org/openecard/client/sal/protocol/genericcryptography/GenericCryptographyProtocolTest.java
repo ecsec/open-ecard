@@ -66,7 +66,7 @@ import org.openecard.client.transport.dispatcher.MessageDispatcher;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-//@Ignore
+@Ignore
 public class GenericCryptographyProtocolTest {
 
     private static ClientEnv env;

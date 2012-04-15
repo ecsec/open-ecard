@@ -50,13 +50,15 @@ import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
 
 /**
  *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
+    private static final Logger _logger = LogManager.getLogger(ChipAuthenticationStep.class.getName());
+
     private Dispatcher dispatcher;
     private byte[] slotHandle;
-    private static final Logger _logger = LogManager.getLogger(ChipAuthenticationStep.class.getName());
 
     public ChipAuthenticationStep(Dispatcher dispatcher) {
 	this.dispatcher = dispatcher;
@@ -67,83 +69,73 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	return FunctionType.DIDAuthenticate;
     }
 
-    private ResponseAPDU transmitSingleAPDU(byte[] apdu) throws WSException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-	ArrayList<byte[]> responses = new ArrayList<byte[]>() {{
-	    add(new byte[] { (byte) 0x90, (byte) 0x00 });
-	}};
-
-	Transmit t = CardCommands.makeTransmit(slotHandle, apdu, responses);
-	TransmitResponse tr = (TransmitResponse) WSHelper.checkResult((TransmitResponse) dispatcher.deliver(t));
-	return new ResponseAPDU(tr.getOutputAPDU().get(0));
-    }
-
-    private byte[] readFile(byte[] FID, byte[] slotHandle) throws IOException, TLVException, WSException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-	// 1. READ FCP and get length, 2. SELECT FILE, 3. READ IN LOOP
-
-	ResponseAPDU rapdu = this.transmitSingleAPDU(CardCommands.Select.EF_FCP(FID));
-	FCP fcp = new FCP(rapdu.getData());
-	long length = fcp.getNumBytes();
-	this.transmitSingleAPDU(CardCommands.Select.EF(FID));
-	ByteArrayOutputStream fileContent = new ByteArrayOutputStream((int) length);
-
-	for (short offset = 0; length > 0; offset += 255, length -= 255) {
-	    byte[] apdu = CardCommands.Read.binary(offset, (short) ((length >= 255) ? 255 : length));
-	    rapdu = this.transmitSingleAPDU(apdu);
-	    fileContent.write(rapdu.getData());
-	}
-
-	return fileContent.toByteArray();
-    }
-
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", new Object[] { didAuthenticate, internalData });
+	if (logger.isLoggable(Level.FINER)) {
+	    logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)",
+		    new Object[]{didAuthenticate, internalData});
 	} // </editor-fold>
+
+	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
+	slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
+
 	try {
-	    EACAdditionalInputType eacAddInput = new EACAdditionalInputType(didAuthenticate.getAuthenticationProtocolData());
-	    this.slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
+	    EACAdditionalInputType eacAdditionalInput = new EACAdditionalInputType(didAuthenticate.getAuthenticationProtocolData());
+	    EAC2OutputType eac2Output = eacAdditionalInput.getOutputType();
 
-	    this.transmitSingleAPDU(CardCommands.ExternalAuthenticate.generic(eacAddInput.getSignature()));
+	    TerminalAuthentication ta = new TerminalAuthentication(dispatcher, slotHandle);
+	    ChipAuthentication ca = new ChipAuthentication(dispatcher, slotHandle);
 
-	    byte[] FID_EFCARDSECURITY = new byte[] { 0x01, 0x1D }; // TODO: should be stored somewhere else
-	    byte[] efCardSecurity = readFile(FID_EFCARDSECURITY, didAuthenticate.getConnectionHandle().getSlotHandle());
+	    // TA: Step 4 - External Authentication
+	    ta.externalAuthentication(eacAdditionalInput.getSignature());
 
-	    //FIXME oid and keyID are fix
-	    this.transmitSingleAPDU(CardCommands.ManageSecurityEnvironment.setAT.CA(ObjectIdentifierUtils.getValue(CAObjectIdentifier.id_CA_ECDH_AES_CBC_CMAC_128), new byte[] { 0x41 }));
+	    // Read EF.CardSecurity
+	    CardUtils cardUtils = new CardUtils(dispatcher);
+	    byte[] efCardSecurity = cardUtils.readFile(slotHandle, EACConstants.EF_CARDSECURITY_FID);
 
-	    ResponseAPDU rapdu = this.transmitSingleAPDU(CardCommands.GeneralAuthenticate.generic((byte) 0x80, StringUtils.toByteArray("04" + internalData.get("pubkey")), false));
+	    // CA: Step 1 - MSE:SET AT
+	    SecurityInfos securityInfos = (SecurityInfos) internalData.get(EACConstants.INTERNAL_DATA_SECURITY_INFOS);
+	    EFCardAccess efca = new EFCardAccess(securityInfos);
+	    CASecurityInfos cas = efca.getCASecurityInfos();
 
-	    TLV tlv = TLV.fromBER(rapdu.getData());
+	    byte[] oid = ObjectIdentifierUtils.getValue(cas.getCAInfo().getProtocol());
+	    byte[] keyID = IntegerUtils.toByteArray(cas.getCAInfo().getKeyID());
+	    ca.mseSetAT(oid, keyID);
+
+	    // CA: Step 2 - General Authenticate
+	    byte[] key = ByteUtils.concatenate((byte) 0x04, (byte[]) internalData.get(EACConstants.INTERNAL_DATA_PK_PCD));
+	    byte[] responseData = ca.generalAuthenticate(key);
+
+	    TLV tlv = TLV.fromBER(responseData);
 	    byte[] nonce = tlv.findChildTags(0x81).get(0).getValue();
 	    byte[] token = tlv.findChildTags(0x82).get(0).getValue();
 
-	    DIDAuthenticateResponse didAuthenticateResponse = new DIDAuthenticateResponse();
-
-	    Result r = new Result();
-	    r.setResultMajor(ECardConstants.Major.OK);
-	    didAuthenticateResponse.setResult(r);
-
-	    EAC2OutputType eacadditionaloutput = new EAC2OutputType(didAuthenticate, ByteUtils.toHexString(efCardSecurity), ByteUtils.toHexString(token), ByteUtils.toHexString(nonce));
-
-	    didAuthenticateResponse.setAuthenticationProtocolData(eacadditionaloutput.getAuthDataType());
-
-	    DestroyChannel destroyChannel = new DestroyChannel(); // disable SecureMessaging
+	    // Disable Secure Messaging
+	    DestroyChannel destroyChannel = new DestroyChannel();
 	    destroyChannel.setSlotHandle(didAuthenticate.getConnectionHandle().getSlotHandle());
 	    dispatcher.deliver(destroyChannel);
+
+	    // Create response
+	    eac2Output.setEFCardSecurity(efCardSecurity);
+	    eac2Output.setNonce(nonce);
+	    eac2Output.setToken(token);
+
+	    response.setResult(WSHelper.makeResultOK());
+	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());
+
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", didAuthenticateResponse);
+	    if (logger.isLoggable(Level.FINER)) {
+		logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", response);
 	    } // </editor-fold>
-	    return didAuthenticateResponse;
-	} catch (Exception e) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", e.getMessage(), e);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultUnknownError(e.getMessage()));
+
+	    return response;
+	} catch (Exception ex) {
+	    logger.log(Level.SEVERE, "Exception", ex);
+	    response.setResult(WSHelper.makeResultUnknownError(ex.getMessage()));
 	}
+
+	return response;
     }
 
 }

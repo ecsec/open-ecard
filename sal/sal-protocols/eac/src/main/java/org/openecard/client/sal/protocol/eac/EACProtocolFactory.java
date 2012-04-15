@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.sal.protocol.eac;
 
 import org.openecard.client.common.ECardConstants;
@@ -20,6 +19,7 @@ import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.Protocol;
 import org.openecard.client.common.sal.ProtocolFactory;
 import org.openecard.client.gui.UserConsent;
+
 
 
 /**

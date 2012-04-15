@@ -44,13 +44,15 @@ import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
 
 /**
  *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
+    private static final Logger _logger = LogManager.getLogger(TerminalAuthenticationStep.class.getName());
+
     private Dispatcher dispatcher;
     private byte[] slotHandle;
-    private static final Logger _logger = LogManager.getLogger(TerminalAuthenticationStep.class.getName());
 
     public TerminalAuthenticationStep(Dispatcher dispatcher) {
 	this.dispatcher = dispatcher;
@@ -61,65 +63,61 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	return FunctionType.DIDAuthenticate;
     }
 
-    private ResponseAPDU transmitSingleAPDU(byte[] apdu) throws WSException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-	ArrayList<byte[]> responses = new ArrayList<byte[]>() {{
-	    add(new byte[] { (byte) 0x90, (byte) 0x00 });
-	    add(new byte[] { 0x6A, (byte) 0x88 });
-	}};
-
-	Transmit t = CardCommands.makeTransmit(slotHandle, apdu, responses);
-	TransmitResponse tr = (TransmitResponse) WSHelper.checkResult((TransmitResponse) dispatcher.deliver(t));
-	return new ResponseAPDU(tr.getOutputAPDU().get(0));
-    }
-
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", new Object[] { didAuthenticate, internalData });
+	if (logger.isLoggable(Level.FINER)) {
+	    logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", new Object[]{didAuthenticate, internalData});
 	} // </editor-fold>
+
+	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
+	slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
+
 	try {
-	    this.slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
-	    this.transmitSingleAPDU(CardCommands.ManageSecurityEnvironment.setDST((byte[]) internalData.get("CAR")));
+	    EAC2InputType eac2Input = new EAC2InputType(didAuthenticate.getAuthenticationProtocolData());
+	    EAC2OutputType eac2Output = eac2Input.getOutputType();
 
-	    EAC2InputType eac2input = new EAC2InputType(didAuthenticate.getAuthenticationProtocolData());
-	    internalData.put("pubkey", ByteUtils.toHexString(eac2input.getEphemeralPublicKey()));
+	    TerminalAuthentication ta = new TerminalAuthentication(dispatcher, slotHandle);
 
-	    for (CardVerifiableCertificate cvc : eac2input.getCertificates()) {
-		this.transmitSingleAPDU(CardCommands.PerformSecurityOperation.verifySelfDescriptiveCertificate(cvc.getBody()));
-		this.transmitSingleAPDU(CardCommands.ManageSecurityEnvironment.setDST(cvc.getCertificateHolderReference()));
-	    }
+	    // TA: Step 1 - Verify certificates
+	    CardVerifiableCertificateChain certificateChain = (CardVerifiableCertificateChain) internalData.get(EACConstants.INTERNAL_DATA_CERTIFICATES);
+	    ta.verifyCertificates(certificateChain);
 
-	    CardVerifiableCertificate eServiceCertificate = (CardVerifiableCertificate) internalData.get("eServiceCertificate");
-	    this.transmitSingleAPDU(CardCommands.PerformSecurityOperation.verifySelfDescriptiveCertificate(eServiceCertificate.getBody()));
+	    // TA: Step 2 - MSE:SET AT
+	    SecurityInfos securityInfos = (SecurityInfos) internalData.get(EACConstants.INTERNAL_DATA_SECURITY_INFOS);
+	    EFCardAccess efca = new EFCardAccess(securityInfos);
+	    TASecurityInfos tas = efca.getTASecurityInfos();
 
-	    //FIXME oid is fix
-	    byte[] apdu = CardCommands.ManageSecurityEnvironment.setAT.TA(ObjectIdentifierUtils.getValue(TAObjectIdentifier.id_TA_ECDSA_SHA_256), eServiceCertificate.getCertificateHolderReference(), eac2input.getCompressedEphemeralPublicKey(), (byte[]) internalData.get("authenticatedAuxiliaryData"));
-	    this.transmitSingleAPDU(apdu);
+	    byte[] oid = ObjectIdentifierUtils.getValue(tas.getTAInfo().getProtocol());
+	    byte[] chr = certificateChain.getTerminalCertificate().getCHR().toByteArray();
+	    byte[] key = eac2Input.getEphemeralPublicKey();
+	    byte[] aad = (byte[]) internalData.get(EACConstants.INTERNAL_DATA_AUTHENTICATED_AUXILIARY_DATA);
+	    ta.mseSetAT(oid, chr, key, aad);
 
-	    apdu = CardCommands.GetChallenge.generic();
-	    byte[] challenge = this.transmitSingleAPDU(apdu).getData();
+	    // TA: Step 3 - Get challenge
+	    byte[] rPICC = ta.getChallenge();
 
-	    DIDAuthenticateResponse didAuthenticateResponse = new DIDAuthenticateResponse();
-	    Result r = new Result();
-	    r.setResultMajor(ECardConstants.Major.OK);
-	    didAuthenticateResponse.setResult(r);
+	    // Store public key for Chip Authentication
+	    internalData.put(EACConstants.INTERNAL_DATA_PK_PCD, ByteUtils.toHexString(eac2Input.getEphemeralPublicKey()));
 
-	    EAC2OutputType eac2output = new EAC2OutputType(didAuthenticate.getAuthenticationProtocolData(), challenge);
+	    // Create response
+	    eac2Output.setChallenge(rPICC);
 
-	    didAuthenticateResponse.setAuthenticationProtocolData(eac2output.getAuthDataType());
+	    response.setResult(WSHelper.makeResultOK());
+	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());
+
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", didAuthenticateResponse);
+	    if (logger.isLoggable(Level.FINER)) {
+		logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", response);
 	    } // </editor-fold>
-	    return didAuthenticateResponse;
+
+	    return response;
 	} catch (Exception ex) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", ex.getMessage(), ex);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultUnknownError(ex.getMessage()));
+	    logger.log(Level.SEVERE, "Exception", ex);
+	    response.setResult(WSHelper.makeResultUnknownError(ex.getMessage()));
 	}
+
+	return response;
     }
 
 }

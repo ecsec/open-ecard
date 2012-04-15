@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.common.ifd.anytype;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
@@ -26,6 +25,11 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class PACEInputType {
 
+    public static final String PIN_ID = "PinID";
+    public static final String CHAT = "CHAT";
+    public static final String PIN = "PIN";
+    public static final String CERTIFICATE_DESCRIPTION = "CertificateDescription";
+
     private final AuthDataMap authMap;
     private final byte pinID;
     private final byte[] chat;
@@ -33,33 +37,33 @@ public class PACEInputType {
     private final byte[] certDesc;
 
     public PACEInputType(DIDAuthenticationDataType baseType) throws ParserConfigurationException {
-        authMap = new AuthDataMap(baseType);
+	authMap = new AuthDataMap(baseType);
 
-        pinID = authMap.getContentAsBytes("PinID")[0];
-        // optional elements
-        chat = authMap.getContentAsBytes("CHAT");
-        pin = authMap.getContentAsString("PIN");
-        certDesc = authMap.getContentAsBytes("CertificateDescription");
+	pinID = authMap.getContentAsBytes(PIN_ID)[0];
+	// optional elements
+	chat = authMap.getContentAsBytes(CHAT);
+	pin = authMap.getContentAsString(PIN);
+	certDesc = authMap.getContentAsBytes(CERTIFICATE_DESCRIPTION);
     }
 
     public byte getPINID() {
-        return pinID;
+	return pinID;
     }
 
     public byte[] getCHAT() {
-        return chat;
+	return chat;
     }
 
     public String getPIN() {
-        return pin;
+	return pin;
     }
 
     public byte[] getCertificateDescription() {
-        return certDesc;
+	return certDesc;
     }
 
     public PACEOutputType getOutputType() {
-        return new PACEOutputType(authMap);
+	return new PACEOutputType(authMap);
     }
 
 }

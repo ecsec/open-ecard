@@ -15,8 +15,11 @@
  */
 package org.openecard.client.crypto.common.asn1.eac.oid;
 
+
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * See BSI-TR-03110, version 2.10
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public abstract interface TAObjectIdentifier extends EACObjectIdentifier {
 
@@ -72,4 +75,5 @@ public abstract interface TAObjectIdentifier extends EACObjectIdentifier {
      * id-TA-ECDSA-SHA-512 OBJECT IDENTIFIER ::= {id-TA-ECDSA 5}
      */
     public static final String id_TA_ECDSA_SHA_512 = id_TA_ECDSA + ".5";
+
 }

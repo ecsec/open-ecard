@@ -1,36 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.openecard</groupId>
-    <artifactId>client</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
-  </parent>
+    <parent>
+	<groupId>org.openecard</groupId>
+	<artifactId>client</artifactId>
+	<version>0.0.3-SNAPSHOT</version>
+    </parent>
 
-  <groupId>org.openecard.client</groupId>
-  <artifactId>clients</artifactId>
-  <packaging>pom</packaging>
-  <name>client implementations</name>
+    <groupId>org.openecard.client</groupId>
+    <artifactId>clients</artifactId>
+    <packaging>pom</packaging>
+    <name>client implementations</name>
 
-  <modules>
-    <module>applet</module>
-  </modules>
+    <modules>
+	<module>applet</module>
+	<module>richclient</module>
+    </modules>
 
-  <profiles>
-      <profile>
-	  <id>android</id>
-	  <activation>
-	      <!-- activate android when sdk path is defined -->
-	      <property>
-		  <name>env.ANDROID_HOME</name>
-	      </property>
-	  </activation>
-	  <modules>
-	      <module>android</module>
-	  </modules>
-      </profile>
-  </profiles>
+    <profiles>
+	<profile>
+	    <id>android</id>
+	    <activation>
+		<!-- activate android when sdk path is defined -->
+		<property>
+		    <name>env.ANDROID_HOME</name>
+		</property>
+	    </activation>
+	    <modules>
+		<module>android</module>
+	    </modules>
+	</profile>
+    </profiles>
 
 </project>

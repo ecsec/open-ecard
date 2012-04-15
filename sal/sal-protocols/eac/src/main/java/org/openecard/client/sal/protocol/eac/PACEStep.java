@@ -60,20 +60,21 @@ import org.w3c.dom.Element;
 
 /**
  *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- *
  */
 public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
-    private Dispatcher dispatcher;
-    private UserConsent gui;
-
-    I18n i = I18n.getTranslation("sal");
     private static final Logger _logger = LogManager.getLogger(PACEStep.class.getName());
+    private static I18n i = I18n.getTranslation("sal");
+
+    private Dispatcher dispatcher;
+    private byte[] slotHandle;
+    private EACUserConsent gui;
 
     public PACEStep(Dispatcher dispatcher, UserConsent gui) {
 	this.dispatcher = dispatcher;
-	this.gui = gui;
+	this.gui = new EACUserConsent(gui);
     }
 
     @Override
@@ -84,194 +85,77 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", new Object[] { didAuthenticate, internalData });
+	if (logger.isLoggable(Level.FINER)) {
+	    logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", new Object[]{didAuthenticate, internalData});
 	} // </editor-fold>
+
+	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
+	slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
+
 	try {
-	    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-	    factory.setNamespaceAware(true);
-	    DocumentBuilder builder = factory.newDocumentBuilder();
-	    Document d = builder.newDocument();
+	    EAC1InputType eac1Input = new EAC1InputType(didAuthenticate.getAuthenticationProtocolData());
+	    EAC1OutputType eac1Output = eac1Input.getOutputType();
 
-	    EAC1InputType eac1input = new EAC1InputType(didAuthenticate.getAuthenticationProtocolData());
+	    CertificateDescription description = CertificateDescription.getInstance(eac1Input.getCertificateDescription());
+	    CHAT requiredCHAT = new CHAT(eac1Input.getRequiredCHAT());
+	    CHAT optionalCHAT = new CHAT(eac1Input.getOptionalCHAT());
+	    CHAT chosenCHAT = gui.show(eac1Input.getCertificates().get(0), description, requiredCHAT, optionalCHAT);
 
-	    CertificateDescription description = new CertificateDescription(TLV.fromBER(eac1input.getCertificateDescription()));
-	    CHAT requiredCHAT = new CHAT(TLV.fromBER(eac1input.getReuiredCHAT()));
-	    CHAT optionalCHAT = new CHAT(TLV.fromBER(eac1input.getOptionalCHAT()));
-	    CHAT chosenCHAT = this.showUserConsentAndRetrieveCHAT(description, requiredCHAT, optionalCHAT, eac1input.getCertificates().get(0));
+	    // Create PACEInputType
+	    AuthDataMap paceAuthMap = new AuthDataMap(didAuthenticate.getAuthenticationProtocolData());
+	    AuthDataResponse paceInputMap = paceAuthMap.createResponse(didAuthenticate.getAuthenticationProtocolData());
+	    //FIXME
+	    paceInputMap.addElement(PACEInputType.PIN_ID, "3");
+	    paceInputMap.addElement(PACEInputType.CHAT, chosenCHAT.toString());
+	    paceInputMap.addElement(PACEInputType.CERTIFICATE_DESCRIPTION, ByteUtils.toHexString(eac1Input.getCertificateDescription()));
 
+	    // EstablishChannel
 	    EstablishChannel establishChannel = new EstablishChannel();
-	    establishChannel.setSlotHandle(didAuthenticate.getConnectionHandle().getSlotHandle());
-
-	    DIDAuthenticationDataType establishChannelInput = new DIDAuthenticationDataType();
-	    establishChannelInput.setProtocol(ECardConstants.Protocol.PACE);
-
-	    Element e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "PinID");
-	    e.setTextContent("3"); // Personalausweis-PIN
-	    establishChannelInput.getAny().add(e);
-
-	    e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "CertificateDescription");
-	    e.setTextContent(ByteUtils.toHexString(eac1input.getCertificateDescription()));
-	    establishChannelInput.getAny().add(e);
-
-	    e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "CHAT");
-	    e.setTextContent(chosenCHAT.toString());
-	    establishChannelInput.getAny().add(e);
-
-	    establishChannel.setAuthenticationProtocolData(establishChannelInput);
-
-	    internalData.put("eServiceCertificate", eac1input.getCertificates().get(0));
-	    internalData.put("authenticatedAuxiliaryData", eac1input.getAuthenticatedAuxiliaryData());
+	    establishChannel.setSlotHandle(slotHandle);
+	    establishChannel.setAuthenticationProtocolData(paceInputMap.getResponse());
 
 	    EstablishChannelResponse establishChannelResponse = (EstablishChannelResponse) dispatcher.deliver(establishChannel);
-	    DIDAuthenticateResponse didAuthenticateResponse = new DIDAuthenticateResponse();
-	    didAuthenticateResponse.setResult(establishChannelResponse.getResult());
 
 	    if (!establishChannelResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
-		// TODO inform user an error happened while establishment of
-		// pace channel
+		// TODO inform user an error happened while establishment of pace channel
 	    } else {
-		EAC1OutputType eac1out = new EAC1OutputType(didAuthenticate.getAuthenticationProtocolData(), establishChannelResponse.getAuthenticationProtocolData(), chosenCHAT.getBytes());
-		didAuthenticateResponse.setAuthenticationProtocolData(eac1out.getAuthDataType());
-		didAuthenticateResponse.getAuthenticationProtocolData().setProtocol(null);
-		internalData.put("CAR", eac1out.getCertificationAuthorityReference());
+		DIDAuthenticationDataType data = establishChannelResponse.getAuthenticationProtocolData();
+		AuthDataMap paceOutputMap = new AuthDataMap(data);
+
+		int retryCounter = Integer.valueOf(paceOutputMap.getContentAsString(PACEOutputType.RETRY_COUNTER));
+		byte[] efCardAccess = paceOutputMap.getContentAsBytes(PACEOutputType.EF_CARD_ACCESS);
+		byte[] currentCAR = paceOutputMap.getContentAsBytes(PACEOutputType.CURRENT_CAR);
+		byte[] previousCAR = paceOutputMap.getContentAsBytes(PACEOutputType.PREVIOUS_CAR);
+		byte[] idpicc = paceOutputMap.getContentAsBytes(PACEOutputType.ID_PICC);
+
+		// Store SecurityInfos
+		SecurityInfos securityInfos = SecurityInfos.getInstance(efCardAccess);
+		internalData.put(EACConstants.INTERNAL_DATA_SECURITY_INFOS, securityInfos);
+		// Store additional data
+		internalData.put(EACConstants.INTERNAL_DATA_AUTHENTICATED_AUXILIARY_DATA, eac1Input.getAuthenticatedAuxiliaryData());
+		internalData.put(EACConstants.INTERNAL_DATA_CERTIFICATES, new CardVerifiableCertificateChain(eac1Input.getCertificates()));
+
+		// Create response
+		eac1Output.setEFCardAccess(efCardAccess);
+		eac1Output.setRetryCounter(retryCounter);
+		eac1Output.setIDPICC(idpicc);
+		eac1Output.setCHAT(chosenCHAT.toByteArray());
+		eac1Output.setCAR(currentCAR);
+
+		response.setResult(WSHelper.makeResultOK());
+		response.setAuthenticationProtocolData(eac1Output.getAuthDataType());
 	    }
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", didAuthenticateResponse);
+	    if (logger.isLoggable(Level.FINER)) {
+		logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", response);
 	    } // </editor-fold>
-	    return didAuthenticateResponse;
-	} catch (Exception e) {
-	 // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", e.getMessage(), e);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultUnknownError(e.getMessage()));
-	}
-    }
 
-    private CHAT showUserConsentAndRetrieveCHAT(CertificateDescription description, CHAT requiredCHAT, CHAT optionalCHAT,
-	    CardVerifiableCertificate cvc) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "showUserConsentAndRetrieveCHAT(CertificateDescription description, CHAT requiredCHAT, CHAT optionalCHAT, CardVerifiableCertificate cvc)", new Object[] { description, requiredCHAT, optionalCHAT, cvc });
-	} // </editor-fold>
-	UserConsentDescription ucd = new UserConsentDescription("test");
-
-	Step s1 = new Step(i.translationForKey("service_providers_statements_title"));
-	ucd.getSteps().add(s1);
-	Text i1 = new Text();
-	i1.setText(i.translationForKey("service_providers_name") + "\n" + description.getSubjectName() + "\n");
-	s1.getInputInfoUnits().add(i1);
-
-	Text i2 = new Text();
-	i2.setText(i.translationForKey("service_providers_internetaddress"));
-	s1.getInputInfoUnits().add(i2);
-
-	try {
-	    Hyperlink h1 = new Hyperlink();
-	    h1.setHref(description.getSubjectURL());
-	    s1.getInputInfoUnits().add(h1);
-	} catch (MalformedURLException e1) {
-	    // Fallback to Textoutput
-	    Text h1 = new Text();
-	    h1.setText(description.getSubjectURL() + "\n");
-	    s1.getInputInfoUnits().add(h1);
+	} catch (Exception ex) {
+	    logger.log(Level.SEVERE, "Exception", ex);
+	    response.setResult(WSHelper.makeResultUnknownError(ex.getMessage()));
 	}
 
-	Text i3 = new Text();
-	i3.setText("\n" + i.translationForKey("service_providers_statements") + "\n" + description.getTermsOfUsage() + "\n");
-	s1.getInputInfoUnits().add(i3);
-
-	Text i6 = new Text();
-	i6.setText(i.translationForKey("certificate_effective_date") + "\n" + i.translationForKey("from") + " " + cvc.getCertificateEffectiveDate() + "\n" + i.translationForKey("to") + " " + cvc.getCertificateExpirationDate() + "\n");
-	s1.getInputInfoUnits().add(i6);
-
-	Text i7 = new Text();
-	i7.setText(i.translationForKey("issuer") + "\n" + description.getIssuerName() + "\n");
-	s1.getInputInfoUnits().add(i7);
-
-	Text i8 = new Text();
-	i8.setText(i.translationForKey("issuers_url"));
-	s1.getInputInfoUnits().add(i8);
-
-	try {
-	    Hyperlink h2 = new Hyperlink();
-	    h2.setHref(description.getIssuerURL());
-	    s1.getInputInfoUnits().add(h2);
-	} catch (MalformedURLException e1) {
-	    // Fallback to Textoutput
-	    Text h2 = new Text();
-	    h2.setText(description.getIssuerURL() + "\n");
-	    s1.getInputInfoUnits().add(h2);
-	}
-
-	Step s2 = new Step(i.translationForKey("requested_data"));
-	ucd.getSteps().add(s2);
-
-	Text i9 = new Text();
-	i9.setText(i.translationForKey("purpose") + "\n");
-	s2.getInputInfoUnits().add(i9);
-
-	Checkbox i4 = new Checkbox();
-	s2.getInputInfoUnits().add(i4);
-
-	for (int i = 0; i < requiredCHAT.getReadAccess().length; i++) {
-	    if (requiredCHAT.getReadAccess()[i]) {
-		BoxItem bi1 = new BoxItem();
-		i4.getBoxItems().add(bi1);
-		bi1.setName(DataGroup.values()[i].name());
-		bi1.setChecked(true);
-		bi1.setDisabled(false);
-		bi1.setText(DataGroup.values()[i].toString());
-	    }
-	}
-
-	for (int i = 0; i < requiredCHAT.getSpecialFunctions().length; i++) {
-
-	    if (requiredCHAT.getSpecialFunctions()[i]) {
-		BoxItem bi1 = new BoxItem();
-		i4.getBoxItems().add(bi1);
-		bi1.setName(SpecialFunction.values()[i].name());
-		bi1.setChecked(true);
-		bi1.setDisabled(false);
-		bi1.setText(SpecialFunction.values()[i].toString());
-	    }
-	}
-
-	UserConsentNavigator ucn = this.gui.obtainNavigator(ucd);
-	ExecutionEngine exec = new ExecutionEngine(ucn);
-	exec.process();
-
-	CHAT chat = new CHAT(TerminalType.AuthenticationTerminal);
-	boolean[] specialFunctions = new boolean[8];
-	boolean[] readAccess = new boolean[21];
-
-	for (OutputInfoUnit out : exec.getResults().get(i.translationForKey("requested_data")).getResults()) {
-	    if (out.type().equals(InfoUnitElementType.Checkbox)) {
-		Checkbox c = (Checkbox) out;
-		for (BoxItem bi : c.getBoxItems()) {
-		    if (bi.isChecked()) {
-			if (bi.getName().startsWith("DG")) {
-			    readAccess[DataGroup.valueOf(bi.getName()).ordinal()] = true;
-			} else {
-			    specialFunctions[SpecialFunction.valueOf(bi.getName()).ordinal()] = true;
-			}
-		    }
-		    // else do nothing, false is default
-		}
-	    }
-	    // else ignore
-	}
-
-	chat.setSpecialFunctions(specialFunctions);
-	chat.setReadAccess(readAccess);
-
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "showUserConsentAndRetrieveCHAT(CertificateDescription description, CHAT requiredCHAT, CHAT optionalCHAT, CardVerifiableCertificate cvc)", chat);
-	} // </editor-fold>
-	return chat;
+	return response;
     }
 
 }

@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.sal.protocol.eac;
 
 import org.openecard.client.common.interfaces.Dispatcher;
+import org.openecard.client.common.sal.Protocol;
 import org.openecard.client.gui.UserConsent;
 
 
@@ -23,18 +23,12 @@ import org.openecard.client.gui.UserConsent;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class EACProtocol extends org.openecard.client.common.sal.Protocol {
+public class EACProtocol extends Protocol {
 
     public EACProtocol(Dispatcher dispatcher, UserConsent gui) {
-	this.steps.add(new PACEStep(dispatcher, gui));
-	this.steps.add(new TerminalAuthenticationStep(dispatcher));
-	this.steps.add(new ChipAuthenticationStep(dispatcher));
-    }
-
-
-    @Override
-    public String toString() {
-	return "EAC";
+	steps.add(new PACEStep(dispatcher, gui));
+	steps.add(new TerminalAuthenticationStep(dispatcher));
+	steps.add(new ChipAuthenticationStep(dispatcher));
     }
 
 }

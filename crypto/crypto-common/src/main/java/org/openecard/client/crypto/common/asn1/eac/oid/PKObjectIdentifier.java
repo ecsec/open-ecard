@@ -15,8 +15,11 @@
  */
 package org.openecard.client.crypto.common.asn1.eac.oid;
 
+
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * See BSI-TR-03110, version 2.10
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public abstract interface PKObjectIdentifier extends EACObjectIdentifier {
 
@@ -28,4 +31,5 @@ public abstract interface PKObjectIdentifier extends EACObjectIdentifier {
      * id-PK-ECDH OBJECT IDENTIFIER ::= {id-PK 2}
      */
     public static final String id_PK_ECDH = id_PK + ".2";
+
 }

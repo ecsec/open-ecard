@@ -15,14 +15,14 @@
  */
 package org.openecard.client.crypto.common.asn1.eac.oid;
 
+
 /**
+ * See BSI-TR-03110, version 2.10
+ *
  * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
  */
 public abstract interface EACObjectIdentifier {
 
-    /**
-     * BSI-TR-03110 - EAC specification version 2.05
-     */
     /**
      * bsi-de OBJECT IDENTIFIER ::= {itu-t(0) identified-organization(4)
      * etsi(0) reserved(127) etsi-identified-organization(0) 7}
@@ -64,26 +64,8 @@ public abstract interface EACObjectIdentifier {
      * id-CI OBJECT IDENTIFIER ::= {bsi-de protocols(2) smartcard(2) 8}
      */
     public static final String id_PT = bsi_de + ".2.2.8";
-    /**
-     * Roles and Authorization Levels. BSI-TR-03110 section C.4.
-     * id-roles OBJECT IDENTIFIER ::= {bsi-de applications(3) mrtd(1) 2}
-     */
-    public static final String id_roles = bsi_de + ".3.1.2";
-    /**
-     * Inspection Systems. BSI-TR-03110 section C.4.1.
-     * id-IS OBJECT IDENTIFIER ::= {id-roles 1}
-     */
-    public static final String id_IS = id_roles + ".1";
-    /**
-     * Authentication Terminals. BSI-TR-03110 section C.4.2.
-     * id-AT OBJECT IDENTIFIER ::= {id-roles 2}
-     */
-    public static final String id_AT = id_roles + ".2";
-    /**
-     * Signature Terminals. BSI-TR-03110 section C.4.3.
-     * id-ST OBJECT IDENTIFIER ::= {id-roles 3}
-     */
-    public static final String id_ST = id_roles + ".3";
+
+
     /**
      * Authenticated Auxiliary Data. BSI-TR-03110 section A.6.5.1.
      * id-AuxiliaryData OBJECT IDENTIFIER ::= {bsi-de applications(3) mrtd(1) 4}
@@ -114,4 +96,5 @@ public abstract interface EACObjectIdentifier {
      * standardizedDomainParameters OBJECT IDENTIFIER ::= {bsi-de algorithms(1) 2}
      */
     public static final String standardizedDomainParameters = bsi_de + ".1.2";
+
 }

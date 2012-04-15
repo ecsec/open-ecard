@@ -15,8 +15,10 @@
  */
 package org.openecard.client.crypto.common.asn1.eac;
 
+
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class CASecurityInfos {
 
@@ -29,7 +31,7 @@ public class CASecurityInfos {
      * @return CADomainParameterInfo
      */
     public CADomainParameterInfo getCADomainParameterInfo() {
-        return caDomainParameter;
+	return caDomainParameter;
     }
 
     /**
@@ -38,7 +40,7 @@ public class CASecurityInfos {
      * @return CAInfo
      */
     public CAInfo getCAInfo() {
-        return caInfo;
+	return caInfo;
     }
 
     /**
@@ -47,30 +49,31 @@ public class CASecurityInfos {
      * @param caDomainParameter
      */
     public void setCADomainParameterInfo(CADomainParameterInfo caDomainParameter) {
-        this.caDomainParameter = caDomainParameter;
+	this.caDomainParameter = caDomainParameter;
     }
 
     /**
      * Sets the CAInfo.
      *
-     * @param caInfo
+     * @param caInfo CAInfo
      */
     public void setCAInfo(CAInfo caInfo) {
-        this.caInfo = caInfo;
+	this.caInfo = caInfo;
     }
 
     /**
-     * Returns true if the object identifier is a CA object identifier, otherwise false.
+     * Checks if the object identifier is a CA object identifier.
      *
      * @param oid Object Identifier
      * @return true if the object identifier is a CA object identifier, otherwise false
      */
     public static boolean isObjectIdentifier(String oid) {
-        if (CAInfo.isObjectIdentifier(oid)) {
-            return true;
-        } else if (CADomainParameterInfo.isObjectIdentifier(oid)) {
-            return true;
-        }
-        return false;
+	if (CAInfo.isObjectIdentifier(oid)) {
+	    return true;
+	} else if (CADomainParameterInfo.isObjectIdentifier(oid)) {
+	    return true;
+	}
+	return false;
     }
+
 }

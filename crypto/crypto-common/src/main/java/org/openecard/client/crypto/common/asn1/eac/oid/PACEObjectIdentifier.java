@@ -15,8 +15,11 @@
  */
 package org.openecard.client.crypto.common.asn1.eac.oid;
 
+
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * See BSI-TR-03110, version 2.10
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public abstract interface PACEObjectIdentifier extends EACObjectIdentifier {
 
@@ -100,4 +103,5 @@ public abstract interface PACEObjectIdentifier extends EACObjectIdentifier {
      * id-PACE-ECDH-IM-AES-CBC-CMAC-256 OBJECT IDENTIFIER ::= {id-PACE-ECDH-IM 4}
      */
     public static final String id_PACE_ECDH_IM_AES_CBC_CMAC_256 = id_PACE_ECDH_IM + ".4";
+
 }

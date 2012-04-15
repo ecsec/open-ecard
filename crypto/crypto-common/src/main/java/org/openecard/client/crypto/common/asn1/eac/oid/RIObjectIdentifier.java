@@ -16,7 +16,9 @@
 package org.openecard.client.crypto.common.asn1.eac.oid;
 
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * See BSI-TR-03110, version 2.10
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public abstract interface RIObjectIdentifier extends EACObjectIdentifier {
 
@@ -52,4 +54,5 @@ public abstract interface RIObjectIdentifier extends EACObjectIdentifier {
      * id-RI-ECDH-SHA-256 OBJECT IDENTIFIER ::= {id-RI-ECDH 3}
      */
     public static final String id_RI_ECDH_SHA_256 = id_RI_ECDH + ".3";
+
 }

@@ -140,6 +140,7 @@ public final class RichClient extends Thread implements EventCallback, PAOSCallb
 	// Set up Dispatcher
 	MessageDispatcher dispatcher = new MessageDispatcher(env);
 	env.setDispatcher(dispatcher);
+	ifd.setDispatcher(dispatcher);
 
 
 	cardStates = new CardStateMap();

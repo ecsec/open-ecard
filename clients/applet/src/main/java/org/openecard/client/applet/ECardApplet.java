@@ -133,6 +133,7 @@ public class ECardApplet extends JApplet {
         management = new TinyManagement(env);
         env.setManagement(management);
         env.setDispatcher(new MessageDispatcher(env));
+	ifd.setDispatcher(env.getDispatcher());
 	SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper(findParentFrame()));
         ifd = new IFD();
         ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());

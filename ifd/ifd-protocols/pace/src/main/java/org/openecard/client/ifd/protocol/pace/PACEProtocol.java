@@ -28,12 +28,12 @@ import org.openecard.client.common.ifd.Protocol;
 import org.openecard.client.common.ifd.anytype.PACEInputType;
 import org.openecard.client.common.ifd.anytype.PACEOutputType;
 import org.openecard.client.common.ifd.protocol.exception.ProtocolException;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.crypto.common.asn1.eac.PACESecurityInfos;
 import org.openecard.client.crypto.common.asn1.eac.SecurityInfos;
 import org.openecard.client.crypto.common.asn1.eac.ef.EFCardAccess;
 import org.openecard.client.gui.UserConsent;
-import org.openecard.ws.IFD;
 
 
 /**
@@ -46,7 +46,7 @@ public class PACEProtocol implements Protocol {
     private SecureMessaging sm;
 
     @Override
-    public EstablishChannelResponse establish(EstablishChannel req, IFD ifd, UserConsent gui) {
+    public EstablishChannelResponse establish(EstablishChannel req, Dispatcher dispatcher, UserConsent gui) {
 	DIDAuthenticationDataType authData = req.getAuthenticationProtocolData();
 
 	try {
@@ -67,7 +67,7 @@ public class PACEProtocol implements Protocol {
 
 	    // Read EF.CardAccess from card
 	    byte[] slotHandle = req.getSlotHandle();
-	    CardUtils cardUtils = new CardUtils(ifd);
+	    CardUtils cardUtils = new CardUtils(dispatcher);
 	    byte[] efcadata = cardUtils.readFile(slotHandle, PACEConstants.EF_CARDACCESS_FID);
 
 	    // Parse SecurityInfos and get PACESecurityInfos
@@ -76,7 +76,7 @@ public class PACEProtocol implements Protocol {
 	    PACESecurityInfos psi = efca.getPACESecurityInfos();
 
 	    // Start PACE
-	    PACEImplementation pace = new PACEImplementation(ifd, slotHandle, psi);
+	    PACEImplementation pace = new PACEImplementation(dispatcher, slotHandle, psi);
 	    pace.execute(pin, passwordType, chat);
 
 	    // Establish Secure Messaging channel

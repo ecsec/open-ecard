@@ -18,8 +18,9 @@ package org.openecard.client.common.ifd;
 
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.gui.UserConsent;
-import org.openecard.ws.IFD;
+
 
 /**
  *
@@ -31,11 +32,11 @@ public interface Protocol {
      * Perform protocol and thereby set up a secure messaging channel.
      *
      * @param req Request data needed for the protocol
-     * @param ifd IFD instance to perform commands on the terminal
+     * @param dispatcher Dispatcher containing IFD instance to perform commands on the terminal
      * @param gui UserConsent GUI which can be used to get secrets (e.g. PIN) from the user
      * @return Protocol response data
      */
-    public EstablishChannelResponse establish(EstablishChannel req, IFD ifd, UserConsent gui);
+    public EstablishChannelResponse establish(EstablishChannel req, Dispatcher dispatcher, UserConsent gui);
 
     /**
      * Filter function to perform secure messaging after the protocol has been established.<br/>

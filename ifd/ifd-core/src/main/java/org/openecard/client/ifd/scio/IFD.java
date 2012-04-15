@@ -35,6 +35,7 @@ import org.openecard.client.common.ifd.Protocol;
 import org.openecard.client.common.ifd.ProtocolFactory;
 import org.openecard.client.common.ifd.anytype.PACEInputType;
 import org.openecard.client.common.ifd.anytype.PACEOutputType;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.gui.UserConsent;
@@ -56,6 +57,7 @@ public class IFD implements org.openecard.ws.IFD {
 
     private byte[] ctxHandle = null;
     private SCWrapper scwrapper;
+    private Dispatcher dispatcher;
     private UserConsent gui = null;
     private ProtocolFactories protocolFactories = new ProtocolFactories();
 
@@ -93,6 +95,10 @@ public class IFD implements org.openecard.ws.IFD {
 
     public void setGUI(UserConsent gui) {
 	this.gui = gui;
+    }
+
+    public void setDispatcher(Dispatcher dispatcher) {
+	this.dispatcher = dispatcher;
     }
 
     public boolean addProtocol(String proto, ProtocolFactory factory) {
@@ -1073,7 +1079,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    if (this.protocolFactories.contains(protocol)) {
 		ProtocolFactory factory = this.protocolFactories.get(protocol);
 		Protocol protoImpl = factory.createInstance();
-		EstablishChannelResponse response = protoImpl.establish(parameters, this, this.gui);
+		EstablishChannelResponse response = protoImpl.establish(parameters, dispatcher, this.gui);
 		// register protocol instance for secure messaging when protocol was processed successful
 		if (response.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
 		    channel.addSecureMessaging(protoImpl);

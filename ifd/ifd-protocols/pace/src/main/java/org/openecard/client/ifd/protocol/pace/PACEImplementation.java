@@ -23,13 +23,13 @@ import org.openecard.client.common.apdu.GeneralAuthenticate;
 import org.openecard.client.common.apdu.common.CardCommandAPDU;
 import org.openecard.client.common.apdu.common.CardResponseAPDU;
 import org.openecard.client.common.ifd.protocol.exception.ProtocolException;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.eac.PACESecurityInfos;
 import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
 import org.openecard.client.ifd.protocol.pace.apdu.MSESetATPACE;
 import org.openecard.client.ifd.protocol.pace.crypto.*;
-import org.openecard.ws.IFD;
 
 
 /**
@@ -39,8 +39,9 @@ import org.openecard.ws.IFD;
 public class PACEImplementation {
 
     private static final Logger logger = LogManager.getLogger(PACEImplementation.class.getName());
+
     // Communication
-    private IFD ifd;
+    private Dispatcher dispatcher;
     private KDF kdf;
     private byte[] slotHandle;
     private CardResponseAPDU response;
@@ -64,8 +65,8 @@ public class PACEImplementation {
      * @param paceSecurityInfos PACESecurityInfos
      * @throws Exception Exception
      */
-    public PACEImplementation(IFD ifd, byte[] slotHandle, PACESecurityInfos paceSecurityInfos) throws Exception {
-	this.ifd = ifd;
+    public PACEImplementation(Dispatcher dispatcher, byte[] slotHandle, PACESecurityInfos paceSecurityInfos) throws Exception {
+	this.dispatcher = dispatcher;
 	this.slotHandle = slotHandle;
 	this.psi = paceSecurityInfos;
 
@@ -102,7 +103,7 @@ public class PACEImplementation {
 	CardCommandAPDU mseSetAT = new MSESetATPACE(oid, chat, passwordType);
 
 	try {
-	    response = mseSetAT.transmit(ifd, slotHandle);
+	    response = mseSetAT.transmit(dispatcher, slotHandle);
 
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
 	    if (logger.isLoggable(Level.FINER)) {
@@ -157,7 +158,7 @@ public class PACEImplementation {
 	byte[] keyPI = kdf.derivePI(password);
 
 	try {
-	    response = gaEncryptedNonce.transmit(ifd, slotHandle);
+	    response = gaEncryptedNonce.transmit(dispatcher, slotHandle);
 	    s = cryptoSuite.decryptNonce(keyPI, response.getData());
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
 	    if (logger.isLoggable(Level.FINER)) {
@@ -205,7 +206,7 @@ public class PACEImplementation {
 	gaMapNonce.setChaining();
 
 	try {
-	    response = gaMapNonce.transmit(ifd, slotHandle);
+	    response = gaMapNonce.transmit(dispatcher, slotHandle);
 	} catch (WSException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
 	    logger.logp(Level.SEVERE, this.getClass().getName(), "generalAuthenticateMapNonce", e.getMessage(), e);
@@ -261,7 +262,7 @@ public class PACEImplementation {
 	gaKeyAgreement.setChaining();
 
 	try {
-	    response = gaKeyAgreement.transmit(ifd, slotHandle);
+	    response = gaKeyAgreement.transmit(dispatcher, slotHandle);
 	    keyPICC = new PACEKey(domainParameter);
 	    byte[] keyPKPICC = keyPICC.decodePublicKey(response.getData());
 
@@ -318,7 +319,7 @@ public class PACEImplementation {
 
 
 	try {
-	    response = gaMutualAuth.transmit(ifd, slotHandle);
+	    response = gaMutualAuth.transmit(dispatcher, slotHandle);
 
 	    if (tokenPICC.verifyToken(response.getData())) {
 

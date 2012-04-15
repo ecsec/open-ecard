@@ -1,4 +1,4 @@
-/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg 
+/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,293 +12,533 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.crypto.common.asn1.cvc;
 
-import org.openecard.client.common.I18n;
+import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
+import org.openecard.client.common.tlv.TagClass;
 import org.openecard.client.common.util.ByteUtils;
-import org.openecard.client.common.util.StringUtils;
+import org.openecard.client.crypto.common.asn1.eac.oid.CVCertificatesObjectIdentifier;
+import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
+
 
 /**
- * Holds the information of a certificate holder authorization template
- * 
+ * Implements the Certificate Holder Authorization Template (CHAT)
+ *
+ * See BSI-TR-03110, version 2.10, part 3, section C.4.
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * 
  */
-public class CHAT {
-    
-    public enum TerminalType {
-	InspectionSystem, AuthenticationTerminal, SignatureTerminal
-    }
+public final class CHAT {
 
+    private String oid;
+    private Role role;
+    private byte[] discretionaryData;
+    private TreeMap<DataGroup, Boolean> writeAccess = new TreeMap<DataGroup, Boolean>() {
+
+	{
+	    DataGroup[] data = DataGroup.values();
+	    for (int i = 16; i < 21; i++) {
+		put(data[i], false);
+	    }
+	}
+    };
+    private TreeMap<DataGroup, Boolean> readAccess = new TreeMap<DataGroup, Boolean>() {
+
+	{
+	    DataGroup[] data = DataGroup.values();
+	    for (int i = 0; i < 21; i++) {
+		put(data[i], false);
+	    }
+	}
+    };
+    private TreeMap<SpecialFunction, Boolean> specialFunctions = new TreeMap<SpecialFunction, Boolean>() {
+
+	{
+	    SpecialFunction[] data = SpecialFunction.values();
+	    for (int i = 0; i < data.length; i++) {
+		put(data[i], false);
+	    }
+	}
+    };
+    private TreeMap<AccessRight, Boolean> accessRights = new TreeMap<AccessRight, Boolean>() {
+
+	{
+	    AccessRight[] data = AccessRight.values();
+	    for (int i = 0; i < data.length; i++) {
+		put(data[i], false);
+	    }
+	}
+    };
+
+    /*
+     * Elemtens of the CHAT.
+     */
     public enum Role {
-	CVCA, DV_official, DV_unofficial, AuthenticationTerminal
+
+	CVCA, DV_OFFICIAL, DV_NON_OFFICIAL,
+	AUTHENTICATION_TERMINAL, INSPECTION_TERMINAL, SIGNATURE_TERMINAL
     }
 
     public enum SpecialFunction {
-	Install_Qualified_Certificate, 
-	Install_Certificate, 
-	PIN_Management, 
-	CAN_allowed, 
-	Privileged_Terminal, 
-	Restricted_Identification {
-	  public String toString() {
-	      return I18n.getTranslation("sal").translationForKey("restricted_identification");
-	  }
-	},
-	Community_ID_Verification, 
-	Age_Verification {
-	    public String toString() {
-		return I18n.getTranslation("sal").translationForKey("age_confirmation");
-	    }
-	},
+
+	INSTALL_QUALIFIED_CERTIFICATE, INSTALL_CERTIFICATE, PIN_MANAGEMENT,
+	CAN_ALLOWED, PRIVILEGED_TERMINAL, RESTRICTED_IDENTIFICATION,
+	COMMUNITY_ID_VERIFICATION, AGE_VERIFICATION;
     }
 
     public enum DataGroup {
-	DG1_Document_Type {
-	  public String toString(){
-	      return I18n.getTranslation("sal").translationForKey("type_of_id_card");
-	  }
-	},
-	DG2_Issuing_State {
-		  public String toString(){
-		      return  I18n.getTranslation("sal").translationForKey("issuing_state");
-		  }
-		}, 
-	DG3_Date_of_Expiry, 
-	DG4_GivenNames {
-		  public String toString(){
-		      return  I18n.getTranslation("sal").translationForKey("given_names");
-		  }
-		},
-	DG5_FamilyNames {
-		  public String toString(){
-		      return  I18n.getTranslation("sal").translationForKey("family_names");
-		  }
-		}, 
-	DG6_ArtisticName {
-		  public String toString(){
-		      return  I18n.getTranslation("sal").translationForKey("religious_artistic_name");
-		  }
-		} , 
-	DG7_AcademicTitle {
-		  public String toString(){
-		      return  I18n.getTranslation("sal").translationForKey("doctoral_degree");
-		  }
-		}, 
-	DG8_DateOfBirth{
-		  public String toString(){
-		      return  I18n.getTranslation("sal").translationForKey("date_of_birth");
-		  }
-		}, 
-	DG9_PlaceOfBirth {
-		  public String toString(){
-		      return  I18n.getTranslation("sal").translationForKey("place_of_birth");
-		  }
-		}, 
-	DG10_Nationality, 
-	DG11_Sex, 
-	DG12_OptionalDataR, 
-	DG13_RFU, 
-	DG14_RFU, 
-	DG15_RFU, 
-	DG16_RFU, 
-	DG17_PlaceOfResidence {
-		  public String toString(){
-		      return  I18n.getTranslation("sal").translationForKey("address");
-		  }
-		}, 
-	DG18_CommunityID, 
-	DG19_ResidencePermitI, 
-	DG20_ResidencePermitII, 
-	DG21_OptionalDataRW
+
+	DG01, DG02, DG03, DG04, DG05, DG06, DG07,
+	DG08, DG09, DG10, DG11, DG12, DG13, DG14,
+	DG15, DG16, DG17, DG18, DG19, DG20, DG21;
     }
 
-    private Role role;
+    public enum AccessRight {
 
+	DG03, DG04, GENERATE_SIGNATURE, GENERATE_QUALIFIED_SIGNATURE;
+    }
+
+    /**
+     * Creates a new CHAT.
+     *
+     * @param chat CHAT
+     * @throws TLVException
+     */
+    public CHAT(byte[] chat) throws TLVException {
+	this(TLV.fromBER(chat));
+    }
+
+    /**
+     * Creates a new CHAT.
+     *
+     * @param tlv TLV
+     * @throws TLVException
+     */
+    public CHAT(TLV tlv) throws TLVException {
+	oid = ObjectIdentifierUtils.toString(tlv.findChildTags(0x06).get(0).getValue());
+	discretionaryData = tlv.findChildTags(0x53).get(0).getValue();
+
+	if (oid.equals(CVCertificatesObjectIdentifier.id_IS)) {
+	    // Inspection systems
+	    parseRole(discretionaryData[0]);
+	    parseAccessRights(discretionaryData[0]);
+	} else if (oid.equals(CVCertificatesObjectIdentifier.id_AT)) {
+	    // Authentication terminal
+	    parseRole(discretionaryData[0]);
+	    parseWriteAccess(discretionaryData);
+	    parseReadAccess(discretionaryData);
+	    parseSpecialFunctions(discretionaryData);
+	} else if (oid.equals(CVCertificatesObjectIdentifier.id_ST)) {
+	    // Signature terminal
+	    parseRole(discretionaryData[0]);
+	    parseAccessRights(discretionaryData[0]);
+	}
+    }
+
+    /**
+     * Parse the role of the CHAT.
+     *
+     * @param roleByte Role
+     */
+    private void parseRole(byte roleByte) {
+	roleByte = (byte) (roleByte & (byte) 0xC0);
+
+	switch (roleByte) {
+	    case (byte) 0xC0:
+		role = Role.CVCA;
+		break;
+	    case (byte) 0x80:
+		role = Role.DV_OFFICIAL;
+		break;
+	    case (byte) 0x40:
+		role = Role.DV_NON_OFFICIAL;
+		break;
+	    case (byte) 0x00:
+		if (oid.equals(CVCertificatesObjectIdentifier.id_IS)) {
+		    role = Role.INSPECTION_TERMINAL;
+		} else if (oid.equals(CVCertificatesObjectIdentifier.id_AT)) {
+		    role = Role.AUTHENTICATION_TERMINAL;
+		} else if (oid.equals(CVCertificatesObjectIdentifier.id_ST)) {
+		    role = Role.SIGNATURE_TERMINAL;
+		}
+		break;
+	    default:
+		break;
+	}
+    }
+
+    /**
+     * Parse the access rights of the CHAT.
+     *
+     * @param accessRightsByte Access rights
+     */
+    private void parseAccessRights(byte accessRightsByte) {
+	if (role.equals(Role.INSPECTION_TERMINAL)) {
+	    if (ByteUtils.isBitSet(6, new byte[]{accessRightsByte})) {
+		// Read access to ePassport application: DG 4 (Iris)
+		accessRights.put(AccessRight.DG04, Boolean.TRUE);
+	    }
+	    if (ByteUtils.isBitSet(7, new byte[]{accessRightsByte})) {
+		// Read access to ePassport application: DG 3 (Fingerprint)
+		accessRights.put(AccessRight.DG03, Boolean.TRUE);
+	    }
+	} else if (role.equals(Role.SIGNATURE_TERMINAL)) {
+	    if (ByteUtils.isBitSet(6, new byte[]{accessRightsByte})) {
+		// Generate qualified electronic signature
+		accessRights.put(AccessRight.GENERATE_QUALIFIED_SIGNATURE, Boolean.TRUE);
+	    }
+	    if (ByteUtils.isBitSet(7, new byte[]{accessRightsByte})) {
+		// Generate electronic signature
+		accessRights.put(AccessRight.GENERATE_SIGNATURE, Boolean.TRUE);
+	    }
+	}
+    }
+
+    /**
+     * Parse the write access of the CHAT.
+     *
+     * @param discretionaryData Discretionary data
+     */
+    private void parseWriteAccess(byte[] discretionaryData) {
+	Iterator<DataGroup> it = writeAccess.keySet().iterator();
+	for (int i = 2; i < 6; i++) {
+	    DataGroup item = (DataGroup) it.next();
+	    writeAccess.put(item, ByteUtils.isBitSet(i, discretionaryData));
+	}
+    }
+
+    /**
+     * Parse the read access of the CHAT.
+     *
+     * @param discretionaryData Discretionary data
+     */
+    private void parseReadAccess(byte[] discretionaryData) {
+	Iterator<DataGroup> it = readAccess.keySet().iterator();
+	for (int i = 31; i > 11; i--) {
+	    DataGroup item = (DataGroup) it.next();
+	    readAccess.put(item, ByteUtils.isBitSet(i, discretionaryData));
+	}
+    }
+
+    /**
+     * Parse the special functions of the CHAT.
+     *
+     * @param discretionaryData Discretionary data
+     */
+    private void parseSpecialFunctions(byte[] discretionaryData) {
+	Iterator<SpecialFunction> it = specialFunctions.keySet().iterator();
+	for (int i = 32; i < 40; i++) {
+	    SpecialFunction item = (SpecialFunction) it.next();
+	    specialFunctions.put(item, ByteUtils.isBitSet(i, discretionaryData));
+	}
+    }
+
+    /**
+     * Returns the role of the CHAT.
+     *
+     * @return Write access
+     */
     public Role getRole() {
 	return role;
     }
 
-    public boolean[] getSpecialFunctions() {
-	return specialFunctions;
-    }
-
-    public boolean[] getReadAccess() {
-	return readAccess;
-    }
-
-    public boolean[] getWriteAccess() {
+    /**
+     * Returns the write access of the CHAT.
+     *
+     * @return Write access
+     */
+    public TreeMap<DataGroup, Boolean> getWriteAccess() {
 	return writeAccess;
     }
 
-    public TerminalType getType() {
-	return type;
+    /**
+     * Sets the write access of the CHAT.
+     *
+     * @param dataGroup Data group
+     * @param selected Selected
+     * @return True if data group is set, otherwise false
+     */
+    public boolean setWriteAccess(DataGroup dataGroup, boolean selected) {
+	if (writeAccess.containsKey(dataGroup)) {
+	    writeAccess.put(dataGroup, selected);
+	    return true;
+	}
+	return false;
     }
-
-    private boolean[] specialFunctions = new boolean[8];
-    private boolean[] readAccess = new boolean[21];
-    private boolean[] writeAccess = new boolean[5];
-
-    private TerminalType type;
-    private final byte[] oidAuthenticationTerminal = StringUtils.toByteArray("04007F000703010202");
-    byte[] oid;
 
     /**
-     * Creates a new empty CHAT for the specified Terminal-Type
-     * 
-     * @param type
-     *            Type of the Terminal this CHAT belongs to
+     * Sets the write access of the CHAT.
+     *
+     * @param dataGroup Data Group
+     * @param selected Selected
+     * @return True if data group is set, otherwise false
      */
-    public CHAT(TerminalType type) {
-	this.type = type;
-	this.role = Role.AuthenticationTerminal;
+    public boolean setWriteAccess(String dataGroup, boolean selected) {
+	return setWriteAccess(DataGroup.valueOf(dataGroup), selected);
     }
 
-    public CHAT(TLV tlv) {
-
-	if (ByteUtils.compare(oidAuthenticationTerminal, tlv.findChildTags(0x06).get(0).getValue())) {
-	    this.oid = oidAuthenticationTerminal;
-	    this.type = TerminalType.AuthenticationTerminal;
-
-	} else {
-	    throw new IllegalArgumentException("Terminal Type not yet supported: "
-		    + ByteUtils.toHexString(tlv.findChildTags(0x06).get(0).getValue()));
+    /**
+     * Sets the write access of the CHAT.
+     *
+     * @param writeAccess Write access
+     */
+    public void setWriteAccess(TreeMap<DataGroup, Boolean> writeAccess) {
+	Iterator<DataGroup> it = this.writeAccess.keySet().iterator();
+	while (it.hasNext()) {
+	    DataGroup item = (DataGroup) it.next();
+	    this.writeAccess.put(item, writeAccess.get(item));
 	}
-
-	this.parseDiscretionaryData(tlv.findChildTags(0x53).get(0).getValue());
-
     }
 
-    private void parseDiscretionaryData(byte[] data) {
+    /**
+     * Returns the read access of the CHAT.
+     *
+     * @return Read access
+     */
+    public TreeMap<DataGroup, Boolean> getReadAccess() {
+	return readAccess;
+    }
 
-	// Role is encoded in bit 0 and 1
-	switch ((byte) (data[0] & ((byte) 0xC0))) {
-	case (byte) 0xC0:
-	    this.role = Role.CVCA;
-	    break;
-	case (byte) 0x80:
-	    this.role = Role.DV_official;
-	    break;
-	case 0x40:
-	    this.role = Role.DV_unofficial;
-	    break;
-	case 0x00:
-	    this.role = Role.AuthenticationTerminal;
-	    break;
+    /**
+     * Sets the read access of the CHAT.
+     *
+     * @param dataGroup Data group
+     * @param selected Selected
+     * @return True if the data group is set, otherwise false
+     */
+    public boolean setReadAccess(DataGroup dataGroup, boolean selected) {
+	if (readAccess.containsKey(dataGroup)) {
+	    readAccess.put(dataGroup, selected);
+	    return true;
 	}
-
-	// Special Functions are encoded in Bit 32 to 39
-	specialFunctions[SpecialFunction.Install_Qualified_Certificate.ordinal()] = isBitSet(32, data);
-	specialFunctions[SpecialFunction.Install_Certificate.ordinal()] = isBitSet(33, data);
-	specialFunctions[SpecialFunction.PIN_Management.ordinal()] = isBitSet(34, data);
-	specialFunctions[SpecialFunction.CAN_allowed.ordinal()] = isBitSet(35, data);
-	specialFunctions[SpecialFunction.Privileged_Terminal.ordinal()] = isBitSet(36, data);
-	specialFunctions[SpecialFunction.Restricted_Identification.ordinal()] = isBitSet(37, data);
-	specialFunctions[SpecialFunction.Community_ID_Verification.ordinal()] = isBitSet(38, data);
-	specialFunctions[SpecialFunction.Age_Verification.ordinal()] = isBitSet(39, data);
-
-	// Read acces is encoded in bit 11 to 31
-
-	// Bits 7 to 10 are RFU
-
-	// write access is encoded in bits 2 to 6
-
-	writeAccess[DataGroup.DG17_PlaceOfResidence.ordinal() - 16] = isBitSet(2, data);
-	writeAccess[DataGroup.DG18_CommunityID.ordinal() - 16] = isBitSet(3, data);
-	writeAccess[DataGroup.DG19_ResidencePermitI.ordinal() - 16] = isBitSet(4, data);
-	writeAccess[DataGroup.DG20_ResidencePermitII.ordinal() - 16] = isBitSet(5, data);
-	writeAccess[DataGroup.DG21_OptionalDataRW.ordinal() - 16] = isBitSet(6, data);
-
-	readAccess[DataGroup.DG1_Document_Type.ordinal()] = isBitSet(31, data);
-	readAccess[DataGroup.DG2_Issuing_State.ordinal()] = isBitSet(30, data);
-	readAccess[DataGroup.DG3_Date_of_Expiry.ordinal()] = isBitSet(29, data);
-	readAccess[DataGroup.DG4_GivenNames.ordinal()] = isBitSet(28, data);
-	readAccess[DataGroup.DG5_FamilyNames.ordinal()] = isBitSet(27, data);
-	readAccess[DataGroup.DG6_ArtisticName.ordinal()] = isBitSet(26, data);
-	readAccess[DataGroup.DG7_AcademicTitle.ordinal()] = isBitSet(25, data);
-	readAccess[DataGroup.DG8_DateOfBirth.ordinal()] = isBitSet(24, data);
-	readAccess[DataGroup.DG9_PlaceOfBirth.ordinal()] = isBitSet(23, data);
-	readAccess[DataGroup.DG10_Nationality.ordinal()] = isBitSet(22, data);
-	readAccess[DataGroup.DG11_Sex.ordinal()] = isBitSet(21, data);
-	readAccess[DataGroup.DG12_OptionalDataR.ordinal()] = isBitSet(20, data);
-	readAccess[DataGroup.DG13_RFU.ordinal()] = isBitSet(19, data);
-	readAccess[DataGroup.DG14_RFU.ordinal()] = isBitSet(18, data);
-	readAccess[DataGroup.DG15_RFU.ordinal()] = isBitSet(17, data);
-	readAccess[DataGroup.DG16_RFU.ordinal()] = isBitSet(16, data);
-	readAccess[DataGroup.DG17_PlaceOfResidence.ordinal()] = isBitSet(15, data);
-	readAccess[DataGroup.DG18_CommunityID.ordinal()] = isBitSet(14, data);
-	readAccess[DataGroup.DG19_ResidencePermitI.ordinal()] = isBitSet(13, data);
-	readAccess[DataGroup.DG20_ResidencePermitII.ordinal()] = isBitSet(12, data);
-	readAccess[DataGroup.DG21_OptionalDataRW.ordinal()] = isBitSet(11, data);
-
+	return false;
     }
 
-    private boolean isBitSet(int position, byte[] array) {
-	return ((array[position / 8] & (128 >> (position % 8))) > 0);
+    /**
+     * Sets the read access of the CHAT.
+     *
+     * @param dataGroup Data group
+     * @param selected Selected
+     * @return True if the data group is set, otherwise false
+     */
+    public boolean setReadAccess(String dataGroup, boolean selected) {
+	return setReadAccess(DataGroup.valueOf(dataGroup), selected);
     }
 
-    public byte[] getBytes() throws TLVException {
+    /**
+     * Sets the read access of the CHAT.
+     *
+     * @param readAccess Read access
+     */
+    public void setReadAccess(TreeMap<DataGroup, Boolean> readAccess) {
+	Iterator<DataGroup> it = this.readAccess.keySet().iterator();
+	while (it.hasNext()) {
+	    DataGroup item = (DataGroup) it.next();
+	    this.readAccess.put(item, readAccess.get(item));
+	}
+    }
 
-	/* temporarily solution */
-	byte[] bytes = new byte[] { 0x7f, 0x4c, 0x12, 0x06, 0x09, 0x04, 0x00, 0x7f, 0x00, 0x07, 0x03, 0x01, 0x02, 0x02, 0x53, 0x05 };
+    /**
+     * Returns the special function of the CHAT.
+     *
+     * @return Special functions
+     */
+    public TreeMap<SpecialFunction, Boolean> getSpecialFunctions() {
+	return specialFunctions;
+    }
+
+    /**
+     * Sets the special functions of the CHAT.
+     *
+     * @param specialFunction Special functions
+     * @param selected Selected
+     * @return True if the special function is set, otherwise false
+     */
+    public boolean setSpecialFunctions(SpecialFunction specialFunction, boolean selected) {
+	if (specialFunctions.containsKey(specialFunction)) {
+	    specialFunctions.put(specialFunction, selected);
+	    return true;
+	}
+	return false;
+    }
+
+    /**
+     * Sets the special functions of the CHAT.
+     *
+     * @param specialFunktion Special functions
+     * @param selected Selected
+     * @return True if the special function is set, otherwise false
+     */
+    public boolean setSpecialFunctions(String specialFunktion, boolean selected) {
+	return setSpecialFunctions(SpecialFunction.valueOf(specialFunktion), selected);
+    }
+
+    /**
+     * Sets the special functions of the CHAT.
+     *
+     * @param specialFunctions Special functions
+     */
+    public void setSpecialFunctions(TreeMap<SpecialFunction, Boolean> specialFunctions) {
+	Iterator<SpecialFunction> it = this.specialFunctions.keySet().iterator();
+	while (it.hasNext()) {
+	    SpecialFunction item = (SpecialFunction) it.next();
+	    this.specialFunctions.put(item, specialFunctions.get(item));
+	}
+    }
+
+    /**
+     * Returns the access rights of the CHAT.
+     *
+     * @return Access rights
+     */
+    public TreeMap<AccessRight, Boolean> getAccessRights() {
+	return accessRights;
+    }
+
+    /**
+     * Sets the special functions of the CHAT.
+     *
+     * @param accessRights Access right
+     * @param selected Selected
+     * @return True if the access right is set, otherwise false
+     */
+    public boolean setAccessRights(AccessRight accessRight, boolean selected) {
+	if (accessRights.containsKey(accessRight)) {
+	    accessRights.put(accessRight, selected);
+	    return true;
+	}
+	return false;
+    }
+
+    /**
+     * Sets the special functions of the CHAT.
+     *
+     * @param accessRights Access right
+     * @param selected Selected
+     * @return True if the access right is set, otherwise false
+     */
+    public boolean setAccessRights(String accessRight, boolean selected) {
+	return setAccessRights(AccessRight.valueOf(accessRight), selected);
+    }
+
+    /**
+     * Sets the special functions of the CHAT.
+     *
+     * @param accessRights Access right
+     */
+    public void setAccessRights(TreeMap<AccessRight, Boolean> accessRights) {
+	Iterator<AccessRight> it = this.accessRights.keySet().iterator();
+	while (it.hasNext()) {
+	    AccessRight item = (AccessRight) it.next();
+	    this.accessRights.put(item, accessRights.get(item));
+	}
+    }
+
+    /**
+     * Returns the CHAT as a byte array.
+     *
+     * @return CHAT
+     * @throws TLVException
+     */
+    public byte[] toByteArray() throws TLVException {
 	byte[] data = new byte[5];
 
-	// Role is encoded in bit 0 and 1
-	switch (this.role) {
-	case CVCA:
-	    data[0] |= 0xC0;
-	    break;
-	case DV_official:
-	    data[0] |= 0x80;
-	    break;
-	case DV_unofficial:
-	    data[0] |= 0x40;
-	    break;
-	case AuthenticationTerminal:
-	    break;
+	// Decode role in bit 0 to 1.
+	switch (role) {
+	    case CVCA:
+		data[0] |= 0xC0;
+		break;
+	    case DV_OFFICIAL:
+		data[0] |= 0x80;
+		break;
+	    case DV_NON_OFFICIAL:
+		data[0] |= 0x40;
+		break;
+	    default:
+		break;
 	}
 
-	// Special Functions are encoded in Bit 32 to 39
-	for (int i = 0; i < specialFunctions.length; i++) {
-	    if (specialFunctions[i])
-		setBit(i + 32, data);
+	// Decode write access in bit 2 to 6.
+	Iterator<DataGroup> it1 = writeAccess.keySet().iterator();
+	for (int i = 2; i < 6; i++) {
+	    DataGroup item = (DataGroup) it1.next();
+	    if (writeAccess.get(item)) {
+		ByteUtils.setBit(i, data);
+	    }
 	}
 
-	for (int i = 0; i < readAccess.length; i++) {
-	    if (readAccess[i])
-		setBit(31 - i, data);
+	// Decode read access in bit 11 to 31.
+	Iterator<DataGroup> it2 = readAccess.keySet().iterator();
+	for (int i = 31; i > 11; i--) {
+	    DataGroup item = (DataGroup) it2.next();
+	    if (readAccess.get(item)) {
+		ByteUtils.setBit(i, data);
+	    }
 	}
 
-	for (int i = 0; i < writeAccess.length; i++) {
-	    if (writeAccess[i])
-		setBit(i + 2, data);
+	// Decode special functions in bit 32 to 40.
+	Iterator<SpecialFunction> it3 = specialFunctions.keySet().iterator();
+	for (int i = 32; i < 40; i++) {
+	    SpecialFunction item = (SpecialFunction) it3.next();
+	    if (specialFunctions.get(item)) {
+		ByteUtils.setBit(i, data);
+	    }
 	}
 
-	return ByteUtils.concatenate(bytes, data);
+	// Decode access rights in bit 2 to 7.
+	Iterator<AccessRight> it4 = accessRights.keySet().iterator();
+	for (int i = 6; i < 7; i++) {
+	    AccessRight item = (AccessRight) it4.next();
+	    if (accessRights.get(item)) {
+		ByteUtils.setBit(i, data);
+	    }
+	}
+
+	TLV discretionaryDataObject = new TLV();
+	discretionaryDataObject.setTagNumWithClass((byte) 0x53);
+	discretionaryDataObject.setValue(data);
+
+	TLV oidObject = new TLV();
+	oidObject.setTagNumWithClass((byte) 0x06);
+	oidObject.setValue(ObjectIdentifierUtils.getValue(oid));
+	oidObject.addToEnd(discretionaryDataObject);
+
+	TLV chatObject = new TLV();
+	chatObject.setTagNum((byte) 0x4C);
+	chatObject.setTagClass(TagClass.APPLICATION);
+	chatObject.setChild(oidObject);
+
+	return chatObject.toBER(true);
     }
 
-    private void setBit(int position, byte[] data) {
-	data[position / 8] |= (128 >> (position % 8));
+    /**
+     * Returns the CHAT as a hex encoded string.
+     *
+     * @return CHAT
+     */
+    public String toHexString() {
+	try {
+	    return ByteUtils.toHexString(toByteArray(), true);
+	} catch (TLVException ex) {
+	    Logger.getLogger(CHAT.class.getName()).log(Level.SEVERE, "Exception", ex);
+	    return null;
+	}
     }
 
+    @Override
     public String toString() {
 	try {
-	    return ByteUtils.toHexString(this.getBytes());
-	} catch (TLVException e) {
-	    return "";
+	    return ByteUtils.toHexString(toByteArray());
+	} catch (TLVException ex) {
+	    Logger.getLogger(CHAT.class.getName()).log(Level.SEVERE, "Exception", ex);
+	    return null;
 	}
-    }
-
-    public void setSpecialFunctions(boolean[] specialFunctions2) {
-	this.specialFunctions = specialFunctions2;
-
-    }
-
-    public void setReadAccess(boolean[] readAccess2) {
-	this.readAccess = readAccess2;
     }
 
 }

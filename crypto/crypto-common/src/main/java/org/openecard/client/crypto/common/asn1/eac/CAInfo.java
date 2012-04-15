@@ -21,7 +21,9 @@ import org.openecard.client.crypto.common.asn1.eac.oid.CAObjectIdentifier;
 
 
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * See BSI-TR-03110, version 2.05, section A.1.1.2.
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class CAInfo extends SecurityInfo implements CAObjectIdentifier {
 
@@ -40,7 +42,7 @@ public final class CAInfo extends SecurityInfo implements CAObjectIdentifier {
     };
 
     /**
-     * Creates a new ChipAuthenticationInfo object. See TR-03110 Section A.1.1.2.
+     * Creates a new ChipAuthenticationInfo object.
      *
      * @param seq ANS1 encoded data
      */
@@ -94,4 +96,5 @@ public final class CAInfo extends SecurityInfo implements CAObjectIdentifier {
         }
         return false;
     }
+
 }

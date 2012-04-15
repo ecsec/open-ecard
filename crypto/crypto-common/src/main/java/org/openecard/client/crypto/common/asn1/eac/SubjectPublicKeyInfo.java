@@ -21,7 +21,8 @@ import org.openecard.bouncycastle.asn1.DERBitString;
 
 
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class SubjectPublicKeyInfo {
 
@@ -34,12 +35,12 @@ public class SubjectPublicKeyInfo {
      * @param seq the ASN1 encoded sequence
      */
     public SubjectPublicKeyInfo(ASN1Sequence seq) {
-        if (seq.size() == 2) {
-            algorithm = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
-            subjectPublicKey = DERBitString.getInstance(seq.getObjectAt(1)).getBytes();
-        } else {
-            throw new IllegalArgumentException("Sequence wrong size for SubjectPublicKeyInfo");
-        }
+	if (seq.size() == 2) {
+	    algorithm = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
+	    subjectPublicKey = DERBitString.getInstance(seq.getObjectAt(1)).getBytes();
+	} else {
+	    throw new IllegalArgumentException("Sequence wrong size for SubjectPublicKeyInfo");
+	}
     }
 
     /**
@@ -49,13 +50,13 @@ public class SubjectPublicKeyInfo {
      * @return single instance of SubjectPublicKeyInfo
      */
     public static SubjectPublicKeyInfo getInstance(Object obj) {
-        if (obj == null || obj instanceof SubjectPublicKeyInfo) {
-            return (SubjectPublicKeyInfo) obj;
-        } else if (obj instanceof ASN1Sequence) {
-            return new SubjectPublicKeyInfo((ASN1Sequence) obj);
-        }
+	if (obj == null || obj instanceof SubjectPublicKeyInfo) {
+	    return (SubjectPublicKeyInfo) obj;
+	} else if (obj instanceof ASN1Sequence) {
+	    return new SubjectPublicKeyInfo((ASN1Sequence) obj);
+	}
 
-        throw new IllegalArgumentException("Unknown object in factory: " + obj.getClass().getName());
+	throw new IllegalArgumentException("Unknown object in factory: " + obj.getClass().getName());
     }
 
     /**
@@ -64,7 +65,7 @@ public class SubjectPublicKeyInfo {
      * @return the algorithm
      */
     public String getAlgorithm() {
-        return algorithm;
+	return algorithm;
     }
 
     /**
@@ -73,6 +74,7 @@ public class SubjectPublicKeyInfo {
      * @return the subject public key
      */
     public byte[] getSubjectPublicKey() {
-        return subjectPublicKey;
+	return subjectPublicKey;
     }
+
 }

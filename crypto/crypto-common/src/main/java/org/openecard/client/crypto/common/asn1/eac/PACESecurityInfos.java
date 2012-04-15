@@ -15,13 +15,15 @@
  */
 package org.openecard.client.crypto.common.asn1.eac;
 
+
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class PACESecurityInfos {
 
-    private PACEInfo paceInfo;
     private PACEDomainParameterInfo paceDomainParameterInfo;
+    private PACEInfo paceInfo;
 
     /**
      * Returns the PACEDomainParameterInfo
@@ -29,16 +31,7 @@ public final class PACESecurityInfos {
      * @return PACEDomainParameterInfo
      */
     public PACEDomainParameterInfo getPACEDomainParameterInfo() {
-        return this.paceDomainParameterInfo;
-    }
-
-    /**
-     * Returns the PACEInfo.
-     *
-     * @return paceInfo
-     */
-    public PACEInfo getPACEInfo() {
-        return paceInfo;
+	return paceDomainParameterInfo;
     }
 
     /**
@@ -47,7 +40,16 @@ public final class PACESecurityInfos {
      * @param paceDomainParameterInfo PACEDomainParameterInfo
      */
     public void setPACEDomainParameterInfo(PACEDomainParameterInfo paceDomainParameterInfo) {
-        this.paceDomainParameterInfo = paceDomainParameterInfo;
+	this.paceDomainParameterInfo = paceDomainParameterInfo;
+    }
+
+    /**
+     * Returns the PACEInfo.
+     *
+     * @return paceInfo
+     */
+    public PACEInfo getPACEInfo() {
+	return paceInfo;
     }
 
     /**
@@ -56,6 +58,7 @@ public final class PACESecurityInfos {
      * @param paceInfo PACEInfo
      */
     public void setPACEInfo(PACEInfo paceInfo) {
-        this.paceInfo = paceInfo;
+	this.paceInfo = paceInfo;
     }
+
 }

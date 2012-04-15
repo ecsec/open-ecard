@@ -22,7 +22,9 @@ import org.openecard.client.crypto.common.asn1.eac.oid.PACEObjectIdentifier;
 
 
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * See BSI-TR-03110, version 2.10, part 3, section A.1.1.1.
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class PACEDomainParameterInfo implements PACEObjectIdentifier {
 
@@ -30,28 +32,28 @@ public final class PACEDomainParameterInfo implements PACEObjectIdentifier {
     private AlgorithmIdentifier domainParameter;
     private int parameterID;
     private static final String[] protocols = new String[]{
-        id_PACE_DH_GM,
-        id_PACE_DH_IM,
-        id_PACE_ECDH_GM,
-        id_PACE_ECDH_IM
+	id_PACE_DH_GM,
+	id_PACE_DH_IM,
+	id_PACE_ECDH_GM,
+	id_PACE_ECDH_IM
     };
 
     /**
-     * Creates a new PACEDomainParameterInfo object. See TR-03110 Section A.1.1.1.
+     * Creates a new PACEDomainParameterInfo object.
      *
      * @param seq ANS1 encoded data
      */
     public PACEDomainParameterInfo(ASN1Sequence seq) {
-        if (seq.size() == 2) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
-            domainParameter = AlgorithmIdentifier.getInstance(seq.getObjectAt(1));
-        } else if (seq.size() == 3) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
-            domainParameter = AlgorithmIdentifier.getInstance(seq.getObjectAt(1));
-            parameterID = ((ASN1Integer) ASN1Integer.getInstance(seq.getObjectAt(2))).getValue().intValue();
-        } else {
-            throw new IllegalArgumentException("Sequence wrong size for PACEDomainParameterInfo");
-        }
+	if (seq.size() == 2) {
+	    protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
+	    domainParameter = AlgorithmIdentifier.getInstance(seq.getObjectAt(1));
+	} else if (seq.size() == 3) {
+	    protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
+	    domainParameter = AlgorithmIdentifier.getInstance(seq.getObjectAt(1));
+	    parameterID = ((ASN1Integer) ASN1Integer.getInstance(seq.getObjectAt(2))).getValue().intValue();
+	} else {
+	    throw new IllegalArgumentException("Sequence wrong size for PACEDomainParameterInfo");
+	}
     }
 
     /**
@@ -60,7 +62,7 @@ public final class PACEDomainParameterInfo implements PACEObjectIdentifier {
      * @return Protocol
      */
     public String getProtocol() {
-        return protocol;
+	return protocol;
     }
 
     /**
@@ -69,7 +71,7 @@ public final class PACEDomainParameterInfo implements PACEObjectIdentifier {
      * @return domain parameter
      */
     public AlgorithmIdentifier getDomainParameter() {
-        return domainParameter;
+	return domainParameter;
     }
 
     /**
@@ -78,22 +80,23 @@ public final class PACEDomainParameterInfo implements PACEObjectIdentifier {
      * @return parameter identifier
      */
     public int getParameterID() {
-        return parameterID;
+	return parameterID;
     }
 
     /**
      * Compares the object identifier.
      *
      * @param oid Object identifier
-     * @return true if oid is a PACE object identifier; false otherwise
+     * @return true if oid is a PACE object identifier, otherwise false
      */
     public static boolean isPACEObjectIdentifer(String oid) {
-        for (int i = 0; i < protocols.length; i++) {
-            if (protocols[i].equals(oid)) {
-                return true;
-            }
-        }
+	for (int i = 0; i < protocols.length; i++) {
+	    if (protocols[i].equals(oid)) {
+		return true;
+	    }
+	}
 
-        return false;
+	return false;
     }
+
 }

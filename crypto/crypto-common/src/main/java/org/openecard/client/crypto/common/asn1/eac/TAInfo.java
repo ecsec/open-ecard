@@ -21,25 +21,26 @@ import org.openecard.client.crypto.common.asn1.eac.oid.TAObjectIdentifier;
 
 
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class TAInfo extends SecurityInfo {
 
     private String protocol;
     private int version;
     private FileID efCVCA;
-    private static final String[] protocols = new String[]{
-        TAObjectIdentifier.id_TA_ECDSA_SHA_1,
-        TAObjectIdentifier.id_TA_ECDSA_SHA_224,
-        TAObjectIdentifier.id_TA_ECDSA_SHA_256,
-        TAObjectIdentifier.id_TA_ECDSA_SHA_384,
-        TAObjectIdentifier.id_TA_ECDSA_SHA_512,
-        TAObjectIdentifier.id_TA_RSA_PSS_SHA_1,
-        TAObjectIdentifier.id_TA_RSA_PSS_SHA_256,
-        TAObjectIdentifier.id_TA_RSA_PSS_SHA_512,
-        TAObjectIdentifier.id_TA_RSA_v1_5_SHA_1,
-        TAObjectIdentifier.id_TA_RSA_v1_5_SHA_256,
-        TAObjectIdentifier.id_TA_RSA_v1_5_SHA_512
+    private static final String[] protocols = new String[] {
+	TAObjectIdentifier.id_TA_ECDSA_SHA_1,
+	TAObjectIdentifier.id_TA_ECDSA_SHA_224,
+	TAObjectIdentifier.id_TA_ECDSA_SHA_256,
+	TAObjectIdentifier.id_TA_ECDSA_SHA_384,
+	TAObjectIdentifier.id_TA_ECDSA_SHA_512,
+	TAObjectIdentifier.id_TA_RSA_PSS_SHA_1,
+	TAObjectIdentifier.id_TA_RSA_PSS_SHA_256,
+	TAObjectIdentifier.id_TA_RSA_PSS_SHA_512,
+	TAObjectIdentifier.id_TA_RSA_v1_5_SHA_1,
+	TAObjectIdentifier.id_TA_RSA_v1_5_SHA_256,
+	TAObjectIdentifier.id_TA_RSA_v1_5_SHA_512
     };
 
     /**
@@ -48,13 +49,13 @@ public final class TAInfo extends SecurityInfo {
      * @param seq ANS1 encoded sequence
      */
     public TAInfo(ASN1Sequence seq) {
-        super(seq);
+	super(seq);
 
-        protocol = getIdentifier();
-        version = ((ASN1Integer) getRequiredData()).getValue().intValue();
-        if (seq.size() == 3) {
-            efCVCA = FileID.getInstance(getOptionalData());
-        }
+	protocol = getIdentifier();
+	version = ((ASN1Integer) getRequiredData()).getValue().intValue();
+	if (seq.size() == 3) {
+	    efCVCA = FileID.getInstance(getOptionalData());
+	}
     }
 
     /**
@@ -63,7 +64,7 @@ public final class TAInfo extends SecurityInfo {
      * @return Protocol
      */
     public String getProtocol() {
-        return protocol;
+	return protocol;
     }
 
     /**
@@ -72,7 +73,7 @@ public final class TAInfo extends SecurityInfo {
      * @return version
      */
     public int getVersion() {
-        return version;
+	return version;
     }
 
     /**
@@ -81,7 +82,7 @@ public final class TAInfo extends SecurityInfo {
      * @return EF.CVCA
      */
     public FileID getEFCVCA() {
-        return efCVCA;
+	return efCVCA;
     }
 
     /**
@@ -91,12 +92,13 @@ public final class TAInfo extends SecurityInfo {
      * @return true if o is a TA object identifier; false otherwise
      */
     public static boolean isObjectIdentifier(String oid) {
-        for (int i = 0; i < protocols.length; i++) {
-            if (protocols[i].equals(oid)) {
-                return true;
-            }
-        }
+	for (int i = 0; i < protocols.length; i++) {
+	    if (protocols[i].equals(oid)) {
+		return true;
+	    }
+	}
 
-        return false;
+	return false;
     }
+
 }

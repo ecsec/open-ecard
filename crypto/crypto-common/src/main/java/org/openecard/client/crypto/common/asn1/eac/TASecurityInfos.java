@@ -19,7 +19,8 @@ import org.openecard.client.crypto.common.asn1.eac.oid.TAObjectIdentifier;
 
 
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class TASecurityInfos {
 
@@ -31,7 +32,7 @@ public final class TASecurityInfos {
      * @return TAInfo
      */
     public TAInfo getTAInfo() {
-        return taInfo;
+	return taInfo;
     }
 
     /**
@@ -40,7 +41,7 @@ public final class TASecurityInfos {
      * @param taInfo
      */
     public void setTAInfo(TAInfo taInfo) {
-        this.taInfo = taInfo;
+	this.taInfo = taInfo;
     }
 
     /**
@@ -50,9 +51,10 @@ public final class TASecurityInfos {
      * @return true if o is a TA object identifier, else false.
      */
     public static boolean isObjectIdentifier(String oid) {
-        if (oid.equals(TAObjectIdentifier.id_TA)) {
-            return true;
-        }
-        return false;
+	if (oid.equals(TAObjectIdentifier.id_TA)) {
+	    return true;
+	}
+	return false;
     }
+
 }

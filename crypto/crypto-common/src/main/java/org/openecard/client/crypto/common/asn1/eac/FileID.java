@@ -20,7 +20,8 @@ import org.openecard.bouncycastle.asn1.ASN1Sequence;
 
 
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class FileID {
 
@@ -33,15 +34,15 @@ public final class FileID {
      * @param seq the ASN1 encoded sequence
      */
     public FileID(ASN1Sequence seq) {
-        if (seq.size() == 1) {
-            fid = ASN1OctetString.getInstance(seq.getObjectAt(0)).getOctets();
+	if (seq.size() == 1) {
+	    fid = ASN1OctetString.getInstance(seq.getObjectAt(0)).getOctets();
 
-        } else if (seq.size() == 2) {
-            fid = ASN1OctetString.getInstance(seq.getObjectAt(0)).getOctets();
-            sfid = ASN1OctetString.getInstance(seq.getObjectAt(1)).getOctets();
-        } else {
-            throw new IllegalArgumentException("Sequence wrong size for FileID");
-        }
+	} else if (seq.size() == 2) {
+	    fid = ASN1OctetString.getInstance(seq.getObjectAt(0)).getOctets();
+	    sfid = ASN1OctetString.getInstance(seq.getObjectAt(1)).getOctets();
+	} else {
+	    throw new IllegalArgumentException("Sequence wrong size for FileID");
+	}
     }
 
     /**
@@ -51,13 +52,13 @@ public final class FileID {
      * @return single instance of FileID
      */
     public static FileID getInstance(Object obj) {
-        if (obj == null || obj instanceof FileID) {
-            return (FileID) obj;
-        } else if (obj instanceof ASN1Sequence) {
-            return new FileID((ASN1Sequence) obj);
-        }
+	if (obj == null || obj instanceof FileID) {
+	    return (FileID) obj;
+	} else if (obj instanceof ASN1Sequence) {
+	    return new FileID((ASN1Sequence) obj);
+	}
 
-        throw new IllegalArgumentException("Unknown object in factory: " + obj.getClass().getName());
+	throw new IllegalArgumentException("Unknown object in factory: " + obj.getClass().getName());
     }
 
     /**
@@ -66,7 +67,7 @@ public final class FileID {
      * @return the FID
      */
     public byte[] getFID() {
-        return fid;
+	return fid;
     }
 
     /**
@@ -75,6 +76,7 @@ public final class FileID {
      * @return the SFID
      */
     public byte[] getSFID() {
-        return sfid;
+	return sfid;
     }
+
 }

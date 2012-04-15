@@ -15,22 +15,24 @@
  */
 package org.openecard.client.crypto.common.asn1.eac;
 
-import org.openecard.bouncycastle.jce.spec.ECParameterSpec;
+import java.security.spec.AlgorithmParameterSpec;
 
 
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public abstract class DomainParameters {
 
-    protected ECParameterSpec domainParameter;
+    protected AlgorithmParameterSpec domainParameter;
 
     /**
      * Gets the domain parameter.
      *
-     * @return the domain parameter
+     * @return Domain parameter
      */
-    public ECParameterSpec getDomainParameter() {
-        return domainParameter;
+    public AlgorithmParameterSpec getParameter() {
+	return domainParameter;
     }
+
 }

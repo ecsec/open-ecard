@@ -19,8 +19,10 @@ import org.openecard.bouncycastle.asn1.ASN1Object;
 import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.openecard.bouncycastle.asn1.ASN1Sequence;
 
+
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class AlgorithmIdentifier {
 
@@ -30,51 +32,51 @@ public class AlgorithmIdentifier {
     /**
      * Instantiates a new algorithm identifier.
      *
-     * @param seq the ASN1 encoded sequence
+     * @param seq ASN1 encoded sequence
      */
     public AlgorithmIdentifier(ASN1Sequence seq) {
-        if (seq.size() == 1) {
-            algorithm = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
-        } else if (seq.size() == 2) {
-            algorithm = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
-            parameters = (ASN1Object) seq.getObjectAt(1);
-        } else {
-            throw new IllegalArgumentException("Sequence wrong size for AlgorithmIdentifier");
-        }
-
+	if (seq.size() == 1) {
+	    algorithm = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
+	} else if (seq.size() == 2) {
+	    algorithm = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
+	    parameters = (ASN1Object) seq.getObjectAt(1);
+	} else {
+	    throw new IllegalArgumentException("Sequence wrong size for AlgorithmIdentifier");
+	}
     }
 
     /**
      * Gets the single instance of AlgorithmIdentifier.
      *
      * @param obj
-     * @return single instance of AlgorithmIdentifier
+     * @return Single instance of AlgorithmIdentifier
      */
     public static AlgorithmIdentifier getInstance(Object obj) {
-        if (obj == null || obj instanceof AlgorithmIdentifier) {
-            return (AlgorithmIdentifier) obj;
-        } else if (obj instanceof ASN1Sequence) {
-            return new AlgorithmIdentifier((ASN1Sequence) obj);
-        }
+	if (obj == null || obj instanceof AlgorithmIdentifier) {
+	    return (AlgorithmIdentifier) obj;
+	} else if (obj instanceof ASN1Sequence) {
+	    return new AlgorithmIdentifier((ASN1Sequence) obj);
+	}
 
-        throw new IllegalArgumentException("Unknown object in factory: " + obj.getClass().getName());
+	throw new IllegalArgumentException("Unknown object in factory: " + obj.getClass().getName());
     }
 
     /**
      * Gets the object identifier.
      *
-     * @return the object identifier
+     * @return Object identifier
      */
     public String getObjectIdentifier() {
-        return algorithm;
+	return algorithm;
     }
 
     /**
      * Gets the parameters.
      *
-     * @return the parameters
+     * @return Parameters
      */
     public ASN1Object getParameters() {
-        return parameters;
+	return parameters;
     }
+
 }

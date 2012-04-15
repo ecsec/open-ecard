@@ -19,8 +19,10 @@ import org.openecard.bouncycastle.asn1.ASN1Encodable;
 import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.openecard.bouncycastle.asn1.ASN1Sequence;
 
+
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class SecurityInfo {
 
@@ -35,13 +37,13 @@ public class SecurityInfo {
      * @return single instance of SecurityInfo
      */
     public static SecurityInfo getInstance(Object obj) {
-        if (obj == null || obj instanceof SecurityInfo) {
-            return (SecurityInfo) obj;
-        } else if (obj instanceof ASN1Sequence) {
-            return new SecurityInfo((ASN1Sequence) obj);
-        }
+	if (obj == null || obj instanceof SecurityInfo) {
+	    return (SecurityInfo) obj;
+	} else if (obj instanceof ASN1Sequence) {
+	    return new SecurityInfo((ASN1Sequence) obj);
+	}
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+	throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     /**
@@ -50,17 +52,17 @@ public class SecurityInfo {
      * @param seq
      */
     public SecurityInfo(ASN1Sequence seq) {
-        if (seq.size() == 2) {
-            identifier = (ASN1ObjectIdentifier) ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
-            requiredData = (ASN1Encodable) seq.getObjectAt(1);
+	if (seq.size() == 2) {
+	    identifier = (ASN1ObjectIdentifier) ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
+	    requiredData = (ASN1Encodable) seq.getObjectAt(1);
 
-        } else if (seq.size() == 3) {
-            identifier = (ASN1ObjectIdentifier) ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
-            requiredData = (ASN1Encodable) seq.getObjectAt(1);
-            optionalData = (ASN1Encodable) seq.getObjectAt(2);
-        } else {
-            throw new IllegalArgumentException("sequence wrong size for CertificateList");
-        }
+	} else if (seq.size() == 3) {
+	    identifier = (ASN1ObjectIdentifier) ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
+	    requiredData = (ASN1Encodable) seq.getObjectAt(1);
+	    optionalData = (ASN1Encodable) seq.getObjectAt(2);
+	} else {
+	    throw new IllegalArgumentException("sequence wrong size for CertificateList");
+	}
     }
 
     /**
@@ -70,8 +72,8 @@ public class SecurityInfo {
      * @param requiredData the required data
      */
     public SecurityInfo(ASN1ObjectIdentifier contentType, ASN1Encodable requiredData) {
-        this.identifier = contentType;
-        this.requiredData = requiredData;
+	this.identifier = contentType;
+	this.requiredData = requiredData;
     }
 
     /**
@@ -82,35 +84,36 @@ public class SecurityInfo {
      * @param optionalData the optional data
      */
     public SecurityInfo(ASN1ObjectIdentifier contentType, ASN1Encodable requiredData, ASN1Encodable optionalData) {
-        this.identifier = contentType;
-        this.requiredData = requiredData;
-        this.optionalData = optionalData;
+	this.identifier = contentType;
+	this.requiredData = requiredData;
+	this.optionalData = optionalData;
     }
 
     /**
      * Returns the object identifier..
-     * 
+     *
      * @return Object identifier
      */
     public String getIdentifier() {
-        return identifier.toString();
+	return identifier.toString();
     }
 
     /**
      * Returns the required data.
-     * 
+     *
      * @return Required data
      */
     public ASN1Encodable getRequiredData() {
-        return requiredData;
+	return requiredData;
     }
 
     /**
      * Returns the optional data.
-     * 
+     *
      * @return Optional data
      */
     public ASN1Encodable getOptionalData() {
-        return optionalData;
+	return optionalData;
     }
+
 }

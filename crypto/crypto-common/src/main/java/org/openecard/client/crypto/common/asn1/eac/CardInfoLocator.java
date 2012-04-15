@@ -21,7 +21,8 @@ import org.openecard.bouncycastle.asn1.DERIA5String;
 
 
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class CardInfoLocator {
 
@@ -35,17 +36,17 @@ public final class CardInfoLocator {
      * @param seq the ASN1 encoded sequence
      */
     public CardInfoLocator(ASN1Sequence seq) {
-        if (seq.size() == 2) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
-            url = DERIA5String.getInstance(seq.getObjectAt(1)).getString();
+	if (seq.size() == 2) {
+	    protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
+	    url = DERIA5String.getInstance(seq.getObjectAt(1)).getString();
 
-        } else if (seq.size() == 3) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
-            url = DERIA5String.getInstance(seq.getObjectAt(1)).getString();
-            efCardInfo = FileID.getInstance(seq.getObjectAt(2));
-        } else {
-            throw new IllegalArgumentException("Sequence wrong size for CardInfoLocator");
-        }
+	} else if (seq.size() == 3) {
+	    protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
+	    url = DERIA5String.getInstance(seq.getObjectAt(1)).getString();
+	    efCardInfo = FileID.getInstance(seq.getObjectAt(2));
+	} else {
+	    throw new IllegalArgumentException("Sequence wrong size for CardInfoLocator");
+	}
     }
 
     /**
@@ -55,13 +56,13 @@ public final class CardInfoLocator {
      * @return single instance of CardInfoLocator
      */
     public static CardInfoLocator getInstance(Object obj) {
-        if (obj == null || obj instanceof CardInfoLocator) {
-            return (CardInfoLocator) obj;
-        } else if (obj instanceof ASN1Sequence) {
-            return new CardInfoLocator((ASN1Sequence) obj);
-        }
+	if (obj == null || obj instanceof CardInfoLocator) {
+	    return (CardInfoLocator) obj;
+	} else if (obj instanceof ASN1Sequence) {
+	    return new CardInfoLocator((ASN1Sequence) obj);
+	}
 
-        throw new IllegalArgumentException("Unknown object in factory: " + obj.getClass().getName());
+	throw new IllegalArgumentException("Unknown object in factory: " + obj.getClass().getName());
     }
 
     /**
@@ -70,7 +71,7 @@ public final class CardInfoLocator {
      * @return the protocol
      */
     public String getProtocol() {
-        return protocol.toString();
+	return protocol.toString();
     }
 
     /**
@@ -79,7 +80,7 @@ public final class CardInfoLocator {
      * @return the URL
      */
     public String getURL() {
-        return url;
+	return url;
     }
 
     /**
@@ -88,6 +89,7 @@ public final class CardInfoLocator {
      * @return the EFCardInfo fileID
      */
     public FileID getEFCardInfo() {
-        return efCardInfo;
+	return efCardInfo;
     }
+
 }

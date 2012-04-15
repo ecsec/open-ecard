@@ -22,7 +22,8 @@ import org.openecard.client.crypto.common.asn1.eac.oid.CAObjectIdentifier;
 
 
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class CADomainParameterInfo {
 
@@ -30,69 +31,69 @@ public final class CADomainParameterInfo {
     private AlgorithmIdentifier domainParameter;
     private int keyID;
     private static final String[] protocols = new String[]{
-        CAObjectIdentifier.id_CA_DH,
-        CAObjectIdentifier.id_CA_ECDH
+	CAObjectIdentifier.id_CA_DH,
+	CAObjectIdentifier.id_CA_ECDH
     };
 
     /**
      * Creates a new ChipAuthenticationDomainParameterInfo object. See TR-03110
      * Section A.1.1.2.
-     * 
+     *
      * @param seq ANS1 encoded data
      */
     public CADomainParameterInfo(ASN1Sequence seq) {
-        if (seq.size() == 2) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
-            domainParameter = AlgorithmIdentifier.getInstance(seq.getObjectAt(1));
-        } else if (seq.size() == 3) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
-            domainParameter = AlgorithmIdentifier.getInstance(seq.getObjectAt(1));
-            keyID = ((ASN1Integer) ASN1Integer.getInstance(seq.getObjectAt(2))).getValue().intValue();
-        } else {
-            throw new IllegalArgumentException("Sequence wrong size for CADomainParameterInfo");
-        }
+	if (seq.size() == 2) {
+	    protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
+	    domainParameter = AlgorithmIdentifier.getInstance(seq.getObjectAt(1));
+	} else if (seq.size() == 3) {
+	    protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
+	    domainParameter = AlgorithmIdentifier.getInstance(seq.getObjectAt(1));
+	    keyID = ((ASN1Integer) ASN1Integer.getInstance(seq.getObjectAt(2))).getValue().intValue();
+	} else {
+	    throw new IllegalArgumentException("Sequence wrong size for CADomainParameterInfo");
+	}
     }
 
     /**
      * Returns the object identifier of the protocol.
-     * 
+     *
      * @return Protocol
      */
     public String getProtocol() {
-        return protocol;
+	return protocol;
     }
 
     /**
      * Returns the ChipAuthentication domain parameter.
-     * 
+     *
      * @return domain parameter
      */
     public AlgorithmIdentifier getDomainParameter() {
-        return domainParameter;
+	return domainParameter;
     }
 
     /**
      * Returns the key identifier.
-     * 
+     *
      * @return KeyID
      */
     public int getKeyID() {
-        return keyID;
+	return keyID;
     }
 
     /**
-     * Compares the object identifier.
-     * 
+     * Checks id the it is a CA object identifier.
+     *
      * @param oid Object identifier
-     * @return true if o is a ChipAuthentication object identifier; false
-     *         otherwise
+     * @return true if o is a CA object identifier, otherwise false
      */
     public static boolean isObjectIdentifier(String oid) {
-        for (int i = 0; i < protocols.length; i++) {
-            if (protocols[i].equals(oid)) {
-                return true;
-            }
-        }
-        return false;
+	for (int i = 0; i < protocols.length; i++) {
+	    if (protocols[i].equals(oid)) {
+		return true;
+	    }
+	}
+	return false;
     }
+
 }

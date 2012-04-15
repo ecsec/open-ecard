@@ -21,7 +21,9 @@ import org.openecard.bouncycastle.asn1.ASN1Sequence;
 
 
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * See BSI-TR-03110, version 2.05, section A.1.1.2.
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class CAPublicKeyInfo {
 
@@ -30,47 +32,48 @@ public class CAPublicKeyInfo {
     private int keyID;
 
     /**
-     * Instantiates a new ChipAuthenticationPublicKeyInfo. See BSI-TR-03110 version 2.05 section A.1.1.2.
+     * Instantiates a new ChipAuthenticationPublicKeyInfo.
      *
      * @param seq the ASN1 encoded sequence
      */
     public CAPublicKeyInfo(ASN1Sequence seq) {
-        if (seq.size() == 2) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
-            subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(seq.getObjectAt(1));
-        } else if (seq.size() == 3) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
-            subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(seq.getObjectAt(1));
-            keyID = ((ASN1Integer) ASN1Integer.getInstance(seq.getObjectAt(2))).getValue().intValue();
-        } else {
-            throw new IllegalArgumentException("Sequence wrong size for CAPublicKeyInfo");
-        }
+	if (seq.size() == 2) {
+	    protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
+	    subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(seq.getObjectAt(1));
+	} else if (seq.size() == 3) {
+	    protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString();
+	    subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(seq.getObjectAt(1));
+	    keyID = ((ASN1Integer) ASN1Integer.getInstance(seq.getObjectAt(2))).getValue().intValue();
+	} else {
+	    throw new IllegalArgumentException("Sequence wrong size for CAPublicKeyInfo");
+	}
     }
 
     /**
      * Gets the protocol.
      *
-     * @return the protocol
+     * @return Protocol
      */
     public String getProtocol() {
-        return protocol;
+	return protocol;
     }
 
     /**
      * Gets the SubjectPublicKeyInfo.
      *
-     * @return the SubjectPublicKeyInfo
+     * @return SubjectPublicKeyInfo
      */
     public SubjectPublicKeyInfo getSubjectPublicKeyInfo() {
-        return subjectPublicKeyInfo;
+	return subjectPublicKeyInfo;
     }
 
     /**
      * Gets the key id.
      *
-     * @return the key id
+     * @return Key identifier
      */
     public int getKeyID() {
-        return keyID;
+	return keyID;
     }
+
 }

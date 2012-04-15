@@ -22,7 +22,8 @@ import org.openecard.bouncycastle.asn1.ASN1Set;
 
 
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class SecurityInfos {
 
@@ -43,7 +44,7 @@ public class SecurityInfos {
             try {
                 return new SecurityInfos((ASN1Set) ASN1Set.fromByteArray((byte[]) obj));
             } catch (IOException e) {
-                Logger.getLogger("ASN1").log(Level.SEVERE, "Cannot parse SecurityInfos", e);
+                Logger.getLogger(SecurityInfos.class.getName()).log(Level.SEVERE, "Cannot parse SecurityInfos", e);
             }
         }
         throw new IllegalArgumentException("unknown object in factory: " + obj.getClass());
@@ -66,4 +67,5 @@ public class SecurityInfos {
     public ASN1Set getSecurityInfos() {
         return securityInfos;
     }
+
 }

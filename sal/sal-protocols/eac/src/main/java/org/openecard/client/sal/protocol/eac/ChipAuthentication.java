@@ -19,9 +19,9 @@ import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.apdu.GeneralAuthenticate;
 import org.openecard.client.common.apdu.common.CardCommandAPDU;
 import org.openecard.client.common.apdu.common.CardResponseAPDU;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.protocol.exception.ProtocolException;
 import org.openecard.client.sal.protocol.eac.apdu.MSESetATCA;
-import org.openecard.ws.IFD;
 
 
 /**
@@ -30,7 +30,7 @@ import org.openecard.ws.IFD;
  */
 public class ChipAuthentication {
 
-    private IFD ifd;
+    private Dispatcher dispatcher;
     private byte[] slotHandle;
 
     /**
@@ -39,8 +39,8 @@ public class ChipAuthentication {
      * @param ifd IFD
      * @param slotHandle Slot handle
      */
-    public ChipAuthentication(IFD ifd, byte[] slotHandle) {
-	this.ifd = ifd;
+    public ChipAuthentication(Dispatcher dispatcher, byte[] slotHandle) {
+	this.dispatcher = dispatcher;
 	this.slotHandle = slotHandle;
     }
 
@@ -54,7 +54,7 @@ public class ChipAuthentication {
     public void mseSetAT(byte[] oid, byte[] keyID) throws ProtocolException {
 	try {
 	    CardCommandAPDU mseSetAT = new MSESetATCA(oid, keyID);
-	    mseSetAT.transmit(ifd, slotHandle);
+	    mseSetAT.transmit(dispatcher, slotHandle);
 	} catch (WSHelper.WSException e) {
 	    throw new ProtocolException(e.getResult());
 	}
@@ -70,7 +70,7 @@ public class ChipAuthentication {
     public byte[] generalAuthenticate(byte[] key) throws ProtocolException {
 	try {
 	    CardCommandAPDU generalAuthenticate = new GeneralAuthenticate((byte) 0x80, key);
-	    CardResponseAPDU response = generalAuthenticate.transmit(ifd, slotHandle);
+	    CardResponseAPDU response = generalAuthenticate.transmit(dispatcher, slotHandle);
 
 	    return response.getData();
 	} catch (WSHelper.WSException e) {

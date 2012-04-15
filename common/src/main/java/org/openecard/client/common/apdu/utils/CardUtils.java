@@ -21,8 +21,8 @@ import org.openecard.client.common.apdu.ReadBinary;
 import org.openecard.client.common.apdu.Select;
 import org.openecard.client.common.apdu.common.CardCommandAPDU;
 import org.openecard.client.common.apdu.common.CardResponseAPDU;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.util.ShortUtils;
-import org.openecard.ws.IFD;
 
 
 /**
@@ -31,15 +31,15 @@ import org.openecard.ws.IFD;
  */
 public class CardUtils {
 
-    private IFD ifd;
+    private Dispatcher dispatcher;
 
     /**
      * Creates a new utility class for file operations.
      *
      * @param ifd IFD
      */
-    public CardUtils(IFD ifd) {
-	this.ifd = ifd;
+    public CardUtils(Dispatcher dispatcher) {
+	this.dispatcher = dispatcher;
     }
 
     /**
@@ -50,7 +50,7 @@ public class CardUtils {
      */
     public void selectMF(byte[] slotHandle) throws WSException {
 	CardCommandAPDU selectMF = new Select.MasterFile();
-	selectMF.transmit(ifd, slotHandle);
+	selectMF.transmit(dispatcher, slotHandle);
     }
 
     /**
@@ -62,7 +62,7 @@ public class CardUtils {
      */
     public void selectFile(byte[] slotHandle, short fileID) throws WSException {
 	CardCommandAPDU selectFile = new Select.File(ShortUtils.toByteArray(fileID));
-	selectFile.transmit(ifd, slotHandle);
+	selectFile.transmit(dispatcher, slotHandle);
     }
 
     /**
@@ -87,7 +87,7 @@ public class CardUtils {
 
 	do {
 	    CardCommandAPDU readBinary = new ReadBinary((short) (i * (length & 0xFF)), length);
-	    response = readBinary.transmit(ifd, slotHandle);
+	    response = readBinary.transmit(dispatcher, slotHandle);
 
 	    baos.write(response.getData());
 	    i++;

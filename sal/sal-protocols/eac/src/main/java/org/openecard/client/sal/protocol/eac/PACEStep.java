@@ -20,42 +20,28 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
-import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.I18n;
 import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.ifd.anytype.PACEInputType;
+import org.openecard.client.common.ifd.anytype.PACEOutputType;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
-import org.openecard.client.common.sal.anytype.EAC1InputType;
-import org.openecard.client.common.sal.anytype.EAC1OutputType;
-import org.openecard.client.common.tlv.TLV;
+import org.openecard.client.common.sal.anytype.AuthDataMap;
+import org.openecard.client.common.sal.anytype.AuthDataResponse;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.cvc.CHAT;
-import org.openecard.client.crypto.common.asn1.cvc.CHAT.DataGroup;
-import org.openecard.client.crypto.common.asn1.cvc.CHAT.SpecialFunction;
-import org.openecard.client.crypto.common.asn1.cvc.CHAT.TerminalType;
-import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
+import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
 import org.openecard.client.crypto.common.asn1.cvc.CertificateDescription;
+import org.openecard.client.crypto.common.asn1.eac.SecurityInfos;
 import org.openecard.client.gui.UserConsent;
-import org.openecard.client.gui.UserConsentNavigator;
-import org.openecard.client.gui.definition.BoxItem;
-import org.openecard.client.gui.definition.Checkbox;
-import org.openecard.client.gui.definition.Hyperlink;
-import org.openecard.client.gui.definition.InfoUnitElementType;
-import org.openecard.client.gui.definition.OutputInfoUnit;
-import org.openecard.client.gui.definition.Step;
-import org.openecard.client.gui.definition.Text;
-import org.openecard.client.gui.definition.UserConsentDescription;
-import org.openecard.client.gui.executor.ExecutionEngine;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.openecard.client.sal.protocol.eac.anytype.EAC1InputType;
+import org.openecard.client.sal.protocol.eac.anytype.EAC1OutputType;
 
 
 /**
@@ -85,8 +71,8 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (logger.isLoggable(Level.FINER)) {
-	    logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", new Object[]{didAuthenticate, internalData});
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", new Object[]{didAuthenticate, internalData});
 	} // </editor-fold>
 
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
@@ -146,12 +132,12 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		response.setAuthenticationProtocolData(eac1Output.getAuthDataType());
 	    }
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (logger.isLoggable(Level.FINER)) {
-		logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", response);
+	    if (_logger.isLoggable(Level.FINER)) {
+		_logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", response);
 	    } // </editor-fold>
 
 	} catch (Exception ex) {
-	    logger.log(Level.SEVERE, "Exception", ex);
+	    _logger.log(Level.SEVERE, "Exception", ex);
 	    response.setResult(WSHelper.makeResultUnknownError(ex.getMessage()));
 	}
 

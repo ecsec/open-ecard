@@ -24,6 +24,7 @@ import javax.activation.UnsupportedDataTypeException;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ifd.anytype.AuthDataMap;
 import org.openecard.client.common.logging.LogManager;

@@ -21,13 +21,13 @@ import org.openecard.client.common.apdu.ExternalAuthentication;
 import org.openecard.client.common.apdu.GetChallenge;
 import org.openecard.client.common.apdu.common.CardCommandAPDU;
 import org.openecard.client.common.apdu.common.CardResponseAPDU;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.protocol.exception.ProtocolException;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
 import org.openecard.client.sal.protocol.eac.apdu.MSESetATTA;
 import org.openecard.client.sal.protocol.eac.apdu.MSESetDST;
 import org.openecard.client.sal.protocol.eac.apdu.PSOVerifyCertificate;
-import org.openecard.ws.IFD;
 
 
 /**
@@ -36,7 +36,7 @@ import org.openecard.ws.IFD;
  */
 public class TerminalAuthentication {
 
-    private IFD ifd;
+    private Dispatcher dispatcher;
     private byte[] slotHandle;
 
     /**
@@ -45,8 +45,8 @@ public class TerminalAuthentication {
      * @param ifd IFD
      * @param slotHandle Slot handle
      */
-    public TerminalAuthentication(IFD ifd, byte[] slotHandle) {
-	this.ifd = ifd;
+    public TerminalAuthentication(Dispatcher dispatcher, byte[] slotHandle) {
+	this.dispatcher = dispatcher;
 	this.slotHandle = slotHandle;
     }
 
@@ -64,10 +64,10 @@ public class TerminalAuthentication {
 		CardVerifiableCertificate cvc = (CardVerifiableCertificate) certificates.get(i);
 		// MSE:SetDST
 		CardCommandAPDU mseSetAT = new MSESetDST(cvc.getCAR().toByteArray());
-		mseSetAT.transmit(ifd, slotHandle);
+		mseSetAT.transmit(dispatcher, slotHandle);
 		// PSO:Verify Certificate
 		CardCommandAPDU psovc = new PSOVerifyCertificate(cvc.getBody());
-		psovc.transmit(ifd, slotHandle);
+		psovc.transmit(dispatcher, slotHandle);
 	    }
 	} catch (WSException e) {
 	    throw new ProtocolException(e.getResult());
@@ -86,7 +86,7 @@ public class TerminalAuthentication {
     public void mseSetAT(byte[] oid, byte[] chr, byte[] key, byte[] aad) throws ProtocolException {
 	try {
 	    CardCommandAPDU mseSetAT = new MSESetATTA(oid, chr, key, aad);
-	    mseSetAT.transmit(ifd, slotHandle);
+	    mseSetAT.transmit(dispatcher, slotHandle);
 	} catch (WSException e) {
 	    throw new ProtocolException(e.getResult());
 	}
@@ -101,7 +101,7 @@ public class TerminalAuthentication {
     public byte[] getChallenge() throws ProtocolException {
 	try {
 	    CardCommandAPDU getChallenge = new GetChallenge();
-	    CardResponseAPDU response = getChallenge.transmit(ifd, slotHandle);
+	    CardResponseAPDU response = getChallenge.transmit(dispatcher, slotHandle);
 
 	    return response.getData();
 	} catch (WSException e) {
@@ -118,7 +118,7 @@ public class TerminalAuthentication {
     public void externalAuthentication(byte[] terminalSignature) throws ProtocolException {
 	try {
 	    CardCommandAPDU externalAuthentication = new ExternalAuthentication(terminalSignature);
-	    externalAuthentication.transmit(ifd, slotHandle);
+	    externalAuthentication.transmit(dispatcher, slotHandle);
 	} catch (WSException e) {
 	    throw new ProtocolException(e.getResult());
 	}

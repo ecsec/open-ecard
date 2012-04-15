@@ -32,7 +32,7 @@ import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.transport.paos.PAOS;
 import org.openecard.client.transport.paos.PAOSCallback;
 import org.openecard.client.transport.tls.PSKTlsClientImpl;
-import org.openecard.client.transport.tls.TLSClientSocketFactory;
+import org.openecard.client.transport.tls.TlsClientSocketFactory;
 
 
 /**
@@ -110,7 +110,7 @@ public final class RichClient extends Thread implements EventCallback, PAOSCallb
 	    PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionIdentifier.getBytes(), psk, serverAddress);
 
 	    // Set up PAOS connection
-	    PAOS p = new PAOS(endpoint, env.getDispatcher(), RichClient.this, new TLSClientSocketFactory(tlsClient));
+	    PAOS p = new PAOS(endpoint, env.getDispatcher(), RichClient.this, new TlsClientSocketFactory(tlsClient));
 
 	    // Send StartPAOS
 	    StartPAOS sp = new StartPAOS();

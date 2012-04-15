@@ -18,34 +18,24 @@ package org.openecard.client.sal.protocol.eac;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
-import iso.std.iso_iec._24727.tech.schema.Transmit;
-import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.smartcardio.ResponseAPDU;
-import oasis.names.tc.dss._1_0.core.schema.Result;
-import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.apdu.utils.CardUtils;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
-import org.openecard.client.common.sal.anytype.EAC2OutputType;
-import org.openecard.client.common.sal.anytype.EACAdditionalInputType;
 import org.openecard.client.common.tlv.TLV;
-import org.openecard.client.common.tlv.TLVException;
-import org.openecard.client.common.tlv.iso7816.FCP;
 import org.openecard.client.common.util.ByteUtils;
-import org.openecard.client.common.util.CardCommands;
-import org.openecard.client.common.util.StringUtils;
-import org.openecard.client.crypto.common.asn1.eac.oid.CAObjectIdentifier;
+import org.openecard.client.common.util.IntegerUtils;
+import org.openecard.client.crypto.common.asn1.eac.CASecurityInfos;
+import org.openecard.client.crypto.common.asn1.eac.SecurityInfos;
+import org.openecard.client.crypto.common.asn1.eac.ef.EFCardAccess;
 import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
+import org.openecard.client.sal.protocol.eac.anytype.EAC2OutputType;
+import org.openecard.client.sal.protocol.eac.anytype.EACAdditionalInputType;
 
 
 /**
@@ -72,9 +62,8 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (logger.isLoggable(Level.FINER)) {
-	    logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)",
-		    new Object[]{didAuthenticate, internalData});
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", new Object[]{didAuthenticate, internalData});
 	} // </editor-fold>
 
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
@@ -125,13 +114,13 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());
 
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (logger.isLoggable(Level.FINER)) {
-		logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", response);
+	    if (_logger.isLoggable(Level.FINER)) {
+		_logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", response);
 	    } // </editor-fold>
 
 	    return response;
 	} catch (Exception ex) {
-	    logger.log(Level.SEVERE, "Exception", ex);
+	    _logger.log(Level.SEVERE, "Exception", ex);
 	    response.setResult(WSHelper.makeResultUnknownError(ex.getMessage()));
 	}
 

@@ -13,28 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openecard.client.ifd.protocol.pace;
-
-import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.ifd.Protocol;
-import org.openecard.client.common.ifd.ProtocolFactory;
+package org.openecard.client.ifd.protocol.pace.crypto;
 
 
 /**
- * Implements a ProtocolFactory for the PACE protocol.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class PACEProtocolFactory implements ProtocolFactory {
+public abstract class PACEMapping {
 
-    @Override
-    public String getProtocol() {
-	return ECardConstants.Protocol.PACE;
+    protected PACEDomainParameter pdp;
+
+    /**
+     * Creates an new mapping for PACE.
+     *
+     * @param pdp PACEDomainParameter
+     */
+    protected PACEMapping(PACEDomainParameter pdp) {
+	this.pdp = pdp;
     }
 
-    @Override
-    public Protocol createInstance() {
-	return new PACEProtocol();
-    }
+    /**
+     * Perform the PACE mapping.
+     *
+     * @param keyPICC Key from PICC
+     * @param keyPCD Key from PCD
+     * @return PACEDomainParameter
+     */
+    public abstract PACEDomainParameter map(byte[] keyPICC, byte[] keyPCD);
 
 }

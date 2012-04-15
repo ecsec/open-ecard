@@ -13,28 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openecard.client.ifd.protocol.pace;
-
-import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.ifd.Protocol;
-import org.openecard.client.common.ifd.ProtocolFactory;
+package org.openecard.client.ifd.protocol.pace.crypto;
 
 
 /**
- * Implements a ProtocolFactory for the PACE protocol.
+ * Implements the Integrated Mapping for PACE.
+ * See BSI-TR-03110, version 2.10, part 3, section A.3.5.2.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class PACEProtocolFactory implements ProtocolFactory {
+public final class PACEIntegratedMapping extends PACEMapping {
 
-    @Override
-    public String getProtocol() {
-	return ECardConstants.Protocol.PACE;
+    /**
+     * Creates an new integrated mapping for PACE.
+     *
+     * @param pdp PACEDomainParameter
+     */
+    public PACEIntegratedMapping(PACEDomainParameter pdp) {
+        super(pdp);
     }
 
     @Override
-    public Protocol createInstance() {
-	return new PACEProtocol();
+    public PACEDomainParameter map(byte[] keyPICC, byte[] keyPCD) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

@@ -15,55 +15,63 @@
  */
 package org.openecard.client.ifd.protocol.pace;
 
-import iso.std.iso_iec._24727.tech.schema.Transmit;
-import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
-import java.util.ArrayList;
+import java.security.GeneralSecurityException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.smartcardio.ResponseAPDU;
-import org.openecard.bouncycastle.math.ec.ECPoint;
 import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.apdu.GeneralAuthenticate;
+import org.openecard.client.common.apdu.common.CardCommandAPDU;
+import org.openecard.client.common.apdu.common.CardResponseAPDU;
+import org.openecard.client.common.ifd.protocol.exception.ProtocolException;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.ByteUtils;
-import org.openecard.client.common.util.CardCommands;
 import org.openecard.client.crypto.common.asn1.eac.PACESecurityInfos;
 import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
-import org.openecard.client.ifd.protocol.exception.ProtocolException;
-import org.openecard.client.ifd.protocol.pace.crypto.KDF;
-import org.openecard.client.ifd.protocol.pace.crypto.PACECryptoSuite;
+import org.openecard.client.ifd.protocol.pace.apdu.MSESetATPACE;
+import org.openecard.client.ifd.protocol.pace.crypto.*;
 import org.openecard.ws.IFD;
 
 
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class PACEImplementation {
 
-    private static final Logger logger = Logger.getLogger("PACE");
-    private PACESecurityInfos psi;
-    private PACECryptoSuite cSuite;
-    private KDF kdf;
-    private byte[] secret, keyMAC, keyENC;
-    private ECPoint keyPKPICC;
+    private static final Logger logger = LogManager.getLogger(PACEImplementation.class.getName());
+    // Communication
     private IFD ifd;
+    private KDF kdf;
     private byte[] slotHandle;
+    private CardResponseAPDU response;
+    // Crypto
+    private PACEDomainParameter domainParameter;
+    private PACESecurityInfos psi;
+    private PACECryptoSuite cryptoSuite;
+    // Keys
+    private PACEKey keyPCD, keyPICC;
+    private byte[] keyMAC, keyENC;
+    private byte[] password, s;
+    // Certificate Authority Reference (CAR)
+    private byte[] currentCAR, previousCAR;
     private byte retryCounter = 3;
-    private ResponseAPDU response;
-    private static final Logger _logger = LogManager.getLogger(PACEImplementation.class.getName());
-    public static final short PASSWORD_DEACTIVATED = (short) 0x6283;
-    
-    /**
-     *
-     * @param connection
-     * @param paceSecurityInfos
-     */
-    public PACEImplementation(IFD ifd, byte[] slotHandle, PACESecurityInfos paceSecurityInfos) {
-        this.ifd = ifd;
-        this.slotHandle = slotHandle;
-        this.psi = paceSecurityInfos;
 
-        cSuite = new PACECryptoSuite(psi);
-        kdf = new KDF();
+    /**
+     * Creates a new instance of the pace protocol.
+     *
+     * @param ifd IFD
+     * @param slotHandle Slot handle
+     * @param paceSecurityInfos PACESecurityInfos
+     * @throws Exception Exception
+     */
+    public PACEImplementation(IFD ifd, byte[] slotHandle, PACESecurityInfos paceSecurityInfos) throws Exception {
+	this.ifd = ifd;
+	this.slotHandle = slotHandle;
+	this.psi = paceSecurityInfos;
+
+	domainParameter = new PACEDomainParameter(psi);
+	cryptoSuite = new PACECryptoSuite(psi, domainParameter);
+	kdf = new KDF();
     }
 
     /**
@@ -72,128 +80,163 @@ public class PACEImplementation {
      * @param password Password
      * @param chat CHAT
      * @param passwordType Password type (PIN, PUK, CAN, MRZ)
+     * @throws Exception Exception
      */
-    public void execute(byte[] password, byte[] chat, byte passwordType) throws ProtocolException {
-        this.secret = password;
-        mseSetAT(chat, passwordType);
+    public void execute(byte[] password, byte passwordType, byte[] chat) throws Exception {
+	this.password = password;
+
+	mseSetAT(passwordType, chat);
     }
 
     /**
-     * Step 1: Initialize PACE
+     * Step 1: Initialise PACE
      */
-    private void mseSetAT(byte[] chat, byte passwordType) throws ProtocolException {
-        // <editor-fold defaultstate="collapsed" desc="log trace">
-        if (logger.isLoggable(Level.FINER)) {
-            logger.entering(this.getClass().getName(), "mseSetAT");
-        }
-        // </editor-fold>
+    private void mseSetAT(byte passwordType, byte[] chat) throws Exception {
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	if (logger.isLoggable(Level.FINER)) {
+	    logger.entering(this.getClass().getName(), "mseSetAT");
+	}
+	// </editor-fold>
 
-        byte[] apdu = CardCommands.ManageSecurityEnvironment.setAT.PACE(ObjectIdentifierUtils.getValue(psi.getPACEInfo().getProtocol()), passwordType, chat);
+	byte[] oid = ObjectIdentifierUtils.getValue(psi.getPACEInfo().getProtocol());
+	CardCommandAPDU mseSetAT = new MSESetATPACE(oid, chat, passwordType);
 
-        try {
-            response = transmit(apdu);
-            // <editor-fold defaultstate="collapsed" desc="log trace">
-            if (logger.isLoggable(Level.FINER)) {
-                logger.exiting(this.getClass().getName(), "mseSetAT");
-            }
-            // </editor-fold>
-            // Continue with Step 2
-            generalAuthenticateEncryptedNonce();
-        } catch (WSException ex) {
-            //TODO ckeck
-            int sw = response.getSW();
+	try {
+	    response = mseSetAT.transmit(ifd, slotHandle);
 
-            if (sw == PASSWORD_DEACTIVATED) {
-                // Password is deactivated
-                throw new ProtocolException("Password is deactivated");
-            } else if ((sw & (short) 0xFFF0) == (short) 0x63C0) {
-                retryCounter = (byte) (sw & (short) 0x000F);
-                if (retryCounter == (byte) 0x00) {
-                    // The password is blocked.
-                    logger.log(Level.WARNING, "Password is blocked");
-                    // GeneralAuthenticateEncryptedNonce();
-                } else if (retryCounter == (byte) 0x01) {
-                    // The password is suspended.
-                    logger.log(Level.WARNING, "Password is suspended");
-                    // GeneralAuthenticateEncryptedNonce();
-                } else if (retryCounter == (byte) 0x02) {
-                    // The password is suspended.
-                    logger.log(Level.WARNING, "Password is wrong");
-                    generalAuthenticateEncryptedNonce();
-                }
-            }
-        }
+	    // <editor-fold defaultstate="collapsed" desc="log trace">
+	    if (logger.isLoggable(Level.FINER)) {
+		logger.exiting(this.getClass().getName(), "mseSetAT");
+	    }
+	    // </editor-fold>
+	    // Continue with Step 2
+	    generalAuthenticateEncryptedNonce();
+	} catch (WSException ex) {
+	    //TODO ckeck
+	    int sw = response.getSW();
+
+	    if (sw == PACEConstants.PASSWORD_DEACTIVATED) {
+		// Password is deactivated
+		throw new ProtocolException("The password is deactivated.");
+	    } else if ((sw & (short) 0xFFF0) == (short) 0x63C0) {
+		retryCounter = (byte) (sw & (short) 0x000F);
+		if (retryCounter == (byte) 0x00) {
+		    // The password is blocked.
+		    logger.log(Level.WARNING, "The password is blocked. The password MUST be unblocked.");
+		    // GeneralAuthenticateEncryptedNonce();
+		} else if (retryCounter == (byte) 0x01) {
+		    // The password is suspended.
+		    logger.log(Level.WARNING, "The password is suspended. The password MUST be resumed.");
+		    //FIXME test me1
+//                    if (passwordType != (byte) 0x03) {
+//                        GeneralAuthenticateEncryptedNonce();
+//                    }
+		} else if (retryCounter == (byte) 0x02) {
+		    // The password is suspended.
+		    logger.log(Level.WARNING, "The password is wrong.");
+		    generalAuthenticateEncryptedNonce();
+		}
+	    }
+	}
     }
 
     /**
      * Step 2: Encrypted nonce
      */
-    private void generalAuthenticateEncryptedNonce() throws ProtocolException {
-        // <editor-fold defaultstate="collapsed" desc="log trace">
-        if (logger.isLoggable(Level.FINER)) {
-            logger.entering(this.getClass().getName(), "generalAuthenticateEncryptedNonce");
-        }
-        // </editor-fold>
+    private void generalAuthenticateEncryptedNonce() throws Exception {
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	if (logger.isLoggable(Level.FINER)) {
+	    logger.entering(this.getClass().getName(), "generalAuthenticateEncryptedNonce");
+	}
+	// </editor-fold>
 
-        byte[] gaEncryptedNonce = CardCommands.GeneralAuthenticate.getNonce();
-        // Derive key PI
-        byte[] keyPI = kdf.derivePI(secret);
+	CardCommandAPDU gaEncryptedNonce = new GeneralAuthenticate();
+	gaEncryptedNonce.setChaining();
 
-        try {
-            response = transmit(gaEncryptedNonce);
-            cSuite.decryptNonce(keyPI, response.getData());
-            // <editor-fold defaultstate="collapsed" desc="log trace">
-            if (logger.isLoggable(Level.FINER)) {
-                logger.exiting(this.getClass().getName(), "generalAuthenticateEncryptedNonce");
-            }
-            // </editor-fold>
-            // Continue with Step 3
-            generalAuthenticateMapNonce();
-        } catch (WSException ex) {
-            // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "generalAuthenticateEncryptedNonce()", ex.getMessage(), ex);
-	    } // </editor-fold>
-	    
-            //TODO throw ProtocolException
-        }
+	// Derive key PI
+	byte[] keyPI = kdf.derivePI(password);
+
+	try {
+	    response = gaEncryptedNonce.transmit(ifd, slotHandle);
+	    s = cryptoSuite.decryptNonce(keyPI, response.getData());
+	    // <editor-fold defaultstate="collapsed" desc="log trace">
+	    if (logger.isLoggable(Level.FINER)) {
+		logger.exiting(this.getClass().getName(), "generalAuthenticateEncryptedNonce");
+	    }
+	    // </editor-fold>
+
+	    // Continue with Step 3
+	    generalAuthenticateMapNonce();
+	} catch (WSException e) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.logp(Level.SEVERE, this.getClass().getName(), "generalAuthenticateEncryptedNonce", e.getMessage(), e);
+	    // </editor-fold>
+	    throw new ProtocolException(e.getResult());
+	} catch (GeneralSecurityException e) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.logp(Level.SEVERE, this.getClass().getName(), "generalAuthenticateEncryptedNonce", e.getMessage(), e);
+	    // </editor-fold>
+	    throw new ProtocolException(e.getMessage());
+	}
     }
 
     /**
      * Step 3: Mapping nonce
      */
-    private void generalAuthenticateMapNonce() throws ProtocolException {
-        // <editor-fold defaultstate="collapsed" desc="log trace">
-        if (logger.isLoggable(Level.FINER)) {
-            logger.entering(this.getClass().getName(), "generalAuthenticateMapNonce");
-        }
-        // </editor-fold>
+    private void generalAuthenticateMapNonce() throws Exception {
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	if (logger.isLoggable(Level.FINER)) {
+	    logger.entering(this.getClass().getName(), "generalAuthenticateMapNonce");
+	}
+	// </editor-fold>
 
-        ECPoint keyMapPKPCD = cSuite.getMapPK_PCD();
-        byte[] gaMapNonce = CardCommands.GeneralAuthenticate.generic((byte) 0x81, keyMapPKPCD.getEncoded(), true);
+	byte[] pkMapPCD = null;
+	PACEMapping mapping = cryptoSuite.getMapping();
 
-        try {
-            response = transmit(gaMapNonce);
-            ECPoint keyMapPKPICC = cSuite.getPublicKey(response.getData());
-            if (!keyMapPKPCD.equals(keyMapPKPICC)) {
-                // <editor-fold defaultstate="collapsed" desc="log trace">
-                if (logger.isLoggable(Level.FINER)) {
-                    logger.exiting(this.getClass().getName(), "generalAuthenticateMapNonce");
-                }
-                // </editor-fold>
-                // Continue with Step 4
-                generalAuthenticateKeyAgreement(keyMapPKPICC);
-            } else {
-                throw new SecurityException("PACE security violation: equal keys");
-            }
-        } catch (WSException ex) {
-            // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "generalAuthenticateMapNonce()", ex.getMessage(), ex);
-	    } // </editor-fold>
-	    
-            //TODO throw ProtocolException
-        }
+	if (mapping instanceof PACEGenericMapping) {
+	    PACEGenericMapping gm = (PACEGenericMapping) mapping;
+	    pkMapPCD = gm.getMappingKey().getEncodedPrivateKey();
+
+	} else if (mapping instanceof PACEIntegratedMapping) {
+	    throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
+	CardCommandAPDU gaMapNonce = new GeneralAuthenticate((byte) 0x81, pkMapPCD);
+	gaMapNonce.setChaining();
+
+	try {
+	    response = gaMapNonce.transmit(ifd, slotHandle);
+	} catch (WSException e) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.logp(Level.SEVERE, this.getClass().getName(), "generalAuthenticateMapNonce", e.getMessage(), e);
+	    // </editor-fold>
+	    throw new ProtocolException(e.getResult());
+	}
+
+	if (mapping instanceof PACEGenericMapping) {
+	    PACEGenericMapping gm = (PACEGenericMapping) mapping;
+	    PACEKey keyMapPICC = new PACEKey(domainParameter);
+	    keyMapPICC.decodePublicKey(response.getData());
+	    byte[] pkMapPICC = keyMapPICC.getEncodedPublicKey();
+
+	    if (ByteUtils.compare(pkMapPICC, pkMapPCD)) {
+		throw new ProtocolException("PACE security violation: equal keys");
+	    }
+
+	    domainParameter = gm.map(pkMapPICC, s);
+
+	} else if (mapping instanceof PACEIntegratedMapping) {
+	    throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	if (logger.isLoggable(Level.FINER)) {
+	    logger.exiting(this.getClass().getName(), "generalAuthenticateMapNonce");
+	}
+	// </editor-fold>
+
+	// Continue with Step 4
+	generalAuthenticateKeyAgreement();
     }
 
     /**
@@ -201,109 +244,117 @@ public class PACEImplementation {
      *
      * @param mapPK_PICC
      */
-    private void generalAuthenticateKeyAgreement(ECPoint keyMapPKPICC) throws ProtocolException {
-        // <editor-fold defaultstate="collapsed" desc="log trace">
-        if (logger.isLoggable(Level.FINER)) {
-            logger.entering(this.getClass().getName(), "generalAuthenticateKeyAgreement");
-        }
-        // </editor-fold>
+    private void generalAuthenticateKeyAgreement() throws Exception {
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	if (logger.isLoggable(Level.FINER)) {
+	    logger.entering(this.getClass().getName(), "generalAuthenticateKeyAgreement");
+	}
+	// </editor-fold>
 
-        ECPoint keyPKPCD = cSuite.mapGenericMapping(keyMapPKPICC);
-        byte[] gaKeyAgreement = CardCommands.GeneralAuthenticate.generic((byte) 0x83, keyPKPCD.getEncoded(), true);
+	// genera key !!
+	keyPCD = new PACEKey(domainParameter);
+	keyPCD.generateKeyPair();
 
-        try {
-            response = transmit(gaKeyAgreement);
-            keyPKPICC = cSuite.getPublicKey(response.getData());
-            if (!keyPKPCD.equals(keyPKPICC)) {
-                // <editor-fold defaultstate="collapsed" desc="log trace">
-                if (logger.isLoggable(Level.FINER)) {
-                    logger.exiting(this.getClass().getName(), "generalAuthenticateKeyAgreement");
-                }
-                // </editor-fold>
-                // Continue with Step 5
-                generalAuthenticateMutualAuthentication(keyPKPCD);
-            } else {
-                throw new SecurityException("PACE security violation: equal keys");
-            }
-        } catch (WSException ex) {
-            // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "generalAuthenticateKeyAgreement(ECPoint keyMapPKPICC)", ex.getMessage(), ex);
-	    } // </editor-fold>
-	    
-            //TODO throw ProtocolException
-        }
+	byte[] keyPKPCD = keyPCD.getEncodedPublicKey();
+
+	CardCommandAPDU gaKeyAgreement = new GeneralAuthenticate((byte) 0x83, keyPKPCD);
+	gaKeyAgreement.setChaining();
+
+	try {
+	    response = gaKeyAgreement.transmit(ifd, slotHandle);
+	    keyPICC = new PACEKey(domainParameter);
+	    byte[] keyPKPICC = keyPICC.decodePublicKey(response.getData());
+
+	    if (!ByteUtils.compare(keyPKPCD, keyPKPICC)) {
+		// <editor-fold defaultstate="collapsed" desc="log trace">
+		if (logger.isLoggable(Level.FINER)) {
+		    logger.exiting(this.getClass().getName(), "generalAuthenticateKeyAgreement");
+		}
+		// </editor-fold>
+		// Continue with Step 5
+		generalAuthenticateMutualAuthentication();
+	    } else {
+		throw new GeneralSecurityException("PACE security violation: equal keys");
+	    }
+	} catch (WSException e) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.logp(Level.SEVERE, this.getClass().getName(), "generalAuthenticateKeyAgreement", e.getMessage(), e);
+	    // </editor-fold>
+	    throw new ProtocolException(e.getResult());
+	} catch (GeneralSecurityException e) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.logp(Level.SEVERE, this.getClass().getName(), "generalAuthenticateKeyAgreement", e.getMessage(), e);
+	    // </editor-fold>
+	    throw new ProtocolException(e.getMessage());
+	}
     }
 
     /**
      * Step 5: Mutual authentication
      */
-    private void generalAuthenticateMutualAuthentication(ECPoint keyPKPCD) throws ProtocolException {
-        // <editor-fold defaultstate="collapsed" desc="log trace">
-        if (logger.isLoggable(Level.FINER)) {
-            logger.entering(this.getClass().getName(), "generalAuthenticateMutualAuthentication");
-        }
-        // </editor-fold>
-        // Calculate shared key k
-        byte[] k = cSuite.getSharedSecret(keyPKPICC);
-        // Derive key MAC
-        keyMAC = kdf.deriveMAC(k);
-        // Derive key ENC
-        keyENC = kdf.deriveENC(k);
-        // Calculate token T_PCD
-        byte[] tPCD = cSuite.generateAuthenticationToken(keyMAC, keyPKPICC);
-        byte[] gaMutualAuth = CardCommands.GeneralAuthenticate.generic( (byte) 0x85, tPCD, false);
-        // Calculate token T_PICC
-        byte[] tPICC = cSuite.generateAuthenticationToken(keyMAC, keyPKPCD);
+    private void generalAuthenticateMutualAuthentication() throws Exception {
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	if (logger.isLoggable(Level.FINER)) {
+	    logger.entering(this.getClass().getName(), "generalAuthenticateMutualAuthentication");
+	}
+	// </editor-fold>
 
-        try {
-            response = transmit(gaMutualAuth);
-            if (cSuite.verifyAuthenticationToken(response.getData(), tPICC)) {
-                logger.log(Level.FINER, "Authentication successful");
-                // <editor-fold defaultstate="collapsed" desc="log trace">
-                if (logger.isLoggable(Level.FINER)) {
-                    logger.exiting(this.getClass().getName(), "generalAuthenticateMutualAuthentication");
-                }
-                // </editor-fold>
-            } else {
-                throw new ProtocolException("Authentication failed");
-            }
-        } catch (WSException ex) {
-            //TODO
-            int sw = response.getSW();
-            if ((sw & (short) 0xFFF0) == (short) 0x63C0) {
-                retryCounter = (byte) (sw & (short) 0x000F);
-                if (retryCounter == (byte) 0x00) {
-                    // The password is blocked.
-                    throw new ProtocolException("Password is blocked");
-                } else if (retryCounter == (byte) 0x01) {
-                    // The password is suspended.
-                    throw new ProtocolException("Password is suspended");
-                } else if (retryCounter == (byte) 0x02) {
-                    // The password is wrong.
-                    throw new ProtocolException("Password is wrong");
-                }
-            } else {
-                throw new ProtocolException("Authentication failed");
-            }
-        } catch (Exception e) {
-            throw new ProtocolException("Authentication failed");
-        }
-    }
+	// Calculate shared key k
+	byte[] k = cryptoSuite.generateSharedSecret(keyPCD.getEncodedPrivateKey(), keyPICC.getEncodedPublicKey());
+	// Derive key MAC
+	keyMAC = kdf.deriveMAC(k);
+	// Derive key ENC
+	keyENC = kdf.deriveENC(k);
 
-    private ResponseAPDU transmit(byte[] apdu) throws WSException {
-        //FIXME
-        ArrayList responses = new ArrayList<byte[]>() {
+	// Calculate token T_PCD
+	AuthenticationToken tokenPCD = new AuthenticationToken(psi);
+	tokenPCD.generateToken(keyMAC, keyPICC.getEncodedPublicKey());
 
-            {
-                add(new byte[]{(byte) 0x90, (byte) 0x00});
-            }
-        };
+	CardCommandAPDU gaMutualAuth = new GeneralAuthenticate((byte) 0x85, tokenPCD.toByteArray());
 
-        Transmit t = CardCommands.makeTransmit(slotHandle, apdu, responses);
-        TransmitResponse tr = ifd.transmit(t);
+	// Calculate token T_PICC
+	AuthenticationToken tokenPICC = new AuthenticationToken(psi);
+	tokenPICC.generateToken(keyMAC, keyPCD.getEncodedPublicKey());
 
-        return new ResponseAPDU(tr.getOutputAPDU().get(0));
+
+	try {
+	    response = gaMutualAuth.transmit(ifd, slotHandle);
+
+	    if (tokenPICC.verifyToken(response.getData())) {
+
+		currentCAR = tokenPICC.getCurrentCAR();
+		previousCAR = tokenPCD.getPreviousCAR();
+
+		logger.log(Level.FINER, "Authentication successful");
+		// <editor-fold defaultstate="collapsed" desc="log trace">
+		if (logger.isLoggable(Level.FINER)) {
+		    logger.exiting(this.getClass().getName(), "generalAuthenticateMutualAuthentication");
+		}
+		// </editor-fold>
+	    } else {
+		throw new GeneralSecurityException("Cannot verify authentication token.");
+	    }
+	} catch (WSException ex) {
+	    //TODO
+	    int sw = response.getSW();
+	    if ((sw & (short) 0xFFF0) == (short) 0x63C0) {
+		retryCounter = (byte) (sw & (short) 0x000F);
+		if (retryCounter == (byte) 0x00) {
+		    // The password is blocked.
+		    throw new ProtocolException("Password is blocked");
+		} else if (retryCounter == (byte) 0x01) {
+		    // The password is suspended.
+		    throw new ProtocolException("Password is suspended");
+		} else if (retryCounter == (byte) 0x02) {
+		    // The password is wrong.
+		    throw new ProtocolException("Password is wrong");
+		}
+	    } else {
+		throw new ProtocolException("Authentication failed");
+	    }
+	} catch (Throwable e) {
+	    throw new ProtocolException("Authentication failed");
+	}
     }
 
     /**
@@ -312,7 +363,7 @@ public class PACEImplementation {
      * @return Current Certification Authority Reference (CAR)
      */
     public byte[] getCurrentCAR() {
-        return cSuite.getCurrentCAR();
+	return currentCAR;
     }
 
     /**
@@ -321,7 +372,7 @@ public class PACEImplementation {
      * @return Previous Certification Authority Reference (CAR)
      */
     public byte[] getPreviousCAR() {
-        return cSuite.getPreviousCAR();
+	return previousCAR;
     }
 
     /**
@@ -330,7 +381,7 @@ public class PACEImplementation {
      * @return KeyMAC
      */
     public byte[] getKeyMAC() {
-        return keyMAC;
+	return keyMAC;
     }
 
     /**
@@ -339,7 +390,7 @@ public class PACEImplementation {
      * @return KeyENC
      */
     public byte[] getKeyENC() {
-        return keyENC;
+	return keyENC;
     }
 
     /**
@@ -348,7 +399,7 @@ public class PACEImplementation {
      * @return ID_PICC
      */
     public byte[] getIDPICC() {
-        return ByteUtils.cutLeadingNullByte(keyPKPICC.getX().toBigInteger().toByteArray());
+	return ByteUtils.cutLeadingNullByte(keyPICC.getEncodedPublicKey());
     }
 
     /**
@@ -357,6 +408,7 @@ public class PACEImplementation {
      * @return Retry counter
      */
     public byte getRetryCounter() {
-        return retryCounter;
+	return retryCounter;
     }
+
 }

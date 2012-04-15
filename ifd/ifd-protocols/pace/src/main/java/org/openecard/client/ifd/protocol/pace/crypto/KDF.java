@@ -15,13 +15,18 @@
  */
 package org.openecard.client.ifd.protocol.pace.crypto;
 
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 /**
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * Implements a Key Derivation Function (KDF).
+ * See BSI-TR-03110, version 2.10, part 3, section A.2.3.
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class KDF {
 
@@ -29,19 +34,23 @@ public final class KDF {
     private int keyLength;
 
     /**
-     * Key Derivation Function.
+     * Create a new Key Derivation Function.
+     *
+     * @throws GeneralSecurityException
      */
-    public KDF() {
+    public KDF() throws GeneralSecurityException {
         try {
             md = MessageDigest.getInstance("SHA1");
             keyLength = 16;
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger("crypto").log(Level.SEVERE, "Exception", ex);
+            Logger.getLogger(KDF.class.getName()).log(Level.SEVERE, "Exception", ex);
+            throw new GeneralSecurityException(ex);
         }
     }
 
     /**
      * Key Derivation Function.
+     *
      * @param md MessageDigest
      * @param keyLength Key length
      */
@@ -52,9 +61,9 @@ public final class KDF {
 
     /**
      * Derive key for encryption.
-     * 
+     *
      * @param secret Secret
-     * @return Key_PI
+     * @return Key for message en/decryption (Key_PI)
      */
     public byte[] derivePI(byte[] secret) {
         return derive(secret, (byte) 3, null);
@@ -62,9 +71,9 @@ public final class KDF {
 
     /**
      * Derive key for message authentication.
-     * 
+     *
      * @param secret Secret
-     * @return Key_MAC
+     * @return Key for message authentication (Key_MAC)
      */
     public byte[] deriveMAC(byte[] secret) {
         return derive(secret, (byte) 2, null);
@@ -72,10 +81,10 @@ public final class KDF {
 
     /**
      * Derive key for message authentication.
-     * 
+     *
      * @param secret Secret
      * @param nonce Nonce
-     * @return Key_MAC
+     * @return Key for message authentication (Key_MAC)
      */
     public byte[] deriveMAC(byte[] secret, byte[] nonce) {
         return derive(secret, (byte) 2, nonce);
@@ -83,9 +92,9 @@ public final class KDF {
 
     /**
      * Derive key for message encryption.
-     * 
+     *
      * @param secret Secret
-     * @return Key_ENC
+     * @return Key for message encryption (Key_ENC)
      */
     public byte[] deriveENC(byte[] secret) {
         return derive(secret, (byte) 1, null);
@@ -93,18 +102,17 @@ public final class KDF {
 
     /**
      * Derive key for message encryption.
-     * 
+     *
      * @param secret Secret
      * @param nonce Nonce
-     * @return Key_ENC
+     * @return Key for message encryption (Key_ENC)
      */
     public byte[] deriveENC(byte[] secret, byte[] nonce) {
         return derive(secret, (byte) 1, nonce);
     }
 
     private byte[] derive(byte[] secret, byte counter, byte[] nonce) {
-        final byte[] c = {(byte) 0x00, (byte) 0x00, (byte) 0x00, counter};
-
+        byte[] c = {(byte) 0x00, (byte) 0x00, (byte) 0x00, counter};
         byte[] key = new byte[keyLength];
 
         md.reset();
@@ -113,10 +121,12 @@ public final class KDF {
             md.update(nonce, 0, nonce.length);
         }
         md.update(c, 0, c.length);
+
         byte[] hash = md.digest();
 
         System.arraycopy(hash, 0, key, 0, key.length);
 
         return key;
     }
+
 }

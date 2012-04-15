@@ -22,7 +22,7 @@ import java.io.StringWriter;
 /**
  * A set of utility functions for Byte and Byte Array.
  *
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class ByteUtils {
@@ -34,12 +34,12 @@ public class ByteUtils {
      * @return new byte array
      */
     public static byte[] clone(byte[] input) {
-        if (input == null) {
-            return null;
-        }
-        byte[] ret = new byte[input.length];
-        System.arraycopy(input, 0, ret, 0, input.length);
-        return ret;
+	if (input == null) {
+	    return null;
+	}
+	byte[] ret = new byte[input.length];
+	System.arraycopy(input, 0, ret, 0, input.length);
+	return ret;
     }
 
     /**
@@ -50,16 +50,16 @@ public class ByteUtils {
      * @return x || y
      */
     public static byte[] concatenate(byte[] x, byte[] y) {
-        if (x == null) {
-            return y;
-        }
-        if (y == null) {
-            return x;
-        }
-        byte[] ret = new byte[x.length + y.length];
-        System.arraycopy(x, 0, ret, 0, x.length);
-        System.arraycopy(y, 0, ret, x.length, y.length);
-        return ret;
+	if (x == null) {
+	    return y;
+	}
+	if (y == null) {
+	    return x;
+	}
+	byte[] ret = new byte[x.length + y.length];
+	System.arraycopy(x, 0, ret, 0, x.length);
+	System.arraycopy(y, 0, ret, x.length, y.length);
+	return ret;
     }
 
     /**
@@ -70,7 +70,7 @@ public class ByteUtils {
      * @return x || y
      */
     public static byte[] concatenate(byte x, byte[] y) {
-        return concatenate(new byte[]{x}, y);
+	return concatenate(new byte[]{x}, y);
     }
 
     /**
@@ -81,7 +81,7 @@ public class ByteUtils {
      * @return x || y
      */
     public static byte[] concatenate(byte[] x, byte y) {
-        return concatenate(x, new byte[]{y});
+	return concatenate(x, new byte[]{y});
     }
 
     /**
@@ -92,7 +92,7 @@ public class ByteUtils {
      * @return x || y
      */
     public static byte[] concatenate(byte x, byte y) {
-        return concatenate(new byte[]{x}, new byte[]{y});
+	return concatenate(new byte[]{x}, new byte[]{y});
     }
 
     /**
@@ -104,12 +104,12 @@ public class ByteUtils {
      * @return the byte[]
      */
     public static byte[] cut(byte[] input, int offset, int length) {
-        if (input == null) {
-            return null;
-        }
-        byte[] tmp = new byte[input.length - offset - length];
-        System.arraycopy(input, length, tmp, offset, tmp.length);
-        return tmp;
+	if (input == null) {
+	    return null;
+	}
+	byte[] tmp = new byte[length];
+	System.arraycopy(input, offset, tmp, 0, tmp.length);
+	return tmp;
     }
 
     /**
@@ -119,20 +119,20 @@ public class ByteUtils {
      * @return byte array without leading null bytes
      */
     public static byte[] cutLeadingNullBytes(byte[] input) {
-        if (input == null) {
-            return null;
-        }
-        if (input[0] != (byte) 0x00) {
-            return input;
-        }
+	if (input == null) {
+	    return null;
+	}
+	if (input[0] != (byte) 0x00) {
+	    return input;
+	}
 
-        int i;
-        for (i = 1; i < input.length - 1; i++) {
-            if (input[i] != (byte) 0x00) {
-                break;
-            }
-        }
-        return cut(input, 0, i);
+	int i;
+	for (i = 1; i < input.length - 1; i++) {
+	    if (input[i] != (byte) 0x00) {
+		break;
+	    }
+	}
+	return cut(input, 0, i);
     }
 
     /**
@@ -142,13 +142,13 @@ public class ByteUtils {
      * @return byte array without leading null bytes
      */
     public static byte[] cutLeadingNullByte(byte[] input) {
-        if (input == null) {
-            return null;
-        }
-        if (input[0] != (byte) 0x00) {
-            return input;
-        }
-        return cut(input, 0, 1);
+	if (input == null) {
+	    return null;
+	}
+	if (input[0] != (byte) 0x00) {
+	    return input;
+	}
+	return cut(input, 0, 1);
     }
 
     /**
@@ -160,12 +160,12 @@ public class ByteUtils {
      * @return the byte[]
      */
     public static byte[] copy(byte[] input, int offset, int length) {
-        if (input == null) {
-            return null;
-        }
-        byte[] tmp = new byte[length];
-        System.arraycopy(input, offset, tmp, 0, length);
-        return tmp;
+	if (input == null) {
+	    return null;
+	}
+	byte[] tmp = new byte[length];
+	System.arraycopy(input, offset, tmp, 0, length);
+	return tmp;
     }
 
     /**
@@ -176,20 +176,20 @@ public class ByteUtils {
      * @return true if x = y, otherwise false
      */
     public static boolean compare(byte[] x, byte[] y) {
-        if (y == null) {
-            return false;
-        } else if (x == null) {
-            return false;
-        }
-        if (x.length != y.length) {
-            return false;
-        }
-        for (int i = 0; i < x.length; i++) {
-            if (x[i] != y[i]) {
-                return false;
-            }
-        }
-        return true;
+	if (y == null) {
+	    return false;
+	} else if (x == null) {
+	    return false;
+	}
+	if (x.length != y.length) {
+	    return false;
+	}
+	for (int i = 0; i < x.length; i++) {
+	    if (x[i] != y[i]) {
+		return false;
+	    }
+	}
+	return true;
     }
 
     /**
@@ -200,7 +200,7 @@ public class ByteUtils {
      * @return true if x = y, otherwise false
      */
     public static boolean compare(byte x, byte[] y) {
-        return compare(new byte[]{x}, y);
+	return compare(new byte[]{x}, y);
     }
 
     /**
@@ -211,7 +211,7 @@ public class ByteUtils {
      * @return true if x = y, otherwise false
      */
     public static boolean compare(byte[] x, byte y) {
-        return compare(x, new byte[]{y});
+	return compare(x, new byte[]{y});
     }
 
     /**
@@ -222,7 +222,7 @@ public class ByteUtils {
      * @return true if x = y, otherwise false
      */
     public static boolean compare(byte x, byte y) {
-        return compare(new byte[]{x}, new byte[]{y});
+	return compare(new byte[]{x}, new byte[]{y});
     }
 
     /**
@@ -232,7 +232,7 @@ public class ByteUtils {
      * @return Hex string only compose of digits, no 0x and no spaces.
      */
     public static String toHexString(byte[] bytes) {
-        return toHexString(bytes, "%02X", false);
+	return toHexString(bytes, "%02X", false);
     }
 
     /**
@@ -243,7 +243,7 @@ public class ByteUtils {
      * @return Hex string
      */
     public static String toHexString(byte[] bytes, boolean formatted) {
-        return toHexString(bytes, formatted, false);
+	return toHexString(bytes, formatted, false);
     }
 
     /**
@@ -255,27 +255,31 @@ public class ByteUtils {
      * @return Hex string
      */
     public static String toHexString(byte[] bytes, boolean formatted, boolean addLinebreak) {
-        if (formatted) {
-            return toHexString(bytes, "0x%02X ", addLinebreak);
-        } else {
-            return toHexString(bytes, "%02X", addLinebreak);
-        }
+	if (formatted) {
+	    return toHexString(bytes, "0x%02X ", addLinebreak);
+	} else {
+	    return toHexString(bytes, "%02X", addLinebreak);
+	}
     }
 
     private static String toHexString(byte[] bytes, String format, boolean addLinebreak) {
-        StringWriter writer = new StringWriter(bytes.length * 2);
-        PrintWriter out = new PrintWriter(writer);
+	if (bytes == null) {
+	    return null;
+	}
 
-        for (int i = 1; i <= bytes.length; i++) {
-            out.printf(format, bytes[i - 1]);
-            if (addLinebreak) {
-                if (i % 16 == 0) {
-                    out.append("\n");
-                }
-            }
-        }
+	StringWriter writer = new StringWriter(bytes.length * 2);
+	PrintWriter out = new PrintWriter(writer);
 
-        return writer.toString();
+	for (int i = 1; i <= bytes.length; i++) {
+	    out.printf(format, bytes[i - 1]);
+	    if (addLinebreak) {
+		if (i % 16 == 0) {
+		    out.append("\n");
+		}
+	    }
+	}
+
+	return writer.toString();
     }
 
     /**
@@ -285,11 +289,11 @@ public class ByteUtils {
      * @return int
      */
     public static int toInteger(byte[] bytes) {
-        if (bytes.length > 4 || bytes.length < 1) {
-            throw new IllegalArgumentException("Size of byte array must be between 1 and 4.");
-        }
+	if (bytes.length > 4 || bytes.length < 1) {
+	    throw new IllegalArgumentException("Size of byte array must be between 1 and 4.");
+	}
 
-        return (int) toLong(bytes);
+	return (int) toLong(bytes);
     }
 
     /**
@@ -299,17 +303,17 @@ public class ByteUtils {
      * @return long
      */
     public static long toLong(byte[] bytes) {
-        if (bytes.length > 8 || bytes.length < 1) {
-            throw new IllegalArgumentException("Size of byte array must be between 1 and 8.");
-        }
+	if (bytes.length > 8 || bytes.length < 1) {
+	    throw new IllegalArgumentException("Size of byte array must be between 1 and 8.");
+	}
 
-        long value = 0;
+	long value = 0;
 
-        for (int i = 0; i < bytes.length; i++) {
-            value |= (0xFF & bytes[bytes.length - 1 - i]) << i * 8;
-        }
+	for (int i = 0; i < bytes.length; i++) {
+	    value |= (0xFF & bytes[bytes.length - 1 - i]) << i * 8;
+	}
 
-        return value;
+	return value;
     }
 
     /**
@@ -319,10 +323,32 @@ public class ByteUtils {
      * @return short
      */
     public static short toShort(byte[] bytes) {
-        if (bytes.length > 2 || bytes.length < 1) {
-            throw new IllegalArgumentException("Size of byte array must be between 1 and 2.");
-        }
+	if (bytes.length > 2 || bytes.length < 1) {
+	    throw new IllegalArgumentException("Size of byte array must be between 1 and 2.");
+	}
 
-        return (short) toLong(bytes);
+	return (short) toLong(bytes);
     }
+
+    /**
+     * Checks if a bit in the array is set or not.
+     *
+     * @param position Position in array
+     * @param array Array
+     * @return True if the bit is set, false otherwise
+     */
+    public static boolean isBitSet(int position, byte[] array) {
+	return ((array[position / 8] & (128 >> (position % 8))) > 0);
+    }
+
+    /**
+     * Sets the bit in the array.
+     *
+     * @param position Position
+     * @param array Array
+     */
+    public static void setBit(int position, byte[] array) {
+	array[position / 8] |= (128 >> (position % 8));
+    }
+
 }

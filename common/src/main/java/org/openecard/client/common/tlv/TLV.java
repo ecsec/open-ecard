@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.common.tlv;
 
 import java.io.ByteArrayOutputStream;
@@ -30,10 +29,9 @@ import org.openecard.client.common.util.ByteUtils;
 public class TLV {
 
     TagLengthValue tag;
-
     //protected TLV parent = null;
-    protected TLV next   = null;
-    protected TLV child  = null;
+    protected TLV next = null;
+    protected TLV child = null;
 
     public TLV() {
 	tag = new TagLengthValue();
@@ -45,14 +43,13 @@ public class TLV {
 	this.child = (obj.child != null) ? new TLV(obj.child) : null;
     }
 
-
     ///
     /// deferred setters for TLV container
     ///
-
     public TagClass getTagClass() {
 	return tag.getTagClass();
     }
+
     public void setTagClass(TagClass tagClass) {
 	tag.setTagClass(tagClass);
     }
@@ -60,6 +57,7 @@ public class TLV {
     public boolean isPrimitive() {
 	return tag.isPrimitive();
     }
+
     public void setPrimitive(boolean primitive) {
 	tag.setPrimitive(primitive);
     }
@@ -67,12 +65,23 @@ public class TLV {
     public long getTagNum() {
 	return tag.getTagNum();
     }
+
+    public void setTagNum(byte tagNum) {
+	setTagNum(tagNum & 0xFF);
+    }
+
     public void setTagNum(long tagNum) {
 	tag.setTagNum(tagNum);
     }
+
     public long getTagNumWithClass() {
 	return tag.getTagNumWithClass();
     }
+
+    public void setTagNumWithClass(byte tagNumWithClass) throws TLVException {
+	setTagNumWithClass(tagNumWithClass & 0xFF);
+    }
+
     public void setTagNumWithClass(long tagNumWithClass) throws TLVException {
 	tag.setTagNumWithClass(tagNumWithClass);
     }
@@ -84,16 +93,14 @@ public class TLV {
     public byte[] getValue() {
 	return tag.getValue();
     }
+
     public void setValue(byte[] value) {
 	tag.setValue(value);
     }
 
-
-
     ///
     /// modification functions
     ///
-
     public void addToEnd(TLV sibling) {
 	if (next == null) {
 	    next = sibling;
@@ -101,18 +108,22 @@ public class TLV {
 	    next.addToEnd(sibling);
 	}
     }
-    /** Remove next which is indicated by n. 0 means direct sibling. */
+
+    /**
+     * Remove next which is indicated by n. 0 means direct sibling.
+     */
     public TLV remove(int n) {
 	if (n == 0) {
 	    TLV tmp = next;
 	    next = null;
 	    return tmp;
 	} else if (n > 0 && next != null) {
-	    return next.remove(n-1);
+	    return next.remove(n - 1);
 	} else {
 	    return null;
 	}
     }
+
     public TLV removeNext() {
 	return remove(0);
     }
@@ -120,9 +131,11 @@ public class TLV {
     public void setChild(TLV child) {
 	this.child = child;
     }
+
     public boolean hasChild() {
 	return child != null;
     }
+
     public TLV getChild() {
 	return child;
     }
@@ -130,10 +143,10 @@ public class TLV {
     public boolean hasNext() {
 	return next != null;
     }
+
     public TLV getNext() {
 	return next;
     }
-
 
     public List<TLV> asList() {
 	LinkedList<TLV> result = new LinkedList<TLV>();
@@ -162,6 +175,7 @@ public class TLV {
 
 	return result;
     }
+
     public List<TLV> findChildTags(long num) {
 	if (hasChild()) {
 	    return getChild().findNextTags(num);
@@ -170,11 +184,9 @@ public class TLV {
 	}
     }
 
-
     ///
     /// TLV construction from and to different encodings
     ///
-
     public static TLV fromBER(byte[] input) throws TLVException {
 	byte[] rest = input;
 
@@ -190,14 +202,14 @@ public class TLV {
 		next = new TLV();
 	    }
 
-            // break execution when 0 tag encountered
-            if (rest[0] == (byte)0) {
-                return first;
-            }
+	    // break execution when 0 tag encountered
+	    if (rest[0] == (byte) 0) {
+		return first;
+	    }
 	    // convert bytes to flat TLV data
 	    next.tag = TagLengthValue.fromBER(rest);
 	    // if constructed build child structure
-	    if (! next.tag.isPrimitive() && next.tag.getValueLength()>0) {
+	    if (!next.tag.isPrimitive() && next.tag.getValueLength() > 0) {
 		next.child = fromBER(next.tag.getValue());
 	    }
 
@@ -216,19 +228,20 @@ public class TLV {
 	return first;
     }
 
-
     public byte[] toBER() throws TLVException {
 	return toBER(false);
     }
+
     public byte[] toBER(boolean withSuccessors) throws TLVException {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	// value calculated from child if any
 	toBER(out, withSuccessors);
 	return out.toByteArray();
     }
+
     private void toBER(ByteArrayOutputStream out, boolean withSuccessors) throws TLVException {
 	if (child != null) {
-	    byte[] childBytes = child.toBER();
+	    byte[] childBytes = child.toBER(withSuccessors);
 	    tag.setPrimitive(false);
 	    tag.setValue(childBytes);
 	} else {
@@ -246,7 +259,6 @@ public class TLV {
 	}
     }
 
-
     @Override
     public String toString() {
 	return toString("");
@@ -255,7 +267,7 @@ public class TLV {
     public String toString(String prefix) {
 	String result = prefix + String.format("%02X", getTagNumWithClass());
 
-	if (! hasChild()) {
+	if (!hasChild()) {
 	    result += " " + tag.getValueLength() + " " + ByteUtils.toHexString(tag.getValue());
 	} else {
 	    result += "\n" + getChild().toString(prefix + "  ");

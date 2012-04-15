@@ -13,26 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openecard.client.common.util;
+package org.openecard.client.common.apdu;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
+import org.openecard.client.common.apdu.common.CardCommandAPDU;
 
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class ByteUtilsTest {
+public class Verify extends CardCommandAPDU {
 
-    @Test
-    public void testtohexString() {
-	byte[] testData = new byte[20];
+    /**
+     * VERIFY command instruction byte
+     */
+    private static final byte VERIFY_INS_1 = (byte) 0x20;
+    private static final byte VERIFY_INS_2 = (byte) 0x21;
 
-	for (int i = 0; i < testData.length; i++) {
-	    testData[i] = (byte) i;
-	}
-	assertEquals(ByteUtils.toHexString(testData), "000102030405060708090A0B0C0D0E0F10111213");
-    }
+    /**
+     * Creates a new VERIFY APDU.
+     */
+//    public Verify(byte p1, byte p2, byte[] data) {
+//        super(x00, VERIFY_INS, p1, p2);
+//        setData(data);
+//    }
 
 }

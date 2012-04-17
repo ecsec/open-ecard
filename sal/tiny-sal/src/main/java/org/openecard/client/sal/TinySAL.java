@@ -265,10 +265,14 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    ConnectResponse connectResponse = (ConnectResponse) env.getDispatcher().deliver(connect);
 	    WSHelper.checkResult(connectResponse);
 
+	    System.out.println("connect: " + ByteUtils.toHexString(connectResponse.getSlotHandle()));
 	    // Select application
 	    transmitSingleAPDU(CardCommands.Select.application(cardApplication), connectResponse.getSlotHandle());
 	    //FIXME
 	    cardStateEntry.setCurrentCardApplication(cardApplication);
+	    cardStateEntry.setSlotHandle(connectResponse.getSlotHandle());
+	    states.addEntry(cardStateEntry);
+
 	    cardApplicationConnectResponse.setConnectionHandle(cardStateEntry.handleCopy());
 	    cardApplicationConnectResponse.getConnectionHandle().setCardApplication(cardApplication);
 	    cardApplicationConnectResponse.setResult(WSHelper.makeResultOK());
@@ -312,6 +316,10 @@ public class TinySAL implements org.openecard.ws.SAL {
 	if (cardStateEntry == null) {
 	    return WSHelper.makeResponse(CardApplicationDisconnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
 	}
+	// FIXME
+	cardStateEntry.setSlotHandle(null);
+	states.addEntry(cardStateEntry);
+
 	CardApplicationDisconnectResponse cardApplicationDisconnectResponse = null;
 	try {
 	    Disconnect disconnect = new Disconnect();
@@ -936,10 +944,10 @@ public class TinySAL implements org.openecard.ws.SAL {
 	if (_logger.isLoggable(Level.FINER)) {
 	    _logger.entering(this.getClass().getName(), "didAuthenticate(DIDAuthenticate didAuthenticate)");
 	} // </editor-fold>
-	String protoUri = didAuthenticate.getAuthenticationProtocolData().getProtocol();
 	if (didAuthenticate.getAuthenticationProtocolData() == null) {
 	    return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "AuthenticationProtocolData is null."));
 	}
+	String protoUri = didAuthenticate.getAuthenticationProtocolData().getProtocol();
 	String didName = didAuthenticate.getDIDName();
 
 	ConnectionHandleType connectionHandle = didAuthenticate.getConnectionHandle();

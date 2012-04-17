@@ -187,6 +187,11 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
     }
 
 
+    public void setSlotHandle(byte[] slotHandle){
+	this.handle.setSlotHandle(slotHandle);
+    }
+
+
     public Protocol setProtocol(String type, Protocol proto) {
 	protoObjects.put(type, proto);
 	return proto;

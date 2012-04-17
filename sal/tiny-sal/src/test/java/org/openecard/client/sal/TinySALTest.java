@@ -50,6 +50,7 @@ import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
+import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
@@ -60,7 +61,7 @@ import org.openecard.client.transport.dispatcher.MessageDispatcher;
  * @author Johannes.Schmoelz <johannes.schmoelz@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@Ignore
+//@Ignore
 public class TinySALTest {
 
     private static ClientEnv env;
@@ -87,25 +88,16 @@ public class TinySALTest {
 	ListIFDsResponse listIFDsResponse = ifd.listIFDs(listIFDs);
 	RecognitionInfo recognitionInfo = cr.recognizeCard(listIFDsResponse.getIFDName().get(0), new BigInteger("0"));
 	SALStateCallback salCallback = new SALStateCallback(cr, states);
-	Connect c = new Connect();
-	c.setContextHandle(ecr.getContextHandle());
-	c.setIFDName(listIFDsResponse.getIFDName().get(0));
-	c.setSlot(new BigInteger("0"));
-	ConnectResponse connectResponse = env.getIFD().connect(c);
 
 	ConnectionHandleType connectionHandleType = new ConnectionHandleType();
 	connectionHandleType.setContextHandle(ecr.getContextHandle());
 	connectionHandleType.setRecognitionInfo(recognitionInfo);
 	connectionHandleType.setIFDName(listIFDsResponse.getIFDName().get(0));
 	connectionHandleType.setSlotIndex(new BigInteger("0"));
-	connectionHandleType.setSlotHandle(connectResponse.getSlotHandle());
+
 	salCallback.signalEvent(EventType.CARD_RECOGNIZED, connectionHandleType);
 	instance = new TinySAL(env, states);
 	env.setSAL(instance);
-	// instance.addProtocol("urn:cryptolite", new
-	// CryptoLiteProtocolFactory());
-	// instance.addProtocol(ECardConstants.Protocol.PIN_COMPARE, new
-	// PINCompareProtocolFactory());
     }
 
     /**
@@ -228,7 +220,6 @@ public class TinySALTest {
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
 	assertEquals(appIdentifier_ESIGN, result.getConnectionHandle().getCardApplication());
 
-
 	// test non existent card application path
 	cardApplicationConnect = new CardApplicationConnect();
 	CardApplicationPathType wrongCardApplicationPath = cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0);
@@ -246,10 +237,11 @@ public class TinySALTest {
 	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, result.getResult().getResultMinor());
     }
 
+
     /**
      * Test of cardApplicationDisconnect method, of class TinySAL.
      */
-    @Ignore
+   // @Ignore
     @Test
     public void testCardApplicationDisconnect() {
 	System.out.println("cardApplicationDisconnect");
@@ -347,6 +339,7 @@ public class TinySALTest {
 	CardApplicationList cardApplicationList = new CardApplicationList();
 	cardApplicationList.setConnectionHandle(result.getConnectionHandle());
 	CardApplicationListResponse cardApplicationListResponse = instance.cardApplicationList(cardApplicationList);
+	System.out.println(cardApplicationListResponse.getResult().getResultMinor());
 	assertEquals(ECardConstants.Major.OK, cardApplicationListResponse.getResult().getResultMajor());
 	assertTrue(cardApplicationListResponse.getCardApplicationNameList().getCardApplicationName().size() > 0);
 
@@ -480,6 +473,7 @@ public class TinySALTest {
 	DataSetList dataSetList = new DataSetList();
 	dataSetList.setConnectionHandle(result.getConnectionHandle());
 	DataSetListResponse dataSetListResponse = instance.dataSetList(dataSetList);
+	System.out.println(ByteUtils.toHexString(result.getConnectionHandle().getSlotHandle()));
 	Assert.assertTrue(dataSetListResponse.getDataSetNameList().getDataSetName().size() > 0);
 	assertEquals(ECardConstants.Major.OK, dataSetListResponse.getResult().getResultMajor());
 
@@ -868,10 +862,9 @@ public class TinySALTest {
     /**
      * Test of didGet method, of class TinySAL.
      */
-    @Ignore
     @Test
     public void testDidGet() {
-	System.out.println("didCreate");
+	System.out.println("didGet");
 	DIDGet parameters = new DIDGet();
 	DIDGetResponse result = instance.didGet(parameters);
 	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
@@ -904,11 +897,12 @@ public class TinySALTest {
      *
      * @throws ParserConfigurationException
      */
-    @Ignore
     @Test
     public void testDidAuthenticate() throws ParserConfigurationException {
 	System.out.println("didAuthenticate");
-
+	DIDAuthenticate parameters = new DIDAuthenticate();
+	DIDAuthenticateResponse result = instance.didAuthenticate(parameters);
+	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
     }
 
     /**

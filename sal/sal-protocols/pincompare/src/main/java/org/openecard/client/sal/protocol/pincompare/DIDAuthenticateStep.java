@@ -39,19 +39,16 @@ import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.sal.anytype.PinCompareDIDAuthenticateInputType;
 import org.openecard.client.common.sal.anytype.PinCompareDIDAuthenticateOutputType;
 import org.openecard.client.common.sal.state.CardStateEntry;
-import org.openecard.client.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.client.common.util.ByteUtils;
-import org.openecard.client.common.util.StringUtils;
 
 
 /**
  *
- * @author Dirk Petrautzki <petrautzki at hs-coburg.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
     private static final Logger _logger = LogManager.getLogger(DIDAuthenticateStep.class.getName());
-
     private final Dispatcher dispatcher;
 
     public DIDAuthenticateStep(Dispatcher dispatcher) {
@@ -59,12 +56,12 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
     }
 
     @Override
-    public FunctionType getFunctionType() {
+	public FunctionType getFunctionType() {
 	return FunctionType.DIDAuthenticate;
     }
 
     @Override
-    public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
+	public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
 	if (_logger.isLoggable(Level.FINER)) {
 	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)");
@@ -73,16 +70,23 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 	    String didName = didAuthenticate.getDIDName();
 	    PinCompareDIDAuthenticateInputType pinCompareDIDAuthenticateInput = new PinCompareDIDAuthenticateInputType(didAuthenticate.getAuthenticationProtocolData());
 	    ConnectionHandleType connectionHandle = didAuthenticate.getConnectionHandle();
-	    DIDScopeType didScope = didAuthenticate.getDIDScope();
+
 	    CardStateEntry cardStateEntry = (CardStateEntry) internalData.get("cardState");
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-	    if(!cardInfoWrapper.checkSecurityCondition(didName, didScope, DifferentialIdentityServiceActionName.DID_AUTHENTICATE)){
+
+	    byte[] cardApplication = null;
+	    if (didAuthenticate.getDIDScope()!=null&&didAuthenticate.getDIDScope().equals(DIDScopeType.GLOBAL)) {
+		cardApplication = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
+	    } else {
+		cardApplication = connectionHandle.getCardApplication();
+	    }
+	    if (!cardStateEntry.checkDIDSecurityCondition(cardApplication, didName, DifferentialIdentityServiceActionName.DID_AUTHENTICATE)) {
 		return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
 	    }
-	    DIDStructureType didStructure = cardInfoWrapper.getDIDStructure(didName, didScope);
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplication);
 
-	    org.openecard.client.common.sal.anytype.PinCompareMarkerType pinCompareMarker = new org.openecard.client.common.sal.anytype.PinCompareMarkerType((PinCompareMarkerType)didStructure.getDIDMarker());
+	    org.openecard.client.common.sal.anytype.PinCompareMarkerType pinCompareMarker = new org.openecard.client.common.sal.anytype.PinCompareMarkerType((PinCompareMarkerType) didStructure.getDIDMarker());
 
+	    byte keyRef = pinCompareMarker.getPinRef().getKeyRef()[0];
 	    VerifyUser verify = new VerifyUser();
 	    verify.setSlotHandle(connectionHandle.getSlotHandle());
 	    InputUnitType inputUnit = new InputUnitType();
@@ -91,8 +95,15 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 	    inputUnit.setPinInput(pinInput);
 	    pinInput.setIndex(BigInteger.ZERO);
 	    pinInput.setPasswordAttributes(pinCompareMarker.getPasswordAttributes());
-	    // FIXME
-	    verify.setTemplate(StringUtils.toByteArray("00 20 00 02", true));
+	    if (pinCompareDIDAuthenticateInput.getPin() == null) {
+		// [TR-03112-6] The structure of the template corresponds to the
+		// structure of an APDU for the VERIFY command in accordance
+		// with [ISO7816-4] (Section 7.5.6).
+		verify.setTemplate(new byte[] { 0x00, 0x20, 0x00, keyRef });
+	    } else {
+		// TODO pin is currently ignored
+		verify.setTemplate(new byte[] { 0x00, 0x20, 0x00, keyRef });
+	    }
 	    VerifyUserResponse verifyR = (VerifyUserResponse) dispatcher.deliver(verify);
 	    byte[] responseCode = verifyR.getResponse();
 
@@ -100,13 +111,16 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 	    did.setResult(WSHelper.makeResultOK());
 	    PinCompareDIDAuthenticateOutputType output = pinCompareDIDAuthenticateInput.getOutputType();
 
-	    // If user verification failed, this contains the current value of the RetryCounter.
-	    if(!ByteUtils.compare(responseCode,new byte[] {(byte) 0x90, 0x00})){
-	       output.setRetryCounter(new BigInteger(Integer.toString((responseCode[1]&0x0F))));
+	    /*
+	     * If user verification failed, this contains the current value of
+	     * the RetryCounter.
+	     */
+	    if (!ByteUtils.compare(responseCode, new byte[] { (byte) 0x90, 0x00 })) {
+		output.setRetryCounter(new BigInteger(Integer.toString((responseCode[1] & 0x0F))));
 	    }
 
 	    did.setResult(WSHelper.makeResultOK());
-	    cardInfoWrapper.addAuthenticated(didName, didScope);
+	    cardStateEntry.addAuthenticated(didName, cardApplication);
 	    did.setAuthenticationProtocolData(output.getAuthDataType());
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
 	    if (_logger.isLoggable(Level.FINER)) {
@@ -115,8 +129,7 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 	    return did;
 	} catch (Exception e) {
 	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "cardApplicationPath(CardApplicationPath cardApplicationPath)",
-			e.getMessage(), e);
+		_logger.logp(Level.WARNING, this.getClass().getName(), "cardApplicationPath(CardApplicationPath cardApplicationPath)", e.getMessage(), e);
 	    }
 	    return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResult(e));
 	}

@@ -30,15 +30,15 @@
 
 package org.openecard.client.sal;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import iso.std.iso_iec._24727.tech.schema.*;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import java.math.BigInteger;
 import java.util.List;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -46,15 +46,13 @@ import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.enums.EventType;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
-import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.recognition.CardRecognition;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import static org.junit.Assert.*;
+import org.openecard.client.transport.dispatcher.MessageDispatcher;
 
 
 /**
@@ -62,6 +60,7 @@ import static org.junit.Assert.*;
  * @author Johannes.Schmoelz <johannes.schmoelz@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
+@Ignore
 public class TinySALTest {
 
     private static ClientEnv env;
@@ -74,6 +73,8 @@ public class TinySALTest {
     @BeforeClass
     public static void setUp() throws Exception {
 	env = new ClientEnv();
+	Dispatcher dispatcher = new MessageDispatcher(env);
+	env.setDispatcher(dispatcher);
 	IFD ifd = new IFD();
 	env.setIFD(ifd);
 	states = new CardStateMap();
@@ -100,6 +101,7 @@ public class TinySALTest {
 	connectionHandleType.setSlotHandle(connectResponse.getSlotHandle());
 	salCallback.signalEvent(EventType.CARD_RECOGNIZED, connectionHandleType);
 	instance = new TinySAL(env, states);
+	env.setSAL(instance);
 	// instance.addProtocol("urn:cryptolite", new
 	// CryptoLiteProtocolFactory());
 	// instance.addProtocol(ECardConstants.Protocol.PIN_COMPARE, new
@@ -221,16 +223,15 @@ public class TinySALTest {
 	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
 	// connect to esign
 	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
-	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult()
-		.get(0));
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
 	CardApplicationConnectResponse result = instance.cardApplicationConnect(cardApplicationConnect);
-	assertEquals(appIdentifier_ESIGN, result.getConnectionHandle().getCardApplication());
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
+	assertEquals(appIdentifier_ESIGN, result.getConnectionHandle().getCardApplication());
+
 
 	// test non existent card application path
 	cardApplicationConnect = new CardApplicationConnect();
-	CardApplicationPathType wrongCardApplicationPath = cardApplicationPathResponse.getCardAppPathResultSet()
-		.getCardApplicationPathResult().get(0);
+	CardApplicationPathType wrongCardApplicationPath = cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0);
 	wrongCardApplicationPath.setCardApplication(new byte[] { 0x12, 0x23, 0x34 });
 	cardApplicationConnect.setCardApplicationPath(wrongCardApplicationPath);
 	result = instance.cardApplicationConnect(cardApplicationConnect);
@@ -261,8 +262,7 @@ public class TinySALTest {
 	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
 	// connect to esign
 	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
-	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult()
-		.get(0));
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
 	CardApplicationConnectResponse result = instance.cardApplicationConnect(cardApplicationConnect);
 	assertEquals(appIdentifier_ESIGN, result.getConnectionHandle().getCardApplication());
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
@@ -275,8 +275,7 @@ public class TinySALTest {
 	// test invalid connectionhandle
 	// connect to esign
 	cardApplicationConnect = new CardApplicationConnect();
-	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult()
-		.get(0));
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
 	result = instance.cardApplicationConnect(cardApplicationConnect);
 	assertEquals(appIdentifier_ESIGN, result.getConnectionHandle().getCardApplication());
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
@@ -291,8 +290,7 @@ public class TinySALTest {
 	// test nullpointer
 	// connect to esign
 	cardApplicationConnect = new CardApplicationConnect();
-	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult()
-		.get(0));
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
 	result = instance.cardApplicationConnect(cardApplicationConnect);
 	assertEquals(appIdentifier_ESIGN, result.getConnectionHandle().getCardApplication());
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
@@ -643,14 +641,16 @@ public class TinySALTest {
 	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
 	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
 	CardApplicationConnectResponse result = instance.cardApplicationConnect(cardApplicationConnect);
-	assertEquals(appIdentifier_ESIGN, result.getConnectionHandle().getCardApplication());
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
+	assertEquals(appIdentifier_ESIGN, result.getConnectionHandle().getCardApplication());
+
 
 	// read EF.C.CH.AUT
 	DSIRead dsiRead = new DSIRead();
 	dsiRead.setConnectionHandle(result.getConnectionHandle());
 	dsiRead.setDSIName("EF.C.CH.AUT");
 	DSIReadResponse dsiReadResponse = instance.dsiRead(dsiRead);
+	System.out.println(dsiReadResponse.getResult().getResultMinor());
 	assertEquals(ECardConstants.Major.OK, dsiReadResponse.getResult().getResultMajor());
 	System.out.println(dsiReadResponse.getResult().getResultMinor());
 	assertTrue(dsiReadResponse.getDSIContent().length>0);
@@ -695,7 +695,6 @@ public class TinySALTest {
 	dsiReadResponse = instance.dsiRead(dsiRead);
 	assertEquals(ECardConstants.Major.ERROR, dsiReadResponse.getResult().getResultMajor());
 	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, dsiReadResponse.getResult().getResultMinor());
-
     }
 
     /**

@@ -21,21 +21,15 @@ import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
-
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.sal.state.CardStateEntry;
-import org.openecard.client.common.sal.state.cif.CardInfoWrapper;
-import org.openecard.client.sal.TinySAL;
-import org.openecard.ws.SAL;
 
 
 /**
@@ -44,12 +38,7 @@ import org.openecard.ws.SAL;
  */
 public class DIDGetStep implements ProtocolStep<DIDGet, DIDGetResponse> {
 
-    private Dispatcher dispatcher;
     private static final Logger _logger = LogManager.getLogger(DIDGetStep.class.getName());
-
-    public DIDGetStep(Dispatcher dispatcher){
-	this.dispatcher = dispatcher;
-    }
 
     @Override
     public FunctionType getFunctionType() {
@@ -64,13 +53,17 @@ public class DIDGetStep implements ProtocolStep<DIDGet, DIDGetResponse> {
 	} // </editor-fold>
 
 	String didName = didGet.getDIDName();
-	DIDScopeType didScope = didGet.getDIDScope();
 	ConnectionHandleType connectionHandle = didGet.getConnectionHandle();
 	CardStateEntry cardStateEntry = (CardStateEntry) internalData.get("cardState");
-	CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-	DIDStructureType didStructure = cardInfoWrapper.getDIDStructure(didName, didScope);
 
-	if (!cardInfoWrapper.checkSecurityCondition(cardInfoWrapper.getCardApplication(connectionHandle.getCardApplication()), DifferentialIdentityServiceActionName.DID_GET)) {
+	DIDStructureType didStructure = null;
+	if (didGet.getDIDScope() != null && didGet.getDIDScope().equals(DIDScopeType.GLOBAL)) {
+	    didStructure = cardStateEntry.getDIDStructure(didName, cardStateEntry.getImplicitlySelectedApplicationIdentifier());
+	} else {
+	    didStructure = cardStateEntry.getDIDStructure(didName, connectionHandle.getCardApplication());
+	}
+
+	if (!cardStateEntry.checkApplicationSecurityCondition(connectionHandle.getCardApplication(), DifferentialIdentityServiceActionName.DID_GET)) {
 	    return WSHelper.makeResponse(DIDGetResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, "cardapplication"));
 	}
 

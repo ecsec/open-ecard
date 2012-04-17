@@ -34,6 +34,7 @@ import iso.std.iso_iec._24727.tech.schema.*;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationListResponse.CardApplicationNameList;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse.CardAppPathResultSet;
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -53,6 +54,7 @@ import org.openecard.client.common.sal.ProtocolFactory;
 import org.openecard.client.common.sal.anytype.CryptoMarkerType;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.sal.state.CardStateMap;
+import org.openecard.client.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.client.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.client.common.tlv.iso7816.FCP;
 import org.openecard.client.common.util.ByteUtils;
@@ -60,7 +62,6 @@ import org.openecard.client.common.util.CardCommands;
 import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.gui.UserConsent;
 import javax.smartcardio.ResponseAPDU;
-import org.openecard.ws.IFD;
 
 
 /**
@@ -119,10 +120,6 @@ public class TinySAL implements org.openecard.ws.SAL {
     public String getSessionId() {
 	return sessionId;
     }
-
-    // public CardStateMap getStates() {
-    // 	return states;
-    // }
 
 
     public boolean addProtocol(String proto, ProtocolFactory factory) {
@@ -199,10 +196,11 @@ public class TinySAL implements org.openecard.ws.SAL {
 	List<CardApplicationPathType> resultPaths = resultSet.getCardApplicationPathResult();
 	for (CardStateEntry entry : entries) {
 	    CardApplicationPathType pathCopy = entry.pathCopy();
-	    if (path.getCardApplication() != null)
+	    if (path.getCardApplication() != null) {
 		pathCopy.setCardApplication(path.getCardApplication());
-	    else
-		pathCopy.setCardApplication(entry.getInfo().getImplicitlySelectedApplication().getApplicationIdentifier());
+	    } else {
+		pathCopy.setCardApplication(entry.getImplicitlySelectedApplicationIdentifier());
+	    }
 	    resultPaths.add(pathCopy);
 	}
 
@@ -236,16 +234,14 @@ public class TinySAL implements org.openecard.ws.SAL {
 	CardApplicationConnectResponse cardApplicationConnectResponse = new CardApplicationConnectResponse();
 	// check existence of required parameters
 	if (cardApplicationConnect.getCardApplicationPath() == null) {
-	    return WSHelper.makeResponse(CardApplicationConnectResponse.class,
-		    WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "CardApplicationPath is null"));
+	    return WSHelper.makeResponse(CardApplicationConnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "CardApplicationPath is null"));
 	}
 
 	byte[] cardApplication = cardApplicationConnect.getCardApplicationPath().getCardApplication();
 	Set<CardStateEntry> cardStateEntrySet = states.getMatchingEntries(cardApplicationConnect.getCardApplicationPath());
 
 	if (cardStateEntrySet.isEmpty()) {
-	    return WSHelper.makeResponse(CardApplicationConnectResponse.class,
-		    WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
+	    return WSHelper.makeResponse(CardApplicationConnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
 	}
 
 	// [TR-03112-4] If the provided path fragments are valid for more than
@@ -256,10 +252,8 @@ public class TinySAL implements org.openecard.ws.SAL {
 	CardStateEntry cardStateEntry = cardStateEntrySet.iterator().next();
 	CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 
-	if (!cardInfoWrapper.checkSecurityCondition(cardInfoWrapper.getCardApplication(cardApplication),
-		ConnectionServiceActionName.CARD_APPLICATION_CONNECT)) {
-	    return WSHelper.makeResponse(CardApplicationConnectResponse.class,
-		    WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
+	if (!cardStateEntry.checkApplicationSecurityCondition(cardApplication, ConnectionServiceActionName.CARD_APPLICATION_CONNECT)) {
+	    return WSHelper.makeResponse(CardApplicationConnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
 	}
 	try {
 	    // Connect to card
@@ -268,26 +262,25 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    connect.setContextHandle(cardApplicationPath.getContextHandle());
 	    connect.setIFDName(cardApplicationPath.getIFDName());
 	    connect.setSlot(cardApplicationPath.getSlotIndex());
-	    ConnectResponse connectResponse = this.env.getIFD().connect(connect);
+	    ConnectResponse connectResponse = (ConnectResponse) env.getDispatcher().deliver(connect);
 	    WSHelper.checkResult(connectResponse);
 
 	    // Select application
-	    transmitSingleAPDU(CardCommands.Select.application(cardApplication), connectResponse.getSlotHandle(), this.env.getIFD());
-	    cardStateEntry.getInfo().setCurrentCardApplication(cardApplication);
+	    transmitSingleAPDU(CardCommands.Select.application(cardApplication), connectResponse.getSlotHandle());
+	    //FIXME
+	    cardStateEntry.setCurrentCardApplication(cardApplication);
 	    cardApplicationConnectResponse.setConnectionHandle(cardStateEntry.handleCopy());
 	    cardApplicationConnectResponse.getConnectionHandle().setCardApplication(cardApplication);
 	    cardApplicationConnectResponse.setResult(WSHelper.makeResultOK());
 
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
 	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "cardApplicationConnect(CardApplicationConnect cardApplicationConnect)",
-			cardApplicationConnectResponse);
+		_logger.exiting(this.getClass().getName(), "cardApplicationConnect(CardApplicationConnect cardApplicationConnect)", cardApplicationConnectResponse);
 	    } // </editor-fold>
 	    return cardApplicationConnectResponse;
-	} catch (WSException e) {
+	} catch (Exception e) {
 	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(),
-			"cardApplicationConnect(CardApplicationConnect cardApplicationConnect)", e.getMessage(), e);
+		_logger.logp(Level.WARNING, this.getClass().getName(), "cardApplicationConnect(CardApplicationConnect cardApplicationConnect)", e.getMessage(), e);
 	    }
 	    return WSHelper.makeResponse(CardApplicationConnectResponse.class, WSHelper.makeResult(e));
 	}
@@ -312,21 +305,23 @@ public class TinySAL implements org.openecard.ws.SAL {
 
 	// check existence of required parameters
 	if (connectionHandle == null) {
-	    return WSHelper.makeResponse(CardApplicationDisconnectResponse.class,
-		    WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "ConnectionHandle is null"));
+	    return WSHelper.makeResponse(CardApplicationDisconnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "ConnectionHandle is null"));
 	}
 	CardStateEntry cardStateEntry = states.getEntry(connectionHandle);
 
-	if(cardStateEntry==null){
+	if (cardStateEntry == null) {
 	    return WSHelper.makeResponse(CardApplicationDisconnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
 	}
-
-	Disconnect disconnect = new Disconnect();
-	disconnect.setSlotHandle(connectionHandle.getSlotHandle());
-	DisconnectResponse disconnectResponse = this.env.getIFD().disconnect(disconnect);
-	CardApplicationDisconnectResponse cardApplicationDisconnectResponse = new CardApplicationDisconnectResponse();
-	cardApplicationDisconnectResponse.setResult(disconnectResponse.getResult());
-
+	CardApplicationDisconnectResponse cardApplicationDisconnectResponse = null;
+	try {
+	    Disconnect disconnect = new Disconnect();
+	    disconnect.setSlotHandle(connectionHandle.getSlotHandle());
+	    DisconnectResponse disconnectResponse = (DisconnectResponse) env.getDispatcher().deliver(disconnect);
+	    cardApplicationDisconnectResponse = new CardApplicationDisconnectResponse();
+	    cardApplicationDisconnectResponse.setResult(disconnectResponse.getResult());
+	} catch (Exception e) {
+	    cardApplicationDisconnectResponse = WSHelper.makeResponse(CardApplicationDisconnectResponse.class, WSHelper.makeResult(e));
+	}
 	// <editor-fold defaultstate="collapsed" desc="log trace">
 	if (_logger.isLoggable(Level.FINER)) {
 	    _logger.exiting(this.getClass().getName(), "cardApplicationDisconnect(CardApplicationDisconnect cardApplicationDisconnect)", cardApplicationDisconnectResponse);
@@ -366,15 +361,13 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    return WSHelper.makeResponse(CardApplicationListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
 	}
 	CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-	if (!cardInfoWrapper.checkSecurityCondition(cardInfoWrapper.getImplicitlySelectedApplication(), CardApplicationServiceActionName.CARD_APPLICATION_LIST)) {
+	if (!cardStateEntry.checkApplicationSecurityCondition(cardStateEntry.getImplicitlySelectedApplicationIdentifier(), CardApplicationServiceActionName.CARD_APPLICATION_LIST)) {
 	    return WSHelper.makeResponse(CardApplicationListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
 	}
 
 	CardApplicationListResponse cardApplicationListResponse = new CardApplicationListResponse();
 	CardApplicationNameList cardApplicationNameList = new CardApplicationNameList();
-	for (CardApplicationType cardApplication : cardInfoWrapper.getAllCardApplications()) {
-	    cardApplicationNameList.getCardApplicationName().add(cardApplication.getApplicationIdentifier());
-	}
+	cardApplicationNameList.getCardApplicationName().addAll(cardInfoWrapper.getCardApplicationNameList());
 	cardApplicationListResponse.setCardApplicationNameList(cardApplicationNameList);
 	cardApplicationListResponse.setResult(WSHelper.makeResultOK());
 	// <editor-fold defaultstate="collapsed" desc="log trace">
@@ -445,13 +438,11 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    return WSHelper.makeResponse(DataSetListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
 	}
 
-	CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-
-	if (!cardInfoWrapper.checkSecurityCondition(cardInfoWrapper.getCurrentCardApplication(), NamedDataServiceActionName.DATA_SET_LIST)) {
+	if (!cardStateEntry.checkApplicationSecurityCondition(connectionHandle.getCardApplication(), NamedDataServiceActionName.DATA_SET_LIST)) {
 	    return WSHelper.makeResponse(DataSetListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
 	}
 
-	DataSetNameListType dataSetNameList = cardInfoWrapper.getDataSetNameList();
+	DataSetNameListType dataSetNameList = cardStateEntry.getInfo().getDataSetNameList(connectionHandle.getCardApplication());
 	DataSetListResponse dataSetListResponse = new DataSetListResponse();
 	dataSetListResponse.setDataSetNameList(dataSetNameList);
 	dataSetListResponse.setResult(WSHelper.makeResultOK());
@@ -482,13 +473,13 @@ public class TinySAL implements org.openecard.ws.SAL {
 
 	ConnectionHandleType connectionHandle = dataSetSelect.getConnectionHandle();
 
-	if (connectionHandle==null) {
+	if (connectionHandle == null) {
 	    return WSHelper.makeResponse(DataSetSelectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is null."));
 	}
 
 	String dataSetName = dataSetSelect.getDataSetName();
 
-	if (dataSetName==null) {
+	if (dataSetName == null) {
 	    return WSHelper.makeResponse(DataSetSelectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The dataSetName is null."));
 	}
 
@@ -498,24 +489,23 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    return WSHelper.makeResponse(DataSetSelectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
 	}
 
-	CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-	DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dataSetName);
+	DataSetInfoType dataSetInfo = cardStateEntry.getInfo().getDataSet(dataSetName, connectionHandle.getCardApplication());
 
-	if (dataSetInfo==null) {
+	if (dataSetInfo == null) {
 	    return WSHelper.makeResponse(DataSetSelectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, "The dataset " + dataSetName + "could not be found."));
 	}
 
 	byte[] fileIdentifier = dataSetInfo.getDataSetPath().getEfIdOrPath();
-	if (!cardInfoWrapper.checkSecurityCondition(dataSetInfo, NamedDataServiceActionName.DATA_SET_SELECT)) {
+	if (!cardStateEntry.checkDataSetSecurityCondition(connectionHandle.getCardApplication(), dataSetName, NamedDataServiceActionName.DATA_SET_SELECT)) {
 	    return WSHelper.makeResponse(DataSetSelectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
 	}
 	try {
-	    this.transmitSingleAPDU(CardCommands.Select.EF(fileIdentifier), connectionHandle.getSlotHandle(), this.env.getIFD());
-	} catch (WSException wex){
+	    this.transmitSingleAPDU(CardCommands.Select.EF(fileIdentifier), connectionHandle.getSlotHandle());
+	} catch (Exception e) {
 	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "dataSetSelect(DataSetSelect dataSetSelect)", wex.getMessage(), wex);
+		_logger.logp(Level.WARNING, this.getClass().getName(), "dataSetSelect(DataSetSelect dataSetSelect)", e.getMessage(), e);
 	    }
-	    return WSHelper.makeResponse(DataSetSelectResponse.class, WSHelper.makeResult(wex));
+	    return WSHelper.makeResponse(DataSetSelectResponse.class, WSHelper.makeResult(e));
 	}
 	DataSetSelectResponse dataSetSelectResponse = new DataSetSelectResponse();
 	dataSetSelectResponse.setResult(WSHelper.makeResultOK());
@@ -574,30 +564,30 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    if (cardStateEntry == null) {
 		return WSHelper.makeResponse(DSIReadResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
 	    }
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dsiName);
+
+	    DataSetInfoType dataSetInfo = cardStateEntry.getInfo().getDataSet(dsiName, dsiRead.getConnectionHandle().getCardApplication());
 	    if (dataSetInfo == null) {
 		return WSHelper.makeResponse(DSIReadResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, "The dsi " + dsiName + "could not be found."));
 	    }
 	    byte[] fileIdentifier = dataSetInfo.getDataSetPath().getEfIdOrPath();
 
-	    if (!cardInfoWrapper.checkSecurityCondition(dataSetInfo, NamedDataServiceActionName.DSI_READ)) {
+	    if (!cardStateEntry.checkDataSetSecurityCondition(dsiRead.getConnectionHandle().getCardApplication(), dsiName, NamedDataServiceActionName.DSI_READ)) {
 		return WSHelper.makeResponse(DSIReadResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
 	    }
 
 	    // read length of the DSI
-	    ResponseAPDU rapdu = this.transmitSingleAPDU(CardCommands.Select.EF_FCP(fileIdentifier), slotHandle, this.env.getIFD());
+	    ResponseAPDU rapdu = this.transmitSingleAPDU(CardCommands.Select.EF_FCP(fileIdentifier), slotHandle);
 	    FCP fcp = new FCP(rapdu.getData());
 	    long length = fcp.getNumBytes();
 
 	    // select the dsi
-	    this.transmitSingleAPDU(CardCommands.Select.EF(fileIdentifier), slotHandle, this.env.getIFD());
+	    this.transmitSingleAPDU(CardCommands.Select.EF(fileIdentifier), slotHandle);
 
 	    // actually read the contents of the DSI
 	    ByteArrayOutputStream fileContent = new ByteArrayOutputStream((int) length);
 	    for (short offset = 0; length > 0; offset += 255, length -= 255) {
 		byte[] apdu = CardCommands.Read.binary(offset, (short) ((length >= 255) ? 255 : length));
-		rapdu = this.transmitSingleAPDU(apdu, slotHandle, this.env.getIFD());
+		rapdu = this.transmitSingleAPDU(apdu, slotHandle);
 		fileContent.write(rapdu.getData());
 	    }
 
@@ -627,20 +617,20 @@ public class TinySAL implements org.openecard.ws.SAL {
 		return WSHelper.makeResponse(EncipherResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "didName is null."));
 	    }
 	    byte[] plainText = encipher.getPlainText();
-	    if (plainText == null) {
+	    if (plainText == null){
 		return WSHelper.makeResponse(EncipherResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "plainText is null."));
 	    }
 	    ConnectionHandleType connectionHandle = encipher.getConnectionHandle();
 	    if (connectionHandle == null) {
 		return WSHelper.makeResponse(EncipherResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "connectionHandle is null."));
 	    }
-	    DIDScopeType didScope = encipher.getDIDScope();
+
 	    CardStateEntry cardStateEntry = states.getEntry(connectionHandle);
 	    if (cardStateEntry == null) {
 		return WSHelper.makeResponse(EncipherResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
 	    }
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-	    DIDStructureType didStructure = cardInfoWrapper.getDIDStructure(didName, didScope);
+
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, connectionHandle.getCardApplication());
 	    if (didStructure == null) {
 		return WSHelper.makeResponse(EncipherResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, "The did " + didName + "could not be found."));
 	    }
@@ -692,7 +682,10 @@ public class TinySAL implements org.openecard.ws.SAL {
 	try {
 	    String didName = sign.getDIDName();
 	    ConnectionHandleType connectionHandle = sign.getConnectionHandle();
-	    DIDScopeType didScope = sign.getDIDScope();
+	    if (connectionHandle==null) {
+		return WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "connectionHandle is null."));
+	    }
+
 	    CardStateEntry cardStateEntry = states.getEntry(connectionHandle);
 	    if (cardStateEntry == null) {
 		return WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
@@ -704,11 +697,8 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    if (message == null) {
 		return WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "message is null."));
 	    }
-	    if (connectionHandle == null) {
-		return WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "connectionHandle is null."));
-	    }
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-	    DIDStructureType didStructure = cardInfoWrapper.getDIDStructure(didName, didScope);
+
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, connectionHandle.getCardApplication());
 	    if (didStructure == null) {
 		return WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, "The did " + didName + "could not be found."));
 	    }
@@ -763,14 +753,14 @@ public class TinySAL implements org.openecard.ws.SAL {
 	} // </editor-fold>
 	try {
 	    ConnectionHandleType connectionHandle = didList.getConnectionHandle();
-	    if (connectionHandle == null) {
+	    if(connectionHandle==null){
 		return WSHelper.makeResponse(DIDListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "connectionHandle is null."));
 	    }
 	    CardStateEntry cardStateEntry = states.getEntry(connectionHandle);
-	    if(cardStateEntry == null) {
+	    if(cardStateEntry==null){
 		return WSHelper.makeResponse(DIDListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
 	    }
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+
 	    DIDQualifierType didQualifier = didList.getFilter();
 	    String objectIdentifier = null;
 	    List<DIDInfoType> didInfos = null;
@@ -797,21 +787,22 @@ public class TinySAL implements org.openecard.ws.SAL {
 		 */
 		applicationIdentifier = didQualifier.getApplicationIdentifier();
 	    }
-	    CardApplicationType cardApplication;
+	    CardApplicationWrapper cardApplication;
 	    if (applicationIdentifier != null) {
-		cardApplication = cardInfoWrapper.getCardApplication(applicationIdentifier);
+		cardApplication = cardStateEntry.getInfo().getCardApplication(applicationIdentifier);
 		if (cardApplication != null) {
-		    didInfos = cardApplication.getDIDInfo();
+		    didInfos = cardApplication.getDIDInfoList();
 		} else {
-		    Result r = WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "No card application with identifier " + ByteUtils.toHexString(applicationIdentifier) + " available");
+		    Result r = WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "No card application with identifier "
+			    + ByteUtils.toHexString(applicationIdentifier) + " available");
 		    return WSHelper.makeResponse(DIDListResponse.class, r);
 		}
 	    } else {
-		cardApplication = cardInfoWrapper.getCurrentCardApplication();
-		didInfos = cardApplication.getDIDInfo();
+		cardApplication = cardStateEntry.getCurrentCardApplication();
+		didInfos = cardApplication.getDIDInfoList();
 	    }
 
-	    if (!cardInfoWrapper.checkSecurityCondition(cardApplication, DifferentialIdentityServiceActionName.DID_LIST)) {
+	    if (!cardStateEntry.checkApplicationSecurityCondition(cardApplication.getApplicationIdentifier(), DifferentialIdentityServiceActionName.DID_LIST)) {
 		return WSHelper.makeResponse(DIDListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
 	    }
 
@@ -882,15 +873,19 @@ public class TinySAL implements org.openecard.ws.SAL {
 	if (connectionHandle == null) {
 	    return WSHelper.makeResponse(DIDGetResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "connectionHandle is null."));
 	}
-	DIDScopeType didScope = didGet.getDIDScope();
+
 	CardStateEntry cardStateEntry = states.getEntry(connectionHandle);
 	if (cardStateEntry == null) {
 	    return WSHelper.makeResponse(DIDGetResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
 	}
-	CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-	DIDStructureType didStructure = cardInfoWrapper.getDIDStructure(didName, didScope);
+	DIDStructureType didStructure = null;
+	if (didGet.getDIDScope() != null && didGet.getDIDScope().equals(DIDScopeType.GLOBAL)) {
+	    didStructure = cardStateEntry.getDIDStructure(didName, cardStateEntry.getImplicitlySelectedApplicationIdentifier());
+	} else {
+	    didStructure = cardStateEntry.getDIDStructure(didName, connectionHandle.getCardApplication());
+	}
 	if (didStructure == null) {
-	    return WSHelper.makeResponse(DIDGetResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, "The did " + didName + "could not be found."));
+	    return WSHelper.makeResponse(DIDGetResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, "The did " + didName + " could not be found."));
 	}
 	String protoUri = didStructure.getDIDMarker().getProtocol();
 	DIDGetResponse resp;
@@ -909,12 +904,14 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    }
 	    Result res = WSHelper.makeResult(ex);
 	    resp = WSHelper.makeResponse(DIDGetResponse.class, res);
+
 	} catch (RuntimeException ex) {
 	    if (_logger.isLoggable(Level.WARNING)) {
 		_logger.logp(Level.WARNING, this.getClass().getName(), "didGet(DIDGet didGet)", ex.getMessage(), ex);
 	    }
 	    Result res = WSHelper.makeResultUnknownError(ex.getMessage());
 	    resp = WSHelper.makeResponse(DIDGetResponse.class, res);
+
 	}
 	// <editor-fold defaultstate="collapsed" desc="log trace">
 	if (_logger.isLoggable(Level.FINER)) {
@@ -994,50 +991,48 @@ public class TinySAL implements org.openecard.ws.SAL {
 	} // </editor-fold>
 	try {
 	    ConnectionHandleType connectionHandle = aclList.getConnectionHandle();
-	    if (connectionHandle == null) {
+	    if(connectionHandle==null){
 		return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is null."));
 	    }
 	    CardStateEntry cardStateEntry = states.getEntry(connectionHandle);
-	    if (cardStateEntry == null) {
+	    if(cardStateEntry==null){
 		return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
 	    }
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 
 	    String dataSetName = aclList.getTargetName().getDataSetName();
 	    byte[] cardApplicationIdentifier = aclList.getTargetName().getCardApplicationName();
 	    String didName = aclList.getTargetName().getDIDName();
-	    DIDScopeType didScope = DIDScopeType.LOCAL;
 	    ACLListResponse aclListResponse = new ACLListResponse();
 	    if (dataSetName == null && didName == null && cardApplicationIdentifier == null) {
 		return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "TargetName is missing."));
 	    }
 	    if (dataSetName != null) {
-		DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dataSetName);
+		DataSetInfoType dataSetInfo = cardStateEntry.getInfo().getDataSet(dataSetName, connectionHandle.getCardApplication());
 		if (dataSetInfo == null) {
 		    return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, "The dataSet" + dataSetName + "could not be found."));
 		}
-		if (!cardInfoWrapper.checkSecurityCondition(dataSetInfo, AuthorizationServiceActionName.ACL_LIST)) {
+		/*if(!cardStateEntry.checkSecurityCondition(dataSetInfo, AuthorizationServiceActionName.ACL_LIST)){
 		    return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
-		}
-		aclListResponse.setTargetACL(cardInfoWrapper.getDataSet(dataSetName).getDataSetACL());
+		}*/
+		aclListResponse.setTargetACL(cardStateEntry.getInfo().getDataSet(dataSetName, connectionHandle.getCardApplication()).getDataSetACL());
 	    } else if (didName != null) {
-		DIDInfoType didInfo = cardInfoWrapper.getDIDInfo(didName, didScope);
+		DIDInfoType didInfo = cardStateEntry.getInfo().getDIDInfo(didName, connectionHandle.getCardApplication());
 		if (didInfo == null) {
 		    return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, "The did" + didName + "could not be found."));
 		}
-		// if (!cardInfoWrapper.checkSecurityCondition(didName, didScope, AuthorizationServiceActionName.ACL_LIST)) {
-		//     return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
-		// }
-		aclListResponse.setTargetACL(cardInfoWrapper.getDIDInfo(didName, didScope).getDIDACL());
+	       /* if(!cardInfoWrapper.checkSecurityCondition(didName, didScope, AuthorizationServiceActionName.ACL_LIST)){
+		    return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
+		}*/
+		aclListResponse.setTargetACL(cardStateEntry.getInfo().getDIDInfo(didName, connectionHandle.getCardApplication()).getDIDACL());
 	    } else if (cardApplicationIdentifier != null) {
-		CardApplicationType cardApplication = cardInfoWrapper.getCardApplication(cardApplicationIdentifier);
+		CardApplicationWrapper cardApplication = cardStateEntry.getInfo().getCardApplication(cardApplicationIdentifier);
 		if (cardApplication == null) {
 		    return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, "The cardapplication with identifier " + ByteUtils.toHexString(cardApplicationIdentifier) + "could not be found."));
 		}
-		if (!cardInfoWrapper.checkSecurityCondition(cardInfoWrapper.getCardApplication(cardApplicationIdentifier), AuthorizationServiceActionName.ACL_LIST)) {
+		if (!cardStateEntry.checkApplicationSecurityCondition(cardApplicationIdentifier, AuthorizationServiceActionName.ACL_LIST)) {
 		    return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
 		}
-		aclListResponse.setTargetACL(cardInfoWrapper.getCardApplication(cardApplicationIdentifier).getCardApplicationACL());
+		aclListResponse.setTargetACL(cardStateEntry.getInfo().getCardApplication(cardApplicationIdentifier).getCardApplicationACL());
 	    }
 
 	    aclListResponse.setResult(WSHelper.makeResultOK());
@@ -1060,14 +1055,15 @@ public class TinySAL implements org.openecard.ws.SAL {
 	return WSHelper.makeResponse(ACLModifyResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
-    private ResponseAPDU transmitSingleAPDU(byte[] apdu, byte[] slotHandle, IFD ifd) throws WSException {
+
+    private ResponseAPDU transmitSingleAPDU(byte[] apdu, byte[] slotHandle) throws WSException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 	ArrayList<byte[]> responses = new ArrayList<byte[]>() {{
 	    add(new byte[] { (byte) 0x90, (byte) 0x00 });
 	    add(new byte[] { (byte) 0x63, (byte) 0xC3 });
 	}};
 
 	Transmit t = CardCommands.makeTransmit(slotHandle, apdu, responses);
-	TransmitResponse tr = (TransmitResponse) WSHelper.checkResult(ifd.transmit(t));
+	TransmitResponse tr = (TransmitResponse) WSHelper.checkResult((TransmitResponse) env.getDispatcher().deliver(t));
 	return new ResponseAPDU(tr.getOutputAPDU().get(0));
     }
 

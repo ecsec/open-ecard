@@ -17,15 +17,17 @@ package org.openecard.client.sal.protocol.genericryptography;
 
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.FunctionType;
-import org.openecard.ws.IFD;
-import org.openecard.ws.SAL;
 
 
+/**
+ * 
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ */
 public class GenericCryptoProtocol extends org.openecard.client.common.sal.Protocol {
 
     public GenericCryptoProtocol(Dispatcher dispatcher) {
 	this.steps.add(new SignStep(dispatcher));
-	this.steps.add(new DIDGetStep(dispatcher));
+	this.steps.add(new DIDGetStep());
     }
 
     @Override

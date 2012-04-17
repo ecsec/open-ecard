@@ -49,6 +49,7 @@ import org.junit.Test;
 import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.state.CardStateMap;
@@ -73,7 +74,8 @@ public class GenericCryptographyProtocolTest {
     private static TinySAL instance;
     private static CardStateMap states;
     byte[] cardApplication = Hex.decode("A000000167455349474E");
-
+    byte[] cardApplication_ROOT = Hex.decode("D2760001448000");
+    
     @BeforeClass
     public static void setUp() throws Exception {
 	env = new ClientEnv();
@@ -142,16 +144,18 @@ public class GenericCryptographyProtocolTest {
     }
 
     @Test
-    public void testSign() {
+    public void testSign() throws Exception {
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
 	cardApplicationPathType.setCardApplication(cardApplication);
 	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
 	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
-
+	WSHelper.checkResult(cardApplicationPathResponse);
 	CardApplicationConnect parameters = new CardApplicationConnect();
 	parameters.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
 	CardApplicationConnectResponse result = instance.cardApplicationConnect(parameters);
+	WSHelper.checkResult(result);
+
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
 	DIDList didList = new DIDList();
 	didList.setConnectionHandle(result.getConnectionHandle());
@@ -161,15 +165,18 @@ public class GenericCryptographyProtocolTest {
 	didQualifier.setApplicationFunction("Compute-signature");
 	didList.setFilter(didQualifier);
 	DIDListResponse didListResponse = instance.didList(didList);
+	WSHelper.checkResult(didListResponse);
 
 	DIDAuthenticate didAthenticate = new DIDAuthenticate();
 	didAthenticate.setDIDName("PIN.home");
 	PinCompareDIDAuthenticateInputType didAuthenticationData = new PinCompareDIDAuthenticateInputType();
 	didAthenticate.setAuthenticationProtocolData(didAuthenticationData);
 	didAthenticate.setConnectionHandle(result.getConnectionHandle());
+	didAthenticate.getConnectionHandle().setCardApplication(cardApplication_ROOT);
 	didAuthenticationData.setProtocol(ECardConstants.Protocol.PIN_COMPARE);
 	didAthenticate.setAuthenticationProtocolData(didAuthenticationData);
 	DIDAuthenticateResponse didAuthenticateResult = instance.didAuthenticate(didAthenticate);
+	WSHelper.checkResult(didAuthenticateResult);
 
 	assertEquals(didAuthenticateResult.getAuthenticationProtocolData().getProtocol(), ECardConstants.Protocol.PIN_COMPARE);
 	assertEquals(didAuthenticateResult.getAuthenticationProtocolData().getAny().size(), 0);
@@ -178,11 +185,13 @@ public class GenericCryptographyProtocolTest {
 	Sign sign = new Sign();
 	sign.setMessage(new byte[] { 0x0, 0x0, 0x0 });
 	sign.setConnectionHandle(result.getConnectionHandle());
+	sign.getConnectionHandle().setCardApplication(cardApplication);
 	sign.setDIDName(didListResponse.getDIDNameList().getDIDName().get(0));
 	sign.setDIDScope(DIDScopeType.LOCAL);
 	SignResponse signResponse = instance.sign(sign);
+	System.out.println(signResponse.getResult().getResultMinor());
 	assertEquals(ECardConstants.Major.OK, signResponse.getResult().getResultMajor());
-
+	WSHelper.checkResult(signResponse);
     }
 
     public void testDIDCreate() {

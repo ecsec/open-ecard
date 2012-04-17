@@ -28,7 +28,7 @@ public class PinCompareProtocol extends org.openecard.client.common.sal.Protocol
     public PinCompareProtocol(Dispatcher dispatcher) {
 	this.steps.add(new DIDAuthenticateStep(dispatcher));
 	this.steps.add(new EnchipherStep());
-	this.steps.add(new DIDGetStep(dispatcher));
+	this.steps.add(new DIDGetStep());
     }
 
     @Override

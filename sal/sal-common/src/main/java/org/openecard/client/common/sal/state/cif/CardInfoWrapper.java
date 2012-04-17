@@ -30,21 +30,18 @@
 
 package org.openecard.client.common.sal.state.cif;
 
-import iso.std.iso_iec._24727.tech.schema.AccessRuleType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationType;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationStateType;
 import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
 import iso.std.iso_iec._24727.tech.schema.DIDMarkerType;
-import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DataSetInfoType;
 import iso.std.iso_iec._24727.tech.schema.DataSetNameListType;
-import iso.std.iso_iec._24727.tech.schema.SecurityConditionType;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import org.openecard.client.common.util.ByteUtils;
+import java.util.Map;
+import org.openecard.client.common.util.ByteArrayWrapper;
 
 
 /**
@@ -55,55 +52,78 @@ import org.openecard.client.common.util.ByteUtils;
 public class CardInfoWrapper {
 
     private final CardInfoType cif;
-    private byte[] currentCardApplication;
-    private Set<DIDInfoType> authenticatedDIDs = new HashSet<DIDInfoType>();
+    private Map<ByteArrayWrapper, CardApplicationWrapper> cardApplications = new HashMap<ByteArrayWrapper, CardApplicationWrapper>();
+    List<byte[]> cardApplicationNames = new ArrayList<byte[]>();
 
     public CardInfoWrapper(CardInfoType cif) {
 	this.cif = cif;
-	this.currentCardApplication = cif.getApplicationCapabilities().getImplicitlySelectedApplication();
     }
 
-    /**
-     *
-     * @return List with all available CardApplications
-     */
-    public List<CardApplicationType> getAllCardApplications() {
-	return cif.getApplicationCapabilities().getCardApplication();
+    public byte[] getImplicitlySelectedApplication(){
+	return cif.getApplicationCapabilities().getImplicitlySelectedApplication();
     }
 
+    public Map<ByteArrayWrapper, CardApplicationWrapper> getCardApplications() {
+        if(cardApplications.isEmpty()){
+            for(CardApplicationType cardApplication : cif.getApplicationCapabilities().getCardApplication()){
+               cardApplications.put(new ByteArrayWrapper(cardApplication.getApplicationIdentifier()), new CardApplicationWrapper(cardApplication)); 
+            }
+        } 
+        return cardApplications;
+    }
+    
+    public DIDInfoType getDIDInfo(String didName, byte[] applicationIdentifier) {
+        CardApplicationWrapper application = cardApplications.get(new ByteArrayWrapper(applicationIdentifier));
+        if (application == null)
+            return null;
+        DIDInfoWrapper didInfo = application.getDIDInfo(didName);
+        if (didInfo == null)
+            return null;
+        else
+            return didInfo.getDIDInfo();
+    }
+    
+    public DataSetNameListType getDataSetNameList(byte[] cardApplication) {
+        return cardApplications.get(new ByteArrayWrapper(cardApplication)).getDataSetNameList();
+    }
+    
+    public DataSetInfoType getDataSet(String dataSetName, byte[] applicationIdentifier) {
+        CardApplicationWrapper application = cardApplications.get(new ByteArrayWrapper(applicationIdentifier));
+        if (application == null)
+            return null;
+        DataSetInfoWrapper dataSet = application.getDataSetInfo(dataSetName);
+        if (dataSet == null)
+            return null;
+        else
+            return dataSet.getDataSetInfo();
+    }
+    
     /**
      *
      * @param applicationIdentifier
      * @return CardApplication for the specified applicationIdentifier or null,
      *         if no application with this identifier exists.
      */
-    public CardApplicationType getCardApplication(byte[] applicationIdentifier) {
-	for (CardApplicationType cardApplication : getAllCardApplications()) {
-	    if (ByteUtils.compare(cardApplication.getApplicationIdentifier(), applicationIdentifier)) {
-		return cardApplication;
-	    }
-	}
-	return null;
+    public CardApplicationWrapper getCardApplication(byte[] applicationIdentifier) {
+	return this.getCardApplications().get(new ByteArrayWrapper(applicationIdentifier));
     }
-
+    
     /**
      *
      * @param didName Name of the DID
-     * @param didScope Scope of the DID
-     * @return DIDStructure for the specified didName and didScope or null,
-     *         if no did with this name and scope exists.
+     * @param cardApplication Identifier of the cardapplication
+     * @return DIDStructure for the specified didName and cardapplication or null,
+     *         if no such did exists.
      */
-    public DIDStructureType getDIDStructure(String didName, DIDScopeType didScope) {
-	DIDInfoType didInfo = this.getDIDInfo(didName, didScope);
+    public DIDStructureType getDIDStructure(String didName, byte[] cardApplication) {
+	DIDInfoType didInfo = this.getDIDInfo(didName, cardApplication);
 	if (didInfo == null) {
 	    return null;
 	}
-
 	DIDStructureType didStructure = new DIDStructureType();
 	didStructure.setDIDName(didInfo.getDifferentialIdentity().getDIDName());
 	didStructure.setDIDScope(didInfo.getDifferentialIdentity().getDIDScope());
 	DIDMarkerType didMarker = didInfo.getDifferentialIdentity().getDIDMarker();
-
 	if (didMarker.getCAMarker() != null) {
 	    didStructure.setDIDMarker(didMarker.getCAMarker());
 	} else if (didMarker.getCryptoMarker() != null) {
@@ -123,145 +143,17 @@ public class CardInfoWrapper {
 	} else if (didMarker.getTAMarker() != null) {
 	    didStructure.setDIDMarker(didMarker.getTAMarker());
 	}
-
 	didStructure.setDIDQualifier(didInfo.getDifferentialIdentity().getDIDQualifier());
-	didStructure.setAuthenticated(this.isAuthenticated(didName, didScope));
 	return didStructure;
     }
 
-    public void addAuthenticated(String didName, DIDScopeType didScope) {
-	this.authenticatedDIDs.add(getDIDInfo(didName, didScope));
-    }
-
-    public void removeAuthenticated(String didName, DIDScopeType didScope) {
-	this.authenticatedDIDs.remove(getDIDInfo(didName, didScope));
-    }
-
-    public boolean isAuthenticated(String didName, DIDScopeType didScope) {
-	if (authenticatedDIDs.contains(getDIDInfo(didName, didScope))) {
-	    return true;
-	} else {
-	    return false;
-	}
-    }
-
-    public DataSetNameListType getDataSetNameList() {
-	DataSetNameListType dataSetNameList = new DataSetNameListType();
-	for (DataSetInfoType dataSetInfo : getCardApplication(currentCardApplication).getDataSetInfo()) {
-	    dataSetNameList.getDataSetName().add(dataSetInfo.getDataSetName());
-	}
-	return dataSetNameList;
-    }
-
-    public DataSetInfoType getDataSet(String dataSetName) {
-	for (DataSetInfoType dataSetInfo : getCardApplication(currentCardApplication).getDataSetInfo()) {
-	    if (dataSetInfo.getDataSetName().equals(dataSetName)) {
-		return dataSetInfo;
+    public List<byte[]> getCardApplicationNameList() {
+	if(cardApplicationNames.isEmpty()){
+	    for(CardApplicationType cardApplication : cif.getApplicationCapabilities().getCardApplication()){
+		cardApplicationNames.add(cardApplication.getApplicationIdentifier());
 	    }
 	}
-	return null;
-    }
-
-    public CardApplicationType getCurrentCardApplication() {
-	return getCardApplication(currentCardApplication);
-    }
-
-    public void setCurrentCardApplication(byte[] currentCardApplication) {
-	this.currentCardApplication = currentCardApplication;
-    }
-
-    public CardApplicationType getImplicitlySelectedApplication() {
-	return getCardApplication(cif.getApplicationCapabilities().getImplicitlySelectedApplication());
-    }
-
-
-    public DIDInfoType getDIDInfo(String didName, DIDScopeType didScope) {
-	List<DIDInfoType> didInfos = null;
-	if (didScope==null || didScope.equals(DIDScopeType.GLOBAL)) {
-	    didInfos = getImplicitlySelectedApplication().getDIDInfo();
-	} else {
-	    didInfos = getCardApplication(currentCardApplication).getDIDInfo();
-	}
-	for (DIDInfoType didInfo : didInfos) {
-	    if (didInfo.getDifferentialIdentity().getDIDName().equals(didName)) {
-		return didInfo;
-	    }
-	}
-	return null;
-    }
-
-    private boolean checkSecurityCondition(SecurityConditionType securityCondition) {
-	try {
-	    if (securityCondition.isAlways()) {
-		return true;
-	    }
-	} catch (NullPointerException e) {
-	    /* ignore */
-	}
-	if (securityCondition.getDIDAuthentication() != null) {
-	    DIDAuthenticationStateType didAuthenticationState = securityCondition.getDIDAuthentication();
-	    // TODO: check what to do with didstate
-	    didAuthenticationState.isDIDState();
-	    return isAuthenticated(didAuthenticationState.getDIDName(), didAuthenticationState.getDIDScope());
-	} else if (securityCondition.getOr() != null) {
-	    for (SecurityConditionType securityConditionOR : securityCondition.getOr().getSecurityCondition()) {
-		if (checkSecurityCondition(securityConditionOR)) {
-		    return true;
-		}
-	    }
-	    return false;
-	} else if (securityCondition.getAnd() != null) {
-	    for (SecurityConditionType securityConditionAND : securityCondition.getAnd().getSecurityCondition()) {
-		if (!checkSecurityCondition(securityConditionAND)) {
-		    return false;
-		}
-	    }
-	    return true;
-	} else if (securityCondition.getNot() != null) {
-	    return ! checkSecurityCondition(securityCondition.getNot());
-	}
-    }
-
-    public boolean checkSecurityCondition(String didName, DIDScopeType didScope, Enum<?> serviceAction) {
-	return checkAccessRules(this.getDIDInfo(didName, didScope).getDIDACL().getAccessRule(), serviceAction);
-    }
-
-    public boolean checkSecurityCondition(CardApplicationType cardApplication, Enum<?> serviceAction) {
-	return checkAccessRules(cardApplication.getCardApplicationACL().getAccessRule(), serviceAction);
-    }
-
-    public boolean checkSecurityCondition(DataSetInfoType dataSetInfo, Enum<?> serviceAction) {
-	return checkAccessRules(dataSetInfo.getDataSetACL().getAccessRule(), serviceAction);
-    }
-
-    private boolean checkAccessRules(List<AccessRuleType> accessRules, Enum<?> serviceAction) {
-	SecurityConditionType securityCondition = null;
-	for (AccessRuleType accessRule : accessRules) {
-	    if (accessRule.getAction().getConnectionServiceAction() != null
-		&& accessRule.getAction().getConnectionServiceAction().equals(serviceAction)) {
-		securityCondition = accessRule.getSecurityCondition();
-	    } else if (accessRule.getAction().getAuthorizationServiceAction() != null
-		       && accessRule.getAction().getAuthorizationServiceAction().equals(serviceAction)) {
-		securityCondition = accessRule.getSecurityCondition();
-	    } else if (accessRule.getAction().getDifferentialIdentityServiceAction() != null
-		       && accessRule.getAction().getDifferentialIdentityServiceAction().equals(serviceAction)) {
-		securityCondition = accessRule.getSecurityCondition();
-	    } else if (accessRule.getAction().getNamedDataServiceAction() != null
-		       && accessRule.getAction().getNamedDataServiceAction().equals(serviceAction)) {
-		securityCondition = accessRule.getSecurityCondition();
-	    } else if (accessRule.getAction().getCryptographicServiceAction() != null
-		       && accessRule.getAction().getCryptographicServiceAction().equals(serviceAction)) {
-		securityCondition = accessRule.getSecurityCondition();
-	    } else if (accessRule.getAction().getCardApplicationServiceAction() != null
-		       && accessRule.getAction().getCardApplicationServiceAction().equals(serviceAction)) {
-		securityCondition = accessRule.getSecurityCondition();
-	    }
-	}
-	if (securityCondition != null) {
-	    return checkSecurityCondition(securityCondition);
-	} else {
-	    return false;
-	}
+	return cardApplicationNames;
     }
 
 }

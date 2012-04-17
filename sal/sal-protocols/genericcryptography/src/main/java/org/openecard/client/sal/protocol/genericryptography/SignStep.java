@@ -25,7 +25,6 @@ import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,11 +39,7 @@ import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.sal.anytype.CryptoMarkerType;
 import org.openecard.client.common.sal.state.CardStateEntry;
-import org.openecard.client.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.client.common.util.CardCommands;
-import org.openecard.client.sal.TinySAL;
-import org.openecard.ws.IFD;
-import org.openecard.ws.SAL;
 
 
 /**
@@ -87,34 +82,32 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    ConnectionHandleType connectionHandle = sign.getConnectionHandle();
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
 	    CardStateEntry cardStateEntry = (CardStateEntry) internalData.get("cardState");
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    String didName = sign.getDIDName();
-	    DIDScopeType didScope = sign.getDIDScope();
-	    DIDStructureType didStructure = cardInfoWrapper.getDIDStructure(didName, didScope);
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, connectionHandle.getCardApplication());
 	    CryptoMarkerType cryptoMarker = new CryptoMarkerType((iso.std.iso_iec._24727.tech.schema.CryptoMarkerType) didStructure.getDIDMarker());
 
-	    if (!cardInfoWrapper.checkSecurityCondition(didName, didScope, CryptographicServiceActionName.SIGN)) {
+	    if (!cardStateEntry.checkDIDSecurityCondition(connectionHandle.getCardApplication(), didName, CryptographicServiceActionName.SIGN)) {
 		return WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
 	    }
 
 	    byte keyReference = cryptoMarker.getCryptoKeyInfo().getKeyRef().getKeyRef()[0];
 	    byte algorithmIdentifier = cryptoMarker.getAlgorithmInfo().getCardAlgRef()[0];
 
-	    ArrayList<String> signatureGenerationInfo = new ArrayList<String>(Arrays.asList(cryptoMarker.getSignatureGenerationInfo()));
-	    // FIXME
-	    byte localKeyRef = (byte) (0x80 | keyReference);
+	    String[] signatureGenerationInfo = cryptoMarker.getSignatureGenerationInfo();
+	    if (didStructure.getDIDScope().equals(DIDScopeType.LOCAL)) {
+		keyReference = (byte) (0x80 | keyReference);
+	    }
 	    ResponseAPDU rapdu = null;
-	    for (String command : signatureGenerationInfo) {
+	    for (int i = 0; i < signatureGenerationInfo.length; i++) {
+		String command = signatureGenerationInfo[i];
 		if (command.equals("MSE_KEY")) {
-		    // FIXME how to figure out with type of mse_key to use
-		    rapdu = transmitSingleAPDU(
-			    CardCommands.ManageSecurityEnvironment.mseSelectPrKeySignature(localKeyRef, algorithmIdentifier), slotHandle);
-		    /*
-		     * rapdu = transmitSingleAPDU(
-		     * CardCommands.ManageSecurityEnvironment
-		     * .mseSelectPrKeyIntAuth(localKeyRef, algorithmIdentifier),
-		     * slotHandle, ifd);
-		     */
+		    String nextCommand = signatureGenerationInfo[i + 1];
+		    // using next command until a better solution comes in mind
+		    if (nextCommand.equals("INT_AUTH")) {
+			rapdu = transmitSingleAPDU(CardCommands.ManageSecurityEnvironment.mseSelectPrKeyIntAuth(keyReference, algorithmIdentifier), slotHandle);
+		    } else if (nextCommand.equals("PSO_CDS")) {
+			rapdu = transmitSingleAPDU(CardCommands.ManageSecurityEnvironment.mseSelectPrKeySignature(keyReference, algorithmIdentifier), slotHandle);
+		    }
 		} else if (command.equals("PSO_CDS")) {
 		    rapdu = transmitSingleAPDU(CardCommands.PerformSecurityOperation.computeDigitalSignature(sign.getMessage()), slotHandle);
 		} else if (command.equals("INT_AUTH")) {

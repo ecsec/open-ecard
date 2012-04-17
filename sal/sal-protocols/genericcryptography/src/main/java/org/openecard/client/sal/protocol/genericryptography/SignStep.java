@@ -26,20 +26,21 @@ import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.smartcardio.ResponseAPDU;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.sal.anytype.CryptoMarkerType;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.util.CardCommands;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 
 /**
@@ -48,8 +49,11 @@ import org.openecard.client.common.util.CardCommands;
  */
 public class SignStep implements ProtocolStep<Sign, SignResponse> {
 
+    private static final Logger _logger = LoggerFactory.getLogger(SignStep.class);
+    private static final Marker _enter = MarkerFactory.getMarker("ENTERING");
+    private static final Marker _exit = MarkerFactory.getMarker("EXITING");
+
     private Dispatcher dispatcher;
-    private static final Logger _logger = LogManager.getLogger(SignStep.class.getName());
 
     public SignStep(Dispatcher dispatcher) {
 	this.dispatcher = dispatcher;
@@ -74,9 +78,8 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
     @Override
     public SignResponse perform(Sign sign, Map<String, Object> internalData) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "perform(Sign sign, Map<String, Object> internalData)");
-	} // </editor-fold>
+	_logger.trace(_enter, "> {}, {}", sign, internalData);
+	// </editor-fold>
 	SignResponse res = new SignResponse();
 	try {
 	    ConnectionHandleType connectionHandle = sign.getConnectionHandle();
@@ -131,13 +134,12 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    res.setSignature(rapdu.getData());
 
 	} catch (Exception e) {
-	    e.printStackTrace();
+	    _logger.warn(e.getMessage(), e);
 	    res = WSHelper.makeResponse(SignResponse.class, WSHelper.makeResult(e));
 	}
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "perform(Sign sign, Map<String, Object> internalData)", res);
-	} // </editor-fold>
+	_logger.trace(_exit, "< {}", res);
+	// </editor-fold>
 	return res;
     }
 

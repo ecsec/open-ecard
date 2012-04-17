@@ -16,9 +16,6 @@
 
 package org.openecard.client.transport.tls;
 
-import iso.std.iso_iec._24727.tech.schema.ACLList;
-import iso.std.iso_iec._24727.tech.schema.ACLListResponse;
-import iso.std.iso_iec._24727.tech.schema.AccessRuleType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
@@ -29,9 +26,6 @@ import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import iso.std.iso_iec._24727.tech.schema.CryptographicServiceActionName;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.DIDGet;
 import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDList;
@@ -42,13 +36,11 @@ import iso.std.iso_iec._24727.tech.schema.DSIRead;
 import iso.std.iso_iec._24727.tech.schema.DSIReadResponse;
 import iso.std.iso_iec._24727.tech.schema.DataSetSelect;
 import iso.std.iso_iec._24727.tech.schema.DataSetSelectResponse;
-import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
 import iso.std.iso_iec._24727.tech.schema.NamedDataServiceActionName;
-import iso.std.iso_iec._24727.tech.schema.TargetNameType;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -99,7 +91,7 @@ import org.openecard.client.transport.dispatcher.MessageDispatcher;
  * @author Simon Potzernheim <potzernheim@hs-coburg.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-//@Ignore //works only with connected terminal+eGK inside the HS
+//@Ignore // works only with connected terminal+eGK with gematik labortest 02 certificate
 public class TlsSmartcardCredentialsTest {
 
     private static ClientEnv env;
@@ -111,7 +103,7 @@ public class TlsSmartcardCredentialsTest {
     byte[] cardApplication_ROOT = Hex.decode("D2760001448000");
 
     @BeforeClass
-	public static void setUpClass() throws Exception {
+    public static void setUpClass() throws Exception {
 	env = new ClientEnv();
 
 	IFD ifd = new IFD();
@@ -158,7 +150,7 @@ public class TlsSmartcardCredentialsTest {
      * @throws IllegalAccessException
      */
     @Test
-	public void test() throws Exception {
+    public void test() throws Exception {
 	// Connect to ESIGN application
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
@@ -203,8 +195,8 @@ public class TlsSmartcardCredentialsTest {
 
 	connectionHandle.setCardApplication(appIdentifier_ESIGN);
 
-	URL url = new URL("https://ftei-vm-073.hs-coburg.de:8888/");
-	// URL url = new URL("https://tls.skidentity.de/demo");
+	// URL url = new URL("https://ftei-vm-073.hs-coburg.de:7777/");
+	URL url = new URL("https://tls.skidentity.de/activate");
 	String host = url.getHost();
 	connectionHandle.setCardApplication(appIdentifier_ESIGN);
 	DefaultTlsAuthentication tlsAuthentication = new DefaultTlsAuthentication(new TlsSmartcardCredentials(dispatcher, connectionHandle, chosenDID));
@@ -230,10 +222,9 @@ public class TlsSmartcardCredentialsTest {
 	} finally {
 	    response.close();
 	}
-	// Server will response with some info, including if a certificate was
-	// successfully transmitted
-	System.out.println(sb.toString());
-	//  Assert.assertTrue(sb.toString().contains("X.509 Certificate Information:"));
+
+	Assert.assertTrue(sb.toString().contains("Activation requested without specifying valid parameters."));
+	// Assert.assertTrue(sb.toString().contains("X.509 Certificate Information:"));
     }
 
     private Certificate readCertificate(String didName, ConnectionHandleType connectionHandle) throws Exception {

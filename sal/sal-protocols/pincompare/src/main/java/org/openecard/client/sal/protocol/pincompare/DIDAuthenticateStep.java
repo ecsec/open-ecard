@@ -28,18 +28,19 @@ import iso.std.iso_iec._24727.tech.schema.VerifyUser;
 import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse;
 import java.math.BigInteger;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.sal.anytype.PinCompareDIDAuthenticateInputType;
 import org.openecard.client.common.sal.anytype.PinCompareDIDAuthenticateOutputType;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.util.ByteUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 
 /**
@@ -48,7 +49,10 @@ import org.openecard.client.common.util.ByteUtils;
  */
 public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
-    private static final Logger _logger = LogManager.getLogger(DIDAuthenticateStep.class.getName());
+    private static final Logger _logger = LoggerFactory.getLogger(DIDAuthenticateStep.class);
+    private static final Marker _enter = MarkerFactory.getMarker("ENTERING");
+    private static final Marker _exit = MarkerFactory.getMarker("EXITING");
+
     private final Dispatcher dispatcher;
 
     public DIDAuthenticateStep(Dispatcher dispatcher) {
@@ -63,9 +67,8 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
     @Override
 	public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)");
-	} // </editor-fold>
+	_logger.trace(_enter, "> {}, {}", didAuthenticate, internalData);
+	// </editor-fold>
 	try {
 	    String didName = didAuthenticate.getDIDName();
 	    PinCompareDIDAuthenticateInputType pinCompareDIDAuthenticateInput = new PinCompareDIDAuthenticateInputType(didAuthenticate.getAuthenticationProtocolData());
@@ -73,7 +76,7 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 
 	    CardStateEntry cardStateEntry = (CardStateEntry) internalData.get("cardState");
 
-	    byte[] cardApplication = null;
+	    byte[] cardApplication;
 	    if (didAuthenticate.getDIDScope()!=null&&didAuthenticate.getDIDScope().equals(DIDScopeType.GLOBAL)) {
 		cardApplication = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
 	    } else {
@@ -107,8 +110,8 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 	    VerifyUserResponse verifyR = (VerifyUserResponse) dispatcher.deliver(verify);
 	    byte[] responseCode = verifyR.getResponse();
 
-	    DIDAuthenticateResponse did = new DIDAuthenticateResponse();
-	    did.setResult(WSHelper.makeResultOK());
+	    DIDAuthenticateResponse didAuthenticateResponse = new DIDAuthenticateResponse();
+	    didAuthenticateResponse.setResult(WSHelper.makeResultOK());
 	    PinCompareDIDAuthenticateOutputType output = pinCompareDIDAuthenticateInput.getOutputType();
 
 	    /*
@@ -119,18 +122,15 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 		output.setRetryCounter(new BigInteger(Integer.toString((responseCode[1] & 0x0F))));
 	    }
 
-	    did.setResult(WSHelper.makeResultOK());
+	    didAuthenticateResponse.setResult(WSHelper.makeResultOK());
 	    cardStateEntry.addAuthenticated(didName, cardApplication);
-	    did.setAuthenticationProtocolData(output.getAuthDataType());
+	    didAuthenticateResponse.setAuthenticationProtocolData(output.getAuthDataType());
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", did);
-	    } // </editor-fold>
-	    return did;
+	    _logger.trace(_exit, "{}", didAuthenticateResponse);
+	    // </editor-fold>
+	    return didAuthenticateResponse;
 	} catch (Exception e) {
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "cardApplicationPath(CardApplicationPath cardApplicationPath)", e.getMessage(), e);
-	    }
+	    _logger.warn(e.getMessage(), e);
 	    return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResult(e));
 	}
     }

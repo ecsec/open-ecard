@@ -39,15 +39,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ECardException;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
 import org.openecard.client.common.interfaces.Environment;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.Protocol;
 import org.openecard.client.common.sal.ProtocolFactory;
@@ -61,6 +58,11 @@ import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.CardCommands;
 import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.gui.UserConsent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
+
 import javax.smartcardio.ResponseAPDU;
 
 
@@ -73,7 +75,9 @@ import javax.smartcardio.ResponseAPDU;
  */
 public class TinySAL implements org.openecard.ws.SAL {
 
-    private static final Logger _logger = LogManager.getLogger(TinySAL.class.getName());
+    private static final Logger _logger = LoggerFactory.getLogger(TinySAL.class);
+    private static final Marker _enter = MarkerFactory.getMarker("ENTERING");
+    private static final Marker _exit = MarkerFactory.getMarker("EXITING");
 
     private Environment env;
     private String sessionId;
@@ -179,9 +183,8 @@ public class TinySAL implements org.openecard.ws.SAL {
     @Override
     public CardApplicationPathResponse cardApplicationPath(CardApplicationPath cardApplicationPath) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "cardApplicationPath(CardApplicationPath cardApplicationPath)");
-	} // </editor-fold>
+	_logger.trace(_enter, "> {}", cardApplicationPath);
+	// </editor-fold>
 	// get card handles (not terminals)
 	CardApplicationPathType path = cardApplicationPath.getCardAppPathRequest();
 	// check existence of required parameters
@@ -208,9 +211,8 @@ public class TinySAL implements org.openecard.ws.SAL {
 	CardApplicationPathResponse res = WSHelper.makeResponse(CardApplicationPathResponse.class, WSHelper.makeResultOK());
 	res.setCardAppPathResultSet(resultSet);
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "cardApplicationPath(CardApplicationPath cardApplicationPath)", res);
-	} // </editor-fold>
+	_logger.trace(_exit, "< {}", res);
+	// </editor-fold>
 	return res;
     }
 
@@ -227,9 +229,8 @@ public class TinySAL implements org.openecard.ws.SAL {
     @Override
     public CardApplicationConnectResponse cardApplicationConnect(CardApplicationConnect cardApplicationConnect) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "cardApplicationConnect(CardApplicationConnect cardApplicationConnect)");
-	} // </editor-fold>
+	_logger.trace(_enter, "> {}", cardApplicationConnect);
+	// </editor-fold>
 
 	CardApplicationConnectResponse cardApplicationConnectResponse = new CardApplicationConnectResponse();
 	// check existence of required parameters
@@ -265,7 +266,6 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    ConnectResponse connectResponse = (ConnectResponse) env.getDispatcher().deliver(connect);
 	    WSHelper.checkResult(connectResponse);
 
-	    System.out.println("connect: " + ByteUtils.toHexString(connectResponse.getSlotHandle()));
 	    // Select application
 	    transmitSingleAPDU(CardCommands.Select.application(cardApplication), connectResponse.getSlotHandle());
 	    //FIXME
@@ -278,14 +278,11 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    cardApplicationConnectResponse.setResult(WSHelper.makeResultOK());
 
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "cardApplicationConnect(CardApplicationConnect cardApplicationConnect)", cardApplicationConnectResponse);
-	    } // </editor-fold>
+	    _logger.trace(_exit, "< {}", cardApplicationConnectResponse);
+	    // </editor-fold>
 	    return cardApplicationConnectResponse;
 	} catch (Exception e) {
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "cardApplicationConnect(CardApplicationConnect cardApplicationConnect)", e.getMessage(), e);
-	    }
+	    _logger.warn(e.getMessage(), e);
 	    return WSHelper.makeResponse(CardApplicationConnectResponse.class, WSHelper.makeResult(e));
 	}
     }
@@ -302,9 +299,8 @@ public class TinySAL implements org.openecard.ws.SAL {
     @Override
     public CardApplicationDisconnectResponse cardApplicationDisconnect(CardApplicationDisconnect cardApplicationDisconnect) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "cardApplicationDisconnect(CardApplicationDisconnect cardApplicationDisconnect)");
-	} // </editor-fold>
+	_logger.trace(_enter, "> {}", cardApplicationDisconnect);
+	// </editor-fold>
 	ConnectionHandleType connectionHandle = cardApplicationDisconnect.getConnectionHandle();
 
 	// check existence of required parameters
@@ -331,9 +327,8 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    cardApplicationDisconnectResponse = WSHelper.makeResponse(CardApplicationDisconnectResponse.class, WSHelper.makeResult(e));
 	}
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "cardApplicationDisconnect(CardApplicationDisconnect cardApplicationDisconnect)", cardApplicationDisconnectResponse);
-	} // </editor-fold>
+	_logger.trace(_exit, "< {}", cardApplicationDisconnectResponse);
+	// </editor-fold>
 	return cardApplicationDisconnectResponse;
     }
 
@@ -354,9 +349,8 @@ public class TinySAL implements org.openecard.ws.SAL {
     @Override
     public CardApplicationListResponse cardApplicationList(CardApplicationList cardApplicationList) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "cardApplicationList(CardApplicationList cardApplicationList)");
-	} // </editor-fold>
+	_logger.trace(_enter, "> {}", cardApplicationList);
+	// </editor-fold>
 	ConnectionHandleType connectionHandle = cardApplicationList.getConnectionHandle();
 
 	// check existence of required parameters
@@ -379,9 +373,8 @@ public class TinySAL implements org.openecard.ws.SAL {
 	cardApplicationListResponse.setCardApplicationNameList(cardApplicationNameList);
 	cardApplicationListResponse.setResult(WSHelper.makeResultOK());
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "cardApplicationList(CardApplicationList cardApplicationList)", cardApplicationListResponse);
-	} // </editor-fold>
+	_logger.trace(_exit, "< {}", cardApplicationListResponse);
+	// </editor-fold>
 	return cardApplicationListResponse;
     }
 
@@ -431,10 +424,9 @@ public class TinySAL implements org.openecard.ws.SAL {
      */
     @Override
     public DataSetListResponse dataSetList(DataSetList dataSetList) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "dataSetList(DataSetList dataSetList)");
-	} // </editor-fold>
+        // <editor-fold defaultstate="collapsed" desc="log trace">
+        _logger.trace(_enter, "> {}", dataSetList);
+        // </editor-fold>
 
 	ConnectionHandleType connectionHandle = dataSetList.getConnectionHandle();
 	if (connectionHandle == null) {
@@ -456,10 +448,8 @@ public class TinySAL implements org.openecard.ws.SAL {
 	dataSetListResponse.setResult(WSHelper.makeResultOK());
 
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "dataSetList(DataSetList dataSetList)", dataSetListResponse);
-	} // </editor-fold>
-
+	_logger.trace(_exit, "< {}", dataSetListResponse);
+	// </editor-fold>
 	return dataSetListResponse;
     }
 
@@ -475,10 +465,8 @@ public class TinySAL implements org.openecard.ws.SAL {
     @Override
     public DataSetSelectResponse dataSetSelect(DataSetSelect dataSetSelect) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "dataSetSelect(DataSetSelect dataSetSelect)");
-	} // </editor-fold>
-
+	_logger.trace(_enter, "> {}", dataSetSelect);
+	// </editor-fold>
 	ConnectionHandleType connectionHandle = dataSetSelect.getConnectionHandle();
 
 	if (connectionHandle == null) {
@@ -510,17 +498,14 @@ public class TinySAL implements org.openecard.ws.SAL {
 	try {
 	    this.transmitSingleAPDU(CardCommands.Select.EF(fileIdentifier), connectionHandle.getSlotHandle());
 	} catch (Exception e) {
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "dataSetSelect(DataSetSelect dataSetSelect)", e.getMessage(), e);
-	    }
+	    _logger.warn(e.getMessage(), e);
 	    return WSHelper.makeResponse(DataSetSelectResponse.class, WSHelper.makeResult(e));
 	}
 	DataSetSelectResponse dataSetSelectResponse = new DataSetSelectResponse();
 	dataSetSelectResponse.setResult(WSHelper.makeResultOK());
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "dataSetSelect(DataSetSelect dataSetSelect)", dataSetSelectResponse);
-	} // </editor-fold>
+	_logger.trace(_exit, "< {}", dataSetSelectResponse);
+	// </editor-fold>
 	return dataSetSelectResponse;
     }
 
@@ -556,9 +541,8 @@ public class TinySAL implements org.openecard.ws.SAL {
     @Override
     public DSIReadResponse dsiRead(DSIRead dsiRead) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "dsiRead(DSIRead dsiRead)");
-	} // </editor-fold>
+	_logger.trace(_enter, "> {}", dsiRead);
+	// </editor-fold>
 	try {
 	    String dsiName = dsiRead.getDSIName();
 	    if (dsiName == null) {
@@ -604,15 +588,12 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    dsiReadResponse.setResult(WSHelper.makeResultOK());
 
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "dsiRead(DSIRead dsiRead))", dsiReadResponse);
-	    } // </editor-fold>
+	    _logger.trace(_exit, "< {}", dsiReadResponse);
+	    // </editor-fold>
 
 	    return dsiReadResponse;
 	} catch (Exception e) {
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "dsiRead(DSIRead dsiRead)", e.getMessage(), e);
-	    }
+	    _logger.warn(e.getMessage(), e);
 	    return WSHelper.makeResponse(DSIReadResponse.class, WSHelper.makeResult(e));
 	}
     }
@@ -653,17 +634,13 @@ public class TinySAL implements org.openecard.ws.SAL {
 		throw new UnknownProtocolException("No protocol step available for Encipher in protocol " + proto.toString() + ".");
 	    }
 	} catch (ECardException ex) {
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "encipher(Encipher encipher)", ex.getMessage(), ex);
-	    }
+	    _logger.warn(ex.getMessage(), ex);
 	    Result res = WSHelper.makeResult(ex);
 	    EncipherResponse resp = WSHelper.makeResponse(EncipherResponse.class, res);
 	    return resp;
 
 	} catch (RuntimeException ex) {
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "encipher(Encipher encipher)", ex.getMessage(), ex);
-	    }
+	    _logger.warn(ex.getMessage(), ex);
 	    Result res = WSHelper.makeResultUnknownError(ex.getMessage());
 	    EncipherResponse resp = WSHelper.makeResponse(EncipherResponse.class, res);
 	    return resp;
@@ -721,17 +698,13 @@ public class TinySAL implements org.openecard.ws.SAL {
 		throw new UnknownProtocolException("No protocol step available for sign in protocol " + proto.toString() + ".");
 	    }
 	} catch (ECardException ex) {
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "sign(Sign sign)", ex.getMessage(), ex);
-	    }
+            _logger.warn(ex.getMessage(), ex);
 	    Result res = WSHelper.makeResult(ex);
 	    SignResponse resp = WSHelper.makeResponse(SignResponse.class, res);
 	    return resp;
 
 	} catch (RuntimeException ex) {
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "sign(Sign sign)", ex.getMessage(), ex);
-	    }
+            _logger.warn(ex.getMessage(), ex);
 	    Result res = WSHelper.makeResultUnknownError(ex.getMessage());
 	    SignResponse resp = WSHelper.makeResponse(SignResponse.class, res);
 	    return resp;
@@ -756,9 +729,8 @@ public class TinySAL implements org.openecard.ws.SAL {
     @Override
     public DIDListResponse didList(DIDList didList) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "didList(DIDList didList)");
-	} // </editor-fold>
+	_logger.trace(_enter, "> {}", didList);
+	// </editor-fold>
 	try {
 	    ConnectionHandleType connectionHandle = didList.getConnectionHandle();
 	    if(connectionHandle==null){
@@ -849,14 +821,11 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    }
 	    didListResponse.setDIDNameList(didNameList);
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "didList(DIDList didList)", didListResponse);
-	    } // </editor-fold>
+	    _logger.trace(_exit, "< {}", didListResponse);
+	    // </editor-fold>
 	    return didListResponse;
 	} catch (Exception e) {
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "didList(DIDList didList)", e.getMessage(), e);
-	    }
+	    _logger.warn(e.getMessage(), e);
 	    return WSHelper.makeResponse(DIDListResponse.class, WSHelper.makeResult(e));
 	}
     }
@@ -869,9 +838,8 @@ public class TinySAL implements org.openecard.ws.SAL {
     @Override
     public DIDGetResponse didGet(DIDGet didGet) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "didGet(DIDGet didGet)");
-	} // </editor-fold>
+	_logger.trace(_enter, "> {}", didGet);
+	// </editor-fold>
 
 	String didName = didGet.getDIDName();
 	ConnectionHandleType connectionHandle = didGet.getConnectionHandle();
@@ -907,24 +875,19 @@ public class TinySAL implements org.openecard.ws.SAL {
 		throw new UnknownProtocolException("No protocol step available for DIDGet in protocol " + proto.toString() + ".");
 	    }
 	} catch (ECardException ex) {
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "didGet(DIDGet didGet)", ex.getMessage(), ex);
-	    }
+	    _logger.warn(ex.getMessage(), ex);
 	    Result res = WSHelper.makeResult(ex);
 	    resp = WSHelper.makeResponse(DIDGetResponse.class, res);
 
 	} catch (RuntimeException ex) {
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "didGet(DIDGet didGet)", ex.getMessage(), ex);
-	    }
+	    _logger.warn(ex.getMessage(), ex);
 	    Result res = WSHelper.makeResultUnknownError(ex.getMessage());
 	    resp = WSHelper.makeResponse(DIDGetResponse.class, res);
 
 	}
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "didGet(DIDGet didGet)", resp);
-	} // </editor-fold>
+	_logger.trace(_exit, "< {}", resp);
+	// </editor-fold>
 	return resp;
     }
 
@@ -941,9 +904,8 @@ public class TinySAL implements org.openecard.ws.SAL {
     @Override
     public DIDAuthenticateResponse didAuthenticate(DIDAuthenticate didAuthenticate) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "didAuthenticate(DIDAuthenticate didAuthenticate)");
-	} // </editor-fold>
+	_logger.trace(_enter, "> {}", didAuthenticate);
+	// </editor-fold>
 	if (didAuthenticate.getAuthenticationProtocolData() == null) {
 	    return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "AuthenticationProtocolData is null."));
 	}
@@ -967,22 +929,17 @@ public class TinySAL implements org.openecard.ws.SAL {
 		throw new UnknownProtocolException("No protocol step available for DIDAuthenticate in protocol " + proto.toString() + ".");
 	    }
 	} catch (ECardException ex) {
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "didAuthenticate(DIDAuthenticate didAuthenticate)", ex.getMessage(), ex);
-	    }
+	    _logger.warn(ex.getMessage(), ex);
 	    Result res = WSHelper.makeResult(ex);
 	    resp = WSHelper.makeResponse(DIDAuthenticateResponse.class, res);
 	} catch (RuntimeException ex) {
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "didAuthenticate(DIDAuthenticate didAuthenticate)", ex.getMessage(), ex);
-	    }
+	    _logger.warn(ex.getMessage(), ex);
 	    Result res = WSHelper.makeResultUnknownError(ex.getMessage());
 	    resp = WSHelper.makeResponse(DIDAuthenticateResponse.class, res);
 	}
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "didAuthenticate(DIDAuthenticate didAuthenticate)", resp);
-	} // </editor-fold>
+	_logger.trace(_exit, "< {}", resp);
+	// </editor-fold>      
 	return resp;
     }
 
@@ -994,9 +951,8 @@ public class TinySAL implements org.openecard.ws.SAL {
     @Override
     public ACLListResponse aclList(ACLList aclList) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "aclList(ACLList aclList)");
-	} // </editor-fold>
+	_logger.trace(_enter, "> {}", aclList);
+	// </editor-fold>
 	try {
 	    ConnectionHandleType connectionHandle = aclList.getConnectionHandle();
 	    if(connectionHandle==null){
@@ -1045,14 +1001,11 @@ public class TinySAL implements org.openecard.ws.SAL {
 
 	    aclListResponse.setResult(WSHelper.makeResultOK());
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "aclList(ACLList aclList)", aclListResponse);
-	    } // </editor-fold>
+	    _logger.trace(_exit, "< {}", aclListResponse);
+	    // </editor-fold>
 	    return aclListResponse;
 	} catch (Exception e) {
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "aclList(ACLList aclList)", e.getMessage(), e);
-	    }
+	    _logger.warn(e.getMessage(), e);
 	    return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResult(e));
 	}
     }

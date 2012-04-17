@@ -22,14 +22,15 @@ import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.sal.state.CardStateEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 
 /**
@@ -38,7 +39,10 @@ import org.openecard.client.common.sal.state.CardStateEntry;
  */
 public class DIDGetStep implements ProtocolStep<DIDGet, DIDGetResponse> {
 
-    private static final Logger _logger = LogManager.getLogger(DIDGetStep.class.getName());
+    private static final Logger _logger = LoggerFactory.getLogger(DIDGetStep.class);
+    private static final Marker _enter = MarkerFactory.getMarker("ENTERING");
+    private static final Marker _exit = MarkerFactory.getMarker("EXITING");
+
 
     @Override
     public FunctionType getFunctionType() {
@@ -48,9 +52,8 @@ public class DIDGetStep implements ProtocolStep<DIDGet, DIDGetResponse> {
     @Override
     public DIDGetResponse perform(DIDGet didGet, Map<String, Object> internalData) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "perform(DIDGet didGet, Map<String, Object> internalData)");
-	} // </editor-fold>
+	_logger.trace(_enter, "> {}, {}", didGet, internalData);
+	// </editor-fold>
 
 	String didName = didGet.getDIDName();
 	ConnectionHandleType connectionHandle = didGet.getConnectionHandle();
@@ -71,9 +74,8 @@ public class DIDGetStep implements ProtocolStep<DIDGet, DIDGetResponse> {
 	didGetResponse.setDIDStructure(didStructure);
 	didGetResponse.setResult(WSHelper.makeResultOK());
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "perform(DIDGet didGet, Map<String, Object> internalData)", didGetResponse);
-	} // </editor-fold>
+	_logger.trace(_exit, "{}", didGetResponse);
+	// </editor-fold>
 	return didGetResponse;
     }
 

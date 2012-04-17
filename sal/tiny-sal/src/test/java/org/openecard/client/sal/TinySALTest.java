@@ -61,7 +61,7 @@ import org.openecard.client.transport.dispatcher.MessageDispatcher;
  * @author Johannes.Schmoelz <johannes.schmoelz@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-//@Ignore
+@Ignore
 public class TinySALTest {
 
     private static ClientEnv env;

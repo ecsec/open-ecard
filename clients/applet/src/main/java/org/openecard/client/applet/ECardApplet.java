@@ -62,7 +62,7 @@ import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.transport.paos.PAOS;
 import org.openecard.client.transport.paos.PAOSCallback;
 import org.openecard.client.transport.tls.PSKTlsClientImpl;
-import org.openecard.client.transport.tls.TLSClientSocketFactory;
+import org.openecard.client.transport.tls.TlsClientSocketFactory;
 
 
 /**
@@ -194,7 +194,7 @@ public class ECardApplet extends JApplet {
 	}
 	if (psk != null) {
 	    PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionId.getBytes(), Hex.decode(psk), hostName);
-	    paos = new PAOS(endpointUrl, env.getDispatcher(), paosCallback, new TLSClientSocketFactory(tlsClient));
+	    paos = new PAOS(endpointUrl, env.getDispatcher(), paosCallback, new TlsClientSocketFactory(tlsClient));
 	} else {
 	    paos = new PAOS(endpointUrl, env.getDispatcher(), paosCallback);
 	}

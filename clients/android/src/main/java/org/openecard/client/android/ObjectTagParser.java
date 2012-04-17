@@ -33,13 +33,13 @@ import org.openecard.client.sal.TinySAL;
 import org.openecard.client.transport.paos.PAOS;
 import org.openecard.client.transport.paos.PAOSCallback;
 import org.openecard.client.transport.tls.PSKTlsClientImpl;
-import org.openecard.client.transport.tls.TLSClientSocketFactory;
+import org.openecard.client.transport.tls.TlsClientSocketFactory;
 import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.soap.SOAPException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
-
 import android.webkit.WebView;
+
 
 /**
  * The purpose of this class is to start the eID-procedure in case the
@@ -70,6 +70,7 @@ public class ObjectTagParser implements PAOSCallback {
 	this.env = env;
     }
 
+    @Override
     public void loadRefreshAddress() {
 	new Thread(new Runnable() {
 	    @Override
@@ -167,10 +168,9 @@ public class ObjectTagParser implements PAOSCallback {
 		    TinySAL sal = (TinySAL) ObjectTagParser.this.env.getSAL();
 		    List<ConnectionHandleType> cHandles = sal.getConnectionHandles();
 		    if (cHandles.size() > 0) {
-			
 			URL url = new URL(serverAddress);
-			TLSClientSocketFactory tlspskSocketFactory = new TLSClientSocketFactory(new PSKTlsClientImpl(
-				sessionIdentifier.getBytes(), psk,  url.getHost()));
+			PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionIdentifier.getBytes(), psk,  url.getHost());
+			TlsClientSocketFactory tlspskSocketFactory = new TlsClientSocketFactory(tlsClient);
 
 			PAOS p = new PAOS(serverAddress + "?sessionid=" + sessionIdentifier, env.getDispatcher(), ObjectTagParser.this,
 				tlspskSocketFactory);
@@ -192,4 +192,5 @@ public class ObjectTagParser implements PAOSCallback {
 	    _logger.exiting(this.getClass().getName(), "showHTML(String html)");
 	} // </editor-fold>
     }
+
 }

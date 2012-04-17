@@ -91,7 +91,7 @@ import org.openecard.client.transport.dispatcher.MessageDispatcher;
  * @author Simon Potzernheim <potzernheim@hs-coburg.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-//@Ignore // works only with connected terminal+eGK with gematik labortest 02 certificate
+@Ignore // works only with connected terminal+eGK with gematik labortest 02 certificate
 public class TlsSmartcardCredentialsTest {
 
     private static ClientEnv env;

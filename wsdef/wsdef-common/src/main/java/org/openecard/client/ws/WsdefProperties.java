@@ -18,8 +18,6 @@ package org.openecard.client.ws;
 
 import java.io.IOException;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.OverridingProperties;
 
 
@@ -40,7 +38,7 @@ public class WsdefProperties {
             properties = new Internal();
         } catch (IOException ex) {
             // in that case a null pointer occurs when properties is accessed
-            Logger.getLogger(WsdefProperties.class.getName()).log(Level.SEVERE, null, ex);
+            org.slf4j.LoggerFactory.getLogger(WsdefProperties.class).error("Failed to load wsdef.properties file correctly.", ex);
         }
     }
 

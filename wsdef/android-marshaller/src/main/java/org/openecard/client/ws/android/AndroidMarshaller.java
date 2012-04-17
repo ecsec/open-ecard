@@ -21,9 +21,6 @@ import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.io.*;
 import java.math.BigInteger;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -35,7 +32,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.ws.MarshallingTypeException;
@@ -46,6 +42,10 @@ import org.openecard.client.ws.soap.MessageFactory;
 import org.openecard.client.ws.soap.SOAPBody;
 import org.openecard.client.ws.soap.SOAPException;
 import org.openecard.client.ws.soap.SOAPMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -55,27 +55,28 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+
 /**
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class AndroidMarshaller implements WSMarshaller {
 
+    private static final Logger _logger = LoggerFactory.getLogger(AndroidMarshaller.class);
+    private static final Marker _enter = MarkerFactory.getMarker("ENTERING");
+    private static final Marker _exit = MarkerFactory.getMarker("EXITING");
+
     private static final String iso = "iso:";
     private static final String tls = "tls:";
     private static final String dss = "dss:";
     private static final String ecapi = "ecapi:"; // xmlns:ecapi="http://www.bsi.bund.de/ecard/api/1.1"
+
     private DocumentBuilderFactory documentBuilderFactory;
     private DocumentBuilder documentBuilder;
     private Transformer transformer;
     private MessageFactory soapFactory;
-    private static final Logger _logger = LogManager.getLogger(AndroidMarshaller.class.getName());
 
     public AndroidMarshaller() {
-	_logger.setLevel(Level.WARNING);
-	ConsoleHandler handler = new ConsoleHandler();
-	handler.setLevel(_logger.getLevel());
-	_logger.addHandler(handler);
 	documentBuilderFactory = null;
 	documentBuilder = null;
 	transformer = null;
@@ -105,9 +106,8 @@ public class AndroidMarshaller implements WSMarshaller {
     @Override
     public synchronized String doc2str(Node doc) throws TransformerException {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(AndroidMarshaller.class.getName(), "doc2str(Node doc)", doc);
-	} // </editor-fold>
+	_logger.trace(_enter, "{}", doc);
+	// </editor-fold>
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	transformer.transform(new DOMSource(doc), new StreamResult(out));
 	String result;
@@ -117,18 +117,16 @@ public class AndroidMarshaller implements WSMarshaller {
 	    throw new TransformerException(ex);
 	}
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "doc2str(Node doc)", result);
-	} // </editor-fold>
+	_logger.trace(_exit, "{}", result);
+	// </editor-fold>
 	return result;
     }
 
     @Override
     public synchronized Document marshal(Object o) throws MarshallingTypeException {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(AndroidMarshaller.class.getName(), "marshal(Object o)", o);
-	} // </editor-fold>
+	_logger.trace(_enter, "{}", o);
+	// </editor-fold>
 	Document document = documentBuilder.newDocument();
 	document.setXmlStandalone(true);
 
@@ -421,9 +419,8 @@ public class AndroidMarshaller implements WSMarshaller {
 	}
 	document.appendChild(rootElement);
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "marshal(Object o)", document);
-	} // </editor-fold>
+	_logger.trace(_exit, "{}", document);
+	// </editor-fold>
 	return document;
     }
 
@@ -559,9 +556,8 @@ public class AndroidMarshaller implements WSMarshaller {
     @Override
     public synchronized Object unmarshal(Node n) throws MarshallingTypeException, WSMarshallerException {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(AndroidMarshaller.class.getName(), "unmarshal(Node n)", n);
-	} // </editor-fold>
+	_logger.trace(_enter, "{}", n);
+	// </editor-fold>
 	Document newDoc = null;
 	if (n instanceof Document) {
 	    newDoc = (Document) n;
@@ -583,9 +579,8 @@ public class AndroidMarshaller implements WSMarshaller {
 		if (eventType == XmlPullParser.START_TAG) {
 		    Object obj = parse(parser);
 		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.FINER)) {
-			_logger.exiting(this.getClass().getName(), "unmarshal(Node n)", obj);
-		    } // </editor-fold>
+		    _logger.trace(_exit, "{}", obj);
+		    // </editor-fold>
 		    return obj;
 		}
 		eventType = parser.next();

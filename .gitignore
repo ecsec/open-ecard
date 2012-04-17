@@ -7,3 +7,4 @@ target
 .classpath
 .directory
 nb-configuration.xml
+dependency-reduced-pom.xml

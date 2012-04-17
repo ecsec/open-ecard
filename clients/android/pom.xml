@@ -87,7 +87,19 @@
 	    <version>2.3.3_r2</version>
 	    <scope>provided</scope>
 	</dependency>
-	<dependency> 
+	<!-- Mark slf4j-api as private as it is already part of the slf4j-android lib. When not provided the build fails because of dup class -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.6.4</version>
+	    <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-android</artifactId>
+            <version>1.6.1-RC1</version>
+        </dependency>
+	<dependency>
         <groupId>org.openecard.client.gui</groupId>
  	 	<artifactId>android-gui</artifactId>
        	<version>${project.version}</version> 
@@ -97,8 +109,8 @@
     	<groupId>org.openecard.client.sal.protocols</groupId>
   		<artifactId>eac</artifactId>
    		<version>${project.version}</version> 
-    </dependency> 
-   </dependencies>
+    </dependency>
+    </dependencies>
 
     <build>
 	<plugins>

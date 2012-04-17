@@ -42,6 +42,11 @@
                   <shadedPattern>org.openecard.bouncycastle</shadedPattern>
                 </relocation>
               </relocations>
+	      <artifactSet>
+		<includes>
+		  <include>org.bouncycastle:*</include>
+		</includes>
+	      </artifactSet>
               <filters>
 		  <filter>
 		      <artifact>*:*</artifact>

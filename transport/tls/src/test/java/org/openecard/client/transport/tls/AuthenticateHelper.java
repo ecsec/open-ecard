@@ -56,6 +56,10 @@ public class AuthenticateHelper {
 	    DIDGetResponse didGetResponse = (DIDGetResponse) dispatcher.deliver(didGet);
 	    WSHelper.checkResult(didGetResponse);
 
+	    if (didGetResponse.getDIDStructure().isAuthenticated()) {
+		return true; //already authenticated
+	    }
+
 	    DIDAuthenticate didAuthenticate = new DIDAuthenticate();
 	    didAuthenticate.setConnectionHandle(connectionHandle);
 	    didAuthenticate.setDIDName(didName);

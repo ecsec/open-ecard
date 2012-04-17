@@ -203,8 +203,8 @@ public class TlsSmartcardCredentialsTest {
 
 	connectionHandle.setCardApplication(appIdentifier_ESIGN);
 
-	// URL url = new URL("https://ftei-vm-073.hs-coburg.de:8888/");
-	URL url = new URL("https://tls.skidentity.de/demo");
+	URL url = new URL("https://ftei-vm-073.hs-coburg.de:8888/");
+	// URL url = new URL("https://tls.skidentity.de/demo");
 	String host = url.getHost();
 	connectionHandle.setCardApplication(appIdentifier_ESIGN);
 	DefaultTlsAuthentication tlsAuthentication = new DefaultTlsAuthentication(new TlsSmartcardCredentials(dispatcher, connectionHandle, chosenDID));

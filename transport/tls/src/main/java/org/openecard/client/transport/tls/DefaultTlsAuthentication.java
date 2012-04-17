@@ -16,42 +16,33 @@
 
 package org.openecard.client.transport.tls;
 
-import org.openecard.bouncycastle.crypto.tls.TlsPSKIdentity;
+import java.io.IOException;
+import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
+import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
+import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
 
 
 /**
- * Simple Implementation for {@link TlsPSKIdentity}
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class TlsPSKIdentityImpl implements TlsPSKIdentity {
+public class DefaultTlsAuthentication implements TlsAuthentication {
 
-    private final byte[] identity;
-    private final byte[] psk;
+    private TlsCredentials tlsCredentials;
 
-    public TlsPSKIdentityImpl(byte[] identity, byte[] psk) {
-	this.identity = identity;
-	this.psk = psk;
+    public DefaultTlsAuthentication(TlsCredentials tlsCredentials) {
+	this.tlsCredentials = tlsCredentials;
     }
 
     @Override
-    public byte[] getPSK() {
-	return psk;
+    public TlsCredentials getClientCredentials(CertificateRequest certificateRequest) throws IOException {
+	return this.tlsCredentials;
     }
 
     @Override
-    public byte[] getPSKIdentity() {
-	return identity;
-    }
-
-    @Override
-    public void notifyIdentityHint(byte[] arg0) {
-	// System.out.println("Received IdentityHint: " + new String(arg0));
-    }
-
-    @Override
-    public void skipIdentityHint() {
-	// OK
+    public void notifyServerCertificate(Certificate certificate) throws IOException {
+	/* ignore */
     }
 
 }

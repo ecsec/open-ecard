@@ -28,6 +28,7 @@ import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
+import iso.std.iso_iec._24727.tech.schema.CryptographicServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
@@ -41,6 +42,7 @@ import iso.std.iso_iec._24727.tech.schema.DSIRead;
 import iso.std.iso_iec._24727.tech.schema.DSIReadResponse;
 import iso.std.iso_iec._24727.tech.schema.DataSetSelect;
 import iso.std.iso_iec._24727.tech.schema.DataSetSelectResponse;
+import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ListIFDs;
@@ -197,11 +199,12 @@ public class TlsSmartcardCredentialsTest {
 	    // only one certificate could be used
 	    chosenDID = didListResponse.getDIDNameList().getDIDName().get(0);
 	}
+	AuthenticateHelper.authenticateDID(states.getEntry(connectionHandle), chosenDID, CryptographicServiceActionName.SIGN, dispatcher);
 
 	connectionHandle.setCardApplication(appIdentifier_ESIGN);
 
-	//   URL url = new URL("https://ftei-vm-073.hs-coburg.de:8888/");
-	URL url = new URL("https://tls.skidentity.de/");
+	// URL url = new URL("https://ftei-vm-073.hs-coburg.de:8888/");
+	URL url = new URL("https://tls.skidentity.de/demo");
 	String host = url.getHost();
 	connectionHandle.setCardApplication(appIdentifier_ESIGN);
 	DefaultTlsAuthentication tlsAuthentication = new DefaultTlsAuthentication(new TlsSmartcardCredentials(dispatcher, connectionHandle, chosenDID));
@@ -251,7 +254,7 @@ public class TlsSmartcardCredentialsTest {
 	DataSetSelectResponse dataSetSelectResponse = (DataSetSelectResponse) dispatcher.deliver(dataSetSelect);
 	WSHelper.checkResult(dataSetSelectResponse);
 
-	authenticateDataSet(dataSetName, connectionHandle, NamedDataServiceActionName.DSI_READ);
+	AuthenticateHelper.authenticateDataSet(states.getEntry(connectionHandle), dataSetName, NamedDataServiceActionName.DSI_READ, dispatcher);
 
 	// read the contents of the certificate
 	DSIRead dsiRead = new DSIRead();
@@ -292,42 +295,6 @@ public class TlsSmartcardCredentialsTest {
 
 	}
 	return null;
-    }
-
-    private void authenticateDataSet(String dataSetName, ConnectionHandleType connectionHandle, Enum<?> action) throws Exception {
-	String didName = null;
-	ACLList aclList = new ACLList();
-	aclList.setConnectionHandle(connectionHandle);
-	TargetNameType targetName = new TargetNameType();
-	targetName.setDataSetName(dataSetName);
-	aclList.setTargetName(targetName);
-	ACLListResponse aclListResponse = instance.aclList(aclList);
-	for (AccessRuleType accessRule : aclListResponse.getTargetACL().getAccessRule()) {
-	    if (accessRule.getAction().getNamedDataServiceAction().equals(action)) {
-		if (accessRule.getSecurityCondition().isAlways() == null) {
-		    didName = accessRule.getSecurityCondition().getDIDAuthentication().getDIDName();
-		} else {
-		    return;
-		}
-	    }
-	}
-
-	DIDGet didGet = new DIDGet();
-	didGet.setConnectionHandle(connectionHandle);
-	didGet.setDIDScope(DIDScopeType.GLOBAL);
-	didGet.setDIDName(didName);
-	DIDGetResponse didGetResponse = instance.didGet(didGet);
-	WSHelper.checkResult(didGetResponse);
-
-	DIDAuthenticate didAuthenticate = new DIDAuthenticate();
-	didAuthenticate.setConnectionHandle(connectionHandle);
-	didAuthenticate.setDIDName(didName);
-	didAuthenticate.getConnectionHandle().setCardApplication(cardApplication_ROOT);
-	didAuthenticate.setDIDScope(DIDScopeType.GLOBAL);
-	didAuthenticate.setAuthenticationProtocolData(new DIDAuthenticationDataType());
-	didAuthenticate.getAuthenticationProtocolData().setProtocol(didGetResponse.getDIDStructure().getDIDMarker().getProtocol());
-	DIDAuthenticateResponse didAuthenticateResponse = (DIDAuthenticateResponse) dispatcher.deliver(didAuthenticate);
-	WSHelper.checkResult(didAuthenticateResponse);
     }
 
 }

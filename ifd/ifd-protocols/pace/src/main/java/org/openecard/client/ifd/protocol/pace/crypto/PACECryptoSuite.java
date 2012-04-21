@@ -27,7 +27,6 @@ import org.openecard.bouncycastle.math.ec.ECPoint;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.eac.*;
 
-
 /**
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
@@ -60,8 +59,7 @@ public final class PACECryptoSuite {
      */
     public byte[] decryptNonce(byte[] keyData, byte[] nonceData) throws GeneralSecurityException {
 	byte[] ret = new byte[16];
-	byte[] nonce = ByteUtils.cut(nonceData, 0, 4);
-
+	byte[] nonce = ByteUtils.cut(nonceData, 4, nonceData.length - 4);
 	try {
 	    Cipher c = Cipher.getInstance("AES/CBC/NoPadding");
 	    SecretKeySpec skeySpec = new SecretKeySpec(keyData, "AES");
@@ -115,5 +113,4 @@ public final class PACECryptoSuite {
 	    throw new IllegalArgumentException();
 	}
     }
-
 }

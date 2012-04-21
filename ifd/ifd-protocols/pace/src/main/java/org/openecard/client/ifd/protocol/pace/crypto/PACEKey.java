@@ -29,7 +29,6 @@ import org.openecard.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.openecard.bouncycastle.math.ec.ECPoint;
 import org.openecard.client.common.util.ByteUtils;
 
-
 /**
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
@@ -56,7 +55,7 @@ public final class PACEKey {
      * @return Decoded key
      */
     public byte[] decodePublicKey(byte[] data) {
-	byte[] keyBytes = ByteUtils.cut(data, 0, 4);
+	byte[] keyBytes = ByteUtils.cut(data, 4, data.length - 4);
 
 	if (pdp.isECDH()) {
 	    ECParameterSpec p = (ECParameterSpec) pdp.getParameter();
@@ -146,5 +145,4 @@ public final class PACEKey {
 	    throw new IllegalArgumentException();
 	}
     }
-
 }

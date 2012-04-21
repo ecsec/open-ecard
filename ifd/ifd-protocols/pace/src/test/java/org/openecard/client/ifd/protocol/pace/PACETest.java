@@ -22,49 +22,56 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.activation.UnsupportedDataTypeException;
 import javax.xml.bind.JAXBException;
-import javax.xml.parsers.ParserConfigurationException;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.ifd.anytype.AuthDataMap;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.ifd.scio.wrapper.SCChannel;
+import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.WSMarshallerFactory;
 import org.xml.sax.SAXException;
-
 
 /**
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class PACETest {
-
+    
     private static final Logger logger = Logger.getLogger("Test");
 
-    @Ignore
+//    @Ignore
     @Test
     public void executePACE_PIN() throws UnsupportedDataTypeException, JAXBException, SAXException, WSMarshallerException {
 	// Setup logger
 	ConsoleHandler ch = new ConsoleHandler();
 	ch.setLevel(Level.FINEST);
-	LogManager.getLogger("PACE").addHandler(ch);
+	logger.setLevel(Level.ALL);
+	logger.addHandler(ch);
+	LogManager.getLogger(PACEImplementation.class.getName()).addHandler(ch);
+	LogManager.getLogger(PACEImplementation.class.getName()).setLevel(Level.FINEST);
 	LogManager.getLogger(SCChannel.class.getName()).addHandler(ch);
-
-//        LogManager.getLogger("Test").addHandler(ch);
-
+	LogManager.getLogger(SCChannel.class.getName()).setLevel(Level.FINEST);
+	
+	ClientEnv env = new ClientEnv();
+	MessageDispatcher dispatcher = new MessageDispatcher(env);
 	IFD ifd = new IFD();
+	
+	env.setIFD(ifd);
+	env.setDispatcher(dispatcher);
+	ifd.setDispatcher(dispatcher);
 	ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
+	
 	EstablishContext eCtx = new EstablishContext();
 	byte[] ctxHandle = ifd.establishContext(eCtx).getContextHandle();
-
+	
 	ListIFDs listIFDs = new ListIFDs();
 	listIFDs.setContextHandle(ctxHandle);
 	String ifdName = ifd.listIFDs(listIFDs).getIFDName().get(0);
-
+	
 	Connect connect = new Connect();
 	connect.setContextHandle(ctxHandle);
 	connect.setIFDName(ifdName);
@@ -83,24 +90,9 @@ public class PACETest {
 		+ "</iso:EstablishChannel>";
 	WSMarshaller m = WSMarshallerFactory.createInstance();
 	EstablishChannel eCh = (EstablishChannel) m.unmarshal(m.str2doc(xmlCall));
-
+	
 	EstablishChannelResponse eChR = ifd.establishChannel(eCh);
-
-	DIDAuthenticationDataType data = eChR.getAuthenticationProtocolData();
-	System.out.println(data.getClass());
-	AuthDataMap map;
-	try {
-	    map = new AuthDataMap(data);
-	    System.out.println(ByteUtils.toHexString(map.getContentAsBytes("EFCardAccess")));
-	} catch (ParserConfigurationException ex) {
-	    Logger.getLogger(PACETest.class.getName()).log(Level.SEVERE, null, ex);
-	}
-
-
-//        PACEInputType pi = new PACECapabilities(slotHandle)
+	
 	logger.log(Level.INFO, eChR.getResult().getResultMajor());
-	System.out.println(eChR.getResult().getResultMajor());
-	System.out.println(eChR.getResult().getResultMessage().getValue());
     }
-
 }

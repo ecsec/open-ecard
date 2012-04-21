@@ -196,7 +196,7 @@ public class PACEImplementation {
 
 	if (mapping instanceof PACEGenericMapping) {
 	    PACEGenericMapping gm = (PACEGenericMapping) mapping;
-	    pkMapPCD = gm.getMappingKey().getEncodedPrivateKey();
+	    pkMapPCD = gm.getMappingKey().getEncodedPublicKey();
 
 	} else if (mapping instanceof PACEIntegratedMapping) {
 	    throw new UnsupportedOperationException("Not implemented yet.");

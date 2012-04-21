@@ -18,11 +18,11 @@ package org.openecard.client.richclient.activation;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openecard.client.richclient.RichClient;
 import org.openecard.client.richclient.activation.messages.ActivationApplicationRequest;
 import org.openecard.client.richclient.activation.messages.ActivationApplicationResponse;
 import org.openecard.client.richclient.activation.messages.ActivationRequest;
 import org.openecard.client.richclient.activation.messages.ActivationResponse;
-import org.openecard.client.richclient.RichClient;
 
 
 /**

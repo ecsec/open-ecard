@@ -21,7 +21,6 @@ import org.openecard.client.common.sal.ProtocolFactory;
 import org.openecard.client.gui.UserConsent;
 
 
-
 /**
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>

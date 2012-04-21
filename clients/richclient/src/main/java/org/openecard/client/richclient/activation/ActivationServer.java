@@ -28,7 +28,7 @@ import org.openecard.client.common.logging.LogManager;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public final class ActivationServer implements Runnable {
+public class ActivationServer implements Runnable {
 
     private static final Logger logger = LogManager.getLogger(ActivationServer.class.getName());
 

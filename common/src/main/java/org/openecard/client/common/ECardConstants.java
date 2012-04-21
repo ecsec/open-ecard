@@ -28,20 +28,20 @@ public class ECardConstants {
 
     public static final String UNKNOWN_CARD = "http://bsi.bund.de/cif/unknown";
     public static final String PAOS_NEXT = ECARD_PREFIX + "PAOS/GetNextCommand";
-    
+
     public static final String ACTOR_NEXT = "http://schemas.xmlsoap.org/soap/actor/next";
     public static final String SOAP_ENVELOPE = "http://schemas.xmlsoap.org/soap/envelope/";
     public static final String PAOS_VERSION_20 = "urn:liberty:paos:2006-08";
     public static final String WS_ADDRESSING = "http://www.w3.org/2005/03/addressing";
-    
+
     public static final String HEADER_KEY_ACCEPT = "Accept";
     public static final String HEADER_KEY_PAOS = "PAOS";
     public static final String HEADER_KEY_CONTENT_TYPE = "Content-Type";
-    
+
     public static final String HEADER_VALUE_ACCEPT = "text/html; application/vnd.paos+xml";
     public static final String HEADER_VALUE_PAOS = "ver=\"urn:liberty:2003-08\",\"urn:liberty:2006-08\";" + PAOS_NEXT;
     public static final String HEADER_VALUE_CONTENT_TYPE = "text/xml";
-    
+
     public static final String DEFAULT_AUTHENTICATION_REQUEST_MESSAGE = "Please enter your PIN";
     public static final String DEFAULT_SUCCESS_MESSAGE = "PIN entry successful";
     public static final String DEFAULT_AUTHENTICATION_FAILED_MESSAGE = "PIN entry incorrect";
@@ -164,6 +164,12 @@ public class ECardConstants {
 	    public static final String UNKNOWN_IFD = IFD_PREFIX + "/terminal#unknownIFD";
 	    public static final String UNKNOWN_SLOT = IFD_PREFIX + "/terminal#unknownSlot";
 
+	    // Not yet specified by the BSI
+	    public static final String PASSWORD_SUSPENDED = IFD_PREFIX + "/passwordSuspended";
+	    public static final String PASSWORD_BLOCKED = IFD_PREFIX + "/passwordBlocked";
+	    public static final String PASSWORD_ERROR = IFD_PREFIX + "/passwordError";
+	    public static final String PASSWORD_DEACTIVATED = IFD_PREFIX + "/passwordDeactivated";
+	    public static final String AUTHENTICATION_FAILED = IFD_PREFIX + "/authenticationFailed";
 
 	    public static class IO {
 

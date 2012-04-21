@@ -18,6 +18,7 @@ package org.openecard.client.ifd.protocol.pace;
 import java.security.GeneralSecurityException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper.WSException;
 import org.openecard.client.common.apdu.GeneralAuthenticate;
 import org.openecard.client.common.apdu.common.CardCommandAPDU;
@@ -31,7 +32,6 @@ import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
 import org.openecard.client.ifd.protocol.pace.apdu.MSESetATPACE;
 import org.openecard.client.ifd.protocol.pace.crypto.*;
 
-
 /**
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
@@ -39,7 +39,6 @@ import org.openecard.client.ifd.protocol.pace.crypto.*;
 public class PACEImplementation {
 
     private static final Logger logger = LogManager.getLogger(PACEImplementation.class.getName());
-
     // Communication
     private Dispatcher dispatcher;
     private KDF kdf;
@@ -110,34 +109,40 @@ public class PACEImplementation {
 		logger.exiting(this.getClass().getName(), "mseSetAT");
 	    }
 	    // </editor-fold>
-	    // Continue with Step 2
+
+	    // Continue with step 2
 	    generalAuthenticateEncryptedNonce();
 	} catch (WSException ex) {
-	    //TODO ckeck
 	    int sw = response.getSW();
 
 	    if (sw == PACEConstants.PASSWORD_DEACTIVATED) {
 		// Password is deactivated
-		throw new ProtocolException("The password is deactivated.");
+		throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_DEACTIVATED);
 	    } else if ((sw & (short) 0xFFF0) == (short) 0x63C0) {
 		retryCounter = (byte) (sw & (short) 0x000F);
 		if (retryCounter == (byte) 0x00) {
-		    // The password is blocked.
+		    // The password is blocked
 		    logger.log(Level.WARNING, "The password is blocked. The password MUST be unblocked.");
-		    // GeneralAuthenticateEncryptedNonce();
+		    if (passwordType == PACEConstants.PASSWORD_PUK) {
+			generalAuthenticateEncryptedNonce();
+		    } else {
+			throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_BLOCKED);
+		    }
 		} else if (retryCounter == (byte) 0x01) {
-		    // The password is suspended.
+		    // The password is suspended
 		    logger.log(Level.WARNING, "The password is suspended. The password MUST be resumed.");
-		    //FIXME test me1
-//                    if (passwordType != (byte) 0x03) {
-//                        GeneralAuthenticateEncryptedNonce();
-//                    }
+		    if (passwordType == PACEConstants.PASSWORD_CAN) {
+			generalAuthenticateEncryptedNonce();
+		    } else {
+			throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED);
+		    }
 		} else if (retryCounter == (byte) 0x02) {
-		    // The password is suspended.
+		    // The password is suspended
 		    logger.log(Level.WARNING, "The password is wrong.");
 		    generalAuthenticateEncryptedNonce();
 		}
 	    }
+	    throw ex;
 	}
     }
 
@@ -317,7 +322,6 @@ public class PACEImplementation {
 	AuthenticationToken tokenPICC = new AuthenticationToken(psi);
 	tokenPICC.generateToken(keyMAC, keyPCD.getEncodedPublicKey());
 
-
 	try {
 	    response = gaMutualAuth.transmit(dispatcher, slotHandle);
 
@@ -336,25 +340,29 @@ public class PACEImplementation {
 		throw new GeneralSecurityException("Cannot verify authentication token.");
 	    }
 	} catch (WSException ex) {
-	    //TODO
 	    int sw = response.getSW();
+
 	    if ((sw & (short) 0xFFF0) == (short) 0x63C0) {
 		retryCounter = (byte) (sw & (short) 0x000F);
 		if (retryCounter == (byte) 0x00) {
 		    // The password is blocked.
-		    throw new ProtocolException("Password is blocked");
+		    logger.log(Level.WARNING, "The password is blocked. The password MUST be unblocked.");
+		    throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_BLOCKED);
 		} else if (retryCounter == (byte) 0x01) {
 		    // The password is suspended.
-		    throw new ProtocolException("Password is suspended");
+		    logger.log(Level.WARNING, "The password is suspended. The password MUST be resumed.");
+		    throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED);
 		} else if (retryCounter == (byte) 0x02) {
 		    // The password is wrong.
-		    throw new ProtocolException("Password is wrong");
+		    logger.log(Level.WARNING, "The password is wrong.");
+		    throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_ERROR);
 		}
 	    } else {
-		throw new ProtocolException("Authentication failed");
+		throw new ProtocolException(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED);
 	    }
+	    throw ex;
 	} catch (Throwable e) {
-	    throw new ProtocolException("Authentication failed");
+	    throw new ProtocolException(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED);
 	}
     }
 
@@ -411,5 +419,4 @@ public class PACEImplementation {
     public byte getRetryCounter() {
 	return retryCounter;
     }
-
 }

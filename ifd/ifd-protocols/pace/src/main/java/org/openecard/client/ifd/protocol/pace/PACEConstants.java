@@ -15,7 +15,6 @@
  */
 package org.openecard.client.ifd.protocol.pace;
 
-
 /**
  * Defines constants for the PACE protocol.
  *
@@ -25,6 +24,11 @@ class PACEConstants {
 
     // EF.CardAccess file identifier
     public static final short EF_CARDACCESS_FID = (short) 0x011C;
+    // PACE password types
+    public static final byte PASSWORD_MRZ = (byte) 0x01;
+    public static final byte PASSWORD_CAN = (byte) 0x02;
+    public static final byte PASSWORD_PIN = (byte) 0x03;
+    public static final byte PASSWORD_PUK = (byte) 0x04;
     // MSE:Set AT error handling
     public static final short PASSWORD_SUSPENDED = (short) 0x63C1;
     public static final short PASSWORD_BLOCKED = (short) 0x63C0;
@@ -37,5 +41,4 @@ class PACEConstants {
     public static final short CONDITIONS_OF_USE_NOT_SATISFIED = (short) 0x6985;
     public static final short CMD_FAILED = (short) 0x6300;
     public static final short INCORRECT_PARA = (short) 0x6300;
-
 }

@@ -19,9 +19,9 @@ import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.activation.UnsupportedDataTypeException;
 import javax.xml.bind.JAXBException;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
@@ -33,45 +33,44 @@ import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.WSMarshallerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
- *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class PACETest {
-    
-    private static final Logger logger = Logger.getLogger("Test");
 
-//    @Ignore
+    private static final Logger logger = LoggerFactory.getLogger(PACETest.class);
+
+    @Ignore
     @Test
     public void executePACE_PIN() throws UnsupportedDataTypeException, JAXBException, SAXException, WSMarshallerException {
 	// Setup logger
 	ConsoleHandler ch = new ConsoleHandler();
 	ch.setLevel(Level.FINEST);
-	logger.setLevel(Level.ALL);
-	logger.addHandler(ch);
 	LogManager.getLogger(PACEImplementation.class.getName()).addHandler(ch);
 	LogManager.getLogger(PACEImplementation.class.getName()).setLevel(Level.FINEST);
 	LogManager.getLogger(SCChannel.class.getName()).addHandler(ch);
 	LogManager.getLogger(SCChannel.class.getName()).setLevel(Level.FINEST);
-	
+
 	ClientEnv env = new ClientEnv();
 	MessageDispatcher dispatcher = new MessageDispatcher(env);
 	IFD ifd = new IFD();
-	
+
 	env.setIFD(ifd);
 	env.setDispatcher(dispatcher);
 	ifd.setDispatcher(dispatcher);
 	ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
-	
+
 	EstablishContext eCtx = new EstablishContext();
 	byte[] ctxHandle = ifd.establishContext(eCtx).getContextHandle();
-	
+
 	ListIFDs listIFDs = new ListIFDs();
 	listIFDs.setContextHandle(ctxHandle);
 	String ifdName = ifd.listIFDs(listIFDs).getIFDName().get(0);
-	
+
 	Connect connect = new Connect();
 	connect.setContextHandle(ctxHandle);
 	connect.setIFDName(ifdName);
@@ -90,9 +89,9 @@ public class PACETest {
 		+ "</iso:EstablishChannel>";
 	WSMarshaller m = WSMarshallerFactory.createInstance();
 	EstablishChannel eCh = (EstablishChannel) m.unmarshal(m.str2doc(xmlCall));
-	
+
 	EstablishChannelResponse eChR = ifd.establishChannel(eCh);
-	
-	logger.log(Level.INFO, eChR.getResult().getResultMajor());
+
+	logger.info("{}", eChR.getResult().getResultMajor());
     }
 }

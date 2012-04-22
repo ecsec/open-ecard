@@ -18,18 +18,17 @@ package org.openecard.client.ifd.protocol.pace.crypto;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.bouncycastle.crypto.engines.AESEngine;
 import org.openecard.bouncycastle.crypto.macs.CMac;
 import org.openecard.bouncycastle.crypto.params.KeyParameter;
-import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TagClass;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.eac.PACESecurityInfos;
 import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * See BSI-TR-03110, version 2.10, part 3, section B.1.
@@ -38,7 +37,7 @@ import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
  */
 public final class AuthenticationToken {
 
-    private static final Logger logger = LogManager.getLogger(AuthenticationToken.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationToken.class.getName());
     // Byte encoded token
     private byte[] token = new byte[8];
     // Certificate Authority Reference (CAR)
@@ -202,11 +201,10 @@ public final class AuthenticationToken {
 	    ret = macObject.toBER(true);
 
 	} catch (Throwable e) {
-	    logger.log(Level.SEVERE, "Exception", e);
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
 	    throw new GeneralSecurityException(e);
 	}
 
 	return ret;
     }
-
 }

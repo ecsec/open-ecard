@@ -19,7 +19,6 @@ import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ifd.Protocol;
 import org.openecard.client.common.ifd.ProtocolFactory;
 
-
 /**
  * Implements a ProtocolFactory for the PACE protocol.
  *
@@ -36,5 +35,4 @@ public class PACEProtocolFactory implements ProtocolFactory {
     public Protocol createInstance() {
 	return new PACEProtocol();
     }
-
 }

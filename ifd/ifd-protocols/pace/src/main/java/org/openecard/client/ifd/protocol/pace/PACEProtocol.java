@@ -15,12 +15,9 @@
  */
 package org.openecard.client.ifd.protocol.pace;
 
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.apdu.utils.CardUtils;
@@ -29,29 +26,31 @@ import org.openecard.client.common.ifd.anytype.PACEInputType;
 import org.openecard.client.common.ifd.anytype.PACEOutputType;
 import org.openecard.client.common.ifd.protocol.exception.ProtocolException;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.crypto.common.asn1.eac.PACESecurityInfos;
 import org.openecard.client.crypto.common.asn1.eac.SecurityInfos;
 import org.openecard.client.crypto.common.asn1.eac.ef.EFCardAccess;
 import org.openecard.client.gui.UserConsent;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class PACEProtocol implements Protocol {
 
-    private static final Logger logger = LogManager.getLogger(PACEProtocol.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(PACEProtocol.class.getName());
     private SecureMessaging sm;
 
     @Override
     public EstablishChannelResponse establish(EstablishChannel req, Dispatcher dispatcher, UserConsent gui) {
-	DIDAuthenticationDataType authData = req.getAuthenticationProtocolData();
+
+	EstablishChannelResponse response = new EstablishChannelResponse();
 
 	try {
 	    // Get parameters for the PACE protocol
-	    PACEInputType paceInput = new PACEInputType(authData);
+	    PACEInputType paceInput = new PACEInputType(req.getAuthenticationProtocolData());
+
 	    byte passwordType = paceInput.getPINID();
 	    byte[] chat = paceInput.getCHAT();
 	    byte[] pin;
@@ -91,27 +90,28 @@ public class PACEProtocol implements Protocol {
 	    paceOutput.setRetryCounter(pace.getRetryCounter());
 
 	    // Create EstablishChannelResponse
-	    EstablishChannelResponse response = new EstablishChannelResponse();
+
 	    response.setResult(WSHelper.makeResultOK());
 	    response.setAuthenticationProtocolData(paceOutput.getAuthDataType());
 
-	    return response;
 	} catch (UnsupportedEncodingException ex) {
-	    logger.logp(Level.FINER, this.getClass().getName(), "", "Exception", ex);
-	    return WSHelper.makeResponse(
-		    EstablishChannelResponse.class,
-		    WSHelper.makeResultError(ECardConstants.Minor.IFD.UNKNOWN_PIN_FORMAT, "Cannot encode the PIN in ISO-8859-1 charset."));
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    // </editor-fold>
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.IFD.UNKNOWN_PIN_FORMAT, "Cannot encode the PIN in ISO-8859-1 charset."));
 	} catch (ProtocolException ex) {
-	    logger.logp(Level.FINER, this.getClass().getName(), "", "Exception", ex);
-	    return WSHelper.makeResponse(
-		    EstablishChannelResponse.class,
-		    WSHelper.makeResult(ex));
-	} catch (Throwable t) {
-	    logger.logp(Level.FINER, this.getClass().getName(), "", "Exception", t);
-	    return WSHelper.makeResponse(
-		    EstablishChannelResponse.class,
-		    WSHelper.makeResult(t));
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    // </editor-fold>
+	    response.setResult(WSHelper.makeResult(ex));
+	} catch (Throwable ex) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    // </editor-fold>
+	    response.setResult(WSHelper.makeResult(ex));
 	}
+
+	return response;
     }
 
     @Override
@@ -119,9 +119,11 @@ public class PACEProtocol implements Protocol {
 	try {
 	    return sm.encrypt(commandAPDU);
 	} catch (Exception ex) {
-	    logger.log(Level.SEVERE, "Exception", ex);
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    // </editor-fold>
+	    throw new RuntimeException(ex);
 	}
-	return null;
     }
 
     @Override
@@ -129,9 +131,10 @@ public class PACEProtocol implements Protocol {
 	try {
 	    return sm.decrypt(responseAPDU);
 	} catch (Exception ex) {
-	    logger.log(Level.SEVERE, "Exception", ex);
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    // </editor-fold>
+	    throw new RuntimeException(ex);
 	}
-	return null;
     }
-
 }

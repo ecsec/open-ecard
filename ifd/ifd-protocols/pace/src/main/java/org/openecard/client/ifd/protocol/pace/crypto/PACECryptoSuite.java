@@ -17,23 +17,23 @@ package org.openecard.client.ifd.protocol.pace.crypto;
 
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.openecard.bouncycastle.jce.spec.ECParameterSpec;
 import org.openecard.bouncycastle.math.ec.ECPoint;
+import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.eac.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class PACECryptoSuite {
 
-    private static final Logger logger = Logger.getLogger(PACECryptoSuite.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(PACECryptoSuite.class.getName());
     private PACESecurityInfos psi;
     private PACEDomainParameter domainParameter;
 
@@ -67,7 +67,7 @@ public final class PACECryptoSuite {
 	    c.init(Cipher.DECRYPT_MODE, skeySpec, params);
 	    c.doFinal(nonce, 0, nonce.length, ret);
 	} catch (Throwable e) {
-	    logger.log(Level.SEVERE, "Exception", e);
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
 	    throw new GeneralSecurityException(e);
 	}
 	return ret;

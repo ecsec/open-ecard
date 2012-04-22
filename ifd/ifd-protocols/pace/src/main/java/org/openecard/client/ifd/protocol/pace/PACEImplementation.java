@@ -16,8 +16,6 @@
 package org.openecard.client.ifd.protocol.pace;
 
 import java.security.GeneralSecurityException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper.WSException;
 import org.openecard.client.common.apdu.GeneralAuthenticate;
@@ -25,20 +23,21 @@ import org.openecard.client.common.apdu.common.CardCommandAPDU;
 import org.openecard.client.common.apdu.common.CardResponseAPDU;
 import org.openecard.client.common.ifd.protocol.exception.ProtocolException;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.eac.PACESecurityInfos;
 import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
 import org.openecard.client.ifd.protocol.pace.apdu.MSESetATPACE;
 import org.openecard.client.ifd.protocol.pace.crypto.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class PACEImplementation {
 
-    private static final Logger logger = LogManager.getLogger(PACEImplementation.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(PACEImplementation.class);
     // Communication
     private Dispatcher dispatcher;
     private KDF kdf;
@@ -93,9 +92,7 @@ public class PACEImplementation {
      */
     private void mseSetAT(byte passwordType, byte[] chat) throws Exception {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (logger.isLoggable(Level.FINER)) {
-	    logger.entering(this.getClass().getName(), "mseSetAT");
-	}
+	logger.trace(LoggingConstants.ENTER, "mseSetAT");
 	// </editor-fold>
 
 	byte[] oid = ObjectIdentifierUtils.getValue(psi.getPACEInfo().getProtocol());
@@ -103,16 +100,15 @@ public class PACEImplementation {
 
 	try {
 	    response = mseSetAT.transmit(dispatcher, slotHandle);
-
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (logger.isLoggable(Level.FINER)) {
-		logger.exiting(this.getClass().getName(), "mseSetAT");
-	    }
+	    logger.trace(LoggingConstants.EXIT, "mseSetAT");
 	    // </editor-fold>
-
 	    // Continue with step 2
 	    generalAuthenticateEncryptedNonce();
 	} catch (WSException ex) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    // </editor-fold>
 	    int sw = response.getSW();
 
 	    if (sw == PACEConstants.PASSWORD_DEACTIVATED) {
@@ -122,7 +118,7 @@ public class PACEImplementation {
 		retryCounter = (byte) (sw & (short) 0x000F);
 		if (retryCounter == (byte) 0x00) {
 		    // The password is blocked
-		    logger.log(Level.WARNING, "The password is blocked. The password MUST be unblocked.");
+		    logger.warn("The password is blocked. The password MUST be unblocked.");
 		    if (passwordType == PACEConstants.PASSWORD_PUK) {
 			generalAuthenticateEncryptedNonce();
 		    } else {
@@ -130,7 +126,7 @@ public class PACEImplementation {
 		    }
 		} else if (retryCounter == (byte) 0x01) {
 		    // The password is suspended
-		    logger.log(Level.WARNING, "The password is suspended. The password MUST be resumed.");
+		    logger.warn("The password is suspended. The password MUST be resumed.");
 		    if (passwordType == PACEConstants.PASSWORD_CAN) {
 			generalAuthenticateEncryptedNonce();
 		    } else {
@@ -138,7 +134,7 @@ public class PACEImplementation {
 		    }
 		} else if (retryCounter == (byte) 0x02) {
 		    // The password is suspended
-		    logger.log(Level.WARNING, "The password is wrong.");
+		    logger.warn("The password is wrong.");
 		    generalAuthenticateEncryptedNonce();
 		}
 	    }
@@ -151,9 +147,7 @@ public class PACEImplementation {
      */
     private void generalAuthenticateEncryptedNonce() throws Exception {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (logger.isLoggable(Level.FINER)) {
-	    logger.entering(this.getClass().getName(), "generalAuthenticateEncryptedNonce");
-	}
+	logger.trace(LoggingConstants.ENTER, "generalAuthenticateEncryptedNonce");
 	// </editor-fold>
 
 	CardCommandAPDU gaEncryptedNonce = new GeneralAuthenticate();
@@ -166,21 +160,19 @@ public class PACEImplementation {
 	    response = gaEncryptedNonce.transmit(dispatcher, slotHandle);
 	    s = cryptoSuite.decryptNonce(keyPI, response.getData());
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (logger.isLoggable(Level.FINER)) {
-		logger.exiting(this.getClass().getName(), "generalAuthenticateEncryptedNonce");
-	    }
+	    logger.trace(LoggingConstants.EXIT, "generalAuthenticateEncryptedNonce");
 	    // </editor-fold>
 
 	    // Continue with Step 3
 	    generalAuthenticateMapNonce();
 	} catch (WSException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.logp(Level.SEVERE, this.getClass().getName(), "generalAuthenticateEncryptedNonce", e.getMessage(), e);
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
 	    // </editor-fold>
 	    throw new ProtocolException(e.getResult());
 	} catch (GeneralSecurityException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.logp(Level.SEVERE, this.getClass().getName(), "generalAuthenticateEncryptedNonce", e.getMessage(), e);
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
 	    // </editor-fold>
 	    throw new ProtocolException(e.getMessage());
 	}
@@ -191,9 +183,7 @@ public class PACEImplementation {
      */
     private void generalAuthenticateMapNonce() throws Exception {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (logger.isLoggable(Level.FINER)) {
-	    logger.entering(this.getClass().getName(), "generalAuthenticateMapNonce");
-	}
+	logger.trace(LoggingConstants.ENTER, "generalAuthenticateMapNonce");
 	// </editor-fold>
 
 	byte[] pkMapPCD = null;
@@ -214,7 +204,7 @@ public class PACEImplementation {
 	    response = gaMapNonce.transmit(dispatcher, slotHandle);
 	} catch (WSException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.logp(Level.SEVERE, this.getClass().getName(), "generalAuthenticateMapNonce", e.getMessage(), e);
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
 	    // </editor-fold>
 	    throw new ProtocolException(e.getResult());
 	}
@@ -236,9 +226,7 @@ public class PACEImplementation {
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (logger.isLoggable(Level.FINER)) {
-	    logger.exiting(this.getClass().getName(), "generalAuthenticateMapNonce");
-	}
+	logger.trace(LoggingConstants.EXIT, "generalAuthenticateMapNonce");
 	// </editor-fold>
 
 	// Continue with Step 4
@@ -252,12 +240,9 @@ public class PACEImplementation {
      */
     private void generalAuthenticateKeyAgreement() throws Exception {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (logger.isLoggable(Level.FINER)) {
-	    logger.entering(this.getClass().getName(), "generalAuthenticateKeyAgreement");
-	}
+	logger.trace(LoggingConstants.ENTER, "generalAuthenticateKeyAgreement");
 	// </editor-fold>
 
-	// genera key !!
 	keyPCD = new PACEKey(domainParameter);
 	keyPCD.generateKeyPair();
 
@@ -273,9 +258,7 @@ public class PACEImplementation {
 
 	    if (!ByteUtils.compare(keyPKPCD, keyPKPICC)) {
 		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (logger.isLoggable(Level.FINER)) {
-		    logger.exiting(this.getClass().getName(), "generalAuthenticateKeyAgreement");
-		}
+		logger.trace(LoggingConstants.EXIT, "generalAuthenticateKeyAgreement");
 		// </editor-fold>
 		// Continue with Step 5
 		generalAuthenticateMutualAuthentication();
@@ -284,12 +267,12 @@ public class PACEImplementation {
 	    }
 	} catch (WSException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.logp(Level.SEVERE, this.getClass().getName(), "generalAuthenticateKeyAgreement", e.getMessage(), e);
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
 	    // </editor-fold>
 	    throw new ProtocolException(e.getResult());
 	} catch (GeneralSecurityException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.logp(Level.SEVERE, this.getClass().getName(), "generalAuthenticateKeyAgreement", e.getMessage(), e);
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
 	    // </editor-fold>
 	    throw new ProtocolException(e.getMessage());
 	}
@@ -300,9 +283,7 @@ public class PACEImplementation {
      */
     private void generalAuthenticateMutualAuthentication() throws Exception {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (logger.isLoggable(Level.FINER)) {
-	    logger.entering(this.getClass().getName(), "generalAuthenticateMutualAuthentication");
-	}
+	logger.trace(LoggingConstants.ENTER, "generalAuthenticateMutualAuthentication");
 	// </editor-fold>
 
 	// Calculate shared key k
@@ -330,31 +311,32 @@ public class PACEImplementation {
 		currentCAR = tokenPICC.getCurrentCAR();
 		previousCAR = tokenPCD.getPreviousCAR();
 
-		logger.log(Level.FINER, "Authentication successful");
+		logger.trace("PACE successful");
 		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (logger.isLoggable(Level.FINER)) {
-		    logger.exiting(this.getClass().getName(), "generalAuthenticateMutualAuthentication");
-		}
+		logger.trace(LoggingConstants.EXIT, "generalAuthenticateMutualAuthentication");
 		// </editor-fold>
 	    } else {
 		throw new GeneralSecurityException("Cannot verify authentication token.");
 	    }
 	} catch (WSException ex) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    // </editor-fold>
 	    int sw = response.getSW();
 
 	    if ((sw & (short) 0xFFF0) == (short) 0x63C0) {
 		retryCounter = (byte) (sw & (short) 0x000F);
 		if (retryCounter == (byte) 0x00) {
 		    // The password is blocked.
-		    logger.log(Level.WARNING, "The password is blocked. The password MUST be unblocked.");
+		    logger.warn("The password is blocked. The password MUST be unblocked.");
 		    throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_BLOCKED);
 		} else if (retryCounter == (byte) 0x01) {
 		    // The password is suspended.
-		    logger.log(Level.WARNING, "The password is suspended. The password MUST be resumed.");
+		    logger.warn("The password is suspended. The password MUST be resumed.");
 		    throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED);
 		} else if (retryCounter == (byte) 0x02) {
 		    // The password is wrong.
-		    logger.log(Level.WARNING, "The password is wrong.");
+		    logger.warn("The password is wrong.");
 		    throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_ERROR);
 		}
 	    } else {
@@ -362,6 +344,9 @@ public class PACEImplementation {
 	    }
 	    throw ex;
 	} catch (Throwable e) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    // </editor-fold>
 	    throw new ProtocolException(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED);
 	}
     }

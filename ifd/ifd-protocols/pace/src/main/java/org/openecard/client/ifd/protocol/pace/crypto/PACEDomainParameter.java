@@ -22,9 +22,7 @@ import org.openecard.client.crypto.common.asn1.eac.PACEInfo;
 import org.openecard.client.crypto.common.asn1.eac.PACESecurityInfos;
 import org.openecard.client.crypto.common.asn1.eac.StandardizedDomainParameters;
 
-
 /**
- *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class PACEDomainParameter {
@@ -108,5 +106,4 @@ public final class PACEDomainParameter {
 	    throw new IllegalArgumentException("Cannot load domain parameter");
 	}
     }
-
 }

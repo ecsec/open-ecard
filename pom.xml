@@ -2,111 +2,136 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.openecard</groupId>
-  <artifactId>client</artifactId>
-  <packaging>pom</packaging>
-  <version>0.0.3-SNAPSHOT</version>
-  <name>eCard Client</name>
+    <groupId>org.openecard</groupId>
+    <artifactId>client</artifactId>
+    <packaging>pom</packaging>
+    <version>0.0.3-SNAPSHOT</version>
+    <name>eCard Client</name>
 
-  <licenses>
-    <license>
-      <name>Apache License Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-    </license>
-  </licenses>
+    <licenses>
+	<license>
+	    <name>Apache License Version 2.0</name>
+	    <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+	</license>
+    </licenses>
 
-  <modules>
-    <module>wsdef</module>
-    <module>common</module>
-    <module>crypto</module>
-    <module>saml</module>
-    <module>esign</module>
-    <module>transport</module>
-    <module>gui</module>
-    <module>ifd</module>
-    <module>sal</module>
-    <module>management</module>
-    <module>recognition</module>
-    <module>event-manager</module>
-    <!-- browser artifacts -->
-    <module>browser</module>
-    <!-- client assemblies -->
-    <module>clients</module>
-  </modules>
+    <modules>
+	<module>wsdef</module>
+	<module>common</module>
+	<module>crypto</module>
+	<module>saml</module>
+	<module>esign</module>
+	<module>transport</module>
+	<module>gui</module>
+	<module>ifd</module>
+	<module>sal</module>
+	<module>management</module>
+	<module>recognition</module>
+	<module>event-manager</module>
+	<!-- browser artifacts -->
+	<module>browser</module>
+	<!-- client assemblies -->
+	<module>clients</module>
+    </modules>
 
-  <distributionManagement>
-    <repository>
-      <id>openecard-repos</id>
-      <name>Openecard Release Repo</name>
-      <url>http://mvn.vserver-001.urospace.de/content/repositories/openecard-release</url>
-    </repository>
-    <snapshotRepository>
-      <id>openecard-repos</id>
-      <name>Openecard Snapshot Repo</name>
-      <url>http://mvn.vserver-001.urospace.de/content/repositories/openecard-snapshot</url>
-    </snapshotRepository>
-  </distributionManagement>
-  <repositories>
-    <repository>
-      <id>openecard-repos</id>
-      <name>Openecard Repos</name>
-      <url>http://mvn.vserver-001.urospace.de/content/groups/openecard-public</url>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>openecard-repos</id>
-      <url>http://mvn.vserver-001.urospace.de/content/groups/openecard-public</url>
-    </pluginRepository>
-  </pluginRepositories>
+    <distributionManagement>
+	<repository>
+	    <id>openecard-repos</id>
+	    <name>Openecard Release Repo</name>
+	    <url>http://mvn.vserver-001.urospace.de/content/repositories/openecard-release</url>
+	</repository>
+	<snapshotRepository>
+	    <id>openecard-repos</id>
+	    <name>Openecard Snapshot Repo</name>
+	    <url>http://mvn.vserver-001.urospace.de/content/repositories/openecard-snapshot</url>
+	</snapshotRepository>
+    </distributionManagement>
+    <repositories>
+	<repository>
+	    <id>openecard-repos</id>
+	    <name>Openecard Repos</name>
+	    <url>http://mvn.vserver-001.urospace.de/content/groups/openecard-public</url>
+	</repository>
+    </repositories>
+    <pluginRepositories>
+	<pluginRepository>
+	    <id>openecard-repos</id>
+	    <url>http://mvn.vserver-001.urospace.de/content/groups/openecard-public</url>
+	</pluginRepository>
+    </pluginRepositories>
 
-  <build>
-    <pluginManagement>
-      <plugins>
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-compiler-plugin</artifactId>
-	  <configuration>
-	    <source>1.6</source>
-	    <target>1.6</target>
-	    <encoding>${project.build.sourceEncoding}</encoding>
-	  </configuration>
-	</plugin>
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-resources-plugin</artifactId>
-	  <configuration>
-	    <encoding>${project.build.sourceEncoding}</encoding>
-	  </configuration>
-	</plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
+    <build>
+	<pluginManagement>
+	    <plugins>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-compiler-plugin</artifactId>
+		    <configuration>
+			<source>1.6</source>
+			<target>1.6</target>
+			<encoding>${project.build.sourceEncoding}</encoding>
+		    </configuration>
+		</plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-resources-plugin</artifactId>
+		    <configuration>
+			<encoding>${project.build.sourceEncoding}</encoding>
+		    </configuration>
+		</plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-javadoc-plugin</artifactId>
+		    <version>2.8.1</version>
+		    <configuration>
+			<windowtitle>Open eCard Client ${project.version} API</windowtitle>
+			<show>protected</show>
+			<linksource>true</linksource>
+			<groups>
+			    <group>
+				<title>Open eCard Client Classes</title>
+				<packages>org.openecard.client.*</packages>
+			    </group>
+			    <group>
+				<title>JAXB and JAX-WS</title>
+				<packages>de.bund.bsi.ecard.api._1:iso.std.iso_iec._24727.tech.schema:oasis.names.tc.*:org.etsi.uri.*:org.setcce.schemas.ers:org.w3._*:org.openecard.ws</packages>
+			    </group>
+			    <group>
+				<title>Support Plugins</title>
+				<packages>org.openecard.client.maven.classlist</packages>
+			    </group>
+			</groups>
+			<!-- <excludePackageNames>org.openecard.client.maven.classlist</excludePackageNames> -->
+		    </configuration>
+		</plugin>
+	    </plugins>
+	</pluginManagement>
+    </build>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.6.4</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.10</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-jdk14</artifactId>
-      <version>1.6.4</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+    <dependencies>
+	<dependency>
+	    <groupId>org.slf4j</groupId>
+	    <artifactId>slf4j-api</artifactId>
+	    <version>1.6.4</version>
+	</dependency>
+	<dependency>
+	    <groupId>junit</groupId>
+	    <artifactId>junit</artifactId>
+	    <version>4.10</version>
+	    <scope>test</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.slf4j</groupId>
+	    <artifactId>slf4j-jdk14</artifactId>
+	    <version>1.6.4</version>
+	    <scope>test</scope>
+	</dependency>
+    </dependencies>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+    <properties>
+	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
 </project>

@@ -106,7 +106,7 @@ public class AndroidMarshaller implements WSMarshaller {
     @Override
     public synchronized String doc2str(Node doc) throws TransformerException {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	_logger.trace(_enter, "{}", doc);
+	_logger.trace(_enter, "> {}", doc);
 	// </editor-fold>
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	transformer.transform(new DOMSource(doc), new StreamResult(out));
@@ -117,7 +117,7 @@ public class AndroidMarshaller implements WSMarshaller {
 	    throw new TransformerException(ex);
 	}
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	_logger.trace(_exit, "{}", result);
+	_logger.trace(_exit, "< {}", result);
 	// </editor-fold>
 	return result;
     }
@@ -125,7 +125,7 @@ public class AndroidMarshaller implements WSMarshaller {
     @Override
     public synchronized Document marshal(Object o) throws MarshallingTypeException {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	_logger.trace(_enter, "{}", o);
+	_logger.trace(_enter, "> {}", o);
 	// </editor-fold>
 	Document document = documentBuilder.newDocument();
 	document.setXmlStandalone(true);
@@ -419,7 +419,7 @@ public class AndroidMarshaller implements WSMarshaller {
 	}
 	document.appendChild(rootElement);
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	_logger.trace(_exit, "{}", document);
+	_logger.trace(_exit, "< {}", document);
 	// </editor-fold>
 	return document;
     }
@@ -556,7 +556,7 @@ public class AndroidMarshaller implements WSMarshaller {
     @Override
     public synchronized Object unmarshal(Node n) throws MarshallingTypeException, WSMarshallerException {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	_logger.trace(_enter, "{}", n);
+	_logger.trace(_enter, "> {}", n);
 	// </editor-fold>
 	Document newDoc = null;
 	if (n instanceof Document) {
@@ -579,7 +579,7 @@ public class AndroidMarshaller implements WSMarshaller {
 		if (eventType == XmlPullParser.START_TAG) {
 		    Object obj = parse(parser);
 		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    _logger.trace(_exit, "{}", obj);
+		    _logger.trace(_exit, "< {}", obj);
 		    // </editor-fold>
 		    return obj;
 		}

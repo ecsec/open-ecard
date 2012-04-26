@@ -914,6 +914,9 @@ public class TinySAL implements org.openecard.ws.SAL {
 	if(protoUri==null){
 	    _logger.warn("ProtocolURI was null");
 	    protoUri=ECardConstants.Protocol.EAC;
+	} else if(protoUri.equals("urn:oid:1.0.24727.3.0.0.7.2")){
+	    _logger.warn("ProtocolURI was urn:oid:1.0.24727.3.0.0.7.2");
+            protoUri=ECardConstants.Protocol.EAC;
 	}
 	
 	String didName = didAuthenticate.getDIDName();

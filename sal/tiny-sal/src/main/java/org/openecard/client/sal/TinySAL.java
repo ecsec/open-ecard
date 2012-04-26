@@ -910,6 +910,12 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "AuthenticationProtocolData is null."));
 	}
 	String protoUri = didAuthenticate.getAuthenticationProtocolData().getProtocol();
+	//FIXME workaround for missing protoUri from eID-Servers
+	if(protoUri==null){
+	    _logger.warn("ProtocolURI was null");
+	    protoUri=ECardConstants.Protocol.EAC;
+	}
+	
 	String didName = didAuthenticate.getDIDName();
 
 	ConnectionHandleType connectionHandle = didAuthenticate.getConnectionHandle();

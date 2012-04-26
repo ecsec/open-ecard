@@ -76,18 +76,15 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 
     private final CardInfoWrapper infoObject;
     private Map<String, Protocol> protoObjects = new TreeMap<String, Protocol>();
-    //private CardApplicationWrapper currentCardApplication;
 
     public CardStateEntry(ConnectionHandleType handle, CardInfoType cif) {
 	serialNumber = nextNumber();
 	infoObject = new CardInfoWrapper(cif);
 	this.handle = handle;
-	//this.currentCardApplication = infoObject.getCardApplication(cif.getApplicationCapabilities().getImplicitlySelectedApplication());
 	this.handle.setCardApplication(getImplicitlySelectedApplicationIdentifier());
     }
 
     public void setCurrentCardApplication(byte[] currentCardApplication) {
-      //  this.currentCardApplication = infoObject.getCardApplication(currentCardApplication);
 	this.handle.setCardApplication(currentCardApplication);
     }
 

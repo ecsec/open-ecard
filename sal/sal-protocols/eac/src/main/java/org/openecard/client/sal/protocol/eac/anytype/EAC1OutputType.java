@@ -98,7 +98,7 @@ public class EAC1OutputType {
 
 	authResponse.addElement("RetryCounter", String.valueOf(retryCounter));
 	authResponse.addElement("EFCardAccess", ByteUtils.toHexString(efCardAccess));
-	authResponse.addElement("CertificationAuthorityReference", ByteUtils.toHexString(car));
+	authResponse.addElement("CertificationAuthorityReference", new String(car));
 	authResponse.addElement("CertificateHolderAuthorizationTemplate", ByteUtils.toHexString(chat));
 	authResponse.addElement("IDPICC", ByteUtils.toHexString(idpicc));
 

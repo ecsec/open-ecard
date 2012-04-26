@@ -60,7 +60,7 @@ public class TerminalAuthentication {
 	try {
 	    ArrayList<CardVerifiableCertificate> certificates = certificateChain.getCertificateChain();
 
-	    for (int i = certificates.size(); i >= 0; i--) {
+	    for (int i = (certificates.size()-1); i >= 0; i--) {
 		CardVerifiableCertificate cvc = (CardVerifiableCertificate) certificates.get(i);
 		// MSE:SetDST
 		CardCommandAPDU mseSetAT = new MSESetDST(cvc.getCAR().toByteArray());

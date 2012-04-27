@@ -18,7 +18,6 @@ package org.openecard.client.transport.tls;
 
 import org.openecard.bouncycastle.crypto.tls.TlsPSKIdentity;
 
-
 /**
  * Simple Implementation for {@link TlsPSKIdentity}
  *

@@ -20,7 +20,6 @@ import java.io.IOException;
 import org.openecard.bouncycastle.crypto.tls.SRPTlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 
-
 /**
  * A TLS-Client that implements the SRP-Protocol.
  *
@@ -29,6 +28,12 @@ import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
  */
 public class SRPTlsClientImpl extends SRPTlsClient {
 
+    /**
+     * 
+     * @param identity Identity used for SRP
+     * @param password Password used for SRP
+     * @param host Hostname as Fully Qualified Domain Name (FQDN)
+     */
     public SRPTlsClientImpl(byte[] identity, byte[] password, String host) {
 	super(identity, password, host);
     }

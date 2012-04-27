@@ -20,7 +20,6 @@ import java.io.IOException;
 import org.openecard.bouncycastle.crypto.tls.DefaultTlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 
-
 /**
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
@@ -29,6 +28,11 @@ public class DefaultTlsClientImpl extends DefaultTlsClient {
 
     private TlsAuthentication tlsAuthentication;
 
+    /**
+     * 
+     * @param host Hostname as Fully Qualified Domain Name (FQDN)
+     * @param tlsAuthentication Authentication to use for this client
+     */
     public DefaultTlsClientImpl(String host, TlsAuthentication tlsAuthentication) {
 	super(host);
 	this.tlsAuthentication = tlsAuthentication;

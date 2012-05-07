@@ -94,6 +94,9 @@ public class SecureMessaging {
 	int lc = cAPDU.getLC();
 	int le = cAPDU.getLE();
 
+	if(cAPDU.isSecureMessaging())
+	    throw new IOException("APDU is already protected with Secure Messaging.");
+	
 	if (data.length > 0) {
 	    data = pad(data, 16);
 
@@ -105,7 +108,7 @@ public class SecureMessaging {
 	    dataEncrypted = ByteUtils.concatenate((byte) 0x01, dataEncrypted);
 
 	    TLV dataObject = new TLV();
-	    dataObject.setTagNum((byte) 0x87);
+	    dataObject.setTagNumWithClass((byte) 0x87);
 	    dataObject.setValue(dataEncrypted);
 	    baos.write(dataObject.toBER());
 	}
@@ -113,7 +116,7 @@ public class SecureMessaging {
 	// Write protected LE
 	if (le >= 0) {
 	    TLV leObject = new TLV();
-	    leObject.setTagNum((byte) 0x97);
+	    leObject.setTagNumWithClass((byte) 0x97);
 	    if (le == 0x100) {
 		leObject.setValue(NULL);
 	    } else if (le > 0x100) {
@@ -124,6 +127,10 @@ public class SecureMessaging {
 	    baos.write(leObject.toBER());
 	}
 
+	// Indicate Secure Messaging
+	// note: must be done before mac calculation
+        header[0] |= 0x0C;
+        
 	/*
 	 * Calculate MAC
 	 */
@@ -147,9 +154,6 @@ public class SecureMessaging {
 	 * Build APDU
 	 */
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-	// Indicate Secure Messaging
-	header[0] = (byte) ((byte) header[0] | (byte) 0x0C);
 
 	// Write header
 	out.write(header);
@@ -204,6 +208,9 @@ public class SecureMessaging {
      * @throws Exception the exception
      */
     private byte[] decrypt(byte[] response, byte[] secureMessagingSSC) throws Exception {
+        if(response.length==2)
+            throw new IOException("APDU is not encrypted with Secure Messaging.");
+        
 	final ByteArrayInputStream bais = new ByteArrayInputStream(response);
 	final ByteArrayOutputStream baos = new ByteArrayOutputStream(response.length - 10);
 
@@ -271,13 +278,13 @@ public class SecureMessaging {
 	    // Write padding-content
 	    if (dataObject != null) {
 		TLV paddedDataObject = new TLV();
-		paddedDataObject.setTagNum((byte) 0x87);
+		paddedDataObject.setTagNumWithClass((byte) 0x87);
 		paddedDataObject.setValue(ByteUtils.concatenate((byte) 0x01, dataObject));
 		macData.write(paddedDataObject.toBER());
 	    }
 	    // Write status bytes
 	    TLV statusBytesObject = new TLV();
-	    statusBytesObject.setTagNum((byte) 0x99);
+	    statusBytesObject.setTagNumWithClass((byte) 0x99);
 	    statusBytesObject.setValue(statusBytes);
 	    macData.write(statusBytesObject.toBER());
 

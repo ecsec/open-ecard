@@ -21,6 +21,7 @@ import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,7 +58,7 @@ public class CardCommandAPDU extends CardAPDU {
      */
     public CardCommandAPDU(byte[] commandAPDU) {
 	System.arraycopy(commandAPDU, 0, header, 0, 4);
-	System.arraycopy(commandAPDU, 4, data, 0, commandAPDU.length - 4);
+	setBody(Arrays.copyOfRange(commandAPDU, 4, commandAPDU.length));
     }
 
     /**
@@ -661,7 +662,7 @@ public class CardCommandAPDU extends CardAPDU {
 	    InputAPDUInfoType apdu = new InputAPDUInfoType();
 	    apdu.setInputAPDU(toByteArray());
 
-	    for (int i = 1; i < responses.length; i++) {
+	    for (int i = 0; i < responses.length; i++) {
 		apdu.getAcceptableStatusCode().add(responses[i]);
 	    }
 

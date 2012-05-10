@@ -92,7 +92,7 @@ public class SecureMessaging {
 	int lc = cAPDU.getLC();
 	int le = cAPDU.getLE();
 
-	if (data.length > 0) {
+	if (data != null) {
 	    data = pad(data, 16);
 
 	    // Encrypt data

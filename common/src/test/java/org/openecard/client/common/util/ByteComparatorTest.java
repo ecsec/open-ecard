@@ -22,38 +22,30 @@
 
 package org.openecard.client.common.util;
 
-import java.util.Arrays;
+import java.util.Comparator;
+import junit.framework.Assert;
+import org.junit.Test;
 
 
 /**
- * Makes it possible to use byte arrays as keys in hashmaps
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public final class ByteArrayWrapper {
+public class ByteComparatorTest {
 
-    private final byte[] data;
+    @Test
+    public void testCompare() {
+	Comparator<byte[]> comp = new ByteComparator();
+	byte[] a = new byte[] { 0x00, 0x01, 0x02 }, b = new byte[] { 0x03, 0x04, 0x05 };
+	byte[] c = new byte[] { 0x00, 0x01, 0x02 }, d = new byte[] { 0x00 };
 
-    // TODO: REMOVE ME Klasse wird nicht verwendet!
-
-    public ByteArrayWrapper(byte[] data) {
-	if (data == null) {
-	    throw new NullPointerException();
-	}
-	this.data = data;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-	if (!(other instanceof ByteArrayWrapper)) {
-	    return false;
-	}
-	return Arrays.equals(data, ((ByteArrayWrapper)other).data);
-    }
-
-    @Override
-    public int hashCode() {
-	return Arrays.hashCode(data);
+	Assert.assertEquals(-3, comp.compare(a, b));
+	Assert.assertEquals(0, comp.compare(a, c));
+	Assert.assertEquals(3, comp.compare(b, a));
+	Assert.assertEquals(2, comp.compare(a, d));
+	Assert.assertEquals(0, comp.compare(a, a));
+	Assert.assertEquals(1, comp.compare(a, null));
+	Assert.assertEquals(-1, comp.compare(null, a));
     }
 
 }

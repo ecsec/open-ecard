@@ -44,7 +44,7 @@ public class PACETest {
 
     private static final Logger logger = LoggerFactory.getLogger(PACETest.class);
 
-    @Ignore
+//    @Ignore
     @Test
     public void executePACE_PIN() throws UnsupportedDataTypeException, JAXBException, SAXException, WSMarshallerException {
 	// Setup logger
@@ -84,7 +84,7 @@ public class PACETest {
 		+ "  <iso:AuthenticationProtocolData Protocol=\"urn:oid:0.4.0.127.0.7.2.2.4\">\n"
 		+ "    <iso:PinID>02</iso:PinID>\n"
 		+ "    <iso:CHAT>7f4c12060904007f0007030102025305300301ffb7</iso:CHAT>\n"
-		+ "    <iso:PIN>142390</iso:PIN>\n"
+		+ "    <iso:PIN>142391</iso:PIN>\n"
 		+ "  </iso:AuthenticationProtocolData>\n"
 		+ "</iso:EstablishChannel>";
 	WSMarshaller m = WSMarshallerFactory.createInstance();
@@ -93,5 +93,7 @@ public class PACETest {
 	EstablishChannelResponse eChR = ifd.establishChannel(eCh);
 
 	logger.info("{}", eChR.getResult().getResultMajor());
+	logger.info("{}", eChR.getResult().getResultMinor());
+	logger.info("{}", eChR.getResult().getResultMessage().getValue());
     }
 }

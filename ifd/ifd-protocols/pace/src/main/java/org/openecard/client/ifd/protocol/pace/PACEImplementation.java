@@ -17,10 +17,10 @@ package org.openecard.client.ifd.protocol.pace;
 
 import java.security.GeneralSecurityException;
 import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.WSHelper.WSException;
 import org.openecard.client.common.apdu.GeneralAuthenticate;
 import org.openecard.client.common.apdu.common.CardCommandAPDU;
 import org.openecard.client.common.apdu.common.CardResponseAPDU;
+import org.openecard.client.common.apdu.exception.APDUException;
 import org.openecard.client.common.ifd.protocol.exception.ProtocolException;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LoggingConstants;
@@ -105,11 +105,11 @@ public class PACEImplementation {
 	    // </editor-fold>
 	    // Continue with step 2
 	    generalAuthenticateEncryptedNonce();
-	} catch (WSException ex) {
+	} catch (APDUException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
 	    // </editor-fold>
-	    int sw = response.getSW();
+	    int sw = e.getResponseAPDU().getSW();
 
 	    if (sw == PACEConstants.PASSWORD_DEACTIVATED) {
 		// Password is deactivated
@@ -122,7 +122,9 @@ public class PACEImplementation {
 		    if (passwordType == PACEConstants.PASSWORD_PUK) {
 			generalAuthenticateEncryptedNonce();
 		    } else {
-			throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_BLOCKED);
+			throw new ProtocolException(
+				ECardConstants.Minor.IFD.PASSWORD_BLOCKED,
+				"The password is blocked. The password MUST be unblocked.");
 		    }
 		} else if (retryCounter == (byte) 0x01) {
 		    // The password is suspended
@@ -130,7 +132,9 @@ public class PACEImplementation {
 		    if (passwordType == PACEConstants.PASSWORD_CAN) {
 			generalAuthenticateEncryptedNonce();
 		    } else {
-			throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED);
+			throw new ProtocolException(
+				ECardConstants.Minor.IFD.PASSWORD_SUSPENDED,
+				"The password is suspended. The password MUST be resumed.");
 		    }
 		} else if (retryCounter == (byte) 0x02) {
 		    // The password is suspended
@@ -138,7 +142,16 @@ public class PACEImplementation {
 		    generalAuthenticateEncryptedNonce();
 		}
 	    }
-	    throw ex;
+	} catch (ProtocolException e) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    // </editor-fold>
+	    throw e;
+	} catch (Exception e) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    // </editor-fold>
+	    throw new ProtocolException(ECardConstants.Minor.IFD.UNKNOWN_ERROR, e.getMessage());
 	}
     }
 
@@ -159,13 +172,14 @@ public class PACEImplementation {
 	try {
 	    response = gaEncryptedNonce.transmit(dispatcher, slotHandle);
 	    s = cryptoSuite.decryptNonce(keyPI, response.getData());
+	    
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
 	    logger.trace(LoggingConstants.EXIT, "generalAuthenticateEncryptedNonce");
 	    // </editor-fold>
 
 	    // Continue with Step 3
 	    generalAuthenticateMapNonce();
-	} catch (WSException e) {
+	} catch (APDUException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
 	    logger.error(LoggingConstants.THROWING, "Exception", e);
 	    // </editor-fold>
@@ -202,7 +216,7 @@ public class PACEImplementation {
 
 	try {
 	    response = gaMapNonce.transmit(dispatcher, slotHandle);
-	} catch (WSException e) {
+	} catch (APDUException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
 	    logger.error(LoggingConstants.THROWING, "Exception", e);
 	    // </editor-fold>
@@ -216,7 +230,7 @@ public class PACEImplementation {
 	    byte[] pkMapPICC = keyMapPICC.getEncodedPublicKey();
 
 	    if (ByteUtils.compare(pkMapPICC, pkMapPCD)) {
-		throw new ProtocolException("PACE security violation: equal keys");
+		throw new GeneralSecurityException("PACE security violation: equal keys");
 	    }
 
 	    domainParameter = gm.map(pkMapPICC, s);
@@ -265,7 +279,7 @@ public class PACEImplementation {
 	    } else {
 		throw new GeneralSecurityException("PACE security violation: equal keys");
 	    }
-	} catch (WSException e) {
+	} catch (APDUException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
 	    logger.error(LoggingConstants.THROWING, "Exception", e);
 	    // </editor-fold>
@@ -311,43 +325,47 @@ public class PACEImplementation {
 		currentCAR = tokenPICC.getCurrentCAR();
 		previousCAR = tokenPCD.getPreviousCAR();
 
-		logger.trace("PACE successful");
 		// <editor-fold defaultstate="collapsed" desc="log trace">
 		logger.trace(LoggingConstants.EXIT, "generalAuthenticateMutualAuthentication");
 		// </editor-fold>
 	    } else {
 		throw new GeneralSecurityException("Cannot verify authentication token.");
 	    }
-	} catch (WSException ex) {
+	} catch (APDUException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
 	    // </editor-fold>
-	    int sw = response.getSW();
+	    int sw = e.getResponseAPDU().getSW();
 
 	    if ((sw & (short) 0xFFF0) == (short) 0x63C0) {
 		retryCounter = (byte) (sw & (short) 0x000F);
 		if (retryCounter == (byte) 0x00) {
 		    // The password is blocked.
 		    logger.warn("The password is blocked. The password MUST be unblocked.");
-		    throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_BLOCKED);
+		    throw new ProtocolException(
+			    ECardConstants.Minor.IFD.PASSWORD_BLOCKED,
+			    "The password is blocked. The password MUST be unblocked.");
 		} else if (retryCounter == (byte) 0x01) {
 		    // The password is suspended.
 		    logger.warn("The password is suspended. The password MUST be resumed.");
-		    throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED);
+		    throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED,
+			    "The password is suspended. The password MUST be resumed.");
 		} else if (retryCounter == (byte) 0x02) {
 		    // The password is wrong.
 		    logger.warn("The password is wrong.");
-		    throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_ERROR);
+		    throw new ProtocolException(
+			    ECardConstants.Minor.IFD.PASSWORD_ERROR,
+			    "The password is wrong.");
 		}
 	    } else {
-		throw new ProtocolException(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED);
+		throw new ProtocolException(
+			ECardConstants.Minor.IFD.AUTHENTICATION_FAILED, "Authentication failed.");
 	    }
-	    throw ex;
-	} catch (Throwable e) {
+	} catch (Exception e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
 	    logger.error(LoggingConstants.THROWING, "Exception", e);
 	    // </editor-fold>
-	    throw new ProtocolException(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED);
+	    throw new ProtocolException(ECardConstants.Minor.IFD.UNKNOWN_ERROR, e.getMessage());
 	}
     }
 
@@ -388,12 +406,12 @@ public class PACEImplementation {
     }
 
     /**
-     * Returns the card identifier ID_PICC = Comp(PK_PICC). Returns only the x-coordinate of the ECPoint!!!
+     * Returns the card identifier ID_PICC = Comp(PK_PICC).
      *
      * @return ID_PICC
      */
     public byte[] getIDPICC() {
-	return ByteUtils.cutLeadingNullByte(keyPICC.getEncodedPublicKey());
+	return ByteUtils.cutLeadingNullByte(keyPICC.getEncodedCompressedPublicKey());
     }
 
     /**

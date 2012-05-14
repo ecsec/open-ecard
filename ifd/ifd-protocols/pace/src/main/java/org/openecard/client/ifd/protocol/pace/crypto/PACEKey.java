@@ -16,6 +16,8 @@
 package org.openecard.client.ifd.protocol.pace.crypto;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import org.openecard.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.openecard.bouncycastle.crypto.params.ECDomainParameters;
@@ -27,7 +29,11 @@ import org.openecard.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
 import org.openecard.bouncycastle.jce.spec.ECParameterSpec;
 import org.openecard.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.openecard.bouncycastle.math.ec.ECPoint;
+import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.ifd.protocol.pace.PACEImplementation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -35,6 +41,7 @@ import org.openecard.client.common.util.ByteUtils;
  */
 public final class PACEKey {
 
+    private static final Logger logger = LoggerFactory.getLogger(PACEImplementation.class);
     private AsymmetricKeyParameter sk;
     private AsymmetricKeyParameter pk;
     private PACEDomainParameter pdp;
@@ -66,6 +73,7 @@ public final class PACEKey {
 
 	    return getEncodedPublicKey();
 	} else if (pdp.isDH()) {
+	    logger.error(LoggingConstants.INFO, "Not implemented yet.");
 	    throw new UnsupportedOperationException("Not implemented yet.");
 	} else {
 	    throw new IllegalArgumentException();
@@ -117,6 +125,32 @@ public final class PACEKey {
 	    return ((ElGamalPublicKeyParameters) pk).getY().toByteArray();
 	} else if (pdp.isECDH()) {
 	    return ((ECPublicKeyParameters) pk).getQ().getEncoded();
+	} else {
+	    throw new IllegalArgumentException();
+	}
+    }
+
+    /**
+     * Returns the byte encoded compressed public key.
+     *
+     * @return Public key
+     */
+    public byte[] getEncodedCompressedPublicKey() {
+	if (pdp.isDH()) {
+	    try {
+		MessageDigest md = MessageDigest.getInstance("SHA-1");
+		byte[] input = ((ElGamalPublicKeyParameters) pk).getY().toByteArray();
+		byte[] hash = md.digest(input);
+
+		return hash;
+	    } catch (NoSuchAlgorithmException ex) {
+		// <editor-fold defaultstate="collapsed" desc="log exception">
+		logger.error(LoggingConstants.THROWING, "Exception", ex);
+		// </editor-fold>
+		throw new RuntimeException(ex);
+	    }
+	} else if (pdp.isECDH()) {
+	    return ((ECPublicKeyParameters) pk).getQ().getX().toBigInteger().toByteArray();
 	} else {
 	    throw new IllegalArgumentException();
 	}

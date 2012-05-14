@@ -1,4 +1,4 @@
-/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg 
+/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import org.junit.Test;
 import org.openecard.client.common.util.StringUtils;
 
 /**
- * 
+ *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * 
+ *
  */
 public class SecureMessagingTest {
 
@@ -62,25 +62,5 @@ public class SecureMessagingTest {
                 .toByteArray("0C2A00BE0001CF878201C101ABAF1B4D8BC4B3A39B076EA8C36A4EFA2FA709C85FBD1047F6DB2F2B069A737E6F08DA822E6256D70A71A52C6224AB20FE055BD3B0F3546A2ECF7C758DBF1AF1092D05080B7B770DFE4EE6D58D084C7B771560DBB0016DE7E7BDD3200AB38DB8C2574C3C4533289EB3C356C3F934B226C01AF3D8D3B20CB79DB2659BF024B5AABC37A1A4459CE9D5436E54CB5D817071663C7B18EBD6D2C66EB09575E9D7AD2D72FE95F91BD6B224DE55621BF6BA6514E3F82BD0E75C21F45807062C611BFFAE726FF6E0F47D84B8357A767F411D4E33FF79C4063302CDCFBCA347D1203791529904CD3B5F985C581F640E7E4E6D2FA6F0C44F8BEF9CD4EB1C7934B2631BDC17726DFB8DC42B4CCC05A69E8E12BD4A3799BF0C1FCEC77F346A770E78894622423B472F26A014C5B745DFBB26C5FE68620A085FF8DDD9FDEDAD6A1DFCE82C4873D6EB4277F0CBFB20DC9335A50A6FAC6F1622F18F481FFE1D7A32CA778702447772024231D1D1654DFDD04A3AE9CC3AEFCB789A927162B2A6A16856B0DF40E8CC4D2AA8384AF5FD5F52892E71D5891B58E1E91CE282734F6BD835E89EDDC618D29B75752888D54A7CE24F16A680B16385D6CA74B70704CB83A5C75D54F2F10FC58E0815FB2BBD0828E8860000");
         encryptedAPDU = sm.encrypt(plainAPDU2);
         Assert.assertArrayEquals(expectedEncryptedAPDU, encryptedAPDU);
-
-        /*
-         * test already encrypted apdu
-         */
-        try {
-            sm.encrypt(expectedEncryptedAPDU);
-            Assert.fail("Encrypting an already encrypted APDU should give an error.");
-        } catch (Exception e) {
-            /* expected */
-        }
-
-        /*
-         * test already decrypted apdu
-         */
-        try {
-            sm.encrypt(expectedEncryptedAPDU);
-            Assert.fail("Decrypting an already decrypted APDU should give an error.");
-        } catch (Exception e) {
-            /* expected */
-        }
     }
 }

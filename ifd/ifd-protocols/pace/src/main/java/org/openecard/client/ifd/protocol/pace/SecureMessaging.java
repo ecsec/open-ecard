@@ -32,12 +32,10 @@ import org.openecard.client.common.apdu.common.CardCommandAPDU;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.util.ByteUtils;
 
-
 /**
  * Implements Secure Messaging according to ISO/IEC 7816-4.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Franziskus Kiefer
  */
 public class SecureMessaging {
 
@@ -94,9 +92,6 @@ public class SecureMessaging {
 	int lc = cAPDU.getLC();
 	int le = cAPDU.getLE();
 
-	if(cAPDU.isSecureMessaging())
-	    throw new IOException("APDU is already protected with Secure Messaging.");
-	
 	if (data.length > 0) {
 	    data = pad(data, 16);
 
@@ -129,8 +124,8 @@ public class SecureMessaging {
 
 	// Indicate Secure Messaging
 	// note: must be done before mac calculation
-        header[0] |= 0x0C;
-        
+	header[0] |= 0x0C;
+
 	/*
 	 * Calculate MAC
 	 */
@@ -208,11 +203,8 @@ public class SecureMessaging {
      * @throws Exception the exception
      */
     private byte[] decrypt(byte[] response, byte[] secureMessagingSSC) throws Exception {
-        if(response.length==2)
-            throw new IOException("APDU is not encrypted with Secure Messaging.");
-        
-	final ByteArrayInputStream bais = new ByteArrayInputStream(response);
-	final ByteArrayOutputStream baos = new ByteArrayOutputStream(response.length - 10);
+	ByteArrayInputStream bais = new ByteArrayInputStream(response);
+	ByteArrayOutputStream baos = new ByteArrayOutputStream(response.length - 10);
 
 	// Status bytes of the response APDU. MUST be 2 bytes.
 	byte[] statusBytes = new byte[2];
@@ -230,7 +222,7 @@ public class SecureMessaging {
 	 */
 	byte tag = (byte) bais.read();
 
-	// Read data object
+	// Read data object (OPTIONAL)
 	if (tag == (byte) 0x87) {
 	    int size = bais.read();
 	    if (size > 0x80) {
@@ -245,20 +237,21 @@ public class SecureMessaging {
 	    tag = (byte) bais.read();
 	}
 
-	// Read processing status
+	// Read processing status (REQUIRED)
 	if (tag == (byte) 0x99) {
-	    bais.skip(1); // Skip LE. MUST be 2 bytes
-	    bais.read(statusBytes, 0, 2);
-
-	    tag = (byte) bais.read();
+	    if (bais.read() == (byte) 0x02) {
+		bais.read(statusBytes, 0, 2);
+		tag = (byte) bais.read();
+	    }
 	} else {
 	    throw new IOException("Malformed Secure Messaging APDU");
 	}
 
-	// Read MAC
+	// Read MAC (REQUIRED)
 	if (tag == (byte) 0x8E) {
-	    bais.skip(1); // Skip LE. MUST be 8 bytes
-	    bais.read(macObject, 0, 8);
+	    if (bais.read() == (byte) 0x08) {
+		bais.read(macObject, 0, 8);
+	    }
 	} else {
 	    throw new IOException("Malformed Secure Messaging APDU");
 	}
@@ -412,5 +405,4 @@ public class SecureMessaging {
 
 	return data;
     }
-
 }

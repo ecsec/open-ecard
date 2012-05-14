@@ -90,7 +90,6 @@ public class PACEProtocol implements Protocol {
 	    paceOutput.setRetryCounter(pace.getRetryCounter());
 
 	    // Create EstablishChannelResponse
-
 	    response.setResult(WSHelper.makeResultOK());
 	    response.setAuthenticationProtocolData(paceOutput.getAuthDataType());
 
@@ -117,8 +116,13 @@ public class PACEProtocol implements Protocol {
     @Override
     public byte[] applySM(byte[] commandAPDU) {
 	try {
-	    return sm.encrypt(commandAPDU);
+	    if (sm != null) {
+		return sm.encrypt(commandAPDU);
+	    } else {
+		throw new RuntimeException("No established Secure Messaging channel available");
+	    }
 	} catch (Exception ex) {
+	    sm = null;
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
 	    logger.error(LoggingConstants.THROWING, "Exception", ex);
 	    // </editor-fold>
@@ -129,8 +133,13 @@ public class PACEProtocol implements Protocol {
     @Override
     public byte[] removeSM(byte[] responseAPDU) {
 	try {
-	    return sm.decrypt(responseAPDU);
+	    if (sm != null) {
+		return sm.decrypt(responseAPDU);
+	    } else {
+		throw new RuntimeException("No established Secure Messaging channel available");
+	    }
 	} catch (Exception ex) {
+	    sm = null;
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
 	    logger.error(LoggingConstants.THROWING, "Exception", ex);
 	    // </editor-fold>

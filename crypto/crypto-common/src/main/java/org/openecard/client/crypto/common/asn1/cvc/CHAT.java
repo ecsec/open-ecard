@@ -540,5 +540,4 @@ public final class CHAT {
 	    return null;
 	}
     }
-
 }

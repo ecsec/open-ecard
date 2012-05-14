@@ -6,6 +6,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openecard.client.common.util.StringUtils;
 
+
 /**
  * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
  */

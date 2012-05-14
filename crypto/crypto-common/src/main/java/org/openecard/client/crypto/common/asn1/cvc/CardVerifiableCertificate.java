@@ -15,11 +15,14 @@
  */
 package org.openecard.client.crypto.common.asn1.cvc;
 
+import java.security.cert.CertificateEncodingException;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
+import org.openecard.client.common.util.ByteUtils;
+
 
 /**
  * Implements a Card Verifiable Certificate.
@@ -73,8 +76,8 @@ public class CardVerifiableCertificate {
     private Calendar expirationDate;
     // Certificate Extension
     private byte[] extensions;
-    // TLV encoded body an signature
-    private byte[] encodedBodyAndSignature;
+    // TLV encoded certificate
+    private TLV certificate;
 
     /**
      * Create a new Card Verifiable Certificate.
@@ -82,68 +85,82 @@ public class CardVerifiableCertificate {
      * @param cvc CardVerifiableCertificate
      * @throws TLVException
      */
-    public CardVerifiableCertificate(byte[] cvc) throws TLVException {
+    public CardVerifiableCertificate(byte[] cvc) throws Exception {
 	this(TLV.fromBER(cvc));
     }
 
     /**
      * Create a new Card Verifiable Certificate.
      *
-     * @param tlv TLV encoded certificate
+     * @param cvc TLV encoded certificate
      * @throws TLVException
      */
-    public CardVerifiableCertificate(TLV tlv) throws TLVException {
-	if (tlv.getTagNumWithClass() != TAG_CVC) {
-	    throw new IllegalArgumentException("CardVerifiableCertificates must start with TAG 0x7F21");
-	}
-	// TLV encoded body and signature
-	encodedBodyAndSignature = tlv.getValue();
-	
-	// Certificate body
-	TLV bodyObject = tlv.findChildTags(TAG_BODY).get(0);
-	body = bodyObject.getValue();
+    public CardVerifiableCertificate(TLV cvc) throws Exception {
+	try {
+	    // TLV encoded body and signature
+	    certificate = cvc;
 
-	// Certificate signature
-	TLV signatureObject = tlv.findChildTags(TAG_SIGNATURE).get(0);
-	signature = signatureObject.getValue();
+	    // Certificate body
+	    TLV bodyObject = cvc.findChildTags(TAG_BODY).get(0);
+	    body = bodyObject.getValue();
 
-	// Certificate body elements
-	List<TLV> bodyElements = bodyObject.getChild().asList();
+	    // Certificate signature
+	    TLV signatureObject = cvc.findChildTags(TAG_SIGNATURE).get(0);
+	    signature = signatureObject.getValue();
 
-	for (Iterator<TLV> it = bodyElements.iterator(); it.hasNext();) {
-	    TLV item = it.next();
-	    int itemTag = (int) item.getTagNumWithClass();
+	    // Certificate body elements
+	    List<TLV> bodyElements = bodyObject.getChild().asList();
 
-	    switch (itemTag) {
-		case TAG_CPI:
-		    cpi = bodyObject.findChildTags(TAG_CPI).get(0).getValue();
-		    break;
-		case TAG_CAR:
-		    car = new PublicKeyReference(bodyObject.findChildTags(TAG_CAR).get(0).getValue());
-		    break;
-		case TAG_PUBLIC_KEY:
-		    publicKey = bodyObject.findChildTags(TAG_PUBLIC_KEY).get(0).getValue();
-		    break;
-		case TAG_CHR:
-		    chr = new PublicKeyReference(bodyObject.findChildTags(TAG_CHR).get(0).getValue());
-		    break;
-		case TAG_CHAT:
-		    chat = new CHAT(bodyObject.findChildTags(TAG_CHAT).get(0));
-		    break;
-		case TAG_EFFECTIVE_DATE:
-		    TLV effectiveDateObject = bodyObject.findChildTags(TAG_EFFECTIVE_DATE).get(0);
-		    effectiveDate = parseDate(effectiveDateObject.getValue());
-		    break;
-		case TAG_EXPIRATION_DATE:
-		    TLV expirationDateObject = bodyObject.findChildTags(TAG_EXPIRATION_DATE).get(0);
-		    expirationDate = parseDate(expirationDateObject.getValue());
-		    break;
-		case TAG_EXTENSION:
-		    extensions = bodyObject.findChildTags(TAG_EXTENSION).get(0).getValue();
-		    break;
-		default:
-		    break;
+	    for (Iterator<TLV> it = bodyElements.iterator(); it.hasNext();) {
+		TLV item = it.next();
+		int itemTag = (int) item.getTagNumWithClass();
+
+		switch (itemTag) {
+		    case TAG_CPI:
+			cpi = bodyObject.findChildTags(TAG_CPI).get(0).getValue();
+			break;
+		    case TAG_CAR:
+			car = new PublicKeyReference(bodyObject.findChildTags(TAG_CAR).get(0).getValue());
+			break;
+		    case TAG_PUBLIC_KEY:
+			publicKey = bodyObject.findChildTags(TAG_PUBLIC_KEY).get(0).getValue();
+			break;
+		    case TAG_CHR:
+			chr = new PublicKeyReference(bodyObject.findChildTags(TAG_CHR).get(0).getValue());
+			break;
+		    case TAG_CHAT:
+			chat = new CHAT(bodyObject.findChildTags(TAG_CHAT).get(0));
+			break;
+		    case TAG_EFFECTIVE_DATE:
+			TLV effectiveDateObject = bodyObject.findChildTags(TAG_EFFECTIVE_DATE).get(0);
+			effectiveDate = parseDate(effectiveDateObject.getValue());
+			break;
+		    case TAG_EXPIRATION_DATE:
+			TLV expirationDateObject = bodyObject.findChildTags(TAG_EXPIRATION_DATE).get(0);
+			expirationDate = parseDate(expirationDateObject.getValue());
+			break;
+		    case TAG_EXTENSION:
+			extensions = bodyObject.findChildTags(TAG_EXTENSION).get(0).getValue();
+			break;
+		    default:
+			break;
+		}
 	    }
+	    verifyCertificate();
+	} catch (Exception e) {
+	    throw new CertificateEncodingException("Malformed CardVerifiableCertificates: " + e.getMessage());
+	}
+    }
+
+    /**
+     * See See BSI-TR-03110, version 2.10, part 3, section C.
+     */
+    private void verifyCertificate() throws CertificateEncodingException {
+	if (body == null || cpi == null || car == null
+		|| publicKey == null || chr == null
+		|| chat == null || effectiveDate == null
+		|| expirationDate == null || signature == null) {
+	    throw new CertificateEncodingException("Malformed CardVerifiableCertificates");
 	}
     }
 
@@ -251,12 +268,21 @@ public class CardVerifiableCertificate {
     }
 
     /**
-     * Returns the TLV encoded body and signature of the certificate.
-     * 
-     * @return TLV encoded body and signature
+     * Returns the certificate.
+     *
+     * @return Certificate
      */
-    public byte[] getEncodedBodyAndSignature() {
-        return encodedBodyAndSignature;
+    public TLV getCertificate() {
+	return certificate;
     }
 
+    /**
+     * Compares the certificate.
+     *
+     * @param certificate Certificate
+     * @return True if the certificate is equal
+     */
+    public boolean equals(CardVerifiableCertificate certificate) {
+	return ByteUtils.compare(getSignature(), certificate.getSignature());
+    }
 }

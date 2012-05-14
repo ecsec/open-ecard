@@ -18,13 +18,15 @@ package org.openecard.client.crypto.common.asn1.cvc;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.LinkedList;
+import java.util.List;
+
+
 /**
- * Implements a chain of Card Verifiable Certificates. 
- * See BSI-TR-03110, version 2.10, part 3, section 2. 
+ * Implements a chain of Card Verifiable Certificates.
+ * See BSI-TR-03110, version 2.10, part 3, section 2.
  * See BSI-TR-03110, version 2.10, part 3, section C.
- * 
+ *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
@@ -34,7 +36,6 @@ public class CardVerifiableCertificateChain {
     private CardVerifiableCertificate cvca;
     private CardVerifiableCertificate dv;
     private CardVerifiableCertificate terminal;
-    private static final Logger _logger = LoggerFactory.getLogger(CardVerifiableCertificateChain.class);
 
     /**
      * Creates a new certificate chain.
@@ -42,9 +43,10 @@ public class CardVerifiableCertificateChain {
      * @param certificates Certificates
      * @throws GeneralSecurityException
      */
-    public CardVerifiableCertificateChain(ArrayList<CardVerifiableCertificate> certificates) throws GeneralSecurityException {
+    public CardVerifiableCertificateChain(List<CardVerifiableCertificate> certificates) throws CertificateException {
 	parseChain(certificates);
-	verifyChain();
+	// FIXME not working yet with all servers.
+//	verifyChain();
     }
 
     /**
@@ -52,28 +54,39 @@ public class CardVerifiableCertificateChain {
      *
      * @param certificates Certificates
      */
-    private void parseChain(ArrayList<CardVerifiableCertificate> certificates) {
+    private void parseChain(List<CardVerifiableCertificate> certificates) {
 	for (int i = 0; i < certificates.size(); i++) {
 	    CardVerifiableCertificate cvc = (CardVerifiableCertificate) certificates.get(i);
 
 	    CHAT.Role role = cvc.getCHAT().getRole();
-	    if (_logger.isDebugEnabled())
-		_logger.debug("Adding certificate to certificate-chain with\n\tRole: " + role + "\n\tCHR: {}\n\tCAR: {}", cvc.getCHR(),
-			cvc.getCAR());
 	    if (role.equals(CHAT.Role.CVCA)) {
 		cvca = cvc;
 		chain.add(cvca);
-	    } else if (role.equals(CHAT.Role.DV_OFFICIAL) 
+	    } else if (role.equals(CHAT.Role.DV_OFFICIAL)
 		    || role.equals(CHAT.Role.DV_NON_OFFICIAL)) {
 		dv = cvc;
 		chain.add(dv);
-	    } else if (role.equals(CHAT.Role.AUTHENTICATION_TERMINAL) 
+	    } else if (role.equals(CHAT.Role.AUTHENTICATION_TERMINAL)
 		    || role.equals(CHAT.Role.INSPECTION_TERMINAL)
 		    || role.equals(CHAT.Role.SIGNATURE_TERMINAL)) {
 		terminal = cvc;
 		chain.add(terminal);
 	    }
 	}
+    }
+
+    /**
+     * Adds a new certificate to the chain.
+     *
+     * @param certificate Certificate
+     */
+    public void addCertificate(final CardVerifiableCertificate certificate) {
+	parseChain(new LinkedList<CardVerifiableCertificate>() {
+
+	    {
+		add(certificate);
+	    }
+	});
     }
 
     /**
@@ -85,15 +98,13 @@ public class CardVerifiableCertificateChain {
      * @throws CertificateException
      */
     private void verifyChain() throws CertificateException {
-	// FIXME in cvca from mtg and bos chr!=car
-	// FIXME no cvca from ageto
 	if (cvca != null) {
-	    if (/* !cvca.getCAR().equals(cvca.getCHR()) || */
-		    !dv.getCAR().equals(cvca.getCHR()) 
+	    if (!cvca.getCAR().equals(cvca.getCHR())
+		    || !dv.getCAR().equals(cvca.getCHR())
 		    || !terminal.getCAR().equals(dv.getCHR())) {
 		throw new CertificateException("Malformed certificate chain");
 	    }
-	} else { // cvca==null
+	} else {
 	    if (!terminal.getCAR().equals(dv.getCHR())) {
 		throw new CertificateException("Malformed certificate chain");
 	    }
@@ -102,7 +113,7 @@ public class CardVerifiableCertificateChain {
 
     /**
      * Returns the certificate of the Country Verifying CA (CVCA).
-     * 
+     *
      * @return CVCA certificate
      */
     public CardVerifiableCertificate getCVCACertificate() {
@@ -111,7 +122,7 @@ public class CardVerifiableCertificateChain {
 
     /**
      * Returns the certificate of the Document Verifier (DV).
-     * 
+     *
      * @return DV certificate
      */
     public CardVerifiableCertificate getDVCertificate() {
@@ -120,7 +131,7 @@ public class CardVerifiableCertificateChain {
 
     /**
      * Returns the certificate of the terminal.
-     * 
+     *
      * @return Terminal certificate
      */
     public CardVerifiableCertificate getTerminalCertificate() {
@@ -132,8 +143,7 @@ public class CardVerifiableCertificateChain {
      *
      * @return Certificate chain
      */
-    public ArrayList<CardVerifiableCertificate> getCertificateChain() {
+    public List<CardVerifiableCertificate> getCertificateChain() {
 	return chain;
     }
-
 }

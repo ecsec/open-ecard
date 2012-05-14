@@ -63,5 +63,4 @@ public class PublicKeyReference {
     public String toString() {
 	return new String(reference);
     }
-
 }

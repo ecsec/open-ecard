@@ -15,16 +15,18 @@
  */
 package org.openecard.client.sal.protocol.eac;
 
-import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.apdu.GeneralAuthenticate;
 import org.openecard.client.common.apdu.common.CardCommandAPDU;
 import org.openecard.client.common.apdu.common.CardResponseAPDU;
+import org.openecard.client.common.apdu.exception.APDUException;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.protocol.exception.ProtocolException;
 import org.openecard.client.sal.protocol.eac.apdu.MSESetATCA;
 
-
 /**
+ * Implements the Chip Authentication protocol.
+ * See BSI-TR-03110, version 2.10, part 2, Section B.3.3.
+ * See BSI-TR-03110, version 2.10, part 3, Section B.2.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
@@ -55,7 +57,7 @@ public class ChipAuthentication {
 	try {
 	    CardCommandAPDU mseSetAT = new MSESetATCA(oid, keyID);
 	    mseSetAT.transmit(dispatcher, slotHandle);
-	} catch (WSHelper.WSException e) {
+	} catch (APDUException e) {
 	    throw new ProtocolException(e.getResult());
 	}
     }
@@ -73,9 +75,8 @@ public class ChipAuthentication {
 	    CardResponseAPDU response = generalAuthenticate.transmit(dispatcher, slotHandle);
 
 	    return response.getData();
-	} catch (WSHelper.WSException e) {
+	} catch (APDUException e) {
 	    throw new ProtocolException(e.getResult());
 	}
     }
-
 }

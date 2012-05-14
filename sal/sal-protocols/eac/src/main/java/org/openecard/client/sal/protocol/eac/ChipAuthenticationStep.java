@@ -12,19 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.sal.protocol.eac;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.apdu.utils.CardUtils;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.tlv.TLV;
@@ -36,17 +33,16 @@ import org.openecard.client.crypto.common.asn1.eac.ef.EFCardAccess;
 import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
 import org.openecard.client.sal.protocol.eac.anytype.EAC2OutputType;
 import org.openecard.client.sal.protocol.eac.anytype.EACAdditionalInputType;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
-    private static final Logger _logger = LogManager.getLogger(ChipAuthenticationStep.class.getName());
-
+    private static final Logger logger = LoggerFactory.getLogger(ChipAuthenticationStep.class.getName());
     private Dispatcher dispatcher;
     private byte[] slotHandle;
 
@@ -62,9 +58,8 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", new Object[]{didAuthenticate, internalData});
-	} // </editor-fold>
+	logger.trace(LoggingConstants.ENTER, "perform");
+	// </editor-fold>
 
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
 	slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
@@ -114,17 +109,17 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());
 
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData)", response);
-	    } // </editor-fold>
+	    logger.trace(LoggingConstants.EXIT, "perform");
+	    // </editor-fold>
 
 	    return response;
-	} catch (Exception ex) {
-	    _logger.log(Level.SEVERE, "Exception", ex);
-	    response.setResult(WSHelper.makeResultUnknownError(ex.getMessage()));
+	} catch (Exception e) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    // </editor-fold>
+	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	}
 
 	return response;
     }
-
 }

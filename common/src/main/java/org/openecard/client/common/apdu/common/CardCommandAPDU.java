@@ -55,8 +55,11 @@ public class CardCommandAPDU extends CardAPDU {
      * @param commandAPDU APDU
      */
     public CardCommandAPDU(byte[] commandAPDU) {
-	System.arraycopy(commandAPDU, 0, header, 0, 4);
+        // set the four header bytes
+        System.arraycopy(commandAPDU, 0, header, 0, 4);
 	setBody(ByteUtils.copy(commandAPDU, 4, commandAPDU.length - 4));
+            // set the body (LC|DATA|LE)
+            setBody(ByteUtils.cut(commandAPDU, 4, commandAPDU.length-4));
     }
 
     /**

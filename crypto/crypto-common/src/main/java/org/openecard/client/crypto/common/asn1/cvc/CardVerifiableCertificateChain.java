@@ -19,7 +19,6 @@ import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 
-
 /**
  * Implements a chain of Card Verifiable Certificates.
  * See BSI-TR-03110, version 2.10, part 3, section 2.
@@ -34,11 +33,22 @@ public class CardVerifiableCertificateChain {
     private CardVerifiableCertificate dv;
     private CardVerifiableCertificate terminal;
 
+    /**
+     * Creates a new certificate chain.
+     *
+     * @param certificates Certificates
+     * @throws GeneralSecurityException
+     */
     public CardVerifiableCertificateChain(ArrayList<CardVerifiableCertificate> certificates) throws GeneralSecurityException {
 	parseChain(certificates);
 	verifyChain();
     }
 
+    /**
+     * Parses the certificate chain.
+     *
+     * @param certificates Certificates
+     */
     private void parseChain(ArrayList<CardVerifiableCertificate> certificates) {
 	for (int i = 0; i < certificates.size(); i++) {
 	    CardVerifiableCertificate cvc = (CardVerifiableCertificate) certificates.get(i);
@@ -60,6 +70,14 @@ public class CardVerifiableCertificateChain {
 	}
     }
 
+    /**
+     * Verifies the certificate chain.
+     * [1] The CAR and the CHR of the CVCA certificate should be equal.
+     * [2] The CAR of the DV certificate should refer to the CHR of the CVCA.
+     * [3] The CAR of the terminal certificate should refer to the CHR of the DV certificate.
+     *
+     * @throws CertificateException
+     */
     private void verifyChain() throws CertificateException {
 	if (!cvca.getCAR().equals(cvca.getCHR())
 		|| !dv.getCAR().equals(cvca.getCHR())
@@ -95,8 +113,12 @@ public class CardVerifiableCertificateChain {
 	return terminal;
     }
 
+    /**
+     * Returns the certificate chain.
+     *
+     * @return Certificate chain
+     */
     public ArrayList<CardVerifiableCertificate> getCertificateChain() {
 	return chain;
     }
-
 }

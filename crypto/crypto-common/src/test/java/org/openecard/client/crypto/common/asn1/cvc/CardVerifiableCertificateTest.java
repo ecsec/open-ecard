@@ -1,15 +1,12 @@
 package org.openecard.client.crypto.common.asn1.cvc;
 
-import java.util.Date;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.util.StringUtils;
-
 
 /**
  *
@@ -36,20 +33,4 @@ public class CardVerifiableCertificateTest {
     @After
     public void tearDown() {
     }
-
-    /**
-     * Test of getVersion method, of class CardVerifiableCertificate.
-     */
-    @Test
-    public void testGetVersion() {
-//        System.out.println("getVersion");
-//        System.out.println(cvc.getCertificateEffectiveDate().toLocaleString());
-//        CardVerifiableCertificate instance = null;
-//        byte expResult = 0;
-//        byte result = instance.getVersion();
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-    }
-
 }

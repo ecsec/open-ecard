@@ -20,8 +20,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.client.common.sal.anytype.AuthDataMap;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
+import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
-
+import org.w3c.dom.Element;
 
 /**
  *
@@ -48,10 +49,18 @@ public final class EAC2InputType {
 	ephemeralPublicKey = authMap.getContentAsBytes("EphemeralPublicKey");
 	signature = authMap.getContentAsBytes("Signature");
 
-	while (authMap.containsContent("Cerificate")) {
+	/*while (authMap.containsContent("Certificate")) {
 	    TLV cardVerifiableCertificate = TLV.fromBER(authMap.getContentAsBytes("Certificate"));
 	    certificates.add(new CardVerifiableCertificate(cardVerifiableCertificate));
-	}
+	}*/
+	
+	//FIXME workaround for retrieving the certificates
+	for (Element elem : baseType.getAny()) {
+	    if (elem.getLocalName().equals("Certificate")) {
+              CardVerifiableCertificate cvc = new CardVerifiableCertificate(TLV.fromBER(StringUtils.toByteArray(elem.getTextContent())));
+              certificates.add(cvc);
+          }
+      }
     }
 
     /**

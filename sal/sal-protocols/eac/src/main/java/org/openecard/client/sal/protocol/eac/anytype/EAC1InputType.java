@@ -20,8 +20,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.client.common.sal.anytype.AuthDataMap;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
+import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
-
+import org.w3c.dom.Element;
 
 /**
  *
@@ -47,14 +48,22 @@ public class EAC1InputType {
     public EAC1InputType(DIDAuthenticationDataType baseType) throws ParserConfigurationException, TLVException {
 	authMap = new AuthDataMap(baseType);
 
-	while (authMap.containsContent("Cerificate")) {
-	    TLV cardVerifiableCertificate = TLV.fromBER(authMap.getContentAsBytes("Certificate"));
-	    certificates.add(new CardVerifiableCertificate(cardVerifiableCertificate));
-	}
 	certificateDescription = authMap.getContentAsBytes("CertificateDescription");
 	requiredCHAT = authMap.getContentAsBytes("RequiredCHAT");
 	optionalCHAT = authMap.getContentAsBytes("OptionalCHAT");
 	authenticatedAuxiliaryData = authMap.getContentAsBytes("AuthenticatedAuxiliaryData");
+	
+	//FIXME workaround for retrieving the certificates
+        //	while (authMap.containsContent("Certificate")) {
+        //              TLV cardVerifiableCertificate = TLV.fromBER(authMap.getContentAsBytes("Certificate"));
+        //              certificates.add(new CardVerifiableCertificate(cardVerifiableCertificate));
+        //      }
+	for (Element elem : baseType.getAny()) {
+	    if (elem.getLocalName().equals("Certificate")) {
+              CardVerifiableCertificate cvc = new CardVerifiableCertificate(TLV.fromBER(StringUtils.toByteArray(elem.getTextContent())));
+              certificates.add(cvc);
+          } 
+        }
     }
 
     /**

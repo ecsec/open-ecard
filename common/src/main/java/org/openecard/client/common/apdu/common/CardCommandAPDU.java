@@ -605,7 +605,7 @@ public class CardCommandAPDU extends CardAPDU {
      * @param slotHandle Slot handle
      * @return Response APDU
      */
-    public CardResponseAPDU transmit(Dispatcher dispatcher, byte[] slotHandle) throws APDUException, Exception {
+    public CardResponseAPDU transmit(Dispatcher dispatcher, byte[] slotHandle) throws APDUException {
 	return transmit(dispatcher, slotHandle, null);
     }
 
@@ -617,7 +617,7 @@ public class CardCommandAPDU extends CardAPDU {
      * @param responses List of positive responses
      * @return Response APDU
      */
-    public CardResponseAPDU transmit(Dispatcher dispatcher, byte[] slotHandle, List<byte[]> responses) throws APDUException, Exception {
+    public CardResponseAPDU transmit(Dispatcher dispatcher, byte[] slotHandle, List<byte[]> responses) throws APDUException {
 	Transmit t;
 	TransmitResponse tr = null;
 
@@ -636,8 +636,7 @@ public class CardCommandAPDU extends CardAPDU {
 	} catch (WSException ex) {
 	    throw new APDUException(ex, tr);
 	} catch (Exception ex) {
-	    logger.log(Level.SEVERE, "No working IFD registered in dispatcher.", ex);
-	    throw new RuntimeException(ex);
+	    throw new APDUException(ex);
 	}
     }
 }

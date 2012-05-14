@@ -63,7 +63,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
+        // <editor-fold defaultstate="collapsed" desc="log trace">
 	logger.trace(LoggingConstants.ENTER, "perform");
 	// </editor-fold>
 
@@ -77,7 +77,10 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    CertificateDescription description = CertificateDescription.getInstance(eac1Input.getCertificateDescription());
 	    CHAT requiredCHAT = new CHAT(eac1Input.getRequiredCHAT());
 	    CHAT optionalCHAT = new CHAT(eac1Input.getOptionalCHAT());
-	    CHAT chosenCHAT = gui.show(eac1Input.getCertificates().get(0), description, requiredCHAT, optionalCHAT);
+	    
+	    //FIXME gui is currently not working, for testing required chat is used
+	    CHAT chosenCHAT = requiredCHAT;
+	    //CHAT chosenCHAT = gui.show(eac1Input.getCertificates().get(0), description, requiredCHAT, optionalCHAT);
 
 	    // Create PACEInputType
 	    AuthDataMap paceAuthMap = new AuthDataMap(didAuthenticate.getAuthenticationProtocolData());
@@ -91,7 +94,9 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    EstablishChannel establishChannel = new EstablishChannel();
 	    establishChannel.setSlotHandle(slotHandle);
 	    establishChannel.setAuthenticationProtocolData(paceInputMap.getResponse());
-
+	    //FIXME
+	    establishChannel.getAuthenticationProtocolData().setProtocol(ECardConstants.Protocol.PACE);
+	    
 	    EstablishChannelResponse establishChannelResponse = (EstablishChannelResponse) dispatcher.deliver(establishChannel);
 
 	    if (!establishChannelResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {

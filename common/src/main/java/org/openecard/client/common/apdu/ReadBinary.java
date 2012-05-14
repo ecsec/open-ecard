@@ -21,7 +21,6 @@ import org.openecard.client.common.apdu.common.CardCommandAPDU;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.ShortUtils;
 
-
 /**
  *
  * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
@@ -123,14 +122,13 @@ public class ReadBinary extends CardCommandAPDU {
      */
     @Override
     public Transmit makeTransmit(byte[] slotHandle) {
-	ArrayList<byte[]> positiveResponses = new ArrayList<byte[]>() {
+	ArrayList<byte[]> defaultResponses = new ArrayList<byte[]>() {
 
 	    {
 		add(new byte[]{(byte) 0x90, (byte) 0x00});
 		add(new byte[]{(byte) 0x62, (byte) 0x82});
 	    }
 	};
-	return makeTransmit(slotHandle, positiveResponses);
+	return makeTransmit(slotHandle, defaultResponses);
     }
-
 }

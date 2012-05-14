@@ -21,9 +21,9 @@ import org.openecard.client.common.apdu.ReadBinary;
 import org.openecard.client.common.apdu.Select;
 import org.openecard.client.common.apdu.common.CardCommandAPDU;
 import org.openecard.client.common.apdu.common.CardResponseAPDU;
+import org.openecard.client.common.apdu.exception.APDUException;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.util.ShortUtils;
-
 
 /**
  *
@@ -48,7 +48,7 @@ public class CardUtils {
      * @param slotHandle Slot handle
      * @throws org.openecard.client.common.WSHelper.WSException
      */
-    public void selectMF(byte[] slotHandle) throws WSException {
+    public void selectMF(byte[] slotHandle) throws APDUException, Exception {
 	CardCommandAPDU selectMF = new Select.MasterFile();
 	selectMF.transmit(dispatcher, slotHandle);
     }
@@ -60,7 +60,7 @@ public class CardUtils {
      * @param fileID File identifier
      * @throws org.openecard.client.common.WSHelper.WSException
      */
-    public void selectFile(byte[] slotHandle, short fileID) throws WSException {
+    public void selectFile(byte[] slotHandle, short fileID) throws APDUException, Exception {
 	CardCommandAPDU selectFile = new Select.File(ShortUtils.toByteArray(fileID));
 	selectFile.transmit(dispatcher, slotHandle);
     }
@@ -97,5 +97,4 @@ public class CardUtils {
 
 	return baos.toByteArray();
     }
-
 }

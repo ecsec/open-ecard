@@ -21,15 +21,14 @@ import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.apdu.exception.APDUException;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.util.ByteUtils;
-
 
 /**
  * Implements a command APDU.
@@ -40,7 +39,6 @@ import org.openecard.client.common.util.ByteUtils;
 public class CardCommandAPDU extends CardAPDU {
 
     private static final Logger logger = Logger.getLogger("APDU");
-
     private byte[] header = new byte[4];
     private int le = -1;
     private int lc = -1;
@@ -58,7 +56,7 @@ public class CardCommandAPDU extends CardAPDU {
      */
     public CardCommandAPDU(byte[] commandAPDU) {
 	System.arraycopy(commandAPDU, 0, header, 0, 4);
-	setBody(Arrays.copyOfRange(commandAPDU, 4, commandAPDU.length));
+	setBody(ByteUtils.copy(commandAPDU, 4, commandAPDU.length - 4));
     }
 
     /**
@@ -331,7 +329,7 @@ public class CardCommandAPDU extends CardAPDU {
      *
      * @param body Body of the APDU
      */
-    public void setBody(byte[] body) {
+    public final void setBody(byte[] body) {
 
 	/*
 	 * Case 1. : |CLA|INS|P1|P2|
@@ -572,13 +570,13 @@ public class CardCommandAPDU extends CardAPDU {
      * @return Transmit
      */
     public Transmit makeTransmit(byte[] slotHandle) {
-	ArrayList<byte[]> positiveResponses = new ArrayList<byte[]>() {
+	ArrayList<byte[]> defaultResponses = new ArrayList<byte[]>() {
 
 	    {
 		add(new byte[]{(byte) 0x90, (byte) 0x00});
 	    }
 	};
-	return makeTransmit(slotHandle, positiveResponses);
+	return makeTransmit(slotHandle, defaultResponses);
     }
 
     /**
@@ -589,12 +587,11 @@ public class CardCommandAPDU extends CardAPDU {
      * @return Transmit
      */
     public Transmit makeTransmit(byte[] slotHandle, List<byte[]> responses) {
-	Transmit t = new Transmit();
 	InputAPDUInfoType apdu = new InputAPDUInfoType();
-
 	apdu.setInputAPDU(toByteArray());
 	apdu.getAcceptableStatusCode().addAll(responses);
 
+	Transmit t = new Transmit();
 	t.setSlotHandle(slotHandle);
 	t.getInputAPDUInfo().add(apdu);
 
@@ -608,20 +605,8 @@ public class CardCommandAPDU extends CardAPDU {
      * @param slotHandle Slot handle
      * @return Response APDU
      */
-    public CardResponseAPDU transmit(Dispatcher dispatcher, byte[] slotHandle) throws WSException {
-	try {
-	    Transmit t = makeTransmit(slotHandle);
-	    TransmitResponse tr = (TransmitResponse) dispatcher.deliver(t);
-	    WSHelper.checkResult(tr);
-	    CardResponseAPDU responseAPDU = new CardResponseAPDU(tr);
-
-	    return responseAPDU;
-	} catch (WSException ex) {
-	    throw ex;
-	} catch (Exception ex) {
-	    logger.log(Level.SEVERE, "No working IFD registered in dispatcher.", ex);
-	    throw new RuntimeException(ex);
-	}
+    public CardResponseAPDU transmit(Dispatcher dispatcher, byte[] slotHandle) throws APDUException, Exception {
+	return transmit(dispatcher, slotHandle, null);
     }
 
     /**
@@ -632,54 +617,27 @@ public class CardCommandAPDU extends CardAPDU {
      * @param responses List of positive responses
      * @return Response APDU
      */
-    public CardResponseAPDU transmit(Dispatcher dispatcher, byte[] slotHandle, List<byte[]> responses) throws WSException {
+    public CardResponseAPDU transmit(Dispatcher dispatcher, byte[] slotHandle, List<byte[]> responses) throws APDUException, Exception {
+	Transmit t;
+	TransmitResponse tr = null;
+
 	try {
-	    Transmit t = makeTransmit(slotHandle, responses);
-	    TransmitResponse tr = (TransmitResponse) dispatcher.deliver(t);
-	    WSHelper.checkResult(tr);
-	    CardResponseAPDU responseAPDU = new CardResponseAPDU(tr);
-
-	    return responseAPDU;
-	} catch (WSException ex) {
-	    throw ex;
-	} catch (Exception ex) {
-	    logger.log(Level.SEVERE, "No working IFD registered in dispatcher.", ex);
-	    throw new RuntimeException(ex);
-	}
-    }
-
-    /**
-     * Transmit the APDU.
-     *
-     * @param ifd IFD
-     * @param slotHandle Slot handle
-     * @param responses List of positive responses
-     * @return Response APDU
-     */
-    public CardResponseAPDU transmit(Dispatcher dispatcher, byte[] slotHandle, byte[]... responses) throws WSException {
-	try {
-	    Transmit t = new Transmit();
-	    InputAPDUInfoType apdu = new InputAPDUInfoType();
-	    apdu.setInputAPDU(toByteArray());
-
-	    for (int i = 0; i < responses.length; i++) {
-		apdu.getAcceptableStatusCode().add(responses[i]);
+	    if (responses != null) {
+		t = makeTransmit(slotHandle, responses);
+	    } else {
+		t = makeTransmit(slotHandle);
 	    }
 
-	    t.setSlotHandle(slotHandle);
-	    t.getInputAPDUInfo().add(apdu);
-
-	    TransmitResponse tr = (TransmitResponse) dispatcher.deliver(t);
+	    tr = (TransmitResponse) dispatcher.deliver(t);
 	    WSHelper.checkResult(tr);
 	    CardResponseAPDU responseAPDU = new CardResponseAPDU(tr);
 
 	    return responseAPDU;
 	} catch (WSException ex) {
-	    throw ex;
+	    throw new APDUException(ex, tr);
 	} catch (Exception ex) {
 	    logger.log(Level.SEVERE, "No working IFD registered in dispatcher.", ex);
 	    throw new RuntimeException(ex);
 	}
     }
-
 }

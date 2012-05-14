@@ -170,6 +170,7 @@ public class ECardConstants {
 	    public static final String PASSWORD_ERROR = IFD_PREFIX + "/passwordError";
 	    public static final String PASSWORD_DEACTIVATED = IFD_PREFIX + "/passwordDeactivated";
 	    public static final String AUTHENTICATION_FAILED = IFD_PREFIX + "/authenticationFailed";
+	    public static final String UNKNOWN_ERROR = IFD_PREFIX + "/unknownError";
 
 	    public static class IO {
 

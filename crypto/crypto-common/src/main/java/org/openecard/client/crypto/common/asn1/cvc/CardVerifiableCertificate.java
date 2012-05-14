@@ -21,7 +21,6 @@ import java.util.List;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
 
-
 /**
  * Implements a Card Verifiable Certificate.
  *
@@ -74,6 +73,8 @@ public class CardVerifiableCertificate {
     private Calendar expirationDate;
     // Certificate Extension
     private byte[] extensions;
+    // TLV encoded body an signature
+    private byte[] encodedBodyAndSignature;
 
     /**
      * Create a new Card Verifiable Certificate.
@@ -93,9 +94,11 @@ public class CardVerifiableCertificate {
      */
     public CardVerifiableCertificate(TLV tlv) throws TLVException {
 	if (tlv.getTagNumWithClass() != TAG_CVC) {
-	    throw new IllegalArgumentException("");
+	    throw new IllegalArgumentException("CardVerifiableCertificates must start with TAG 0x7F21");
 	}
-
+	// TLV encoded body and signature
+	encodedBodyAndSignature = tlv.getValue();
+	
 	// Certificate body
 	TLV bodyObject = tlv.findChildTags(TAG_BODY).get(0);
 	body = bodyObject.getValue();
@@ -133,7 +136,7 @@ public class CardVerifiableCertificate {
 		    break;
 		case TAG_EXPIRATION_DATE:
 		    TLV expirationDateObject = bodyObject.findChildTags(TAG_EXPIRATION_DATE).get(0);
-		    effectiveDate = parseDate(expirationDateObject.getValue());
+		    expirationDate = parseDate(expirationDateObject.getValue());
 		    break;
 		case TAG_EXTENSION:
 		    extensions = bodyObject.findChildTags(TAG_EXTENSION).get(0).getValue();
@@ -245,6 +248,15 @@ public class CardVerifiableCertificate {
      */
     public byte[] getExtensions() {
 	return extensions;
+    }
+
+    /**
+     * Returns the TLV encoded body and signature of the certificate.
+     * 
+     * @return TLV encoded body and signature
+     */
+    public byte[] getEncodedBodyAndSignature() {
+        return encodedBodyAndSignature;
     }
 
 }

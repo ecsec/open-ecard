@@ -14,15 +14,15 @@
  * http://www.gnu.org/copyleft/gpl.html.
  *
  * Other Usage
- * Alternatively, this file may be used in accordance with the terms and
- * conditions contained in a signed written agreement between you and ecsec.
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
  *
  ***************************************************************************/
 
 package org.openecard.client.common.util;
 
 import java.security.SecureRandom;
-import java.util.Random;
 import java.util.UUID;
 
 
@@ -39,36 +39,17 @@ public class ValueGenerators {
      * @return PSK
      */
     public static String generatePSK() {
-	return generatePSK(32);
+	return generatePSK(64);
     }
 
     /**
      * Generates a new pre-shared key (PSK).
      *
-     * @param length Length of the PSK
+     * @param bitLength Length of the PSK
      * @return PSK
      */
-    public static String generatePSK(int length) {
-	return generateSecureRandomHex(length);
-    }
-
-    /**
-     * Generates an session identifier.
-     *
-     * @return Session identifier.
-     */
-    public static String generateSessionID() {
-	return generateSessionID(28);
-    }
-
-    /**
-     * Generates a session identifier.
-     *
-     * @param length Length of the session identifier
-     * @return Session identifier
-     */
-    public static String generateSessionID(int length) {
-	return generateRandomHex(28);
+    public static String generatePSK(int bitLength) {
+	return generateRandomHex(bitLength);
     }
 
     /**
@@ -76,8 +57,18 @@ public class ValueGenerators {
      *
      * @return Session identifier
      */
-    public static String generateSecureSessionID() {
-	return generateSecureRandomHex(28);
+    public static String generateSessionID() {
+	return generateSessionID(32);
+    }
+
+    /**
+     * Generates a secure session identifier.
+     *
+     * @param bitLength Length of the session identifier
+     * @return Session identifier
+     */
+    public static String generateSessionID(int bitLength) {
+	return generateRandomHex(bitLength);
     }
 
     /**
@@ -92,42 +83,13 @@ public class ValueGenerators {
     }
 
     /**
-     * Generates a random hex string.
-     *
-     * @param length Length of the random
-     * @return Random hex string
-     */
-    public static String generateRandomHex(int length) {
-	return ByteUtils.toHexString(generateRandom(length));
-    }
-
-    /**
-     * Generates a random value.
-     * Using 'java.util.Random'.
-     *
-     * @param length Length of the random
-     * @return Secure random value
-     */
-    public static byte[] generateRandom(int length) {
-	if (length < 1) {
-	    return null;
-	}
-
-	Random rand = new Random();
-	byte[] randomBytes = new byte[length];
-	rand.nextBytes(randomBytes);
-
-	return randomBytes;
-    }
-
-    /**
      * Generates a secure random hex string.
      *
-     * @param length Length of the random
+     * @param bitLength Length of the random
      * @return Secure random hex string
      */
-    public static String generateSecureRandomHex(int length) {
-	return ByteUtils.toHexString(generateSecureRandom(length));
+    public static String generateRandomHex(int bitLength) {
+	return ByteUtils.toHexString(generateRandom(bitLength));
     }
 
     /**
@@ -137,13 +99,15 @@ public class ValueGenerators {
      * @param length Length of the random
      * @return Secure random value
      */
-    public static byte[] generateSecureRandom(int length) {
-	if (length < 1) {
+    public static byte[] generateRandom(int bitLength) {
+	if (bitLength < 1) {
 	    return null;
 	}
 
+	bitLength = (bitLength / 2 + bitLength % 2);
+
 	SecureRandom rand = new SecureRandom();
-	byte[] randomBytes = new byte[length];
+	byte[] randomBytes = new byte[bitLength];
 	rand.nextBytes(randomBytes);
 
 	return randomBytes;

@@ -41,31 +41,13 @@ public class ValueGeneratorsTest {
     @Test
     public void testGenerateSessionID() {
 	String session = ValueGenerators.generateSessionID();
-	assertEquals(28, session.length());
+	assertEquals(32, session.length());
     }
 
     @Test
     public void testGenerateRandomHex() {
-	String randomHex = ValueGenerators.generateRandomHex(20);
-	assertEquals(20, randomHex.length());
-    }
-
-    @Test
-    public void testGenerateSecureSessionID() {
-	String session = ValueGenerators.generateSecureSessionID();
-	assertEquals(56, session.length());
-    }
-
-    @Test
-    public void testGenerateSecureRandomHex() {
-	String randomHex = ValueGenerators.generateSecureRandomHex(20);
+	String randomHex = ValueGenerators.generateRandomHex(40);
 	assertEquals(40, randomHex.length());
-
-	randomHex = ValueGenerators.generateSecureRandomHex(-5);
-	assertEquals("", randomHex);
-
-	randomHex = ValueGenerators.generateSecureRandomHex(0);
-	assertEquals("", randomHex);
     }
 
     @Test

@@ -182,6 +182,10 @@ public class ByteUtilsTest {
 	s = ByteUtils.toLong(input);
 	assertEquals(Long.MAX_VALUE, s);
 
+	input = new byte[] { (byte) 0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFE };
+	s = ByteUtils.toLong(input);
+	assertEquals(Long.MAX_VALUE - 1, s);
+
 	input = new byte[] { (byte) 0x80, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 	s = ByteUtils.toLong(input);
 	assertEquals(Long.MIN_VALUE, s);

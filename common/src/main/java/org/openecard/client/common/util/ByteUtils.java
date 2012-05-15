@@ -298,7 +298,7 @@ public class ByteUtils {
 	long value = 0;
 
 	for (int i = 0; i < bytes.length; i++) {
-	    value |= (0xFF & bytes[bytes.length - 1 - i]) << i * 8;
+	    value |= ((long) 0xFF & bytes[bytes.length - 1 - i]) << i * 8;
 	}
 
 	return value;

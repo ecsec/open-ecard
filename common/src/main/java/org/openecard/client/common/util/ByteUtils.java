@@ -1,22 +1,30 @@
-/*
- * Copyright 2012 Moritz Horsch.
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.common.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 
 
 /**
@@ -24,22 +32,21 @@ import java.io.StringWriter;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class ByteUtils {
 
     /**
      * Clone a byte array.
      *
-     * @param input
-     * @return new byte array
+     * @param input the byte array to clone
+     * @return new byte array, or null if input is null
      */
     public static byte[] clone(byte[] input) {
 	if (input == null) {
 	    return null;
 	}
-	byte[] ret = new byte[input.length];
-	System.arraycopy(input, 0, ret, 0, input.length);
-	return ret;
+	return input.clone();
     }
 
     /**
@@ -105,12 +112,9 @@ public class ByteUtils {
 	if (input == null) {
 	    return null;
 	}
-	if (input[0] != (byte) 0x00) {
-	    return input;
-	}
 
 	int i;
-	for (i = 1; i < input.length - 1; i++) {
+	for (i = 0; i < input.length - 1; i++) {
 	    if (input[i] != (byte) 0x00) {
 		break;
 	    }
@@ -319,8 +323,11 @@ public class ByteUtils {
      * @param position Position in array
      * @param array Array
      * @return True if the bit is set, false otherwise
+     * @throws IllegalArgumentException if position is negative or greater than the number of bits in this array
      */
-    public static boolean isBitSet(int position, byte[] array) {
+    public static boolean isBitSet(int position, byte[] array) throws IllegalArgumentException {
+	if(position<0 || position >= array.length*8)
+	    throw new IllegalArgumentException("position is invalid");
 	return ((array[position / 8] & (128 >> (position % 8))) > 0);
     }
 
@@ -329,8 +336,12 @@ public class ByteUtils {
      *
      * @param position Position
      * @param array Array
+     * @throws IllegalArgumentException if position is negative or greater than the number of bits in this array
      */
-    public static void setBit(int position, byte[] array) {
+    public static void setBit(int position, byte[] array) throws IllegalArgumentException {
+	if(position<0 || position >= array.length*8)
+	    throw new IllegalArgumentException("position is invalid");
 	array[position / 8] |= (128 >> (position % 8));
     }
+
 }

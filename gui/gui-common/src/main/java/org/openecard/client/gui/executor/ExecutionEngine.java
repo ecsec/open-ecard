@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.gui.executor;
 
 import java.util.Collections;
@@ -25,7 +24,6 @@ import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.UserConsentNavigator;
 import org.openecard.client.gui.definition.OutputInfoUnit;
 
-
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
@@ -34,24 +32,21 @@ public class ExecutionEngine {
 
     private final UserConsentNavigator navigator;
     private final TreeMap<String, ExecutionResults> results = new TreeMap<String, ExecutionResults>();
-
-    private TreeMap<String,StepAction> customActions;
+    private TreeMap<String, StepAction> customActions;
 
     public ExecutionEngine(UserConsentNavigator navigator) {
 	this.navigator = navigator;
     }
 
-
     public void addCustomAction(StepAction action) {
-	getCustomActions().put(action.associatedStepName(), action);
+	getCustomActions().put(action.getStepID(), action);
     }
 
     public ResultStatus process() {
 	StepResult next = navigator.next(); // get first step
-	ResultStatus result = ResultStatus.OK;
 	// loop over steps. break inside loop
 	while (true) {
-	    result = next.status();
+	    ResultStatus result = next.getStatus();
 	    // close dialog on cancel
 	    if (result == ResultStatus.CANCEL) {
 		navigator.close();
@@ -59,12 +54,12 @@ public class ExecutionEngine {
 	    }
 
 	    // get result and put it in resultmap
-	    List<OutputInfoUnit> stepResults = next.results();
+	    List<OutputInfoUnit> stepResults = next.getResults();
 	    Map<String, ExecutionResults> oldResults = Collections.unmodifiableMap(results);
-	    results.put(next.stepName(), new ExecutionResults(next.stepName(), stepResults));
+	    results.put(next.getStepID(), new ExecutionResults(next.getStepID(), stepResults));
 
 	    // perform action
-	    StepAction action = getAction(next.stepName());
+	    StepAction action = getAction(next.getStepID());
 	    StepActionResult actionResult = action.perform(oldResults, next);
 	    // replace step if told by result value
 	    if (actionResult.getReplacement() != null) {
@@ -84,7 +79,7 @@ public class ExecutionEngine {
 			next = navigator.replaceCurrent(actionResult.getReplacement());
 			break;
 		}
-	    // no replacement just proceed
+		// no replacement just proceed
 	    } else {
 		switch (actionResult.getStatus()) {
 		    case BACK:
@@ -106,11 +101,11 @@ public class ExecutionEngine {
 	}
     }
 
-    public Map<String,ExecutionResults> getResults() {
+    public Map<String, ExecutionResults> getResults() {
 	return Collections.unmodifiableMap(results);
     }
 
-    private TreeMap<String,StepAction> getCustomActions() {
+    private TreeMap<String, StepAction> getCustomActions() {
 	if (customActions == null) {
 	    customActions = new TreeMap<String, StepAction>();
 	}
@@ -122,12 +117,16 @@ public class ExecutionEngine {
 	    return getCustomActions().get(stepName);
 	} else {
 	    return new StepAction(stepName) {
+
 		@Override
 		public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-		    switch (result.status()) {
-			case BACK: return new StepActionResult(StepActionResultStatus.BACK);
-			case OK: return new StepActionResult(StepActionResultStatus.NEXT);
-			default: return new StepActionResult(StepActionResultStatus.REPEAT); // cancel performed before
+		    switch (result.getStatus()) {
+			case BACK:
+			    return new StepActionResult(StepActionResultStatus.BACK);
+			case OK:
+			    return new StepActionResult(StepActionResultStatus.NEXT);
+			default:
+			    return new StepActionResult(StepActionResultStatus.REPEAT); // cancel performed before
 		    }
 		}
 	    };
@@ -140,10 +139,12 @@ public class ExecutionEngine {
 
     private ResultStatus convertStatus(StepActionResultStatus in) {
 	switch (in) {
-	    case BACK: return ResultStatus.BACK;
-	    case NEXT: return ResultStatus.OK;
-	    default:   return ResultStatus.OK; // repeat undefined for this kind of status
+	    case BACK:
+		return ResultStatus.BACK;
+	    case NEXT:
+		return ResultStatus.OK;
+	    default:
+		return ResultStatus.OK; // repeat undefined for this kind of status
 	}
     }
-
 }

@@ -24,6 +24,7 @@ package org.openecard.client.gui.definition;
 public enum InfoUnitElementType {
 
     Text,
+    ToggleText,
     Hyperlink,
     Checkbox,
     Radiobox,

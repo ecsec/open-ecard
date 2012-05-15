@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.gui;
 
 import java.util.List;
 import org.openecard.client.gui.definition.OutputInfoUnit;
-
 
 /**
  *
@@ -26,13 +24,15 @@ import org.openecard.client.gui.definition.OutputInfoUnit;
  */
 public interface StepResult {
 
-    public String stepName();
+    public String getStepID();
 
-    public ResultStatus status();
+    public ResultStatus getStatus();
+
     public boolean isOK();
+
     public boolean isBack();
+
     public boolean isCancelled();
 
-    public List<OutputInfoUnit> results();
-
+    public List<OutputInfoUnit> getResults();
 }

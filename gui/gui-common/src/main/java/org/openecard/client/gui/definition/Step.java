@@ -13,35 +13,62 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.gui.definition;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Map;
+import java.util.UUID;
+import org.openecard.client.gui.StepResult;
+import org.openecard.client.gui.executor.ExecutionResults;
+import org.openecard.client.gui.executor.StepAction;
+import org.openecard.client.gui.executor.StepActionResult;
+import org.openecard.client.gui.executor.StepActionResultStatus;
 
 /**
- *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class Step {
 
-    private String name;
-    private boolean reversible=true;
-    private boolean instantReturn=false;
+    private String id;
+    private String title;
+    private String description;
+    private StepAction action;
+    private boolean reversible = true;
+    private boolean instantReturn = false;
     private List<InputInfoUnit> inputInfoUnits;
 
-    public Step(String name) {
-	this.name = name;
+    public Step(String title) {
+	this(UUID.randomUUID().toString(), title);
     }
 
-
-    public String getName() {
-	return name;
+    public Step(String id, String title) {
+	this.id = id;
+	this.title = title;
     }
 
-    public void setName(String name) {
-	this.name = name;
+    public String getID() {
+	return id;
+    }
+
+    public void setID(String id) {
+	this.id = id;
+    }
+
+    public String getDescription() {
+	return description;
+    }
+
+    public void setDescription(String description) {
+	this.description = description;
+    }
+
+    public String getTitle() {
+	return title;
+    }
+
+    public void setTitle(String title) {
+	this.title = title;
     }
 
     public boolean isReversible() {
@@ -71,4 +98,27 @@ public class Step {
 	return getInputInfoUnits().isEmpty();
     }
 
+    public StepAction getAction() {
+	if (action == null) {
+	    return new StepAction(getID()) {
+
+		@Override
+		public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
+		    switch (result.getStatus()) {
+			case BACK:
+			    return new StepActionResult(StepActionResultStatus.BACK);
+			case OK:
+			    return new StepActionResult(StepActionResultStatus.NEXT);
+			default:
+			    return new StepActionResult(StepActionResultStatus.REPEAT);
+		    }
+		}
+	    };
+	}
+	return action;
+    }
+
+    public void setAction(StepAction action) {
+	this.action = action;
+    }
 }

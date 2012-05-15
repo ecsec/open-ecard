@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.gui.executor;
 
 import java.util.List;
 import org.openecard.client.gui.definition.OutputInfoUnit;
-
 
 /**
  *
@@ -26,20 +24,19 @@ import org.openecard.client.gui.definition.OutputInfoUnit;
  */
 public class ExecutionResults {
 
-    private final String stepName;
+    private final String stepID;
     private final List<OutputInfoUnit> results;
 
-    public ExecutionResults(String stepName, List<OutputInfoUnit> results) {
-	this.stepName = stepName;
+    public ExecutionResults(String stepID, List<OutputInfoUnit> results) {
+	this.stepID = stepID;
 	this.results = results;
     }
-
 
     /**
      * @return the stepName
      */
-    public String getStepName() {
-	return stepName;
+    public String getStepID() {
+	return stepID;
     }
 
     /**
@@ -48,5 +45,4 @@ public class ExecutionResults {
     public List<OutputInfoUnit> getResults() {
 	return results;
     }
-
 }

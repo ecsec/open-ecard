@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.gui.executor;
 
 import java.util.Map;
 import org.openecard.client.gui.StepResult;
-
+import org.openecard.client.gui.definition.Step;
 
 /**
  *
@@ -26,17 +25,19 @@ import org.openecard.client.gui.StepResult;
  */
 public abstract class StepAction {
 
-    private final String stepName;
+    private final String stepID;
 
-    public StepAction(String stepName) {
-	this.stepName = stepName;
+    public StepAction(Step step) {
+	this(step.getID());
     }
 
-
-    public String associatedStepName() {
-	return stepName;
+    public StepAction(String stepID) {
+	this.stepID = stepID;
     }
 
-    public abstract StepActionResult perform(Map<String,ExecutionResults> oldResults, StepResult result);
+    public String getStepID() {
+	return stepID;
+    }
 
+    public abstract StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result);
 }

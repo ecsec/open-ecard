@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.gui.definition;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  *
@@ -30,15 +28,14 @@ public class UserConsentDescription {
     private String dialogType;
     private ArrayList<Step> steps;
 
+    public UserConsentDescription(String title) {
+	this(title, "");
+    }
+
     public UserConsentDescription(String title, String dialogType) {
 	this.title = title;
 	this.dialogType = dialogType;
     }
-
-    public UserConsentDescription(String title) {
-	this.title = title;
-    }
-
 
     /**
      * @return the title
@@ -74,5 +71,4 @@ public class UserConsentDescription {
 	}
 	return steps;
     }
-
 }

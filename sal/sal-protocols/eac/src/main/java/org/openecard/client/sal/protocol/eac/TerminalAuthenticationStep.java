@@ -41,7 +41,6 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 
     private static final Logger logger = LoggerFactory.getLogger(TerminalAuthenticationStep.class.getName());
     private Dispatcher dispatcher;
-    private byte[] slotHandle;
 
     public TerminalAuthenticationStep(Dispatcher dispatcher) {
 	this.dispatcher = dispatcher;
@@ -59,7 +58,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	// </editor-fold>
 
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
-	slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
+	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
 
 	try {
 	    EAC2InputType eac2Input = new EAC2InputType(didAuthenticate.getAuthenticationProtocolData());

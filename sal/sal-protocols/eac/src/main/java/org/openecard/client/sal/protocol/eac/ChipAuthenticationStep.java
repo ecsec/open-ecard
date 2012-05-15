@@ -44,7 +44,6 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 
     private static final Logger logger = LoggerFactory.getLogger(ChipAuthenticationStep.class.getName());
     private Dispatcher dispatcher;
-    private byte[] slotHandle;
 
     public ChipAuthenticationStep(Dispatcher dispatcher) {
 	this.dispatcher = dispatcher;
@@ -62,7 +61,7 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	// </editor-fold>
 
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
-	slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
+	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
 
 	try {
 	    EACAdditionalInputType eacAdditionalInput = new EACAdditionalInputType(didAuthenticate.getAuthenticationProtocolData());

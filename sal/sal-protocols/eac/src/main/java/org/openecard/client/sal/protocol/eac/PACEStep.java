@@ -49,7 +49,6 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
     private static final Logger logger = LoggerFactory.getLogger(PACEStep.class.getName());
     private Dispatcher dispatcher;
-    private byte[] slotHandle;
     private EACUserConsent gui;
 
     public PACEStep(Dispatcher dispatcher, UserConsent gui) {
@@ -69,7 +68,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	// </editor-fold>
 
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
-	slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
+	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
 
 	try {
 	    EAC1InputType eac1Input = new EAC1InputType(didAuthenticate.getAuthenticationProtocolData());

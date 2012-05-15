@@ -22,8 +22,6 @@
 
 package org.openecard.client.ifd.protocol.pace;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openecard.client.common.util.StringUtils;
@@ -68,7 +66,7 @@ public class SecureMessagingTest {
 	try {
 	    decryptedAPDU = sm.decrypt(new byte[] { (byte) 0x90, 0x00 });
 	    Assert.fail("Decrypting an unencrypted APDU should give an error.");
-	} catch (IOException e) {
+	} catch (Exception e) {
 	    /* expected */
 	}
 
@@ -79,7 +77,7 @@ public class SecureMessagingTest {
 	    apduToDecrypt = StringUtils.toByteArray("8E0812503AC2A74CC4639000");
 	    decryptedAPDU = sm.decrypt(apduToDecrypt);
 	    Assert.fail("Decrypting an APDU without DO99 should give an error.");
-	} catch (IOException e) {
+	} catch (Exception e) {
 	    /* expected */
 	}
 
@@ -90,7 +88,7 @@ public class SecureMessagingTest {
 	    apduToDecrypt = StringUtils.toByteArray("990290009000");
 	    decryptedAPDU = sm.decrypt(apduToDecrypt);
 	    Assert.fail("Decrypting an APDU without DO8E should give an error.");
-	} catch (IllegalArgumentException e) {
+	} catch (Exception e) {
 	    /* expected */
 	}
 
@@ -101,7 +99,7 @@ public class SecureMessagingTest {
 	    apduToDecrypt = StringUtils.toByteArray("871101FFC073CB761DC0461DDAFA3217DFB392990290008E08442DFAAF0E458896");
 	    decryptedAPDU = sm.decrypt(apduToDecrypt);
 	    Assert.fail("Decrypting an APDU without Statusbytes should give an error.");
-	} catch (IOException e) {
+	} catch (Exception e) {
 	    /* expected */
 	}
 
@@ -112,7 +110,7 @@ public class SecureMessagingTest {
 	    apduToDecrypt = StringUtils.toByteArray("871101FFC073CB761DC0461DDAFA3217DFB392990290008E0812345678910111269000");
 	    decryptedAPDU = sm.decrypt(apduToDecrypt);
 	    Assert.fail("Decrypting an APDU with wrong MAC should give an error.");
-	} catch (GeneralSecurityException e) {
+	} catch (Exception e) {
 	    /* expected */
 	}
     }

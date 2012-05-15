@@ -33,7 +33,6 @@ import java.util.List;
  * See BSI-TR-03110, version 2.10, part 3, section C.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class CardVerifiableCertificateChain {
 
@@ -51,7 +50,7 @@ public class CardVerifiableCertificateChain {
     public CardVerifiableCertificateChain(List<CardVerifiableCertificate> certificates) throws CertificateException {
 	parseChain(certificates);
 	// FIXME not working yet with all servers.
-//	verifyChain();
+//	verify();
     }
 
     /**
@@ -88,17 +87,11 @@ public class CardVerifiableCertificateChain {
      *
      * @throws CertificateException
      */
-    private void verifyChain() throws CertificateException {
-	if (cvca != null) {
-	    if (!cvca.getCAR().equals(cvca.getCHR())
-		    || !dv.getCAR().equals(cvca.getCHR())
-		    || !terminal.getCAR().equals(dv.getCHR())) {
-		throw new CertificateException("Malformed certificate chain");
-	    }
-	} else {
-	    if (!terminal.getCAR().equals(dv.getCHR())) {
-		throw new CertificateException("Malformed certificate chain");
-	    }
+    private void verify() throws CertificateException {
+	if (!cvca.getCAR().equals(cvca.getCHR())
+		|| !dv.getCAR().equals(cvca.getCHR())
+		|| !terminal.getCAR().equals(dv.getCHR())) {
+	    throw new CertificateException("Malformed certificate chain");
 	}
     }
 

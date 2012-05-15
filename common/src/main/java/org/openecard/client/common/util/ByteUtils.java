@@ -24,7 +24,6 @@ package org.openecard.client.common.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Arrays;
 
 
 /**
@@ -46,7 +45,9 @@ public class ByteUtils {
 	if (input == null) {
 	    return null;
 	}
-	return input.clone();
+	byte[] ret = new byte[input.length];
+	System.arraycopy(input, 0, ret, 0, input.length);
+	return ret;
     }
 
     /**
@@ -133,7 +134,7 @@ public class ByteUtils {
 	    return null;
 	}
 	if (input[0] != (byte) 0x00) {
-	    return input;
+	    return ByteUtils.clone(input);
 	}
 	return copy(input, 1, input.length - 1);
     }
@@ -326,8 +327,9 @@ public class ByteUtils {
      * @throws IllegalArgumentException if position is negative or greater than the number of bits in this array
      */
     public static boolean isBitSet(int position, byte[] array) throws IllegalArgumentException {
-	if(position<0 || position >= array.length*8)
-	    throw new IllegalArgumentException("position is invalid");
+	if (position < 0 || position >= array.length * 8) {
+	    throw new IllegalArgumentException("Position is invalid");
+	}
 	return ((array[position / 8] & (128 >> (position % 8))) > 0);
     }
 
@@ -339,8 +341,9 @@ public class ByteUtils {
      * @throws IllegalArgumentException if position is negative or greater than the number of bits in this array
      */
     public static void setBit(int position, byte[] array) throws IllegalArgumentException {
-	if(position<0 || position >= array.length*8)
-	    throw new IllegalArgumentException("position is invalid");
+	if (position < 0 || position >= array.length * 8) {
+	    throw new IllegalArgumentException("Position is invalid");
+	}
 	array[position / 8] |= (128 >> (position % 8));
     }
 

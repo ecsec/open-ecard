@@ -31,10 +31,14 @@ public abstract class StepLayouter {
 	if (dialogType.equals("somefancy dialog type like nPa-eID")) {
 	    // TODO: create and return
 	}
-        
+
         if (stepName.equals("some step with special layout needs")) {
             // TODO: create and return
         }
+	 if (stepName.equals("PIN-Eingabe")) {
+            layouter = new NPAStepLayouter(infoUnits, stepName);
+        }
+
 
 	// default type if nothing happened so far
 	if (layouter == null) {

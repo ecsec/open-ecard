@@ -1,9 +1,11 @@
 package org.openecard.client.gui.swing.components;
 
 import java.awt.Component;
-import javax.swing.JLabel;
+import java.awt.Insets;
+import javax.swing.JButton;
+import javax.swing.JTextArea;
 import org.openecard.client.gui.definition.OutputInfoUnit;
-
+import org.openecard.client.gui.swing.StepFrame;
 
 /**
  * Implementation of a simple text component for use in a {@link StepFrame}.
@@ -12,22 +14,20 @@ import org.openecard.client.gui.definition.OutputInfoUnit;
  */
 public class Text implements StepComponent {
 
-    private final JLabel label;
+    private JTextArea textArea;
 
     public Text(org.openecard.client.gui.definition.Text text) {
-	String s = text.getText();
-	// replace newlines with appropriate html code
-	if (s.contains("\n")) {
-	    s = "<html>" + s + "</html>";
-	    s = s.replace("\n", "<br/>");
-	}
-	this.label = new JLabel(s);
+	textArea = new JTextArea(text.getText());
+	textArea.setMargin(new Insets(0, 0, 0, 0));
+	textArea.setEditable(false);
+	textArea.setLineWrap(true);
+	textArea.setWrapStyleWord(true);
+	textArea.setFont(new JButton().getFont());
     }
-
 
     @Override
     public Component getComponent() {
-	return label;
+	return textArea;
     }
 
     @Override
@@ -44,5 +44,4 @@ public class Text implements StepComponent {
     public OutputInfoUnit getValue() {
 	return null;
     }
-
 }

@@ -1,3 +1,7 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package org.openecard.client.gui.swing.steplayout;
 
 import java.awt.BorderLayout;
@@ -23,17 +27,15 @@ import org.openecard.client.gui.swing.components.Text;
 import org.openecard.client.gui.swing.components.ToggleText;
 
 /**
- * Updated Default layouter. Should be fine for most generic forms
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @editor Florian Feldmann <florian.feldmann@rub.de>
+ * @author John
  */
-public class DefaultStepLayouter extends StepLayouter {
+public class NPAStepLayouter extends StepLayouter {
 
     private final ArrayList<StepComponent> components;
     private final JPanel rootPanel;
 
-    protected DefaultStepLayouter(List<InputInfoUnit> infoUnits, String stepName) {
+    protected NPAStepLayouter(List<InputInfoUnit> infoUnits, String stepName) {
 	components = new ArrayList<StepComponent>(infoUnits.size());
 
 	// using GridBagLayout over GridLayout gives much more control of

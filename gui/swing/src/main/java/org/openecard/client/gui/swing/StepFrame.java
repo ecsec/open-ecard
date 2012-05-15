@@ -1,123 +1,85 @@
 package org.openecard.client.gui.swing;
 
-import org.openecard.client.gui.ResultStatus;
-import org.openecard.client.gui.swing.components.StepComponent;
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Exchanger;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import javax.swing.JButton;
-import javax.swing.JLabel;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import org.openecard.client.gui.ResultStatus;
 import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.definition.OutputInfoUnit;
 import org.openecard.client.gui.definition.Step;
+import org.openecard.client.gui.swing.components.StepComponent;
 import org.openecard.client.gui.swing.steplayout.StepLayouter;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The StepFrame class represents a single step. The actual layouting is however
  * deferred to a layouting component.
  *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @editor Florian Feldmann <florian.feldmann@rub.de>
  */
-public class StepFrame {
+public class StepFrame extends JPanel implements ActionListener {
 
-    private final Step step;
-
-    private final JPanel rootPanel;
-    private final JButton backButton;
-    private final JButton forwardButton;
-    private final JButton cancelButton;
-
-    private final List<StepComponent> components;
-
+    private static final Logger logger = LoggerFactory.getLogger(StepFrame.class);
+    private Step step;
+    private String dialogType;
+    private List<StepComponent> components;
     private SwingStepResult stepResult;
-    
-    // button descriptors
-    private String TEXT_BACK_BUTTON = "Zurück";
-    private String TEXT_FINISHED_BUTTON = "Fertig";
-    private String TEXT_FORWARD_BUTTON = "Weiter";
-    private String TEXT_CANCEL_BUTTON = "Abbrechen";
 
-    public StepFrame(Step step, String dialogType, boolean last) {
+    public StepFrame(Step step, String dialogType) {
 	this.step = step;
-	// create panels
-	BorderLayout layout = new BorderLayout();
-	rootPanel = new JPanel(layout);
-	FlowLayout buttonLayout = new FlowLayout();
-	JPanel buttonPanel = new JPanel(buttonLayout);
-	rootPanel.add(buttonPanel, BorderLayout.SOUTH);
+	this.dialogType = dialogType;
 
-	// create button elements
-	backButton = new JButton();
-	forwardButton = new JButton();
-	cancelButton = new JButton();
-	buttonPanel.add(backButton);
-	buttonPanel.add(forwardButton);
-	buttonPanel.add(cancelButton);
-	// back
-	backButton.setText(TEXT_BACK_BUTTON);
-	if (! step.isReversible()) {
-	    backButton.setEnabled(false);
-	} else {
-	    backButton.addActionListener(new BackEvent());
-	}
-	// forward
-	if (last) {
-	    forwardButton.setText(TEXT_FINISHED_BUTTON);
-	    forwardButton.addActionListener(new ForwardEvent());
-	} else {
-	    forwardButton.setText(TEXT_FORWARD_BUTTON);
-	    forwardButton.addActionListener(new ForwardEvent());
-	}
-	// cancel
-	cancelButton.removeAll();
-	cancelButton.setText(TEXT_CANCEL_BUTTON);
-	cancelButton.addActionListener(new CancelEvent());
+	stepResult = new SwingStepResult(step.getID());
 
-        // dummy JLabel for alignment, adjusts free space left of content
-        JLabel dummy = new JLabel("   ");
-        rootPanel.add(dummy, BorderLayout.WEST);
+	initLayout();
+    }
 
-	// fill content panel - this is done with an external class which knows all about the actual layout
-	StepLayouter stepLayouter = StepLayouter.create(step.getInputInfoUnits(), dialogType, step.getName());
+    private void initLayout() {
+	setLayout(new BorderLayout());
+    }
+
+    private void initComponents() {
+	StepLayouter stepLayouter = StepLayouter.create(step.getInputInfoUnits(), dialogType, step.getTitle());
 	Container contentPanel = stepLayouter.getPanel();
-	rootPanel.add(contentPanel, BorderLayout.CENTER);
+	add(contentPanel, BorderLayout.CENTER);
+
 	components = stepLayouter.getComponents();
     }
 
     public void resetForDisplay() {
-	stepResult = new SwingStepResult();
+	stepResult = new SwingStepResult(step.getID());
     }
 
     public void instantReturnIfSet() {
 	if (step.isInstantReturn()) {
-	    forwardButton.doClick();
+	    //TODO
+//	    forwardButton.doClick();
 	}
     }
 
+    //OK
     public Container getPanel() {
-	return rootPanel;
+	revalidate(this);
+	return this;
     }
 
     /**
      * Check if all components on the frame are valid. This can be used to see
      * if a jump to the next frame can be made.
+     *
      * @return True if all components are valid, false otherwise.
      */
-    public boolean validate() {
+    public boolean validateComponents() {
 	for (StepComponent next : components) {
-	    if (next.isValueType() && ! next.validate()) {
+	    if (next.isValueType() && !next.validate()) {
 		return false;
 	    }
 	}
@@ -126,6 +88,7 @@ public class StepFrame {
 
     /**
      * Get result for all components on the frame that support result values.
+     *
      * @return List containg all result values. As a matter of fact this list can be empty.
      */
     public List<OutputInfoUnit> getResultContent() {
@@ -138,156 +101,42 @@ public class StepFrame {
 	return result;
     }
 
-
     public StepResult getStepResult() {
+	removeAll();
+	initComponents();
+	revalidate(this);
 	return stepResult;
     }
 
+    private void revalidate(JComponent c) {
+	for (int i = 0; i < c.getComponentCount(); i++) {
+	    this.revalidate((JComponent) c.getComponent(i));
+	}
+	c.revalidate();
+	c.repaint();
+    }
 
-    /**
-     * Event class for cancel button clicks.
-     */
-    private class CancelEvent implements ActionListener {
-	@Override
-	public void actionPerformed(ActionEvent e) {
-	    synchronized (stepResult) {
-		stepResult.cancelled = true;
-		stepResult.done = true;
+    @Override
+    public void actionPerformed(ActionEvent e) {
+	logger.info("StepFrame event: {}", e.paramString());
+
+	if (e.getSource().equals(step)) {
+	    String command = e.getActionCommand();
+	    if (command.equals(GUIConstants.BUTTON_BACK)) {
+		stepResult.setResult(getResultContent());
+		stepResult.setResultStatus(ResultStatus.BACK);
+	    } else if (command.equals(GUIConstants.BUTTON_NEXT)) {
+		stepResult.setResult(getResultContent());
+		stepResult.setResultStatus(ResultStatus.OK);
+	    } else if (command.equals(GUIConstants.BUTTON_CANCEL)) {
+		stepResult.setResultStatus(ResultStatus.CANCEL);
+	    } else {
+		return;
 	    }
 	    try {
-		stepResult.syncPoint.exchange(null, 500, TimeUnit.MILLISECONDS);
-	    } catch (InterruptedException ex) {
-	    } catch (TimeoutException ex) {
+		stepResult.syncPoint.exchange(null);
+	    } catch (Exception ignore) {
 	    }
 	}
     }
-    /**
-     * Event class for forward button clicks.
-     */
-    private class ForwardEvent implements ActionListener {
-	@Override
-	public void actionPerformed(ActionEvent e) {
-	    if (validate()) {
-		synchronized (stepResult) {
-		    stepResult.done = true;
-		    stepResult.results = getResultContent();
-		}
-		try {
-		    stepResult.syncPoint.exchange(null, 500, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException ex) {
-		} catch (TimeoutException ex) {
-		}
-	    }
-	}
-    }
-    /**
-     * Event class for back button clicks.
-     */
-    private class BackEvent implements ActionListener {
-	@Override
-	public void actionPerformed(ActionEvent e) {
-	    synchronized (stepResult) {
-		stepResult.back = true;
-		stepResult.done = true;
-	    }
-	    try {
-		stepResult.syncPoint.exchange(null, 500, TimeUnit.MILLISECONDS);
-	    } catch (InterruptedException ex) {
-	    } catch (TimeoutException ex) {
-	    }
-	}
-    }
-
-
-
-    private class SwingStepResult implements StepResult {
-
-	public Exchanger syncPoint = new Exchanger();
-	public boolean done = false;
-	public boolean cancelled = false;
-	public boolean back = false;
-	public List<OutputInfoUnit> results = null;
-
-	@Override
-	public String stepName() {
-	    return step.getName();
-	}
-
-	@Override
-	public ResultStatus status() {
-	    if (!done) {
-		try {
-		    syncPoint.exchange(null);
-		} catch (InterruptedException ex) {
-		}
-	    }
-	    // return appropriate result
-	    synchronized (this) {
-		if (cancelled) {
-		    return ResultStatus.CANCEL;
-		} else if (back) {
-		    return ResultStatus.BACK;
-		} else {
-		    return ResultStatus.OK;
-		}
-	    }
-	}
-
-	@Override
-	public boolean isOK() {
-	    if (!done) {
-		try {
-		    syncPoint.exchange(null);
-		} catch (InterruptedException ex) {
-		}
-	    }
-	    synchronized (this) {
-		return status() == ResultStatus.OK;
-	    }
-	}
-
-	@Override
-	public boolean isBack() {
-	    if (!done) {
-		try {
-		    syncPoint.exchange(null);
-		} catch (InterruptedException ex) {
-		}
-	    }
-	    synchronized (this) {
-		return status() == ResultStatus.BACK;
-	    }
-	}
-
-	@Override
-	public boolean isCancelled() {
-	    if (!done) {
-		try {
-		    syncPoint.exchange(null);
-		} catch (InterruptedException ex) {
-		}
-	    }
-	    synchronized (this) {
-		return status() == ResultStatus.CANCEL;
-	    }
-	}
-
-	@Override
-	public List<OutputInfoUnit> results() {
-	    if (!done) {
-		try {
-		    syncPoint.exchange(null);
-		} catch (InterruptedException ex) {
-		}
-	    }
-	    synchronized (this) {
-		if (results == null) {
-		    results = Collections.unmodifiableList(new LinkedList());
-		}
-		return results;
-	    }
-	}
-
-    }
-
 }

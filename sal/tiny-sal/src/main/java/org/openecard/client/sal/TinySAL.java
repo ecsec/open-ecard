@@ -1,4 +1,5 @@
-/****************************************************************************
+/**
+ * **************************************************************************
  * Copyright (C) 2012 ecsec GmbH
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -14,11 +15,11 @@
  *
  * Open eCard Client is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  *
  * Other Usage
@@ -26,8 +27,8 @@
  * Alternatively, this file may be used in accordance with the terms and
  * conditions contained in a signed written agreement between you and ecsec.
  *
- ****************************************************************************/
-
+ ***************************************************************************
+ */
 package org.openecard.client.sal;
 
 import iso.std.iso_iec._24727.tech.schema.*;
@@ -36,9 +37,11 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse.CardAppPat
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import javax.smartcardio.ResponseAPDU;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ECardException;
@@ -63,11 +66,9 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-import javax.smartcardio.ResponseAPDU;
-
 
 /**
- * 
+ *
  * @author Johannes.Schmoelz <johannes.schmoelz@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * @author Simon Potzernheim <potzernheim@hs-coburg.de>
@@ -78,7 +79,6 @@ public class TinySAL implements org.openecard.ws.SAL {
     private static final Logger _logger = LoggerFactory.getLogger(TinySAL.class);
     private static final Marker _enter = MarkerFactory.getMarker("ENTERING");
     private static final Marker _exit = MarkerFactory.getMarker("EXITING");
-
     private Environment env;
     private String sessionId;
     private boolean legacyMode;
@@ -125,7 +125,6 @@ public class TinySAL implements org.openecard.ws.SAL {
 	return sessionId;
     }
 
-
     public boolean addProtocol(String proto, ProtocolFactory factory) {
 	return protocolFactories.add(proto, factory);
     }
@@ -159,7 +158,6 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    }
 	}
     }
-
 
     @Override
     public InitializeResponse initialize(Initialize parameters) {
@@ -267,7 +265,13 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    WSHelper.checkResult(connectResponse);
 
 	    // Select application
-	    transmitSingleAPDU(CardCommands.Select.application(cardApplication), connectResponse.getSlotHandle());
+	    // nPA Hack
+	    // TODO: Differ between MF, EF, DF and AID.
+	    if (Arrays.equals(cardApplication, new byte[]{0x3F, 0x00})) {
+		transmitSingleAPDU(CardCommands.Select.MF(), connectResponse.getSlotHandle());
+	    } else {
+		transmitSingleAPDU(CardCommands.Select.application(cardApplication), connectResponse.getSlotHandle());
+	    }
 	    //FIXME
 	    cardStateEntry.setCurrentCardApplication(cardApplication);
 	    cardStateEntry.setSlotHandle(connectResponse.getSlotHandle());
@@ -282,6 +286,7 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    // </editor-fold>
 	    return cardApplicationConnectResponse;
 	} catch (Exception e) {
+	    e.printStackTrace();
 	    _logger.warn(e.getMessage(), e);
 	    return WSHelper.makeResponse(CardApplicationConnectResponse.class, WSHelper.makeResult(e));
 	}
@@ -424,9 +429,9 @@ public class TinySAL implements org.openecard.ws.SAL {
      */
     @Override
     public DataSetListResponse dataSetList(DataSetList dataSetList) {
-        // <editor-fold defaultstate="collapsed" desc="log trace">
-        _logger.trace(_enter, "> {}", dataSetList);
-        // </editor-fold>
+	// <editor-fold defaultstate="collapsed" desc="log trace">
+	_logger.trace(_enter, "> {}", dataSetList);
+	// </editor-fold>
 
 	ConnectionHandleType connectionHandle = dataSetList.getConnectionHandle();
 	if (connectionHandle == null) {
@@ -606,7 +611,7 @@ public class TinySAL implements org.openecard.ws.SAL {
 		return WSHelper.makeResponse(EncipherResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "didName is null."));
 	    }
 	    byte[] plainText = encipher.getPlainText();
-	    if (plainText == null){
+	    if (plainText == null) {
 		return WSHelper.makeResponse(EncipherResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "plainText is null."));
 	    }
 	    ConnectionHandleType connectionHandle = encipher.getConnectionHandle();
@@ -667,7 +672,7 @@ public class TinySAL implements org.openecard.ws.SAL {
 	try {
 	    String didName = sign.getDIDName();
 	    ConnectionHandleType connectionHandle = sign.getConnectionHandle();
-	    if (connectionHandle==null) {
+	    if (connectionHandle == null) {
 		return WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "connectionHandle is null."));
 	    }
 
@@ -698,13 +703,13 @@ public class TinySAL implements org.openecard.ws.SAL {
 		throw new UnknownProtocolException("No protocol step available for sign in protocol " + proto.toString() + ".");
 	    }
 	} catch (ECardException ex) {
-            _logger.warn(ex.getMessage(), ex);
+	    _logger.warn(ex.getMessage(), ex);
 	    Result res = WSHelper.makeResult(ex);
 	    SignResponse resp = WSHelper.makeResponse(SignResponse.class, res);
 	    return resp;
 
 	} catch (RuntimeException ex) {
-            _logger.warn(ex.getMessage(), ex);
+	    _logger.warn(ex.getMessage(), ex);
 	    Result res = WSHelper.makeResultUnknownError(ex.getMessage());
 	    SignResponse resp = WSHelper.makeResponse(SignResponse.class, res);
 	    return resp;
@@ -733,11 +738,11 @@ public class TinySAL implements org.openecard.ws.SAL {
 	// </editor-fold>
 	try {
 	    ConnectionHandleType connectionHandle = didList.getConnectionHandle();
-	    if(connectionHandle==null){
+	    if (connectionHandle == null) {
 		return WSHelper.makeResponse(DIDListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "connectionHandle is null."));
 	    }
 	    CardStateEntry cardStateEntry = states.getEntry(connectionHandle);
-	    if(cardStateEntry==null){
+	    if (cardStateEntry == null) {
 		return WSHelper.makeResponse(DIDListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
 	    }
 
@@ -911,14 +916,14 @@ public class TinySAL implements org.openecard.ws.SAL {
 	}
 	String protoUri = didAuthenticate.getAuthenticationProtocolData().getProtocol();
 	//FIXME workaround for missing protoUri from eID-Servers
-	if(protoUri==null){
+	if (protoUri == null) {
 	    _logger.warn("ProtocolURI was null");
-	    protoUri=ECardConstants.Protocol.EAC;
-	} else if(protoUri.equals("urn:oid:1.0.24727.3.0.0.7.2")){
+	    protoUri = ECardConstants.Protocol.EAC;
+	} else if (protoUri.equals("urn:oid:1.0.24727.3.0.0.7.2")) {
 	    _logger.warn("ProtocolURI was urn:oid:1.0.24727.3.0.0.7.2");
-            protoUri=ECardConstants.Protocol.EAC;
+	    protoUri = ECardConstants.Protocol.EAC;
 	}
-	
+
 	String didName = didAuthenticate.getDIDName();
 
 	ConnectionHandleType connectionHandle = didAuthenticate.getConnectionHandle();
@@ -948,10 +953,9 @@ public class TinySAL implements org.openecard.ws.SAL {
 	}
 	// <editor-fold defaultstate="collapsed" desc="log trace">
 	_logger.trace(_exit, "< {}", resp);
-	// </editor-fold>      
+	// </editor-fold>
 	return resp;
     }
-
 
     /**
      * [TR-03112-4] The ACLList function returns the access control list for the stated
@@ -964,11 +968,11 @@ public class TinySAL implements org.openecard.ws.SAL {
 	// </editor-fold>
 	try {
 	    ConnectionHandleType connectionHandle = aclList.getConnectionHandle();
-	    if(connectionHandle==null){
+	    if (connectionHandle == null) {
 		return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is null."));
 	    }
 	    CardStateEntry cardStateEntry = states.getEntry(connectionHandle);
-	    if(cardStateEntry==null){
+	    if (cardStateEntry == null) {
 		return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
 	    }
 
@@ -984,18 +988,22 @@ public class TinySAL implements org.openecard.ws.SAL {
 		if (dataSetInfo == null) {
 		    return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, "The dataSet" + dataSetName + "could not be found."));
 		}
-		/*if(!cardStateEntry.checkSecurityCondition(dataSetInfo, AuthorizationServiceActionName.ACL_LIST)){
-		    return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
-		}*/
+		/*
+		 * if(!cardStateEntry.checkSecurityCondition(dataSetInfo, AuthorizationServiceActionName.ACL_LIST)){
+		 * return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
+		 * }
+		 */
 		aclListResponse.setTargetACL(cardStateEntry.getInfo().getDataSet(dataSetName, connectionHandle.getCardApplication()).getDataSetACL());
 	    } else if (didName != null) {
 		DIDInfoType didInfo = cardStateEntry.getInfo().getDIDInfo(didName, connectionHandle.getCardApplication());
 		if (didInfo == null) {
 		    return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, "The did" + didName + "could not be found."));
 		}
-	       /* if(!cardInfoWrapper.checkSecurityCondition(didName, didScope, AuthorizationServiceActionName.ACL_LIST)){
-		    return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
-		}*/
+		/*
+		 * if(!cardInfoWrapper.checkSecurityCondition(didName, didScope, AuthorizationServiceActionName.ACL_LIST)){
+		 * return WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
+		 * }
+		 */
 		aclListResponse.setTargetACL(cardStateEntry.getInfo().getDIDInfo(didName, connectionHandle.getCardApplication()).getDIDACL());
 	    } else if (cardApplicationIdentifier != null) {
 		CardApplicationWrapper cardApplication = cardStateEntry.getInfo().getCardApplication(cardApplicationIdentifier);
@@ -1019,22 +1027,22 @@ public class TinySAL implements org.openecard.ws.SAL {
 	}
     }
 
-
     @Override
     public ACLModifyResponse aclModify(ACLModify parameters) {
 	return WSHelper.makeResponse(ACLModifyResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
-
     private ResponseAPDU transmitSingleAPDU(byte[] apdu, byte[] slotHandle) throws WSException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-	ArrayList<byte[]> responses = new ArrayList<byte[]>() {{
-	    add(new byte[] { (byte) 0x90, (byte) 0x00 });
-	    add(new byte[] { (byte) 0x63, (byte) 0xC3 });
-	}};
+	ArrayList<byte[]> responses = new ArrayList<byte[]>() {
+
+	    {
+		add(new byte[]{(byte) 0x90, (byte) 0x00});
+		add(new byte[]{(byte) 0x63, (byte) 0xC3});
+	    }
+	};
 
 	Transmit t = CardCommands.makeTransmit(slotHandle, apdu, responses);
 	TransmitResponse tr = (TransmitResponse) WSHelper.checkResult((TransmitResponse) env.getDispatcher().deliver(t));
 	return new ResponseAPDU(tr.getOutputAPDU().get(0));
     }
-
 }

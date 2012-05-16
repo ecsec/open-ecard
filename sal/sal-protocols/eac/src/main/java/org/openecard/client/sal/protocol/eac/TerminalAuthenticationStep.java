@@ -68,7 +68,8 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 
 	    // TA: Step 1 - Verify certificates
 	    CardVerifiableCertificateChain certificateChain = (CardVerifiableCertificateChain) internalData.get(EACConstants.INTERNAL_DATA_CERTIFICATES);
-	    ta.verifyCertificates(certificateChain);
+	    byte[] currentCAR = (byte[]) internalData.get(EACConstants.CURRENT_CAR);
+	    ta.verifyCertificates(certificateChain, currentCAR);
 
 	    // TA: Step 2 - MSE:SET AT
 	    SecurityInfos securityInfos = (SecurityInfos) internalData.get(EACConstants.INTERNAL_DATA_SECURITY_INFOS);

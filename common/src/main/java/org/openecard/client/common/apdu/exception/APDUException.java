@@ -5,6 +5,7 @@ import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardException;
 import org.openecard.client.common.apdu.common.CardResponseAPDU;
 
+
 /**
  * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
  */

@@ -30,6 +30,7 @@ import org.openecard.client.common.apdu.exception.APDUException;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.util.ByteUtils;
 
+
 /**
  * Implements a command APDU.
  * See ISO/IEC 7816-4 Section 5.1.
@@ -55,11 +56,8 @@ public class CardCommandAPDU extends CardAPDU {
      * @param commandAPDU APDU
      */
     public CardCommandAPDU(byte[] commandAPDU) {
-        // set the four header bytes
-        System.arraycopy(commandAPDU, 0, header, 0, 4);
+	System.arraycopy(commandAPDU, 0, header, 0, 4);
 	setBody(ByteUtils.copy(commandAPDU, 4, commandAPDU.length - 4));
-            // set the body (LC|DATA|LE)
-            setBody(ByteUtils.cut(commandAPDU, 4, commandAPDU.length-4));
     }
 
     /**

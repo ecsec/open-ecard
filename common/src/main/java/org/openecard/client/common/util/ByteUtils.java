@@ -96,23 +96,6 @@ public class ByteUtils {
     }
 
     /**
-     * Copy of range.
-     *
-     * @param input the input
-     * @param offset
-     * @param length the length
-     * @return the byte[]
-     */
-    public static byte[] cut(byte[] input, int offset, int length) {
-	if (input == null) {
-	    return null;
-	}
-	byte[] tmp = new byte[length];
-	System.arraycopy(input, offset, tmp, 0, tmp.length);
-	return tmp;
-    }
-
-    /**
      * Cut leading null bytes of a byte array.
      *
      * @param input
@@ -132,7 +115,7 @@ public class ByteUtils {
 		break;
 	    }
 	}
-	return cut(input, 0, i);
+	return copy(input, 0, i);
     }
 
     /**
@@ -148,7 +131,7 @@ public class ByteUtils {
 	if (input[0] != (byte) 0x00) {
 	    return input;
 	}
-	return cut(input, 0, 1);
+	return copy(input, 0, 1);
     }
 
     /**
@@ -350,5 +333,4 @@ public class ByteUtils {
     public static void setBit(int position, byte[] array) {
 	array[position / 8] |= (128 >> (position % 8));
     }
-
 }

@@ -15,8 +15,8 @@
  */
 package org.openecard.client.richclient.activation.messages;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import org.openecard.client.richclient.activation.tctoken.TCToken;
-
 
 /**
  *
@@ -25,6 +25,7 @@ import org.openecard.client.richclient.activation.tctoken.TCToken;
 public class ActivationApplicationRequest {
 
     private TCToken token;
+    private ConnectionHandleType connectionHandle;
 
     /**
      * Returns the TCToken.
@@ -32,7 +33,7 @@ public class ActivationApplicationRequest {
      * @return TCToken
      */
     public TCToken getTCToken() {
-        return token;
+	return token;
     }
 
     /**
@@ -41,7 +42,14 @@ public class ActivationApplicationRequest {
      * @param token TCToken
      */
     public void setTCToken(TCToken token) {
-        this.token = token;
+	this.token = token;
     }
 
+    public ConnectionHandleType getConnectionHandle() {
+	return connectionHandle;
+    }
+
+    public void setConnectionHandle(ConnectionHandleType connectionHandle) {
+	this.connectionHandle = connectionHandle;
+    }
 }

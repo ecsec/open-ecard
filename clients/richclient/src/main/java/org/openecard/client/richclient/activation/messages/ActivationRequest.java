@@ -69,9 +69,10 @@ public class ActivationRequest {
 		if (line.contains("eID-Client?tcTokenURL")) {
 		    parseURI(line);
 		    // Not needed yet.
-//                    while (!(line = reader.readLine()).isEmpty()) {
+                    while (!(line = reader.readLine()).isEmpty()) {
 //                        parseParameter(line);
-//                    }
+			System.out.println(line);
+                    }
 		    parseTCToken();
 		} else {
 		    throw new IllegalArgumentException();

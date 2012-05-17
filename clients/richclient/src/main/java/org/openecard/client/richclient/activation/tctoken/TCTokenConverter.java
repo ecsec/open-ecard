@@ -29,7 +29,7 @@ public class TCTokenConverter {
 
     public String convert(String input) {
 	int x = input.indexOf("<object");
-	int y = input.indexOf("object", x + 7) + 7;
+	int y = input.indexOf("object", x + 7);
 	data = input.substring(x, y);
 
 	StringBuilder out = new StringBuilder();

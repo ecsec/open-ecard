@@ -28,7 +28,7 @@ public final class ActivationConstants {
 
     public enum ActivationError {
 
-	BAD_REQUEST, TC_TOKEN_NOT_AVAILABLE, TC_TOKEN_REFUSED, INTERNAL_ERROR;
+	NOT_FOUND, BAD_REQUEST, TC_TOKEN_NOT_AVAILABLE, TC_TOKEN_REFUSED, INTERNAL_ERROR;
 
 	@Override
 	public String toString() {

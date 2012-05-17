@@ -79,7 +79,6 @@ public class TCTokenSAXHandler extends DefaultHandler {
 	} else if (qName.equalsIgnoreCase(TCToken.BINDING)) {
 	    token.setBinding(value);
 	} else if (qName.equalsIgnoreCase(TCToken.PathSecurityParameter.PSK)) {
-	    System.out.println(value);
 	    byte[] b = StringUtils.toByteArray(value.toUpperCase());
 	    token.getPathSecurityParameter().setPSK(b);
 	}

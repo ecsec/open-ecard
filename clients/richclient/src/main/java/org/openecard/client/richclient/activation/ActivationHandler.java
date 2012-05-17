@@ -19,6 +19,7 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openecard.client.richclient.RichClient;
+import org.openecard.client.richclient.activation.common.ActivationConstants;
 import org.openecard.client.richclient.activation.messages.ActivationApplicationRequest;
 import org.openecard.client.richclient.activation.messages.ActivationApplicationResponse;
 import org.openecard.client.richclient.activation.messages.ActivationRequest;
@@ -65,6 +66,7 @@ public class ActivationHandler implements Runnable {
 		Logger.getLogger(ActivationHandler.class.getName()).log(Level.SEVERE, "Exception", ex);
 		ActivationResponse response = new ActivationResponse(socket.getOutputStream());
 		response.handleErrorResponse(ex.getMessage());
+		throw new RuntimeException();
 	    }
 
 	    try {
@@ -80,8 +82,10 @@ public class ActivationHandler implements Runnable {
 		    response.handleErrorPage(applicationReponse.getErrorPage());
 		} else if (applicationReponse.getErrorMessage() != null) {
 		    response.handleErrorResponse(applicationReponse.getErrorMessage());
-		} else {
+		} else if (applicationReponse.getRefreshAddress() != null) {
 		    response.handleRedirectResponse(applicationReponse.getRefreshAddress());
+		} else {
+		    response.handleErrorResponse(ActivationConstants.ActivationError.INTERNAL_ERROR.toString());
 		}
 
 	    } catch (Exception ex) {

@@ -15,6 +15,10 @@
  */
 package org.openecard.client.crypto.common.asn1.cvc;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +47,15 @@ public class CHATTest {
     @Test
     public void testEncoding() throws TLVException {
 	assertArrayEquals(chatBytes, chat.toByteArray());
+    }
+
+//    @Test
+    public void testtoString() throws TLVException {
+	TreeMap<CHAT.DataGroup, Boolean> readAccess = chat.getReadAccess();
+
+	for (Map.Entry<CHAT.DataGroup, Boolean> entry : readAccess.entrySet()) {
+	    System.out.println(entry.getKey() + " " + entry.getValue());
+	}
     }
 
     @Test

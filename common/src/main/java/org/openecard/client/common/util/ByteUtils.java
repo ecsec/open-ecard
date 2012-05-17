@@ -115,7 +115,7 @@ public class ByteUtils {
 		break;
 	    }
 	}
-	return copy(input, 0, i);
+	return copy(input, i, input.length - i);
     }
 
     /**
@@ -131,7 +131,7 @@ public class ByteUtils {
 	if (input[0] != (byte) 0x00) {
 	    return input;
 	}
-	return copy(input, 0, 1);
+	return copy(input, 1, input.length - 1);
     }
 
     /**

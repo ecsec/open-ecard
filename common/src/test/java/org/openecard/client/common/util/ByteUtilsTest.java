@@ -35,4 +35,14 @@ public class ByteUtilsTest {
 	assertEquals(ByteUtils.toHexString(testData), "000102030405060708090A0B0C0D0E0F10111213");
     }
 
+    @Test
+    public void testcutLeadingNullBytes() {
+	byte[] testData = new byte[20];
+
+	for (int i = 0; i < testData.length - 9; i++) {
+	    testData[i+9] = (byte) i;
+	}
+	assertEquals(ByteUtils.toHexString(ByteUtils.cutLeadingNullBytes(testData)), "0102030405060708090A");
+    }
+
 }

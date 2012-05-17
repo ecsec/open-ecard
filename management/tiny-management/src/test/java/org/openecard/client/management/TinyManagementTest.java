@@ -1,4 +1,4 @@
-/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg 
+/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
  * @author Dirk.Petrautzki <petrautzki@hs-coburg.de>
  */
 public class TinyManagementTest {
-    
+
     private ClientEnv env;
     private TinyManagement instance;
 
@@ -46,45 +46,45 @@ public class TinyManagementTest {
         instance = new TinyManagement(env);
     }
 
-    
-    @Test 
+
+    @Test
     public void testInitializeFramework(){
 	InitializeFramework initializeFramework = new InitializeFramework();
 	InitializeFrameworkResponse initializeFrameworkResponse = instance.initializeFramework(initializeFramework);
 	assertEquals(ECardConstants.Major.OK, initializeFrameworkResponse.getResult().getResultMajor());
 	//TODO version should be a constant somewhere else
 	assertEquals(new BigInteger("1"), initializeFrameworkResponse.getVersion().getMajor());
-	assertEquals(new BigInteger("6"), initializeFrameworkResponse.getVersion().getMinor());
+	assertEquals(new BigInteger("8"), initializeFrameworkResponse.getVersion().getMinor());
 	assertEquals(new BigInteger("0"), initializeFrameworkResponse.getVersion().getSubMinor());
     }
-    
+
     @Test
     public void testRest() throws InstantiationException, IllegalAccessException{
 	for(Method m : instance.getClass().getDeclaredMethods()){
 	    if(m.getName().equals("initializeFramework"))
 		continue;
 	    System.out.println( m.getName());
-	    
+
 	   Object o = m.getParameterTypes()[0].newInstance();
 
 	   try {
 	    ResponseType result = (ResponseType) m.invoke(instance, o);
-	    
+
 	    assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
 
-	    
+
 	} catch (IllegalArgumentException e) {
-	   
+
 	    e.printStackTrace();
 	} catch (InvocationTargetException e) {
-	   
+
 	    e.printStackTrace();
 	} catch (SecurityException e) {
-	   
+
 	    e.printStackTrace();
-	} 
 	}
-	
+	}
+
     }
 
 //    /**

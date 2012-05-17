@@ -1,4 +1,4 @@
-/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg 
+/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ import de.bund.bsi.ecard.api._1.UnregisterIFD;
 import de.bund.bsi.ecard.api._1.UnregisterIFDResponse;
 
 /**
- * 
+ *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  *
  */
@@ -102,7 +102,7 @@ public class TinyManagement implements  Management {
     public TinyManagement(Environment env) {
         this.env = env;
     }
-    
+
     @Override
     public AddCardInfoFilesResponse addCardInfoFiles(AddCardInfoFiles arg0) {
 	   return WSHelper.makeResponse(AddCardInfoFilesResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
@@ -219,7 +219,7 @@ public class TinyManagement implements  Management {
 	Version version = new Version();
 	//TODO version should be a constant somewhere else
     	version.setMajor(new BigInteger("1"));
-    	version.setMinor(new BigInteger("6"));
+    	version.setMinor(new BigInteger("8"));
     	version.setSubMinor(new BigInteger("0"));
     	initializeFrameworkResponse.setVersion(version);
     	Result r = new Result();

@@ -42,7 +42,7 @@ public class Text implements InputInfoUnit {
 
     @Override
     public InfoUnitElementType type() {
-	return InfoUnitElementType.Text;
+	return InfoUnitElementType.TEXT;
     }
 
 }

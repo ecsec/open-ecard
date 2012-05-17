@@ -13,48 +13,57 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.gui.definition;
 
-
 /**
+ * Implements a abstract text field.
+ * A field can be identified by an ID.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public abstract class AbstractTextfield implements InputInfoUnit, OutputInfoUnit {
+public abstract class AbstractTextField implements InputInfoUnit, OutputInfoUnit {
 
-    private String name;
-    private String text;
+    private String id;
+    private String description;
     private String value;
     private int minLength = 0;
     private int maxLength = Integer.MAX_VALUE;
 
     /**
-     * @return the name
+     * Returns the ID of the text field.
+     *
+     * @return ID
      */
-    public String getName() {
-	return name;
+    public String getID() {
+	return id;
     }
 
     /**
-     * @param name the name to set
+     * Sets the ID of the text field.
+     *
+     * @param id ID
      */
-    public void setName(String name) {
-	this.name = name;
+    public void setID(String id) {
+	this.id = id;
     }
 
     /**
-     * @return the text
+     *
+     * Returns the description of the text field.
+     *
+     * @return Description
      */
-    public String getText() {
-	return text;
+    public String getDescription() {
+	return description;
     }
 
     /**
-     * @param text the text to set
+     * Sets the description of the text field.
+     *
+     * @param description Description
      */
-    public void setText(String text) {
-	this.text = text;
+    public void setDescription(String description) {
+	this.description = description;
     }
 
     /**
@@ -98,5 +107,4 @@ public abstract class AbstractTextfield implements InputInfoUnit, OutputInfoUnit
     public void setMaxLength(int maxLength) {
 	this.maxLength = maxLength;
     }
-
 }

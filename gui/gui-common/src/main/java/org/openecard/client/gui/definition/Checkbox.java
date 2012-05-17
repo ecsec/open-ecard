@@ -25,7 +25,7 @@ public class Checkbox extends AbstractBox {
 
     @Override
     public InfoUnitElementType type() {
-	return InfoUnitElementType.Checkbox;
+	return InfoUnitElementType.CHECK_BOX;
     }
 
 }

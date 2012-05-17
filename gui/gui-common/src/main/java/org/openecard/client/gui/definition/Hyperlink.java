@@ -66,7 +66,7 @@ public class Hyperlink implements InputInfoUnit {
 
     @Override
     public InfoUnitElementType type() {
-	return InfoUnitElementType.Hyperlink;
+	return InfoUnitElementType.HYPERLINK;
     }
 
 }

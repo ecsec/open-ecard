@@ -25,7 +25,7 @@ public class Radiobox extends AbstractBox {
 
     @Override
     public InfoUnitElementType type() {
-	return InfoUnitElementType.Radiobox;
+	return InfoUnitElementType.RADIO_BOX;
     }
 
 }

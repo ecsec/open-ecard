@@ -21,11 +21,11 @@ package org.openecard.client.gui.definition;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class Passwordfield extends AbstractTextfield {
+public class PasswordField extends AbstractTextField {
 
     @Override
     public InfoUnitElementType type() {
-	return InfoUnitElementType.Passwordfield;
+	return InfoUnitElementType.PASSWORD_FIELD;
     }
 
 }

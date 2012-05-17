@@ -21,11 +21,11 @@ package org.openecard.client.gui.definition;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class Textfield extends AbstractTextfield {
+public class Textfield extends AbstractTextField {
 
     @Override
     public InfoUnitElementType type() {
-	return InfoUnitElementType.Textfield;
+	return InfoUnitElementType.TEXT_FIELD;
     }
 
 }

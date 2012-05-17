@@ -23,13 +23,13 @@ package org.openecard.client.gui.definition;
  */
 public enum InfoUnitElementType {
 
-    Text,
+    TEXT,
     ToggleText,
-    Hyperlink,
-    Checkbox,
-    Radiobox,
-    Textfield,
-    Passwordfield,
-    Signaturefield;
+    HYPERLINK,
+    CHECK_BOX,
+    RADIO_BOX,
+    TEXT_FIELD,
+    PASSWORD_FIELD,
+    SIGNAUTRE_FIELD;
 
 }

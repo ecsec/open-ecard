@@ -72,7 +72,7 @@ public class Signaturefield implements InputInfoUnit, OutputInfoUnit {
 
     @Override
     public InfoUnitElementType type() {
-	return InfoUnitElementType.Signaturefield;
+	return InfoUnitElementType.SIGNAUTRE_FIELD;
     }
 
 }

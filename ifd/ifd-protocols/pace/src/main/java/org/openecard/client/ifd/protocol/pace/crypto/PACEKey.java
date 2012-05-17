@@ -62,7 +62,7 @@ public final class PACEKey {
      * @return Decoded key
      */
     public byte[] decodePublicKey(byte[] data) {
-	byte[] keyBytes = ByteUtils.cut(data, 4, data.length - 4);
+	byte[] keyBytes = ByteUtils.copy(data, 4, data.length - 4);
 
 	if (pdp.isECDH()) {
 	    ECParameterSpec p = (ECParameterSpec) pdp.getParameter();

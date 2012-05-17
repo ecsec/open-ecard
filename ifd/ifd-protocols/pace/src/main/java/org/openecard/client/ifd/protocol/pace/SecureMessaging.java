@@ -32,6 +32,7 @@ import org.openecard.client.common.apdu.common.CardCommandAPDU;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.util.ByteUtils;
 
+
 /**
  * Implements Secure Messaging according to ISO/IEC 7816-4.
  *
@@ -86,6 +87,10 @@ public class SecureMessaging {
     private byte[] encrypt(byte[] apdu, byte[] secureMessagingSSC) throws Exception {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	CardCommandAPDU cAPDU = new CardCommandAPDU(apdu);
+
+	if (cAPDU.isSecureMessaging()) {
+	    throw new IllegalArgumentException("Malformed APDU.");
+	}
 
 	byte[] data = cAPDU.getData();
 	byte[] header = cAPDU.getHeader();
@@ -191,6 +196,9 @@ public class SecureMessaging {
      * @throws Exception the exception
      */
     public byte[] decrypt(byte[] response) throws Exception {
+	if (response.length < 12) {
+	    throw new IllegalArgumentException("Malformed Secure Messaging APDU");
+	}
 	return decrypt(response, secureMessagingSSC);
     }
 
@@ -312,7 +320,7 @@ public class SecureMessaging {
      * @param ssc the Send Sequence Counter (SSC)
      */
     public static void incrementSSC(byte[] ssc) {
-	for (int i = ssc.length - 1; i > 0; i--) {
+	for (int i = ssc.length - 1; i >= 0; i--) {
 	    ssc[i]++;
 	    if (ssc[i] != 0) {
 		break;

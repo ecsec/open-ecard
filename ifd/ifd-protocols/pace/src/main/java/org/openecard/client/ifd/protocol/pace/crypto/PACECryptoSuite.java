@@ -59,7 +59,7 @@ public final class PACECryptoSuite {
      */
     public byte[] decryptNonce(byte[] keyData, byte[] nonceData) throws GeneralSecurityException {
 	byte[] ret = new byte[16];
-	byte[] nonce = ByteUtils.cut(nonceData, 4, nonceData.length - 4);
+	byte[] nonce = ByteUtils.copy(nonceData, 4, nonceData.length - 4);
 	try {
 	    Cipher c = Cipher.getInstance("AES/CBC/NoPadding");
 	    SecretKeySpec skeySpec = new SecretKeySpec(keyData, "AES");

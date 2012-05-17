@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.sal.protocol.eac;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import org.openecard.client.common.WSHelper.WSException;
+import java.util.List;
 import org.openecard.client.common.apdu.ExternalAuthentication;
 import org.openecard.client.common.apdu.GetChallenge;
 import org.openecard.client.common.apdu.common.CardCommandAPDU;
@@ -59,35 +56,22 @@ public class TerminalAuthentication {
 
     /**
      * Verify certificates. (Step 1)
-     * 
+     *
      * @param currentCAR the current Certification Authority Reference of the mrtd
      * @param certificateChain Certificate-chain
      * @throws ProtocolException
      */
     public void verifyCertificates(CardVerifiableCertificateChain certificateChain, byte[] currentCAR) throws ProtocolException {
 	try {
-	    ArrayList<CardVerifiableCertificate> certificates = certificateChain.getCertificateChain();
+	    List<CardVerifiableCertificate> certificates = certificateChain.getCertificateChain();
 
-	    /*
-	     * get first certificate with matching CAR
-	     */
-	    int i = (certificates.size() - 1);
-	    for (; i >= 0; i--) {
-		CardVerifiableCertificate cvc = (CardVerifiableCertificate) certificates.get(i);
-		if (Arrays.equals(cvc.getCAR().toByteArray(), currentCAR))
-		    break;
-	    }
-
-	    /*
-	     * send certificate-chain to the mrtd
-	     */
-	    for (; i >= 0; i--) {
+	    for (int i = certificates.size() - 1; i >= 0; i--) {
 		CardVerifiableCertificate cvc = (CardVerifiableCertificate) certificates.get(i);
 		// MSE:SetDST
 		CardCommandAPDU mseSetDST = new MSESetDST(cvc.getCAR().toByteArray());
 		mseSetDST.transmit(dispatcher, slotHandle);
 		// PSO:Verify Certificate
-		CardCommandAPDU psovc = new PSOVerifyCertificate(cvc.getEncodedBodyAndSignature());
+		CardCommandAPDU psovc = new PSOVerifyCertificate(cvc.getCertificate().getValue());
 		psovc.transmit(dispatcher, slotHandle);
 	    }
 	} catch (APDUException e) {
@@ -144,5 +128,4 @@ public class TerminalAuthentication {
 	    throw new ProtocolException(e.getResult());
 	}
     }
-
 }

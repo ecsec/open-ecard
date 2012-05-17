@@ -18,11 +18,11 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import java.util.ArrayList;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.client.common.sal.anytype.AuthDataMap;
-import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.w3c.dom.Element;
+
 
 /**
  *
@@ -31,8 +31,14 @@ import org.w3c.dom.Element;
  */
 public class EAC1InputType {
 
+    public static final String CERTIFICATE = "Certificate";
+    public static final String CERTIFICATE_DESCRIPTION = "CertificateDescription";
+    public static final String REQUIRED_CHAT = "RequiredCHAT";
+    public static final String OPTIONAL_CHAT = "OptionalCHAT";
+    public static final String AUTHENTICATED_AUXILIARY_DATA = "AuthenticatedAuxiliaryData";
+    //
     private final AuthDataMap authMap;
-    private ArrayList<CardVerifiableCertificate> certificates = new ArrayList<CardVerifiableCertificate>();
+    private ArrayList<CardVerifiableCertificate> certificates;
     private byte[] certificateDescription;
     private byte[] requiredCHAT;
     private byte[] optionalCHAT;
@@ -45,25 +51,22 @@ public class EAC1InputType {
      * @throws ParserConfigurationException
      * @throws TLVException
      */
-    public EAC1InputType(DIDAuthenticationDataType baseType) throws ParserConfigurationException, TLVException {
+    public EAC1InputType(DIDAuthenticationDataType baseType) throws Exception {
 	authMap = new AuthDataMap(baseType);
 
-	certificateDescription = authMap.getContentAsBytes("CertificateDescription");
-	requiredCHAT = authMap.getContentAsBytes("RequiredCHAT");
-	optionalCHAT = authMap.getContentAsBytes("OptionalCHAT");
-	authenticatedAuxiliaryData = authMap.getContentAsBytes("AuthenticatedAuxiliaryData");
-	
-	//FIXME workaround for retrieving the certificates
-        //	while (authMap.containsContent("Certificate")) {
-        //              TLV cardVerifiableCertificate = TLV.fromBER(authMap.getContentAsBytes("Certificate"));
-        //              certificates.add(new CardVerifiableCertificate(cardVerifiableCertificate));
-        //      }
-	for (Element elem : baseType.getAny()) {
-	    if (elem.getLocalName().equals("Certificate")) {
-              CardVerifiableCertificate cvc = new CardVerifiableCertificate(TLV.fromBER(StringUtils.toByteArray(elem.getTextContent())));
-              certificates.add(cvc);
-          } 
-        }
+	certificateDescription = authMap.getContentAsBytes(CERTIFICATE_DESCRIPTION);
+	requiredCHAT = authMap.getContentAsBytes(REQUIRED_CHAT);
+	optionalCHAT = authMap.getContentAsBytes(OPTIONAL_CHAT);
+	authenticatedAuxiliaryData = authMap.getContentAsBytes(AUTHENTICATED_AUXILIARY_DATA);
+
+	certificates = new ArrayList<CardVerifiableCertificate>();
+	for (Element element : baseType.getAny()) {
+	    if (element.getLocalName().equals(CERTIFICATE)) {
+		byte[] value = StringUtils.toByteArray(element.getTextContent());
+		CardVerifiableCertificate cvc = new CardVerifiableCertificate(value);
+		certificates.add(cvc);
+	    }
+	}
     }
 
     /**
@@ -119,5 +122,4 @@ public class EAC1InputType {
     public EAC1OutputType getOutputType() {
 	return new EAC1OutputType(authMap);
     }
-
 }

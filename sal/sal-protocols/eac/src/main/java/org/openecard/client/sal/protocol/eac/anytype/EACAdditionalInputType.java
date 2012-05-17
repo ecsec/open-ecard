@@ -26,6 +26,8 @@ import org.openecard.client.common.sal.anytype.AuthDataMap;
  */
 public class EACAdditionalInputType {
 
+    public static final String SIGNATURE = "Signature";
+    //
     private final AuthDataMap authMap;
     private final byte[] signature;
 
@@ -37,7 +39,7 @@ public class EACAdditionalInputType {
      */
     public EACAdditionalInputType(DIDAuthenticationDataType baseType) throws ParserConfigurationException {
 	authMap = new AuthDataMap(baseType);
-	signature = authMap.getContentAsBytes("Signature");
+	signature = authMap.getContentAsBytes(SIGNATURE);
     }
 
     /**
@@ -57,5 +59,4 @@ public class EACAdditionalInputType {
     public EAC2OutputType getOutputType() {
 	return new EAC2OutputType(authMap);
     }
-
 }

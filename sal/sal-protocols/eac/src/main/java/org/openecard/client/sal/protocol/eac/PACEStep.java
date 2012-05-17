@@ -38,8 +38,10 @@ import org.openecard.client.crypto.common.asn1.eac.SecurityInfos;
 import org.openecard.client.gui.UserConsent;
 import org.openecard.client.sal.protocol.eac.anytype.EAC1InputType;
 import org.openecard.client.sal.protocol.eac.anytype.EAC1OutputType;
+import org.openecard.client.sal.protocol.eac.gui.GUIContentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
@@ -63,7 +65,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
-        // <editor-fold defaultstate="collapsed" desc="log trace">
+	// <editor-fold defaultstate="collapsed" desc="log trace">
 	logger.trace(LoggingConstants.ENTER, "perform");
 	// </editor-fold>
 
@@ -74,20 +76,28 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    EAC1InputType eac1Input = new EAC1InputType(didAuthenticate.getAuthenticationProtocolData());
 	    EAC1OutputType eac1Output = eac1Input.getOutputType();
 
-	    CertificateDescription description = CertificateDescription.getInstance(eac1Input.getCertificateDescription());
+	    CardVerifiableCertificateChain certChain = new CardVerifiableCertificateChain(eac1Input.getCertificates());
+	    CertificateDescription certDescription = CertificateDescription.getInstance(eac1Input.getCertificateDescription());
 	    CHAT requiredCHAT = new CHAT(eac1Input.getRequiredCHAT());
 	    CHAT optionalCHAT = new CHAT(eac1Input.getOptionalCHAT());
-	    
-	    //FIXME gui is currently not working, for testing required chat is used
-	    CHAT chosenCHAT = requiredCHAT;
-	    //CHAT chosenCHAT = gui.show(eac1Input.getCertificates().get(0), description, requiredCHAT, optionalCHAT);
+
+	    // GUI request
+	    GUIContentMap content = new GUIContentMap();
+	    content.add(GUIContentMap.ELEMENT.CERTIFICATE, certChain.getTerminalCertificate());
+	    content.add(GUIContentMap.ELEMENT.CERTIFICATE_DESCRIPTION, certDescription);
+	    content.add(GUIContentMap.ELEMENT.REQUIRED_CHAT, requiredCHAT);
+	    content.add(GUIContentMap.ELEMENT.OPTIONAL_CHAT, optionalCHAT);
+	    gui.show(content);
+
+	    // GUI response
+	    CHAT selectedCHAT = (CHAT) content.get(GUIContentMap.ELEMENT.SELECTED_CHAT);
 
 	    // Create PACEInputType
 	    AuthDataMap paceAuthMap = new AuthDataMap(didAuthenticate.getAuthenticationProtocolData());
 	    AuthDataResponse paceInputMap = paceAuthMap.createResponse(didAuthenticate.getAuthenticationProtocolData());
 	    //FIXME
 	    paceInputMap.addElement(PACEInputType.PIN_ID, "3");
-	    paceInputMap.addElement(PACEInputType.CHAT, chosenCHAT.toString());
+	    paceInputMap.addElement(PACEInputType.CHAT, selectedCHAT.toString());
 	    paceInputMap.addElement(PACEInputType.CERTIFICATE_DESCRIPTION, ByteUtils.toHexString(eac1Input.getCertificateDescription()));
 
 	    // EstablishChannel
@@ -96,7 +106,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    establishChannel.setAuthenticationProtocolData(paceInputMap.getResponse());
 	    //FIXME
 	    establishChannel.getAuthenticationProtocolData().setProtocol(ECardConstants.Protocol.PACE);
-	    
+
 	    EstablishChannelResponse establishChannelResponse = (EstablishChannelResponse) dispatcher.deliver(establishChannel);
 
 	    if (!establishChannelResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
@@ -116,14 +126,14 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		internalData.put(EACConstants.INTERNAL_DATA_SECURITY_INFOS, securityInfos);
 		// Store additional data
 		internalData.put(EACConstants.INTERNAL_DATA_AUTHENTICATED_AUXILIARY_DATA, eac1Input.getAuthenticatedAuxiliaryData());
-		internalData.put(EACConstants.INTERNAL_DATA_CERTIFICATES, new CardVerifiableCertificateChain(eac1Input.getCertificates()));
-		internalData.put(EACConstants.CURRENT_CAR, currentCAR);
-		
+		internalData.put(EACConstants.INTERNAL_DATA_CERTIFICATES, certChain);
+		internalData.put(EACConstants.INTERNAL_DATA_CURRENT_CAR, currentCAR);
+
 		// Create response
 		eac1Output.setEFCardAccess(efCardAccess);
 		eac1Output.setRetryCounter(retryCounter);
 		eac1Output.setIDPICC(idpicc);
-		eac1Output.setCHAT(chosenCHAT.toByteArray());
+		eac1Output.setCHAT(selectedCHAT.toByteArray());
 		eac1Output.setCAR(currentCAR);
 
 		response.setResult(WSHelper.makeResultOK());

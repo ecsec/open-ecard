@@ -6,22 +6,24 @@ package org.openecard.client.sal.protocol.eac.gui;
 
 import java.util.HashMap;
 
+
 /**
- *
- * @author John
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class ContentMap {
+public class GUIContentMap {
 
     public enum ELEMENT {
 
 	CERTIFICATE,
-	CERTIFICATEDESCRIPTION,
+	CERTIFICATE_DESCRIPTION,
 	REQUIRED_CHAT,
-	OPTIONAL_CHAT;
+	OPTIONAL_CHAT,
+	SELECTED_CHAT;
     }
+
     private HashMap<String, Object> map = new HashMap<String, Object>();
 
-    public ContentMap() {
+    public GUIContentMap() {
     }
 
     public void add(ELEMENT id, Object value) {

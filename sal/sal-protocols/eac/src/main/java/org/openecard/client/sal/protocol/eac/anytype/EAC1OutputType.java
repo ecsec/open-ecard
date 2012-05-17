@@ -27,6 +27,12 @@ import org.openecard.client.common.util.ByteUtils;
  */
 public class EAC1OutputType {
 
+    public static final String RETRY_COUNTER = "RetryCounter";
+    public static final String EF_CARDACCESS = "EFCardAccess";
+    public static final String CAR = "CertificationAuthorityReference";
+    public static final String CHAT = "CertificateHolderAuthorizationTemplate";
+    public static final String ID_PICC = "IDPICC";
+    //
     private final AuthDataMap authMap;
     private byte[] efCardAccess;
     private byte[] car;
@@ -96,13 +102,12 @@ public class EAC1OutputType {
     public DIDAuthenticationDataType getAuthDataType() {
 	AuthDataResponse authResponse = authMap.createResponse(new iso.std.iso_iec._24727.tech.schema.EAC1OutputType());
 
-	authResponse.addElement("RetryCounter", String.valueOf(retryCounter));
-	authResponse.addElement("EFCardAccess", ByteUtils.toHexString(efCardAccess));
-	authResponse.addElement("CertificationAuthorityReference", new String(car));
-	authResponse.addElement("CertificateHolderAuthorizationTemplate", ByteUtils.toHexString(chat));
-	authResponse.addElement("IDPICC", ByteUtils.toHexString(idpicc));
+	authResponse.addElement(RETRY_COUNTER, String.valueOf(retryCounter));
+	authResponse.addElement(EF_CARDACCESS, ByteUtils.toHexString(efCardAccess));
+	authResponse.addElement(CAR, new String(car));
+	authResponse.addElement(CHAT, ByteUtils.toHexString(chat));
+	authResponse.addElement(ID_PICC, ByteUtils.toHexString(idpicc));
 
 	return authResponse.getResponse();
     }
-
 }

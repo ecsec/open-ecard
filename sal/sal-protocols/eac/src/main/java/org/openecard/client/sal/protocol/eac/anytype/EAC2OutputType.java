@@ -27,6 +27,11 @@ import org.openecard.client.common.util.ByteUtils;
  */
 public class EAC2OutputType {
 
+    public static final String CHALLENGE = "Challenge";
+    public static final String EF_CARDSECURITY = "EFCardSecurity";
+    public static final String TOKEN = "AuthenticationToken";
+    public static final String NONCE = "Nonce";
+    //
     private final AuthDataMap authMap;
     private byte[] challenge;
     private byte[] efCardSecurity;
@@ -86,18 +91,17 @@ public class EAC2OutputType {
     public DIDAuthenticationDataType getAuthDataType() {
 	AuthDataResponse authResponse = authMap.createResponse(new iso.std.iso_iec._24727.tech.schema.EAC2OutputType());
 	if (challenge != null) {
-	    authResponse.addElement("Challenge", ByteUtils.toHexString(challenge));
+	    authResponse.addElement(CHALLENGE, ByteUtils.toHexString(challenge));
 	}
 	if (efCardSecurity != null) {
-	    authResponse.addElement("EFCardSecurity", ByteUtils.toHexString(efCardSecurity));
+	    authResponse.addElement(EF_CARDSECURITY, ByteUtils.toHexString(efCardSecurity));
 	}
 	if (token != null) {
-	    authResponse.addElement("AuthenticationToken", ByteUtils.toHexString(token));
+	    authResponse.addElement(TOKEN, ByteUtils.toHexString(token));
 	}
 	if (nonce != null) {
-	    authResponse.addElement("Nonce", ByteUtils.toHexString(nonce));
+	    authResponse.addElement(NONCE, ByteUtils.toHexString(nonce));
 	}
 	return authResponse.getResponse();
     }
-
 }

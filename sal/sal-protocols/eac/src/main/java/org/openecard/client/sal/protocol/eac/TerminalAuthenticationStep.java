@@ -16,6 +16,7 @@ package org.openecard.client.sal.protocol.eac;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
+import java.util.Arrays;
 import java.util.Map;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.interfaces.Dispatcher;
@@ -27,6 +28,7 @@ import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificateChai
 import org.openecard.client.crypto.common.asn1.eac.SecurityInfos;
 import org.openecard.client.crypto.common.asn1.eac.TASecurityInfos;
 import org.openecard.client.crypto.common.asn1.eac.ef.EFCardAccess;
+import org.openecard.client.crypto.common.asn1.eac.oid.TAObjectIdentifier;
 import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
 import org.openecard.client.sal.protocol.eac.anytype.EAC2InputType;
 import org.openecard.client.sal.protocol.eac.anytype.EAC2OutputType;
@@ -68,7 +70,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 
 	    // TA: Step 1 - Verify certificates
 	    CardVerifiableCertificateChain certificateChain = (CardVerifiableCertificateChain) internalData.get(EACConstants.INTERNAL_DATA_CERTIFICATES);
-	    byte[] currentCAR = (byte[]) internalData.get(EACConstants.CURRENT_CAR);
+	    byte[] currentCAR = (byte[]) internalData.get(EACConstants.INTERNAL_DATA_CURRENT_CAR);
 	    ta.verifyCertificates(certificateChain, currentCAR);
 
 	    // TA: Step 2 - MSE:SET AT
@@ -76,17 +78,24 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    EFCardAccess efca = new EFCardAccess(securityInfos);
 	    TASecurityInfos tas = efca.getTASecurityInfos();
 
-	    byte[] oid = ObjectIdentifierUtils.getValue(tas.getTAInfo().getProtocol());
+	    byte[] oid = ObjectIdentifierUtils.getValue(certificateChain.getTerminalCertificate().getPublicKey().getObjectIdentifier());
 	    byte[] chr = certificateChain.getTerminalCertificate().getCHR().toByteArray();
 	    byte[] key = eac2Input.getEphemeralPublicKey();
 	    byte[] aad = (byte[]) internalData.get(EACConstants.INTERNAL_DATA_AUTHENTICATED_AUXILIARY_DATA);
+
+	    System.out.println("---- key");
+	    System.out.println(ByteUtils.toHexString(key));
+	    key = Arrays.copyOfRange(key, 0, 32);
+
+	    System.out.println(ByteUtils.toHexString(key));
+
 	    ta.mseSetAT(oid, chr, key, aad);
 
 	    // TA: Step 3 - Get challenge
 	    byte[] rPICC = ta.getChallenge();
 
 	    // Store public key for Chip Authentication
-	    internalData.put(EACConstants.INTERNAL_DATA_PK_PCD, ByteUtils.toHexString(eac2Input.getEphemeralPublicKey()));
+	    internalData.put(EACConstants.INTERNAL_DATA_PK_PCD, eac2Input.getEphemeralPublicKey());
 
 	    // Create response
 	    eac2Output.setChallenge(rPICC);

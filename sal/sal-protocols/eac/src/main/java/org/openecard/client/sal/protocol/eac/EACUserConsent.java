@@ -14,36 +14,50 @@
  */
 package org.openecard.client.sal.protocol.eac;
 
-import java.net.MalformedURLException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openecard.client.common.I18n;
 import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.crypto.common.asn1.cvc.CHAT;
-import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
-import org.openecard.client.crypto.common.asn1.cvc.CertificateDescription;
 import org.openecard.client.gui.UserConsent;
 import org.openecard.client.gui.UserConsentNavigator;
 import org.openecard.client.gui.definition.*;
 import org.openecard.client.gui.executor.ExecutionEngine;
+import org.openecard.client.sal.protocol.eac.gui.CHATStep;
+import org.openecard.client.sal.protocol.eac.gui.CVCStep;
+import org.openecard.client.sal.protocol.eac.gui.GUIContentMap;
 
 
 /**
- *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class EACUserConsent {
 
     private static final Logger logger = LogManager.getLogger(EACUserConsent.class.getName());
-    private I18n lang = I18n.getTranslation("sal");
     private UserConsent gui;
 
     public EACUserConsent(UserConsent gui) {
 	this.gui = gui;
     }
 
-    public CHAT show(CardVerifiableCertificate certificate, CertificateDescription description, CHAT requiredCHAT, CHAT optionalCHAT) {
+    public void show(GUIContentMap content) {
+
+	UserConsentDescription uc = new UserConsentDescription("PACE Protokol");
+
+	Step cvcStep = new CVCStep(content).create();
+	Step chatStep = new CHATStep(content).create();
+
+
+	uc.getSteps().add(cvcStep);
+	uc.getSteps().add(chatStep);
+
+	UserConsentNavigator navigator = gui.obtainNavigator(uc);
+	ExecutionEngine exec = new ExecutionEngine(navigator);
+	exec.process();
+
+//	ExecutionResults execResults = exec.getResults().get(step.getID());
+//	pinInputField = (PasswordField) execResults.getResults().get(0);
+
+//	return pinInputField.getValue();
+
 //        // <editor-fold defaultstate="collapsed" desc="log trace">
 //        if (logger.isLoggable(Level.FINER)) {
 //            logger.entering(
@@ -170,7 +184,5 @@ public class EACUserConsent {
 //                    "showUserConsentAndRetrieveCHAT(CertificateDescription description, CHAT requiredCHAT, CHAT optionalCHAT, CardVerifiableCertificate cvc)",
 //                    chat);
 //        } // </editor-fold>
-	return null;
     }
-
 }

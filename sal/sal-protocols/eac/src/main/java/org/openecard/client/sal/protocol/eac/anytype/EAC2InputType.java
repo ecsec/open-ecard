@@ -18,11 +18,11 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import java.util.ArrayList;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.client.common.sal.anytype.AuthDataMap;
-import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.w3c.dom.Element;
+
 
 /**
  *
@@ -31,6 +31,10 @@ import org.w3c.dom.Element;
  */
 public final class EAC2InputType {
 
+    public static final String CERTIFICATE = "Certificate";
+    public static final String SIGNATURE = "Signature";
+    public static final String EPHEMERAL_PUBLIC_KEY = "EphemeralPublicKey";
+    //
     private final AuthDataMap authMap;
     private ArrayList<CardVerifiableCertificate> certificates = new ArrayList<CardVerifiableCertificate>();
     private byte[] ephemeralPublicKey;
@@ -43,24 +47,19 @@ public final class EAC2InputType {
      * @throws ParserConfigurationException
      * @throws TLVException
      */
-    public EAC2InputType(DIDAuthenticationDataType baseType) throws ParserConfigurationException, TLVException {
+    public EAC2InputType(DIDAuthenticationDataType baseType) throws Exception {
 	this.authMap = new AuthDataMap(baseType);
 
-	ephemeralPublicKey = authMap.getContentAsBytes("EphemeralPublicKey");
-	signature = authMap.getContentAsBytes("Signature");
+	ephemeralPublicKey = authMap.getContentAsBytes(EPHEMERAL_PUBLIC_KEY);
+	signature = authMap.getContentAsBytes(SIGNATURE);
 
-	/*while (authMap.containsContent("Certificate")) {
-	    TLV cardVerifiableCertificate = TLV.fromBER(authMap.getContentAsBytes("Certificate"));
-	    certificates.add(new CardVerifiableCertificate(cardVerifiableCertificate));
-	}*/
-	
-	//FIXME workaround for retrieving the certificates
-	for (Element elem : baseType.getAny()) {
-	    if (elem.getLocalName().equals("Certificate")) {
-              CardVerifiableCertificate cvc = new CardVerifiableCertificate(TLV.fromBER(StringUtils.toByteArray(elem.getTextContent())));
-              certificates.add(cvc);
-          }
-      }
+	for (Element element : baseType.getAny()) {
+	    if (element.getLocalName().equals(CERTIFICATE)) {
+		byte[] value = StringUtils.toByteArray(element.getTextContent());
+		CardVerifiableCertificate cvc = new CardVerifiableCertificate(value);
+		certificates.add(cvc);
+	    }
+	}
     }
 
     /**
@@ -98,5 +97,4 @@ public final class EAC2InputType {
     public EAC2OutputType getOutputType() {
 	return new EAC2OutputType(authMap);
     }
-
 }

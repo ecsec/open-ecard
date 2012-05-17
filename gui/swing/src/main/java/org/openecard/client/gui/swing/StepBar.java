@@ -13,6 +13,7 @@ import org.openecard.client.gui.definition.Step;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Tobias Wich <tobias.wich@ecsec.de>
@@ -41,8 +42,8 @@ public final class StepBar extends JPanel implements PropertyChangeListener {
     private void initializeComponents() {
 	GridBagConstraints gbc = new GridBagConstraints();
 	gbc.fill = GridBagConstraints.HORIZONTAL;
+	gbc.anchor = GridBagConstraints.PAGE_START;
 	gbc.ipady = 10;
-	gbc.weightx = 1.0;
 	gbc.gridwidth = GridBagConstraints.REMAINDER;
 
 	for (String names : getStepNames(steps)) {
@@ -50,28 +51,32 @@ public final class StepBar extends JPanel implements PropertyChangeListener {
 	    l.setForeground(Color.GRAY);
 	    add(l, gbc);
 	}
+
+	gbc.weighty = 1.0;
+	add(new JLabel(), gbc);
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
 	logger.info("StepBar event: {} | {} | {} | {}",
 		new Object[]{evt.getSource().getClass(), evt.getPropertyName(), evt.getOldValue(), evt.getNewValue()});
+	if (evt.getPropertyName() != null) {
+	    if (evt.getPropertyName().equals(SwingNavigator.PROPERTY_CURRENT_STEP)) {
+		Object newIndex = evt.getNewValue();
+		Object oldIndex = evt.getOldValue();
 
-	if (evt.getPropertyName().equals(SwingNavigator.PROPERTY_CURRENT_STEP)) {
-	    Object newIndex = evt.getNewValue();
-	    Object oldIndex = evt.getOldValue();
-
-	    if (newIndex instanceof Integer) {
-		int newIndexValue = ((Integer) newIndex).intValue();
-		if (newIndexValue >= 0 && newIndexValue < getComponentCount()) {
-		    getComponent(newIndexValue).setForeground(Color.GRAY);
+		if (newIndex instanceof Integer) {
+		    int newIndexValue = ((Integer) newIndex).intValue();
+		    if (newIndexValue >= 0 && newIndexValue < getComponentCount()) {
+			getComponent(newIndexValue).setForeground(Color.GRAY);
+		    }
 		}
-	    }
-	    if (oldIndex instanceof Integer) {
-		int oldIndexValue = ((Integer) oldIndex).intValue();
-		if (oldIndexValue >= 0 && oldIndexValue < getComponentCount()) {
-		    // Highlight current element
-		    getComponent(oldIndexValue).setForeground(Color.BLACK);
+		if (oldIndex instanceof Integer) {
+		    int oldIndexValue = ((Integer) oldIndex).intValue();
+		    if (oldIndexValue >= 0 && oldIndexValue < getComponentCount()) {
+			// Highlight current element
+			getComponent(oldIndexValue).setForeground(Color.BLACK);
+		    }
 		}
 	    }
 	}

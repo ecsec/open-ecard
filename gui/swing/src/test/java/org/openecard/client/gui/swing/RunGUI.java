@@ -21,7 +21,7 @@ import org.openecard.client.gui.UserConsentNavigator;
 import org.openecard.client.gui.definition.BoxItem;
 import org.openecard.client.gui.definition.Checkbox;
 import org.openecard.client.gui.definition.Hyperlink;
-import org.openecard.client.gui.definition.Passwordfield;
+import org.openecard.client.gui.definition.PasswordField;
 import org.openecard.client.gui.definition.Step;
 import org.openecard.client.gui.definition.Text;
 import org.openecard.client.gui.definition.ToggleText;
@@ -134,6 +134,7 @@ Step requestedData_Step1 = new Step("Angefragte Daten");
 	vornameBoxItem.setChecked(true);
 	vornameBoxItem.setDisabled(false);
 	vornameBoxItem.setText("Vorname");
+
 	BoxItem nameBoxItem = new BoxItem();
 	nameBoxItem.setName("nameBoxItem");
 	nameBoxItem.setChecked(true);
@@ -320,9 +321,9 @@ Step requestedData_Step1 = new Step("Angefragte Daten");
 	sendAgreement_Text.setText("Wenn Sie mit der Übermittlung der ausgewählten\n"
 		+ "Daten einverstanden sind, geben Sie bitte\n"
 		+ "Ihre 6-stellige PIN ein.");
-	Passwordfield p1 = new Passwordfield();
-	p1.setName("pass input1");
-	p1.setText("PIN:");
+	PasswordField p1 = new PasswordField();
+	p1.setDescription("pass input1");
+	p1.setDescription("PIN:");
 
 	dataToSendSelection.getBoxItems().add(vornameBoxItem);
 	dataToSendSelection.getBoxItems().add(nameBoxItem);

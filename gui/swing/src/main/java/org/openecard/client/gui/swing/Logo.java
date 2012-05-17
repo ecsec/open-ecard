@@ -9,16 +9,18 @@ import java.awt.Toolkit;
 import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+
 
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class Logo extends JLabel {
+public class Logo extends JPanel {
 
     public Logo() {
 	ImageIcon logo = new ImageIcon();
-//	URL url = Logo.class.getResource("/loader.gif");
 	URL url = Logo.class.getResource("/openecardwhite.gif");
+
 	if (url != null) {
 	    Toolkit toolkit = Toolkit.getDefaultToolkit();
 	    Image image = toolkit.getImage(url);
@@ -26,7 +28,6 @@ public class Logo extends JLabel {
 	    logo.setImage(image);
 	}
 
-	setIcon(logo);
-//	logo.setImageObserver(this);
+	add(new JLabel(logo));
     }
 }

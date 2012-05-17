@@ -15,7 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import org.openecard.client.gui.definition.InputInfoUnit;
-import org.openecard.client.gui.definition.Passwordfield;
+import org.openecard.client.gui.definition.PasswordField;
 import org.openecard.client.gui.definition.Radiobox;
 import org.openecard.client.gui.definition.Textfield;
 import org.openecard.client.gui.swing.components.AbstractInput;
@@ -67,24 +67,24 @@ public class NPAStepLayouter extends StepLayouter {
 	    StepComponent nextComponent = null;
 
 	    switch (next.type()) {
-		case Checkbox:
+		case CHECK_BOX:
 		    nextComponent = new Checkbox((org.openecard.client.gui.definition.Checkbox) next);
 		    break;
-		case Hyperlink:
+		case HYPERLINK:
 		    nextComponent = new Hyperlink((org.openecard.client.gui.definition.Hyperlink) next);
 		    break;
-		case Passwordfield:
-		    nextComponent = new AbstractInput((Passwordfield) next);
+		case PASSWORD_FIELD:
+		    nextComponent = new AbstractInput((PasswordField) next);
 		    break;
-		case Radiobox:
+		case RADIO_BOX:
 		    nextComponent = new Radiobutton((Radiobox) next);
 		    break;
-		case Signaturefield:
+		case SIGNAUTRE_FIELD:
 		    throw new UnsupportedOperationException("Not implemented yet.");
-		case Text:
+		case TEXT:
 		    nextComponent = new Text((org.openecard.client.gui.definition.Text) next);
 		    break;
-		case Textfield:
+		case TEXT_FIELD:
 		    nextComponent = new AbstractInput((Textfield) next);
 		    break;
 		case ToggleText:

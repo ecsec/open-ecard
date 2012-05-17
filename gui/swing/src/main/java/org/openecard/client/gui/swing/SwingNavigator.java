@@ -16,7 +16,7 @@ import org.openecard.client.gui.definition.Step;
  */
 public class SwingNavigator implements UserConsentNavigator {
 
-    public static String PROPERTY_CURRENT_STEP;
+    public static String PROPERTY_CURRENT_STEP = "PROPERTY_CURRENT_STEP";
     private final Container stepContainer;
     private final DialogWrapper dialogWrapper;
     private String dialogType;

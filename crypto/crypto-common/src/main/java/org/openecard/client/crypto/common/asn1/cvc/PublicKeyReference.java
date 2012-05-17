@@ -30,9 +30,9 @@ public class PublicKeyReference {
     private void parse() {
 	final int length = reference.length;
 
-	countryCode = new String(ByteUtils.cut(reference, 0, 2));
-	holderMnemonic = new String(ByteUtils.cut(reference, 2, length - 7));
-	sequenceNumber = new String(ByteUtils.cut(reference, length - 5, 5));
+	countryCode = new String(ByteUtils.copy(reference, 0, 2));
+	holderMnemonic = new String(ByteUtils.copy(reference, 2, length - 7));
+	sequenceNumber = new String(ByteUtils.copy(reference, length - 5, 5));
     }
 
     public String getCountryCode() {

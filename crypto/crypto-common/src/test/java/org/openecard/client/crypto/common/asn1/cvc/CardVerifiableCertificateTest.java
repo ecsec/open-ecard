@@ -33,7 +33,7 @@ public class CardVerifiableCertificateTest {
 	assertArrayEquals(chat, cvc.getCHAT().toByteArray());
 	assertArrayEquals(chr, cvc.getCHR().toByteArray());
 	assertArrayEquals(car, cvc.getCAR().toByteArray());
-	assertArrayEquals(publicKey, cvc.getPublicKey());
+	assertArrayEquals(publicKey, cvc.getPublicKey().getTLVEncoded().getValue());
 	assertArrayEquals(cpi, cvc.getCPI());
 	assertArrayEquals(encodedBodyAndSignature, cvc.getCertificate().getValue());
 	assertArrayEquals(extension, cvc.getExtensions());

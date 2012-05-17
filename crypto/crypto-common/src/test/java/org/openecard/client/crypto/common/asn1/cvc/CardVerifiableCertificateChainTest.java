@@ -6,6 +6,7 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.eac.EFCardAccessTest;
 
 

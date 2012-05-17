@@ -16,6 +16,7 @@
 package org.openecard.client.crypto.common.asn1.cvc;
 
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
@@ -67,7 +68,7 @@ public class CardVerifiableCertificate {
     // Certificate Holder Reference (CHR)
     private PublicKeyReference chr;
     // Public key
-    private byte[] publicKey;
+    private PublicKey publicKey;
     // Certificate Holder Authorization Template (CHAT)
     private CHAT chat;
     // Certificate Effective Date
@@ -85,7 +86,7 @@ public class CardVerifiableCertificate {
      * @param cvc CardVerifiableCertificate
      * @throws TLVException
      */
-    public CardVerifiableCertificate(byte[] cvc) throws Exception {
+    public CardVerifiableCertificate(byte[] cvc) throws CertificateException, TLVException {
 	this(TLV.fromBER(cvc));
     }
 
@@ -95,7 +96,7 @@ public class CardVerifiableCertificate {
      * @param cvc TLV encoded certificate
      * @throws TLVException
      */
-    public CardVerifiableCertificate(TLV cvc) throws Exception {
+    public CardVerifiableCertificate(TLV cvc) throws CertificateException {
 	try {
 	    // TLV encoded body and signature
 	    certificate = cvc;
@@ -123,7 +124,7 @@ public class CardVerifiableCertificate {
 			car = new PublicKeyReference(bodyObject.findChildTags(TAG_CAR).get(0).getValue());
 			break;
 		    case TAG_PUBLIC_KEY:
-			publicKey = bodyObject.findChildTags(TAG_PUBLIC_KEY).get(0).getValue();
+			publicKey = PublicKey.getInstance(bodyObject.findChildTags(TAG_PUBLIC_KEY).get(0));
 			break;
 		    case TAG_CHR:
 			chr = new PublicKeyReference(bodyObject.findChildTags(TAG_CHR).get(0).getValue());
@@ -227,7 +228,7 @@ public class CardVerifiableCertificate {
      *
      * @return Public key
      */
-    public byte[] getPublicKey() {
+    public PublicKey getPublicKey() {
 	return publicKey;
     }
 

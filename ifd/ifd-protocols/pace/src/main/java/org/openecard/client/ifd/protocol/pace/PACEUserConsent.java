@@ -18,45 +18,53 @@ package org.openecard.client.ifd.protocol.pace;
 import org.openecard.client.common.I18n;
 import org.openecard.client.gui.UserConsent;
 import org.openecard.client.gui.UserConsentNavigator;
+import org.openecard.client.gui.definition.PasswordField;
 import org.openecard.client.gui.definition.Step;
 import org.openecard.client.gui.definition.Text;
-import org.openecard.client.gui.definition.Textfield;
 import org.openecard.client.gui.definition.UserConsentDescription;
 import org.openecard.client.gui.executor.ExecutionEngine;
+import org.openecard.client.gui.executor.ExecutionResults;
 
 
 /**
  * Implements a user consent GUI for the PACE protocol.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class PACEUserConsent {
 
+    private static final String PIN_ENTRY = "pin_entry";
+    private static final String PIN_AGREE = "pin_agree";
+    private static final String PIN = "pin";
     private final I18n lang = I18n.getTranslation("ifd");
 
-    protected PACEUserConsent() { }
+    protected PACEUserConsent() {
+    }
 
-    public byte[] getPINFromUser(UserConsent gui) {
-	UserConsentDescription uc = new UserConsentDescription("openecard");
-	Step s3 = new Step(lang.translationForKey("pin_entry"));
+    public String getPINFromUser(UserConsent gui) {
+	UserConsentDescription uc = new UserConsentDescription("PACE Protokol");
 
-	Text i9 = new Text();
-	i9.setText(lang.translationForKey("pin_agree") + "\n");
-	s3.getInputInfoUnits().add(i9);
+	Step step = new Step(lang.translationForKey(PIN_ENTRY));
 
-	Textfield f1 = new Textfield();
-	f1.setName(lang.translationForKey("pin"));
-	s3.getInputInfoUnits().add(f1);
+	Text description = new Text();
+	description.setText(lang.translationForKey(PIN_AGREE));
+	step.getInputInfoUnits().add(description);
 
-	uc.getSteps().add(s3);
+	PasswordField pinInputField = new PasswordField();
+	pinInputField.setID(PIN_ENTRY);
+	pinInputField.setDescription(lang.translationForKey(PIN));
+	step.getInputInfoUnits().add(pinInputField);
+
+	uc.getSteps().add(step);
 
 	UserConsentNavigator navigator = gui.obtainNavigator(uc);
 	ExecutionEngine exec = new ExecutionEngine(navigator);
 	exec.process();
 
-	Textfield t = (Textfield) exec.getResults().get(lang.translationForKey("pin_entry")).getResults().get(0);
-	//TODO error handling
-	return t.getValue().getBytes();
-    }
+	ExecutionResults execResults = exec.getResults().get(step.getID());
+	pinInputField = (PasswordField) execResults.getResults().get(0);
 
+	return pinInputField.getValue();
+    }
 }

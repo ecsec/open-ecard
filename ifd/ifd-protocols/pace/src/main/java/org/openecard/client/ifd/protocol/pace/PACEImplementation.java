@@ -32,6 +32,7 @@ import org.openecard.client.ifd.protocol.pace.crypto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
@@ -109,7 +110,7 @@ public class PACEImplementation {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
 	    logger.error(LoggingConstants.THROWING, "Exception", e);
 	    // </editor-fold>
-	    int sw = e.getResponseAPDU().getSW();
+	    short sw = e.getResponseAPDU().getSW();
 
 	    if (sw == PACEConstants.PASSWORD_DEACTIVATED) {
 		// Password is deactivated
@@ -172,7 +173,7 @@ public class PACEImplementation {
 	try {
 	    response = gaEncryptedNonce.transmit(dispatcher, slotHandle);
 	    s = cryptoSuite.decryptNonce(keyPI, response.getData());
-	    
+
 	    // <editor-fold defaultstate="collapsed" desc="log trace">
 	    logger.trace(LoggingConstants.EXIT, "generalAuthenticateEncryptedNonce");
 	    // </editor-fold>

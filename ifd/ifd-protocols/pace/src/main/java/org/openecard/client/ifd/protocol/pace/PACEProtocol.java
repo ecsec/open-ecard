@@ -58,7 +58,7 @@ public class PACEProtocol implements Protocol {
 	    if (paceInput.getPIN() == null || paceInput.getPIN().isEmpty()) {
 		// No PIN is given, ask user for PIN
 		PACEUserConsent paceUserConsent = new PACEUserConsent();
-		pin = paceUserConsent.getPINFromUser(gui);
+		pin = paceUserConsent.getPINFromUser(gui).getBytes("ISO-8859-1");
 	    } else {
 		// PIN must be encoded in ISO/IEC 8859 encoding
 		pin = paceInput.getPIN().getBytes("ISO-8859-1");

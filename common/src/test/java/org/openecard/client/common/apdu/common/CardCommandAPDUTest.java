@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openecard.client.common.apdu;
+package org.openecard.client.common.apdu.common;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Random;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.openecard.client.common.apdu.common.CardCommandAPDU;
+import org.openecard.client.common.apdu.GeneralAuthenticate;
+import org.openecard.client.common.apdu.ReadBinary;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.IntegerUtils;
 
 
 /**
- *
  * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class CardCommandAPDUTest {
@@ -132,34 +132,34 @@ public class CardCommandAPDUTest {
     }
 
     @Test
-    public void testConstructors(){
-        /*
-         * test constructor CardCommandAPDU(byte[] commandAPDU) with Case 4.2 APDU
-         */
-        CardCommandAPDU capdu = new CardCommandAPDU(new byte[]{(byte) 0x00, (byte) 0xAB,(byte) 0xBC, (byte) 0xDE,(byte)  0x01,(byte) 0x01,(byte) 0x00,(byte) 0x01,(byte) 0xFF});
-        assertEquals((byte)0x00, capdu.getCLA());
-        assertEquals((byte) 0xAB, capdu.getINS());
-        assertEquals((byte) 0xBC, capdu.getP1());
-        assertEquals((byte)0xDE, capdu.getP2());
-        assertEquals((byte)0x01, capdu.getLC());
-        assertEquals(511, capdu.getLE());
-        assertArrayEquals(new byte[]{(byte) 0x01}, capdu.getData());
-        assertArrayEquals(new byte[]{(byte) 0x00, (byte)0xAB, (byte)0xBC,(byte)0xDE}, capdu.getHeader());
-        
-        /*
-         * test constructor CardCommandAPDU(byte[] commandAPDU) with Case 1 APDU
-         */
-        capdu = new CardCommandAPDU(new byte[]{(byte) 0x00, (byte) 0xAB,(byte) 0xBC, (byte) 0xDE});
-        assertEquals((byte)0x00, capdu.getCLA());
-        assertEquals((byte) 0xAB, capdu.getINS());
-        assertEquals((byte) 0xBC, capdu.getP1());
-        assertEquals((byte)0xDE, capdu.getP2());
-        assertEquals(-1, capdu.getLC());
-        assertEquals(-1, capdu.getLE());
-        assertNull(capdu.getData());
-        assertArrayEquals(new byte[]{(byte) 0x00, (byte)0xAB, (byte)0xBC,(byte)0xDE}, capdu.getHeader());
+    public void testConstructors() {
+	/*
+	 * test constructor CardCommandAPDU(byte[] commandAPDU) with Case 4.2 APDU
+	 */
+	CardCommandAPDU capdu = new CardCommandAPDU(new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE, (byte) 0x01, (byte) 0x01, (byte) 0x00, (byte) 0x01, (byte) 0xFF});
+	assertEquals((byte) 0x00, capdu.getCLA());
+	assertEquals((byte) 0xAB, capdu.getINS());
+	assertEquals((byte) 0xBC, capdu.getP1());
+	assertEquals((byte) 0xDE, capdu.getP2());
+	assertEquals((byte) 0x01, capdu.getLC());
+	assertEquals(511, capdu.getLE());
+	assertArrayEquals(new byte[]{(byte) 0x01}, capdu.getData());
+	assertArrayEquals(new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE}, capdu.getHeader());
+
+	/*
+	 * test constructor CardCommandAPDU(byte[] commandAPDU) with Case 1 APDU
+	 */
+	capdu = new CardCommandAPDU(new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE});
+	assertEquals((byte) 0x00, capdu.getCLA());
+	assertEquals((byte) 0xAB, capdu.getINS());
+	assertEquals((byte) 0xBC, capdu.getP1());
+	assertEquals((byte) 0xDE, capdu.getP2());
+	assertEquals(-1, capdu.getLC());
+	assertEquals(-1, capdu.getLE());
+	assertNull(capdu.getData());
+	assertArrayEquals(new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE}, capdu.getHeader());
     }
-    
+
     private byte[] fillBytesWithLength(int i) throws IOException {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -182,5 +182,4 @@ public class CardCommandAPDUTest {
 	}
 	return baos.toByteArray();
     }
-
 }

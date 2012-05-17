@@ -15,7 +15,6 @@
  */
 package org.openecard.client.common.apdu.common;
 
-
 /**
  *
  * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
@@ -23,11 +22,11 @@ package org.openecard.client.common.apdu.common;
 class CardAPDU {
 
     /**
-     * 0x00 byte
+     * 0x00 byte. Do not use me with a bit mask!
      */
     protected static final byte x00 = (byte) 0x00;
     /**
-     * 0xFF byte
+     * 0xFF byte. Do not use me with a bit mask!
      */
     protected static final byte xFF = (byte) 0xFF;
     /**
@@ -59,5 +58,4 @@ class CardAPDU {
     public void setData(byte[] data) {
 	this.data = data;
     }
-
 }

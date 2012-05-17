@@ -190,7 +190,7 @@ public class CardCommandAPDU extends CardAPDU {
      * @return Class byte
      */
     public byte getCLA() {
-	return header[0];
+	return (byte) (header[0] & 0xFF);
     }
 
     /**
@@ -208,7 +208,7 @@ public class CardCommandAPDU extends CardAPDU {
      * @return Instruction byte
      */
     public byte getINS() {
-	return header[1];
+	return (byte) (header[1] & 0xFF);
     }
 
     /**
@@ -226,7 +226,7 @@ public class CardCommandAPDU extends CardAPDU {
      * @return Parameter byte P1
      */
     public byte getP1() {
-	return header[2];
+	return (byte) (header[2] & 0xFF);
     }
 
     /**
@@ -244,7 +244,7 @@ public class CardCommandAPDU extends CardAPDU {
      * @return parameter byte P2
      */
     public byte getP2() {
-	return header[3];
+	return (byte) (header[3] & 0xFF);
     }
 
     /**
@@ -352,7 +352,9 @@ public class CardCommandAPDU extends CardAPDU {
 	    le = -1;
 	    data = new byte[0];
 
-	    if (length == 1) {
+	    if (length == 0) {
+		// Case 1. : |CLA|INS|P1|P2|
+	    } else if (length == 1) {
 		// Case 2 |CLA|INS|P1|P2|LE|
 		le = (bais.read() & 0xFF);
 	    } else if (length < 65536) {

@@ -99,7 +99,7 @@ public final class CardResponseAPDU extends CardAPDU {
      * @return SW1
      */
     public byte getSW1() {
-	return trailer[0];
+	return (byte) (trailer[0] & 0xFF);
     }
 
     /**
@@ -117,7 +117,7 @@ public final class CardResponseAPDU extends CardAPDU {
      * @return SW2
      */
     public byte getSW2() {
-	return trailer[1];
+	return (byte) (trailer[1] & 0xFF);
     }
 
     /**
@@ -135,7 +135,7 @@ public final class CardResponseAPDU extends CardAPDU {
      * @return Status bytes
      */
     public short getSW() {
-	return (short) ((getSW1() << 8) | getSW2());
+	return (short) (((trailer[0] & 0xFF) << 8) | (trailer[1] & 0xFF));
     }
 
     /**
@@ -275,5 +275,4 @@ public final class CardResponseAPDU extends CardAPDU {
     public String toString() {
 	return ByteUtils.toHexString(toByteArray(), true);
     }
-
 }

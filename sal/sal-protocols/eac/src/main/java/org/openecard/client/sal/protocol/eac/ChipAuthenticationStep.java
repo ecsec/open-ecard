@@ -25,7 +25,6 @@ import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.tlv.TLV;
-import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.IntegerUtils;
 import org.openecard.client.crypto.common.asn1.eac.CASecurityInfos;
 import org.openecard.client.crypto.common.asn1.eac.SecurityInfos;
@@ -35,6 +34,7 @@ import org.openecard.client.sal.protocol.eac.anytype.EAC2OutputType;
 import org.openecard.client.sal.protocol.eac.anytype.EACAdditionalInputType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
@@ -87,7 +87,7 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    ca.mseSetAT(oid, keyID);
 
 	    // CA: Step 2 - General Authenticate
-	    byte[] key = ByteUtils.concatenate((byte) 0x04, (byte[]) internalData.get(EACConstants.INTERNAL_DATA_PK_PCD));
+	    byte[] key = (byte[]) internalData.get(EACConstants.INTERNAL_DATA_PK_PCD);
 	    byte[] responseData = ca.generalAuthenticate(key);
 
 	    TLV tlv = TLV.fromBER(responseData);

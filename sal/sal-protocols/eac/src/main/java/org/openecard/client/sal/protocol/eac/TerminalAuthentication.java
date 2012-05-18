@@ -57,11 +57,10 @@ public class TerminalAuthentication {
     /**
      * Verify certificates. (Step 1)
      *
-     * @param currentCAR the current Certification Authority Reference of the mrtd
-     * @param certificateChain Certificate-chain
+     * @param certificateChain Certificate chain
      * @throws ProtocolException
      */
-    public void verifyCertificates(CardVerifiableCertificateChain certificateChain, byte[] currentCAR) throws ProtocolException {
+    public void verifyCertificates(CardVerifiableCertificateChain certificateChain) throws ProtocolException {
 	try {
 	    List<CardVerifiableCertificate> certificates = certificateChain.getCertificateChain();
 

@@ -21,7 +21,9 @@ import org.openecard.client.common.apdu.common.CardResponseAPDU;
 import org.openecard.client.common.apdu.exception.APDUException;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.protocol.exception.ProtocolException;
+import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.sal.protocol.eac.apdu.MSESetATCA;
+
 
 /**
  * Implements the Chip Authentication protocol.
@@ -71,6 +73,9 @@ public class ChipAuthentication {
      */
     public byte[] generalAuthenticate(byte[] key) throws ProtocolException {
 	try {
+	    if (key[0] != (byte) 0x04) {
+		key = ByteUtils.concatenate((byte) 0x04, key);
+	    }
 	    CardCommandAPDU generalAuthenticate = new GeneralAuthenticate((byte) 0x80, key);
 	    CardResponseAPDU response = generalAuthenticate.transmit(dispatcher, slotHandle);
 

@@ -87,14 +87,18 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    content.add(GUIContentMap.ELEMENT.CERTIFICATE_DESCRIPTION, certDescription);
 	    content.add(GUIContentMap.ELEMENT.REQUIRED_CHAT, requiredCHAT);
 	    content.add(GUIContentMap.ELEMENT.OPTIONAL_CHAT, optionalCHAT);
+	    content.add(GUIContentMap.ELEMENT.SELECTED_CHAT, requiredCHAT);
 	    gui.show(content);
 
 	    // GUI response
 	    CHAT selectedCHAT = (CHAT) content.get(GUIContentMap.ELEMENT.SELECTED_CHAT);
+	    String pin = (String) content.get(GUIContentMap.ELEMENT.PIN);
 
 	    // Create PACEInputType
 	    AuthDataMap paceAuthMap = new AuthDataMap(didAuthenticate.getAuthenticationProtocolData());
 	    AuthDataResponse paceInputMap = paceAuthMap.createResponse(didAuthenticate.getAuthenticationProtocolData());
+
+	    paceInputMap.addElement(PACEInputType.PIN, pin);
 	    //FIXME
 	    paceInputMap.addElement(PACEInputType.PIN_ID, "3");
 	    paceInputMap.addElement(PACEInputType.CHAT, selectedCHAT.toString());
@@ -104,7 +108,6 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    EstablishChannel establishChannel = new EstablishChannel();
 	    establishChannel.setSlotHandle(slotHandle);
 	    establishChannel.setAuthenticationProtocolData(paceInputMap.getResponse());
-	    //FIXME
 	    establishChannel.getAuthenticationProtocolData().setProtocol(ECardConstants.Protocol.PACE);
 
 	    EstablishChannelResponse establishChannelResponse = (EstablishChannelResponse) dispatcher.deliver(establishChannel);
@@ -127,7 +130,6 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		// Store additional data
 		internalData.put(EACConstants.INTERNAL_DATA_AUTHENTICATED_AUXILIARY_DATA, eac1Input.getAuthenticatedAuxiliaryData());
 		internalData.put(EACConstants.INTERNAL_DATA_CERTIFICATES, certChain);
-		internalData.put(EACConstants.INTERNAL_DATA_CURRENT_CAR, currentCAR);
 
 		// Create response
 		eac1Output.setEFCardAccess(efCardAccess);

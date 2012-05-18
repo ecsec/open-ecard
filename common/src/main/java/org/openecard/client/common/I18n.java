@@ -98,7 +98,7 @@ public class I18n {
      * @return Translation as specified in the translation, or default file.
      */
     public String translationForKey(String key, Object ... parameters) {
-	String result = translation.getProperty(key);
+	String result = translation.getProperty(key.toLowerCase());
 	if (result == null) {
 	    return "<<No translation for key <" + key + ">>";
 	} else if (parameters.length != 0) {

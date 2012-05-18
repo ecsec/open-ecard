@@ -18,6 +18,7 @@ package org.openecard.client.richclient.activation.messages;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import org.openecard.client.richclient.activation.tctoken.TCToken;
 
+
 /**
  *
  * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>

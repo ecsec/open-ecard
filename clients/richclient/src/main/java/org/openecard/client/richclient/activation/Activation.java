@@ -16,8 +16,6 @@
 package org.openecard.client.richclient.activation;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 /**
@@ -27,15 +25,6 @@ import java.util.logging.Logger;
 public class Activation {
 
     private static Activation activation;
-
-    // Only for testing
-    public static void main(String[] args) {
-	try {
-	    Activation.getInstance();
-	} catch (IOException ex) {
-	    Logger.getLogger(Activation.class.getName()).log(Level.SEVERE, "Exception", ex);
-	}
-    }
 
     /**
      * Returns a new instance of the Activation.
@@ -59,5 +48,4 @@ public class Activation {
 	ActivationServer activationServer = new ActivationServer();
 	activationServer.start();
     }
-
 }

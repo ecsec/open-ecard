@@ -31,7 +31,6 @@ import org.openecard.client.common.logging.LogManager;
 public class ActivationServer implements Runnable {
 
     private static final Logger logger = LogManager.getLogger(ActivationServer.class.getName());
-
     private ServerSocket server;
     private int port = 24727;
     private int backlog = 10;
@@ -85,5 +84,4 @@ public class ActivationServer implements Runnable {
 	    }
 	}
     }
-
 }

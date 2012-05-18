@@ -25,6 +25,7 @@ import org.openecard.client.common.ifd.protocol.exception.ProtocolException;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.crypto.common.asn1.eac.PACEDomainParameter;
 import org.openecard.client.crypto.common.asn1.eac.PACESecurityInfos;
 import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
 import org.openecard.client.ifd.protocol.pace.apdu.MSESetATPACE;
@@ -412,7 +413,7 @@ public class PACEImplementation {
      * @return ID_PICC
      */
     public byte[] getIDPICC() {
-	return ByteUtils.cutLeadingNullByte(keyPICC.getEncodedCompressedPublicKey());
+	return keyPICC.getEncodedCompressedPublicKey();
     }
 
     /**

@@ -30,10 +30,13 @@ import org.openecard.bouncycastle.jce.spec.ECParameterSpec;
 import org.openecard.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.openecard.bouncycastle.math.ec.ECPoint;
 import org.openecard.client.common.logging.LoggingConstants;
+import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.crypto.common.asn1.eac.PACEDomainParameter;
 import org.openecard.client.ifd.protocol.pace.PACEImplementation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  *
@@ -61,8 +64,16 @@ public final class PACEKey {
      * @param data Encoded key
      * @return Decoded key
      */
-    public byte[] decodePublicKey(byte[] data) {
-	byte[] keyBytes = ByteUtils.copy(data, 4, data.length - 4);
+    public byte[] decodePublicKey(byte[] data) throws Exception {
+	byte[] keyBytes;
+
+	if (data[0] == (byte) 0x7C) {
+	    keyBytes = TLV.fromBER(data).getChild().getValue();
+	} else if (data[0] != 04) {
+	    keyBytes = ByteUtils.concatenate((byte) 0x04, data);
+	} else {
+	    keyBytes = data;
+	}
 
 	if (pdp.isECDH()) {
 	    ECParameterSpec p = (ECParameterSpec) pdp.getParameter();
@@ -140,9 +151,9 @@ public final class PACEKey {
 	    try {
 		MessageDigest md = MessageDigest.getInstance("SHA-1");
 		byte[] input = ((ElGamalPublicKeyParameters) pk).getY().toByteArray();
-		byte[] hash = md.digest(input);
+		byte[] compKey = md.digest(input);
 
-		return hash;
+		return compKey;
 	    } catch (NoSuchAlgorithmException ex) {
 		// <editor-fold defaultstate="collapsed" desc="log exception">
 		logger.error(LoggingConstants.THROWING, "Exception", ex);
@@ -150,7 +161,8 @@ public final class PACEKey {
 		throw new RuntimeException(ex);
 	    }
 	} else if (pdp.isECDH()) {
-	    return ((ECPublicKeyParameters) pk).getQ().getX().toBigInteger().toByteArray();
+	    byte[] compKey = ((ECPublicKeyParameters) pk).getQ().getX().toBigInteger().toByteArray();
+	    return ByteUtils.cutLeadingNullByte(compKey);
 	} else {
 	    throw new IllegalArgumentException();
 	}

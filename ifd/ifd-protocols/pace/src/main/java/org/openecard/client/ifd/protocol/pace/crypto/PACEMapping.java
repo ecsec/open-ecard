@@ -15,6 +15,9 @@
  */
 package org.openecard.client.ifd.protocol.pace.crypto;
 
+import org.openecard.client.crypto.common.asn1.eac.PACEDomainParameter;
+
+
 
 /**
  *

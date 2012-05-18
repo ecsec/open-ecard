@@ -19,6 +19,7 @@ import java.math.BigInteger;
 import org.openecard.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.openecard.bouncycastle.jce.spec.ECParameterSpec;
 import org.openecard.bouncycastle.math.ec.ECPoint;
+import org.openecard.client.crypto.common.asn1.eac.PACEDomainParameter;
 
 
 /**
@@ -74,5 +75,4 @@ public final class PACEGenericMapping extends PACEMapping {
     public PACEKey getMappingKey() {
 	return mapKey;
     }
-
 }

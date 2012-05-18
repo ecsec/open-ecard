@@ -18,7 +18,9 @@ public class GUIContentMap {
 	CERTIFICATE_DESCRIPTION,
 	REQUIRED_CHAT,
 	OPTIONAL_CHAT,
-	SELECTED_CHAT;
+	SELECTED_CHAT,
+	PIN_TYPE,
+	PIN;
     }
 
     private HashMap<String, Object> map = new HashMap<String, Object>();

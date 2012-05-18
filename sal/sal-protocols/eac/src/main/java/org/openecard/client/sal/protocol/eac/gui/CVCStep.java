@@ -2,12 +2,16 @@ package org.openecard.client.sal.protocol.eac.gui;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 import org.openecard.client.common.I18n;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.client.crypto.common.asn1.cvc.CertificateDescription;
+import org.openecard.client.gui.definition.OutputInfoUnit;
+import org.openecard.client.gui.definition.PasswordField;
 import org.openecard.client.gui.definition.Step;
 import org.openecard.client.gui.definition.Text;
 import org.openecard.client.gui.definition.ToggleText;
+import org.openecard.client.gui.executor.ExecutionResults;
 
 
 /**
@@ -101,5 +105,13 @@ public class CVCStep {
 	step.getInputInfoUnits().add(issuerURL);
 
 	return step;
+    }
+
+    public void processResult(Map<String, ExecutionResults> results) {
+	processResult(results.get(step.getID()));
+    }
+
+    private void processResult(ExecutionResults executionResults) {
+	//NOP
     }
 }

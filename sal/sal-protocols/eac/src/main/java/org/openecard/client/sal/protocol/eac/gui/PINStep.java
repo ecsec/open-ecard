@@ -1,7 +1,12 @@
 package org.openecard.client.sal.protocol.eac.gui;
 
+import java.util.Map;
 import org.openecard.client.common.I18n;
+import org.openecard.client.gui.definition.OutputInfoUnit;
+import org.openecard.client.gui.definition.PasswordField;
 import org.openecard.client.gui.definition.Step;
+import org.openecard.client.gui.definition.Text;
+import org.openecard.client.gui.executor.ExecutionResults;
 
 
 /**
@@ -10,16 +15,9 @@ import org.openecard.client.gui.definition.Step;
 public class PINStep {
 
     // GUI translation constants
-    private static final String TITLE = "service_providers_statements_title";
-    private static final String SUBJECT_NAME = "service_providers_name";
-    private static final String SUBJECT_URL = "service_providers_internetaddress";
-    private static final String TERMS_OF_USAGE = "service_providers_termsofusage";
-    private static final String VALIDITY = "service_providers_validity";
-    private static final String VALIDITY_FORMAT = "service_providers_validity_format";
-    private static final String VALIDITY_FROM = "service_providers_validity_from";
-    private static final String VALIDITY_TO = "service_providers_validity_to";
-    private static final String ISSUER_NAME = "service_providers_validity";
-    private static final String ISSUER_URL = "service_providers_validity";
+    private static final String TITLE = "step_pace_title";
+    private static final String DESCRIPTION = "step_pace_description";
+    private static final String PIN = "pin";
     //
     private I18n lang = I18n.getTranslation("ifd");
     private Step step = new Step(lang.translationForKey(TITLE));
@@ -30,7 +28,31 @@ public class PINStep {
     }
 
     public Step create() {
+	Text description = new Text();
+	description.setText(lang.translationForKey(DESCRIPTION));
+	step.getInputInfoUnits().add(description);
+
+	//TODO Der step sollte so den pin type berücksichtigen.
+	PasswordField pinInputField = new PasswordField();
+	pinInputField.setID(PIN);
+	pinInputField.setDescription(lang.translationForKey(PIN));
+	step.getInputInfoUnits().add(pinInputField);
 
 	return step;
+    }
+
+    public void processResult(Map<String, ExecutionResults> results) {
+	processResult(results.get(step.getID()));
+    }
+
+    private void processResult(ExecutionResults executionResults) {
+	for (OutputInfoUnit output : executionResults.getResults()) {
+	    if (output instanceof PasswordField) {
+		PasswordField p = (PasswordField) output;
+		if (p.getID().equals(PIN)) {
+		    content.add(GUIContentMap.ELEMENT.PIN, p.getValue());
+		}
+	    }
+	}
     }
 }

@@ -2,23 +2,23 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	 xmlns="http://maven.apache.org/POM/4.0.0"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.openecard.client.sal</groupId>
-    <artifactId>sal-protocols</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
-  </parent>
+    <parent>
+	<groupId>org.openecard.client.sal</groupId>
+	<artifactId>sal-protocols</artifactId>
+	<version>0.0.3-SNAPSHOT</version>
+    </parent>
 
-  <groupId>org.openecard.client.sal.protocols</groupId>
-  <artifactId>eac</artifactId>
-  <name>EAC protocol</name>
-  <dependencies>
-   <dependency>
-      <groupId>org.openecard.client.ifd.protocols</groupId>
- 	 <artifactId>pace</artifactId>
-      <version>${project.version}</version>
-      <scope>provided</scope>
-    </dependency>
+    <groupId>org.openecard.client.sal.protocols</groupId>
+    <artifactId>eac</artifactId>
+    <name>EAC protocol</name>
+    <dependencies>
+	<dependency>
+	    <groupId>org.openecard.client.ifd.protocols</groupId>
+	    <artifactId>pace</artifactId>
+	    <version>${project.version}</version>
+	    <scope>provided</scope>
+	</dependency>
     </dependencies>
 </project>

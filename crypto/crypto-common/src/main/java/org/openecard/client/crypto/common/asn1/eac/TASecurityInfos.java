@@ -15,33 +15,74 @@
  */
 package org.openecard.client.crypto.common.asn1.eac;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.openecard.client.crypto.common.asn1.eac.oid.TAObjectIdentifier;
 
 
 /**
+ * Implements the SecurityInfos for Chip Authentication.
+ * See BSI-TR-03110, version 2.10, part 3, section A.1.1.3.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class TASecurityInfos {
 
-    private TAInfo taInfo;
+    private List<TAInfo> taiList;
+    private int taiIndex;
 
     /**
-     * Returns the TerminalAuthenticationInfo.
+     * Creates a new set of TASecurityInfos.
+     */
+    public TASecurityInfos() {
+	taiList = new ArrayList<TAInfo>();
+	taiIndex = 0;
+    }
+
+    /**
+     * Returns the selected TAInfo.
      *
      * @return TAInfo
      */
     public TAInfo getTAInfo() {
-	return taInfo;
+	return taiList.get(taiIndex);
     }
 
     /**
-     * Sets the TAInfo
+     * Returns the TAInfos.
      *
-     * @param taInfo
+     * @return TAInfos
      */
-    public void setTAInfo(TAInfo taInfo) {
-	this.taInfo = taInfo;
+    public List<TAInfo> getTAInfos() {
+	return taiList;
+    }
+
+    /**
+     * Sets the TAInfos
+     *
+     * @param taInfos TAInfos
+     */
+    public void setTAInfos(List<TAInfo> taInfos) {
+	this.taiList = taInfos;
+    }
+
+    /**
+     * Adds a TAInfo.
+     *
+     * @param taInfo TAInfo
+     */
+    public void addTAInfo(TAInfo taInfos) {
+	this.taiList.add(taInfos);
+    }
+
+    /**
+     * Selects a TAInfo.
+     */
+    public void selectTAInfo(int index) {
+	if (index < 0 || index > taiList.size() - 1) {
+	    throw new IllegalArgumentException("Index out of range.");
+	}
+	this.taiIndex = index;
     }
 
     /**
@@ -56,5 +97,4 @@ public final class TASecurityInfos {
 	}
 	return false;
     }
-
 }

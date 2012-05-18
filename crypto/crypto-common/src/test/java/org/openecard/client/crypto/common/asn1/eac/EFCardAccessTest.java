@@ -17,13 +17,12 @@ package org.openecard.client.crypto.common.asn1.eac;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static org.junit.Assert.*;
+import org.junit.Before;
 import org.junit.Test;
-import org.openecard.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.openecard.client.crypto.common.asn1.eac.ef.EFCardAccess;
 import org.openecard.client.crypto.common.asn1.eac.oid.CAObjectIdentifier;
 import org.openecard.client.crypto.common.asn1.eac.oid.EACObjectIdentifier;
@@ -39,11 +38,14 @@ public class EFCardAccessTest {
     private EFCardAccess efcaA;
     private EFCardAccess efcaB;
 
-    private void init() throws Exception {
+    @Before
+    public void init() throws Exception {
 
 	ConsoleHandler ch = new ConsoleHandler();
-	ch.setLevel(Level.ALL);
-	Logger.getLogger("ASN1").addHandler(ch);
+	ch.setLevel(Level.FINE);
+//	Logger.getLogger("ASN1").addHandler(ch);
+//	Logger.getLogger(EFCardAccess.class.getName()).addHandler(ch);
+//	Logger.getLogger(EFCardAccess.class.getName()).setLevel(Level.FINE);
 
 	// Standardized Domain Parameters
 	byte[] data = loadTestFile("EF_CardAccess.bin");
@@ -73,77 +75,90 @@ public class EFCardAccessTest {
 
     @Test
     public void testPACESecurityInfos() throws Exception {
-	init();
 	PACESecurityInfos psi = efcaA.getPACESecurityInfos();
-	PACEInfo pi = psi.getPACEInfo();
-	PACEDomainParameterInfo pdp = psi.getPACEDomainParameterInfo();
+	PACEInfo pi = psi.getPACEInfos().get(0);
+	PACEDomainParameter pdp = new PACEDomainParameter(psi);
 
 	assertEquals(pi.getProtocol(), "0.4.0.127.0.7.2.2.4.2.2");
 	assertEquals(pi.getProtocol(), PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128);
 	assertEquals(pi.getVersion(), 2);
 	assertEquals(pi.getParameterID(), 13);
-	assertNull(pdp);
 
 	psi = efcaB.getPACESecurityInfos();
-	pi = psi.getPACEInfo();
-	pdp = psi.getPACEDomainParameterInfo();
+	pi = psi.getPACEInfos().get(0);
+	PACEDomainParameterInfo pdpi = psi.getPACEDomainParameterInfos().get(0);
+//	pdp = new PACEDomainParameter(psi);
 
 	assertEquals(pi.getProtocol(), "0.4.0.127.0.7.2.2.4.2.2");
 	assertEquals(pi.getProtocol(), PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128);
 	assertEquals(pi.getVersion(), 1);
 	assertEquals(pi.getParameterID(), -1);
 
-	assertEquals(pdp.getProtocol(), "0.4.0.127.0.7.2.2.4.2");
-	assertEquals(pdp.getProtocol(), PACEObjectIdentifier.id_PACE_ECDH_GM);
-	assertEquals(pdp.getParameterID(), 0);
-	assertEquals(pdp.getDomainParameter().getObjectIdentifier(), "0.4.0.127.0.7.1.1.5.2.2.2");
+	assertEquals(pdpi.getProtocol(), "0.4.0.127.0.7.2.2.4.2");
+	assertEquals(pdpi.getProtocol(), PACEObjectIdentifier.id_PACE_ECDH_GM);
+	assertEquals(pdpi.getParameterID(), 0);
+	assertEquals(pdpi.getDomainParameter().getObjectIdentifier(), "0.4.0.127.0.7.1.1.5.2.2.2");
     }
 
     @Test
     public void testCASecurityInfos() throws Exception {
-	init();
 	CASecurityInfos csi = efcaA.getCASecurityInfos();
-	CAInfo ci = csi.getCAInfo();
-	CADomainParameterInfo cdp = csi.getCADomainParameterInfo();
+	CADomainParameter cdp = new CADomainParameter(csi);
 
+	CAInfo ci = csi.getCAInfos().get(0);
+	assertEquals(ci.getProtocol(), "0.4.0.127.0.7.2.2.3.2.2");
+	assertEquals(ci.getProtocol(), CAObjectIdentifier.id_CA_ECDH_AES_CBC_CMAC_128);
+	assertEquals(ci.getVersion(), 2);
+	assertEquals(ci.getKeyID(), 65);
+
+	ci = csi.getCAInfos().get(1);
 	assertEquals(ci.getProtocol(), "0.4.0.127.0.7.2.2.3.2.2");
 	assertEquals(ci.getProtocol(), CAObjectIdentifier.id_CA_ECDH_AES_CBC_CMAC_128);
 	assertEquals(ci.getVersion(), 2);
 	assertEquals(ci.getKeyID(), 69);
 
-	assertEquals(cdp.getProtocol().toString(), "0.4.0.127.0.7.2.2.3.2");
-	assertEquals(cdp.getProtocol().toString(), CAObjectIdentifier.id_CA_ECDH.toString());
-	assertEquals(cdp.getDomainParameter().getObjectIdentifier().toString(), "0.4.0.127.0.7.1.2");
-	assertEquals(cdp.getDomainParameter().getObjectIdentifier().toString(), EACObjectIdentifier.standardizedDomainParameters.toString());
-	assertEquals(cdp.getDomainParameter().getParameters().toString(), "13");
-	assertEquals(cdp.getKeyID(), 69);
+	CADomainParameterInfo cdpi = csi.getCADomainParameterInfos().get(0);
+	assertEquals(cdpi.getProtocol().toString(), "0.4.0.127.0.7.2.2.3.2");
+	assertEquals(cdpi.getProtocol().toString(), CAObjectIdentifier.id_CA_ECDH.toString());
+	assertEquals(cdpi.getDomainParameter().getObjectIdentifier().toString(), "0.4.0.127.0.7.1.2");
+	assertEquals(cdpi.getDomainParameter().getObjectIdentifier().toString(), EACObjectIdentifier.standardized_Domain_Parameters.toString());
+	assertEquals(cdpi.getDomainParameter().getParameters().toString(), "13");
+	assertEquals(cdpi.getKeyID(), 65);
+
+	cdpi = csi.getCADomainParameterInfos().get(1);
+	assertEquals(cdpi.getProtocol().toString(), "0.4.0.127.0.7.2.2.3.2");
+	assertEquals(cdpi.getProtocol().toString(), CAObjectIdentifier.id_CA_ECDH.toString());
+	assertEquals(cdpi.getDomainParameter().getObjectIdentifier().toString(), "0.4.0.127.0.7.1.2");
+	assertEquals(cdpi.getDomainParameter().getObjectIdentifier().toString(), EACObjectIdentifier.standardized_Domain_Parameters.toString());
+	assertEquals(cdpi.getDomainParameter().getParameters().toString(), "13");
+	assertEquals(cdpi.getKeyID(), 69);
 
 	csi = efcaB.getCASecurityInfos();
-	ci = csi.getCAInfo();
-	cdp = csi.getCADomainParameterInfo();
+	ci = csi.getCAInfos().get(0);
+	cdpi = csi.getCADomainParameterInfos().get(0);
+//	cdp = new CADomainParameter(csi);
 
 	assertEquals(ci.getProtocol(), "0.4.0.127.0.7.2.2.3.2.2");
 	assertEquals(ci.getProtocol(), CAObjectIdentifier.id_CA_ECDH_AES_CBC_CMAC_128);
 	assertEquals(ci.getVersion(), 2);
 	assertEquals(ci.getKeyID(), 0);
 
-	assertEquals(cdp.getProtocol().toString(), "0.4.0.127.0.7.2.2.3.2");
-	assertEquals(cdp.getProtocol().toString(), CAObjectIdentifier.id_CA_ECDH.toString());
-	assertEquals(cdp.getDomainParameter().getObjectIdentifier().toString(), "0.4.0.127.0.7.1.1.5.2.2.2");
+	assertEquals(cdpi.getProtocol().toString(), "0.4.0.127.0.7.2.2.3.2");
+	assertEquals(cdpi.getProtocol().toString(), CAObjectIdentifier.id_CA_ECDH.toString());
+	assertEquals(cdpi.getDomainParameter().getObjectIdentifier().toString(), "0.4.0.127.0.7.1.1.5.2.2.2");
     }
 
     @Test
     public void testTASecurityInfos() throws Exception {
-	init();
 	TASecurityInfos tsi = efcaA.getTASecurityInfos();
-	TAInfo ti = tsi.getTAInfo();
+	TAInfo ti = tsi.getTAInfos().get(0);
 
 	assertEquals(ti.getProtocol().toString(), "0.4.0.127.0.7.2.2.2");
 	assertEquals(ti.getProtocol().toString(), EACObjectIdentifier.id_TA);
 	assertEquals(ti.getVersion(), 2);
 
 	tsi = efcaB.getTASecurityInfos();
-	ti = tsi.getTAInfo();
+	ti = tsi.getTAInfos().get(0);
 
 	assertEquals(ti.getProtocol().toString(), "0.4.0.127.0.7.2.2.2");
 	assertEquals(ti.getProtocol().toString(), EACObjectIdentifier.id_TA);
@@ -152,7 +167,6 @@ public class EFCardAccessTest {
 
     @Test
     public void testCardInfoLocator() throws Exception {
-	init();
 	CardInfoLocator cil = efcaA.getCardInfoLocator();
 
 	assertEquals(cil.getProtocol().toString(), "0.4.0.127.0.7.2.2.6");
@@ -167,5 +181,4 @@ public class EFCardAccessTest {
 	assertEquals(cil.getURL(), "AwT ePA - BDr GmbH - Testkarte v1.0");
 	assertNull(cil.getEFCardInfo());
     }
-
 }

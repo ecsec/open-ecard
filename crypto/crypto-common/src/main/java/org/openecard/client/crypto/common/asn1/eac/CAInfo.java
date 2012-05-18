@@ -31,14 +31,14 @@ public final class CAInfo extends SecurityInfo implements CAObjectIdentifier {
     private int version;
     private int keyID;
     private static final String[] protocols = new String[]{
-        id_CA_DH_3DES_CBC_CBC,
-        id_CA_DH_AES_CBC_CMAC_128,
-        id_CA_DH_AES_CBC_CMAC_192,
-        id_CA_DH_AES_CBC_CMAC_256,
-        id_CA_ECDH_3DES_CBC_CBC,
-        id_CA_ECDH_AES_CBC_CMAC_128,
-        id_CA_ECDH_AES_CBC_CMAC_192,
-        id_CA_ECDH_AES_CBC_CMAC_256
+	id_CA_DH_3DES_CBC_CBC,
+	id_CA_DH_AES_CBC_CMAC_128,
+	id_CA_DH_AES_CBC_CMAC_192,
+	id_CA_DH_AES_CBC_CMAC_256,
+	id_CA_ECDH_3DES_CBC_CBC,
+	id_CA_ECDH_AES_CBC_CMAC_128,
+	id_CA_ECDH_AES_CBC_CMAC_192,
+	id_CA_ECDH_AES_CBC_CMAC_256
     };
 
     /**
@@ -47,12 +47,36 @@ public final class CAInfo extends SecurityInfo implements CAObjectIdentifier {
      * @param seq ANS1 encoded data
      */
     public CAInfo(ASN1Sequence seq) {
-        super(seq);
-        protocol = getIdentifier();
-        version = ((ASN1Integer) getRequiredData()).getValue().intValue();
-        if (seq.size() == 3) {
-            keyID = ((ASN1Integer) getOptionalData()).getValue().intValue();
-        }
+	super(seq);
+	protocol = getIdentifier();
+	version = ((ASN1Integer) getRequiredData()).getValue().intValue();
+	if (seq.size() == 3) {
+	    keyID = ((ASN1Integer) getOptionalData()).getValue().intValue();
+	}
+    }
+
+    /**
+     * Checks if the protocol identifier indicates Diffie-Hellman.
+     *
+     * @return True if Diffie-Hellman is used, otherwise false
+     */
+    public boolean isDH() {
+	if (protocol.startsWith(id_CA_DH)) {
+	    return true;
+	}
+	return false;
+    }
+
+    /**
+     * Checks if the protocol identifier indicates elliptic curve Diffie-Hellman.
+     *
+     * @return True if elliptic curve Diffie-Hellman is used, otherwise false
+     */
+    public boolean isECDH() {
+	if (protocol.startsWith(id_CA_ECDH)) {
+	    return true;
+	}
+	return false;
     }
 
     /**
@@ -61,7 +85,7 @@ public final class CAInfo extends SecurityInfo implements CAObjectIdentifier {
      * @return Protocol
      */
     public String getProtocol() {
-        return protocol;
+	return protocol;
     }
 
     /**
@@ -70,7 +94,7 @@ public final class CAInfo extends SecurityInfo implements CAObjectIdentifier {
      * @return Version
      */
     public int getVersion() {
-        return version;
+	return version;
     }
 
     /**
@@ -79,7 +103,7 @@ public final class CAInfo extends SecurityInfo implements CAObjectIdentifier {
      * @return KeyID
      */
     public int getKeyID() {
-        return keyID;
+	return keyID;
     }
 
     /**
@@ -89,12 +113,11 @@ public final class CAInfo extends SecurityInfo implements CAObjectIdentifier {
      * @return true if o is a ChipAuthentication object identifier; false otherwise
      */
     public static boolean isObjectIdentifier(String oid) {
-        for (int i = 0; i < protocols.length; i++) {
-            if (protocols[i].equals(oid)) {
-                return true;
-            }
-        }
-        return false;
+	for (int i = 0; i < protocols.length; i++) {
+	    if (protocols[i].equals(oid)) {
+		return true;
+	    }
+	}
+	return false;
     }
-
 }

@@ -13,14 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openecard.client.ifd.protocol.pace.crypto;
+package org.openecard.client.crypto.common.asn1.eac;
 
 import java.security.spec.AlgorithmParameterSpec;
-import org.openecard.client.crypto.common.asn1.eac.ExplicitDomainParameters;
-import org.openecard.client.crypto.common.asn1.eac.PACEDomainParameterInfo;
-import org.openecard.client.crypto.common.asn1.eac.PACEInfo;
-import org.openecard.client.crypto.common.asn1.eac.PACESecurityInfos;
-import org.openecard.client.crypto.common.asn1.eac.StandardizedDomainParameters;
+
 
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>

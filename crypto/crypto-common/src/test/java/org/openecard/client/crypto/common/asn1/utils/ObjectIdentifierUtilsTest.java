@@ -2,10 +2,10 @@ package org.openecard.client.crypto.common.asn1.utils;
 
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openecard.client.crypto.common.asn1.eac.oid.EACObjectIdentifier;
 
 
@@ -65,5 +65,4 @@ public class ObjectIdentifierUtilsTest {
 	byte[] result = ObjectIdentifierUtils.getValue(oid);
 	assertArrayEquals(expResult, result);
     }
-
 }

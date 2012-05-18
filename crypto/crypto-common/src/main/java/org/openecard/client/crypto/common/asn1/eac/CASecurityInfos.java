@@ -15,50 +15,124 @@
  */
 package org.openecard.client.crypto.common.asn1.eac;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
+ * Implements the SecurityInfos for Chip Authentication.
+ * See BSI-TR-03110, version 2.10, part 3, section A.1.1.2.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class CASecurityInfos {
 
-    private CADomainParameterInfo caDomainParameter;
-    private CAInfo caInfo;
+    private List<CADomainParameterInfo> cadpiList;
+    private List<CAInfo> caiList;
+    private int cadpiIndex;
+    private int caiIndex;
 
     /**
-     * Returns the CADomainParameterInfo.
+     * Creates a new set of CASecurityInfos.
+     */
+    public CASecurityInfos() {
+	cadpiList = new ArrayList<CADomainParameterInfo>();
+	caiList = new ArrayList<CAInfo>();
+	cadpiIndex = 0;
+	caiIndex = 0;
+    }
+
+    /**
+     * Returns the selected CADomainParameterInfo.
      *
      * @return CADomainParameterInfo
      */
     public CADomainParameterInfo getCADomainParameterInfo() {
-	return caDomainParameter;
+	return cadpiList.get(cadpiIndex);
     }
 
     /**
-     * Returns the CAInfo.
+     * Returns the CADomainParameterInfos.
      *
-     * @return CAInfo
+     * @return CADomainParameterInfos
+     */
+    public List<CADomainParameterInfo> getCADomainParameterInfos() {
+	return cadpiList;
+    }
+
+    /**
+     * Sets the CADomainParameterInfos.
+     *
+     * @param caDomainParameterInfos CADomainParameterInfos
+     */
+    public void setCADomainParameterInfos(List<CADomainParameterInfo> caDomainParameterInfos) {
+	this.cadpiList = caDomainParameterInfos;
+    }
+
+    /**
+     * Adds a CADomainParameterInfo.
+     *
+     * @param caDomainParameterInfo CADomainParameterInfo
+     */
+    public void addCADomainParameterInfo(CADomainParameterInfo caDomainParameterInfo) {
+	this.cadpiList.add(caDomainParameterInfo);
+//	cadpiIndex++;
+    }
+
+    /**
+     * Selects a CADomainParameterInfo.
+     */
+    public void selectCADomainParameterInfo(int index) {
+	if (index < 0 || index > cadpiList.size() - 1) {
+	    throw new IllegalArgumentException("Index out of range.");
+	}
+	this.cadpiIndex = index;
+    }
+
+    /**
+     * Returns the selected CAInfo.
+     *
+     * @return CAInfos
      */
     public CAInfo getCAInfo() {
-	return caInfo;
+	return caiList.get(caiIndex);
     }
 
     /**
-     * Sets the CADomainParameterInfo.
+     * Returns the CAInfos.
      *
-     * @param caDomainParameter
+     * @return CAInfos
      */
-    public void setCADomainParameterInfo(CADomainParameterInfo caDomainParameter) {
-	this.caDomainParameter = caDomainParameter;
+    public List<CAInfo> getCAInfos() {
+	return caiList;
     }
 
     /**
-     * Sets the CAInfo.
+     * Sets the CAInfos.
+     *
+     * @param caInfos CAInfos
+     */
+    public void setCAInfos(List<CAInfo> caInfos) {
+	this.caiList = caInfos;
+    }
+
+    /**
+     * Adds a CAInfo.
      *
      * @param caInfo CAInfo
      */
-    public void setCAInfo(CAInfo caInfo) {
-	this.caInfo = caInfo;
+    public void addCAInfo(CAInfo caInfo) {
+	this.caiList.add(caInfo);
+    }
+
+    /**
+     * Selects a CAInfo.
+     */
+    public void selectCAInfo(int index) {
+	if (index < 0 || index > caiList.size() - 1) {
+	    throw new IllegalArgumentException("Index out of range.");
+	}
+	this.caiIndex = index;
     }
 
     /**
@@ -75,5 +149,4 @@ public class CASecurityInfos {
 	}
 	return false;
     }
-
 }

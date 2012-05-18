@@ -85,5 +85,4 @@ public class ExplicitDomainParameters extends DomainParameters {
     private void loadDHParameter(ASN1Sequence seq) {
 	throw new UnsupportedOperationException("Not implemented yet");
     }
-
 }

@@ -35,7 +35,7 @@ import org.openecard.client.crypto.common.asn1.eac.oid.EACObjectIdentifier;
 
 /**
  * Implements a EF.CardAccess file.
- * See BSI-TR-03110, Version 2.05, Section A.1.2.1.
+ * See BSI-TR-03110, version 2.10, part 3, section A.1.2.1.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
@@ -88,27 +88,27 @@ public final class EFCardAccess {
 	    if (PACEInfo.isPACEObjectIdentifer(oid)) {
 		logger.log(Level.FINE, "Found PACEInfo object identifier");
 		PACEInfo pi = new PACEInfo(securityInfo);
-		psi.setPACEInfo(pi);
+		psi.addPACEInfo(pi);
 	    } // PACEDoaminParameterInfo (CONDITIONAL)
 	    else if (PACEDomainParameterInfo.isPACEObjectIdentifer(oid)) {
 		logger.log(Level.FINE, "Found PACEDomainParameterInfo object identifier");
 		PACEDomainParameterInfo pdp = new PACEDomainParameterInfo(securityInfo);
-		psi.setPACEDomainParameterInfo(pdp);
+		psi.addPACEDomainParameterInfo(pdp);
 	    } // ChipAuthenticationInfo (CONDITIONAL)
 	    else if (CAInfo.isObjectIdentifier(oid)) {
 		logger.log(Level.FINE, "Found ChipAuthenticationInfo object identifier");
 		CAInfo ci = new CAInfo(securityInfo);
-		csi.setCAInfo(ci);
+		csi.addCAInfo(ci);
 	    } // ChipAuthenticationDomainParameterInfo (CONDITIONAL)
 	    else if (CADomainParameterInfo.isObjectIdentifier(oid)) {
 		logger.log(Level.FINE, "Found ChipAuthenticationDomainParameterInfo object identifier");
 		CADomainParameterInfo cdp = new CADomainParameterInfo(securityInfo);
-		csi.setCADomainParameterInfo(cdp);
+		csi.addCADomainParameterInfo(cdp);
 	    } // TerminalAuthenticationInfo (CONDITIONAL)
 	    else if (EACObjectIdentifier.id_TA.equals(oid)) {
 		logger.log(Level.FINE, "Found TerminalAuthenticationInfo object identifier");
 		TAInfo ta = new TAInfo(securityInfo);
-		tsi.setTAInfo(ta);
+		tsi.addTAInfo(ta);
 	    } // CardInfoLocator (RECOMMENDED)
 	    else if (EACObjectIdentifier.id_CI.equals(oid)) {
 		logger.log(Level.FINE, "Found CardInfoLocator object identifier");
@@ -118,6 +118,7 @@ public final class EFCardAccess {
 		logger.log(Level.FINE, "Found PrivilegedTerminalInfo object identifier");
 		pti = PrivilegedTerminalInfo.getInstance(securityInfo);
 	    } else {
+		System.out.println(oid.toString());
 		logger.log(Level.WARNING, "Found unknown object identifier: {0}", oid.toString());
 	    }
 	}
@@ -167,5 +168,4 @@ public final class EFCardAccess {
     public PrivilegedTerminalInfo getPrivilegedTerminalInfo() {
 	return pti;
     }
-
 }

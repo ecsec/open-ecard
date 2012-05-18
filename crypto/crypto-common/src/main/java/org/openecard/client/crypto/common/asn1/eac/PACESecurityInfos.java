@@ -15,50 +15,122 @@
  */
 package org.openecard.client.crypto.common.asn1.eac;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
+ * Implements the SecurityInfos for PACE.
+ * See BSI-TR-03110, version 2.10, part 3, section A.1.1.1.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class PACESecurityInfos {
 
-    private PACEDomainParameterInfo paceDomainParameterInfo;
-    private PACEInfo paceInfo;
+    private List<PACEDomainParameterInfo> pdpiList;
+    private List<PACEInfo> piList;
+    private int pdpiIndex;
+    private int piIndex;
 
     /**
-     * Returns the PACEDomainParameterInfo
+     * Creates a new set of PACESecurityInfos.
+     */
+    public PACESecurityInfos() {
+	pdpiList = new ArrayList<PACEDomainParameterInfo>();
+	piList = new ArrayList<PACEInfo>();
+	pdpiIndex = 0;
+	piIndex = 0;
+    }
+
+    /**
+     * Returns the selected PACEDomainParameterInfo.
      *
      * @return PACEDomainParameterInfo
      */
     public PACEDomainParameterInfo getPACEDomainParameterInfo() {
-	return paceDomainParameterInfo;
+	return pdpiList.get(pdpiIndex);
     }
 
     /**
-     * Sets the PACEDomainParameterInfo.
+     * Returns the PACEDomainParameterInfos.
+     *
+     * @return PACEDomainParameterInfos
+     */
+    public List<PACEDomainParameterInfo> getPACEDomainParameterInfos() {
+	return pdpiList;
+    }
+
+    /**
+     * Sets the PACEDomainParameterInfos.
+     *
+     * @param paceDomainParameterInfos PACEDomainParameterInfos
+     */
+    public void setPACEDomainParameterInfos(List<PACEDomainParameterInfo> paceDomainParameterInfos) {
+	this.pdpiList = paceDomainParameterInfos;
+    }
+
+    /**
+     * Adds a PACEDomainParameterInfo.
      *
      * @param paceDomainParameterInfo PACEDomainParameterInfo
      */
-    public void setPACEDomainParameterInfo(PACEDomainParameterInfo paceDomainParameterInfo) {
-	this.paceDomainParameterInfo = paceDomainParameterInfo;
+    public void addPACEDomainParameterInfo(PACEDomainParameterInfo paceDomainParameterInfo) {
+	this.pdpiList.add(paceDomainParameterInfo);
     }
 
     /**
-     * Returns the PACEInfo.
+     * Selects a PACEDomainParameterInfo.
+     */
+    public void selectPACEDomainParameterInfo(int index) {
+	if (index < 0 || index > pdpiList.size() - 1) {
+	    throw new IllegalArgumentException("Index out of range.");
+	}
+	this.pdpiIndex = index;
+    }
+
+    /**
+     * Returns the selected PACEInfo.
      *
-     * @return paceInfo
+     * @return PACEInfo
      */
     public PACEInfo getPACEInfo() {
-	return paceInfo;
+	return piList.get(piIndex);
     }
 
     /**
-     * Sets the PACEInfo.
+     * Returns the PACEInfos.
+     *
+     * @return PACEInfos
+     */
+    public List<PACEInfo> getPACEInfos() {
+	return piList;
+    }
+
+    /**
+     * Sets the PACEInfos.
      *
      * @param paceInfo PACEInfo
      */
-    public void setPACEInfo(PACEInfo paceInfo) {
-	this.paceInfo = paceInfo;
+    public void setPACEInfos(List<PACEInfo> paceInfos) {
+	this.piList = paceInfos;
     }
 
+    /**
+     * Adds a PACEInfo.
+     *
+     * @param paceInfo PACEInfo
+     */
+    public void addPACEInfo(PACEInfo paceInfo) {
+	this.piList.add(paceInfo);
+    }
+
+    /**
+     * Selects a PACEInfo.
+     */
+    public void selectPACEInfo(int index) {
+	if (index < 0 || index > piList.size() - 1) {
+	    throw new IllegalArgumentException("Index out of range.");
+	}
+	this.piIndex = index;
+    }
 }

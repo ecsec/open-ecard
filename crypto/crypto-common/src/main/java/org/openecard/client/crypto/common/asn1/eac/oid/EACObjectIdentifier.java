@@ -95,6 +95,6 @@ public abstract interface EACObjectIdentifier {
      * Standardized Domain Parameters. BSI-TR-03110 section A.2.1.1.
      * standardizedDomainParameters OBJECT IDENTIFIER ::= {bsi-de algorithms(1) 2}
      */
-    public static final String standardizedDomainParameters = bsi_de + ".1.2";
+    public static final String standardized_Domain_Parameters = bsi_de + ".1.2";
 
 }

@@ -24,23 +24,23 @@ import org.openecard.client.crypto.common.asn1.eac.oid.TAObjectIdentifier;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public final class TAInfo extends SecurityInfo {
+public final class TAInfo extends SecurityInfo implements TAObjectIdentifier {
 
     private String protocol;
     private int version;
     private FileID efCVCA;
-    private static final String[] protocols = new String[] {
-	TAObjectIdentifier.id_TA_ECDSA_SHA_1,
-	TAObjectIdentifier.id_TA_ECDSA_SHA_224,
-	TAObjectIdentifier.id_TA_ECDSA_SHA_256,
-	TAObjectIdentifier.id_TA_ECDSA_SHA_384,
-	TAObjectIdentifier.id_TA_ECDSA_SHA_512,
-	TAObjectIdentifier.id_TA_RSA_PSS_SHA_1,
-	TAObjectIdentifier.id_TA_RSA_PSS_SHA_256,
-	TAObjectIdentifier.id_TA_RSA_PSS_SHA_512,
-	TAObjectIdentifier.id_TA_RSA_v1_5_SHA_1,
-	TAObjectIdentifier.id_TA_RSA_v1_5_SHA_256,
-	TAObjectIdentifier.id_TA_RSA_v1_5_SHA_512
+    private static final String[] protocols = new String[]{
+	id_TA_ECDSA_SHA_1,
+	id_TA_ECDSA_SHA_224,
+	id_TA_ECDSA_SHA_256,
+	id_TA_ECDSA_SHA_384,
+	id_TA_ECDSA_SHA_512,
+	id_TA_RSA_PSS_SHA_1,
+	id_TA_RSA_PSS_SHA_256,
+	id_TA_RSA_PSS_SHA_512,
+	id_TA_RSA_v1_5_SHA_1,
+	id_TA_RSA_v1_5_SHA_256,
+	id_TA_RSA_v1_5_SHA_512
     };
 
     /**
@@ -56,6 +56,30 @@ public final class TAInfo extends SecurityInfo {
 	if (seq.size() == 3) {
 	    efCVCA = FileID.getInstance(getOptionalData());
 	}
+    }
+
+    /**
+     * Checks if the protocol identifier indicates ECDSA.
+     *
+     * @return True if ECDSA is used, otherwise false
+     */
+    public boolean isECDSA() {
+	if (protocol.startsWith(id_TA_ECDSA)) {
+	    return true;
+	}
+	return false;
+    }
+
+    /**
+     * Checks if the protocol identifier indicates elliptic curve RSA.
+     *
+     * @return True if elliptic curve RSA is used, otherwise false
+     */
+    public boolean isRSA() {
+	if (protocol.startsWith(id_TA_RSA)) {
+	    return true;
+	}
+	return false;
     }
 
     /**
@@ -100,5 +124,4 @@ public final class TAInfo extends SecurityInfo {
 
 	return false;
     }
-
 }

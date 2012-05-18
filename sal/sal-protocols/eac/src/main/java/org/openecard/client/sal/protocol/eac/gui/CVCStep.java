@@ -6,8 +6,6 @@ import java.util.Map;
 import org.openecard.client.common.I18n;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.client.crypto.common.asn1.cvc.CertificateDescription;
-import org.openecard.client.gui.definition.OutputInfoUnit;
-import org.openecard.client.gui.definition.PasswordField;
 import org.openecard.client.gui.definition.Step;
 import org.openecard.client.gui.definition.Text;
 import org.openecard.client.gui.definition.ToggleText;
@@ -42,9 +40,10 @@ public class CVCStep {
 	this.content = content;
 	this.certificate = (CardVerifiableCertificate) content.get(GUIContentMap.ELEMENT.CERTIFICATE);
 	this.description = (CertificateDescription) content.get(GUIContentMap.ELEMENT.CERTIFICATE_DESCRIPTION);
+	initialize();
     }
 
-    public Step create() {
+    private void initialize() {
 	Text decription = new Text();
 	decription.setText(lang.translationForKey(DESCRIPTION));
 	step.getInputInfoUnits().add(decription);
@@ -103,7 +102,9 @@ public class CVCStep {
 	issuerURL.setText(description.getIssuerURL());
 	issuerURL.setCollapsed(true);
 	step.getInputInfoUnits().add(issuerURL);
+    }
 
+    public Step getStep() {
 	return step;
     }
 

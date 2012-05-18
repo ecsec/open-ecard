@@ -2,6 +2,7 @@ package org.openecard.client.sal.protocol.eac.gui;
 
 import java.util.Map;
 import org.openecard.client.common.I18n;
+import org.openecard.client.gui.definition.Checkbox;
 import org.openecard.client.gui.definition.OutputInfoUnit;
 import org.openecard.client.gui.definition.PasswordField;
 import org.openecard.client.gui.definition.Step;
@@ -25,19 +26,26 @@ public class PINStep {
 
     public PINStep(GUIContentMap content) {
 	this.content = content;
+
+	initialize();
     }
 
-    public Step create() {
+    private void initialize() {
 	Text description = new Text();
 	description.setText(lang.translationForKey(DESCRIPTION));
 	step.getInputInfoUnits().add(description);
+
+	Checkbox readAccessCheckBox = new Checkbox();
+	step.getInputInfoUnits().add(readAccessCheckBox);
 
 	//TODO Der step sollte so den pin type berücksichtigen.
 	PasswordField pinInputField = new PasswordField();
 	pinInputField.setID(PIN);
 	pinInputField.setDescription(lang.translationForKey(PIN));
 	step.getInputInfoUnits().add(pinInputField);
+    }
 
+    public Step getStep() {
 	return step;
     }
 

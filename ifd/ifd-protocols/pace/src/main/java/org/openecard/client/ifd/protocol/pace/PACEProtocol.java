@@ -31,8 +31,10 @@ import org.openecard.client.crypto.common.asn1.eac.PACESecurityInfos;
 import org.openecard.client.crypto.common.asn1.eac.SecurityInfos;
 import org.openecard.client.crypto.common.asn1.eac.ef.EFCardAccess;
 import org.openecard.client.gui.UserConsent;
+import org.openecard.client.ifd.protocol.pace.gui.GUIContentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
@@ -51,17 +53,25 @@ public class PACEProtocol implements Protocol {
 	    // Get parameters for the PACE protocol
 	    PACEInputType paceInput = new PACEInputType(req.getAuthenticationProtocolData());
 
-	    byte passwordType = paceInput.getPINID();
+	    String pin;
+	    byte pinID = paceInput.getPINID();
 	    byte[] chat = paceInput.getCHAT();
-	    byte[] pin;
 
 	    if (paceInput.getPIN() == null || paceInput.getPIN().isEmpty()) {
-		// No PIN is given, ask user for PIN
-		PACEUserConsent paceUserConsent = new PACEUserConsent();
-		pin = paceUserConsent.getPINFromUser(gui).getBytes("ISO-8859-1");
+		// GUI request
+		GUIContentMap content = new GUIContentMap();
+		content.add(GUIContentMap.ELEMENT.PIN_TYPE, pinID);
+		PACEUserConsent paceUserConsent = new PACEUserConsent(gui);
+		paceUserConsent.show(content);
+		pin = (String) content.get(GUIContentMap.ELEMENT.PIN);
 	    } else {
-		// PIN must be encoded in ISO/IEC 8859 encoding
-		pin = paceInput.getPIN().getBytes("ISO-8859-1");
+		pin = paceInput.getPIN();
+	    }
+	    if (pin == null || pin.isEmpty()) {
+		response.setResult(WSHelper.makeResultError(
+			ECardConstants.Minor.IFD.CANCELLATION_BY_USER,
+			"No PIN was entered."));
+		return response;
 	    }
 
 	    // Read EF.CardAccess from card
@@ -76,7 +86,7 @@ public class PACEProtocol implements Protocol {
 
 	    // Start PACE
 	    PACEImplementation pace = new PACEImplementation(dispatcher, slotHandle, psi);
-	    pace.execute(pin, passwordType, chat);
+	    pace.execute(pin.getBytes(PACEConstants.PIN_CHARSET), pinID, chat);
 
 	    // Establish Secure Messaging channel
 	    sm = new SecureMessaging(pace.getKeyMAC(), pace.getKeyENC());
@@ -97,7 +107,9 @@ public class PACEProtocol implements Protocol {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
 	    logger.error(LoggingConstants.THROWING, "Exception", ex);
 	    // </editor-fold>
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.IFD.UNKNOWN_PIN_FORMAT, "Cannot encode the PIN in ISO-8859-1 charset."));
+	    response.setResult(WSHelper.makeResultError(
+		    ECardConstants.Minor.IFD.UNKNOWN_PIN_FORMAT,
+		    "Cannot encode the PIN in " + PACEConstants.PIN_CHARSET + " charset."));
 	} catch (ProtocolException ex) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
 	    logger.error(LoggingConstants.THROWING, "Exception", ex);

@@ -29,6 +29,7 @@ class PACEConstants {
     public static final byte PASSWORD_CAN = (byte) 0x02;
     public static final byte PASSWORD_PIN = (byte) 0x03;
     public static final byte PASSWORD_PUK = (byte) 0x04;
+    public static final String PIN_CHARSET = "ISO-8859-1";
     // MSE:Set AT error handling
     public static final short PASSWORD_SUSPENDED = (short) 0x63C1;
     public static final short PASSWORD_BLOCKED = (short) 0x63C0;

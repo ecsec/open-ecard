@@ -28,20 +28,20 @@ public class MessageGenerator {
     private static String otherMsg = null;
     private static String myMsg = null;
 
-    public static String getRemoteId() {
+    public static String getRemoteID() {
 	return otherMsg;
     }
 
-    public static boolean setRemoteId(String newId) {
-	if (myMsg != null && newId.equals(myMsg)) {
+    public static boolean setRemoteID(String newID) {
+	if (myMsg != null && newID.equals(myMsg)) {
 	    // messages don't fit together
 	    return false;
 	}
-	otherMsg = newId;
+	otherMsg = newID;
 	return true;
     }
 
-    public static String createNewId() {
+    public static String createNewID() {
 	myMsg = ValueGenerators.generateUUID();
 	return myMsg;
     }

@@ -1,4 +1,5 @@
-/****************************************************************************
+/**
+ * **************************************************************************
  * Copyright (C) 2012 ecsec GmbH
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -14,11 +15,11 @@
  *
  * Open eCard Client is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  *
  * Other Usage
@@ -26,8 +27,8 @@
  * Alternatively, this file may be used in accordance with the terms and
  * conditions contained in a signed written agreement between you and ecsec.
  *
- ****************************************************************************/
-
+ ***************************************************************************
+ */
 package org.openecard.client.transport.paos;
 
 import de.bund.bsi.ecard.api._1.InitializeFramework;
@@ -39,15 +40,13 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerException;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerException;
@@ -55,22 +54,32 @@ import org.openecard.client.ws.WSMarshallerFactory;
 import org.openecard.client.ws.soap.SOAPException;
 import org.openecard.client.ws.soap.SOAPHeader;
 import org.openecard.client.ws.soap.SOAPMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+
 /**
- * 
+ *
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class PAOS {
 
-    private static final Logger _logger = LogManager.getLogger(PAOS.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(PAOS.class.getName());
+    private final WSMarshaller m;
+    private final String endpoint;
+    private final Dispatcher dispatcher;
+    private SSLSocketFactory socketFactory;
+    private PAOSCallback callback;
 
     static {
+	logger.warn("SECURITY ALERT: Using custom hostname verifier!!!!");
 	javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(new javax.net.ssl.HostnameVerifier() {
 	    // TODO: verify hostname and whatnot
+
 	    @Override
 	    public boolean verify(String hostname, javax.net.ssl.SSLSession sslSession) {
 		return true;
@@ -78,22 +87,8 @@ public class PAOS {
 	});
     }
 
-
-    /**
-     * Enum listing all EID Servers which need special treatment in PAOS.
-     */
-    public static enum EIDServerTypes {
-	mTG;
-    }
-
-
-    private final WSMarshaller m;
-    private final String endpoint;
-    private final Dispatcher dispatcher;
-    private SSLSocketFactory socketFactory;
-    private PAOSCallback callback;
-
     public PAOS(String endpoint, Dispatcher dispatcher, PAOSCallback callback, SSLSocketFactory sockFac) {
+	//TODO PAOSCallback should be removed!
 	this.endpoint = endpoint;
 	this.dispatcher = dispatcher;
 	this.callback = callback;
@@ -101,42 +96,49 @@ public class PAOS {
 
 	try {
 	    m = WSMarshallerFactory.createInstance();
-	} catch (WSMarshallerException ex) {
-	    throw new RuntimeException(ex);
+	} catch (WSMarshallerException e) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    // </editor-fold>
+	    throw new RuntimeException(e);
 	}
     }
 
     public PAOS(String endpoint, Dispatcher dispatcher, PAOSCallback callback) {
+	//TODO  PAOSCallback should be removed!
 	this(endpoint, dispatcher, callback, null);
     }
 
+    public PAOS(String endpoint, Dispatcher dispatcher, SSLSocketFactory sslSocket) {
+	this.endpoint = endpoint;
+	this.dispatcher = dispatcher;
+	this.socketFactory = sslSocket;
 
-
+	try {
+	    m = WSMarshallerFactory.createInstance();
+	} catch (WSMarshallerException e) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    // </editor-fold>
+	    throw new RuntimeException(e);
+	}
+    }
 
     private String getRelatesTo(SOAPMessage msg) throws SOAPException {
-	return getHeaderElemStr(msg, new QName(ECardConstants.WS_ADDRESSING, "RelatesTo"));
+	return getHeaderElement(msg, new QName(ECardConstants.WS_ADDRESSING, "RelatesTo"));
     }
 
     private void setRelatesTo(SOAPMessage msg, String value) throws SOAPException {
-	Element elem = getHeaderElem(msg, new QName(ECardConstants.WS_ADDRESSING, "RelatesTo"), true);
+	Element elem = getHeaderElement(msg, new QName(ECardConstants.WS_ADDRESSING, "RelatesTo"), true);
 	elem.setTextContent(value);
     }
 
-    private String getMessageIdentifier(SOAPMessage msg) throws SOAPException {
-	return getHeaderElemStr(msg, new QName(ECardConstants.WS_ADDRESSING, "MessageID"));
-    }
-
-    private void setMessageIdentifier(SOAPMessage msg, String value) throws SOAPException {
-	Element elem = getHeaderElem(msg, new QName(ECardConstants.WS_ADDRESSING, "MessageID"), true);
-	elem.setTextContent(value);
-    }
-
-    private String getHeaderElemStr(SOAPMessage msg, QName elem) throws SOAPException {
-	Element headerElem = getHeaderElem(msg, elem, false);
+    private String getHeaderElement(SOAPMessage msg, QName elem) throws SOAPException {
+	Element headerElem = getHeaderElement(msg, elem, false);
 	return (headerElem == null) ? null : headerElem.getTextContent().trim();
     }
 
-    private Element getHeaderElem(SOAPMessage msg, QName elem, boolean create) throws SOAPException {
+    private Element getHeaderElement(SOAPMessage msg, QName elem, boolean create) throws SOAPException {
 	Element result = null;
 	SOAPHeader h = msg.getSOAPHeader();
 	// try to find a header
@@ -153,62 +155,85 @@ public class PAOS {
 	return result;
     }
 
-    private void addMessageIds(SOAPMessage msg) throws SOAPException {
-	String otherId = MessageGenerator.getRemoteId();
-	String newId = MessageGenerator.createNewId(); // also swaps messages in
+    private void addMessageIDs(SOAPMessage msg) throws SOAPException {
+	String otherID = MessageGenerator.getRemoteID();
+	String newID = MessageGenerator.createNewID(); // also swaps messages in
 	// MessageGenerator
-	if (otherId != null) {
+	if (otherID != null) {
 	    // add relatesTo element
-	    setRelatesTo(msg, otherId);
+	    setRelatesTo(msg, otherID);
 	}
 	// add MessageID element
-	setMessageIdentifier(msg, newId);
+	setMessageID(msg, newID);
     }
 
-    private void updateMessageId(SOAPMessage msg) throws PAOSException {
+    private void updateMessageID(SOAPMessage msg) throws PAOSException {
 	try {
-	    String id = getMessageIdentifier(msg);
+	    String id = getMessageID(msg);
 	    if (id == null) {
 		throw new PAOSException("No MessageID in PAOS header.");
 	    }
-	    if (!MessageGenerator.setRemoteId(id)) {
-		// ids don't match throw exception
+	    if (!MessageGenerator.setRemoteID(id)) {
+		// IDs don't match throw exception
 		throw new PAOSException("MessageID from result doesn't match.");
 	    }
-	} catch (SOAPException ex) {
-	    _logger.log(Level.SEVERE, null, ex);
-	    throw new PAOSException(ex.getMessage(), ex);
+	} catch (SOAPException e) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    // </editor-fold>
+	    throw new PAOSException(e.getMessage(), e);
 	}
     }
 
+    private String getMessageID(SOAPMessage msg) throws SOAPException {
+	return getHeaderElement(msg, new QName(ECardConstants.WS_ADDRESSING, "MessageID"));
+    }
+
+    private void setMessageID(SOAPMessage msg, String value) throws SOAPException {
+	Element elem = getHeaderElement(msg, new QName(ECardConstants.WS_ADDRESSING, "MessageID"), true);
+	elem.setTextContent(value);
+    }
+
     public Object processPAOSRequest(InputStream content) throws PAOSException {
-	Exception e;
 	try {
 	    Document doc = m.str2doc(content);
 	    SOAPMessage msg = m.doc2soap(doc);
-	    updateMessageId(msg);
+	    updateMessageID(msg);
+
+	    // <editor-fold defaultstate="collapsed" desc="log message">
+	    logger.trace("Receive PAOS message:\n {}", m.doc2str(doc));
+	    // </editor-fold>
+
 	    return m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
-	} catch (Exception ex) {
-	    _logger.log(Level.SEVERE, null, ex);
-	    e = ex;
+	} catch (Exception e) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    // </editor-fold>
+	    throw new PAOSException(e.getMessage(), e);
 	}
-	throw new PAOSException(e.getMessage(), e);
     }
 
     public String createPAOSResponse(Object obj) throws MarshallingTypeException, SOAPException, TransformerException {
 	SOAPMessage msg = createSOAPMessage(obj);
 	String result = m.doc2str(msg.getDocument());
+
+	// <editor-fold defaultstate="collapsed" desc="log message">
+	logger.trace("Send PAOS message:\n {}", result);
+	// </editor-fold>
+
 	return result;
     }
 
     public String createStartPAOS(String sessionIdentifier, List<ConnectionHandleType> connectionHandles) throws MarshallingTypeException,
-    SOAPException, TransformerException {
+	    SOAPException, TransformerException {
 	StartPAOS startPAOS = new StartPAOS();
 	startPAOS.setSessionIdentifier(sessionIdentifier);
 	startPAOS.setProfile(ECardConstants.Profile.ECARD_1_1);
 	startPAOS.getConnectionHandle().addAll(connectionHandles);
+
 	SOAPMessage soapMsg = createSOAPMessage(startPAOS);
 	String responseStr = m.doc2str(soapMsg.getDocument());
+
 	return responseStr;
     }
 
@@ -221,20 +246,23 @@ public class PAOS {
 	Element paos = header.addHeaderElement(new QName(ECardConstants.PAOS_VERSION_20, "PAOS"));
 	paos.setAttributeNS(ECardConstants.SOAP_ENVELOPE, "actor", ECardConstants.ACTOR_NEXT);
 	paos.setAttributeNS(ECardConstants.SOAP_ENVELOPE, "mustUnderstand", "1");
+
 	Element version = header.addChildElement(paos, new QName(ECardConstants.PAOS_VERSION_20, "Version"));
 	version.setTextContent(ECardConstants.PAOS_VERSION_20);
+
 	Element endpointReference = header.addChildElement(paos, new QName(ECardConstants.PAOS_VERSION_20, "EndpointReference"));
 	Element address = header.addChildElement(endpointReference, new QName(ECardConstants.PAOS_VERSION_20, "Address"));
 	address.setTextContent("http://www.projectliberty.org/2006/01/role/paos");
 	Element metaData = header.addChildElement(endpointReference, new QName(ECardConstants.PAOS_VERSION_20, "MetaData"));
 	Element serviceType = header.addChildElement(metaData, new QName(ECardConstants.PAOS_VERSION_20, "ServiceType"));
 	serviceType.setTextContent(ECardConstants.PAOS_NEXT);
+
 	Element replyTo = header.addHeaderElement(new QName(ECardConstants.WS_ADDRESSING, "ReplyTo"));
 	address = header.addChildElement(replyTo, new QName(ECardConstants.WS_ADDRESSING, "Address"));
 	address.setTextContent("http://www.projectliberty.org/2006/02/role/paos");
 
-	// add message ids
-	addMessageIds(msg);
+	// add message IDs
+	addMessageIDs(msg);
 	return msg;
     }
 
@@ -246,8 +274,7 @@ public class PAOS {
 	while (true) {
 	    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 	    if (socketFactory != null && conn instanceof HttpsURLConnection) {
-		HttpsURLConnection tmpConn = (HttpsURLConnection) url.openConnection();
-		tmpConn.setSSLSocketFactory(socketFactory);
+		((HttpsURLConnection) conn).setSSLSocketFactory(socketFactory);
 	    }
 	    conn.setDoInput(true); // http is always input and output
 	    conn.setDoOutput(true);
@@ -280,18 +307,20 @@ public class PAOS {
 	    } else if (requestObj instanceof InitializeFramework) {
 		// connection seems to be successfully established, trigger
 		// loading of refreshAddress (see. BSI TR-03112-7)
-		Thread t = new Thread(new Runnable() {
-		    @Override
-		    public void run() {
-			callback.loadRefreshAddress();
-		    }
-		});
-		t.start();
+		if (callback != null) {
+		    Thread t = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+			    callback.loadRefreshAddress();
+			}
+		    });
+		    t.start();
+		}
 	    }
 
 	    // send via dispatcher
 	    msg = dispatcher.deliver(requestObj);
 	}
     }
-
 }

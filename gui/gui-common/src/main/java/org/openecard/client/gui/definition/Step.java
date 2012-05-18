@@ -18,12 +18,13 @@ package org.openecard.client.gui.definition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import org.openecard.client.gui.StepResult;
+import org.openecard.client.gui.common.IDGenerator;
 import org.openecard.client.gui.executor.ExecutionResults;
 import org.openecard.client.gui.executor.StepAction;
 import org.openecard.client.gui.executor.StepActionResult;
 import org.openecard.client.gui.executor.StepActionResultStatus;
+
 
 /**
  * @author Tobias Wich <tobias.wich@ecsec.de>
@@ -39,7 +40,7 @@ public class Step {
     private List<InputInfoUnit> inputInfoUnits;
 
     public Step(String title) {
-	this(UUID.randomUUID().toString(), title);
+	this(IDGenerator.generateID(), title);
     }
 
     public Step(String id, String title) {

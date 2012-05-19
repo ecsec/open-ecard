@@ -15,7 +15,6 @@
 
 package org.openecard.client.sal.protocol.pincompare;
 
-import static org.junit.Assert.assertEquals;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
@@ -38,6 +37,8 @@ import java.math.BigInteger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -48,6 +49,7 @@ import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
+import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.recognition.CardRecognition;

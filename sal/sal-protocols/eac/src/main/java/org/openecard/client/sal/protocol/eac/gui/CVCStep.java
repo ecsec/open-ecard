@@ -109,10 +109,6 @@ public class CVCStep {
     }
 
     public void processResult(Map<String, ExecutionResults> results) {
-	processResult(results.get(step.getID()));
-    }
-
-    private void processResult(ExecutionResults executionResults) {
-	//NOP
+//	ExecutionResults executionResults = results.get(step.getID());
     }
 }

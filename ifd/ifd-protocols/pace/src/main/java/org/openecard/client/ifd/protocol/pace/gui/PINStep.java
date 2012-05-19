@@ -42,10 +42,12 @@ public class PINStep {
     }
 
     public void processResult(Map<String, ExecutionResults> results) {
-	processResult(results.get(step.getID()));
-    }
+	ExecutionResults executionResults = results.get(step.getID());
 
-    private void processResult(ExecutionResults executionResults) {
+	if (executionResults == null) {
+	    return;
+	}
+
 	for (OutputInfoUnit output : executionResults.getResults()) {
 	    if (output instanceof PasswordField) {
 		PasswordField p = (PasswordField) output;

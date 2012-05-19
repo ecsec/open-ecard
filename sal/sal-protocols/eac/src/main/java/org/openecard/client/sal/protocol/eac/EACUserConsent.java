@@ -16,6 +16,7 @@ package org.openecard.client.sal.protocol.eac;
 
 import java.util.Map;
 import java.util.logging.Logger;
+import org.openecard.client.common.I18n;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.gui.ResultStatus;
 import org.openecard.client.gui.StepResult;
@@ -40,6 +41,9 @@ import org.openecard.client.sal.protocol.eac.gui.PINStep;
 public class EACUserConsent {
 
     private static final Logger logger = LogManager.getLogger(EACUserConsent.class.getName());
+    // GUI translation constants
+    private static final String TITLE = "eac_user_consent_title";
+    private I18n lang = I18n.getTranslation("sal");
     private UserConsent gui;
 
     protected EACUserConsent(UserConsent gui) {
@@ -48,7 +52,7 @@ public class EACUserConsent {
 
     public void show(GUIContentMap content) {
 
-	final UserConsentDescription uc = new UserConsentDescription("PACE Protokol");
+	final UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE));
 
 	final CVCStep cvcStep = new CVCStep(content);
 	final CHATStep chatStep = new CHATStep(content);
@@ -59,7 +63,7 @@ public class EACUserConsent {
 	uc.getSteps().add(pinStep.getStep());
 
 	// Custom action for PIN step
-	StepAction pinStepAction = new StepAction(pinStep.getStep()) {
+	StepAction chatStepAction = new StepAction(chatStep.getStep()) {
 
 	    @Override
 	    public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
@@ -72,11 +76,52 @@ public class EACUserConsent {
 
 		switch (result.getStatus()) {
 		    case BACK:
+			return new StepActionResult(StepActionResultStatus.BACK);
+		    case OK:
+			for (InputInfoUnit i : pinStep.getStep().getInputInfoUnits()) {
+			    if (i instanceof Checkbox) {
+				Checkbox c = (Checkbox) i;
+				c.getBoxItems().clear();
+				for (BoxItem b : cc.getBoxItems()) {
+				    if (b.isChecked()) {
+					BoxItem ii = b;
+					ii.setDisabled(true);
+					c.getBoxItems().add(ii);
+				    }
+				}
+			    }
+			}
+			return new StepActionResult(StepActionResultStatus.NEXT);
+		    default:
+			return new StepActionResult(StepActionResultStatus.REPEAT);
+		}
+	    }
+	};
+
+	// Custom action for PIN step
+	StepAction pinStepAction = new StepAction(pinStep.getStep()) {
+
+	    @Override
+	    public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
+		Checkbox cc = null;
+		for (OutputInfoUnit o : oldResults.get(chatStep.getStep().getID()).getResults()) {
+		    if (o instanceof Checkbox) {
+			cc = (Checkbox) o;
+		    }
+		}
+
+		switch (result.getStatus()) {
+		    case BACK:
 			for (InputInfoUnit i : chatStep.getStep().getInputInfoUnits()) {
 			    if (i instanceof Checkbox) {
 				Checkbox c = (Checkbox) i;
 				c.getBoxItems().clear();
-				c.getBoxItems().addAll(cc.getBoxItems());
+				for (BoxItem b : cc.getBoxItems()) {
+				    BoxItem ii = b;
+				    ii.setDisabled(false);
+				    ii.setChecked(b.isChecked());
+				    c.getBoxItems().add(ii);
+				}
 			    }
 			}
 			return new StepActionResult(StepActionResultStatus.BACK);
@@ -92,6 +137,7 @@ public class EACUserConsent {
 	ExecutionEngine exec = new ExecutionEngine(navigator);
 
 	// Add custom action
+	exec.addCustomAction(chatStepAction);
 	exec.addCustomAction(pinStepAction);
 
 	ResultStatus processResult = exec.process();

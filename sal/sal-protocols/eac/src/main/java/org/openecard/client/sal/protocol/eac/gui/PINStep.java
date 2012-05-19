@@ -16,11 +16,11 @@ import org.openecard.client.gui.executor.ExecutionResults;
 public class PINStep {
 
     // GUI translation constants
-    private static final String TITLE = "step_pace_title";
-    private static final String DESCRIPTION = "step_pace_description";
-    private static final String PIN = "pin";
+    private static final String TITLE = "step_pin_title";
+    private static final String DESCRIPTION = "step_pin_description";
+    private static final String PIN = "PIN";
     //
-    private I18n lang = I18n.getTranslation("ifd");
+    private I18n lang = I18n.getTranslation("sal");
     private Step step = new Step(lang.translationForKey(TITLE));
     private GUIContentMap content;
 
@@ -41,7 +41,8 @@ public class PINStep {
 	//TODO Der step sollte so den pin type berücksichtigen.
 	PasswordField pinInputField = new PasswordField();
 	pinInputField.setID(PIN);
-	pinInputField.setDescription(lang.translationForKey(PIN));
+//	pinInputField.setDescription(lang.translationForKey(PIN));
+	pinInputField.setDescription(PIN);
 	step.getInputInfoUnits().add(pinInputField);
     }
 
@@ -49,11 +50,30 @@ public class PINStep {
 	return step;
     }
 
-    public void processResult(Map<String, ExecutionResults> results) {
-	processResult(results.get(step.getID()));
+    public void updateResult(Map<String, ExecutionResults> results) {
+	ExecutionResults executionResults = results.get(step.getID());
+
+	if (executionResults == null) {
+	    return;
+	}
+
+	for (OutputInfoUnit output : executionResults.getResults()) {
+	    if (output instanceof PasswordField) {
+		PasswordField p = (PasswordField) output;
+		if (p.getID().equals(PIN)) {
+		    content.add(GUIContentMap.ELEMENT.PIN, p.getValue());
+		}
+	    }
+	}
     }
 
-    private void processResult(ExecutionResults executionResults) {
+    public void processResult(Map<String, ExecutionResults> results) {
+	ExecutionResults executionResults = results.get(step.getID());
+
+	if (executionResults == null) {
+	    return;
+	}
+
 	for (OutputInfoUnit output : executionResults.getResults()) {
 	    if (output instanceof PasswordField) {
 		PasswordField p = (PasswordField) output;

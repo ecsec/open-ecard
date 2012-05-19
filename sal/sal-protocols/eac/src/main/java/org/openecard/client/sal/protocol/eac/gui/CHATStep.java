@@ -48,7 +48,7 @@ public class CHATStep {
 
     private void initialize() {
 	String decriptionText = lang.translationForKey(DESCRIPTION);
-	decriptionText = decriptionText.replaceFirst("%s", certificateDescription.getIssuerName());
+	decriptionText = decriptionText.replaceFirst("%s", certificateDescription.getSubjectName());
 
 	Text decription = new Text();
 	decription.setText(decriptionText);
@@ -62,6 +62,8 @@ public class CHATStep {
 	    if (i > 8) {
 		break;
 	    }
+	    i++;
+
 	    CHAT.DataGroup dataGroup = entry.getKey();
 	    Boolean isRequired = entry.getValue();
 //	    if (isRequired) {
@@ -87,10 +89,12 @@ public class CHATStep {
     }
 
     public void processResult(Map<String, ExecutionResults> results) {
-	processResult(results.get(step.getID()));
-    }
+	ExecutionResults executionResults = results.get(step.getID());
 
-    private void processResult(ExecutionResults executionResults) {
+	if (executionResults == null) {
+	    return;
+	}
+
 	for (OutputInfoUnit output : executionResults.getResults()) {
 	    if (output instanceof Checkbox) {
 		Checkbox cb = (Checkbox) output;

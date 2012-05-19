@@ -30,6 +30,7 @@ import org.openecard.bouncycastle.asn1.DERPrintableString;
 import org.openecard.bouncycastle.asn1.DERSet;
 import org.openecard.bouncycastle.asn1.DERTaggedObject;
 import org.openecard.bouncycastle.asn1.DERUTF8String;
+import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.eac.oid.CVCertificatesObjectIdentifier;
 
 
@@ -112,6 +113,7 @@ public class CertificateDescription {
 			break;
 		    case 5:
 			if (descriptionType.equals(CVCertificatesObjectIdentifier.id_plainFormat)) {
+			    System.out.println(ByteUtils.toHexString(taggedObject.getObject().getEncoded()));
 			    termsOfUsage = ((DERUTF8String) taggedObject.getObject()).getString();
 			} else if (descriptionType.equals(CVCertificatesObjectIdentifier.id_htmlFormat)) {
 			    termsOfUsage = ((DERIA5String) taggedObject.getObject()).getString();

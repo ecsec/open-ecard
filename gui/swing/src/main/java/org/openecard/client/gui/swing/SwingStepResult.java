@@ -8,18 +8,24 @@ import org.openecard.client.gui.ResultStatus;
 import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.definition.OutputInfoUnit;
 
+
 /**
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class SwingStepResult implements StepResult {
 
-    private String id;
-    private ResultStatus status = null;
     public Exchanger syncPoint = new Exchanger();
-    private List<OutputInfoUnit> results = null;
+    private String id;
+    private ResultStatus status;
+    private List<OutputInfoUnit> results;
 
     public SwingStepResult(String id) {
+	this(id, null);
+    }
+
+    public SwingStepResult(String id, ResultStatus status) {
 	this.id = id;
+	this.status = status;
     }
 
     public void setResultStatus(ResultStatus status) {

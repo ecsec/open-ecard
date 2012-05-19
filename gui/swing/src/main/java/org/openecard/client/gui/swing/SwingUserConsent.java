@@ -1,16 +1,11 @@
 package org.openecard.client.gui.swing;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Container;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.util.List;
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.openecard.client.gui.UserConsent;
 import org.openecard.client.gui.UserConsentNavigator;
@@ -43,30 +38,27 @@ public class SwingUserConsent implements UserConsent {
     public UserConsentNavigator obtainNavigator(UserConsentDescription parameters) {
 	dialogWrapper.setTitle(parameters.getTitle());
 
-	Container rootPanel = dialogWrapper.getRootPanel();
+	Container rootPanel = dialogWrapper.getContentPane();
 	rootPanel.removeAll();
 
 	String dialogType = parameters.getDialogType();
 	List<Step> steps = parameters.getSteps();
 
 	// Set up panels
-	JPanel stepPanel = new JPanel();
+	JPanel stepPanel = new JPanel(new BorderLayout());
 	JPanel sideBar = new JPanel(new BorderLayout());
 
 	StepBar stepBar = new StepBar(steps);
 	Navigation navigationPanel = new Navigation(steps);
 
-//	sideBar.add(new Logo(), BorderLayout.PAGE_START);
-//	sideBar.add(stepBar, BorderLayout.CENTER);
-
 	Logo l = new Logo();
 	initializeSidePanel(sideBar, l, stepBar);
 
-
-	stepBar.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
-	SwingNavigator navigator = new SwingNavigator(dialogWrapper, dialogType, steps, stepPanel, navigationPanel);
+	SwingNavigator navigator = new SwingNavigator(dialogWrapper, dialogType, steps, stepPanel);
 	navigator.addPropertyChangeListener(stepBar);
+	for(StepFrame frame : navigator.getStepFrames()){
+	    navigationPanel.addActionListener(frame);
+	}
 
 	// Config layout
 	GroupLayout layout = new GroupLayout(rootPanel);
@@ -76,9 +68,18 @@ public class SwingUserConsent implements UserConsent {
 	layout.setAutoCreateContainerGaps(true);
 
 	layout.setHorizontalGroup(
-		layout.createSequentialGroup().addComponent(sideBar, 150, 150, 150).addGroup(layout.createParallelGroup().addComponent(stepPanel).addGap(10).addComponent(navigationPanel)));
+		layout.createSequentialGroup()
+		.addComponent(sideBar, 150, 150, 150)
+		.addGroup(layout.createParallelGroup()
+		.addComponent(stepPanel)
+		.addGap(10)
+		.addComponent(navigationPanel)));
 	layout.setVerticalGroup(
-		layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(sideBar).addGroup(layout.createSequentialGroup().addComponent(stepPanel).addComponent(navigationPanel)));
+		layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+		.addComponent(sideBar)
+		.addGroup(layout.createSequentialGroup()
+		.addComponent(stepPanel)
+		.addComponent(navigationPanel)));
 
 	rootPanel.validate();
 	rootPanel.repaint();
@@ -87,29 +88,9 @@ public class SwingUserConsent implements UserConsent {
     }
 
     private void initializeSidePanel(JPanel panel, JComponent... components) {
-//	panel.set
-//	GridBagLayout layout = new GridBagLayout();
-//	GridBagConstraints gbc = new GridBagConstraints();
 	panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
-
-//	gbc.fill = GridBagConstraints.HORIZONTAL;
-//	gbc.anchor = GridBagConstraints.PAGE_START;
-////	gbc.weightx = 0.5;
-//	gbc.weightx = 0.5;
-//	gbc.weighty = 1.0;
-//	gbc.gridwidth = GridBagConstraints.REMAINDER;
-//		gbc.gridwidth = 1;
-
 	for (JComponent c : components) {
-//	    panel.add(c, gbc);
 	    panel.add(c);
 	}
-
-//	panel.add(new Logo());
-//	gbc.weighty = 1.0;
-//	panel.add(new JLabel(), gbc);
-
-
-
     }
 }

@@ -1,20 +1,29 @@
 package org.openecard.client.gui.swing.components;
 
+import java.awt.Dimension;
+import javax.swing.Icon;
 import javax.swing.JLabel;
+import org.openecard.client.gui.swing.common.GUIDefaults;
+
 
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class ToggleTextIndicator extends JLabel {
 
-    private String openedIndicator = " ▼";
-    private String closedIndicator = " ▲";
+//    private String openedIndicator = " ▼";
+    private Icon openedIndicator = GUIDefaults.getImage("ToggleText.selectedIcon");
+//    private String closedIndicator = " ▲";
+    private Icon closedIndicator = GUIDefaults.getImage("ToggleText.icon");
 
     /**
      * Creates a new ToggleTextIndicator.
      */
     public ToggleTextIndicator() {
 	super(" ");
+	int height = Math.max(openedIndicator.getIconHeight(), closedIndicator.getIconHeight());
+	setPreferredSize(new Dimension(1, height));
+
     }
 
     /**
@@ -32,7 +41,7 @@ public final class ToggleTextIndicator extends JLabel {
      * @param openedIndicator
      */
     public void setOpenedIndicator(String openedIndicator) {
-	this.openedIndicator = openedIndicator;
+//	this.openedIndicator = openedIndicator;
     }
 
     /**
@@ -41,7 +50,7 @@ public final class ToggleTextIndicator extends JLabel {
      * @param closedIndicator
      */
     public void setClosedIndicator(String closedIndicator) {
-	this.closedIndicator = closedIndicator;
+//	this.closedIndicator = closedIndicator;
     }
 
     /**
@@ -51,9 +60,11 @@ public final class ToggleTextIndicator extends JLabel {
      */
     public void setCollapsed(boolean collapsed) {
 	if (collapsed) {
-	    setText(openedIndicator);
+//	    setText(openedIndicator);
+	    setIcon(openedIndicator);
 	} else {
-	    setText(closedIndicator);
+//	    setText(closedIndicator);
+	    setIcon(closedIndicator);
 	}
     }
 }

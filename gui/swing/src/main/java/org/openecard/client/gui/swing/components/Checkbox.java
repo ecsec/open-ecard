@@ -14,11 +14,13 @@ import org.openecard.client.gui.definition.BoxItem;
 import org.openecard.client.gui.definition.OutputInfoUnit;
 import org.openecard.client.gui.swing.StepFrame;
 
+
 /**
  * Implementation of a checkbox group for use in a {@link StepFrame}.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
- * @editor Florian Feldmann <florian.feldmann@rub.de>
+ * @author Florian Feldmann <florian.feldmann@rub.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class Checkbox implements StepComponent {
 
@@ -52,7 +54,7 @@ public class Checkbox implements StepComponent {
 	    copy.setText(next.getText());
 	    copy.setDisabled(next.isDisabled());
 	    // create checkbox
-	    JCheckBox component = new JCheckBox((next.getText() == null) ? "" : next.getText(), next.isChecked());
+	    CheckBoxItem component = new CheckBoxItem((next.getText() == null) ? "" : next.getText(), next.isChecked());
 	    if (next.isDisabled()) {
 		component.setEnabled(false);
 	    }

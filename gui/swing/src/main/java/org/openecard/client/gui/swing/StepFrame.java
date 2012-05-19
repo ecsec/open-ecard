@@ -12,10 +12,12 @@ import org.openecard.client.gui.ResultStatus;
 import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.definition.OutputInfoUnit;
 import org.openecard.client.gui.definition.Step;
+import org.openecard.client.gui.swing.common.GUIConstants;
 import org.openecard.client.gui.swing.components.StepComponent;
 import org.openecard.client.gui.swing.steplayout.StepLayouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * The StepFrame class represents a single step. The actual layouting is however
@@ -23,21 +25,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Tobias Wich <tobias.wich@ecsec.de>
- * @editor Florian Feldmann <florian.feldmann@rub.de>
+ * @author Florian Feldmann <florian.feldmann@rub.de>
  */
 public class StepFrame extends JPanel implements ActionListener {
 
     private static final Logger logger = LoggerFactory.getLogger(StepFrame.class);
     private Step step;
-    private String dialogType;
-    private List<StepComponent> components;
     private SwingStepResult stepResult;
+    private List<StepComponent> components;
+    private String dialogType;
 
     public StepFrame(Step step, String dialogType) {
 	this.step = step;
 	this.dialogType = dialogType;
-
-	stepResult = new SwingStepResult(step.getID());
+	this.stepResult = new SwingStepResult(step.getID());
 
 	initLayout();
     }
@@ -54,7 +55,7 @@ public class StepFrame extends JPanel implements ActionListener {
 	components = stepLayouter.getComponents();
     }
 
-    public void resetForDisplay() {
+    public void resetResult() {
 	stepResult = new SwingStepResult(step.getID());
     }
 
@@ -65,7 +66,6 @@ public class StepFrame extends JPanel implements ActionListener {
 	}
     }
 
-    //OK
     public Container getPanel() {
 	revalidate(this);
 	return this;
@@ -108,14 +108,6 @@ public class StepFrame extends JPanel implements ActionListener {
 	return stepResult;
     }
 
-    private void revalidate(JComponent c) {
-	for (int i = 0; i < c.getComponentCount(); i++) {
-	    this.revalidate((JComponent) c.getComponent(i));
-	}
-	c.revalidate();
-	c.repaint();
-    }
-
     @Override
     public void actionPerformed(ActionEvent e) {
 	logger.info("StepFrame event: {}", e.paramString());
@@ -138,5 +130,13 @@ public class StepFrame extends JPanel implements ActionListener {
 	    } catch (Exception ignore) {
 	    }
 	}
+    }
+
+    private void revalidate(JComponent c) {
+	for (int i = 0; i < c.getComponentCount(); i++) {
+	    this.revalidate((JComponent) c.getComponent(i));
+	}
+	c.revalidate();
+	c.repaint();
     }
 }

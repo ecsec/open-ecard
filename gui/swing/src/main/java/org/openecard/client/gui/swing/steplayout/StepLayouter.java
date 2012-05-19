@@ -18,6 +18,7 @@ public abstract class StepLayouter {
     /**
      * Create a layouter instance deping on the dialog type and/or the individual step name..
      * The newly created instance deals with the layouting of the components described in infoUnits.
+     *
      * @param infoUnits Abstract description of the components in the step.
      * @param dialogType URI describing the type of the dialog. Empty string when none is given.
      * @param stepName Name of the step. This can be used to have a different layouter for disclaimer and pin entry step for example.
@@ -32,13 +33,9 @@ public abstract class StepLayouter {
 	    // TODO: create and return
 	}
 
-        if (stepName.equals("some step with special layout needs")) {
-            // TODO: create and return
-        }
-	 if (stepName.equals("PIN-Eingabe")) {
-            layouter = new NPAStepLayouter(infoUnits, stepName);
-        }
-
+	if (stepName.equals("some step with special layout needs")) {
+	    // TODO: create and return
+	}
 
 	// default type if nothing happened so far
 	if (layouter == null) {
@@ -48,17 +45,17 @@ public abstract class StepLayouter {
 	return layouter;
     }
 
-
     /**
      * Get the list of components which have been placed onto the container.
+     *
      * @return
      */
     public abstract List<StepComponent> getComponents();
 
     /**
      * Get panel with layouted components, so it can be embedded in the frame.
+     *
      * @return Container panel
      */
     public abstract Container getPanel();
-
 }

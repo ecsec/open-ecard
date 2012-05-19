@@ -1,26 +1,16 @@
 package org.openecard.client.gui.swing;
 
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.net.URL;
-import java.util.Iterator;
+import org.openecard.client.gui.swing.common.GUIDefaults;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
-import javax.swing.ImageIcon;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.Before;
 import org.junit.Test;
 import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.UserConsentNavigator;
 import org.openecard.client.gui.definition.BoxItem;
 import org.openecard.client.gui.definition.Checkbox;
-import org.openecard.client.gui.definition.Hyperlink;
 import org.openecard.client.gui.definition.PasswordField;
 import org.openecard.client.gui.definition.Step;
 import org.openecard.client.gui.definition.Text;
@@ -31,6 +21,7 @@ import org.openecard.client.gui.executor.ExecutionResults;
 import org.openecard.client.gui.executor.StepAction;
 import org.openecard.client.gui.executor.StepActionResult;
 import org.openecard.client.gui.executor.StepActionResultStatus;
+
 
 /**
  *
@@ -52,12 +43,19 @@ public class RunGUI {
 	    uc.getSteps().add(pinInputStep());
 	    uc.getSteps().add(checkDataStep());
 
-	    UIDefaults defaults = UIManager.getDefaults();
-	    defaults.put("Panel.background", Color.WHITE);
-	    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+	    GUIDefaults.initialize();
+
 	} catch (Exception e) {
+	    System.out.println(e.getMessage());
 	    e.printStackTrace();
 	}
+    }
+
+    public boolean validateColor(final String hex) {
+	Pattern pattern = Pattern.compile("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$");
+	Matcher matcher = pattern.matcher(hex);
+	return matcher.matches();
+
     }
 
     private Step identityCheckStep() {
@@ -77,9 +75,13 @@ public class RunGUI {
     private Step providerInfoStep() {
 	Step step = new Step("Anbieter");
 
+	Text decription = new Text();
+	decription.setText("Zu dem Dienstanbieter und seiner Berechtigung liegen folgende Information vor.");
+	step.getInputInfoUnits().add(decription);
+
 	ToggleText name = new ToggleText();
 	name.setTitle("Name");
-	name.setText("Frauenhofer FOKUS");
+	name.setText("Fraunhofer FOKUS");
 	step.getInputInfoUnits().add(name);
 
 	ToggleText url = new ToggleText();
@@ -117,7 +119,8 @@ public class RunGUI {
 
 	return step;
     }
-Step requestedData_Step1 = new Step("Angefragte Daten");
+    Step requestedData_Step1 = new Step("Angefragte Daten");
+
     private Step reqestedDataStep() throws Exception {
 
 
@@ -342,50 +345,6 @@ Step requestedData_Step1 = new Step("Angefragte Daten");
 	return requestedData_Step;
     }
 
-    private class TestDialog implements DialogWrapper {
-
-	private JFrame dialog;
-
-	public TestDialog() {
-	    this.dialog = new JFrame();
-	    this.dialog.setSize(600, 400);
-	    ImageIcon logo = new ImageIcon();
-//	URL url = Logo.class.getResource("/loader.gif");
-	    URL url = Logo.class.getResource("/openecardwhite.gif");
-	    if (url != null) {
-		Toolkit toolkit = Toolkit.getDefaultToolkit();
-		Image image = toolkit.getImage(url);
-		image = image.getScaledInstance(32, 32, Image.SCALE_SMOOTH);
-		logo.setImage(image);
-	    }
-	    this.dialog.setIconImage(logo.getImage());
-
-
-	    this.dialog.setVisible(false);
-	    this.dialog.setDefaultCloseOperation(JDialog.EXIT_ON_CLOSE);
-	}
-
-	@Override
-	public void setTitle(String title) {
-	    dialog.setTitle(title);
-	}
-
-	@Override
-	public Container getRootPanel() {
-	    return dialog.getContentPane();
-	}
-
-	@Override
-	public void showDialog() {
-	    this.dialog.setVisible(true);
-	}
-
-	@Override
-	public void hideDialog() {
-	    this.dialog.setVisible(false);
-	}
-    }
-
     /**
      * Uncomment the
      * <code>@Ignore</code> line to run a demo gui so you can debug it.
@@ -394,7 +353,7 @@ Step requestedData_Step1 = new Step("Angefragte Daten");
     @Test
     public void runUC() {
 	try {
-	    TestDialog dialog = new TestDialog();
+	    SwingDialogWrapper dialog = new SwingDialogWrapper();
 	    SwingUserConsent ucEngine = new SwingUserConsent(dialog);
 	    UserConsentNavigator navigator = ucEngine.obtainNavigator(uc);
 	    ExecutionEngine exec = new ExecutionEngine(navigator);
@@ -412,7 +371,7 @@ Step requestedData_Step1 = new Step("Angefragte Daten");
 		    }
 
 		    List<BoxItem> l = cc.getBoxItems();
-		    for(BoxItem b : l){
+		    for (BoxItem b : l) {
 			System.out.println(b.getName() + " " + b.isChecked());
 		    }
 
@@ -464,7 +423,7 @@ Step requestedData_Step1 = new Step("Angefragte Daten");
 			}
 		    }
 		    List<BoxItem> l = cc.getBoxItems();
-		    for(BoxItem b : l){
+		    for (BoxItem b : l) {
 			System.out.println(b.getName() + " " + b.isChecked());
 		    }
 //		    Object[] data = requestedData_Step1.getInputInfoUnits().toArray();

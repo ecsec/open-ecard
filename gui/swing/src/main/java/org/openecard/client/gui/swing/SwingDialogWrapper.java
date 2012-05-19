@@ -4,16 +4,12 @@
  */
 package org.openecard.client.gui.swing;
 
-import java.awt.Color;
+import org.openecard.client.gui.swing.common.GUIDefaults;
 import java.awt.Container;
-import java.awt.Image;
+import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.net.URL;
-import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
 
 
 /**
@@ -23,40 +19,24 @@ public class SwingDialogWrapper implements DialogWrapper {
 
     private JFrame dialog;
 
-    private void initializeLookAndFeel() {
-	// Load UI defaults
-	UIDefaults defaults = UIManager.getDefaults();
-	defaults.put("Panel.background", Color.WHITE);
-
-	try {
-	    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-	} catch (Exception ignore) {
-	}
-    }
-
-    private void initializeIcon() {
-	ImageIcon logo = new ImageIcon();
-	URL url = Logo.class.getResource("/openecardwhite.gif");
-	if (url != null) {
-	    Toolkit toolkit = Toolkit.getDefaultToolkit();
-	    Image image = toolkit.getImage(url);
-	    image = image.getScaledInstance(32, 32, Image.SCALE_SMOOTH);
-	    logo.setImage(image);
-	}
-	if (dialog != null) {
-	    dialog.setIconImage(logo.getImage());
-	}
-    }
-
     public SwingDialogWrapper() {
-	initializeLookAndFeel();
+	// Initialize Look and Feel
+	GUIDefaults.initialize();
 
 	dialog = new JFrame();
 	dialog.setSize(600, 400);
 
-	initializeIcon();
+	// Center window
+	Toolkit toolkit = Toolkit.getDefaultToolkit();
+	Dimension screenSize = toolkit.getScreenSize();
+	int x = (screenSize.width - dialog.getWidth()) / 2;
+	int y = (screenSize.height - dialog.getHeight()) / 2;
+	dialog.setLocation(x, y);
+
+	dialog.setIconImage(GUIDefaults.getImage("Frame.icon", 45, 45).getImage());
 
 	dialog.setVisible(false);
+	//FIXME
 	dialog.setDefaultCloseOperation(JDialog.EXIT_ON_CLOSE);
     }
 
@@ -66,17 +46,17 @@ public class SwingDialogWrapper implements DialogWrapper {
     }
 
     @Override
-    public Container getRootPanel() {
+    public Container getContentPane() {
 	return dialog.getContentPane();
     }
 
     @Override
-    public void showDialog() {
+    public void show() {
 	this.dialog.setVisible(true);
     }
 
     @Override
-    public void hideDialog() {
+    public void hide() {
 	this.dialog.setVisible(false);
     }
 }

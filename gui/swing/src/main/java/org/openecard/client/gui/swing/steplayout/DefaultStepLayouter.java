@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
@@ -22,6 +23,7 @@ import org.openecard.client.gui.swing.components.StepComponent;
 import org.openecard.client.gui.swing.components.Text;
 import org.openecard.client.gui.swing.components.ToggleText;
 
+
 /**
  * Updated Default layouter. Should be fine for most generic forms
  *
@@ -35,31 +37,26 @@ public class DefaultStepLayouter extends StepLayouter {
 
     protected DefaultStepLayouter(List<InputInfoUnit> infoUnits, String stepName) {
 	components = new ArrayList<StepComponent>(infoUnits.size());
+	rootPanel = new JPanel(new BorderLayout());
 
-	// using GridBagLayout over GridLayout gives much more control of
-	// components' position and layout
-	//
-	// basically, all components are positioned into the first column -
-	// multicolumn layout should only be used for specific forms
+	// Add step title
+	JLabel title = new JLabel("<html><h3>" + stepName + "</h3></html>");
+	rootPanel.add(title, BorderLayout.PAGE_START);
+
 	GridBagLayout layout = new GridBagLayout();
 	GridBagConstraints gbc = new GridBagConstraints();
 
-	rootPanel = new JPanel(new BorderLayout());
-	rootPanel.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+	JPanel contentPanel = new JPanel();
+	contentPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 20));
+	contentPanel.setLayout(layout);
 
-	// create title tag from stepName, formatting can be done in HTML
-	JLabel title = new JLabel("<html><h3>" + stepName + "</h3></html>");
 	gbc.fill = GridBagConstraints.HORIZONTAL;
 	gbc.anchor = GridBagConstraints.WEST;
 	gbc.weightx = 0.5;
 	gbc.gridwidth = GridBagConstraints.REMAINDER;
-	JPanel headerPanel = new JPanel(layout);
-	JPanel contentPanel = new JPanel(layout);
-	contentPanel.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
-	headerPanel.add(title, gbc);
-	rootPanel.add(headerPanel, BorderLayout.PAGE_START);
+	gbc.insets = new Insets(0, 0, 10, 0);
 
-	// create content
+	// Create content
 	for (InputInfoUnit next : infoUnits) {
 	    StepComponent nextComponent = null;
 
@@ -94,17 +91,16 @@ public class DefaultStepLayouter extends StepLayouter {
 	    }
 	}
 
-//		rootPanel.add(new JScrollPane(contentPanel), gbc);
-
-
 	// Add empty dummy element
 	gbc.weighty = 1.0;
 	contentPanel.add(new JLabel(), gbc);
+
 	JScrollPane pane = new JScrollPane(contentPanel);
 	pane.setBorder(BorderFactory.createEmptyBorder());
 	pane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+	layout.setConstraints(pane, gbc);
+
 	rootPanel.add(pane, BorderLayout.CENTER);
-	rootPanel.add(new JLabel(), BorderLayout.PAGE_END);
     }
 
     @Override

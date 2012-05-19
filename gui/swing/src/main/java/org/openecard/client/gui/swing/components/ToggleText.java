@@ -76,7 +76,7 @@ public class ToggleText implements StepComponent {
      */
     private void initComponents(String buttonText, String contentText) {
 	rootPanel = new JPanel();
-	button = new JButton(buttonText);
+	button = new JButton(buttonText + "  ");
 	indicator = new ToggleTextIndicator();
 	text = new JTextArea(contentText);
 
@@ -153,7 +153,6 @@ public class ToggleText implements StepComponent {
 	text.setWrapStyleWord(true);
 	text.setFont(font);
 
-	rootPanel.setBorder(new EmptyBorder(new Insets(0, 0, 10, 0)));
 	rootPanel.setBackground(bg);
 	rootPanel.setForeground(fg);
 

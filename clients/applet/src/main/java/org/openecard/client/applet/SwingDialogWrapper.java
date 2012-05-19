@@ -48,17 +48,17 @@ public class SwingDialogWrapper implements DialogWrapper {
     }
 
     @Override
-    public Container getRootPanel() {
+    public Container getContentPane() {
         return dialog.getContentPane();
     }
 
     @Override
-    public void showDialog() {
+    public void show() {
         dialog.setVisible(true);
     }
 
     @Override
-    public void hideDialog() {
+    public void hide() {
         dialog.setVisible(false);
     }
 

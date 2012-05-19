@@ -5,6 +5,7 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.ifd.scio.wrapper.SCChannel;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
+//@Ignore
 public class RichClientTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RichClient.class.getName());

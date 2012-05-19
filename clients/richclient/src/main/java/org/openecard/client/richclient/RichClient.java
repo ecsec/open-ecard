@@ -8,13 +8,11 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import java.net.BindException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
-import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.common.util.ValueGenerators;
@@ -35,6 +33,8 @@ import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.transport.paos.PAOS;
 import org.openecard.client.transport.tls.PSKTlsClientImpl;
 import org.openecard.client.transport.tls.TlsClientSocketFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -43,7 +43,7 @@ import org.openecard.client.transport.tls.TlsClientSocketFactory;
  */
 public final class RichClient {
 
-    private static final Logger logger = LogManager.getLogger(RichClient.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(RichClient.class.getName());
     private static RichClient client;
     // Client environment
     private ClientEnv env = new ClientEnv();
@@ -55,6 +55,14 @@ public final class RichClient {
     private CardStateMap cardStates;
     // ContextHandle determines a specific IFD layer context
     private byte[] contextHandle;
+
+    public static void main(String args[]) {
+	try {
+	    RichClient.getInstance();
+	} catch (Exception e) {
+	    logger.warn(e.getMessage());
+	}
+    }
 
     public static RichClient getInstance() throws Exception {
 	if (client == null) {
@@ -145,7 +153,7 @@ public final class RichClient {
 	    response.setRefreshAddress(token.getRefreshAddress());
 
 	} catch (Throwable w) {
-	    logger.log(Level.SEVERE, "Exception", w);
+	    logger.error(LoggingConstants.THROWING, "Exception", w);
 	    response.setErrorMessage(w.getMessage());
 	}
 

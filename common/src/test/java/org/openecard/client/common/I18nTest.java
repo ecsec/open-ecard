@@ -25,5 +25,4 @@ public class I18nTest {
 	//FIXME funktioniert nur mit EN!
 //	Assert.assertEquals("Enter secret 'PIN'", result);
     }
-
 }

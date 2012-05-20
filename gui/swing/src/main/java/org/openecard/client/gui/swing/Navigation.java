@@ -1,6 +1,5 @@
 package org.openecard.client.gui.swing;
 
-import org.openecard.client.gui.swing.common.GUIConstants;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -11,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import org.openecard.client.common.I18n;
 import org.openecard.client.gui.definition.Step;
+import org.openecard.client.gui.swing.common.GUIConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 public class Navigation extends JPanel implements ActionListener {
 
     private static final Logger logger = LoggerFactory.getLogger(Navigation.class);
+    private final I18n lang = I18n.getTranslation("gui");
     private ArrayList<ActionListener> listeners = new ArrayList<ActionListener>();
     private JButton backButton, nextButton, cancelButton;
-    private I18n lang = I18n.getTranslation("gui");
     private List<Step> steps;
     private int stepPointer = 0;
 
@@ -69,7 +69,10 @@ public class Navigation extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+	// <editor-fold defaultstate="collapsed" desc="log event">
 	logger.info("Navigation event: {} ", e.paramString());
+	// </editor-fold>
+
 	String command = e.getActionCommand();
 
 	for (Iterator<ActionListener> it = listeners.iterator(); it.hasNext();) {

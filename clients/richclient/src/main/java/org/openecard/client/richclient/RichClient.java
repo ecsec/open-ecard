@@ -24,8 +24,12 @@ import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.management.TinyManagement;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.richclient.activation.Activation;
-import org.openecard.client.richclient.activation.messages.ActivationApplicationRequest;
-import org.openecard.client.richclient.activation.messages.ActivationApplicationResponse;
+import org.openecard.client.richclient.activation.messages.StatusRequest;
+import org.openecard.client.richclient.activation.messages.StatusResponse;
+import org.openecard.client.richclient.activation.messages.TCTokenRequest;
+import org.openecard.client.richclient.activation.messages.TCTokenResponse;
+import org.openecard.client.richclient.activation.messages.common.ClientRequest;
+import org.openecard.client.richclient.activation.messages.common.ClientResponse;
 import org.openecard.client.richclient.activation.tctoken.TCToken;
 import org.openecard.client.sal.TinySAL;
 import org.openecard.client.sal.protocol.eac.EACProtocolFactory;
@@ -80,14 +84,30 @@ public final class RichClient {
 	setup();
     }
 
+    public ClientResponse request(ClientRequest request) {
+	if (request instanceof TCTokenRequest) {
+	    return handleActivate((TCTokenRequest) request);
+	} else if (request instanceof StatusRequest) {
+	    return handleStatus((StatusRequest) request);
+	}
+	return null;
+    }
+
+    private StatusResponse handleStatus(StatusRequest statusRequest) {
+	StatusResponse response = new StatusResponse();
+	
+
+	return response;
+    }
+
     /**
      * Activate the client.
      *
      * @param request ActivationApplicationRequest
      * @return ActivationApplicationResponse
      */
-    public ActivationApplicationResponse activate(ActivationApplicationRequest request) {
-	ActivationApplicationResponse response = new ActivationApplicationResponse();
+    private TCTokenResponse handleActivate(TCTokenRequest request) {
+	TCTokenResponse response = new TCTokenResponse();
 
 	TCToken token = request.getTCToken();
 	ConnectionHandleType connectionHandle = request.getConnectionHandle();

@@ -15,7 +15,6 @@
  */
 package org.openecard.client.richclient.activation.tctoken;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;

@@ -17,7 +17,6 @@ package org.openecard.client.richclient.activation.common;
 
 
 /**
- *
  * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class ErrorPage {

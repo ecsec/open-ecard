@@ -19,9 +19,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.richclient.handler.ActivationHandler;
 
 
 /**
@@ -31,6 +34,7 @@ import org.openecard.client.common.logging.LogManager;
 public class ActivationServer implements Runnable {
 
     private static final Logger logger = LogManager.getLogger(ActivationServer.class.getName());
+    private List<ActivationHandler> activationHandlers = new ArrayList<ActivationHandler>();
     private ServerSocket server;
     private int port = 24727;
     private int backlog = 10;
@@ -77,11 +81,19 @@ public class ActivationServer implements Runnable {
 	while (running) {
 	    try {
 		Socket socket = server.accept();
-		ActivationHandler handler = new ActivationHandler(socket);
+		ActivationSocketHandler handler = new ActivationSocketHandler(socket, activationHandlers);
 		handler.start();
 	    } catch (Exception ex) {
 		logger.log(Level.SEVERE, "Cannot handle activation: " + ex.getMessage(), ex);
 	    }
 	}
+    }
+
+    public void addHandler(ActivationHandler handler) {
+	activationHandlers.add(handler);
+    }
+
+    public void removeHandler(ActivationHandler handler) {
+	activationHandlers.remove(handler);
     }
 }

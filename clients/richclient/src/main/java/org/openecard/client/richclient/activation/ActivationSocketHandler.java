@@ -16,32 +16,37 @@
 package org.openecard.client.richclient.activation;
 
 import java.net.Socket;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openecard.client.richclient.RichClient;
-import org.openecard.client.richclient.activation.common.ActivationConstants;
-import org.openecard.client.richclient.activation.messages.ActivationApplicationRequest;
-import org.openecard.client.richclient.activation.messages.ActivationApplicationResponse;
+import org.openecard.client.richclient.activation.common.ErrorPage;
 import org.openecard.client.richclient.activation.messages.ActivationRequest;
 import org.openecard.client.richclient.activation.messages.ActivationResponse;
+import org.openecard.client.richclient.activation.messages.common.ClientRequest;
+import org.openecard.client.richclient.activation.messages.common.ClientResponse;
+import org.openecard.client.richclient.handler.ActivationHandler;
 
 
 /**
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class ActivationHandler implements Runnable {
+public class ActivationSocketHandler implements Runnable {
 
     private final Thread t;
     private Socket socket;
+    private List<ActivationHandler> handlers;
 
     /**
      * Creates an new ActivationHandler.
      *
      * @param socket Socket
      */
-    public ActivationHandler(Socket socket) {
+    public ActivationSocketHandler(Socket socket, List<ActivationHandler> handlers) {
 	this.socket = socket;
+	this.handlers = handlers;
 
 	t = new Thread(this);
     }
@@ -55,48 +60,43 @@ public class ActivationHandler implements Runnable {
 
     @Override
     public void run() {
-	ActivationRequest request = null;
-
+	ClientRequest clientRequest = null;
+	ActivationHandler aHandler = null;
 	try {
 	    try {
 		// Handle request
-		request = new ActivationRequest(socket.getInputStream());
-		request.handleRequest();
+		ActivationRequest activationRequest = new ActivationRequest(socket.getInputStream());
+
+		for (Iterator<ActivationHandler> it = handlers.iterator(); it.hasNext();) {
+		    aHandler = it.next();
+		    clientRequest = aHandler.handleRequest(activationRequest.getInput());
+		    if (clientRequest != null) {
+			break;
+		    }
+		}
 	    } catch (Exception ex) {
-		Logger.getLogger(ActivationHandler.class.getName()).log(Level.SEVERE, "Exception", ex);
+		Logger.getLogger(ActivationSocketHandler.class.getName()).log(Level.SEVERE, "Exception", ex);
 		ActivationResponse response = new ActivationResponse(socket.getOutputStream());
-		response.handleErrorResponse(ex.getMessage());
+		response.setOutput(new ErrorPage(ex.getMessage()).getHTML());
 		throw new RuntimeException();
 	    }
 
 	    try {
 		// Start client
 		RichClient app = RichClient.getInstance();
-		ActivationApplicationRequest applicationRequest = new ActivationApplicationRequest();
-		applicationRequest.setTCToken(request.getTCTokens().get(0));
-		ActivationApplicationResponse applicationReponse = app.activate(applicationRequest);
+		ClientResponse clientReponse = app.request(clientRequest);
 
 		// Handle response
-		ActivationResponse response = new ActivationResponse(socket.getOutputStream());
-		if (applicationReponse.getErrorPage() != null) {
-		    response.handleErrorPage(applicationReponse.getErrorPage());
-		} else if (applicationReponse.getErrorMessage() != null) {
-		    response.handleErrorResponse(applicationReponse.getErrorMessage());
-		} else if (applicationReponse.getRefreshAddress() != null) {
-		    response.handleRedirectResponse(applicationReponse.getRefreshAddress());
-		} else {
-		    response.handleErrorResponse(ActivationConstants.ActivationError.INTERNAL_ERROR.toString());
-		}
-
+		ActivationResponse activationResponse = new ActivationResponse(socket.getOutputStream());
+		activationResponse.setOutput(aHandler.handleResponse(clientReponse));
 	    } catch (Exception ex) {
-		Logger.getLogger(ActivationHandler.class.getName()).log(Level.SEVERE, "Exception", ex);
+		Logger.getLogger(ActivationSocketHandler.class.getName()).log(Level.SEVERE, "Exception", ex);
 		ActivationResponse response = new ActivationResponse(socket.getOutputStream());
-		response.handleErrorResponse(ex.getMessage());
+		response.setOutput(new ErrorPage(ex.getMessage()).getHTML());
 	    }
 	} catch (Throwable ignore) {
 	    // Cannot handle such exceptions
 	}
 
     }
-
 }

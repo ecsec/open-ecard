@@ -16,10 +16,11 @@
 package org.openecard.client.richclient.activation;
 
 import java.io.IOException;
+import org.openecard.client.richclient.handler.StatusHandler;
+import org.openecard.client.richclient.handler.TCTokenHandler;
 
 
 /**
- *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class Activation {
@@ -46,6 +47,11 @@ public class Activation {
      */
     protected Activation() throws IOException {
 	ActivationServer activationServer = new ActivationServer();
+
+	// Add handlers to the server
+	activationServer.addHandler(new TCTokenHandler());
+	activationServer.addHandler(new StatusHandler());
+
 	activationServer.start();
     }
 }

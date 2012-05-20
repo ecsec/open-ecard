@@ -15,11 +15,9 @@
  */
 package org.openecard.client.richclient.activation.messages;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.openecard.client.richclient.activation.common.ErrorPage;
 
 
 /**
@@ -28,11 +26,8 @@ import org.openecard.client.richclient.activation.common.ErrorPage;
  */
 public class ActivationResponse {
 
-    // Charset for HTTP header encoding
     private static final String charset = "UTF-8";
-    // Carriage Return Line Feed "\r\n"
-    private static final byte[] CRLF = new byte[]{(byte) 0x0D, (byte) 0x0A};
-    private OutputStream output;
+    private OutputStream outputStream;
 
     /**
      * Create a new ActivationResponse.
@@ -40,96 +35,12 @@ public class ActivationResponse {
      * @param output OutputStream
      */
     public ActivationResponse(OutputStream output) {
-	this.output = output;
+	this.outputStream = output;
     }
 
-    /**
-     * Handle a redirect response.
-     *
-     * @param location Location
-     */
-    public void handleRedirectResponse(String location) {
-	try {
-	    writeln(output, "HTTP/1.1 303 See Other");
-	    writeln(output, "Location: " + location);
-
-	    output.write(CRLF);
-	    output.write(CRLF);
-	    output.flush();
-
-	} catch (IOException e) {
-	    Logger.getLogger(ActivationResponse.class.getName()).log(Level.SEVERE, "Cannot write response", e);
-	} finally {
-	    try {
-		output.close();
-	    } catch (Exception ignore) {
-	    }
-	}
+    public void setOutput(String output) throws IOException {
+	outputStream.write(output.getBytes(charset));
+	outputStream.flush();
+	outputStream.close();
     }
-
-    /**
-     * Handle a error response.
-     *
-     * @param message Message
-     */
-    public void handleErrorResponse(String message) {
-	try {
-
-	    ErrorPage p = new ErrorPage(message);
-	    String content = p.getHTML();
-
-	    // Header
-	    writeln(output, "HTTP/1.1 200 OK");
-	    writeln(output, "Content-Length: " + content.getBytes().length);
-	    writeln(output, "Connection: close");
-	    writeln(output, "Content-Type: text/html");
-	    // Content
-	    output.write(CRLF);
-	    writeln(output, content);
-	    output.flush();
-
-	} catch (IOException e) {
-	    Logger.getLogger(ActivationResponse.class.getName()).log(Level.SEVERE, "Cannot write response", e);
-	} finally {
-	    try {
-		output.close();
-	    } catch (Exception ignore) {
-	    }
-	}
-    }
-
-    /**
-     * Handle a error HTML page.
-     *
-     * @param page HTML page
-     */
-    public void handleErrorPage(String page) {
-	try {
-	    byte[] pageBytes = page.getBytes(charset);
-	    // Header
-	    writeln(output, "HTTP/1.1 200 OK");
-	    writeln(output, "Content-Length: " + pageBytes.length);
-	    writeln(output, "Connection: close");
-	    writeln(output, "Content-Type: text/html");
-	    // Content
-	    output.write(CRLF);
-	    output.write(pageBytes);
-	    output.write(CRLF);
-	    output.flush();
-
-	} catch (IOException e) {
-	    Logger.getLogger(ActivationResponse.class.getName()).log(Level.SEVERE, "Cannot write response", e);
-	} finally {
-	    try {
-		output.close();
-	    } catch (Exception ignore) {
-	    }
-	}
-    }
-
-    private void writeln(OutputStream out, String s) throws IOException {
-	out.write(s.getBytes(charset));
-	out.write(CRLF);
-    }
-
 }

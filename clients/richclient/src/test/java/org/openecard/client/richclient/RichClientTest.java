@@ -5,13 +5,12 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import static org.junit.Assert.*;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.ifd.scio.wrapper.SCChannel;
 import org.openecard.client.richclient.activation.common.ActivationConstants;
-import org.openecard.client.richclient.activation.messages.ActivationApplicationRequest;
-import org.openecard.client.richclient.activation.messages.ActivationApplicationResponse;
+import org.openecard.client.richclient.activation.messages.TCTokenRequest;
+import org.openecard.client.richclient.activation.messages.TCTokenResponse;
 import org.openecard.client.richclient.activation.tctoken.TCToken;
 import org.openecard.client.richclient.activation.tctoken.TCTokenConverter;
 import org.openecard.client.richclient.activation.tctoken.TCTokenException;
@@ -84,9 +83,9 @@ public class RichClientTest {
 	    // Wait some seconds until the client comes up
 	    Thread.sleep(2500);
 
-	    ActivationApplicationRequest applicationRequest = new ActivationApplicationRequest();
+	    TCTokenRequest applicationRequest = new TCTokenRequest();
 	    applicationRequest.setTCToken(tokens.get(0));
-	    ActivationApplicationResponse applicationReponse = client.activate(applicationRequest);
+	    TCTokenResponse applicationReponse = (TCTokenResponse) client.request(applicationRequest);
 
 	    System.out.println("RICH CLIENT RESULT");
 	    System.out.println(applicationReponse.getErrorMessage());

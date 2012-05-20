@@ -1,3 +1,5 @@
+package org.openecard.client.richclient.activation.messages;
+
 /*
  * Copyright 2012 Moritz Horsch.
  *
@@ -13,14 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openecard.client.richclient.activation.messages;
+
+
+import org.openecard.client.richclient.activation.messages.common.ClientResponse;
 
 
 /**
- *
  * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class ActivationApplicationResponse {
+public class TCTokenResponse implements ClientResponse {
 
     private String refreshAddress;
     private String errorMessage;
@@ -79,5 +82,4 @@ public class ActivationApplicationResponse {
     public void setErrorPage(String errorPage) {
 	this.errorPage = errorPage;
     }
-
 }

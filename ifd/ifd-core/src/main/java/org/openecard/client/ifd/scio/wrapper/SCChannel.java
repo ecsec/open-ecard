@@ -120,6 +120,14 @@ public class SCChannel {
             sw[0] = (byte) result[result.length - 2];
             sw[1] = (byte) result[result.length - 1];
 
+	    // return without validation when no expected results given
+	    if (responses.isEmpty()) {
+		// <editor-fold defaultstate="collapsed" desc="log trace">
+		if (_logger.isLoggable(Level.FINER)) {
+		    _logger.exiting(this.getClass().getName(), "transmit(byte[] input, List<byte[]> responses)", result);
+		} // </editor-fold>
+		return result;
+	    }
             // verify result
             for (byte[] expected : responses) {
                 if (Arrays.equals(expected, sw)) {

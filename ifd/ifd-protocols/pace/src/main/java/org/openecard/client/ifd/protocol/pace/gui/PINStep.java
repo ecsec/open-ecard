@@ -3,7 +3,7 @@ package org.openecard.client.ifd.protocol.pace.gui;
 import java.util.Map;
 import org.openecard.client.common.I18n;
 import org.openecard.client.gui.definition.OutputInfoUnit;
-import org.openecard.client.gui.definition.PasswordField;
+import org.openecard.client.gui.definition.Passwordfield;
 import org.openecard.client.gui.definition.Step;
 import org.openecard.client.gui.definition.Text;
 import org.openecard.client.gui.executor.ExecutionResults;
@@ -33,7 +33,7 @@ public class PINStep {
 	step.getInputInfoUnits().add(description);
 
 	//TODO Der step sollte so den pin type berücksichtigen.
-	PasswordField pinInputField = new PasswordField();
+	Passwordfield pinInputField = new Passwordfield();
 	pinInputField.setID(PIN);
 	pinInputField.setDescription(lang.translationForKey(PIN));
 	step.getInputInfoUnits().add(pinInputField);
@@ -49,8 +49,8 @@ public class PINStep {
 	}
 
 	for (OutputInfoUnit output : executionResults.getResults()) {
-	    if (output instanceof PasswordField) {
-		PasswordField p = (PasswordField) output;
+	    if (output instanceof Passwordfield) {
+		Passwordfield p = (Passwordfield) output;
 		if (p.getID().equals(PIN)) {
 		    content.add(GUIContentMap.ELEMENT.PIN, p.getValue());
 		}

@@ -273,7 +273,7 @@ public class TlsSmartcardCredentialsTest {
 
 	for (Map.Entry<String, ExecutionResults> entry : exec.getResults().entrySet()) {
 	    for (OutputInfoUnit out : entry.getValue().getResults()) {
-		if (out.type().equals(InfoUnitElementType.Checkbox)) {
+		if (out.type().equals(InfoUnitElementType.CHECK_BOX)) {
 		    Checkbox c = (Checkbox) out;
 		    for (BoxItem bi : c.getBoxItems()) {
 			if (bi.isChecked()) {

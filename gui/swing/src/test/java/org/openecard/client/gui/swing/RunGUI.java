@@ -11,7 +11,7 @@ import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.UserConsentNavigator;
 import org.openecard.client.gui.definition.BoxItem;
 import org.openecard.client.gui.definition.Checkbox;
-import org.openecard.client.gui.definition.PasswordField;
+import org.openecard.client.gui.definition.Passwordfield;
 import org.openecard.client.gui.definition.Step;
 import org.openecard.client.gui.definition.Text;
 import org.openecard.client.gui.definition.ToggleText;
@@ -324,7 +324,7 @@ public class RunGUI {
 	sendAgreement_Text.setText("Wenn Sie mit der Übermittlung der ausgewählten\n"
 		+ "Daten einverstanden sind, geben Sie bitte\n"
 		+ "Ihre 6-stellige PIN ein.");
-	PasswordField p1 = new PasswordField();
+	Passwordfield p1 = new Passwordfield();
 	p1.setDescription("pass input1");
 	p1.setDescription("PIN:");
 

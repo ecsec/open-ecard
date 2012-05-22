@@ -595,8 +595,8 @@ class AbstractTerminal {
 	// add text instructing user
 	Passwordfield i1 = new Passwordfield();
 	s.getInputInfoUnits().add(i1);
-	i1.setName("pin");
-	i1.setText("PIN:");
+	i1.setID("pin");
+	i1.setID("PIN:");
 	i1.setMinLength(minLength);
 	i1.setMaxLength(maxLength);
 
@@ -619,9 +619,9 @@ class AbstractTerminal {
     private static String getPinFromUserConsent(ExecutionEngine response) {
 	List<OutputInfoUnit> results = response.getResults().get("Enter PIN").getResults();
 	for (OutputInfoUnit next : results) {
-	    if (next.type() == InfoUnitElementType.Passwordfield) {
+	    if (next.type() == InfoUnitElementType.PASSWORD_FIELD) {
 		Passwordfield p = (Passwordfield)next;
-		if (p.getName().equals("pin")) {
+		if (p.getID().equals("pin")) {
 		    return p.getValue();
 		}
 	    }

@@ -26,10 +26,10 @@ import org.openecard.client.gui.UserConsentNavigator;
 import org.openecard.client.gui.definition.OutputInfoUnit;
 import org.openecard.client.gui.definition.Step;
 
+
 /**
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * 
  */
 public class AndroidNavigator implements UserConsentNavigator {
 
@@ -136,12 +136,12 @@ public class AndroidNavigator implements UserConsentNavigator {
 	public List<OutputInfoUnit> results = null;
 
 	@Override
-	public String stepName() {
-	    return steps.get(curStep).getName();
+	public String getStepID() {
+	    return steps.get(curStep).getID();
 	}
 
 	@Override
-	public ResultStatus status() {
+	public ResultStatus getStatus() {
 	    if (!done) {
 		try {
 		    syncPoint.exchange(null);
@@ -169,7 +169,7 @@ public class AndroidNavigator implements UserConsentNavigator {
 		}
 	    }
 	    synchronized (this) {
-		return status() == ResultStatus.OK;
+		return getStatus() == ResultStatus.OK;
 	    }
 	}
 
@@ -182,7 +182,7 @@ public class AndroidNavigator implements UserConsentNavigator {
 		}
 	    }
 	    synchronized (this) {
-		return status() == ResultStatus.BACK;
+		return getStatus() == ResultStatus.BACK;
 	    }
 	}
 
@@ -195,12 +195,12 @@ public class AndroidNavigator implements UserConsentNavigator {
 		}
 	    }
 	    synchronized (this) {
-		return status() == ResultStatus.CANCEL;
+		return getStatus() == ResultStatus.CANCEL;
 	    }
 	}
 
 	@Override
-	public List<OutputInfoUnit> results() {
+	public List<OutputInfoUnit> getResults() {
 	    if (!done) {
 		try {
 		    syncPoint.exchange(null);
@@ -215,4 +215,5 @@ public class AndroidNavigator implements UserConsentNavigator {
 	    }
 	}
     }
+
 }

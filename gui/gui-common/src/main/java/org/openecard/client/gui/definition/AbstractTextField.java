@@ -21,7 +21,7 @@ package org.openecard.client.gui.definition;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public abstract class AbstractTextfield implements InputInfoUnit, OutputInfoUnit {
+public abstract class AbstractTextField implements InputInfoUnit, OutputInfoUnit {
 
     private String id;
     private String description;

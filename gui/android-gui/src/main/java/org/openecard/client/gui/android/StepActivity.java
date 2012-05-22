@@ -26,22 +26,13 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 import org.openecard.client.gui.android.views.StepView;
-import org.openecard.client.gui.definition.Checkbox;
-import org.openecard.client.gui.definition.Hyperlink;
-import org.openecard.client.gui.definition.InfoUnitElementType;
-import org.openecard.client.gui.definition.InputInfoUnit;
-import org.openecard.client.gui.definition.OutputInfoUnit;
-import org.openecard.client.gui.definition.Passwordfield;
-import org.openecard.client.gui.definition.Radiobox;
-import org.openecard.client.gui.definition.Step;
-import org.openecard.client.gui.definition.Text;
-import org.openecard.client.gui.definition.Textfield;
+import org.openecard.client.gui.definition.*;
+
 
 /**
  * This activity displays a specific step when showStep is called
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * 
  */
 public class StepActivity extends Activity {
 
@@ -84,21 +75,21 @@ public class StepActivity extends Activity {
 	    public void run() {
 		ll.removeAllViews();
 		org.openecard.client.gui.definition.Step a = step2;
-		if (a.getName() != null)
-		    mTitle.setText(a.getName());
+		if (a.getID() != null)
+		    mTitle.setText(a.getID());
 		org.openecard.client.gui.android.views.StepView t = null;
 		for (InputInfoUnit infoUnitType : a.getInputInfoUnits()) {
-		    if (infoUnitType.type().equals(InfoUnitElementType.Text)) {
+		    if (infoUnitType.type().equals(InfoUnitElementType.TEXT)) {
 			t = new org.openecard.client.gui.android.views.Text((Text) infoUnitType, StepActivity.this);
-		    } else if (infoUnitType.type().equals(InfoUnitElementType.Checkbox)) {
+		    } else if (infoUnitType.type().equals(InfoUnitElementType.CHECK_BOX)) {
 			t = new org.openecard.client.gui.android.views.Checkbox((Checkbox) infoUnitType, StepActivity.this);
-		    } else if (infoUnitType.type().equals(InfoUnitElementType.Radiobox)) {
+		    } else if (infoUnitType.type().equals(InfoUnitElementType.RADIO_BOX)) {
 			t = new org.openecard.client.gui.android.views.Radiobutton((Radiobox) infoUnitType, StepActivity.this);
-		    } else if (infoUnitType.type().equals(InfoUnitElementType.Passwordfield)) {
-			t = new org.openecard.client.gui.android.views.AbstractInput((Passwordfield) infoUnitType, StepActivity.this);
-		    } else if (infoUnitType.type().equals(InfoUnitElementType.Textfield)) {
-			t = new org.openecard.client.gui.android.views.AbstractInput((Textfield) infoUnitType, StepActivity.this);
-		    } else if (infoUnitType.type().equals(InfoUnitElementType.Hyperlink)) {
+		    } else if (infoUnitType.type().equals(InfoUnitElementType.PASSWORD_FIELD)) {
+			t = new org.openecard.client.gui.android.views.AbstractInput((PasswordField) infoUnitType, StepActivity.this);
+		    } else if (infoUnitType.type().equals(InfoUnitElementType.TEXT_FIELD)) {
+			t = new org.openecard.client.gui.android.views.AbstractInput((TextField) infoUnitType, StepActivity.this);
+		    } else if (infoUnitType.type().equals(InfoUnitElementType.HYPERLINK)) {
 			t = new org.openecard.client.gui.android.views.Hyperlink((Hyperlink) infoUnitType, StepActivity.this);
 		    }
 		    views.add(t);
@@ -143,4 +134,5 @@ public class StepActivity extends Activity {
 	    }
 	});
     }
+
 }

@@ -8,10 +8,10 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
-import org.openecard.client.gui.definition.AbstractTextfield;
+import org.openecard.client.gui.definition.AbstractTextField;
 import org.openecard.client.gui.definition.OutputInfoUnit;
-import org.openecard.client.gui.definition.Passwordfield;
-import org.openecard.client.gui.definition.Textfield;
+import org.openecard.client.gui.definition.PasswordField;
+import org.openecard.client.gui.definition.TextField;
 
 
 /**
@@ -33,16 +33,16 @@ public class AbstractInput implements StepComponent {
     private final JLabel label;
     private final JTextComponent textField;
 
-    private final AbstractTextfield result;
+    private final AbstractTextField result;
 
-    public AbstractInput(Textfield input) {
-	this(input, new Textfield(), new JTextField(20));
+    public AbstractInput(TextField input) {
+	this(input, new TextField(), new JTextField(20));
     }
-    public AbstractInput(Passwordfield input) {
-	this(input, new Passwordfield(), new JPasswordField(12));
+    public AbstractInput(PasswordField input) {
+	this(input, new PasswordField(), new JPasswordField(12));
     }
 
-    private AbstractInput(AbstractTextfield input, AbstractTextfield output, JTextComponent textFieldImpl) {
+    private AbstractInput(AbstractTextField input, AbstractTextField output, JTextComponent textFieldImpl) {
 	String value = null;
 	String labelText = null;
 

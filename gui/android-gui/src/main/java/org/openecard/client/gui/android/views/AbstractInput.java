@@ -15,12 +15,6 @@
 
 package org.openecard.client.gui.android.views;
 
-import org.openecard.client.gui.definition.AbstractTextfield;
-import org.openecard.client.gui.definition.InfoUnitElementType;
-import org.openecard.client.gui.definition.OutputInfoUnit;
-import org.openecard.client.gui.definition.Passwordfield;
-import org.openecard.client.gui.definition.Textfield;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.text.InputFilter;
@@ -31,28 +25,28 @@ import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import org.openecard.client.gui.definition.*;
+
 
 /**
- * <p>
  * Common base for {@link Textinput} and {@link Passwordinput}.
- * <p/>
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class AbstractInput implements StepView {
 
-    private final AbstractTextfield result;
+    private final AbstractTextField result;
     private TableLayout tbl;
     private TextView tv;
 
-    public AbstractInput(AbstractTextfield input, Context ctx) {
+    public AbstractInput(AbstractTextField input, Context ctx) {
 	tv = new TextView(ctx);
 	android.view.Display display = ((android.view.WindowManager)ctx.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 	
-	if (input.getText() != null)
-	    tv.setText(input.getText());
+	if (input.getValue() != null)
+	    tv.setText(input.getValue());
 	else
-	    tv.setText(input.getName());
+	    tv.setText(input.getID());
 	tv.setTextColor(Color.BLACK);
 	tv.setWidth((int)(display.getWidth()/2));
 	tv.setGravity(Gravity.CENTER | Gravity.BOTTOM);
@@ -62,7 +56,7 @@ public class AbstractInput implements StepView {
 	et.setLines(1);
 	et.setWidth((int)(display.getWidth()/2));
 	et.setMinimumWidth(input.getMinLength()*20);
-	if (input.type().equals(InfoUnitElementType.Passwordfield)) {
+	if (input.type().equals(InfoUnitElementType.PASSWORD_FIELD)) {
 	    et.setTransformationMethod(new PasswordTransformationMethod());
 	}
 	if (input.getMaxLength() > 0) {
@@ -78,15 +72,15 @@ public class AbstractInput implements StepView {
 	tbr.addView(tv);
 	tbr.addView(et);
 	tbl.addView(tbr);
-	if (input.type().equals(InfoUnitElementType.Passwordfield)) {
-	    result = new Passwordfield();
+	if (input.type().equals(InfoUnitElementType.PASSWORD_FIELD)) {
+	    result = new PasswordField();
 	} else {
-	    result = new Textfield();
+	    result = new TextField();
 	}
 	result.setMinLength(input.getMinLength());
 	result.setMaxLength(input.getMaxLength());
-	result.setName(input.getName());
-	result.setText(input.getText());
+	result.setID(input.getID());
+	result.setValue(input.getValue());
     }
 
     @Override
@@ -122,4 +116,5 @@ public class AbstractInput implements StepView {
 	result.setValue(textValue);
 	return result;
     }
+
 }

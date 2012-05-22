@@ -593,7 +593,7 @@ class AbstractTerminal {
 	Step s = new Step("Enter PIN");
 	uc.getSteps().add(s);
 	// add text instructing user
-	Passwordfield i1 = new Passwordfield();
+	PasswordField i1 = new PasswordField();
 	s.getInputInfoUnits().add(i1);
 	i1.setID("pin");
 	i1.setID("PIN:");
@@ -620,7 +620,7 @@ class AbstractTerminal {
 	List<OutputInfoUnit> results = response.getResults().get("Enter PIN").getResults();
 	for (OutputInfoUnit next : results) {
 	    if (next.type() == InfoUnitElementType.PASSWORD_FIELD) {
-		Passwordfield p = (Passwordfield)next;
+		PasswordField p = (PasswordField)next;
 		if (p.getID().equals("pin")) {
 		    return p.getValue();
 		}

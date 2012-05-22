@@ -12,9 +12,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import org.openecard.client.gui.definition.InputInfoUnit;
-import org.openecard.client.gui.definition.Passwordfield;
+import org.openecard.client.gui.definition.PasswordField;
 import org.openecard.client.gui.definition.Radiobox;
-import org.openecard.client.gui.definition.Textfield;
+import org.openecard.client.gui.definition.TextField;
 import org.openecard.client.gui.swing.components.AbstractInput;
 import org.openecard.client.gui.swing.components.Checkbox;
 import org.openecard.client.gui.swing.components.Hyperlink;
@@ -68,7 +68,7 @@ public class DefaultStepLayouter extends StepLayouter {
 		    nextComponent = new Hyperlink((org.openecard.client.gui.definition.Hyperlink) next);
 		    break;
 		case PASSWORD_FIELD:
-		    nextComponent = new AbstractInput((Passwordfield) next);
+		    nextComponent = new AbstractInput((PasswordField) next);
 		    break;
 		case RADIO_BOX:
 		    nextComponent = new Radiobutton((Radiobox) next);
@@ -79,7 +79,7 @@ public class DefaultStepLayouter extends StepLayouter {
 		    nextComponent = new Text((org.openecard.client.gui.definition.Text) next);
 		    break;
 		case TEXT_FIELD:
-		    nextComponent = new AbstractInput((Textfield) next);
+		    nextComponent = new AbstractInput((TextField) next);
 		    break;
 		case ToggleText:
 		    nextComponent = new ToggleText((org.openecard.client.gui.definition.ToggleText) next);

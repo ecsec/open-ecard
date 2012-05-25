@@ -74,10 +74,6 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	logger.trace(LoggingConstants.ENTER, "perform");
-	// </editor-fold>
-
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
 	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
 
@@ -150,10 +146,6 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		response.setResult(WSHelper.makeResultOK());
 		response.setAuthenticationProtocolData(eac1Output.getAuthDataType());
 	    }
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    logger.trace(LoggingConstants.EXIT, "perform");
-	    // </editor-fold>
-
 	} catch (Exception e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
 	    logger.error(LoggingConstants.THROWING, "Exception", e);

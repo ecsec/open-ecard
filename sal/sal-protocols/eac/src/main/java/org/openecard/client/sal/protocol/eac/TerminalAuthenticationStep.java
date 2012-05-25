@@ -63,10 +63,6 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	logger.trace(LoggingConstants.ENTER, "perform");
-	// </editor-fold>
-
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
 	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
 
@@ -109,10 +105,6 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 
 	    response.setResult(WSHelper.makeResultOK());
 	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());
-
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    logger.trace(LoggingConstants.EXIT, "perform");
-	    // </editor-fold>
 
 	    return response;
 	} catch (Exception e) {

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	<title>Open eCardApp</title>
+	<link rel="stylesheet" href="static/css/style.css" type="text/css">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript">xfSessionId = "<%= sessionId%>"</script>
+	<script src="static/js/libs/json2.js"></script>
+	<script src="static/js/libs/jquery-1.7.2.min.js"></script>
+	<script src="static/js/script.js"></script>
+    </head>
+    <body>
+	<div class="applet">
+	    <script type="text/javascript" src="static/js/libs/deployJava.js"></script>
+	    <script type="text/javascript">
+		var attributes = { code: 'org.openecard.client.applet.ECardApplet',
+		    id: 'ecard-applet',
+		    width: 1,
+		    height: 1 } ;
+		var parameters = {jnlp_href: 'static/jnlp/ecard.jnlp',
+		    sessionId: '1234567890',
+		    endpointUrl: 'http://ekiosk.vserver-001.urospace.de/ecard/paos-interface',
+		    PSK: '1234567890',
+		    recognizeCard: true,
+		    spBehavior: 'click',
+		    selfSigned: true };
+		deployJava.runApplet(attributes, parameters, '1.6');
+	    </script>
+	</div>
+	<div class="content">
+	    <div class="message">
+		<p></p>
+	    </div>
+	    <div class="control">
+
+	    </div>
+	    <div class="application">
+		<iframe id="app" src="about:blank" name="selected_app"></iframe>
+		<p><button type="button" onclick="back()">Zur&uuml;ck</button></p>
+	    </div>
+	</div>
+    </body>
+</html>

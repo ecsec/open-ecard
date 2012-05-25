@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp codebase="." href="ecard.jnlp">
+    <information>
+	<title>eCard Applet</title>
+	<vendor>ecsec GmbH</vendor>
+    </information>
+    <resources>
+	<java version="1.6+" />
+	<jar href="../../applet.jar"
+	     main="true" />
+    </resources>
+    <security>
+	<all-permissions />
+    </security>
+    <applet-desc name="OpeneCard Applet"
+		 main-class="org.openecard.client.applet.ECardApplet"
+		 width="1"
+		 height="1">
+	<param name="MAYSCRIPT" value="true" />
+	<param name="separate_jvm" value="true" />
+    </applet-desc>
+</jnlp>

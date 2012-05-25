@@ -37,14 +37,22 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Implements Chip Authentication protocol step according to BSI-TR-03112-7.
+ * See BSI-TR-03112, version 1.1.2, part 7, section 4.6.6.
+ *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(ChipAuthenticationStep.class.getName());
-    private Dispatcher dispatcher;
+    private final Dispatcher dispatcher;
 
+    /**
+     * Creates a new Chip Authentication step.
+     *
+     * @param dispatcher Dispatcher
+     */
     public ChipAuthenticationStep(Dispatcher dispatcher) {
 	this.dispatcher = dispatcher;
     }
@@ -82,9 +90,9 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    EFCardAccess efca = new EFCardAccess(securityInfos);
 	    CASecurityInfos cas = efca.getCASecurityInfos();
 
-	    byte[] oid = ObjectIdentifierUtils.getValue(cas.getCAInfo().getProtocol());
+	    byte[] oID = ObjectIdentifierUtils.getValue(cas.getCAInfo().getProtocol());
 	    byte[] keyID = IntegerUtils.toByteArray(cas.getCAInfo().getKeyID());
-	    ca.mseSetAT(oid, keyID);
+	    ca.mseSetAT(oID, keyID);
 
 	    // CA: Step 2 - General Authenticate
 	    byte[] key = (byte[]) internalData.get(EACConstants.INTERNAL_DATA_PK_PCD);

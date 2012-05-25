@@ -25,10 +25,15 @@ import org.openecard.client.gui.UserConsent;
  */
 public class EACProtocol extends Protocol {
 
+    /**
+     * Creates a new EACProtocol.
+     *
+     * @param dispatcher Dispatcher
+     * @param gui GUI
+     */
     public EACProtocol(Dispatcher dispatcher, UserConsent gui) {
 	steps.add(new PACEStep(dispatcher, gui));
 	steps.add(new TerminalAuthenticationStep(dispatcher));
 	steps.add(new ChipAuthenticationStep(dispatcher));
     }
-
 }

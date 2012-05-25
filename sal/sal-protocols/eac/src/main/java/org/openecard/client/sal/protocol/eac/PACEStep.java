@@ -44,15 +44,24 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Implements PACE protocol step according to BSI-TR-03112-7.
+ * See BSI-TR-03112, version 1.1.2., part 7, section 4.6.5.
+ *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(PACEStep.class.getName());
-    private Dispatcher dispatcher;
-    private EACUserConsent gui;
+    private final Dispatcher dispatcher;
+    private final EACUserConsent gui;
 
+    /**
+     * Creates a new PACE protocol step.
+     *
+     * @param dispatcher Dispatcher
+     * @param gui GUI
+     */
     public PACEStep(Dispatcher dispatcher, UserConsent gui) {
 	this.dispatcher = dispatcher;
 	this.gui = new EACUserConsent(gui);

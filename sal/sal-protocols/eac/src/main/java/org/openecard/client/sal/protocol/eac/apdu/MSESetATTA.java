@@ -16,15 +16,15 @@
 package org.openecard.client.sal.protocol.eac.apdu;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.apdu.ManageSecurityEnviroment;
 import org.openecard.client.common.apdu.common.CardAPDUOutputStream;
+import org.openecard.client.common.logging.LoggingConstants;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * Implements a new MSE:Set AT APDU for Terminal Authentication.
- * See BSI-TR-03110, Version 2.05, Section B.11.1.
+ * See BSI-TR-03110, version 2.10, part 3, section B.11.1.
  * See ISO/IEC 7816-4, Section 7.5.11.
  *
  * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
@@ -41,17 +41,17 @@ public class MSESetATTA extends ManageSecurityEnviroment {
     /**
      * Creates a new MSE:Set AT for Terminal Authentication.
      *
-     * @param oid Terminal Authentication object identifier
+     * @param oID Terminal Authentication object identifier
      * @param chr Certificate Holder Reference
      * @param pkPCD Ephemeral Public Key
      * @param aad Auxiliary Data Verification
      */
-    public MSESetATTA(byte[] oid, byte[] chr, byte[] pkPCD, byte[] aad) {
+    public MSESetATTA(byte[] oID, byte[] chr, byte[] pkPCD, byte[] aad) {
 	super((byte) 0x81, (byte) 0xA4);
 
 	CardAPDUOutputStream caos = new CardAPDUOutputStream();
 	try {
-	    caos.writeTLV((byte) 0x80, oid);
+	    caos.writeTLV((byte) 0x80, oID);
 
 	    if (chr != null) {
 		caos.writeTLV((byte) 0x83, chr);
@@ -65,7 +65,7 @@ public class MSESetATTA extends ManageSecurityEnviroment {
 
 	    caos.flush();
 	} catch (IOException ex) {
-	    Logger.getLogger(MSESetATTA.class.getName()).log(Level.SEVERE, "Exception", ex);
+	    LoggerFactory.getLogger(MSESetATTA.class).error(LoggingConstants.THROWING, "Exception", ex);
 	} finally {
 	    try {
 		caos.close();

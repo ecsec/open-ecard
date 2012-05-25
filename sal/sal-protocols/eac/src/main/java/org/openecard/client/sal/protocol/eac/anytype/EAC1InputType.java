@@ -16,15 +16,15 @@ package org.openecard.client.sal.protocol.eac.anytype;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import java.util.ArrayList;
-import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.client.common.sal.anytype.AuthDataMap;
-import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.w3c.dom.Element;
 
 
 /**
+ * Implements the EAC1InputType data structure.
+ * See BSI-TR-03112, version 1.1.2, part 7, section 4.6.5.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
@@ -48,8 +48,7 @@ public class EAC1InputType {
      * Creates a new EAC1InputType.
      *
      * @param baseType DIDAuthenticationDataType
-     * @throws ParserConfigurationException
-     * @throws TLVException
+     * @throws Exception
      */
     public EAC1InputType(DIDAuthenticationDataType baseType) throws Exception {
 	authMap = new AuthDataMap(baseType);

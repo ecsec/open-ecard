@@ -13,6 +13,8 @@ import org.openecard.client.gui.executor.ExecutionResults;
 
 
 /**
+ * Implements a GUI user consent step for the CVC.
+ *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class CVCStep {
@@ -36,6 +38,11 @@ public class CVCStep {
     private CardVerifiableCertificate certificate;
     private GUIContentMap content;
 
+    /**
+     * Creates a new GUI user consent step for the CVC.
+     *
+     * @param content GUI content
+     */
     public CVCStep(GUIContentMap content) {
 	this.content = content;
 	this.certificate = (CardVerifiableCertificate) content.get(GUIContentMap.ELEMENT.CERTIFICATE);
@@ -104,11 +111,21 @@ public class CVCStep {
 	step.getInputInfoUnits().add(issuerURL);
     }
 
+    /**
+     * Returns the generated step.
+     *
+     * @return Step
+     */
     public Step getStep() {
 	return step;
     }
 
+    /**
+     * Processes the results of step.
+     *
+     * @param results Results
+     */
     public void processResult(Map<String, ExecutionResults> results) {
-//	ExecutionResults executionResults = results.get(step.getID());
+	// NOP
     }
 }

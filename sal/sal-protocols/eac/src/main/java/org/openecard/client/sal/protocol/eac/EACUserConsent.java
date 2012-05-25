@@ -35,6 +35,8 @@ import org.openecard.client.sal.protocol.eac.gui.PINStep;
 
 
 /**
+ * Implements the EAC user consent dialog.
+ *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
@@ -46,12 +48,21 @@ public class EACUserConsent {
     private I18n lang = I18n.getTranslation("sal");
     private UserConsent gui;
 
+    /**
+     * Creates a new EAC user consent.
+     *
+     * @param gui GUI
+     */
     protected EACUserConsent(UserConsent gui) {
 	this.gui = gui;
     }
 
+    /**
+     * Shows the GUI.
+     *
+     * @param content GUI Content
+     */
     public void show(GUIContentMap content) {
-
 	final UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE));
 
 	final CVCStep cvcStep = new CVCStep(content);

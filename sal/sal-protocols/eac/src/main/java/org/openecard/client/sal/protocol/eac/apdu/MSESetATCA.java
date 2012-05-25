@@ -16,17 +16,17 @@
 package org.openecard.client.sal.protocol.eac.apdu;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.apdu.ManageSecurityEnviroment;
 import org.openecard.client.common.apdu.common.CardAPDUOutputStream;
+import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.util.ByteUtils;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * Implements a MSE:Set AT APDU for Chip Authentication.
- * See BSI-TR-03110, Version 2.05, Section B.11.1.
- * See ISO/IEC 7816-4, Section 7.5.11.
+ * See BSI-TR-03110, version 2.10, part 3, section B.11.1.
+ * See ISO/IEC 7816-4, section 7.5.11.
  *
  * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
  */
@@ -51,15 +51,15 @@ public class MSESetATCA extends ManageSecurityEnviroment {
     /**
      * Creates a MSE:Set AT APDU for Chip Authentication.
      *
-     * @param oid Chip Authentication object identifier
+     * @param oID Chip Authentication object identifier
      * @param keyID Reference of a private key
      */
-    public MSESetATCA(byte[] oid, byte[] keyID) {
+    public MSESetATCA(byte[] oID, byte[] keyID) {
 	super((byte) 0x41, (byte) 0xA4);
 
 	CardAPDUOutputStream caos = new CardAPDUOutputStream();
 	try {
-	    caos.writeTLV((byte) 0x80, oid);
+	    caos.writeTLV((byte) 0x80, oID);
 
 	    if (keyID != null) {
 		caos.writeTLV((byte) 0x84, ByteUtils.cutLeadingNullBytes(keyID));
@@ -67,7 +67,7 @@ public class MSESetATCA extends ManageSecurityEnviroment {
 
 	    caos.flush();
 	} catch (IOException ex) {
-	    Logger.getLogger(MSESetATCA.class.getName()).log(Level.SEVERE, "Exception", ex);
+	    LoggerFactory.getLogger(MSESetATCA.class).error(LoggingConstants.THROWING, "Exception", ex);
 	} finally {
 	    try {
 		caos.close();

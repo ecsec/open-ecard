@@ -36,6 +36,9 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Implements TerminalAuthentication protocol step according to BSI-TR-03112-7.
+ * See BSI-TR-03112, version 1.1.2, part 7, section 4.6.6.
+ *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
@@ -44,6 +47,11 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
     private static final Logger logger = LoggerFactory.getLogger(TerminalAuthenticationStep.class.getName());
     private Dispatcher dispatcher;
 
+    /**
+     * Creates a new Terminal Authentication protocol step.
+     *
+     * @param dispatcher Dispatcher
+     */
     public TerminalAuthenticationStep(Dispatcher dispatcher) {
 	this.dispatcher = dispatcher;
     }

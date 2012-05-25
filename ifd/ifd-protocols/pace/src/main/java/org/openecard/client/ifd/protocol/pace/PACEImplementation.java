@@ -60,7 +60,7 @@ public class PACEImplementation {
     /**
      * Creates a new instance of the pace protocol.
      *
-     * @param ifd IFD
+     * @param dispatcher Dispatcher
      * @param slotHandle Slot handle
      * @param paceSecurityInfos PACESecurityInfos
      * @throws Exception Exception
@@ -90,7 +90,9 @@ public class PACEImplementation {
     }
 
     /**
-     * Step 1: Initialise PACE
+     * Initialize Chip Authentication. Sends an MSE:Set AT APDU. (S
+     * Step 1: Initialise PACE.
+     * See BSI-TR-03110, version 2.10, part 3, B.11.1.
      */
     private void mseSetAT(byte passwordType, byte[] chat) throws Exception {
 	// <editor-fold defaultstate="collapsed" desc="log trace">

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.openecard.client.sal.protocol.eac.gui;
 
 import java.util.Map;
@@ -20,6 +16,8 @@ import org.openecard.client.gui.executor.ExecutionResults;
 
 
 /**
+ * Implements a GUI user consent step for the CHAT.
+ *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class CHATStep {
@@ -33,9 +31,14 @@ public class CHATStep {
     private Step step = new Step(lang.translationForKey(TITLE));
     private CHAT requiredCHAT, optionalCHAT, selectedCHAT;
     private GUIContentMap content;
-    CardVerifiableCertificate certificate;
-    CertificateDescription certificateDescription;
+    private CardVerifiableCertificate certificate;
+    private CertificateDescription certificateDescription;
 
+    /**
+     * Creates a new GUI user consent step for the CHAT.
+     *
+     * @param content GUI content
+     */
     public CHATStep(GUIContentMap content) {
 	this.requiredCHAT = (CHAT) content.get(GUIContentMap.ELEMENT.REQUIRED_CHAT);
 	this.selectedCHAT = (CHAT) content.get(GUIContentMap.ELEMENT.REQUIRED_CHAT);
@@ -84,10 +87,20 @@ public class CHATStep {
 	step.getInputInfoUnits().add(requestedDataDescription1);
     }
 
+    /**
+     * Returns the generated step.
+     *
+     * @return Step
+     */
     public Step getStep() {
 	return step;
     }
 
+    /**
+     * Processes the results of step.
+     *
+     * @param results Results
+     */
     public void processResult(Map<String, ExecutionResults> results) {
 	ExecutionResults executionResults = results.get(step.getID());
 

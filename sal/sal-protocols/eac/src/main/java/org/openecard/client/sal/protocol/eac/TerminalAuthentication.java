@@ -36,17 +36,16 @@ import org.openecard.client.sal.protocol.eac.apdu.PSOVerifyCertificate;
  * See BSI-TR-03110, version 2.10, part 3, Section B.3.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class TerminalAuthentication {
 
-    private Dispatcher dispatcher;
-    private byte[] slotHandle;
+    private final Dispatcher dispatcher;
+    private final byte[] slotHandle;
 
     /**
      * Creates a new Terminal Authentication.
      *
-     * @param ifd IFD
+     * @param dispatcher Dispatcher
      * @param slotHandle Slot handle
      */
     public TerminalAuthentication(Dispatcher dispatcher, byte[] slotHandle) {
@@ -55,7 +54,10 @@ public class TerminalAuthentication {
     }
 
     /**
-     * Verify certificates. (Step 1)
+     * Verify certificates.
+     * Sends an MSE:Set DST APDU and PSO:Verify Certificate APDU per certificate. (Protocol step 1)
+     * See BSI-TR-03110, version 2.10, part 3, B.11.4.
+     * See BSI-TR-03110, version 2.10, part 3, B.11.5.
      *
      * @param certificateChain Certificate chain
      * @throws ProtocolException
@@ -63,13 +65,12 @@ public class TerminalAuthentication {
     public void verifyCertificates(CardVerifiableCertificateChain certificateChain) throws ProtocolException {
 	try {
 	    List<CardVerifiableCertificate> certificates = certificateChain.getCertificateChain();
-
 	    for (int i = certificates.size() - 1; i >= 0; i--) {
 		CardVerifiableCertificate cvc = (CardVerifiableCertificate) certificates.get(i);
-		// MSE:SetDST
+		// MSE:SetDST APDU
 		CardCommandAPDU mseSetDST = new MSESetDST(cvc.getCAR().toByteArray());
 		mseSetDST.transmit(dispatcher, slotHandle);
-		// PSO:Verify Certificate
+		// PSO:Verify Certificate  APDU
 		CardCommandAPDU psovc = new PSOVerifyCertificate(cvc.getCertificate().getValue());
 		psovc.transmit(dispatcher, slotHandle);
 	    }
@@ -79,17 +80,19 @@ public class TerminalAuthentication {
     }
 
     /**
-     * Initialize Terminal Authentication. Sends an MSE:Set AT APDU. (Step 2)
+     * Initializes the Terminal Authentication protocol.
+     * Sends an MSE:Set AT APDU. (Protocol step 2)
+     * See BSI-TR-03110, version 2.10, part 3, B.11.1.
      *
-     * @param oid Terminal Authentication object identifier
+     * @param oID Terminal Authentication object identifier
      * @param chr Certificate Holder Reference (CHR)
      * @param key Ephemeral public key
      * @param aad Authenticated Auxiliary Data (AAD)
      * @throws ProtocolException
      */
-    public void mseSetAT(byte[] oid, byte[] chr, byte[] key, byte[] aad) throws ProtocolException {
+    public void mseSetAT(byte[] oID, byte[] chr, byte[] key, byte[] aad) throws ProtocolException {
 	try {
-	    CardCommandAPDU mseSetAT = new MSESetATTA(oid, chr, key, aad);
+	    CardCommandAPDU mseSetAT = new MSESetATTA(oID, chr, key, aad);
 	    mseSetAT.transmit(dispatcher, slotHandle);
 	} catch (APDUException e) {
 	    throw new ProtocolException(e.getResult());
@@ -97,7 +100,9 @@ public class TerminalAuthentication {
     }
 
     /**
-     * Gets a challenge from the PICC. (Step 3)
+     * Gets a challenge from the PICC.
+     * Sends a Get Challenge APDU. (Protocol step 3)
+     * See BSI-TR-03110, version 2.10, part 3, B.11.6.
      *
      * @return Challenge
      * @throws ProtocolException
@@ -115,6 +120,8 @@ public class TerminalAuthentication {
 
     /**
      * Performs an External Authentication.
+     * Sends an External Authentication APDU. (Protocol step 4)
+     * See BSI-TR-03110, version 2.10, part 3, B.11.7.
      *
      * @param terminalSignature Terminal signature
      * @throws ProtocolException

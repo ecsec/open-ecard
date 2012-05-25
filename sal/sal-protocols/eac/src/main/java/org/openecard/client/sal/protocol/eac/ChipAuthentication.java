@@ -34,13 +34,13 @@ import org.openecard.client.sal.protocol.eac.apdu.MSESetATCA;
  */
 public class ChipAuthentication {
 
-    private Dispatcher dispatcher;
-    private byte[] slotHandle;
+    private final Dispatcher dispatcher;
+    private final byte[] slotHandle;
 
     /**
      * Creates a new Chip Authentication.
      *
-     * @param ifd IFD
+     * @param dispatcher Dispatcher
      * @param slotHandle Slot handle
      */
     public ChipAuthentication(Dispatcher dispatcher, byte[] slotHandle) {
@@ -49,15 +49,17 @@ public class ChipAuthentication {
     }
 
     /**
-     * Initialize Chip Authentication. Sends an MSE:Set AT APDU. (Step 1)
+     * Initializes the Chip Authentication protocol.
+     * Sends an MSE:Set AT APDU. (Protocol step 1)
+     * See BSI-TR-03110, version 2.10, part 3, B.11.1.
      *
-     * @param oid Terminal Authentication object identifier
-     * @param key Key identifier
+     * @param oID Chip Authentication object identifier
+     * @param keyID Key identifier
      * @throws ProtocolException
      */
-    public void mseSetAT(byte[] oid, byte[] keyID) throws ProtocolException {
+    public void mseSetAT(byte[] oID, byte[] keyID) throws ProtocolException {
 	try {
-	    CardCommandAPDU mseSetAT = new MSESetATCA(oid, keyID);
+	    CardCommandAPDU mseSetAT = new MSESetATCA(oID, keyID);
 	    mseSetAT.transmit(dispatcher, slotHandle);
 	} catch (APDUException e) {
 	    throw new ProtocolException(e.getResult());
@@ -66,9 +68,11 @@ public class ChipAuthentication {
 
     /**
      * Performs a General Authenticate.
+     * Sends an General Authenticate APDU. (Protocol step 2)
+     * See BSI-TR-03110, version 2.10, part 3, B.11.2.
      *
      * @param key Ephemeral Public Key
-     * @return Response
+     * @return Response APDU
      * @throws ProtocolException
      */
     public byte[] generalAuthenticate(byte[] key) throws ProtocolException {

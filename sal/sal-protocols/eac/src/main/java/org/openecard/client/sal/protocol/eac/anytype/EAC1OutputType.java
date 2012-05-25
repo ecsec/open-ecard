@@ -21,6 +21,8 @@ import org.openecard.client.common.util.ByteUtils;
 
 
 /**
+ * Implements the EAC1OutputType data structure.
+ * See BSI-TR-03112, version 1.1.2, part 7, section 4.6.5.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>

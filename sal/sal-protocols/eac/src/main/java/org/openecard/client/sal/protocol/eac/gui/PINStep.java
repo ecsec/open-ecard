@@ -11,6 +11,8 @@ import org.openecard.client.gui.executor.ExecutionResults;
 
 
 /**
+ * Implements a GUI user consent step for the PIN.
+ *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class PINStep {
@@ -24,6 +26,11 @@ public class PINStep {
     private Step step = new Step(lang.translationForKey(TITLE));
     private GUIContentMap content;
 
+    /**
+     * Creates a new GUI user consent step for the PIN.
+     *
+     * @param content GUI content
+     */
     public PINStep(GUIContentMap content) {
 	this.content = content;
 
@@ -46,27 +53,20 @@ public class PINStep {
 	step.getInputInfoUnits().add(pinInputField);
     }
 
+    /**
+     * Returns the generated step.
+     *
+     * @return Step
+     */
     public Step getStep() {
 	return step;
     }
 
-    public void updateResult(Map<String, ExecutionResults> results) {
-	ExecutionResults executionResults = results.get(step.getID());
-
-	if (executionResults == null) {
-	    return;
-	}
-
-	for (OutputInfoUnit output : executionResults.getResults()) {
-	    if (output instanceof PasswordField) {
-		PasswordField p = (PasswordField) output;
-		if (p.getID().equals(PIN)) {
-		    content.add(GUIContentMap.ELEMENT.PIN, p.getValue());
-		}
-	    }
-	}
-    }
-
+    /**
+     * Processes the results of step.
+     *
+     * @param results Results
+     */
     public void processResult(Map<String, ExecutionResults> results) {
 	ExecutionResults executionResults = results.get(step.getID());
 

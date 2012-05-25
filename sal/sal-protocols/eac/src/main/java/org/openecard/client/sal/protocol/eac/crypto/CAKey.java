@@ -33,18 +33,18 @@ import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.eac.CADomainParameter;
-import org.openecard.client.ifd.protocol.pace.PACEImplementation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
+ * Implements an abstract key for chip authentication.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class CAKey {
 
-    private static final Logger logger = LoggerFactory.getLogger(PACEImplementation.class);
+    private static final Logger logger = LoggerFactory.getLogger(CAKey.class);
     private AsymmetricKeyParameter sk;
     private AsymmetricKeyParameter pk;
     private CADomainParameter cdp;
@@ -63,6 +63,7 @@ public final class CAKey {
      *
      * @param data Encoded key
      * @return Decoded key
+     * @throws Exception
      */
     public byte[] decodePublicKey(byte[] data) throws Exception {
 	byte[] keyBytes;

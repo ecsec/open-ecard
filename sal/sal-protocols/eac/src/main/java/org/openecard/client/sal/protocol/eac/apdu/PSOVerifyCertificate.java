@@ -20,7 +20,7 @@ import org.openecard.client.common.apdu.PerformSecurityOperation;
 
 /**
  * Implements a PSO:VerifyCertificate APDU for Terminal Authentication.
- * See BSI-TR-03110, Version 2.05, Section B.11.5.
+ * See BSI-TR-03110, version 2.10, part 3, section B.11.5.
  *
  * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
  */

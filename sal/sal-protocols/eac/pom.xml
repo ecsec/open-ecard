@@ -13,12 +13,5 @@
     <groupId>org.openecard.client.sal.protocols</groupId>
     <artifactId>eac</artifactId>
     <name>EAC protocol</name>
-    <dependencies>
-	<dependency>
-	    <groupId>org.openecard.client.ifd.protocols</groupId>
-	    <artifactId>pace</artifactId>
-	    <version>${project.version}</version>
-	    <scope>provided</scope>
-	</dependency>
-    </dependencies>
+
 </project>

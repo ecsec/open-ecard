@@ -22,8 +22,6 @@ import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import java.util.Map;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.ifd.anytype.PACEInputType;
-import org.openecard.client.common.ifd.anytype.PACEOutputType;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.FunctionType;
@@ -38,6 +36,8 @@ import org.openecard.client.crypto.common.asn1.eac.SecurityInfos;
 import org.openecard.client.gui.UserConsent;
 import org.openecard.client.sal.protocol.eac.anytype.EAC1InputType;
 import org.openecard.client.sal.protocol.eac.anytype.EAC1OutputType;
+import org.openecard.client.sal.protocol.eac.anytype.PACEInputType;
+import org.openecard.client.sal.protocol.eac.anytype.PACEOutputType;
 import org.openecard.client.sal.protocol.eac.gui.GUIContentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,8 +104,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    AuthDataResponse paceInputMap = paceAuthMap.createResponse(didAuthenticate.getAuthenticationProtocolData());
 
 	    paceInputMap.addElement(PACEInputType.PIN, pin);
-	    //FIXME
-	    paceInputMap.addElement(PACEInputType.PIN_ID, "3");
+	    paceInputMap.addElement(PACEInputType.PIN_ID, EACConstants.PASSWORD_TYPE.valueOf(didAuthenticate.getDIDName()).toByteString());
 	    paceInputMap.addElement(PACEInputType.CHAT, selectedCHAT.toString());
 	    paceInputMap.addElement(PACEInputType.CERTIFICATE_DESCRIPTION, ByteUtils.toHexString(eac1Input.getCertificateDescription()));
 

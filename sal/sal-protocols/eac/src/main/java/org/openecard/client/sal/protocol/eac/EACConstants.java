@@ -29,22 +29,4 @@ public class EACConstants {
     protected static final String INTERNAL_DATA_AUTHENTICATED_AUXILIARY_DATA = "AuthenticatedAuxiliaryData";
     protected static final String INTERNAL_DATA_PK_PCD = "PKPCD";
     protected static final String INTERNAL_DATA_SECURITY_INFOS = "SecurityInfos";
-
-    public enum PASSWORD_TYPE {
-
-	MRZ((byte) 0x01),
-	CAN((byte) 0x02),
-	PIN((byte) 0x03),
-	PUK((byte) 0x04);
-	byte type;
-
-	public String toByteString() {
-	    return type + "";
-	}
-
-	private PASSWORD_TYPE(byte type) {
-	    this.type = type;
-	}
-    }
-
 }

@@ -38,6 +38,7 @@ import org.openecard.client.sal.protocol.eac.anytype.EAC1InputType;
 import org.openecard.client.sal.protocol.eac.anytype.EAC1OutputType;
 import org.openecard.client.sal.protocol.eac.anytype.PACEInputType;
 import org.openecard.client.sal.protocol.eac.anytype.PACEOutputType;
+import org.openecard.client.sal.protocol.eac.common.PasswordID;
 import org.openecard.client.sal.protocol.eac.gui.GUIContentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +105,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    AuthDataResponse paceInputMap = paceAuthMap.createResponse(didAuthenticate.getAuthenticationProtocolData());
 
 	    paceInputMap.addElement(PACEInputType.PIN, pin);
-	    paceInputMap.addElement(PACEInputType.PIN_ID, EACConstants.PASSWORD_TYPE.valueOf(didAuthenticate.getDIDName()).toByteString());
+	    paceInputMap.addElement(PACEInputType.PIN_ID, PasswordID.valueOf(didAuthenticate.getDIDName()).getByteAsString());
 	    paceInputMap.addElement(PACEInputType.CHAT, selectedCHAT.toString());
 	    paceInputMap.addElement(PACEInputType.CERTIFICATE_DESCRIPTION, ByteUtils.toHexString(eac1Input.getCertificateDescription()));
 

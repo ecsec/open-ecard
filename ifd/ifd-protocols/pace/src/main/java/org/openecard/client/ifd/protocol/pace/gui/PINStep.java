@@ -7,6 +7,7 @@ import org.openecard.client.gui.definition.PasswordField;
 import org.openecard.client.gui.definition.Step;
 import org.openecard.client.gui.definition.Text;
 import org.openecard.client.gui.executor.ExecutionResults;
+import org.openecard.client.ifd.protocol.pace.common.PasswordID;
 
 
 /**
@@ -17,14 +18,16 @@ public class PINStep {
     // GUI translation constants
     private static final String TITLE = "step_pace_title";
     private static final String DESCRIPTION = "step_pace_description";
-    private static final String PIN = "pin";
     //
     private I18n lang = I18n.getTranslation("ifd");
     private Step step = new Step(lang.translationForKey(TITLE));
     private GUIContentMap content;
+    private String passwordType;
 
     public PINStep(GUIContentMap content) {
 	this.content = content;
+
+	passwordType = PasswordID.parse((Byte) (content.get(GUIContentMap.ELEMENT.PIN_ID))).getString();
     }
 
     public Step create() {
@@ -32,10 +35,9 @@ public class PINStep {
 	description.setText(lang.translationForKey(DESCRIPTION));
 	step.getInputInfoUnits().add(description);
 
-	//TODO Der step sollte so den pin type berücksichtigen.
 	PasswordField pinInputField = new PasswordField();
-	pinInputField.setID(PIN);
-	pinInputField.setDescription(lang.translationForKey(PIN));
+	pinInputField.setID(passwordType);
+	pinInputField.setDescription(lang.translationForKey(passwordType));
 	step.getInputInfoUnits().add(pinInputField);
 
 	return step;
@@ -51,7 +53,7 @@ public class PINStep {
 	for (OutputInfoUnit output : executionResults.getResults()) {
 	    if (output instanceof PasswordField) {
 		PasswordField p = (PasswordField) output;
-		if (p.getID().equals(PIN)) {
+		if (p.getID().equals(passwordType)) {
 		    content.add(GUIContentMap.ELEMENT.PIN, p.getValue());
 		}
 	    }

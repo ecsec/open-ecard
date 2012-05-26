@@ -41,27 +41,27 @@ public final class MSESetATPACE extends ManageSecurityEnviroment {
     /**
      * Creates a new MSE:Set AT APDU for PACE.
      *
-     * @param oid PACE object identifier
-     * @param type Password type (PIN, PUK, CAN, MRZ)
+     * @param oID PACE object identifier
+     * @param passwordID Password type (PIN, PUK, CAN, MRZ)
      */
-    public MSESetATPACE(byte[] oid, byte type) {
-	this(oid, null, type);
+    public MSESetATPACE(byte[] oID, byte passwordID) {
+	this(oID, passwordID, null);
     }
 
     /**
      * Creates a new MSE:Set AT APDU for PACE.
      *
-     * @param oid PACE object identifier
+     * @param oID PACE object identifier
+     * @param passwordID Password type (PIN, PUK, CAN, MRZ)
      * @param chat Certificate Holder Authentication Template
-     * @param passwordType Password type (PIN, PUK, CAN, MRZ)
      */
-    public MSESetATPACE(byte[] oid, byte[] chat, byte passwordType) {
+    public MSESetATPACE(byte[] oID, byte passwordID, byte[] chat) {
 	super((byte) 0xC1, (byte) 0xA4);
 
 	CardAPDUOutputStream caos = new CardAPDUOutputStream();
 	try {
-	    caos.writeTLV((byte) 0x80, oid);
-	    caos.writeTLV((byte) 0x83, passwordType);
+	    caos.writeTLV((byte) 0x80, oID);
+	    caos.writeTLV((byte) 0x83, passwordID);
 
 	    if (chat != null) {
 		caos.write(chat);
@@ -79,5 +79,4 @@ public final class MSESetATPACE extends ManageSecurityEnviroment {
 
 	setData(caos.toByteArray());
     }
-
 }

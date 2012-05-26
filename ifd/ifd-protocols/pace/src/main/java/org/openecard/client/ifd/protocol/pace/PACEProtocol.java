@@ -53,21 +53,21 @@ public class PACEProtocol implements Protocol {
 	    // Get parameters for the PACE protocol
 	    PACEInputType paceInput = new PACEInputType(req.getAuthenticationProtocolData());
 
-	    String pin;
+	    byte[] pin;
 	    byte pinID = paceInput.getPINID();
 	    byte[] chat = paceInput.getCHAT();
 
 	    if (paceInput.getPIN() == null || paceInput.getPIN().isEmpty()) {
 		// GUI request
 		GUIContentMap content = new GUIContentMap();
-		content.add(GUIContentMap.ELEMENT.PIN_TYPE, pinID);
+		content.add(GUIContentMap.ELEMENT.PIN_ID, pinID);
 		PACEUserConsent paceUserConsent = new PACEUserConsent(gui);
 		paceUserConsent.show(content);
-		pin = (String) content.get(GUIContentMap.ELEMENT.PIN);
+		pin = ((String) content.get(GUIContentMap.ELEMENT.PIN)).getBytes(PACEConstants.PIN_CHARSET);
 	    } else {
-		pin = paceInput.getPIN();
+		pin = paceInput.getPIN().getBytes(PACEConstants.PIN_CHARSET);
 	    }
-	    if (pin == null || pin.isEmpty()) {
+	    if (pin == null || pin.length == 0) {
 		response.setResult(WSHelper.makeResultError(
 			ECardConstants.Minor.IFD.CANCELLATION_BY_USER,
 			"No PIN was entered."));
@@ -86,7 +86,7 @@ public class PACEProtocol implements Protocol {
 
 	    // Start PACE
 	    PACEImplementation pace = new PACEImplementation(dispatcher, slotHandle, psi);
-	    pace.execute(pin.getBytes(PACEConstants.PIN_CHARSET), pinID, chat);
+	    pace.execute(pin, pinID, chat);
 
 	    // Establish Secure Messaging channel
 	    sm = new SecureMessaging(pace.getKeyMAC(), pace.getKeyENC());

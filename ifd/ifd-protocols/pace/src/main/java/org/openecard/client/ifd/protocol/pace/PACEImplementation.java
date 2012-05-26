@@ -79,14 +79,14 @@ public class PACEImplementation {
      * Start PACE.
      *
      * @param password Password
+     * @param passwordID Password type (PIN, PUK, CAN, MRZ)
      * @param chat CHAT
-     * @param passwordType Password type (PIN, PUK, CAN, MRZ)
      * @throws Exception Exception
      */
-    public void execute(byte[] password, byte passwordType, byte[] chat) throws Exception {
+    public void execute(byte[] password, byte passwordID, byte[] chat) throws Exception {
 	this.password = password;
 
-	mseSetAT(passwordType, chat);
+	mseSetAT(passwordID, chat);
     }
 
     /**
@@ -94,13 +94,13 @@ public class PACEImplementation {
      * Step 1: Initialise PACE.
      * See BSI-TR-03110, version 2.10, part 3, B.11.1.
      */
-    private void mseSetAT(byte passwordType, byte[] chat) throws Exception {
+    private void mseSetAT(byte passwordID, byte[] chat) throws Exception {
 	// <editor-fold defaultstate="collapsed" desc="log trace">
 	logger.trace(LoggingConstants.ENTER, "mseSetAT");
 	// </editor-fold>
 
-	byte[] oid = ObjectIdentifierUtils.getValue(psi.getPACEInfo().getProtocol());
-	CardCommandAPDU mseSetAT = new MSESetATPACE(oid, chat, passwordType);
+	byte[] oID = ObjectIdentifierUtils.getValue(psi.getPACEInfo().getProtocol());
+	CardCommandAPDU mseSetAT = new MSESetATPACE(oID, passwordID, chat);
 
 	try {
 	    response = mseSetAT.transmit(dispatcher, slotHandle);
@@ -123,7 +123,7 @@ public class PACEImplementation {
 		if (retryCounter == (byte) 0x00) {
 		    // The password is blocked
 		    logger.warn("The password is blocked. The password MUST be unblocked.");
-		    if (passwordType == PACEConstants.PASSWORD_PUK) {
+		    if (passwordID == PACEConstants.PASSWORD_PUK) {
 			generalAuthenticateEncryptedNonce();
 		    } else {
 			throw new ProtocolException(
@@ -133,7 +133,7 @@ public class PACEImplementation {
 		} else if (retryCounter == (byte) 0x01) {
 		    // The password is suspended
 		    logger.warn("The password is suspended. The password MUST be resumed.");
-		    if (passwordType == PACEConstants.PASSWORD_CAN) {
+		    if (passwordID == PACEConstants.PASSWORD_CAN) {
 			generalAuthenticateEncryptedNonce();
 		    } else {
 			throw new ProtocolException(

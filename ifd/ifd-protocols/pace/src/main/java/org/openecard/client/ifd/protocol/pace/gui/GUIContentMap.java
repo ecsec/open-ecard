@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.openecard.client.ifd.protocol.pace.gui;
 
 import java.util.HashMap;
@@ -15,7 +11,7 @@ public class GUIContentMap {
     public enum ELEMENT {
 
 	PIN,
-	PIN_TYPE;
+	PIN_ID;
     }
 
     private HashMap<String, Object> map = new HashMap<String, Object>();

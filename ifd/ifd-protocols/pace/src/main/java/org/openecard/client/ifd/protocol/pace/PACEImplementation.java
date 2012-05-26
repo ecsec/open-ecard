@@ -95,18 +95,11 @@ public class PACEImplementation {
      * See BSI-TR-03110, version 2.10, part 3, B.11.1.
      */
     private void mseSetAT(byte passwordID, byte[] chat) throws Exception {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	logger.trace(LoggingConstants.ENTER, "mseSetAT");
-	// </editor-fold>
-
 	byte[] oID = ObjectIdentifierUtils.getValue(psi.getPACEInfo().getProtocol());
 	CardCommandAPDU mseSetAT = new MSESetATPACE(oID, passwordID, chat);
 
 	try {
 	    response = mseSetAT.transmit(dispatcher, slotHandle);
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    logger.trace(LoggingConstants.EXIT, "mseSetAT");
-	    // </editor-fold>
 	    // Continue with step 2
 	    generalAuthenticateEncryptedNonce();
 	} catch (APDUException e) {
@@ -163,10 +156,6 @@ public class PACEImplementation {
      * Step 2: Encrypted nonce
      */
     private void generalAuthenticateEncryptedNonce() throws Exception {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	logger.trace(LoggingConstants.ENTER, "generalAuthenticateEncryptedNonce");
-	// </editor-fold>
-
 	CardCommandAPDU gaEncryptedNonce = new GeneralAuthenticate();
 	gaEncryptedNonce.setChaining();
 
@@ -176,11 +165,6 @@ public class PACEImplementation {
 	try {
 	    response = gaEncryptedNonce.transmit(dispatcher, slotHandle);
 	    s = cryptoSuite.decryptNonce(keyPI, response.getData());
-
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    logger.trace(LoggingConstants.EXIT, "generalAuthenticateEncryptedNonce");
-	    // </editor-fold>
-
 	    // Continue with Step 3
 	    generalAuthenticateMapNonce();
 	} catch (APDUException e) {
@@ -200,10 +184,6 @@ public class PACEImplementation {
      * Step 3: Mapping nonce
      */
     private void generalAuthenticateMapNonce() throws Exception {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	logger.trace(LoggingConstants.ENTER, "generalAuthenticateMapNonce");
-	// </editor-fold>
-
 	byte[] pkMapPCD = null;
 	PACEMapping mapping = cryptoSuite.getMapping();
 
@@ -243,10 +223,6 @@ public class PACEImplementation {
 	    throw new UnsupportedOperationException("Not implemented yet.");
 	}
 
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	logger.trace(LoggingConstants.EXIT, "generalAuthenticateMapNonce");
-	// </editor-fold>
-
 	// Continue with Step 4
 	generalAuthenticateKeyAgreement();
     }
@@ -257,10 +233,6 @@ public class PACEImplementation {
      * @param mapPK_PICC
      */
     private void generalAuthenticateKeyAgreement() throws Exception {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	logger.trace(LoggingConstants.ENTER, "generalAuthenticateKeyAgreement");
-	// </editor-fold>
-
 	keyPCD = new PACEKey(domainParameter);
 	keyPCD.generateKeyPair();
 
@@ -275,9 +247,6 @@ public class PACEImplementation {
 	    byte[] keyPKPICC = keyPICC.decodePublicKey(response.getData());
 
 	    if (!ByteUtils.compare(keyPKPCD, keyPKPICC)) {
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		logger.trace(LoggingConstants.EXIT, "generalAuthenticateKeyAgreement");
-		// </editor-fold>
 		// Continue with Step 5
 		generalAuthenticateMutualAuthentication();
 	    } else {
@@ -300,10 +269,6 @@ public class PACEImplementation {
      * Step 5: Mutual authentication
      */
     private void generalAuthenticateMutualAuthentication() throws Exception {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	logger.trace(LoggingConstants.ENTER, "generalAuthenticateMutualAuthentication");
-	// </editor-fold>
-
 	// Calculate shared key k
 	byte[] k = cryptoSuite.generateSharedSecret(keyPCD.getEncodedPrivateKey(), keyPICC.getEncodedPublicKey());
 	// Derive key MAC
@@ -325,13 +290,8 @@ public class PACEImplementation {
 	    response = gaMutualAuth.transmit(dispatcher, slotHandle);
 
 	    if (tokenPICC.verifyToken(response.getData())) {
-
 		currentCAR = tokenPICC.getCurrentCAR();
 		previousCAR = tokenPCD.getPreviousCAR();
-
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		logger.trace(LoggingConstants.EXIT, "generalAuthenticateMutualAuthentication");
-		// </editor-fold>
 	    } else {
 		throw new GeneralSecurityException("Cannot verify authentication token.");
 	    }

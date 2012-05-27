@@ -34,6 +34,12 @@ public final class ECPublicKey extends PublicKey {
     private byte[] y;
     private BigInteger h;
 
+    /**
+     * Creates a new ECPublicKey.
+     *
+     * @param key Key
+     * @throws Exception
+     */
     protected ECPublicKey(TLV key) throws Exception {
 	this.key = key;
 
@@ -45,34 +51,55 @@ public final class ECPublicKey extends PublicKey {
 
 	    switch (itemTag) {
 		case OID_TAG:
+		    // MANDATORY
 		    oid = ObjectIdentifierUtils.toString(key.findChildTags(OID_TAG).get(0).getValue());
 		    break;
 		case PRIME_TAG:
+		    // CONDITIONAL
 		    prime = new BigInteger(key.findChildTags(PRIME_TAG).get(0).getValue());
 		    break;
 		case COEFFICIENT_A_TAG:
+		    // CONDITIONAL
 		    a = new BigInteger(key.findChildTags(COEFFICIENT_A_TAG).get(0).getValue());
 		    break;
 		case COEFFICIENT_B_TAG:
+		    // CONDITIONAL
 		    b = new BigInteger(key.findChildTags(COEFFICIENT_B_TAG).get(0).getValue());
 		    break;
 		case BASE_POINT_TAG:
+		    // CONDITIONAL
 		    g = key.findChildTags(BASE_POINT_TAG).get(0).getValue();
 		    break;
 		case ORDER_TAG:
+		    // CONDITIONAL
 		    order = new BigInteger(key.findChildTags(ORDER_TAG).get(0).getValue());
 		    break;
 		case PUBLIC_POINT_TAG:
+		    // MANDATORY
 		    y = key.findChildTags(PUBLIC_POINT_TAG).get(0).getValue();
 		    break;
 		case COFACTOR_TAG:
+		    // CONDITIONAL
 		    h = new BigInteger(key.findChildTags(COFACTOR_TAG).get(0).getValue());
 		    break;
 		default:
 		    break;
 	    }
 	}
-	//TODO Verify me.
+	verify();
+    }
+
+    private void verify() {
+	// Object identifier and public point are MANDATORY
+	if (oid != null || y != null) {
+	    throw new IllegalArgumentException("Malformed ECPublicKey");
+	}
+	// CONDITIONAL domain parameters MUST be either all present, except the cofactor, or all absent
+	if (prime == null || a == null || b == null || g == null || order == null) {
+	    if (prime != null || a != null || b != null || g != null || order != null) {
+		throw new IllegalArgumentException("Malformed ECPublicKey");
+	    }
+	}
     }
 
     @Override
@@ -89,14 +116,29 @@ public final class ECPublicKey extends PublicKey {
 	return key;
     }
 
+    /**
+     * Returns the coefficient A.
+     *
+     * @return Coefficient A
+     */
     public BigInteger getA() {
 	return a;
     }
 
+    /**
+     * Returns the coefficient B.
+     *
+     * @return Coefficient B
+     */
     public BigInteger getB() {
 	return b;
     }
 
+    /**
+     * Returns the cofactor.
+     *
+     * @return Cofactor
+     */
     public BigInteger getCofactor() {
 	return h;
     }
@@ -106,18 +148,38 @@ public final class ECPublicKey extends PublicKey {
 	return oid;
     }
 
+    /**
+     * Returns the order.
+     *
+     * @return Order
+     */
     public BigInteger getOrder() {
 	return order;
     }
 
+    /**
+     * Returns the prime number.
+     *
+     * @return Prime number.
+     */
     public BigInteger getPrime() {
 	return prime;
     }
 
+    /**
+     * Returns the public point.
+     *
+     * @return Public point
+     */
     public byte[] getY() {
 	return y;
     }
 
+    /**
+     * Returns the base point.
+     *
+     * @return Base point
+     */
     public byte[] getBasePoint() {
 	return g;
     }

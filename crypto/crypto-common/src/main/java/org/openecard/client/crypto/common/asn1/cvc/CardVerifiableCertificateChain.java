@@ -15,7 +15,6 @@
  */
 package org.openecard.client.crypto.common.asn1.cvc;
 
-import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -41,7 +40,7 @@ public class CardVerifiableCertificateChain {
      * Creates a new certificate chain.
      *
      * @param certificates Certificates
-     * @throws GeneralSecurityException
+     * @throws CertificateException
      */
     public CardVerifiableCertificateChain(List<CardVerifiableCertificate> certificates) throws CertificateException {
 	parseChain(certificates);
@@ -76,20 +75,6 @@ public class CardVerifiableCertificateChain {
     }
 
     /**
-     * Adds a new certificate to the chain.
-     *
-     * @param certificate Certificate
-     */
-    public void addCertificate(final CardVerifiableCertificate certificate) {
-	parseChain(new LinkedList<CardVerifiableCertificate>() {
-
-	    {
-		add(certificate);
-	    }
-	});
-    }
-
-    /**
      * Verifies the certificate chain.
      * [1] The CAR and the CHR of the CVCA certificate should be equal.
      * [2] The CAR of the DV certificate should refer to the CHR of the CVCA.
@@ -109,6 +94,20 @@ public class CardVerifiableCertificateChain {
 		throw new CertificateException("Malformed certificate chain");
 	    }
 	}
+    }
+
+    /**
+     * Adds a new certificate to the chain.
+     *
+     * @param certificate Certificate
+     */
+    public void addCertificate(final CardVerifiableCertificate certificate) {
+	parseChain(new LinkedList<CardVerifiableCertificate>() {
+
+	    {
+		add(certificate);
+	    }
+	});
     }
 
     /**

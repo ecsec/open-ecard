@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.openecard.client.crypto.common.asn1.cvc;
 
 import org.openecard.client.common.tlv.TLV;
@@ -16,31 +12,64 @@ import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
  */
 public abstract class PublicKey {
 
+    /**
+     * Tag for object identifiers.
+     */
     protected static final int OID_TAG = 0x06;
 
+    /**
+     * Creates a new public key.
+     *
+     * @param key Key
+     * @return Public key
+     * @throws Exception
+     */
     public static PublicKey getInstance(byte[] key) throws Exception {
 	return getInstance(TLV.fromBER(key));
     }
 
+    /**
+     * Creates a new public key.
+     *
+     * @param key Key
+     * @return Public key
+     * @throws Exception
+     */
     public static PublicKey getInstance(TLV key) throws Exception {
 	try {
 	    String oid = ObjectIdentifierUtils.toString(key.findChildTags(OID_TAG).get(0).getValue());
 
-	    //TODO Bedingungen überprüfen!!!
 	    if (oid.startsWith(TAObjectIdentifier.id_TA_ECDSA)) {
 		return new ECPublicKey(key);
 	    } else if (oid.startsWith(TAObjectIdentifier.id_TA_RSA)) {
 		return new RSAPublicKey(key);
+	    } else {
+		throw new IllegalArgumentException("Cannot handle object identifier");
 	    }
-	    throw new IllegalArgumentException("Malformed public key");
 	} catch (Exception e) {
 	    throw new IllegalArgumentException("Malformed public key: " + e.getMessage());
 	}
     }
 
+    /**
+     * Returns the object identifier.
+     *
+     * @return Object identifier
+     */
     public abstract String getObjectIdentifier();
 
+    /**
+     * Compares the public key.
+     *
+     * @param pk PublicKey
+     * @return True if they are equal, otherwise false
+     */
     public abstract boolean equals(PublicKey pk);
 
+    /**
+     * Returns the TLV encoded key.
+     *
+     * @return TLV encoded key
+     */
     public abstract TLV getTLVEncoded();
 }

@@ -18,10 +18,20 @@ public class PublicKeyReference {
     // Sequence Number; Encoding: ISO/IEC 8859-1; Length: 5F
     private String sequenceNumber;
 
+    /**
+     * Creates a new public key reference.
+     *
+     * @param reference Public key reference
+     */
     public PublicKeyReference(String reference) {
 	this(reference.getBytes());
     }
 
+    /**
+     * Creates a new public key reference.
+     *
+     * @param reference Public key reference
+     */
     public PublicKeyReference(byte[] reference) {
 	this.reference = reference;
 	parse();
@@ -35,26 +45,57 @@ public class PublicKeyReference {
 	sequenceNumber = new String(ByteUtils.copy(reference, length - 5, 5));
     }
 
+    /**
+     * Returns the country code.
+     *
+     * @return Country code
+     */
     public String getCountryCode() {
 	return countryCode;
     }
 
+    /**
+     * Returns the holder mnemonic.
+     *
+     * @return Holder mnemonice
+     */
     public String getHolderMnemonic() {
 	return holderMnemonic;
     }
 
+    /**
+     * Returns the sequence number.
+     *
+     * @return Sequence number.
+     */
     public String getSequenceNumber() {
 	return sequenceNumber;
     }
 
+    /**
+     * Returns the public key reference as a byte array.
+     *
+     * @return Byte array
+     */
     public byte[] toByteArray() {
 	return reference;
     }
 
+    /**
+     * Compares the public key reference.
+     *
+     * @param publicKeyReference PublicKeyReference
+     * @return True if they are equal, otherwise false
+     */
     public boolean equals(PublicKeyReference publicKeyReference) {
 	return ByteUtils.compare(reference, publicKeyReference.toByteArray());
     }
 
+    /**
+     * Returns the public key reference as a hex string.
+     *
+     * @return Hex string
+     */
     public String toHexString() {
 	return ByteUtils.toHexString(reference, true);
     }

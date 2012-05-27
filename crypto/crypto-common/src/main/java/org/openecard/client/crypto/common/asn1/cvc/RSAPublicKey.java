@@ -10,6 +10,11 @@ import org.openecard.client.common.tlv.TLV;
  */
 public class RSAPublicKey extends PublicKey {
 
+    /**
+     * Creates a new RSAPublicKey.
+     *
+     * @param tlv TLV encoded key
+     */
     protected RSAPublicKey(TLV tlv) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -29,4 +34,3 @@ public class RSAPublicKey extends PublicKey {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 }
-

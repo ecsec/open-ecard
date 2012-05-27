@@ -71,12 +71,14 @@ public final class TASecurityInfos {
      *
      * @param taInfo TAInfo
      */
-    public void addTAInfo(TAInfo taInfos) {
-	this.taiList.add(taInfos);
+    public void addTAInfo(TAInfo taInfo) {
+	this.taiList.add(taInfo);
     }
 
     /**
      * Selects a TAInfo.
+     *
+     * @param index Index
      */
     public void selectTAInfo(int index) {
 	if (index < 0 || index > taiList.size() - 1) {

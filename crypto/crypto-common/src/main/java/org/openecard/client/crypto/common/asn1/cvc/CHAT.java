@@ -76,8 +76,11 @@ public final class CHAT {
 	}
     };
 
-    /*
-     * Elemtens of the CHAT.
+    /**
+     * Represents the roles.
+     * See BSI-TR-03110, version 2.10, part 3, section C.4.1.
+     * See BSI-TR-03110, version 2.10, part 3, section C.4.2.
+     * See BSI-TR-03110, version 2.10, part 3, section C.4.3.
      */
     public enum Role {
 
@@ -85,6 +88,10 @@ public final class CHAT {
 	AUTHENTICATION_TERMINAL, INSPECTION_TERMINAL, SIGNATURE_TERMINAL
     }
 
+    /**
+     * Represents the special functions.
+     * See BSI-TR-03110, version 2.10, part 3, section C.4.2.
+     */
     public enum SpecialFunction {
 
 	INSTALL_QUALIFIED_CERTIFICATE, INSTALL_CERTIFICATE, PIN_MANAGEMENT,
@@ -92,6 +99,11 @@ public final class CHAT {
 	COMMUNITY_ID_VERIFICATION, AGE_VERIFICATION;
     }
 
+    /**
+     * Represents the data groups.
+     * See BSI-TR-03110, version 2.10, part 3, section C.4.2.
+     * See BSI-TR-03110, version 2.10, part 2, section A.1.
+     */
     public enum DataGroup {
 
 	DG01, DG02, DG03, DG04, DG05, DG06, DG07,
@@ -99,6 +111,11 @@ public final class CHAT {
 	DG15, DG16, DG17, DG18, DG19, DG20, DG21;
     }
 
+    /**
+     * Represents the access rights.
+     * See BSI-TR-03110, version 2.10, part 3, section C.4.1.
+     * See BSI-TR-03110, version 2.10, part 3, section C.4.3.
+     */
     public enum AccessRight {
 
 	DG03, DG04, GENERATE_SIGNATURE, GENERATE_QUALIFIED_SIGNATURE;
@@ -404,7 +421,7 @@ public final class CHAT {
     /**
      * Sets the special functions of the CHAT.
      *
-     * @param accessRights Access right
+     * @param accessRight Access right
      * @param selected Selected
      * @return True if the access right is set, otherwise false
      */
@@ -419,7 +436,7 @@ public final class CHAT {
     /**
      * Sets the special functions of the CHAT.
      *
-     * @param accessRights Access right
+     * @param accessRight Access right
      * @param selected Selected
      * @return True if the access right is set, otherwise false
      */

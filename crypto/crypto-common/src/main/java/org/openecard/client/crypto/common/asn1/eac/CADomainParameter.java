@@ -29,9 +29,9 @@ public final class CADomainParameter {
     private CAInfo ci;
 
     /**
-     * Create new PACEDomainParameter. Loads parameter as defined in the PACEInfo.
+     * Create new CADomainParameter.
      *
-     * @param psi PACESecurityInfos
+     * @param csi CASecurityInfos
      */
     public CADomainParameter(CASecurityInfos csi) {
 	this.csi = csi;
@@ -41,9 +41,9 @@ public final class CADomainParameter {
     }
 
     /**
-     * Create new PACEDomainParameter.
+     * Create new CADomainParameter.
      *
-     * @param psi PACESecurityInfos
+     * @param csi CASecurityInfos
      * @param domainParameter AlgorithmParameterSpec
      */
     public CADomainParameter(CASecurityInfos csi, AlgorithmParameterSpec domainParameter) {

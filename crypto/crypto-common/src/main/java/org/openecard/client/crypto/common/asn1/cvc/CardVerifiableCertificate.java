@@ -84,6 +84,7 @@ public class CardVerifiableCertificate {
      * Create a new Card Verifiable Certificate.
      *
      * @param cvc CardVerifiableCertificate
+     * @throws CertificateException
      * @throws TLVException
      */
     public CardVerifiableCertificate(byte[] cvc) throws CertificateException, TLVException {
@@ -94,7 +95,7 @@ public class CardVerifiableCertificate {
      * Create a new Card Verifiable Certificate.
      *
      * @param cvc TLV encoded certificate
-     * @throws TLVException
+     * @throws CertificateException
      */
     public CardVerifiableCertificate(TLV cvc) throws CertificateException {
 	try {

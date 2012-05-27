@@ -24,6 +24,9 @@ import java.security.spec.AlgorithmParameterSpec;
  */
 public abstract class DomainParameters {
 
+    /**
+     * Stores the domain parameter.
+     */
     protected AlgorithmParameterSpec domainParameter;
 
     /**
@@ -34,5 +37,4 @@ public abstract class DomainParameters {
     public AlgorithmParameterSpec getParameter() {
 	return domainParameter;
     }
-
 }

@@ -76,11 +76,12 @@ public class CASecurityInfos {
      */
     public void addCADomainParameterInfo(CADomainParameterInfo caDomainParameterInfo) {
 	this.cadpiList.add(caDomainParameterInfo);
-//	cadpiIndex++;
     }
 
     /**
      * Selects a CADomainParameterInfo.
+     *
+     * @param index Index
      */
     public void selectCADomainParameterInfo(int index) {
 	if (index < 0 || index > cadpiList.size() - 1) {
@@ -127,6 +128,8 @@ public class CASecurityInfos {
 
     /**
      * Selects a CAInfo.
+     *
+     * @param index Index
      */
     public void selectCAInfo(int index) {
 	if (index < 0 || index > caiList.size() - 1) {

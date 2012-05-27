@@ -80,6 +80,7 @@ public final class PACESecurityInfos {
 
     /**
      * Selects a PACEDomainParameterInfo.
+     * @param index Index
      */
     public void selectPACEDomainParameterInfo(int index) {
 	if (index < 0 || index > pdpiList.size() - 1) {
@@ -109,7 +110,7 @@ public final class PACESecurityInfos {
     /**
      * Sets the PACEInfos.
      *
-     * @param paceInfo PACEInfo
+     * @param paceInfos PACEInfos
      */
     public void setPACEInfos(List<PACEInfo> paceInfos) {
 	this.piList = paceInfos;
@@ -126,6 +127,8 @@ public final class PACESecurityInfos {
 
     /**
      * Selects a PACEInfo.
+     *
+     * @param index Index
      */
     public void selectPACEInfo(int index) {
 	if (index < 0 || index > piList.size() - 1) {

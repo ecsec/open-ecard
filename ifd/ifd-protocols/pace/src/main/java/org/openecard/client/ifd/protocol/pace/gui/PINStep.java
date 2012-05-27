@@ -26,6 +26,11 @@ public class PINStep {
     private GUIContentMap content;
     private String passwordType;
 
+    /**
+     * Creates a new GUI user consent step for the PIN.
+     *
+     * @param content GUI content
+     */
     public PINStep(GUIContentMap content) {
 	this.content = content;
 

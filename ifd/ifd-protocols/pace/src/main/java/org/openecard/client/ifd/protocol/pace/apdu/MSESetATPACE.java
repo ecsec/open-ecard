@@ -16,10 +16,11 @@
 package org.openecard.client.ifd.protocol.pace.apdu;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.apdu.ManageSecurityEnviroment;
 import org.openecard.client.common.apdu.common.CardAPDUOutputStream;
+import org.openecard.client.common.logging.LoggingConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -30,6 +31,8 @@ import org.openecard.client.common.apdu.common.CardAPDUOutputStream;
  * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class MSESetATPACE extends ManageSecurityEnviroment {
+
+    private static final Logger logger = LoggerFactory.getLogger(MSESetATPACE.class);
 
     /**
      * Creates a new MSE:Set AT APDU for PACE.
@@ -69,7 +72,9 @@ public final class MSESetATPACE extends ManageSecurityEnviroment {
 
 	    caos.flush();
 	} catch (IOException ex) {
-	    Logger.getLogger(MSESetATPACE.class.getName()).log(Level.SEVERE, "Exception", ex);
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    // </editor-fold>
 	} finally {
 	    try {
 		caos.close();

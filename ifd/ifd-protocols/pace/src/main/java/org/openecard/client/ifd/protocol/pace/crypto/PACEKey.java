@@ -63,6 +63,7 @@ public final class PACEKey {
      *
      * @param data Encoded key
      * @return Decoded key
+     * @throws Exception
      */
     public byte[] decodePublicKey(byte[] data) throws Exception {
 	byte[] keyBytes;

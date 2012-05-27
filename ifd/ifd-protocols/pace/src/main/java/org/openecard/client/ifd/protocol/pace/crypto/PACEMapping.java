@@ -18,13 +18,15 @@ package org.openecard.client.ifd.protocol.pace.crypto;
 import org.openecard.client.crypto.common.asn1.eac.PACEDomainParameter;
 
 
-
 /**
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public abstract class PACEMapping {
 
+    /**
+     * Stores the PACEDomainParameter.
+     */
     protected PACEDomainParameter pdp;
 
     /**
@@ -44,5 +46,4 @@ public abstract class PACEMapping {
      * @return PACEDomainParameter
      */
     public abstract PACEDomainParameter map(byte[] keyPICC, byte[] keyPCD);
-
 }

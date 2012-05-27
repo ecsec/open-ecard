@@ -11,6 +11,8 @@ import org.openecard.client.ifd.protocol.pace.common.PasswordID;
 
 
 /**
+ * Implements a GUI user consent step for the PIN.
+ *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class PINStep {
@@ -28,9 +30,10 @@ public class PINStep {
 	this.content = content;
 
 	passwordType = PasswordID.parse((Byte) (content.get(GUIContentMap.ELEMENT.PIN_ID))).getString();
+	initialize();
     }
 
-    public Step create() {
+    private void initialize() {
 	Text description = new Text();
 	description.setText(lang.translationForKey(DESCRIPTION));
 	step.getInputInfoUnits().add(description);
@@ -39,10 +42,22 @@ public class PINStep {
 	pinInputField.setID(passwordType);
 	pinInputField.setDescription(lang.translationForKey(passwordType));
 	step.getInputInfoUnits().add(pinInputField);
+    }
 
+    /**
+     * Returns the generated step.
+     *
+     * @return Step
+     */
+    public Step getStep() {
 	return step;
     }
 
+    /**
+     * Processes the results of step.
+     *
+     * @param results Results
+     */
     public void processResult(Map<String, ExecutionResults> results) {
 	ExecutionResults executionResults = results.get(step.getID());
 

@@ -15,9 +15,7 @@
  */
 package org.openecard.client.ifd.protocol.pace;
 
-import java.util.logging.Logger;
 import org.openecard.client.common.I18n;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.gui.UserConsent;
 import org.openecard.client.gui.UserConsentNavigator;
 import org.openecard.client.gui.definition.UserConsentDescription;
@@ -29,24 +27,36 @@ import org.openecard.client.ifd.protocol.pace.gui.PINStep;
 /**
  * Implements a user consent GUI for the PACE protocol.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class PACEUserConsent {
 
-    private static final Logger logger = LogManager.getLogger(PACEUserConsent.class.getName());
+    // GUI translation constants
+    private static final String USER_CONSENT = "step_pace_userconsent";
+    //
     private final I18n lang = I18n.getTranslation("ifd");
     private UserConsent gui;
 
+    /**
+     * Creates a new PACEUserConsent.
+     *
+     * @param gui GUI
+     */
     protected PACEUserConsent(UserConsent gui) {
 	this.gui = gui;
     }
 
+    /**
+     * Shows the user consent.
+     *
+     * @param content GUI content
+     */
     public void show(GUIContentMap content) {
-	PINStep pinStep = new PINStep(content);
+	final UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(USER_CONSENT));
 
-	UserConsentDescription uc = new UserConsentDescription("PACE Protocol");
-	uc.getSteps().add(pinStep.create());
+	final PINStep pinStep = new PINStep(content);
+
+	uc.getSteps().add(pinStep.getStep());
 
 	UserConsentNavigator navigator = gui.obtainNavigator(uc);
 	ExecutionEngine exec = new ExecutionEngine(navigator);

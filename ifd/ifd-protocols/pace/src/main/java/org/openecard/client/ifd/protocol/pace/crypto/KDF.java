@@ -18,8 +18,9 @@ package org.openecard.client.ifd.protocol.pace.crypto;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.openecard.client.common.logging.LoggingConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -30,6 +31,7 @@ import java.util.logging.Logger;
  */
 public final class KDF {
 
+    private static final Logger logger = LoggerFactory.getLogger(KDF.class);
     private MessageDigest md;
     private int keyLength;
 
@@ -39,13 +41,15 @@ public final class KDF {
      * @throws GeneralSecurityException
      */
     public KDF() throws GeneralSecurityException {
-        try {
-            md = MessageDigest.getInstance("SHA1");
-            keyLength = 16;
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(KDF.class.getName()).log(Level.SEVERE, "Exception", ex);
-            throw new GeneralSecurityException(ex);
-        }
+	try {
+	    md = MessageDigest.getInstance("SHA1");
+	    keyLength = 16;
+	} catch (NoSuchAlgorithmException ex) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    // </editor-fold>
+	    throw new GeneralSecurityException(ex);
+	}
     }
 
     /**
@@ -55,8 +59,8 @@ public final class KDF {
      * @param keyLength Key length
      */
     public KDF(MessageDigest md, int keyLength) {
-        this.md = md;
-        this.keyLength = keyLength;
+	this.md = md;
+	this.keyLength = keyLength;
     }
 
     /**
@@ -66,7 +70,7 @@ public final class KDF {
      * @return Key for message en/decryption (Key_PI)
      */
     public byte[] derivePI(byte[] secret) {
-        return derive(secret, (byte) 3, null);
+	return derive(secret, (byte) 3, null);
     }
 
     /**
@@ -76,7 +80,7 @@ public final class KDF {
      * @return Key for message authentication (Key_MAC)
      */
     public byte[] deriveMAC(byte[] secret) {
-        return derive(secret, (byte) 2, null);
+	return derive(secret, (byte) 2, null);
     }
 
     /**
@@ -87,7 +91,7 @@ public final class KDF {
      * @return Key for message authentication (Key_MAC)
      */
     public byte[] deriveMAC(byte[] secret, byte[] nonce) {
-        return derive(secret, (byte) 2, nonce);
+	return derive(secret, (byte) 2, nonce);
     }
 
     /**
@@ -97,7 +101,7 @@ public final class KDF {
      * @return Key for message encryption (Key_ENC)
      */
     public byte[] deriveENC(byte[] secret) {
-        return derive(secret, (byte) 1, null);
+	return derive(secret, (byte) 1, null);
     }
 
     /**
@@ -108,25 +112,24 @@ public final class KDF {
      * @return Key for message encryption (Key_ENC)
      */
     public byte[] deriveENC(byte[] secret, byte[] nonce) {
-        return derive(secret, (byte) 1, nonce);
+	return derive(secret, (byte) 1, nonce);
     }
 
     private byte[] derive(byte[] secret, byte counter, byte[] nonce) {
-        byte[] c = {(byte) 0x00, (byte) 0x00, (byte) 0x00, counter};
-        byte[] key = new byte[keyLength];
+	byte[] c = {(byte) 0x00, (byte) 0x00, (byte) 0x00, counter};
+	byte[] key = new byte[keyLength];
 
-        md.reset();
-        md.update(secret, 0, secret.length);
-        if (nonce != null) {
-            md.update(nonce, 0, nonce.length);
-        }
-        md.update(c, 0, c.length);
+	md.reset();
+	md.update(secret, 0, secret.length);
+	if (nonce != null) {
+	    md.update(nonce, 0, nonce.length);
+	}
+	md.update(c, 0, c.length);
 
-        byte[] hash = md.digest();
+	byte[] hash = md.digest();
 
-        System.arraycopy(hash, 0, key, 0, key.length);
+	System.arraycopy(hash, 0, key, 0, key.length);
 
-        return key;
+	return key;
     }
-
 }

@@ -37,6 +37,7 @@ public class ShortUtils {
      * Convert a short integer to a byte array with a given bit size per byte.
      *
      * @param value short integer to be converted
+     * @param numBits Number of bits
      * @return byte[]
      */
     public static byte[] toByteArray(short value, int numBits) {

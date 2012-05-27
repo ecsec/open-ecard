@@ -6,11 +6,14 @@ import java.util.Arrays;
 /**
  * To use byte arrays as keys in hashmaps
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ *
  */
 public final class ByteArrayWrapper
 {
     private final byte[] data;
 
+    //TODO REMOVE ME Klasse wird nicht verwendet!
+    
     public ByteArrayWrapper(byte[] data) {
 	if (data == null) {
 	    throw new NullPointerException();

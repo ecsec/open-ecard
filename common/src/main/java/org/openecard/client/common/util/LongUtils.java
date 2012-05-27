@@ -36,6 +36,7 @@ public class LongUtils {
      * Convert a long integer to a byte array with a given bit size per byte.
      *
      * @param value - long integer to be converted
+     * @param numBits Number of bizs
      * @return byte[]
      */
     public static byte[] toByteArray(long value, int numBits) {
@@ -89,7 +90,7 @@ public class LongUtils {
     }
 
     /**
-     * Convert a long integer to a byte array. 
+     * Convert a long integer to a byte array.
      * If the resulting array contains less bytes than 8 bytes, 0 bytes are prepended if the flag is set.
      *
      * @param value long integer to be converted

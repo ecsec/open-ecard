@@ -70,7 +70,7 @@ public class GeneralAuthenticate extends CardCommandAPDU {
      * 'A0' Identification data template
      *
      * @param tag Authentication data tag. 0x7C is omitted!
-     * @param data Authentication data objects
+     * @param authData Authentication data
      */
     public GeneralAuthenticate(byte tag, byte[] authData) {
 	super(x00, GENERAL_AUTHENTICATION_INS, x00, x00);
@@ -91,5 +91,4 @@ public class GeneralAuthenticate extends CardCommandAPDU {
 
 	setLE(x00);
     }
-
 }

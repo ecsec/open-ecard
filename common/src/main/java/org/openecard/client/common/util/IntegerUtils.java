@@ -37,6 +37,7 @@ public class IntegerUtils {
      * Convert an integer to a byte array with a given bit size per byte.
      *
      * @param value integer to be converted
+     * @param numBits Number of bits
      * @return byte[]
      */
     public static byte[] toByteArray(int value, int numBits) {

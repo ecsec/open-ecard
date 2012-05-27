@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.sal.protocol.eac.anytype;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
@@ -23,6 +22,8 @@ import org.openecard.client.common.util.ByteUtils;
 
 
 /**
+ * Implements the PACEOutputType data structure.
+ * See BSI-TR-03112, version 1.1.2, part 7, section 4.3.5.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -33,7 +34,7 @@ public class PACEOutputType {
     public static final String CURRENT_CAR = "CARcurr";
     public static final String PREVIOUS_CAR = "CARprev";
     public static final String ID_PICC = "IDPICC";
-
+    //
     private final AuthDataMap authMap;
     private byte[] efCardAccess;
     private byte[] currentCAR;
@@ -41,30 +42,65 @@ public class PACEOutputType {
     private byte[] idpicc;
     private byte retryCounter;
 
+    /**
+     * Creates a new PACEOutputType.
+     *
+     * @param authMap AuthDataMap
+     */
     protected PACEOutputType(AuthDataMap authMap) {
 	this.authMap = authMap;
     }
 
+    /**
+     * Sets the content of the file EF.CardAccess.
+     *
+     * @param efCardAccess Content of the file EF.CardAccess
+     */
     public void setEFCardAccess(byte[] efCardAccess) {
 	this.efCardAccess = efCardAccess;
     }
 
+    /**
+     * Sets the current CAR.
+     *
+     * @param car current CAR
+     */
     public void setCurrentCAR(byte[] car) {
 	this.currentCAR = car;
     }
 
+    /**
+     * Sets the previous CAR.
+     *
+     * @param car Previous CAR
+     */
     public void setPreviousCAR(byte[] car) {
 	this.previousCAR = car;
     }
 
+    /**
+     * Sets the IDPICC.
+     *
+     * @param idpicc IDPICC
+     */
     public void setIDPICC(byte[] idpicc) {
 	this.idpicc = idpicc;
     }
 
-    public void setRetryCounter(byte counter){
+    /**
+     * Sets the retry counter.
+     *
+     * @param counter Retry counter
+     */
+    public void setRetryCounter(byte counter) {
 	this.retryCounter = counter;
     }
 
+    /**
+     * Returns the DIDAuthenticationDataType.
+     *
+     * @return DIDAuthenticationDataType
+     */
     public DIDAuthenticationDataType getAuthDataType() {
 	AuthDataResponse authResponse = authMap.createResponse(new iso.std.iso_iec._24727.tech.schema.PACEOutputType());
 	authResponse.addElement(RETRY_COUNTER, String.valueOf(retryCounter));
@@ -80,5 +116,4 @@ public class PACEOutputType {
 	}
 	return authResponse.getResponse();
     }
-
 }

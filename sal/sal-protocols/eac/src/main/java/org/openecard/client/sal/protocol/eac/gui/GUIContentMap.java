@@ -17,7 +17,7 @@ public class GUIContentMap {
 	REQUIRED_CHAT,
 	OPTIONAL_CHAT,
 	SELECTED_CHAT,
-	PIN_TYPE,
+	PIN_ID,
 	PIN;
     }
 

@@ -16,7 +16,6 @@
 package org.openecard.client.common.apdu.utils;
 
 import java.io.ByteArrayOutputStream;
-import org.openecard.client.common.WSHelper.WSException;
 import org.openecard.client.common.apdu.ReadBinary;
 import org.openecard.client.common.apdu.Select;
 import org.openecard.client.common.apdu.common.CardCommandAPDU;
@@ -36,7 +35,7 @@ public class CardUtils {
     /**
      * Creates a new utility class for file operations.
      *
-     * @param ifd IFD
+     * @param dispatcher Dispatcher
      */
     public CardUtils(Dispatcher dispatcher) {
 	this.dispatcher = dispatcher;
@@ -46,7 +45,8 @@ public class CardUtils {
      * Select the Master File.
      *
      * @param slotHandle Slot handle
-     * @throws org.openecard.client.common.WSHelper.WSException
+     * @throws APDUException
+     * @throws Exception
      */
     public void selectMF(byte[] slotHandle) throws APDUException, Exception {
 	CardCommandAPDU selectMF = new Select.MasterFile();
@@ -58,7 +58,8 @@ public class CardUtils {
      *
      * @param slotHandle Slot handle
      * @param fileID File identifier
-     * @throws org.openecard.client.common.WSHelper.WSException
+     * @throws APDUException
+     * @throws Exception
      */
     public void selectFile(byte[] slotHandle, short fileID) throws APDUException, Exception {
 	CardCommandAPDU selectFile = new Select.File(ShortUtils.toByteArray(fileID));

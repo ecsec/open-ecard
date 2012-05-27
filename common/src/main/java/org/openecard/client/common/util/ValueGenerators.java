@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openecard.client.common.util;
 
 import java.security.SecureRandom;
@@ -22,52 +21,125 @@ import java.util.UUID;
 
 
 /**
+ * Implements convenience methods to generates random values.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class ValueGenerators {
 
+    /**
+     * Generates a new pre-shared key (PSK).
+     *
+     * @return PSK
+     */
     public static String generatePSK() {
-	String psk = generateSecureRandomHex(32);
-	return psk;
+	return generatePSK(32);
     }
 
+    /**
+     * Generates a new pre-shared key (PSK).
+     *
+     * @param length Length of the PSK
+     * @return PSK
+     */
+    public static String generatePSK(int length) {
+	return generateSecureRandomHex(length);
+    }
+
+    /**
+     * Generates an session identifier.
+     *
+     * @return Session identifier.
+     */
     public static String generateSessionID() {
-	String session = generateRandomHex(28);
-	return session;
+	return generateSessionID(28);
     }
 
-    public static String generateRandomHex(int len) {
-	StringBuilder result = new StringBuilder(len);
-	Random rand = new Random();
-	for (int i = 0; i < len; i++) {
-	    int num = Math.abs(rand.nextInt()) % 16;
-	    char c = Character.forDigit(num, 16);
-	    result.append(c);
-	}
-	return result.toString();
+    /**
+     * Generates a session identifier.
+     *
+     * @param length Length of the session identifier
+     * @return Session identifier
+     */
+    public static String generateSessionID(int length) {
+	return generateRandomHex(28);
     }
 
+    /**
+     * Generates a secure session identifier.
+     *
+     * @return Session identifier
+     */
     public static String generateSecureSessionID() {
-	String session = generateSecureRandomHex(28);
-	return session;
+	return generateSecureRandomHex(28);
     }
 
-    public static String generateSecureRandomHex(int len) {
-	if (len <= 0) {
-	    return "";
+    /**
+     * Generates a UUID.
+     * Using Java UUID and adds the prefix 'urn:uuid:'.
+     *
+     * @return UUID
+     */
+    public static String generateUUID() {
+	String uuid = UUID.randomUUID().toString();
+	return "urn:uuid:" + uuid;
+    }
+
+    /**
+     * Generates a random hex string.
+     *
+     * @param length Length of the random
+     * @return Random hex string
+     */
+    public static String generateRandomHex(int length) {
+	return ByteUtils.toHexString(generateRandom(length));
+    }
+
+    /**
+     * Generates a random value.
+     * Using 'java.util.Random'.
+     *
+     * @param length Length of the random
+     * @return Secure random value
+     */
+    public static byte[] generateRandom(int length) {
+	if (length < 1) {
+	    return null;
 	}
 
-	byte[] randomBytes = new byte[len];
-	SecureRandom rand = new SecureRandom();
-
+	Random rand = new Random();
+	byte[] randomBytes = new byte[length];
 	rand.nextBytes(randomBytes);
-	return ByteUtils.toHexString(randomBytes);
+
+	return randomBytes;
     }
 
-    public static String generateUUID() {
-        String uuid = UUID.randomUUID().toString();
-        return "urn:uuid:" + uuid;
+    /**
+     * Generates a secure random hex string.
+     *
+     * @param length Length of the random
+     * @return Secure random hex string
+     */
+    public static String generateSecureRandomHex(int length) {
+	return ByteUtils.toHexString(generateSecureRandom(length));
     }
 
+    /**
+     * Generates a secure random value.
+     * Using 'java.security.SecureRandom'.
+     *
+     * @param length Length of the random
+     * @return Secure random value
+     */
+    public static byte[] generateSecureRandom(int length) {
+	if (length < 1) {
+	    return null;
+	}
+
+	SecureRandom rand = new SecureRandom();
+	byte[] randomBytes = new byte[length];
+	rand.nextBytes(randomBytes);
+
+	return randomBytes;
+    }
 }

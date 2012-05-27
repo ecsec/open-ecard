@@ -41,6 +41,12 @@ public class CardCommandStatus {
     private static final String sw6E = "Class not supported.";
     private static final String sw6F = "No precise diagnosis.";
 
+    /**
+     * Returns the message.
+     *
+     * @param status Status bytes
+     * @return Message
+     */
     public static String getMessage(byte[] status) {
 	String msg = defaultMsg;
 	switch (status[0]) {
@@ -274,5 +280,4 @@ public class CardCommandStatus {
 
 	return msg;
     }
-
 }

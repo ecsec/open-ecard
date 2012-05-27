@@ -474,7 +474,10 @@ public class CardCommandAPDU extends CardAPDU {
 	header[0] = (byte) (header[0] | 0x10);
     }
 
-    public final void getChainingIterator() {
+    /**
+     * Returns a iterator over the chaining APDUs.
+     */
+    public final Iterable getChainingIterator() {
 	//TODO
 	throw new IllegalAccessError("Not implemented yet");
     }
@@ -604,9 +607,10 @@ public class CardCommandAPDU extends CardAPDU {
     /**
      * Transmit the APDU.
      *
-     * @param ifd IFD
+     * @param dispatcher Dispatcher
      * @param slotHandle Slot handle
      * @return Response APDU
+     * @throws APDUException
      */
     public CardResponseAPDU transmit(Dispatcher dispatcher, byte[] slotHandle) throws APDUException {
 	return transmit(dispatcher, slotHandle, null);
@@ -615,10 +619,11 @@ public class CardCommandAPDU extends CardAPDU {
     /**
      * Transmit the APDU.
      *
-     * @param ifd IFD
+     * @param dispatcher Dispatcher
      * @param slotHandle Slot handle
      * @param responses List of positive responses
      * @return Response APDU
+     * @throws APDUException
      */
     public CardResponseAPDU transmit(Dispatcher dispatcher, byte[] slotHandle, List<byte[]> responses) throws APDUException {
 	Transmit t;

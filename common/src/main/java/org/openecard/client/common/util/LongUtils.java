@@ -1,19 +1,26 @@
-/*
- * Copyright 2012 Tobias Wich ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms and
+ * conditions contained in a signed written agreement between you and ecsec.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.common.util;
+
 
 /**
  * A set of utility functions for long integers.
@@ -29,7 +36,7 @@ public class LongUtils {
      * @return byte[]
      */
     public static byte[] toByteArray(long value) {
-        return toByteArray(value, 8);
+	return toByteArray(value, 8);
     }
 
     /**
@@ -40,53 +47,53 @@ public class LongUtils {
      * @return byte[]
      */
     public static byte[] toByteArray(long value, int numBits) {
-        if (value < 0) {
-            throw new IllegalArgumentException("Value must not be negative.");
-        }
-        if (numBits <= 0 || numBits > 8) {
-            throw new IllegalArgumentException("Numbits must be between 0 and 8.");
-        }
+	if (value < 0) {
+	    throw new IllegalArgumentException("Value must not be negative.");
+	}
+	if (numBits <= 0 || numBits > 8) {
+	    throw new IllegalArgumentException("Numbits must be between 0 and 8.");
+	}
 
-        if (value == 0) {
-            return new byte[1];
-        }
+	if (value == 0) {
+	    return new byte[1];
+	}
 
-        byte[] buffer = null;
+	byte[] buffer = null;
 
-        int numBytesInBuffer = 64 / numBits;
-        int restBits = 64 - (numBytesInBuffer * numBits);
+	int numBytesInBuffer = 64 / numBits;
+	int restBits = 64 - (numBytesInBuffer * numBits);
 
-        int j = 0;
-        for (int i = numBytesInBuffer - ((restBits > 0) ? 0 : 1); i >= 0; i--) {
-            byte b;
-            // first chunk which has uneven number of bits?
-            if (i == numBytesInBuffer) {
-                byte mask = numBitsToMask((byte) restBits);
-                b = (byte) ((byte) (value >> (((i - 1) * numBits) + restBits)) & mask);
-            } else {
-                byte mask = numBitsToMask((byte) numBits);
-                b = (byte) ((value >> (i * numBits)) & mask);
-            }
+	int j = 0;
+	for (int i = numBytesInBuffer - ((restBits > 0) ? 0 : 1); i >= 0; i--) {
+	    byte b;
+	    // first chunk which has uneven number of bits?
+	    if (i == numBytesInBuffer) {
+		byte mask = numBitsToMask((byte) restBits);
+		b = (byte) ((byte) (value >> (((i - 1) * numBits) + restBits)) & mask);
+	    } else {
+		byte mask = numBitsToMask((byte) numBits);
+		b = (byte) ((value >> (i * numBits)) & mask);
+	    }
 
-            if (buffer == null && b != 0) {
-                buffer = new byte[i + 1];
-            } else if (buffer == null) {
-                continue;
-            }
+	    if (buffer == null && b != 0) {
+		buffer = new byte[i + 1];
+	    } else if (buffer == null) {
+		continue;
+	    }
 
-            buffer[j] = b;
-            j++;
-        }
+	    buffer[j] = b;
+	    j++;
+	}
 
-        return buffer;
+	return buffer;
     }
 
     private static byte numBitsToMask(byte numBits) {
-        byte result = 0;
-        for (byte i = 0; i < numBits; i++) {
-            result = (byte) ((result << 1) | 1);
-        }
-        return result;
+	byte result = 0;
+	for (byte i = 0; i < numBits; i++) {
+	    result = (byte) ((result << 1) | 1);
+	}
+	return result;
     }
 
     /**
@@ -98,10 +105,11 @@ public class LongUtils {
      * @return byte[]
      */
     public static byte[] toByteArray(long value, boolean padArrayToTypeLength) {
-        byte[] result = toByteArray(value, 8);
-        if (padArrayToTypeLength && result.length < 8) {
-            result = ByteUtils.concatenate(new byte[8 - result.length], result);
-        }
-        return result;
+	byte[] result = toByteArray(value, 8);
+	if (padArrayToTypeLength && result.length < 8) {
+	    result = ByteUtils.concatenate(new byte[8 - result.length], result);
+	}
+	return result;
     }
+
 }

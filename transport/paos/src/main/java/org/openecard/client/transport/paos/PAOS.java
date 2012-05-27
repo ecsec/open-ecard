@@ -1,34 +1,24 @@
-/**
- * **************************************************************************
- * Copyright (C) 2012 ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
- * This file is part of the Open eCard Client.
+ * This file is part of the Open eCard App.
  *
  * GNU General Public License Usage
- *
- * Open eCard Client is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Open eCard Client is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
  * Other Usage
- *
  * Alternatively, this file may be used in accordance with the terms and
  * conditions contained in a signed written agreement between you and ecsec.
  *
- ***************************************************************************
- */
+ ***************************************************************************/
+
 package org.openecard.client.transport.paos;
 
 import de.bund.bsi.ecard.api._1.InitializeFramework;
@@ -323,4 +313,5 @@ public class PAOS {
 	    msg = dispatcher.deliver(requestObj);
 	}
     }
+
 }

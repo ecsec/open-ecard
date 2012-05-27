@@ -478,7 +478,7 @@ public class CardCommandAPDU extends CardAPDU {
      * Returns a iterator over the chaining APDUs.
      */
     public final Iterable getChainingIterator() {
-	//TODO
+	// TODO: Implemente the chaining iterator
 	throw new IllegalAccessError("Not implemented yet");
     }
 

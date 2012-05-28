@@ -68,7 +68,7 @@ import org.w3c.dom.Element;
  */
 public class PAOS {
 
-    private static final Logger logger = LoggerFactory.getLogger(PAOS.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(PAOS.class);
     private final WSMarshaller m;
     private final String endpoint;
     private final Dispatcher dispatcher;
@@ -201,7 +201,7 @@ public class PAOS {
 	    updateMessageID(msg);
 
 	    // <editor-fold defaultstate="collapsed" desc="log message">
-	    logger.trace("Receive PAOS message:\n {}", m.doc2str(doc));
+	    logger.info(LoggingConstants.FINE, "Message received:\n{}", m.doc2str(doc));
 	    // </editor-fold>
 
 	    return m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
@@ -218,7 +218,7 @@ public class PAOS {
 	String result = m.doc2str(msg.getDocument());
 
 	// <editor-fold defaultstate="collapsed" desc="log message">
-	logger.trace("Send PAOS message:\n {}", result);
+	logger.info(LoggingConstants.FINE, "Message sent:\n{}", result);
 	// </editor-fold>
 
 	return result;

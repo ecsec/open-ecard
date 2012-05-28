@@ -30,7 +30,6 @@ import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.ifd.scio.IFD;
-import org.openecard.client.ifd.scio.wrapper.SCChannel;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerException;
@@ -51,12 +50,15 @@ public class PACETest {
     @Test
     public void executePACE_PIN() throws UnsupportedDataTypeException, JAXBException, SAXException, WSMarshallerException {
 	// Setup logger
+	java.util.logging.LogManager.getLogManager().reset();
+
 	ConsoleHandler ch = new ConsoleHandler();
-	ch.setLevel(Level.FINEST);
-	LogManager.getLogger(PACEImplementation.class.getName()).addHandler(ch);
-	LogManager.getLogger(PACEImplementation.class.getName()).setLevel(Level.FINEST);
-	LogManager.getLogger(SCChannel.class.getName()).addHandler(ch);
-	LogManager.getLogger(SCChannel.class.getName()).setLevel(Level.FINEST);
+	ch.setLevel(Level.ALL);
+
+	LogManager.getLogger("org.openecard.client.ifd.protocol.pace").addHandler(ch);
+	LogManager.getLogger("org.openecard.client.ifd.protocol.pace").setLevel(Level.FINEST);
+	LogManager.getLogger("org.openecard.client.ifd.scio.wrapper").addHandler(ch);
+	LogManager.getLogger("org.openecard.client.ifd.scio.wrapper").setLevel(Level.FINE);
 
 	ClientEnv env = new ClientEnv();
 	MessageDispatcher dispatcher = new MessageDispatcher(env);
@@ -91,7 +93,7 @@ public class PACETest {
 		+ "    <iso:PinID>02</iso:PinID>\n"
 		+ "    <iso:CHAT>7f4c12060904007f0007030102025305300301ffb7</iso:CHAT>\n"
 		// Remove PIN element to active the GUI
-//		+ "    <iso:PIN>142390</iso:PIN>\n"
+		+ "    <iso:PIN>142390</iso:PIN>\n"
 		//		+ "    <iso:PIN>123456</iso:PIN>\n"
 		+ "  </iso:AuthenticationProtocolData>\n"
 		+ "</iso:EstablishChannel>";

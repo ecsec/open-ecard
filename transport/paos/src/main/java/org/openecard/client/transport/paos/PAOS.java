@@ -201,7 +201,7 @@ public class PAOS {
 	    updateMessageID(msg);
 
 	    // <editor-fold defaultstate="collapsed" desc="log message">
-	    logger.info(LoggingConstants.FINE, "Message received:\n{}", m.doc2str(doc));
+	    logger.debug(LoggingConstants.FINE, "Message received:\n{}", m.doc2str(doc));
 	    // </editor-fold>
 
 	    return m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
@@ -218,7 +218,7 @@ public class PAOS {
 	String result = m.doc2str(msg.getDocument());
 
 	// <editor-fold defaultstate="collapsed" desc="log message">
-	logger.info(LoggingConstants.FINE, "Message sent:\n{}", result);
+	logger.debug(LoggingConstants.FINE, "Message sent:\n{}", result);
 	// </editor-fold>
 
 	return result;

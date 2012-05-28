@@ -86,6 +86,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    CertificateDescription certDescription = CertificateDescription.getInstance(eac1Input.getCertificateDescription());
 	    CHAT requiredCHAT = new CHAT(eac1Input.getRequiredCHAT());
 	    CHAT optionalCHAT = new CHAT(eac1Input.getOptionalCHAT());
+	    byte pinID = PasswordID.valueOf(didAuthenticate.getDIDName()).getByte();
 
 	    // GUI request
 	    GUIContentMap content = new GUIContentMap();
@@ -94,6 +95,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    content.add(GUIContentMap.ELEMENT.REQUIRED_CHAT, requiredCHAT);
 	    content.add(GUIContentMap.ELEMENT.OPTIONAL_CHAT, optionalCHAT);
 	    content.add(GUIContentMap.ELEMENT.SELECTED_CHAT, requiredCHAT);
+	    content.add(GUIContentMap.ELEMENT.PIN_ID, pinID);
 	    gui.show(content);
 
 	    // GUI response
@@ -105,7 +107,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    AuthDataResponse paceInputMap = paceAuthMap.createResponse(didAuthenticate.getAuthenticationProtocolData());
 
 	    paceInputMap.addElement(PACEInputType.PIN, pin);
-	    paceInputMap.addElement(PACEInputType.PIN_ID, PasswordID.valueOf(didAuthenticate.getDIDName()).getByteAsString());
+	    paceInputMap.addElement(PACEInputType.PIN_ID, PasswordID.parse(pinID).getByteAsString());
 	    paceInputMap.addElement(PACEInputType.CHAT, selectedCHAT.toString());
 	    paceInputMap.addElement(PACEInputType.CERTIFICATE_DESCRIPTION, ByteUtils.toHexString(eac1Input.getCertificateDescription()));
 

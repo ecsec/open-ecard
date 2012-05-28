@@ -14,8 +14,9 @@
  * http://www.gnu.org/copyleft/gpl.html.
  *
  * Other Usage
- * Alternatively, this file may be used in accordance with the terms and
- * conditions contained in a signed written agreement between you and ecsec.
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
  *
  ***************************************************************************/
 
@@ -29,7 +30,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.ifd.scio.wrapper.SCChannel;
 import org.openecard.client.richclient.activation.common.ActivationConstants;
 import org.openecard.client.richclient.activation.messages.TCTokenRequest;
 import org.openecard.client.richclient.activation.messages.TCTokenResponse;
@@ -57,20 +57,6 @@ public class RichClientTest {
     @Before
     public void setUp() {
 	try {
-	    ConsoleHandler ch = new ConsoleHandler();
-	    ch.setLevel(Level.FINEST);
-//
-//	    LogManager.getLogger("org.openecard.client.richclient.activation").setLevel(Level.FINE);
-//	    LogManager.getLogger("org.openecard.client.richclient.activation").addHandler(ch);
-	    LogManager.getLogger("org.openecard.client.transport.paos").setLevel(Level.FINEST);
-	    LogManager.getLogger("org.openecard.client.transport.paos").addHandler(ch);
-//	    LogManager.getLogger("org.openecard.client.ifd.scio").addHandler(ch);
-//	    LogManager.getLogger("org.openecard.client.ifd.scio").setLevel(Level.ALL);
-	    LogManager.getLogger(SCChannel.class.getName()).addHandler(ch);
-	    LogManager.getLogger("org.openecard.client.ifd.scio-backend").addHandler(ch);
-	    LogManager.getLogger("org.openecard.client.ifd.scio-backend").setLevel(Level.FINEST);
-	    LogManager.getLogger(SCChannel.class.getName()).setLevel(Level.FINEST);
-
 	    // Get TCToken from the given URL
 	    TCTokenGrabber grabber = new TCTokenGrabber();
 	    String data = grabber.getResource(tokenURI);
@@ -99,9 +85,22 @@ public class RichClientTest {
     @Test
     public void testMain() {
 	try {
+
+	    java.util.logging.LogManager.getLogManager().reset();
+
+	    ConsoleHandler ch = new ConsoleHandler();
+	    ch.setLevel(Level.ALL);
+
+	    LogManager.getLogger("org.openecard.client.ifd.scio.wrapper").addHandler(ch);
+	    LogManager.getLogger("org.openecard.client.ifd.scio.wrapper").setLevel(Level.FINE);
+
+
 	    RichClient client = RichClient.getInstance();
 	    // Wait some seconds until the client comes up
 	    Thread.sleep(2500);
+
+	    LogManager.getLogger("org.openecard.client.transport.paos").addHandler(ch);
+	    LogManager.getLogger("org.openecard.client.transport.paos").setLevel(Level.FINE);
 
 	    TCTokenRequest applicationRequest = new TCTokenRequest();
 	    applicationRequest.setTCToken(tokens.get(0));

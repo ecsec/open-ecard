@@ -148,7 +148,7 @@ public class CardVerifiableCertificate {
 			break;
 		}
 	    }
-	    verifyCertificate();
+	    verify();
 	} catch (Exception e) {
 	    throw new CertificateEncodingException("Malformed CardVerifiableCertificates: " + e.getMessage());
 	}
@@ -157,7 +157,7 @@ public class CardVerifiableCertificate {
     /**
      * See See BSI-TR-03110, version 2.10, part 3, section C.
      */
-    private void verifyCertificate() throws CertificateEncodingException {
+    private void verify() throws CertificateEncodingException {
 	if (body == null || cpi == null || car == null
 		|| publicKey == null || chr == null
 		|| chat == null || effectiveDate == null
@@ -167,7 +167,8 @@ public class CardVerifiableCertificate {
     }
 
     /*
-     * Parse the date. Format YYMMDD (6 Bytes). Note: Januar = 0 not 1!
+     * Parses the date.
+     * Format YYMMDD (6 Bytes). Note: Januar = 0 not 1!
      */
     private Calendar parseDate(byte[] date) {
 	Calendar cal = Calendar.getInstance();

@@ -91,7 +91,7 @@ public final class ECPublicKey extends PublicKey {
 
     private void verify() {
 	// Object identifier and public point are MANDATORY
-	if (oid != null || y != null) {
+	if (oid == null || y == null) {
 	    throw new IllegalArgumentException("Malformed ECPublicKey");
 	}
 	// CONDITIONAL domain parameters MUST be either all present, except the cofactor, or all absent
@@ -99,15 +99,6 @@ public final class ECPublicKey extends PublicKey {
 	    if (prime != null || a != null || b != null || g != null || order != null) {
 		throw new IllegalArgumentException("Malformed ECPublicKey");
 	    }
-	}
-    }
-
-    @Override
-    public boolean equals(PublicKey pk) {
-	try {
-	    return ByteUtils.compare(getTLVEncoded().toBER(), pk.getTLVEncoded().toBER());
-	} catch (TLVException ignore) {
-	    return false;
 	}
     }
 

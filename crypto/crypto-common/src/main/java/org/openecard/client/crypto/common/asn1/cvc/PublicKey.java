@@ -1,6 +1,8 @@
 package org.openecard.client.crypto.common.asn1.cvc;
 
 import org.openecard.client.common.tlv.TLV;
+import org.openecard.client.common.tlv.TLVException;
+import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.eac.oid.TAObjectIdentifier;
 import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
 
@@ -37,6 +39,7 @@ public abstract class PublicKey {
      */
     public static PublicKey getInstance(TLV key) throws Exception {
 	try {
+
 	    String oid = ObjectIdentifierUtils.toString(key.findChildTags(OID_TAG).get(0).getValue());
 
 	    if (oid.startsWith(TAObjectIdentifier.id_TA_ECDSA)) {
@@ -52,19 +55,25 @@ public abstract class PublicKey {
     }
 
     /**
-     * Returns the object identifier.
-     *
-     * @return Object identifier
-     */
-    public abstract String getObjectIdentifier();
-
-    /**
      * Compares the public key.
      *
      * @param pk PublicKey
      * @return True if they are equal, otherwise false
      */
-    public abstract boolean equals(PublicKey pk);
+    public boolean equals(PublicKey pk) {
+	try {
+	    return ByteUtils.compare(getTLVEncoded().toBER(), pk.getTLVEncoded().toBER());
+	} catch (TLVException ignore) {
+	    return false;
+	}
+    }
+
+    /**
+     * Returns the object identifier.
+     *
+     * @return Object identifier
+     */
+    public abstract String getObjectIdentifier();
 
     /**
      * Returns the TLV encoded key.

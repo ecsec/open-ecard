@@ -1,32 +1,24 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
- * This file is part of the Open eCard Client.
+ * This file is part of the Open eCard App.
  *
  * GNU General Public License Usage
- *
- * Open eCard Client is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Open eCard Client is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
  * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
  *
- * Alternatively, this file may be used in accordance with the terms and
- * conditions contained in a signed written agreement between you and ecsec.
- *
- ****************************************************************************/
+ ***************************************************************************/
 
 package org.openecard.client.applet;
 
@@ -70,7 +62,7 @@ import org.openecard.client.transport.tls.TlsClientSocketFactory;
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
  */
 public class ECardApplet extends JApplet {
-    
+
     // load logging config
     static {
 	File conf = new File(LogManager.openecardPath + File.separator + LogManager.openecardConfFileName);
@@ -98,7 +90,7 @@ public class ECardApplet extends JApplet {
     private PAOS paos;
     private JSEventCallback jsec;
     private TinyManagement management;
-    
+
     private byte[] ctx;
     private boolean initialized;
     private boolean paramsPresent;
@@ -123,49 +115,49 @@ public class ECardApplet extends JApplet {
      */
     @Override
     public void init() {
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "init()");
-        }
-        initialized = false;
-        paramsPresent = true;
-        setParams();
-        env = new ClientEnv();
-        management = new TinyManagement(env);
-        env.setManagement(management);
-        env.setDispatcher(new MessageDispatcher(env));
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.entering(this.getClass().getName(), "init()");
+	}
+	initialized = false;
+	paramsPresent = true;
+	setParams();
+	env = new ClientEnv();
+	management = new TinyManagement(env);
+	env.setManagement(management);
+	env.setDispatcher(new MessageDispatcher(env));
 	ifd.setDispatcher(env.getDispatcher());
 	SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper(findParentFrame()));
-        ifd = new IFD();
-        ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
-        ifd.setGUI(gui);
-        env.setIFD(ifd);
-        EstablishContext ecRequest = new EstablishContext();
-        EstablishContextResponse ecResponse = ifd.establishContext(ecRequest);
-        if (ecResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
-            if (ecResponse.getContextHandle() != null) {
-                ctx = ecResponse.getContextHandle();
-                initialized = true;
-            }
-        }
-        if (recognizeCard) {
-            try {
-                // TODO: reactivate remote tree repository as soon as it supports the embedded TLSMarker
-                //GetRecognitionTree client = (GetRecognitionTree) WSClassLoader.getClientService(RecognitionProperties.getServiceName(), RecognitionProperties.getServiceAddr());
-                recognition = new CardRecognition(ifd, ctx);
-            } catch (Exception ex) {
-                _logger.logp(Level.SEVERE, this.getClass().getName(), "init()", ex.getMessage(), ex);
-                recognition = null;
-                initialized = false;
-            }
-        } else {
-            recognition = null;
-        }
+	ifd = new IFD();
+	ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
+	ifd.setGUI(gui);
+	env.setIFD(ifd);
+	EstablishContext ecRequest = new EstablishContext();
+	EstablishContextResponse ecResponse = ifd.establishContext(ecRequest);
+	if (ecResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
+	    if (ecResponse.getContextHandle() != null) {
+		ctx = ecResponse.getContextHandle();
+		initialized = true;
+	    }
+	}
+	if (recognizeCard) {
+	    try {
+		// TODO: reactivate remote tree repository as soon as it supports the embedded TLSMarker
+		//GetRecognitionTree client = (GetRecognitionTree) WSClassLoader.getClientService(RecognitionProperties.getServiceName(), RecognitionProperties.getServiceAddr());
+		recognition = new CardRecognition(ifd, ctx);
+	    } catch (Exception ex) {
+		_logger.logp(Level.SEVERE, this.getClass().getName(), "init()", ex.getMessage(), ex);
+		recognition = null;
+		initialized = false;
+	    }
+	} else {
+	    recognition = null;
+	}
 	// TODO: replace socket factory with this strange psk stuff
 	PAOSCallback paosCallback = new PAOSCallback() {
-	    
+
 	    @Override
 	    public void loadRefreshAddress() {
-		
+
 		new Thread(new Runnable() {
 		    @Override
 		    public void run() {
@@ -183,7 +175,7 @@ public class ECardApplet extends JApplet {
 			    e.printStackTrace(System.err);
 			}
 		    }
-		}).start();	
+		}).start();
 	    }
 	};
 
@@ -199,155 +191,155 @@ public class ECardApplet extends JApplet {
 	} else {
 	    paos = new PAOS(endpointUrl, env.getDispatcher(), paosCallback);
 	}
-        em = new EventManager(recognition, env, ctx, sessionId);
-        env.setEventManager(em);
+	em = new EventManager(recognition, env, ctx, sessionId);
+	env.setEventManager(em);
 	CardStateMap cardStates = new CardStateMap();
 	SALStateCallback salCallback = new SALStateCallback(recognition, cardStates);
-        sal = new TinySAL(env, cardStates, sessionId);
+	sal = new TinySAL(env, cardStates, sessionId);
 	sal.setGUI(gui);
 	sal.addProtocol(ECardConstants.Protocol.EAC, new EACProtocolFactory());
-	env.setSAL(sal);   
+	env.setSAL(sal);
 
-        em.registerAllEvents(salCallback);
-        jsec = new JSEventCallback(this);
-        em.registerAllEvents(jsec);
-        worker = new AppletWorker(this);
-        if (spBehavior.equals(WAIT)) {
-            if (recognizeCard) {
-                em.register(worker, EventType.CARD_RECOGNIZED);
-            } else {
-                em.register(worker, EventType.CARD_INSERTED);
-            }
-        }
-        InitializeResponse initResponse = sal.initialize(new Initialize());
-        if (initResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
-            initialized = false;
-        }
-        List<ConnectionHandleType> cHandles = sal.getConnectionHandles();
-        if (cHandles.isEmpty()) {
-            jsec.showMessage("Please connect Terminal.");
-        } else {
-            ConnectionHandleType cHandle;
-            for (Iterator<ConnectionHandleType> iter = cHandles.iterator(); iter.hasNext();) {
-                cHandle = iter.next();
-                jsec.signalEvent(EventType.TERMINAL_ADDED, cHandle);
-                if (cHandle.getRecognitionInfo() != null) {
-                    jsec.signalEvent(EventType.CARD_INSERTED, cHandle);
-                }
-            }
-        }
+	em.registerAllEvents(salCallback);
+	jsec = new JSEventCallback(this);
+	em.registerAllEvents(jsec);
+	worker = new AppletWorker(this);
+	if (spBehavior.equals(WAIT)) {
+	    if (recognizeCard) {
+		em.register(worker, EventType.CARD_RECOGNIZED);
+	    } else {
+		em.register(worker, EventType.CARD_INSERTED);
+	    }
+	}
+	InitializeResponse initResponse = sal.initialize(new Initialize());
+	if (initResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
+	    initialized = false;
+	}
+	List<ConnectionHandleType> cHandles = sal.getConnectionHandles();
+	if (cHandles.isEmpty()) {
+	    jsec.showMessage("Please connect Terminal.");
+	} else {
+	    ConnectionHandleType cHandle;
+	    for (Iterator<ConnectionHandleType> iter = cHandles.iterator(); iter.hasNext();) {
+		cHandle = iter.next();
+		jsec.signalEvent(EventType.TERMINAL_ADDED, cHandle);
+		if (cHandle.getRecognitionInfo() != null) {
+		    jsec.signalEvent(EventType.CARD_INSERTED, cHandle);
+		}
+	    }
+	}
 
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "init()");
-        }
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.exiting(this.getClass().getName(), "init()");
+	}
     }
 
     @Override
     public void start() {
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "start()");
-        }
-        if (paramsPresent && initialized) {
-            if (worker == null) {
-                worker = new AppletWorker(this);
-            }
-            worker.start();
-        }
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "start()");
-        }
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.entering(this.getClass().getName(), "start()");
+	}
+	if (paramsPresent && initialized) {
+	    if (worker == null) {
+		worker = new AppletWorker(this);
+	    }
+	    worker.start();
+	}
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.exiting(this.getClass().getName(), "start()");
+	}
     }
 
     @Override
     public void destroy() {
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "destroy()");
-        }
-        if (worker != null) {
-            worker.interrupt();
-            worker = null;
-        }
-        paos = null;
-        if (em != null) {
-            em.terminate();
-            em = null;
-        }
-        sal = null;
-        recognition = null;
-        if (ifd != null) {
-            ReleaseContext rcRequest = new ReleaseContext();
-            rcRequest.setContextHandle(ctx);
-            // Since JVM will be shut down after destroy method has been called by the browser,
-            // evaluation of ReleaseContextResponse is not necessary.
-            ifd.releaseContext(rcRequest);
-            ifd = null;
-        }
-        env = null;
-        jsec = null;
-        ctx = null;
-        sessionId = null;
-        endpointUrl = null;
-        redirectUrl = null;
-        reportId = null;
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "destroy()");
-        }
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.entering(this.getClass().getName(), "destroy()");
+	}
+	if (worker != null) {
+	    worker.interrupt();
+	    worker = null;
+	}
+	paos = null;
+	if (em != null) {
+	    em.terminate();
+	    em = null;
+	}
+	sal = null;
+	recognition = null;
+	if (ifd != null) {
+	    ReleaseContext rcRequest = new ReleaseContext();
+	    rcRequest.setContextHandle(ctx);
+	    // Since JVM will be shut down after destroy method has been called by the browser,
+	    // evaluation of ReleaseContextResponse is not necessary.
+	    ifd.releaseContext(rcRequest);
+	    ifd = null;
+	}
+	env = null;
+	jsec = null;
+	ctx = null;
+	sessionId = null;
+	endpointUrl = null;
+	redirectUrl = null;
+	reportId = null;
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.exiting(this.getClass().getName(), "destroy()");
+	}
     }
-    
+
     public Frame findParentFrame() {
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "findParentFrame()");
-        }
-        Container c = this;
-        while (c != null) {
-            if (c instanceof Frame) {
-                if (_logger.isLoggable(Level.FINER)) {
-                    _logger.exiting(this.getClass().getName(), "findParentFrame()", (Frame) c);
-                }
-                return (Frame) c;
-            }
-            c = c.getParent();
-        }
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "findParentFrame()", (Frame) null);
-        }
-        return (Frame) null;
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.entering(this.getClass().getName(), "findParentFrame()");
+	}
+	Container c = this;
+	while (c != null) {
+	    if (c instanceof Frame) {
+		if (_logger.isLoggable(Level.FINER)) {
+		    _logger.exiting(this.getClass().getName(), "findParentFrame()", (Frame) c);
+		}
+		return (Frame) c;
+	    }
+	    c = c.getParent();
+	}
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.exiting(this.getClass().getName(), "findParentFrame()", (Frame) null);
+	}
+	return (Frame) null;
     }
 
     public String getSessionId() {
-        return sessionId;
+	return sessionId;
     }
 
     public String getReportId() {
-        return reportId;
+	return reportId;
     }
 
     public String getEndpointUrl() {
-        return endpointUrl;
+	return endpointUrl;
     }
 
     public String getRedirectUrl() {
-        return redirectUrl;
+	return redirectUrl;
     }
 
     public boolean recognizeCard() {
-        return recognizeCard;
+	return recognizeCard;
     }
 
     public ClientEnv getEnv() {
-        return env;
+	return env;
     }
 
     public TinySAL getTinySAL() {
-        return sal;
+	return sal;
     }
 
     public PAOS getPAOS() {
-        return paos;
+	return paos;
     }
 
     public String getSpBehavior() {
-        return spBehavior;
+	return spBehavior;
     }
 
     public String getPsk() {
@@ -359,128 +351,128 @@ public class ECardApplet extends JApplet {
     }
 
     public void startPAOS() {
-        startPAOS(null);
+	startPAOS(null);
     }
 
     public void startPAOS(String ifdName) {
-        if (spBehavior.equals(CLICK)) {
-            worker.startPAOS(ifdName);
-        }
+	if (spBehavior.equals(CLICK)) {
+	    worker.startPAOS(ifdName);
+	}
     }
 
     private void setParams() {
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "setParams()");
-        }
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.entering(this.getClass().getName(), "setParams()");
+	}
 
-        //
-        // mandatory parameters
-        //
+	//
+	// mandatory parameters
+	//
 
-        String param = getParameter("sessionId");
-        if (param != null) {
-            sessionId = param;
-            if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "sessionId set to " + param + ".", param);
-            }
-        } else {
-            _logger.logp(Level.SEVERE, this.getClass().getName(), "setParams()", "sessionId not set.");
-            paramsPresent = false;
-            return;
-        }
-        param = getParameter("endpointUrl");
-        if (param != null) {
-            endpointUrl = param;
-            if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "endpointUrl set to " + param + ".", param);
-            }
-        } else {
-            _logger.logp(Level.SEVERE, this.getClass().getName(), "setParams()", "endpointUrl not set.");
-            paramsPresent = false;
-            return;
-        }
+	String param = getParameter("sessionId");
+	if (param != null) {
+	    sessionId = param;
+	    if (_logger.isLoggable(Level.CONFIG)) {
+		_logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "sessionId set to " + param + ".", param);
+	    }
+	} else {
+	    _logger.logp(Level.SEVERE, this.getClass().getName(), "setParams()", "sessionId not set.");
+	    paramsPresent = false;
+	    return;
+	}
+	param = getParameter("endpointUrl");
+	if (param != null) {
+	    endpointUrl = param;
+	    if (_logger.isLoggable(Level.CONFIG)) {
+		_logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "endpointUrl set to " + param + ".", param);
+	    }
+	} else {
+	    _logger.logp(Level.SEVERE, this.getClass().getName(), "setParams()", "endpointUrl not set.");
+	    paramsPresent = false;
+	    return;
+	}
 
-        param = getParameter("PSK");
-        if (param != null) {
-            setPsk(param);
-            if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "PSK set to " + param + ".", param);
-            }
-        } else {
-            _logger.logp(Level.SEVERE, this.getClass().getName(), "setParams()", "PSK not set.");
-        }
-        
-        //
-        // optional parameters
-        //
+	param = getParameter("PSK");
+	if (param != null) {
+	    setPsk(param);
+	    if (_logger.isLoggable(Level.CONFIG)) {
+		_logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "PSK set to " + param + ".", param);
+	    }
+	} else {
+	    _logger.logp(Level.SEVERE, this.getClass().getName(), "setParams()", "PSK not set.");
+	}
 
-        param = getParameter("reportId");
-        if (param != null) {
-            reportId = param;
-            if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "reportId set to " + param + ".", param);
-            }
-        } else {
-            if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "reportId not set.");
-            }
-        }
-        param = getParameter("redirectUrl");
-        if (param != null) {
-            redirectUrl = param;
-            if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "redirectUrl set to " + param + ".", param);
-            }
-        } else {
-            if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "redirectUrl not set.");
-            }
-        }
-        param = getParameter("recognizeCard");
-        if (param != null) {
-            recognizeCard = Boolean.parseBoolean(param);
-            if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "recognizeCard set to " + param + ".", param);
-            }
-        } else {
-            recognizeCard = true;
-            if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "recognizeCard set to " + recognizeCard + ".");
-            }
-        }
-        param = getParameter("spBehavior");
-        if (param != null) {
-            if (param.equalsIgnoreCase(WAIT) || param.equalsIgnoreCase(CLICK)) {
-                spBehavior = param;
-            } else {
-                // if param is neither set to WAIT nor set to CLICK, set it to INSTANT
-                spBehavior = INSTANT;
-            }
-            if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "spBehavior set to " + spBehavior + ".", param);
-            }
-        } else {
-            spBehavior = INSTANT;
-            if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "spBehavior set to " + spBehavior + ".");
-            }
-        }
-        param = getParameter("selfSigned");
-        if (param != null) {
-            selfSigned = Boolean.parseBoolean(param);
-            if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "selfSigned set to " + param + ".", param);
-            }
-        } else {
-            selfSigned = false;
-            if (_logger.isLoggable(Level.CONFIG)) {
-                _logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "selfSigned set to " + selfSigned + ".");
-            }
-        }
+	//
+	// optional parameters
+	//
 
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "setParams()");
-        }
+	param = getParameter("reportId");
+	if (param != null) {
+	    reportId = param;
+	    if (_logger.isLoggable(Level.CONFIG)) {
+		_logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "reportId set to " + param + ".", param);
+	    }
+	} else {
+	    if (_logger.isLoggable(Level.CONFIG)) {
+		_logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "reportId not set.");
+	    }
+	}
+	param = getParameter("redirectUrl");
+	if (param != null) {
+	    redirectUrl = param;
+	    if (_logger.isLoggable(Level.CONFIG)) {
+		_logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "redirectUrl set to " + param + ".", param);
+	    }
+	} else {
+	    if (_logger.isLoggable(Level.CONFIG)) {
+		_logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "redirectUrl not set.");
+	    }
+	}
+	param = getParameter("recognizeCard");
+	if (param != null) {
+	    recognizeCard = Boolean.parseBoolean(param);
+	    if (_logger.isLoggable(Level.CONFIG)) {
+		_logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "recognizeCard set to " + param + ".", param);
+	    }
+	} else {
+	    recognizeCard = true;
+	    if (_logger.isLoggable(Level.CONFIG)) {
+		_logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "recognizeCard set to " + recognizeCard + ".");
+	    }
+	}
+	param = getParameter("spBehavior");
+	if (param != null) {
+	    if (param.equalsIgnoreCase(WAIT) || param.equalsIgnoreCase(CLICK)) {
+		spBehavior = param;
+	    } else {
+		// if param is neither set to WAIT nor set to CLICK, set it to INSTANT
+		spBehavior = INSTANT;
+	    }
+	    if (_logger.isLoggable(Level.CONFIG)) {
+		_logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "spBehavior set to " + spBehavior + ".", param);
+	    }
+	} else {
+	    spBehavior = INSTANT;
+	    if (_logger.isLoggable(Level.CONFIG)) {
+		_logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "spBehavior set to " + spBehavior + ".");
+	    }
+	}
+	param = getParameter("selfSigned");
+	if (param != null) {
+	    selfSigned = Boolean.parseBoolean(param);
+	    if (_logger.isLoggable(Level.CONFIG)) {
+		_logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "selfSigned set to " + param + ".", param);
+	    }
+	} else {
+	    selfSigned = false;
+	    if (_logger.isLoggable(Level.CONFIG)) {
+		_logger.logp(Level.CONFIG, this.getClass().getName(), "setParams()", "selfSigned set to " + selfSigned + ".");
+	    }
+	}
+
+	if (_logger.isLoggable(Level.FINER)) {
+	    _logger.exiting(this.getClass().getName(), "setParams()");
+	}
     }
 
 }

@@ -1,4 +1,5 @@
-/****************************************************************************
+/**
+ * **************************************************************************
  * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,8 +19,8 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ **************************************************************************
+ */
 package org.openecard.client.applet;
 
 import iso.std.iso_iec._24727.tech.schema.Connect;
@@ -34,16 +35,21 @@ import java.util.logging.Logger;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.connector.activation.ConnectorListener;
+import org.openecard.client.connector.messages.TCTokenRequest;
+import org.openecard.client.connector.messages.TCTokenResponse;
+import org.openecard.client.connector.messages.common.ClientRequest;
+import org.openecard.client.connector.messages.common.ClientResponse;
+import org.openecard.client.connector.tctoken.TCToken;
 
 
 /**
  *
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
  */
-public class AppletWorker extends Thread implements EventCallback {
+public class AppletWorker extends Thread implements EventCallback, ConnectorListener {
 
     private static final Logger _logger = LogManager.getLogger(AppletWorker.class.getName());
-
     private ECardApplet applet;
     private String selection;
     private boolean eventOccurred;
@@ -60,7 +66,7 @@ public class AppletWorker extends Thread implements EventCallback {
     }
 
     public void startPAOS(String ifdName) {
-	synchronized(this) {
+	synchronized (this) {
 	    selection = ifdName;
 	    this.notify();
 	}
@@ -87,20 +93,20 @@ public class AppletWorker extends Thread implements EventCallback {
 	if (applet.getSpBehavior().equals(ECardApplet.CLICK)) {
 	    waitForInput();
 	    if (selection != null) {
-		 cHandles = new ArrayList<ConnectionHandleType>(1);
-		 ConnectionHandleType cHandle = getConnectionHandle(selection);
-		 // need a slothandle
-		 Connect c = new Connect();
-		 c.setContextHandle(cHandle.getContextHandle());
-		 c.setExclusive(false);
-		 c.setIFDName(selection);
-		 c.setSlot(new BigInteger("0"));
-		 ConnectResponse cr = this.applet.getEnv().getIFD().connect(c);
-		 cHandle.setSlotHandle(cr.getSlotHandle());
-		 //doesn't work with mtg testserver !? so remove
-		 cHandle.setRecognitionInfo(null);
-		 cHandle.setChannelHandle(null);
-		 cHandles.add(cHandle);
+		cHandles = new ArrayList<ConnectionHandleType>(1);
+		ConnectionHandleType cHandle = getConnectionHandle(selection);
+		// need a slothandle
+		Connect c = new Connect();
+		c.setContextHandle(cHandle.getContextHandle());
+		c.setExclusive(false);
+		c.setIFDName(selection);
+		c.setSlot(new BigInteger("0"));
+		ConnectResponse cr = this.applet.getEnv().getIFD().connect(c);
+		cHandle.setSlotHandle(cr.getSlotHandle());
+		//doesn't work with mtg testserver !? so remove
+		cHandle.setRecognitionInfo(null);
+		cHandle.setChannelHandle(null);
+		cHandles.add(cHandle);
 	    } else {
 		cHandles = getConnectionHandles();
 	    }
@@ -113,22 +119,24 @@ public class AppletWorker extends Thread implements EventCallback {
 	try {
 	    Object result = applet.getPAOS().sendStartPAOS(sp);
 
-	   /* String redirectUrl = applet.getRedirectUrl();
-	    if (redirectUrl != null) {
-		try {
-		    applet.getAppletContext().showDocument(new URL(redirectUrl), "_top");
-		} catch (MalformedURLException ex) {
-		    if (_logger.isLoggable(Level.WARNING)) {
-			_logger.logp(Level.WARNING, this.getClass().getName(), "run()", ex.getMessage(), ex);
-		    }
-		}
-		return;
-	    } else {
-		if (_logger.isLoggable(Level.WARNING)) {
-		    _logger.logp(Level.WARNING, this.getClass().getName(), "run()", "Unknown response type.", result);
-		}
-		return;
-	    }*/
+	    /*
+	     * String redirectUrl = applet.getRedirectUrl();
+	     * if (redirectUrl != null) {
+	     * try {
+	     * applet.getAppletContext().showDocument(new URL(redirectUrl), "_top");
+	     * } catch (MalformedURLException ex) {
+	     * if (_logger.isLoggable(Level.WARNING)) {
+	     * _logger.logp(Level.WARNING, this.getClass().getName(), "run()", ex.getMessage(), ex);
+	     * }
+	     * }
+	     * return;
+	     * } else {
+	     * if (_logger.isLoggable(Level.WARNING)) {
+	     * _logger.logp(Level.WARNING, this.getClass().getName(), "run()", "Unknown response type.", result);
+	     * }
+	     * return;
+	     * }
+	     */
 	} catch (Exception ex) {
 	    _logger.logp(Level.SEVERE, AppletWorker.class.getName(), "run()", "Failure occured while sending or receiving PAOS messages from endpoint " + applet.getEndpointUrl() + ".", ex);
 	}
@@ -166,11 +174,28 @@ public class AppletWorker extends Thread implements EventCallback {
     public void signalEvent(EventType eventType, Object eventData) {
 	if (eventType.equals(EventType.CARD_INSERTED) || eventType.equals(EventType.CARD_RECOGNIZED)) {
 	    applet.getEnv().getEventManager().unregister(this);
-	    synchronized(this) {
+	    synchronized (this) {
 		eventOccurred = true;
 	    }
 	    startPAOS(null);
 	}
     }
 
+    @Override
+    public ClientResponse request(ClientRequest request) {
+	if (request instanceof TCTokenRequest) {
+	    return handleActivate((TCTokenRequest) request);
+	}
+	return null;
+    }
+
+    private TCTokenResponse handleActivate(TCTokenRequest request) {
+	TCTokenResponse response = new TCTokenResponse();
+
+	TCToken token = request.getTCToken();
+
+	// TODO implement me
+
+	return response;
+    }
 }

@@ -30,17 +30,17 @@ import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
-import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.connector.activation.ConnectorListener;
 import org.openecard.client.connector.messages.TCTokenRequest;
 import org.openecard.client.connector.messages.TCTokenResponse;
 import org.openecard.client.connector.messages.common.ClientRequest;
 import org.openecard.client.connector.messages.common.ClientResponse;
 import org.openecard.client.connector.tctoken.TCToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -49,20 +49,14 @@ import org.openecard.client.connector.tctoken.TCToken;
  */
 public class AppletWorker extends Thread implements EventCallback, ConnectorListener {
 
-    private static final Logger _logger = LogManager.getLogger(AppletWorker.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(AppletWorker.class);
     private ECardApplet applet;
     private String selection;
     private boolean eventOccurred;
 
     public AppletWorker(ECardApplet applet) {
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "AppletWorker(ECardApplet applet)", applet);
-	}
 	this.applet = applet;
 	eventOccurred = false;
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "AppletWorker(ECardApplet applet)");
-	}
     }
 
     public void startPAOS(String ifdName) {
@@ -74,9 +68,6 @@ public class AppletWorker extends Thread implements EventCallback, ConnectorList
 
     @Override
     public void run() {
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "run()");
-	}
 	List<ConnectionHandleType> cHandles = null;
 
 	if (applet.getSpBehavior().equals(ECardApplet.INSTANT)) {
@@ -100,7 +91,7 @@ public class AppletWorker extends Thread implements EventCallback, ConnectorList
 		c.setContextHandle(cHandle.getContextHandle());
 		c.setExclusive(false);
 		c.setIFDName(selection);
-		c.setSlot(new BigInteger("0"));
+		c.setSlot(BigInteger.ZERO);
 		ConnectResponse cr = this.applet.getEnv().getIFD().connect(c);
 		cHandle.setSlotHandle(cr.getSlotHandle());
 		//doesn't work with mtg testserver !? so remove
@@ -138,11 +129,9 @@ public class AppletWorker extends Thread implements EventCallback, ConnectorList
 	     * }
 	     */
 	} catch (Exception ex) {
-	    _logger.logp(Level.SEVERE, AppletWorker.class.getName(), "run()", "Failure occured while sending or receiving PAOS messages from endpoint " + applet.getEndpointUrl() + ".", ex);
-	}
-
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "run()");
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    // </editor-fold>
 	}
     }
 

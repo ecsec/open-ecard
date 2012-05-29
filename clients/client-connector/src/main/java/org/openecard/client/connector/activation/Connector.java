@@ -16,6 +16,7 @@
 package org.openecard.client.connector.activation;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import org.openecard.client.connector.handler.ConnectorHandler;
 import org.openecard.client.connector.handler.StatusHandler;
@@ -28,8 +29,8 @@ import org.openecard.client.connector.handler.TCTokenHandler;
 public final class Connector {
 
     private static Connector connector;
-    private List<ConnectorHandler> connectorHandlers;
-    private List<ConnectorListener> connectorListeners;
+    private volatile List<ConnectorHandler> connectorHandlers = new ArrayList<ConnectorHandler>();
+    private volatile List<ConnectorListener> connectorListeners = new ArrayList<ConnectorListener>();
 
     /**
      * Returns a new instance of the Connector.
@@ -50,12 +51,11 @@ public final class Connector {
      * @throws IOException
      */
     protected Connector() throws IOException {
-	ConnectorServer connectorServer = ConnectorServer.getInstance();
-
 	// Add handlers
-	connector.addConnectorHandler(new TCTokenHandler());
-	connector.addConnectorHandler(new StatusHandler());
+	addConnectorHandler(new TCTokenHandler());
+	addConnectorHandler(new StatusHandler());
 
+	ConnectorServer connectorServer = ConnectorServer.getInstance();
 	connectorServer.start();
     }
 

@@ -1,4 +1,5 @@
-/****************************************************************************
+/**
+ * **************************************************************************
  * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,8 +19,8 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ **************************************************************************
+ */
 package org.openecard.client.richclient;
 
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
@@ -94,23 +95,26 @@ public final class RichClient implements ConnectorListener {
     public static RichClient getInstance() throws Exception {
 	if (client == null) {
 	    client = new RichClient();
+	    try {
+		Connector connector = Connector.getInstance();
+		connector.addConnectorListener(client);
+	    } catch (BindException e) {
+		throw new Exception("Client connector is running.");
+	    }
 	}
 	return client;
     }
 
     private RichClient() throws Exception {
-	try {
-	    Connector connector = Connector.getInstance();
-	    connector.addConnectorListener(client);
 
-	} catch (BindException e) {
-	    throw new Exception("Client activation is running.");
-	}
 	setup();
     }
 
     @Override
     public ClientResponse request(ClientRequest request) {
+	// <editor-fold defaultstate="collapsed" desc="log request">
+	logger.debug(LoggingConstants.FINER, "Client request: {}", request.getClass());
+	// </editor-fold>
 	if (request instanceof TCTokenRequest) {
 	    return handleActivate((TCTokenRequest) request);
 	} else if (request instanceof StatusRequest) {
@@ -121,7 +125,6 @@ public final class RichClient implements ConnectorListener {
 
     private StatusResponse handleStatus(StatusRequest statusRequest) {
 	StatusResponse response = new StatusResponse();
-
 
 	return response;
     }
@@ -253,5 +256,4 @@ public final class RichClient implements ConnectorListener {
 	// Initialize the EventManager
 	em.initialize();
     }
-
 }

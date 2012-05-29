@@ -30,15 +30,15 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openecard.client.common.logging.LogManager;
-import org.openecard.client.richclient.activation.common.ActivationConstants;
-import org.openecard.client.richclient.activation.messages.TCTokenRequest;
-import org.openecard.client.richclient.activation.messages.TCTokenResponse;
-import org.openecard.client.richclient.activation.tctoken.TCToken;
-import org.openecard.client.richclient.activation.tctoken.TCTokenConverter;
-import org.openecard.client.richclient.activation.tctoken.TCTokenException;
-import org.openecard.client.richclient.activation.tctoken.TCTokenGrabber;
-import org.openecard.client.richclient.activation.tctoken.TCTokenParser;
-import org.openecard.client.richclient.activation.tctoken.TCTokenVerifier;
+import org.openecard.client.connector.common.ConnectorConstants;
+import org.openecard.client.connector.messages.TCTokenRequest;
+import org.openecard.client.connector.messages.TCTokenResponse;
+import org.openecard.client.connector.tctoken.TCToken;
+import org.openecard.client.connector.tctoken.TCTokenConverter;
+import org.openecard.client.connector.tctoken.TCTokenException;
+import org.openecard.client.connector.tctoken.TCTokenGrabber;
+import org.openecard.client.connector.tctoken.TCTokenParser;
+import org.openecard.client.connector.tctoken.TCTokenVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +70,7 @@ public class RichClientTest {
 	    tokens = parser.parse(data);
 
 	    if (tokens.isEmpty()) {
-		throw new TCTokenException(ActivationConstants.ActivationError.TC_TOKEN_NOT_AVAILABLE.toString());
+		throw new TCTokenException(ConnectorConstants.ConnectorError.TC_TOKEN_NOT_AVAILABLE.toString());
 	    }
 
 	    // Verify the TCToken

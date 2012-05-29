@@ -99,6 +99,11 @@
 	    <artifactId>swing</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
+        <dependency>
+            <groupId>org.openecard.client.clients</groupId>
+            <artifactId>client-connector</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

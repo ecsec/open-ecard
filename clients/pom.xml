@@ -18,6 +18,7 @@
     <modules>
 	<module>applet</module>
 	<module>richclient</module>
+	<module>client-connector</module>
     </modules>
 
     <profiles>

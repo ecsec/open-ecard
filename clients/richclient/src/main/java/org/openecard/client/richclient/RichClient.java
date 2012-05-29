@@ -38,6 +38,15 @@ import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.common.util.ValueGenerators;
+import org.openecard.client.connector.activation.Connector;
+import org.openecard.client.connector.activation.ConnectorListener;
+import org.openecard.client.connector.messages.StatusRequest;
+import org.openecard.client.connector.messages.StatusResponse;
+import org.openecard.client.connector.messages.TCTokenRequest;
+import org.openecard.client.connector.messages.TCTokenResponse;
+import org.openecard.client.connector.messages.common.ClientRequest;
+import org.openecard.client.connector.messages.common.ClientResponse;
+import org.openecard.client.connector.tctoken.TCToken;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
@@ -45,14 +54,6 @@ import org.openecard.client.ifd.protocol.pace.PACEProtocolFactory;
 import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.management.TinyManagement;
 import org.openecard.client.recognition.CardRecognition;
-import org.openecard.client.richclient.activation.Activation;
-import org.openecard.client.richclient.activation.messages.StatusRequest;
-import org.openecard.client.richclient.activation.messages.StatusResponse;
-import org.openecard.client.richclient.activation.messages.TCTokenRequest;
-import org.openecard.client.richclient.activation.messages.TCTokenResponse;
-import org.openecard.client.richclient.activation.messages.common.ClientRequest;
-import org.openecard.client.richclient.activation.messages.common.ClientResponse;
-import org.openecard.client.richclient.activation.tctoken.TCToken;
 import org.openecard.client.sal.TinySAL;
 import org.openecard.client.sal.protocol.eac.EACProtocolFactory;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
@@ -67,7 +68,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public final class RichClient {
+public final class RichClient implements ConnectorListener {
 
     private static final Logger logger = LoggerFactory.getLogger(RichClient.class.getName());
     private static RichClient client;
@@ -99,13 +100,16 @@ public final class RichClient {
 
     private RichClient() throws Exception {
 	try {
-	    Activation.getInstance();
+	    Connector connector = Connector.getInstance();
+	    connector.addConnectorListener(client);
+
 	} catch (BindException e) {
 	    throw new Exception("Client activation is running.");
 	}
 	setup();
     }
 
+    @Override
     public ClientResponse request(ClientRequest request) {
 	if (request instanceof TCTokenRequest) {
 	    return handleActivate((TCTokenRequest) request);

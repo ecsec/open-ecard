@@ -65,6 +65,7 @@ public class PAOS {
     private final URL endpoint;
     private final Dispatcher dispatcher;
     private SSLSocketFactory socketFactory;
+    @Deprecated
     private PAOSCallback callback;
 
     static {
@@ -126,9 +127,15 @@ public class PAOS {
 	}
     }
 
-    public PAOS(URL endpoint, Dispatcher dispatcher) {
-	this.endpoint = endpoint;
+    @Deprecated
+    public PAOS(String endpoint, Dispatcher dispatcher, SSLSocketFactory sslSocket) {
+	try {
+	    this.endpoint = new URL(endpoint);
+	} catch (Exception e) {
+	    throw new RuntimeException("Malformed URL");
+	}
 	this.dispatcher = dispatcher;
+	this.socketFactory = sslSocket;
 
 	try {
 	    m = WSMarshallerFactory.createInstance();
@@ -140,13 +147,12 @@ public class PAOS {
 	}
     }
 
-    @Deprecated
-    public PAOS(String endpoint, Dispatcher dispatcher, SSLSocketFactory sslSocket) {
-	try {
-	    this.endpoint = new URL(endpoint);
-	} catch (Exception e) {
-	    throw new RuntimeException("Malformed URL");
-	}
+    public PAOS(URL endpoint, Dispatcher dispatcher) {
+	this(endpoint, dispatcher, null);
+    }
+
+    public PAOS(URL endpoint, Dispatcher dispatcher, SSLSocketFactory sslSocket) {
+	this.endpoint = endpoint;
 	this.dispatcher = dispatcher;
 	this.socketFactory = sslSocket;
 

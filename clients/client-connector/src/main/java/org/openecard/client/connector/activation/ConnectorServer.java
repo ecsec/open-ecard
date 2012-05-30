@@ -32,11 +32,10 @@ public final class ConnectorServer implements Runnable {
 
     private static final Logger logger = LogManager.getLogger(ConnectorServer.class.getName());
     private static ConnectorServer connectorServer;
+    private final Thread thread;
     private ServerSocket server;
     private int port = 24727;
     private int backlog = 10;
-    private Thread thread;
-    private volatile boolean running;
 
     public static ConnectorServer getInstance() throws IOException {
 	if (connectorServer == null) {
@@ -60,24 +59,23 @@ public final class ConnectorServer implements Runnable {
      * Starts the server.
      */
     public void start() {
-	running = true;
 	thread.start();
     }
 
     /**
-     * Stops the server.
+     * Interrupts the server.
      */
-    public void stop() {
-	running = false;
+    public void interrupt() {
 	try {
+	    thread.interrupt();
 	    server.close();
-	} catch (IOException ignore) {
+	} catch (Exception ignore) {
 	}
     }
 
     @Override
     public void run() {
-	while (running) {
+	while (!thread.isInterrupted()) {
 	    try {
 		Socket socket = server.accept();
 		ConnectorSocketHandler handler = new ConnectorSocketHandler(socket);

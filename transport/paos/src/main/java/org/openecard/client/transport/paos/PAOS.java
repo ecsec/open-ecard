@@ -1,4 +1,5 @@
-/****************************************************************************
+/**
+ * **************************************************************************
  * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,8 +19,8 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ **************************************************************************
+ */
 package org.openecard.client.transport.paos;
 
 import de.bund.bsi.ecard.api._1.InitializeFramework;
@@ -78,6 +79,7 @@ public class PAOS {
 	});
     }
 
+    @Deprecated
     public PAOS(String endpoint, Dispatcher dispatcher, PAOSCallback callback, SSLSocketFactory sockFac) {
 	//TODO PAOSCallback should be removed!
 	this.endpoint = endpoint;
@@ -95,9 +97,24 @@ public class PAOS {
 	}
     }
 
+    @Deprecated
     public PAOS(String endpoint, Dispatcher dispatcher, PAOSCallback callback) {
 	//TODO  PAOSCallback should be removed!
 	this(endpoint, dispatcher, callback, null);
+    }
+
+    public PAOS(String endpoint, Dispatcher dispatcher) {
+	this.endpoint = endpoint;
+	this.dispatcher = dispatcher;
+
+	try {
+	    m = WSMarshallerFactory.createInstance();
+	} catch (WSMarshallerException e) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    // </editor-fold>
+	    throw new RuntimeException(e);
+	}
     }
 
     public PAOS(String endpoint, Dispatcher dispatcher, SSLSocketFactory sslSocket) {
@@ -314,5 +331,4 @@ public class PAOS {
 	    msg = dispatcher.deliver(requestObj);
 	}
     }
-
 }

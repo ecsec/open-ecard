@@ -15,6 +15,8 @@
  */
 package org.openecard.client.connector.tctoken;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import org.openecard.client.common.util.StringUtils;
@@ -71,9 +73,23 @@ public class TCTokenSAXHandler extends DefaultHandler {
 	} else if (qName.equalsIgnoreCase(TCToken.SESSION_IDENTIFIER)) {
 	    token.setSessionIdentifier(value);
 	} else if (qName.equalsIgnoreCase(TCToken.SERVER_ADDRESS)) {
-	    token.setServerAddress(value);
+	    try {
+		//FIXME malformed URL hack
+		if (!value.startsWith("https://")) {
+		    value = "https://" + value;
+		} else if (!value.startsWith("http://")) {
+		    value = "http://" + value;
+		}
+		token.setServerAddress(new URL(value));
+	    } catch (java.net.MalformedURLException e) {
+		throw new SAXException("Cannot parse the parameter ServerAddress", e);
+	    }
 	} else if (qName.equalsIgnoreCase(TCToken.REFRESH_ADDRESS)) {
-	    token.setRefreshAddress(value);
+	    try {
+		token.setRefreshAddress(new URL(value));
+	    } catch (java.net.MalformedURLException e) {
+		throw new SAXException("Cannot parse the parameter RefreshAddress", e);
+	    }
 	} else if (qName.equalsIgnoreCase(TCToken.PATH_SECURITY_PROTOCOL)) {
 	    token.setPathSecurityProtocol(value);
 	} else if (qName.equalsIgnoreCase(TCToken.BINDING)) {
@@ -106,5 +122,4 @@ public class TCTokenSAXHandler extends DefaultHandler {
     public List<TCToken> getTCTokens() {
 	return tokens;
     }
-
 }

@@ -17,6 +17,7 @@ package org.openecard.client.connector.messages;
  */
 
 
+import java.net.URL;
 import org.openecard.client.connector.messages.common.ClientResponse;
 
 
@@ -25,7 +26,7 @@ import org.openecard.client.connector.messages.common.ClientResponse;
  */
 public class TCTokenResponse implements ClientResponse {
 
-    private String refreshAddress;
+    private URL refreshAddress;
     private String errorMessage;
     private String errorPage;
 
@@ -34,7 +35,7 @@ public class TCTokenResponse implements ClientResponse {
      *
      * @return Refresh address
      */
-    public String getRefreshAddress() {
+    public URL getRefreshAddress() {
 	return refreshAddress;
     }
 
@@ -43,7 +44,7 @@ public class TCTokenResponse implements ClientResponse {
      *
      * @param refreshAddress Refresh address
      */
-    public void setRefreshAddress(String refreshAddress) {
+    public void setRefreshAddress(URL refreshAddress) {
 	this.refreshAddress = refreshAddress;
     }
 

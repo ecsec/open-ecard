@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import org.openecard.client.connector.activation.ConnectorException;
@@ -156,6 +157,15 @@ public class TCTokenHandler implements ConnectorHandler {
 	ver.verify();
 
 	return tokens.get(0);
+    }
+
+    /**
+     * Handle a redirect response.
+     *
+     * @param location Location
+     */
+    public void handleRedirectResponse(URL location) {
+	handleErrorResponse(location.toString());
     }
 
     /**

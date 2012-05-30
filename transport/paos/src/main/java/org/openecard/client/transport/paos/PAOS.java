@@ -62,7 +62,7 @@ public class PAOS {
 
     private static final Logger logger = LoggerFactory.getLogger(PAOS.class);
     private final WSMarshaller m;
-    private final String endpoint;
+    private final URL endpoint;
     private final Dispatcher dispatcher;
     private SSLSocketFactory socketFactory;
     private PAOSCallback callback;
@@ -82,7 +82,11 @@ public class PAOS {
     @Deprecated
     public PAOS(String endpoint, Dispatcher dispatcher, PAOSCallback callback, SSLSocketFactory sockFac) {
 	//TODO PAOSCallback should be removed!
-	this.endpoint = endpoint;
+	try {
+	    this.endpoint = new URL(endpoint);
+	} catch (Exception e) {
+	    throw new RuntimeException("Malformed URL");
+	}
 	this.dispatcher = dispatcher;
 	this.callback = callback;
 	this.socketFactory = sockFac;
@@ -103,7 +107,26 @@ public class PAOS {
 	this(endpoint, dispatcher, callback, null);
     }
 
+    @Deprecated
     public PAOS(String endpoint, Dispatcher dispatcher) {
+	try {
+	    this.endpoint = new URL(endpoint);
+	} catch (Exception e) {
+	    throw new RuntimeException("Malformed URL");
+	}
+	this.dispatcher = dispatcher;
+
+	try {
+	    m = WSMarshallerFactory.createInstance();
+	} catch (WSMarshallerException e) {
+	    // <editor-fold defaultstate="collapsed" desc="log exception">
+	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    // </editor-fold>
+	    throw new RuntimeException(e);
+	}
+    }
+
+    public PAOS(URL endpoint, Dispatcher dispatcher) {
 	this.endpoint = endpoint;
 	this.dispatcher = dispatcher;
 
@@ -117,8 +140,13 @@ public class PAOS {
 	}
     }
 
+    @Deprecated
     public PAOS(String endpoint, Dispatcher dispatcher, SSLSocketFactory sslSocket) {
-	this.endpoint = endpoint;
+	try {
+	    this.endpoint = new URL(endpoint);
+	} catch (Exception e) {
+	    throw new RuntimeException("Malformed URL");
+	}
 	this.dispatcher = dispatcher;
 	this.socketFactory = sslSocket;
 
@@ -276,11 +304,10 @@ public class PAOS {
 
     public StartPAOSResponse sendStartPAOS(StartPAOS message) throws Exception {
 	Object msg = message;
-	URL url = new URL(endpoint);
 
 	// loop and send makes a computer happy
 	while (true) {
-	    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+	    HttpURLConnection conn = (HttpURLConnection) endpoint.openConnection();
 	    if (socketFactory != null && conn instanceof HttpsURLConnection) {
 		((HttpsURLConnection) conn).setSSLSocketFactory(socketFactory);
 	    }

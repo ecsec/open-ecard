@@ -15,6 +15,9 @@
  */
 package org.openecard.client.connector.tctoken;
 
+import java.net.URL;
+
+
 
 /**
  * Implements a TCToken.
@@ -31,9 +34,9 @@ public class TCToken {
     protected static final String REFRESH_ADDRESS = "RefreshAddress";
     protected static final String PATH_SECURITY_PROTOCOL = "PathSecurity-Protocol";
     protected static final String BINDING = "Binding";
-    private String serverAddress;
+    private URL serverAddress;
     private String sessionIdentifier;
-    private String refreshAddress;
+    private URL refreshAddress;
     private String pathSecurityProtocol;
     private String binding;
     private TCToken.PathSecurityParameter pathSecurityParameter;
@@ -43,7 +46,7 @@ public class TCToken {
      *
      * @return ServerAddress
      */
-    public String getServerAddress() {
+    public URL getServerAddress() {
 	return serverAddress;
     }
 
@@ -52,7 +55,7 @@ public class TCToken {
      *
      * @param serverAddress ServerAddress
      */
-    protected void setServerAddress(String serverAddress) {
+    protected void setServerAddress(URL serverAddress) {
 	this.serverAddress = serverAddress;
     }
 
@@ -79,7 +82,7 @@ public class TCToken {
      *
      * @return RefreshAddress
      */
-    public String getRefreshAddress() {
+    public URL getRefreshAddress() {
 	return refreshAddress;
     }
 
@@ -88,7 +91,7 @@ public class TCToken {
      *
      * @param refreshAddress RefreshAddress
      */
-    protected void setRefreshAddress(String refreshAddress) {
+    protected void setRefreshAddress(URL refreshAddress) {
 	this.refreshAddress = refreshAddress;
     }
 

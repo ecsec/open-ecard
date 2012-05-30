@@ -15,6 +15,7 @@
  */
 package org.openecard.client.connector.tctoken;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -22,8 +23,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.openecard.client.connector.common.ConnectorConstants.ConnectorError;
 import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.connector.common.ConnectorConstants.ConnectorError;
 
 
 /**
@@ -91,10 +92,8 @@ public class TCTokenVerifier {
      * @throws Exception
      */
     public void verifyServerAddress() throws Exception {
-	String value = token.getServerAddress();
+	URL value = token.getServerAddress();
 	checkEmpty(value);
-	//FIXME URI von den providern ist malformed!
-//        isHTTTPS(value);
     }
 
     /**
@@ -116,7 +115,7 @@ public class TCTokenVerifier {
      * @throws Exception
      */
     public void verifyRefreshAddress() throws Exception {
-	String value = token.getRefreshAddress();
+	URL value = token.getRefreshAddress();
 	checkRequired(value);
     }
 
@@ -168,6 +167,10 @@ public class TCTokenVerifier {
 	if (value != null) {
 	    if (value instanceof String) {
 		if (!((String) value).isEmpty()) {
+		    return true;
+		}
+	    } else if (value instanceof URL) {
+		if (!((URL) value).toString().isEmpty()) {
 		    return true;
 		}
 	    } else if (value instanceof byte[]) {
@@ -224,5 +227,4 @@ public class TCTokenVerifier {
 	    throw new Exception("The length of the value is " + count + " bytes, expected are " + minOccurrence);
 	}
     }
-
 }

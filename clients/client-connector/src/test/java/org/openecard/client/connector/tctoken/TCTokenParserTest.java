@@ -1,7 +1,5 @@
 package org.openecard.client.connector.tctoken;
 
-import org.openecard.client.connector.tctoken.TCTokenParser;
-import org.openecard.client.connector.tctoken.TCToken;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
@@ -26,8 +24,8 @@ public class TCTokenParserTest {
 
 	TCToken t = tokens.get(0);
 	assertEquals(t.getSessionIdentifier(), "3eab1b41ecc1ce5246acf6f4e275");
-	assertEquals(t.getServerAddress(), "eid-ref.my-service.de:443");
-	assertEquals(t.getRefreshAddress(), "https://eid.services.my.net:443/?sessionID=D9D6851A7C02167A5699DA57657664715F4D9C44E50A94F7A83909D24AFA997A");
+	assertEquals(t.getServerAddress().toString(), "https://eid-ref.my-service.de:443");
+	assertEquals(t.getRefreshAddress().toString(), "https://eid.services.my.net:443/?sessionID=D9D6851A7C02167A5699DA57657664715F4D9C44E50A94F7A83909D24AFA997A");
 	assertEquals(t.getBinding(), "urn:liberty:paos:2006-08");
     }
 

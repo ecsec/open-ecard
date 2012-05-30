@@ -29,8 +29,10 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
+import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import java.net.BindException;
+import java.net.URL;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
@@ -182,13 +184,13 @@ public final class RichClient implements ConnectorListener {
 	    //TODO Change to support different protocols
 	    byte[] psk = token.getPathSecurityParameter().getPSK();
 	    String sessionIdentifier = token.getSessionIdentifier();
-	    String serverAddress = token.getServerAddress();
+	    URL serverAddress = token.getServerAddress();
 
 	    //FIXME
-	    String endpoint = "https://" + serverAddress + "/?sessionid=" + sessionIdentifier;
+	    String endpoint = serverAddress + "/?sessionid=" + sessionIdentifier;
 
 	    // Set up TLS connection
-	    PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionIdentifier.getBytes(), psk, serverAddress);
+	    PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionIdentifier.getBytes(), psk, serverAddress.getHost());
 
 	    // Set up PAOS connection
 	    PAOS p = new PAOS(endpoint, env.getDispatcher(), new TlsClientSocketFactory(tlsClient));
@@ -229,7 +231,17 @@ public final class RichClient implements ConnectorListener {
 
 	// Perform an EstablishContext to get a ContextHandle
 	EstablishContext establishContext = new EstablishContext();
-	contextHandle = ifd.establishContext(establishContext).getContextHandle();
+	EstablishContextResponse establishContextResponse = ifd.establishContext(establishContext);
+
+	if (establishContextResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
+	    if (establishContextResponse.getContextHandle() != null) {
+		contextHandle = ifd.establishContext(establishContext).getContextHandle();
+	    } else{
+		//TODO
+	    }
+	} else {
+	    // TODO
+	}
 
 	// Set up CardRecognition
 	recognition = new CardRecognition(ifd, contextHandle);

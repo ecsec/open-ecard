@@ -34,7 +34,7 @@ package org.openecard.client.applet;
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.awt.Container;
 import java.awt.Frame;
-import java.net.MalformedURLException;
+import java.net.BindException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
@@ -43,9 +43,11 @@ import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.enums.EventType;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
+import org.openecard.client.connector.activation.Connector;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.ifd.protocol.pace.PACEProtocolFactory;
@@ -56,19 +58,19 @@ import org.openecard.client.sal.TinySAL;
 import org.openecard.client.sal.protocol.eac.EACProtocolFactory;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.transport.paos.PAOS;
-import org.openecard.client.transport.paos.PAOSCallback;
 import org.openecard.client.transport.tls.PSKTlsClientImpl;
 import org.openecard.client.transport.tls.TlsClientSocketFactory;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
- *
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class ECardApplet extends JApplet {
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ECardApplet.class);
+    private static final Logger logger = LoggerFactory.getLogger(ECardApplet.class);
     private AppletWorker worker;
     private ClientEnv env;
     private TinySAL sal;
@@ -78,15 +80,14 @@ public class ECardApplet extends JApplet {
     private PAOS paos;
     private JSEventCallback jsec;
     private TinyManagement management;
-    private byte[] ctx;
-    private boolean initialized;
-    private boolean paramsPresent;
+    private byte[] contextHandle;
+    private boolean initialized = false;
     // applet parameters
-    private String sessionId;
-    private String endpointUrl;
-    private String redirectUrl;
-    private String reportId;
-    private String spBehavior;
+    private String sessionID;
+    private URL endpointURL;
+    private URL redirectURL;
+    private String reportID;
+    private String spBehavior = INSTANT;
     private String psk;
     private boolean recognizeCard;
     private boolean selfSigned;
@@ -100,98 +101,74 @@ public class ECardApplet extends JApplet {
      */
     @Override
     public void init() {
-	initialized = false;
-	paramsPresent = true;
-	setParams();
+	loadParameters();
+
+
+	// Client environment
 	env = new ClientEnv();
+
+	// Management
 	management = new TinyManagement(env);
 	env.setManagement(management);
-	env.setDispatcher(new MessageDispatcher(env));
 
+	// Dispatcher
+	Dispatcher dispatcher = new MessageDispatcher(env);
+	env.setDispatcher(dispatcher);
+
+	// GUI
 	SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper(findParentFrame()));
+
+	// IFD
 	ifd = new IFD();
-	ifd.setDispatcher(env.getDispatcher());
-	ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
+	ifd.setDispatcher(dispatcher);
 	ifd.setGUI(gui);
+	ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
 	env.setIFD(ifd);
-	EstablishContext ecRequest = new EstablishContext();
-	EstablishContextResponse ecResponse = ifd.establishContext(ecRequest);
-	if (ecResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
-	    if (ecResponse.getContextHandle() != null) {
-		ctx = ecResponse.getContextHandle();
-		initialized = true;
+
+	EstablishContext establishContext = new EstablishContext();
+	EstablishContextResponse establishContextResponse = ifd.establishContext(establishContext);
+	if (establishContextResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
+	    if (establishContextResponse.getContextHandle() != null) {
+		contextHandle = establishContextResponse.getContextHandle();
+	    } else {
+		throw new RuntimeException("Cannot establish context");
 	    }
+	} else {
+	    throw new RuntimeException("Cannot establish context");
 	}
+
 	if (recognizeCard) {
 	    try {
 		// TODO: reactivate remote tree repository as soon as it supports the embedded TLSMarker
 		//GetRecognitionTree client = (GetRecognitionTree) WSClassLoader.getClientService(RecognitionProperties.getServiceName(), RecognitionProperties.getServiceAddr());
-		recognition = new CardRecognition(ifd, ctx);
+		recognition = new CardRecognition(ifd, contextHandle);
 	    } catch (Exception ex) {
 		// <editor-fold defaultstate="collapsed" desc="log exception">
 		logger.error(LoggingConstants.THROWING, "Exception", ex);
 		// </editor-fold>
-		recognition = null;
 		initialized = false;
 	    }
-	} else {
-	    recognition = null;
 	}
-	// TODO: replace socket factory with this strange psk stuff
-	PAOSCallback paosCallback = new PAOSCallback() {
 
-	    @Override
-	    public void loadRefreshAddress() {
-
-		new Thread(new Runnable() {
-
-		    @Override
-		    public void run() {
-			try {
-			    URL url = new URL(redirectUrl);
-			    if (url.getQuery() != null) {
-				redirectUrl = redirectUrl + "&ResultMajor=ok";
-			    } else {
-				redirectUrl = redirectUrl + "?ResultMajor=ok";
-			    }
-			    System.out.println("redirecting to: " + redirectUrl);
-			    ECardApplet.this.getAppletContext().showDocument(new URL(redirectUrl), "_blank");
-			} catch (MalformedURLException ex) {
-			    // <editor-fold defaultstate="collapsed" desc="log exception">
-			    logger.error(LoggingConstants.THROWING, "Exception", ex);
-			    // </editor-fold>
-			}
-		    }
-		}).start();
-	    }
-	};
-
-	String hostName = null;
-	try {
-	    hostName = new URL(endpointUrl).getHost();
-	} catch (MalformedURLException ex) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", ex);
-	    // </editor-fold>
-	}
-	if (psk != null) {
-	    PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionId.getBytes(), Hex.decode(psk), hostName);
-	    paos = new PAOS(endpointUrl, env.getDispatcher(), paosCallback, new TlsClientSocketFactory(tlsClient));
-	} else {
-	    paos = new PAOS(endpointUrl, env.getDispatcher(), paosCallback);
-	}
-	em = new EventManager(recognition, env, ctx, sessionId);
+	// EventManager
+	em = new EventManager(recognition, env, contextHandle, sessionID);
 	env.setEventManager(em);
+
+	// CardStateMap
 	CardStateMap cardStates = new CardStateMap();
 	SALStateCallback salCallback = new SALStateCallback(recognition, cardStates);
-	sal = new TinySAL(env, cardStates, sessionId);
+	em.registerAllEvents(salCallback);
+
+	// SAL
+	sal = new TinySAL(env, cardStates);
 	sal.setGUI(gui);
 	sal.addProtocol(ECardConstants.Protocol.EAC, new EACProtocolFactory());
 	env.setSAL(sal);
 
-	em.registerAllEvents(salCallback);
+
 	jsec = new JSEventCallback(this);
 	em.registerAllEvents(jsec);
+
 	worker = new AppletWorker(this);
 	if (spBehavior.equals(WAIT)) {
 	    if (recognizeCard) {
@@ -200,10 +177,12 @@ public class ECardApplet extends JApplet {
 		em.register(worker, EventType.CARD_INSERTED);
 	    }
 	}
-	InitializeResponse initResponse = sal.initialize(new Initialize());
-	if (initResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
-	    initialized = false;
-	}
+
+
+
+
+	em.initialize();
+
 	List<ConnectionHandleType> cHandles = sal.getConnectionHandles();
 	if (cHandles.isEmpty()) {
 	    jsec.showMessage("Please connect Terminal.");
@@ -217,11 +196,28 @@ public class ECardApplet extends JApplet {
 		}
 	    }
 	}
+
+	// PAOS
+	if (psk != null) {
+	    PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionID.getBytes(), Hex.decode(psk), endpointURL.getHost());
+	    paos = new PAOS(endpointURL, env.getDispatcher(), new TlsClientSocketFactory(tlsClient));
+	} else {
+	    paos = new PAOS(endpointURL, env.getDispatcher());
+	}
+
+	// Start client connector to listen on port 24727
+	try {
+
+	    Connector connector = Connector.getInstance();
+	    connector.addConnectorListener(worker);
+	} catch (Exception e) {
+	    throw new RuntimeException("Client connector is running.");
+	}
     }
 
     @Override
     public void start() {
-	if (paramsPresent && initialized) {
+	if (initialized) {
 	    if (worker == null) {
 		worker = new AppletWorker(this);
 	    }
@@ -231,32 +227,22 @@ public class ECardApplet extends JApplet {
 
     @Override
     public void destroy() {
-	if (worker != null) {
+	try {
 	    worker.interrupt();
-	    worker = null;
+	} catch (Exception ignore) {
 	}
-	paos = null;
-	if (em != null) {
+
+	try {
 	    em.terminate();
-	    em = null;
+	} catch (Exception ignore) {
 	}
-	sal = null;
-	recognition = null;
-	if (ifd != null) {
-	    ReleaseContext rcRequest = new ReleaseContext();
-	    rcRequest.setContextHandle(ctx);
-	    // Since JVM will be shut down after destroy method has been called by the browser,
-	    // evaluation of ReleaseContextResponse is not necessary.
-	    ifd.releaseContext(rcRequest);
-	    ifd = null;
+
+	try {
+	    ReleaseContext releaseContext = new ReleaseContext();
+	    releaseContext.setContextHandle(contextHandle);
+	    ifd.releaseContext(releaseContext);
+	} catch (Exception ignore) {
 	}
-	env = null;
-	jsec = null;
-	ctx = null;
-	sessionId = null;
-	endpointUrl = null;
-	redirectUrl = null;
-	reportId = null;
     }
 
     public Frame findParentFrame() {
@@ -270,32 +256,16 @@ public class ECardApplet extends JApplet {
 	return (Frame) null;
     }
 
-    public String getSessionId() {
-	return sessionId;
+    public String getSessionID() {
+	return sessionID;
     }
 
-    public String getReportId() {
-	return reportId;
+    public String getReportID() {
+	return reportID;
     }
 
-    public String getEndpointUrl() {
-	return endpointUrl;
-    }
-
-    public String getRedirectUrl() {
-	return redirectUrl;
-    }
-
-    public boolean recognizeCard() {
-	return recognizeCard;
-    }
-
-    public ClientEnv getEnv() {
+    public ClientEnv getClientEnvironment() {
 	return env;
-    }
-
-    public TinySAL getTinySAL() {
-	return sal;
     }
 
     public PAOS getPAOS() {
@@ -304,14 +274,6 @@ public class ECardApplet extends JApplet {
 
     public String getSpBehavior() {
 	return spBehavior;
-    }
-
-    public String getPsk() {
-	return psk;
-    }
-
-    public void setPsk(String psk) {
-	this.psk = psk;
     }
 
     public void startPAOS() {
@@ -324,63 +286,51 @@ public class ECardApplet extends JApplet {
 	}
     }
 
-    private void setParams() {
+    private void loadParameters() {
 
-	//
-	// mandatory parameters
-	//
+	// MANDATORY parameters
 
-	String param = getParameter("sessionId");
-	if (param != null) {
-	    sessionId = param;
-	} else {
-	    paramsPresent = false;
-	    return;
+	sessionID = getParameter("sessionId");
+	if (sessionID == null) {
+	    throw new IllegalArgumentException("The parameter sessionID is missing!");
 	}
 	// <editor-fold defaultstate="collapsed" desc="log configuration">
-	logger.debug(LoggingConstants.CONFIG, "sessionId set to {}", sessionId);
+	logger.debug(LoggingConstants.CONFIG, "sessionId set to {}", sessionID);
 	// </editor-fold>
 
-	param = getParameter("endpointUrl");
-	if (param != null) {
-	    endpointUrl = param;
-	} else {
-	    paramsPresent = false;
-	    return;
+	try {
+	    endpointURL = new URL(getParameter("endpointUrl"));
+	} catch (Exception e) {
+	    throw new IllegalArgumentException("Malformed endpointURL parameter: " + e.getMessage());
 	}
 	// <editor-fold defaultstate="collapsed" desc="log configuration">
-	logger.debug(LoggingConstants.CONFIG, "endpointUrl set to {}", endpointUrl);
+	logger.debug(LoggingConstants.CONFIG, "endpointUrl set to {}", endpointURL);
 	// </editor-fold>
 
-	param = getParameter("PSK");
-	if (param != null) {
-	    setPsk(param);
+	psk = getParameter("PSK");
+	// <editor-fold defaultstate="collapsed" desc="log configuration">
+	logger.debug(LoggingConstants.CONFIG, "PSK set to {}", psk);
+	// </editor-fold>
+
+	// OPTIONAL parameters
+
+	reportID = getParameter("reportId");
+	// <editor-fold defaultstate="collapsed" desc="log configuration">
+	logger.debug(LoggingConstants.CONFIG, "reportId set to {}", reportID);
+	// </editor-fold>
+
+	try {
+	    redirectURL = new URL(getParameter("redirectUrl"));
+	} catch (Exception e) {
+	    if (e.getCause() instanceof java.net.MalformedURLException) {
+		throw new IllegalArgumentException("Malformed redirectURL parameter: " + e.getMessage());
+	    }
 	}
 	// <editor-fold defaultstate="collapsed" desc="log configuration">
-	logger.debug(LoggingConstants.CONFIG, "PSK set to {}", param);
+	logger.debug(LoggingConstants.CONFIG, "redirectUrl set to {}", redirectURL);
 	// </editor-fold>
 
-	//
-	// optional parameters
-	//
-
-	param = getParameter("reportId");
-	if (param != null) {
-	    reportId = param;
-	}
-	// <editor-fold defaultstate="collapsed" desc="log configuration">
-	logger.debug(LoggingConstants.CONFIG, "reportId set to {}", reportId);
-	// </editor-fold>
-
-	param = getParameter("redirectUrl");
-	if (param != null) {
-	    redirectUrl = param;
-	}
-	// <editor-fold defaultstate="collapsed" desc="log configuration">
-	logger.debug(LoggingConstants.CONFIG, "redirectUrl set to {}", redirectUrl);
-	// </editor-fold>
-
-	param = getParameter("recognizeCard");
+	String param = getParameter("recognizeCard");
 	if (param != null) {
 	    recognizeCard = Boolean.parseBoolean(param);
 	} else {
@@ -392,25 +342,17 @@ public class ECardApplet extends JApplet {
 
 	param = getParameter("spBehavior");
 	if (param != null) {
-	    if (param.equalsIgnoreCase(WAIT) || param.equalsIgnoreCase(CLICK)) {
+	    if (param.equalsIgnoreCase(WAIT) || param.equalsIgnoreCase(CLICK) || param.equalsIgnoreCase(INSTANT)) {
 		spBehavior = param;
 	    } else {
-		// if param is neither set to WAIT nor set to CLICK, set it to INSTANT
-		spBehavior = INSTANT;
+		throw new IllegalArgumentException("The parameter spBehavior is malformed!");
 	    }
-	} else {
-	    spBehavior = INSTANT;
 	}
 	// <editor-fold defaultstate="collapsed" desc="log configuration">
 	logger.debug(LoggingConstants.CONFIG, "spBehavior set to {}", spBehavior);
 	// </editor-fold>
 
-	param = getParameter("selfSigned");
-	if (param != null) {
-	    selfSigned = Boolean.parseBoolean(param);
-	} else {
-	    selfSigned = false;
-	}
+	Boolean.parseBoolean(getParameter("selfSigned"));
 	// <editor-fold defaultstate="collapsed" desc="log configuration">
 	logger.debug(LoggingConstants.CONFIG, "selfSigned set to {}", selfSigned);
 	// </editor-fold>

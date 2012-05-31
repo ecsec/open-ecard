@@ -23,33 +23,46 @@
  */
 package org.openecard.client.applet;
 
+import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import java.math.BigInteger;
+import java.net.BindException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.common.logging.LoggingConstants;
+import org.openecard.client.connector.activation.Connector;
 import org.openecard.client.connector.activation.ConnectorListener;
 import org.openecard.client.connector.messages.TCTokenRequest;
 import org.openecard.client.connector.messages.TCTokenResponse;
 import org.openecard.client.connector.messages.common.ClientRequest;
 import org.openecard.client.connector.messages.common.ClientResponse;
 import org.openecard.client.connector.tctoken.TCToken;
+import org.openecard.client.sal.TinySAL;
+import org.openecard.client.transport.paos.PAOS;
+import org.openecard.client.transport.tls.PSKTlsClientImpl;
+import org.openecard.client.transport.tls.TlsClientSocketFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
- *
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class AppletWorker extends Thread implements EventCallback, ConnectorListener {
+public final class AppletWorker implements Runnable, EventCallback, ConnectorListener {
 
     private static final Logger logger = LoggerFactory.getLogger(AppletWorker.class);
+    private final Thread thread;
     private ECardApplet applet;
     private String selection;
     private boolean eventOccurred;
@@ -57,13 +70,20 @@ public class AppletWorker extends Thread implements EventCallback, ConnectorList
     public AppletWorker(ECardApplet applet) {
 	this.applet = applet;
 	eventOccurred = false;
+	thread = new Thread(this);
     }
 
-    public void startPAOS(String ifdName) {
-	synchronized (this) {
-	    selection = ifdName;
-	    this.notify();
-	}
+    public synchronized void startPAOS(String ifdName) {
+	selection = ifdName;
+	notifyAll();
+    }
+
+    public void start() {
+	thread.start();
+    }
+
+    public void interrupt() {
+	thread.interrupt();
     }
 
     @Override
@@ -92,7 +112,7 @@ public class AppletWorker extends Thread implements EventCallback, ConnectorList
 		c.setExclusive(false);
 		c.setIFDName(selection);
 		c.setSlot(BigInteger.ZERO);
-		ConnectResponse cr = this.applet.getEnv().getIFD().connect(c);
+		ConnectResponse cr = this.applet.getClientEnvironment().getIFD().connect(c);
 		cHandle.setSlotHandle(cr.getSlotHandle());
 		//doesn't work with mtg testserver !? so remove
 		cHandle.setRecognitionInfo(null);
@@ -105,13 +125,13 @@ public class AppletWorker extends Thread implements EventCallback, ConnectorList
 
 	StartPAOS sp = new StartPAOS();
 	sp.getConnectionHandle().addAll(cHandles);
-	sp.setSessionIdentifier(applet.getSessionId());
+	sp.setSessionIdentifier(applet.getSessionID());
 
 	try {
 	    Object result = applet.getPAOS().sendStartPAOS(sp);
 
 	    /*
-	     * String redirectUrl = applet.getRedirectUrl();
+	     * String redirectUrl = applet.getRedirectURL();
 	     * if (redirectUrl != null) {
 	     * try {
 	     * applet.getAppletContext().showDocument(new URL(redirectUrl), "_top");
@@ -128,6 +148,21 @@ public class AppletWorker extends Thread implements EventCallback, ConnectorList
 	     * return;
 	     * }
 	     */
+
+//	    try {
+//			    URL url = new URL(redirectURL);
+//			    if (url.getQuery() != null) {
+//				redirectURL = redirectURL + "&ResultMajor=ok";
+//			    } else {
+//				redirectURL = redirectURL + "?ResultMajor=ok";
+//			    }
+//			    System.out.println("redirecting to: " + redirectURL);
+//			    ECardApplet.this.getAppletContext().showDocument(new URL(redirectURL), "_blank");
+//			} catch (MalformedURLException ex) {
+//			    // <editor-fold defaultstate="collapsed" desc="log exception">
+//			    logger.error(LoggingConstants.THROWING, "Exception", ex);
+//			    // </editor-fold>
+//			}
 	} catch (Exception ex) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
 	    logger.error(LoggingConstants.THROWING, "Exception", ex);
@@ -135,13 +170,10 @@ public class AppletWorker extends Thread implements EventCallback, ConnectorList
 	}
     }
 
-    private void waitForInput() {
-	synchronized (this) {
-	    try {
-		wait();
-	    } catch (InterruptedException ex) {
-		// Oh oh,...
-	    }
+    private synchronized void waitForInput() {
+	try {
+	    thread.wait();
+	} catch (InterruptedException ignore) {
 	}
     }
 
@@ -156,13 +188,13 @@ public class AppletWorker extends Thread implements EventCallback, ConnectorList
     }
 
     private List<ConnectionHandleType> getConnectionHandles() {
-	return applet.getTinySAL().getConnectionHandles();
+	return ((TinySAL) applet.getClientEnvironment().getSAL()).getConnectionHandles();
     }
 
     @Override
     public void signalEvent(EventType eventType, Object eventData) {
 	if (eventType.equals(EventType.CARD_INSERTED) || eventType.equals(EventType.CARD_RECOGNIZED)) {
-	    applet.getEnv().getEventManager().unregister(this);
+	    applet.getClientEnvironment().getEventManager().unregister(this);
 	    synchronized (this) {
 		eventOccurred = true;
 	    }
@@ -182,8 +214,72 @@ public class AppletWorker extends Thread implements EventCallback, ConnectorList
 	TCTokenResponse response = new TCTokenResponse();
 
 	TCToken token = request.getTCToken();
+	ConnectionHandleType connectionHandle = request.getConnectionHandle();
 
-	// TODO implement me
+	//FIXME ConnectionHandle kommt nachher vom ActivationApplicationRequest
+	connectionHandle = ((TinySAL) applet.getClientEnvironment().getSAL()).getConnectionHandles().get(0);
+
+	try {
+	    // Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
+	    CardApplicationPath cardApplicationPath = new CardApplicationPath();
+	    cardApplicationPath.setCardAppPathRequest(connectionHandle);
+	    CardApplicationPathResponse cardApplicationPathResponse = applet.getClientEnvironment().getSAL().cardApplicationPath(cardApplicationPath);
+
+	    try {
+		// Check CardApplicationPathResponse
+		WSHelper.checkResult(cardApplicationPathResponse);
+	    } catch (WSHelper.WSException ex) {
+		// <editor-fold defaultstate="collapsed" desc="log exception">
+//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+		// </editor-fold>
+		response.setErrorMessage(ex.getMessage());
+		return response;
+	    }
+
+	    CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
+	    cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
+	    CardApplicationConnectResponse cardApplicationConnectResponse = applet.getClientEnvironment().getSAL().cardApplicationConnect(cardApplicationConnect);
+	    // Update ConnectionHandle. It now includes a SlotHandle.
+	    connectionHandle = cardApplicationConnectResponse.getConnectionHandle();
+
+	    try {
+		// Check CardApplicationConnectResponse
+		WSHelper.checkResult(cardApplicationConnectResponse);
+	    } catch (WSHelper.WSException ex) {
+		// <editor-fold defaultstate="collapsed" desc="log exception">
+//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+		// </editor-fold>
+		response.setErrorMessage(ex.getMessage());
+		return response;
+	    }
+
+	    // Collect parameters for PSK based TLS
+	    //TODO Change to support different protocols
+	    byte[] psk = token.getPathSecurityParameter().getPSK();
+	    String sessionIdentifier = token.getSessionIdentifier();
+	    URL serverAddress = token.getServerAddress();
+	    //FIXME Wie weit ist das NPA abhängig.
+	    URL endpoint = new URL(serverAddress + "/?sessionid=" + sessionIdentifier);
+
+	    // Set up TLS connection
+	    PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionIdentifier.getBytes(), psk, serverAddress.getHost());
+	    TlsClientSocketFactory tlsClientFactory = new TlsClientSocketFactory(tlsClient);
+
+	    // Set up PAOS connection
+	    PAOS p = new PAOS(endpoint, applet.getClientEnvironment().getDispatcher(), tlsClientFactory);
+
+	    // Send StartPAOS
+	    StartPAOS sp = new StartPAOS();
+	    sp.getConnectionHandle().add(connectionHandle);
+	    sp.setSessionIdentifier(sessionIdentifier);
+	    p.sendStartPAOS(sp);
+
+	    response.setRefreshAddress(token.getRefreshAddress());
+
+	} catch (Throwable w) {
+	    logger.error(LoggingConstants.THROWING, "Exception", w);
+	    response.setErrorMessage(w.getMessage());
+	}
 
 	return response;
     }

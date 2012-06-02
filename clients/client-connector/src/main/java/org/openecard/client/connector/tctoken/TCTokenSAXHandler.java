@@ -81,13 +81,13 @@ public class TCTokenSAXHandler extends DefaultHandler {
 		    value = "http://" + value;
 		}
 		token.setServerAddress(new URL(value));
-	    } catch (java.net.MalformedURLException e) {
+	    } catch (MalformedURLException e) {
 		throw new SAXException("Cannot parse the parameter ServerAddress", e);
 	    }
 	} else if (qName.equalsIgnoreCase(TCToken.REFRESH_ADDRESS)) {
 	    try {
 		token.setRefreshAddress(new URL(value));
-	    } catch (java.net.MalformedURLException e) {
+	    } catch (MalformedURLException e) {
 		throw new SAXException("Cannot parse the parameter RefreshAddress", e);
 	    }
 	} else if (qName.equalsIgnoreCase(TCToken.PATH_SECURITY_PROTOCOL)) {

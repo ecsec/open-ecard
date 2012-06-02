@@ -15,6 +15,7 @@ package org.openecard.client.connector.messages;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.connector.messages.common.ClientRequest;
 import org.openecard.client.connector.tctoken.TCToken;
 
@@ -25,8 +26,8 @@ import org.openecard.client.connector.tctoken.TCToken;
 public class TCTokenRequest implements ClientRequest {
 
     private TCToken token;
-    private String slotHandle;
-    private String contextHandle;
+    private byte[] slotHandle;
+    private byte[] contextHandle;
 
     /**
      * Returns the TCToken.
@@ -51,7 +52,7 @@ public class TCTokenRequest implements ClientRequest {
      *
      * @return Context handle
      */
-    public String getContextHandle() {
+    public byte[] getContextHandle() {
 	return contextHandle;
     }
 
@@ -61,7 +62,7 @@ public class TCTokenRequest implements ClientRequest {
      * @param contextHandle Context handle
      */
     public void setContextHandle(String contextHandle) {
-	this.contextHandle = contextHandle;
+	this.contextHandle = StringUtils.toByteArray(contextHandle);
     }
 
     /**
@@ -69,7 +70,7 @@ public class TCTokenRequest implements ClientRequest {
      *
      * @return Slot handle
      */
-    public String getSlotHandle() {
+    public byte[] getSlotHandle() {
 	return slotHandle;
     }
 
@@ -79,6 +80,6 @@ public class TCTokenRequest implements ClientRequest {
      * @param slotHandle Slot handle
      */
     public void setSlotHandle(String slotHandle) {
-	this.slotHandle = slotHandle;
+	this.slotHandle = StringUtils.toByteArray(slotHandle);
     }
 }

@@ -1,23 +1,16 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.openecard.client.connector.activation;
 
-import org.openecard.client.connector.Connector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.BeforeClass;
-import org.openecard.client.connector.handler.ConnectorHandler;
+import org.junit.Test;
+import org.openecard.client.connector.Connector;
 
 
 /**
- *
- * @author John
+ * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class ConnectorTest {
 
@@ -46,9 +39,8 @@ public class ConnectorTest {
 
     @Test
     public void testGetInstance() throws Exception {
-	System.out.println("getInstance");
-	Connector expResult = null;
-
+//	System.out.println("getInstance");
+//	Connector expResult = null;
 //	assertEquals(expResult, result);
 //	fail("The test case is a prototype.");
     }

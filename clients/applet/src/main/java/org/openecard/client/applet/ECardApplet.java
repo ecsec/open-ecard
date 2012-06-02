@@ -34,7 +34,6 @@ package org.openecard.client.applet;
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.awt.Container;
 import java.awt.Frame;
-import java.net.BindException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;

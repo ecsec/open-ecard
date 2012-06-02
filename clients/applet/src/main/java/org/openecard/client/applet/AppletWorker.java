@@ -32,7 +32,6 @@ import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import java.math.BigInteger;
-import java.net.BindException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +39,7 @@ import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.common.logging.LoggingConstants;
-import org.openecard.client.connector.Connector;
+import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.connector.ConnectorListener;
 import org.openecard.client.connector.messages.TCTokenRequest;
 import org.openecard.client.connector.messages.TCTokenResponse;
@@ -128,7 +127,7 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 	sp.setSessionIdentifier(applet.getSessionID());
 
 	try {
-	    Object result = applet.getPAOS().sendStartPAOS(sp);
+//	    Object result = applet.getPAOS().sendStartPAOS(sp);
 
 	    /*
 	     * String redirectUrl = applet.getRedirectURL();
@@ -148,7 +147,6 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 	     * return;
 	     * }
 	     */
-
 //	    try {
 //			    URL url = new URL(redirectURL);
 //			    if (url.getQuery() != null) {
@@ -213,11 +211,30 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
     private TCTokenResponse handleActivate(TCTokenRequest request) {
 	TCTokenResponse response = new TCTokenResponse();
 
+	// TCToken
 	TCToken token = request.getTCToken();
-	ConnectionHandleType connectionHandle = request.getConnectionHandle();
 
-	//FIXME ConnectionHandle kommt nachher vom ActivationApplicationRequest
-	connectionHandle = ((TinySAL) applet.getClientEnvironment().getSAL()).getConnectionHandles().get(0);
+	// ContextHandle and SlotHandle
+	ConnectionHandleType connectionHandle = null;
+	byte[] requestedContextHandle = request.getContextHandle();
+	byte[] requestedSlotHandle = request.getSlotHandle();
+
+	for (ConnectionHandleType availableConnectionHandle : ((TinySAL) applet.getClientEnvironment().getSAL()).getConnectionHandles()) {
+	    if (ByteUtils.compare(availableConnectionHandle.getContextHandle(), requestedContextHandle)) {
+		if (ByteUtils.compare(availableConnectionHandle.getSlotHandle(), requestedSlotHandle)) {
+		    connectionHandle = availableConnectionHandle;
+		    break;
+		}
+	    }
+	}
+
+	if (connectionHandle == null) {
+	    // <editor-fold defaultstate="collapsed" desc="log error">
+	    logger.error(LoggingConstants.SEVERE, "Warning", "Given ConnectionHandle is invalied.");
+	    // </editor-fold>
+	    response.setErrorMessage("Given ConnectionHandle is invalied.");
+	    return response;
+	}
 
 	try {
 	    // Perform a CardApplicationPath and CardApplicationConnect to connect to the card application

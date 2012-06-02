@@ -40,6 +40,7 @@ import org.openecard.client.common.WSHelper.WSException;
 import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
+import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.connector.Connector;
 import org.openecard.client.connector.ConnectorListener;
@@ -140,17 +141,30 @@ public final class RichClient implements ConnectorListener {
     private TCTokenResponse handleActivate(TCTokenRequest request) {
 	TCTokenResponse response = new TCTokenResponse();
 
+	// TCToken
 	TCToken token = request.getTCToken();
 
+	// ContextHandle and SlotHandle
+	ConnectionHandleType connectionHandle = null;
+	byte[] requestedContextHandle = request.getContextHandle();
+	byte[] requestedSlotHandle = request.getSlotHandle();
 
-	//FIXME ConnectionHandle kommt nachher vom ActivationApplicationRequest
-//	for (ConnectionHandleType connectionHandle : sal.getConnectionHandles()) {
-//	    if(connectionHandle.)
-//	}
-//
-//	ConnectionHandleType connectionHandle = request.getConnectionHandleID();
-//	ConnectionHandleType connectionHandle = request.getConnectionHandleID();
-	ConnectionHandleType connectionHandle = sal.getConnectionHandles().get(0);
+	for (ConnectionHandleType availableConnectionHandle : sal.getConnectionHandles()) {
+	    if (ByteUtils.compare(availableConnectionHandle.getContextHandle(), requestedContextHandle)) {
+		if (ByteUtils.compare(availableConnectionHandle.getSlotHandle(), requestedSlotHandle)) {
+		    connectionHandle = availableConnectionHandle;
+		    break;
+		}
+	    }
+	}
+
+	if (connectionHandle == null) {
+	    // <editor-fold defaultstate="collapsed" desc="log error">
+	    logger.error(LoggingConstants.SEVERE, "Warning", "Given ConnectionHandle is invalied.");
+	    // </editor-fold>
+	    response.setErrorMessage("Given ConnectionHandle is invalied.");
+	    return response;
+	}
 
 	try {
 	    // Perform a CardApplicationPath and CardApplicationConnect to connect to the card application

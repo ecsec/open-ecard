@@ -7,11 +7,8 @@ package org.openecard.client.connector.http.io;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.BeforeClass;
 
 
 /**
@@ -22,18 +19,6 @@ public class HTTPInputStreamTest {
     private static final byte[] CRLF = new byte[]{(byte) 0x0D, (byte) 0x0A};
 
     public HTTPInputStreamTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
-
-    @Before
-    public void setUp() throws IOException {
     }
 
     @Test

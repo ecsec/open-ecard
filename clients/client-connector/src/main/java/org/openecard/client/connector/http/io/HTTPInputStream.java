@@ -21,9 +21,10 @@ public class HTTPInputStream {
     private int bufferPosition = 0;
 
     /**
+     * Creates a new HTTPInputStream.
      *
-     * @param inputStream
-     * @throws IOException
+     * @param inputStream InputStream
+     * @throws IOException If the HTTP request is malformed
      */
     public HTTPInputStream(InputStream inputStream) throws IOException {
 	fillBuffer(inputStream);
@@ -67,7 +68,6 @@ public class HTTPInputStream {
 
 
 	buffer = bais.toByteArray();
-	System.out.println(ByteUtils.toHexString(buffer));
     }
 
     private int findCRLF() {
@@ -85,8 +85,10 @@ public class HTTPInputStream {
     }
 
     /**
+     * Reads a line from the stream.
+     * The end of line is indicated by a CRLF.
      *
-     * @return
+     * @return Line
      */
     public String readLine() {
 	int position = findCRLF();

@@ -15,7 +15,6 @@ package org.openecard.client.connector.messages;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import org.openecard.client.connector.messages.common.ClientRequest;
 import org.openecard.client.connector.tctoken.TCToken;
 
@@ -26,7 +25,8 @@ import org.openecard.client.connector.tctoken.TCToken;
 public class TCTokenRequest implements ClientRequest {
 
     private TCToken token;
-    private ConnectionHandleType connectionHandle;
+    private String slotHandle;
+    private String contextHandle;
 
     /**
      * Returns the TCToken.
@@ -46,11 +46,39 @@ public class TCTokenRequest implements ClientRequest {
 	this.token = token;
     }
 
-    public ConnectionHandleType getConnectionHandle() {
-	return connectionHandle;
+    /**
+     * Returns the context handle.
+     *
+     * @return Context handle
+     */
+    public String getContextHandle() {
+	return contextHandle;
     }
 
-    public void setConnectionHandle(ConnectionHandleType connectionHandle) {
-	this.connectionHandle = connectionHandle;
+    /**
+     * Sets the context handle.
+     *
+     * @param contextHandle Context handle
+     */
+    public void setContextHandle(String contextHandle) {
+	this.contextHandle = contextHandle;
+    }
+
+    /**
+     * Returns the slot handle.
+     *
+     * @return Slot handle
+     */
+    public String getSlotHandle() {
+	return slotHandle;
+    }
+
+    /**
+     * Sets the slot handle.
+     *
+     * @param slotHandle Slot handle
+     */
+    public void setSlotHandle(String slotHandle) {
+	this.slotHandle = slotHandle;
     }
 }

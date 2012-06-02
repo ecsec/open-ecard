@@ -1,4 +1,4 @@
-package org.openecard.client.connector.activation;
+package org.openecard.client.connector;
 
 import org.openecard.client.connector.messages.common.ClientRequest;
 import org.openecard.client.connector.messages.common.ClientResponse;

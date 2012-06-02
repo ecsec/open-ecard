@@ -1,16 +1,17 @@
 package org.openecard.client.connector.handler;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
 import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
-import org.openecard.client.connector.activation.ConnectorException;
+import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.connector.common.ConnectorConstants;
 import org.openecard.client.connector.common.ErrorPage;
-import org.openecard.client.connector.io.CustomStringBuilder;
+import org.openecard.client.connector.http.HTTPRequest;
+import org.openecard.client.connector.http.HTTPResponse;
+import org.openecard.client.connector.http.HTTPStatusCode;
+import org.openecard.client.connector.http.header.RequestLine;
+import org.openecard.client.connector.http.header.ResponseHeader;
+import org.openecard.client.connector.http.header.StatusLine;
 import org.openecard.client.connector.messages.TCTokenRequest;
 import org.openecard.client.connector.messages.TCTokenResponse;
 import org.openecard.client.connector.messages.common.ClientRequest;
@@ -21,6 +22,8 @@ import org.openecard.client.connector.tctoken.TCTokenException;
 import org.openecard.client.connector.tctoken.TCTokenGrabber;
 import org.openecard.client.connector.tctoken.TCTokenParser;
 import org.openecard.client.connector.tctoken.TCTokenVerifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -28,11 +31,7 @@ import org.openecard.client.connector.tctoken.TCTokenVerifier;
  */
 public class TCTokenHandler implements ConnectorHandler {
 
-    private URI tokenURI;
-    private CustomStringBuilder output = new CustomStringBuilder();
-    private HashMap<String, String> parameters = new HashMap<String, String>();
-    // Charset for HTTP header encoding
-    private static final String charset = "UTF-8";
+    private static final Logger logger = LoggerFactory.getLogger(TCTokenHandler.class);
 
     /**
      * Create a new ActivationRequest.
@@ -41,93 +40,70 @@ public class TCTokenHandler implements ConnectorHandler {
     }
 
     @Override
-    public ClientRequest handleRequest(String request) throws Exception {
-	try {
-	    BufferedReader reader = new BufferedReader(new StringReader(request));
-	    String line = reader.readLine();
+    public ClientRequest handleRequest(HTTPRequest httpRequest) throws Exception {
+	RequestLine requestLine = httpRequest.getRequestLine();
 
-	    if (line.startsWith("GET")) {
-		if (line.contains("eID-Client?tcTokenURL")) {
-		    parseURI(line);
-		    // Not needed yet.
-//		    while (!(line = reader.readLine()).isEmpty()) {
-//                        parseParameter(line);
-//		    }
+	if (requestLine.getMethod().equals(RequestLine.Methode.GET.name())) {
+	    URI requestURI = requestLine.getRequestURI();
 
-		    TCToken token = parseTCToken();
+	    if (requestURI.getPath().equals("/eID-Client")) {
+		TCTokenRequest tcTokenRequest = new TCTokenRequest();
+		String query[] = requestURI.getQuery().split("&");
 
-		    TCTokenRequest tcTokenRequest = new TCTokenRequest();
-		    tcTokenRequest.setTCToken(token);
+		for (String q : query) {
+		    String name = q.substring(0, q.indexOf("="));
+		    String value = q.substring(q.indexOf("=") + 1, q.length());
 
-		    return tcTokenRequest;
+		    if (name.startsWith("tcTokenURL")) {
+			if (!value.isEmpty()) {
+			    TCToken token = parseTCToken(new URL(value));
+			    tcTokenRequest.setTCToken(token);
+			} else {
+			    throw new IllegalArgumentException("Malformed tcTokenURL");
+			}
+
+		    } else if (name.startsWith("slotHandle")) {
+			if (!value.isEmpty()) {
+			    tcTokenRequest.setSlotHandle(value);
+			} else {
+			    throw new IllegalArgumentException("Malformed slot handle");
+			}
+		    } else if (name.startsWith("contextHandle")) {
+			if (!value.isEmpty()) {
+			    tcTokenRequest.setContextHandle(value);
+			} else {
+			    throw new IllegalArgumentException("Malformed context handle");
+			}
+		    } else {
+			// <editor-fold defaultstate="collapsed" desc="log unknown query element">
+			logger.info(LoggingConstants.FINE, "Unknown query element: {}", name);
+			// </editor-fold>
+		    }
 		}
+
+		return tcTokenRequest;
 	    }
-	    return null;
-	} catch (TCTokenException e) {
-	    throw e;
-	} catch (IllegalArgumentException e) {
-	    String message = ConnectorConstants.ConnectorError.BAD_REQUEST.toString();
-	    throw new ConnectorException(message, e);
-	} catch (IOException e) {
-	    String message = ConnectorConstants.ConnectorError.BAD_REQUEST.toString();
-	    throw new ConnectorException(message, e);
-	} catch (Throwable e) {
-	    String message = ConnectorConstants.ConnectorError.INTERNAL_ERROR.toString();
-	    throw new ConnectorException(message, e);
 	}
+
+	return null;
     }
 
     @Override
-    public String handleResponse(ClientResponse clientResponse) throws Exception {
+    public HTTPResponse handleResponse(ClientResponse clientResponse) throws Exception {
 	if (clientResponse instanceof TCTokenResponse) {
 	    TCTokenResponse response = (TCTokenResponse) clientResponse;
 
 	    if (response.getErrorPage() != null) {
-		handleErrorPage(response.getErrorPage());
+		return handleErrorPage(response.getErrorPage());
 	    } else if (response.getErrorMessage() != null) {
-		handleErrorResponse(response.getErrorMessage());
+		return handleErrorResponse(response.getErrorMessage());
 	    } else if (response.getRefreshAddress() != null) {
-		handleRedirectResponse(response.getRefreshAddress());
+		return handleRedirectResponse(response.getRefreshAddress());
 	    } else {
-		handleErrorResponse(ConnectorConstants.ConnectorError.INTERNAL_ERROR.toString());
+		return handleErrorResponse(ConnectorConstants.ConnectorError.INTERNAL_ERROR.toString());
 	    }
 	}
 	return null;
-    }
-
-    /**
-     * Parses the URI from the HTTP GET request.
-     *
-     * @param input Input
-     */
-    private void parseURI(String input) {
-	try {
-	    String uri = input.split(" ")[1];
-	    uri = uri.substring(uri.indexOf("=") + 1);
-	    tokenURI = new URI(uri);
-	} catch (Exception e) {
-	    throw new IllegalArgumentException(e.getMessage());
-	}
-    }
-
-    /**
-     * Parses the parameter of the HTTP request.
-     *
-     * @param input Input
-     */
-    private void parseParameter(String input) {
-	try {
-	    int x = input.indexOf(":");
-	    String parameter = input.substring(0, x);
-	    String value = input.substring(x + 1, input.length());
-	    if (value.startsWith(" ")) {
-		value = value.substring(1, value.length());
-	    }
-
-	    parameters.put(parameter, value);
-	} catch (Exception e) {
-	    throw new IllegalArgumentException(e.getMessage());
-	}
     }
 
     /**
@@ -135,7 +111,7 @@ public class TCTokenHandler implements ConnectorHandler {
      *
      * @throws TCTokenException
      */
-    private TCToken parseTCToken() throws TCTokenException {
+    private TCToken parseTCToken(URL tokenURI) throws TCTokenException {
 	// Get TCToken from the given url
 	TCTokenGrabber grabber = new TCTokenGrabber();
 	String data = grabber.getResource(tokenURI.toString());
@@ -162,66 +138,47 @@ public class TCTokenHandler implements ConnectorHandler {
     /**
      * Handle a redirect response.
      *
-     * @param location Location
+     * @param location Redirect location
+     * @return HTTP response
      */
-    public void handleRedirectResponse(URL location) {
-	handleErrorResponse(location.toString());
-    }
+    public HTTPResponse handleRedirectResponse(URL location) {
+	HTTPResponse httpResponse = new HTTPResponse();
+	httpResponse.setStatusLine(new StatusLine(HTTPStatusCode.SEE_OTHER_303));
+	httpResponse.addResponseHeaders(new ResponseHeader(ResponseHeader.Field.LOCATION, location.toString()));
 
-    /**
-     * Handle a redirect response.
-     *
-     * @param location Location
-     */
-    public void handleRedirectResponse(String location) {
-	output.appendln("HTTP/1.1 303 See Other");
-	output.append("Location: ");
-	output.appendln(location);
-	output.appendln();
-	output.appendln();
+	return httpResponse;
     }
 
     /**
      * Handle a error response.
+     * The message will be placed in a HTML page.
      *
      * @param message Message
+     * @return HTTP response
      */
-    public void handleErrorResponse(String message) {
-	try {
-	    ErrorPage p = new ErrorPage(message);
-	    String content = p.getHTML();
+    public HTTPResponse handleErrorResponse(String message) {
+	ErrorPage p = new ErrorPage(message);
+	String content = p.getHTML();
 
-	    // Header
-	    output.appendln("HTTP/1.1 200 OK");
-	    output.appendln("Content-Length: " + content.getBytes(charset).length);
-	    output.appendln("Connection: close");
-	    output.appendln("Content-Type: text/html");
-	    // Content
-	    output.appendln();
-	    output.appendln(content);
-	} catch (IOException e) {
-	    //TODO
-	}
+	HTTPResponse httpResponse = new HTTPResponse();
+	httpResponse.setStatusLine(new StatusLine(HTTPStatusCode.OK_200));
+	httpResponse.setMessageBody(content);
+
+	return httpResponse;
     }
 
     /**
      * Handle a error HTML page.
      *
-     * @param page HTML page
+     * @param content Content
+     * @return HTTP response
      */
-    public void handleErrorPage(String page) {
-	try {
-	    // Header
-	    output.appendln("HTTP/1.1 200 OK");
-	    output.appendln("Content-Length: " + page.getBytes(charset).length);
-	    output.appendln("Connection: close");
-	    output.appendln("Content-Type: text/html");
-	    // Content
-	    output.appendln();
-	    output.appendln(page);
-	    output.appendln();
-	} catch (IOException e) {
-	    //TODO
-	}
+    public HTTPResponse handleErrorPage(String content) {
+
+	HTTPResponse httpResponse = new HTTPResponse();
+	httpResponse.setStatusLine(new StatusLine(HTTPStatusCode.OK_200));
+	httpResponse.setMessageBody(content);
+
+	return httpResponse;
     }
 }

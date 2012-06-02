@@ -13,31 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openecard.client.connector.activation;
+package org.openecard.client.connector;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.common.logging.LoggingConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
- *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class ConnectorServer implements Runnable {
 
-    private static final Logger logger = LogManager.getLogger(ConnectorServer.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ConnectorServer.class);
     private static ConnectorServer connectorServer;
     private final Thread thread;
     private ServerSocket server;
     private int port = 24727;
     private int backlog = 10;
 
-    public static ConnectorServer getInstance() throws IOException {
+    public static ConnectorServer getInstance() throws Exception {
 	if (connectorServer == null) {
 	    connectorServer = new ConnectorServer();
 	}
@@ -47,9 +45,9 @@ public final class ConnectorServer implements Runnable {
     /**
      * Creates a new ConnectorServer.
      *
-     * @throws IOException
+     * @throws Exception if an I/O error occurs when opening the socket.
      */
-    protected ConnectorServer() throws IOException {
+    protected ConnectorServer() throws Exception {
 	this.thread = new Thread(this);
 	this.server = new ServerSocket(port, backlog, InetAddress.getLoopbackAddress());
 
@@ -80,8 +78,10 @@ public final class ConnectorServer implements Runnable {
 		Socket socket = server.accept();
 		ConnectorSocketHandler handler = new ConnectorSocketHandler(socket);
 		handler.start();
-	    } catch (Exception ex) {
-		logger.log(Level.SEVERE, "Cannot handle activation: " + ex.getMessage(), ex);
+	    } catch (Exception e) {
+		// <editor-fold defaultstate="collapsed" desc="log exception">
+		logger.error(LoggingConstants.THROWING, "Exception", e);
+		// </editor-fold>
 	    }
 	}
     }

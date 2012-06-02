@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openecard.client.connector.activation;
+package org.openecard.client.connector;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public final class Connector {
      * @return Activation
      * @throws IOException
      */
-    public static Connector getInstance() throws IOException {
+    public static Connector getInstance() throws Exception {
 	if (connector == null) {
 	    connector = new Connector();
 	}
@@ -50,7 +50,7 @@ public final class Connector {
      *
      * @throws IOException
      */
-    protected Connector() throws IOException {
+    protected Connector() throws Exception {
 	// Add handlers
 	addConnectorHandler(new TCTokenHandler());
 	addConnectorHandler(new StatusHandler());

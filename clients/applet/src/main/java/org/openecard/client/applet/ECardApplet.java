@@ -47,7 +47,7 @@ import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
-import org.openecard.client.connector.activation.Connector;
+import org.openecard.client.connector.Connector;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.ifd.protocol.pace.PACEProtocolFactory;

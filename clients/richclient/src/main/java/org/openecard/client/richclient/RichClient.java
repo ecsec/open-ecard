@@ -41,8 +41,8 @@ import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.common.util.ValueGenerators;
-import org.openecard.client.connector.activation.Connector;
-import org.openecard.client.connector.activation.ConnectorListener;
+import org.openecard.client.connector.Connector;
+import org.openecard.client.connector.ConnectorListener;
 import org.openecard.client.connector.messages.StatusRequest;
 import org.openecard.client.connector.messages.StatusResponse;
 import org.openecard.client.connector.messages.TCTokenRequest;
@@ -141,10 +141,16 @@ public final class RichClient implements ConnectorListener {
 	TCTokenResponse response = new TCTokenResponse();
 
 	TCToken token = request.getTCToken();
-	ConnectionHandleType connectionHandle = request.getConnectionHandle();
+
 
 	//FIXME ConnectionHandle kommt nachher vom ActivationApplicationRequest
-	connectionHandle = sal.getConnectionHandles().get(0);
+//	for (ConnectionHandleType connectionHandle : sal.getConnectionHandles()) {
+//	    if(connectionHandle.)
+//	}
+//
+//	ConnectionHandleType connectionHandle = request.getConnectionHandleID();
+//	ConnectionHandleType connectionHandle = request.getConnectionHandleID();
+	ConnectionHandleType connectionHandle = sal.getConnectionHandles().get(0);
 
 	try {
 	    // Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
@@ -185,15 +191,14 @@ public final class RichClient implements ConnectorListener {
 	    byte[] psk = token.getPathSecurityParameter().getPSK();
 	    String sessionIdentifier = token.getSessionIdentifier();
 	    URL serverAddress = token.getServerAddress();
-
-	    //FIXME
-	    String endpoint = serverAddress + "/?sessionid=" + sessionIdentifier;
+	    URL endpoint = new URL(serverAddress + "/?sessionid=" + sessionIdentifier);
 
 	    // Set up TLS connection
 	    PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionIdentifier.getBytes(), psk, serverAddress.getHost());
+	    TlsClientSocketFactory tlsClientFactory = new TlsClientSocketFactory(tlsClient);
 
 	    // Set up PAOS connection
-	    PAOS p = new PAOS(endpoint, env.getDispatcher(), new TlsClientSocketFactory(tlsClient));
+	    PAOS p = new PAOS(endpoint, env.getDispatcher(), tlsClientFactory);
 
 	    // Send StartPAOS
 	    StartPAOS sp = new StartPAOS();
@@ -236,7 +241,7 @@ public final class RichClient implements ConnectorListener {
 	if (establishContextResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
 	    if (establishContextResponse.getContextHandle() != null) {
 		contextHandle = ifd.establishContext(establishContext).getContextHandle();
-	    } else{
+	    } else {
 		//TODO
 	    }
 	} else {

@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-@Ignore
+//@Ignore
 public class RichClientTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RichClient.class.getName());

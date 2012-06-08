@@ -66,6 +66,41 @@
 	</pluginRepository>
     </pluginRepositories>
 
+    <profiles>
+	<profile>
+	    <id>api-check</id>
+	    <activation>
+		<activeByDefault>true</activeByDefault>
+	    </activation>
+	    <build>
+		<plugins>
+		    <plugin>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>animal-sniffer-maven-plugin</artifactId>
+			<version>1.7</version>
+			<executions>
+			    <execution>
+				<id>api-check</id>
+				<phase>test</phase>
+				<goals>
+				    <goal>check</goal>
+				</goals>
+			    </execution>
+			</executions>
+			<configuration>
+			    <signature>
+				<groupId>org.codehaus.mojo.signature</groupId>
+				<!-- use sun artifact, because java16 doesn't contain smartcardio -->
+				<artifactId>java16-sun</artifactId>
+				<version>1.0</version>
+			    </signature>
+			</configuration>
+		    </plugin>
+		</plugins>
+	    </build>
+	</profile>
+    </profiles>
+
     <build>
 	<pluginManagement>
 	    <plugins>

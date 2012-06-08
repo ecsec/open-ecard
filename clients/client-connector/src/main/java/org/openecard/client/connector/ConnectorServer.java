@@ -49,8 +49,7 @@ public final class ConnectorServer implements Runnable {
      */
     protected ConnectorServer() throws Exception {
 	this.thread = new Thread(this);
-	this.server = new ServerSocket(port, backlog, InetAddress.getLoopbackAddress());
-
+	this.server = new ServerSocket(port, backlog, InetAddress.getLocalHost());
     }
 
     /**

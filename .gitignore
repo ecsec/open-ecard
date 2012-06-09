@@ -8,3 +8,5 @@ target
 .directory
 nb-configuration.xml
 dependency-reduced-pom.xml
+/.idea/
+*.iml

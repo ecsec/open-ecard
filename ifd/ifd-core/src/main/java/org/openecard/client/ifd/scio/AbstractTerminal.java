@@ -1,18 +1,24 @@
-/*
- * Copyright 2012 Tobias Wich ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.ifd.scio;
 
@@ -186,7 +192,7 @@ class AbstractTerminal {
 		UserConsentNavigator ucr = gui.obtainNavigator(pinUserConsent(allMsgs.getAuthenticationRequestMessage()));
 		ExecutionEngine exec = new ExecutionEngine(ucr);
 		// add custom pinAction to submit pin to terminal
-		NativePinStepAction pinAction = new NativePinStepAction("Enter PIN", pinInput, term, template);
+		NativePinStepAction pinAction = new NativePinStepAction("enter-pin", pinInput, term, template);
 		exec.addCustomAction(pinAction);
 		// run gui
 		ResultStatus status = exec.process();
@@ -590,13 +596,13 @@ class AbstractTerminal {
     private static UserConsentDescription pinUserConsent(String title, int minLength, int maxLength) {
 	UserConsentDescription uc = new UserConsentDescription(title);
 	// create step
-	Step s = new Step("Enter PIN");
+	Step s = new Step("enter-pin", "Enter PIN");
 	uc.getSteps().add(s);
 	// add text instructing user
 	PasswordField i1 = new PasswordField();
 	s.getInputInfoUnits().add(i1);
 	i1.setID("pin");
-	i1.setID("PIN:");
+	i1.setDescription("PIN:");
 	i1.setMinLength(minLength);
 	i1.setMaxLength(maxLength);
 
@@ -605,7 +611,7 @@ class AbstractTerminal {
     private static UserConsentDescription pinUserConsent(String title) {
 	UserConsentDescription uc = new UserConsentDescription(title);
 	// create step
-	Step s = new Step("Enter PIN");
+	Step s = new Step("enter-pin", "Enter PIN");
 	uc.getSteps().add(s);
 	s.setInstantReturn(true);
 	// add text instructing user
@@ -617,7 +623,7 @@ class AbstractTerminal {
     }
 
     private static String getPinFromUserConsent(ExecutionEngine response) {
-	List<OutputInfoUnit> results = response.getResults().get("Enter PIN").getResults();
+	List<OutputInfoUnit> results = response.getResults().get("enter-pin").getResults();
 	for (OutputInfoUnit next : results) {
 	    if (next.type() == InfoUnitElementType.PASSWORD_FIELD) {
 		PasswordField p = (PasswordField)next;
@@ -628,6 +634,7 @@ class AbstractTerminal {
 	}
 	return null;
     }
+
 
     /**
      * Action to perform a native pin verify in the GUI executor.

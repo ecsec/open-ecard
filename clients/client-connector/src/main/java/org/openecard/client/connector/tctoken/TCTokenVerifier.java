@@ -1,18 +1,25 @@
-/*
- * Copyright 2012 Moritz Horsch.
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.connector.tctoken;
 
 import java.net.URL;
@@ -24,6 +31,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.common.util.ValueValidator;
 import org.openecard.client.connector.common.ConnectorConstants.ConnectorError;
 
 
@@ -104,9 +112,7 @@ public class TCTokenVerifier {
     public void verifySessionIdentifier() throws Exception {
 	String value = token.getSessionIdentifier();
 	checkRequired(value);
-	//FIXME 16
-	checkHexLength(value, 8);
-	//TODO check length of the sessionID
+	checkSessionLength(value);
     }
 
     /**
@@ -138,6 +144,7 @@ public class TCTokenVerifier {
     public void verifyPathSecurityProtocol() throws Exception {
 	String value = token.getPathSecurityProtocol();
 	if (!checkEmpty(value)) {
+	    checkEqual(value, "urn:ietf:rfc:4346");
 	    checkEqual(value, "urn:ietf:rfc:4279");
 	    checkEqual(value, "urn:ietf:rfc:5487");
 	}
@@ -149,10 +156,13 @@ public class TCTokenVerifier {
      * @throws Exception
      */
     public void verifyPathSecurityParameter() throws Exception {
-	TCToken.PathSecurityParameter psp = token.getPathSecurityParameter();
-	if (!checkEmpty(psp)) {
-	    checkRequired(psp.getPSK());
-	    checkHexLength(ByteUtils.toHexString(psp.getPSK()), 16);
+	if (token.getPathSecurityProtocol().equals("urn:ietf:rfc:4279")
+	   || token.getPathSecurityProtocol().equals("urn:ietf:rfc:5487")) {
+	    TCToken.PathSecurityParameter psp = token.getPathSecurityParameter();
+	    if (!checkEmpty(psp)) {
+		checkRequired(psp.getPSK());
+		checkPSKLength(ByteUtils.toHexString(psp.getPSK()));
+	    }
 	}
     }
 
@@ -208,23 +218,17 @@ public class TCTokenVerifier {
 	}
     }
 
-    /**
-     * Checks if the value contains enough hex bytes.
-     *
-     * @param value Value
-     * @param minOccurrence Min occurrence
-     * @throws Exception
-     */
-    private void checkHexLength(String value, int minOccurrence) throws Exception {
-	Pattern p = Pattern.compile("\\p{XDigit}{2}");
-	Matcher m = p.matcher(value);
 
-	int count = 0;
-	while (m.find()) {
-	    count++;
-	}
-	if (count < minOccurrence) {
-	    throw new Exception("The length of the value is " + count + " bytes, expected are " + minOccurrence);
+    private void checkSessionLength(String value) throws Exception {
+	// FIXME: 16, use session method in ValueValidator class
+	if (ValueValidator.checkHexStrength(value, 8)) {
+	    throw new Exception("The number of bytes in the session is too small.");
 	}
     }
+    private void checkPSKLength(String value) throws Exception {
+	if (ValueValidator.checkPSKStrength(value)) {
+	    throw new Exception("The number of bytes in the PSK is too small.");
+	}
+    }
+
 }

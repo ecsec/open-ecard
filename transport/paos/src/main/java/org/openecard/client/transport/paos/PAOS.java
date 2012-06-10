@@ -1,5 +1,4 @@
-/**
- * **************************************************************************
+/****************************************************************************
  * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -19,12 +18,13 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- **************************************************************************
- */
+ ***************************************************************************/
+
 package org.openecard.client.transport.paos;
 
 import de.bund.bsi.ecard.api._1.InitializeFramework;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.DisconnectResponse;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.io.InputStream;
@@ -32,6 +32,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 import javax.xml.namespace.QName;
@@ -65,23 +66,22 @@ public class PAOS {
     private final URL endpoint;
     private final Dispatcher dispatcher;
     private SSLSocketFactory socketFactory;
-    @Deprecated
-    private PAOSCallback callback;
+    @Deprecated private PAOSCallback callback;
 
     static {
 	logger.warn("SECURITY ALERT: Using custom hostname verifier!!!!");
-	javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(new javax.net.ssl.HostnameVerifier() {
-	    // TODO: verify hostname and whatnot
-
+	// TODO: verify hostname and whatnot
+	HostnameVerifier hv = new HostnameVerifier() {
 	    @Override
 	    public boolean verify(String hostname, javax.net.ssl.SSLSession sslSession) {
 		return true;
 	    }
-	});
+	};
+	javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(hv);
     }
 
     @Deprecated
-    public PAOS(String endpoint, Dispatcher dispatcher, PAOSCallback callback, SSLSocketFactory sockFac) {
+	public PAOS(String endpoint, Dispatcher dispatcher, PAOSCallback callback, SSLSocketFactory sockFac) {
 	//TODO PAOSCallback should be removed!
 	try {
 	    this.endpoint = new URL(endpoint);
@@ -103,13 +103,13 @@ public class PAOS {
     }
 
     @Deprecated
-    public PAOS(String endpoint, Dispatcher dispatcher, PAOSCallback callback) {
+	public PAOS(String endpoint, Dispatcher dispatcher, PAOSCallback callback) {
 	//TODO  PAOSCallback should be removed!
 	this(endpoint, dispatcher, callback, null);
     }
 
     @Deprecated
-    public PAOS(String endpoint, Dispatcher dispatcher) {
+	public PAOS(String endpoint, Dispatcher dispatcher) {
 	try {
 	    this.endpoint = new URL(endpoint);
 	} catch (Exception e) {
@@ -128,7 +128,7 @@ public class PAOS {
     }
 
     @Deprecated
-    public PAOS(String endpoint, Dispatcher dispatcher, SSLSocketFactory sslSocket) {
+	public PAOS(String endpoint, Dispatcher dispatcher, SSLSocketFactory sslSocket) {
 	try {
 	    this.endpoint = new URL(endpoint);
 	} catch (Exception e) {
@@ -266,8 +266,7 @@ public class PAOS {
 	return result;
     }
 
-    public String createStartPAOS(String sessionIdentifier, List<ConnectionHandleType> connectionHandles) throws MarshallingTypeException,
-	    SOAPException, TransformerException {
+    public String createStartPAOS(String sessionIdentifier, List<ConnectionHandleType> connectionHandles) throws MarshallingTypeException, SOAPException, TransformerException {
 	StartPAOS startPAOS = new StartPAOS();
 	startPAOS.setSessionIdentifier(sessionIdentifier);
 	startPAOS.setProfile(ECardConstants.Profile.ECARD_1_1);
@@ -341,6 +340,10 @@ public class PAOS {
 		response.close();
 	    }
 
+	    if (msg instanceof DisconnectResponse) {
+	    	return null;
+	    }
+
 	    // break when message is startpaosresponse
 	    if (requestObj instanceof StartPAOSResponse) {
 		StartPAOSResponse startPAOSResponse = (StartPAOSResponse) requestObj;
@@ -351,11 +354,11 @@ public class PAOS {
 		if (callback != null) {
 		    Thread t = new Thread(new Runnable() {
 
-			@Override
-			public void run() {
-			    callback.loadRefreshAddress();
-			}
-		    });
+			    @Override
+				public void run() {
+				callback.loadRefreshAddress();
+			    }
+			});
 		    t.start();
 		}
 	    }
@@ -364,4 +367,5 @@ public class PAOS {
 	    msg = dispatcher.deliver(requestObj);
 	}
     }
+
 }

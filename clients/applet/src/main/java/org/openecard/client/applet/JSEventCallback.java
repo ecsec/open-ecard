@@ -46,7 +46,7 @@ public class JSEventCallback implements EventCallback {
     }
 
     @Override
-	public void signalEvent(EventType eventType, Object eventData) {
+    public void signalEvent(EventType eventType, Object eventData) {
 	if (eventData instanceof ConnectionHandleType) {
 	    try {
 		String args = toJSON(eventType, (ConnectionHandleType) eventData);
@@ -62,11 +62,11 @@ public class JSEventCallback implements EventCallback {
     }
 
     private String toJSON(EventType type, ConnectionHandleType cHandle) {
+	String eventType = type.name();
 	String contextHandle = ByteUtils.toHexString(cHandle.getContextHandle());
 	String ifdName = cHandle.getIFDName();
+	String slotIndex = cHandle.getSlotIndex() != null ? cHandle.getSlotIndex().toString() : "";
 	String cardType = cHandle.getRecognitionInfo() != null ? cHandle.getRecognitionInfo().getCardType() : null;
-	String eventType = type.name();
-	String slotHandle = cHandle.getSlotHandle() != null ? ByteUtils.toHexString(cHandle.getSlotHandle()) : "";
 
 	StringBuilder sb = new StringBuilder();
 	sb.append("{");
@@ -76,7 +76,7 @@ public class JSEventCallback implements EventCallback {
 	sb.append("\"").append("eventType").append("\"").append(":").append("\"").append(eventType).append("\"").append(",");
 	sb.append("\"").append("reportId").append("\"").append(":").append("\"").append(applet.getReportID()).append("\"").append(",");
 	sb.append("\"").append("contextHandle").append("\"").append(":").append("\"").append(contextHandle).append("\"").append(",");
-	sb.append("\"").append("slotHandle").append("\"").append(":").append("\"").append(slotHandle).append("\"");
+	sb.append("\"").append("slotIndex").append("\"").append(":").append("\"").append(slotIndex).append("\"");
 
 	sb.append("}");
 
@@ -86,10 +86,10 @@ public class JSEventCallback implements EventCallback {
     private String makeId(String input) {
 	try {
 	    MessageDigest md = MessageDigest.getInstance("SHA");
-	    return ByteUtils.toHexString(md.digest(input.getBytes()));
+	    byte[] bytes = md.digest(input.getBytes());
+	    return ByteUtils.toHexString(bytes);
 	} catch (NoSuchAlgorithmException ex) {
-	    //FIXME
-	    // Das kann so nicht stimmen!
+	    // FIXME: Das kann so nicht stimmen!
 	    return input.replaceAll(" ", "_");
 	}
     }

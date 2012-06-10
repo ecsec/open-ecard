@@ -1,5 +1,4 @@
-/**
- * **************************************************************************
+/****************************************************************************
  * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -19,27 +18,23 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- **************************************************************************
- */
+ ***************************************************************************/
+
 package org.openecard.client.applet;
 
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
-import iso.std.iso_iec._24727.tech.schema.Connect;
-import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.StartPAOS;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.common.logging.LoggingConstants;
-import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.connector.ConnectorListener;
 import org.openecard.client.connector.messages.TCTokenRequest;
 import org.openecard.client.connector.messages.TCTokenResponse;
@@ -127,7 +122,7 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 	sp.setSessionIdentifier(applet.getSessionID());
 
 	try {
-//	    Object result = applet.getPAOS().sendStartPAOS(sp);
+	    // Object result = applet.getPAOS().sendStartPAOS(sp);
 
 	    /*
 	     * String redirectUrl = applet.getRedirectURL();
@@ -147,20 +142,20 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 	     * return;
 	     * }
 	     */
-//	    try {
-//			    URL url = new URL(redirectURL);
-//			    if (url.getQuery() != null) {
-//				redirectURL = redirectURL + "&ResultMajor=ok";
-//			    } else {
-//				redirectURL = redirectURL + "?ResultMajor=ok";
-//			    }
-//			    System.out.println("redirecting to: " + redirectURL);
-//			    ECardApplet.this.getAppletContext().showDocument(new URL(redirectURL), "_blank");
-//			} catch (MalformedURLException ex) {
-//			    // <editor-fold defaultstate="collapsed" desc="log exception">
-//			    logger.error(LoggingConstants.THROWING, "Exception", ex);
-//			    // </editor-fold>
-//			}
+	    // try {
+	    // 	URL url = new URL(redirectURL);
+	    // 	if (url.getQuery() != null) {
+	    // 	    redirectURL = redirectURL + "&ResultMajor=ok";
+	    // 	} else {
+	    // 	    redirectURL = redirectURL + "?ResultMajor=ok";
+	    // 	}
+	    // 	System.out.println("redirecting to: " + redirectURL);
+	    // 	ECardApplet.this.getAppletContext().showDocument(new URL(redirectURL), "_blank");
+	    // } catch (MalformedURLException ex) {
+	    // 	// <editor-fold defaultstate="collapsed" desc="log exception">
+	    // 	logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    // 	// </editor-fold>
+	    // }
 	} catch (Exception ex) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
 	    logger.error(LoggingConstants.THROWING, "Exception", ex);
@@ -217,15 +212,18 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 	// ContextHandle and SlotHandle
 	ConnectionHandleType connectionHandle = null;
 	byte[] requestedContextHandle = request.getContextHandle();
-	byte[] requestedSlotHandle = request.getSlotHandle();
+	BigInteger requestedSlotIndex = request.getSlotIndex();
 
-	for (ConnectionHandleType availableConnectionHandle : ((TinySAL) applet.getClientEnvironment().getSAL()).getConnectionHandles()) {
-	    if (ByteUtils.compare(availableConnectionHandle.getContextHandle(), requestedContextHandle)) {
-		if (ByteUtils.compare(availableConnectionHandle.getSlotHandle(), requestedSlotHandle)) {
-		    connectionHandle = availableConnectionHandle;
-		    break;
-		}
-	    }
+	ConnectionHandleType requestedHandle = new ConnectionHandleType();
+
+	requestedHandle.setContextHandle(requestedContextHandle);
+	requestedHandle.setIFDName(request.getIFDName());
+	requestedHandle.setSlotIndex(requestedSlotIndex);
+
+	Set<CardStateEntry> matchingHandles = applet.getCardStates().getMatchingEntries(requestedHandle);
+
+	if(!matchingHandles.isEmpty()) {
+	    connectionHandle = matchingHandles.toArray(new CardStateEntry[]{})[0].handleCopy();
 	}
 
 	if (connectionHandle == null) {
@@ -247,7 +245,7 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 		WSHelper.checkResult(cardApplicationPathResponse);
 	    } catch (WSHelper.WSException ex) {
 		// <editor-fold defaultstate="collapsed" desc="log exception">
-//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+		//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
 		// </editor-fold>
 		response.setErrorMessage(ex.getMessage());
 		return response;
@@ -264,23 +262,31 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 		WSHelper.checkResult(cardApplicationConnectResponse);
 	    } catch (WSHelper.WSException ex) {
 		// <editor-fold defaultstate="collapsed" desc="log exception">
-//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+		//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
 		// </editor-fold>
 		response.setErrorMessage(ex.getMessage());
 		return response;
 	    }
 
-	    // Collect parameters for PSK based TLS
-	    //TODO Change to support different protocols
-	    byte[] psk = token.getPathSecurityParameter().getPSK();
 	    String sessionIdentifier = token.getSessionIdentifier();
 	    URL serverAddress = token.getServerAddress();
-	    //FIXME Wie weit ist das NPA abhängig.
-	    URL endpoint = new URL(serverAddress + "/?sessionid=" + sessionIdentifier);
 
-	    // Set up TLS connection
-	    PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionIdentifier.getBytes(), psk, serverAddress.getHost());
-	    TlsClientSocketFactory tlsClientFactory = new TlsClientSocketFactory(tlsClient);
+	    //FIXME Wie weit ist das NPA abhängig.
+	    URL endpoint = new URL(serverAddress + "?sessionid=" + sessionIdentifier);
+
+	    TlsClientSocketFactory tlsClientFactory = null;
+
+	    // Collect parameters for PSK based TLS
+	    //TODO Change to support different protocols
+	    if(token.getPathSecurityProtocol().equals("urn:ietf:rfc:4279")
+	       || token.getPathSecurityProtocol().equals("urn:ietf:rfc:5487")) {
+		byte[] psk = token.getPathSecurityParameter().getPSK();
+
+		// Set up TLS connection
+		PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionIdentifier.getBytes(), psk, serverAddress.getHost());
+
+		tlsClientFactory = new TlsClientSocketFactory(tlsClient);
+	    }
 
 	    // Set up PAOS connection
 	    PAOS p = new PAOS(endpoint, applet.getClientEnvironment().getDispatcher(), tlsClientFactory);
@@ -289,7 +295,11 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 	    StartPAOS sp = new StartPAOS();
 	    sp.getConnectionHandle().add(connectionHandle);
 	    sp.setSessionIdentifier(sessionIdentifier);
-	    p.sendStartPAOS(sp);
+
+	    ExecutorService service = Executors.newCachedThreadPool();
+
+	    // FIXME: remove background thread as soon as possible
+	    service.submit(new TestRunnable(p,sp));
 
 	    response.setRefreshAddress(token.getRefreshAddress());
 
@@ -300,4 +310,24 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 
 	return response;
     }
+
+    private class TestRunnable implements Runnable {
+    	final PAOS p;
+    	final StartPAOS sp;
+
+    	public TestRunnable(PAOS p, StartPAOS sp) {
+	    this.p = p;
+	    this.sp = sp;
+    	}
+
+	@Override
+	public void run() {
+	    try {
+		this.p.sendStartPAOS(sp);
+	    } catch (Exception e) {
+		logger.error(e.getMessage(), e);
+	    }
+	}
+    }
+
 }

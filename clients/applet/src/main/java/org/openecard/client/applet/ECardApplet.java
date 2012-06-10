@@ -68,6 +68,7 @@ public class ECardApplet extends JApplet {
     private TinySAL sal;
     private IFD ifd;
     private CardRecognition recognition;
+    private CardStateMap cardStates;
     private EventManager em;
     private PAOS paos;
     private JSEventCallback jsec;
@@ -148,7 +149,7 @@ public class ECardApplet extends JApplet {
 	env.setEventManager(em);
 
 	// CardStateMap
-	CardStateMap cardStates = new CardStateMap();
+	this.cardStates = new CardStateMap();
 	SALStateCallback salCallback = new SALStateCallback(recognition, cardStates);
 	em.registerAllEvents(salCallback);
 
@@ -235,6 +236,10 @@ public class ECardApplet extends JApplet {
 	    ifd.releaseContext(releaseContext);
 	} catch (Exception ignore) {
 	}
+    }
+
+    public CardStateMap getCardStates() {
+    	return this.cardStates;
     }
 
     public Frame findParentFrame() {

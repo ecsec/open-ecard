@@ -1,20 +1,28 @@
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.connector.messages;
 
-/*
- * Copyright 2012 Moritz Horsch.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import java.math.BigInteger;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.connector.messages.common.ClientRequest;
 import org.openecard.client.connector.tctoken.TCToken;
@@ -26,7 +34,8 @@ import org.openecard.client.connector.tctoken.TCToken;
 public class TCTokenRequest implements ClientRequest {
 
     private TCToken token;
-    private byte[] slotHandle;
+    private String ifdName;
+    private BigInteger slotIndex;
     private byte[] contextHandle;
 
     /**
@@ -48,6 +57,24 @@ public class TCTokenRequest implements ClientRequest {
     }
 
     /**
+     * Returns the IFD name.
+     *
+     * @return IFD name
+     */
+    public String getIFDName() {
+	return ifdName;
+    }
+
+    /**
+     * Sets the IFD name.
+     *
+     * @param ifdName IFD name
+     */
+    public void setIFDName(String ifdName) {
+	this.ifdName = ifdName;
+    }
+
+    /**
      * Returns the context handle.
      *
      * @return Context handle
@@ -66,20 +93,21 @@ public class TCTokenRequest implements ClientRequest {
     }
 
     /**
-     * Returns the slot handle.
+     * Returns the slot index.
      *
-     * @return Slot handle
+     * @return Slot index
      */
-    public byte[] getSlotHandle() {
-	return slotHandle;
+    public BigInteger getSlotIndex() {
+	return slotIndex;
     }
 
     /**
-     * Sets the slot handle.
+     * Sets the slot index.
      *
-     * @param slotHandle Slot handle
+     * @param slotIndex Slot index
      */
-    public void setSlotHandle(String slotHandle) {
-	this.slotHandle = StringUtils.toByteArray(slotHandle);
+    public void setSlotIndex(String slotIndex) {
+	this.slotIndex = new BigInteger(slotIndex);
     }
+
 }

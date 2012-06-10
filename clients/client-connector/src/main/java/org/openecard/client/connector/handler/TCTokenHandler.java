@@ -74,25 +74,35 @@ public class TCTokenHandler implements ConnectorHandler {
 
 		    if (name.startsWith("tcTokenURL")) {
 			if (!value.isEmpty()) {
-				value = URLDecoder.decode(value,"UTF-8");
+			    value = URLDecoder.decode(value,"UTF-8");
 			    TCToken token = parseTCToken(new URL(value));
 			    tcTokenRequest.setTCToken(token);
 			} else {
 			    throw new IllegalArgumentException("Malformed tcTokenURL");
 			}
 
-		    } else if (name.startsWith("slotHandle")) {
+		    } else if (name.startsWith("ifdName")) {
 			if (!value.isEmpty()) {
-			    tcTokenRequest.setSlotHandle(value);
+			    value = URLDecoder.decode(value,"UTF-8");
+			    tcTokenRequest.setIFDName(value);
 			} else {
-			    throw new IllegalArgumentException("Malformed slot handle");
+			    throw new IllegalArgumentException("Malformed ifd name");
 			}
+
 		    } else if (name.startsWith("contextHandle")) {
 			if (!value.isEmpty()) {
 			    tcTokenRequest.setContextHandle(value);
 			} else {
 			    throw new IllegalArgumentException("Malformed context handle");
 			}
+
+		    } else if (name.startsWith("slotIndex")) {
+			if (!value.isEmpty()) {
+			    tcTokenRequest.setSlotIndex(value);
+			} else {
+			    throw new IllegalArgumentException("Malformed slot index");
+			}
+
 		    } else {
 			logger.info(LoggingConstants.FINE, "Unknown query element: {}", name);
 		    }
@@ -135,8 +145,8 @@ public class TCTokenHandler implements ConnectorHandler {
 
 	//FIXME Remove me
 	/*
-	TCTokenConverter converter = new TCTokenConverter();
-	data = converter.convert(data);
+	  TCTokenConverter converter = new TCTokenConverter();
+	  data = converter.convert(data);
 	*/
 
 	// Parse the TCToken

@@ -46,10 +46,14 @@ public class JSEventCallback implements EventCallback {
     }
 
     @Override
-    public void signalEvent(EventType eventType, Object eventData) {
+	public void signalEvent(EventType eventType, Object eventData) {
 	if (eventData instanceof ConnectionHandleType) {
-	    String args = toJSON(eventType, (ConnectionHandleType) eventData);
-	    jso.call("signalEvent", new String[]{args});
+	    try {
+		String args = toJSON(eventType, (ConnectionHandleType) eventData);
+		jso.call("signalEvent", new String[]{args});
+	    } catch(Exception e) {
+		e.printStackTrace(System.out);
+	    }
 	}
     }
 
@@ -58,11 +62,11 @@ public class JSEventCallback implements EventCallback {
     }
 
     private String toJSON(EventType type, ConnectionHandleType cHandle) {
-	String contextHandle = new String(cHandle.getContextHandle());
+	String contextHandle = ByteUtils.toHexString(cHandle.getContextHandle());
 	String ifdName = cHandle.getIFDName();
 	String cardType = cHandle.getRecognitionInfo() != null ? cHandle.getRecognitionInfo().getCardType() : null;
 	String eventType = type.name();
-	String slotHandle = new String(cHandle.getSlotHandle());
+	String slotHandle = cHandle.getSlotHandle() != null ? ByteUtils.toHexString(cHandle.getSlotHandle()) : "";
 
 	StringBuilder sb = new StringBuilder();
 	sb.append("{");
@@ -70,9 +74,9 @@ public class JSEventCallback implements EventCallback {
 	sb.append("\"").append("name").append("\"").append(":").append("\"").append(ifdName).append("\"").append(",");
 	sb.append("\"").append("cardType").append("\"").append(":").append("\"").append(cardType).append("\"").append(",");
 	sb.append("\"").append("eventType").append("\"").append(":").append("\"").append(eventType).append("\"").append(",");
-	sb.append("\"").append("reportId").append("\"").append(":").append("\"").append(applet.getReportID()).append("\"");
+	sb.append("\"").append("reportId").append("\"").append(":").append("\"").append(applet.getReportID()).append("\"").append(",");
+	sb.append("\"").append("contextHandle").append("\"").append(":").append("\"").append(contextHandle).append("\"").append(",");
 	sb.append("\"").append("slotHandle").append("\"").append(":").append("\"").append(slotHandle).append("\"");
-	sb.append("\"").append("contextHandle").append("\"").append(":").append("\"").append(contextHandle).append("\"");
 
 	sb.append("}");
 

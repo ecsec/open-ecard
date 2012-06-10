@@ -1,3 +1,25 @@
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.connector.handler;
 
 import java.net.URI;
@@ -17,12 +39,7 @@ import org.openecard.client.connector.messages.TCTokenRequest;
 import org.openecard.client.connector.messages.TCTokenResponse;
 import org.openecard.client.connector.messages.common.ClientRequest;
 import org.openecard.client.connector.messages.common.ClientResponse;
-import org.openecard.client.connector.tctoken.TCToken;
-import org.openecard.client.connector.tctoken.TCTokenConverter;
-import org.openecard.client.connector.tctoken.TCTokenException;
-import org.openecard.client.connector.tctoken.TCTokenGrabber;
-import org.openecard.client.connector.tctoken.TCTokenParser;
-import org.openecard.client.connector.tctoken.TCTokenVerifier;
+import org.openecard.client.connector.tctoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,9 +94,7 @@ public class TCTokenHandler implements ConnectorHandler {
 			    throw new IllegalArgumentException("Malformed context handle");
 			}
 		    } else {
-			// <editor-fold defaultstate="collapsed" desc="log unknown query element">
 			logger.info(LoggingConstants.FINE, "Unknown query element: {}", name);
-			// </editor-fold>
 		    }
 		}
 
@@ -119,8 +134,10 @@ public class TCTokenHandler implements ConnectorHandler {
 	String data = grabber.getResource(tokenURI.toString());
 
 	//FIXME Remove me
+	/*
 	TCTokenConverter converter = new TCTokenConverter();
 	data = converter.convert(data);
+	*/
 
 	// Parse the TCToken
 	TCTokenParser parser = new TCTokenParser();
@@ -183,4 +200,5 @@ public class TCTokenHandler implements ConnectorHandler {
 
 	return httpResponse;
     }
+
 }

@@ -1,44 +1,37 @@
-/**
- * **************************************************************************
- * Copyright (C) 2012 ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
- * This file is part of the Open eCard Client.
+ * This file is part of the Open eCard App.
  *
  * GNU General Public License Usage
- *
- * Open eCard Client is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Open eCard Client is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
  * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
  *
- * Alternatively, this file may be used in accordance with the terms and
- * conditions contained in a signed written agreement between you and ecsec.
- *
- ***************************************************************************
- */
+ ***************************************************************************/
+
 package org.openecard.client.applet;
 
-import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.EstablishContext;
+import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
+import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import java.awt.Container;
 import java.awt.Frame;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 import javax.swing.JApplet;
-import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.enums.EventType;
@@ -46,6 +39,7 @@ import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
+import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.connector.Connector;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingUserConsent;
@@ -57,13 +51,12 @@ import org.openecard.client.sal.TinySAL;
 import org.openecard.client.sal.protocol.eac.EACProtocolFactory;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.transport.paos.PAOS;
-import org.openecard.client.transport.tls.PSKTlsClientImpl;
-import org.openecard.client.transport.tls.TlsClientSocketFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
+ *
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
@@ -93,6 +86,7 @@ public class ECardApplet extends JApplet {
     protected static final String INSTANT = "instant";
     protected static final String WAIT = "wait";
     protected static final String CLICK = "click";
+
 
     /**
      * Initialization method that will be called after the applet is loaded
@@ -177,9 +171,6 @@ public class ECardApplet extends JApplet {
 	    }
 	}
 
-
-
-
 	em.initialize();
 
 	List<ConnectionHandleType> cHandles = sal.getConnectionHandles();
@@ -196,13 +187,15 @@ public class ECardApplet extends JApplet {
 	    }
 	}
 
+	/* TODO: remove obsolete code
 	// PAOS
 	if (psk != null) {
-	    PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionID.getBytes(), Hex.decode(psk), endpointURL.getHost());
-	    paos = new PAOS(endpointURL, env.getDispatcher(), new TlsClientSocketFactory(tlsClient));
+	PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionID.getBytes(), Hex.decode(psk), endpointURL.getHost());
+	paos = new PAOS(endpointURL, env.getDispatcher(), new TlsClientSocketFactory(tlsClient));
 	} else {
-	    paos = new PAOS(endpointURL, env.getDispatcher());
+	paos = new PAOS(endpointURL, env.getDispatcher());
 	}
+	*/
 
 	// Start client connector to listen on port 24727
 	try {
@@ -287,31 +280,44 @@ public class ECardApplet extends JApplet {
 
     private void loadParameters() {
 
-	// MANDATORY parameters
+	///
+	/// MANDATORY parameters
+	///
 
-	sessionID = getParameter("sessionId");
-	if (sessionID == null) {
-	    throw new IllegalArgumentException("The parameter sessionID is missing!");
-	}
-	// <editor-fold defaultstate="collapsed" desc="log configuration">
-	logger.debug(LoggingConstants.CONFIG, "sessionId set to {}", sessionID);
-	// </editor-fold>
+	/*
+	 * sessionID is not used anymore, but we've to set it to something
+	 * to satisfy current EventManager implementation
+	 */
+	sessionID = ValueGenerators.generateSessionID();
+	/*
+	  sessionID = getParameter("sessionId");
+	  if (sessionID == null) {
+	  throw new IllegalArgumentException("The parameter sessionID is missing!");
+	  }
+	  // <editor-fold defaultstate="collapsed" desc="log configuration">
+	  logger.debug(LoggingConstants.CONFIG, "sessionId set to {}", sessionID);
+	  // </editor-fold>
+	  */
 
-	try {
-	    endpointURL = new URL(getParameter("endpointUrl"));
-	} catch (Exception e) {
-	    throw new IllegalArgumentException("Malformed endpointURL parameter: " + e.getMessage());
-	}
-	// <editor-fold defaultstate="collapsed" desc="log configuration">
-	logger.debug(LoggingConstants.CONFIG, "endpointUrl set to {}", endpointURL);
-	// </editor-fold>
+	/* endpointURL is not needed anymore
+	   try {
+	   endpointURL = new URL(getParameter("endpointUrl"));
+	   } catch (Exception e) {
+	   throw new IllegalArgumentException("Malformed endpointURL parameter: " + e.getMessage());
+	   }
+	   // <editor-fold defaultstate="collapsed" desc="log configuration">
+	   logger.debug(LoggingConstants.CONFIG, "endpointUrl set to {}", endpointURL);
+	   // </editor-fold>
+	   */
 
 	psk = getParameter("PSK");
 	// <editor-fold defaultstate="collapsed" desc="log configuration">
 	logger.debug(LoggingConstants.CONFIG, "PSK set to {}", psk);
 	// </editor-fold>
 
-	// OPTIONAL parameters
+	///
+	/// OPTIONAL parameters
+	///
 
 	reportID = getParameter("reportId");
 	// <editor-fold defaultstate="collapsed" desc="log configuration">
@@ -356,4 +362,5 @@ public class ECardApplet extends JApplet {
 	logger.debug(LoggingConstants.CONFIG, "selfSigned set to {}", selfSigned);
 	// </editor-fold>
     }
+
 }

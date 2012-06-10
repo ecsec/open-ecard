@@ -1,18 +1,24 @@
-/*
- * Copyright 2012 Johannes Schmoelz ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.applet;
 
@@ -35,48 +41,53 @@ public class JSEventCallback implements EventCallback {
     private JSObject jso;
 
     public JSEventCallback(ECardApplet applet) {
-        this.applet = applet;
-        jso = JSObject.getWindow(applet);
+	this.applet = applet;
+	jso = JSObject.getWindow(applet);
     }
 
     @Override
     public void signalEvent(EventType eventType, Object eventData) {
-        if (eventData instanceof ConnectionHandleType) {
-            String args = toJSON(eventType, (ConnectionHandleType) eventData);
-            jso.call("signalEvent", new String[]{args});
-        }
+	if (eventData instanceof ConnectionHandleType) {
+	    String args = toJSON(eventType, (ConnectionHandleType) eventData);
+	    jso.call("signalEvent", new String[]{args});
+	}
     }
 
     public void showMessage(String message) {
-        jso.call("showMessage", new String[]{message});
+	jso.call("showMessage", new String[]{message});
     }
 
     private String toJSON(EventType type, ConnectionHandleType cHandle) {
-        String ifdName = cHandle.getIFDName();
-        String cardType = cHandle.getRecognitionInfo() != null ? cHandle.getRecognitionInfo().getCardType() : null;
-        String eventType = type.name();
+	String contextHandle = new String(cHandle.getContextHandle());
+	String ifdName = cHandle.getIFDName();
+	String cardType = cHandle.getRecognitionInfo() != null ? cHandle.getRecognitionInfo().getCardType() : null;
+	String eventType = type.name();
+	String slotHandle = new String(cHandle.getSlotHandle());
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        sb.append("\"").append("id").append("\"").append(":").append("\"").append(makeId(ifdName)).append("\"").append(",");
-        sb.append("\"").append("name").append("\"").append(":").append("\"").append(ifdName).append("\"").append(",");
-        sb.append("\"").append("cardType").append("\"").append(":").append("\"").append(cardType).append("\"").append(",");
-        sb.append("\"").append("eventType").append("\"").append(":").append("\"").append(eventType).append("\"").append(",");
-        sb.append("\"").append("reportId").append("\"").append(":").append("\"").append(applet.getReportID()).append("\"");
-        sb.append("}");
+	StringBuilder sb = new StringBuilder();
+	sb.append("{");
+	sb.append("\"").append("id").append("\"").append(":").append("\"").append(makeId(ifdName)).append("\"").append(",");
+	sb.append("\"").append("name").append("\"").append(":").append("\"").append(ifdName).append("\"").append(",");
+	sb.append("\"").append("cardType").append("\"").append(":").append("\"").append(cardType).append("\"").append(",");
+	sb.append("\"").append("eventType").append("\"").append(":").append("\"").append(eventType).append("\"").append(",");
+	sb.append("\"").append("reportId").append("\"").append(":").append("\"").append(applet.getReportID()).append("\"");
+	sb.append("\"").append("slotHandle").append("\"").append(":").append("\"").append(slotHandle).append("\"");
+	sb.append("\"").append("contextHandle").append("\"").append(":").append("\"").append(contextHandle).append("\"");
 
-        return sb.toString();
+	sb.append("}");
+
+	return sb.toString();
     }
 
     private String makeId(String input) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA");
-            return ByteUtils.toHexString(md.digest(input.getBytes()));
-        } catch (NoSuchAlgorithmException ex) {
+	try {
+	    MessageDigest md = MessageDigest.getInstance("SHA");
+	    return ByteUtils.toHexString(md.digest(input.getBytes()));
+	} catch (NoSuchAlgorithmException ex) {
 	    //FIXME
 	    // Das kann so nicht stimmen!
-            return input.replaceAll(" ", "_");
-        }
+	    return input.replaceAll(" ", "_");
+	}
     }
 
 }

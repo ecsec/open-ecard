@@ -2,6 +2,7 @@ package org.openecard.client.connector.handler;
 
 import java.net.URI;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.List;
 import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.connector.common.ConnectorConstants;
@@ -56,6 +57,7 @@ public class TCTokenHandler implements ConnectorHandler {
 
 		    if (name.startsWith("tcTokenURL")) {
 			if (!value.isEmpty()) {
+				value = URLDecoder.decode(value,"UTF-8");
 			    TCToken token = parseTCToken(new URL(value));
 			    tcTokenRequest.setTCToken(token);
 			} else {

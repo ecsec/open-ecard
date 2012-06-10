@@ -1,18 +1,25 @@
-/*
- * Copyright 2012 Moritz Horsch.
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.connector;
 
 import java.net.InetAddress;
@@ -24,33 +31,55 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class ConnectorServer implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectorServer.class);
-    private static ConnectorServer connectorServer;
+
+    private static final int defaultPort = 24727;
+    private static final int backlog = 10;
+
     private final Thread thread;
-    private ServerSocket server;
-    private int port = 24727;
-    private int backlog = 10;
+    private final int port;
+    private final ServerSocket server;
+
+    private static ConnectorServer connectorServer;
 
     public static ConnectorServer getInstance() throws Exception {
 	if (connectorServer == null) {
-	    connectorServer = new ConnectorServer();
+	    connectorServer = new ConnectorServer(defaultPort);
 	}
 	return connectorServer;
     }
 
+
     /**
      * Creates a new ConnectorServer.
      *
+     * @param port Port the server should listen on.
      * @throws Exception if an I/O error occurs when opening the socket.
      */
-    protected ConnectorServer() throws Exception {
+    protected ConnectorServer(int port) throws Exception {
 	this.thread = new Thread(this);
-	this.server = new ServerSocket(port, backlog, InetAddress.getLocalHost());
+	this.thread.setName("Open-eCard Localhost-Binding");
+	this.server = new ServerSocket(port, backlog, InetAddress.getByName("127.0.0.1"));
+	this.port = this.server.getLocalPort();
     }
+
+
+    /**
+     * Get bound port number of the server socket.
+     * The specification defines the number to be 24727, but when used e.g. in an applet, it makes sense to dynamically
+     * bind the port. And tell the number to the calling context (the Browser).
+     *
+     * @return Port number the socket is listening on.
+     */
+    public int getPortNumber() {
+	return port;
+    }
+
 
     /**
      * Starts the server.
@@ -70,6 +99,7 @@ public final class ConnectorServer implements Runnable {
 	}
     }
 
+
     @Override
     public void run() {
 	while (!thread.isInterrupted()) {
@@ -78,10 +108,9 @@ public final class ConnectorServer implements Runnable {
 		ConnectorSocketHandler handler = new ConnectorSocketHandler(socket);
 		handler.start();
 	    } catch (Exception e) {
-		// <editor-fold defaultstate="collapsed" desc="log exception">
-		logger.error(LoggingConstants.THROWING, "Exception", e);
-		// </editor-fold>
+		logger.error(LoggingConstants.THROWING, e.getMessage(), e);
 	    }
 	}
     }
+
 }

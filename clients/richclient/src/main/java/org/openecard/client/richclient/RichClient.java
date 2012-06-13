@@ -1,5 +1,4 @@
-/**
- * **************************************************************************
+/****************************************************************************
  * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -19,28 +18,23 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- **************************************************************************
- */
+ ***************************************************************************/
+
 package org.openecard.client.richclient;
 
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.EstablishContext;
-import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
-import iso.std.iso_iec._24727.tech.schema.StartPAOS;
+import iso.std.iso_iec._24727.tech.schema.*;
+import java.math.BigInteger;
 import java.net.BindException;
 import java.net.URL;
+import java.util.Set;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
 import org.openecard.client.common.logging.LoggingConstants;
+import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
-import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.connector.Connector;
 import org.openecard.client.connector.ConnectorListener;
@@ -144,18 +138,21 @@ public final class RichClient implements ConnectorListener {
 	// TCToken
 	TCToken token = request.getTCToken();
 
-	// ContextHandle and SlotHandle
+	// ContextHandle, IFDName and SlotIndex
 	ConnectionHandleType connectionHandle = null;
 	byte[] requestedContextHandle = request.getContextHandle();
-	byte[] requestedSlotHandle = request.getSlotHandle();
+	String ifdName = request.getIFDName();
+	BigInteger requestedSlotIndex = request.getSlotIndex();
 
-	for (ConnectionHandleType availableConnectionHandle : sal.getConnectionHandles()) {
-	    if (ByteUtils.compare(availableConnectionHandle.getContextHandle(), requestedContextHandle)) {
-		if (ByteUtils.compare(availableConnectionHandle.getSlotHandle(), requestedSlotHandle)) {
-		    connectionHandle = availableConnectionHandle;
-		    break;
-		}
-	    }
+	ConnectionHandleType requestedHandle = new ConnectionHandleType();
+	requestedHandle.setContextHandle(requestedContextHandle);
+	requestedHandle.setIFDName(ifdName);
+	requestedHandle.setSlotIndex(requestedSlotIndex);
+
+	Set<CardStateEntry> matchingHandles = cardStates.getMatchingEntries(requestedHandle);
+
+	if (!matchingHandles.isEmpty()) {
+	    connectionHandle = matchingHandles.toArray(new CardStateEntry[]{})[0].handleCopy();
 	}
 
 	if (connectionHandle == null) {
@@ -177,7 +174,7 @@ public final class RichClient implements ConnectorListener {
 		WSHelper.checkResult(cardApplicationPathResponse);
 	    } catch (WSException ex) {
 		// <editor-fold defaultstate="collapsed" desc="log exception">
-//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+		//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
 		// </editor-fold>
 		response.setErrorMessage(ex.getMessage());
 		return response;
@@ -194,7 +191,7 @@ public final class RichClient implements ConnectorListener {
 		WSHelper.checkResult(cardApplicationConnectResponse);
 	    } catch (WSException ex) {
 		// <editor-fold defaultstate="collapsed" desc="log exception">
-//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+		//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
 		// </editor-fold>
 		response.setErrorMessage(ex.getMessage());
 		return response;
@@ -287,4 +284,5 @@ public final class RichClient implements ConnectorListener {
 	// Initialize the EventManager
 	em.initialize();
     }
+
 }

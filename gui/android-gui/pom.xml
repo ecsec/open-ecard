@@ -1,64 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.openecard.client.gui</groupId>
-	<artifactId>android-gui</artifactId>
-	<packaging>apklib</packaging>
-	<name>Android GUI</name>
+	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.openecard.client.gui</groupId>
+    <artifactId>android-gui</artifactId>
+    <packaging>apklib</packaging>
+    <name>Android GUI</name>
 
-	<parent>
-		<groupId>org.openecard.client</groupId>
-		<artifactId>gui</artifactId>
-		<version>0.0.3-SNAPSHOT</version>
-	</parent>
+    <parent>
+	<groupId>org.openecard.client</groupId>
+	<artifactId>gui</artifactId>
+	<version>1.0.0-pre1</version>
+    </parent>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.openecard.client.gui</groupId>
-			<artifactId>gui-common</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.client.wsdef</groupId>
-			<artifactId>wsdef-client</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.android</groupId>
-			<artifactId>android</artifactId>
-			<version>2.3.3</version>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
+    <dependencies>
+	<dependency>
+	    <groupId>org.openecard.client.gui</groupId>
+	    <artifactId>gui-common</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.wsdef</groupId>
+	    <artifactId>wsdef-client</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.google.android</groupId>
+	    <artifactId>android</artifactId>
+	    <version>2.3.3</version>
+	    <scope>provided</scope>
+	</dependency>
+    </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
-				<artifactId>android-maven-plugin</artifactId>
-				<version>3.0.2</version>
-				<extensions>true</extensions>
-				<configuration>
-					<zipalign>
-						<verbose>true</verbose>
-						<skip>false</skip>
-						<inputApk>${project.build.directory}/${project.build.finalName}.apk</inputApk>
-						<outputApk>${project.build.directory}/${project.build.finalName}-aligned.apk</outputApk>
-					</zipalign>
-					<sdk>
-						<platform>10</platform>
-					</sdk>
-					<test>
-						<createReport>true</createReport>
-					</test>
-					<proguard>
-						<!-- skip as long as problems exist -->
-						<skip>true</skip>
-					</proguard>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+	<plugins>
+	    <plugin>
+		<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+		<artifactId>android-maven-plugin</artifactId>
+		<version>3.0.2</version>
+		<extensions>true</extensions>
+		<configuration>
+		    <zipalign>
+			<verbose>true</verbose>
+			<skip>false</skip>
+			<inputApk>${project.build.directory}/${project.build.finalName}.apk</inputApk>
+			<outputApk>${project.build.directory}/${project.build.finalName}-aligned.apk</outputApk>
+		    </zipalign>
+		    <sdk>
+			<platform>10</platform>
+		    </sdk>
+		    <test>
+			<createReport>true</createReport>
+		    </test>
+		    <proguard>
+			<!-- skip as long as problems exist -->
+			<skip>true</skip>
+		    </proguard>
+		</configuration>
+	    </plugin>
+	</plugins>
+    </build>
 
 </project>

@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	 xmlns="http://maven.apache.org/POM/4.0.0"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -7,7 +7,7 @@
     <parent>
 	<groupId>org.openecard.client</groupId>
 	<artifactId>clients</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>1.0.0-pre1</version>
     </parent>
 
     <groupId>org.openecard.client.clients</groupId>
@@ -37,9 +37,9 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	 	<groupId>org.openecard.client.management</groupId>
-  		<artifactId>tiny-management</artifactId>
-    	<version>${project.version}</version>
+	    <groupId>org.openecard.client.management</groupId>
+	    <artifactId>tiny-management</artifactId>
+	    <version>${project.version}</version>
 	</dependency>
 	<!-- <dependency> -->
 	<!--   <groupId>org.openecard.client.gui</groupId> -->
@@ -62,9 +62,9 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-		<groupId>org.openecard.client.transport</groupId>
- 		 <artifactId>dispatcher</artifactId>
-  		 <version>${project.version}</version>
+	    <groupId>org.openecard.client.transport</groupId>
+	    <artifactId>dispatcher</artifactId>
+	    <version>${project.version}</version>
   	</dependency>
 	<dependency>
 	    <groupId>org.openecard.client.transport</groupId>
@@ -73,12 +73,12 @@
 	</dependency>
 	<dependency>
 	    <groupId>org.openecard.client.ifd.protocols</groupId>
-  		<artifactId>pace</artifactId>
+	    <artifactId>pace</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
 	    <groupId>org.openecard.client.transport</groupId>
-  		<artifactId>tls</artifactId>
+	    <artifactId>tls</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
@@ -100,16 +100,16 @@
             <version>1.6.1-RC1</version>
         </dependency>
 	<dependency>
-        <groupId>org.openecard.client.gui</groupId>
- 	 	<artifactId>android-gui</artifactId>
-       	<version>${project.version}</version> 
-       	<type>apklib</type>
-    </dependency> 
-    <dependency> 
-    	<groupId>org.openecard.client.sal.protocols</groupId>
-  		<artifactId>eac</artifactId>
-   		<version>${project.version}</version> 
-    </dependency>
+	    <groupId>org.openecard.client.gui</groupId>
+	    <artifactId>android-gui</artifactId>
+	    <version>${project.version}</version> 
+	    <type>apklib</type>
+	</dependency> 
+	<dependency> 
+	    <groupId>org.openecard.client.sal.protocols</groupId>
+	    <artifactId>eac</artifactId>
+	    <version>${project.version}</version> 
+	</dependency>
     </dependencies>
 
     <build>

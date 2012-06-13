@@ -2,81 +2,81 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.openecard.client</groupId>
-    <artifactId>wsdef</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
-  </parent>
+    <parent>
+	<groupId>org.openecard.client</groupId>
+	<artifactId>wsdef</artifactId>
+	<version>1.0.0-pre1</version>
+    </parent>
 
-  <groupId>org.openecard.client.wsdef</groupId>
-  <artifactId>wsdef-client</artifactId>
-  <packaging>jar</packaging>
-  <name>openecard WS classes</name>
+    <groupId>org.openecard.client.wsdef</groupId>
+    <artifactId>wsdef-client</artifactId>
+    <packaging>jar</packaging>
+    <name>openecard WS classes</name>
 
-  <build>
-    <resources>
-      <resource>
-    	<directory>src/main/wsdl</directory>
-    	<includes>
-    	  <include>**/ALL.wsdl</include>
-    	  <include>**/*.xsd</include>
-    	</includes>
-      </resource>
-    </resources>
+    <build>
+	<resources>
+	    <resource>
+		<directory>src/main/wsdl</directory>
+		<includes>
+		    <include>**/ALL.wsdl</include>
+		    <include>**/*.xsd</include>
+		</includes>
+	    </resource>
+	</resources>
 
-    <plugins>
-      <plugin>
-	<groupId>org.codehaus.mojo</groupId>
-	<artifactId>jaxws-maven-plugin</artifactId>
-	<version>1.12</version>
-	<executions>
-	  <!-- rest -->
-	  <execution>
-	    <id>All other Services</id>
-	    <goals>
-	      <goal>wsimport</goal>
-	    </goals>
-	    <configuration>
-	      <wsdlDirectory>${basedir}/src/main/wsdl</wsdlDirectory>
-	      <wsdlFiles><wsdlFile>ALL.wsdl</wsdlFile></wsdlFiles>
-	      <sourceDestDir>${project.build.directory}/generated-sources/jaxws</sourceDestDir>
-	      <target>2.1</target>
-	      <xjcArgs>
-		<xjcArg>-npa</xjcArg>
-	      </xjcArgs>
-	      <wsdlLocation>ALL.wsdl</wsdlLocation>
-	      <!-- <keep>true</keep> -->
-	      <!-- <verbose>true</verbose> -->
-	    </configuration>
-	  </execution>
-	</executions>
-        <dependencies>
-	  <!-- use version 2.1 as long as there are java6 users out there -->
-          <dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>jaxws-tools</artifactId>
-            <version>2.1.7</version>
-          </dependency>
-        </dependencies>
-      </plugin>
+	<plugins>
+	    <plugin>
+		<groupId>org.codehaus.mojo</groupId>
+		<artifactId>jaxws-maven-plugin</artifactId>
+		<version>1.12</version>
+		<executions>
+		    <!-- rest -->
+		    <execution>
+			<id>All other Services</id>
+			<goals>
+			    <goal>wsimport</goal>
+			</goals>
+			<configuration>
+			    <wsdlDirectory>${basedir}/src/main/wsdl</wsdlDirectory>
+			    <wsdlFiles><wsdlFile>ALL.wsdl</wsdlFile></wsdlFiles>
+			    <sourceDestDir>${project.build.directory}/generated-sources/jaxws</sourceDestDir>
+			    <target>2.1</target>
+			    <xjcArgs>
+				<xjcArg>-npa</xjcArg>
+			    </xjcArgs>
+			    <wsdlLocation>ALL.wsdl</wsdlLocation>
+			    <!-- <keep>true</keep> -->
+			    <!-- <verbose>true</verbose> -->
+			</configuration>
+		    </execution>
+		</executions>
+		<dependencies>
+		    <!-- use version 2.1 as long as there are java6 users out there -->
+		    <dependency>
+			<groupId>com.sun.xml.ws</groupId>
+			<artifactId>jaxws-tools</artifactId>
+			<version>2.1.7</version>
+		    </dependency>
+		</dependencies>
+	    </plugin>
 
-      <plugin>
-	<groupId>org.openecard.client.wsdef</groupId>
-	<artifactId>class-list-plugin</artifactId>
-	<version>${project.version}</version>
-	<executions>
-	  <execution>
-	    <phase>process-classes</phase>
-	    <goals>
-	      <goal>class-list</goal>
-	    </goals>
-	  </execution>
-	</executions>
-      </plugin>
+	    <plugin>
+		<groupId>org.openecard.client.wsdef</groupId>
+		<artifactId>class-list-plugin</artifactId>
+		<version>${project.version}</version>
+		<executions>
+		    <execution>
+			<phase>process-classes</phase>
+			<goals>
+			    <goal>class-list</goal>
+			</goals>
+		    </execution>
+		</executions>
+	    </plugin>
 
-    </plugins>
-  </build>
+	</plugins>
+    </build>
 
 </project>

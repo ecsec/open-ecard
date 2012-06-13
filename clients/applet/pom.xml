@@ -176,6 +176,11 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
+	    <groupId>org.openecard.client.clients</groupId>
+	    <artifactId>client-connector</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
 	    <groupId>org.slf4j</groupId>
 	    <artifactId>slf4j-jdk14</artifactId>
 	    <version>1.6.4</version>
@@ -185,11 +190,6 @@
 	    <artifactId>java-plugin</artifactId>
 	    <version>1.6.0.26</version>
 	    <scope>provided</scope>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.client.clients</groupId>
-	    <artifactId>client-connector</artifactId>
-	    <version>${project.version}</version>
 	</dependency>
     </dependencies>
 

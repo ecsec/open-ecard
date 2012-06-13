@@ -220,13 +220,12 @@ public class TCTokenVerifier {
 
 
     private void checkSessionLength(String value) throws Exception {
-	// FIXME: 16, use session method in ValueValidator class
-	if (ValueValidator.checkHexStrength(value, 8)) {
+	if (! ValueValidator.checkSessionStrength(value)) {
 	    throw new Exception("The number of bytes in the session is too small.");
 	}
     }
     private void checkPSKLength(String value) throws Exception {
-	if (ValueValidator.checkPSKStrength(value)) {
+	if (! ValueValidator.checkPSKStrength(value)) {
 	    throw new Exception("The number of bytes in the PSK is too small.");
 	}
     }

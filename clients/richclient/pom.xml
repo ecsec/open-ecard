@@ -45,18 +45,8 @@
 
     <dependencies>
 	<dependency>
-	    <groupId>org.openecard.client</groupId>
-	    <artifactId>common</artifactId>
-	    <version>0.0.3-SNAPSHOT</version>
-	</dependency>
-	<dependency>
 	    <groupId>org.openecard.client.sal</groupId>
 	    <artifactId>tiny-sal</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.client</groupId>
-	    <artifactId>recognition</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
@@ -103,6 +93,11 @@
             <groupId>org.openecard.client.clients</groupId>
             <artifactId>client-connector</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.3</version>
         </dependency>
     </dependencies>
 

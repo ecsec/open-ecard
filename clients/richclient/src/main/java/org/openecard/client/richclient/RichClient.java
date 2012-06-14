@@ -38,6 +38,7 @@ import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.connector.Connector;
 import org.openecard.client.connector.ConnectorListener;
+import org.openecard.client.connector.ConnectorServer;
 import org.openecard.client.connector.messages.StatusRequest;
 import org.openecard.client.connector.messages.StatusResponse;
 import org.openecard.client.connector.messages.TCTokenRequest;
@@ -93,8 +94,8 @@ public final class RichClient implements ConnectorListener {
 	if (client == null) {
 	    client = new RichClient();
 	    try {
-		Connector connector = Connector.getInstance();
-		connector.addConnectorListener(client);
+		Connector connector = new Connector(ConnectorServer.DEFAULT_PORT);
+		connector.getListeners().addConnectorListener(client);
 	    } catch (BindException e) {
 		throw new Exception("Client connector is running.");
 	    }

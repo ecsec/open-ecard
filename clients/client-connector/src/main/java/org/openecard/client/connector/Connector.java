@@ -1,24 +1,28 @@
-/*
- * Copyright 2012 Moritz Horsch.
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.connector;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.openecard.client.connector.handler.ConnectorHandler;
 import org.openecard.client.connector.handler.StatusHandler;
 import org.openecard.client.connector.handler.TCTokenHandler;
 
@@ -28,58 +32,50 @@ import org.openecard.client.connector.handler.TCTokenHandler;
  */
 public final class Connector {
 
-    private static Connector connector;
-    private volatile List<ConnectorHandler> connectorHandlers = new ArrayList<ConnectorHandler>();
-    private volatile List<ConnectorListener> connectorListeners = new ArrayList<ConnectorListener>();
+    private final ConnectorServer connectorServer;
+    private final ConnectorHandlers handlers = new ConnectorHandlers();
+    private final ConnectorListeners listeners = new ConnectorListeners();
+
 
     /**
-     * Returns a new instance of the Connector.
+     * Create a new Activation.
      *
-     * @return Activation
+     * @param port Port the server should listen on.
      * @throws IOException
      */
-    public static Connector getInstance() throws Exception {
-	if (connector == null) {
-	    connector = new Connector();
-	}
-	return connector;
-    }
-
-    /**
-     * Creates a new Activation.
-     *
-     * @throws IOException
-     */
-    protected Connector() throws Exception {
+    protected Connector(int port) throws Exception {
 	// Add handlers
-	addConnectorHandler(new TCTokenHandler());
-	addConnectorHandler(new StatusHandler());
+	handlers.addConnectorHandler(new TCTokenHandler());
+	handlers.addConnectorHandler(new StatusHandler());
 
-	ConnectorServer connectorServer = ConnectorServer.getInstance();
+	connectorServer = new ConnectorServer(port, handlers, listeners);
 	connectorServer.start();
     }
 
-    protected List<ConnectorListener> getConnectorListeners() {
-	return connectorListeners;
+    /**
+     * Create a new Activation.
+     * The port is set to any available number.
+     *
+     * @throws Exception if an I/O error occurs when opening the socket.
+     */
+    public Connector() throws Exception {
+	this(0);
     }
 
-    public void addConnectorListener(ConnectorListener listener) {
-	connectorListeners.add(listener);
+    public ConnectorHandlers getHandlers() {
+	return handlers;
     }
 
-    public void removeConnectorListener(ConnectorListener listener) {
-	connectorListeners.remove(listener);
+    public ConnectorListeners getListeners() {
+	return listeners;
     }
 
-    protected List<ConnectorHandler> getConnectorHandlers() {
-	return connectorHandlers;
+    /**
+     * @see ConnectorServer#getPortNumber() 
+     * @return Port number where the connector is reachable.
+     */
+    public int getPortNumber() {
+	return connectorServer.getPortNumber();
     }
 
-    public void addConnectorHandler(ConnectorHandler handler) {
-	connectorHandlers.add(handler);
-    }
-
-    public void removeConnectorHandler(ConnectorHandler handler) {
-	connectorHandlers.remove(handler);
-    }
 }

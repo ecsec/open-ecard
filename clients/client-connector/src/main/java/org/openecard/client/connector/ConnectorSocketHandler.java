@@ -1,18 +1,25 @@
-/*
- * Copyright 2012 Moritz Horsch.
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.connector;
 
 import java.net.Socket;
@@ -38,15 +45,20 @@ public final class ConnectorSocketHandler implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectorSocketHandler.class);
     private final Thread thread;
-    private Socket socket;
+    private final Socket socket;
+    private final ConnectorHandlers handlers;
+    private final ConnectorListeners listeners;
+
 
     /**
      * Creates an new ConnectorHandler.
      *
      * @param socket Socket
      */
-    public ConnectorSocketHandler(Socket socket) {
+    public ConnectorSocketHandler(Socket socket, ConnectorHandlers handlers, ConnectorListeners listeners) {
 	this.socket = socket;
+	this.handlers = handlers;
+	this.listeners = listeners;
 	thread = new Thread(this);
     }
 
@@ -69,8 +81,8 @@ public final class ConnectorSocketHandler implements Runnable {
 		HTTPRequest httpRequest = new HTTPRequest();
 		httpRequest.setInputStream(socket.getInputStream());
 
-		List<ConnectorHandler> handlers = Connector.getInstance().getConnectorHandlers();
-		for (Iterator<ConnectorHandler> it = handlers.iterator(); it.hasNext();) {
+		List<ConnectorHandler> handlerList = this.handlers.getConnectorHandlers();
+		for (Iterator<ConnectorHandler> it = handlerList.iterator(); it.hasNext();) {
 		    aHandler = it.next();
 		    clientRequest = aHandler.handleRequest(httpRequest);
 		    if (clientRequest != null) {
@@ -104,9 +116,9 @@ public final class ConnectorSocketHandler implements Runnable {
 
 	    try {
 		// Start client
-		List<ConnectorListener> listeners = Connector.getInstance().getConnectorListeners();
+		List<ConnectorListener> listenerList = this.listeners.getConnectorListeners();
 
-		for (Iterator<ConnectorListener> it = listeners.iterator(); it.hasNext();) {
+		for (Iterator<ConnectorListener> it = listenerList.iterator(); it.hasNext();) {
 		    ConnectorListener listener = it.next();
 		    clientReponse = listener.request(clientRequest);
 		    if (clientReponse != null) {
@@ -118,15 +130,14 @@ public final class ConnectorSocketHandler implements Runnable {
 		HTTPResponse httpResponse = aHandler.handleResponse(clientReponse);
 		httpResponse.setOutputStream(socket.getOutputStream());
 	    } catch (Exception e) {
-		// <editor-fold defaultstate="collapsed" desc="log exception">
 		logger.error(LoggingConstants.THROWING, "Exception", e);
-		// </editor-fold>
 
 		HTTPResponse httpResponse = new HTTPResponse();
 		httpResponse.setStatusLine(new StatusLine(HTTPStatusCode.INTERNAL_SERVER_ERROR_500));
 		httpResponse.setOutputStream(socket.getOutputStream());
 	    }
 	} catch (Throwable ignore) {
+	    // FIXME: get rid of Throwable catch
 	    // Cannot handle such exceptions
 	}
 

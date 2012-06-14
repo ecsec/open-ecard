@@ -22,38 +22,30 @@
 
 package org.openecard.client.connector;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.openecard.client.connector.handler.ConnectorHandler;
+
 
 /**
- * Implements an exception for connector errors.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class ConnectorException extends RuntimeException {
+public class ConnectorHandlers {
 
-    /**
-     * Create a new ConnectorException.
-     */
-    public ConnectorException() {
-	super();
+    private volatile List<ConnectorHandler> connectorHandlers = new ArrayList<ConnectorHandler>();
+
+
+    protected List<ConnectorHandler> getConnectorHandlers() {
+	return connectorHandlers;
     }
 
-    /**
-     * Create a new ConnectorException.
-     *
-     * @param message Message
-     */
-    public ConnectorException(String message) {
-	super(message);
+    public void addConnectorHandler(ConnectorHandler handler) {
+	connectorHandlers.add(handler);
     }
 
-    /**
-     * Create a new ConnectorException.
-     *
-     * @param message Message
-     * @param throwable Throwable
-     */
-    public ConnectorException(String message, Throwable throwable) {
-	super(message, throwable);
+    public void removeConnectorHandler(ConnectorHandler handler) {
+	connectorHandlers.remove(handler);
     }
 
 }

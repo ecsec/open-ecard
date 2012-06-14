@@ -38,30 +38,26 @@ public final class ConnectorServer implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectorServer.class);
 
-    private static final int defaultPort = 24727;
+    public static final int DEFAULT_PORT = 24727;
     private static final int backlog = 10;
 
     private final Thread thread;
     private final int port;
     private final ServerSocket server;
-
-    private static ConnectorServer connectorServer;
-
-    public static ConnectorServer getInstance() throws Exception {
-	if (connectorServer == null) {
-	    connectorServer = new ConnectorServer(defaultPort);
-	}
-	return connectorServer;
-    }
+    private final ConnectorHandlers handlers;
+    private final ConnectorListeners listeners;
 
 
     /**
-     * Creates a new ConnectorServer.
+     * Create a new ConnectorServer.
+     * The port is opened on the specified port. When the port is 0, then an anvailable port number will be selected.
      *
      * @param port Port the server should listen on.
      * @throws Exception if an I/O error occurs when opening the socket.
      */
-    protected ConnectorServer(int port) throws Exception {
+    protected ConnectorServer(int port, ConnectorHandlers handlers, ConnectorListeners listeners) throws Exception {
+	this.handlers = handlers;
+	this.listeners = listeners;
 	this.thread = new Thread(this);
 	this.thread.setName("Open-eCard Localhost-Binding");
 	this.server = new ServerSocket(port, backlog, InetAddress.getByName("127.0.0.1"));
@@ -105,7 +101,7 @@ public final class ConnectorServer implements Runnable {
 	while (!thread.isInterrupted()) {
 	    try {
 		Socket socket = server.accept();
-		ConnectorSocketHandler handler = new ConnectorSocketHandler(socket);
+		ConnectorSocketHandler handler = new ConnectorSocketHandler(socket, handlers, listeners);
 		handler.start();
 	    } catch (Exception e) {
 		logger.error(LoggingConstants.THROWING, e.getMessage(), e);

@@ -43,7 +43,7 @@ public final class Connector {
      * @param port Port the server should listen on.
      * @throws IOException
      */
-    protected Connector(int port) throws Exception {
+    public Connector(int port) throws Exception {
 	// Add handlers
 	handlers.addConnectorHandler(new TCTokenHandler());
 	handlers.addConnectorHandler(new StatusHandler());
@@ -61,6 +61,7 @@ public final class Connector {
     public Connector() throws Exception {
 	this(0);
     }
+
 
     public ConnectorHandlers getHandlers() {
 	return handlers;

@@ -202,13 +202,13 @@ public class ECardApplet extends JApplet {
 
 	// Start client connector to listen on port 24727
 	try {
-	    // TODO: use an arbitrary port and tell it to the webapp
-	    Connector connector = new Connector(ConnectorServer.DEFAULT_PORT);
+	    Connector connector = new Connector();
 	    connector.getListeners().addConnectorListener(worker);
 
-	    jsec.setEidClientPort(ConnectorServer.DEFAULT_PORT);
+	    jsec.setEidClientPort(connector.getPortNumber());
 	} catch (Exception e) {
-	    throw new RuntimeException("Client connector is running.");
+	    logger.error(e.getMessage(), e);
+	    throw new RuntimeException("Client connector is running.", e);
 	}
     }
 

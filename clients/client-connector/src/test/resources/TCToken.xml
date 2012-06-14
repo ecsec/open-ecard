@@ -5,7 +5,7 @@
     <RefreshAddress>https://eid.services.my.net:443/?sessionID=D9D6851A7C02167A5699DA57657664715F4D9C44E50A94F7A83909D24AFA997A</RefreshAddress>
     <PathSecurity-Protocol>urn:ietf:rfc:4279</PathSecurity-Protocol>
     <Binding>urn:liberty:paos:2006-08</Binding>
-    <PathSecurity-Parameters>
+    <PathSecurity-Parameter>
 	<PSK>b7e9dd2ba2568c3c8d572aaadb3eebf7d4515e66d5fc2fd8e46626725a9abba2</PSK>
-    </PathSecurity-Parameters>
+    </PathSecurity-Parameter>
 </TCTokenType>

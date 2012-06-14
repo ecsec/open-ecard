@@ -43,7 +43,10 @@ public class GenericFactory <T> {
 
 	try {
 	    constructor = loadClass(className);
-	} catch (ReflectiveOperationException ex) {
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
 	    throw new GenericFactoryException(ex);
 	}
     }
@@ -53,7 +56,10 @@ public class GenericFactory <T> {
 	try {
 	    T o = constructor.newInstance(); // null because it is static
 	    return o; // type is asserted by method definition
-	} catch (ReflectiveOperationException ex) {
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
 	    throw new GenericFactoryException(ex);
 	}
     }

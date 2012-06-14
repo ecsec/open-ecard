@@ -34,31 +34,65 @@ import org.openecard.client.common.util.ByteUtils;
 /**
  *
  * @author Johannes.Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
  */
 public class JSEventCallback implements EventCallback {
 
-    private ECardApplet applet;
-    private JSObject jso;
+    private final ECardApplet applet;
+    private final JSObject jsObject;
+
+    private String jsMessageCallback;
+    private String jsEventCallback;
+    private String jsSetEidClientPortCallback;
 
     public JSEventCallback(ECardApplet applet) {
 	this.applet = applet;
-	jso = JSObject.getWindow(applet);
+	this.jsObject = JSObject.getWindow(applet);
+
+	parseParameter(applet);
+    }
+
+    private void parseParameter(ECardApplet applet) {
+	this.jsEventCallback = applet.getParameter("jsEventCallback");
+	this.jsMessageCallback = applet.getParameter("jsMessageCallback");
+	this.jsSetEidClientPortCallback = applet.getParameter("jsSetEidClientPortCallback");
     }
 
     @Override
     public void signalEvent(EventType eventType, Object eventData) {
+	if(this.jsEventCallback == null) {
+	    return;
+	}
+
 	if (eventData instanceof ConnectionHandleType) {
 	    try {
 		String args = toJSON(eventType, (ConnectionHandleType) eventData);
-		jso.call("signalEvent", new String[]{args});
-	    } catch(Exception e) {
-		e.printStackTrace(System.out);
+		jsObject.call(this.jsEventCallback, new String[]{ args });
+	    } catch(Exception ignore) {
 	    }
 	}
     }
 
-    public void showMessage(String message) {
-	jso.call("showMessage", new String[]{message});
+    public void sendMessage(String message) {
+	if(this.jsMessageCallback == null) {
+	    return;
+	}
+
+	try {
+	    this.jsObject.call(this.jsMessageCallback, new String[]{ message });
+	} catch(Exception ignore) {
+	}
+    }
+
+    public void setEidClientPort(int port) {
+	if(this.jsSetEidClientPortCallback == null) {
+	    return;
+	}
+
+	try {
+	    this.jsObject.call(this.jsSetEidClientPortCallback, new Integer[]{ port });
+	} catch(Exception ignore) {
+	}
     }
 
     private String toJSON(EventType type, ConnectionHandleType cHandle) {
@@ -74,7 +108,7 @@ public class JSEventCallback implements EventCallback {
 	sb.append("\"").append("name").append("\"").append(":").append("\"").append(ifdName).append("\"").append(",");
 	sb.append("\"").append("cardType").append("\"").append(":").append("\"").append(cardType).append("\"").append(",");
 	sb.append("\"").append("eventType").append("\"").append(":").append("\"").append(eventType).append("\"").append(",");
-	sb.append("\"").append("reportId").append("\"").append(":").append("\"").append(applet.getReportID()).append("\"").append(",");
+	sb.append("\"").append("reportId").append("\"").append(":").append("\"").append(this.applet.getReportID()).append("\"").append(",");
 	sb.append("\"").append("contextHandle").append("\"").append(":").append("\"").append(contextHandle).append("\"").append(",");
 	sb.append("\"").append("slotIndex").append("\"").append(":").append("\"").append(slotIndex).append("\"");
 
@@ -83,7 +117,7 @@ public class JSEventCallback implements EventCallback {
 	return sb.toString();
     }
 
-    private String makeId(String input) {
+    private static String makeId(String input) {
 	try {
 	    MessageDigest md = MessageDigest.getInstance("SHA");
 	    byte[] bytes = md.digest(input.getBytes());

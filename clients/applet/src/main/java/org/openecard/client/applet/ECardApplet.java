@@ -60,6 +60,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
  */
 public class ECardApplet extends JApplet {
 
@@ -177,7 +178,7 @@ public class ECardApplet extends JApplet {
 
 	List<ConnectionHandleType> cHandles = sal.getConnectionHandles();
 	if (cHandles.isEmpty()) {
-	    jsec.showMessage("Please connect Terminal.");
+	    jsec.sendMessage("Please connect Terminal.");
 	} else {
 	    ConnectionHandleType cHandle;
 	    for (Iterator<ConnectionHandleType> iter = cHandles.iterator(); iter.hasNext();) {
@@ -204,6 +205,8 @@ public class ECardApplet extends JApplet {
 	    // TODO: use an arbitrary port and tell it to the webapp
 	    Connector connector = new Connector(ConnectorServer.DEFAULT_PORT);
 	    connector.getListeners().addConnectorListener(worker);
+
+	    jsec.setEidClientPort(ConnectorServer.DEFAULT_PORT);
 	} catch (Exception e) {
 	    throw new RuntimeException("Client connector is running.");
 	}

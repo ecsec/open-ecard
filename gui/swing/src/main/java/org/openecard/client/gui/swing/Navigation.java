@@ -56,11 +56,19 @@ public class Navigation extends JPanel implements ActionListener {
 	layout.setAutoCreateGaps(true);
 	layout.setAutoCreateContainerGaps(true);
 
-	layout.setHorizontalGroup(
-		layout.createSequentialGroup().addGap(0, 0, Integer.MAX_VALUE).addComponent(backButton, 60, 60, 100).addComponent(nextButton, 60, 60, 100).addGap(10).addComponent(cancelButton, 60, 60, 100));
-	layout.setVerticalGroup(
-		layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(backButton).addComponent(nextButton).addComponent(cancelButton));
-
+	GroupLayout.SequentialGroup hg = layout.createSequentialGroup();
+	hg.addGap(0, 0, Integer.MAX_VALUE);
+	hg.addComponent(backButton, 60, 60, 150);
+	hg.addComponent(nextButton, 60, 60, 150);
+	hg.addGap(10);
+	hg.addComponent(cancelButton, 60, 60, 150);
+	layout.setHorizontalGroup(hg);
+	
+	GroupLayout.ParallelGroup vg = layout.createParallelGroup(GroupLayout.Alignment.BASELINE);
+	vg.addComponent(backButton);
+	vg.addComponent(nextButton);
+	vg.addComponent(cancelButton);
+	layout.setVerticalGroup(vg);
     }
 
     public void addActionListener(ActionListener actionListener) {

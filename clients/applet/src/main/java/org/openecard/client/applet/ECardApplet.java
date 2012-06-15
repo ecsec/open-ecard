@@ -43,6 +43,7 @@ import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.connector.Connector;
 import org.openecard.client.connector.ConnectorServer;
 import org.openecard.client.event.EventManager;
+import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.ifd.protocol.pace.PACEProtocolFactory;
 import org.openecard.client.ifd.scio.IFD;
@@ -112,7 +113,7 @@ public class ECardApplet extends JApplet {
 	env.setDispatcher(dispatcher);
 
 	// GUI
-	SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper(findParentFrame()));
+	SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper());
 
 	// IFD
 	ifd = new IFD();

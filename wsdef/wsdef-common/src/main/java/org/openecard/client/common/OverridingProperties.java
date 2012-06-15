@@ -1,25 +1,30 @@
-/*
- * Copyright 2012 Tobias Wich ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.common;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.net.URL;
 import java.util.Properties;
 
 
@@ -32,22 +37,21 @@ public class OverridingProperties {
 
     private final Properties properties;
 
-    protected OverridingProperties(String fName) throws IOException {
-	InputStream in = OverridingProperties.class.getResourceAsStream("/" + fName);
+    public OverridingProperties(String fName) throws IOException {
+	InputStream in = this.getClass().getResourceAsStream("/" + fName);
 	if (in == null) {
-	    in = OverridingProperties.class.getResourceAsStream(fName);
+	    in = this.getClass().getResourceAsStream(fName);
 	}
-        Reader r = new InputStreamReader(in, "utf-8");
 	properties = new Properties();
 	properties.load(in);
 	init();
     }
-    protected OverridingProperties(InputStream stream) throws IOException {
+    public OverridingProperties(InputStream stream) throws IOException {
 	properties = new Properties();
 	properties.load(stream);
 	init();
     }
-    protected OverridingProperties(Properties props) {
+    public OverridingProperties(Properties props) {
 	properties = new Properties(props);
 	init();
     }
@@ -68,6 +72,14 @@ public class OverridingProperties {
     }
 
 
+    public URL getDependentResource(String fname) {
+	URL url = this.getClass().getResource("/" + fname);
+	if (url == null) {
+	    url = this.getClass().getResource(fname);
+	}
+	return url;
+    }
+
     public final String getProperty(String key) {
 	return properties.getProperty(key);
     }
@@ -77,7 +89,7 @@ public class OverridingProperties {
     }
 
     public final Properties properties() {
-        return new Properties(properties);
+        return (Properties) properties.clone();
     }
 
 }

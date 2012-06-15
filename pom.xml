@@ -8,7 +8,7 @@
     <artifactId>client</artifactId>
     <packaging>pom</packaging>
     <version>0.0.3-SNAPSHOT</version>
-    <name>eCard Client</name>
+    <name>Open eCard Framework</name>
 
     <licenses>
 	<license>

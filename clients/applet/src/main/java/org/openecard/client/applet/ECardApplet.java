@@ -177,9 +177,8 @@ public class ECardApplet extends JApplet {
 	em.initialize();
 
 	List<ConnectionHandleType> cHandles = sal.getConnectionHandles();
-	if (cHandles.isEmpty()) {
-	    jsec.sendMessage("Please connect Terminal.");
-	} else {
+
+	if (!cHandles.isEmpty()) {
 	    ConnectionHandleType cHandle;
 	    for (Iterator<ConnectionHandleType> iter = cHandles.iterator(); iter.hasNext();) {
 		cHandle = iter.next();

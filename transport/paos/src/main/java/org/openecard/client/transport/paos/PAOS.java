@@ -327,6 +327,9 @@ public class PAOS {
 	    try {
 		output = conn.getOutputStream();
 		output.write(this.createPAOSResponse(msg).getBytes("UTF-8"));
+	    } catch (Exception ex) {
+		logger.error(LoggingConstants.THROWING, ex.getMessage(), ex);
+		throw ex;
 	    } finally {
 		output.close();
 	    }
@@ -336,12 +339,15 @@ public class PAOS {
 	    try {
 		response = conn.getInputStream();
 		requestObj = this.processPAOSRequest(response);
+	    } catch (Exception ex) {
+		logger.error(LoggingConstants.THROWING, ex.getMessage(), ex);
+		throw ex;
 	    } finally {
 		response.close();
 	    }
 
 	    if (msg instanceof DisconnectResponse) {
-	    	return null;
+	    	//return null;
 	    }
 
 	    // break when message is startpaosresponse

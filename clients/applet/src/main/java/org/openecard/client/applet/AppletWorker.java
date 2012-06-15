@@ -35,6 +35,7 @@ import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.state.CardStateEntry;
+import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.connector.ConnectorListener;
 import org.openecard.client.connector.messages.TCTokenRequest;
 import org.openecard.client.connector.messages.TCTokenResponse;
@@ -271,8 +272,10 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 	    String sessionIdentifier = token.getSessionIdentifier();
 	    URL serverAddress = token.getServerAddress();
 
-	    //FIXME Wie weit ist das NPA abhängig.
-	    URL endpoint = new URL(serverAddress + "?sessionid=" + sessionIdentifier);
+	    // FIXME: Wie weit ist das NPA abhängig.
+	    if (token.getPathSecurityParameter() != null && token.getPathSecurityParameter().getPSK() != null) {
+		serverAddress = new URL(serverAddress + "/?sessionid=" + sessionIdentifier);
+	    }
 
 	    TlsClientSocketFactory tlsClientFactory = null;
 
@@ -281,15 +284,15 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 	    if(token.getPathSecurityProtocol().equals("urn:ietf:rfc:4279")
 	       || token.getPathSecurityProtocol().equals("urn:ietf:rfc:5487")) {
 		byte[] psk = token.getPathSecurityParameter().getPSK();
+		byte[] sessionBytes = sessionIdentifier.getBytes();
 
 		// Set up TLS connection
-		PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionIdentifier.getBytes(), psk, serverAddress.getHost());
-
+		PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionBytes, psk, serverAddress.getHost());
 		tlsClientFactory = new TlsClientSocketFactory(tlsClient);
 	    }
 
 	    // Set up PAOS connection
-	    PAOS p = new PAOS(endpoint, applet.getClientEnvironment().getDispatcher(), tlsClientFactory);
+	    PAOS p = new PAOS(serverAddress, applet.getClientEnvironment().getDispatcher(), tlsClientFactory);
 
 	    // Send StartPAOS
 	    StartPAOS sp = new StartPAOS();
@@ -303,9 +306,13 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 
 	    response.setRefreshAddress(token.getRefreshAddress());
 
-	} catch (Throwable w) {
-	    logger.error(LoggingConstants.THROWING, "Exception", w);
-	    response.setErrorMessage(w.getMessage());
+	} catch (Exception ex) {
+	    ex.printStackTrace();
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    response.setErrorMessage(ex.getMessage());
 	}
 
 	return response;

@@ -1,9 +1,31 @@
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.crypto.common.asn1.cvc;
 
 import java.util.GregorianCalendar;
-import static org.junit.Assert.*;
-import org.junit.Test;
 import org.openecard.client.common.util.StringUtils;
+import static org.testng.Assert.assertEquals;
+import org.testng.annotations.Test;
 
 
 /**
@@ -28,15 +50,15 @@ public class CardVerifiableCertificateTest {
 
 	CardVerifiableCertificate cvc = new CardVerifiableCertificate(c);
 
-	assertArrayEquals(body, cvc.getBody());
-	assertArrayEquals(signature, cvc.getSignature());
-	assertArrayEquals(chat, cvc.getCHAT().toByteArray());
-	assertArrayEquals(chr, cvc.getCHR().toByteArray());
-	assertArrayEquals(car, cvc.getCAR().toByteArray());
-	assertArrayEquals(publicKey, cvc.getPublicKey().getTLVEncoded().getValue());
-	assertArrayEquals(cpi, cvc.getCPI());
-	assertArrayEquals(encodedBodyAndSignature, cvc.getCertificate().getValue());
-	assertArrayEquals(extension, cvc.getExtensions());
+	assertEquals(body, cvc.getBody());
+	assertEquals(signature, cvc.getSignature());
+	assertEquals(chat, cvc.getCHAT().toByteArray());
+	assertEquals(chr, cvc.getCHR().toByteArray());
+	assertEquals(car, cvc.getCAR().toByteArray());
+	assertEquals(publicKey, cvc.getPublicKey().getTLVEncoded().getValue());
+	assertEquals(cpi, cvc.getCPI());
+	assertEquals(encodedBodyAndSignature, cvc.getCertificate().getValue());
+	assertEquals(extension, cvc.getExtensions());
 
 	assertEquals(13, cvc.getEffectiveDate().get(GregorianCalendar.DAY_OF_MONTH));
 	assertEquals(9, cvc.getEffectiveDate().get(GregorianCalendar.MONTH));

@@ -1,26 +1,38 @@
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.gui.swing;
 
-import org.openecard.client.gui.swing.common.GUIDefaults;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.junit.Before;
-import org.junit.Test;
 import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.UserConsentNavigator;
-import org.openecard.client.gui.definition.BoxItem;
-import org.openecard.client.gui.definition.Checkbox;
-import org.openecard.client.gui.definition.PasswordField;
-import org.openecard.client.gui.definition.Step;
-import org.openecard.client.gui.definition.Text;
-import org.openecard.client.gui.definition.ToggleText;
-import org.openecard.client.gui.definition.UserConsentDescription;
-import org.openecard.client.gui.executor.ExecutionEngine;
-import org.openecard.client.gui.executor.ExecutionResults;
-import org.openecard.client.gui.executor.StepAction;
-import org.openecard.client.gui.executor.StepActionResult;
-import org.openecard.client.gui.executor.StepActionResultStatus;
+import org.openecard.client.gui.definition.*;
+import org.openecard.client.gui.executor.*;
+import org.openecard.client.gui.swing.common.GUIDefaults;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 
 /**
@@ -32,23 +44,17 @@ public class RunGUI {
 
     private UserConsentDescription uc;
 
-    @Before
+    @BeforeTest
     public void setUp() throws Exception {
-	try {
-	    uc = new UserConsentDescription("Identitätsnachweis");
+	uc = new UserConsentDescription("Identitätsnachweis");
 
-	    uc.getSteps().add(identityCheckStep());
-	    uc.getSteps().add(providerInfoStep());
-	    uc.getSteps().add(reqestedDataStep());
-	    uc.getSteps().add(pinInputStep());
-	    uc.getSteps().add(checkDataStep());
+	uc.getSteps().add(identityCheckStep());
+	uc.getSteps().add(providerInfoStep());
+	uc.getSteps().add(reqestedDataStep());
+	uc.getSteps().add(pinInputStep());
+	uc.getSteps().add(checkDataStep());
 
-	    GUIDefaults.initialize();
-
-	} catch (Exception e) {
-	    System.out.println(e.getMessage());
-	    e.printStackTrace();
-	}
+	GUIDefaults.initialize();
     }
 
     public boolean validateColor(final String hex) {
@@ -463,4 +469,5 @@ public class RunGUI {
 	    w.printStackTrace();
 	}
     }
+
 }

@@ -1,18 +1,24 @@
-/*
- * Copyright 2012 Tobias Wich ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.ifd.scio;
 
@@ -21,10 +27,6 @@ import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import javax.activation.UnsupportedDataTypeException;
 import javax.xml.bind.JAXBException;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.fail;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.gui.swing.SwingUserConsent;
@@ -32,6 +34,9 @@ import org.openecard.client.ifd.scio.reader.PCSCPinVerify;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.WSMarshallerFactory;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+import org.testng.annotations.Test;
 import org.xml.sax.SAXException;
 
 
@@ -63,10 +68,10 @@ public class PINTest {
 	PasswordAttributesType pwdAttr = create(true, ISO_9564_1, 4, 8, 12);
 
 	byte[] pinMask = IFDUtils.createPinMask(pwdAttr);
-	assertArrayEquals(new byte[] {0x20,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF}, pinMask);
+	assertEquals(new byte[] {0x20,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF}, pinMask);
 
 	byte[] pinResult = IFDUtils.encodePin("123456789", pwdAttr);
-	assertArrayEquals(new byte[] {0x29,0x12,0x34,0x56,0x78,(byte)0x9F,(byte)0xFF,(byte)0xFF}, pinResult);
+	assertEquals(new byte[] {0x29,0x12,0x34,0x56,0x78,(byte)0x9F,(byte)0xFF,(byte)0xFF}, pinResult);
     }
 
     @Test
@@ -75,10 +80,10 @@ public class PINTest {
 	pwdAttr.setPadChar(new byte[]{(byte)0xFF});
 
 	byte[] pinMask = IFDUtils.createPinMask(pwdAttr);
-	assertArrayEquals(new byte[] {(byte)0xFF,(byte)0xFF,(byte)0xFF}, pinMask);
+	assertEquals(new byte[] {(byte)0xFF,(byte)0xFF,(byte)0xFF}, pinMask);
 
 	byte[] pinResult = IFDUtils.encodePin("12345", pwdAttr);
-	assertArrayEquals(new byte[] {(byte)0x12,(byte)0x34,(byte)0x5F}, pinResult);
+	assertEquals(new byte[] {(byte)0x12,(byte)0x34,(byte)0x5F}, pinResult);
     }
 
     @Test
@@ -86,7 +91,7 @@ public class PINTest {
 	PasswordAttributesType pwdAttr = create(false, ASCII_NUMERIC, 6, 6);
 
 	byte[] pinResult = IFDUtils.encodePin("123456", pwdAttr);
-	assertArrayEquals(new byte[] {0x31,0x32,0x33,0x34,0x35,0x36}, pinResult);
+	assertEquals(new byte[] {0x31,0x32,0x33,0x34,0x35,0x36}, pinResult);
 
 	try {
 	    pwdAttr = create(true, ASCII_NUMERIC, 6, 6);
@@ -107,13 +112,13 @@ public class PINTest {
 	PasswordAttributesType pwdAttr = create(false, HALF_NIBBLE_BCD, 6, 6);
 
 	byte[] pinResult = IFDUtils.encodePin("123456", pwdAttr);
-	assertArrayEquals(new byte[] {(byte)0xF1,(byte)0xF2,(byte)0xF3,(byte)0xF4,(byte)0xF5,(byte)0xF6}, pinResult);
+	assertEquals(new byte[] {(byte)0xF1,(byte)0xF2,(byte)0xF3,(byte)0xF4,(byte)0xF5,(byte)0xF6}, pinResult);
 
 	pwdAttr = create(true, HALF_NIBBLE_BCD, 6, 7);
 	pwdAttr.setPadChar(new byte[]{(byte)0xFF});
 
 	pinResult = IFDUtils.encodePin("123456", pwdAttr);
-	assertArrayEquals(new byte[] {(byte)0xF1,(byte)0xF2,(byte)0xF3,(byte)0xF4,(byte)0xF5,(byte)0xF6,(byte)0xFF}, pinResult);
+	assertEquals(new byte[] {(byte)0xF1,(byte)0xF2,(byte)0xF3,(byte)0xF4,(byte)0xF5,(byte)0xF6,(byte)0xFF}, pinResult);
     }
 
     @Test
@@ -124,7 +129,7 @@ public class PINTest {
 	String pinStr = "00 20 00 01 08 20 FF FF FF FF FF FF FF"; // length=13
 	String ctrlStr = "00 0F 89 47 04 0E04 02 FF 0407 00 000000 0D000000";
 	byte[] referenceData = StringUtils.toByteArray(ctrlStr + pinStr, true);
-	assertArrayEquals(referenceData, structData);
+	assertEquals(referenceData, structData);
     }
 
     @Test
@@ -135,11 +140,11 @@ public class PINTest {
 	String pinStr = "00 20 00 01 04 FF FF FF FF"; // length=9
 	String ctrlStr = "00 0F 82 04 00 0404 02 FF 0407 00 000000 09000000";
 	byte[] referenceData = StringUtils.toByteArray(ctrlStr + pinStr, true);
-	assertArrayEquals(referenceData, structData);
+	assertEquals(referenceData, structData);
     }
 
-    @Ignore
-    @Test
+
+    @Test(enabled=false)
     public void verifyeGK() {
 	IFD ifd = new IFD();
 	ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
@@ -169,8 +174,8 @@ public class PINTest {
 	byte[] responseCode = verifyR.getResponse();
     }
 
-    @Ignore
-    @Test
+
+    @Test(enabled=false)
     public void executePACE_PIN() throws UnsupportedDataTypeException, JAXBException, SAXException, WSMarshallerException {
 	IFD ifd = new IFD();
 	ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper()));

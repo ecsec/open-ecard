@@ -25,14 +25,14 @@ package org.openecard.client.recognition;
 import iso.std.iso_iec._24727.tech.schema.GetCardInfoOrACD;
 import iso.std.iso_iec._24727.tech.schema.GetCardInfoOrACDResponse;
 import java.io.IOException;
-import org.junit.Assert;
-import org.junit.Test;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
 import org.openecard.client.recognition.staticrepo.LocalCifRepo;
 import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.jaxb.JAXBMarshaller;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import org.xml.sax.SAXException;
 
 

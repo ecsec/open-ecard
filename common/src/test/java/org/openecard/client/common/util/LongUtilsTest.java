@@ -22,8 +22,9 @@
 
 package org.openecard.client.common.util;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+import org.testng.annotations.Test;
 
 
 /**
@@ -36,29 +37,29 @@ public class LongUtilsTest {
     @Test
     public void testToByteArray() {
 	byte[] expected = new byte[] { (byte) 0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF };
-	assertArrayEquals(expected, LongUtils.toByteArray(Long.MAX_VALUE));
+	assertEquals(expected, LongUtils.toByteArray(Long.MAX_VALUE));
 
 	expected = new byte[] { 0x00 };
-	assertArrayEquals(expected, LongUtils.toByteArray(0));
+	assertEquals(expected, LongUtils.toByteArray(0));
 
 	expected = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-	assertArrayEquals(expected, LongUtils.toByteArray(0, true));
+	assertEquals(expected, LongUtils.toByteArray(0, true));
 
 	expected = new byte[] { 0x00 };
-	assertArrayEquals(expected, LongUtils.toByteArray(0, false));
+	assertEquals(expected, LongUtils.toByteArray(0, false));
 
 	expected = new byte[] { (byte) 0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF };
-	assertArrayEquals(expected, LongUtils.toByteArray(Long.MAX_VALUE, true));
+	assertEquals(expected, LongUtils.toByteArray(Long.MAX_VALUE, true));
 
 	expected = new byte[] { (byte) 0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF };
-	assertArrayEquals(expected, LongUtils.toByteArray(Long.MAX_VALUE, true));
+	assertEquals(expected, LongUtils.toByteArray(Long.MAX_VALUE, true));
 
 	expected = new byte[] { 0x01, 0x00, 0x00, 0x00 };
-	assertArrayEquals(expected, LongUtils.toByteArray(8, 1));
+	assertEquals(expected, LongUtils.toByteArray(8, 1));
 
 	try {
 	    expected = new byte[] { 0x01, 0x00, 0x00, 0x00 };
-	    assertArrayEquals(expected, LongUtils.toByteArray(8, 0));
+	    assertEquals(expected, LongUtils.toByteArray(8, 0));
 	    fail("A numbits of '0' should give an IllegalArgumentException");
 	} catch (IllegalArgumentException e) {
 	    /* expected */
@@ -66,7 +67,7 @@ public class LongUtilsTest {
 
 	try {
 	    expected = new byte[] { 0x01, 0x00, 0x00, 0x00 };
-	    assertArrayEquals(expected, LongUtils.toByteArray(8, -5));
+	    assertEquals(expected, LongUtils.toByteArray(8, -5));
 	    fail("A negative value for numbits should give an IllegalArgumentException");
 	} catch (IllegalArgumentException e) {
 	    /* expected */
@@ -74,7 +75,7 @@ public class LongUtilsTest {
 
 	try {
 	    expected = new byte[] { 0x01, 0x00, 0x00, 0x00 };
-	    assertArrayEquals(expected, LongUtils.toByteArray(-8, 5));
+	    assertEquals(expected, LongUtils.toByteArray(-8, 5));
 	    fail("A negative value for value should give an IllegalArgumentException");
 	} catch (IllegalArgumentException e) {
 	    /* expected */
@@ -82,7 +83,7 @@ public class LongUtilsTest {
 
 	try {
 	    expected = new byte[] { 0x01, 0x00, 0x00, 0x00 };
-	    assertArrayEquals(expected, LongUtils.toByteArray(8, 9));
+	    assertEquals(expected, LongUtils.toByteArray(8, 9));
 	    fail("A value above 8 for numbits should give an IllegalArgumentException");
 	} catch (IllegalArgumentException e) {
 	    /* expected */

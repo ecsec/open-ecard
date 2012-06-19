@@ -1,50 +1,49 @@
-/*
- * Copyright 2012 Tobias Wich ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.ws.jaxb;
 
-import static junit.framework.Assert.assertNotNull;
-
-import java.math.BigInteger;
-
-import iso.std.iso_iec._24727.tech.schema.Connect;
+import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
+import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse.Version;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.EAC2OutputType;
-
+import java.math.BigInteger;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
-
-import org.junit.Test;
 import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.soap.MessageFactory;
 import org.openecard.client.ws.soap.SOAPBody;
 import org.openecard.client.ws.soap.SOAPException;
 import org.openecard.client.ws.soap.SOAPMessage;
+import static org.testng.Assert.assertNotNull;
+import org.testng.annotations.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
-import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse.Version;
 
 
 /**

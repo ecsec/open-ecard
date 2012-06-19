@@ -26,9 +26,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import static org.junit.Assert.*;
-import org.junit.Test;
 import org.openecard.client.crypto.common.asn1.eac.EFCardAccessTest;
+import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 
 /**

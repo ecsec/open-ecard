@@ -1,46 +1,29 @@
-/*
- * Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg
+/****************************************************************************
+ * Copyright (C) 2012 HS Coburg.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.transport.tls;
 
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
-import iso.std.iso_iec._24727.tech.schema.Connect;
-import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
-import iso.std.iso_iec._24727.tech.schema.CryptographicServiceActionName;
-import iso.std.iso_iec._24727.tech.schema.DIDGet;
-import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDList;
-import iso.std.iso_iec._24727.tech.schema.DIDListResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDQualifierType;
-import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
-import iso.std.iso_iec._24727.tech.schema.DSIRead;
-import iso.std.iso_iec._24727.tech.schema.DSIReadResponse;
-import iso.std.iso_iec._24727.tech.schema.DataSetSelect;
-import iso.std.iso_iec._24727.tech.schema.DataSetSelectResponse;
-import iso.std.iso_iec._24727.tech.schema.EstablishContext;
-import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
-import iso.std.iso_iec._24727.tech.schema.ListIFDs;
-import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
-import iso.std.iso_iec._24727.tech.schema.NamedDataServiceActionName;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -52,10 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
-import junit.framework.Assert;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.openecard.bouncycastle.asn1.ASN1Sequence;
 import org.openecard.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
@@ -84,6 +63,9 @@ import org.openecard.client.sal.TinySAL;
 import org.openecard.client.sal.protocol.genericryptography.GenericCryptoProtocolFactory;
 import org.openecard.client.sal.protocol.pincompare.PinCompareProtocolFactory;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 
 /**
@@ -91,7 +73,6 @@ import org.openecard.client.transport.dispatcher.MessageDispatcher;
  * @author Simon Potzernheim <potzernheim@hs-coburg.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@Ignore // works only with connected terminal+eGK with gematik labortest 02 certificate
 public class TlsSmartcardCredentialsTest {
 
     private static ClientEnv env;
@@ -149,7 +130,7 @@ public class TlsSmartcardCredentialsTest {
      * @throws NoSuchMethodException
      * @throws IllegalAccessException
      */
-    @Test
+    @Test(enabled=false) // works only with connected terminal+eGK with gematik labortest 02 certificate
     public void test() throws Exception {
 	// Connect to ESIGN application
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();

@@ -6,7 +6,6 @@ This product includes software developed at:
  - HS Coburg (http://www.hs-coburg.de)
  - TU Darmstadt (http://www.tu-darmstadt.de)
  - Ruhr Uni Bochum (http://www.ruhr-uni-bochum.de)
- - AGETO Holding AG (http://www.ageto.de)
 
 The following software projects are included in this software distribution:
  - Apache Commons (http://commons.apache.org)
@@ -15,8 +14,8 @@ The following software projects are included in this software distribution:
  - Bouncy Castle Crypto API (http://www.bouncycastle.org)
  - Google Android Java ME Library (http://source.android.com)
  - JSON Parser (http://www.json.org)
- - JUnit testing framework (http://www.junit.org)
  - OpenJDK (http://openjdk.java.net)
  - Seek for Android (https://code.google.com/p/seek-for-android)
  - Sun Java (http://java.sun.com)
+ - TestNG testing framework (http://testng.org)
  - Xml Pull Parser (http://www.extreme.indiana.edu/xgws/xsoap/xpp)

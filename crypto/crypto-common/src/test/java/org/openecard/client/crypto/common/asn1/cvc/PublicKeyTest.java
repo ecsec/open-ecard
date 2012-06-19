@@ -1,14 +1,36 @@
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.crypto.common.asn1.cvc;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import org.junit.Assert;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 import org.openecard.client.crypto.common.asn1.eac.EFCardAccessTest;
 import org.openecard.client.crypto.common.asn1.eac.oid.TAObjectIdentifier;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 
 /**
@@ -19,10 +41,8 @@ public class PublicKeyTest {
 
     private CardVerifiableCertificateChain chain;
 
-    public PublicKeyTest() {
-    }
 
-    @Before
+    @BeforeTest
     public void setUp() throws Exception {
 	try {
 	    byte[] cvca = loadTestFile("cert_cvca.cvcert");
@@ -43,19 +63,19 @@ public class PublicKeyTest {
     @Test
     public void testKeyCVCA() throws Exception {
 	PublicKey pk = chain.getCVCACertificate().getPublicKey();
-	Assert.assertEquals(pk.getObjectIdentifier(), TAObjectIdentifier.id_TA_ECDSA_SHA_512);
+	assertEquals(pk.getObjectIdentifier(), TAObjectIdentifier.id_TA_ECDSA_SHA_512);
     }
 
     @Test
     public void testKeyDV() throws Exception {
 	PublicKey pk = chain.getDVCertificate().getPublicKey();
-	Assert.assertEquals(pk.getObjectIdentifier(), TAObjectIdentifier.id_TA_ECDSA_SHA_512);
+	assertEquals(pk.getObjectIdentifier(), TAObjectIdentifier.id_TA_ECDSA_SHA_512);
     }
 
     @Test
     public void testKeyTerminal() throws Exception {
 	PublicKey pk = chain.getTerminalCertificate().getPublicKey();
-	Assert.assertEquals(pk.getObjectIdentifier(), TAObjectIdentifier.id_TA_ECDSA_SHA_512);
+	assertEquals(pk.getObjectIdentifier(), TAObjectIdentifier.id_TA_ECDSA_SHA_512);
     }
 
     private byte[] loadTestFile(String file) throws Exception {
@@ -72,4 +92,5 @@ public class PublicKeyTest {
 	}
 	return baos.toByteArray();
     }
+
 }

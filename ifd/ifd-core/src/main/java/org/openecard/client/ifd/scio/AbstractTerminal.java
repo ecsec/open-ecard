@@ -26,12 +26,9 @@ import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.CardCommandStatus;
 import org.openecard.client.gui.ResultStatus;
@@ -44,6 +41,8 @@ import org.openecard.client.ifd.scio.reader.PCSCFeatures;
 import org.openecard.client.ifd.scio.reader.PCSCPinVerify;
 import org.openecard.client.ifd.scio.wrapper.SCTerminal;
 import org.openecard.client.ifd.scio.wrapper.SCWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -52,7 +51,7 @@ import org.openecard.client.ifd.scio.wrapper.SCWrapper;
  */
 class AbstractTerminal {
 
-    private static final Logger _logger = LogManager.getLogger(AbstractTerminal.class.getName());
+    private static final Logger _logger = LoggerFactory.getLogger(AbstractTerminal.class);
 
     private final IFD ifd;
     private final SCWrapper scwrapper;
@@ -68,27 +67,14 @@ class AbstractTerminal {
     private BigInteger keyIdx = null;
 
     public AbstractTerminal(IFD ifd, SCWrapper scwrapper, UserConsent gui, byte[] ctxHandle, BigInteger displayIdx) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "AbstractTerminal(IFD ifd, SCWrapper scwrapper, UserConsent gui, byte[] ctxHandle, BigInteger displayIdx)", new Object[]{ifd, scwrapper, gui, ctxHandle, displayIdx});
-	} // </editor-fold>
 	this.ifd = ifd;
 	this.scwrapper = scwrapper;
 	this.gui = gui;
 	this.ctxHandle = ctxHandle;
 	this.displayIdx = displayIdx;
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "AbstractTerminal(IFD ifd, SCWrapper scwrapper, UserConsent gui, byte[] ctxHandle, BigInteger displayIdx)");
-	} // </editor-fold>
     }
 
     public void output(String ifdName, OutputInfoType outInfo) throws IFDException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "output(String ifdName, OutputInfoType outInfo)", new Object[]{ifdName, outInfo});
-	} // </editor-fold>
-
 	getCapabilities(ifdName);
 
 	// extract values from outInfo for convenience
@@ -112,10 +98,7 @@ class AbstractTerminal {
 		beep();
 	    } else {
 		IFDException ex = new IFDException("No device to output a beep available.");
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.WARNING)) {
-		    _logger.logp(Level.WARNING, this.getClass().getName(), "output(String ifdName, OutputInfoType outInfo)", ex.getMessage(), ex);
-		} // </editor-fold>
+		_logger.warn(ex.getMessage(), ex);
 		throw ex;
 	    }
 	}
@@ -124,10 +107,7 @@ class AbstractTerminal {
 		blink();
 	    } else {
 		IFDException ex = new IFDException("No device to output a blink available.");
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.WARNING)) {
-		    _logger.logp(Level.WARNING, this.getClass().getName(), "output(String ifdName, OutputInfoType outInfo)", ex.getMessage(), ex);
-		} // </editor-fold>
+		_logger.warn(ex.getMessage(), ex);
 		throw ex;
 	    }
 	}
@@ -136,25 +116,14 @@ class AbstractTerminal {
 		display(msg, timeout);
 	    } else {
 		IFDException ex = new IFDException("No device to output a message available.");
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.WARNING)) {
-		    _logger.logp(Level.WARNING, this.getClass().getName(), "output(String ifdName, OutputInfoType outInfo)", ex.getMessage(), ex);
-		} // </editor-fold>
+		_logger.warn(ex.getMessage(), ex);
 		throw ex;
 	    }
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "output(String ifdName, OutputInfoType outInfo)");
-	} // </editor-fold>
     }
 
 
     public VerifyUserResponse verifyUser(VerifyUser verify) throws IFDException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "verifyUser(VerifyUser verify)", verify);
-	} // </editor-fold>
 	byte[] handle = verify.getSlotHandle();
 	// get capabilities
 	final SCTerminal term = scwrapper.getTerminal(handle);
@@ -178,10 +147,7 @@ class AbstractTerminal {
 	if (inputUnit.getBiometricInput() != null) {
 	    // TODO: implement
 	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.UNKNOWN_INPUT_UNIT, "Biometric authentication not supported by IFD.");
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "verifyUser(VerifyUser verify)", ex.getMessage(), ex);
-	    } // </editor-fold>
+	    _logger.warn(ex.getMessage(), ex);
 	    throw ex;
 	} else if (inputUnit.getPinInput() != null) {
 	    final PinInputType pinInput = inputUnit.getPinInput();
@@ -198,16 +164,10 @@ class AbstractTerminal {
 		ResultStatus status = exec.process();
 		if (status == ResultStatus.CANCEL) {
 		    IFDException ex = new IFDException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN entry cancelled by user.");
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.WARNING)) {
-			_logger.logp(Level.WARNING, this.getClass().getName(), "verifyUser(VerifyUser verify)", ex.getMessage(), ex);
-		    } // </editor-fold>
+		    _logger.warn(ex.getMessage(), ex);
 		    throw ex;
 		} else if (pinAction.exception != null) {
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.WARNING)) {
-			_logger.logp(Level.WARNING, this.getClass().getName(), "verifyUser(VerifyUser verify)", pinAction.exception.getMessage(), pinAction.exception);
-		    } // </editor-fold>
+		    _logger.warn(pinAction.exception.getMessage(), pinAction.exception);
 		    throw pinAction.exception;
 		}
 		// input by user
@@ -225,10 +185,7 @@ class AbstractTerminal {
 		ResultStatus status = exec.process();
 		if (status == ResultStatus.CANCEL) {
 		    IFDException ex = new IFDException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN entry cancelled by user.");
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.WARNING)) {
-			_logger.logp(Level.WARNING, this.getClass().getName(), "verifyUser(VerifyUser verify)", ex.getMessage(), ex);
-		    } // </editor-fold>
+		    _logger.warn(ex.getMessage(), ex);
 		    throw ex;
 		}
 		byte[] pin = IFDUtils.encodePin(getPinFromUserConsent(exec), pinInput.getPasswordAttributes());
@@ -247,43 +204,26 @@ class AbstractTerminal {
 		if (transResp.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
 		    if (transResp.getOutputAPDU().isEmpty()) {
 			IFDException ex = new IFDException(transResp.getResult());
-			// <editor-fold defaultstate="collapsed" desc="log trace">
-			if (_logger.isLoggable(Level.WARNING)) {
-			    _logger.logp(Level.WARNING, this.getClass().getName(), "verifyUser(VerifyUser verify)", ex.getMessage(), ex);
-			} // </editor-fold>
+			_logger.warn(ex.getMessage(), ex);
 			throw ex;
 		    } else {
 			VerifyUserResponse response = WSHelper.makeResponse(VerifyUserResponse.class, transResp.getResult());
 			response.setResponse(transResp.getOutputAPDU().get(0));
-			// <editor-fold defaultstate="collapsed" desc="log trace">
-			if (_logger.isLoggable(Level.FINER)) {
-			    _logger.exiting(this.getClass().getName(), "verifyUser(VerifyUser verify)", response);
-			} // </editor-fold>
 			return response;
 		    }
 		} else {
 		    VerifyUserResponse response = WSHelper.makeResponse(VerifyUserResponse.class, transResp.getResult());
 		    response.setResponse(transResp.getOutputAPDU().get(0));
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.FINER)) {
-			_logger.exiting(this.getClass().getName(), "verifyUser(VerifyUser verify)", response);
-		    } // </editor-fold>
 		    return response;
 		}
 	    } else {
 		IFDException ex = new IFDException("No input unit available to perform PinCompare protocol.");
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.WARNING)) {
-		    _logger.logp(Level.WARNING, this.getClass().getName(), "verifyUser(VerifyUser verify)", ex.getMessage(), ex);
-		} // </editor-fold>
+		_logger.warn(ex.getMessage(), ex);
 		throw ex;
 	    }
 	} else {
 	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.UNKNOWN_INPUT_UNIT, "Unsupported authentication input method requested.");
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "verifyUser(VerifyUser verify)", ex.getMessage(), ex);
-	    } // </editor-fold>
+	    _logger.warn(ex.getMessage(), ex);
 	    throw ex;
 	}
     }
@@ -323,82 +263,38 @@ class AbstractTerminal {
 
 
     private void beep() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "beep()");
-	} // </editor-fold>
 	if (canBeep()) {
 	    // TODO: implement
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "beep()");
-	} // </editor-fold>
     }
 
     private void blink() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "blink()");
-	} // </editor-fold>
 	if (canBlink()) {
 	    // TODO: implement
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "blink()");
-	} // </editor-fold>
     }
 
     private void display(String msg, BigInteger timeout) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "display(String msg, BigInteger timeout)", new Object[]{msg, timeout});
-	} // </editor-fold>
 	if (canDisplay()) {
 	    // TODO: implement
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "display(String msg, BigInteger timeout)");
-	} // </editor-fold>
     }
 
     private boolean canBeep() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "canBeep()");
-	} // </editor-fold>
 	if (canBeep == null) {
 	    canBeep = capabilities.isAcousticSignalUnit();
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "canBeep()", canBeep);
-	} // </editor-fold>
 	return canBeep.booleanValue();
     }
 
     private boolean canBlink() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "canBlink()");
-	} // </editor-fold>
 	if (canBlink == null) {
 	    canBlink = capabilities.isOpticalSignalUnit();
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "canBlink()", canBlink);
-	} // </editor-fold>
 	return canBlink.booleanValue();
     }
 
     private boolean canDisplay() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "canDisplay()");
-	} // </editor-fold>
 	if (canDisplay == null) {
 	    canDisplay = Boolean.FALSE;
 	    if (displayIdx == null && ! capabilities.getDisplayCapability().isEmpty()) {
@@ -412,56 +308,28 @@ class AbstractTerminal {
 		}
 	    }
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "canDisplay()", canDisplay);
-	} // </editor-fold>
 	return canDisplay.booleanValue();
     }
 
     private DisplayCapabilityType getDisplayCapabilities() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "getDisplayCapabilities()");
-	} // </editor-fold>
 	if (canDisplay) {
 	    if (displayIdx == null) {
 		DisplayCapabilityType disp = capabilities.getDisplayCapability().get(0);
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "getDisplayCapabilities()", disp);
-		} // </editor-fold>
 		return disp;
 	    } else {
 		for (DisplayCapabilityType disp : capabilities.getDisplayCapability()) {
 		    if (disp.getIndex().equals(displayIdx)) {
-			// <editor-fold defaultstate="collapsed" desc="log trace">
-			if (_logger.isLoggable(Level.FINER)) {
-			    _logger.exiting(this.getClass().getName(), "getDisplayCapabilities()", disp);
-			} // </editor-fold>
 			return disp;
 		    }
 		}
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "getDisplayCapabilities()", null);
-		} // </editor-fold>
 		return null;
 	    }
 	} else {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "getDisplayCapabilities()", null);
-	    } // </editor-fold>
 	    return null;
 	}
     }
 
     private boolean canEnter() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "canEnter()");
-	} // </editor-fold>
 	if (canEnter == null) {
 	    canEnter = Boolean.FALSE;
 	    if (keyIdx == null && ! capabilities.getKeyPadCapability().isEmpty()) {
@@ -475,47 +343,23 @@ class AbstractTerminal {
 		}
 	    }
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "canEnter()", canEnter);
-	} // </editor-fold>
 	return canEnter.booleanValue();
     }
 
     private KeyPadCapabilityType getKeypadCapabilities() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "getKeypadCapabilities()");
-	} // </editor-fold>
 	if (canEnter) {
 	    if (keyIdx == null) {
 		KeyPadCapabilityType key = capabilities.getKeyPadCapability().get(0);
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "getKeypadCapabilities()", key);
-		} // </editor-fold>
 		return key;
 	    } else {
 		for (KeyPadCapabilityType key : capabilities.getKeyPadCapability()) {
 		    if (key.getIndex().equals(keyIdx)) {
-			// <editor-fold defaultstate="collapsed" desc="log trace">
-			if (_logger.isLoggable(Level.FINER)) {
-			    _logger.exiting(this.getClass().getName(), "getKeypadCapabilities()", key);
-			} // </editor-fold>
 			return key;
 		    }
 		}
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "getKeypadCapabilities()", null);
-		} // </editor-fold>
 		return null;
 	    }
 	} else {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "getKeypadCapabilities()", null);
-	    } // </editor-fold>
 	    return null;
 	}
     }
@@ -567,10 +411,6 @@ class AbstractTerminal {
     }
 
     private void getCapabilities(String ifdName) throws IFDException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "getCapabilities(String ifdName)", ifdName);
-	} // </editor-fold>
 	GetIFDCapabilities capabilitiesReq = new GetIFDCapabilities();
 	capabilitiesReq.setContextHandle(ctxHandle);
 	capabilitiesReq.setIFDName(ifdName);
@@ -579,17 +419,10 @@ class AbstractTerminal {
 	Result r = cap.getResult();
 	if (r.getResultMajor().equals(ECardConstants.Major.ERROR)) {
 	    IFDException ex = new IFDException(r);
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "getCapabilities(String ifdName)", ex.getMessage(), ex);
-	    } // </editor-fold>
+	    _logger.warn(ex.getMessage(), ex);
 	    throw ex;
 	}
 	this.capabilities = cap.getIFDCapabilities();
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "getCapabilities(String ifdName)");
-	} // </editor-fold>
     }
 
 

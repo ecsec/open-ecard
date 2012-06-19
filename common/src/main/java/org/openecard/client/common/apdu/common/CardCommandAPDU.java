@@ -29,13 +29,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
 import org.openecard.client.common.apdu.exception.APDUException;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.util.ByteUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -46,7 +46,8 @@ import org.openecard.client.common.util.ByteUtils;
  */
 public class CardCommandAPDU extends CardAPDU {
 
-    private static final Logger logger = Logger.getLogger("APDU");
+    private static final Logger _logger = LoggerFactory.getLogger(CardCommandAPDU.class);
+
     private byte[] header = new byte[4];
     private int le = -1;
     private int lc = -1;
@@ -421,7 +422,7 @@ public class CardCommandAPDU extends CardAPDU {
 		throw new IllegalArgumentException("Malformed APDU.");
 	    }
 	} catch (Exception e) {
-	    logger.log(Level.SEVERE, "Exception", e);
+	    _logger.error(e.getMessage(), e);
 	}
     }
 
@@ -551,7 +552,7 @@ public class CardCommandAPDU extends CardAPDU {
 		baos.write((byte) le);
 	    }
 	} catch (Exception e) {
-	    logger.log(Level.SEVERE, "Exception", e);
+	    _logger.error(e.getMessage(), e);
 	}
 
 	return baos.toByteArray();

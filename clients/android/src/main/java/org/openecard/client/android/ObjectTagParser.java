@@ -1,33 +1,37 @@
-/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg 
+/****************************************************************************
+ * Copyright (C) 2012 HS Coburg.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.android;
 
+import android.webkit.WebView;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.transform.TransformerException;
 import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.sal.TinySAL;
 import org.openecard.client.transport.paos.PAOS;
@@ -36,9 +40,10 @@ import org.openecard.client.transport.tls.PSKTlsClientImpl;
 import org.openecard.client.transport.tls.TlsClientSocketFactory;
 import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.soap.SOAPException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
-import android.webkit.WebView;
 
 
 /**
@@ -50,6 +55,8 @@ import android.webkit.WebView;
  */
 public class ObjectTagParser implements PAOSCallback {
 
+    private static final Logger _logger = LoggerFactory.getLogger(ObjectTagParser.class);
+
     private ClientEnv env;
     private WebView webview;
     String refreshAddress = null;
@@ -59,13 +66,8 @@ public class ObjectTagParser implements PAOSCallback {
     String binding = "";
     String pathSecurityParameters = "";
     byte[] psk = null;
-    private static final Logger _logger = LogManager.getLogger(ObjectTagParser.class.getName());
 
     public ObjectTagParser(ClientEnv env, WebView view) {
-	_logger.setLevel(Level.WARNING);
-	ConsoleHandler handler = new ConsoleHandler();
-	handler.setLevel(_logger.getLevel());
-	_logger.addHandler(handler);
 	this.webview = view;
 	this.env = env;
     }
@@ -83,10 +85,7 @@ public class ObjectTagParser implements PAOSCallback {
 			refreshAddress = refreshAddress + "?ResultMajor=ok";
 		    }
 		} catch (MalformedURLException e) {
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.WARNING)) {
-			_logger.logp(Level.WARNING, this.getClass().getName(), "loadRefreshAddress()", e.getMessage(), e);
-		    } // </editor-fold>
+		    _logger.warn(e.getMessage(), e);
 		}
 		webview.loadUrl(refreshAddress);
 	    }
@@ -104,10 +103,6 @@ public class ObjectTagParser implements PAOSCallback {
      * @throws MarshallingTypeException
      */
     public void showHTML(String html) throws MarshallingTypeException, SOAPException, TransformerException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(ObjectTagParser.class.getName(), "showHTML(String html)", html);
-	} // </editor-fold>
 	try {
 	    XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 	    factory.setNamespaceAware(true);
@@ -142,23 +137,17 @@ public class ObjectTagParser implements PAOSCallback {
 		}
 		eventType = parser.next();
 	    }
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.logp(Level.FINER, this.getClass().getName(), "showHTML(String html)", "SessionIdentifier: " + sessionIdentifier);
-		_logger.logp(Level.FINER, this.getClass().getName(), "showHTML(String html)", "serverAddress: " + serverAddress);
-		_logger.logp(Level.FINER, this.getClass().getName(), "showHTML(String html)", "refreshAddress: " + refreshAddress);
-		_logger.logp(Level.FINER, this.getClass().getName(), "showHTML(String html)", "pathSecurityProtocol: "
-			+ pathSecurityProtocol);
-		_logger.logp(Level.FINER, this.getClass().getName(), "showHTML(String html)", "binding: " + binding);
-		_logger.logp(Level.FINER, this.getClass().getName(), "showHTML(String html)", "pathSecurityParameters: "
-			+ pathSecurityParameters);
-		_logger.logp(Level.FINER, this.getClass().getName(), "showHTML(String html)", "psk: " + ByteUtils.toHexString(psk));
-	    } // </editor-fold>
+	    if (_logger.isDebugEnabled()) {
+		_logger.debug("SessionIdentifier: {}", sessionIdentifier);
+		_logger.debug("serverAddress: {}", serverAddress);
+		_logger.debug("refreshAddress: {}", refreshAddress);
+		_logger.debug("pathSecurityProtocol: {}", pathSecurityProtocol);
+		_logger.debug("binding: {}", binding);
+		_logger.debug("pathSecurityParameters: {}", pathSecurityParameters);
+		_logger.debug("psk: {}", ByteUtils.toHexString(psk));
+	    }
 	} catch (Exception e) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "showHTML(String html)", e.getMessage(), e);
-	    } // </editor-fold>
+	    _logger.warn(e.getMessage(), e);
 	}
 
 	new Thread(new Runnable() {
@@ -180,17 +169,10 @@ public class ObjectTagParser implements PAOSCallback {
 			p.sendStartPAOS(sp);
 		    }
 		} catch (Exception e) {
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.WARNING)) {
-			_logger.logp(Level.WARNING, this.getClass().getName(), "run()", e.getMessage(), e);
-		    } // </editor-fold>
+		    _logger.warn(e.getMessage(), e);
 		}
 	    }
 	}).start();
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "showHTML(String html)");
-	} // </editor-fold>
     }
 
 }

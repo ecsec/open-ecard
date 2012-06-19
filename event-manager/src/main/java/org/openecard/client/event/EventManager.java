@@ -1,3 +1,25 @@
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.event;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
@@ -9,7 +31,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.logging.Logger;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -20,9 +41,10 @@ import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.Environment;
 import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.common.interfaces.EventFilter;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.recognition.RecognitionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -31,7 +53,7 @@ import org.openecard.client.recognition.RecognitionException;
  */
 public class EventManager implements org.openecard.client.common.interfaces.EventManager {
 
-    private static final Logger _logger = LogManager.getLogger(EventManager.class.getPackage().getName());
+    private static final Logger _logger = LoggerFactory.getLogger(EventManager.class);
 
     protected final CardRecognition cr;
     protected final Environment env;

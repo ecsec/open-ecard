@@ -25,19 +25,10 @@ package org.openecard.client.crypto.common.asn1.cvc;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.openecard.bouncycastle.asn1.ASN1Sequence;
-import org.openecard.bouncycastle.asn1.ASN1Set;
-import org.openecard.bouncycastle.asn1.ASN1TaggedObject;
-import org.openecard.bouncycastle.asn1.DERIA5String;
-import org.openecard.bouncycastle.asn1.DEROctetString;
-import org.openecard.bouncycastle.asn1.DERPrintableString;
-import org.openecard.bouncycastle.asn1.DERSet;
-import org.openecard.bouncycastle.asn1.DERTaggedObject;
-import org.openecard.bouncycastle.asn1.DERUTF8String;
+import org.openecard.bouncycastle.asn1.*;
 import org.openecard.client.crypto.common.asn1.eac.oid.CVCertificatesObjectIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -59,6 +50,8 @@ import org.openecard.client.crypto.common.asn1.eac.oid.CVCertificatesObjectIdent
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class CertificateDescription {
+
+    private static final Logger _logger = LoggerFactory.getLogger(CertificateDescription.class);
 
     private String descriptionType;
     private String issuerName;
@@ -84,7 +77,7 @@ public class CertificateDescription {
 	    try {
 		return new CertificateDescription((ASN1Sequence) ASN1Sequence.fromByteArray((byte[]) obj));
 	    } catch (IOException e) {
-		Logger.getLogger(CertificateDescription.class.getName()).log(Level.SEVERE, "Cannot parse CertificateDescription", e.getMessage());
+		_logger.error("Cannot parse CertificateDescription", e);
 		throw new IllegalArgumentException("Cannot parse CertificateDescription");
 	    }
 	}
@@ -143,7 +136,7 @@ public class CertificateDescription {
 			throw new IllegalArgumentException("Unknown object in CertificateDescription");
 		}
 	    } catch (IOException e) {
-		Logger.getLogger(CertificateDescription.class.getName()).log(Level.SEVERE, "Cannot parse CertificateDescription", e.getMessage());
+		_logger.error("Cannot parse CertificateDescription", e);
 		throw new IllegalArgumentException("Cannot parse CertificateDescription");
 	    }
 	}

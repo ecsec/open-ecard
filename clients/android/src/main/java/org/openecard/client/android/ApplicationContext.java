@@ -1,45 +1,42 @@
-/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg 
+/****************************************************************************
+ * Copyright (C) 2012 HS Coburg.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.android;
 
-import iso.std.iso_iec._24727.tech.schema.Connect;
-import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.CryptoMarkerType;
-import iso.std.iso_iec._24727.tech.schema.EstablishContext;
-import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
-import iso.std.iso_iec._24727.tech.schema.ListIFDs;
-import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
-import iso.std.iso_iec._24727.tech.schema.Sign;
-
+import android.app.Application;
+import android.bluetooth.BluetoothAdapter;
+import android.webkit.WebView;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.Locale;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.OpenecardProperties;
-import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.logging.LogManager;
+import org.openecard.client.common.sal.state.CardStateMap;
+import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.android.AndroidUserConsent;
 import org.openecard.client.ifd.BluetoothConnection;
@@ -53,12 +50,8 @@ import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.ws.WsdefProperties;
 import org.openecard.ws.IFD;
 import org.openecard.ws.Management;
-
-import android.app.Application;
-import android.bluetooth.BluetoothAdapter;
-import android.webkit.WebView;
-import org.openecard.client.common.sal.state.CardStateMap;
-import org.openecard.client.common.sal.state.SALStateCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -69,22 +62,11 @@ import org.openecard.client.common.sal.state.SALStateCallback;
  */
 public class ApplicationContext extends Application {
 
-    // load logging config
     static {
-	File conf = new File(LogManager.openecardPath + File.separator + LogManager.openecardConfFileName);
-	boolean success = false;
-	if (conf.isFile()) {
-	    try {
-		success = LogManager.loadConfig(new FileInputStream(conf));
-	    } catch (FileNotFoundException ex) {
-		System.err.println("ERROR: Unable to read logging config file '" + conf.getAbsolutePath() + "'.");
-	    }
-	}
-	if (!success) {
-	    LogManager.loadOpeneCardDefaultConfig();
-	}
+	// TODO: load logging config
     }
 
+    	private static final Logger _logger = LoggerFactory.getLogger(ApplicationContext.class);
 
 	private ClientEnv env;
 	private TinySAL sal;
@@ -95,14 +77,8 @@ public class ApplicationContext extends Application {
 	private boolean initialized = false;
 	private boolean recognizeCard = true;
 	private WebView webView;
-	private static final Logger _logger = LogManager.getLogger(ApplicationContext.class.getName());
 	  
 	public ApplicationContext() throws Throwable {
-	    _logger.setLevel(Level.WARNING);
-	    ConsoleHandler handler = new ConsoleHandler();
-	    handler.setLevel(_logger.getLevel());
-	    _logger.addHandler(handler);
-	    
 		OpenecardProperties.setProperty("org.openecard.lang", Locale.getDefault().toString());
 		
 
@@ -205,4 +181,5 @@ public class ApplicationContext extends Application {
 	public WebView getWebView() {
 		return this.webView;
 	}
+
 }

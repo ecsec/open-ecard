@@ -1,28 +1,35 @@
-/*
- * Copyright 2012 Moritz Horsch.
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.crypto.common.asn1.eac;
 
 import java.math.BigInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.bouncycastle.asn1.ASN1Integer;
 import org.openecard.bouncycastle.asn1.ASN1Sequence;
 import org.openecard.bouncycastle.asn1.x9.X9ECParameters;
 import org.openecard.bouncycastle.jce.spec.ECParameterSpec;
 import org.openecard.bouncycastle.math.ec.ECCurve;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -31,6 +38,8 @@ import org.openecard.bouncycastle.math.ec.ECCurve;
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class ExplicitDomainParameters extends DomainParameters {
+
+    private static final Logger _logger = LoggerFactory.getLogger(ExplicitDomainParameters.class);
 
     /**
      * dhpublicnumber OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x942(10046) number-type(2) 1}
@@ -78,11 +87,12 @@ public class ExplicitDomainParameters extends DomainParameters {
 	    domainParameter = new ECParameterSpec(curve, ECParameters.getG(), r, f);
 
 	} catch (Exception e) {
-	    Logger.getLogger(ExplicitDomainParameters.class.getName()).log(Level.SEVERE, "Failed to load proprietary domain parameters", e);
+	    _logger.error("Failed to load proprietary domain parameters", e);
 	}
     }
 
     private void loadDHParameter(ASN1Sequence seq) {
 	throw new UnsupportedOperationException("Not implemented yet");
     }
+
 }

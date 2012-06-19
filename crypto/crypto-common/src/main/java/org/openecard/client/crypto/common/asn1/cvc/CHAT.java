@@ -24,14 +24,14 @@ package org.openecard.client.crypto.common.asn1.cvc;
 
 import java.util.Iterator;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.tlv.TagClass;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.eac.oid.CVCertificatesObjectIdentifier;
 import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -44,11 +44,12 @@ import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
  */
 public final class CHAT {
 
+    private static final Logger _logger = LoggerFactory.getLogger(CHAT.class);
+
     private String oid;
     private Role role;
     private byte[] discretionaryData;
     private TreeMap<DataGroup, Boolean> writeAccess = new TreeMap<DataGroup, Boolean>() {
-
 	{
 	    DataGroup[] data = DataGroup.values();
 	    for (int i = 16; i < 21; i++) {
@@ -57,7 +58,6 @@ public final class CHAT {
 	}
     };
     private TreeMap<DataGroup, Boolean> readAccess = new TreeMap<DataGroup, Boolean>() {
-
 	{
 	    DataGroup[] data = DataGroup.values();
 	    for (int i = 0; i < 21; i++) {
@@ -66,7 +66,6 @@ public final class CHAT {
 	}
     };
     private TreeMap<SpecialFunction, Boolean> specialFunctions = new TreeMap<SpecialFunction, Boolean>() {
-
 	{
 	    SpecialFunction[] data = SpecialFunction.values();
 	    for (int i = 0; i < data.length; i++) {
@@ -75,7 +74,6 @@ public final class CHAT {
 	}
     };
     private TreeMap<AccessRight, Boolean> accessRights = new TreeMap<AccessRight, Boolean>() {
-
 	{
 	    AccessRight[] data = AccessRight.values();
 	    for (int i = 0; i < data.length; i++) {
@@ -91,7 +89,6 @@ public final class CHAT {
      * See BSI-TR-03110, version 2.10, part 3, section C.4.3.
      */
     public enum Role {
-
 	CVCA, DV_OFFICIAL, DV_NON_OFFICIAL,
 	AUTHENTICATION_TERMINAL, INSPECTION_TERMINAL, SIGNATURE_TERMINAL
     }
@@ -101,7 +98,6 @@ public final class CHAT {
      * See BSI-TR-03110, version 2.10, part 3, section C.4.2.
      */
     public enum SpecialFunction {
-
 	INSTALL_QUALIFIED_CERTIFICATE, INSTALL_CERTIFICATE, PIN_MANAGEMENT,
 	CAN_ALLOWED, PRIVILEGED_TERMINAL, RESTRICTED_IDENTIFICATION,
 	COMMUNITY_ID_VERIFICATION, AGE_VERIFICATION;
@@ -113,7 +109,6 @@ public final class CHAT {
      * See BSI-TR-03110, version 2.10, part 2, section A.1.
      */
     public enum DataGroup {
-
 	DG01, DG02, DG03, DG04, DG05, DG06, DG07,
 	DG08, DG09, DG10, DG11, DG12, DG13, DG14,
 	DG15, DG16, DG17, DG18, DG19, DG20, DG21;
@@ -125,7 +120,6 @@ public final class CHAT {
      * See BSI-TR-03110, version 2.10, part 3, section C.4.3.
      */
     public enum AccessRight {
-
 	DG03, DG04, GENERATE_SIGNATURE, GENERATE_QUALIFIED_SIGNATURE;
     }
 
@@ -551,7 +545,7 @@ public final class CHAT {
 	try {
 	    return ByteUtils.toHexString(toByteArray(), true);
 	} catch (TLVException ex) {
-	    Logger.getLogger(CHAT.class.getName()).log(Level.SEVERE, "Exception", ex);
+	    _logger.error(ex.getMessage(), ex);
 	    return null;
 	}
     }
@@ -561,7 +555,7 @@ public final class CHAT {
 	try {
 	    return ByteUtils.toHexString(toByteArray());
 	} catch (TLVException ex) {
-	    Logger.getLogger(CHAT.class.getName()).log(Level.SEVERE, "Exception", ex);
+	    _logger.error(ex.getMessage(), ex);
 	    return null;
 	}
     }

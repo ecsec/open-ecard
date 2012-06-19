@@ -1,31 +1,35 @@
-/*
- * Copyright 2012 Tobias Wich ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.recognition;
 
-import iso.std.iso_iec._24727.tech.schema.*;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.logging.Logger;
 import javax.xml.namespace.NamespaceContext;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.util.ByteUtils;
@@ -36,6 +40,8 @@ import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerFactory;
 import org.openecard.ws.GetRecognitionTree;
 import org.openecard.ws.IFD;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -44,7 +50,7 @@ import org.openecard.ws.IFD;
  */
 public class CardRecognition {
 
-    private static final Logger _logger = LogManager.getLogger(CardRecognition.class.getName());
+    private static final Logger _logger = LoggerFactory.getLogger(CardRecognition.class);
     private static final NamespaceContext nsCtx = new NamespaceContext() {
         Map<String, String> nsMap = Collections.unmodifiableMap(new TreeMap<String, String>() {
             {

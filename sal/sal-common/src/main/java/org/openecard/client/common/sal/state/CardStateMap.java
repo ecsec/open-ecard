@@ -26,16 +26,11 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.logging.Logger;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.ByteComparator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -44,7 +39,7 @@ import org.openecard.client.common.util.ByteComparator;
  */
 public class CardStateMap {
 
-    private static final Logger _logger = LogManager.getLogger(CardStateMap.class.getName());
+    private static final Logger _logger = LoggerFactory.getLogger(CardStateMap.class);
 
     private final TreeSet<CardStateEntry> allEntries = new TreeSet<CardStateEntry>();
     private final ConcurrentSkipListMap<String,Set<CardStateEntry>> sessionMap = new ConcurrentSkipListMap<String,Set<CardStateEntry>>();
@@ -58,9 +53,9 @@ public class CardStateMap {
 	if (size == 1) {
 	    return entry.iterator().next();
 	} else if (size == 0) {
-	    _logger.warning("No state entry found for the given ConnectionHandle.");
+	    _logger.warn("No state entry found for the given ConnectionHandle.");
 	} else {
-	    _logger.warning("More than one state entry found for the given ConnectionHandle.");
+	    _logger.warn("More than one state entry found for the given ConnectionHandle.");
 	}
 	return null;
     }
@@ -85,7 +80,7 @@ public class CardStateMap {
     public synchronized void removeEntry(ConnectionHandleType handle) {
 	Set<CardStateEntry> entry = getMatchingEntries(handle);
 	if (entry.size() > 1) {
-	    _logger.warning("Not removing CardStateEntry, because given ConnectionHandle matches more than one state.");
+	    _logger.warn("Not removing CardStateEntry, because given ConnectionHandle matches more than one state.");
 	} else if (entry.size() == 1) {
 	    removeEntry(entry.iterator().next());
 	}

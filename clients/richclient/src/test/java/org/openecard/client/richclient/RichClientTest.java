@@ -23,9 +23,6 @@
 package org.openecard.client.richclient;
 
 import java.util.List;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.connector.common.ConnectorConstants;
 import org.openecard.client.connector.messages.TCTokenRequest;
 import org.openecard.client.connector.messages.TCTokenResponse;
@@ -79,22 +76,9 @@ public class RichClientTest {
     @Test
     public void testMain() {
 	try {
-
-	    java.util.logging.LogManager.getLogManager().reset();
-
-	    ConsoleHandler ch = new ConsoleHandler();
-	    ch.setLevel(Level.ALL);
-
-	    LogManager.getLogger("org.openecard.client.ifd.scio.wrapper").addHandler(ch);
-	    LogManager.getLogger("org.openecard.client.ifd.scio.wrapper").setLevel(Level.FINE);
-
-
 	    RichClient client = RichClient.getInstance();
 	    // Wait some seconds until the client comes up
 	    Thread.sleep(2500);
-
-	    LogManager.getLogger("org.openecard.client.transport.paos").addHandler(ch);
-	    LogManager.getLogger("org.openecard.client.transport.paos").setLevel(Level.FINE);
 
 	    TCTokenRequest applicationRequest = new TCTokenRequest();
 	    applicationRequest.setTCToken(tokens.get(0));
@@ -104,8 +88,6 @@ public class RichClientTest {
 	    System.out.println(applicationReponse.getErrorMessage());
 	    System.out.println(applicationReponse.getRefreshAddress());
 	    System.out.println(applicationReponse.getErrorPage());
-
-
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    logger.error(e.getMessage());

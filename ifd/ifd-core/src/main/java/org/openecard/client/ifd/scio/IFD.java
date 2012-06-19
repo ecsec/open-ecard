@@ -1,18 +1,24 @@
-/*
- * Copyright 2012 Tobias Wich ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.ifd.scio;
 
@@ -24,8 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.jws.WebService;
 import javax.smartcardio.CardException;
 import oasis.names.tc.dss._1_0.core.schema.Result;
@@ -36,7 +40,6 @@ import org.openecard.client.common.ifd.ProtocolFactory;
 import org.openecard.client.common.ifd.anytype.PACEInputType;
 import org.openecard.client.common.ifd.anytype.PACEOutputType;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.gui.UserConsent;
 import org.openecard.client.ifd.scio.reader.*;
@@ -44,6 +47,8 @@ import org.openecard.client.ifd.scio.wrapper.SCCard;
 import org.openecard.client.ifd.scio.wrapper.SCChannel;
 import org.openecard.client.ifd.scio.wrapper.SCTerminal;
 import org.openecard.client.ifd.scio.wrapper.SCWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -53,7 +58,7 @@ import org.openecard.client.ifd.scio.wrapper.SCWrapper;
 @WebService(endpointInterface = "org.openecard.ws.IFD")
 public class IFD implements org.openecard.ws.IFD {
 
-    private static final Logger _logger = LogManager.getLogger(IFD.class .getName());
+    private static final Logger _logger = LoggerFactory.getLogger(IFD.class);
 
     private byte[] ctxHandle = null;
     private SCWrapper scwrapper;
@@ -81,15 +86,7 @@ public class IFD implements org.openecard.ws.IFD {
     }
 
     private boolean hasContext() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "hasContext()");
-	} // </editor-fold>
 	Boolean hasContext = ctxHandle != null;
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "hasContext()", hasContext);
-	} // </editor-fold>
 	return hasContext.booleanValue();
     }
 
@@ -109,10 +106,6 @@ public class IFD implements org.openecard.ws.IFD {
     @Override
     public synchronized EstablishContextResponse establishContext(EstablishContext parameters) {
 	try {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.entering(this.getClass().getName(), "establishContext(EstablishContext parameters)", parameters);
-	    } // </editor-fold>
 	    // on first call, create a new unique handle
 	    if (ctxHandle == null) {
 		scwrapper = new SCWrapper();
@@ -128,26 +121,19 @@ public class IFD implements org.openecard.ws.IFD {
 	    // prepare response
 	    EstablishContextResponse response = WSHelper.makeResponse(EstablishContextResponse.class, WSHelper.makeResultOK());
 	    response.setContextHandle(ctxHandle);
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "establishContext(EstablishContext parameters)", response);
-	    } // </editor-fold>
 	    return response;
-	} catch (Throwable t) {
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "establishContext(EstablishContext parameters)", t.getMessage(), t);
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
 	    }
-	    return WSHelper.makeResponse(EstablishContextResponse.class, WSHelper.makeResult(t));
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(EstablishContextResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
     @Override
     public synchronized ReleaseContextResponse releaseContext(ReleaseContext parameters) {
 	try {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.entering(this.getClass().getName(), "releaseContext(ReleaseContext parameters)", parameters);
-	    } // </editor-fold>
 	    ReleaseContextResponse response;
 	    if (IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
 		if (numClients.decrementAndGet() == 0) { // last client detaches
@@ -164,25 +150,17 @@ public class IFD implements org.openecard.ws.IFD {
 		}
 
 		response = WSHelper.makeResponse(ReleaseContextResponse.class, WSHelper.makeResultOK());
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "releaseContext(ReleaseContext parameters)", response);
-		} // </editor-fold>
 		return response;
 	    } else {
 		response = WSHelper.makeResponse(ReleaseContextResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "releaseContext(ReleaseContext parameters)", response);
-		} // </editor-fold>
 		return response;
 	    }
-	} catch (Throwable t) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "releaseContext(ReleaseContext parameters)", t.getMessage(), t);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(ReleaseContextResponse.class, WSHelper.makeResult(t));
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(ReleaseContextResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
@@ -190,43 +168,28 @@ public class IFD implements org.openecard.ws.IFD {
     @Override
     public ListIFDsResponse listIFDs(ListIFDs parameters) {
 	try {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.entering(this.getClass().getName(), "listIFDs(ListIFDs parameters)", parameters);
-	    } // </editor-fold>
 	    ListIFDsResponse response;
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
 		response = WSHelper.makeResponse(ListIFDsResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "listIFDs(ListIFDs parameters)", response);
-		} // </editor-fold>
 		return response;
 	    } else {
 		try {
 		    List<String> ifds = scwrapper.getTerminalNames(true);
 		    response = WSHelper.makeResponse(ListIFDsResponse.class, WSHelper.makeResultOK());
 		    response.getIFDName().addAll(ifds);
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.FINER)) {
-			_logger.exiting(this.getClass().getName(), "listIFDs(ListIFDs parameters)", response);
-		    } // </editor-fold>
 		    return response;
 		} catch (IFDException ex) {
 		    response = WSHelper.makeResponse(ListIFDsResponse.class, ex.getResult());
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.WARNING)) {
-			_logger.logp(Level.WARNING, this.getClass().getName(), "listIFDs(ListIFDs parameters)", ex.getMessage(), ex);
-		    } // </editor-fold>
+		    _logger.warn(ex.getMessage(), ex);
 		    return response;
 		}
 	    }
-	} catch (Throwable t) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "listIFDs(ListIFDs parameters)", t.getMessage(), t);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(ListIFDsResponse.class, WSHelper.makeResult(t));
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(ListIFDsResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
@@ -244,17 +207,9 @@ public class IFD implements org.openecard.ws.IFD {
     @Override
     public GetIFDCapabilitiesResponse getIFDCapabilities(GetIFDCapabilities parameters) {
 	try {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.entering(this.getClass().getName(), "getIFDCapabilities(GetIFDCapabilities parameters)", parameters);
-	    } // </editor-fold>
 	    GetIFDCapabilitiesResponse response;
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
 		response = WSHelper.makeResponse(GetIFDCapabilitiesResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "getIFDCapabilities(GetIFDCapabilities parameters)", response);
-		} // </editor-fold>
 		return response;
 	    } else {
 		try {
@@ -304,26 +259,19 @@ public class IFD implements org.openecard.ws.IFD {
 		    // send response
 		    response = WSHelper.makeResponse(GetIFDCapabilitiesResponse.class, WSHelper.makeResultOK());
 		    response.setIFDCapabilities(cap);
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.FINER)) {
-			_logger.exiting(this.getClass().getName(), "getIFDCapabilities(GetIFDCapabilities parameters)", response);
-		    } // </editor-fold>
 		    return response;
 		} catch (IFDException ex) {
 		    response = WSHelper.makeResponse(GetIFDCapabilitiesResponse.class, ex.getResult());
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.WARNING)) {
-			_logger.logp(Level.WARNING, this.getClass().getName(), "getIFDCapabilities(GetIFDCapabilities parameters)", ex.getMessage(), ex);
-		    } // </editor-fold>
+		    _logger.warn(ex.getMessage(), ex);
 		    return response;
 		}
 	    }
-	} catch (Throwable t) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "getIFDCapabilities(GetIFDCapabilities parameters)", t.getMessage(), t);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(GetIFDCapabilitiesResponse.class, WSHelper.makeResult(t));
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(GetIFDCapabilitiesResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
@@ -331,18 +279,10 @@ public class IFD implements org.openecard.ws.IFD {
     @Override
     public GetStatusResponse getStatus(GetStatus parameters) {
 	try {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.entering(this.getClass().getName(), "getStatus(GetStatus parameters)", parameters);
-	    } // </editor-fold>
 	    GetStatusResponse response;
             //FIXME
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
 		response = WSHelper.makeResponse(GetStatusResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "getStatus(GetStatus parameters)", response);
-		} // </editor-fold>
 		return response;
 	    } else {
 		// get ifd name from request or directly from the sc-io
@@ -353,10 +293,6 @@ public class IFD implements org.openecard.ws.IFD {
 			SCTerminal t = scwrapper.getTerminal(parameters.getIFDName(), true);
 			if (t == null) {
 			    response = WSHelper.makeResponse(GetStatusResponse.class, WSHelper.makeResult(ECardConstants.Major.ERROR, ECardConstants.Minor.IFD.UNKNOWN_IFD, "Unknown IFD."));
-			    // <editor-fold defaultstate="collapsed" desc="log trace">
-			    if (_logger.isLoggable(Level.FINER)) {
-				_logger.exiting(this.getClass().getName(), "getStatus(GetStatus parameters)", response);
-			    } // </editor-fold>
 			    return response;
 			} else {
 			    ifds.add(t);
@@ -366,10 +302,7 @@ public class IFD implements org.openecard.ws.IFD {
 		    }
 		} catch (IFDException ex) {
 		    response = WSHelper.makeResponse(GetStatusResponse.class, ex.getResult());
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.WARNING)) {
-			_logger.logp(Level.WARNING, this.getClass().getName(), "getStatus(GetStatus parameters)", ex.getMessage(), ex);
-		    } // </editor-fold>
+		    _logger.warn(ex.getMessage(), ex);
 		    return response;
 		}
 
@@ -381,28 +314,21 @@ public class IFD implements org.openecard.ws.IFD {
 			statuss.add(s);
 		    } catch (IFDException ex) {
 			response = WSHelper.makeResponse(GetStatusResponse.class, ex.getResult());
-			// <editor-fold defaultstate="collapsed" desc="log trace">
-			if (_logger.isLoggable(Level.WARNING)) {
-			    _logger.logp(Level.WARNING, this.getClass().getName(), "getStatus(GetStatus parameters)", ex.getMessage(), ex);
-			} // </editor-fold>
+			_logger.warn(ex.getMessage(), ex);
 			return response;
 		    }
 		}
 		// everything worked out well
 		response = WSHelper.makeResponse(GetStatusResponse.class, WSHelper.makeResultOK());
 		response.getIFDStatus().addAll(statuss);
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "getStatus(GetStatus parameters)", response);
-		} // </editor-fold>
 		return response;
 	    }
-	} catch (Throwable t) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "getStatus(GetStatus parameters)", t.getMessage(), t);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(GetStatusResponse.class, WSHelper.makeResult(t));
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(GetStatusResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
@@ -410,18 +336,10 @@ public class IFD implements org.openecard.ws.IFD {
     @Override
     public WaitResponse wait(Wait parameters) {
 	try {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.entering(this.getClass().getName(), "wait(Wait parameters)", parameters);
-	    } // </editor-fold>
 	    WaitResponse response;
 	    // check for context handle
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
 		response = WSHelper.makeResponse(WaitResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "wait(Wait parameters)", response);
-		} // </editor-fold>
 		return response;
 	    } else {
 		BigInteger timeout = parameters.getTimeOut();
@@ -444,10 +362,6 @@ public class IFD implements org.openecard.ws.IFD {
 		    GetStatusResponse status = getStatus(statusReq);
 		    if (status.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
 			response = WSHelper.makeResponse(WaitResponse.class, status.getResult());
-			// <editor-fold defaultstate="collapsed" desc="log trace">
-			if (_logger.isLoggable(Level.FINER)) {
-			    _logger.exiting(this.getClass().getName(), "wait(Wait parameters)", response);
-			} // </editor-fold>
 			return response;
 		    }
 		    expectedStatuses = status.getIFDStatus();
@@ -456,10 +370,6 @@ public class IFD implements org.openecard.ws.IFD {
 		    for (IFDStatusType s : expectedStatuses) {
 			if (s.getIFDName() == null) {
 			    response = WSHelper.makeResponse(WaitResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.UNKNOWN_IFD, "IFD in a request IFDStatus not known."));
-			    // <editor-fold defaultstate="collapsed" desc="log trace">
-			    if (_logger.isLoggable(Level.FINER)) {
-				_logger.exiting(this.getClass().getName(), "wait(Wait parameters)", response);
-			    } // </editor-fold>
 			    return response;
 			}
 		    }
@@ -489,10 +399,6 @@ public class IFD implements org.openecard.ws.IFD {
 		    if (callback.getSessionIdentifier() != null) {
 			response.setSessionIdentifier(callback.getSessionIdentifier());
 		    }
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.FINER)) {
-			_logger.exiting(this.getClass().getName(), "wait(Wait parameters)", response);
-		    } // </editor-fold>
 		    return response;
 		} else {
 		    // run wait in a future so it can be easily interrupted
@@ -505,25 +411,18 @@ public class IFD implements org.openecard.ws.IFD {
 		    // prepare response
 		    response = WSHelper.makeResponse(WaitResponse.class, WSHelper.makeResultOK());
 		    response.getIFDEvent().addAll(events);
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.FINER)) {
-			_logger.exiting(this.getClass().getName(), "wait(Wait parameters)", response);
-		    } // </editor-fold>
 		    return response;
 		}
 	    }
 	} catch (ExecutionException ex) { // this is the exception from within the future
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "wait(Wait parameters)", ex.getMessage(), ex);
-	    } // </editor-fold>
+	    _logger.warn(ex.getMessage(), ex);
 	    return WSHelper.makeResponse(WaitResponse.class, WSHelper.makeResult(ex.getCause()));
-	} catch (Throwable t) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "wait(Wait parameters)", t.getMessage(), t);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(WaitResponse.class, WSHelper.makeResult(t));
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(WaitResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
@@ -531,10 +430,6 @@ public class IFD implements org.openecard.ws.IFD {
     @Override
     public CancelResponse cancel(Cancel parameters) {
 	try {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.entering(this.getClass().getName(), "cancel(Cancel parameters)", parameters);
-	    } // </editor-fold>
 	    CancelResponse response = null;
 	    // check for context handle
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
@@ -567,37 +462,26 @@ public class IFD implements org.openecard.ws.IFD {
 		// nothing to cancel
 		response = WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResultUnknownError("No cancelable command matches the given parameters."));
 	    }
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "cancel(Cancel parameters)", response);
-		} // </editor-fold>
 	    return response;
-	} catch (Throwable t) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "cancel(Cancel parameters)", t.getMessage(), t);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResult(t));
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
-    @Override
+
     /**
      * Note: the first byte of the command data is the control code.
      */
+    @Override
     public ControlIFDResponse controlIFD(ControlIFD parameters) {
 	try {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.entering(this.getClass().getName(), "controlIFD(ControlIFD parameters)", parameters);
-	    } // </editor-fold>
 	    ControlIFDResponse response;
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
 		response = WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "controlIFD(ControlIFD parameters)", response);
-		} // </editor-fold>
 		return response;
 	    } else {
 		try {
@@ -610,27 +494,19 @@ public class IFD implements org.openecard.ws.IFD {
 		    // TODO: evaluate result
 		    response = WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResultOK());
 		    response.setResponse(resultCommand);
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.FINER)) {
-			_logger.exiting(this.getClass().getName(), "controlIFD(ControlIFD parameters)", response);
-		    } // </editor-fold>
 		    return response;
 
 		} catch (IFDException ex) {
 		    response = WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResult(ex));
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.FINER)) {
-			_logger.exiting(this.getClass().getName(), "controlIFD(ControlIFD parameters)", response);
-		    } // </editor-fold>
 		    return response;
 		}
 	    }
-	} catch (Throwable t) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "connect(Connect parameters)", t.getMessage(), t);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResult(t));
+	} catch (Throwable ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
@@ -638,26 +514,15 @@ public class IFD implements org.openecard.ws.IFD {
     @Override
     public ConnectResponse connect(Connect parameters) {
 	try {
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.entering(this.getClass().getName(), "connect(Connect parameters)", parameters);
-	    }
 	    ConnectResponse response;
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
 		response = WSHelper.makeResponse(ConnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "connect(Connect parameters)", response);
-		} // </editor-fold>
 		return response;
 	    } else {
 		try {
                     //FIXME
 		    if (!IFDUtils.getSlotIndex(parameters.getIFDName()).equals(parameters.getSlot())) {
 			response = WSHelper.makeResponse(ConnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Invalid slot handle."));
-			// <editor-fold defaultstate="collapsed" desc="log trace">
-			if (_logger.isLoggable(Level.FINER)) {
-			    _logger.exiting(this.getClass().getName(), "connect(Connect parameters)", response);
-			} // </editor-fold>
 			return response;
 		    } else {
 			SCTerminal t = scwrapper.getTerminal(parameters.getIFDName());
@@ -670,37 +535,26 @@ public class IFD implements org.openecard.ws.IFD {
 			    BeginTransactionResponse resp = beginTransaction(transact);
 			    if (resp.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
 				response = WSHelper.makeResponse(ConnectResponse.class, resp.getResult());
-				// <editor-fold defaultstate="collapsed" desc="log trace">
-				if (_logger.isLoggable(Level.FINER)) {
-				    _logger.exiting(this.getClass().getName(), "connect(Connect parameters)", response);
-				} // </editor-fold>
 				return response;
 			    }
 			}
 			// connection established, return result
 			response = WSHelper.makeResponse(ConnectResponse.class, WSHelper.makeResultOK());
 			response.setSlotHandle(channel.getHandle());
-			// <editor-fold defaultstate="collapsed" desc="log trace">
-			if (_logger.isLoggable(Level.FINER)) {
-			    _logger.exiting(this.getClass().getName(), "connect(Connect parameters)", response);
-			} // </editor-fold>
 			return response;
 		    }
 		} catch (IFDException ex) {
 		    response = WSHelper.makeResponse(ConnectResponse.class, ex.getResult());
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.WARNING)) {
-			_logger.logp(Level.WARNING, this.getClass().getName(), "connect(Connect parameters)", ex.getMessage(), ex);
-		    } // </editor-fold>
+		    _logger.warn(ex.getMessage(), ex);
 		    return response;
 		}
 	    }
-	} catch (Throwable t) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "connect(Connect parameters)", t.getMessage(), t);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(ConnectResponse.class, WSHelper.makeResult(t));
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(ConnectResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
@@ -708,17 +562,9 @@ public class IFD implements org.openecard.ws.IFD {
     @Override
     public synchronized DisconnectResponse disconnect(Disconnect parameters) {
 	try {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.entering(this.getClass().getName(), "disconnect(Disconnect parameters)", parameters);
-	    } // </editor-fold>
 	    DisconnectResponse response;
 	    if (!hasContext()) {
 		response = WSHelper.makeResponse(DisconnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Context not initialized."));
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "disconnect(Disconnect parameters)", response);
-		} // </editor-fold>
 		return response;
 	    }
 
@@ -728,25 +574,18 @@ public class IFD implements org.openecard.ws.IFD {
 		// TODO: add support for actions
 		c.closeChannel(handle, false);
 		response = WSHelper.makeResponse(DisconnectResponse.class, WSHelper.makeResultOK());
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "disconnect(Disconnect parameters)", response);
-		} // </editor-fold>
 		return response;
 	    } catch (IFDException ex) {
 		response = WSHelper.makeResponse(DisconnectResponse.class, ex.getResult());
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.WARNING)) {
-		    _logger.logp(Level.WARNING, this.getClass().getName(), "disconnect(Disconnect parameters)", ex.getMessage(), ex);
-		} // </editor-fold>
+		_logger.warn(ex.getMessage(), ex);
 		return response;
 	    }
-	} catch (Throwable t) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "disconnect(Disconnect parameters)", t.getMessage(), t);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(DisconnectResponse.class, WSHelper.makeResult(t));
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(DisconnectResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
@@ -754,17 +593,9 @@ public class IFD implements org.openecard.ws.IFD {
     @Override
     public BeginTransactionResponse beginTransaction(BeginTransaction beginTransaction) {
 	try {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.entering(this.getClass().getName(), "beginTransaction(BeginTransaction beginTransaction)", beginTransaction);
-	    } // </editor-fold>
 	    BeginTransactionResponse response;
 	    if (!hasContext()) {
 		response = WSHelper.makeResponse(BeginTransactionResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Context not initialized."));
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "beginTransaction(BeginTransaction beginTransaction)", response);
-		} // </editor-fold>
 		return response;
 	    }
 	    byte[] handle = beginTransaction.getSlotHandle();
@@ -773,49 +604,31 @@ public class IFD implements org.openecard.ws.IFD {
 		// TODO: create thread, associate it with the current card instance, and begin exclusive card access
 		c.beginExclusive();
 		response = WSHelper.makeResponse(BeginTransactionResponse.class, WSHelper.makeResultOK());
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "beginTransaction(BeginTransaction beginTransaction)", response);
-		} // </editor-fold>
 		return response;
 	    } catch (CardException ex) {
 		response = WSHelper.makeResponse(BeginTransactionResponse.class, WSHelper.makeResult(ex));
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.WARNING)) {
-		    _logger.logp(Level.WARNING, this.getClass().getName(), "BeginTransactionResponse response", ex.getMessage(), ex);
-		} // </editor-fold>
+		_logger.warn(ex.getMessage(), ex);
 		return response;
 	    } catch (IFDException ex) {
 		response = WSHelper.makeResponse(BeginTransactionResponse.class, ex.getResult());
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.WARNING)) {
-		    _logger.logp(Level.WARNING, this.getClass().getName(), "BeginTransactionResponse response", ex.getMessage(), ex);
-		} // </editor-fold>
+		_logger.warn(ex.getMessage(), ex);
 		return response;
 	    }
-	} catch (Throwable t) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "beginTransaction(BeginTransaction parameters)", t.getMessage(), t);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(BeginTransactionResponse.class, WSHelper.makeResult(t));
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(BeginTransactionResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
     @Override
     public EndTransactionResponse endTransaction(EndTransaction parameters) {
 	try {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.entering(this.getClass().getName(), "endTransaction(EndTransaction parameters)", parameters);
-	    } // </editor-fold>
 	    EndTransactionResponse response;
 	    if (!hasContext()) {
 		response = WSHelper.makeResponse(EndTransactionResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Context not initialized."));
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "endTransaction(EndTransaction parameters)", response);
-		} // </editor-fold>
 		return response;
 	    }
 	    byte[] handle = parameters.getSlotHandle();
@@ -824,32 +637,22 @@ public class IFD implements org.openecard.ws.IFD {
 		// TODO: retrieve thread associated with the current card instance and end exclusive card access
 		c.endExclusive();
 		response = WSHelper.makeResponse(EndTransactionResponse.class, WSHelper.makeResultOK());
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "endTransaction(EndTransaction parameters)", response);
-		} // </editor-fold>
 		return response;
 	    } catch (CardException ex) {
 		response = WSHelper.makeResponse(EndTransactionResponse.class, WSHelper.makeResult(ex));
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.WARNING)) {
-		    _logger.logp(Level.WARNING, this.getClass().getName(), "endTransaction(EndTransaction parameters)", ex.getMessage(), ex);
-		} // </editor-fold>
+		_logger.warn(ex.getMessage(), ex);
 		return response;
 	    } catch (IFDException ex) {
 		response = WSHelper.makeResponse(EndTransactionResponse.class, ex.getResult());
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.WARNING)) {
-		    _logger.logp(Level.WARNING, this.getClass().getName(), "endTransaction(EndTransaction parameters)", ex.getMessage(), ex);
-		} // </editor-fold>
+		_logger.warn(ex.getMessage(), ex);
 		return response;
 	    }
-	} catch (Throwable t) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "endTransaction(EndTransaction parameters)", t.getMessage(), t);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(EndTransactionResponse.class, WSHelper.makeResult(t));
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(EndTransactionResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
@@ -857,17 +660,9 @@ public class IFD implements org.openecard.ws.IFD {
     @Override
     public TransmitResponse transmit(Transmit parameters) {
 	try {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.entering(this.getClass().getName(), "transmit(Transmit parameters)", parameters);
-	    } // </editor-fold>
 	    TransmitResponse response;
 	    if (!hasContext()) {
 		response = WSHelper.makeResponse(TransmitResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Context not initialized."));
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "transmit(Transmit parameters)", response);
-		} // </editor-fold>
 		return response;
 	    }
 
@@ -892,17 +687,13 @@ public class IFD implements org.openecard.ws.IFD {
 	    }
 
 	    response.setResult(result);
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "transmit(Transmit parameters)", response);
-	    } // </editor-fold>
 	    return response;
-	} catch (Throwable t) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "transmit(Transmit parameters)", t.getMessage(), t);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(TransmitResponse.class, WSHelper.makeResult(t));
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(TransmitResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
@@ -910,42 +701,26 @@ public class IFD implements org.openecard.ws.IFD {
     @Override
     public VerifyUserResponse verifyUser(VerifyUser parameters) {
 	try {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.entering(this.getClass().getName(), "verifyUser(VerifyUser parameters)", parameters);
-	    } // </editor-fold>
 	    VerifyUserResponse response;
 	    if (!hasContext()) {
 		response = WSHelper.makeResponse(VerifyUserResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Context not initialized."));
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "verifyUser(VerifyUser parameters)", response);
-		} // </editor-fold>
 		return response;
 	    }
 
 	    AbstractTerminal aTerm = new AbstractTerminal(this, scwrapper, gui, ctxHandle, parameters.getDisplayIndex());
 	    try {
 		response = aTerm.verifyUser(parameters);
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "verifyUser(VerifyUser parameters)", response);
-		} // </editor-fold>
 		return response;
 	    } catch (IFDException ex) {
 		response = WSHelper.makeResponse(VerifyUserResponse.class, ex.getResult());
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "verifyUser(VerifyUser parameters)", response);
-		} // </editor-fold>
 		return response;
 	    }
-	} catch (Throwable t) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "verifyUser(VerifyUser parameters)", t.getMessage(), t);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(VerifyUserResponse.class, WSHelper.makeResult(t));
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(VerifyUserResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
@@ -957,12 +732,12 @@ public class IFD implements org.openecard.ws.IFD {
 		return WSHelper.makeResponse(ModifyVerificationDataResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Context not initialized."));
 	    }
 	    throw new UnsupportedOperationException("Not supported yet.");
-	} catch (Throwable t) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "modifyVerificationData(ModifyVerificationData parameters)", t.getMessage(), t);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(ModifyVerificationDataResponse.class, WSHelper.makeResult(t));
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(ModifyVerificationDataResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
@@ -970,17 +745,9 @@ public class IFD implements org.openecard.ws.IFD {
     @Override
     public OutputResponse output(Output parameters) {
 	try {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.entering(this.getClass().getName(), "output(Output parameters)", parameters);
-	    } // </editor-fold>
 	    OutputResponse response;
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
 		response = WSHelper.makeResponse(OutputResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "output(Output parameters)", response);
-		} // </editor-fold>
 		return response;
 	    } else {
 		String ifdName = parameters.getIFDName();
@@ -991,25 +758,17 @@ public class IFD implements org.openecard.ws.IFD {
 		    aTerm.output(ifdName, outInfo);
 		} catch (IFDException ex) {
 		    response = WSHelper.makeResponse(OutputResponse.class, ex.getResult());
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.FINER)) {
-			_logger.exiting(this.getClass().getName(), "output(Output parameters)", response);
-		    } // </editor-fold>
 		    return response;
 		}
 		response = WSHelper.makeResponse(OutputResponse.class, WSHelper.makeResultOK());
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.exiting(this.getClass().getName(), "output(Output parameters)", response);
-		} // </editor-fold>
 		return response;
 	    }
-	} catch (Throwable t) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "output(Output parameters)", t.getMessage(), t);
-	    } // </editor-fold>
-	    return WSHelper.makeResponse(OutputResponse.class, WSHelper.makeResult(t));
+	} catch (Exception ex) {
+	    if (ex instanceof RuntimeException) {
+		throw (RuntimeException)ex;
+	    }
+	    _logger.warn(ex.getMessage(), ex);
+	    return WSHelper.makeResponse(OutputResponse.class, WSHelper.makeResult(ex));
 	}
     }
 
@@ -1096,7 +855,6 @@ public class IFD implements org.openecard.ws.IFD {
 
     @Override
     public DestroyChannelResponse destroyChannel(DestroyChannel parameters) {
-
 	try {
 	    byte[] slotHandle = parameters.getSlotHandle();
 		 SCCard card = this.scwrapper.getCard(slotHandle);

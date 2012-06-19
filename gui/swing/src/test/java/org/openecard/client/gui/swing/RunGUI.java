@@ -22,27 +22,17 @@
 
 package org.openecard.client.gui.swing;
 
-import org.openecard.client.gui.swing.common.GUIDefaults;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.junit.Before;
-import org.junit.Test;
 import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.UserConsentNavigator;
-import org.openecard.client.gui.definition.BoxItem;
-import org.openecard.client.gui.definition.Checkbox;
-import org.openecard.client.gui.definition.PasswordField;
-import org.openecard.client.gui.definition.Step;
-import org.openecard.client.gui.definition.Text;
-import org.openecard.client.gui.definition.ToggleText;
-import org.openecard.client.gui.definition.UserConsentDescription;
-import org.openecard.client.gui.executor.ExecutionEngine;
-import org.openecard.client.gui.executor.ExecutionResults;
-import org.openecard.client.gui.executor.StepAction;
-import org.openecard.client.gui.executor.StepActionResult;
-import org.openecard.client.gui.executor.StepActionResultStatus;
+import org.openecard.client.gui.definition.*;
+import org.openecard.client.gui.executor.*;
+import org.openecard.client.gui.swing.common.GUIDefaults;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 
 /**
@@ -54,23 +44,17 @@ public class RunGUI {
 
     private UserConsentDescription uc;
 
-    @Before
+    @BeforeTest
     public void setUp() throws Exception {
-	try {
-	    uc = new UserConsentDescription("Identitätsnachweis");
+	uc = new UserConsentDescription("Identitätsnachweis");
 
-	    uc.getSteps().add(identityCheckStep());
-	    uc.getSteps().add(providerInfoStep());
-	    uc.getSteps().add(reqestedDataStep());
-	    uc.getSteps().add(pinInputStep());
-	    uc.getSteps().add(checkDataStep());
+	uc.getSteps().add(identityCheckStep());
+	uc.getSteps().add(providerInfoStep());
+	uc.getSteps().add(reqestedDataStep());
+	uc.getSteps().add(pinInputStep());
+	uc.getSteps().add(checkDataStep());
 
-	    GUIDefaults.initialize();
-
-	} catch (Exception e) {
-	    System.out.println(e.getMessage());
-	    e.printStackTrace();
-	}
+	GUIDefaults.initialize();
     }
 
     public boolean validateColor(final String hex) {
@@ -484,4 +468,5 @@ public class RunGUI {
 	    w.printStackTrace();
 	}
     }
+
 }

@@ -22,10 +22,9 @@
 
 package org.openecard.client.common.util;
 
-import org.junit.Assert;
-import org.junit.Test;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.fail;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+import org.testng.annotations.Test;
 
 
 /**
@@ -38,23 +37,23 @@ public class ShortUtilsTest {
     public void testToByteArray() {
 	byte[] result = ShortUtils.toByteArray((short) Short.MAX_VALUE);
 	byte[] expected = new byte[] { 0x7F, (byte) 0xFF };
-	Assert.assertArrayEquals(expected, result);
+	assertEquals(expected, result);
 
 	result = ShortUtils.toByteArray((short) Short.MAX_VALUE, true);
 	expected = new byte[] { 0x7F, (byte) 0xFF };
-	Assert.assertArrayEquals(expected, result);
+	assertEquals(expected, result);
 
 	result = ShortUtils.toByteArray((short) 0, true);
 	expected = new byte[] { 0x00, 0x00 };
-	Assert.assertArrayEquals(expected, result);
+	assertEquals(expected, result);
 
 	result = ShortUtils.toByteArray((short) 0, false);
 	expected = new byte[] { 0x00 };
-	Assert.assertArrayEquals(expected, result);
+	assertEquals(expected, result);
 
 	try {
 	    expected = new byte[] { 0x01, 0x00, 0x00, 0x00 };
-	    assertArrayEquals(expected, ShortUtils.toByteArray((short) -8, 5));
+	    assertEquals(expected, ShortUtils.toByteArray((short) -8, 5));
 	    fail("A negative value for value should give an IllegalArgumentException");
 	} catch (IllegalArgumentException e) {
 	    /* expected */

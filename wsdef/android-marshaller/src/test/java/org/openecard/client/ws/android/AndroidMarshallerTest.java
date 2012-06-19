@@ -1,17 +1,24 @@
-/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg 
+/****************************************************************************
+ * Copyright (C) 2012 HS Coburg.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.ws.android;
 
@@ -28,14 +35,14 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
-import org.junit.Assert;
-import org.junit.Test;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.sal.anytype.AuthDataMap;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.soap.SOAPHeader;
 import org.openecard.client.ws.soap.SOAPMessage;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -56,6 +63,7 @@ public class AndroidMarshallerTest {
     private static final String didAuthenticateTA;
     private static final String didAuthenticateCA;
     private static final String didAuthenticateResponse;
+
     static {
 	try {
 	    getRecognitionTreeResponseXML = loadXML("GetRecognitionTreeResponse.xml");
@@ -406,7 +414,7 @@ public class AndroidMarshallerTest {
 	
 	DIDAuthenticate didAuthenticate = (DIDAuthenticate) o;
 	Assert.assertEquals(didAuthenticate.getDIDName(), "PIN");
-	Assert.assertArrayEquals(didAuthenticate.getConnectionHandle().getSlotHandle(), StringUtils.toByteArray("93F25BA574EF3F94F8AE42796DAF7C05"));
+	Assert.assertEquals(didAuthenticate.getConnectionHandle().getSlotHandle(), StringUtils.toByteArray("93F25BA574EF3F94F8AE42796DAF7C05"));
 	Assert.assertEquals(EAC1InputType.class, didAuthenticate.getAuthenticationProtocolData().getClass());
 	
 	for(int i = 0;i<didAuthenticate.getAuthenticationProtocolData().getAny().size();i++){
@@ -432,7 +440,7 @@ public class AndroidMarshallerTest {
 	
 	didAuthenticate = (DIDAuthenticate) o;
 	Assert.assertEquals(didAuthenticate.getDIDName(), "PIN");
-	Assert.assertArrayEquals(didAuthenticate.getConnectionHandle().getSlotHandle(), StringUtils.toByteArray("05D4F40AEBD9919383C22216055EA3DB15056C51"));
+	Assert.assertEquals(didAuthenticate.getConnectionHandle().getSlotHandle(), StringUtils.toByteArray("05D4F40AEBD9919383C22216055EA3DB15056C51"));
 	Assert.assertEquals(EAC2InputType.class, didAuthenticate.getAuthenticationProtocolData().getClass());
 	AuthDataMap eac2input = new AuthDataMap(didAuthenticate.getAuthenticationProtocolData());
 	
@@ -451,7 +459,7 @@ public class AndroidMarshallerTest {
 	
 	didAuthenticate = (DIDAuthenticate) o;
 	Assert.assertEquals(didAuthenticate.getDIDName(), "PIN");
-	Assert.assertArrayEquals(didAuthenticate.getConnectionHandle().getSlotHandle(), StringUtils.toByteArray("05D4F40AEBD9919383C22216055EA3DB15056C51"));
+	Assert.assertEquals(didAuthenticate.getConnectionHandle().getSlotHandle(), StringUtils.toByteArray("05D4F40AEBD9919383C22216055EA3DB15056C51"));
 	Assert.assertEquals(EACAdditionalInputType.class, didAuthenticate.getAuthenticationProtocolData().getClass());
 	AuthDataMap eacadditionalinput = new AuthDataMap(didAuthenticate.getAuthenticationProtocolData());
 	

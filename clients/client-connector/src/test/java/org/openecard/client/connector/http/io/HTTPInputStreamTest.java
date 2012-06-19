@@ -1,25 +1,43 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.connector.http.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import org.testng.annotations.Test;
 
 
 /**
+ *
  * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class HTTPInputStreamTest {
 
     private static final byte[] CRLF = new byte[]{(byte) 0x0D, (byte) 0x0A};
 
-    public HTTPInputStreamTest() {
-    }
 
     @Test
     public void testReadLine() throws IOException {
@@ -41,4 +59,5 @@ public class HTTPInputStreamTest {
 	assertNull(instance.readLine());
 	assertNull(instance.readLine());
     }
+
 }

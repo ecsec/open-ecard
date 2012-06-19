@@ -24,12 +24,9 @@ package org.openecard.client.connector.activation;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 import org.openecard.client.connector.Connector;
 import org.openecard.client.connector.ConnectorServer;
+import org.testng.annotations.Test;
 
 
 /**
@@ -38,27 +35,12 @@ import org.openecard.client.connector.ConnectorServer;
  */
 public class ConnectorTest {
 
-    public ConnectorTest() {
-    }
-
     public static void main(String[] arg) {
 	try {
 	    Connector result = new Connector(ConnectorServer.DEFAULT_PORT);
 	} catch (Exception ex) {
 	    Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
 	}
-    }
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
-
-    @Before
-    public void setUp() {
     }
 
     @Test

@@ -22,18 +22,11 @@
 
 package org.openecard.client.sal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import iso.std.iso_iec._24727.tech.schema.*;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
@@ -46,6 +39,11 @@ import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
+import org.testng.Assert;
+import static org.testng.Assert.*;
+import org.testng.SkipException;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 
 /**
@@ -53,8 +51,12 @@ import org.openecard.client.transport.dispatcher.MessageDispatcher;
  * @author Johannes.Schmoelz <johannes.schmoelz@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@Ignore
 public class TinySALTest {
+
+    @BeforeClass
+    public static void disable() {
+	throw new SkipException("Test completely disabled.");
+    }
 
     private static ClientEnv env;
     private static TinySAL instance;
@@ -95,8 +97,7 @@ public class TinySALTest {
     /**
      * Test of getConnectionHandles method, of class TinySAL.
      */
-    @Ignore
-    @Test
+    @Test(enabled=false)
     public void testGetConnectionHandles() {
 	System.out.println("getConnectionHandles");
 	List<ConnectionHandleType> cHandles = instance.getConnectionHandles();
@@ -127,8 +128,7 @@ public class TinySALTest {
     /**
      * Test of initialize method, of class TinySAL.
      */
-    @Ignore
-    @Test
+    @Test(enabled=false)
     public void testInitialize() {
 	// TODO: make this test work
 	System.out.println("initialize");
@@ -233,7 +233,6 @@ public class TinySALTest {
     /**
      * Test of cardApplicationDisconnect method, of class TinySAL.
      */
-   // @Ignore
     @Test
     public void testCardApplicationDisconnect() {
 	System.out.println("cardApplicationDisconnect");
@@ -981,8 +980,7 @@ public class TinySALTest {
     /**
      * Test of singalEvent method, of class TinySAL.
      */
-    @Ignore
-    @Test
+    @Test(enabled=false)
     public void testSingalEvent() {
 	System.out.println("singalEvent");
 	// same as getconnectionhandles, so call this one instead

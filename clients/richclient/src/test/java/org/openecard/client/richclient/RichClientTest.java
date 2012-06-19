@@ -25,9 +25,6 @@ package org.openecard.client.richclient;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.connector.common.ConnectorConstants;
 import org.openecard.client.connector.messages.TCTokenRequest;
@@ -35,6 +32,9 @@ import org.openecard.client.connector.messages.TCTokenResponse;
 import org.openecard.client.connector.tctoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.testng.Assert.fail;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 
 /**
@@ -48,7 +48,7 @@ public class RichClientTest {
     private static List<TCToken> tokens;
     private static String tokenURI = "https://willow.mtg.de/eid-server-demo-app/result/request.html";
 
-    @Before
+    @BeforeMethod
     public void setUp() {
 	try {
 	    // Get TCToken from the given URL

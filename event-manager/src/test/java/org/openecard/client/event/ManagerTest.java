@@ -1,12 +1,33 @@
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.event;
 
-import org.openecard.client.common.interfaces.Environment;
-import org.openecard.client.ifd.scio.IFD;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.openecard.client.common.ClientEnv;
+import org.openecard.client.common.interfaces.Environment;
+import org.openecard.client.ifd.scio.IFD;
+import org.testng.annotations.Test;
 
 
 /**
@@ -15,8 +36,7 @@ import org.openecard.client.common.ClientEnv;
  */
 public class ManagerTest {
 
-    @Ignore
-    @Test
+    @Test(enabled=false)
     public void runManager() throws InterruptedException {
 	IFD ifd = new IFD();
 	EstablishContext ctx = new EstablishContext();

@@ -1,25 +1,30 @@
-/*
- * Copyright 2012 Tobias Wich ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.ifd.scio;
 
 import iso.std.iso_iec._24727.tech.schema.*;
-import static org.junit.Assert.assertTrue;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.testng.Assert.assertTrue;
+import org.testng.annotations.Test;
 
 
 /**
@@ -35,8 +40,7 @@ public class WaitTest {
     }
 
 
-    @Ignore
-    @Test
+    @Test(enabled=false)
     public void testBlockingWait(){
         byte[] ctxHandle = ifd.establishContext(new EstablishContext()).getContextHandle();
         GetStatusResponse statusResp;
@@ -50,7 +54,7 @@ public class WaitTest {
 //        waitReq.setTimeOut(new BigInteger("1000"));
         WaitResponse wr = ifd.wait(waitReq);
 
-        assertTrue("Wait test failed", wr.getIFDEvent().get(0).getSlotStatus().get(0).isCardAvailable() == true);
+        assertTrue(wr.getIFDEvent().get(0).getSlotStatus().get(0).isCardAvailable() == true, "Wait test failed");
 
         // add second terminal without smartcard
         Wait waitReq2 = new Wait();
@@ -58,14 +62,14 @@ public class WaitTest {
         waitReq2.setContextHandle(ctxHandle);
         WaitResponse wr2 = ifd.wait(waitReq2);
 
-        assertTrue("Wait test failed", wr2.getIFDEvent().get(1).getSlotStatus().get(0).isCardAvailable() == false);
+        assertTrue(wr2.getIFDEvent().get(1).getSlotStatus().get(0).isCardAvailable() == false, "Wait test failed");
         // insert a terminal
         Wait waitReq3 = new Wait();
         waitReq3.getIFDStatus().addAll(wr2.getIFDEvent());
         waitReq3.setContextHandle(ctxHandle);
         WaitResponse wr3 = ifd.wait(waitReq3);
 
-        assertTrue("Wait test failed", wr3.getIFDEvent().size() == 1);
+        assertTrue(wr3.getIFDEvent().size() == 1, "Wait test failed");
     }
 
 }

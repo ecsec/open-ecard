@@ -22,8 +22,8 @@
 
 package org.openecard.client.common.util;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
+import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 
 /**
@@ -40,7 +40,7 @@ public class ByteUtilsTest {
 	byte[] clone = ByteUtils.clone(input);
 
 	assertFalse(clone == input);
-	assertArrayEquals(clone, input);
+	assertEquals(clone, input);
 	/*
 	 * test null as input
 	 */
@@ -53,22 +53,22 @@ public class ByteUtilsTest {
 	byte c = 6, d = 7;
 	byte[] result = ByteUtils.concatenate(a, b);
 	byte[] expected = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
-	assertArrayEquals(expected, result);
+	assertEquals(expected, result);
 	result = ByteUtils.concatenate(a, c);
 	expected = new byte[] { 0x00, 0x01, 0x02, 0x06 };
-	assertArrayEquals(expected, result);
+	assertEquals(expected, result);
 	result = ByteUtils.concatenate(d, b);
 	expected = new byte[] { 0x07, 0x03, 0x04, 0x05 };
-	assertArrayEquals(expected, result);
+	assertEquals(expected, result);
 	result = ByteUtils.concatenate(d, c);
 	expected = new byte[] { 0x07, 0x06 };
-	assertArrayEquals(expected, result);
+	assertEquals(expected, result);
 	result = ByteUtils.concatenate(d, null);
 	expected = new byte[] { 0x07 };
-	assertArrayEquals(expected, result);
+	assertEquals(expected, result);
 	result = ByteUtils.concatenate(null, d);
 	expected = new byte[] { 0x07 };
-	assertArrayEquals(expected, result);
+	assertEquals(expected, result);
 
     }
 
@@ -82,14 +82,14 @@ public class ByteUtilsTest {
 	byte[] input = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
 	byte[] expected = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
 	byte[] result = ByteUtils.cutLeadingNullByte(input);
-	assertArrayEquals(expected, result);
+	assertEquals(expected, result);
 
 	/*
 	 * test without leading null byte
 	 */
 	input = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
 	result = ByteUtils.cutLeadingNullByte(input);
-	assertArrayEquals(expected, result);
+	assertEquals(expected, result);
 
 	/*
 	 * test null as input
@@ -102,7 +102,7 @@ public class ByteUtilsTest {
 	byte[] input = new byte[] { 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
 	byte[] expected = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
 	byte[] result = ByteUtils.cutLeadingNullBytes(input);
-	assertArrayEquals(expected, result);
+	assertEquals(expected, result);
 	assertNull(ByteUtils.cutLeadingNullBytes(null));
     }
 
@@ -111,7 +111,7 @@ public class ByteUtilsTest {
 	byte[] input = new byte[] { 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
 	byte[] expected = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
 	byte[] result = ByteUtils.copy(input, 2, 5);
-	assertArrayEquals(expected, result);
+	assertEquals(expected, result);
 	assertNull(ByteUtils.copy(null, 0, 23));
     }
 

@@ -1,29 +1,36 @@
-/*
- * Copyright 2012 Moritz Horsch.
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.common.apdu.common;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Random;
-import static org.junit.Assert.*;
-import org.junit.Test;
 import org.openecard.client.common.apdu.GeneralAuthenticate;
 import org.openecard.client.common.apdu.ReadBinary;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.IntegerUtils;
+import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 
 /**
@@ -36,7 +43,7 @@ public class CardCommandAPDUTest {
     @Test
     public void testLengthCommand() throws IOException {
 	CardCommandAPDU apdu = new CardCommandAPDU((byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF);
-	assertArrayEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF});
+	assertEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF});
 
 	apdu = new CardCommandAPDU((byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF, fillBytes(1));
 	assertEquals(apdu.getLC(), 1);
@@ -55,23 +62,23 @@ public class CardCommandAPDUTest {
     public void testLengthExpected() throws IOException {
 	CardCommandAPDU apdu = new ReadBinary();
 
-	assertArrayEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF});
+	assertEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF});
 
 	apdu.setLE(1);
 
-	assertArrayEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF, (byte) 0x01});
+	assertEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF, (byte) 0x01});
 
 	apdu.setLE(255);
-	assertArrayEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF, (byte) 0xFF});
+	assertEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF, (byte) 0xFF});
 
 	apdu.setLE(256);
-	assertArrayEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF, (byte) 0x00});
+	assertEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF, (byte) 0x00});
 
 	apdu.setLE(257);
-	assertArrayEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF, (byte) 0x00, (byte) 0x01, (byte) 0x01});
+	assertEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF, (byte) 0x00, (byte) 0x01, (byte) 0x01});
 
 	apdu.setLE(65535);
-	assertArrayEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF, (byte) 0x00, (byte) 0xFF, (byte) 0xFF});
+	assertEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF, (byte) 0x00, (byte) 0xFF, (byte) 0xFF});
 
 	apdu = new CardCommandAPDU((byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF, fillBytes(65535));
 	apdu.setLE(65535);
@@ -143,8 +150,8 @@ public class CardCommandAPDUTest {
 	assertEquals((byte) 0xDE, capdu.getP2());
 	assertEquals((byte) 0x01, capdu.getLC());
 	assertEquals(511, capdu.getLE());
-	assertArrayEquals(new byte[]{(byte) 0x01}, capdu.getData());
-	assertArrayEquals(new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE}, capdu.getHeader());
+	assertEquals(new byte[]{(byte) 0x01}, capdu.getData());
+	assertEquals(new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE}, capdu.getHeader());
 
 	/*
 	 * test constructor CardCommandAPDU(byte[] commandAPDU) with Case 1 APDU
@@ -157,7 +164,7 @@ public class CardCommandAPDUTest {
 	assertEquals(-1, capdu.getLC());
 	assertEquals(-1, capdu.getLE());
 	assertNull(capdu.getData());
-	assertArrayEquals(new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE}, capdu.getHeader());
+	assertEquals(new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE}, capdu.getHeader());
     }
 
     private byte[] fillBytesWithLength(int i) throws IOException {
@@ -182,4 +189,5 @@ public class CardCommandAPDUTest {
 	}
 	return baos.toByteArray();
     }
+
 }

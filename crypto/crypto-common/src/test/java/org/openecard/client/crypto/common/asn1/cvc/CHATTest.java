@@ -1,29 +1,34 @@
-/*
- * Copyright 2012 Moritz Horsch.
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.crypto.common.asn1.cvc;
 
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.util.StringUtils;
+import static org.testng.Assert.assertEquals;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 
 /**
@@ -35,10 +40,8 @@ public class CHATTest {
     private CHAT chat;
     private byte[] chatBytes;
 
-    public CHATTest() {
-    }
 
-    @Before
+    @BeforeMethod
     public void setUp() throws TLVException {
 	chatBytes = StringUtils.toByteArray("7f4c12060904007f0007030102025305300301ffb7");
 	chat = new CHAT(chatBytes);
@@ -46,10 +49,10 @@ public class CHATTest {
 
     @Test
     public void testEncoding() throws TLVException {
-	assertArrayEquals(chatBytes, chat.toByteArray());
+	assertEquals(chatBytes, chat.toByteArray());
     }
 
-//    @Test
+    @Test(enabled=false)
     public void testtoString() throws TLVException {
 	TreeMap<CHAT.DataGroup, Boolean> readAccess = chat.getReadAccess();
 
@@ -63,7 +66,7 @@ public class CHATTest {
 	chatBytes = StringUtils.toByteArray("7f4c12060904007f0007030102025305000301ffb7");
 	chat.setWriteAccess(CHAT.DataGroup.DG17, false);
 	chat.setWriteAccess("DG18", false);
-	assertArrayEquals(chatBytes, chat.toByteArray());
+	assertEquals(chatBytes, chat.toByteArray());
     }
 
     @Test
@@ -73,7 +76,7 @@ public class CHATTest {
 	chat.setReadAccess(CHAT.DataGroup.DG02, false);
 	chat.setReadAccess(CHAT.DataGroup.DG03.name(), false);
 	chat.setReadAccess("DG04", false);
-	assertArrayEquals(chatBytes, chat.toByteArray());
+	assertEquals(chatBytes, chat.toByteArray());
     }
 
     @Test
@@ -81,6 +84,7 @@ public class CHATTest {
 	chatBytes = StringUtils.toByteArray("7f4c12060904007f0007030102025305300301ffAF");
 	chat.setSpecialFunctions(CHAT.SpecialFunction.PRIVILEGED_TERMINAL, true);
 	chat.setSpecialFunctions("CAN_ALLOWED", false);
-	assertArrayEquals(chatBytes, chat.toByteArray());
+	assertEquals(chatBytes, chat.toByteArray());
     }
+
 }

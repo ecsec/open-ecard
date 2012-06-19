@@ -1,51 +1,31 @@
-/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg
+/****************************************************************************
+ * Copyright (C) 2012 HS Coburg.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.sal.protocol.genericcryptography;
 
-import static org.junit.Assert.assertEquals;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
-import iso.std.iso_iec._24727.tech.schema.Connect;
-import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
-import iso.std.iso_iec._24727.tech.schema.CryptoMarkerType;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDGet;
-import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDList;
-import iso.std.iso_iec._24727.tech.schema.DIDListResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDQualifierType;
-import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
-import iso.std.iso_iec._24727.tech.schema.EstablishContext;
-import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
-import iso.std.iso_iec._24727.tech.schema.ListIFDs;
-import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
-import iso.std.iso_iec._24727.tech.schema.PinCompareDIDAuthenticateInputType;
-import iso.std.iso_iec._24727.tech.schema.Sign;
-import iso.std.iso_iec._24727.tech.schema.SignResponse;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import javax.xml.parsers.ParserConfigurationException;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
@@ -61,14 +41,22 @@ import org.openecard.client.sal.TinySAL;
 import org.openecard.client.sal.protocol.genericryptography.GenericCryptoProtocolFactory;
 import org.openecard.client.sal.protocol.pincompare.PinCompareProtocolFactory;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
+import static org.testng.Assert.assertEquals;
+import org.testng.SkipException;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 
 /**
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@Ignore
 public class GenericCryptographyProtocolTest {
+
+    @BeforeClass
+    public static void disable() {
+	throw new SkipException("Test completely disabled.");
+    }
 
     private static ClientEnv env;
     private static TinySAL instance;

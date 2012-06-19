@@ -22,9 +22,8 @@
 
 package org.openecard.client.common.util;
 
-import junit.framework.Assert;
-import org.junit.Test;
-import static org.junit.Assert.fail;
+import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 
 /**
@@ -50,14 +49,11 @@ public class ByteArrayWrapperTest {
 	ByteArrayWrapper wrapB = new ByteArrayWrapper(b);
 
 	// test unequal
-	Assert.assertFalse(wrapA.equals(wrapB));
-
+	assertFalse(wrapA.equals(wrapB));
 	// test equal
-	Assert.assertTrue(wrapA.equals(wrapA));
-
-
+	assertTrue(wrapA.equals(wrapA));
 	// test not instance of ByteArrayWrapper
-	Assert.assertFalse(wrapA.equals(b));
+	assertFalse(wrapA.equals(b));
     }
 
     @Test
@@ -66,7 +62,7 @@ public class ByteArrayWrapperTest {
 	byte[] b = new byte[] { 0x00, 0x01, 0x02 };
 	ByteArrayWrapper wrapA = new ByteArrayWrapper(a);
 	ByteArrayWrapper wrapB = new ByteArrayWrapper(b);
-	Assert.assertEquals(wrapA.hashCode(), wrapB.hashCode());
+	assertEquals(wrapA.hashCode(), wrapB.hashCode());
     }
 
 }

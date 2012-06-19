@@ -28,8 +28,6 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import javax.activation.UnsupportedDataTypeException;
 import javax.xml.bind.JAXBException;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.logging.LogManager;
@@ -43,6 +41,7 @@ import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.Test;
 import org.xml.sax.SAXException;
 
 
@@ -53,8 +52,7 @@ public class PACETest {
 
     private static final Logger logger = LoggerFactory.getLogger(PACETest.class);
 
-    @Ignore
-    @Test
+    @Test(enabled=false)
     public void executePACE_PIN() throws UnsupportedDataTypeException, JAXBException, SAXException, WSMarshallerException {
 	// Setup logger
 	java.util.logging.LogManager.getLogManager().reset();

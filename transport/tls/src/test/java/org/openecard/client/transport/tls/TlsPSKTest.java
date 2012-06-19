@@ -1,18 +1,24 @@
-/*
- * Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg
+/****************************************************************************
+ * Copyright (C) 2012 HS Coburg.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.transport.tls;
 
@@ -23,11 +29,10 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
-import junit.framework.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.openecard.bouncycastle.crypto.tls.TlsProtocolHandler;
 import org.openecard.bouncycastle.util.encoders.Hex;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 
 /**
@@ -35,7 +40,6 @@ import org.openecard.bouncycastle.util.encoders.Hex;
  * @author Simon Potzernheim <potzernheim@hs-coburg.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@Ignore //works only from inside the HS
 public class TlsPSKTest {
 
     /**
@@ -43,7 +47,7 @@ public class TlsPSKTest {
      *
      * @throws IOException
      */
-    @Test
+    @Test(enabled=false) //works only from inside the HS
     public void testPSK() throws IOException {
 	URL url = new URL("https://ftei-vm-073.hs-coburg.de:8888/");
 	String host = url.getHost();
@@ -81,8 +85,7 @@ public class TlsPSKTest {
      *
      * @throws IOException
      */
-    @Ignore
-    @Test
+    @Test(enabled=false)
     public void testRSAPSK() throws IOException {
 
 	URL url = new URL("https://ftei-vm-073.hs-coburg.de:4433/");

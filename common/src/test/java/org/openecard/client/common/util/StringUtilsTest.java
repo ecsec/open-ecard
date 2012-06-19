@@ -22,8 +22,8 @@
 
 package org.openecard.client.common.util;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.testng.Assert.assertEquals;
+import org.testng.annotations.Test;
 
 
 /**
@@ -38,15 +38,15 @@ public class StringUtilsTest {
 	String hex2 = "00             11        22 33";
 	byte[] array = StringUtils.toByteArray(hex);
 	byte[] expected = new byte[] { 0x00, 0x11, 0x22, 0x33 };
-	assertArrayEquals(expected, array);
+	assertEquals(expected, array);
 
 	array = StringUtils.toByteArray(hex2, true);
 	expected = new byte[] { 0x00, 0x11, 0x22, 0x33 };
-	assertArrayEquals(expected, array);
+	assertEquals(expected, array);
 
 	array = StringUtils.toByteArray(hex, false);
 	expected = new byte[] { 0x00, 0x11, 0x22, 0x33 };
-	assertArrayEquals(expected, array);
+	assertEquals(expected, array);
     }
 
 }

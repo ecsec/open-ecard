@@ -52,6 +52,7 @@
 	    <url>http://mvn.vserver-001.urospace.de/content/repositories/openecard-snapshot</url>
 	</snapshotRepository>
     </distributionManagement>
+
     <repositories>
 	<repository>
 	    <id>openecard-repos</id>
@@ -59,47 +60,13 @@
 	    <url>http://mvn.vserver-001.urospace.de/content/groups/openecard-public</url>
 	</repository>
     </repositories>
+
     <pluginRepositories>
 	<pluginRepository>
 	    <id>openecard-repos</id>
 	    <url>http://mvn.vserver-001.urospace.de/content/groups/openecard-public</url>
 	</pluginRepository>
     </pluginRepositories>
-
-    <profiles>
-	<profile>
-	    <id>api-check</id>
-	    <activation>
-		<activeByDefault>true</activeByDefault>
-	    </activation>
-	    <build>
-		<plugins>
-		    <plugin>
-			<groupId>org.codehaus.mojo</groupId>
-			<artifactId>animal-sniffer-maven-plugin</artifactId>
-			<version>1.8</version>
-			<executions>
-			    <execution>
-				<id>api-check</id>
-				<phase>test</phase>
-				<goals>
-				    <goal>check</goal>
-				</goals>
-			    </execution>
-			</executions>
-			<configuration>
-			    <signature>
-				<groupId>org.codehaus.mojo.signature</groupId>
-				<!-- use sun artifact, because java16 doesn't contain smartcardio -->
-				<artifactId>java16-sun</artifactId>
-				<version>1.0</version>
-			    </signature>
-			</configuration>
-		    </plugin>
-		</plugins>
-	    </build>
-	</profile>
-    </profiles>
 
     <build>
 	<pluginManagement>
@@ -146,8 +113,71 @@
 			<!-- <excludePackageNames>org.openecard.client.maven.classlist</excludePackageNames> -->
 		    </configuration>
 		</plugin>
+		<plugin>
+		    <groupId>org.codehaus.mojo</groupId>
+		    <artifactId>cobertura-maven-plugin</artifactId>
+		    <version>2.5.1</version>
+		    <configuration>
+			<instrumentation>
+			    <includes>
+				<include>org/openecard/**/*.class</include>
+			    </includes>
+			    <excludes>
+				<exclude>org/openecard/**/*Test.class</exclude>
+			    </excludes>
+			</instrumentation>
+			<maxmem>1024m</maxmem>
+		    </configuration>
+		</plugin>
 	    </plugins>
 	</pluginManagement>
+	<plugins>
+	    <plugin>
+		<groupId>org.codehaus.mojo</groupId>
+		<artifactId>animal-sniffer-maven-plugin</artifactId>
+		<version>1.8</version>
+		<executions>
+		    <execution>
+			<id>api-check</id>
+			<phase>test</phase>
+			<goals>
+			    <goal>check</goal>
+			</goals>
+		    </execution>
+		</executions>
+		<configuration>
+		    <signature>
+			<groupId>org.codehaus.mojo.signature</groupId>
+			<!-- use sun artifact, because java16 doesn't contain smartcardio -->
+			<artifactId>java16-sun</artifactId>
+			<version>1.0</version>
+		    </signature>
+		</configuration>
+	    </plugin>
+
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-site-plugin</artifactId>
+		<version>3.1</version>
+		<configuration>
+		    <reportPlugins>
+			<plugin>
+			    <groupId>org.codehaus.mojo</groupId>
+			    <artifactId>cobertura-maven-plugin</artifactId>
+			    <version>2.5.1</version>
+			    <configuration>
+				<maxmem>1024m</maxmem>
+				<aggregate>true</aggregate>
+				<formats>
+				    <format>html</format>
+				    <format>xml</format>
+				</formats>
+			    </configuration>
+			</plugin>
+		    </reportPlugins>
+		</configuration>
+	    </plugin>
+	</plugins>
     </build>
 
     <dependencies>

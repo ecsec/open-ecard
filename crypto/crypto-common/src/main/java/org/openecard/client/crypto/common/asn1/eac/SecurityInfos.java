@@ -1,24 +1,31 @@
-/*
- * Copyright 2012 Moritz Horsch.
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.crypto.common.asn1.eac;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.bouncycastle.asn1.ASN1Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -26,6 +33,8 @@ import org.openecard.bouncycastle.asn1.ASN1Set;
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class SecurityInfos {
+
+    private static final Logger _logger = LoggerFactory.getLogger(SecurityInfos.class);
 
     private ASN1Set securityInfos;
 
@@ -44,7 +53,7 @@ public class SecurityInfos {
             try {
                 return new SecurityInfos((ASN1Set) ASN1Set.fromByteArray((byte[]) obj));
             } catch (IOException e) {
-                Logger.getLogger(SecurityInfos.class.getName()).log(Level.SEVERE, "Cannot parse SecurityInfos", e);
+                _logger.error("Cannot parse SecurityInfos", e);
             }
         }
         throw new IllegalArgumentException("unknown object in factory: " + obj.getClass());

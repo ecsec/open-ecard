@@ -1,6 +1,27 @@
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.common.util;
 
-import org.openecard.client.common.logging.LogManager;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
 import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
 import java.math.BigInteger;
@@ -8,8 +29,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -18,7 +39,7 @@ import java.util.logging.Logger;
  */
 public class IFDStatusDiff {
 
-    private static final Logger _logger = LogManager.getLogger(IFDStatusDiff.class.getName());
+    private static final Logger _logger = LoggerFactory.getLogger(IFDStatusDiff.class);
     
     private final List<IFDStatusType> expected;
     private List<IFDStatusType> result;
@@ -36,10 +57,6 @@ public class IFDStatusDiff {
     }
 
     public void diff(List<IFDStatusType> others, boolean withNew) {
-        // <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "diff(List<IFDStatusType> others, boolean withNew)", new Object[]{others, withNew});
-        } // </editor-fold>
         result = new LinkedList<IFDStatusType>();
         deleted = new LinkedList<IFDStatusType>(expected);
 
@@ -94,11 +111,6 @@ public class IFDStatusDiff {
         }
 
         merge(deleted);
-
-        // <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "diff(List<IFDStatusType> others, boolean withNew)");
-        } // </editor-fold>
     }
 
     private static boolean arrayEquals(byte[] a, byte[] b) {
@@ -111,36 +123,16 @@ public class IFDStatusDiff {
     }
 
     private IFDStatusType expectedGet(String ifdName) {
-        // <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "expectedGet(String ifdName)", ifdName);
-        } // </editor-fold>
         for (IFDStatusType s : expected) {
             if (s.getIFDName().equals(ifdName)) {
-                // <editor-fold defaultstate="collapsed" desc="log trace">
-                if (_logger.isLoggable(Level.FINER)) {
-                    _logger.exiting(this.getClass().getName(), "expectedGet(String ifdName)", s);
-                } // </editor-fold>
                 return s;
             }
         }
-        // <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "expectedGet(String ifdName)", null);
-        } // </editor-fold>
         return null;
     }
 
     private boolean expectedContains(String ifdName) {
-        // <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "expectedContains(String ifdName)", ifdName);
-        } // </editor-fold>
         Boolean b = expectedGet(ifdName) != null;
-        // <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "expectedContains(String ifdName)", b);
-        } // </editor-fold>
         return b.booleanValue();
     }
 
@@ -178,4 +170,5 @@ public class IFDStatusDiff {
     public List<IFDStatusType> result() {
         return result;
     }
+
 }

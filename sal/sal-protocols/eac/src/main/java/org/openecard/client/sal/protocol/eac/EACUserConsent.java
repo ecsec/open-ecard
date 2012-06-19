@@ -23,23 +23,19 @@
 package org.openecard.client.sal.protocol.eac;
 
 import java.util.Map;
-import java.util.logging.Logger;
 import org.openecard.client.common.I18n;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.gui.ResultStatus;
 import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.UserConsent;
 import org.openecard.client.gui.UserConsentNavigator;
 import org.openecard.client.gui.definition.*;
-import org.openecard.client.gui.executor.ExecutionEngine;
-import org.openecard.client.gui.executor.ExecutionResults;
-import org.openecard.client.gui.executor.StepAction;
-import org.openecard.client.gui.executor.StepActionResult;
-import org.openecard.client.gui.executor.StepActionResultStatus;
+import org.openecard.client.gui.executor.*;
 import org.openecard.client.sal.protocol.eac.gui.CHATStep;
 import org.openecard.client.sal.protocol.eac.gui.CVCStep;
 import org.openecard.client.sal.protocol.eac.gui.GUIContentMap;
 import org.openecard.client.sal.protocol.eac.gui.PINStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -50,7 +46,8 @@ import org.openecard.client.sal.protocol.eac.gui.PINStep;
  */
 public class EACUserConsent {
 
-    private static final Logger logger = LogManager.getLogger(EACUserConsent.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(EACUserConsent.class);
+
     // GUI translation constants
     private static final String TITLE = "eac_user_consent_title";
     private I18n lang = I18n.getTranslation("sal");

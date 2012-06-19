@@ -22,10 +22,10 @@
 
 package org.openecard.client.connector.activation;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.connector.Connector;
 import org.openecard.client.connector.ConnectorServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 
@@ -35,11 +35,13 @@ import org.testng.annotations.Test;
  */
 public class ConnectorTest {
 
+    private static final Logger _logger = LoggerFactory.getLogger(ConnectorTest.class);
+
     public static void main(String[] arg) {
 	try {
 	    Connector result = new Connector(ConnectorServer.DEFAULT_PORT);
 	} catch (Exception ex) {
-	    Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+	    _logger.error(ex.getMessage(), ex);
 	}
     }
 

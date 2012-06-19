@@ -24,13 +24,10 @@ package org.openecard.client.ifd.protocol.pace;
 
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
 import javax.activation.UnsupportedDataTypeException;
 import javax.xml.bind.JAXBException;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
@@ -54,17 +51,6 @@ public class PACETest {
 
     @Test(enabled=false)
     public void executePACE_PIN() throws UnsupportedDataTypeException, JAXBException, SAXException, WSMarshallerException {
-	// Setup logger
-	java.util.logging.LogManager.getLogManager().reset();
-
-	ConsoleHandler ch = new ConsoleHandler();
-	ch.setLevel(Level.ALL);
-
-	LogManager.getLogger("org.openecard.client.ifd.protocol.pace").addHandler(ch);
-	LogManager.getLogger("org.openecard.client.ifd.protocol.pace").setLevel(Level.FINEST);
-	LogManager.getLogger("org.openecard.client.ifd.scio.wrapper").addHandler(ch);
-	LogManager.getLogger("org.openecard.client.ifd.scio.wrapper").setLevel(Level.FINE);
-
 	ClientEnv env = new ClientEnv();
 	MessageDispatcher dispatcher = new MessageDispatcher(env);
 	IFD ifd = new IFD();

@@ -1,18 +1,24 @@
-/*
- * Copyright 2012 Tobias Wich ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.ifd.scio;
 
@@ -20,18 +26,17 @@ import iso.std.iso_iec._24727.tech.schema.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CardTerminals;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ifd.TerminalFactory;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.IFDStatusDiff;
 import org.openecard.client.ifd.scio.wrapper.IFDTerminalFactory;
 import org.openecard.client.ws.WSClassLoader;
 import org.openecard.ws.IFDCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -40,18 +45,18 @@ import org.openecard.ws.IFDCallback;
  */
 public class EventListener implements Callable<List<IFDStatusType>> {
 
-    private static final Logger _logger;
+    private static final Logger _logger = LoggerFactory.getLogger(EventListener.class);
+
     private static final long pollDelay;
 
     static {
-        _logger = LogManager.getLogger(EventListener.class.getName());
         String delayStr = IFDProperties.getProperty("org.openecard.ifd.wait.delay");
         long delay = 500;
         if (delayStr != null) {
             try {
                 delay = Long.parseLong(delayStr);
             } catch (NumberFormatException ex) {
-                _logger.warning("Property 'org.openecard.ifd.wait.delay' contains a misformed number.");
+                _logger.warn("Property 'org.openecard.ifd.wait.delay' contains a malformed number.");
             }
         }
         pollDelay = delay;
@@ -71,10 +76,6 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 
 
     public EventListener(IFD ifd, byte[] ctxHandle, long timeout, ChannelHandleType callback, List<IFDStatusType> expectedStatuses, boolean withNew) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "EventListener(IFD ifd, byte[] ctxHandle, long timeout, ChannelHandleType callback, List<IFDStatusType> expectedStatuses, boolean withNew)", new Object[]{ifd, ctxHandle, timeout, callback, expectedStatuses, withNew});
-	} // </editor-fold>
 	this.ifd = ifd;
 	this.ctxHandle = ctxHandle;
 	this.timeout = timeout;
@@ -82,10 +83,6 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 	this.expectedStatuses = expectedStatuses;
 	this.withNew = withNew;
 	startTime = System.currentTimeMillis();
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "EventListener(IFD ifd, byte[] ctxHandle, long timeout, ChannelHandleType callback, List<IFDStatusType> expectedStatuses, boolean withNew)");
-	} // </editor-fold>
     }
 
 
@@ -101,16 +98,10 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 	    return result;
 
 	} catch (TimeoutException ex) {
-            // <editor-fold defaultstate="collapsed" desc="log exception">
-            if (_logger.isLoggable(Level.WARNING)) {
-                _logger.logp(Level.WARNING, this.getClass().getName(), "call", ex.getMessage(), ex);
-            } // </editor-fold>
+	    _logger.warn(ex.getMessage(), ex);
 	    throw new IFDException(ECardConstants.Minor.IFD.TIMEOUT_ERROR, "Wait timed out.");
 	} catch (Exception ex) {
-            // <editor-fold defaultstate="collapsed" desc="log exception">
-            if (_logger.isLoggable(Level.WARNING)) {
-                _logger.logp(Level.WARNING, this.getClass().getName(), "call", ex.getMessage(), ex);
-            } // </editor-fold>
+	    _logger.warn(ex.getMessage(), ex);
 	    throw ex; // needed to process finally block
 	} finally {
 	    // remove async thread from IFD
@@ -153,39 +144,24 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 
 
     private List<IFDStatusType> getCurrentStatus() throws IFDException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "getCurrentStatus()");
-	} // </editor-fold>
 	GetStatus statusReq = new GetStatus();
 	statusReq.setContextHandle(ctxHandle);
 	GetStatusResponse status = ifd.getStatus(statusReq);
 	if (status.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
 	    IFDException ex = new IFDException(status.getResult());
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "getCurrentStatus()", ex.getMessage(), ex);
-	    } // </editor-fold>
+	    _logger.warn(ex.getMessage(), ex);
 	    throw ex;
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "getCurrentStatus()", status);
-	} // </editor-fold>
 	return status.getIFDStatus();
     }
 
 
     private void sendResult(List<IFDStatusType> result) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "sendResult(List<IFDStatusType> result)");
-	} // </editor-fold>
 	IFDCallback endpoint = null;
 	try {
 	    endpoint = (IFDCallback) WSClassLoader.getClientService("IFDCallback", callback.getProtocolTerminationPoint());
 	} catch (Exception ex) {
-	    _logger.logp(Level.SEVERE, this.getClass().getName(), "sendResult(List<IFDStatusType> result)", ex.getMessage(), ex);
+	    _logger.error(ex.getMessage(), ex);
 	    return;
 	}
 
@@ -195,13 +171,8 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 	sevt.getIFDEvent().addAll(result);
 	ResponseType sevtResp = endpoint.signalEvent(sevt);
 	if (sevtResp.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
-	    _logger.logp(Level.SEVERE, this.getClass().getName(), "sendResult(List<IFDStatusType> result)", "SignalEvent returned with an error.", sevtResp);
+	    _logger.error("SignalEvent returned with an error.\n{}", sevtResp);
 	}
-
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "sendResult(List<IFDStatusType> result)");
-	} // </editor-fold>
     }
 
 
@@ -211,23 +182,11 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 
 
     private boolean expectedContains(String ifdName) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "expectedContains(String ifdName)", ifdName);
-	} // </editor-fold>
 	Boolean b = expectedGet(ifdName) != null;
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "expectedContains(String ifdName)", b);
-	} // </editor-fold>
 	return b.booleanValue();
     }
 
     private boolean expectedHasCard(String ifdName) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "expectedHasCard(String ifdName)", ifdName);
-	} // </editor-fold>
 	IFDStatusType s = expectedGet(ifdName);
 	List<SlotStatusType> slots = s.getSlotStatus();
 	boolean result = false;
@@ -235,18 +194,10 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 	    SlotStatusType slot = slots.get(0);
 	    result = slot.isCardAvailable();
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "expectedHasCard(String ifdName)", result);
-	} // </editor-fold>
 	return result;
     }
 
     private IFDStatusType expectedGet(String ifdName) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "expectedGet(String ifdName)", ifdName);
-	} // </editor-fold>
 	IFDStatusType result = null;
 	for (IFDStatusType s : expectedStatuses) {
 	    if (s.getIFDName().equals(ifdName)) {
@@ -254,10 +205,6 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 		break;
 	    }
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "expectedGet(String ifdName)", result);
-	} // </editor-fold>
 	return result;
     }
 

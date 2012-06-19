@@ -1,18 +1,24 @@
-/*
- * Copyright 2012 Tobias Wich ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.ifd.scio.wrapper;
 
@@ -22,11 +28,8 @@ import iso.std.iso_iec._24727.tech.schema.KeyPadCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.smartcardio.*;
 import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.ifd.scio.IFDException;
 import org.openecard.client.ifd.scio.IFDUtils;
@@ -34,6 +37,8 @@ import org.openecard.client.ifd.scio.reader.ExecutePACERequest;
 import org.openecard.client.ifd.scio.reader.ExecutePACEResponse;
 import org.openecard.client.ifd.scio.reader.PACECapabilities;
 import org.openecard.client.ifd.scio.reader.PCSCFeatures;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -42,7 +47,7 @@ import org.openecard.client.ifd.scio.reader.PCSCFeatures;
  */
 public class SCTerminal {
     
-    private static final Logger _logger = LogManager.getLogger(SCTerminal.class.getName());
+    private static final Logger _logger = LoggerFactory.getLogger(SCTerminal.class);
 
     private final CardTerminal terminal;
     private final SCWrapper scwrapper;
@@ -60,88 +65,40 @@ public class SCTerminal {
 
 
     public SCTerminal(CardTerminal terminal, SCWrapper scwrapper) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "SCTerminal(CardTerminal terminal, SCWrapper scwrapper)", new Object[]{terminal, scwrapper});
-        } // </editor-fold>
         this.terminal = terminal;
 	this.scwrapper = scwrapper;
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "SCTerminal(CardTerminal terminal, SCWrapper scwrapper)");
-        } // </editor-fold>
     }
 
 
     public String getName() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "getName()");
-            _logger.exiting(this.getClass().getName(), "getName()", terminal.getName());
-        } // </editor-fold>
 	return terminal.getName();
     }
 
     public boolean isCardPresent() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "isCardPresent()");
-        } // </editor-fold>
 	try {
             Boolean result = terminal.isCardPresent();
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-            if (_logger.isLoggable(Level.FINER)) {
-                _logger.exiting(this.getClass().getName(), "isCardPresent()", result);
-            } // </editor-fold>
 	    return result.booleanValue();
 	} catch (CardException ex) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-                _logger.exiting(this.getClass().getName(), "isCardPresent()", Boolean.FALSE);
-            } // </editor-fold>
             return false;
 	}
     }
 
     public boolean isConnected() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "isConnected()");
-        } // </editor-fold>
         Boolean result = scCard != null;
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "isConnected()", result);
-        } // </editor-fold>
 	return result.booleanValue();
     }
 
     public synchronized SCCard getCard() throws IFDException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "getCard()");
-        } // </editor-fold>
         if (scCard == null) {
 	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.NO_CARD, "No card inserted in terminal.");
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-            if (_logger.isLoggable(Level.WARNING)) {
-                _logger.logp(Level.WARNING, this.getClass().getName(), "getCard()", ex.getMessage(), ex);
-            } // </editor-fold>
+	    _logger.warn(ex.getMessage(), ex);
             throw ex;
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "getCard()", scCard);
-        } // </editor-fold>
 	return scCard;
     }
 
 
     public synchronized IFDStatusType getStatus() throws IFDException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "getStatus()");
-        } // </editor-fold>
 	try {
 	    IFDStatusType status = new IFDStatusType();
 	    status.setIFDName(getName());
@@ -165,46 +122,23 @@ public class SCTerminal {
 		    c.disconnect(false);
 		}
 	    }
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-            if (_logger.isLoggable(Level.FINER)) {
-                _logger.exiting(this.getClass().getName(), "getStatus()", status);
-            } // </editor-fold>
 	    // ifd status completely constructed
 	    return status;
 	} catch (Exception ex) {
 	    IFDException ifdex = new IFDException(ex);
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-            if (_logger.isLoggable(Level.WARNING)) {
-                _logger.logp(Level.WARNING, this.getClass().getName(), "getStatus()", ifdex.getMessage(), ifdex);
-            } // </editor-fold>
+	    _logger.warn(ifdex.getMessage(), ifdex);
             throw ifdex;
 	}
     }
 
 
     public boolean equals(String ifdName) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "equals(String ifdName)", ifdName);
-	} // </editor-fold>
 	Boolean result = terminal.getName().equals(ifdName);
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "equals(ifdName)", result);
-	} // </editor-fold>
 	return result.booleanValue();
     }
 
     public boolean equals(CardTerminal other) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "equals(CardTerminal other)", other);
-	} // </editor-fold>
 	Boolean result = terminal.getName().equals(other.getName());
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "terminal.getName().equals(other.getName())", result);
-	} // </editor-fold>
 	return result.booleanValue();
     }
 
@@ -214,10 +148,6 @@ public class SCTerminal {
     ///
 
     void updateTerminal() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "updateTerminal()");
-	} // </editor-fold>
 	if (! isCardPresent()) {
 	    scCard = null;
 	} else {
@@ -234,17 +164,9 @@ public class SCTerminal {
 		scCard = null;
 	    }
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "updateTerminal()");
-	} // </editor-fold>
     }
 
     public synchronized SCChannel connect() throws IFDException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "connect()");
-	} // </editor-fold>
 	byte[] handle = scwrapper.createHandle(ECardConstants.CONTEXT_HANDLE_DEFAULT_SIZE);
 	// connect card if needed
 	if (! isConnected()) {
@@ -253,62 +175,33 @@ public class SCTerminal {
 		scCard = new SCCard(c, this);
 	    } catch (CardNotPresentException ex) {
 		IFDException ifdex = new IFDException(ECardConstants.Minor.IFD.NO_CARD, ex.getMessage());
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.WARNING)) {
-		    _logger.logp(Level.WARNING, this.getClass().getName(), "connect()", ifdex.getMessage(), ifdex);
-		} // </editor-fold>
+		_logger.warn(ifdex.getMessage(), ifdex);
 		throw ifdex;
 	    } catch (CardException ex) {
 		IFDException ifdex = new IFDException(ex);
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.WARNING)) {
-		    _logger.logp(Level.WARNING, this.getClass().getName(), "connect()", ifdex.getMessage(), ifdex);
-		} // </editor-fold>
+		_logger.warn(ifdex.getMessage(), ifdex);
 		throw ifdex;
 	    }
 	}
 	try {
 	    SCChannel scChannel = scCard.addChannel(handle);
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.exiting(this.getClass().getName(), "connect()", scChannel);
-	    } // </editor-fold>
 	    return scChannel;
 	} catch (CardException ex) {
 	    IFDException ifdex = new IFDException(ex.getMessage());
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.WARNING)) {
-		_logger.logp(Level.WARNING, this.getClass().getName(), "connect()", ifdex.getMessage(), ifdex);
-	    } // </editor-fold>
+	    _logger.warn(ifdex.getMessage(), ifdex);
 	    throw ifdex;
 	}
     }
 
     // for use in release context
     synchronized void disconnect() throws CardException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "disconnect()");
-	} // </editor-fold>
 	if (isConnected()) {
 	    scCard.disconnect();
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "disconnect()");
-	} // </editor-fold>
     }
 
     synchronized void removeCard() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(this.getClass().getName(), "remove()");
-	} // </editor-fold>
 	scCard = null;
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(this.getClass().getName(), "remove()");
-	} // </editor-fold>
     }
 
 

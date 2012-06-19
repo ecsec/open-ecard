@@ -1,18 +1,24 @@
-/*
- * Copyright 2012 Tobias Wich ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.ifd.scio.wrapper;
 
@@ -23,7 +29,6 @@ import javax.smartcardio.CardException;
 import javax.smartcardio.CommandAPDU;
 import javax.smartcardio.ResponseAPDU;
 import org.openecard.client.common.ifd.Protocol;
-import org.openecard.client.common.logging.XLogger;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.CardCommandStatus;
 import org.openecard.client.ifd.scio.IFDException;
@@ -39,7 +44,6 @@ import org.slf4j.LoggerFactory;
 public class SCChannel {
 
     private static final Logger _logger = LoggerFactory.getLogger(SCChannel.class);
-    private static final XLogger _trace = new XLogger(_logger);
 
     private final CardChannel channel;
     private final byte[] handle;
@@ -49,28 +53,21 @@ public class SCChannel {
     private Protocol smProtocol = null;
 
     public SCChannel(CardChannel channel, byte[] handle) {
-	_trace.entry(channel, handle);
         this.channel = channel;
         this.handle = handle;
-	_trace.exit();
     }
 
     public byte[] getHandle() {
-	_trace.entry();
-	_trace.exit(handle);
         return handle;
     }
 
     void close() throws CardException {
-	_trace.entry();
         if (channel.getChannelNumber() != 0) {
             channel.close(); // this only closes logical channels
         }
-	_trace.exit();
     }
 
     public byte[] transmit(byte[] input, List<byte[]> responses) throws TransmitException, IFDException {
-	_trace.entry(input, responses);
         // add default value if not present
         if (responses.isEmpty()) {
             responses.add(new byte[]{(byte) 0x90, (byte) 0x00});
@@ -98,51 +95,40 @@ public class SCChannel {
 
 	    // return without validation when no expected results given
 	    if (responses.isEmpty()) {
-		_trace.exit(result);
 		return result;
 	    }
             // verify result
             for (byte[] expected : responses) {
                 if (Arrays.equals(expected, sw)) {
-		    _trace.exit(result);
                     return result;
                 }
             }
 
             // not an expected result
             TransmitException tex = new TransmitException(result, CardCommandStatus.getMessage(sw));
-	    _trace.throwing(tex);
             throw tex;
         } catch (IllegalArgumentException ex) {
-	    _trace.catching(ex);
             IFDException ifdex = new IFDException(ex);
-	    _trace.throwing(ifdex);
+	    _logger.error(ifdex.getMessage(), ifdex);
             throw ifdex;
         } catch (CardException ex) {
-	    _trace.catching(ex);
             IFDException ifdex = new IFDException(ex);
-	    _trace.throwing(ifdex);
+	    _logger.error(ifdex.getMessage(), ifdex);
             throw ifdex;
         }
     }
 
     private synchronized boolean isSM() {
-	_trace.entry();
 	boolean result = this.smProtocol != null;
-	_trace.exit(result);
         return result;
     }
 
     public synchronized void addSecureMessaging(Protocol protocol) {
-	_trace.entry(protocol);
         this.smProtocol = protocol;
-	_trace.exit();
     }
 
     public synchronized void removeSecureMessaging() {
-	_trace.entry();
         this.smProtocol = null;
-	_trace.exit();
     }
 
 }

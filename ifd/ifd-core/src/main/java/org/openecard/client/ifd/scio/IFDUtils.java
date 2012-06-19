@@ -1,18 +1,24 @@
-/*
- * Copyright 2012 Johannes Schmoelz ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.ifd.scio;
 
@@ -21,10 +27,9 @@ import iso.std.iso_iec._24727.tech.schema.PasswordTypeType;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.logging.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -33,7 +38,7 @@ import org.openecard.client.common.logging.LogManager;
  */
 public class IFDUtils {
 
-    private static final Logger _logger = LogManager.getLogger(IFDUtils.class.getName()); 
+    private static final Logger _logger = LoggerFactory.getLogger(IFDUtils.class);
 
     /**
      * Extracts the slot index from the specified ifd name.
@@ -46,22 +51,10 @@ public class IFDUtils {
     }
 
     public static boolean arrayEquals(byte[] a, byte[] b) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(IFDUtils.class.getName(), "arrayEquals(byte[] a, byte[] b)", new Object[]{a, b});
-        } // </editor-fold>
         if (a == null && b == null) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-                _logger.exiting(IFDUtils.class.getName(), "arrayEquals(byte[] a, byte[] b)", Boolean.FALSE);
-            } // </editor-fold>
             return false;
 	} else {
             Boolean result = Arrays.equals(a, b);
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-            if (_logger.isLoggable(Level.FINER)) {
-                _logger.exiting(IFDUtils.class.getName(), "arrayEquals(byte[] a, byte[] b)", result);
-            } // </editor-fold>
             return result.booleanValue();
 	}
     }
@@ -73,19 +66,12 @@ public class IFDUtils {
 	    return (byte) (c - '0');
 	} else {
 	    IFDException ex = new IFDException("Entered PIN contains invalid characters.");
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.throwing(IFDUtils.class.getName(), "getByte(char)", ex);
-	    } // </editor-fold>
+	    _logger.error(ex.getMessage(), ex);
 	    throw ex;
 	}
     }
 
     public static byte[] encodePin(String rawPin, PasswordAttributesType attributes) throws IFDException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(IFDUtils.class.getName(), "encodePin(String, PasswordAttributesType)", new Object[]{rawPin, attributes});
-	} // </editor-fold>
 	byte[] mask = createPinMask(attributes);
 	PasswordTypeType pwdType = attributes.getPwdType();
 	int startByte = 0;
@@ -103,10 +89,7 @@ public class IFDUtils {
 	// check if pin is within boundaries
 	if (!(minLen <= rawPin.length() && rawPin.length() <= maxLen)) {
 	    IFDException ex = new IFDException("Supplied PIN has wrong length: minLen(" + minLen + ") <= PIN(" + rawPin.length() + ") <= maxLen(" + maxLen + ")");
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    if (_logger.isLoggable(Level.FINER)) {
-		_logger.throwing(IFDUtils.class.getName(), "encodePin(String, PasswordAttributesType)", ex);
-	    } // </editor-fold>
+	    _logger.error(ex.getMessage(), ex);
 	}
 
 	// correct pin length if iso encoding
@@ -145,26 +128,15 @@ public class IFDUtils {
 		    break;
 		default:
 		    IFDException ex = new IFDException(ECardConstants.Minor.IFD.IO.UNKNOWN_PIN_FORMAT, "UTF-8 PINs are not supported.");
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    if (_logger.isLoggable(Level.FINER)) {
-			_logger.throwing(IFDUtils.class.getName(), "encodePin(String, PasswordAttributesType)", ex);
-		    } // </editor-fold>
+		    _logger.error(ex.getMessage(), ex);
 		    throw ex;
 	    }
 	}
 
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(IFDUtils.class.getName(), "encodePin(String, PasswordAttributesType)", mask);
-	} // </editor-fold>
 	return mask;
     }
 
     public static byte[] createPinMask(PasswordAttributesType attributes) throws IFDException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.entering(IFDUtils.class.getName(), "createPinMask(PasswordAttributesType)", new Object[]{attributes});
-	} // </editor-fold>
 	PasswordTypeType pwdType = attributes.getPwdType();
 	boolean nibbleHandling = pwdType == PasswordTypeType.BCD || pwdType == PasswordTypeType.ISO_9564_1;
 	boolean needsPadding = attributes.getPwdFlags().contains("needs-padding");
@@ -193,10 +165,7 @@ public class IFDUtils {
 	    byte[] padChars = attributes.getPadChar();
 	    if (padChars == null || padChars.length == 0) {
 		IFDException ex = new IFDException("Unsupported combination of PIN parameters concerning padding.");
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.throwing(IFDUtils.class.getName(), "createPinMask(PasswordAttributesType)", ex);
-		} // </editor-fold>
+		_logger.error(ex.getMessage(), ex);
 		throw ex;
 	    } else {
 		padChar = padChars[0];
@@ -224,18 +193,11 @@ public class IFDUtils {
 		break;
 	    default:
 		IFDException ex = new IFDException(ECardConstants.Minor.IFD.IO.UNKNOWN_PIN_FORMAT, "Pin with format '" + pwdType.name() + "' not supported.");
-		// <editor-fold defaultstate="collapsed" desc="log trace">
-		if (_logger.isLoggable(Level.FINER)) {
-		    _logger.throwing(IFDUtils.class.getName(), "createPinMask(PasswordAttributesType)", ex);
-		} // </editor-fold>
+		_logger.error(ex.getMessage(), ex);
 		throw ex;
 	}
 
 	byte[] result = o.toByteArray();
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-	    _logger.exiting(IFDUtils.class.getName(), "createPinMask(PasswordAttributesType)", result);
-	} // </editor-fold>
 	return result;
     }
 

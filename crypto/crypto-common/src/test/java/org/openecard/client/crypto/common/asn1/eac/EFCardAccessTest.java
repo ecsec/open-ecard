@@ -24,13 +24,12 @@ package org.openecard.client.crypto.common.asn1.eac;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.crypto.common.asn1.eac.ef.EFCardAccess;
 import org.openecard.client.crypto.common.asn1.eac.oid.CAObjectIdentifier;
 import org.openecard.client.crypto.common.asn1.eac.oid.EACObjectIdentifier;
 import org.openecard.client.crypto.common.asn1.eac.oid.PACEObjectIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -42,18 +41,13 @@ import org.testng.annotations.Test;
  */
 public class EFCardAccessTest {
 
+    private static final Logger _logger = LoggerFactory.getLogger(EFCardAccessTest.class);
+
     private EFCardAccess efcaA;
     private EFCardAccess efcaB;
 
     @BeforeTest
     public void init() throws Exception {
-
-	ConsoleHandler ch = new ConsoleHandler();
-	ch.setLevel(Level.FINE);
-//	Logger.getLogger("ASN1").addHandler(ch);
-//	Logger.getLogger(EFCardAccess.class.getName()).addHandler(ch);
-//	Logger.getLogger(EFCardAccess.class.getName()).setLevel(Level.FINE);
-
 	// Standardized Domain Parameters
 	byte[] data = loadTestFile("EF_CardAccess.bin");
 	SecurityInfos sis = SecurityInfos.getInstance(data);
@@ -75,7 +69,7 @@ public class EFCardAccessTest {
 		baos.write((byte) b);
 	    }
 	} catch (Exception e) {
-	    Logger.getLogger(EFCardAccessTest.class.getName()).log(Level.SEVERE, "Exception", e);
+	    _logger.error(e.getMessage(), e);
 	}
 	return baos.toByteArray();
     }
@@ -188,4 +182,5 @@ public class EFCardAccessTest {
 	assertEquals(cil.getURL(), "AwT ePA - BDr GmbH - Testkarte v1.0");
 	assertNull(cil.getEFCardInfo());
     }
+
 }

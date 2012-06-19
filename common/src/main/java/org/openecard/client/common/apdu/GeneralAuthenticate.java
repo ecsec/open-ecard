@@ -22,10 +22,10 @@
 
 package org.openecard.client.common.apdu;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.apdu.common.CardCommandAPDU;
 import org.openecard.client.common.tlv.TLV;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -35,6 +35,8 @@ import org.openecard.client.common.tlv.TLV;
  * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class GeneralAuthenticate extends CardCommandAPDU {
+
+    private static final Logger _logger = LoggerFactory.getLogger(GeneralAuthenticate.class);
 
     /**
      * GENERAL AUTHENTICATION command instruction byte
@@ -93,7 +95,7 @@ public class GeneralAuthenticate extends CardCommandAPDU {
 
 	    setData(tag7c.toBER());
 	} catch (Exception ex) {
-	    Logger.getLogger(GeneralAuthenticate.class.getName()).log(Level.SEVERE, "Exception", ex);
+	    _logger.error(ex.getMessage(), ex);
 	}
 
 	setLE(x00);

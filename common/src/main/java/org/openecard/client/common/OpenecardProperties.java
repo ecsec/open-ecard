@@ -2,8 +2,8 @@ package org.openecard.client.common;
 
 import java.io.IOException;
 import java.util.Properties;
-import java.util.logging.Level;
-import org.openecard.client.common.logging.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -11,6 +11,8 @@ import org.openecard.client.common.logging.LogManager;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class OpenecardProperties {
+
+    private static final Logger _logger = LoggerFactory.getLogger(OpenecardProperties.class);
 
     private static class Internal extends OverridingProperties {
 	public Internal() throws IOException {
@@ -23,7 +25,7 @@ public class OpenecardProperties {
 	    properties = new Internal();
 	} catch (IOException ex) {
 	    // in that case a null pointer occurs when properties is accessed
-	    LogManager.getLogger(OpenecardProperties.class.getName()).log(Level.SEVERE, null, ex);
+	    _logger.error(ex.getMessage(), ex);
 	}
     }
 

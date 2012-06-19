@@ -26,13 +26,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.ValueValidator;
 import org.openecard.client.connector.common.ConnectorConstants.ConnectorError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -41,6 +39,8 @@ import org.openecard.client.connector.common.ConnectorConstants.ConnectorError;
  * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class TCTokenVerifier {
+
+    private static final Logger _logger = LoggerFactory.getLogger(TCTokenVerifier.class);
 
     private List<TCToken> tokens;
     private TCToken token;
@@ -72,7 +72,7 @@ public class TCTokenVerifier {
     public void verify() throws TCTokenException {
 	if (tokens.isEmpty()) {
 	    String message = ConnectorError.TC_TOKEN_NOT_AVAILABLE.toString();
-	    Logger.getLogger(TCTokenVerifier.class.getName()).log(Level.SEVERE, message);
+	    _logger.error(message);
 	    throw new TCTokenException(message);
 	}
 
@@ -89,7 +89,7 @@ public class TCTokenVerifier {
 	    }
 	} catch (Exception e) {
 	    String message = ConnectorError.TC_TOKEN_REFUSED.toString();
-	    Logger.getLogger(TCTokenVerifier.class.getName()).log(Level.SEVERE, message, e);
+	    _logger.error(message, e);
 	    throw new TCTokenException(message, e);
 	}
     }

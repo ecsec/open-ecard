@@ -24,12 +24,11 @@ package org.openecard.client.common.sal.state;
 
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.recognition.CardRecognition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -38,7 +37,7 @@ import org.openecard.client.recognition.CardRecognition;
  */
 public class SALStateCallback implements EventCallback {
 
-    private static final Logger _logger = LogManager.getLogger(SALStateCallback.class.getName());
+    private static final Logger _logger = LoggerFactory.getLogger(SALStateCallback.class);
 
     private final CardRecognition recognition;
     private final CardStateMap cardState;
@@ -57,17 +56,17 @@ public class SALStateCallback implements EventCallback {
 	    switch (eventType) {
 		// only add cards with a cardinfo file
 		case CARD_RECOGNIZED:
-		    _logger.log(Level.INFO, "Add ConnectionHandle to SAL.", HandlePrinter.printHandle(handle));
+		    _logger.info("Add ConnectionHandle to SAL:\n{}", HandlePrinter.printHandle(handle));
 		    CardInfoType cif = recognition.getCardInfo(handle.getRecognitionInfo().getCardType());
 		    if (cif != null) {
 			CardStateEntry entry = new CardStateEntry(handle, cif);
 			cardState.addEntry(entry);
 		    } else {
-			_logger.log(Level.INFO, "Not adding card to SAL, because it has no CardInfo file.");
+			_logger.info("Not adding card to SAL, because it has no CardInfo file.");
 		    }
 		    break;
 		case CARD_REMOVED:
-		    _logger.log(Level.INFO, "Remove ConnectionHandle from SAL.", HandlePrinter.printHandle(handle));
+		    _logger.info("Remove ConnectionHandle from SAL.\n{}", HandlePrinter.printHandle(handle));
 		    cardState.removeEntry(handle);
 		    break;
 		default:

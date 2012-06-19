@@ -1,34 +1,39 @@
-/*
- * Copyright 2012 Tobias Wich ecsec GmbH
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of the Open eCard App.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
 package org.openecard.client.ifd.scio.wrapper;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.smartcardio.ATR;
 import javax.smartcardio.Card;
 import javax.smartcardio.CardChannel;
 import javax.smartcardio.CardException;
 import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.logging.LogManager;
 import org.openecard.client.ifd.scio.IFDException;
 import org.openecard.client.ifd.scio.reader.PCSCFeatures;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -37,7 +42,7 @@ import org.openecard.client.ifd.scio.reader.PCSCFeatures;
  */
 public class SCCard {
 
-    private static final Logger _logger = LogManager.getLogger(SCCard.class.getName());
+    private static final Logger _logger = LoggerFactory.getLogger(SCCard.class);
 
     private final Card card;
     private final SCTerminal terminal;
@@ -47,17 +52,9 @@ public class SCCard {
     private final ConcurrentSkipListMap<byte[],SCChannel> scChannels;
 
     public SCCard(Card card, SCTerminal terminal) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "SCCard(Card card, SCTerminal terminal)", new Object[]{card, terminal});
-        } // </editor-fold>
         this.card = card;
 	this.terminal = terminal;
 	this.scChannels = new ConcurrentSkipListMap<byte[], SCChannel>(new ByteArrayComparator());
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "SCCard(Card card, SCTerminal terminal)");
-        } // </editor-fold>
     }
 
 
@@ -74,7 +71,7 @@ public class SCCard {
 		featureCodes = PCSCFeatures.featureMapFromRequest(response);
 	    } catch (CardException ex) {
 		// TODO: remove this workaround by supporting feature requests under all systems and all readers
-		_logger.logp(Level.WARNING, this.getClass().getName(), "getFeatureCodes()", "Unable to request features from reader." ,ex);
+		_logger.warn("Unable to request features from reader." ,ex);
 		featureCodes = new HashMap<Integer, Integer>();
 	    }
         }
@@ -83,67 +80,31 @@ public class SCCard {
     }
 
     public String getProtocol() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "getProtocol()");
-        } // </editor-fold>
 	String p = card.getProtocol();
 	if (p.equals("T=0")) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-            if (_logger.isLoggable(Level.FINER)) {
-                _logger.exiting(this.getClass().getName(), "getProtocol()", ECardConstants.IFD.Protocol.T0);
-            } // </editor-fold>
 	    return ECardConstants.IFD.Protocol.T0;
 	} else if (p.equals("T=1")) {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-            if (_logger.isLoggable(Level.FINER)) {
-                _logger.exiting(this.getClass().getName(), "getProtocol()", ECardConstants.IFD.Protocol.T1);
-            } // </editor-fold>
 	    return ECardConstants.IFD.Protocol.T1;
 	} else {
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-            if (_logger.isLoggable(Level.FINER)) {
-                _logger.exiting(this.getClass().getName(), "getProtocol()", null);
-            } // </editor-fold>
 	    return null;
 	}
     }
 
     public ATR getATR() {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "getATR()");
-            _logger.exiting(this.getClass().getName(), "getATR()", card.getATR());
-        } // </editor-fold>
 	return card.getATR();
     }
 
     public synchronized SCChannel getChannel(byte[] handle) throws IFDException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "getChannel(byte[] handle)", handle);
-        } // </editor-fold>
 	SCChannel ch = scChannels.get(handle);
 	if (ch == null) {
 	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "No such slot handle.");
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-            if (_logger.isLoggable(Level.FINEST)) {
-                _logger.logp(Level.FINEST, this.getClass().getName(), "getChannel(byte[] handle)", ex.getMessage(), ex);
-            } // </editor-fold>
+	    _logger.debug(ex.getMessage(), ex);
             throw ex;
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "getChannel(byte[] handle)", ch);
-        } // </editor-fold>
 	return ch;
     }
 
     public synchronized void closeChannel(byte[] handle, boolean reset) throws IFDException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "closeChannel(byte[] handle, boolean reset)", new Object[]{handle, reset});
-        } // </editor-fold>
         SCChannel ch = getChannel(handle);
 	try {
 	    ch.close();
@@ -155,68 +116,29 @@ public class SCCard {
 	    }
 	} catch (CardException ex) {
 	    IFDException ifdex = new IFDException(ex);
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-            if (_logger.isLoggable(Level.WARNING)) {
-                _logger.logp(Level.WARNING, this.getClass().getName(), "closeChannel(byte[] handle, boolean reset)", ifdex.getMessage(), ifdex);
-            } // </editor-fold>
+	    _logger.warn(ifdex.getMessage(), ifdex);
             throw ifdex;
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "closeChannel(byte[] handle, boolean reset)");
-        } // </editor-fold>
     }
 
 
     public SCChannel addChannel(byte[] handle) throws CardException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "addChannel(byte[] handle)", handle);
-        } // </editor-fold>
 	CardChannel channel = card.getBasicChannel();
 	SCChannel scChannel = new SCChannel(channel, handle);
 	scChannels.put(handle, scChannel);
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "addChannel(byte[] handle)", scChannel);
-        } // </editor-fold>
 	return scChannel;
     }
 
     synchronized void disconnect() throws CardException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "disconnect()");
-        } // </editor-fold>
 	card.disconnect(true);
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "disconnect()");
-        } // </editor-fold>
     }
     
     public void beginExclusive() throws CardException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "beginExclusive()");
-        } // </editor-fold>
         card.beginExclusive();
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "beginExclusive()");
-        } // </editor-fold>
     }
     
     public void endExclusive() throws CardException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.entering(this.getClass().getName(), "endExclusive()");
-        } // </editor-fold>
         card.endExclusive();
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-        if (_logger.isLoggable(Level.FINER)) {
-            _logger.exiting(this.getClass().getName(), "endExclusive()");
-        } // </editor-fold>
     }
 
     public boolean equalCardObj(Card other) {

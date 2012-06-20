@@ -28,6 +28,7 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import org.openecard.client.gui.definition.OutputInfoUnit;
+import org.openecard.client.gui.swing.common.GUIDefaults;
 
 
 /**
@@ -41,9 +42,13 @@ public class ToggleText implements StepComponent {
     private final static String TOGGLETEXT_BACKGROUND = TOGGLETEXT + ".background";
     private final static String TOGGLETEXT_FONT = TOGGLETEXT + ".font";
     private final static String TOGGLETEXT_INDICATOR_FOREGROUND = TOGGLETEXT + "Indicator.foreground";
+//    private String openedIndicator = " ▼";
+    private final static Icon openedIndicator = GUIDefaults.getImage("ToggleText.selectedIcon");
+//    private String closedIndicator = " ▲";
+    private final static Icon closedIndicator = GUIDefaults.getImage("ToggleText.icon");
+
     private JPanel rootPanel;
     private JButton button;
-    private ToggleTextIndicator indicator;
     private JTextArea text;
 
     /**
@@ -79,7 +84,7 @@ public class ToggleText implements StepComponent {
 
 	button.setSelected(collapsed);
 	text.setVisible(!collapsed);
-	indicator.setCollapsed(!collapsed);
+	button.setIcon(!collapsed ? openedIndicator : closedIndicator);
     }
 
     /**
@@ -91,14 +96,13 @@ public class ToggleText implements StepComponent {
     private void initComponents(String buttonText, String contentText) {
 	rootPanel = new JPanel();
 	button = new JButton(buttonText + "  ");
-	indicator = new ToggleTextIndicator();
 	text = new JTextArea(contentText);
 
 	button.addActionListener(new ActionListener() {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
 		text.setVisible(!text.isVisible());
-		indicator.setCollapsed(text.isVisible());
+		button.setIcon(text.isVisible() ? openedIndicator : closedIndicator);
 		rootPanel.revalidate();
 		rootPanel.doLayout();
 		rootPanel.repaint();
@@ -117,14 +121,10 @@ public class ToggleText implements StepComponent {
 	// Add elements
 	gbc.gridx = 0;
 	gbc.gridy = 0;
-	rootPanel.add(button, gbc);
-
-	gbc.weightx = 1.0;
 	gbc.fill = GridBagConstraints.HORIZONTAL;
 	gbc.gridwidth = GridBagConstraints.REMAINDER;
-	gbc.gridx = 1;
-	gbc.gridy = 0;
-	rootPanel.add(indicator, gbc);
+	gbc.weightx = 1.0;
+	rootPanel.add(button, gbc);
 
 	gbc.gridx = 0;
 	gbc.gridy = 1;
@@ -159,6 +159,7 @@ public class ToggleText implements StepComponent {
 	button.setBounds(0, 0, 0, 0);
 	button.setFont(font.deriveFont(Font.BOLD));
 	button.setContentAreaFilled(false);
+	button.setHorizontalTextPosition(SwingConstants.LEADING);
 
 	text.setMargin(new Insets(0, 13, 0, 0));
 	text.setEditable(false);
@@ -173,8 +174,6 @@ public class ToggleText implements StepComponent {
 	    rootPanel.getComponent(i).setBackground(bg);
 	    rootPanel.getComponent(i).setForeground(fg);
 	}
-
-	indicator.setForeground(fgIndicator);
     }
 
     @Override

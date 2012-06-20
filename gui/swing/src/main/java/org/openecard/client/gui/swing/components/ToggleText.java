@@ -1,23 +1,37 @@
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.gui.swing.components;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import javax.swing.SwingConstants;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import org.openecard.client.gui.definition.OutputInfoUnit;
 
+
 /**
+ *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class ToggleText implements StepComponent {
@@ -81,7 +95,6 @@ public class ToggleText implements StepComponent {
 	text = new JTextArea(contentText);
 
 	button.addActionListener(new ActionListener() {
-
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
 		text.setVisible(!text.isVisible());
@@ -147,7 +160,7 @@ public class ToggleText implements StepComponent {
 	button.setFont(font.deriveFont(Font.BOLD));
 	button.setContentAreaFilled(false);
 
-	text.setMargin(new Insets(0, 1, 0, 0));
+	text.setMargin(new Insets(0, 13, 0, 0));
 	text.setEditable(false);
 	text.setLineWrap(true);
 	text.setWrapStyleWord(true);
@@ -183,4 +196,5 @@ public class ToggleText implements StepComponent {
     public OutputInfoUnit getValue() {
 	return null;
     }
+
 }

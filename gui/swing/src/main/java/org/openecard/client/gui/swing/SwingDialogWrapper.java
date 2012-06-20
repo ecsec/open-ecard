@@ -24,6 +24,7 @@ package org.openecard.client.gui.swing;
 
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -43,14 +44,16 @@ public class SwingDialogWrapper implements DialogWrapper {
 	GUIDefaults.initialize();
 
 	dialog = new JFrame();
-	dialog.setSize(600, 400);
+	dialog.setSize(640, 480);
 
 	// Center window
-	Toolkit toolkit = Toolkit.getDefaultToolkit();
-	Dimension screenSize = toolkit.getScreenSize();
-	int x = (screenSize.width - dialog.getWidth()) / 2;
-	int y = (screenSize.height - dialog.getHeight()) / 2;
-	dialog.setLocation(x, y);
+	// Toolkit toolkit = Toolkit.getDefaultToolkit();
+	// Dimension screenSize = toolkit.getScreenSize();
+	// int x = (screenSize.width - dialog.getWidth()) / 2;
+	// int y = (screenSize.height - dialog.getHeight()) / 2;
+	//dialog.setLocation(x, y);
+	//dialog.setLocationByPlatform(true);
+	dialog.setLocationRelativeTo(null);
 
 	dialog.setIconImage(GUIDefaults.getImage("Frame.icon", 45, 45).getImage());
 

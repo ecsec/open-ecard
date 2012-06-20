@@ -104,18 +104,26 @@ public class GUIDefaults {
     }
 
     public static ImageIcon getImage(String identifier, int width, int height) {
-	ImageIcon logo = new ImageIcon();
-	URL url = (URL) getProperty(identifier);
-	if (url != null) {
+	Object obj = getProperty(identifier);
+	if (obj instanceof ImageIcon) {
+	    return (ImageIcon) obj;
+	} else if (obj instanceof URL || obj instanceof String) {
+	    ImageIcon logo = new ImageIcon();
 	    Toolkit toolkit = Toolkit.getDefaultToolkit();
-	    Image image = toolkit.getImage(url);
+	    Image image;
+	    if (obj instanceof URL) {
+		image = toolkit.getImage((URL)obj);
+	    } else {
+		image = toolkit.getImage((String)obj);
+	    }
 	    if (width > -1) {
 		image = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
 	    }
 	    logo.setImage(image);
+	    return logo;
+	} else {
+	    return null;
 	}
-
-	return logo;
     }
 
     public static ImageIcon getImage(String identifier) {

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012 Ruhr Uni Bochum.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -127,9 +127,8 @@ public class RunGUI {
     }
     Step requestedData_Step1 = new Step("Angefragte Daten");
 
+
     private Step reqestedDataStep() throws Exception {
-
-
 	Text requestedDataDescription = new Text();
 	requestedDataDescription.setText("Der Anbieter \"Test-Diensteanbieter\"  fordert zum Zweck \"Entwicklung und Test von Software\" die folgenden Daten von Ihnen an:");
 	requestedData_Step1.getInputInfoUnits().add(requestedDataDescription);
@@ -151,7 +150,7 @@ public class RunGUI {
 	nameBoxItem.setText("Name");
 	BoxItem doctordegreeBoxItem = new BoxItem();
 	doctordegreeBoxItem.setName("doctordegreeBoxItem");
-	doctordegreeBoxItem.setChecked(false);
+	doctordegreeBoxItem.setChecked(true);
 	doctordegreeBoxItem.setDisabled(true);
 	doctordegreeBoxItem.setText("Doktorgrad");
 	BoxItem addressBoxItem = new BoxItem();
@@ -203,7 +202,7 @@ public class RunGUI {
 
 	dataToSendSelection.getBoxItems().add(vornameBoxItem);
 	dataToSendSelection.getBoxItems().add(nameBoxItem);
-//	dataToSendSelection.getBoxItems().add(doctordegreeBoxItem);
+	dataToSendSelection.getBoxItems().add(doctordegreeBoxItem);
 //	dataToSendSelection.getBoxItems().add(addressBoxItem);
 //	dataToSendSelection.getBoxItems().add(birthdayBoxItem);
 //	dataToSendSelection.getBoxItems().add(birthplaceBoxItem);

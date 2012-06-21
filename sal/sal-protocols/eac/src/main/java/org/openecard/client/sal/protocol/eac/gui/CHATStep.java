@@ -97,6 +97,10 @@ public class CHATStep {
 	    item.setChecked(isRequired);
 	    item.setText(lang.translationForKey(DATA_GROUP_PREFIX + dataGroup.name()));
 
+	    if (dataGroup != CHAT.DataGroup.DG04 && dataGroup != CHAT.DataGroup.DG05) {
+		item.setDisabled(true);
+	    }
+
 	    readAccessCheckBox.getBoxItems().add(item);
 //	}
 	}

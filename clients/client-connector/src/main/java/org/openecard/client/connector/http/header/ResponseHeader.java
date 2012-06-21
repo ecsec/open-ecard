@@ -19,7 +19,9 @@ public final class ResponseHeader extends MessageHeader {
 	RETRY_AFTER("Retry-After"),
 	SERVER("Server"),
 	VARY("Vary"),
-	WWW_AUTHENTICATE("WWW-Authenticate");
+	WWW_AUTHENTICATE("WWW-Authenticate"),
+	ACCESS_CONTROL_ALLOW_ORIGIN("Access-Control-Allow-Origin"),
+	ACCESS_CONTROL_ALLOW_METHODS("Access-Control-Allow-Methods");
 	//
 	private String fieldName;
 

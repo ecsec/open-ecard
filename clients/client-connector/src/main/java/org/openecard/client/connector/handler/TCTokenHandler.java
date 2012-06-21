@@ -32,6 +32,8 @@ import org.openecard.client.connector.common.ErrorPage;
 import org.openecard.client.connector.http.HTTPRequest;
 import org.openecard.client.connector.http.HTTPResponse;
 import org.openecard.client.connector.http.HTTPStatusCode;
+import org.openecard.client.connector.http.header.EntityHeader;
+import org.openecard.client.connector.http.header.GeneralHeader;
 import org.openecard.client.connector.http.header.RequestLine;
 import org.openecard.client.connector.http.header.ResponseHeader;
 import org.openecard.client.connector.http.header.StatusLine;
@@ -51,10 +53,13 @@ public class TCTokenHandler implements ConnectorHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(TCTokenHandler.class);
 
+    private boolean corsRequest;
+
     /**
      * Create a new ActivationRequest.
      */
     public TCTokenHandler() {
+	this.corsRequest = false;
     }
 
     @Override
@@ -103,6 +108,10 @@ public class TCTokenHandler implements ConnectorHandler {
 			    throw new IllegalArgumentException("Malformed slot index");
 			}
 
+		    } else if (name.startsWith("corsRequest")) {
+			if (!value.isEmpty()) {
+			    this.corsRequest = true;
+			}
 		    } else {
 			logger.info(LoggingConstants.FINE, "Unknown query element: {}", name);
 		    }
@@ -125,7 +134,11 @@ public class TCTokenHandler implements ConnectorHandler {
 	    } else if (response.getErrorMessage() != null) {
 		return handleErrorResponse(response.getErrorMessage());
 	    } else if (response.getRefreshAddress() != null) {
-		return handleRedirectResponse(response.getRefreshAddress());
+		if(this.corsRequest) {
+		    return handleCORSRedirectResponse(response.getRefreshAddress());
+		} else {
+		    return handleRedirectResponse(response.getRefreshAddress());
+		}
 	    } else {
 		return handleErrorResponse(ConnectorConstants.ConnectorError.INTERNAL_ERROR.toString());
 	    }
@@ -162,6 +175,24 @@ public class TCTokenHandler implements ConnectorHandler {
 	ver.verify();
 
 	return tokens.get(0);
+    }
+
+    /**
+     * Handle a redirect response using CORS and the redirect URL in the response message body.
+     * Used for Ajax requests.
+     *
+     * @param location Redirect location
+     * @return HTTP response
+     */
+    public HTTPResponse handleCORSRedirectResponse(URL location) {
+	HTTPResponse httpResponse = new HTTPResponse();
+	httpResponse.addResponseHeaders(new ResponseHeader(ResponseHeader.Field.ACCESS_CONTROL_ALLOW_ORIGIN, "*"));
+	httpResponse.addResponseHeaders(new ResponseHeader(ResponseHeader.Field.ACCESS_CONTROL_ALLOW_METHODS, "GET"));
+	httpResponse.addEntityHeaders(new EntityHeader(EntityHeader.Field.CONTENT_TYPE, "text/plain"));
+	httpResponse.setStatusLine(new StatusLine(HTTPStatusCode.OK_200));
+	httpResponse.setMessageBody(location.toString());
+
+	return httpResponse;
     }
 
     /**

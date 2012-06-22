@@ -41,6 +41,7 @@ import org.openecard.client.crypto.common.asn1.cvc.CHAT;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
 import org.openecard.client.crypto.common.asn1.cvc.CertificateDescription;
 import org.openecard.client.crypto.common.asn1.eac.SecurityInfos;
+import org.openecard.client.gui.ResultStatus;
 import org.openecard.client.gui.UserConsent;
 import org.openecard.client.sal.protocol.eac.anytype.EAC1InputType;
 import org.openecard.client.sal.protocol.eac.anytype.EAC1OutputType;
@@ -104,7 +105,12 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    content.add(GUIContentMap.ELEMENT.OPTIONAL_CHAT, optionalCHAT);
 	    content.add(GUIContentMap.ELEMENT.SELECTED_CHAT, requiredCHAT);
 	    content.add(GUIContentMap.ELEMENT.PIN_ID, pinID);
-	    gui.show(content);
+	    ResultStatus guiStatus = gui.show(content);
+
+	    if (guiStatus.equals(ResultStatus.CANCEL)) {
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User Consent was cancelled by the user."));
+		return response;
+	    }
 
 	    // GUI response
 	    CHAT selectedCHAT = (CHAT) content.get(GUIContentMap.ELEMENT.SELECTED_CHAT);

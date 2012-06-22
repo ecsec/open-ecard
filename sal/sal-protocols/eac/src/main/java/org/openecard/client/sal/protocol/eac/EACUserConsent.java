@@ -70,7 +70,7 @@ public class EACUserConsent {
      *
      * @param content GUI Content
      */
-    public void show(GUIContentMap content) {
+    public ResultStatus show(GUIContentMap content) {
 	final UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE));
 
 	final CVCStep cvcStep = new CVCStep(content);
@@ -161,16 +161,14 @@ public class EACUserConsent {
 
 	ResultStatus processResult = exec.process();
 
-	if (processResult.equals(ResultStatus.CANCEL)) {
-	    //TODO
-//	    throw new WSHelper.WSException(WSHelper.makeResultError(
-//			ECardConstants.Minor.IFD.CANCELLATION_BY_USER,""));
+	if (processResult.equals(ResultStatus.OK)) {
+	    Map<String, ExecutionResults> results = exec.getResults();
+	    cvcStep.processResult(results);
+	    chatStep.processResult(results);
+	    pinStep.processResult(results);
 	}
 
-	Map<String, ExecutionResults> results = exec.getResults();
-	cvcStep.processResult(results);
-	chatStep.processResult(results);
-	pinStep.processResult(results);
+	return processResult;
     }
 
 }

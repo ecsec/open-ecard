@@ -98,7 +98,7 @@
 		<artifactId>maven-jar-plugin</artifactId>
 		<version>2.4</version>
 		<configuration>
-		    <keystore>src/package/resources/keystore/ecStore</keystore>
+		    <keystore>src/package/resources/keystore/keystore.jks</keystore>
 		    <storepass>DgN1CB0Ywy2W</storepass>
 		    <alias>applet</alias>
 		    <keypass>bHrjoV3j7ucq</keypass>

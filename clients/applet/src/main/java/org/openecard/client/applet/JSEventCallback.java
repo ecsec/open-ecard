@@ -108,7 +108,6 @@ public class JSEventCallback implements EventCallback {
 	sb.append("\"").append("ifdName").append("\"").append(":").append("\"").append(ifdName).append("\"").append(",");
 	sb.append("\"").append("cardType").append("\"").append(":").append("\"").append(cardType).append("\"").append(",");
 	sb.append("\"").append("eventType").append("\"").append(":").append("\"").append(eventType).append("\"").append(",");
-	sb.append("\"").append("reportId").append("\"").append(":").append("\"").append(this.applet.getReportID()).append("\"").append(",");
 	sb.append("\"").append("contextHandle").append("\"").append(":").append("\"").append(contextHandle).append("\"").append(",");
 	sb.append("\"").append("slotIndex").append("\"").append(":").append("\"").append(slotIndex).append("\"");
 
@@ -123,7 +122,6 @@ public class JSEventCallback implements EventCallback {
 	    byte[] bytes = md.digest(input.getBytes());
 	    return ByteUtils.toHexString(bytes);
 	} catch (NoSuchAlgorithmException ex) {
-	    // FIXME: Das kann so nicht stimmen!
 	    return input.replaceAll(" ", "_");
 	}
     }

@@ -41,7 +41,6 @@ import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.connector.Connector;
-import org.openecard.client.connector.ConnectorServer;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
@@ -80,13 +79,10 @@ public class ECardApplet extends JApplet {
     private boolean initialized = false;
     // applet parameters
     private String sessionID;
-    private URL endpointURL;
     private URL redirectURL;
-    private String reportID;
     private String spBehavior = INSTANT;
     private String psk;
     private boolean recognizeCard;
-    private boolean selfSigned;
     protected static final String INSTANT = "instant";
     protected static final String WAIT = "wait";
     protected static final String CLICK = "click";
@@ -261,10 +257,6 @@ public class ECardApplet extends JApplet {
 	return sessionID;
     }
 
-    public String getReportID() {
-	return reportID;
-    }
-
     public ClientEnv getClientEnvironment() {
 	return env;
     }
@@ -298,26 +290,6 @@ public class ECardApplet extends JApplet {
 	 * to satisfy current EventManager implementation
 	 */
 	sessionID = ValueGenerators.generateSessionID();
-	/*
-	  sessionID = getParameter("sessionId");
-	  if (sessionID == null) {
-	  throw new IllegalArgumentException("The parameter sessionID is missing!");
-	  }
-	  // <editor-fold defaultstate="collapsed" desc="log configuration">
-	  logger.debug(LoggingConstants.CONFIG, "sessionId set to {}", sessionID);
-	  // </editor-fold>
-	  */
-
-	/* endpointURL is not needed anymore
-	   try {
-	   endpointURL = new URL(getParameter("endpointUrl"));
-	   } catch (Exception e) {
-	   throw new IllegalArgumentException("Malformed endpointURL parameter: " + e.getMessage());
-	   }
-	   // <editor-fold defaultstate="collapsed" desc="log configuration">
-	   logger.debug(LoggingConstants.CONFIG, "endpointUrl set to {}", endpointURL);
-	   // </editor-fold>
-	   */
 
 	psk = getParameter("PSK");
 	// <editor-fold defaultstate="collapsed" desc="log configuration">
@@ -327,11 +299,6 @@ public class ECardApplet extends JApplet {
 	///
 	/// OPTIONAL parameters
 	///
-
-	reportID = getParameter("reportId");
-	// <editor-fold defaultstate="collapsed" desc="log configuration">
-	logger.debug(LoggingConstants.CONFIG, "reportId set to {}", reportID);
-	// </editor-fold>
 
 	try {
 	    redirectURL = new URL(getParameter("redirectUrl"));
@@ -364,11 +331,6 @@ public class ECardApplet extends JApplet {
 	}
 	// <editor-fold defaultstate="collapsed" desc="log configuration">
 	logger.debug(LoggingConstants.CONFIG, "spBehavior set to {}", spBehavior);
-	// </editor-fold>
-
-	Boolean.parseBoolean(getParameter("selfSigned"));
-	// <editor-fold defaultstate="collapsed" desc="log configuration">
-	logger.debug(LoggingConstants.CONFIG, "selfSigned set to {}", selfSigned);
 	// </editor-fold>
     }
 

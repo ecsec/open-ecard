@@ -35,7 +35,6 @@ import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.state.CardStateEntry;
-import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.connector.ConnectorListener;
 import org.openecard.client.connector.messages.TCTokenRequest;
 import org.openecard.client.connector.messages.TCTokenResponse;

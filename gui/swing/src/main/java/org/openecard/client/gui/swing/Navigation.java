@@ -121,8 +121,7 @@ public class Navigation extends JPanel implements ActionListener {
 	if (stepPointer == 0) {
 	    backButton.setVisible(false);
 	} else {
-	    // FIXME: set visibility for steps+1
-	    //backButton.setVisible(true);
+	    backButton.setVisible(!false);
 	}
 
 	// Change the forward button on the last step to "finished"

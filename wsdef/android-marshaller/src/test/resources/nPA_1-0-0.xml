@@ -1,0 +1,5024 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iso:CardInfo xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+			  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			  xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+			  xsi:schemaLocation="urn:iso:std:iso-iec:24727:tech:schema http://ws.openecard.org/schema/CardInfo.xsd">
+	<iso:CardType>
+		<iso:ObjectIdentifier>http://bsi.bund.de/cif/npa.xml</iso:ObjectIdentifier>
+		<iso:SpecificationBodyOrIssuer>Federal Office for Information Security</iso:SpecificationBodyOrIssuer>
+		<iso:CardTypeName xml:lang="DE">Personalausweis</iso:CardTypeName>
+		<iso:CardTypeName xml:lang="EN">Electronic Identity Card</iso:CardTypeName>
+		<iso:Version>
+			<iso:Major>1</iso:Major>
+			<iso:Minor>0</iso:Minor>
+			<iso:SubMinor>0</iso:SubMinor>
+		</iso:Version>
+		<iso:Status>Final Release</iso:Status>
+		<iso:Date>2011-11-25</iso:Date>
+	</iso:CardType>
+	<!--  The following references are used throughout this file:
+		[BSI-TR-03110]		https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TR03110/TR-03110_v205_pdf.pdf?__blob=publicationFile
+		[BSI-TR-03112-7]	https://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Publikationen/TechnischeRichtlinien/TR03112/API/api1_teil7_pdf.pdf?__blob=publicationFile
+		[BSI-TR-03117]		https://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Publikationen/TechnischeRichtlinien/TR03117/BSI-TR-03117_pdf.pdf?__blob=publicationFile
+	-->
+	<iso:CardIdentification>
+		<iso:CharacteristicFeature>
+			<!--
+				The recognition of the card type will be realized by
+				(1.) selecting the file EF.DIR and
+				(2.) reading the content with the READ BINARY command and comparing the result
+				with the value specified below.
+			-->
+			<iso:CardCall>
+				<!-- 1. CL=00, INS=A4=SELECT, P1= 02, P2=0C, Lc=02, Data=2F00 (FI of EF.DIR), Le=absent -->
+				<iso:CommandAPDU>00A4020C022F00</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<iso:Trailer>9000</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+			<iso:CardCall>
+				<!-- 2. CL=00, INS=B0=Read Binary, P1=00, P2=00 (no offset), Lc=00, Le=5A -->
+				<iso:CommandAPDU>00B000005A</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<!-- specific content of EF.DIR -->
+					<iso:Body>
+						<iso:MatchingData>
+							<iso:Offset>00</iso:Offset>
+							<iso:Length>5A</iso:Length>
+							<iso:MatchingValue>61324F0FE828BD080FA000000167455349474E500F434941207A752044462E655369676E5100730C4F0AA000000167455349474E61094F07A0000002471001610B4F09E80704007F00070302610C4F0AA000000167455349474E</iso:MatchingValue>
+						</iso:MatchingData>
+					</iso:Body>
+					<iso:Trailer>9000</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+		</iso:CharacteristicFeature>
+	</iso:CardIdentification>
+	<iso:CardCapabilities>
+		<!-- Depending on the specific hardware one of the following protocols is supported by the card -->
+		<iso:Interface>
+			<iso:RequirementLevel>PlatformOptional</iso:RequirementLevel>
+			<iso:Protocol>urn:iso:std:iso-iec:14443:-2:tech:protocols:Type-A</iso:Protocol>
+		</iso:Interface>
+		<iso:Interface>
+			<iso:RequirementLevel>PlatformOptional</iso:RequirementLevel>
+			<iso:Protocol>urn:iso:std:iso-iec:14443:-2:tech:protocols:Type-B</iso:Protocol>
+		</iso:Interface>
+		<!-- EF.DIR exists and indicates which applications are present on the card. -->
+		<iso:EF.DIR>
+			<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+			<iso:Path><iso:efIdOrPath>2F00</iso:efIdOrPath></iso:Path>
+		</iso:EF.DIR>
+		<!-- EF.ATR exists and provides COS-specific information on the card service data,
+			 card capabilities and extended length information. -->
+		<iso:EF.ATRorINFO>
+			<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+			<iso:Path><iso:efIdOrPath>2F01</iso:efIdOrPath></iso:Path>
+		</iso:EF.ATRorINFO>
+	</iso:CardCapabilities>
+	<iso:ApplicationCapabilities>
+		<iso:ImplicitlySelectedApplication>
+			3F00
+		</iso:ImplicitlySelectedApplication>
+		<!-- =============== -->
+		<!-- CardApplication -->
+		<!-- ............... -->
+		<!--       MF        -->
+		<!-- =============== -->
+		<iso:CardApplication>
+			<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+			<iso:ApplicationIdentifier>3F00</iso:ApplicationIdentifier>
+			<iso:ApplicationName>MF</iso:ApplicationName>
+
+			<!-- As there are only standardized card application services, there are no
+				 CardApplicationServiceInfo elements. -->
+
+
+			<!-- ====================== -->
+			<!-- MF: CardApplicationACL -->
+			<!-- ====================== -->
+
+			<iso:CardApplicationACL>
+				<!-- ================================ -->
+				<!-- MF: CardApplicationServiceAccess -->
+				<!-- ================================ -->
+
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationServiceAccess</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:APIAccessEntryPoint>Initialize</iso:APIAccessEntryPoint>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationServiceAccess</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:APIAccessEntryPoint>Terminate</iso:APIAccessEntryPoint>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationServiceAccess</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:APIAccessEntryPoint>CardApplicationPath</iso:APIAccessEntryPoint>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- ====================== -->
+				<!-- MF: ConnectionService  -->
+				<!-- ====================== -->
+
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationConnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationDisconnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationStartSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationEndSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- ========================== -->
+				<!-- MF: CardApplicationService -->
+				<!-- ========================== -->
+
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationList</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- CardApplicationCreate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationCreate</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- CardApplicationDelete is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationDelete</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- CardApplicationServiceList is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationServiceList</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- CardApplicationServiceCreate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationServiceCreate</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- CardApplicationServiceLoad is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationServiceLoad</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- CardApplicationServiceDelete is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationServiceDelete</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- CardApplicationServiceDescribe is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationServiceDescribe</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- ExecuteAction is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>ExecuteAction</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+
+				<!-- ==================== -->
+				<!-- MF: NamedDataService -->
+				<!-- ==================== -->
+
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetList</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- DataSetCreate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetCreate</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- DataSetDelete is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetDelete</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DSIList</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- DSICreate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DSICreate</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DSIDelete is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DSIDelete</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+
+				<!-- DSIWrite is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- ======================== -->
+				<!-- MF: CryptographicService -->
+				<!-- ======================== -->
+
+				<!-- Encipher is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>Encipher</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- Decipher is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>Decipher</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>GetRandom</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- Hash is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>Hash</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- Sign is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- VerifySignature is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>VerifySignature</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>VerifyCertificate</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- =============================== -->
+				<!-- MF: DifferentialIdentityService -->
+				<!-- =============================== -->
+
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDList</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- DIDCreate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDCreate</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- DIDUpdate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDUpdate</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DIDDelete is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDDelete</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- ======================== -->
+				<!-- MF: AuthorizationService -->
+				<!-- ======================== -->
+
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- ACLModify is NOT allowed.  -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:AuthorizationServiceAction>ACLModify</iso:AuthorizationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+			</iso:CardApplicationACL>
+
+
+
+			<!-- ================================ -->
+			<!--    MF: Differential Identities   -->
+			<!-- ================================ -->
+
+
+
+			<!-- CAN - Card Access Number	-->
+			<!-- see [EAC2], Section 3.3.1	-->
+
+			<iso:DIDInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>CAN</iso:DIDName>
+					<iso:LocalDIDName xml:lang="DE">Personalausweis Zugriffsnummer</iso:LocalDIDName>
+					<iso:LocalDIDName xml:lang="EN">Card Access Number</iso:LocalDIDName>
+					<iso:DIDProtocol>urn:oid:0.4.0.127.0.7.2.2.4</iso:DIDProtocol>
+					<!-- the OID is defined in [EAC2], Section A.1.1.1 -->
+
+					<!--PACE-->
+					<iso:DIDMarker>
+						<iso:PACEMarker Protocol="urn:oid:0.4.0.127.0.7.2.2.4">
+							<iso:PasswordRef>
+								<iso:KeyRef>02</iso:KeyRef>
+							</iso:PasswordRef>
+							<iso:minLength>6</iso:minLength>
+							<iso:maxLength>6</iso:maxLength>
+							<!--
+								CAN is non-blocking and there is only one state.
+							-->
+						</iso:PACEMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>global</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+
+			<!-- PIN - Personal Identification Number -->
+			<!-- see [EAC2], Section 3.3.2            -->
+
+			<iso:DIDInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>PIN</iso:DIDName>
+					<iso:LocalDIDName xml:lang="DE">Personalausweis-PIN</iso:LocalDIDName>
+					<iso:LocalDIDName xml:lang="EN">Electronic Authentication PIN</iso:LocalDIDName>
+					<iso:DIDProtocol>urn:oid:0.4.0.127.0.7.2.2.4</iso:DIDProtocol>
+					<!--PACE-->
+					<iso:DIDMarker>
+						<iso:PACEMarker Protocol="urn:oid:0.4.0.127.0.7.2.2.4">
+							<!--PACE-->
+							<iso:PasswordRef>
+								<iso:KeyRef>03</iso:KeyRef>
+							</iso:PasswordRef>
+							<!--
+								The status of the PIN may be determined using the MSE.Set AT
+								command (cf. [EAC2], Section B.11.1.):
+
+								CL ='00'
+								INS='22' - MSE
+								P1 ='C1'
+								P2 ='A4' - PACE
+								Lc ='0F' - Length of Data field
+								Data = '800A04007F00070202040202830103'
+								- 80 0A 04 00 7F 00 07 02 02 04 02 02 - PACE-Protocol-OID
+								(id-PACE-ECDH-GM-AES-CBC-CMAC-128 (0 4 0 127 0 7 2 2 4 2 2))
+								- 83 01 03 - PACE Key Reference
+
+								The corresponding Response-APDUs indicate the state of the PIN:
+
+								(1) 9000 - activated with RC=3
+								(2) 63C2 - activated with RC=2
+								(3) 63C1 - suspended with RC=1
+								(will become resumed after entry of the CAN)
+								(4) 6283 - deactivated
+								(will become activated after activation; this state requires new state recognition)
+								(5) 63C0 - blocked (RC=0)
+
+								Note that the PIN may be in a specific transport mode, in which a 5 character secret needs
+								to be entered and changed to a regular PIN which is 6 characters long. As it is not possible
+								to recognize that the PIN is in this specific transport mode there is no separate state or
+								differential identity for this purpose.
+							-->
+							<iso:minLength>5</iso:minLength>
+							<!-- the minimum length of the PIN (including transport mode) is 5 -->
+							<iso:maxLength>6</iso:maxLength>
+							<iso:StateInfo>
+								<iso:StateRecognition>
+									<iso:CardCall>
+										<iso:CommandAPDU>0022C1A40F800A04007F00070202040202830103</iso:CommandAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>9000</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>PIN_activated-RC3</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>63C2</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>PIN_activated-RC2</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>63C1</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>PIN_suspended</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>6283</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>PIN_deactivated</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>63C0</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>PIN_blocked</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+									</iso:CardCall>
+								</iso:StateRecognition>
+
+								<iso:State StateName="PIN_start" StateClass="RecognitionNecessary">
+								</iso:State>
+
+								<!-- (1) PIN_activated-RC3 (9000) -->
+
+								<iso:State StateName="PIN_activated-RC3" StateClass="Operational">
+
+									<iso:RetryCounter>3</iso:RetryCounter>
+
+									<!-- wrong PIN reduces the retry counter (RC=2) -->
+									<iso:StateTransition TargetState="PIN_activated-RC2">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>PIN</iso:DIDName>
+											<iso:DIDState>false</iso:DIDState>
+										</iso:DIDAuthenticationState>
+									</iso:StateTransition>
+
+									<!-- PIN may be deactivated -->
+									<iso:StateTransition TargetState="PIN_deactivated">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
+											<!--
+												The DIDStateQualifier contains the CHAT (including Tag and Length),
+												which consists of the following information (see [BSI-TR-03110], C.1.5, C.4, D.2):
+												7F4C - Tag for CHAT
+												12   - Length of CHAT
+												06   - Tag for OID
+												09   - Length of OID
+												04007F000703010202 - OID for Authentication Terminal Role (0.4.0.127.0.7.3.1.2.2)
+												53   - Tag for Discretionary Data
+												05	  - Length of Discretionary Data
+												0000000020 - Role (PIN Management Bit is set)
+											-->
+										</iso:DIDAuthenticationState>
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<!-- Deactivate (see [EAC-2], Section B.11.11) -->
+												<iso:CommandAPDU>0C041003</iso:CommandAPDU>
+												<iso:ResponseAPDU>
+													<iso:Trailer>9000</iso:Trailer>
+												</iso:ResponseAPDU>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
+								</iso:State>
+
+								<!-- (2) PIN_activated-RC2 (63C2) -->
+								<iso:State StateName="PIN_activated-RC2" StateClass="Operational">
+									<iso:RetryCounter>2</iso:RetryCounter>
+
+									<!-- correct PIN sets the retry counter to maximum (RC=3) -->
+									<iso:StateTransition TargetState="PIN_activated-RC3">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>PIN</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthenticationState>
+									</iso:StateTransition>
+
+									<!-- wrong PIN reduces the retry counter (RC=1) -->
+									<iso:StateTransition TargetState="PIN_suspended">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>PIN</iso:DIDName>
+											<iso:DIDState>false</iso:DIDState>
+										</iso:DIDAuthenticationState>
+									</iso:StateTransition>
+
+									<!-- PIN may be deactivated -->
+									<iso:StateTransition TargetState="PIN_deactivated">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
+										</iso:DIDAuthenticationState>
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<!-- Deactivate (see [EAC-2], Section B.11.11) -->
+												<iso:CommandAPDU>0C041003</iso:CommandAPDU>
+												<iso:ResponseAPDU>
+													<iso:Trailer>9000</iso:Trailer>
+												</iso:ResponseAPDU>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
+
+									<!-- Retry counter may be reset to maximum (RC=3) using TA.
+										 In this case a new PIN is captured and set (case P1=02). -->
+									<iso:StateTransition TargetState="PIN_activated-RC3">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
+										</iso:DIDAuthenticationState>
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<iso:APICall>
+													<iso:ModifyVerificationData>
+														<iso:SlotHandle></iso:SlotHandle>
+														<iso:InputUnit>
+															<iso:PinInput>
+																<iso:Index>0</iso:Index>
+																<iso:PasswordAttributes>
+																	<iso:pwdFlags>initialized resetRetryCounter1</iso:pwdFlags>
+																	<iso:pwdType>ascii-numeric</iso:pwdType>
+																	<iso:minLength>6</iso:minLength>
+																	<iso:storedLength>6</iso:storedLength>
+																	<iso:maxLength>6</iso:maxLength>
+																</iso:PasswordAttributes>
+															</iso:PinInput>
+														</iso:InputUnit>
+														<!-- Reset Retry Counter (see [EAC-2], Section B.11.9)  -->
+														<iso:Template>002C0203</iso:Template>
+													</iso:ModifyVerificationData>
+												</iso:APICall>
+												<iso:APIResponse>
+													<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+														<dss:Result>
+															<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+														</dss:Result>
+														<iso:Response>9000</iso:Response>
+													</iso:ModifyVerificationDataResponse>
+												</iso:APIResponse>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+
+									</iso:StateTransition>
+
+									<!-- Retry counter may be reset to maximum (RC=3) using PUK.
+										 In this case no new PIN is set (case P1=03). -->
+									<iso:StateTransition>
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>PUK</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthenticationState>
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<!-- Reset Retry Counter (see [EAC-2], Section B.11.9)  -->
+												<iso:CommandAPDU>002C0303</iso:CommandAPDU>
+												<iso:ResponseAPDU>
+													<!-- This trailer indicates the success of the resetting procedure. -->
+													<iso:Trailer>9000</iso:Trailer>
+													<iso:Conclusion>
+														<iso:RecognizedState>PIN_activated-RC3</iso:RecognizedState>
+													</iso:Conclusion>
+												</iso:ResponseAPDU>
+												<iso:ResponseAPDU>
+													<!-- This trailer indicates that the PUK is exhausted. -->
+													<iso:Trailer>6984</iso:Trailer>
+													<iso:Conclusion>
+														<iso:RecognizedState>PUK_blocked_in_PIN</iso:RecognizedState>
+													</iso:Conclusion>
+												</iso:ResponseAPDU>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+
+									</iso:StateTransition>
+								</iso:State>
+
+								<!-- (3) PIN_suspended (63C1) -->
+
+								<iso:State StateName="PIN_suspended" StateClass="NotOperational">
+									<iso:RetryCounter>1</iso:RetryCounter>
+
+									<!-- PIN may be resumed using CAN -->
+									<iso:StateTransition TargetState="PIN_resumed">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>CAN</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthenticationState>
+									</iso:StateTransition>
+
+									<!-- PIN may be deactivated -->
+									<iso:StateTransition TargetState="PIN_deactivated">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
+										</iso:DIDAuthenticationState>
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<!-- Deactivate (see [EAC-2], Section B11.11)  -->
+												<iso:CommandAPDU>0C041003</iso:CommandAPDU>
+												<iso:ResponseAPDU>
+													<iso:Trailer>9000</iso:Trailer>
+												</iso:ResponseAPDU>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
+
+									<!-- Retry counter may be reset to maximum (RC=3) using TA.
+										 In this case a new PIN is captured and set (case P1=02). -->
+									<iso:StateTransition TargetState="PIN_activated-RC3">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
+										</iso:DIDAuthenticationState>
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<iso:APICall>
+													<iso:ModifyVerificationData>
+														<iso:SlotHandle></iso:SlotHandle>
+														<iso:InputUnit>
+															<iso:PinInput>
+																<iso:Index>0</iso:Index>
+																<iso:PasswordAttributes>
+																	<iso:pwdFlags>initialized resetRetryCounter1</iso:pwdFlags>
+																	<iso:pwdType>ascii-numeric</iso:pwdType>
+																	<iso:minLength>6</iso:minLength>
+																	<iso:storedLength>6</iso:storedLength>
+																	<iso:maxLength>6</iso:maxLength>
+																</iso:PasswordAttributes>
+															</iso:PinInput>
+														</iso:InputUnit>
+														<!-- Reset Retry Counter (see [EAC-2], Section B.11.9)  -->
+														<iso:Template>002C0203</iso:Template>
+													</iso:ModifyVerificationData>
+												</iso:APICall>
+												<iso:APIResponse>
+													<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+														<dss:Result>
+															<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+														</dss:Result>
+														<iso:Response>9000</iso:Response>
+													</iso:ModifyVerificationDataResponse>
+												</iso:APIResponse>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
+
+									<!-- Retry counter may be reset to maximum (RC=3) using PUK.
+										 In this case no new PIN is set (case P1=03). -->
+									<iso:StateTransition TargetState="PIN_activated-RC3">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>PUK</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthenticationState>
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<!-- Reset Retry Counter (see [EAC-2], Section B.11.9)  -->
+												<iso:CommandAPDU>002C0303</iso:CommandAPDU>
+												<iso:ResponseAPDU>
+													<iso:Trailer>9000</iso:Trailer>
+												</iso:ResponseAPDU>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
+								</iso:State>
+
+								<!-- (3) PIN_resumed, after PIN_suspended  -->
+
+								<iso:State StateName="PIN_resumed" StateClass="Operational">
+									<iso:RetryCounter>1</iso:RetryCounter>
+
+									<!-- correct PIN resets the retry counter to maximum (RC=3) -->
+									<iso:StateTransition TargetState="PIN_activated-RC3">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>PIN</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthenticationState>
+									</iso:StateTransition>
+
+									<!-- wrong PIN reduces the retry counter and blocks the PIN (RC=0) -->
+									<iso:StateTransition TargetState="PIN_blocked">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>PIN</iso:DIDName>
+											<iso:DIDState>false</iso:DIDState>
+										</iso:DIDAuthenticationState>
+									</iso:StateTransition>
+								</iso:State>
+
+
+
+								<!-- (4) PIN_deactivated (6283) -->
+
+								<iso:State StateName="PIN_deactivated" StateClass="NotOperational">
+
+									<iso:StateTransition TargetState="PIN_start">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
+										</iso:DIDAuthenticationState>
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<!-- Activate (see [EAC-2], Section B.11.10)  -->
+												<iso:CommandAPDU>0C441003</iso:CommandAPDU>
+												<iso:ResponseAPDU>
+													<iso:Trailer>9000</iso:Trailer>
+												</iso:ResponseAPDU>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
+								</iso:State>
+
+
+								<!-- (5) PIN_blocked (63C0) -->
+
+								<iso:State StateName="PIN_blocked" StateClass="NotOperational">
+									<iso:RetryCounter>0</iso:RetryCounter>
+									<!-- Retry counter may be reset to maximum (RC=3) using TA.
+										 In this case a new PIN is captured and set (case P1=02). -->
+									<iso:StateTransition>
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
+										</iso:DIDAuthenticationState>
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<iso:APICall>
+													<iso:ModifyVerificationData>
+														<iso:SlotHandle></iso:SlotHandle>
+														<iso:InputUnit>
+															<iso:PinInput>
+																<iso:Index>0</iso:Index>
+																<iso:PasswordAttributes>
+																	<iso:pwdFlags>initialized resetRetryCounter1</iso:pwdFlags>
+																	<iso:pwdType>ascii-numeric</iso:pwdType>
+																	<iso:minLength>6</iso:minLength>
+																	<iso:storedLength>6</iso:storedLength>
+																	<iso:maxLength>6</iso:maxLength>
+																</iso:PasswordAttributes>
+															</iso:PinInput>
+														</iso:InputUnit>
+														<!-- Reset Retry Counter (see [EAC-2], Section B.11.9)  -->
+														<iso:Template>002C0203</iso:Template>
+													</iso:ModifyVerificationData>
+												</iso:APICall>
+												<iso:APIResponse>
+													<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+														<dss:Result>
+															<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+														</dss:Result>
+														<!-- This result indicates the success of the resetting procedure. -->
+														<iso:Response>9000</iso:Response>
+													</iso:ModifyVerificationDataResponse>
+													<iso:Conlusion>
+														<iso:RecognizedState>PIN_activated-RC3</iso:RecognizedState>
+													</iso:Conlusion>
+												</iso:APIResponse>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
+
+									<!-- Retry counter may be reset to maximum (RC=3) using PUK.
+										 In this case no new PIN is set (case P1=03). -->
+									<iso:StateTransition>
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>PUK</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthenticationState>
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<!-- Reset Retry Counter (see [EAC-2], Section B.11.9)  -->
+												<iso:CommandAPDU>002C0303</iso:CommandAPDU>
+												<iso:ResponseAPDU>
+													<!-- This result indicates that the call was successful. -->
+													<iso:Trailer>9000</iso:Trailer>
+													<iso:Conclusion>
+														<iso:RecognizedState>PIN_activated-RC3</iso:RecognizedState>
+													</iso:Conclusion>
+												</iso:ResponseAPDU>
+												<iso:ResponseAPDU>
+													<!-- This result indicates that the PUK is exhausted. -->
+													<iso:Trailer>6984</iso:Trailer>
+													<iso:Conclusion>
+														<iso:RecognizedState>PUK_blocked_in_PIN</iso:RecognizedState>
+													</iso:Conclusion>
+												</iso:ResponseAPDU>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
+								</iso:State>
+
+								<iso:State StateName="PUK_blocked_in_PIN" StateClass="NotOperational" />
+							</iso:StateInfo>
+						</iso:PACEMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>global</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDUpdate</iso:DifferentialIdentityServiceAction>
+							<!-- According to [EAC-2], Section 3.5 there are the following possibilities for changing the PIN:
+								 1. after entered PIN
+								 2. after terminal authentication with appropriate access rights (PIN Management bit is set)
+							-->
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:or>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>PIN</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:or>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+
+
+			<!-- PUK - PIN Unblock Key        -->
+			<!-- see [EAC2], Section 3.3.3 -->
+			<iso:DIDInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>PUK</iso:DIDName>
+					<iso:LocalDIDName xml:lang="DE">Personalausweis-PUK</iso:LocalDIDName>
+					<iso:LocalDIDName xml:lang="EN">Personal Unblocking Key</iso:LocalDIDName>
+
+					<iso:DIDProtocol>urn:oid:0.4.0.127.0.7.2.2.4</iso:DIDProtocol>
+					<!--PACE-->
+					<iso:DIDMarker>
+						<iso:PACEMarker Protocol="urn:oid:0.4.0.127.0.7.2.2.4">
+							<!--PACE-->
+							<iso:PasswordRef>
+								<iso:KeyRef>04</iso:KeyRef>
+							</iso:PasswordRef>
+							<iso:minLength>10</iso:minLength>
+							<iso:maxLength>10</iso:maxLength>
+							<iso:StateInfo>
+								<iso:State StateName="PUK_start" StateClass="NotOperational">
+									<!-- just initialize usage counter and proceed to PUK_operational -->
+									<iso:UsageCounter>0</iso:UsageCounter>
+									<iso:StateTransition TargetState="PUK_operational">
+										<iso:UsageCounter>0</iso:UsageCounter>
+									</iso:StateTransition>
+								</iso:State>
+								<iso:State StateName="PUK_operational" StateClass="Operational">
+									<iso:StateTransition TargetState="PUK_operational">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>PUK</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthenticationState>
+									</iso:StateTransition>
+									<iso:StateTransition TargetState="PUK_operational">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>PUK</iso:DIDName>
+											<iso:DIDState>false</iso:DIDState>
+										</iso:DIDAuthenticationState>
+										<iso:UpdateCounter operation="add" variable="UsageCounter">1</iso:UpdateCounter>
+									</iso:StateTransition>
+									<iso:StateTransition TargetState="PUK_blocked">
+										<iso:UsageCounter>10</iso:UsageCounter>
+									</iso:StateTransition>
+								</iso:State>
+								<iso:State StateName="PUK_blocked" StateClass="NotOperational" />
+							</iso:StateInfo>
+						</iso:PACEMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>global</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+
+
+			<!-- MRZ - Machine Readable Zone             -->
+			<!-- see [EAC2], Section 3.3.4               -->
+			<!-- may only be used by inspection systems. -->
+
+			<!-- Public Root Key for Terminal Authentication -->
+
+			<iso:DIDInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>TAKey</iso:DIDName>
+					<iso:DIDProtocol>urn:oid:0.4.0.127.0.7.2.2.2</iso:DIDProtocol>
+					<!--Terminal Authentication-->
+					<iso:DIDMarker>
+						<iso:TAMarker Protocol="urn:oid:0.4.0.127.0.7.2.2.2"></iso:TAMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>global</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:or>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>PIN</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAN</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:or>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+
+			<!-- Private Key for Chip Authentication (with generation-specific key) -->
+
+			<iso:DIDInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>CAKey</iso:DIDName>
+					<iso:DIDProtocol>urn:oid:0.4.0.127.0.7.2.2.3</iso:DIDProtocol>
+					<!--Chip Authentication-->
+					<iso:DIDMarker>
+						<iso:CAMarker Protocol="urn:oid:0.4.0.127.0.7.2.2.3">
+							<!--The KeyId element is omitted, because it is COS-specific and hence it is only provided in the file EF.CardAccess. -->
+						</iso:CAMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>global</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<!-- Accessing the generation-specific CAKey is possible with either PACE+TA or CAN+TA (with "CAN allowed" bit set) -->
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:or>
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+												<!-- The DIDStateQualifier refers to the full CHAT.
+													 In this case it states that the
+													 "CAN allowed" bit must be set. -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+							</iso:or>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+
+			<!-- Private Key for Chip Authentication (with chip-individual key) -->
+
+			<iso:DIDInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>CAKey-ci</iso:DIDName>
+					<iso:DIDProtocol>urn:oid:0.4.0.127.0.7.2.2.3</iso:DIDProtocol>
+					<!--Chip Authentication-->
+					<iso:DIDMarker>
+						<iso:CAMarker Protocol="urn:oid:0.4.0.127.0.7.2.2.3">
+							<!--The KeyId element is omitted, because it is COS-specific and hence it is only provided in the file EF.CardAccess. -->
+						</iso:CAMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>global</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<!-- Accessing the chip-individual CAKey-ci is possible with either PACE+TA (with
+					 "Privileged Terminal" bit set) or CAN+TA (with "Privileged Terminal" + "CAN allowed" bit set) -->
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:or>
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000008</iso:DIDStateQualifier>
+												<!-- The DIDStateQualifier refers to the full CHAT.
+													 In this case it states that the "Privileged Terminal"
+													 bit must be set. -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000018</iso:DIDStateQualifier>
+												<!-- The DIDStateQualifier refers to the full CHAT.
+													 In this case it states that the "CAN allowed" and
+													 "Priviledged Terminal" bit must be set. -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+							</iso:or>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+
+			<!-- Key Material for Restricted Identification (with general access) -->
+
+			<iso:DIDInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>RIKey</iso:DIDName>
+					<iso:DIDProtocol>urn:oid:0.4.0.127.0.7.2.2.5</iso:DIDProtocol>
+					<!--Restricted Identification-->
+					<iso:DIDMarker>
+						<iso:RIMarker Protocol="urn:oid:0.4.0.127.0.7.2.2.5">
+						</iso:RIMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>global</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<!-- Accessing the RIKey with general access is possible with either PACE+TA+(CAKey or CAKey-ci) or CAN+TA+(CAKey or CAKey-ci)
+					 (where TA is performed with a certificate in which "CAN allowed" bit is set) -->
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:or>
+								<!-- PACE+TA+CAKey -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<!-- PACE+TA+CAKey-ci -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey-ci</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<!-- CAN+TA+CAKey -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+												<!-- The DIDStateQualifier refers to the full CHAT.
+													 In this case it states that the
+													 "CAN allowed" bit must be set. -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<!-- CAN+TA+CAKey-ci -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+												<!-- The DIDStateQualifier refers to the full CHAT.
+													 In this case it states that the
+													 "CAN allowed" bit must be set. -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey-ci</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+							</iso:or>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+
+			<!-- Key Material for Restricted Identification (with authorized access) -->
+
+			<iso:DIDInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>RIKey-aa</iso:DIDName>
+					<iso:DIDProtocol>urn:oid:0.4.0.127.0.7.2.2.5</iso:DIDProtocol>
+					<!--Restricted Identification-->
+					<iso:DIDMarker>
+						<iso:RIMarker Protocol="urn:oid:0.4.0.127.0.7.2.2.5">
+						</iso:RIMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>global</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<!-- Accessing the RIKey-aa (with authorized access) is possible with either PACE+TA+(CAKey or CAKey-ci) (where
+					 TA is performed with a certificate in which "Restricted Identification" bit is set
+					 or CAN+TA+(CAKey or CAKey-ci) (where TA is performed with certificate in which the "CAN allowed"
+					 and the "Restricted Identification" bit is set) -->
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:or>
+								<!-- PACE+TA+CAKey -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000004</iso:DIDStateQualifier>
+												<!-- "Restricted Identification" bit must be set. -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<!-- PACE+TA+CAKey-ci -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000014</iso:DIDStateQualifier>
+												<!-- "Restricted Identification" and "CAN allowed" bit must be set. -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey-ci</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+							</iso:or>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+
+
+
+			<!-- ============== -->
+			<!-- MF: Data Sets  -->
+			<!-- ============== -->
+
+			<!--EF.DIR-->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.DIR</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>2F00</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!--EF.ATR-->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.ATR</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>2F01</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!--EF.CardAccess-->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.CardAccess</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>011C</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!--EF.CardSecurity-->
+
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.CardSecurity</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:or>
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<!-- EF.CardSecurity may be accessed by PACE + TA (IS, AT or ST).
+													 Hence no specific CHAT DIDStateQualifier is required. -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+							</iso:or>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>011D</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+
+
+			<!-- EF.ChipSecurity -->
+
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.ChipSecurity</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:or>
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000018</iso:DIDStateQualifier>
+												<!-- "Privileged terminal" bit and "CAN allowed" bit must be set. -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000008</iso:DIDStateQualifier>
+												<!-- Privileged terminal bit must be set. -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+							</iso:or>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>011B</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+
+		</iso:CardApplication>
+
+
+
+		<!-- =============== -->
+		<!-- CardApplication -->
+		<!-- ............... -->
+		<!--       eID       -->
+		<!-- =============== -->
+
+
+
+		<iso:CardApplication>
+			<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+			<!-- see [EAC2], E.1.1 -->
+			<iso:ApplicationIdentifier>E80704007F00070302</iso:ApplicationIdentifier>
+			<iso:ApplicationName>eID</iso:ApplicationName>
+
+			<!-- As there are only standardized card application services, there are no
+				 CardApplicationServiceInfo elements. -->
+
+			<iso:CardApplicationACL>
+
+
+				<!-- ================================= -->
+				<!-- eID: CardApplicationServiceAccess -->
+				<!-- ================================= -->
+
+
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationServiceAccess</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:APIAccessEntryPoint>Initialize</iso:APIAccessEntryPoint>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationServiceAccess</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:APIAccessEntryPoint>Terminate</iso:APIAccessEntryPoint>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationServiceAccess</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:APIAccessEntryPoint>CardApplicationPath</iso:APIAccessEntryPoint>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- ======================== -->
+				<!-- eID: Connection Service  -->
+				<!-- ======================== -->
+
+
+				<!-- CardApplicationConnect -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationConnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:and>
+							<iso:SecurityCondition>
+								<iso:or>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>PIN</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:and>
+											<iso:SecurityCondition>
+												<iso:DIDAuthentication>
+													<iso:DIDName>CAN</iso:DIDName>
+													<iso:DIDState>true</iso:DIDState>
+												</iso:DIDAuthentication>
+											</iso:SecurityCondition>
+											<iso:SecurityCondition>
+												<iso:DIDAuthentication>
+													<iso:DIDName>TAKey</iso:DIDName>
+													<iso:DIDState>true</iso:DIDState>
+													<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+													<!-- The DIDStateQualifier refers to the full CHAT. In this case it states that the
+														 "CAN allowed" bit must be set. -->
+												</iso:DIDAuthentication>
+											</iso:SecurityCondition>
+										</iso:and>
+									</iso:SecurityCondition>
+								</iso:or>
+							</iso:SecurityCondition>
+							<iso:SecurityCondition>
+								<iso:DIDAuthentication>
+									<iso:DIDName>TAKey</iso:DIDName>
+									<iso:DIDState>true</iso:DIDState>
+								</iso:DIDAuthentication>
+							</iso:SecurityCondition>
+							<iso:SecurityCondition>
+								<iso:DIDAuthentication>
+									<iso:DIDName>CAKey</iso:DIDName>
+									<iso:DIDState>true</iso:DIDState>
+								</iso:DIDAuthentication>
+							</iso:SecurityCondition>
+						</iso:and>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<!-- CardApplicationDisconnect -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationDisconnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<!-- CardApplicationStartSession -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationStartSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<!-- CardApplicationEndSession -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationEndSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<!-- ============================ -->
+				<!-- eID: CardApplication Service -->
+				<!-- ============================ -->
+
+				<!-- CardApplicationList is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationList</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+
+				<!-- CardApplicationCreate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationCreate</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- CardApplicationDelete is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationDelete</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+
+				<!-- CardApplicationServiceList is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationServiceList</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- CardApplicationServiceCreate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationServiceCreate</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- CardApplicationServiceLoad is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationServiceLoad</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+
+				<!-- CardApplicationServiceDelete is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationServiceDelete</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+
+				<!-- CardApplicationServiceDescribe is NOT allowed  -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationServiceDescribe</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- ExecuteAction is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>ExecuteAction</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+
+				<!-- ======================= -->
+				<!-- eID: Named Data Service -->
+				<!-- ======================= -->
+				<!-- DataSetList -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetList</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- DataSetCreate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetCreate</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DataSetSelect -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DataSetDelete is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetDelete</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DSIList -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DSIList</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DSICreate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DSICreate</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DSIDelete is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DSIDelete</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DSIRead -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- DSIWrite -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- ========================== -->
+				<!-- eID: Cryptographic Service -->
+				<!-- ========================== -->
+				<!-- Encipher is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>Encipher</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- Decipher is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>Decipher</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- GetRandom is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>GetRandom</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- Hash is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>Hash</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- Sign is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- VerifySignature is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>VerifySignature</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- VerifyCertificate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>VerifyCertificate</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- ================================== -->
+				<!-- eID: Differential Identity Service -->
+				<!-- ================================== -->
+
+				<!-- DIDList is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDList</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DIDCreate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDCreate</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DIDGet is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+
+				<!-- DIDUpdate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDUpdate</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DIDDelete is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDDelete</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DIDAuthenticate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- ========================= -->
+				<!-- eID: Authorization Service -->
+				<!-- ========================= -->
+
+				<!-- ACLList -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- ACLModify is NOT allowed  -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:AuthorizationServiceAction>ACLModify</iso:AuthorizationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+			</iso:CardApplicationACL>
+
+			<!-- =============== -->
+			<!-- eID: Data Sets  -->
+			<!-- =============== -->
+
+
+			<!-- DG1 - DocumentType --><iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>DG1</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:and>
+								<iso:SecurityCondition>
+									<iso:or>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:and>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>CAN</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>TAKey</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+														<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+														<!-- The DIDStateQualifier refers to the full CHAT. In this case it states that the
+															 "CAN allowed" bit must be set. -->
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+											</iso:and>
+										</iso:SecurityCondition>
+									</iso:or>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+
+										<!-- The DIDStateQualifier refers to the full CHAT, which in case of an
+											 authentication terminal is formed as follows: 7F4C12060904007F0007030102025305<RIGHT>.
+
+											 The correspondence between the data groups (DG1-DG21)
+											 (cf. [BSI-TR-03110#Table E.1]) and the CHAT (cf. [BSI-TR-03110#Table C.5)
+											 is given as follows:
+
+											 ========================
+											 <RIGHT> for READ ACCESS:
+											 ========================
+											 DG 1: 0000000100 - Document Type
+											 DG 2: 0000000200 - Issuing State
+											 DG 3: 0000000400 - Date of Expiry
+											 DG 4: 0000000800 - Given Names
+											 DG 5: 0000001000 - Family Names
+											 DG 6: 0000002000 - Religious / Artistic Name
+											 DG 7: 0000004000 - Academic Title
+											 DG 8: 0000008000 - Date of Birth
+											 DG 9: 0000010000 - Place of Birth
+											 DG10: 0000020000 - Nationality
+											 DG11: 0000040000 - Sex
+											 DG12: 0000080000 - Optional Data
+											 DG13: 0000100000 - n/a
+											 DG14: 0000200000 - n/a
+											 DG15: 0000400000 - n/a
+											 DG16: 0000800000 - n/a
+											 DG17: 0001000000 - Normal Place of Residence
+											 DG18: 0002000000 - Community ID
+											 DG19: 0004000000 - Residence Permit I
+											 DG20: 0008000000 - Residence Permit II
+											 DG21: 0010000000 - Optional Data
+
+											 =========================
+											 <RIGHT> for WRITE ACCESS:
+											 =========================
+
+											 DG17: 2000000000 - Normal Place of Residence
+											 DG18: 1000000000 - Community ID
+											 DG19: 0800000000 - Residence Permit I
+											 DG20: 0400000000 - Residence Permit II
+											 DG21: 0200000000 - Optional Data
+										-->
+
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000100</iso:DIDStateQualifier>
+										<!-- DG 1: 0000000100 - Document Type -->
+
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:and>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>0101</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+
+			<!-- DG2 - IssuingState -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>DG2</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:and>
+								<iso:SecurityCondition>
+									<iso:or>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:and>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>CAN</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>TAKey</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+														<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+														<!-- "CAN allowed" bit must be set. -->
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+											</iso:and>
+										</iso:SecurityCondition>
+									</iso:or>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000200</iso:DIDStateQualifier>
+										<!-- DG 2: 0000000200 - Issuing State  -->
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:and>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>0102</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- DG3 - DateOfExpiry -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>DG3</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:and>
+								<iso:SecurityCondition>
+									<iso:or>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:and>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>CAN</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>TAKey</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+														<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+														<!-- "CAN allowed" bit must be set. -->
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+											</iso:and>
+										</iso:SecurityCondition>
+									</iso:or>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000004000</iso:DIDStateQualifier>
+										<!-- DG 3: 0000000400 - Date of Expiry  -->
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:and>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>0103</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- DG4 - GivenNames -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>DG4</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:and>
+								<iso:SecurityCondition>
+									<iso:or>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:and>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>CAN</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>TAKey</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+														<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+														<!-- "CAN allowed" bit must be set. -->
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+											</iso:and>
+										</iso:SecurityCondition>
+									</iso:or>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000800</iso:DIDStateQualifier>
+										<!-- DG 4: 0000000800 - Given Names -->
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:and>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>0104</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- DG5 - FamilyNames -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>DG5</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:and>
+								<iso:SecurityCondition>
+									<iso:or>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:and>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>CAN</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>TAKey</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+														<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+														<!-- "CAN allowed" bit must be set. -->
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+											</iso:and>
+										</iso:SecurityCondition>
+									</iso:or>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000001000</iso:DIDStateQualifier>
+										<!-- DG 5: 0000001000 - Family Names -->
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:and>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>0105</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- DG6 - ArtisticName -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>DG6</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:and>
+								<iso:SecurityCondition>
+									<iso:or>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:and>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>CAN</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>TAKey</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+														<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+														<!-- "CAN allowed" bit must be set. -->
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+											</iso:and>
+										</iso:SecurityCondition>
+									</iso:or>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000002000</iso:DIDStateQualifier>
+										<!-- DG 6: 0000002000 - Religious / Artistic Name -->
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:and>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>0106</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- DG7 - AcademicTitle -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>DG7</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:and>
+								<iso:SecurityCondition>
+									<iso:or>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:and>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>CAN</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>TAKey</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+														<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+														<!-- "CAN allowed" bit must be set. -->
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+											</iso:and>
+										</iso:SecurityCondition>
+									</iso:or>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000004000</iso:DIDStateQualifier>
+										<!-- DG 7: 0000004000 - Academic Title  -->
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:and>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>0107</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- DG8 - DataOfBirth  -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>DG8</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:and>
+								<iso:SecurityCondition>
+									<iso:or>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:and>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>CAN</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>TAKey</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+														<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+														<!-- "CAN allowed" bit must be set. -->
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+											</iso:and>
+										</iso:SecurityCondition>
+									</iso:or>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000008000</iso:DIDStateQualifier>
+										<!-- DG 8: 0000008000 - Date of Birth -->
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:and>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>0108</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- DG9 - PlaceOfBirth -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>DG9</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:and>
+								<iso:SecurityCondition>
+									<iso:or>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:and>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>CAN</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>TAKey</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+														<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+														<!-- "CAN allowed" bit must be set. -->
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+											</iso:and>
+										</iso:SecurityCondition>
+									</iso:or>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000010000</iso:DIDStateQualifier>
+										<!-- DG 9: 0000010000 - Place of Birth  -->
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:and>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>0109</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+
+			<!-- DG10 - Nationality -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>DG10</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:and>
+								<iso:SecurityCondition>
+									<iso:or>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:and>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>CAN</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>TAKey</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+														<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+														<!-- "CAN allowed" bit must be set. -->
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+											</iso:and>
+										</iso:SecurityCondition>
+									</iso:or>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000020000</iso:DIDStateQualifier>
+										<!--  DG10: 0000020000 - Nationality  -->
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:and>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>010A</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- DG11 - Sex -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>DG11</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:and>
+								<iso:SecurityCondition>
+									<iso:or>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:and>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>CAN</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>TAKey</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+														<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+														<!-- "CAN allowed" bit must be set. -->
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+											</iso:and>
+										</iso:SecurityCondition>
+									</iso:or>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000040000</iso:DIDStateQualifier>
+										<!--  DG11: 0000040000 - Sex  -->
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:and>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>010B</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- DG17 - NormalPlaceOfResidence  -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>DG17</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:and>
+								<iso:SecurityCondition>
+									<iso:or>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:and>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>CAN</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>TAKey</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+														<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+														<!-- "CAN allowed" bit must be set. -->
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+											</iso:and>
+										</iso:SecurityCondition>
+									</iso:or>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253050001000000</iso:DIDStateQualifier>
+										<!-- DG17: 0001000000 - Normal Place of Residence (READ) -->
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:and>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:and>
+								<iso:SecurityCondition>
+									<iso:or>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:and>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>CAN</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>TAKey</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+														<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+														<!-- "CAN allowed" bit must be set. -->
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+											</iso:and>
+										</iso:SecurityCondition>
+									</iso:or>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253052000000000</iso:DIDStateQualifier>
+										<!-- DG17: 2000000000 - Normal Place of Residence (WRITE) -->
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:and>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>0111</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- DG18 - CommunityID  -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>DG18</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:and>
+								<iso:SecurityCondition>
+									<iso:or>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:and>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>CAN</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>TAKey</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+														<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+														<!-- "CAN allowed" bit must be set. -->
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+											</iso:and>
+										</iso:SecurityCondition>
+									</iso:or>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253050002000000</iso:DIDStateQualifier>
+										<!--  DG18: 0002000000 - Community ID (READ) -->
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:and>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:and>
+								<iso:SecurityCondition>
+									<iso:or>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:and>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>CAN</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+												<iso:SecurityCondition>
+													<iso:DIDAuthentication>
+														<iso:DIDName>TAKey</iso:DIDName>
+														<iso:DIDState>true</iso:DIDState>
+														<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000010</iso:DIDStateQualifier>
+														<!-- "CAN allowed" bit must be set. -->
+													</iso:DIDAuthentication>
+												</iso:SecurityCondition>
+											</iso:and>
+										</iso:SecurityCondition>
+									</iso:or>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>TAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+										<iso:DIDStateQualifier>7F4C12060904007F00070301020253051000000000</iso:DIDStateQualifier>
+										<!-- DG18: 1000000000 - Community ID (WRITE) -->
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+								<iso:SecurityCondition>
+									<iso:DIDAuthentication>
+										<iso:DIDName>CAKey</iso:DIDName>
+										<iso:DIDState>true</iso:DIDState>
+									</iso:DIDAuthentication>
+								</iso:SecurityCondition>
+							</iso:and>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>0111</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+		</iso:CardApplication>
+
+
+		<!-- =============== -->
+		<!-- CardApplication -->
+		<!-- ............... -->
+		<!--      eSign      -->
+		<!-- =============== -->
+
+		<iso:CardApplication>
+			<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+			<iso:ApplicationIdentifier>A000000167455349474E</iso:ApplicationIdentifier>
+			<iso:ApplicationName>eSign</iso:ApplicationName>
+
+
+			<!-- As there are only standardized card application services, there are no
+				 CardApplicationServiceInfo elements. -->
+
+			<iso:CardApplicationACL>
+
+				<!-- =================================== -->
+				<!-- eSign: CardApplicationServiceAccess -->
+				<!-- =================================== -->
+
+
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationServiceAccess</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:APIAccessEntryPoint>Initialize</iso:APIAccessEntryPoint>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationServiceAccess</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:APIAccessEntryPoint>Terminate</iso:APIAccessEntryPoint>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationServiceAccess</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:APIAccessEntryPoint>CardApplicationPath</iso:APIAccessEntryPoint>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- ========================== -->
+				<!-- eSign: Connection Service  -->
+				<!-- ========================== -->
+
+
+
+				<!-- CardApplicationConnect -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationConnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<!-- For the selection of the eSign-Application there are three options:
+						 1. TAKey with Authentication Terminal (with "Install Qualified Certificate" bit) + CA + PIN
+						 2. TAKey with Signature Terminal (with "Generate qualified electronic signature" bit) + CA + PIN
+						 3. TAKey with Signature Terminal (with "Generate qualified electronic signature" bit) + CA + CAN,
+						 4. TAKey with Signature Terminal (with "Generate qualified electronic signature" bit) + CA + PUK,
+						 where CA = CAKey or CAKey-ci.
+					-->
+					<iso:SecurityCondition>
+						<iso:or>
+							<!-- AT + CAKey + PIN -->
+							<iso:SecurityCondition>
+								<iso:and>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<!-- The DIDStateQualifier refers to the full CHAT.
+												 In this case it states that the "Install
+												 Qualified Certificate" bit of an Authentication Terminal
+												 must be set. -->
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000080</iso:DIDStateQualifier>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>CAKey</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>PIN</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+								</iso:and>
+							</iso:SecurityCondition>
+							<!-- ST + CAKey + PIN -->
+							<iso:SecurityCondition>
+								<iso:and>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<!-- The DIDStateQualifier refers to the full CHAT.
+												 In this case it states that the "Generate qualified electronic signature" bit
+												 of a Signature Terminal must be set. -->
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>CAKey</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>PIN</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+								</iso:and>
+							</iso:SecurityCondition>
+							<!-- ST + CAKey + CAN -->
+							<iso:SecurityCondition>
+								<iso:and>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<!-- The DIDStateQualifier refers to the full CHAT.
+												 In this case it states that the "Generate qualified electronic signature" bit
+												 of a Signature Terminal must be set. -->
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>CAKey</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>CAN</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+								</iso:and>
+							</iso:SecurityCondition>
+							<!-- ST + CAKey + PUK -->
+							<iso:SecurityCondition>
+								<iso:and>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<!-- The DIDStateQualifier refers to the full CHAT.
+												 In this case it states that the "Generate qualified electronic signature" bit
+												 of a Signature Terminal must be set. -->
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>CAKey</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>PUK</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+								</iso:and>
+							</iso:SecurityCondition>
+							<!-- AT + CAKey-ci + PIN -->
+							<iso:SecurityCondition>
+								<iso:and>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<!-- The DIDStateQualifier refers to the full CHAT.
+												 In this case it states that the "Install
+												 Qualified Certificate" bit of an Authentication Terminal
+												 must be set. -->
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000080</iso:DIDStateQualifier>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>CAKey-ci</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>PIN</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+								</iso:and>
+							</iso:SecurityCondition>
+							<!-- ST + CAKey-ci + PIN -->
+							<iso:SecurityCondition>
+								<iso:and>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<!-- The DIDStateQualifier refers to the full CHAT.
+												 In this case it states that the "Generate qualified electronic signature" bit
+												 of a Signature Terminal must be set. -->
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>CAKey-ci</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>PIN</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+								</iso:and>
+							</iso:SecurityCondition>
+							<!-- ST + CAKey-ci + CAN -->
+							<iso:SecurityCondition>
+								<iso:and>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<!-- The DIDStateQualifier refers to the full CHAT.
+												 In this case it states that the "Generate qualified electronic signature" bit
+												 of a Signature Terminal must be set. -->
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>CAKey-ci</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>CAN</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+								</iso:and>
+							</iso:SecurityCondition>
+							<!-- ST + CAKey-ci + PUK -->
+							<iso:SecurityCondition>
+								<iso:and>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<!-- The DIDStateQualifier refers to the full CHAT.
+												 In this case it states that the "Generate qualified electronic signature" bit
+												 of a Signature Terminal must be set. -->
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>CAKey-ci</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>PUK</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+								</iso:and>
+							</iso:SecurityCondition>
+						</iso:or>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<!-- CardApplicationDisconnect -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationDisconnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<!-- CardApplicationStartSession -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationStartSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<!-- CardApplicationEndSession -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationEndSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<!-- ============================== -->
+				<!-- eSign: CardApplication Service -->
+				<!-- ============================== -->
+
+				<!-- CardApplicationList is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationList</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+
+				<!-- CardApplicationCreate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationCreate</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- CardApplicationDelete is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationDelete</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- CardApplicationServiceList is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationServiceList</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- CardApplicationServiceCreate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationServiceCreate</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- CardApplicationServiceLoad is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationServiceLoad</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- CardApplicationServiceDelete is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationServiceDelete</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- CardApplicationServiceDescribe is NOT allowed  -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationServiceDescribe</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- ExecuteAction is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>ExecuteAction</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- ========================= -->
+				<!-- eSign: Named Data Service -->
+				<!-- ========================= -->
+				<!-- DataSetList -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetList</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<!-- DataSetCreate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetCreate</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+
+				<!-- DataSetSelect -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- DataSetDelete is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetDelete</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DSIList -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DSIList</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- DSICreate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DSICreate</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- DSIDelete is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DSIDelete</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DSIRead -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- DSIWrite -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- ============================ -->
+				<!-- eSign: Cryptographic Service -->
+				<!-- ============================ -->
+
+
+				<!-- Encipher is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>Encipher</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- Decipher is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>Decipher</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- GetRandom -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>GetRandom</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- Hash is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>Hash</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- Sign -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- VerifySignature is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>VerifySignature</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- VerifyCertificate -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CryptographicServiceAction>VerifyCertificate</iso:CryptographicServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- ==================================== -->
+				<!-- eSign: Differential Identity Service -->
+				<!-- ==================================== -->
+
+				<!-- DIDList -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDList</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- DIDCreate is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDCreate</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- DIDGet -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- DIDUpdate is used for activating the electronic signature functionality, which requires TA
+					 with a signature terminal (with "Generate qualified electronic signature" bit set) + (CAKey or CAKey-ci) and the PIN.
+				-->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDUpdate</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:or>
+							<!-- TAKey (AT) + CAKey + PIN -->
+							<iso:SecurityCondition>
+								<iso:and>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<!-- The DIDStateQualifier refers to the full CHAT.
+												 In this case it states that the "Generate qualified electronic signature" bit
+												 of a Signature Terminal must be set. -->
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>CAKey</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>PIN</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+								</iso:and>
+							</iso:SecurityCondition>
+							<!-- TAKey (AT) + CAKey-ci + PIN -->
+							<iso:SecurityCondition>
+								<iso:and>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>TAKey</iso:DIDName>
+											<!-- The DIDStateQualifier refers to the full CHAT.
+												 In this case it states that the "Generate qualified electronic signature" bit
+												 of a Signature Terminal must be set. -->
+											<iso:DIDState>true</iso:DIDState>
+											<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>CAKey-ci</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+									<iso:SecurityCondition>
+										<iso:DIDAuthentication>
+											<iso:DIDName>PIN</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthentication>
+									</iso:SecurityCondition>
+								</iso:and>
+							</iso:SecurityCondition>
+						</iso:or>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DIDDelete is NOT allowed -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDDelete</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+
+				<!-- DIDAuthenticate -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- ============================ -->
+				<!-- eSign: Authorization Service -->
+				<!-- ============================ -->
+
+				<!-- ACLList -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+				<!-- ACLModify is NOT allowed  -->
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:AuthorizationServiceAction>ACLModify</iso:AuthorizationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:never>false</iso:never>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+
+			</iso:CardApplicationACL>
+
+
+			<!-- =============================== -->
+			<!-- eSign: Differential Identities  -->
+			<!-- =============================== -->
+
+
+
+
+			<!-- PrK.ICC.QES   -->
+
+			<iso:DIDInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>PrK.ICC.QES</iso:DIDName>
+					<iso:DIDProtocol>
+						urn:oid:1.3.162.15480.3.0.25
+					</iso:DIDProtocol>
+					<iso:DIDMarker>
+						<iso:CryptoMarker
+							Protocol="urn:oid:1.3.162.15480.3.0.25">
+							<iso:AlgorithmInfo>
+								<iso:Algorithm>ECDSAwithSHA256</iso:Algorithm>
+								<iso:AlgorithmIdentifier>
+									<iso:Algorithm>
+										urn:oid:1.2.840.10045.4.3.2
+									</iso:Algorithm>
+								</iso:AlgorithmIdentifier>
+								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
+								<!-- There is no CardAlgRef specified, because it is implicitly known.  -->
+							</iso:AlgorithmInfo>
+							<iso:KeyInfo>
+								<iso:KeyRef>
+									<iso:KeyRef>84</iso:KeyRef>
+									<iso:Protected>true</iso:Protected>
+								</iso:KeyRef>
+							</iso:KeyInfo>
+							<iso:SignatureGenerationInfo>MSE_KEY PSO_CDS</iso:SignatureGenerationInfo>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.ZDA.QES</iso:DataSetName>
+							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.ICC.QES</iso:DataSetName>
+							</iso:CertificateRef>
+						</iso:CryptoMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+						</iso:Action>
+						<!-- In order to create a signature TA with a Signature Terminal (with "Generate qualified electronic signature" bit) + CAN + (CAKey or CAKey-ci) + eSign-PIN is required. -->
+						<iso:SecurityCondition>
+							<iso:or>
+								<!-- TA (ST) + CAKey + CAN + eSign-PIN -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<!-- The DIDStateQualifier refers to the full CHAT.
+													 In this case it states that the "Generate qualified electronic signature" bit
+													 of a Signature Terminal must be set. -->
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>
+													eSign-PIN
+												</iso:DIDName>
+												<iso:DIDState>
+													true
+												</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<!-- TA (ST) + CAKey-ci + CAN + eSign-PIN -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<!-- The DIDStateQualifier refers to the full CHAT.
+													 In this case it states that the "Generate qualified electronic signature" bit
+													 of a Signature Terminal must be set. -->
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey-ci</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>
+													eSign-PIN
+												</iso:DIDName>
+												<iso:DIDState>
+													true
+												</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+							</iso:or>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+
+
+			<!--  eSign-PIN  -->
+			<iso:DIDInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>eSign-PIN</iso:DIDName>
+					<iso:LocalDIDName xml:lang="DE">Signatur-PIN</iso:LocalDIDName>
+					<iso:LocalDIDName xml:lang="EN">Electronic Signature PIN</iso:LocalDIDName>
+					<iso:DIDProtocol>
+						urn:oid:1.3.162.15480.3.0.9
+					</iso:DIDProtocol>
+					<!--PIN Compare-->
+					<iso:DIDMarker>
+						<iso:PinCompareMarker
+							Protocol="urn:oid:1.3.162.15480.3.0.9">
+							<iso:PinRef>
+								<iso:KeyRef>81</iso:KeyRef>
+								<iso:Protected>true</iso:Protected>
+							</iso:PinRef>
+							<iso:PasswordAttributes>
+								<iso:pwdFlags>local initialized exchangeRefData resetRetryCounter1 resetRetryCounter2 needs-padding
+								</iso:pwdFlags>
+								<iso:pwdType>ascii-numeric</iso:pwdType>
+								<iso:minLength>6</iso:minLength>
+								<iso:storedLength>6</iso:storedLength>
+								<iso:maxLength>6</iso:maxLength>
+							</iso:PasswordAttributes>
+							<!--
+								The different states may be distinguished by calling VERIFY without data:
+
+								CL ='0C' - secure messaging with authenticated header, no chaining
+								INS='20' - just as VERIFY
+								P1 ='00'
+								P2 ='81' - Key Reference of the eSign-PIN (as <iso:KeyRef>81</iso:KeyRef> is specified above)
+								The status of the eSign-PIN is indicated in the response of this command:
+								- 9000 - means that the eSign-PIN already has been entered
+								- 63Cx - means that the eSign-PIN needs to be entered and there are x trials left (eSign_RCx)
+
+								- 6983 - indicates that the eSign-PIN is blocked and the PUK and the RESET RETRY COUNTER command is used for
+								resetting the retry counter (eSign_blocked)
+								- 6984 - indicates that the eSign-PIN is terminated and first needs to be set (using Change Reference Data / Modify Verification Data)
+								to be operational.
+								- 6982 - indicates that the eSign-PIN is either blocked or terminated:
+								As indicated in [BSI-TR-03117#A.2.1] the chip may signal that the
+								eSign-PIN is blocked by returning 6982 instead of 6983.
+								On the other side (cf. [BSI-TR-03117#A.2.1]) the chip may also signal that the
+								eSign-PIN is terminated by returning 6982 instead of 6984.
+								Hence 6982 means that the chip is either terminated or blocked.
+
+								Hence in order to distinguish these two cases it is required to try to set eSign-PIN.
+								If this is possible then the chip enters the operational state eSign_RC3 and
+								it becomes clear that it was in the terminated state. If entering the eSign-PIN
+								is not possible, then it becomes clear that the eSign-PIN is blocked.
+
+							-->
+							<iso:StateInfo>
+								<iso:StateRecognition>
+									<iso:CardCall>
+										<iso:CommandAPDU>0C200081</iso:CommandAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>63C3</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>eSign_RC3</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>63C2</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>eSign_RC2</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>63C1</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>eSign_RC1</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>63C0</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>eSign_blocked</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>6983</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>eSign_blocked</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>6984</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>eSign_terminated</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>6982</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>eSign_blocked_or_terminated</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+									</iso:CardCall>
+								</iso:StateRecognition>
+								<iso:State StateName="eSign_start" StateClass="RecognitionNecessary">
+								</iso:State>
+								<iso:State StateName="eSign_RC3" StateClass="Operational">
+									<iso:RetryCounter>3</iso:RetryCounter>
+									<iso:StateTransition TargetState="eSign_RC2">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>eSign-PIN</iso:DIDName>
+											<iso:DIDState>false</iso:DIDState>
+										</iso:DIDAuthenticationState>
+									</iso:StateTransition>
+								</iso:State>
+								<iso:State StateName="eSign_RC2" StateClass="Operational">
+									<iso:RetryCounter>2</iso:RetryCounter>
+									<iso:StateTransition TargetState="eSign_RC3">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>eSign-PIN</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthenticationState>
+									</iso:StateTransition>
+									<iso:StateTransition TargetState="eSign_RC1">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>eSign-PIN</iso:DIDName>
+											<iso:DIDState>false</iso:DIDState>
+										</iso:DIDAuthenticationState>
+									</iso:StateTransition>
+								</iso:State>
+								<iso:State StateName="eSign_RC1" StateClass="Operational">
+									<iso:RetryCounter>1</iso:RetryCounter>
+									<iso:StateTransition TargetState="eSign_RC3">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>eSign-PIN</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthenticationState>
+									</iso:StateTransition>
+									<iso:StateTransition TargetState="eSign_blocked">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>eSign-PIN</iso:DIDName>
+											<iso:DIDState>false</iso:DIDState>
+										</iso:DIDAuthenticationState>
+									</iso:StateTransition>
+								</iso:State>
+								<iso:State StateName="eSign_blocked" StateClass="NotOperational">
+									<iso:RetryCounter>0</iso:RetryCounter>
+									<iso:StateTransition TargetState="eSign_RC3">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>PUK</iso:DIDName>
+											<iso:DIDState>true</iso:DIDState>
+										</iso:DIDAuthenticationState>
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<!-- RESET RETRY COUNTER with P1=03. -->
+												<iso:CommandAPDU>0C2C0381</iso:CommandAPDU>
+												<iso:ResponseAPDU>
+													<iso:Trailer>9000</iso:Trailer>
+													<iso:Conclusion><iso:RecognizedState>eSign_RC3</iso:RecognizedState></iso:Conclusion>
+												</iso:ResponseAPDU>
+												<iso:ResponseAPDU>
+													<iso:Trailer>6984</iso:Trailer>
+													<iso:Conclusion><iso:RecognizedState>PUK_blocked_in_eSign</iso:RecognizedState></iso:Conclusion>
+												</iso:ResponseAPDU>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
+								</iso:State>
+								<iso:State StateName="eSign_terminated" StateClass="NotOperational">
+									<iso:StateTransition TargetState="eSign_RC3">
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<iso:APICall>
+													<iso:ModifyVerificationData>
+														<iso:SlotHandle></iso:SlotHandle>
+														<iso:InputUnit>
+															<iso:PinInput>
+																<iso:Index>0</iso:Index>
+																<iso:PasswordAttributes>
+																	<iso:pwdFlags>local initialized exchangeRefData resetRetryCounter1 resetRetryCounter2 needs-padding
+																	</iso:pwdFlags>
+																	<iso:pwdType>ascii-numeric</iso:pwdType>
+																	<iso:minLength>6</iso:minLength>
+																	<iso:storedLength>6</iso:storedLength>
+																</iso:PasswordAttributes>
+															</iso:PinInput>
+														</iso:InputUnit>
+														<!-- Change Reference Data to set the eSign_PIN -->
+														<iso:Template>0C240181</iso:Template>
+													</iso:ModifyVerificationData>
+												</iso:APICall>
+												<iso:APIResponse>
+													<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+														<dss:Result>
+															<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+														</dss:Result>
+														<iso:Response>9000</iso:Response>
+													</iso:ModifyVerificationDataResponse>
+												</iso:APIResponse>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
+								</iso:State>
+								<iso:State StateName="eSign_blocked_or_terminated" StateClass="NotOperational">
+									<iso:StateTransition>
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<iso:APICall>
+													<iso:ModifyVerificationData>
+														<iso:SlotHandle></iso:SlotHandle>
+														<iso:InputUnit>
+															<iso:PinInput>
+																<iso:Index>0</iso:Index>
+																<iso:PasswordAttributes>
+																	<iso:pwdFlags>local initialized exchangeRefData resetRetryCounter1 resetRetryCounter2 needs-padding
+																	</iso:pwdFlags>
+																	<iso:pwdType>ascii-numeric</iso:pwdType>
+																	<iso:minLength>6</iso:minLength>
+																	<iso:storedLength>6</iso:storedLength>
+																</iso:PasswordAttributes>
+															</iso:PinInput>
+														</iso:InputUnit>
+														<!-- Try Change Reference Data to set the eSign_PIN. If this is successful (9000) the state was in fact terminated
+															 and the PIN is set. Otherwise (6983) or (6982) it is clear that the state was in fact blocked. -->
+														<iso:Template>0C240181</iso:Template>
+													</iso:ModifyVerificationData>
+												</iso:APICall>
+												<iso:APIResponse>
+													<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+														<dss:Result>
+															<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+														</dss:Result>
+														<iso:Response>9000</iso:Response>
+													</iso:ModifyVerificationDataResponse>
+													<iso:Conclusion>
+														<iso:RecognizedState>eSign_RC3</iso:RecognizedState>
+													</iso:Conclusion>
+												</iso:APIResponse>
+												<iso:APIResponse>
+													<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+														<dss:Result>
+															<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+														</dss:Result>
+														<iso:Response>6983</iso:Response>
+													</iso:ModifyVerificationDataResponse>
+													<iso:Conclusion>
+														<iso:RecognizedState>eSign_blocked</iso:RecognizedState>
+													</iso:Conclusion>
+												</iso:APIResponse>
+												<iso:APIResponse>
+													<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+														<dss:Result>
+															<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+														</dss:Result>
+														<iso:Response>6982</iso:Response>
+													</iso:ModifyVerificationDataResponse>
+													<iso:Conclusion>
+														<iso:RecognizedState>eSign_blocked</iso:RecognizedState>
+													</iso:Conclusion>
+												</iso:APIResponse>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
+								</iso:State>
+								<iso:State StateName="PUK_blocked_in_eSign" StateClass="NotOperational" />
+							</iso:StateInfo>
+						</iso:PinCompareMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+
+					<!-- Updating the eSign-PIN is possible with CAN+TAKey+(CAKey or CAKey-ci)+eSign-PIN, where the TA-certificate is a signature terminal
+						 with "Generate qualified electronic signature" bit set. -->
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDUpdate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:or>
+								<!-- CAN + TAKey + CAKey + eSign-PIN -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+												<!-- Signature Terminal with "Generate qualified electronic signature" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>eSign-PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<!-- CAN + TAKey + CAKey-ci + eSign-PIN -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+												<!-- Signature Terminal with "Generate qualified electronic signature" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey-ci</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>eSign-PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+							</iso:or>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+
+					<!-- Entering the eSign-PIN is possible with CAN+TAKey+(CAKey or CAKey-ci), where the TA-certificate is a signature terminal
+						 with "Generate qualified electronic signature" bit set. -->
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:or>
+								<!-- CAN + TAKey + CAKey  -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+												<!-- Signature Terminal with "Generate qualified electronic signature" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<!-- CAN + TAKey + CAKey-ci -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+												<!-- Signature Terminal with "Generate qualified electronic signature" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey-ci</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+							</iso:or>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+
+			<!-- ================= -->
+			<!-- eSign: Data Sets  -->
+			<!-- ================= -->
+
+			<!-- EF.C.ZDA.QES -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.C.ZDA.QES</iso:DataSetName>
+				<iso:LocalDataSetName xml:lang="DE">Zertifikat des ZDA für die QES</iso:LocalDataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<!-- Reading the certificate is possible with (CAN or PIN)+TAKey+(CAKey or CAKey-ci), where the TA-certificate is a signature terminal
+							 with "Generate qualified electronic signature" bit set. -->
+						<iso:SecurityCondition>
+							<iso:or>
+								<!-- CAN + TAKey + CAKey  -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+												<!-- Signature Terminal with "Generate qualified electronic signature" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<!-- CAN + TAKey + CAKey-ci -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+												<!-- Signature Terminal with "Generate qualified electronic signature" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey-ci</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<!-- PIN + TAKey + CAKey  -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+												<!-- Signature Terminal with "Generate qualified electronic signature" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<!-- PIN + TAKey + CAKey-ci -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+												<!-- Signature Terminal with "Generate qualified electronic signature" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey-ci</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+							</iso:or>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
+						</iso:Action>
+						<!-- Writing of certificate is possible for Authentication Terminals with PIN+(CAKey or CAKey-ci)+TAKey
+							 with certificate in which install qualified certificate bit is set. -->
+						<iso:SecurityCondition>
+							<iso:or>
+								<!-- PIN+CAKey+TAKey -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000080</iso:DIDStateQualifier>
+												<!-- Authentication Terminal with "Install qualified certificate" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<!-- PIN+CAKey-ci+TAKey -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000080</iso:DIDStateQualifier>
+												<!-- Authentication Terminal with "Install qualified certificate" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+							</iso:or>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>C000</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+
+			<!-- EF.C.ICC.QES -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.C.ICC.QES</iso:DataSetName>
+				<iso:LocalDataSetName xml:lang="DE">Zertifikat des Inhabers für die QES</iso:LocalDataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<!-- Reading the certificate is possible with (CAN or PIN)+TAKey+(CAKey or CAKey-ci), where the TA-certificate is a signature terminal
+							 with "Generate qualified electronic signature" bit set. -->
+						<iso:SecurityCondition>
+							<iso:or>
+								<!-- CAN + TAKey + CAKey  -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+												<!-- Signature Terminal with "Generate qualified electronic signature" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<!-- CAN + TAKey + CAKey-ci -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+												<!-- Signature Terminal with "Generate qualified electronic signature" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey-ci</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<!-- PIN + TAKey + CAKey  -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+												<!-- Signature Terminal with "Generate qualified electronic signature" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<!-- PIN + TAKey + CAKey-ci -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F000703010203530102</iso:DIDStateQualifier>
+												<!-- Signature Terminal with "Generate qualified electronic signature" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey-ci</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+							</iso:or>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
+						</iso:Action>
+						<!-- Writing of certificate is possible for Authentication Terminals with PIN+(CAKey or CAKey-ci)+TAKey
+							 with certificate in which install qualified certificate bit is set. -->
+						<iso:SecurityCondition>
+							<iso:or>
+								<!-- PIN+CAKey+TAKey -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000080</iso:DIDStateQualifier>
+												<!-- Authentication Terminal with "Install qualified certificate" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+								<!-- PIN+CAKey-ci+TAKey -->
+								<iso:SecurityCondition>
+									<iso:and>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>PIN</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>CAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+										<iso:SecurityCondition>
+											<iso:DIDAuthentication>
+												<iso:DIDName>TAKey</iso:DIDName>
+												<iso:DIDState>true</iso:DIDState>
+												<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000080</iso:DIDStateQualifier>
+												<!-- Authentication Terminal with "Install qualified certificate" bit set -->
+											</iso:DIDAuthentication>
+										</iso:SecurityCondition>
+									</iso:and>
+								</iso:SecurityCondition>
+							</iso:or>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>C001</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+		</iso:CardApplication>
+	</iso:ApplicationCapabilities>
+</iso:CardInfo>

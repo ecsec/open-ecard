@@ -63,14 +63,15 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 
 /**
- * 
+ * This class is a provisional and simple replacement for the JAXB-Marshaller
+ * used in the applet and the rich client since JAXB is not available on
+ * Android.</br>
+ *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class AndroidMarshaller implements WSMarshaller {
 
     private static final Logger _logger = LoggerFactory.getLogger(AndroidMarshaller.class);
-    private static final Marker _enter = MarkerFactory.getMarker("ENTERING");
-    private static final Marker _exit = MarkerFactory.getMarker("EXITING");
 
     private static final String iso = "iso:";
     private static final String tls = "tls:";
@@ -111,9 +112,6 @@ public class AndroidMarshaller implements WSMarshaller {
 
     @Override
     public synchronized String doc2str(Node doc) throws TransformerException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	_logger.trace(_enter, "> {}", doc);
-	// </editor-fold>
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	transformer.transform(new DOMSource(doc), new StreamResult(out));
 	String result;
@@ -122,17 +120,11 @@ public class AndroidMarshaller implements WSMarshaller {
 	} catch (UnsupportedEncodingException ex) {
 	    throw new TransformerException(ex);
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	_logger.trace(_exit, "< {}", result);
-	// </editor-fold>
 	return result;
     }
 
     @Override
     public synchronized Document marshal(Object o) throws MarshallingTypeException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	_logger.trace(_enter, "> {}", o);
-	// </editor-fold>
 	Document document = documentBuilder.newDocument();
 	document.setXmlStandalone(true);
 
@@ -424,9 +416,6 @@ public class AndroidMarshaller implements WSMarshaller {
 	    throw new IllegalArgumentException("Cannot marshal " + o.getClass().getSimpleName());
 	}
 	document.appendChild(rootElement);
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	_logger.trace(_exit, "< {}", document);
-	// </editor-fold>
 	return document;
     }
 
@@ -561,9 +550,6 @@ public class AndroidMarshaller implements WSMarshaller {
 
     @Override
     public synchronized Object unmarshal(Node n) throws MarshallingTypeException, WSMarshallerException {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	_logger.trace(_enter, "> {}", n);
-	// </editor-fold>
 	Document newDoc = null;
 	if (n instanceof Document) {
 	    newDoc = (Document) n;
@@ -584,9 +570,6 @@ public class AndroidMarshaller implements WSMarshaller {
 	    while (eventType != XmlPullParser.END_DOCUMENT) {
 		if (eventType == XmlPullParser.START_TAG) {
 		    Object obj = parse(parser);
-		    // <editor-fold defaultstate="collapsed" desc="log trace">
-		    _logger.trace(_exit, "< {}", obj);
-		    // </editor-fold>
 		    return obj;
 		}
 		eventType = parser.next();
@@ -778,10 +761,8 @@ public class AndroidMarshaller implements WSMarshaller {
 		parser.next();
 		eventType = parser.getEventType();
 		if (eventType == XmlPullParser.START_TAG) {
-		    if (parser.getName().equals("ResultMajor")) {
-			Result r = new Result();
-			r.setResultMajor(parser.nextText());
-			waitResponse.setResult(r);
+		    if (parser.getName().equals("Result")) {
+			waitResponse.setResult(this.parseResult(parser));
 		    } else if (parser.getName().equals("IFDEvent")) {
 			waitResponse.getIFDEvent().add(parseIFDStatusType(parser, "IFDEvent"));
 		    } else if (parser.getName().equals("SessionIdentifier")) {
@@ -798,10 +779,8 @@ public class AndroidMarshaller implements WSMarshaller {
 		parser.next();
 		eventType = parser.getEventType();
 		if (eventType == XmlPullParser.START_TAG) {
-		    if (parser.getName().equals("ResultMajor")) {
-			Result r = new Result();
-			r.setResultMajor(parser.nextText());
-			getStatusResponse.setResult(r);
+		    if (parser.getName().equals("Result")) {
+			getStatusResponse.setResult(this.parseResult(parser));
 		    } else if (parser.getName().equals("IFDStatus")) {
 			getStatusResponse.getIFDStatus().add(parseIFDStatusType(parser, "IFDStatus"));
 		    }
@@ -831,10 +810,8 @@ public class AndroidMarshaller implements WSMarshaller {
 		parser.next();
 		eventType = parser.getEventType();
 		if (eventType == XmlPullParser.START_TAG) {
-		    if (parser.getName().equals("ResultMajor")) {
-			Result r = new Result();
-			r.setResultMajor(parser.nextText());
-			resp.setResult(r);
+		    if (parser.getName().equals("Result")) {
+			resp.setResult(this.parseResult(parser));
 		    } else if (parser.getName().equals("CardCall")) {
 			recTree.getCardCall().add(this.parseCardCall(parser));
 		    }
@@ -858,10 +835,8 @@ public class AndroidMarshaller implements WSMarshaller {
 		parser.next();
 		eventType = parser.getEventType();
 		if (eventType == XmlPullParser.START_TAG) {
-		    if (parser.getName().equals("ResultMajor")) {
-			Result r = new Result();
-			r.setResultMajor(parser.nextText());
-			establishContextResponse.setResult(r);
+		    if (parser.getName().equals("Result")) {
+			establishContextResponse.setResult(this.parseResult(parser));
 		    } else if (parser.getName().equals("ContextHandle")) {
 			establishContextResponse.setContextHandle(StringUtils.toByteArray(parser.nextText()));
 		    }
@@ -876,10 +851,8 @@ public class AndroidMarshaller implements WSMarshaller {
 		parser.next();
 		eventType = parser.getEventType();
 		if (eventType == XmlPullParser.START_TAG) {
-		    if (parser.getName().equals("ResultMajor")) {
-			Result r = new Result();
-			r.setResultMajor(parser.nextText());
-			listIFDsResponse.setResult(r);
+		    if (parser.getName().equals("Result")) {
+			listIFDsResponse.setResult(this.parseResult(parser));
 		    } else if (parser.getName().equals("IFDName")) {
 			listIFDsResponse.getIFDName().add(parser.nextText());
 		    }
@@ -894,10 +867,8 @@ public class AndroidMarshaller implements WSMarshaller {
 		parser.next();
 		eventType = parser.getEventType();
 		if (eventType == XmlPullParser.START_TAG) {
-		    if (parser.getName().equals("ResultMajor")) {
-			Result r = new Result();
-			r.setResultMajor(parser.nextText());
-			connectResponse.setResult(r);
+		    if (parser.getName().equals("Result")) {
+			connectResponse.setResult(this.parseResult(parser));
 		    } else if (parser.getName().equals("SlotHandle")) {
 			connectResponse.setSlotHandle(StringUtils.toByteArray(parser.nextText()));
 		    }
@@ -948,16 +919,37 @@ public class AndroidMarshaller implements WSMarshaller {
 		parser.next();
 		eventType = parser.getEventType();
 		if (eventType == XmlPullParser.START_TAG) {
-		    if (parser.getName().equals("ResultMajor")) {
-			Result r = new Result();
-			r.setResultMajor(parser.nextText());
-			transmitResponse.setResult(r);
+		    if (parser.getName().equals("Result")) {
+			transmitResponse.setResult(this.parseResult(parser));
 		    } else if (parser.getName().equals("OutputAPDU")) {
 			transmitResponse.getOutputAPDU().add(StringUtils.toByteArray(parser.nextText()));
 		    }
 		}
 	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("TransmitResponse")));
 	    return transmitResponse;
+	} else if (parser.getName().equals("CardInfo")) {
+	    CardInfo cardInfo = new CardInfo();
+	    ApplicationCapabilitiesType applicationCapabilities = new ApplicationCapabilitiesType();
+	    int eventType = parser.getEventType();
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("ObjectIdentifier")) {
+			CardTypeType cardType = new CardTypeType();
+			cardType.setObjectIdentifier(parser.nextText());
+			cardInfo.setCardType(cardType);
+		    } else if (parser.getName().equals("ImplicitlySelectedApplication")) {
+			applicationCapabilities.setImplicitlySelectedApplication(StringUtils.toByteArray(parser.nextText()));
+		    } else if (parser.getName().equals("ApplicationIdentifier")) {
+			CardApplicationType cardApplication = new CardApplicationType();
+			cardApplication.setApplicationIdentifier(StringUtils.toByteArray(parser.nextText()));
+			applicationCapabilities.getCardApplication().add(cardApplication);
+		    }
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("CardInfo")));
+	    cardInfo.setApplicationCapabilities(applicationCapabilities);
+	    return cardInfo;
 	} else {
 	    return null;
 	}

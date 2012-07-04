@@ -54,72 +54,72 @@ public class AppTray {
     }
 
     private void initialize() {
-	if (SystemTray.isSupported()) {
-	    final SystemTray tray = SystemTray.getSystemTray();
+        if (SystemTray.isSupported()) {
+            final SystemTray tray = SystemTray.getSystemTray();
+            
+            MenuItem configItem = new MenuItem(lang.translationForKey("tray.config"));
+            configItem.addActionListener(new ActionListener() {
 
-	    MenuItem configItem = new MenuItem(lang.translationForKey("tray.config"));
-	    configItem.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                     JOptionPane.showMessageDialog(null, "Implement Me!");
+                }
+            });
+            
+            MenuItem helpItem = new MenuItem(lang.translationForKey("tray.help"));
+            helpItem.addActionListener(new ActionListener() {
 
-		@Override
-		public void actionPerformed(ActionEvent e) {
-		     JOptionPane.showMessageDialog(null, "Implement Me!");
-		}
-	    });
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    JOptionPane.showMessageDialog(null, "Implement Me!");
+                }
+            });
+            
+            MenuItem aboutItem = new MenuItem(lang.translationForKey("tray.about"));
+            aboutItem.addActionListener(new ActionListener() {
 
-	    MenuItem helpItem = new MenuItem(lang.translationForKey("tray.help"));
-	    helpItem.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    JOptionPane.showMessageDialog(null, "Implement Me!");
+                }
+            });
+            
+            MenuItem exitItem = new MenuItem(lang.translationForKey("tray.exit"));
+            exitItem.addActionListener(new ActionListener() {
 
-		@Override
-		public void actionPerformed(ActionEvent e) {
-		    JOptionPane.showMessageDialog(null, "Implement Me!");
-		}
-	    });
-
-	    MenuItem aboutItem = new MenuItem(lang.translationForKey("tray.about"));
-	    aboutItem.addActionListener(new ActionListener() {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-		    JOptionPane.showMessageDialog(null, "Implement Me!");
-		}
-	    });
-
-	    MenuItem exitItem = new MenuItem(lang.translationForKey("tray.exit"));
-	    exitItem.addActionListener(new ActionListener() {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-		    trayIcon.displayMessage("Open eCard App", lang.translationForKey("tray.message.shutdown"), TrayIcon.MessageType.INFO);
-		    client.teardown();
-		    tray.remove(trayIcon);
-		    System.exit(0);
-		}
-	    });
-
-	    final PopupMenu popup = new PopupMenu();
-	    popup.add(configItem);
-	    popup.add(helpItem);
-	    popup.add(aboutItem);
-	    popup.addSeparator();
-	    popup.add(exitItem);
-
-	    trayIcon = new TrayIcon(getImage("loader.gif"), lang.translationForKey("tray.title"), popup);
-	    trayIcon.setImageAutoSize(true);
-
-	    try {
-		tray.add(trayIcon);
-		trayIcon.displayMessage(lang.translationForKey("tray.title"), lang.translationForKey("tray.message.loading"), TrayIcon.MessageType.INFO);
-	    } catch (AWTException ex) {
-		logger.error(LoggingConstants.THROWING, "TrayIcon could not be added to the system tray.", ex);
-	    }
-
-	} else {
-	    // TODO: handle cases where system tray is not supported
-	}
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    trayIcon.displayMessage("Open eCard App", lang.translationForKey("tray.message.shutdown"), TrayIcon.MessageType.INFO);
+                    client.teardown();
+                    tray.remove(trayIcon);
+                    System.exit(0);
+                }
+            });
+            
+            final PopupMenu popup = new PopupMenu();
+            popup.add(configItem);
+            popup.add(helpItem);
+            popup.add(aboutItem);
+            popup.addSeparator();
+            popup.add(exitItem);
+                        
+            trayIcon = new TrayIcon(getImage("loader.gif"), lang.translationForKey("tray.message.loading"), popup);
+            trayIcon.setImageAutoSize(true);
+            
+            try {
+                tray.add(trayIcon);
+            } catch (AWTException ex) {
+                logger.error(LoggingConstants.THROWING, "TrayIcon could not be added to the system tray.", ex);
+            }
+            
+        } else {
+            // TODO: handle cases where system tray is not supported
+        }
     }
 
     public void done() {
-	trayIcon.setImage(getImage("logo.png"));
+        trayIcon.setImage(getImage("logo.png"));
+        trayIcon.setToolTip(lang.translationForKey("tray.title"));
     }
 
     private Image getImage(String name) {

@@ -53,6 +53,7 @@ import org.openecard.client.ifd.protocol.pace.PACEProtocolFactory;
 import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.management.TinyManagement;
 import org.openecard.client.recognition.CardRecognition;
+import org.openecard.client.richclient.gui.AppTray;
 import org.openecard.client.sal.TinySAL;
 import org.openecard.client.sal.protocol.eac.EACProtocolFactory;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
@@ -66,18 +67,27 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
 public final class RichClient implements ConnectorListener {
 
     private static final Logger logger = LoggerFactory.getLogger(RichClient.class.getName());
+
+    // Rich client
     private static RichClient client;
+    // Tray icon
+    private AppTray tray;
     // Client environment
     private ClientEnv env = new ClientEnv();
     // Interface Device Layer (IFD)
     private IFD ifd;
     // Service Access Layer (SAL)
     private TinySAL sal;
+    // Event manager
+    private EventManager em;
+    // Card recognition
     private CardRecognition recognition;
+    // card states
     private CardStateMap cardStates;
     // ContextHandle determines a specific IFD layer context
     private byte[] contextHandle;
@@ -229,6 +239,8 @@ public final class RichClient implements ConnectorListener {
     }
 
     public void setup() throws Exception {
+	tray = new AppTray(this);
+
 	// Set up client environment
 	env = new ClientEnv();
 
@@ -264,7 +276,7 @@ public final class RichClient implements ConnectorListener {
 	recognition = new CardRecognition(ifd, contextHandle);
 
 	// Set up EventManager
-	EventManager em = new EventManager(recognition, env, contextHandle, ValueGenerators.generateSessionID());
+	em = new EventManager(recognition, env, contextHandle, ValueGenerators.generateSessionID());
 	env.setEventManager(em);
 
 	// Set up SALStateCallback
@@ -284,6 +296,22 @@ public final class RichClient implements ConnectorListener {
 
 	// Initialize the EventManager
 	em.initialize();
+
+	tray.done();
+    }
+
+    public void teardown() {
+	// shutdwon event manager
+	em.terminate();
+
+	// shutdown SAL
+	Terminate terminate = new Terminate();
+	sal.terminate(terminate);
+
+	// shutdown IFD
+	ReleaseContext releaseContext = new ReleaseContext();
+	releaseContext.setContextHandle(contextHandle);
+	ifd.releaseContext(releaseContext);
     }
 
 }

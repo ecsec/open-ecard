@@ -25,7 +25,12 @@ package org.openecard.client.richclient.gui;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.net.URL;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import org.openecard.client.common.I18n;
 import org.openecard.client.common.logging.LoggingConstants;
@@ -45,92 +50,151 @@ public class AppTray {
 
     private final I18n lang = I18n.getTranslation("tray");
 
+    private SystemTray tray;
     private TrayIcon trayIcon;
+    private PopupMenu popup;
+    private JFrame frame;
+    private JLabel label;
+    private ImageIcon logo;
+    private ImageIcon loader;
     private RichClient client;
+    private boolean trayAvailable;
 
     public AppTray(RichClient client) {
        this.client = client;
-       initialize();
+       setup();
     }
 
-    private void initialize() {
-        if (SystemTray.isSupported()) {
-            final SystemTray tray = SystemTray.getSystemTray();
-            
-            MenuItem configItem = new MenuItem(lang.translationForKey("tray.config"));
-            configItem.addActionListener(new ActionListener() {
+    private void setup() {
+	logo = getImageIcon("logo.png");
+	loader = getImageIcon("loader.gif");
 
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                     JOptionPane.showMessageDialog(null, "Implement Me!");
-                }
-            });
-            
-            MenuItem helpItem = new MenuItem(lang.translationForKey("tray.help"));
-            helpItem.addActionListener(new ActionListener() {
+	createPopupMenu();
 
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    JOptionPane.showMessageDialog(null, "Implement Me!");
-                }
-            });
-            
-            MenuItem aboutItem = new MenuItem(lang.translationForKey("tray.about"));
-            aboutItem.addActionListener(new ActionListener() {
+	if (SystemTray.isSupported()) {
+	    trayAvailable = true;
 
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    JOptionPane.showMessageDialog(null, "Implement Me!");
-                }
-            });
-            
-            MenuItem exitItem = new MenuItem(lang.translationForKey("tray.exit"));
-            exitItem.addActionListener(new ActionListener() {
+	    tray = SystemTray.getSystemTray();
 
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    trayIcon.displayMessage("Open eCard App", lang.translationForKey("tray.message.shutdown"), TrayIcon.MessageType.INFO);
-                    client.teardown();
-                    tray.remove(trayIcon);
-                    System.exit(0);
-                }
-            });
-            
-            final PopupMenu popup = new PopupMenu();
-            popup.add(configItem);
-            popup.add(helpItem);
-            popup.add(aboutItem);
-            popup.addSeparator();
-            popup.add(exitItem);
-                        
-            trayIcon = new TrayIcon(getImage("loader.gif"), lang.translationForKey("tray.message.loading"), popup);
-            trayIcon.setImageAutoSize(true);
-            
-            try {
-                tray.add(trayIcon);
-            } catch (AWTException ex) {
-                logger.error(LoggingConstants.THROWING, "TrayIcon could not be added to the system tray.", ex);
-            }
-            
-        } else {
-            // TODO: handle cases where system tray is not supported
-        }
+	    trayIcon = new TrayIcon(loader.getImage(), lang.translationForKey("tray.message.loading"), popup);
+	    trayIcon.setImageAutoSize(true);
+
+	    try {
+		tray.add(trayIcon);
+	    } catch (AWTException ex) {
+		logger.error(LoggingConstants.THROWING, "TrayIcon could not be added to the system tray.", ex);
+
+		// tray and trayIcon are not needed anymore
+		tray = null;
+		trayIcon = null;
+		setupFrame();
+	    }
+
+	} else {
+	    setupFrame();
+	}
     }
 
     public void done() {
-        trayIcon.setImage(getImage("logo.png"));
-        trayIcon.setToolTip(lang.translationForKey("tray.title"));
+	if (trayAvailable) {
+	    trayIcon.setImage(logo.getImage());
+	    trayIcon.setToolTip(lang.translationForKey("tray.title"));
+	} else {
+	    label.setIcon(logo);
+	}
     }
 
-    private Image getImage(String name) {
-	URL imageUrl = AppTray.class.getResource("images/" + name);
+    private void createPopupMenu() {
+	MenuItem configItem = new MenuItem(lang.translationForKey("tray.config"));
+	configItem.addActionListener(new ActionListener() {
 
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+		JOptionPane.showMessageDialog(null, "Implement Me!");
+	    }
+	});
+
+	MenuItem helpItem = new MenuItem(lang.translationForKey("tray.help"));
+	helpItem.addActionListener(new ActionListener() {
+
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+		JOptionPane.showMessageDialog(null, "Implement Me!");
+	    }
+	});
+
+	MenuItem aboutItem = new MenuItem(lang.translationForKey("tray.about"));
+	aboutItem.addActionListener(new ActionListener() {
+
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+		JOptionPane.showMessageDialog(null, "Implement Me!");
+	    }
+	});
+
+	MenuItem exitItem = new MenuItem(lang.translationForKey("tray.exit"));
+	exitItem.addActionListener(new ActionListener() {
+
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+		if (trayAvailable) {
+		    trayIcon.displayMessage("Open eCard App", lang.translationForKey("tray.message.shutdown"), TrayIcon.MessageType.INFO);
+		    client.teardown();
+		    tray.remove(trayIcon);
+		    System.exit(0);
+		} else {
+		    client.teardown();
+		    System.exit(0);
+		}
+	    }
+	});
+
+	popup = new PopupMenu();
+	popup.add(configItem);
+	popup.add(helpItem);
+	popup.add(aboutItem);
+	popup.addSeparator();
+	popup.add(exitItem);
+    }
+
+    private ImageIcon getImageIcon(String name) {
+	URL imageUrl = AppTray.class.getResource("images/" + name);
 	if (imageUrl == null) {
 	    imageUrl = AppTray.class.getResource("/images/" + name);
 	}
-	Image image = Toolkit.getDefaultToolkit().getImage(imageUrl);
 
-	return image;
+	ImageIcon icon = new ImageIcon(imageUrl);
+	return icon;
+    }
+
+    private void setupFrame() {
+	trayAvailable = false;
+
+	frame = new JFrame(lang.translationForKey("tray.title"));
+	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	frame.setIconImage(logo.getImage());
+
+	label = new JLabel(loader);
+	label.add(popup);
+	label.addMouseListener(new MouseAdapter() {
+
+	    @Override
+	    public void mousePressed(MouseEvent e) {
+		if (e.isPopupTrigger() || e.getButton() == MouseEvent.BUTTON1) {
+		    popup.show(e.getComponent(), e.getX(), e.getY());
+		}
+	    }
+	});
+
+	Container c = frame.getContentPane();
+	c.setPreferredSize(new Dimension(logo.getIconWidth(), logo.getIconHeight()));
+	c.setBackground(Color.white);
+	c.add(label);
+
+	frame.pack();
+	frame.setResizable(false);
+	frame.setLocationRelativeTo(null);
+	frame.setVisible(true);
     }
 
 }

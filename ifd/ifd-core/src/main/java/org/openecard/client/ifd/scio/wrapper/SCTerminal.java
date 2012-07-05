@@ -35,7 +35,7 @@ import org.openecard.client.ifd.scio.IFDException;
 import org.openecard.client.ifd.scio.IFDUtils;
 import org.openecard.client.ifd.scio.reader.ExecutePACERequest;
 import org.openecard.client.ifd.scio.reader.ExecutePACEResponse;
-import org.openecard.client.ifd.scio.reader.PACECapabilities;
+import org.openecard.client.common.ifd.PACECapabilities;
 import org.openecard.client.ifd.scio.reader.PCSCFeatures;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

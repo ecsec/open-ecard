@@ -197,9 +197,7 @@ public class IFD implements org.openecard.ws.IFD {
     private List<String> buildPACEProtocolList(List<Long> paceCapabilities) {
 	List<String> supportedProtos = new LinkedList<String>();
 	for (Long next : paceCapabilities) {
-	    if (next.equals(Long.valueOf(0x10)) || next.equals(Long.valueOf(0x20)) || next.equals(Long.valueOf(0x40))) {
-		supportedProtos.add(ECardConstants.Protocol.PACE + "." + next.longValue());
-	    }
+	    supportedProtos.add(ECardConstants.Protocol.PACE + "." + next.longValue());
 	}
 	return supportedProtos;
     }
@@ -788,6 +786,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    List<Long> paceCapabilities = term.getPACECapabilities();
 	    List<String> supportedProtos = buildPACEProtocolList(paceCapabilities);
 	    // check out if this actually a PACE request
+	    // FIXME: check type of protocol
 	    if (!supportedProtos.isEmpty() && supportedProtos.get(0).startsWith(protocol)) { // i don't care which type is supported, i try it anyways
 		// yeah, PACE seems to be supported by the reader, big win
 		PACEInputType paceParam = new PACEInputType(protoParam);

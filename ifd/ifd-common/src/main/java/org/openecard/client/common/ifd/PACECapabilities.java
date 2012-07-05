@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.ifd.scio.reader;
+package org.openecard.client.common.ifd;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +33,29 @@ import java.util.List;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class PACECapabilities {
+
+    /**
+     * PACE Capabilities as defined in PCSC-10 AMD1.1 p. 6
+     */
+    public enum PACECapability {
+	DestroyPACEChannel(0x80),
+	GenericPACE(0x40), //
+	GermanEID(0x20),
+	QES(0x10);
+
+	private final long number;
+	private PACECapability(long number) {
+	    this.number = number;
+	}
+	public static PACECapability getCapability(long number) {
+	    for (PACECapability next : values()) {
+		if (next.number == number) {
+		    return next;
+		}
+	    }
+	    return null;
+	}
+    }
 
     private final BitSet capabilities;
 
@@ -53,6 +76,17 @@ public class PACECapabilities {
 	for (int i = capabilities.nextSetBit(0); i >= 0; i = capabilities.nextSetBit(i+1)) {
 	    // operate on index i here
 	    result.add(Long.valueOf(1<<i));
+	}
+	return result;
+    }
+    public List<PACECapability> getFeaturesEnum() {
+	List<Long> features = getFeatures();
+	List<PACECapability> result = new ArrayList<PACECapability>(features.size());
+	for (Long next : features) {
+	    PACECapability cap = PACECapability.getCapability(next);
+	    if (next != null) {
+		result.add(cap);
+	    }
 	}
 	return result;
     }

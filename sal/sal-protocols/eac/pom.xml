@@ -14,4 +14,12 @@
     <artifactId>eac</artifactId>
     <name>EAC protocol</name>
 
+    <dependencies>
+	<dependency>
+	    <groupId>org.openecard.client.ifd</groupId>
+	    <artifactId>ifd-common</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+    </dependencies>
+
 </project>

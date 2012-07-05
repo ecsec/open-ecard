@@ -22,20 +22,21 @@
 
 package org.openecard.client.sal.protocol.eac;
 
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
-import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
-import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
+import iso.std.iso_iec._24727.tech.schema.*;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Map;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.ifd.PACECapabilities;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.sal.anytype.AuthDataMap;
 import org.openecard.client.common.sal.anytype.AuthDataResponse;
+import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.cvc.CHAT;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
@@ -59,12 +60,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(PACEStep.class.getName());
     private final Dispatcher dispatcher;
-    private final EACUserConsent gui;
+    private final UserConsent gui;
 
     /**
      * Creates a new PACE protocol step.
@@ -74,7 +76,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
      */
     public PACEStep(Dispatcher dispatcher, UserConsent gui) {
 	this.dispatcher = dispatcher;
-	this.gui = new EACUserConsent(gui);
+	this.gui = gui;
     }
 
     @Override
@@ -85,9 +87,13 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
+	CardStateEntry cardState = (CardStateEntry) internalData.get("cardState");
 	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
 
 	try {
+	    boolean nativePace = genericPaceSupport(cardState.handleCopy());
+	    EACUserConsent uc = new EACUserConsent(gui, !nativePace);
+
 	    EAC1InputType eac1Input = new EAC1InputType(didAuthenticate.getAuthenticationProtocolData());
 	    EAC1OutputType eac1Output = eac1Input.getOutputType();
 
@@ -105,7 +111,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    content.add(GUIContentMap.ELEMENT.OPTIONAL_CHAT, optionalCHAT);
 	    content.add(GUIContentMap.ELEMENT.SELECTED_CHAT, requiredCHAT);
 	    content.add(GUIContentMap.ELEMENT.PIN_ID, pinID);
-	    ResultStatus guiStatus = gui.show(content);
+	    ResultStatus guiStatus = uc.show(content);
 
 	    if (guiStatus.equals(ResultStatus.CANCEL)) {
 		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User Consent was cancelled by the user."));
@@ -114,13 +120,15 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 	    // GUI response
 	    CHAT selectedCHAT = (CHAT) content.get(GUIContentMap.ELEMENT.SELECTED_CHAT);
-	    String pin = (String) content.get(GUIContentMap.ELEMENT.PIN);
 
 	    // Create PACEInputType
 	    AuthDataMap paceAuthMap = new AuthDataMap(didAuthenticate.getAuthenticationProtocolData());
 	    AuthDataResponse paceInputMap = paceAuthMap.createResponse(didAuthenticate.getAuthenticationProtocolData());
 
-	    paceInputMap.addElement(PACEInputType.PIN, pin);
+	    if (!nativePace) {
+		String pin = (String) content.get(GUIContentMap.ELEMENT.PIN);
+		paceInputMap.addElement(PACEInputType.PIN, pin);
+	    }
 	    paceInputMap.addElement(PACEInputType.PIN_ID, PasswordID.parse(pinID).getByteAsString());
 	    paceInputMap.addElement(PACEInputType.CHAT, selectedCHAT.toString());
 	    paceInputMap.addElement(PACEInputType.CERTIFICATE_DESCRIPTION, ByteUtils.toHexString(eac1Input.getCertificateDescription()));
@@ -164,13 +172,49 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		response.setAuthenticationProtocolData(eac1Output.getAuthDataType());
 	    }
 	} catch (Exception e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
 	    logger.error(LoggingConstants.THROWING, "Exception", e);
-	    // </editor-fold>
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	}
 
 	return response;
+    }
+
+
+    /**
+     * Check if the selected reader supports genericPACE.
+     * In that case, the reader is a standard or comfort reader.
+     * @param cHandle Handle describing the IFD and reader.
+     * @return true when card reader supports genericPACE, false otherwise.
+     * @throws org.openecard.client.common.WSHelper.WSException
+     * @throws IllegalAccessException Dispatcher error.
+     * @throws NoSuchMethodException Dispatcher error.
+     * @throws InvocationTargetException Dispatcher error.
+     */
+    private boolean genericPaceSupport(ConnectionHandleType cHandle) throws WSException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+	// request terminal capabilities
+	GetIFDCapabilities capReq = new GetIFDCapabilities();
+	capReq.setContextHandle(cHandle.getContextHandle());
+	capReq.setIFDName(cHandle.getIFDName());
+	GetIFDCapabilitiesResponse capRes = (GetIFDCapabilitiesResponse) dispatcher.deliver(capReq);
+	WSHelper.checkResult(capRes);
+
+	if (capRes.getIFDCapabilities() != null) {
+	    List<SlotCapabilityType> capabilities = capRes.getIFDCapabilities().getSlotCapability();
+	    // check all capabilities for generic PACE
+	    final String genericPace = PACECapabilities.PACECapability.GenericPACE.getProtocol();
+	    for (SlotCapabilityType cap : capabilities) {
+		if (cap.getIndex().equals(cHandle.getSlotIndex())) {
+		    for (String proto : cap.getProtocol()) {
+			if (proto.equals(genericPace)) {
+			    return true;
+			}
+		    }
+		}
+	    }
+	}
+
+	// no PACE capability found
+	return false;
     }
 
 }

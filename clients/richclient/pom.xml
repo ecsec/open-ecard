@@ -55,13 +55,13 @@
 			<version>1.4.0-incubating</version>
 			<configuration>
 			    <sourceFiles>
-				<sourceFile>src/main/wix/IT005.wxs</sourceFile>
+				<sourceFile>WindowsInstaller.wxs</sourceFile>
 			    </sourceFiles>
 			    <outputDirectory>target</outputDirectory>
 			    <objectFiles>
-				<objectFile>target/IT005.wixobj</objectFile>
+				<objectFile>target/WindowsInstaller.wixobj</objectFile>
 			    </objectFiles>
-			    <outputFile>target/IT005.msi</outputFile>
+			    <outputFile>target/${project.artifactId}-${project.version}.msi</outputFile>
 			</configuration>
 			<executions>
 			    <execution>

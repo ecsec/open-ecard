@@ -46,8 +46,8 @@
 
     <properties>
 	<wininstall.resources.dir>${basedir}/installer/windows</wininstall.resources.dir>
-	<wininstall.tmp.dirname>tmp</wininstall.tmp.dirname>
-	<wininstall.tmp.dir>${wininstall.resources.dir}/${wininstall.tmp.dirname}</wininstall.tmp.dir>
+	<wininstall.tmp.dirname>wix-tmp</wininstall.tmp.dirname>
+	<wininstall.tmp.dir>${project.build.directory}/${wininstall.tmp.dirname}</wininstall.tmp.dir>
     </properties>
 
     <profiles>
@@ -146,7 +146,7 @@
 					    </includes>
 					</fileset>
 					<fileset>
-					    <directory>${wininstall.resources.dir}</directory>
+					    <directory>${project.build.directory}</directory>
 					    <includes>
 						<include>${wininstall.tmp.dirname}</include>
 					    </includes>

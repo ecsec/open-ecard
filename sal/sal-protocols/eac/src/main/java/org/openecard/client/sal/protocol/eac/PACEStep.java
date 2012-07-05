@@ -151,6 +151,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		// Store additional data
 		internalData.put(EACConstants.INTERNAL_DATA_AUTHENTICATED_AUXILIARY_DATA, eac1Input.getAuthenticatedAuxiliaryData());
 		internalData.put(EACConstants.INTERNAL_DATA_CERTIFICATES, certChain);
+		internalData.put(EACConstants.CURRENT_CAR, currentCAR);
 
 		// Create response
 		eac1Output.setEFCardAccess(efCardAccess);

@@ -22,6 +22,7 @@
 
 package org.openecard.client.sal.protocol.eac;
 
+import java.util.Arrays;
 import java.util.List;
 import org.openecard.client.common.apdu.ExternalAuthentication;
 import org.openecard.client.common.apdu.GetChallenge;
@@ -43,6 +44,7 @@ import org.openecard.client.sal.protocol.eac.apdu.PSOVerifyCertificate;
  * See BSI-TR-03110, version 2.10, part 3, Section B.3.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class TerminalAuthentication {
 
@@ -69,15 +71,27 @@ public class TerminalAuthentication {
      * @param certificateChain Certificate chain
      * @throws ProtocolException
      */
-    public void verifyCertificates(CardVerifiableCertificateChain certificateChain) throws ProtocolException {
+    public void verifyCertificates(CardVerifiableCertificateChain certificateChain, byte[] currentCAR) throws ProtocolException {
 	try {
 	    List<CardVerifiableCertificate> certificates = certificateChain.getCertificateChain();
-	    for (int i = certificates.size() - 1; i >= 0; i--) {
+
+	    // get first certificate with matching CAR
+	    int i = (certificates.size() - 1);
+	    for (; i >= 0; i--) {
 		CardVerifiableCertificate cvc = (CardVerifiableCertificate) certificates.get(i);
+		if (Arrays.equals(cvc.getCAR().toByteArray(), currentCAR)) {
+		    break;
+		}
+	    }
+
+	    // send certificate-chain to the mrtd
+	    for (; i >= 0; i--) {
+		CardVerifiableCertificate cvc = (CardVerifiableCertificate) certificates.get(i);
+
 		// MSE:SetDST APDU
 		CardCommandAPDU mseSetDST = new MSESetDST(cvc.getCAR().toByteArray());
 		mseSetDST.transmit(dispatcher, slotHandle);
-		// PSO:Verify Certificate  APDU
+		// PSO:Verify Certificate APDU
 		CardCommandAPDU psovc = new PSOVerifyCertificate(cvc.getCertificate().getValue());
 		psovc.transmit(dispatcher, slotHandle);
 	    }

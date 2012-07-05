@@ -46,20 +46,25 @@ import org.slf4j.LoggerFactory;
  */
 public class EACUserConsent {
 
-    private static final Logger logger = LoggerFactory.getLogger(EACUserConsent.class);
+    private static final Logger _logger = LoggerFactory.getLogger(EACUserConsent.class);
 
     // GUI translation constants
     private static final String TITLE = "eac_user_consent_title";
-    private I18n lang = I18n.getTranslation("sal");
-    private UserConsent gui;
+
+    private final I18n lang = I18n.getTranslation("sal");
+    private final UserConsent gui;
+    private final boolean capturePin;
+
 
     /**
      * Creates a new EAC user consent.
      *
      * @param gui GUI
+     * @param capturePin True if PIN is captured in dialog, false if reader takes care of the PIN entry.
      */
-    protected EACUserConsent(UserConsent gui) {
+    protected EACUserConsent(UserConsent gui, boolean capturePin) {
 	this.gui = gui;
+	this.capturePin = capturePin;
     }
 
     /**
@@ -76,9 +81,11 @@ public class EACUserConsent {
 
 	uc.getSteps().add(cvcStep.getStep());
 	uc.getSteps().add(chatStep.getStep());
-	uc.getSteps().add(pinStep.getStep());
+	if (capturePin) { // don't capture PIN when terminal supports native PACE
+	    uc.getSteps().add(pinStep.getStep());
+	}
 
-	// Custom action for PIN step
+	// Custom action for CHAT step
 	StepAction chatStepAction = new StepAction(chatStep.getStep()) {
 
 	    @Override

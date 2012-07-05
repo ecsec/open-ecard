@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
+import org.openecard.client.common.ECardConstants;
 
 
 /**
@@ -43,7 +44,7 @@ public class PACECapabilities {
 	GermanEID(0x20),
 	QES(0x10);
 
-	private final long number;
+	public final long number;
 	private PACECapability(long number) {
 	    this.number = number;
 	}
@@ -54,6 +55,10 @@ public class PACECapabilities {
 		}
 	    }
 	    return null;
+	}
+
+	public String getProtocol() {
+	    return ECardConstants.Protocol.PACE + "." + number;
 	}
     }
 

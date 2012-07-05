@@ -388,14 +388,14 @@ public final class CHAT {
     }
 
     /**
-     * Sets the special functions of the CHAT.
+     * Sets the given special function of the CHAT.
      *
-     * @param specialFunktion Special functions
+     * @param specialFunction Special function
      * @param selected Selected
      * @return True if the special function is set, otherwise false
      */
-    public boolean setSpecialFunctions(String specialFunktion, boolean selected) {
-	return setSpecialFunctions(SpecialFunction.valueOf(specialFunktion), selected);
+    public boolean setSpecialFunction(String specialFunction, boolean selected) {
+	return setSpecialFunctions(SpecialFunction.valueOf(specialFunction), selected);
     }
 
     /**

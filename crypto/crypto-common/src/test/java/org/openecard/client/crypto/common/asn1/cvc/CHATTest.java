@@ -26,7 +26,10 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.util.StringUtils;
-import static org.testng.Assert.assertEquals;
+import org.openecard.client.crypto.common.asn1.cvc.CHAT.DataGroup;
+import org.openecard.client.crypto.common.asn1.cvc.CHAT.Role;
+import org.openecard.client.crypto.common.asn1.cvc.CHAT.SpecialFunction;
+import static org.testng.Assert.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -34,6 +37,7 @@ import org.testng.annotations.Test;
 /**
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class CHATTest {
 
@@ -45,6 +49,37 @@ public class CHATTest {
     public void setUp() throws TLVException {
 	chatBytes = StringUtils.toByteArray("7f4c12060904007f0007030102025305300301ffb7");
 	chat = new CHAT(chatBytes);
+    }
+
+    @Test
+    public void testParse() throws TLVException {
+	CHAT c = new CHAT(StringUtils.toByteArray("7F4C12060904007F0007030102025305000100FA04"));
+	assertEquals(Role.AUTHENTICATION_TERMINAL, c.getRole());
+	DataGroup[] data = DataGroup.values();
+	SpecialFunction[] specialFunctions = SpecialFunction.values();
+
+	// check writeAccess
+	for (int i = 16; i < 21; i++) {
+	    assertFalse(c.getWriteAccess().get(data[i]));
+	}
+
+	// check readAccess
+	for (int i = 0; i < 21; i++) {
+	    if (i == 1 || (i > 2 && i < 8) || i == 16) {
+		assertTrue(c.getReadAccess().get(data[i]));
+	    } else {
+		assertFalse(c.getReadAccess().get(data[i]));
+	    }
+	}
+
+	// check special functions
+	for (int i = 0; i < 8; i++) {
+	    if (i == SpecialFunction.RESTRICTED_IDENTIFICATION.ordinal()) {
+		assertTrue(c.getSpecialFunctions().get(specialFunctions[i]));
+	    } else {
+		assertFalse(c.getSpecialFunctions().get(specialFunctions[i]));
+	    }
+	}
     }
 
     @Test
@@ -83,7 +118,7 @@ public class CHATTest {
     public void testSpecialFunctions() throws TLVException {
 	chatBytes = StringUtils.toByteArray("7f4c12060904007f0007030102025305300301ffAF");
 	chat.setSpecialFunctions(CHAT.SpecialFunction.PRIVILEGED_TERMINAL, true);
-	chat.setSpecialFunctions("CAN_ALLOWED", false);
+	chat.setSpecialFunction("CAN_ALLOWED", false);
 	assertEquals(chatBytes, chat.toByteArray());
     }
 

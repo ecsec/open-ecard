@@ -42,11 +42,6 @@ public class ECardConstants {
     public static final String HEADER_VALUE_PAOS = "ver=\"urn:liberty:2003-08\",\"urn:liberty:2006-08\";" + PAOS_NEXT;
     public static final String HEADER_VALUE_CONTENT_TYPE = "text/xml";
 
-    public static final String DEFAULT_AUTHENTICATION_REQUEST_MESSAGE = "Please enter your PIN";
-    public static final String DEFAULT_SUCCESS_MESSAGE = "PIN entry successful";
-    public static final String DEFAULT_AUTHENTICATION_FAILED_MESSAGE = "PIN entry incorrect";
-    public static final String DEFAULT_REQUEST_CONFIRMATION_MESSAGE = "Please re-enter your PIN";
-    public static final String DEFAULT_CANCEL_MESSAGE = "PIN entry cancelled";
 
     public static class CIF {
 

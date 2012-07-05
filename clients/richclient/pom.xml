@@ -44,32 +44,121 @@
     </build>
 
 
+    <properties>
+	<wininstall.resources.dir>${basedir}/installer/windows</wininstall.resources.dir>
+	<wininstall.tmp.dirname>tmp</wininstall.tmp.dirname>
+	<wininstall.tmp.dir>${wininstall.resources.dir}/${wininstall.tmp.dirname}</wininstall.tmp.dir>
+    </properties>
+
     <profiles>
 	<profile>
-	    <id>msi-package</id>
+	    <id>windows-installer</id>
 	    <build>
 		<plugins>
+		    <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-antrun-plugin</artifactId>
+			<version>1.7</version>
+			<executions>
+			    <execution>
+				<id>antrun</id>
+				<phase>package</phase>
+				<configuration>
+				    <target>
+					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/Open-eCard-Logo.ico" />
+					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/run.bat" />
+					<copy todir="${wininstall.tmp.dir}/lib" flatten="true" >
+					    <path>
+						<path refid="maven.runtime.classpath" />
+						<pathelement location="${project.build.directory}/${project.build.finalName}.${project.packaging}" />
+					    </path>
+					</copy>
+
+					<!-- build string for replacement in WIX configuration file -->
+					<fileset id="alljars.fileset" dir="${wininstall.tmp.dir}/lib" includes="*.jar" />
+					<pathconvert pathsep=";" property="alljars.property" refid="alljars.fileset">
+					    <mapper type="flatten" />
+					</pathconvert>
+					<echo file="${wininstall.tmp.dir}/tmp.txt">${alljars.property}</echo>
+					<replaceregexp file="${wininstall.tmp.dir}/tmp.txt" match="\A" replace="&lt;File Source='lib/"/>
+					<replaceregexp file="${wininstall.tmp.dir}/tmp.txt" match=";" replace="'/>&lt;File Source='lib/" flags="g" />
+					<replaceregexp file="${wininstall.tmp.dir}/tmp.txt" match="\Z" replace="'/>"/>
+					<loadfile property="all_jars" srcfile="${wininstall.tmp.dir}/tmp.txt" />
+
+
+					<copy tofile="${wininstall.tmp.dir}/WindowsInstaller.wxs" file="${wininstall.resources.dir}/WindowsInstaller.wxs.xml" >
+					    <filterset>
+						<filter token="ALL_JARS" value="${all_jars}"/>
+						<filter token="VERSION" value="${project.build.version}"/>
+					    </filterset>
+					</copy>
+				    </target>
+				</configuration>
+				<goals>
+				    <goal>run</goal>
+				</goals>
+			    </execution>
+			</executions>
+		    </plugin>
 		    <plugin>
 			<groupId>org.apache.npanday.plugins</groupId>
 			<artifactId>wix-maven-plugin</artifactId>
 			<version>1.4.0-incubating</version>
 			<configuration>
 			    <sourceFiles>
-				<sourceFile>WindowsInstaller.wxs</sourceFile>
+				<sourceFile>${wininstall.tmp.dir}/WindowsInstaller.wxs</sourceFile>
 			    </sourceFiles>
-			    <outputDirectory>target</outputDirectory>
+			    <outputDirectory>${wininstall.tmp.dir}</outputDirectory>
 			    <objectFiles>
-				<objectFile>target/WindowsInstaller.wixobj</objectFile>
+				<objectFile>${wininstall.tmp.dir}/WindowsInstaller.wixobj</objectFile>
 			    </objectFiles>
-			    <outputFile>target/${project.artifactId}-${project.version}.msi</outputFile>
+			    <outputFile>${project.build.directory}/${project.build.finalName}.msi</outputFile>
 			</configuration>
 			<executions>
 			    <execution>
 				<id>wix</id>
+				<phase>package</phase>
 				<goals>
 				    <goal>candle</goal>
 				    <goal>light</goal>
 				</goals>
+			    </execution>
+			</executions>
+		    </plugin>
+		    <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-clean-plugin</artifactId>
+			<version>2.4.1</version>
+			<executions>
+			    <execution>
+				<id>auto-clean</id>
+				<phase>package</phase>
+				<goals>
+				    <goal>clean</goal>
+				</goals>
+				<configuration>
+				    <excludeDefaultDirectories>true</excludeDefaultDirectories>
+				    <filesets>
+					<fileset>
+					    <directory>${wininstall.tmp.dir}</directory>
+					    <includes>
+						<include>**</include>
+					    </includes>
+					</fileset>
+					<fileset>
+					    <directory>${wininstall.resources.dir}</directory>
+					    <includes>
+						<include>${wininstall.tmp.dirname}</include>
+					    </includes>
+					</fileset>
+					<fileset>
+					    <directory>${project.build.directory}</directory>
+					    <includes>
+						<include>${project.build.finalName}.wixpdb</include>
+					    </includes>
+					</fileset>
+				    </filesets>
+				</configuration>
 			    </execution>
 			</executions>
 		    </plugin>

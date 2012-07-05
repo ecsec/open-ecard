@@ -35,6 +35,7 @@ import javax.smartcardio.CardException;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.ifd.PACECapabilities;
 import org.openecard.client.common.ifd.Protocol;
 import org.openecard.client.common.ifd.ProtocolFactory;
 import org.openecard.client.common.ifd.anytype.PACEInputType;
@@ -194,10 +195,10 @@ public class IFD implements org.openecard.ws.IFD {
     }
 
 
-    private List<String> buildPACEProtocolList(List<Long> paceCapabilities) {
+    private List<String> buildPACEProtocolList(List<PACECapabilities.PACECapability> paceCapabilities) {
 	List<String> supportedProtos = new LinkedList<String>();
-	for (Long next : paceCapabilities) {
-	    supportedProtos.add(ECardConstants.Protocol.PACE + "." + next.longValue());
+	for (PACECapabilities.PACECapability next : paceCapabilities) {
+	    supportedProtos.add(next.getProtocol());
 	}
 	return supportedProtos;
     }
@@ -235,7 +236,7 @@ public class IFD implements org.openecard.ws.IFD {
 		    // then ask whether the reader can do it or a software solution exists
 		    if (gui != null) {
 			if (t.supportsPace()) {
-			    List<Long> capabilities = t.getPACECapabilities();
+			    List<PACECapabilities.PACECapability> capabilities = t.getPACECapabilities();
 			    List<String> protos = buildPACEProtocolList(capabilities);
 			    slotCap.getProtocol().addAll(protos);
 			}
@@ -783,7 +784,7 @@ public class IFD implements org.openecard.ws.IFD {
 
 	    // check if it is PACE and try to perform native implementation
 	    // get pace capabilities
-	    List<Long> paceCapabilities = term.getPACECapabilities();
+	    List<PACECapabilities.PACECapability> paceCapabilities = term.getPACECapabilities();
 	    List<String> supportedProtos = buildPACEProtocolList(paceCapabilities);
 	    // check out if this actually a PACE request
 	    // FIXME: check type of protocol
@@ -801,6 +802,7 @@ public class IFD implements org.openecard.ws.IFD {
 		EstablishPACERequest estPaceReq = new EstablishPACERequest(pinID, chat, null, certDesc); // TODO: add supplied PIN
 		ExecutePACERequest  execPaceReq = new ExecutePACERequest(ExecutePACERequest.Function.EstablishPACEChannel, estPaceReq.toBytes());
 		// see if PACE type demanded for this input value combination is supported
+		// TODO: check if this additional check is really necessary
 		if (estPaceReq.isSupportedType(paceCapabilities)) {
 		    byte[] reqData = execPaceReq.toBytes();
 		    // execute pace

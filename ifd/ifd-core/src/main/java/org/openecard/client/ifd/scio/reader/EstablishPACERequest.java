@@ -24,6 +24,7 @@ package org.openecard.client.ifd.scio.reader;
 
 import java.io.ByteArrayOutputStream;
 import java.util.List;
+import org.openecard.client.common.ifd.PACECapabilities;
 import org.openecard.client.common.util.ShortUtils;
 
 
@@ -57,19 +58,19 @@ public class EstablishPACERequest {
         }
     }
 
-    public boolean isSupportedType(List<Long> capabilities) {
+    public boolean isSupportedType(List<PACECapabilities.PACECapability> capabilities) {
         // perform sanity check of the request according to BSI-TR-03119_V1
         // Für eine Durchführung von PACE in der Rolle
         // + eines nicht-authentisierten Terminals (Capability PACE) ist nur die Position 1 vorhanden
         // + in der Rolle Authentisierungsterminal (Capability eID) sind alle Positionen anzugeben
         // + in der Rolle Signaturterminal (Capability QES) sind die Positionen 1-3 und ggfs. 4-5 (für
         //     Passwort CAN, sofern dieses nicht am Leser eingegeben wird) anzugeben.
-        if (chat == null && password == null && certDesc == null) {
-            return capabilities.contains(Long.valueOf(0x40));
-        } else if (chat != null && password != null && certDesc != null) {
-            return capabilities.contains(Long.valueOf(0x20));
+        if (chat == null && certDesc == null) {
+            return capabilities.contains(PACECapabilities.PACECapability.GenericPACE);
+        } else if (chat != null && certDesc != null) {
+            return capabilities.contains(PACECapabilities.PACECapability.GermanEID);
         } else if (chat != null && certDesc == null) {
-            return capabilities.contains(Long.valueOf(0x10));
+            return capabilities.contains(PACECapabilities.PACECapability.QES);
         }
         return false;
     }

@@ -30,12 +30,12 @@ import java.math.BigInteger;
 import java.util.*;
 import javax.smartcardio.*;
 import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.ifd.PACECapabilities;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.ifd.scio.IFDException;
 import org.openecard.client.ifd.scio.IFDUtils;
 import org.openecard.client.ifd.scio.reader.ExecutePACERequest;
 import org.openecard.client.ifd.scio.reader.ExecutePACEResponse;
-import org.openecard.client.common.ifd.PACECapabilities;
 import org.openecard.client.ifd.scio.reader.PCSCFeatures;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +59,7 @@ public class SCTerminal {
     private DisplayCapabilityType dispCap = null;
     private boolean keyCapRead = false;
     private KeyPadCapabilityType keyCap = null;
-    private List<Long> PACECapabilities = null;
+    private List<PACECapabilities.PACECapability> PACECapabilities = null;
     // card if available
     private SCCard scCard = null;
 
@@ -309,8 +309,8 @@ public class SCTerminal {
 	return getPaceCtrlCode() != null;
     }
 
-    public List<Long> getPACECapabilities() throws IFDException {
-	List<Long> result = new LinkedList<Long>();
+    public List<PACECapabilities.PACECapability> getPACECapabilities() throws IFDException {
+	List<PACECapabilities.PACECapability> result = new LinkedList<PACECapabilities.PACECapability>();
 
 	if (PACECapabilities == null) {
 	    if (isConnected()) {
@@ -324,7 +324,7 @@ public class SCTerminal {
 			    throw new IFDException(paceResponse.getResult());
 			}
 			PACECapabilities cap = new PACECapabilities(paceResponse.getData());
-			PACECapabilities = cap.getFeatures();
+			PACECapabilities = cap.getFeaturesEnum();
 			result.addAll(PACECapabilities);
 		    } catch (CardException e) {
 			IFDException ex = new IFDException(e);

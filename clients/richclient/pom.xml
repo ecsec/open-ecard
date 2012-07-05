@@ -43,6 +43,42 @@
 	</plugins>
     </build>
 
+
+    <profiles>
+	<profile>
+	    <id>msi-package</id>
+	    <build>
+		<plugins>
+		    <plugin>
+			<groupId>org.apache.npanday.plugins</groupId>
+			<artifactId>wix-maven-plugin</artifactId>
+			<version>1.4.0-incubating</version>
+			<configuration>
+			    <sourceFiles>
+				<sourceFile>src/main/wix/IT005.wxs</sourceFile>
+			    </sourceFiles>
+			    <outputDirectory>target</outputDirectory>
+			    <objectFiles>
+				<objectFile>target/IT005.wixobj</objectFile>
+			    </objectFiles>
+			    <outputFile>target/IT005.msi</outputFile>
+			</configuration>
+			<executions>
+			    <execution>
+				<id>wix</id>
+				<goals>
+				    <goal>candle</goal>
+				    <goal>light</goal>
+				</goals>
+			    </execution>
+			</executions>
+		    </plugin>
+		</plugins>
+	    </build>
+	</profile>
+    </profiles>
+
+
     <dependencies>
 	<dependency>
 	    <groupId>org.openecard.client.sal</groupId>
@@ -89,16 +125,16 @@
 	    <artifactId>swing</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
-        <dependency>
-            <groupId>org.openecard.client.clients</groupId>
-            <artifactId>client-connector</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.0.3</version>
-        </dependency>
+	<dependency>
+	    <groupId>org.openecard.client.clients</groupId>
+	    <artifactId>client-connector</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>ch.qos.logback</groupId>
+	    <artifactId>logback-classic</artifactId>
+	    <version>1.0.3</version>
+	</dependency>
     </dependencies>
 
 </project>

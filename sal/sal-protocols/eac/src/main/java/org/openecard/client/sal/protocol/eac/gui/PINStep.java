@@ -61,12 +61,12 @@ public class PINStep {
     }
 
     private void initialize() {
-	Text description = new Text();
+	step.setResetOnLoad(true);
+	Text description = new Text("description");
 	description.setText(lang.translationForKey(DESCRIPTION));
 	step.getInputInfoUnits().add(description);
 
-	PasswordField pinInputField = new PasswordField();
-	pinInputField.setID(passwordType);
+	PasswordField pinInputField = new PasswordField(passwordType);
 	pinInputField.setDescription(lang.translationForKey(passwordType));
 	step.getInputInfoUnits().add(pinInputField);
     }
@@ -92,14 +92,8 @@ public class PINStep {
 	    return;
 	}
 
-	for (OutputInfoUnit output : executionResults.getResults()) {
-	    if (output instanceof PasswordField) {
-		PasswordField p = (PasswordField) output;
-		if (p.getID().equals(passwordType)) {
-		    content.add(GUIContentMap.ELEMENT.PIN, p.getValue());
-		}
-	    }
-	}
+	PasswordField p = (PasswordField) executionResults.getResult(passwordType);
+	content.add(GUIContentMap.ELEMENT.PIN, p.getValue());
     }
 
 }

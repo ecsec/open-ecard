@@ -39,13 +39,13 @@ public class CertificateDialog {
 
 	Step s1 = new Step("Certificate Selection");
 	uc.getSteps().add(s1);
-	Text msg = new Text();
+	Text msg = new Text("msg");
 	msg.setText("Bitte Wählen Sie ein Zertifikat aus.");
 	s1.getInputInfoUnits().add(msg);
 	int index = 0;
 
 	for (Certificate certificateChain : allcerts) {
-	    Text i1 = new Text();
+	    Text i1 = new Text("cert-text_" + index);
 	    StringBuilder sb = new StringBuilder();
 
 	    sb.append("------------------------------------------------------------------------------");
@@ -70,7 +70,7 @@ public class CertificateDialog {
 
 	    i1.setText(sb.toString());
 	    s1.getInputInfoUnits().add(i1);
-	    Checkbox i2 = new Checkbox();
+	    Checkbox i2 = new Checkbox("cert-selection_" + index);
 	    BoxItem b = new BoxItem();
 
 	    b.setName(String.valueOf(index));

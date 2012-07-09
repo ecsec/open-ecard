@@ -24,7 +24,6 @@ package org.openecard.client.ifd.protocol.pace.gui;
 
 import java.util.Map;
 import org.openecard.client.common.I18n;
-import org.openecard.client.gui.definition.OutputInfoUnit;
 import org.openecard.client.gui.definition.PasswordField;
 import org.openecard.client.gui.definition.Step;
 import org.openecard.client.gui.definition.Text;
@@ -61,12 +60,11 @@ public class PINStep {
     }
 
     private void initialize() {
-	Text description = new Text();
+	Text description = new Text("description");
 	description.setText(lang.translationForKey(DESCRIPTION));
 	step.getInputInfoUnits().add(description);
 
-	PasswordField pinInputField = new PasswordField();
-	pinInputField.setID(passwordType);
+	PasswordField pinInputField = new PasswordField(passwordType);
 	pinInputField.setDescription(lang.translationForKey(passwordType));
 	step.getInputInfoUnits().add(pinInputField);
     }
@@ -92,14 +90,8 @@ public class PINStep {
 	    return;
 	}
 
-	for (OutputInfoUnit output : executionResults.getResults()) {
-	    if (output instanceof PasswordField) {
-		PasswordField p = (PasswordField) output;
-		if (p.getID().equals(passwordType)) {
-		    content.add(GUIContentMap.ELEMENT.PIN, p.getValue());
-		}
-	    }
-	}
+	PasswordField p = (PasswordField) executionResults.getResult(passwordType);
+	content.add(GUIContentMap.ELEMENT.PIN, p.getValue());
     }
 
 }

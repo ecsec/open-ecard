@@ -22,12 +22,7 @@
 
 package org.openecard.client.sal.protocol.pincompare;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.DIDGet;
-import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
-import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
-import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.util.Map;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
@@ -36,8 +31,6 @@ import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 
 /**
@@ -47,8 +40,6 @@ import org.slf4j.MarkerFactory;
 public class DIDGetStep implements ProtocolStep<DIDGet, DIDGetResponse> {
 
     private static final Logger _logger = LoggerFactory.getLogger(DIDGetStep.class);
-    private static final Marker _enter = MarkerFactory.getMarker("ENTERING");
-    private static final Marker _exit = MarkerFactory.getMarker("EXITING");
 
 
     @Override
@@ -58,15 +49,11 @@ public class DIDGetStep implements ProtocolStep<DIDGet, DIDGetResponse> {
 
     @Override
     public DIDGetResponse perform(DIDGet didGet, Map<String, Object> internalData) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	_logger.trace(_enter, "> {}, {}", didGet, internalData);
-	// </editor-fold>
-
 	String didName = didGet.getDIDName();
 	ConnectionHandleType connectionHandle = didGet.getConnectionHandle();
 	CardStateEntry cardStateEntry = (CardStateEntry) internalData.get("cardState");
 
-	DIDStructureType didStructure = null;
+	DIDStructureType didStructure;
 	if (didGet.getDIDScope() != null && didGet.getDIDScope().equals(DIDScopeType.GLOBAL)) {
 	    didStructure = cardStateEntry.getDIDStructure(didName, cardStateEntry.getImplicitlySelectedApplicationIdentifier());
 	} else {
@@ -80,9 +67,6 @@ public class DIDGetStep implements ProtocolStep<DIDGet, DIDGetResponse> {
 	DIDGetResponse didGetResponse = new DIDGetResponse();
 	didGetResponse.setDIDStructure(didStructure);
 	didGetResponse.setResult(WSHelper.makeResultOK());
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	_logger.trace(_exit, "{}", didGetResponse);
-	// </editor-fold>
 	return didGetResponse;
     }
 

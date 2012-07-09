@@ -25,11 +25,11 @@ package org.openecard.client.sal.protocol.eac;
 import java.util.Map;
 import org.openecard.client.common.I18n;
 import org.openecard.client.gui.ResultStatus;
-import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.UserConsent;
 import org.openecard.client.gui.UserConsentNavigator;
-import org.openecard.client.gui.definition.*;
-import org.openecard.client.gui.executor.*;
+import org.openecard.client.gui.definition.UserConsentDescription;
+import org.openecard.client.gui.executor.ExecutionEngine;
+import org.openecard.client.gui.executor.ExecutionResults;
 import org.openecard.client.sal.protocol.eac.gui.CHATStep;
 import org.openecard.client.sal.protocol.eac.gui.CVCStep;
 import org.openecard.client.sal.protocol.eac.gui.GUIContentMap;
@@ -86,86 +86,8 @@ public class EACUserConsent {
 	    uc.getSteps().add(pinStep.getStep());
 	}
 
-	// Custom action for CVC step
-	StepAction cvcStepAction = new StepAction(cvcStep.getStep()) {
-
-	    @Override
-	    public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-		switch (result.getStatus()) {
-		    case BACK:
-			return new StepActionResult(StepActionResultStatus.BACK);
-		    case OK:
-			// write back result from last visit of chatStep
-			if (oldResults.get(chatStep.getStep().getID()) != null) {
-			    Checkbox cc = null;
-			    for (OutputInfoUnit o : oldResults.get(chatStep.getStep().getID()).getResults()) {
-				if (o instanceof Checkbox) {
-				    cc = (Checkbox) o;
-				}
-			    }
-
-			    for (InputInfoUnit i : chatStep.getStep().getInputInfoUnits()) {
-				if (i instanceof Checkbox) {
-				    Checkbox c = (Checkbox) i;
-				    c.getBoxItems().clear();
-				    for (BoxItem b : cc.getBoxItems()) {
-					BoxItem ii = b;
-					ii.setDisabled(b.isDisabled());
-					ii.setChecked(b.isChecked());
-					c.getBoxItems().add(ii);
-				    }
-				}
-			    }
-			}
-			return new StepActionResult(StepActionResultStatus.NEXT);
-		    default:
-			return new StepActionResult(StepActionResultStatus.REPEAT);
-		}
-	    }
-	};
-
-	// Custom action for PIN step
-	StepAction pinStepAction = new StepAction(pinStep.getStep()) {
-
-	    @Override
-	    public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-		switch (result.getStatus()) {
-		    case BACK:
-			// write back result from last visit of chatStep
-			Checkbox cc = null;
-			for (OutputInfoUnit o : oldResults.get(chatStep.getStep().getID()).getResults()) {
-			    if (o instanceof Checkbox) {
-				cc = (Checkbox) o;
-			    }
-			}
-
-			for (InputInfoUnit i : chatStep.getStep().getInputInfoUnits()) {
-			    if (i instanceof Checkbox) {
-				Checkbox c = (Checkbox) i;
-				c.getBoxItems().clear();
-				for (BoxItem b : cc.getBoxItems()) {
-				    BoxItem ii = b;
-				    ii.setDisabled(b.isDisabled());
-				    ii.setChecked(b.isChecked());
-				    c.getBoxItems().add(ii);
-				}
-			    }
-			}
-			return new StepActionResult(StepActionResultStatus.BACK);
-		    case OK:
-			return new StepActionResult(StepActionResultStatus.NEXT);
-		    default:
-			return new StepActionResult(StepActionResultStatus.REPEAT);
-		}
-	    }
-	};
-
 	UserConsentNavigator navigator = gui.obtainNavigator(uc);
 	ExecutionEngine exec = new ExecutionEngine(navigator);
-
-	// Add custom action
-	exec.addCustomAction(cvcStepAction);
-	exec.addCustomAction(pinStepAction);
 
 	ResultStatus processResult = exec.process();
 

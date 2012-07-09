@@ -24,11 +24,29 @@ package org.openecard.client.gui.definition;
 
 
 /**
+ * Base interface every info unit must implement.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public interface InfoUnit {
 
+    /**
+     * Get type of info unit.
+     */
     public InfoUnitElementType type();
+
+    /**
+     * Get ID of the info unit.
+     * The id must be unique per step.
+     */
+    public String getID();
+
+    /**
+     * Copy the content of the given info unit to this instance.
+     * Both instances must have the same type. If the types differ, a warning is logged and
+     * the copy is not performed.
+     * @param origin InfoUnit to copy from.
+     */
+    public void copyContentFrom(final InfoUnit origin);
 
 }

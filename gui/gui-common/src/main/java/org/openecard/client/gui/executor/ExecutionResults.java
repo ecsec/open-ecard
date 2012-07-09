@@ -54,4 +54,19 @@ public class ExecutionResults {
 	return results;
     }
 
+    /**
+     * Get result element with a specific ID.
+     *
+     * @param id ID of the result element.
+     * @return Result element or null if none exists for the given ID.
+     */
+    public OutputInfoUnit getResult(String id) {
+	for (OutputInfoUnit next : getResults()) {
+	    if (next.getID().equals(id)) {
+		return next;
+	    }
+	}
+	return null;
+    }
+
 }

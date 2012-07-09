@@ -27,11 +27,23 @@ package org.openecard.client.gui.definition;
  * @see AbstractBox
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class Radiobox extends AbstractBox {
+public final class Radiobox extends AbstractBox {
+
+    private final String id;
+
+    public Radiobox(String id) {
+	this.id = id;
+    }
+
 
     @Override
     public InfoUnitElementType type() {
 	return InfoUnitElementType.RADIO_BOX;
+    }
+
+    @Override
+    public String getID() {
+	return id;
     }
 
 }

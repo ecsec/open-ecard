@@ -22,14 +22,30 @@
 
 package org.openecard.client.gui.definition;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class Text implements InputInfoUnit {
+public final class Text implements InputInfoUnit {
 
+    private static final Logger _logger = LoggerFactory.getLogger(Text.class);
+
+    private final String id;
     private String text;
+
+    public Text(String id) {
+	this.id = id;
+    }
+
+
+    @Override
+    public String getID() {
+	return id;
+    }
 
     /**
      * @return the text
@@ -49,6 +65,18 @@ public class Text implements InputInfoUnit {
     @Override
     public InfoUnitElementType type() {
 	return InfoUnitElementType.TEXT;
+    }
+
+
+    @Override
+    public void copyContentFrom(InfoUnit origin) {
+	if (!(this.getClass().equals(origin.getClass()))) {
+	    _logger.warn("Trying to copy content from type {} to type {}.", origin.getClass(), this.getClass());
+	    return;
+	}
+	Text other = (Text) origin;
+	// do copy
+	this.text = other.text;
     }
 
 }

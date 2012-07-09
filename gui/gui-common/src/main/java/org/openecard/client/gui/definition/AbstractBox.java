@@ -24,6 +24,8 @@ package org.openecard.client.gui.definition;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -31,6 +33,8 @@ import java.util.List;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public abstract class AbstractBox implements InputInfoUnit, OutputInfoUnit {
+
+    private static final Logger _logger = LoggerFactory.getLogger(AbstractBox.class);
 
     private String groupText;
     private List<BoxItem> boxItems;
@@ -54,6 +58,27 @@ public abstract class AbstractBox implements InputInfoUnit, OutputInfoUnit {
 	    boxItems = new ArrayList<BoxItem>();
 	}
 	return boxItems;
+    }
+
+
+    @Override
+    public void copyContentFrom(InfoUnit origin) {
+	if (!(this.getClass().equals(origin.getClass()))) {
+	    _logger.warn("Trying to copy content from type {} to type {}.", origin.getClass(), this.getClass());
+	    return;
+	}
+	AbstractBox other = (AbstractBox) origin;
+	// do copy
+	this.groupText = other.groupText;
+	this.getBoxItems().clear();
+	for (BoxItem next : other.getBoxItems()) {
+	    BoxItem copy = new BoxItem();
+	    copy.setChecked(next.isChecked());
+	    copy.setDisabled(next.isDisabled());
+	    copy.setName(next.getName());
+	    copy.setText(next.getText());
+	    this.getBoxItems().add(copy);
+	}
     }
 
 }

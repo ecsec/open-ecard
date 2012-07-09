@@ -22,6 +22,10 @@
 
 package org.openecard.client.gui.definition;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 
 /**
  * Implements a abstract text field.
@@ -31,29 +35,13 @@ package org.openecard.client.gui.definition;
  */
 public abstract class AbstractTextField implements InputInfoUnit, OutputInfoUnit {
 
-    private String id;
+    private static final Logger _logger = LoggerFactory.getLogger(AbstractTextField.class);
+
     private String description;
     private String value;
     private int minLength = 0;
     private int maxLength = Integer.MAX_VALUE;
 
-    /**
-     * Returns the ID of the text field.
-     *
-     * @return ID
-     */
-    public String getID() {
-	return id;
-    }
-
-    /**
-     * Sets the ID of the text field.
-     *
-     * @param id ID
-     */
-    public void setID(String id) {
-	this.id = id;
-    }
 
     /**
      *
@@ -114,6 +102,21 @@ public abstract class AbstractTextField implements InputInfoUnit, OutputInfoUnit
      */
     public void setMaxLength(int maxLength) {
 	this.maxLength = maxLength;
+    }
+
+
+    @Override
+    public void copyContentFrom(InfoUnit origin) {
+	if (!(this.getClass().equals(origin.getClass()))) {
+	    _logger.warn("Trying to copy content from type {} to type {}.", origin.getClass(), this.getClass());
+	    return;
+	}
+	AbstractTextField other = (AbstractTextField) origin;
+	// do copy
+	this.description = other.description;
+	this.value = other.value;
+	this.minLength = other.minLength;
+	this.maxLength = other.maxLength;
     }
 
 }

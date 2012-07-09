@@ -46,11 +46,13 @@ import org.openecard.client.gui.definition.OutputInfoUnit;
 public class CheckBoxItemAdapter extends BaseAdapter {
 
     private Context context;
+    private Checkbox input;
     private List<BoxItem> boxItems;
 
     public CheckBoxItemAdapter(Context c, InputInfoUnit i) {
 	this.context = c;
-	this.boxItems = ((Checkbox) i).getBoxItems();
+	this.input = (Checkbox) i;
+	this.boxItems = input.getBoxItems();
     }
 
     public int getCount() {
@@ -82,7 +84,7 @@ public class CheckBoxItemAdapter extends BaseAdapter {
     }
 
     public OutputInfoUnit getValue() {
-	org.openecard.client.gui.definition.Checkbox result = new org.openecard.client.gui.definition.Checkbox();
+	Checkbox result = new Checkbox(input.getID());
 	result.getBoxItems().addAll(boxItems);
 	return result;
     }

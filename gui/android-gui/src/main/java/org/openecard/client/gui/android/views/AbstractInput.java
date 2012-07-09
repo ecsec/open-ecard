@@ -80,13 +80,12 @@ public class AbstractInput implements StepView {
 	tbr.addView(et);
 	tbl.addView(tbr);
 	if (input.type().equals(InfoUnitElementType.PASSWORD_FIELD)) {
-	    result = new PasswordField();
+	    result = new PasswordField(input.getID());
 	} else {
-	    result = new TextField();
+	    result = new TextField(input.getID());
 	}
 	result.setMinLength(input.getMinLength());
 	result.setMaxLength(input.getMaxLength());
-	result.setID(input.getID());
 	result.setValue(input.getValue());
     }
 

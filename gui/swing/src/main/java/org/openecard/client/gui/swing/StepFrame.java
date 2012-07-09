@@ -60,7 +60,7 @@ public class StepFrame extends JPanel implements ActionListener {
     public StepFrame(Step step, String dialogType) {
 	this.step = step;
 	this.dialogType = dialogType;
-	this.stepResult = new SwingStepResult(step.getID());
+	this.stepResult = new SwingStepResult(step);
 
 	initLayout();
     }
@@ -78,7 +78,7 @@ public class StepFrame extends JPanel implements ActionListener {
     }
 
     public void resetResult() {
-	stepResult = new SwingStepResult(step.getID());
+	stepResult = new SwingStepResult(step);
     }
 
     public void instantReturnIfSet() {

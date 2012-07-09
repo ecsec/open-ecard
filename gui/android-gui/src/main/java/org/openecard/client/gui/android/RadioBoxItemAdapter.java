@@ -46,11 +46,13 @@ import org.openecard.client.gui.definition.Radiobox;
 public class RadioBoxItemAdapter extends BaseAdapter {
 
     private Context context;
+    private Radiobox input;
     private List<BoxItem> boxItems;
 
     public RadioBoxItemAdapter(Context c, InputInfoUnit i) {
 	this.context = c;
-	this.boxItems = ((Radiobox) i).getBoxItems();
+	input = (Radiobox) i;
+	this.boxItems = input.getBoxItems();
     }
 
     public int getCount() {
@@ -82,7 +84,7 @@ public class RadioBoxItemAdapter extends BaseAdapter {
     }
 
     public OutputInfoUnit getValue() {
-	org.openecard.client.gui.definition.Radiobox result = new org.openecard.client.gui.definition.Radiobox();
+	Radiobox result = new Radiobox(input.getID());
 	result.getBoxItems().addAll(boxItems);
 	return result;
     }

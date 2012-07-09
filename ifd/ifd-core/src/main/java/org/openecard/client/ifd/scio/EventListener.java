@@ -48,6 +48,9 @@ public class EventListener implements Callable<List<IFDStatusType>> {
     private static final Logger _logger = LoggerFactory.getLogger(EventListener.class);
 
     private static final long pollDelay;
+    private static final long pauseDelay;
+
+    private static long pauseTime = 0;
 
     static {
         String delayStr = IFDProperties.getProperty("org.openecard.ifd.wait.delay");
@@ -56,10 +59,21 @@ public class EventListener implements Callable<List<IFDStatusType>> {
             try {
                 delay = Long.parseLong(delayStr);
             } catch (NumberFormatException ex) {
-                _logger.warn("Property 'org.openecard.ifd.wait.delay' contains a malformed number.");
+                _logger.warn("Property 'org.openecard.ifd.wait.delay' contains a malformed number.", ex);
             }
         }
         pollDelay = delay;
+
+        String pauseStr = IFDProperties.getProperty("org.openecard.ifd.wait.pause");
+        long pause = 2000;
+        if (delayStr != null) {
+            try {
+                pause = Long.parseLong(pauseStr);
+            } catch (NumberFormatException ex) {
+                _logger.warn("Property 'org.openecard.ifd.wait.pause' contains a malformed number.", ex);
+            }
+        }
+        pauseDelay = pause;
     }
 
 
@@ -83,6 +97,15 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 	this.expectedStatuses = expectedStatuses;
 	this.withNew = withNew;
 	startTime = System.currentTimeMillis();
+    }
+
+    /**
+     * Pause wait for events.
+     * The time to pause is set via the property org.openecard.ifd.wait.pause.
+     * If the property is invalid or unset, 2000ms is the default.
+     */
+    public static synchronized void pause() {
+	pauseTime = System.currentTimeMillis() + pauseDelay;
     }
 
 
@@ -156,22 +179,25 @@ public class EventListener implements Callable<List<IFDStatusType>> {
     }
 
 
+    /**
+     * Send a SOAP call with the given result to the IFDCallback address set when creating the class instance.
+     *
+     * @param result List of result stati.
+     */
     private void sendResult(List<IFDStatusType> result) {
-	IFDCallback endpoint = null;
 	try {
-	    endpoint = (IFDCallback) WSClassLoader.getClientService("IFDCallback", callback.getProtocolTerminationPoint());
+	    IFDCallback endpoint = (IFDCallback) WSClassLoader.getClientService("IFDCallback", callback.getProtocolTerminationPoint());
+
+	    SignalEvent sevt = new SignalEvent();
+	    sevt.setContextHandle(ctxHandle);
+	    sevt.setSessionIdentifier(callback.getSessionIdentifier());
+	    sevt.getIFDEvent().addAll(result);
+	    ResponseType sevtResp = endpoint.signalEvent(sevt);
+	    if (sevtResp.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
+		_logger.error("SignalEvent returned with an error.\n{}", sevtResp);
+	    }
 	} catch (Exception ex) {
 	    _logger.error(ex.getMessage(), ex);
-	    return;
-	}
-
-	SignalEvent sevt = new SignalEvent();
-	sevt.setContextHandle(ctxHandle);
-	sevt.setSessionIdentifier(callback.getSessionIdentifier());
-	sevt.getIFDEvent().addAll(result);
-	ResponseType sevtResp = endpoint.signalEvent(sevt);
-	if (sevtResp.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
-	    _logger.error("SignalEvent returned with an error.\n{}", sevtResp);
 	}
     }
 
@@ -219,7 +245,9 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 
 	@Override
 	public Void call() throws Exception {
+	    int pcscErrorCount = 0; // used to break out of the call if pcsc doesn't come back online
 	    boolean change = false;
+
 	    while (!change) {
 		// get list of terminals
 		CardTerminals terminals = factory.terminals();
@@ -249,12 +277,29 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 			return null;
 		    }
 
+		    // block execution here
+		    while(true) {
+			long currentPauseTime;
+			synchronized (EventListener.class) {
+			    currentPauseTime = pauseTime;
+			}
+			long now = System.currentTimeMillis();
+			if (now > currentPauseTime) {
+			    break;
+			}
+			Thread.sleep(currentPauseTime - now);
+		    }
+
 		    change = terminals.waitForChange(pollDelay); // in millis
 
 		} catch (CardException ex) {
 		    try {
-			// PCSC pooped, try again in a second
-			Thread.sleep(250);
+			// PCSC pooped, try again after a short break
+			pcscErrorCount++;
+			if (pcscErrorCount == 500) {
+			    throw ex;
+			}
+			Thread.sleep(1000);
 		    } catch (InterruptedException exc) {
 			throw exc; // somebody wants me to quit, so i do it.
 		    }
@@ -266,6 +311,7 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 			throw exc; // somebody wants me to quit, so i do it.
 		    }
                 } catch (Exception ex) {
+		    _logger.error(ex.getMessage(), ex);
 		    throw ex;
 		}
 	    }

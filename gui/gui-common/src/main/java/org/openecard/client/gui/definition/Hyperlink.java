@@ -24,16 +24,31 @@ package org.openecard.client.gui.definition;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class Hyperlink implements InputInfoUnit {
+public final class Hyperlink implements InputInfoUnit {
 
+    private static final Logger _logger = LoggerFactory.getLogger(Hyperlink.class);
+
+    private final String id;
     private String text;
     private URL href;
+
+    public Hyperlink(String id) {
+	this.id = id;
+    }
+
+
+    @Override
+    public String getID() {
+	return id;
+    }
 
     /**
      * @return the text
@@ -73,6 +88,19 @@ public class Hyperlink implements InputInfoUnit {
     @Override
     public InfoUnitElementType type() {
 	return InfoUnitElementType.HYPERLINK;
+    }
+
+
+    @Override
+    public void copyContentFrom(InfoUnit origin) {
+	if (!(this.getClass().equals(origin.getClass()))) {
+	    _logger.warn("Trying to copy content from type {} to type {}.", origin.getClass(), this.getClass());
+	    return;
+	}
+	Hyperlink other = (Hyperlink) origin;
+	// do copy
+	this.href = other.href;
+	this.text = other.text;
     }
 
 }

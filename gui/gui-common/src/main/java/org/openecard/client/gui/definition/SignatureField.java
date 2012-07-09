@@ -22,16 +22,34 @@
 
 package org.openecard.client.gui.definition;
 
+import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class SignatureField implements InputInfoUnit, OutputInfoUnit {
+public final class SignatureField implements InputInfoUnit, OutputInfoUnit {
 
+    private static final Logger _logger = LoggerFactory.getLogger(SignatureField.class);
+
+    private final String id;
     private String name;
     private String text;
     private byte[] value;
+
+    public SignatureField(String id) {
+	this.id = id;
+    }
+
+
+    @Override
+    public String getID() {
+	return id;
+    }
 
     /**
      * @return the name
@@ -79,6 +97,22 @@ public class SignatureField implements InputInfoUnit, OutputInfoUnit {
     @Override
     public InfoUnitElementType type() {
 	return InfoUnitElementType.SIGNAUTRE_FIELD;
+    }
+
+
+    @Override
+    public void copyContentFrom(InfoUnit origin) {
+	if (!(this.getClass().equals(origin.getClass()))) {
+	    _logger.warn("Trying to copy content from type {} to type {}.", origin.getClass(), this.getClass());
+	    return;
+	}
+	SignatureField other = (SignatureField) origin;
+	// do copy
+	this.name = other.name;
+	this.text = other.text;
+	if (other.value != null) {
+	    this.value = Arrays.copyOf(other.value, other.value.length);
+	}
     }
 
 }

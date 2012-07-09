@@ -27,11 +27,23 @@ package org.openecard.client.gui.definition;
  * @see AbstractBox
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class Checkbox extends AbstractBox {
+public final class Checkbox extends AbstractBox {
+
+    private final String id;
+
+    public Checkbox(String id) {
+	this.id = id;
+    }
+
 
     @Override
     public InfoUnitElementType type() {
 	return InfoUnitElementType.CHECK_BOX;
+    }
+
+    @Override
+    public String getID() {
+	return id;
     }
 
 }

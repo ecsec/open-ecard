@@ -27,7 +27,19 @@ package org.openecard.client.gui.definition;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class TextField extends AbstractTextField {
+public final class TextField extends AbstractTextField {
+
+    private final String id;
+
+    public TextField(String id) {
+	this.id = id;
+    }
+
+
+    @Override
+    public String getID() {
+	return id;
+    }
 
     @Override
     public InfoUnitElementType type() {

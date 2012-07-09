@@ -75,7 +75,8 @@
 					    </path>
 					</copy>
 
-					<!-- build string for replacement in WIX configuration file -->
+
+					<!-- build dependency string for replacement in WIX configuration file -->
 					<fileset id="alljars.fileset" dir="${wininstall.tmp.dir}/lib" includes="*.jar" />
 					<pathconvert pathsep=";" property="alljars.property" refid="alljars.fileset">
 					    <mapper type="flatten" />
@@ -87,10 +88,17 @@
 					<loadfile property="all_jars" srcfile="${wininstall.tmp.dir}/tmp.txt" />
 
 
+					<!-- build version number string for replacement in WIX configuration file -->
+					<echo file="${wininstall.tmp.dir}/version_number.txt">${version}</echo>
+					<replaceregexp file="${wininstall.tmp.dir}/version_number.txt" match="((\d)*(\.(\d)*){0,3})(.*)" replace="\1"/>
+					<loadfile property="version_number" srcfile="${wininstall.tmp.dir}/version_number.txt" />
+
+
 					<copy tofile="${wininstall.tmp.dir}/WindowsInstaller.wxs" file="${wininstall.resources.dir}/WindowsInstaller.wxs.xml" >
 					    <filterset>
 						<filter token="ALL_JARS" value="${all_jars}"/>
 						<filter token="VERSION" value="${version}"/>
+						<filter token="VERSION_NUMBER" value="${version_number}"/>
 					    </filterset>
 					</copy>
 				    </target>

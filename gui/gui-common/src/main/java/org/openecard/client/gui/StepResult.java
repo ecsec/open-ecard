@@ -24,6 +24,7 @@ package org.openecard.client.gui;
 
 import java.util.List;
 import org.openecard.client.gui.definition.OutputInfoUnit;
+import org.openecard.client.gui.definition.Step;
 
 
 /**
@@ -32,6 +33,7 @@ import org.openecard.client.gui.definition.OutputInfoUnit;
  */
 public interface StepResult {
 
+    public Step getStep();
     public String getStepID();
 
     public ResultStatus getStatus();

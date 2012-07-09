@@ -23,13 +23,16 @@
 package org.openecard.client.gui.executor;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.openecard.client.gui.ResultStatus;
 import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.UserConsentNavigator;
+import org.openecard.client.gui.definition.InputInfoUnit;
 import org.openecard.client.gui.definition.OutputInfoUnit;
+import org.openecard.client.gui.definition.Step;
 
 
 /**
@@ -65,10 +68,25 @@ public class ExecutionEngine {
 	    List<OutputInfoUnit> stepResults = next.getResults();
 	    Map<String, ExecutionResults> oldResults = Collections.unmodifiableMap(results);
 	    results.put(next.getStepID(), new ExecutionResults(next.getStepID(), stepResults));
+	    // replace InfoInputUnit values in live list
+	    if (! next.getStep().isResetOnLoad()) {
+		Step s = next.getStep();
+		List<InputInfoUnit> inputInfo = s.getInputInfoUnits();
+		Map<String,InputInfoUnit> infoMap = new HashMap<String, InputInfoUnit>();
+		// create index over infos
+		for (InputInfoUnit nextInfo : inputInfo) {
+		    infoMap.put(nextInfo.getID(), nextInfo);
+		}
+		for (OutputInfoUnit nextOut : stepResults) {
+		    InputInfoUnit matchingInfo = infoMap.get(nextOut.getID());
+		    matchingInfo.copyContentFrom(nextOut);
+		}
+	    }
 
 	    // perform action
 	    StepAction action = getAction(next.getStepID());
 	    StepActionResult actionResult = action.perform(oldResults, next);
+
 	    // replace step if told by result value
 	    if (actionResult.getReplacement() != null) {
 		switch (actionResult.getStatus()) {

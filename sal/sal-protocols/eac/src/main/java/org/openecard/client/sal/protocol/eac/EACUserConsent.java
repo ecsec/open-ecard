@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class EACUserConsent {
 
@@ -85,30 +86,32 @@ public class EACUserConsent {
 	    uc.getSteps().add(pinStep.getStep());
 	}
 
-	// Custom action for CHAT step
-	StepAction chatStepAction = new StepAction(chatStep.getStep()) {
+	// Custom action for CVC step
+	StepAction cvcStepAction = new StepAction(cvcStep.getStep()) {
 
 	    @Override
 	    public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-		Checkbox cc = null;
-		for (OutputInfoUnit o : result.getResults()) {
-		    if (o instanceof Checkbox) {
-			cc = (Checkbox) o;
-		    }
-		}
-
 		switch (result.getStatus()) {
 		    case BACK:
 			return new StepActionResult(StepActionResultStatus.BACK);
 		    case OK:
-			for (InputInfoUnit i : pinStep.getStep().getInputInfoUnits()) {
-			    if (i instanceof Checkbox) {
-				Checkbox c = (Checkbox) i;
-				c.getBoxItems().clear();
-				for (BoxItem b : cc.getBoxItems()) {
-				    if (b.isChecked()) {
+			// write back result from last visit of chatStep
+			if (oldResults.get(chatStep.getStep().getID()) != null) {
+			    Checkbox cc = null;
+			    for (OutputInfoUnit o : oldResults.get(chatStep.getStep().getID()).getResults()) {
+				if (o instanceof Checkbox) {
+				    cc = (Checkbox) o;
+				}
+			    }
+
+			    for (InputInfoUnit i : chatStep.getStep().getInputInfoUnits()) {
+				if (i instanceof Checkbox) {
+				    Checkbox c = (Checkbox) i;
+				    c.getBoxItems().clear();
+				    for (BoxItem b : cc.getBoxItems()) {
 					BoxItem ii = b;
-					ii.setDisabled(true);
+					ii.setDisabled(b.isDisabled());
+					ii.setChecked(b.isChecked());
 					c.getBoxItems().add(ii);
 				    }
 				}
@@ -126,22 +129,23 @@ public class EACUserConsent {
 
 	    @Override
 	    public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-		Checkbox cc = null;
-		for (OutputInfoUnit o : oldResults.get(chatStep.getStep().getID()).getResults()) {
-		    if (o instanceof Checkbox) {
-			cc = (Checkbox) o;
-		    }
-		}
-
 		switch (result.getStatus()) {
 		    case BACK:
+			// write back result from last visit of chatStep
+			Checkbox cc = null;
+			for (OutputInfoUnit o : oldResults.get(chatStep.getStep().getID()).getResults()) {
+			    if (o instanceof Checkbox) {
+				cc = (Checkbox) o;
+			    }
+			}
+
 			for (InputInfoUnit i : chatStep.getStep().getInputInfoUnits()) {
 			    if (i instanceof Checkbox) {
 				Checkbox c = (Checkbox) i;
 				c.getBoxItems().clear();
 				for (BoxItem b : cc.getBoxItems()) {
 				    BoxItem ii = b;
-				    ii.setDisabled(false);
+				    ii.setDisabled(b.isDisabled());
 				    ii.setChecked(b.isChecked());
 				    c.getBoxItems().add(ii);
 				}
@@ -160,7 +164,7 @@ public class EACUserConsent {
 	ExecutionEngine exec = new ExecutionEngine(navigator);
 
 	// Add custom action
-	exec.addCustomAction(chatStepAction);
+	exec.addCustomAction(cvcStepAction);
 	exec.addCustomAction(pinStepAction);
 
 	ResultStatus processResult = exec.process();

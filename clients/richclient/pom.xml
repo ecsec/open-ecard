@@ -65,6 +65,7 @@
 				<phase>package</phase>
 				<configuration>
 				    <target>
+					<property name="version" value="${project.build.version}" />
 					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/Open-eCard-Logo.ico" />
 					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/run.bat" />
 					<copy todir="${wininstall.tmp.dir}/lib" flatten="true" >
@@ -89,7 +90,7 @@
 					<copy tofile="${wininstall.tmp.dir}/WindowsInstaller.wxs" file="${wininstall.resources.dir}/WindowsInstaller.wxs.xml" >
 					    <filterset>
 						<filter token="ALL_JARS" value="${all_jars}"/>
-						<filter token="VERSION" value="${project.build.version}"/>
+						<filter token="VERSION" value="${version}"/>
 					    </filterset>
 					</copy>
 				    </target>

@@ -143,8 +143,13 @@ public class AndroidNavigator implements UserConsentNavigator {
 	public List<OutputInfoUnit> results = null;
 
 	@Override
+	public Step getStep() {
+	    return steps.get(curStep);
+	}
+
+	@Override
 	public String getStepID() {
-	    return steps.get(curStep).getID();
+	    return getStep().getID();
 	}
 
 	@Override

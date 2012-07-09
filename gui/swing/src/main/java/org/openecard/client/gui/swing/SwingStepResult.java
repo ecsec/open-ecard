@@ -29,6 +29,7 @@ import java.util.concurrent.Exchanger;
 import org.openecard.client.gui.ResultStatus;
 import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.definition.OutputInfoUnit;
+import org.openecard.client.gui.definition.Step;
 
 
 /**
@@ -37,16 +38,16 @@ import org.openecard.client.gui.definition.OutputInfoUnit;
 public class SwingStepResult implements StepResult {
 
     public Exchanger syncPoint = new Exchanger();
-    private String id;
+    private Step step;
     private ResultStatus status;
     private List<OutputInfoUnit> results;
 
-    public SwingStepResult(String id) {
-	this(id, null);
+    public SwingStepResult(Step step) {
+	this(step, null);
     }
 
-    public SwingStepResult(String id, ResultStatus status) {
-	this.id = id;
+    public SwingStepResult(Step step, ResultStatus status) {
+	this.step = step;
 	this.status = status;
     }
 
@@ -59,8 +60,12 @@ public class SwingStepResult implements StepResult {
     }
 
     @Override
+    public Step getStep() {
+	return step;
+    }
+    @Override
     public String getStepID() {
-	return id;
+	return step.getID();
     }
 
     @Override
@@ -115,4 +120,5 @@ public class SwingStepResult implements StepResult {
 	    }
 	}
     }
+
 }

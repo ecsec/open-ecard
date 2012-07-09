@@ -49,7 +49,7 @@ public class Checkbox implements StepComponent {
     JPanel contentPanel = new JPanel();
 
     public Checkbox(org.openecard.client.gui.definition.Checkbox checkbox) {
-	result = new org.openecard.client.gui.definition.Checkbox(); // copy of checkbox, so result is pre assembled
+	result = new org.openecard.client.gui.definition.Checkbox(checkbox.getID()); // copy of checkbox, so result is pre assembled
 	panel = new JPanel(new BorderLayout());
 
 //	contentPanel.setBorder(new LineBorder(Color.GRAY));

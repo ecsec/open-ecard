@@ -58,15 +58,15 @@ public class AbstractInput implements StepComponent {
     private final AbstractTextField result;
 
     public AbstractInput(TextField input) {
-	this(input, new TextField(), new JTextField(20));
+	this(input, new TextField(input.getID()), new JTextField(20));
     }
     public AbstractInput(PasswordField input) {
-	this(input, new PasswordField(), new JPasswordField(12));
+	this(input, new PasswordField(input.getID()), new JPasswordField(12));
     }
 
     private AbstractInput(AbstractTextField input, AbstractTextField output, JTextComponent textFieldImpl) {
-	String value = null;
-	String labelText = null;
+	String value;
+	String labelText;
 
 	// extract values from input and write to output (depending on actual type)
 	this.name = input.getID();
@@ -78,7 +78,6 @@ public class AbstractInput implements StepComponent {
 	result = output;
 	result.setMinLength(minLength);
 	result.setMaxLength(maxLength);
-	result.setID(this.name);
 	result.setDescription(labelText);
 
 	// correct values

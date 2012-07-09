@@ -45,7 +45,7 @@ public class Radiobutton implements StepComponent {
     private final JPanel panel;
 
     public Radiobutton(Radiobox radio) {
-	result = new Radiobox(); // copy of radio, so result is pre assembled
+	result = new Radiobox(radio.getID()); // copy of radio, so result is pre assembled
 	panel = new JPanel();
 	GridLayout layout = new GridLayout(0, 1);
 	panel.setLayout(layout);

@@ -36,7 +36,6 @@ import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.common.util.ValueGenerators;
@@ -137,7 +136,7 @@ public class ECardApplet extends JApplet {
 		recognition = new CardRecognition(ifd, contextHandle);
 	    } catch (Exception ex) {
 		// <editor-fold defaultstate="collapsed" desc="log exception">
-		logger.error(LoggingConstants.THROWING, "Exception", ex);
+		logger.error("Exception", ex);
 		// </editor-fold>
 		initialized = false;
 	    }
@@ -293,7 +292,7 @@ public class ECardApplet extends JApplet {
 
 	psk = getParameter("PSK");
 	// <editor-fold defaultstate="collapsed" desc="log configuration">
-	logger.debug(LoggingConstants.CONFIG, "PSK set to {}", psk);
+	logger.debug("PSK set to {}", psk);
 	// </editor-fold>
 
 	///
@@ -308,7 +307,7 @@ public class ECardApplet extends JApplet {
 	    }
 	}
 	// <editor-fold defaultstate="collapsed" desc="log configuration">
-	logger.debug(LoggingConstants.CONFIG, "redirectUrl set to {}", redirectURL);
+	logger.debug("redirectUrl set to {}", redirectURL);
 	// </editor-fold>
 
 	String param = getParameter("recognizeCard");
@@ -318,7 +317,7 @@ public class ECardApplet extends JApplet {
 	    recognizeCard = true;
 	}
 	// <editor-fold defaultstate="collapsed" desc="log configuration">
-	logger.debug(LoggingConstants.CONFIG, "recognizeCard set to {}", recognizeCard);
+	logger.debug("recognizeCard set to {}", recognizeCard);
 	// </editor-fold>
 
 	param = getParameter("spBehavior");
@@ -330,7 +329,7 @@ public class ECardApplet extends JApplet {
 	    }
 	}
 	// <editor-fold defaultstate="collapsed" desc="log configuration">
-	logger.debug(LoggingConstants.CONFIG, "spBehavior set to {}", spBehavior);
+	logger.debug("spBehavior set to {}", spBehavior);
 	// </editor-fold>
     }
 

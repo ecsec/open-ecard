@@ -28,7 +28,6 @@ import java.security.GeneralSecurityException;
 import org.openecard.bouncycastle.crypto.engines.AESEngine;
 import org.openecard.bouncycastle.crypto.macs.CMac;
 import org.openecard.bouncycastle.crypto.params.KeyParameter;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TagClass;
 import org.openecard.client.common.util.ByteUtils;
@@ -209,7 +208,7 @@ public final class AuthenticationToken {
 	    ret = macObject.toBER(true);
 
 	} catch (Throwable e) {
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    throw new GeneralSecurityException(e);
 	}
 

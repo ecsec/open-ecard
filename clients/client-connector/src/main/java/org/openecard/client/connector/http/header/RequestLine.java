@@ -1,7 +1,6 @@
 package org.openecard.client.connector.http.header;
 
 import java.net.URI;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.connector.http.HTTPConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +62,7 @@ public final class RequestLine extends StartLine {
 	    return new RequestLine(elem1, elem2, elem3);
 	} catch (Exception e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.info(LoggingConstants.THROWING, "Exception", e);
+	    logger.info("Exception", e);
 	    // </editor-fold>
 	    throw new IllegalArgumentException();
 	}

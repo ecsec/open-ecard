@@ -25,7 +25,6 @@ package org.openecard.client.connector;
 import java.net.Socket;
 import java.util.Iterator;
 import java.util.List;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.connector.handler.ConnectorHandler;
 import org.openecard.client.connector.http.HTTPRequest;
 import org.openecard.client.connector.http.HTTPResponse;
@@ -104,7 +103,7 @@ public final class ConnectorSocketHandler implements Runnable {
 		throw new ConnectorException("Cannot handle such a request");
 	    } catch (Exception e) {
 		// <editor-fold defaultstate="collapsed" desc="log exception">
-		logger.error(LoggingConstants.THROWING, "Exception", e);
+		logger.error("Exception", e);
 		// </editor-fold>
 
 		HTTPResponse httpResponse = new HTTPResponse();
@@ -130,7 +129,7 @@ public final class ConnectorSocketHandler implements Runnable {
 		HTTPResponse httpResponse = aHandler.handleResponse(clientReponse);
 		httpResponse.setOutputStream(socket.getOutputStream());
 	    } catch (Exception e) {
-		logger.error(LoggingConstants.THROWING, "Exception", e);
+		logger.error("Exception", e);
 
 		HTTPResponse httpResponse = new HTTPResponse();
 		httpResponse.setStatusLine(new StatusLine(HTTPStatusCode.INTERNAL_SERVER_ERROR_500));

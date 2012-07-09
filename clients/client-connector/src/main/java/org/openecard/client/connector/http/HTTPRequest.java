@@ -3,7 +3,6 @@ package org.openecard.client.connector.http;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.connector.http.header.EntityHeader;
 import org.openecard.client.connector.http.header.GeneralHeader;
 import org.openecard.client.connector.http.header.RequestHeader;
@@ -83,7 +82,7 @@ public final class HTTPRequest extends HTTPMessage {
 
 	} catch (Exception e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    throw new IllegalArgumentException();
 	}

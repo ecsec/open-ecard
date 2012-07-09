@@ -24,7 +24,6 @@ package org.openecard.client.ifd.protocol.pace;
 
 import java.util.List;
 import javax.smartcardio.*;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.util.ByteUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +50,7 @@ public class PCSCTest {
 	    logger.info("Receive APDU {}", ByteUtils.toHexString(response.getBytes()));
 	} catch (CardException ex) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    logger.error("Exception", ex);
 	    // </editor-fold>
 	}
     }
@@ -83,7 +82,7 @@ public class PCSCTest {
 
 	} catch (Exception ex) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    logger.error("Exception", ex);
 	    // </editor-fold>
 	}
     }

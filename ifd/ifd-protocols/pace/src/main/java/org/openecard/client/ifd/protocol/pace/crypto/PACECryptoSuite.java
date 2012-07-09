@@ -29,7 +29,6 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.openecard.bouncycastle.jce.spec.ECParameterSpec;
 import org.openecard.bouncycastle.math.ec.ECPoint;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.eac.*;
 import org.slf4j.Logger;
@@ -75,7 +74,7 @@ public final class PACECryptoSuite {
 	    c.init(Cipher.DECRYPT_MODE, skeySpec, params);
 	    c.doFinal(nonce, 0, nonce.length, ret);
 	} catch (Throwable e) {
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    throw new GeneralSecurityException(e);
 	}
 	return ret;

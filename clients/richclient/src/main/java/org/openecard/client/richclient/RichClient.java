@@ -31,7 +31,6 @@ import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
@@ -120,7 +119,7 @@ public final class RichClient implements ConnectorListener {
     @Override
     public ClientResponse request(ClientRequest request) {
 	// <editor-fold defaultstate="collapsed" desc="log request">
-	logger.debug(LoggingConstants.FINER, "Client request: {}", request.getClass());
+	logger.debug("Client request: {}", request.getClass());
 	// </editor-fold>
 	if (request instanceof TCTokenRequest) {
 	    return handleActivate((TCTokenRequest) request);
@@ -172,7 +171,7 @@ public final class RichClient implements ConnectorListener {
 
 	if (connectionHandle == null) {
 	    // <editor-fold defaultstate="collapsed" desc="log error">
-	    logger.error(LoggingConstants.SEVERE, "Warning", "Given ConnectionHandle is invalied.");
+	    logger.error("Warning", "Given ConnectionHandle is invalied.");
 	    // </editor-fold>
 	    response.setErrorMessage("Given ConnectionHandle is invalied.");
 	    return response;

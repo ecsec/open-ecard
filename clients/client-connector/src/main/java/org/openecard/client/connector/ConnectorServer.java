@@ -25,7 +25,6 @@ package org.openecard.client.connector;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +103,7 @@ public final class ConnectorServer implements Runnable {
 		ConnectorSocketHandler handler = new ConnectorSocketHandler(socket, handlers, listeners);
 		handler.start();
 	    } catch (Exception e) {
-		logger.error(LoggingConstants.THROWING, e.getMessage(), e);
+		logger.error(e.getMessage(), e);
 	    }
 	}
     }

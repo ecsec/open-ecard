@@ -33,7 +33,6 @@ import java.util.concurrent.Executors;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.connector.ConnectorListener;
 import org.openecard.client.connector.messages.TCTokenRequest;
@@ -158,7 +157,7 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 	    // }
 	} catch (Exception ex) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    logger.error("Exception", ex);
 	    // </editor-fold>
 	}
     }
@@ -228,7 +227,7 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 
 	if (connectionHandle == null) {
 	    // <editor-fold defaultstate="collapsed" desc="log error">
-	    logger.error(LoggingConstants.SEVERE, "Warning", "Given ConnectionHandle is invalied.");
+	    logger.error("Warning", "Given ConnectionHandle is invalied.");
 	    // </editor-fold>
 	    response.setErrorMessage("Given ConnectionHandle is invalied.");
 	    return response;
@@ -310,7 +309,7 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 	    if (ex instanceof RuntimeException) {
 		throw (RuntimeException)ex;
 	    }
-	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    logger.error("Exception", ex);
 	    response.setErrorMessage(ex.getMessage());
 	}
 

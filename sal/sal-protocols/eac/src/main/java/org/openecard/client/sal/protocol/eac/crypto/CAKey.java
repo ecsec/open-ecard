@@ -36,7 +36,6 @@ import org.openecard.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
 import org.openecard.bouncycastle.jce.spec.ECParameterSpec;
 import org.openecard.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.openecard.bouncycastle.math.ec.ECPoint;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.eac.CADomainParameter;
@@ -92,7 +91,7 @@ public final class CAKey {
 
 	    return getEncodedPublicKey();
 	} else if (cdp.isDH()) {
-	    logger.error(LoggingConstants.INFO, "Not implemented yet.");
+	    logger.error("Not implemented yet.");
 	    throw new UnsupportedOperationException("Not implemented yet.");
 	} else {
 	    throw new IllegalArgumentException();
@@ -164,7 +163,7 @@ public final class CAKey {
 		return compKey;
 	    } catch (NoSuchAlgorithmException ex) {
 		// <editor-fold defaultstate="collapsed" desc="log exception">
-		logger.error(LoggingConstants.THROWING, "Exception", ex);
+		logger.error("Exception", ex);
 		// </editor-fold>
 		throw new RuntimeException(ex);
 	    }

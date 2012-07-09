@@ -27,7 +27,6 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import java.util.Map;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
@@ -118,7 +117,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    return response;
 	} catch (Exception e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	}

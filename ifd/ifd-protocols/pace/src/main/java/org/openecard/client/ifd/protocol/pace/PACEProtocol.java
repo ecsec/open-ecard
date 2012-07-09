@@ -33,7 +33,6 @@ import org.openecard.client.common.ifd.anytype.PACEInputType;
 import org.openecard.client.common.ifd.anytype.PACEOutputType;
 import org.openecard.client.common.ifd.protocol.exception.ProtocolException;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.crypto.common.asn1.eac.PACESecurityInfos;
 import org.openecard.client.crypto.common.asn1.eac.SecurityInfos;
 import org.openecard.client.crypto.common.asn1.eac.ef.EFCardAccess;
@@ -112,19 +111,19 @@ public class PACEProtocol implements Protocol {
 
 	} catch (UnsupportedEncodingException ex) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    logger.error("Exception", ex);
 	    // </editor-fold>
 	    response.setResult(WSHelper.makeResultError(
 		    ECardConstants.Minor.IFD.UNKNOWN_PIN_FORMAT,
 		    "Cannot encode the PIN in " + PACEConstants.PIN_CHARSET + " charset."));
 	} catch (ProtocolException ex) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    logger.error("Exception", ex);
 	    // </editor-fold>
 	    response.setResult(WSHelper.makeResult(ex));
 	} catch (Throwable ex) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    logger.error("Exception", ex);
 	    // </editor-fold>
 	    response.setResult(WSHelper.makeResult(ex));
 	}
@@ -143,7 +142,7 @@ public class PACEProtocol implements Protocol {
 	} catch (Exception ex) {
 	    sm = null;
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    logger.error("Exception", ex);
 	    // </editor-fold>
 	    throw new RuntimeException(ex);
 	}
@@ -160,7 +159,7 @@ public class PACEProtocol implements Protocol {
 	} catch (Exception ex) {
 	    sm = null;
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    logger.error("Exception", ex);
 	    // </editor-fold>
 	    throw new RuntimeException(ex);
 	}

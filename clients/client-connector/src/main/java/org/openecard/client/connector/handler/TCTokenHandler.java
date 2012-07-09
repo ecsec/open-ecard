@@ -26,14 +26,12 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.List;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.connector.common.ConnectorConstants;
 import org.openecard.client.connector.common.ErrorPage;
 import org.openecard.client.connector.http.HTTPRequest;
 import org.openecard.client.connector.http.HTTPResponse;
 import org.openecard.client.connector.http.HTTPStatusCode;
 import org.openecard.client.connector.http.header.EntityHeader;
-import org.openecard.client.connector.http.header.GeneralHeader;
 import org.openecard.client.connector.http.header.RequestLine;
 import org.openecard.client.connector.http.header.ResponseHeader;
 import org.openecard.client.connector.http.header.StatusLine;
@@ -113,7 +111,7 @@ public class TCTokenHandler implements ConnectorHandler {
 			    this.corsRequest = true;
 			}
 		    } else {
-			logger.info(LoggingConstants.FINE, "Unknown query element: {}", name);
+			logger.info("Unknown query element: {}", name);
 		    }
 		}
 

@@ -33,7 +33,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import org.openecard.client.common.I18n;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.richclient.RichClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +81,7 @@ public class AppTray {
 	    try {
 		tray.add(trayIcon);
 	    } catch (AWTException ex) {
-		logger.error(LoggingConstants.THROWING, "TrayIcon could not be added to the system tray.", ex);
+		logger.error("TrayIcon could not be added to the system tray.", ex);
 
 		// tray and trayIcon are not needed anymore
 		tray = null;

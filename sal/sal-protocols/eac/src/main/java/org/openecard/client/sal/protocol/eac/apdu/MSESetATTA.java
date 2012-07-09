@@ -25,7 +25,6 @@ package org.openecard.client.sal.protocol.eac.apdu;
 import java.io.IOException;
 import org.openecard.client.common.apdu.ManageSecurityEnviroment;
 import org.openecard.client.common.apdu.common.CardAPDUOutputStream;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.slf4j.LoggerFactory;
 
 
@@ -72,7 +71,7 @@ public class MSESetATTA extends ManageSecurityEnviroment {
 
 	    caos.flush();
 	} catch (IOException ex) {
-	    LoggerFactory.getLogger(MSESetATTA.class).error(LoggingConstants.THROWING, "Exception", ex);
+	    LoggerFactory.getLogger(MSESetATTA.class).error("Exception", ex);
 	} finally {
 	    try {
 		caos.close();

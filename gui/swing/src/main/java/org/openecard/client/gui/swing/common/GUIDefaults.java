@@ -34,7 +34,6 @@ import java.util.regex.Pattern;
 import javax.swing.ImageIcon;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -164,17 +163,17 @@ public class GUIDefaults {
 		    else if (iconProperties.contains(propertyAttribute)) {
 			URL url = guiProps.getDependentResource(value);
 			if (url == null) {
-			    logger.error(LoggingConstants.INFO, "Cannot parse the property: " + property);
+			    logger.error("Cannot parse the property: " + property);
 			} else {
 			    defaults.put(property, url);
 			}
 		    }
 		} catch (Exception e) {
-		    logger.error(LoggingConstants.INFO, "Cannot parse the property: " + property);
+		    logger.error("Cannot parse the property: " + property);
 		}
 	    }
 	} catch (Exception e) {
-	    logger.error(LoggingConstants.THROWING, e.getMessage());
+	    logger.error(e.getMessage());
 	}
     }
 

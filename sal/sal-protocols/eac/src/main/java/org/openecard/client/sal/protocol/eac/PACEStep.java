@@ -31,7 +31,6 @@ import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
 import org.openecard.client.common.ifd.PACECapabilities;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.sal.anytype.AuthDataMap;
@@ -172,7 +171,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		response.setAuthenticationProtocolData(eac1Output.getAuthDataType());
 	    }
 	} catch (Exception e) {
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	}
 

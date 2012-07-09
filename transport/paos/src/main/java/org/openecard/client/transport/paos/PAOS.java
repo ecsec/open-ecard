@@ -39,7 +39,6 @@ import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerException;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerException;
@@ -96,7 +95,7 @@ public class PAOS {
 	    m = WSMarshallerFactory.createInstance();
 	} catch (WSMarshallerException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    throw new RuntimeException(e);
 	}
@@ -121,7 +120,7 @@ public class PAOS {
 	    m = WSMarshallerFactory.createInstance();
 	} catch (WSMarshallerException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    throw new RuntimeException(e);
 	}
@@ -141,7 +140,7 @@ public class PAOS {
 	    m = WSMarshallerFactory.createInstance();
 	} catch (WSMarshallerException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    throw new RuntimeException(e);
 	}
@@ -160,7 +159,7 @@ public class PAOS {
 	    m = WSMarshallerFactory.createInstance();
 	} catch (WSMarshallerException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    throw new RuntimeException(e);
 	}
@@ -221,7 +220,7 @@ public class PAOS {
 	    }
 	} catch (SOAPException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    throw new PAOSException(e.getMessage(), e);
 	}
@@ -243,13 +242,13 @@ public class PAOS {
 	    updateMessageID(msg);
 
 	    // <editor-fold defaultstate="collapsed" desc="log message">
-	    logger.debug(LoggingConstants.FINE, "Message received:\n{}", m.doc2str(doc));
+	    logger.debug("Message received:\n{}", m.doc2str(doc));
 	    // </editor-fold>
 
 	    return m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
 	} catch (Exception e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    throw new PAOSException(e.getMessage(), e);
 	}
@@ -260,7 +259,7 @@ public class PAOS {
 	String result = m.doc2str(msg.getDocument());
 
 	// <editor-fold defaultstate="collapsed" desc="log message">
-	logger.debug(LoggingConstants.FINE, "Message sent:\n{}", result);
+	logger.debug("Message sent:\n{}", result);
 	// </editor-fold>
 
 	return result;
@@ -328,7 +327,7 @@ public class PAOS {
 		output = conn.getOutputStream();
 		output.write(this.createPAOSResponse(msg).getBytes("UTF-8"));
 	    } catch (Exception ex) {
-		logger.error(LoggingConstants.THROWING, ex.getMessage(), ex);
+		logger.error(ex.getMessage(), ex);
 		throw ex;
 	    } finally {
 		output.close();
@@ -340,7 +339,7 @@ public class PAOS {
 		response = conn.getInputStream();
 		requestObj = this.processPAOSRequest(response);
 	    } catch (Exception ex) {
-		logger.error(LoggingConstants.THROWING, ex.getMessage(), ex);
+		logger.error(ex.getMessage(), ex);
 		throw ex;
 	    } finally {
 		response.close();

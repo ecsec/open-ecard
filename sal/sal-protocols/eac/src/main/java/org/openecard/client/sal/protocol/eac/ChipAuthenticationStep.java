@@ -29,7 +29,6 @@ import java.util.Map;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.apdu.utils.CardUtils;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.tlv.TLV;
@@ -122,7 +121,7 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    return response;
 	} catch (Exception e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	}

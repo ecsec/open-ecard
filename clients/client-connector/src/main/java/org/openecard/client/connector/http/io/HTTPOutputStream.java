@@ -3,7 +3,6 @@ package org.openecard.client.connector.http.io;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.connector.http.HTTPConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +104,7 @@ public final class HTTPOutputStream {
      */
     public synchronized void close() throws IOException {
 	// <editor-fold defaultstate="collapsed" desc="log response">
-	logger.debug(LoggingConstants.FINER, "HTTP response:\n{}", new String(buffer.toByteArray()));
+	logger.debug("HTTP response:\n{}", new String(buffer.toByteArray()));
 	// </editor-fold>
 	outputStream.write(buffer.toByteArray());
 	outputStream.flush();

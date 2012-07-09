@@ -3,7 +3,6 @@ package org.openecard.client.connector.http.io;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.connector.http.HTTPConstants;
 import org.openecard.client.connector.io.LimitedInputStream;
@@ -29,7 +28,7 @@ public class HTTPInputStream {
     public HTTPInputStream(InputStream inputStream) throws IOException {
 	fillBuffer(inputStream);
 	// <editor-fold defaultstate="collapsed" desc="log request">
-	logger.debug(LoggingConstants.FINER, "HTTP request:\n{}", new String(buffer));
+	logger.debug("HTTP request:\n{}", new String(buffer));
 	// </editor-fold>
     }
 

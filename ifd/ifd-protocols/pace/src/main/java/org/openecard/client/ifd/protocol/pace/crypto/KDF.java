@@ -25,7 +25,6 @@ package org.openecard.client.ifd.protocol.pace.crypto;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +52,7 @@ public final class KDF {
 	    keyLength = 16;
 	} catch (NoSuchAlgorithmException ex) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", ex);
+	    logger.error("Exception", ex);
 	    // </editor-fold>
 	    throw new GeneralSecurityException(ex);
 	}

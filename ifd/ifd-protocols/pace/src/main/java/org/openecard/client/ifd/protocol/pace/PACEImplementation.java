@@ -30,7 +30,6 @@ import org.openecard.client.common.apdu.common.CardResponseAPDU;
 import org.openecard.client.common.apdu.exception.APDUException;
 import org.openecard.client.common.ifd.protocol.exception.ProtocolException;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.eac.PACEDomainParameter;
 import org.openecard.client.crypto.common.asn1.eac.PACESecurityInfos;
@@ -112,7 +111,7 @@ public class PACEImplementation {
 	    generalAuthenticateEncryptedNonce();
 	} catch (APDUException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    short sw = e.getResponseAPDU().getSW();
 
@@ -149,12 +148,12 @@ public class PACEImplementation {
 	    }
 	} catch (ProtocolException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    throw e;
 	} catch (Exception e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    throw new ProtocolException(ECardConstants.Minor.IFD.UNKNOWN_ERROR, e.getMessage());
 	}
@@ -177,12 +176,12 @@ public class PACEImplementation {
 	    generalAuthenticateMapNonce();
 	} catch (APDUException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    throw new ProtocolException(e.getResult());
 	} catch (GeneralSecurityException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    throw new ProtocolException(e.getMessage());
 	}
@@ -210,7 +209,7 @@ public class PACEImplementation {
 	    response = gaMapNonce.transmit(dispatcher, slotHandle);
 	} catch (APDUException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    throw new ProtocolException(e.getResult());
 	}
@@ -262,12 +261,12 @@ public class PACEImplementation {
 	    }
 	} catch (APDUException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    throw new ProtocolException(e.getResult());
 	} catch (GeneralSecurityException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    throw new ProtocolException(e.getMessage());
 	}
@@ -305,7 +304,7 @@ public class PACEImplementation {
 	    }
 	} catch (APDUException e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    int sw = e.getResponseAPDU().getSW();
 
@@ -335,7 +334,7 @@ public class PACEImplementation {
 	    }
 	} catch (Exception e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    throw new ProtocolException(ECardConstants.Minor.IFD.UNKNOWN_ERROR, e.getMessage());
 	}

@@ -3,7 +3,6 @@ package org.openecard.client.connector.http;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import org.openecard.client.common.logging.LoggingConstants;
 import org.openecard.client.connector.http.header.EntityHeader;
 import org.openecard.client.connector.http.header.GeneralHeader;
 import org.openecard.client.connector.http.header.ResponseHeader;
@@ -76,7 +75,7 @@ public final class HTTPResponse extends HTTPMessage {
 	    output.close();
 	} catch (Exception e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", e);
+	    logger.error("Exception", e);
 	    // </editor-fold>
 	    outputStream.write(new StatusLine(HTTPStatusCode.INTERNAL_SERVER_ERROR_500).toString().getBytes());
 	    outputStream.write(HTTPConstants.CRLF);

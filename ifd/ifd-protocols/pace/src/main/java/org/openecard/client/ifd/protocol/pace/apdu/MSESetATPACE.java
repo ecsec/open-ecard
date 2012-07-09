@@ -79,9 +79,7 @@ public final class MSESetATPACE extends ManageSecurityEnviroment {
 
 	    caos.flush();
 	} catch (IOException ex) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error(LoggingConstants.THROWING, "Exception", ex);
-	    // </editor-fold>
+	    logger.error(ex.getMessage(), ex);
 	} finally {
 	    try {
 		caos.close();

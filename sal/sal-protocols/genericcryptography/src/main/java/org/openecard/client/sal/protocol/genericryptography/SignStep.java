@@ -22,14 +22,7 @@
 
 package org.openecard.client.sal.protocol.genericryptography;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.CryptographicServiceActionName;
-import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
-import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
-import iso.std.iso_iec._24727.tech.schema.Sign;
-import iso.std.iso_iec._24727.tech.schema.SignResponse;
-import iso.std.iso_iec._24727.tech.schema.Transmit;
-import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Map;
@@ -46,8 +39,6 @@ import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.util.CardCommands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 
 /**
@@ -57,8 +48,6 @@ import org.slf4j.MarkerFactory;
 public class SignStep implements ProtocolStep<Sign, SignResponse> {
 
     private static final Logger _logger = LoggerFactory.getLogger(SignStep.class);
-    private static final Marker _enter = MarkerFactory.getMarker("ENTERING");
-    private static final Marker _exit = MarkerFactory.getMarker("EXITING");
 
     private Dispatcher dispatcher;
 
@@ -84,9 +73,6 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 
     @Override
     public SignResponse perform(Sign sign, Map<String, Object> internalData) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	_logger.trace(_enter, "> {}, {}", sign, internalData);
-	// </editor-fold>
 	SignResponse res = new SignResponse();
 	try {
 	    ConnectionHandleType connectionHandle = sign.getConnectionHandle();
@@ -144,9 +130,6 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    _logger.warn(e.getMessage(), e);
 	    res = WSHelper.makeResponse(SignResponse.class, WSHelper.makeResult(e));
 	}
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	_logger.trace(_exit, "< {}", res);
-	// </editor-fold>
 	return res;
     }
 

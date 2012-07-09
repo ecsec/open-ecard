@@ -40,11 +40,6 @@ public class GUIContentMap {
 
     private HashMap<String, Object> map = new HashMap<String, Object>();
 
-    /**
-     * Creates a new GUI Content map.
-     */
-    public GUIContentMap() {
-    }
 
     /**
      * Adds a new value to the GUI content map.

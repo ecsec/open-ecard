@@ -32,12 +32,7 @@ import org.openecard.client.crypto.common.asn1.cvc.CHAT.DataGroup;
 import org.openecard.client.crypto.common.asn1.cvc.CHAT.SpecialFunction;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.client.crypto.common.asn1.cvc.CertificateDescription;
-import org.openecard.client.gui.definition.BoxItem;
-import org.openecard.client.gui.definition.Checkbox;
-import org.openecard.client.gui.definition.OutputInfoUnit;
-import org.openecard.client.gui.definition.Step;
-import org.openecard.client.gui.definition.Text;
-import org.openecard.client.gui.definition.ToggleText;
+import org.openecard.client.gui.definition.*;
 import org.openecard.client.gui.executor.ExecutionResults;
 
 
@@ -52,6 +47,7 @@ public class CHATStep {
     // GUI translation constants
     private static final String TITLE = "step_chat_title";
     private static final String DESCRIPTION = "step_chat_description";
+    private static final String CHAT_BOXES = "readAccessCheckBox";
 
     private I18n lang = I18n.getTranslation("sal");
     private Step step = new Step(lang.translationForKey(TITLE));
@@ -79,11 +75,11 @@ public class CHATStep {
 	String decriptionText = lang.translationForKey(DESCRIPTION);
 	decriptionText = decriptionText.replaceFirst("%s", certificateDescription.getSubjectName());
 
-	Text decription = new Text();
+	Text decription = new Text("description");
 	decription.setText(decriptionText);
 	step.getInputInfoUnits().add(decription);
 
-	Checkbox readAccessCheckBox = new Checkbox();
+	Checkbox readAccessCheckBox = new Checkbox(CHAT_BOXES);
 	TreeMap<CHAT.DataGroup, Boolean> requiredReadAccess = requiredCHAT.getReadAccess();
 	TreeMap<CHAT.DataGroup, Boolean> optionalReadAccess = optionalCHAT.getReadAccess();
 	TreeMap<SpecialFunction, Boolean> requiredSpecialFunctions = requiredCHAT.getSpecialFunctions();
@@ -116,7 +112,7 @@ public class CHATStep {
 
 	// TODO: check required and optional CHAT against certificate
 	// TODO: internationalize the following toggletext
-	ToggleText requestedDataDescription1 = new ToggleText();
+	ToggleText requestedDataDescription1 = new ToggleText("notice");
 	requestedDataDescription1.setTitle("Hinweis");
 	requestedDataDescription1.setText("Die markierten Elemente benötigt der Anbieter zur Durchführung seiner Dienstleistung. Optionale Daten können Sie hinzufügen.");
 	requestedDataDescription1.setCollapsed(!true);
@@ -178,16 +174,12 @@ public class CHATStep {
 	    return;
 	}
 
-	for (OutputInfoUnit output : executionResults.getResults()) {
-	    if (output instanceof Checkbox) {
-		Checkbox cb = (Checkbox) output;
-		for (BoxItem item : cb.getBoxItems()) {
-		    if (dataGroupsNames.contains(item.getName())) {
-			selectedCHAT.setReadAccess(item.getName(), item.isChecked());
-		    } else if (specialFunctionsNames.contains(item.getName())) {
-			selectedCHAT.setSpecialFunction(item.getName(), item.isChecked());
-		    }
-		}
+	Checkbox cb = (Checkbox) executionResults.getResult(CHAT_BOXES);
+	for (BoxItem item : cb.getBoxItems()) {
+	    if (dataGroupsNames.contains(item.getName())) {
+		selectedCHAT.setReadAccess(item.getName(), item.isChecked());
+	    } else if (specialFunctionsNames.contains(item.getName())) {
+		selectedCHAT.setSpecialFunction(item.getName(), item.isChecked());
 	    }
 	}
     }

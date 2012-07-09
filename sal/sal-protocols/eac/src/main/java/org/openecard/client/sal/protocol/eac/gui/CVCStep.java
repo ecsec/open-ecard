@@ -73,24 +73,24 @@ public class CVCStep {
     }
 
     private void initialize() {
-	Text decription = new Text();
+	Text decription = new Text("description");
 	decription.setText(lang.translationForKey(DESCRIPTION));
 	step.getInputInfoUnits().add(decription);
 
 	// SubjectName
-	ToggleText subjectName = new ToggleText();
+	ToggleText subjectName = new ToggleText("subjectName");
 	subjectName.setTitle(lang.translationForKey(SUBJECT_NAME));
 	subjectName.setText(description.getSubjectName());
 	step.getInputInfoUnits().add(subjectName);
 
 	// SubjectURL
-	ToggleText subjectURL = new ToggleText();
+	ToggleText subjectURL = new ToggleText("subjectURL");
 	subjectURL.setTitle(lang.translationForKey(SUBJECT_URL));
 	subjectURL.setText(description.getSubjectURL());
 	step.getInputInfoUnits().add(subjectURL);
 
 	// TermsofUsage
-	ToggleText termsOfUsage = new ToggleText();
+	ToggleText termsOfUsage = new ToggleText("termsOfUsage");
 	termsOfUsage.setTitle(lang.translationForKey(TERMS_OF_USAGE));
 	termsOfUsage.setText(description.getTermsOfUsage().toString());
 	termsOfUsage.setCollapsed(true);
@@ -112,21 +112,21 @@ public class CVCStep {
 	sb.append(" ");
 	sb.append(dateFormat.format(certificate.getExpirationDate().getTime()));
 
-	ToggleText validity = new ToggleText();
+	ToggleText validity = new ToggleText("validity");
 	validity.setTitle(lang.translationForKey(VALIDITY));
 	validity.setText(sb.toString());
 	validity.setCollapsed(true);
 	step.getInputInfoUnits().add(validity);
 
 	// IssuerName
-	ToggleText issuerName = new ToggleText();
+	ToggleText issuerName = new ToggleText("issuer");
 	issuerName.setTitle(lang.translationForKey(ISSUER_NAME));
 	issuerName.setText(description.getIssuerName());
 	issuerName.setCollapsed(true);
 	step.getInputInfoUnits().add(issuerName);
 
 	// IssuerURL
-	ToggleText issuerURL = new ToggleText();
+	ToggleText issuerURL = new ToggleText("issuerURL");
 	issuerURL.setTitle(lang.translationForKey(ISSUER_URL));
 	issuerURL.setText(description.getIssuerURL());
 	issuerURL.setCollapsed(true);

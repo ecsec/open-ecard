@@ -22,17 +22,7 @@
 
 package org.openecard.client.sal.protocol.pincompare;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
-import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
-import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
-import iso.std.iso_iec._24727.tech.schema.InputUnitType;
-import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
-import iso.std.iso_iec._24727.tech.schema.PinInputType;
-import iso.std.iso_iec._24727.tech.schema.VerifyUser;
-import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.util.Map;
 import org.openecard.client.common.ECardConstants;
@@ -46,8 +36,6 @@ import org.openecard.client.sal.protocol.pincompare.anytype.PinCompareDIDAuthent
 import org.openecard.client.sal.protocol.pincompare.anytype.PinCompareDIDAuthenticateOutputType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 
 /**
@@ -57,8 +45,6 @@ import org.slf4j.MarkerFactory;
 public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
     private static final Logger _logger = LoggerFactory.getLogger(DIDAuthenticateStep.class);
-    private static final Marker _enter = MarkerFactory.getMarker("ENTERING");
-    private static final Marker _exit = MarkerFactory.getMarker("EXITING");
 
     private final Dispatcher dispatcher;
 
@@ -73,9 +59,6 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 
     @Override
 	public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
-	// <editor-fold defaultstate="collapsed" desc="log trace">
-	_logger.trace(_enter, "> {}, {}", didAuthenticate, internalData);
-	// </editor-fold>
 	try {
 	    String didName = didAuthenticate.getDIDName();
 	    PinCompareDIDAuthenticateInputType pinCompareDIDAuthenticateInput = new PinCompareDIDAuthenticateInputType(didAuthenticate.getAuthenticationProtocolData());
@@ -132,9 +115,6 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 	    didAuthenticateResponse.setResult(WSHelper.makeResultOK());
 	    cardStateEntry.addAuthenticated(didName, cardApplication);
 	    didAuthenticateResponse.setAuthenticationProtocolData(output.getAuthDataType());
-	    // <editor-fold defaultstate="collapsed" desc="log trace">
-	    _logger.trace(_exit, "{}", didAuthenticateResponse);
-	    // </editor-fold>
 	    return didAuthenticateResponse;
 	} catch (Exception e) {
 	    _logger.warn(e.getMessage(), e);

@@ -432,9 +432,8 @@ class AbstractTerminal {
 	Step s = new Step("enter-pin", "Enter PIN");
 	uc.getSteps().add(s);
 	// add text instructing user
-	PasswordField i1 = new PasswordField();
+	PasswordField i1 = new PasswordField("pin");
 	s.getInputInfoUnits().add(i1);
-	i1.setID("pin");
 	i1.setDescription("PIN:");
 	i1.setMinLength(minLength);
 	i1.setMaxLength(maxLength);
@@ -448,7 +447,7 @@ class AbstractTerminal {
 	uc.getSteps().add(s);
 	s.setInstantReturn(true);
 	// add text instructing user
-	Text i1 = new Text();
+	Text i1 = new Text("description");
 	s.getInputInfoUnits().add(i1);
 	i1.setText("Enter your secret in the connected chip card terminal.");
 
@@ -456,16 +455,8 @@ class AbstractTerminal {
     }
 
     private static String getPinFromUserConsent(ExecutionEngine response) {
-	List<OutputInfoUnit> results = response.getResults().get("enter-pin").getResults();
-	for (OutputInfoUnit next : results) {
-	    if (next.type() == InfoUnitElementType.PASSWORD_FIELD) {
-		PasswordField p = (PasswordField)next;
-		if (p.getID().equals("pin")) {
-		    return p.getValue();
-		}
-	    }
-	}
-	return null;
+	PasswordField p = (PasswordField) response.getResults().get("enter-pin").getResult("pin");
+	return p.getValue();
     }
 
 

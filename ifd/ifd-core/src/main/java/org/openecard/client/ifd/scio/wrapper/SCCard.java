@@ -30,6 +30,7 @@ import javax.smartcardio.Card;
 import javax.smartcardio.CardChannel;
 import javax.smartcardio.CardException;
 import org.openecard.client.common.ECardConstants;
+import org.openecard.client.ifd.scio.EventListener;
 import org.openecard.client.ifd.scio.IFDException;
 import org.openecard.client.ifd.scio.reader.PCSCFeatures;
 import org.slf4j.Logger;
@@ -59,6 +60,9 @@ public class SCCard {
 
 
     public byte[] controlCommand(int controlCode, byte[] commandData) throws CardException {
+	// pause background threads talking to PCSC
+	EventListener.pause();
+
         byte[] result = card.transmitControlCommand(controlCode, commandData);
         return result;
     }

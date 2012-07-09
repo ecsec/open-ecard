@@ -31,6 +31,7 @@ import javax.smartcardio.ResponseAPDU;
 import org.openecard.client.common.ifd.Protocol;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.CardCommandStatus;
+import org.openecard.client.ifd.scio.EventListener;
 import org.openecard.client.ifd.scio.IFDException;
 import org.openecard.client.ifd.scio.TransmitException;
 import org.slf4j.Logger;
@@ -68,6 +69,9 @@ public class SCChannel {
     }
 
     public byte[] transmit(byte[] input, List<byte[]> responses) throws TransmitException, IFDException {
+	// pause background threads talking to PCSC
+	EventListener.pause();
+
         // add default value if not present
         if (responses.isEmpty()) {
             responses.add(new byte[]{(byte) 0x90, (byte) 0x00});

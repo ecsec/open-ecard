@@ -44,6 +44,7 @@ public class Step {
     private StepAction action;
     private boolean reversible = true;
     private boolean instantReturn = false;
+    private boolean resetOnLoad = false;
     private List<InputInfoUnit> inputInfoUnits;
 
     public Step(String title) {
@@ -54,6 +55,7 @@ public class Step {
 	this.id = id;
 	this.title = title;
     }
+
 
     public String getID() {
 	return id;
@@ -94,6 +96,15 @@ public class Step {
     public void setInstantReturn(boolean instantReturn) {
 	this.instantReturn = instantReturn;
     }
+
+    public boolean isResetOnLoad() {
+	return resetOnLoad;
+    }
+
+    public void setResetOnLoad(boolean resetOnLoad) {
+	this.resetOnLoad = resetOnLoad;
+    }
+
 
     public List<InputInfoUnit> getInputInfoUnits() {
 	if (inputInfoUnits == null) {

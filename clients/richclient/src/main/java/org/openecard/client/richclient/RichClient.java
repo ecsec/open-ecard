@@ -114,7 +114,6 @@ public final class RichClient implements ConnectorListener {
     }
 
     private RichClient() throws Exception {
-
 	setup();
     }
 
@@ -144,8 +143,13 @@ public final class RichClient implements ConnectorListener {
      * @return ActivationApplicationResponse
      */
     private TCTokenResponse handleActivate(TCTokenRequest request) {
-	TCTokenResponse response = new TCTokenResponse();
+	// use dumb activation without explicitly specifying the card and terminal
+	// see TR-03112-7 v 1.1.2 (2012-02-28) sec. 3.2
+	if (request.getContextHandle() == null || request.getIFDName() == null || request.getSlotIndex() == null) {
+	    return handleAusweisappActivate(request);
+	}
 
+	TCTokenResponse response = new TCTokenResponse();
 	// TCToken
 	TCToken token = request.getTCToken();
 
@@ -174,6 +178,54 @@ public final class RichClient implements ConnectorListener {
 	    return response;
 	}
 
+	return doPAOS(token, connectionHandle);
+    }
+
+
+    /**
+     * Activate the client, but assume a german eID card is used and no handle information is given upfront.
+     *
+     * @param request
+     * @return
+     */
+    private TCTokenResponse handleAusweisappActivate(TCTokenRequest request) {
+	TCToken token = request.getTCToken();
+
+	// get handle to nPA
+	ConnectionHandleType connectionHandle = getFirstnPAHandle();
+	if (connectionHandle == null) {
+	    TCTokenResponse response = new TCTokenResponse();
+	    String msg = "No ConnectionHandle with a german eID card available.";
+	    logger.error(msg);
+	    response.setErrorMessage(msg);
+	    return response;
+	}
+
+	return doPAOS(token, connectionHandle);
+    }
+
+    /**
+     * Get the first found handle of an nPA.
+     *
+     * @return Handle describing the nPA or null if none is present.
+     */
+    private ConnectionHandleType getFirstnPAHandle() {
+	ConnectionHandleType conHandle = new ConnectionHandleType();
+	ConnectionHandleType.RecognitionInfo rec = new ConnectionHandleType.RecognitionInfo();
+	rec.setCardType("http://bsi.bund.de/cif/npa.xml");
+	conHandle.setRecognitionInfo(rec);
+
+	// TODO: wait for nPA a while when none is present
+
+	Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
+	if (entries.isEmpty()) {
+	    return null;
+	} else {
+	    return entries.iterator().next().handleCopy();
+	}
+    }
+
+    private TCTokenResponse doPAOS(TCToken token, ConnectionHandleType connectionHandle) {
 	try {
 	    // Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
 	    CardApplicationPath cardApplicationPath = new CardApplicationPath();
@@ -184,9 +236,7 @@ public final class RichClient implements ConnectorListener {
 		// Check CardApplicationPathResponse
 		WSHelper.checkResult(cardApplicationPathResponse);
 	    } catch (WSException ex) {
-		// <editor-fold defaultstate="collapsed" desc="log exception">
-		//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
-		// </editor-fold>
+		TCTokenResponse response = new TCTokenResponse();
 		response.setErrorMessage(ex.getMessage());
 		return response;
 	    }
@@ -201,9 +251,7 @@ public final class RichClient implements ConnectorListener {
 		// Check CardApplicationConnectResponse
 		WSHelper.checkResult(cardApplicationConnectResponse);
 	    } catch (WSException ex) {
-		// <editor-fold defaultstate="collapsed" desc="log exception">
-		//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
-		// </editor-fold>
+		TCTokenResponse response = new TCTokenResponse();
 		response.setErrorMessage(ex.getMessage());
 		return response;
 	    }
@@ -228,15 +276,18 @@ public final class RichClient implements ConnectorListener {
 	    sp.setSessionIdentifier(sessionIdentifier);
 	    p.sendStartPAOS(sp);
 
+	    TCTokenResponse response = new TCTokenResponse();
 	    response.setRefreshAddress(token.getRefreshAddress());
+	    return response;
 
 	} catch (Throwable w) {
-	    logger.error(LoggingConstants.THROWING, "Exception", w);
+	    TCTokenResponse response = new TCTokenResponse();
+	    logger.error(w.getMessage(), w);
 	    response.setErrorMessage(w.getMessage());
+	    return response;
 	}
-
-	return response;
     }
+
 
     public void setup() throws Exception {
 	tray = new AppTray(this);

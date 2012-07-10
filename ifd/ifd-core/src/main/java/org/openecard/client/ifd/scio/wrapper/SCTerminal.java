@@ -110,7 +110,7 @@ public class SCTerminal {
 	    stype.setCardAvailable(cardPresent);
 	    stype.setIndex(IFDUtils.getSlotIndex(getName()));
 	    // get card status and stuff
-	    if (isCardPresent()) {
+	    if (cardPresent) {
 		if (isConnected()) {
 		    ATR atr = scCard.getATR();
 		    stype.setATRorATS(atr.getBytes());

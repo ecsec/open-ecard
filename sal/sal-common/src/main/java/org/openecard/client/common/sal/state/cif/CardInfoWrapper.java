@@ -22,13 +22,7 @@
 
 package org.openecard.client.common.sal.state.cif;
 
-import iso.std.iso_iec._24727.tech.schema.CardApplicationType;
-import iso.std.iso_iec._24727.tech.schema.CardInfoType;
-import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
-import iso.std.iso_iec._24727.tech.schema.DIDMarkerType;
-import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
-import iso.std.iso_iec._24727.tech.schema.DataSetInfoType;
-import iso.std.iso_iec._24727.tech.schema.DataSetNameListType;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +44,12 @@ public class CardInfoWrapper {
     public CardInfoWrapper(CardInfoType cif) {
 	this.cif = cif;
     }
+
+
+    public String getCardType() {
+	return cif.getCardType().getObjectIdentifier();
+    }
+
 
     public byte[] getImplicitlySelectedApplication(){
 	return cif.getApplicationCapabilities().getImplicitlySelectedApplication();

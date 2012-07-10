@@ -25,6 +25,7 @@ package org.openecard.client.common.sal.state;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -128,14 +129,14 @@ public class CardStateMap {
 
 
     public Set<CardStateEntry> getMatchingEntries(ConnectionHandleType cHandle) {
-	return getMatchingEntries(cHandle, cHandle.getSlotHandle());
+	return getMatchingEntries(cHandle, cHandle.getSlotHandle(), cHandle.getRecognitionInfo());
     }
 
     public Set<CardStateEntry> getMatchingEntries(CardApplicationPathType cHandle) {
-	return getMatchingEntries(cHandle, null);
+	return getMatchingEntries(cHandle, null, null);
     }
 
-    private synchronized Set<CardStateEntry> getMatchingEntries(CardApplicationPathType cHandle, byte[] slotHandle) {
+    private synchronized Set<CardStateEntry> getMatchingEntries(CardApplicationPathType cHandle, byte[] slotHandle, RecognitionInfo recInfo) {
 	// extract values from map
 	ChannelHandleType channel = cHandle.getChannelHandle();
 	String session = (channel != null) ? channel.getSessionIdentifier() : null;
@@ -183,6 +184,10 @@ public class CardStateMap {
 	    // [TR-03112-4] If no card application is specified, paths to all
 	    // available cards (alpha-card applications) and unused card
 	    // terminal slots are returned.
+	}
+
+	if (recInfo != null && recInfo.getCardType() != null) {
+	    filterCardType(mergedSets, recInfo.getCardType());
 	}
 
 	return mergedSets;
@@ -257,6 +262,25 @@ public class CardStateMap {
 	    }
 	}
     }
+
+    /**
+     * Remove non matching entries (cardType) from given list.
+     *
+     * @param entries
+     * @param cardType
+     */
+    private static void filterCardType(Set<CardStateEntry> entries, String cardType) {
+	Iterator<CardStateEntry> it = entries.iterator();
+	while (it.hasNext()) {
+	    CardStateEntry next = it.next();
+	    String otherType = next.getCardType();
+	    // other ifdName is not equal to this one
+	    if (! otherType.equals(cardType)) {
+		it.remove();
+	    }
+	}
+    }
+
 
     private static Set<CardStateEntry> mergeSets(List<Set<CardStateEntry>> setsToMerge) {
 	TreeSet<CardStateEntry> result = new TreeSet<CardStateEntry>();

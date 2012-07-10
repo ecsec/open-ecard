@@ -22,15 +22,7 @@
 
 package org.openecard.client.common.sal.state;
 
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
-import iso.std.iso_iec._24727.tech.schema.CardInfoType;
-import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationStateType;
-import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
-import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
-import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
-import iso.std.iso_iec._24727.tech.schema.SecurityConditionType;
+import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Map;
@@ -76,6 +68,12 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	this.handle.setCardApplication(getImplicitlySelectedApplicationIdentifier());
     }
 
+
+    public String getCardType() {
+	return infoObject.getCardType();
+    }
+
+
     public void setCurrentCardApplication(byte[] currentCardApplication) {
 	this.handle.setCardApplication(currentCardApplication);
     }
@@ -83,6 +81,7 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
     public CardApplicationWrapper getCurrentCardApplication() {
 	return infoObject.getCardApplication(this.handle.getCardApplication());
     }
+
 
     public Set<DIDInfoType> getAuthenticatedDIDs() {
 	return authenticatedDIDs;

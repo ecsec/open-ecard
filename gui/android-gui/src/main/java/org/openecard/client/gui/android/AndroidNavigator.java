@@ -33,7 +33,6 @@ import org.openecard.client.gui.UserConsentNavigator;
 import org.openecard.client.gui.definition.OutputInfoUnit;
 import org.openecard.client.gui.definition.Step;
 
-
 /**
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
@@ -98,6 +97,10 @@ public class AndroidNavigator implements UserConsentNavigator {
 	return this.getStepResult();
     }
 
+    public boolean hasPrevious(){
+	return curStep>=1;
+    }
+    
     @Override
     public boolean hasNext() {
 	return curStep < numSteps - 1;

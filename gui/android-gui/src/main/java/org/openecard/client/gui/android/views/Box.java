@@ -1,48 +1,40 @@
-/****************************************************************************
- * Copyright (C) 2012 HS Coburg.
- * All rights reserved.
- * Contact: ecsec GmbH (info@ecsec.de)
+/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg 
  *
- * This file is part of the Open eCard App.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * GNU General Public License Usage
- * This file may be used under the terms of the GNU General Public
- * License version 3.0 as published by the Free Software Foundation
- * and appearing in the file LICENSE.GPL included in the packaging of
- * this file. Please review the following information to ensure the
- * GNU General Public License version 3.0 requirements will be met:
- * http://www.gnu.org/copyleft/gpl.html.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Other Usage
- * Alternatively, this file may be used in accordance with the terms
- * and conditions contained in a signed written agreement between
- * you and ecsec GmbH.
- *
- ***************************************************************************/
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.openecard.client.gui.android.views;
 
 import android.content.Context;
 import android.view.View;
-import android.view.View.MeasureSpec;
-import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.GridView;
-import org.openecard.client.gui.android.CheckBoxItemAdapter;
+import org.openecard.client.gui.android.BoxItemAdapter;
+import org.openecard.client.gui.definition.InputInfoUnit;
 import org.openecard.client.gui.definition.OutputInfoUnit;
 
-
 /**
- * Implementation of a checkbox group for use in a {@link StepFrame}.
+ * Implementation of a radio- and checkbox group for use in a {@link StepActivity}.
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class Checkbox implements StepView {
+public class Box implements StepView {
 
     private GridView gridview;
-    private CheckBoxItemAdapter boxItemAdapter;
+    private BaseAdapter boxItemAdapter;
 
-    public Checkbox(org.openecard.client.gui.definition.Checkbox checkbox, Context ctx) {
-	gridview = new GridView(ctx) {
+    public Box(InputInfoUnit box, Context ctx, boolean useCheckBoxes) {
+	gridview = new GridView(ctx){
 	    //workaround to get a gridview displayed in a scrollview
 	    @Override 
 	    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -59,16 +51,12 @@ public class Checkbox implements StepView {
 	        
 	    }
 	};
-	
 	gridview.setColumnWidth(250);
 	gridview.setNumColumns(-1); // auto fit
 	gridview.setStretchMode(2); // stretch column
-	boxItemAdapter = new CheckBoxItemAdapter(ctx, checkbox);
+	boxItemAdapter = new BoxItemAdapter(ctx, box, useCheckBoxes);
 	gridview.setAdapter(boxItemAdapter);
-	        
     }
-
-    
 
     @Override
     public View getView() {
@@ -87,7 +75,6 @@ public class Checkbox implements StepView {
 
     @Override
     public OutputInfoUnit getValue() {
-	return boxItemAdapter.getValue();
+	    return ((BoxItemAdapter) boxItemAdapter).getValue();
     }
-
 }

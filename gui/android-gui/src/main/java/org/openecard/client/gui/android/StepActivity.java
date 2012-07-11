@@ -22,19 +22,17 @@
 
 package org.openecard.client.gui.android;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 import org.openecard.client.gui.android.views.StepView;
 import org.openecard.client.gui.definition.*;
-
 
 /**
  * This activity displays a specific step when showStep is called
@@ -43,19 +41,15 @@ import org.openecard.client.gui.definition.*;
  */
 public class StepActivity extends Activity {
 
-    private TextView mTitle = null;
     LinearLayout ll;
     ArrayList<StepView> views = new ArrayList<StepView>();
-
+    ActionBar actionBar;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
-	requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 	setContentView(R.layout.gui_interface);
-	getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
-	mTitle = (TextView) findViewById(R.id.title_left_text);
-	mTitle.setText(R.string.app_name);
-	mTitle = (TextView) findViewById(R.id.title_right_text);
+	actionBar = getActionBar();
 	ll = (LinearLayout) findViewById(R.id.linearLayoutGUIInterface);
 	AndroidNavigator.getInstance().setActivity(this);
     }
@@ -76,38 +70,47 @@ public class StepActivity extends Activity {
 	return result;
     }
 
-    void showStep(final Step step2) {
+    void showStep(final Step step) {
 	ll.post(new Runnable() {
 	    @Override
 	    public void run() {
 		ll.removeAllViews();
-		org.openecard.client.gui.definition.Step a = step2;
-		if (a.getID() != null)
-		    mTitle.setText(a.getID());
+		if ((step.getTitle() != null))
+		    actionBar.setSubtitle(step.getTitle());
 		org.openecard.client.gui.android.views.StepView t = null;
-		for (InputInfoUnit infoUnitType : a.getInputInfoUnits()) {
+		for (InputInfoUnit infoUnitType : step.getInputInfoUnits()) {
 		    if (infoUnitType.type().equals(InfoUnitElementType.TEXT)) {
 			t = new org.openecard.client.gui.android.views.Text((Text) infoUnitType, StepActivity.this);
 		    } else if (infoUnitType.type().equals(InfoUnitElementType.CHECK_BOX)) {
-			t = new org.openecard.client.gui.android.views.Checkbox((Checkbox) infoUnitType, StepActivity.this);
+			t = new org.openecard.client.gui.android.views.Box(infoUnitType, StepActivity.this, true);
 		    } else if (infoUnitType.type().equals(InfoUnitElementType.RADIO_BOX)) {
-			t = new org.openecard.client.gui.android.views.Radiobutton((Radiobox) infoUnitType, StepActivity.this);
+			t = new org.openecard.client.gui.android.views.Box(infoUnitType, StepActivity.this, false);
 		    } else if (infoUnitType.type().equals(InfoUnitElementType.PASSWORD_FIELD)) {
 			t = new org.openecard.client.gui.android.views.AbstractInput((PasswordField) infoUnitType, StepActivity.this);
 		    } else if (infoUnitType.type().equals(InfoUnitElementType.TEXT_FIELD)) {
 			t = new org.openecard.client.gui.android.views.AbstractInput((TextField) infoUnitType, StepActivity.this);
 		    } else if (infoUnitType.type().equals(InfoUnitElementType.HYPERLINK)) {
 			t = new org.openecard.client.gui.android.views.Hyperlink((Hyperlink) infoUnitType, StepActivity.this);
+		    } else if(infoUnitType.type().equals(InfoUnitElementType.ToggleText)){
+			t =  new org.openecard.client.gui.android.views.ToggleText((ToggleText) infoUnitType, StepActivity.this);
+		    } else {
+			// TODO: log warning
 		    }
 		    views.add(t);
-		    ll.addView(t.getView());
+		    
+		    // add a margin of 20dp after every InputInfoUnit
+		    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+			     LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+		    layoutParams.setMargins(0, 0, 0, 20);
+	
+		    ll.addView(t.getView(), layoutParams);
 		}
 
 		Button cancel = (Button) findViewById(R.id.button_cancel);
 		cancel.setOnClickListener(new OnClickListener() {
 		    public void onClick(View v) {
 			try {
-			    AndroidNavigator.getInstance().setStepResult(false, true, null);
+			    AndroidNavigator.getInstance().setStepResult(false, true, getResultContent());
 			} catch (InterruptedException e) {
 			    e.printStackTrace();
 			}
@@ -115,11 +118,17 @@ public class StepActivity extends Activity {
 		});
 
 		Button b = (Button) findViewById(R.id.button_back);
+		if(!(AndroidNavigator.getInstance().hasPrevious())){
+		    b.setVisibility(View.INVISIBLE);
+		} else {
+		    b.setVisibility(View.VISIBLE);
+		}
+		
 		b.setOnClickListener(new OnClickListener() {
 		    public void onClick(View v) {
-
+			
 			try {
-			    AndroidNavigator.getInstance().setStepResult(true, false, null);
+			    AndroidNavigator.getInstance().setStepResult(true, false, getResultContent());
 			} catch (InterruptedException e) {
 
 			    e.printStackTrace();
@@ -129,6 +138,12 @@ public class StepActivity extends Activity {
 		});
 
 		Button next = (Button) findViewById(R.id.button_next);
+		//TODO internationalization
+		if(!AndroidNavigator.getInstance().hasNext()){
+		    next.setText("Senden");
+		} else {
+		    next.setText("Weiter");
+		}
 		next.setOnClickListener(new OnClickListener() {
 		    public void onClick(View v) {
 			try {

@@ -1,0 +1,79 @@
+/* Copyright 2012, Hochschule fuer angewandte Wissenschaften Coburg 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openecard.client.gui.android.views;
+
+import org.openecard.client.gui.android.StepActivity;
+import org.openecard.client.gui.android.ToggleTextExpandableListAdapter;
+import org.openecard.client.gui.definition.OutputInfoUnit;
+
+import android.content.Context;
+import android.view.View;
+import android.widget.ExpandableListView;
+
+/**
+ * Implementation of a view for ToggleText for use in a {@link StepActivity}.
+ * 
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ */
+public class ToggleText implements StepView {
+
+    private ExpandableListView elv;
+
+    public ToggleText(org.openecard.client.gui.definition.ToggleText toggleText, Context ctx) {
+	
+	elv = new ExpandableListView(ctx){
+	    //workaround to get a ExpandableListView displayed in a ScrollView
+	    @Override 
+	    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+	                 
+	            // Calculate entire height by providing a very large height hint.
+	            // But do not use the highest 2 bits of this integer; those are
+	            // reserved for the MeasureSpec mode.
+	            int expandSpec = MeasureSpec.makeMeasureSpec(Integer.MAX_VALUE >> 2,
+	                        MeasureSpec.AT_MOST);
+	            super.onMeasure(widthMeasureSpec, expandSpec);
+
+	            android.view.ViewGroup.LayoutParams params = getLayoutParams();
+	            params.height = getMeasuredHeight();
+	        
+	    }	    
+	};
+	elv.setAdapter(new ToggleTextExpandableListAdapter(ctx, toggleText));
+	if(!toggleText.isCollapsed())
+	    elv.expandGroup(0);
+    }
+
+    @Override
+    public View getView() {
+	return elv;
+    }
+
+    @Override
+    public boolean validate() {
+	return true;
+    }
+
+    @Override
+    public boolean isValueType() {
+	return false;
+    }
+
+    @Override
+    public OutputInfoUnit getValue() {
+	return null;
+    }
+
+}

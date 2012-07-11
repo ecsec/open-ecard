@@ -23,58 +23,74 @@
 package org.openecard.client.gui.android;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
+import android.widget.*;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import java.util.List;
-import org.openecard.client.gui.definition.BoxItem;
-import org.openecard.client.gui.definition.Checkbox;
-import org.openecard.client.gui.definition.InputInfoUnit;
-import org.openecard.client.gui.definition.OutputInfoUnit;
+import org.openecard.client.gui.definition.*;
 
 
 /**
- * Adapter needed to fill View of StepActivity for checkboxes
- * 
+ * Adapter needed to fill View of StepActivity for boxitems.
+ *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * 
  */
-public class CheckBoxItemAdapter extends BaseAdapter {
+public class BoxItemAdapter extends BaseAdapter {
 
     private Context context;
-    private Checkbox input;
+    private String id;
     private List<BoxItem> boxItems;
+    private boolean useCheckboxes;
 
-    public CheckBoxItemAdapter(Context c, InputInfoUnit i) {
-	this.context = c;
-	this.input = (Checkbox) i;
-	this.boxItems = input.getBoxItems();
+    /**
+     *
+     * @param context application context
+     * @param inputInfoUnit InputInfoUnit of type checkbox or radiobox
+     * @param useCheckboxes true if checkboxes should be used, false for radioboxes
+     */
+    public BoxItemAdapter(Context context, InputInfoUnit inputInfoUnit, boolean useCheckboxes) {
+	this.useCheckboxes = useCheckboxes;
+	this.context = context;
+	this.id = inputInfoUnit.getID();
+	this.boxItems =  ((AbstractBox) inputInfoUnit).getBoxItems();
     }
 
+    @Override
     public int getCount() {
 	return boxItems.size();
     }
 
     /* unused */
+    @Override
     public Object getItem(int position) {
 	return null;
     }
 
     /* unused */
+    @Override
     public long getItemId(int position) {
 	return 0;
     }
 
+    @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-	CompoundButton b = new CheckBox(context);
-	b.setTextColor(Color.BLACK);
+	CompoundButton b = null;
+	if(useCheckboxes){
+	    b = new CheckBox(context);
+	    
+	} else{
+	    b = new RadioButton(context);
+	    
+	}
 	b.setText(boxItems.get(position).getText() != null ? boxItems.get(position).getText() : boxItems.get(position).getName());
 	b.setChecked(boxItems.get(position).isChecked());
 	b.setEnabled(!boxItems.get(position).isDisabled());
+	if(!b.isEnabled()){
+	    b.setButtonDrawable(android.R.drawable.radiobutton_on_background);
+	} else {
+	    b.setButtonDrawable(android.R.drawable.radiobutton_off_background);
+	}
 	b.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 	    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 		boxItems.get(position).setChecked(isChecked);
@@ -84,7 +100,7 @@ public class CheckBoxItemAdapter extends BaseAdapter {
     }
 
     public OutputInfoUnit getValue() {
-	Checkbox result = new Checkbox(input.getID());
+	AbstractBox result = useCheckboxes ? new Checkbox(id) :  new Radiobox(id);
 	result.getBoxItems().addAll(boxItems);
 	return result;
     }

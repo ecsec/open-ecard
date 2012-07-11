@@ -23,7 +23,6 @@
 package org.openecard.client.gui.android.views;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.View;
 import android.widget.TextView;
 import org.openecard.client.gui.android.StepActivity;
@@ -41,7 +40,6 @@ public class Text implements StepView {
 
     public Text(org.openecard.client.gui.definition.Text text, Context ctx) {
 	t = new TextView(ctx);
-	t.setTextColor(Color.BLACK);
 	t.setText(text.getText());
     }
 

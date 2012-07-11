@@ -23,7 +23,6 @@
 package org.openecard.client.gui.android.views;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.text.InputFilter;
 import android.text.method.PasswordTransformationMethod;
 import android.view.Gravity;
@@ -33,7 +32,6 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import org.openecard.client.gui.definition.*;
-
 
 /**
  * Common base for {@link Textinput} and {@link Passwordinput}.
@@ -45,6 +43,7 @@ public class AbstractInput implements StepView {
     private final AbstractTextField result;
     private TableLayout tbl;
     private TextView tv;
+    private EditText et;
 
     public AbstractInput(AbstractTextField input, Context ctx) {
 	tv = new TextView(ctx);
@@ -54,15 +53,14 @@ public class AbstractInput implements StepView {
 	    tv.setText(input.getValue());
 	else
 	    tv.setText(input.getID());
-	tv.setTextColor(Color.BLACK);
 	tv.setWidth((int)(display.getWidth()/2));
 	tv.setGravity(Gravity.CENTER | Gravity.BOTTOM);
 
-	EditText et = new EditText(ctx);
-	et.setTextColor(Color.BLACK);
+	et = new EditText(ctx);
 	et.setLines(1);
 	et.setWidth((int)(display.getWidth()/2));
 	et.setMinimumWidth(input.getMinLength()*20);
+	et.requestFocus();
 	if (input.type().equals(InfoUnitElementType.PASSWORD_FIELD)) {
 	    et.setTransformationMethod(new PasswordTransformationMethod());
 	}
@@ -114,11 +112,11 @@ public class AbstractInput implements StepView {
     @Override
     public OutputInfoUnit getValue() {
 	String textValue = null;
-	if (this.tv.getText() != null)
-	    textValue = this.tv.getText().toString();
-	if (textValue == null) {
+	if (this.et.getText() != null)
+	    textValue = this.et.getText().toString();
+	else
 	    textValue = "";
-	}
+	
 	result.setValue(textValue);
 	return result;
     }

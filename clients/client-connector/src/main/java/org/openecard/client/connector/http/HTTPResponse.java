@@ -1,3 +1,25 @@
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.connector.http;
 
 import java.io.OutputStream;
@@ -30,15 +52,16 @@ import org.slf4j.LoggerFactory;
 public final class HTTPResponse extends HTTPMessage {
 
     private static final Logger logger = LoggerFactory.getLogger(HTTPResponse.class);
-    /**
-     * Stores the response-headers of a HTTP message.
-     */
+    /** Stores the response-headers of a HTTP message. */
     private List<ResponseHeader> responseHeaders = new ArrayList<ResponseHeader>();
 
     /**
      * Creates a new HTTP response.
      */
     public HTTPResponse() {
+	// all HTTPResponses support CORS
+	addResponseHeaders(new ResponseHeader(ResponseHeader.Field.ACCESS_CONTROL_ALLOW_ORIGIN, "*"));
+	addResponseHeaders(new ResponseHeader(ResponseHeader.Field.ACCESS_CONTROL_ALLOW_METHODS, "GET"));
     }
 
     /**
@@ -157,4 +180,5 @@ public final class HTTPResponse extends HTTPMessage {
     public void setMessageBody(String messageBody) {
 	this.messageBody = messageBody;
     }
+
 }

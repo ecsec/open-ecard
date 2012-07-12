@@ -28,6 +28,7 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import java.awt.Container;
 import java.awt.Frame;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
@@ -93,6 +94,12 @@ public class ECardApplet extends JApplet {
      */
     @Override
     public void init() {
+	try {
+	    LogProperties.loadJavaUtilLogging();
+	} catch (IOException ex) {
+	    System.err.println("WARNING: Using java.util.logging system defaults.");
+	}
+
 	loadParameters();
 
 
@@ -238,7 +245,7 @@ public class ECardApplet extends JApplet {
     }
 
     public CardStateMap getCardStates() {
-    	return this.cardStates;
+	return this.cardStates;
     }
 
     public Frame findParentFrame() {

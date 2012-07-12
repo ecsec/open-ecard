@@ -31,11 +31,12 @@ import java.util.logging.LogManager;
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
 public class LogProperties {
 
     private static final String dirName = "openecard";
-    private static final String logConfName = "applet_log.conf";
+    private static final String logConfName = "applet_log.properties";
 
     private static final String localAppData = System.getenv("LOCALAPPDATA");
     private static final String appData = System.getenv("LOCALAPPDATA");
@@ -55,7 +56,6 @@ public class LogProperties {
 	    LogProperties inst = new LogProperties();
 	    Properties props = inst.getLocal();
 	    LogManager manager = LogManager.getLogManager();
-	    manager.reset();
 	    manager.readConfiguration(propertiesToStream(props));
 	    System.out.println("INFO: Loading of java.util.logging configuration successful.");
 	} catch (IOException ex) {
@@ -66,9 +66,8 @@ public class LogProperties {
 
 
     private static InputStream propertiesToStream(final Properties p) throws IOException {
-	PipedInputStream in = new PipedInputStream();
-	PipedOutputStream out = new PipedOutputStream(in);
-	PrintWriter w = new PrintWriter(out);
+	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	PrintWriter w = new PrintWriter(baos);
 
 	// do it by hand, else the default properties are omitted
 	Enumeration<String> keys = (Enumeration<String>) p.propertyNames();
@@ -76,9 +75,10 @@ public class LogProperties {
 	    String next = keys.nextElement();
 	    String value = p.getProperty(next);
 	    w.format("%s = %s%n", next, value);
+	    w.flush();
 	}
 
-	return in;
+	return new ByteArrayInputStream(baos.toByteArray());
     }
 
     private static Properties getDefault() throws IOException {
@@ -123,6 +123,7 @@ public class LogProperties {
 	if (in != null) {
 	    Properties p = new Properties(defaults);
 	    try {
+		System.out.println("INFO: Loading config from path:\n  " + actualPath);
 		p.load(in);
 		correctFileHandlerPath(p);
 		return p;
@@ -135,7 +136,12 @@ public class LogProperties {
 
     private static boolean makeDir(String path) {
 	File f = new File(path);
-	return f.mkdirs();
+
+	if (f.exists()) {
+	    return true;
+	} else {
+	    return f.mkdirs();
+	}
     }
 
     /**
@@ -159,14 +165,42 @@ public class LogProperties {
     private void correctFileHandlerPath(Properties p) throws IOException {
 	String key = "java.util.logging.FileHandler.pattern";
 	String value = p.getProperty(key);
-	// %h == home, %t == temp
-	if (value != null && !value.startsWith("%h") && !value.startsWith("%t")) {
-	    File handlerPath = new File(value);
-	    if (! handlerPath.isAbsolute()) {
-		// this assumes, that the path should be relative to the conf directory
-		String base = actualPath.getParentFile().getCanonicalPath();
-		value = base + File.separator + value;
-		p.setProperty(key, value);
+
+	if (value != null) {
+	    // %h == home, %t == temp
+	    if (!value.startsWith("%h") && !value.startsWith("%t")) {
+		File handlerPath = new File(value);
+		if (!handlerPath.isAbsolute()) {
+		    // this assumes, that the path should be relative to the conf directory
+		    String base = actualPath.getParentFile().getCanonicalPath();
+		    // java.util.logging.FileHandler.pattern expects / as pathname separator
+		    value = (base + File.separator + value).replace("\\", "/");
+
+		    // create non-existent directories
+		    if (value.contains("/")) {
+			int pos = value.lastIndexOf("/");
+			String dir = value.substring(0, pos);
+			makeDir(dir);
+		    }
+
+		    p.setProperty(key, value);
+		}
+	    } else {
+		String var = null;
+		if (value.startsWith("%h")) {
+		    var = home;
+		}
+		if (value.startsWith("%t")) {
+		    var = System.getProperty("java.io.tmpdir");
+		}
+
+		String temp = (var + value.substring(2)).replace("\\", "/");
+		// create non-existent directories
+		if (temp.contains("/")) {
+		    int pos = temp.lastIndexOf("/");
+		    String dir = temp.substring(0, pos);
+		    makeDir(dir);
+		}
 	    }
 	}
     }

@@ -51,14 +51,8 @@ public class TCTokenHandler implements ConnectorHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(TCTokenHandler.class);
 
-    private boolean corsRequest;
+    private boolean redirectUrlAsBody = false;
 
-    /**
-     * Create a new ActivationRequest.
-     */
-    public TCTokenHandler() {
-	this.corsRequest = false;
-    }
 
     @Override
     public ClientRequest handleRequest(HTTPRequest httpRequest) throws Exception {
@@ -106,9 +100,9 @@ public class TCTokenHandler implements ConnectorHandler {
 			    throw new IllegalArgumentException("Malformed slot index");
 			}
 
-		    } else if (name.startsWith("corsRequest")) {
+		    } else if (name.startsWith("redirectUrlAsBody")) {
 			if (!value.isEmpty()) {
-			    this.corsRequest = true;
+			    this.redirectUrlAsBody = true;
 			}
 		    } else {
 			logger.info("Unknown query element: {}", name);
@@ -132,8 +126,8 @@ public class TCTokenHandler implements ConnectorHandler {
 	    } else if (response.getErrorMessage() != null) {
 		return handleErrorResponse(response.getErrorMessage());
 	    } else if (response.getRefreshAddress() != null) {
-		if(this.corsRequest) {
-		    return handleCORSRedirectResponse(response.getRefreshAddress());
+		if(this.redirectUrlAsBody) {
+		    return handleRedirectUrlAsBodyResponse(response.getRefreshAddress());
 		} else {
 		    return handleRedirectResponse(response.getRefreshAddress());
 		}
@@ -182,10 +176,8 @@ public class TCTokenHandler implements ConnectorHandler {
      * @param location Redirect location
      * @return HTTP response
      */
-    public HTTPResponse handleCORSRedirectResponse(URL location) {
+    public HTTPResponse handleRedirectUrlAsBodyResponse(URL location) {
 	HTTPResponse httpResponse = new HTTPResponse();
-	httpResponse.addResponseHeaders(new ResponseHeader(ResponseHeader.Field.ACCESS_CONTROL_ALLOW_ORIGIN, "*"));
-	httpResponse.addResponseHeaders(new ResponseHeader(ResponseHeader.Field.ACCESS_CONTROL_ALLOW_METHODS, "GET"));
 	httpResponse.addEntityHeaders(new EntityHeader(EntityHeader.Field.CONTENT_TYPE, "text/plain"));
 	httpResponse.setStatusLine(new StatusLine(HTTPStatusCode.OK_200));
 	httpResponse.setMessageBody(location.toString());

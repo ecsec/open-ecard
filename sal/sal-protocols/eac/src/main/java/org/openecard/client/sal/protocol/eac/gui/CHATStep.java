@@ -75,7 +75,7 @@ public class CHATStep {
 	String decriptionText = lang.translationForKey(DESCRIPTION);
 	decriptionText = decriptionText.replaceFirst("%s", certificateDescription.getSubjectName());
 
-	Text decription = new Text("description");
+	Text decription = new Text();
 	decription.setText(decriptionText);
 	step.getInputInfoUnits().add(decription);
 
@@ -112,7 +112,7 @@ public class CHATStep {
 
 	// TODO: check required and optional CHAT against certificate
 	// TODO: internationalize the following toggletext
-	ToggleText requestedDataDescription1 = new ToggleText("notice");
+	ToggleText requestedDataDescription1 = new ToggleText();
 	requestedDataDescription1.setTitle("Hinweis");
 	requestedDataDescription1.setText("Die markierten Elemente benötigt der Anbieter zur Durchführung seiner Dienstleistung. Optionale Daten können Sie hinzufügen.");
 	requestedDataDescription1.setCollapsed(!true);

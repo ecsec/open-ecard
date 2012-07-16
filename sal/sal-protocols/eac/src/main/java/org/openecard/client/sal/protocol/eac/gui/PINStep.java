@@ -24,7 +24,6 @@ package org.openecard.client.sal.protocol.eac.gui;
 
 import java.util.Map;
 import org.openecard.client.common.I18n;
-import org.openecard.client.gui.definition.OutputInfoUnit;
 import org.openecard.client.gui.definition.PasswordField;
 import org.openecard.client.gui.definition.Step;
 import org.openecard.client.gui.definition.Text;
@@ -62,7 +61,7 @@ public class PINStep {
 
     private void initialize() {
 	step.setResetOnLoad(true);
-	Text description = new Text("description");
+	Text description = new Text();
 	description.setText(lang.translationForKey(DESCRIPTION));
 	step.getInputInfoUnits().add(description);
 

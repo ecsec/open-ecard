@@ -24,7 +24,6 @@ package org.openecard.client.ifd.scio;
 
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
-import java.util.List;
 import java.util.Map;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
@@ -35,7 +34,10 @@ import org.openecard.client.gui.ResultStatus;
 import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.UserConsent;
 import org.openecard.client.gui.UserConsentNavigator;
-import org.openecard.client.gui.definition.*;
+import org.openecard.client.gui.definition.PasswordField;
+import org.openecard.client.gui.definition.Step;
+import org.openecard.client.gui.definition.Text;
+import org.openecard.client.gui.definition.UserConsentDescription;
 import org.openecard.client.gui.executor.*;
 import org.openecard.client.ifd.scio.reader.PCSCFeatures;
 import org.openecard.client.ifd.scio.reader.PCSCPinVerify;
@@ -447,7 +449,7 @@ class AbstractTerminal {
 	uc.getSteps().add(s);
 	s.setInstantReturn(true);
 	// add text instructing user
-	Text i1 = new Text("description");
+	Text i1 = new Text();
 	s.getInputInfoUnits().add(i1);
 	i1.setText("Enter your secret in the connected chip card terminal.");
 

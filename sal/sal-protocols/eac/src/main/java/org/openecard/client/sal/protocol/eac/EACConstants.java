@@ -36,5 +36,7 @@ public class EACConstants {
     protected static final String INTERNAL_DATA_AUTHENTICATED_AUXILIARY_DATA = "AuthenticatedAuxiliaryData";
     protected static final String INTERNAL_DATA_PK_PCD = "PKPCD";
     protected static final String INTERNAL_DATA_SECURITY_INFOS = "SecurityInfos";
+    protected static final String INTERNAL_DATA_CARD_STATE_ENTRY = "cardState";
+    protected static final String INTERNAL_DATA_CURRENT_CAR = "CurrentCAR";
 
 }

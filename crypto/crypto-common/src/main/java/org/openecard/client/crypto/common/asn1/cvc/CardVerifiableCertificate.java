@@ -292,7 +292,7 @@ public class CardVerifiableCertificate {
      * @param certificate Certificate
      * @return True if the certificate is equal
      */
-    public boolean equals(CardVerifiableCertificate certificate) {
+    public boolean compare(CardVerifiableCertificate certificate) {
 	return ByteUtils.compare(getSignature(), certificate.getSignature());
     }
 

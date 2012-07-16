@@ -22,7 +22,6 @@
 
 package org.openecard.client.sal.protocol.eac;
 
-import java.util.List;
 import org.openecard.client.common.apdu.ExternalAuthentication;
 import org.openecard.client.common.apdu.GetChallenge;
 import org.openecard.client.common.apdu.common.CardCommandAPDU;
@@ -71,9 +70,7 @@ public class TerminalAuthentication {
      */
     public void verifyCertificates(CardVerifiableCertificateChain certificateChain) throws ProtocolException {
 	try {
-	    List<CardVerifiableCertificate> certificates = certificateChain.getCertificateChain();
-	    for (int i = certificates.size() - 1; i >= 0; i--) {
-		CardVerifiableCertificate cvc = (CardVerifiableCertificate) certificates.get(i);
+	    for (CardVerifiableCertificate cvc : certificateChain.getCertificates()) {
 		// MSE:SetDST APDU
 		CardCommandAPDU mseSetDST = new MSESetDST(cvc.getCAR().toByteArray());
 		mseSetDST.transmit(dispatcher, slotHandle);

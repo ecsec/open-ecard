@@ -29,6 +29,7 @@ import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
+import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
 import org.openecard.client.crypto.common.asn1.eac.CADomainParameter;
 import org.openecard.client.crypto.common.asn1.eac.CASecurityInfos;
@@ -51,8 +52,10 @@ import org.slf4j.LoggerFactory;
  */
 public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
-    private static final Logger logger = LoggerFactory.getLogger(TerminalAuthenticationStep.class.getName());
+    private static final Logger _logger = LoggerFactory.getLogger(TerminalAuthenticationStep.class.getName());
+
     private Dispatcher dispatcher;
+
 
     /**
      * Creates a new Terminal Authentication protocol step.
@@ -79,15 +82,22 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 
 	    TerminalAuthentication ta = new TerminalAuthentication(dispatcher, slotHandle);
 
-	    // TA: Step 1 - Verify certificates
+	    // Build certificate chain
 	    CardVerifiableCertificateChain certificateChain = (CardVerifiableCertificateChain) internalData.get(EACConstants.INTERNAL_DATA_CERTIFICATES);
+	    certificateChain.addCertificates(eac2Input.getCertificates());
+
+	    byte[] currentCAR = (byte[]) internalData.get(EACConstants.INTERNAL_DATA_CURRENT_CAR);
+	    certificateChain = certificateChain.getCertificateChainFromCAR(currentCAR);
+
+	    // TA: Step 1 - Verify certificates
 	    ta.verifyCertificates(certificateChain);
 
 	    // TA: Step 2 - MSE:SET AT
 	    SecurityInfos securityInfos = (SecurityInfos) internalData.get(EACConstants.INTERNAL_DATA_SECURITY_INFOS);
 
-	    byte[] oid = ObjectIdentifierUtils.getValue(certificateChain.getTerminalCertificate().getPublicKey().getObjectIdentifier());
-	    byte[] chr = certificateChain.getTerminalCertificate().getCHR().toByteArray();
+	    CardVerifiableCertificate terminalCertificate = certificateChain.getTerminalCertificates().get(0);
+	    byte[] oid = ObjectIdentifierUtils.getValue(terminalCertificate.getPublicKey().getObjectIdentifier());
+	    byte[] chr = terminalCertificate.getCHR().toByteArray();
 	    byte[] key = eac2Input.getEphemeralPublicKey();
 	    byte[] aad = (byte[]) internalData.get(EACConstants.INTERNAL_DATA_AUTHENTICATED_AUXILIARY_DATA);
 
@@ -116,7 +126,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    return response;
 	} catch (Exception e) {
 	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
+	    _logger.error("Exception", e);
 	    // </editor-fold>
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	}

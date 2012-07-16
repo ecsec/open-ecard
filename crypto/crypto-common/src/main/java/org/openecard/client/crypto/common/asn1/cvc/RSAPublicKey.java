@@ -47,7 +47,7 @@ public class RSAPublicKey extends PublicKey {
     }
 
     @Override
-    public boolean equals(PublicKey pk) {
+    public boolean compare(PublicKey pk) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 

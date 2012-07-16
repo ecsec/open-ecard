@@ -87,8 +87,18 @@ public class PublicKeyReference {
      * @param publicKeyReference PublicKeyReference
      * @return True if they are equal, otherwise false
      */
-    public boolean equals(PublicKeyReference publicKeyReference) {
-	return ByteUtils.compare(reference, publicKeyReference.toByteArray());
+    public boolean compare(PublicKeyReference publicKeyReference) {
+	return compare(publicKeyReference.toByteArray());
+    }
+
+    /**
+     * Compares the public key reference.
+     *
+     * @param publicKeyReference PublicKeyReference
+     * @return True if they are equal, otherwise false
+     */
+    public boolean compare(byte[] publicKeyReference) {
+	return ByteUtils.compare(reference, publicKeyReference);
     }
 
     /**

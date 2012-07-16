@@ -82,7 +82,7 @@ public abstract class PublicKey {
      * @param pk PublicKey
      * @return True if they are equal, otherwise false
      */
-    public boolean equals(PublicKey pk) {
+    public boolean compare(PublicKey pk) {
 	try {
 	    return ByteUtils.compare(getTLVEncoded().toBER(), pk.getTLVEncoded().toBER());
 	} catch (TLVException ignore) {

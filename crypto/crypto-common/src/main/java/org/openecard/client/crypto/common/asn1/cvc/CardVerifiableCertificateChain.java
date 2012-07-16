@@ -24,8 +24,11 @@ package org.openecard.client.crypto.common.asn1.cvc;
 
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -37,10 +40,11 @@ import java.util.List;
  */
 public class CardVerifiableCertificateChain {
 
-    private ArrayList<CardVerifiableCertificate> chain = new ArrayList<CardVerifiableCertificate>();
-    private CardVerifiableCertificate cvca;
-    private CardVerifiableCertificate dv;
-    private CardVerifiableCertificate terminal;
+    private static final Logger _logger = LoggerFactory.getLogger(CertificateDescription.class);
+    private ArrayList<CardVerifiableCertificate> certs = new ArrayList<CardVerifiableCertificate>();
+    private ArrayList<CardVerifiableCertificate> cvcaCerts = new ArrayList<CardVerifiableCertificate>();
+    private ArrayList<CardVerifiableCertificate> dvCerts = new ArrayList<CardVerifiableCertificate>();
+    private ArrayList<CardVerifiableCertificate> terminalCerts = new ArrayList<CardVerifiableCertificate>();
 
     /**
      * Creates a new certificate chain.
@@ -52,6 +56,7 @@ public class CardVerifiableCertificateChain {
 	parseChain(certificates);
 	// FIXME not working yet with all servers.
 //	verify();
+	_logger.warn("Verification of the certificate chain is disabled.");
     }
 
     /**
@@ -59,49 +64,86 @@ public class CardVerifiableCertificateChain {
      *
      * @param certificates Certificates
      */
-    private void parseChain(List<CardVerifiableCertificate> certificates) {
-	for (int i = 0; i < certificates.size(); i++) {
-	    CardVerifiableCertificate cvc = (CardVerifiableCertificate) certificates.get(i);
+    private void parseChain(List<CardVerifiableCertificate> certificates) throws CertificateException {
+	for (CardVerifiableCertificate cvc : certificates) {
+	    if (containsChertificate(cvc)) {
+		break;
+	    }
 
 	    CHAT.Role role = cvc.getCHAT().getRole();
+
 	    if (role.equals(CHAT.Role.CVCA)) {
-		cvca = cvc;
-		chain.add(cvca);
+		cvcaCerts.add(cvc);
+		certs.add(cvc);
 	    } else if (role.equals(CHAT.Role.DV_OFFICIAL)
 		    || role.equals(CHAT.Role.DV_NON_OFFICIAL)) {
-		dv = cvc;
-		chain.add(dv);
+		dvCerts.add(cvc);
+		certs.add(cvc);
 	    } else if (role.equals(CHAT.Role.AUTHENTICATION_TERMINAL)
 		    || role.equals(CHAT.Role.INSPECTION_TERMINAL)
 		    || role.equals(CHAT.Role.SIGNATURE_TERMINAL)) {
-		terminal = cvc;
-		chain.add(terminal);
+		terminalCerts.add(cvc);
+		certs.add(cvc);
+	    } else {
+		throw new CertificateException("Malformed certificate.");
 	    }
 	}
     }
 
     /**
      * Verifies the certificate chain.
-     * [1] The CAR and the CHR of the CVCA certificate should be equal.
-     * [2] The CAR of the DV certificate should refer to the CHR of the CVCA.
-     * [3] The CAR of the terminal certificate should refer to the CHR of the DV certificate.
+     * [1] The CAR and the CHR of the CVCA certificates should be equal.
+     * [2] The CAR of a DV certificate should refer to the CHR of a CVCA certificate.
+     * [3] The CAR of a terminal certificate should refer to the CHR of a DV certificate.
      *
      * @throws CertificateException
      */
     private void verify() throws CertificateException {
-	if (!cvca.getCAR().equals(cvca.getCHR())
-		|| !dv.getCAR().equals(cvca.getCHR())
-		|| !terminal.getCAR().equals(dv.getCHR())) {
-	    throw new CertificateException("Malformed certificate chain");
+	verify(terminalCerts, dvCerts);
+	verify(dvCerts, cvcaCerts);
+	verify(cvcaCerts, cvcaCerts);
+    }
+
+    private void verify(List<CardVerifiableCertificate> authorities, List<CardVerifiableCertificate> holders) throws CertificateException {
+	for (Iterator<CardVerifiableCertificate> ai = authorities.iterator(); ai.hasNext();) {
+	    CardVerifiableCertificate authority = ai.next();
+
+	    for (Iterator<CardVerifiableCertificate> hi = holders.iterator(); hi.hasNext();) {
+		CardVerifiableCertificate holder = hi.next();
+		if (authority.getCAR().equals(holder.getCHR())) {
+		    break;
+		}
+
+		if (!ai.hasNext()) {
+		    throw new CertificateException(
+			    "Malformed certificate chain: Cannot find a CHR for the CAR (" + authority.getCAR().toString() + ").");
+		}
+	    }
 	}
+    }
+
+    /**
+     * Checks if the certificate chain contains the given certificate.
+     *
+     * @param cvc Certificate
+     * @return True if the chain contains the certificate, false otherwise
+     */
+    public boolean containsChertificate(CardVerifiableCertificate cvc) {
+	for (CardVerifiableCertificate c : certs) {
+	    if (c.compare(cvc)) {
+		return true;
+	    }
+	}
+	return false;
     }
 
     /**
      * Adds a new certificate to the chain.
      *
      * @param certificate Certificate
+     * @throws CertificateException
      */
-    public void addCertificate(final CardVerifiableCertificate certificate) {
+    public void addCertificate(final CardVerifiableCertificate certificate) throws CertificateException {
 	parseChain(new LinkedList<CardVerifiableCertificate>() {
 
 	    {
@@ -111,30 +153,40 @@ public class CardVerifiableCertificateChain {
     }
 
     /**
-     * Returns the certificate of the Country Verifying CA (CVCA).
+     * Adds new certificates to the chain.
      *
-     * @return CVCA certificate
+     * @param certificates Certificate
+     * @throws CertificateException
      */
-    public CardVerifiableCertificate getCVCACertificate() {
-	return cvca;
+    public void addCertificates(ArrayList<CardVerifiableCertificate> certificates) throws CertificateException {
+	parseChain(certificates);
     }
 
     /**
-     * Returns the certificate of the Document Verifier (DV).
+     * Returns the certificates of the Country Verifying CAs (CVCA).
      *
-     * @return DV certificate
+     * @return CVCA certificates
      */
-    public CardVerifiableCertificate getDVCertificate() {
-	return dv;
+    public List<CardVerifiableCertificate> getCVCACertificates() {
+	return cvcaCerts;
     }
 
     /**
-     * Returns the certificate of the terminal.
+     * Returns the certificates of the Document Verifiers (DV).
      *
-     * @return Terminal certificate
+     * @return DV certificates
      */
-    public CardVerifiableCertificate getTerminalCertificate() {
-	return terminal;
+    public List<CardVerifiableCertificate> getDVCertificates() {
+	return dvCerts;
+    }
+
+    /**
+     * Returns the certificates of the terminal.
+     *
+     * @return Terminal certificates
+     */
+    public List<CardVerifiableCertificate> getTerminalCertificates() {
+	return terminalCerts;
     }
 
     /**
@@ -142,8 +194,44 @@ public class CardVerifiableCertificateChain {
      *
      * @return Certificate chain
      */
-    public List<CardVerifiableCertificate> getCertificateChain() {
-	return chain;
+    public List<CardVerifiableCertificate> getCertificates() {
+	return certs;
+    }
+
+    /**
+     * Returns the certificate chain from the CAR.
+     *
+     * @param car Certification Authority Reference (CAR)
+     * @return Certificate chain
+     * @throws CertificateException
+     */
+    public CardVerifiableCertificateChain getCertificateChainFromCAR(byte[] car) throws CertificateException {
+	return getCertificateChainFromCAR(new PublicKeyReference(car));
+    }
+
+    /**
+     * Returns the certificate chain from the CAR.
+     *
+     * @param car Certification Authority Reference (CAR)
+     * @return Certificate chain
+     * @throws CertificateException
+     */
+    public CardVerifiableCertificateChain getCertificateChainFromCAR(PublicKeyReference car) throws CertificateException {
+	List<CardVerifiableCertificate> certChain = buildChain(certs, car);
+	return new CardVerifiableCertificateChain(certChain);
+    }
+
+    private ArrayList<CardVerifiableCertificate> buildChain(ArrayList<CardVerifiableCertificate> certs, PublicKeyReference car) {
+	ArrayList<CardVerifiableCertificate> certChain = new ArrayList<CardVerifiableCertificate>();
+
+	for (CardVerifiableCertificate c : certs) {
+	    if (c.getCAR().compare(car)) {
+		certChain.add(c);
+		certChain.addAll(buildChain(certs, c.getCHR()));
+	    }
+	}
+
+	return certChain;
     }
 
 }

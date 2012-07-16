@@ -24,7 +24,6 @@ package org.openecard.client.crypto.common.asn1.cvc;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import org.openecard.client.crypto.common.asn1.eac.EFCardAccessTest;
 import static org.testng.Assert.*;
@@ -52,6 +51,7 @@ public class CardVerifiableCertificateChainTest {
 	    certificates.add(new CardVerifiableCertificate(cvca));
 	    certificates.add(new CardVerifiableCertificate(dv));
 	    certificates.add(new CardVerifiableCertificate(at));
+//	    certificates.add(new CardVerifiableCertificate(malformedAT));
 
 	    malformedCertificates.add(new CardVerifiableCertificate(cvca));
 	    malformedCertificates.add(new CardVerifiableCertificate(dv));
@@ -61,23 +61,21 @@ public class CardVerifiableCertificateChainTest {
 	}
     }
 
-    @Test
+    @Test(enabled=true)
     public void testChain() throws Exception {
 	init();
 	CardVerifiableCertificateChain chain = new CardVerifiableCertificateChain(certificates);
-	assertEquals(certificates.get(0), chain.getCVCACertificate());
-	assertEquals(certificates.get(1), chain.getDVCertificate());
-	assertEquals(certificates.get(2), chain.getTerminalCertificate());
-	assertEquals(certificates, chain.getCertificateChain());
+	assertEquals(certificates.get(0), chain.getCVCACertificates().get(0));
+	assertEquals(certificates.get(1), chain.getDVCertificates().get(0));
+	assertEquals(certificates.get(2), chain.getTerminalCertificates().get(0));
 
 	/*
 	 * test missing cvca certificate
 	 */
 	certificates.remove(0);
 	chain = new CardVerifiableCertificateChain(certificates);
-	assertEquals(certificates.get(0), chain.getDVCertificate());
-	assertEquals(certificates.get(1), chain.getTerminalCertificate());
-	assertEquals(certificates, chain.getCertificateChain());
+	assertEquals(certificates.get(0), chain.getDVCertificates().get(0));
+	assertEquals(certificates.get(1), chain.getTerminalCertificates().get(0));
 
 	/*
 	 * test add
@@ -87,26 +85,10 @@ public class CardVerifiableCertificateChainTest {
 	certificates.add(new CardVerifiableCertificate(dv));
 	certificates.add(new CardVerifiableCertificate(at));
 	chain.addCertificate(new CardVerifiableCertificate(cvca));
-	assertTrue(certificates.get(0).equals(chain.getCVCACertificate()));
-	assertTrue(certificates.get(1).equals(chain.getDVCertificate()));
-	assertTrue(certificates.get(2).equals(chain.getTerminalCertificate()));
 
-	/*
-	 * test malformed chain with cvca
-	 */
-	try {
-	    chain = new CardVerifiableCertificateChain(malformedCertificates);
-	} catch (CertificateException expected) {
-	}
-
-	/*
-	 * test malformed chain without cvca
-	 */
-	try {
-	    malformedCertificates.remove(0);
-	    chain = new CardVerifiableCertificateChain(malformedCertificates);
-	} catch (CertificateException expected) {
-	}
+	assertTrue(certificates.get(0).compare(chain.getCVCACertificates().get(0)));
+	assertTrue(certificates.get(1).compare(chain.getDVCertificates().get(0)));
+	assertTrue(certificates.get(2).compare(chain.getTerminalCertificates().get(0)));
     }
 
     private byte[] loadTestFile(String file) throws Exception {

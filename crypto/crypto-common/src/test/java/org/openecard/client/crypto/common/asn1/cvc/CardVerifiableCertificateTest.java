@@ -24,7 +24,7 @@ package org.openecard.client.crypto.common.asn1.cvc;
 
 import java.util.GregorianCalendar;
 import org.openecard.client.common.util.StringUtils;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 
 
@@ -73,4 +73,5 @@ public class CardVerifiableCertificateTest {
 	} catch (Exception expected) {
 	}
     }
+
 }

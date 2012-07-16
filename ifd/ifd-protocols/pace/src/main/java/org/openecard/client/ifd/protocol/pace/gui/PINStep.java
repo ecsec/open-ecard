@@ -60,7 +60,7 @@ public class PINStep {
     }
 
     private void initialize() {
-	Text description = new Text("description");
+	Text description = new Text();
 	description.setText(lang.translationForKey(DESCRIPTION));
 	step.getInputInfoUnits().add(description);
 

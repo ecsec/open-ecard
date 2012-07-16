@@ -31,6 +31,8 @@ import org.openecard.client.gui.UserConsentNavigator;
 import org.openecard.client.gui.definition.*;
 import org.openecard.client.gui.executor.*;
 import org.openecard.client.gui.swing.common.GUIDefaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -41,6 +43,8 @@ import org.testng.annotations.Test;
  * @editor Vladislav Mladenov
  */
 public class RunGUI {
+
+    private static final Logger _logger = LoggerFactory.getLogger(RunGUI.class);
 
     private UserConsentDescription uc;
 
@@ -66,11 +70,11 @@ public class RunGUI {
 
     private Step identityCheckStep() {
 	Step identityCheck_ServerConnection_Step = new Step("Start");//("Identitätsnachweis wird gestartet");
-	Text serverConnectionText = new Text("t1");
+	Text serverConnectionText = new Text();
 	serverConnectionText.setText("Verbindung zum Server wird aufgebaut");
 	identityCheck_ServerConnection_Step.getInputInfoUnits().add(serverConnectionText);
 
-	ToggleText providerName_Text1 = new ToggleText("tt1");
+	ToggleText providerName_Text1 = new ToggleText();
 	providerName_Text1.setTitle("Name");
 	providerName_Text1.setText("Frauenhofer FOKUS\n\n");
 //	identityCheck_ServerConnection_Step.getInputInfoUnits().add(providerName_Text1);
@@ -81,22 +85,22 @@ public class RunGUI {
     private Step providerInfoStep() {
 	Step step = new Step("Anbieter");
 
-	Text decription = new Text("t1");
+	Text decription = new Text();
 	decription.setText("Zu dem Dienstanbieter und seiner Berechtigung liegen folgende Information vor.");
 	step.getInputInfoUnits().add(decription);
 
-	ToggleText name = new ToggleText("tt1");
+	ToggleText name = new ToggleText();
 	name.setTitle("Name");
 	name.setText("Fraunhofer FOKUS");
 	step.getInputInfoUnits().add(name);
 
-	ToggleText url = new ToggleText("tt2");
+	ToggleText url = new ToggleText();
 	url.setTitle("Internetadresse");
 	url.setText("http://www.fraunhofer.de");
 //	url.setCollapsed(true);
 	step.getInputInfoUnits().add(url);
 
-	ToggleText termsofUsage = new ToggleText("tt3");
+	ToggleText termsofUsage = new ToggleText();
 	termsofUsage.setTitle("Nutzungsbestimmungen");
 	termsofUsage.setText("Anschrift:\nTest-Diensteanbieter\nTest-Strasse 1\n12345 Test-Ort\n\n"
 		+ "E-Mail-Adresse:\ninfo@test-diensteanbieter.de\n\n"
@@ -105,19 +109,19 @@ public class RunGUI {
 	termsofUsage.setCollapsed(true);
 	step.getInputInfoUnits().add(termsofUsage);
 
-	ToggleText validation = new ToggleText("tt4");
+	ToggleText validation = new ToggleText();
 	validation.setTitle("Gültigkeit");
 	validation.setText("Von 01.01.2012 bis zum 02.01.2012");
 	validation.setCollapsed(true);
 	step.getInputInfoUnits().add(validation);
 
-	ToggleText subjectName = new ToggleText("tt5");
+	ToggleText subjectName = new ToggleText();
 	subjectName.setTitle("Aussteller des Berechtigung");
 	subjectName.setText("D-Trust GmbH");
 	subjectName.setCollapsed(true);
 	step.getInputInfoUnits().add(subjectName);
 
-	ToggleText subjectURL = new ToggleText("tt6");
+	ToggleText subjectURL = new ToggleText();
 	subjectURL.setTitle("Internetadresse des Ausstellers");
 	subjectURL.setText("http://www.dtrust.de");
 	subjectURL.setCollapsed(true);
@@ -129,7 +133,7 @@ public class RunGUI {
 
 
     private Step reqestedDataStep() throws Exception {
-	Text requestedDataDescription = new Text("t1");
+	Text requestedDataDescription = new Text();
 	requestedDataDescription.setText("Der Anbieter \"Test-Diensteanbieter\"  fordert zum Zweck \"Entwicklung und Test von Software\" die folgenden Daten von Ihnen an:");
 	requestedData_Step1.getInputInfoUnits().add(requestedDataDescription);
 //	Hyperlink dataPrivacyDescriptionLink = new Hyperlink();
@@ -212,7 +216,7 @@ public class RunGUI {
 //	dataToSendSelection.getBoxItems().add(ageverificationBoxItem);
 	requestedData_Step1.getInputInfoUnits().add(dataToSendSelection);
 
-	ToggleText requestedDataDescription1 = new ToggleText("tt1");
+	ToggleText requestedDataDescription1 = new ToggleText();
 	requestedDataDescription1.setTitle("Hinweis");
 	requestedDataDescription1.setText("Die markierten Elemente benötigt der Anbieter zur Durchführung seiner Dienstleistung. Optionale Daten können Sie hinzufügen.");
 	requestedDataDescription1.setCollapsed(!true);
@@ -223,7 +227,7 @@ public class RunGUI {
 
     private Step checkDataStep() {
 	Step dataTransaction_Step = new Step("Identitätsnachweis");// wird durchgeführt");
-	Text requestedPIN_Text = new Text("t1");
+	Text requestedPIN_Text = new Text();
 	requestedPIN_Text.setText("Eingegebene PIN");
 	BoxItem pinCorrekt = new BoxItem();
 	pinCorrekt.setName("pinCorrect");
@@ -231,7 +235,7 @@ public class RunGUI {
 	pinCorrekt.setText("OK");
 	dataTransaction_Step.getInputInfoUnits().add(requestedPIN_Text);
 
-	Text cerificate_Text = new Text("t2");
+	Text cerificate_Text = new Text();
 	cerificate_Text.setText("Berechtigungszertifikat");
 	BoxItem certificateCorrekt = new BoxItem();
 	certificateCorrekt.setName("certificateCorrekt");
@@ -240,7 +244,7 @@ public class RunGUI {
 //        statusMessages_CheckBox.getBoxItems().add(certificateCorrekt);
 	dataTransaction_Step.getInputInfoUnits().add(cerificate_Text);
 
-	Text eCard_Text = new Text("t3");
+	Text eCard_Text = new Text();
 	eCard_Text.setText("Verwendete Karte");
 	BoxItem eCardCorrekt = new BoxItem();
 	eCardCorrekt.setName("eCardCorrekt");
@@ -249,7 +253,7 @@ public class RunGUI {
 	dataTransaction_Step.getInputInfoUnits().add(eCard_Text);
 //        statusMessages_CheckBox.getBoxItems().add(eCardCorrekt);
 
-	Text dataTransaction_Text = new Text("t4");
+	Text dataTransaction_Text = new Text();
 	dataTransaction_Text.setText("Datenübermittlung wird geprüft");
 	BoxItem dataTransactionCorrekt = new BoxItem();
 	dataTransactionCorrekt.setName("dataTransactionCorrekt");
@@ -265,7 +269,7 @@ public class RunGUI {
     Step requestedData_Step = new Step("PIN-Eingabe");
 
     private Step pinInputStep() throws Exception {
-	Text t = new Text("t1");
+	Text t = new Text();
 	t.setText("Durch die Eingabe Ihrer PIN bestätigen Sie, dass folgende markierte Daten an den Anbieter übermittelt werden.");
 	requestedData_Step.getInputInfoUnits().add(t);
 	Checkbox dataToSendSelection = new Checkbox("c1");
@@ -325,7 +329,7 @@ public class RunGUI {
 	ageverificationBoxItem.setDisabled(true);
 	ageverificationBoxItem.setText("Altersverifikation");
 
-	Text sendAgreement_Text = new Text("t2");
+	Text sendAgreement_Text = new Text();
 	sendAgreement_Text.setText("Wenn Sie mit der Übermittlung der ausgewählten\n"
 		+ "Daten einverstanden sind, geben Sie bitte\n"
 		+ "Ihre 6-stellige PIN ein.");
@@ -464,7 +468,7 @@ public class RunGUI {
 	    exec.addCustomAction(sp1);
 	    exec.process();
 	} catch (Throwable w) {
-	    w.printStackTrace();
+	    _logger.error(w.getMessage(), w);
 	}
     }
 

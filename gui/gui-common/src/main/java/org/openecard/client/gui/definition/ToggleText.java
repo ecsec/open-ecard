@@ -30,24 +30,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public final class ToggleText implements InputInfoUnit {
+public final class ToggleText extends IDTrait implements InputInfoUnit {
 
     private static final Logger _logger = LoggerFactory.getLogger(Text.class);
 
-    private final String id;
     private String title;
     private String text;
     private boolean collapsed;
 
-    public ToggleText(String id) {
-	this.id = id;
-    }
-
-
-    @Override
-    public String getID() {
-	return this.id;
-    }
 
     public boolean isCollapsed() {
 	return collapsed;

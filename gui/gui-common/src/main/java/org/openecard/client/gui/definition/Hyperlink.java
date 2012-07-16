@@ -32,23 +32,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public final class Hyperlink implements InputInfoUnit {
+public final class Hyperlink extends IDTrait implements InputInfoUnit {
 
     private static final Logger _logger = LoggerFactory.getLogger(Hyperlink.class);
 
-    private final String id;
     private String text;
     private URL href;
-
-    public Hyperlink(String id) {
-	this.id = id;
-    }
-
-
-    @Override
-    public String getID() {
-	return id;
-    }
 
     /**
      * @return the text

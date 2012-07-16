@@ -29,16 +29,8 @@ package org.openecard.client.gui.definition;
  */
 public final class PasswordField extends AbstractTextField {
 
-    private final String id;
-
     public PasswordField(String id) {
-	this.id = id;
-    }
-
-
-    @Override
-    public String getID() {
-	return id;
+	super(id);
     }
 
     @Override

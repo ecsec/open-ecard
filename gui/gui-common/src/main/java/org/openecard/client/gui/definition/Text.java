@@ -30,22 +30,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public final class Text implements InputInfoUnit {
+public final class Text extends IDTrait implements InputInfoUnit {
 
     private static final Logger _logger = LoggerFactory.getLogger(Text.class);
 
-    private final String id;
     private String text;
 
-    public Text(String id) {
-	this.id = id;
-    }
-
-
-    @Override
-    public String getID() {
-	return id;
-    }
 
     /**
      * @return the text

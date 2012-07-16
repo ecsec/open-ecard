@@ -29,21 +29,13 @@ package org.openecard.client.gui.definition;
  */
 public final class Checkbox extends AbstractBox {
 
-    private final String id;
-
     public Checkbox(String id) {
-	this.id = id;
+	super(id);
     }
-
 
     @Override
     public InfoUnitElementType type() {
 	return InfoUnitElementType.CHECK_BOX;
-    }
-
-    @Override
-    public String getID() {
-	return id;
     }
 
 }

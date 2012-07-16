@@ -26,14 +26,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-
 /**
  * Implements a abstract text field.
  * A field can be identified by an ID.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public abstract class AbstractTextField implements InputInfoUnit, OutputInfoUnit {
+public abstract class AbstractTextField extends IDTrait implements InputInfoUnit, OutputInfoUnit {
 
     private static final Logger _logger = LoggerFactory.getLogger(AbstractTextField.class);
 
@@ -41,6 +40,13 @@ public abstract class AbstractTextField implements InputInfoUnit, OutputInfoUnit
     private String value;
     private int minLength = 0;
     private int maxLength = Integer.MAX_VALUE;
+
+    public AbstractTextField() {
+    }
+
+    public AbstractTextField(String id) {
+	super(id);
+    }
 
 
     /**

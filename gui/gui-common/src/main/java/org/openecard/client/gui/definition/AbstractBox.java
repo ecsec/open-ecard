@@ -32,12 +32,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public abstract class AbstractBox implements InputInfoUnit, OutputInfoUnit {
+public abstract class AbstractBox extends IDTrait implements InputInfoUnit, OutputInfoUnit {
 
     private static final Logger _logger = LoggerFactory.getLogger(AbstractBox.class);
 
     private String groupText;
     private List<BoxItem> boxItems;
+
+    public AbstractBox() {
+    }
+
+    public AbstractBox(String id) {
+	super(id);
+    }
+
 
     /**
      * @return the groupText

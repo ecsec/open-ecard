@@ -29,21 +29,13 @@ package org.openecard.client.gui.definition;
  */
 public final class Radiobox extends AbstractBox {
 
-    private final String id;
-
     public Radiobox(String id) {
-	this.id = id;
+	super(id);
     }
-
 
     @Override
     public InfoUnitElementType type() {
 	return InfoUnitElementType.RADIO_BOX;
-    }
-
-    @Override
-    public String getID() {
-	return id;
     }
 
 }

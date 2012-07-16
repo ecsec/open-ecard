@@ -29,16 +29,8 @@ package org.openecard.client.gui.definition;
  */
 public final class TextField extends AbstractTextField {
 
-    private final String id;
-
     public TextField(String id) {
-	this.id = id;
-    }
-
-
-    @Override
-    public String getID() {
-	return id;
+	super(id);
     }
 
     @Override

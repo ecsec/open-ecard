@@ -22,36 +22,33 @@
 
 package org.openecard.client.gui.definition;
 
+import org.openecard.client.gui.common.IDGenerator;
+
 
 /**
- * Base interface every info unit must implement.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public interface InfoUnit {
+public abstract class IDTrait implements InfoUnit {
 
-    /**
-     * Get type of info unit.
-     */
-    public InfoUnitElementType type();
+    private String id;
 
-    /**
-     * Get ID of the info unit.
-     * The id must be unique per step.
-     */
-    public String getID();
-    /**
-     * Set ID of the info unit.
-     * The id must be unique per step.
-     */
-    public void setID(String id);
+    public IDTrait() {
+	this(IDGenerator.generateID());
+    }
 
-    /**
-     * Copy the content of the given info unit to this instance.
-     * Both instances must have the same type. If the types differ, a warning is logged and
-     * the copy is not performed.
-     * @param origin InfoUnit to copy from.
-     */
-    public void copyContentFrom(final InfoUnit origin);
+    public IDTrait(String id) {
+	this.id = id;
+    }
+
+
+    @Override
+    public final String getID() {
+	return id;
+    }
+    @Override
+    public final void setID(String id) {
+	this.id = id;
+    }
 
 }

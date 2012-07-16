@@ -22,11 +22,7 @@
 
 package org.openecard.client.gui.executor;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import org.openecard.client.gui.ResultStatus;
 import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.UserConsentNavigator;
@@ -68,6 +64,7 @@ public class ExecutionEngine {
 	    List<OutputInfoUnit> stepResults = next.getResults();
 	    Map<String, ExecutionResults> oldResults = Collections.unmodifiableMap(results);
 	    results.put(next.getStepID(), new ExecutionResults(next.getStepID(), stepResults));
+
 	    // replace InfoInputUnit values in live list
 	    if (! next.getStep().isResetOnLoad()) {
 		Step s = next.getStep();

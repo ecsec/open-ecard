@@ -47,7 +47,8 @@ public class CHATStep {
     // GUI translation constants
     private static final String TITLE = "step_chat_title";
     private static final String DESCRIPTION = "step_chat_description";
-    private static final String CHAT_BOXES = "readAccessCheckBox";
+    private static final String REQUIRED_CHAT_BOXES = "requiredReadAccessCheckBox";
+    private static final String OPTIONAL_CHAT_BOXES = "optionalReadAccessCheckBox";
 
     private I18n lang = I18n.getTranslation("sal");
     private Step step = new Step(lang.translationForKey(TITLE));
@@ -77,9 +78,16 @@ public class CHATStep {
 
 	Text decription = new Text();
 	decription.setText(decriptionText);
+	//TODO internationalize the following to texts
+	Text requested = new Text();
+	requested.setText("Verbindlich:");
+	Text optional = new Text();
+	optional.setText("Optional:");
 	step.getInputInfoUnits().add(decription);
-
-	Checkbox readAccessCheckBox = new Checkbox(CHAT_BOXES);
+	step.getInputInfoUnits().add(requested);
+	
+	Checkbox requiredReadAccessCheckBox = new Checkbox(REQUIRED_CHAT_BOXES);
+	Checkbox optionalReadAccessCheckBox = new Checkbox(OPTIONAL_CHAT_BOXES);
 	TreeMap<CHAT.DataGroup, Boolean> requiredReadAccess = requiredCHAT.getReadAccess();
 	TreeMap<CHAT.DataGroup, Boolean> optionalReadAccess = optionalCHAT.getReadAccess();
 	TreeMap<SpecialFunction, Boolean> requiredSpecialFunctions = requiredCHAT.getSpecialFunctions();
@@ -92,9 +100,9 @@ public class CHATStep {
 	for (int i = 0; i < 21; i++) {
 	    DataGroup dataGroup = dataGroups[i];
 	    if (requiredReadAccess.get(dataGroup)) {
-		readAccessCheckBox.getBoxItems().add(makeRequiredBoxItem(dataGroup));
+		requiredReadAccessCheckBox.getBoxItems().add(makeRequiredBoxItem(dataGroup));
 	    } else if (optionalReadAccess.get(dataGroup)) {
-		readAccessCheckBox.getBoxItems().add(makeOptionalBoxItem(dataGroup));
+		optionalReadAccessCheckBox.getBoxItems().add(makeOptionalBoxItem(dataGroup));
 	    }
 	}
 
@@ -102,13 +110,15 @@ public class CHATStep {
 	for (int i = 0; i < 8; i++) {
 	    SpecialFunction specialFunction = specialFunctions[i];
 	    if (requiredSpecialFunctions.get(specialFunction)) {
-		readAccessCheckBox.getBoxItems().add(makeRequiredBoxItem(specialFunction));
+		requiredReadAccessCheckBox.getBoxItems().add(makeRequiredBoxItem(specialFunction));
 	    } else if (optionalSpecialFunctions.get(specialFunction)) {
-		readAccessCheckBox.getBoxItems().add(makeOptionalBoxItem(specialFunction));
+		optionalReadAccessCheckBox.getBoxItems().add(makeOptionalBoxItem(specialFunction));
 	    }
 	}
 
-	step.getInputInfoUnits().add(readAccessCheckBox);
+	step.getInputInfoUnits().add(requiredReadAccessCheckBox);
+	step.getInputInfoUnits().add(optional);
+	step.getInputInfoUnits().add(optionalReadAccessCheckBox);
 
 	// TODO: check required and optional CHAT against certificate
 	// TODO: internationalize the following toggletext
@@ -174,7 +184,16 @@ public class CHATStep {
 	    return;
 	}
 
-	Checkbox cb = (Checkbox) executionResults.getResult(CHAT_BOXES);
+	Checkbox cb = (Checkbox) executionResults.getResult(REQUIRED_CHAT_BOXES);
+	for (BoxItem item : cb.getBoxItems()) {
+	    if (dataGroupsNames.contains(item.getName())) {
+		selectedCHAT.setReadAccess(item.getName(), item.isChecked());
+	    } else if (specialFunctionsNames.contains(item.getName())) {
+		selectedCHAT.setSpecialFunction(item.getName(), item.isChecked());
+	    }
+	}
+	
+	cb = (Checkbox) executionResults.getResult(OPTIONAL_CHAT_BOXES);
 	for (BoxItem item : cb.getBoxItems()) {
 	    if (dataGroupsNames.contains(item.getName())) {
 		selectedCHAT.setReadAccess(item.getName(), item.isChecked());

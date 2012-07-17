@@ -18,34 +18,25 @@
     <build>
 	<plugins>
 	    <plugin>
-		<artifactId>maven-assembly-plugin</artifactId>
-		<version>2.3</version>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-jar-plugin</artifactId>
+		<version>2.4</version>
 		<configuration>
-		    <descriptorRefs>
-			<descriptorRef>jar-with-dependencies</descriptorRef>
-		    </descriptorRefs>
 		    <archive>
+			<index>true</index>
 			<manifest>
+			    <addClasspath>true</addClasspath>
 			    <mainClass>org.openecard.client.richclient.RichClient</mainClass>
 			</manifest>
 		    </archive>
 		</configuration>
-		<executions>
-		    <execution>
-			<id>make-assembly</id>
-			<phase>package</phase>
-			<goals>
-			    <goal>single</goal>
-			</goals>
-		    </execution>
-		</executions>
 	    </plugin>
 	</plugins>
     </build>
 
 
     <properties>
-	<wininstall.resources.dir>${basedir}/installer/windows</wininstall.resources.dir>
+	<wininstall.resources.dir>${basedir}/src/main/windows-installer</wininstall.resources.dir>
 	<wininstall.tmp.dirname>wix-tmp</wininstall.tmp.dirname>
 	<wininstall.tmp.dir>${project.build.directory}/${wininstall.tmp.dirname}</wininstall.tmp.dir>
     </properties>
@@ -67,8 +58,8 @@
 				    <target>
 					<property name="version" value="${project.build.version}" />
 					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/Open-eCard-Logo.ico" />
-					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/run.bat" />
-					<copy todir="${wininstall.tmp.dir}/lib" flatten="true" >
+					<!-- <copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/run.bat" /> -->
+					<copy todir="${wininstall.tmp.dir}/lib" flatten="true">
 					    <path>
 						<path refid="maven.runtime.classpath" />
 						<pathelement location="${project.build.directory}/${project.build.finalName}.${project.packaging}" />
@@ -81,24 +72,24 @@
 					<pathconvert pathsep=";" property="alljars.property" refid="alljars.fileset">
 					    <mapper type="flatten" />
 					</pathconvert>
-					<echo file="${wininstall.tmp.dir}/tmp.txt">${alljars.property}</echo>
-					<replaceregexp file="${wininstall.tmp.dir}/tmp.txt" match="\A" replace="&lt;File Source='lib/"/>
-					<replaceregexp file="${wininstall.tmp.dir}/tmp.txt" match=";" replace="'/>&lt;File Source='lib/" flags="g" />
-					<replaceregexp file="${wininstall.tmp.dir}/tmp.txt" match="\Z" replace="'/>"/>
-					<loadfile property="all_jars" srcfile="${wininstall.tmp.dir}/tmp.txt" />
+					<echo file="${wininstall.tmp.dir}/filelist.tmp">${alljars.property}</echo>
+					<replaceregexp file="${wininstall.tmp.dir}/filelist.tmp" match="\A" replace="&lt;File Source='lib/"/>
+					<replaceregexp file="${wininstall.tmp.dir}/filelist.tmp" match=";" replace="'/>&lt;File Source='lib/" flags="g" />
+					<replaceregexp file="${wininstall.tmp.dir}/filelist.tmp" match="\Z" replace="'/>"/>
+					<loadfile property="all_jars" srcfile="${wininstall.tmp.dir}/filelist.tmp" />
 
-
-					<!-- build version number string for replacement in WIX configuration file -->
-					<echo file="${wininstall.tmp.dir}/version_number.txt">${version}</echo>
+					<!-- build windows conforming version number string -->
+					<echo file="${wininstall.tmp.dir}/version_number.txt">${project.version}</echo>
 					<replaceregexp file="${wininstall.tmp.dir}/version_number.txt" match="((\d)*(\.(\d)*){0,3})(.*)" replace="\1"/>
 					<loadfile property="version_number" srcfile="${wininstall.tmp.dir}/version_number.txt" />
 
-
-					<copy tofile="${wininstall.tmp.dir}/WindowsInstaller.wxs" file="${wininstall.resources.dir}/WindowsInstaller.wxs.xml" >
+					<!-- replace variables in wix config file -->
+					<copy tofile="${wininstall.tmp.dir}/WindowsInstaller.wxs"
+					      file="${wininstall.resources.dir}/WindowsInstaller.wxs">
 					    <filterset>
-						<filter token="ALL_JARS" value="${all_jars}"/>
-						<filter token="VERSION" value="${version}"/>
-						<filter token="VERSION_NUMBER" value="${version_number}"/>
+						<filter token="ALL_JARS" value="${all_jars}" />
+						<filter token="VERSION" value="${project.version}" />
+						<filter token="VERSION_NUMBER" value="${version_number}" />
 					    </filterset>
 					</copy>
 				    </target>
@@ -131,43 +122,6 @@
 				    <goal>candle</goal>
 				    <goal>light</goal>
 				</goals>
-			    </execution>
-			</executions>
-		    </plugin>
-		    <plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-clean-plugin</artifactId>
-			<version>2.4.1</version>
-			<executions>
-			    <execution>
-				<id>auto-clean</id>
-				<phase>package</phase>
-				<goals>
-				    <goal>clean</goal>
-				</goals>
-				<configuration>
-				    <excludeDefaultDirectories>true</excludeDefaultDirectories>
-				    <filesets>
-					<fileset>
-					    <directory>${wininstall.tmp.dir}</directory>
-					    <includes>
-						<include>**</include>
-					    </includes>
-					</fileset>
-					<fileset>
-					    <directory>${project.build.directory}</directory>
-					    <includes>
-						<include>${wininstall.tmp.dirname}</include>
-					    </includes>
-					</fileset>
-					<fileset>
-					    <directory>${project.build.directory}</directory>
-					    <includes>
-						<include>${project.build.finalName}.wixpdb</include>
-					    </includes>
-					</fileset>
-				    </filesets>
-				</configuration>
 			    </execution>
 			</executions>
 		    </plugin>

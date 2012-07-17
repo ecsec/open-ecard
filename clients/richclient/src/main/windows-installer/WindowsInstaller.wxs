@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+
+    <Product Name='Open eCard App' Id='*' Language='1033'
+	     Version='@VERSION_NUMBER@' Manufacturer='openecard.org'>
+
+
+	<Package Id='*' InstallerVersion='200' Compressed='yes' />
+
+	<Media Id='1' Cabinet='Open_eCard_App.cab' EmbedCab='yes' />
+
+	<!-- Define directory structure -->
+	<Directory Id='TARGETDIR' Name='SourceDir'>
+	    <Directory Id='ProgramFilesFolder'>
+		<Directory Id="ecard_dir" Name="Open eCard">
+		    <Directory Id='INSTALLDIR' Name='App @VERSION@'>
+			<Directory Id="libdir" Name="lib" />
+		    </Directory>
+		</Directory>
+	    </Directory>
+
+	    <Directory Id="ProgramMenuFolder">
+		<Directory Id="ProgramMenuDir" Name="Open eCard" />
+	    </Directory>
+
+	    <Directory Id="DesktopFolder" Name="Desktop" />
+	</Directory>
+
+	<!-- <DirectoryRef Id="INSTALLDIR"> -->
+	<!--     <Component Id='MainExecutable' Guid='*'> -->
+	<!-- 	<File Id='StartFile' Name='run.bat' Source='run.bat' Vital='yes' KeyPath='yes' > -->
+	<!-- 	    <Shortcut Id="startmenu" Directory="ProgramMenuDir" -->
+	<!-- 		      Name="Open eCard App" WorkingDirectory='INSTALLDIR' -->
+	<!-- 		      Icon="OpenECard.ico" IconIndex="0" Advertise='yes' /> -->
+	<!-- 	</File> -->
+	<!-- 	<RemoveFolder Id="INSTALLDIR" On="uninstall" /> -->
+	<!--     </Component> -->
+	<!-- </DirectoryRef> -->
+
+	<DirectoryRef Id="ecard_dir">
+	    <Component Id="BaseFolderComponent" Guid="8b5a020c-3a86-4d61-a933-b54575b0d0c3">
+		<RemoveFolder Id="ecard_dir" On="uninstall" />
+	    </Component>
+	</DirectoryRef>
+
+	<DirectoryRef Id="libdir">
+	    <Component Id='libs' Guid='8b5a020c-3a86-4d61-a933-b54575b0d0c4'>
+		@ALL_JARS@
+	    </Component>
+	</DirectoryRef>
+
+	<DirectoryRef Id="ProgramMenuDir">
+	    <Component Id='ProgramMenuShortcut' Guid='8b5a020c-3a86-4d61-a933-b54575b0d0c5'>
+		<Shortcut Id="ProgramStartMenuShortcut"
+			  Name="Open eCard App"
+			  Description="Free implementation of the client side eCard specification."
+			  Icon="OpenECard.ico"
+			  Target="[libdir]richclient-@VERSION@.jar"
+                          WorkingDirectory="libdir"
+			  Advertise="no">
+		</Shortcut>
+		<RemoveFolder Id="ProgramMenuDir" On="uninstall" />
+		<RegistryValue Root="HKCU" Key="SOFTWARE\Open eCard App" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+	    </Component>
+	</DirectoryRef>
+
+
+	<Icon Id="OpenECard.ico" SourceFile="Open-eCard-Logo.ico" />
+	<Property Id="ARPPRODUCTICON" Value="OpenECard.ico" />
+	<!-- select ALL USERS as install target -->
+	<!-- <Property Id="ALLUSERS"><![CDATA[2]]></Property> -->
+
+	<Feature Id="Complete" Level="1">
+	    <ComponentRef Id="BaseFolderComponent" />
+	    <ComponentRef Id="libs" />
+	    <ComponentRef Id="ProgramMenuShortcut" />
+	</Feature>
+
+
+	<!-- WixVariable Id="WixUIBannerBmp" Value="Open-eCard-Logo.bmp" /-->
+	<!-- WixVariable Id="WixUIDialogBmp" Value="Open-eCard-Logo.bmp" /-->
+	<!-- WixVariable Id="WixUILicenseRtf" Value="OurLicense.rtf" /-->
+    </Product>
+</Wix>

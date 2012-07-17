@@ -24,7 +24,7 @@ package org.openecard.client.gui.android.views;
 
 import android.content.Context;
 import android.text.InputFilter;
-import android.text.method.PasswordTransformationMethod;
+import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
@@ -62,7 +62,7 @@ public class AbstractInput implements StepView {
 	et.setMinimumWidth(input.getMinLength()*20);
 	et.requestFocus();
 	if (input.type().equals(InfoUnitElementType.PASSWORD_FIELD)) {
-	    et.setTransformationMethod(new PasswordTransformationMethod());
+	    et.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
 	}
 	if (input.getMaxLength() > 0) {
 	    InputFilter[] FilterArray = new InputFilter[1];

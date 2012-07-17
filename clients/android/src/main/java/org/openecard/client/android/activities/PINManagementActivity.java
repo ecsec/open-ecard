@@ -1,22 +1,26 @@
+/****************************************************************************
+ * Copyright (C) 2012 HS Coburg.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.android.activities;
-
-import java.math.BigInteger;
-
-import iso.std.iso_iec._24727.tech.schema.Connect;
-import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
-import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
-import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.openecard.client.android.ApplicationContext;
-import org.openecard.client.android.R;
-import org.openecard.client.common.ECardConstants;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -24,10 +28,17 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
+import iso.std.iso_iec._24727.tech.schema.*;
+import java.math.BigInteger;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.openecard.client.android.R;
+import org.openecard.client.common.ECardConstants;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.openecard.client.android.ApplicationContext;
 
 /**
  * This activity is used for the pin management.
@@ -51,18 +62,11 @@ public class PINManagementActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 	appState = ((ApplicationContext) getApplicationContext());
-	// // Setup the window
-	// requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-	requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+
 	setContentView(R.layout.pin_management);
 	// et = (TextView) findViewById(R.id.remainingTries);
 	// Log.d(TAG, et.toString());
-	getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 
-	TextView mTitle = (TextView) findViewById(R.id.title_left_text);
-	mTitle.setText(R.string.app_name);
-	mTitle = (TextView) findViewById(R.id.title_right_text);
-	mTitle.setText(R.string.menu_pinmanagement);
 	// Set result CANCELED incase the user backs out
 	// setResult(Activity.RESULT_CANCELED);
 	// final EditText editTextCAN = (EditText)

@@ -27,10 +27,8 @@ import org.openecard.client.android.R;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.TextView;
 
 
 /**
@@ -42,17 +40,11 @@ public class AboutActivity extends Activity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
 	super.onCreate(savedInstanceState);
-
-	// Set up the window layout and the cusom title
-	requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+	
+	// Set up the window layout
 	setContentView(R.layout.about);
-	getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
-	TextView mTitle = (TextView) findViewById(R.id.title_left_text);
-	mTitle.setText(R.string.app_name);
-	// mTitle = (TextView) findViewById(R.id.title_right_text);
-
+	
 	Button b = (Button) findViewById(R.id.button_back);
 	b.setOnClickListener(new OnClickListener() {
 	    public void onClick(View v) {

@@ -90,6 +90,10 @@ public class AndroidNavigator implements UserConsentNavigator {
 	return stepResult;
     }
 
+    public int getCurrentStep(){
+	return curStep;
+    }
+    
     @Override
     public StepResult current() {
 	AndroidNavigator.stepResult.done = false;

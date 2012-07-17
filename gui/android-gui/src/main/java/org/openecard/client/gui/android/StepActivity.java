@@ -24,11 +24,14 @@ package org.openecard.client.gui.android;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.openecard.client.gui.android.views.StepView;
@@ -41,17 +44,28 @@ import org.openecard.client.gui.definition.*;
  */
 public class StepActivity extends Activity {
 
-    LinearLayout ll;
+    private LinearLayout llGuiInterface;
     ArrayList<StepView> views = new ArrayList<StepView>();
-    ActionBar actionBar;
+    private ActionBar actionBar;
+    private LinearLayout llOutwards;
+    private ScrollView scrollView;
+    private View view;
+    private LinearLayout ll1;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 	setContentView(R.layout.gui_interface);
 	actionBar = getActionBar();
-	ll = (LinearLayout) findViewById(R.id.linearLayoutGUIInterface);
+	llGuiInterface = (LinearLayout) findViewById(R.id.linearLayoutGUIInterface);
+	llOutwards = (LinearLayout) findViewById(R.id.linearLayoutOutwards);
+	scrollView = (ScrollView) findViewById(R.id.scrollView1);
+	view = (View)findViewById(R.id.view1);
+	ll1 = (LinearLayout) findViewById(R.id.linearLayout1);
 	AndroidNavigator.getInstance().setActivity(this);
+	if(savedInstanceState!=null){
+	    this.showStep(AndroidNavigator.steps.get(savedInstanceState.getInt("step")));
+	}
     }
 
     /**
@@ -70,11 +84,68 @@ public class StepActivity extends Activity {
 	return result;
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("step", AndroidNavigator.getInstance().getCurrentStep());
+    }
+    
     void showStep(final Step step) {
-	ll.post(new Runnable() {
+	llOutwards.post(new Runnable() {
+	    
 	    @Override
 	    public void run() {
-		ll.removeAllViews();
+		llOutwards.removeAllViews();
+		int i = 0;
+		for(Step p : AndroidNavigator.steps){
+		    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+			     LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+		    layoutParams.setMargins(0, 2, 0, 2);
+		    TextView test = new TextView(StepActivity.this);
+		    test.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
+			test.setText(p.getTitle());
+			test.setWidth(llOutwards.getWidth());
+			//TODO dont use fixed colors -> get from theme
+			test.setTextColor(Color.WHITE);
+			test.setBackgroundColor(0xFF909090);
+			llOutwards.addView(test, layoutParams);
+
+			i++;
+			if(p.getTitle().equals(step.getTitle())){
+			    test.setTypeface(null,Typeface.BOLD);
+			    test.setTextSize(TypedValue.COMPLEX_UNIT_PX, test.getTextSize()*1.2f);
+			    break;
+			}
+			
+		}
+		
+		llOutwards.addView(scrollView);
+		
+		for(;i<AndroidNavigator.steps.size();i++){
+		    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+			     LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+		    layoutParams.setMargins(0, 2, 0, 2);
+		    TextView test = new TextView(StepActivity.this);
+		    test.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
+			test.setText(AndroidNavigator.steps.get(i).getTitle());
+			test.setWidth(llOutwards.getWidth());
+			//TODO dont use fixed colors -> get from theme
+			test.setTextColor(Color.WHITE);
+			test.setBackgroundColor(0xFF909090);
+			
+			llOutwards.addView(test, layoutParams);
+		}
+		
+		llOutwards.addView(view);
+		llOutwards.addView(ll1);
+	    }
+	});
+	
+	llGuiInterface.post(new Runnable() {
+	    @Override
+	    public void run() {
+		llGuiInterface.removeAllViews();
+
 		if ((step.getTitle() != null))
 		    actionBar.setSubtitle(step.getTitle());
 		org.openecard.client.gui.android.views.StepView t = null;
@@ -103,7 +174,7 @@ public class StepActivity extends Activity {
 			     LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 		    layoutParams.setMargins(0, 0, 0, 20);
 	
-		    ll.addView(t.getView(), layoutParams);
+		    llGuiInterface.addView(t.getView(), layoutParams);
 		}
 
 		Button cancel = (Button) findViewById(R.id.button_cancel);
@@ -119,7 +190,7 @@ public class StepActivity extends Activity {
 
 		Button b = (Button) findViewById(R.id.button_back);
 		if(!(AndroidNavigator.getInstance().hasPrevious())){
-		    b.setVisibility(View.INVISIBLE);
+		    b.setVisibility(View.GONE);
 		} else {
 		    b.setVisibility(View.VISIBLE);
 		}

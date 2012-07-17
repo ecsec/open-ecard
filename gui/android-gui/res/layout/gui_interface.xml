@@ -3,14 +3,15 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:gravity="left|right"
-    android:orientation="vertical"
-    android:padding="@dimen/padding" >
+     android:id="@+id/linearLayoutOutwards"
+    android:orientation="vertical" >
 
     <ScrollView
         android:id="@+id/scrollView1"
         android:layout_width="match_parent"
         android:layout_height="0dip"
-        android:layout_weight="60" >
+        android:layout_weight="60" 
+        android:layout_margin="@dimen/padding">
 
         <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -22,6 +23,7 @@
 
     <View
         android:layout_width="fill_parent"
+        android:id="@+id/view1"
         android:layout_height="2dip"
         android:layout_marginBottom="1dip"
         android:layout_marginTop="1dip"
@@ -29,6 +31,7 @@
 
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
+         android:id="@+id/linearLayout1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
@@ -37,8 +40,25 @@
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="50"
             android:gravity="left"
+            android:layout_weight="100"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/button_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="90dp"
+                android:text="Abbrechen" />
+
+        </LinearLayout>
+        
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="50"
+            android:gravity="right"
             android:orientation="horizontal" >
 
             <Button
@@ -56,22 +76,7 @@
                 android:text="Weiter" />
         </LinearLayout>
 
-        <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:gravity="right"
-            android:layout_weight="100"
-            android:orientation="horizontal" >
-
-            <Button
-                android:id="@+id/button_cancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minWidth="90dp"
-                android:text="Abbrechen" />
-
-        </LinearLayout>
+        
     </LinearLayout>
 
 </LinearLayout>

@@ -78,7 +78,7 @@ public class BoxItemAdapter extends BaseAdapter {
 	CompoundButton b = null;
 	if(useCheckboxes){
 	    b = new CheckBox(context);
-	    
+	    b.setButtonDrawable(android.R.drawable.btn_radio);
 	} else{
 	    b = new RadioButton(context);
 	    
@@ -86,11 +86,6 @@ public class BoxItemAdapter extends BaseAdapter {
 	b.setText(boxItems.get(position).getText() != null ? boxItems.get(position).getText() : boxItems.get(position).getName());
 	b.setChecked(boxItems.get(position).isChecked());
 	b.setEnabled(!boxItems.get(position).isDisabled());
-	if(!b.isEnabled()){
-	    b.setButtonDrawable(android.R.drawable.radiobutton_on_background);
-	} else {
-	    b.setButtonDrawable(android.R.drawable.radiobutton_off_background);
-	}
 	b.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 	    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 		boxItems.get(position).setChecked(isChecked);

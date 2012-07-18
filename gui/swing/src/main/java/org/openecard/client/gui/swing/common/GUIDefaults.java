@@ -50,6 +50,7 @@ public class GUIDefaults {
     private static final Pattern hexColorPattern = Pattern.compile(HEX_PATTERN);
     // Swing UIDefaults
     private static final UIDefaults defaults = UIManager.getDefaults();
+    private static final UIDefaults ownDefaults = new UIDefaults();
     private static ArrayList<String> colorProperties = new ArrayList<String>() {
 
 	{
@@ -79,7 +80,7 @@ public class GUIDefaults {
     };
 
     private static Object getProperty(String identifier) {
-	return defaults.get(identifier);
+	return ownDefaults.get(identifier);
     }
 
     public static Color getColor(String identifier) {
@@ -155,10 +156,14 @@ public class GUIDefaults {
 			    }
 			    value = sb.toString();
 			}
-			defaults.put(property, Color.decode(value));
+			Color color = Color.decode(value);
+			defaults.put(property, color);
+			ownDefaults.put(property, color);
 		    } // Parse font propertiy
 		    else if (fontProperties.contains(propertyAttribute)) {
-			defaults.put(property, Font.decode(value));
+			Font font = Font.decode(value);
+			defaults.put(property, font);
+			ownDefaults.put(property, font);
 		    }// Parse icon propertiy
 		    else if (iconProperties.contains(propertyAttribute)) {
 			URL url = guiProps.getDependentResource(value);
@@ -166,6 +171,7 @@ public class GUIDefaults {
 			    logger.error("Cannot parse the property: " + property);
 			} else {
 			    defaults.put(property, url);
+			    ownDefaults.put(property, url);
 			}
 		    }
 		} catch (Exception e) {

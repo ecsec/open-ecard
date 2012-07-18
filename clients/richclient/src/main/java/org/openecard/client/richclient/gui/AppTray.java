@@ -27,12 +27,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import org.openecard.client.common.I18n;
+import org.openecard.client.gui.about.AboutDialog;
 import org.openecard.client.richclient.RichClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ public class AppTray {
 
     private static final Logger logger = LoggerFactory.getLogger(AppTray.class);
 
-    private final I18n lang = I18n.getTranslation("tray");
+    private final I18n lang = I18n.getTranslation("richclient");
 
     private SystemTray tray;
     private TrayIcon trayIcon;
@@ -61,12 +61,12 @@ public class AppTray {
 
     public AppTray(RichClient client) {
        this.client = client;
-       setup();
+       setupUI();
     }
 
-    private void setup() {
-	logo = getImageIcon("logo.png");
-	loader = getImageIcon("loader.gif");
+    private void setupUI() {
+	logo = GuiUtils.getImageIcon("logo.png");
+	loader = GuiUtils.getImageIcon("loader.gif");
 
 	createPopupMenu();
 
@@ -103,6 +103,7 @@ public class AppTray {
 	}
     }
 
+
     private void createPopupMenu() {
 	MenuItem configItem = new MenuItem(lang.translationForKey("tray.config"));
 	configItem.addActionListener(new ActionListener() {
@@ -127,7 +128,7 @@ public class AppTray {
 
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
-		JOptionPane.showMessageDialog(null, "Implement Me!");
+		AboutDialog.showDialog();
 	    }
 	});
 
@@ -156,15 +157,6 @@ public class AppTray {
 	popup.add(exitItem);
     }
 
-    private ImageIcon getImageIcon(String name) {
-	URL imageUrl = AppTray.class.getResource("images/" + name);
-	if (imageUrl == null) {
-	    imageUrl = AppTray.class.getResource("/images/" + name);
-	}
-
-	ImageIcon icon = new ImageIcon(imageUrl);
-	return icon;
-    }
 
     private void setupFrame() {
 	trayAvailable = false;

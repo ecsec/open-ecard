@@ -177,6 +177,11 @@
 	    <artifactId>swing</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
+        <dependency>
+	    <groupId>org.openecard.client.gui</groupId>
+	    <artifactId>about</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
 	<dependency>
 	    <groupId>org.openecard.client.clients</groupId>
 	    <artifactId>client-connector</artifactId>

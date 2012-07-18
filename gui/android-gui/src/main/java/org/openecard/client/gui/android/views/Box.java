@@ -17,10 +17,9 @@ package org.openecard.client.gui.android.views;
 
 import android.content.Context;
 import android.view.View;
-import android.widget.BaseAdapter;
 import android.widget.GridView;
 import org.openecard.client.gui.android.BoxItemAdapter;
-import org.openecard.client.gui.definition.InputInfoUnit;
+import org.openecard.client.gui.definition.AbstractBox;
 import org.openecard.client.gui.definition.OutputInfoUnit;
 
 /**
@@ -31,9 +30,9 @@ import org.openecard.client.gui.definition.OutputInfoUnit;
 public class Box implements StepView {
 
     private GridView gridview;
-    private BaseAdapter boxItemAdapter;
+    private BoxItemAdapter boxItemAdapter;
 
-    public Box(InputInfoUnit box, Context ctx, boolean useCheckBoxes) {
+    public Box(AbstractBox box, Context ctx, boolean useCheckBoxes) {
 	gridview = new GridView(ctx){
 	    //workaround to get a gridview displayed in a scrollview
 	    @Override 
@@ -75,6 +74,6 @@ public class Box implements StepView {
 
     @Override
     public OutputInfoUnit getValue() {
-	    return ((BoxItemAdapter) boxItemAdapter).getValue();
+	    return  boxItemAdapter.getValue();
     }
 }

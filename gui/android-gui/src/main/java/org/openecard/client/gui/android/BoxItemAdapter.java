@@ -46,14 +46,14 @@ public class BoxItemAdapter extends BaseAdapter {
     /**
      *
      * @param context application context
-     * @param inputInfoUnit InputInfoUnit of type checkbox or radiobox
+     * @param abstractBox abstractBox of type checkbox or radiobox
      * @param useCheckboxes true if checkboxes should be used, false for radioboxes
      */
-    public BoxItemAdapter(Context context, InputInfoUnit inputInfoUnit, boolean useCheckboxes) {
+    public BoxItemAdapter(Context context, AbstractBox abstractBox, boolean useCheckboxes) {
 	this.useCheckboxes = useCheckboxes;
 	this.context = context;
-	this.id = inputInfoUnit.getID();
-	this.boxItems =  ((AbstractBox) inputInfoUnit).getBoxItems();
+	this.id = abstractBox.getID();
+	this.boxItems =  ((AbstractBox) abstractBox).getBoxItems();
     }
 
     @Override

@@ -153,9 +153,9 @@ public class StepActivity extends Activity {
 		    if (infoUnitType.type().equals(InfoUnitElementType.TEXT)) {
 			t = new org.openecard.client.gui.android.views.Text((Text) infoUnitType, StepActivity.this);
 		    } else if (infoUnitType.type().equals(InfoUnitElementType.CHECK_BOX)) {
-			t = new org.openecard.client.gui.android.views.Box(infoUnitType, StepActivity.this, true);
+			t = new org.openecard.client.gui.android.views.Box((AbstractBox) infoUnitType, StepActivity.this, true);
 		    } else if (infoUnitType.type().equals(InfoUnitElementType.RADIO_BOX)) {
-			t = new org.openecard.client.gui.android.views.Box(infoUnitType, StepActivity.this, false);
+			t = new org.openecard.client.gui.android.views.Box((AbstractBox) infoUnitType, StepActivity.this, false);
 		    } else if (infoUnitType.type().equals(InfoUnitElementType.PASSWORD_FIELD)) {
 			t = new org.openecard.client.gui.android.views.AbstractInput((PasswordField) infoUnitType, StepActivity.this);
 		    } else if (infoUnitType.type().equals(InfoUnitElementType.TEXT_FIELD)) {

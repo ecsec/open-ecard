@@ -14,6 +14,25 @@
     <artifactId>common</artifactId>
     <packaging>jar</packaging>
     <name>openecard Common Libs</name>
+
+    <build>
+	<resources>
+	    <resource>
+		<directory>src/main/resources</directory>
+		<filtering>true</filtering>
+		<includes>
+		    <include>**/VERSION</include>
+		</includes>
+	    </resource>
+	    <resource>
+		<directory>src/main/resources</directory>
+		<filtering>false</filtering>
+		<excludes>
+		    <exclude>**/VERSION</exclude>
+		</excludes>
+	    </resource>
+	</resources>
+    </build>
     
     <dependencies>
 	<dependency>

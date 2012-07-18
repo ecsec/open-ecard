@@ -105,26 +105,15 @@ public class GUIDefaults {
     }
 
     public static ImageIcon getImage(String identifier, int width, int height) {
-	Object obj = getProperty(identifier);
-	if (obj instanceof ImageIcon) {
-	    return (ImageIcon) obj;
-	} else if (obj instanceof URL || obj instanceof String) {
-	    ImageIcon logo = new ImageIcon();
-	    Toolkit toolkit = Toolkit.getDefaultToolkit();
-	    Image image;
-	    if (obj instanceof URL) {
-		image = toolkit.getImage((URL)obj);
-	    } else {
-		image = toolkit.getImage((String)obj);
-	    }
-	    if (width > -1) {
-		image = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-	    }
-	    logo.setImage(image);
-	    return logo;
-	} else {
-	    return null;
+	ImageIcon icon = (ImageIcon) getProperty(identifier);
+
+	if (width > -1 || height > -1) {
+	    Image image = icon.getImage();
+	    image = image.getScaledInstance(width, height,  Image.SCALE_SMOOTH);
+	    icon = new ImageIcon(image);
 	}
+
+	return icon;
     }
 
     public static ImageIcon getImage(String identifier) {
@@ -135,6 +124,7 @@ public class GUIDefaults {
 	try {
 	    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
+	    Toolkit toolkit = Toolkit.getDefaultToolkit();
 	    GUIProperties guiProps = new GUIProperties();
 	    Properties props = guiProps.properties();
 
@@ -171,8 +161,10 @@ public class GUIDefaults {
 			if (url == null) {
 			    logger.error(LoggingConstants.INFO, "Cannot parse the property: " + property);
 			} else {
-			    defaults.put(property, url);
-			    ownDefaults.put(property, url);
+			    Image image = toolkit.getImage(url);
+			    ImageIcon icon = new ImageIcon(image);
+			    defaults.put(property, icon);
+			    ownDefaults.put(property, icon);
 			}
 		    }
 		} catch (Exception e) {

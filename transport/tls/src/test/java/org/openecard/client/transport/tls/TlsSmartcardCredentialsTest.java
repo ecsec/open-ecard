@@ -38,6 +38,7 @@ import javax.net.ssl.HttpsURLConnection;
 import org.openecard.bouncycastle.asn1.ASN1Sequence;
 import org.openecard.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
@@ -182,7 +183,8 @@ public class TlsSmartcardCredentialsTest {
 	connectionHandle.setCardApplication(appIdentifier_ESIGN);
 	DefaultTlsAuthentication tlsAuthentication = new DefaultTlsAuthentication(new TlsSmartcardCredentials(dispatcher, connectionHandle, chosenDID));
 	DefaultTlsClientImpl tlsClient = new DefaultTlsClientImpl(host, tlsAuthentication);
-
+	//TODO reenable when bouncycaslte artifact is updated
+	//tlsClient.setClientVersion(ProtocolVersion.TLSv11);
 	TlsClientSocketFactory tlsClientSocketFactory = new TlsClientSocketFactory(tlsClient);
 
 	HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -203,7 +205,7 @@ public class TlsSmartcardCredentialsTest {
 	} finally {
 	    response.close();
 	}
-
+	System.out.println(sb.toString());
 	Assert.assertTrue(sb.toString().contains("Activation requested without specifying valid parameters."));
 	// Assert.assertTrue(sb.toString().contains("X.509 Certificate Information:"));
     }

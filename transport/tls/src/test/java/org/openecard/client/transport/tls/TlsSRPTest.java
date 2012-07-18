@@ -30,7 +30,7 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
+import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 
 /**
  *
@@ -44,14 +44,15 @@ public class TlsSRPTest {
      * @throws IOException
      */
     @Test(enabled=false) //works only from inside the HS
-    public void test() throws IOException {
+    public void testSRPwithTLS11() throws IOException {
 	URL url = new URL("https://ftei-vm-073.hs-coburg.de:8888/");
 	String host = url.getHost();
 	byte[] user = "test".getBytes();
 	byte[] password = "id4health".getBytes();
 
 	SRPTlsClientImpl tlsClient = new SRPTlsClientImpl(user, password, host);
-
+	//TODO reenable when bouncycaslte artifact is updated
+	//tlsClient.setClientVersion(ProtocolVersion.TLSv11);
 	TlsClientSocketFactory tlsClientSocketFactory = new TlsClientSocketFactory(tlsClient);
 
 	HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -75,5 +76,43 @@ public class TlsSRPTest {
 	// Server will response with some infos, including chosen Ciphersuite
 	Assert.assertTrue(sb.toString().contains("SRP"));
     }
+   
+   /**
+    *
+    * @throws IOException
+    */
+   @Test(enabled=false) //works only from inside the HS
+   public void testSRPwithTLS10() throws IOException {
+
+       URL url = new URL("https://ftei-vm-073.hs-coburg.de:8888/");
+       String host = url.getHost();
+       byte[] user = "test".getBytes();
+       byte[] password = "id4health".getBytes();
+
+       SRPTlsClientImpl tlsClient = new SRPTlsClientImpl(user, password, host);
+
+       TlsClientSocketFactory tlsClientSocketFactory = new TlsClientSocketFactory(tlsClient);
+
+       HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+       conn.setSSLSocketFactory(tlsClientSocketFactory);
+       conn.connect();
+
+       InputStream response = null;
+       StringBuilder sb = new StringBuilder();
+       try {
+	   response = conn.getInputStream();
+	   InputStreamReader isr = new InputStreamReader(response);
+	   BufferedReader br = new BufferedReader(isr);
+	   String line;
+	   while ((line = br.readLine()) != null) {
+	       sb.append(line);
+	       sb.append("\n");
+	   }
+       } finally {
+	   response.close();
+       }
+       // Server will response with some infos, including chosen Ciphersuite
+       Assert.assertTrue(sb.toString().contains("SRP"));
+   }
 
 }

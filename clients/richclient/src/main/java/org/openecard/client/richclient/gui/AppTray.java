@@ -30,7 +30,6 @@ import java.awt.event.MouseEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import org.openecard.client.common.I18n;
 import org.openecard.client.gui.about.AboutDialog;
 import org.openecard.client.richclient.RichClient;
@@ -105,23 +104,25 @@ public class AppTray {
 
 
     private void createPopupMenu() {
-	MenuItem configItem = new MenuItem(lang.translationForKey("tray.config"));
-	configItem.addActionListener(new ActionListener() {
+	// TODO: implement config menu
+//	MenuItem configItem = new MenuItem(lang.translationForKey("tray.config"));
+//	configItem.addActionListener(new ActionListener() {
+//
+//	    @Override
+//	    public void actionPerformed(ActionEvent e) {
+//		JOptionPane.showMessageDialog(null, "Implement Me!");
+//	    }
+//	});
 
-	    @Override
-	    public void actionPerformed(ActionEvent e) {
-		JOptionPane.showMessageDialog(null, "Implement Me!");
-	    }
-	});
-
-	MenuItem helpItem = new MenuItem(lang.translationForKey("tray.help"));
-	helpItem.addActionListener(new ActionListener() {
-
-	    @Override
-	    public void actionPerformed(ActionEvent e) {
-		JOptionPane.showMessageDialog(null, "Implement Me!");
-	    }
-	});
+	// TODO: implement help menu
+//	MenuItem helpItem = new MenuItem(lang.translationForKey("tray.help"));
+//	helpItem.addActionListener(new ActionListener() {
+//
+//	    @Override
+//	    public void actionPerformed(ActionEvent e) {
+//		JOptionPane.showMessageDialog(null, "Implement Me!");
+//	    }
+//	});
 
 	MenuItem aboutItem = new MenuItem(lang.translationForKey("tray.about"));
 	aboutItem.addActionListener(new ActionListener() {
@@ -150,8 +151,8 @@ public class AppTray {
 	});
 
 	popup = new PopupMenu();
-	popup.add(configItem);
-	popup.add(helpItem);
+//	popup.add(configItem);
+//	popup.add(helpItem);
 	popup.add(aboutItem);
 	popup.addSeparator();
 	popup.add(exitItem);

@@ -11,3 +11,7 @@ nb-configuration.xml
 dependency-reduced-pom.xml
 /.idea/
 *.iml
+test-output
+obj
+.deps/
+.libs/

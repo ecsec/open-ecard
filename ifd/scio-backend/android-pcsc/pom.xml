@@ -1,0 +1,60 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+        <groupId>org.openecard.client.ifd</groupId>
+        <artifactId>scio-backend</artifactId>
+        <version>1.0.0-pre2-SNAPSHOT</version>
+    </parent>
+    
+    
+ <groupId>org.openecard.client.ifd.scio-backend</groupId>
+<artifactId>android-pcsc</artifactId>
+    <packaging>apklib</packaging>
+    <name>PC/SC for Android</name>
+  
+  
+  <dependencies>
+    <dependency>
+        <groupId>com.google.android</groupId>
+        <artifactId>android</artifactId>
+        <version>4.0.1.2</version>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.openecard.client.ifd.scio-backend</groupId>
+        <artifactId>android-scio</artifactId> 
+        <version>1.0.0-pre2-SNAPSHOT</version>
+    </dependency>
+  
+  </dependencies>
+  
+  <build>
+    <plugins>
+        <plugin>
+        <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+        <artifactId>android-maven-plugin</artifactId>
+        <version>3.0.2</version>
+        <extensions>true</extensions>
+        <configuration>
+            <zipalign>
+            <verbose>true</verbose>
+            <skip>false</skip>
+            <inputApk>${project.build.directory}/${project.build.finalName}.apk</inputApk>
+            <outputApk>${project.build.directory}/${project.build.finalName}-aligned.apk</outputApk>
+            </zipalign>
+            <sdk>
+            <platform>15</platform>
+            </sdk>
+            <test>
+            <createReport>true</createReport>
+            </test>
+            <proguard>
+            <!--  skip as long as problems exist -->
+            <skip>true</skip>
+            </proguard>
+        </configuration>
+        </plugin>
+    </plugins>
+    </build>
+</project>

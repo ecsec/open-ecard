@@ -20,6 +20,7 @@
     <module>seek</module>
     <module>android-nfc</module>
     <module>android-scio</module>
+	 <module>android-pcsc</module>
   </modules>
 
   <dependencies>

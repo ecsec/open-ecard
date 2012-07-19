@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>libifd-cyberjack.so</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>cyberjack-ifd</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>0.0.1d1</string>
+
+	<key>ifdManufacturerString</key>
+	<string>REINER SCT (www.reiner-sct.com)</string>
+	<key>ifdProductString</key>
+	<string>PC/SC Lite IFD driver</string>
+
+	<key>ifdCapabilities</key>
+	<string>0x00000000</string>
+	<key>ifdProtocolSupport</key>
+	<string>0x00000001</string>
+	<key>ifdVersionNumber</key>
+	<string>0x00000001</string>
+
+	<key>ifdVendorID</key>
+	<array>
+		<string>0x0c4b</string>
+		<string>0x0c4b</string>
+		<string>0x0c4b</string>
+		<string>0x0c4b</string>
+		<string>0x0c4b</string>
+		<string>0x0c4b</string>
+	</array>
+
+	<key>ifdProductID</key>
+	<array>
+		<string>0x0300</string>
+		<string>0x0400</string>
+		<string>0x0401</string>
+		<string>0x0500</string>
+		<string>0x0501</string>
+		<string>0x0502</string>
+	</array>
+
+	<key>ifdFriendlyName</key>
+	<array>
+		<string>REINER SCT cyberJack pp_a</string>
+		<string>REINER SCT cyberJack ecom_a</string>
+		<string>REINER SCT cyberJack pp_a2</string>
+		<string>REINER SCT cyberJack RFID standard</string>
+		<string>REINER SCT cyberJack RFID komfort</string>
+		<string>REINER SCT cyberJack compact</string>
+	</array>
+</dict>
+</plist>

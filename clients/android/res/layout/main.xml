@@ -3,9 +3,21 @@
 	android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-     android:id="@+id/linearLayoutMainActivity">
-        <WebView android:layout_width="fill_parent"
-         	android:id="@+id/webview"
-            android:layout_height="fill_parent"
-            android:layout_weight="1" />
+     android:id="@+id/linearLayoutMainActivity"
+     android:padding="@dimen/padding">
+
+    <TextView
+        android:id="@+id/textViewMain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Es wurde kein Personalausweis gefunden!\n\nBitte legen Sie Ihren Personalausweis auf ein kompatibles Kartenlesegerät."
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible" />
+        
 </LinearLayout>  

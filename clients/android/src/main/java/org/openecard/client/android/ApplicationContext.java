@@ -23,24 +23,17 @@
 package org.openecard.client.android;
 
 import android.app.Application;
-import android.bluetooth.BluetoothAdapter;
 import android.webkit.WebView;
 import iso.std.iso_iec._24727.tech.schema.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.math.BigInteger;
 import java.util.Locale;
-import org.openecard.client.common.ClientEnv;
-import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.OpenecardProperties;
+import org.openecard.client.common.*;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.android.AndroidUserConsent;
-import org.openecard.client.ifd.BluetoothConnection;
-import org.openecard.client.ifd.SerialConnectionIFD;
+import org.openecard.client.ifd.protocol.pace.PACEProtocolFactory;
+import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.ifd.scio.IFDProperties;
 import org.openecard.client.management.TinyManagement;
 import org.openecard.client.recognition.CardRecognition;
@@ -48,11 +41,6 @@ import org.openecard.client.sal.TinySAL;
 import org.openecard.client.sal.protocol.eac.EACProtocolFactory;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.ws.WsdefProperties;
-import org.openecard.ws.IFD;
-import org.openecard.ws.Management;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /**
  * This class is instantiated when the process of this application is created.
@@ -66,120 +54,127 @@ public class ApplicationContext extends Application {
 	// TODO: load logging config
     }
 
-    	private static final Logger _logger = LoggerFactory.getLogger(ApplicationContext.class);
+    private ClientEnv env;
+    private TinySAL sal;
+    private IFD ifd;
+    private CardRecognition recognition;
+    private CardStateMap cardStates;
+    private EventManager em;
+    private TinyManagement management;
+    private byte[] contextHandle;
+    private Dispatcher dispatcher = null;
+    private boolean initialized = false;
+    private boolean recognizeCard = true;
+    private WebView webView;
 
-	private ClientEnv env;
-	private TinySAL sal;
-	private IFD ifd;
-	private CardRecognition recognition;
-	private EventManager em;
-	private byte[] ctx;
-	private boolean initialized = false;
-	private boolean recognizeCard = true;
-	private WebView webView;
-	  
-	public ApplicationContext() throws Throwable {
-		OpenecardProperties.setProperty("org.openecard.lang", Locale.getDefault().toString());
+    public ApplicationContext() throws Throwable {
+	super();
+    }
+
+    public void shutdown() {
+	// shutdwon event manager
+	em.terminate();
+
+	// shutdown SAL
+	Terminate terminate = new Terminate();
+	sal.terminate(terminate);
+
+	// shutdown IFD
+	ReleaseContext releaseContext = new ReleaseContext();
+	releaseContext.setContextHandle(contextHandle);
+	ifd.releaseContext(releaseContext);
 		
+    }
 
-		IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl",
-				"org.openecard.client.scio.NFCFactory");
-		WsdefProperties.setProperty("org.openecard.client.ws.marshaller.impl",
-				"org.openecard.client.ws.android.AndroidMarshaller");
+    public void initialize() {
+	OpenecardProperties.setProperty("org.openecard.lang", Locale.getDefault().toString());
 
-		
-		/* not usable without nfc/ext apdus
-		 this.ifd = new org.openecard.client.ifd.scio.IFD();
-		ifd.addProtocol(ECardConstants.Protocol.PACE, new
-		PACEProtocolFactory());
-		*/
-		this.ifd = new SerialConnectionIFD(new BluetoothConnection(
-				BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
-						"60:D8:19:C0:73:EF")));
-		this.env = new ClientEnv();
-		env.setIFD(ifd);
-		EstablishContext ecRequest = new EstablishContext();
-		EstablishContextResponse ecResponse = ifd.establishContext(ecRequest);
-		if (ecResponse.getResult().getResultMajor()
-				.equals(ECardConstants.Major.OK)) {
-			if (ecResponse.getContextHandle() != null) {
-				ctx = ecResponse.getContextHandle();
-				initialized = true;
-			}
-		}
+	IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl", "org.openecard.client.scio.AndroidPCSCFactory");
+	WsdefProperties.setProperty("org.openecard.client.ws.marshaller.impl", "org.openecard.client.ws.android.AndroidMarshaller");
 
-		ListIFDs listIFDs = new ListIFDs();
-		listIFDs.setContextHandle(ctx);
-		ListIFDsResponse listresp = ifd.listIFDs(listIFDs);
-		System.out.println("Listresp: " + listresp.getIFDName().get(0));
+	// Client environment
+	env = new ClientEnv();
 
-		Connect c = new Connect();
-		c.setContextHandle(ecResponse.getContextHandle());
-		c.setExclusive(false);
-		c.setIFDName("SCM Microsystems Inc. SCL011 Contactless Reader 0");
-		c.setSlot(new BigInteger("0"));
-		ConnectResponse cr = ifd.connect(c);
+	// Management
+	management = new TinyManagement(env);
+	env.setManagement(management);
 
-		ConnectionHandleType ch = new ConnectionHandleType();
-		ch.setIFDName("SCM Microsystems Inc. SCL011 Contactless Reader 0");
-		ch.setSlotIndex(new BigInteger("0"));
-		ch.setSlotHandle(cr.getSlotHandle());
-		ch.setContextHandle(ecResponse.getContextHandle());
+	// Dispatcher
+	dispatcher = new MessageDispatcher(env);
+	env.setDispatcher(dispatcher);
 
-		if (recognizeCard) {
-			try {
-				// Always use static Tree
-				recognition = new CardRecognition(ifd, ctx);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				// _logger.logp(Level.SEVERE, this.getClass().getName(),
-				// "init()", ex.getMessage(), ex);
-				recognition = null;
-				initialized = false;
-			}
-		} else {
-			recognition = null;
-		}
-		
-		
-		
-		em = new EventManager(recognition, env, ctx, null);
-		CardStateMap cardStates = new CardStateMap();
-		SALStateCallback salCallback = new SALStateCallback(recognition, cardStates);
-		sal = new TinySAL(env, cardStates);
-		sal.setGUI(new AndroidUserConsent(this));
-		sal.addProtocol(ECardConstants.Protocol.EAC, new EACProtocolFactory());
-		em.registerAllEvents(salCallback);
-		em.registerAllEvents(new ClientEventCallBack());
-		env.setEventManager(em);
-		env.setSAL(sal);
-		// TODO: SAL only deals with cards, not raw terminals, this call is crap, we need a working event manager
-		//salCallback.signalEvent(EventType.TERMINAL_ADDED, ch);
-		// Event-Manager doesnt work with Bluetooth-IFD, Wait blocks communication
-		// em.initialize();
-		Management m = new TinyManagement(env);
-		env.setManagement(m);
+	// GUI
+	AndroidUserConsent gui = new AndroidUserConsent(this);
 
-		Dispatcher d = new MessageDispatcher(env);
-		env.setDispatcher(d);
+	// IFD
+	ifd = new IFD();
+	ifd.setDispatcher(dispatcher);
+	ifd.setGUI(gui);
+	ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
+	env.setIFD(ifd);
 
+	EstablishContext establishContext = new EstablishContext();
+	EstablishContextResponse establishContextResponse = ifd.establishContext(establishContext);
+	if (establishContextResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
+	    if (establishContextResponse.getContextHandle() != null) {
+		contextHandle = establishContextResponse.getContextHandle();
+	    } else {
+		throw new RuntimeException("Cannot establish context");
+	    }
+	} else {
+	    throw new RuntimeException("Cannot establish context");
 	}
 
-	public byte[] getCTX() {
-		return ctx;
+	if (recognizeCard) {
+	    try {
+		// TODO: reactivate remote tree repository as soon as it
+		// supports the embedded TLSMarker
+		// GetRecognitionTree client = (GetRecognitionTree)
+		// WSClassLoader.getClientService(RecognitionProperties.getServiceName(),
+		// RecognitionProperties.getServiceAddr());
+		recognition = new CardRecognition(ifd, contextHandle);
+	    } catch (Exception ex) {
+		// <editor-fold defaultstate="collapsed" desc="log exception">
+		// logger.error(LoggingConstants.THROWING, "Exception", ex);
+		// </editor-fold>
+		initialized = false;
+	    }
 	}
 
-	public ClientEnv getEnv() {
-		return env;
-	}
+	// EventManager
+	em = new EventManager(recognition, env, contextHandle, null);
+	env.setEventManager(em);
 
-	public void setWebView(WebView mWebView) {
-		this.webView = mWebView;
+	// CardStateMap
+	this.cardStates = new CardStateMap();
+	SALStateCallback salCallback = new SALStateCallback(recognition, cardStates);
+	em.registerAllEvents(salCallback);
 
-	}
+	// SAL
+	sal = new TinySAL(env, cardStates);
+	sal.setGUI(gui);
+	sal.addProtocol(ECardConstants.Protocol.EAC, new EACProtocolFactory());
+	env.setSAL(sal);
 
-	public WebView getWebView() {
-		return this.webView;
-	}
+	em.initialize();
+    }
+
+    public byte[] getCTX() {
+	return contextHandle;
+    }
+
+    public ClientEnv getEnv() {
+	return env;
+    }
+
+    @Deprecated
+    public void setWebView(WebView mWebView) {
+	this.webView = mWebView;
+    }
+
+    @Deprecated
+    public WebView getWebView() {
+	return this.webView;
+    }
 
 }

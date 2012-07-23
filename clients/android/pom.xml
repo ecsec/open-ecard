@@ -124,7 +124,7 @@
 	    <plugin>
 		<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 		<artifactId>android-maven-plugin</artifactId>
-		<version>3.0.2</version>
+		<version>3.3.0</version>
 		<extensions>true</extensions>
 		<configuration>
 		    <zipalign>
@@ -140,8 +140,7 @@
 			<createReport>true</createReport>
 		    </test>
 		    <proguard>
-			<!--  skip as long as problems exist -->
-			<skip>true</skip>
+			  <skip>false</skip> 
 		    </proguard>
 		</configuration>
 	    </plugin>

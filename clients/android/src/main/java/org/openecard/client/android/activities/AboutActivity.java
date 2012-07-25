@@ -23,6 +23,7 @@
 package org.openecard.client.android.activities;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -34,6 +35,7 @@ import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
 import org.openecard.client.android.R;
+import org.openecard.client.android.TCTokenService;
 import org.openecard.client.common.I18n;
 
 /**
@@ -49,7 +51,10 @@ public class AboutActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
-
+	
+	Intent i = new Intent(this, TCTokenService.class);
+	this.startService(i);
+		
 	// Set up the window layout
 	setContentView(R.layout.about);
 

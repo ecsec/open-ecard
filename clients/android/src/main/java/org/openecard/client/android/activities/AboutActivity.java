@@ -22,14 +22,19 @@
 
 package org.openecard.client.android.activities;
 
-import org.openecard.client.android.R;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.WebView;
 import android.widget.Button;
-
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
+import android.widget.TabHost;
+import android.widget.TabHost.TabContentFactory;
+import android.widget.TabHost.TabSpec;
+import org.openecard.client.android.R;
+import org.openecard.client.common.I18n;
 
 /**
  * Simple Activity used to show the About-Infos.
@@ -38,19 +43,60 @@ import android.widget.Button;
  */
 public class AboutActivity extends Activity {
 
+    private String[] tags = new String[] { "1", "2", "3" };
+    private final I18n lang = I18n.getTranslation("about");
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
-	
+
 	// Set up the window layout
 	setContentView(R.layout.about);
-	
+
 	Button b = (Button) findViewById(R.id.button_back);
 	b.setOnClickListener(new OnClickListener() {
 	    public void onClick(View v) {
 		finish();
 	    }
 	});
-    }
 
+	TabHost tabs = (TabHost) this.findViewById(R.id.my_tabhost);
+	tabs.setup();
+
+	TabContentFactory tabContentFactory = new TabContentFactory() {
+
+	    @Override
+	    public View createTabContent(String tag) {
+		LinearLayout ll = new LinearLayout(AboutActivity.this);
+		ll.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		WebView webView = new WebView(AboutActivity.this);
+		if (tag.equals(tags[0])) {
+		    webView.loadUrl("file:///android_asset/about_de.html");
+		} else if (tag.equals(tags[1])) {
+		    webView.loadUrl("file:///android_asset/feedback_de.html");
+		} else {
+		    webView.loadUrl("file:///android_asset/join_de.html");
+		}
+		webView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		ll.addView(webView);
+		return ll;
+	    }
+	};
+
+	TabSpec tspec1 = tabs.newTabSpec(tags[0]);
+	tspec1.setIndicator(lang.translationForKey("about.tab.about"));
+	tspec1.setContent(tabContentFactory);
+	tabs.addTab(tspec1);
+	TabSpec tspec2 = tabs.newTabSpec(tags[1]);
+	tspec2.setIndicator(lang.translationForKey("about.tab.feedback"));
+	tspec2.setContent(tabContentFactory);
+	tabs.addTab(tspec2);
+	TabSpec tspec3 = tabs.newTabSpec(tags[2]);
+	tspec3.setIndicator(lang.translationForKey("about.tab.join"));
+	tspec3.setContent(tabContentFactory);
+	tabs.addTab(tspec3);
+	// pad as much as the tabs are high
+	int topPadding = tabs.getTabWidget().getChildAt(0).getLayoutParams().height;
+	tabs.getTabContentView().setPadding(0, topPadding, 0, 0);
+    }
 }

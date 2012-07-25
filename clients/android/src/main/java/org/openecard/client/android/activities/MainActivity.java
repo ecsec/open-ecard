@@ -34,6 +34,7 @@ import java.net.URLDecoder;
 import java.util.List;
 import org.openecard.client.android.ApplicationContext;
 import org.openecard.client.android.R;
+import org.openecard.client.android.RootHelper;
 import org.openecard.client.android.TCTokenService;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.enums.EventType;
@@ -148,15 +149,10 @@ public class MainActivity extends Activity implements EventCallback {
 			Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(tcTokenRequest.getTCToken().getRefreshAddress()
 				.toString()));
 			startActivity(browserIntent);
-			runOnUiThread(new Runnable() {
-
-			    @Override
-			    public void run() {
-				TextView tv = (TextView) findViewById(R.id.textViewMain);
-				tv.setText("");
-			    }
-			});
-
+			Intent i = new Intent(MainActivity.this, AboutActivity.class);
+			startActivity(i);
+			finish();
+			onDestroy();
 		    } else {
 
 		    }
@@ -180,8 +176,7 @@ public class MainActivity extends Activity implements EventCallback {
 	editor.clear();
 	editor.commit();
 	trimCache(this);
-	super.onDestroy();
-	android.os.Process.killProcess(android.os.Process.myPid());
+	System.exit(0);
     }
 
     public static void trimCache(Context context) {
@@ -208,10 +203,7 @@ public class MainActivity extends Activity implements EventCallback {
 	        }
 	    }
 
-	    // <uses-permission
-	    // android:name="android.permission.CLEAR_APP_CACHE"></uses-permission>
 	    // The directory is now empty so delete it
-
 	    return dir.delete();
 	}
 
@@ -223,9 +215,7 @@ public class MainActivity extends Activity implements EventCallback {
 		FileInputStream fis = new FileInputStream(f);
 		byte[] pid = new byte[fis.available()];
 		fis.read(pid);
-		Process p = Runtime.getRuntime().exec("su");
-		OutputStream os = p.getOutputStream();
-		writeCommand(os, "kill -9 " + new String(pid));
+		RootHelper.executeAsRoot("kill -9 " + new String(pid));
 	    } catch (Exception e) {
 		e.printStackTrace();
 		//TODO
@@ -239,9 +229,6 @@ public class MainActivity extends Activity implements EventCallback {
 	super.onCreate(null);
 
 	setContentView(R.layout.main);
-	
-	Intent i = new Intent(this, TCTokenService.class);
-	this.startService(i);
 	
 	startPCSCD();
 	
@@ -257,30 +244,14 @@ public class MainActivity extends Activity implements EventCallback {
     }
 
     private void startPCSCD() {
+	// kill old instances of pcsc daemon if any
 	killPCSCD();
 	String pcscd_exec = getFilesDir().getParent() + "/lib/libpcscd.so";
-	String files_dir = getFilesDir().getAbsolutePath();
-	String permission_string = "logwrapper chmod 777 " + pcscd_exec;
-	String server_string = "su -c \"logwrapper " + pcscd_exec + "\"";
-
-	try {
-	    Process sh = Runtime.getRuntime().exec("su", null, new File(files_dir));
-	    OutputStream os = sh.getOutputStream();
-	    writeCommand(os, permission_string);
-	    writeCommand(os, server_string);
-	} catch (IOException e1) {
-	    // TODO Auto-generated catch block
-	    e1.printStackTrace();
-	} catch (Exception e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
+	String permission_string = "chmod 777 " + pcscd_exec;
+	RootHelper.executeAsRoot(permission_string);
+	RootHelper.executeAsRoot(pcscd_exec);
     }
     
-    static void writeCommand(OutputStream os, String command) throws Exception {
-	os.write((command + "\n").getBytes("ASCII"));
-    }
-
     /**
      * Handles the intent the application was startet with.</br> If it's action
      * equals Intent.ACTION_VIEW we've been startet through a link to localhost.
@@ -421,7 +392,7 @@ public class MainActivity extends Activity implements EventCallback {
 	    }
 	});
     }
-
+    
     @Override
     public void signalEvent(EventType eventType, Object eventData) {
 	if (eventType.equals(EventType.CARD_INSERTED)) {

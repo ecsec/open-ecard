@@ -25,6 +25,7 @@ package org.openecard.client.android;
 import android.app.Application;
 import iso.std.iso_iec._24727.tech.schema.*;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,24 +72,27 @@ public class ApplicationContext extends Application {
 
     @Override
     public void onCreate() {
-        // TODO Auto-generated method stub
-        super.onCreate();
-        try {
-            InputStream driverInputStream = getResources().openRawResource(R.raw.drivers);
-            if(driverInputStream!=null)
-            ResourceUnpacker.unpackResources(driverInputStream, this, "/data/pcsc");
-		
-	    } catch (FileNotFoundException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	    } catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	    }
+        	super.onCreate();
+	try {
+	    InputStream driverInputStream = getResources().openRawResource(R.raw.drivers);
+	    if (driverInputStream != null) {
+		File f = new File("/data/pcsc");
+		if (!f.exists()) {
+		    RootHelper.executeAsRoot("mkdir /data/pcsc");
+		    RootHelper.executeAsRoot("chmod 777 /data/pcsc");
+		}
+
+		ResourceUnpacker.unpackResources(driverInputStream, this, "/data/pcsc");
+ 	    }
+	} catch (FileNotFoundException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	} catch (IOException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
     }
-    
-    
-	
+
     public void shutdown() {
 	// shutdwon event manager
 	em.terminate();

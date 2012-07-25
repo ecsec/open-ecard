@@ -28,6 +28,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -60,6 +61,7 @@ public class TCTokenService extends Service implements Runnable {
 		// TODO check that only local connections get accepted
 		System.out.println("remote address: " + remote.toString());
 		BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
+		BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
 		byte[] buffer = new byte[70000];
 
 		int length = bis.read(buffer);
@@ -78,6 +80,12 @@ public class TCTokenService extends Service implements Runnable {
 			intent.addCategory("android.intent.category.BROWSABLE");
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			this.startActivity(intent);
+			String s = new String("<html><head></head><body><p>Diese Seite kann geschlossen werden.</p></body></html>");
+			bos.write(s.getBytes());
+			bos.flush();
+			bos.close();
+			bis.close();
+			
 		    }
 		} catch (Exception e) {
 		    // TODO

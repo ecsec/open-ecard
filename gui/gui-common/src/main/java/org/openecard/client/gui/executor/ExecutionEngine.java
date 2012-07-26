@@ -76,6 +76,8 @@ public class ExecutionEngine {
 		}
 		for (OutputInfoUnit nextOut : stepResults) {
 		    InputInfoUnit matchingInfo = infoMap.get(nextOut.getID());
+		    // an entry must exist, otherwise this is an error in the GUI implementation
+		    // this type of error should be found in tests
 		    matchingInfo.copyContentFrom(nextOut);
 		}
 	    }

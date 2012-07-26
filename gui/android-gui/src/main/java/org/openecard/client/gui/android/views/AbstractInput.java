@@ -85,6 +85,7 @@ public class AbstractInput implements StepView {
 	result.setMinLength(input.getMinLength());
 	result.setMaxLength(input.getMaxLength());
 	result.setValue(input.getValue());
+	result.setID(input.getID());
     }
 
     @Override

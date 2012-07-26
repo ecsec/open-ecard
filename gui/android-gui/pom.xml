@@ -37,7 +37,7 @@
 	    <plugin>
 		<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 		<artifactId>android-maven-plugin</artifactId>
-		<version>3.0.2</version>
+		<version>3.3.0</version>
 		<extensions>true</extensions>
 		<configuration>
 		    <zipalign>
@@ -47,7 +47,7 @@
 			<outputApk>${project.build.directory}/${project.build.finalName}-aligned.apk</outputApk>
 		    </zipalign>
 		    <sdk>
-			<platform>15</platform>
+			<platform>11</platform>
 		    </sdk>
 		    <test>
 			<createReport>true</createReport>

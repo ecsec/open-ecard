@@ -22,20 +22,20 @@
 
 package org.openecard.client.android.activities;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences.Editor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.*;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import iso.std.iso_iec._24727.tech.schema.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
+import java.io.*;
+import java.net.*;
 import java.util.List;
-import org.openecard.client.android.ApplicationContext;
-import org.openecard.client.android.R;
-import org.openecard.client.android.RootHelper;
-import org.openecard.client.android.TCTokenService;
+import org.openecard.client.android.*;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.Environment;
@@ -50,18 +50,6 @@ import org.openecard.client.sal.TinySAL;
 import org.openecard.client.transport.paos.PAOS;
 import org.openecard.client.transport.tls.PSKTlsClientImpl;
 import org.openecard.client.transport.tls.TlsClientSocketFactory;
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences.Editor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 /**
  * This is the main Activity. It is the first activity to open when the
@@ -170,7 +158,6 @@ public class MainActivity extends Activity implements EventCallback {
 
     @Override
     protected void onDestroy() {
-	applicationContext.shutdown();
 	killPCSCD();
 	Editor editor = getSharedPreferences("clear_cache", Context.MODE_PRIVATE).edit();
 	editor.clear();
@@ -180,33 +167,30 @@ public class MainActivity extends Activity implements EventCallback {
     }
 
     public static void trimCache(Context context) {
-	    try {
-	        File dir = context.getCacheDir();
-	        if (dir != null && dir.isDirectory()) {
-	            deleteDir(dir);
-
-	        }
-	    } catch (Exception e) {
-	        // TODO: handle exception
-	    }
-	}
-
-
-	public static boolean deleteDir(File dir) {
+	try {
+	    File dir = context.getCacheDir();
 	    if (dir != null && dir.isDirectory()) {
-	        String[] children = dir.list();
-	        for (int i = 0; i < children.length; i++) {
-	            boolean success = deleteDir(new File(dir, children[i]));
-	            if (!success) {
-	                return false;
-	            }
-	        }
+		deleteDir(dir);
 	    }
+	} catch (Exception e) {
+	    // TODO: handle exception
+	}
+    }
 
-	    // The directory is now empty so delete it
-	    return dir.delete();
+    public static boolean deleteDir(File dir) {
+	if (dir != null && dir.isDirectory()) {
+	    String[] children = dir.list();
+	    for (int i = 0; i < children.length; i++) {
+		boolean success = deleteDir(new File(dir, children[i]));
+		if (!success) {
+		    return false;
+		}
+	    }
 	}
 
+	// The directory is now empty so delete it
+	return dir.delete();
+    }
 	
     private void killPCSCD() {
 	File f = new File("/data/pcscd/pcscd.pid");
@@ -253,10 +237,8 @@ public class MainActivity extends Activity implements EventCallback {
     }
     
     /**
-     * Handles the intent the application was startet with.</br> If it's action
-     * equals Intent.ACTION_VIEW we've been startet through a link to localhost.
-     * </br> If It's action equals Intent.MAIN we've been explicitely startet
-     * through the user
+     * Handles the intent the MainActivity was started with.</br> It's action
+     * should equal Intent.ACTION_VIEW because we've been started through a link to localhost.
      * 
      * @param intent
      *            The intent the application was started with.
@@ -267,18 +249,10 @@ public class MainActivity extends Activity implements EventCallback {
     private void handleIntent(Intent intent) throws UnsupportedEncodingException, MalformedURLException, TCTokenException {
 	if (intent != null) {
 	    String action = intent.getAction();
-	    System.out.println("action: " + action);
 	    if (action == Intent.ACTION_VIEW) {
 		this.uri = intent.getData();
-	    } else {
-		//TODO
-	    }
-
-	} else {
-	    // should never happen
-	    return;
-	}
-
+	    } 
+	} 
     }
 
     private TCTokenRequest handleActionIntent(Uri data) throws UnsupportedEncodingException, MalformedURLException, TCTokenException {
@@ -347,14 +321,14 @@ public class MainActivity extends Activity implements EventCallback {
 	    i = new Intent(this, AboutActivity.class);
 	    startActivity(i);
 	    return true;
-	case R.id.cardinfo:
+	/*case R.id.cardinfo:
 	    i = new Intent(this, CardInfoActivity.class);
 	    startActivity(i);
 	    return true;
 	case R.id.pinmanagement:
 	    i = new Intent(this, PINManagementActivity.class);
 	    startActivity(i);
-	    return true;
+	    return true;*/
 	}
 
 	return false;

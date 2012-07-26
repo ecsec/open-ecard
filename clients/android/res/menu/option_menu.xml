@@ -6,7 +6,7 @@
         android:icon="@android:drawable/ic_dialog_info"
         android:title="@string/menu_about"/>
 
-    <item
+    <!--  <item
         android:id="@+id/cardinfo"
         android:icon="@android:drawable/sym_contact_card"
         android:title="@string/menu_cardinfo"/>
@@ -15,5 +15,5 @@
         android:id="@+id/pinmanagement"
         android:icon="@android:drawable/ic_dialog_dialer"
         android:title="@string/menu_pinmanagement"/>
-   
+   -->
 </menu>

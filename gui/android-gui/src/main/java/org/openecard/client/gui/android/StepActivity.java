@@ -91,6 +91,7 @@ public class StepActivity extends Activity {
     }
     
     void showStep(final Step step) {
+	views.clear();
 	llOutwards.post(new Runnable() {
 	    
 	    @Override

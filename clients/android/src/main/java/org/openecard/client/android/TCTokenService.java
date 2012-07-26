@@ -58,8 +58,11 @@ public class TCTokenService extends Service implements Runnable {
 	    while (true) {
 		socket = serverSocket.accept();
 		SocketAddress remote = socket.getRemoteSocketAddress();
-		// TODO check that only local connections get accepted
-		System.out.println("remote address: " + remote.toString());
+		// only accept local connections
+		if(!remote.toString().contains("127.0.0.1")){
+		    socket.close();
+		    continue;
+		}
 		BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
 		BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
 		byte[] buffer = new byte[70000];

@@ -27,6 +27,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -46,16 +49,19 @@ public class AppTray {
 
     private static final Logger logger = LoggerFactory.getLogger(AppTray.class);
 
+    private static final String ICON_LOADER = "loader";
+    private static final String ICON_LOGO = "logo";
+    
     private final I18n lang = I18n.getTranslation("richclient");
-
+    
     private SystemTray tray;
     private TrayIcon trayIcon;
     private PopupMenu popup;
     private JFrame frame;
     private JLabel label;
-    private ImageIcon logo;
-    private ImageIcon loader;
     private RichClient client;
+    private Boolean isLinux = null;
+    private Boolean isKde = null;
     private boolean trayAvailable;
 
     public AppTray(RichClient client) {
@@ -64,30 +70,10 @@ public class AppTray {
     }
 
     private void setupUI() {
-	logo = GuiUtils.getImageIcon("logo.png");
-	loader = GuiUtils.getImageIcon("loader.gif");
-
 	createPopupMenu();
 
 	if (SystemTray.isSupported()) {
-	    trayAvailable = true;
-
-	    tray = SystemTray.getSystemTray();
-
-	    trayIcon = new TrayIcon(loader.getImage(), lang.translationForKey("tray.message.loading"), popup);
-	    trayIcon.setImageAutoSize(true);
-
-	    try {
-		tray.add(trayIcon);
-	    } catch (AWTException ex) {
-		logger.error("TrayIcon could not be added to the system tray.", ex);
-
-		// tray and trayIcon are not needed anymore
-		tray = null;
-		trayIcon = null;
-		setupFrame();
-	    }
-
+	    setupTrayIcon();
 	} else {
 	    setupFrame();
 	}
@@ -95,16 +81,16 @@ public class AppTray {
 
     public void done() {
 	if (trayAvailable) {
-	    trayIcon.setImage(logo.getImage());
+            trayIcon.setImage(getTrayIconImage(ICON_LOGO));
 	    trayIcon.setToolTip(lang.translationForKey("tray.title"));
 	} else {
-	    label.setIcon(logo);
+	    label.setIcon(GuiUtils.getImageIcon("logo_icon_default_256.png"));
 	}
     }
 
-
+    
     private void createPopupMenu() {
-	// TODO: implement config menu
+        // TODO: implement config menu
 //	MenuItem configItem = new MenuItem(lang.translationForKey("tray.config"));
 //	configItem.addActionListener(new ActionListener() {
 //
@@ -114,7 +100,7 @@ public class AppTray {
 //	    }
 //	});
 
-	// TODO: implement help menu
+        // TODO: implement help menu
 //	MenuItem helpItem = new MenuItem(lang.translationForKey("tray.help"));
 //	helpItem.addActionListener(new ActionListener() {
 //
@@ -124,49 +110,223 @@ public class AppTray {
 //	    }
 //	});
 
-	MenuItem aboutItem = new MenuItem(lang.translationForKey("tray.about"));
-	aboutItem.addActionListener(new ActionListener() {
+        MenuItem aboutItem = new MenuItem(lang.translationForKey("tray.about"));
+        aboutItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AboutDialog.showDialog();
+            }
+        });
 
-	    @Override
-	    public void actionPerformed(ActionEvent e) {
-		AboutDialog.showDialog();
-	    }
-	});
+        MenuItem exitItem = new MenuItem(lang.translationForKey("tray.exit"));
+        exitItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (trayAvailable) {
+                    trayIcon.displayMessage("Open eCard App", lang.translationForKey("tray.message.shutdown"), TrayIcon.MessageType.INFO);
+                    client.teardown();
+                    tray.remove(trayIcon);
+                    System.exit(0);
+                } else {
+                    client.teardown();
+                    System.exit(0);
+                }
+            }
+        });
 
-	MenuItem exitItem = new MenuItem(lang.translationForKey("tray.exit"));
-	exitItem.addActionListener(new ActionListener() {
-
-	    @Override
-	    public void actionPerformed(ActionEvent e) {
-		if (trayAvailable) {
-		    trayIcon.displayMessage("Open eCard App", lang.translationForKey("tray.message.shutdown"), TrayIcon.MessageType.INFO);
-		    client.teardown();
-		    tray.remove(trayIcon);
-		    System.exit(0);
-		} else {
-		    client.teardown();
-		    System.exit(0);
-		}
-	    }
-	});
-
-	popup = new PopupMenu();
+        popup = new PopupMenu();
 //	popup.add(configItem);
 //	popup.add(helpItem);
-	popup.add(aboutItem);
-	popup.addSeparator();
-	popup.add(exitItem);
+        popup.add(aboutItem);
+        popup.addSeparator();
+        popup.add(exitItem);
+    }
+    
+    
+    private void setupTrayIcon() {
+        trayAvailable = true;
+        
+        tray = SystemTray.getSystemTray();
+        
+        trayIcon = new TrayIcon(getTrayIconImage(ICON_LOADER), lang.translationForKey("tray.message.loading"), popup);
+        trayIcon.setImageAutoSize(true);
+        
+        try {
+            tray.add(trayIcon);
+        } catch (AWTException ex) {
+            logger.error("TrayIcon could not be added to the system tray.", ex);
+
+            // tray and trayIcon are not needed anymore
+            tray = null;
+            trayIcon = null;
+            setupFrame();
+        }
     }
 
+    private Image getTrayIconImage(String name) {
+        Dimension dim = tray.getTrayIconSize();
+        
+        if (isLinux()) {
+            if (isKde()) {
+                return getImageKde(name, dim);
+            } else {
+                return getImageLinux(name, dim);
+            }
+        } else {
+            return getImageDefault(name, dim);
+        }
+    }
+    
+    private Image getImageKde(String name, Dimension dim) {
+        if (name.equals(ICON_LOADER)) {
+            switch(dim.width) {
+                case 24:
+                    return GuiUtils.getImage("loader_icon_linux_kde_24.gif");
+                default:
+                    return GuiUtils.getImage("loader_icon_linux_default_256.gif");
+            }
+        } else {
+            switch(dim.width) {
+                case 24:
+                    return GuiUtils.getImage("logo_icon_linux_kde_24.png");
+                default:
+                    return GuiUtils.getImage("logo_icon_linux_default_256.png");
+            }
+        }
+    }
+    
+    private Image getImageLinux(String name, Dimension dim) {
+        if (name.equals(ICON_LOADER)) {
+            switch (dim.width) {
+                case 16:
+                    return GuiUtils.getImage("loader_icon_linux_default_16.gif");
+                case 24:
+                    return GuiUtils.getImage("loader_icon_linux_default_24.gif");
+                case 32:
+                    return GuiUtils.getImage("loader_icon_linux_default_32.gif");
+                case 48:
+                    return GuiUtils.getImage("loader_icon_linux_default_48.gif");
+                case 64:
+                    return GuiUtils.getImage("loader_icon_linux_default_64.gif");
+                case 72:
+                    return GuiUtils.getImage("loader_icon_linux_default_72.gif");
+                case 96:
+                    return GuiUtils.getImage("loader_icon_linux_default_96.gif");
+                case 128:
+                    return GuiUtils.getImage("loader_icon_linux_default_128.gif");
+                default:
+                    return GuiUtils.getImage("loader_icon_linux_default_256.gif");
+            }
+        } else {
+            switch (dim.width) {
+                case 16:
+                    return GuiUtils.getImage("logo_icon_linux_default_16.png");
+                case 24:
+                    return GuiUtils.getImage("logo_icon_linux_default_24.png");
+                case 32:
+                    return GuiUtils.getImage("logo_icon_linux_default_32.png");
+                case 48:
+                    return GuiUtils.getImage("logo_icon_linux_default_48.png");
+                case 64:
+                    return GuiUtils.getImage("logo_icon_linux_default_64.png");
+                case 72:
+                    return GuiUtils.getImage("logo_icon_linux_default_72.png");
+                case 96:
+                    return GuiUtils.getImage("logo_icon_linux_default_96.png");
+                case 128:
+                    return GuiUtils.getImage("logo_icon_linux_default_128.png");
+                default:
+                    return GuiUtils.getImage("logo_icon_linux_default_256.png");
+            }
+        }
+    }
+    
+    private Image getImageDefault(String name, Dimension dim) {
+        if (name.equals(ICON_LOADER)) {
+            switch (dim.width) {
+                case 16:
+                    return GuiUtils.getImage("loader_icon_default_16.gif");
+                case 24:
+                    return GuiUtils.getImage("loader_icon_default_24.gif");
+                case 32:
+                    return GuiUtils.getImage("loader_icon_default_32.gif");
+                case 48:
+                    return GuiUtils.getImage("loader_icon_default_48.gif");
+                case 64:
+                    return GuiUtils.getImage("loader_icon_default_64.gif");
+                case 72:
+                    return GuiUtils.getImage("loader_icon_default_72.gif");
+                case 96:
+                    return GuiUtils.getImage("loader_icon_default_96.gif");
+                case 128:
+                    return GuiUtils.getImage("loader_icon_default_128.gif");
+                default:
+                    return GuiUtils.getImage("loader_icon_default_256.gif");
+            }
+        } else {
+            switch (dim.width) {
+                case 16:
+                    return GuiUtils.getImage("logo_icon_default_16.png");
+                case 24:
+                    return GuiUtils.getImage("logo_icon_default_24.png");
+                case 32:
+                    return GuiUtils.getImage("logo_icon_default_32.png");
+                case 48:
+                    return GuiUtils.getImage("logo_icon_default_48.png");
+                case 64:
+                    return GuiUtils.getImage("logo_icon_default_64.png");
+                case 72:
+                    return GuiUtils.getImage("logo_icon_default_72.png");
+                case 96:
+                    return GuiUtils.getImage("logo_icon_default_96.png");
+                case 128:
+                    return GuiUtils.getImage("logo_icon_default_128.png");
+                default:
+                    return GuiUtils.getImage("logo_icon_default_256.png");
+            }
+        }
+    }
+    
+    private boolean isLinux() {
+        if (isLinux == null) {
+            String os = System.getProperty("os.name").toLowerCase();
+            isLinux = os.indexOf("nux") >= 0;
+        }
+        return isLinux;
+    }
+    
+    private boolean isKde() {
+        if (isKde == null) {
+            try {
+                String[] command = {"pgrep", "-l", "kwin"};
+                ProcessBuilder pb = new ProcessBuilder(command);
+                Process child = pb.start();
 
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                InputStream is = child.getInputStream();
+                int c;
+                while ((c = is.read()) != -1) {
+                    baos.write(c);
+                }
+                is.close();
+
+                isKde = baos.toString().indexOf("kwin") >= 0;
+
+            } catch (IOException ex) {
+                isKde = false;
+            }
+        }
+        return isKde;
+    }
+    
     private void setupFrame() {
 	trayAvailable = false;
-
+        
 	frame = new JFrame(lang.translationForKey("tray.title"));
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	frame.setIconImage(logo.getImage());
+	frame.setIconImage(GuiUtils.getImage("logo_icon_default_256.png"));
 
-	label = new JLabel(loader);
+	label = new JLabel(GuiUtils.getImageIcon("loader_icon_default_64.gif"));
 	label.add(popup);
 	label.addMouseListener(new MouseAdapter() {
 
@@ -178,6 +338,7 @@ public class AppTray {
 	    }
 	});
 
+        ImageIcon logo = GuiUtils.getImageIcon("logo_icon_default_256.png");
 	Container c = frame.getContentPane();
 	c.setPreferredSize(new Dimension(logo.getIconWidth(), logo.getIconHeight()));
 	c.setBackground(Color.white);

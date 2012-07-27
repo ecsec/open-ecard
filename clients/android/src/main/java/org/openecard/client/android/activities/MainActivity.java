@@ -138,8 +138,8 @@ public class MainActivity extends Activity implements EventCallback {
 				.toString()));
 			startActivity(browserIntent);
 			Intent i = new Intent(MainActivity.this, AboutActivity.class);
+			i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(i);
-			finish();
 			onDestroy();
 		    } else {
 

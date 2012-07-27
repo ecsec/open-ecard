@@ -78,7 +78,7 @@ public class BoxItemAdapter extends BaseAdapter {
 	CompoundButton b = null;
 	if(useCheckboxes){
 	    b = new CheckBox(context);
-	    b.setButtonDrawable(android.R.drawable.btn_radio);
+	    //b.setButtonDrawable(android.R.drawable.btn_radio);
 	} else{
 	    b = new RadioButton(context);
 	    

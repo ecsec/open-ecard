@@ -14,6 +14,7 @@
     <string name="error_no_nfc">Ihr Android-Gerät ist nicht NFC-fähig. Die
 		Anwendung wurde beendet.</string>
     <string name="button_back">Zurück</string>
+    <string name="button_close">Beenden</string>
        <string name="pinExplanatoryText">Wenn Sie mit der Übermittlung der ausgewählten Daten einverstanden sind, geben Sie bitte ihre 6-stellige Personalausweis-PIN ein.</string>
               <string name="pinChangeText">Bitte geben Sie Ihre Personalausweis-PIN ein.</string>
     <string name="text_about">Lorem ipsum dolor sit amet, consetetur sadipscing

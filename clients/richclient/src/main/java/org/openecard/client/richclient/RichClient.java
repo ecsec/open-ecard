@@ -344,6 +344,8 @@ public final class RichClient implements ConnectorListener {
 	sal.setGUI(gui);
 	ifd.setGUI(gui);
 
+        em.registerAllEvents(tray.status());
+
 	// Initialize the EventManager
 	em.initialize();
 

@@ -33,7 +33,7 @@
 	    </resource>
 	</resources>
     </build>
-    
+
     <dependencies>
 	<dependency>
 	    <groupId>org.openecard.client.wsdef</groupId>

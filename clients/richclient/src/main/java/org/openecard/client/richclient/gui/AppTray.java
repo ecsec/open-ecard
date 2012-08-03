@@ -57,6 +57,7 @@ public class AppTray {
     private SystemTray tray;
     private TrayIcon trayIcon;
     private PopupMenu popup;
+    private Status status;
     private JFrame frame;
     private JLabel label;
     private RichClient client;
@@ -70,7 +71,8 @@ public class AppTray {
     }
 
     private void setupUI() {
-	createPopupMenu();
+	status = new Status();
+        createPopupMenu();
 
 	if (SystemTray.isSupported()) {
 	    setupTrayIcon();
@@ -86,6 +88,10 @@ public class AppTray {
 	} else {
 	    label.setIcon(GuiUtils.getImageIcon("logo_icon_default_256.png"));
 	}
+    }
+
+    public Status status() {
+        return status;
     }
 
     
@@ -126,11 +132,10 @@ public class AppTray {
                     trayIcon.displayMessage("Open eCard App", lang.translationForKey("tray.message.shutdown"), TrayIcon.MessageType.INFO);
                     client.teardown();
                     tray.remove(trayIcon);
-                    System.exit(0);
                 } else {
                     client.teardown();
-                    System.exit(0);
                 }
+                System.exit(0);
             }
         });
 
@@ -150,6 +155,15 @@ public class AppTray {
         
         trayIcon = new TrayIcon(getTrayIconImage(ICON_LOADER), lang.translationForKey("tray.message.loading"), popup);
         trayIcon.setImageAutoSize(true);
+        trayIcon.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    status.showInfo(new Point(e.getX(), e.getY()));
+                }
+            }
+        });
         
         try {
             tray.add(trayIcon);
@@ -162,6 +176,7 @@ public class AppTray {
             setupFrame();
         }
     }
+
 
     private Image getTrayIconImage(String name) {
         Dimension dim = tray.getTrayIconSize();
@@ -195,6 +210,7 @@ public class AppTray {
         }
     }
     
+
     private Image getImageLinux(String name, Dimension dim) {
         if (name.equals(ICON_LOADER)) {
             switch (dim.width) {
@@ -241,6 +257,7 @@ public class AppTray {
         }
     }
     
+
     private Image getImageDefault(String name, Dimension dim) {
         if (name.equals(ICON_LOADER)) {
             switch (dim.width) {
@@ -287,6 +304,7 @@ public class AppTray {
         }
     }
     
+
     private boolean isLinux() {
         if (isLinux == null) {
             String os = System.getProperty("os.name").toLowerCase();
@@ -332,9 +350,14 @@ public class AppTray {
 
 	    @Override
 	    public void mousePressed(MouseEvent e) {
-		if (e.isPopupTrigger() || e.getButton() == MouseEvent.BUTTON1) {
-		    popup.show(e.getComponent(), e.getX(), e.getY());
+		if (e.getButton() == MouseEvent.BUTTON1) {
+		    status.showInfo(e.getLocationOnScreen());
+                    return;
 		}
+
+                if (e.isPopupTrigger() && e.getButton() == MouseEvent.BUTTON3) {
+                    popup.show(e.getComponent(), e.getX(), e.getY());
+                }
 	    }
 	});
 

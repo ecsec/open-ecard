@@ -67,7 +67,8 @@ public class JSEventCallback implements EventCallback {
 	if (eventData instanceof ConnectionHandleType) {
 	    try {
 		String args = toJSON(eventType, (ConnectionHandleType) eventData);
-		jsObject.call(this.jsEventCallback, new String[]{ args });
+		//this.jsObject.call(this.jsEventCallback, new String[]{ args });
+		this.jsObject.eval(this.jsEventCallback + "(" + args + ")");
 	    } catch(Exception ignore) {
 	    }
 	}
@@ -79,7 +80,8 @@ public class JSEventCallback implements EventCallback {
 	}
 
 	try {
-	    this.jsObject.call(this.jsMessageCallback, new String[]{ message });
+	    //this.jsObject.call(this.jsMessageCallback, new String[]{ message });
+	    this.jsObject.eval(this.jsMessageCallback + "(" + message + ")");
 	} catch(Exception ignore) {
 	}
     }
@@ -90,7 +92,8 @@ public class JSEventCallback implements EventCallback {
 	}
 
 	try {
-	    this.jsObject.call(this.jsSetEidClientPortCallback, new Integer[]{ port });
+	    //this.jsObject.call(this.jsSetEidClientPortCallback, new Integer[]{ port });
+	    this.jsObject.eval(this.jsSetEidClientPortCallback + "(" + port + ")");
 	} catch(Exception ignore) {
 	}
     }

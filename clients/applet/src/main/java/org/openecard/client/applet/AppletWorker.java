@@ -30,16 +30,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.common.sal.state.CardStateEntry;
-import org.openecard.client.connector.ConnectorListener;
-import org.openecard.client.connector.messages.TCTokenRequest;
-import org.openecard.client.connector.messages.TCTokenResponse;
-import org.openecard.client.connector.messages.common.ClientRequest;
-import org.openecard.client.connector.messages.common.ClientResponse;
-import org.openecard.client.connector.tctoken.TCToken;
+import org.openecard.client.connector.client.ClientRequest;
+import org.openecard.client.connector.client.ClientResponse;
+import org.openecard.client.connector.client.ConnectorListener;
+import org.openecard.client.connector.handler.tctoken.TCToken;
+import org.openecard.client.connector.handler.tctoken.TCTokenRequest;
+import org.openecard.client.connector.handler.tctoken.TCTokenResponse;
 import org.openecard.client.sal.TinySAL;
 import org.openecard.client.transport.paos.PAOS;
 import org.openecard.client.transport.tls.PSKTlsClientImpl;
@@ -49,6 +50,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ *
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
@@ -221,7 +223,7 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 
 	Set<CardStateEntry> matchingHandles = applet.getCardStates().getMatchingEntries(requestedHandle);
 
-	if(!matchingHandles.isEmpty()) {
+	if (!matchingHandles.isEmpty()) {
 	    connectionHandle = matchingHandles.toArray(new CardStateEntry[]{})[0].handleCopy();
 	}
 
@@ -229,7 +231,7 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 	    // <editor-fold defaultstate="collapsed" desc="log error">
 	    logger.error("Warning", "Given ConnectionHandle is invalied.");
 	    // </editor-fold>
-	    response.setErrorMessage("Given ConnectionHandle is invalied.");
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "Given ConnectionHandle is invalied."));
 	    return response;
 	}
 
@@ -246,7 +248,7 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 		// <editor-fold defaultstate="collapsed" desc="log exception">
 		//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
 		// </editor-fold>
-		response.setErrorMessage(ex.getMessage());
+		response.setResult(ex.getResult());
 		return response;
 	    }
 
@@ -263,7 +265,7 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 		// <editor-fold defaultstate="collapsed" desc="log exception">
 		//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
 		// </editor-fold>
-		response.setErrorMessage(ex.getMessage());
+		response.setResult(ex.getResult());
 		return response;
 	    }
 
@@ -271,7 +273,7 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 	    URL serverAddress = token.getServerAddress();
 
 	    // FIXME: Wie weit ist das NPA abhängig.
-	    if (token.getPathSecurityParameter() != null && token.getPathSecurityParameter().getPSK() != null) {
+	    if (token.getPathSecurityParameters() != null && token.getPathSecurityParameters().getPSK() != null) {
 		serverAddress = new URL(serverAddress + "/?sessionid=" + sessionIdentifier);
 	    }
 
@@ -279,9 +281,9 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 
 	    // Collect parameters for PSK based TLS
 	    //TODO Change to support different protocols
-	    if(token.getPathSecurityProtocol().equals("urn:ietf:rfc:4279")
-	       || token.getPathSecurityProtocol().equals("urn:ietf:rfc:5487")) {
-		byte[] psk = token.getPathSecurityParameter().getPSK();
+	    if (token.getPathSecurityProtocol().equals("urn:ietf:rfc:4279")
+		    || token.getPathSecurityProtocol().equals("urn:ietf:rfc:5487")) {
+		byte[] psk = token.getPathSecurityParameters().getPSK();
 		byte[] sessionBytes = sessionIdentifier.getBytes();
 
 		// Set up TLS connection
@@ -300,30 +302,31 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 	    ExecutorService service = Executors.newCachedThreadPool();
 
 	    // FIXME: remove background thread as soon as possible
-	    service.submit(new TestRunnable(p,sp));
+	    service.submit(new TestRunnable(p, sp));
 
 	    response.setRefreshAddress(token.getRefreshAddress());
 
 	} catch (Exception ex) {
-	    ex.printStackTrace();
 	    if (ex instanceof RuntimeException) {
-		throw (RuntimeException)ex;
+		throw (RuntimeException) ex;
 	    }
 	    logger.error("Exception", ex);
-	    response.setErrorMessage(ex.getMessage());
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, ex.getMessage()));
 	}
 
+	response.setResult(WSHelper.makeResultOK());
 	return response;
     }
 
     private class TestRunnable implements Runnable {
-    	final PAOS p;
-    	final StartPAOS sp;
 
-    	public TestRunnable(PAOS p, StartPAOS sp) {
+	final PAOS p;
+	final StartPAOS sp;
+
+	public TestRunnable(PAOS p, StartPAOS sp) {
 	    this.p = p;
 	    this.sp = sp;
-    	}
+	}
 
 	@Override
 	public void run() {
@@ -333,6 +336,7 @@ public final class AppletWorker implements Runnable, EventCallback, ConnectorLis
 		logger.error(e.getMessage(), e);
 	    }
 	}
+
     }
 
 }

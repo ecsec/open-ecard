@@ -36,15 +36,15 @@ import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.connector.Connector;
-import org.openecard.client.connector.ConnectorListener;
 import org.openecard.client.connector.ConnectorServer;
-import org.openecard.client.connector.messages.StatusRequest;
-import org.openecard.client.connector.messages.StatusResponse;
-import org.openecard.client.connector.messages.TCTokenRequest;
-import org.openecard.client.connector.messages.TCTokenResponse;
-import org.openecard.client.connector.messages.common.ClientRequest;
-import org.openecard.client.connector.messages.common.ClientResponse;
-import org.openecard.client.connector.tctoken.TCToken;
+import org.openecard.client.connector.client.ClientRequest;
+import org.openecard.client.connector.client.ClientResponse;
+import org.openecard.client.connector.client.ConnectorListener;
+import org.openecard.client.connector.handler.status.StatusRequest;
+import org.openecard.client.connector.handler.status.StatusResponse;
+import org.openecard.client.connector.handler.tctoken.TCToken;
+import org.openecard.client.connector.handler.tctoken.TCTokenRequest;
+import org.openecard.client.connector.handler.tctoken.TCTokenResponse;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class RichClient implements ConnectorListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(RichClient.class.getName());
+    private static final Logger _logger = LoggerFactory.getLogger(RichClient.class.getName());
 
     // Rich client
     private static RichClient client;
@@ -95,7 +95,7 @@ public final class RichClient implements ConnectorListener {
 	try {
 	    RichClient.getInstance();
 	} catch (Exception e) {
-	    logger.warn(e.getMessage());
+	    _logger.warn(e.getMessage());
 	}
     }
 
@@ -119,7 +119,7 @@ public final class RichClient implements ConnectorListener {
     @Override
     public ClientResponse request(ClientRequest request) {
 	// <editor-fold defaultstate="collapsed" desc="log request">
-	logger.debug("Client request: {}", request.getClass());
+	_logger.debug("Client request: {}", request.getClass());
 	// </editor-fold>
 	if (request instanceof TCTokenRequest) {
 	    return handleActivate((TCTokenRequest) request);
@@ -171,15 +171,14 @@ public final class RichClient implements ConnectorListener {
 
 	if (connectionHandle == null) {
 	    // <editor-fold defaultstate="collapsed" desc="log error">
-	    logger.error("Warning", "Given ConnectionHandle is invalied.");
+	    _logger.error("Warning", "Given ConnectionHandle is invalied.");
 	    // </editor-fold>
-	    response.setErrorMessage("Given ConnectionHandle is invalied.");
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "Given ConnectionHandle is invalid."));
 	    return response;
 	}
 
 	return doPAOS(token, connectionHandle);
     }
-
 
     /**
      * Activate the client, but assume a german eID card is used and no handle information is given upfront.
@@ -195,8 +194,8 @@ public final class RichClient implements ConnectorListener {
 	if (connectionHandle == null) {
 	    TCTokenResponse response = new TCTokenResponse();
 	    String msg = "No ConnectionHandle with a german eID card available.";
-	    logger.error(msg);
-	    response.setErrorMessage(msg);
+	    _logger.error(msg);
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 	    return response;
 	}
 
@@ -236,7 +235,7 @@ public final class RichClient implements ConnectorListener {
 		WSHelper.checkResult(cardApplicationPathResponse);
 	    } catch (WSException ex) {
 		TCTokenResponse response = new TCTokenResponse();
-		response.setErrorMessage(ex.getMessage());
+		response.setResult(ex.getResult());
 		return response;
 	    }
 
@@ -251,13 +250,13 @@ public final class RichClient implements ConnectorListener {
 		WSHelper.checkResult(cardApplicationConnectResponse);
 	    } catch (WSException ex) {
 		TCTokenResponse response = new TCTokenResponse();
-		response.setErrorMessage(ex.getMessage());
+		response.setResult(ex.getResult());
 		return response;
 	    }
 
 	    // Collect parameters for PSK based TLS
 	    //TODO Change to support different protocols
-	    byte[] psk = token.getPathSecurityParameter().getPSK();
+	    byte[] psk = token.getPathSecurityParameters().getPSK();
 	    String sessionIdentifier = token.getSessionIdentifier();
 	    URL serverAddress = token.getServerAddress();
 	    URL endpoint = new URL(serverAddress + "/?sessionid=" + sessionIdentifier);
@@ -277,12 +276,18 @@ public final class RichClient implements ConnectorListener {
 
 	    TCTokenResponse response = new TCTokenResponse();
 	    response.setRefreshAddress(token.getRefreshAddress());
+	    response.setResult(WSHelper.makeResultOK());
 	    return response;
 
+	} catch (WSException w) {
+	    TCTokenResponse response = new TCTokenResponse();
+	    _logger.error(w.getMessage(), w);
+	    response.setResult(w.getResult());
+	    return response;
 	} catch (Throwable w) {
 	    TCTokenResponse response = new TCTokenResponse();
-	    logger.error(w.getMessage(), w);
-	    response.setErrorMessage(w.getMessage());
+	    _logger.error(w.getMessage(), w);
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
 	    return response;
 	}
     }
@@ -344,7 +349,7 @@ public final class RichClient implements ConnectorListener {
 	sal.setGUI(gui);
 	ifd.setGUI(gui);
 
-        em.registerAllEvents(tray.status());
+	em.registerAllEvents(tray.status());
 
 	// Initialize the EventManager
 	em.initialize();

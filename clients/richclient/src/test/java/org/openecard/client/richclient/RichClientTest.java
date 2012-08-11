@@ -22,11 +22,21 @@
 
 package org.openecard.client.richclient;
 
+import ch.qos.logback.classic.BasicConfigurator;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.ConsoleAppender;
 import java.util.List;
-import org.openecard.client.connector.common.ConnectorConstants;
-import org.openecard.client.connector.messages.TCTokenRequest;
-import org.openecard.client.connector.messages.TCTokenResponse;
-import org.openecard.client.connector.tctoken.*;
+import org.openecard.client.connector.ConnectorConstants;
+import org.openecard.client.connector.handler.tctoken.TCToken;
+import org.openecard.client.connector.handler.tctoken.TCTokenConverter;
+import org.openecard.client.connector.handler.tctoken.TCTokenException;
+import org.openecard.client.connector.handler.tctoken.TCTokenGrabber;
+import org.openecard.client.connector.handler.tctoken.TCTokenParser;
+import org.openecard.client.connector.handler.tctoken.TCTokenRequest;
+import org.openecard.client.connector.handler.tctoken.TCTokenResponse;
+import org.openecard.client.connector.handler.tctoken.TCTokenVerifier;
+import org.openecard.client.ifd.scio.wrapper.SCChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.testng.Assert.fail;
@@ -38,7 +48,6 @@ import org.testng.annotations.Test;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-//@Ignore
 public class RichClientTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RichClient.class.getName());
@@ -73,7 +82,7 @@ public class RichClientTest {
 	}
     }
 
-    @Test
+    @Test(enabled = !true)
     public void testMain() {
 	try {
 	    RichClient client = RichClient.getInstance();
@@ -85,11 +94,9 @@ public class RichClientTest {
 	    TCTokenResponse applicationReponse = (TCTokenResponse) client.request(applicationRequest);
 
 	    System.out.println("RICH CLIENT RESULT");
-	    System.out.println(applicationReponse.getErrorMessage());
+	    System.out.println(applicationReponse.getResult().getResultMajor());
 	    System.out.println(applicationReponse.getRefreshAddress());
-	    System.out.println(applicationReponse.getErrorPage());
 	} catch (Exception e) {
-	    e.printStackTrace();
 	    logger.error(e.getMessage());
 	    fail(e.getMessage());
 	}

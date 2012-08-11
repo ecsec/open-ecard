@@ -25,7 +25,7 @@ package org.openecard.client.common.apdu.common;
 
 /**
  *
- * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 class CardAPDU {
 

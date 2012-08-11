@@ -29,7 +29,7 @@ import org.openecard.client.common.apdu.common.CardCommandAPDU;
  * PERFORM SECURITY OPERATION Command
  * See ISO/IEC 7816-8 Section 11
  *
- * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class PerformSecurityOperation extends CardCommandAPDU {
 

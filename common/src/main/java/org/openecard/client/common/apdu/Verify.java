@@ -27,7 +27,7 @@ import org.openecard.client.common.apdu.common.CardCommandAPDU;
 
 /**
  *
- * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class Verify extends CardCommandAPDU {
 

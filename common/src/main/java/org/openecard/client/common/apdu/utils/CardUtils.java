@@ -34,7 +34,7 @@ import org.openecard.client.common.util.ShortUtils;
 
 /**
  *
- * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class CardUtils {
 

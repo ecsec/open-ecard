@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * Implements a MSE:Set DST APDU for Terminal Authentication.
  * See BSI-TR-03110, version 2.10, part 3, section B.11.4.
  *
- * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class MSESetDST extends ManageSecurityEnviroment {
 

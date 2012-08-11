@@ -29,7 +29,7 @@ import org.openecard.client.common.apdu.common.CardResponseAPDU;
 
 
 /**
- * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class APDUException extends ECardException {
 

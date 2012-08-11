@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 
 
 /**
- * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class CardResponseAPDUTest {
 

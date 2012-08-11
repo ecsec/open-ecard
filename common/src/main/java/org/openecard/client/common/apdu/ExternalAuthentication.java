@@ -29,7 +29,7 @@ import org.openecard.client.common.apdu.common.CardCommandAPDU;
  * EXTERNAL AUTHENTICATION Command
  * See ISO/IEC 7816-4 Section 7.5.4
  *
- * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class ExternalAuthentication extends CardCommandAPDU {
 

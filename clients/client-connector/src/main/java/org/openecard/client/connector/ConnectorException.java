@@ -34,7 +34,7 @@ public class ConnectorException extends RuntimeException {
      * Create a new ConnectorException.
      */
     public ConnectorException() {
-	super();
+	super("");
     }
 
     /**

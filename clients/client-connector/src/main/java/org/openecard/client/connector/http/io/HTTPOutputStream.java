@@ -1,19 +1,39 @@
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.connector.http.io;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import org.openecard.client.connector.http.HTTPConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
- * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class HTTPOutputStream {
 
-    private static final Logger logger = LoggerFactory.getLogger(HTTPOutputStream.class);
     private ByteArrayOutputStream buffer;
     private OutputStream outputStream;
 
@@ -44,7 +64,7 @@ public final class HTTPOutputStream {
      * @throws IOException
      */
     public void write(String data) throws IOException {
-	write(data.getBytes(HTTPConstants.CHATSET));
+	write(data.getBytes(HTTPConstants.CHARSET));
     }
 
     /**
@@ -84,7 +104,7 @@ public final class HTTPOutputStream {
      * @throws IOException
      */
     public void writeln(String data) throws IOException {
-	writeln(data.getBytes(HTTPConstants.CHATSET));
+	writeln(data.getBytes(HTTPConstants.CHARSET));
     }
 
     /**
@@ -103,11 +123,9 @@ public final class HTTPOutputStream {
      * @throws IOException
      */
     public synchronized void close() throws IOException {
-	// <editor-fold defaultstate="collapsed" desc="log response">
-	logger.debug("HTTP response:\n{}", new String(buffer.toByteArray()));
-	// </editor-fold>
 	outputStream.write(buffer.toByteArray());
 	outputStream.flush();
 	outputStream.close();
     }
+
 }

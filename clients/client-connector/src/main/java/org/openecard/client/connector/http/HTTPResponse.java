@@ -22,14 +22,18 @@
 
 package org.openecard.client.connector.http;
 
-import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.message.BasicStatusLine;
+import org.openecard.client.connector.common.MimeType;
 import org.openecard.client.connector.http.header.EntityHeader;
 import org.openecard.client.connector.http.header.GeneralHeader;
 import org.openecard.client.connector.http.header.ResponseHeader;
 import org.openecard.client.connector.http.header.StatusLine;
-import org.openecard.client.connector.http.io.HTTPOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,12 +43,7 @@ import org.slf4j.LoggerFactory;
  * See RFC 2616, section 6 Response.
  * See http://tools.ietf.org/html/rfc2616#section-6
  *
- * Response = Status-Line
- * (( general-header
- * | response-header
- * | entity-header ) CRLF)
- * CRLF
- * [ message-body ]
+ * Response = Status-Line (( general-header | response-header | entity-header ) CRLF) CRLF [ message-body ]
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
@@ -64,48 +63,12 @@ public final class HTTPResponse extends HTTPMessage {
     }
 
     /**
-     * Sets the output stream to write the HTTP response to the socket.
+     * Creates a new HTTP response.
      *
-     * @param outputStream Output stream
-     * @throws Exception
+     * @param statusCode Status code
      */
-    public void setOutputStream(OutputStream outputStream) throws Exception {
-	try {
-	    HTTPOutputStream output = new HTTPOutputStream(outputStream);
-
-	    output.writeln(startLine.toString());
-	    for (GeneralHeader generalHeader : generalHeaders) {
-		output.writeln(generalHeader.toString());
-	    }
-	    for (ResponseHeader responseHeader : responseHeaders) {
-		output.writeln(responseHeader.toString());
-	    }
-	    for (EntityHeader entityHeader : entityHeaders) {
-		output.writeln(entityHeader.toString());
-	    }
-
-	    if (messageBody != null && !messageBody.isEmpty()) {
-		byte[] messageBytes = messageBody.getBytes(HTTPConstants.CHATSET);
-		String length = String.valueOf(messageBytes.length);
-
-		output.writeln(new EntityHeader(EntityHeader.Field.CONTENT_LENGTH, length).toString());
-		output.writeln();
-		output.write(messageBytes);
-	    } else {
-		output.writeln();
-	    }
-
-	    output.close();
-	} catch (Exception e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
-	    outputStream.write(new StatusLine(HTTPStatusCode.INTERNAL_SERVER_ERROR_500).toString().getBytes());
-	    outputStream.write(HTTPConstants.CRLF);
-	    outputStream.write(HTTPConstants.CRLF);
-	} finally {
-	    outputStream.close();
-	}
+    public HTTPResponse(HTTPStatusCode statusCode) {
+	this.startLine = new StatusLine(statusCode);
     }
 
     /**
@@ -175,9 +138,71 @@ public final class HTTPResponse extends HTTPMessage {
      * Sets the message body of the HTTP response.
      *
      * @param messageBody Message body
+     * @throws UnsupportedEncodingException
      */
-    public void setMessageBody(String messageBody) {
+    public void setMessageBody(String messageBody) throws UnsupportedEncodingException {
+	if (messageBody != null) {
+	    this.messageBody = messageBody.getBytes(HTTPConstants.CHARSET);
+	    String type = MimeType.TEXT_PLAIN.getMimeType() + "; charset=" + HTTPConstants.CHARSET.toLowerCase();
+	    EntityHeader eh = new EntityHeader(EntityHeader.Field.CONTENT_TYPE, type);
+	    this.addEntityHeaders(eh);
+	}
+    }
+
+    /**
+     * Sets the message body of the HTTP response.
+     *
+     * @param messageBody Message body
+     */
+    public void setMessageBody(byte[] messageBody) {
 	this.messageBody = messageBody;
+    }
+
+
+    /**
+     * Returns a org.apache.http.HttpResponse.
+     *
+     * @param httpResponse HttpResponse
+     * @return org.apache.http.HttpResponse
+     */
+    public HttpResponse toHttpResponse(HttpResponse httpResponse) {
+	try {
+	    // Write status line
+	    StatusLine statusLine = (StatusLine) startLine;
+	    BasicStatusLine basicStatusLine = new BasicStatusLine(
+		    HttpVersion.HTTP_1_1,
+		    statusLine.getStatusCode().getStatusCode(),
+		    statusLine.getStatusCode().getReasonPhrase());
+
+	    httpResponse.setStatusLine(basicStatusLine);
+
+	    // Write headers
+	    for (GeneralHeader generalHeader : generalHeaders) {
+		httpResponse.addHeader(generalHeader.getFieldName(), generalHeader.getFieldValue());
+	    }
+	    for (ResponseHeader responseHeader : responseHeaders) {
+		httpResponse.addHeader(responseHeader.getFieldName(), responseHeader.getFieldValue());
+	    }
+	    for (EntityHeader entityHeader : entityHeaders) {
+		httpResponse.addHeader(entityHeader.getFieldName(), entityHeader.getFieldValue());
+	    }
+
+	    // Write message body
+	    if (messageBody != null) {
+		httpResponse.setEntity(new ByteArrayEntity(messageBody));
+	    }
+	} catch (Exception e) {
+	    logger.error("Exception", e);
+
+	    BasicStatusLine basicStatusLine = new BasicStatusLine(
+		    HttpVersion.HTTP_1_1,
+		    HTTPStatusCode.INTERNAL_SERVER_ERROR_500.getStatusCode(),
+		    HTTPStatusCode.INTERNAL_SERVER_ERROR_500.getReasonPhrase());
+
+	    httpResponse.setStatusLine(basicStatusLine);
+	}
+
+	return httpResponse;
     }
 
 }

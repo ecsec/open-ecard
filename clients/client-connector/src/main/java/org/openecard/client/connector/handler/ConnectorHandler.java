@@ -1,35 +1,55 @@
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.connector.handler;
 
-import org.openecard.client.connector.http.HTTPRequest;
-import org.openecard.client.connector.http.HTTPResponse;
-import org.openecard.client.connector.messages.common.ClientRequest;
-import org.openecard.client.connector.messages.common.ClientResponse;
+import org.apache.http.protocol.HttpRequestHandler;
 
 
 /**
- * Implements a common connector handler.
  *
- * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public interface ConnectorHandler {
+public abstract class ConnectorHandler implements HttpRequestHandler {
+
+    /** Path to register the handler for */
+    protected String path;
 
     /**
-     * Handles a HTTP request and creates a client request.
-     * If the request can be handled by the handler it should return a client request.
-     * Otherwise the handler should return null.
+     * Create a new ConnectorHandler.
      *
-     * @param httpRequest HTTP request
-     * @return A client request or null
-     * @throws Exception If the request should be handled by the handler but is malformed
+     * @param path Path
      */
-    public ClientRequest handleRequest(HTTPRequest httpRequest) throws Exception;
+    protected ConnectorHandler(String path) {
+	this.path = path;
+    }
 
     /**
-     * Handles a client response and creates a HTTP response.
+     * Return the path to register the handler for.
      *
-     * @param clientResponse Client response
-     * @return A HTTP response
-     * @throws Exception
+     * @return Path
      */
-    public HTTPResponse handleResponse(ClientResponse clientResponse) throws Exception;
+    public String getPath() {
+	return path;
+    }
+
 }

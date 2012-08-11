@@ -22,9 +22,18 @@
 
 package org.openecard.client.connector;
 
-import java.io.IOException;
-import org.openecard.client.connector.handler.StatusHandler;
-import org.openecard.client.connector.handler.TCTokenHandler;
+import org.openecard.client.connector.client.ConnectorListeners;
+import org.openecard.client.connector.common.DocumentRoot;
+import org.openecard.client.connector.handler.ConnectorHandlers;
+import org.openecard.client.connector.handler.common.DefaultHandler;
+import org.openecard.client.connector.handler.common.FileHandler;
+import org.openecard.client.connector.handler.common.IndexHandler;
+import org.openecard.client.connector.handler.status.StatusHandler;
+import org.openecard.client.connector.handler.tctoken.TCTokenHandler;
+import org.openecard.client.connector.interceptor.ConnectorInterceptors;
+import org.openecard.client.connector.interceptor.cors.CORSRequestInterceptor;
+import org.openecard.client.connector.interceptor.cors.CORSResponseInterceptor;
+import org.openecard.client.connector.interceptor.error.ErrorResponseInterceptor;
 
 
 /**
@@ -32,48 +41,81 @@ import org.openecard.client.connector.handler.TCTokenHandler;
  */
 public final class Connector {
 
-    private final ConnectorServer connectorServer;
     private final ConnectorHandlers handlers = new ConnectorHandlers();
     private final ConnectorListeners listeners = new ConnectorListeners();
-
+    private final ConnectorInterceptors interceptors = new ConnectorInterceptors();
+    private final ConnectorServer connectorServer;
+    private final DocumentRoot documentRoot;
 
     /**
-     * Create a new Activation.
+     * Creates a new Connector.
      *
      * @param port Port the server should listen on.
-     * @throws IOException
+     * @throws Exception If an I/O error occurs when opening the socket
      */
     public Connector(int port) throws Exception {
-	// Add handlers
-	handlers.addConnectorHandler(new TCTokenHandler());
-	handlers.addConnectorHandler(new StatusHandler());
+	this(port, "/www");
+    }
 
-	connectorServer = new ConnectorServer(port, handlers, listeners);
+    /**
+     * Creates a new Connector.
+     *
+     * @param port Port the server should listen on.
+     * @param documentRootPath Path of the document root
+     * @throws Exception If an I/O error occurs when opening the socket
+     */
+    public Connector(int port, String documentRootPath) throws Exception {
+	// Create document root
+	documentRoot = new DocumentRoot(documentRootPath);
+
+	// Add handlers
+	handlers.addConnectorHandler(new TCTokenHandler(listeners));
+	handlers.addConnectorHandler(new StatusHandler(listeners));
+	handlers.addConnectorHandler(new IndexHandler());
+	handlers.addConnectorHandler(new FileHandler(documentRoot));
+	handlers.addConnectorHandler(new DefaultHandler());
+
+	// Add interceptors
+	interceptors.addConnectorInterceptor(new ErrorResponseInterceptor(documentRoot, "/templates/error.html"));
+	interceptors.addConnectorInterceptor(new CORSResponseInterceptor());
+	interceptors.addConnectorInterceptor(new CORSRequestInterceptor());
+
+	// Start up server
+	connectorServer = new ConnectorServer(port, handlers, interceptors);
 	connectorServer.start();
     }
 
     /**
-     * Create a new Activation.
+     * Create a new Connector.
      * The port is set to any available number.
      *
-     * @throws Exception if an I/O error occurs when opening the socket.
+     * @throws Exception If an I/O error occurs when opening the socket
      */
     public Connector() throws Exception {
 	this(0);
     }
 
-
+    /**
+     * Returns the handlers.
+     *
+     * @return Handlers
+     */
     public ConnectorHandlers getHandlers() {
 	return handlers;
     }
 
+    /**
+     * Returns the listeners.
+     *
+     * @return Listeners
+     */
     public ConnectorListeners getListeners() {
 	return listeners;
     }
 
     /**
-     * @see ConnectorServer#getPortNumber() 
-     * @return Port number where the connector is reachable.
+     * @see ConnectorServer#getPortNumber()
+     * @return Port number where the connector is reachable
      */
     public int getPortNumber() {
 	return connectorServer.getPortNumber();

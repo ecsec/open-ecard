@@ -1,15 +1,41 @@
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.client.connector.http;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.http.Header;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpRequest;
+import org.openecard.client.common.io.LimitedInputStream;
+import org.openecard.client.connector.ConnectorHTTPException;
 import org.openecard.client.connector.http.header.EntityHeader;
 import org.openecard.client.connector.http.header.GeneralHeader;
 import org.openecard.client.connector.http.header.RequestHeader;
 import org.openecard.client.connector.http.header.RequestLine;
-import org.openecard.client.connector.http.io.HTTPInputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -28,7 +54,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class HTTPRequest extends HTTPMessage {
 
-    private static final Logger logger = LoggerFactory.getLogger(HTTPRequest.class);
     /**
      * Stores the request-headers of a HTTP message.
      */
@@ -38,54 +63,6 @@ public final class HTTPRequest extends HTTPMessage {
      * Creates a new HTTP request.
      */
     public HTTPRequest() {
-    }
-
-    /**
-     * Sets the input stream of the HTTP request.
-     * The HTTP request will be read and parsed.
-     *
-     * @param inputStream Input stream
-     * @throws Exception If the HTTP request is malformed
-     */
-    public void setInputStream(InputStream inputStream) throws Exception {
-	HTTPInputStream input = new HTTPInputStream(inputStream);
-
-	try {
-	    // Read request line
-	    startLine = RequestLine.getInstance(input.readLine());
-
-	    String line = input.readLine();
-	    while (line != null && !line.isEmpty()) {
-		GeneralHeader generalHeader = GeneralHeader.getInstance(line);
-		if (generalHeader != null) {
-		    generalHeaders.add(generalHeader);
-		}
-		RequestHeader requestHeader = RequestHeader.getInstance(line);
-		if (requestHeader != null) {
-		    requestHeaders.add(requestHeader);
-		}
-		EntityHeader entityHeader = EntityHeader.getInstance(line);
-		if (entityHeader != null) {
-		    entityHeaders.add(entityHeader);
-		}
-
-		line = input.readLine();
-	    }
-
-	    line = input.readLine();
-	    StringBuilder sb = new StringBuilder();
-	    while (line != null && !line.isEmpty()) {
-		sb.append(line);
-		line = input.readLine();
-	    }
-	    messageBody = sb.toString();
-
-	} catch (Exception e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
-	    throw new IllegalArgumentException();
-	}
     }
 
     /**
@@ -129,7 +106,58 @@ public final class HTTPRequest extends HTTPMessage {
      *
      * @return Message body
      */
-    public String getMessageBody() {
+    public byte[] getMessageBody() {
 	return messageBody;
     }
+
+
+    /**
+     * Creates a org.openecard.client.connector.http.HTTPRequest
+     * from a org.apache.http.HttpRequest.
+     *
+     * @param httpRequest HttpRequest
+     * @throws ConnectorHTTPException
+     */
+    public void fromHttpRequest(HttpRequest httpRequest) throws ConnectorHTTPException {
+	try {
+	    // Read request line
+	    startLine = RequestLine.getInstance(httpRequest.getRequestLine().toString());
+
+	    // Read headers
+	    for (Header h : httpRequest.getAllHeaders()) {
+		String line = h.toString();
+		GeneralHeader generalHeader = GeneralHeader.getInstance(line);
+		if (generalHeader != null) {
+		    generalHeaders.add(generalHeader);
+		}
+		RequestHeader requestHeader = RequestHeader.getInstance(line);
+		if (requestHeader != null) {
+		    requestHeaders.add(requestHeader);
+		}
+		EntityHeader entityHeader = EntityHeader.getInstance(line);
+		if (entityHeader != null) {
+		    entityHeaders.add(entityHeader);
+		}
+	    }
+
+	    // Read message body
+	    if (httpRequest instanceof HttpEntityEnclosingRequest) {
+		InputStream is = ((HttpEntityEnclosingRequest) httpRequest).getEntity().getContent();
+		LimitedInputStream lis = new LimitedInputStream(is);
+		InputStreamReader isr = new InputStreamReader(lis);
+		BufferedReader br = new BufferedReader(isr);
+		StringBuilder sb = new StringBuilder();
+		String line = br.readLine();
+
+		while (line != null || !line.isEmpty()) {
+		    sb.append(line);
+		    line = br.readLine();
+		}
+	    }
+
+	} catch (Exception e) {
+	    throw new ConnectorHTTPException(HTTPStatusCode.BAD_REQUEST_400, e.getMessage());
+	}
+    }
+
 }

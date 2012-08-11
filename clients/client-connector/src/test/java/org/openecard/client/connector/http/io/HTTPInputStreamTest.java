@@ -32,12 +32,11 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class HTTPInputStreamTest {
 
     private static final byte[] CRLF = new byte[]{(byte) 0x0D, (byte) 0x0A};
-
 
     @Test
     public void testReadLine() throws IOException {

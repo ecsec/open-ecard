@@ -29,13 +29,13 @@ import org.testng.annotations.Test;
 
 
 /**
- * @author Moritz Horsch <moritz.horsch@cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class HTTPOutputStreamTest {
 
     private static final byte[] CRLF = new byte[]{(byte) 0x0D, (byte) 0x0A};
     private String testData = "Test data";
-
 
     @Test
     public void testWrite() throws Exception {

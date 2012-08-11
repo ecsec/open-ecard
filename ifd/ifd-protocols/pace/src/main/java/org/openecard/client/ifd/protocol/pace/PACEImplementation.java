@@ -60,7 +60,7 @@ public class PACEImplementation {
     private PACEKey keyPCD, keyPICC;
     private byte[] keyMAC, keyENC;
     private byte[] password, s;
-    // Certificate Authority Reference (CAR)
+    // Certification Authority Reference (CAR)
     private byte[] currentCAR, previousCAR;
     private byte retryCounter = 3;
 

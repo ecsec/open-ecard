@@ -107,4 +107,16 @@ public class FileUtils {
 	return new String(toByteArray(file), charset);
     }
 
+    public static String convertPath(String path) {
+	String os = System.getProperty("os.name").toLowerCase();
+
+	if (os.indexOf("win") >= 0) {
+	    return path.replace("/", "\\");
+	} else if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0) {
+	    return path.replace("\\\\", "/");
+	} else {
+	    return null;
+	}
+    }
+
 }

@@ -23,9 +23,19 @@
 package org.openecard.client.crypto.common.asn1.cvc;
 
 import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import org.openecard.bouncycastle.asn1.*;
+import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.openecard.bouncycastle.asn1.ASN1Sequence;
+import org.openecard.bouncycastle.asn1.ASN1Set;
+import org.openecard.bouncycastle.asn1.ASN1TaggedObject;
+import org.openecard.bouncycastle.asn1.DERIA5String;
+import org.openecard.bouncycastle.asn1.DEROctetString;
+import org.openecard.bouncycastle.asn1.DERPrintableString;
+import org.openecard.bouncycastle.asn1.DERSet;
+import org.openecard.bouncycastle.asn1.DERTaggedObject;
+import org.openecard.bouncycastle.asn1.DERUTF8String;
 import org.openecard.client.crypto.common.asn1.eac.oid.CVCertificatesObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +71,7 @@ public class CertificateDescription {
     private Object termsOfUsage;
     private String redirectURL;
     private ArrayList<byte[]> commCertificates;
+    private byte[] encoded;
 
     /**
      * Creates a new CertificateDescription.
@@ -68,7 +79,7 @@ public class CertificateDescription {
      * @param obj Encoded CertificateDescription
      * @return CertificateDescription
      */
-    public static CertificateDescription getInstance(Object obj) {
+    public static CertificateDescription getInstance(Object obj) throws CertificateException {
 	if (obj instanceof CertificateDescription) {
 	    return (CertificateDescription) obj;
 	} else if (obj instanceof ASN1Set) {
@@ -89,16 +100,17 @@ public class CertificateDescription {
      *
      * @param seq Encoded CertificateDescription
      */
-    public CertificateDescription(ASN1Sequence seq) {
-	Enumeration elements = seq.getObjects();
+    private CertificateDescription(ASN1Sequence seq) throws CertificateException {
+	try {
+	    encoded = seq.getEncoded();
+	    Enumeration elements = seq.getObjects();
+	    descriptionType = ASN1ObjectIdentifier.getInstance(elements.nextElement()).toString();
 
-	descriptionType = ASN1ObjectIdentifier.getInstance(elements.nextElement()).toString();
+	    while (elements.hasMoreElements()) {
+		ASN1TaggedObject taggedObject = DERTaggedObject.getInstance(elements.nextElement());
+		int tag = taggedObject.getTagNo();
 
-	while (elements.hasMoreElements()) {
-	    ASN1TaggedObject taggedObject = DERTaggedObject.getInstance(elements.nextElement());
-	    int tag = taggedObject.getTagNo();
 
-	    try {
 		switch (tag) {
 		    case 1:
 			issuerName = ((DERUTF8String) taggedObject.getObject()).getString();
@@ -135,10 +147,11 @@ public class CertificateDescription {
 		    default:
 			throw new IllegalArgumentException("Unknown object in CertificateDescription");
 		}
-	    } catch (IOException e) {
-		_logger.error("Cannot parse CertificateDescription", e);
-		throw new IllegalArgumentException("Cannot parse CertificateDescription");
+
 	    }
+	} catch (IOException e) {
+	    _logger.error("Cannot parse CertificateDescription", e);
+	    throw new CertificateException("Cannot parse CertificateDescription");
 	}
     }
 
@@ -212,6 +225,15 @@ public class CertificateDescription {
      */
     public ArrayList<byte[]> getCommCertificates() {
 	return commCertificates;
+    }
+
+    /**
+     * Returns the certificate description as a byte array.
+     *
+     * @return Certificate description as a byte array
+     */
+    public byte[] getEncoded() {
+	return encoded;
     }
 
 }

@@ -87,7 +87,7 @@ public class CHATTest {
 	assertEquals(chatBytes, chat.toByteArray());
     }
 
-    @Test(enabled=false)
+    @Test(enabled = false)
     public void testtoString() throws TLVException {
 	TreeMap<CHAT.DataGroup, Boolean> readAccess = chat.getReadAccess();
 

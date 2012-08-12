@@ -69,7 +69,7 @@ public class CardVerifiableCertificateViewer {
 	}
     }
 
-    @Test(enabled=false)
+    @Test(enabled = !true)
     public void view() throws Exception {
 
 	init();
@@ -84,7 +84,12 @@ public class CardVerifiableCertificateViewer {
 	    System.out.println("CHAT: " + c.getCHAT().toString());
 	    System.out.println("EffectiveDate: " + dateFormat.format(c.getEffectiveDate().getTime()));
 	    System.out.println("ExpirationDate: " + dateFormat.format(c.getExpirationDate().getTime()));
+
 	    System.out.println("");
+
+	    if (c.getExtensions() != null) {
+		System.out.println(ByteUtils.toHexString(c.getExtensions(), true));
+	    }
 	}
     }
 

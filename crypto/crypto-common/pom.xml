@@ -5,26 +5,25 @@
     <modelVersion>4.0.0</modelVersion>
     
     <parent>
-        <artifactId>crypto</artifactId>
-        <groupId>org.openecard.client</groupId>
-        <version>1.0.0-pre2-SNAPSHOT</version>
+	<artifactId>crypto</artifactId>
+	<groupId>org.openecard.client</groupId>
+	<version>1.0.0-pre2-SNAPSHOT</version>
     </parent>
     
     <groupId>org.openecard.client.crypto</groupId>
     <artifactId>crypto-common</artifactId>
     <name>Crypto common</name>
-    
     <dependencies>
-        <dependency>
-            <groupId>org.openecard.client</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openecard.client.crypto</groupId>
-            <artifactId>bouncycastle</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+	<dependency>
+	    <groupId>org.openecard.client</groupId>
+	    <artifactId>common</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.crypto</groupId>
+	    <artifactId>bouncycastle</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
     </dependencies>
 
 </project>

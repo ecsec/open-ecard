@@ -171,7 +171,7 @@ public class TCTokenHandler extends ConnectorClientHandler {
 	}
 
 	// Verify the TCToken
-	TCTokenVerifier ver = new TCTokenVerifier(tokens);
+	TCTokenVerifier ver = new TCTokenVerifier(tokens.get(0));
 	ver.verify();
 
 	return tokens.get(0);

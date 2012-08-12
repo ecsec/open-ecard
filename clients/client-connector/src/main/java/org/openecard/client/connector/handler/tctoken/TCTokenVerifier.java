@@ -23,9 +23,6 @@
 package org.openecard.client.connector.handler.tctoken;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.ValueValidator;
 import org.openecard.client.connector.ConnectorConstants.ConnectorError;
@@ -41,17 +38,7 @@ import org.slf4j.LoggerFactory;
 public class TCTokenVerifier {
 
     private static final Logger _logger = LoggerFactory.getLogger(TCTokenVerifier.class);
-    private List<TCToken> tokens;
     private TCToken token;
-
-    /**
-     * Creates a new TCTokenVerifier to verify a TCToken.
-     *
-     * @param tokens Tokens
-     */
-    public TCTokenVerifier(List<TCToken> tokens) {
-	this.tokens = tokens;
-    }
 
     /**
      * Creates a new TCTokenVerifier to verify a TCToken.
@@ -59,8 +46,7 @@ public class TCTokenVerifier {
      * @param token Token
      */
     public TCTokenVerifier(TCToken token) {
-	tokens = new ArrayList<TCToken>();
-	tokens.add(token);
+	this.token = token;
     }
 
     /**
@@ -69,26 +55,22 @@ public class TCTokenVerifier {
      * @throws TCTokenException
      */
     public void verify() throws TCTokenException {
-	if (tokens.isEmpty()) {
+	if (token == null) {
 	    String message = ConnectorError.TC_TOKEN_NOT_AVAILABLE.toString();
 	    _logger.error(message);
 	    throw new TCTokenException(message);
 	}
 
 	try {
-	    for (Iterator<TCToken> it = tokens.iterator(); it.hasNext();) {
-		token = it.next();
-
-		verifyServerAddress();
-		verifySessionIdentifier();
-		verifyRefreshAddress();
-		verifyBinding();
-		verifyPathSecurityParameters();
-		verifyPathSecurityProtocol();
-	    }
-	} catch (Exception e) {
+	    verifyServerAddress();
+	    verifySessionIdentifier();
+	    verifyRefreshAddress();
+	    verifyBinding();
+	    verifyPathSecurityParameters();
+	    verifyPathSecurityProtocol();
+	} catch (TCTokenException e) {
 	    String message = ConnectorError.TC_TOKEN_REFUSED.toString();
-	    _logger.error(message, e);
+	    _logger.error(message);
 	    throw new TCTokenException(message, e);
 	}
     }
@@ -98,10 +80,12 @@ public class TCTokenVerifier {
      *
      * @throws Exception
      */
-    public void verifyServerAddress() throws Exception {
-	URL value = token.getServerAddress();
-	if (!checkEmpty(value)) {
-	    throw new TCTokenException("ServerAddress is empty!");
+    public void verifyServerAddress() throws TCTokenException {
+	try {
+	    URL value = token.getServerAddress();
+	    checkRequired(value);
+	} catch (TCTokenException e) {
+	    throw new TCTokenException("Malformed ServerAddress");
 	}
     }
 
@@ -110,10 +94,14 @@ public class TCTokenVerifier {
      *
      * @throws Exception
      */
-    public void verifySessionIdentifier() throws Exception {
-	String value = token.getSessionIdentifier();
-	checkRequired(value);
-	checkSessionLength(value);
+    public void verifySessionIdentifier() throws TCTokenException {
+	try {
+	    String value = token.getSessionIdentifier();
+	    checkRequired(value);
+	    checkSessionLength(value);
+	} catch (TCTokenException e) {
+	    throw new TCTokenException("Malformed SessionIdentifier");
+	}
     }
 
     /**
@@ -121,9 +109,13 @@ public class TCTokenVerifier {
      *
      * @throws Exception
      */
-    public void verifyRefreshAddress() throws Exception {
-	URL value = token.getRefreshAddress();
-	checkRequired(value);
+    public void verifyRefreshAddress() throws TCTokenException {
+	try {
+	    URL value = token.getRefreshAddress();
+	    checkRequired(value);
+	} catch (TCTokenException e) {
+	    throw new TCTokenException("Malformed RefreshAddress");
+	}
     }
 
     /**
@@ -131,10 +123,14 @@ public class TCTokenVerifier {
      *
      * @throws Exception
      */
-    public void verifyBinding() throws Exception {
-	String value = token.getBinding();
-	checkRequired(value);
-	checkEqual(value, "urn:liberty:paos:2006-08");
+    public void verifyBinding() throws TCTokenException {
+	try {
+	    String value = token.getBinding();
+	    checkRequired(value);
+	    checkEqual(value, "urn:liberty:paos:2006-08");
+	} catch (TCTokenException e) {
+	    throw new TCTokenException("Malformed Binding");
+	}
     }
 
     /**
@@ -142,13 +138,14 @@ public class TCTokenVerifier {
      *
      * @throws Exception
      */
-    public void verifyPathSecurityProtocol() throws Exception {
-	String value = token.getPathSecurityProtocol();
-	if (!checkEmpty(value)) {
-	    //FIXME
-	    checkEqual(value, "urn:ietf:rfc:4346");
-	    checkEqual(value, "urn:ietf:rfc:4279");
-	    checkEqual(value, "urn:ietf:rfc:5487");
+    public void verifyPathSecurityProtocol() throws TCTokenException {
+	try {
+	    String value = token.getPathSecurityProtocol();
+	    if (!checkEmpty(value)) {
+		checkEqualOR(value, "urn:ietf:rfc:4346", "urn:ietf:rfc:4279", "urn:ietf:rfc:5487");
+	    }
+	} catch (TCTokenException e) {
+	    throw new TCTokenException("Malformed PathSecurityProtocol");
 	}
     }
 
@@ -157,14 +154,18 @@ public class TCTokenVerifier {
      *
      * @throws Exception
      */
-    public void verifyPathSecurityParameters() throws Exception {
-	if (token.getPathSecurityProtocol().equals("urn:ietf:rfc:4279")
-		|| token.getPathSecurityProtocol().equals("urn:ietf:rfc:5487")) {
-	    TCToken.PathSecurityParameters psp = token.getPathSecurityParameters();
-	    if (!checkEmpty(psp)) {
-		checkRequired(psp.getPSK());
-		checkPSKLength(ByteUtils.toHexString(psp.getPSK()));
+    public void verifyPathSecurityParameters() throws TCTokenException {
+	try {
+	    if (token.getPathSecurityProtocol().equals("urn:ietf:rfc:4279")
+		    || token.getPathSecurityProtocol().equals("urn:ietf:rfc:5487")) {
+		TCToken.PathSecurityParameters psp = token.getPathSecurityParameters();
+		if (!checkEmpty(psp)) {
+		    checkRequired(psp.getPSK());
+		    checkPSKLength(ByteUtils.toHexString(psp.getPSK()));
+		}
 	    }
+	} catch (TCTokenException e) {
+	    throw new TCTokenException("Malformed PathSecurityParameters");
 	}
     }
 
@@ -173,26 +174,25 @@ public class TCTokenVerifier {
      *
      * @param value Value
      * @return True if the element is empty, otherwise false
-     * @throws Exception
      */
-    private boolean checkEmpty(Object value) throws Exception {
+    private boolean checkEmpty(Object value) {
 	if (value != null) {
 	    if (value instanceof String) {
-		if (!((String) value).isEmpty()) {
+		if (((String) value).isEmpty()) {
 		    return true;
 		}
 	    } else if (value instanceof URL) {
-		if (!((URL) value).toString().isEmpty()) {
+		if (((URL) value).toString().isEmpty()) {
 		    return true;
 		}
 	    } else if (value instanceof byte[]) {
-		if (((byte[]) value).length != 0) {
+		if (((byte[]) value).length == 0) {
 		    return true;
 		}
 	    }
 	    return false;
 	}
-	return false;
+	return true;
     }
 
     /**
@@ -202,10 +202,19 @@ public class TCTokenVerifier {
      * @param equal Equal
      * @throws Exception
      */
-    private void checkEqual(String value, String equal) throws Exception {
+    private void checkEqual(String value, String equal) throws TCTokenException {
 	if (!value.equals(equal)) {
-	    throw new Exception("Element is not equal to " + equal);
+	    throw new TCTokenException("Element is not equal to " + equal);
 	}
+    }
+
+    private void checkEqualOR(String value, String... equal) throws TCTokenException {
+	for (String string : equal) {
+	    if (value.equals(string)) {
+		return;
+	    }
+	}
+	throw new TCTokenException();
     }
 
     /**
@@ -214,21 +223,21 @@ public class TCTokenVerifier {
      * @param value Value
      * @throws Exception
      */
-    private void checkRequired(Object value) throws Exception {
-	if (!checkEmpty(value)) {
-	    throw new Exception("Element is required.");
+    private void checkRequired(Object value) throws TCTokenException {
+	if (checkEmpty(value)) {
+	    throw new TCTokenException("Element is required.");
 	}
     }
 
-    private void checkSessionLength(String value) throws Exception {
+    private void checkSessionLength(String value) throws TCTokenException {
 	if (!ValueValidator.checkSessionStrength(value)) {
-	    throw new Exception("The number of bytes in the session is too small.");
+	    throw new TCTokenException("The number of bytes in the session is too small.");
 	}
     }
 
-    private void checkPSKLength(String value) throws Exception {
+    private void checkPSKLength(String value) throws TCTokenException {
 	if (!ValueValidator.checkPSKStrength(value)) {
-	    throw new Exception("The number of bytes in the PSK is too small.");
+	    throw new TCTokenException("The number of bytes in the PSK is too small.");
 	}
     }
 

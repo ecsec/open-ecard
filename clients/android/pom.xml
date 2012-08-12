@@ -65,7 +65,7 @@
 	    <groupId>org.openecard.client.transport</groupId>
 	    <artifactId>dispatcher</artifactId>
 	    <version>${project.version}</version>
-  	</dependency>
+	</dependency>
 	<dependency>
 	    <groupId>org.openecard.client.transport</groupId>
 	    <artifactId>paos</artifactId>
@@ -88,17 +88,17 @@
 	    <scope>provided</scope>
 	</dependency>
 	<!-- Mark slf4j-api as private as it is already part of the slf4j-android lib. When not provided the build fails because of dup class -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.6.6</version>
+	<dependency>
+	    <groupId>org.slf4j</groupId>
+	    <artifactId>slf4j-api</artifactId>
+	    <version>1.6.6</version>
 	    <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-android</artifactId>
-            <version>1.6.1-RC1</version>
-        </dependency>
+	</dependency>
+	<dependency>
+	    <groupId>org.slf4j</groupId>
+	    <artifactId>slf4j-android</artifactId>
+	    <version>1.6.1-RC1</version>
+	</dependency>
 	<dependency>
 	    <groupId>org.openecard.client.gui</groupId>
 	    <artifactId>android-gui</artifactId>
@@ -109,6 +109,12 @@
 	    <groupId>org.openecard.client.sal.protocols</groupId>
 	    <artifactId>eac</artifactId>
 	    <version>${project.version}</version> 
+	</dependency>
+	<dependency>
+	    <groupId>org.apache.httpcomponents</groupId>
+	    <artifactId>httpcore</artifactId>
+	    <version>4.2.1</version>
+	    <scope>provided</scope>
 	</dependency>
     </dependencies>
 

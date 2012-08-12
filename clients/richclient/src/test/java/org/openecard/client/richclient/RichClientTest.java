@@ -74,7 +74,7 @@ public class RichClientTest {
 	    }
 
 	    // Verify the TCToken
-	    TCTokenVerifier ver = new TCTokenVerifier(tokens);
+	    TCTokenVerifier ver = new TCTokenVerifier(tokens.get(0));
 	    ver.verify();
 	} catch (Exception e) {
 	    logger.error(e.getMessage());

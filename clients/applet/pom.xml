@@ -13,6 +13,7 @@
     <groupId>org.openecard.client.clients</groupId>
     <artifactId>applet</artifactId>
     <name>Applet</name>
+    <packaging>signed-packed-jar</packaging>
 
     <profiles>
 	<profile>
@@ -28,93 +29,96 @@
     </profiles>
 
     <build>
-	<plugins>
-	    <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-shade-plugin</artifactId>
-		<version>1.6</version>
-		<executions>
-		    <execution>
-			<phase>package</phase>
-			<goals>
-			    <goal>shade</goal>
-			</goals>
-			<configuration>
-			    <filters>
-				<filter>
-				    <artifact>*:*</artifact>
-				    <excludes>
-					<exclude>META-INF/**/pom.xml</exclude>
-					<exclude>META-INF/**/pom.properties</exclude>
-				    </excludes>
-				</filter>
-			    </filters>
-			</configuration>
-		    </execution>
-		</executions>
-	    </plugin>
+	<pluginManagement>
+	    <plugins>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-shade-plugin</artifactId>
+		    <version>1.6</version>
+		    <configuration>
+			<filters>
+			    <filter>
+				<artifact>*:*</artifact>
+				<excludes>
+				    <exclude>META-INF/**/pom.xml</exclude>
+				    <exclude>META-INF/**/pom.properties</exclude>
+				</excludes>
+			    </filter>
+			</filters>
+		    </configuration>
+		</plugin>
+		<plugin>
+		    <groupId>de.ecsec.maven.plugins</groupId>
+		    <artifactId>maven-pack200-plugin</artifactId>
+		    <version>1.0.0</version>
+		    <configuration>
+			<processMainArtifact>true</processMainArtifact>
+			<effort>9</effort>
+			<deflateHint>true</deflateHint>
+			<!--<keepFileOrder>true</keepFileOrder>-->
+		    </configuration>
+		</plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-jar-plugin</artifactId>
+		    <version>2.4</version>
+		    <configuration>
+			<keystore>src/package/resources/keystore/keystore.jks</keystore>
+			<storepass>DgN1CB0Ywy2W</storepass>
+			<alias>applet</alias>
+			<keypass>bHrjoV3j7ucq</keypass>
+			<verify>true</verify>
+			<jarPath>${project.build.directory}/${project.build.FinalName}.jar</jarPath>
+		    </configuration>
+		</plugin>
+	    </plugins>
+	</pluginManagement>
+	<extensions>
+	    <extension>
+		<groupId>de.ecsec.maven.plugins</groupId>
+		<artifactId>maven-pack200-plugin</artifactId>
+		<version>1.0.0</version>
+	    </extension>
+	</extensions>
 
-	    <!-- Disabled until configured correctly -->
+	<!-- Disabled until configured correctly -->
 
-	    <!-- <plugin> -->
-	    <!-- 	  <groupId>com.github.wvengen</groupId> -->
-	    <!-- 	  <artifactId>proguard-maven-plugin</artifactId> -->
-	    <!-- 	  <version>2.0.5</version> -->
-	    <!-- 	  <executions> -->
-	    <!-- 	      <execution> -->
-	    <!-- 		  <phase>package</phase> -->
-	    <!-- 		  <goals><goal>proguard</goal></goals> -->
-	    <!-- 	      </execution> -->
-	    <!-- 	  </executions> -->
-	    <!-- 	  <configuration> -->
-	    <!-- 	      <proguardVersion>4.7</proguardVersion> -->
-	    <!-- 	      <includeDependency>false</includeDependency> -->
-	    <!-- 	      <options> -->
-	    <!-- don't warn about these packages not being found, because they are not needed anyways -->
-	    <!-- 		  <option>-dontwarn org.bouncycastle.**</option> -->
-	    <!-- 		  <option>-dontwarn junit.**</option> -->
-	    <!-- general options -->
-	    <!-- 		  <option>-allowaccessmodification</option> -->
-	    <!-- tell proguard which classes/methods to keep untouched -->
-	    <!-- 		  <option>-keep public class * extends java.applet.Applet { *; }</option> -->
-	    <!-- 	      </options> -->
-	    <!-- 	      <libs> -->
-	    <!-- 		  <lib>${java.home}/lib/rt.jar</lib> -->
-	    <!-- 		  <lib>${java.home}/lib/jce.jar</lib> -->
-	    <!-- 	      </libs> -->
-	    <!-- 	  </configuration> -->
-	    <!-- 	  <dependencies> -->
-	    <!-- 	      <dependency> -->
-	    <!-- 		  <groupId>net.sf.proguard</groupId> -->
-	    <!-- 		  <artifactId>proguard-base</artifactId> -->
-	    <!-- 		  <version>4.7</version> -->
-	    <!-- 		  <scope>runtime</scope> -->
-	    <!-- 	      </dependency> -->
-	    <!-- 	  </dependencies> -->
-	    <!-- </plugin> -->
-
-	    <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-jar-plugin</artifactId>
-		<version>2.4</version>
-		<configuration>
-		    <keystore>src/package/resources/keystore/keystore.jks</keystore>
-		    <storepass>DgN1CB0Ywy2W</storepass>
-		    <alias>applet</alias>
-		    <keypass>bHrjoV3j7ucq</keypass>
-		    <verify>true</verify>
-		    <jarPath>${project.build.directory}/${project.build.FinalName}.${project.packaging}</jarPath>
-		</configuration>
-		<executions>
-		    <execution>
-			<phase>verify</phase>
-			<goals>
-			    <goal>sign</goal>
-			</goals>
-		    </execution>
-		</executions>
-	    </plugin>
-	</plugins>
+	<!-- <plugin> -->
+	<!--     <groupId>com.github.wvengen</groupId> -->
+	<!--     <artifactId>proguard-maven-plugin</artifactId> -->
+	<!--     <version>2.0.5</version> -->
+	<!--     <executions> -->
+	<!-- 	<execution> -->
+	<!-- 	    <phase>package</phase> -->
+	<!-- 	    <goals><goal>proguard</goal></goals> -->
+	<!-- 	</execution> -->
+	<!--     </executions> -->
+	<!--     <configuration> -->
+	<!-- 	<proguardVersion>4.7</proguardVersion> -->
+	<!-- 	<includeDependency>false</includeDependency> -->
+	<!-- 	<options> -->
+		    <!-- don't warn about these packages not being found, because they are not needed anyways -->
+		    <!-- <option>-dontwarn org.bouncycastle.**</option> -->
+		    <!-- <option>-dontwarn junit.**</option> -->
+		    <!-- general options -->
+		    <!-- <option>-allowaccessmodification</option> -->
+		    <!-- tell proguard which classes/methods to keep untouched -->
+	<!-- 	    <option>-keep public class * extends java.applet.Applet { *; }</option> -->
+	<!-- 	</options> -->
+	<!-- 	<libs> -->
+	<!-- 	    <lib>${java.home}/lib/rt.jar</lib> -->
+	<!-- 	    <lib>${java.home}/lib/jce.jar</lib> -->
+	<!-- 	</libs> -->
+	<!--     </configuration> -->
+	<!--     <dependencies> -->
+	<!-- 	<dependency> -->
+	<!-- 	    <groupId>net.sf.proguard</groupId> -->
+	<!-- 	    <artifactId>proguard-base</artifactId> -->
+	<!-- 	    <version>4.7</version> -->
+	<!-- 	    <scope>runtime</scope> -->
+	<!-- 	</dependency> -->
+	<!--     </dependencies> -->
+	<!-- </plugin> -->
     </build>
 
     <dependencies>

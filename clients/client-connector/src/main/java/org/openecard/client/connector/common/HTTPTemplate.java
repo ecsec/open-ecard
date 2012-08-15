@@ -29,7 +29,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import org.openecard.client.connector.http.HTTPConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +74,7 @@ public class HTTPTemplate {
 	    baos.write(b);
 	}
 
-	content = new StringBuilder(new String(baos.toByteArray(), HTTPConstants.CHARSET));
+	content = new StringBuilder(new String(baos.toByteArray(), "UTF-8"));
     }
 
     /**
@@ -104,7 +103,7 @@ public class HTTPTemplate {
      * @throws UnsupportedEncodingException
      */
     public byte[] getBytes() throws UnsupportedEncodingException {
-	return toString().getBytes(HTTPConstants.CHARSET);
+	return toString().getBytes("UTF-8");
     }
 
     @Override

@@ -26,12 +26,15 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.openecard.client.common.I18n;
@@ -39,8 +42,7 @@ import org.openecard.client.connector.ConnectorConstants;
 import org.openecard.client.connector.common.DocumentRoot;
 import org.openecard.client.connector.common.HTTPTemplate;
 import org.openecard.client.connector.common.MimeType;
-import org.openecard.client.connector.http.HTTPConstants;
-import org.openecard.client.connector.http.header.EntityHeader;
+import org.openecard.client.connector.http.HeaderTypes;
 import org.openecard.client.connector.interceptor.ConnectorResponseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,20 +68,20 @@ public class ErrorResponseInterceptor extends ConnectorResponseInterceptor {
      * @param template Template
      */
     public ErrorResponseInterceptor(DocumentRoot documentRoot, String template) {
-	this(documentRoot,
-		template,
-		new ArrayList<Integer>() {
-		    {
-			for (int i = 400; i <= 417; i++) {
-			    add(i);
-			}
-			for (int i = 500; i <= 505; i++) {
-			    add(i);
-			}
-		    }
-
-		});
+	this(documentRoot, template, generateErrorCodes());
     }
+
+    private static ArrayList<Integer> generateErrorCodes() {
+	ArrayList<Integer> result = new ArrayList<Integer>();
+	for (int i = 400; i <= 417; i++) {
+	    result.add(i);
+	}
+	for (int i = 500; i <= 505; i++) {
+	    result.add(i);
+	}
+	return result;
+    }
+
 
     /**
      * Create a new ErrorInterceptor.
@@ -95,20 +97,20 @@ public class ErrorResponseInterceptor extends ConnectorResponseInterceptor {
 
     @Override
     public void process(HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
-	Integer statusCode = Integer.valueOf(httpResponse.getStatusLine().getStatusCode());
+	int statusCode = httpResponse.getStatusLine().getStatusCode();
 
 	if (errorCodes.contains(statusCode)) {
 	    _logger.debug("HTTP response intercepted");
-	    Header contentType = httpResponse.getFirstHeader(EntityHeader.Field.CONTENT_TYPE.getFieldName());
+	    Header contentType = httpResponse.getFirstHeader(HeaderTypes.CONTENT_TYPE.fieldName());
 	    if (contentType != null) {
 		// Intercept response with the content type "text/plain"
 		if (contentType.getValue().contains(MimeType.TEXT_PLAIN.getMimeType())) {
 		    // Remove old headers
-		    httpResponse.removeHeaders(EntityHeader.Field.CONTENT_TYPE.getFieldName());
-		    httpResponse.removeHeaders(EntityHeader.Field.CONTENT_LENGTH.getFieldName());
+		    httpResponse.removeHeaders(HeaderTypes.CONTENT_TYPE.fieldName());
+		    httpResponse.removeHeaders(HeaderTypes.CONTENT_LENGTH.fieldName());
 
 		    // Read message body
-		    String content = readEntiry(httpResponse.getEntity());
+		    String content = readEntity(httpResponse.getEntity());
 
 		    template.setProperty("%%%MESSAGE%%%", content);
 		}
@@ -120,26 +122,18 @@ public class ErrorResponseInterceptor extends ConnectorResponseInterceptor {
 	    template.setProperty("%%%HEADLINE%%%", httpResponse.getStatusLine().getReasonPhrase());
 
 	    // Add new content
-	    httpResponse.setEntity(new StringEntity(template.toString(), HTTPConstants.CHARSET));
-	    httpResponse.addHeader(
-		    EntityHeader.Field.CONTENT_TYPE.getFieldName(),
-		    MimeType.TEXT_HTML.getMimeType() + "; charset=" + HTTPConstants.CHARSET.toLowerCase());
-	    httpResponse.addHeader(
-		    EntityHeader.Field.CONTENT_LENGTH.getFieldName(),
-		    String.valueOf(template.getBytes().length));
+	    httpResponse.setEntity(new StringEntity(template.toString(), "UTF-8"));
+	    httpResponse.addHeader(HeaderTypes.CONTENT_TYPE.fieldName(), MimeType.TEXT_HTML.getMimeType() + "; charset=utf-8");
+	    httpResponse.addHeader(HeaderTypes.CONTENT_LENGTH.fieldName(), String.valueOf(template.getBytes().length));
 	}
     }
 
-    private String readEntiry(HttpEntity httpEntiry) throws IOException {
-	InputStream is = new BufferedInputStream(httpEntiry.getContent());
+    private String readEntity(HttpEntity httpEntity) throws IOException {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	httpEntity.writeTo(baos);
 
-	int b;
-	while ((b = is.read()) != -1) {
-	    baos.write(b);
-	}
-
-	return new String(baos.toByteArray());
+	ContentType type = ContentType.getOrDefault(httpEntity);
+	return new String(baos.toByteArray(), type.getCharset());
     }
 
 }

@@ -22,23 +22,19 @@
 
 package org.openecard.client.connector.handler.common;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URLDecoder;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.RequestLine;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.FileEntity;
 import org.openecard.client.connector.common.DocumentRoot;
 import org.openecard.client.connector.common.MimeType;
 import org.openecard.client.connector.handler.ConnectorCommonHandler;
-import org.openecard.client.connector.http.HTTPConstants;
-import org.openecard.client.connector.http.HTTPRequest;
-import org.openecard.client.connector.http.HTTPResponse;
-import org.openecard.client.connector.http.HTTPStatusCode;
-import org.openecard.client.connector.http.header.EntityHeader;
-import org.openecard.client.connector.http.header.RequestLine;
-import org.openecard.client.connector.http.header.StatusLine;
+import org.openecard.client.connector.http.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,15 +61,15 @@ public class FileHandler extends ConnectorCommonHandler {
     }
 
     @Override
-    public HTTPResponse handle(HTTPRequest httpRequest) throws Exception {
+    public HttpResponse handle(HttpRequest httpRequest) throws Exception {
 	// Return 404 Not Found in the default case
-	HTTPResponse httpResponse = new HTTPResponse(HTTPStatusCode.NOT_FOUND_404);
+	Http11Response httpResponse = new Http11Response(HttpStatus.SC_NOT_FOUND);
 	RequestLine requestLine = httpRequest.getRequestLine();
 
-	if (requestLine.getMethod().equals(RequestLine.Methode.GET.name())) {
-	    URI requestURI = requestLine.getRequestURI();
+	if (requestLine.getMethod().equals("GET")) {
+	    URI requestURI = URI.create(requestLine.getUri());
 
-	    File file = new File(documentRoot.getPath(), URLDecoder.decode(requestURI.getPath(), HTTPConstants.CHARSET));
+	    File file = new File(documentRoot.getPath(), URLDecoder.decode(requestURI.getPath(), "UTF-8"));
 	    if (documentRoot.contains(file)) {
 		if (file.isFile() && !file.isDirectory()) {
 		    // Handle file
@@ -85,50 +81,32 @@ public class FileHandler extends ConnectorCommonHandler {
 		    handleDirectory(httpResponse, file);
 		} else {
 		    _logger.debug("Cannot handle the request");
-		    httpResponse.setStatusLine(new StatusLine(HTTPStatusCode.INTERNAL_SERVER_ERROR_500));
+		    httpResponse.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 		}
 	    } else {
 		_logger.debug("The DocumentRoot does not contain the URI: {}", requestURI.getPath());
 	    }
 	} else {
 	    // Return 405 Method Not Allowed
-	    httpResponse.setStatusLine(new StatusLine(HTTPStatusCode.METHOD_NOT_ALLOWED_405));
+	    httpResponse.setStatusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
 	}
 
 	return httpResponse;
     }
 
-    private void handleFile(HTTPResponse httpResponse, File file) throws Exception {
-	InputStream is = new BufferedInputStream(new FileInputStream(file));
-	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    private void handleFile(Http11Response httpResponse, File file) throws Exception {
+	String fileExtention = file.getName().substring(file.getName().lastIndexOf(".") + 1, file.getName().length());
+	MimeType mimeType = MimeType.fromFilenameExtension(fileExtention);
+	String typeName = (mimeType != null) ? mimeType.getMimeType() : MimeType.TEXT_PLAIN.getMimeType();
 
-	int b;
-	while ((b = is.read()) != -1) {
-	    baos.write(b);
-	}
-
-	httpResponse.setStatusLine(new StatusLine(HTTPStatusCode.OK_200));
-	httpResponse.setMessageBody(baos.toByteArray());
-
-	try {
-	    String fileExtention = file.getName().substring(file.getName().lastIndexOf(".") + 1, file.getName().length());
-	    MimeType mineType = MimeType.fromFilenameExtension(fileExtention);
-	    if (mineType != null) {
-		httpResponse.addEntityHeaders(new EntityHeader(EntityHeader.Field.CONTENT_TYPE, mineType.getMimeType()));
-	    } else {
-		_logger.debug("Unknown MINE type for the file: {}", file.toString());
-		httpResponse.addEntityHeaders(new EntityHeader(EntityHeader.Field.CONTENT_TYPE, MimeType.TEXT_PLAIN.getMimeType()));
-	    }
-	} catch (StringIndexOutOfBoundsException e) {
-	    _logger.debug("Cannot determine the MINE type of the file: {}", file.toString());
-	    httpResponse.addEntityHeaders(new EntityHeader(EntityHeader.Field.CONTENT_TYPE, MimeType.TEXT_PLAIN.getMimeType()));
-	}
+	httpResponse.setStatusCode(HttpStatus.SC_OK);
+	httpResponse.setEntity(new FileEntity(file, ContentType.create(typeName)));
     }
 
-    private void handleDirectory(HTTPResponse httpResponse, File file) {
+    private void handleDirectory(Http11Response httpResponse, File file) {
 	// Directory Listing is not allowed
 	_logger.debug("Directory Listing is not allowed for: {}", file.toString());
-	httpResponse.setStatusLine(new StatusLine(HTTPStatusCode.FORBIDDEN_403));
+	httpResponse.setStatusCode(HttpStatus.SC_FORBIDDEN);
     }
 
 }

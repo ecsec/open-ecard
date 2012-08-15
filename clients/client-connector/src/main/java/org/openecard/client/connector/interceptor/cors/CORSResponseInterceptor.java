@@ -26,7 +26,7 @@ import java.io.IOException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
-import org.openecard.client.connector.http.header.ResponseHeader;
+import org.openecard.client.connector.http.HeaderTypes;
 import org.openecard.client.connector.interceptor.ConnectorResponseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +48,8 @@ public class CORSResponseInterceptor extends ConnectorResponseInterceptor {
 	    // CORS required
 	    _logger.debug("CORS required");
 
-	    httpResponse.addHeader(ResponseHeader.Field.ACCESS_CONTROL_ALLOW_ORIGIN.getFieldName(), "*");
-	    httpResponse.addHeader(ResponseHeader.Field.ACCESS_CONTROL_ALLOW_METHODS.getFieldName(), "GET");
+	    httpResponse.setHeader(HeaderTypes.ACCESS_CONTROL_ALLOW_ORIGIN.fieldName(), "*");
+	    httpResponse.setHeader(HeaderTypes.ACCESS_CONTROL_ALLOW_METHODS.fieldName(), "GET");
 	}
     }
 

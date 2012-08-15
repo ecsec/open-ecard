@@ -22,11 +22,12 @@
 
 package org.openecard.client.connector.handler.common;
 
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.openecard.client.connector.handler.ConnectorCommonHandler;
-import org.openecard.client.connector.http.HTTPRequest;
-import org.openecard.client.connector.http.HTTPResponse;
-import org.openecard.client.connector.http.HTTPStatusCode;
-import org.openecard.client.connector.http.header.ResponseHeader;
+import org.openecard.client.connector.http.HeaderTypes;
+import org.openecard.client.connector.http.Http11Response;
 
 
 /**
@@ -36,16 +37,16 @@ import org.openecard.client.connector.http.header.ResponseHeader;
 public class IndexHandler extends ConnectorCommonHandler {
 
     /**
-     * Creates a new debug handler.
+     * Create a new debug handler.
      */
     public IndexHandler() {
 	super("/");
     }
 
     @Override
-    public HTTPResponse handle(HTTPRequest httpRequest) throws Exception {
-	HTTPResponse httpResponse = new HTTPResponse(HTTPStatusCode.SEE_OTHER_303);
-	httpResponse.addResponseHeaders(new ResponseHeader(ResponseHeader.Field.LOCATION, "/index.html"));
+    public HttpResponse handle(HttpRequest httpRequest) throws Exception {
+	HttpResponse httpResponse = new Http11Response(HttpStatus.SC_SEE_OTHER);
+	httpResponse.setHeader(HeaderTypes.LOCATION.fieldName(), "/index.html");
 
 	return httpResponse;
     }

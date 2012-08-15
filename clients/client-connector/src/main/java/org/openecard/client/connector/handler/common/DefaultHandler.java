@@ -22,10 +22,11 @@
 
 package org.openecard.client.connector.handler.common;
 
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.openecard.client.connector.handler.ConnectorCommonHandler;
-import org.openecard.client.connector.http.HTTPRequest;
-import org.openecard.client.connector.http.HTTPResponse;
-import org.openecard.client.connector.http.HTTPStatusCode;
+import org.openecard.client.connector.http.Http11Response;
 
 
 /**
@@ -42,9 +43,9 @@ public class DefaultHandler extends ConnectorCommonHandler {
     }
 
     @Override
-    public HTTPResponse handle(HTTPRequest httpRequest) throws Exception {
+    public HttpResponse handle(HttpRequest httpRequest) throws Exception {
 	// Always return 404 Not Found
-	HTTPResponse httpResponse = new HTTPResponse(HTTPStatusCode.NOT_FOUND_404);
+	HttpResponse httpResponse = new Http11Response(HttpStatus.SC_NOT_FOUND);
 	return httpResponse;
     }
 

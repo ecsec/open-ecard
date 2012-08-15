@@ -22,14 +22,14 @@
 
 package org.openecard.client.connector.handler.status;
 
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.openecard.client.connector.ConnectorHTTPException;
 import org.openecard.client.connector.client.ClientRequest;
 import org.openecard.client.connector.client.ClientResponse;
 import org.openecard.client.connector.client.ConnectorListeners;
 import org.openecard.client.connector.handler.ConnectorClientHandler;
-import org.openecard.client.connector.http.HTTPRequest;
-import org.openecard.client.connector.http.HTTPResponse;
-import org.openecard.client.connector.http.HTTPStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,17 +54,17 @@ public class StatusHandler extends ConnectorClientHandler {
     }
 
     @Override
-    public ClientRequest handleRequest(HTTPRequest httpRequest) throws Exception {
+    public ClientRequest handleRequest(HttpRequest httpRequest) throws Exception {
 	_logger.warn("Implement me!");
 	//TODO implement me.
-	throw new ConnectorHTTPException(HTTPStatusCode.NOT_FOUND_404, "Implement me!");
+	throw new ConnectorHTTPException(HttpStatus.SC_NOT_FOUND, "Implement me!");
     }
 
     @Override
-    public HTTPResponse handleResponse(ClientResponse clientResponse) throws Exception {
+    public HttpResponse handleResponse(ClientResponse clientResponse) throws Exception {
 	_logger.warn("Implement me!");
 	//TODO implement me.
-	throw new ConnectorHTTPException(HTTPStatusCode.NOT_FOUND_404, "Implement me!");
+	throw new ConnectorHTTPException(HttpStatus.SC_NOT_FOUND, "Implement me!");
     }
 
 }

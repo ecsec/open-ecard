@@ -28,6 +28,11 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.List;
 import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.RequestLine;
+import org.apache.http.entity.StringEntity;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.connector.ConnectorConstants;
 import org.openecard.client.connector.ConnectorHTTPException;
@@ -35,11 +40,8 @@ import org.openecard.client.connector.client.ClientRequest;
 import org.openecard.client.connector.client.ClientResponse;
 import org.openecard.client.connector.client.ConnectorListeners;
 import org.openecard.client.connector.handler.ConnectorClientHandler;
-import org.openecard.client.connector.http.HTTPRequest;
-import org.openecard.client.connector.http.HTTPResponse;
-import org.openecard.client.connector.http.HTTPStatusCode;
-import org.openecard.client.connector.http.header.RequestLine;
-import org.openecard.client.connector.http.header.ResponseHeader;
+import org.openecard.client.connector.http.HeaderTypes;
+import org.openecard.client.connector.http.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,12 +65,12 @@ public class TCTokenHandler extends ConnectorClientHandler {
     }
 
     @Override
-    public ClientRequest handleRequest(HTTPRequest httpRequest) throws Exception {
+    public ClientRequest handleRequest(HttpRequest httpRequest) throws Exception {
 	try {
 	    RequestLine requestLine = httpRequest.getRequestLine();
 
-	    if (requestLine.getMethod().equals(RequestLine.Methode.GET.name())) {
-		URI requestURI = requestLine.getRequestURI();
+	    if (requestLine.getMethod().equals("GET")) {
+		URI requestURI = URI.create(requestLine.getUri());
 
 		TCTokenRequest tcTokenRequest = new TCTokenRequest();
 		String query[] = requestURI.getQuery().split("&");
@@ -114,17 +116,17 @@ public class TCTokenHandler extends ConnectorClientHandler {
 
 		return tcTokenRequest;
 	    } else {
-		throw new ConnectorHTTPException(HTTPStatusCode.METHOD_NOT_ALLOWED_405);
+		throw new ConnectorHTTPException(HttpStatus.SC_METHOD_NOT_ALLOWED);
 	    }
 	} catch (ConnectorHTTPException e) {
 	    throw e;
 	} catch (Exception e) {
-	    throw new ConnectorHTTPException(HTTPStatusCode.BAD_REQUEST_400, e.getMessage());
+	    throw new ConnectorHTTPException(HttpStatus.SC_BAD_REQUEST, e.getMessage());
 	}
     }
 
     @Override
-    public HTTPResponse handleResponse(ClientResponse clientResponse) throws Exception {
+    public HttpResponse handleResponse(ClientResponse clientResponse) throws Exception {
 	if (clientResponse instanceof TCTokenResponse) {
 	    TCTokenResponse response = (TCTokenResponse) clientResponse;
 	    Result result = response.getResult();
@@ -133,17 +135,17 @@ public class TCTokenHandler extends ConnectorClientHandler {
 		if (response.getRefreshAddress() != null) {
 		    return handleRedirectResponse(response.getRefreshAddress());
 		} else {
-		    return new HTTPResponse(HTTPStatusCode.INTERNAL_SERVER_ERROR_500);
+		    return new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 		}
 	    } else {
 		if (result.getResultMessage().getValue() != null) {
 		    return handleErrorResponse(result.getResultMessage().getValue());
 		} else {
-		    return new HTTPResponse(HTTPStatusCode.INTERNAL_SERVER_ERROR_500);
+		    return new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 		}
 	    }
 	}
-	return new HTTPResponse(HTTPStatusCode.BAD_REQUEST_400);
+	return new Http11Response(HttpStatus.SC_BAD_REQUEST);
     }
 
     /**
@@ -183,9 +185,9 @@ public class TCTokenHandler extends ConnectorClientHandler {
      * @param location Redirect location
      * @return HTTP response
      */
-    private HTTPResponse handleRedirectResponse(URL location) {
-	HTTPResponse httpResponse = new HTTPResponse(HTTPStatusCode.SEE_OTHER_303);
-	httpResponse.addResponseHeaders(new ResponseHeader(ResponseHeader.Field.LOCATION, location.toString()));
+    private HttpResponse handleRedirectResponse(URL location) {
+	HttpResponse httpResponse = new Http11Response(HttpStatus.SC_SEE_OTHER);
+	httpResponse.setHeader(HeaderTypes.LOCATION.fieldName(), location.toString());
 
 	return httpResponse;
     }
@@ -196,9 +198,10 @@ public class TCTokenHandler extends ConnectorClientHandler {
      * @param message Message
      * @return HTTP response
      */
-    private HTTPResponse handleErrorResponse(String message) throws UnsupportedEncodingException {
-	HTTPResponse httpResponse = new HTTPResponse(HTTPStatusCode.BAD_REQUEST_400);
-	httpResponse.setMessageBody(message);
+    private HttpResponse handleErrorResponse(String message) throws UnsupportedEncodingException {
+	Http11Response httpResponse = new Http11Response(HttpStatus.SC_BAD_REQUEST);
+	// TODO: set correct mime type. Is it text/html?
+	httpResponse.setEntity(new StringEntity(message, "UTF-8"));
 
 	return httpResponse;
     }

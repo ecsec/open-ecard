@@ -26,18 +26,16 @@ import java.io.IOException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.openecard.client.connector.ConnectorException;
-import org.openecard.client.connector.ConnectorHTTPException;
 import org.openecard.client.connector.client.ClientRequest;
 import org.openecard.client.connector.client.ClientResponse;
 import org.openecard.client.connector.client.ConnectorListener;
 import org.openecard.client.connector.client.ConnectorListeners;
-import org.openecard.client.connector.http.HTTPRequest;
-import org.openecard.client.connector.http.HTTPResponse;
-import org.openecard.client.connector.http.HTTPStatusCode;
-import org.openecard.client.connector.http.header.StatusLine;
+import org.openecard.client.connector.http.Http11Response;
 import org.openecard.client.connector.interceptor.cors.CORSRequestInterceptor;
 import org.openecard.client.connector.interceptor.cors.CORSResponseInterceptor;
 import org.slf4j.Logger;
@@ -73,7 +71,7 @@ public abstract class ConnectorClientHandler extends ConnectorHandler {
      * @return A client request or null
      * @throws Exception If the request should be handled by the handler but is malformed
      */
-    public abstract ClientRequest handleRequest(HTTPRequest httpRequest) throws Exception;
+    public abstract ClientRequest handleRequest(HttpRequest httpRequest) throws Exception;
 
     /**
      * Handles a client response and creates a HTTP response.
@@ -82,7 +80,7 @@ public abstract class ConnectorClientHandler extends ConnectorHandler {
      * @return A HTTP response
      * @throws Exception
      */
-    public abstract HTTPResponse handleResponse(ClientResponse clientResponse) throws Exception;
+    public abstract HttpResponse handleResponse(ClientResponse clientResponse) throws Exception;
 
     /**
      * Handles a HTTP request.
@@ -95,46 +93,38 @@ public abstract class ConnectorClientHandler extends ConnectorHandler {
      */
     @Override
     public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
-	HTTPResponse httpResponse = new HTTPResponse();
+	_logger.debug("HTTP request: {}", request.toString());
+	HttpResponse httpResponse = null;
 
 	try {
-	    _logger.debug("HTTP request: {}", request.toString());
-	    HTTPRequest httpRequest = new HTTPRequest();
-	    httpRequest.fromHttpRequest(request);
-
-	    ClientRequest clientRequest = handleRequest(httpRequest);
+	    ClientRequest clientRequest = handleRequest(request);
 	    ClientResponse clientResponse = null;
 
-	    if (clientRequest != null) {
-		for (ConnectorListener listener : listeners.getConnectorListeners()) {
-		    clientResponse = listener.request(clientRequest);
-		    if (clientResponse != null) {
-			break;
-		    }
-		}
-	    } else {
+	    if (clientRequest == null) {
 		throw new ConnectorException();
+	    }
+
+	    for (ConnectorListener listener : listeners.getConnectorListeners()) {
+		clientResponse = listener.request(clientRequest);
+		if (clientResponse != null) {
+		    break;
+		}
 	    }
 
 	    // Forward HttpContext attributes to response parameters
 	    BasicHttpParams params = new BasicHttpParams();
-	    params.setParameter(
-		    CORSResponseInterceptor.class.getName(),
-		    context.getAttribute(CORSRequestInterceptor.class.getName()));
+	    params.setParameter(CORSResponseInterceptor.class.getName(), context.getAttribute(CORSRequestInterceptor.class.getName()));
 	    response.setParams(params);
 
 	    httpResponse = handleResponse(clientResponse);
-	} catch (ConnectorHTTPException e) {
-	    httpResponse.setStatusLine(new StatusLine(e.getHTTPStatusCode()));
-	    httpResponse.setMessageBody(e.getMessage());
 	} catch (ConnectorException e) {
-	    httpResponse.setStatusLine(new StatusLine(HTTPStatusCode.BAD_REQUEST_400));
-	    httpResponse.setMessageBody(e.getMessage());
+	    httpResponse = new Http11Response(HttpStatus.SC_BAD_REQUEST);
+	    httpResponse.setEntity(new StringEntity(e.getMessage(), "UTF-8"));
 	} catch (Exception e) {
-	    httpResponse.setStatusLine(new StatusLine(HTTPStatusCode.INTERNAL_SERVER_ERROR_500));
+	    httpResponse = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 	    _logger.error("Exception", e);
 	} finally {
-	    httpResponse.toHttpResponse(response);
+	    Http11Response.copyHttpResponse(httpResponse, response);
 	    _logger.debug("HTTP response: {}", response);
 	    _logger.debug("HTTP request handled by: {}", this.getClass().getName());
 	}

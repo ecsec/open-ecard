@@ -22,8 +22,6 @@
 
 package org.openecard.client.connector;
 
-import org.openecard.client.connector.http.HTTPStatusCode;
-
 
 /**
  *
@@ -31,14 +29,14 @@ import org.openecard.client.connector.http.HTTPStatusCode;
  */
 public class ConnectorHTTPException extends ConnectorException {
 
-    private HTTPStatusCode httpStatusCode;
+    private int httpStatusCode;
 
     /**
      * Create a new ConnectorHTTPException.
      *
      * @param httpStatusCode HTTPStatusCode
      */
-    public ConnectorHTTPException(HTTPStatusCode httpStatusCode) {
+    public ConnectorHTTPException(int httpStatusCode) {
 	super("");
 	this.httpStatusCode = httpStatusCode;
     }
@@ -49,7 +47,7 @@ public class ConnectorHTTPException extends ConnectorException {
      * @param httpStatusCode HTTPStatusCode
      * @param message Message
      */
-    public ConnectorHTTPException(HTTPStatusCode httpStatusCode, String message) {
+    public ConnectorHTTPException(int httpStatusCode, String message) {
 	super(message);
 	this.httpStatusCode = httpStatusCode;
     }
@@ -59,7 +57,7 @@ public class ConnectorHTTPException extends ConnectorException {
      *
      * @return HTTPStatusCode
      */
-    public HTTPStatusCode getHTTPStatusCode() {
+    public int getHTTPStatusCode() {
 	return httpStatusCode;
     }
 

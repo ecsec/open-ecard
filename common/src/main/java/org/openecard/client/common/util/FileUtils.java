@@ -22,20 +22,23 @@
 
 package org.openecard.client.common.util;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import org.openecard.client.common.io.LimitedInputStream;
 
 
 /**
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class FileUtils {
 
@@ -48,15 +51,8 @@ public class FileUtils {
      * @throws IOException
      */
     public static byte[] toByteArray(File file) throws FileNotFoundException, IOException {
-	InputStream is = new BufferedInputStream(new FileInputStream(file));
-	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-	int b;
-	while ((b = is.read()) != -1) {
-	    baos.write(b);
-	}
-
-	return baos.toByteArray();
+	BufferedInputStream is = new BufferedInputStream(new FileInputStream(file));
+	return toByteArray(is);
     }
 
     /**
@@ -69,14 +65,16 @@ public class FileUtils {
      * @throws IOException
      */
     public static byte[] toByteArray(File file, int limit) throws FileNotFoundException, IOException {
-	InputStream is = new BufferedInputStream(new LimitedInputStream(new FileInputStream(file)), limit);
+	BufferedInputStream is = new BufferedInputStream(new LimitedInputStream(new FileInputStream(file)), limit);
+	return toByteArray(is);
+    }
+
+    public static byte[] toByteArray(InputStream is) throws IOException {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-	int b;
-	while ((b = is.read()) != -1) {
-	    baos.write(b);
+	byte[] buffer = new byte[4*1024]; // disks use 4k nowadays
+	while (is.read(buffer) != -1) {
+	    baos.write(buffer);
 	}
-
 	return baos.toByteArray();
     }
 
@@ -90,7 +88,7 @@ public class FileUtils {
      * @throws UnsupportedEncodingException
      */
     public static String toString(File file) throws FileNotFoundException, IOException, UnsupportedEncodingException {
-	return new String(toByteArray(file), "UTF-8");
+	return toString(new FileInputStream(file));
     }
 
     /**
@@ -104,19 +102,73 @@ public class FileUtils {
      * @throws UnsupportedEncodingException
      */
     public static String toString(File file, String charset) throws FileNotFoundException, IOException, UnsupportedEncodingException {
-	return new String(toByteArray(file), charset);
+	return toString(new FileInputStream(file), charset);
     }
 
-    public static String convertPath(String path) {
-	String os = System.getProperty("os.name").toLowerCase();
+    public static String toString(InputStream in) throws UnsupportedEncodingException, IOException {
+	return toString(in, "UTF-8");
+    }
 
-	if (os.indexOf("win") >= 0) {
-	    return path.replace("/", "\\");
-	} else if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0) {
-	    return path.replace("\\\\", "/");
-	} else {
-	    return null;
+    public static String toString(InputStream in, String charset) throws UnsupportedEncodingException, IOException {
+	return new String(toByteArray(in), charset);
+    }
+
+
+    /**
+     * List directory contents for a resource folder. This is basically a brute-force implementation.
+     * Works for regular files and also JARs. <p>Taken from
+     * {@link http://www.uofr.net/~greg/java/get-resource-listing.html} and modified for our needs.</p>
+     *
+     * @author Greg Briggs
+     * @param clazz Any java class that lives in the same place as the resources you want.
+     * @param path Should end with "/", but not start with one.
+     * @return List of URLs pointing to all subentries including the specified one.
+     * @throws URISyntaxException
+     * @throws IOException
+     */
+    public static List<URL> getResourceListing(Class clazz, String path) throws URISyntaxException, IOException {
+	URL dirURL = clazz.getClassLoader().getResource(path);
+	if (dirURL != null && dirURL.getProtocol().equals("file")) {
+	    LinkedList<URL> resultList = new LinkedList<URL>();
+	    File dirFile = new File(dirURL.toURI());
+	    resultList.add(dirURL);
+	    // recurse on directory
+	    if (dirFile.isDirectory()) {
+		String[] subPaths = dirFile.list();
+		for (String next : subPaths) {
+		    List<URL> subdir = getResourceListing(clazz, next);
+		    resultList.addAll(subdir);
+		}
+	    }
+	    return resultList;
 	}
+
+	if (dirURL == null) {
+	    // In case of a jar file, we can't actually find a directory.
+	    // Have to assume the same jar as clazz.
+	    String me = clazz.getName().replace(".", "/") + ".class";
+	    dirURL = clazz.getClassLoader().getResource(me);
+	}
+
+	if (dirURL.getProtocol().equals("jar")) {
+	    // a JAR path
+	    String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); //strip out only the JAR file
+	    String jarUrl = dirURL.toExternalForm().substring(0, dirURL.toExternalForm().indexOf("!"));
+	    JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
+	    Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
+	    HashSet<URL> result = new HashSet<URL>(); //avoid duplicates in case it is a subdirectory
+	    while (entries.hasMoreElements()) {
+		JarEntry nextEntry = entries.nextElement();
+		String name = nextEntry.getName();
+		if (name.startsWith(path)) { //filter according to the path
+		    String entryPath = jarUrl + "!/" + name;
+		    result.add(new URL(entryPath));
+		}
+	    }
+	    return new LinkedList<URL>(result);
+	}
+
+	throw new UnsupportedOperationException("Cannot list files for URL " + dirURL);
     }
 
 }

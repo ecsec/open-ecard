@@ -22,9 +22,11 @@
 
 package org.openecard.client.connector.common;
 
-import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import org.openecard.client.common.util.FileUtils;
 import org.slf4j.Logger;
@@ -39,8 +41,8 @@ public class DocumentRoot {
 
     private static final Logger _logger = LoggerFactory.getLogger(DocumentRoot.class);
 
-    private final File path;
-    private List<File> files = new ArrayList<File>();
+    private URL path;
+    private List<URL> files;
 
     /**
      * Creates a new DocumentRoot.
@@ -49,32 +51,25 @@ public class DocumentRoot {
      * @throws IOException
      */
     public DocumentRoot(String rootPath) throws IOException {
-	try {
-	    rootPath = FileUtils.convertPath(rootPath);
-	    if (!rootPath.startsWith(File.separator)) {
-		rootPath = File.separator + rootPath;
-	    }
-
-	    path = new File(DocumentRoot.class.getClassLoader().getResource(rootPath).toURI());
-	} catch (Exception e) {
-	    _logger.error("Invalid path {}", rootPath);
-	    throw new IOException(e);
+	// strip leading / for the listing code
+	if (rootPath.startsWith("/")) {
+	    rootPath = rootPath.substring(1);
 	}
-	// Get files and directories in the document root
-	listFiles(path);
-    }
-
-    private void listFiles(File file) {
-	if (file != null && file.canRead()) {
-	    files.add(file);
-
-	    _logger.debug("Add file: {} ", file.toString());
-
-	    if (file.isDirectory()) {
-		for (File f : file.listFiles()) {
-		    listFiles(f);
-		}
+	try {
+	    path = DocumentRoot.class.getResource(rootPath);
+	    if (path == null) {
+		path = DocumentRoot.class.getResource("/" + rootPath);
 	    }
+	    if (path == null) {
+		FileNotFoundException ex = new FileNotFoundException("Path denoted by '" + rootPath + "' does not exist in the classpath.");
+		_logger.error(ex.getMessage(), ex);
+		throw ex;
+	    }
+	    // load all paths
+	    files = FileUtils.getResourceListing(DocumentRoot.class, rootPath);
+	} catch (URISyntaxException ex) {
+	    _logger.error("Invalid path {}", rootPath);
+	    throw new FileNotFoundException(ex.getMessage());
 	}
     }
 
@@ -84,17 +79,18 @@ public class DocumentRoot {
      * @param file File
      * @return True if the document root contains the file, otherwise false
      */
-    public boolean contains(File file) {
+    public boolean contains(URL file) {
 	return files.contains(file);
     }
 
     /**
      * Returns files and directories in the document root.
+     * The list is an immutable copy of the internal file list.
      *
      * @return Files and directories in the document root
      */
-    public List<File> getFiles() {
-	return files;
+    public List<URL> getFiles() {
+	return Collections.unmodifiableList(files);
     }
 
     /**
@@ -103,9 +99,8 @@ public class DocumentRoot {
      * @param fileName File name
      * @return File or directory in the document root
      */
-    public File getFile(String fileName) {
-	fileName = FileUtils.convertPath(fileName);
-	for (File f : files) {
+    public URL getFile(String fileName) {
+	for (URL f : files) {
 	    String t = path.toString() + fileName;
 	    if (f.toString().equals(t)) {
 		return f;
@@ -120,7 +115,7 @@ public class DocumentRoot {
      *
      * @return Document root path
      */
-    public File getPath() {
+    public URL getPath() {
 	return path;
     }
 

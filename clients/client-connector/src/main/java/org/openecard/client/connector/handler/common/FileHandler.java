@@ -22,15 +22,15 @@
 
 package org.openecard.client.connector.handler.common;
 
-import java.io.File;
 import java.net.URI;
+import java.net.URL;
 import java.net.URLDecoder;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.RequestLine;
+import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.FileEntity;
 import org.openecard.client.connector.common.DocumentRoot;
 import org.openecard.client.connector.common.MimeType;
 import org.openecard.client.connector.handler.ConnectorCommonHandler;
@@ -69,22 +69,20 @@ public class FileHandler extends ConnectorCommonHandler {
 	if (requestLine.getMethod().equals("GET")) {
 	    URI requestURI = URI.create(requestLine.getUri());
 
-	    File file = new File(documentRoot.getPath(), URLDecoder.decode(requestURI.getPath(), "UTF-8"));
-	    if (documentRoot.contains(file)) {
-		if (file.isFile() && !file.isDirectory()) {
+	    URL filePath = documentRoot.getFile(URLDecoder.decode(requestURI.getPath(), "UTF-8"));
+	    if (documentRoot.contains(filePath)) {
+		if (filePath.toString().endsWith("/")) {
+		    // handle directory
+		    _logger.debug("Handle directory request");
+		    handleDirectory(httpResponse, filePath);
+		} else {
 		    // Handle file
 		    _logger.debug("Handle file request");
-		    handleFile(httpResponse, file);
-		} else if (!file.isFile() && file.isDirectory()) {
-		    // Handle directory
-		    _logger.debug("Handle directory request");
-		    handleDirectory(httpResponse, file);
-		} else {
-		    _logger.debug("Cannot handle the request");
-		    httpResponse.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+		    handleFile(httpResponse, filePath);
 		}
 	    } else {
 		_logger.debug("The DocumentRoot does not contain the URI: {}", requestURI.getPath());
+		httpResponse.setStatusCode(HttpStatus.SC_NOT_FOUND);
 	    }
 	} else {
 	    // Return 405 Method Not Allowed
@@ -94,16 +92,20 @@ public class FileHandler extends ConnectorCommonHandler {
 	return httpResponse;
     }
 
-    private void handleFile(Http11Response httpResponse, File file) throws Exception {
-	String fileExtention = file.getName().substring(file.getName().lastIndexOf(".") + 1, file.getName().length());
-	MimeType mimeType = MimeType.fromFilenameExtension(fileExtention);
+    private void handleFile(Http11Response httpResponse, URL file) throws Exception {
+	String fname = file.toString();
+	String fileExtension = fname.substring(fname.lastIndexOf(".") + 1);
+	MimeType mimeType = MimeType.fromFilenameExtension(fileExtension);
 	String typeName = (mimeType != null) ? mimeType.getMimeType() : MimeType.TEXT_PLAIN.getMimeType();
 
 	httpResponse.setStatusCode(HttpStatus.SC_OK);
-	httpResponse.setEntity(new FileEntity(file, ContentType.create(typeName)));
+	BasicHttpEntity entity = new BasicHttpEntity();
+	entity.setContent(file.openStream());
+	entity.setContentType(ContentType.create(typeName, "UTF-8").toString());
+	httpResponse.setEntity(entity);
     }
 
-    private void handleDirectory(Http11Response httpResponse, File file) {
+    private void handleDirectory(Http11Response httpResponse, URL file) {
 	// Directory Listing is not allowed
 	_logger.debug("Directory Listing is not allowed for: {}", file.toString());
 	httpResponse.setStatusCode(HttpStatus.SC_FORBIDDEN);

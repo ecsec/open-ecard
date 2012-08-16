@@ -22,13 +22,10 @@
 
 package org.openecard.client.connector.common;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.util.HashMap;
+import org.openecard.client.common.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +39,7 @@ public class HTTPTemplate {
     private static final Logger _logger = LoggerFactory.getLogger(HTTPTemplate.class);
 
     private HashMap<String, String> properties = new HashMap<String, String>();
-    private StringBuilder content;
+    private String content;
 
     /**
      * Creates a new HTTPTemplate.
@@ -52,29 +49,11 @@ public class HTTPTemplate {
      */
     public HTTPTemplate(DocumentRoot documentRoot, String templatePath) {
 	try {
-	    File f = documentRoot.getFile(templatePath);
-	    loadTemplate(f);
+	    URL url = documentRoot.getFile(templatePath);
+	    content = FileUtils.toString(url.openStream());
 	} catch (Exception e) {
 	    _logger.error("Exception", e);
 	}
-    }
-
-    /**
-     * Loads the template from the given file.
-     *
-     * @param file File
-     * @throws Exception If the file cannot be read
-     */
-    private void loadTemplate(File file) throws Exception {
-	InputStream is = new BufferedInputStream(new FileInputStream(file));
-	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-	int b;
-	while ((b = is.read()) != -1) {
-	    baos.write(b);
-	}
-
-	content = new StringBuilder(new String(baos.toByteArray(), "UTF-8"));
     }
 
     /**
@@ -108,7 +87,7 @@ public class HTTPTemplate {
 
     @Override
     public String toString() {
-	StringBuilder out = new StringBuilder(content.toString());
+	StringBuilder out = new StringBuilder(content);
 	for (String key : properties.keySet()) {
 	    int i = out.indexOf(key);
 	    int j = i + key.length();

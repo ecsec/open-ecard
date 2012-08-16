@@ -22,9 +22,7 @@
 
 package org.openecard.client.connector.http;
 
-import java.util.Locale;
 import org.apache.http.*;
-import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import org.apache.http.message.BasicHttpResponse;
 
 
@@ -35,7 +33,7 @@ import org.apache.http.message.BasicHttpResponse;
 public class Http11Response extends BasicHttpResponse {
 
     public Http11Response(StatusLine statusline) {
-	super(statusline);
+	this(statusline.getStatusCode(), statusline.getReasonPhrase());
     }
 
     public Http11Response(int code, String reason) {
@@ -43,31 +41,7 @@ public class Http11Response extends BasicHttpResponse {
     }
 
     public Http11Response(int code) {
-	this(code, reasonForCode(code));
-    }
-
-    public Http11Response(StatusLine statusline, ReasonPhraseCatalog catalog, Locale locale) {
-	super(statusline, catalog, locale);
-    }
-
-
-    @Override
-    public void setStatusCode(int code) {
-	setStatusLine(HttpVersion.HTTP_1_1, code);
-    }
-
-    @Override
-    public void setStatusLine(StatusLine statusline) {
-	if (statusline.getReasonPhrase() != null) {
-	    super.setStatusLine(statusline);
-	} else {
-	    setStatusLine(statusline.getProtocolVersion(), statusline.getStatusCode());
-	}
-    }
-
-    @Override
-    public void setStatusLine(ProtocolVersion ver, int code) {
-	super.setStatusLine(ver, code, reasonForCode(code));
+	this(code, null);
     }
 
 
@@ -109,18 +83,6 @@ public class Http11Response extends BasicHttpResponse {
 	// copy rest
 	out.setLocale(in.getLocale());
 	out.setStatusLine(in.getStatusLine());
-    }
-
-
-    /**
-     * Get reason phrase for HTTP status code.
-     *
-     * @param code HTTP status code
-     * @return Reason phrase, or "Extension Code" if code is not defined in the RFC.
-     */
-    private static String reasonForCode(int code) {
-	String reason = EnglishReasonPhraseCatalog.INSTANCE.getReason(code, Locale.ENGLISH);
-	return reason != null ? reason : "Extension Code";
     }
 
 }

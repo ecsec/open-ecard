@@ -23,12 +23,8 @@
 package org.openecard.client.connector.http;
 
 import java.util.Locale;
-import org.apache.http.Header;
-import org.apache.http.HeaderIterator;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpVersion;
-import org.apache.http.ReasonPhraseCatalog;
-import org.apache.http.StatusLine;
+import org.apache.http.*;
+import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import org.apache.http.message.BasicHttpResponse;
 
 
@@ -47,11 +43,31 @@ public class Http11Response extends BasicHttpResponse {
     }
 
     public Http11Response(int code) {
-	this(code, null);
+	this(code, reasonForCode(code));
     }
 
     public Http11Response(StatusLine statusline, ReasonPhraseCatalog catalog, Locale locale) {
 	super(statusline, catalog, locale);
+    }
+
+
+    @Override
+    public void setStatusCode(int code) {
+	setStatusLine(HttpVersion.HTTP_1_1, code);
+    }
+
+    @Override
+    public void setStatusLine(StatusLine statusline) {
+	if (statusline.getReasonPhrase() != null) {
+	    super.setStatusLine(statusline);
+	} else {
+	    setStatusLine(statusline.getProtocolVersion(), statusline.getStatusCode());
+	}
+    }
+
+    @Override
+    public void setStatusLine(ProtocolVersion ver, int code) {
+	super.setStatusLine(ver, code, reasonForCode(code));
     }
 
 
@@ -74,11 +90,37 @@ public class Http11Response extends BasicHttpResponse {
 	    out.addHeader(next);
 	}
 
+	// set entity stuff
+	if (in.getEntity() != null) {
+	    HttpEntity entity = in.getEntity();
+	    out.setEntity(entity);
+	    if (entity.getContentType() != null) {
+		out.setHeader(entity.getContentType());
+	    }
+	    if (entity.getContentEncoding() != null) {
+		out.setHeader(entity.getContentEncoding());
+	    }
+	    if (entity.getContentLength() > 0) {
+		out.setHeader(HeaderTypes.CONTENT_LENGTH.fieldName(), Long.toString(entity.getContentLength()));
+	    }
+	    // TODO: use chunked, repeatable and streaming attribute from entity
+	}
+
 	// copy rest
-	out.setParams(in.getParams());
 	out.setLocale(in.getLocale());
 	out.setStatusLine(in.getStatusLine());
-	out.setEntity(in.getEntity());
+    }
+
+
+    /**
+     * Get reason phrase for HTTP status code.
+     *
+     * @param code HTTP status code
+     * @return Reason phrase, or "Extension Code" if code is not defined in the RFC.
+     */
+    private static String reasonForCode(int code) {
+	String reason = EnglishReasonPhraseCatalog.INSTANCE.getReason(code, Locale.ENGLISH);
+	return reason != null ? reason : "Extension Code";
     }
 
 }

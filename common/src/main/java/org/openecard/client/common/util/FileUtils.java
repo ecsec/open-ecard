@@ -72,8 +72,9 @@ public class FileUtils {
     public static byte[] toByteArray(InputStream is) throws IOException {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	byte[] buffer = new byte[4*1024]; // disks use 4k nowadays
-	while (is.read(buffer) != -1) {
-	    baos.write(buffer);
+	int i;
+	while ((i = is.read(buffer)) != -1) {
+	    baos.write(buffer, 0, i);
 	}
 	return baos.toByteArray();
     }

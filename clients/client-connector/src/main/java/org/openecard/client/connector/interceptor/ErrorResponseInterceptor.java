@@ -20,22 +20,17 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.connector.interceptor.error;
+package org.openecard.client.connector.interceptor;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
+import java.util.Locale;
+import org.apache.http.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import org.apache.http.protocol.HttpContext;
 import org.openecard.client.common.I18n;
 import org.openecard.client.connector.ConnectorConstants;
@@ -43,7 +38,6 @@ import org.openecard.client.connector.common.DocumentRoot;
 import org.openecard.client.connector.common.HTTPTemplate;
 import org.openecard.client.connector.common.MimeType;
 import org.openecard.client.connector.http.HeaderTypes;
-import org.openecard.client.connector.interceptor.ConnectorResponseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +46,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class ErrorResponseInterceptor extends ConnectorResponseInterceptor {
+public class ErrorResponseInterceptor implements HttpResponseInterceptor {
 
     private static final Logger _logger = LoggerFactory.getLogger(ErrorResponseInterceptor.class);
 
@@ -97,7 +91,8 @@ public class ErrorResponseInterceptor extends ConnectorResponseInterceptor {
 
     @Override
     public void process(HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
-	int statusCode = httpResponse.getStatusLine().getStatusCode();
+	StatusLine statusLine = httpResponse.getStatusLine();
+	int statusCode = statusLine.getStatusCode();
 
 	if (errorCodes.contains(statusCode)) {
 	    _logger.debug("HTTP response intercepted");
@@ -119,7 +114,9 @@ public class ErrorResponseInterceptor extends ConnectorResponseInterceptor {
 	    }
 
 	    template.setProperty("%%%TITLE%%%", "Error");
-	    template.setProperty("%%%HEADLINE%%%", httpResponse.getStatusLine().getReasonPhrase());
+	    String reason = statusLine.getReasonPhrase();
+	    reason = reason != null ? reason : reasonForCode(statusCode);
+	    template.setProperty("%%%HEADLINE%%%", reason);
 
 	    // Add new content
 	    httpResponse.setEntity(new StringEntity(template.toString(), "UTF-8"));
@@ -134,6 +131,18 @@ public class ErrorResponseInterceptor extends ConnectorResponseInterceptor {
 
 	ContentType type = ContentType.getOrDefault(httpEntity);
 	return new String(baos.toByteArray(), type.getCharset());
+    }
+
+
+    /**
+     * Get reason phrase for HTTP status code.
+     *
+     * @param code HTTP status code
+     * @return Reason phrase, or "Extension Code" if code is not defined in the RFC.
+     */
+    private static String reasonForCode(int code) {
+	String reason = EnglishReasonPhraseCatalog.INSTANCE.getReason(code, Locale.ENGLISH);
+	return reason != null ? reason : "Extension Code";
     }
 
 }

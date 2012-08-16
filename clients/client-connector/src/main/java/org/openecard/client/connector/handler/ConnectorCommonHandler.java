@@ -30,8 +30,8 @@ import org.apache.http.HttpStatus;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.openecard.client.connector.http.Http11Response;
-import org.openecard.client.connector.interceptor.cors.CORSRequestInterceptor;
-import org.openecard.client.connector.interceptor.cors.CORSResponseInterceptor;
+import org.openecard.client.connector.interceptor.CORSRequestInterceptor;
+import org.openecard.client.connector.interceptor.CORSResponseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

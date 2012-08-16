@@ -23,27 +23,37 @@
 package org.openecard.client.connector.interceptor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.protocol.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public abstract class ConnectorRequestInterceptor implements ConnectorInterceptor, HttpRequestInterceptor {
+public class CORSRequestInterceptor implements HttpRequestInterceptor {
 
-    /**
-     * Processes a HTTP request.
-     *
-     * @param httpRequest HTTP request
-     * @param httpContext HTTP context
-     * @throws HttpException
-     * @throws IOException
-     */
+    private static final Logger _logger = LoggerFactory.getLogger(CORSRequestInterceptor.class);
+
+    private static ArrayList<String> userAgents = new ArrayList<String>() {
+	{
+	    add("TODO");
+	}
+    };
+
     @Override
-    abstract public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException;
+    public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
+	String userAgent = httpRequest.getFirstHeader("User-Agent").getValue();
+
+	if (userAgents.contains(userAgent)) {
+	    _logger.debug("CORS required");
+	    httpContext.setAttribute(CORSRequestInterceptor.class.getName(), "required");
+	}
+    }
 
 }

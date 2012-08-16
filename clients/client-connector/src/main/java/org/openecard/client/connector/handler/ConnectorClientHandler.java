@@ -36,8 +36,8 @@ import org.openecard.client.connector.client.ClientResponse;
 import org.openecard.client.connector.client.ConnectorListener;
 import org.openecard.client.connector.client.ConnectorListeners;
 import org.openecard.client.connector.http.Http11Response;
-import org.openecard.client.connector.interceptor.cors.CORSRequestInterceptor;
-import org.openecard.client.connector.interceptor.cors.CORSResponseInterceptor;
+import org.openecard.client.connector.interceptor.CORSRequestInterceptor;
+import org.openecard.client.connector.interceptor.CORSResponseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

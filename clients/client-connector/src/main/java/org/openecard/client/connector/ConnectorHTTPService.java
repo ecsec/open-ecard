@@ -24,20 +24,13 @@ package org.openecard.client.connector;
 
 import java.io.IOException;
 import org.apache.http.ConnectionReuseStrategy;
-import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseFactory;
-import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpServerConnection;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpProcessor;
-import org.apache.http.protocol.HttpRequestHandlerRegistry;
-import org.apache.http.protocol.HttpService;
-import org.apache.http.protocol.ImmutableHttpProcessor;
+import org.apache.http.protocol.*;
 import org.openecard.client.connector.handler.ConnectorHandler;
 import org.openecard.client.connector.handler.ConnectorHandlers;
-import org.openecard.client.connector.interceptor.ConnectorInterceptors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,17 +51,12 @@ public class ConnectorHTTPService {
      * @param handlers ConnectorHandlers
      * @param interceptors ConnectorInterceptors
      */
-    public ConnectorHTTPService(ConnectorHandlers handlers, ConnectorInterceptors interceptors) {
+    public ConnectorHTTPService(ConnectorHandlers handlers, BasicHttpProcessor interceptors) {
 	ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
 	HttpResponseFactory responseFactory = new DefaultHttpResponseFactory();
 
 	// Interceptors
-	HttpResponseInterceptor[] responseInterceptor = (HttpResponseInterceptor[]) interceptors.getConnectorResponseInterceptors().toArray(
-		new HttpResponseInterceptor[interceptors.getConnectorResponseInterceptors().size()]);
-	HttpRequestInterceptor[] requestInterceptor = (HttpRequestInterceptor[]) interceptors.getConnectorRequestInterceptors().toArray(
-		new HttpRequestInterceptor[interceptors.getConnectorRequestInterceptors().size()]);
-
-	HttpProcessor httpProcessor = new ImmutableHttpProcessor(requestInterceptor, responseInterceptor);
+	HttpProcessor httpProcessor = new ImmutableHttpProcessor(interceptors, interceptors);
 
 	// Deprecated since 4.1 but the only constructor in Android
 	service = new HttpService(httpProcessor, connectionReuseStrategy, responseFactory);

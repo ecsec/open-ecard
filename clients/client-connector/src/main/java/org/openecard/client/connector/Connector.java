@@ -22,6 +22,7 @@
 
 package org.openecard.client.connector;
 
+import org.apache.http.protocol.BasicHttpProcessor;
 import org.openecard.client.connector.client.ConnectorListeners;
 import org.openecard.client.connector.common.DocumentRoot;
 import org.openecard.client.connector.handler.ConnectorHandlers;
@@ -30,10 +31,9 @@ import org.openecard.client.connector.handler.common.FileHandler;
 import org.openecard.client.connector.handler.common.IndexHandler;
 import org.openecard.client.connector.handler.status.StatusHandler;
 import org.openecard.client.connector.handler.tctoken.TCTokenHandler;
-import org.openecard.client.connector.interceptor.ConnectorInterceptors;
-import org.openecard.client.connector.interceptor.cors.CORSRequestInterceptor;
-import org.openecard.client.connector.interceptor.cors.CORSResponseInterceptor;
-import org.openecard.client.connector.interceptor.error.ErrorResponseInterceptor;
+import org.openecard.client.connector.interceptor.CORSRequestInterceptor;
+import org.openecard.client.connector.interceptor.CORSResponseInterceptor;
+import org.openecard.client.connector.interceptor.ErrorResponseInterceptor;
 
 
 /**
@@ -43,7 +43,7 @@ public final class Connector {
 
     private final ConnectorHandlers handlers = new ConnectorHandlers();
     private final ConnectorListeners listeners = new ConnectorListeners();
-    private final ConnectorInterceptors interceptors = new ConnectorInterceptors();
+    private final BasicHttpProcessor interceptors = new BasicHttpProcessor();
     private final ConnectorServer connectorServer;
     private final DocumentRoot documentRoot;
 
@@ -76,9 +76,9 @@ public final class Connector {
 	handlers.addConnectorHandler(new DefaultHandler());
 
 	// Add interceptors
-	interceptors.addConnectorInterceptor(new ErrorResponseInterceptor(documentRoot, "/templates/error.html"));
-	interceptors.addConnectorInterceptor(new CORSResponseInterceptor());
-	interceptors.addConnectorInterceptor(new CORSRequestInterceptor());
+	interceptors.addInterceptor(new ErrorResponseInterceptor(documentRoot, "/templates/error.html"));
+	interceptors.addInterceptor(new CORSResponseInterceptor());
+	interceptors.addInterceptor(new CORSRequestInterceptor());
 
 	// Start up server
 	connectorServer = new ConnectorServer(port, handlers, interceptors);

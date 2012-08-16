@@ -29,8 +29,8 @@ import java.net.UnknownHostException;
 import java.util.Random;
 import org.apache.http.impl.DefaultHttpServerConnection;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.protocol.BasicHttpProcessor;
 import org.openecard.client.connector.handler.ConnectorHandlers;
-import org.openecard.client.connector.interceptor.ConnectorInterceptors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +59,7 @@ public final class ConnectorServer implements Runnable {
      * @param interceptors ConnectorInterceptors
      * @throws IOException if an I/O error occurs when opening the socket.
      */
-    protected ConnectorServer(int port, ConnectorHandlers handlers, ConnectorInterceptors interceptors) throws IOException {
+    protected ConnectorServer(int port, ConnectorHandlers handlers, BasicHttpProcessor interceptors) throws IOException {
 	if (port == 0) {
 	    port = selectRandomPort();
 	}

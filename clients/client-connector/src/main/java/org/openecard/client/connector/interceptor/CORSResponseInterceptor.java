@@ -20,14 +20,14 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.connector.interceptor.cors;
+package org.openecard.client.connector.interceptor;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.protocol.HttpContext;
-import org.openecard.client.connector.interceptor.ConnectorRequestInterceptor;
+import org.openecard.client.connector.http.HeaderTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,23 +36,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class CORSRequestInterceptor extends ConnectorRequestInterceptor {
+public class CORSResponseInterceptor implements HttpResponseInterceptor {
 
-    private static final Logger _logger = LoggerFactory.getLogger(CORSRequestInterceptor.class);
-
-    private static ArrayList<String> userAgents = new ArrayList<String>() {
-	{
-	    add("TODO");
-	}
-    };
+    private static final Logger _logger = LoggerFactory.getLogger(CORSResponseInterceptor.class);
 
     @Override
-    public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
-	String userAgent = httpRequest.getFirstHeader("User-Agent").getValue();
+    public void process(HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
+	String cors = (String) httpResponse.getParams().getParameter(CORSResponseInterceptor.class.getName());
 
-	if (userAgents.contains(userAgent)) {
+	if (cors != null && cors.equals("required")) {
+	    // CORS required
 	    _logger.debug("CORS required");
-	    httpContext.setAttribute(CORSRequestInterceptor.class.getName(), "required");
+
+	    httpResponse.setHeader(HeaderTypes.ACCESS_CONTROL_ALLOW_ORIGIN.fieldName(), "*");
+	    httpResponse.setHeader(HeaderTypes.ACCESS_CONTROL_ALLOW_METHODS.fieldName(), "GET");
 	}
     }
 

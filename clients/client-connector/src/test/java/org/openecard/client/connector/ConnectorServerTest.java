@@ -22,8 +22,8 @@
 package org.openecard.client.connector;
 
 import java.io.IOException;
+import org.apache.http.protocol.BasicHttpProcessor;
 import org.openecard.client.connector.handler.ConnectorHandlers;
-import org.openecard.client.connector.interceptor.ConnectorInterceptors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -38,7 +38,7 @@ public class ConnectorServerTest {
     private static final Logger _logger = LoggerFactory.getLogger(ConnectorServerTest.class);
 
     private ConnectorHandlers handlers = new ConnectorHandlers();
-    private ConnectorInterceptors interceptors = new ConnectorInterceptors();
+    private BasicHttpProcessor interceptors = new BasicHttpProcessor();
 
     @Test(enabled = !true)
     public void randomPort() {

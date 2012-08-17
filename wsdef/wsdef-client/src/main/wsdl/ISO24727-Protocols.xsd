@@ -103,6 +103,26 @@
 							type="iso:ConnectionHandleType" maxOccurs="unbounded"
 							minOccurs="0">
 						</element>
+						<element name="UserAgent" maxOccurs="1" minOccurs="0">
+							<complexType>
+								<sequence>
+								  <element name="Name" type="string" />
+								  <element name="VersionMajor" type="integer" />
+								  <element name="VersionMinor" type="integer" />
+								  <element name="VersionSubminor" type="integer" maxOccurs="1" minOccurs="0" />
+								</sequence>
+							</complexType>
+						</element>
+						<element name="SupportedAPIVersions" maxOccurs="unbounded" minOccurs="0">
+							<complexType>
+								<sequence>
+								  <element name="Major" type="integer" />
+								  <element name="Minor" type="integer" maxOccurs="1" minOccurs="0" />
+								  <element name="Subminor" type="integer" maxOccurs="1" minOccurs="0" />
+								</sequence>
+							</complexType>
+						</element>
+						<element name="SupportedDIDProtocols" type="anyURI" maxOccurs="unbounded"	minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -315,9 +335,7 @@
 	<complexType name="ConclusionType">
 		<choice>
 			<element name="RecognizedState" type="IDREF" />
-			<sequence>
-				<element name="RecognizedCardType" type="anyURI" />
-			</sequence>
+			<element name="RecognizedCardType" type="anyURI"></element>
 			<element ref="iso:CardCall" maxOccurs="unbounded" minOccurs="1">
 			</element>
 		</choice>
@@ -737,7 +755,7 @@
 						name="CertificateHolderAuthorizationTemplate" type="hexBinary"
 						maxOccurs="1" minOccurs="0" />
 					<element name="CertificationAuthorityReference"
-						 type="iso:DIDNameType" maxOccurs="2" minOccurs="0" />
+						 type="hexBinary" maxOccurs="2" minOccurs="0" />
 					<element name="EFCardAccess" type="hexBinary"
 						maxOccurs="1" minOccurs="0" />
 

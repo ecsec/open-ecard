@@ -1412,7 +1412,7 @@
 
 	<wsdl:service name="SAL">
 		<wsdl:port name="SALPort" binding="iso:SAL">
-			<soap:address location="http://127.0.0.1:18080" />
+			<soap:address location="http://127.0.0.1:24727" />
 		</wsdl:port>
 	</wsdl:service>
 

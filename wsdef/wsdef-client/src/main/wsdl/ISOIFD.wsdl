@@ -536,7 +536,7 @@
 
 	<wsdl:service name="IFD">
 		<wsdl:port name="IFDPort" binding="iso:IFD">
-			<soap:address location="http://127.0.0.1:18080" />
+			<soap:address location="http://127.0.0.1:24727" />
 		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>

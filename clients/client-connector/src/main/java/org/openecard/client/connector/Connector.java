@@ -94,7 +94,7 @@ public final class Connector {
      * @throws Exception If an I/O error occurs when opening the socket
      */
     public Connector() throws Exception {
-	this(0);
+	this(ConnectorServer.RANDOM_PORT);
     }
 
     /**

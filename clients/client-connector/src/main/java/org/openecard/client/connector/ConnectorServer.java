@@ -25,8 +25,6 @@ package org.openecard.client.connector;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.net.UnknownHostException;
-import java.util.Random;
 import org.apache.http.impl.DefaultHttpServerConnection;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.protocol.BasicHttpProcessor;
@@ -42,11 +40,12 @@ import org.slf4j.LoggerFactory;
 public final class ConnectorServer implements Runnable {
 
     public static final int DEFAULT_PORT = 24727;
+    public static final int RANDOM_PORT = 0;
+
     private static final Logger _logger = LoggerFactory.getLogger(ConnectorServer.class);
     private static final int backlog = 10;
 
     private final Thread thread;
-    private final int port;
     private final ServerSocket server;
     private final ConnectorHTTPService httpService;
 
@@ -60,31 +59,11 @@ public final class ConnectorServer implements Runnable {
      * @throws IOException if an I/O error occurs when opening the socket.
      */
     protected ConnectorServer(int port, ConnectorHandlers handlers, BasicHttpProcessor interceptors) throws IOException {
-	if (port == 0) {
-	    port = selectRandomPort();
-	}
-
 	this.thread = new Thread(this, "Open-eCard Localhost-Binding");
 	this.server = new ServerSocket(port, backlog, InetAddress.getByName("127.0.0.1"));
 	this.httpService = new ConnectorHTTPService(handlers, interceptors);
-	this.port = port;
     }
 
-    private int selectRandomPort() {
-	Random r = new Random();
-	while (true) {
-	    int p = r.nextInt(64508) + 1025;
-	    try {
-		ServerSocket serverSocket = new ServerSocket(p, backlog, InetAddress.getByName("127.0.0.1"));
-		serverSocket.close();
-	    } catch (UnknownHostException ex) {
-		throw new ConnectorException("Cannot open local socket", ex);
-	    } catch (IOException ignore) {
-		// Port is used
-	    }
-	    return p;
-	}
-    }
 
     /**
      * Get bound port number of the server socket.
@@ -94,7 +73,7 @@ public final class ConnectorServer implements Runnable {
      * @return Port number the socket is listening on.
      */
     public int getPortNumber() {
-	return port;
+	return server.getLocalPort();
     }
 
     /**

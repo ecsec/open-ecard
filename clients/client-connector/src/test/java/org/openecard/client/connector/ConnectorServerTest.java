@@ -43,7 +43,7 @@ public class ConnectorServerTest {
     @Test(enabled = !true)
     public void randomPort() {
 	try {
-	    ConnectorServer connectorServer = new ConnectorServer(0, handlers, interceptors);
+	    ConnectorServer connectorServer = new ConnectorServer(ConnectorServer.RANDOM_PORT, handlers, interceptors);
 	    _logger.debug("Open random port at {}", connectorServer.getPortNumber());
 	} catch (IOException e) {
 	    _logger.error("Exception", e);

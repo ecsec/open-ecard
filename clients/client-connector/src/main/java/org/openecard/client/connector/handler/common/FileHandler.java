@@ -70,7 +70,7 @@ public class FileHandler extends ConnectorCommonHandler {
 	    URI requestURI = URI.create(requestLine.getUri());
 
 	    URL filePath = documentRoot.getFile(URLDecoder.decode(requestURI.getPath(), "UTF-8"));
-	    if (documentRoot.contains(filePath)) {
+	    if (filePath != null) {
 		// Handle file
 		_logger.debug("Handle file request");
 		handleFile(httpResponse, filePath);

@@ -28,9 +28,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import org.openecard.client.common.io.LimitedInputStream;
@@ -128,11 +127,11 @@ public class FileUtils {
      * @throws URISyntaxException
      * @throws IOException
      */
-    public static List<URL> getResourceListing(Class clazz, String path) throws URISyntaxException, IOException {
+    public static Map<String,URL> getResourceListing(Class clazz, String path) throws URISyntaxException, IOException {
 	URL dirURL = clazz.getClassLoader().getResource(path);
 	if (dirURL != null && dirURL.getProtocol().equals("file")) {
 	    File dirFile = new File(dirURL.toURI());
-	    return getSubdirFileListing(dirFile);
+	    return getSubdirFileListing(dirFile, dirURL.toExternalForm());
 	}
 
 	// TODO: I think this code is not needed (at least on linux), revise on windows and remove if possible
@@ -149,7 +148,7 @@ public class FileUtils {
 	    String jarUrl = dirURL.toExternalForm().substring(0, dirURL.toExternalForm().indexOf("!"));
 	    JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
 	    Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
-	    HashSet<URL> result = new HashSet<URL>(); //avoid duplicates in case it is a subdirectory
+	    TreeMap<String,URL> result = new TreeMap<String,URL>(); //avoid duplicates in case it is a subdirectory
 	    while (entries.hasMoreElements()) {
 		JarEntry nextEntry = entries.nextElement();
 		// skip directory entries
@@ -157,23 +156,27 @@ public class FileUtils {
 		    String name = nextEntry.getName();
 		    if (name.startsWith(path)) { //filter according to the path
 			String entryPath = jarUrl + "!/" + name;
-			result.add(new URL(entryPath));
+			String prefix = "/" + name.substring(path.length());
+			result.put(prefix, new URL(entryPath));
 		    }
 		}
 	    }
-	    return new LinkedList<URL>(result);
+	    return result;
 	}
 
 	throw new UnsupportedOperationException("Cannot list files for URL " + dirURL);
     }
 
-    private static LinkedList<URL> getSubdirFileListing(File dir) throws MalformedURLException {
-	LinkedList<URL> resultList = new LinkedList<URL>();
+    private static TreeMap<String,URL> getSubdirFileListing(File dir, String base) throws MalformedURLException {
+	TreeMap<String,URL> resultList = new TreeMap<String,URL>();
 	for (File next : dir.listFiles()) {
 	    if (next.canRead() && next.isDirectory()) {
-		resultList.addAll(getSubdirFileListing(next));
+		resultList.putAll(getSubdirFileListing(next, base));
 	    } else if (next.canRead() && next.isFile()) {
-		resultList.add(next.toURI().toURL());
+		// generate prefix
+		URL fileURL = next.toURI().toURL();
+		String prefix = fileURL.toExternalForm().substring(base.length()-1);
+		resultList.put(prefix, fileURL);
 	    }
 	}
 	return resultList;

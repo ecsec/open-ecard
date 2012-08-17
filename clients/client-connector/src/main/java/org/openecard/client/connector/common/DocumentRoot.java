@@ -26,8 +26,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.openecard.client.common.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +42,7 @@ public class DocumentRoot {
 
     private static final Logger _logger = LoggerFactory.getLogger(DocumentRoot.class);
 
-    private URL path;
-    private List<URL> files;
+    private Map<String,URL> files;
 
     /**
      * Creates a new DocumentRoot.
@@ -55,16 +55,11 @@ public class DocumentRoot {
 	if (rootPath.startsWith("/")) {
 	    rootPath = rootPath.substring(1);
 	}
+	// path should end with /
+	if (!rootPath.endsWith("/")) {
+	    rootPath += "/";
+	}
 	try {
-	    path = DocumentRoot.class.getResource(rootPath);
-	    if (path == null) {
-		path = DocumentRoot.class.getResource("/" + rootPath);
-	    }
-	    if (path == null) {
-		FileNotFoundException ex = new FileNotFoundException("Path denoted by '" + rootPath + "' does not exist in the classpath.");
-		_logger.error(ex.getMessage(), ex);
-		throw ex;
-	    }
 	    // load all paths
 	    files = FileUtils.getResourceListing(DocumentRoot.class, rootPath);
 	} catch (URISyntaxException ex) {
@@ -79,8 +74,8 @@ public class DocumentRoot {
      * @param file File
      * @return True if the document root contains the file, otherwise false
      */
-    public boolean contains(URL file) {
-	return files.contains(file);
+    public boolean contains(String file) {
+	return files.containsKey(file);
     }
 
     /**
@@ -90,7 +85,7 @@ public class DocumentRoot {
      * @return Files and directories in the document root
      */
     public List<URL> getFiles() {
-	return Collections.unmodifiableList(files);
+	return new ArrayList<URL>(files.values());
     }
 
     /**
@@ -100,23 +95,11 @@ public class DocumentRoot {
      * @return File or directory in the document root
      */
     public URL getFile(String fileName) {
-	for (URL f : files) {
-	    String t = path.toString() + fileName;
-	    if (f.toString().equals(t)) {
-		return f;
-	    }
+	URL file = files.get(fileName);
+	if (file == null) {
+	    _logger.error("Cannot load file: {} ", fileName);
 	}
-	_logger.error("Cannot load file: {} ", path.toString() + fileName);
-	return null;
-    }
-
-    /**
-     * Return the document root path.
-     *
-     * @return Document root path
-     */
-    public URL getPath() {
-	return path;
+	return file;
     }
 
 }

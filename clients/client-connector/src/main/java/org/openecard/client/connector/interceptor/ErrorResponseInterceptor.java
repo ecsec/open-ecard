@@ -26,11 +26,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import org.apache.http.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import org.apache.http.protocol.HttpContext;
 import org.openecard.client.common.I18n;
 import org.openecard.client.connector.ConnectorConstants;
@@ -115,7 +113,6 @@ public class ErrorResponseInterceptor implements HttpResponseInterceptor {
 
 	    template.setProperty("%%%TITLE%%%", "Error");
 	    String reason = statusLine.getReasonPhrase();
-	    reason = reason != null ? reason : reasonForCode(statusCode);
 	    template.setProperty("%%%HEADLINE%%%", reason);
 
 	    // Add new content
@@ -131,18 +128,6 @@ public class ErrorResponseInterceptor implements HttpResponseInterceptor {
 
 	ContentType type = ContentType.getOrDefault(httpEntity);
 	return new String(baos.toByteArray(), type.getCharset());
-    }
-
-
-    /**
-     * Get reason phrase for HTTP status code.
-     *
-     * @param code HTTP status code
-     * @return Reason phrase, or "Extension Code" if code is not defined in the RFC.
-     */
-    private static String reasonForCode(int code) {
-	String reason = EnglishReasonPhraseCatalog.INSTANCE.getReason(code, Locale.ENGLISH);
-	return reason != null ? reason : "Extension Code";
     }
 
 }

@@ -34,6 +34,7 @@ import org.openecard.client.connector.handler.tctoken.TCTokenHandler;
 import org.openecard.client.connector.interceptor.CORSRequestInterceptor;
 import org.openecard.client.connector.interceptor.CORSResponseInterceptor;
 import org.openecard.client.connector.interceptor.ErrorResponseInterceptor;
+import org.openecard.client.connector.interceptor.StatusLineResponseInterceptor;
 
 
 /**
@@ -76,6 +77,7 @@ public final class Connector {
 	handlers.addConnectorHandler(new DefaultHandler());
 
 	// Add interceptors
+	interceptors.addInterceptor(new StatusLineResponseInterceptor());
 	interceptors.addInterceptor(new ErrorResponseInterceptor(documentRoot, "/templates/error.html"));
 	interceptors.addInterceptor(new CORSResponseInterceptor());
 	interceptors.addInterceptor(new CORSRequestInterceptor());

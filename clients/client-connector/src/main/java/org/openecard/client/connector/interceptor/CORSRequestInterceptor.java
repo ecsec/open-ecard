@@ -52,7 +52,7 @@ public class CORSRequestInterceptor implements HttpRequestInterceptor {
 
 	if (userAgents.contains(userAgent)) {
 	    _logger.debug("CORS required");
-	    httpContext.setAttribute(CORSRequestInterceptor.class.getName(), "required");
+	    httpRequest.getParams().setBooleanParameter("CORS-required", true);
 	}
     }
 

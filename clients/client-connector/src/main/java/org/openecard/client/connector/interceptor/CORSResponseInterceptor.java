@@ -42,9 +42,7 @@ public class CORSResponseInterceptor implements HttpResponseInterceptor {
 
     @Override
     public void process(HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
-	String cors = (String) httpResponse.getParams().getParameter(CORSResponseInterceptor.class.getName());
-
-	if (cors != null && cors.equals("required")) {
+	if (httpResponse.getParams().isParameterTrue("CORS-required")) {
 	    // CORS required
 	    _logger.debug("CORS required");
 

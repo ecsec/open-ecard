@@ -28,7 +28,6 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.params.BasicHttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.openecard.client.connector.ConnectorException;
 import org.openecard.client.connector.client.ClientRequest;
@@ -36,8 +35,6 @@ import org.openecard.client.connector.client.ClientResponse;
 import org.openecard.client.connector.client.ConnectorListener;
 import org.openecard.client.connector.client.ConnectorListeners;
 import org.openecard.client.connector.http.Http11Response;
-import org.openecard.client.connector.interceptor.CORSRequestInterceptor;
-import org.openecard.client.connector.interceptor.CORSResponseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,10 +108,8 @@ public abstract class ConnectorClientHandler extends ConnectorHandler {
 		}
 	    }
 
-	    // Forward HttpContext attributes to response parameters
-	    BasicHttpParams params = new BasicHttpParams();
-	    params.setParameter(CORSResponseInterceptor.class.getName(), context.getAttribute(CORSRequestInterceptor.class.getName()));
-	    response.setParams(params);
+	    // Forward request parameters to response parameters
+	    response.setParams(request.getParams());
 
 	    httpResponse = handleResponse(clientResponse);
 	} catch (ConnectorException e) {

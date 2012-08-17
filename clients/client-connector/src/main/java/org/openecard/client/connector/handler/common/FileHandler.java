@@ -71,18 +71,11 @@ public class FileHandler extends ConnectorCommonHandler {
 
 	    URL filePath = documentRoot.getFile(URLDecoder.decode(requestURI.getPath(), "UTF-8"));
 	    if (documentRoot.contains(filePath)) {
-		if (filePath.toString().endsWith("/")) {
-		    // handle directory
-		    _logger.debug("Handle directory request");
-		    handleDirectory(httpResponse, filePath);
-		} else {
-		    // Handle file
-		    _logger.debug("Handle file request");
-		    handleFile(httpResponse, filePath);
-		}
+		// Handle file
+		_logger.debug("Handle file request");
+		handleFile(httpResponse, filePath);
 	    } else {
 		_logger.debug("The DocumentRoot does not contain the URI: {}", requestURI.getPath());
-		httpResponse.setStatusCode(HttpStatus.SC_NOT_FOUND);
 	    }
 	} else {
 	    // Return 405 Method Not Allowed
@@ -103,12 +96,6 @@ public class FileHandler extends ConnectorCommonHandler {
 	entity.setContent(file.openStream());
 	entity.setContentType(ContentType.create(typeName, "UTF-8").toString());
 	httpResponse.setEntity(entity);
-    }
-
-    private void handleDirectory(Http11Response httpResponse, URL file) {
-	// Directory Listing is not allowed
-	_logger.debug("Directory Listing is not allowed for: {}", file.toString());
-	httpResponse.setStatusCode(HttpStatus.SC_FORBIDDEN);
     }
 
 }

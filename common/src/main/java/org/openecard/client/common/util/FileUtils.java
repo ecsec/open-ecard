@@ -23,6 +23,7 @@
 package org.openecard.client.common.util;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -130,20 +131,11 @@ public class FileUtils {
     public static List<URL> getResourceListing(Class clazz, String path) throws URISyntaxException, IOException {
 	URL dirURL = clazz.getClassLoader().getResource(path);
 	if (dirURL != null && dirURL.getProtocol().equals("file")) {
-	    LinkedList<URL> resultList = new LinkedList<URL>();
 	    File dirFile = new File(dirURL.toURI());
-	    resultList.add(dirURL);
-	    // recurse on directory
-	    if (dirFile.isDirectory()) {
-		String[] subPaths = dirFile.list();
-		for (String next : subPaths) {
-		    List<URL> subdir = getResourceListing(clazz, next);
-		    resultList.addAll(subdir);
-		}
-	    }
-	    return resultList;
+	    return getSubdirFileListing(dirFile);
 	}
 
+	// TODO: I think this code is not needed (at least on linux), revise on windows and remove if possible
 	if (dirURL == null) {
 	    // In case of a jar file, we can't actually find a directory.
 	    // Have to assume the same jar as clazz.
@@ -160,16 +152,31 @@ public class FileUtils {
 	    HashSet<URL> result = new HashSet<URL>(); //avoid duplicates in case it is a subdirectory
 	    while (entries.hasMoreElements()) {
 		JarEntry nextEntry = entries.nextElement();
-		String name = nextEntry.getName();
-		if (name.startsWith(path)) { //filter according to the path
-		    String entryPath = jarUrl + "!/" + name;
-		    result.add(new URL(entryPath));
+		// skip directory entries
+		if (! nextEntry.isDirectory()) {
+		    String name = nextEntry.getName();
+		    if (name.startsWith(path)) { //filter according to the path
+			String entryPath = jarUrl + "!/" + name;
+			result.add(new URL(entryPath));
+		    }
 		}
 	    }
 	    return new LinkedList<URL>(result);
 	}
 
 	throw new UnsupportedOperationException("Cannot list files for URL " + dirURL);
+    }
+
+    private static LinkedList<URL> getSubdirFileListing(File dir) throws MalformedURLException {
+	LinkedList<URL> resultList = new LinkedList<URL>();
+	for (File next : dir.listFiles()) {
+	    if (next.canRead() && next.isDirectory()) {
+		resultList.addAll(getSubdirFileListing(next));
+	    } else if (next.canRead() && next.isFile()) {
+		resultList.add(next.toURI().toURL());
+	    }
+	}
+	return resultList;
     }
 
 }

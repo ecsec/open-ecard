@@ -30,6 +30,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.openecard.client.connector.ConnectorException;
+import org.openecard.client.connector.ConnectorHTTPException;
 import org.openecard.client.connector.client.ClientRequest;
 import org.openecard.client.connector.client.ClientResponse;
 import org.openecard.client.connector.client.ConnectorListener;
@@ -46,9 +47,7 @@ import org.slf4j.LoggerFactory;
 public abstract class ConnectorClientHandler extends ConnectorHandler {
 
     private static final Logger _logger = LoggerFactory.getLogger(ConnectorClientHandler.class);
-
     private ConnectorListeners listeners;
-
 
     /**
      * Creates a new ConnectorRequestHandler.
@@ -68,7 +67,7 @@ public abstract class ConnectorClientHandler extends ConnectorHandler {
      * @return A client request or null
      * @throws Exception If the request should be handled by the handler but is malformed
      */
-    public abstract ClientRequest handleRequest(HttpRequest httpRequest) throws Exception;
+    public abstract ClientRequest handleRequest(HttpRequest httpRequest) throws ConnectorException, Exception;
 
     /**
      * Handles a client response and creates a HTTP response.
@@ -77,7 +76,7 @@ public abstract class ConnectorClientHandler extends ConnectorHandler {
      * @return A HTTP response
      * @throws Exception
      */
-    public abstract HttpResponse handleResponse(ClientResponse clientResponse) throws Exception;
+    public abstract HttpResponse handleResponse(ClientResponse clientResponse) throws ConnectorException, Exception;
 
     /**
      * Handles a HTTP request.
@@ -114,7 +113,14 @@ public abstract class ConnectorClientHandler extends ConnectorHandler {
 	    httpResponse = handleResponse(clientResponse);
 	} catch (ConnectorException e) {
 	    httpResponse = new Http11Response(HttpStatus.SC_BAD_REQUEST);
-	    httpResponse.setEntity(new StringEntity(e.getMessage(), "UTF-8"));
+
+	    if (e.getMessage() != null && !e.getMessage().isEmpty()) {
+		httpResponse.setEntity(new StringEntity(e.getMessage(), "UTF-8"));
+	    }
+
+	    if (e instanceof ConnectorHTTPException) {
+		httpResponse.setStatusCode(((ConnectorHTTPException) e).getHTTPStatusCode());
+	    }
 	} catch (Exception e) {
 	    httpResponse = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 	    _logger.error("Exception", e);

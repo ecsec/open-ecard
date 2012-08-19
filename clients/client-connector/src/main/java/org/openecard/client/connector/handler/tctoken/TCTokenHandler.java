@@ -35,6 +35,7 @@ import org.apache.http.RequestLine;
 import org.apache.http.entity.StringEntity;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.connector.ConnectorConstants;
+import org.openecard.client.connector.ConnectorException;
 import org.openecard.client.connector.ConnectorHTTPException;
 import org.openecard.client.connector.client.ClientRequest;
 import org.openecard.client.connector.client.ClientResponse;
@@ -54,7 +55,6 @@ public class TCTokenHandler extends ConnectorClientHandler {
 
     private static final Logger _logger = LoggerFactory.getLogger(TCTokenHandler.class);
 
-
     /**
      * Create a new TCTokenHandler.
      *
@@ -65,7 +65,7 @@ public class TCTokenHandler extends ConnectorClientHandler {
     }
 
     @Override
-    public ClientRequest handleRequest(HttpRequest httpRequest) throws Exception {
+    public ClientRequest handleRequest(HttpRequest httpRequest) throws ConnectorException, Exception {
 	try {
 	    RequestLine requestLine = httpRequest.getRequestLine();
 
@@ -126,7 +126,7 @@ public class TCTokenHandler extends ConnectorClientHandler {
     }
 
     @Override
-    public HttpResponse handleResponse(ClientResponse clientResponse) throws Exception {
+    public HttpResponse handleResponse(ClientResponse clientResponse) throws ConnectorException, Exception {
 	if (clientResponse instanceof TCTokenResponse) {
 	    TCTokenResponse response = (TCTokenResponse) clientResponse;
 	    Result result = response.getResult();

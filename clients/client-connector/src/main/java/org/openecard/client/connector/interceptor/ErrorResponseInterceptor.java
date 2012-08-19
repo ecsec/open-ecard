@@ -19,7 +19,6 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.client.connector.interceptor;
 
 import java.io.ByteArrayOutputStream;
@@ -47,11 +46,9 @@ import org.slf4j.LoggerFactory;
 public class ErrorResponseInterceptor implements HttpResponseInterceptor {
 
     private static final Logger _logger = LoggerFactory.getLogger(ErrorResponseInterceptor.class);
-
     private static I18n lang = ConnectorConstants.getI18n();
     private final HTTPTemplate template;
     private final List<Integer> errorCodes;
-
 
     /**
      * Create a new ErrorInterceptor.
@@ -62,18 +59,6 @@ public class ErrorResponseInterceptor implements HttpResponseInterceptor {
     public ErrorResponseInterceptor(DocumentRoot documentRoot, String template) {
 	this(documentRoot, template, generateErrorCodes());
     }
-
-    private static ArrayList<Integer> generateErrorCodes() {
-	ArrayList<Integer> result = new ArrayList<Integer>();
-	for (int i = 400; i <= 417; i++) {
-	    result.add(i);
-	}
-	for (int i = 500; i <= 505; i++) {
-	    result.add(i);
-	}
-	return result;
-    }
-
 
     /**
      * Create a new ErrorInterceptor.
@@ -128,6 +113,17 @@ public class ErrorResponseInterceptor implements HttpResponseInterceptor {
 
 	ContentType type = ContentType.getOrDefault(httpEntity);
 	return new String(baos.toByteArray(), type.getCharset());
+    }
+
+    private static ArrayList<Integer> generateErrorCodes() {
+	ArrayList<Integer> result = new ArrayList<Integer>();
+	for (int i = 400; i <= 417; i++) {
+	    result.add(i);
+	}
+	for (int i = 500; i <= 505; i++) {
+	    result.add(i);
+	}
+	return result;
     }
 
 }

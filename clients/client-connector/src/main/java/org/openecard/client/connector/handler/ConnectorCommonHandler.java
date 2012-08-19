@@ -27,7 +27,10 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
+import org.openecard.client.connector.ConnectorException;
+import org.openecard.client.connector.ConnectorHTTPException;
 import org.openecard.client.connector.http.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +43,6 @@ import org.slf4j.LoggerFactory;
 public abstract class ConnectorCommonHandler extends ConnectorHandler {
 
     private static final Logger _logger = LoggerFactory.getLogger(ConnectorCommonHandler.class);
-
 
     /**
      * Creates a new new ConnectorCommonHandler.
@@ -65,7 +67,7 @@ public abstract class ConnectorCommonHandler extends ConnectorHandler {
      * @return HTTPResponse
      * @throws Exception
      */
-    public abstract HttpResponse handle(HttpRequest httpRequest) throws Exception;
+    public abstract HttpResponse handle(HttpRequest httpRequest) throws ConnectorException, Exception;
 
     /**
      * Handles a HTTP request.
@@ -86,6 +88,17 @@ public abstract class ConnectorCommonHandler extends ConnectorHandler {
 	    response.setParams(request.getParams());
 
 	    httpResponse = handle(request);
+	} catch (ConnectorException e) {
+	    httpResponse = new Http11Response(HttpStatus.SC_BAD_REQUEST);
+	    httpResponse.setEntity(new StringEntity(e.getMessage(), "UTF-8"));
+
+	    if (e.getMessage() != null && !e.getMessage().isEmpty()) {
+		httpResponse.setEntity(new StringEntity(e.getMessage(), "UTF-8"));
+	    }
+
+	    if (e instanceof ConnectorHTTPException) {
+		httpResponse.setStatusCode(((ConnectorHTTPException) e).getHTTPStatusCode());
+	    }
 	} catch (Exception e) {
 	    httpResponse = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 	    _logger.error("Exception", e);

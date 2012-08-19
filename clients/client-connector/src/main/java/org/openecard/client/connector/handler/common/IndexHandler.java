@@ -25,6 +25,7 @@ package org.openecard.client.connector.handler.common;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.openecard.client.connector.ConnectorException;
 import org.openecard.client.connector.handler.ConnectorCommonHandler;
 import org.openecard.client.connector.http.HeaderTypes;
 import org.openecard.client.connector.http.Http11Response;
@@ -44,7 +45,7 @@ public class IndexHandler extends ConnectorCommonHandler {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws Exception {
+    public HttpResponse handle(HttpRequest httpRequest) throws ConnectorException, Exception {
 	HttpResponse httpResponse = new Http11Response(HttpStatus.SC_SEE_OTHER);
 	httpResponse.setHeader(HeaderTypes.LOCATION.fieldName(), "/index.html");
 

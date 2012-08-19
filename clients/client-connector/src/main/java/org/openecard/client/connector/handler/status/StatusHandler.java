@@ -25,6 +25,7 @@ package org.openecard.client.connector.handler.status;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.openecard.client.connector.ConnectorException;
 import org.openecard.client.connector.ConnectorHTTPException;
 import org.openecard.client.connector.client.ClientRequest;
 import org.openecard.client.connector.client.ClientResponse;
@@ -54,14 +55,14 @@ public class StatusHandler extends ConnectorClientHandler {
     }
 
     @Override
-    public ClientRequest handleRequest(HttpRequest httpRequest) throws Exception {
+    public ClientRequest handleRequest(HttpRequest httpRequest) throws ConnectorException, Exception {
 	_logger.warn("Implement me!");
 	//TODO implement me.
 	throw new ConnectorHTTPException(HttpStatus.SC_NOT_FOUND, "Implement me!");
     }
 
     @Override
-    public HttpResponse handleResponse(ClientResponse clientResponse) throws Exception {
+    public HttpResponse handleResponse(ClientResponse clientResponse) throws ConnectorException, Exception {
 	_logger.warn("Implement me!");
 	//TODO implement me.
 	throw new ConnectorHTTPException(HttpStatus.SC_NOT_FOUND, "Implement me!");

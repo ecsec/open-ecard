@@ -86,7 +86,7 @@ public class Navigation extends JPanel implements ActionListener {
 	hg.addGap(10);
 	hg.addComponent(cancelButton, 60, 60, 150);
 	layout.setHorizontalGroup(hg);
-	
+
 	GroupLayout.ParallelGroup vg = layout.createParallelGroup(GroupLayout.Alignment.BASELINE);
 	vg.addComponent(backButton);
 	vg.addComponent(nextButton);
@@ -100,9 +100,7 @@ public class Navigation extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-	// <editor-fold defaultstate="collapsed" desc="log event">
-	logger.info("Navigation event: {} ", e.paramString());
-	// </editor-fold>
+	logger.debug("Navigation event: {} ", e.paramString());
 
 	String command = e.getActionCommand();
 
@@ -130,6 +128,11 @@ public class Navigation extends JPanel implements ActionListener {
 	} else {
 	    nextButton.setText(lang.translationForKey(GUIConstants.BUTTON_NEXT));
 	}
+    }
+
+    @Override
+    public boolean hasFocus() {
+	return backButton.hasFocus() || nextButton.hasFocus() || cancelButton.hasFocus();
     }
 
 }

@@ -80,10 +80,8 @@ public final class StepBar extends JPanel implements PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-	// <editor-fold defaultstate="collapsed" desc="log event">
-	logger.info("StepBar event: {} | {} | {} | {}",
+	logger.debug("StepBar event: {} | {} | {} | {}",
 		new Object[]{evt.getSource().getClass(), evt.getPropertyName(), evt.getOldValue(), evt.getNewValue()});
-	// </editor-fold>
 
 	if (evt.getPropertyName() != null) {
 	    if (evt.getPropertyName().equals(SwingNavigator.PROPERTY_CURRENT_STEP)) {

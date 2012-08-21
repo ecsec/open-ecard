@@ -132,7 +132,7 @@ public class StepFrame extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-	logger.info("StepFrame event: {}", e.paramString());
+	logger.debug("StepFrame event: {}", e.paramString());
 
 	if (e.getSource().equals(step)) {
 	    String command = e.getActionCommand();
@@ -161,4 +161,5 @@ public class StepFrame extends JPanel implements ActionListener {
 	c.revalidate();
 	c.repaint();
     }
+
 }

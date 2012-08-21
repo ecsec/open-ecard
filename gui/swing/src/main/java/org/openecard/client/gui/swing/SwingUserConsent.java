@@ -19,11 +19,15 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.client.gui.swing;
 
+import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.EventQueue;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
@@ -33,6 +37,7 @@ import org.openecard.client.gui.UserConsent;
 import org.openecard.client.gui.UserConsentNavigator;
 import org.openecard.client.gui.definition.Step;
 import org.openecard.client.gui.definition.UserConsentDescription;
+import org.openecard.client.gui.swing.common.GUIConstants;
 
 
 /**
@@ -71,16 +76,36 @@ public class SwingUserConsent implements UserConsent {
 	JPanel sideBar = new JPanel(new BorderLayout());
 
 	StepBar stepBar = new StepBar(steps);
-	Navigation navigationPanel = new Navigation(steps);
+	final Navigation navigationPanel = new Navigation(steps);
 
 	Logo l = new Logo();
 	initializeSidePanel(sideBar, l, stepBar);
 
 	SwingNavigator navigator = new SwingNavigator(dialogWrapper, dialogType, steps, stepPanel);
 	navigator.addPropertyChangeListener(stepBar);
-	for(StepFrame frame : navigator.getStepFrames()){
+	for (StepFrame frame : navigator.getStepFrames()) {
 	    navigationPanel.addActionListener(frame);
 	}
+
+	// Add global key listener
+	Toolkit.getDefaultToolkit().getSystemEventQueue().push(
+		new EventQueue() {
+		    @Override
+		    protected void dispatchEvent(AWTEvent event) {
+			if (event instanceof KeyEvent) {
+			    KeyEvent keyEvent = (KeyEvent) event;
+			    if (KeyEvent.KEY_RELEASED == keyEvent.getID() && KeyEvent.VK_ENTER == keyEvent.getKeyCode()) {
+				// If the enter is pressed when perform a next step event
+				if (!navigationPanel.hasFocus()) {
+				    navigationPanel.actionPerformed(
+					    new ActionEvent(navigationPanel, ActionEvent.ACTION_PERFORMED, GUIConstants.BUTTON_NEXT));
+				}
+			    }
+			}
+			super.dispatchEvent(event);
+		    }
+
+		});
 
 	// Config layout
 	GroupLayout layout = new GroupLayout(rootPanel);
@@ -115,4 +140,5 @@ public class SwingUserConsent implements UserConsent {
 	    panel.add(c);
 	}
     }
+
 }

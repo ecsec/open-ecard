@@ -49,7 +49,6 @@ public class SwingNavigator implements UserConsentNavigator {
     public SwingNavigator(DialogWrapper dialogWrapper, String dialogType, List<Step> steps, Container stepContainer) {
 	this.dialogWrapper = dialogWrapper;
 	this.stepContainer = stepContainer;
-
 	this.stepFrames = createStepFrames(steps, dialogType);
 
 	this.dialogWrapper.show();

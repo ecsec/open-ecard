@@ -23,11 +23,13 @@
 package org.openecard.client.crypto.common.asn1.cvc;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.List;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.eac.oid.CVCertificatesObjectIdentifier;
+import org.openecard.client.crypto.common.asn1.eac.oid.TAObjectIdentifier;
 import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +66,7 @@ public class CardVerifiableCertificateVerifier {
 		    List<TLV> hashObjects = item.findChildTags(0x80);
 		    if (hashObjects != null && !hashObjects.isEmpty()) {
 			TLV hashObject = hashObjects.get(0);
-			//TODO Replace default message digest
-			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			MessageDigest md = selectDigest(certificate.getPublicKey().getObjectIdentifier());
 			byte[] hash = md.digest(description.getEncoded());
 			if (!ByteUtils.compare(hash, hashObject.getValue())) {
 			    throw new CertificateException("The checksum of the certificate description cannot be verified!");
@@ -93,17 +94,27 @@ public class CardVerifiableCertificateVerifier {
 	}
     }
 
-    /**
-     * Verifies that the CHAT containing in the certificate is equal to the given CHAT.
-     *
-     * @param certificate Certificate
-     * @param chat CHAT
-     * @throws CertificateException
-     */
-    public static void verify(CardVerifiableCertificate certificate, CHAT chat) throws CertificateException {
-	if (!certificate.getCHAT().compareTo(chat)) {
-	    throw new CertificateException("Verification failed: CHAT mismatch!");
+    private static MessageDigest selectDigest(String oid) throws NoSuchAlgorithmException {
+	if (oid.equals(TAObjectIdentifier.id_TA_ECDSA_SHA_1)
+		|| oid.equals(TAObjectIdentifier.id_TA_RSA_PSS_SHA_1)
+		|| oid.equals(TAObjectIdentifier.id_TA_RSA_v1_5_SHA_1)) {
+	    return MessageDigest.getInstance("SHA-1");
+	} else if (oid.equals(TAObjectIdentifier.id_TA_ECDSA_SHA_224)) {
+	    return MessageDigest.getInstance("SHA-224");
+	} else if (oid.equals(TAObjectIdentifier.id_TA_ECDSA_SHA_256)
+		|| oid.equals(TAObjectIdentifier.id_TA_RSA_PSS_SHA_256)
+		|| oid.equals(TAObjectIdentifier.id_TA_RSA_PSS_SHA_256)) {
+	    return MessageDigest.getInstance("SHA-256");
+	} else if (oid.equals(TAObjectIdentifier.id_TA_ECDSA_SHA_384)
+		|| oid.equals(TAObjectIdentifier.id_TA_RSA_PSS_SHA_1)
+		|| oid.equals(TAObjectIdentifier.id_TA_RSA_PSS_SHA_1)) {
+	    return MessageDigest.getInstance("SHA-384");
+	} else if (oid.equals(TAObjectIdentifier.id_TA_ECDSA_SHA_512)
+		|| oid.equals(TAObjectIdentifier.id_TA_RSA_PSS_SHA_512)
+		|| oid.equals(TAObjectIdentifier.id_TA_RSA_PSS_SHA_512)) {
+	    return MessageDigest.getInstance("SHA-512");
 	}
+	throw new NoSuchAlgorithmException();
     }
 
 }

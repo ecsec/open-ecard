@@ -85,11 +85,12 @@ public class CardVerifiableCertificateViewer {
 	    System.out.println("EffectiveDate: " + dateFormat.format(c.getEffectiveDate().getTime()));
 	    System.out.println("ExpirationDate: " + dateFormat.format(c.getExpirationDate().getTime()));
 
-	    System.out.println("");
-
 	    if (c.getExtensions() != null) {
+		System.out.println("Extensions: ");
 		System.out.println(ByteUtils.toHexString(c.getExtensions(), true));
 	    }
+
+	    System.out.println("");
 	}
     }
 

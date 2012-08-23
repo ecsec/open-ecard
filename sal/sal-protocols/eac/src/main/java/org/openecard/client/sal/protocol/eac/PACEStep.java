@@ -37,7 +37,10 @@ import org.openecard.client.common.sal.anytype.AuthDataResponse;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.cvc.CHAT;
+import org.openecard.client.crypto.common.asn1.cvc.CHATVerifier;
+import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
+import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificateVerifier;
 import org.openecard.client.crypto.common.asn1.cvc.CertificateDescription;
 import org.openecard.client.crypto.common.asn1.eac.SecurityInfos;
 import org.openecard.client.gui.ResultStatus;
@@ -100,6 +103,14 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    CHAT requiredCHAT = new CHAT(eac1Input.getRequiredCHAT());
 	    CHAT optionalCHAT = new CHAT(eac1Input.getOptionalCHAT());
 	    byte pinID = PasswordID.valueOf(didAuthenticate.getDIDName()).getByte();
+
+	    // Verify that the certificate description matches the terminal certificate
+	    CardVerifiableCertificate taCert = certChain.getTerminalCertificates().get(0);
+	    CardVerifiableCertificateVerifier.verify(taCert, certDescription);
+	    // Verify that the required CHAT matches the terminal certificate's CHAT
+	    CHATVerifier.verfiy(taCert.getCHAT(), optionalCHAT);
+	    // Verify that the optional CHAT has no more access rights then the required CHAT
+	    CHATVerifier.verfiy(requiredCHAT, optionalCHAT);
 
 	    // GUI request
 	    GUIContentMap content = new GUIContentMap();

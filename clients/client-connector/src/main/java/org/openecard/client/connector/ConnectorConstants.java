@@ -39,7 +39,7 @@ public final class ConnectorConstants {
 
 	@Override
 	public String toString() {
-	    return lang.translationForKey(this.name());
+	    return lang.translationForKey("connector." + this.name().replace("_", ""));
 	}
 
     }

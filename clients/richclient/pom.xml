@@ -26,6 +26,7 @@
 			<index>true</index>
 			<manifest>
 			    <addClasspath>true</addClasspath>
+			    <useUniqueVersions>false</useUniqueVersions>
 			    <mainClass>org.openecard.client.richclient.RichClient</mainClass>
 			</manifest>
 		    </archive>
@@ -137,6 +138,9 @@
 				<objectFile>${wininstall.tmp.dir}/WindowsInstaller.wixobj</objectFile>
 			    </objectFiles>
 			    <outputFile>${project.build.directory}/${project.build.finalName}.msi</outputFile>
+                            <extensions>
+                                <extension>WixUIExtension</extension>
+                            </extensions>
 			</configuration>
 			<executions>
 			    <execution>

@@ -3,12 +3,16 @@
 
     <Product Name="Open eCard App" Id="*" Language="1033"
 	     Version="@VERSION_NUMBER@" Manufacturer="openecard.org"
-             UpgradeCode="ccdf0b3e-c450-434e-b74f-30c15b6fce39">
+	     UpgradeCode="ccdf0b3e-c450-434e-b74f-30c15b6fce39">
 
 
 	<Package Id="*" InstallerVersion="200" Compressed="yes" />
 
 	<Media Id="1" Cabinet="Open_eCard_App.cab" EmbedCab="yes" />
+    
+	<MajorUpgrade Schedule="afterInstallValidate" 
+                  RemoveFeatures="Complete"
+                  DowngradeErrorMessage="A later version of [ProductName] is already installed. Setup will now exit." />
 
 	<!-- Define directory structure -->
 	<Directory Id="TARGETDIR" Name="SourceDir">
@@ -53,7 +57,7 @@
                 <RegistryKey Root="HKCU" 
                              Key="SOFTWARE\Open eCard App"
                              Action="createAndRemoveOnUninstall">
-                    <RegistryValue Name="installed" Type="integer" Value="1" KeyPath="yes" />
+                    <RegistryValue Name="installed" Type="string" Value="@VERSION@" KeyPath="yes" />
                 </RegistryKey>
 	    </Component>
 	</DirectoryRef>

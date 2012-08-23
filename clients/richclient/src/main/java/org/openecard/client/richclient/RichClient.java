@@ -27,8 +27,10 @@ import java.math.BigInteger;
 import java.net.BindException;
 import java.net.URL;
 import java.util.Set;
+import javax.swing.JOptionPane;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.I18n;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
 import org.openecard.client.common.sal.state.CardStateEntry;
@@ -48,11 +50,13 @@ import org.openecard.client.connector.handler.tctoken.TCTokenResponse;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
+import org.openecard.client.gui.swing.common.GUIDefaults;
 import org.openecard.client.ifd.protocol.pace.PACEProtocolFactory;
 import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.management.TinyManagement;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.richclient.gui.AppTray;
+import org.openecard.client.richclient.gui.MessageDialog;
 import org.openecard.client.sal.TinySAL;
 import org.openecard.client.sal.protocol.eac.EACProtocolFactory;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
@@ -71,7 +75,7 @@ import org.slf4j.LoggerFactory;
 public final class RichClient implements ConnectorListener {
 
     private static final Logger _logger = LoggerFactory.getLogger(RichClient.class.getName());
-
+    private static final I18n lang = I18n.getTranslation("gui");
     // Rich client
     private static RichClient client;
     // Tray icon
@@ -92,35 +96,24 @@ public final class RichClient implements ConnectorListener {
     private byte[] contextHandle;
 
     public static void main(String args[]) {
-	try {
-	    RichClient.getInstance();
-	} catch (Exception e) {
-	    _logger.warn(e.getMessage());
-	}
+	RichClient.getInstance();
     }
 
-    public static RichClient getInstance() throws Exception {
+    public static RichClient getInstance() {
 	if (client == null) {
 	    client = new RichClient();
-	    try {
-		Connector connector = new Connector(ConnectorServer.DEFAULT_PORT);
-		connector.getListeners().addConnectorListener(client);
-	    } catch (BindException e) {
-		throw new Exception("Client connector is running.");
-	    }
 	}
 	return client;
     }
 
-    private RichClient() throws Exception {
+    private RichClient() {
 	setup();
     }
 
     @Override
     public ClientResponse request(ClientRequest request) {
-	// <editor-fold defaultstate="collapsed" desc="log request">
 	_logger.debug("Client request: {}", request.getClass());
-	// </editor-fold>
+
 	if (request instanceof TCTokenRequest) {
 	    return handleActivate((TCTokenRequest) request);
 	} else if (request instanceof StatusRequest) {
@@ -170,9 +163,7 @@ public final class RichClient implements ConnectorListener {
 	}
 
 	if (connectionHandle == null) {
-	    // <editor-fold defaultstate="collapsed" desc="log error">
 	    _logger.error("Warning", "Given ConnectionHandle is invalied.");
-	    // </editor-fold>
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "Given ConnectionHandle is invalid."));
 	    return response;
 	}
@@ -292,83 +283,119 @@ public final class RichClient implements ConnectorListener {
 	}
     }
 
+    public void setup() {
+	GUIDefaults.initialize();
 
-    public void setup() throws Exception {
-	tray = new AppTray(this);
+	MessageDialog dialog = new MessageDialog();
+	dialog.setHeadline(lang.translationForKey("client.startup.failed.headline"));
 
-	// Set up client environment
-	env = new ClientEnv();
-
-	// Set up Management
-	TinyManagement management = new TinyManagement(env);
-	env.setManagement(management);
-
-	// Set up the IFD
-	ifd = new IFD();
-	ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
-	env.setIFD(ifd);
-
-	// Set up the Dispatcher
-	MessageDispatcher dispatcher = new MessageDispatcher(env);
-	env.setDispatcher(dispatcher);
-	ifd.setDispatcher(dispatcher);
-
-	// Perform an EstablishContext to get a ContextHandle
-	EstablishContext establishContext = new EstablishContext();
-	EstablishContextResponse establishContextResponse = ifd.establishContext(establishContext);
-
-	if (establishContextResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
-	    if (establishContextResponse.getContextHandle() != null) {
-		contextHandle = ifd.establishContext(establishContext).getContextHandle();
-	    } else {
-		//TODO
+	try {
+	    // Start up control interface
+	    try {
+		Connector connector = new Connector(ConnectorServer.DEFAULT_PORT);
+		connector.getListeners().addConnectorListener(client);
+	    } catch (BindException e) {
+		dialog.setMessage(lang.translationForKey("client.startup.failed.portinuse"));
+		throw e;
 	    }
-	} else {
-	    // TODO
+
+	    tray = new AppTray(this);
+
+	    // Set up client environment
+	    env = new ClientEnv();
+
+	    // Set up Management
+	    TinyManagement management = new TinyManagement(env);
+	    env.setManagement(management);
+
+	    // Set up the IFD
+	    ifd = new IFD();
+	    ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
+	    env.setIFD(ifd);
+
+	    // Set up the Dispatcher
+	    MessageDispatcher dispatcher = new MessageDispatcher(env);
+	    env.setDispatcher(dispatcher);
+	    ifd.setDispatcher(dispatcher);
+
+	    // Perform an EstablishContext to get a ContextHandle
+	    EstablishContext establishContext = new EstablishContext();
+	    EstablishContextResponse establishContextResponse = ifd.establishContext(establishContext);
+
+	    if (establishContextResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
+		if (establishContextResponse.getContextHandle() != null) {
+		    contextHandle = ifd.establishContext(establishContext).getContextHandle();
+		} else {
+		    //TODO
+		}
+	    } else {
+		// TODO
+	    }
+
+	    // Set up CardRecognition
+	    try {
+		recognition = new CardRecognition(ifd, contextHandle);
+	    } catch (Exception e) {
+		//TODO 
+		throw e;
+	    }
+
+	    // Set up EventManager
+	    em = new EventManager(recognition, env, contextHandle, ValueGenerators.generateSessionID());
+	    env.setEventManager(em);
+
+	    // Set up SALStateCallback
+	    cardStates = new CardStateMap();
+	    SALStateCallback salCallback = new SALStateCallback(recognition, cardStates);
+	    em.registerAllEvents(salCallback);
+
+	    // Set up SAL
+	    sal = new TinySAL(env, cardStates);
+	    sal.addProtocol(ECardConstants.Protocol.EAC, new EACProtocolFactory());
+	    env.setSAL(sal);
+
+	    // Set up GUI
+	    SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper());
+	    sal.setGUI(gui);
+	    ifd.setGUI(gui);
+
+	    em.registerAllEvents(tray.status());
+
+	    // Initialize the EventManager
+	    em.initialize();
+
+	    tray.done();
+	} catch (Exception e) {
+	    _logger.error("Exception", e);
+
+	    if (dialog.getMessage() == null || dialog.getMessage().isEmpty()) {
+		// Add exception message if no custom message is set
+		dialog.setMessage(e.getMessage());
+	    }
+
+	    // Show dialog to the user and shut down the client
+	    JOptionPane.showMessageDialog(null, dialog, "Open eCard App", JOptionPane.PLAIN_MESSAGE);
+	    teardown();
 	}
-
-	// Set up CardRecognition
-	recognition = new CardRecognition(ifd, contextHandle);
-
-	// Set up EventManager
-	em = new EventManager(recognition, env, contextHandle, ValueGenerators.generateSessionID());
-	env.setEventManager(em);
-
-	// Set up SALStateCallback
-	cardStates = new CardStateMap();
-	SALStateCallback salCallback = new SALStateCallback(recognition, cardStates);
-	em.registerAllEvents(salCallback);
-
-	// Set up SAL
-	sal = new TinySAL(env, cardStates);
-	sal.addProtocol(ECardConstants.Protocol.EAC, new EACProtocolFactory());
-	env.setSAL(sal);
-
-	// Set up GUI
-	SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper());
-	sal.setGUI(gui);
-	ifd.setGUI(gui);
-
-	em.registerAllEvents(tray.status());
-
-	// Initialize the EventManager
-	em.initialize();
-
-	tray.done();
     }
 
     public void teardown() {
-	// shutdwon event manager
-	em.terminate();
+	try {
+	    // shutdwon event manager
+	    em.terminate();
 
-	// shutdown SAL
-	Terminate terminate = new Terminate();
-	sal.terminate(terminate);
+	    // shutdown SAL
+	    Terminate terminate = new Terminate();
+	    sal.terminate(terminate);
 
-	// shutdown IFD
-	ReleaseContext releaseContext = new ReleaseContext();
-	releaseContext.setContextHandle(contextHandle);
-	ifd.releaseContext(releaseContext);
+	    // shutdown IFD
+	    ReleaseContext releaseContext = new ReleaseContext();
+	    releaseContext.setContextHandle(contextHandle);
+	    ifd.releaseContext(releaseContext);
+	} catch (Exception ignore) {
+	}
+
+	System.exit(0);
     }
 
 }

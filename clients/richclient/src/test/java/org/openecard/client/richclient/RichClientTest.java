@@ -22,11 +22,8 @@
 
 package org.openecard.client.richclient;
 
-import ch.qos.logback.classic.BasicConfigurator;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.ConsoleAppender;
 import java.util.List;
+import org.openecard.client.common.ECardConstants;
 import org.openecard.client.connector.ConnectorConstants;
 import org.openecard.client.connector.handler.tctoken.TCToken;
 import org.openecard.client.connector.handler.tctoken.TCTokenConverter;
@@ -36,7 +33,6 @@ import org.openecard.client.connector.handler.tctoken.TCTokenParser;
 import org.openecard.client.connector.handler.tctoken.TCTokenRequest;
 import org.openecard.client.connector.handler.tctoken.TCTokenResponse;
 import org.openecard.client.connector.handler.tctoken.TCTokenVerifier;
-import org.openecard.client.ifd.scio.wrapper.SCChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.testng.Assert.fail;
@@ -93,11 +89,11 @@ public class RichClientTest {
 	    applicationRequest.setTCToken(tokens.get(0));
 	    TCTokenResponse applicationReponse = (TCTokenResponse) client.request(applicationRequest);
 
-	    System.out.println("RICH CLIENT RESULT");
-	    System.out.println(applicationReponse.getResult().getResultMajor());
-	    System.out.println(applicationReponse.getRefreshAddress());
+	    if (!applicationReponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
+		fail(applicationReponse.getResult().getResultMajor());
+	    }
 	} catch (Exception e) {
-	    logger.error(e.getMessage());
+	    logger.error("Exception", e);
 	    fail(e.getMessage());
 	}
     }

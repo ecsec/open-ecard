@@ -19,13 +19,13 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.client.richclient;
 
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.net.BindException;
 import java.net.URL;
+import java.util.List;
 import java.util.Set;
 import javax.swing.JOptionPane;
 import org.openecard.client.common.ClientEnv;
@@ -102,12 +102,9 @@ public final class RichClient implements ConnectorListener {
     public static RichClient getInstance() {
 	if (client == null) {
 	    client = new RichClient();
+	    client.setup();
 	}
 	return client;
-    }
-
-    private RichClient() {
-	setup();
     }
 
     @Override
@@ -124,6 +121,14 @@ public final class RichClient implements ConnectorListener {
 
     private StatusResponse handleStatus(StatusRequest statusRequest) {
 	StatusResponse response = new StatusResponse();
+
+	List<ConnectionHandleType> connectionHandles = sal.getConnectionHandles();
+	if (connectionHandles.isEmpty()) {
+	    response.setResult(WSHelper.makeResultUnknownError("TBD"));
+	    return response;
+	}
+
+	response.setConnectionHandles(connectionHandles);
 
 	return response;
     }

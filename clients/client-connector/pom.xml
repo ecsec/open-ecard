@@ -29,6 +29,12 @@
 	    <artifactId>httpcore</artifactId>
 	    <version>4.2.1</version>
 	</dependency>
+	<dependency>
+	    <artifactId>jaxb-marshaller</artifactId>
+	    <groupId>org.openecard.client.wsdef</groupId>
+	    <version>${project.version}</version>
+	    <scope>test</scope>
+	</dependency>
     </dependencies>
 
 </project>

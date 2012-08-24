@@ -22,6 +22,8 @@
 
 package org.openecard.client.connector.handler.status;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import java.util.List;
 import org.openecard.client.connector.client.ClientResponse;
 
 
@@ -30,5 +32,15 @@ import org.openecard.client.connector.client.ClientResponse;
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class StatusResponse extends ClientResponse {
+
+    private List<ConnectionHandleType> connectionHandles;
+
+    public List<ConnectionHandleType> getConnectionHandles() {
+	return connectionHandles;
+    }
+
+    public void setConnectionHandles(List<ConnectionHandleType> connectionHandles) {
+	this.connectionHandles = connectionHandles;
+    }
 
 }

@@ -22,17 +22,30 @@
 
 package org.openecard.client.connector.handler.status;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import java.net.URI;
+import java.util.List;
+import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.RequestLine;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.openecard.client.connector.ConnectorException;
 import org.openecard.client.connector.ConnectorHTTPException;
 import org.openecard.client.connector.client.ClientRequest;
 import org.openecard.client.connector.client.ClientResponse;
 import org.openecard.client.connector.client.ConnectorListeners;
 import org.openecard.client.connector.handler.ConnectorClientHandler;
+import org.openecard.client.connector.http.Http11Response;
+import org.openecard.client.ws.WSMarshaller;
+import org.openecard.client.ws.WSMarshallerException;
+import org.openecard.client.ws.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 
 /**
@@ -42,8 +55,8 @@ import org.slf4j.LoggerFactory;
  */
 public class StatusHandler extends ConnectorClientHandler {
 
-    private static final Logger _logger = LoggerFactory.getLogger(StatusHandler.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(StatusHandler.class);
+    private final WSMarshaller m;
 
     /**
      * Creates a new StatusHandler.
@@ -52,20 +65,59 @@ public class StatusHandler extends ConnectorClientHandler {
      */
     public StatusHandler(ConnectorListeners listeners) {
 	super("/status", listeners);
+
+	try {
+	    m = WSMarshallerFactory.createInstance();
+	} catch (WSMarshallerException e) {
+	    logger.error("Exception", e);
+	    throw new RuntimeException(e);
+	}
     }
 
     @Override
     public ClientRequest handleRequest(HttpRequest httpRequest) throws ConnectorException, Exception {
-	_logger.warn("Implement me!");
-	//TODO implement me.
-	throw new ConnectorHTTPException(HttpStatus.SC_NOT_FOUND, "Implement me!");
+	try {
+	    RequestLine requestLine = httpRequest.getRequestLine();
+
+	    if (requestLine.getMethod().equals("GET")) {
+		URI requestURI = URI.create(requestLine.getUri());
+		
+		if (requestURI.getQuery() != null && !requestURI.getQuery().isEmpty()) {
+		    throw new ConnectorHTTPException(HttpStatus.SC_BAD_REQUEST);
+		}
+
+		return new StatusRequest();
+	    } else {
+		throw new ConnectorHTTPException(HttpStatus.SC_METHOD_NOT_ALLOWED);
+	    }
+	} catch (ConnectorHTTPException e) {
+	    throw e;
+	} catch (Exception e) {
+	    throw new ConnectorHTTPException(HttpStatus.SC_BAD_REQUEST, e.getMessage());
+	}
     }
 
     @Override
     public HttpResponse handleResponse(ClientResponse clientResponse) throws ConnectorException, Exception {
-	_logger.warn("Implement me!");
-	//TODO implement me.
-	throw new ConnectorHTTPException(HttpStatus.SC_NOT_FOUND, "Implement me!");
+	if (clientResponse instanceof StatusResponse) {
+
+	    List<ConnectionHandleType> connectionHandles = ((StatusResponse) clientResponse).getConnectionHandles();
+	    StringBuilder xml = new StringBuilder();
+	    for (ConnectionHandleType handle : connectionHandles) {
+		//FIXME 
+		Document contentDoc = m.marshal(new JAXBElement(new QName("iso", "Status"), ConnectionHandleType.class, handle));
+		String result = m.doc2str(contentDoc);
+		xml.append(result);
+	    }
+
+	    HttpResponse httpResponse = new Http11Response(HttpStatus.SC_ACCEPTED);
+	    ContentType contentType = ContentType.create(ContentType.TEXT_XML.getMimeType(), "UTF-8");
+	    StringEntity entity = new StringEntity(xml.toString(), contentType);
+	    httpResponse.setEntity(entity);
+
+	    return httpResponse;
+	}
+	return new Http11Response(HttpStatus.SC_BAD_REQUEST);
     }
 
 }

@@ -83,7 +83,9 @@
 				    <target>
 					<property name="version" value="${project.build.version}" />
 					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/Open-eCard-Logo.ico" />
-					<!-- <copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/run.bat" /> -->
+					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/WixUIDialog.bmp" />
+					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/WixUIBanner.bmp" />
+					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/License.rtf" />
 					<copy todir="${wininstall.tmp.dir}/lib" flatten="true">
 					    <path>
 						<path refid="maven.runtime.classpath" />
@@ -140,6 +142,7 @@
 			    <outputFile>${project.build.directory}/${project.build.finalName}.msi</outputFile>
                             <extensions>
                                 <extension>WixUIExtension</extension>
+                                <extension>WixUtilExtension</extension>
                             </extensions>
 			</configuration>
 			<executions>

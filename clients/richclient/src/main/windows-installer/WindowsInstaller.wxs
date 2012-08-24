@@ -95,8 +95,15 @@
 
         <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
         <Property Id="WixShellExecTarget" Value="[libdir]richclient-@VERSION@.jar" />
+        <CustomAction Id="SetINSTALLDESKTOPSHORTCUT" Property="INSTALLDESKTOPSHORTCUT" Value="1" Execute="firstSequence" />
+        <CustomAction Id="SetLAUNCHAPPONEXIT" Property="LAUNCHAPPONEXIT" Value="1" Execute="firstSequence" />
         <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" Execute="immediate" />        
         <UI>
+            <InstallUISequence>
+                <Custom Action="SetINSTALLDESKTOPSHORTCUT" Before="AppSearch">NOT Installed</Custom>
+                <Custom Action="SetLAUNCHAPPONEXIT" Before="AppSearch">NOT Installed</Custom>
+            </InstallUISequence>
+            
             <UIRef Id="CustomWixUI_InstallDir" />
             <Publish Dialog="CustomExitDialog" Control="Finish" Order="1" Event="DoAction" Value="LaunchApplication">LAUNCHAPPONEXIT</Publish>
         </UI>
@@ -183,7 +190,7 @@
                 <Control Id="FolderLabel" Type="Text" X="20" Y="60" Width="290" Height="30" NoPrefix="yes" Text="!(loc.InstallDirDlgFolderLabel)" />
                 <Control Id="Folder" Type="PathEdit" X="20" Y="100" Width="320" Height="18" Property="WIXUI_INSTALLDIR" Indirect="yes" />
                 <Control Id="ChangeFolder" Type="PushButton" X="20" Y="120" Width="56" Height="17" Text="!(loc.InstallDirDlgChange)" />
-                <Control Id="DesktopShortcutCheckBox" Type="CheckBox" X="20" Y="160" Width="290" Height="17" Property="INSTALLDESKTOPSHORTCUT" CheckBoxValue="1" Text="Create a shortcut for this program on the desktop." />
+                <Control Id="DesktopShortcutCheckBox" Type="CheckBox" X="20" Y="160" Width="290" Height="17" Property="INSTALLDESKTOPSHORTCUT" CheckBoxValue="1" Text="Create a shortcut on the desktop" />
             </Dialog>
         </UI>
     </Fragment>
@@ -198,7 +205,7 @@
                 <Control Id="Description" Type="Text" X="135" Y="70" Width="220" Height="40" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogDescription)" />
                 <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogTitle)" />
                 <Control Id="LaunchCheckBox" Type="CheckBox" X="10" Y="243" Width="270" Height="17" Property="LAUNCHAPPONEXIT" 
-                         Hidden="yes" CheckBoxValue="1" Text="Launch Open eCard App @VERSION@ when setup exits.">
+                         Hidden="yes" CheckBoxValue="1" Text="Launch Open eCard App @VERSION@">
                     <Condition Action="show">NOT Installed</Condition>
                 </Control>
             </Dialog>

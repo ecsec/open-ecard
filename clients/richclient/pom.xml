@@ -140,6 +140,7 @@
 				<objectFile>${wininstall.tmp.dir}/WindowsInstaller.wixobj</objectFile>
 			    </objectFiles>
 			    <outputFile>${project.build.directory}/${project.build.finalName}.msi</outputFile>
+                            <arguments>-sice:ICE57</arguments>
                             <extensions>
                                 <extension>WixUIExtension</extension>
                                 <extension>WixUtilExtension</extension>

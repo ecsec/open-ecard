@@ -29,6 +29,14 @@
     </profiles>
 
     <build>
+	<extensions>
+	    <extension>
+		<groupId>de.ecsec.maven.plugins</groupId>
+		<artifactId>maven-pack200-plugin</artifactId>
+		<version>1.0.0</version>
+	    </extension>
+	</extensions>
+
 	<pluginManagement>
 	    <plugins>
 		<plugin>
@@ -36,6 +44,13 @@
 		    <artifactId>maven-shade-plugin</artifactId>
 		    <version>1.6</version>
 		    <configuration>
+			<!--
+			    The reduced pom excludes transitive dependencies of test scope
+			    libraries, eg. com.beust.jcommander from org.testng.testng, so
+			    a subsequent test run (eg. started by cobertura) will miss some
+			    dependencies
+			-->
+			<createDependencyReducedPom>false</createDependencyReducedPom>
 			<filters>
 			    <filter>
 				<artifact>*:*</artifact>
@@ -73,52 +88,46 @@
 		</plugin>
 	    </plugins>
 	</pluginManagement>
-	<extensions>
-	    <extension>
-		<groupId>de.ecsec.maven.plugins</groupId>
-		<artifactId>maven-pack200-plugin</artifactId>
-		<version>1.0.0</version>
-	    </extension>
-	</extensions>
 
 	<!-- Disabled until configured correctly -->
-
-	<!-- <plugin> -->
-	<!--     <groupId>com.github.wvengen</groupId> -->
-	<!--     <artifactId>proguard-maven-plugin</artifactId> -->
-	<!--     <version>2.0.5</version> -->
-	<!--     <executions> -->
-	<!-- 	<execution> -->
-	<!-- 	    <phase>package</phase> -->
-	<!-- 	    <goals><goal>proguard</goal></goals> -->
-	<!-- 	</execution> -->
-	<!--     </executions> -->
-	<!--     <configuration> -->
-	<!-- 	<proguardVersion>4.7</proguardVersion> -->
-	<!-- 	<includeDependency>false</includeDependency> -->
-	<!-- 	<options> -->
-		    <!-- don't warn about these packages not being found, because they are not needed anyways -->
-		    <!-- <option>-dontwarn org.bouncycastle.**</option> -->
-		    <!-- <option>-dontwarn junit.**</option> -->
-		    <!-- general options -->
-		    <!-- <option>-allowaccessmodification</option> -->
-		    <!-- tell proguard which classes/methods to keep untouched -->
-	<!-- 	    <option>-keep public class * extends java.applet.Applet { *; }</option> -->
-	<!-- 	</options> -->
-	<!-- 	<libs> -->
-	<!-- 	    <lib>${java.home}/lib/rt.jar</lib> -->
-	<!-- 	    <lib>${java.home}/lib/jce.jar</lib> -->
-	<!-- 	</libs> -->
-	<!--     </configuration> -->
-	<!--     <dependencies> -->
-	<!-- 	<dependency> -->
-	<!-- 	    <groupId>net.sf.proguard</groupId> -->
-	<!-- 	    <artifactId>proguard-base</artifactId> -->
-	<!-- 	    <version>4.7</version> -->
-	<!-- 	    <scope>runtime</scope> -->
-	<!-- 	</dependency> -->
-	<!--     </dependencies> -->
-	<!-- </plugin> -->
+	<!-- <plugins> -->
+	<!--     <plugin> -->
+	<!--         <groupId>com.github.wvengen</groupId> -->
+	<!--         <artifactId>proguard-maven-plugin</artifactId> -->
+	<!--         <version>2.0.5</version> -->
+	<!--         <executions> -->
+	<!-- 	    <execution> -->
+	<!-- 		<phase>package</phase> -->
+	<!-- 		<goals><goal>proguard</goal></goals> -->
+	<!-- 	    </execution> -->
+	<!-- 	</executions> -->
+	<!--         <configuration> -->
+	<!-- 	    <proguardVersion>4.7</proguardVersion> -->
+	<!-- 	    <includeDependency>false</includeDependency> -->
+	<!-- 	    <options> -->
+			<!-- don't warn about these packages not being found, because they are not needed anyways -->
+			<!-- <option>-dontwarn org.bouncycastle.**</option> -->
+			<!-- <option>-dontwarn junit.**</option> -->
+			<!-- general options -->
+			<!-- <option>-allowaccessmodification</option> -->
+			<!-- tell proguard which classes/methods to keep untouched -->
+	<!-- 		<option>-keep public class * extends java.applet.Applet { *; }</option> -->
+	<!-- 	    </options> -->
+	<!-- 	    <libs> -->
+	<!-- 		<lib>${java.home}/lib/rt.jar</lib> -->
+	<!-- 		<lib>${java.home}/lib/jce.jar</lib> -->
+	<!-- 	    </libs> -->
+	<!-- 	</configuration> -->
+	<!--         <dependencies> -->
+	<!-- 	    <dependency> -->
+	<!-- 		<groupId>net.sf.proguard</groupId> -->
+	<!-- 		<artifactId>proguard-base</artifactId> -->
+	<!-- 		<version>4.7</version> -->
+	<!-- 		<scope>runtime</scope> -->
+	<!-- 	    </dependency> -->
+	<!-- 	</dependencies> -->
+	<!--     </plugin> -->
+	<!-- </plugins> -->
     </build>
 
     <dependencies>

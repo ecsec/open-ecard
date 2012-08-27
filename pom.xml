@@ -86,6 +86,34 @@
 		</plugins>
 	    </build>
 	</profile>
+	<profile>
+	    <id>cobertura-xml-report</id>
+	    <build>
+		<plugins>
+		    <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-site-plugin</artifactId>
+			<version>3.1</version>
+			<configuration>
+			    <reportPlugins>
+				<plugin>
+				    <groupId>org.codehaus.mojo</groupId>
+				    <artifactId>cobertura-maven-plugin</artifactId>
+				    <version>2.5.1</version>
+				    <configuration>
+					<maxmem>1024m</maxmem>
+					<aggregate>true</aggregate>
+					<formats>
+					    <format>xml</format>
+					</formats>
+				    </configuration>
+				</plugin>
+			    </reportPlugins>
+			</configuration>
+		    </plugin>
+		</plugins>
+	    </build>
+	</profile>
     </profiles>
 
     <build>
@@ -204,7 +232,6 @@
 				<aggregate>true</aggregate>
 				<formats>
 				    <format>html</format>
-				    <format>xml</format>
 				</formats>
 			    </configuration>
 			</plugin>

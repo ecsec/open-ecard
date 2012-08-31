@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"> 
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+	<artifactId>control-interface</artifactId>
+	<groupId>org.openecard.client</groupId>
+	<version>1.0.0-pre2-SNAPSHOT</version>
+    </parent>
+    
+    <groupId>org.openecard.client.control</groupId>
+    <artifactId>control-bindings</artifactId>
+    <packaging>pom</packaging>
+    <name>Control Interface Bindings</name>
+    
+    <modules>
+	<module>HTTP</module>
+	<module>javascript</module>
+    </modules>
+    
+    <dependencies>
+	<dependency>
+	    <groupId>org.openecard.client.control</groupId>
+	    <artifactId>control-core</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+    </dependencies>
+    
+</project>

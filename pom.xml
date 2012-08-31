@@ -38,6 +38,7 @@
 	<module>browser</module>
 	<!-- client assemblies -->
 	<module>clients</module>
+	<module>control-interface</module>
     </modules>
 
     <distributionManagement>
@@ -213,18 +214,18 @@
 	    <version>1.0.6</version>
 	    <scope>test</scope>
 	</dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.5.2</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>junit</artifactId>
-                    <groupId>junit</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+	<dependency>
+	    <groupId>org.testng</groupId>
+	    <artifactId>testng</artifactId>
+	    <version>6.5.2</version>
+	    <scope>test</scope>
+	    <exclusions>
+		<exclusion>
+		    <artifactId>junit</artifactId>
+		    <groupId>junit</groupId>
+		</exclusion>
+	    </exclusions>
+	</dependency>
     </dependencies>
 
     <properties>

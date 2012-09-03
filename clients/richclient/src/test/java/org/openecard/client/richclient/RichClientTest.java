@@ -24,15 +24,7 @@ package org.openecard.client.richclient;
 
 import java.util.List;
 import org.openecard.client.common.ECardConstants;
-import org.openecard.client.connector.ConnectorConstants;
-import org.openecard.client.connector.handler.tctoken.TCToken;
-import org.openecard.client.connector.handler.tctoken.TCTokenConverter;
-import org.openecard.client.connector.handler.tctoken.TCTokenException;
-import org.openecard.client.connector.handler.tctoken.TCTokenGrabber;
-import org.openecard.client.connector.handler.tctoken.TCTokenParser;
-import org.openecard.client.connector.handler.tctoken.TCTokenRequest;
-import org.openecard.client.connector.handler.tctoken.TCTokenResponse;
-import org.openecard.client.connector.handler.tctoken.TCTokenVerifier;
+import org.openecard.client.control.module.tctoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.testng.Assert.fail;
@@ -66,7 +58,7 @@ public class RichClientTest {
 	    tokens = parser.parse(data);
 
 	    if (tokens.isEmpty()) {
-		throw new TCTokenException(ConnectorConstants.ConnectorError.TC_TOKEN_NOT_AVAILABLE.toString());
+		throw new TCTokenException("TCToken not available");
 	    }
 
 	    // Verify the TCToken

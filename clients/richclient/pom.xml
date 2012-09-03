@@ -206,9 +206,9 @@
 	    <artifactId>about</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
-	<dependency>
-	    <groupId>org.openecard.client.clients</groupId>
-	    <artifactId>client-connector</artifactId>
+        <dependency>
+	    <groupId>org.openecard.client.control.bindings</groupId>
+	    <artifactId>http</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>

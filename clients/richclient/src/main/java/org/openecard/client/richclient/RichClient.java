@@ -23,7 +23,6 @@ package org.openecard.client.richclient;
 
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
-import java.net.BindException;
 import java.net.URL;
 import java.util.List;
 import java.util.Set;
@@ -37,16 +36,16 @@ import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.common.util.ValueGenerators;
-import org.openecard.client.connector.Connector;
-import org.openecard.client.connector.ConnectorServer;
-import org.openecard.client.connector.client.ClientRequest;
-import org.openecard.client.connector.client.ClientResponse;
-import org.openecard.client.connector.client.ConnectorListener;
-import org.openecard.client.connector.handler.status.StatusRequest;
-import org.openecard.client.connector.handler.status.StatusResponse;
-import org.openecard.client.connector.handler.tctoken.TCToken;
-import org.openecard.client.connector.handler.tctoken.TCTokenRequest;
-import org.openecard.client.connector.handler.tctoken.TCTokenResponse;
+import org.openecard.client.control.ControlInterface;
+import org.openecard.client.control.binding.http.HTTPBinding;
+import org.openecard.client.control.client.ClientRequest;
+import org.openecard.client.control.client.ClientResponse;
+import org.openecard.client.control.client.ControlListener;
+import org.openecard.client.control.module.status.StatusRequest;
+import org.openecard.client.control.module.status.StatusResponse;
+import org.openecard.client.control.module.tctoken.TCToken;
+import org.openecard.client.control.module.tctoken.TCTokenRequest;
+import org.openecard.client.control.module.tctoken.TCTokenResponse;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
@@ -72,7 +71,7 @@ import org.slf4j.LoggerFactory;
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
-public final class RichClient implements ConnectorListener {
+public final class RichClient implements ControlListener {
 
     private static final Logger _logger = LoggerFactory.getLogger(RichClient.class.getName());
     private static final I18n lang = I18n.getTranslation("gui");
@@ -80,6 +79,8 @@ public final class RichClient implements ConnectorListener {
     private static RichClient client;
     // Tray icon
     private AppTray tray;
+    // control interface
+    ControlInterface control;
     // Client environment
     private ClientEnv env = new ClientEnv();
     // Interface Device Layer (IFD)
@@ -296,13 +297,10 @@ public final class RichClient implements ConnectorListener {
 
 	try {
 	    // Start up control interface
-	    try {
-		Connector connector = new Connector(ConnectorServer.DEFAULT_PORT);
-		connector.getListeners().addConnectorListener(client);
-	    } catch (BindException e) {
-		dialog.setMessage(lang.translationForKey("client.startup.failed.portinuse"));
-		throw e;
-	    }
+	    HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
+	    control = new ControlInterface(binding);
+	    control.getListeners().addControlListener(this);
+	    control.start();
 
 	    tray = new AppTray(this);
 	    tray.beginSetup();

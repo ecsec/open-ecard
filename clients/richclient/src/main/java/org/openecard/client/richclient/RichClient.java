@@ -23,6 +23,7 @@ package org.openecard.client.richclient;
 
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
+import java.net.BindException;
 import java.net.URL;
 import java.util.List;
 import java.util.Set;
@@ -79,8 +80,8 @@ public final class RichClient implements ControlListener {
     private static RichClient client;
     // Tray icon
     private AppTray tray;
-    // control interface
-    ControlInterface control;
+    // Control interface
+    private ControlInterface control;
     // Client environment
     private ClientEnv env = new ClientEnv();
     // Interface Device Layer (IFD)
@@ -297,10 +298,15 @@ public final class RichClient implements ControlListener {
 
 	try {
 	    // Start up control interface
-	    HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
-	    control = new ControlInterface(binding);
-	    control.getListeners().addControlListener(this);
-	    control.start();
+	    try {
+		HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
+		control = new ControlInterface(binding);
+		control.getListeners().addControlListener(this);
+		control.start();
+	    } catch (BindException e) {
+		dialog.setMessage(lang.translationForKey("client.startup.failed.portinuse"));
+		throw e;
+	    }
 
 	    tray = new AppTray(this);
 	    tray.beginSetup();

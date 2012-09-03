@@ -305,6 +305,7 @@ public final class RichClient implements ConnectorListener {
 	    }
 
 	    tray = new AppTray(this);
+	    tray.beginSetup();
 
 	    // Set up client environment
 	    env = new ClientEnv();
@@ -338,12 +339,7 @@ public final class RichClient implements ConnectorListener {
 	    }
 
 	    // Set up CardRecognition
-	    try {
-		recognition = new CardRecognition(ifd, contextHandle);
-	    } catch (Exception e) {
-		//TODO 
-		throw e;
-	    }
+	    recognition = new CardRecognition(ifd, contextHandle);
 
 	    // Set up EventManager
 	    em = new EventManager(recognition, env, contextHandle, ValueGenerators.generateSessionID());
@@ -369,7 +365,7 @@ public final class RichClient implements ConnectorListener {
 	    // Initialize the EventManager
 	    em.initialize();
 
-	    tray.done();
+	    tray.endSetup();
 	} catch (Exception e) {
 	    _logger.error("Exception", e);
 

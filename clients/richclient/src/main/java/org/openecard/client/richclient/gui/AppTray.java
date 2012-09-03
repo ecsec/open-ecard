@@ -67,10 +67,13 @@ public class AppTray {
 
     public AppTray(RichClient client) {
        this.client = client;
-       setupUI();
     }
 
-    private void setupUI() {
+    /**
+     * Starts the setup process.
+     * A loading icon is displayed.
+     */
+    public void beginSetup() {
 	status = new Status();
         createPopupMenu();
 
@@ -81,7 +84,11 @@ public class AppTray {
 	}
     }
 
-    public void done() {
+    /**
+     * Finishes the setup process.
+     * The loading icon is replaced with the eCard logo.
+     */
+    public void endSetup() {
 	if (trayAvailable) {
             trayIcon.setImage(getTrayIconImage(ICON_LOGO));
 	    trayIcon.setToolTip(lang.translationForKey("tray.title"));

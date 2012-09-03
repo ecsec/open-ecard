@@ -68,7 +68,7 @@ public class HTTPBinding extends ControlBinding {
      * @throws Exception 
      */
     public HTTPBinding(int port) throws IOException, Exception {
-	this(port, "/www");
+	this(port, "/www", "/www-files");
     }
 
     /**
@@ -79,11 +79,11 @@ public class HTTPBinding extends ControlBinding {
      * @throws IOException If the document root cannot be read
      * @throws Exception 
      */
-    public HTTPBinding(int port, String documentRootPath) throws IOException, Exception {
+    public HTTPBinding(int port, String documentRootPath, String listFile) throws IOException, Exception {
 	this.port = port;
 
 	// Create document root
-	documentRoot = new DocumentRoot(documentRootPath);
+	documentRoot = new DocumentRoot(documentRootPath, listFile);
     }
 
     /**

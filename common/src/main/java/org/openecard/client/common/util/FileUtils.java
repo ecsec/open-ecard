@@ -182,4 +182,70 @@ public class FileUtils {
 	return resultList;
     }
 
+
+    /**
+     * Map list of files to resource URLs.
+     * The list file must itself be present in the classpath and contain unix style path values separated by colons (:).
+     * These path values must be relative to the classpath. The map key is path without the given prefix.<br/>
+     * E.g.
+     * <code>/www/index.html</code> becomes <code>/index.html</code> -> <code>some-url-to-the-file</code>.
+     *
+     * @param clazz Base for the {@link java.lang.Class#getResource()} operation.
+     * @param prefix Prefix common to all path entries.
+     * @param listFile File with the path entries.
+     * @return Mapping of all files without the classpath prefix to their respective URLs.
+     * @throws UnsupportedEncodingException
+     * @throws IOException
+     */
+    public static Map<String,URL> getResourceFileListing(Class clazz, String prefix, String listFile) throws UnsupportedEncodingException, IOException {
+	InputStream fileStream = resolveResourceAsStream(clazz, listFile);
+	String fileValue = toString(fileStream);
+	String[] files = fileValue.split(":");
+
+	TreeMap<String,URL> result = new TreeMap<String,URL>();
+	for (String file : files) {
+	    URL fileUrl = resolveResourceAsURL(clazz, file);
+	    if (fileUrl != null) {
+		result.put(file.substring(prefix.length()), fileUrl);
+	    }
+	}
+
+	return result;
+    }
+
+
+    /**
+     * Same as {@link java.lang.Class#getResourceAsStream()} but works with and without jars reliably.
+     * In fact the resource is tried to be loaded with and without / in front of the path.
+     *
+     * @param clazz Base for the <code>getResource()</code> operation.
+     * @param name Name of the resource.
+     * @return Open stream to the resource or null if none found.
+     * @throws IOException
+     */
+    public static InputStream resolveResourceAsStream(Class clazz, String name) throws IOException {
+	URL url = resolveResourceAsURL(clazz, name);
+	if (url != null) {
+	    return url.openStream();
+	}
+	return null;
+    }
+    /**
+     * Same as {@link java.lang.Class#getResource()} but works with and without jars reliably.
+     * In fact the resource is tried to be loaded with and without / in front of the path.
+     *
+     * @param clazz Base for the <code>getResource()</code> operation.
+     * @param name name of the resource.
+     * @return URL to the resource or null if none found.
+     * @throws IOException
+     */
+    public static URL resolveResourceAsURL(Class clazz, String name) {
+	URL url = clazz.getResource(name);
+	if (url == null) {
+	    name = name.startsWith("/") ? name.substring(1) : "/" + name;
+	    url = clazz.getResource(name);
+	}
+	return url;
+    }
+
 }

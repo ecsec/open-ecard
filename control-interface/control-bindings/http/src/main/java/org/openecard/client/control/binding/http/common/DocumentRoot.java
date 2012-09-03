@@ -24,7 +24,6 @@ package org.openecard.client.control.binding.http.common;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,19 +48,12 @@ public class DocumentRoot {
      * @param rootPath Path of the document root.
      * @throws IOException
      */
-    public DocumentRoot(String rootPath) throws IOException {
+    public DocumentRoot(String rootPath, String listFile) throws IOException {
 	// strip leading / for the listing code
-	if (rootPath.startsWith("/")) {
-	    rootPath = rootPath.substring(1);
-	}
-	// path should end with /
-	if (!rootPath.endsWith("/")) {
-	    rootPath += "/";
-	}
 	try {
 	    // load all paths
-	    files = FileUtils.getResourceListing(DocumentRoot.class, rootPath);
-	} catch (URISyntaxException ex) {
+	    files = FileUtils.getResourceFileListing(DocumentRoot.class, rootPath, listFile);
+	} catch (IOException ex) {
 	    _logger.error("Invalid path {}", rootPath);
 	    throw new FileNotFoundException(ex.getMessage());
 	}

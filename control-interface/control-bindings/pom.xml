@@ -16,7 +16,7 @@
     <name>Control Interface Bindings</name>
     
     <modules>
-	<module>HTTP</module>
+	<module>http</module>
 	<module>javascript</module>
     </modules>
     

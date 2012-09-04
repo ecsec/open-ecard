@@ -20,23 +20,34 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.control.module.tctoken;
+package org.openecard.client.control.module.tctoken.hacks;
 
 import java.io.IOException;
 
 
 /**
- * Remove the converter as soon as possible!!!
- *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class TCTokenConverter {
+public class ObjectTag {
 
-    private String data;
+    private static String data;
 
-    public String convert(String input) {
+    /**
+     * Return TCTokenType.
+     * If the parameter contains an object element it is converted to a TCTpkenType.
+     * If it is already a TCTokenType, the string is returned as is.
+     * @param input
+     * @return
+     */
+    public static String fix(String input) {
 	int x = input.indexOf("<object");
 	int y = input.indexOf("object", x + 7);
+
+	// there is nothing to do here ... leave
+	if (x == -1 || y == -1) {
+	    return input;
+	}
+
 	data = input.substring(x, y);
 
 	StringBuilder out = new StringBuilder();
@@ -52,7 +63,7 @@ public class TCTokenConverter {
 	return out.toString();
     }
 
-    private String convertParameter(String input) throws IOException {
+    private static String convertParameter(String input) throws IOException {
 	StringBuilder out = new StringBuilder();
 
 	int x = input.indexOf("<param name=");
@@ -62,22 +73,14 @@ public class TCTokenConverter {
 	    x += 13;
 	}
 	String element = input.substring(x, input.indexOf("\"", x));
-	//TODO fix for non-conforming PathSecurity-Parameters element
-	if (!element.equals("PathSecurity-Parameters")) {
-	    element = element.replace("PathSecurity-Parameter", "PathSecurity-Parameters");
-	}
 
 	int y = input.indexOf("value=", x) + 7;
 	String value = input.substring(y, input.indexOf("\"", y));
 
-	out.append("<");
-	out.append(element);
-	out.append(">");
+	out.append("<" + element + ">");
 	out.append(value);
-	out.append("</");
-	out.append(element);
-	out.append(">");
-	
+	out.append("</" + element + ">");
+
 	data = input.substring(y + value.length(), input.length());
 
 	return out.toString();

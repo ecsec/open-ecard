@@ -23,40 +23,24 @@
 package org.openecard.client.control.module.tctoken;
 
 import java.net.URL;
-import java.util.List;
-import org.openecard.client.control.module.tctoken.hacks.AgetoURI;
-import org.openecard.client.control.module.tctoken.hacks.ObjectTag;
-import org.openecard.client.control.module.tctoken.hacks.PathSecurityParameters;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class TCTokenFactory {
+public class TCTokenFactoryTest {
 
-    public static TCToken generateTCToken(URL tcTokenURL) throws TCTokenException {
-	// Get TCToken from the given url
-	TCTokenGrabber grabber = new TCTokenGrabber();
-	String data = grabber.getResource(tcTokenURL.toString());
-
-	// FIXME: Hack
-	data = PathSecurityParameters.fix(data);
-	// FIXME: Hack
-	data = ObjectTag.fix(data);
-
-	// Parse the TCToken
-	TCTokenParser parser = new TCTokenParser();
-	List<TCToken> tokens = parser.parse(data);
-
-	if (tokens.isEmpty()) {
-	    throw new TCTokenException("TCToken not available");
+    @Test
+    public void testGenerateTCToken() throws Exception {
+	try {
+	    String url = "http://openecard-demo.vserver-001.urospace.de/tcToken?card-type=http://bsi.bund.de/cif/npa.xml";
+	    URL tcTokenURL = new URL(url);
+	    TCToken result = TCTokenFactory.generateTCToken(tcTokenURL);
+	} catch (Exception e) {
+	    Assert.fail(e.getMessage());
 	}
-
-	// Verify the TCToken
-	TCTokenVerifier ver = new TCTokenVerifier(tokens.get(0));
-	ver.verify();
-
-	return tokens.get(0);
     }
 
 }

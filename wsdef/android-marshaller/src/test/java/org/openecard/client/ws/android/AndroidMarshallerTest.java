@@ -26,6 +26,7 @@ import de.bund.bsi.ecard.api._1.InitializeFramework;
 import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
 import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse.Version;
 import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
@@ -36,6 +37,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.sal.anytype.AuthDataMap;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.ws.WSMarshaller;
@@ -45,7 +47,6 @@ import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 
 /**
  *
@@ -64,6 +65,11 @@ public class AndroidMarshallerTest {
     private static final String didAuthenticateCA;
     private static final String didAuthenticateResponse;
     private static final String npaCif;
+    private static final String disconnect;
+    private static final String disconnectResponse;
+    private static final String destroyChannel;
+    private static final String startPAOS;
+    private static final String transmit;
 
     static {
 	try {
@@ -78,6 +84,11 @@ public class AndroidMarshallerTest {
 	    didAuthenticateCA = loadXML("DIDAuthenticateCA.xml");
 	    didAuthenticateResponse = loadXML("DIDAuthenticateResponse.xml");
 	    npaCif = loadXML("nPA_1-0-0.xml");
+	    disconnect = loadXML("Disconnect.xml");
+	    disconnectResponse = loadXML("DisconnectResponse.xml");
+	    destroyChannel = loadXML("DestroyChannel.xml");
+	    startPAOS = loadXML("StartPAOS.xml");
+	    transmit = loadXML("Transmit.xml");
 	} catch (IOException ex) {
 	    throw new RuntimeException(ex);
 	}
@@ -125,21 +136,77 @@ public class AndroidMarshallerTest {
     }
 
     @Test
+    public void testConversionOfDisconnect() throws Exception {
+	WSMarshaller m = new AndroidMarshaller();
+	Object o = m.unmarshal(m.str2doc(disconnect));
+
+	if (!(o instanceof Disconnect)) {
+	    throw new Exception("Object should be an instace of EstablishContext");
+	}
+
+	Disconnect d = (Disconnect) o;
+	assertEquals(d.getSlotHandle(), StringUtils.toByteArray("1D8EFC10F063FB6FE8A3BBF8D2E0CA5C"));
+	assertEquals(d.getAction(), ActionType.EJECT);
+    }
+
+    @Test
+    public void testConversionOfDisconnectResponse() throws Exception {
+	WSMarshaller m = new AndroidMarshaller();
+	DisconnectResponse dr = new DisconnectResponse();
+	dr.setResult(WSHelper.makeResultOK());
+	Document d = m.marshal(dr);
+	assertEquals(m.doc2str(d), disconnectResponse);
+    }
+
+    @Test
+    public void testConversionOfDestroyChannel() throws Exception {
+	WSMarshaller m = new AndroidMarshaller();
+	DestroyChannel destroy = new DestroyChannel();
+	destroy.setSlotHandle(new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5 });
+	Document d = m.marshal(destroy);
+	assertEquals(m.doc2str(d), destroyChannel);
+    }
+
+    @Test
+    public void testConversionOfTransmit() throws Exception {
+	WSMarshaller m = new AndroidMarshaller();
+	Object o = m.unmarshal(m.str2doc(transmit));
+	if (!(o instanceof Transmit)) {
+	    throw new Exception("Object should be an instace of Transmit");
+	}
+	Transmit t = (Transmit) o;
+	assertEquals(t.getSlotHandle(), StringUtils.toByteArray("7695F667EE2B53824F77544D861236DD"));
+	assertEquals(t.getInputAPDUInfo().size(), 2);
+	assertEquals(t.getInputAPDUInfo().get(0).getInputAPDU(), StringUtils.toByteArray("00A4040C06D27600000102"));
+	assertEquals(t.getInputAPDUInfo().get(0).getAcceptableStatusCode().size(), 1);
+	assertEquals(t.getInputAPDUInfo().get(0).getAcceptableStatusCode().get(0), StringUtils.toByteArray("9000"));
+	assertEquals(t.getInputAPDUInfo().get(1).getInputAPDU(), StringUtils.toByteArray("00A4040C06D27600000103"));
+	assertEquals(t.getInputAPDUInfo().get(1).getAcceptableStatusCode().size(), 2);
+	assertEquals(t.getInputAPDUInfo().get(1).getAcceptableStatusCode().get(0), StringUtils.toByteArray("9000"));
+	assertEquals(t.getInputAPDUInfo().get(1).getAcceptableStatusCode().get(1), StringUtils.toByteArray("6666"));
+    }
+
+    @Test
     public void testConversionOfStartPAOS() throws Exception {
 	WSMarshaller m = new AndroidMarshaller();
-	StartPAOS startPAOS = new StartPAOS();
-	startPAOS.setSessionIdentifier("5ec5ebb1dd254f392e6ca33cf5bf");
+	StartPAOS startP = new StartPAOS();
+	startP.setSessionIdentifier("5ec5ebb1dd254f392e6ca33cf5bf");
 	ConnectionHandleType connectionHandleType = new ConnectionHandleType();
 	connectionHandleType.setContextHandle(new BigInteger("94D7439CE657561E7AE3D491FD71AC21F8BCBB5608BA61F5A0EA52269BC01250", 16).toByteArray());
 	connectionHandleType.setSlotHandle(new BigInteger("EEB49368C1152BEC379DA59356D59039CA7757AC3EAF9430285F2CBB3DD6EDDD", 16).toByteArray());
+	connectionHandleType.setIFDName("Name of IFD");
+	connectionHandleType.setSlotIndex(new BigInteger("0"));
+	connectionHandleType.setCardApplication(new byte[] { 0x0, 0x0, 0x0 });
+	ChannelHandleType channelHandle = new ChannelHandleType();
+	channelHandle.setSessionIdentifier("sessionID");
+	connectionHandleType.setChannelHandle(channelHandle);
+	RecognitionInfo recognitionInfo = new RecognitionInfo();
+	recognitionInfo.setCardType("nPA_1-0-0.xml");
+	connectionHandleType.setRecognitionInfo(recognitionInfo);
+	startP.getConnectionHandle().add(connectionHandleType);
 
-	startPAOS.getConnectionHandle().add(connectionHandleType);
-
-	Document d = m.marshal(startPAOS);
-	String s = m.doc2str(d);
-	System.out.println(s);
-
-	JAXB.marshal(startPAOS, System.out);
+	Document d = m.marshal(startP);
+	assertEquals(m.doc2str(d), startPAOS);
     }
 
     @Test

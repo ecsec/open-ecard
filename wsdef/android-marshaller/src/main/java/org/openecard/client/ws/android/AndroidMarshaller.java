@@ -30,43 +30,29 @@ import java.math.BigInteger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.StringUtils;
-import org.openecard.client.ws.MarshallingTypeException;
-import org.openecard.client.ws.WSMarshaller;
-import org.openecard.client.ws.WSMarshallerException;
-import org.openecard.client.ws.WhitespaceFilter;
-import org.openecard.client.ws.soap.MessageFactory;
-import org.openecard.client.ws.soap.SOAPBody;
-import org.openecard.client.ws.soap.SOAPException;
-import org.openecard.client.ws.soap.SOAPMessage;
+import org.openecard.client.ws.*;
+import org.openecard.client.ws.soap.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
+import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
+import org.xmlpull.v1.*;
 
 /**
  * This class is a provisional and simple replacement for the JAXB-Marshaller
  * used in the applet and the rich client since JAXB is not available on
  * Android.</br>
- *
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class AndroidMarshaller implements WSMarshaller {
@@ -212,19 +198,51 @@ public class AndroidMarshaller implements WSMarshaller {
 	} else if (o instanceof iso.std.iso_iec._24727.tech.schema.StartPAOS) {
 	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
 	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
-	    StartPAOS startPAOSPOJO = (StartPAOS) o;
+	    StartPAOS startPAOS = (StartPAOS) o;
 
 	    Element em = document.createElement(iso + "SessionIdentifier");
-	    em.appendChild(document.createTextNode(startPAOSPOJO.getSessionIdentifier()));
+	    em.appendChild(document.createTextNode(startPAOS.getSessionIdentifier()));
 	    rootElement.appendChild(em);
 
 	    em = document.createElement(iso + "ConnectionHandle");
 	    Element em2 = document.createElement(iso + "ContextHandle");
-	    em2.appendChild(document.createTextNode(ByteUtils.toHexString(startPAOSPOJO.getConnectionHandle().get(0).getContextHandle())));
+	    em2.appendChild(document.createTextNode(ByteUtils.toHexString(startPAOS.getConnectionHandle().get(0).getContextHandle())));
 	    em.appendChild(em2);
-	    if (startPAOSPOJO.getConnectionHandle().get(0).getSlotHandle() != null) {
+	    if (startPAOS.getConnectionHandle().get(0).getSlotHandle() != null) {
 		em2 = document.createElement(iso + "SlotHandle");
-		em2.appendChild(document.createTextNode(ByteUtils.toHexString(startPAOSPOJO.getConnectionHandle().get(0).getSlotHandle())));
+		em2.appendChild(document.createTextNode(ByteUtils.toHexString(startPAOS.getConnectionHandle().get(0).getSlotHandle())));
+		em.appendChild(em2);
+	    }
+	    if (startPAOS.getConnectionHandle().get(0).getCardApplication() != null) {
+		em2 = document.createElement(iso + "CardApplication");
+		em2.appendChild(document.createTextNode(ByteUtils.toHexString(startPAOS.getConnectionHandle().get(0).getCardApplication())));
+		em.appendChild(em2);
+	    }
+	    if (startPAOS.getConnectionHandle().get(0).getSlotIndex() != null) {
+		em2 = document.createElement(iso + "SlotIndex");
+		em2.appendChild(document.createTextNode(startPAOS.getConnectionHandle().get(0).getSlotIndex().toString()));
+		em.appendChild(em2);
+	    }
+	    if (startPAOS.getConnectionHandle().get(0).getIFDName() != null) {
+		em2 = document.createElement(iso + "IFDName");
+		em2.appendChild(document.createTextNode(startPAOS.getConnectionHandle().get(0).getIFDName()));
+		em.appendChild(em2);
+	    }
+	    if (startPAOS.getConnectionHandle().get(0).getChannelHandle() != null) {
+		em2 = document.createElement(iso + "ChannelHandle");
+		if (startPAOS.getConnectionHandle().get(0).getChannelHandle().getSessionIdentifier() != null) {
+		    Element em3 = document.createElement(iso + "SessionIdentifier");
+		    em3.appendChild(document.createTextNode(startPAOS.getConnectionHandle().get(0).getChannelHandle()
+			    .getSessionIdentifier()));
+		    em2.appendChild(em3);
+		}
+		em.appendChild(em2);
+	    }
+	    if (startPAOS.getConnectionHandle().get(0).getRecognitionInfo() != null) {
+		em2 = document.createElement(iso + "RecognitionInfo");
+		Element em3 = document.createElement(iso + "CardType");
+		em3.appendChild(document.createTextNode(startPAOS.getConnectionHandle().get(0).getRecognitionInfo().getCardType()));
+		em2.appendChild(em3);
 		em.appendChild(em2);
 	    }
 	    rootElement.appendChild(em);
@@ -412,6 +430,12 @@ public class AndroidMarshaller implements WSMarshaller {
 		rootElement.appendChild(marshalCardCall(c, document));
 	    }
 
+	} else if (o instanceof DisconnectResponse) {
+	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
+	    DisconnectResponse disconnectResponse = (DisconnectResponse) o;
+	    Element em = marshalResult(disconnectResponse.getResult(), document);
+	    rootElement.appendChild(em);
 	} else {
 	    throw new IllegalArgumentException("Cannot marshal " + o.getClass().getSimpleName());
 	}
@@ -893,6 +917,21 @@ public class AndroidMarshaller implements WSMarshaller {
 		}
 	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Connect")));
 	    return c;
+	} else if (parser.getName().equals("Disconnect")) {
+	    Disconnect d = new Disconnect();
+	    int eventType = parser.getEventType();
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("SlotHandle")) {
+			d.setSlotHandle(StringUtils.toByteArray(parser.nextText()));
+		    } else if (parser.getName().equals("Action")) {
+			d.setAction(ActionType.fromValue(parser.nextText()));
+		    }
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Disconnect")));
+	    return d;
 
 	} else if (parser.getName().equals("Transmit")) {
 	    Transmit t = new Transmit();
@@ -901,13 +940,11 @@ public class AndroidMarshaller implements WSMarshaller {
 		parser.next();
 		eventType = parser.getEventType();
 		if (eventType == XmlPullParser.START_TAG) {
-		    if (parser.getName().equals("InputAPDU")) {
-			InputAPDUInfoType iait = new InputAPDUInfoType();
-			iait.setInputAPDU(StringUtils.toByteArray(parser.nextText()));
-			t.getInputAPDUInfo().add(iait);
+		    if (parser.getName().equals("InputAPDUInfo")) {
+			t.getInputAPDUInfo().add(this.parseInputAPDUInfo(parser));
 		    } else if (parser.getName().equals("SlotHandle")) {
 			t.setSlotHandle(StringUtils.toByteArray(parser.nextText()));
-		    } // TODO acceptablestatuscode
+		    }
 		}
 	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Transmit")));
 	    return t;
@@ -955,6 +992,23 @@ public class AndroidMarshaller implements WSMarshaller {
 	}
     }
 
+    private InputAPDUInfoType parseInputAPDUInfo(XmlPullParser parser) throws XmlPullParserException, IOException{
+	InputAPDUInfoType inputAPDUInfo = new InputAPDUInfoType();
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("InputAPDU")) {
+		    inputAPDUInfo.setInputAPDU(StringUtils.toByteArray(parser.nextText()));
+		} else if (parser.getName().equals("AcceptableStatusCode")) {
+		    inputAPDUInfo.getAcceptableStatusCode().add(StringUtils.toByteArray(parser.nextText()));
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("InputAPDUInfo")));
+	return inputAPDUInfo;
+    }
+    
     private DIDAuthenticationDataType parseDIDAuthenticationDataType(XmlPullParser parser) throws XmlPullParserException, IOException {
 	Document document = documentBuilder.newDocument();
 	DIDAuthenticationDataType didAuthenticationDataType = null;

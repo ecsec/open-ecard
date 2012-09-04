@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<iso:DisconnectResponse xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema">
+  <dss:Result xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema">
+    <dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+  </dss:Result>
+</iso:DisconnectResponse>

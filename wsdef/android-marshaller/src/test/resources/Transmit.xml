@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns4:Transmit xmlns:ns4="urn:iso:std:iso-iec:24727:tech:schema"
+    xmlns:ns10="http://www.setcce.org/schemas/ers"
+    xmlns:ns11="http://ws.openecard.org/gui/v1.0"
+    xmlns:ns12="http://ws.skidentity.de/eidb/v1.0"
+    xmlns:ns13="urn:oasis:names:tc:SAML:2.0:metadata"
+    xmlns:ns14="http://www.w3.org/2001/04/xmlenc#"
+    xmlns:ns15="http://test.cardinfo.eu"
+    xmlns:ns16="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#"
+    xmlns:ns17="http://uri.etsi.org/01903/v1.3.2#"
+    xmlns:ns18="urn:oasis:names:tc:SAML:1.0:assertion"
+    xmlns:ns19="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+    xmlns:ns2="http://www.w3.org/2000/09/xmldsig#"
+    xmlns:ns20="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+    xmlns:ns21="http://www.w3.org/2001/04/xmldsig-more#"
+    xmlns:ns3="http://www.bsi.bund.de/ecard/api/1.1"
+    xmlns:ns5="urn:oasis:names:tc:SAML:2.0:assertion"
+    xmlns:ns6="http://www.w3.org/ns/ws-policy"
+    xmlns:ns7="http://uri.etsi.org/02231/v2.1.1#"
+    xmlns:ns8="http://uri.etsi.org/02231/v2.x#"
+    xmlns:ns9="http://uri.etsi.org/02231/v3.1.2#"
+    xmlns="urn:oasis:names:tc:dss:1.0:core:schema" >
+
+    <ns4:SlotHandle>7695F667EE2B53824F77544D861236DD</ns4:SlotHandle>
+
+    <ns4:InputAPDUInfo>
+        <ns4:InputAPDU>00A4040C06D27600000102</ns4:InputAPDU>
+        <ns4:AcceptableStatusCode>9000</ns4:AcceptableStatusCode>
+    </ns4:InputAPDUInfo>
+
+    <ns4:InputAPDUInfo>
+        <ns4:InputAPDU>00A4040C06D27600000103</ns4:InputAPDU>
+        <ns4:AcceptableStatusCode>9000</ns4:AcceptableStatusCode>
+        <ns4:AcceptableStatusCode>6666</ns4:AcceptableStatusCode>
+    </ns4:InputAPDUInfo>
+</ns4:Transmit>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<iso:StartPAOS xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema">
+  <iso:SessionIdentifier>5ec5ebb1dd254f392e6ca33cf5bf</iso:SessionIdentifier>
+  <iso:ConnectionHandle>
+    <iso:ContextHandle>0094D7439CE657561E7AE3D491FD71AC21F8BCBB5608BA61F5A0EA52269BC01250</iso:ContextHandle>
+    <iso:SlotHandle>00EEB49368C1152BEC379DA59356D59039CA7757AC3EAF9430285F2CBB3DD6EDDD</iso:SlotHandle>
+    <iso:CardApplication>000000</iso:CardApplication>
+    <iso:SlotIndex>0</iso:SlotIndex>
+    <iso:IFDName>Name of IFD</iso:IFDName>
+    <iso:ChannelHandle>
+      <iso:SessionIdentifier>sessionID</iso:SessionIdentifier>
+    </iso:ChannelHandle>
+    <iso:RecognitionInfo>
+      <iso:CardType>nPA_1-0-0.xml</iso:CardType>
+    </iso:RecognitionInfo>
+  </iso:ConnectionHandle>
+</iso:StartPAOS>

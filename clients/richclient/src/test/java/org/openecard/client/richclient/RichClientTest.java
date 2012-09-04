@@ -22,7 +22,7 @@
 
 package org.openecard.client.richclient;
 
-import java.util.List;
+import java.net.URL;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.control.module.tctoken.*;
 import org.slf4j.Logger;
@@ -39,31 +39,13 @@ import org.testng.annotations.Test;
 public class RichClientTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RichClient.class.getName());
-    private static List<TCToken> tokens;
+    private static TCToken token;
     private static String tokenURI = "https://willow.mtg.de/eid-server-demo-app/result/request.html";
 
     @BeforeMethod
     public void setUp() {
 	try {
-	    // Get TCToken from the given URL
-	    TCTokenGrabber grabber = new TCTokenGrabber();
-	    String data = grabber.getResource(tokenURI);
-
-	    //FIXME Remove me
-	    TCTokenConverter converter = new TCTokenConverter();
-	    data = converter.convert(data);
-
-	    // Parse the TCToken
-	    TCTokenParser parser = new TCTokenParser();
-	    tokens = parser.parse(data);
-
-	    if (tokens.isEmpty()) {
-		throw new TCTokenException("TCToken not available");
-	    }
-
-	    // Verify the TCToken
-	    TCTokenVerifier ver = new TCTokenVerifier(tokens.get(0));
-	    ver.verify();
+	    token = TCTokenFactory.generateTCToken(new URL(tokenURI));
 	} catch (Exception e) {
 	    logger.error(e.getMessage());
 	    fail(e.getMessage());
@@ -78,7 +60,7 @@ public class RichClientTest {
 	    Thread.sleep(2500);
 
 	    TCTokenRequest applicationRequest = new TCTokenRequest();
-	    applicationRequest.setTCToken(tokens.get(0));
+	    applicationRequest.setTCToken(token);
 	    TCTokenResponse applicationReponse = (TCTokenResponse) client.request(applicationRequest);
 
 	    if (!applicationReponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {

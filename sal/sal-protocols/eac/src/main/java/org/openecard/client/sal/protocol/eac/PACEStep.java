@@ -109,8 +109,9 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    CardVerifiableCertificateVerifier.verify(taCert, certDescription);
 	    // Verify that the required CHAT matches the terminal certificate's CHAT
 	    CHATVerifier.verfiy(taCert.getCHAT(), optionalCHAT);
-	    // Verify that the optional CHAT has no more access rights then the required CHAT
-	    CHATVerifier.verfiy(requiredCHAT, optionalCHAT);
+	    // Verify that the required and optional CHAT has no more rights then defined in the certificate
+	    CHATVerifier.verfiy(taCert.getCHAT(), requiredCHAT);
+	    CHATVerifier.verfiy(taCert.getCHAT(), optionalCHAT);
 
 	    // GUI request
 	    GUIContentMap content = new GUIContentMap();

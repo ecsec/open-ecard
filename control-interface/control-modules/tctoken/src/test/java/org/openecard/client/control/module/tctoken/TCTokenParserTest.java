@@ -26,6 +26,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.List;
+import org.openecard.client.common.util.FileUtils;
+import org.openecard.client.common.util.StringUtils;
+import org.openecard.client.control.module.tctoken.hacks.PathSecurityParameters;
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 
@@ -37,21 +40,35 @@ public class TCTokenParserTest {
 
     @Test(enabled = !true)
     public void testParse() throws Exception {
-	try {
-	    URL testFileLocation = getClass().getResource("/TCToken.xml");
-	    File testFile = new File(testFileLocation.toURI());
+	URL testFileLocation = getClass().getResource("/TCToken.xml");
+	File testFile = new File(testFileLocation.toURI());
 
-	    TCTokenParser parser = new TCTokenParser();
-	    List<TCToken> tokens = parser.parse(new FileInputStream(testFile));
+	TCTokenParser parser = new TCTokenParser();
+	List<TCToken> tokens = parser.parse(new FileInputStream(testFile));
 
-	    TCToken t = tokens.get(0);
-	    assertEquals(t.getSessionIdentifier(), "3eab1b41ecc1ce5246acf6f4e275");
-	    assertEquals(t.getServerAddress().toString(), "https://eid-ref.my-service.de:443");
-	    assertEquals(t.getRefreshAddress().toString(), "https://eid.services.my.net:443/?sessionID=D9D6851A7C02167A5699DA57657664715F4D9C44E50A94F7A83909D24AFA997A");
-	    assertEquals(t.getBinding(), "urn:liberty:paos:2006-08");
-	} catch (Exception e) {
-	    fail(e.getMessage());
-	}
+	TCToken t = tokens.get(0);
+	assertEquals(t.getSessionIdentifier(), "3eab1b41ecc1ce5246acf6f4e275");
+	assertEquals(t.getServerAddress().toString(), "https://eid-ref.my-service.de:443");
+	assertEquals(t.getRefreshAddress().toString(), "https://eid.services.my.net:443/?sessionID=D9D6851A7C02167A5699DA57657664715F4D9C44E50A94F7A83909D24AFA997A");
+	assertEquals(t.getBinding(), "urn:liberty:paos:2006-08");
+    }
+
+    @Test
+    public void testParseMalformed() throws Exception {
+	URL testFileLocation = getClass().getResource("/TCToken-malformed.xml");
+	String data = FileUtils.toString(testFileLocation.openStream());
+
+	data = PathSecurityParameters.fix(data);
+
+	TCTokenParser parser = new TCTokenParser();
+	List<TCToken> tokens = parser.parse(data);
+
+	TCToken t = tokens.get(0);
+	assertEquals(t.getSessionIdentifier(), "3eab1b41ecc1ce5246acf6f4e275");
+	assertEquals(t.getServerAddress().toString(), "https://eid-ref.my-service.de:443");
+	assertEquals(t.getRefreshAddress().toString(), "https://eid.services.my.net:443/?sessionID=D9D6851A7C02167A5699DA57657664715F4D9C44E50A94F7A83909D24AFA997A");
+	assertEquals(t.getBinding(), "urn:liberty:paos:2006-08");
+	assertEquals(t.getPathSecurityParameters().getPSK(), StringUtils.toByteArray("b7e9dd2ba2568c3c8d572aaadb3eebf7d4515e66d5fc2fd8e46626725a9abba2"));
     }
 
 }

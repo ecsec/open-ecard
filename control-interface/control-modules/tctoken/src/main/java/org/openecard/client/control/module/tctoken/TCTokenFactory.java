@@ -24,7 +24,6 @@ package org.openecard.client.control.module.tctoken;
 
 import java.net.URL;
 import java.util.List;
-import org.openecard.client.control.module.tctoken.hacks.AgetoURI;
 import org.openecard.client.control.module.tctoken.hacks.ObjectTag;
 import org.openecard.client.control.module.tctoken.hacks.PathSecurityParameters;
 

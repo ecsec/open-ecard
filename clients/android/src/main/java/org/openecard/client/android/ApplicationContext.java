@@ -23,8 +23,11 @@
 package org.openecard.client.android;
 
 import android.app.Application;
-import android.webkit.WebView;
 import iso.std.iso_iec._24727.tech.schema.*;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Locale;
 import org.openecard.client.common.*;
 import org.openecard.client.common.interfaces.Dispatcher;
@@ -65,12 +68,27 @@ public class ApplicationContext extends Application {
     private Dispatcher dispatcher = null;
     private boolean initialized = false;
     private boolean recognizeCard = true;
-    private WebView webView;
 
-    public ApplicationContext() throws Throwable {
-	super();
+    @Override
+    public void onCreate() {
+        // TODO Auto-generated method stub
+        super.onCreate();
+        try {
+            InputStream driverInputStream = getResources().openRawResource(R.raw.drivers);
+            if(driverInputStream!=null)
+            ResourceUnpacker.unpackResources(driverInputStream, this, "/data/pcsc");
+		
+	    } catch (FileNotFoundException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    } catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
     }
-
+    
+    
+	
     public void shutdown() {
 	// shutdwon event manager
 	em.terminate();
@@ -159,22 +177,7 @@ public class ApplicationContext extends Application {
 	em.initialize();
     }
 
-    public byte[] getCTX() {
-	return contextHandle;
-    }
-
     public ClientEnv getEnv() {
 	return env;
     }
-
-    @Deprecated
-    public void setWebView(WebView mWebView) {
-	this.webView = mWebView;
-    }
-
-    @Deprecated
-    public WebView getWebView() {
-	return this.webView;
-    }
-
 }

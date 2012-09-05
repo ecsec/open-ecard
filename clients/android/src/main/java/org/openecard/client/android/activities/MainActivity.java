@@ -25,17 +25,14 @@ package org.openecard.client.android.activities;
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.List;
 import org.openecard.client.android.ApplicationContext;
-import org.openecard.client.android.ObjectTagParser;
 import org.openecard.client.android.R;
 import org.openecard.client.android.TCTokenService;
 import org.openecard.client.common.WSHelper;
@@ -57,19 +54,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.net.Uri;
-import android.net.http.SslError;
-import android.opengl.Visibility;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.animation.Animation;
-import android.webkit.SslErrorHandler;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -146,12 +135,12 @@ public class MainActivity extends Activity implements EventCallback {
 		    connectionHandle = cardApplicationConnectResponse.getConnectionHandle();
 
 		    if (cHandles.size() > 0) {
-			URL url = new URL(serverAddress);
+			URL url = new URL(serverAddress + "?sessionid=" + sessionIdentifier);
 			PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionIdentifier.getBytes(), psk, url.getHost());
 			tlsClient.removeClientExtension(0);
 			TlsClientSocketFactory tlspskSocketFactory = new TlsClientSocketFactory(tlsClient);
 
-			PAOS p = new PAOS(serverAddress + "?sessionid=" + sessionIdentifier, env.getDispatcher(), tlspskSocketFactory);
+			PAOS p = new PAOS(url, env.getDispatcher(), tlspskSocketFactory);
 			StartPAOS sp = new StartPAOS();
 			sp.getConnectionHandle().add(connectionHandle);
 			sp.setSessionIdentifier(sessionIdentifier);
@@ -187,15 +176,12 @@ public class MainActivity extends Activity implements EventCallback {
     protected void onDestroy() {
 	applicationContext.shutdown();
 	killPCSCD();
-	// closing Entire Application
-
 	Editor editor = getSharedPreferences("clear_cache", Context.MODE_PRIVATE).edit();
 	editor.clear();
 	editor.commit();
 	trimCache(this);
 	super.onDestroy();
-	//android.os.Process.killProcess(android.os.Process.myPid());
-
+	android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     public static void trimCache(Context context) {
@@ -270,28 +256,18 @@ public class MainActivity extends Activity implements EventCallback {
 	}
     }
 
-    private void startPCSCD(){
+    private void startPCSCD() {
 	killPCSCD();
-	String pcscd_exec=getFilesDir().getParent() + "/lib/libpcscd.so";
-	System.out.println(pcscd_exec);
+	String pcscd_exec = getFilesDir().getParent() + "/lib/libpcscd.so";
 	String files_dir = getFilesDir().getAbsolutePath();
-	System.out.println(files_dir);
-	
-	String permission_string="logwrapper chmod 777 " + pcscd_exec;
-	System.out.println(permission_string);
-	String server_string= "su -c \"logwrapper " + pcscd_exec + " -f -d \"";
-	System.out.println(server_string);
-	
-	
-	try {
-	    	    
+	String permission_string = "logwrapper chmod 777 " + pcscd_exec;
+	String server_string = "su -c \"logwrapper " + pcscd_exec + "\"";
 
-	    //
-	    //sh = Runtime.getRuntime().exec("su -c '" + server_string + "'",null,new File(files_dir)); 
-		Process sh = Runtime.getRuntime().exec("su",null,new File(files_dir));
+	try {
+	    Process sh = Runtime.getRuntime().exec("su", null, new File(files_dir));
 	    OutputStream os = sh.getOutputStream();
-		writeCommand(os, permission_string);
-		writeCommand(os, server_string);
+	    writeCommand(os, permission_string);
+	    writeCommand(os, server_string);
 	} catch (IOException e1) {
 	    // TODO Auto-generated catch block
 	    e1.printStackTrace();
@@ -324,52 +300,7 @@ public class MainActivity extends Activity implements EventCallback {
 	    if (action == Intent.ACTION_VIEW) {
 		this.uri = intent.getData();
 	    } else {
-		WebView webView = new WebView(this);
-
-		webView.getSettings().setJavaScriptEnabled(true);
-		webView.addJavascriptInterface(new ObjectTagParser(applicationContext.getEnv(), webView), "HTMLOUT");
-
-		this.applicationContext.setWebView(webView);
-
-		/* Testserver */
-		// webView.loadUrl("https://test.governikus-eid.de/Autent-DemoApplication/");
-		// // funktioniert
-		// mWebView.loadUrl("http://willow.mtg.de/eidavs/static/bigbunny.html");
-		// //funktioniert
-		// webView.loadUrl("https://eid.services.ageto.net/gw"); //
-		// funktioniert
-
-		webView.loadUrl("https://willow.mtg.de/eid-server-demo-app/index.html");
-		/* Produktivserver */
-		// mWebView.loadUrl("https://www.bos-bremen.de/login/");
-		// mWebView.loadUrl("https://eid.vx4.net/webapp/test.jsp");
-		// mWebView.loadUrl("http://www.mein-cockpit.de");
-
-		webView.setWebViewClient(new WebViewClient() {
-
-		    @Override
-		    public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-			// proceed on ssl error, since the webview doesn't show
-			// a dialog
-			// for accepting or refusing a certificate
-			handler.proceed();
-		    }
-
-		    @Override
-		    public void onPageFinished(final WebView view, String url) {
-			super.onPageFinished(view, url);
-			runOnUiThread(new Runnable() {
-			    @Override
-			    public void run() {
-				view.loadUrl("javascript:window.HTMLOUT.showHTML(document.getElementsByTagName('object')[0].innerHTML);");
-			    }
-
-			});
-		    }
-		});
-
-		LinearLayout linearLayout = (LinearLayout) findViewById(R.id.linearLayoutMainActivity);
-		linearLayout.addView(webView);
+		//TODO
 	    }
 
 	} else {

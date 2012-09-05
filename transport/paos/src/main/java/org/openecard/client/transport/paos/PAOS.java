@@ -22,7 +22,6 @@
 
 package org.openecard.client.transport.paos;
 
-import de.bund.bsi.ecard.api._1.InitializeFramework;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DisconnectResponse;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
@@ -65,7 +64,6 @@ public class PAOS {
     private final URL endpoint;
     private final Dispatcher dispatcher;
     private SSLSocketFactory socketFactory;
-    @Deprecated private PAOSCallback callback;
 
     static {
 	logger.warn("SECURITY ALERT: Using custom hostname verifier!!!!");
@@ -77,73 +75,6 @@ public class PAOS {
 	    }
 	};
 	javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(hv);
-    }
-
-    @Deprecated
-	public PAOS(String endpoint, Dispatcher dispatcher, PAOSCallback callback, SSLSocketFactory sockFac) {
-	//TODO PAOSCallback should be removed!
-	try {
-	    this.endpoint = new URL(endpoint);
-	} catch (Exception e) {
-	    throw new RuntimeException("Malformed URL");
-	}
-	this.dispatcher = dispatcher;
-	this.callback = callback;
-	this.socketFactory = sockFac;
-
-	try {
-	    m = WSMarshallerFactory.createInstance();
-	} catch (WSMarshallerException e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
-	    throw new RuntimeException(e);
-	}
-    }
-
-    @Deprecated
-	public PAOS(String endpoint, Dispatcher dispatcher, PAOSCallback callback) {
-	//TODO  PAOSCallback should be removed!
-	this(endpoint, dispatcher, callback, null);
-    }
-
-    @Deprecated
-	public PAOS(String endpoint, Dispatcher dispatcher) {
-	try {
-	    this.endpoint = new URL(endpoint);
-	} catch (Exception e) {
-	    throw new RuntimeException("Malformed URL");
-	}
-	this.dispatcher = dispatcher;
-
-	try {
-	    m = WSMarshallerFactory.createInstance();
-	} catch (WSMarshallerException e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
-	    throw new RuntimeException(e);
-	}
-    }
-
-    @Deprecated
-	public PAOS(String endpoint, Dispatcher dispatcher, SSLSocketFactory sslSocket) {
-	try {
-	    this.endpoint = new URL(endpoint);
-	} catch (Exception e) {
-	    throw new RuntimeException("Malformed URL");
-	}
-	this.dispatcher = dispatcher;
-	this.socketFactory = sslSocket;
-
-	try {
-	    m = WSMarshallerFactory.createInstance();
-	} catch (WSMarshallerException e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
-	    throw new RuntimeException(e);
-	}
     }
 
     public PAOS(URL endpoint, Dispatcher dispatcher) {
@@ -320,7 +251,6 @@ public class PAOS {
 	    conn.setRequestProperty(ECardConstants.HEADER_KEY_PAOS, ECardConstants.HEADER_VALUE_PAOS);
 	    conn.setRequestProperty(ECardConstants.HEADER_KEY_CONTENT_TYPE, ECardConstants.HEADER_VALUE_CONTENT_TYPE);
 	    conn.setRequestProperty(ECardConstants.HEADER_KEY_ACCEPT, ECardConstants.HEADER_VALUE_ACCEPT);
-	    conn.connect();
 
 	    OutputStream output = null;
 	    try {
@@ -345,31 +275,14 @@ public class PAOS {
 		response.close();
 	    }
 
-	    if (msg instanceof DisconnectResponse) {
-	    	//return null;
-	    }
-
 	    // break when message is startpaosresponse
 	    if (requestObj instanceof StartPAOSResponse) {
 		StartPAOSResponse startPAOSResponse = (StartPAOSResponse) requestObj;
-		return startPAOSResponse;
-	    } else if (requestObj instanceof InitializeFramework) {
-		// connection seems to be successfully established, trigger
-		// loading of refreshAddress (see. BSI TR-03112-7)
-		if (callback != null) {
-		    Thread t = new Thread(new Runnable() {
-
-			    @Override
-				public void run() {
-				callback.loadRefreshAddress();
-			    }
-			});
-		    t.start();
-		}
+		return startPAOSResponse;		
 	    }
 
 	    // send via dispatcher
-	    msg = dispatcher.deliver(requestObj);
+	    msg = dispatcher.deliver(requestObj);    
 	}
     }
 

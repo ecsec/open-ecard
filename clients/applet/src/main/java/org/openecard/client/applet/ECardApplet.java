@@ -40,7 +40,8 @@ import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.common.util.ValueGenerators;
-import org.openecard.client.connector.Connector;
+import org.openecard.client.control.ControlInterface;
+import org.openecard.client.control.binding.http.HTTPBinding;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
@@ -204,13 +205,15 @@ public class ECardApplet extends JApplet {
 
 	// Start client connector to listen on port 24727
 	try {
-	    Connector connector = new Connector();
-	    connector.getListeners().addConnectorListener(worker);
+	    HTTPBinding binding = new HTTPBinding();
+	    ControlInterface control = new ControlInterface(binding);
+	    control.getListeners().addControlListener(worker);
+	    control.start();
 
-	    jsec.setEidClientPort(connector.getPortNumber());
+	    jsec.setEidClientPort(binding.getPort());
 	} catch (Exception e) {
 	    logger.error(e.getMessage(), e);
-	    throw new RuntimeException("Client connector is running.", e);
+	    throw new RuntimeException("Failed to start client connector.", e);
 	}
     }
 

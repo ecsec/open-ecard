@@ -177,6 +177,11 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
+	    <groupId>org.openecard.client.control.bindings</groupId>
+	    <artifactId>http</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
 	    <groupId>org.openecard.client.transport</groupId>
 	    <artifactId>dispatcher</artifactId>
 	    <version>${project.version}</version>

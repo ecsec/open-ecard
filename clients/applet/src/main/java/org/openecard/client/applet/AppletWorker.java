@@ -35,12 +35,12 @@ import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.common.sal.state.CardStateEntry;
-import org.openecard.client.connector.client.ClientRequest;
-import org.openecard.client.connector.client.ClientResponse;
-import org.openecard.client.connector.client.ConnectorListener;
-import org.openecard.client.connector.handler.tctoken.TCToken;
-import org.openecard.client.connector.handler.tctoken.TCTokenRequest;
-import org.openecard.client.connector.handler.tctoken.TCTokenResponse;
+import org.openecard.client.control.client.ClientRequest;
+import org.openecard.client.control.client.ClientResponse;
+import org.openecard.client.control.client.ControlListener;
+import org.openecard.client.control.module.tctoken.TCToken;
+import org.openecard.client.control.module.tctoken.TCTokenRequest;
+import org.openecard.client.control.module.tctoken.TCTokenResponse;
 import org.openecard.client.sal.TinySAL;
 import org.openecard.client.transport.paos.PAOS;
 import org.openecard.client.transport.tls.PSKTlsClientImpl;
@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public final class AppletWorker implements Runnable, EventCallback, ConnectorListener {
+public final class AppletWorker implements Runnable, EventCallback, ControlListener {
 
     private static final Logger logger = LoggerFactory.getLogger(AppletWorker.class);
     private final Thread thread;

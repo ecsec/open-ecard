@@ -25,6 +25,9 @@ package org.openecard.client.ws.android;
 import de.bund.bsi.ecard.api._1.InitializeFramework;
 import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
 import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.SecurityConditionType.And;
+import iso.std.iso_iec._24727.tech.schema.SecurityConditionType.Or;
+
 import java.io.*;
 import java.math.BigInteger;
 import javax.xml.parsers.DocumentBuilder;
@@ -978,10 +981,8 @@ public class AndroidMarshaller implements WSMarshaller {
 			cardInfo.setCardType(cardType);
 		    } else if (parser.getName().equals("ImplicitlySelectedApplication")) {
 			applicationCapabilities.setImplicitlySelectedApplication(StringUtils.toByteArray(parser.nextText()));
-		    } else if (parser.getName().equals("ApplicationIdentifier")) {
-			CardApplicationType cardApplication = new CardApplicationType();
-			cardApplication.setApplicationIdentifier(StringUtils.toByteArray(parser.nextText()));
-			applicationCapabilities.getCardApplication().add(cardApplication);
+		    } else if (parser.getName().equals("CardApplication")) {
+			applicationCapabilities.getCardApplication().add(this.parseCardApplication(parser));
 		    }
 		}
 	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("CardInfo")));
@@ -992,7 +993,167 @@ public class AndroidMarshaller implements WSMarshaller {
 	}
     }
 
-    private InputAPDUInfoType parseInputAPDUInfo(XmlPullParser parser) throws XmlPullParserException, IOException{
+    private CardApplicationType parseCardApplication(XmlPullParser parser) throws XmlPullParserException, IOException {
+	CardApplicationType cardApplication = new CardApplicationType();
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("ApplicationIdentifier")) {
+		    cardApplication.setApplicationIdentifier(StringUtils.toByteArray(parser.nextText()));
+		} else if (parser.getName().equals("ApplicationName")) {
+		    cardApplication.setApplicationName(parser.nextText());
+		} else if (parser.getName().equals("RequirementLevel")) {
+		    cardApplication.setRequirementLevel(BasicRequirementsType.fromValue(parser.nextText()));
+		} else if (parser.getName().equals("CardApplicationACL")){
+		    cardApplication.setCardApplicationACL(this.parseCardApplicationACL(parser));
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("CardApplication")));
+	return cardApplication;
+    }
+
+    private AccessControlListType parseCardApplicationACL(XmlPullParser parser) throws XmlPullParserException, IOException {
+	AccessControlListType accessControlList = new AccessControlListType();
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("AccessRule")) {
+		    accessControlList.getAccessRule().add(this.parseAccessRule(parser)); 
+		} 
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("CardApplicationACL")));
+	return accessControlList;
+    }
+
+    private AccessRuleType parseAccessRule(XmlPullParser parser) throws XmlPullParserException, IOException {
+	AccessRuleType accessRule = new AccessRuleType();
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("CardApplicationServiceName")) {
+		    accessRule.setCardApplicationServiceName(parser.nextText());			
+		} else if (parser.getName().equals("Action")) {
+		    accessRule.setAction(this.parseAction(parser));
+		} else if (parser.getName().equals("SecurityCondition")) {
+		    accessRule.setSecurityCondition(this.parseSecurityCondition(parser));
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("AccessRule")));
+	return accessRule;
+    }
+
+    private SecurityConditionType parseSecurityCondition(XmlPullParser parser) throws XmlPullParserException, IOException {
+	SecurityConditionType securityCondition = new SecurityConditionType();
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("always")) {
+		    securityCondition.setAlways(true);			
+		} else if(parser.getName().equals("never")) {
+		    securityCondition.setNever(false);
+		} else if(parser.getName().equals("DIDAuthenicationState")) {
+		    securityCondition.setDIDAuthentication(this.parseDIDAuthenticationState(parser));
+		} else if(parser.getName().equals("not")) {
+		    securityCondition.setNot(this.parseSecurityCondition(parser));
+		} else if (parser.getName().equals("and")) {
+		    securityCondition.setAnd(this.parseSecurityConditionTypeAnd(parser));
+		} else if (parser.getName().equals("or")) {
+		    securityCondition.setOr(this.parseSecurityConditionTypeOr(parser));
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("SecurityCondition")));
+	return securityCondition;
+    }
+
+    private DIDAuthenticationStateType parseDIDAuthenticationState(XmlPullParser parser) throws XmlPullParserException, IOException {
+	DIDAuthenticationStateType didAuthenticationState = new DIDAuthenticationStateType();
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("DIDName")) {
+		    didAuthenticationState.setDIDName(parser.nextText());
+		} else if (parser.getName().equals("DIDScope")) {
+		    didAuthenticationState.setDIDScope(DIDScopeType.fromValue(parser.nextText()));
+		} else if (parser.getName().equals("DIDState")) {
+		    didAuthenticationState.setDIDState(Boolean.parseBoolean(parser.nextText()));
+		} else if (parser.getName().equals("DIDStateQualifier")) {
+		    didAuthenticationState.setDIDStateQualifier(StringUtils.toByteArray(parser.nextText()));
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("or")));
+	return didAuthenticationState;
+    }
+
+    private Or parseSecurityConditionTypeOr(XmlPullParser parser) throws XmlPullParserException, IOException {
+	SecurityConditionType.Or securityConditionOr = new SecurityConditionType.Or();
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("SecurityCondition")) {
+		    securityConditionOr.getSecurityCondition().add(this.parseSecurityCondition(parser));			
+		} 
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("or")));
+	return securityConditionOr;
+    }
+
+    private And parseSecurityConditionTypeAnd(XmlPullParser parser) throws XmlPullParserException, IOException {
+	SecurityConditionType.And securityConditionAnd = new SecurityConditionType.And();
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("SecurityCondition")) {
+		    securityConditionAnd.getSecurityCondition().add(this.parseSecurityCondition(parser));			
+		} 
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("and")));
+	return securityConditionAnd;
+    }
+
+    private ActionNameType parseAction(XmlPullParser parser) throws XmlPullParserException, IOException {
+	ActionNameType action = new ActionNameType();
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("APIAccessEntryPoint")) {
+		    action.setAPIAccessEntryPoint(APIAccessEntryPointName.fromValue(parser.nextText()));	 
+		} else if (parser.getName().equals("ConnectionServiceAction")) {
+		    action.setConnectionServiceAction(ConnectionServiceActionName.fromValue(parser.nextText()));
+		} else if (parser.getName().equals("CardApplicationServiceAction")) {
+		    action.setCardApplicationServiceAction(CardApplicationServiceActionName.fromValue(parser.nextText()));
+		} else if (parser.getName().equals("NamedDataServiceAction")) {
+		    action.setNamedDataServiceAction(NamedDataServiceActionName.fromValue(parser.nextText()));
+		} else if (parser.getName().equals("CryptographicServiceAction")) {
+		    action.setCryptographicServiceAction(CryptographicServiceActionName.fromValue(parser.nextText()));
+		} else if (parser.getName().equals("DifferentialIdentityServiceAction")) {
+		    action.setDifferentialIdentityServiceAction(DifferentialIdentityServiceActionName.fromValue(parser.nextText()));
+		} else if (parser.getName().equals("AuthorizationServiceAction")) {
+		    action.setAuthorizationServiceAction(AuthorizationServiceActionName.fromValue(parser.nextText()));
+		} else if (parser.getName().equals("LoadedAction")) {
+		    action.setLoadedAction(parser.nextText());
+		} 	
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Action")));
+	return action;
+    }
+
+    private InputAPDUInfoType parseInputAPDUInfo(XmlPullParser parser) throws XmlPullParserException, IOException {
 	InputAPDUInfoType inputAPDUInfo = new InputAPDUInfoType();
 	int eventType = parser.getEventType();
 	do {

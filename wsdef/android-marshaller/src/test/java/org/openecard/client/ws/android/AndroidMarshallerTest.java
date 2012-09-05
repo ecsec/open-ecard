@@ -117,7 +117,18 @@ public class AndroidMarshallerTest {
 	CardInfo cardInfo = (CardInfo) o;
 	assertEquals("http://bsi.bund.de/cif/npa.xml", cardInfo.getCardType().getObjectIdentifier());
 	assertEquals(new byte[] { 0x3F, 0x00 }, cardInfo.getApplicationCapabilities().getImplicitlySelectedApplication());
-	assertEquals(3, cardInfo.getApplicationCapabilities().getCardApplication().size());
+	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().size(), 3);
+	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().get(0).getApplicationName(), "MF");
+	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().get(0).getRequirementLevel(), BasicRequirementsType.PERSONALIZATION_MANDATORY);
+	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().get(0).getCardApplicationACL().getAccessRule().size(), 40);
+	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().get(0).getCardApplicationACL().getAccessRule().get(0).getCardApplicationServiceName(), "CardApplicationServiceAccess");
+	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().get(0).getCardApplicationACL().getAccessRule().get(0).getAction().getAPIAccessEntryPoint(), APIAccessEntryPointName.INITIALIZE);
+	assertTrue(cardInfo.getApplicationCapabilities().getCardApplication().get(0).getCardApplicationACL().getAccessRule().get(0).getSecurityCondition().isAlways());
+	
+	// last accessrule
+	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().get(0).getCardApplicationACL().getAccessRule().get(39).getAction().getAuthorizationServiceAction(), AuthorizationServiceActionName.ACL_MODIFY);
+	assertFalse(cardInfo.getApplicationCapabilities().getCardApplication().get(0).getCardApplicationACL().getAccessRule().get(39).getSecurityCondition().isNever());
+
     }
 
     @Test

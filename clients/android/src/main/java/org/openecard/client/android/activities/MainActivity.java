@@ -42,9 +42,12 @@ import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.Environment;
 import org.openecard.client.common.interfaces.EventCallback;
-import org.openecard.client.connector.common.ConnectorConstants;
-import org.openecard.client.connector.messages.TCTokenRequest;
-import org.openecard.client.connector.tctoken.*;
+import org.openecard.client.control.module.tctoken.TCToken;
+import org.openecard.client.control.module.tctoken.TCTokenException;
+import org.openecard.client.control.module.tctoken.TCTokenGrabber;
+import org.openecard.client.control.module.tctoken.TCTokenParser;
+import org.openecard.client.control.module.tctoken.TCTokenRequest;
+import org.openecard.client.control.module.tctoken.TCTokenVerifier;
 import org.openecard.client.sal.TinySAL;
 import org.openecard.client.transport.paos.PAOS;
 import org.openecard.client.transport.tls.PSKTlsClientImpl;
@@ -414,11 +417,11 @@ public class MainActivity extends Activity implements EventCallback {
 	List<TCToken> tokens = parser.parse(data);
 
 	if (tokens.isEmpty()) {
-	    throw new TCTokenException(ConnectorConstants.ConnectorError.TC_TOKEN_NOT_AVAILABLE.toString());
+	    throw new TCTokenException("TCToken is not available.");
 	}
 
 	// Verify the TCToken
-	TCTokenVerifier ver = new TCTokenVerifier(tokens);
+	TCTokenVerifier ver = new TCTokenVerifier(tokens.get(0));
 	ver.verify();
 
 	return tokens.get(0);

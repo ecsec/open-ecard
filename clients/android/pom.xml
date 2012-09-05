@@ -78,10 +78,10 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	   <groupId>org.openecard.client.clients</groupId>
-        <artifactId>client-connector</artifactId>
-        <version>${project.version}</version>
-    </dependency>
+	   <groupId>org.openecard.client.control.bindings</groupId>
+	    <artifactId>http</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
 	<dependency>
 	    <groupId>com.google.android</groupId>
 	    <artifactId>android</artifactId>

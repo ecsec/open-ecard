@@ -109,8 +109,6 @@ public class ApplicationContext extends Application {
     }
 
     public void initialize() {
-	OpenecardProperties.setProperty("org.openecard.lang", Locale.getDefault().toString());
-
 	IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl", "org.openecard.client.scio.AndroidPCSCFactory");
 	WsdefProperties.setProperty("org.openecard.client.ws.marshaller.impl", "org.openecard.client.ws.android.AndroidMarshaller");
 

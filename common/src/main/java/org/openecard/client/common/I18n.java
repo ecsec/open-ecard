@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -45,7 +46,7 @@ public class I18n {
     private final Properties translation;
 
     private I18n(String component) {
-	String lang = OpenecardProperties.getProperty("org.openecard.lang");
+	String lang = Locale.getDefault().toString();
 	Properties defaults = loadFile(component + "_C.properties");
 	Properties target = loadFile(component + "_" + lang + ".properties");
 	this.component = component;

@@ -364,12 +364,11 @@ public final class RichClient implements ControlListener {
 	    sal.setGUI(gui);
 	    ifd.setGUI(gui);
 
+	    tray.endSetup(recognition);
 	    em.registerAllEvents(tray.status());
 
 	    // Initialize the EventManager
 	    em.initialize();
-
-	    tray.endSetup();
 	} catch (Exception e) {
 	    _logger.error("Exception", e);
 

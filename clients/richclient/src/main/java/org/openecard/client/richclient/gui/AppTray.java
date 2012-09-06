@@ -35,6 +35,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import org.openecard.client.common.I18n;
 import org.openecard.client.gui.about.AboutDialog;
+import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.richclient.RichClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public class AppTray {
     private boolean trayAvailable;
 
     public AppTray(RichClient client) {
-       this.client = client;
+	this.client = client;
     }
 
     /**
@@ -74,8 +75,7 @@ public class AppTray {
      * A loading icon is displayed.
      */
     public void beginSetup() {
-	status = new Status();
-        createPopupMenu();
+	createPopupMenu();
 
 	if (SystemTray.isSupported()) {
 	    setupTrayIcon();
@@ -88,13 +88,15 @@ public class AppTray {
      * Finishes the setup process.
      * The loading icon is replaced with the eCard logo.
      */
-    public void endSetup() {
+    public void endSetup(CardRecognition rec) {
 	if (trayAvailable) {
             trayIcon.setImage(getTrayIconImage(ICON_LOGO));
 	    trayIcon.setToolTip(lang.translationForKey("tray.title"));
 	} else {
 	    label.setIcon(GuiUtils.getImageIcon("logo_icon_default_256.png"));
 	}
+
+	status = new Status(rec);
     }
 
     public Status status() {

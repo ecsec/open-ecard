@@ -22,8 +22,10 @@
 
 package org.openecard.client.recognition;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -34,6 +36,7 @@ import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.CardCommands;
+import org.openecard.client.common.util.FileUtils;
 import org.openecard.client.recognition.staticrepo.LocalCifRepo;
 import org.openecard.client.recognition.statictree.LocalFileTree;
 import org.openecard.client.ws.WSMarshaller;
@@ -82,6 +85,8 @@ public class CardRecognition {
     private final org.openecard.ws.GetCardInfoOrACD cifRepo;
     private final ConcurrentSkipListMap<String,CardInfoType> cifCache = new ConcurrentSkipListMap<String, CardInfoType>();
 
+    private final Properties cardImagesMap = new Properties();
+
     private final IFD ifd;
     private final byte[] ctx;
 
@@ -109,6 +114,8 @@ public class CardRecognition {
 	    cifRepo = new LocalCifRepo(marshaller);
 	}
 	this.cifRepo = cifRepo;
+
+	cardImagesMap.load(FileUtils.resolveResourceAsStream(CardRecognition.class, "/card-images/card-images.properties"));
 
 	// request tree from service
 	iso.std.iso_iec._24727.tech.schema.GetRecognitionTree req = new iso.std.iso_iec._24727.tech.schema.GetRecognitionTree();
@@ -142,6 +149,56 @@ public class CardRecognition {
 		return null;
 	    }
 	} else {
+	    return null;
+	}
+    }
+
+    /**
+     * Gets image stream of the given card or a no card image if the object identifier is unknown.
+     * @param objectid iso:ObjectIdentifier as defined in the CardInfo file.
+     * @return InputStream of the card image.
+     */
+    public InputStream getCardImage(String objectid) {
+	String fname = cardImagesMap.getProperty(objectid);
+	InputStream fs = null;
+	if (fname != null) {
+	    fs = loadCardImage(fname);
+	}
+	if (fs == null) {
+	    fs = getUnknownCardImage();
+	}
+	return fs;
+    }
+
+    /**
+     * @see #getCardImage(java.lang.String)
+     */
+    public InputStream getUnknownCardImage() {
+	return loadCardImage("unknown_card.png");
+    }
+    /**
+     * @see #getCardImage(java.lang.String)
+     */
+    public InputStream getNoCardImage() {
+	return loadCardImage("no_card.png");
+    }
+    /**
+     * @see #getCardImage(java.lang.String)
+     */
+    public InputStream getNoTerminalImage() {
+	return loadCardImage("no_terminal.png");
+    }
+
+    /**
+     * Gets stream of the given image in the directory card-images.
+     * @param filename
+     * @return Stream of the image or null, if none is found.
+     */
+    private static InputStream loadCardImage(String filename) {
+	try {
+	    return FileUtils.resolveResourceAsStream(CardRecognition.class, "/card-images/" + filename);
+	} catch (IOException ex) {
+	    _logger.info("Failed to load card image '" + filename + "'.", ex);
 	    return null;
 	}
     }

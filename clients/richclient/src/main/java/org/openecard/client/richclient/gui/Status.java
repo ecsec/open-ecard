@@ -31,11 +31,9 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Point;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentSkipListMap;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -45,6 +43,7 @@ import javax.swing.JPanel;
 import org.openecard.client.common.I18n;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
+import org.openecard.client.recognition.CardRecognition;
 import org.slf4j.LoggerFactory;
 
 
@@ -66,9 +65,10 @@ public class Status implements EventCallback {
     private JPanel infoView;
     private JPanel noTerminal;
     private InfoPopup popup;
+    private final CardRecognition recognition;
 
-    public Status() {
-	readConfig();
+    public Status(CardRecognition recognition) {
+	this.recognition = recognition;
 	setupBaseUI();
     }
 
@@ -83,28 +83,6 @@ public class Status implements EventCallback {
 	popup = new InfoPopup(contentPane, p);
     }
 
-    private void readConfig() {
-	InputStream is = Status.class.getResourceAsStream("openecard_config/cardtypes.properties");
-	if (is == null) {
-	    is = Status.class.getResourceAsStream("/openecard_config/cardtypes.properties");
-	}
-
-	Properties props = new Properties();
-	try {
-	    props.load(is);
-
-	    ImageIcon icon;
-	    String key, value;
-	    for (Map.Entry entry : props.entrySet()) {
-		key = (String) entry.getKey();
-		value = (String) entry.getValue();
-		icon = GuiUtils.getImageIcon(value);
-		cardIcons.put(key, icon);
-	    }
-	} catch (IOException ex) {
-	    logger.warn("Loading of properties file failed.", ex);
-	}
-    }
 
     private void setupBaseUI() {
 	contentPane = new Container();
@@ -177,16 +155,23 @@ public class Status implements EventCallback {
 	}
     }
 
-    private ImageIcon getCardIcon(String cardType) {
+    private synchronized ImageIcon getCardIcon(String cardType) {
 	if (cardType == null) {
-	    return cardIcons.get("default.nocard");
+	    cardType = "http://openecard.org/cif/no-card";
 	}
 
-	if (cardIcons.containsKey(cardType)) {
-	    return cardIcons.get(cardType);
+	boolean unknown = false;
+	if (! cardIcons.containsKey(cardType)) {
+	    InputStream is = recognition.getCardImage(cardType);
+	    if (is == null) {
+		unknown = true;
+		is = recognition.getUnknownCardImage();
+	    }
+	    ImageIcon icon = GuiUtils.getImageIcon(is);
+	    cardIcons.put(cardType, icon);
 	}
 
-	return cardIcons.get("default");
+	return cardIcons.get(cardType);
     }
 
     private String getCardType(RecognitionInfo info) {
@@ -194,12 +179,21 @@ public class Status implements EventCallback {
 	    String cardType = info.getCardType();
 
 	    if (cardType != null) {
-		return cardType;
+		return resolveCardType(cardType);
 	    } else {
 		return lang.translationForKey("status.nocard");
 	    }
 	} else {
 	    return lang.translationForKey("status.nocard");
+	}
+    }
+
+    private String resolveCardType(String cardType) {
+	if (cardType.equals("http://bsi.bund.de/cif/unknown")) {
+	    return lang.translationForKey("status.unknowncard");
+	} else {
+	    // TODO: read CardTypeName from CardInfo file
+	    return cardType;
 	}
     }
 
@@ -217,7 +211,7 @@ public class Status implements EventCallback {
 	} else {
 	    // no_terminal.png is based on klaasvangend_USB_plug.svg by klaasvangend
 	    // see: http://openclipart.org/detail/3705/usb-plug-by-klaasvangend
-	    label.setIcon(GuiUtils.getImageIcon("no_terminal.png"));
+	    label.setIcon(getCardIcon("http://openecard.org/cif/no-terminal"));
 	    label.setText("<html><i>" + lang.translationForKey("status.noterminal") + "</i></html>");
 	}
 

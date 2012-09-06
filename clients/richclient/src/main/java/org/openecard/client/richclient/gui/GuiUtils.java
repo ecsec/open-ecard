@@ -23,8 +23,13 @@
 package org.openecard.client.richclient.gui;
 
 import java.awt.Image;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -32,6 +37,8 @@ import javax.swing.ImageIcon;
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
 public class GuiUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(GuiUtils.class);
 
     public static ImageIcon getImageIcon(String name) {
         URL imageUrl = GuiUtils.class.getResource("images/" + name);
@@ -41,6 +48,16 @@ public class GuiUtils {
 
         ImageIcon icon = new ImageIcon(imageUrl);
         return icon;
+    }
+
+    public static ImageIcon getImageIcon(InputStream imageStream) {
+	ImageIcon icon = new ImageIcon();
+	try {
+	    icon = new ImageIcon(ImageIO.read(imageStream));
+	} catch (IOException ex) {
+	    logger.error("Failed to read image stream.", ex);
+	}
+	return icon;
     }
 
     public static Image getImage(String name) {

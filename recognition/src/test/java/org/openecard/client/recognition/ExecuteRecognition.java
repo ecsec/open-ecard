@@ -22,8 +22,8 @@
 
 package org.openecard.client.recognition;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import java.math.BigInteger;
 import org.openecard.ws.IFD;
 import org.testng.annotations.Test;

@@ -7,7 +7,8 @@
 	<iso:SpecificationBodyOrIssuer>
 	    Gesellschaft für Telematikanwendungen der Gesundheitskarte mbH
 	</iso:SpecificationBodyOrIssuer>
-	<iso:CardTypeName xml:lang="DE">Elektronische Gesundheitskarte</iso:CardTypeName>
+	<iso:CardTypeName xml:lang="EN">German eHealth Card</iso:CardTypeName>
+	<iso:CardTypeName xml:lang="DE">Deutsche elektronische Gesundheitskarte</iso:CardTypeName>
 	<iso:Version>
 	    <!--The version number corresponds to the version of the product description [eGK-PSB]. -->
 	    <iso:Major>1</iso:Major>

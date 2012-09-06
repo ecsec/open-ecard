@@ -4,6 +4,18 @@
 	      xsi:schemaLocation="urn:iso:std:iso-iec:24727:tech:schema http://ws.openecard.org/schema/CardInfo.xsd">
     <iso:CardType>
 	<iso:ObjectIdentifier>http://ws.gematik.de/egk/1.0.0</iso:ObjectIdentifier>
+	<iso:SpecificationBodyOrIssuer>
+	    Gesellschaft für Telematikanwendungen der Gesundheitskarte mbH
+	</iso:SpecificationBodyOrIssuer>
+	<iso:CardTypeName xml:lang="DE">Elektronische Gesundheitskarte</iso:CardTypeName>
+	<iso:Version>
+	    <!--The version number corresponds to the version of the product description [eGK-PSB]. -->
+	    <iso:Major>1</iso:Major>
+	    <iso:Minor>0</iso:Minor>
+	    <iso:SubMinor>0</iso:SubMinor>
+	</iso:Version>
+	<iso:Status>Final Release</iso:Status>
+	<iso:Date>2011-11-25</iso:Date>
     </iso:CardType>
     <iso:CardIdentification />
     <iso:ApplicationCapabilities>

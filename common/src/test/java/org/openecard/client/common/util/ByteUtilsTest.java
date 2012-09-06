@@ -156,16 +156,15 @@ public class ByteUtilsTest {
 
 	input = new byte[5];
 	try {
-	    s = ByteUtils.toInteger(input);
+	    ByteUtils.toInteger(input);
 	    fail("An IllegalArgumentException should have been thrown.");
 	} catch (IllegalArgumentException e) {
 	    /* expected */
 	}
 
 	input = new byte[0];
-
 	try {
-	    s = ByteUtils.toInteger(input);
+	    ByteUtils.toInteger(input);
 	    fail("An IllegalArgumentException should have been thrown.");
 	} catch (IllegalArgumentException e) {
 	    /* expected */
@@ -192,16 +191,15 @@ public class ByteUtilsTest {
 
 	input = new byte[9];
 	try {
-	    s = ByteUtils.toLong(input);
+	    ByteUtils.toLong(input);
 	    fail("An IllegalArgumentException should have been thrown.");
 	} catch (IllegalArgumentException e) {
 	    /* expected */
 	}
 
 	input = new byte[0];
-
 	try {
-	    s = ByteUtils.toLong(input);
+	    ByteUtils.toLong(input);
 	    fail("An IllegalArgumentException should have been thrown.");
 	} catch (IllegalArgumentException e) {
 	    /* expected */
@@ -224,7 +222,7 @@ public class ByteUtilsTest {
 
 	input = new byte[3];
 	try {
-	    s = ByteUtils.toShort(input);
+	    ByteUtils.toShort(input);
 	    fail("An IllegalArgumentException should have been thrown.");
 	} catch (IllegalArgumentException e) {
 	    /* expected */
@@ -233,7 +231,7 @@ public class ByteUtilsTest {
 	input = new byte[0];
 
 	try {
-	    s = ByteUtils.toShort(input);
+	    ByteUtils.toShort(input);
 	    fail("An IllegalArgumentException should have been thrown.");
 	} catch (IllegalArgumentException e) {
 	    /* expected */

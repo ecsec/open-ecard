@@ -34,8 +34,6 @@ public final class ByteArrayWrapper {
 
     private final byte[] data;
 
-    // TODO: REMOVE ME Klasse wird nicht verwendet!
-
     public ByteArrayWrapper(byte[] data) {
 	if (data == null) {
 	    throw new NullPointerException();

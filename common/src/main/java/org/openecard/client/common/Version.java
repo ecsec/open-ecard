@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.openecard.client.common.util.FileUtils;
 
 
 /**
@@ -50,9 +51,11 @@ public class Version {
     private static final String buildId;
 
     static {
-	InputStream in = Version.class.getResourceAsStream("/" + versionFile);
-	if (in == null) {
-	    in = Version.class.getResourceAsStream(versionFile);
+	InputStream in;
+	try {
+	    in = FileUtils.resolveResourceAsStream(Version.class, versionFile);
+	} catch (IOException ex) {
+	    in = null;
 	}
 	version = loadVersionLine(in);
 	String[] groups = splitVersion(version);

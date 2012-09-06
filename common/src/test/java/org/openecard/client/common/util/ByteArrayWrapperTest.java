@@ -32,14 +32,9 @@ import org.testng.annotations.Test;
  */
 public class ByteArrayWrapperTest {
 
-    @Test
+    @Test(expectedExceptions = NullPointerException.class)
     public void testConstructor() {
-	try {
-	    new ByteArrayWrapper(null);
-	    fail("A NullPointerException should have been thrown.");
-	} catch (NullPointerException e) {
-	    /* expected */
-	}
+	new ByteArrayWrapper(null);
     }
 
     @Test
@@ -49,11 +44,11 @@ public class ByteArrayWrapperTest {
 	ByteArrayWrapper wrapB = new ByteArrayWrapper(b);
 
 	// test unequal
-	assertFalse(wrapA.equals(wrapB));
+	assertNotEquals(wrapA, wrapB);
 	// test equal
-	assertTrue(wrapA.equals(wrapA));
+	assertEquals(wrapA, wrapA);
 	// test not instance of ByteArrayWrapper
-	assertFalse(wrapA.equals(b));
+	assertNotEquals(wrapA, b);
     }
 
     @Test

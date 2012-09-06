@@ -24,6 +24,8 @@ package org.openecard.client.common.util;
 
 
 /**
+ * Resolves RAPDU status words to human readable messages.
+ * Cp. ISO-7816-4 sec. 5.1.3 Status Bytes
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */

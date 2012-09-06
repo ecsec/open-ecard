@@ -28,6 +28,7 @@ import org.openecard.client.common.apdu.common.CardCommandAPDU;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.ShortUtils;
 
+
 /**
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>

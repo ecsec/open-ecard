@@ -50,13 +50,14 @@ public class TLV {
 	this.child = (obj.child != null) ? new TLV(obj.child) : null;
     }
 
+
     ///
     /// deferred setters for TLV container
     ///
+
     public TagClass getTagClass() {
 	return tag.getTagClass();
     }
-
     public void setTagClass(TagClass tagClass) {
 	tag.setTagClass(tagClass);
     }
@@ -64,7 +65,6 @@ public class TLV {
     public boolean isPrimitive() {
 	return tag.isPrimitive();
     }
-
     public void setPrimitive(boolean primitive) {
 	tag.setPrimitive(primitive);
     }
@@ -72,11 +72,9 @@ public class TLV {
     public long getTagNum() {
 	return tag.getTagNum();
     }
-
     public void setTagNum(byte tagNum) {
 	setTagNum(tagNum & 0xFF);
     }
-
     public void setTagNum(long tagNum) {
 	tag.setTagNum(tagNum);
     }
@@ -84,11 +82,9 @@ public class TLV {
     public long getTagNumWithClass() {
 	return tag.getTagNumWithClass();
     }
-
     public void setTagNumWithClass(byte tagNumWithClass) throws TLVException {
 	setTagNumWithClass(tagNumWithClass & 0xFF);
     }
-
     public void setTagNumWithClass(long tagNumWithClass) throws TLVException {
 	tag.setTagNumWithClass(tagNumWithClass);
     }
@@ -100,14 +96,15 @@ public class TLV {
     public byte[] getValue() {
 	return tag.getValue();
     }
-
     public void setValue(byte[] value) {
 	tag.setValue(value);
     }
 
+
     ///
     /// modification functions
     ///
+
     public void addToEnd(TLV sibling) {
 	if (next == null) {
 	    next = sibling;
@@ -138,11 +135,9 @@ public class TLV {
     public void setChild(TLV child) {
 	this.child = child;
     }
-
     public boolean hasChild() {
 	return child != null;
     }
-
     public TLV getChild() {
 	return child;
     }
@@ -150,7 +145,6 @@ public class TLV {
     public boolean hasNext() {
 	return next != null;
     }
-
     public TLV getNext() {
 	return next;
     }
@@ -191,9 +185,11 @@ public class TLV {
 	}
     }
 
+
     ///
     /// TLV construction from and to different encodings
     ///
+
     public static TLV fromBER(byte[] input) throws TLVException {
 	byte[] rest = input;
 
@@ -235,6 +231,7 @@ public class TLV {
 	return first;
     }
 
+
     public byte[] toBER() throws TLVException {
 	return toBER(false);
     }
@@ -265,6 +262,7 @@ public class TLV {
 	    next.toBER(out, withSuccessors);
 	}
     }
+
 
     @Override
     public String toString() {

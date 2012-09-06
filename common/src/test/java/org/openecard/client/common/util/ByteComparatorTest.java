@@ -39,13 +39,13 @@ public class ByteComparatorTest {
 	byte[] a = new byte[] { 0x00, 0x01, 0x02 }, b = new byte[] { 0x03, 0x04, 0x05 };
 	byte[] c = new byte[] { 0x00, 0x01, 0x02 }, d = new byte[] { 0x00 };
 
-	Assert.assertEquals(-3, comp.compare(a, b));
-	Assert.assertEquals(0, comp.compare(a, c));
-	Assert.assertEquals(3, comp.compare(b, a));
-	Assert.assertEquals(2, comp.compare(a, d));
-	Assert.assertEquals(0, comp.compare(a, a));
-	Assert.assertEquals(1, comp.compare(a, null));
-	Assert.assertEquals(-1, comp.compare(null, a));
+	Assert.assertTrue(0 >  comp.compare(a, b));
+	Assert.assertTrue(0 == comp.compare(a, c));
+	Assert.assertTrue(0 <  comp.compare(b, a));
+	Assert.assertTrue(0 <  comp.compare(a, d));
+	Assert.assertTrue(0 == comp.compare(a, a));
+	Assert.assertTrue(0 <  comp.compare(a, null));
+	Assert.assertTrue(0 >  comp.compare(null, a));
     }
 
 }

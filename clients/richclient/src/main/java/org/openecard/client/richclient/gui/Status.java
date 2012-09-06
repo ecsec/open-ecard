@@ -22,6 +22,8 @@
 
 package org.openecard.client.richclient.gui;
 
+import iso.std.iso_iec._24727.tech.schema.CardInfoType;
+import iso.std.iso_iec._24727.tech.schema.CardTypeType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import java.awt.BorderLayout;
@@ -33,6 +35,8 @@ import java.awt.Font;
 import java.awt.Point;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 import javax.swing.Box;
@@ -40,10 +44,12 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import org.openecard.client.common.I18n;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.recognition.CardRecognition;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
@@ -53,7 +59,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Status implements EventCallback {
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AppTray.class);
+    private static final Logger logger = LoggerFactory.getLogger(Status.class);
 
     private static final String NO_TERMINAL_CONNECTED = "noTerminalConnected";
 
@@ -160,11 +166,9 @@ public class Status implements EventCallback {
 	    cardType = "http://openecard.org/cif/no-card";
 	}
 
-	boolean unknown = false;
 	if (! cardIcons.containsKey(cardType)) {
 	    InputStream is = recognition.getCardImage(cardType);
 	    if (is == null) {
-		unknown = true;
 		is = recognition.getUnknownCardImage();
 	    }
 	    ImageIcon icon = GuiUtils.getImageIcon(is);
@@ -192,8 +196,35 @@ public class Status implements EventCallback {
 	if (cardType.equals("http://bsi.bund.de/cif/unknown")) {
 	    return lang.translationForKey("status.unknowncard");
 	} else {
-	    // TODO: read CardTypeName from CardInfo file
-	    return cardType;
+	    // read CardTypeName from CardInfo file
+	    CardInfoType cif = recognition.getCardInfo(cardType);
+	    String cardTypeName = cardType;
+
+	    if (cif != null) {
+		CardTypeType type = cif.getCardType();
+		if (type != null) {
+		    boolean found = false;
+		    String[] languages = new String[] {Locale.getDefault().getLanguage(), "en"};
+
+		    // check native lang, then english
+		    for (String language : languages) {
+			if (found) { // stop when the inner loop terminated
+			    break;
+			}
+
+			List<InternationalStringType> cardTypeNames = type.getCardTypeName();
+			for (InternationalStringType ist : cardTypeNames) {
+			    if (ist.getLang().equalsIgnoreCase(language)) {
+				cardTypeName = ist.getValue();
+				found = true;
+				break;
+			    }
+			}
+		    }
+		}
+	    }
+
+	    return cardTypeName;
 	}
     }
 
@@ -205,7 +236,7 @@ public class Status implements EventCallback {
 	JLabel label = new JLabel();
 
 	if (ifdName != null) {
-	    String cardType = info != null ? info.getCardType() : null;
+	    String cardType = info != null ? info.getCardType() : "http://openecard.org/cif/no-card";
 	    label.setIcon(getCardIcon(cardType));
 	    label.setText("<html><b>" + getCardType(info) + "</b><br><i>" + ifdName + "</i></html>");
 	} else {
@@ -229,15 +260,9 @@ public class Status implements EventCallback {
 
 	    if (eventType.equals(EventType.TERMINAL_ADDED)) {
 		addInfo(ifdName, info);
-		return;
-	    }
-
-	    if (eventType.equals(EventType.TERMINAL_REMOVED)) {
+	    } else if (eventType.equals(EventType.TERMINAL_REMOVED)) {
 		removeInfo(ifdName);
-		return;
-	    }
-
-	    if (eventType.equals(EventType.CARD_INSERTED) || eventType.equals(EventType.CARD_RECOGNIZED) || eventType.equals(EventType.CARD_REMOVED)) {
+	    } else {
 		updateInfo(ifdName, info);
 	    }
 	}

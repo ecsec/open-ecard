@@ -6,6 +6,7 @@ target
 .project
 .classpath
 .directory
+.checkstyle
 nb-configuration.xml
 dependency-reduced-pom.xml
 /.idea/

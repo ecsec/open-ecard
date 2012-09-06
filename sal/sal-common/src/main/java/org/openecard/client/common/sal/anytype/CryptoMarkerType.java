@@ -48,8 +48,10 @@ public class CryptoMarkerType {
     private CertificateRefType certificateRef = null;
     private CryptoKeyInfoType cryptoKeyInfo = null;
     private String[] signatureGenerationInfo = null;
+    private final String protocol;
 
     public CryptoMarkerType(iso.std.iso_iec._24727.tech.schema.CryptoMarkerType baseType) {
+	protocol = baseType.getProtocol();
 	for (Element elem : baseType.getAny()) {
 	    if (elem.getLocalName().equals("AlgorithmInfo")) {
 		algorithmInfo = new AlgorithmInfoType();
@@ -144,6 +146,10 @@ public class CryptoMarkerType {
 
     public StateInfo getStateInfo() throws Exception {
 	throw new Exception("Not yet implemented");
+    }
+
+    public String getProtocol() {
+	return protocol;
     }
 
 }

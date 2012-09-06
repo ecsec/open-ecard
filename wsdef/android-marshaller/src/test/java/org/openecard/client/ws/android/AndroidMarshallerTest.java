@@ -39,6 +39,7 @@ import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.sal.anytype.AuthDataMap;
+import org.openecard.client.common.sal.anytype.CryptoMarkerType;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.soap.SOAPHeader;
@@ -65,6 +66,7 @@ public class AndroidMarshallerTest {
     private static final String didAuthenticateCA;
     private static final String didAuthenticateResponse;
     private static final String npaCif;
+    private static final String egkCif;
     private static final String disconnect;
     private static final String disconnectResponse;
     private static final String destroyChannel;
@@ -84,6 +86,7 @@ public class AndroidMarshallerTest {
 	    didAuthenticateCA = loadXML("DIDAuthenticateCA.xml");
 	    didAuthenticateResponse = loadXML("DIDAuthenticateResponse.xml");
 	    npaCif = loadXML("nPA_1-0-0.xml");
+	    egkCif = loadXML("eGK_1-0-0.xml");
 	    disconnect = loadXML("Disconnect.xml");
 	    disconnectResponse = loadXML("DisconnectResponse.xml");
 	    destroyChannel = loadXML("DestroyChannel.xml");
@@ -124,11 +127,38 @@ public class AndroidMarshallerTest {
 	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().get(0).getCardApplicationACL().getAccessRule().get(0).getCardApplicationServiceName(), "CardApplicationServiceAccess");
 	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().get(0).getCardApplicationACL().getAccessRule().get(0).getAction().getAPIAccessEntryPoint(), APIAccessEntryPointName.INITIALIZE);
 	assertTrue(cardInfo.getApplicationCapabilities().getCardApplication().get(0).getCardApplicationACL().getAccessRule().get(0).getSecurityCondition().isAlways());
-	
+
 	// last accessrule
 	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().get(0).getCardApplicationACL().getAccessRule().get(39).getAction().getAuthorizationServiceAction(), AuthorizationServiceActionName.ACL_MODIFY);
 	assertFalse(cardInfo.getApplicationCapabilities().getCardApplication().get(0).getCardApplicationACL().getAccessRule().get(39).getSecurityCondition().isNever());
 
+	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().get(0).getDIDInfo().get(0).getRequirementLevel(), BasicRequirementsType.PERSONALIZATION_MANDATORY);
+	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().get(0).getDIDInfo().get(0).getDIDACL().getAccessRule().get(0).getCardApplicationServiceName(), "DifferentialIdentityService");
+
+	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().get(1).getDataSetInfo().get(0).getRequirementLevel(), BasicRequirementsType.PERSONALIZATION_MANDATORY);
+	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().get(1).getDataSetInfo().get(0).getDataSetACL().getAccessRule().get(0).getCardApplicationServiceName(), "NamedDataService");
+
+	for(DataSetInfoType dataSetInfo : cardInfo.getApplicationCapabilities().getCardApplication().get(2).getDataSetInfo()) {
+	    if(dataSetInfo.getDataSetName().equals("EF.C.ZDA.QES")){
+		assertEquals(dataSetInfo.getLocalDataSetName().get(0).getLang(), "DE");
+		assertEquals(dataSetInfo.getLocalDataSetName().get(0).getValue(), "Zertifikat des ZDA für die QES");
+	    }
+	}
+
+	// Test eGK
+	o = m.unmarshal(m.str2doc(egkCif));
+	if (!(o instanceof CardInfo)) {
+	    throw new Exception("Object should be an instace of CardInfo");
+	}
+	cardInfo = (CardInfo) o;
+	assertEquals("http://ws.gematik.de/egk/1.0.0", cardInfo.getCardType().getObjectIdentifier());
+	CardApplicationType cardApplicationESIGN = cardInfo.getApplicationCapabilities().getCardApplication().get(1);
+	assertEquals(cardApplicationESIGN.getDIDInfo().get(0).getDifferentialIdentity().getDIDName(), "PrK.CH.AUT_signPKCS1_V1_5");
+	assertEquals(cardApplicationESIGN.getDIDInfo().get(0).getDifferentialIdentity().getDIDProtocol(), "urn:oid:1.3.162.15480.3.0.25");
+	CryptoMarkerType cryptoMarkerType = new CryptoMarkerType(cardApplicationESIGN.getDIDInfo().get(0).getDifferentialIdentity().getDIDMarker().getCryptoMarker());
+	assertEquals(cryptoMarkerType.getProtocol(), "urn:oid:1.3.162.15480.3.0.25");
+	assertEquals(cryptoMarkerType.getAlgorithmInfo().getSupportedOperations().get(0), "Compute-signature");
+		
     }
 
     @Test

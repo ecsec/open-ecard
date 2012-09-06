@@ -27,12 +27,10 @@ import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
 import iso.std.iso_iec._24727.tech.schema.*;
 import iso.std.iso_iec._24727.tech.schema.SecurityConditionType.And;
 import iso.std.iso_iec._24727.tech.schema.SecurityConditionType.Or;
-
 import java.io.*;
 import java.math.BigInteger;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import java.util.*;
+import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -44,8 +42,6 @@ import org.openecard.client.ws.*;
 import org.openecard.client.ws.soap.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -1006,15 +1002,214 @@ public class AndroidMarshaller implements WSMarshaller {
 		    cardApplication.setApplicationName(parser.nextText());
 		} else if (parser.getName().equals("RequirementLevel")) {
 		    cardApplication.setRequirementLevel(BasicRequirementsType.fromValue(parser.nextText()));
-		} else if (parser.getName().equals("CardApplicationACL")){
-		    cardApplication.setCardApplicationACL(this.parseCardApplicationACL(parser));
+		} else if (parser.getName().equals("CardApplicationACL")) {
+		    cardApplication.setCardApplicationACL(this.parseACL(parser, "CardApplicationACL"));
+		} else if (parser.getName().equals("DIDInfo")) {
+		    cardApplication.getDIDInfo().add(this.parseDIDInfo(parser));
+		} else if (parser.getName().equals("DataSetInfo")) {
+		    cardApplication.getDataSetInfo().add(this.parseDataSetInfo(parser));
 		}
 	    }
 	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("CardApplication")));
 	return cardApplication;
     }
 
-    private AccessControlListType parseCardApplicationACL(XmlPullParser parser) throws XmlPullParserException, IOException {
+    private DataSetInfoType parseDataSetInfo(XmlPullParser parser) throws XmlPullParserException, IOException {
+	DataSetInfoType dataSetInfo = new DataSetInfoType();
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("RequirementLevel")) {
+		    dataSetInfo.setRequirementLevel(BasicRequirementsType.fromValue(parser.nextText()));
+		} else if (parser.getName().equals("DataSetACL")) {
+		    dataSetInfo.setDataSetACL(this.parseACL(parser, "DataSetACL"));
+		} else if (parser.getName().equals("DataSetName")) {
+		    dataSetInfo.setDataSetName(parser.nextText());
+		} else if (parser.getName().equals("DataSetPath")) {
+		    dataSetInfo.setDataSetPath(this.parseDataSetPath(parser));
+		} else if (parser.getName().equals("LocalDataSetName")) {
+		    InternationalStringType internationalString = new InternationalStringType();
+		    internationalString.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+		    internationalString.setValue(parser.nextText());
+		    dataSetInfo.getLocalDataSetName().add(internationalString);
+		} else
+		    throw new IOException(parser.getName() + " not yet implemented");
+
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("DataSetInfo")));
+	return dataSetInfo;
+    }
+
+    private PathType parseDataSetPath(XmlPullParser parser) throws XmlPullParserException, IOException {
+	PathType path = new PathType();
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("efIdOrPath")) {
+		    path.setEfIdOrPath(StringUtils.toByteArray(parser.nextText()));
+		} else
+		    throw new IOException(parser.getName() + " not yet implemented");
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("DataSetPath")));
+	return path;
+    }
+
+    private DIDInfoType parseDIDInfo(XmlPullParser parser) throws XmlPullParserException, IOException {
+	DIDInfoType didInfo = new DIDInfoType();
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("RequirementLevel")) {
+		    didInfo.setRequirementLevel(BasicRequirementsType.fromValue(parser.nextText()));
+		} else if (parser.getName().equals("DIDACL")) {
+		    didInfo.setDIDACL(this.parseACL(parser, "DIDACL"));
+		} else if (parser.getName().equals("DifferentialIdentity")) {
+		    didInfo.setDifferentialIdentity(this.parseDifferentialIdentity(parser));
+		} else
+		    throw new IOException(parser.getName() + " not yet implemented");
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("DIDInfo")));
+	return didInfo;
+    }
+
+    private DifferentialIdentityType parseDifferentialIdentity(XmlPullParser parser) throws XmlPullParserException, IOException {
+	DifferentialIdentityType differentialIdentity = new DifferentialIdentityType();
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("DIDName")) {
+		    differentialIdentity.setDIDName(parser.nextText());
+		} else if (parser.getName().equals("LocalDIDName")) {
+		    InternationalStringType internationalString = new InternationalStringType();
+		    internationalString.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+		    internationalString.setValue(parser.nextText());
+		    differentialIdentity.getLocalDIDName().add(internationalString);
+		} else if (parser.getName().equals("DIDProtocol")) {
+		    differentialIdentity.setDIDProtocol(parser.nextText());
+		} else if (parser.getName().equals("DIDMarker")) {
+		    differentialIdentity.setDIDMarker(this.parseDIDMarkerType(parser));
+		} else if (parser.getName().equals("DIDScope")) {
+		    differentialIdentity.setDIDScope(DIDScopeType.fromValue(parser.nextText()));
+		} else
+		    throw new IOException(parser.getName() + " not yet implemented");
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("DifferentialIdentity")));
+	return differentialIdentity;
+    }
+
+    private DIDMarkerType parseDIDMarkerType(XmlPullParser parser) throws XmlPullParserException, IOException {
+	DIDMarkerType didMarker = new DIDMarkerType();
+	int eventType = parser.getEventType();
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("PACEMarker")) {
+		    didMarker.setPACEMarker(this.parsePACEMarker(parser));
+		} else if (parser.getName().equals("TAMarker")) {
+		    didMarker.setTAMarker(this.parseTAMarker(parser));
+		} else if (parser.getName().equals("CAMarker")) {
+		    didMarker.setCAMarker(this.parseCAMarker(parser));
+		} else if (parser.getName().equals("RIMarker")) {
+		    didMarker.setRIMarker(this.parseRIMarker(parser));
+		} else if (parser.getName().equals("CryptoMarker")) {
+		    didMarker.setCryptoMarker(this.parseCryptoMarker(parser));
+		} else if (parser.getName().equals("PinCompareMarker")) {
+		    didMarker.setPinCompareMarker(this.parsePINCompareMarker(parser));
+		} else
+		    throw new IOException(parser.getName() + " not yet implemented");
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("DIDMarker")));
+	return didMarker;
+    }
+
+    private PinCompareMarkerType parsePINCompareMarker(XmlPullParser parser) throws XmlPullParserException, IOException {
+	PinCompareMarkerType pinCompareMarker = new PinCompareMarkerType();
+	pinCompareMarker.setProtocol(parser.getAttributeValue(null, "Protocol"));
+	Document d = documentBuilder.newDocument();
+	pinCompareMarker.getAny().addAll(parseAnyTypes(parser, "PinCompareMarker", parser.getNamespace(), d, false));
+	return pinCompareMarker;
+    }
+
+    private Collection<? extends Element> parseAnyTypes(XmlPullParser parser, String name, String ns, Document d, Boolean firstCall)
+	    throws XmlPullParserException, IOException {
+	int eventType = parser.getEventType();
+	List<Element> elements = new ArrayList<Element>();
+	boolean terminalNode = false;
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		elements.addAll(parseAnyTypes(parser, parser.getName(), parser.getNamespace(), d, true));
+	    } else if (eventType == XmlPullParser.TEXT) {
+		if (parser.getText().trim().length() > 0) {
+		    Element em = d.createElementNS(ns, name);
+		    em.setTextContent(parser.getText());
+		    elements.add(em);
+		    terminalNode = true;
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals(name)));
+	if (!terminalNode && firstCall) {
+	    Element test = d.createElementNS(ns, name);
+	    for (Element e : elements)
+		test.appendChild(e);
+	    List<Element> elements2 = new ArrayList<Element>();
+	    elements2.add(test);
+	    return elements2;
+	}
+	return elements;
+    }
+
+    private CryptoMarkerType parseCryptoMarker(XmlPullParser parser) throws XmlPullParserException, IOException {
+	CryptoMarkerType cryptoMarker = new CryptoMarkerType();
+	cryptoMarker.setProtocol(parser.getAttributeValue(null, "Protocol"));
+	Document d = documentBuilder.newDocument();
+	cryptoMarker.getAny().addAll(parseAnyTypes(parser, "CryptoMarker", parser.getNamespace(), d, false));
+	return cryptoMarker;
+    }
+
+    private RIMarkerType parseRIMarker(XmlPullParser parser) throws XmlPullParserException, IOException {
+	RIMarkerType riMarker = new RIMarkerType();
+	riMarker.setProtocol(parser.getAttributeValue(null, "Protocol"));
+	Document d = documentBuilder.newDocument();
+	riMarker.getAny().addAll(parseAnyTypes(parser, "RIMarker", parser.getNamespace(), d, false));
+	return riMarker;
+    }
+
+    private CAMarkerType parseCAMarker(XmlPullParser parser) throws XmlPullParserException, IOException {
+	CAMarkerType caMarker = new CAMarkerType();
+	caMarker.setProtocol(parser.getAttributeValue(null, "Protocol"));
+	Document d = documentBuilder.newDocument();
+	caMarker.getAny().addAll(parseAnyTypes(parser, "CAMarker", parser.getNamespace(), d, false));
+	return caMarker;
+    }
+
+    private TAMarkerType parseTAMarker(XmlPullParser parser) throws XmlPullParserException, IOException {
+	TAMarkerType taMarker = new TAMarkerType();
+	taMarker.setProtocol(parser.getAttributeValue(null, "Protocol"));
+	Document d = documentBuilder.newDocument();
+	taMarker.getAny().addAll(parseAnyTypes(parser, "TAMarker", parser.getNamespace(), d, false));
+	return taMarker;
+    }
+
+    private PACEMarkerType parsePACEMarker(XmlPullParser parser) throws XmlPullParserException, IOException {
+	PACEMarkerType paceMarker = new PACEMarkerType();
+	paceMarker.setProtocol(parser.getAttributeValue(null, "Protocol"));
+	Document d = documentBuilder.newDocument();
+	paceMarker.getAny().addAll(parseAnyTypes(parser, "PACEMarker", parser.getNamespace(), d, false));
+	return paceMarker;
+    }
+
+    private AccessControlListType parseACL(XmlPullParser parser, String endTag) throws XmlPullParserException, IOException {
 	AccessControlListType accessControlList = new AccessControlListType();
 	int eventType = parser.getEventType();
 	do {
@@ -1022,10 +1217,10 @@ public class AndroidMarshaller implements WSMarshaller {
 	    eventType = parser.getEventType();
 	    if (eventType == XmlPullParser.START_TAG) {
 		if (parser.getName().equals("AccessRule")) {
-		    accessControlList.getAccessRule().add(this.parseAccessRule(parser)); 
-		} 
+		    accessControlList.getAccessRule().add(this.parseAccessRule(parser));
+		}
 	    }
-	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("CardApplicationACL")));
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals(endTag)));
 	return accessControlList;
     }
 
@@ -1037,12 +1232,13 @@ public class AndroidMarshaller implements WSMarshaller {
 	    eventType = parser.getEventType();
 	    if (eventType == XmlPullParser.START_TAG) {
 		if (parser.getName().equals("CardApplicationServiceName")) {
-		    accessRule.setCardApplicationServiceName(parser.nextText());			
+		    accessRule.setCardApplicationServiceName(parser.nextText());
 		} else if (parser.getName().equals("Action")) {
 		    accessRule.setAction(this.parseAction(parser));
 		} else if (parser.getName().equals("SecurityCondition")) {
 		    accessRule.setSecurityCondition(this.parseSecurityCondition(parser));
-		}
+		} else
+		    throw new IOException("not yet implemented");
 	    }
 	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("AccessRule")));
 	return accessRule;
@@ -1056,18 +1252,19 @@ public class AndroidMarshaller implements WSMarshaller {
 	    eventType = parser.getEventType();
 	    if (eventType == XmlPullParser.START_TAG) {
 		if (parser.getName().equals("always")) {
-		    securityCondition.setAlways(true);			
-		} else if(parser.getName().equals("never")) {
+		    securityCondition.setAlways(true);
+		} else if (parser.getName().equals("never")) {
 		    securityCondition.setNever(false);
-		} else if(parser.getName().equals("DIDAuthenicationState")) {
+		} else if (parser.getName().equals("DIDAuthentication")) {
 		    securityCondition.setDIDAuthentication(this.parseDIDAuthenticationState(parser));
-		} else if(parser.getName().equals("not")) {
+		} else if (parser.getName().equals("not")) {
 		    securityCondition.setNot(this.parseSecurityCondition(parser));
 		} else if (parser.getName().equals("and")) {
 		    securityCondition.setAnd(this.parseSecurityConditionTypeAnd(parser));
 		} else if (parser.getName().equals("or")) {
 		    securityCondition.setOr(this.parseSecurityConditionTypeOr(parser));
-		}
+		} else
+		    throw new IOException(parser.getName() + " not yet implemented");
 	    }
 	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("SecurityCondition")));
 	return securityCondition;
@@ -1088,9 +1285,10 @@ public class AndroidMarshaller implements WSMarshaller {
 		    didAuthenticationState.setDIDState(Boolean.parseBoolean(parser.nextText()));
 		} else if (parser.getName().equals("DIDStateQualifier")) {
 		    didAuthenticationState.setDIDStateQualifier(StringUtils.toByteArray(parser.nextText()));
-		}
+		} else
+		    throw new IOException(parser.getName() + " not yet implemented");
 	    }
-	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("or")));
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("DIDAuthentication")));
 	return didAuthenticationState;
     }
 
@@ -1102,8 +1300,8 @@ public class AndroidMarshaller implements WSMarshaller {
 	    eventType = parser.getEventType();
 	    if (eventType == XmlPullParser.START_TAG) {
 		if (parser.getName().equals("SecurityCondition")) {
-		    securityConditionOr.getSecurityCondition().add(this.parseSecurityCondition(parser));			
-		} 
+		    securityConditionOr.getSecurityCondition().add(this.parseSecurityCondition(parser));
+		}
 	    }
 	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("or")));
 	return securityConditionOr;
@@ -1117,8 +1315,8 @@ public class AndroidMarshaller implements WSMarshaller {
 	    eventType = parser.getEventType();
 	    if (eventType == XmlPullParser.START_TAG) {
 		if (parser.getName().equals("SecurityCondition")) {
-		    securityConditionAnd.getSecurityCondition().add(this.parseSecurityCondition(parser));			
-		} 
+		    securityConditionAnd.getSecurityCondition().add(this.parseSecurityCondition(parser));
+		}
 	    }
 	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("and")));
 	return securityConditionAnd;
@@ -1132,7 +1330,7 @@ public class AndroidMarshaller implements WSMarshaller {
 	    eventType = parser.getEventType();
 	    if (eventType == XmlPullParser.START_TAG) {
 		if (parser.getName().equals("APIAccessEntryPoint")) {
-		    action.setAPIAccessEntryPoint(APIAccessEntryPointName.fromValue(parser.nextText()));	 
+		    action.setAPIAccessEntryPoint(APIAccessEntryPointName.fromValue(parser.nextText()));
 		} else if (parser.getName().equals("ConnectionServiceAction")) {
 		    action.setConnectionServiceAction(ConnectionServiceActionName.fromValue(parser.nextText()));
 		} else if (parser.getName().equals("CardApplicationServiceAction")) {
@@ -1147,7 +1345,7 @@ public class AndroidMarshaller implements WSMarshaller {
 		    action.setAuthorizationServiceAction(AuthorizationServiceActionName.fromValue(parser.nextText()));
 		} else if (parser.getName().equals("LoadedAction")) {
 		    action.setLoadedAction(parser.nextText());
-		} 	
+		}
 	    }
 	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Action")));
 	return action;
@@ -1169,7 +1367,7 @@ public class AndroidMarshaller implements WSMarshaller {
 	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("InputAPDUInfo")));
 	return inputAPDUInfo;
     }
-    
+
     private DIDAuthenticationDataType parseDIDAuthenticationDataType(XmlPullParser parser) throws XmlPullParserException, IOException {
 	Document document = documentBuilder.newDocument();
 	DIDAuthenticationDataType didAuthenticationDataType = null;

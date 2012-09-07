@@ -252,8 +252,8 @@
 			    <artifactId>maven-checkstyle-plugin</artifactId>
 			    <version>2.9.1</version>
 			    <configuration>
-				<configLocation>src/compile/checkstyle/openecard-checkstyle.xml</configLocation>
-				<headerLocation>src/compile/checkstyle/openecard-checkstyle-header.txt</headerLocation>
+				<configLocation>src/qa/checkstyle/openecard-checkstyle.xml</configLocation>
+				<headerLocation>src/qa/checkstyle/openecard-checkstyle-header.txt</headerLocation>
 				<suppressionsLocation>src/compile/checkstyle/openecard-checkstyle-suppressions.xml</suppressionsLocation>
 				<includeTestSourceDirectory>true</includeTestSourceDirectory>
 				<excludes>**/generated-sources/**/*.java</excludes>
@@ -280,19 +280,27 @@
 				<tagListOptions>
 				    <tagClasses>
 					<tagClass>
-					    <displayName>Todo's</displayName>
+					    <displayName>Normal</displayName>
 					    <tags>
 						<tag>
-						    <matchString>todo</matchString>
+						    <matchString>TODO</matchString>
+						    <matchType>ignoreCase</matchType>
+						</tag>
+						<tag>
+						    <matchString>TBD</matchString>
 						    <matchType>ignoreCase</matchType>
 						</tag>
 					    </tags>
 					</tagClass>
 					<tagClass>
-					    <displayName>Urgent Fixes</displayName>
+					    <displayName>Urgent</displayName>
 					    <tags>
 						<tag>
-						    <matchString>fixme</matchString>
+						    <matchString>FIXME</matchString>
+						    <matchType>ignoreCase</matchType>
+						</tag>
+						<tag>
+						    <matchString>@deprecated</matchString>
 						    <matchType>ignoreCase</matchType>
 						</tag>
 					    </tags>

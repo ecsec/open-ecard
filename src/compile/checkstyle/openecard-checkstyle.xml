@@ -28,7 +28,7 @@
 	</module>
 	<module name="PackageName">
 	    <property name="id" value="package_name"/>
-	    <property name="format" value="^org\.openecard(\.[-a-z]+)+$"/>
+	    <property name="format" value="^org\.openecard(\.[-a-zA-Z0-9]+)+$"/>
 	</module>
 	<module name="NeedBraces">
 	    <property name="id" value="curly_braces"/>

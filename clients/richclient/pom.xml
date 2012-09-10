@@ -85,7 +85,8 @@
 					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/Open-eCard-Logo.ico" />
 					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/WixUIDialog.bmp" />
 					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/WixUIBanner.bmp" />
-					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/License.rtf" />
+					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/WindowsInstallerTexts.en-us.wxl" />
+					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/License.en-us.rtf" />
 					<copy todir="${wininstall.tmp.dir}/lib" flatten="true">
 					    <path>
 						<path refid="maven.runtime.classpath" />
@@ -140,7 +141,10 @@
 				<objectFile>${wininstall.tmp.dir}/WindowsInstaller.wixobj</objectFile>
 			    </objectFiles>
 			    <outputFile>${project.build.directory}/${project.build.finalName}.msi</outputFile>
-                            <arguments>-sice:ICE57</arguments>
+                            <arguments>-sice:ICE57 -cultures:en-us</arguments>
+                            <localizationFiles>
+                                <localizationFile>${wininstall.tmp.dir}/WindowsInstallerTexts.en-us.wxl</localizationFile>
+                            </localizationFiles>
                             <extensions>
                                 <extension>WixUIExtension</extension>
                                 <extension>WixUtilExtension</extension>

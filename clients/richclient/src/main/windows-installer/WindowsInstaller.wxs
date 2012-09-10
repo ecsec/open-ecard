@@ -51,8 +51,12 @@
 			  Icon="OpenECard.ico"
 			  Target="[libdir]richclient-@VERSION@.jar"
                           WorkingDirectory="libdir"
-			  Advertise="no">
-		</Shortcut>
+			  Advertise="no" />
+                <Shortcut Id="UninstallShortcut"             
+                          Name="Uninstall Open eCard App"
+                          Target="[SystemFolder]msiexec.exe"
+                          Arguments="/x [ProductCode]"
+                          Description="Uninstalls Open eCard App" />
 		<RemoveFolder Id="ProgramMenuDir" On="uninstall" />
                 <RegistryKey Root="HKMU" 
                              Key="SOFTWARE\Open eCard App"
@@ -71,8 +75,7 @@
                           Icon="OpenECard.ico"
                           Target="[libdir]richclient-@VERSION@.jar"
                           WorkingDirectory="libdir"
-                          Advertise="no">
-                </Shortcut>
+                          Advertise="no" />
                 <RegistryKey Root="HKMU" 
                              Key="SOFTWARE\Open eCard App"
                              Action="createAndRemoveOnUninstall">

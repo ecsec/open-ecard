@@ -20,9 +20,23 @@
     <module>seek</module>
     <module>android-nfc</module>
     <module>android-scio</module>
-	 <module>android-pcsc</module>
   </modules>
 
+  <profiles>
+    <profile>
+        <id>android-ndk</id>
+        <activation>
+        <!-- activate android when ndk path is defined -->
+        <property>
+            <name>env.ANDROID_NDK_HOME</name>
+        </property>
+        </activation>
+        <modules>
+        <module>android-pcsc</module>
+        </modules>
+    </profile>
+  </profiles>
+  
   <dependencies>
     <dependency>
       <groupId>org.openecard.client.ifd</groupId>

@@ -1,60 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  
-  <parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
         <groupId>org.openecard.client.ifd</groupId>
         <artifactId>scio-backend</artifactId>
         <version>1.0.0-pre2-SNAPSHOT</version>
     </parent>
-    
-    
- <groupId>org.openecard.client.ifd.scio-backend</groupId>
-<artifactId>android-pcsc</artifactId>
+
+    <groupId>org.openecard.client.ifd.scio-backend</groupId>
+    <artifactId>android-pcsc</artifactId>
     <packaging>apklib</packaging>
     <name>PC/SC for Android</name>
-  
-  
-  <dependencies>
-    <dependency>
-        <groupId>com.google.android</groupId>
-        <artifactId>android</artifactId>
-        <version>4.0.1.2</version>
-        <scope>provided</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.openecard.client.ifd.scio-backend</groupId>
-        <artifactId>android-scio</artifactId> 
-        <version>1.0.0-pre2-SNAPSHOT</version>
-    </dependency>
-  
-  </dependencies>
-  
-  <build>
-    <plugins>
-        <plugin>
-        <groupId>com.jayway.maven.plugins.android.generation2</groupId>
-        <artifactId>android-maven-plugin</artifactId>
-        <version>3.3.0</version>
-        <extensions>true</extensions>
-        <configuration>
-            <zipalign>
-            <verbose>true</verbose>
-            <skip>false</skip>
-            <inputApk>${project.build.directory}/${project.build.finalName}.apk</inputApk>
-            <outputApk>${project.build.directory}/${project.build.finalName}-aligned.apk</outputApk>
-            </zipalign>
-            <sdk>
-            <platform>11</platform>
-            </sdk>
-            <test>
-            <createReport>true</createReport>
-            </test>
-            <proguard>
-            <!--  skip as long as problems exist -->
-            <skip>true</skip>
-            </proguard>
-        </configuration>
-        </plugin>
-    </plugins>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>android</artifactId>
+            <version>4.0.1.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openecard.client.ifd.scio-backend</groupId>
+            <artifactId>android-scio</artifactId>
+            <version>1.0.0-pre2-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>ant-compile</id>
+                        <phase>compile</phase>
+                        <configuration>
+                            <tasks>
+                                <exec executable="${env.ANDROID_NDK_HOME}/ndk-build.cmd" failonerror="true" />
+                                <move file="libs/armeabi/pcscd" tofile="libs/armeabi/libpcscd.so" />
+                                <zip destfile="res/raw/drivers.zip">
+                                    <zipfileset dir="libs/armeabi" includes="libccid.so" prefix="drivers/ifd-ccid.bundle/Contents/Linux" />
+                                    <zipfileset dir="jni/ccid-1.4.5/src" includes="Info.plist" prefix="drivers/ifd-ccid.bundle/Contents" />
+                                    <zipfileset dir="libs/armeabi" includes="libcyberjack.so" fullpath="drivers/cyberjack.bundle/Contents/Linux/libifd-cyberjack.so" />
+                                    <zipfileset dir="jni/cyberjack/ifd" includes="Info.plist" prefix="drivers/cyberjack.bundle/Contents" />
+                                </zip>
+                                <delete file="libs/armeabi/libcyberjack.so" />
+                                <delete file="libs/armeabi/libccid.so" />
+                                <exec executable="${env.ANDROID_NDK_HOME}/ndk-build.cmd" failonerror="true">
+                                    <arg value="clean" />
+                                </exec>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>ant-install</id>
+                        <phase>install</phase>
+                        <configuration>
+                            <tasks>
+                                <delete file="res/raw/drivers.zip" />
+                                <delete dir="libs" />
+                                <delete dir="obj" />
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+                <version>3.3.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <zipalign>
+                        <verbose>true</verbose>
+                        <skip>false</skip>
+                        <inputApk>${project.build.directory}/${project.build.finalName}.apk</inputApk>
+                        <outputApk>${project.build.directory}/${project.build.finalName}-aligned.apk</outputApk>
+                    </zipalign>
+                    <sdk>
+                        <platform>11</platform>
+                    </sdk>
+                    <test>
+                        <createReport>true</createReport>
+                    </test>
+                    <proguard>
+                        <!-- skip since this is done in main android project -->
+                        <skip>true</skip>
+                    </proguard>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>

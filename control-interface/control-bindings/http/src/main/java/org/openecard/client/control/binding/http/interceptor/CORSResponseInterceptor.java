@@ -23,9 +23,12 @@
 package org.openecard.client.control.binding.http.interceptor;
 
 import java.io.IOException;
+import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.openecard.client.control.binding.http.common.HeaderTypes;
 import org.slf4j.Logger;
@@ -35,6 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
  */
 public class CORSResponseInterceptor implements HttpResponseInterceptor {
 
@@ -42,12 +46,21 @@ public class CORSResponseInterceptor implements HttpResponseInterceptor {
 
     @Override
     public void process(HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
-	if (httpResponse.getParams().isParameterTrue("CORS-required")) {
-	    // CORS required
-	    _logger.debug("CORS required");
 
-	    httpResponse.setHeader(HeaderTypes.ACCESS_CONTROL_ALLOW_ORIGIN.fieldName(), "*");
-	    httpResponse.setHeader(HeaderTypes.ACCESS_CONTROL_ALLOW_METHODS.fieldName(), "GET");
+	// enable CORS for all types of HTTP responses
+	httpResponse.setHeader(HeaderTypes.ACCESS_CONTROL_ALLOW_ORIGIN.fieldName(), "*");
+
+	if (httpResponse.getParams().isParameterTrue("disable-CORS-redirect")
+		&& httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_SEE_OTHER) {
+	    _logger.debug("CORS redirect not supported");
+
+	    Header locationHeader = httpResponse.getLastHeader(HeaderTypes.LOCATION.fieldName());
+
+	    if (locationHeader != null && locationHeader.getValue() != null) {
+		httpResponse.setEntity(new StringEntity(locationHeader.getValue()));
+		httpResponse.removeHeader(locationHeader);
+		httpResponse.setStatusLine(httpResponse.getStatusLine().getProtocolVersion(), HttpStatus.SC_OK);
+	    }
 	}
     }
 

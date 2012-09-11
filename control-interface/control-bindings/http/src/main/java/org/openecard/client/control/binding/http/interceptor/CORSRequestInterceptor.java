@@ -23,11 +23,11 @@
 package org.openecard.client.control.binding.http.interceptor;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.protocol.HttpContext;
+import org.openecard.client.control.binding.http.common.HttpRequestWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,24 +35,19 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
  */
 public class CORSRequestInterceptor implements HttpRequestInterceptor {
 
     private static final Logger _logger = LoggerFactory.getLogger(CORSRequestInterceptor.class);
 
-    private static ArrayList<String> userAgents = new ArrayList<String>() {
-	{
-	    add("TODO");
-	}
-    };
-
     @Override
     public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
-	String userAgent = httpRequest.getFirstHeader("User-Agent").getValue();
+	HttpRequestWrapper requestWrapper = new HttpRequestWrapper(httpRequest);
 
-	if (userAgents.contains(userAgent)) {
-	    _logger.debug("CORS required");
-	    httpRequest.getParams().setBooleanParameter("CORS-required", true);
+	if (requestWrapper.hasRequestParameter("redirectUrlAsBody")) {
+	    _logger.debug("CORS redirect not supported");
+	    httpRequest.getParams().setBooleanParameter("disable-CORS-redirect", true);
 	}
     }
 

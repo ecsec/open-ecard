@@ -33,7 +33,7 @@
 	    <extension>
 		<groupId>de.ecsec.maven.plugins</groupId>
 		<artifactId>maven-pack200-plugin</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 	    </extension>
 	</extensions>
 
@@ -71,6 +71,13 @@
 			<effort>9</effort>
 			<deflateHint>true</deflateHint>
 			<!--<keepFileOrder>true</keepFileOrder>-->
+			<stripCodeAttributes>
+			    <!-- Comment the following lines to debug the applet -->
+			    <param>SourceFile</param>
+			    <param>LineNumberTable</param>
+			    <param>LocalVariableTable</param>
+			    <param>LocalVariableTypeTable</param>
+			</stripCodeAttributes>
 		    </configuration>
 		</plugin>
 		<plugin>

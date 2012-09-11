@@ -206,10 +206,15 @@
 			    <includes>
 				<include>org/openecard/**/*.class</include>
 			    </includes>
-			    <excludes>
-				<exclude>org/openecard/**/*Test.class</exclude>
-			    </excludes>
 			</instrumentation>
+		    </configuration>
+		</plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-dependency-plugin</artifactId>
+		    <version>2.5.1</version>
+		    <configuration>
+			<excludeGroupIds>org.openecard.client</excludeGroupIds>
 		    </configuration>
 		</plugin>
 	    </plugins>
@@ -254,9 +259,9 @@
 			    <configuration>
 				<configLocation>src/qa/checkstyle/openecard-checkstyle.xml</configLocation>
 				<headerLocation>src/qa/checkstyle/openecard-checkstyle-header.txt</headerLocation>
-				<suppressionsLocation>src/compile/checkstyle/openecard-checkstyle-suppressions.xml</suppressionsLocation>
+				<suppressionsLocation>src/qa/checkstyle/openecard-checkstyle-suppressions.xml</suppressionsLocation>
 				<includeTestSourceDirectory>true</includeTestSourceDirectory>
-				<excludes>**/generated-sources/**/*.java</excludes>
+				<!--<excludes>**/generated-sources/**/*.java</excludes>-->
 			    </configuration>
 			</plugin>
 			<plugin>
@@ -266,6 +271,7 @@
 			    <configuration>
 				<maxmem>1024m</maxmem>
 				<aggregate>true</aggregate>
+				<quiet>true</quiet>
 				<formats>
 				    <format>xml</format>
 				    <format>html</format>

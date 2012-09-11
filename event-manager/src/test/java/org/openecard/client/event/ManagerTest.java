@@ -43,7 +43,7 @@ public class ManagerTest {
 	EstablishContextResponse ctxR = ifd.establishContext(ctx);
 	Environment env = new ClientEnv();
 	env.setIFD(ifd);
-	EventManager evt = new EventManager(null, env, ctxR.getContextHandle(), "1234567890");
+	EventManager evt = new EventManager(null, env, ctxR.getContextHandle());
 	evt.initialize();
 	Thread.sleep(1000);
 	//evt.terminate();

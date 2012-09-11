@@ -41,6 +41,7 @@ import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.Environment;
 import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.common.interfaces.EventFilter;
+import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.recognition.RecognitionException;
 import org.slf4j.Logger;
@@ -67,12 +68,12 @@ public class EventManager implements org.openecard.client.common.interfaces.Even
     private Future watcher;
 
 
-    public EventManager(CardRecognition cr, Environment env, byte[] ctx, String sessionId) {
+    public EventManager(CardRecognition cr, Environment env, byte[] ctx) {
 	this.cr = cr;
 	this.recognize = cr != null;
 	this.env = env;
 	this.ctx = ctx;
-        this.sessionId = sessionId;
+        this.sessionId = ValueGenerators.generateSessionID();
 	this.dispatcher = new Dispatcher(this);
     }
 
@@ -141,16 +142,16 @@ public class EventManager implements org.openecard.client.common.interfaces.Even
     }
 
 
-    private IFDStatusType getCorresponding(String ifdName, List<IFDStatusType> stati) {
-	for (IFDStatusType next : stati) {
+    private IFDStatusType getCorresponding(String ifdName, List<IFDStatusType> statuses) {
+	for (IFDStatusType next : statuses) {
 	    if (next.getIFDName().equals(ifdName)) {
 		return next;
 	    }
 	}
 	return null;
     }
-    private SlotStatusType getCorresponding(BigInteger idx, List<SlotStatusType> stati) {
-	for (SlotStatusType next : stati) {
+    private SlotStatusType getCorresponding(BigInteger idx, List<SlotStatusType> statuses) {
+	for (SlotStatusType next : statuses) {
 	    if (next.getIndex().equals(idx)) {
 		return next;
 	    }

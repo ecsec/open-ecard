@@ -58,7 +58,6 @@ public class ECardAppletTest {
     private DummyCallback cb;
 
     private byte[] ctx;
-    private String sessionId;
 
     private boolean ctxEstablished;
     private boolean salInitialized;
@@ -94,12 +93,8 @@ public class ECardAppletTest {
         env = new ClientEnv();
         System.out.println("done.");
 
-        System.out.print("Set SessionId... ");
-        sessionId = "0123456789";
-        System.out.println("done.");
-
         System.out.print("Create EventManager... ");
-        manager = new EventManager(cr, env, ctx, "1234567890");
+        manager = new EventManager(cr, env, ctx);
         System.out.println("done.");
 
         System.out.print("Create SAL... ");
@@ -133,7 +128,6 @@ public class ECardAppletTest {
     public void tearDown() {
         manager = null;
         sal = null;
-        sessionId = null;
         env = null;
         cr = null;
         ctx = null;

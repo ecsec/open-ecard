@@ -96,7 +96,7 @@ public final class TestClient implements ControlListener {
 	CardRecognition recognition = new CardRecognition(ifd, contextHandle);
 
 	// Set up EventManager
-	EventManager em = new EventManager(recognition, env, contextHandle, ValueGenerators.generateSessionID());
+	EventManager em = new EventManager(recognition, env, contextHandle);
 	env.setEventManager(em);
 
 	// Set up SALStateCallback

@@ -346,7 +346,7 @@ public final class RichClient implements ControlListener {
 	    recognition = new CardRecognition(ifd, contextHandle);
 
 	    // Set up EventManager
-	    em = new EventManager(recognition, env, contextHandle, ValueGenerators.generateSessionID());
+	    em = new EventManager(recognition, env, contextHandle);
 	    env.setEventManager(em);
 
 	    // Set up SALStateCallback

@@ -25,15 +25,11 @@ package org.openecard.client.applet;
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.enums.EventType;
-import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.control.client.ClientRequest;
 import org.openecard.client.control.client.ClientResponse;
@@ -41,7 +37,6 @@ import org.openecard.client.control.client.ControlListener;
 import org.openecard.client.control.module.tctoken.TCToken;
 import org.openecard.client.control.module.tctoken.TCTokenRequest;
 import org.openecard.client.control.module.tctoken.TCTokenResponse;
-import org.openecard.client.sal.TinySAL;
 import org.openecard.client.transport.paos.PAOS;
 import org.openecard.client.transport.tls.PSKTlsClientImpl;
 import org.openecard.client.transport.tls.TlsClientSocketFactory;
@@ -54,146 +49,14 @@ import org.slf4j.LoggerFactory;
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public final class AppletWorker implements Runnable, EventCallback, ControlListener {
+public final class ApplicationHandler implements ControlListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(AppletWorker.class);
-    private final Thread thread;
+    private static final Logger logger = LoggerFactory.getLogger(ApplicationHandler.class);
+    
     private ECardApplet applet;
-    private String selection;
-    private boolean eventOccurred;
 
-    public AppletWorker(ECardApplet applet) {
+    public ApplicationHandler(ECardApplet applet) {
 	this.applet = applet;
-	eventOccurred = false;
-	thread = new Thread(this);
-    }
-
-    public synchronized void startPAOS(String ifdName) {
-	selection = ifdName;
-	notifyAll();
-    }
-
-    public void start() {
-	thread.start();
-    }
-
-    public void interrupt() {
-	thread.interrupt();
-    }
-
-    @Override
-    public void run() {
-	List<ConnectionHandleType> cHandles = null;
-
-	if (applet.getSpBehavior().equals(ECardApplet.INSTANT)) {
-	    cHandles = getConnectionHandles();
-	}
-
-	if (applet.getSpBehavior().equals(ECardApplet.WAIT)) {
-	    if (!eventOccurred) {
-		waitForInput();
-	    }
-	    cHandles = getConnectionHandles();
-	}
-
-	if (applet.getSpBehavior().equals(ECardApplet.CLICK)) {
-	    waitForInput();
-	    if (selection != null) {
-		cHandles = new ArrayList<ConnectionHandleType>(1);
-		ConnectionHandleType cHandle = getConnectionHandle(selection);
-		// need a slothandle
-		Connect c = new Connect();
-		c.setContextHandle(cHandle.getContextHandle());
-		c.setExclusive(false);
-		c.setIFDName(selection);
-		c.setSlot(BigInteger.ZERO);
-		ConnectResponse cr = this.applet.getClientEnvironment().getIFD().connect(c);
-		cHandle.setSlotHandle(cr.getSlotHandle());
-		//doesn't work with mtg testserver !? so remove
-		cHandle.setRecognitionInfo(null);
-		cHandle.setChannelHandle(null);
-		cHandles.add(cHandle);
-	    } else {
-		cHandles = getConnectionHandles();
-	    }
-	}
-
-	StartPAOS sp = new StartPAOS();
-	sp.getConnectionHandle().addAll(cHandles);
-	sp.setSessionIdentifier(applet.getSessionID());
-
-	try {
-	    // Object result = applet.getPAOS().sendStartPAOS(sp);
-
-	    /*
-	     * String redirectUrl = applet.getRedirectURL();
-	     * if (redirectUrl != null) {
-	     * try {
-	     * applet.getAppletContext().showDocument(new URL(redirectUrl), "_top");
-	     * } catch (MalformedURLException ex) {
-	     * if (_logger.isLoggable(Level.WARNING)) {
-	     * _logger.logp(Level.WARNING, this.getClass().getName(), "run()", ex.getMessage(), ex);
-	     * }
-	     * }
-	     * return;
-	     * } else {
-	     * if (_logger.isLoggable(Level.WARNING)) {
-	     * _logger.logp(Level.WARNING, this.getClass().getName(), "run()", "Unknown response type.", result);
-	     * }
-	     * return;
-	     * }
-	     */
-	    // try {
-	    // 	URL url = new URL(redirectURL);
-	    // 	if (url.getQuery() != null) {
-	    // 	    redirectURL = redirectURL + "&ResultMajor=ok";
-	    // 	} else {
-	    // 	    redirectURL = redirectURL + "?ResultMajor=ok";
-	    // 	}
-	    // 	System.out.println("redirecting to: " + redirectURL);
-	    // 	ECardApplet.this.getAppletContext().showDocument(new URL(redirectURL), "_blank");
-	    // } catch (MalformedURLException ex) {
-	    // 	// <editor-fold defaultstate="collapsed" desc="log exception">
-	    // 	logger.error(LoggingConstants.THROWING, "Exception", ex);
-	    // 	// </editor-fold>
-	    // }
-	} catch (Exception ex) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", ex);
-	    // </editor-fold>
-	}
-    }
-
-    private synchronized void waitForInput() {
-	try {
-	    thread.wait();
-	} catch (InterruptedException ignore) {
-	}
-    }
-
-    private ConnectionHandleType getConnectionHandle(String ifdName) {
-	List<ConnectionHandleType> cHandles = getConnectionHandles();
-	for (ConnectionHandleType cHandle : cHandles) {
-	    if (ifdName.equals(cHandle.getIFDName())) {
-		return cHandle;
-	    }
-	}
-	return null;
-    }
-
-    private List<ConnectionHandleType> getConnectionHandles() {
-	return ((TinySAL) applet.getClientEnvironment().getSAL()).getConnectionHandles();
-    }
-
-    @Override
-    public void signalEvent(EventType eventType, Object eventData) {
-	if (eventType.equals(EventType.CARD_INSERTED) || eventType.equals(EventType.CARD_RECOGNIZED)) {
-	    applet.getClientEnvironment().getEventManager().unregister(this);
-	    synchronized (this) {
-		eventOccurred = true;
-	    }
-	    startPAOS(null);
-	}
     }
 
     @Override
@@ -228,10 +91,8 @@ public final class AppletWorker implements Runnable, EventCallback, ControlListe
 	}
 
 	if (connectionHandle == null) {
-	    // <editor-fold defaultstate="collapsed" desc="log error">
-	    logger.error("Warning", "Given ConnectionHandle is invalied.");
-	    // </editor-fold>
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "Given ConnectionHandle is invalied."));
+	    logger.error("Warning", "Given ConnectionHandle is invalid.");
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "Given ConnectionHandle is invalid."));
 	    return response;
 	}
 
@@ -245,9 +106,7 @@ public final class AppletWorker implements Runnable, EventCallback, ControlListe
 		// Check CardApplicationPathResponse
 		WSHelper.checkResult(cardApplicationPathResponse);
 	    } catch (WSHelper.WSException ex) {
-		// <editor-fold defaultstate="collapsed" desc="log exception">
-		//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
-		// </editor-fold>
+		logger.error("Exception", ex);
 		response.setResult(ex.getResult());
 		return response;
 	    }
@@ -262,9 +121,7 @@ public final class AppletWorker implements Runnable, EventCallback, ControlListe
 		// Check CardApplicationConnectResponse
 		WSHelper.checkResult(cardApplicationConnectResponse);
 	    } catch (WSHelper.WSException ex) {
-		// <editor-fold defaultstate="collapsed" desc="log exception">
-		//	    logger.error(LoggingConstants.THROWING, "Exception", ex);
-		// </editor-fold>
+		logger.error("Exception", ex);
 		response.setResult(ex.getResult());
 		return response;
 	    }

@@ -162,7 +162,7 @@ public class ApplicationContext extends Application {
 	}
 
 	// EventManager
-	em = new EventManager(recognition, env, contextHandle, null);
+	em = new EventManager(recognition, env, contextHandle);
 	env.setEventManager(em);
 
 	// CardStateMap

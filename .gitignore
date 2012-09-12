@@ -12,6 +12,5 @@ dependency-reduced-pom.xml
 /.idea/
 *.iml
 test-output
-obj
 .deps/
 .libs/

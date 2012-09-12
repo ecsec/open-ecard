@@ -1,0 +1,8 @@
+*
+!.gitignore
+!Android.mk
+!Info.plist
+!*.h
+!*.hpp
+!*.c
+!*.cpp

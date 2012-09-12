@@ -22,10 +22,12 @@
 
 package org.openecard.client.applet;
 
+import de.bund.bsi.ecard.api._1.TerminateFramework;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
+import iso.std.iso_iec._24727.tech.schema.Terminate;
 import java.awt.Container;
 import java.awt.Frame;
 import java.io.IOException;
@@ -61,7 +63,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
  */
@@ -70,14 +72,14 @@ public class ECardApplet extends JApplet {
     private static final Logger logger = LoggerFactory.getLogger(ECardApplet.class);
     private static final I18n lang = I18n.getTranslation("applet");
     
-    private ApplicationHandler worker;
+    private ApplicationHandler handler;
     private ClientEnv env;
     private TinySAL sal;
     private IFD ifd;
     private CardRecognition recognition;
     private CardStateMap cardStates;
     private EventManager em;
-    private JSEventCallback jsec;
+    private JSEventCallback jsCallback;
     private TinyManagement management;
     private byte[] contextHandle;
 
@@ -121,10 +123,16 @@ public class ECardApplet extends JApplet {
 	    if (establishContextResponse.getContextHandle() != null) {
 		contextHandle = establishContextResponse.getContextHandle();
 	    } else {
-		throw new RuntimeException("Cannot establish context");
+		logger.error("EstablishContext failed.");
+                JOptionPane.showMessageDialog(null, lang.translationForKey("ifd.context.error"), lang.translationForKey("error"), JOptionPane.ERROR_MESSAGE, getLogo());
+                destroy();
+                return;
 	    }
 	} else {
-	    throw new RuntimeException("Cannot establish context");
+            logger.error("EstablishContext failed.");
+	    JOptionPane.showMessageDialog(null, lang.translationForKey("ifd.context.error"), lang.translationForKey("error"), JOptionPane.ERROR_MESSAGE, getLogo());
+            destroy();
+            return;
 	}
 
         // CardRecognition
@@ -132,11 +140,9 @@ public class ECardApplet extends JApplet {
             recognition = new CardRecognition(ifd, contextHandle);
         } catch (Exception ex) {
             logger.error("Exception", ex);
-            
-            URL resource = FileUtils.resolveResourceAsURL(ECardApplet.class, "/images/logo.png");
-            ImageIcon icon = new ImageIcon(resource);
-            
-            JOptionPane.showMessageDialog(null, lang.translationForKey("recognition.error"), lang.translationForKey("error"), JOptionPane.ERROR_MESSAGE, icon);
+            JOptionPane.showMessageDialog(null, lang.translationForKey("recognition.error"), lang.translationForKey("error"), JOptionPane.ERROR_MESSAGE, getLogo());
+            destroy();
+            return;
         }
 
 	// EventManager
@@ -155,10 +161,10 @@ public class ECardApplet extends JApplet {
 	env.setSAL(sal);
 
         // JavaScript Bridge
-	jsec = new JSEventCallback(this);
-	em.registerAllEvents(jsec);
+	jsCallback = new JSEventCallback(this);
+	em.registerAllEvents(jsCallback);
 
-	worker = new ApplicationHandler(this);
+	handler = new ApplicationHandler(this);
 
 	em.initialize();
 
@@ -168,21 +174,22 @@ public class ECardApplet extends JApplet {
 	    ConnectionHandleType cHandle;
 	    for (Iterator<ConnectionHandleType> iter = cHandles.iterator(); iter.hasNext();) {
 		cHandle = iter.next();
-		jsec.signalEvent(EventType.TERMINAL_ADDED, cHandle);
+		jsCallback.signalEvent(EventType.TERMINAL_ADDED, cHandle);
 		if (cHandle.getRecognitionInfo() != null) {
-		    jsec.signalEvent(EventType.CARD_INSERTED, cHandle);
+		    jsCallback.signalEvent(EventType.CARD_INSERTED, cHandle);
 		}
 	    }
 	}
 
+        // TODO: replace HTTP server with JavaScript binding
 	// Start client connector to listen on port 24727
 	try {
 	    HTTPBinding binding = new HTTPBinding();
 	    ControlInterface control = new ControlInterface(binding);
-	    control.getListeners().addControlListener(worker);
+	    control.getListeners().addControlListener(handler);
 	    control.start();
 
-	    jsec.setEidClientPort(binding.getPort());
+	    jsCallback.setEidClientPort(binding.getPort());
 	} catch (Exception e) {
 	    logger.error(e.getMessage(), e);
 	    throw new RuntimeException("Failed to start client connector.", e);
@@ -191,17 +198,57 @@ public class ECardApplet extends JApplet {
 
     @Override
     public void destroy() {
-	try {
-	    em.terminate();
-	} catch (Exception ignore) {
-	}
-
-	try {
-	    ReleaseContext releaseContext = new ReleaseContext();
-	    releaseContext.setContextHandle(contextHandle);
-	    ifd.releaseContext(releaseContext);
-	} catch (Exception ignore) {
-	}
+        // destroy EventManager
+        try {
+            if (em != null) {
+                em.terminate();
+            }
+        } catch (Exception ex) {
+            logger.error("An exception occurred while destroying EventManager.", ex);
+        } finally {
+            em = null;
+            recognition = null;
+        }
+        // destroy Management
+        try {
+            if (management != null) {
+                TerminateFramework terminateFramework = new TerminateFramework();
+                management.terminateFramework(terminateFramework);
+            }
+        } catch (Exception ex) {
+            logger.error("An exception occurred while destroying Management.", ex);
+        } finally {
+            management = null;
+        }
+        // destroy SAL
+        try {
+            if (sal != null) {
+                Terminate terminate = new Terminate();
+                sal.terminate(terminate);
+            }
+        } catch (Exception ex) {
+            logger.error("An exception occurred while destroying SAL.", ex);
+        } finally {
+            sal = null;
+            cardStates = null;
+        }
+        // destroy IFD
+        try {
+            if (ifd != null) {
+                ReleaseContext releaseContext = new ReleaseContext();
+                releaseContext.setContextHandle(contextHandle);
+                ifd.releaseContext(releaseContext);
+            }
+        } catch (Exception ex) {
+            logger.error("An exception occurred while destroying IFD.", ex);
+        } finally {
+            ifd = null;
+            contextHandle = null;
+        }
+        // destroy the remaining components
+        handler = null;
+        jsCallback = null;
+        env = null;
     }
 
     public CardStateMap getCardStates() {
@@ -221,6 +268,11 @@ public class ECardApplet extends JApplet {
 
     public ClientEnv getClientEnvironment() {
 	return env;
+    }
+    
+    private ImageIcon getLogo() {
+        URL resource = FileUtils.resolveResourceAsURL(ECardApplet.class, "/images/logo.png");
+        return new ImageIcon(resource);
     }
 
 }

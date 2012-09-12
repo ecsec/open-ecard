@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class ApplicationHandler implements ControlListener {
@@ -137,7 +137,7 @@ public final class ApplicationHandler implements ControlListener {
 	    TlsClientSocketFactory tlsClientFactory = null;
 
 	    // Collect parameters for PSK based TLS
-	    //TODO Change to support different protocols
+	    // TODO: Change to support different protocols
 	    if (token.getPathSecurityProtocol().equals("urn:ietf:rfc:4279")
 		    || token.getPathSecurityProtocol().equals("urn:ietf:rfc:5487")) {
 		byte[] psk = token.getPathSecurityParameters().getPSK();

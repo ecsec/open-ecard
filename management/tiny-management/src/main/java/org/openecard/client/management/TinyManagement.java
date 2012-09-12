@@ -224,7 +224,7 @@ public class TinyManagement implements  Management {
     public InitializeFrameworkResponse initializeFramework(InitializeFramework arg0) {
 	InitializeFrameworkResponse initializeFrameworkResponse = new InitializeFrameworkResponse();
 	Version version = new Version();
-	//TODO version should be a constant somewhere else
+	// TODO: version should be a constant somewhere else
     	version.setMajor(new BigInteger("1"));
     	version.setMinor(new BigInteger("8"));
     	version.setSubMinor(new BigInteger("0"));

@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Johannes.Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * @author Simon Potzernheim <potzernheim@hs-coburg.de>
  * @author Tobias Wich <tobias.wich@ecsec.de>
@@ -131,12 +131,7 @@ public class TinySAL implements org.openecard.ws.SAL {
 
     @Override
     public InitializeResponse initialize(Initialize parameters) {
-	if (env != null) {
-	    env.getEventManager().initialize();
-
-	    return WSHelper.makeResponse(InitializeResponse.class, WSHelper.makeResultOK());
-	}
-	return WSHelper.makeResponse(InitializeResponse.class, WSHelper.makeResultUnknownError("Initialization of SAL failed."));
+        return WSHelper.makeResponse(InitializeResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
     @Override

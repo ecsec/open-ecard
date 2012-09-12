@@ -48,7 +48,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Johannes.Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class TinySALTest {
@@ -128,9 +128,8 @@ public class TinySALTest {
     /**
      * Test of initialize method, of class TinySAL.
      */
-    @Test(enabled=false)
+    @Test
     public void testInitialize() {
-	// TODO: make this test work
 	System.out.println("initialize");
 	Initialize parameters = new Initialize();
 	InitializeResponse result = instance.initialize(parameters);

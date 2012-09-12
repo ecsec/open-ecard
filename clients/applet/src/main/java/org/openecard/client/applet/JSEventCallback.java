@@ -33,7 +33,7 @@ import org.openecard.client.common.util.ByteUtils;
 
 /**
  *
- * @author Johannes.Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
  */
 public class JSEventCallback implements EventCallback {

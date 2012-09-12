@@ -26,6 +26,24 @@
             <version>1.0.0-pre2-SNAPSHOT</version>
         </dependency>
     </dependencies>
+    
+    <properties>
+        <ndk.executable>ndk-build</ndk.executable>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                </os>
+            </activation>
+            <properties>
+                <ndk.executable>ndk-build.cmd</ndk.executable>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
@@ -37,7 +55,7 @@
                         <phase>compile</phase>
                         <configuration>
                             <tasks>
-                                <exec executable="${env.ANDROID_NDK_HOME}/ndk-build.cmd" failonerror="true" />
+                                <exec executable="${env.ANDROID_NDK_HOME}/${ndk.executable}" failonerror="true" />
                                 <move file="libs/armeabi/pcscd" tofile="libs/armeabi/libpcscd.so" />
                                 <zip destfile="res/raw/drivers.zip">
                                     <zipfileset dir="libs/armeabi" includes="libccid.so" prefix="drivers/ifd-ccid.bundle/Contents/Linux" />
@@ -47,7 +65,7 @@
                                 </zip>
                                 <delete file="libs/armeabi/libcyberjack.so" />
                                 <delete file="libs/armeabi/libccid.so" />
-                                <exec executable="${env.ANDROID_NDK_HOME}/ndk-build.cmd" failonerror="true">
+                                <exec executable="${env.ANDROID_NDK_HOME}/${ndk.executable}" failonerror="true">
                                     <arg value="clean" />
                                 </exec>
                             </tasks>

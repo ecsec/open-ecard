@@ -111,6 +111,16 @@
 	    <artifactId>eac</artifactId>
 	    <version>${project.version}</version> 
 	</dependency>
+    <dependency> 
+        <groupId>org.openecard.client.sal.protocols</groupId>
+        <artifactId>genericcryptography</artifactId>
+        <version>${project.version}</version> 
+    </dependency>
+    <dependency> 
+        <groupId>org.openecard.client.sal.protocols</groupId>
+        <artifactId>pincompare</artifactId>
+        <version>${project.version}</version> 
+    </dependency>
 	<dependency>
 	    <groupId>org.apache.httpcomponents</groupId>
 	    <artifactId>httpcore</artifactId>

@@ -36,6 +36,7 @@ import java.io.*;
 import java.net.*;
 import java.util.List;
 import org.openecard.client.android.*;
+import org.openecard.client.android.RootHelper;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.Environment;
@@ -158,7 +159,7 @@ public class MainActivity extends Activity implements EventCallback {
 
     @Override
     protected void onDestroy() {
-	killPCSCD();
+	RootHelper.killPCSCD();
 	Editor editor = getSharedPreferences("clear_cache", Context.MODE_PRIVATE).edit();
 	editor.clear();
 	editor.commit();
@@ -192,53 +193,29 @@ public class MainActivity extends Activity implements EventCallback {
 	return dir.delete();
     }
 	
-    private void killPCSCD() {
-	File f = new File("/data/pcscd/pcscd.pid");
-	if (f.exists()) { 
-	    try {
-		FileInputStream fis = new FileInputStream(f);
-		byte[] pid = new byte[fis.available()];
-		fis.read(pid);
-		RootHelper.executeAsRoot("kill -9 " + new String(pid));
-	    } catch (Exception e) {
-		e.printStackTrace();
-		//TODO
-	    } 
-	}
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
 	super.onCreate(null);
 
 	setContentView(R.layout.main);
-	
-	startPCSCD();
-	
+	RootHelper.startPCSCD(getFilesDir());
+
 	applicationContext = ((ApplicationContext) getApplicationContext());
 	applicationContext.initialize();
 	applicationContext.getEnv().getEventManager().registerAllEvents(this);
 	final Intent intent = getIntent();
 	try {
 	    handleIntent(intent);
-	} catch (Exception e) {    
-		// TODO
+	} catch (Exception e) {
+	    // TODO
 	}
     }
 
-    private void startPCSCD() {
-	// kill old instances of pcsc daemon if any
-	killPCSCD();
-	String pcscd_exec = getFilesDir().getParent() + "/lib/libpcscd.so";
-	String permission_string = "chmod 777 " + pcscd_exec;
-	RootHelper.executeAsRoot(permission_string);
-	RootHelper.executeAsRoot(pcscd_exec);
-    }
-    
     /**
      * Handles the intent the MainActivity was started with.</br> It's action
-     * should equal Intent.ACTION_VIEW because we've been started through a link to localhost.
+     * should equal Intent.ACTION_VIEW because we've been started through a link
+     * to localhost.
      * 
      * @param intent
      *            The intent the application was started with.
@@ -251,8 +228,8 @@ public class MainActivity extends Activity implements EventCallback {
 	    String action = intent.getAction();
 	    if (action == Intent.ACTION_VIEW) {
 		this.uri = intent.getData();
-	    } 
-	} 
+	    }
+	}
     }
 
     private TCTokenRequest handleActionIntent(Uri data) throws UnsupportedEncodingException, MalformedURLException, TCTokenException {

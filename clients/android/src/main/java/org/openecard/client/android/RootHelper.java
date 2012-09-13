@@ -22,6 +22,8 @@
 
 package org.openecard.client.android;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -41,7 +43,7 @@ public class RootHelper {
      * Executes a command as root and uses logwrapper to redirect output to
      * logcat.
      * 
-     * @param command the command that should be executed as root      
+     * @param command the command that should be executed as root
      * @return the exit value of the native process
      */
     public static int executeAsRoot(String command) {
@@ -65,6 +67,42 @@ public class RootHelper {
 
     private static void writeCommand(OutputStream os, String command) throws IOException {
 	os.write((command + "\n").getBytes("ASCII"));
+    }
+
+    public static void startPCSCD(File filesDir) {
+	// kill old instances of pcsc daemon if any
+	killPCSCD();
+	String pcscd_exec = filesDir.getParent() + "/lib/libpcscd.so";
+	File f = new File(pcscd_exec);
+	String cmd[] = { "chmod", "777", f.getAbsolutePath() };
+	try {
+	    Process p = Runtime.getRuntime().exec(cmd);
+
+	    p.waitFor();
+	} catch (InterruptedException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	} catch (IOException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+
+	RootHelper.executeAsRoot(pcscd_exec);
+    }
+
+    public static void killPCSCD() {
+	File f = new File("/data/pcscd/pcscd.pid");
+	if (f.exists()) {
+	    try {
+		FileInputStream fis = new FileInputStream(f);
+		byte[] pid = new byte[fis.available()];
+		fis.read(pid);
+		RootHelper.executeAsRoot("kill -9 " + new String(pid));
+	    } catch (Exception e) {
+		e.printStackTrace();
+		// TODO
+	    }
+	}
     }
 
 }

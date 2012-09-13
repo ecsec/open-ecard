@@ -46,18 +46,18 @@ public class ResourceUnpacker {
      * 
      * @param ins an inputstream pointing to the resource to unpack
      * @param ctx the application context 
-     * @param destFolder destination folder where the resource is unpacked to
+     * @param file destination folder where the resource is unpacked to
      * @throws FileNotFoundException
      * @throws IOException
      */
-    static void unpackResources(InputStream ins, Context ctx, String destFolder) throws FileNotFoundException, IOException {
+    static void unpackResources(InputStream ins, Context ctx, File file) throws FileNotFoundException, IOException {
 	// Open the ZipInputStream
 	ZipInputStream inputStream = new ZipInputStream(ins);
 
 	// Loop through all the files and folders
 	for (ZipEntry entry = inputStream.getNextEntry(); entry != null; entry = inputStream.getNextEntry()) {
 
-	    String innerFileName = destFolder + File.separator + entry.getName();
+	    String innerFileName = file + File.separator + entry.getName();
 	    File innerFile = new File(innerFileName);
 	    if (innerFile.exists()) {
 		innerFile.delete();

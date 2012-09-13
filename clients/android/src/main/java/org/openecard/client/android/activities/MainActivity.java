@@ -36,6 +36,7 @@ import java.io.*;
 import java.net.*;
 import java.util.List;
 import org.openecard.client.android.*;
+import org.openecard.client.android.ApplicationContext;
 import org.openecard.client.android.RootHelper;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.enums.EventType;
@@ -171,28 +172,13 @@ public class MainActivity extends Activity implements EventCallback {
 	try {
 	    File dir = context.getCacheDir();
 	    if (dir != null && dir.isDirectory()) {
-		deleteDir(dir);
+		ApplicationContext.deleteDir(dir);
 	    }
 	} catch (Exception e) {
 	    // TODO: handle exception
 	}
     }
 
-    public static boolean deleteDir(File dir) {
-	if (dir != null && dir.isDirectory()) {
-	    String[] children = dir.list();
-	    for (int i = 0; i < children.length; i++) {
-		boolean success = deleteDir(new File(dir, children[i]));
-		if (!success) {
-		    return false;
-		}
-	    }
-	}
-
-	// The directory is now empty so delete it
-	return dir.delete();
-    }
-	
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
@@ -278,37 +264,6 @@ public class MainActivity extends Activity implements EventCallback {
 	ver.verify();
 
 	return tokens.get(0);
-    }
-
-    /**
-     * Overridden to inflate our own option menu.
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-	MenuInflater inflater = getMenuInflater();
-	inflater.inflate(R.menu.option_menu, menu);
-	return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-	Intent i;
-	switch (item.getItemId()) {
-	case R.id.about:
-	    i = new Intent(this, AboutActivity.class);
-	    startActivity(i);
-	    return true;
-	/*case R.id.cardinfo:
-	    i = new Intent(this, CardInfoActivity.class);
-	    startActivity(i);
-	    return true;
-	case R.id.pinmanagement:
-	    i = new Intent(this, PINManagementActivity.class);
-	    startActivity(i);
-	    return true;*/
-	}
-
-	return false;
     }
 
     private void displayText(final String text) {

@@ -43,6 +43,8 @@ import org.openecard.client.management.TinyManagement;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.sal.TinySAL;
 import org.openecard.client.sal.protocol.eac.EACProtocolFactory;
+import org.openecard.client.sal.protocol.genericryptography.GenericCryptoProtocolFactory;
+import org.openecard.client.sal.protocol.pincompare.PinCompareProtocolFactory;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.ws.WsdefProperties;
 
@@ -72,25 +74,39 @@ public class ApplicationContext extends Application {
 
     @Override
     public void onCreate() {
-        	super.onCreate();
-	try {
-	    InputStream driverInputStream = getResources().openRawResource(R.raw.drivers);
-	    if (driverInputStream != null) {
-		File f = new File("/data/pcsc");
-		if (!f.exists()) {
-		    RootHelper.executeAsRoot("mkdir /data/pcsc");
-		    RootHelper.executeAsRoot("chmod 777 /data/pcsc");
-		}
+	super.onCreate();
 
-		ResourceUnpacker.unpackResources(driverInputStream, this, "/data/pcsc");
- 	    }
-	} catch (FileNotFoundException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	} catch (IOException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
+	InputStream driverInputStream = getResources().openRawResource(R.raw.drivers);
+	if (driverInputStream != null) {
+	    File f = new File(getFilesDir() + "/drivers");
+	    if (f.exists())
+		deleteDir(f);
+	    try {
+		ResourceUnpacker.unpackResources(driverInputStream, this, getFilesDir());
+	    } catch (FileNotFoundException e) {
+		// TODO LOG
+		throw new RuntimeException("Cannot get drivers resource.", e);
+	    } catch (IOException e) {
+		// TODO LOG
+		throw new RuntimeException("Cannot get drivers resource.", e);
+	    }
+	} else throw new RuntimeException("Cannot get drivers resource.");
+    }
+
+    public static boolean deleteDir(File dir) {
+	// recursively remove all files and subdirectories
+	if (dir.isDirectory()) {
+	    String[] children = dir.list();
+	    for (int i = 0; i < children.length; i++) {
+		boolean success = deleteDir(new File(dir, children[i]));
+		if (!success) {
+		    return false;
+		}
+	    }
 	}
+
+	// The directory is now empty so delete it
+	return dir.delete();
     }
 
     public void shutdown() {
@@ -174,6 +190,8 @@ public class ApplicationContext extends Application {
 	sal = new TinySAL(env, cardStates);
 	sal.setGUI(gui);
 	sal.addProtocol(ECardConstants.Protocol.EAC, new EACProtocolFactory());
+	sal.addProtocol(ECardConstants.Protocol.PIN_COMPARE, new PinCompareProtocolFactory());
+	sal.addProtocol(ECardConstants.Protocol.GENERIC_CRYPTO, new GenericCryptoProtocolFactory());
 	env.setSAL(sal);
 
 	em.initialize();

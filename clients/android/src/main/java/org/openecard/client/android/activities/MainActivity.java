@@ -229,7 +229,7 @@ public class MainActivity extends Activity implements EventCallback {
 	if (name.startsWith("tcTokenURL")) {
 	    if (!value.isEmpty()) {
 		value = URLDecoder.decode(value, "UTF-8");
-		TCToken token = parseTCToken(new URL(value));
+		TCToken token = TCTokenFactory.generateTCToken(new URL(value));
 		tcTokenRequest.setTCToken(token);
 	    } else {
 		throw new IllegalArgumentException("Malformed tcTokenURL");
@@ -237,33 +237,6 @@ public class MainActivity extends Activity implements EventCallback {
 
 	}
 	return tcTokenRequest;
-    }
-
-    /**
-     * Parses the TCToken.
-     * 
-     * @throws TCTokenException
-     */
-    private TCToken parseTCToken(URL tokenURI) throws TCTokenException {
-	// Get TCToken from the given url
-	TCTokenGrabber grabber = new TCTokenGrabber();
-	String data = grabber.getResource(tokenURI.toString());
-	data = data.substring(data.indexOf("<TCTokenType"), data.indexOf("</TCTokenType>") + 14);
-
-	// Parse the TCToken
-	TCTokenParser parser = new TCTokenParser();
-
-	List<TCToken> tokens = parser.parse(data);
-
-	if (tokens.isEmpty()) {
-	    throw new TCTokenException("TCToken is not available.");
-	}
-
-	// Verify the TCToken
-	TCTokenVerifier ver = new TCTokenVerifier(tokens.get(0));
-	ver.verify();
-
-	return tokens.get(0);
     }
 
     private void displayText(final String text) {

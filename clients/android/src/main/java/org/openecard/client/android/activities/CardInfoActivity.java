@@ -25,6 +25,7 @@ package org.openecard.client.android.activities;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import org.openecard.client.android.ApplicationContext;
 import org.openecard.client.android.R;
+import org.openecard.client.android.RootHelper;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
 import android.app.Activity;
@@ -42,7 +43,7 @@ import android.widget.TextView;
  */
 public class CardInfoActivity extends Activity implements EventCallback {
 
-    private ApplicationContext appState;
+    private ApplicationContext applicationContext;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,9 +53,12 @@ public class CardInfoActivity extends Activity implements EventCallback {
 	// Set up the window layout
 	setContentView(R.layout.cardinfo);
 
+	RootHelper.startPCSCD(getFilesDir());
+	
 	// register for events
-	appState = ((ApplicationContext) getApplicationContext());
-	appState.getEnv().getEventManager().registerAllEvents(this);
+	applicationContext = ((ApplicationContext) getApplicationContext());
+	applicationContext.initialize();
+	applicationContext.getEnv().getEventManager().registerAllEvents(this);
 
 	Button b = (Button) findViewById(R.id.button_back);
 	b.setOnClickListener(new OnClickListener() {
@@ -64,7 +68,14 @@ public class CardInfoActivity extends Activity implements EventCallback {
 	});
  
     }
-
+    
+    @Override
+    protected void onDestroy() {
+	applicationContext.shutdown();
+	RootHelper.killPCSCD();
+        super.onDestroy();  
+    }
+        
     @Override
     public void signalEvent(EventType eventType, Object eventData) {
 	if (eventType.equals(EventType.CARD_RECOGNIZED)) {

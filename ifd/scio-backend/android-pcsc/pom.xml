@@ -66,6 +66,9 @@
 				    <zipfileset dir="libs/armeabi" includes="libcyberjack.so" fullpath="drivers/cyberjack.bundle/Contents/Linux/libifd-cyberjack.so" />
 				    <zipfileset dir="jni/cyberjack/ifd" includes="Info.plist" prefix="drivers/cyberjack.bundle/Contents" />
 				</zip>
+				<!-- remove to prevent packaging into apk -->
+				<delete file="libs/armeabi/libcyberjack.so" />
+				<delete file="libs/armeabi/libccid.so" />
 			    </tasks>
 			</configuration>
 			<goals>
@@ -77,8 +80,6 @@
 		    	<phase>clean</phase>
 		    	<configuration>
 		    	    <tasks>
-				<delete file="libs/armeabi/libcyberjack.so" />
-				<delete file="libs/armeabi/libccid.so" />
 		    		<delete file="res/raw/drivers.zip" />
 		    		<delete dir="libs" />
 		    		<delete dir="obj" />

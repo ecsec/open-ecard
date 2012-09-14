@@ -201,6 +201,7 @@
 		    <artifactId>cobertura-maven-plugin</artifactId>
 		    <version>2.5.1</version>
 		    <configuration>
+			<quiet>true</quiet>
 			<maxmem>1024m</maxmem>
 			<instrumentation>
 			    <includes>

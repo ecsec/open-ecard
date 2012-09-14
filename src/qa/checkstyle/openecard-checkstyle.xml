@@ -76,7 +76,7 @@
 	    <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
 	</module>
 	<module name="FallThrough">
-	    <property name="checkLastCaseGroup" value="true"/>
+	    <property name="id" value="switch_fall_through"/>
 	</module>
 	<module name="JavadocMethod">
 	    <property name="id" value="method_javadoc"/>
@@ -92,6 +92,15 @@
 	    <property name="id" value="javadoc_style"/>
 	    <property name="tokens" value="INTERFACE_DEF,CLASS_DEF,METHOD_DEF,CTOR_DEF"/>
 	</module>
+	<module name="Regexp">
+	    <property name="id" value="invalid_java_class_file_ending"/>
+	    <property name="format" value="\n{2}\}\n\Z"/>
+	    <message key="required.regexp" value="Das Dateiende entspricht nicht dem Muster ''{0}''."/>
+	</module>
+	<module name="Regexp">
+	    <property name="id" value="invalid_class_declaration_format"/>
+	    <property name="format" value="\n(\S+ )*(?:class|@?interface|enum) (\S+ )+\{\n\n"/>
+	</module>
     </module>
     <module name="RegexpHeader">
 	<property name="id" value="licence_header"/>
@@ -100,9 +109,22 @@
     </module>
     <module name="RegexpMultiline">
 	<property name="id" value="package_import_header"/>
-	<property name="format" value="^(?:(.*\n)*.+[^\n]\n{2})?package \S+;\n{2}(?:(?:import \S+;\n)*(?:import \S+;\n{2}))*?\n(?!import)(?!\n)"/>
+	<property name="format" value="^(?:(.*\n)*.+[^\n]\n{2})?package \S+;\n{2}(?:(?:import (static )?\S+?;\n)*(?:import (static )?\S+?;\n{2}))?\n(?!import)(?!\n)"/>
 	<property name="message" value="Package and import header format wrong."/>
 	<property name="minimum" value="1"/>
 	<property name="maximum" value="1"/>
+    </module>
+    <module name="RegexpMultiline">
+	<property name="id" value="invalid_line_ending"/>
+	<property name="format" value="(?:\r\n|\n\r)$"/>
+	<property name="message" value="Only unix line endings are allowed."/>
+    </module>
+    <module name="SuppressionFilter">
+	<property name="file" value="${checkstyle.suppressions.file}"/>
+    </module>
+    <module name="RegexpSingleline">
+	<property name="id" value="whitespace_only_line"/>
+	<property name="format" value="^\s+$"/>
+	<property name="message" value="Line isn't allowed to contain whitespaces only."/>
     </module>
 </module>

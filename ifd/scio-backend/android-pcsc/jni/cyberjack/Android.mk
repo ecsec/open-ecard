@@ -1,8 +1,8 @@
-LOCAL_PATH:= $(call my-dir)
+LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:= \
+LOCAL_SRC_FILES := \
 	cjeca32/ausb/ausb.c \
 	cjeca32/ausb/ausb_libusb0.c \
 	cjeca32/ausb/ausb_libusb1.c \
@@ -39,7 +39,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_STATIC_LIBRARIES += libusb
 
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/ \
+LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/cjeca32/ausb \
 	$(LOCAL_PATH)/../libusbx-1.0.12/libusb \
 	$(LOCAL_PATH)/include/driver \
@@ -50,6 +50,6 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/ \
 
 LOCAL_CFLAGS += -O2 -DHAVE_CONFIG_H 
 
-LOCAL_MODULE:= cyberjack
+LOCAL_MODULE := cyberjack
 
 include $(BUILD_SHARED_LIBRARY)

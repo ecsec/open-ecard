@@ -1,7 +1,7 @@
-LOCAL_PATH:= $(call my-dir)
+LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:= \
+LOCAL_SRC_FILES := \
 src/pcscdaemon.c \
 src/debuglog.c \
 src/readerfactory.c \
@@ -22,7 +22,6 @@ src/winscard_msg.c \
 src/simclist.c \
 src/tokenparser.c
 
-
 LOCAL_C_INCLUDES += \
 $(LOCAL_PATH)/src/ \
 $(LOCAL_PATH)/src/PCSC/ \
@@ -32,14 +31,14 @@ LOCAL_CFLAGS := -O2 -DHAVE_CONFIG_H -DHAVE_LIBUSB
 
 LOCAL_STATIC_LIBRARIES := libusb
 
-LOCAL_MODULE:= pcscd
+LOCAL_MODULE := pcscd
 
 include $(BUILD_EXECUTABLE)
 
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:= \
+LOCAL_SRC_FILES := \
 src/winscard_clnt.c \
 src/debug.c \
 src/error.c \
@@ -59,7 +58,7 @@ LOCAL_CFLAGS := -O2 -DHAVE_CONFIG_H -DHAVE_LIBUSB
 
 LOCAL_STATIC_LIBRARIES := libusb
 
-LOCAL_MODULE:= libpcsclite
+LOCAL_MODULE := libpcsclite
 
 include $(BUILD_STATIC_LIBRARY)
 

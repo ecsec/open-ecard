@@ -1,8 +1,8 @@
-LOCAL_PATH:= $(call my-dir)
+LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:= \
+LOCAL_SRC_FILES := \
 	src/ccid.c \
 	src/commands.c \
 	src/ccid_usb.c \
@@ -18,7 +18,7 @@ LOCAL_SRC_FILES:= \
 	src/openct/buffer.c \
 	src/openct/checksum.c
 
-LOCAL_STATIC_LIBRARIES += libusb libpcsclite
+LOCAL_STATIC_LIBRARIES += libusb
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/src \
@@ -27,6 +27,6 @@ LOCAL_C_INCLUDES += \
 
 	LOCAL_CFLAGS += -O2 -DHAVE_CONFIG_H
 
-LOCAL_MODULE:= ccid
+LOCAL_MODULE := ccid
 
 include $(BUILD_SHARED_LIBRARY)

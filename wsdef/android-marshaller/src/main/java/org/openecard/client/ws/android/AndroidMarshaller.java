@@ -588,7 +588,7 @@ public class AndroidMarshaller implements WSMarshaller {
 	    XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 	    factory.setNamespaceAware(true);
 	    XmlPullParser parser = factory.newPullParser();
-	    parser.setInput(new InputStreamReader(new ByteArrayInputStream(this.doc2str(newDoc).getBytes("UTF-8"))));
+	    parser.setInput(new ByteArrayInputStream(this.doc2str(newDoc).getBytes("UTF-8")), "UTF-8");
 	    int eventType = parser.getEventType();
 	    while (eventType != XmlPullParser.END_DOCUMENT) {
 		if (eventType == XmlPullParser.START_TAG) {

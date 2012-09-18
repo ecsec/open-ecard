@@ -22,6 +22,7 @@
 
 package org.openecard.client.control.module.tctoken;
 
+import generated.TCTokenType;
 import java.net.URL;
 import java.util.List;
 import org.openecard.client.control.module.tctoken.hacks.ObjectTag;
@@ -33,7 +34,7 @@ import org.openecard.client.control.module.tctoken.hacks.PathSecurityParameters;
  */
 public class TCTokenFactory {
 
-    public static TCToken generateTCToken(URL tcTokenURL) throws TCTokenException {
+    public static TCTokenType generateTCToken(URL tcTokenURL) throws TCTokenException {
 	// Get TCToken from the given url
 	TCTokenGrabber grabber = new TCTokenGrabber();
 	String data = grabber.getResource(tcTokenURL.toString());
@@ -45,7 +46,7 @@ public class TCTokenFactory {
 
 	// Parse the TCToken
 	TCTokenParser parser = new TCTokenParser();
-	List<TCToken> tokens = parser.parse(data);
+	List<TCTokenType> tokens = parser.parse(data);
 
 	if (tokens.isEmpty()) {
 	    throw new TCTokenException("TCToken not available");

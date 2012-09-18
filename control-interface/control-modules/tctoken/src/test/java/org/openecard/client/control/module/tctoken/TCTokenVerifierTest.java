@@ -22,6 +22,7 @@
 
 package org.openecard.client.control.module.tctoken;
 
+import generated.TCTokenType;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
@@ -34,7 +35,7 @@ import org.testng.annotations.Test;
  */
 public class TCTokenVerifierTest {
 
-    private TCToken token;
+    private TCTokenType token;
     private TCTokenVerifier verifier;
 
     public TCTokenVerifierTest() throws Exception {
@@ -42,7 +43,7 @@ public class TCTokenVerifierTest {
 	File testFile = new File(testFileLocation.toURI());
 
 	TCTokenParser parser = new TCTokenParser();
-	List<TCToken> tokens = parser.parse(new FileInputStream(testFile));
+	List<TCTokenType> tokens = parser.parse(new FileInputStream(testFile));
 	token = tokens.get(0);
 	verifier = new TCTokenVerifier(token);
     }
@@ -97,7 +98,7 @@ public class TCTokenVerifierTest {
 
     @Test(expectedExceptions = TCTokenException.class)
     public void testVerifyPathSecurityParameters2() throws Exception {
-	TCToken.PathSecurityParameters psp = new TCToken.PathSecurityParameters();
+	TCTokenType.PathSecurityParameters psp = new TCTokenType.PathSecurityParameters();
 	psp.setPSK(null);
 	token.setPathSecurityParameters(psp);
 	verifier.verifyPathSecurityParameters();

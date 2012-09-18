@@ -19,11 +19,9 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.client.control.module.tctoken;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import generated.TCTokenType;
 import java.util.ArrayList;
 import java.util.List;
 import org.openecard.client.common.util.StringUtils;
@@ -38,14 +36,22 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class TCTokenSAXHandler extends DefaultHandler {
 
+    private static final String TC_TOKEN_TYPE = "TCTokenType";
+    private static final String SERVER_ADDRESS = "ServerAddress";
+    private static final String SESSION_IDENTIFIER = "SessionIdentifier";
+    private static final String REFRESH_ADDRESS = "RefreshAddress";
+    private static final String PATH_SECURITY_PROTOCOL = "PathSecurity-Protocol";
+    private static final String BINDING = "Binding";
+    private static final String PATH_SECURITY_PARAMETERS = "PathSecurity-Parameters";
+    private static final String PSK = "PSK";
     private boolean read;
     private StringBuilder sb;
-    private List<TCToken> tokens;
-    private TCToken token;
+    private List<TCTokenType> tokens;
+    private TCTokenType token;
 
     @Override
     public void startDocument() throws SAXException {
-	tokens = new ArrayList<TCToken>();
+	tokens = new ArrayList<TCTokenType>();
 	sb = new StringBuilder();
     }
 
@@ -59,11 +65,11 @@ public class TCTokenSAXHandler extends DefaultHandler {
     @Override
     public void startElement(String uri, String localName, String qName, org.xml.sax.Attributes attributes) throws SAXException {
 	// Consider only the TCTokens.
-	if (qName.equalsIgnoreCase(TCToken.TC_TOKEN_TYPE)) {
+	if (qName.equalsIgnoreCase(TC_TOKEN_TYPE)) {
 	    read = true;
-	    token = new TCToken();
-	} else if (qName.equalsIgnoreCase(TCToken.PathSecurityParameters.PATH_SECURITY_PARAMETERS)) {
-	    token.setPathSecurityParameters(new TCToken.PathSecurityParameters());
+	    token = new TCTokenType();
+	} else if (qName.equalsIgnoreCase(PATH_SECURITY_PARAMETERS)) {
+	    token.setPathSecurityParameters(new TCTokenType.PathSecurityParameters());
 	}
     }
 
@@ -73,34 +79,26 @@ public class TCTokenSAXHandler extends DefaultHandler {
 	String value = sb.toString();
 	sb.delete(0, sb.length());
 
-	if (qName.equalsIgnoreCase(TCToken.TC_TOKEN_TYPE)) {
+	if (qName.equalsIgnoreCase(TC_TOKEN_TYPE)) {
 	    tokens.add(token);
-	    token = new TCToken();
+	    token = new TCTokenType();
 	    read = false;
-	} else if (qName.equalsIgnoreCase(TCToken.SESSION_IDENTIFIER)) {
+	} else if (qName.equalsIgnoreCase(SESSION_IDENTIFIER)) {
 	    token.setSessionIdentifier(value);
-	} else if (qName.equalsIgnoreCase(TCToken.SERVER_ADDRESS)) {
-	    try {
-		//FIXME: malformed URL hack
-		if (!value.startsWith("https://") && !value.startsWith("http://")) {
-		    value = "https://" + value;
-		}
+	} else if (qName.equalsIgnoreCase(SERVER_ADDRESS)) {
+	    //FIXME: malformed URL hack
+	    if (!value.startsWith("https://") && !value.startsWith("http://")) {
+		value = "https://" + value;
+	    }
 
-		token.setServerAddress(new URL(value));
-	    } catch (MalformedURLException e) {
-		throw new SAXException("Cannot parse the parameter ServerAddress", e);
-	    }
-	} else if (qName.equalsIgnoreCase(TCToken.REFRESH_ADDRESS)) {
-	    try {
-		token.setRefreshAddress(new URL(value));
-	    } catch (MalformedURLException e) {
-		throw new SAXException("Cannot parse the parameter RefreshAddress", e);
-	    }
-	} else if (qName.equalsIgnoreCase(TCToken.PATH_SECURITY_PROTOCOL)) {
+	    token.setServerAddress(value);
+	} else if (qName.equalsIgnoreCase(REFRESH_ADDRESS)) {
+	    token.setRefreshAddress(value);
+	} else if (qName.equalsIgnoreCase(PATH_SECURITY_PROTOCOL)) {
 	    token.setPathSecurityProtocol(value);
-	} else if (qName.equalsIgnoreCase(TCToken.BINDING)) {
+	} else if (qName.equalsIgnoreCase(BINDING)) {
 	    token.setBinding(value);
-	} else if (qName.equalsIgnoreCase(TCToken.PathSecurityParameters.PSK)) {
+	} else if (qName.equalsIgnoreCase(PSK)) {
 	    byte[] b = StringUtils.toByteArray(value.toUpperCase());
 	    token.getPathSecurityParameters().setPSK(b);
 	}
@@ -125,7 +123,7 @@ public class TCTokenSAXHandler extends DefaultHandler {
      *
      * @return TCTokens
      */
-    public List<TCToken> getTCTokens() {
+    public List<TCTokenType> getTCTokens() {
 	return tokens;
     }
 

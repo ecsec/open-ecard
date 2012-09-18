@@ -22,6 +22,7 @@
 
 package org.openecard.client.applet;
 
+import generated.TCTokenType;
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.net.URL;
@@ -34,7 +35,6 @@ import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.control.client.ClientRequest;
 import org.openecard.client.control.client.ClientResponse;
 import org.openecard.client.control.client.ControlListener;
-import org.openecard.client.control.module.tctoken.TCToken;
 import org.openecard.client.control.module.tctoken.TCTokenRequest;
 import org.openecard.client.control.module.tctoken.TCTokenResponse;
 import org.openecard.client.transport.paos.PAOS;
@@ -71,7 +71,7 @@ public final class ApplicationHandler implements ControlListener {
 	TCTokenResponse response = new TCTokenResponse();
 
 	// TCToken
-	TCToken token = request.getTCToken();
+	TCTokenType token = request.getTCToken();
 
 	// ContextHandle and SlotHandle
 	ConnectionHandleType connectionHandle = null;
@@ -127,7 +127,7 @@ public final class ApplicationHandler implements ControlListener {
 	    }
 
 	    String sessionIdentifier = token.getSessionIdentifier();
-	    URL serverAddress = token.getServerAddress();
+	    URL serverAddress = new URL(token.getServerAddress());
 
 	    // FIXME: Wie weit ist das NPA abhängig.
 	    if (token.getPathSecurityParameters() != null && token.getPathSecurityParameters().getPSK() != null) {
@@ -161,7 +161,7 @@ public final class ApplicationHandler implements ControlListener {
 	    // FIXME: remove background thread as soon as possible
 	    service.submit(new TestRunnable(p, sp));
 
-	    response.setRefreshAddress(token.getRefreshAddress());
+	    response.setRefreshAddress(new URL(token.getRefreshAddress()));
 
 	} catch (Exception ex) {
 	    if (ex instanceof RuntimeException) {

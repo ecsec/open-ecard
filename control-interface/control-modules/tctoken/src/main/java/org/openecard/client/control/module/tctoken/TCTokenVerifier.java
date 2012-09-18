@@ -19,9 +19,9 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.client.control.module.tctoken;
 
+import generated.TCTokenType;
 import java.net.URL;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.ValueValidator;
@@ -34,14 +34,14 @@ import org.openecard.client.common.util.ValueValidator;
  */
 public class TCTokenVerifier {
 
-    private TCToken token;
+    private TCTokenType token;
 
     /**
      * Creates a new TCTokenVerifier to verify a TCToken.
      *
      * @param token Token
      */
-    public TCTokenVerifier(TCToken token) {
+    public TCTokenVerifier(TCTokenType token) {
 	this.token = token;
     }
 
@@ -74,8 +74,9 @@ public class TCTokenVerifier {
      */
     public void verifyServerAddress() throws TCTokenException {
 	try {
-	    URL value = token.getServerAddress();
-	    checkRequired(value);
+	    String value = token.getServerAddress();
+	    assertURL(value);
+	    assertRequired(value);
 	} catch (TCTokenException e) {
 	    throw new TCTokenException("Malformed ServerAddress");
 	}
@@ -89,7 +90,7 @@ public class TCTokenVerifier {
     public void verifySessionIdentifier() throws TCTokenException {
 	try {
 	    String value = token.getSessionIdentifier();
-	    checkRequired(value);
+	    assertRequired(value);
 	    checkSessionLength(value);
 	} catch (TCTokenException e) {
 	    throw new TCTokenException("Malformed SessionIdentifier");
@@ -103,8 +104,9 @@ public class TCTokenVerifier {
      */
     public void verifyRefreshAddress() throws TCTokenException {
 	try {
-	    URL value = token.getRefreshAddress();
-	    checkRequired(value);
+	    String value = token.getRefreshAddress();
+	    assertURL(value);
+	    assertRequired(value);
 	} catch (TCTokenException e) {
 	    throw new TCTokenException("Malformed RefreshAddress");
 	}
@@ -118,7 +120,7 @@ public class TCTokenVerifier {
     public void verifyBinding() throws TCTokenException {
 	try {
 	    String value = token.getBinding();
-	    checkRequired(value);
+	    assertRequired(value);
 	    checkEqual(value, "urn:liberty:paos:2006-08");
 	} catch (TCTokenException e) {
 	    throw new TCTokenException("Malformed Binding");
@@ -150,9 +152,9 @@ public class TCTokenVerifier {
 	try {
 	    if (token.getPathSecurityProtocol().equals("urn:ietf:rfc:4279")
 		    || token.getPathSecurityProtocol().equals("urn:ietf:rfc:5487")) {
-		TCToken.PathSecurityParameters psp = token.getPathSecurityParameters();
+		TCTokenType.PathSecurityParameters psp = token.getPathSecurityParameters();
 		if (!checkEmpty(psp)) {
-		    checkRequired(psp.getPSK());
+		    assertRequired(psp.getPSK());
 		    checkPSKLength(ByteUtils.toHexString(psp.getPSK()));
 		}
 	    }
@@ -215,9 +217,17 @@ public class TCTokenVerifier {
      * @param value Value
      * @throws Exception
      */
-    private void checkRequired(Object value) throws TCTokenException {
+    private void assertRequired(Object value) throws TCTokenException {
 	if (checkEmpty(value)) {
 	    throw new TCTokenException("Element is required.");
+	}
+    }
+
+    private void assertURL(Object value) throws TCTokenException {
+	try {
+	    new URL(value.toString());
+	} catch (Exception e) {
+	    throw new TCTokenException("Malformed URL");
 	}
     }
 

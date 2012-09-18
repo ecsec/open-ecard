@@ -22,6 +22,7 @@
 
 package org.openecard.client.control.module.tctoken;
 
+import generated.TCTokenType;
 import java.math.BigInteger;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.control.client.ClientRequest;
@@ -33,7 +34,7 @@ import org.openecard.client.control.client.ClientRequest;
  */
 public class TCTokenRequest extends ClientRequest {
 
-    private TCToken token;
+    private TCTokenType token;
     private String ifdName;
     private BigInteger slotIndex;
     private byte[] contextHandle;
@@ -43,7 +44,7 @@ public class TCTokenRequest extends ClientRequest {
      *
      * @return TCToken
      */
-    public TCToken getTCToken() {
+    public TCTokenType getTCToken() {
 	return token;
     }
 
@@ -52,7 +53,7 @@ public class TCTokenRequest extends ClientRequest {
      *
      * @param token TCToken
      */
-    public void setTCToken(TCToken token) {
+    public void setTCToken(TCTokenType token) {
 	this.token = token;
     }
 

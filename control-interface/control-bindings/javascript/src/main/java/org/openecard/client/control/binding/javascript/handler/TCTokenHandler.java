@@ -22,13 +22,13 @@
 
 package org.openecard.client.control.binding.javascript.handler;
 
+import generated.TCTokenType;
 import java.net.URL;
 import java.net.URLDecoder;
 import org.openecard.client.control.ControlException;
 import org.openecard.client.control.client.ClientRequest;
 import org.openecard.client.control.client.ClientResponse;
 import org.openecard.client.control.client.ControlListeners;
-import org.openecard.client.control.module.tctoken.TCToken;
 import org.openecard.client.control.module.tctoken.TCTokenFactory;
 import org.openecard.client.control.module.tctoken.TCTokenRequest;
 import org.openecard.client.control.module.tctoken.TCTokenResponse;
@@ -64,7 +64,7 @@ public class TCTokenHandler extends ControlJavaScriptHandler {
 		    case 0:
 			// TCTokenURL
 			value = URLDecoder.decode(value, "UTF-8");
-			TCToken token = TCTokenFactory.generateTCToken(new URL(value));
+			TCTokenType token = TCTokenFactory.generateTCToken(new URL(value));
 			tcTokenRequest.setTCToken(token);
 			break;
 		    case 1:

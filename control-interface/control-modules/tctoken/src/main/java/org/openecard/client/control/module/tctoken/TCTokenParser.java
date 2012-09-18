@@ -22,6 +22,7 @@
 
 package org.openecard.client.control.module.tctoken;
 
+import generated.TCTokenType;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
@@ -64,7 +65,7 @@ public class TCTokenParser {
      * @return List of TCTokens
      * @throws TCTokenException
      */
-    public List<TCToken> parse(String data) throws TCTokenException {
+    public List<TCTokenType> parse(String data) throws TCTokenException {
 	return parse(new ByteArrayInputStream(data.getBytes()));
     }
 
@@ -75,7 +76,7 @@ public class TCTokenParser {
      * @return List of TCTokens
      * @throws TCTokenException
      */
-    public List<TCToken> parse(InputStream inputStream) throws TCTokenException {
+    public List<TCTokenType> parse(InputStream inputStream) throws TCTokenException {
 	try {
 	    // Parse TCTokens
 	    SAXParser saxParser = saxFactory.newSAXParser();
@@ -83,7 +84,7 @@ public class TCTokenParser {
 	    saxParser.parse(stream, saxHandler);
 
 	    // Get TCTokens
-	    List<TCToken> tokens = saxHandler.getTCTokens();
+	    List<TCTokenType> tokens = saxHandler.getTCTokens();
 
 	    return tokens;
 	} catch (Exception e) {

@@ -21,11 +21,11 @@
  ***************************************************************************/
 package org.openecard.client.control.binding.http;
 
+import generated.TCTokenType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import java.math.BigInteger;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Set;
@@ -35,13 +35,11 @@ import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
-import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.control.client.ClientRequest;
 import org.openecard.client.control.client.ClientResponse;
 import org.openecard.client.control.client.ControlListener;
 import org.openecard.client.control.module.status.StatusRequest;
 import org.openecard.client.control.module.status.StatusResponse;
-import org.openecard.client.control.module.tctoken.TCToken;
 import org.openecard.client.control.module.tctoken.TCTokenRequest;
 import org.openecard.client.control.module.tctoken.TCTokenResponse;
 import org.openecard.client.event.EventManager;
@@ -144,7 +142,7 @@ public final class TestClient implements ControlListener {
 	
 	try {
 	    // TCToken
-	    TCToken token = request.getTCToken();
+	    TCTokenType token = request.getTCToken();
 
 	    if (request.getContextHandle() == null || request.getIFDName() == null || request.getSlotIndex() == null) {
 		response.setRefreshAddress(new URL("http://www.openecard.org"));

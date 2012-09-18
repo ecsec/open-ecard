@@ -21,6 +21,7 @@
  ***************************************************************************/
 package org.openecard.client.richclient;
 
+import generated.TCTokenType;
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.net.BindException;
@@ -36,7 +37,6 @@ import org.openecard.client.common.WSHelper.WSException;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
-import org.openecard.client.common.util.ValueGenerators;
 import org.openecard.client.control.ControlInterface;
 import org.openecard.client.control.binding.http.HTTPBinding;
 import org.openecard.client.control.client.ClientRequest;
@@ -44,7 +44,6 @@ import org.openecard.client.control.client.ClientResponse;
 import org.openecard.client.control.client.ControlListener;
 import org.openecard.client.control.module.status.StatusRequest;
 import org.openecard.client.control.module.status.StatusResponse;
-import org.openecard.client.control.module.tctoken.TCToken;
 import org.openecard.client.control.module.tctoken.TCTokenRequest;
 import org.openecard.client.control.module.tctoken.TCTokenResponse;
 import org.openecard.client.event.EventManager;
@@ -150,7 +149,7 @@ public final class RichClient implements ControlListener {
 
 	TCTokenResponse response = new TCTokenResponse();
 	// TCToken
-	TCToken token = request.getTCToken();
+	TCTokenType token = request.getTCToken();
 
 	// ContextHandle, IFDName and SlotIndex
 	ConnectionHandleType connectionHandle = null;
@@ -185,7 +184,7 @@ public final class RichClient implements ControlListener {
      * @return
      */
     private TCTokenResponse handleAusweisappActivate(TCTokenRequest request) {
-	TCToken token = request.getTCToken();
+	TCTokenType token = request.getTCToken();
 
 	// get handle to nPA
 	ConnectionHandleType connectionHandle = getFirstnPAHandle();
@@ -221,7 +220,7 @@ public final class RichClient implements ControlListener {
 	}
     }
 
-    private TCTokenResponse doPAOS(TCToken token, ConnectionHandleType connectionHandle) {
+    private TCTokenResponse doPAOS(TCTokenType token, ConnectionHandleType connectionHandle) {
 	try {
 	    // Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
 	    CardApplicationPath cardApplicationPath = new CardApplicationPath();
@@ -256,7 +255,7 @@ public final class RichClient implements ControlListener {
 	    //TODO Change to support different protocols
 	    byte[] psk = token.getPathSecurityParameters().getPSK();
 	    String sessionIdentifier = token.getSessionIdentifier();
-	    URL serverAddress = token.getServerAddress();
+	    URL serverAddress = new URL(token.getServerAddress());
 	    URL endpoint = new URL(serverAddress + "/?sessionid=" + sessionIdentifier);
 
 	    // Set up TLS connection
@@ -273,7 +272,7 @@ public final class RichClient implements ControlListener {
 	    p.sendStartPAOS(sp);
 
 	    TCTokenResponse response = new TCTokenResponse();
-	    response.setRefreshAddress(token.getRefreshAddress());
+	    response.setRefreshAddress(new URL(token.getRefreshAddress()));
 	    response.setResult(WSHelper.makeResultOK());
 	    return response;
 

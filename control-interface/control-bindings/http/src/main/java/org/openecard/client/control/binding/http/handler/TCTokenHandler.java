@@ -22,6 +22,7 @@
 
 package org.openecard.client.control.binding.http.handler;
 
+import generated.TCTokenType;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URL;
@@ -40,7 +41,6 @@ import org.openecard.client.control.binding.http.common.Http11Response;
 import org.openecard.client.control.client.ClientRequest;
 import org.openecard.client.control.client.ClientResponse;
 import org.openecard.client.control.client.ControlListeners;
-import org.openecard.client.control.module.tctoken.TCToken;
 import org.openecard.client.control.module.tctoken.TCTokenFactory;
 import org.openecard.client.control.module.tctoken.TCTokenRequest;
 import org.openecard.client.control.module.tctoken.TCTokenResponse;
@@ -82,7 +82,7 @@ public class TCTokenHandler extends ControlClientHandler {
 		    if (name.startsWith("tcTokenURL")) {
 			if (!value.isEmpty()) {
 			    value = URLDecoder.decode(value, "UTF-8");
-			    TCToken token = TCTokenFactory.generateTCToken(new URL(value));
+			    TCTokenType token = TCTokenFactory.generateTCToken(new URL(value));
 			    tcTokenRequest.setTCToken(token);
 			} else {
 			    throw new IllegalArgumentException("Malformed TCTokenURL");

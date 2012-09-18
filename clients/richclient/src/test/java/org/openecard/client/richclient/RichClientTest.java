@@ -22,6 +22,7 @@
 
 package org.openecard.client.richclient;
 
+import generated.TCTokenType;
 import java.net.URL;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.control.module.tctoken.*;
@@ -39,7 +40,7 @@ import org.testng.annotations.Test;
 public class RichClientTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RichClient.class.getName());
-    private static TCToken token;
+    private static TCTokenType token;
     private static String tokenURI = "https://willow.mtg.de/eid-server-demo-app/result/request.html";
 
     @BeforeMethod
@@ -52,7 +53,7 @@ public class RichClientTest {
 	}
     }
 
-    @Test(enabled = !true)
+    @Test(enabled = true)
     public void testMain() {
 	try {
 	    RichClient client = RichClient.getInstance();

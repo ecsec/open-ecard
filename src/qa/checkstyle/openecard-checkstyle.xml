@@ -28,7 +28,7 @@
 	</module>
 	<module name="PackageName">
 	    <property name="id" value="package_name"/>
-	    <property name="format" value="^org\.openecard(\.[-a-zA-Z0-9]+)+$"/>
+	    <property name="format" value="^org\.openecard\.client(\.[-a-zA-Z0-9]+)+$"/>
 	</module>
 	<module name="NeedBraces">
 	    <property name="id" value="curly_braces"/>
@@ -95,11 +95,20 @@
 	<module name="Regexp">
 	    <property name="id" value="invalid_java_class_file_ending"/>
 	    <property name="format" value="\n{2}\}\n\Z"/>
-	    <message key="required.regexp" value="Das Dateiende entspricht nicht dem Muster ''{0}''."/>
+	    <message key="required.regexp" value="Java class file ending format is wrong."/>
 	</module>
 	<module name="Regexp">
 	    <property name="id" value="invalid_class_declaration_format"/>
 	    <property name="format" value="\n(\S+ )*(?:class|@?interface|enum) (\S+ )+\{\n\n"/>
+	</module>
+	<module name="Indentation">
+	    <property name="id" value="indentation_wrong"/>
+	</module>
+	<module name="RegexpSinglelineJava">
+	    <property name="id" value="indentation_format_wrong"/>
+	    <property name="format" value="[ ]{8}"/>
+	    <property name="message" value="Indentation format is wrong (8 spaces -&gt; 1 tab)."/>
+	    <property name="ignoreComments" value="true"/>
 	</module>
     </module>
     <module name="RegexpHeader">

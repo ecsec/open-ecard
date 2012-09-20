@@ -53,7 +53,7 @@ public class RichClientTest {
 	}
     }
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void testMain() {
 	try {
 	    RichClient client = RichClient.getInstance();

@@ -31,23 +31,19 @@ import android.os.Bundle;
 import android.view.*;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import generated.TCTokenType;
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.io.*;
 import java.net.*;
 import java.util.List;
 import org.openecard.client.android.*;
-import org.openecard.client.android.ApplicationContext;
-import org.openecard.client.android.RootHelper;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.Environment;
 import org.openecard.client.common.interfaces.EventCallback;
-import org.openecard.client.control.module.tctoken.TCToken;
 import org.openecard.client.control.module.tctoken.TCTokenException;
-import org.openecard.client.control.module.tctoken.TCTokenGrabber;
-import org.openecard.client.control.module.tctoken.TCTokenParser;
+import org.openecard.client.control.module.tctoken.TCTokenFactory;
 import org.openecard.client.control.module.tctoken.TCTokenRequest;
-import org.openecard.client.control.module.tctoken.TCTokenVerifier;
 import org.openecard.client.sal.TinySAL;
 import org.openecard.client.transport.paos.PAOS;
 import org.openecard.client.transport.tls.PSKTlsClientImpl;
@@ -76,7 +72,7 @@ public class MainActivity extends Activity implements EventCallback {
 	public void run() {
 	    try {
 		TCTokenRequest tcTokenRequest = handleActionIntent(uri);
-		String serverAddress = tcTokenRequest.getTCToken().getServerAddress().toExternalForm();
+		String serverAddress = tcTokenRequest.getTCToken().getServerAddress();
 		byte[] psk = tcTokenRequest.getTCToken().getPathSecurityParameters().getPSK();
 		String sessionIdentifier = tcTokenRequest.getTCToken().getSessionIdentifier();
 		Environment env = applicationContext.getEnv();
@@ -229,7 +225,7 @@ public class MainActivity extends Activity implements EventCallback {
 	if (name.startsWith("tcTokenURL")) {
 	    if (!value.isEmpty()) {
 		value = URLDecoder.decode(value, "UTF-8");
-		TCToken token = TCTokenFactory.generateTCToken(new URL(value));
+		TCTokenType token = TCTokenFactory.generateTCToken(new URL(value));
 		tcTokenRequest.setTCToken(token);
 	    } else {
 		throw new IllegalArgumentException("Malformed tcTokenURL");

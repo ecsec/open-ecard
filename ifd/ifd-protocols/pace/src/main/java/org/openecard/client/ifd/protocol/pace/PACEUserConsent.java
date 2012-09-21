@@ -41,7 +41,7 @@ public class PACEUserConsent {
     // GUI translation constants
     private static final String USER_CONSENT = "step_pace_userconsent";
 
-    private final I18n lang = I18n.getTranslation("ifd");
+    private final I18n lang = I18n.getTranslation("pace");
     private UserConsent gui;
 
     /**

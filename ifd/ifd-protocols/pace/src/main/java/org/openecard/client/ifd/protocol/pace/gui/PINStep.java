@@ -42,7 +42,7 @@ public class PINStep {
     private static final String TITLE = "step_pace_title";
     private static final String DESCRIPTION = "step_pace_description";
 
-    private I18n lang = I18n.getTranslation("ifd");
+    private I18n lang = I18n.getTranslation("pace");
     private Step step = new Step(lang.translationForKey(TITLE));
     private GUIContentMap content;
     private String passwordType;
@@ -60,8 +60,15 @@ public class PINStep {
     }
 
     private void initialize() {
+	String stepTitle = lang.translationForKey(TITLE);
+	stepTitle = stepTitle.replaceFirst("%s", passwordType);
+	step.setTitle(stepTitle);
+	
+	String decriptionText = lang.translationForKey(DESCRIPTION);
+	decriptionText = decriptionText.replaceFirst("%s", passwordType);
+	
 	Text description = new Text();
-	description.setText(lang.translationForKey(DESCRIPTION));
+	description.setText(decriptionText);
 	step.getInputInfoUnits().add(description);
 
 	PasswordField pinInputField = new PasswordField(passwordType);

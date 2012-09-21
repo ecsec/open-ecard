@@ -34,8 +34,6 @@ import org.openecard.client.sal.protocol.eac.gui.CHATStep;
 import org.openecard.client.sal.protocol.eac.gui.CVCStep;
 import org.openecard.client.sal.protocol.eac.gui.GUIContentMap;
 import org.openecard.client.sal.protocol.eac.gui.PINStep;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -47,12 +45,10 @@ import org.slf4j.LoggerFactory;
  */
 public class EACUserConsent {
 
-    private static final Logger _logger = LoggerFactory.getLogger(EACUserConsent.class);
-
     // GUI translation constants
     private static final String TITLE = "eac_user_consent_title";
 
-    private final I18n lang = I18n.getTranslation("sal");
+    private final I18n lang = I18n.getTranslation("eac");
     private final UserConsent gui;
     private final boolean capturePin;
 
@@ -82,7 +78,8 @@ public class EACUserConsent {
 
 	uc.getSteps().add(cvcStep.getStep());
 	uc.getSteps().add(chatStep.getStep());
-	if (capturePin) { // don't capture PIN when terminal supports native PACE
+	if (capturePin) { 
+	    // don't capture PIN when terminal supports native PACE
 	    uc.getSteps().add(pinStep.getStep());
 	}
 

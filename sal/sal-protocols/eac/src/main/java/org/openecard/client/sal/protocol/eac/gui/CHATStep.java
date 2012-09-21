@@ -19,7 +19,6 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.client.sal.protocol.eac.gui;
 
 import java.util.ArrayList;
@@ -47,10 +46,11 @@ public class CHATStep {
     // GUI translation constants
     private static final String TITLE = "step_chat_title";
     private static final String DESCRIPTION = "step_chat_description";
+    private static final String NOTE = "step_chat_note";
+    private static final String NOTE_CONTENT = "step_chat_note_content";
     private static final String REQUIRED_CHAT_BOXES = "requiredReadAccessCheckBox";
     private static final String OPTIONAL_CHAT_BOXES = "optionalReadAccessCheckBox";
-
-    private I18n lang = I18n.getTranslation("sal");
+    private I18n lang = I18n.getTranslation("eac");
     private Step step = new Step(lang.translationForKey(TITLE));
     private CHAT requiredCHAT, optionalCHAT, selectedCHAT;
     private GUIContentMap content;
@@ -85,7 +85,7 @@ public class CHATStep {
 	optional.setText("Optional:");
 	step.getInputInfoUnits().add(decription);
 	step.getInputInfoUnits().add(requested);
-	
+
 	Checkbox requiredReadAccessCheckBox = new Checkbox(REQUIRED_CHAT_BOXES);
 	Checkbox optionalReadAccessCheckBox = new Checkbox(OPTIONAL_CHAT_BOXES);
 	TreeMap<CHAT.DataGroup, Boolean> requiredReadAccess = requiredCHAT.getReadAccess();
@@ -120,13 +120,11 @@ public class CHATStep {
 	step.getInputInfoUnits().add(optional);
 	step.getInputInfoUnits().add(optionalReadAccessCheckBox);
 
-	// TODO: check required and optional CHAT against certificate
-	// TODO: internationalize the following toggletext
-	ToggleText requestedDataDescription1 = new ToggleText();
-	requestedDataDescription1.setTitle("Hinweis");
-	requestedDataDescription1.setText("Die markierten Elemente benötigt der Anbieter zur Durchführung seiner Dienstleistung. Optionale Daten können Sie hinzufügen.");
-	requestedDataDescription1.setCollapsed(!true);
-	step.getInputInfoUnits().add(requestedDataDescription1);
+	ToggleText requestedDataDescription = new ToggleText();
+	requestedDataDescription.setTitle(lang.translationForKey(NOTE));
+	requestedDataDescription.setText(lang.translationForKey(NOTE_CONTENT));
+	requestedDataDescription.setCollapsed(!true);
+	step.getInputInfoUnits().add(requestedDataDescription);
     }
 
     /**
@@ -192,7 +190,7 @@ public class CHATStep {
 		selectedCHAT.setSpecialFunction(item.getName(), item.isChecked());
 	    }
 	}
-	
+
 	cb = (Checkbox) executionResults.getResult(OPTIONAL_CHAT_BOXES);
 	for (BoxItem item : cb.getBoxItems()) {
 	    if (dataGroupsNames.contains(item.getName())) {

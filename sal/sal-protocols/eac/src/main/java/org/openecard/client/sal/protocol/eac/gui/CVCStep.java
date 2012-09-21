@@ -54,7 +54,7 @@ public class CVCStep {
     private static final String ISSUER_NAME = "cvc_issuer_name";
     private static final String ISSUER_URL = "cvc_issuer_url";
     //
-    private I18n lang = I18n.getTranslation("sal");
+    private I18n lang = I18n.getTranslation("eac");
     private Step step = new Step(lang.translationForKey(TITLE));
     private CertificateDescription description;
     private CardVerifiableCertificate certificate;

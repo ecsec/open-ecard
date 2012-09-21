@@ -42,7 +42,7 @@ public class PINStep {
     private static final String TITLE = "step_pin_title";
     private static final String DESCRIPTION = "step_pin_description";
 
-    private I18n lang = I18n.getTranslation("sal");
+    private I18n lang = I18n.getTranslation("eac");
     private Step step = new Step(lang.translationForKey(TITLE));
     private GUIContentMap content;
     private String passwordType;

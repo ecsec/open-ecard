@@ -114,10 +114,10 @@ public class MarshalTest {
     @Test
     public void testSOAPMarshal() throws Exception {
 	JAXBMarshaller m = new JAXBMarshaller();
-    	Document doc = m.str2doc(xmlStr);
+	Document doc = m.str2doc(xmlStr);
 	SOAPMessage msg = m.doc2soap(doc);
 
-    	Object o = m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
+	Object o = m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
 	doc = m.marshal(o);
 
 	MessageFactory factory = MessageFactory.newInstance();
@@ -129,7 +129,7 @@ public class MarshalTest {
     @Test
     public void testConversionOfDIDAuthenticatResponseAndInitializeFrameworkResponse() throws MarshallingTypeException, TransformerException, SOAPException, ParserConfigurationException {
 	JAXBMarshaller m = new JAXBMarshaller();
-	
+
 	DIDAuthenticateResponse didAuthenticateResponse = new DIDAuthenticateResponse();
 	Result r = new Result();
 	r.setResultMajor("major");
@@ -139,44 +139,44 @@ public class MarshalTest {
 	internationalStringType.setValue("message");
 	r.setResultMessage(internationalStringType);
 	didAuthenticateResponse.setResult(r);
-	
+
 	EAC2OutputType didAuthenticationDataType = new EAC2OutputType();
 
 	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	factory.setNamespaceAware(true);
 	DocumentBuilder builder = factory.newDocumentBuilder();
 	Document d = builder.newDocument();
-	
+
 	Element e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "Signature");
 	e.setTextContent("7117D7BF95D8D6BD437A0D43DE48F42528273A98F2605758D6A3A2BFC38141E7577CABB4F8FBC8DF152E3A097D1B3A703597331842425FE4A9D0F1C9067AC4A9");
 	didAuthenticationDataType.getAny().add(e);
-		
+
 	didAuthenticateResponse.setAuthenticationProtocolData(didAuthenticationDataType);
-	
+
 	Document doc = m.marshal(didAuthenticateResponse);
-	
+
 	System.out.println(m.doc2str(doc)); //test ok if this works
 
 	InitializeFrameworkResponse initializeFrameworkResponse = new InitializeFrameworkResponse();
-    	Version version = new Version();
-    	version.setMajor(new BigInteger("11"));
-    	version.setMinor(new BigInteger("22"));
-    	version.setSubMinor(new BigInteger("33"));
+	Version version = new Version();
+	version.setMajor(new BigInteger("11"));
+	version.setMinor(new BigInteger("22"));
+	version.setSubMinor(new BigInteger("33"));
 
-    	initializeFrameworkResponse.setVersion(version);
-    	
-    	r.setResultMessage(internationalStringType);
-    	initializeFrameworkResponse.setResult(r);
-    	
-    	doc = m.marshal(initializeFrameworkResponse);
-		
+	initializeFrameworkResponse.setVersion(version);
+
+	r.setResultMessage(internationalStringType);
+	initializeFrameworkResponse.setResult(r);
+
+	doc = m.marshal(initializeFrameworkResponse);
+
 	System.out.println(m.doc2str(doc)); //test ok if this works
     }
-        
+
     @Test
     public void testSoapHeaderAdd() throws Exception {
 	JAXBMarshaller m = new JAXBMarshaller();
-    	Document doc = m.str2doc(xmlStr);
+	Document doc = m.str2doc(xmlStr);
 	SOAPMessage msg = m.doc2soap(doc);
 
 	Element msgId=null;

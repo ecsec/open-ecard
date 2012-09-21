@@ -84,7 +84,7 @@ public final class JAXBMarshaller implements WSMarshaller {
     public JAXBMarshaller() {
 	this(new Class[0]);
     }
-    
+
     public JAXBMarshaller(Class... additionalClasses) {
 	JAXBContext tmpJaxbCtx = null;
 	Marshaller tmpMarshaller = null;
@@ -117,7 +117,7 @@ public final class JAXBMarshaller implements WSMarshaller {
 	    tmpSerializer = tfactory.newTransformer();
 	    tmpSerializer.setOutputProperty(OutputKeys.INDENT, "yes");
 	    tmpSerializer.setOutputProperty(OutputKeys.STANDALONE, "yes");
-            tmpSerializer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+	    tmpSerializer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 	    tmpSerializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 
 	    // instantiate soap stuff
@@ -137,36 +137,36 @@ public final class JAXBMarshaller implements WSMarshaller {
     }
 
     private static Class[] getJaxbClasses() {
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+	ClassLoader cl = Thread.currentThread().getContextClassLoader();
 	List<Class> classes = new LinkedList<Class>();
-        InputStream classListStream = cl.getResourceAsStream("classes.lst");
-        InputStream classListStreamC = cl.getResourceAsStream("/classes.lst");
+	InputStream classListStream = cl.getResourceAsStream("classes.lst");
+	InputStream classListStreamC = cl.getResourceAsStream("/classes.lst");
 
-        if (classListStream == null && classListStreamC == null) {
-            System.err.println("Error loading classes.lst");
-        } else {
-            // select the one stream that is set
-            classListStream = (classListStream != null) ? classListStream : classListStreamC;
+	if (classListStream == null && classListStreamC == null) {
+	    System.err.println("Error loading classes.lst");
+	} else {
+	    // select the one stream that is set
+	    classListStream = (classListStream != null) ? classListStream : classListStreamC;
 
-            try {
-                LineNumberReader r = new LineNumberReader(new InputStreamReader(classListStream));
-                String next;
-                // read all entries from file
-                while ((next = r.readLine()) != null) {
-                    try {
-                        // load class and see if it is a JAXB class
-                        Class c = cl.loadClass(next);
-                        if (c.getAnnotation(XmlType.class) != null) {
-                            classes.add(c);
-                        }
-                    } catch (ClassNotFoundException ex) {
-                        System.err.println(ex.getMessage());
-                    }
-                }
-            } catch (IOException ex) {
-                System.err.println(ex.getMessage());
-            }
-        }
+	    try {
+		LineNumberReader r = new LineNumberReader(new InputStreamReader(classListStream));
+		String next;
+		// read all entries from file
+		while ((next = r.readLine()) != null) {
+		    try {
+			// load class and see if it is a JAXB class
+			Class c = cl.loadClass(next);
+			if (c.getAnnotation(XmlType.class) != null) {
+			    classes.add(c);
+			}
+		    } catch (ClassNotFoundException ex) {
+			System.err.println(ex.getMessage());
+		    }
+		}
+	    } catch (IOException ex) {
+		System.err.println(ex.getMessage());
+	    }
+	}
 
 	return classes.toArray(new Class[classes.size()]);
     }
@@ -183,18 +183,18 @@ public final class JAXBMarshaller implements WSMarshaller {
 
     @Override
     public synchronized Document str2doc(String docStr) throws SAXException {
-        try {
-            // read dom as w3
-            StringReader strReader = new StringReader(docStr);
-            InputSource inSrc = new InputSource(strReader);
-            Document doc = w3Builder.parse(inSrc);
+	try {
+	    // read dom as w3
+	    StringReader strReader = new StringReader(docStr);
+	    InputSource inSrc = new InputSource(strReader);
+	    Document doc = w3Builder.parse(inSrc);
 
-            WhitespaceFilter.filter(doc);
+	    WhitespaceFilter.filter(doc);
 
-            return doc;
-        } catch (IOException ex) {
-            throw new SAXException(ex);
-        }
+	    return doc;
+	} catch (IOException ex) {
+	    throw new SAXException(ex);
+	}
     }
 
     @Override
@@ -212,12 +212,12 @@ public final class JAXBMarshaller implements WSMarshaller {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	serializer.transform(new DOMSource(doc), new StreamResult(out));
 	String result;
-        try {
-            result = out.toString("UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            throw new TransformerException(ex);
-        }
-        return result;
+	try {
+	    result = out.toString("UTF-8");
+	} catch (UnsupportedEncodingException ex) {
+	    throw new TransformerException(ex);
+	}
+	return result;
     }
 
     @Override
@@ -234,11 +234,11 @@ public final class JAXBMarshaller implements WSMarshaller {
 	}
 
 	Object result;
-        try {
-            result = unmarshaller.unmarshal(newDoc); //NOI18N
-        } catch (JAXBException ex) {
-            throw new MarshallingTypeException(ex);
-        }
+	try {
+	    result = unmarshaller.unmarshal(newDoc); //NOI18N
+	} catch (JAXBException ex) {
+	    throw new MarshallingTypeException(ex);
+	}
 	return result;
     }
 

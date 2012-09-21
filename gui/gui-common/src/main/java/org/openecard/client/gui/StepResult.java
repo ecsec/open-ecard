@@ -33,17 +33,17 @@ import org.openecard.client.gui.definition.Step;
  */
 public interface StepResult {
 
-    public Step getStep();
-    public String getStepID();
+    Step getStep();
+    String getStepID();
 
-    public ResultStatus getStatus();
+    ResultStatus getStatus();
 
-    public boolean isOK();
+    boolean isOK();
 
-    public boolean isBack();
+    boolean isBack();
 
-    public boolean isCancelled();
+    boolean isCancelled();
 
-    public List<OutputInfoUnit> getResults();
+    List<OutputInfoUnit> getResults();
 
 }

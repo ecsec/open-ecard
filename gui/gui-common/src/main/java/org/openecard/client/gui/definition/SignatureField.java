@@ -79,14 +79,14 @@ public final class SignatureField extends IDTrait implements InputInfoUnit, Outp
      * @return the value
      */
     public byte[] getValue() {
-	return value;
+	return (value == null) ? null : Arrays.copyOf(value, value.length);
     }
 
     /**
      * @param value the value to set
      */
     public void setValue(byte[] value) {
-	this.value = value;
+	this.value = Arrays.copyOf(value, value.length);
     }
 
 

@@ -37,6 +37,26 @@ import org.openecard.client.gui.definition.Step;
  */
 public class ExecutionEngine {
 
+    private static class InnerAction extends StepAction {
+
+	public InnerAction(String stepID) {
+	    super(stepID);
+	}
+
+	@Override
+	public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
+	    switch (result.getStatus()) {
+		case BACK:
+		    return new StepActionResult(StepActionResultStatus.BACK);
+		case OK:
+		    return new StepActionResult(StepActionResultStatus.NEXT);
+		default:
+		    return new StepActionResult(StepActionResultStatus.REPEAT); // cancel performed before
+	    }
+	}
+
+    }
+
     private final UserConsentNavigator navigator;
     private final TreeMap<String, ExecutionResults> results = new TreeMap<String, ExecutionResults>();
     private TreeMap<String, StepAction> customActions;
@@ -69,7 +89,7 @@ public class ExecutionEngine {
 	    if (! next.getStep().isResetOnLoad()) {
 		Step s = next.getStep();
 		List<InputInfoUnit> inputInfo = s.getInputInfoUnits();
-		Map<String,InputInfoUnit> infoMap = new HashMap<String, InputInfoUnit>();
+		Map<String, InputInfoUnit> infoMap = new HashMap<String, InputInfoUnit>();
 		// create index over infos
 		for (InputInfoUnit nextInfo : inputInfo) {
 		    infoMap.put(nextInfo.getID(), nextInfo);
@@ -140,22 +160,8 @@ public class ExecutionEngine {
     private StepAction getAction(String stepName) {
 	if (hasCustomAction(stepName)) {
 	    return getCustomActions().get(stepName);
-	} else {
-	    return new StepAction(stepName) {
-
-		@Override
-		public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-		    switch (result.getStatus()) {
-			case BACK:
-			    return new StepActionResult(StepActionResultStatus.BACK);
-			case OK:
-			    return new StepActionResult(StepActionResultStatus.NEXT);
-			default:
-			    return new StepActionResult(StepActionResultStatus.REPEAT); // cancel performed before
-		    }
-		}
-	    };
 	}
+	return new InnerAction(stepName);
     }
 
     private boolean hasCustomAction(String stepName) {

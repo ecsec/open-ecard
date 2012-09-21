@@ -38,6 +38,26 @@ import org.openecard.client.gui.executor.StepActionResultStatus;
  */
 public class Step {
 
+    private static class InnerAction extends StepAction {
+
+	public InnerAction(String stepID) {
+	    super(stepID);
+	}
+
+	@Override
+	public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
+	    switch (result.getStatus()) {
+		case BACK:
+		    return new StepActionResult(StepActionResultStatus.BACK);
+		case OK:
+		    return new StepActionResult(StepActionResultStatus.NEXT);
+		default:
+		    return new StepActionResult(StepActionResultStatus.REPEAT);
+	    }
+	}
+
+    }
+
     private String id;
     private String title;
     private String description;
@@ -119,20 +139,7 @@ public class Step {
 
     public StepAction getAction() {
 	if (action == null) {
-	    return new StepAction(getID()) {
-
-		@Override
-		public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-		    switch (result.getStatus()) {
-			case BACK:
-			    return new StepActionResult(StepActionResultStatus.BACK);
-			case OK:
-			    return new StepActionResult(StepActionResultStatus.NEXT);
-			default:
-			    return new StepActionResult(StepActionResultStatus.REPEAT);
-		    }
-		}
-	    };
+	    return new InnerAction(getID());
 	}
 	return action;
     }

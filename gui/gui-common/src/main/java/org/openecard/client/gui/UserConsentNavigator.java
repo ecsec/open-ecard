@@ -31,16 +31,16 @@ import org.openecard.client.gui.definition.Step;
  */
 public interface UserConsentNavigator {
 
-    public boolean hasNext();
+    boolean hasNext();
 
-    public StepResult current();
-    public StepResult next();
-    public StepResult previous();
+    StepResult current();
+    StepResult next();
+    StepResult previous();
 
-    public StepResult replaceCurrent(Step step);
-    public StepResult replaceNext(Step step);
-    public StepResult replacePrevious(Step step);
+    StepResult replaceCurrent(Step step);
+    StepResult replaceNext(Step step);
+    StepResult replacePrevious(Step step);
 
-    public void close();
+    void close();
 
 }

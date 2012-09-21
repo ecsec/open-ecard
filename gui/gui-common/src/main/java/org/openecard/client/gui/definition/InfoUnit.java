@@ -33,18 +33,18 @@ public interface InfoUnit {
     /**
      * Get type of info unit.
      */
-    public InfoUnitElementType type();
+    InfoUnitElementType type();
 
     /**
      * Get ID of the info unit.
      * The id must be unique per step.
      */
-    public String getID();
+    String getID();
     /**
      * Set ID of the info unit.
      * The id must be unique per step.
      */
-    public void setID(String id);
+    void setID(String id);
 
     /**
      * Copy the content of the given info unit to this instance.
@@ -52,6 +52,6 @@ public interface InfoUnit {
      * the copy is not performed.
      * @param origin InfoUnit to copy from.
      */
-    public void copyContentFrom(final InfoUnit origin);
+    void copyContentFrom(final InfoUnit origin);
 
 }

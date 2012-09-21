@@ -31,6 +31,6 @@ import org.openecard.client.gui.definition.UserConsentDescription;
  */
 public interface UserConsent {
 
-    public UserConsentNavigator obtainNavigator(UserConsentDescription uc);
+    UserConsentNavigator obtainNavigator(UserConsentDescription uc);
 
 }

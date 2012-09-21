@@ -68,6 +68,7 @@ public class EACUserConsent {
      * Shows the GUI.
      *
      * @param content GUI Content
+     * @return Result of the GUI interaction
      */
     public ResultStatus show(GUIContentMap content) {
 	final UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE));

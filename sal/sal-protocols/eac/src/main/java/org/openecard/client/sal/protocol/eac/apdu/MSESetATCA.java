@@ -19,13 +19,13 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.client.sal.protocol.eac.apdu;
 
 import java.io.IOException;
 import org.openecard.client.common.apdu.ManageSecurityEnviroment;
 import org.openecard.client.common.apdu.common.CardAPDUOutputStream;
 import org.openecard.client.common.util.ByteUtils;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
@@ -37,6 +37,8 @@ import org.slf4j.LoggerFactory;
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class MSESetATCA extends ManageSecurityEnviroment {
+
+    private static final Logger logger = LoggerFactory.getLogger(MSESetATCA.class);
 
     /**
      * Creates a MSE:Set AT APDU for Chip Authentication.
@@ -72,8 +74,8 @@ public class MSESetATCA extends ManageSecurityEnviroment {
 	    }
 
 	    caos.flush();
-	} catch (IOException ex) {
-	    LoggerFactory.getLogger(MSESetATCA.class).error("Exception", ex);
+	} catch (IOException e) {
+	    logger.error("Exception", e);
 	} finally {
 	    try {
 		caos.close();

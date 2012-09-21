@@ -19,7 +19,6 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.client.sal.protocol.eac;
 
 import iso.std.iso_iec._24727.tech.schema.*;
@@ -88,16 +87,17 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
-	CardStateEntry cardState = (CardStateEntry) internalData.get(EACConstants.INTERNAL_DATA_CARD_STATE_ENTRY);
 	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
 
 	try {
+	    CardStateEntry cardState = (CardStateEntry) internalData.get(EACConstants.INTERNAL_DATA_CARD_STATE_ENTRY);
 	    boolean nativePace = genericPACESupport(cardState.handleCopy());
 	    EACUserConsent uc = new EACUserConsent(gui, !nativePace);
 
 	    EAC1InputType eac1Input = new EAC1InputType(didAuthenticate.getAuthenticationProtocolData());
 	    EAC1OutputType eac1Output = eac1Input.getOutputType();
 
+	    // Certificate chain
 	    CardVerifiableCertificateChain certChain = new CardVerifiableCertificateChain(eac1Input.getCertificates());
 	    CertificateDescription certDescription = CertificateDescription.getInstance(eac1Input.getCertificateDescription());
 	    CHAT requiredCHAT = new CHAT(eac1Input.getRequiredCHAT());
@@ -153,6 +153,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 	    if (!establishChannelResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
 		// TODO inform user an error happened while establishment of pace channel
+		response.setResult(WSHelper.makeResultUnknownError("Cannot establish channel"));
 	    } else {
 		DIDAuthenticationDataType data = establishChannelResponse.getAuthenticationProtocolData();
 		AuthDataMap paceOutputMap = new AuthDataMap(data);

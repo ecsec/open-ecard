@@ -25,6 +25,7 @@ package org.openecard.client.sal.protocol.eac.apdu;
 import java.io.IOException;
 import org.openecard.client.common.apdu.ManageSecurityEnviroment;
 import org.openecard.client.common.apdu.common.CardAPDUOutputStream;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
@@ -36,6 +37,8 @@ import org.slf4j.LoggerFactory;
  */
 public class MSESetDST extends ManageSecurityEnviroment {
 
+    private static final Logger logger = LoggerFactory.getLogger(MSESetATCA.class);
+    
     /**
      * Creates a new MSE:Set DST APDU.
      */
@@ -56,8 +59,8 @@ public class MSESetDST extends ManageSecurityEnviroment {
 	    caos.writeTLV((byte) 0x83, chr);
 
 	    caos.flush();
-	} catch (IOException ex) {
-	    LoggerFactory.getLogger(MSESetDST.class).error("Exception", ex);
+	} catch (IOException e) {
+	    logger.error("Exception", e);
 	} finally {
 	    try {
 		caos.close();

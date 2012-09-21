@@ -85,6 +85,7 @@ public final class CAKey {
 
 	    return getEncodedPublicKey();
 	} else if (cdp.isDH()) {
+	    //TODO
 	    logger.error("Not implemented yet.");
 	    throw new UnsupportedOperationException("Not implemented yet.");
 	} else {
@@ -155,11 +156,9 @@ public final class CAKey {
 		byte[] compKey = md.digest(input);
 
 		return compKey;
-	    } catch (NoSuchAlgorithmException ex) {
-		// <editor-fold defaultstate="collapsed" desc="log exception">
-		logger.error("Exception", ex);
-		// </editor-fold>
-		throw new RuntimeException(ex);
+	    } catch (NoSuchAlgorithmException e) {
+		logger.error("Exception", e);
+		throw new RuntimeException(e);
 	    }
 	} else if (cdp.isECDH()) {
 	    byte[] compKey = ((ECPublicKeyParameters) pk).getQ().getX().toBigInteger().toByteArray();

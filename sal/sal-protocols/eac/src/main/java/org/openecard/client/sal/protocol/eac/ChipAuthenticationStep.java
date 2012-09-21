@@ -117,12 +117,8 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 
 	    response.setResult(WSHelper.makeResultOK());
 	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());
-
-	    return response;
 	} catch (Exception e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
 	    logger.error("Exception", e);
-	    // </editor-fold>
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	}
 

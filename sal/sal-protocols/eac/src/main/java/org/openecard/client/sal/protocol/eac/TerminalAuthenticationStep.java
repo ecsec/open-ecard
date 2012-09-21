@@ -52,8 +52,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
-    private static final Logger _logger = LoggerFactory.getLogger(TerminalAuthenticationStep.class.getName());
-
+    private static final Logger logger = LoggerFactory.getLogger(TerminalAuthenticationStep.class.getName());
     private Dispatcher dispatcher;
 
 
@@ -122,12 +121,8 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 
 	    response.setResult(WSHelper.makeResultOK());
 	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());
-
-	    return response;
 	} catch (Exception e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    _logger.error("Exception", e);
-	    // </editor-fold>
+	    logger.error("Exception", e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	}
 

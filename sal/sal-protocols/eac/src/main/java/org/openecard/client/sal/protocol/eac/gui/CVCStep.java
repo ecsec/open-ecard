@@ -58,7 +58,6 @@ public class CVCStep {
     private Step step = new Step(lang.translationForKey(TITLE));
     private CertificateDescription description;
     private CardVerifiableCertificate certificate;
-    private GUIContentMap content;
 
     /**
      * Creates a new GUI user consent step for the CVC.
@@ -66,7 +65,6 @@ public class CVCStep {
      * @param content GUI content
      */
     public CVCStep(GUIContentMap content) {
-	this.content = content;
 	this.certificate = (CardVerifiableCertificate) content.get(GUIContentMap.ELEMENT.CERTIFICATE);
 	this.description = (CertificateDescription) content.get(GUIContentMap.ELEMENT.CERTIFICATE_DESCRIPTION);
 	initialize();

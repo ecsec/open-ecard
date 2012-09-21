@@ -74,7 +74,7 @@ import org.slf4j.LoggerFactory;
 public final class RichClient implements ControlListener {
 
     private static final Logger _logger = LoggerFactory.getLogger(RichClient.class.getName());
-    private static final I18n lang = I18n.getTranslation("gui");
+    private static final I18n lang = I18n.getTranslation("richclient");
     // Rich client
     private static RichClient client;
     // Tray icon

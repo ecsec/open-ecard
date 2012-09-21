@@ -29,7 +29,6 @@ import org.openecard.client.common.I18n;
 import org.openecard.client.crypto.common.asn1.cvc.CHAT;
 import org.openecard.client.crypto.common.asn1.cvc.CHAT.DataGroup;
 import org.openecard.client.crypto.common.asn1.cvc.CHAT.SpecialFunction;
-import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.client.crypto.common.asn1.cvc.CertificateDescription;
 import org.openecard.client.gui.definition.*;
 import org.openecard.client.gui.executor.ExecutionResults;
@@ -48,13 +47,11 @@ public class CHATStep {
     private static final String DESCRIPTION = "step_chat_description";
     private static final String NOTE = "step_chat_note";
     private static final String NOTE_CONTENT = "step_chat_note_content";
-    private static final String REQUIRED_CHAT_BOXES = "requiredReadAccessCheckBox";
-    private static final String OPTIONAL_CHAT_BOXES = "optionalReadAccessCheckBox";
+    // GUI element IDs
+    private static final String CHAT_BOXES = "CHATCheckBoxs";
     private I18n lang = I18n.getTranslation("eac");
     private Step step = new Step(lang.translationForKey(TITLE));
     private CHAT requiredCHAT, optionalCHAT, selectedCHAT;
-    private GUIContentMap content;
-    private CardVerifiableCertificate certificate;
     private CertificateDescription certificateDescription;
 
     /**
@@ -67,7 +64,6 @@ public class CHATStep {
 	this.selectedCHAT = (CHAT) content.get(GUIContentMap.ELEMENT.REQUIRED_CHAT);
 	this.optionalCHAT = (CHAT) content.get(GUIContentMap.ELEMENT.OPTIONAL_CHAT);
 
-	certificate = (CardVerifiableCertificate) content.get(GUIContentMap.ELEMENT.CERTIFICATE);
 	certificateDescription = (CertificateDescription) content.get(GUIContentMap.ELEMENT.CERTIFICATE_DESCRIPTION);
 	initialize();
     }
@@ -78,16 +74,9 @@ public class CHATStep {
 
 	Text decription = new Text();
 	decription.setText(decriptionText);
-	//TODO internationalize the following to texts
-	Text requested = new Text();
-	requested.setText("Verbindlich:");
-	Text optional = new Text();
-	optional.setText("Optional:");
 	step.getInputInfoUnits().add(decription);
-	step.getInputInfoUnits().add(requested);
 
-	Checkbox requiredReadAccessCheckBox = new Checkbox(REQUIRED_CHAT_BOXES);
-	Checkbox optionalReadAccessCheckBox = new Checkbox(OPTIONAL_CHAT_BOXES);
+	Checkbox readAccessCheckBox = new Checkbox(CHAT_BOXES);
 	TreeMap<CHAT.DataGroup, Boolean> requiredReadAccess = requiredCHAT.getReadAccess();
 	TreeMap<CHAT.DataGroup, Boolean> optionalReadAccess = optionalCHAT.getReadAccess();
 	TreeMap<SpecialFunction, Boolean> requiredSpecialFunctions = requiredCHAT.getSpecialFunctions();
@@ -100,9 +89,9 @@ public class CHATStep {
 	for (int i = 0; i < 21; i++) {
 	    DataGroup dataGroup = dataGroups[i];
 	    if (requiredReadAccess.get(dataGroup)) {
-		requiredReadAccessCheckBox.getBoxItems().add(makeRequiredBoxItem(dataGroup));
+		readAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, true));
 	    } else if (optionalReadAccess.get(dataGroup)) {
-		optionalReadAccessCheckBox.getBoxItems().add(makeOptionalBoxItem(dataGroup));
+		readAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, false));
 	    }
 	}
 
@@ -110,15 +99,13 @@ public class CHATStep {
 	for (int i = 0; i < 8; i++) {
 	    SpecialFunction specialFunction = specialFunctions[i];
 	    if (requiredSpecialFunctions.get(specialFunction)) {
-		requiredReadAccessCheckBox.getBoxItems().add(makeRequiredBoxItem(specialFunction));
+		readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, true));
 	    } else if (optionalSpecialFunctions.get(specialFunction)) {
-		optionalReadAccessCheckBox.getBoxItems().add(makeOptionalBoxItem(specialFunction));
+		readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, false));
 	    }
 	}
 
-	step.getInputInfoUnits().add(requiredReadAccessCheckBox);
-	step.getInputInfoUnits().add(optional);
-	step.getInputInfoUnits().add(optionalReadAccessCheckBox);
+	step.getInputInfoUnits().add(readAccessCheckBox);
 
 	ToggleText requestedDataDescription = new ToggleText();
 	requestedDataDescription.setTitle(lang.translationForKey(NOTE));
@@ -127,35 +114,14 @@ public class CHATStep {
 	step.getInputInfoUnits().add(requestedDataDescription);
     }
 
-    /**
-     * Constructs a BoxItem for a <b>optional</b> data group or special function and returns it.</br>
-     * It will not be checked and is not disabled.
-     *
-     * @param value data group or special function to construct the BoxItem for
-     * @return constructed BoxItem
-     */
-    private BoxItem makeOptionalBoxItem(Enum<?> value) {
+    private BoxItem makeBoxItem(Enum<?> value, boolean checked, boolean disabled) {
 	BoxItem item = new BoxItem();
-	item.setName(value.name());
-	item.setChecked(false);
-	item.setDisabled(false);
-	item.setText(lang.translationForKey(value.name()));
-	return item;
-    }
 
-    /**
-     * Constructs a BoxItem for a <b>required</b> data group or special function and returns it.</br>
-     * It will be checked and disabled.
-     *
-     * @param value data group or special function to construct the BoxItem for
-     * @return constructed BoxItem
-     */
-    private BoxItem makeRequiredBoxItem(Enum<?> value) {
-	BoxItem item = new BoxItem();
 	item.setName(value.name());
-	item.setChecked(true);
-	item.setDisabled(true);
+	item.setChecked(checked);
+	item.setDisabled(disabled);
 	item.setText(lang.translationForKey(value.name()));
+
 	return item;
     }
 
@@ -182,16 +148,7 @@ public class CHATStep {
 	    return;
 	}
 
-	Checkbox cb = (Checkbox) executionResults.getResult(REQUIRED_CHAT_BOXES);
-	for (BoxItem item : cb.getBoxItems()) {
-	    if (dataGroupsNames.contains(item.getName())) {
-		selectedCHAT.setReadAccess(item.getName(), item.isChecked());
-	    } else if (specialFunctionsNames.contains(item.getName())) {
-		selectedCHAT.setSpecialFunction(item.getName(), item.isChecked());
-	    }
-	}
-
-	cb = (Checkbox) executionResults.getResult(OPTIONAL_CHAT_BOXES);
+	Checkbox cb = (Checkbox) executionResults.getResult(CHAT_BOXES);
 	for (BoxItem item : cb.getBoxItems()) {
 	    if (dataGroupsNames.contains(item.getName())) {
 		selectedCHAT.setReadAccess(item.getName(), item.isChecked());

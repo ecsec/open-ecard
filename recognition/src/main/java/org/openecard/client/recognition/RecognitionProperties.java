@@ -39,46 +39,46 @@ public class RecognitionProperties {
     private static final Logger _logger = LoggerFactory.getLogger(RecognitionProperties.class);
 
     private static class Internal extends OverridingProperties {
-        public Internal() throws IOException {
-            super("cardrecognition.properties");
-        }
+	public Internal() throws IOException {
+	    super("cardrecognition.properties");
+	}
     }
 
     static {
-        try {
-            properties = new Internal();
-        } catch (IOException ex) {
-            // in that case a null pointer occurs when properties is accessed
-            _logger.error(ex.getMessage(), ex);
-        }
+	try {
+	    properties = new Internal();
+	} catch (IOException ex) {
+	    // in that case a null pointer occurs when properties is accessed
+	    _logger.error(ex.getMessage(), ex);
+	}
     }
 
     private static Internal properties;
 
 
     public static String getProperty(String key) {
-        return properties.getProperty(key);
+	return properties.getProperty(key);
     }
 
     public static Object setProperty(String key, String value) {
-        return properties.setProperty(key, value);
+	return properties.setProperty(key, value);
     }
 
     public static Properties properties() {
-        return properties.properties();
+	return properties.properties();
     }
 
 
     public static String getAction() {
-        return getProperty("org.openecard.client.recognition.action");
+	return getProperty("org.openecard.client.recognition.action");
     }
 
     public static String getServiceName() {
-        return getProperty("org.openecard.client.recognition.serviceName");
+	return getProperty("org.openecard.client.recognition.serviceName");
     }
 
     public static String getServiceAddr() {
-        return getProperty("org.openecard.client.recognition.serviceAddr");
+	return getProperty("org.openecard.client.recognition.serviceAddr");
     }
 
 }

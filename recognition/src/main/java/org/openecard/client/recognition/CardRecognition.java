@@ -55,35 +55,35 @@ public class CardRecognition {
 
     private static final Logger _logger = LoggerFactory.getLogger(CardRecognition.class);
     private static final NamespaceContext nsCtx = new NamespaceContext() {
-        Map<String, String> nsMap = Collections.unmodifiableMap(new TreeMap<String, String>() {
-            {
-                put("iso", "urn:iso:std:iso-iec:24727:tech:schema");
-                put("tls", "http://ws.openecard.org/protocols/tls/v1.0");
-            }
-        });
-        @Override
-        public String getNamespaceURI(String prefix) {
-            return nsMap.get(prefix);
-        }
-        @Override
-        public String getPrefix(String namespaceURI) {
-            for (Map.Entry<String,String> e : nsMap.entrySet()) {
-                if (e.getValue().equals(namespaceURI)) {
-                    return e.getKey();
-                }
-            }
-            return null;
-        }
-        @Override
-        public Iterator getPrefixes(String namespaceURI) {
-            return nsMap.keySet().iterator();
-        }
+	Map<String, String> nsMap = Collections.unmodifiableMap(new TreeMap<String, String>() {
+	    {
+		put("iso", "urn:iso:std:iso-iec:24727:tech:schema");
+		put("tls", "http://ws.openecard.org/protocols/tls/v1.0");
+	    }
+	});
+	@Override
+	public String getNamespaceURI(String prefix) {
+	    return nsMap.get(prefix);
+	}
+	@Override
+	public String getPrefix(String namespaceURI) {
+	    for (Map.Entry<String, String> e : nsMap.entrySet()) {
+		if (e.getValue().equals(namespaceURI)) {
+		    return e.getKey();
+		}
+	    }
+	    return null;
+	}
+	@Override
+	public Iterator getPrefixes(String namespaceURI) {
+	    return nsMap.keySet().iterator();
+	}
     };
 
     private final RecognitionTree tree;
 
     private final org.openecard.ws.GetCardInfoOrACD cifRepo;
-    private final ConcurrentSkipListMap<String,CardInfoType> cifCache = new ConcurrentSkipListMap<String, CardInfoType>();
+    private final ConcurrentSkipListMap<String, CardInfoType> cifCache = new ConcurrentSkipListMap<String, CardInfoType>();
 
     private final Properties cardImagesMap = new Properties();
 
@@ -98,18 +98,18 @@ public class CardRecognition {
      * @throws Exception
      */
     public CardRecognition(IFD ifd, byte[] ctx) throws Exception {
-        this(ifd, ctx, null, null);
+	this(ifd, ctx, null, null);
     }
 
     public CardRecognition(IFD ifd, byte[] ctx, GetRecognitionTree treeRepo, org.openecard.ws.GetCardInfoOrACD cifRepo) throws Exception {
 	this.ifd = ifd;
 	this.ctx = ctx;
 
-        // load alternative tree service if needed
-        WSMarshaller marshaller = WSMarshallerFactory.createInstance();
-        if (treeRepo == null) {
-            treeRepo = new LocalFileTree(marshaller);
-        }
+	// load alternative tree service if needed
+	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
+	if (treeRepo == null) {
+	    treeRepo = new LocalFileTree(marshaller);
+	}
 	if (cifRepo == null) {
 	    cifRepo = new LocalCifRepo(marshaller);
 	}
@@ -234,11 +234,11 @@ public class CardRecognition {
      * @return True when result present, false otherwise.
      */
     private boolean checkTransmitResult(TransmitResponse r) {
-        if (! r.getOutputAPDU().isEmpty() && r.getOutputAPDU().get(0).length >= 2) {
-            return true;
-        } else {
-            return false;
-        }
+	if (! r.getOutputAPDU().isEmpty() && r.getOutputAPDU().get(0).length >= 2) {
+	    return true;
+	} else {
+	    return false;
+	}
     }
 
 
@@ -264,12 +264,12 @@ public class CardRecognition {
 
     private byte[] transmit(byte[] slotHandle, byte[] input, List<ResponseAPDUType> results) {
 	Transmit t = new Transmit();
-        t.setSlotHandle(slotHandle);
+	t.setSlotHandle(slotHandle);
 	InputAPDUInfoType apdu = new InputAPDUInfoType();
 	apdu.setInputAPDU(input);
-        for (ResponseAPDUType result : results) {
-            apdu.getAcceptableStatusCode().add(result.getTrailer());
-        }
+	for (ResponseAPDUType result : results) {
+	    apdu.getAcceptableStatusCode().add(result.getTrailer());
+	}
 	t.getInputAPDUInfo().add(apdu);
 
 	TransmitResponse r = ifd.transmit(t);
@@ -309,16 +309,16 @@ public class CardRecognition {
 		if (resultBytes == null) {
 		    break;
 		}
-                // get command bytes and trailer
+		// get command bytes and trailer
 		byte[] result = CardCommands.getDataFromResponse(resultBytes);
 		byte[] trailer = CardCommands.getResultFromResponse(resultBytes);
 		// if select, only one response exists
 		if (!matcher && ! Arrays.equals(next.getResponseAPDU().get(0).getTrailer(), trailer)) {
 		    // break when outcome is wrong
 		    break;
-                } else if (!matcher) {
-                    // trailer matches expected response from select, continue
-                    continue;
+		} else if (!matcher) {
+		    // trailer matches expected response from select, continue
+		    continue;
 		} else {
 		    // matcher command, loop through responses
 		    for (ResponseAPDUType r : next.getResponseAPDU()) {
@@ -417,31 +417,31 @@ public class CardRecognition {
 
 	// convert values for convenience
 	if (offsetBytes == null) {
-	    offsetBytes = new byte[] {(byte)0x00, (byte)0x00};
+	    offsetBytes = new byte[] {(byte) 0x00, (byte) 0x00};
 	}
 	int offset = ByteUtils.toInteger(offsetBytes);
 	int length = ByteUtils.toInteger(lengthBytes);
 	if (maskBytes == null) {
 	    maskBytes = new byte[valueBytes.length];
-	    for (int i=0; i < maskBytes.length; i++) {
+	    for (int i = 0; i < maskBytes.length; i++) {
 		maskBytes[i] = (byte) 0xFF;
 	    }
 	}
 
 	// some basic integrity checks
-	if (maskBytes != null && maskBytes.length != valueBytes.length) {
+	if (maskBytes.length != valueBytes.length) {
 	    return false;
 	}
 	if (valueBytes.length != length) {
 	    return false;
 	}
-	if (result.length < length+offset) {
+	if (result.length < length + offset) {
 	    return false;
 	}
 
 	// check
-	for (int i=offset; i < length+offset; i++) {
-	    if ((maskBytes[i-offset] & result[i]) != valueBytes[i-offset]) {
+	for (int i = offset; i < length + offset; i++) {
+	    if ((maskBytes[i - offset] & result[i]) != valueBytes[i - offset]) {
 		return false;
 	    }
 	}

@@ -35,7 +35,7 @@ import org.testng.annotations.Test;
  */
 public class ExecuteRecognition {
 
-    @Test(enabled=false)
+    @Test(enabled = false)
     public void testExecute() throws Exception {
 	IFD ifd = new org.openecard.client.ifd.scio.IFD();
 	byte[] ctx;

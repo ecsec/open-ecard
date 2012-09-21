@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 public class ErrorResponseInterceptor implements HttpResponseInterceptor {
 
     private static final Logger _logger = LoggerFactory.getLogger(ErrorResponseInterceptor.class);
-    private static I18n lang = I18n.getTranslation("connector");
+    private static I18n lang = I18n.getTranslation("http");
     private final HTTPTemplate template;
     private final List<Integer> errorCodes;
 

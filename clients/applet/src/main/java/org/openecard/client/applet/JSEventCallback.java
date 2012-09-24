@@ -24,10 +24,14 @@ package org.openecard.client.applet;
 
 import generated.StatusChangeType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import java.security.AccessController;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivilegedAction;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
-import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.control.ControlInterface;
 import org.openecard.client.control.binding.javascript.JavaScriptBinding;
@@ -47,26 +51,33 @@ public class JSEventCallback {
 
     private static final Logger logger = LoggerFactory.getLogger(JSEventCallback.class);
 
+    private final ExecutorService workerPool;
     private final ApplicationHandler handler;
     private final JSObject jsObject;
+    private final String jsEventCallback;
+    private final String jsMessageCallback;
+
     private JavaScriptBinding binding;
 
-    private String jsAppletStartedCallback;
-    private String jsMessageCallback;
-
     public JSEventCallback(ECardApplet applet, ApplicationHandler handler) {
+	this.workerPool = Executors.newCachedThreadPool();
 	this.handler = handler;
 	this.jsObject = JSObject.getWindow(applet);
-	this.jsAppletStartedCallback = applet.getParameter("jsAppletStartedCallback");
+	this.jsEventCallback = applet.getParameter("jsEventCallback");
 	this.jsMessageCallback = applet.getParameter("jsMessageCallback");
 
 	setupJSBinding(this.handler);
     }
 
+    /**
+     * Prepare the JavaScript internal binding.
+     *
+     * @param handler to handle requests/responses
+     */
     private void setupJSBinding(ApplicationHandler handler) {
 	try {
-	    binding = new JavaScriptBinding();
-	    ControlInterface control = new ControlInterface(binding);
+	    this.binding = new JavaScriptBinding();
+	    ControlInterface control = new ControlInterface(this.binding);
 	    control.getListeners().addControlListener(handler);
 	    control.start();
 	} catch (Exception ex) {
@@ -74,67 +85,102 @@ public class JSEventCallback {
 	}
     }
 
+    /**
+     * Start event polling and push available events to the JavaScript frontend.
+     */
+    public void notifyScript() {
+	if (this.jsEventCallback == null) {
+	    return;
+	}
+
+	this.workerPool.execute(new Runnable() {
+	    @Override
+	    public void run() {
+		// FIXME: this is a workaround until the javascript binding supports StatusChangeRequests/Responses
+		StatusChangeRequest statusChangeRequest = new StatusChangeRequest();
+		ClientResponse clientResponse = null;
+
+		while (true) {
+		    clientResponse = handler.request(statusChangeRequest);
+
+		    if (clientResponse != null && clientResponse instanceof StatusChangeResponse
+			    && ((StatusChangeResponse) clientResponse).getStatusChangeType() != null) {
+			StatusChangeType statusChange = ((StatusChangeResponse) clientResponse).getStatusChangeType();
+			Object[] response = buildEvent(statusChange);
+
+			try {
+			    jsObject.call(jsEventCallback, response);
+			} catch (JSException ignore) {
+			}
+		    }
+		}
+	    }
+	});
+    }
+
+    /**
+     * Send a message to the JavaScript frontend.
+     *
+     * @param message containing desired information
+     */
     public void sendMessage(String message) {
 	if (this.jsMessageCallback == null) {
 	    return;
 	}
 
 	try {
-	    this.jsObject.eval(this.jsMessageCallback + "(" + message + ")");
-	} catch (Exception ignore) {
+	    this.jsObject.call(this.jsMessageCallback, new Object[] { message });
+	} catch (JSException ignore) {
 	}
-    }
-
-    public Object[] handle(String id, Object[] data) {
-	// FIXME: this is a workaround until the javascript binding supports StatusChangeRequests/Responses
-	if (id.equals("statuschange")) {
-	    ClientResponse clientResponse = this.handler.request(new StatusChangeRequest());
-	    Object[] response = null;
-
-	    if (clientResponse != null && clientResponse instanceof StatusChangeResponse) {
-		StatusChangeType statusChangeType = ((StatusChangeResponse) clientResponse).getStatusChangeType();
-		String event = toJSON(statusChangeType.getAction(), statusChangeType.getConnectionHandle());
-
-		response = new Object[]{ event };
-	    } else {
-		response = new Object[]{};
-	    }
-
-	    return response;
-	}
-
-	return binding.handle(id, data);
     }
 
     /**
-     * Notify the JavaScript library that the Applet is started.
+     * This is the entry point for JavaScript to Java communication.
+     *
+     * @param callback to call after finished processing
+     * @param id to identify the request
+     * @param data as input parameters
      */
-    public void notifyScript() {
-	try {
-	    this.jsObject.eval(this.jsAppletStartedCallback + "()");
-	} catch (Exception ignore) {
-	}
+    public void handle(final String callback, final String id, final Object[] data) {
+	this.workerPool.execute(new Runnable() {
+	    @Override
+	    public void run() {
+		Object[] response = AccessController.doPrivileged(new ActivateAction(binding, id, data));
+
+		try {
+		    jsObject.call(callback, response);
+		} catch (JSException ignore) {
+		}
+	    }
+	});
     }
 
-    private String toJSON(String action, ConnectionHandleType cHandle) {
-	String contextHandle = ByteUtils.toHexString(cHandle.getContextHandle());
+    /**
+     * Build the JavaScript event callback parameter array.
+     *
+     * @param statusChange that occurred
+     * @return JavaScript parameters array
+     */
+    private static Object[] buildEvent(StatusChangeType statusChange) {
+	ConnectionHandleType cHandle = statusChange.getConnectionHandle();
+
+	String action = statusChange.getAction();
+	String ifdId = makeId(cHandle.getIFDName());
 	String ifdName = cHandle.getIFDName();
-	String slotIndex = cHandle.getSlotIndex() != null ? cHandle.getSlotIndex().toString() : "";
 	String cardType = cHandle.getRecognitionInfo() != null ? cHandle.getRecognitionInfo().getCardType() : null;
+	String contextHandle = ByteUtils.toHexString(cHandle.getContextHandle());
+	String slotIndex = cHandle.getSlotIndex() != null ? cHandle.getSlotIndex().toString() : null;
 
-	StringBuilder sb = new StringBuilder();
-	sb.append("{");
-	sb.append("\"").append("action").append("\"").append(":").append("\"").append(action).append("\"").append(",");
-	sb.append("\"").append("id").append("\"").append(":").append("\"").append(makeId(ifdName)).append("\"").append(",");
-	sb.append("\"").append("ifdName").append("\"").append(":").append("\"").append(ifdName).append("\"").append(",");
-	sb.append("\"").append("cardType").append("\"").append(":").append("\"").append(cardType).append("\"").append(",");
-	sb.append("\"").append("contextHandle").append("\"").append(":").append("\"").append(contextHandle).append("\"").append(",");
-	sb.append("\"").append("slotIndex").append("\"").append(":").append("\"").append(slotIndex).append("\"");
-	sb.append("}");
-
-	return sb.toString();
+	return new Object[] { action, ifdId, ifdName, cardType, contextHandle, slotIndex };
     }
 
+    /**
+     * Helper method to generate a unique id from a string input.
+     * Used by the JavaScript frontend.
+     *
+     * @param input to generate unique id
+     * @return unique id
+     */
     private static String makeId(String input) {
 	try {
 	    MessageDigest md = MessageDigest.getInstance("SHA");
@@ -144,4 +190,27 @@ public class JSEventCallback {
 	    return input.replaceAll(" ", "_");
 	}
     }
+
+    /**
+     * Some methods triggered by JavaScript calls need privileged access to various
+     * resources like network connections to external hosts (eg. to fetch the TcToken).
+     */
+    private static class ActivateAction implements PrivilegedAction<Object[]> {
+
+	private final JavaScriptBinding binding;
+	private final String id;
+	private final Object[] data;
+
+	public ActivateAction(JavaScriptBinding binding, String id, Object[] data) {
+	    this.binding = binding;
+	    this.id = id;
+	    this.data = data;
+	}
+
+	@Override
+	public Object[] run() {
+	    return this.binding.handle(this.id, this.data);
+	}
+    }
+
 }

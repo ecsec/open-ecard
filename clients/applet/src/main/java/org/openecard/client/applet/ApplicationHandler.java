@@ -22,8 +22,14 @@
 
 package org.openecard.client.applet;
 
+import generated.StatusChangeType;
 import generated.TCTokenType;
-import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import java.math.BigInteger;
 import java.net.URL;
 import java.util.List;
@@ -55,6 +61,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
  */
 public final class ApplicationHandler implements ControlListener {
 
@@ -71,8 +78,8 @@ public final class ApplicationHandler implements ControlListener {
 	this.applet = applet;
 	this.env = env;
 	this.sal = sal;
-	handler = new EventHandler();
-	this.env.getEventManager().registerAllEvents(handler);
+	this.handler = new EventHandler();
+	this.env.getEventManager().registerAllEvents(this.handler);
     }
 
     @Override
@@ -214,9 +221,9 @@ public final class ApplicationHandler implements ControlListener {
     private StatusChangeResponse handleStatusChangeRequest(StatusChangeRequest request) {
 	StatusChangeResponse response = new StatusChangeResponse();
 
-	ConnectionHandleType handle = handler.next();
+	StatusChangeType statusChangeType = handler.next();
 
-	response.setConnectionHandle(handle);
+	response.setStatusChangeType(statusChangeType);
 	response.setResult(WSHelper.makeResultOK());
 	return response;
     }

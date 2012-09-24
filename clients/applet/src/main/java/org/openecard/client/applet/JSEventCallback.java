@@ -22,6 +22,7 @@
 
 package org.openecard.client.applet;
 
+import generated.StatusChangeType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -30,8 +31,12 @@ import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.control.ControlInterface;
 import org.openecard.client.control.binding.javascript.JavaScriptBinding;
+import org.openecard.client.control.client.ClientResponse;
+import org.openecard.client.control.module.status.StatusChangeRequest;
+import org.openecard.client.control.module.status.StatusChangeResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * 
@@ -42,21 +47,18 @@ public class JSEventCallback {
 
     private static final Logger logger = LoggerFactory.getLogger(JSEventCallback.class);
 
-    private final ECardApplet applet;
     private final ApplicationHandler handler;
     private final JSObject jsObject;
     private JavaScriptBinding binding;
 
+    private String jsAppletStartedCallback;
     private String jsMessageCallback;
-    private String jsEventCallback;
-    private String jsSetEidClientPortCallback;
 
     public JSEventCallback(ECardApplet applet, ApplicationHandler handler) {
-	this.applet = applet;
 	this.handler = handler;
-	this.jsObject = JSObject.getWindow(this.applet);
-
-	parseParameter(this.applet);
+	this.jsObject = JSObject.getWindow(applet);
+	this.jsAppletStartedCallback = applet.getParameter("jsAppletStartedCallback");
+	this.jsMessageCallback = applet.getParameter("jsMessageCallback");
 
 	setupJSBinding(this.handler);
     }
@@ -72,12 +74,6 @@ public class JSEventCallback {
 	}
     }
 
-    private void parseParameter(ECardApplet applet) {
-	this.jsEventCallback = applet.getParameter("jsEventCallback");
-	this.jsMessageCallback = applet.getParameter("jsMessageCallback");
-	this.jsSetEidClientPortCallback = applet.getParameter("jsSetEidClientPortCallback");
-    }
-
     public void sendMessage(String message) {
 	if (this.jsMessageCallback == null) {
 	    return;
@@ -90,26 +86,37 @@ public class JSEventCallback {
     }
 
     public Object[] handle(String id, Object[] data) {
+	// FIXME: this is a workaround until the javascript binding supports StatusChangeRequests/Responses
+	if (id.equals("statuschange")) {
+	    ClientResponse clientResponse = this.handler.request(new StatusChangeRequest());
+	    Object[] response = null;
+
+	    if (clientResponse != null && clientResponse instanceof StatusChangeResponse) {
+		StatusChangeType statusChangeType = ((StatusChangeResponse) clientResponse).getStatusChangeType();
+		String event = toJSON(statusChangeType.getAction(), statusChangeType.getConnectionHandle());
+
+		response = new Object[]{ event };
+	    } else {
+		response = new Object[]{};
+	    }
+
+	    return response;
+	}
+
 	return binding.handle(id, data);
     }
 
+    /**
+     * Notify the JavaScript library that the Applet is started.
+     */
     public void notifyScript() {
-	// TODO: implement
-    }
-
-    public void setEidClientPort(int port) {
-	if (this.jsSetEidClientPortCallback == null) {
-	    return;
-	}
-
 	try {
-	    this.jsObject.eval(this.jsSetEidClientPortCallback + "(" + port + ")");
+	    this.jsObject.eval(this.jsAppletStartedCallback + "()");
 	} catch (Exception ignore) {
 	}
     }
 
-    private String toJSON(EventType type, ConnectionHandleType cHandle) {
-	String eventType = type.name();
+    private String toJSON(String action, ConnectionHandleType cHandle) {
 	String contextHandle = ByteUtils.toHexString(cHandle.getContextHandle());
 	String ifdName = cHandle.getIFDName();
 	String slotIndex = cHandle.getSlotIndex() != null ? cHandle.getSlotIndex().toString() : "";
@@ -117,10 +124,10 @@ public class JSEventCallback {
 
 	StringBuilder sb = new StringBuilder();
 	sb.append("{");
+	sb.append("\"").append("action").append("\"").append(":").append("\"").append(action).append("\"").append(",");
 	sb.append("\"").append("id").append("\"").append(":").append("\"").append(makeId(ifdName)).append("\"").append(",");
 	sb.append("\"").append("ifdName").append("\"").append(":").append("\"").append(ifdName).append("\"").append(",");
 	sb.append("\"").append("cardType").append("\"").append(":").append("\"").append(cardType).append("\"").append(",");
-	sb.append("\"").append("eventType").append("\"").append(":").append("\"").append(eventType).append("\"").append(",");
 	sb.append("\"").append("contextHandle").append("\"").append(":").append("\"").append(contextHandle).append("\"").append(",");
 	sb.append("\"").append("slotIndex").append("\"").append(":").append("\"").append(slotIndex).append("\"");
 	sb.append("}");
@@ -137,5 +144,4 @@ public class JSEventCallback {
 	    return input.replaceAll(" ", "_");
 	}
     }
-
 }

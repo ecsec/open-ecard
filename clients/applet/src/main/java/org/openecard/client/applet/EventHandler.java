@@ -22,6 +22,7 @@
 
 package org.openecard.client.applet;
 
+import generated.StatusChangeType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -30,38 +31,43 @@ import org.openecard.client.common.interfaces.EventCallback;
 
 
 /**
- *
+ * 
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
  */
 public class EventHandler implements EventCallback {
-    
-    private final LinkedBlockingQueue<ConnectionHandleType> eventQueue;
-    
+
+    private final LinkedBlockingQueue<StatusChangeType> eventQueue;
+
     public EventHandler() {
-        eventQueue = new LinkedBlockingQueue<ConnectionHandleType>();
+	eventQueue = new LinkedBlockingQueue<StatusChangeType>();
     }
-    
-    public ConnectionHandleType next() {
-        ConnectionHandleType handle = null;
 
-        do {
-            try {
-                handle = eventQueue.poll(30, TimeUnit.SECONDS);
-            } catch (InterruptedException ignore) {
-            }
-        } while (handle == null);
+    public StatusChangeType next() {
+	StatusChangeType handle = null;
 
-        return handle;
+	do {
+	    try {
+		handle = eventQueue.poll(30, TimeUnit.SECONDS);
+	    } catch (InterruptedException ignore) {
+	    }
+	} while (handle == null);
+
+	return handle;
     }
-    
+
     @Override
     public void signalEvent(EventType eventType, Object eventData) {
-        if (eventData instanceof ConnectionHandleType) {
-            try {
-                eventQueue.put((ConnectionHandleType) eventData);
-            } catch (InterruptedException ignore) {
-            }
-        }
+	if (eventData instanceof ConnectionHandleType) {
+	    try {
+		StatusChangeType statusChange = new StatusChangeType();
+		statusChange.setAction(eventType.getEventTypeIdentifier());
+		statusChange.setConnectionHandle((ConnectionHandleType) eventData);
+
+		eventQueue.put(statusChange);
+	    } catch (InterruptedException ignore) {
+	    }
+	}
     }
-    
+
 }

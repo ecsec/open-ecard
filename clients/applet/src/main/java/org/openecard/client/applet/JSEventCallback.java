@@ -27,29 +27,49 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import netscape.javascript.JSObject;
 import org.openecard.client.common.enums.EventType;
-import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.common.util.ByteUtils;
-
+import org.openecard.client.control.ControlInterface;
+import org.openecard.client.control.binding.javascript.JavaScriptBinding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
+ * 
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
  */
-public class JSEventCallback implements EventCallback {
+public class JSEventCallback {
+
+    private static final Logger logger = LoggerFactory.getLogger(JSEventCallback.class);
 
     private final ECardApplet applet;
+    private final ApplicationHandler handler;
     private final JSObject jsObject;
+    private JavaScriptBinding binding;
 
     private String jsMessageCallback;
     private String jsEventCallback;
     private String jsSetEidClientPortCallback;
 
-    public JSEventCallback(ECardApplet applet) {
+    public JSEventCallback(ECardApplet applet, ApplicationHandler handler) {
 	this.applet = applet;
-	this.jsObject = JSObject.getWindow(applet);
+	this.handler = handler;
+	this.jsObject = JSObject.getWindow(this.applet);
 
-	parseParameter(applet);
+	parseParameter(this.applet);
+
+	setupJSBinding(this.handler);
+    }
+
+    private void setupJSBinding(ApplicationHandler handler) {
+	try {
+	    binding = new JavaScriptBinding();
+	    ControlInterface control = new ControlInterface(binding);
+	    control.getListeners().addControlListener(handler);
+	    control.start();
+	} catch (Exception ex) {
+	    logger.error("Exception", ex);
+	}
     }
 
     private void parseParameter(ECardApplet applet) {
@@ -58,43 +78,33 @@ public class JSEventCallback implements EventCallback {
 	this.jsSetEidClientPortCallback = applet.getParameter("jsSetEidClientPortCallback");
     }
 
-    @Override
-    public void signalEvent(EventType eventType, Object eventData) {
-	if(this.jsEventCallback == null) {
-	    return;
-	}
-
-	if (eventData instanceof ConnectionHandleType) {
-	    try {
-		String args = toJSON(eventType, (ConnectionHandleType) eventData);
-		//this.jsObject.call(this.jsEventCallback, new String[]{ args });
-		this.jsObject.eval(this.jsEventCallback + "(" + args + ")");
-	    } catch(Exception ignore) {
-	    }
-	}
-    }
-
     public void sendMessage(String message) {
-	if(this.jsMessageCallback == null) {
+	if (this.jsMessageCallback == null) {
 	    return;
 	}
 
 	try {
-	    //this.jsObject.call(this.jsMessageCallback, new String[]{ message });
 	    this.jsObject.eval(this.jsMessageCallback + "(" + message + ")");
-	} catch(Exception ignore) {
+	} catch (Exception ignore) {
 	}
+    }
+
+    public Object[] handle(String id, Object[] data) {
+	return binding.handle(id, data);
+    }
+
+    public void notifyScript() {
+	// TODO: implement
     }
 
     public void setEidClientPort(int port) {
-	if(this.jsSetEidClientPortCallback == null) {
+	if (this.jsSetEidClientPortCallback == null) {
 	    return;
 	}
 
 	try {
-	    //this.jsObject.call(this.jsSetEidClientPortCallback, new Integer[]{ port });
 	    this.jsObject.eval(this.jsSetEidClientPortCallback + "(" + port + ")");
-	} catch(Exception ignore) {
+	} catch (Exception ignore) {
 	}
     }
 
@@ -113,7 +123,6 @@ public class JSEventCallback implements EventCallback {
 	sb.append("\"").append("eventType").append("\"").append(":").append("\"").append(eventType).append("\"").append(",");
 	sb.append("\"").append("contextHandle").append("\"").append(":").append("\"").append(contextHandle).append("\"").append(",");
 	sb.append("\"").append("slotIndex").append("\"").append(":").append("\"").append(slotIndex).append("\"");
-
 	sb.append("}");
 
 	return sb.toString();

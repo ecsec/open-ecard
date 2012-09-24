@@ -37,6 +37,8 @@ public final class StatusResponse extends ClientResponse {
     /**
      * Returns the list of connection handles
      * 
+     * TODO: replace ConnectionHandleType with StatusType
+     * 
      * @return List of connection handles
      */
     public List<ConnectionHandleType> getConnectionHandles() {
@@ -45,6 +47,8 @@ public final class StatusResponse extends ClientResponse {
 
     /**
      * Sets the list of connection handles.
+     * 
+     * TODO: replace ConnectionHandleType with StatusType
      * 
      * @param connectionHandles List of connection handles
      */

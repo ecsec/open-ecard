@@ -26,17 +26,24 @@ import generated.TCTokenType;
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import java.net.URL;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.control.client.ClientRequest;
 import org.openecard.client.control.client.ClientResponse;
 import org.openecard.client.control.client.ControlListener;
+import org.openecard.client.control.module.status.StatusChangeRequest;
+import org.openecard.client.control.module.status.StatusChangeResponse;
+import org.openecard.client.control.module.status.StatusRequest;
+import org.openecard.client.control.module.status.StatusResponse;
 import org.openecard.client.control.module.tctoken.TCTokenRequest;
 import org.openecard.client.control.module.tctoken.TCTokenResponse;
+import org.openecard.client.sal.TinySAL;
 import org.openecard.client.transport.paos.PAOS;
 import org.openecard.client.transport.tls.PSKTlsClientImpl;
 import org.openecard.client.transport.tls.TlsClientSocketFactory;
@@ -45,26 +52,40 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- *
+ * 
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class ApplicationHandler implements ControlListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationHandler.class);
-    
-    private ECardApplet applet;
 
-    public ApplicationHandler(ECardApplet applet) {
+    private final ECardApplet applet;
+    private final ClientEnv env;
+    private final TinySAL sal;
+    private final EventHandler handler;
+
+    // TODO: use org.openecard.ws.SAL instead of
+    // org.openecard.client.sal.TinySAL
+    public ApplicationHandler(ECardApplet applet, ClientEnv env, TinySAL sal) {
 	this.applet = applet;
+	this.env = env;
+	this.sal = sal;
+	handler = new EventHandler();
+	this.env.getEventManager().registerAllEvents(handler);
     }
 
     @Override
     public ClientResponse request(ClientRequest request) {
 	if (request instanceof TCTokenRequest) {
 	    return handleActivate((TCTokenRequest) request);
+	} else if (request instanceof StatusRequest) {
+	    return handleStatus((StatusRequest) request);
+	} else if (request instanceof StatusChangeRequest) {
+	    return handleStatusChangeRequest((StatusChangeRequest) request);
+	} else {
+	    return null;
 	}
-	return null;
     }
 
     private TCTokenResponse handleActivate(TCTokenRequest request) {
@@ -87,7 +108,7 @@ public final class ApplicationHandler implements ControlListener {
 	Set<CardStateEntry> matchingHandles = applet.getCardStates().getMatchingEntries(requestedHandle);
 
 	if (!matchingHandles.isEmpty()) {
-	    connectionHandle = matchingHandles.toArray(new CardStateEntry[]{})[0].handleCopy();
+	    connectionHandle = matchingHandles.toArray(new CardStateEntry[] {})[0].handleCopy();
 	}
 
 	if (connectionHandle == null) {
@@ -97,10 +118,11 @@ public final class ApplicationHandler implements ControlListener {
 	}
 
 	try {
-	    // Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
+	    // Perform a CardApplicationPath and CardApplicationConnect to
+	    // connect to the card application
 	    CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	    cardApplicationPath.setCardAppPathRequest(connectionHandle);
-	    CardApplicationPathResponse cardApplicationPathResponse = applet.getClientEnvironment().getSAL().cardApplicationPath(cardApplicationPath);
+	    CardApplicationPathResponse cardApplicationPathResponse = env.getSAL().cardApplicationPath(cardApplicationPath);
 
 	    try {
 		// Check CardApplicationPathResponse
@@ -113,7 +135,7 @@ public final class ApplicationHandler implements ControlListener {
 
 	    CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
 	    cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
-	    CardApplicationConnectResponse cardApplicationConnectResponse = applet.getClientEnvironment().getSAL().cardApplicationConnect(cardApplicationConnect);
+	    CardApplicationConnectResponse cardApplicationConnectResponse = env.getSAL().cardApplicationConnect(cardApplicationConnect);
 	    // Update ConnectionHandle. It now includes a SlotHandle.
 	    connectionHandle = cardApplicationConnectResponse.getConnectionHandle();
 
@@ -149,7 +171,7 @@ public final class ApplicationHandler implements ControlListener {
 	    }
 
 	    // Set up PAOS connection
-	    PAOS p = new PAOS(serverAddress, applet.getClientEnvironment().getDispatcher(), tlsClientFactory);
+	    PAOS p = new PAOS(serverAddress, env.getDispatcher(), tlsClientFactory);
 
 	    // Send StartPAOS
 	    StartPAOS sp = new StartPAOS();
@@ -171,6 +193,30 @@ public final class ApplicationHandler implements ControlListener {
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, ex.getMessage()));
 	}
 
+	response.setResult(WSHelper.makeResultOK());
+	return response;
+    }
+
+    private StatusResponse handleStatus(StatusRequest request) {
+	StatusResponse response = new StatusResponse();
+
+	List<ConnectionHandleType> connectionHandles = sal.getConnectionHandles();
+	if (connectionHandles.isEmpty()) {
+	    response.setResult(WSHelper.makeResultUnknownError("No connection handles available."));
+	    return response;
+	}
+
+	response.setConnectionHandles(connectionHandles);
+	response.setResult(WSHelper.makeResultOK());
+	return response;
+    }
+
+    private StatusChangeResponse handleStatusChangeRequest(StatusChangeRequest request) {
+	StatusChangeResponse response = new StatusChangeResponse();
+
+	ConnectionHandleType handle = handler.next();
+
+	response.setConnectionHandle(handle);
 	response.setResult(WSHelper.makeResultOK());
 	return response;
     }

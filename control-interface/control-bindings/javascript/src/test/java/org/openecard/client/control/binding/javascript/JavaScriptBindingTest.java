@@ -22,7 +22,6 @@
 
 package org.openecard.client.control.binding.javascript;
 
-import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.control.ControlInterface;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerFactory;

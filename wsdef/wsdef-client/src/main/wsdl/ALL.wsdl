@@ -41,6 +41,9 @@
     <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
       <xsd:import namespace="" schemaLocation="TCTokenType.xsd" />
     </xsd:schema>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+      <xsd:import namespace="" schemaLocation="StatusChangeType.xsd" />
+    </xsd:schema>
   </wsdl:types>
 
 

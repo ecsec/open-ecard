@@ -22,38 +22,36 @@
 
 package org.openecard.client.control.module.status;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import generated.StatusChangeType;
 import org.openecard.client.control.client.ClientResponse;
 
 
 /**
  *
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
  */
 public final class StatusChangeResponse extends ClientResponse {
-    
-    private ConnectionHandleType connectionHandle;
+
+    private StatusChangeType statusChangeType;
 
     /**
-     * Returns the connection handle.
+     * Returns the status change type.
      * 
-     * TODO: replace ConnectionHandleType with StatusChangeType
-     * 
-     * @return List of connection handles
+     * @return the status change type
      */
-    public ConnectionHandleType getConnectionHandles() {
-	return connectionHandle;
+    public StatusChangeType getStatusChangeType() {
+	return statusChangeType;
     }
 
     /**
-     * Sets the connection handle.
+     * Sets the status change type.
      * 
-     * TODO: replace ConnectionHandleType with StatusChangeType
-     * 
-     * @param connectionHandles List of connection handles
+     * @param statusChangeType the status change type
      */
-    public void setConnectionHandle(ConnectionHandleType connectionHandle) {
-	this.connectionHandle = connectionHandle;
+    public void setStatusChangeType(StatusChangeType statusChangeType) {
+	this.statusChangeType = statusChangeType;
     }
-    
+
+
 }

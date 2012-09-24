@@ -26,13 +26,29 @@ package org.openecard.client.common.enums;
 /**
  *
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
  */
 public enum EventType {
 
-    CARD_INSERTED,
-    CARD_REMOVED,
-    CARD_RECOGNIZED,
-    TERMINAL_ADDED,
-    TERMINAL_REMOVED
+    CARD_INSERTED("http://openecard.org/event/card_inserted"),
+    CARD_REMOVED("http://openecard.org/event/card_removed"),
+    CARD_RECOGNIZED("http://openecard.org/event/card_recognized"),
+    TERMINAL_ADDED("http://openecard.org/event/terminal_added"),
+    TERMINAL_REMOVED("http://openecard.org/event/terminal_removed");
+
+    private String eventTypeIdentifier;
+
+    /**
+     * Return the unique event type identifier.
+     * 
+     * @param eventTypeIdentifier the event type identifier
+     */
+    EventType(String eventTypeIdentifier) {
+	this.eventTypeIdentifier = eventTypeIdentifier;
+    }
+
+    public String getEventTypeIdentifier() {
+	return this.eventTypeIdentifier;
+    }
 
 }

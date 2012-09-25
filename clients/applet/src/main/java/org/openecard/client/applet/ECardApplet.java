@@ -173,7 +173,7 @@ public class ECardApplet extends JApplet {
 
     @Override
     public void start() {
-	jsCallback.notifyScript();
+	this.jsCallback.startEventPush();
     }
 
     @Override

@@ -24,6 +24,7 @@ package org.openecard.client.applet;
 
 import generated.StatusChangeType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import java.applet.Applet;
 import java.security.AccessController;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -53,7 +54,7 @@ public class JSEventCallback {
 
     private final ExecutorService workerPool;
     private final ApplicationHandler handler;
-    private final JSObject jsObject;
+    private final JSObjectWrapper jsObjectWrapper;
     private final String jsEventCallback;
     private final String jsMessageCallback;
 
@@ -62,7 +63,7 @@ public class JSEventCallback {
     public JSEventCallback(ECardApplet applet, ApplicationHandler handler) {
 	this.workerPool = Executors.newCachedThreadPool();
 	this.handler = handler;
-	this.jsObject = JSObject.getWindow(applet);
+	this.jsObjectWrapper = new JSObjectWrapper(applet);
 	this.jsEventCallback = applet.getParameter("jsEventCallback");
 	this.jsMessageCallback = applet.getParameter("jsMessageCallback");
 
@@ -88,7 +89,7 @@ public class JSEventCallback {
     /**
      * Start event polling and push available events to the JavaScript frontend.
      */
-    public void notifyScript() {
+    public void startEventPush() {
 	if (this.jsEventCallback == null) {
 	    return;
 	}
@@ -96,6 +97,9 @@ public class JSEventCallback {
 	this.workerPool.execute(new Runnable() {
 	    @Override
 	    public void run() {
+		JSObject jsObject = jsObjectWrapper.getNamespacedJSObject(jsEventCallback);
+		String function = JSObjectWrapper.getFunction(jsEventCallback);
+
 		// FIXME: this is a workaround until the javascript binding supports StatusChangeRequests/Responses
 		StatusChangeRequest statusChangeRequest = new StatusChangeRequest();
 		ClientResponse clientResponse = null;
@@ -109,7 +113,7 @@ public class JSEventCallback {
 			Object[] response = buildEvent(statusChange);
 
 			try {
-			    jsObject.call(jsEventCallback, response);
+			    jsObject.call(function, response);
 			} catch (JSException ignore) {
 			}
 		    }
@@ -129,7 +133,7 @@ public class JSEventCallback {
 	}
 
 	try {
-	    this.jsObject.call(this.jsMessageCallback, new Object[] { message });
+	    this.jsObjectWrapper.call(this.jsMessageCallback, message);
 	} catch (JSException ignore) {
 	}
     }
@@ -145,10 +149,17 @@ public class JSEventCallback {
 	this.workerPool.execute(new Runnable() {
 	    @Override
 	    public void run() {
-		Object[] response = AccessController.doPrivileged(new ActivateAction(binding, id, data));
+		// Some methods triggered by JavaScript calls need privileged access to various
+		// resources like network connections to external hosts (eg. to fetch the TcToken).
+		Object[] response = AccessController.doPrivileged(new PrivilegedAction<Object[]>() {
+		    @Override
+		    public Object[] run() {
+			return binding.handle(id, data);
+		    }
+		});
 
 		try {
-		    jsObject.call(callback, response);
+		    jsObjectWrapper.call(callback, response);
 		} catch (JSException ignore) {
 		}
 	    }
@@ -192,24 +203,75 @@ public class JSEventCallback {
     }
 
     /**
-     * Some methods triggered by JavaScript calls need privileged access to various
-     * resources like network connections to external hosts (eg. to fetch the TcToken).
+     * JSObject wrapper class to handle namespaced function calls.
+     *
+     * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
      */
-    private static class ActivateAction implements PrivilegedAction<Object[]> {
+    private static final class JSObjectWrapper {
 
-	private final JavaScriptBinding binding;
-	private final String id;
-	private final Object[] data;
+	private final JSObject jsObject;
 
-	public ActivateAction(JavaScriptBinding binding, String id, Object[] data) {
-	    this.binding = binding;
-	    this.id = id;
-	    this.data = data;
+	/**
+	 * Create wrapper instance from applet.
+	 *
+	 * @param applet to get JavaScript window object
+	 * @throws JSException throw by underlying JSObject.getWindow()
+	 */
+	public JSObjectWrapper(Applet applet) throws JSException {
+	    this.jsObject = JSObject.getWindow(applet);
 	}
 
-	@Override
-	public Object[] run() {
-	    return this.binding.handle(this.id, this.data);
+	/**
+	 * Call namespaced JavaScript function with single parameter.
+	 *
+	 * @param function to call
+	 * @param parameter to use with the JavaScript function call
+	 * @throws JSException thrown by underlying JSObject.call() or namespace resolution
+	 */
+	public void call(String function, Object parameter) throws JSException {
+	    call(function, new Object[] { parameter });
+	}
+
+	/**
+	 * Call namespaced JavaScript function with parameters array.
+	 *
+	 * @param function to call
+	 * @param parameters to use with the JavaScript function call
+	 * @throws JSException thrown by underlying JSObject.call() or namespace resolution
+	 */
+	public void call(String function, Object[] parameters)  throws JSException {
+	    getNamespacedJSObject(function).call(getFunction(function), parameters);
+	}
+
+	/**
+	 * Used to get the correct JSObject from possible namespaced function. JavaScript
+	 * namespaces are typically implemented via global objects.
+	 *
+	 * @param function to call
+	 * @return the matching JSObject
+	 * @throws JSException if JavaScript object can't be found
+	 */
+	public JSObject getNamespacedJSObject(String function) throws JSException {
+	    JSObject jsObject = this.jsObject;
+	    String[] namespacesAndFunction = function.split("\\.");
+
+	    for (int i = 0; i < (namespacesAndFunction.length - 1); i++) {
+		jsObject = (JSObject) jsObject.getMember(namespacesAndFunction[i]);
+	    }
+
+	    return jsObject;
+	}
+
+	/**
+	 * Get simple function from namespaced function.
+	 *
+	 * @param namespacedFunction to get function of
+	 * @return simple function
+	 */
+	public static String getFunction(String namespacedFunction) {
+	    String[] namespacesAndFunction = namespacedFunction.split("\\.");
+
+	    return namespacesAndFunction[namespacesAndFunction.length - 1];
 	}
     }
 

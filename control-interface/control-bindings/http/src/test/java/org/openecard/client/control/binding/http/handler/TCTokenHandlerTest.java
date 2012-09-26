@@ -22,8 +22,11 @@
 
 package org.openecard.client.control.binding.http.handler;
 
+import java.net.URL;
+import java.net.URLEncoder;
 import org.apache.http.HttpRequest;
 import org.apache.http.message.BasicHttpRequest;
+import org.openecard.client.common.util.FileUtils;
 import org.openecard.client.control.client.ControlListeners;
 import org.openecard.client.control.module.tctoken.TCTokenRequest;
 import org.testng.annotations.Test;
@@ -38,7 +41,9 @@ public class TCTokenHandlerTest {
 
     @Test
     public void testHandleRequest() throws Exception {
-	String uri = "/eID-Client?tcTokenURL=http%3A%2F%2Fopenecard-demo.vserver-001.urospace.de%2FtcToken%3Fcard-type%3Dhttp%3A%2F%2Fbsi.bund.de%2Fcif%2Fnpa.xml";
+	URL tokenUrl = FileUtils.resolveResourceAsURL(getClass(), "TCToken.xml");
+	String tokenUrlCoded = URLEncoder.encode(tokenUrl.toExternalForm(), "utf-8");
+	String uri = "/eID-Client?tcTokenURL=" + tokenUrlCoded;
 	HttpRequest httpRequest = new BasicHttpRequest("GET", uri);
 
 	TCTokenRequest result = (TCTokenRequest) instance.handleRequest(httpRequest);

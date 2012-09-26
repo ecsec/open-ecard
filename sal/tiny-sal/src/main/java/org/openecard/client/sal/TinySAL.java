@@ -580,8 +580,61 @@ public class TinySAL implements org.openecard.ws.SAL {
     }
 
     @Override
-    public DecipherResponse decipher(Decipher parameters) {
-	return WSHelper.makeResponse(DecipherResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+    public DecipherResponse decipher(Decipher decipher) {
+	try {
+	    String didName = decipher.getDIDName();
+	    ConnectionHandleType connectionHandle = decipher.getConnectionHandle();
+	    if (connectionHandle == null) {
+		return WSHelper.makeResponse(DecipherResponse.class,
+			WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "connectionHandle is null."));
+	    }
+
+	    CardStateEntry cardStateEntry = states.getEntry(connectionHandle);
+	    if (cardStateEntry == null) {
+		return WSHelper.makeResponse(DecipherResponse.class, WSHelper.makeResultError(
+			ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
+	    }
+	    if (didName == null) {
+		return WSHelper.makeResponse(DecipherResponse.class,
+			WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "didName is null."));
+	    }
+	    byte[] message = decipher.getCipherText();
+	    if (message == null) {
+		return WSHelper.makeResponse(DecipherResponse.class,
+			WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "message is null."));
+	    }
+
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName,
+		    connectionHandle.getCardApplication());
+	    if (didStructure == null) {
+		return WSHelper.makeResponse(
+			DecipherResponse.class,
+			WSHelper.makeResultError(ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, "The did " + didName
+				+ "could not be found."));
+	    }
+	    String protoUri = didStructure.getDIDMarker().getProtocol();
+
+	    Protocol proto = getProtocol(connectionHandle, protoUri);
+	    if (proto.hasNextStep(FunctionType.Decipher)) {
+		DecipherResponse resp = proto.decipher(decipher);
+		removeFinishedProtocol(connectionHandle, protoUri, proto);
+		return resp;
+	    } else {
+		throw new UnknownProtocolException("No protocol step available for sign in protocol "
+			+ proto.toString() + ".");
+	    }
+	} catch (ECardException ex) {
+	    logger.warn(ex.getMessage(), ex);
+	    Result res = WSHelper.makeResult(ex);
+	    DecipherResponse resp = WSHelper.makeResponse(DecipherResponse.class, res);
+	    return resp;
+
+	} catch (RuntimeException ex) {
+	    logger.warn(ex.getMessage(), ex);
+	    Result res = WSHelper.makeResultUnknownError(ex.getMessage());
+	    DecipherResponse resp = WSHelper.makeResponse(DecipherResponse.class, res);
+	    return resp;
+	}
     }
 
     @Override

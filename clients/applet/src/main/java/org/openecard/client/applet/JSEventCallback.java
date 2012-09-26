@@ -87,6 +87,13 @@ public class JSEventCallback {
     }
 
     /**
+     * Stop all running worker threads.
+     */
+    public void stop() {
+	this.workerPool.shutdownNow();
+    }
+
+    /**
      * Start event polling and push available events to the JavaScript frontend.
      */
     public void startEventPush() {
@@ -94,7 +101,7 @@ public class JSEventCallback {
 	    return;
 	}
 
-	this.workerPool.execute(new Runnable() {
+	this.workerPool.submit(new Runnable() {
 	    @Override
 	    public void run() {
 		JSObject jsObject = jsObjectWrapper.getNamespacedJSObject(jsEventCallback);
@@ -104,7 +111,7 @@ public class JSEventCallback {
 		StatusChangeRequest statusChangeRequest = new StatusChangeRequest();
 		ClientResponse clientResponse = null;
 
-		while (true) {
+		while (!Thread.currentThread().isInterrupted()) {
 		    clientResponse = handler.request(statusChangeRequest);
 
 		    if (clientResponse != null && clientResponse instanceof StatusChangeResponse
@@ -146,17 +153,20 @@ public class JSEventCallback {
      * @param data as input parameters
      */
     public void handle(final String callback, final String id, final Object[] data) {
-	this.workerPool.execute(new Runnable() {
+	this.workerPool.submit(new Runnable() {
 	    @Override
 	    public void run() {
 		// Some methods triggered by JavaScript calls need privileged access to various
 		// resources like network connections to external hosts (eg. to fetch the TcToken).
+		/*
 		Object[] response = AccessController.doPrivileged(new PrivilegedAction<Object[]>() {
 		    @Override
 		    public Object[] run() {
 			return binding.handle(id, data);
 		    }
 		});
+		*/
+		Object[] response = binding.handle(id, data);
 
 		try {
 		    jsObjectWrapper.call(callback, response);
@@ -186,10 +196,10 @@ public class JSEventCallback {
     }
 
     /**
-     * Helper method to generate a unique id from a string input.
+     * Helper method to generate a JavaScript compatible id from a string input.
      * Used by the JavaScript frontend.
      *
-     * @param input to generate unique id
+     * @param input to generate id
      * @return unique id
      */
     private static String makeId(String input) {

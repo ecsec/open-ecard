@@ -225,10 +225,19 @@ public class ECardApplet extends JApplet {
 	    ifd = null;
 	    contextHandle = null;
 	}
+	// destroy JSEventCallback
+	try {
+	    if (jsCallback != null) {
+		jsCallback.stop();
+	    }
+	} catch (Exception ex) {
+	    logger.error("An exception occurred while destroying JSEventCallback.", ex);
+	} finally {
+	    jsCallback = null;
+	}
 	// destroy the remaining components
 	handler = null;
 	eventHandler = null;
-	jsCallback = null;
 	env = null;
     }
 

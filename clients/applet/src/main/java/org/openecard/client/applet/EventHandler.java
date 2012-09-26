@@ -49,7 +49,8 @@ public class EventHandler implements EventCallback {
 	do {
 	    try {
 		handle = eventQueue.poll(30, TimeUnit.SECONDS);
-	    } catch (InterruptedException ignore) {
+	    } catch (InterruptedException ex) {
+		return null;
 	    }
 	} while (handle == null);
 

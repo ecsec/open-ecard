@@ -22,7 +22,6 @@
 
 package org.openecard.client.applet;
 
-import generated.StatusChangeType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.applet.Applet;
 import java.security.AccessController;
@@ -39,6 +38,7 @@ import org.openecard.client.control.binding.javascript.JavaScriptBinding;
 import org.openecard.client.control.client.ClientResponse;
 import org.openecard.client.control.module.status.StatusChangeRequest;
 import org.openecard.client.control.module.status.StatusChangeResponse;
+import org.openecard.ws.schema.StatusChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,8 +115,8 @@ public class JSEventCallback {
 		    clientResponse = handler.request(statusChangeRequest);
 
 		    if (clientResponse != null && clientResponse instanceof StatusChangeResponse
-			    && ((StatusChangeResponse) clientResponse).getStatusChangeType() != null) {
-			StatusChangeType statusChange = ((StatusChangeResponse) clientResponse).getStatusChangeType();
+			    && ((StatusChangeResponse) clientResponse).getStatusChange() != null) {
+			StatusChange statusChange = ((StatusChangeResponse) clientResponse).getStatusChange();
 			Object[] response = buildEvent(statusChange);
 
 			try {
@@ -179,7 +179,7 @@ public class JSEventCallback {
      * @param statusChange that occurred
      * @return JavaScript parameters array
      */
-    private static Object[] buildEvent(StatusChangeType statusChange) {
+    private static Object[] buildEvent(StatusChange statusChange) {
 	ConnectionHandleType cHandle = statusChange.getConnectionHandle();
 
 	String action = statusChange.getAction();

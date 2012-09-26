@@ -22,8 +22,8 @@
 
 package org.openecard.client.control.module.status;
 
-import generated.StatusChangeType;
 import org.openecard.client.control.client.ClientResponse;
+import org.openecard.ws.schema.StatusChange;
 
 
 /**
@@ -33,25 +33,24 @@ import org.openecard.client.control.client.ClientResponse;
  */
 public final class StatusChangeResponse extends ClientResponse {
 
-    private StatusChangeType statusChangeType;
+    private StatusChange statusChange;
 
     /**
-     * Returns the status change type.
+     * Returns the status change element.
      * 
      * @return the status change type
      */
-    public StatusChangeType getStatusChangeType() {
-	return statusChangeType;
+    public StatusChange getStatusChange() {
+	return statusChange;
     }
 
     /**
-     * Sets the status change type.
+     * Sets the status change element.
      * 
-     * @param statusChangeType the status change type
+     * @param statusChange the status change element
      */
-    public void setStatusChangeType(StatusChangeType statusChangeType) {
-	this.statusChangeType = statusChangeType;
+    public void setStatusChange(StatusChange statusChange) {
+	this.statusChange = statusChange;
     }
-
 
 }

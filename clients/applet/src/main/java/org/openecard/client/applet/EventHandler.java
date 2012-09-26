@@ -22,12 +22,12 @@
 
 package org.openecard.client.applet;
 
-import generated.StatusChangeType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
+import org.openecard.ws.schema.StatusChange;
 
 
 /**
@@ -37,14 +37,14 @@ import org.openecard.client.common.interfaces.EventCallback;
  */
 public class EventHandler implements EventCallback {
 
-    private final LinkedBlockingQueue<StatusChangeType> eventQueue;
+    private final LinkedBlockingQueue<StatusChange> eventQueue;
 
     public EventHandler() {
-	eventQueue = new LinkedBlockingQueue<StatusChangeType>();
+	eventQueue = new LinkedBlockingQueue<StatusChange>();
     }
 
-    public StatusChangeType next() {
-	StatusChangeType handle = null;
+    public StatusChange next() {
+	StatusChange handle = null;
 
 	do {
 	    try {
@@ -61,7 +61,7 @@ public class EventHandler implements EventCallback {
     public void signalEvent(EventType eventType, Object eventData) {
 	if (eventData instanceof ConnectionHandleType) {
 	    try {
-		StatusChangeType statusChange = new StatusChangeType();
+		StatusChange statusChange = new StatusChange();
 		statusChange.setAction(eventType.getEventTypeIdentifier());
 		statusChange.setConnectionHandle((ConnectionHandleType) eventData);
 

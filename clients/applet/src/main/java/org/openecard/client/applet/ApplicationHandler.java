@@ -22,7 +22,6 @@
 
 package org.openecard.client.applet;
 
-import generated.StatusChangeType;
 import generated.TCTokenType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
@@ -53,6 +52,7 @@ import org.openecard.client.sal.TinySAL;
 import org.openecard.client.transport.paos.PAOS;
 import org.openecard.client.transport.tls.PSKTlsClientImpl;
 import org.openecard.client.transport.tls.TlsClientSocketFactory;
+import org.openecard.ws.schema.StatusChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -221,9 +221,9 @@ public final class ApplicationHandler implements ControlListener {
     private StatusChangeResponse handleStatusChangeRequest(StatusChangeRequest request) {
 	StatusChangeResponse response = new StatusChangeResponse();
 
-	StatusChangeType statusChangeType = handler.next();
+	StatusChange statusChange = handler.next();
 
-	response.setStatusChangeType(statusChangeType);
+	response.setStatusChange(statusChange);
 	response.setResult(WSHelper.makeResultOK());
 	return response;
     }

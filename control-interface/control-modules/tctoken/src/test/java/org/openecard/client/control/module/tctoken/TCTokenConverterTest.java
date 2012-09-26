@@ -22,7 +22,6 @@
 
 package org.openecard.client.control.module.tctoken;
 
-import java.io.InputStream;
 import org.openecard.client.common.util.FileUtils;
 import org.openecard.client.control.module.tctoken.hacks.ObjectTag;
 import static org.testng.Assert.*;
@@ -37,8 +36,7 @@ public class TCTokenConverterTest {
     @Test(enabled = true)
     public void testConvert() {
 	try {
-	    InputStream testFileStream = getClass().getResourceAsStream("/TCTokenObject.xml");
-	    String content = FileUtils.toString(testFileStream);
+	    String content = FileUtils.toString(FileUtils.resolveResourceAsStream(getClass(), "TCTokenObject.xml"));
 
 	    String data = ObjectTag.fix(content);
 

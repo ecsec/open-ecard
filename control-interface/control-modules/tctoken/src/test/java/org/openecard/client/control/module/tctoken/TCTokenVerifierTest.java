@@ -23,10 +23,9 @@
 package org.openecard.client.control.module.tctoken;
 
 import generated.TCTokenType;
-import java.io.File;
-import java.io.FileInputStream;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.List;
+import org.openecard.client.common.util.FileUtils;
 import org.testng.annotations.Test;
 
 
@@ -39,11 +38,10 @@ public class TCTokenVerifierTest {
     private TCTokenVerifier verifier;
 
     public TCTokenVerifierTest() throws Exception {
-	URL testFileLocation = TCTokenVerifierTest.class.getResource("/TCToken.xml");
-	File testFile = new File(testFileLocation.toURI());
+	InputStream testFile = FileUtils.resolveResourceAsStream(getClass(), "TCToken.xml");
 
 	TCTokenParser parser = new TCTokenParser();
-	List<TCTokenType> tokens = parser.parse(new FileInputStream(testFile));
+	List<TCTokenType> tokens = parser.parse(testFile);
 	token = tokens.get(0);
 	verifier = new TCTokenVerifier(token);
     }

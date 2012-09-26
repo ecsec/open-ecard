@@ -23,9 +23,7 @@
 package org.openecard.client.control.module.tctoken;
 
 import generated.TCTokenType;
-import java.io.File;
-import java.io.FileInputStream;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.List;
 import org.openecard.client.common.util.FileUtils;
 import org.openecard.client.common.util.StringUtils;
@@ -41,11 +39,10 @@ public class TCTokenParserTest {
 
     @Test(enabled = !true)
     public void testParse() throws Exception {
-	URL testFileLocation = getClass().getResource("/TCToken.xml");
-	File testFile = new File(testFileLocation.toURI());
+	InputStream testFile = FileUtils.resolveResourceAsStream(getClass(), "TCToken.xml");
 
 	TCTokenParser parser = new TCTokenParser();
-	List<TCTokenType> tokens = parser.parse(new FileInputStream(testFile));
+	List<TCTokenType> tokens = parser.parse(testFile);
 
 	TCTokenType t = tokens.get(0);
 	assertEquals(t.getSessionIdentifier(), "3eab1b41ecc1ce5246acf6f4e275");
@@ -56,8 +53,7 @@ public class TCTokenParserTest {
 
     @Test
     public void testParseMalformed() throws Exception {
-	URL testFileLocation = getClass().getResource("/TCToken-malformed.xml");
-	String data = FileUtils.toString(testFileLocation.openStream());
+	String data = FileUtils.toString(FileUtils.resolveResourceAsStream(getClass(), "TCToken-malformed.xml"));
 
 	data = PathSecurityParameters.fix(data);
 

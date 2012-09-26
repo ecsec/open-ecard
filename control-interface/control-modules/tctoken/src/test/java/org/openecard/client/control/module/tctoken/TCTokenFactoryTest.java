@@ -24,6 +24,7 @@ package org.openecard.client.control.module.tctoken;
 
 import generated.TCTokenType;
 import java.net.URL;
+import org.openecard.client.common.util.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -36,8 +37,7 @@ public class TCTokenFactoryTest {
     @Test
     public void testGenerateTCToken() throws Exception {
 	try {
-	    String url = "http://openecard-demo.vserver-001.urospace.de/tcToken?card-type=http://bsi.bund.de/cif/npa.xml";
-	    URL tcTokenURL = new URL(url);
+	    URL tcTokenURL = FileUtils.resolveResourceAsURL(TCTokenFactoryTest.class, "TCToken.xml");
 	    TCTokenType result = TCTokenFactory.generateTCToken(tcTokenURL);
 	} catch (Exception e) {
 	    Assert.fail(e.getMessage());

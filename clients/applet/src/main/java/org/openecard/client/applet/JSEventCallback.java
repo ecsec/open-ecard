@@ -158,15 +158,12 @@ public class JSEventCallback {
 	    public void run() {
 		// Some methods triggered by JavaScript calls need privileged access to various
 		// resources like network connections to external hosts (eg. to fetch the TcToken).
-		/*
 		Object[] response = AccessController.doPrivileged(new PrivilegedAction<Object[]>() {
 		    @Override
 		    public Object[] run() {
 			return binding.handle(id, data);
 		    }
 		});
-		*/
-		Object[] response = binding.handle(id, data);
 
 		try {
 		    jsObjectWrapper.call(callback, response);

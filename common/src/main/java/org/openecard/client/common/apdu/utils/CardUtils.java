@@ -45,6 +45,7 @@ public class CardUtils {
      *
      * @param dispatcher Dispatcher
      */
+    @Deprecated
     public CardUtils(Dispatcher dispatcher) {
 	this.dispatcher = dispatcher;
     }
@@ -56,7 +57,20 @@ public class CardUtils {
      * @throws APDUException
      * @throws Exception
      */
+    @Deprecated
     public void selectMF(byte[] slotHandle) throws APDUException, Exception {
+	CardCommandAPDU selectMF = new Select.MasterFile();
+	selectMF.transmit(dispatcher, slotHandle);
+    }
+
+    /**
+     * Selects the Master File.
+     * 
+     * @param dispatcher Dispatcher
+     * @param slotHandle Slot handle
+     * @throws APDUException 
+     */
+    public static void selectMF(Dispatcher dispatcher, byte[] slotHandle) throws APDUException {
 	CardCommandAPDU selectMF = new Select.MasterFile();
 	selectMF.transmit(dispatcher, slotHandle);
     }
@@ -69,7 +83,22 @@ public class CardUtils {
      * @throws APDUException
      * @throws Exception
      */
+    @Deprecated
     public void selectFile(byte[] slotHandle, short fileID) throws APDUException, Exception {
+	CardCommandAPDU selectFile = new Select.File(ShortUtils.toByteArray(fileID));
+	selectFile.transmit(dispatcher, slotHandle);
+    }
+
+    /**
+     * Selects a File.
+     * 
+     * @param dispatcher Dispatcher
+     * @param slotHandle Slot handle
+     * @param fileID File ID
+     * @throws APDUException
+     * @throws Exception 
+     */
+    public static void selectFile(Dispatcher dispatcher, byte[] slotHandle, short fileID) throws APDUException, Exception {
 	CardCommandAPDU selectFile = new Select.File(ShortUtils.toByteArray(fileID));
 	selectFile.transmit(dispatcher, slotHandle);
     }
@@ -82,6 +111,7 @@ public class CardUtils {
      * @return Read file content.
      * @throws Exception
      */
+    @Deprecated
     public byte[] readFile(byte[] slotHandle, short fileID) throws Exception {
 	// Select MF
 	selectMF(slotHandle);
@@ -102,6 +132,53 @@ public class CardUtils {
 	    i++;
 
 	} while (response.isNormalProcessed());
+	baos.close();
+
+	return baos.toByteArray();
+    }
+
+    /**
+     * Reads a file.
+     * 
+     * @param dispatcher Dispatcher
+     * @param slotHandle Slot handle
+     * @return File content
+     * @throws Exception 
+     */
+    public static byte[] readFile(Dispatcher dispatcher, byte[] slotHandle) throws Exception {
+	return readFile(dispatcher, slotHandle, (short) -1);
+    }
+
+    /**
+     * Reads a file.
+     * 
+     * @param dispatcher Dispatcher
+     * @param slotHandle Slot handle
+     * @param fileID File ID
+     * @return File content
+     * @throws Exception 
+     */
+    public static byte[] readFile(Dispatcher dispatcher, byte[] slotHandle, short fileID) throws Exception {
+	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	// Read 255 bytes per APDU
+	byte length = (byte) 0xFF;
+	int i = 0;
+	CardResponseAPDU response;
+
+	if (fileID != -1) {
+	    // Select file
+	    CardCommandAPDU selectFile = new Select.File(ShortUtils.toByteArray(fileID));
+	    selectFile.transmit(dispatcher, slotHandle);
+	}
+
+	do {
+	    CardCommandAPDU readBinary = new ReadBinary((short) (i * (length & 0xFF)), length);
+	    response = readBinary.transmit(dispatcher, slotHandle);
+
+	    baos.write(response.getData());
+	    i++;
+	} while (response.isNormalProcessed());
+
 	baos.close();
 
 	return baos.toByteArray();

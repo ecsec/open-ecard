@@ -22,6 +22,7 @@
 
 package org.openecard.client.common.apdu.common;
 
+import org.openecard.client.common.util.ByteUtils;
 import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
 
@@ -57,6 +58,20 @@ public class CardResponseAPDUTest {
 	short expResult = 25538;
 	short result = instance.getSW();
 	assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testGetData() {
+	byte[] apdu = new byte[]{(byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04, (byte) 0x90, (byte) 0x00};
+
+	assertEquals(CardResponseAPDU.getData(apdu), new byte[]{(byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04});
+    }
+
+    @Test
+    public void testGetTrailer() {
+	byte[] apdu = new byte[]{(byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04, (byte) 0x90, (byte) 0x00};
+
+	assertEquals(CardResponseAPDU.getTrailer(apdu), new byte[]{(byte) 0x90, (byte) 0x00});
     }
 
 }

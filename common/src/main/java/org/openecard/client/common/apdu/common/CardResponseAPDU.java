@@ -84,6 +84,20 @@ public final class CardResponseAPDU extends CardAPDU {
     }
 
     /**
+     * Returns the data field of the APDU.
+     * 
+     * @param responseAPDU Response APDU
+     * @return Data field of the APDU
+     */
+    public static byte[] getData(byte[] responseAPDU) {
+	if (responseAPDU.length < 2) {
+	    throw new IllegalArgumentException("Malformed APDU");
+	}
+
+	return ByteUtils.copy(responseAPDU, 0, responseAPDU.length - 2);
+    }
+
+    /**
      * Sets the trailer (status bytes) of the APDU.
      *
      * @param trailer Trailer (SW1, SW2)
@@ -99,6 +113,20 @@ public final class CardResponseAPDU extends CardAPDU {
      */
     public byte[] getTrailer() {
 	return trailer;
+    }
+
+    /**
+     * Returns the trailer (status bytes) of the APDU.
+     * 
+     * @param responseAPDU Response APDU
+     * @return Trailer of the APDU
+     */
+    public static byte[] getTrailer(byte[] responseAPDU) {
+	if (responseAPDU.length < 2) {
+	    throw new IllegalArgumentException("Malformed APDU");
+	}
+
+	return ByteUtils.copy(responseAPDU, responseAPDU.length - 2, 2);
     }
 
     /**
@@ -259,7 +287,7 @@ public final class CardResponseAPDU extends CardAPDU {
 	    baos.write(trailer);
 	    baos.write(data);
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    logger.error("Exception", e);
 	}
 
 	return baos.toByteArray();

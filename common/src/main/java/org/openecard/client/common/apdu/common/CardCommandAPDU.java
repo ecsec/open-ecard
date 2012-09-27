@@ -46,8 +46,8 @@ import org.slf4j.LoggerFactory;
  */
 public class CardCommandAPDU extends CardAPDU {
 
-    private static final Logger _logger = LoggerFactory.getLogger(CardCommandAPDU.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(CardCommandAPDU.class);
+    
     private byte[] header = new byte[4];
     private int le = -1;
     private int lc = -1;
@@ -284,6 +284,19 @@ public class CardCommandAPDU extends CardAPDU {
     }
 
     /**
+     * Returns the header of the APDU.
+     * 
+     * @param commandAPDU Command APDU
+     */
+    public static byte[] getHeader(byte[] commandAPDU) {
+	if (commandAPDU.length < 4) {
+	    throw new IllegalArgumentException("Malformed APDU");
+	}
+
+	return ByteUtils.copy(commandAPDU, 0, 4);
+    }
+
+    /**
      * Sets the length command (LC) field of the APDU.
      *
      * @param lc Length command (LC) field
@@ -422,8 +435,22 @@ public class CardCommandAPDU extends CardAPDU {
 		throw new IllegalArgumentException("Malformed APDU.");
 	    }
 	} catch (Exception e) {
-	    _logger.error(e.getMessage(), e);
+	    logger.error("Exception", e);
 	}
+    }
+
+    /**
+     * Returns the body of the APDU (LC*|DATA|LE*).
+     * 
+     * @param commandAPDU Command APDU
+     * @return Body of the APDU
+     */
+    public static byte[] getBody(byte[] commandAPDU) {
+	if (commandAPDU.length < 4) {
+	    throw new IllegalArgumentException("Malformed APDU");
+	}
+
+	return ByteUtils.copy(commandAPDU, 4, commandAPDU.length - 4);
     }
 
     /**
@@ -552,7 +579,7 @@ public class CardCommandAPDU extends CardAPDU {
 		baos.write((byte) le);
 	    }
 	} catch (Exception e) {
-	    _logger.error(e.getMessage(), e);
+	    logger.error("Exception", e);
 	}
 
 	return baos.toByteArray();

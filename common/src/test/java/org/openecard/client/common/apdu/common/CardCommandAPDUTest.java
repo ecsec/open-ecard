@@ -29,6 +29,7 @@ import org.openecard.client.common.apdu.GeneralAuthenticate;
 import org.openecard.client.common.apdu.ReadBinary;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.IntegerUtils;
+import org.testng.Assert;
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 
@@ -165,6 +166,27 @@ public class CardCommandAPDUTest {
 	assertEquals(-1, capdu.getLE());
 	assertNull(capdu.getData());
 	assertEquals(new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE}, capdu.getHeader());
+    }
+
+    @Test
+    public void testGetBody() {
+	byte[] apdu = new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE, (byte) 0x01, (byte) 0x01, (byte) 0x00, (byte) 0x01, (byte) 0xFF};
+
+	Assert.assertEquals(CardCommandAPDU.getBody(apdu), new byte[]{(byte) 0x01, (byte) 0x01, (byte) 0x00, (byte) 0x01, (byte) 0xFF});
+    }
+
+    @Test
+    public void testGetHeader() {
+	byte[] apdu = new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE, (byte) 0x01, (byte) 0x01, (byte) 0x00, (byte) 0x01, (byte) 0xFF};
+
+	Assert.assertEquals(CardCommandAPDU.getHeader(apdu), new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE});
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetHeader2() {
+	byte[] apdu = new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC};
+
+	CardCommandAPDU.getHeader(apdu);
     }
 
     private byte[] fillBytesWithLength(int i) throws IOException {

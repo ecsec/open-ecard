@@ -35,6 +35,7 @@ import java.util.List;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
+@Deprecated
 public class CardCommands {
 
     private static final byte CLASS_BYTE = (byte) 0x00;

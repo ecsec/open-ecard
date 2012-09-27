@@ -25,19 +25,18 @@ package org.openecard.client.sal;
 import iso.std.iso_iec._24727.tech.schema.*;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationListResponse.CardApplicationNameList;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse.CardAppPathResultSet;
-import java.io.ByteArrayOutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import javax.smartcardio.ResponseAPDU;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ECardException;
 import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.apdu.Select;
+import org.openecard.client.common.apdu.common.CardCommandAPDU;
+import org.openecard.client.common.apdu.utils.CardUtils;
 import org.openecard.client.common.interfaces.Environment;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.Protocol;
@@ -47,9 +46,7 @@ import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.client.common.sal.state.cif.CardInfoWrapper;
-import org.openecard.client.common.tlv.iso7816.FCP;
 import org.openecard.client.common.util.ByteUtils;
-import org.openecard.client.common.util.CardCommands;
 import org.openecard.client.gui.UserConsent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -222,11 +219,15 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    // Select application
 	    // nPA Hack
 	    // TODO: Differ between MF, EF, DF and AID.
-	    if (Arrays.equals(cardApplication, new byte[]{0x3F, 0x00})) {
-		transmitSingleAPDU(CardCommands.Select.MF(), connectResponse.getSlotHandle());
+	    CardCommandAPDU select;
+	    if (Arrays.equals(cardApplication, Select.MasterFile.MF_FID)) {
+		select = new Select.MasterFile();
 	    } else {
-		transmitSingleAPDU(CardCommands.Select.application(cardApplication), connectResponse.getSlotHandle());
+		select = new Select.Application(cardApplication);
 	    }
+	    
+	    select.transmit(env.getDispatcher(), connectResponse.getSlotHandle());
+	    
 	    //FIXME
 	    cardStateEntry.setCurrentCardApplication(cardApplication);
 	    cardStateEntry.setSlotHandle(connectResponse.getSlotHandle());
@@ -437,7 +438,8 @@ public class TinySAL implements org.openecard.ws.SAL {
 	    return WSHelper.makeResponse(DataSetSelectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
 	}
 	try {
-	    this.transmitSingleAPDU(CardCommands.Select.EF(fileIdentifier), connectionHandle.getSlotHandle());
+	    CardCommandAPDU selectEF = new Select.File(fileIdentifier);
+	    selectEF.transmit(env.getDispatcher(), connectionHandle.getSlotHandle());
 	} catch (Exception e) {
 	    logger.warn(e.getMessage(), e);
 	    return WSHelper.makeResponse(DataSetSelectResponse.class, WSHelper.makeResult(e));
@@ -503,24 +505,10 @@ public class TinySAL implements org.openecard.ws.SAL {
 		return WSHelper.makeResponse(DSIReadResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
 	    }
 
-	    // read length of the DSI
-	    ResponseAPDU rapdu = this.transmitSingleAPDU(CardCommands.Select.EF_FCP(fileIdentifier), slotHandle);
-	    FCP fcp = new FCP(rapdu.getData());
-	    long length = fcp.getNumBytes();
-
-	    // select the dsi
-	    this.transmitSingleAPDU(CardCommands.Select.EF(fileIdentifier), slotHandle);
-
-	    // actually read the contents of the DSI
-	    ByteArrayOutputStream fileContent = new ByteArrayOutputStream((int) length);
-	    for (short offset = 0; length > 0; offset += 255, length -= 255) {
-		byte[] apdu = CardCommands.Read.binary(offset, (short) ((length >= 255) ? 255 : length));
-		rapdu = this.transmitSingleAPDU(apdu, slotHandle);
-		fileContent.write(rapdu.getData());
-	    }
+	    byte[] fileContent = CardUtils.readFile(env.getDispatcher(), slotHandle, fileIdentifier);
 
 	    DSIReadResponse dsiReadResponse = new DSIReadResponse();
-	    dsiReadResponse.setDSIContent(fileContent.toByteArray());
+	    dsiReadResponse.setDSIContent(fileContent);
 	    dsiReadResponse.setResult(WSHelper.makeResultOK());
 
 	    return dsiReadResponse;
@@ -991,17 +979,4 @@ public class TinySAL implements org.openecard.ws.SAL {
 	return WSHelper.makeResponse(ACLModifyResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
-    private ResponseAPDU transmitSingleAPDU(byte[] apdu, byte[] slotHandle) throws WSException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-	ArrayList<byte[]> responses = new ArrayList<byte[]>() {
-
-	    {
-		add(new byte[]{(byte) 0x90, (byte) 0x00});
-		add(new byte[]{(byte) 0x63, (byte) 0xC3});
-	    }
-	};
-
-	Transmit t = CardCommands.makeTransmit(slotHandle, apdu, responses);
-	TransmitResponse tr = (TransmitResponse) WSHelper.checkResult((TransmitResponse) env.getDispatcher().deliver(t));
-	return new ResponseAPDU(tr.getOutputAPDU().get(0));
-    }
 }

@@ -30,10 +30,10 @@ import java.math.BigInteger;
 import java.util.*;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.apdu.common.CardResponseAPDU;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.util.ByteUtils;
-import org.openecard.client.common.util.CardCommands;
 import org.openecard.client.common.util.FileUtils;
 import org.openecard.client.recognition.staticrepo.LocalCifRepo;
 import org.openecard.client.recognition.statictree.LocalFileTree;
@@ -283,8 +283,8 @@ public class CardRecognition {
 		    break;
 		}
 		// get command bytes and trailer
-		byte[] result = CardCommands.getDataFromResponse(resultBytes);
-		byte[] trailer = CardCommands.getResultFromResponse(resultBytes);
+		byte[] result = CardResponseAPDU.getData(resultBytes);
+		byte[] trailer = CardResponseAPDU.getTrailer(resultBytes);
 		// if select, only one response exists
 		if (!matcher && ! Arrays.equals(next.getResponseAPDU().get(0).getTrailer(), trailer)) {
 		    // break when outcome is wrong

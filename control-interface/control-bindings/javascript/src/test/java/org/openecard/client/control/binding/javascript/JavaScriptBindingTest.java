@@ -22,6 +22,7 @@
 
 package org.openecard.client.control.binding.javascript;
 
+import java.util.HashMap;
 import org.openecard.client.control.ControlInterface;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerFactory;
@@ -92,7 +93,11 @@ public final class JavaScriptBindingTest {
 
 	    String tokenURI = "https://willow.mtg.de/eid-server-demo-app/result/request.html";
 
-	    Object[] parameters = new Object[]{tokenURI, contextHandle, ifdName, slotIndex};
+	    HashMap<String, Object> parameters = new HashMap<String, Object>();
+	    parameters.put("tcTokenURL", tokenURI);
+	    parameters.put("contextHandle", contextHandle);
+	    parameters.put("ifdName", ifdName);
+	    parameters.put("slotIndex", slotIndex);
 	    
 	    response = binding.handle("eID-Client", parameters);
 	    if (response == null) {

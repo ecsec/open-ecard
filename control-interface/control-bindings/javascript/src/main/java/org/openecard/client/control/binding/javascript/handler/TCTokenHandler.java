@@ -25,6 +25,8 @@ package org.openecard.client.control.binding.javascript.handler;
 import generated.TCTokenType;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.Iterator;
+import java.util.Map;
 import org.openecard.client.control.ControlException;
 import org.openecard.client.control.client.ClientRequest;
 import org.openecard.client.control.client.ClientResponse;
@@ -53,37 +55,33 @@ public class TCTokenHandler extends ControlJavaScriptHandler {
     }
 
     @Override
-    public ClientRequest handleRequest(Object[] data) throws ControlException, Exception {
+    public ClientRequest handleRequest(Map data) throws ControlException, Exception {
 	try {
 	    TCTokenRequest tcTokenRequest = new TCTokenRequest();
 
-	    for (int i = 0; i < data.length; i++) {
-		String value = (String) data[i];
-
-		switch (i) {
-		    case 0:
-			// TCTokenURL
-			value = URLDecoder.decode(value, "UTF-8");
-			TCTokenType token = TCTokenFactory.generateTCToken(new URL(value));
-			tcTokenRequest.setTCToken(token);
-			break;
-		    case 1:
-			// ContextHandle
-			tcTokenRequest.setContextHandle(value);
-			break;
-		    case 2:
-			// IFDName
-			value = URLDecoder.decode(value, "UTF-8");
-			tcTokenRequest.setIFDName(value);
-			break;
-		    case 3:
-			// SlotIndex
-			tcTokenRequest.setSlotIndex(value);
-			break;
-		    default:
-			break;
+	    // TODO: rewrite code so that it is safer
+	    Iterator i = data.entrySet().iterator();
+	    while (i.hasNext()) {
+		Map.Entry e = (Map.Entry) i.next();
+		// check content
+		if ("tcTokenURL".equals(e.getKey())) {
+		    // TCTokenURL
+		    String value = URLDecoder.decode(e.getValue().toString(), "UTF-8");
+		    TCTokenType token = TCTokenFactory.generateTCToken(new URL(value));
+		    tcTokenRequest.setTCToken(token);
+		} else if ("contextHandle".equals(e.getKey())) {
+		    // ContextHandle
+		    tcTokenRequest.setContextHandle(e.getValue().toString());
+		} else if ("ifdName".equals(e.getKey())) {
+		    // IFDName
+		    String value = URLDecoder.decode(e.getValue().toString(), "UTF-8");
+		    tcTokenRequest.setIFDName(value);
+		} else if ("slotIndex".equals(e.getKey())) {
+		    // SlotIndex
+		    tcTokenRequest.setSlotIndex(e.getValue().toString());
 		}
 	    }
+
 	    return tcTokenRequest;
 	} catch (Exception e) {
 	    logger.error(e.getMessage(), e);

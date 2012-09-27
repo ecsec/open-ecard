@@ -25,6 +25,7 @@ package org.openecard.client.control.binding.javascript.handler;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import org.openecard.client.control.ControlException;
@@ -68,7 +69,7 @@ public class StatusHandler extends ControlJavaScriptHandler {
     }
     
     @Override
-    public ClientRequest handleRequest(Object[] data) throws ControlException, Exception {
+    public ClientRequest handleRequest(Map data) throws ControlException, Exception {
 	return new StatusRequest();
     }
     

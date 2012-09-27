@@ -22,6 +22,7 @@
 
 package org.openecard.client.control.binding.javascript;
 
+import java.util.Map;
 import org.openecard.client.control.binding.ControlBinding;
 import org.openecard.client.control.binding.javascript.handler.StatusHandler;
 import org.openecard.client.control.binding.javascript.handler.TCTokenHandler;
@@ -41,7 +42,7 @@ public class JavaScriptBinding extends ControlBinding {
     public JavaScriptBinding() throws Exception {
     }
 
-    public Object[] handle(String id, Object[] data) {
+    public Object[] handle(String id, Map data) {
 	return service.handle(id, data);
     }
     

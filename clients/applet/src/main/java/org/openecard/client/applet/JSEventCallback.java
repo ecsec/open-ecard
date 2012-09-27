@@ -28,6 +28,7 @@ import java.security.AccessController;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivilegedAction;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import netscape.javascript.JSException;
@@ -152,7 +153,7 @@ public class JSEventCallback {
      * @param id to identify the request
      * @param data as input parameters
      */
-    public void handle(final String callback, final String id, final Object[] data) {
+    public void handle(final String callback, final String id, final Map data) {
 	this.workerPool.submit(new Runnable() {
 	    @Override
 	    public void run() {

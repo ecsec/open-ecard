@@ -22,6 +22,7 @@
 
 package org.openecard.client.control.binding.javascript;
 
+import java.util.Map;
 import org.openecard.client.control.binding.javascript.handler.ControlJavaScriptHandler;
 import org.openecard.client.control.handler.ControlHandler;
 import org.openecard.client.control.handler.ControlHandlers;
@@ -45,7 +46,7 @@ public class JavaScriptService implements Runnable {
 	logger.debug("Starting JavaScriptBinding");
     }
 
-    public Object[] handle(String id, Object[] data) {
+    public Object[] handle(String id, Map data) {
 	try {
 	    for (ControlHandler h : handlers.getControlHandlers()) {
 		if (id.equals(h.getID())) {

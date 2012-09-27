@@ -22,7 +22,8 @@
 
 package org.openecard.client.control.binding.javascript.handler;
 
-import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
 import org.openecard.client.control.ControlException;
 import org.openecard.client.control.client.ClientRequest;
 import org.openecard.client.control.client.ClientResponse;
@@ -53,7 +54,7 @@ public abstract class ControlJavaScriptHandler extends ControlHandler {
      * @return A client request or null
      * @throws Exception If the request should be handled by the handler but is malformed
      */
-    public abstract ClientRequest handleRequest(Object[] data) throws ControlException, Exception;
+    public abstract ClientRequest handleRequest(Map data) throws ControlException, Exception;
 
     /**
      * Handles a client response and creates a response.
@@ -64,8 +65,16 @@ public abstract class ControlJavaScriptHandler extends ControlHandler {
      */
     public abstract Object[] handleResponse(ClientResponse clientResponse) throws ControlException, Exception;
 
-    public Object[] handle(Object[] request) throws Exception {
-	logger.debug("JavaScript request: {}", Arrays.toString(request));
+    public Object[] handle(Map request) throws Exception {
+	if (logger.isDebugEnabled()) {
+	    StringBuilder b = new StringBuilder();
+	    Iterator<Map.Entry> i = request.entrySet().iterator();
+	    while (i.hasNext()) {
+		Map.Entry e = i.next();
+		b.append("\n '").append(e.getKey()).append("' : '").append(e.getValue()).append("'");
+	    }
+	    logger.debug("JavaScript request: {}", b.toString());
+	}
 	Object[] response = null;
 
 	try {

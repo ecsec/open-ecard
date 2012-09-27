@@ -287,6 +287,7 @@ public class CardCommandAPDU extends CardAPDU {
      * Returns the header of the APDU.
      * 
      * @param commandAPDU Command APDU
+     * @return Header of the APDU
      */
     public static byte[] getHeader(byte[] commandAPDU) {
 	if (commandAPDU.length < 4) {
@@ -511,6 +512,7 @@ public class CardCommandAPDU extends CardAPDU {
 
     /**
      * Returns a iterator over the chaining APDUs.
+     * @return 
      */
     public final Iterable getChainingIterator() {
 	// TODO: Implemente the chaining iterator

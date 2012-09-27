@@ -34,7 +34,6 @@ import org.openecard.client.common.util.ShortUtils;
  */
 public class Select extends CardCommandAPDU {
 
-    private static final byte[] MF_FID = new byte[]{(byte) 0x3F, (byte) 0x00};
     /**
      * SELECT command instruction byte
      */
@@ -82,6 +81,9 @@ public class Select extends CardCommandAPDU {
      */
     public static final class MasterFile extends Select {
 
+	/** MasterFile file identifier */
+	public static final byte[] MF_FID = new byte[]{(byte) 0x3F, (byte) 0x00};
+	
 	/**
 	 * Creates a new Select APDU to select the Master File.
 	 */

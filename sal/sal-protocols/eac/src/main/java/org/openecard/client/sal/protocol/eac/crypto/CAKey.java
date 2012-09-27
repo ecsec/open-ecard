@@ -157,7 +157,7 @@ public final class CAKey {
 
 		return compKey;
 	    } catch (NoSuchAlgorithmException e) {
-		logger.error("Exception", e);
+		logger.error(e.getMessage(), e);
 		throw new RuntimeException(e);
 	    }
 	} else if (cdp.isECDH()) {

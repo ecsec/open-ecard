@@ -89,9 +89,7 @@ public class PAOS {
 	try {
 	    m = WSMarshallerFactory.createInstance();
 	} catch (WSMarshallerException e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
+	    logger.error(e.getMessage(), e);
 	    throw new RuntimeException(e);
 	}
     }
@@ -150,9 +148,7 @@ public class PAOS {
 		throw new PAOSException("MessageID from result doesn't match.");
 	    }
 	} catch (SOAPException e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
+	    logger.error(e.getMessage(), e);
 	    throw new PAOSException(e.getMessage(), e);
 	}
     }
@@ -178,9 +174,7 @@ public class PAOS {
 
 	    return m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
 	} catch (Exception e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
+	    logger.error(e.getMessage(), e);
 	    throw new PAOSException(e.getMessage(), e);
 	}
     }

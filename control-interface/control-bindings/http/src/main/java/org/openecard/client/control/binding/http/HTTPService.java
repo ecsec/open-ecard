@@ -124,7 +124,7 @@ public class HTTPService implements Runnable {
 				service.handleRequest(connection, new BasicHttpContext());
 			    }
 			} catch (Exception e) {
-			    logger.error("Exception", e);
+			    logger.error(e.getMessage(), e);
 			} finally {
 			    try {
 				connection.shutdown();
@@ -135,7 +135,7 @@ public class HTTPService implements Runnable {
 
 		}.start();
 	    } catch (Exception e) {
-		logger.error("Exception", e);
+		logger.error(e.getMessage(), e);
 	    }
 	}
     }

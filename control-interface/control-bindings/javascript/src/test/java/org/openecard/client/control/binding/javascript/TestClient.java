@@ -68,7 +68,7 @@ public final class TestClient implements ControlListener {
 	try {
 	    setup();
 	} catch (Exception e) {
-	    logger.error("Exception", e);
+	    logger.error(e.getMessage(), e);
 	}
     }
 
@@ -168,7 +168,7 @@ public final class TestClient implements ControlListener {
 
 	    response.setRefreshAddress(new URL("http://www.openecard.org"));
 	} catch (Exception e) {
-	    logger.error("Exception", e);
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	}
 

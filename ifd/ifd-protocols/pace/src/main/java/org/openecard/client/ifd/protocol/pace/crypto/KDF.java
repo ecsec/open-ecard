@@ -51,9 +51,7 @@ public final class KDF {
 	    md = MessageDigest.getInstance("SHA1");
 	    keyLength = 16;
 	} catch (NoSuchAlgorithmException ex) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", ex);
-	    // </editor-fold>
+	    logger.error(ex.getMessage(), ex);
 	    throw new GeneralSecurityException(ex);
 	}
     }

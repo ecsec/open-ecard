@@ -162,9 +162,7 @@ public final class PACEKey {
 
 		return compKey;
 	    } catch (NoSuchAlgorithmException ex) {
-		// <editor-fold defaultstate="collapsed" desc="log exception">
-		logger.error("Exception", ex);
-		// </editor-fold>
+		logger.error(ex.getMessage(), ex);
 		throw new RuntimeException(ex);
 	    }
 	} else if (pdp.isECDH()) {

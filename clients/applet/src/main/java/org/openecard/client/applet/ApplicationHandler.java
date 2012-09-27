@@ -135,7 +135,7 @@ public final class ApplicationHandler implements ControlListener {
 		// Check CardApplicationPathResponse
 		WSHelper.checkResult(cardApplicationPathResponse);
 	    } catch (WSHelper.WSException ex) {
-		logger.error("Exception", ex);
+		logger.error(ex.getMessage(), ex);
 		response.setResult(ex.getResult());
 		return response;
 	    }
@@ -150,7 +150,7 @@ public final class ApplicationHandler implements ControlListener {
 		// Check CardApplicationConnectResponse
 		WSHelper.checkResult(cardApplicationConnectResponse);
 	    } catch (WSHelper.WSException ex) {
-		logger.error("Exception", ex);
+		logger.error(ex.getMessage(), ex);
 		response.setResult(ex.getResult());
 		return response;
 	    }
@@ -196,7 +196,7 @@ public final class ApplicationHandler implements ControlListener {
 	    if (ex instanceof RuntimeException) {
 		throw (RuntimeException) ex;
 	    }
-	    logger.error("Exception", ex);
+	    logger.error(ex.toString(), ex);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, ex.getMessage()));
 	}
 

@@ -121,7 +121,7 @@ public class TCTokenHandler extends ControlClientHandler {
 	} catch (HTTPException e) {
 	    throw e;
 	} catch (Exception e) {
-	    _logger.error("Exception", e);
+	    _logger.error(e.getMessage(), e);
 	    throw new HTTPException(HttpStatus.SC_BAD_REQUEST, e.getMessage());
 	}
     }

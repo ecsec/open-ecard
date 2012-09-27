@@ -62,7 +62,7 @@ public class StatusHandler extends ControlJavaScriptHandler {
 	try {
 	    m = WSMarshallerFactory.createInstance();
 	} catch (WSMarshallerException e) {
-	    logger.error("Exception", e);
+	    logger.error(e.getMessage(), e);
 	    throw new RuntimeException(e);
 	}
     }

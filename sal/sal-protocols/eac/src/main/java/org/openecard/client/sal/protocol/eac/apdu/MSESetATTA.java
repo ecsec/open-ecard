@@ -74,7 +74,7 @@ public class MSESetATTA extends ManageSecurityEnviroment {
 
 	    caos.flush();
 	} catch (IOException e) {
-	    logger.error("Exception", e);
+	    logger.error(e.getMessage(), e);
 	} finally {
 	    try {
 		caos.close();

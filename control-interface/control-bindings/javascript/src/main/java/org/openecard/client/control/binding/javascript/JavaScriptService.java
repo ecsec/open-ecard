@@ -59,7 +59,7 @@ public class JavaScriptService implements Runnable {
 	    logger.error("Cannot find a handler for the ID [{}]", id);
 	    return null;
 	} catch (Exception e) {
-	    logger.error("Exception", e);
+	    logger.error(e.getMessage(), e);
 	    return null;
 	}
     }

@@ -86,7 +86,7 @@ public abstract class ControlJavaScriptHandler extends ControlHandler {
 	    //TODO
 	    throw e;
 	} catch (Exception e) {
-	    logger.error("Exception", e);
+	    logger.error(e.getMessage(), e);
 	} finally {
 	    logger.debug("JavaScript response: {}", response);
 	    logger.debug("JavaScript request handled by: {}", this.getClass().getName());

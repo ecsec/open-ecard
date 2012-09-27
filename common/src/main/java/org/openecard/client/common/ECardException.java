@@ -90,7 +90,7 @@ public abstract class ECardException extends Exception {
 
 
 	private Implementation(Result r) {
-	    super((r.getResultMessage() != null) ? r.getResultMessage().getValue() : "Unknown IFD exception occurred.");
+	    super((r.getResultMessage() != null) ? r.getResultMessage().getValue() : "Unknown eCard exception occurred.");
 	    this.resultMajor = r.getResultMajor();
 	    if (r.getResultMinor() != null) {
 		this.resultMinor = r.getResultMinor();

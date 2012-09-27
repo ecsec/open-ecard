@@ -74,7 +74,7 @@ public final class PACECryptoSuite {
 	    c.init(Cipher.DECRYPT_MODE, skeySpec, params);
 	    c.doFinal(nonce, 0, nonce.length, ret);
 	} catch (Throwable e) {
-	    logger.error("Exception", e);
+	    logger.error(e.getMessage(), e);
 	    throw new GeneralSecurityException(e);
 	}
 	return ret;

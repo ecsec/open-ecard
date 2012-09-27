@@ -183,10 +183,10 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		response.setAuthenticationProtocolData(eac1Output.getAuthDataType());
 	    }
 	} catch (WSException e) {
-	    logger.error("Exception", e);
+	    logger.error(e.getMessage(), e);
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error("Exception", e);
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	}
 

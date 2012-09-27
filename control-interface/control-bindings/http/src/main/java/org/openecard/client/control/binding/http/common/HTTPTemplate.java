@@ -50,7 +50,7 @@ public class HTTPTemplate {
 	    URL url = documentRoot.getFile(templatePath);
 	    content = FileUtils.toString(url.openStream());
 	} catch (Exception e) {
-	    _logger.error("Exception", e);
+	    _logger.error(e.getMessage(), e);
 	}
     }
 

@@ -54,7 +54,7 @@ public class TCTokenParser {
 	try {
 	    saxFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 	} catch (Exception e) {
-	    _logger.error("Exception", e);
+	    _logger.error(e.getMessage(), e);
 	}
     }
 
@@ -88,7 +88,7 @@ public class TCTokenParser {
 
 	    return tokens;
 	} catch (Exception e) {
-	     _logger.error("Exception", e);
+	    _logger.error(e.getMessage(), e);
 	    throw new TCTokenException("TCToken is malformed", e);
 	}
     }

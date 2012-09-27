@@ -130,7 +130,7 @@ public abstract class ControlClientHandler extends ControlHandler implements Htt
 	    }
 	} catch (Exception e) {
 	    httpResponse = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-	    _logger.error("Exception", e);
+	    _logger.error(e.getMessage(), e);
 	} finally {
 	    Http11Response.copyHttpResponse(httpResponse, response);
 	    _logger.debug("HTTP response: {}", response);

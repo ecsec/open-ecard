@@ -369,7 +369,7 @@ public final class RichClient implements ControlListener {
 	    // Initialize the EventManager
 	    em.initialize();
 	} catch (Exception e) {
-	    _logger.error("Exception", e);
+	    _logger.error(e.getMessage(), e);
 
 	    if (dialog.getMessage() == null || dialog.getMessage().isEmpty()) {
 		// Add exception message if no custom message is set

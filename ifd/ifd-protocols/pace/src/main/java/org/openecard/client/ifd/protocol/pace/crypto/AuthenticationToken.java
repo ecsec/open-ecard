@@ -208,7 +208,7 @@ public final class AuthenticationToken {
 	    ret = macObject.toBER(true);
 
 	} catch (Throwable e) {
-	    logger.error("Exception", e);
+	    logger.error(e.getMessage(), e);
 	    throw new GeneralSecurityException(e);
 	}
 

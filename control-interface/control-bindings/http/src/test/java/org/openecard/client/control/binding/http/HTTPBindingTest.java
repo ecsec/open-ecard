@@ -138,7 +138,7 @@ public final class HTTPBindingTest {
 
 	    return content.toString();
 	} catch (IOException e) {
-	    logger.error("Exception", e);
+	    logger.error(e.getMessage(), e);
 	    return null;
 	}
     }

@@ -110,9 +110,7 @@ public class PACEImplementation {
 	    // Continue with step 2
 	    generalAuthenticateEncryptedNonce();
 	} catch (APDUException e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
+	    logger.error(e.getMessage(), e);
 	    short sw = e.getResponseAPDU().getSW();
 
 	    if (sw == PACEConstants.PASSWORD_DEACTIVATED) {
@@ -147,14 +145,10 @@ public class PACEImplementation {
 		}
 	    }
 	} catch (ProtocolException e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
+	    logger.error(e.getMessage(), e);
 	    throw e;
 	} catch (Exception e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
+	    logger.error(e.getMessage(), e);
 	    throw new ProtocolException(ECardConstants.Minor.IFD.UNKNOWN_ERROR, e.getMessage());
 	}
     }
@@ -175,14 +169,10 @@ public class PACEImplementation {
 	    // Continue with Step 3
 	    generalAuthenticateMapNonce();
 	} catch (APDUException e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
+	    logger.error(e.getMessage(), e);
 	    throw new ProtocolException(e.getResult());
 	} catch (GeneralSecurityException e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
+	    logger.error(e.getMessage(), e);
 	    throw new ProtocolException(e.getMessage());
 	}
     }
@@ -208,9 +198,7 @@ public class PACEImplementation {
 	try {
 	    response = gaMapNonce.transmit(dispatcher, slotHandle);
 	} catch (APDUException e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
+	    logger.error(e.getMessage(), e);
 	    throw new ProtocolException(e.getResult());
 	}
 
@@ -260,14 +248,10 @@ public class PACEImplementation {
 		throw new GeneralSecurityException("PACE security violation: equal keys");
 	    }
 	} catch (APDUException e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
+	    logger.error(e.getMessage(), e);
 	    throw new ProtocolException(e.getResult());
 	} catch (GeneralSecurityException e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
+	    logger.error(e.getMessage(), e);
 	    throw new ProtocolException(e.getMessage());
 	}
     }
@@ -303,9 +287,7 @@ public class PACEImplementation {
 		throw new GeneralSecurityException("Cannot verify authentication token.");
 	    }
 	} catch (APDUException e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
+	    logger.error(e.getMessage(), e);
 	    int sw = e.getResponseAPDU().getSW();
 
 	    if ((sw & (short) 0xFFF0) == (short) 0x63C0) {
@@ -333,9 +315,7 @@ public class PACEImplementation {
 			ECardConstants.Minor.IFD.AUTHENTICATION_FAILED, "Authentication failed.");
 	    }
 	} catch (Exception e) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", e);
-	    // </editor-fold>
+	    logger.error(e.getMessage(), e);
 	    throw new ProtocolException(ECardConstants.Minor.IFD.UNKNOWN_ERROR, e.getMessage());
 	}
     }

@@ -68,7 +68,7 @@ public class RichClientTest {
 		fail(applicationReponse.getResult().getResultMajor());
 	    }
 	} catch (Exception e) {
-	    logger.error("Exception", e);
+	    logger.error(e.getMessage(), e);
 	    fail(e.getMessage());
 	}
     }

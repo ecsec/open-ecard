@@ -86,7 +86,7 @@ public class TCTokenHandler extends ControlJavaScriptHandler {
 	    }
 	    return tcTokenRequest;
 	} catch (Exception e) {
-	    logger.error("Exception", e);
+	    logger.error(e.getMessage(), e);
 	    return null;
 	}
     }

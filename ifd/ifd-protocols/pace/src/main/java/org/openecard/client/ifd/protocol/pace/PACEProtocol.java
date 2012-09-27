@@ -110,21 +110,15 @@ public class PACEProtocol implements Protocol {
 	    response.setAuthenticationProtocolData(paceOutput.getAuthDataType());
 
 	} catch (UnsupportedEncodingException ex) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", ex);
-	    // </editor-fold>
+	    logger.error(ex.getMessage(), ex);
 	    response.setResult(WSHelper.makeResultError(
 		    ECardConstants.Minor.IFD.UNKNOWN_PIN_FORMAT,
 		    "Cannot encode the PIN in " + PACEConstants.PIN_CHARSET + " charset."));
 	} catch (ProtocolException ex) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", ex);
-	    // </editor-fold>
+	    logger.error(ex.getMessage(), ex);
 	    response.setResult(WSHelper.makeResult(ex));
 	} catch (Throwable ex) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", ex);
-	    // </editor-fold>
+	    logger.error(ex.getMessage(), ex);
 	    response.setResult(WSHelper.makeResult(ex));
 	}
 
@@ -141,9 +135,7 @@ public class PACEProtocol implements Protocol {
 	    }
 	} catch (Exception ex) {
 	    sm = null;
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", ex);
-	    // </editor-fold>
+	    logger.error(ex.getMessage(), ex);
 	    throw new RuntimeException(ex);
 	}
     }
@@ -158,9 +150,7 @@ public class PACEProtocol implements Protocol {
 	    }
 	} catch (Exception ex) {
 	    sm = null;
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", ex);
-	    // </editor-fold>
+	    logger.error(ex.getMessage(), ex);
 	    throw new RuntimeException(ex);
 	}
     }

@@ -82,7 +82,7 @@ public class JSEventCallback {
 	    control.getListeners().addControlListener(handler);
 	    control.start();
 	} catch (Exception ex) {
-	    logger.error("Exception", ex);
+	    logger.error(ex.getMessage(), ex);
 	}
     }
 

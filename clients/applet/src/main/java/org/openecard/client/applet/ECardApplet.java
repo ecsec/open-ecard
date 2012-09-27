@@ -139,7 +139,7 @@ public class ECardApplet extends JApplet {
 	try {
 	    recognition = new CardRecognition(ifd, contextHandle);
 	} catch (Exception ex) {
-	    logger.error("Exception", ex);
+	    logger.error(ex.getMessage(), ex);
 	    JOptionPane.showMessageDialog(null, lang.translationForKey("recognition.error"), lang
 		    .translationForKey("error"), JOptionPane.ERROR_MESSAGE, getLogo());
 	    destroy();

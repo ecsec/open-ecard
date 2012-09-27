@@ -49,9 +49,7 @@ public class PCSCTest {
 	    ResponseAPDU response = connection.transmit(new CommandAPDU(selectmf));
 	    logger.info("Receive APDU {}", ByteUtils.toHexString(response.getBytes()));
 	} catch (CardException ex) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", ex);
-	    // </editor-fold>
+	    logger.error(ex.getMessage(), ex);
 	}
     }
 
@@ -81,9 +79,7 @@ public class PCSCTest {
 	    }
 
 	} catch (Exception ex) {
-	    // <editor-fold defaultstate="collapsed" desc="log exception">
-	    logger.error("Exception", ex);
-	    // </editor-fold>
+	    logger.error(ex.getMessage(), ex);
 	}
     }
 

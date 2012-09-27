@@ -27,8 +27,8 @@ import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.util.List;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.openecard.client.common.apdu.common.CardResponseAPDU;
 import org.openecard.client.common.util.CardCommandStatus;
-import org.openecard.client.common.util.CardCommands;
 
 
 /**
@@ -52,10 +52,11 @@ public class WSHelper {
 	    if (response instanceof TransmitResponse) {
 		TransmitResponse tr = (TransmitResponse) response;
 		List<byte[]> rApdus = tr.getOutputAPDU();
-		byte[] apdu = (rApdus.size() < 1) ? null : CardCommands.getResultFromResponse(rApdus.get(rApdus.size()-1));
-		if (apdu == null) {
+		
+		if(rApdus.size() < 1){
 		    throw new WSException(r);
 		} else {
+		    byte[] apdu = CardResponseAPDU.getTrailer(rApdus.get(rApdus.size()-1));
 		    String msg = CardCommandStatus.getMessage(apdu);
 		    throw new WSException(msg);
 		}
@@ -121,7 +122,7 @@ public class WSHelper {
             t.setProfile(ECardConstants.Profile.ECARD_1_1);
             t.setResult(r);
             return t;
-        } catch (Exception ex) {
+        } catch (Exception ignore) {
             return null;
         }
     }

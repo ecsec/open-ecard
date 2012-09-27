@@ -23,6 +23,7 @@
 package org.openecard.client.common.apdu;
 
 import org.openecard.client.common.apdu.common.CardCommandAPDU;
+import org.openecard.client.common.util.ShortUtils;
 
 
 /**
@@ -119,6 +120,15 @@ public class Select extends CardCommandAPDU {
 	public File(byte[] fid) {
 	    super((byte) 0x02, (byte) 0x0C);
 	    setData(fid);
+	}
+	
+	/**
+	 * Creates a new Select APDU to select a file.
+	 *
+	 * @param fid File Identifier
+	 */
+	public File(short fid){
+	    this(ShortUtils.toByteArray(fid));
 	}
     }
 

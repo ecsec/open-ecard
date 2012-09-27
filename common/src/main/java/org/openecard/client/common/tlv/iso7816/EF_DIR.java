@@ -22,22 +22,15 @@
 
 package org.openecard.client.common.tlv.iso7816;
 
-import iso.std.iso_iec._24727.tech.schema.Transmit;
-import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.apdu.exception.APDUException;
+import org.openecard.client.common.apdu.utils.CardUtils;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.tlv.Parser;
 import org.openecard.client.common.tlv.TLV;
 import org.openecard.client.common.tlv.TLVException;
 import org.openecard.client.common.tlv.Tag;
-import org.openecard.client.common.util.CardCommands;
-import org.openecard.client.common.util.StringUtils;
-import org.openecard.ws.IFD;
 
 
 /**
@@ -45,6 +38,8 @@ import org.openecard.ws.IFD;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class EF_DIR {
+
+    public static final short EF_DIR_FID = (short) 0x2F00;
 
     private final TLV tlv;
 
@@ -75,82 +70,12 @@ public class EF_DIR {
 	this(TLV.fromBER(data));
     }
 
-
-    public static EF_DIR selectAndRead(IFD ifd, byte[] slotHandle) throws WSException, TLVException {
-	// select EF.DIR and eval FCP
-	Transmit t = CardCommands.Select.makeTransmit(slotHandle, CardCommands.Select.EF_FCP(StringUtils.toByteArray("2F00")));
-	TransmitResponse tr = ifd.transmit(t);
-	WSHelper.checkResult(tr);
-
-	byte[] fcpData = tr.getOutputAPDU().get(0);
-	fcpData = CardCommands.getDataFromResponse(fcpData);
-	FCP fcp = new FCP(fcpData);
-
-	if (fcp.getDataElements().isTransparent()) {
-	    return readAsTransparent(ifd, slotHandle);
-	} else if (fcp.getDataElements().isLinear()) {
-	    return readAsRecords(ifd, slotHandle);
-	} else {
-	    return readAsAny(ifd, slotHandle);
-	}
-    }
-
-    public static EF_DIR readAsAny(IFD ifd, byte[] slotHandle) throws WSException, TLVException {
-	try {
-	    return readAsTransparent(ifd, slotHandle);
-	} catch (Exception ex) {
-	    return readAsRecords(ifd, slotHandle);
-	}
-    }
-
-    public static EF_DIR readAsRecords(IFD ifd, byte[] slotHandle) throws WSException, TLVException {
-	ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-	boolean done = false;
-	byte i=1;
-	while (!done) {
-	    Transmit t = CardCommands.Read.makeTransmit(slotHandle, CardCommands.Read.recordNumber(i));
-	    TransmitResponse tr = ifd.transmit(t);
-	    try {
-		WSHelper.checkResult(tr);
-		try {
-		    out.write(CardCommands.getDataFromResponse(tr.getOutputAPDU().get(0)));
-		} catch (IOException ex) {
-		    // what could possibly go wrong?!?
-		}
-	    } catch (WSException ex) {
-		// check if end of records has been reached, or something bad happened
-		if (!tr.getOutputAPDU().isEmpty() && Arrays.equals(new byte[] {(byte)0x6A, (byte)0x83}, tr.getOutputAPDU().get(0))) {
-		    done = true;
-		} else {
-		    throw ex;
-		}
-	    }
-
-	    i++; // at most 255 records in file
-	    if (i == 0xFF) {
-		done = true;
-	    }
-	}
-
-	byte[] data = out.toByteArray();
-	if (data.length == 0) {
-	    // no data is most certainly wrong
-	    throw new TLVException("No data found in EF.DIR.");
-	}
+    public static EF_DIR selectAndRead(Dispatcher dispatcher, byte[] slotHandle) throws APDUException, TLVException {
+	// Select and read EF.DIR 
+	byte[] data = CardUtils.readFile(dispatcher, slotHandle, EF_DIR_FID);
+	
 	return new EF_DIR(data);
     }
-
-    public static EF_DIR readAsTransparent(IFD ifd, byte[] slotHandle) throws WSException, TLVException {
-	Transmit t = CardCommands.Read.makeTransmit(slotHandle, CardCommands.Read.binary());
-	TransmitResponse tr = ifd.transmit(t);
-	WSHelper.checkResult(tr);
-
-	// TODO: what is the code for more data available?
-
-	return new EF_DIR(CardCommands.getDataFromResponse(tr.getOutputAPDU().get(0)));
-    }
-
 
 
     public List<byte[]> getApplicationIds() {

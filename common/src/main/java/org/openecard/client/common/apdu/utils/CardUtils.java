@@ -19,10 +19,10 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.client.common.apdu.utils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import org.openecard.client.common.apdu.ReadBinary;
 import org.openecard.client.common.apdu.Select;
 import org.openecard.client.common.apdu.common.CardCommandAPDU;
@@ -145,7 +145,7 @@ public class CardUtils {
      * @return File content
      * @throws Exception 
      */
-    public static byte[] readFile(Dispatcher dispatcher, byte[] slotHandle) throws Exception {
+    public static byte[] readFile(Dispatcher dispatcher, byte[] slotHandle) throws APDUException {
 	return readFile(dispatcher, slotHandle, (short) -1);
     }
 
@@ -158,7 +158,7 @@ public class CardUtils {
      * @return File content
      * @throws Exception 
      */
-    public static byte[] readFile(Dispatcher dispatcher, byte[] slotHandle, short fileID) throws Exception {
+    public static byte[] readFile(Dispatcher dispatcher, byte[] slotHandle, short fileID) throws APDUException {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	// Read 255 bytes per APDU
 	byte length = (byte) 0xFF;
@@ -171,15 +171,18 @@ public class CardUtils {
 	    selectFile.transmit(dispatcher, slotHandle);
 	}
 
-	do {
-	    CardCommandAPDU readBinary = new ReadBinary((short) (i * (length & 0xFF)), length);
-	    response = readBinary.transmit(dispatcher, slotHandle);
+	try {
+	    do {
+		CardCommandAPDU readBinary = new ReadBinary((short) (i * (length & 0xFF)), length);
+		response = readBinary.transmit(dispatcher, slotHandle);
 
-	    baos.write(response.getData());
-	    i++;
-	} while (response.isNormalProcessed());
-
-	baos.close();
+		baos.write(response.getData());
+		i++;
+	    } while (response.isNormalProcessed());
+	    baos.close();
+	} catch (IOException e) {
+	    throw new APDUException(e);
+	}
 
 	return baos.toByteArray();
     }

@@ -112,7 +112,7 @@
         </UI>
         <WixVariable Id="WixUIBannerBmp" Value="WixUIBanner.bmp" />
         <WixVariable Id="WixUIDialogBmp" Value="WixUIDialog.bmp" />
-        <WixVariable Id="WixUILicenseRtf" Value="License.en-us.rtf" />
+        <WixVariable Id="WixUILicenseRtf" Value="License.de-de.rtf" />
     </Product>
     
     

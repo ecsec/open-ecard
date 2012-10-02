@@ -38,6 +38,8 @@ public class TCTokenRequest extends ClientRequest {
     private String ifdName;
     private BigInteger slotIndex;
     private byte[] contextHandle;
+    private String cardType = "http://bsi.bund.de/cif/npa.xml";
+
 
     /**
      * Returns the TCToken.
@@ -109,6 +111,25 @@ public class TCTokenRequest extends ClientRequest {
      */
     public void setSlotIndex(String slotIndex) {
 	this.slotIndex = new BigInteger(slotIndex);
+    }
+
+    /**
+     * Returns the card type selected for this authentication process.
+     * Defaults to the nPA identifier to provide a fallback.
+     *
+     * @return Card type
+     */
+    public String getCardType() {
+	return cardType;
+    }
+
+    /**
+     * Sets the card type.
+     *
+     * @param cardType Card type
+     */
+    public void setCardType(String cardType) {
+	this.cardType = cardType;
     }
 
 }

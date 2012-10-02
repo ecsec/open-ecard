@@ -109,6 +109,12 @@ public class TCTokenHandler extends ControlClientHandler {
 			} else {
 			    throw new IllegalArgumentException("Malformed SlotIndex");
 			}
+		    } else if (name.startsWith("cardType")) {
+			if (!value.isEmpty()) {
+			    tcTokenRequest.setCardType(value);
+			} else {
+			    throw new IllegalArgumentException("Malformed CardType");
+			}
 		    } else {
 			_logger.debug("Unknown query element: {}", name);
 		    }

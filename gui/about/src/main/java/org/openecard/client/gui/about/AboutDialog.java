@@ -70,14 +70,14 @@ public class AboutDialog extends JDialog {
 	getContentPane().setBackground(Color.white);
 
 	JTextPane txtpnHeading = new JTextPane();
-	txtpnHeading.setFont(new Font("Dialog", Font.BOLD, 20));
+	txtpnHeading.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
 	txtpnHeading.setEditable(false);
 	txtpnHeading.setText(lang.translationForKey("about.heading"));
 	txtpnHeading.setBounds(12, 12, 692, 30);
 	getContentPane().add(txtpnHeading);
 
 	JTextPane txtpnVersion = new JTextPane();
-	txtpnVersion.setFont(new Font("Dialog", Font.PLAIN, 9));
+	txtpnVersion.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 9));
 	txtpnVersion.setEditable(false);
 	txtpnVersion.setText(lang.translationForKey("about.version"));
 	txtpnVersion.setBounds(12, 54, 692, 18);

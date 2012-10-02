@@ -115,7 +115,7 @@ public class Status implements EventCallback {
 
 	JLabel label = new JLabel(" " + lang.translationForKey("tray.title") + " ");
 	label.setBackground(Color.white);
-	label.setFont(new Font("Dialog", Font.BOLD, 20));
+	label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
         
         JPanel btnPanel = new JPanel();
         btnPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));

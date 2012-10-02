@@ -25,9 +25,6 @@ package org.openecard.client.richclient.gui;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -262,7 +259,7 @@ public class AppTray {
             }
         }
     }
-    
+
 
     private boolean isLinux() {
         if (isLinux == null) {
@@ -271,34 +268,26 @@ public class AppTray {
         }
         return isLinux;
     }
-    
+
     private boolean isKde() {
         if (isKde == null) {
-            try {
-                String[] command = {"pgrep", "-l", "kwin"};
-                ProcessBuilder pb = new ProcessBuilder(command);
-                Process child = pb.start();
-
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                InputStream is = child.getInputStream();
-                int c;
-                while ((c = is.read()) != -1) {
-                    baos.write(c);
-                }
-                is.close();
-
-                isKde = baos.toString().indexOf("kwin") >= 0;
-
-            } catch (IOException ex) {
-                isKde = false;
-            }
+	    // KDE_FULL_SESSION contains true when KDE is running
+	    // The spec says (http://techbase.kde.org/KDE_System_Administration/Environment_Variables#KDE_FULL_SESSION)
+	    // If you plan on using this variable to detect a running KDE session, check if the value is not empty
+	    // instead of seeing if it equals true. The value might be changed in the future to include KDE version.
+	    String kdeSession = System.getenv("KDE_FULL_SESSION");
+	    if (kdeSession != null && ! kdeSession.isEmpty()) {
+		isKde = true;
+	    } else {
+		isKde = false;
+	    }
         }
         return isKde;
     }
-    
+
     private void setupFrame() {
 	trayAvailable = false;
-        
+
 	frame = new JFrame(lang.translationForKey("tray.title"));
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	frame.setIconImage(GuiUtils.getImage("logo_icon_default_256.png"));

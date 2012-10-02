@@ -57,6 +57,7 @@ public class InfoPopup extends JDialog {
     }
 
     private void setupUI(Container c) {
+	setAlwaysOnTop(true);
 	setUndecorated(true);
 	Color blue = new Color(121, 170, 215);
 	setBackground(blue);

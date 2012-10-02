@@ -63,10 +63,10 @@ public class PINStep {
 	String stepTitle = lang.translationForKey(TITLE);
 	stepTitle = stepTitle.replaceFirst("%s", passwordType);
 	step.setTitle(stepTitle);
-	
+
 	String decriptionText = lang.translationForKey(DESCRIPTION);
 	decriptionText = decriptionText.replaceFirst("%s", passwordType);
-	
+
 	Text description = new Text();
 	description.setText(decriptionText);
 	step.getInputInfoUnits().add(description);

@@ -47,9 +47,9 @@ import org.openecard.client.common.util.ByteUtils;
  */
 public class SecureMessaging {
 
-    private final static byte[] NULL = new byte[]{0x00};
+    private static final byte[] NULL = new byte[]{0x00};
     // ISO/IEC 7816-4 padding tag
-    private final static byte PAD = (byte) 0x80;
+    private static final byte PAD = (byte) 0x80;
     // Send Sequence Counter. See BSI-TR-03110 section F.3.
     private byte[] secureMessagingSSC;
     // Keys for encryption and message authentication.

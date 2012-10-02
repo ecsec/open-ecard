@@ -35,7 +35,13 @@ import org.openecard.client.crypto.common.asn1.eac.PACEDomainParameter;
 import org.openecard.client.crypto.common.asn1.eac.PACESecurityInfos;
 import org.openecard.client.crypto.common.asn1.utils.ObjectIdentifierUtils;
 import org.openecard.client.ifd.protocol.pace.apdu.MSESetATPACE;
-import org.openecard.client.ifd.protocol.pace.crypto.*;
+import org.openecard.client.ifd.protocol.pace.crypto.AuthenticationToken;
+import org.openecard.client.ifd.protocol.pace.crypto.KDF;
+import org.openecard.client.ifd.protocol.pace.crypto.PACECryptoSuite;
+import org.openecard.client.ifd.protocol.pace.crypto.PACEGenericMapping;
+import org.openecard.client.ifd.protocol.pace.crypto.PACEIntegratedMapping;
+import org.openecard.client.ifd.protocol.pace.crypto.PACEKey;
+import org.openecard.client.ifd.protocol.pace.crypto.PACEMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

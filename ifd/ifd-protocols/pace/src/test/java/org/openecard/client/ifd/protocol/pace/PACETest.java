@@ -22,7 +22,11 @@
 
 package org.openecard.client.ifd.protocol.pace;
 
-import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.Connect;
+import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
+import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
+import iso.std.iso_iec._24727.tech.schema.EstablishContext;
+import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import java.math.BigInteger;
 import javax.activation.UnsupportedDataTypeException;
 import javax.xml.bind.JAXBException;
@@ -49,7 +53,7 @@ public class PACETest {
 
     private static final Logger logger = LoggerFactory.getLogger(PACETest.class);
 
-    @Test(enabled=false)
+    @Test(enabled = false)
     public void executePACE_PIN() throws UnsupportedDataTypeException, JAXBException, SAXException, WSMarshallerException {
 	ClientEnv env = new ClientEnv();
 	MessageDispatcher dispatcher = new MessageDispatcher(env);

@@ -30,7 +30,8 @@ import javax.crypto.spec.SecretKeySpec;
 import org.openecard.bouncycastle.jce.spec.ECParameterSpec;
 import org.openecard.bouncycastle.math.ec.ECPoint;
 import org.openecard.client.common.util.ByteUtils;
-import org.openecard.client.crypto.common.asn1.eac.*;
+import org.openecard.client.crypto.common.asn1.eac.PACEDomainParameter;
+import org.openecard.client.crypto.common.asn1.eac.PACESecurityInfos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

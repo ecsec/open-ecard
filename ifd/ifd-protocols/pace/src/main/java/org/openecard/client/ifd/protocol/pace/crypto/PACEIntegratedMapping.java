@@ -25,7 +25,6 @@ package org.openecard.client.ifd.protocol.pace.crypto;
 import org.openecard.client.crypto.common.asn1.eac.PACEDomainParameter;
 
 
-
 /**
  * Implements the Integrated Mapping for PACE.
  * See BSI-TR-03110, version 2.10, part 3, section A.3.5.2.
@@ -40,12 +39,12 @@ public final class PACEIntegratedMapping extends PACEMapping {
      * @param pdp PACEDomainParameter
      */
     public PACEIntegratedMapping(PACEDomainParameter pdp) {
-        super(pdp);
+	super(pdp);
     }
 
     @Override
     public PACEDomainParameter map(byte[] keyPICC, byte[] keyPCD) {
-        throw new UnsupportedOperationException("Not supported yet.");
+	throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

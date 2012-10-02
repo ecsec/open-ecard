@@ -23,7 +23,14 @@
 package org.openecard.client.ifd.protocol.pace;
 
 import java.util.List;
-import javax.smartcardio.*;
+import javax.smartcardio.Card;
+import javax.smartcardio.CardChannel;
+import javax.smartcardio.CardException;
+import javax.smartcardio.CardTerminal;
+import javax.smartcardio.CardTerminals;
+import javax.smartcardio.CommandAPDU;
+import javax.smartcardio.ResponseAPDU;
+import javax.smartcardio.TerminalFactory;
 import org.openecard.client.common.util.ByteUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +46,7 @@ public class PCSCTest {
     private static final Logger logger = LoggerFactory.getLogger(PCSCTest.class);
     private CardChannel connection;
 
-    @Test(enabled=false)
+    @Test(enabled = false)
     public void PCSCTest() {
 	connect();
 

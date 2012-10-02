@@ -22,6 +22,7 @@
 
 package org.openecard.client.ifd.protocol.pace.common;
 
+
 /**
  * Implements the different password identifier.
  * See BSI-TR-03110, version 2.10, part 3, section B.11.1.
@@ -34,6 +35,7 @@ public enum PasswordID {
     CAN((byte) 0x02),
     PIN((byte) 0x03),
     PUK((byte) 0x04);
+
     private byte b;
 
     private PasswordID(byte type) {

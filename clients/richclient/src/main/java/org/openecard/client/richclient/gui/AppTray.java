@@ -23,8 +23,6 @@
 package org.openecard.client.richclient.gui;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.ByteArrayOutputStream;
@@ -34,7 +32,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import org.openecard.client.common.I18n;
-import org.openecard.client.gui.about.AboutDialog;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.richclient.RichClient;
 import org.slf4j.Logger;
@@ -57,7 +54,6 @@ public class AppTray {
     
     private SystemTray tray;
     private TrayIcon trayIcon;
-    private PopupMenu popup;
     private Status status;
     private JFrame frame;
     private JLabel label;
@@ -75,8 +71,6 @@ public class AppTray {
      * A loading icon is displayed.
      */
     public void beginSetup() {
-	createPopupMenu();
-
 	if (SystemTray.isSupported()) {
 	    setupTrayIcon();
 	} else {
@@ -96,81 +90,37 @@ public class AppTray {
 	    label.setIcon(GuiUtils.getImageIcon("logo_icon_default_256.png"));
 	}
 
-	status = new Status(rec);
+	status = new Status(this, rec);
     }
 
     public Status status() {
         return status;
     }
 
-    
-    private void createPopupMenu() {
-        // TODO: implement config menu
-//	MenuItem configItem = new MenuItem(lang.translationForKey("tray.config"));
-//	configItem.addActionListener(new ActionListener() {
-//
-//	    @Override
-//	    public void actionPerformed(ActionEvent e) {
-//		JOptionPane.showMessageDialog(null, "Implement Me!");
-//	    }
-//	});
-
-        // TODO: implement help menu
-//	MenuItem helpItem = new MenuItem(lang.translationForKey("tray.help"));
-//	helpItem.addActionListener(new ActionListener() {
-//
-//	    @Override
-//	    public void actionPerformed(ActionEvent e) {
-//		JOptionPane.showMessageDialog(null, "Implement Me!");
-//	    }
-//	});
-
-        MenuItem aboutItem = new MenuItem(lang.translationForKey("tray.about"));
-        aboutItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                AboutDialog.showDialog();
-            }
-        });
-
-        MenuItem exitItem = new MenuItem(lang.translationForKey("tray.exit"));
-        exitItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (trayAvailable) {
-                    trayIcon.displayMessage("Open eCard App", lang.translationForKey("tray.message.shutdown"), TrayIcon.MessageType.INFO);
-                    client.teardown();
-                    tray.remove(trayIcon);
-                } else {
-                    client.teardown();
-                }
-                System.exit(0);
-            }
-        });
-
-        popup = new PopupMenu();
-//	popup.add(configItem);
-//	popup.add(helpItem);
-        popup.add(aboutItem);
-        popup.addSeparator();
-        popup.add(exitItem);
+    public void shutdown() {
+        if (trayAvailable) {
+            trayIcon.displayMessage("Open eCard App", lang.translationForKey("tray.message.shutdown"), TrayIcon.MessageType.INFO);
+            client.teardown();
+            tray.remove(trayIcon);
+        } else {
+            client.teardown();
+        }
+        System.exit(0);
     }
-    
+
     
     private void setupTrayIcon() {
         trayAvailable = true;
         
         tray = SystemTray.getSystemTray();
         
-        trayIcon = new TrayIcon(getTrayIconImage(ICON_LOADER), lang.translationForKey("tray.message.loading"), popup);
+        trayIcon = new TrayIcon(getTrayIconImage(ICON_LOADER), lang.translationForKey("tray.message.loading"), null);
         trayIcon.setImageAutoSize(true);
         trayIcon.addMouseListener(new MouseAdapter() {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    status.showInfo(new Point(e.getX(), e.getY()));
-                }
+                status.showInfo(new Point(e.getX(), e.getY()));
             }
         });
         
@@ -354,19 +304,11 @@ public class AppTray {
 	frame.setIconImage(GuiUtils.getImage("logo_icon_default_256.png"));
 
 	label = new JLabel(GuiUtils.getImageIcon("loader_icon_default_64.gif"));
-	label.add(popup);
 	label.addMouseListener(new MouseAdapter() {
 
 	    @Override
 	    public void mousePressed(MouseEvent e) {
-		if (e.getButton() == MouseEvent.BUTTON1) {
-		    status.showInfo(e.getLocationOnScreen());
-                    return;
-		}
-
-                if (e.isPopupTrigger() && e.getButton() == MouseEvent.BUTTON3) {
-                    popup.show(e.getComponent(), e.getX(), e.getY());
-                }
+                status.showInfo(e.getLocationOnScreen());
 	    }
 	});
 

@@ -33,6 +33,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -42,12 +44,14 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import org.openecard.client.common.I18n;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.EventCallback;
+import org.openecard.client.gui.about.AboutDialog;
 import org.openecard.client.recognition.CardRecognition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,11 +75,13 @@ public class Status implements EventCallback {
     private JPanel infoView;
     private JPanel noTerminal;
     private InfoPopup popup;
+    private final AppTray appTray;
     private final CardRecognition recognition;
 
-    public Status(CardRecognition recognition) {
-	this.recognition = recognition;
-	setupBaseUI();
+    public Status(AppTray appTray, CardRecognition recognition) {
+	this.appTray = appTray;
+      	this.recognition = recognition;
+        setupBaseUI();
     }
 
     public void showInfo() {
@@ -110,9 +116,35 @@ public class Status implements EventCallback {
 	JLabel label = new JLabel(" " + lang.translationForKey("tray.title") + " ");
 	label.setBackground(Color.white);
 	label.setFont(new Font("Dialog", Font.BOLD, 20));
+        
+        JPanel btnPanel = new JPanel();
+        btnPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        btnPanel.setBackground(Color.white);
+        
+        JButton btnExit = new JButton(lang.translationForKey("tray.exit"));
+        btnExit.addActionListener(new ActionListener() {
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                appTray.shutdown();
+            }
+        });
+        
+        JButton btnAbout = new JButton(lang.translationForKey("tray.about"));
+        btnAbout.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AboutDialog.showDialog();
+            }
+        });
+        
+        btnPanel.add(btnAbout);
+        btnPanel.add(btnExit);
 
 	contentPane.add(label, BorderLayout.NORTH);
 	contentPane.add(infoView, BorderLayout.CENTER);
+        contentPane.add(btnPanel, BorderLayout.SOUTH);
     }
 
     private synchronized void addInfo(String ifdName, RecognitionInfo info) {

@@ -96,12 +96,14 @@
 
         <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
         <Property Id="WixShellExecTarget" Value="[libdir]richclient-@VERSION@.jar" />
-        <CustomAction Id="SetINSTALLDESKTOPSHORTCUT" Property="INSTALLDESKTOPSHORTCUT" Value="1" Execute="firstSequence" />
+        <CustomAction Id="SetINSTALLDESKTOPSHORTCUT" Property="INSTALLDESKTOPSHORTCUT" Value="0" Execute="firstSequence" />
+        <CustomAction Id="SetALLUSERS" Property="ALLUSERS" Value="1" Execute="firstSequence" />
         <CustomAction Id="SetLAUNCHAPPONEXIT" Property="LAUNCHAPPONEXIT" Value="1" Execute="firstSequence" />
         <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" Execute="immediate" />        
         <UI>
             <InstallUISequence>
                 <Custom Action="SetINSTALLDESKTOPSHORTCUT" Before="AppSearch">NOT Installed</Custom>
+                <Custom Action="SetALLUSERS" Before="AppSearch">NOT Installed</Custom>
                 <Custom Action="SetLAUNCHAPPONEXIT" Before="AppSearch">NOT Installed</Custom>
             </InstallUISequence>
             

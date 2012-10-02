@@ -119,8 +119,9 @@ public final class ApplicationHandler implements ControlListener {
 	}
 
 	if (connectionHandle == null) {
-	    logger.error("Warning", "Given ConnectionHandle is invalid.");
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "Given ConnectionHandle is invalid."));
+	    String msg = "Given ConnectionHandle is invalid.";
+	    logger.error(msg);
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 	    return response;
 	}
 
@@ -157,11 +158,6 @@ public final class ApplicationHandler implements ControlListener {
 
 	    String sessionIdentifier = token.getSessionIdentifier();
 	    URL serverAddress = new URL(token.getServerAddress());
-
-	    // FIXME: Wie weit ist das NPA abhängig.
-	    if (token.getPathSecurityParameters() != null && token.getPathSecurityParameters().getPSK() != null) {
-		serverAddress = new URL(serverAddress + "/?sessionid=" + sessionIdentifier);
-	    }
 
 	    TlsClientSocketFactory tlsClientFactory = null;
 

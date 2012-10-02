@@ -29,6 +29,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Set;
 import javax.swing.JOptionPane;
+import org.openecard.bouncycastle.crypto.tls.TlsClient;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.I18n;
@@ -144,7 +145,7 @@ public final class RichClient implements ControlListener {
 	// use dumb activation without explicitly specifying the card and terminal
 	// see TR-03112-7 v 1.1.2 (2012-02-28) sec. 3.2
 	if (request.getContextHandle() == null || request.getIFDName() == null || request.getSlotIndex() == null) {
-	    return handleAusweisappActivate(request);
+	    return handleCardTypeActivate(request);
 	}
 
 	TCTokenResponse response = new TCTokenResponse();
@@ -169,8 +170,9 @@ public final class RichClient implements ControlListener {
 	}
 
 	if (connectionHandle == null) {
-	    _logger.error("Warning", "Given ConnectionHandle is invalied.");
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "Given ConnectionHandle is invalid."));
+	    String msg = "Given ConnectionHandle is invalid.";
+	    _logger.error(msg);
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 	    return response;
 	}
 
@@ -178,19 +180,19 @@ public final class RichClient implements ControlListener {
     }
 
     /**
-     * Activate the client, but assume a german eID card is used and no handle information is given upfront.
+     * Activate the client, but assume to use the given card type and no handle information is given upfront.
      *
      * @param request
      * @return
      */
-    private TCTokenResponse handleAusweisappActivate(TCTokenRequest request) {
+    private TCTokenResponse handleCardTypeActivate(TCTokenRequest request) {
 	TCTokenType token = request.getTCToken();
 
-	// get handle to nPA
-	ConnectionHandleType connectionHandle = getFirstnPAHandle();
+	// get handle to first card of specifified type
+	ConnectionHandleType connectionHandle = getFirstHandle(request.getCardType());
 	if (connectionHandle == null) {
 	    TCTokenResponse response = new TCTokenResponse();
-	    String msg = "No ConnectionHandle with a german eID card available.";
+	    String msg = "No ConnectionHandle with card type '" + request.getCardType() + "' available.";
 	    _logger.error(msg);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 	    return response;
@@ -204,13 +206,13 @@ public final class RichClient implements ControlListener {
      *
      * @return Handle describing the nPA or null if none is present.
      */
-    private ConnectionHandleType getFirstnPAHandle() {
+    private ConnectionHandleType getFirstHandle(String type) {
 	ConnectionHandleType conHandle = new ConnectionHandleType();
 	ConnectionHandleType.RecognitionInfo rec = new ConnectionHandleType.RecognitionInfo();
-	rec.setCardType("http://bsi.bund.de/cif/npa.xml");
+	rec.setCardType(type);
 	conHandle.setRecognitionInfo(rec);
 
-	// TODO: wait for nPA a while when none is present
+	// TODO: wait for card when none is present
 
 	Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
 	if (entries.isEmpty()) {
@@ -251,19 +253,21 @@ public final class RichClient implements ControlListener {
 		return response;
 	    }
 
-	    // Collect parameters for PSK based TLS
-	    //TODO Change to support different protocols
-	    byte[] psk = token.getPathSecurityParameters().getPSK();
 	    String sessionIdentifier = token.getSessionIdentifier();
 	    URL serverAddress = new URL(token.getServerAddress());
-	    URL endpoint = new URL(serverAddress + "/?sessionid=" + sessionIdentifier);
 
 	    // Set up TLS connection
-	    PSKTlsClientImpl tlsClient = new PSKTlsClientImpl(sessionIdentifier.getBytes(), psk, serverAddress.getHost());
-	    TlsClientSocketFactory tlsClientFactory = new TlsClientSocketFactory(tlsClient);
+	    String secProto = token.getPathSecurityProtocol();
+	    TlsClientSocketFactory tlsClientFactory = null;
+	    // TODO: Change to support different protocols
+	    if (secProto.equals("urn:ietf:rfc:4279") || secProto.equals("urn:ietf:rfc:5487")) {
+		byte[] psk = token.getPathSecurityParameters().getPSK();
+		TlsClient tlsClient = new PSKTlsClientImpl(sessionIdentifier.getBytes(), psk, serverAddress.getHost());
+		tlsClientFactory = new TlsClientSocketFactory(tlsClient);
+	    }
 
 	    // Set up PAOS connection
-	    PAOS p = new PAOS(endpoint, env.getDispatcher(), tlsClientFactory);
+	    PAOS p = new PAOS(serverAddress, env.getDispatcher(), tlsClientFactory);
 
 	    // Send StartPAOS
 	    StartPAOS sp = new StartPAOS();

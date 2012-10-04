@@ -117,7 +117,9 @@ public class AppTray {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                status.showInfo(new Point(e.getX(), e.getY()));
+                if (status != null) {
+                    status.showInfo(new Point(e.getX(), e.getY()));
+                }
             }
         });
         

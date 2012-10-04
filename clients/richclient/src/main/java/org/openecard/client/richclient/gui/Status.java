@@ -280,6 +280,11 @@ public class Status implements EventCallback {
 
 	label.setIconTextGap(10);
 	label.setBackground(Color.white);
+        
+        // on Windows the label width is too small to display all information
+        Dimension dim = label.getPreferredSize();
+        label.setPreferredSize(new Dimension(dim.width + 10, dim.height));
+        
 	return label;
     }
 

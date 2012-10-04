@@ -9,10 +9,10 @@
 	<Package Id="*" InstallerVersion="200" Compressed="yes" />
 
 	<Media Id="1" Cabinet="Open_eCard_App.cab" EmbedCab="yes" />
-    
-	<MajorUpgrade Schedule="afterInstallValidate" 
-                  RemoveFeatures="Complete"
-                  DowngradeErrorMessage="!(loc.DowngradeErrorMessage)" />
+
+	<MajorUpgrade Schedule="afterInstallValidate"
+		  RemoveFeatures="Complete"
+		  DowngradeErrorMessage="!(loc.DowngradeErrorMessage)" />
 
 	<!-- Define directory structure -->
 	<Directory Id="TARGETDIR" Name="SourceDir">
@@ -50,41 +50,41 @@
 			  Description="!(loc.ProgramDescription)"
 			  Icon="OpenECard.ico"
 			  Target="[libdir]richclient-@VERSION@.jar"
-                          WorkingDirectory="libdir"
+			  WorkingDirectory="libdir"
 			  Advertise="no" />
-                <Shortcut Id="UninstallShortcut"             
-                          Name="!(loc.UninstallShortcut_Name)"
-                          Target="[SystemFolder]msiexec.exe"
-                          Arguments="/x [ProductCode]"
-                          Description="!(loc.UninstallShortcut_Description)" />
+		<Shortcut Id="UninstallShortcut"
+			  Name="!(loc.UninstallShortcut_Name)"
+			  Target="[SystemFolder]msiexec.exe"
+			  Arguments="/x [ProductCode]"
+			  Description="!(loc.UninstallShortcut_Description)" />
 		<RemoveFolder Id="ProgramMenuDir" On="uninstall" />
-                <RegistryKey Root="HKMU" 
-                             Key="SOFTWARE\Open eCard App"
-                             Action="createAndRemoveOnUninstall">
-                    <RegistryValue Name="installed" Type="string" Value="@VERSION@" KeyPath="yes" />
-                </RegistryKey>
+		<RegistryKey Root="HKMU"
+			     Key="SOFTWARE\Open eCard App"
+			     Action="createAndRemoveOnUninstall">
+		    <RegistryValue Name="installed" Type="string" Value="@VERSION@" KeyPath="yes" />
+		</RegistryKey>
 	    </Component>
 	</DirectoryRef>
 
-        <DirectoryRef Id="DesktopFolder">
-            <Component Id="ProgrammDesktopShortcut" Guid="05806c9e-4aa6-4dde-a3c5-145f75daaec9">
-                <Condition>INSTALLDESKTOPSHORTCUT</Condition>
-                <Shortcut Id="ProgrammStartDesktopShortcut"
-                          Name="!(loc.ProgramName)"
-                          Description="!(loc.ProgramDescription)"
-                          Icon="OpenECard.ico"
-                          Target="[libdir]richclient-@VERSION@.jar"
-                          WorkingDirectory="libdir"
-                          Advertise="no" />
-                <RegistryKey Root="HKMU" 
-                             Key="SOFTWARE\Open eCard App"
-                             Action="createAndRemoveOnUninstall">
-                    <RegistryValue Name="DesktopSC" Type="integer" Value="1" KeyPath="yes" />
-                </RegistryKey>
-            </Component>
-        </DirectoryRef>
+	<DirectoryRef Id="DesktopFolder">
+	    <Component Id="ProgrammDesktopShortcut" Guid="05806c9e-4aa6-4dde-a3c5-145f75daaec9">
+		<Condition>INSTALLDESKTOPSHORTCUT</Condition>
+		<Shortcut Id="ProgrammStartDesktopShortcut"
+			  Name="!(loc.ProgramName)"
+			  Description="!(loc.ProgramDescription)"
+			  Icon="OpenECard.ico"
+			  Target="[libdir]richclient-@VERSION@.jar"
+			  WorkingDirectory="libdir"
+			  Advertise="no" />
+		<RegistryKey Root="HKMU"
+			     Key="SOFTWARE\Open eCard App"
+			     Action="createAndRemoveOnUninstall">
+		    <RegistryValue Name="DesktopSC" Type="integer" Value="1" KeyPath="yes" />
+		</RegistryKey>
+	    </Component>
+	</DirectoryRef>
 
-        <Icon Id="OpenECard.ico" SourceFile="Open-eCard-Logo.ico" />
+	<Icon Id="OpenECard.ico" SourceFile="Open-eCard-Logo.ico" />
 	<Property Id="ARPPRODUCTICON" Value="OpenECard.ico" />
 
 	<Feature Id="Complete" Level="1" ConfigurableDirectory="INSTALLDIR">
@@ -94,133 +94,131 @@
 	    <ComponentRef Id="ProgrammDesktopShortcut" />
 	</Feature>
 
-        <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
-        <Property Id="WixShellExecTarget" Value="[libdir]richclient-@VERSION@.jar" />
-        <CustomAction Id="SetINSTALLDESKTOPSHORTCUT" Property="INSTALLDESKTOPSHORTCUT" Value="0" Execute="firstSequence" />
-        <CustomAction Id="SetALLUSERS" Property="ALLUSERS" Value="1" Execute="firstSequence" />
-        <CustomAction Id="SetLAUNCHAPPONEXIT" Property="LAUNCHAPPONEXIT" Value="1" Execute="firstSequence" />
-        <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" Execute="immediate" />        
-        <UI>
-            <InstallUISequence>
-                <Custom Action="SetINSTALLDESKTOPSHORTCUT" Before="AppSearch">NOT Installed</Custom>
-                <Custom Action="SetALLUSERS" Before="AppSearch">NOT Installed</Custom>
-                <Custom Action="SetLAUNCHAPPONEXIT" Before="AppSearch">NOT Installed</Custom>
-            </InstallUISequence>
-            
-            <UIRef Id="CustomWixUI_InstallDir" />
-            <Publish Dialog="CustomExitDialog" Control="Finish" Order="1" Event="DoAction" Value="LaunchApplication">LAUNCHAPPONEXIT</Publish>
-        </UI>
-        <WixVariable Id="WixUIBannerBmp" Value="WixUIBanner.bmp" />
-        <WixVariable Id="WixUIDialogBmp" Value="WixUIDialog.bmp" />
-        <WixVariable Id="WixUILicenseRtf" Value="License.de-de.rtf" />
+	<Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+	<Property Id="WixShellExecTarget" Value="[libdir]richclient-@VERSION@.jar" />
+	<CustomAction Id="SetALLUSERS" Property="ALLUSERS" Value="1" Execute="firstSequence" />
+	<CustomAction Id="SetLAUNCHAPPONEXIT" Property="LAUNCHAPPONEXIT" Value="1" Execute="firstSequence" />
+	<CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" Execute="immediate" />
+	<UI>
+	    <InstallUISequence>
+		<Custom Action="SetALLUSERS" Before="AppSearch">NOT Installed</Custom>
+		<Custom Action="SetLAUNCHAPPONEXIT" Before="AppSearch">NOT Installed</Custom>
+	    </InstallUISequence>
+
+	    <UIRef Id="CustomWixUI_InstallDir" />
+	    <Publish Dialog="CustomExitDialog" Control="Finish" Order="1" Event="DoAction" Value="LaunchApplication">LAUNCHAPPONEXIT</Publish>
+	</UI>
+	<WixVariable Id="WixUIBannerBmp" Value="WixUIBanner.bmp" />
+	<WixVariable Id="WixUIDialogBmp" Value="WixUIDialog.bmp" />
+	<WixVariable Id="WixUILicenseRtf" Value="License.de-de.rtf" />
     </Product>
-    
-    
-    
-    
+
+
+
+
     <!-- Customized WixUI_InstallDir Dialog: use customized InstallDirDlg -->
     <Fragment>
-        <UI Id="CustomWixUI_InstallDir">
-            <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
-            <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
-            <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+	<UI Id="CustomWixUI_InstallDir">
+	    <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+	    <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+	    <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
 
-            <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
-            <Property Id="WixUI_Mode" Value="InstallDir" />
+	    <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+	    <Property Id="WixUI_Mode" Value="InstallDir" />
 
-            <DialogRef Id="BrowseDlg" />
-            <DialogRef Id="DiskCostDlg" />
-            <DialogRef Id="ErrorDlg" />
-            <DialogRef Id="FatalError" />
-            <DialogRef Id="FilesInUse" />
-            <DialogRef Id="MsiRMFilesInUse" />
-            <DialogRef Id="PrepareDlg" />
-            <DialogRef Id="ProgressDlg" />
-            <DialogRef Id="ResumeDlg" />
-            <DialogRef Id="UserExit" />
-            
-            <Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath" Order="3">1</Publish>
-            <Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4"><![CDATA[WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
+	    <DialogRef Id="BrowseDlg" />
+	    <DialogRef Id="DiskCostDlg" />
+	    <DialogRef Id="ErrorDlg" />
+	    <DialogRef Id="FatalError" />
+	    <DialogRef Id="FilesInUse" />
+	    <DialogRef Id="MsiRMFilesInUse" />
+	    <DialogRef Id="PrepareDlg" />
+	    <DialogRef Id="ProgressDlg" />
+	    <DialogRef Id="ResumeDlg" />
+	    <DialogRef Id="UserExit" />
 
-            <Publish Dialog="CustomExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+	    <Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath" Order="3">1</Publish>
+	    <Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4"><![CDATA[WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
 
-            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg">NOT Installed</Publish>
-            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">Installed AND PATCH</Publish>
+	    <Publish Dialog="CustomExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
 
-            <Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
-            <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="InstallOptionsDlg">LicenseAccepted = "1"</Publish>
+	    <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg">NOT Installed</Publish>
+	    <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">Installed AND PATCH</Publish>
 
-            <Publish Dialog="InstallOptionsDlg" Control="Back" Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
-            <Publish Dialog="InstallOptionsDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
-            <Publish Dialog="InstallOptionsDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath" Order="2">NOT WIXUI_DONTVALIDATEPATH</Publish>
-            <Publish Dialog="InstallOptionsDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3"><![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
-            <Publish Dialog="InstallOptionsDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="4">WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"</Publish>
-            <Publish Dialog="InstallOptionsDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
-            <Publish Dialog="InstallOptionsDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
-            
-            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="InstallOptionsDlg" Order="1">NOT Installed</Publish>
-            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed AND NOT PATCH</Publish>
-            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">Installed AND PATCH</Publish>
+	    <Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
+	    <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="InstallOptionsDlg">LicenseAccepted = "1"</Publish>
 
-            <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+	    <Publish Dialog="InstallOptionsDlg" Control="Back" Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
+	    <Publish Dialog="InstallOptionsDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+	    <Publish Dialog="InstallOptionsDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath" Order="2">NOT WIXUI_DONTVALIDATEPATH</Publish>
+	    <Publish Dialog="InstallOptionsDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3"><![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
+	    <Publish Dialog="InstallOptionsDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="4">WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"</Publish>
+	    <Publish Dialog="InstallOptionsDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+	    <Publish Dialog="InstallOptionsDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
 
-            <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-            <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-            <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+	    <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="InstallOptionsDlg" Order="1">NOT Installed</Publish>
+	    <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed AND NOT PATCH</Publish>
+	    <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">Installed AND PATCH</Publish>
 
-            <Property Id="ARPNOMODIFY" Value="1" />
-        </UI>
+	    <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
 
-        <UIRef Id="WixUI_Common" />
+	    <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+	    <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+	    <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+
+	    <Property Id="ARPNOMODIFY" Value="1" />
+	</UI>
+
+	<UIRef Id="WixUI_Common" />
     </Fragment>
-    
+
     <!-- Custom InstallOptionsDlg Dialog -->
     <Fragment>
-        <UI>
-            <Dialog Id="InstallOptionsDlg" Width="370" Height="270" Title="!(loc.InstallDirDlg_Title)">
-                <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)" />
-                <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
-                <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
-                    <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
-                </Control>
-                
-                <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Setup Options" />
-                <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.InstallOptionsDlg_Description)" />
-                <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.InstallDirDlgBannerBitmap)" />
-                <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
-                <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
-                
-                <Control Id="AllUsersCheckBox" Type="CheckBox" X="20" Y="80" Width="290" Height="17" Property="ALLUSERS" CheckBoxValue="1" Text="!(loc.InstallOptionsDlg_AllUsersCheckBox)" />
-                <Control Id="DesktopShortcutCheckBox" Type="CheckBox" X="20" Y="110" Width="290" Height="17" Property="INSTALLDESKTOPSHORTCUT" CheckBoxValue="1" Text="!(loc.InstallOptionsDlg_DesktopShortcutCheckBox)" />
-                <Control Id="FolderLabel"  Type="Text"       X="22"  Y="160" Width="290" Height="30" NoPrefix="yes" Text="!(loc.InstallDirDlgFolderLabel)" Transparent="yes" />
-                <Control Id="Folder"       Type="PathEdit"   X="20"  Y="180" Width="272" Height="18" Property="WIXUI_INSTALLDIR" Indirect="yes" />
-                <Control Id="ChangeFolder" Type="PushButton" X="304" Y="180" Width="56" Height="17" Text="!(loc.InstallDirDlgChange)" />
-            </Dialog>
-        </UI>
+	<UI>
+	    <Dialog Id="InstallOptionsDlg" Width="370" Height="270" Title="!(loc.InstallDirDlg_Title)">
+		<Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)" />
+		<Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+		<Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+		    <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+		</Control>
+
+		<Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Setup Options" />
+		<Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.InstallOptionsDlg_Description)" />
+		<Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.InstallDirDlgBannerBitmap)" />
+		<Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+		<Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+
+		<Control Id="AllUsersCheckBox" Type="CheckBox" X="20" Y="80" Width="290" Height="17" Property="ALLUSERS" CheckBoxValue="1" Text="!(loc.InstallOptionsDlg_AllUsersCheckBox)" />
+		<Control Id="DesktopShortcutCheckBox" Type="CheckBox" X="20" Y="110" Width="290" Height="17" Property="INSTALLDESKTOPSHORTCUT" CheckBoxValue="1" Text="!(loc.InstallOptionsDlg_DesktopShortcutCheckBox)" />
+		<Control Id="FolderLabel"  Type="Text"       X="22"  Y="160" Width="290" Height="30" NoPrefix="yes" Text="!(loc.InstallDirDlgFolderLabel)" Transparent="yes" />
+		<Control Id="Folder"       Type="PathEdit"   X="20"  Y="180" Width="272" Height="18" Property="WIXUI_INSTALLDIR" Indirect="yes" />
+		<Control Id="ChangeFolder" Type="PushButton" X="304" Y="180" Width="56" Height="17" Text="!(loc.InstallDirDlgChange)" />
+	    </Dialog>
+	</UI>
     </Fragment>
-    
+
     <!-- Customized ExitDialog Dialog: added LaunchCheckBox -->
     <Fragment>
-        <UI>
-            <Dialog Id="CustomExitDialog" Width="370" Height="270" Title="!(loc.ExitDialog_Title)">
-                <Control Id="Finish" Type="PushButton" X="304" Y="243" Width="56" Height="17" Default="yes" Cancel="yes" Text="!(loc.WixUIFinish)" />
-                <Control Id="Bitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="234" TabSkip="no" Text="!(loc.ExitDialogBitmap)" />
-                <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
-                <Control Id="Description" Type="Text" X="135" Y="70" Width="220" Height="40" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogDescription)" />
-                <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogTitle)" />
-                <Control Id="LaunchCheckBox" Type="CheckBox" X="10" Y="243" Width="270" Height="17" Property="LAUNCHAPPONEXIT" 
-                         Hidden="yes" CheckBoxValue="1" Text="!(loc.CustomExitDialog_LaunchCheckBox) !(loc.ProgramName) @VERSION@">
-                    <Condition Action="show">NOT Installed</Condition>
-                </Control>
-            </Dialog>
+	<UI>
+	    <Dialog Id="CustomExitDialog" Width="370" Height="270" Title="!(loc.ExitDialog_Title)">
+		<Control Id="Finish" Type="PushButton" X="304" Y="243" Width="56" Height="17" Default="yes" Cancel="yes" Text="!(loc.WixUIFinish)" />
+		<Control Id="Bitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="234" TabSkip="no" Text="!(loc.ExitDialogBitmap)" />
+		<Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+		<Control Id="Description" Type="Text" X="135" Y="70" Width="220" Height="40" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogDescription)" />
+		<Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogTitle)" />
+		<Control Id="LaunchCheckBox" Type="CheckBox" X="10" Y="243" Width="270" Height="17" Property="LAUNCHAPPONEXIT"
+			 Hidden="yes" CheckBoxValue="1" Text="!(loc.CustomExitDialog_LaunchCheckBox) !(loc.ProgramName) @VERSION@">
+		    <Condition Action="show">NOT Installed</Condition>
+		</Control>
+	    </Dialog>
 
-           <InstallUISequence>
-               <Show Dialog="CustomExitDialog" OnExit="success" Overridable="yes" />
-           </InstallUISequence>
+	   <InstallUISequence>
+	       <Show Dialog="CustomExitDialog" OnExit="success" Overridable="yes" />
+	   </InstallUISequence>
 
-           <AdminUISequence>
-               <Show Dialog="CustomExitDialog" OnExit="success" Overridable="yes" />
-           </AdminUISequence>
-        </UI>
+	   <AdminUISequence>
+	       <Show Dialog="CustomExitDialog" OnExit="success" Overridable="yes" />
+	   </AdminUISequence>
+	</UI>
    </Fragment>
 </Wix>

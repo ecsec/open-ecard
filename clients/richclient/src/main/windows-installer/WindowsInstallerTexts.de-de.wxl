@@ -7,7 +7,7 @@
     <String Id="LicenseFileName" Overridable="yes">License.rtf</String>
     <String Id="UninstallShortcut_Name" Overridable="yes">Deinstalliere Open eCard App</String>
     <String Id="UninstallShortcut_Description" Overridable="yes">Deinstalliert die Open eCard App</String>
-    <String Id="InstallOptionsDlg_Description" Overridable="yes">Passen Sie die Setup Optionen an und bestätigen Sie mit Weiter.</String>
+    <String Id="InstallOptionsDlg_Description" Overridable="yes">Passen Sie die Setup-Optionen an und bestätigen Sie bitte mit "Weiter".</String>
     <String Id="InstallOptionsDlg_AllUsersCheckBox" Overridable="yes">Für alle Benutzer installieren</String>
     <String Id="InstallOptionsDlg_DesktopShortcutCheckBox" Overridable="yes">Link auf dem Desktop anlegen</String>
     <String Id="CustomExitDialog_LaunchCheckBox" Overridable="yes">Starten</String>

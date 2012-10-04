@@ -149,13 +149,13 @@ public class AboutDialog extends JDialog {
     }
 
     private ImageIcon getImageIcon(String name) {
-	URL imageUrl = FileUtils.resolveResourceAsURL(AboutDialog.class, "images/" + name);
+	URL imageUrl = FileUtils.resolveResourceAsURL(AboutDialog.class, "about/images/" + name);
 	ImageIcon icon = new ImageIcon(imageUrl);
 	return icon;
     }
 
     private URL getResourceUrl(String name) {
-	URL resourceUrl = FileUtils.resolveResourceAsURL(AboutDialog.class, "html/" + name);
+	URL resourceUrl = FileUtils.resolveResourceAsURL(AboutDialog.class, "about/html/" + name);
 	return resourceUrl;
     }
 

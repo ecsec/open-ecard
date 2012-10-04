@@ -39,6 +39,7 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import org.openecard.client.common.I18n;
+import org.openecard.client.common.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +86,7 @@ public class AboutDialog extends JDialog {
 
 	JLabel label = new JLabel();
 	label.setHorizontalAlignment(SwingConstants.CENTER);
-	label.setIcon(getImageIcon("logo.png"));
+	label.setIcon(getImageIcon("oec_logo_bg-white.png"));
 	label.setBounds(12, 84, 155, 320);
 	getContentPane().add(label);
 
@@ -108,7 +109,7 @@ public class AboutDialog extends JDialog {
 	});
 	getContentPane().add(btnClose);
 
-	setIconImage(getImageIcon("logo.png").getImage());
+	setIconImage(getImageIcon("oec_logo_bg-white.png").getImage());
 	setTitle(lang.translationForKey("about.title"));
 	setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 	setResizable(false);
@@ -148,21 +149,13 @@ public class AboutDialog extends JDialog {
     }
 
     private ImageIcon getImageIcon(String name) {
-	URL imageUrl = AboutDialog.class.getResource("images/" + name);
-	if (imageUrl == null) {
-	    imageUrl = AboutDialog.class.getResource("/images/" + name);
-	}
-
+	URL imageUrl = FileUtils.resolveResourceAsURL(AboutDialog.class, "images/" + name);
 	ImageIcon icon = new ImageIcon(imageUrl);
 	return icon;
     }
 
     private URL getResourceUrl(String name) {
-	URL resourceUrl = AboutDialog.class.getResource("html/" + name);
-	if (resourceUrl == null) {
-	    resourceUrl = AboutDialog.class.getResource("/html/" + name);
-	}
-
+	URL resourceUrl = FileUtils.resolveResourceAsURL(AboutDialog.class, "html/" + name);
 	return resourceUrl;
     }
 

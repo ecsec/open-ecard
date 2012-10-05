@@ -203,7 +203,8 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
      */
     public DIDStructureType getDIDStructure(String didName, byte[] cardApplication) {
 	DIDStructureType didStructure = this.infoObject.getDIDStructure(didName, cardApplication);
-	didStructure.setAuthenticated(this.isAuthenticated(didName, cardApplication));
+	if (didStructure != null)
+	    didStructure.setAuthenticated(this.isAuthenticated(didName, cardApplication));
 	return didStructure;
     }
 

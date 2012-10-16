@@ -22,7 +22,6 @@
 		<dependency>
 		    <groupId>org.slf4j</groupId>
 		    <artifactId>slf4j-ext</artifactId>
-		    <version>1.6.6</version>
 		</dependency>
 	    </dependencies>
 	</profile>
@@ -215,7 +214,6 @@
 	<dependency>
 	    <groupId>org.slf4j</groupId>
 	    <artifactId>slf4j-jdk14</artifactId>
-	    <version>1.6.6</version>
 	</dependency>
 	<dependency>
 	    <groupId>openjdk</groupId>

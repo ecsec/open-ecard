@@ -19,7 +19,6 @@
 	<dependency>
 	    <groupId>com.google.android</groupId>
 	    <artifactId>android</artifactId>
-	    <version>4.0.1.2</version>
 	    <scope>provided</scope>
 	</dependency>
 	<dependency>
@@ -50,6 +49,7 @@
     <build>
 	<plugins>
 	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
 		<artifactId>maven-antrun-plugin</artifactId>
 		<executions>
 		    <execution>
@@ -98,7 +98,6 @@
 	    <plugin>
 		<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 		<artifactId>android-maven-plugin</artifactId>
-		<version>3.3.0</version>
 		<extensions>true</extensions>
 		<configuration>
 		    <zipalign>

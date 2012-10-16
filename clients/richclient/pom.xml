@@ -12,8 +12,8 @@
 
     <groupId>org.openecard.client.clients</groupId>
     <artifactId>richclient</artifactId>
-    <packaging>jar</packaging>
     <name>Rich Client</name>
+    <packaging>jar</packaging>
 
     <build>
 	<plugins>
@@ -74,7 +74,6 @@
 		    <plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-antrun-plugin</artifactId>
-			<version>1.7</version>
 			<executions>
 			    <execution>
 				<id>antrun</id>
@@ -226,7 +225,6 @@
 	<dependency>
 	    <groupId>ch.qos.logback</groupId>
 	    <artifactId>logback-classic</artifactId>
-	    <version>1.0.6</version>
 	</dependency>
     </dependencies>
 

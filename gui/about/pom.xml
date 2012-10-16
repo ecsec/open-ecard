@@ -12,6 +12,7 @@
 
     <groupId>org.openecard.client.gui</groupId>
     <artifactId>about</artifactId>
-    <packaging>jar</packaging>
     <name>About Dialog</name>
+    <packaging>jar</packaging>
+
 </project>

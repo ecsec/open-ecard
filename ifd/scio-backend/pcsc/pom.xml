@@ -12,7 +12,7 @@
 
   <groupId>org.openecard.client.ifd.scio-backend</groupId>
   <artifactId>pcsc</artifactId>
-  <packaging>jar</packaging>
   <name>PCSC SmartcardIO</name>
+  <packaging>jar</packaging>
 
 </project>

@@ -18,6 +18,7 @@
     <modules>
 	<module>bouncycastle</module>
 	<module>crypto-common</module>
+	<module>tls</module>
     </modules>
 
 </project>

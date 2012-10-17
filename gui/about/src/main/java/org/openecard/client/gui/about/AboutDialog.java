@@ -39,6 +39,7 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import org.openecard.client.common.I18n;
+import org.openecard.client.common.Version;
 import org.openecard.client.common.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +81,7 @@ public class AboutDialog extends JDialog {
 	JTextPane txtpnVersion = new JTextPane();
 	txtpnVersion.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 9));
 	txtpnVersion.setEditable(false);
-	txtpnVersion.setText(lang.translationForKey("about.version"));
+	txtpnVersion.setText(lang.translationForKey("about.version", Version.getVersion()));
 	txtpnVersion.setBounds(12, 54, 692, 18);
 	getContentPane().add(txtpnVersion);
 

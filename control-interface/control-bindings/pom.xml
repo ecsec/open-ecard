@@ -7,7 +7,7 @@
     <parent>
 	<artifactId>control-interface</artifactId>
 	<groupId>org.openecard.client</groupId>
-	<version>1.0.0-pre2-SNAPSHOT</version>
+	<version>1.0.0-pre2</version>
     </parent>
     
     <groupId>org.openecard.client.control</groupId>

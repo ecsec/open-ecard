@@ -7,7 +7,7 @@
     <parent>
 	<artifactId>crypto</artifactId>
 	<groupId>org.openecard.client</groupId>
-	<version>1.0.0-pre2</version>
+	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
     
     <groupId>org.openecard.client.crypto</groupId>

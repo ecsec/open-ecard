@@ -65,7 +65,7 @@
 		<plugin>
 		    <groupId>de.ecsec.maven.plugins</groupId>
 		    <artifactId>maven-pack200-plugin</artifactId>
-		    <version>1.0.0</version>
+		    <version>1.0.1</version>
 		    <configuration>
 			<processMainArtifact>true</processMainArtifact>
 			<effort>9</effort>

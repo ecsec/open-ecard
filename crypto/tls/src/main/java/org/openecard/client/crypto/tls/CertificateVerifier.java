@@ -47,7 +47,7 @@ public interface CertificateVerifier {
      * The verification must at least check the certificate chain and the hosts name.
      *
      * @param chain Certificate chain to be verified.
-     * @param hostname Name of the host used in the validation.
+     * @param hostname Name of the host used in the validation. Null if hostname is not available.
      * @throws CertificateVerificationException Thrown in case the verification failed.
      */
     void isValid(Certificate chain, String hostname) throws CertificateVerificationException;

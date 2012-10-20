@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,21 +20,20 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.sal;
+package org.openecard.client.common.sal.exception;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ECardException;
 import org.openecard.client.common.sal.state.HandlePrinter;
 
-
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class UnknownConnectionHandle extends ECardException {
+public final class UnknownConnectionHandleException extends ECardException {
 
-    public UnknownConnectionHandle(ConnectionHandleType handle) {
+    public UnknownConnectionHandleException(ConnectionHandleType handle) {
 	makeException(this, ECardConstants.Minor.SAL.UNKNOWN_HANDLE, HandlePrinter.printHandle(handle));
     }
 

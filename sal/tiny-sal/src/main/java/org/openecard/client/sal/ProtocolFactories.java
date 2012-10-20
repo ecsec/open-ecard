@@ -38,23 +38,46 @@ public class ProtocolFactories {
 
     private Map<String,ProtocolFactory> factories = new TreeMap<String, ProtocolFactory>();
 
-
-    public boolean contains(String proto) {
-	return factories.containsKey(proto);
+    /**
+     * Checks if the map contains the given protocol URI.
+     *
+     * @param protocolURI Protocol URI
+     * @return 
+     */
+    public boolean contains(String protocolURI) {
+	return factories.containsKey(protocolURI);
     }
+    /**
+     * Returns a list of protocol URIs.
+     *
+     * @return List of protocol URIs
+     */
     public List<String> protocols() {
 	return new ArrayList<String>(factories.keySet());
     }
 
-    public ProtocolFactory get(String proto) {
-	return factories.get(proto);
+    /**
+     * Returns the protocol factory for a given protocol URI.
+     *
+     * @param protocolURI Protocol URI
+     * @return Protocol factory
+     */
+    public ProtocolFactory get(String protocolURI) {
+	return factories.get(protocolURI);
     }
 
-    public boolean add(String proto, ProtocolFactory impl) {
+    /**
+     * Adds a new protocol to the factory.
+     *
+     * @param protocolURI Protocol URI
+     * @param protocolFactory Protocol factory
+     * @return True if the protocol was added, otherwise false
+     */
+    public boolean add(String protocolURI, ProtocolFactory protocolFactory) {
 	boolean result = false;
-	if (! contains(proto)) {
+	if (!contains(protocolURI)) {
 	    result = true;
-	    factories.put(proto, impl);
+	    factories.put(protocolURI, protocolFactory);
 	}
 	return result;
     }

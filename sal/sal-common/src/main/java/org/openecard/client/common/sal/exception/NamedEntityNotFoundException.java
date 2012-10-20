@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,20 +20,19 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.sal;
+package org.openecard.client.common.sal.exception;
 
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ECardException;
 
-
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class UnknownProtocolException extends ECardException {
+public final class NamedEntityNotFoundException extends ECardException {
 
-    public UnknownProtocolException(String message) {
-	makeException(this, ECardConstants.Minor.SAL.PROTOCOL_NOT_RECOGNIZED, message);
+    public NamedEntityNotFoundException(String message) {
+	makeException(this, ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, message);
     }
 
 }

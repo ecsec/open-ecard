@@ -22,29 +22,55 @@
 
 package org.openecard.client.common.sal.anytype;
 
-import iso.std.iso_iec._24727.tech.schema.CardApplicationType;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityType;
+import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.sal.state.cif.CardApplicationWrapper;
+import org.openecard.client.common.sal.state.cif.CardInfoWrapper;
+import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.recognition.CardRecognition;
-import static org.testng.Assert.assertTrue;
 import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNull;
 
 
 /**
- *
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class CryptoMarkerTypeTest {
 
+    private static final String cardType = "http://ws.gematik.de/egk/1.0.0";
+    private static final byte[] esignApplication = StringUtils.toByteArray("A000000167455349474E");
+    private static final String didName = "PrK.CH.AUT_signPKCS1_V1_5";
+
+    /**
+     * Simple test for CryptoMarkerType. After getting the CryptoMarker for the PrK.CH.AUT_signPKCS1_V1_5 DID in the the
+     * ESIGN application we check if the get-methods return the expected values.
+     * 
+     * @throws Exception
+     *             when something in this test went unexpectedly wrong
+     */
     @Test
     public void testCryptoMarkerType() throws Exception {
 	CardRecognition recognition = new CardRecognition(null, null);
-	CardInfoType cardInfo = recognition.getCardInfo("http://ws.gematik.de/egk/1.0.0");
+	CardInfoType cardInfo = recognition.getCardInfo(cardType);
+	CardInfoWrapper wrapper = new CardInfoWrapper(cardInfo);
 
-	CardApplicationType app = cardInfo.getApplicationCapabilities().getCardApplication().get(1);
-	DifferentialIdentityType diffId = app.getDIDInfo().get(0).getDifferentialIdentity();
+	CardApplicationWrapper app = wrapper.getCardApplication(esignApplication);
+	DifferentialIdentityType diffId = app.getDIDInfo(didName).getDIDInfo().getDifferentialIdentity();
 	CryptoMarkerType cryptoMarker = new CryptoMarkerType(diffId.getDIDMarker().getCryptoMarker());
-	assertTrue(cryptoMarker.getAlgorithmInfo().getSupportedOperations().size()>0);
+	assertTrue(cryptoMarker.getAlgorithmInfo().getSupportedOperations().size() > 0);
+	assertEquals(cryptoMarker.getSignatureGenerationInfo(), new String[] { "MSE_KEY", "PSO_CDS" });
+	assertEquals(cryptoMarker.getCryptoKeyInfo().getKeyRef().getKeyRef(), new byte[] { 0x02 });
+	assertEquals(cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm(),
+		"urn:oid:1.2.840.113549.1.1");
+	assertNull(cryptoMarker.getLegacyKeyName());
+	assertNull(cryptoMarker.getHashGenerationInfo());
+	assertEquals(cryptoMarker.getCertificateRef().getDataSetName(), "EF.C.CH.AUT");
+	// assertEquals(cryptoMarker.getStateInfo(), "");
+	assertEquals(cryptoMarker.getProtocol(), ECardConstants.Protocol.GENERIC_CRYPTO);
     }
 
 }

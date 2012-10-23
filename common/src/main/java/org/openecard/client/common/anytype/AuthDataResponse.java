@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.common.ifd.anytype;
+package org.openecard.client.common.anytype;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import javax.xml.namespace.QName;

@@ -22,7 +22,17 @@
 
 package org.openecard.client.sal.protocol.pincompare;
 
-import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
+import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
+import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
+import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
+import iso.std.iso_iec._24727.tech.schema.InputUnitType;
+import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
+import iso.std.iso_iec._24727.tech.schema.PinInputType;
+import iso.std.iso_iec._24727.tech.schema.VerifyUser;
+import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse;
 import java.math.BigInteger;
 import java.util.Map;
 import org.openecard.client.common.ECardConstants;
@@ -39,45 +49,56 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- *
+ * Implementation of the ProtocolStep interface for the DIDAuthenticate step of
+ * the PinCompare protocol.
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
-    private static final Logger _logger = LoggerFactory.getLogger(DIDAuthenticateStep.class);
+    private static final Logger logger = LoggerFactory.getLogger(DIDAuthenticateStep.class);
 
     private final Dispatcher dispatcher;
 
+    /**
+     * 
+     * @param dispatcher the dispatcher to use for message delivery
+     */
     public DIDAuthenticateStep(Dispatcher dispatcher) {
 	this.dispatcher = dispatcher;
     }
 
     @Override
-	public FunctionType getFunctionType() {
+    public FunctionType getFunctionType() {
 	return FunctionType.DIDAuthenticate;
     }
 
     @Override
-	public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
+    public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	try {
 	    String didName = didAuthenticate.getDIDName();
-	    PinCompareDIDAuthenticateInputType pinCompareDIDAuthenticateInput = new PinCompareDIDAuthenticateInputType(didAuthenticate.getAuthenticationProtocolData());
+	    PinCompareDIDAuthenticateInputType pinCompareDIDAuthenticateInput = new PinCompareDIDAuthenticateInputType(
+		    didAuthenticate.getAuthenticationProtocolData());
 	    ConnectionHandleType connectionHandle = didAuthenticate.getConnectionHandle();
 
 	    CardStateEntry cardStateEntry = (CardStateEntry) internalData.get("cardState");
 
 	    byte[] cardApplication;
-	    if (didAuthenticate.getDIDScope()!=null&&didAuthenticate.getDIDScope().equals(DIDScopeType.GLOBAL)) {
+	    if (didAuthenticate.getDIDScope() != null && didAuthenticate.getDIDScope().equals(DIDScopeType.GLOBAL)) {
 		cardApplication = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
 	    } else {
 		cardApplication = connectionHandle.getCardApplication();
 	    }
-	    if (!cardStateEntry.checkDIDSecurityCondition(cardApplication, didName, DifferentialIdentityServiceActionName.DID_AUTHENTICATE)) {
-		return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
+	    if (!cardStateEntry.checkDIDSecurityCondition(cardApplication, didName,
+		    DifferentialIdentityServiceActionName.DID_AUTHENTICATE)) {
+		return WSHelper.makeResponse(DIDAuthenticateResponse.class,
+			WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
 	    }
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplication);
 
-	    org.openecard.client.common.sal.anytype.PinCompareMarkerType pinCompareMarker = new org.openecard.client.common.sal.anytype.PinCompareMarkerType((PinCompareMarkerType) didStructure.getDIDMarker());
+	    org.openecard.client.common.sal.anytype.PinCompareMarkerType pinCompareMarker = 
+		    new org.openecard.client.common.sal.anytype.PinCompareMarkerType(
+			    (PinCompareMarkerType) didStructure.getDIDMarker());
 
 	    byte keyRef = pinCompareMarker.getPinRef().getKeyRef()[0];
 	    VerifyUser verify = new VerifyUser();
@@ -117,7 +138,7 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 	    didAuthenticateResponse.setAuthenticationProtocolData(output.getAuthDataType());
 	    return didAuthenticateResponse;
 	} catch (Exception e) {
-	    _logger.warn(e.getMessage(), e);
+	    logger.error(e.getMessage(), e);
 	    return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResult(e));
 	}
     }

@@ -32,7 +32,7 @@ import org.openecard.client.common.sal.ProtocolStep;
 
 
 /**
- *
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class EnchipherStep implements ProtocolStep<Encipher, EncipherResponse> {
@@ -44,7 +44,10 @@ public class EnchipherStep implements ProtocolStep<Encipher, EncipherResponse> {
 
     @Override
     public EncipherResponse perform(Encipher request, Map internalData) {
-	return WSHelper.makeResponse(EncipherResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION, "The function '" + getFunctionType() + "' is not supported with this protocol."));
+	return WSHelper.makeResponse(
+		EncipherResponse.class,
+		WSHelper.makeResultError(ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION, "The function '"
+			+ getFunctionType() + "' is not supported with this protocol."));
     }
 
 }

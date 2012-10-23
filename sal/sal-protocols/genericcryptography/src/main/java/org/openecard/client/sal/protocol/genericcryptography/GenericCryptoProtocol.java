@@ -20,29 +20,42 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.sal.protocol.genericryptography;
+package org.openecard.client.sal.protocol.genericcryptography;
 
-import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.sal.Protocol;
-import org.openecard.client.common.sal.ProtocolFactory;
-import org.openecard.client.gui.UserConsent;
+import org.openecard.client.common.sal.FunctionType;
 
 
 /**
- *
+ * SAL protocol implementation of the GenericCryptography protocol.
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class GenericCryptoProtocolFactory implements ProtocolFactory {
+public class GenericCryptoProtocol extends org.openecard.client.common.sal.Protocol {
 
-    @Override
-    public String getProtocol() {
-	return ECardConstants.Protocol.GENERIC_CRYPTO;
+    /**
+     * 
+     * @param dispatcher the dispatcher to use for message delivery
+     */
+    public GenericCryptoProtocol(Dispatcher dispatcher) {
+	this.steps.add(new SignStep(dispatcher));
+	this.steps.add(new DIDGetStep());
+	this.steps.add(new DecipherStep(dispatcher));
+	this.steps.add(new VerifySignatureStep(dispatcher));
     }
 
     @Override
-    public Protocol createInstance(Dispatcher dispatcher, UserConsent gui) {
-        return new GenericCryptoProtocol(dispatcher);
+    public boolean hasNextStep(FunctionType functionName) {
+	for (int i = 0; i < steps.size(); i++) {
+	    if (steps.get(i).getFunctionType().equals(functionName)) {
+		super.curStep = i;
+	    }
+	}
+	return true;
+    }
+
+    @Override
+    public String toString() {
+	return "Generic cryptography";
     }
 
 }

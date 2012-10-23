@@ -20,36 +20,30 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.sal.protocol.genericryptography;
+package org.openecard.client.sal.protocol.genericcryptography;
 
-import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.sal.FunctionType;
+import org.openecard.client.common.ECardConstants;
+import org.openecard.client.sal.protocol.genericcryptography.GenericCryptoProtocol;
+import org.openecard.client.sal.protocol.genericcryptography.GenericCryptoProtocolFactory;
+import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 
 /**
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class GenericCryptoProtocol extends org.openecard.client.common.sal.Protocol {
+public class GenericCryptographyProtocolFactoryTest {
 
-    public GenericCryptoProtocol(Dispatcher dispatcher) {
-	this.steps.add(new SignStep(dispatcher));
-	this.steps.add(new DIDGetStep());
-    }
-
-    @Override
-    public boolean hasNextStep(FunctionType functionName) {
-	for(int i = 0;i<steps.size();i++){
-	    if(steps.get(i).getFunctionType().equals(functionName)){
-		super.curStep = i;
-	    }
-	}
-	return true;
-    }
-
-    @Override
-    public String toString() {
-	return "Generic cryptography";
+    /**
+     * Test if the Factory returns the right Protocol.
+     */
+    @Test
+    public void test() {
+	GenericCryptoProtocolFactory pinCompareProtocolFactory = new GenericCryptoProtocolFactory();
+	assertEquals(pinCompareProtocolFactory.getProtocol(), ECardConstants.Protocol.GENERIC_CRYPTO);
+	assertEquals(pinCompareProtocolFactory.createInstance(null, null).getClass(), GenericCryptoProtocol.class);
+	assertEquals(pinCompareProtocolFactory.createInstance(null, null).toString(), "Generic cryptography");
     }
 
 }

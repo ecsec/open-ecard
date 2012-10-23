@@ -35,7 +35,9 @@ import java.util.Map;
 
 
 /**
- *
+ * This class wraps a single card application of a card info in order to make the access to attributes more efficient
+ * and more user friendly.
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class CardApplicationWrapper {
@@ -46,35 +48,63 @@ public class CardApplicationWrapper {
     private DataSetNameListType dataSetNameList = new DataSetNameListType();
     private HashMap<String, DataSetInfoWrapper> dataSetInfos = new HashMap<String, DataSetInfoWrapper>();
 
+    /**
+     * 
+     * @param cardApplication
+     *            the CardApplication that should be wrapped
+     */
     public CardApplicationWrapper(CardApplicationType cardApplication) {
 	this.cardApplication = cardApplication;
     }
 
+    /**
+     * 
+     * @param serviceAction
+     *            the ServiceAction to which the SecurityCondition should be returned
+     * @return the SecurityCondition for the specified ServiceAction
+     */
     public SecurityConditionType getSecurityCondition(Enum<?> serviceAction) {
 	if (securityConditions.isEmpty()) {
 	    for (AccessRuleType accessRule : this.cardApplication.getCardApplicationACL().getAccessRule()) {
 		if (accessRule.getAction().getConnectionServiceAction() != null) {
-		    securityConditions.put(accessRule.getAction().getConnectionServiceAction(), accessRule.getSecurityCondition());
+		    securityConditions.put(accessRule.getAction().getConnectionServiceAction(),
+			    accessRule.getSecurityCondition());
 		} else if (accessRule.getAction().getAuthorizationServiceAction() != null) {
-		    securityConditions.put(accessRule.getAction().getAuthorizationServiceAction(), accessRule.getSecurityCondition());
+		    securityConditions.put(accessRule.getAction().getAuthorizationServiceAction(),
+			    accessRule.getSecurityCondition());
 		} else if (accessRule.getAction().getDifferentialIdentityServiceAction() != null) {
-		    securityConditions.put(accessRule.getAction().getDifferentialIdentityServiceAction(), accessRule.getSecurityCondition());
+		    securityConditions.put(accessRule.getAction().getDifferentialIdentityServiceAction(),
+			    accessRule.getSecurityCondition());
 		} else if (accessRule.getAction().getNamedDataServiceAction() != null) {
-		    securityConditions.put(accessRule.getAction().getNamedDataServiceAction(), accessRule.getSecurityCondition());
+		    securityConditions.put(accessRule.getAction().getNamedDataServiceAction(),
+			    accessRule.getSecurityCondition());
 		} else if (accessRule.getAction().getCryptographicServiceAction() != null) {
-		    securityConditions.put(accessRule.getAction().getCryptographicServiceAction(), accessRule.getSecurityCondition());
+		    securityConditions.put(accessRule.getAction().getCryptographicServiceAction(),
+			    accessRule.getSecurityCondition());
 		} else if (accessRule.getAction().getCardApplicationServiceAction() != null) {
-		    securityConditions.put(accessRule.getAction().getCardApplicationServiceAction(), accessRule.getSecurityCondition());
+		    securityConditions.put(accessRule.getAction().getCardApplicationServiceAction(),
+			    accessRule.getSecurityCondition());
 		}
 	    }
 	}
+
 	return securityConditions.get(serviceAction);
     }
 
+    /**
+     * 
+     * @return the ApplicationIdentifier of the wrapped card application
+     */
     public byte[] getApplicationIdentifier() {
 	return cardApplication.getApplicationIdentifier();
     }
 
+    /**
+     * 
+     * @param didName
+     *            the name of the DID to be returned
+     * @return a DIDInfoWrapper wrapping the specified DID or null if no such DID exists in the card appication
+     */
     public DIDInfoWrapper getDIDInfo(String didName) {
 	if (didInfos.isEmpty()) {
 	    for (DIDInfoType didInfo : cardApplication.getDIDInfo()) {
@@ -84,14 +114,26 @@ public class CardApplicationWrapper {
 	return this.didInfos.get(didName);
     }
 
+    /**
+     * 
+     * @return list of DIDInfos in this card application
+     */
     public List<DIDInfoType> getDIDInfoList() {
 	return cardApplication.getDIDInfo();
     }
 
+    /**
+     * 
+     * @return the ACL for this card application
+     */
     public AccessControlListType getCardApplicationACL() {
 	return cardApplication.getCardApplicationACL();
     }
 
+    /**
+     * 
+     * @return list of data set names in this card application
+     */
     public DataSetNameListType getDataSetNameList() {
 	if (dataSetNameList.getDataSetName().isEmpty()) {
 	    for (DataSetInfoType dataSetInfo : cardApplication.getDataSetInfo()) {
@@ -101,6 +143,13 @@ public class CardApplicationWrapper {
 	return this.dataSetNameList;
     }
 
+    /**
+     * 
+     * @param dataSetName
+     *            the name of the dataset to be returned
+     * @return a DataSetInfoWrapper wrapping the specified dataset or null if no such dataset exists in the card
+     *         appication
+     */
     public DataSetInfoWrapper getDataSetInfo(String dataSetName) {
 	if (dataSetInfos.isEmpty()) {
 	    for (DataSetInfoType dataSetInfo : cardApplication.getDataSetInfo()) {

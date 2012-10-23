@@ -44,6 +44,10 @@ public class PinCompareMarkerType {
     private PasswordAttributesType passwordAttributes = null;
     private final String protocol;
 
+    /**
+     * 
+     * @param baseType the iso PinCompareMarkerType to create our PinCompareMarkerType from
+     */
     public PinCompareMarkerType(iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType baseType) {
 	this.protocol = baseType.getProtocol();
 	for (Element elem : baseType.getAny()) {
@@ -82,7 +86,7 @@ public class PinCompareMarkerType {
 		    }
 		}
 	    } else if (elem.getLocalName().equals("StateInfo")) {
-		// TODO
+		;// TODO
 	    }
 	}
     }

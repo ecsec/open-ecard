@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,45 +22,28 @@
 
 package org.openecard.client.sal.protocol.genericcryptography;
 
-import java.awt.Container;
-import javax.swing.JDialog;
-import org.openecard.client.gui.swing.DialogWrapper;
+import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.interfaces.Dispatcher;
+import org.openecard.client.common.sal.Protocol;
+import org.openecard.client.common.sal.ProtocolFactory;
+import org.openecard.client.gui.UserConsent;
 
 
 /**
- *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * ProtocolFactory implementation for the GenericCrypthography protocol.
+ * 
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class SwingDialogWrapper implements DialogWrapper {
-
-    private JDialog dialog;
-
-    public SwingDialogWrapper() {
-	this.dialog = new JDialog();
-	this.dialog.setSize(640, 480);
-	this.dialog.setVisible(false);
-	this.dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-    }
-
+public class GenericCryptoProtocolFactory implements ProtocolFactory {
 
     @Override
-    public void setTitle(String title) {
-	dialog.setTitle(title);
+    public String getProtocol() {
+	return ECardConstants.Protocol.GENERIC_CRYPTO;
     }
 
     @Override
-    public Container getContentPane() {
-	return dialog.getContentPane();
-    }
-
-    @Override
-    public void show() {
-	this.dialog.setVisible(true);
-    }
-
-    @Override
-    public void hide() {
-	this.dialog.setVisible(false);
+    public Protocol createInstance(Dispatcher dispatcher, UserConsent gui) {
+        return new GenericCryptoProtocol(dispatcher);
     }
 
 }

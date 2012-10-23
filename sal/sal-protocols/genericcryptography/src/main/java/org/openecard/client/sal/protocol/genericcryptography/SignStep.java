@@ -20,9 +20,16 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.sal.protocol.genericryptography;
+package org.openecard.client.sal.protocol.genericcryptography;
 
-import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.CryptographicServiceActionName;
+import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
+import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
+import iso.std.iso_iec._24727.tech.schema.Sign;
+import iso.std.iso_iec._24727.tech.schema.SignResponse;
+import iso.std.iso_iec._24727.tech.schema.Transmit;
+import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Map;
@@ -42,7 +49,9 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- *
+ * Implementation of the ProtocolStep interface for the Sign step of
+ * the GenericCryptography protocol.
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class SignStep implements ProtocolStep<Sign, SignResponse> {
@@ -51,6 +60,10 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 
     private Dispatcher dispatcher;
 
+    /**
+     * 
+     * @param dispatcher the dispatcher to use for message delivery
+     */
     public SignStep(Dispatcher dispatcher) {
 	this.dispatcher = dispatcher;
     }
@@ -60,11 +73,14 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	return FunctionType.Sign;
     }
 
-    private ResponseAPDU transmitSingleAPDU(byte[] apdu, byte[] slotHandle) throws WSException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-	ArrayList<byte[]> responses = new ArrayList<byte[]>() {{
-	    add(new byte[] { (byte) 0x90, (byte) 0x00 });
-	    add(new byte[] { (byte) 0x63, (byte) 0xC3 });
-	}};
+    private ResponseAPDU transmitSingleAPDU(byte[] apdu, byte[] slotHandle) throws WSException, IllegalAccessException,
+	    NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+	ArrayList<byte[]> responses = new ArrayList<byte[]>() {
+	    {
+		add(new byte[] { (byte) 0x90, (byte) 0x00 });
+		add(new byte[] { (byte) 0x63, (byte) 0xC3 });
+	    }
+	};
 
 	Transmit t = CardCommands.makeTransmit(slotHandle, apdu, responses);
 	TransmitResponse tr = (TransmitResponse) WSHelper.checkResult((TransmitResponse) this.dispatcher.deliver(t));
@@ -79,11 +95,15 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
 	    CardStateEntry cardStateEntry = (CardStateEntry) internalData.get("cardState");
 	    String didName = sign.getDIDName();
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, connectionHandle.getCardApplication());
-	    CryptoMarkerType cryptoMarker = new CryptoMarkerType((iso.std.iso_iec._24727.tech.schema.CryptoMarkerType) didStructure.getDIDMarker());
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName,
+		    connectionHandle.getCardApplication());
+	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(
+		    (iso.std.iso_iec._24727.tech.schema.CryptoMarkerType) didStructure.getDIDMarker());
 
-	    if (!cardStateEntry.checkDIDSecurityCondition(connectionHandle.getCardApplication(), didName, CryptographicServiceActionName.SIGN)) {
-		return WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
+	    if (!cardStateEntry.checkDIDSecurityCondition(connectionHandle.getCardApplication(), didName,
+		    CryptographicServiceActionName.SIGN)) {
+		return WSHelper.makeResponse(SignResponse.class,
+			WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
 	    }
 
 	    byte keyReference = cryptoMarker.getCryptoKeyInfo().getKeyRef().getKeyRef()[0];
@@ -100,14 +120,19 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 		    String nextCommand = signatureGenerationInfo[i + 1];
 		    // using next command until a better solution comes in mind
 		    if (nextCommand.equals("INT_AUTH")) {
-			rapdu = transmitSingleAPDU(CardCommands.ManageSecurityEnvironment.mseSelectPrKeyIntAuth(keyReference, algorithmIdentifier), slotHandle);
+			rapdu = transmitSingleAPDU(CardCommands.ManageSecurityEnvironment.mseSelectPrKeyIntAuth(
+				keyReference, algorithmIdentifier), slotHandle);
 		    } else if (nextCommand.equals("PSO_CDS")) {
-			rapdu = transmitSingleAPDU(CardCommands.ManageSecurityEnvironment.mseSelectPrKeySignature(keyReference, algorithmIdentifier), slotHandle);
+			rapdu = transmitSingleAPDU(CardCommands.ManageSecurityEnvironment.mseSelectPrKeySignature(
+				keyReference, algorithmIdentifier), slotHandle);
 		    }
 		} else if (command.equals("PSO_CDS")) {
-		    rapdu = transmitSingleAPDU(CardCommands.PerformSecurityOperation.computeDigitalSignature(sign.getMessage()), slotHandle);
+		    rapdu = transmitSingleAPDU(
+			    CardCommands.PerformSecurityOperation.computeDigitalSignature(sign.getMessage()),
+			    slotHandle);
 		} else if (command.equals("INT_AUTH")) {
-		    rapdu = transmitSingleAPDU(CardCommands.InternalAuthenticate.generic(sign.getMessage(), (short) 0x0), slotHandle);
+		    rapdu = transmitSingleAPDU(
+			    CardCommands.InternalAuthenticate.generic(sign.getMessage(), (short) 0x0), slotHandle);
 		} else if (command.equals("MSE_RESTORE")) {
 		    WSHelper.makeResultUnknownError("Not yet implemented");
 		} else if (command.equals("MSE_HASH")) {

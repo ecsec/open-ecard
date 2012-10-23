@@ -24,7 +24,7 @@ package org.openecard.client.sal.protocol.eac.anytype;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import java.util.ArrayList;
-import org.openecard.client.common.sal.anytype.AuthDataMap;
+import org.openecard.client.common.anytype.AuthDataMap;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.w3c.dom.Element;

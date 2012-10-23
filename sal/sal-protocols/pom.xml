@@ -17,7 +17,6 @@
 
     <modules>
 	<module>eac</module>
-	<module>crypto-lite</module>
 	<module>pincompare</module>
 	<module>genericcryptography</module>
     </modules>

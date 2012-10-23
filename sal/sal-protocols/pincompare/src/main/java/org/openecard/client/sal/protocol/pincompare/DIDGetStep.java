@@ -22,7 +22,12 @@
 
 package org.openecard.client.sal.protocol.pincompare;
 
-import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.DIDGet;
+import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
+import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
+import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
+import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
 import java.util.Map;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
@@ -34,13 +39,14 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- *
+ * Implementation of the ProtocolStep interface for the DIDGet step of
+ * the PinCompare protocol.
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class DIDGetStep implements ProtocolStep<DIDGet, DIDGetResponse> {
 
-    private static final Logger _logger = LoggerFactory.getLogger(DIDGetStep.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(DIDGetStep.class);
 
     @Override
     public FunctionType getFunctionType() {
@@ -55,13 +61,16 @@ public class DIDGetStep implements ProtocolStep<DIDGet, DIDGetResponse> {
 
 	DIDStructureType didStructure;
 	if (didGet.getDIDScope() != null && didGet.getDIDScope().equals(DIDScopeType.GLOBAL)) {
-	    didStructure = cardStateEntry.getDIDStructure(didName, cardStateEntry.getImplicitlySelectedApplicationIdentifier());
+	    didStructure = cardStateEntry.getDIDStructure(didName,
+		    cardStateEntry.getImplicitlySelectedApplicationIdentifier());
 	} else {
 	    didStructure = cardStateEntry.getDIDStructure(didName, connectionHandle.getCardApplication());
 	}
 
-	if (!cardStateEntry.checkApplicationSecurityCondition(connectionHandle.getCardApplication(), DifferentialIdentityServiceActionName.DID_GET)) {
-	    return WSHelper.makeResponse(DIDGetResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, "cardapplication"));
+	if (!cardStateEntry.checkApplicationSecurityCondition(connectionHandle.getCardApplication(),
+		DifferentialIdentityServiceActionName.DID_GET)) {
+	    return WSHelper.makeResponse(DIDGetResponse.class, WSHelper.makeResultError(
+		    ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, "cardapplication"));
 	}
 
 	DIDGetResponse didGetResponse = new DIDGetResponse();

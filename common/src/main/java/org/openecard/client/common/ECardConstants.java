@@ -162,6 +162,8 @@ public class ECardConstants {
 	    public static final String NAMED_ENTITY_NOT_FOUND = SAL_PREFIX + "#namedEntityNotFound";
 
 	    public static final String CANCELLATION_BY_USER = SAL_PREFIX + "#cancellationByUser";
+	    
+	    public static final String INVALID_SIGNATURE = SAL_PREFIX + "#invalidSignature";
 
 	};
 

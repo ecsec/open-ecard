@@ -34,26 +34,28 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
+import iso.std.iso_iec._24727.tech.schema.DIDGet;
+import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
+import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.Encipher;
 import iso.std.iso_iec._24727.tech.schema.EncipherResponse;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
+import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
 import java.math.BigInteger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import static org.testng.Assert.assertEquals;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
+import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.ifd.scio.IFD;
@@ -61,12 +63,15 @@ import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.sal.TinySAL;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.testng.SkipException;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import static org.testng.Assert.assertEquals;
 
 
 /**
- *
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class PinCompareProtocolTest {
@@ -79,13 +84,14 @@ public class PinCompareProtocolTest {
     private static ClientEnv env;
     private static TinySAL instance;
     private static CardStateMap states;
-    byte[] appIdentifier_ROOT = Hex.decode("D2760001448000");
+    byte[] appIdentifier_ROOT = StringUtils.toByteArray("D2760001448000");
+    byte[] appIdentifier_ESIGN = StringUtils.toByteArray("A000000167455349474E");
 
     @BeforeClass
     public static void setUp() throws Exception {
 	env = new ClientEnv();
-        Dispatcher d = new MessageDispatcher(env);
-        env.setDispatcher(d);
+	Dispatcher d = new MessageDispatcher(env);
+	env.setDispatcher(d);
 	IFD ifd = new IFD();
 	ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
 	env.setIFD(ifd);
@@ -125,7 +131,8 @@ public class PinCompareProtocolTest {
 	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
 	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
 	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
-	cardApplicationPathType = cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0);
+	cardApplicationPathType = cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult()
+		.get(0);
 	cardApplicationConnect.setCardApplicationPath(cardApplicationPathType);
 	CardApplicationConnectResponse result1 = instance.cardApplicationConnect(cardApplicationConnect);
 
@@ -135,11 +142,17 @@ public class PinCompareProtocolTest {
 	factory.setNamespaceAware(true);
 	DocumentBuilder builder = factory.newDocumentBuilder();
 	Document d = builder.newDocument();
-	//FIXME user is always asked for pin no matter if this element exists
+	// FIXME user is always asked for pin no matter if this element exists
 	Element elemPin = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "Pin");
 	elemPin.setTextContent("123456");
 	DIDAuthenticationDataType didAuthenticationData = new DIDAuthenticationDataType();
 	didAuthenticationData.getAny().add(elemPin);
+
+	org.openecard.client.sal.protocol.pincompare.anytype.PinCompareDIDAuthenticateInputType 
+	pinCompareDIDAuthenticateInputType = new 
+	org.openecard.client.sal.protocol.pincompare.anytype.PinCompareDIDAuthenticateInputType(
+		didAuthenticationData);
+
 	parameters.setAuthenticationProtocolData(didAuthenticationData);
 	parameters.setConnectionHandle(result1.getConnectionHandle());
 	didAuthenticationData.setProtocol(ECardConstants.Protocol.PIN_COMPARE);
@@ -148,53 +161,113 @@ public class PinCompareProtocolTest {
 
 	assertEquals(result.getAuthenticationProtocolData().getProtocol(), ECardConstants.Protocol.PIN_COMPARE);
 	assertEquals(result.getAuthenticationProtocolData().getAny().size(), 0);
-	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
-
+	assertEquals(result.getResult().getResultMajor(), ECardConstants.Major.OK);
+	assertEquals(pinCompareDIDAuthenticateInputType.getPin(), "123456");
     }
 
     @Test
-    public void testDIDCreate(){
-	//TODO
+    public void testDIDCreate() {
+	// TODO
     }
 
     @Test
-    public void testDIDUpdate(){
-	//TODO
+    public void testDIDUpdate() {
+	// TODO
     }
 
     @Test
-    public void testDIDGet(){
-	//TODO
-    }
-
-    /*
-     * [TR-03112-7] The following functions are not supported with this protocol and, when
-     * called up, relay an error message to this effect
-     * /resultminor/sal#inappropriateProtocolForAction:
-     * CardApplicationStartSession, Encipher, Decipher, GetRandom, Hash, Sign,
-     * VerifySignature, VerifyCertificate
-     */
-    @Test
-    public void testUnsupportedFunctions(){
-
+    public void testDIDGet() {
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
 	cardApplicationPathType.setCardApplication(this.appIdentifier_ROOT);
 	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
 	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
 	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
-	cardApplicationPathType = cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0);
+	cardApplicationPathType = cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult()
+		.get(0);
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathType);
+	CardApplicationConnectResponse result1 = instance.cardApplicationConnect(cardApplicationConnect);
+
+	DIDGet didGet = new DIDGet();
+	didGet.setDIDName("PIN.home");
+	didGet.setConnectionHandle(result1.getConnectionHandle());
+	DIDGetResponse result = instance.didGet(didGet);
+	assertEquals(result.getResult().getResultMajor(), "http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok");
+	assertEquals(result.getDIDStructure().getDIDName(), "PIN.home");
+	assertEquals(result.getDIDStructure().getDIDMarker().getClass(), PinCompareMarkerType.class);
+	org.openecard.client.common.sal.anytype.PinCompareMarkerType pinCompareMarkerType = 
+		new org.openecard.client.common.sal.anytype.PinCompareMarkerType(
+			(PinCompareMarkerType) result.getDIDStructure().getDIDMarker());
+	assertEquals(ByteUtils.toHexString(pinCompareMarkerType.getPinRef().getKeyRef()), "02");
+
+	// test with given correct scope
+	didGet = new DIDGet();
+	didGet.setDIDName("PIN.home");
+	didGet.setDIDScope(DIDScopeType.GLOBAL);
+	didGet.setConnectionHandle(result1.getConnectionHandle());
+	result = instance.didGet(didGet);
+	assertEquals(result.getResult().getResultMajor(), ECardConstants.Major.OK);
+	assertEquals(result.getDIDStructure().getDIDName(), "PIN.home");
+	assertEquals(result.getDIDStructure().getDIDMarker().getClass(), PinCompareMarkerType.class);
+	pinCompareMarkerType = new org.openecard.client.common.sal.anytype.PinCompareMarkerType((PinCompareMarkerType) 
+		result.getDIDStructure().getDIDMarker());
+	assertEquals(ByteUtils.toHexString(pinCompareMarkerType.getPinRef().getKeyRef()), "02");
+
+	cardApplicationPath = new CardApplicationPath();
+	cardApplicationPathType = new CardApplicationPathType();
+	cardApplicationPathType.setCardApplication(this.appIdentifier_ESIGN);
+	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
+	cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
+	cardApplicationConnect = new CardApplicationConnect();
+	cardApplicationPathType = cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult()
+		.get(0);
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathType);
+	result1 = instance.cardApplicationConnect(cardApplicationConnect);
+
+	assertEquals(result1.getResult().getResultMajor(), ECardConstants.Major.OK);
+
+	didGet = new DIDGet();
+	didGet.setDIDName("PIN.home");
+	didGet.setDIDScope(DIDScopeType.LOCAL);
+	didGet.setConnectionHandle(result1.getConnectionHandle());
+	result = instance.didGet(didGet);
+	assertEquals(result.getResult().getResultMajor(), ECardConstants.Major.ERROR);
+	assertEquals(result.getResult().getResultMinor(), ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND);
+    }
+
+    /*
+     * [TR-03112-7] The following functions are not supported with this protocol
+     * and, when called up, relay an error message to this effect
+     * /resultminor/sal#inappropriateProtocolForAction:
+     * CardApplicationStartSession, Encipher, Decipher, GetRandom, Hash, Sign,
+     * VerifySignature, VerifyCertificate
+     */
+    /**
+     * This Test ensures that all functions unsupported by this protocol relay the correct error message when
+     * called.
+     */
+    @Test
+    public void testUnsupportedFunctions() {
+	CardApplicationPath cardApplicationPath = new CardApplicationPath();
+	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
+	cardApplicationPathType.setCardApplication(this.appIdentifier_ROOT);
+	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
+	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
+	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
+	cardApplicationPathType = cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult()
+		.get(0);
 	cardApplicationConnect.setCardApplicationPath(cardApplicationPathType);
 	CardApplicationConnectResponse result1 = instance.cardApplicationConnect(cardApplicationConnect);
 
 	Encipher encipher = new Encipher();
 	encipher.setDIDName("PIN.home");
-	encipher.setPlainText(new byte[]{0x0, 0x0, 0x0});
+	encipher.setPlainText(new byte[] { 0x0, 0x0, 0x0 });
 	encipher.setConnectionHandle(result1.getConnectionHandle());
 	EncipherResponse encipherResponse = instance.encipher(encipher);
-	assertEquals(ECardConstants.Major.ERROR, encipherResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION, encipherResponse.getResult().getResultMinor());
-	//TODO remaining unsupported functions
+	assertEquals(encipherResponse.getResult().getResultMajor(), ECardConstants.Major.ERROR);
+	assertEquals(encipherResponse.getResult()
+		.getResultMinor(), ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION);
+	// TODO remaining unsupported functions
     }
 
 }

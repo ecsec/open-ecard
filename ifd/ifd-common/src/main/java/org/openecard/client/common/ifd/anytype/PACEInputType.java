@@ -24,6 +24,7 @@ package org.openecard.client.common.ifd.anytype;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import javax.xml.parsers.ParserConfigurationException;
+import org.openecard.client.common.anytype.AuthDataMap;
 
 
 /**

@@ -37,7 +37,7 @@ import org.w3c.dom.NodeList;
 
 
 /**
- *
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class CryptoMarkerType {
@@ -50,6 +50,11 @@ public class CryptoMarkerType {
     private String[] signatureGenerationInfo = null;
     private final String protocol;
 
+    /**
+     * 
+     * @param baseType
+     *            the iso CryptoMarkerType to create our CryptoMarkerType from
+     */
     public CryptoMarkerType(iso.std.iso_iec._24727.tech.schema.CryptoMarkerType baseType) {
 	protocol = baseType.getProtocol();
 	for (Element elem : baseType.getAny()) {
@@ -71,6 +76,7 @@ public class CryptoMarkerType {
 				algorithmIdentifierType.setParameters(n);
 			    }
 			}
+			algorithmInfo.setAlgorithmIdentifier(algorithmIdentifierType);
 		    } else if (node.getLocalName().equals("SupportedOperations")) {
 			String[] supportedOperations = node.getTextContent().split(" ");
 			for (String s : supportedOperations) {
@@ -115,13 +121,13 @@ public class CryptoMarkerType {
 	    } else if (elem.getLocalName().equals("LegacyKeyName")) {
 		this.legacyKeyName = elem.getTextContent();
 	    } else if (elem.getLocalName().equals("StateInfo")) {
-		// TODO
+		;// TODO
 	    }
 	}
     }
 
     public String[] getSignatureGenerationInfo() {
-	return signatureGenerationInfo;
+	return signatureGenerationInfo.clone();
     }
 
     public CryptoKeyInfoType getCryptoKeyInfo() {

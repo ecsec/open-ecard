@@ -361,6 +361,12 @@ public class CardCommands {
 	    return genericCommand(COMMAND_MANAGE_SECURITY_ENVIRONMENT, p12, data);
 	}
 
+	@Deprecated
+	public static byte[] mseSelectPrKeyDecipher(byte keyRef, byte algId){
+	    byte[] p12 = new byte[] { (byte) 0x41, (byte) 0xB8 };
+	    byte[] data = new byte[] { (byte) 0x84, (byte) 0x01, (byte) keyRef, (byte) 0x80, (byte) 0x01, algId };
+	    return genericCommand(COMMAND_MANAGE_SECURITY_ENVIRONMENT, p12, data);
+	}
 
 	/**
 	 * Creates an APDU that is equivalent to the command
@@ -461,6 +467,11 @@ public class CardCommands {
 	public static byte[] computeDigitalSignature(byte[] input) {
 	    byte[] p12 = new byte[]{(byte)0x9E,(byte) 0x9A};
 	    return genericCommand(COMMAND_PERFORM_SECURITY_OPERATION, p12, input, (short) 0x00);
+	}
+
+	public static byte[] decipher(byte[] input, short length) {
+	    byte[] p12 = new byte[]{(byte)0x80,(byte) 0x86};
+	    return genericCommand(COMMAND_PERFORM_SECURITY_OPERATION, p12, input, length);
 	}
 
 	// TODO add further pso commands

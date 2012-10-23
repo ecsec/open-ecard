@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.sal.protocol.genericryptography;
+package org.openecard.client.sal.protocol.genericcryptography;
 
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.util.Map;
@@ -34,7 +34,9 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- *
+ * Implementation of the ProtocolStep interface for the DIDGet step of
+ * the GenericCryptographoy protocol.
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class DIDGetStep implements ProtocolStep<DIDGet, DIDGetResponse> {
@@ -53,8 +55,10 @@ public class DIDGetStep implements ProtocolStep<DIDGet, DIDGetResponse> {
 	CardStateEntry cardStateEntry = (CardStateEntry) internalData.get("cardState");
 	DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, connectionHandle.getCardApplication());
 
-	if (!cardStateEntry.checkApplicationSecurityCondition(connectionHandle.getCardApplication(), DifferentialIdentityServiceActionName.DID_GET)) {
-	    return WSHelper.makeResponse(DIDGetResponse.class, WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, "cardapplication"));
+	if (!cardStateEntry.checkApplicationSecurityCondition(connectionHandle.getCardApplication(),
+		DifferentialIdentityServiceActionName.DID_GET)) {
+	    return WSHelper.makeResponse(DIDGetResponse.class, WSHelper.makeResultError(
+		    ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, "cardapplication"));
 	}
 
 	DIDGetResponse didGetResponse = new DIDGetResponse();

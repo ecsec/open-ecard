@@ -23,8 +23,8 @@
 package org.openecard.client.sal.protocol.eac.anytype;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
-import org.openecard.client.common.sal.anytype.AuthDataMap;
-import org.openecard.client.common.sal.anytype.AuthDataResponse;
+import org.openecard.client.common.anytype.AuthDataMap;
+import org.openecard.client.common.anytype.AuthDataResponse;
 import org.openecard.client.common.util.ByteUtils;
 
 

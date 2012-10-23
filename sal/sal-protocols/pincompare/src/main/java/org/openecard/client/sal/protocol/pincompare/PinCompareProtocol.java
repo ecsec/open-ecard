@@ -27,11 +27,15 @@ import org.openecard.client.common.sal.FunctionType;
 
 
 /**
- *
+ * SAL protocol implementation of the PinCompare protocol.
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class PinCompareProtocol extends org.openecard.client.common.sal.Protocol {
 
+    /**
+     * 
+     * @param dispatcher the dispatcher to use for message delivery
+     */
     public PinCompareProtocol(Dispatcher dispatcher) {
 	this.steps.add(new DIDAuthenticateStep(dispatcher));
 	this.steps.add(new EnchipherStep());
@@ -40,11 +44,11 @@ public class PinCompareProtocol extends org.openecard.client.common.sal.Protocol
 
     @Override
     public boolean hasNextStep(FunctionType functionName) {
-       for(int i = 0;i<steps.size();i++){
-	   if(steps.get(i).getFunctionType().equals(functionName)){
-	       super.curStep = i;
-	   }
-       }
+	for (int i = 0; i < steps.size(); i++) {
+	    if (steps.get(i).getFunctionType().equals(functionName)) {
+		super.curStep = i;
+	    }
+	}
 	return true;
     }
 

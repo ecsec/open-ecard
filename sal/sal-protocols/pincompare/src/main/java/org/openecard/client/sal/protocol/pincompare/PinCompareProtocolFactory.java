@@ -30,7 +30,7 @@ import org.openecard.client.gui.UserConsent;
 
 
 /**
- *
+ * ProtocolFactory implementation for the PinCompare protocol.
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class PinCompareProtocolFactory implements ProtocolFactory {

@@ -25,14 +25,14 @@ package org.openecard.client.sal.protocol.pincompare.anytype;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import java.math.BigInteger;
 import javax.xml.parsers.ParserConfigurationException;
-import org.openecard.client.common.sal.anytype.AuthDataMap;
-import org.openecard.client.common.sal.anytype.AuthDataResponse;
+import org.openecard.client.common.anytype.AuthDataMap;
+import org.openecard.client.common.anytype.AuthDataResponse;
 
 
 /**
  * [TR-03112-7] MAY contain the value of the PIN. If this element is missing, it
  * is input at the terminal.
- *
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class PinCompareDIDAuthenticateOutputType {
@@ -44,14 +44,34 @@ public class PinCompareDIDAuthenticateOutputType {
      */
     private BigInteger retryCounter = null;
 
-    public PinCompareDIDAuthenticateOutputType(DIDAuthenticationDataType didAuthenticationDataType) throws ParserConfigurationException {
+    /**
+     * 
+     * @param didAuthenticationDataType
+     *            a DIDAuthenticationDataType of type
+     *            PinCompareDIDAuthenticateOutputType
+     * @throws ParserConfigurationException
+     *             to indicate a XML configuration error
+     */
+    public PinCompareDIDAuthenticateOutputType(DIDAuthenticationDataType didAuthenticationDataType)
+	throws ParserConfigurationException {
 	this.authMap = new AuthDataMap(didAuthenticationDataType);
     }
 
+    /**
+     * 
+     * @param authMap
+     *            AuthDataMap with contents for this
+     *            PinCompareDIDAuthenticateOutputType
+     */
     protected PinCompareDIDAuthenticateOutputType(AuthDataMap authMap) {
 	this.authMap = authMap;
     }
 
+    /**
+     * 
+     * @return if user verification failed, this contains the current value of
+     *         the RetryCounter, else null
+     */
     public BigInteger getRetryCounter() {
 	return retryCounter;
     }
@@ -60,8 +80,13 @@ public class PinCompareDIDAuthenticateOutputType {
 	this.retryCounter = counter;
     }
 
+    /**
+     * 
+     * @return the PinCompareDIDAuthenticateOutputType
+     */
     public DIDAuthenticationDataType getAuthDataType() {
-	AuthDataResponse authResponse = authMap.createResponse(new iso.std.iso_iec._24727.tech.schema.PinCompareDIDAuthenticateOutputType());
+	AuthDataResponse authResponse = authMap
+		.createResponse(new iso.std.iso_iec._24727.tech.schema.PinCompareDIDAuthenticateOutputType());
 	if (retryCounter != null) {
 	    authResponse.addElement("RetryCounter", retryCounter.toString());
 	}

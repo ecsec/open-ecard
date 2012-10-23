@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,15 +22,17 @@
 
 package org.openecard.client.common.sal.state.cif;
 
-import java.util.HashMap;
-import java.util.Map;
 import iso.std.iso_iec._24727.tech.schema.AccessRuleType;
 import iso.std.iso_iec._24727.tech.schema.DataSetInfoType;
 import iso.std.iso_iec._24727.tech.schema.SecurityConditionType;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
- *
+ * This class wraps a single data set of a card application in order to make the access to attributes more efficient
+ * and more user friendly.
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class DataSetInfoWrapper {
@@ -38,29 +40,50 @@ public class DataSetInfoWrapper {
     private DataSetInfoType dataSetInfo;
     private Map<Enum<?>, SecurityConditionType> securityConditions = new HashMap<Enum<?>, SecurityConditionType>();
 
-    public DataSetInfoWrapper(DataSetInfoType dataSetInfo){
+    /**
+     * 
+     * @param dataSetInfo
+     *            the DataSetInfo that should be wrapped
+     */
+    public DataSetInfoWrapper(DataSetInfoType dataSetInfo) {
 	this.dataSetInfo = dataSetInfo;
     }
 
+    /**
+     * 
+     * @return the DataSetInfo wrapped by this wrapper
+     */
     public DataSetInfoType getDataSetInfo() {
 	return dataSetInfo;
     }
 
+    /**
+     * 
+     * @param serviceAction
+     *            the ServiceAction to which the SecurityCondition should be returned
+     * @return the SecurityCondition for the specified ServiceAction
+     */
     public SecurityConditionType getSecurityCondition(Enum<?> serviceAction) {
-	if(securityConditions.isEmpty()){
-	    for(AccessRuleType accessRule : this.dataSetInfo.getDataSetACL().getAccessRule()){
+	if (securityConditions.isEmpty()) {
+	    for (AccessRuleType accessRule : this.dataSetInfo.getDataSetACL().getAccessRule()) {
 		if (accessRule.getAction().getConnectionServiceAction() != null) {
-		    securityConditions.put(accessRule.getAction().getConnectionServiceAction(), accessRule.getSecurityCondition());
+		    securityConditions.put(accessRule.getAction().getConnectionServiceAction(),
+			    accessRule.getSecurityCondition());
 		} else if (accessRule.getAction().getAuthorizationServiceAction() != null) {
-		    securityConditions.put(accessRule.getAction().getAuthorizationServiceAction(), accessRule.getSecurityCondition());
+		    securityConditions.put(accessRule.getAction().getAuthorizationServiceAction(),
+			    accessRule.getSecurityCondition());
 		} else if (accessRule.getAction().getDifferentialIdentityServiceAction() != null) {
-		    securityConditions.put(accessRule.getAction().getDifferentialIdentityServiceAction(), accessRule.getSecurityCondition());
+		    securityConditions.put(accessRule.getAction().getDifferentialIdentityServiceAction(),
+			    accessRule.getSecurityCondition());
 		} else if (accessRule.getAction().getNamedDataServiceAction() != null) {
-		    securityConditions.put(accessRule.getAction().getNamedDataServiceAction(), accessRule.getSecurityCondition());
+		    securityConditions.put(accessRule.getAction().getNamedDataServiceAction(),
+			    accessRule.getSecurityCondition());
 		} else if (accessRule.getAction().getCryptographicServiceAction() != null) {
-		    securityConditions.put(accessRule.getAction().getCryptographicServiceAction(), accessRule.getSecurityCondition());
+		    securityConditions.put(accessRule.getAction().getCryptographicServiceAction(),
+			    accessRule.getSecurityCondition());
 		} else if (accessRule.getAction().getCardApplicationServiceAction() != null) {
-		    securityConditions.put(accessRule.getAction().getCardApplicationServiceAction(), accessRule.getSecurityCondition());
+		    securityConditions.put(accessRule.getAction().getCardApplicationServiceAction(),
+			    accessRule.getSecurityCondition());
 		}
 	    }
 	}

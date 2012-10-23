@@ -19,20 +19,29 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+
 package org.openecard.client.sal.protocol.eac;
 
-import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
+import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
+import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
+import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities;
+import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse;
+import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
 import java.util.List;
 import java.util.Map;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.anytype.AuthDataMap;
+import org.openecard.client.common.anytype.AuthDataResponse;
 import org.openecard.client.common.ifd.PACECapabilities;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
-import org.openecard.client.common.sal.anytype.AuthDataMap;
-import org.openecard.client.common.sal.anytype.AuthDataResponse;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.crypto.common.asn1.cvc.CHAT;

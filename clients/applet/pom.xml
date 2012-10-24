@@ -29,14 +29,6 @@
     </profiles>
 
     <build>
-	<extensions>
-	    <extension>
-		<groupId>de.ecsec.maven.plugins</groupId>
-		<artifactId>maven-pack200-plugin</artifactId>
-		<version>1.0.1</version>
-	    </extension>
-	</extensions>
-
 	<pluginManagement>
 	    <plugins>
 		<plugin>
@@ -63,24 +55,6 @@
 		    </configuration>
 		</plugin>
 		<plugin>
-		    <groupId>de.ecsec.maven.plugins</groupId>
-		    <artifactId>maven-pack200-plugin</artifactId>
-		    <version>1.0.1</version>
-		    <configuration>
-			<processMainArtifact>true</processMainArtifact>
-			<effort>9</effort>
-			<deflateHint>true</deflateHint>
-			<!--<keepFileOrder>true</keepFileOrder>-->
-			<stripCodeAttributes>
-			    <!-- Comment the following lines to debug the applet -->
-			    <param>SourceFile</param>
-			    <param>LineNumberTable</param>
-			    <param>LocalVariableTable</param>
-			    <param>LocalVariableTypeTable</param>
-			</stripCodeAttributes>
-		    </configuration>
-		</plugin>
-		<plugin>
 		    <groupId>org.apache.maven.plugins</groupId>
 		    <artifactId>maven-jar-plugin</artifactId>
 		    <version>2.4</version>
@@ -96,8 +70,28 @@
 	    </plugins>
 	</pluginManagement>
 
+	<plugins>
+	    <plugin>
+		<groupId>de.ecsec.maven.plugins</groupId>
+		<artifactId>maven-pack200-plugin</artifactId>
+		<version>1.0.1</version>
+		<configuration>
+		    <processMainArtifact>true</processMainArtifact>
+		    <effort>9</effort>
+		    <deflateHint>true</deflateHint>
+		    <!--<keepFileOrder>true</keepFileOrder>-->
+		    <stripCodeAttributes>
+			<!-- Comment the following lines to debug the applet -->
+			<param>SourceFile</param>
+			<param>LineNumberTable</param>
+			<param>LocalVariableTable</param>
+			<param>LocalVariableTypeTable</param>
+		    </stripCodeAttributes>
+		</configuration>
+		<extensions>true</extensions>
+	    </plugin>
+
 	<!-- Disabled until configured correctly -->
-	<!-- <plugins> -->
 	<!--     <plugin> -->
 	<!--         <groupId>com.github.wvengen</groupId> -->
 	<!--         <artifactId>proguard-maven-plugin</artifactId> -->
@@ -134,7 +128,7 @@
 	<!-- 	    </dependency> -->
 	<!-- 	</dependencies> -->
 	<!--     </plugin> -->
-	<!-- </plugins> -->
+	</plugins>
     </build>
 
     <dependencies>

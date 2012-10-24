@@ -277,7 +277,14 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 			Thread.sleep(currentPauseTime - now);
 		    }
 
-		    change = scWrapper.waitForChange(pollDelay); // in millis
+		    // waitForChange has a severe bug in OSX, the code works without waitForChange.
+		    // only the CPU load is slightly higher
+		    // TODO: only do this on 64bit VMs. 32bit seems to run fine with Apple PCSC
+		    if (! System.getProperty("os.name").contains("OS X")) {
+			change = scWrapper.waitForChange(pollDelay); // in millis
+		    } else {
+			Thread.sleep(50);
+		    }
 
 		} catch (IFDException ex) {
 		    try {

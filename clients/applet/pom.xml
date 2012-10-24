@@ -55,15 +55,14 @@
 		</plugin>
 		<plugin>
 		    <groupId>org.apache.maven.plugins</groupId>
-		    <artifactId>maven-jar-plugin</artifactId>
-		    <version>2.4</version>
+		    <artifactId>maven-jarsigner-plugin</artifactId>
+		    <version>1.2</version>
 		    <configuration>
 			<keystore>src/package/resources/keystore/keystore.jks</keystore>
 			<storepass>DgN1CB0Ywy2W</storepass>
 			<alias>applet</alias>
 			<keypass>bHrjoV3j7ucq</keypass>
-			<verify>true</verify>
-			<jarPath>${project.build.directory}/${project.build.FinalName}.jar</jarPath>
+			<archive>${project.build.directory}/${project.build.FinalName}.jar</archive>
 		    </configuration>
 		</plugin>
 	    </plugins>
@@ -73,7 +72,7 @@
 	    <plugin>
 		<groupId>de.ecsec.maven.plugins</groupId>
 		<artifactId>maven-pack200-plugin</artifactId>
-		<version>1.0.1</version>
+		<version>1.0.2</version>
 		<configuration>
 		    <processMainArtifact>true</processMainArtifact>
 		    <effort>9</effort>

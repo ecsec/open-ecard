@@ -385,8 +385,8 @@ public class IFD implements org.openecard.ws.IFD {
 		}
 
 		// create the event and fire
-		EventListener l = new EventListener(this, ctxHandle, timeout.longValue(), callback, expectedStatuses, withNew);
-		FutureTask<List<IFDStatusType>> future = new FutureTask(l);
+		EventListener l = new EventListener(this, scwrapper, ctxHandle, timeout.longValue(), callback, expectedStatuses, withNew);
+		FutureTask<List<IFDStatusType>> future = new FutureTask<List<IFDStatusType>>(l);
 
 		if (l.isAsync()) {
 		    // add future to async wait list

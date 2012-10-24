@@ -26,13 +26,10 @@ import iso.std.iso_iec._24727.tech.schema.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
-import javax.smartcardio.CardException;
-import javax.smartcardio.CardTerminal;
-import javax.smartcardio.CardTerminals;
 import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.ifd.TerminalFactory;
 import org.openecard.client.common.util.IFDStatusDiff;
-import org.openecard.client.ifd.scio.wrapper.IFDTerminalFactory;
+import org.openecard.client.ifd.scio.wrapper.SCTerminal;
+import org.openecard.client.ifd.scio.wrapper.SCWrapper;
 import org.openecard.client.ws.WSClassLoader;
 import org.openecard.ws.IFDCallback;
 import org.slf4j.Logger;
@@ -78,6 +75,7 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 
 
     private final IFD ifd;
+    private final SCWrapper scWrapper;
     private final byte[] ctxHandle;
     private final boolean withNew;
 
@@ -89,8 +87,9 @@ public class EventListener implements Callable<List<IFDStatusType>> {
     private Future termWatcher = null;
 
 
-    public EventListener(IFD ifd, byte[] ctxHandle, long timeout, ChannelHandleType callback, List<IFDStatusType> expectedStatuses, boolean withNew) {
+    public EventListener(IFD ifd, SCWrapper scWrapper, byte[] ctxHandle, long timeout, ChannelHandleType callback, List<IFDStatusType> expectedStatuses, boolean withNew) {
 	this.ifd = ifd;
+	this.scWrapper = scWrapper;
 	this.ctxHandle = ctxHandle;
 	this.timeout = timeout;
 	this.callback = callback;
@@ -237,12 +236,6 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 
     private class TerminalWatcher implements Callable<Void> {
 
-	private final TerminalFactory factory;
-
-	public TerminalWatcher() throws IFDException {
-	    factory = IFDTerminalFactory.getInstance();
-	}
-
 	@Override
 	public Void call() throws Exception {
 	    int pcscErrorCount = 0; // used to break out of the call if pcsc doesn't come back online
@@ -250,19 +243,13 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 
 	    while (!change) {
 		// get list of terminals
-		CardTerminals terminals = factory.terminals();
-		List<CardTerminal> termList;
-		try {
-		    termList = terminals.list();
-		} catch (CardException e) {
-		    termList = new LinkedList<CardTerminal>(); // empty list because list call can fail with exception on some systems
-		}
+		List<SCTerminal> termList = scWrapper.getTerminals(true);
 
 		// observe status
 		try {
 		    // check if there are new or changed terminals
 		    List<IFDStatusType> deleted = new LinkedList<IFDStatusType>(expectedStatuses);
-		    for (CardTerminal t : termList) {
+		    for (SCTerminal t : termList) {
 			if (expectedContains(t.getName())) {
 			    if (t.isCardPresent() != expectedHasCard(t.getName())) {
 				return null;
@@ -290,9 +277,9 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 			Thread.sleep(currentPauseTime - now);
 		    }
 
-		    change = terminals.waitForChange(pollDelay); // in millis
+		    change = scWrapper.waitForChange(pollDelay); // in millis
 
-		} catch (CardException ex) {
+		} catch (IFDException ex) {
 		    try {
 			// PCSC pooped, try again after a short break
 			pcscErrorCount++;

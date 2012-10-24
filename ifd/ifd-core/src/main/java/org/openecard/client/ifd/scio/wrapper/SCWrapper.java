@@ -69,6 +69,7 @@ public class SCWrapper {
 	    if (t.isConnected()) {
 		SCCard c = t.getCard(); // this may produce a valid error
 		try {
+		    // try to match handle, error is raised and element skipped if not matching
 		    SCChannel ch = c.getChannel(handle);
 		    return ch;
 		} catch (IFDException ex) {
@@ -86,7 +87,8 @@ public class SCWrapper {
 	    if (t.isConnected()) {
 		SCCard c = t.getCard();
 		try {
-		    SCChannel ch = c.getChannel(handle);
+		    // try to match handle, error is raised and element skipped if not matching
+		    c.getChannel(handle);
 		    return c;
 		} catch (IFDException ex) {
 		    // ignore, as this exception belongs to the normal find process
@@ -103,7 +105,8 @@ public class SCWrapper {
 	    if (t.isConnected()) {
 		SCCard c = t.getCard();
 		try {
-		    SCChannel ch = c.getChannel(handle);
+		    // try to match handle, error is raised and element skipped if not matching
+		    c.getChannel(handle);
 		    return t;
 		} catch (IFDException ex) {
 		    // ignore, as this exception belongs to the normal find process
@@ -196,6 +199,18 @@ public class SCWrapper {
 	for (String s : deleted) {
 	    scTerminals.remove(s);
 	}
+    }
+
+    public synchronized boolean waitForChange(long timeout) throws IFDException {
+	try {
+	    return terminals.waitForChange(timeout);
+	} catch (CardException ex) {
+	    throw new IFDException(ex);
+	}
+    }
+
+    public synchronized boolean waitForChange() throws IFDException {
+	return waitForChange(0);
     }
 
     /**

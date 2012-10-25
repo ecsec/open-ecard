@@ -979,6 +979,12 @@ public class AndroidMarshaller implements WSMarshaller {
 			applicationCapabilities.setImplicitlySelectedApplication(StringUtils.toByteArray(parser.nextText()));
 		    } else if (parser.getName().equals("CardApplication")) {
 			applicationCapabilities.getCardApplication().add(this.parseCardApplication(parser));
+		    } else if (parser.getName().equals("CardTypeName")) {
+			InternationalStringType internationalString = new InternationalStringType();
+			internationalString.setLang(parser
+				.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+			internationalString.setValue(parser.nextText());
+			cardInfo.getCardType().getCardTypeName().add(internationalString);
 		    }
 		}
 	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("CardInfo")));

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URL;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -49,7 +50,8 @@ public class I18n {
 
     /**
      * Load a translation for the specified component. If no translation for a
-     * component exists, and empty I18n instance is returned.
+     * component exists, a fallback method is used according to {@link java.util.ResourceBundle} and in case no
+     * translation exists at all, an empty I18n instance is returned.
      *
      * @param component String describing the component. This must also be the filename prefix of the translation.
      * @return I18n instance responsible for specified component.
@@ -123,7 +125,7 @@ public class I18n {
     }
 
     /**
-     * Get the translated value for the given key. <br/>
+     * Get the translated value for the given key.
      * The implementation tries to find the key in the requested language, then the default language and if nothing is
      * specified at all, a special string in the form of &lt;No translation for key &lt;requested.key&gt;&gt;
      * is returned.
@@ -143,6 +145,64 @@ public class I18n {
 	} else {
 	    return result;
 	}
+    }
+
+
+    /**
+     * Calls {@link #translationForFile(java.lang.String, java.lang.String)} with the second parameter set to null.
+     */
+    public URL translationForFile(String name) throws IOException {
+	return translationForFile(name, null);
+    }
+
+    /**
+     * Get translated version of a file depending on current locale.
+     * <p>The file's base path equals the component directory. The language definition is enclosed between the filename
+     * and the filending plus a '.'.</p>
+     * <p>An example looks like this:<br/>
+     * <pre>I18n l = I18n.getTranslation("gui");
+     * l.translationForFile("about", "html");
+     * // this code in a german environment tries to load the following files until one is found
+     * // - openecard_i18n/gui/about_de_DE.html
+     * // - openecard_i18n/gui/about_de.html
+     * // - openecard_i18n/gui/about_C.html</pre>
+     * </p>
+     *
+     * @param name Name part of the file
+     * @param fileEnding File ending if available, null otherwise.
+     * @return URL pointing to the translated, or default file.
+     * @throws IOException Thrown in case no resource is available.
+     */
+    public URL translationForFile(String name, String fileEnding) throws IOException {
+	Locale locale = Locale.getDefault();
+	String lang = locale.getLanguage();
+	String country = locale.getCountry();
+	String fnameBase = "/openecard_i18n/" + component + "/" + name;
+	fileEnding = fileEnding != null ? ("." + fileEnding) : "";
+	// try to guess correct file to load
+	if (!lang.isEmpty() && !country.isEmpty()) {
+	    String fileName = fnameBase + "_" + lang + "_" + country + fileEnding;
+	    URL url = FileUtils.resolveResourceAsURL(I18n.class, fileName);
+	    if (url != null) {
+		return url;
+	    }
+	}
+	if (!lang.isEmpty()) {
+	    String fileName = fnameBase + "_" + lang + fileEnding;
+	    URL url = FileUtils.resolveResourceAsURL(I18n.class, fileName);
+	    if (url != null) {
+		return url;
+	    }
+	}
+	// else
+	String fileName = fnameBase + "_C" + fileEnding;
+	URL url = FileUtils.resolveResourceAsURL(I18n.class, fileName);
+	if (url != null) {
+	    return url;
+	}
+
+	// no file found
+	throw new IOException("No translation available for file '" + name + fileEnding + "'.");
     }
 
 }

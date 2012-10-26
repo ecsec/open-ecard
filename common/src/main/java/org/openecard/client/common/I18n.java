@@ -79,7 +79,7 @@ public class I18n {
     private static Properties loadFile(String name) {
 	// load properties or die tryin'
 	try {
-	    InputStream in = FileUtils.resolveResourceAsStream(I18n.class, "/openecard_config/i18n/" + name);
+	    InputStream in = FileUtils.resolveResourceAsStream(I18n.class, "/openecard_i18n/" + name);
 	    Properties props = new Properties();
 	    Reader r = new InputStreamReader(in, "utf-8");
 	    props.load(r);

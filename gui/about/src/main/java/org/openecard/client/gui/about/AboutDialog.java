@@ -94,9 +94,9 @@ public class AboutDialog extends JDialog {
 	JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	tabbedPane.setBounds(185, 84, 519, 320);
 	tabbedPane.setBackground(Color.white);
-	tabbedPane.addTab(lang.translationForKey("about.tab.about"), createTabContent("about_de.html"));
-	tabbedPane.addTab(lang.translationForKey("about.tab.feedback"), createTabContent("feedback_de.html"));
-	tabbedPane.addTab(lang.translationForKey("about.tab.join"), createTabContent("join_de.html"));
+	tabbedPane.addTab(lang.translationForKey("about.tab.about"), createTabContent("about"));
+	tabbedPane.addTab(lang.translationForKey("about.tab.feedback"), createTabContent("feedback"));
+	tabbedPane.addTab(lang.translationForKey("about.tab.join"), createTabContent("join"));
 	getContentPane().add(tabbedPane);
 
 	JButton btnClose = new JButton(lang.translationForKey("about.button.close"));
@@ -127,7 +127,8 @@ public class AboutDialog extends JDialog {
 	editorPane.setDocument(doc);
 
 	try {
-	    editorPane.setPage(getResourceUrl(resourceName));
+	    URL url = lang.translationForFile(resourceName, "html");
+	    editorPane.setPage(url);
 	} catch (IOException ex) {
 	    editorPane.setText("Page not found.");
 	}

@@ -54,7 +54,7 @@ public class I18n {
      * @param component String describing the component. This must also be the filename prefix of the translation.
      * @return I18n instance responsible for specified component.
      */
-    public static I18n getTranslation(String component) {
+    public synchronized static I18n getTranslation(String component) {
 	if (translations.containsKey(component)) {
 	    return translations.get(component);
 	} else {
@@ -69,17 +69,30 @@ public class I18n {
     private final Properties translation;
 
     private I18n(String component) {
-	String lang = Locale.getDefault().toString();
-	Properties defaults = loadFile(component + "_C.properties");
-	Properties target = loadFile(component + "_" + lang + ".properties");
+	Locale userLocale = Locale.getDefault();
+	String lang = userLocale.getLanguage();
+	String country = userLocale.getCountry();
+	// load applicable language files
+	// the order is: C -> lang -> lang_country
+	Properties defaults = loadFile(component, "C");
+	if (!lang.isEmpty()) {
+	    Properties target = loadFile(component, lang);
+	    defaults = mergeProperties(defaults, target);
+	}
+	if (!lang.isEmpty() && !country.isEmpty()) {
+	    Properties target = loadFile(component, lang + "_" + country);
+	    defaults = mergeProperties(defaults, target);
+	}
+
 	this.component = component;
-	this.translation = mergeProperties(defaults, target);
+	this.translation = defaults;
     }
 
-    private static Properties loadFile(String name) {
+    private static Properties loadFile(String component, String locale) {
 	// load properties or die tryin'
 	try {
-	    InputStream in = FileUtils.resolveResourceAsStream(I18n.class, "/openecard_i18n/" + name);
+	    String fileName = "/openecard_i18n/" + component + "/Messages_" + locale + ".properties";
+	    InputStream in = FileUtils.resolveResourceAsStream(I18n.class, fileName);
 	    Properties props = new Properties();
 	    Reader r = new InputStreamReader(in, "utf-8");
 	    props.load(r);

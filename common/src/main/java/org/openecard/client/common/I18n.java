@@ -34,6 +34,23 @@ import org.openecard.client.common.util.FileUtils;
 
 
 /**
+ * An internationalization component similar to Java's {@link ava.util.ResourceBundle}.
+ * It is capable of providing translated versions of key identified values as well as complete files.
+ * <p>
+ * All translation files must be located below the folder <pre>openecard_i18n</pre> plus a component name.
+ * The special file Messages.properties is used to provide translated key value pairs. Completely translated files can
+ * have any other name.<br/>
+ * All translation files follow the same scheme to identify their language. The language is written in the form of
+ * <a href="https://tools.ietf.org/html/bcp47">BCP 47</a> language tags. However instead of -, _ is used as a separator,
+ * which is the common practice. This implementation only supports a subset of the BCP 47 specification, meaning only
+ * language and country codes are allowed. The default language, which is English is described by C. The name of the
+ * file and its language is separated by _. The file ending is optional for arbitrary files.<br/>
+ * The following examples illustrate the scheme.
+ * <pre>Messages_C.properties
+ * Messages_de.properties
+ * Messages_de_DE.properties
+ * anyotherfile_C
+ * anyotherfile_C.html</pre>
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -69,6 +86,7 @@ public class I18n {
 
     private final String component;
     private final Properties translation;
+    private final ConcurrentSkipListMap<String, URL> translatedFiles;
 
     private I18n(String component) {
 	Locale userLocale = Locale.getDefault();
@@ -88,6 +106,7 @@ public class I18n {
 
 	this.component = component;
 	this.translation = defaults;
+	this.translatedFiles = new ConcurrentSkipListMap<String, URL>();
     }
 
     private static Properties loadFile(String component, String locale) {
@@ -173,7 +192,19 @@ public class I18n {
      * @return URL pointing to the translated, or default file.
      * @throws IOException Thrown in case no resource is available.
      */
-    public URL translationForFile(String name, String fileEnding) throws IOException {
+    public synchronized URL translationForFile(String name, String fileEnding) throws IOException {
+	// check if the url has already been found previously
+	fileEnding = fileEnding != null ? ("." + fileEnding) : "";
+	String mapKey = name + fileEnding;
+	if (translatedFiles.containsKey(mapKey)) {
+	    URL url = translatedFiles.get(mapKey);
+	    if (url == null) {
+		throw new IOException("No translation available for file '" + name + fileEnding + "'.");
+	    } else {
+		return url;
+	    }
+	}
+
 	Locale locale = Locale.getDefault();
 	String lang = locale.getLanguage();
 	String country = locale.getCountry();
@@ -184,6 +215,7 @@ public class I18n {
 	    String fileName = fnameBase + "_" + lang + "_" + country + fileEnding;
 	    URL url = FileUtils.resolveResourceAsURL(I18n.class, fileName);
 	    if (url != null) {
+		translatedFiles.put(mapKey, url);
 		return url;
 	    }
 	}
@@ -191,6 +223,7 @@ public class I18n {
 	    String fileName = fnameBase + "_" + lang + fileEnding;
 	    URL url = FileUtils.resolveResourceAsURL(I18n.class, fileName);
 	    if (url != null) {
+		translatedFiles.put(mapKey, url);
 		return url;
 	    }
 	}
@@ -198,10 +231,12 @@ public class I18n {
 	String fileName = fnameBase + "_C" + fileEnding;
 	URL url = FileUtils.resolveResourceAsURL(I18n.class, fileName);
 	if (url != null) {
+	    translatedFiles.put(mapKey, url);
 	    return url;
 	}
 
 	// no file found
+	translatedFiles.put(mapKey, null);
 	throw new IOException("No translation available for file '" + name + fileEnding + "'.");
     }
 

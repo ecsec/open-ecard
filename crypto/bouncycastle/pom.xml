@@ -15,50 +15,63 @@
     <packaging>jar</packaging>
     <name>openecard Bouncy Castle</name>
 
-    <dependencies>
-	<dependency>
-	    <groupId>org.bouncycastle</groupId>
-	    <artifactId>bcprov-jdk16</artifactId>
-	    <version>1.47-RC2</version>
-	    <scope>runtime</scope>
-	</dependency>
-    </dependencies>
-
     <build>
 	<plugins>
+	    <!-- copy bouncycastle sources -->
+            <plugin>
+		<groupId>com.google.code.maven-replacer-plugin</groupId>
+		<artifactId>maven-replacer-plugin</artifactId>
+		<version>1.4.1</version>
+		<executions>
+                    <execution>
+			<phase>validate</phase>
+			<goals>
+                            <goal>replace</goal>
+			</goals>
+                    </execution>
+		</executions>
+		<configuration>
+		    <basedir>${basedir}/src/bc/src/org</basedir>
+		    <outputBasedir>${basedir}/target/generated-sources/bc</outputBasedir>
+		    <outputDir>org/openecard</outputDir>
+		    <includes>
+			<include>**/*.java</include>
+		    </includes>
+		    <excludes>
+			<!-- unused and conflicting with android packages -->
+			<exclude>bouncycastle/**/jcajce/*.java</exclude>
+			<exclude>bouncycastle/cert/**/*.java</exclude>
+			<exclude>bouncycastle/cms/**/*.java</exclude>
+			<exclude>bouncycastle/mail/**/*.java</exclude>
+			<exclude>bouncycastle/mozilla/**/*.java</exclude>
+			<exclude>bouncycastle/openpgp/**/*.java</exclude>
+			<exclude>bouncycastle/openssl/**/*.java</exclude>
+			<exclude>bouncycastle/operator/**/*.java</exclude>
+			<exclude>bouncycastle/pkcs/**/*.java</exclude>
+			<exclude>bouncycastle/tsp/**/*.java</exclude>
+		    </excludes>
+                    <regex>false</regex>
+                    <token>org.bouncycastle</token>
+                    <value>org.openecard.bouncycastle</value>
+		</configuration>
+            </plugin>
+
+	    <!-- add copied sources to normal build -->
 	    <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-shade-plugin</artifactId>
-		<version>1.5</version>
+		<groupId>org.codehaus.mojo</groupId>
+		<artifactId>build-helper-maven-plugin</artifactId>
+		<version>1.7</version>
 		<executions>
 		    <execution>
-			<phase>package</phase>
+			<id>add-source</id>
+			<phase>generate-sources</phase>
 			<goals>
-			    <goal>shade</goal>
+			    <goal>add-source</goal>
 			</goals>
 			<configuration>
-			    <relocations>
-				<relocation>
-				    <pattern>org.bouncycastle</pattern>
-				    <shadedPattern>org.openecard.bouncycastle</shadedPattern>
-				</relocation>
-			    </relocations>
-			    <artifactSet>
-				<includes>
-				    <include>org.bouncycastle:*</include>
-				</includes>
-			    </artifactSet>
-			    <filters>
-				<filter>
-				    <artifact>*:*</artifact>
-				    <excludes>
-					<!-- else we get error: JCE cannot authenticate the provider BC -->
-					<!-- <exclude>META-INF/*.SF</exclude> -->
-					<!-- <exclude>META-INF/*.DSA</exclude> -->
-					<!-- <exclude>META-INF/*.RSA</exclude> -->
-				    </excludes>
-				</filter>
-			    </filters>
+			    <sources>
+				<source>target/generated-sources/bc</source>
+			    </sources>
 			</configuration>
 		    </execution>
 		</executions>

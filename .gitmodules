@@ -1,0 +1,3 @@
+[submodule "crypto/bouncycastle/src/bc"]
+	path = crypto/bouncycastle/src/bc
+	url = git@vserver-001.urospace.de:bouncycastle

@@ -23,21 +23,29 @@
 package org.openecard.client.transport.paos;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.DisconnectResponse;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
+import java.net.Socket;
 import java.net.URL;
 import java.util.List;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
 import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerException;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.DefaultConnectionReuseStrategy;
+import org.apache.http.message.BasicHttpEntityEnclosingRequest;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpRequestExecutor;
+import org.openecard.bouncycastle.crypto.tls.TlsClient;
+import org.openecard.bouncycastle.crypto.tls.TlsProtocolHandler;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.interfaces.Dispatcher;
+import org.openecard.client.transport.httpcore.HttpRequestHelper;
+import org.openecard.client.transport.httpcore.StreamHttpClientConnection;
 import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerException;
@@ -60,31 +68,21 @@ import org.w3c.dom.Element;
 public class PAOS {
 
     private static final Logger logger = LoggerFactory.getLogger(PAOS.class);
+
     private final WSMarshaller m;
     private final URL endpoint;
     private final Dispatcher dispatcher;
-    private SSLSocketFactory socketFactory;
+    private final TlsClient tlsClient;
 
-    static {
-	logger.warn("SECURITY ALERT: Using custom hostname verifier!!!!");
-	// TODO: verify hostname and whatnot
-	HostnameVerifier hv = new HostnameVerifier() {
-	    @Override
-	    public boolean verify(String hostname, javax.net.ssl.SSLSession sslSession) {
-		return true;
-	    }
-	};
-	javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(hv);
-    }
 
     public PAOS(URL endpoint, Dispatcher dispatcher) {
 	this(endpoint, dispatcher, null);
     }
 
-    public PAOS(URL endpoint, Dispatcher dispatcher, SSLSocketFactory sslSocket) {
+    public PAOS(URL endpoint, Dispatcher dispatcher, TlsClient tlsClient) {
 	this.endpoint = endpoint;
 	this.dispatcher = dispatcher;
-	this.socketFactory = sslSocket;
+	this.tlsClient = tlsClient;
 
 	try {
 	    m = WSMarshallerFactory.createInstance();
@@ -168,9 +166,7 @@ public class PAOS {
 	    SOAPMessage msg = m.doc2soap(doc);
 	    updateMessageID(msg);
 
-	    // <editor-fold defaultstate="collapsed" desc="log message">
 	    logger.debug("Message received:\n{}", m.doc2str(doc));
-	    // </editor-fold>
 
 	    return m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
 	} catch (Exception e) {
@@ -183,9 +179,7 @@ public class PAOS {
 	SOAPMessage msg = createSOAPMessage(obj);
 	String result = m.doc2str(msg.getDocument());
 
-	// <editor-fold defaultstate="collapsed" desc="log message">
 	logger.debug("Message sent:\n{}", result);
-	// </editor-fold>
 
 	return result;
     }
@@ -233,50 +227,65 @@ public class PAOS {
 
     public StartPAOSResponse sendStartPAOS(StartPAOS message) throws Exception {
 	Object msg = message;
+	String hostname = endpoint.getHost();
+	int port = endpoint.getPort();
+	if (port == -1) {
+	    port = endpoint.getDefaultPort();
+	}
+	String resource = endpoint.getFile();
 
 	// loop and send makes a computer happy
 	while (true) {
-	    HttpURLConnection conn = (HttpURLConnection) endpoint.openConnection();
-	    if (socketFactory != null && conn instanceof HttpsURLConnection) {
-		((HttpsURLConnection) conn).setSSLSocketFactory(socketFactory);
-	    }
-	    conn.setDoInput(true); // http is always input and output
-	    conn.setDoOutput(true);
-	    conn.setRequestProperty(ECardConstants.HEADER_KEY_PAOS, ECardConstants.HEADER_VALUE_PAOS);
-	    conn.setRequestProperty(ECardConstants.HEADER_KEY_CONTENT_TYPE, ECardConstants.HEADER_VALUE_CONTENT_TYPE);
-	    conn.setRequestProperty(ECardConstants.HEADER_KEY_ACCEPT, ECardConstants.HEADER_VALUE_ACCEPT);
-
-	    OutputStream output = null;
-	    try {
-		output = conn.getOutputStream();
-		output.write(this.createPAOSResponse(msg).getBytes("UTF-8"));
-	    } catch (Exception ex) {
-		logger.error(ex.getMessage(), ex);
-		throw ex;
-	    } finally {
-		output.close();
+	    // set up connection
+	    Socket socket = new Socket(hostname, port);
+	    StreamHttpClientConnection conn;
+	    if (tlsClient != null) {
+		// TLS
+		TlsProtocolHandler handler = new TlsProtocolHandler(socket.getInputStream(), socket.getOutputStream());
+		handler.connect(tlsClient);
+		conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());
+	    } else {
+		// no TLS
+		conn = new StreamHttpClientConnection(socket.getInputStream(), socket.getOutputStream());
 	    }
 
-	    InputStream response = null;
-	    Object requestObj;
-	    try {
-		response = conn.getInputStream();
-		requestObj = this.processPAOSRequest(response);
-	    } catch (Exception ex) {
-		logger.error(ex.getMessage(), ex);
-		throw ex;
-	    } finally {
-		response.close();
-	    }
+	    HttpContext ctx = new BasicHttpContext();
+	    HttpRequestExecutor httpexecutor = new HttpRequestExecutor();
+	    DefaultConnectionReuseStrategy reuse = new DefaultConnectionReuseStrategy();
+	    boolean isReusable;
+	    // send as long as connection is valid
+	    do {
+		// prepare request
+		BasicHttpEntityEnclosingRequest req = new BasicHttpEntityEnclosingRequest("POST", resource);
+		req.setParams(conn.getParams());
+		HttpRequestHelper.setDefaultHeader(req, hostname);
+		String reqMsgStr = createPAOSResponse(msg);
+		req.setHeader(ECardConstants.HEADER_KEY_PAOS, ECardConstants.HEADER_VALUE_PAOS);
+		req.setHeader("Accept", "application/vnd.paos+xml");
+		ContentType reqContentType = ContentType.create("application/vnd.paos+xml", "UTF-8");
+		StringEntity reqMsg = new StringEntity(reqMsgStr, reqContentType);
+		req.setEntity(reqMsg);
+		req.setHeader(reqMsg.getContentType());
+		req.setHeader("Content-Length", Long.toString(reqMsg.getContentLength()));
+		// send request and receive response
+		HttpResponse response = httpexecutor.execute(req, conn, ctx);
+		conn.receiveResponseEntity(response);
+		HttpEntity entity = response.getEntity();
+		// consume entity
+		Object requestObj = processPAOSRequest(entity.getContent());
 
-	    // break when message is startpaosresponse
-	    if (requestObj instanceof StartPAOSResponse) {
-		StartPAOSResponse startPAOSResponse = (StartPAOSResponse) requestObj;
-		return startPAOSResponse;		
-	    }
+		// break when message is startpaosresponse
+		if (requestObj instanceof StartPAOSResponse) {
+		    StartPAOSResponse startPAOSResponse = (StartPAOSResponse) requestObj;
+		    return startPAOSResponse;
+		}
 
-	    // send via dispatcher
-	    msg = dispatcher.deliver(requestObj);    
+		// send via dispatcher
+		msg = dispatcher.deliver(requestObj);
+
+		// check if connection can be used one more time
+		isReusable = reuse.keepAlive(response, ctx);
+	    } while (isReusable);
 	}
     }
 

@@ -22,6 +22,16 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
+	    <groupId>org.openecard.client.crypto</groupId>
+	    <artifactId>tls</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.transport</groupId>
+	    <artifactId>http-core</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
 	    <groupId>org.openecard.client.wsdef</groupId>
 	    <artifactId>wsdef-client</artifactId>
 	    <version>${project.version}</version>

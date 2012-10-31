@@ -49,6 +49,9 @@
 #define USB_MAXINTERFACES	32
 #define USB_MAXCONFIG		8
 
+/* The following is used to silence warnings for unused variables */
+#define UNUSED(var)			(void)(var)
+
 struct list_head {
 	struct list_head *prev, *next;
 };
@@ -108,6 +111,7 @@ static inline void list_del(struct list_head *entry)
 {
 	entry->next->prev = entry->prev;
 	entry->prev->next = entry->next;
+	entry->next = entry->prev = NULL;
 }
 
 static inline void *usbi_reallocf(void *ptr, size_t size)
@@ -127,25 +131,25 @@ static inline void *usbi_reallocf(void *ptr, size_t size)
 
 #define TIMESPEC_IS_SET(ts) ((ts)->tv_sec != 0 || (ts)->tv_nsec != 0)
 
-void usbi_log(struct libusb_context *ctx, enum usbi_log_level level,
+void usbi_log(struct libusb_context *ctx, enum libusb_log_level level,
 	const char *function, const char *format, ...);
 
-void usbi_log_v(struct libusb_context *ctx, enum usbi_log_level level,
+void usbi_log_v(struct libusb_context *ctx, enum libusb_log_level level,
 	const char *function, const char *format, va_list args);
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1400
 
 #ifdef ENABLE_LOGGING
 #define _usbi_log(ctx, level, ...) usbi_log(ctx, level, __FUNCTION__, __VA_ARGS__)
-#define usbi_dbg(...) _usbi_log(NULL, LOG_LEVEL_DEBUG, __VA_ARGS__)
+#define usbi_dbg(...) _usbi_log(NULL, LIBUSB_LOG_LEVEL_DEBUG, __VA_ARGS__)
 #else
 #define _usbi_log(ctx, level, ...) do { (void)(ctx); } while(0)
 #define usbi_dbg(...) do {} while(0)
 #endif
 
-#define usbi_info(ctx, ...) _usbi_log(ctx, LOG_LEVEL_INFO, __VA_ARGS__)
-#define usbi_warn(ctx, ...) _usbi_log(ctx, LOG_LEVEL_WARNING, __VA_ARGS__)
-#define usbi_err(ctx, ...) _usbi_log(ctx, LOG_LEVEL_ERROR, __VA_ARGS__)
+#define usbi_info(ctx, ...) _usbi_log(ctx, LIBUSB_LOG_LEVEL_INFO, __VA_ARGS__)
+#define usbi_warn(ctx, ...) _usbi_log(ctx, LIBUSB_LOG_LEVEL_WARNING, __VA_ARGS__)
+#define usbi_err(ctx, ...) _usbi_log(ctx, LIBUSB_LOG_LEVEL_ERROR, __VA_ARGS__)
 
 #else /* !defined(_MSC_VER) || _MSC_VER >= 1400 */
 
@@ -163,16 +167,16 @@ void usbi_log_v(struct libusb_context *ctx, enum usbi_log_level level,
 
 static inline void usbi_info(struct libusb_context *ctx, const char *format,
 	...)
-	LOG_BODY(ctx,LOG_LEVEL_INFO)
+	LOG_BODY(ctx,LIBUSB_LOG_LEVEL_INFO)
 static inline void usbi_warn(struct libusb_context *ctx, const char *format,
 	...)
-	LOG_BODY(ctx,LOG_LEVEL_WARNING)
+	LOG_BODY(ctx,LIBUSB_LOG_LEVEL_WARNING)
 static inline void usbi_err( struct libusb_context *ctx, const char *format,
 	...)
-	LOG_BODY(ctx,LOG_LEVEL_ERROR)
+	LOG_BODY(ctx,LIBUSB_LOG_LEVEL_ERROR)
 
 static inline void usbi_dbg(const char *format, ...)
-	LOG_BODY(NULL,LOG_LEVEL_DEBUG)
+	LOG_BODY(NULL,LIBUSB_LOG_LEVEL_DEBUG)
 
 #endif /* !defined(_MSC_VER) || _MSC_VER >= 1400 */
 

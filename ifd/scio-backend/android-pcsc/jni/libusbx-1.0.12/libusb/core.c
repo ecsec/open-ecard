@@ -48,7 +48,7 @@ const struct usbi_os_backend * const usbi_backend = &windows_backend;
 struct libusb_context *usbi_default_context = NULL;
 const struct libusb_version libusb_version_internal =
 	{ LIBUSB_MAJOR, LIBUSB_MINOR, LIBUSB_MICRO, LIBUSB_NANO,
-	  LIBUSB_RC, "unused - please use the nano" };
+	  LIBUSB_RC, "http://libusbx.org" };
 static int default_context_refcnt = 0;
 static usbi_mutex_static_t default_context_lock = USBI_MUTEX_INITIALIZER;
 static struct timeval timestamp_origin = { 0, 0 };
@@ -60,13 +60,12 @@ static struct timeval timestamp_origin = { 0, 0 };
  *
  * libusbx is an open source library that allows you to communicate with USB
  * devices from userspace. For more info, see the
- * <a href="http://libusbx.sourceforge.net">libusbx homepage</a>.
+ * <a href="http://libusbx.org">libusbx homepage</a>.
  *
  * This documentation is aimed at application developers wishing to
  * communicate with USB peripherals from their own software. After reviewing
  * this documentation, feedback and questions can be sent to the
- * <a href="https://lists.sourceforge.net/lists/listinfo/libusbx-devel">libusbx-devel mailing
- * list</a>.
+ * <a href="http://mailing-list.libusbx.org">libusbx-devel mailing list</a>.
  *
  * This documentation assumes knowledge of how to operate USB devices from
  * a software standpoint (descriptors, configurations, interfaces, endpoints,
@@ -107,15 +106,18 @@ static struct timeval timestamp_origin = { 0, 0 };
  *
  * \section msglog Debug message logging
  *
- * libusbx does not log any messages by default. Your application is therefore
- * free to close stdout/stderr and those descriptors may be reused without
- * worry.
+ * libusbx uses stderr for all logging. By default, logging is set to NONE,
+ * which means that no output will be produced. However, unless the library
+ * has been compiled with logging disabled, then any application calls to
+ * libusb_set_debug(), or the setting of the environmental variable
+ * LIBUSB_DEBUG outside of the application, can result in logging being
+ * produced. Your application should therefore not close stderr, but instead
+ * direct it to the null device if its output is undesireable.
  *
- * The libusb_set_debug() function can be used to enable stderr logging of
- * certain messages. Under standard configuration, libusbx doesn't really
- * log much at all, so you are advised to use this function to enable all
- * error/warning/informational messages. It will help you debug problems with
- * your software.
+ * The libusb_set_debug() function can be used to enable logging of certain
+ * messages. Under standard configuration, libusbx doesn't really log much
+ * so you are advised to use this function to enable all error/warning/
+ * informational messages. It will help debug problems with your software.
  *
  * The logged messages are unstructured. There is no one-to-one correspondence
  * between messages being logged and success or failure return codes from
@@ -138,10 +140,10 @@ static struct timeval timestamp_origin = { 0, 0 };
  * systems. In this case, libusb_set_debug() and the LIBUSB_DEBUG environment
  * variable have no effects.
  *
- * libusbx can also be compiled with verbose debugging messages. When the
- * library is compiled in this way, all messages of all verbosities are always
- * logged.  libusb_set_debug() and the LIBUSB_DEBUG environment variable have
- * no effects.
+ * libusbx can also be compiled with verbose debugging messages always. When
+ * the library is compiled in this way, all messages of all verbosities are
+ * always logged. libusb_set_debug() and the LIBUSB_DEBUG environment variable
+ * have no effects.
  *
  * \section remarks Other remarks
  *
@@ -672,6 +674,7 @@ uint8_t API_EXPORTED libusb_get_port_number(libusb_device *dev)
 
 /** \ingroup dev
  * Get the list of all port numbers from root for the specified device
+ * \param ctx the context to operate on, or NULL for the default context
  * \param dev a device
  * \param path the array that should contain the port numbers
  * \param path_len the maximum length of the array. As per the USB 3.0
@@ -683,7 +686,7 @@ int API_EXPORTED libusb_get_port_path(libusb_context *ctx, libusb_device *dev, u
 {
 	int i = path_len;
 	ssize_t r;
-	struct libusb_device **devs;
+	struct libusb_device **devs = NULL;
 
 	/* The device needs to be open, else the parents may have been destroyed */
 	r = libusb_get_device_list(ctx, &devs);
@@ -857,7 +860,7 @@ int API_EXPORTED libusb_get_max_iso_packet_size(libusb_device *dev,
 		return LIBUSB_ERROR_NOT_FOUND;
 
 	val = ep->wMaxPacketSize;
-	ep_type = ep->bmAttributes & 0x3;
+	ep_type = (enum libusb_transfer_type) (ep->bmAttributes & 0x3);
 	libusb_free_config_descriptor(config);
 
 	r = val & 0x07ff;
@@ -1000,7 +1003,7 @@ int API_EXPORTED libusb_open(libusb_device *dev,
 
 	r = usbi_backend->open(_handle);
 	if (r < 0) {
-		usbi_dbg("open %d.%d returns %d", dev->bus_number, dev->device_address, r);
+		usbi_dbg("could not open device: %s", libusb_error_name(r));
 		libusb_unref_device(dev);
 		usbi_mutex_destroy(&_handle->lock);
 		free(_handle);
@@ -1513,6 +1516,10 @@ int API_EXPORTED libusb_kernel_driver_active(libusb_device_handle *dev,
  *
  * This functionality is not available on Darwin or Windows.
  *
+ * Note that libusbx itself also talks to the device through a special kernel
+ * driver, if this driver is already attached to the device, this call will
+ * not detach it and return LIBUSB_ERROR_NOT_FOUND.
+ *
  * \param dev a device handle
  * \param interface_number the interface to detach the driver from
  * \returns 0 on success
@@ -1567,11 +1574,11 @@ int API_EXPORTED libusb_attach_kernel_driver(libusb_device_handle *dev,
 /** \ingroup lib
  * Set log message verbosity.
  *
- * The default level is \ref LOG_LEVEL_NONE, which means no messages are ever
+ * The default level is LIBUSB_LOG_LEVEL_NONE, which means no messages are ever
  * printed. If you choose to increase the message verbosity level, ensure
  * that your application does not close the stdout/stderr file descriptors.
  *
- * You are advised to use level \ref LOG_LEVEL_WARNING. libusbx is conservative
+ * You are advised to use level LIBUSB_LOG_LEVEL_WARNING. libusbx is conservative
  * with its message logging and most of the time, will only log messages that
  * explain error conditions and other oddities. This will help you debug
  * your software.
@@ -1611,7 +1618,7 @@ void API_EXPORTED libusb_set_debug(libusb_context *ctx, int level)
  */
 int API_EXPORTED libusb_init(libusb_context **context)
 {
-	char *dbg = getenv("LIBUSB_DEBUG");
+	char *dbg;
 	struct libusb_context *ctx;
 	int r = 0;
 
@@ -1628,17 +1635,17 @@ int API_EXPORTED libusb_init(libusb_context **context)
 		return 0;
 	}
 
-	ctx = malloc(sizeof(*ctx));
+	ctx = calloc(1, sizeof(*ctx));
 	if (!ctx) {
 		r = LIBUSB_ERROR_NO_MEM;
 		goto err_unlock;
 	}
-	memset(ctx, 0, sizeof(*ctx));
 
 #ifdef ENABLE_DEBUG_LOGGING
-	ctx->debug = LOG_LEVEL_DEBUG;
+	ctx->debug = LIBUSB_LOG_LEVEL_DEBUG;
 #endif
 
+	dbg = getenv("LIBUSB_DEBUG");
 	if (dbg) {
 		ctx->debug = atoi(dbg);
 		if (ctx->debug)
@@ -1739,8 +1746,7 @@ void API_EXPORTED libusb_exit(struct libusb_context *ctx)
  */
 int API_EXPORTED libusb_has_capability(uint32_t capability)
 {
-	enum libusb_capability cap = capability;
-	switch (cap) {
+	switch (capability) {
 	case LIBUSB_CAP_HAS_CAPABILITY:
 		return 1;
 	}
@@ -1775,25 +1781,25 @@ int API_EXPORTED libusb_has_capability(uint32_t capability)
 #define _W32_FT_OFFSET (116444736000000000)
 
 int usbi_gettimeofday(struct timeval *tp, void *tzp)
- {
-  union {
-    unsigned __int64 ns100; /*time since 1 Jan 1601 in 100ns units */
-    FILETIME ft;
-  }  _now;
+{
+	union {
+		unsigned __int64 ns100; /* Time since 1 Jan 1601, in 100ns units */
+		FILETIME ft;
+	} _now;
+	UNUSED(tzp);
 
-  if(tp)
-    {
-      GetSystemTimeAsFileTime (&_now.ft);
-      tp->tv_usec=(long)((_now.ns100 / 10) % 1000000 );
-      tp->tv_sec= (long)((_now.ns100 - _W32_FT_OFFSET) / 10000000);
-    }
-  /* Always return 0 as per Open Group Base Specifications Issue 6.
-     Do not set errno on error.  */
-  return 0;
+	if(tp) {
+		GetSystemTimeAsFileTime (&_now.ft);
+		tp->tv_usec=(long)((_now.ns100 / 10) % 1000000 );
+		tp->tv_sec= (long)((_now.ns100 - _W32_FT_OFFSET) / 10000000);
+	}
+	/* Always return 0 as per Open Group Base Specifications Issue 6.
+	   Do not set errno on error.  */
+	return 0;
 }
 #endif
 
-void usbi_log_v(struct libusb_context *ctx, enum usbi_log_level level,
+void usbi_log_v(struct libusb_context *ctx, enum libusb_log_level level,
 	const char *function, const char *format, va_list args)
 {
 	const char *prefix = "";
@@ -1803,18 +1809,19 @@ void usbi_log_v(struct libusb_context *ctx, enum usbi_log_level level,
 
 #ifdef ENABLE_DEBUG_LOGGING
 	global_debug = 1;
+	UNUSED(ctx);
 #else
 	USBI_GET_CONTEXT(ctx);
 	if (ctx == NULL)
 		return;
-	global_debug = (ctx->debug == LOG_LEVEL_DEBUG);
+	global_debug = (ctx->debug == LIBUSB_LOG_LEVEL_DEBUG);
 	if (!ctx->debug)
 		return;
-	if (level == LOG_LEVEL_WARNING && ctx->debug < LOG_LEVEL_WARNING)
+	if (level == LIBUSB_LOG_LEVEL_WARNING && ctx->debug < LIBUSB_LOG_LEVEL_WARNING)
 		return;
-	if (level == LOG_LEVEL_INFO && ctx->debug < LOG_LEVEL_INFO)
+	if (level == LIBUSB_LOG_LEVEL_INFO && ctx->debug < LIBUSB_LOG_LEVEL_INFO)
 		return;
-	if (level == LOG_LEVEL_DEBUG && ctx->debug < LOG_LEVEL_DEBUG)
+	if (level == LIBUSB_LOG_LEVEL_DEBUG && ctx->debug < LIBUSB_LOG_LEVEL_DEBUG)
 		return;
 #endif
 
@@ -1832,19 +1839,19 @@ void usbi_log_v(struct libusb_context *ctx, enum usbi_log_level level,
 	now.tv_usec -= timestamp_origin.tv_usec;
 
 	switch (level) {
-	case LOG_LEVEL_INFO:
+	case LIBUSB_LOG_LEVEL_INFO:
 		prefix = "info";
 		break;
-	case LOG_LEVEL_WARNING:
+	case LIBUSB_LOG_LEVEL_WARNING:
 		prefix = "warning";
 		break;
-	case LOG_LEVEL_ERROR:
+	case LIBUSB_LOG_LEVEL_ERROR:
 		prefix = "error";
 		break;
-	case LOG_LEVEL_DEBUG:
+	case LIBUSB_LOG_LEVEL_DEBUG:
 		prefix = "debug";
 		break;
-	case LOG_LEVEL_NONE:
+	case LIBUSB_LOG_LEVEL_NONE:
 		break;
 	default:
 		prefix = "unknown";
@@ -1863,7 +1870,7 @@ void usbi_log_v(struct libusb_context *ctx, enum usbi_log_level level,
 	fprintf(stderr, "\n");
 }
 
-void usbi_log(struct libusb_context *ctx, enum usbi_log_level level,
+void usbi_log(struct libusb_context *ctx, enum libusb_log_level level,
 	const char *function, const char *format, ...)
 {
 	va_list args;
@@ -1875,18 +1882,17 @@ void usbi_log(struct libusb_context *ctx, enum usbi_log_level level,
 
 /** \ingroup misc
  * Returns a constant NULL-terminated string with the ASCII name of a libusb
- * error code. The caller must not free() the returned string.
+ * error or transfer status code. The caller must not free() the returned
+ * string.
  *
- * \param error_code The \ref libusb_error code to return the name of.
+ * \param error_code The \ref libusb_error or libusb_transfer_status code to
+ * return the name of.
  * \returns The error name, or the string **UNKNOWN** if the value of
- * error_code is not a known error code.
+ * error_code is not a known error / status code.
  */
 DEFAULT_VISIBILITY const char * LIBUSB_CALL libusb_error_name(int error_code)
 {
-	enum libusb_error error = error_code;
-	switch (error) {
-	case LIBUSB_SUCCESS:
-		return "LIBUSB_SUCCESS";
+	switch (error_code) {
 	case LIBUSB_ERROR_IO:
 		return "LIBUSB_ERROR_IO";
 	case LIBUSB_ERROR_INVALID_PARAM:
@@ -1913,8 +1919,25 @@ DEFAULT_VISIBILITY const char * LIBUSB_CALL libusb_error_name(int error_code)
 		return "LIBUSB_ERROR_NOT_SUPPORTED";
 	case LIBUSB_ERROR_OTHER:
 		return "LIBUSB_ERROR_OTHER";
+
+	case LIBUSB_TRANSFER_ERROR:
+		return "LIBUSB_TRANSFER_ERROR";
+	case LIBUSB_TRANSFER_TIMED_OUT:
+		return "LIBUSB_TRANSFER_TIMED_OUT";
+	case LIBUSB_TRANSFER_CANCELLED:
+		return "LIBUSB_TRANSFER_CANCELLED";
+	case LIBUSB_TRANSFER_STALL:
+		return "LIBUSB_TRANSFER_STALL";
+	case LIBUSB_TRANSFER_NO_DEVICE:
+		return "LIBUSB_TRANSFER_NO_DEVICE";
+	case LIBUSB_TRANSFER_OVERFLOW:
+		return "LIBUSB_TRANSFER_OVERFLOW";
+
+	case 0:
+		return "LIBUSB_SUCCESS / LIBUSB_TRANSFER_COMPLETED";
+	default:
+		return "**UNKNOWN**";
 	}
-	return "**UNKNOWN**";
 }
 
 /** \ingroup misc

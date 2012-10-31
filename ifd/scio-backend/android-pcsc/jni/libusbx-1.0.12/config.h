@@ -81,7 +81,7 @@
 #define PACKAGE_NAME "libusbx"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "libusbx 1.0.12"
+#define PACKAGE_STRING "libusbx 1.0.14"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "libusbx"
@@ -90,7 +90,7 @@
 #define PACKAGE_URL "http://www.libusbx.org/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.0.12"
+#define PACKAGE_VERSION "1.0.14"
 
 /* type of second poll() argument */
 #define POLL_NFDS_TYPE nfds_t
@@ -105,7 +105,7 @@
 /* #undef USBI_TIMERFD_AVAILABLE */
 
 /* Version number of package */
-#define VERSION "1.0.12"
+#define VERSION "1.0.14"
 
 /* Use GNU extensions */
 #define _GNU_SOURCE 1

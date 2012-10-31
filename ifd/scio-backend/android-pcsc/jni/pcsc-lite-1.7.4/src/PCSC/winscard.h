@@ -6,12 +6,12 @@
  * Copyright (C) 2002-2009
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: winscard.h 5341 2010-10-22 11:36:06Z rousseau $
+ * $Id: winscard.h 5962 2011-09-24 08:24:34Z rousseau $
  */
 
 /**
  * @file
- * @brief This handles smartcard reader communications.
+ * @brief This handles smart card reader communications.
  */
 
 #ifndef __winscard_h__

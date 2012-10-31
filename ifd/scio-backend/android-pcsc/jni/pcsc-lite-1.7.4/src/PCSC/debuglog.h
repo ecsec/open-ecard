@@ -6,7 +6,7 @@
  * Copyright (C) 1999-2011
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: debuglog.h 5714 2011-05-05 09:26:47Z rousseau $
+ * $Id: debuglog.h 5854 2011-07-09 11:10:32Z rousseau $
  */
 
 /**
@@ -60,6 +60,10 @@ enum {
 #define __FUNCTION__ ""
 #endif
 
+#ifndef __GNUC__
+#define __attribute__(x) /*nothing*/
+#endif
+
 #ifdef NO_LOG
 
 #define Log0(priority) do { } while(0)
@@ -92,7 +96,9 @@ enum {
 
 #endif	/* NO_LOG */
 
-PCSC_API void log_msg(const int priority, const char *fmt, ...);
+PCSC_API void log_msg(const int priority, const char *fmt, ...)
+	__attribute__((format(printf, 2, 3)));
+
 PCSC_API void log_xxd(const int priority, const char *msg,
 	const unsigned char *buffer, const int size);
 

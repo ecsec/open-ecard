@@ -8,7 +8,7 @@
  * Copyright (C) 2002-2010
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: sys_unix.c 5047 2010-06-29 14:39:24Z rousseau $
+ * $Id: sys_unix.c 6319 2012-06-05 08:59:08Z rousseau $
  */
 
 /**
@@ -86,7 +86,11 @@ INTERNAL int SYS_RandomInt(int fStart, int fEnd)
 		iInitialized = 1;
 	}
 
-	iRandNum = ((rand()+0.0)/RAND_MAX * (fEnd - fStart)) + fStart;
+	if (-1 == fEnd)
+		/* full int range */
+		iRandNum = rand();
+	else
+		iRandNum = ((rand()+0.0)/RAND_MAX * (fEnd - fStart)) + fStart;
 
 	return iRandNum;
 }

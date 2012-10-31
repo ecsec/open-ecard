@@ -8,7 +8,7 @@
  * Copyright (C) 2005
  *  Martin Paljak <martin@paljak.pri.ee>
  *
- * $Id: pcsclite.h.in 5736 2011-05-12 08:43:33Z rousseau $
+ * $Id: pcsclite.h.in 6355 2012-06-25 13:22:27Z rousseau $
  */
 
 /**
@@ -190,11 +190,11 @@ extern const SCARD_IO_REQUEST g_rgSCardT0Pci, g_rgSCardT1Pci, g_rgSCardRawPci;
 #define INFINITE			0xFFFFFFFF	/**< Infinite timeout */
 #endif
 
-#define PCSCLITE_VERSION_NUMBER		"1.7.4"	/**< Current version */
+#define PCSCLITE_VERSION_NUMBER		"1.8.6"	/**< Current version */
 /** Maximum readers context (a slot is count as a reader) */
 #define PCSCLITE_MAX_READERS_CONTEXTS			16
 
-#define MAX_READERNAME			100
+#define MAX_READERNAME			128
 
 #ifndef SCARD_ATR_LENGTH
 #define SCARD_ATR_LENGTH		MAX_ATR_SIZE	/**< Maximum ATR size */
@@ -206,7 +206,7 @@ extern const SCARD_IO_REQUEST g_rgSCardT0Pci, g_rgSCardT1Pci, g_rgSCardRawPci;
  * to accomodate the transmit_struct
  */
 #define MAX_BUFFER_SIZE			264	/**< Maximum Tx/Rx Buffer for short APDU */
-#define MAX_BUFFER_SIZE_EXTENDED	(4 + 3 + (1<<16) + 3)	/**< enhanced (64K + APDU + Lc + Le) Tx/Rx Buffer */
+#define MAX_BUFFER_SIZE_EXTENDED	(4 + 3 + (1<<16) + 3 + 2)	/**< enhanced (64K + APDU + Lc + Le + SW) Tx/Rx Buffer */
 
 /*
  * Gets a stringified error response

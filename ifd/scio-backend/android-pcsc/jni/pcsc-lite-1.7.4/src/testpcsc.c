@@ -6,7 +6,7 @@
  * Copyright (C) 2004-2010
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: testpcsc.c 5096 2010-08-02 14:33:35Z rousseau $
+ * $Id: testpcsc.c 5885 2011-08-09 07:49:14Z rousseau $
  */
 
 /**
@@ -79,8 +79,8 @@ int main(/*@unused@*/ int argc, /*@unused@*/ char **argv)
 	DWORD i;
 	int p, iReader;
 	int iList[16];
-	SCARD_IO_REQUEST pioRecvPci;
-	SCARD_IO_REQUEST pioSendPci;
+	SCARD_IO_REQUEST ioRecvPci = *SCARD_PCI_T0;	/* use a default value */
+	const SCARD_IO_REQUEST *pioSendPci;
 	unsigned char bSendBuffer[MAX_BUFFER_SIZE];
 	unsigned char bRecvBuffer[MAX_BUFFER_SIZE];
 	DWORD send_length, length;
@@ -188,7 +188,7 @@ wait_for_card_again:
 
 			printf("Enter the reader number\t\t: ");
 			(void)fgets(input, sizeof(input), stdin);
-			(void)sscanf(input, "%d", &iReader);
+			iReader = atoi(input);
 
 			if (iReader > p || iReader <= 0)
 				printf("Invalid Value - try again\n");
@@ -219,13 +219,13 @@ wait_for_card_again:
 	switch(dwPref)
 	{
 		case SCARD_PROTOCOL_T0:
-			pioSendPci = *SCARD_PCI_T0;
+			pioSendPci = SCARD_PCI_T0;
 			break;
 		case SCARD_PROTOCOL_T1:
-			pioSendPci = *SCARD_PCI_T1;
+			pioSendPci = SCARD_PCI_T1;
 			break;
 		case SCARD_PROTOCOL_RAW:
-			pioSendPci = *SCARD_PCI_RAW;
+			pioSendPci = SCARD_PCI_RAW;
 			break;
 		default:
 			printf("Unknown protocol\n");
@@ -242,8 +242,8 @@ wait_for_card_again:
 	length = sizeof(bRecvBuffer);
 
 	printf("Testing SCardTransmit\t\t: ");
-	rv = SCardTransmit(hCard, &pioSendPci, bSendBuffer, send_length,
-		&pioRecvPci, bRecvBuffer, &length);
+	rv = SCardTransmit(hCard, pioSendPci, bSendBuffer, send_length,
+		&ioRecvPci, bRecvBuffer, &length);
 	test_rv(rv, hContext, PANIC);
 	printf(" card response:" GREEN);
 	for (i=0; i<length; i++)

@@ -8,7 +8,7 @@
  * Copyright (C) 2002-2010
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: winscard_msg_srv.c 5391 2010-11-08 14:53:02Z rousseau $
+ * $Id: winscard_msg_srv.c 6043 2011-10-15 16:44:08Z rousseau $
  */
 
 /**
@@ -39,6 +39,7 @@
 
 #include "misc.h"
 #include "pcscd.h"
+#include "sd-daemon.h"
 #include "winscard.h"
 #include "debuglog.h"
 #include "winscard_msg.h"
@@ -97,7 +98,11 @@ static int ProcessCommonChannelRequest(/*@out@*/ uint32_t *pdwClientID)
  */
 INTERNAL int32_t InitializeSocket(void)
 {
-	struct sockaddr_un serv_adr;
+	union
+	{
+		struct sockaddr sa;
+		struct sockaddr_un un;
+	} sa;
 
 	/*
 	 * Create the common shared connection socket
@@ -109,13 +114,12 @@ INTERNAL int32_t InitializeSocket(void)
 		return -1;
 	}
 
-	serv_adr.sun_family = AF_UNIX;
-	strncpy(serv_adr.sun_path, PCSCLITE_CSOCK_NAME,
-		sizeof(serv_adr.sun_path));
+	memset(&sa, 0, sizeof sa);
+	sa.un.sun_family = AF_UNIX;
+	strncpy(sa.un.sun_path, PCSCLITE_CSOCK_NAME, sizeof sa.un.sun_path);
 	(void)remove(PCSCLITE_CSOCK_NAME);
 
-	if (bind(commonSocket, (struct sockaddr *) &serv_adr,
-			sizeof(serv_adr.sun_family) + strlen(serv_adr.sun_path) + 1) < 0)
+	if (bind(commonSocket, &sa.sa, sizeof sa) < 0)
 	{
 		Log2(PCSC_LOG_CRITICAL, "Unable to bind common socket: %s",
 			strerror(errno));
@@ -134,6 +138,30 @@ INTERNAL int32_t InitializeSocket(void)
 	 */
 	(void)chmod(PCSCLITE_CSOCK_NAME, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
 
+	return 0;
+}
+
+/**
+ * @brief Acquires a socket passed in from systemd.
+ *
+ * This is called by the server to start listening on an existing socket for
+ * local IPC with the clients.
+ *
+ * @param fd The file descriptor to start listening on.
+ *
+ * @return Error code.
+ * @retval 0 Success
+ * @retval -1 Passed FD is not an UNIX socket.
+ */
+INTERNAL int32_t ListenExistingSocket(int fd)
+{
+	if (!sd_is_socket(fd, AF_UNIX, SOCK_STREAM, -1))
+	{
+		Log1(PCSC_LOG_CRITICAL, "Passed FD is not an UNIX socket");
+		return -1;
+	}
+
+	commonSocket = fd;
 	return 0;
 }
 

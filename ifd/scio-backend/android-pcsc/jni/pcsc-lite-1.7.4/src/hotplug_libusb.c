@@ -10,7 +10,7 @@
  * Copyright (C) 2003-2004
  *  Damien Sauveron <damien.sauveron@labri.fr>
  *
- * $Id: hotplug_libusb.c 5711 2011-05-05 09:02:08Z rousseau $
+ * $Id: hotplug_libusb.c 5938 2011-09-03 21:43:53Z rousseau $
  */
 
 /**
@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <libusb.h>
 #include <pthread.h>
+#include <signal.h>
 
 #include "misc.h"
 #include "wintypes.h"
@@ -217,6 +218,7 @@ static LONG HPReadBundleValues(void)
 					{
 						Log1(PCSC_LOG_CRITICAL, "Not enough memory");
 						driverSize = -1;
+						closedir(hpDir);
 						return -1;
 					}
 
@@ -389,9 +391,17 @@ static void HPRescanUsbBus(void)
 static void HPEstablishUSBNotifications(int pipefd[2])
 {
 	int i, do_polling;
+	int r;
 	char c = 42;	/* magic value */
 
-	libusb_init(ctx);
+	r = libusb_init(ctx);
+	if (r < 0)
+	{
+		Log2(PCSC_LOG_CRITICAL, "libusb_init failed: %d", r);
+		/* emergency exit */
+		kill(getpid(), SIGTERM);
+		return;
+	}
 
 	/* scan the USB bus for devices at startup */
 	HPRescanUsbBus();
@@ -616,7 +626,8 @@ ULONG HPRegisterForHotplugEvents(void)
 
 void HPReCheckSerialReaders(void)
 {
-  	if (rescan_pipe[1] >= 0)
+	Log0(PCSC_LOG_INFO);
+	if (rescan_pipe[1] >= 0)
 	{
 		char dummy = 0;
 		write(rescan_pipe[1], &dummy, sizeof(dummy));

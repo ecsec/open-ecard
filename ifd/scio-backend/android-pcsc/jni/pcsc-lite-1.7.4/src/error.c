@@ -10,7 +10,7 @@
  * - BSD-like, see the COPYING file
  * - GNU Lesser General Licence 2.1 or (at your option) any later version.
  *
- * $Id: error.c 5287 2010-10-10 12:52:00Z rousseau $
+ * $Id: error.c 5964 2011-09-24 09:22:24Z rousseau $
  */
 
 /**
@@ -37,8 +37,7 @@ PCSC_API char* pcsc_stringify_error(const long pcscError)
 }
 #else
 /**
- * @brief This function return a human readable text for the given PC/SC error
- * code.
+ * @brief Returns a human readable text for the given PC/SC error code.
  *
  * @ingroup API
  * @param[in] pcscError Error code to be translated to text.
@@ -50,7 +49,7 @@ PCSC_API char* pcsc_stringify_error(const long pcscError)
  * LONG rv;
  * rv = SCardEstablishContext(SCARD_SCOPE_SYSTEM, NULL, NULL, &hContext);
  * if (rv != SCARD_S_SUCCESS)
- *     printf("SCardReleaseContext: %s (0x%lX)\n",
+ *     printf("SCardEstablishContext: %s (0x%lX)\n",
  *         pcsc_stringify_error(rv), rv);
  * @endcode
  */

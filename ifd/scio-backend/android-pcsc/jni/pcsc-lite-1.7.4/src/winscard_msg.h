@@ -8,7 +8,7 @@
  * Copyright (C) 2002-2010
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: winscard_msg.h 5796 2011-06-16 08:56:03Z rousseau $
+ * $Id: winscard_msg.h 5929 2011-09-03 21:43:21Z rousseau $
  */
 
 /**
@@ -252,13 +252,14 @@
 
 #ifdef PCSCD
 	int32_t InitializeSocket(void);
+	int32_t ListenExistingSocket(int fd);
 	int32_t ProcessEventsServer(/*@out@*/ uint32_t *);
 #else
 	char *getSocketName(void);
 	int32_t ClientSetupSession(uint32_t *);
 	int32_t ClientCloseSession(uint32_t);
 	LONG MessageReceiveTimeout(uint32_t command, /*@out@*/ void *buffer,
-		uint64_t buffer_size, int32_t filedes, unsigned long timeOut);
+		uint64_t buffer_size, int32_t filedes, long timeOut);
 	LONG MessageSendWithHeader(uint32_t command, uint32_t dwClientID,
 		uint64_t size, void *data);
 #endif

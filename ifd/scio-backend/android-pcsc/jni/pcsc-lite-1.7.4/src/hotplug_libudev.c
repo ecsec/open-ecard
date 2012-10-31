@@ -4,7 +4,7 @@
  * Copyright (C) 2011
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: hotplug_libudev.c 5793 2011-06-15 14:10:45Z rousseau $
+ * $Id: hotplug_libudev.c 6380 2012-06-29 14:18:31Z rousseau $
  */
 
 /**
@@ -104,6 +104,7 @@ static LONG HPReadBundleValues(void)
 	if (NULL == driverTracker)
 	{
 		Log1(PCSC_LOG_CRITICAL, "Not enough memory");
+		(void)closedir(hpDir);
 		return -1;
 	}
 
@@ -199,6 +200,7 @@ static LONG HPReadBundleValues(void)
 					{
 						Log1(PCSC_LOG_CRITICAL, "Not enough memory");
 						driverSize = -1;
+						(void)closedir(hpDir);
 						return -1;
 					}
 
@@ -243,7 +245,7 @@ static LONG HPReadBundleValues(void)
 		Log1(PCSC_LOG_ERROR, "udev_device_get_sysattr_value() failed");
 		return NULL;
 	}
-	sscanf(str, "%X", &idVendor);
+	idVendor = strtol(str, NULL, 16);
 
 	str = udev_device_get_sysattr_value(dev, "idProduct");
 	if (!str)
@@ -251,7 +253,7 @@ static LONG HPReadBundleValues(void)
 		Log1(PCSC_LOG_ERROR, "udev_device_get_sysattr_value() failed");
 		return NULL;
 	}
-	sscanf(str, "%X", &idProduct);
+	idProduct = strtol(str, NULL, 16);
 
 	Log4(PCSC_LOG_DEBUG,
 		"Looking for a driver for VID: 0x%04X, PID: 0x%04X, path: %s",
@@ -292,6 +294,7 @@ static void HPAddDevice(struct udev_device *dev, struct udev_device *parent,
 	char fullname[MAX_READERNAME];
 	struct _driverTracker *driver, *classdriver;
 	const char *sSerialNumber = NULL, *sInterfaceName = NULL;
+	const char *sInterfaceNumber;
 	LONG ret;
 	int bInterfaceNumber;
 
@@ -308,8 +311,12 @@ static void HPAddDevice(struct udev_device *dev, struct udev_device *parent,
 
 	Log2(PCSC_LOG_INFO, "Adding USB device: %s", driver->readerName);
 
-	bInterfaceNumber = atoi(udev_device_get_sysattr_value(dev,
-		"bInterfaceNumber"));
+	sInterfaceNumber = udev_device_get_sysattr_value(dev, "bInterfaceNumber");
+	if (sInterfaceNumber)
+		bInterfaceNumber = atoi(sInterfaceNumber);
+	else
+		bInterfaceNumber = 0;
+
 	(void)snprintf(deviceName, sizeof(deviceName),
 		"usb:%04x/%04x:libudev:%d:%s", driver->manuID, driver->productID,
 		bInterfaceNumber, devpath);
@@ -495,16 +502,15 @@ static void HPRescanUsbBus(struct udev *udev)
 	/* Free the enumerator object */
 	udev_enumerate_unref(enumerate);
 
+	pthread_mutex_lock(&usbNotifierMutex);
 	/* check if all the previously found readers are still present */
 	for (i=0; i<PCSCLITE_MAX_READERS_CONTEXTS; i++)
 	{
 		if ((READER_ABSENT == readerTracker[i].status)
 			&& (readerTracker[i].fullName != NULL))
 		{
-			pthread_mutex_lock(&usbNotifierMutex);
-
-			Log3(PCSC_LOG_INFO, "Removing USB device[%d]: %s", i,
-				readerTracker[i].devpath);
+			Log4(PCSC_LOG_INFO, "Removing USB device[%d]: %s at %s", i,
+				readerTracker[i].fullName, readerTracker[i].devpath);
 
 			RFRemoveReader(readerTracker[i].fullName,
 				PCSCLITE_HP_BASE_PORT + i);
@@ -515,9 +521,9 @@ static void HPRescanUsbBus(struct udev *udev)
 			free(readerTracker[i].fullName);
 			readerTracker[i].fullName = NULL;
 
-			pthread_mutex_unlock(&usbNotifierMutex);
 		}
 	}
+	pthread_mutex_unlock(&usbNotifierMutex);
 }
 
 static void HPEstablishUSBNotifications(struct udev *udev)

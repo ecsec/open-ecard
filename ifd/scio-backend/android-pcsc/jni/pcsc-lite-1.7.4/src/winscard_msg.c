@@ -8,7 +8,7 @@
  * Copyright (C) 2002-2010
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: winscard_msg.c 5796 2011-06-16 08:56:03Z rousseau $
+ * $Id: winscard_msg.c 6441 2012-08-24 07:42:05Z rousseau $
  */
 
 /**
@@ -90,7 +90,6 @@ char *getSocketName(void)
 INTERNAL int ClientSetupSession(uint32_t *pdwClientID)
 {
 	struct sockaddr_un svc_addr;
-	int one;
 	int ret;
 	char *socketName;
 
@@ -116,8 +115,16 @@ INTERNAL int ClientSetupSession(uint32_t *pdwClientID)
 		return -1;
 	}
 
-	one = 1;
-	if (ioctl(*pdwClientID, FIONBIO, &one) < 0)
+	ret = fcntl(*pdwClientID, F_GETFL, 0);
+	if (ret < 0)
+	{
+		Log3(PCSC_LOG_CRITICAL, "Error: cannot retrieve socket %s flags: %s",
+			socketName, strerror(errno));
+		(void)close(*pdwClientID);
+		return -1;
+	}
+
+	if (fcntl(*pdwClientID, F_SETFL, ret | O_NONBLOCK) < 0)
 	{
 		Log3(PCSC_LOG_CRITICAL, "Error: cannot set socket %s nonblocking: %s",
 			socketName, strerror(errno));
@@ -157,7 +164,7 @@ INTERNAL int ClientCloseSession(uint32_t dwClientID)
  * @retval SCARD_F_COMM_ERROR A signal was received.
  */
 INTERNAL LONG MessageReceiveTimeout(uint32_t command, void *buffer_void,
-	uint64_t buffer_size, int32_t filedes, unsigned long timeOut)
+	uint64_t buffer_size, int32_t filedes, long timeOut)
 {
 	char *buffer = buffer_void;
 

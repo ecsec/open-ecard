@@ -6,7 +6,7 @@
  * Copyright (C) 2004-2011
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: prothandler.c 5711 2011-05-05 09:02:08Z rousseau $
+ * $Id: prothandler.c 5861 2011-07-09 11:30:36Z rousseau $
  */
 
 /**
@@ -25,46 +25,6 @@
 #include "atrhandler.h"
 #include "ifdwrapper.h"
 #include "eventhandler.h"
-
-/**
- * Get the default protocol used immediately after reset.
- *
- * This protocol is returned from the function.
- */
-UCHAR PHGetDefaultProtocol(PUCHAR pucAtr, DWORD dwLength)
-{
-	SMARTCARD_EXTENSION sSmartCard;
-
-	/*
-	 * Zero out everything
-	 */
-	memset(&sSmartCard, 0x00, sizeof(SMARTCARD_EXTENSION));
-
-	if (ATRDecodeAtr(&sSmartCard, pucAtr, dwLength))
-		return sSmartCard.CardCapabilities.CurrentProtocol;
-	else
-		return 0x00;
-}
-
-/**
- * Get the protocols supported by the card.
- *
- * These protocols are returned from the function as bit masks.
- */
-UCHAR PHGetAvailableProtocols(PUCHAR pucAtr, DWORD dwLength)
-{
-	SMARTCARD_EXTENSION sSmartCard;
-
-	/*
-	 * Zero out everything
-	 */
-	memset(&sSmartCard, 0x00, sizeof(SMARTCARD_EXTENSION));
-
-	if (ATRDecodeAtr(&sSmartCard, pucAtr, dwLength))
-		return sSmartCard.CardCapabilities.AvailableProtocols;
-	else
-		return 0x00;
-}
 
 /**
  * Determine which protocol to use.
@@ -139,7 +99,7 @@ DWORD PHSetProtocol(struct ReaderContext * rContext,
 					(SCARD_PROTOCOL_T0 == protocol) ? 0 : 1);
 			else
 			{
-				Log3(PCSC_LOG_INFO, "PTS failed (%d), using T=%d", rv,
+				Log3(PCSC_LOG_INFO, "PTS failed (%ld), using T=%d", rv,
 					(SCARD_PROTOCOL_T0 == protocol) ? 0 : 1);
 
 				/* ISO 7816-3:1997 ch. 7.2 PPS protocol page 14

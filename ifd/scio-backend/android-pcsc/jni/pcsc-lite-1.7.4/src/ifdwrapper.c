@@ -8,7 +8,7 @@
  * Copyright (C) 2002-2011
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: ifdwrapper.c 5805 2011-06-22 07:06:50Z rousseau $
+ * $Id: ifdwrapper.c 6315 2012-06-02 13:08:05Z rousseau $
  */
 
 /**
@@ -122,8 +122,8 @@ LONG IFDOpenIFD(READER_CONTEXT * rContext)
 #else
 	{
 		/* Use device name only if defined */
-		if (rContext->lpcDevice[0] != '\0')
-			rv = IFDHCreateChannelByName(rContext->slot, rContext->lpcDevice);
+		if (rContext->device[0] != '\0')
+			rv = IFDHCreateChannelByName(rContext->slot, rContext->device);
 		else
 			rv = IFDHCreateChannel(rContext->slot, rContext->port);
 	}
@@ -266,7 +266,14 @@ LONG IFDPowerICC(READER_CONTEXT * rContext, DWORD dwAction,
 	/*
 	 * Check that the card is inserted first
 	 */
-	(void)IFDStatusICC(rContext, &dwStatus);
+	rv = IFDStatusICC(rContext, &dwStatus);
+	if (rv != IFD_SUCCESS)
+	{
+		if (rv == IFD_NO_SUCH_DEVICE)
+			return SCARD_E_READER_UNAVAILABLE;
+
+		return SCARD_E_NOT_TRANSACTED;
+	}
 
 	if (dwStatus & SCARD_ABSENT)
 		return SCARD_W_REMOVED_CARD;
@@ -452,7 +459,7 @@ LONG IFDControl(READER_CONTEXT * rContext, DWORD ControlCode,
 	else
 	{
 		Log2(PCSC_LOG_ERROR, "Card not transacted: %ld", rv);
-		Log3(PCSC_LOG_DEBUG, "ControlCode: 0x%.8LX BytesReturned: %ld",
+		Log3(PCSC_LOG_DEBUG, "ControlCode: 0x%.8lX BytesReturned: %ld",
 			ControlCode, *BytesReturned);
 		LogXxd(PCSC_LOG_DEBUG, "TxBuffer ", TxBuffer, TxLength);
 		LogXxd(PCSC_LOG_DEBUG, "RxBuffer ", RxBuffer, *BytesReturned);

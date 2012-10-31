@@ -6,7 +6,7 @@
  * Copyright (C) 2002-2011
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: pcscdaemon.c 5764 2011-05-18 11:57:51Z rousseau $
+ * $Id: pcscdaemon.c 6446 2012-08-24 09:07:18Z rousseau $
  */
 
 /**
@@ -37,6 +37,7 @@
 #include "pcsclite.h"
 #include "pcscd.h"
 #include "debuglog.h"
+#include "sd-daemon.h"
 #include "winscard_msg.h"
 #include "winscard_svc.h"
 #include "sys_generic.h"
@@ -54,6 +55,7 @@
 char AraKiri = FALSE;
 static char Init = TRUE;
 char AutoExit = FALSE;
+char SocketActivated = FALSE;
 static int ExitValue = EXIT_FAILURE;
 int HPForceReaderPolling = 0;
 static int pipefd[] = {-1, -1};
@@ -91,7 +93,7 @@ static void SVCServiceRunLoop(void)
 			Log2(PCSC_LOG_DEBUG, "A new context thread creation is requested: %d", dwClientID);
 			rv = CreateContextThread(&dwClientID);
 
- 			if (rv != SCARD_S_SUCCESS)
+			if (rv != SCARD_S_SUCCESS)
 				Log1(PCSC_LOG_ERROR, "Problem during the context thread creation");
 			break;
 
@@ -316,6 +318,26 @@ int main(int argc, char **argv)
 	}
 
 	/*
+	 * Check if systemd passed us any file descriptors
+	 */
+	rv = sd_listen_fds(0);
+	if (rv > 1)
+	{
+		Log1(PCSC_LOG_CRITICAL, "Too many file descriptors received");
+		return EXIT_FAILURE;
+	}
+	else
+	{
+		if (rv == 1)
+		{
+			SocketActivated = TRUE;
+			Log1(PCSC_LOG_INFO, "Started by systemd");
+		}
+		else
+			SocketActivated = FALSE;
+	}
+
+	/*
 	 * test the presence of /var/run/pcscd/pcscd.comm
 	 */
 
@@ -365,17 +387,6 @@ int main(int argc, char **argv)
 				Log1(PCSC_LOG_CRITICAL, "Hotplug failed");
 				return EXIT_FAILURE;
 			}
-
-			Log1(PCSC_LOG_CRITICAL,
-				"file " PCSCLITE_CSOCK_NAME " already exists.");
-			Log1(PCSC_LOG_CRITICAL,
-				"Maybe another pcscd is running?");
-			Log1(PCSC_LOG_CRITICAL,
-				"I can't read process pid from " PCSCLITE_RUN_PID);
-			Log1(PCSC_LOG_CRITICAL, "Remove " PCSCLITE_CSOCK_NAME);
-			Log1(PCSC_LOG_CRITICAL,
-				"if pcscd is not running to clear this message.");
-			return EXIT_FAILURE;
 		}
 	}
 	else
@@ -389,30 +400,13 @@ int main(int argc, char **argv)
 	 * root ("/") */
 	(void)chdir("/");
 
-	if (AutoExit)
-	{
-		int pid;
-
-		/* create a new session so that Ctrl-C on the application will
-		 * not also quit pcscd */
-		setsid();
-
-		/* fork() so that pcscd always return in --auto-exit mode */
-		pid = fork();
-		if (-1 == pid )
-			Log2(PCSC_LOG_CRITICAL, "fork() failed: %s", strerror(errno));
-
-		if (pid)
-			/* father */
-			return EXIT_SUCCESS;
-	}
-
 	/*
 	 * If this is set to one the user has asked it not to fork
 	 */
 	if (!setToForeground)
 	{
 		int pid;
+		int fd;
 
 		if (pipe(pipefd) == -1)
 		{
@@ -429,9 +423,17 @@ int main(int argc, char **argv)
 
 		/* like in daemon(3): redirect standard input, standard output
 		 * and standard error to /dev/null */
-		(void)close(0);
-		(void)close(1);
-		(void)close(2);
+		fd = open("/dev/null", O_RDWR);
+		if (fd != -1)
+		{
+			dup2(fd, STDIN_FILENO);
+			dup2(fd, STDOUT_FILENO);
+			dup2(fd, STDERR_FILENO);
+
+			/* do not close stdin, stdout or stderr */
+			if (fd > 2)
+				close(fd);
+		}
 
 		if (pid)
 		/* in the father */
@@ -474,13 +476,11 @@ int main(int argc, char **argv)
 	/*
 	 * If PCSCLITE_IPC_DIR does not exist then create it
 	 */
-	rv = stat(PCSCLITE_IPC_DIR, &fStatBuf);
-	if (rv < 0)
 	{
 		int mode = S_IROTH | S_IXOTH | S_IRGRP | S_IXGRP | S_IRWXU;
 
 		rv = mkdir(PCSCLITE_IPC_DIR, mode);
-		if (rv != 0)
+		if ((rv != 0) && (errno != EEXIST))
 		{
 			Log2(PCSC_LOG_CRITICAL,
 				"cannot create " PCSCLITE_IPC_DIR ": %s", strerror(errno));
@@ -492,37 +492,6 @@ int main(int argc, char **argv)
 		 * The directory containes files used by libpcsclite */
 		(void)chmod(PCSCLITE_IPC_DIR, mode);
 	}
-
-	/*
-	 * Record our pid to make it easier
-	 * to kill the correct pcscd
-	 */
-	{
-		int f;
-		int mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-
-		f = open(PCSCLITE_RUN_PID, O_RDWR | O_CREAT, mode);
-		if (f != -1)
-		{
-			char pid[PID_ASCII_SIZE];
-
-			(void)snprintf(pid, sizeof(pid), "%u\n", (unsigned) getpid());
-			(void)write(f, pid, strlen(pid));
-			(void)close(f);
-
-			/* set mode so that the file is world readable even is umask is
-			 * restrictive
-			 * The file is used by libpcsclite */
-			(void)chmod(PCSCLITE_RUN_PID, mode);
-		}
-		else
-			Log2(PCSC_LOG_CRITICAL, "cannot create " PCSCLITE_RUN_PID ": %s",
-				strerror(errno));
-	}
-
-	/* cleanly remove /var/run/pcscd/pcsc.* files when exiting */
-	if (atexit(at_exit))
-		Log2(PCSC_LOG_CRITICAL, "atexit() failed: %s", strerror(errno));
 
 	/*
 	 * Allocate memory for reader structures
@@ -556,6 +525,35 @@ int main(int argc, char **argv)
 	Log1(PCSC_LOG_INFO, "pcsc-lite " VERSION " daemon ready.");
 
 	/*
+	 * Record our pid to make it easier
+	 * to kill the correct pcscd
+	 *
+	 * Do not fork after this point or the stored pid will be wrong
+	 */
+	{
+		int f;
+		int mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+
+		f = open(PCSCLITE_RUN_PID, O_RDWR | O_CREAT, mode);
+		if (f != -1)
+		{
+			char pid[PID_ASCII_SIZE];
+
+			(void)snprintf(pid, sizeof(pid), "%u\n", (unsigned) getpid());
+			(void)write(f, pid, strlen(pid));
+			(void)close(f);
+
+			/* set mode so that the file is world readable even is umask is
+			 * restrictive
+			 * The file is used by libpcsclite */
+			(void)chmod(PCSCLITE_RUN_PID, mode);
+		}
+		else
+			Log2(PCSC_LOG_CRITICAL, "cannot create " PCSCLITE_RUN_PID ": %s",
+				strerror(errno));
+	}
+
+	/*
 	 * post initialistion
 	 */
 	Init = FALSE;
@@ -568,7 +566,11 @@ int main(int argc, char **argv)
 	/*
 	 * Initialize the comm structure
 	 */
-	rv = InitializeSocket();
+	if (SocketActivated)
+		rv = ListenExistingSocket(SD_LISTEN_FDS_START + 0);
+	else
+		rv = InitializeSocket();
+
 	if (rv)
 	{
 		Log1(PCSC_LOG_CRITICAL, "Error initializing pcscd.");
@@ -595,8 +597,10 @@ int main(int argc, char **argv)
 	 * Set up the search for USB/PCMCIA devices
 	 */
 	rv = HPSearchHotPluggables();
+#ifndef USE_SERIAL
 	if (rv)
 		at_exit();
+#endif
 
 	rv = HPRegisterForHotplugEvents();
 	if (rv)
@@ -652,10 +656,13 @@ static void clean_temp_files(void)
 {
 	int rv;
 
-	rv = remove(PCSCLITE_CSOCK_NAME);
-	if (rv != 0)
-		Log2(PCSC_LOG_ERROR, "Cannot remove " PCSCLITE_CSOCK_NAME ": %s",
-			strerror(errno));
+	if (!SocketActivated)
+	{
+		rv = remove(PCSCLITE_CSOCK_NAME);
+		if (rv != 0)
+			Log2(PCSC_LOG_ERROR, "Cannot remove " PCSCLITE_CSOCK_NAME ": %s",
+				strerror(errno));
+	}
 
 	rv = remove(PCSCLITE_RUN_PID);
 	if (rv != 0)
@@ -687,6 +694,12 @@ static void signal_trap(int sig)
 	{
 		Log1(PCSC_LOG_INFO, "Direct suicide");
 		at_exit();
+	}
+
+	if (SIGALRM == sig)
+	{
+		/* normal exit without error */
+		ExitValue = EXIT_SUCCESS;
 	}
 
 	/* the signal handler is called several times for the same Ctrl-C */
@@ -739,28 +752,30 @@ static void print_usage (char const * const progname)
 	printf("  -c, --config		path to reader.conf\n");
 	printf("  -f, --foreground	run in foreground (no daemon),\n");
 	printf("			send logs to stdout instead of syslog\n");
-	printf("  -T, --color       force use of colored logs\n");
+	printf("  -T, --color		force use of colored logs\n");
 	printf("  -h, --help		display usage information\n");
 	printf("  -H, --hotplug		ask the daemon to rescan the available readers\n");
 	printf("  -v, --version		display the program version number\n");
-	printf("  -d, --debug	 	display lower level debug messages\n");
-	printf("      --info	 	display info level debug messages (default level)\n");
-	printf("  -e  --error	 	display error level debug messages\n");
-	printf("  -C  --critical 	display critical only level debug messages\n");
+	printf("  -d, --debug		display lower level debug messages\n");
+	printf("      --info		display info level debug messages\n");
+	printf("  -e  --error		display error level debug messages (default level)\n");
+	printf("  -C  --critical	display critical only level debug messages\n");
 	printf("  --force-reader-polling ignore the IFD_GENERATE_HOTPLUG reader capability\n");
 	printf("  -t, --max-thread	maximum number of threads (default %d)\n", PCSC_MAX_CONTEXT_THREADS);
 	printf("  -s, --max-card-handle-per-thread	maximum number of card handle per thread (default: %d)\n", PCSC_MAX_CONTEXT_CARD_HANDLES);
 	printf("  -r, --max-card-handle-per-reader	maximum number of card handle per reader (default: %d)\n", PCSC_MAX_READER_HANDLES);
-	printf("  -x, --auto-exits	pcscd will quit after %d seconds of inactivity\n", TIME_BEFORE_SUICIDE);
+	printf("  -x, --auto-exit	pcscd will quit after %d seconds of inactivity\n", TIME_BEFORE_SUICIDE);
 #else
 	printf("  -a    log APDU commands and results\n");
-	printf("  -c 	path to reader.conf\n");
+	printf("  -c	path to reader.conf\n");
 	printf("  -f	run in foreground (no daemon), send logs to stdout instead of syslog\n");
 	printf("  -T    force use of colored logs\n");
-	printf("  -d 	display debug messages. Output may be:\n");
-	printf("  -h 	display usage information\n");
+	printf("  -d	display debug messages.\n");
+	printf("  -e	display error messages (default level).\n");
+	printf("  -C	display critical messages.\n");
+	printf("  -h	display usage information\n");
 	printf("  -H	ask the daemon to rescan the available readers\n");
-	printf("  -v 	display the program version number\n");
+	printf("  -v	display the program version number\n");
 	printf("  -t    maximum number of threads\n");
 	printf("  -s    maximum number of card handle per thread\n");
 	printf("  -r    maximum number of card handle per reader\n");

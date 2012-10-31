@@ -10,7 +10,7 @@
  * Copyright (C) 2009
  *  Jean-Luc Giraud <jlgiraud@googlemail.com>
  *
- * $Id: readerfactory.c 5711 2011-05-05 09:02:08Z rousseau $
+ * $Id: readerfactory.c 6447 2012-08-24 15:39:52Z rousseau $
  */
 
 /**
@@ -58,6 +58,7 @@ static int ConfigFileCRC = 0;
 static pthread_mutex_t LockMutex = PTHREAD_MUTEX_INITIALIZER;
 
 #define IDENTITY_SHIFT 16
+static LONG removeReader(READER_CONTEXT * sReader);
 
 static int RDR_CLIHANDLES_seeker(const void *el, const void *key)
 {
@@ -66,7 +67,7 @@ static int RDR_CLIHANDLES_seeker(const void *el, const void *key)
 	if ((el == NULL) || (key == NULL))
 	{
 		Log3(PCSC_LOG_CRITICAL,
-			"RDR_CLIHANDLES_seeker called with NULL pointer: el=%X, key=%X",
+			"RDR_CLIHANDLES_seeker called with NULL pointer: el=%p, key=%p",
 			el, key);
 		return 0;
 	}
@@ -77,6 +78,33 @@ static int RDR_CLIHANDLES_seeker(const void *el, const void *key)
 	return 0;
 }
 
+
+LONG _RefReader(READER_CONTEXT * sReader)
+{
+	if (0 == sReader->reference)
+		return SCARD_E_READER_UNAVAILABLE;
+
+	pthread_mutex_lock(&sReader->reference_lock);
+	sReader->reference += 1;
+	pthread_mutex_unlock(&sReader->reference_lock);
+
+	return SCARD_S_SUCCESS;
+}
+
+LONG _UnrefReader(READER_CONTEXT * sReader)
+{
+	if (0 == sReader->reference)
+		return SCARD_E_READER_UNAVAILABLE;
+
+	pthread_mutex_lock(&sReader->reference_lock);
+	sReader->reference -= 1;
+	pthread_mutex_unlock(&sReader->reference_lock);
+
+	if (0 == sReader->reference)
+		removeReader(sReader);
+
+	return SCARD_S_SUCCESS;
+}
 
 LONG RFAllocateReaderSpace(unsigned int customMaxReaderHandles)
 {
@@ -106,7 +134,7 @@ LONG RFAllocateReaderSpace(unsigned int customMaxReaderHandles)
 	return EHInitializeEventStructures();
 }
 
-LONG RFAddReader(const char *readerName, int port, const char *library,
+LONG RFAddReader(const char *readerNameLong, int port, const char *library,
 	const char *device)
 {
 	DWORD dwContext = 0, dwGetSize;
@@ -114,16 +142,22 @@ LONG RFAddReader(const char *readerName, int port, const char *library,
 	LONG rv, parentNode;
 	int i, j;
 	int lrv = 0;
+	char *readerName = NULL;
 
-	if ((readerName == NULL) || (library == NULL) || (device == NULL))
+	if ((readerNameLong == NULL) || (library == NULL) || (device == NULL))
 		return SCARD_E_INVALID_VALUE;
+
+	/* allocate memory that is automatically freed */
+	readerName = alloca(strlen(readerNameLong)+1);
+	strcpy(readerName, readerNameLong);
 
 	/* Reader name too long? also count " 00 00"*/
 	if (strlen(readerName) > MAX_READERNAME - sizeof(" 00 00"))
 	{
-		Log3(PCSC_LOG_ERROR, "Reader name too long: %d chars instead of max %d",
+		Log3(PCSC_LOG_ERROR,
+			"Reader name too long: %zd chars instead of max %zd. Truncating!",
 			strlen(readerName), MAX_READERNAME - sizeof(" 00 00"));
-		return SCARD_E_INVALID_VALUE;
+		readerName[MAX_READERNAME - sizeof(" 00 00")] = '\0';
 	}
 
 	/* Same name, same port - duplicate reader cannot be used */
@@ -171,7 +205,7 @@ LONG RFAddReader(const char *readerName, int port, const char *library,
 
 	/* Check and set the readername to see if it must be enumerated */
 	parentNode = RFSetReaderName(sReadersContexts[dwContext], readerName,
-		library, port, 0);
+		library, port);
 	if (parentNode < -1)
 		return SCARD_E_NO_MEMORY;
 
@@ -188,8 +222,6 @@ LONG RFAddReader(const char *readerName, int port, const char *library,
 	sReadersContexts[dwContext]->pFeeds = NULL;
 	sReadersContexts[dwContext]->pMutex = NULL;
 	sReadersContexts[dwContext]->pthCardEvent = NULL;
-	sReadersContexts[dwContext]->dwIdentity =
-		(dwContext + 1) << IDENTITY_SHIFT;
 
 	lrv = list_init(&sReadersContexts[dwContext]->handlesList);
 	if (lrv < 0)
@@ -213,6 +245,11 @@ LONG RFAddReader(const char *readerName, int port, const char *library,
 	(void)pthread_mutex_init(&sReadersContexts[dwContext]->powerState_lock,
 		NULL);
 	sReadersContexts[dwContext]->powerState = POWER_STATE_UNPOWERED;
+
+	/* reference count */
+	(void)pthread_mutex_init(&sReadersContexts[dwContext]->reference_lock,
+		NULL);
+	sReadersContexts[dwContext]->reference = 1;
 
 	/* If a clone to this reader exists take some values from that clone */
 	if (parentNode >= 0 && parentNode < PCSCLITE_MAX_READERS_CONTEXTS)
@@ -352,7 +389,7 @@ LONG RFAddReader(const char *readerName, int port, const char *library,
 		(void)strlcpy(tmpReader,
 			sReadersContexts[dwContext]->readerState->readerName,
 			sizeof(sReadersContexts[dwContextB]->readerState->readerName));
-		sprintf(tmpReader + strlen(tmpReader) - 2, "%02X", j);
+		snprintf(tmpReader + strlen(tmpReader) - 2, 3, "%02X", j);
 
 		sReadersContexts[dwContextB]->library =
 			sReadersContexts[dwContext]->library;
@@ -385,8 +422,6 @@ LONG RFAddReader(const char *readerName, int port, const char *library,
 		sReadersContexts[dwContextB]->contexts = 0;
 		sReadersContexts[dwContextB]->hLockId = 0;
 		sReadersContexts[dwContextB]->LockCount = 0;
-		sReadersContexts[dwContextB]->dwIdentity =
-			(dwContextB + 1) << IDENTITY_SHIFT;
 
 		lrv = list_init(&sReadersContexts[dwContextB]->handlesList);
 		if (lrv < 0)
@@ -408,6 +443,11 @@ LONG RFAddReader(const char *readerName, int port, const char *library,
 		(void)pthread_mutex_init(&sReadersContexts[dwContextB]->powerState_lock,
 			NULL);
 		sReadersContexts[dwContextB]->powerState = POWER_STATE_UNPOWERED;
+
+		/* reference count */
+		(void)pthread_mutex_init(&sReadersContexts[dwContextB]->reference_lock,
+			NULL);
+		sReadersContexts[dwContextB]->reference = 1;
 
 		/* Call on the parent driver to see if the slots are thread safe */
 		dwGetSize = sizeof(ucThread);
@@ -466,30 +506,53 @@ LONG RFAddReader(const char *readerName, int port, const char *library,
 
 LONG RFRemoveReader(const char *readerName, int port)
 {
-	LONG rv;
-	READER_CONTEXT * sContext;
+	char lpcStripReader[MAX_READERNAME];
+	int i;
 
 	if (readerName == NULL)
 		return SCARD_E_INVALID_VALUE;
 
-	while (SCARD_S_SUCCESS ==
-		RFReaderInfoNamePort(port, readerName, &sContext))
+	for (i = 0; i < PCSCLITE_MAX_READERS_CONTEXTS; i++)
+	{
+		if (sReadersContexts[i]->vHandle != 0)
+		{
+			strncpy(lpcStripReader,
+				sReadersContexts[i]->readerState->readerName,
+				sizeof(lpcStripReader));
+			lpcStripReader[strlen(lpcStripReader) - 6] = 0;
+
+			/* Compare only the significant part of the reader name */
+			if ((strncmp(readerName, lpcStripReader, MAX_READERNAME - sizeof(" 00 00")) == 0)
+				&& (port == sReadersContexts[i]->port))
+			{
+				/* remove the reader */
+				UNREF_READER(sReadersContexts[i])
+			}
+		}
+	}
+
+	return SCARD_S_SUCCESS;
+}
+
+LONG removeReader(READER_CONTEXT * sContext)
+{
+	LONG rv;
+
 	{
 		/* Try to destroy the thread */
 		if (sContext -> pthThread)
 			(void)EHDestroyEventHandler(sContext);
 
-		rv = RFUnInitializeReader(sContext);
-		if (rv != SCARD_S_SUCCESS)
-			return rv;
-
-		/* Destroy and free the mutex */
 		if ((NULL == sContext->pMutex) || (NULL == sContext->pFeeds))
 		{
 			Log1(PCSC_LOG_ERROR,
 				"Trying to remove an already removed driver");
 			return SCARD_E_INVALID_VALUE;
 		}
+
+		rv = RFUnInitializeReader(sContext);
+		if (rv != SCARD_S_SUCCESS)
+			return rv;
 
 		*sContext->pMutex -= 1;
 
@@ -498,6 +561,7 @@ LONG RFRemoveReader(const char *readerName, int port)
 		{
 			(void)pthread_mutex_destroy(sContext->mMutex);
 			free(sContext->mMutex);
+			sContext->mMutex = NULL;
 			free(sContext->library);
 			free(sContext->device);
 			free(sContext->pMutex);
@@ -513,24 +577,23 @@ LONG RFRemoveReader(const char *readerName, int port)
 			sContext->pFeeds = NULL;
 		}
 
+		(void)pthread_mutex_destroy(&sContext->powerState_lock);
 		sContext->version = 0;
 		sContext->port = 0;
-		sContext->mMutex = NULL;
 		sContext->contexts = 0;
 		sContext->slot = 0;
 		sContext->hLockId = 0;
 		sContext->LockCount = 0;
 		sContext->vHandle = NULL;
-		sContext->dwIdentity = 0;
 
 		(void)pthread_mutex_lock(&sContext->handlesList_lock);
-		while (list_size(&(sContext->handlesList)) != 0)
+		while (list_size(&sContext->handlesList) != 0)
 		{
 			int lrv;
 			RDR_CLIHANDLES *currentHandle;
 
-			currentHandle = list_get_at(&(sContext->handlesList), 0);
-			lrv = list_delete_at(&(sContext->handlesList), 0);
+			currentHandle = list_get_at(&sContext->handlesList, 0);
+			lrv = list_delete_at(&sContext->handlesList, 0);
 			if (lrv < 0)
 				Log2(PCSC_LOG_CRITICAL,
 					"list_delete_at failed with return value: %d", lrv);
@@ -538,7 +601,8 @@ LONG RFRemoveReader(const char *readerName, int port)
 			free(currentHandle);
 		}
 		(void)pthread_mutex_unlock(&sContext->handlesList_lock);
-		list_destroy(&(sContext->handlesList));
+		(void)pthread_mutex_destroy(&sContext->handlesList_lock);
+		list_destroy(&sContext->handlesList);
 		dwNumReadersContexts -= 1;
 
 		/* signal an event to clients */
@@ -549,7 +613,7 @@ LONG RFRemoveReader(const char *readerName, int port)
 }
 
 LONG RFSetReaderName(READER_CONTEXT * rContext, const char *readerName,
-	const char *libraryName, int port, DWORD slot)
+	const char *libraryName, int port)
 {
 	LONG parent = -1;	/* reader number of the parent of the clone */
 	DWORD valueLength;
@@ -562,7 +626,7 @@ LONG RFSetReaderName(READER_CONTEXT * rContext, const char *readerName,
 	for (i = 0; i < PCSCLITE_MAX_READERS_CONTEXTS; i++)
 		usedDigits[i] = FALSE;
 
-	if ((0 == slot) && (dwNumReadersContexts != 0))
+	if (dwNumReadersContexts != 0)
 	{
 		for (i = 0; i < PCSCLITE_MAX_READERS_CONTEXTS; i++)
 		{
@@ -648,11 +712,11 @@ LONG RFSetReaderName(READER_CONTEXT * rContext, const char *readerName,
 	}
 
 	snprintf(rContext->readerState->readerName,
-		sizeof(rContext->readerState->readerName), "%s %02X %02lX",
-		readerName, i, slot);
+		sizeof(rContext->readerState->readerName), "%s %02X 00",
+		readerName, i);
 
 	/* Set the slot in 0xDDDDCCCC */
-	rContext->slot = (i << 16) + slot;
+	rContext->slot = i << 16;
 
 	return parent;
 }
@@ -671,6 +735,9 @@ LONG RFReaderInfo(const char *readerName, READER_CONTEXT ** sReader)
 			if (strcmp(readerName,
 				sReadersContexts[i]->readerState->readerName) == 0)
 			{
+				/* Increase reference count */
+				REF_READER(sReadersContexts[i])
+
 				*sReader = sReadersContexts[i];
 				return SCARD_S_SUCCESS;
 			}
@@ -680,50 +747,27 @@ LONG RFReaderInfo(const char *readerName, READER_CONTEXT ** sReader)
 	return SCARD_E_UNKNOWN_READER;
 }
 
-LONG RFReaderInfoNamePort(int port, const char *readerName,
-	READER_CONTEXT * * sReader)
+LONG RFReaderInfoById(SCARDHANDLE hCard, READER_CONTEXT * * sReader)
 {
-	char lpcStripReader[MAX_READERNAME];
 	int i;
 
 	for (i = 0; i < PCSCLITE_MAX_READERS_CONTEXTS; i++)
 	{
 		if (sReadersContexts[i]->vHandle != 0)
 		{
-			int tmplen;
-
-			strncpy(lpcStripReader,
-				sReadersContexts[i]->readerState->readerName,
-				sizeof(lpcStripReader));
-			tmplen = strlen(lpcStripReader);
-			lpcStripReader[tmplen - 6] = 0;
-
-			if ((strcmp(readerName, lpcStripReader) == 0) &&
-				(port == sReadersContexts[i]->port))
+			RDR_CLIHANDLES * currentHandle;
+			(void)pthread_mutex_lock(&sReadersContexts[i]->handlesList_lock);
+			currentHandle = list_seek(&sReadersContexts[i]->handlesList,
+				&hCard);
+			(void)pthread_mutex_unlock(&sReadersContexts[i]->handlesList_lock);
+			if (currentHandle != NULL)
 			{
+				/* Increase reference count */
+				REF_READER(sReadersContexts[i])
+
 				*sReader = sReadersContexts[i];
 				return SCARD_S_SUCCESS;
 			}
-		}
-	}
-
-	return SCARD_E_INVALID_VALUE;
-}
-
-LONG RFReaderInfoById(DWORD dwIdentity, READER_CONTEXT * * sReader)
-{
-	int i;
-
-	/* Strip off the lower nibble and get the identity */
-	dwIdentity = dwIdentity >> IDENTITY_SHIFT;
-	dwIdentity = dwIdentity << IDENTITY_SHIFT;
-
-	for (i = 0; i < PCSCLITE_MAX_READERS_CONTEXTS; i++)
-	{
-		if (dwIdentity == sReadersContexts[i]->dwIdentity)
-		{
-			*sReader = sReadersContexts[i];
-			return SCARD_S_SUCCESS;
 		}
 	}
 
@@ -938,7 +982,7 @@ LONG RFInitializeReader(READER_CONTEXT * rContext)
 	rv = RFLoadReader(rContext);
 	if (rv != SCARD_S_SUCCESS)
 	{
-		Log2(PCSC_LOG_ERROR, "RFLoadReader failed: 0x%X", rv);
+		Log2(PCSC_LOG_ERROR, "RFLoadReader failed: 0x%lX", rv);
 		return rv;
 	}
 
@@ -947,7 +991,7 @@ LONG RFInitializeReader(READER_CONTEXT * rContext)
 
 	if (rv != SCARD_S_SUCCESS)
 	{
-		Log2(PCSC_LOG_ERROR, "RFBindFunctions failed: 0x%X", rv);
+		Log2(PCSC_LOG_ERROR, "RFBindFunctions failed: 0x%lX", rv);
 		(void)RFUnloadReader(rContext);
 		return rv;
 	}
@@ -1009,68 +1053,29 @@ LONG RFUnInitializeReader(READER_CONTEXT * rContext)
 
 SCARDHANDLE RFCreateReaderHandle(READER_CONTEXT * rContext)
 {
-	USHORT randHandle;
+	SCARDHANDLE randHandle;
+	READER_CONTEXT *dummy_reader;
+	LONG ret;
 
-	/* Create a random handle with 16 bits check to see if it already is
-	 * used. */
-	/* FIXME: THIS IS NOT STRONG ENOUGH: A 128-bit token should be
-	 * generated.  The client and server would associate token and hCard
-	 * for authentication. */
-	randHandle = SYS_RandomInt(10, 65000);
+	(void)rContext;
 
-	int i;
-again:
-	for (i = 0; i < PCSCLITE_MAX_READERS_CONTEXTS; i++)
+	do
 	{
-		if (sReadersContexts[i]->vHandle != 0)
-		{
-			RDR_CLIHANDLES *currentHandle;
-			list_t * l = &sReadersContexts[i]->handlesList;
+		/* Create a random handle with 32 bits check to see if it already is
+		 * used. */
+		/* FIXME: THIS IS NOT STRONG ENOUGH: A 128-bit token should be
+		 * generated.  The client and server would associate token and hCard
+		 * for authentication. */
+		randHandle = SYS_RandomInt(0, -1);
 
-			(void)pthread_mutex_lock(&sReadersContexts[i]->handlesList_lock);
-			list_iterator_start(l);
-			while (list_iterator_hasnext(l))
-			{
-				currentHandle = list_iterator_next(l);
-				if (((LONG)rContext->dwIdentity + randHandle) ==
-					(currentHandle->hCard))
-				{
-					/* Get a new handle and loop again */
-					randHandle = SYS_RandomInt(10, 65000);
-					list_iterator_stop(l);
-					(void)pthread_mutex_unlock(&sReadersContexts[i]->handlesList_lock);
-					goto again;
-				}
-			}
-			list_iterator_stop(l);
-			(void)pthread_mutex_unlock(&sReadersContexts[i]->handlesList_lock);
-		}
+		/* do we already use this hCard somewhere? */
+		ret = RFReaderInfoById(randHandle, &dummy_reader);
 	}
+	while (SCARD_S_SUCCESS == ret);
 
 	/* Once the for loop is completed w/o restart a good handle was
 	 * found and the loop can be exited. */
-	return rContext->dwIdentity + randHandle;
-}
-
-LONG RFFindReaderHandle(SCARDHANDLE hCard)
-{
-	int i;
-
-	for (i = 0; i < PCSCLITE_MAX_READERS_CONTEXTS; i++)
-	{
-		if (sReadersContexts[i]->vHandle != 0)
-		{
-			RDR_CLIHANDLES * currentHandle;
-			(void)pthread_mutex_lock(&sReadersContexts[i]->handlesList_lock);
-			currentHandle = list_seek(&sReadersContexts[i]->handlesList,
-				&hCard);
-			(void)pthread_mutex_unlock(&sReadersContexts[i]->handlesList_lock);
-			if (currentHandle != NULL)
-				return SCARD_S_SUCCESS;
-		}
-	}
-
-	return SCARD_E_INVALID_HANDLE;
+	return randHandle;
 }
 
 LONG RFDestroyReaderHandle(/*@unused@*/ SCARDHANDLE hCard)
@@ -1086,7 +1091,7 @@ LONG RFAddReaderHandle(READER_CONTEXT * rContext, SCARDHANDLE hCard)
 	LONG rv = SCARD_S_SUCCESS;
 
 	(void)pthread_mutex_lock(&rContext->handlesList_lock);
-	listLength = list_size(&(rContext->handlesList));
+	listLength = list_size(&rContext->handlesList);
 
 	/* Throttle the number of possible handles */
 	if (listLength >= maxReaderHandles)
@@ -1109,7 +1114,7 @@ LONG RFAddReaderHandle(READER_CONTEXT * rContext, SCARDHANDLE hCard)
 	newHandle->hCard = hCard;
 	newHandle->dwEventStatus = 0;
 
-	lrv = list_append(&(rContext->handlesList), newHandle);
+	lrv = list_append(&rContext->handlesList, newHandle);
 	if (lrv < 0)
 	{
 		free(newHandle);
@@ -1129,15 +1134,15 @@ LONG RFRemoveReaderHandle(READER_CONTEXT * rContext, SCARDHANDLE hCard)
 	LONG rv = SCARD_S_SUCCESS;
 
 	(void)pthread_mutex_lock(&rContext->handlesList_lock);
-	currentHandle = list_seek(&(rContext->handlesList), &hCard);
+	currentHandle = list_seek(&rContext->handlesList, &hCard);
 	if (NULL == currentHandle)
 	{
-		Log2(PCSC_LOG_CRITICAL, "list_seek failed to locate hCard=%X", hCard);
+		Log2(PCSC_LOG_CRITICAL, "list_seek failed to locate hCard=%lX", hCard);
 		rv = SCARD_E_INVALID_HANDLE;
 		goto end;
 	}
 
-	lrv = list_delete(&(rContext->handlesList), currentHandle);
+	lrv = list_delete(&rContext->handlesList, currentHandle);
 	if (lrv < 0)
 		Log2(PCSC_LOG_CRITICAL,
 			"list_delete failed with return value: %d", lrv);
@@ -1158,14 +1163,14 @@ LONG RFSetReaderEventState(READER_CONTEXT * rContext, DWORD dwEvent)
 	RDR_CLIHANDLES *currentHandle;
 
 	(void)pthread_mutex_lock(&rContext->handlesList_lock);
-	listSize = list_size(&(rContext->handlesList));
+	listSize = list_size(&rContext->handlesList);
 
 	for (list_index = 0; list_index < listSize; list_index++)
 	{
-		currentHandle = list_get_at(&(rContext->handlesList), list_index);
+		currentHandle = list_get_at(&rContext->handlesList, list_index);
 		if (NULL == currentHandle)
 		{
-			Log2(PCSC_LOG_CRITICAL, "list_get_at failed at index %s",
+			Log2(PCSC_LOG_CRITICAL, "list_get_at failed at index %d",
 				list_index);
 			continue;
 		}
@@ -1190,12 +1195,12 @@ LONG RFCheckReaderEventState(READER_CONTEXT * rContext, SCARDHANDLE hCard)
 	RDR_CLIHANDLES *currentHandle;
 
 	(void)pthread_mutex_lock(&rContext->handlesList_lock);
-	currentHandle = list_seek(&(rContext->handlesList), &hCard);
+	currentHandle = list_seek(&rContext->handlesList, &hCard);
 	(void)pthread_mutex_unlock(&rContext->handlesList_lock);
 	if (NULL == currentHandle)
 	{
 		/* Not Found */
-		Log2(PCSC_LOG_CRITICAL, "list_seek failed for hCard 0x%X", hCard);
+		Log2(PCSC_LOG_CRITICAL, "list_seek failed for hCard 0x%lX", hCard);
 		return SCARD_E_INVALID_HANDLE;
 	}
 
@@ -1225,7 +1230,7 @@ LONG RFClearReaderEventState(READER_CONTEXT * rContext, SCARDHANDLE hCard)
 	RDR_CLIHANDLES *currentHandle;
 
 	(void)pthread_mutex_lock(&rContext->handlesList_lock);
-	currentHandle = list_seek(&(rContext->handlesList), &hCard);
+	currentHandle = list_seek(&rContext->handlesList, &hCard);
 	(void)pthread_mutex_unlock(&rContext->handlesList_lock);
 	if (NULL == currentHandle)
 		/* Not Found */
@@ -1271,7 +1276,7 @@ void RFCleanupReaders(void)
 			rv = RFRemoveReader(lpcStripReader, sReadersContexts[i]->port);
 
 			if (rv != SCARD_S_SUCCESS)
-				Log2(PCSC_LOG_ERROR, "RFRemoveReader error: 0x%08X", rv);
+				Log2(PCSC_LOG_ERROR, "RFRemoveReader error: 0x%08lX", rv);
 		}
 	}
 }

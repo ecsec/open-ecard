@@ -6,7 +6,7 @@
  * Copyright (C) 2002-2011
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: debuglog.c 5713 2011-05-05 09:25:14Z rousseau $
+ * $Id: debuglog.c 6445 2012-08-24 08:27:10Z rousseau $
  */
 
 /**
@@ -79,8 +79,7 @@ INTERNAL void DebugLogCategory(const int category, const unsigned char *buffer,
 #else
 
 /**
- * Max string size when dumping a 256 bytes longs APDU
- * Should be bigger than 256*3+30
+ * Max string size dumping a maxmium of 2 lines of 80 characters
  */
 #define DEBUG_BUF_SIZE 2048
 
@@ -104,7 +103,7 @@ void log_msg(const int priority, const char *fmt, ...)
 		return;
 
 	va_start(argptr, fmt);
-	vsnprintf(DebugBuffer, DEBUG_BUF_SIZE, fmt, argptr);
+	vsnprintf(DebugBuffer, sizeof DebugBuffer, fmt, argptr);
 	va_end(argptr);
 
 	log_line(priority, DebugBuffer);
@@ -137,6 +136,8 @@ static void log_line(const int priority, const char *DebugBuffer)
 		else
 			delta = 99999999;
 
+		last_time = new_time;
+
 		if (LogDoColor)
 		{
 			const char *color_pfx = "", *color_sfx = "\33[0m";
@@ -164,37 +165,32 @@ static void log_line(const int priority, const char *DebugBuffer)
 
 			printf("%s%.8d%s %s%s%s\n", time_pfx, delta, time_sfx,
 				color_pfx, DebugBuffer, color_sfx);
-			last_time = new_time;
 		}
 		else
 		{
 			printf("%.8d %s\n", delta, DebugBuffer);
 		}
+		fflush(stdout);
 	}
 } /* log_msg */
 
 static void log_xxd_always(const int priority, const char *msg,
 	const unsigned char *buffer, const int len)
 {
-	char DebugBuffer[DEBUG_BUF_SIZE];
+	char DebugBuffer[len*3 + strlen(msg) +1];
 	int i;
 	char *c;
-	char *debug_buf_end;
+	size_t l;
 
-	debug_buf_end = DebugBuffer + DEBUG_BUF_SIZE - 5;
+	l = strlcpy(DebugBuffer, msg, sizeof(DebugBuffer));
+	c = DebugBuffer + l;
 
-	strlcpy(DebugBuffer, msg, sizeof(DebugBuffer));
-	c = DebugBuffer + strlen(DebugBuffer);
-
-	for (i = 0; (i < len) && (c < debug_buf_end); ++i)
+	for (i = 0; (i < len); ++i)
 	{
-		sprintf(c, "%02X ", buffer[i]);
+		/* 2 hex characters, 1 space, 1 NUL : total 4 characters */
+		snprintf(c, 4, "%02X ", buffer[i]);
 		c += 3;
 	}
-
-	/* the buffer is too small so end it with "..." */
-	if ((c >= debug_buf_end) && (i < len))
-		c[-3] = c[-2] = c[-1] = '.';
 
 	log_line(priority, DebugBuffer);
 } /* log_xxd_always */
@@ -204,6 +200,10 @@ void log_xxd(const int priority, const char *msg, const unsigned char *buffer,
 {
 	if ((priority < LogLevel) /* log priority lower than threshold? */
 		|| (DEBUGLOG_NO_DEBUG == LogMsgType))
+		return;
+
+	/* len is an error value? */
+	if (len < 0)
 		return;
 
 	log_xxd_always(priority, msg, buffer, len);
@@ -229,7 +229,7 @@ void DebugLogSetLogType(const int dbgtype)
 	if ((DEBUGLOG_STDOUT_DEBUG == LogMsgType && isatty(fileno(stdout)))
 		|| (DEBUGLOG_STDOUT_COLOR_DEBUG == LogMsgType))
 	{
-		const char *terms[] = { "linux", "xterm", "xterm-color", "Eterm", "rxvt", "rxvt-unicode" };
+		const char *terms[] = { "linux", "xterm", "xterm-color", "Eterm", "rxvt", "rxvt-unicode", "xterm-256color" };
 		char *term;
 
 		term = getenv("TERM");
@@ -327,7 +327,7 @@ void debug_msg(const char *fmt, ...)
 		return;
 
 	va_start(argptr, fmt);
-	vsnprintf(DebugBuffer, DEBUG_BUF_SIZE, fmt, argptr);
+	vsnprintf(DebugBuffer, sizeof DebugBuffer, fmt, argptr);
 	va_end(argptr);
 
 	if (DEBUGLOG_SYSLOG_DEBUG == LogMsgType)

@@ -131,7 +131,7 @@
 #define PACKAGE_NAME "pcsc-lite"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "pcsc-lite 1.7.4"
+#define PACKAGE_STRING "pcsc-lite 1.8.6"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pcsc-lite"
@@ -140,7 +140,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.7.4"
+#define PACKAGE_VERSION "1.8.6"
 
 /* pcscd filename */
 #define PCSCD_BINARY "/mnt/share/test2/sbin/pcscd"
@@ -174,7 +174,7 @@
 #define USE_USB 1
 
 /* Version number of package */
-#define VERSION "1.7.4"
+#define VERSION "1.8.6"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

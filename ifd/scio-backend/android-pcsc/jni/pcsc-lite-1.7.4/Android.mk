@@ -20,14 +20,15 @@ src/winscard_msg_srv.c \
 src/winscard_svc.c \
 src/winscard_msg.c \
 src/simclist.c \
-src/tokenparser.c
+src/tokenparser.c \
+src/sd-daemon.c
 
 LOCAL_C_INCLUDES += \
 $(LOCAL_PATH)/src/ \
 $(LOCAL_PATH)/src/PCSC/ \
 $(LOCAL_PATH)/../libusbx-1.0.12/libusb
 
-LOCAL_CFLAGS := -O2 -DHAVE_CONFIG_H -DHAVE_LIBUSB
+LOCAL_CFLAGS := -O2 -DHAVE_CONFIG_H -DHAVE_LIBUSB -DDISABLE_SYSTEMD
 
 LOCAL_STATIC_LIBRARIES := libusb
 

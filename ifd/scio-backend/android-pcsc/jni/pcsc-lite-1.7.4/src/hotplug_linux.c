@@ -9,7 +9,7 @@
  * The USB code was based partly on Johannes Erdfelt
  * libusb code found at libusb.sourceforge.net
  *
- * $Id: hotplug_linux.c 5711 2011-05-05 09:02:08Z rousseau $
+ * $Id: hotplug_linux.c 5993 2011-10-04 07:51:33Z rousseau $
  */
 
 /**
@@ -185,7 +185,7 @@ static LONG HPReadBundleValues(void)
 
 				if (listCount >= sizeof(bundleTracker)/sizeof(bundleTracker[0]))
 				{
-					Log2(PCSC_LOG_CRITICAL, "Too many readers declared. Maximum is %d", sizeof(bundleTracker)/sizeof(bundleTracker[0]));
+					Log2(PCSC_LOG_CRITICAL, "Too many readers declared. Maximum is %zd", sizeof(bundleTracker)/sizeof(bundleTracker[0]));
 					goto end;
 				}
 			}
@@ -258,7 +258,8 @@ static void HPEstablishUSBNotifications(void)
 					continue;
 				}
 
-				sprintf(dirpath, "%s/%s", PCSCLITE_USB_PATH, entry->d_name);
+				snprintf(dirpath, sizeof dirpath, "%s/%s",
+					PCSCLITE_USB_PATH, entry->d_name);
 
 				dirB = opendir(dirpath);
 
@@ -280,8 +281,9 @@ static void HPEstablishUSBNotifications(void)
 
 					/* Get the device number so we can distinguish
 					   multiple readers */
-					sprintf(filename, "%s/%s", dirpath, entryB->d_name);
-					sscanf(entryB->d_name, "%d", &deviceNumber);
+					snprintf(filename, sizeof filename, "%s/%s",
+						dirpath, entryB->d_name);
+					deviceNumber = atoi(entryB->d_name);
 
 					fd = open(filename, O_RDONLY);
 					if (fd < 0)

@@ -6,7 +6,7 @@
  * Copyright (C) 2002-2011
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: readerfactory.h 5711 2011-05-05 09:02:08Z rousseau $
+ * $Id: readerfactory.h 6397 2012-08-02 14:23:26Z rousseau $
  */
 
 /**
@@ -103,28 +103,34 @@
 		int port;				/**< Port ID */
 		int slot;				/**< Current Reader Slot */
 		SCARDHANDLE hLockId;	/**< Lock Id */
-		DWORD dwIdentity;		/**< Shared ID High Nibble */
 		int LockCount;			/**< number of recursive locks */
 		int32_t contexts;		/**< Number of open contexts */
 		int * pFeeds;			/**< Number of shared client to lib */
 		int * pMutex;			/**< Number of client to mutex */
 		int powerState;			/**< auto power off state */
 		pthread_mutex_t powerState_lock;	/**< powerState mutex */
+		int reference;			/**< number of users of the structure */
+		pthread_mutex_t reference_lock;	 /**< reference mutex */
 
 		struct pubReaderStatesList *readerState; /**< link to the reader state */
-		/* we can't use READER_CONTEXT * here since eventhandler.h can't be
+		/* we can't use READER_STATE * here since eventhandler.h can't be
 		 * included because of circular dependencies */
 	};
 
 	typedef struct ReaderContext READER_CONTEXT;
 
+	LONG _RefReader(READER_CONTEXT * sReader);
+	LONG _UnrefReader(READER_CONTEXT * sReader);
+
+#define REF_READER(reader) { LONG rv; Log2(PCSC_LOG_DEBUG, "RefReader() count was: %d", reader->reference); rv = _RefReader(reader); if (rv != SCARD_S_SUCCESS) return rv; }
+#define UNREF_READER(reader) {Log2(PCSC_LOG_DEBUG, "UnrefReader() count was: %d", reader->reference); _UnrefReader(reader);}
+
 	LONG RFAllocateReaderSpace(unsigned int);
 	LONG RFAddReader(const char *, int, const char *, const char *);
 	LONG RFRemoveReader(const char *, int);
-	LONG RFSetReaderName(READER_CONTEXT *, const char *, const char *, int, DWORD);
+	LONG RFSetReaderName(READER_CONTEXT *, const char *, const char *, int);
 	LONG RFReaderInfo(const char *, /*@out@*/ struct ReaderContext **);
-	LONG RFReaderInfoNamePort(int, const char *, /*@out@*/ struct ReaderContext **);
-	LONG RFReaderInfoById(DWORD, /*@out@*/ struct ReaderContext **);
+	LONG RFReaderInfoById(SCARDHANDLE, /*@out@*/ struct ReaderContext **);
 	LONG RFCheckSharing(SCARDHANDLE, READER_CONTEXT *);
 	LONG RFLockSharing(SCARDHANDLE, READER_CONTEXT *);
 	LONG RFUnlockSharing(SCARDHANDLE, READER_CONTEXT *);
@@ -138,7 +144,6 @@
 	SCARDHANDLE RFCreateReaderHandle(READER_CONTEXT *);
 	LONG RFDestroyReaderHandle(SCARDHANDLE hCard);
 	LONG RFAddReaderHandle(READER_CONTEXT *, SCARDHANDLE);
-	LONG RFFindReaderHandle(SCARDHANDLE);
 	LONG RFRemoveReaderHandle(READER_CONTEXT *, SCARDHANDLE);
 	LONG RFSetReaderEventState(READER_CONTEXT *, DWORD);
 	LONG RFCheckReaderEventState(READER_CONTEXT *, SCARDHANDLE);

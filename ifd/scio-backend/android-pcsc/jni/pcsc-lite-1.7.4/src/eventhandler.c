@@ -6,7 +6,7 @@
  * Copyright (C) 2002-2011
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: eventhandler.c 5769 2011-05-30 09:22:57Z rousseau $
+ * $Id: eventhandler.c 6391 2012-07-26 18:44:54Z rousseau $
  */
 
 /**
@@ -170,7 +170,7 @@ LONG EHDestroyEventHandler(READER_CONTEXT * rContext)
 
 		if ((IFD_SUCCESS == rv) && (dwGetSize == sizeof(fct)))
 		{
-			Log1(PCSC_LOG_INFO, "Request stoping of polling thread");
+			Log1(PCSC_LOG_INFO, "Request stopping of polling thread");
 			fct(rContext->slot);
 		}
 		else
@@ -269,7 +269,7 @@ static void EHStatusHandlerThread(READER_CONTEXT * rContext)
 			readerState = SCARD_PRESENT | SCARD_SWALLOWED;
 			rContext->powerState = POWER_STATE_UNPOWERED;
 			Log1(PCSC_LOG_DEBUG, "powerState: POWER_STATE_UNPOWERED");
-			Log3(PCSC_LOG_ERROR, "Error powering up card: %d 0x%04X", rv, rv);
+			Log3(PCSC_LOG_ERROR, "Error powering up card: %ld 0x%04lX", rv, rv);
 		}
 #endif
 

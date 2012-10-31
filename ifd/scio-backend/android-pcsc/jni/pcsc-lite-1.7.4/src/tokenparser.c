@@ -414,11 +414,11 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    2,    4,    4,    5,    4,    4,    4,    4,    4,
         4,    4,    4,    4,    4,    4,    6,    7,    7,    7,
-        7,    7,    7,    7,    7,    7,    7,    4,    1,    8,
+        7,    7,    7,    7,    7,    7,    7,    4,    4,    8,
         4,    9,    4,    4,   10,   10,   10,   10,   10,   10,
        10,   10,   10,   10,   10,   10,   10,   10,   10,   10,
        10,   10,   10,   10,   10,   10,   10,   10,   10,   10,
-        1,    1,    1,    4,    4,    1,   11,   11,   11,   11,
+        4,    1,    4,    4,    4,    1,   11,   11,   11,   11,
 
        12,   11,   13,   11,   14,   11,   15,   11,   11,   16,
        11,   11,   11,   17,   18,   19,   11,   11,   11,   11,
@@ -510,7 +510,7 @@ char *tptext;
  * Copyright (C) 2003-2010
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: tokenparser.l 5279 2010-10-05 13:58:20Z rousseau $
+ * $Id: tokenparser.l 6325 2012-06-06 11:54:48Z rousseau $
  */
 /**
  * @file
@@ -1835,6 +1835,7 @@ static void eval_key(char *pcToken, list_t *list_key)
 
 	r = list_init(&elt->values);
 	assert(r >= 0);
+	(void)r;
 
 	/* add the key/values */
 	list_append(list_key, elt);
@@ -1848,6 +1849,7 @@ static void eval_value(char *pcToken, list_t *list_values)
 	int r;
 	size_t len;
 	char *value;
+	char *amp;
 
 	/* <string>foobar</string>
 	 * 012345678 : 8 is the first string character index */
@@ -1862,8 +1864,22 @@ static void eval_value(char *pcToken, list_t *list_values)
 
 	(void)strlcpy(value, &pcToken[8], len);
 
+	/* convert the firt &amp; into & */
+	amp = strstr(value, "&amp;");
+	if (amp)
+	{
+		char *p;
+
+		/* just skip "amp;" substring (4 letters) */
+		for (p = amp+1; *(p+4); p++)
+		{
+			*p = *(p+4);
+		}
+	}
+
 	r = list_append(list_values, value);
 	assert(r >= 0);
+	(void)r;
 }
 
 void tperrorCheck (char *token_error)
@@ -1916,6 +1932,9 @@ int bundleParse(const char *fileName, list_t *l)
 {
 	FILE *file = NULL;
 	int r;
+#ifndef NDEBUG
+	int i;
+#endif
 
 	file = fopen(fileName, "r");
 	if (!file)
@@ -1927,6 +1946,7 @@ int bundleParse(const char *fileName, list_t *l)
 
 	r = list_init(l);
 	assert(r >= 0);
+	(void)r;
 
 	ListKeys = l;
 	tpin = file;
@@ -1983,6 +2003,7 @@ void bundleRelease(list_t *l)
 		list_destroy(&elt->values);
 
 		/* free the key */
+		free(elt->key);
 		free(elt);
 	}
 

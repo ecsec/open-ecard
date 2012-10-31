@@ -480,7 +480,7 @@ char *yytext;
  * Copyright (C) 2004-2010
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: configfile.l 5543 2011-01-21 08:39:43Z rousseau $
+ * $Id: configfile.l 6215 2012-02-04 09:08:36Z rousseau $
  */
 #line 17 "configfile.l"
 #include <dirent.h>
@@ -1976,10 +1976,21 @@ int DBGetReaderListDir(const char *readerconf_dir,
 			char filename[FILENAME_MAX];
 			int r;
 
-			/* skip . and .. */
-			if ((strcmp(direntry->d_name, ".") == 0) ||
-				(strcmp(direntry->d_name, "..") == 0))
+			/* skip non regular files */
+			if (direntry->d_type != DT_REG)
+			{
+				Log2(PCSC_LOG_DEBUG, "Skipping non regular file: %s",
+					direntry->d_name);
 				continue;
+			}
+
+			/* skip files starting with . like ., .., .svn, etc */
+			if ('.' == direntry->d_name[0])
+			{
+				Log2(PCSC_LOG_DEBUG, "Skipping hidden file: %s",
+					direntry->d_name);
+				continue;
+			}
 
 			snprintf(filename, sizeof(filename), "%s/%s",
 				readerconf_dir, direntry->d_name);

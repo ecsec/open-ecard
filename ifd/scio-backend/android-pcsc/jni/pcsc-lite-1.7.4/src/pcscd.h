@@ -1,10 +1,10 @@
 /*
  * MUSCLE SmartCard Development ( http://www.linuxnet.com )
  *
- * Copyright (C) 2006-2009
+ * Copyright (C) 2006-2011
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id$
+ * $Id: pcscd.h.in 6323 2012-06-05 09:19:06Z rousseau $
  */
 
 /**
@@ -23,16 +23,14 @@
 #define SCARD_INSERTED			0x0002	/**< Card was inserted */
 #define SCARD_REMOVED			0x0004	/**< Card was removed */
 
-#define PCSCLITE_CONFIG_DIR		"/mnt/share/test2/etc/reader.conf.d"
+#define PCSCLITE_CONFIG_DIR		"/etc/reader.conf.d"
 
 #define PCSCLITE_IPC_DIR		USE_IPCDIR
 #define PCSCLITE_RUN_PID		PCSCLITE_IPC_DIR "/pcscd.pid"
 
 #define PCSCLITE_CSOCK_NAME		PCSCLITE_IPC_DIR "/pcscd.comm"
 
-#define PCSCLITE_SVC_IDENTITY		0x01030000	/**< Service ID */
-
-#define PCSCLITE_VERSION_NUMBER		"1.7.4"	/**< Current version */
+#define PCSCLITE_VERSION_NUMBER		"1.8.6"	/**< Current version */
 #define PCSCLITE_STATUS_POLL_RATE	400000		/**< Status polling rate */
 #define PCSCLITE_LOCK_POLL_RATE		100000		/**< Lock polling rate */
 
@@ -42,9 +40,6 @@
 
 #define PCSCLITE_STATUS_WAIT		200000	/**< Status Change Sleep */
 #define MAX_DEVICENAME		255
-
-#define MAX_BUFFER_SIZE			264	/**< Maximum Tx/Rx Buffer for get/set attributes */
-#define MAX_BUFFER_SIZE_EXTENDED	(4 + 3 + (1<<16) + 3)	/**< max APDU (64K + APDU + Lc + Le) Tx/Rx Buffer */
 
 /** Different values for struct ReaderContext powerState field */
 enum

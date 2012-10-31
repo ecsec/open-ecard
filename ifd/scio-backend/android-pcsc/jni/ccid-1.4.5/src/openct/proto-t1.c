@@ -291,6 +291,10 @@ int t1_transceive(t1_state_t * t1, unsigned int dad,
 				DEBUG_COMM4("received: %d, expected: %d, more: %d",
 					t1_seq(pcb), t1->ns, t1->more);
 
+				/* ISO 7816-3 Rule 7.4.2 */
+				if (retries == 0)
+					goto resync;
+
 				/* ISO 7816-3 Rule 7.2 */
 				if (T1_R_BLOCK == t1_block_type(t1->previous_block[PCB]))
 				{
@@ -300,9 +304,6 @@ int t1_transceive(t1_state_t * t1, unsigned int dad,
 				}
 
 				DEBUG_COMM("R-Block required");
-				/* ISO 7816-3 Rule 7.4.2 */
-				if (retries == 0)
-					goto resync;
 				slen = t1_build(t1, sdata,
 						dad, T1_R_BLOCK | T1_OTHER_ERROR,
 						NULL, NULL);
@@ -361,6 +362,11 @@ int t1_transceive(t1_state_t * t1, unsigned int dad,
 			 * an R block */
 			if (t1_seq(pcb) != t1->nr) {
 				DEBUG_COMM("wrong nr");
+
+				/* ISO 7816-3 Rule 7.4.2 */
+				if (retries == 0)
+					goto resync;
+
 				slen = t1_build(t1, sdata, dad,
 						T1_R_BLOCK | T1_OTHER_ERROR,
 						NULL, NULL);
@@ -665,7 +671,7 @@ static int t1_xcv(t1_state_t * t1, unsigned char *block, size_t slen,
 
 		n = CCID_Transmit(t1 -> lun, slen, block, rmax, t1->wtx);
 		if (n != IFD_SUCCESS)
-			return n;
+			return -1;
 
 		/* the second argument of CCID_Receive() is (unsigned int *)
 		 * so we can't use &rmax since &rmax is a (size_t *) and may not
@@ -682,7 +688,7 @@ static int t1_xcv(t1_state_t * t1, unsigned char *block, size_t slen,
 
 		n = CCID_Transmit(t1 -> lun, 0, block, rmax, t1->wtx);
 		if (n != IFD_SUCCESS)
-			return n;
+			return -1;
 
 		rmax_int = rmax;
 		n = CCID_Receive(t1 -> lun, &rmax_int, &block[3], NULL);
@@ -699,7 +705,7 @@ static int t1_xcv(t1_state_t * t1, unsigned char *block, size_t slen,
 		n = CCID_Transmit(t1 -> lun, slen, block, 0, t1->wtx);
 		t1->wtx = 0;	/* reset to default value */
 		if (n != IFD_SUCCESS)
-			return n;
+			return -1;
 
 		/* Get the response en bloc */
 		rmax_int = rmax;

@@ -17,7 +17,7 @@
 	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-/* $Id: ifdhandler.c 6022 2011-10-10 13:00:55Z rousseau $ */
+/* $Id: ifdhandler.c 6399 2012-08-02 18:06:38Z rousseau $ */
 
 #include <stdio.h>
 #include <string.h>
@@ -68,7 +68,8 @@ static unsigned int T1_card_timeout(double f, double d, int TC1, int BWI,
 static int get_IFSC(ATR_t *atr, int *i);
 
 
-EXTERNAL RESPONSECODE IFDHCreateChannelByName(DWORD Lun, LPSTR lpcDevice)
+static RESPONSECODE CreateChannelByNameOrChannel(DWORD Lun,
+	LPSTR lpcDevice, DWORD Channel)
 {
 	RESPONSECODE return_value = IFD_SUCCESS;
 	int reader_index;
@@ -77,7 +78,14 @@ EXTERNAL RESPONSECODE IFDHCreateChannelByName(DWORD Lun, LPSTR lpcDevice)
 	if (! DebugInitialized)
 		init_driver();
 
-	DEBUG_INFO3("lun: %lX, device: %s", Lun, lpcDevice);
+	if (lpcDevice)
+	{
+		DEBUG_INFO3("Lun: " DWORD_X ", device: %s", Lun, lpcDevice);
+	}
+	else
+	{
+		DEBUG_INFO3("Lun: " DWORD_X ", Channel: " DWORD_X, Lun, Channel);
+	}
 
 	if (-1 == (reader_index = GetNewReaderIndex(Lun)))
 		return IFD_COMMUNICATION_ERROR;
@@ -90,13 +98,20 @@ EXTERNAL RESPONSECODE IFDHCreateChannelByName(DWORD Lun, LPSTR lpcDevice)
 	CcidSlots[reader_index].bPowerFlags = POWERFLAGS_RAZ;
 
 	/* reader name */
-	CcidSlots[reader_index].readerName = strdup(lpcDevice);
+	if (lpcDevice)
+		CcidSlots[reader_index].readerName = strdup(lpcDevice);
+	else
+		CcidSlots[reader_index].readerName = strdup("no name");
 
 #ifdef HAVE_PTHREAD
 	(void)pthread_mutex_lock(&ifdh_context_mutex);
 #endif
 
-	ret = OpenPortByName(reader_index, lpcDevice);
+	if (lpcDevice)
+		ret = OpenPortByName(reader_index, lpcDevice);
+	else
+		ret = OpenPort(reader_index, Channel);
+
 	if (ret != STATUS_SUCCESS)
 	{
 		DEBUG_CRITICAL("failed");
@@ -105,8 +120,7 @@ EXTERNAL RESPONSECODE IFDHCreateChannelByName(DWORD Lun, LPSTR lpcDevice)
 		else
 			return_value = IFD_COMMUNICATION_ERROR;
 
-		/* release the allocated reader_index */
-		ReleaseReaderIndex(reader_index);
+		goto error;
 	}
 	else
 	{
@@ -117,27 +131,28 @@ EXTERNAL RESPONSECODE IFDHCreateChannelByName(DWORD Lun, LPSTR lpcDevice)
 		/* Maybe we have a special treatment for this reader */
 		(void)ccid_open_hack_pre(reader_index);
 
-		/* save the current read timeout computed from card capabilities */
-		oldReadTimeout = ccid_descriptor->readTimeout;
-
-		/* 1000ms just to resync the USB toggle bits */
-		ccid_descriptor->readTimeout = 1000;
-
 		/* Try to access the reader */
 		/* This "warm up" sequence is sometimes needed when pcscd is
 		 * restarted with the reader already connected. We get some
 		 * "usb_bulk_read: Resource temporarily unavailable" on the first
 		 * few tries. It is an empirical hack */
+
+		/* The reader may have to start here so give it some time */
+		ret = CmdGetSlotStatus(reader_index, pcbuffer);
+		if (IFD_NO_SUCH_DEVICE == ret)
+			return ret;
+
+		/* save the current read timeout computed from card capabilities */
+		oldReadTimeout = ccid_descriptor->readTimeout;
+
+		/* 100 ms just to resync the USB toggle bits */
+		ccid_descriptor->readTimeout = 100;
+
 		if ((IFD_COMMUNICATION_ERROR == CmdGetSlotStatus(reader_index, pcbuffer))
-			&& (IFD_COMMUNICATION_ERROR == CmdGetSlotStatus(reader_index, pcbuffer))
 			&& (IFD_COMMUNICATION_ERROR == CmdGetSlotStatus(reader_index, pcbuffer)))
 		{
 			DEBUG_CRITICAL("failed");
 			return_value = IFD_COMMUNICATION_ERROR;
-
-			/* release the allocated resources */
-			(void)ClosePort(reader_index);
-			ReleaseReaderIndex(reader_index);
 		}
 		else
 		{
@@ -145,17 +160,34 @@ EXTERNAL RESPONSECODE IFDHCreateChannelByName(DWORD Lun, LPSTR lpcDevice)
 			ccid_descriptor->readTimeout = oldReadTimeout;
 
 			/* Maybe we have a special treatment for this reader */
-			(void)ccid_open_hack_post(reader_index);
+			return_value = ccid_open_hack_post(reader_index);
+			if (return_value != IFD_SUCCESS)
+			{
+				DEBUG_CRITICAL("failed");
+			}
 		}
 	}
 
+error:
 #ifdef HAVE_PTHREAD
 	(void)pthread_mutex_unlock(&ifdh_context_mutex);
 #endif
 
-	return return_value;
-} /* IFDHCreateChannelByName */
+	if (return_value != IFD_SUCCESS)
+	{
+		/* release the allocated resources */
+		free(CcidSlots[reader_index].readerName);
+		ReleaseReaderIndex(reader_index);
+	}
 
+	return return_value;
+} /* CreateChannelByNameOrChannel */
+
+
+EXTERNAL RESPONSECODE IFDHCreateChannelByName(DWORD Lun, LPSTR lpcDevice)
+{
+	return CreateChannelByNameOrChannel(Lun, lpcDevice, -1);
+}
 
 EXTERNAL RESPONSECODE IFDHCreateChannel(DWORD Lun, DWORD Channel)
 {
@@ -192,85 +224,7 @@ EXTERNAL RESPONSECODE IFDHCreateChannel(DWORD Lun, DWORD Channel)
 	 *
 	 * IFD_SUCCESS IFD_COMMUNICATION_ERROR
 	 */
-	RESPONSECODE return_value = IFD_SUCCESS;
-	int reader_index;
-
-	if (! DebugInitialized)
-		init_driver();
-
-	DEBUG_INFO2("lun: %lX", Lun);
-
-	if (-1 == (reader_index = GetNewReaderIndex(Lun)))
-		return IFD_COMMUNICATION_ERROR;
-
-	/* Reset ATR buffer */
-	CcidSlots[reader_index].nATRLength = 0;
-	*CcidSlots[reader_index].pcATRBuffer = '\0';
-
-	/* Reset PowerFlags */
-	CcidSlots[reader_index].bPowerFlags = POWERFLAGS_RAZ;
-
-	/* reader name */
-	CcidSlots[reader_index].readerName = strdup("no name");
-
-#ifdef HAVE_PTHREAD
-	(void)pthread_mutex_lock(&ifdh_context_mutex);
-#endif
-
-	if (OpenPort(reader_index, Channel) != STATUS_SUCCESS)
-	{
-		DEBUG_CRITICAL("failed");
-		return_value = IFD_COMMUNICATION_ERROR;
-
-		/* release the allocated reader_index */
-		ReleaseReaderIndex(reader_index);
-	}
-	else
-	{
-		unsigned char pcbuffer[SIZE_GET_SLOT_STATUS];
-		unsigned int oldReadTimeout;
-		_ccid_descriptor *ccid_descriptor = get_ccid_descriptor(reader_index);
-
-		/* Maybe we have a special treatment for this reader */
-		(void)ccid_open_hack_pre(reader_index);
-
-		/* save the current read timeout computed from card capabilities */
-		oldReadTimeout = ccid_descriptor->readTimeout;
-
-		/* 100ms just to resync the USB toggle bits */
-		ccid_descriptor->readTimeout = 100;
-
-		/* Try to access the reader */
-		/* This "warm up" sequence is sometimes needed when pcscd is
-		 * restarted with the reader already connected. We get some
-		 * "usb_bulk_read: Resource temporarily unavailable" on the first
-		 * few tries. It is an empirical hack */
-		if ((IFD_COMMUNICATION_ERROR == CmdGetSlotStatus(reader_index, pcbuffer))
-			&& (IFD_COMMUNICATION_ERROR == CmdGetSlotStatus(reader_index, pcbuffer))
-			&& (IFD_COMMUNICATION_ERROR == CmdGetSlotStatus(reader_index, pcbuffer)))
-		{
-			DEBUG_CRITICAL("failed");
-			return_value = IFD_COMMUNICATION_ERROR;
-
-			/* release the allocated resources */
-			(void)ClosePort(reader_index);
-			ReleaseReaderIndex(reader_index);
-		}
-		else
-		{
-			/* set back the old timeout */
-			ccid_descriptor->readTimeout = oldReadTimeout;
-
-			/* Maybe we have a special treatment for this reader */
-			(void)ccid_open_hack_post(reader_index);
-		}
-	}
-
-#ifdef HAVE_PTHREAD
-	(void)pthread_mutex_unlock(&ifdh_context_mutex);
-#endif
-
-	return return_value;
+	return CreateChannelByNameOrChannel(Lun, NULL, Channel);
 } /* IFDHCreateChannel */
 
 
@@ -291,7 +245,8 @@ EXTERNAL RESPONSECODE IFDHCloseChannel(DWORD Lun)
 	if (-1 == (reader_index = LunToReaderIndex(Lun)))
 		return IFD_COMMUNICATION_ERROR;
 
-	DEBUG_INFO3("%s (lun: %lX)", CcidSlots[reader_index].readerName, Lun);
+	DEBUG_INFO3("%s (lun: " DWORD_X ")", CcidSlots[reader_index].readerName,
+		Lun);
 
 	/* Restore the default timeout
 	 * No need to wait too long if the reader disapeared */
@@ -328,8 +283,8 @@ static RESPONSECODE IFDHPolling(DWORD Lun, int timeout)
 
 	/* log only if DEBUG_LEVEL_PERIODIC is set */
 	if (LogLevel & DEBUG_LEVEL_PERIODIC)
-		DEBUG_INFO4("%s (lun: %lX) %d ms", CcidSlots[reader_index].readerName,
-			Lun, timeout);
+		DEBUG_INFO4("%s (lun: " DWORD_X ") %d ms",
+			CcidSlots[reader_index].readerName, Lun, timeout);
 
 	return InterruptRead(reader_index, timeout);
 }
@@ -343,8 +298,8 @@ static RESPONSECODE IFDHSleep(DWORD Lun, int timeout)
 	if (-1 == (reader_index = LunToReaderIndex(Lun)))
 		return IFD_COMMUNICATION_ERROR;
 
-	DEBUG_INFO4("%s (lun: %lX) %d ms", CcidSlots[reader_index].readerName, Lun,
-		timeout);
+	DEBUG_INFO4("%s (lun: " DWORD_X ") %d ms",
+		CcidSlots[reader_index].readerName, Lun, timeout);
 
 	/* just sleep for 5 seconds since the polling thread is NOT killable
 	 * so pcscd event thread must loop to exit cleanly
@@ -364,7 +319,8 @@ static RESPONSECODE IFDHStopPolling(DWORD Lun)
 	if (-1 == (reader_index = LunToReaderIndex(Lun)))
 		return IFD_COMMUNICATION_ERROR;
 
-	DEBUG_INFO3("%s (lun: %lX)", CcidSlots[reader_index].readerName, Lun);
+	DEBUG_INFO3("%s (lun: " DWORD_X ")",
+		CcidSlots[reader_index].readerName, Lun);
 
 	(void)InterruptStop(reader_index);
 	return IFD_SUCCESS;
@@ -398,7 +354,7 @@ EXTERNAL RESPONSECODE IFDHGetCapabilities(DWORD Lun, DWORD Tag,
 	if (-1 == (reader_index = LunToReaderIndex(Lun)))
 		return IFD_COMMUNICATION_ERROR;
 
-	DEBUG_INFO4("tag: 0x%lX, %s (lun: %lX)", Tag,
+	DEBUG_INFO4("tag: 0x" DWORD_X ", %s (lun: " DWORD_X ")", Tag,
 		CcidSlots[reader_index].readerName, Lun);
 
 	switch (Tag)
@@ -666,7 +622,7 @@ EXTERNAL RESPONSECODE IFDHSetCapabilities(DWORD Lun, DWORD Tag,
 	if (-1 == (reader_index = LunToReaderIndex(Lun)))
 		return IFD_COMMUNICATION_ERROR;
 
-	DEBUG_INFO4("tag: 0x%lX, %s (lun: %lX)", Tag,
+	DEBUG_INFO4("tag: 0x" DWORD_X ", %s (lun: " DWORD_X ")", Tag,
 		CcidSlots[reader_index].readerName, Lun);
 
 	return IFD_NOT_SUPPORTED;
@@ -708,8 +664,8 @@ EXTERNAL RESPONSECODE IFDHSetProtocolParameters(DWORD Lun, DWORD Protocol,
 	if (-1 == (reader_index = LunToReaderIndex(Lun)))
 		return IFD_COMMUNICATION_ERROR;
 
-	DEBUG_INFO4("protocol T=%ld, %s (lun: %lX)", Protocol-SCARD_PROTOCOL_T0,
-		CcidSlots[reader_index].readerName, Lun);
+	DEBUG_INFO4("protocol T=" DWORD_D ", %s (lun: " DWORD_X ")",
+		Protocol-SCARD_PROTOCOL_T0, CcidSlots[reader_index].readerName, Lun);
 
 	/* Set to zero buffer */
 	memset(pps, 0, sizeof(pps));
@@ -926,7 +882,7 @@ EXTERNAL RESPONSECODE IFDHSetProtocolParameters(DWORD Lun, DWORD Protocol,
 				/* convert from ATR_PROTOCOL_TYPE_T? to SCARD_PROTOCOL_T? */
 				Protocol = default_protocol +
 					(SCARD_PROTOCOL_T0 - ATR_PROTOCOL_TYPE_T0);
-				DEBUG_INFO2("PPS not supported on O2Micro readers. Using T=%ld",
+				DEBUG_INFO2("PPS not supported on O2Micro readers. Using T=" DWORD_D,
 					Protocol - SCARD_PROTOCOL_T0);
 			}
 			else
@@ -1159,8 +1115,8 @@ EXTERNAL RESPONSECODE IFDHPowerICC(DWORD Lun, DWORD Action,
 	if (-1 == (reader_index = LunToReaderIndex(Lun)))
 		return IFD_COMMUNICATION_ERROR;
 
-	DEBUG_INFO4("action: %s, %s (lun: %lX)", actions[Action-IFD_POWER_UP],
-		CcidSlots[reader_index].readerName, Lun);
+	DEBUG_INFO4("action: %s, %s (lun: " DWORD_X ")",
+		actions[Action-IFD_POWER_UP], CcidSlots[reader_index].readerName, Lun);
 
 	switch (Action)
 	{
@@ -1189,6 +1145,19 @@ EXTERNAL RESPONSECODE IFDHPowerICC(DWORD Lun, DWORD Action,
 			/* save the current read timeout computed from card capabilities */
 			ccid_descriptor = get_ccid_descriptor(reader_index);
 			oldReadTimeout = ccid_descriptor->readTimeout;
+
+			/* The German eID card is bogus and need to be powered off
+			 * before a power on */
+			if (KOBIL_IDTOKEN == ccid_descriptor -> readerID)
+			{
+				/* send the command */
+				if (IFD_SUCCESS != CmdPowerOff(reader_index))
+				{
+					DEBUG_CRITICAL("PowerDown failed");
+					return_value = IFD_ERROR_POWER_ACTION;
+					goto end;
+				}
+			}
 
 			/* use a very long timeout since the card can use up to
 			 * (9600+12)*33 ETU in total
@@ -1289,7 +1258,59 @@ EXTERNAL RESPONSECODE IFDHTransmitToICC(DWORD Lun, SCARD_IO_HEADER SendPci,
 	if (-1 == (reader_index = LunToReaderIndex(Lun)))
 		return IFD_COMMUNICATION_ERROR;
 
-	DEBUG_INFO3("%s (lun: %lX)", CcidSlots[reader_index].readerName, Lun);
+	DEBUG_INFO3("%s (lun: " DWORD_X ")", CcidSlots[reader_index].readerName,
+		Lun);
+
+	/* special APDU for the Kobil IDToken (CLASS = 0xFF) */
+	if (KOBIL_IDTOKEN == get_ccid_descriptor(reader_index) -> readerID)
+	{
+		char manufacturer[] = {0xFF, 0x9A, 0x01, 0x01, 0x00};
+		char product_name[] = {0xFF, 0x9A, 0x01, 0x03, 0x00};
+		char firmware_version[] = {0xFF, 0x9A, 0x01, 0x06, 0x00};
+		char driver_version[] = {0xFF, 0x9A, 0x01, 0x07, 0x00};
+
+		if ((sizeof manufacturer == TxLength)
+			&& (memcmp(TxBuffer, manufacturer, sizeof manufacturer) == 0))
+		{
+			DEBUG_INFO("IDToken: Manufacturer command");
+			memcpy(RxBuffer, "KOBIL systems\220\0", 15);
+			*RxLength = 15;
+			return IFD_SUCCESS;
+		}
+
+		if ((sizeof product_name == TxLength)
+			&& (memcmp(TxBuffer, product_name, sizeof product_name) == 0))
+		{
+			DEBUG_INFO("IDToken: Product name command");
+			memcpy(RxBuffer, "IDToken\220\0", 9);
+			*RxLength = 9;
+			return IFD_SUCCESS;
+		}
+
+		if ((sizeof firmware_version == TxLength)
+			&& (memcmp(TxBuffer, firmware_version, sizeof firmware_version) == 0))
+		{
+			int IFD_bcdDevice = get_ccid_descriptor(reader_index)->IFD_bcdDevice;
+
+			DEBUG_INFO("IDToken: Firmware version command");
+			*RxLength = sprintf((char *)RxBuffer, "%X.%02X",
+				IFD_bcdDevice >> 8, IFD_bcdDevice & 0xFF);
+			RxBuffer[(*RxLength)++] = 0x90;
+			RxBuffer[(*RxLength)++] = 0x00;
+			return IFD_SUCCESS;
+		}
+
+		if ((sizeof driver_version == TxLength)
+			&& (memcmp(TxBuffer, driver_version, sizeof driver_version) == 0))
+		{
+			DEBUG_INFO("IDToken: Driver version command");
+#define DRIVER_VERSION "2012.2.7\220\0"
+			memcpy(RxBuffer, DRIVER_VERSION, sizeof DRIVER_VERSION -1);
+			*RxLength = sizeof DRIVER_VERSION -1;
+			return IFD_SUCCESS;
+		}
+
+	}
 
 	rx_length = *RxLength;
 	return_value = CmdXfrBlock(reader_index, TxLength, TxBuffer, &rx_length,
@@ -1331,8 +1352,8 @@ EXTERNAL RESPONSECODE IFDHControl(DWORD Lun, DWORD dwControlCode,
 
 	ccid_descriptor = get_ccid_descriptor(reader_index);
 
-	DEBUG_INFO4("ControlCode: 0x%lX, %s (lun: %lX)", dwControlCode,
-		CcidSlots[reader_index].readerName, Lun);
+	DEBUG_INFO4("ControlCode: 0x" DWORD_X ", %s (lun: " DWORD_X ")",
+		dwControlCode, CcidSlots[reader_index].readerName, Lun);
 	DEBUG_INFO_XXD("Control TxBuffer: ", TxBuffer, TxLength);
 
 	/* Set the return length to 0 to avoid problems */
@@ -1555,6 +1576,41 @@ EXTERNAL RESPONSECODE IFDHControl(DWORD Lun, DWORD dwControlCode,
 			/* bit0: PPDU is supported over SCardControl using
 			 * FEATURE_CCID_ESC_COMMAND */
 
+		/* wIdVendor */
+		{
+			int idVendor = ccid_descriptor -> readerID >> 16;
+			RxBuffer[p++] = PCSCv2_PART10_PROPERTY_wIdVendor;
+			RxBuffer[p++] = 2;	/* length */
+			RxBuffer[p++] = idVendor & 0xFF;
+			RxBuffer[p++] = idVendor >> 8;
+		}
+
+		/* wIdProduct */
+		{
+			int idProduct = ccid_descriptor -> readerID & 0xFFFF;
+			RxBuffer[p++] = PCSCv2_PART10_PROPERTY_wIdProduct;
+			RxBuffer[p++] = 2;	/* length */
+			RxBuffer[p++] = idProduct & 0xFF;
+			RxBuffer[p++] = idProduct >> 8;
+		}
+
+		/* dwMaxAPDUDataSize */
+		{
+			int MaxAPDUDataSize = 0; /* short APDU only by default */
+
+			/* reader is TPDU or extended APDU */
+			if ((ccid_descriptor -> dwFeatures & CCID_CLASS_EXTENDED_APDU)
+				|| (ccid_descriptor -> dwFeatures & CCID_CLASS_TPDU))
+				MaxAPDUDataSize = 0x10000;
+
+			RxBuffer[p++] = PCSCv2_PART10_PROPERTY_dwMaxAPDUDataSize;
+			RxBuffer[p++] = 4;	/* length */
+			RxBuffer[p++] = MaxAPDUDataSize & 0xFF;
+			RxBuffer[p++] = (MaxAPDUDataSize >> 8) & 0xFF;
+			RxBuffer[p++] = (MaxAPDUDataSize >> 16) & 0xFF;
+			RxBuffer[p++] = (MaxAPDUDataSize >> 24) & 0xFF;
+		}
+
 		*pdwBytesReturned = p;
 		return_value = IFD_SUCCESS;
 	}
@@ -1641,7 +1697,7 @@ EXTERNAL RESPONSECODE IFDHICCPresence(DWORD Lun)
 	if (-1 == (reader_index = LunToReaderIndex(Lun)))
 		return IFD_COMMUNICATION_ERROR;
 
-	DEBUG_PERIODIC3("%s (lun: %lX)", CcidSlots[reader_index].readerName, Lun);
+	DEBUG_PERIODIC3("%s (lun: " DWORD_X ")", CcidSlots[reader_index].readerName, Lun);
 
 	ccid_descriptor = get_ccid_descriptor(reader_index);
 

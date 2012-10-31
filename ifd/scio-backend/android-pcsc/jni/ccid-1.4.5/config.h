@@ -96,7 +96,7 @@
 #define PACKAGE_NAME "ccid"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "ccid 1.4.5"
+#define PACKAGE_STRING "ccid 1.4.8"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "ccid"
@@ -105,7 +105,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.4.5"
+#define PACKAGE_VERSION "1.4.8"
 
 /* directory containing USB drivers */
 #define PCSCLITE_HP_DROPDIR "/data/data/org.openecard.client.android/files/drivers"
@@ -124,7 +124,7 @@
 /* #undef USE_COMPOSITE_AS_MULTISLOT */
 
 /* Version number of package */
-#define VERSION "1.4.5"
+#define VERSION "1.4.8"
 
 /* Define to 1 if `lex' declares `yytext' as a `char *' by default, not a
    `char[]'. */

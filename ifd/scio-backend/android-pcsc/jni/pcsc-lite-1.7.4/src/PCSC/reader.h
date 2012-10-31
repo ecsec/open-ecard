@@ -6,7 +6,7 @@
  * Copyright (C) 2005-2009
  *  Ludovic Rousseau <ludovic.rousseau@free.fr>
  *
- * $Id: reader.h 5801 2011-06-21 11:26:03Z rousseau $
+ * $Id: reader.h 6241 2012-03-20 16:42:11Z rousseau $
  */
 
 /**
@@ -120,6 +120,7 @@
 #define FEATURE_IFD_DISPLAY_PROPERTIES   0x11
 #define FEATURE_GET_TLV_PROPERTIES       0x12
 #define FEATURE_CCID_ESC_COMMAND         0x13
+#define FEATURE_EXECUTE_PACE             0x20
 
 /* structures used (but not defined) in PC/SC Part 10:
  * "IFDs with Secure Pin Entry Capabilities" */
@@ -229,6 +230,9 @@ typedef struct {
 #define PCSCv2_PART10_PROPERTY_bMaxPINSize 7
 #define PCSCv2_PART10_PROPERTY_sFirmwareID 8
 #define PCSCv2_PART10_PROPERTY_bPPDUSupport 9
+#define PCSCv2_PART10_PROPERTY_dwMaxAPDUDataSize 10
+#define PCSCv2_PART10_PROPERTY_wIdVendor 11
+#define PCSCv2_PART10_PROPERTY_wIdProduct 12
 
 #endif
 

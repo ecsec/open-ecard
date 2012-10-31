@@ -18,7 +18,7 @@
 */
 
 /*
- * $Id: defs.h 4973 2010-06-01 09:43:29Z rousseau $
+ * $Id: defs.h 6305 2012-05-19 08:10:08Z rousseau $
  */
 
 #include <pcsclite.h>
@@ -75,7 +75,18 @@ typedef enum {
 #define T_1 1
 
 /* Default communication read timeout in milliseconds */
-#define DEFAULT_COM_READ_TIMEOUT (2*1000)
+#define DEFAULT_COM_READ_TIMEOUT (3*1000)
+
+/* DWORD type formating */
+#ifdef __APPLE__
+/* Apple defines DWORD as uint32_t */
+#define DWORD_X "%X"
+#define DWORD_D "%d"
+#else
+/* pcsc-lite defines DWORD as unsigned long */
+#define DWORD_X "%lX"
+#define DWORD_D "%ld"
+#endif
 
 /*
  * communication ports abstraction

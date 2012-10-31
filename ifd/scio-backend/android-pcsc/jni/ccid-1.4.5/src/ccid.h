@@ -18,7 +18,7 @@
 */
 
 /*
- * $Id: ccid.h 6024 2011-10-10 13:03:49Z rousseau $
+ * $Id: ccid.h 6306 2012-05-19 08:11:56Z rousseau $
  */
 
 typedef struct
@@ -136,6 +136,11 @@ typedef struct
 	 * USB bcdDevice
 	 */
 	int IFD_bcdDevice;
+
+	/*
+	 * Gemalto extra features, if any
+	 */
+	struct GEMALTO_FIRMWARE_FEATURES *gemalto_firmware_features;
 } _ccid_descriptor;
 
 /* Features from dwFeatures */
@@ -201,6 +206,8 @@ typedef struct
 #define KOBIL_MIDENTITY_VISUAL	0x0D460D46
 #define VEGAALPHA   0x09820008
 #define HPSMARTCARDKEYBOARD 0x03F01024
+#define HP_CCIDSMARTCARDKEYBOARD 0x03F00036
+#define KOBIL_IDTOKEN 0x0D46301D
 
 #define VENDOR_GEMALTO 0x08E6
 #define GET_VENDOR(readerID) ((readerID >> 16) & 0xFFFF)
@@ -254,4 +261,60 @@ _ccid_descriptor *get_ccid_descriptor(unsigned int reader_index);
 
 /* data rates supported by the secondary slots on the GemCore Pos Pro & SIM Pro */
 #define GEMPLUS_CUSTOM_DATA_RATES 10753, 21505, 43011, 125000
+
+/* Structure returned by Gemalto readers for the CCID Escape command 0x6A */
+struct GEMALTO_FIRMWARE_FEATURES
+{
+	UCHAR	bLogicalLCDLineNumber;	/* Logical number of LCD lines */
+	UCHAR	bLogicalLCDRowNumber;	/* Logical number of characters per LCD line */
+	UCHAR	bLcdInfo;				/* b0 indicates if scrolling is available */
+	UCHAR	bEntryValidationCondition;	/* See PIN_PROPERTIES */
+
+	/* Here come the PC/SC bit features to report */
+	UCHAR	VerifyPinStart:1;
+	UCHAR	VerifyPinFinish:1;
+	UCHAR	ModifyPinStart:1;
+	UCHAR	ModifyPinFinish:1;
+	UCHAR	GetKeyPressed:1;
+	UCHAR	VerifyPinDirect:1;
+	UCHAR	ModifyPinDirect:1;
+	UCHAR	Abort:1;
+
+	UCHAR	GetKey:1;
+	UCHAR	WriteDisplay:1;
+	UCHAR	SetSpeMessage:1;
+	UCHAR	RFUb1:5;
+
+	UCHAR	RFUb2[2];
+
+	/* Additional flags */
+	UCHAR	bTimeOut2:1;
+	UCHAR	bListSupportedLanguages:1;	/* Reader is able to indicate
+	   the list of supported languages through CCID-ESC 0x6B */
+	UCHAR	bNumberMessageFix:1;	/* Reader handles correctly shifts
+		made by bNumberMessage in PIN modification data structure */
+	UCHAR	bPPDUSupportOverXferBlock:1;	/* Reader supports PPDU over
+		PC_to_RDR_XferBlock command */
+	UCHAR	bPPDUSupportOverEscape:1;	/* Reader supports PPDU over
+		PC_to_RDR_Escape command with abData[0]=0xFF */
+	UCHAR	RFUb3:3;
+
+	UCHAR	RFUb4[3];
+
+	UCHAR	VersionNumber;	/* ?? */
+	UCHAR	MinimumPINSize;	/* for Verify and Modify */
+	UCHAR	MaximumPINSize;
+
+	/* Miscellaneous reader features */
+	UCHAR	Firewall:1;
+	UCHAR	RFUb5:7;
+
+	/* The following fields, FirewalledCommand_SW1 and
+	 * FirewalledCommand_SW2 are only valid if Firewall=1
+	 * These fields give the SW1 SW2 value used by the reader to
+	 * indicate a command has been firewalled */
+	UCHAR	FirewalledCommand_SW1;
+	UCHAR	FirewalledCommand_SW2;
+	UCHAR	RFUb6[3];
+};
 

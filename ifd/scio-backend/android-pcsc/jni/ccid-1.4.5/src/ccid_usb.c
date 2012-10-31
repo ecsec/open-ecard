@@ -18,7 +18,7 @@
 */
 
 /*
- * $Id: ccid_usb.c 6025 2011-10-10 13:04:38Z rousseau $
+ * $Id: ccid_usb.c 6348 2012-06-20 06:43:28Z rousseau $
  */
 
 #define __CCID_USB__
@@ -116,7 +116,6 @@ struct _bogus_firmware
 static struct _bogus_firmware Bogus_firmwares[] = {
 	{ 0x04e6, 0xe001, 0x0516 },	/* SCR 331 */
 	{ 0x04e6, 0x5111, 0x0620 },	/* SCR 331-DI */
-	{ 0x04e6, 0x5115, 0x0514 },	/* SCR 335 */
 	{ 0x04e6, 0xe003, 0x0510 },	/* SPR 532 */
 	{ 0x0D46, 0x3001, 0x0037 },	/* KAAN Base */
 	{ 0x0D46, 0x3002, 0x0037 },	/* KAAN Advanced */
@@ -176,6 +175,7 @@ status_t OpenUSBByName(unsigned int reader_index, /*@null@*/ char *device)
 	list_t plist, *values, *ifdVendorID, *ifdProductID, *ifdFriendlyName;
 	int rv;
 	int claim_failed = FALSE;
+	int return_value = STATUS_SUCCESS;
 
 	DEBUG_COMM3("Reader index: %X, Device: %s", reader_index, device);
 
@@ -225,6 +225,7 @@ status_t OpenUSBByName(unsigned int reader_index, /*@null@*/ char *device)
 	/* Info.plist full patch filename */
 	(void)snprintf(infofile, sizeof(infofile), "%s/%s/Contents/Info.plist",
 		PCSCLITE_HP_DROPDIR, BUNDLE);
+	DEBUG_INFO2("Using: %s", infofile);
 
 	rv = bundleParse(infofile, &plist);
 	if (rv)
@@ -235,8 +236,8 @@ status_t OpenUSBByName(unsigned int reader_index, /*@null@*/ char *device)
 	if (rv) \
 	{ \
 		DEBUG_CRITICAL2("Value/Key not defined for " key " in %s", infofile); \
-		bundleRelease(&plist); \
-		return STATUS_UNSUCCESSFUL; \
+		return_value = STATUS_UNSUCCESSFUL; \
+		goto end1; \
 	} \
 	else \
 		DEBUG_INFO2(key ": %s", (char *)list_get_at(values, 0));
@@ -252,7 +253,8 @@ status_t OpenUSBByName(unsigned int reader_index, /*@null@*/ char *device)
 		if (rv != 0)
 		{
 			DEBUG_CRITICAL2("libusb_init failed: %d", rv);
-			return STATUS_UNSUCCESSFUL;
+			return_value = STATUS_UNSUCCESSFUL;
+			goto end1;
 		}
 	}
 
@@ -260,7 +262,8 @@ status_t OpenUSBByName(unsigned int reader_index, /*@null@*/ char *device)
 	if (cnt < 0)
 	{
 		DEBUG_CRITICAL("libusb_get_device_list() failed\n");
-		return STATUS_UNSUCCESSFUL;
+		return_value = STATUS_UNSUCCESSFUL;
+		goto end1;
 	}
 
 #define GET_KEYS(key, values) \
@@ -268,13 +271,22 @@ status_t OpenUSBByName(unsigned int reader_index, /*@null@*/ char *device)
 	if (rv) \
 	{ \
 		DEBUG_CRITICAL2("Value/Key not defined for " key " in %s", infofile); \
-		bundleRelease(&plist); \
-		return STATUS_UNSUCCESSFUL; \
+		return_value = STATUS_UNSUCCESSFUL; \
+		goto end2; \
 	}
 
 	GET_KEYS("ifdVendorID", &ifdVendorID)
 	GET_KEYS("ifdProductID", &ifdProductID);
 	GET_KEYS("ifdFriendlyName", &ifdFriendlyName)
+
+	/* The 3 lists do not have the same size */
+	if  ((list_size(ifdVendorID) != list_size(ifdProductID))
+		|| (list_size(ifdVendorID) != list_size(ifdFriendlyName)))
+	{
+		DEBUG_CRITICAL2("Error parsing %s", infofile);
+		return_value = STATUS_UNSUCCESSFUL;
+		goto end1;
+	}
 
 	/* for any supported reader */
 	for (alias=0; alias<list_size(ifdVendorID); alias++)
@@ -474,7 +486,8 @@ again:
 					(void)libusb_close(dev_handle);
 					DEBUG_CRITICAL3("Unable to find the device descriptor for %d/%d",
 						bus_number, device_address);
-					return STATUS_UNSUCCESSFUL;
+					return_value = STATUS_UNSUCCESSFUL;
+					goto end2;
 				}
 
 				interface = usb_interface->altsetting->bInterfaceNumber;
@@ -482,6 +495,8 @@ again:
 				{
 					/* an interface was specified and it is not the
 					 * current one */
+					DEBUG_INFO3("Found interface %d but expecting %d",
+						interface_number, interface);
 					DEBUG_INFO3("Wrong interface for USB device %d/%d."
 						" Checking next one.", bus_number, device_address);
 
@@ -511,7 +526,8 @@ again:
 				if (ccid_check_firmware(&desc))
 				{
 					(void)libusb_close(dev_handle);
-					return STATUS_UNSUCCESSFUL;
+					return_value = STATUS_UNSUCCESSFUL;
+					goto end2;
 				}
 
 #ifdef USE_COMPOSITE_AS_MULTISLOT
@@ -557,6 +573,7 @@ again:
 				usbDevice[reader_index].ccid.dwSlotStatus = IFD_ICC_PRESENT;
 				usbDevice[reader_index].ccid.bVoltageSupport = device_descriptor[5];
 				usbDevice[reader_index].ccid.sIFD_serial_number = NULL;
+				usbDevice[reader_index].ccid.gemalto_firmware_features = NULL;
 				if (desc.iSerialNumber)
 				{
 					unsigned char serial[128];
@@ -599,14 +616,19 @@ end:
 		return STATUS_NO_SUCH_DEVICE;
 	}
 
-	/* free the libusb allocated list & devices */
-	libusb_free_device_list(devs, 1);
-
 	/* memorise the current reader_index so we can detect
 	 * a new OpenUSBByName on a multi slot reader */
 	previous_reader_index = reader_index;
 
-	return STATUS_SUCCESS;
+end2:
+	/* free the libusb allocated list & devices */
+	libusb_free_device_list(devs, 1);
+
+end1:
+	/* free bundle list */
+	bundleRelease(&plist);
+
+	return return_value;
 } /* OpenUSBByName */
 
 
@@ -724,6 +746,12 @@ status_t CloseUSB(unsigned int reader_index)
 	{
 		free(usbDevice[reader_index].ccid.arrayOfSupportedDataRates);
 		usbDevice[reader_index].ccid.arrayOfSupportedDataRates = NULL;
+	}
+
+	if (usbDevice[reader_index].ccid.gemalto_firmware_features)
+	{
+		free(usbDevice[reader_index].ccid.gemalto_firmware_features);
+		usbDevice[reader_index].ccid.gemalto_firmware_features = NULL ;
 	}
 
 	/* one slot closed */
@@ -1025,7 +1053,7 @@ int ControlUSB(int reader_index, int requesttype, int request, int value,
 			usbDevice[reader_index].bus_number,
 			usbDevice[reader_index].device_address, ret, strerror(errno));
 
-		return STATUS_UNSUCCESSFUL;
+		return ret;
 	}
 
 	if (requesttype & 0x80)
@@ -1134,6 +1162,7 @@ void InterruptStop(int reader_index)
 	struct libusb_transfer *transfer;
 
 	transfer = usbDevice[reader_index].polling_transfer;
+	usbDevice[reader_index].polling_transfer = NULL;
 	if (transfer)
 	{
 		int ret;

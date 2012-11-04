@@ -27,6 +27,7 @@ import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
 import iso.std.iso_iec._24727.tech.schema.PasswordTypeType;
 import iso.std.iso_iec._24727.tech.schema.StateInfoType;
 import java.math.BigInteger;
+import java.util.Arrays;
 import org.openecard.client.common.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -37,42 +38,45 @@ import org.w3c.dom.NodeList;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class PinCompareMarkerType {
+public class PINCompareMarkerType {
 
     private KeyRefType pinRef = null;
     private String pinValue = null;
     private PasswordAttributesType passwordAttributes = null;
-    private final String protocol;
+    private String protocol;
 
-    /**
-     * 
-     * @param baseType the iso PinCompareMarkerType to create our PinCompareMarkerType from
-     */
-    public PinCompareMarkerType(iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType baseType) {
-	this.protocol = baseType.getProtocol();
-	for (Element elem : baseType.getAny()) {
-	    if (elem.getLocalName().equals("PinRef")) {
+    public PINCompareMarkerType(iso.std.iso_iec._24727.tech.schema.DIDAbstractMarkerType didAbstractMarkerType) {
+	if(!(didAbstractMarkerType instanceof iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType)){
+	    throw new IllegalArgumentException();
+	}
+
+	protocol = didAbstractMarkerType.getProtocol();
+
+	for (Element e : didAbstractMarkerType.getAny()) {
+	    if (e.getLocalName().equals("PinRef")) {
 		pinRef = new KeyRefType();
-		NodeList nodeList = elem.getChildNodes();
+		NodeList nodeList = e.getChildNodes();
+
 		for (int i = 0; i < nodeList.getLength(); i++) {
 		    Node n = nodeList.item(i);
+		    
 		    if (n.getLocalName().equals("KeyRef")) {
 			pinRef.setKeyRef(StringUtils.toByteArray(n.getTextContent()));
 		    } else if (n.getLocalName().equals("Protected")) {
 			pinRef.setProtected(Boolean.parseBoolean(n.getTextContent()));
 		    }
 		}
-	    } else if (elem.getLocalName().equals("PinValue")) {
-		pinValue = elem.getTextContent();
-	    } else if (elem.getLocalName().equals("PasswordAttributes")) {
+	    } else if (e.getLocalName().equals("PinValue")) {
+		pinValue = e.getTextContent();
+	    } else if (e.getLocalName().equals("PasswordAttributes")) {
 		passwordAttributes = new PasswordAttributesType();
-		NodeList nodeList = elem.getChildNodes();
+		NodeList nodeList = e.getChildNodes();
+
 		for (int i = 0; i < nodeList.getLength(); i++) {
 		    Node n = nodeList.item(i);
+
 		    if (n.getLocalName().equals("pwdFlags")) {
-			for (String s : n.getTextContent().split(" ")) {
-			    passwordAttributes.getPwdFlags().add(s);
-			}
+			passwordAttributes.getPwdFlags().addAll(Arrays.asList(n.getTextContent().split(" ")));
 		    } else if (n.getLocalName().equals("pwdType")) {
 			passwordAttributes.setPwdType(PasswordTypeType.fromValue(n.getTextContent()));
 		    } else if (n.getLocalName().equals("minLength")) {
@@ -85,17 +89,17 @@ public class PinCompareMarkerType {
 			passwordAttributes.setPadChar(StringUtils.toByteArray(n.getTextContent()));
 		    }
 		}
-	    } else if (elem.getLocalName().equals("StateInfo")) {
-		;// TODO
+	    } else if (e.getLocalName().equals("StateInfo")) {
+		// TODO
 	    }
 	}
     }
 
-    public KeyRefType getPinRef() {
+    public KeyRefType getPINRef() {
 	return pinRef;
     }
 
-    public String getPinValue() {
+    public String getPINValue() {
 	return pinValue;
     }
 
@@ -107,8 +111,7 @@ public class PinCompareMarkerType {
 	return protocol;
     }
 
-    public StateInfoType getStateInfo() throws Exception {
-       throw new Exception("Not yet implemented");
+    public StateInfoType getStateInfo() {
+	throw new UnsupportedOperationException("Not yet implemented");
     }
-
 }

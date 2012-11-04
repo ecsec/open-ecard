@@ -25,24 +25,26 @@ package org.openecard.client.sal.protocol.pincompare;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDGet;
 import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
 import java.util.Map;
-import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.ECardException;
 import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.sal.Assert;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.sal.state.CardStateEntry;
+import org.openecard.client.common.sal.util.SALUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
- * Implementation of the ProtocolStep interface for the DIDGet step of
- * the PinCompare protocol.
+ * Implements the DIDGet step of the PIN Compare protocol.
+ * See TR-03112, version 1.1.2, part 7, section 4.1.4.
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class DIDGetStep implements ProtocolStep<DIDGet, DIDGetResponse> {
 
@@ -54,29 +56,26 @@ public class DIDGetStep implements ProtocolStep<DIDGet, DIDGetResponse> {
     }
 
     @Override
-    public DIDGetResponse perform(DIDGet didGet, Map<String, Object> internalData) {
-	String didName = didGet.getDIDName();
-	ConnectionHandleType connectionHandle = didGet.getConnectionHandle();
-	CardStateEntry cardStateEntry = (CardStateEntry) internalData.get("cardState");
+    public DIDGetResponse perform(DIDGet request, Map<String, Object> internalData) {
+	DIDGetResponse response = WSHelper.makeResponse(DIDGetResponse.class, WSHelper.makeResultOK());
 
-	DIDStructureType didStructure;
-	if (didGet.getDIDScope() != null && didGet.getDIDScope().equals(DIDScopeType.GLOBAL)) {
-	    didStructure = cardStateEntry.getDIDStructure(didName,
-		    cardStateEntry.getImplicitlySelectedApplicationIdentifier());
-	} else {
-	    didStructure = cardStateEntry.getDIDStructure(didName, connectionHandle.getCardApplication());
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(internalData, connectionHandle);
+	    String didName = SALUtils.getDIDName(request);
+	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, cardStateEntry, connectionHandle);
+
+	    byte[] applicationID = connectionHandle.getCardApplication();
+	    Assert.securityConditionApplication(cardStateEntry, applicationID, DifferentialIdentityServiceActionName.DID_GET);
+
+	    response.setDIDStructure(didStructure);
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
 	}
 
-	if (!cardStateEntry.checkApplicationSecurityCondition(connectionHandle.getCardApplication(),
-		DifferentialIdentityServiceActionName.DID_GET)) {
-	    return WSHelper.makeResponse(DIDGetResponse.class, WSHelper.makeResultError(
-		    ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, "cardapplication"));
-	}
-
-	DIDGetResponse didGetResponse = new DIDGetResponse();
-	didGetResponse.setDIDStructure(didStructure);
-	didGetResponse.setResult(WSHelper.makeResultOK());
-	return didGetResponse;
+	return response;
     }
-
 }

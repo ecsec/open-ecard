@@ -74,7 +74,7 @@ import static org.testng.Assert.assertEquals;
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class PinCompareProtocolTest {
+public class PINCompareProtocolTest {
 
     @BeforeClass
     public static void disable() {
@@ -103,7 +103,7 @@ public class PinCompareProtocolTest {
 
 	listIFDs.setContextHandle(ecr.getContextHandle());
 	ListIFDsResponse listIFDsResponse = ifd.listIFDs(listIFDs);
-	RecognitionInfo recognitionInfo = cr.recognizeCard(listIFDsResponse.getIFDName().get(0), new BigInteger("0"));
+	RecognitionInfo recognitionInfo = cr.recognizeCard(listIFDsResponse.getIFDName().get(1), new BigInteger("0"));
 	SALStateCallback salCallback = new SALStateCallback(cr, states);
 	Connect c = new Connect();
 	c.setContextHandle(ecr.getContextHandle());
@@ -119,7 +119,7 @@ public class PinCompareProtocolTest {
 	connectionHandleType.setSlotHandle(connectResponse.getSlotHandle());
 	salCallback.signalEvent(EventType.CARD_RECOGNIZED, connectionHandleType);
 	instance = new TinySAL(env, states);
-	instance.addProtocol(ECardConstants.Protocol.PIN_COMPARE, new PinCompareProtocolFactory());
+	instance.addProtocol(ECardConstants.Protocol.PIN_COMPARE, new PINCompareProtocolFactory());
     }
 
     @Test
@@ -148,9 +148,9 @@ public class PinCompareProtocolTest {
 	DIDAuthenticationDataType didAuthenticationData = new DIDAuthenticationDataType();
 	didAuthenticationData.getAny().add(elemPin);
 
-	org.openecard.client.sal.protocol.pincompare.anytype.PinCompareDIDAuthenticateInputType 
+	org.openecard.client.sal.protocol.pincompare.anytype.PINCompareDIDAuthenticateInputType
 	pinCompareDIDAuthenticateInputType = new 
-	org.openecard.client.sal.protocol.pincompare.anytype.PinCompareDIDAuthenticateInputType(
+	org.openecard.client.sal.protocol.pincompare.anytype.PINCompareDIDAuthenticateInputType(
 		didAuthenticationData);
 
 	parameters.setAuthenticationProtocolData(didAuthenticationData);
@@ -162,7 +162,7 @@ public class PinCompareProtocolTest {
 	assertEquals(result.getAuthenticationProtocolData().getProtocol(), ECardConstants.Protocol.PIN_COMPARE);
 	assertEquals(result.getAuthenticationProtocolData().getAny().size(), 0);
 	assertEquals(result.getResult().getResultMajor(), ECardConstants.Major.OK);
-	assertEquals(pinCompareDIDAuthenticateInputType.getPin(), "123456");
+	assertEquals(pinCompareDIDAuthenticateInputType.getPIN(), "123456");
     }
 
     @Test
@@ -195,10 +195,10 @@ public class PinCompareProtocolTest {
 	assertEquals(result.getResult().getResultMajor(), "http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok");
 	assertEquals(result.getDIDStructure().getDIDName(), "PIN.home");
 	assertEquals(result.getDIDStructure().getDIDMarker().getClass(), PinCompareMarkerType.class);
-	org.openecard.client.common.sal.anytype.PinCompareMarkerType pinCompareMarkerType = 
-		new org.openecard.client.common.sal.anytype.PinCompareMarkerType(
+	org.openecard.client.common.sal.anytype.PINCompareMarkerType pinCompareMarkerType =
+		new org.openecard.client.common.sal.anytype.PINCompareMarkerType(
 			(PinCompareMarkerType) result.getDIDStructure().getDIDMarker());
-	assertEquals(ByteUtils.toHexString(pinCompareMarkerType.getPinRef().getKeyRef()), "02");
+	assertEquals(ByteUtils.toHexString(pinCompareMarkerType.getPINRef().getKeyRef()), "02");
 
 	// test with given correct scope
 	didGet = new DIDGet();
@@ -209,9 +209,9 @@ public class PinCompareProtocolTest {
 	assertEquals(result.getResult().getResultMajor(), ECardConstants.Major.OK);
 	assertEquals(result.getDIDStructure().getDIDName(), "PIN.home");
 	assertEquals(result.getDIDStructure().getDIDMarker().getClass(), PinCompareMarkerType.class);
-	pinCompareMarkerType = new org.openecard.client.common.sal.anytype.PinCompareMarkerType((PinCompareMarkerType) 
+	pinCompareMarkerType = new org.openecard.client.common.sal.anytype.PINCompareMarkerType((PinCompareMarkerType)
 		result.getDIDStructure().getDIDMarker());
-	assertEquals(ByteUtils.toHexString(pinCompareMarkerType.getPinRef().getKeyRef()), "02");
+	assertEquals(ByteUtils.toHexString(pinCompareMarkerType.getPINRef().getKeyRef()), "02");
 
 	cardApplicationPath = new CardApplicationPath();
 	cardApplicationPathType = new CardApplicationPathType();

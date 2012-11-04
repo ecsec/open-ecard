@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,45 +22,44 @@
 
 package org.openecard.client.sal.protocol.pincompare;
 
+import iso.std.iso_iec._24727.tech.schema.DIDUpdate;
+import iso.std.iso_iec._24727.tech.schema.DIDUpdateResponse;
+import java.util.Map;
+import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.FunctionType;
-import org.openecard.client.common.sal.Protocol;
 import org.openecard.client.common.sal.ProtocolStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
- * Implements the PIN Compare protocol.
- * See TR-03112, version 1.1.2, part 7, section 4.
- *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * Implements the DIDUpdate step of the PIN Compare protocol.
+ * See TR-03112, version 1.1.2, part 7, section 4.1.3.
+ * 
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class PINCompareProtocol extends Protocol {
+public class DIDUpdateStep implements ProtocolStep<DIDUpdate, DIDUpdateResponse> {
+
+    private static final Logger logger = LoggerFactory.getLogger(DIDUpdateStep.class);
+    private final Dispatcher dispatcher;
 
     /**
-     * Creates a new PINCompare protocol.
+     * Creates a new DIDAuthenticateStep.
      *
      * @param dispatcher Dispatcher
      */
-    public PINCompareProtocol(Dispatcher dispatcher) {
-	steps.add(new DIDCreateStep(dispatcher));
-	steps.add(new DIDUpdateStep(dispatcher));
-	steps.add(new DIDGetStep());
-	steps.add(new DIDAuthenticateStep(dispatcher));
-    }
-
-
-    @Override
-    public boolean hasNextStep(FunctionType functionName) {
-	for (int i = 0; i < steps.size(); i++) {
-	    if (steps.get(i).getFunctionType().equals(functionName)) {
-		super.curStep = i;
-	    }
-	}
-	return true;
+    public DIDUpdateStep(Dispatcher dispatcher) {
+	this.dispatcher = dispatcher;
     }
 
     @Override
-    public String toString() {
-	return "PINCompare";
+    public FunctionType getFunctionType() {
+	return FunctionType.DIDUpdate;
+    }
+
+    @Override
+    public DIDUpdateResponse perform(DIDUpdate request, Map<String, Object> internalData) {
+	return WSHelper.makeResponse(DIDUpdateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 }

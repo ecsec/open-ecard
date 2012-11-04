@@ -30,54 +30,51 @@ import org.openecard.client.common.anytype.AuthDataResponse;
 
 
 /**
- * [TR-03112-7] MAY contain the value of the PIN. If this element is missing, it
- * is input at the terminal.
+ * Implements the PINCompareDIDAuthenticateOutputType.
+ * See TR-03112, version 1.1.2, part 7, section 4.1.5.
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class PinCompareDIDAuthenticateOutputType {
+public class PINCompareDIDAuthenticateOutputType {
 
     private final AuthDataMap authMap;
-    /**
-     * If user verification failed, this contains the current value of the
-     * RetryCounter.
-     */
     private BigInteger retryCounter = null;
 
     /**
+     * Creates a new PINCompareDIDAuthenticateOutputType.
      * 
-     * @param didAuthenticationDataType
-     *            a DIDAuthenticationDataType of type
-     *            PinCompareDIDAuthenticateOutputType
+     * @param data DIDAuthenticationDataType
      * @throws ParserConfigurationException
-     *             to indicate a XML configuration error
      */
-    public PinCompareDIDAuthenticateOutputType(DIDAuthenticationDataType didAuthenticationDataType)
-	throws ParserConfigurationException {
-	this.authMap = new AuthDataMap(didAuthenticationDataType);
+    public PINCompareDIDAuthenticateOutputType(DIDAuthenticationDataType data) throws ParserConfigurationException {
+	authMap = new AuthDataMap(data);
     }
 
     /**
-     * 
-     * @param authMap
-     *            AuthDataMap with contents for this
-     *            PinCompareDIDAuthenticateOutputType
+     * Creates a new PINCompareDIDAuthenticateOutputType.
+     *
+     * @param authMap AuthDataMap
      */
-    protected PinCompareDIDAuthenticateOutputType(AuthDataMap authMap) {
+    protected PINCompareDIDAuthenticateOutputType(AuthDataMap authMap) {
 	this.authMap = authMap;
     }
 
     /**
+     * Returns the retry counter.
      * 
-     * @return if user verification failed, this contains the current value of
-     *         the RetryCounter, else null
+     * @return Retry counter
      */
     public BigInteger getRetryCounter() {
 	return retryCounter;
     }
 
-    public void setRetryCounter(BigInteger counter) {
-	this.retryCounter = counter;
+    /**
+     * Sets the retry counter.
+     *
+     * @param retryCounter Retry counter
+     */
+    public void setRetryCounter(BigInteger retryCounter) {
+	this.retryCounter = retryCounter;
     }
 
     /**
@@ -85,12 +82,11 @@ public class PinCompareDIDAuthenticateOutputType {
      * @return the PinCompareDIDAuthenticateOutputType
      */
     public DIDAuthenticationDataType getAuthDataType() {
-	AuthDataResponse authResponse = authMap
-		.createResponse(new iso.std.iso_iec._24727.tech.schema.PinCompareDIDAuthenticateOutputType());
+	AuthDataResponse authResponse = authMap.createResponse(new iso.std.iso_iec._24727.tech.schema.PinCompareDIDAuthenticateOutputType());
 	if (retryCounter != null) {
 	    authResponse.addElement("RetryCounter", retryCounter.toString());
 	}
+
 	return authResponse.getResponse();
     }
-
 }

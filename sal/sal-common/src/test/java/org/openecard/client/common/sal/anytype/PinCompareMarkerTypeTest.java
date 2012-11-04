@@ -24,11 +24,9 @@ package org.openecard.client.common.sal.anytype;
 
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
-import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import java.math.BigInteger;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.sal.state.cif.CardInfoWrapper;
-import org.openecard.client.common.sal.state.cif.DIDInfoWrapper;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.recognition.CardRecognition;
 import org.testng.annotations.Test;
@@ -60,10 +58,10 @@ public class PinCompareMarkerTypeTest {
 	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo);
 
 	DIDInfoType didInfoWrapper = cardInfoWrapper.getDIDInfo(didName, rootApplication);
-	PinCompareMarkerType pinCompareMarker = new PinCompareMarkerType(
+	PINCompareMarkerType pinCompareMarker = new PINCompareMarkerType(
 		 didInfoWrapper.getDifferentialIdentity().getDIDMarker().getPinCompareMarker());
-	assertEquals(pinCompareMarker.getPinRef().getKeyRef(), new byte[] { 0x02 });
-	assertNull(pinCompareMarker.getPinValue());
+	assertEquals(pinCompareMarker.getPINRef().getKeyRef(), new byte[] { 0x02 });
+	assertNull(pinCompareMarker.getPINValue());
 	assertEquals(pinCompareMarker.getPasswordAttributes().getMaxLength(), new BigInteger("8"));
 	assertEquals(pinCompareMarker.getProtocol(), ECardConstants.Protocol.PIN_COMPARE);
     }

@@ -30,10 +30,11 @@ import org.openecard.client.gui.UserConsent;
 
 
 /**
- * ProtocolFactory implementation for the PinCompare protocol.
+ * ProtocolFactory implementation for the PIN Compare protocol.
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class PinCompareProtocolFactory implements ProtocolFactory {
+public class PINCompareProtocolFactory implements ProtocolFactory {
 
     @Override
     public String getProtocol() {
@@ -42,7 +43,6 @@ public class PinCompareProtocolFactory implements ProtocolFactory {
 
     @Override
     public Protocol createInstance(Dispatcher dispatcher, UserConsent gui) {
-	return new PinCompareProtocol(dispatcher);
+	return new PINCompareProtocol(dispatcher);
     }
-
 }

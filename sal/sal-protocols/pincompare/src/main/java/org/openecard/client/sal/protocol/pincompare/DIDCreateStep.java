@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,32 +22,44 @@
 
 package org.openecard.client.sal.protocol.pincompare;
 
-import iso.std.iso_iec._24727.tech.schema.Encipher;
-import iso.std.iso_iec._24727.tech.schema.EncipherResponse;
+import iso.std.iso_iec._24727.tech.schema.DIDCreate;
+import iso.std.iso_iec._24727.tech.schema.DIDCreateResponse;
 import java.util.Map;
-import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
+ * Implements the DIDCreate step of the PIN Compare protocol.
+ * See TR-03112, version 1.1.2, part 7, section 4.1.2.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class EnchipherStep implements ProtocolStep<Encipher, EncipherResponse> {
+public class DIDCreateStep implements ProtocolStep<DIDCreate, DIDCreateResponse> {
+
+    private static final Logger logger = LoggerFactory.getLogger(DIDCreateStep.class);
+    private final Dispatcher dispatcher;
+
+    /**
+     * Creates a new DIDAuthenticateStep.
+     *
+     * @param dispatcher Dispatcher
+     */
+    public DIDCreateStep(Dispatcher dispatcher) {
+	this.dispatcher = dispatcher;
+    }
 
     @Override
     public FunctionType getFunctionType() {
-	return FunctionType.Encipher;
+	return FunctionType.DIDCreate;
     }
 
     @Override
-    public EncipherResponse perform(Encipher request, Map internalData) {
-	return WSHelper.makeResponse(
-		EncipherResponse.class,
-		WSHelper.makeResultError(ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION, "The function '"
-			+ getFunctionType() + "' is not supported with this protocol."));
+    public DIDCreateResponse perform(DIDCreate request, Map<String, Object> internalData) {
+	return WSHelper.makeResponse(DIDCreateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
-
 }

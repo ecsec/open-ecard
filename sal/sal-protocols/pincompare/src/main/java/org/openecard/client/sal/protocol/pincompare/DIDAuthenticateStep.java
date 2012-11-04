@@ -29,40 +29,44 @@ import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.InputUnitType;
-import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
 import iso.std.iso_iec._24727.tech.schema.PinInputType;
 import iso.std.iso_iec._24727.tech.schema.VerifyUser;
 import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse;
 import java.math.BigInteger;
 import java.util.Map;
-import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.ECardException;
 import org.openecard.client.common.WSHelper;
+import org.openecard.client.common.apdu.Verify;
+import org.openecard.client.common.apdu.common.CardResponseAPDU;
 import org.openecard.client.common.interfaces.Dispatcher;
+import org.openecard.client.common.sal.Assert;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
+import org.openecard.client.common.sal.anytype.PINCompareMarkerType;
 import org.openecard.client.common.sal.state.CardStateEntry;
-import org.openecard.client.common.util.ByteUtils;
-import org.openecard.client.sal.protocol.pincompare.anytype.PinCompareDIDAuthenticateInputType;
-import org.openecard.client.sal.protocol.pincompare.anytype.PinCompareDIDAuthenticateOutputType;
+import org.openecard.client.common.sal.util.SALUtils;
+import org.openecard.client.sal.protocol.pincompare.anytype.PINCompareDIDAuthenticateInputType;
+import org.openecard.client.sal.protocol.pincompare.anytype.PINCompareDIDAuthenticateOutputType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
- * Implementation of the ProtocolStep interface for the DIDAuthenticate step of
- * the PinCompare protocol.
+ * Implements the DIDAuthenticate step of the PIN Compare protocol.
+ * See TR-03112, version 1.1.2, part 7, section 4.1.5.
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(DIDAuthenticateStep.class);
-
     private final Dispatcher dispatcher;
 
     /**
+     * Creates a new DIDAuthenticateStep.
      * 
-     * @param dispatcher the dispatcher to use for message delivery
+     * @param dispatcher Dispatcher
      */
     public DIDAuthenticateStep(Dispatcher dispatcher) {
 	this.dispatcher = dispatcher;
@@ -74,73 +78,64 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
     }
 
     @Override
-    public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
-	try {
-	    String didName = didAuthenticate.getDIDName();
-	    PinCompareDIDAuthenticateInputType pinCompareDIDAuthenticateInput = new PinCompareDIDAuthenticateInputType(
-		    didAuthenticate.getAuthenticationProtocolData());
-	    ConnectionHandleType connectionHandle = didAuthenticate.getConnectionHandle();
+    public DIDAuthenticateResponse perform(DIDAuthenticate request, Map<String, Object> internalData) {
+	DIDAuthenticateResponse response = WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultOK());
 
-	    CardStateEntry cardStateEntry = (CardStateEntry) internalData.get("cardState");
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    String didName = SALUtils.getDIDName(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(internalData, connectionHandle);
+	    PINCompareDIDAuthenticateInputType pinCompareInput = new PINCompareDIDAuthenticateInputType(request.getAuthenticationProtocolData());
+	    PINCompareDIDAuthenticateOutputType pinCompareOutput = pinCompareInput.getOutputType();
 
 	    byte[] cardApplication;
-	    if (didAuthenticate.getDIDScope() != null && didAuthenticate.getDIDScope().equals(DIDScopeType.GLOBAL)) {
+	    if (request.getDIDScope() != null && request.getDIDScope().equals(DIDScopeType.GLOBAL)) {
 		cardApplication = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
 	    } else {
 		cardApplication = connectionHandle.getCardApplication();
 	    }
-	    if (!cardStateEntry.checkDIDSecurityCondition(cardApplication, didName,
-		    DifferentialIdentityServiceActionName.DID_AUTHENTICATE)) {
-		return WSHelper.makeResponse(DIDAuthenticateResponse.class,
-			WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
-	    }
+	    Assert.securityConditionDID(cardStateEntry, cardApplication, didName, DifferentialIdentityServiceActionName.DID_AUTHENTICATE);
+
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplication);
+	    PINCompareMarkerType pinCompareMarker = new PINCompareMarkerType(didStructure.getDIDMarker());
+	    byte keyRef = pinCompareMarker.getPINRef().getKeyRef()[0];
 
-	    org.openecard.client.common.sal.anytype.PinCompareMarkerType pinCompareMarker = 
-		    new org.openecard.client.common.sal.anytype.PinCompareMarkerType(
-			    (PinCompareMarkerType) didStructure.getDIDMarker());
-
-	    byte keyRef = pinCompareMarker.getPinRef().getKeyRef()[0];
-	    VerifyUser verify = new VerifyUser();
-	    verify.setSlotHandle(connectionHandle.getSlotHandle());
+	    VerifyUser verifyUser = new VerifyUser();
 	    InputUnitType inputUnit = new InputUnitType();
-	    verify.setInputUnit(inputUnit);
 	    PinInputType pinInput = new PinInputType();
-	    inputUnit.setPinInput(pinInput);
+
+	    verifyUser.setSlotHandle(connectionHandle.getSlotHandle());
+	    verifyUser.setInputUnit(inputUnit);
 	    pinInput.setIndex(BigInteger.ZERO);
 	    pinInput.setPasswordAttributes(pinCompareMarker.getPasswordAttributes());
-	    if (pinCompareDIDAuthenticateInput.getPin() == null) {
-		// [TR-03112-6] The structure of the template corresponds to the
-		// structure of an APDU for the VERIFY command in accordance
-		// with [ISO7816-4] (Section 7.5.6).
-		verify.setTemplate(new byte[] { 0x00, 0x20, 0x00, keyRef });
+	    inputUnit.setPinInput(pinInput);
+
+	    // [TR-03112-6] The structure of the template corresponds to the
+	    // structure of an APDU for the VERIFY command in accordance
+	    // with [ISO7816-4] (Section 7.5.6).
+	    if (pinCompareInput.getPIN() == null || pinCompareInput.getPIN().isEmpty()) {
+		verifyUser.setTemplate(new Verify(keyRef).toByteArray());
 	    } else {
-		// TODO pin is currently ignored
-		verify.setTemplate(new byte[] { 0x00, 0x20, 0x00, keyRef });
-	    }
-	    VerifyUserResponse verifyR = (VerifyUserResponse) dispatcher.deliver(verify);
-	    byte[] responseCode = verifyR.getResponse();
-
-	    DIDAuthenticateResponse didAuthenticateResponse = new DIDAuthenticateResponse();
-	    didAuthenticateResponse.setResult(WSHelper.makeResultOK());
-	    PinCompareDIDAuthenticateOutputType output = pinCompareDIDAuthenticateInput.getOutputType();
-
-	    /*
-	     * If user verification failed, this contains the current value of
-	     * the RetryCounter.
-	     */
-	    if (!ByteUtils.compare(responseCode, new byte[] { (byte) 0x90, 0x00 })) {
-		output.setRetryCounter(new BigInteger(Integer.toString((responseCode[1] & 0x0F))));
+		byte[] verificationData = pinCompareInput.getPIN().getBytes("ISO-8859-1");
+		verifyUser.setTemplate(new Verify(keyRef, verificationData).toByteArray());
 	    }
 
-	    didAuthenticateResponse.setResult(WSHelper.makeResultOK());
+	    VerifyUserResponse verifyResponse = (VerifyUserResponse) dispatcher.deliver(verifyUser);
+	    CardResponseAPDU verifyResponseAPDU = new CardResponseAPDU(verifyResponse.getResponse());
+
+	    if (verifyResponseAPDU.isWarningProcessed()) {
+		pinCompareOutput.setRetryCounter(new BigInteger(Integer.toString((verifyResponseAPDU.getSW2() & 0x0F))));
+	    }
+
 	    cardStateEntry.addAuthenticated(didName, cardApplication);
-	    didAuthenticateResponse.setAuthenticationProtocolData(output.getAuthDataType());
-	    return didAuthenticateResponse;
+	    response.setAuthenticationProtocolData(pinCompareOutput.getAuthDataType());
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
 	} catch (Exception e) {
 	    logger.error(e.getMessage(), e);
-	    return WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResult(e));
+	    response.setResult(WSHelper.makeResult(e));
 	}
-    }
 
+	return response;
+    }
 }

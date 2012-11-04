@@ -28,50 +28,43 @@ import org.openecard.client.common.anytype.AuthDataMap;
 
 
 /**
- * [TR-03112-7] This type specifies the structure of the
- * DIDAuthenticationDataType for the PIN Compare protocol when DIDAuthenticate
- * is called.
+ * Implements the PINCompareDIDAuthenticateInputType.
+ * See TR-03112, version 1.1.2, part 7, section 4.1.5.
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class PinCompareDIDAuthenticateInputType {
+public class PINCompareDIDAuthenticateInputType {
 
-    /**
-     * MAY contain the value of the PIN. If this element is missing, it is input
-     * at the terminal.
-     */
-    private String pin = null;
     private final AuthDataMap authMap;
+    private String pin = null;
 
     /**
+     * Creates a new PINCompareDIDAuthenticateInputType.
      * 
-     * @param baseType
-     *            a DIDAuthenticationDataType of type
-     *            PinCompareDIDAuthenticateInputType
+     * @param data DIDAuthenticationDataType
      * @throws ParserConfigurationException
-     *             to indicate a XML configuration error
      */
-    public PinCompareDIDAuthenticateInputType(DIDAuthenticationDataType baseType) throws ParserConfigurationException {
-	authMap = new AuthDataMap(baseType);
+    public PINCompareDIDAuthenticateInputType(DIDAuthenticationDataType data) throws ParserConfigurationException {
+	authMap = new AuthDataMap(data);
 	// Optional contents
 	pin = authMap.getContentAsString("Pin");
     }
 
     /**
-     * 
-     * @return the pin or null if not present
+     * Returns the PIN.
+     *
+     * @return PIN
      */
-    public String getPin() {
+    public String getPIN() {
 	return pin;
     }
 
     /**
+     * Returns a new PINCompareDIDAuthenticateOutputType.
      * 
-     * @return the corresponding PinCompareDIDAuthenticateOutputType for this
-     *         PinCompareDIDAuthenticateInputType
+     * @return PINCompareDIDAuthenticateOutputType
      */
-    public PinCompareDIDAuthenticateOutputType getOutputType() {
-	return new PinCompareDIDAuthenticateOutputType(authMap);
+    public PINCompareDIDAuthenticateOutputType getOutputType() {
+	return new PINCompareDIDAuthenticateOutputType(authMap);
     }
-
 }

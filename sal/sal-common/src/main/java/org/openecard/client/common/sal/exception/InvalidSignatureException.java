@@ -30,10 +30,9 @@ import org.openecard.client.common.ECardException;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public final class IncorrectParameterException extends ECardException {
+public class InvalidSignatureException extends ECardException {
 
-    public IncorrectParameterException(String message) {
-	makeException(this, ECardConstants.Minor.App.INCORRECT_PARM, message);
+    public InvalidSignatureException() {
+	makeException(this, ECardConstants.Minor.App.INCORRECT_PARM, "The signature is invalid.");
     }
-
 }

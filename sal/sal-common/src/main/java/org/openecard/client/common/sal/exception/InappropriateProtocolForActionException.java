@@ -30,10 +30,17 @@ import org.openecard.client.common.ECardException;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public final class IncorrectParameterException extends ECardException {
+public final class InappropriateProtocolForActionException extends ECardException {
 
-    public IncorrectParameterException(String message) {
-	makeException(this, ECardConstants.Minor.App.INCORRECT_PARM, message);
+    public InappropriateProtocolForActionException() {
+	makeException(this, ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION, "The function is not supported for this protocol.");
     }
 
+    public InappropriateProtocolForActionException(String message) {
+	makeException(this, ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION, message);
+    }
+
+    public InappropriateProtocolForActionException(String function, String objectString) {
+	this("The function '" + function + "' is not supported for the protocol '" + objectString + "'.");
+    }
 }

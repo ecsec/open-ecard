@@ -23,12 +23,17 @@
 package org.openecard.client.common.sal.util;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
+import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import java.lang.reflect.Method;
+import java.util.Map;
 import org.openecard.client.common.ECardException;
 import org.openecard.client.common.sal.Assert;
+import org.openecard.client.common.sal.exception.NamedEntityNotFoundException;
 import org.openecard.client.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.sal.state.CardStateMap;
+
 
 /**
  * Convenience class for the SAL.
@@ -51,9 +56,35 @@ public class SALUtils {
 	return value;
     }
 
+    public static DIDStructureType getDIDStructure(Object object, String didName, CardStateEntry entry, ConnectionHandleType connectionHandle)
+	    throws NamedEntityNotFoundException, Exception {
+	DIDScopeType didScope = (DIDScopeType) get(object, "getDIDScope");
+	DIDStructureType didStructure;
+
+	if (didScope != null && didScope.equals(DIDScopeType.GLOBAL)) {
+	    didStructure = entry.getDIDStructure(didName, entry.getImplicitlySelectedApplicationIdentifier());
+	} else {
+	    didStructure = entry.getDIDStructure(didName, connectionHandle.getCardApplication());
+	}
+
+	Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	return didStructure;
+    }
+
     public static CardStateEntry getCardStateEntry(CardStateMap states, ConnectionHandleType connectionHandle)
 	    throws UnknownConnectionHandleException {
 	CardStateEntry value = states.getEntry(connectionHandle);
+	if (value == null) {
+	    throw new UnknownConnectionHandleException(connectionHandle);
+	}
+
+	return value;
+    }
+
+    public static CardStateEntry getCardStateEntry(Map<String, Object> internalData, ConnectionHandleType connectionHandle)
+	    throws UnknownConnectionHandleException {
+	CardStateEntry value = (CardStateEntry) internalData.get("cardState");
 	if (value == null) {
 	    throw new UnknownConnectionHandleException(connectionHandle);
 	}

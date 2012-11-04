@@ -75,7 +75,6 @@ import iso.std.iso_iec._24727.tech.schema.DIDList;
 import iso.std.iso_iec._24727.tech.schema.DIDListResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDNameListType;
 import iso.std.iso_iec._24727.tech.schema.DIDQualifierType;
-import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DIDUpdate;
 import iso.std.iso_iec._24727.tech.schema.DIDUpdateResponse;
@@ -141,6 +140,7 @@ import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.Protocol;
 import org.openecard.client.common.sal.ProtocolFactory;
 import org.openecard.client.common.sal.anytype.CryptoMarkerType;
+import org.openecard.client.common.sal.exception.InappropriateProtocolForActionException;
 import org.openecard.client.common.sal.exception.IncorrectParameterException;
 import org.openecard.client.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.client.common.sal.exception.UnknownProtocolException;
@@ -188,11 +188,11 @@ public class TinySAL implements SAL {
      * The interface is initialised with this function.
      * See BSI-TR-03112-4, version 1.1.2, section 3.1.1.
      *
-     * @param initialize Initialize
+     * @param request Initialize
      * @return InitializeResponse
      */
     @Override
-    public InitializeResponse initialize(Initialize initialize) {
+    public InitializeResponse initialize(Initialize request) {
 	return WSHelper.makeResponse(InitializeResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -201,11 +201,11 @@ public class TinySAL implements SAL {
      * This function closes all established connections and open sessions.
      * See BSI-TR-03112-4, version 1.1.2, section 3.1.2.
      *
-     * @param terminate Terminate
+     * @param request Terminate
      * @return TerminateResponse
      */
     @Override
-    public TerminateResponse terminate(Terminate terminate) {
+    public TerminateResponse terminate(Terminate request) {
 	return WSHelper.makeResponse(TerminateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -213,15 +213,15 @@ public class TinySAL implements SAL {
      * The CardApplicationPath function determines a path between the client application and a card application.
      * See BSI-TR-03112-4, version 1.1.2, section 3.1.3.
      *
-     * @param cardApplicationPath CardApplicationPath
+     * @param request CardApplicationPath
      * @return CardApplicationPathResponse
      */
     @Override
-    public CardApplicationPathResponse cardApplicationPath(CardApplicationPath cardApplicationPath) {
+    public CardApplicationPathResponse cardApplicationPath(CardApplicationPath request) {
 	CardApplicationPathResponse response = WSHelper.makeResponse(CardApplicationPathResponse.class, WSHelper.makeResultOK());
 
 	try {
-	    CardApplicationPathType cardAppPath = cardApplicationPath.getCardAppPathRequest();
+	    CardApplicationPathType cardAppPath = request.getCardAppPathRequest();
 	    Assert.assertIncorrectParameter(cardAppPath, "The parameter CardAppPathRequest is empty.");
 
 	    Set<CardStateEntry> entries = states.getMatchingEntries(cardAppPath);
@@ -243,6 +243,7 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -254,15 +255,15 @@ public class TinySAL implements SAL {
      * application and the card application.
      * See BSI-TR-03112-4, version 1.1.2, section 3.2.1.
      *
-     * @param cardApplicationConnect CardApplicationConnect
+     * @param request CardApplicationConnect
      * @return CardApplicationConnectResponse
      */
     @Override
-    public CardApplicationConnectResponse cardApplicationConnect(CardApplicationConnect cardApplicationConnect) {
+    public CardApplicationConnectResponse cardApplicationConnect(CardApplicationConnect request) {
 	CardApplicationConnectResponse response = WSHelper.makeResponse(CardApplicationConnectResponse.class, WSHelper.makeResultOK());
 
 	try {
-	    CardApplicationPathType cardAppPath = cardApplicationConnect.getCardApplicationPath();
+	    CardApplicationPathType cardAppPath = request.getCardApplicationPath();
 	    Assert.assertIncorrectParameter(cardAppPath, "The parameter CardAppPathRequest is empty.");
 
 	    Set<CardStateEntry> cardStateEntrySet = states.getMatchingEntries(cardAppPath);
@@ -304,6 +305,7 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -314,15 +316,15 @@ public class TinySAL implements SAL {
      * The CardApplicationDisconnect function terminates the connection to a card application.
      * See BSI-TR-03112-4, version 1.1.2, section 3.2.2.
      *
-     * @param cardApplicationDisconnect CardApplicationDisconnect
+     * @param request CardApplicationDisconnect
      * @return CardApplicationDisconnectResponse
      */
     @Override
-    public CardApplicationDisconnectResponse cardApplicationDisconnect(CardApplicationDisconnect cardApplicationDisconnect) {
+    public CardApplicationDisconnectResponse cardApplicationDisconnect(CardApplicationDisconnect request) {
 	CardApplicationDisconnectResponse response = WSHelper.makeResponse(CardApplicationDisconnectResponse.class, WSHelper.makeResultOK());
 
 	try {
-	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(cardApplicationDisconnect);
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
 
 	    // check existence of required parameters
@@ -345,6 +347,7 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -355,11 +358,11 @@ public class TinySAL implements SAL {
      * This CardApplicationStartSession function starts a session between the client application and the card application.
      * See BSI-TR-03112-4, version 1.1.2, section 3.2.3.
      *
-     * @param cardApplicationStartSession CardApplicationStartSession
+     * @param request CardApplicationStartSession
      * @return CardApplicationStartSessionResponse
      */
     @Override
-    public CardApplicationStartSessionResponse cardApplicationStartSession(CardApplicationStartSession cardApplicationStartSession) {
+    public CardApplicationStartSessionResponse cardApplicationStartSession(CardApplicationStartSession request) {
 	return WSHelper.makeResponse(CardApplicationStartSessionResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -367,11 +370,11 @@ public class TinySAL implements SAL {
      * The CardApplicationEndSession function closes the session between the client application and the card application.
      * See BSI-TR-03112-4, version 1.1.2, section 3.2.4.
      *
-     * @param cardApplicationEndSession CardApplicationEndSession
+     * @param request CardApplicationEndSession
      * @return CardApplicationEndSessionResponse
      */
     @Override
-    public CardApplicationEndSessionResponse cardApplicationEndSession(CardApplicationEndSession cardApplicationEndSession) {
+    public CardApplicationEndSessionResponse cardApplicationEndSession(CardApplicationEndSession request) {
 	return WSHelper.makeResponse(CardApplicationEndSessionResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -379,15 +382,15 @@ public class TinySAL implements SAL {
      * The CardApplicationList function returns a list of the available card applications on an eCard.
      * See BSI-TR-03112-4, version 1.1.2, section 3.3.1.
      *
-     * @param cardApplicationList CardApplicationList
+     * @param request CardApplicationList
      * @return CardApplicationListResponse
      */
     @Override
-    public CardApplicationListResponse cardApplicationList(CardApplicationList cardApplicationList) {
+    public CardApplicationListResponse cardApplicationList(CardApplicationList request) {
 	CardApplicationListResponse response = WSHelper.makeResponse(CardApplicationListResponse.class, WSHelper.makeResultOK());
 
 	try {
-	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(cardApplicationList);
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
@@ -401,6 +404,7 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -411,11 +415,11 @@ public class TinySAL implements SAL {
      * A new card application is created on an eCard with the CardApplicationCreate function.
      * See BSI-TR-03112-4, version 1.1.2, section 3.3.2.
      *
-     * @param cardApplicationCreate CardApplicationCreate
+     * @param request CardApplicationCreate
      * @return CardApplicationCreateResponse
      */
     @Override
-    public CardApplicationCreateResponse cardApplicationCreate(CardApplicationCreate cardApplicationCreate) {
+    public CardApplicationCreateResponse cardApplicationCreate(CardApplicationCreate request) {
 	return WSHelper.makeResponse(CardApplicationCreateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -424,11 +428,11 @@ public class TinySAL implements SAL {
      * data sets, DSIs, DIDs and services.
      * See BSI-TR-03112-4, version 1.1.2, section 3.3.3.
      *
-     * @param cardApplicationDelete CardApplicationDelete
+     * @param request CardApplicationDelete
      * @return CardApplicationDeleteResponse
      */
     @Override
-    public CardApplicationDeleteResponse cardApplicationDelete(CardApplicationDelete cardApplicationDelete) {
+    public CardApplicationDeleteResponse cardApplicationDelete(CardApplicationDelete request) {
 	return WSHelper.makeResponse(CardApplicationDeleteResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -436,11 +440,11 @@ public class TinySAL implements SAL {
      * The CardApplicationServiceList function returns a list of all avail-able services of a card application.
      * See BSI-TR-03112-4, version 1.1.2, section 3.3.4.
      *
-     * @param cardApplicationServiceList CardApplicationServiceList
+     * @param request CardApplicationServiceList
      * @return CardApplicationServiceListResponse
      */
     @Override
-    public CardApplicationServiceListResponse cardApplicationServiceList(CardApplicationServiceList cardApplicationServiceList) {
+    public CardApplicationServiceListResponse cardApplicationServiceList(CardApplicationServiceList request) {
 	return WSHelper.makeResponse(CardApplicationServiceListResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -448,11 +452,11 @@ public class TinySAL implements SAL {
      * The CardApplicationServiceCreate function creates a new service in the card application.
      * See BSI-TR-03112-4, version 1.1.2, section 3.3.5.
      *
-     * @param cardApplicationServiceCreate CardApplicationServiceCreate
+     * @param request CardApplicationServiceCreate
      * @return CardApplicationServiceCreateResponse
      */
     @Override
-    public CardApplicationServiceCreateResponse cardApplicationServiceCreate(CardApplicationServiceCreate cardApplicationServiceCreate) {
+    public CardApplicationServiceCreateResponse cardApplicationServiceCreate(CardApplicationServiceCreate request) {
 	return WSHelper.makeResponse(CardApplicationServiceCreateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -461,11 +465,11 @@ public class TinySAL implements SAL {
      * of the CardApplicationServiceLoad function.
      * See BSI-TR-03112-4, version 1.1.2, section 3.3.6.
      *
-     * @param cardApplicationServiceLoad CardApplicationServiceLoad
+     * @param request CardApplicationServiceLoad
      * @return CardApplicationServiceLoadResponse
      */
     @Override
-    public CardApplicationServiceLoadResponse cardApplicationServiceLoad(CardApplicationServiceLoad cardApplicationServiceLoad) {
+    public CardApplicationServiceLoadResponse cardApplicationServiceLoad(CardApplicationServiceLoad request) {
 	return WSHelper.makeResponse(CardApplicationServiceLoadResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -473,11 +477,11 @@ public class TinySAL implements SAL {
      * The CardApplicationServiceDelete function deletes a card application service in a card application.
      * See BSI-TR-03112-4, version 1.1.2, section 3.3.7.
      *
-     * @param cardApplicationServiceDelete CardApplicationServiceDelete
+     * @param request CardApplicationServiceDelete
      * @return CardApplicationServiceDeleteResponse
      */
     @Override
-    public CardApplicationServiceDeleteResponse cardApplicationServiceDelete(CardApplicationServiceDelete cardApplicationServiceDelete) {
+    public CardApplicationServiceDeleteResponse cardApplicationServiceDelete(CardApplicationServiceDelete request) {
 	return WSHelper.makeResponse(CardApplicationServiceDeleteResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -486,11 +490,11 @@ public class TinySAL implements SAL {
      * of the selected card application service.
      * See BSI-TR-03112-4, version 1.1.2, section 3.3.8.
      *
-     * @param cardApplicationServiceDescribe CardApplicationServiceDescribe
+     * @param request CardApplicationServiceDescribe
      * @return CardApplicationServiceDescribeResponse
      */
     @Override
-    public CardApplicationServiceDescribeResponse cardApplicationServiceDescribe(CardApplicationServiceDescribe cardApplicationServiceDescribe) {
+    public CardApplicationServiceDescribeResponse cardApplicationServiceDescribe(CardApplicationServiceDescribe request) {
 	return WSHelper.makeResponse(CardApplicationServiceDescribeResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -499,11 +503,11 @@ public class TinySAL implements SAL {
      * which are not explicitly specified in [ISO24727-3] but which can be implemented by the eCard with additional code.
      * See BSI-TR-03112-4, version 1.1.2, section 3.3.9.
      *
-     * @param excuteAction ExecuteAction
+     * @param request ExecuteAction
      * @return ExecuteActionResponse
      */
     @Override
-    public ExecuteActionResponse executeAction(ExecuteAction excuteAction) {
+    public ExecuteActionResponse executeAction(ExecuteAction request) {
 	return WSHelper.makeResponse(ExecuteActionResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -511,18 +515,18 @@ public class TinySAL implements SAL {
      * The DataSetList function returns the list of the data sets in the card application addressed with the ConnectionHandle.
      * See BSI-TR-03112-4, version 1.1.2, section 3.4.1.
      *
-     * @param dataSetList DataSetList
+     * @param request DataSetList
      * @return DataSetListResponse
      */
     @Override
-    public DataSetListResponse dataSetList(DataSetList dataSetList) {
+    public DataSetListResponse dataSetList(DataSetList request) {
 	DataSetListResponse response = WSHelper.makeResponse(DataSetListResponse.class, WSHelper.makeResultOK());
 
 	try {
-	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(dataSetList);
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
-
+	    
 	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID, NamedDataServiceActionName.DATA_SET_LIST);
 
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
@@ -532,6 +536,7 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -543,11 +548,11 @@ public class TinySAL implements SAL {
      * ConnectionHandle (or otherwise in a previously selected data set if this is implemented as a DF).
      * See BSI-TR-03112-4, version 1.1.2, section 3.4.2.
      *
-     * @param dataSetCreate DataSetCreate
+     * @param request DataSetCreate
      * @return DataSetCreateResponse
      */
     @Override
-    public DataSetCreateResponse dataSetCreate(DataSetCreate dataSetCreate) {
+    public DataSetCreateResponse dataSetCreate(DataSetCreate request) {
 	return WSHelper.makeResponse(DataSetCreateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -555,21 +560,20 @@ public class TinySAL implements SAL {
      * The DataSetSelect function selects a data set in a card application.
      * See BSI-TR-03112-4, version 1.1.2, section 3.4.3.
      *
-     * @param dataSetSelect DataSetSelect
+     * @param request DataSetSelect
      * @return DataSetSelectResponse
      */
     @Override
-    public DataSetSelectResponse dataSetSelect(DataSetSelect dataSetSelect) {
+    public DataSetSelectResponse dataSetSelect(DataSetSelect request) {
 	DataSetSelectResponse response = WSHelper.makeResponse(DataSetSelectResponse.class, WSHelper.makeResultOK());
 
 	try {
-	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(dataSetSelect);
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-
-	    String dataSetName = dataSetSelect.getDataSetName();
-	    Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
-
 	    byte[] applicationID = connectionHandle.getCardApplication();
+	    String dataSetName = request.getDataSetName();
+	    
+	    Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
 	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dataSetName, NamedDataServiceActionName.DATA_SET_SELECT);
 
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
@@ -583,6 +587,7 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -593,11 +598,11 @@ public class TinySAL implements SAL {
      * The DataSetDelete function deletes a data set of a card application on an eCard.
      * See BSI-TR-03112-4, version 1.1.2, section 3.4.4.
      *
-     * @param dataSetDelete DataSetDelete
+     * @param request DataSetDelete
      * @return DataSetDeleteResponse
      */
     @Override
-    public DataSetDeleteResponse dataSetDelete(DataSetDelete dataSetDelete) {
+    public DataSetDeleteResponse dataSetDelete(DataSetDelete request) {
 	return WSHelper.makeResponse(DataSetDeleteResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -605,11 +610,11 @@ public class TinySAL implements SAL {
      * The function DSIList supplies the list of the DSI (Data Structure for Interoperability) which exist in the selected data set.
      * See BSI-TR-03112-4, version 1.1.2, section 3.4.5.
      *
-     * @param didList DSIList
+     * @param request DSIList
      * @return DSIListResponse
      */
     @Override
-    public DSIListResponse dsiList(DSIList didList) {
+    public DSIListResponse dsiList(DSIList request) {
 	return WSHelper.makeResponse(DSIListResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -617,11 +622,11 @@ public class TinySAL implements SAL {
      * The DSICreate function creates a DSI (Data Structure for Interoperability) in the currently selected data set.
      * See BSI-TR-03112-4, version 1.1.2, section 3.4.6.
      *
-     * @param didCreate DSICreate
+     * @param request DSICreate
      * @return DSICreateResponse
      */
     @Override
-    public DSICreateResponse dsiCreate(DSICreate didCreate) {
+    public DSICreateResponse dsiCreate(DSICreate request) {
 	return WSHelper.makeResponse(DSICreateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -629,11 +634,11 @@ public class TinySAL implements SAL {
      * The DSIDelete function deletes a DSI (Data Structure for Interoperability) in the currently selected data set.
      * See BSI-TR-03112-4, version 1.1.2, section 3.4.7.
      *
-     * @param didDelete DSIDelete
+     * @param request DSIDelete
      * @return DSIDeleteResponse
      */
     @Override
-    public DSIDeleteResponse dsiDelete(DSIDelete didDelete) {
+    public DSIDeleteResponse dsiDelete(DSIDelete request) {
 	return WSHelper.makeResponse(DSIDeleteResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -641,11 +646,11 @@ public class TinySAL implements SAL {
      * The DSIWrite function changes the content of a DSI (Data Structure for Interoperability).
      * See BSI-TR-03112-4, version 1.1.2, section 3.4.8.
      *
-     * @param didWrite DSIWrite
+     * @param request DSIWrite
      * @return DSIWriteResponse
      */
     @Override
-    public DSIWriteResponse dsiWrite(DSIWrite didWrite) {
+    public DSIWriteResponse dsiWrite(DSIWrite request) {
 	return WSHelper.makeResponse(DSIWriteResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -653,21 +658,20 @@ public class TinySAL implements SAL {
      * The DSIRead function reads out the content of a specific DSI (Data Structure for Interoperability).
      * See BSI-TR-03112-4, version 1.1.2, section 3.4.9.
      *
-     * @param dsiRead DSIRead
+     * @param request DSIRead
      * @return DSIReadResponse
      */
     @Override
-    public DSIReadResponse dsiRead(DSIRead dsiRead) {
+    public DSIReadResponse dsiRead(DSIRead request) {
 	DSIReadResponse response = WSHelper.makeResponse(DSIReadResponse.class, WSHelper.makeResultOK());
 
 	try {
-	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(dsiRead);
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-
-	    String dsiName = dsiRead.getDSIName();
-	    Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
-
 	    byte[] applicationID = connectionHandle.getCardApplication();
+	    String dsiName = request.getDSIName();
+
+	    Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
 	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dsiName, NamedDataServiceActionName.DSI_READ);
 
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
@@ -682,6 +686,7 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -693,36 +698,37 @@ public class TinySAL implements SAL {
      * the protocol of the DID.
      * See BSI-TR-03112-4, version 1.1.2, section 3.5.1.
      *
-     * @param encipher Encipher
+     * @param request Encipher
      * @return EncipherResponse
      */
     @Override
-    public EncipherResponse encipher(Encipher encipher) {
+    public EncipherResponse encipher(Encipher request) {
 	EncipherResponse response = WSHelper.makeResponse(EncipherResponse.class, WSHelper.makeResultOK());
 
 	try {
-	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(encipher);
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    String didName = SALUtils.getDIDName(encipher);
-
-	    byte[] plainText = encipher.getPlainText();
-	    Assert.assertIncorrectParameter(plainText, "The parameter PlainText is empty.");
-
 	    byte[] applicationID = connectionHandle.getCardApplication();
+	    String didName = SALUtils.getDIDName(request);
+
+	    byte[] plainText = request.getPlainText();
+	    Assert.assertIncorrectParameter(plainText, "The parameter PlainText is empty.");
+	    
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    Protocol protocol = getProtocol(connectionHandle, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.Encipher)) {
-		response = protocol.encipher(encipher);
+		response = protocol.encipher(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
 	    } else {
-		throw new UnknownProtocolException("Encipher", protocol.toString());
+		throw new InappropriateProtocolForActionException("Encipher", protocol.toString());
 	    }
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -734,36 +740,37 @@ public class TinySAL implements SAL {
      * the protocol of the DID.
      * See BSI-TR-03112-4, version 1.1.2, section 3.5.2.
      *
-     * @param decipher Decipher
+     * @param request Decipher
      * @return DecipherResponse
      */
     @Override
-    public DecipherResponse decipher(Decipher decipher) {
+    public DecipherResponse decipher(Decipher request) {
 	DecipherResponse response = WSHelper.makeResponse(DecipherResponse.class, WSHelper.makeResultOK());
 
 	try {
-	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(decipher);
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    String didName = SALUtils.getDIDName(decipher);
-
-	    byte[] cipherText = decipher.getCipherText();
-	    Assert.assertIncorrectParameter(cipherText, "The parameter CipherText is empty.");
-
 	    byte[] applicationID = connectionHandle.getCardApplication();
+	    String didName = SALUtils.getDIDName(request);
+
+	    byte[] cipherText = request.getCipherText();
+	    Assert.assertIncorrectParameter(cipherText, "The parameter CipherText is empty.");
+	    
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    Protocol protocol = getProtocol(connectionHandle, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.Decipher)) {
-		response = protocol.decipher(decipher);
+		response = protocol.decipher(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
 	    } else {
-		throw new UnknownProtocolException("Decipher", protocol.toString());
+		throw new InappropriateProtocolForActionException("Decipher", protocol.toString());
 	    }
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -774,11 +781,11 @@ public class TinySAL implements SAL {
      * The GetRandom function returns a random number which is suitable for authentication with the DID addressed with DIDName.
      * See BSI-TR-03112-4, version 1.1.2, section 3.5.3.
      *
-     * @param getRandom GetRandom
+     * @param request GetRandom
      * @return GetRandomResponse
      */
     @Override
-    public GetRandomResponse getRandom(GetRandom getRandom) {
+    public GetRandomResponse getRandom(GetRandom request) {
 	return WSHelper.makeResponse(GetRandomResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -786,11 +793,11 @@ public class TinySAL implements SAL {
      * The Hash function calculates the hash value of a transmitted message.
      * See BSI-TR-03112-4, version 1.1.2, section 3.5.4.
      *
-     * @param hash Hash
+     * @param request Hash
      * @return HashResponse
      */
     @Override
-    public HashResponse hash(Hash hash) {
+    public HashResponse hash(Hash request) {
 	return WSHelper.makeResponse(HashResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -798,36 +805,37 @@ public class TinySAL implements SAL {
      * The Sign function signs a transmitted message.
      * See BSI-TR-03112-4, version 1.1.2, section 3.5.5.
      *
-     * @param sign Sign
+     * @param request Sign
      * @return SignResponse
      */
     @Override
-    public SignResponse sign(Sign sign) {
+    public SignResponse sign(Sign request) {
 	SignResponse response = WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultOK());
 
 	try {
-	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(sign);
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    String didName = SALUtils.getDIDName(sign);
-
-	    byte[] message = sign.getMessage();
-	    Assert.assertIncorrectParameter(message, "The parameter Message is empty.");
-
 	    byte[] applicationID = connectionHandle.getCardApplication();
+	    String didName = SALUtils.getDIDName(request);
+
+	    byte[] message = request.getMessage();
+	    Assert.assertIncorrectParameter(message, "The parameter Message is empty.");
+	    
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    Protocol protocol = getProtocol(connectionHandle, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.Sign)) {
-		response = protocol.sign(sign);
+		response = protocol.sign(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
 	    } else {
-		throw new UnknownProtocolException("Sign", protocol.toString());
+		throw new InappropriateProtocolForActionException("Sign", protocol.toString());
 	    }
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -838,11 +846,11 @@ public class TinySAL implements SAL {
      * The VerifySignature function verifies a digital signature.
      * See BSI-TR-03112-4, version 1.1.2, section 3.5.6.
      *
-     * @param verifySignature VerifySignature
+     * @param request VerifySignature
      * @return VerifySignatureResponse
      */
     @Override
-    public VerifySignatureResponse verifySignature(VerifySignature verifySignature) {
+    public VerifySignatureResponse verifySignature(VerifySignature request) {
 	return WSHelper.makeResponse(VerifySignatureResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -850,11 +858,11 @@ public class TinySAL implements SAL {
      * The VerifyCertificate function validates a given certificate.
      * See BSI-TR-03112-4, version 1.1.2, section 3.5.7.
      *
-     * @param verifyCretificate VerifyCertificate
+     * @param request VerifyCertificate
      * @return VerifyCertificateResponse
      */
     @Override
-    public VerifyCertificateResponse verifyCertificate(VerifyCertificate verifyCretificate) {
+    public VerifyCertificateResponse verifyCertificate(VerifyCertificate request) {
 	return WSHelper.makeResponse(VerifyCertificateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -863,25 +871,25 @@ public class TinySAL implements SAL {
      * ConnectionHandle or the ApplicationIdentifier element within the Filter.
      * See BSI-TR-03112-4, version 1.1.2, section 3.6.1.
      *
-     * @param didList DIDList
+     * @param request DIDList
      * @return DIDListResponse
      */
     @Override
-    public DIDListResponse didList(DIDList didList) {
+    public DIDListResponse didList(DIDList request) {
 	DIDListResponse response = WSHelper.makeResponse(DIDListResponse.class, WSHelper.makeResultOK());
 
 	try {
-	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(didList);
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-
 	    byte[] applicationID = connectionHandle.getCardApplication();
+	    
 	    Assert.securityConditionApplication(cardStateEntry, applicationID, DifferentialIdentityServiceActionName.DID_LIST);
 
 	    byte[] applicationIDFilter = null;
 	    String objectIDFilter = null;
 	    String applicationFunctionFilter = null;
 
-	    DIDQualifierType didQualifier = didList.getFilter();
+	    DIDQualifierType didQualifier = request.getFilter();
 	    if (didQualifier != null) {
 		applicationIDFilter = didQualifier.getApplicationIdentifier();
 		objectIDFilter = didQualifier.getObjectIdentifier();
@@ -948,6 +956,7 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -958,11 +967,11 @@ public class TinySAL implements SAL {
      * The DIDCreate function creates a new differential identity in the card application addressed with ConnectionHandle.
      * See BSI-TR-03112-4, version 1.1.2, section 3.6.2.
      *
-     * @param didCreate DIDCreate
+     * @param request DIDCreate
      * @return DIDCreateResponse
      */
     @Override
-    public DIDCreateResponse didCreate(DIDCreate didCreate) {
+    public DIDCreateResponse didCreate(DIDCreate request) {
 	return WSHelper.makeResponse(DIDCreateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -970,38 +979,31 @@ public class TinySAL implements SAL {
      * The public information for a DID is read with the DIDGet function.
      * See BSI-TR-03112-4, version 1.1.2, section 3.6.3.
      *
-     * @param didGet DIDGet
+     * @param request DIDGet
      * @return DIDGetResponse
      */
     @Override
-    public DIDGetResponse didGet(DIDGet didGet) {
+    public DIDGetResponse didGet(DIDGet request) {
 	DIDGetResponse response = WSHelper.makeResponse(DIDGetResponse.class, WSHelper.makeResultOK());
 
 	try {
-	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(didGet);
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    String didName = SALUtils.getDIDName(didGet);
-
-	    DIDStructureType didStructure;
-	    if (didGet.getDIDScope() != null && didGet.getDIDScope().equals(DIDScopeType.GLOBAL)) {
-		didStructure = cardStateEntry.getDIDStructure(didName, cardStateEntry.getImplicitlySelectedApplicationIdentifier());
-	    } else {
-		didStructure = cardStateEntry.getDIDStructure(didName, connectionHandle.getCardApplication());
-	    }
-
-	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+	    String didName = SALUtils.getDIDName(request);
+	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, cardStateEntry, connectionHandle);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    Protocol protocol = getProtocol(connectionHandle, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.DIDGet)) {
-		response = protocol.didGet(didGet);
+		response = protocol.didGet(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
 	    } else {
-		throw new UnknownProtocolException("DIDGet", protocol.toString());
+		throw new InappropriateProtocolForActionException("DIDGet", protocol.toString());
 	    }
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1012,11 +1014,11 @@ public class TinySAL implements SAL {
      * The DIDUpdate function creates a new key (marker) for the DID addressed with DIDName.
      * See BSI-TR-03112-4, version 1.1.2, section 3.6.4.
      *
-     * @param didUpdate DIDUpdate
+     * @param request DIDUpdate
      * @return DIDUpdateResponse
      */
     @Override
-    public DIDUpdateResponse didUpdate(DIDUpdate didUpdate) {
+    public DIDUpdateResponse didUpdate(DIDUpdate request) {
 	return WSHelper.makeResponse(DIDUpdateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -1024,11 +1026,11 @@ public class TinySAL implements SAL {
      * The DIDDelete function deletes the DID addressed with DIDName.
      * See BSI-TR-03112-4, version 1.1.2, section 3.6.5.
      *
-     * @param didDelete DIDDelete
+     * @param request DIDDelete
      * @return DIDDeleteResponse
      */
     @Override
-    public DIDDeleteResponse didDelete(DIDDelete didDelete) {
+    public DIDDeleteResponse didDelete(DIDDelete request) {
 	return WSHelper.makeResponse(DIDDeleteResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
@@ -1036,21 +1038,20 @@ public class TinySAL implements SAL {
      * The DIDAuthenticate function can be used to execute an authentication protocol using a DID addressed by DIDName.
      * See BSI-TR-03112-4, version 1.1.2, section 3.6.6.
      *
-     * @param didAuthenticate DIDAuthenticate
+     * @param request DIDAuthenticate
      * @return DIDAuthenticateResponse
      */
     @Override
-    public DIDAuthenticateResponse didAuthenticate(DIDAuthenticate didAuthenticate) {
+    public DIDAuthenticateResponse didAuthenticate(DIDAuthenticate request) {
 	DIDAuthenticateResponse response = WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultOK());
 
 	try {
-	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(didAuthenticate);
-
-	    DIDAuthenticationDataType didAuthenticationData = didAuthenticate.getAuthenticationProtocolData();
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    DIDAuthenticationDataType didAuthenticationData = request.getAuthenticationProtocolData();
 	    Assert.assertIncorrectParameter(didAuthenticationData, "The parameter AuthenticationProtocolData is empty.");
 
-	    String protocolURI = didAuthenticate.getAuthenticationProtocolData().getProtocol();
-	    //FIXME workaround for missing protoUri from eID-Servers
+	    String protocolURI = request.getAuthenticationProtocolData().getProtocol();
+	    //FIXME workaround for missing protocol URI from eID-Servers
 	    if (protocolURI == null) {
 		logger.warn("ProtocolURI was null");
 		protocolURI = ECardConstants.Protocol.EAC;
@@ -1061,14 +1062,15 @@ public class TinySAL implements SAL {
 
 	    Protocol protocol = getProtocol(connectionHandle, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.DIDAuthenticate)) {
-		response = protocol.didAuthenticate(didAuthenticate);
+		response = protocol.didAuthenticate(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
 	    } else {
-		throw new UnknownProtocolException("DIDAuthenticate", protocol.toString());
+		throw new InappropriateProtocolForActionException("DIDAuthenticate", protocol.toString());
 	    }
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1079,18 +1081,18 @@ public class TinySAL implements SAL {
      * The ACLList function returns the access control list for the stated target object (card application, data set, DID).
      * See BSI-TR-03112-4, version 1.1.2, section 3.7.1.
      *
-     * @param aclList ACLList
+     * @param request ACLList
      * @return ACLListResponse
      */
     @Override
-    public ACLListResponse aclList(ACLList aclList) {
+    public ACLListResponse aclList(ACLList request) {
 	ACLListResponse response = WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultOK());
 
 	try {
-	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(aclList);
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 
-	    TargetNameType targetName = aclList.getTargetName();
+	    TargetNameType targetName = request.getTargetName();
 	    Assert.assertIncorrectParameter(targetName, "The parameter TargetName is empty.");
 
 	    String dataSetName = targetName.getDataSetName();
@@ -1121,6 +1123,7 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1131,11 +1134,11 @@ public class TinySAL implements SAL {
      * An access rule in the access control list is modified with the ACLModify function.
      * See BSI-TR-03112-4, version 1.1.2, section 3.7.2.
      *
-     * @param aclModify ACLModify
+     * @param request ACLModify
      * @return ACLModifyResponse
      */
     @Override
-    public ACLModifyResponse aclModify(ACLModify aclModify) {
+    public ACLModifyResponse aclModify(ACLModify request) {
 	return WSHelper.makeResponse(ACLModifyResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 

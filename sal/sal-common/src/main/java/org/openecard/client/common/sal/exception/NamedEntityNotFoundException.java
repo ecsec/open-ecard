@@ -25,6 +25,7 @@ package org.openecard.client.common.sal.exception;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.ECardException;
 
+
 /**
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>

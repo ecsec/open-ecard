@@ -28,6 +28,7 @@ import org.openecard.client.common.sal.exception.NamedEntityNotFoundException;
 import org.openecard.client.common.sal.exception.SecurityConditionNotSatisfiedException;
 import org.openecard.client.common.sal.state.CardStateEntry;
 
+
 /**
  * Assertion convenience class for the SAL.
  * 

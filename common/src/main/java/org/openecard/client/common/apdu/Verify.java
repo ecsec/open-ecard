@@ -39,10 +39,21 @@ public class Verify extends CardCommandAPDU {
 
     /**
      * Creates a new VERIFY APDU.
+     *
+     * @param p2 Parameter p2.
      */
-//    public Verify(byte p1, byte p2, byte[] data) {
-//        super(x00, VERIFY_INS, p1, p2);
-//        setData(data);
-//    }
+    public Verify(byte p2) {
+	super(x00, VERIFY_INS_1, x00, p2);
+    }
 
+    /**
+     * Creates a new VERIFY APDU.
+     *
+     * @param p2 Parameter p2.
+     * @param data Verification data
+     */
+    public Verify(byte p2, byte[] data) {
+	super(x00, VERIFY_INS_1, x00, p2);
+	setData(data);
+    }
 }

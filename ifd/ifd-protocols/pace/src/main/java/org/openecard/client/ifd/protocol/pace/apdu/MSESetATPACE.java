@@ -23,7 +23,7 @@
 package org.openecard.client.ifd.protocol.pace.apdu;
 
 import java.io.IOException;
-import org.openecard.client.common.apdu.ManageSecurityEnviroment;
+import org.openecard.client.common.apdu.ManageSecurityEnvironment;
 import org.openecard.client.common.apdu.common.CardAPDUOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public final class MSESetATPACE extends ManageSecurityEnviroment {
+public final class MSESetATPACE extends ManageSecurityEnvironment.Set {
 
     private static final Logger logger = LoggerFactory.getLogger(MSESetATPACE.class);
 
@@ -44,7 +44,7 @@ public final class MSESetATPACE extends ManageSecurityEnviroment {
      * Creates a new MSE:Set AT APDU for PACE.
      */
     public MSESetATPACE() {
-	super((byte) 0xC1, (byte) 0xA4);
+	super((byte) 0xC1, AT);
     }
 
     /**
@@ -65,7 +65,7 @@ public final class MSESetATPACE extends ManageSecurityEnviroment {
      * @param chat Certificate Holder Authentication Template
      */
     public MSESetATPACE(byte[] oID, byte passwordID, byte[] chat) {
-	super((byte) 0xC1, (byte) 0xA4);
+	super((byte) 0xC1, AT);
 
 	CardAPDUOutputStream caos = new CardAPDUOutputStream();
 	try {

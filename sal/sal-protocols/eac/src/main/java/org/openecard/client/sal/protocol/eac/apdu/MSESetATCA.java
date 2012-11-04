@@ -22,7 +22,7 @@
 package org.openecard.client.sal.protocol.eac.apdu;
 
 import java.io.IOException;
-import org.openecard.client.common.apdu.ManageSecurityEnviroment;
+import org.openecard.client.common.apdu.ManageSecurityEnvironment;
 import org.openecard.client.common.apdu.common.CardAPDUOutputStream;
 import org.openecard.client.common.util.ByteUtils;
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class MSESetATCA extends ManageSecurityEnviroment {
+public class MSESetATCA extends ManageSecurityEnvironment {
 
     private static final Logger logger = LoggerFactory.getLogger(MSESetATCA.class);
 
@@ -44,7 +44,7 @@ public class MSESetATCA extends ManageSecurityEnviroment {
      * Creates a MSE:Set AT APDU for Chip Authentication.
      */
     public MSESetATCA() {
-	super((byte) 0x41, (byte) 0xA4);
+	super((byte) 0x41, AT);
     }
 
     /**
@@ -63,7 +63,7 @@ public class MSESetATCA extends ManageSecurityEnviroment {
      * @param keyID Reference of a private key
      */
     public MSESetATCA(byte[] oID, byte[] keyID) {
-	super((byte) 0x41, (byte) 0xA4);
+	super((byte) 0x41, AT);
 
 	CardAPDUOutputStream caos = new CardAPDUOutputStream();
 	try {

@@ -23,7 +23,7 @@
 package org.openecard.client.sal.protocol.eac.apdu;
 
 import java.io.IOException;
-import org.openecard.client.common.apdu.ManageSecurityEnviroment;
+import org.openecard.client.common.apdu.ManageSecurityEnvironment;
 import org.openecard.client.common.apdu.common.CardAPDUOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class MSESetATTA extends ManageSecurityEnviroment {
+public class MSESetATTA extends ManageSecurityEnvironment {
 
     private static final Logger logger = LoggerFactory.getLogger(MSESetATTA.class);
     
@@ -44,7 +44,7 @@ public class MSESetATTA extends ManageSecurityEnviroment {
      * Creates a new MSE:Set AT for Terminal Authentication.
      */
     public MSESetATTA() {
-	super((byte) 0x81, (byte) 0xA4);
+	super((byte) 0x81, AT);
     }
 
     /**
@@ -56,7 +56,7 @@ public class MSESetATTA extends ManageSecurityEnviroment {
      * @param aad Auxiliary Data Verification
      */
     public MSESetATTA(byte[] oID, byte[] chr, byte[] pkPCD, byte[] aad) {
-	super((byte) 0x81, (byte) 0xA4);
+	super((byte) 0x81, AT);
 
 	CardAPDUOutputStream caos = new CardAPDUOutputStream();
 	try {

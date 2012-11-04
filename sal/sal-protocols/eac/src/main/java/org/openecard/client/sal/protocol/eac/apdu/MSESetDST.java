@@ -23,7 +23,7 @@
 package org.openecard.client.sal.protocol.eac.apdu;
 
 import java.io.IOException;
-import org.openecard.client.common.apdu.ManageSecurityEnviroment;
+import org.openecard.client.common.apdu.ManageSecurityEnvironment;
 import org.openecard.client.common.apdu.common.CardAPDUOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class MSESetDST extends ManageSecurityEnviroment {
+public class MSESetDST extends ManageSecurityEnvironment {
 
     private static final Logger logger = LoggerFactory.getLogger(MSESetATCA.class);
     
@@ -43,7 +43,7 @@ public class MSESetDST extends ManageSecurityEnviroment {
      * Creates a new MSE:Set DST APDU.
      */
     public MSESetDST() {
-	super((byte) 0x81, (byte) 0xB6);
+	super((byte) 0x81, DST);
     }
 
     /**
@@ -52,7 +52,7 @@ public class MSESetDST extends ManageSecurityEnviroment {
      * @param chr Certificate Holder Reference
      */
     public MSESetDST(byte[] chr) {
-	super((byte) 0x81, (byte) 0xB6);
+	super((byte) 0x81, DST);
 
 	CardAPDUOutputStream caos = new CardAPDUOutputStream();
 	try {

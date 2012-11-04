@@ -45,4 +45,14 @@ public class PerformSecurityOperation extends CardCommandAPDU {
 	super(x00, PERFORM_SECURITY_OPERATION_INS, x00, x00);
     }
 
+    /**
+     * Creates a new PERFORM SECURITY OPERATION APDU.
+     *
+     * @param p1 Parameter byte P1
+     * @param p2 Parameter byte P2
+     */
+    public PerformSecurityOperation(byte p1, byte p2) {
+	super(x00, PERFORM_SECURITY_OPERATION_INS, p1, p2);
+    }
+
 }

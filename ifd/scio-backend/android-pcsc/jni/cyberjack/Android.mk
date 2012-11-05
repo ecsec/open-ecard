@@ -41,10 +41,10 @@ LOCAL_STATIC_LIBRARIES += libusb
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/cjeca32/ausb \
-	$(LOCAL_PATH)/../libusbx-1.0.12/libusb \
+	$(LOCAL_PATH)/../libusbx/libusb \
 	$(LOCAL_PATH)/include/driver \
-	$(LOCAL_PATH)/../pcsc-lite-1.7.4/src \
-	$(LOCAL_PATH)/../pcsc-lite-1.7.4/src/PCSC \
+	$(LOCAL_PATH)/../pcsc-lite/src \
+	$(LOCAL_PATH)/../pcsc-lite/src/PCSC \
 	$(LOCAL_PATH)/cjeca32 \
 	$(LOCAL_PATH)/include/firmware
 

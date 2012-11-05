@@ -26,7 +26,7 @@ src/sd-daemon.c
 LOCAL_C_INCLUDES += \
 $(LOCAL_PATH)/src/ \
 $(LOCAL_PATH)/src/PCSC/ \
-$(LOCAL_PATH)/../libusbx-1.0.12/libusb
+$(LOCAL_PATH)/../libusbx/libusb
 
 LOCAL_CFLAGS := -O2 -DHAVE_CONFIG_H -DHAVE_LIBUSB -DDISABLE_SYSTEMD
 
@@ -53,7 +53,7 @@ src/utils.c
 LOCAL_C_INCLUDES += \
 $(LOCAL_PATH)/src/ \
 $(LOCAL_PATH)/src/PCSC/ \
-$(LOCAL_PATH)/../libusb/libusb
+$(LOCAL_PATH)/../libusbx/libusb
 
 LOCAL_CFLAGS := -O2 -DHAVE_CONFIG_H -DHAVE_LIBUSB
 

@@ -22,8 +22,8 @@ LOCAL_STATIC_LIBRARIES += libusb
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/src \
-	$(LOCAL_PATH)/../libusbx-1.0.12/libusb \
-	$(LOCAL_PATH)/../pcsc-lite-1.7.4/src/PCSC 
+	$(LOCAL_PATH)/../libusbx/libusb \
+	$(LOCAL_PATH)/../pcsc-lite/src/PCSC 
 
 	LOCAL_CFLAGS += -O2 -DHAVE_CONFIG_H
 

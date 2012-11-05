@@ -41,7 +41,6 @@ import java.util.Enumeration;
 import java.util.List;
 import org.openecard.bouncycastle.asn1.x500.RDN;
 import org.openecard.bouncycastle.asn1.x500.style.BCStrictStyle;
-import org.openecard.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.client.crypto.tls.CertificateVerificationException;
 import org.openecard.client.crypto.tls.CertificateVerifier;
@@ -144,7 +143,7 @@ public class JavaSecVerifier implements CertificateVerifier {
     public void isValid(Certificate chain, String hostname) throws CertificateVerificationException {
 	// check hostname
 	if (hostname != null) {
-	    X509CertificateStructure cert = chain.getCerts()[0];
+	    org.openecard.bouncycastle.asn1.x509.Certificate cert = chain.getCerts()[0];
 	    RDN[] cn = cert.getSubject().getRDNs(BCStrictStyle.CN);
 	    if (cn.length != 1) {
 		throw new CertificateVerificationException("Multiple CN entries in certificate's Subject.");
@@ -181,7 +180,7 @@ public class JavaSecVerifier implements CertificateVerifier {
 	ArrayList<java.security.cert.Certificate> result = new ArrayList<java.security.cert.Certificate>(numCerts);
 	CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
-	for (X509CertificateStructure next : chain.getCerts()) {
+	for (org.openecard.bouncycastle.asn1.x509.Certificate next : chain.getCerts()) {
 	    byte[] nextData = next.getEncoded();
 	    ByteArrayInputStream nextDataStream = new ByteArrayInputStream(nextData);
 	    java.security.cert.Certificate nextConverted = cf.generateCertificate(nextDataStream);

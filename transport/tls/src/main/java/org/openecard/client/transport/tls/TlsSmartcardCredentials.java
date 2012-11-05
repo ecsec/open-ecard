@@ -24,8 +24,6 @@ package org.openecard.client.transport.tls;
 
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.io.IOException;
-import org.openecard.bouncycastle.asn1.ASN1Sequence;
-import org.openecard.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.TlsSignerCredentials;
 import org.openecard.client.common.WSHelper;
@@ -64,7 +62,7 @@ public class TlsSmartcardCredentials implements TlsSignerCredentials {
      */
     @Override
     public Certificate getCertificate() {
-	Certificate cert = null;
+	Certificate cert;
 	try {
 	    // get the specified did
 	    DIDGet didGet = new DIDGet();
@@ -91,9 +89,10 @@ public class TlsSmartcardCredentials implements TlsSignerCredentials {
 	    WSHelper.checkResult(dsiReadResponse);
 
 	    // convert to bouncycastle certificate
-	    ASN1Sequence asn1Sequence = ASN1Sequence.getInstance(dsiReadResponse.getDSIContent());
-	    X509CertificateStructure[] x509CertificateStructure = { new X509CertificateStructure(asn1Sequence) };
-	    cert = new org.openecard.bouncycastle.crypto.tls.Certificate(x509CertificateStructure);
+	    byte[] dsiContent = dsiReadResponse.getDSIContent();
+	    org.openecard.bouncycastle.asn1.x509.Certificate[] certStruct = new org.openecard.bouncycastle.asn1.x509.Certificate[1];
+	    certStruct[0] = org.openecard.bouncycastle.asn1.x509.Certificate.getInstance(dsiContent);
+	    cert = new org.openecard.bouncycastle.crypto.tls.Certificate(certStruct);
 	} catch (Exception e) {
 	    _logger.warn(e.getMessage(), e);
 	    cert = Certificate.EMPTY_CHAIN;

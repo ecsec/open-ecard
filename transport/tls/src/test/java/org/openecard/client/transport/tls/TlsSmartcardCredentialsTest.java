@@ -22,8 +22,8 @@
 
 package org.openecard.client.transport.tls;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,10 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
-import org.openecard.bouncycastle.asn1.ASN1Sequence;
-import org.openecard.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
-import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
@@ -239,9 +236,10 @@ public class TlsSmartcardCredentialsTest {
 	WSHelper.checkResult(dsiReadResponse);
 
 	// convert to bouncycastle certificate
-	ASN1Sequence asn1Sequence = ASN1Sequence.getInstance(dsiReadResponse.getDSIContent());
-	X509CertificateStructure[] x509CertificateStructure = { new X509CertificateStructure(asn1Sequence) };
-	return new org.openecard.bouncycastle.crypto.tls.Certificate(x509CertificateStructure);
+	byte[] dsiContent = dsiReadResponse.getDSIContent();
+	org.openecard.bouncycastle.asn1.x509.Certificate[] certStruct = new org.openecard.bouncycastle.asn1.x509.Certificate[1];
+	certStruct[0] = org.openecard.bouncycastle.asn1.x509.Certificate.getInstance(dsiContent);
+	return new org.openecard.bouncycastle.crypto.tls.Certificate(certStruct);
     }
 
     private String showSelectCertificateDialog(List<Certificate> certificates, DIDListResponse didListResponse) {

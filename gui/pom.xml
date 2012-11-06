@@ -17,6 +17,7 @@
 
     <modules>
 	<module>about</module>
+	<module>graphics</module>
 	<module>gui-common</module>
 	<module>swing</module>
     </modules>

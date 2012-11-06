@@ -23,6 +23,8 @@
 package org.openecard.client.control.module.status;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import org.openecard.client.common.enums.EventType;
@@ -35,23 +37,43 @@ import org.openecard.ws.schema.StatusChange;
  * 
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class EventHandler implements EventCallback {
 
-    private final LinkedBlockingQueue<StatusChange> eventQueue;
+    private Map<String, LinkedBlockingQueue<StatusChange>> eventQueues;
+    private Map<String, ReschedulableTimer> timers;
+    // after this delay of inactivity an event queue (and it's timer) will be deleted
+    private static final int deleteDelay = 60 * 1000;
 
+    /**
+     * Create a new EventHandler.
+     * 
+     * @param eventManager
+     *            event manager to get events (status changes) from
+     */
     public EventHandler(EventManager eventManager) {
-	eventQueue = new LinkedBlockingQueue<StatusChange>();
+	eventQueues = new HashMap<String, LinkedBlockingQueue<StatusChange>>();
+	timers = new HashMap<String, ReschedulableTimer>();
 	eventManager.registerAllEvents(this);
     }
 
-    public StatusChange next() {
+    /**
+     * 
+     * @param statusChangeRequest
+     *            a status change request for a specific session
+     * @return a StatusChange containing the new status, or null if no eventQueue for the given session exists or if
+     *         interrupted
+     */
+    public StatusChange next(StatusChangeRequest statusChangeRequest) {
 	StatusChange handle = null;
-
+	LinkedBlockingQueue<StatusChange> queue = eventQueues.get(statusChangeRequest.getSessionIdentifier());
+	if (queue == null)
+	    return null;
 	do {
 	    try {
-		eventQueue.clear();
-		handle = eventQueue.poll(30, TimeUnit.SECONDS);
+		timers.get(statusChangeRequest.getSessionIdentifier()).reschedule(deleteDelay);
+		handle = eventQueues.get(statusChangeRequest.getSessionIdentifier()).poll(30, TimeUnit.SECONDS);
 	    } catch (InterruptedException ex) {
 		return null;
 	    }
@@ -64,13 +86,50 @@ public class EventHandler implements EventCallback {
     public void signalEvent(EventType eventType, Object eventData) {
 	if (eventData instanceof ConnectionHandleType) {
 	    try {
-		StatusChange statusChange = new StatusChange();
-		statusChange.setAction(eventType.getEventTypeIdentifier());
-		statusChange.setConnectionHandle((ConnectionHandleType) eventData);
+		ConnectionHandleType connectionHandle = (ConnectionHandleType) eventData;
+		String session = connectionHandle.getChannelHandle().getSessionIdentifier();
+		LinkedBlockingQueue<StatusChange> queue = eventQueues.get(session);
 
-		eventQueue.put(statusChange);
+		if (queue != null) {
+		    StatusChange statusChange = new StatusChange();
+		    statusChange.setAction(eventType.getEventTypeIdentifier());
+		    statusChange.setConnectionHandle(connectionHandle);
+		    queue.put(statusChange);
+		}
+
 	    } catch (InterruptedException ignore) {
 	    }
+	}
+    }
+
+    /**
+     * Adds a new EventQueue for a given session.
+     * 
+     * @param sessionIdentifier
+     *            session identifier
+     */
+    public void addQueue(final String sessionIdentifier) {
+	if (eventQueues.get(sessionIdentifier) == null) {
+	    eventQueues.put(sessionIdentifier, new LinkedBlockingQueue<StatusChange>());
+	    ReschedulableTimer timer = new ReschedulableTimer();
+	    timer.schedule(new DeleteTask(sessionIdentifier), deleteDelay);
+	    timers.put(sessionIdentifier, timer);
+	} else {
+	    timers.get(sessionIdentifier).reschedule(deleteDelay);
+	}
+    }
+
+    private final class DeleteTask implements Runnable {
+	private final String sessionIdentifier;
+
+	public DeleteTask(String sessionIdentifier) {
+	    this.sessionIdentifier = sessionIdentifier;
+	}
+
+	@Override
+	public void run() {
+	    eventQueues.remove(sessionIdentifier);
+	    timers.remove(sessionIdentifier);
 	}
     }
 

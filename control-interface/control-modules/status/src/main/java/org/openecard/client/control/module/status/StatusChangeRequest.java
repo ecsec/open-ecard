@@ -28,7 +28,26 @@ import org.openecard.client.control.client.ClientRequest;
 /**
  * 
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public final class StatusChangeRequest extends ClientRequest {
+
+    private final String sessionIdentifier;
+
+    /**
+     * Create a new StatusChangeReuquest.
+     * @param sessionIdentfier session identifier
+     */
+    public StatusChangeRequest(String sessionIdentfier) {
+	this.sessionIdentifier = sessionIdentfier;
+    }
+
+    /**
+     * Returns the session identifier.
+     * @return the session identifier
+     */
+    public String getSessionIdentifier() {
+	return sessionIdentifier;
+    }
 
 }

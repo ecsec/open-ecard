@@ -53,7 +53,7 @@ public class HttpWaitForChangeHandler extends HttpControlHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpWaitForChangeHandler.class);
     private final WSMarshaller m;
-    private GenericWaitForChangeHandler genericWaitForChangeHandler;
+    private final GenericWaitForChangeHandler genericWaitForChangeHandler;
 
     /**
      * Creates a new HttpWaitForChangeHandler.
@@ -84,11 +84,7 @@ public class HttpWaitForChangeHandler extends HttpControlHandler {
 	    if (requestLine.getMethod().equals("GET")) {
 		URI requestURI = URI.create(requestLine.getUri());
 
-		if (requestURI.getQuery() != null && !requestURI.getQuery().isEmpty()) {
-		    throw new HTTPException(HttpStatus.SC_BAD_REQUEST);
-		}
-
-		return new StatusChangeRequest();
+		return genericWaitForChangeHandler.parseStatusChangeRequestURI(requestURI);
 	    } else {
 		throw new HTTPException(HttpStatus.SC_METHOD_NOT_ALLOWED);
 	    }
@@ -103,17 +99,16 @@ public class HttpWaitForChangeHandler extends HttpControlHandler {
      * 
      * @param statusChange
      *            the statusChange to respond
-     * @return a HttpResponse containing the statusChange as xml
+     * @return a HttpResponse containing the statusChange as XML
      * @throws HTTPException
      *             if creating the HttpResponse fails
      */
     public HttpResponse handleResponse(StatusChange statusChange) throws HTTPException {
 	try {
-	    HttpResponse httpResponse = new Http11Response(HttpStatus.SC_BAD_REQUEST);
+	    HttpResponse httpResponse = new Http11Response(HttpStatus.SC_ACCEPTED);
 
 	    String xml = m.doc2str(m.marshal(statusChange));
 
-	    httpResponse.setStatusCode(HttpStatus.SC_ACCEPTED);
 	    ContentType contentType = ContentType.create(ContentType.TEXT_XML.getMimeType(), "UTF-8");
 	    StringEntity entity = new StringEntity(xml, contentType);
 	    httpResponse.setEntity(entity);
@@ -131,10 +126,14 @@ public class HttpWaitForChangeHandler extends HttpControlHandler {
 	HttpResponse httpResponse = null;
 	try {
 	    StatusChangeRequest statusRequest = this.handleRequest(request);
-	    StatusChange status = genericWaitForChangeHandler.getStatusChange();
-	    httpResponse = this.handleResponse(status);
+	    StatusChange status = genericWaitForChangeHandler.getStatusChange(statusRequest);
+	    if (status == null) {
+		String msg = "There is no event queue for the specified session identifier existing.";
+		httpResponse = new Http11Response(HttpStatus.SC_BAD_REQUEST, msg );
+	    } else {
+		httpResponse = this.handleResponse(status);
+	    }
 	    response.setParams(request.getParams());
-	    Http11Response.copyHttpResponse(httpResponse, response);
 	} catch (ControlException e) {
 	    httpResponse = new Http11Response(HttpStatus.SC_BAD_REQUEST);
 

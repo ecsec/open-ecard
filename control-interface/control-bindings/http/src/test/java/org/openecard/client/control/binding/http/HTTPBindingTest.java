@@ -27,8 +27,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
+import org.openecard.client.ws.WSMarshaller;
+import org.openecard.client.ws.WSMarshallerFactory;
+import org.openecard.ws.schema.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -43,6 +45,7 @@ import org.testng.annotations.Test;
 public final class HTTPBindingTest {
 
     private static final Logger logger = LoggerFactory.getLogger(HTTPBindingTest.class);
+    private static WSMarshaller m;
 
     /**
      * Start up the TestClient.
@@ -53,6 +56,7 @@ public final class HTTPBindingTest {
     public static void setUpClass() throws Exception {
 	try {
 	    TestClient tc = new TestClient();
+	    m = WSMarshallerFactory.createInstance();
 
 	    // Wait some seconds until the SAL comes up
 	    Thread.sleep(2500);
@@ -62,33 +66,107 @@ public final class HTTPBindingTest {
 	}
     }
 
+    /**
+     * Tests the HttpStatusChangeHandler by sending: 
+     * 1. a get status to get the session identifier 
+     * 2. a get status with session identifier to set up event queue 
+     * 3. after 30 sec. a waitForChange 
+     * 4. after 45 sec. a waitForChange to see if the event queue still exists 
+     * 5. after 70 sec. a waitForChange to see if the event queue has correctly been removed due to timeout 
+     * 6. a waitForChange as POST request
+     */
     @Test(enabled = !true)
-    public void testWaitForChange() throws MalformedURLException {
+    public void testWaitForChange() {
+	try {
+	    // Request a "get status" with GET and without optional session parameter
+	    URL u = new URL("http", "127.0.0.1", 24727, "/getStatus");
+	    String response = httpRequest(u, false);
 
-	// Request a "waitForChange" with GET
-	URL u = new URL("http", "127.0.0.1", 24727, "/waitForChange");
-	String response = httpRequest(u, false);
+	    if (response == null) {
+		Assert.fail("Get status failed");
+	    }
 
-	if (response == null) {
-	    Assert.fail("Get status failed");
-	}
+	    logger.debug(response);
+	    Status status = (Status) m.unmarshal(m.str2doc(response));
+	    String session = status.getConnectionHandle().get(0).getChannelHandle().getSessionIdentifier();
 
-	logger.debug(response);
-	// Request a "waitForChange" with POST
-	response = httpRequest(u, true);
+	    // Request a "get status" with GET and with optional session parameter
+	    u = new URL("http", "127.0.0.1", 24727, "/getStatus?session=" + session);
+	    response = httpRequest(u, false);
 
-	// we expect response code 405, therefore response must be null
-	if (response != null)
+	    if (response == null) {
+		Assert.fail("Get status failed");
+	    }
+
+	    logger.debug(response);
+
+	    Thread.sleep(30 * 1000);
+	    // Request a "waitForChange" with GET
+	    u = new URL("http", "127.0.0.1", 24727, "/waitForChange?session=" + session);
+	    response = httpRequest(u, false);
+
+	    if (response == null) {
+		Assert.fail("Get status failed");
+	    }
+
+	    logger.debug(response);
+
+	    Thread.sleep(45 * 1000);
+	    // Request a "waitForChange" with GET
+	    u = new URL("http", "127.0.0.1", 24727, "/waitForChange?session=" + session);
+	    response = httpRequest(u, false);
+
+	    if (response == null) {
+		Assert.fail("Get status failed");
+	    }
+
+	    logger.debug(response);
+
+	    Thread.sleep(70 * 1000);
+	    // Request a "waitForChange" with GET
+	    u = new URL("http", "127.0.0.1", 24727, "/waitForChange?session=" + session);
+	    response = httpRequest(u, false);
+	    // we expect response code 400, therefore response must be null
+	    if (response != null)
+		Assert.fail();
+
+	    // Request a "waitForChange" with POST
+	    response = httpRequest(u, true);
+
+	    // we expect response code 405, therefore response must be null
+	    if (response != null)
+		Assert.fail();
+	} catch (Exception e) {
+	    logger.debug(e.getMessage(), e);
 	    Assert.fail();
-
+	}
     }
 
+    /**
+     * Tests the HttpStatusHandler by sending: 
+     * 1. a GET request without optional session parameter 
+     * 2. a GET request with optional session parameter 
+     * 3. a POST request 
+     * 4. a GET request with optional and malformed session parameter
+     */
     @Test(enabled = !true)
     public void testGetStatus() {
 	try {
-	    // Request a "get status" with GET
+	    // Request a "get status" with GET and without optional session parameter
 	    URL u = new URL("http", "127.0.0.1", 24727, "/getStatus");
 	    String response = httpRequest(u, false);
+
+	    if (response == null) {
+		Assert.fail("Get status failed");
+	    }
+
+	    logger.debug(response);
+	    Status status = (Status) m.unmarshal(m.str2doc(response));
+	    String session = status.getConnectionHandle().get(0).getChannelHandle().getSessionIdentifier();
+
+	    // Request a "get status" with GET and with optional session parameter
+	    u = new URL("http", "127.0.0.1", 24727, "/getStatus?session=" + session);
+	    response = httpRequest(u, false);
 
 	    if (response == null) {
 		Assert.fail("Get status failed");
@@ -101,6 +179,15 @@ public final class HTTPBindingTest {
 	    // we expect response code 405, therefore response must be null
 	    if (response != null)
 		Assert.fail();
+
+	    // Request a "get status" with GET and with optional malformed session parameter
+	    u = new URL("http", "127.0.0.1", 24727, "/getStatus?session=");
+	    response = httpRequest(u, false);
+
+	    // we expect response code 400, therefore response must be null
+	    if (response != null)
+		Assert.fail();
+
 	} catch (Exception e) {
 	    logger.debug(e.getMessage(), e);
 	    Assert.fail();
@@ -129,7 +216,8 @@ public final class HTTPBindingTest {
      * 
      * @param url
      *            URL to connect to
-     * @param doPOST true for POST, false for GET
+     * @param doPOST
+     *            true for POST, false for GET
      * @return response as string
      */
     private static String httpRequest(URL url, boolean doPOST) {

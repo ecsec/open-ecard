@@ -79,7 +79,7 @@ public class JavaScriptBinding extends ControlBinding {
 	    handlers = new ControlHandlers();
 	    handlers.addControlHandler(new JavaScriptTCTokenHandler(new GenericTCTokenHandler(cardStateMap, dispatcher,
 		    gui, reg)));
-	    handlers.addControlHandler(new JavaScriptStatusHandler(new GenericStatusHandler(cardStateMap)));
+	    handlers.addControlHandler(new JavaScriptStatusHandler(new GenericStatusHandler(cardStateMap, eventHandler)));
 	    handlers.addControlHandler(new JavaScriptWaitForChangeHandler(new GenericWaitForChangeHandler(
 		    eventHandler)));
 	}

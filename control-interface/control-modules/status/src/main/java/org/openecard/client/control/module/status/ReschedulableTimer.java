@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,32 +22,51 @@
 
 package org.openecard.client.control.module.status;
 
-import org.openecard.client.control.client.ClientRequest;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 /**
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * Extends Timer to make it reschedulable.
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ *
  */
-public final class StatusRequest extends ClientRequest {
+class ReschedulableTimer extends Timer {
 
-    private String sessionIdentifier = null;
+    private Runnable task;
+    private TimerTask timerTask;
 
     /**
-     * Returns the session identifier.
-     * @return the session identifier or null if not present
+     * Schedules the specified task for execution after the specified delay.
+     * @param runnable the task to execute after the delay
+     * @param delay execution delay in milliseconds
      */
-    public String getSessionIdentifier() {
-	return sessionIdentifier;
+    public void schedule(Runnable runnable, long delay) {
+	task = runnable;
+
+	timerTask = new TimerTask() {
+	    public void run() {
+		task.run();
+	    };
+	};
+
+	super.schedule(timerTask, delay);
     }
 
     /**
-     * Sets the session identifier.
-     *
-     * @param sessionIdentifier session identifier
+     * Reschedule the timer with a new delay.
+     * @param delay reschedule delay in milliseconds
      */
-    public void setSessionIdentifier(String sessionIdentifier) {
-	this.sessionIdentifier = sessionIdentifier;
+    public void reschedule(long delay) {
+	timerTask.cancel();
+
+	timerTask = new TimerTask() {
+	    public void run() {
+		task.run();
+	    };
+	};
+
+	super.schedule(timerTask, delay);
     }
 
 }

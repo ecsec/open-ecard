@@ -26,15 +26,16 @@ import java.util.HashMap;
 import javax.xml.transform.TransformerException;
 import org.openecard.client.control.ControlInterface;
 import org.openecard.client.control.module.status.EventHandler;
-import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.WSMarshaller;
+import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.WSMarshallerFactory;
-import org.openecard.ws.schema.StatusChange;
+import org.openecard.ws.schema.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.xml.sax.SAXException;
 
 
 /**
@@ -59,8 +60,8 @@ public final class JavaScriptBindingTest {
 	    // Wait some seconds until the SAL comes up
 	    Thread.sleep(2500);
 	    // Start control interface and binding
-	    binding = new JavaScriptBinding(tc.getCardStates(), tc.getDispatcher(), new EventHandler(tc.getEventManager()), tc.getGUI(),
-		    tc.getCardRecognition());
+	    binding = new JavaScriptBinding(tc.getCardStates(), tc.getDispatcher(), new EventHandler(
+		    tc.getEventManager()), tc.getGUI(), tc.getCardRecognition());
 	    ControlInterface controlInterface = new ControlInterface(binding);
 	    controlInterface.start();
 
@@ -71,7 +72,8 @@ public final class JavaScriptBindingTest {
     }
 
     @Test(enabled = !true)
-    public void testGetStatus() throws MarshallingTypeException, TransformerException {
+    public void testGetStatus() throws TransformerException, WSMarshallerException, SAXException {
+
 	// Request a "get status"
 	HashMap<String, Object> parameters = new HashMap<String, Object>();
 	Object[] response = binding.handle("getStatus", parameters);
@@ -79,6 +81,20 @@ public final class JavaScriptBindingTest {
 	    Assert.fail("Get status failed");
 	}
 	logger.debug(response[0].toString());
+
+	Status status = (Status) m.unmarshal(m.str2doc(response[0].toString()));
+	String session = status.getConnectionHandle().get(0).getChannelHandle().getSessionIdentifier();
+
+	// Request a "get status" with GET and with optional session parameter
+	parameters.put("session", session);
+	response = binding.handle("getStatus", parameters);
+
+	if (response == null) {
+	    Assert.fail("Get status failed");
+	}
+
+	logger.debug(response[0].toString());
+
     }
 
     @Test(enabled = !true)
@@ -104,13 +120,51 @@ public final class JavaScriptBindingTest {
     @Test(enabled = !true)
     public void testWaitForChange() {
 	try {
+
+	    // Request a "get status"
 	    HashMap<String, Object> parameters = new HashMap<String, Object>();
-	    Object[] response = binding.handle("waitForChange", parameters);
+	    Object[] response = binding.handle("getStatus", parameters);
+	    if (response == null) {
+		Assert.fail("Get status failed");
+	    }
+	    logger.debug(response[0].toString());
+
+	    Status status = (Status) m.unmarshal(m.str2doc(response[0].toString()));
+	    String session = status.getConnectionHandle().get(0).getChannelHandle().getSessionIdentifier();
+
+	    // Request a "get status" with GET and with optional session parameter
+	    parameters.put("session", session);
+	    response = binding.handle("getStatus", parameters);
+
+	    if (response == null) {
+		Assert.fail("Get status failed");
+	    }
+
+	    logger.debug(response[0].toString());
+
+	    Thread.sleep(30 * 1000);
+	    // Request a waitForChange
+	    response = binding.handle("waitForChange", parameters);
 	    if (response == null) {
 		Assert.fail("WaitForChange failed");
 	    }
 	    logger.debug(response[0].toString());
-	    StatusChange sResponse = (StatusChange) m.unmarshal(m.str2doc(response[0].toString()));
+
+	    Thread.sleep(45 * 1000);
+	    // Request a waitForChange
+	    response = binding.handle("waitForChange", parameters);
+	    if (response == null) {
+		Assert.fail("WaitForChange failed");
+	    }
+	    logger.debug(response[0].toString());
+
+	    Thread.sleep(70 * 1000);
+	    // Request a waitForChange
+	    response = binding.handle("waitForChange", parameters);
+	    if (response != null) {
+		Assert.fail("WaitForChange failed");
+	    }
+
 	} catch (Exception e) {
 	    logger.debug(e.getMessage(), e);
 	    Assert.fail();

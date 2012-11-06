@@ -145,7 +145,7 @@ public class HTTPBinding extends ControlBinding {
 	if (handlers == null || handlers.getControlHandlers().isEmpty()) {
 	    handlers = new ControlHandlers();
 	    handlers.addControlHandler(new HttpTCTokenHandler(new GenericTCTokenHandler(cardStates, dispatcher, gui, reg)));
-	    handlers.addControlHandler(new HttpStatusHandler(new GenericStatusHandler(cardStates)));
+	    handlers.addControlHandler(new HttpStatusHandler(new GenericStatusHandler(cardStates, eventHandler)));
 	    handlers.addControlHandler(new HttpWaitForChangeHandler(new GenericWaitForChangeHandler(eventHandler)));
 	    handlers.addControlHandler(new IndexHandler());
 	    handlers.addControlHandler(new FileHandler(documentRoot));

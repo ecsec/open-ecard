@@ -22,11 +22,13 @@
 
 package org.openecard.client.control.binding.javascript.handler;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import org.openecard.client.control.ControlException;
 import org.openecard.client.control.module.status.GenericStatusHandler;
+import org.openecard.client.control.module.status.StatusRequest;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.WSMarshallerFactory;
@@ -77,8 +79,9 @@ public class JavaScriptStatusHandler extends JavaScriptControlHandler {
 	    logger.debug("JavaScript request handled by: {}", this.getClass().getName());
 	}
 	try {
+	    StatusRequest statusRequest = this.handleRequest(request);
+	    Status status = genericStatusHandler.handleRequest(statusRequest);
 	    ArrayList<String> xml = new ArrayList<String>();
-	    Status status = genericStatusHandler.handleRequest();
 	    Document contentDoc = m.marshal(status);
 	    String result = m.doc2str(contentDoc);
 	    xml.add(result);
@@ -86,6 +89,34 @@ public class JavaScriptStatusHandler extends JavaScriptControlHandler {
 	} catch (ControlException e) {
 	    // TODO
 	    throw e;
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    return null;
+	}
+    }
+
+    /**
+     * Extracts the StatusRequest from the request-data.
+     * @param data the request data
+     * @return the extracted StatusRequest or null if an error occurred
+     */
+    private StatusRequest handleRequest(Map data) {
+	try {
+	    StatusRequest statusRequest = new StatusRequest();
+
+	    // TODO: rewrite code so that it is safer
+	    Iterator i = data.entrySet().iterator();
+	    while (i.hasNext()) {
+		Map.Entry e = (Map.Entry) i.next();
+		// check content
+		if ("session".equals(e.getKey())) {
+		    // session
+		    String value = URLDecoder.decode(e.getValue().toString(), "UTF-8");
+		    statusRequest.setSessionIdentifier(value);
+		} 
+	    }
+
+	    return statusRequest;
 	} catch (Exception e) {
 	    logger.error(e.getMessage(), e);
 	    return null;

@@ -22,14 +22,17 @@
 
 package org.openecard.client.control.binding.javascript.handler;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import org.openecard.client.control.ControlException;
 import org.openecard.client.control.module.status.GenericWaitForChangeHandler;
+import org.openecard.client.control.module.status.StatusChangeRequest;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerException;
 import org.openecard.client.ws.WSMarshallerFactory;
+import org.openecard.ws.schema.StatusChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -49,7 +52,8 @@ public class JavaScriptWaitForChangeHandler extends JavaScriptControlHandler {
     /**
      * Creates a new JavaScriptWaitForChangeHandler.
      * 
-     * @param genericWaitForChangeHandler to handle the generic part of the WaitForChange request
+     * @param genericWaitForChangeHandler
+     *            to handle the generic part of the WaitForChange request
      */
     public JavaScriptWaitForChangeHandler(GenericWaitForChangeHandler genericWaitForChangeHandler) {
 	super("waitForChange");
@@ -76,8 +80,13 @@ public class JavaScriptWaitForChangeHandler extends JavaScriptControlHandler {
 	}
 	try {
 	    ArrayList<String> xml = new ArrayList<String>();
+	    StatusChangeRequest statusChangeRequest = this.handleRequest(request);
+	    StatusChange statusChange = genericWaitForChangeHandler.getStatusChange(statusChangeRequest);
 
-	    Document contentDoc = m.marshal(genericWaitForChangeHandler.getStatusChange());
+	    if (statusChange == null)
+		return null;
+
+	    Document contentDoc = m.marshal(statusChange);
 	    String result = m.doc2str(contentDoc);
 	    xml.add(result);
 
@@ -85,6 +94,33 @@ public class JavaScriptWaitForChangeHandler extends JavaScriptControlHandler {
 	} catch (ControlException e) {
 	    // TODO
 	    throw e;
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    return null;
+	}
+    }
+
+    /**
+     * Extracts the StatusChangeRequest from the request-data.
+     * @param data the request data
+     * @return the extracted StatusChangeRequest or null if an error occurred
+     */
+    private StatusChangeRequest handleRequest(Map data) {
+	try {
+	    StatusChangeRequest statusChangeRequest = null;
+	    // TODO: rewrite code so that it is safer
+	    Iterator i = data.entrySet().iterator();
+	    while (i.hasNext()) {
+		Map.Entry e = (Map.Entry) i.next();
+		// check content
+		if ("session".equals(e.getKey())) {
+		    // session
+		    String value = URLDecoder.decode(e.getValue().toString(), "UTF-8");
+		    statusChangeRequest = new StatusChangeRequest(value);
+		}
+	    }
+
+	    return statusChangeRequest;
 	} catch (Exception e) {
 	    logger.error(e.getMessage(), e);
 	    return null;

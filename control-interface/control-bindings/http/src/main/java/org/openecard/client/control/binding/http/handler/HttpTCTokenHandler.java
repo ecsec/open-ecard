@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 public class HttpTCTokenHandler extends HttpControlHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpTCTokenHandler.class);
-    private GenericTCTokenHandler genericTCTokenHandler;
+    private final GenericTCTokenHandler genericTCTokenHandler;
 
     /**
      * Create a new HttpTCTokenHandler.

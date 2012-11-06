@@ -54,7 +54,7 @@ public class HttpStatusHandler extends HttpControlHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpStatusHandler.class);
     private final WSMarshaller m;
-    private GenericStatusHandler genericStatusHandler;
+    private final GenericStatusHandler genericStatusHandler;
 
     /**
      * Creates a new StatusHandler.
@@ -78,7 +78,7 @@ public class HttpStatusHandler extends HttpControlHandler {
 	HttpResponse httpResponse = null;
 	try {
 	    StatusRequest statusRequest = this.handleRequest(request);
-	    Status status = genericStatusHandler.handleRequest();
+	    Status status = genericStatusHandler.handleRequest(statusRequest);
 	    httpResponse = this.handleResponse(status);
 	    response.setParams(request.getParams());
 	    Http11Response.copyHttpResponse(httpResponse, response);
@@ -116,11 +116,7 @@ public class HttpStatusHandler extends HttpControlHandler {
 	    if (requestLine.getMethod().equals("GET")) {
 		URI requestURI = URI.create(requestLine.getUri());
 
-		if (requestURI.getQuery() != null && !requestURI.getQuery().isEmpty()) {
-		    throw new HTTPException(HttpStatus.SC_BAD_REQUEST);
-		}
-
-		return new StatusRequest();
+		return genericStatusHandler.parseStatusRequestURI(requestURI);
 	    } else {
 		throw new HTTPException(HttpStatus.SC_METHOD_NOT_ALLOWED);
 	    }

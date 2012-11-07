@@ -25,7 +25,6 @@ package org.openecard.client.sal.protocol.pincompare;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.Protocol;
-import org.openecard.client.common.sal.ProtocolStep;
 
 
 /**
@@ -54,9 +53,10 @@ public class PINCompareProtocol extends Protocol {
 	for (int i = 0; i < steps.size(); i++) {
 	    if (steps.get(i).getFunctionType().equals(functionName)) {
 		super.curStep = i;
+		return true;
 	    }
 	}
-	return true;
+	return false;
     }
 
     @Override

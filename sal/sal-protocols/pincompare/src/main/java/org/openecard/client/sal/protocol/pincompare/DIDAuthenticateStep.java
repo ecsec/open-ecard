@@ -130,6 +130,7 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 	    cardStateEntry.addAuthenticated(didName, cardApplication);
 	    response.setAuthenticationProtocolData(pinCompareOutput.getAuthDataType());
 	} catch (ECardException e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
 	    logger.error(e.getMessage(), e);

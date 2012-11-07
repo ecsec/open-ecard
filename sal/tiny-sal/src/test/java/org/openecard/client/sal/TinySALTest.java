@@ -267,7 +267,7 @@ public class TinySALTest {
 	cardApplicationDisconnect.getConnectionHandle().setSlotHandle(new byte[]{0x0, 0x0, 0x0});
 	cardApplicationDisconnectResponse = instance.cardApplicationDisconnect(cardApplicationDisconnect);
 	assertEquals(ECardConstants.Major.ERROR, cardApplicationDisconnectResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, cardApplicationDisconnectResponse.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, cardApplicationDisconnectResponse.getResult().getResultMinor());
 
 	// test nullpointer
 	// connect to esign
@@ -340,7 +340,7 @@ public class TinySALTest {
 	cardApplicationList.getConnectionHandle().setIFDName("invalid");
 	cardApplicationListResponse = instance.cardApplicationList(cardApplicationList);
 	assertEquals(ECardConstants.Major.ERROR, cardApplicationListResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, cardApplicationListResponse.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, cardApplicationListResponse.getResult().getResultMinor());
 
 	// test nullpointer
 	cardApplicationList = new CardApplicationList();
@@ -474,7 +474,7 @@ public class TinySALTest {
 	dataSetList.setConnectionHandle(wrongConnectionHandle);
 	dataSetListResponse = instance.dataSetList(dataSetList);
 	assertEquals(ECardConstants.Major.ERROR, dataSetListResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, dataSetListResponse.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, dataSetListResponse.getResult().getResultMinor());
 
 	// test null connectionhandle
 	dataSetList = new DataSetList();
@@ -550,7 +550,7 @@ public class TinySALTest {
 	dataSetSelect.setDataSetName("EF.C.CH.AUT");
 	dataSetSelectResponse = instance.dataSetSelect(dataSetSelect);
 	assertEquals(ECardConstants.Major.ERROR, dataSetSelectResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, dataSetSelectResponse.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, dataSetSelectResponse.getResult().getResultMinor());
     }
 
     /**
@@ -678,7 +678,7 @@ public class TinySALTest {
 	dsiRead.setDSIName(null);
 	dsiReadResponse = instance.dsiRead(dsiRead);
 	assertEquals(ECardConstants.Major.ERROR, dsiReadResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, dsiReadResponse.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, dsiReadResponse.getResult().getResultMinor());
     }
 
     /**
@@ -834,7 +834,7 @@ public class TinySALTest {
 	didList.getConnectionHandle().setIFDName("invalid");
 	didListResponse = instance.didList(didList);
 	assertEquals(ECardConstants.Major.ERROR, didListResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, didListResponse.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, didListResponse.getResult().getResultMinor());
 
     }
 
@@ -921,7 +921,7 @@ public class TinySALTest {
 	targetName.setCardApplicationName(appIdentifier_ESIGN);
 	aclList.setTargetName(targetName);
 	ACLListResponse aclListResponse = instance.aclList(aclList);
-	assertEquals(ECardConstants.Major.OK, aclListResponse.getResult().getResultMajor());
+	assertEquals(aclListResponse.getResult().getResultMajor(), ECardConstants.Major.OK);
 	assertTrue(aclListResponse.getTargetACL().getAccessRule().size()>0);
 
 	// test null connectionhandle
@@ -962,7 +962,7 @@ public class TinySALTest {
 	aclList.setTargetName(targetName);
 	aclListResponse = instance.aclList(aclList);
 	assertEquals(ECardConstants.Major.ERROR, aclListResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, aclListResponse.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, aclListResponse.getResult().getResultMinor());
     }
 
     /**

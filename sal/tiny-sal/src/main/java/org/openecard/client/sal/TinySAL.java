@@ -572,13 +572,14 @@ public class TinySAL implements SAL {
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    byte[] applicationID = connectionHandle.getCardApplication();
 	    String dataSetName = request.getDataSetName();
-	    
+
 	    Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
-	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dataSetName, NamedDataServiceActionName.DATA_SET_SELECT);
 
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dataSetName, applicationID);
 	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DataSet cannot be found.");
+
+	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dataSetName, NamedDataServiceActionName.DATA_SET_SELECT);
 
 	    byte[] fileID = dataSetInfo.getDataSetPath().getEfIdOrPath();
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
@@ -672,11 +673,12 @@ public class TinySAL implements SAL {
 	    String dsiName = request.getDSIName();
 
 	    Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
-	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dsiName, NamedDataServiceActionName.DSI_READ);
 
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dsiName, applicationID);
 	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DSIName cannot be found.");
+
+	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dsiName, NamedDataServiceActionName.DSI_READ); 
 
 	    byte[] fileID = dataSetInfo.getDataSetPath().getEfIdOrPath();
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
@@ -1096,7 +1098,12 @@ public class TinySAL implements SAL {
 	    Assert.assertIncorrectParameter(targetName, "The parameter TargetName is empty.");
 
 	    String dataSetName = targetName.getDataSetName();
-	    String didName = SALUtils.getDIDName(targetName);
+	    String didName;
+	    if(targetName.getDIDName()!=null) {
+		didName = SALUtils.getDIDName(targetName);
+	    } else {
+		didName = null;
+	    }
 	    byte[] cardApplicationID = targetName.getCardApplicationName();
 
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();

@@ -80,7 +80,7 @@ import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.sal.TinySAL;
-import org.openecard.client.sal.protocol.pincompare.PinCompareProtocolFactory;
+import org.openecard.client.sal.protocol.pincompare.PINCompareProtocolFactory;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,7 +162,7 @@ public class GenericCryptographyProtocolTest {
 	env.setSAL(instance);
 
 	instance.addProtocol(ECardConstants.Protocol.GENERIC_CRYPTO, new GenericCryptoProtocolFactory());
-	instance.addProtocol(ECardConstants.Protocol.PIN_COMPARE, new PinCompareProtocolFactory());
+	instance.addProtocol(ECardConstants.Protocol.PIN_COMPARE, new PINCompareProtocolFactory());
     }
 
     @Test

@@ -49,4 +49,9 @@ public class SRPTlsClientImpl extends SRPTlsClient {
 	return new DefaultTlsAuthentication(null);
     }
 
+    @Override
+    public void notifySessionID(byte[] sessionID) {
+	// ignore and thus don't do session resuming
+    }
+
 }

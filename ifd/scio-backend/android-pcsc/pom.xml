@@ -54,7 +54,7 @@
 		<executions>
 		    <execution>
 			<id>ant-compile</id>
-			<phase>compile</phase>
+			<phase>initialize</phase>
 			<configuration>
 			    <tasks>
 				<exec executable="${env.ANDROID_NDK_HOME}/${ndk.executable}" failonerror="true" />
@@ -76,21 +76,21 @@
 			</goals>
 		    </execution>
 		    <execution>
-		    	<id>ant-install</id>
-		    	<phase>clean</phase>
-		    	<configuration>
-		    	    <tasks>
-		    		<delete file="res/raw/drivers.zip" />
-		    		<delete dir="libs" />
-		    		<delete dir="obj" />
+			<id>ant-install</id>
+			<phase>clean</phase>
+			<configuration>
+			    <tasks>
+				<delete file="res/raw/drivers.zip" />
+				<delete dir="libs" />
+				<delete dir="obj" />
 				<exec executable="${env.ANDROID_NDK_HOME}/${ndk.executable}" failonerror="true">
 				    <arg value="clean" />
 				</exec>
-		    	    </tasks>
-		    	</configuration>
-		    	<goals>
-		    	    <goal>run</goal>
-		    	</goals>
+			    </tasks>
+			</configuration>
+			<goals>
+			    <goal>run</goal>
+			</goals>
 		    </execution>
 		</executions>
 	    </plugin>

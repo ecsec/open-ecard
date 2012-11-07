@@ -21,7 +21,6 @@
             <plugin>
 		<groupId>com.google.code.maven-replacer-plugin</groupId>
 		<artifactId>maven-replacer-plugin</artifactId>
-		<version>1.4.1</version>
 		<executions>
                     <execution>
 			<phase>validate</phase>
@@ -60,7 +59,6 @@
 	    <plugin>
 		<groupId>org.codehaus.mojo</groupId>
 		<artifactId>build-helper-maven-plugin</artifactId>
-		<version>1.7</version>
 		<executions>
 		    <execution>
 			<id>add-source</id>

@@ -139,7 +139,7 @@
 			<outputApk>${project.build.directory}/${project.build.finalName}-aligned.apk</outputApk>
 		    </zipalign>
 		    <sdk>
-			<platform>11</platform>
+			<platform>12</platform>
 		    </sdk>
 		    <test>
 			<createReport>true</createReport>

@@ -59,10 +59,16 @@ public class InsertCardStepAction extends StepAction {
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
+	Set<CardStateEntry> entries;
 
-	if (entries.size() > 0) 
-	    setResponse(entries.iterator().next().handleCopy());
+	do {
+	    entries = cardStates.getMatchingEntries(conHandle);
+	    try {
+		Thread.sleep(200);
+	    } catch (InterruptedException e) {
+	    }
+	} while (entries.size() < 1);
+	setResponse(entries.iterator().next().handleCopy());
 	return new StepActionResult(StepActionResultStatus.NEXT);
     }
 

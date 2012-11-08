@@ -81,7 +81,7 @@ public class GenericTCTokenHandler {
     public TCTokenRequest parseTCTokenRequestURI(URI requestURI) throws UnsupportedEncodingException, MalformedURLException, TCTokenException {
    	TCTokenRequest tcTokenRequest = new TCTokenRequest();
    	String queryStr = requestURI.getRawQuery();
-	String query[] = queryStr.split("&");
+	String[] query = queryStr.split("&");
 
    	for (String q : query) {
    	    String name = q.substring(0, q.indexOf("="));
@@ -254,7 +254,7 @@ public class GenericTCTokenHandler {
 	}
 
 	if (connectionHandle == null) {
-	    String msg = "No card available for ther given ConnectionHandle.";
+	    String msg = "No card available for the given ConnectionHandle.";
 	    logger.error(msg);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 	    return response;

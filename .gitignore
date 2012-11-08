@@ -14,3 +14,4 @@ dependency-reduced-pom.xml
 test-output
 .deps/
 .libs/
+project.properties

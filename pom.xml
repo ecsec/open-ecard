@@ -59,6 +59,10 @@
     </properties>
 
     <distributionManagement>
+	<site>
+	    <id>Open eCard Website</id>
+	    <url>https://dev.openecard.org/TODO</url>
+	</site>
 	<repository>
 	    <id>openecard-repos</id>
 	    <name>Openecard Release Repo</name>
@@ -106,17 +110,227 @@
 			    </execution>
 			</executions>
 		    </plugin>
+		    <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-site-plugin</artifactId>
+			<configuration>
+			    <reportPlugins>
+				<plugin>
+				    <groupId>org.apache.maven.plugins</groupId>
+				    <artifactId>maven-jxr-plugin</artifactId>
+				    <reports>
+					<report>jxr</report>
+					<report>aggregate</report>
+					<report>test-jxr</report>
+					<report>test-aggregate</report>
+				    </reports>
+				</plugin>
+				<plugin>
+				    <groupId>org.apache.maven.plugins</groupId>
+				    <artifactId>maven-project-info-reports-plugin</artifactId>
+				</plugin>
+				<plugin>
+				    <groupId>org.apache.maven.plugins</groupId>
+				    <artifactId>maven-surefire-report-plugin</artifactId>
+				    <configuration>
+					<alwaysGenerateSurefireReport>false</alwaysGenerateSurefireReport>
+					<aggregate>true</aggregate>
+				    </configuration>
+				    <reports>
+					<report>report-only</report>
+				    </reports>
+				</plugin>
+				<plugin>
+				    <groupId>org.apache.maven.plugins</groupId>
+				    <artifactId>maven-surefire-report-plugin</artifactId>
+				    <configuration>
+					<alwaysGenerateSurefireReport>false</alwaysGenerateSurefireReport>
+				    </configuration>
+				    <reports>
+					<report>report-only</report>
+				    </reports>
+				</plugin>
+				<plugin>
+				    <groupId>org.apache.maven.plugins</groupId>
+				    <artifactId>maven-javadoc-plugin</artifactId>
+				</plugin>
+				<plugin>
+				    <groupId>org.apache.maven.plugins</groupId>
+				    <artifactId>maven-checkstyle-plugin</artifactId>
+				    <configuration>
+					<configLocation>src/qa/checkstyle/openecard-checkstyle.xml</configLocation>
+					<headerLocation>src/qa/checkstyle/openecard-checkstyle-header.txt</headerLocation>
+					<suppressionsLocation>src/qa/checkstyle/openecard-checkstyle-suppressions.xml</suppressionsLocation>
+					<includeTestSourceDirectory>true</includeTestSourceDirectory>
+				    </configuration>
+				    <reports>
+					<report>checkstyle</report>
+					<report>checkstyle-aggregate</report>
+				    </reports>
+				</plugin>
+				<plugin>
+				    <groupId>org.codehaus.mojo</groupId>
+				    <artifactId>taglist-maven-plugin</artifactId>
+				    <configuration>
+					<tagListOptions>
+					    <tagClasses>
+						<tagClass>
+						    <displayName>Normal</displayName>
+						    <tags>
+							<tag>
+							    <matchString>TODO</matchString>
+							    <matchType>ignoreCase</matchType>
+							</tag>
+							<tag>
+							    <matchString>TBD</matchString>
+							    <matchType>ignoreCase</matchType>
+							</tag>
+						    </tags>
+						</tagClass>
+						<tagClass>
+						    <displayName>Urgent</displayName>
+						    <tags>
+							<tag>
+							    <matchString>FIXME</matchString>
+							    <matchType>ignoreCase</matchType>
+							</tag>
+							<tag>
+							    <matchString>@deprecated</matchString>
+							    <matchType>ignoreCase</matchType>
+							</tag>
+						    </tags>
+						</tagClass>
+					    </tagClasses>
+					</tagListOptions>
+				    </configuration>
+				</plugin>
+				<plugin>
+				    <groupId>org.codehaus.mojo</groupId>
+				    <artifactId>taglist-maven-plugin</artifactId>
+				    <configuration>
+					<aggregate>true</aggregate>
+					<tagListOptions>
+					    <tagClasses>
+						<tagClass>
+						    <displayName>Normal</displayName>
+						    <tags>
+							<tag>
+							    <matchString>TODO</matchString>
+							    <matchType>ignoreCase</matchType>
+							</tag>
+							<tag>
+							    <matchString>TBD</matchString>
+							    <matchType>ignoreCase</matchType>
+							</tag>
+						    </tags>
+						</tagClass>
+						<tagClass>
+						    <displayName>Urgent</displayName>
+						    <tags>
+							<tag>
+							    <matchString>FIXME</matchString>
+							    <matchType>ignoreCase</matchType>
+							</tag>
+							<tag>
+							    <matchString>@deprecated</matchString>
+							    <matchType>ignoreCase</matchType>
+							</tag>
+						    </tags>
+						</tagClass>
+					    </tagClasses>
+					</tagListOptions>
+				    </configuration>
+				</plugin>
+				<plugin>
+				    <groupId>org.codehaus.mojo</groupId>
+				    <artifactId>cobertura-maven-plugin</artifactId>
+				    <configuration>
+					<maxmem>1024m</maxmem>
+					<aggregate>true</aggregate>
+					<quiet>true</quiet>
+					<formats>
+					    <format>html</format>
+					</formats>
+				    </configuration>
+				</plugin>
+				<plugin>
+				    <groupId>org.codehaus.mojo</groupId>
+				    <artifactId>findbugs-maven-plugin</artifactId>
+				    <configuration>
+					<effort>Max</effort>
+					<threshold>Low</threshold>
+					<includeTests>true</includeTests>
+					<maxHeap>1024</maxHeap>
+					<onlyAnalyze>org.openecard.client.-</onlyAnalyze>
+					<failOnError>false</failOnError>
+				    </configuration>
+				</plugin>
+				<plugin>
+				    <groupId>org.codehaus.mojo</groupId>
+				    <artifactId>jdepend-maven-plugin</artifactId>
+				</plugin>
+			    </reportPlugins>
+			</configuration>
+		    </plugin>
 		</plugins>
 	    </build>
 	</profile>
 	<profile>
-	    <id>no-api-check</id>
-	    <distributionManagement>
-		<site>
-		    <id>Jenkins Maven site</id>
-		    <url>http://dev.openecard.org/maven-site/</url>
-		</site>
-	    </distributionManagement>
+	    <id>ci</id>
+	    <build>
+		<plugins>
+		    <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-site-plugin</artifactId>
+			<configuration>
+			    <reportPlugins>
+				<plugin>
+				    <groupId>org.apache.maven.plugins</groupId>
+				    <artifactId>maven-checkstyle-plugin</artifactId>
+				    <configuration>
+					<configLocation>src/qa/checkstyle/openecard-checkstyle.xml</configLocation>
+					<headerLocation>src/qa/checkstyle/openecard-checkstyle-header.txt</headerLocation>
+					<suppressionsLocation>src/qa/checkstyle/openecard-checkstyle-suppressions.xml</suppressionsLocation>
+					<includeTestSourceDirectory>true</includeTestSourceDirectory>
+					<enableRSS>false</enableRSS>
+					<enableFilesSummary>false</enableFilesSummary>
+					<enableRulesSummary>false</enableRulesSummary>
+					<enableSeveritySummary>false</enableSeveritySummary>
+					<linkXRef>false</linkXRef>
+				    </configuration>
+				    <reports>
+					<report>checkstyle</report>
+				    </reports>
+				</plugin>
+				<plugin>
+				    <groupId>org.codehaus.mojo</groupId>
+				    <artifactId>cobertura-maven-plugin</artifactId>
+				    <configuration>
+					<maxmem>1024m</maxmem>
+					<aggregate>true</aggregate>
+					<quiet>true</quiet>
+					<formats>
+					    <format>xml</format>
+					</formats>
+				    </configuration>
+				</plugin>
+				<plugin>
+				    <groupId>org.codehaus.mojo</groupId>
+				    <artifactId>findbugs-maven-plugin</artifactId>
+				    <configuration>
+					<effort>Max</effort>
+					<threshold>Low</threshold>
+					<includeTests>true</includeTests>
+					<maxHeap>1024</maxHeap>
+					<onlyAnalyze>org.openecard.client.-</onlyAnalyze>
+					<xmlOutput>true</xmlOutput>
+					<failOnError>false</failOnError>
+				    </configuration>
+				</plugin>
+			    </reportPlugins>
+			</configuration>
+		    </plugin>
+	    </plugins></build>
 	</profile>
 	<profile>
 	    <id>release</id>
@@ -202,14 +416,16 @@
 		    <groupId>org.apache.maven.plugins</groupId>
 		    <artifactId>maven-dependency-plugin</artifactId>
 		    <version>2.5.1</version>
+		    <!--
 		    <configuration>
 			<excludeGroupIds>org.openecard.-</excludeGroupIds>
 		    </configuration>
+		    -->
 		</plugin>
 		<plugin>
 		    <groupId>org.apache.maven.plugins</groupId>
 		    <artifactId>maven-surefire-report-plugin</artifactId>
-		    <version>2.12.3</version>
+		    <version>2.12.4</version>
 		</plugin>
 		<plugin>
 		    <groupId>org.apache.maven.plugins</groupId>
@@ -293,134 +509,6 @@
 		</plugin>
 	    </plugins>
 	</pluginManagement>
-
-	<plugins>
-	    <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-site-plugin</artifactId>
-		<configuration>
-		    <reportPlugins>
-			<plugin>
-			    <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-jxr-plugin</artifactId>
-			    <!--
-			    <configuration>
-				<aggregate>true</aggregate>
-			    </configuration>
-			    -->
-			</plugin>
-			<plugin>
-			    <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-project-info-reports-plugin</artifactId>
-			</plugin>
-			<plugin>
-			    <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-surefire-report-plugin</artifactId>
-
-			    <configuration>
-				<alwaysGenerateSurefireReport>false</alwaysGenerateSurefireReport>
-				<!--
-				<aggregate>true</aggregate>
-				-->
-			    </configuration>
-			    <reports>
-				<report>report-only</report>
-			    </reports>
-			</plugin>
-			<!--
-			<plugin>
-			    <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-javadoc-plugin</artifactId>
-			</plugin>
-			-->
-			<plugin>
-			    <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-checkstyle-plugin</artifactId>
-			    <configuration>
-				<configLocation>src/qa/checkstyle/openecard-checkstyle.xml</configLocation>
-				<headerLocation>src/qa/checkstyle/openecard-checkstyle-header.txt</headerLocation>
-				<suppressionsLocation>src/qa/checkstyle/openecard-checkstyle-suppressions.xml</suppressionsLocation>
-				<includeTestSourceDirectory>true</includeTestSourceDirectory>
-			    </configuration>
-			    <reports>
-				<report>checkstyle</report>
-			    </reports>
-			</plugin>
-			<plugin>
-			    <groupId>org.codehaus.mojo</groupId>
-			    <artifactId>taglist-maven-plugin</artifactId>
-			    <configuration>
-				<!--
-				<aggregate>true</aggregate>
-				-->
-				<tagListOptions>
-				    <tagClasses>
-					<tagClass>
-					    <displayName>Normal</displayName>
-					    <tags>
-						<tag>
-						    <matchString>TODO</matchString>
-						    <matchType>ignoreCase</matchType>
-						</tag>
-						<tag>
-						    <matchString>TBD</matchString>
-						    <matchType>ignoreCase</matchType>
-						</tag>
-					    </tags>
-					</tagClass>
-					<tagClass>
-					    <displayName>Urgent</displayName>
-					    <tags>
-						<tag>
-						    <matchString>FIXME</matchString>
-						    <matchType>ignoreCase</matchType>
-						</tag>
-						<tag>
-						    <matchString>@deprecated</matchString>
-						    <matchType>ignoreCase</matchType>
-						</tag>
-					    </tags>
-					</tagClass>
-				    </tagClasses>
-				</tagListOptions>
-			    </configuration>
-			</plugin>
-			<plugin>
-			    <groupId>org.codehaus.mojo</groupId>
-			    <artifactId>cobertura-maven-plugin</artifactId>
-			    <configuration>
-				<maxmem>1024m</maxmem>
-				<aggregate>true</aggregate>
-				<quiet>true</quiet>
-				<formats>
-				    <format>xml</format>
-				    <format>html</format>
-				</formats>
-			    </configuration>
-			</plugin>
-			<plugin>
-			    <groupId>org.codehaus.mojo</groupId>
-			    <artifactId>findbugs-maven-plugin</artifactId>
-			    <configuration>
-				<effort>Max</effort>
-				<threshold>Low</threshold>
-				<includeTests>true</includeTests>
-				<maxHeap>1024</maxHeap>
-				<onlyAnalyze>org.openecard.client.-</onlyAnalyze>
-				<xmlOutput>true</xmlOutput>
-				<failOnError>false</failOnError>
-			    </configuration>
-			</plugin>
-			<!--
-			<plugin>
-			    <groupId>org.codehaus.mojo</groupId>
-			    <artifactId>jdepend-maven-plugin</artifactId>
-			</plugin>
-			-->
-		    </reportPlugins>
-		</configuration>
-	    </plugin>
-	</plugins>
     </build>
 
     <dependencyManagement>

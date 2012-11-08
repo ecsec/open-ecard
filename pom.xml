@@ -150,10 +150,10 @@
 					<report>report-only</report>
 				    </reports>
 				</plugin>
-				<plugin>
+				<!--<plugin>
 				    <groupId>org.apache.maven.plugins</groupId>
 				    <artifactId>maven-javadoc-plugin</artifactId>
-				</plugin>
+				</plugin>-->
 				<plugin>
 				    <groupId>org.apache.maven.plugins</groupId>
 				    <artifactId>maven-checkstyle-plugin</artifactId>

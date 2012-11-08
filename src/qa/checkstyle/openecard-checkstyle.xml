@@ -9,12 +9,15 @@
     <property name="severity" value="warning"/>
     <module name="TreeWalker">
 	<module name="AvoidStarImport">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="star_import"/>
 	</module>
 	<module name="UnusedImports">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="unused_import"/>
 	</module>
 	<module name="ImportOrder">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="import_order"/>
 	    <property name="option" value="bottom"/>
 	</module>
@@ -24,59 +27,74 @@
 	    <property name="max" value="120"/>
 	</module>
 	<module name="AnonInnerLength">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="anonymous_inner_classes"/>
 	    <property name="max" value="40"/>
 	</module>
 	<module name="PackageName">
+	    <property name="severity" value="error"/>
 	    <property name="id" value="package_name"/>
 	    <property name="format" value="^org\.openecard(\.[-a-zA-Z0-9]+)+$"/>
 	</module>
 	<module name="NeedBraces">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="curly_braces"/>
 	</module>
 	<module name="RightCurly">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="right_curly_brace_placement"/>
 	</module>
 	<module name="EmptyBlock">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="empty_block"/>
 	    <property name="tokens" value="LITERAL_DO,LITERAL_ELSE,LITERAL_FINALLY,LITERAL_IF,LITERAL_FOR,LITERAL_TRY,LITERAL_WHILE,STATIC_INIT"/>
 	</module>
 	<module name="LeftCurly">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="left_curly_brace_placement"/>
 	    <property name="maxLineLength" value="120"/>
 	    <property name="tokens" value="CTOR_DEF,INTERFACE_DEF,LITERAL_CATCH,LITERAL_DO,LITERAL_ELSE,LITERAL_FINALLY,LITERAL_FOR,LITERAL_IF,LITERAL_SWITCH,LITERAL_SYNCHRONIZED,LITERAL_TRY,LITERAL_WHILE,METHOD_DEF"/>
 	</module>
 	<module name="LeftCurly">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="class_left_curly_brace_placement"/>
 	    <property name="maxLineLength" value="200"/>
 	    <property name="tokens" value="CLASS_DEF"/>
 	</module>
 	<module name="WhitespaceAfter">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="whitespace_after"/>
 	</module>
 	<module name="WhitespaceAround">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="whitespace_around"/>
 	    <property name="allowEmptyConstructors" value="true"/>
 	    <property name="allowEmptyMethods" value="true"/>
 	</module>
 	<module name="RedundantModifier">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="redundant_modifier"/>
 	</module>
 	<module name="ModifierOrder">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="modifier_order"/>
 	</module>
 	<module name="ConstantName">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="constant_name"/>
 	    <property name="applyToPrivate" value="false"/>
 	</module>
 	<module name="DeclarationOrder">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="declaration_order"/>
 	    <property name="ignoreModifiers" value="true"/>
 	</module>
 	<module name="FallThrough">
+	    <property name="severity" value="info"/>
 	    <property name="id" value="switch_fall_through"/>
 	</module>
 	<module name="JavadocMethod">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="method_javadoc"/>
 	    <property name="scope" value="protected"/>
 	    <property name="allowUndeclaredRTE" value="true"/>
@@ -84,40 +102,49 @@
 	    <property name="suppressLoadErrors" value="true"/>
 	</module>
 	<module name="JavadocType">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="type_javadoc"/>
 	    <property name="authorFormat" value="\S+\s\S+"/>
 	</module>
 	<module name="JavadocStyle">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="javadoc_style"/>
 	    <property name="scope" value="protected"/>
 	    <property name="checkEmptyJavadoc" value="true"/>
 	    <property name="endOfSentenceFormat" value="([.?!][ \t\n\r\f&lt;])|([.?!]$){2,}"/>
 	</module>
 	<module name="Regexp">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="invalid_java_class_file_ending"/>
 	    <property name="format" value="\n{2}\}\n\Z"/>
 	    <message key="required.regexp" value="Java class file ending format is wrong."/>
 	</module>
 	<module name="Regexp">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="invalid_class_declaration_format"/>
 	    <property name="format" value="\n(\S+ )*(?:class|@?interface|enum) (\S+ )+\{\n\n"/>
 	</module>
 	<module name="Indentation">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="indentation_wrong"/>
 	</module>
 	<module name="RegexpSinglelineJava">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="indentation_format_wrong"/>
 	    <property name="format" value="[ ]{8}"/>
 	    <property name="message" value="Indentation format is wrong (8 spaces -&gt; 1 tab)."/>
 	    <property name="ignoreComments" value="true"/>
 	</module>
 	<module name="PackageAnnotation">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="package_annotation"/>
 	</module>
 	<module name="SuppressWarnings">
+	    <property name="severity" value="info"/>
 	    <property name="id" value="suppress_warnings"/>
 	</module>
 	<module name="IllegalImport">
+	    <property name="severity" value="error"/>
 	    <property name="id" value="illegal_import"/>
 	</module>
 	<module name="LineLength">
@@ -126,91 +153,116 @@
 	    <property name="max" value="130"/>
 	</module>
 	<module name="OuterTypeNumber">
+	    <property name="severity" value="error"/>
 	    <property name="id" value="classes_per_file"/>
 	</module>
 	<module name="NoWhitespaceAfter">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="no_whitespace_after"/>
 	    <property name="allowLineBreaks" value="false"/>
 	    <property name="tokens" value="DOT"/>
 	</module>
 	<module name="NoWhitespaceBefore">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="no_whitespace_before"/>
 	    <property name="tokens" value="SEMI,DOT,POST_DEC,POST_INC"/>
 	</module>
 	<module name="OperatorWrap">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="operator_wrap"/>
 	    <property name="tokens" value="EQUAL,GE,GT,LAND,LE,LOR,LT,NOT_EQUAL"/>
 	</module>
 	<module name="MethodParamPad">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="method_parameter_pad"/>
 	</module>
 	<module name="ParenPad">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="paren_pad"/>
 	</module>
 	<module name="TypecastParenPad">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="typecast_paren_pad"/>
 	    <property name="tokens" value="RPAREN,TYPECAST"/>
 	</module>
 	<module name="DefaultComesLast">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="default_comes_last"/>
 	</module>
 	<module name="EmptyStatement">
+	    <property name="severity" value="info"/>
 	    <property name="id" value="empty_statement"/>
 	</module>
 	<module name="ExplicitInitialization">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="member_default_initialization"/>
 	</module>
 	<module name="FinalLocalVariable">
+	    <property name="severity" value="info"/>
 	    <property name="id" value="final_local_variable"/>
 	</module>
 	<module name="HiddenField">
+	    <property name="severity" value="ignore"/>
 	    <property name="id" value="hidden_field"/>
 	    <property name="ignoreConstructorParameter" value="true"/>
 	    <property name="ignoreSetter" value="true"/>
 	    <property name="ignoreAbstractMethods" value="true"/>
 	</module>
 	<module name="IllegalCatch">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="illegal_catch"/>
 	</module>
 	<module name="IllegalThrows">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="illegal_throws"/>
 	</module>
 	<module name="IllegalToken">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="illegal_tokens"/>
 	    <property name="tokens" value="INC,DEC"/>
 	</module>
 	<module name="MultipleVariableDeclarations">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="multiple_variable_declaration"/>
 	</module>
 	<module name="PackageDeclaration">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="package_declaration"/>
 	</module>
 	<module name="RedundantThrows">
+	    <property name="severity" value="warning"/>
 	    <property name="id" value="redundant_throws"/>
 	    <property name="suppressLoadErrors" value="true"/>
 	</module>
 	<module name="StringLiteralEquality">
+	    <property name="severity" value="error"/>
 	    <property name="id" value="string_compare"/>
 	</module>
 	<module name="OneStatementPerLine">
+	    <property name="severity" value="error"/>
 	    <property name="id" value="one_statement_per_line"/>
 	</module>
 	<module name="InterfaceIsType">
+	    <property name="severity" value="error"/>
 	    <property name="id" value="interface_type"/>
 	</module>
 	<module name="ArrayTypeStyle">
+	    <property name="severity" value="error"/>
 	    <property name="id" value="array_style"/>
 	</module>
 	<module name="OuterTypeFilename">
+	    <property name="severity" value="error"/>
 	    <property name="id" value="class_file_name"/>
 	</module>
     </module>
     <module name="RegexpHeader">
+	<property name="severity" value="error"/>
 	<property name="id" value="licence_header"/>
 	<property name="headerFile" value="${checkstyle.header.file}"/>
 	<property name="fileExtensions" value="java"/>
     </module>
     <module name="RegexpMultiline">
+	<property name="severity" value="warning"/>
 	<property name="id" value="package_import_header"/>
 	<property name="format" value="^(?:(.*\n)*.+[^\n]\n{2})?package \S+;\n{2}(?:(?:import (static )?\S+?;\n)*(?:import (static )?\S+?;\n{2}))?\n(?!import)(?!\n)"/>
 	<property name="message" value="Package and import header format wrong."/>
@@ -218,6 +270,7 @@
 	<property name="maximum" value="1"/>
     </module>
     <module name="RegexpMultiline">
+	<property name="severity" value="error"/>
 	<property name="id" value="invalid_line_ending"/>
 	<property name="format" value="(?:\r\n|\n\r)$"/>
 	<property name="message" value="Only unix line endings are allowed."/>
@@ -226,14 +279,17 @@
 	<property name="file" value="${checkstyle.suppressions.file}"/>
     </module>
     <module name="RegexpSingleline">
+	<property name="severity" value="warning"/>
 	<property name="id" value="whitespace_only_line"/>
 	<property name="format" value="^\s+$"/>
 	<property name="message" value="Line isn't allowed to contain whitespaces only."/>
     </module>
     <module name="JavadocPackage">
+	<property name="severity" value="warning"/>
 	<property name="id" value="package_javadoc"/>
     </module>
     <module name="NewlineAtEndOfFile">
+	<property name="severity" value="warning"/>
 	<property name="id" value="eof_new_line"/>
 	<property name="fileExtensions" value="java"/>
     </module>

@@ -28,39 +28,42 @@ import org.openecard.client.common.OverridingProperties;
 
 
 /**
+ * Class loading properties with values for the webservice module.
+ * Take a look at the resource file wsdef.properties for a complete list of the available keys.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class WsdefProperties {
+public abstract class WsdefProperties {
 
     private static class Internal extends OverridingProperties {
-        public Internal() throws IOException {
-            super("wsdef.properties");
-        }
+	public Internal() throws IOException {
+	    super("wsdef.properties");
+	}
     }
 
     static {
-        try {
-            properties = new Internal();
-        } catch (IOException ex) {
-            // in that case a null pointer occurs when properties is accessed
-            org.slf4j.LoggerFactory.getLogger(WsdefProperties.class).error("Failed to load wsdef.properties file correctly.", ex);
-        }
+	try {
+	    properties = new Internal();
+	} catch (IOException ex) {
+	    // in that case a null pointer occurs when properties is accessed
+	    String msg = "Failed to load wsdef.properties file correctly.";
+	    org.slf4j.LoggerFactory.getLogger(WsdefProperties.class).error(msg, ex);
+	}
     }
 
     private static Internal properties;
 
 
     public static String getProperty(String key) {
-        return properties.getProperty(key);
+	return properties.getProperty(key);
     }
 
     public static Object setProperty(String key, String value) {
-        return properties.setProperty(key, value);
+	return properties.setProperty(key, value);
     }
 
     public static Properties properties() {
-        return properties.properties();
+	return properties.properties();
     }
 
 }

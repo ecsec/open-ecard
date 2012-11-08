@@ -64,7 +64,7 @@ public class SOAPMessage {
 	    throw new SOAPException("No Envelope element in SOAP message.");
 	}
 	env = new SOAPEnvelope(envElem);
-	
+
 	namespace = MessageFactory.verifyNamespace(envElem.getNamespaceURI());
 
 	// extract envelope and stuff from doc
@@ -81,10 +81,10 @@ public class SOAPMessage {
 		Element e = (Element) n;
 		if (e.getNamespaceURI().equals(namespace)) {
 		    // head is next
-		    if (!headProcessed && !bodyProcessed && e.getLocalName().equals("Header")) {
+		    if (!headProcessed && !bodyProcessed && "Header".equals(e.getLocalName())) {
 			headProcessed = true;
 			headElem = e;
-		    } else if (!bodyProcessed && e.getLocalName().equals("Body")) {
+		    } else if (!bodyProcessed && "Body".equals(e.getLocalName())) {
 			bodyProcessed = true;
 			bodyElem = e;
 		    } else {
@@ -117,15 +117,15 @@ public class SOAPMessage {
     }
 
     public SOAPEnvelope getSOAPEnvelope() {
-        return env;
+	return env;
     }
 
     public SOAPHeader getSOAPHeader() {
-        return head;
+	return head;
     }
 
     public SOAPBody getSOAPBody() {
-        return body;
+	return body;
     }
 
 }

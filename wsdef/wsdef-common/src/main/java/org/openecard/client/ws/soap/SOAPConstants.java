@@ -29,7 +29,7 @@ import javax.xml.namespace.QName;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public interface SOAPConstants {
+public abstract class SOAPConstants {
 
     public static final String SOAP_1_1_PROTOCOL = "SOAP 1.1 Protocol";
     public static final String SOAP_1_2_PROTOCOL = "SOAP 1.2 Protocol";

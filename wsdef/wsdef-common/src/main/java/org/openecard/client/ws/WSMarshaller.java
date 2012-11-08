@@ -38,14 +38,14 @@ import org.xml.sax.SAXException;
  */
 public interface WSMarshaller {
 
-    public Document str2doc(String docStr) throws SAXException;
-    public Document str2doc(InputStream docStr) throws SAXException, IOException;
-    public String doc2str(Node doc) throws TransformerException;
+    Document str2doc(String docStr) throws SAXException;
+    Document str2doc(InputStream docStr) throws SAXException, IOException;
+    String doc2str(Node doc) throws TransformerException;
 
-    public Object unmarshal(Node n) throws MarshallingTypeException, WSMarshallerException;
-    public Document marshal(Object o) throws MarshallingTypeException;
+    Object unmarshal(Node n) throws MarshallingTypeException, WSMarshallerException;
+    Document marshal(Object o) throws MarshallingTypeException;
 
-    public SOAPMessage doc2soap(Document envDoc) throws SOAPException;
-    public SOAPMessage add2soap(Document content) throws SOAPException;
+    SOAPMessage doc2soap(Document envDoc) throws SOAPException;
+    SOAPMessage add2soap(Document content) throws SOAPException;
 
 }

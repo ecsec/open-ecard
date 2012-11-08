@@ -31,7 +31,7 @@ import org.w3c.dom.NodeList;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class WhitespaceFilter {
+public abstract class WhitespaceFilter {
 
     public static void filter(Node root) {
 	NodeList childNodes = root.getChildNodes();

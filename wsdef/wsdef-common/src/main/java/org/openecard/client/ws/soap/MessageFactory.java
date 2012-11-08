@@ -53,10 +53,10 @@ public class MessageFactory {
 
     public static MessageFactory newInstance(String protocol) throws SOAPException {
 	try {
-	    DocumentBuilderFactory tmpW3Factory = DocumentBuilderFactory.newInstance();
+	    final DocumentBuilderFactory tmpW3Factory = DocumentBuilderFactory.newInstance();
 	    tmpW3Factory.setNamespaceAware(true);
 	    tmpW3Factory.setIgnoringComments(true);
-	    DocumentBuilder tmpW3Builder = tmpW3Factory.newDocumentBuilder();
+	    final DocumentBuilder tmpW3Builder = tmpW3Factory.newDocumentBuilder();
 
 	    return newInstance(protocol, tmpW3Builder);
 	} catch (ParserConfigurationException ex) {

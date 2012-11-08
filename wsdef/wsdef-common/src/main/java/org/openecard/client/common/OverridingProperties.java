@@ -89,7 +89,7 @@ public class OverridingProperties {
     }
 
     public final Properties properties() {
-        return (Properties) properties.clone();
+	return (Properties) properties.clone();
     }
 
 }

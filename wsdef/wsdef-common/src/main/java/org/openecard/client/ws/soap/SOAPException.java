@@ -32,15 +32,15 @@ import org.openecard.client.ws.WSMarshallerException;
 public class SOAPException extends WSMarshallerException {
 
     public SOAPException(String message) {
-        super(message);
+	super(message);
     }
 
     public SOAPException(Throwable cause) {
-        super(cause);
+	super(cause);
     }
 
     public SOAPException(String message, Throwable cause) {
-        super(message, cause);
+	super(message, cause);
     }
 
 }

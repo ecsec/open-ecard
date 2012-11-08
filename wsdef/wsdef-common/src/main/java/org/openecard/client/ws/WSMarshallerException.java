@@ -30,15 +30,15 @@ package org.openecard.client.ws;
 public class WSMarshallerException extends Exception {
 
     public WSMarshallerException(String message) {
-        super(message);
+	super(message);
     }
 
     public WSMarshallerException(Throwable cause) {
-        super(cause);
+	super(cause);
     }
 
     public WSMarshallerException(String message, Throwable cause) {
-        super(message, cause);
+	super(message, cause);
     }
 
 }

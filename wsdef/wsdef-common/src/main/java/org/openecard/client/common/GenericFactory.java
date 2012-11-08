@@ -23,6 +23,7 @@
 package org.openecard.client.common;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.Properties;
 
@@ -36,17 +37,16 @@ public class GenericFactory <T> {
     private final Constructor<T> constructor;
 
     public GenericFactory(Properties properties, String key) throws GenericFactoryException {
-	String className = properties.getProperty(key);
+	final String className = properties.getProperty(key);
 	if (className == null) {
 	    throw new GenericFactoryException("No factory class defined for the specified key '" + key + "'.");
 	}
 
 	try {
 	    constructor = loadClass(className);
-	} catch (Exception ex) {
-	    if (ex instanceof RuntimeException) {
-		throw (RuntimeException)ex;
-	    }
+	} catch (ClassNotFoundException ex) {
+	    throw new GenericFactoryException(ex);
+	} catch (NoSuchMethodException ex) {
 	    throw new GenericFactoryException(ex);
 	}
     }
@@ -56,10 +56,13 @@ public class GenericFactory <T> {
 	try {
 	    T o = constructor.newInstance(); // null because it is static
 	    return o; // type is asserted by method definition
-	} catch (Exception ex) {
-	    if (ex instanceof RuntimeException) {
-		throw (RuntimeException)ex;
-	    }
+	} catch (InstantiationException ex) {
+	    throw new GenericFactoryException(ex);
+	} catch (IllegalAccessException ex) {
+	    throw new GenericFactoryException(ex);
+	} catch (IllegalArgumentException ex) {
+	    throw new GenericFactoryException(ex);
+	} catch (InvocationTargetException ex) {
 	    throw new GenericFactoryException(ex);
 	}
     }

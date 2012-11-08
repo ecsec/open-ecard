@@ -20,25 +20,8 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.ws;
-
-
 /**
- *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * Common utilities for the work with JAXB, JAX-WS and SAAJ.
+ * The utilities comprise a generic factory class and a specialised version of the Properties class.
  */
-public class MarshallingTypeException extends WSMarshallerException {
-
-    public MarshallingTypeException(String message) {
-	super(message);
-    }
-
-    public MarshallingTypeException(Throwable cause) {
-	super(cause);
-    }
-
-    public MarshallingTypeException(String message, Throwable cause) {
-	super(message, cause);
-    }
-
-}
+package org.openecard.client.common;

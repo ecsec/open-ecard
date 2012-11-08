@@ -35,26 +35,27 @@ public class WSMarshallerFactory {
     private GenericFactory<WSMarshaller> factory;
 
     private WSMarshallerFactory() throws WSMarshallerException {
-        try {
-            factory = new GenericFactory<WSMarshaller>(WsdefProperties.properties(), "org.openecard.client.ws.marshaller.impl");
-        } catch (GenericFactoryException ex) {
-            throw new WSMarshallerException(ex);
-        }
+	try {
+	    String key = "org.openecard.client.ws.marshaller.impl";
+	    factory = new GenericFactory<WSMarshaller>(WsdefProperties.properties(), key);
+	} catch (GenericFactoryException ex) {
+	    throw new WSMarshallerException(ex);
+	}
     }
 
 
-    private static WSMarshallerFactory inst = null;
+    private static WSMarshallerFactory inst;
 
     public static WSMarshaller createInstance() throws WSMarshallerException {
-        if (inst == null) {
-            inst = new WSMarshallerFactory();
-        }
+	if (inst == null) {
+	    inst = new WSMarshallerFactory();
+	}
 
-        try {
-            return inst.factory.getInstance();
-        } catch (GenericFactoryException ex) {
-            throw new WSMarshallerException(ex);
-        }
+	try {
+	    return inst.factory.getInstance();
+	} catch (GenericFactoryException ex) {
+	    throw new WSMarshallerException(ex);
+	}
     }
 
 }

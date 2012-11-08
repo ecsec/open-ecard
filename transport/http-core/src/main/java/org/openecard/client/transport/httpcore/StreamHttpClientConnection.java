@@ -108,7 +108,7 @@ public class StreamHttpClientConnection extends AbstractHttpClientConnection {
 
     @Override
     public void close() throws IOException {
-        if (open) {
+	if (open) {
 	    open = false;
 	    // send pending bytes
 	    doFlush();

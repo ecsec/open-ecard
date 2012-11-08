@@ -20,29 +20,11 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.transport.httpcore;
-
-import org.apache.http.HttpVersion;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreProtocolPNames;
-import org.openecard.client.common.Version;
-
-
 /**
- * Extension of BasicHttpParams with useful default values.
+ * Stream based extension to the Apache http-core library.
+ * <p>Instead of being socket based, the {@link org.apache.http.HttpClientConnection} implementation in this package
+ * can operate directly on Java's standard {@link java.io.InputStream} and {@link java.io.OutputStream} class.</p>
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @see <a href="https://hc.apache.org/httpcomponents-core-ga/tutorial/html/fundamentals.html">http-core Tutorial</a>
  */
-public class OECBasicHttpParams extends BasicHttpParams {
-
-    /**
-     * Create an instance with sensible defaults for clients. <br/>
-     * The parameters include charset, protocol version and a user agent identifier.
-     */
-    public OECBasicHttpParams() {
-	setParameter(CoreProtocolPNames.HTTP_CONTENT_CHARSET, "UTF-8");
-	setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
-	setParameter(CoreProtocolPNames.USER_AGENT, "Open-eCard-App/" + Version.getVersion());
-    }
-
-}
+package org.openecard.client.transport.httpcore;

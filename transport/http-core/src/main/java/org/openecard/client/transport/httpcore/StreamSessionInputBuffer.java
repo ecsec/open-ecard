@@ -70,7 +70,7 @@ public class StreamSessionInputBuffer extends AbstractSessionInputBuffer {
 	    throw new IOException("Wait for data timed out.", ex);
 	} catch (ExecutionException ex) {
 	    throw (IOException) ex.getCause();
-	} catch (Exception ex) {
+	} catch (InterruptedException ex) {
 	    // these types of exception occur by interrupt and cancel methods
 	    // it is no use proceeding after them, returning no data available seems to be the right choice
 	    return false;

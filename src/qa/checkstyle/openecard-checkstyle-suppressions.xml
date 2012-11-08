@@ -2,6 +2,11 @@
 <!DOCTYPE suppressions PUBLIC "-//Puppy Crawl//DTD Suppressions 1.0//EN" "http://www.puppycrawl.com/dtds/suppressions_1_0.dtd">
 
 <suppressions>
+    <!-- ignore all from imported bouncycastle -->
+    <suppress checks=".*" files="^.*/crypto/bouncycastle/src/bc/.*$" />
+    <!-- ignore imported smartcardio classes -->
     <suppress checks=".*" files="^.*/ifd/scio-backend/android-scio/.*$" />
     <suppress checks=".*" files="^.*/ifd/scio-backend/android-pcsc/src/main/java/sun/security/smartcardio/.*$" />
+    <!-- star imports (assert etc.) allowed for test code -->
+    <suppress checks="star_import" files="^.*/src/main/test/.*$" />
 </suppressions>

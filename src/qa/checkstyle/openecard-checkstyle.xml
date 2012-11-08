@@ -19,7 +19,8 @@
 	    <property name="option" value="bottom"/>
 	</module>
 	<module name="LineLength">
-	    <property name="id" value="line_length"/>
+	    <property name="severity" value="info"/>
+	    <property name="id" value="line_length_info"/>
 	    <property name="max" value="120"/>
 	</module>
 	<module name="AnonInnerLength">
@@ -28,11 +29,10 @@
 	</module>
 	<module name="PackageName">
 	    <property name="id" value="package_name"/>
-	    <property name="format" value="^org\.openecard\.client(\.[-a-zA-Z0-9]+)+$"/>
+	    <property name="format" value="^org\.openecard(\.[-a-zA-Z0-9]+)+$"/>
 	</module>
 	<module name="NeedBraces">
 	    <property name="id" value="curly_braces"/>
-	    <property name="tokens" value="LITERAL_DO,LITERAL_FOR,LITERAL_WHILE"/>
 	</module>
 	<module name="RightCurly">
 	    <property name="id" value="right_curly_brace_placement"/>
@@ -66,20 +66,19 @@
 	    <property name="id" value="modifier_order"/>
 	</module>
 	<module name="ConstantName">
-	    <property name="severity" value="ignore"/>
 	    <property name="id" value="constant_name"/>
-	    <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
+	    <property name="applyToPrivate" value="false"/>
 	</module>
 	<module name="DeclarationOrder">
-	    <property name="severity" value="ignore"/>
 	    <property name="id" value="declaration_order"/>
-	    <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
+	    <property name="ignoreModifiers" value="true"/>
 	</module>
 	<module name="FallThrough">
 	    <property name="id" value="switch_fall_through"/>
 	</module>
 	<module name="JavadocMethod">
 	    <property name="id" value="method_javadoc"/>
+	    <property name="scope" value="protected"/>
 	    <property name="allowUndeclaredRTE" value="true"/>
 	    <property name="allowMissingPropertyJavadoc" value="true"/>
 	    <property name="suppressLoadErrors" value="true"/>
@@ -90,7 +89,9 @@
 	</module>
 	<module name="JavadocStyle">
 	    <property name="id" value="javadoc_style"/>
-	    <property name="tokens" value="INTERFACE_DEF,CLASS_DEF,METHOD_DEF,CTOR_DEF"/>
+	    <property name="scope" value="protected"/>
+	    <property name="checkEmptyJavadoc" value="true"/>
+	    <property name="endOfSentenceFormat" value="([.?!][ \t\n\r\f&lt;])|([.?!]$){2,}"/>
 	</module>
 	<module name="Regexp">
 	    <property name="id" value="invalid_java_class_file_ending"/>
@@ -109,6 +110,99 @@
 	    <property name="format" value="[ ]{8}"/>
 	    <property name="message" value="Indentation format is wrong (8 spaces -&gt; 1 tab)."/>
 	    <property name="ignoreComments" value="true"/>
+	</module>
+	<module name="PackageAnnotation">
+	    <property name="id" value="package_annotation"/>
+	</module>
+	<module name="SuppressWarnings">
+	    <property name="id" value="suppress_warnings"/>
+	</module>
+	<module name="IllegalImport">
+	    <property name="id" value="illegal_import"/>
+	</module>
+	<module name="LineLength">
+	    <property name="severity" value="warning"/>
+	    <property name="id" value="line_length_warn"/>
+	    <property name="max" value="130"/>
+	</module>
+	<module name="OuterTypeNumber">
+	    <property name="id" value="classes_per_file"/>
+	</module>
+	<module name="NoWhitespaceAfter">
+	    <property name="id" value="no_whitespace_after"/>
+	    <property name="allowLineBreaks" value="false"/>
+	    <property name="tokens" value="DOT"/>
+	</module>
+	<module name="NoWhitespaceBefore">
+	    <property name="id" value="no_whitespace_before"/>
+	    <property name="tokens" value="SEMI,DOT,POST_DEC,POST_INC"/>
+	</module>
+	<module name="OperatorWrap">
+	    <property name="id" value="operator_wrap"/>
+	    <property name="tokens" value="EQUAL,GE,GT,LAND,LE,LOR,LT,NOT_EQUAL"/>
+	</module>
+	<module name="MethodParamPad">
+	    <property name="id" value="method_parameter_pad"/>
+	</module>
+	<module name="ParenPad">
+	    <property name="id" value="paren_pad"/>
+	</module>
+	<module name="TypecastParenPad">
+	    <property name="id" value="typecast_paren_pad"/>
+	    <property name="tokens" value="RPAREN,TYPECAST"/>
+	</module>
+	<module name="DefaultComesLast">
+	    <property name="id" value="default_comes_last"/>
+	</module>
+	<module name="EmptyStatement">
+	    <property name="id" value="empty_statement"/>
+	</module>
+	<module name="ExplicitInitialization">
+	    <property name="id" value="member_default_initialization"/>
+	</module>
+	<module name="FinalLocalVariable">
+	    <property name="id" value="final_local_variable"/>
+	</module>
+	<module name="HiddenField">
+	    <property name="id" value="hidden_field"/>
+	    <property name="ignoreConstructorParameter" value="true"/>
+	    <property name="ignoreSetter" value="true"/>
+	    <property name="ignoreAbstractMethods" value="true"/>
+	</module>
+	<module name="IllegalCatch">
+	    <property name="id" value="illegal_catch"/>
+	</module>
+	<module name="IllegalThrows">
+	    <property name="id" value="illegal_throws"/>
+	</module>
+	<module name="IllegalToken">
+	    <property name="id" value="illegal_tokens"/>
+	    <property name="tokens" value="INC,DEC"/>
+	</module>
+	<module name="MultipleVariableDeclarations">
+	    <property name="id" value="multiple_variable_declaration"/>
+	</module>
+	<module name="PackageDeclaration">
+	    <property name="id" value="package_declaration"/>
+	</module>
+	<module name="RedundantThrows">
+	    <property name="id" value="redundant_throws"/>
+	    <property name="suppressLoadErrors" value="true"/>
+	</module>
+	<module name="StringLiteralEquality">
+	    <property name="id" value="string_compare"/>
+	</module>
+	<module name="OneStatementPerLine">
+	    <property name="id" value="one_statement_per_line"/>
+	</module>
+	<module name="InterfaceIsType">
+	    <property name="id" value="interface_type"/>
+	</module>
+	<module name="ArrayTypeStyle">
+	    <property name="id" value="array_style"/>
+	</module>
+	<module name="OuterTypeFilename">
+	    <property name="id" value="class_file_name"/>
 	</module>
     </module>
     <module name="RegexpHeader">
@@ -135,5 +229,12 @@
 	<property name="id" value="whitespace_only_line"/>
 	<property name="format" value="^\s+$"/>
 	<property name="message" value="Line isn't allowed to contain whitespaces only."/>
+    </module>
+    <module name="JavadocPackage">
+	<property name="id" value="package_javadoc"/>
+    </module>
+    <module name="NewlineAtEndOfFile">
+	<property name="id" value="eof_new_line"/>
+	<property name="fileExtensions" value="java"/>
     </module>
 </module>

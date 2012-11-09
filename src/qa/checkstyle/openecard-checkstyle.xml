@@ -131,7 +131,7 @@
 	<module name="RegexpSinglelineJava">
 	    <property name="severity" value="warning"/>
 	    <property name="id" value="indentation_format_wrong"/>
-	    <property name="format" value="[ ]{8}"/>
+	    <property name="format" value="^\s*?[ ]{8}"/>
 	    <property name="message" value="Indentation format is wrong (8 spaces -&gt; 1 tab)."/>
 	    <property name="ignoreComments" value="true"/>
 	</module>
@@ -198,7 +198,7 @@
 	    <property name="id" value="member_default_initialization"/>
 	</module>
 	<module name="FinalLocalVariable">
-	    <property name="severity" value="info"/>
+	    <property name="severity" value="ignore"/>
 	    <property name="id" value="final_local_variable"/>
 	</module>
 	<module name="HiddenField">

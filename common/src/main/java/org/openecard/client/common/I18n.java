@@ -29,6 +29,7 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import org.openecard.client.common.util.FileUtils;
 
@@ -86,7 +87,7 @@ public class I18n {
 
     private final String component;
     private final Properties translation;
-    private final ConcurrentSkipListMap<String, URL> translatedFiles;
+    private final TreeMap<String, URL> translatedFiles;
 
     private I18n(String component) {
 	Locale userLocale = Locale.getDefault();
@@ -106,7 +107,7 @@ public class I18n {
 
 	this.component = component;
 	this.translation = defaults;
-	this.translatedFiles = new ConcurrentSkipListMap<String, URL>();
+	this.translatedFiles = new TreeMap<String, URL>();
     }
 
     private static Properties loadFile(String component, String locale) {
@@ -209,7 +210,6 @@ public class I18n {
 	String lang = locale.getLanguage();
 	String country = locale.getCountry();
 	String fnameBase = "/openecard_i18n/" + component + "/" + name;
-	fileEnding = fileEnding != null ? ("." + fileEnding) : "";
 	// try to guess correct file to load
 	if (!lang.isEmpty() && !country.isEmpty()) {
 	    String fileName = fnameBase + "_" + lang + "_" + country + fileEnding;

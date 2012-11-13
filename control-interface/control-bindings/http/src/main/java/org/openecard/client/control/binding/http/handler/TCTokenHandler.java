@@ -73,7 +73,8 @@ public class TCTokenHandler extends ControlClientHandler {
 		URI requestURI = URI.create(requestLine.getUri());
 
 		TCTokenRequest tcTokenRequest = new TCTokenRequest();
-		String query[] = requestURI.getQuery().split("&");
+		String queryStr = requestURI.getRawQuery();
+		String query[] = queryStr.split("&");
 
 		for (String q : query) {
 		    String name = q.substring(0, q.indexOf("="));
@@ -98,6 +99,7 @@ public class TCTokenHandler extends ControlClientHandler {
 
 		    } else if (name.startsWith("contextHandle")) {
 			if (!value.isEmpty()) {
+			    value = URLDecoder.decode(value, "UTF-8");
 			    tcTokenRequest.setContextHandle(value);
 			} else {
 			    throw new IllegalArgumentException("Malformed ContextHandle");
@@ -105,12 +107,14 @@ public class TCTokenHandler extends ControlClientHandler {
 
 		    } else if (name.startsWith("slotIndex")) {
 			if (!value.isEmpty()) {
+			    value = URLDecoder.decode(value, "UTF-8");
 			    tcTokenRequest.setSlotIndex(value);
 			} else {
 			    throw new IllegalArgumentException("Malformed SlotIndex");
 			}
 		    } else if (name.startsWith("cardType")) {
 			if (!value.isEmpty()) {
+			    value = URLDecoder.decode(value, "UTF-8");
 			    tcTokenRequest.setCardType(value);
 			} else {
 			    throw new IllegalArgumentException("Malformed CardType");

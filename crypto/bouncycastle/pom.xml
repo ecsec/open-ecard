@@ -33,6 +33,7 @@
 		    <basedir>${basedir}/src/bc/src/org</basedir>
 		    <outputBasedir>${basedir}/target/generated-sources/bc</outputBasedir>
 		    <outputDir>org/openecard</outputDir>
+		    <encoding>${project.build.sourceEncoding}</encoding>
 		    <includes>
 			<include>**/*.java</include>
 		    </includes>

@@ -29,7 +29,6 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
-import javax.xml.namespace.NamespaceContext;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.tlv.TLV;
@@ -54,31 +53,6 @@ import org.slf4j.LoggerFactory;
 public class CardRecognition {
 
     private static final Logger _logger = LoggerFactory.getLogger(CardRecognition.class);
-    private static final NamespaceContext nsCtx = new NamespaceContext() {
-	Map<String, String> nsMap = Collections.unmodifiableMap(new TreeMap<String, String>() {
-	    {
-		put("iso", "urn:iso:std:iso-iec:24727:tech:schema");
-		put("tls", "http://ws.openecard.org/protocols/tls/v1.0");
-	    }
-	});
-	@Override
-	public String getNamespaceURI(String prefix) {
-	    return nsMap.get(prefix);
-	}
-	@Override
-	public String getPrefix(String namespaceURI) {
-	    for (Map.Entry<String, String> e : nsMap.entrySet()) {
-		if (e.getValue().equals(namespaceURI)) {
-		    return e.getKey();
-		}
-	    }
-	    return null;
-	}
-	@Override
-	public Iterator getPrefixes(String namespaceURI) {
-	    return nsMap.keySet().iterator();
-	}
-    };
 
     private final RecognitionTree tree;
 
@@ -346,66 +320,47 @@ public class CardRecognition {
 
 
     private boolean checkDataObject(DataMaskType matcher, byte[] result) {
-	// check if we have a tag
-	if (matcher.getTag() != null) {
-	    byte [] tag = matcher.getTag();
+	// check if we have a tag and data object
+	if (matcher.getTag() != null && matcher.getDataObject() != null) {
 	    try {
 		TLV tlv = TLV.fromBER(result);
-
-		// proceed only if tag matches
-		long tagNum = ByteUtils.toLong(tag);
-		while (tlv != null) {
-		    if (tlv.getTagNumWithClass() == tagNum) {
-			// check if we have a DataObject
-			if (matcher.getDataObject() != null) {
-			    return checkDataObject(matcher, tlv);
-			} else {
-			    return checkMatchingData(matcher.getMatchingData(), tlv.getValue());
-			}
-		    } else {
-			tlv = tlv.getNext();
-		    }
-		}
+		return checkDataObject(matcher, tlv);
 	    } catch (TLVException ex) {
 	    }
 	    // no TLV structure or fallthrough after tag not found
 	    return false;
 	}
 
-	// DataObject without a Tag is plain stupid
-	if (matcher.getDataObject() != null) {
-	    return false;
-	}
-
-	// ok we have a matcher
+	// we have a matcher
 	return checkMatchingData(matcher.getMatchingData(), result);
     }
 
     private boolean checkDataObject(DataMaskType matcher, TLV result) {
 	byte[] tag = matcher.getTag();
-	long tagNum = 0;
-	if (tag != null) {
-	    tagNum = ByteUtils.toLong(tag);
-	}
+	DataMaskType nextMatcher = matcher.getDataObject();
 
-	// no tag and dataobject is a fail
-	if (tag == null && matcher.getDataObject() != null) {
+	// this function only works with tag and dataobject
+	if (tag == null || nextMatcher == null) {
 	    return false;
 	}
 
-	if (matcher.getDataObject() != null) {
-	    List<TLV> chunks = result.findNextTags(tagNum);
-	    for (TLV next : chunks) {
-		boolean outcome = checkDataObject(matcher.getDataObject(), next);
-		if (outcome == true) {
-		    return true;
-		}
+	long tagNum = ByteUtils.toLong(tag);
+
+	List<TLV> chunks = result.findNextTags(tagNum);
+	for (TLV next : chunks) {
+	    boolean outcome;
+	    if (nextMatcher.getMatchingData() != null) {
+		outcome = checkMatchingData(nextMatcher.getMatchingData(), next.getValue());
+	    } else {
+		outcome = checkDataObject(nextMatcher, next.getChild());
 	    }
-	    // no match
-	    return false;
+	    // evaluate outcome
+	    if (outcome == true) {
+		return true;
+	    }
 	}
-
-	return checkMatchingData(matcher.getMatchingData(), result.getValue());
+	// no match
+	return false;
     }
 
     private boolean checkMatchingData(MatchingDataType matcher, byte[] result) {

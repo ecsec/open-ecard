@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.ConcurrentSkipListMap;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.tlv.TLV;
@@ -57,7 +56,7 @@ public class CardRecognition {
     private final RecognitionTree tree;
 
     private final org.openecard.ws.GetCardInfoOrACD cifRepo;
-    private final ConcurrentSkipListMap<String, CardInfoType> cifCache = new ConcurrentSkipListMap<String, CardInfoType>();
+    private final TreeMap<String, CardInfoType> cifCache = new TreeMap<String, CardInfoType>();
 
     private final Properties cardImagesMap = new Properties();
 

@@ -1,8 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <iso:GetRecognitionTreeResponse Profile="http://www.bsi.bund.de/ecard/api/1.1"
 				xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
-				xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
-				xmlns:tls="http://ws.openecard.org/protocols/tls/v1.0">
+				xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema">
     <dss:Result>
 	<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
     </dss:Result>
@@ -22,15 +21,17 @@
 				    <iso:ResponseAPDU>
 					<iso:Body>
 					    <iso:Tag>61</iso:Tag>
-					    <iso:MatchingData>
-						<iso:Offset>00</iso:Offset>
-						<iso:Length>11</iso:Length>
-						<iso:MatchingValue>4F0FE828BD080FA000000167455349474E</iso:MatchingValue>
-					    </iso:MatchingData>
+					    <iso:DataObject>
+						<iso:MatchingData>
+						    <iso:Offset>00</iso:Offset>
+						    <iso:Length>0D</iso:Length>
+						    <iso:MatchingValue>4F0BE828BD080FD27600006601</iso:MatchingValue>
+						</iso:MatchingData>
+					    </iso:DataObject>
 					</iso:Body>
-					<iso:Trailer>9000</iso:Trailer>
+					<iso:Trailer>6282</iso:Trailer>
 					<iso:Conclusion>
-					    <iso:RecognizedCardType>http://www.baek.de/HBAQSIG</iso:RecognizedCardType>
+					    <iso:RecognizedCardType>http://www.baek.de/HBA</iso:RecognizedCardType>
 					</iso:Conclusion>
 				    </iso:ResponseAPDU>
 				    <iso:ResponseAPDU>
@@ -49,11 +50,13 @@
 				    <iso:ResponseAPDU>
 					<iso:Body>
 					    <iso:Tag>61</iso:Tag>
-					    <iso:MatchingData>
-						<iso:Offset>00</iso:Offset>
-						<iso:Length>11</iso:Length>
-						<iso:MatchingValue>4F0FE828BD080FA000000167455349474E</iso:MatchingValue>
-					    </iso:MatchingData>
+					    <iso:DataObject>
+						<iso:MatchingData>
+						    <iso:Offset>00</iso:Offset>
+						    <iso:Length>11</iso:Length>
+						    <iso:MatchingValue>4F0FE828BD080FA000000167455349474E</iso:MatchingValue>
+						</iso:MatchingData>
+					    </iso:DataObject>
 					</iso:Body>
 					<iso:Trailer>6282</iso:Trailer>
 					<iso:Conclusion>
@@ -68,35 +71,53 @@
 	    </iso:ResponseAPDU>
 	</iso:CardCall>
 	<iso:CardCall>
-	    <iso:CommandAPDU>00B08200FC</iso:CommandAPDU>
+	    <iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
 	    <iso:ResponseAPDU>
-		<iso:Body>
-		    <iso:Tag>5A</iso:Tag>
-		    <iso:MatchingData>
-			<iso:Offset>00</iso:Offset>
-			<iso:Length>06</iso:Length>
-			<iso:MatchingValue>642090011016</iso:MatchingValue>
-			<iso:Mask>FFFFFFFFFFFF</iso:Mask>
-		    </iso:MatchingData>
-		</iso:Body>
-		<iso:Trailer>6282</iso:Trailer>
+		<iso:Trailer>9000</iso:Trailer>
 		<iso:Conclusion>
-		    <iso:RecognizedCardType>http://www.signtrust.de/SigntrustCard</iso:RecognizedCardType>
-		</iso:Conclusion>
-	    </iso:ResponseAPDU>
-	    <iso:ResponseAPDU>
-		<iso:Body>
-		    <iso:Tag>5A</iso:Tag>
-		    <iso:MatchingData>
-			<iso:Offset>00</iso:Offset>
-			<iso:Length>06</iso:Length>
-			<iso:MatchingValue>642090011014</iso:MatchingValue>
-			<iso:Mask>FFFFFFFFFFFF</iso:Mask>
-		    </iso:MatchingData>
-		</iso:Body>
-		<iso:Trailer>6282</iso:Trailer>
-		<iso:Conclusion>
-		    <iso:RecognizedCardType>http://www.datev.de/DatevCard</iso:RecognizedCardType>
+		    <iso:CardCall>
+			<iso:CommandAPDU>00A4020C022F02</iso:CommandAPDU>
+			<iso:ResponseAPDU>
+			    <iso:Trailer>9000</iso:Trailer>
+			    <iso:Conclusion>
+				<iso:CardCall>
+				    <iso:CommandAPDU>00B00000FF</iso:CommandAPDU>
+				    <iso:ResponseAPDU>
+					<iso:Body>
+					    <iso:Tag>5A</iso:Tag>
+					    <iso:DataObject>
+						<iso:MatchingData>
+						    <iso:Offset>00</iso:Offset>
+						    <iso:Length>06</iso:Length>
+						    <iso:MatchingValue>642090011016</iso:MatchingValue>
+						</iso:MatchingData>
+					    </iso:DataObject>
+					</iso:Body>
+					<iso:Trailer>6282</iso:Trailer>
+					<iso:Conclusion>
+					    <iso:RecognizedCardType>http://www.signtrust.de/SigntrustCard</iso:RecognizedCardType>
+					</iso:Conclusion>
+				    </iso:ResponseAPDU>
+				    <iso:ResponseAPDU>
+					<iso:Body>
+					    <iso:Tag>5A</iso:Tag>
+					    <iso:DataObject>
+						<iso:MatchingData>
+						    <iso:Offset>00</iso:Offset>
+						    <iso:Length>06</iso:Length>
+						    <iso:MatchingValue>642090011014</iso:MatchingValue>
+						</iso:MatchingData>
+					    </iso:DataObject>
+					</iso:Body>
+					<iso:Trailer>6282</iso:Trailer>
+					<iso:Conclusion>
+					    <iso:RecognizedCardType>http://www.datev.de/DatevCard</iso:RecognizedCardType>
+					</iso:Conclusion>
+				    </iso:ResponseAPDU>
+				</iso:CardCall>
+			    </iso:Conclusion>
+			</iso:ResponseAPDU>
+		    </iso:CardCall>
 		</iso:Conclusion>
 	    </iso:ResponseAPDU>
 	</iso:CardCall>
@@ -115,15 +136,33 @@
 				    <iso:ResponseAPDU>
 					<iso:Body>
 					    <iso:Tag>61</iso:Tag>
-					    <iso:MatchingData>
-						<iso:Offset>00</iso:Offset>
-						<iso:Length>09</iso:Length>
-						<iso:MatchingValue>4F07D2760000030202</iso:MatchingValue>
-					    </iso:MatchingData>
+					    <iso:DataObject>
+						<iso:MatchingData>
+						    <iso:Offset>00</iso:Offset>
+						    <iso:Length>09</iso:Length>
+						    <iso:MatchingValue>4F07D2760000030202</iso:MatchingValue>
+						</iso:MatchingData>
+					    </iso:DataObject>
 					</iso:Body>
 					<iso:Trailer>6282</iso:Trailer>
 					<iso:Conclusion>
 					    <iso:RecognizedCardType>http://www.openlimit.com/E4NetKey</iso:RecognizedCardType>
+					</iso:Conclusion>
+				    </iso:ResponseAPDU>
+				    <iso:ResponseAPDU>
+					<iso:Body>
+					    <iso:Tag>61</iso:Tag>
+					    <iso:DataObject>
+						<iso:MatchingData>
+						    <iso:Offset>00</iso:Offset>
+						    <iso:Length>0E</iso:Length>
+						    <iso:MatchingValue>4F0CA000000063504B43532D3135</iso:MatchingValue>
+						</iso:MatchingData>
+					    </iso:DataObject>
+					</iso:Body>
+					<iso:Trailer>9000</iso:Trailer>
+					<iso:Conclusion>
+					    <iso:RecognizedCardType>http://www.aekno.de/eAT-light</iso:RecognizedCardType>
 					</iso:Conclusion>
 				    </iso:ResponseAPDU>
 				</iso:CardCall>
@@ -134,23 +173,43 @@
 	    </iso:ResponseAPDU>
 	</iso:CardCall>
 	<iso:CardCall>
-	    <iso:CommandAPDU>00A4020C022F00</iso:CommandAPDU>
+	    <iso:CommandAPDU>00A4000C00</iso:CommandAPDU>
 	    <iso:ResponseAPDU>
 		<iso:Trailer>9000</iso:Trailer>
 		<iso:Conclusion>
 		    <iso:CardCall>
-			<iso:CommandAPDU>00B000005A</iso:CommandAPDU>
+			<iso:CommandAPDU>00A4010C02EEEE</iso:CommandAPDU>
 			<iso:ResponseAPDU>
-			    <iso:Body>
-				<iso:MatchingData>
-				    <iso:Offset>00</iso:Offset>
-				    <iso:Length>5A</iso:Length>
-				    <iso:MatchingValue>61324F0FE828BD080FA000000167455349474E500F434941207A752044462E655369676E5100730C4F0AA000000167455349474E61094F07A0000002471001610B4F09E80704007F00070302610C4F0AA000000167455349474E</iso:MatchingValue>
-				</iso:MatchingData>
-			    </iso:Body>
 			    <iso:Trailer>9000</iso:Trailer>
 			    <iso:Conclusion>
-				<iso:RecognizedCardType>http://bsi.bund.de/cif/npa.xml</iso:RecognizedCardType>
+				<iso:CardCall>
+				    <iso:CommandAPDU>00A40200025044</iso:CommandAPDU>
+				    <iso:ResponseAPDU>
+					<iso:Body>
+					    <iso:Tag>6F</iso:Tag>
+					    <iso:DataObject>
+						<iso:Tag>62</iso:Tag>
+						<iso:DataObject>
+						    <iso:Tag>62</iso:Tag>
+						    <iso:DataObject>
+							<iso:Tag>83</iso:Tag>
+							<iso:DataObject>
+							    <iso:MatchingData>
+								<iso:Offset>00</iso:Offset>
+								<iso:Length>02</iso:Length>
+								<iso:MatchingValue>5044</iso:MatchingValue>
+							    </iso:MatchingData>
+							</iso:DataObject>
+						    </iso:DataObject>
+						</iso:DataObject>
+					    </iso:DataObject>
+					</iso:Body>
+					<iso:Trailer>9000</iso:Trailer>
+					<iso:Conclusion>
+					    <iso:RecognizedCardType>http://cif.id.ee/eid</iso:RecognizedCardType>
+					</iso:Conclusion>
+				    </iso:ResponseAPDU>
+				</iso:CardCall>
 			    </iso:Conclusion>
 			</iso:ResponseAPDU>
 		    </iso:CardCall>
@@ -162,14 +221,46 @@
 	    <iso:ResponseAPDU>
 		<iso:Body>
 		    <iso:MatchingData>
-                        <iso:Offset>00</iso:Offset>
-                        <iso:Length>00</iso:Length>
-                        <iso:MatchingValue/>
+			<iso:Offset>00</iso:Offset>
+			<iso:Length>00</iso:Length>
+			<iso:MatchingValue/>
 		    </iso:MatchingData>
 		</iso:Body>
 		<iso:Trailer>9000</iso:Trailer>
 		<iso:Conclusion>
 		    <iso:RecognizedCardType>http://www.reiner-sct.com/owok/</iso:RecognizedCardType>
+		</iso:Conclusion>
+	    </iso:ResponseAPDU>
+	</iso:CardCall>
+	<iso:CardCall>
+	    <iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
+	    <iso:ResponseAPDU>
+		<iso:Trailer>9000</iso:Trailer>
+		<iso:Conclusion>
+		    <iso:CardCall>
+			<iso:CommandAPDU>00A4020C022F00</iso:CommandAPDU>
+			<iso:ResponseAPDU>
+			    <iso:Trailer>9000</iso:Trailer>
+			    <iso:Conclusion>
+				<iso:CardCall>
+				    <iso:CommandAPDU>00B00000FF</iso:CommandAPDU>
+				    <iso:ResponseAPDU>
+					<iso:Body>
+					    <iso:MatchingData>
+						<iso:Offset>00</iso:Offset>
+						<iso:Length>5A</iso:Length>
+						<iso:MatchingValue>61324F0FE828BD080FA000000167455349474E500F434941207A752044462E655369676E5100730C4F0AA000000167455349474E61094F07A0000002471001610B4F09E80704007F00070302610C4F0AA000000167455349474E</iso:MatchingValue>
+					    </iso:MatchingData>
+					</iso:Body>
+					<iso:Trailer>6282</iso:Trailer>
+					<iso:Conclusion>
+					    <iso:RecognizedCardType>http://bsi.bund.de/cif/npa.xml</iso:RecognizedCardType>
+					</iso:Conclusion>
+				    </iso:ResponseAPDU>
+				</iso:CardCall>
+			    </iso:Conclusion>
+			</iso:ResponseAPDU>
+		    </iso:CardCall>
 		</iso:Conclusion>
 	    </iso:ResponseAPDU>
 	</iso:CardCall>

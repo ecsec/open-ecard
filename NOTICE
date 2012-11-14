@@ -2,20 +2,29 @@ Open eCard App
 Copyright 2011-2012 (see entries below)
 
 This product includes software developed at:
+ - Bremen Online Services (http://www.bos-bremen.de)
  - ecsec GmbH (http://www.ecsec.de)
  - HS Coburg (http://www.hs-coburg.de)
- - TU Darmstadt (http://www.tu-darmstadt.de)
  - Ruhr Uni Bochum (http://www.ruhr-uni-bochum.de)
+ - TU Darmstadt (http://www.tu-darmstadt.de)
 
-The following software projects are included in this software distribution:
+The following software projects are included/used(*) in this software distribution:
  - Apache Commons (http://commons.apache.org)
  - Apache HttpComponents (http://hc.apache.org)
+ - Apache Maven (https://maven.apache.org)
  - Apache XML (http://xml.apache.org)
  - Bouncy Castle Crypto API (http://www.bouncycastle.org)
- - Google Android Java ME Library (http://source.android.com)
+ - CCID driver (http://pcsclite.alioth.debian.org/ccid.html)
+ - cyberJack PCSC (http://www.reiner-sct.com/index.php?option=content&task=view&id=243)
+ - Google Android SDK (http://source.android.com)
  - JSON Parser (http://www.json.org)
+ - libusbx (http://libusbx.org/)
+ - Logback (http://logback.qos.ch/)
  - OpenJDK (http://openjdk.java.net)
+ - PCSC-Lite (http://pcsclite.alioth.debian.org/pcsclite.html)
+ - SLF4J (http://www.slf4j.org)
  - Seek for Android (https://code.google.com/p/seek-for-android)
- - Sun Java (http://java.sun.com)
  - TestNG testing framework (http://testng.org)
- - Xml Pull Parser (http://www.extreme.indiana.edu/xgws/xsoap/xpp)
+
+
+(*) Only direct dependencies are named

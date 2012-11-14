@@ -68,6 +68,44 @@
 
     <profiles>
 	<profile>
+	    <id>bundled-jar</id>
+	    <build>
+		<plugins>
+		    <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-shade-plugin</artifactId>
+			<version>2.0</version>
+			<executions>
+			    <execution>
+				<phase>package</phase>
+				<goals>
+				    <goal>shade</goal>
+				</goals>
+				<configuration>
+				    <!--
+					The reduced pom excludes transitive dependencies of test scope
+					libraries, eg. com.beust.jcommander from org.testng.testng, so
+					a subsequent test run (eg. started by cobertura) will miss some
+					dependencies
+				    -->
+				    <createDependencyReducedPom>false</createDependencyReducedPom>
+				    <filters>
+					<filter>
+					    <artifact>*:*</artifact>
+					    <excludes>
+						<exclude>META-INF/**/pom.xml</exclude>
+						<exclude>META-INF/**/pom.properties</exclude>
+					    </excludes>
+					</filter>
+				    </filters>
+				</configuration>
+			    </execution>
+			</executions>
+		    </plugin>
+		</plugins>
+	    </build>
+	</profile>
+	<profile>
 	    <id>windows-installer</id>
 	    <build>
 		<plugins>
@@ -212,12 +250,12 @@
 	    <artifactId>swing</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
-        <dependency>
+	<dependency>
 	    <groupId>org.openecard.client.gui</groupId>
 	    <artifactId>about</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
-        <dependency>
+	<dependency>
 	    <groupId>org.openecard.client.control.bindings</groupId>
 	    <artifactId>http</artifactId>
 	    <version>${project.version}</version>

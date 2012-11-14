@@ -156,11 +156,6 @@ public class AboutDialog extends JDialog {
 	return icon;
     }
 
-    private URL getResourceUrl(String name) {
-	URL resourceUrl = FileUtils.resolveResourceAsURL(AboutDialog.class, "about/html/" + name);
-	return resourceUrl;
-    }
-
     private void openUrl(HyperlinkEvent event) {
 	EventType type = event.getEventType();
 	if (type == EventType.ACTIVATED) {

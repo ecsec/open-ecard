@@ -200,4 +200,9 @@ public class ApplicationContext extends Application {
     public ClientEnv getEnv() {
 	return env;
     }
+
+    public CardRecognition getRecognition() {
+	return recognition;
+    }
+
 }

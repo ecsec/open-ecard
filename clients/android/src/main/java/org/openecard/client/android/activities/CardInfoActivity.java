@@ -22,12 +22,6 @@
 
 package org.openecard.client.android.activities;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import org.openecard.client.android.ApplicationContext;
-import org.openecard.client.android.R;
-import org.openecard.client.android.RootHelper;
-import org.openecard.client.common.enums.EventType;
-import org.openecard.client.common.interfaces.EventCallback;
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;

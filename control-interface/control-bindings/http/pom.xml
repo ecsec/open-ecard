@@ -72,6 +72,18 @@
 	    <version>${project.version}</version>
 	    <scope>test</scope>
 	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.management</groupId>
+	    <artifactId>tiny-management</artifactId>
+	    <version>${project.version}</version>
+	    <scope>test</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.gui</groupId>
+	    <artifactId>swing</artifactId>
+	    <version>${project.version}</version>
+	    <scope>test</scope>
+	</dependency>
     </dependencies>
 
     <build>

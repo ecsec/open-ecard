@@ -20,15 +20,33 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.control.module.status;
-
-import org.openecard.client.control.client.ClientRequest;
+package org.openecard.client.control.handler;
 
 
 /**
- * 
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public final class StatusChangeRequest extends ClientRequest {
+public abstract class ControlHandler {
+
+    /** Identifier to register the handler for */
+    protected String id;
+
+    /**
+     * Create a new ControlHandler.
+     *
+     * @param id Identifier 
+     */
+    protected ControlHandler(String id) {
+	this.id = id;
+    }
+
+    /**
+     * Return the ID to register the handler for.
+     *
+     * @return Identifier
+     */
+    public String getID() {
+	return id;
+    }
 
 }

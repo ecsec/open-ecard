@@ -14,5 +14,21 @@
     <artifactId>tctoken</artifactId>
     <packaging>jar</packaging>
     <name>TCToken</name>
-    
+    <dependencies>
+        <dependency>
+        <groupId>org.openecard.client.transport</groupId>
+        <artifactId>tls</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.openecard.client.transport</groupId>
+        <artifactId>paos</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.openecard.client.sal</groupId>
+        <artifactId>sal-common</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+    </dependencies>
 </project>

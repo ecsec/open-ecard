@@ -14,5 +14,11 @@
     <artifactId>status</artifactId>
     <packaging>jar</packaging>
     <name>Status</name>
-    
+    <dependencies>
+	    <dependency>
+	        <groupId>org.openecard.client.sal</groupId>
+	        <artifactId>sal-common</artifactId>
+	        <version>${project.version}</version>
+	    </dependency>
+    </dependencies>
 </project>

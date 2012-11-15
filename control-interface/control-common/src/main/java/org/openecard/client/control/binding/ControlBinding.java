@@ -20,15 +20,35 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.control.module.status;
+package org.openecard.client.control.binding;
 
-import org.openecard.client.control.client.ClientRequest;
+import org.openecard.client.control.handler.ControlHandlers;
 
 
 /**
- * 
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public final class StatusChangeRequest extends ClientRequest {
+public abstract class ControlBinding {
+
+    protected ControlHandlers handlers;
+
+    /**
+     * Sets the control handlers.
+     * 
+     * @param handlers Control handlers
+     */
+    public void setControlHandlers(ControlHandlers handlers) {
+	this.handlers = handlers;
+    }
+
+    /**
+     * Starts the binding.
+     */
+    public abstract void start() throws Exception;
+
+    /**
+     * Stops the binding.
+     */
+    public abstract void stop() throws Exception;
 
 }

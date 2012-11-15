@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,77 +20,63 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.control.binding.javascript;
+package org.openecard.client.control.binding.intent;
 
-import java.util.Map;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.control.binding.ControlBinding;
-import org.openecard.client.control.binding.javascript.handler.JavaScriptStatusHandler;
-import org.openecard.client.control.binding.javascript.handler.JavaScriptTCTokenHandler;
-import org.openecard.client.control.binding.javascript.handler.JavaScriptWaitForChangeHandler;
+import org.openecard.client.control.binding.intent.handler.IntentTCTokenHandler;
 import org.openecard.client.control.handler.ControlHandlers;
-import org.openecard.client.control.module.status.EventHandler;
-import org.openecard.client.control.module.status.GenericStatusHandler;
-import org.openecard.client.control.module.status.GenericWaitForChangeHandler;
 import org.openecard.client.control.module.tctoken.GenericTCTokenHandler;
 import org.openecard.client.gui.UserConsent;
 import org.openecard.client.recognition.CardRecognition;
 
 
 /**
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * Implements an Intent binding for the control interface.
+ * 
+ * @author Dirk Petrautzki  <petrautzki@hs-coburg.de>
  */
-public class JavaScriptBinding extends ControlBinding {
+public class IntentBinding extends ControlBinding {
 
-    private JavaScriptService service;
-    private CardStateMap cardStateMap;
+    /** The port 24727 according to BSI-TR-03112 is set in the Android client Manifest */
+    private CardStateMap cardStates;
     private Dispatcher dispatcher;
-    private EventHandler eventHandler;
     private UserConsent gui;
     private CardRecognition reg;
 
     /**
-     * Creates a new JavaScriptBinding.
-     * @param cardStateMap CardStateMap of the client
+     * Creates a new IntentBinding.
+     * @param cardStates CardStateMap of the client
      * @param dispatcher dispatcher for sending messages
-     * @param eventHandler to wait for status changes
      * @param gui to show card insertion dialog
      * @param reg to get card information shown in insertion dialog
      */
-    public JavaScriptBinding(CardStateMap cardStateMap, Dispatcher dispatcher, EventHandler eventHandler,
-	    UserConsent gui, CardRecognition reg) {
-	this.cardStateMap = cardStateMap;
+    public IntentBinding(CardStateMap cardStates, Dispatcher dispatcher, UserConsent gui, CardRecognition reg) {
+	this.cardStates = cardStates;
 	this.dispatcher = dispatcher;
-	this.eventHandler = eventHandler;
 	this.gui = gui;
 	this.reg = reg;
     }
 
-    public Object[] handle(String id, Map data) {
-	return service.handle(id, data);
-    }
-
     @Override
     public void start() throws Exception {
+
 	// Add default handlers if none are given
 	if (handlers == null || handlers.getControlHandlers().isEmpty()) {
 	    handlers = new ControlHandlers();
-	    handlers.addControlHandler(new JavaScriptTCTokenHandler(new GenericTCTokenHandler(cardStateMap, dispatcher,
-		    gui, reg)));
-	    handlers.addControlHandler(new JavaScriptStatusHandler(new GenericStatusHandler(cardStateMap)));
-	    handlers.addControlHandler(new JavaScriptWaitForChangeHandler(new GenericWaitForChangeHandler(
-		    eventHandler)));
+	    handlers.addControlHandler(new IntentTCTokenHandler(new GenericTCTokenHandler(cardStates, dispatcher, gui,
+		    reg)));
 	}
+    }
 
-	service = new JavaScriptService(handlers);
-	service.start();
+    public ControlHandlers getHandlers() {
+	return handlers;
     }
 
     @Override
     public void stop() throws Exception {
-	service.interrupt();
+	// nothing to do here
     }
 
 }

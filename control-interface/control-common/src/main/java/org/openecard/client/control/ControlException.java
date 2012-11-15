@@ -20,15 +20,40 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.control.module.status;
-
-import org.openecard.client.control.client.ClientRequest;
+package org.openecard.client.control;
 
 
 /**
- * 
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * Implements an exception for connector errors.
+ *
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public final class StatusChangeRequest extends ClientRequest {
+public class ControlException extends RuntimeException {
+
+    /**
+     * Create a new ControlException.
+     */
+    public ControlException() {
+	super("");
+    }
+
+    /**
+     * Create a new ControlException.
+     *
+     * @param message Message
+     */
+    public ControlException(String message) {
+	super(message);
+    }
+
+    /**
+     * Create a new ControlException.
+     *
+     * @param message Message
+     * @param throwable Throwable
+     */
+    public ControlException(String message, Throwable throwable) {
+	super(message, throwable);
+    }
 
 }

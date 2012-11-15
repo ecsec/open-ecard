@@ -29,4 +29,5 @@ import org.openecard.client.control.client.ClientRequest;
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public final class StatusRequest extends ClientRequest {
+
 }

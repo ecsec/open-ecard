@@ -20,33 +20,51 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.control.binding.http.handler;
+package org.openecard.client.control;
 
-import java.net.URL;
-import java.net.URLEncoder;
-import org.apache.http.HttpRequest;
-import org.apache.http.message.BasicHttpRequest;
-import org.openecard.client.common.util.FileUtils;
-import org.openecard.client.control.module.tctoken.TCTokenRequest;
-import org.testng.annotations.Test;
+import org.openecard.client.control.binding.ControlBinding;
+import org.openecard.client.control.handler.ControlHandlers;
 
 
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class TCTokenHandlerTest {
+public class ControlInterface {
 
-    // TODO fix this test or remove
-    /*TCTokenHandler instance = new TCTokenHandler();
+    private final ControlBinding binding;
 
-    @Test
-    public void testHandleRequest() throws Exception {
-	URL tokenUrl = FileUtils.resolveResourceAsURL(getClass(), "TCToken.xml");
-	String tokenUrlCoded = URLEncoder.encode(tokenUrl.toExternalForm(), "utf-8");
-	String uri = "/eID-Client?tcTokenURL=" + tokenUrlCoded;
-	HttpRequest httpRequest = new BasicHttpRequest("GET", uri);
+    /**
+     * Creates a new ControlInterface.
+     * 
+     * @param binding ControlBinding
+     */
+    public ControlInterface(ControlBinding binding) {
+	this(binding, new ControlHandlers());
+    }
 
-	TCTokenRequest result = (TCTokenRequest) instance.handleRequest(httpRequest);
-    }*/
+    /**
+     * Creates a new ControlInterface.
+     * 
+     * @param binding ControlBinding
+     * @param handlers ControlHandlers
+     */
+    public ControlInterface(ControlBinding binding, ControlHandlers handlers) {
+	this.binding = binding;
+	this.binding.setControlHandlers(handlers);
+    }
+
+    /**
+     * Starts the control interface.
+     */
+    public void start() throws Exception {
+	binding.start();
+    }
+
+    /**
+     * Stops the control interface.
+     */
+    public void stop() throws Exception {
+	binding.stop();
+    }
 
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,13 +22,28 @@
 
 package org.openecard.client.control.module.status;
 
-import org.openecard.client.control.client.ClientRequest;
+import org.openecard.ws.schema.StatusChange;
 
 
 /**
  * 
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ *
  */
-public final class StatusChangeRequest extends ClientRequest {
+public class GenericWaitForChangeHandler {
+
+    private final EventHandler eventHandler;
+
+    /**
+     * Creates a new GenericWaitForChangeHandler.
+     * @param eventHandler to query for a status change
+     */
+    public GenericWaitForChangeHandler(EventHandler eventHandler) {
+	this.eventHandler = eventHandler;
+    }
+
+    public StatusChange getStatusChange() {
+	return eventHandler.next();
+    }
 
 }

@@ -35,7 +35,7 @@ public final class StatusResponse extends ClientResponse {
     private List<ConnectionHandleType> connectionHandles;
 
     /**
-     * Returns the list of connection handles
+     * Returns the list of connection handles.
      * 
      * TODO: replace ConnectionHandleType with StatusType
      * 

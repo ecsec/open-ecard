@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,15 +20,31 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.control.module.status;
+package org.openecard.client.control.binding.intent.handler;
 
-import org.openecard.client.control.client.ClientRequest;
+import android.content.Intent;
+import org.openecard.client.control.handler.ControlHandler;
 
 
 /**
- * 
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public final class StatusChangeRequest extends ClientRequest {
+public abstract class IntentControlHandler extends ControlHandler {
+
+    /**
+     * Creates a new IntentControlHandler.
+     *
+     * @param path Path
+     */
+    public IntentControlHandler(String path) {
+	super(path);
+    }
+
+    /**
+     * Handles an incoming Intent and creates the corresponding outgoing Intent.
+     * @param i incoming Intent containing the request (e.g. for an eID-Client)
+     * @return outgoing intent for the browser
+     */
+    public abstract Intent handle(Intent i);
 
 }

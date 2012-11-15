@@ -23,44 +23,47 @@
 package org.openecard.client.control.binding.javascript;
 
 import java.util.HashMap;
+import javax.xml.transform.TransformerException;
 import org.openecard.client.control.ControlInterface;
+import org.openecard.client.control.module.status.EventHandler;
+import org.openecard.client.ws.MarshallingTypeException;
 import org.openecard.client.ws.WSMarshaller;
 import org.openecard.client.ws.WSMarshallerFactory;
+import org.openecard.ws.schema.StatusChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public final class JavaScriptBindingTest {
 
     private static final Logger logger = LoggerFactory.getLogger(JavaScriptBindingTest.class);
-    private static JavaScriptBinding binding;
     private static WSMarshaller m;
+    static TestClient tc;
+    static JavaScriptBinding binding;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
 	try {
 	    m = WSMarshallerFactory.createInstance();
 
-	    // Start control interface and binding
-	    binding = new JavaScriptBinding();
-	    ControlInterface controlInterface = new ControlInterface(binding);
-	    controlInterface.start();
-
-	    // Start TestClient and at it as al listener
-	    TestClient tc = new TestClient();
-	    controlInterface.getListeners().addControlListener(tc);
+	    // Start TestClient
+	    tc = new TestClient();
 
 	    // Wait some seconds until the SAL comes up
 	    Thread.sleep(2500);
+	    // Start control interface and binding
+	    binding = new JavaScriptBinding(tc.getCardStates(), tc.getDispatcher(), new EventHandler(tc.getEventManager()), tc.getGUI(),
+		    tc.getCardRecognition());
+	    ControlInterface controlInterface = new ControlInterface(binding);
+	    controlInterface.start();
+
 	} catch (Exception e) {
 	    logger.debug(e.getMessage(), e);
 	    Assert.fail();
@@ -68,42 +71,46 @@ public final class JavaScriptBindingTest {
     }
 
     @Test(enabled = !true)
-    public void testBinding() {
+    public void testGetStatus() throws MarshallingTypeException, TransformerException {
+	// Request a "get status"
+	HashMap<String, Object> parameters = new HashMap<String, Object>();
+	Object[] response = binding.handle("getStatus", parameters);
+	if (response == null) {
+	    Assert.fail("Get status failed");
+	}
+	logger.debug(response[0].toString());
+    }
+
+    @Test(enabled = !true)
+    public void testeIDClient() {
 	try {
-	    // Request a "get status"
-	    Object[] response = binding.handle("status", null);
-	    if (response == null) {
-		Assert.fail("Get status failed");
-	    }
 
-	    // Request a "eID-Client"
-	    Document d = m.str2doc(response[0].toString());
-
-	    Node status = d.getFirstChild();
-	    NodeList statusElements = status.getChildNodes();
-
-	    Node n1 = statusElements.item(1);
-	    String contextHandle = n1.getFirstChild().getNodeValue();
-
-	    Node n2 = statusElements.item(2);
-	    String ifdName = n2.getFirstChild().getNodeValue();
-
-	    Node n3 = statusElements.item(3);
-	    String slotIndex = n3.getFirstChild().getNodeValue();
-
-	    String tokenURI = "https://willow.mtg.de/eid-server-demo-app/result/request.html";
+	    String tokenURI = "http://openecard-demo.vserver-001.urospace.de/tcToken?card-type=http://bsi.bund.de/cif/npa.xml";
 
 	    HashMap<String, Object> parameters = new HashMap<String, Object>();
 	    parameters.put("tcTokenURL", tokenURI);
-	    parameters.put("contextHandle", contextHandle);
-	    parameters.put("ifdName", ifdName);
-	    parameters.put("slotIndex", slotIndex);
-	    
-	    response = binding.handle("eID-Client", parameters);
+
+	    Object[] response = binding.handle("eID-Client", parameters);
 	    if (response == null) {
-		Assert.fail("Get status failed");
+		Assert.fail("Get eID-Client failed");
 	    }
 
+	} catch (Exception e) {
+	    logger.debug(e.getMessage(), e);
+	    Assert.fail();
+	}
+    }
+
+    @Test(enabled = !true)
+    public void testWaitForChange() {
+	try {
+	    HashMap<String, Object> parameters = new HashMap<String, Object>();
+	    Object[] response = binding.handle("waitForChange", parameters);
+	    if (response == null) {
+		Assert.fail("WaitForChange failed");
+	    }
+	    logger.debug(response[0].toString());
+	    StatusChange sResponse = (StatusChange) m.unmarshal(m.str2doc(response[0].toString()));
 	} catch (Exception e) {
 	    logger.debug(e.getMessage(), e);
 	    Assert.fail();

@@ -20,15 +20,21 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.control.module.status;
+package org.openecard.client.control.binding.javascript.handler;
 
-import org.openecard.client.control.client.ClientRequest;
+import java.util.Map;
+import org.openecard.client.control.handler.ControlHandler;
 
 
 /**
- * 
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public final class StatusChangeRequest extends ClientRequest {
+public abstract class JavaScriptControlHandler extends ControlHandler {
+
+    public JavaScriptControlHandler(String id) {
+	super(id);
+    }
+
+    public abstract Object[] handle(Map request);
 
 }

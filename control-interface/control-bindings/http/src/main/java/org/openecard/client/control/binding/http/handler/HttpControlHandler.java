@@ -22,31 +22,39 @@
 
 package org.openecard.client.control.binding.http.handler;
 
-import java.net.URL;
-import java.net.URLEncoder;
+import java.io.IOException;
 import org.apache.http.HttpRequest;
-import org.apache.http.message.BasicHttpRequest;
-import org.openecard.client.common.util.FileUtils;
-import org.openecard.client.control.module.tctoken.TCTokenRequest;
-import org.testng.annotations.Test;
+import org.apache.http.HttpResponse;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpRequestHandler;
+import org.openecard.client.control.handler.ControlHandler;
 
 
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class TCTokenHandlerTest {
+public abstract class HttpControlHandler extends ControlHandler implements HttpRequestHandler {
 
-    // TODO fix this test or remove
-    /*TCTokenHandler instance = new TCTokenHandler();
+    /**
+     * Creates a new HttpControlHandler.
+     *
+     * @param path Path
+     */
+    public HttpControlHandler(String path) {
+	super(path);
+    }
 
-    @Test
-    public void testHandleRequest() throws Exception {
-	URL tokenUrl = FileUtils.resolveResourceAsURL(getClass(), "TCToken.xml");
-	String tokenUrlCoded = URLEncoder.encode(tokenUrl.toExternalForm(), "utf-8");
-	String uri = "/eID-Client?tcTokenURL=" + tokenUrlCoded;
-	HttpRequest httpRequest = new BasicHttpRequest("GET", uri);
-
-	TCTokenRequest result = (TCTokenRequest) instance.handleRequest(httpRequest);
-    }*/
+    /**
+     * Handles a HTTP request.
+     *
+     * @param request HttpRequest
+     * @param response HttpResponse
+     * @param context HttpContext
+     * @throws HttpException
+     * @throws IOException
+     */
+    @Override
+    public abstract void handle(HttpRequest request, HttpResponse response, HttpContext context) 
+	throws IOException;
 
 }

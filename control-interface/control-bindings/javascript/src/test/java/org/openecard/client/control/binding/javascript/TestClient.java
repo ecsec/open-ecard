@@ -21,29 +21,18 @@
  ***************************************************************************/
 package org.openecard.client.control.binding.javascript;
 
-import generated.TCTokenType;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
-import java.math.BigInteger;
-import java.net.URL;
-import java.util.List;
-import java.util.Set;
 import org.openecard.client.common.ClientEnv;
-import org.openecard.client.common.ECardConstants;
-import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.sal.state.CardStateEntry;
+import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
-import org.openecard.client.control.client.ClientRequest;
-import org.openecard.client.control.client.ClientResponse;
-import org.openecard.client.control.client.ControlListener;
-import org.openecard.client.control.module.status.StatusRequest;
-import org.openecard.client.control.module.status.StatusResponse;
-import org.openecard.client.control.module.tctoken.TCTokenRequest;
-import org.openecard.client.control.module.tctoken.TCTokenResponse;
 import org.openecard.client.event.EventManager;
+import org.openecard.client.gui.UserConsent;
+import org.openecard.client.gui.swing.SwingDialogWrapper;
+import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.ifd.scio.IFD;
+import org.openecard.client.management.TinyManagement;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.sal.TinySAL;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
@@ -52,17 +41,22 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Implements a TestClient to test the control interface.
+ * Implements a TestClient to test the JavaScriptBinding.
  * 
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Dirk Petrauzki <petrautzki@hs-coburg.de>
  */
-public final class TestClient implements ControlListener {
+public final class TestClient {
 
     private static final Logger logger = LoggerFactory.getLogger(TestClient.class);
     // Service Access Layer (SAL)
     private TinySAL sal;
-    // card states
+    // card states and dispatcher
     private CardStateMap cardStates;
+    private Dispatcher dispatcher;
+    private org.openecard.client.common.interfaces.EventManager eventManager;
+    private CardRecognition recognition;
+    private SwingUserConsent gui;
 
     public TestClient() {
 	try {
@@ -76,12 +70,18 @@ public final class TestClient implements ControlListener {
 	// Set up client environment
 	ClientEnv env = new ClientEnv();
 
+	gui = new SwingUserConsent(new SwingDialogWrapper());
+
 	// Set up the IFD
 	IFD ifd = new IFD();
 	env.setIFD(ifd);
 
+	// Set up Management
+	TinyManagement management = new TinyManagement(env);
+	env.setManagement(management);
+
 	// Set up the Dispatcher
-	MessageDispatcher dispatcher = new MessageDispatcher(env);
+	dispatcher = new MessageDispatcher(env);
 	env.setDispatcher(dispatcher);
 	ifd.setDispatcher(dispatcher);
 
@@ -91,10 +91,11 @@ public final class TestClient implements ControlListener {
 
 	byte[] contextHandle = ifd.establishContext(establishContext).getContextHandle();
 
-	CardRecognition recognition = new CardRecognition(ifd, contextHandle);
+	recognition = new CardRecognition(ifd, contextHandle);
 
 	// Set up EventManager
 	EventManager em = new EventManager(recognition, env, contextHandle);
+	this.eventManager = em;
 	env.setEventManager(em);
 
 	// Set up SALStateCallback
@@ -110,69 +111,24 @@ public final class TestClient implements ControlListener {
 	em.initialize();
     }
 
-    @Override
-    public ClientResponse request(ClientRequest request) {
-	logger.debug("Client request: {}", request.getClass());
-
-	if (request instanceof TCTokenRequest) {
-	    return handleActivate((TCTokenRequest) request);
-	} else if (request instanceof StatusRequest) {
-	    return handleStatus((StatusRequest) request);
-	}
-	return null;
+    public CardStateMap getCardStates() {
+	return this.cardStates;
     }
 
-    private StatusResponse handleStatus(StatusRequest statusRequest) {
-	StatusResponse response = new StatusResponse();
-
-	List<ConnectionHandleType> connectionHandles = sal.getConnectionHandles();
-	if (connectionHandles.isEmpty()) {
-	    response.setResult(WSHelper.makeResultUnknownError("TBD"));
-	    return response;
-	}
-
-	response.setConnectionHandles(connectionHandles);
-
-	return response;
+    public Dispatcher getDispatcher() {
+	return this.dispatcher;
     }
 
-    private TCTokenResponse handleActivate(TCTokenRequest request) {
+    public org.openecard.client.common.interfaces.EventManager getEventManager() {
+	return this.eventManager;
+    }
 
-	TCTokenResponse response = new TCTokenResponse();
-	try {
-	    // TCToken
-	    TCTokenType token = request.getTCToken();
+    public UserConsent getGUI() {
+	return gui;
+    }
 
-	    // ContextHandle, IFDName and SlotIndex
-	    ConnectionHandleType connectionHandle = null;
-	    byte[] requestedContextHandle = request.getContextHandle();
-	    String ifdName = request.getIFDName();
-	    BigInteger requestedSlotIndex = request.getSlotIndex();
-
-	    ConnectionHandleType requestedHandle = new ConnectionHandleType();
-	    requestedHandle.setContextHandle(requestedContextHandle);
-	    requestedHandle.setIFDName(ifdName);
-	    requestedHandle.setSlotIndex(requestedSlotIndex);
-
-	    Set<CardStateEntry> matchingHandles = cardStates.getMatchingEntries(requestedHandle);
-
-	    if (!matchingHandles.isEmpty()) {
-		connectionHandle = matchingHandles.toArray(new CardStateEntry[]{})[0].handleCopy();
-	    }
-
-	    if (connectionHandle == null) {
-		logger.error("Warning", "Given ConnectionHandle is invalied.");
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "Given ConnectionHandle is invalid."));
-		return response;
-	    }
-
-	    response.setRefreshAddress(new URL("http://www.openecard.org"));
-	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
-	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
-	}
-
-	return response;
+    public CardRecognition getCardRecognition() {
+	return recognition;
     }
 
 }

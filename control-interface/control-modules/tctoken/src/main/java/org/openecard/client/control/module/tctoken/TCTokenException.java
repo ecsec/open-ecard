@@ -22,6 +22,7 @@
 
 package org.openecard.client.control.module.tctoken;
 
+
 /**
  * Implements an exception for TCToken verification errors.
  *

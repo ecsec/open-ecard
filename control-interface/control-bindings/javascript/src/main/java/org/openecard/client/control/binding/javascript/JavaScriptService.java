@@ -23,7 +23,7 @@
 package org.openecard.client.control.binding.javascript;
 
 import java.util.Map;
-import org.openecard.client.control.binding.javascript.handler.ControlJavaScriptHandler;
+import org.openecard.client.control.binding.javascript.handler.JavaScriptControlHandler;
 import org.openecard.client.control.handler.ControlHandler;
 import org.openecard.client.control.handler.ControlHandlers;
 import org.slf4j.Logger;
@@ -50,8 +50,8 @@ public class JavaScriptService implements Runnable {
 	try {
 	    for (ControlHandler h : handlers.getControlHandlers()) {
 		if (id.equals(h.getID())) {
-		    if (h instanceof ControlJavaScriptHandler) {
-			return ((ControlJavaScriptHandler) h).handle(data);
+		    if (h instanceof JavaScriptControlHandler) {
+			return ((JavaScriptControlHandler) h).handle(data);
 		    } else {
 			logger.error("Handler [{}] is not supported by the JavaScriptBinding");
 		    }

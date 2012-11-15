@@ -27,8 +27,6 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import org.openecard.client.android.activities.MainActivity;
 import org.openecard.client.common.ClientEnv;
@@ -50,12 +48,19 @@ import org.openecard.client.sal.protocol.eac.EACProtocolFactory;
 import org.openecard.client.sal.protocol.genericryptography.GenericCryptoProtocolFactory;
 import org.openecard.client.sal.protocol.pincompare.PinCompareProtocolFactory;
 import org.openecard.client.scio.ResourceUnpacker;
-import org.openecard.client.scio.VarioCardTerminal;
+import org.openecard.client.scio.RootHelper;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.ws.WsdefProperties;
 import android.app.Application;
-import org.openecard.client.scio.RootHelper;
+import java.io.IOException;
+import org.openecard.client.common.interfaces.Environment;
+import org.openecard.client.control.binding.intent.handler.IntentTCTokenHandler;
+import org.openecard.client.control.handler.ControlHandler;
+import org.openecard.client.control.handler.ControlHandlers;
+import org.openecard.client.control.module.tctoken.GenericTCTokenHandler;
 import org.openecard.client.gui.UserConsent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -65,6 +70,8 @@ import org.openecard.client.gui.UserConsent;
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class ApplicationContext extends Application {
+
+    Logger logger = LoggerFactory.getLogger(ApplicationContext.class);
 
     static {
 	// TODO: load logging config
@@ -90,18 +97,18 @@ public class ApplicationContext extends Application {
 	InputStream driverInputStream = getResources().openRawResource(R.raw.drivers);
 	if (driverInputStream != null) {
 	    File f = new File(getFilesDir() + "/drivers");
-	    if (f.exists())
+	    if (f.exists()) {
 		deleteDir(f);
+	    }
 	    try {
 		ResourceUnpacker.unpackResources(driverInputStream, this, getFilesDir());
-	    } catch (FileNotFoundException e) {
-		// TODO LOG
-		throw new RuntimeException("Cannot get drivers resource.", e);
-	    } catch (IOException e) {
-		// TODO LOG
-		throw new RuntimeException("Cannot get drivers resource.", e);
+	    } catch (IOException ex) {
+		logger.error("Failed to load PCSC drivers.", ex);
+		throw new RuntimeException(ex);
 	    }
-	} else throw new RuntimeException("Cannot get drivers resource.");
+	} else {
+	    throw new RuntimeException("Cannot get drivers resource.");
+	}
     }
 
     public static boolean deleteDir(File dir) {
@@ -141,7 +148,7 @@ public class ApplicationContext extends Application {
 	WsdefProperties.setProperty("org.openecard.client.ws.marshaller.impl",
 	    "org.openecard.client.ws.android.AndroidMarshaller");
 	RootHelper.startPCSCD(getFilesDir());
-	VarioCardTerminal.setApplicationContext(this);
+	//VarioCardTerminal.setApplicationContext(this);
 
 	// Client environment
 	env = new ClientEnv();
@@ -213,11 +220,15 @@ public class ApplicationContext extends Application {
 
 	// Start up control interface
 	try {
-	    IntentBinding intentBinding = new IntentBinding(this.getCardStates(), this.getEnv().getDispatcher(),
-		    this.getGUI(), this.getRecognition());
-	    ControlInterface control = new ControlInterface(intentBinding);
+	    IntentBinding binding = new IntentBinding();
+	    ControlHandlers handler = new ControlHandlers();
+	    GenericTCTokenHandler genericTCTokenHandler = new GenericTCTokenHandler(cardStates, dispatcher, gui, recognition);
+	    ControlHandler tcTokenHandler = new IntentTCTokenHandler(genericTCTokenHandler);
+	    handler.addControlHandler(tcTokenHandler);
+	    ControlInterface control = new ControlInterface(binding, handler);
 	    control.start();
-	    MainActivity.setHandlers(intentBinding.getHandlers());
+
+	    MainActivity.setHandlers(binding.getHandlers());
 	} catch (Exception e) {
 	    System.exit(0);
 	}
@@ -230,6 +241,10 @@ public class ApplicationContext extends Application {
 
     public CardRecognition getRecognition() {
 	return recognition;
+    }
+
+    public Environment getEnv() {
+	return env;
     }
 
 }

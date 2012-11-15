@@ -104,15 +104,15 @@ public class JSEventCallback {
     private void setupJSBinding(CardStateMap cardStates, Dispatcher dispatcher, EventHandler eventHandler, UserConsent gui, CardRecognition reg) {
 	try {
 	    ControlHandlers handler = new ControlHandlers();
-    	GenericTCTokenHandler genericTCTokenHandler = new GenericTCTokenHandler(cardStates, dispatcher, gui, reg);
-    	ControlHandler tcTokenHandler = new JavaScriptTCTokenHandler(genericTCTokenHandler);
-    	GenericStatusHandler genericStatusHandler = new GenericStatusHandler(cardStates, eventHandler);
-    	ControlHandler statusHandler = new JavaScriptStatusHandler(genericStatusHandler);
-    	GenericWaitForChangeHandler genericWaitForChangeHandler = new GenericWaitForChangeHandler(eventHandler);
-    	ControlHandler waitForChangeHandler = new JavaScriptWaitForChangeHandler(genericWaitForChangeHandler);
-    	handler.addControlHandler(tcTokenHandler);
-    	handler.addControlHandler(statusHandler);
-    	handler.addControlHandler(waitForChangeHandler);
+	    GenericTCTokenHandler genericTCTokenHandler = new GenericTCTokenHandler(cardStates, dispatcher, gui, reg);
+	    ControlHandler tcTokenHandler = new JavaScriptTCTokenHandler(genericTCTokenHandler);
+	    GenericStatusHandler genericStatusHandler = new GenericStatusHandler(cardStates, eventHandler);
+	    ControlHandler statusHandler = new JavaScriptStatusHandler(genericStatusHandler);
+	    GenericWaitForChangeHandler genericWaitForChangeHandler = new GenericWaitForChangeHandler(eventHandler);
+	    ControlHandler waitForChangeHandler = new JavaScriptWaitForChangeHandler(genericWaitForChangeHandler);
+	    handler.addControlHandler(tcTokenHandler);
+	    handler.addControlHandler(statusHandler);
+	    handler.addControlHandler(waitForChangeHandler);
 	    ControlInterface control = new ControlInterface(this.binding);
 	    control.start();
 	} catch (Exception ex) {

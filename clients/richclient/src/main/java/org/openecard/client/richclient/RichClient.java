@@ -34,10 +34,14 @@ import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.control.ControlInterface;
 import org.openecard.client.control.binding.http.HTTPBinding;
+import org.openecard.client.control.binding.http.handler.HttpStatusHandler;
 import org.openecard.client.control.binding.http.handler.HttpTCTokenHandler;
+import org.openecard.client.control.binding.http.handler.HttpWaitForChangeHandler;
 import org.openecard.client.control.handler.ControlHandler;
 import org.openecard.client.control.handler.ControlHandlers;
 import org.openecard.client.control.module.status.EventHandler;
+import org.openecard.client.control.module.status.GenericStatusHandler;
+import org.openecard.client.control.module.status.GenericWaitForChangeHandler;
 import org.openecard.client.control.module.tctoken.GenericTCTokenHandler;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingDialogWrapper;
@@ -169,13 +173,19 @@ public final class RichClient {
 	    em.initialize();
 	    // Start up control interface
 	    try {
-	    	HTTPBinding binding = 
-	    			new HTTPBinding(HTTPBinding.DEFAULT_PORT);
+	    	HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
 	    	ControlHandlers handler = new ControlHandlers();
 	    	GenericTCTokenHandler genericTCTokenHandler = new GenericTCTokenHandler(cardStates, dispatcher, gui, recognition);
+		EventHandler eventHandler = new EventHandler(em);
+		GenericStatusHandler genericStatusHandler = new GenericStatusHandler(cardStates, eventHandler);
+		GenericWaitForChangeHandler genericWaitHandler = new GenericWaitForChangeHandler(eventHandler);
 	    	ControlHandler tcTokenHandler = new HttpTCTokenHandler(genericTCTokenHandler);
+		ControlHandler statusHandler = new HttpStatusHandler(genericStatusHandler);
+		ControlHandler waitHandler = new HttpWaitForChangeHandler(genericWaitHandler);
 	    	handler.addControlHandler(tcTokenHandler);
-	    	ControlInterface control = new ControlInterface(binding, handler);
+		handler.addControlHandler(statusHandler);
+		handler.addControlHandler(waitHandler);
+	    	control = new ControlInterface(binding, handler);
 	    	control.start();
 	    } catch (BindException e) {
 		dialog.setMessage(lang.translationForKey("client.startup.failed.portinuse"));
@@ -198,6 +208,9 @@ public final class RichClient {
 
     public void teardown() {
 	try {
+	    // shutdown control modules
+	    control.stop();
+
 	    // shutdwon event manager
 	    em.terminate();
 

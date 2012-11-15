@@ -227,6 +227,18 @@ public class StepActivity extends Activity {
 		});
 	    }
 	});
+
+	if (step.isInstantReturn()) {
+	    llGuiInterface.post(new Runnable() {
+		@Override
+		public void run() {
+		    try {
+			AndroidNavigator.getInstance().setStepResult(false, false, getResultContent());
+		    } catch (InterruptedException ignore) {
+		    }
+		}
+	    });
+	}
     }
 
 }

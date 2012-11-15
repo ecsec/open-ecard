@@ -160,19 +160,7 @@ public class MainActivity extends Activity implements EventCallback {
 	Editor editor = getSharedPreferences("clear_cache", Context.MODE_PRIVATE).edit();
 	editor.clear();
 	editor.commit();
-	trimCache(this);
 	System.exit(0);
-    }
-
-    public static void trimCache(Context context) {
-	try {
-	    File dir = context.getCacheDir();
-	    if (dir != null && dir.isDirectory()) {
-		ApplicationContext.deleteDir(dir);
-	    }
-	} catch (Exception e) {
-	    // TODO: handle exception
-	}
     }
 
     @Override

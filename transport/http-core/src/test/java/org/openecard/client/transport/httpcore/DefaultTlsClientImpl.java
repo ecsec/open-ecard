@@ -55,9 +55,4 @@ public class DefaultTlsClientImpl extends DefaultTlsClient {
 	};
     }
 
-    @Override
-    public void notifySessionID(byte[] sessionID) {
-	// ignore and thus don't do session resuming
-    }
-
 }

@@ -78,9 +78,4 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	this.tlsAuth = tlsAuth;
     }
 
-    @Override
-    public void notifySessionID(byte[] sessionID) {
-	// ignore and thus don't do session resuming
-    }
-
 }

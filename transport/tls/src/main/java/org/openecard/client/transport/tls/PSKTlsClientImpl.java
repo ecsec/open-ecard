@@ -70,9 +70,4 @@ public class PSKTlsClientImpl extends PSKTlsClient {
         return new DefaultTlsAuthentication(null);
     }
 
-    @Override
-    public void notifySessionID(byte[] sessionID) {
-	// ignore and thus don't do session resuming
-    }
-
 }

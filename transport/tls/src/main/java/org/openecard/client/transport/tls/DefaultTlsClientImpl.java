@@ -49,9 +49,4 @@ public class DefaultTlsClientImpl extends DefaultTlsClient {
 	return tlsAuthentication;
     }
 
-    @Override
-    public void notifySessionID(byte[] sessionID) {
-	// ignore and thus don't do session resuming
-    }
-
 }

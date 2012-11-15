@@ -81,9 +81,4 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 	this.tlsAuth = tlsAuth;
     }
 
-    @Override
-    public void notifySessionID(byte[] sessionID) {
-	// ignore and thus don't do session resuming
-    }
-
 }

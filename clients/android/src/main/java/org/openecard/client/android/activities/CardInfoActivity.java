@@ -31,6 +31,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import java.io.InputStream;
 import org.openecard.client.android.ApplicationContext;
 import org.openecard.client.android.R;
 import org.openecard.client.common.enums.EventType;

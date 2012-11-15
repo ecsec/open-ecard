@@ -22,18 +22,22 @@
 
 package org.openecard.client.android;
 
-import android.app.Application;
-import iso.std.iso_iec._24727.tech.schema.*;
-
+import iso.std.iso_iec._24727.tech.schema.EstablishContext;
+import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
+import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
+import iso.std.iso_iec._24727.tech.schema.Terminate;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Locale;
-import org.openecard.client.common.*;
+import org.openecard.client.android.activities.MainActivity;
+import org.openecard.client.common.ClientEnv;
+import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
+import org.openecard.client.control.ControlInterface;
+import org.openecard.client.control.binding.intent.IntentBinding;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.android.AndroidUserConsent;
 import org.openecard.client.ifd.protocol.pace.PACEProtocolFactory;
@@ -45,8 +49,14 @@ import org.openecard.client.sal.TinySAL;
 import org.openecard.client.sal.protocol.eac.EACProtocolFactory;
 import org.openecard.client.sal.protocol.genericryptography.GenericCryptoProtocolFactory;
 import org.openecard.client.sal.protocol.pincompare.PinCompareProtocolFactory;
+import org.openecard.client.scio.ResourceUnpacker;
+import org.openecard.client.scio.VarioCardTerminal;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.openecard.client.ws.WsdefProperties;
+import android.app.Application;
+import org.openecard.client.scio.RootHelper;
+import org.openecard.client.gui.UserConsent;
+
 
 /**
  * This class is instantiated when the process of this application is created.
@@ -71,6 +81,7 @@ public class ApplicationContext extends Application {
     private Dispatcher dispatcher = null;
     private boolean initialized = false;
     private boolean recognizeCard = true;
+    private UserConsent gui;
 
     @Override
     public void onCreate() {
@@ -121,12 +132,16 @@ public class ApplicationContext extends Application {
 	ReleaseContext releaseContext = new ReleaseContext();
 	releaseContext.setContextHandle(contextHandle);
 	ifd.releaseContext(releaseContext);
-		
+	RootHelper.killPCSCD();
     }
 
     public void initialize() {
+	// IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl", "org.openecard.client.scio.VarioFactory");
 	IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl", "org.openecard.client.scio.AndroidPCSCFactory");
-	WsdefProperties.setProperty("org.openecard.client.ws.marshaller.impl", "org.openecard.client.ws.android.AndroidMarshaller");
+	WsdefProperties.setProperty("org.openecard.client.ws.marshaller.impl",
+	    "org.openecard.client.ws.android.AndroidMarshaller");
+	RootHelper.startPCSCD(getFilesDir());
+	VarioCardTerminal.setApplicationContext(this);
 
 	// Client environment
 	env = new ClientEnv();
@@ -140,7 +155,7 @@ public class ApplicationContext extends Application {
 	env.setDispatcher(dispatcher);
 
 	// GUI
-	AndroidUserConsent gui = new AndroidUserConsent(this);
+	gui = new AndroidUserConsent(this);
 
 	// IFD
 	ifd = new IFD();
@@ -195,10 +210,22 @@ public class ApplicationContext extends Application {
 	env.setSAL(sal);
 
 	em.initialize();
+
+	// Start up control interface
+	try {
+	    IntentBinding intentBinding = new IntentBinding(this.getCardStates(), this.getEnv().getDispatcher(),
+		    this.getGUI(), this.getRecognition());
+	    ControlInterface control = new ControlInterface(intentBinding);
+	    control.start();
+	    MainActivity.setHandlers(intentBinding.getHandlers());
+	} catch (Exception e) {
+	    System.exit(0);
+	}
+
     }
 
-    public ClientEnv getEnv() {
-	return env;
+    public UserConsent getGUI() {
+	return gui;
     }
 
     public CardRecognition getRecognition() {

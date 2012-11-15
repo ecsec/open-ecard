@@ -22,55 +22,125 @@
 
 package org.openecard.client.richclient;
 
-import generated.TCTokenType;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import org.openecard.client.common.ECardConstants;
-import org.openecard.client.control.module.tctoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.testng.Assert.fail;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 
 /**
- *
+ * 
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class RichClientTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RichClient.class.getName());
-    private static TCTokenType token;
-    private static String tokenURI = "https://willow.mtg.de/eid-server-demo-app/result/request.html";
 
+    private static URL tcTokenURL;
+    private static URL statusURL;
+    private static URL waitForChangeURL;
+
+    /**
+     * Starts up the RichClient.
+     */
     @BeforeMethod
     public void setUp() {
 	try {
-	    token = TCTokenFactory.generateTCToken(new URL(tokenURI));
-	} catch (Exception e) {
-	    logger.error(e.getMessage());
-	    fail(e.getMessage());
-	}
-    }
-
-    @Test(enabled = false)
-    public void testMain() {
-	try {
+	    tcTokenURL = new URL("http", "127.0.0.1", 24727, 
+		   "/eID-Client?tcTokenURL=http%3A%2F%2Fopenecard-demo.vserver-001.urospace.de%2FtcToken%3Fcard-type%3Dhttp%3A%2F%2Fbsi.bund.de%2Fcif%2Fnpa.xml");
+	    statusURL = new URL("http", "127.0.0.1", 24727, "/getStatus");
+	    waitForChangeURL = new URL("http", "127.0.0.1", 24727, "/waitForChange");
 	    RichClient client = RichClient.getInstance();
 	    // Wait some seconds until the client comes up
 	    Thread.sleep(2500);
-
-	    TCTokenRequest applicationRequest = new TCTokenRequest();
-	    applicationRequest.setTCToken(token);
-	    TCTokenResponse applicationReponse = (TCTokenResponse) client.request(applicationRequest);
-
-	    if (!applicationReponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
-		fail(applicationReponse.getResult().getResultMajor());
-	    }
 	} catch (Exception e) {
 	    logger.error(e.getMessage(), e);
 	    fail(e.getMessage());
 	}
+    }
+
+    /**
+     * Test the Response of the RichClient to a TCTokenRequest.
+     */
+    @Test(enabled = false)
+    public void testTCToken() {
+	try {
+	    HttpURLConnection urlConnection = (HttpURLConnection) tcTokenURL.openConnection();
+	    getResponse(urlConnection);
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    fail(e.getMessage());
+	}
+    }
+
+    /**
+     * Test the Response of the RichClient to a StatusRequest.
+     */
+    @Test(enabled = false)
+    public void testStatus() {
+	try {
+	    HttpURLConnection urlConnection = (HttpURLConnection) statusURL.openConnection();
+	    getResponse(urlConnection);
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    fail(e.getMessage());
+	}
+    }
+
+    /**
+     * Test the Response of the RichClient to a WaitForChangeReuquest.
+     */
+    @Test(enabled = false)
+    public void testWaitForChange() {
+	try {
+	    HttpURLConnection urlConnection = (HttpURLConnection) waitForChangeURL.openConnection();
+	    getResponse(urlConnection);
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    fail(e.getMessage());
+	}
+    }
+
+    /**
+     * Opens the URLConnection, gets the Response and checks the ResponseCode.
+     * @param urlConnection the connection to open
+     * @throws IOException if an I/O error occurs 
+     */
+    private static void getResponse(HttpURLConnection urlConnection) throws IOException {
+	try {
+	    StringBuilder sb = new StringBuilder();
+	    BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+	    String read = br.readLine();
+
+	    while (read != null) {
+		sb.append(read);
+		read = br.readLine();
+	    }
+
+	    logger.debug(sb.toString());
+	    assertTrue(checkResponseCode(urlConnection.getResponseCode()));
+	} finally {
+	    urlConnection.disconnect();
+	}
+    }
+
+    /**
+     * Check for a successful status code (2xx).
+     * 
+     * @param code
+     *            status code to be checked
+     * @return true if successful, else false
+     */
+    private static boolean checkResponseCode(int code) {
+	return ((code >= 200) && (code < 300));
     }
 
 }

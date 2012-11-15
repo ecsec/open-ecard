@@ -23,7 +23,6 @@
 package org.openecard.client.applet;
 
 import de.bund.bsi.ecard.api._1.TerminateFramework;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
@@ -32,19 +31,17 @@ import java.awt.Container;
 import java.awt.Frame;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Iterator;
-import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JApplet;
 import javax.swing.JOptionPane;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.I18n;
-import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.common.util.FileUtils;
+import org.openecard.client.control.module.status.EventHandler;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
@@ -70,8 +67,6 @@ public class ECardApplet extends JApplet {
     private static final Logger logger = LoggerFactory.getLogger(ECardApplet.class);
     private static final I18n lang = I18n.getTranslation("applet");
 
-    private ApplicationHandler handler;
-    private EventHandler eventHandler;
     private ClientEnv env;
     private TinySAL sal;
     private IFD ifd;
@@ -161,11 +156,8 @@ public class ECardApplet extends JApplet {
 	sal.addProtocol(ECardConstants.Protocol.EAC, new EACProtocolFactory());
 	env.setSAL(sal);
 
-	// ApplicationHandler
-	handler = new ApplicationHandler(this, env, sal);
-
 	// JavaScript Bridge
-	jsCallback = new JSEventCallback(this, handler);
+	jsCallback = new JSEventCallback(this, cardStates, dispatcher, new EventHandler(em), gui, recognition);
 
 	// start EventManager
 	em.initialize();
@@ -236,8 +228,6 @@ public class ECardApplet extends JApplet {
 	    jsCallback = null;
 	}
 	// destroy the remaining components
-	handler = null;
-	eventHandler = null;
 	env = null;
     }
 

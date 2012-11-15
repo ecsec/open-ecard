@@ -25,17 +25,22 @@ package org.openecard.client.android.activities;
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.io.InputStream;
 import org.openecard.client.android.ApplicationContext;
+import org.openecard.client.android.ApplicationContext;
+import org.openecard.client.android.R;
 import org.openecard.client.android.R;
 import org.openecard.client.android.RootHelper;
 import org.openecard.client.common.enums.EventType;
+import org.openecard.client.common.enums.EventType;
+import org.openecard.client.common.interfaces.EventCallback;
 import org.openecard.client.common.interfaces.EventCallback;
 
 
@@ -58,8 +63,6 @@ public class CardInfoActivity extends Activity implements EventCallback {
 	// Set up the window layout
 	setContentView(R.layout.cardinfo);
 
-	RootHelper.startPCSCD(getFilesDir());
-
 	// initialize and register for events
 	applicationContext = ((ApplicationContext) getApplicationContext());
 	applicationContext.initialize();
@@ -78,8 +81,7 @@ public class CardInfoActivity extends Activity implements EventCallback {
     @Override
     protected void onDestroy() {
 	applicationContext.shutdown();
-	RootHelper.killPCSCD();
-        super.onDestroy();  
+	super.onDestroy();
     }
         
     @Override

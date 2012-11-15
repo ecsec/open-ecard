@@ -21,32 +21,20 @@
  ***************************************************************************/
 package org.openecard.client.richclient;
 
-import generated.TCTokenType;
-import iso.std.iso_iec._24727.tech.schema.*;
-import java.math.BigInteger;
+import iso.std.iso_iec._24727.tech.schema.EstablishContext;
+import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
+import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
+import iso.std.iso_iec._24727.tech.schema.Terminate;
 import java.net.BindException;
-import java.net.URL;
-import java.util.List;
-import java.util.Set;
 import javax.swing.JOptionPane;
-import org.openecard.bouncycastle.crypto.tls.TlsClient;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.I18n;
-import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.WSHelper.WSException;
-import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.control.ControlInterface;
 import org.openecard.client.control.binding.http.HTTPBinding;
-import org.openecard.client.control.client.ClientRequest;
-import org.openecard.client.control.client.ClientResponse;
-import org.openecard.client.control.client.ControlListener;
-import org.openecard.client.control.module.status.StatusRequest;
-import org.openecard.client.control.module.status.StatusResponse;
-import org.openecard.client.control.module.tctoken.TCTokenRequest;
-import org.openecard.client.control.module.tctoken.TCTokenResponse;
+import org.openecard.client.control.module.status.EventHandler;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
@@ -60,9 +48,6 @@ import org.openecard.client.richclient.gui.MessageDialog;
 import org.openecard.client.sal.TinySAL;
 import org.openecard.client.sal.protocol.eac.EACProtocolFactory;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
-import org.openecard.client.transport.paos.PAOS;
-import org.openecard.client.transport.tls.PSKTlsClientImpl;
-import org.openecard.client.transport.tls.TlsClientSocketFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
-public final class RichClient implements ControlListener {
+public final class RichClient {
 
     private static final Logger _logger = LoggerFactory.getLogger(RichClient.class.getName());
     private static final I18n lang = I18n.getTranslation("richclient");
@@ -109,190 +94,6 @@ public final class RichClient implements ControlListener {
 	return client;
     }
 
-    @Override
-    public ClientResponse request(ClientRequest request) {
-	_logger.debug("Client request: {}", request.getClass());
-
-	if (request instanceof TCTokenRequest) {
-	    return handleActivate((TCTokenRequest) request);
-	} else if (request instanceof StatusRequest) {
-	    return handleStatus((StatusRequest) request);
-	}
-	return null;
-    }
-
-    private StatusResponse handleStatus(StatusRequest statusRequest) {
-	StatusResponse response = new StatusResponse();
-
-	List<ConnectionHandleType> connectionHandles = sal.getConnectionHandles();
-	if (connectionHandles.isEmpty()) {
-	    response.setResult(WSHelper.makeResultUnknownError("TBD"));
-	    return response;
-	}
-
-	response.setConnectionHandles(connectionHandles);
-
-	return response;
-    }
-
-    /**
-     * Activate the client.
-     *
-     * @param request ActivationApplicationRequest
-     * @return ActivationApplicationResponse
-     */
-    private TCTokenResponse handleActivate(TCTokenRequest request) {
-	// use dumb activation without explicitly specifying the card and terminal
-	// see TR-03112-7 v 1.1.2 (2012-02-28) sec. 3.2
-	if (request.getContextHandle() == null || request.getIFDName() == null || request.getSlotIndex() == null) {
-	    return handleCardTypeActivate(request);
-	}
-
-	TCTokenResponse response = new TCTokenResponse();
-	// TCToken
-	TCTokenType token = request.getTCToken();
-
-	// ContextHandle, IFDName and SlotIndex
-	ConnectionHandleType connectionHandle = null;
-	byte[] requestedContextHandle = request.getContextHandle();
-	String ifdName = request.getIFDName();
-	BigInteger requestedSlotIndex = request.getSlotIndex();
-
-	ConnectionHandleType requestedHandle = new ConnectionHandleType();
-	requestedHandle.setContextHandle(requestedContextHandle);
-	requestedHandle.setIFDName(ifdName);
-	requestedHandle.setSlotIndex(requestedSlotIndex);
-
-	Set<CardStateEntry> matchingHandles = cardStates.getMatchingEntries(requestedHandle);
-
-	if (!matchingHandles.isEmpty()) {
-	    connectionHandle = matchingHandles.toArray(new CardStateEntry[]{})[0].handleCopy();
-	}
-
-	if (connectionHandle == null) {
-	    String msg = "Given ConnectionHandle is invalid.";
-	    _logger.error(msg);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
-	    return response;
-	}
-
-	return doPAOS(token, connectionHandle);
-    }
-
-    /**
-     * Activate the client, but assume to use the given card type and no handle information is given upfront.
-     *
-     * @param request
-     * @return
-     */
-    private TCTokenResponse handleCardTypeActivate(TCTokenRequest request) {
-	TCTokenType token = request.getTCToken();
-
-	// get handle to first card of specifified type
-	ConnectionHandleType connectionHandle = getFirstHandle(request.getCardType());
-	if (connectionHandle == null) {
-	    TCTokenResponse response = new TCTokenResponse();
-	    String msg = "No ConnectionHandle with card type '" + request.getCardType() + "' available.";
-	    _logger.error(msg);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
-	    return response;
-	}
-
-	return doPAOS(token, connectionHandle);
-    }
-
-    /**
-     * Get the first found handle of an nPA.
-     *
-     * @return Handle describing the nPA or null if none is present.
-     */
-    private ConnectionHandleType getFirstHandle(String type) {
-	ConnectionHandleType conHandle = new ConnectionHandleType();
-	ConnectionHandleType.RecognitionInfo rec = new ConnectionHandleType.RecognitionInfo();
-	rec.setCardType(type);
-	conHandle.setRecognitionInfo(rec);
-
-	// TODO: wait for card when none is present
-
-	Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
-	if (entries.isEmpty()) {
-	    return null;
-	} else {
-	    return entries.iterator().next().handleCopy();
-	}
-    }
-
-    private TCTokenResponse doPAOS(TCTokenType token, ConnectionHandleType connectionHandle) {
-	try {
-	    // Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
-	    CardApplicationPath cardApplicationPath = new CardApplicationPath();
-	    cardApplicationPath.setCardAppPathRequest(connectionHandle);
-	    CardApplicationPathResponse cardApplicationPathResponse = sal.cardApplicationPath(cardApplicationPath);
-
-	    try {
-		// Check CardApplicationPathResponse
-		WSHelper.checkResult(cardApplicationPathResponse);
-	    } catch (WSException ex) {
-		TCTokenResponse response = new TCTokenResponse();
-		response.setResult(ex.getResult());
-		return response;
-	    }
-
-	    CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
-	    cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
-	    CardApplicationConnectResponse cardApplicationConnectResponse = sal.cardApplicationConnect(cardApplicationConnect);
-	    // Update ConnectionHandle. It now includes a SlotHandle.
-	    connectionHandle = cardApplicationConnectResponse.getConnectionHandle();
-
-	    try {
-		// Check CardApplicationConnectResponse
-		WSHelper.checkResult(cardApplicationConnectResponse);
-	    } catch (WSException ex) {
-		TCTokenResponse response = new TCTokenResponse();
-		response.setResult(ex.getResult());
-		return response;
-	    }
-
-	    String sessionIdentifier = token.getSessionIdentifier();
-	    URL serverAddress = new URL(token.getServerAddress());
-
-	    // Set up TLS connection
-	    String secProto = token.getPathSecurityProtocol();
-	    TlsClientSocketFactory tlsClientFactory = null;
-	    // TODO: Change to support different protocols
-	    if (secProto.equals("urn:ietf:rfc:4279") || secProto.equals("urn:ietf:rfc:5487")) {
-		byte[] psk = token.getPathSecurityParameters().getPSK();
-		TlsClient tlsClient = new PSKTlsClientImpl(sessionIdentifier.getBytes(), psk, serverAddress.getHost());
-		tlsClientFactory = new TlsClientSocketFactory(tlsClient);
-	    }
-
-	    // Set up PAOS connection
-	    PAOS p = new PAOS(serverAddress, env.getDispatcher(), tlsClientFactory);
-
-	    // Send StartPAOS
-	    StartPAOS sp = new StartPAOS();
-	    sp.getConnectionHandle().add(connectionHandle);
-	    sp.setSessionIdentifier(sessionIdentifier);
-	    p.sendStartPAOS(sp);
-
-	    TCTokenResponse response = new TCTokenResponse();
-	    response.setRefreshAddress(new URL(token.getRefreshAddress()));
-	    response.setResult(WSHelper.makeResultOK());
-	    return response;
-
-	} catch (WSException w) {
-	    TCTokenResponse response = new TCTokenResponse();
-	    _logger.error(w.getMessage(), w);
-	    response.setResult(w.getResult());
-	    return response;
-	} catch (Throwable w) {
-	    TCTokenResponse response = new TCTokenResponse();
-	    _logger.error(w.getMessage(), w);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
-	    return response;
-	}
-    }
-
     public void setup() {
 	GUIDefaults.initialize();
 
@@ -300,16 +101,6 @@ public final class RichClient implements ControlListener {
 	dialog.setHeadline(lang.translationForKey("client.startup.failed.headline"));
 
 	try {
-	    // Start up control interface
-	    try {
-		HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
-		control = new ControlInterface(binding);
-		control.getListeners().addControlListener(this);
-		control.start();
-	    } catch (BindException e) {
-		dialog.setMessage(lang.translationForKey("client.startup.failed.portinuse"));
-		throw e;
-	    }
 
 	    tray = new AppTray(this);
 	    tray.beginSetup();
@@ -372,6 +163,16 @@ public final class RichClient implements ControlListener {
 
 	    // Initialize the EventManager
 	    em.initialize();
+	    // Start up control interface
+	    try {
+		HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT, cardStates, env.getDispatcher(), new EventHandler(em), gui, recognition);
+		control = new ControlInterface(binding);
+		control.start();
+	    } catch (BindException e) {
+		dialog.setMessage(lang.translationForKey("client.startup.failed.portinuse"));
+		throw e;
+	    }
+
 	} catch (Exception e) {
 	    _logger.error(e.getMessage(), e);
 

@@ -11,6 +11,10 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.CLEAR_APP_CACHE" />
 
+    <!-- Permission to use REINER SCT Vario Bluetooth Reader -->
+    <uses-permission android:name="com.reinersct.permission.CYBERJACK" />
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+
     <application
         android:name=".ApplicationContext"
         android:icon="@drawable/openecard"

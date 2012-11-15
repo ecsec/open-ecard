@@ -33,15 +33,23 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
+import org.openecard.client.common.interfaces.Dispatcher;
+import org.openecard.client.common.interfaces.EventManager;
+import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.control.ControlInterface;
 import org.openecard.client.control.binding.javascript.JavaScriptBinding;
-import org.openecard.client.control.client.ClientResponse;
-import org.openecard.client.control.module.status.StatusChangeRequest;
-import org.openecard.client.control.module.status.StatusChangeResponse;
+import org.openecard.client.control.module.status.EventHandler;
+import org.openecard.client.gui.UserConsent;
+import org.openecard.client.recognition.CardRecognition;
+import org.openecard.client.ws.MarshallingTypeException;
+import org.openecard.client.ws.WSMarshaller;
+import org.openecard.client.ws.WSMarshallerException;
+import org.openecard.client.ws.WSMarshallerFactory;
 import org.openecard.ws.schema.StatusChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 
 /**
@@ -54,33 +62,42 @@ public class JSEventCallback {
     private static final Logger logger = LoggerFactory.getLogger(JSEventCallback.class);
 
     private final ExecutorService workerPool;
-    private final ApplicationHandler handler;
     private final JSObjectWrapper jsObjectWrapper;
     private final String jsEventCallback;
     private final String jsMessageCallback;
 
     private JavaScriptBinding binding;
 
-    public JSEventCallback(ECardApplet applet, ApplicationHandler handler) {
+    /**
+     * Create a new JSEventCallback.
+     * @param applet
+     * @param cardStates CardStateMap of the client
+     * @param dispatcher dispatcher for sending messages
+     * @param eventHandler to wait for status changes
+     * @param gui to show card insertion dialog
+     * @param reg to get card information shown in insertion dialog
+     */
+    public JSEventCallback(ECardApplet applet, CardStateMap cardStates, Dispatcher dispatcher, EventHandler eventHandler, UserConsent gui, CardRecognition reg) {
 	this.workerPool = Executors.newCachedThreadPool();
-	this.handler = handler;
 	this.jsObjectWrapper = new JSObjectWrapper(applet);
 	this.jsEventCallback = applet.getParameter("jsEventCallback");
 	this.jsMessageCallback = applet.getParameter("jsMessageCallback");
-
-	setupJSBinding(this.handler);
+	setupJSBinding(cardStates, dispatcher, eventHandler, gui, reg);
     }
 
     /**
      * Prepare the JavaScript internal binding.
      *
-     * @param handler to handle requests/responses
+     * @param cardStates CardStateMap of the client
+     * @param dispatcher dispatcher for sending messages
+     * @param eventHandler to wait for status changes
+     * @param gui to show card insertion dialog
+     * @param reg to get card information shown in insertion dialog
      */
-    private void setupJSBinding(ApplicationHandler handler) {
+    private void setupJSBinding(CardStateMap cardStates, Dispatcher dispatcher, EventHandler eventHandler, UserConsent gui, CardRecognition reg) {
 	try {
-	    this.binding = new JavaScriptBinding();
+	    this.binding = new JavaScriptBinding(cardStates, dispatcher, eventHandler, gui, reg);
 	    ControlInterface control = new ControlInterface(this.binding);
-	    control.getListeners().addControlListener(handler);
 	    control.start();
 	} catch (Exception ex) {
 	    logger.error(ex.getMessage(), ex);
@@ -108,20 +125,28 @@ public class JSEventCallback {
 		JSObject jsObject = jsObjectWrapper.getNamespacedJSObject(jsEventCallback);
 		String function = JSObjectWrapper.getFunction(jsEventCallback);
 
-		// FIXME: this is a workaround until the javascript binding supports StatusChangeRequests/Responses
-		StatusChangeRequest statusChangeRequest = new StatusChangeRequest();
-		ClientResponse clientResponse = null;
-
+		WSMarshaller m = null;
+		try {
+		    m = WSMarshallerFactory.createInstance();
+		} catch (WSMarshallerException e) {
+		    logger.error(e.getMessage(), e);
+		    throw new RuntimeException(e);
+		}
 		while (!Thread.currentThread().isInterrupted()) {
-		    clientResponse = handler.request(statusChangeRequest);
+		    Object[] waitForChangeResponse =  binding.handle("waitForChange", null);
 
-		    if (clientResponse != null && clientResponse instanceof StatusChangeResponse
-			    && ((StatusChangeResponse) clientResponse).getStatusChange() != null) {
-			StatusChange statusChange = ((StatusChangeResponse) clientResponse).getStatusChange();
-			Object[] response = buildEvent(statusChange);
-
+		    if (waitForChangeResponse != null) {
+			StatusChange statusChange;
 			try {
+			    statusChange = (StatusChange)  m.unmarshal(m.str2doc(waitForChangeResponse[0].toString()));
+			    Object[] response = buildEvent(statusChange);
 			    jsObject.call(function, response);
+			} catch (MarshallingTypeException e) {
+			    logger.error("Marshalling of WaitForChange-Response failed", e);
+			} catch (WSMarshallerException e) {
+			    logger.error("Marshalling of WaitForChange-Response failed", e);
+			} catch (SAXException e) {
+			    logger.error("Marshalling of WaitForChange-Response failed", e);
 			} catch (JSException ignore) {
 			}
 		    }

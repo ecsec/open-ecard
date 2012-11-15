@@ -25,6 +25,9 @@ import java.io.IOException;
 import org.apache.http.protocol.BasicHttpProcessor;
 import org.openecard.client.control.binding.ControlBinding;
 import org.openecard.client.control.binding.http.common.DocumentRoot;
+import org.openecard.client.control.binding.http.handler.common.DefaultHandler;
+import org.openecard.client.control.binding.http.handler.common.FileHandler;
+import org.openecard.client.control.binding.http.handler.common.IndexHandler;
 import org.openecard.client.control.binding.http.interceptor.CORSRequestInterceptor;
 import org.openecard.client.control.binding.http.interceptor.CORSResponseInterceptor;
 import org.openecard.client.control.binding.http.interceptor.ErrorResponseInterceptor;
@@ -100,6 +103,11 @@ public class HTTPBinding extends ControlBinding {
 	    interceptors.addInterceptor(new CORSResponseInterceptor());
 	    interceptors.addInterceptor(new CORSRequestInterceptor());
 	}
+
+	// add default handlers
+	handlers.addControlHandler(new IndexHandler());
+	handlers.addControlHandler(new FileHandler(documentRoot));
+	handlers.addControlHandler(new DefaultHandler());
 
 	service = new HTTPService(port, handlers, interceptors);
 	service.start();

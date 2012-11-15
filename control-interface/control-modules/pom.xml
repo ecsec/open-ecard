@@ -23,7 +23,7 @@
     <dependencies>
 	<dependency>
 	    <groupId>org.openecard.client.control</groupId>
-	    <artifactId>control-core</artifactId>
+	    <artifactId>control-common</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
     </dependencies>

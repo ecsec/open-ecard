@@ -31,11 +31,12 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client</groupId>
-	    <artifactId>recognition</artifactId>
+	    <groupId>org.openecard.client.wsdef</groupId>
+	    <artifactId>wsdef-client</artifactId>
 	    <version>${project.version}</version>
-	    <scope>test</scope>
+	    <scope>provided</scope>
 	</dependency>
+
 	<dependency>
 	    <groupId>org.openecard.client.transport</groupId>
 	    <artifactId>dispatcher</artifactId>

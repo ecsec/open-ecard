@@ -14,11 +14,19 @@
     <artifactId>status</artifactId>
     <packaging>jar</packaging>
     <name>Status</name>
+
     <dependencies>
-	    <dependency>
-	        <groupId>org.openecard.client.sal</groupId>
-	        <artifactId>sal-common</artifactId>
-	        <version>${project.version}</version>
-	    </dependency>
+	<dependency>
+	    <groupId>org.openecard.client.wsdef</groupId>
+	    <artifactId>wsdef-client</artifactId>
+	    <version>${project.version}</version>
+	    <scope>provided</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.client.sal</groupId>
+	    <artifactId>sal-common</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
     </dependencies>
+
 </project>

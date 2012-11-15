@@ -40,10 +40,6 @@ import org.openecard.client.recognition.CardRecognition;
 public class IntentBinding extends ControlBinding {
 
     /** The port 24727 according to BSI-TR-03112 is set in the Android client Manifest */
-    private CardStateMap cardStates;
-    private Dispatcher dispatcher;
-    private UserConsent gui;
-    private CardRecognition reg;
 
     /**
      * Creates a new IntentBinding.
@@ -52,22 +48,12 @@ public class IntentBinding extends ControlBinding {
      * @param gui to show card insertion dialog
      * @param reg to get card information shown in insertion dialog
      */
-    public IntentBinding(CardStateMap cardStates, Dispatcher dispatcher, UserConsent gui, CardRecognition reg) {
-	this.cardStates = cardStates;
-	this.dispatcher = dispatcher;
-	this.gui = gui;
-	this.reg = reg;
+    public IntentBinding() {
     }
 
     @Override
     public void start() throws Exception {
-
-	// Add default handlers if none are given
-	if (handlers == null || handlers.getControlHandlers().isEmpty()) {
-	    handlers = new ControlHandlers();
-	    handlers.addControlHandler(new IntentTCTokenHandler(new GenericTCTokenHandler(cardStates, dispatcher, gui,
-		    reg)));
-	}
+    // nothing to do here
     }
 
     public ControlHandlers getHandlers() {

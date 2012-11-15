@@ -34,12 +34,19 @@ import java.util.concurrent.Executors;
 import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
 import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.interfaces.EventManager;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.control.ControlInterface;
 import org.openecard.client.control.binding.javascript.JavaScriptBinding;
+import org.openecard.client.control.binding.javascript.handler.JavaScriptStatusHandler;
+import org.openecard.client.control.binding.javascript.handler.JavaScriptTCTokenHandler;
+import org.openecard.client.control.binding.javascript.handler.JavaScriptWaitForChangeHandler;
+import org.openecard.client.control.handler.ControlHandler;
+import org.openecard.client.control.handler.ControlHandlers;
 import org.openecard.client.control.module.status.EventHandler;
+import org.openecard.client.control.module.status.GenericStatusHandler;
+import org.openecard.client.control.module.status.GenericWaitForChangeHandler;
+import org.openecard.client.control.module.tctoken.GenericTCTokenHandler;
 import org.openecard.client.gui.UserConsent;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.ws.MarshallingTypeException;
@@ -96,7 +103,16 @@ public class JSEventCallback {
      */
     private void setupJSBinding(CardStateMap cardStates, Dispatcher dispatcher, EventHandler eventHandler, UserConsent gui, CardRecognition reg) {
 	try {
-	    this.binding = new JavaScriptBinding(cardStates, dispatcher, eventHandler, gui, reg);
+	    ControlHandlers handler = new ControlHandlers();
+    	GenericTCTokenHandler genericTCTokenHandler = new GenericTCTokenHandler(cardStates, dispatcher, gui, reg);
+    	ControlHandler tcTokenHandler = new JavaScriptTCTokenHandler(genericTCTokenHandler);
+    	GenericStatusHandler genericStatusHandler = new GenericStatusHandler(cardStates, eventHandler);
+    	ControlHandler statusHandler = new JavaScriptStatusHandler(genericStatusHandler);
+    	GenericWaitForChangeHandler genericWaitForChangeHandler = new GenericWaitForChangeHandler(eventHandler);
+    	ControlHandler waitForChangeHandler = new JavaScriptWaitForChangeHandler(genericWaitForChangeHandler);
+    	handler.addControlHandler(tcTokenHandler);
+    	handler.addControlHandler(statusHandler);
+    	handler.addControlHandler(waitForChangeHandler);
 	    ControlInterface control = new ControlInterface(this.binding);
 	    control.start();
 	} catch (Exception ex) {

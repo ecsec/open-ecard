@@ -23,27 +23,12 @@ package org.openecard.client.control.binding.http;
 
 import java.io.IOException;
 import org.apache.http.protocol.BasicHttpProcessor;
-import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.control.binding.ControlBinding;
 import org.openecard.client.control.binding.http.common.DocumentRoot;
-import org.openecard.client.control.binding.http.handler.HttpStatusHandler;
-import org.openecard.client.control.binding.http.handler.HttpTCTokenHandler;
-import org.openecard.client.control.binding.http.handler.HttpWaitForChangeHandler;
-import org.openecard.client.control.binding.http.handler.common.DefaultHandler;
-import org.openecard.client.control.binding.http.handler.common.FileHandler;
-import org.openecard.client.control.binding.http.handler.common.IndexHandler;
 import org.openecard.client.control.binding.http.interceptor.CORSRequestInterceptor;
 import org.openecard.client.control.binding.http.interceptor.CORSResponseInterceptor;
 import org.openecard.client.control.binding.http.interceptor.ErrorResponseInterceptor;
 import org.openecard.client.control.binding.http.interceptor.StatusLineResponseInterceptor;
-import org.openecard.client.control.handler.ControlHandlers;
-import org.openecard.client.control.module.status.EventHandler;
-import org.openecard.client.control.module.status.GenericStatusHandler;
-import org.openecard.client.control.module.status.GenericWaitForChangeHandler;
-import org.openecard.client.control.module.tctoken.GenericTCTokenHandler;
-import org.openecard.client.gui.UserConsent;
-import org.openecard.client.recognition.CardRecognition;
 
 
 /**
@@ -60,40 +45,25 @@ public class HTTPBinding extends ControlBinding {
     private final DocumentRoot documentRoot;
     private BasicHttpProcessor interceptors;
     private HTTPService service;
-    private CardStateMap cardStates;
-    private Dispatcher dispatcher;
-    private EventHandler eventHandler;
-    private UserConsent gui;
-    private CardRecognition reg;
 
     /**
      * Creates a new HTTPBinding using a random port.
-     * @param cardStates CardStateMap of the client
-     * @param dispatcher dispatcher for sending messages
-     * @param eventHandler to wait for status changes
-     * @param gui to show card insertion dialog
-     * @param reg to get card information shown in insertion dialog
      * @throws IOException If the document root cannot be read
      * @throws Exception 
      */
-    public HTTPBinding(CardStateMap cardStates, Dispatcher dispatcher, EventHandler eventHandler, UserConsent gui, CardRecognition reg) throws IOException, Exception {
-	this(0, cardStates, dispatcher, eventHandler, gui, reg);
+    public HTTPBinding() throws IOException, Exception {
+	this(DEFAULT_PORT);
     }
 
     /**
      * Creates a new HTTPBinding using the given port.
      * 
      * @param port Port
-     * @param cardStates CardStateMap of the client
-     * @param dispatcher dispatcher for sending messages
-     * @param eventHandler to wait for status changes
-     * @param gui to show card insertion dialog
-     * @param reg to get card information shown in insertion dialog
      * @throws IOException If the document root cannot be read
      * @throws Exception 
      */
-    public HTTPBinding(int port, CardStateMap cardStates, Dispatcher dispatcher, EventHandler eventHandler, UserConsent gui, CardRecognition reg) throws IOException, Exception {
-	this(port, "/www", "/www-files", cardStates, dispatcher, eventHandler, gui, reg);
+    public HTTPBinding(int port) throws IOException, Exception {
+	this(port, "/www", "/www-files");
     }
 
     /**
@@ -101,24 +71,14 @@ public class HTTPBinding extends ControlBinding {
      * 
      * @param port Port
      * @param documentRootPath Path of the document root
-     * @param cardStates CardStateMap of the client
-     * @param dispatcher dispatcher for sending messages
-     * @param eventHandler to wait for status changes
-     * @param gui to show card insertion dialog
-     * @param reg to get card information shown in insertion dialog
      * @throws IOException If the document root cannot be read
      * @throws Exception 
      */
-    public HTTPBinding(int port, String documentRootPath, String listFile, CardStateMap cardStates, Dispatcher dispatcher, EventHandler eventHandler, UserConsent gui, CardRecognition reg) throws IOException, Exception {
+    public HTTPBinding(int port, String documentRootPath, String listFile) throws IOException, Exception {
 	this.port = port;
 
 	// Create document root
 	documentRoot = new DocumentRoot(documentRootPath, listFile);
-	this.cardStates = cardStates;
-	this.dispatcher = dispatcher;
-	this.eventHandler = eventHandler;
-	this.gui = gui;
-	this.reg = reg;
     }
 
     /**
@@ -139,17 +99,6 @@ public class HTTPBinding extends ControlBinding {
 	    interceptors.addInterceptor(new ErrorResponseInterceptor(documentRoot, "/templates/error.html"));
 	    interceptors.addInterceptor(new CORSResponseInterceptor());
 	    interceptors.addInterceptor(new CORSRequestInterceptor());
-	}
-
-	// Add default handlers if none are given
-	if (handlers == null || handlers.getControlHandlers().isEmpty()) {
-	    handlers = new ControlHandlers();
-	    handlers.addControlHandler(new HttpTCTokenHandler(new GenericTCTokenHandler(cardStates, dispatcher, gui, reg)));
-	    handlers.addControlHandler(new HttpStatusHandler(new GenericStatusHandler(cardStates, eventHandler)));
-	    handlers.addControlHandler(new HttpWaitForChangeHandler(new GenericWaitForChangeHandler(eventHandler)));
-	    handlers.addControlHandler(new IndexHandler());
-	    handlers.addControlHandler(new FileHandler(documentRoot));
-	    handlers.addControlHandler(new DefaultHandler());
 	}
 
 	service = new HTTPService(port, handlers, interceptors);

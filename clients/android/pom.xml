@@ -31,11 +31,11 @@
 	    <artifactId>android-marshaller</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
-	<dependency>
-	    <groupId>org.openecard.client.ifd.scio-backend</groupId>
-	    <artifactId>android-vario</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
+<!-- 	<dependency> -->
+<!-- 	    <groupId>org.openecard.client.ifd.scio-backend</groupId> -->
+<!-- 	    <artifactId>android-vario</artifactId> -->
+<!-- 	    <version>${project.version}</version> -->
+<!-- 	</dependency> -->
 	<dependency>
         <groupId>org.openecard.client.ifd.scio-backend</groupId>
         <artifactId>android-pcsc</artifactId>

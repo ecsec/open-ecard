@@ -23,19 +23,7 @@
 package org.openecard.client.control.binding.javascript;
 
 import java.util.Map;
-import org.openecard.client.common.interfaces.Dispatcher;
-import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.control.binding.ControlBinding;
-import org.openecard.client.control.binding.javascript.handler.JavaScriptStatusHandler;
-import org.openecard.client.control.binding.javascript.handler.JavaScriptTCTokenHandler;
-import org.openecard.client.control.binding.javascript.handler.JavaScriptWaitForChangeHandler;
-import org.openecard.client.control.handler.ControlHandlers;
-import org.openecard.client.control.module.status.EventHandler;
-import org.openecard.client.control.module.status.GenericStatusHandler;
-import org.openecard.client.control.module.status.GenericWaitForChangeHandler;
-import org.openecard.client.control.module.tctoken.GenericTCTokenHandler;
-import org.openecard.client.gui.UserConsent;
-import org.openecard.client.recognition.CardRecognition;
 
 
 /**
@@ -45,27 +33,11 @@ import org.openecard.client.recognition.CardRecognition;
 public class JavaScriptBinding extends ControlBinding {
 
     private JavaScriptService service;
-    private CardStateMap cardStateMap;
-    private Dispatcher dispatcher;
-    private EventHandler eventHandler;
-    private UserConsent gui;
-    private CardRecognition reg;
 
     /**
      * Creates a new JavaScriptBinding.
-     * @param cardStateMap CardStateMap of the client
-     * @param dispatcher dispatcher for sending messages
-     * @param eventHandler to wait for status changes
-     * @param gui to show card insertion dialog
-     * @param reg to get card information shown in insertion dialog
      */
-    public JavaScriptBinding(CardStateMap cardStateMap, Dispatcher dispatcher, EventHandler eventHandler,
-	    UserConsent gui, CardRecognition reg) {
-	this.cardStateMap = cardStateMap;
-	this.dispatcher = dispatcher;
-	this.eventHandler = eventHandler;
-	this.gui = gui;
-	this.reg = reg;
+    public JavaScriptBinding() {
     }
 
     public Object[] handle(String id, Map data) {
@@ -74,16 +46,6 @@ public class JavaScriptBinding extends ControlBinding {
 
     @Override
     public void start() throws Exception {
-	// Add default handlers if none are given
-	if (handlers == null || handlers.getControlHandlers().isEmpty()) {
-	    handlers = new ControlHandlers();
-	    handlers.addControlHandler(new JavaScriptTCTokenHandler(new GenericTCTokenHandler(cardStateMap, dispatcher,
-		    gui, reg)));
-	    handlers.addControlHandler(new JavaScriptStatusHandler(new GenericStatusHandler(cardStateMap, eventHandler)));
-	    handlers.addControlHandler(new JavaScriptWaitForChangeHandler(new GenericWaitForChangeHandler(
-		    eventHandler)));
-	}
-
 	service = new JavaScriptService(handlers);
 	service.start();
     }

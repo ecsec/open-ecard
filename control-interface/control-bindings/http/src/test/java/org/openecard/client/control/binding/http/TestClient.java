@@ -27,7 +27,17 @@ import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.control.ControlInterface;
+import org.openecard.client.control.binding.http.handler.HttpStatusHandler;
+import org.openecard.client.control.binding.http.handler.HttpTCTokenHandler;
+import org.openecard.client.control.binding.http.handler.HttpWaitForChangeHandler;
+import org.openecard.client.control.binding.http.handler.common.DefaultHandler;
+import org.openecard.client.control.binding.http.handler.common.IndexHandler;
+import org.openecard.client.control.handler.ControlHandler;
+import org.openecard.client.control.handler.ControlHandlers;
 import org.openecard.client.control.module.status.EventHandler;
+import org.openecard.client.control.module.status.GenericStatusHandler;
+import org.openecard.client.control.module.status.GenericWaitForChangeHandler;
+import org.openecard.client.control.module.tctoken.GenericTCTokenHandler;
 import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
@@ -109,8 +119,23 @@ public final class TestClient {
 	em.initialize();
 
 	HTTPBinding binding = 
-		new HTTPBinding(HTTPBinding.DEFAULT_PORT, cardStates, env.getDispatcher(), new EventHandler(em), gui, recognition);
-	ControlInterface control = new ControlInterface(binding);
+		new HTTPBinding(HTTPBinding.DEFAULT_PORT);
+	ControlHandlers handler = new ControlHandlers();
+	EventHandler eventHandler = new EventHandler(em);
+	GenericStatusHandler genericStatusHandler = new GenericStatusHandler(cardStates, eventHandler);
+	GenericWaitForChangeHandler genericWaitForChangeHandler = new GenericWaitForChangeHandler(eventHandler);
+	GenericTCTokenHandler genericTCTokenHandler = new GenericTCTokenHandler(cardStates, dispatcher, gui, recognition);
+	ControlHandler tcTokenHandler = new HttpTCTokenHandler(genericTCTokenHandler);
+	ControlHandler statusHandler = new HttpStatusHandler(genericStatusHandler);
+	ControlHandler waitForChangeHandler = new HttpWaitForChangeHandler(genericWaitForChangeHandler);
+	handler.addControlHandler(tcTokenHandler);
+	handler.addControlHandler(statusHandler);
+	handler.addControlHandler(waitForChangeHandler);
+	handler.addControlHandler(new IndexHandler());
+	//TODO
+    // handlers.addControlHandler(new FileHandler(documentRoot));
+    handler.addControlHandler(new DefaultHandler());
+	ControlInterface control = new ControlInterface(binding, handler);
 	control.start();
 
     }

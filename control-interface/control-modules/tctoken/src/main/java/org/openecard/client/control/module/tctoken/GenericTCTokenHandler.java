@@ -29,6 +29,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -36,7 +37,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Set;
-import org.openecard.bouncycastle.crypto.tls.TlsClient;
+import org.openecard.bouncycastle.crypto.tls.TlsPSKIdentity;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.WSHelper.WSException;
@@ -44,11 +45,15 @@ import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.control.module.tctoken.gui.InsertCardUserConsent;
+import org.openecard.client.crypto.tls.ClientCertDefaultTlsClient;
+import org.openecard.client.crypto.tls.ClientCertPSKTlsClient;
+import org.openecard.client.crypto.tls.ClientCertTlsClient;
+import org.openecard.client.crypto.tls.TlsNoAuthentication;
+import org.openecard.client.crypto.tls.TlsPSKIdentityImpl;
+import org.openecard.client.crypto.tls.verify.JavaSecVerifier;
 import org.openecard.client.gui.UserConsent;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.transport.paos.PAOS;
-import org.openecard.client.transport.tls.PSKTlsClientImpl;
-import org.openecard.client.transport.tls.TlsClientSocketFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +65,7 @@ import org.slf4j.LoggerFactory;
 public class GenericTCTokenHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GenericTCTokenHandler.class);
+
     final CardStateMap cardStates;
     private final Dispatcher dispatcher;
     private final UserConsent gui;
@@ -145,98 +151,9 @@ public class GenericTCTokenHandler {
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 	    return response;
 	}
-	return doPAOS(token, connectionHandle);
-    }
 
-    /**
-     * Get the first found handle of the given card type.
-     * 
-     * @param type
-     *            the card type to get the first handle for
-     * @return Handle describing the given card type or null if none is present.
-     */
-    private ConnectionHandleType getFirstHandle(String type) {
 	try {
-	    ConnectionHandleType conHandle = new ConnectionHandleType();
-	    ConnectionHandleType.RecognitionInfo rec = new ConnectionHandleType.RecognitionInfo();
-	    rec.setCardType(type);
-	    conHandle.setRecognitionInfo(rec);
-	    Set<CardStateEntry> entries;
-	    entries = cardStates.getMatchingEntries(conHandle);
-	    if (entries.isEmpty()) {
-
-		InsertCardUserConsent uc = new InsertCardUserConsent(gui, reg, conHandle, cardStates);
-		return uc.show();
-	    } else
-		return entries.iterator().next().handleCopy();
-	} catch (RuntimeException e) {
-	    e.printStackTrace();
-	    throw e;
-	}
-    }
-
-    private TCTokenResponse doPAOS(TCTokenType token, ConnectionHandleType connectionHandle) {
-	try {
-	    // Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
-	    CardApplicationPath cardApplicationPath = new CardApplicationPath();
-	    cardApplicationPath.setCardAppPathRequest(connectionHandle);
-	    CardApplicationPathResponse cardApplicationPathResponse = (CardApplicationPathResponse) dispatcher
-		    .deliver(cardApplicationPath);
-
-	    try {
-		// Check CardApplicationPathResponse
-		WSHelper.checkResult(cardApplicationPathResponse);
-	    } catch (WSException ex) {
-		TCTokenResponse response = new TCTokenResponse();
-		response.setResult(ex.getResult());
-		return response;
-	    }
-
-	    CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
-	    cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet()
-		    .getCardApplicationPathResult().get(0));
-	    CardApplicationConnectResponse cardApplicationConnectResponse = (CardApplicationConnectResponse) dispatcher
-		    .deliver(cardApplicationConnect);
-	    // Update ConnectionHandle. It now includes a SlotHandle.
-	    connectionHandle = cardApplicationConnectResponse.getConnectionHandle();
-
-	    try {
-		// Check CardApplicationConnectResponse
-		WSHelper.checkResult(cardApplicationConnectResponse);
-	    } catch (WSException ex) {
-		TCTokenResponse response = new TCTokenResponse();
-		response.setResult(ex.getResult());
-		return response;
-	    }
-
-	    String sessionIdentifier = token.getSessionIdentifier();
-	    URL serverAddress = new URL(token.getServerAddress());
-
-	    // Set up TLS connection
-	    String secProto = token.getPathSecurityProtocol();
-	    TlsClientSocketFactory tlsClientFactory = null;
-	    // TODO: Change to support different protocols
-	    if (secProto.equals("urn:ietf:rfc:4279") || secProto.equals("urn:ietf:rfc:5487")) {
-		byte[] psk = token.getPathSecurityParameters().getPSK();
-		TlsClient tlsClient = new PSKTlsClientImpl(sessionIdentifier.getBytes(), psk, serverAddress.getHost());
-		tlsClientFactory = new TlsClientSocketFactory(tlsClient);
-	    }
-
-	    // Set up PAOS connection
-	    PAOS p = new PAOS(serverAddress, dispatcher, tlsClientFactory);
-
-	    // Send StartPAOS
-	    StartPAOS sp = new StartPAOS();
-	    sp.getConnectionHandle().add(connectionHandle);
-	    sp.setSessionIdentifier(sessionIdentifier);
-	    p.sendStartPAOS(sp);
-
-	    TCTokenResponse response = new TCTokenResponse();
-	    response.setRefreshAddress(new URL(token.getRefreshAddress()));
-	    response.setResult(WSHelper.makeResultOK());
-
-	    return response; 
-
+	    return doPAOS(token, connectionHandle);
 	} catch (WSException w) {
 	    TCTokenResponse response = new TCTokenResponse();
 	    logger.error(w.getMessage(), w);
@@ -248,6 +165,111 @@ public class GenericTCTokenHandler {
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
 	    return response;
 	}
+    }
+
+    /**
+     * Get the first found handle of the given card type.
+     * 
+     * @param type the card type to get the first handle for
+     * @return Handle describing the given card type or null if none is present.
+     */
+    private ConnectionHandleType getFirstHandle(String type) {
+	try {
+	    ConnectionHandleType conHandle = new ConnectionHandleType();
+	    ConnectionHandleType.RecognitionInfo rec = new ConnectionHandleType.RecognitionInfo();
+	    rec.setCardType(type);
+	    conHandle.setRecognitionInfo(rec);
+	    Set<CardStateEntry> entries;
+	    entries = cardStates.getMatchingEntries(conHandle);
+	    if (entries.isEmpty()) {
+		InsertCardUserConsent uc = new InsertCardUserConsent(gui, reg, conHandle, cardStates);
+		return uc.show();
+	    } else {
+		return entries.iterator().next().handleCopy();
+	    }
+	} catch (RuntimeException e) {
+	    logger.error(e.getMessage(), e);
+	    throw e;
+	}
+    }
+
+    private TCTokenResponse doPAOS(TCTokenType token, ConnectionHandleType connectionHandle) throws WSException, Exception {
+	// Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
+	CardApplicationPath cardApplicationPath = new CardApplicationPath();
+	cardApplicationPath.setCardAppPathRequest(connectionHandle);
+	CardApplicationPathResponse cardApplicationPathResponse = (CardApplicationPathResponse) dispatcher
+		.deliver(cardApplicationPath);
+
+	try {
+	    // Check CardApplicationPathResponse
+	    WSHelper.checkResult(cardApplicationPathResponse);
+	} catch (WSException ex) {
+	    TCTokenResponse response = new TCTokenResponse();
+	    response.setResult(ex.getResult());
+	    return response;
+	}
+
+	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet()
+		.getCardApplicationPathResult().get(0));
+	CardApplicationConnectResponse cardApplicationConnectResponse = (CardApplicationConnectResponse) dispatcher
+		.deliver(cardApplicationConnect);
+	// Update ConnectionHandle. It now includes a SlotHandle.
+	connectionHandle = cardApplicationConnectResponse.getConnectionHandle();
+
+	try {
+	    // Check CardApplicationConnectResponse
+	    WSHelper.checkResult(cardApplicationConnectResponse);
+	} catch (WSException ex) {
+	    TCTokenResponse response = new TCTokenResponse();
+	    response.setResult(ex.getResult());
+	    return response;
+	}
+
+	String sessionIdentifier = token.getSessionIdentifier();
+	URL serverAddress = new URL(token.getServerAddress());
+	String serverHost = serverAddress.getHost();
+	String secProto = token.getPathSecurityProtocol();
+
+	// Set up TLS connection
+	ClientCertTlsClient tlsClient;
+	if (secProto.equals("urn:ietf:rfc:4279") || secProto.equals("urn:ietf:rfc:5487")) {
+	    TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
+	    tlsAuth.setHostname(serverHost);
+	    tlsAuth.setCertificateVerifier(new JavaSecVerifier());
+	    byte[] psk = token.getPathSecurityParameters().getPSK();
+	    TlsPSKIdentity pskId = new TlsPSKIdentityImpl(sessionIdentifier.getBytes(), psk);
+	    tlsClient = new ClientCertPSKTlsClient(pskId, serverHost);
+	    tlsClient.setAuthentication(tlsAuth);
+	} else if (secProto.equals("urn:ietf:rfc:4346")) {
+	    TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
+	    tlsAuth.setHostname(serverHost);
+	    tlsAuth.setCertificateVerifier(new JavaSecVerifier());
+	    tlsClient = new ClientCertDefaultTlsClient(serverHost);
+	    tlsClient.setAuthentication(tlsAuth);
+	} else {
+	    throw new IOException("Unknow security protocol '" + secProto + "' requested.");
+	}
+
+	// TODO: remove this workaround as soon as eGK server uses HTTPS
+	if (serverAddress.getProtocol().equals("http")) {
+	    tlsClient = null;
+	}
+
+	// Set up PAOS connection
+	PAOS p = new PAOS(serverAddress, dispatcher, tlsClient);
+
+	// Send StartPAOS
+	StartPAOS sp = new StartPAOS();
+	sp.getConnectionHandle().add(connectionHandle);
+	sp.setSessionIdentifier(sessionIdentifier);
+	p.sendStartPAOS(sp);
+
+	TCTokenResponse response = new TCTokenResponse();
+	response.setRefreshAddress(new URL(token.getRefreshAddress()));
+	response.setResult(WSHelper.makeResultOK());
+
+	return response;
     }
 
     /**
@@ -293,7 +315,17 @@ public class GenericTCTokenHandler {
 	    return response;
 	}
 
-	return doPAOS(token, connectionHandle);
+	try {
+	    return doPAOS(token, connectionHandle);
+	} catch (WSException w) {
+	    logger.error(w.getMessage(), w);
+	    response.setResult(w.getResult());
+	    return response;
+	} catch (Throwable w) {
+	    logger.error(w.getMessage(), w);
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
+	    return response;
+	}
     }
 
 }

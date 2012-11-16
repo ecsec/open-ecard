@@ -134,62 +134,23 @@ public class GenericTCTokenHandler {
     }
 
     /**
-     * Activate the client, but assume to use the given card type and no handle information is given upfront.
-     * 
-     * @param request
-     * @return
-     */
-    private TCTokenResponse handleCardTypeActivate(TCTokenRequest request) {
-	TCTokenType token = request.getTCToken();
-
-	// get handle to first card of specifified type
-	ConnectionHandleType connectionHandle = getFirstHandle(request.getCardType());
-	if (connectionHandle == null) {
-	    TCTokenResponse response = new TCTokenResponse();
-	    String msg = "No ConnectionHandle with card type '" + request.getCardType() + "' available.";
-	    logger.error(msg);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
-	    return response;
-	}
-
-	try {
-	    return doPAOS(token, connectionHandle);
-	} catch (WSException w) {
-	    TCTokenResponse response = new TCTokenResponse();
-	    logger.error(w.getMessage(), w);
-	    response.setResult(w.getResult());
-	    return response;
-	} catch (Throwable w) {
-	    TCTokenResponse response = new TCTokenResponse();
-	    logger.error(w.getMessage(), w);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
-	    return response;
-	}
-    }
-
-    /**
      * Get the first found handle of the given card type.
      * 
      * @param type the card type to get the first handle for
      * @return Handle describing the given card type or null if none is present.
      */
     private ConnectionHandleType getFirstHandle(String type) {
-	try {
-	    ConnectionHandleType conHandle = new ConnectionHandleType();
-	    ConnectionHandleType.RecognitionInfo rec = new ConnectionHandleType.RecognitionInfo();
-	    rec.setCardType(type);
-	    conHandle.setRecognitionInfo(rec);
-	    Set<CardStateEntry> entries;
-	    entries = cardStates.getMatchingEntries(conHandle);
-	    if (entries.isEmpty()) {
-		InsertCardUserConsent uc = new InsertCardUserConsent(gui, reg, conHandle, cardStates);
-		return uc.show();
-	    } else {
-		return entries.iterator().next().handleCopy();
-	    }
-	} catch (RuntimeException e) {
-	    logger.error(e.getMessage(), e);
-	    throw e;
+	ConnectionHandleType conHandle = new ConnectionHandleType();
+	ConnectionHandleType.RecognitionInfo rec = new ConnectionHandleType.RecognitionInfo();
+	rec.setCardType(type);
+	conHandle.setRecognitionInfo(rec);
+	Set<CardStateEntry> entries;
+	entries = cardStates.getMatchingEntries(conHandle);
+	if (entries.isEmpty()) {
+	    InsertCardUserConsent uc = new InsertCardUserConsent(gui, reg, conHandle, cardStates);
+	    return uc.show();
+	} else {
+	    return entries.iterator().next().handleCopy();
 	}
     }
 
@@ -200,14 +161,8 @@ public class GenericTCTokenHandler {
 	CardApplicationPathResponse cardApplicationPathResponse = (CardApplicationPathResponse) dispatcher
 		.deliver(cardApplicationPath);
 
-	try {
-	    // Check CardApplicationPathResponse
-	    WSHelper.checkResult(cardApplicationPathResponse);
-	} catch (WSException ex) {
-	    TCTokenResponse response = new TCTokenResponse();
-	    response.setResult(ex.getResult());
-	    return response;
-	}
+	// Check CardApplicationPathResponse
+	WSHelper.checkResult(cardApplicationPathResponse);
 
 	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
 	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet()
@@ -217,14 +172,8 @@ public class GenericTCTokenHandler {
 	// Update ConnectionHandle. It now includes a SlotHandle.
 	connectionHandle = cardApplicationConnectResponse.getConnectionHandle();
 
-	try {
-	    // Check CardApplicationConnectResponse
-	    WSHelper.checkResult(cardApplicationConnectResponse);
-	} catch (WSException ex) {
-	    TCTokenResponse response = new TCTokenResponse();
-	    response.setResult(ex.getResult());
-	    return response;
-	}
+	// Check CardApplicationConnectResponse
+	WSHelper.checkResult(cardApplicationConnectResponse);
 
 	String sessionIdentifier = token.getSessionIdentifier();
 	URL serverAddress = new URL(token.getServerAddress());
@@ -275,53 +224,49 @@ public class GenericTCTokenHandler {
     /**
      * Activate the client.
      * 
-     * @param request
-     *            ActivationApplicationRequest
+     * @param request ActivationApplicationRequest
      * @return ActivationApplicationResponse
      */
     public TCTokenResponse handleActivate(TCTokenRequest request) {
-
-	// use dumb activation without explicitly specifying the card and terminal
-	// see TR-03112-7 v 1.1.2 (2012-02-28) sec. 3.2
-	if (request.getContextHandle() == null || request.getIFDName() == null || request.getSlotIndex() == null) {
-	    return handleCardTypeActivate(request);
-	}
-
-	TCTokenResponse response = new TCTokenResponse();
-	// TCToken
-	TCTokenType token = request.getTCToken();
-
-	// ContextHandle, IFDName and SlotIndex
 	ConnectionHandleType connectionHandle = null;
+	TCTokenResponse response = new TCTokenResponse();
+
 	byte[] requestedContextHandle = request.getContextHandle();
 	String ifdName = request.getIFDName();
 	BigInteger requestedSlotIndex = request.getSlotIndex();
 
-	ConnectionHandleType requestedHandle = new ConnectionHandleType();
-	requestedHandle.setContextHandle(requestedContextHandle);
-	requestedHandle.setIFDName(ifdName);
-	requestedHandle.setSlotIndex(requestedSlotIndex);
+	if (requestedContextHandle == null || ifdName == null || requestedSlotIndex == null) {
+	    // use dumb activation without explicitly specifying the card and terminal
+	    // see TR-03112-7 v 1.1.2 (2012-02-28) sec. 3.2
+	    connectionHandle = getFirstHandle(request.getCardType());
+	} else {
+	    // we know exactly which card we want
+	    ConnectionHandleType requestedHandle = new ConnectionHandleType();
+	    requestedHandle.setContextHandle(requestedContextHandle);
+	    requestedHandle.setIFDName(ifdName);
+	    requestedHandle.setSlotIndex(requestedSlotIndex);
 
-	Set<CardStateEntry> matchingHandles = cardStates.getMatchingEntries(requestedHandle);
+	    Set<CardStateEntry> matchingHandles = cardStates.getMatchingEntries(requestedHandle);
 
-	if (!matchingHandles.isEmpty()) {
-	    connectionHandle = matchingHandles.toArray(new CardStateEntry[] {})[0].handleCopy();
+	    if (!matchingHandles.isEmpty()) {
+		connectionHandle = matchingHandles.toArray(new CardStateEntry[] {})[0].handleCopy();
+	    }
 	}
 
 	if (connectionHandle == null) {
-	    String msg = "Given ConnectionHandle is invalid.";
+	    String msg = "No card available for ther given ConnectionHandle.";
 	    logger.error(msg);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 	    return response;
 	}
 
 	try {
-	    return doPAOS(token, connectionHandle);
+	    return doPAOS(request.getTCToken(), connectionHandle);
 	} catch (WSException w) {
 	    logger.error(w.getMessage(), w);
 	    response.setResult(w.getResult());
 	    return response;
-	} catch (Throwable w) {
+	} catch (Exception w) {
 	    logger.error(w.getMessage(), w);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
 	    return response;

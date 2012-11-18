@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp codebase="$$codebase" href="openecard.jnlp">
+    <information os="Linux">
+        <icon kind="shortcut" href="img/openecard-shortcut-linux.png" />
+        <!-- TODO: fill right licence
+        <related-content href="http://www.gnu.org/licenses/gpl.html" >
+            <title>License</title>
+            <description>This product is licensed under the General Public License v3</description>
+            <icon href="img/license.png" />
+        </related-content>
+        -->
+    </information>
+    <information os="Mac OS X">
+        <icon kind="shortcut" href="img/openecard-shortcut-mac.icns" />
+    </information>
+    <information os="Windows">
+        <icon kind="shortcut" href="img/openecard-shortcut-win.ico" />
+        <!-- TODO: fill right licence
+        <related-content href="http://www.gnu.org/licenses/gpl.html" >
+            <title>License</title>
+            <description>This product is licensed under the General Public License v3</description>
+            <icon href="img/license.ico" />
+        </related-content>
+        -->
+    </information>
+    <information>
+        <title>Open eCard App</title>
+        <vendor>ecsec GmbH</vendor>
+        <description>Open Source eCard client</description>
+        <homepage href="http://www.openecard.org" />
+        <icon kind="default" href="img/openecard-default.png" width="100" height="100" />
+        <icon kind="splash" href="img/openecard-splash.png" width="150" height="150" />
+        <shortcut online="true" install="true">
+            <desktop/>
+            <menu submenu="Open eCard App" />
+        </shortcut>
+        <offline-allowed />
+    </information>
+    <update check="timeout" policy="prompt-update" />
+    <resources>
+        <j2se version="1.6+" />
+        <property name="jnlp.versionEnabled" value="true" />
+        <jar href="richclient-${openecard.richclient.version}.jar"
+             version="${openecard.richclient.version}"
+             main="true" />
+    </resources>
+    <security>
+        <all-permissions />
+    </security>
+    <application-desc name="Open eCard App"
+                      main-class="org.openecard.client.richclient.RichClient"
+                      width="1"
+                      height="1">
+    </application-desc>
+</jnlp>

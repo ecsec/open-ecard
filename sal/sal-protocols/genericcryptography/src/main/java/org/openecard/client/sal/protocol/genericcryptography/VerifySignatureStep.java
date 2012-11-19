@@ -23,7 +23,6 @@
 package org.openecard.client.sal.protocol.genericcryptography;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DSIRead;
 import iso.std.iso_iec._24727.tech.schema.DSIReadResponse;
@@ -37,35 +36,35 @@ import java.security.cert.X509Certificate;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 import java.util.Map;
-import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
-import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.ECardException;
 import org.openecard.client.common.WSHelper;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.sal.anytype.CryptoMarkerType;
+import org.openecard.client.common.sal.exception.IncorrectParameterException;
+import org.openecard.client.common.sal.exception.InvalidSignatureException;
 import org.openecard.client.common.sal.state.CardStateEntry;
+import org.openecard.client.common.sal.util.SALUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
- * Implementation of the ProtocolStep interface for the Decipher step of the GenericCryptography protocol.
+ * Implements the Hash step of the Generic cryptography protocol.
+ * See TR-03112, version 1.1.2, part 7, section 4.9.10.
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class VerifySignatureStep implements ProtocolStep<VerifySignature, VerifySignatureResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(VerifySignatureStep.class);
-
     private Dispatcher dispatcher;
 
     /**
-     * 
-     * @param dispatcher
-     *            the dispatcher to use for message delivery
+     * Creates a new VerifySignatureStep.
+     * @param dispatcher Dispatcher
      */
     public VerifySignatureStep(Dispatcher dispatcher) {
 	this.dispatcher = dispatcher;
@@ -77,24 +76,22 @@ public class VerifySignatureStep implements ProtocolStep<VerifySignature, Verify
     }
 
     @Override
-    public VerifySignatureResponse perform(VerifySignature verifySignature, Map<String, Object> internalData) {
-	VerifySignatureResponse res = new VerifySignatureResponse();
+    public VerifySignatureResponse perform(VerifySignature request, Map<String, Object> internalData) {
+	VerifySignatureResponse response = WSHelper.makeResponse(VerifySignatureResponse.class, WSHelper.makeResultOK());
+
 	try {
-	    ConnectionHandleType connectionHandle = verifySignature.getConnectionHandle();
-	    CardStateEntry cardStateEntry = (CardStateEntry) internalData.get("cardState");
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(internalData, connectionHandle);
+	    String didName = SALUtils.getDIDName(request);
+	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, cardStateEntry, connectionHandle);
 
 	    // required
-	    byte[] signature = verifySignature.getSignature();
-	    String didName = verifySignature.getDIDName();
+	    byte[] signature = request.getSignature();
 
 	    // optional
-	    DIDScopeType didScope = verifySignature.getDIDScope();
-	    byte[] message = verifySignature.getMessage();
+	    byte[] message = request.getMessage();
 
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName,
-		    connectionHandle.getCardApplication());
-	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(
-		    (iso.std.iso_iec._24727.tech.schema.CryptoMarkerType) didStructure.getDIDMarker());
+	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didStructure.getDIDMarker());
 
 	    String dataSetNameCertificate = cryptoMarker.getCertificateRef().getDataSetName();
 	    String algorithmIdentifier = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
@@ -104,47 +101,40 @@ public class VerifySignatureStep implements ProtocolStep<VerifySignature, Verify
 	    dsiRead.setDSIName(dataSetNameCertificate);
 
 	    DSIReadResponse dsiReadResponse = (DSIReadResponse) dispatcher.deliver(dsiRead);
+	    WSHelper.checkResult(dsiReadResponse);
 
-	    Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(
-		    new ByteArrayInputStream(dsiReadResponse.getDSIContent()));
+	    CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+	    Certificate cert = (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(dsiReadResponse.getDSIContent()));
 
 	    Signature signatureAlgorithm;
 	    if (algorithmIdentifier.equals(GenericCryptoObjectIdentifier.pkcs_1)) {
 		signatureAlgorithm = Signature.getInstance("RSA", new BouncyCastleProvider());
 	    } else if (algorithmIdentifier.equals(GenericCryptoObjectIdentifier.id_RSASSA_PSS)) {
 		signatureAlgorithm = Signature.getInstance("RAWRSASSA-PSS", new BouncyCastleProvider());
-		signatureAlgorithm.setParameter(new PSSParameterSpec("SHA-256", "MGF1",
-			new MGF1ParameterSpec("SHA-256"), 32, 1));
+		signatureAlgorithm.setParameter(new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 32, 1));
+	    } else if (algorithmIdentifier.equals(GenericCryptoObjectIdentifier.sigS_ISO9796_2)) {
+		return WSHelper.makeResponse(VerifySignatureResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
 	    } else if (algorithmIdentifier.equals(GenericCryptoObjectIdentifier.sigS_ISO9796_2rnd)) {
-		// TODO sign9796_2_DS2
-		return WSHelper.makeResponse(VerifySignatureResponse.class, WSHelper.makeResultError(
-			ECardConstants.Minor.App.PARM_ERROR, "Signature algorithm with identifier '"
-				+ algorithmIdentifier + "' not yet supported."));
+		return WSHelper.makeResponse(VerifySignatureResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
 	    } else {
-		return WSHelper.makeResponse(VerifySignatureResponse.class, WSHelper.makeResultError(
-			ECardConstants.Minor.App.PARM_ERROR, "Signature algorithm with identifier '"
-				+ algorithmIdentifier + "' not yet supported."));
+		throw new IncorrectParameterException("Unknown signature algorithm.");
 	    }
 	    signatureAlgorithm.initVerify(cert);
-	    signatureAlgorithm.update(message);
-	    boolean verified = signatureAlgorithm.verify(signature);
-	    Result result = new Result();
-	    if (verified)
-		result.setResultMajor(org.openecard.client.common.ECardConstants.Major.OK);
-	    else {
-		result.setResultMajor(ECardConstants.Major.ERROR);
-		result.setResultMinor(ECardConstants.Minor.SAL.INVALID_SIGNATURE);
-		InternationalStringType ist = new InternationalStringType();
-		ist.setLang("en");
-		ist.setValue("The verified signature is not valid");
-		result.setResultMessage(ist);
+	    if (message != null) {
+		signatureAlgorithm.update(message);
 	    }
-	    res.setResult(result);
-	} catch (Exception e) {
+
+	    if (!signatureAlgorithm.verify(signature)) {
+		throw new InvalidSignatureException();
+	    }
+	} catch (ECardException e) {
 	    logger.error(e.getMessage(), e);
-	    res = WSHelper.makeResponse(VerifySignatureResponse.class, WSHelper.makeResult(e));
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    response.setResult(WSHelper.makeResult(e));
 	}
-	return res;
+
+	return response;
     }
 
 }

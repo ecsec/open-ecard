@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,28 +20,27 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.sal.protocol.genericcryptography;
+package org.openecard.client.sal.protocol.genericcryptography.apdu;
 
-import org.openecard.client.common.ECardConstants;
-import org.testng.annotations.Test;
-import static org.testng.Assert.*;
+import org.openecard.client.common.apdu.PerformSecurityOperation;
 
 
 /**
+ * Implements a Hash operation.
+ * See ISO/IEC 7816-8, section 11.8.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class GenericCryptographyProtocolFactoryTest {
+public final class PSOHash extends PerformSecurityOperation {
 
     /**
-     * Test if the Factory returns the right Protocol.
+     * Creates a new PSO Hash APDU.
+     * 
+     * @param data Data to be hashed
      */
-    @Test
-    public void test() {
-	GenericCryptoProtocolFactory pinCompareProtocolFactory = new GenericCryptoProtocolFactory();
-	assertEquals(pinCompareProtocolFactory.getProtocol(), ECardConstants.Protocol.GENERIC_CRYPTO);
-	assertEquals(pinCompareProtocolFactory.createInstance(null, null).getClass(), GenericCryptoProtocol.class);
-	assertEquals(pinCompareProtocolFactory.createInstance(null, null).toString(), "Generic cryptography");
+    public PSOHash(byte[] data){
+	super((byte) 0x90, (byte) 0x80);
+	setData(data);
     }
 
 }

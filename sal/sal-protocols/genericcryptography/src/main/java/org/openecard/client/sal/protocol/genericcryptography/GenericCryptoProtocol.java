@@ -24,23 +24,22 @@ package org.openecard.client.sal.protocol.genericcryptography;
 
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.FunctionType;
+import org.openecard.client.common.sal.Protocol;
 
 
 /**
- * SAL protocol implementation of the GenericCryptography protocol.
+ * Implements the Generic cryptography protocol.
+ * See BSI-TR-03112, version 1.1.2, part 7, section 4.9.
+ *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class GenericCryptoProtocol extends org.openecard.client.common.sal.Protocol {
+public class GenericCryptoProtocol extends Protocol {
 
-    /**
-     * 
-     * @param dispatcher the dispatcher to use for message delivery
-     */
     public GenericCryptoProtocol(Dispatcher dispatcher) {
-	this.steps.add(new SignStep(dispatcher));
-	this.steps.add(new DIDGetStep());
-	this.steps.add(new DecipherStep(dispatcher));
-	this.steps.add(new VerifySignatureStep(dispatcher));
+	steps.add(new SignStep(dispatcher));
+	steps.add(new DIDGetStep());
+	steps.add(new DecipherStep(dispatcher));
+	steps.add(new VerifySignatureStep(dispatcher));
     }
 
     @Override

@@ -30,6 +30,7 @@ import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
 import iso.std.iso_iec._24727.tech.schema.KeyRefType;
 import iso.std.iso_iec._24727.tech.schema.StateInfo;
 import java.math.BigInteger;
+import java.util.Arrays;
 import org.openecard.client.common.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -50,12 +51,7 @@ public class CryptoMarkerType {
     private String[] signatureGenerationInfo = null;
     private final String protocol;
 
-    /**
-     * 
-     * @param baseType
-     *            the iso CryptoMarkerType to create our CryptoMarkerType from
-     */
-    public CryptoMarkerType(iso.std.iso_iec._24727.tech.schema.CryptoMarkerType baseType) {
+    public CryptoMarkerType(iso.std.iso_iec._24727.tech.schema.DIDAbstractMarkerType baseType) {
 	protocol = baseType.getProtocol();
 	for (Element elem : baseType.getAny()) {
 	    if (elem.getLocalName().equals("AlgorithmInfo")) {
@@ -79,9 +75,7 @@ public class CryptoMarkerType {
 			algorithmInfo.setAlgorithmIdentifier(algorithmIdentifierType);
 		    } else if (node.getLocalName().equals("SupportedOperations")) {
 			String[] supportedOperations = node.getTextContent().split(" ");
-			for (String s : supportedOperations) {
-			    algorithmInfo.getSupportedOperations().add(s);
-			}
+			algorithmInfo.getSupportedOperations().addAll(Arrays.asList(supportedOperations));
 		    } else if (node.getLocalName().equals("CardAlgRef")) {
 			algorithmInfo.setCardAlgRef(StringUtils.toByteArray(node.getTextContent()));
 		    } else if (node.getLocalName().equals("HashAlgRef")) {
@@ -121,7 +115,7 @@ public class CryptoMarkerType {
 	    } else if (elem.getLocalName().equals("LegacyKeyName")) {
 		this.legacyKeyName = elem.getTextContent();
 	    } else if (elem.getLocalName().equals("StateInfo")) {
-		;// TODO
+		// TODO
 	    }
 	}
     }
@@ -150,8 +144,8 @@ public class CryptoMarkerType {
 	return certificateRef;
     }
 
-    public StateInfo getStateInfo() throws Exception {
-	throw new Exception("Not yet implemented");
+    public StateInfo getStateInfo() {
+	throw new UnsupportedOperationException("Not yet implemented");
     }
 
     public String getProtocol() {

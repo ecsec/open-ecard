@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,28 +20,27 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.sal.protocol.genericcryptography;
+package org.openecard.client.sal.protocol.genericcryptography.apdu;
 
-import org.openecard.client.common.ECardConstants;
-import org.testng.annotations.Test;
-import static org.testng.Assert.*;
+import org.openecard.client.common.apdu.PerformSecurityOperation;
 
 
 /**
+ * Implements a Compute Cryptographic Checksum operation.
+ * See ISO/IEC 7816-8, section 11.7.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class GenericCryptographyProtocolFactoryTest {
+public final class PSOComputeDigitalSignature extends PerformSecurityOperation {
 
     /**
-     * Test if the Factory returns the right Protocol.
+     * Creates a new PSO Compute Cryptographic Checksum APDU.
+     * 
+     * @param message Message to be signed
      */
-    @Test
-    public void test() {
-	GenericCryptoProtocolFactory pinCompareProtocolFactory = new GenericCryptoProtocolFactory();
-	assertEquals(pinCompareProtocolFactory.getProtocol(), ECardConstants.Protocol.GENERIC_CRYPTO);
-	assertEquals(pinCompareProtocolFactory.createInstance(null, null).getClass(), GenericCryptoProtocol.class);
-	assertEquals(pinCompareProtocolFactory.createInstance(null, null).toString(), "Generic cryptography");
+    public PSOComputeDigitalSignature(byte[] message){
+	super((byte) 0x9E, (byte) 0x9A);
+	setData(message);
     }
 
 }

@@ -28,41 +28,42 @@ import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
-import iso.std.iso_iec._24727.tech.schema.Transmit;
-import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Map;
-import javax.smartcardio.ResponseAPDU;
-import oasis.names.tc.dss._1_0.core.schema.Result;
-import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.ECardException;
 import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.WSHelper.WSException;
+import org.openecard.client.common.apdu.InternalAuthenticate;
+import org.openecard.client.common.apdu.ManageSecurityEnvironment;
+import org.openecard.client.common.apdu.common.CardCommandAPDU;
+import org.openecard.client.common.apdu.common.CardResponseAPDU;
 import org.openecard.client.common.interfaces.Dispatcher;
+import org.openecard.client.common.sal.Assert;
 import org.openecard.client.common.sal.FunctionType;
 import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.sal.anytype.CryptoMarkerType;
+import org.openecard.client.common.sal.exception.IncorrectParameterException;
 import org.openecard.client.common.sal.state.CardStateEntry;
-import org.openecard.client.common.util.CardCommands;
+import org.openecard.client.common.sal.util.SALUtils;
+import org.openecard.client.sal.protocol.genericcryptography.apdu.PSOComputeDigitalSignature;
+import org.openecard.client.sal.protocol.genericcryptography.apdu.PSOHash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
- * Implementation of the ProtocolStep interface for the Sign step of
- * the GenericCryptography protocol.
+ * Implements the Sign step of the Generic cryptography protocol.
+ * See TR-03112, version 1.1.2, part 7, section 4.9.9.
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class SignStep implements ProtocolStep<Sign, SignResponse> {
 
-    private static final Logger _logger = LoggerFactory.getLogger(SignStep.class);
-
-    private Dispatcher dispatcher;
+    private static final Logger logger = LoggerFactory.getLogger(SignStep.class);
+    private final Dispatcher dispatcher;
 
     /**
+     * Creates a new SignStep.
      * 
-     * @param dispatcher the dispatcher to use for message delivery
+     * @param dispatcher Dispatcher
      */
     public SignStep(Dispatcher dispatcher) {
 	this.dispatcher = dispatcher;
@@ -73,89 +74,71 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	return FunctionType.Sign;
     }
 
-    private ResponseAPDU transmitSingleAPDU(byte[] apdu, byte[] slotHandle) throws WSException, IllegalAccessException,
-	    NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-	ArrayList<byte[]> responses = new ArrayList<byte[]>() {
-	    {
-		add(new byte[] { (byte) 0x90, (byte) 0x00 });
-		add(new byte[] { (byte) 0x63, (byte) 0xC3 });
-	    }
-	};
-
-	Transmit t = CardCommands.makeTransmit(slotHandle, apdu, responses);
-	TransmitResponse tr = (TransmitResponse) WSHelper.checkResult((TransmitResponse) this.dispatcher.deliver(t));
-	return new ResponseAPDU(tr.getOutputAPDU().get(0));
-    }
-
     @Override
     public SignResponse perform(Sign sign, Map<String, Object> internalData) {
-	SignResponse res = new SignResponse();
-	try {
-	    ConnectionHandleType connectionHandle = sign.getConnectionHandle();
-	    byte[] slotHandle = connectionHandle.getSlotHandle();
-	    CardStateEntry cardStateEntry = (CardStateEntry) internalData.get("cardState");
-	    String didName = sign.getDIDName();
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName,
-		    connectionHandle.getCardApplication());
-	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(
-		    (iso.std.iso_iec._24727.tech.schema.CryptoMarkerType) didStructure.getDIDMarker());
+	SignResponse response = WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultOK());
 
-	    if (!cardStateEntry.checkDIDSecurityCondition(connectionHandle.getCardApplication(), didName,
-		    CryptographicServiceActionName.SIGN)) {
-		return WSHelper.makeResponse(SignResponse.class,
-			WSHelper.makeResultError(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, null));
-	    }
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(sign);
+	    String didName = SALUtils.getDIDName(sign);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(internalData, connectionHandle);
+	    DIDStructureType didStructure = SALUtils.getDIDStructure(sign, didName, cardStateEntry, connectionHandle);
+	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didStructure.getDIDMarker());
+
+	    byte[] slotHandle = connectionHandle.getSlotHandle();
+	    byte[] applicationID = connectionHandle.getCardApplication();
+	    Assert.securityConditionDID(cardStateEntry, applicationID, didName, CryptographicServiceActionName.SIGN);
 
 	    byte keyReference = cryptoMarker.getCryptoKeyInfo().getKeyRef().getKeyRef()[0];
-	    byte algorithmIdentifier = cryptoMarker.getAlgorithmInfo().getCardAlgRef()[0];
+	    byte[] algorithmIdentifier = cryptoMarker.getAlgorithmInfo().getCardAlgRef();
 
-	    String[] signatureGenerationInfo = cryptoMarker.getSignatureGenerationInfo();
+
 	    if (didStructure.getDIDScope().equals(DIDScopeType.LOCAL)) {
 		keyReference = (byte) (0x80 | keyReference);
 	    }
-	    ResponseAPDU rapdu = null;
+	    byte[] message = sign.getMessage();
+	    byte[] signature = new byte[0];
+
+	    CardCommandAPDU commandAPDU = null;
+	    CardResponseAPDU responseAPDU = null;
+
+	    String[] signatureGenerationInfo = cryptoMarker.getSignatureGenerationInfo();
 	    for (int i = 0; i < signatureGenerationInfo.length; i++) {
 		String command = signatureGenerationInfo[i];
+
 		if (command.equals("MSE_KEY")) {
-		    String nextCommand = signatureGenerationInfo[i + 1];
-		    // using next command until a better solution comes in mind
-		    if (nextCommand.equals("INT_AUTH")) {
-			rapdu = transmitSingleAPDU(CardCommands.ManageSecurityEnvironment.mseSelectPrKeyIntAuth(
-				keyReference, algorithmIdentifier), slotHandle);
-		    } else if (nextCommand.equals("PSO_CDS")) {
-			rapdu = transmitSingleAPDU(CardCommands.ManageSecurityEnvironment.mseSelectPrKeySignature(
-				keyReference, algorithmIdentifier), slotHandle);
-		    }
+		    commandAPDU = new ManageSecurityEnvironment.Set((byte) 0x41, ManageSecurityEnvironment.DST);
 		} else if (command.equals("PSO_CDS")) {
-		    rapdu = transmitSingleAPDU(
-			    CardCommands.PerformSecurityOperation.computeDigitalSignature(sign.getMessage()),
-			    slotHandle);
+		    commandAPDU = new PSOComputeDigitalSignature(message);
 		} else if (command.equals("INT_AUTH")) {
-		    rapdu = transmitSingleAPDU(
-			    CardCommands.InternalAuthenticate.generic(sign.getMessage(), (short) 0x0), slotHandle);
+		    commandAPDU = new InternalAuthenticate(message);
 		} else if (command.equals("MSE_RESTORE")) {
-		    WSHelper.makeResultUnknownError("Not yet implemented");
+		    commandAPDU = new ManageSecurityEnvironment.Restore(ManageSecurityEnvironment.DST);
 		} else if (command.equals("MSE_HASH")) {
-		    WSHelper.makeResultUnknownError("Not yet implemented");
+		    commandAPDU = new ManageSecurityEnvironment.Set((byte) 0x41, ManageSecurityEnvironment.HT);
 		} else if (command.equals("PSO_HASH")) {
-		    WSHelper.makeResultUnknownError("Not yet implemented");
+		    commandAPDU = new PSOHash(signature);
 		} else if (command.equals("MSE_DS")) {
-		    WSHelper.makeResultUnknownError("Not yet implemented");
+		    commandAPDU = new ManageSecurityEnvironment.Set((byte) 0x41, ManageSecurityEnvironment.DST);
 		} else if (command.equals("MSE_KEY_DS")) {
-		    WSHelper.makeResultUnknownError("Not yet implemented");
+		    commandAPDU = new ManageSecurityEnvironment.Set((byte) 0x41, ManageSecurityEnvironment.DST);
+		} else {
+		    throw new IncorrectParameterException("The signature generation command '" + command + "' is unknown.");
 		}
+
+		responseAPDU = commandAPDU.transmit(dispatcher, slotHandle);
 	    }
 
-	    Result result = new Result();
-	    result.setResultMajor(org.openecard.client.common.ECardConstants.Major.OK);
-	    res.setResult(result);
-	    res.setSignature(rapdu.getData());
+	    response.setSignature(responseAPDU.getData());
 
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    _logger.warn(e.getMessage(), e);
-	    res = WSHelper.makeResponse(SignResponse.class, WSHelper.makeResult(e));
+	    logger.warn(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
 	}
-	return res;
+
+	return response;
     }
 
 }

@@ -28,8 +28,9 @@ import java.util.Map;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.CardCommandStatus;
+import org.openecard.client.common.util.PINUtils;
+import org.openecard.client.common.util.UtilException;
 import org.openecard.client.gui.ResultStatus;
 import org.openecard.client.gui.StepResult;
 import org.openecard.client.gui.UserConsent;
@@ -190,17 +191,20 @@ class AbstractTerminal {
 		    _logger.warn(ex.getMessage(), ex);
 		    throw ex;
 		}
-		byte[] pin = IFDUtils.encodePin(getPinFromUserConsent(exec), pinInput.getPasswordAttributes());
+
+		String rawPIN = getPinFromUserConsent(exec);
+		PasswordAttributesType attributes = pinInput.getPasswordAttributes();
+		Transmit verifyTransmit;
+
+		try {
+		    verifyTransmit = PINUtils.buildVerifyTransmit(rawPIN, attributes, template, handle);
+		} catch (UtilException e) {
+		    IFDException ex = new IFDException(e);
+		    throw ex;
+		}
 
 		// send to reader
-		byte[] pinCmd = ByteUtils.concatenate(template, (byte)pin.length);
-		pinCmd = ByteUtils.concatenate(pinCmd, pin);
-		Transmit transmit = new Transmit();
-		transmit.setSlotHandle(handle);
-		InputAPDUInfoType pinApdu = new InputAPDUInfoType();
-		pinApdu.setInputAPDU(pinCmd);
-		transmit.getInputAPDUInfo().add(pinApdu);
-		TransmitResponse transResp = ifd.transmit(transmit);
+		TransmitResponse transResp = ifd.transmit(verifyTransmit);
 
 		// produce messages
 		if (transResp.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {

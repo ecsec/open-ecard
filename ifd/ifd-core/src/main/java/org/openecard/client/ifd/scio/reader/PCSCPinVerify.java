@@ -28,8 +28,9 @@ import java.io.ByteArrayOutputStream;
 import org.openecard.client.common.USBLangID;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.IntegerUtils;
+import org.openecard.client.common.util.PINUtils;
+import org.openecard.client.common.util.UtilException;
 import org.openecard.client.ifd.scio.IFDException;
-import org.openecard.client.ifd.scio.IFDUtils;
 
 
 /**
@@ -64,7 +65,15 @@ public class PCSCPinVerify {
 
     private void prepareStructure(PasswordAttributesType attributes, byte[] cmdTemplate) throws IFDException {
 	// get apdu and pin template
-	byte[] pinTemplate = IFDUtils.createPinMask(attributes);
+	byte[] pinTemplate;
+	
+	try {
+	    pinTemplate = PINUtils.createPinMask(attributes);
+	} catch (UtilException e) {
+	    IFDException ex = new IFDException(e);
+	    throw ex;
+	}
+	
 	byte[] template = ByteUtils.concatenate(cmdTemplate, (byte)pinTemplate.length);
 	setData(ByteUtils.concatenate(template, pinTemplate));
 

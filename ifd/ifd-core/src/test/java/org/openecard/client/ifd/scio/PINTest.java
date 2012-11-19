@@ -28,7 +28,9 @@ import java.math.BigInteger;
 import javax.activation.UnsupportedDataTypeException;
 import javax.xml.bind.JAXBException;
 import org.openecard.client.common.util.ByteUtils;
+import org.openecard.client.common.util.PINUtils;
 import org.openecard.client.common.util.StringUtils;
+import org.openecard.client.common.util.UtilException;
 import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.ifd.scio.reader.PCSCPinVerify;
@@ -65,60 +67,60 @@ public class PINTest {
 
 
     @Test
-    public void testISO() throws IFDException {
+    public void testISO() throws UtilException {
 	PasswordAttributesType pwdAttr = create(true, ISO_9564_1, 4, 8, 12);
 
-	byte[] pinMask = IFDUtils.createPinMask(pwdAttr);
+	byte[] pinMask = PINUtils.createPinMask(pwdAttr);
 	assertEquals(new byte[] {0x20,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF}, pinMask);
 
-	byte[] pinResult = IFDUtils.encodePin("123456789", pwdAttr);
+	byte[] pinResult = PINUtils.encodePin("123456789", pwdAttr);
 	assertEquals(new byte[] {0x29,0x12,0x34,0x56,0x78,(byte)0x9F,(byte)0xFF,(byte)0xFF}, pinResult);
     }
 
     @Test
-    public void testBCD() throws IFDException {
+    public void testBCD() throws UtilException {
 	PasswordAttributesType pwdAttr = create(true, BCD, 4, 3, 6);
 	pwdAttr.setPadChar(new byte[]{(byte)0xFF});
 
-	byte[] pinMask = IFDUtils.createPinMask(pwdAttr);
+	byte[] pinMask = PINUtils.createPinMask(pwdAttr);
 	assertEquals(new byte[] {(byte)0xFF,(byte)0xFF,(byte)0xFF}, pinMask);
 
-	byte[] pinResult = IFDUtils.encodePin("12345", pwdAttr);
+	byte[] pinResult = PINUtils.encodePin("12345", pwdAttr);
 	assertEquals(new byte[] {(byte)0x12,(byte)0x34,(byte)0x5F}, pinResult);
     }
 
     @Test
-    public void testASCII() throws IFDException {
+    public void testASCII() throws UtilException {
 	PasswordAttributesType pwdAttr = create(false, ASCII_NUMERIC, 6, 6);
 
-	byte[] pinResult = IFDUtils.encodePin("123456", pwdAttr);
+	byte[] pinResult = PINUtils.encodePin("123456", pwdAttr);
 	assertEquals(new byte[] {0x31,0x32,0x33,0x34,0x35,0x36}, pinResult);
 
 	try {
 	    pwdAttr = create(true, ASCII_NUMERIC, 6, 6);
-	    IFDUtils.encodePin("123456", pwdAttr);
+	    PINUtils.encodePin("123456", pwdAttr);
 	    fail(); // padding needed, but no char given
-	} catch (IFDException ex) {
+	} catch (UtilException ex) {
 	}
 	try {
 	    pwdAttr = create(false, ASCII_NUMERIC, 6, 7);
-	    IFDUtils.encodePin("123456", pwdAttr);
+	    PINUtils.encodePin("123456", pwdAttr);
 	    fail(); // padding inferred, but no char given
-	} catch (IFDException ex) {
+	} catch (UtilException ex) {
 	}
     }
 
     @Test
-    public void testHalfNibble() throws IFDException {
+    public void testHalfNibble() throws UtilException {
 	PasswordAttributesType pwdAttr = create(false, HALF_NIBBLE_BCD, 6, 6);
 
-	byte[] pinResult = IFDUtils.encodePin("123456", pwdAttr);
+	byte[] pinResult = PINUtils.encodePin("123456", pwdAttr);
 	assertEquals(new byte[] {(byte)0xF1,(byte)0xF2,(byte)0xF3,(byte)0xF4,(byte)0xF5,(byte)0xF6}, pinResult);
 
 	pwdAttr = create(true, HALF_NIBBLE_BCD, 6, 7);
 	pwdAttr.setPadChar(new byte[]{(byte)0xFF});
 
-	pinResult = IFDUtils.encodePin("123456", pwdAttr);
+	pinResult = PINUtils.encodePin("123456", pwdAttr);
 	assertEquals(new byte[] {(byte)0xF1,(byte)0xF2,(byte)0xF3,(byte)0xF4,(byte)0xF5,(byte)0xF6,(byte)0xFF}, pinResult);
     }
 

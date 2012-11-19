@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,39 +20,36 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.ifd.scio;
+package org.openecard.client.common.util;
 
-import java.math.BigInteger;
-import java.util.Arrays;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.openecard.client.common.ECardException;
 
 
 /**
- *
- * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
+ * Exception class for utility classes.
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class IFDUtils {
+public class UtilException extends ECardException {
 
-    private static final Logger _logger = LoggerFactory.getLogger(IFDUtils.class);
-
-    /**
-     * Extracts the slot index from the specified ifd name.
-     * @param name Name of IFD
-     * @return slot index
-     * @throws IFDException 
-     */
-    public static BigInteger getSlotIndex(String name) throws IFDException {
-	return BigInteger.ZERO;
+    public UtilException(String msg) {
+	makeException(this, msg);
     }
 
-    public static boolean arrayEquals(byte[] a, byte[] b) {
-        if (a == null && b == null) {
-            return false;
-	} else {
-            Boolean result = Arrays.equals(a, b);
-            return result.booleanValue();
-	}
+    public UtilException(String minor, String msg) {
+	makeException(this, minor, msg);
+    }
+
+    public UtilException(Result r) {
+	makeException(this, r);
+    }
+
+    public UtilException(Throwable cause) {
+	makeException(this, cause);
     }
 
 }
+
+
+
+

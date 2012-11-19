@@ -256,27 +256,31 @@ public class TinySAL implements org.openecard.ws.SAL {
     @Override
     public CardApplicationDisconnectResponse cardApplicationDisconnect(CardApplicationDisconnect cardApplicationDisconnect) {
 	ConnectionHandleType connectionHandle = cardApplicationDisconnect.getConnectionHandle();
+	byte[] slotHandle = connectionHandle != null ? connectionHandle.getSlotHandle() : null;
 
 	// check existence of required parameters
-	if (connectionHandle == null) {
+	if (slotHandle == null) {
 	    return WSHelper.makeResponse(CardApplicationDisconnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "ConnectionHandle is null"));
 	}
-	CardStateEntry cardStateEntry = states.getEntry(connectionHandle);
+	// CardApplicationDisconnect only operates on slotHandle
+	connectionHandle = new ConnectionHandleType();
+	connectionHandle.setSlotHandle(slotHandle);
 
+	CardStateEntry cardStateEntry = states.getEntry(connectionHandle);
 	if (cardStateEntry == null) {
 	    return WSHelper.makeResponse(CardApplicationDisconnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "The ConnectionHandle is invalid."));
 	}
-	// FIXME
-	cardStateEntry.setSlotHandle(null);
-	states.addEntry(cardStateEntry);
 
-	CardApplicationDisconnectResponse cardApplicationDisconnectResponse = null;
+	CardApplicationDisconnectResponse cardApplicationDisconnectResponse;
 	try {
 	    Disconnect disconnect = new Disconnect();
 	    disconnect.setSlotHandle(connectionHandle.getSlotHandle());
 	    DisconnectResponse disconnectResponse = (DisconnectResponse) env.getDispatcher().deliver(disconnect);
 	    cardApplicationDisconnectResponse = new CardApplicationDisconnectResponse();
 	    cardApplicationDisconnectResponse.setResult(disconnectResponse.getResult());
+	    WSHelper.checkResult(disconnectResponse);
+	    // remove entries associated with this handle
+	    states.removeEntry(connectionHandle);
 	} catch (Exception e) {
 	    cardApplicationDisconnectResponse = WSHelper.makeResponse(CardApplicationDisconnectResponse.class, WSHelper.makeResult(e));
 	}

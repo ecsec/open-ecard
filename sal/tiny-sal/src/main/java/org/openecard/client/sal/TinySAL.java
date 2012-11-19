@@ -331,17 +331,13 @@ public class TinySAL implements SAL {
 	    if (slotHandle == null) {
 		return WSHelper.makeResponse(CardApplicationDisconnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "ConnectionHandle is null"));
 	    }
-	    // CardApplicationDisconnect only operates on slotHandle
-	    // cardStateMap must only have this one param
-	    connectionHandle = new ConnectionHandleType();
-	    connectionHandle.setSlotHandle(slotHandle);
 
 	    Disconnect disconnect = new Disconnect();
-	    disconnect.setSlotHandle(connectionHandle.getSlotHandle());
+	    disconnect.setSlotHandle(slotHandle);
 	    DisconnectResponse disconnectResponse = (DisconnectResponse) env.getDispatcher().deliver(disconnect);
 
 	    // remove entries associated with this handle
-	    states.removeEntry(connectionHandle);
+	    states.removeSlotHandleEntry(slotHandle);
 
 	    response.setResult(disconnectResponse.getResult());
 	} catch (ECardException e) {

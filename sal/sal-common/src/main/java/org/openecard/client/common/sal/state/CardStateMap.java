@@ -22,6 +22,7 @@
 
 package org.openecard.client.common.sal.state;
 
+import de.bund.bsi.ecard.api._1.ConnectionHandle;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
@@ -87,6 +88,24 @@ public class CardStateMap {
 	while (it.hasNext()) {
 	    CardStateEntry entry = it.next();
 	    removeEntry(entry, removeSlotHandles);
+	}
+    }
+
+    /**
+     * Remove the entry reference in slotHandle index. <br/>
+     * This function is needed to update the index in CardApplicationDisconnect.
+     *
+     * @param slotHandle SlotHandle for which the entry reference should be deleted.
+     */
+    public synchronized void removeSlotHandleEntry(byte[] slotHandle) {
+	ConnectionHandleType handle = new ConnectionHandleType();
+	handle.setSlotHandle(slotHandle);
+	Set<CardStateEntry> entries = getMatchingEntries(handle);
+	Iterator<CardStateEntry> it = entries.iterator();
+
+	if (it.hasNext()) {
+	    CardStateEntry entry = it.next();
+	    removeMapEntry(handle.getSlotHandle(), slothandleMap, entry);
 	}
     }
 

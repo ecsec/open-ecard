@@ -29,14 +29,16 @@ import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.InputUnitType;
+import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
 import iso.std.iso_iec._24727.tech.schema.PinInputType;
+import iso.std.iso_iec._24727.tech.schema.Transmit;
+import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifyUser;
 import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse;
 import java.math.BigInteger;
 import java.util.Map;
 import org.openecard.client.common.ECardException;
 import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.apdu.Verify;
 import org.openecard.client.common.apdu.common.CardResponseAPDU;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.Assert;
@@ -45,6 +47,7 @@ import org.openecard.client.common.sal.ProtocolStep;
 import org.openecard.client.common.sal.anytype.PINCompareMarkerType;
 import org.openecard.client.common.sal.state.CardStateEntry;
 import org.openecard.client.common.sal.util.SALUtils;
+import org.openecard.client.common.util.PINUtils;
 import org.openecard.client.sal.protocol.pincompare.anytype.PINCompareDIDAuthenticateInputType;
 import org.openecard.client.sal.protocol.pincompare.anytype.PINCompareDIDAuthenticateOutputType;
 import org.slf4j.Logger;
@@ -99,30 +102,37 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplication);
 	    PINCompareMarkerType pinCompareMarker = new PINCompareMarkerType(didStructure.getDIDMarker());
 	    byte keyRef = pinCompareMarker.getPINRef().getKeyRef()[0];
-
-	    VerifyUser verifyUser = new VerifyUser();
-	    InputUnitType inputUnit = new InputUnitType();
-	    PinInputType pinInput = new PinInputType();
-
-	    verifyUser.setSlotHandle(connectionHandle.getSlotHandle());
-	    verifyUser.setInputUnit(inputUnit);
-	    pinInput.setIndex(BigInteger.ZERO);
-	    pinInput.setPasswordAttributes(pinCompareMarker.getPasswordAttributes());
-	    inputUnit.setPinInput(pinInput);
+	    byte[] slotHandle = connectionHandle.getSlotHandle();
+	    PasswordAttributesType attributes = pinCompareMarker.getPasswordAttributes();
+	    String rawPIN = pinCompareInput.getPIN();
+	    byte[] template = new byte[] { 0x00, 0x20, 0x00, keyRef };
+	    byte[] responseCode;
 
 	    // [TR-03112-6] The structure of the template corresponds to the
 	    // structure of an APDU for the VERIFY command in accordance
 	    // with [ISO7816-4] (Section 7.5.6).
-	    if (pinCompareInput.getPIN() == null || pinCompareInput.getPIN().isEmpty()) {
-		verifyUser.setTemplate(new Verify(keyRef).toByteArray());
+	    if (rawPIN == null || rawPIN.isEmpty()) {
+		VerifyUser verify = new VerifyUser();
+		verify.setSlotHandle(slotHandle);
+
+		InputUnitType inputUnit = new InputUnitType();
+		verify.setInputUnit(inputUnit);
+
+		PinInputType pinInput = new PinInputType();
+		inputUnit.setPinInput(pinInput);
+		pinInput.setIndex(BigInteger.ZERO);
+		pinInput.setPasswordAttributes(attributes);
+
+		verify.setTemplate(template);
+		VerifyUserResponse verifyR = (VerifyUserResponse) dispatcher.deliver(verify);
+		responseCode = verifyR.getResponse();
 	    } else {
-		byte[] verificationData = pinCompareInput.getPIN().getBytes("ISO-8859-1");
-		verifyUser.setTemplate(new Verify(keyRef, verificationData).toByteArray());
+		Transmit verifyTransmit = PINUtils.buildVerifyTransmit(rawPIN, attributes, template, slotHandle);
+		TransmitResponse transResp = (TransmitResponse) dispatcher.deliver(verifyTransmit);
+		responseCode = transResp.getOutputAPDU().get(0);
 	    }
 
-	    VerifyUserResponse verifyResponse = (VerifyUserResponse) dispatcher.deliver(verifyUser);
-	    CardResponseAPDU verifyResponseAPDU = new CardResponseAPDU(verifyResponse.getResponse());
-
+	    CardResponseAPDU verifyResponseAPDU = new CardResponseAPDU(responseCode);
 	    if (verifyResponseAPDU.isWarningProcessed()) {
 		pinCompareOutput.setRetryCounter(new BigInteger(Integer.toString((verifyResponseAPDU.getSW2() & 0x0F))));
 	    }

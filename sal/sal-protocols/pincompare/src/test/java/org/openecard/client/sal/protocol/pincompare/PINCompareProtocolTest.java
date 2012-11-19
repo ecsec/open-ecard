@@ -52,6 +52,7 @@ import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.enums.EventType;
 import org.openecard.client.common.interfaces.Dispatcher;
+import org.openecard.client.common.sal.anytype.PINCompareMarkerType;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.common.util.ByteUtils;
@@ -61,10 +62,11 @@ import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.sal.TinySAL;
+import org.openecard.client.sal.protocol.pincompare.anytype.PINCompareDIDAuthenticateInputType;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
-import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.SkipException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import static org.testng.Assert.assertEquals;
@@ -136,21 +138,21 @@ public class PINCompareProtocolTest {
 	cardApplicationConnect.setCardApplicationPath(cardApplicationPathType);
 	CardApplicationConnectResponse result1 = instance.cardApplicationConnect(cardApplicationConnect);
 
+	///
+	/// Test with a pin set.
+	///
 	DIDAuthenticate parameters = new DIDAuthenticate();
 	parameters.setDIDName("PIN.home");
 	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	factory.setNamespaceAware(true);
 	DocumentBuilder builder = factory.newDocumentBuilder();
 	Document d = builder.newDocument();
-	// FIXME user is always asked for pin no matter if this element exists
 	Element elemPin = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "Pin");
-	//elemPin.setTextContent("123456");
+	elemPin.setTextContent("123456");
 	DIDAuthenticationDataType didAuthenticationData = new DIDAuthenticationDataType();
 	didAuthenticationData.getAny().add(elemPin);
 
-	org.openecard.client.sal.protocol.pincompare.anytype.PINCompareDIDAuthenticateInputType
-	pinCompareDIDAuthenticateInputType = new 
-	org.openecard.client.sal.protocol.pincompare.anytype.PINCompareDIDAuthenticateInputType(
+	PINCompareDIDAuthenticateInputType pinCompareDIDAuthenticateInputType = new PINCompareDIDAuthenticateInputType(
 		didAuthenticationData);
 
 	parameters.setAuthenticationProtocolData(didAuthenticationData);
@@ -160,9 +162,24 @@ public class PINCompareProtocolTest {
 	DIDAuthenticateResponse result = instance.didAuthenticate(parameters);
 
 	assertEquals(result.getAuthenticationProtocolData().getProtocol(), ECardConstants.Protocol.PIN_COMPARE);
+	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
 	assertEquals(result.getAuthenticationProtocolData().getAny().size(), 0);
-	assertEquals(result.getResult().getResultMajor(), ECardConstants.Major.OK);
-	//assertEquals(pinCompareDIDAuthenticateInputType.getPIN(), "123456");
+
+	///
+	/// Test without a pin set.
+	///
+	parameters = new DIDAuthenticate();
+	parameters.setDIDName("PIN.home");
+	didAuthenticationData = new DIDAuthenticationDataType();
+	parameters.setAuthenticationProtocolData(didAuthenticationData);
+	parameters.setConnectionHandle(result1.getConnectionHandle());
+	didAuthenticationData.setProtocol(ECardConstants.Protocol.PIN_COMPARE);
+	parameters.setAuthenticationProtocolData(didAuthenticationData);
+	result = instance.didAuthenticate(parameters);
+
+	assertEquals(result.getAuthenticationProtocolData().getProtocol(), ECardConstants.Protocol.PIN_COMPARE);
+ 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
+	assertEquals(result.getAuthenticationProtocolData().getAny().size(), 0);
     }
 
     @Test
@@ -195,9 +212,8 @@ public class PINCompareProtocolTest {
 	assertEquals(result.getResult().getResultMajor(), "http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok");
 	assertEquals(result.getDIDStructure().getDIDName(), "PIN.home");
 	assertEquals(result.getDIDStructure().getDIDMarker().getClass(), PinCompareMarkerType.class);
-	org.openecard.client.common.sal.anytype.PINCompareMarkerType pinCompareMarkerType =
-		new org.openecard.client.common.sal.anytype.PINCompareMarkerType(
-			(PinCompareMarkerType) result.getDIDStructure().getDIDMarker());
+	PINCompareMarkerType pinCompareMarkerType = new PINCompareMarkerType(
+		(PinCompareMarkerType) result.getDIDStructure().getDIDMarker());
 	assertEquals(ByteUtils.toHexString(pinCompareMarkerType.getPINRef().getKeyRef()), "02");
 
 	// test with given correct scope
@@ -209,8 +225,7 @@ public class PINCompareProtocolTest {
 	assertEquals(result.getResult().getResultMajor(), ECardConstants.Major.OK);
 	assertEquals(result.getDIDStructure().getDIDName(), "PIN.home");
 	assertEquals(result.getDIDStructure().getDIDMarker().getClass(), PinCompareMarkerType.class);
-	pinCompareMarkerType = new org.openecard.client.common.sal.anytype.PINCompareMarkerType((PinCompareMarkerType)
-		result.getDIDStructure().getDIDMarker());
+	pinCompareMarkerType = new PINCompareMarkerType((PinCompareMarkerType) result.getDIDStructure().getDIDMarker());
 	assertEquals(ByteUtils.toHexString(pinCompareMarkerType.getPINRef().getKeyRef()), "02");
 
 	cardApplicationPath = new CardApplicationPath();

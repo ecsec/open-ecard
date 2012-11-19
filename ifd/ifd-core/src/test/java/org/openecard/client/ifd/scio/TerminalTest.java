@@ -25,6 +25,7 @@ package org.openecard.client.ifd.scio;
 import iso.std.iso_iec._24727.tech.schema.*;
 import java.math.BigInteger;
 import org.openecard.client.common.ECardConstants;
+import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
 import static org.testng.Assert.assertEquals;
 import org.testng.annotations.AfterTest;

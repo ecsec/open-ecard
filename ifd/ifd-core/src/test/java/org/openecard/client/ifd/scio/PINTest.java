@@ -29,6 +29,7 @@ import javax.activation.UnsupportedDataTypeException;
 import javax.xml.bind.JAXBException;
 import org.openecard.client.common.util.ByteUtils;
 import org.openecard.client.common.util.StringUtils;
+import org.openecard.client.gui.swing.SwingDialogWrapper;
 import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.ifd.scio.reader.PCSCPinVerify;
 import org.openecard.client.ws.WSMarshaller;

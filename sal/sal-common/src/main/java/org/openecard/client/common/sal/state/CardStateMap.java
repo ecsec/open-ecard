@@ -73,25 +73,29 @@ public class CardStateMap {
 	allEntries.add(entry);
     }
 
+
     /**
-     * Remove all references to the CardStateEntry matching this ConnectionHandle.<br/>
-     * If more than one entry matches, then nothing is deleted and a warning is issued.
+     * Remove all references to the CardStateEntries matching this ConnectionHandle. <br/>
+     * If more than one entry exists, all occurrences are deleted.
      * @param handle
      */
     public synchronized void removeEntry(ConnectionHandleType handle) {
-	Set<CardStateEntry> entry = getMatchingEntries(handle);
-	if (entry.size() > 1) {
-	    _logger.warn("Not removing CardStateEntry, because given ConnectionHandle matches more than one state.");
-	} else if (entry.size() == 1) {
-	    removeEntry(entry.iterator().next());
+	Set<CardStateEntry> entries = getMatchingEntries(handle);
+	Iterator<CardStateEntry> it = entries.iterator();
+	boolean removeSlotHandles = handle.getSlotHandle() == null;
+
+	while (it.hasNext()) {
+	    CardStateEntry entry = it.next();
+	    removeEntry(entry, removeSlotHandles);
 	}
     }
 
     /**
      * Remove all references to this CardStateEntry.
-     * @param entry
+     * @param entry Entry to delete.
+     * @param removeSlotHandles When set remove all occurrences of this entry in the slotHandle index.
      */
-    private synchronized void removeEntry(CardStateEntry entry) {
+    private synchronized void removeEntry(CardStateEntry entry, boolean removeSlotHandles) {
 	ConnectionHandleType handle = entry.handleCopy();
 	ChannelHandleType channel = handle.getChannelHandle();
 
@@ -99,7 +103,16 @@ public class CardStateMap {
 	    removeMapEntry(channel.getSessionIdentifier(), sessionMap, entry);
 	}
 	removeMapEntry(handle.getContextHandle(), contextMap, entry);
-	removeMapEntry(handle.getSlotHandle(), slothandleMap, entry);
+	// remove all or just the one a key is given for
+	if (removeSlotHandles) {
+	    Iterator<byte[]> it = slothandleMap.keySet().iterator();
+	    while (it.hasNext()) {
+		byte[] key = it.next();
+		removeMapEntry(key, slothandleMap, entry);
+	    }
+	} else {
+	    removeMapEntry(handle.getSlotHandle(), slothandleMap, entry);
+	}
 	allEntries.remove(entry);
     }
 

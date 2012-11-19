@@ -25,6 +25,7 @@ package org.openecard.client.control.module.tctoken;
 import generated.TCTokenType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
@@ -175,50 +176,57 @@ public class GenericTCTokenHandler {
 	// Check CardApplicationConnectResponse
 	WSHelper.checkResult(cardApplicationConnectResponse);
 
-	String sessionIdentifier = token.getSessionIdentifier();
-	URL serverAddress = new URL(token.getServerAddress());
-	String serverHost = serverAddress.getHost();
-	String secProto = token.getPathSecurityProtocol();
+	try {
+	    String sessionIdentifier = token.getSessionIdentifier();
+	    URL serverAddress = new URL(token.getServerAddress());
+	    String serverHost = serverAddress.getHost();
+	    String secProto = token.getPathSecurityProtocol();
 
-	// Set up TLS connection
-	ClientCertTlsClient tlsClient;
-	if (secProto.equals("urn:ietf:rfc:4279") || secProto.equals("urn:ietf:rfc:5487")) {
-	    TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
-	    tlsAuth.setHostname(serverHost);
-	    tlsAuth.setCertificateVerifier(new JavaSecVerifier());
-	    byte[] psk = token.getPathSecurityParameters().getPSK();
-	    TlsPSKIdentity pskId = new TlsPSKIdentityImpl(sessionIdentifier.getBytes(), psk);
-	    tlsClient = new ClientCertPSKTlsClient(pskId, serverHost);
-	    tlsClient.setAuthentication(tlsAuth);
-	} else if (secProto.equals("urn:ietf:rfc:4346")) {
-	    TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
-	    tlsAuth.setHostname(serverHost);
-	    tlsAuth.setCertificateVerifier(new JavaSecVerifier());
-	    tlsClient = new ClientCertDefaultTlsClient(serverHost);
-	    tlsClient.setAuthentication(tlsAuth);
-	} else {
-	    throw new IOException("Unknow security protocol '" + secProto + "' requested.");
+	    // Set up TLS connection
+	    ClientCertTlsClient tlsClient;
+	    if (secProto.equals("urn:ietf:rfc:4279") || secProto.equals("urn:ietf:rfc:5487")) {
+		TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
+		tlsAuth.setHostname(serverHost);
+		tlsAuth.setCertificateVerifier(new JavaSecVerifier());
+		byte[] psk = token.getPathSecurityParameters().getPSK();
+		TlsPSKIdentity pskId = new TlsPSKIdentityImpl(sessionIdentifier.getBytes(), psk);
+		tlsClient = new ClientCertPSKTlsClient(pskId, serverHost);
+		tlsClient.setAuthentication(tlsAuth);
+	    } else if (secProto.equals("urn:ietf:rfc:4346")) {
+		TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
+		tlsAuth.setHostname(serverHost);
+		tlsAuth.setCertificateVerifier(new JavaSecVerifier());
+		tlsClient = new ClientCertDefaultTlsClient(serverHost);
+		tlsClient.setAuthentication(tlsAuth);
+	    } else {
+		throw new IOException("Unknow security protocol '" + secProto + "' requested.");
+	    }
+
+	    // TODO: remove this workaround as soon as eGK server uses HTTPS
+	    if (serverAddress.getProtocol().equals("http")) {
+		tlsClient = null;
+	    }
+
+	    // Set up PAOS connection
+	    PAOS p = new PAOS(serverAddress, dispatcher, tlsClient);
+
+	    // Send StartPAOS
+	    StartPAOS sp = new StartPAOS();
+	    sp.getConnectionHandle().add(connectionHandle);
+	    sp.setSessionIdentifier(sessionIdentifier);
+	    p.sendStartPAOS(sp);
+
+	    TCTokenResponse response = new TCTokenResponse();
+	    response.setRefreshAddress(new URL(token.getRefreshAddress()));
+	    response.setResult(WSHelper.makeResultOK());
+
+	    return response;
+	} finally {
+	    // disconnect card after authentication
+	    CardApplicationDisconnect appDis = new CardApplicationDisconnect();
+	    appDis.setConnectionHandle(connectionHandle);
+	    dispatcher.deliver(appDis);
 	}
-
-	// TODO: remove this workaround as soon as eGK server uses HTTPS
-	if (serverAddress.getProtocol().equals("http")) {
-	    tlsClient = null;
-	}
-
-	// Set up PAOS connection
-	PAOS p = new PAOS(serverAddress, dispatcher, tlsClient);
-
-	// Send StartPAOS
-	StartPAOS sp = new StartPAOS();
-	sp.getConnectionHandle().add(connectionHandle);
-	sp.setSessionIdentifier(sessionIdentifier);
-	p.sendStartPAOS(sp);
-
-	TCTokenResponse response = new TCTokenResponse();
-	response.setRefreshAddress(new URL(token.getRefreshAddress()));
-	response.setResult(WSHelper.makeResultOK());
-
-	return response;
     }
 
     /**

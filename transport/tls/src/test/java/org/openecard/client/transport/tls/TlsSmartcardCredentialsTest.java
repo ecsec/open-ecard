@@ -58,8 +58,8 @@ import org.openecard.client.gui.swing.SwingUserConsent;
 import org.openecard.client.ifd.scio.IFD;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.sal.TinySAL;
-import org.openecard.client.sal.protocol.genericryptography.GenericCryptoProtocolFactory;
-import org.openecard.client.sal.protocol.pincompare.PinCompareProtocolFactory;
+import org.openecard.client.sal.protocol.genericcryptography.GenericCryptoProtocolFactory;
+import org.openecard.client.sal.protocol.pincompare.PINCompareProtocolFactory;
 import org.openecard.client.transport.dispatcher.MessageDispatcher;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -115,7 +115,7 @@ public class TlsSmartcardCredentialsTest {
 	dispatcher = new MessageDispatcher(env);
 	env.setDispatcher(dispatcher);
 	env.setSAL(instance);
-	instance.addProtocol(ECardConstants.Protocol.PIN_COMPARE, new PinCompareProtocolFactory());
+	instance.addProtocol(ECardConstants.Protocol.PIN_COMPARE, new PINCompareProtocolFactory());
 	instance.addProtocol(ECardConstants.Protocol.GENERIC_CRYPTO, new GenericCryptoProtocolFactory());
     }
 

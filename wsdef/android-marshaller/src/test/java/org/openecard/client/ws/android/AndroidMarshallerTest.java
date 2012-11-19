@@ -38,7 +38,7 @@ import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.client.common.ECardConstants;
 import org.openecard.client.common.WSHelper;
-import org.openecard.client.common.sal.anytype.AuthDataMap;
+import org.openecard.client.common.anytype.AuthDataMap;
 import org.openecard.client.common.sal.anytype.CryptoMarkerType;
 import org.openecard.client.common.util.StringUtils;
 import org.openecard.client.ws.WSMarshaller;

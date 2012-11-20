@@ -29,6 +29,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import org.openecard.client.common.I18n;
+import org.openecard.client.gui.graphics.GraphicsUtil;
+import org.openecard.client.gui.graphics.OecLogoBgWhite;
 import org.openecard.client.recognition.CardRecognition;
 import org.openecard.client.richclient.RichClient;
 import org.slf4j.Logger;
@@ -84,7 +86,7 @@ public class AppTray {
             trayIcon.setImage(getTrayIconImage(ICON_LOGO));
 	    trayIcon.setToolTip(lang.translationForKey("tray.title"));
 	} else {
-	    label.setIcon(GuiUtils.getImageIcon("logo_icon_default_256.png"));
+	    label.setIcon(new ImageIcon(GraphicsUtil.createImage(OecLogoBgWhite.class, 256, 256)));
 	}
 
 	status = new Status(this, rec);
@@ -159,12 +161,13 @@ public class AppTray {
                     return GuiUtils.getImage("loader_icon_linux_default_256.gif");
             }
         } else {
-            switch(dim.width) {
-                case 24:
-                    return GuiUtils.getImage("logo_icon_linux_kde_24.png");
-                default:
-                    return GuiUtils.getImage("logo_icon_linux_default_256.png");
-            }
+            // KDE uses tray icon images with the size of 24 x 24 pixels, but only 22 x 22 pixels are shown. The images
+            // are not scaled, but simply get cropped on the right side and the bottom by 2 pixels. If a smaller image
+            // is used (e.g. 22 x 22 pixels), it will be first scaled to 24 x 24 pixels and then it will be cropped.
+            // So an image must be used which is 24 x 24 pixels in size and can be cropped by 2 pixels without loosing
+            // any information. 
+            // Attention: This may change in future version of KDE!
+            return GraphicsUtil.createImage(OecLogoBgWhite.class, dim.width - 2, dim.height - 2, dim.width, dim.height, 0, 0);
         }
     }
     
@@ -192,26 +195,7 @@ public class AppTray {
                     return GuiUtils.getImage("loader_icon_linux_default_256.gif");
             }
         } else {
-            switch (dim.width) {
-                case 16:
-                    return GuiUtils.getImage("logo_icon_linux_default_16.png");
-                case 24:
-                    return GuiUtils.getImage("logo_icon_linux_default_24.png");
-                case 32:
-                    return GuiUtils.getImage("logo_icon_linux_default_32.png");
-                case 48:
-                    return GuiUtils.getImage("logo_icon_linux_default_48.png");
-                case 64:
-                    return GuiUtils.getImage("logo_icon_linux_default_64.png");
-                case 72:
-                    return GuiUtils.getImage("logo_icon_linux_default_72.png");
-                case 96:
-                    return GuiUtils.getImage("logo_icon_linux_default_96.png");
-                case 128:
-                    return GuiUtils.getImage("logo_icon_linux_default_128.png");
-                default:
-                    return GuiUtils.getImage("logo_icon_linux_default_256.png");
-            }
+            return GraphicsUtil.createImage(OecLogoBgWhite.class, dim.width, dim.height);
         }
     }
     
@@ -239,26 +223,7 @@ public class AppTray {
                     return GuiUtils.getImage("loader_icon_default_256.gif");
             }
         } else {
-            switch (dim.width) {
-                case 16:
-                    return GuiUtils.getImage("logo_icon_default_16.png");
-                case 24:
-                    return GuiUtils.getImage("logo_icon_default_24.png");
-                case 32:
-                    return GuiUtils.getImage("logo_icon_default_32.png");
-                case 48:
-                    return GuiUtils.getImage("logo_icon_default_48.png");
-                case 64:
-                    return GuiUtils.getImage("logo_icon_default_64.png");
-                case 72:
-                    return GuiUtils.getImage("logo_icon_default_72.png");
-                case 96:
-                    return GuiUtils.getImage("logo_icon_default_96.png");
-                case 128:
-                    return GuiUtils.getImage("logo_icon_default_128.png");
-                default:
-                    return GuiUtils.getImage("logo_icon_default_256.png");
-            }
+            return GraphicsUtil.createImage(OecLogoBgWhite.class, dim.width, dim.height);
         }
     }
 
@@ -292,7 +257,7 @@ public class AppTray {
 
 	frame = new JFrame(lang.translationForKey("tray.title"));
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	frame.setIconImage(GuiUtils.getImage("logo_icon_default_256.png"));
+	frame.setIconImage(GraphicsUtil.createImage(OecLogoBgWhite.class, 256, 256));
 
 	label = new JLabel(GuiUtils.getImageIcon("loader_icon_default_64.gif"));
 	label.addMouseListener(new MouseAdapter() {
@@ -303,7 +268,7 @@ public class AppTray {
 	    }
 	});
 
-        ImageIcon logo = GuiUtils.getImageIcon("logo_icon_default_256.png");
+        ImageIcon logo = new ImageIcon(GraphicsUtil.createImage(OecLogoBgWhite.class, 256, 256));
 	Container c = frame.getContentPane();
 	c.setPreferredSize(new Dimension(logo.getIconWidth(), logo.getIconHeight()));
 	c.setBackground(Color.white);

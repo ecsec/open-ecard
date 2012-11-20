@@ -167,6 +167,7 @@ public class AboutDialog extends JDialog {
 			browserOpened = true;
 		    } catch (IOException ex) {
 			// failed to open browser
+                        logger.debug(ex.getMessage(), ex);
 		    }
 		}
 		if (! browserOpened) {
@@ -175,10 +176,12 @@ public class AboutDialog extends JDialog {
 			pb.start();
 		    } catch (IOException ex) {
 			// failed to execute command
+                        logger.debug(ex.getMessage(), ex);
 		    }
 		}
 	    } catch (URISyntaxException ex) {
 		// wrong syntax
+                logger.debug(ex.getMessage(), ex);
 	    }
 	}
     }

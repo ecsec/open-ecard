@@ -23,8 +23,10 @@
 package org.openecard.client.scio;
 
 import android.content.Context;
+import de.hscoburg.R;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,8 +35,7 @@ import java.util.zip.ZipInputStream;
 
 
 /**
- * This class is used to unpack zipped resources (e.g. pcsc drivers) to make
- * them accessible for the app.
+ * This class is used to unpack zipped resources (e.g. pcsc drivers) to make them accessible for the app.
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * 
@@ -44,15 +45,40 @@ public class ResourceUnpacker {
     /**
      * Unpacks a zipped resource to a specific folder.
      * 
-     * @param ins
-     *            an inputstream pointing to the resource to unpack
      * @param ctx
      *            the application context
+     */
+    public static void unpackResources(Context ctx) {
+
+	InputStream ins = ctx.getResources().openRawResource(R.raw.drivers);
+
+	if (ins != null) {
+	    File f = new File(ctx.getFilesDir() + "/drivers");
+	    if (f.exists())
+		deleteDir(f);
+	    try {
+		ResourceUnpacker.unpackResources(ins, ctx.getFilesDir());
+	    } catch (FileNotFoundException e) {
+		// TODO LOG
+		throw new RuntimeException("Cannot get drivers resource.", e);
+	    } catch (IOException e) {
+		// TODO LOG
+		throw new RuntimeException("Cannot get drivers resource.", e);
+	    }
+	} else
+	    throw new RuntimeException("Cannot get drivers resource.");
+    }
+
+    /**
+     * @param ins
+     *            an inputstream pointing to the resource to unpack
+     * 
      * @param file
      *            destination folder where the resource is unpacked to
-     * @throws IOException if an io related error occurs while unpacking the resource
+     * @throws IOException
+     *             if an io related error occurs while unpacking the resource
      */
-    public static void unpackResources(InputStream ins, Context ctx, File file) throws IOException {
+    private static void unpackResources(InputStream ins, File file) throws IOException {
 	// Open the ZipInputStream
 	ZipInputStream inputStream = new ZipInputStream(ins);
 
@@ -93,6 +119,29 @@ public class ResourceUnpacker {
 	    inputStream.closeEntry();
 	}
 	inputStream.close();
+    }
+
+    /**
+     * Delete a directory and all contained files and subdirectories.
+     * 
+     * @param dir
+     *            the directory to delete
+     * @return true if successfully deleted, else false
+     */
+    private static boolean deleteDir(File dir) {
+	// recursively remove all files and subdirectories
+	if (dir.isDirectory()) {
+	    String[] children = dir.list();
+	    for (int i = 0; i < children.length; i++) {
+		boolean success = deleteDir(new File(dir, children[i]));
+		if (!success) {
+		    return false;
+		}
+	    }
+	}
+
+	// The directory is now empty so delete it
+	return dir.delete();
     }
 
 }

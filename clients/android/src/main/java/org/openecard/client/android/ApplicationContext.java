@@ -22,43 +22,40 @@
 
 package org.openecard.client.android;
 
+import android.app.Application;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
-import java.io.File;
-import java.io.InputStream;
 import org.openecard.client.android.activities.MainActivity;
 import org.openecard.client.common.ClientEnv;
 import org.openecard.client.common.ECardConstants;
+import org.openecard.client.common.ifd.AndroidTerminalFactory;
 import org.openecard.client.common.interfaces.Dispatcher;
 import org.openecard.client.common.sal.state.CardStateMap;
 import org.openecard.client.common.sal.state.SALStateCallback;
 import org.openecard.client.control.ControlInterface;
 import org.openecard.client.control.binding.intent.IntentBinding;
-import org.openecard.client.event.EventManager;
-import org.openecard.client.gui.android.AndroidUserConsent;
-import org.openecard.client.ifd.protocol.pace.PACEProtocolFactory;
-import org.openecard.client.ifd.scio.IFD;
-import org.openecard.client.ifd.scio.IFDProperties;
-import org.openecard.client.management.TinyManagement;
-import org.openecard.client.recognition.CardRecognition;
-import org.openecard.client.sal.TinySAL;
-import org.openecard.client.sal.protocol.eac.EACProtocolFactory;
-import org.openecard.client.scio.ResourceUnpacker;
-import org.openecard.client.scio.RootHelper;
-import org.openecard.client.transport.dispatcher.MessageDispatcher;
-import org.openecard.client.ws.WsdefProperties;
-import android.app.Application;
-import java.io.IOException;
-import org.openecard.client.common.interfaces.Environment;
 import org.openecard.client.control.binding.intent.handler.IntentTCTokenHandler;
 import org.openecard.client.control.handler.ControlHandler;
 import org.openecard.client.control.handler.ControlHandlers;
 import org.openecard.client.control.module.tctoken.GenericTCTokenHandler;
+import org.openecard.client.event.EventManager;
 import org.openecard.client.gui.UserConsent;
+import org.openecard.client.gui.android.AndroidUserConsent;
+import org.openecard.client.ifd.protocol.pace.PACEProtocolFactory;
+import org.openecard.client.ifd.scio.IFD;
+import org.openecard.client.ifd.scio.IFDException;
+import org.openecard.client.ifd.scio.IFDProperties;
+import org.openecard.client.ifd.scio.wrapper.IFDTerminalFactory;
+import org.openecard.client.management.TinyManagement;
+import org.openecard.client.recognition.CardRecognition;
+import org.openecard.client.sal.TinySAL;
+import org.openecard.client.sal.protocol.eac.EACProtocolFactory;
 import org.openecard.client.sal.protocol.genericcryptography.GenericCryptoProtocolFactory;
 import org.openecard.client.sal.protocol.pincompare.PINCompareProtocolFactory;
+import org.openecard.client.transport.dispatcher.MessageDispatcher;
+import org.openecard.client.ws.WsdefProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,11 +68,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ApplicationContext extends Application {
 
-    Logger logger = LoggerFactory.getLogger(ApplicationContext.class);
-
-    static {
-	// TODO: load logging config
-    }
+    private Logger logger = LoggerFactory.getLogger(ApplicationContext.class);
 
     private ClientEnv env;
     private TinySAL sal;
@@ -85,48 +78,31 @@ public class ApplicationContext extends Application {
     private EventManager em;
     private TinyManagement management;
     private byte[] contextHandle;
-    private Dispatcher dispatcher = null;
+    private Dispatcher dispatcher;
     private boolean initialized = false;
     private boolean recognizeCard = true;
     private UserConsent gui;
+    private AndroidTerminalFactory terminalFactory;
 
-    @Override
-    public void onCreate() {
-	super.onCreate();
-
-	InputStream driverInputStream = getResources().openRawResource(R.raw.drivers);
-	if (driverInputStream != null) {
-	    File f = new File(getFilesDir() + "/drivers");
-	    if (f.exists()) {
-		deleteDir(f);
-	    }
-	    try {
-		ResourceUnpacker.unpackResources(driverInputStream, this, getFilesDir());
-	    } catch (IOException ex) {
-		logger.error("Failed to load PCSC drivers.", ex);
-		throw new RuntimeException(ex);
-	    }
-	} else {
-	    throw new RuntimeException("Cannot get drivers resource.");
-	}
+    public CardRecognition getRecognition() {
+	return recognition;
     }
 
-    public static boolean deleteDir(File dir) {
-	// recursively remove all files and subdirectories
-	if (dir.isDirectory()) {
-	    String[] children = dir.list();
-	    for (int i = 0; i < children.length; i++) {
-		boolean success = deleteDir(new File(dir, children[i]));
-		if (!success) {
-		    return false;
-		}
-	    }
-	}
-
-	// The directory is now empty so delete it
-	return dir.delete();
+    public CardStateMap getCardStates() {
+	return cardStates;
     }
 
+    public ClientEnv getEnv() {
+	return env;
+    }
+
+    public UserConsent getGUI() {
+	return gui;
+    }
+    
+    /**
+     * Shut down the whole client by shutting down components.
+     */
     public void shutdown() {
 	// shutdwon event manager
 	em.terminate();
@@ -139,16 +115,24 @@ public class ApplicationContext extends Application {
 	ReleaseContext releaseContext = new ReleaseContext();
 	releaseContext.setContextHandle(contextHandle);
 	ifd.releaseContext(releaseContext);
-	RootHelper.killPCSCD();
+	terminalFactory.stop();
     }
 
+    /**
+     * Initialize the client by setting properties for Android and starting up each module.
+     */
     public void initialize() {
-	// IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl", "org.openecard.client.scio.VarioFactory");
+	//IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl", "org.openecard.client.scio.VarioFactory");
 	IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl", "org.openecard.client.scio.AndroidPCSCFactory");
-	WsdefProperties.setProperty("org.openecard.client.ws.marshaller.impl",
-	    "org.openecard.client.ws.android.AndroidMarshaller");
-	RootHelper.startPCSCD(getFilesDir());
-	//VarioCardTerminal.setApplicationContext(this);
+	WsdefProperties.setProperty("org.openecard.client.ws.marshaller.impl", "org.openecard.client.ws.android.AndroidMarshaller");
+
+	try {
+	    terminalFactory = (AndroidTerminalFactory) IFDTerminalFactory.getInstance();
+	} catch (IFDException e) {
+	    //TODO log
+	    System.exit(0);
+	}
+	terminalFactory.start(this);
 
 	// Client environment
 	env = new ClientEnv();
@@ -232,19 +216,6 @@ public class ApplicationContext extends Application {
 	} catch (Exception e) {
 	    System.exit(0);
 	}
-
-    }
-
-    public UserConsent getGUI() {
-	return gui;
-    }
-
-    public CardRecognition getRecognition() {
-	return recognition;
-    }
-
-    public Environment getEnv() {
-	return env;
     }
 
 }

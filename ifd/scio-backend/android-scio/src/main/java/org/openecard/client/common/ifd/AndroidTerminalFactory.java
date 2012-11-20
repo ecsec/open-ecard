@@ -20,35 +20,29 @@
  *
  ***************************************************************************/
 
-package org.openecard.client.scio;
-
-import javax.smartcardio.CardTerminals;
-import org.openecard.client.common.ifd.AndroidTerminalFactory;
+package org.openecard.client.common.ifd;
 
 
 /**
- * NFC specific implementation of the TerminalFactory
+ * Extend the TerminalFactory with a start- and stop-method for android to take care of starting and stopping things
+ * like the pcsc daemon, bluetooth or nfc.
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * 
  */
-public class NFCFactory implements AndroidTerminalFactory {
+public interface AndroidTerminalFactory extends TerminalFactory {
 
-    @Override
-    public String getType() {
-	return "NFC";
-    }
+    /**
+     * Stop daemons and services.
+     */
+    void stop();
 
-    @Override
-    public CardTerminals terminals() {
-	return new NFCCardTerminals();
-    }
-
-    @Override
-    public void stop() {	
-    }
-
-    @Override
-    public void start(Object o) {
-    }
+    /**
+     * Start daemons and services.
+     * 
+     * @param o
+     *            this will most likely be the application context
+     */
+    void start(Object o);
 
 }

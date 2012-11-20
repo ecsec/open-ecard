@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
 public class AboutDialog extends JDialog {
 
     private static final Logger logger = LoggerFactory.getLogger(AboutDialog.class);
+    private static final long serialVersionUID = 1L;
 
     private final I18n lang = I18n.getTranslation("about");
 

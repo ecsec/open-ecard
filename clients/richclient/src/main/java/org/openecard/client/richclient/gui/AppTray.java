@@ -38,7 +38,9 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- *
+ * This class creates a tray icon on systems that do have a system tray.
+ * Otherwise a normal window will be shown.
+ * 
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
@@ -61,6 +63,11 @@ public class AppTray {
     private Boolean isKde = null;
     private boolean trayAvailable;
 
+    /**
+     * Constructor of AppTray class.
+     * 
+     * @param client RichClient
+     */
     public AppTray(RichClient client) {
 	this.client = client;
     }
@@ -92,10 +99,18 @@ public class AppTray {
 	status = new Status(this, rec);
     }
 
+    /**
+     * Returns the current status.
+     * 
+     * @return current status
+     */
     public Status status() {
         return status;
     }
 
+    /**
+     * Removes the tray icon from the tray and terminates the application.
+     */
     public void shutdown() {
         if (trayAvailable) {
             trayIcon.displayMessage("Open eCard App", lang.translationForKey("tray.message.shutdown"), TrayIcon.MessageType.INFO);

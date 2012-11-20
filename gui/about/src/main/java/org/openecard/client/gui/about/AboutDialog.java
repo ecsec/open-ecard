@@ -48,7 +48,8 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- *
+ * This class is used to create an About dialog.
+ * 
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
 public class AboutDialog extends JDialog {
@@ -57,11 +58,17 @@ public class AboutDialog extends JDialog {
 
     private final I18n lang = I18n.getTranslation("about");
 
+    /**
+     * Constructor of AboutDialog class.
+     */
     public AboutDialog() {
 	super();
 	setupUI();
     }
 
+    /**
+     * Convenience method for showing an About dialog.
+     */
     public static void showDialog() {
 	AboutDialog dialog = new AboutDialog();
 	dialog.setVisible(true);

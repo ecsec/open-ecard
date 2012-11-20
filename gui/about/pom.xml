@@ -15,4 +15,11 @@
     <name>About Dialog</name>
     <packaging>jar</packaging>
 
+    <dependencies>
+	<dependency>
+	    <groupId>org.openecard.client.gui</groupId>
+            <artifactId>graphics</artifactId>
+	    <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

@@ -26,6 +26,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -40,7 +41,8 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import org.openecard.client.common.I18n;
 import org.openecard.client.common.Version;
-import org.openecard.client.common.util.FileUtils;
+import org.openecard.client.gui.graphics.GraphicsUtil;
+import org.openecard.client.gui.graphics.OecLogoBgWhite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +68,9 @@ public class AboutDialog extends JDialog {
     }
 
     private void setupUI() {
-	setSize(720, 480);
+	Image logo = GraphicsUtil.createImage(OecLogoBgWhite.class, 147, 147);
+        
+        setSize(720, 480);
 	// use null layout with absolute positioning
 	getContentPane().setLayout(null);
 	getContentPane().setBackground(Color.white);
@@ -87,7 +91,7 @@ public class AboutDialog extends JDialog {
 
 	JLabel label = new JLabel();
 	label.setHorizontalAlignment(SwingConstants.CENTER);
-	label.setIcon(getImageIcon("oec_logo_bg-white.png"));
+	label.setIcon(new ImageIcon(logo));
 	label.setBounds(12, 84, 155, 320);
 	getContentPane().add(label);
 
@@ -110,7 +114,7 @@ public class AboutDialog extends JDialog {
 	});
 	getContentPane().add(btnClose);
 
-	setIconImage(getImageIcon("oec_logo_bg-white.png").getImage());
+	setIconImage(logo);
 	setTitle(lang.translationForKey("about.title"));
 	setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 	setResizable(false);
@@ -148,12 +152,6 @@ public class AboutDialog extends JDialog {
 	panel.add(scrollPane, BorderLayout.CENTER);
 
 	return panel;
-    }
-
-    private ImageIcon getImageIcon(String name) {
-	URL imageUrl = FileUtils.resolveResourceAsURL(AboutDialog.class, "about/images/" + name);
-	ImageIcon icon = new ImageIcon(imageUrl);
-	return icon;
     }
 
     private void openUrl(HyperlinkEvent event) {

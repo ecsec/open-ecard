@@ -52,7 +52,7 @@ public abstract class CardChannel {
      * object.
      */
     protected CardChannel() {
-        // empty
+	// empty
     }
 
     /**
@@ -161,7 +161,7 @@ public abstract class CardChannel {
      * @throws CardException if the card operation failed
      */
     public abstract int transmit(ByteBuffer command, ByteBuffer response)
-        throws CardException;
+	throws CardException;
 
     /**
      * Closes this CardChannel. The logical channel is closed by issuing

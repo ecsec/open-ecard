@@ -57,44 +57,44 @@ public final class ATR implements java.io.Serializable {
      * @throws NullPointerException if <code>atr</code> is null
      */
     public ATR(byte[] atr) {
-        this.atr = atr.clone();
-        parse();
+	this.atr = atr.clone();
+	parse();
     }
 
     private void parse() {
-        if (atr.length < 2) {
-            return;
-        }
-        if ((atr[0] != 0x3b) && (atr[0] != 0x3f)) {
-            return;
-        }
-        int t0 = (atr[1] & 0xf0) >> 4;
-        int n = atr[1] & 0xf;
-        int i = 2;
-        while ((t0 != 0) && (i < atr.length)) {
-            if ((t0 & 1) != 0) {
-                i++;
-            }
-            if ((t0 & 2) != 0) {
-                i++;
-            }
-            if ((t0 & 4) != 0) {
-                i++;
-            }
-            if ((t0 & 8) != 0) {
-                if (i >= atr.length) {
-                    return;
-                }
-                t0 = (atr[i++] & 0xf0) >> 4;
-            } else {
-                t0 = 0;
-            }
-        }
-        int k = i + n;
-        if ((k == atr.length) || (k == atr.length - 1)) {
-            startHistorical = i;
-            nHistorical = n;
-        }
+	if (atr.length < 2) {
+	    return;
+	}
+	if ((atr[0] != 0x3b) && (atr[0] != 0x3f)) {
+	    return;
+	}
+	int t0 = (atr[1] & 0xf0) >> 4;
+	int n = atr[1] & 0xf;
+	int i = 2;
+	while ((t0 != 0) && (i < atr.length)) {
+	    if ((t0 & 1) != 0) {
+		i++;
+	    }
+	    if ((t0 & 2) != 0) {
+		i++;
+	    }
+	    if ((t0 & 4) != 0) {
+		i++;
+	    }
+	    if ((t0 & 8) != 0) {
+		if (i >= atr.length) {
+		    return;
+		}
+		t0 = (atr[i++] & 0xf0) >> 4;
+	    } else {
+		t0 = 0;
+	    }
+	}
+	int k = i + n;
+	if ((k == atr.length) || (k == atr.length - 1)) {
+	    startHistorical = i;
+	    nHistorical = n;
+	}
     }
 
     /**
@@ -103,7 +103,7 @@ public final class ATR implements java.io.Serializable {
      * @return a copy of the bytes in this ATR.
      */
     public byte[] getBytes() {
-        return atr.clone();
+	return atr.clone();
     }
 
     /**
@@ -114,9 +114,9 @@ public final class ATR implements java.io.Serializable {
      * @return a copy of the historical bytes in this ATR.
      */
     public byte[] getHistoricalBytes() {
-        byte[] b = new byte[nHistorical];
-        System.arraycopy(atr, startHistorical, b, 0, nHistorical);
-        return b;
+	byte[] b = new byte[nHistorical];
+	System.arraycopy(atr, startHistorical, b, 0, nHistorical);
+	return b;
     }
 
     /**
@@ -125,7 +125,7 @@ public final class ATR implements java.io.Serializable {
      * @return a String representation of this ATR.
      */
     public String toString() {
-        return "ATR: " + atr.length + " bytes";
+	return "ATR: " + atr.length + " bytes";
     }
 
     /**
@@ -137,14 +137,14 @@ public final class ATR implements java.io.Serializable {
      * @return true if the specified object is equal to this ATR
      */
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj instanceof ATR == false) {
-            return false;
-        }
-        ATR other = (ATR)obj;
-        return Arrays.equals(this.atr, other.atr);
+	if (this == obj) {
+	    return true;
+	}
+	if (obj instanceof ATR == false) {
+	    return false;
+	}
+	ATR other = (ATR)obj;
+	return Arrays.equals(this.atr, other.atr);
     }
 
     /**
@@ -153,13 +153,13 @@ public final class ATR implements java.io.Serializable {
      * @return the hash code value for this ATR.
      */
     public int hashCode() {
-        return Arrays.hashCode(atr);
+	return Arrays.hashCode(atr);
     }
 
     private void readObject(java.io.ObjectInputStream in)
-            throws java.io.IOException, ClassNotFoundException {
-        atr = (byte[])in.readUnshared();
-        parse();
+	    throws java.io.IOException, ClassNotFoundException {
+	atr = (byte[])in.readUnshared();
+	parse();
     }
 
 }

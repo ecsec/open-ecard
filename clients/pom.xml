@@ -6,14 +6,14 @@
 
     <parent>
 	<groupId>org.openecard</groupId>
-	<artifactId>client</artifactId>
+	<artifactId>app</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openecard.client</groupId>
+    <groupId>org.openecard</groupId>
     <artifactId>clients</artifactId>
     <packaging>pom</packaging>
-    <name>client implementations</name>
+    <name>Client Implementations</name>
 
     <modules>
 	<module>applet</module>

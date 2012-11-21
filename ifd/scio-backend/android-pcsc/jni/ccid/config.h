@@ -108,7 +108,7 @@
 #define PACKAGE_VERSION "1.4.8"
 
 /* directory containing USB drivers */
-#define PCSCLITE_HP_DROPDIR "/data/data/org.openecard.client.android/files/drivers"
+#define PCSCLITE_HP_DROPDIR "/data/data/org.openecard.android/files/drivers"
 
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */

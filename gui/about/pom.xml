@@ -5,21 +5,22 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-	<groupId>org.openecard.client</groupId>
+	<groupId>org.openecard</groupId>
 	<artifactId>gui</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openecard.client.gui</groupId>
+    <groupId>org.openecard.gui</groupId>
     <artifactId>about</artifactId>
     <name>About Dialog</name>
     <packaging>jar</packaging>
 
     <dependencies>
 	<dependency>
-	    <groupId>org.openecard.client.gui</groupId>
-            <artifactId>graphics</artifactId>
+	    <groupId>org.openecard.gui</groupId>
+	    <artifactId>graphics</artifactId>
 	    <version>${project.version}</version>
-        </dependency>
+	</dependency>
     </dependencies>
+
 </project>

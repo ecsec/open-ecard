@@ -5,44 +5,44 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-	<groupId>org.openecard.client</groupId>
+	<groupId>org.openecard</groupId>
 	<artifactId>sal</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openecard.client.sal</groupId>
+    <groupId>org.openecard.sal</groupId>
     <artifactId>sal-common</artifactId>
     <name>SAL common</name>
 
     <dependencies>
 	<dependency>
-	    <groupId>org.openecard.client</groupId>
+	    <groupId>org.openecard</groupId>
 	    <artifactId>common</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client</groupId>
+	    <groupId>org.openecard</groupId>
 	    <artifactId>recognition</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.crypto</groupId>
+	    <groupId>org.openecard.crypto</groupId>
 	    <artifactId>crypto-common</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.gui</groupId>
+	    <groupId>org.openecard.gui</groupId>
 	    <artifactId>gui-common</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.wsdef</groupId>
+	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>wsdef-client</artifactId>
 	    <version>${project.version}</version>
 	    <scope>provided</scope>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.wsdef</groupId>
+	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>jaxb-marshaller</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>

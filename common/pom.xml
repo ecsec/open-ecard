@@ -6,11 +6,11 @@
 
     <parent>
 	<groupId>org.openecard</groupId>
-	<artifactId>client</artifactId>
+	<artifactId>app</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openecard.client</groupId>
+    <groupId>org.openecard</groupId>
     <artifactId>common</artifactId>
     <packaging>jar</packaging>
     <name>openecard Common Libs</name>
@@ -36,17 +36,17 @@
 
     <dependencies>
 	<dependency>
-	    <groupId>org.openecard.client.wsdef</groupId>
+	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>wsdef-common</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client</groupId>
+	    <groupId>org.openecard</groupId>
 	    <artifactId>i18n</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.wsdef</groupId>
+	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>wsdef-client</artifactId>
 	    <version>${project.version}</version>
 	    <scope>provided</scope>

@@ -63,15 +63,15 @@ public final class ResponseAPDU implements java.io.Serializable {
      * @throws IllegalArgumentException if apdu.length is less than 2
      */
     public ResponseAPDU(byte[] apdu) {
-        apdu = apdu.clone();
-        check(apdu);
-        this.apdu = apdu;
+	apdu = apdu.clone();
+	check(apdu);
+	this.apdu = apdu;
     }
 
     private static void check(byte[] apdu) {
-        if (apdu.length < 2) {
-            throw new IllegalArgumentException("apdu must be at least 2 bytes long");
-        }
+	if (apdu.length < 2) {
+	    throw new IllegalArgumentException("apdu must be at least 2 bytes long");
+	}
     }
 
     /**
@@ -83,7 +83,7 @@ public final class ResponseAPDU implements java.io.Serializable {
      * has no body.
      */
     public int getNr() {
-        return apdu.length - 2;
+	return apdu.length - 2;
     }
 
     /**
@@ -94,9 +94,9 @@ public final class ResponseAPDU implements java.io.Serializable {
      *    byte array if this APDU has no body.
      */
     public byte[] getData() {
-        byte[] data = new byte[apdu.length - 2];
-        System.arraycopy(apdu, 0, data, 0, data.length);
-        return data;
+	byte[] data = new byte[apdu.length - 2];
+	System.arraycopy(apdu, 0, data, 0, data.length);
+	return data;
     }
 
     /**
@@ -105,7 +105,7 @@ public final class ResponseAPDU implements java.io.Serializable {
      * @return the value of the status byte SW1 as a value between 0 and 255.
      */
     public int getSW1() {
-        return apdu[apdu.length - 2] & 0xff;
+	return apdu[apdu.length - 2] & 0xff;
     }
 
     /**
@@ -114,7 +114,7 @@ public final class ResponseAPDU implements java.io.Serializable {
      * @return the value of the status byte SW2 as a value between 0 and 255.
      */
     public int getSW2() {
-        return apdu[apdu.length - 1] & 0xff;
+	return apdu[apdu.length - 1] & 0xff;
     }
 
     /**
@@ -126,7 +126,7 @@ public final class ResponseAPDU implements java.io.Serializable {
      * @return the value of the status word SW.
      */
     public int getSW() {
-        return (getSW1() << 8) | getSW2();
+	return (getSW1() << 8) | getSW2();
     }
 
     /**
@@ -135,7 +135,7 @@ public final class ResponseAPDU implements java.io.Serializable {
      * @return a copy of the bytes in this APDU.
      */
     public byte[] getBytes() {
-        return apdu.clone();
+	return apdu.clone();
     }
 
     /**
@@ -144,8 +144,8 @@ public final class ResponseAPDU implements java.io.Serializable {
      * @return a String representation of this response APDU.
      */
     public String toString() {
-        return "ResponseAPDU: " + apdu.length + " bytes, SW="
-            + Integer.toHexString(getSW());
+	return "ResponseAPDU: " + apdu.length + " bytes, SW="
+	    + Integer.toHexString(getSW());
     }
 
     /**
@@ -157,14 +157,14 @@ public final class ResponseAPDU implements java.io.Serializable {
      * @return true if the specified object is equal to this response APDU
      */
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj instanceof ResponseAPDU == false) {
-            return false;
-        }
-        ResponseAPDU other = (ResponseAPDU)obj;
-        return Arrays.equals(this.apdu, other.apdu);
+	if (this == obj) {
+	    return true;
+	}
+	if (obj instanceof ResponseAPDU == false) {
+	    return false;
+	}
+	ResponseAPDU other = (ResponseAPDU)obj;
+	return Arrays.equals(this.apdu, other.apdu);
     }
 
     /**
@@ -173,13 +173,13 @@ public final class ResponseAPDU implements java.io.Serializable {
      * @return the hash code value for this response APDU.
      */
     public int hashCode() {
-        return Arrays.hashCode(apdu);
+	return Arrays.hashCode(apdu);
     }
 
     private void readObject(java.io.ObjectInputStream in)
-            throws java.io.IOException, ClassNotFoundException {
-        apdu = (byte[])in.readUnshared();
-        check(apdu);
+	    throws java.io.IOException, ClassNotFoundException {
+	apdu = (byte[])in.readUnshared();
+	check(apdu);
     }
 
 }

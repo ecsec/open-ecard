@@ -6,39 +6,39 @@
 
     <parent>
 	<groupId>org.openecard</groupId>
-	<artifactId>client</artifactId>
+	<artifactId>app</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openecard.client</groupId>
+    <groupId>org.openecard</groupId>
     <artifactId>event-manager</artifactId>
     <name>Event Manager</name>
 
     <dependencies>
 	<dependency>
-	    <groupId>org.openecard.client</groupId>
+	    <groupId>org.openecard</groupId>
 	    <artifactId>common</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client</groupId>
+	    <groupId>org.openecard</groupId>
 	    <artifactId>recognition</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.ifd</groupId>
+	    <groupId>org.openecard.ifd</groupId>
 	    <artifactId>ifd-core</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.ifd.scio-backend</groupId>
+	    <groupId>org.openecard.ifd.scio-backend</groupId>
 	    <artifactId>pcsc</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.wsdef</groupId>
+	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>wsdef-client</artifactId>
 	    <version>${project.version}</version>
 	    <scope>provided</scope>

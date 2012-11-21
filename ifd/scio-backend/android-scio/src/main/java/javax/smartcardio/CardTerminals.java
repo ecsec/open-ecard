@@ -58,7 +58,7 @@ public abstract class CardTerminals {
      * to obtain a CardTerminals object.
      */
     protected CardTerminals() {
-        // empty
+	// empty
     }
 
     /**
@@ -69,7 +69,7 @@ public abstract class CardTerminals {
      * @throws CardException if the card operation failed
      */
     public List<CardTerminal> list() throws CardException {
-         return list(State.ALL);
+	 return list(State.ALL);
     }
 
     /**
@@ -111,19 +111,19 @@ public abstract class CardTerminals {
      * @throws NullPointerException if name is null
      */
     public CardTerminal getTerminal(String name) {
-        if (name == null) {
-            throw new NullPointerException();
-        }
-        try {
-            for (CardTerminal terminal : list()) {
-                if (terminal.getName().equals(name)) {
-                    return terminal;
-                }
-            }
-            return null;
-        } catch (CardException e) {
-            return null;
-        }
+	if (name == null) {
+	    throw new NullPointerException();
+	}
+	try {
+	    for (CardTerminal terminal : list()) {
+		if (terminal.getName().equals(name)) {
+		    return terminal;
+		}
+	    }
+	    return null;
+	} catch (CardException e) {
+	    return null;
+	}
     }
 
     /**
@@ -138,7 +138,7 @@ public abstract class CardTerminals {
      * @throws CardException if the card operation failed
      */
     public void waitForChange() throws CardException {
-        waitForChange(0);
+	waitForChange(0);
     }
 
     /**
@@ -190,30 +190,30 @@ public abstract class CardTerminals {
      * @since 1.6
      */
     public static enum State {
-        /**
-         * All CardTerminals.
-         */
-        ALL,
-        /**
-         * CardTerminals in which a card is present.
-         */
-        CARD_PRESENT,
-        /**
-         * CardTerminals in which a card is not present.
-         */
-        CARD_ABSENT,
-        /**
-         * CardTerminals for which a card insertion was detected during the
-         * latest call to {@linkplain State#waitForChange waitForChange()}
-         * call.
-         */
-        CARD_INSERTION,
-        /**
-         * CardTerminals for which a card removal was detected during the
-         * latest call to {@linkplain State#waitForChange waitForChange()}
-         * call.
-         */
-        CARD_REMOVAL,
+	/**
+	 * All CardTerminals.
+	 */
+	ALL,
+	/**
+	 * CardTerminals in which a card is present.
+	 */
+	CARD_PRESENT,
+	/**
+	 * CardTerminals in which a card is not present.
+	 */
+	CARD_ABSENT,
+	/**
+	 * CardTerminals for which a card insertion was detected during the
+	 * latest call to {@linkplain State#waitForChange waitForChange()}
+	 * call.
+	 */
+	CARD_INSERTION,
+	/**
+	 * CardTerminals for which a card removal was detected during the
+	 * latest call to {@linkplain State#waitForChange waitForChange()}
+	 * call.
+	 */
+	CARD_REMOVAL,
     }
 
 }

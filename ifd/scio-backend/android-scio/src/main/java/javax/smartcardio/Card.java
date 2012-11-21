@@ -48,7 +48,7 @@ public abstract class Card {
      * object.
      */
     protected Card() {
-        // empty
+	// empty
     }
 
     /**
@@ -147,7 +147,7 @@ public abstract class Card {
      *   via the {@linkplain #disconnect disconnect()} method
      */
     public abstract byte[] transmitControlCommand(int controlCode,
-            byte[] command) throws CardException;
+	    byte[] command) throws CardException;
 
     /**
      * Disconnects the connection with this card. After this method returns,

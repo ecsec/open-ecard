@@ -31,20 +31,20 @@ class PlatformPCSC {
     static final Throwable initException;
 
     PlatformPCSC() {
-        // empty
+	// empty
     }
 
     static {
-        initException = loadLibrary();
+	initException = loadLibrary();
     }
 
     private static Throwable loadLibrary() {
-        try {
-            System.loadLibrary("j2pcsc");
-            return null;
-        } catch (Throwable e) {
-            return e;
-        }
+	try {
+	    System.loadLibrary("j2pcsc");
+	    return null;
+	} catch (Throwable e) {
+	    return e;
+	}
     }
 
     // PCSC constants defined differently under Windows and MUSCLE

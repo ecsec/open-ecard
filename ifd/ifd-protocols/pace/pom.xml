@@ -5,53 +5,53 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-	<groupId>org.openecard.client.ifd</groupId>
+	<groupId>org.openecard.ifd</groupId>
 	<artifactId>ifd-protocols</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openecard.client.ifd.protocols</groupId>
+    <groupId>org.openecard.ifd.protocols</groupId>
     <artifactId>pace</artifactId>
     <name>PACE protocol</name>
 
     <dependencies>
 	<dependency>
-	    <groupId>org.openecard.client.gui</groupId>
+	    <groupId>org.openecard.gui</groupId>
 	    <artifactId>gui-common</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.wsdef</groupId>
+	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>wsdef-client</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.crypto</groupId>
+	    <groupId>org.openecard.crypto</groupId>
 	    <artifactId>crypto-common</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.ifd</groupId>
+	    <groupId>org.openecard.ifd</groupId>
 	    <artifactId>ifd-core</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.ifd.scio-backend</groupId>
+	    <groupId>org.openecard.ifd.scio-backend</groupId>
 	    <artifactId>pcsc</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.wsdef</groupId>
+	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>jaxb-marshaller</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.transport</groupId>
+	    <groupId>org.openecard.transport</groupId>
 	    <artifactId>dispatcher</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.gui</groupId>
+	    <groupId>org.openecard.gui</groupId>
 	    <artifactId>swing</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>

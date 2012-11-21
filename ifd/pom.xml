@@ -2,24 +2,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
+    <parent>
+	<groupId>org.openecard</groupId>
+	<artifactId>app</artifactId>
+	<version>1.0.0-pre3-SNAPSHOT</version>
+    </parent>
+
     <groupId>org.openecard</groupId>
-    <artifactId>client</artifactId>
-    <version>1.0.0-pre3-SNAPSHOT</version>
-  </parent>
+    <artifactId>ifd</artifactId>
+    <packaging>pom</packaging>
+    <name>IFD implementations</name>
 
-  <groupId>org.openecard.client</groupId>
-  <artifactId>ifd</artifactId>
-  <packaging>pom</packaging>
-  <name>IFD implementations</name>
-
-  <modules>
-    <module>ifd-common</module>
-    <module>ifd-protocols</module>
-    <module>scio-backend</module>
-    <module>ifd-core</module>
-  </modules>
+    <modules>
+	<module>ifd-common</module>
+	<module>ifd-protocols</module>
+	<module>scio-backend</module>
+	<module>ifd-core</module>
+    </modules>
 
 </project>

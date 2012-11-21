@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-	<groupId>org.openecard.client</groupId>
+	<groupId>org.openecard</groupId>
 	<artifactId>crypto</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openecard.client.crypto</groupId>
+    <groupId>org.openecard.crypto</groupId>
     <artifactId>bouncycastle</artifactId>
     <packaging>jar</packaging>
     <name>openecard Bouncy Castle</name>
@@ -18,16 +18,16 @@
     <build>
 	<plugins>
 	    <!-- copy bouncycastle sources -->
-            <plugin>
+	    <plugin>
 		<groupId>com.google.code.maven-replacer-plugin</groupId>
 		<artifactId>maven-replacer-plugin</artifactId>
 		<executions>
-                    <execution>
+		    <execution>
 			<phase>generate-sources</phase>
 			<goals>
-                            <goal>replace</goal>
+			    <goal>replace</goal>
 			</goals>
-                    </execution>
+		    </execution>
 		</executions>
 		<configuration>
 		    <basedir>${basedir}/src/bc/src/org</basedir>
@@ -50,11 +50,11 @@
 			<exclude>bouncycastle/pkcs/**/*.java</exclude>
 			<exclude>bouncycastle/tsp/**/*.java</exclude>
 		    </excludes>
-                    <regex>false</regex>
-                    <token>org.bouncycastle</token>
-                    <value>org.openecard.bouncycastle</value>
+		    <regex>false</regex>
+		    <token>org.bouncycastle</token>
+		    <value>org.openecard.bouncycastle</value>
 		</configuration>
-            </plugin>
+	    </plugin>
 
 	    <!-- add copied sources to normal build -->
 	    <plugin>

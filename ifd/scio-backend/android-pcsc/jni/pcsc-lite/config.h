@@ -146,10 +146,10 @@
 #define PCSCD_BINARY "/mnt/share/test2/sbin/pcscd"
 
 /* Enabled PC/SC lite features */
-#define PCSCLITE_FEATURES " Linux arm-unknown-linux-gnu serial usb libusb usbdropdir=/data/data/org.openecard.client.android/files/drivers ipcdir=/data/data/org.openecard.client.android/files/pcscd configdir=/mnt/share/test2/etc/reader.conf.d"
+#define PCSCLITE_FEATURES " Linux arm-unknown-linux-gnu serial usb libusb usbdropdir=/data/data/org.openecard.android/files/drivers ipcdir=/data/data/org.openecard.android/files/pcscd configdir=/mnt/share/test2/etc/reader.conf.d"
 
 /* directory containing USB drivers */
-#define PCSCLITE_HP_DROPDIR "/data/data/org.openecard.client.android/files/drivers"
+#define PCSCLITE_HP_DROPDIR "/data/data/org.openecard.android/files/drivers"
 
 /* PC/SC target architecture */
 #define PCSC_ARCH "Linux"
@@ -165,7 +165,7 @@
 #define TIME_WITH_SYS_TIME 1
 
 /* directory containing IPC files */
-#define USE_IPCDIR "/data/data/org.openecard.client.android/files/pcscd"
+#define USE_IPCDIR "/data/data/org.openecard.android/files/pcscd"
 
 /* Use serial conf file mechanism */
 #define USE_SERIAL 1

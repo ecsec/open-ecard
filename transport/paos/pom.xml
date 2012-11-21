@@ -5,34 +5,34 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-	<groupId>org.openecard.client</groupId>
+	<groupId>org.openecard</groupId>
 	<artifactId>transport</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openecard.client.transport</groupId>
+    <groupId>org.openecard.transport</groupId>
     <artifactId>paos</artifactId>
     <packaging>jar</packaging>
     <name>PAOS</name>
 
     <dependencies>
 	<dependency>
-	    <groupId>org.openecard.client</groupId>
+	    <groupId>org.openecard</groupId>
 	    <artifactId>common</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.crypto</groupId>
+	    <groupId>org.openecard.crypto</groupId>
 	    <artifactId>tls</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.transport</groupId>
+	    <groupId>org.openecard.transport</groupId>
 	    <artifactId>http-core</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.wsdef</groupId>
+	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>wsdef-client</artifactId>
 	    <version>${project.version}</version>
 	    <scope>provided</scope>

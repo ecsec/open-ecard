@@ -3,21 +3,21 @@
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
 	<artifactId>control-interface</artifactId>
-	<groupId>org.openecard.client</groupId>
+	<groupId>org.openecard</groupId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
-    
-    <groupId>org.openecard.client.control</groupId>
+
+    <groupId>org.openecard.control</groupId>
     <artifactId>control-common</artifactId>
     <packaging>jar</packaging>
     <name>Control common</name>
 
     <dependencies>
 	<dependency>
-	    <groupId>org.openecard.client.wsdef</groupId>
+	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>wsdef-client</artifactId>
 	    <version>${project.version}</version>
 	    <scope>provided</scope>

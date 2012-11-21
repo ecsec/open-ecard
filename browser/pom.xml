@@ -6,17 +6,16 @@
 
     <parent>
 	<groupId>org.openecard</groupId>
-	<artifactId>client</artifactId>
+	<artifactId>app</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openecard.client</groupId>
+    <groupId>org.openecard</groupId>
     <artifactId>browser</artifactId>
-    <packaging>pom</packaging>
     <name>Browser integration</name>
+    <packaging>pom</packaging>
 
     <modules>
-	<module>object-handler</module>
 	<module>pkcs11</module>
 	<module>tls-channel-binding</module>
     </modules>

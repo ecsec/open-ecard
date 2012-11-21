@@ -6,18 +6,18 @@
 
     <parent>
 	<groupId>org.openecard</groupId>
-	<artifactId>client</artifactId>
+	<artifactId>app</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openecard.client</groupId>
+    <groupId>org.openecard</groupId>
     <artifactId>esign</artifactId>
     <packaging>jar</packaging>
     <name>eSign module</name>
-    
+
     <dependencies>
 	<dependency>
-	    <groupId>org.openecard.client.wsdef</groupId>
+	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>wsdef-client</artifactId>
 	    <version>${project.version}</version>
 	    <scope>provided</scope>

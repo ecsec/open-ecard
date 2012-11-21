@@ -7,7 +7,7 @@
 	</encoder>
     </appender>
 
-    <logger name="org.openecard.client" level="DEBUG" />
+    <logger name="org.openecard" level="DEBUG" />
 
     <root level="ALL">
 	<appender-ref ref="STDOUT" />

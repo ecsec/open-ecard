@@ -85,13 +85,13 @@ public class CardPermission extends Permission {
     private final static int A_ALL                  = 0x3f;
 
     private final static int[] ARRAY_MASKS = {
-        A_ALL,
-        A_CONNECT,
-        A_EXCLUSIVE,
-        A_GET_BASIC_CHANNEL,
-        A_OPEN_LOGICAL_CHANNEL,
-        A_RESET,
-        A_TRANSMIT_CONTROL,
+	A_ALL,
+	A_CONNECT,
+	A_EXCLUSIVE,
+	A_GET_BASIC_CHANNEL,
+	A_OPEN_LOGICAL_CHANNEL,
+	A_RESET,
+	A_TRANSMIT_CONTROL,
     };
 
     private final static String S_CONNECT              = "connect";
@@ -104,13 +104,13 @@ public class CardPermission extends Permission {
     private final static String S_ALL                  = "*";
 
     private final static String[] ARRAY_STRINGS = {
-        S_ALL,
-        S_CONNECT,
-        S_EXCLUSIVE,
-        S_GET_BASIC_CHANNEL,
-        S_OPEN_LOGICAL_CHANNEL,
-        S_RESET,
-        S_TRANSMIT_CONTROL,
+	S_ALL,
+	S_CONNECT,
+	S_EXCLUSIVE,
+	S_GET_BASIC_CHANNEL,
+	S_OPEN_LOGICAL_CHANNEL,
+	S_RESET,
+	S_TRANSMIT_CONTROL,
     };
 
     private transient int mask;
@@ -138,62 +138,62 @@ public class CardPermission extends Permission {
      *   specification
      */
     public CardPermission(String terminalName, String actions) {
-        super(terminalName);
-        if (terminalName == null) {
-            throw new NullPointerException();
-        }
-        mask = getMask(actions);
+	super(terminalName);
+	if (terminalName == null) {
+	    throw new NullPointerException();
+	}
+	mask = getMask(actions);
     }
 
     private static int getMask(String actions) {
-        if ((actions == null) || (actions.length() == 0)) {
-            throw new IllegalArgumentException("actions must not be empty");
-        }
+	if ((actions == null) || (actions.length() == 0)) {
+	    throw new IllegalArgumentException("actions must not be empty");
+	}
 
-        // try exact matches for simple actions first
-        for (int i = 0; i < ARRAY_STRINGS.length; i++) {
-            if (actions == ARRAY_STRINGS[i]) {
-                return ARRAY_MASKS[i];
-            }
-        }
+	// try exact matches for simple actions first
+	for (int i = 0; i < ARRAY_STRINGS.length; i++) {
+	    if (actions == ARRAY_STRINGS[i]) {
+		return ARRAY_MASKS[i];
+	    }
+	}
 
-        if (actions.endsWith(",")) {
-            throw new IllegalArgumentException("Invalid actions: '" + actions + "'");
-        }
-        int mask = 0;
-        String[] split = actions.split(",");
+	if (actions.endsWith(",")) {
+	    throw new IllegalArgumentException("Invalid actions: '" + actions + "'");
+	}
+	int mask = 0;
+	String[] split = actions.split(",");
     outer:
-        for (String s : split) {
-            for (int i = 0; i < ARRAY_STRINGS.length; i++) {
-                if (ARRAY_STRINGS[i].equalsIgnoreCase(s)) {
-                    mask |= ARRAY_MASKS[i];
-                    continue outer;
-                }
-            }
-            throw new IllegalArgumentException("Invalid action: '" + s + "'");
-        }
+	for (String s : split) {
+	    for (int i = 0; i < ARRAY_STRINGS.length; i++) {
+		if (ARRAY_STRINGS[i].equalsIgnoreCase(s)) {
+		    mask |= ARRAY_MASKS[i];
+		    continue outer;
+		}
+	    }
+	    throw new IllegalArgumentException("Invalid action: '" + s + "'");
+	}
 
-        return mask;
+	return mask;
     }
 
     private static String getActions(int mask) {
-        if (mask == A_ALL) {
-            return S_ALL;
-        }
-        boolean first = true;
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < ARRAY_MASKS.length; i++) {
-            int action = ARRAY_MASKS[i];
-            if ((mask & action) == action) {
-                if (first == false) {
-                    sb.append(",");
-                } else {
-                    first = false;
-                }
-                sb.append(ARRAY_STRINGS[i]);
-            }
-        }
-        return sb.toString();
+	if (mask == A_ALL) {
+	    return S_ALL;
+	}
+	boolean first = true;
+	StringBuilder sb = new StringBuilder();
+	for (int i = 0; i < ARRAY_MASKS.length; i++) {
+	    int action = ARRAY_MASKS[i];
+	    if ((mask & action) == action) {
+		if (first == false) {
+		    sb.append(",");
+		} else {
+		    first = false;
+		}
+		sb.append(ARRAY_STRINGS[i]);
+	    }
+	}
+	return sb.toString();
     }
 
 
@@ -206,10 +206,10 @@ public class CardPermission extends Permission {
      * @return the canonical string representation of the actions.
      */
     public String getActions() {
-        if (actions == null) {
-            actions = getActions(mask);
-        }
-        return actions;
+	if (actions == null) {
+	    actions = getActions(mask);
+	}
+	return actions;
     }
 
     /**
@@ -229,21 +229,21 @@ public class CardPermission extends Permission {
      *   specified permission.
      */
     public boolean implies(Permission permission) {
-        if (permission instanceof CardPermission == false) {
-            return false;
-        }
-        CardPermission other = (CardPermission)permission;
-        if ((this.mask & other.mask) != other.mask) {
-            return false;
-        }
-        String thisName = getName();
-        if (thisName.equals("*")) {
-            return true;
-        }
-        if (thisName.equals(other.getName())) {
-            return true;
-        }
-        return false;
+	if (permission instanceof CardPermission == false) {
+	    return false;
+	}
+	CardPermission other = (CardPermission)permission;
+	if ((this.mask & other.mask) != other.mask) {
+	    return false;
+	}
+	String thisName = getName();
+	if (thisName.equals("*")) {
+	    return true;
+	}
+	if (thisName.equals(other.getName())) {
+	    return true;
+	}
+	return false;
     }
 
     /**
@@ -263,14 +263,14 @@ public class CardPermission extends Permission {
      *   CardPermission
      */
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj instanceof CardPermission == false) {
-            return false;
-        }
-        CardPermission other = (CardPermission)obj;
-        return this.getName().equals(other.getName()) && (this.mask == other.mask);
+	if (this == obj) {
+	    return true;
+	}
+	if (obj instanceof CardPermission == false) {
+	    return false;
+	}
+	CardPermission other = (CardPermission)obj;
+	return this.getName().equals(other.getName()) && (this.mask == other.mask);
     }
 
     /**
@@ -279,23 +279,23 @@ public class CardPermission extends Permission {
      * @return the hash code value for this CardPermission object.
      */
     public int hashCode() {
-        return getName().hashCode() + 31 * mask;
+	return getName().hashCode() + 31 * mask;
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {
-        // Write out the actions. The superclass takes care of the name.
-        // Call getActions to make sure actions field is initialized
-        if (actions == null) {
-            getActions();
-        }
-        s.defaultWriteObject();
+	// Write out the actions. The superclass takes care of the name.
+	// Call getActions to make sure actions field is initialized
+	if (actions == null) {
+	    getActions();
+	}
+	s.defaultWriteObject();
     }
 
     private void readObject(ObjectInputStream s)
-            throws IOException, ClassNotFoundException {
-        // Read in the actions, then restore the mask.
-        s.defaultReadObject();
-        mask = getMask(actions);
+	    throws IOException, ClassNotFoundException {
+	// Read in the actions, then restore the mask.
+	s.defaultReadObject();
+	mask = getMask(actions);
     }
 
 }

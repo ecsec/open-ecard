@@ -5,19 +5,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-	<groupId>org.openecard.client.ifd</groupId>
+	<groupId>org.openecard.ifd</groupId>
 	<artifactId>scio-backend</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openecard.client.ifd.scio-backend</groupId>
+    <groupId>org.openecard.ifd.scio-backend</groupId>
     <artifactId>seek</artifactId>
     <packaging>jar</packaging>
     <name>Seek SmartcardIO</name>
 
     <dependencies>
 	<dependency>
-	    <groupId>org.openecard.client.ifd.scio-backend</groupId>
+	    <groupId>org.openecard.ifd.scio-backend</groupId>
 	    <artifactId>android-scio</artifactId>
 	    <version>${project.version}</version>
 	</dependency>

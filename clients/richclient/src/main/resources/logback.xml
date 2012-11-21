@@ -16,7 +16,7 @@
 	</encoder>
     </appender>
 
-    <logger name="org.openecard.client.richclient" level="INFO" />
+    <logger name="org.openecard.richclient" level="INFO" />
 
     <root level="WARN">
 	<appender-ref ref="FILE" />

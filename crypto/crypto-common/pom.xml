@@ -3,24 +3,24 @@
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
 	<artifactId>crypto</artifactId>
-	<groupId>org.openecard.client</groupId>
+	<groupId>org.openecard</groupId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
-    
-    <groupId>org.openecard.client.crypto</groupId>
+
+    <groupId>org.openecard.crypto</groupId>
     <artifactId>crypto-common</artifactId>
     <name>Crypto common</name>
     <dependencies>
 	<dependency>
-	    <groupId>org.openecard.client</groupId>
+	    <groupId>org.openecard</groupId>
 	    <artifactId>common</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.crypto</groupId>
+	    <groupId>org.openecard.crypto</groupId>
 	    <artifactId>bouncycastle</artifactId>
 	    <version>${project.version}</version>
 	</dependency>

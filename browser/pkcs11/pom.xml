@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-	<groupId>org.openecard.client</groupId>
+	<groupId>org.openecard</groupId>
 	<artifactId>browser</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openecard.client.browser</groupId>
+    <groupId>org.openecard.browser</groupId>
     <artifactId>pkcs11</artifactId>
     <name>PKCS11 Binding</name>
 

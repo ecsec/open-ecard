@@ -48,7 +48,7 @@
         <all-permissions />
     </security>
     <application-desc name="Open eCard App"
-                      main-class="org.openecard.client.richclient.RichClient"
+                      main-class="org.openecard.richclient.RichClient"
                       width="1"
                       height="1">
     </application-desc>

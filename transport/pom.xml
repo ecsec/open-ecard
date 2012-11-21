@@ -6,11 +6,11 @@
 
     <parent>
 	<groupId>org.openecard</groupId>
-	<artifactId>client</artifactId>
+	<artifactId>app</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openecard.client</groupId>
+    <groupId>org.openecard</groupId>
     <artifactId>transport</artifactId>
     <name>Transport</name>
     <packaging>pom</packaging>
@@ -19,7 +19,6 @@
 	<module>dispatcher</module>
 	<module>http-core</module>
 	<module>paos</module>
-	<module>tls</module>
     </modules>
 
 </project>

@@ -5,31 +5,31 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-	<groupId>org.openecard.client</groupId>
+	<groupId>org.openecard</groupId>
 	<artifactId>transport</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openecard.client.transport</groupId>
+    <groupId>org.openecard.transport</groupId>
     <artifactId>http-core</artifactId>
     <name>openecard HTTP core</name>
 
     <dependencies>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.openecard.client</groupId>
-            <artifactId>common</artifactId>
+	<dependency>
+	    <groupId>org.apache.httpcomponents</groupId>
+	    <artifactId>httpcore</artifactId>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard</groupId>
+	    <artifactId>common</artifactId>
 	    <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openecard.client.crypto</groupId>
-            <artifactId>bouncycastle</artifactId>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.crypto</groupId>
+	    <artifactId>bouncycastle</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>
-        </dependency>
+	</dependency>
     </dependencies>
 
 </project>

@@ -3,84 +3,84 @@
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
-	<groupId>org.openecard.client.control</groupId>
+	<groupId>org.openecard.control</groupId>
 	<artifactId>control-bindings</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
-    
-    <groupId>org.openecard.client.control.bindings</groupId>
+
+    <groupId>org.openecard.control.bindings</groupId>
     <artifactId>http</artifactId>
     <packaging>jar</packaging>
     <name>HTTP Binding</name>
-    
+
     <dependencies>
 	<dependency>
 	    <groupId>org.apache.httpcomponents</groupId>
 	    <artifactId>httpcore</artifactId>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.control.module</groupId>
+	    <groupId>org.openecard.control.module</groupId>
 	    <artifactId>tctoken</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.control.module</groupId>
+	    <groupId>org.openecard.control.module</groupId>
 	    <artifactId>status</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.wsdef</groupId>
+	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>wsdef-client</artifactId>
 	    <version>${project.version}</version>
 	    <scope>provided</scope>
 	</dependency>
 
 	<dependency>
-	    <groupId>org.openecard.client.transport</groupId>
+	    <groupId>org.openecard.transport</groupId>
 	    <artifactId>dispatcher</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.ifd</groupId>
+	    <groupId>org.openecard.ifd</groupId>
 	    <artifactId>ifd-core</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client</groupId>
+	    <groupId>org.openecard</groupId>
 	    <artifactId>event-manager</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.sal</groupId>
+	    <groupId>org.openecard.sal</groupId>
 	    <artifactId>tiny-sal</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.ifd.scio-backend</groupId>
+	    <groupId>org.openecard.ifd.scio-backend</groupId>
 	    <artifactId>pcsc</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.wsdef</groupId>
+	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>jaxb-marshaller</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.management</groupId>
+	    <groupId>org.openecard.management</groupId>
 	    <artifactId>tiny-management</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.gui</groupId>
+	    <groupId>org.openecard.gui</groupId>
 	    <artifactId>swing</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>

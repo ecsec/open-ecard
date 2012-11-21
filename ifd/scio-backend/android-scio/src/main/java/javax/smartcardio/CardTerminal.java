@@ -54,7 +54,7 @@ public abstract class CardTerminal {
      * to obtain a CardTerminal object.
      */
     protected CardTerminal() {
-        // empty
+	// empty
     }
 
     /**

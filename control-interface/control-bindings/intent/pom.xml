@@ -3,26 +3,26 @@
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
-	<groupId>org.openecard.client.control</groupId>
+	<groupId>org.openecard.control</groupId>
 	<artifactId>control-bindings</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
-    
-    <groupId>org.openecard.client.control.bindings</groupId>
+
+    <groupId>org.openecard.control.bindings</groupId>
     <artifactId>intent</artifactId>
     <packaging>jar</packaging>
     <name>Intent Binding</name>
-    
+
     <dependencies>
 	<dependency>
-	    <groupId>org.openecard.client.control.module</groupId>
+	    <groupId>org.openecard.control.module</groupId>
 	    <artifactId>tctoken</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.client.wsdef</groupId>
+	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>wsdef-client</artifactId>
 	    <version>${project.version}</version>
 	    <scope>provided</scope>
@@ -31,7 +31,7 @@
 	    <groupId>com.google.android</groupId>
 	    <artifactId>android</artifactId>
 	    <scope>provided</scope>
-        </dependency>
+	</dependency>
     </dependencies>
 
 </project>

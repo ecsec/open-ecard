@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-	<groupId>org.openecard.client</groupId>
+	<groupId>org.openecard</groupId>
 	<artifactId>wsdef</artifactId>
 	<version>1.0.0-pre3-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openecard.client.wsdef</groupId>
+    <groupId>org.openecard.wsdef</groupId>
     <artifactId>wsdef-client</artifactId>
     <packaging>jar</packaging>
     <name>openecard WS classes</name>
@@ -63,7 +63,7 @@
 	    </plugin>
 
 	    <plugin>
-		<groupId>org.openecard.client.wsdef</groupId>
+		<groupId>org.openecard.wsdef</groupId>
 		<artifactId>class-list-plugin</artifactId>
 		<version>${project.version}</version>
 		<executions>

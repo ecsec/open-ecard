@@ -32,25 +32,43 @@ import javax.swing.JDialog;
 
 
 /**
- *
+ * This class creats a InfoPopup showing different information about connected terminals and inserted cards.
+ * It also contains the different controls of the application, e.g. the exit button.
+ * 
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
 public class InfoPopup extends JDialog {
-    
+
     private static final long serialVersionUID = 1L;
 
     private Point point;
 
+    /**
+     * Constructor of InfoPopup class.
+     * 
+     * @param c Container which will be set as ContentPane 
+     */
     public InfoPopup(Container c) {
 	this(c, null);
     }
 
+    /**
+     * Constructor of InfoPopup class.
+     * 
+     * @param c Container which will be set as ContentPane 
+     * @param p position
+     */
     public InfoPopup(Container c, Point p) {
 	super();
 	point = p;
 	setupUI(c);
     }
 
+    /**
+     * Updates the content of the InfoPopup by setting a new ContentPane.
+     * 
+     * @param c Container which will be set as ContentPane
+     */
     public void updateContent(Container c) {
 	setContentPane(c);
 	pack();
@@ -77,7 +95,7 @@ public class InfoPopup extends JDialog {
 
         return new Point(x, y);
     }
-    
+
     private void setupUI(Container c) {
 	setAlwaysOnTop(true);
 	setUndecorated(true);
@@ -85,7 +103,7 @@ public class InfoPopup extends JDialog {
 	setBackground(blue);
 	setContentPane(c);
         pack();
-        
+
 	if (point != null) {
 	    setLocation(calculatePosition(c, point));
 	}

@@ -36,6 +36,8 @@ import javax.swing.JDialog;
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
 public class InfoPopup extends JDialog {
+    
+    private static final long serialVersionUID = 1L;
 
     private Point point;
 

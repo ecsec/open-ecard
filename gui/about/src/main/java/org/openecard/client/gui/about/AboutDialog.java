@@ -33,7 +33,16 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JEditorPane;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.event.HyperlinkListener;
@@ -48,7 +57,8 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * This class is used to create an About dialog.
+ * This class is used to create an About dialog. It shows some information about the application, e.g. the version and
+ * the license of the application, how to contribute to the project, how to submit bug reports and so on.
  * 
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
@@ -69,6 +79,7 @@ public class AboutDialog extends JDialog {
 
     /**
      * Convenience method for showing an About dialog.
+     * Since this method is static, there is no need to create an instance of AboutDialog to call it.
      */
     public static void showDialog() {
 	AboutDialog dialog = new AboutDialog();

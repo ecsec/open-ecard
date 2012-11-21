@@ -37,7 +37,7 @@ import javax.swing.JDialog;
  */
 public class InfoPopup extends JDialog {
 
-    private Point location;
+    private Point point;
 
     public InfoPopup(Container c) {
 	this(c, null);
@@ -45,27 +45,47 @@ public class InfoPopup extends JDialog {
 
     public InfoPopup(Container c, Point p) {
 	super();
-	location = p;
+	point = p;
 	setupUI(c);
     }
 
     public void updateContent(Container c) {
 	setContentPane(c);
 	pack();
-	Dimension d = c.getPreferredSize();
-	setLocation(location.x - d.width, location.y - d.height);
+	setLocation(calculatePosition(c, point));
     }
 
+    private Point calculatePosition(Container c, Point p) {
+        int x;
+        int y;
+        Dimension d = c.getPreferredSize();
+
+        // calculate X coordinate
+        if (p.x - d.width > 0) {
+            x = p.x - d.width;
+        } else {
+            x = p.x;
+        }
+        // calculate Y coordinate
+        if (p.y - d.height > 0) {
+            y = p.y - d.height;
+        } else {
+            y = p.y;
+        }
+
+        return new Point(x, y);
+    }
+    
     private void setupUI(Container c) {
 	setAlwaysOnTop(true);
 	setUndecorated(true);
 	Color blue = new Color(121, 170, 215);
 	setBackground(blue);
 	setContentPane(c);
-
-	if (location != null) {
-	    Dimension d = c.getPreferredSize();
-	    setLocation(location.x - d.width, location.y - d.height);
+        pack();
+        
+	if (point != null) {
+	    setLocation(calculatePosition(c, point));
 	}
 
 	addWindowFocusListener(new WindowAdapter() {
@@ -76,7 +96,6 @@ public class InfoPopup extends JDialog {
 	    }
 	});
 
-	pack();
 	setVisible(true);
     }
 

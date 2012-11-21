@@ -306,10 +306,15 @@ public class Status implements EventCallback {
 
     @Override
     public void signalEvent(EventType eventType, Object eventData) {
+        logger.debug("Event: {}", eventType);
+
         if (eventData instanceof ConnectionHandleType) {
             ConnectionHandleType ch = (ConnectionHandleType) eventData;
+            logger.debug("ConnectionHandle: {}", ch);
             RecognitionInfo info = ch.getRecognitionInfo();
+            logger.debug("RecognitionInfo: {}", info);
             String ifdName = ch.getIFDName();
+            logger.debug("IFDName: {}", ifdName);
 
             if (eventType.equals(EventType.TERMINAL_ADDED)) {
                 addInfo(ifdName, info);

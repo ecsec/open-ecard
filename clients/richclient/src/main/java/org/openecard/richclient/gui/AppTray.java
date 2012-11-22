@@ -22,7 +22,14 @@
 
 package org.openecard.richclient.gui;
 
-import java.awt.*;
+import java.awt.AWTException;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.ImageIcon;
@@ -188,26 +195,7 @@ public class AppTray {
 
     private Image getImageLinux(String name, Dimension dim) {
 	if (name.equals(ICON_LOADER)) {
-	    switch (dim.width) {
-		case 16:
-		    return GuiUtils.getImage("loader_icon_linux_default_16.gif");
-		case 24:
-		    return GuiUtils.getImage("loader_icon_linux_default_24.gif");
-		case 32:
-		    return GuiUtils.getImage("loader_icon_linux_default_32.gif");
-		case 48:
-		    return GuiUtils.getImage("loader_icon_linux_default_48.gif");
-		case 64:
-		    return GuiUtils.getImage("loader_icon_linux_default_64.gif");
-		case 72:
-		    return GuiUtils.getImage("loader_icon_linux_default_72.gif");
-		case 96:
-		    return GuiUtils.getImage("loader_icon_linux_default_96.gif");
-		case 128:
-		    return GuiUtils.getImage("loader_icon_linux_default_128.gif");
-		default:
-		    return GuiUtils.getImage("loader_icon_linux_default_256.gif");
-	    }
+	    return GuiUtils.getImage("loader_icon_linux_default_256.gif");
 	} else {
 	    return GraphicsUtil.createImage(OecLogoBgWhite.class, dim.width, dim.height);
 	}
@@ -216,26 +204,7 @@ public class AppTray {
 
     private Image getImageDefault(String name, Dimension dim) {
 	if (name.equals(ICON_LOADER)) {
-	    switch (dim.width) {
-		case 16:
-		    return GuiUtils.getImage("loader_icon_default_16.gif");
-		case 24:
-		    return GuiUtils.getImage("loader_icon_default_24.gif");
-		case 32:
-		    return GuiUtils.getImage("loader_icon_default_32.gif");
-		case 48:
-		    return GuiUtils.getImage("loader_icon_default_48.gif");
-		case 64:
-		    return GuiUtils.getImage("loader_icon_default_64.gif");
-		case 72:
-		    return GuiUtils.getImage("loader_icon_default_72.gif");
-		case 96:
-		    return GuiUtils.getImage("loader_icon_default_96.gif");
-		case 128:
-		    return GuiUtils.getImage("loader_icon_default_128.gif");
-		default:
-		    return GuiUtils.getImage("loader_icon_default_256.gif");
-	    }
+	    return GuiUtils.getImage("loader_icon_default_256.gif");
 	} else {
 	    return GraphicsUtil.createImage(OecLogoBgWhite.class, dim.width, dim.height);
 	}

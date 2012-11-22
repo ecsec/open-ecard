@@ -87,7 +87,8 @@
 	    <artifactId>android</artifactId>
 	    <scope>provided</scope>
 	</dependency>
-	<!-- Mark slf4j-api as private as it is already part of the slf4j-android lib. When not provided the build fails because of dup class -->
+	<!-- Mark slf4j-api as private as it is already part of the slf4j-android lib.
+	     When not provided the build fails because of dup class -->
 	<dependency>
 	    <groupId>org.slf4j</groupId>
 	    <artifactId>slf4j-api</artifactId>

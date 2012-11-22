@@ -19,8 +19,8 @@
     <properties>
 	<sign.keystore>src/package/resources/keystore/keystore.jks</sign.keystore>
 	<sign.storepass>123456</sign.storepass>
-	<sign.keypass>selfsigned</sign.keypass>
-	<sign.alias>123456</sign.alias>
+	<sign.keypass>123456</sign.keypass>
+	<sign.alias>selfsigned</sign.alias>
     </properties>
 
     <profiles>

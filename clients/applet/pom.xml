@@ -33,7 +33,6 @@
 		<plugin>
 		    <groupId>org.apache.maven.plugins</groupId>
 		    <artifactId>maven-shade-plugin</artifactId>
-		    <version>1.6</version>
 		    <configuration>
 			<!--
 			    The reduced pom excludes transitive dependencies of test scope
@@ -56,7 +55,6 @@
 		<plugin>
 		    <groupId>org.apache.maven.plugins</groupId>
 		    <artifactId>maven-jarsigner-plugin</artifactId>
-		    <version>1.2</version>
 		    <configuration>
 			<keystore>src/package/resources/keystore/keystore.jks</keystore>
 			<storepass>DgN1CB0Ywy2W</storepass>
@@ -72,7 +70,6 @@
 	    <plugin>
 		<groupId>de.ecsec.maven.plugins</groupId>
 		<artifactId>maven-pack200-plugin</artifactId>
-		<version>1.0.2</version>
 		<configuration>
 		    <processMainArtifact>true</processMainArtifact>
 		    <effort>9</effort>
@@ -212,7 +209,6 @@
 	<dependency>
 	    <groupId>openjdk</groupId>
 	    <artifactId>java-plugin</artifactId>
-	    <version>1.6.0.26</version>
 	    <scope>provided</scope>
 	</dependency>
     </dependencies>

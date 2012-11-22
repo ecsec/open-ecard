@@ -30,34 +30,35 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.Enumeration;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.LogManager;
+import org.openecard.common.util.FileUtils;
 
 
 /**
+ * Helper class for Java Util Logging configuration.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
-public class LogProperties {
+public final class LogProperties {
 
-    private static final String dirName = "openecard";
     private static final String logConfName = "applet_log.properties";
-
-    private static final String localAppData = System.getenv("LOCALAPPDATA");
-    private static final String appData = System.getenv("LOCALAPPDATA");
-    private static final String home = System.getProperty("user.home");
 
     private File actualPath;
 
     private LogProperties() { }
 
     /**
+     * Load Java Util Logging configuration.
+     * The default configuration is loaded from withing the applet jar. The default properties are selectively
+     * overwritten by the file '$HOME/.openecard/applet_log.properties'.
      *
      * @throws IOException If no config could be loaded.
+     * @throws SecurityException If the config dir is not writable.
      */
-    public static void loadJavaUtilLogging() throws IOException {
+    public static void loadJavaUtilLogging() throws IOException, SecurityException {
 	System.out.println("INFO: Loading java.util.logging configuration.");
 	try {
 	    LogProperties inst = new LogProperties();
@@ -77,11 +78,8 @@ public class LogProperties {
 	PrintWriter w = new PrintWriter(baos);
 
 	// do it by hand, else the default properties are omitted
-	Enumeration<String> keys = (Enumeration<String>) p.propertyNames();
-	while (keys.hasMoreElements()) {
-	    String next = keys.nextElement();
-	    String value = p.getProperty(next);
-	    w.format("%s = %s%n", next, value);
+	for (Map.Entry next : p.entrySet()) {
+	    w.format("%s = %s%n", next.getKey(), next.getValue());
 	    w.flush();
 	}
 
@@ -89,10 +87,7 @@ public class LogProperties {
     }
 
     private static Properties getDefault() throws IOException {
-	InputStream in = LogProperties.class.getResourceAsStream("/" + logConfName);
-	if (in == null) {
-	    in = LogProperties.class.getResourceAsStream(logConfName);
-	}
+	InputStream in = FileUtils.resolveResourceAsStream(LogProperties.class, logConfName);
 	if (in == null) {
 	    System.err.println("ERROR: No default log config found.");
 	    throw new FileNotFoundException("Log config " + logConfName + " not found in path.");
@@ -103,29 +98,11 @@ public class LogProperties {
 	return p;
     }
 
-    private Properties getLocal() throws IOException {
-	InputStream in = null;
+    private Properties getLocal() throws IOException, SecurityException {
 	Properties defaults = getDefault();
 
-	// try windows vista style
-	if (localAppData != null) {
-	    String pathname = localAppData + File.separator + dirName;
-	    if (makeDir(pathname)) {
-		in = loadFile(pathname + File.separator + logConfName);
-	    }
-	}
-	if (appData != null && in == null) {
-	    String pathname = appData + File.separator + dirName;
-	    if (makeDir(pathname)) {
-		in = loadFile(pathname + File.separator + logConfName);
-	    }
-	}
-	if (home != null && in == null) {
-	    String pathname = home + File.separator + "." + dirName;
-	    if (makeDir(pathname)) {
-		in = loadFile(pathname + File.separator + logConfName);
-	    }
-	}
+	File pathname = FileUtils.getHomeConfigDir();
+	InputStream in = loadFile(pathname + File.separator + logConfName);
 
 	if (in != null) {
 	    Properties p = new Properties(defaults);
@@ -195,7 +172,7 @@ public class LogProperties {
 	    } else {
 		String var = null;
 		if (value.startsWith("%h")) {
-		    var = home;
+		    var = System.getProperty("user.home");
 		}
 		if (value.startsWith("%t")) {
 		    var = System.getProperty("java.io.tmpdir");

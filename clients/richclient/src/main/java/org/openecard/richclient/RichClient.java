@@ -19,12 +19,15 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+
 package org.openecard.richclient;
 
+import ch.qos.logback.core.joran.spi.JoranException;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
+import java.io.IOException;
 import java.net.BindException;
 import javax.swing.JOptionPane;
 import org.openecard.common.ClientEnv;
@@ -90,6 +93,19 @@ public final class RichClient {
     private CardStateMap cardStates;
     // ContextHandle determines a specific IFD layer context
     private byte[] contextHandle;
+
+
+    static {
+	try {
+	    // load logger config from HOME if set
+	    LogbackConfig.load();
+	} catch (IOException ex) {
+	    _logger.error("Failed to load logback config from user config.", ex);
+	} catch (JoranException ex) {
+	    _logger.error("Failed to load logback config from user config.", ex);
+	}
+    }
+
 
     public static void main(String args[]) {
 	RichClient.getInstance();

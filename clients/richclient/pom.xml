@@ -59,6 +59,12 @@
 
 
     <properties>
+	<!-- These properties can be set from the commandline to override the selected certificate -->
+	<sign.keystore>src/main/webstart/keystore.jks</sign.keystore>
+	<sign.storepass>123456</sign.storepass>
+	<sign.keypass>selfsigned</sign.keypass>
+	<sign.alias>123456</sign.alias>
+
 	<wininstall.resources.dir>${basedir}/src/main/windows-installer</wininstall.resources.dir>
 	<wininstall.tmp.dirname>wix-tmp</wininstall.tmp.dirname>
 	<wininstall.tmp.dir>${project.build.directory}/${wininstall.tmp.dirname}</wininstall.tmp.dir>
@@ -150,10 +156,10 @@
 				    <goal>verify</goal>
 				</goals>
 				<configuration>
-				    <keystore>src/main/webstart/keystore.jks</keystore>
-				    <storepass>123456</storepass>
-				    <alias>selfsigned</alias>
-				    <keypass>123456</keypass>
+				    <keystore>${sign.keystore}</keystore>
+				    <storepass>${sign.storepass}</storepass>
+				    <alias>${sign.alias}</alias>
+				    <keypass>${sign.keypass}</keypass>
 				    <archive>${project.build.directory}/${project.build.FinalName}.${project.packaging}</archive>
 				</configuration>
 			    </execution>

@@ -50,6 +50,31 @@ import org.openecard.common.io.LimitedInputStream;
 public class FileUtils {
 
     /**
+     * Finds and returns the user specific config directory.
+     * The config directory is defined as '$HOME/.openecard'. This function evaluates the system property 'user.home'
+     * and simply appends '.openecard'. <br/>
+     * The config directory can be used to save logging configs, logs, certificates and anything else one might think
+     * of.
+     *
+     * @return File object pointing to the config directory.
+     * @throws IOException In case the directory can not be found.
+     * @throws SecurityException In case the directory and/or one of its parents could not be created.
+     */
+    public static File getHomeConfigDir() throws IOException, SecurityException {
+	final String dirName = "openecard";
+	final String home = System.getProperty("user.home");
+
+	if (home != null) {
+	    String pathname = home + File.separator + "." + dirName;
+	    File path = new File(pathname);
+	    path.mkdirs();
+	    return path;
+	} else {
+	    throw new IOException("Home path can not be determined.");
+	}
+    }
+
+    /**
      * Reads a file.
      *
      * @param file File

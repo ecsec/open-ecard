@@ -57,9 +57,9 @@
 		    <artifactId>maven-jarsigner-plugin</artifactId>
 		    <configuration>
 			<keystore>src/package/resources/keystore/keystore.jks</keystore>
-			<storepass>DgN1CB0Ywy2W</storepass>
-			<alias>applet</alias>
-			<keypass>bHrjoV3j7ucq</keypass>
+			<storepass>123456</storepass>
+			<alias>selfsigned</alias>
+			<keypass>123456</keypass>
 			<archive>${project.build.directory}/${project.build.FinalName}.jar</archive>
 		    </configuration>
 		</plugin>

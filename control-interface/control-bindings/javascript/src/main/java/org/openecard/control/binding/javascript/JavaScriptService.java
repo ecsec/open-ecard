@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 public class JavaScriptService implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(JavaScriptService.class);
+
     private final ControlHandlers handlers;
     private final Thread thread;
 

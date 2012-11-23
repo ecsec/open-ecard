@@ -67,10 +67,10 @@ public class JavaScriptTCTokenHandler extends JavaScriptControlHandler {
 		b.append("\n '").append(e.getKey()).append("' : '").append(e.getValue()).append("'");
 	    }
 	    logger.debug("JavaScript request: {}", b.toString());
-	    logger.debug("JavaScript request handled by: {}", this.getClass().getName());
+	    logger.debug("JavaScript request handled by: {}", getClass().getName());
 	}
 	try {
-	    TCTokenRequest tcTokenRequest = this.handleRequest(request);
+	    TCTokenRequest tcTokenRequest = handleRequest(request);
 	    TCTokenResponse response = genericTCTokenHandler.handleActivate(tcTokenRequest);
 	    return handleResponse(response);
 	} catch (ControlException e) {

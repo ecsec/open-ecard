@@ -28,6 +28,7 @@ import java.security.AccessController;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivilegedAction;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,6 +37,7 @@ import netscape.javascript.JSObject;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.common.util.ValueGenerators;
 import org.openecard.control.ControlInterface;
 import org.openecard.control.binding.javascript.JavaScriptBinding;
 import org.openecard.control.binding.javascript.handler.JavaScriptStatusHandler;
@@ -74,6 +76,9 @@ public class JSEventCallback {
     private final String jsMessageCallback;
 
     private JavaScriptBinding binding;
+    private ControlInterface control;
+    private HashMap<String, String> sessionMap; // this is just one session for waitForChange
+
 
     /**
      * Create a new JSEventCallback.
@@ -85,10 +90,13 @@ public class JSEventCallback {
      * @param reg to get card information shown in insertion dialog
      */
     public JSEventCallback(ECardApplet applet, CardStateMap cardStates, Dispatcher dispatcher, EventHandler eventHandler, UserConsent gui, CardRecognition reg) {
-	this.workerPool = Executors.newCachedThreadPool();
-	this.jsObjectWrapper = new JSObjectWrapper(applet);
-	this.jsEventCallback = applet.getParameter("jsEventCallback");
-	this.jsMessageCallback = applet.getParameter("jsMessageCallback");
+	workerPool = Executors.newCachedThreadPool();
+	jsObjectWrapper = new JSObjectWrapper(applet);
+	jsEventCallback = applet.getParameter("jsEventCallback");
+	jsMessageCallback = applet.getParameter("jsMessageCallback");
+	binding = new JavaScriptBinding();
+	sessionMap = new HashMap<String, String>();
+	sessionMap.put("session", ValueGenerators.generateSessionID());
 	setupJSBinding(cardStates, dispatcher, eventHandler, gui, reg);
     }
 
@@ -105,16 +113,19 @@ public class JSEventCallback {
 	try {
 	    ControlHandlers handler = new ControlHandlers();
 	    GenericTCTokenHandler genericTCTokenHandler = new GenericTCTokenHandler(cardStates, dispatcher, gui, reg);
-	    ControlHandler tcTokenHandler = new JavaScriptTCTokenHandler(genericTCTokenHandler);
 	    GenericStatusHandler genericStatusHandler = new GenericStatusHandler(cardStates, eventHandler);
-	    ControlHandler statusHandler = new JavaScriptStatusHandler(genericStatusHandler);
 	    GenericWaitForChangeHandler genericWaitForChangeHandler = new GenericWaitForChangeHandler(eventHandler);
+	    ControlHandler tcTokenHandler = new JavaScriptTCTokenHandler(genericTCTokenHandler);
+	    ControlHandler statusHandler = new JavaScriptStatusHandler(genericStatusHandler);
 	    ControlHandler waitForChangeHandler = new JavaScriptWaitForChangeHandler(genericWaitForChangeHandler);
 	    handler.addControlHandler(tcTokenHandler);
 	    handler.addControlHandler(statusHandler);
 	    handler.addControlHandler(waitForChangeHandler);
-	    ControlInterface control = new ControlInterface(this.binding);
+	    control = new ControlInterface(binding, handler);
 	    control.start();
+
+	    // send initial Status and thereby register session
+	    binding.handle("getStatus", sessionMap);
 	} catch (Exception ex) {
 	    logger.error(ex.getMessage(), ex);
 	}
@@ -124,6 +135,10 @@ public class JSEventCallback {
      * Stop all running worker threads.
      */
     public void stop() {
+	try {
+	    control.stop();
+	} catch (Exception ex) {
+	}
 	this.workerPool.shutdownNow();
     }
 
@@ -148,8 +163,9 @@ public class JSEventCallback {
 		    logger.error(e.getMessage(), e);
 		    throw new RuntimeException(e);
 		}
+
 		while (!Thread.currentThread().isInterrupted()) {
-		    Object[] waitForChangeResponse =  binding.handle("waitForChange", null);
+		    Object[] waitForChangeResponse =  binding.handle("waitForChange", sessionMap);
 
 		    if (waitForChangeResponse != null) {
 			StatusChange statusChange;
@@ -233,6 +249,7 @@ public class JSEventCallback {
 
 	return new Object[] { action, ifdId, ifdName, cardType, contextHandle, slotIndex };
     }
+
 
     /**
      * Helper method to generate a JavaScript compatible id from a string input.

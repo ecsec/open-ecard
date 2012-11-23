@@ -31,6 +31,8 @@ import org.openecard.common.enums.EventType;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventManager;
 import org.openecard.ws.schema.StatusChange;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -41,6 +43,8 @@ import org.openecard.ws.schema.StatusChange;
  */
 public class EventHandler implements EventCallback {
 
+    private static final Logger logger = LoggerFactory.getLogger(EventHandler.class);
+
     private Map<String, LinkedBlockingQueue<StatusChange>> eventQueues;
     private Map<String, ReschedulableTimer> timers;
     // after this delay of inactivity an event queue (and it's timer) will be deleted
@@ -49,8 +53,7 @@ public class EventHandler implements EventCallback {
     /**
      * Create a new EventHandler.
      *
-     * @param eventManager
-     *            event manager to get events (status changes) from
+     * @param eventManager event manager to get events (status changes) from
      */
     public EventHandler(EventManager eventManager) {
 	eventQueues = new HashMap<String, LinkedBlockingQueue<StatusChange>>();
@@ -60,45 +63,45 @@ public class EventHandler implements EventCallback {
 
     /**
      *
-     * @param statusChangeRequest
-     *            a status change request for a specific session
+     * @param statusChangeRequest a status change request for a specific session
      * @return a StatusChange containing the new status, or null if no eventQueue for the given session exists or if
-     *         interrupted
+     *   interrupted
      */
     public StatusChange next(StatusChangeRequest statusChangeRequest) {
+	String session = statusChangeRequest.getSessionIdentifier();
 	StatusChange handle = null;
-	LinkedBlockingQueue<StatusChange> queue = eventQueues.get(statusChangeRequest.getSessionIdentifier());
+	LinkedBlockingQueue<StatusChange> queue = eventQueues.get(session);
 	if (queue == null) {
+	    logger.error("No queue found for session {}", session);
 	    return null;
 	}
 	do {
 	    try {
 		timers.get(statusChangeRequest.getSessionIdentifier()).reschedule(deleteDelay);
 		handle = eventQueues.get(statusChangeRequest.getSessionIdentifier()).poll(30, TimeUnit.SECONDS);
+		logger.debug("WaitForChange event pulled from event queue.");
 	    } catch (InterruptedException ex) {
 		return null;
 	    }
 	} while (handle == null);
-
+	
 	return handle;
     }
 
     @Override
     public void signalEvent(EventType eventType, Object eventData) {
 	if (eventData instanceof ConnectionHandleType) {
-	    try {
-		ConnectionHandleType connectionHandle = (ConnectionHandleType) eventData;
-		String session = connectionHandle.getChannelHandle().getSessionIdentifier();
-		LinkedBlockingQueue<StatusChange> queue = eventQueues.get(session);
+	    ConnectionHandleType connectionHandle = (ConnectionHandleType) eventData;
 
-		if (queue != null) {
+	    for (Map.Entry<String, LinkedBlockingQueue<StatusChange>> entry : eventQueues.entrySet()) {
+		try {
+		    LinkedBlockingQueue<StatusChange> queue = entry.getValue();
 		    StatusChange statusChange = new StatusChange();
 		    statusChange.setAction(eventType.getEventTypeIdentifier());
 		    statusChange.setConnectionHandle(connectionHandle);
 		    queue.put(statusChange);
+		} catch (InterruptedException ignore) {
 		}
-
-	    } catch (InterruptedException ignore) {
 	    }
 	}
     }
@@ -106,8 +109,7 @@ public class EventHandler implements EventCallback {
     /**
      * Adds a new EventQueue for a given session.
      *
-     * @param sessionIdentifier
-     *            session identifier
+     * @param sessionIdentifier session identifier
      */
     public void addQueue(final String sessionIdentifier) {
 	if (eventQueues.get(sessionIdentifier) == null) {

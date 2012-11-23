@@ -43,9 +43,10 @@ import org.slf4j.LoggerFactory;
  */
 public class GenericStatusHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(GenericStatusHandler.class);
+
     private CardStateMap cardStates;
     private EventHandler eventHandler;
-    private static final Logger logger = LoggerFactory.getLogger(GenericStatusHandler.class);
 
     /**
      * Create a new GenericStatusHandler.
@@ -100,8 +101,8 @@ public class GenericStatusHandler {
 	StatusRequest statusRequest = new StatusRequest();
 
 	if (requestURI.getQuery() == null) {
-		    return statusRequest;
-		}
+	    return statusRequest;
+	}
 
 	String query[] = requestURI.getQuery().split("&");
 

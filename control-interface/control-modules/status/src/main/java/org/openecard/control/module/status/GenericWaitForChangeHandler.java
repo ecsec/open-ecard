@@ -92,8 +92,8 @@ public class GenericWaitForChangeHandler {
 	if (sessionIdentfier == null) {
 	    throw new MalformedURLException("RequestURI is missing mandatory session parameter.");
 	} else {
-		    return new StatusChangeRequest(sessionIdentfier);
-		}
+	    return new StatusChangeRequest(sessionIdentfier);
+	}
     }
 
 }

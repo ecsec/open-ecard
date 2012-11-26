@@ -23,6 +23,7 @@
 package org.openecard.control.binding.http.common;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +33,9 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
 import org.apache.http.util.EntityUtils;
+import org.openecard.common.util.HttpRequestLineUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -40,6 +44,8 @@ import org.apache.http.util.EntityUtils;
  * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
  */
 public class HttpRequestWrapper {
+
+    private static final Logger logger = LoggerFactory.getLogger(HttpRequestWrapper.class);
 
     private final HttpRequest request;
     private final Map<String, List<String>> parameterMap;
@@ -105,15 +111,21 @@ public class HttpRequestWrapper {
 
 	if (method.equals(Http11Method.GET.getMethodString())) {
 	    // decoded query string
-	    String query = URI.create(this.request.getRequestLine().getUri()).getQuery();
-
+	    String query = URI.create(this.request.getRequestLine().getUri()).getRawQuery();
 	    if (query == null) {
 		return parameterMap;
 	    }
 
-	    for (String parameter : query.split("&")) {
-		String name = parameter.substring(0, parameter.indexOf("="));
-		String value = parameter.substring(parameter.indexOf("=") + 1, parameter.length());
+	    Map<String, String> queries;
+	    try {
+		queries = HttpRequestLineUtils.transform(query);
+	    } catch (UnsupportedEncodingException ex) {
+		queries = HttpRequestLineUtils.transformRaw(query);
+	    }
+
+	    for (Map.Entry<String, String> next : queries.entrySet()) {
+		String name = next.getKey();
+		String value = next.getValue();
 
 		if (this.parameterMap.containsKey(name)) {
 		    this.parameterMap.get(name).add(value);
@@ -123,6 +135,7 @@ public class HttpRequestWrapper {
 		    this.parameterMap.put(name, values);
 		}
 	    }
+
 	} else if (method.equals(Http11Method.POST.getMethodString())
 		&& request instanceof HttpEntityEnclosingRequest) {
 	    HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();

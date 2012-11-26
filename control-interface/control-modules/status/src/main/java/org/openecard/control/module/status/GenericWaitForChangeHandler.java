@@ -25,7 +25,8 @@ package org.openecard.control.module.status;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URLDecoder;
+import java.util.Map;
+import org.openecard.common.util.HttpRequestLineUtils;
 import org.openecard.ws.schema.StatusChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,17 +71,15 @@ public class GenericWaitForChangeHandler {
      */
     public StatusChangeRequest parseStatusChangeRequestURI(URI requestURI) throws UnsupportedEncodingException,
 	    MalformedURLException {
-
-	String query[] = requestURI.getQuery().split("&");
+	Map<String, String> queries = HttpRequestLineUtils.transform(requestURI.getRawQuery());
 	String sessionIdentfier = null;
 
-	for (String q : query) {
-	    String name = q.substring(0, q.indexOf("="));
-	    String value = q.substring(q.indexOf("=") + 1, q.length());
+	for (Map.Entry<String, String> next : queries.entrySet()) {
+	    String name = next.getKey();
+	    String value = next.getValue();
 
 	    if (name.startsWith("session")) {
-		if (!value.isEmpty()) {
-		    value = URLDecoder.decode(value, "UTF-8");
+		if (value != null && !value.isEmpty()) {
 		    sessionIdentfier = value;
 		} else {
 		    throw new IllegalArgumentException("Malformed StatusURL");

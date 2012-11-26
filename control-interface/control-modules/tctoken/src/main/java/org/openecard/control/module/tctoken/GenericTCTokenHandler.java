@@ -36,7 +36,7 @@ import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLDecoder;
+import java.util.Map;
 import java.util.Set;
 import org.openecard.bouncycastle.crypto.tls.TlsPSKIdentity;
 import org.openecard.common.ECardConstants;
@@ -45,6 +45,7 @@ import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
+import org.openecard.common.util.HttpRequestLineUtils;
 import org.openecard.control.module.tctoken.gui.InsertCardUserConsent;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertPSKTlsClient;
@@ -82,53 +83,48 @@ public class GenericTCTokenHandler {
     public TCTokenRequest parseTCTokenRequestURI(URI requestURI) throws UnsupportedEncodingException, MalformedURLException, TCTokenException {
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 	String queryStr = requestURI.getRawQuery();
-	String[] query = queryStr.split("&");
+	Map<String, String> queries = HttpRequestLineUtils.transform(queryStr);
 
-	for (String q : query) {
-	    String name = q.substring(0, q.indexOf("="));
-	    String value = q.substring(q.indexOf("=") + 1, q.length());
+	for (Map.Entry<String, String> next : queries.entrySet()) {
+	    String k = next.getKey();
+	    String v = next.getValue();
 
-	    if (name.startsWith("tcTokenURL")) {
-		if (!value.isEmpty()) {
-		    value = URLDecoder.decode(value, "UTF-8");
-		    TCTokenType token = TCTokenFactory.generateTCToken(new URL(value));
+	    if (k.equals("tcTokenURL")) {
+		if (v != null && !v.isEmpty()) {
+		    TCTokenType token = TCTokenFactory.generateTCToken(new URL(v));
 		    tcTokenRequest.setTCToken(token);
 		} else {
 		    throw new IllegalArgumentException("Malformed TCTokenURL");
 		}
 
-	    } else if (name.startsWith("ifdName")) {
-		if (!value.isEmpty()) {
-		    value = URLDecoder.decode(value, "UTF-8");
-		    tcTokenRequest.setIFDName(value);
+	    } else if (k.equals("ifdName")) {
+		if (v != null && !v.isEmpty()) {
+		    tcTokenRequest.setIFDName(v);
 		} else {
 		    throw new IllegalArgumentException("Malformed IFDName");
 		}
 
-	    } else if (name.startsWith("contextHandle")) {
-		if (!value.isEmpty()) {
-		    value = URLDecoder.decode(value, "UTF-8");
-		    tcTokenRequest.setContextHandle(value);
+	    } else if (k.equals("contextHandle")) {
+		if (v != null && !v.isEmpty()) {
+		    tcTokenRequest.setContextHandle(v);
 		} else {
 		    throw new IllegalArgumentException("Malformed ContextHandle");
 		}
 
-	    } else if (name.startsWith("slotIndex")) {
-		if (!value.isEmpty()) {
-		    value = URLDecoder.decode(value, "UTF-8");
-		    tcTokenRequest.setSlotIndex(value);
+	    } else if (k.equals("slotIndex")) {
+		if (v != null && !v.isEmpty()) {
+		    tcTokenRequest.setSlotIndex(v);
 		} else {
 		    throw new IllegalArgumentException("Malformed SlotIndex");
 		}
-	    } else if (name.startsWith("cardType")) {
-		if (!value.isEmpty()) {
-		    value = URLDecoder.decode(value, "UTF-8");
-		    tcTokenRequest.setCardType(value);
+	    } else if (k.equals("cardType")) {
+		if (v != null && !v.isEmpty()) {
+		    tcTokenRequest.setCardType(v);
 		} else {
 		    throw new IllegalArgumentException("Malformed CardType");
 		}
 	    } else {
-		logger.debug("Unknown query element: {}", name);
+		logger.debug("Unknown query element: {}", k);
 	    }
 	}
 	return tcTokenRequest;

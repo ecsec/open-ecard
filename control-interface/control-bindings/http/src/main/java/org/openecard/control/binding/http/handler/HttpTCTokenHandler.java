@@ -124,8 +124,7 @@ public class HttpTCTokenHandler extends HttpControlHandler {
     }
 
     @Override
-    public void handle(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext context) throws
-	    IOException {
+    public void handle(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext context) throws IOException {
 	logger.debug("HTTP request: {}", httpRequest.toString());
 	HttpResponse response = null;
 	try {

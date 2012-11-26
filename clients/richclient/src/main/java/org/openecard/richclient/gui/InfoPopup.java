@@ -22,7 +22,6 @@
 
 package org.openecard.richclient.gui;
 
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Point;
@@ -32,7 +31,7 @@ import javax.swing.JDialog;
 
 
 /**
- * This class creats a InfoPopup showing different information about connected terminals and inserted cards.
+ * This class creats a InfoPopup showing different information about connected terminals and available cards.
  * It also contains the different controls of the application, e.g. the exit button.
  *
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
@@ -99,8 +98,6 @@ public class InfoPopup extends JDialog {
     private void setupUI(Container c) {
 	setAlwaysOnTop(true);
 	setUndecorated(true);
-	Color blue = new Color(121, 170, 215);
-	setBackground(blue);
 	setContentPane(c);
 	pack();
 

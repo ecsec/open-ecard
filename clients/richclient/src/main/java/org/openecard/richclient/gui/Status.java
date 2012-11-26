@@ -28,7 +28,6 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -41,12 +40,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.BevelBorder;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import org.openecard.common.I18n;
 import org.openecard.common.enums.EventType;
@@ -73,7 +74,7 @@ public class Status implements EventCallback {
 
     private Map<String, JPanel> infoMap = new ConcurrentSkipListMap<String, JPanel>();
     private HashMap<String, ImageIcon> cardIcons = new HashMap<String, ImageIcon>();
-    private Container contentPane;
+    private JPanel contentPane;
     private JPanel infoView;
     private JPanel noTerminal;
     private InfoPopup popup;
@@ -113,9 +114,10 @@ public class Status implements EventCallback {
 
 
     private void setupBaseUI() {
-	contentPane = new Container();
+	contentPane = new JPanel();
 	contentPane.setLayout(new BorderLayout());
 	contentPane.setBackground(Color.white);
+	contentPane.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.LIGHT_GRAY, Color.DARK_GRAY));
 
 	noTerminal = new JPanel();
 	noTerminal.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -130,8 +132,11 @@ public class Status implements EventCallback {
 	infoView.add(noTerminal);
 
 	JLabel label = new JLabel(" " + lang.translationForKey("tray.title") + " ");
-	label.setBackground(Color.white);
 	label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
+
+	GradientPanel panel = new GradientPanel(new Color(106, 163, 213), new Color(80, 118, 177));
+	panel.setOpaque(false);
+	panel.add(label);
 
 	JPanel btnPanel = new JPanel();
 	btnPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -158,7 +163,7 @@ public class Status implements EventCallback {
 	btnPanel.add(btnAbout);
 	btnPanel.add(btnExit);
 
-	contentPane.add(label, BorderLayout.NORTH);
+	contentPane.add(panel, BorderLayout.NORTH);
 	contentPane.add(infoView, BorderLayout.CENTER);
 	contentPane.add(btnPanel, BorderLayout.SOUTH);
     }

@@ -38,6 +38,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 import java.util.Set;
+import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.crypto.tls.TlsPSKIdentity;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
@@ -188,12 +189,14 @@ public class GenericTCTokenHandler {
 		TlsPSKIdentity pskId = new TlsPSKIdentityImpl(sessionIdentifier.getBytes(), psk);
 		tlsClient = new ClientCertPSKTlsClient(pskId, serverHost);
 		tlsClient.setAuthentication(tlsAuth);
+		tlsClient.setClientVersion(ProtocolVersion.TLSv11);
 	    } else if (secProto.equals("urn:ietf:rfc:4346")) {
 		TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
 		tlsAuth.setHostname(serverHost);
 		tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 		tlsClient = new ClientCertDefaultTlsClient(serverHost);
 		tlsClient.setAuthentication(tlsAuth);
+		tlsClient.setClientVersion(ProtocolVersion.TLSv11);
 	    } else {
 		throw new IOException("Unknow security protocol '" + secProto + "' requested.");
 	    }

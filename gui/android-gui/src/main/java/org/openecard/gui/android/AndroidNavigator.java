@@ -27,6 +27,7 @@ import android.content.Intent;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Exchanger;
+import java.util.concurrent.Future;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsentNavigator;
@@ -72,6 +73,12 @@ public class AndroidNavigator implements UserConsentNavigator {
 
     public void setActivity(StepActivity activity) {
 	this.activity = activity;
+    }
+
+    @Override
+    public void setRunningAction(Future action) {
+	// TODO: implement cancel of the action as shown in SwingNavigator
+	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override

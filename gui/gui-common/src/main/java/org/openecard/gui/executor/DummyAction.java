@@ -22,14 +22,34 @@
 
 package org.openecard.gui.executor;
 
+import java.util.Map;
+import org.openecard.gui.StepResult;
+
 
 /**
- * Result status of step actions.
+ * Dummy action to produce step results for the execution engine.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public enum StepActionResultStatus {
+public class DummyAction extends StepAction {
 
-    NEXT, BACK, REPEAT, CANCEL;
+    /**
+     * {@inheritDoc}
+     */
+    public DummyAction(String stepID) {
+	super(stepID);
+    }
+
+    @Override
+    public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
+	switch (result.getStatus()) {
+	    case BACK:
+		return new StepActionResult(StepActionResultStatus.BACK);
+	    case OK:
+		return new StepActionResult(StepActionResultStatus.NEXT);
+	    default:
+		return new StepActionResult(StepActionResultStatus.REPEAT); // cancel performed before
+	}
+    }
 
 }

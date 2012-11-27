@@ -22,10 +22,13 @@
 
 package org.openecard.gui;
 
+import java.util.concurrent.Future;
 import org.openecard.gui.definition.Step;
+import org.openecard.gui.executor.ExecutionEngine;
 
 
 /**
+ * Navigator interface for use in the {@link ExecutionEngine}.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -41,6 +44,17 @@ public interface UserConsentNavigator {
     StepResult replaceNext(Step step);
     StepResult replacePrevious(Step step);
 
+    /**
+     * Sets the action in the navigator which is executed after calling this method.
+     * The action can be canceled from within the navigator if needed.
+     *
+     * @param action Future of the StepAction that is executed next.
+     */
+    void setRunningAction(Future action);
+
+    /**
+     * Closes the open dialog.
+     */
     void close();
 
 }

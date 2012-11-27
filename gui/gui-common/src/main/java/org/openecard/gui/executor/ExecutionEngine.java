@@ -27,12 +27,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -41,29 +46,12 @@ import org.openecard.gui.definition.Step;
  */
 public class ExecutionEngine {
 
-    private static class InnerAction extends StepAction {
-
-	public InnerAction(String stepID) {
-	    super(stepID);
-	}
-
-	@Override
-	public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	    switch (result.getStatus()) {
-		case BACK:
-		    return new StepActionResult(StepActionResultStatus.BACK);
-		case OK:
-		    return new StepActionResult(StepActionResultStatus.NEXT);
-		default:
-		    return new StepActionResult(StepActionResultStatus.REPEAT); // cancel performed before
-	    }
-	}
-
-    }
+    private static final Logger logger = LoggerFactory.getLogger(ExecutionEngine.class);
 
     private final UserConsentNavigator navigator;
     private final TreeMap<String, ExecutionResults> results = new TreeMap<String, ExecutionResults>();
     private TreeMap<String, StepAction> customActions;
+
 
     public ExecutionEngine(UserConsentNavigator navigator) {
 	this.navigator = navigator;
@@ -108,7 +96,33 @@ public class ExecutionEngine {
 
 	    // perform action
 	    StepAction action = getAction(next.getStepID());
-	    StepActionResult actionResult = action.perform(oldResults, next);
+	    StepActionCallable actionCallable = new StepActionCallable(action, oldResults, next);
+	    FutureTask<StepActionResult> actionFuture = new FutureTask<StepActionResult>(actionCallable);
+	    navigator.setRunningAction(actionFuture);
+	    StepActionResult actionResult;
+	    try {
+		actionFuture.run();
+		actionResult = actionFuture.get();
+	    }catch (CancellationException ex) {
+		logger.info("StepAction was canceled.", ex);
+		navigator.close();
+		return ResultStatus.CANCEL;
+	    } catch (InterruptedException ex) {
+		logger.info("StepAction was interrupted.", ex);
+		navigator.close();
+		return ResultStatus.CANCEL;
+	    } catch (ExecutionException ex) {
+		logger.error("StepAction failed with error.", ex.getCause());
+		navigator.close();
+		return ResultStatus.CANCEL;
+	    }
+
+	    // break out if cancel was returned
+	    if (actionResult.getStatus() == StepActionResultStatus.CANCEL) {
+		logger.info("StepAction was canceled.");
+		navigator.close();
+		return ResultStatus.CANCEL;
+	    }
 
 	    // replace step if told by result value
 	    if (actionResult.getReplacement() != null) {
@@ -165,7 +179,7 @@ public class ExecutionEngine {
 	if (hasCustomAction(stepName)) {
 	    return getCustomActions().get(stepName);
 	}
-	return new InnerAction(stepName);
+	return new DummyAction(stepName);
     }
 
     private boolean hasCustomAction(String stepName) {

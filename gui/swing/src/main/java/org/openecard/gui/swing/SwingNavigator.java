@@ -27,6 +27,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsentNavigator;
@@ -55,11 +56,13 @@ public class SwingNavigator implements UserConsentNavigator, ActionListener {
     private final NavigationBar navBar;
     private final StepBar stepBar;
 
-    private int stepPointer = -1;
+    private int stepPointer;
+    private Future action;
 
 
     public SwingNavigator(DialogWrapper dialogWrapper, String dialogType, List<Step> steps, Container stepContainer,
 	    NavigationBar navPanel, StepBar stepBar) {
+	this.stepPointer = -1;
 	this.dialogWrapper = dialogWrapper;
 	this.stepContainer = stepContainer;
 	this.stepFrames = createStepFrames(steps, dialogType);
@@ -131,6 +134,13 @@ public class SwingNavigator implements UserConsentNavigator, ActionListener {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
+
+    @Override
+    public void setRunningAction(Future action) {
+	this.action = action;
+    }
+
+
     @Override
     public void close() {
 	dialogWrapper.hide();
@@ -193,6 +203,13 @@ public class SwingNavigator implements UserConsentNavigator, ActionListener {
 	NavigationEvent event = NavigationEvent.fromEvent(e);
 	if (event == null) {
 	    logger.error("Unknown event received: {}", e.getActionCommand());
+	    return;
+	}
+
+	// in case there is a runnign action, kill it and bail out
+	if (action != null && ! action.isDone()) {
+	    logger.debug("Canceling execution of the currently running StepAction.");
+	    action.cancel(true);
 	    return;
 	}
 

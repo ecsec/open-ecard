@@ -22,13 +22,24 @@
 
 package org.openecard.common;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
+import org.openecard.common.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
+ * Openecard properties class.
+ * These properties are loaded from the following places. The first occurrence of a key value pair overrides the next.
+ * <ol>
+ *   <li>System Properties</li>
+ *   <li>$HOME/.openecard/openecard.properties</li>
+ *   <li>$classpath/openecard_config/openecard.properties</li>
+ * </ol>
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -37,14 +48,29 @@ public class OpenecardProperties {
     private static final Logger _logger = LoggerFactory.getLogger(OpenecardProperties.class);
 
     private static class Internal extends OverridingProperties {
-	public Internal() throws IOException {
-	    super("openecard_config/openecard.properties");
+	public Internal(InputStream bundledProps, InputStream homeProps) throws IOException {
+	    super(bundledProps, homeProps);
 	}
     }
 
     static {
+	InputStream homeProps = null;
+	InputStream bundledProps = null;
 	try {
-	    properties = new Internal();
+	    File homePath = FileUtils.getHomeConfigDir();
+	    File cfgFile = new File(homePath + File.separator + "openecard.properties");
+	    homeProps = new FileInputStream(cfgFile);
+	} catch (IOException ex) {
+	    _logger.info("Failed to load bundled properties.", ex);
+	}
+	try {
+	    String fileName = "openecard_config/openecard.properties";
+	    bundledProps = FileUtils.resolveResourceAsStream(OpenecardProperties.class, fileName);
+	} catch (IOException ex) {
+	    _logger.info("Failed to load properties from config dir.", ex);
+	}
+	try {
+	    properties = new Internal(bundledProps, homeProps);
 	} catch (IOException ex) {
 	    // in that case a null pointer occurs when properties is accessed
 	    _logger.error(ex.getMessage(), ex);
@@ -54,14 +80,16 @@ public class OpenecardProperties {
     private static Internal properties;
 
 
+    /**
+     * @see OverridingProperties#getProperty(java.lang.String)
+     */
     public static String getProperty(String key) {
 	return properties.getProperty(key);
     }
 
-    public static Object setProperty(String key, String value) {
-	return properties.setProperty(key, value);
-    }
-
+    /**
+     * @see OverridingProperties#properties()
+     */
     public static Properties properties() {
 	return properties.properties();
     }

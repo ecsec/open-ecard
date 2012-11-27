@@ -44,6 +44,7 @@ import org.openecard.bouncycastle.crypto.tls.TlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsProtocolHandler;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.io.ProxySettings;
 import org.openecard.transport.httpcore.HttpRequestHelper;
 import org.openecard.transport.httpcore.StreamHttpClientConnection;
 import org.openecard.ws.MarshallingTypeException;
@@ -237,7 +238,7 @@ public class PAOS {
 	// loop and send makes a computer happy
 	while (true) {
 	    // set up connection
-	    Socket socket = new Socket(hostname, port);
+	    Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
 	    StreamHttpClientConnection conn;
 	    if (tlsClient != null) {
 		// TLS

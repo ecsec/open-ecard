@@ -36,8 +36,8 @@ import org.openecard.gui.executor.StepActionResultStatus;
 
 /**
  * Action to wait for a card insertion in the GUI executor.
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  *
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class InsertCardStepAction extends StepAction {
 
@@ -66,6 +66,8 @@ public class InsertCardStepAction extends StepAction {
 	    try {
 		Thread.sleep(200);
 	    } catch (InterruptedException e) {
+		// action was cancelled by the user
+		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
 	} while (entries.size() < 1);
 	setResponse(entries.iterator().next().handleCopy());

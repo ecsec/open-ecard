@@ -24,8 +24,6 @@ package org.openecard.gui.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JComponent;
@@ -34,7 +32,8 @@ import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
-import org.openecard.gui.swing.common.GUIConstants;
+import org.openecard.gui.executor.ExecutionEngine;
+import org.openecard.gui.swing.common.NavigationEvent;
 import org.openecard.gui.swing.components.StepComponent;
 import org.openecard.gui.swing.steplayout.StepLayouter;
 import org.slf4j.Logger;
@@ -49,17 +48,19 @@ import org.slf4j.LoggerFactory;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Florian Feldmann <florian.feldmann@rub.de>
  */
-public class StepFrame extends JPanel implements ActionListener {
+public class StepFrame {
 
     private static final Logger logger = LoggerFactory.getLogger(StepFrame.class);
     private static final long serialVersionUID = 1L;
 
+    private JPanel panel;
     private Step step;
     private SwingStepResult stepResult;
     private List<StepComponent> components;
     private String dialogType;
 
     public StepFrame(Step step, String dialogType) {
+	this.panel = new JPanel();
 	this.step = step;
 	this.dialogType = dialogType;
 	this.stepResult = new SwingStepResult(step);
@@ -68,13 +69,13 @@ public class StepFrame extends JPanel implements ActionListener {
     }
 
     private void initLayout() {
-	setLayout(new BorderLayout());
+	panel.setLayout(new BorderLayout());
     }
 
     private void initComponents() {
 	StepLayouter stepLayouter = StepLayouter.create(step.getInputInfoUnits(), dialogType, step.getTitle());
 	Container contentPanel = stepLayouter.getPanel();
-	add(contentPanel, BorderLayout.CENTER);
+	panel.add(contentPanel, BorderLayout.CENTER);
 
 	components = stepLayouter.getComponents();
     }
@@ -83,16 +84,17 @@ public class StepFrame extends JPanel implements ActionListener {
 	stepResult = new SwingStepResult(step);
     }
 
-    public void instantReturnIfSet() {
-	if (step.isInstantReturn()) {
-	    //TODO
-//	    forwardButton.doClick();
-	}
+    public boolean isInstantReturn() {
+	return step.isInstantReturn();
     }
 
     public Container getPanel() {
-	revalidate(this);
-	return this;
+	revalidate(panel);
+	return panel;
+    }
+
+    public Step getStep() {
+	return step;
     }
 
     /**
@@ -113,7 +115,7 @@ public class StepFrame extends JPanel implements ActionListener {
     /**
      * Get result for all components on the frame that support result values.
      *
-     * @return List containg all result values. As a matter of fact this list can be empty.
+     * @return List containing all result values. As a matter of fact this list can be empty.
      */
     public List<OutputInfoUnit> getResultContent() {
 	ArrayList<OutputInfoUnit> result = new ArrayList<OutputInfoUnit>(components.size());
@@ -125,36 +127,16 @@ public class StepFrame extends JPanel implements ActionListener {
 	return result;
     }
 
-    public StepResult getStepResult() {
-	removeAll();
+    public void updateFrame() {
+	panel.removeAll();
 	initComponents();
-	revalidate(this);
+	revalidate(panel);
+    }
+
+    public StepResult getStepResult() {
 	return stepResult;
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-	logger.debug("StepFrame event: {}", e.paramString());
-
-	if (e.getSource().equals(step)) {
-	    String command = e.getActionCommand();
-	    if (command.equals(GUIConstants.BUTTON_BACK)) {
-		stepResult.setResult(getResultContent());
-		stepResult.setResultStatus(ResultStatus.BACK);
-	    } else if (command.equals(GUIConstants.BUTTON_NEXT)) {
-		stepResult.setResult(getResultContent());
-		stepResult.setResultStatus(ResultStatus.OK);
-	    } else if (command.equals(GUIConstants.BUTTON_CANCEL)) {
-		stepResult.setResultStatus(ResultStatus.CANCEL);
-	    } else {
-		return;
-	    }
-	    try {
-		stepResult.syncPoint.exchange(null);
-	    } catch (Exception ignore) {
-	    }
-	}
-    }
 
     private void revalidate(JComponent c) {
 	for (int i = 0; i < c.getComponentCount(); i++) {
@@ -162,6 +144,49 @@ public class StepFrame extends JPanel implements ActionListener {
 	}
 	c.revalidate();
 	c.repaint();
+    }
+
+
+    /**
+     * Locks elements on the frame, so they can not be modified anymore.
+     * This is needed when executing an action. That is the time between a button click and the update of the frame
+     * panel.
+     */
+    public void lockControls() {
+	// TODO: lock all elements
+    }
+    /**
+     * Unlocks elements on this frame, so that they can be modified.
+     * This is needed to unlock the frame when it is displayed after it has been locked by an action.
+     */
+    public void unlockControls() {
+	// TODO: unlock elements of this frame
+    }
+
+    /**
+     * Updates the StepResult when a button is clicked.
+     * Before a button is clicked by the user, the {@link ExecutionEngine} waits for the result content by calling
+     * {@link StepResult#getStatus()}. This method sets the portions of the result relevant for the respective button
+     * event and unlocks the getStatus method.
+     *
+     * @param event Event describing which button has been clicked.
+     */
+    public void updateResult(NavigationEvent event) {
+	if (event == NavigationEvent.BACK) {
+	    stepResult.setResult(getResultContent());
+	    stepResult.setResultStatus(ResultStatus.BACK);
+	} else if (event == NavigationEvent.NEXT) {
+	    stepResult.setResult(getResultContent());
+	    stepResult.setResultStatus(ResultStatus.OK);
+	} else if (event == NavigationEvent.CANCEL) {
+	    stepResult.setResultStatus(ResultStatus.CANCEL);
+	}
+
+	try {
+	    logger.debug("Exchange result for step '{}", step.getTitle());
+	    stepResult.syncPoint.exchange(null);
+	} catch (Exception ignore) {
+	}
     }
 
 }

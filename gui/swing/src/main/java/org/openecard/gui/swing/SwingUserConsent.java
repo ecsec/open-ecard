@@ -19,6 +19,7 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+
 package org.openecard.gui.swing;
 
 import java.awt.AWTEvent;
@@ -76,36 +77,32 @@ public class SwingUserConsent implements UserConsent {
 	JPanel sideBar = new JPanel(new BorderLayout());
 
 	StepBar stepBar = new StepBar(steps);
-	final Navigation navigationPanel = new Navigation(steps);
+	final NavigationBar navigationBar = new NavigationBar(steps.size());
 
 	Logo l = new Logo();
 	initializeSidePanel(sideBar, l, stepBar);
 
-	SwingNavigator navigator = new SwingNavigator(dialogWrapper, dialogType, steps, stepPanel);
-	navigator.addPropertyChangeListener(stepBar);
-	for (StepFrame frame : navigator.getStepFrames()) {
-	    navigationPanel.addActionListener(frame);
-	}
+	final SwingNavigator navigator = new SwingNavigator(dialogWrapper, dialogType, steps, stepPanel, navigationBar, stepBar);
+	navigationBar.registerEvents(navigator);
 
 	// Add global key listener
-	Toolkit.getDefaultToolkit().getSystemEventQueue().push(
-		new EventQueue() {
-		    @Override
-		    protected void dispatchEvent(AWTEvent event) {
-			if (event instanceof KeyEvent) {
-			    KeyEvent keyEvent = (KeyEvent) event;
-			    if (KeyEvent.KEY_RELEASED == keyEvent.getID() && KeyEvent.VK_ENTER == keyEvent.getKeyCode()) {
-				// If the enter is pressed when perform a next step event
-				if (!navigationPanel.hasFocus()) {
-				    navigationPanel.actionPerformed(
-					    new ActionEvent(navigationPanel, ActionEvent.ACTION_PERFORMED, GUIConstants.BUTTON_NEXT));
-				}
-			    }
+	EventQueue eventQueue = new EventQueue() {
+	    ActionEvent e = new ActionEvent(navigationBar, ActionEvent.ACTION_PERFORMED, GUIConstants.BUTTON_NEXT);
+	    @Override
+	    protected void dispatchEvent(AWTEvent event) {
+		if (event instanceof KeyEvent) {
+		    KeyEvent keyEvent = (KeyEvent) event;
+		    if (KeyEvent.KEY_RELEASED == keyEvent.getID() && KeyEvent.VK_ENTER == keyEvent.getKeyCode()) {
+			// If the enter is pressed when perform a next step event
+			if (!navigationBar.hasFocus()) {
+			    navigator.actionPerformed(e);
 			}
-			super.dispatchEvent(event);
 		    }
-
-		});
+		}
+		super.dispatchEvent(event);
+	    }
+	};
+	Toolkit.getDefaultToolkit().getSystemEventQueue().push(eventQueue);
 
 	// Config layout
 	GroupLayout layout = new GroupLayout(rootPanel);
@@ -120,13 +117,13 @@ public class SwingUserConsent implements UserConsent {
 		.addGroup(layout.createParallelGroup()
 		.addComponent(stepPanel)
 		.addGap(10)
-		.addComponent(navigationPanel)));
+		.addComponent(navigationBar)));
 	layout.setVerticalGroup(
 		layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 		.addComponent(sideBar)
 		.addGroup(layout.createSequentialGroup()
 		.addComponent(stepPanel)
-		.addComponent(navigationPanel)));
+		.addComponent(navigationBar)));
 
 	rootPanel.validate();
 	rootPanel.repaint();

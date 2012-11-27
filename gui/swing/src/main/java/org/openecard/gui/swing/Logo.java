@@ -28,18 +28,25 @@ import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.openecard.common.util.FileUtils;
 
 
 /**
+ * Open eCard logo for the sidebar of the Swing GUI.
+ * The logo is placed on a JPanel, so that it can be placed on any component conveniently.
+ *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class Logo extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Load logo from classpath and instantiate panel.
+     */
     public Logo() {
 	ImageIcon logo = new ImageIcon();
-	URL url = Logo.class.getResource("/openecardwhite.gif");
+	URL url = FileUtils.resolveResourceAsURL(Logo.class, "openecardwhite.gif");
 
 	if (url != null) {
 	    Toolkit toolkit = Toolkit.getDefaultToolkit();

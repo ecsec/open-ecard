@@ -22,56 +22,79 @@
 
 package org.openecard.gui.swing;
 
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import org.openecard.common.I18n;
-import org.openecard.gui.definition.Step;
 import org.openecard.gui.swing.common.GUIConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
+ * Component of the Swing GUI with navigation buttons.
+ * Depending on whether the first, the last or an intermediate step is displayed, the visible buttons are:
+ * <ul>
+ *   <li>Back</li>
+ *   <li>Next</li>
+ *   <li>Finish</li>
+ *   <li>Cancel</li>
+ * </ul>
  *
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class Navigation extends JPanel implements ActionListener {
+public class NavigationBar extends JPanel {
 
-    private static final Logger logger = LoggerFactory.getLogger(Navigation.class);
+    private static final Logger logger = LoggerFactory.getLogger(NavigationBar.class);
     private static final long serialVersionUID = 1L;
 
     private final I18n lang = I18n.getTranslation("gui");
-    private ArrayList<ActionListener> listeners = new ArrayList<ActionListener>();
-    private JButton backButton, nextButton, cancelButton;
-    private List<Step> steps;
-    private int stepPointer = 0;
+    private JButton backButton;
+    private JButton nextButton;
+    private JButton cancelButton;
 
-    public Navigation(List<Step> steps) {
-	this.steps = steps;
+    private int numSteps;
 
+
+    /**
+     * Create and initialize the navigation panel for the given number of steps.
+     * The step number is important, because the panel needs to know when it is finished.
+     *
+     * @param numSteps Number of steps in this user consent.
+     */
+    public NavigationBar(int numSteps) {
+	this.numSteps = numSteps;
 	initializeComponents();
 	initializeLayout();
+    }
+
+    /**
+     * Register the provided listener for all navigation (button) events.
+     *
+     * @param eventSink Listener for button events.
+     */
+    public void registerEvents(ActionListener eventSink) {
+	backButton.addActionListener(eventSink);
+	nextButton.addActionListener(eventSink);
+	cancelButton.addActionListener(eventSink);
     }
 
     private void initializeComponents() {
 	backButton = new JButton(lang.translationForKey(GUIConstants.BUTTON_BACK));
 	backButton.setActionCommand(GUIConstants.BUTTON_BACK);
-	backButton.addActionListener(this);
 	backButton.setVisible(false);
 
 	nextButton = new JButton(lang.translationForKey(GUIConstants.BUTTON_NEXT));
 	nextButton.setActionCommand(GUIConstants.BUTTON_NEXT);
-	nextButton.addActionListener(this);
+	// if there is only one step set next button to finished
+	if (numSteps == 1) {
+	    nextButton.setText(lang.translationForKey(GUIConstants.BUTTON_FINISH));
+	}
 
 	cancelButton = new JButton(lang.translationForKey(GUIConstants.BUTTON_CANCEL));
 	cancelButton.setActionCommand(GUIConstants.BUTTON_CANCEL);
-	cancelButton.addActionListener(this);
     }
 
     private void initializeLayout() {
@@ -96,41 +119,45 @@ public class Navigation extends JPanel implements ActionListener {
 	layout.setVerticalGroup(vg);
     }
 
-    public void addActionListener(ActionListener actionListener) {
-	listeners.add(actionListener);
+
+    /**
+     * Locks buttons except the cancel button.
+     */
+    public void lockControls() {
+	// lock buttons
+	backButton.setEnabled(false);
+	nextButton.setEnabled(false);
+    }
+    /**
+     * Unlocks all buttons.
+     */
+    public void unlockControls() {
+	// unlock buttons
+	backButton.setEnabled(true);
+	nextButton.setEnabled(true);
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-	logger.debug("Navigation event: {} ", e.paramString());
-
-	String command = e.getActionCommand();
-
-	for (Iterator<ActionListener> it = listeners.iterator(); it.hasNext();) {
-	    ActionListener actionListener = it.next();
-	    actionListener.actionPerformed(new ActionEvent(steps.get(stepPointer), ActionEvent.ACTION_PERFORMED, command));
-	}
-
-	if (command.equals(GUIConstants.BUTTON_NEXT)) {
-	    stepPointer++;
-	} else if (command.equals(GUIConstants.BUTTON_BACK)) {
-	    stepPointer--;
-	}
-
-	// Dont show the back button on the first step
-	if (stepPointer == 0) {
+    /**
+     * Updates the buttons according to the position of the user consent.
+     *
+     * @param nextIdx Index of the step that is to be displayed.
+     */
+    public void selectIdx(int nextIdx) {
+	// Don't show the back button on the first step
+	if (nextIdx == 0) {
 	    backButton.setVisible(false);
 	} else {
-	    backButton.setVisible(!false);
+	    backButton.setVisible(true);
 	}
 
 	// Change the forward button on the last step to "finished"
-	if (stepPointer == steps.size() - 1) {
+	if (nextIdx == (numSteps - 1)) {
 	    nextButton.setText(lang.translationForKey(GUIConstants.BUTTON_FINISH));
 	} else {
 	    nextButton.setText(lang.translationForKey(GUIConstants.BUTTON_NEXT));
 	}
     }
+
 
     @Override
     public boolean hasFocus() {

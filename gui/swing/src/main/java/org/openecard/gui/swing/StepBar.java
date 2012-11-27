@@ -25,12 +25,13 @@ package org.openecard.gui.swing;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.openecard.common.util.FileUtils;
 import org.openecard.gui.definition.Step;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,23 +42,88 @@ import org.slf4j.LoggerFactory;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @editor Florian Feldmann <florian.feldmann@rub.de>
  */
-public final class StepBar extends JPanel implements PropertyChangeListener {
+public final class StepBar extends JPanel {
 
     private static final Logger logger = LoggerFactory.getLogger(StepBar.class);
     private static final long serialVersionUID = 1L;
 
-    private List<Step> steps;
+    private static final ImageIcon loader;
 
+    private List<Step> steps;
+    private List<JLabel> labels;
+    private int curIdx;
+
+    static {
+	URL loaderUrl = FileUtils.resolveResourceAsURL(StepBar.class, "loader.gif");
+	loader = new ImageIcon(loaderUrl);
+    }
+
+
+    /**
+     * Initialize StepBar for the given steps.
+     * The index is initialized to -1.
+     *
+     * @param steps Steps of the GUI.
+     */
     public StepBar(List<Step> steps) {
-	this.steps = steps;
+	this.curIdx = -1;
 	updateStepBar(steps);
     }
 
+    /**
+     * Update the StepBar to a new set of steps.
+     * The index is kept in tact. Usually the list of the steps should only be extended.
+     *
+     * @param steps New set of steps.
+     */
     public void updateStepBar(List<Step> steps) {
+	this.steps = steps;
+	this.labels = new ArrayList<JLabel>(steps.size());
 	removeAll();
 	initializeLayout();
 	initializeComponents();
     }
+
+    /**
+     * Select the step referenced by the given index.
+     *
+     * @param nextIdx Index of the step which is selected.
+     */
+    public void selectIdx(final int nextIdx) {
+	final int oldIdx = curIdx;
+	curIdx = nextIdx;
+	logger.debug("Selecting index {}, previous was {}.", nextIdx, oldIdx);
+
+	if (oldIdx >= 0 && oldIdx < getComponentCount()) {
+	    // reset last displayed element
+	    getComponent(oldIdx).setForeground(Color.GRAY);
+	}
+	if (nextIdx >= 0 && nextIdx < getComponentCount()) {
+	    // Highlight current element
+	    getComponent(nextIdx).setForeground(Color.BLACK);
+	}
+    }
+
+    /**
+     * Enable loader icon for the currently highlighted element.
+     */
+    public void enableLoaderImage() {
+	if (curIdx >= 0 && curIdx < labels.size()) {
+	    JLabel label = labels.get(curIdx);
+	    label.setIcon(loader);
+	}
+    }
+
+    /**
+     * Disable loader icon for the currently highlighted element.
+     */
+    public void disableLoaderImage() {
+	if (curIdx >= 0 && curIdx < labels.size()) {
+	    JLabel label = labels.get(curIdx);
+	    label.setIcon(null);
+	}
+    }
+
 
     private void initializeLayout() {
 	setLayout(new GridBagLayout());
@@ -72,39 +138,15 @@ public final class StepBar extends JPanel implements PropertyChangeListener {
 
 	for (String names : getStepNames(steps)) {
 	    JLabel l = new JLabel(names);
+	    labels.add(l);
+	    l.setIconTextGap(10);
+	    l.setHorizontalTextPosition(JLabel.LEFT);
 	    l.setForeground(Color.GRAY);
 	    add(l, gbc);
 	}
 
 	gbc.weighty = 1.0;
 	add(new JLabel(), gbc);
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-	logger.debug("StepBar event: {} | {} | {} | {}",
-		new Object[]{evt.getSource().getClass(), evt.getPropertyName(), evt.getOldValue(), evt.getNewValue()});
-
-	if (evt.getPropertyName() != null) {
-	    if (evt.getPropertyName().equals(SwingNavigator.PROPERTY_CURRENT_STEP)) {
-		Object newIndex = evt.getNewValue();
-		Object oldIndex = evt.getOldValue();
-
-		if (newIndex instanceof Integer) {
-		    int newIndexValue = ((Integer) newIndex).intValue();
-		    if (newIndexValue >= 0 && newIndexValue < getComponentCount()) {
-			getComponent(newIndexValue).setForeground(Color.GRAY);
-		    }
-		}
-		if (oldIndex instanceof Integer) {
-		    int oldIndexValue = ((Integer) oldIndex).intValue();
-		    if (oldIndexValue >= 0 && oldIndexValue < getComponentCount()) {
-			// Highlight current element
-			getComponent(oldIndexValue).setForeground(Color.BLACK);
-		    }
-		}
-	    }
-	}
     }
 
     private static String[] getStepNames(List<Step> steps) {

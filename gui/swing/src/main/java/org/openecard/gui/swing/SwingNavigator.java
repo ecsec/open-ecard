@@ -23,33 +23,48 @@
 package org.openecard.gui.swing;
 
 import java.awt.Container;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.Step;
+import org.openecard.gui.swing.common.GUIConstants;
+import org.openecard.gui.swing.common.NavigationEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
+ * Implementation of the UserConsentNavigator interface for the Swing GUI.
+ * This class receives button clicks and orchestrates the update of the steps and progress indication components.
+ *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class SwingNavigator implements UserConsentNavigator {
+public class SwingNavigator implements UserConsentNavigator, ActionListener {
 
-    public static String PROPERTY_CURRENT_STEP = "PROPERTY_CURRENT_STEP";
-    private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
-    private Container stepContainer;
-    private DialogWrapper dialogWrapper;
-    private ArrayList<StepFrame> stepFrames;
+    public static final Logger logger = LoggerFactory.getLogger(SwingNavigator.class);
+
+    private final DialogWrapper dialogWrapper;
+    private final Container stepContainer;
+
+    private final ArrayList<StepFrame> stepFrames;
+    private final NavigationBar navBar;
+    private final StepBar stepBar;
+
     private int stepPointer = -1;
 
-    public SwingNavigator(DialogWrapper dialogWrapper, String dialogType, List<Step> steps, Container stepContainer) {
+
+    public SwingNavigator(DialogWrapper dialogWrapper, String dialogType, List<Step> steps, Container stepContainer,
+	    NavigationBar navPanel, StepBar stepBar) {
 	this.dialogWrapper = dialogWrapper;
 	this.stepContainer = stepContainer;
 	this.stepFrames = createStepFrames(steps, dialogType);
+	this.navBar = navPanel;
+	this.stepBar = stepBar;
 
 	this.dialogWrapper.show();
     }
@@ -61,26 +76,42 @@ public class SwingNavigator implements UserConsentNavigator {
 
     @Override
     public StepResult current() {
+	stepBar.disableLoaderImage();
 	selectIdx(stepPointer);
-	return stepFrames.get(stepPointer).getStepResult();
+	StepFrame frame = stepFrames.get(stepPointer);
+
+	// click next button without giving the user the possibility to interfere
+	clickIfInstantReturn(frame);
+
+	return frame.getStepResult();
     }
 
     @Override
     public StepResult next() {
+	stepBar.disableLoaderImage();
 	if (hasNext()) {
 	    selectIdx(stepPointer + 1);
-	    firePropertyChange(PROPERTY_CURRENT_STEP, stepPointer, stepPointer - 1);
-	    return stepFrames.get(stepPointer).getStepResult();
+	    StepFrame frame = stepFrames.get(stepPointer);
+
+	    // click next button without giving the user the possibility to interfere
+	    clickIfInstantReturn(frame);
+
+	    return frame.getStepResult();
 	}
 	return new SwingStepResult(null, ResultStatus.CANCEL);
     }
 
     @Override
     public StepResult previous() {
+	stepBar.disableLoaderImage();
 	if (stepPointer > 0) {
 	    selectIdx(stepPointer - 1);
-	    firePropertyChange(PROPERTY_CURRENT_STEP, stepPointer, stepPointer + 1);
-	    return stepFrames.get(stepPointer).getStepResult();
+	    StepFrame frame = stepFrames.get(stepPointer);
+
+	    // click next button without giving the user the possibility to interfere
+	    clickIfInstantReturn(frame);
+
+	    return frame.getStepResult();
 	}
 	return new SwingStepResult(null, ResultStatus.CANCEL);
     }
@@ -105,9 +136,6 @@ public class SwingNavigator implements UserConsentNavigator {
 	dialogWrapper.hide();
     }
 
-    public List<StepFrame> getStepFrames() {
-	return stepFrames;
-    }
 
     private ArrayList<StepFrame> createStepFrames(List<Step> steps, String dialogType) {
 	ArrayList<StepFrame> frames = new ArrayList<StepFrame>(steps.size());
@@ -122,9 +150,12 @@ public class SwingNavigator implements UserConsentNavigator {
 	return frames;
     }
 
+
     private void selectIdx(int idx) {
 	// Content replacement
 	StepFrame nextStep = stepFrames.get(idx);
+	stepBar.selectIdx(idx);
+	navBar.selectIdx(idx);
 	Container nextPanel = nextStep.getPanel();
 	nextStep.resetResult();
 
@@ -134,20 +165,43 @@ public class SwingNavigator implements UserConsentNavigator {
 	stepContainer.repaint();
 
 	stepPointer = idx;
-	//TODO
-//	nextStep.instantReturnIfSet();
+
+	nextStep.updateFrame();
+	nextStep.unlockControls();
+	navBar.unlockControls();
     }
 
-    public void addPropertyChangeListener(PropertyChangeListener p) {
-	propertyChangeSupport.addPropertyChangeListener(p);
+
+    private void clickIfInstantReturn(StepFrame frame) {
+	if (frame.isInstantReturn()) {
+	    String command = GUIConstants.BUTTON_NEXT;
+	    final ActionEvent e = new ActionEvent(frame.getStep(), ActionEvent.ACTION_PERFORMED, command);
+	    // create async invocation of the action
+	    new Thread("Instant-Return-Thread") {
+		@Override
+		public void run() {
+		    actionPerformed(e);
+		}
+	    }.start();
+	}
     }
 
-    public void removePropertyChangeListener(PropertyChangeListener p) {
-	propertyChangeSupport.removePropertyChangeListener(p);
-    }
+    @Override
+    public void actionPerformed(ActionEvent e) {
+	logger.debug("Received event: {}", e.getActionCommand());
 
-    protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
-	propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
+	NavigationEvent event = NavigationEvent.fromEvent(e);
+	if (event == null) {
+	    logger.error("Unknown event received: {}", e.getActionCommand());
+	    return;
+	}
+
+	// lock controls and update current step result
+	StepFrame curStep = stepFrames.get(stepPointer);
+	stepBar.enableLoaderImage();
+	navBar.lockControls();
+	curStep.lockControls();
+	curStep.updateResult(event);
     }
 
 }

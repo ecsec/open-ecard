@@ -43,10 +43,12 @@ import org.openecard.gui.swing.components.ToggleText;
 
 
 /**
- * Updated Default layouter. Should be fine for most generic forms
+ * Default layouter for the Swing GUI.
+ * This layouter provides a decent look and feel for most user consent tasks. If you need a specialised version,
+ * create another layouter and register it for the respective URI.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
- * @editor Florian Feldmann <florian.feldmann@rub.de>
+ * @author Florian Feldmann <florian.feldmann@rub.de>
  */
 public class DefaultStepLayouter extends StepLayouter {
 

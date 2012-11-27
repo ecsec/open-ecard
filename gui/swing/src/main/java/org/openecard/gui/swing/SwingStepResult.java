@@ -33,6 +33,10 @@ import org.openecard.gui.definition.Step;
 
 
 /**
+ * Blocking StepResult implementation for the Swing GUI.
+ * After the values are set, the {@link #synchronize()} method can be called, so that any listeners can proceed and
+ * fetch the values.
+ *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class SwingStepResult implements StepResult {
@@ -76,7 +80,7 @@ public class SwingStepResult implements StepResult {
 
     @Override
     public boolean isOK() {
-	// Warum muss ich das machen?
+	// wait until values are present (blocks until triggered
 	synchronize();
 	synchronized (this) {
 	    return getStatus() == ResultStatus.OK;
@@ -85,7 +89,7 @@ public class SwingStepResult implements StepResult {
 
     @Override
     public boolean isBack() {
-	// Warum muss ich das machen?
+	// wait until values are present
 	synchronize();
 	synchronized (this) {
 	    return getStatus() == ResultStatus.BACK;
@@ -94,7 +98,7 @@ public class SwingStepResult implements StepResult {
 
     @Override
     public boolean isCancelled() {
-	// Warum muss ich das machen?
+	// wait until values are present
 	synchronize();
 	synchronized (this) {
 	    return getStatus() == ResultStatus.CANCEL;
@@ -103,6 +107,7 @@ public class SwingStepResult implements StepResult {
 
     @Override
     public List<OutputInfoUnit> getResults() {
+	// wait until values are present
 	synchronize();
 	synchronized (this) {
 	    if (results == null) {
@@ -117,6 +122,7 @@ public class SwingStepResult implements StepResult {
 	    try {
 		syncPoint.exchange(null);
 	    } catch (InterruptedException ignore) {
+		// TODO: maybe setting status to cancel makes sense here
 	    }
 	}
     }

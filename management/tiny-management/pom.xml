@@ -7,7 +7,7 @@
     <parent>
 	<groupId>org.openecard</groupId>
 	<artifactId>management</artifactId>
-	<version>1.0.0-pre3-SNAPSHOT</version>
+	<version>1.0.0-pre3</version>
     </parent>
 
     <groupId>org.openecard.management</groupId>

@@ -66,10 +66,8 @@ public class CHATStep extends Step {
     }
 
     private void addElements() {
-	String decriptionText = lang.translationForKey(DESCRIPTION);
-	decriptionText = decriptionText.replaceFirst("%s", eacData.certificateDescription.getSubjectName());
-
 	Text decription = new Text();
+	String decriptionText = lang.translationForKey(DESCRIPTION, eacData.certificateDescription.getSubjectName());
 	decription.setText(decriptionText);
 	getInputInfoUnits().add(decription);
 

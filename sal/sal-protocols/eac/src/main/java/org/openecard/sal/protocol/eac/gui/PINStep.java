@@ -41,19 +41,22 @@ public class PINStep extends Step {
     // step id
     public static final String STEP_ID = "PROTOCOL_EAC_GUI_STEP_PIN";
     // GUI translation constants
-    private static final String TITLE = "step_pin_title";
-    private static final String DESCRIPTION = "step_pin_description";
+    private static final String TITLE = "step_pace_title";
+    private static final String DESCRIPTION = "step_pace_description";
+    private static final String DESCRIPTION_NATIVE = "step_pace_native_description";
+    private static final String NOTICE = "eac_forward_notice";
     // GUI element IDs
     public static final String PIN_FIELD = "PACE_PIN_FIELD";
 
-    private final I18n lang = I18n.getTranslation("eac");
-    private final EACData eacData;
+    private final I18n langEac = I18n.getTranslation("eac");
+    private final I18n langPace = I18n.getTranslation("pace");
+    private final String pinType;
 
     public PINStep(EACData eacData, boolean capturePin) {
 	super(STEP_ID);
-	this.eacData = eacData;
-	setTitle(lang.translationForKey(TITLE));
-	setDescription(lang.translationForKey(DESCRIPTION));
+	this.pinType = langPace.translationForKey(eacData.passwordType);
+	setTitle(langPace.translationForKey(TITLE, pinType));
+	setDescription(langPace.translationForKey(DESCRIPTION, pinType));
 
 	// create step elements
 	if (capturePin) {
@@ -66,20 +69,28 @@ public class PINStep extends Step {
     private void addSoftwareElements() {
 	setResetOnLoad(true);
 	Text description = new Text();
-	description.setText(lang.translationForKey(DESCRIPTION));
+	description.setText(langPace.translationForKey(DESCRIPTION, pinType));
 	getInputInfoUnits().add(description);
 
 	PasswordField pinInputField = new PasswordField(PIN_FIELD);
-	pinInputField.setDescription(lang.translationForKey(eacData.passwordType));
+	pinInputField.setDescription(pinType);
 	getInputInfoUnits().add(pinInputField);
+
+	Text notice = new Text();
+	notice.setText(langEac.translationForKey(NOTICE, pinType));
+	getInputInfoUnits().add(notice);
     }
 
     private void addTerminalElements() {
 	setInstantReturn(true);
 	Text description = new Text();
 	// TODO: use translation
-	description.setText("Please enter the PIN in your card terminal.");
+	description.setText(langPace.translationForKey(DESCRIPTION_NATIVE, pinType));
 	getInputInfoUnits().add(description);
+
+	Text notice = new Text();
+	notice.setText(langEac.translationForKey(NOTICE, pinType));
+	getInputInfoUnits().add(notice);
     }
 
 }

@@ -37,8 +37,10 @@ import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifyUser;
 import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse;
 import java.math.BigInteger;
+import java.util.List;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.common.CardCommandStatus;
 import org.openecard.common.util.PINUtils;
@@ -65,6 +67,8 @@ import org.slf4j.LoggerFactory;
 class AbstractTerminal {
 
     private static final Logger _logger = LoggerFactory.getLogger(AbstractTerminal.class);
+
+    private final I18n lang = I18n.getTranslation("pace");
 
     private final IFD ifd;
     private final SCWrapper scwrapper;
@@ -143,7 +147,8 @@ class AbstractTerminal {
 	getCapabilities(term.getName());
 
 	// check if is possible to perform PinCompare protocol
-	if (! this.capabilities.getSlotCapability().get(0).getProtocol().contains(ECardConstants.Protocol.PIN_COMPARE)) {
+	List<String> protoList = this.capabilities.getSlotCapability().get(0).getProtocol();
+	if (! protoList.contains(ECardConstants.Protocol.PIN_COMPARE)) {
 	    throw new IFDException("PinCompare protocol is not supported by this IFD.");
 	}
 
@@ -159,7 +164,8 @@ class AbstractTerminal {
 	// check which type of authentication to perform
 	if (inputUnit.getBiometricInput() != null) {
 	    // TODO: implement
-	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.UNKNOWN_INPUT_UNIT, "Biometric authentication not supported by IFD.");
+	    String msg = "Biometric authentication not supported by IFD.";
+	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.UNKNOWN_INPUT_UNIT, msg);
 	    _logger.warn(ex.getMessage(), ex);
 	    throw ex;
 	} else if (inputUnit.getPinInput() != null) {
@@ -170,13 +176,14 @@ class AbstractTerminal {
 		// create custom pinAction to submit pin to terminal
 		NativePinStepAction pinAction = new NativePinStepAction("enter-pin", pinInput, term, template);
 		// display message instructing user what to do
-		UserConsentDescription uc = pinUserConsent(allMsgs.getAuthenticationRequestMessage(), pinAction);
+		UserConsentDescription uc = pinUserConsent("step_pace_userconsent", pinAction);
 		UserConsentNavigator ucr = gui.obtainNavigator(uc);
 		ExecutionEngine exec = new ExecutionEngine(ucr);
 		// run gui
 		ResultStatus status = exec.process();
 		if (status == ResultStatus.CANCEL) {
-		    IFDException ex = new IFDException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN entry cancelled by user.");
+		    String msg = "PIN entry cancelled by user.";
+		    IFDException ex = new IFDException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg);
 		    _logger.warn(ex.getMessage(), ex);
 		    throw ex;
 		} else if (pinAction.exception != null) {
@@ -193,11 +200,15 @@ class AbstractTerminal {
 
 	    } else if (isVirtual()) { // software method
 		// get pin, encode and send
-		UserConsentNavigator ucr = gui.obtainNavigator(pinUserConsent(allMsgs.getAuthenticationRequestMessage(), pinInput.getPasswordAttributes().getMinLength().intValue(), pinInput.getPasswordAttributes().getMaxLength().intValue()));
+		int minLength = pinInput.getPasswordAttributes().getMinLength().intValue();
+		int maxLength = pinInput.getPasswordAttributes().getMaxLength().intValue();
+		UserConsentDescription uc = pinUserConsent("step_pace_userconsent", minLength, maxLength);
+		UserConsentNavigator ucr = gui.obtainNavigator(uc);
 		ExecutionEngine exec = new ExecutionEngine(ucr);
 		ResultStatus status = exec.process();
 		if (status == ResultStatus.CANCEL) {
-		    IFDException ex = new IFDException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN entry cancelled by user.");
+		    String msg = "PIN entry cancelled by user.";
+		    IFDException ex = new IFDException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg);
 		    _logger.warn(ex.getMessage(), ex);
 		    throw ex;
 		}
@@ -436,10 +447,10 @@ class AbstractTerminal {
     }
 
 
-    private static UserConsentDescription pinUserConsent(String title, int minLength, int maxLength) {
-	UserConsentDescription uc = new UserConsentDescription(title);
+    private UserConsentDescription pinUserConsent(String title, int minLength, int maxLength) {
+	UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(title));
 	// create step
-	Step s = new Step("enter-pin", "Enter PIN");
+	Step s = new Step("enter-pin", lang.translationForKey("step_pace_title", "PIN"));
 	uc.getSteps().add(s);
 	// add text instructing user
 	PasswordField i1 = new PasswordField("pin");
@@ -450,17 +461,17 @@ class AbstractTerminal {
 
 	return uc;
     }
-    private static UserConsentDescription pinUserConsent(String title, StepAction action) {
+    private UserConsentDescription pinUserConsent(String title, StepAction action) {
 	UserConsentDescription uc = new UserConsentDescription(title);
 	// create step
-	Step s = new Step("enter-pin", "Enter PIN");
+	Step s = new Step("enter-pin", lang.translationForKey("step_pace_title", "PIN"));
 	s.setAction(action);
 	uc.getSteps().add(s);
 	s.setInstantReturn(true);
 	// add text instructing user
 	Text i1 = new Text();
 	s.getInputInfoUnits().add(i1);
-	i1.setText("Enter your secret in the connected chip card terminal.");
+	i1.setText(lang.translationForKey("step_pace_native_description", "PIN"));
 
 	return uc;
     }

@@ -132,7 +132,7 @@ public class Status implements EventCallback {
 	infoView.add(noTerminal);
 
 	JLabel label = new JLabel(" " + lang.translationForKey("tray.title") + " ");
-	label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
+	label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
 
 	GradientPanel panel = new GradientPanel(new Color(106, 163, 213), new Color(80, 118, 177));
 	panel.setOpaque(false);

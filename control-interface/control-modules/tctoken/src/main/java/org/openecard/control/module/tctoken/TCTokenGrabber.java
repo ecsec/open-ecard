@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
@@ -41,6 +42,7 @@ import org.apache.http.protocol.HttpRequestExecutor;
 import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.crypto.tls.TlsProtocolHandler;
 import org.openecard.common.io.LimitedInputStream;
+import org.openecard.common.io.ProxySettings;
 import org.openecard.control.ControlException;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
@@ -66,7 +68,7 @@ public class TCTokenGrabber {
      * @throws TCTokenException
      */
     public InputStream getStream(String uri) throws TCTokenException, MalformedURLException, KeyStoreException,
-	    IOException, GeneralSecurityException, HttpException {
+	    IOException, GeneralSecurityException, HttpException, URISyntaxException {
 	String targetUrl = uri;
 	HttpEntity entity = null;
 	boolean finished = false;
@@ -93,7 +95,7 @@ public class TCTokenGrabber {
 	    tlsClient.setAuthentication(tlsAuth);
 	    tlsClient.setClientVersion(ProtocolVersion.TLSv11);
 
-	    Socket socket = new Socket(hostname, port);
+	    Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
 	    TlsProtocolHandler h = new TlsProtocolHandler(socket.getInputStream(), socket.getOutputStream());
 	    h.connect(tlsClient);
 	    StreamHttpClientConnection conn = new StreamHttpClientConnection(h.getInputStream(), h.getOutputStream());

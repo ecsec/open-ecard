@@ -50,7 +50,8 @@ import org.openecard.ifd.scio.IFD;
 import org.openecard.management.TinyManagement;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.sal.TinySAL;
-import org.openecard.sal.protocol.eac.EACProtocolFactory;
+import org.openecard.sal.protocol.eac.EAC2ProtocolFactory;
+import org.openecard.sal.protocol.eac.EACGenericProtocolFactory;
 import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,7 +155,8 @@ public class ECardApplet extends JApplet {
 	// SAL
 	sal = new TinySAL(env, cardStates);
 	sal.setGUI(gui);
-	sal.addProtocol(ECardConstants.Protocol.EAC, new EACProtocolFactory());
+	sal.addProtocol(ECardConstants.Protocol.EAC_GENERIC, new EACGenericProtocolFactory());
+	sal.addProtocol(ECardConstants.Protocol.EAC2, new EAC2ProtocolFactory());
 	env.setSAL(sal);
 
 	// JavaScript Bridge

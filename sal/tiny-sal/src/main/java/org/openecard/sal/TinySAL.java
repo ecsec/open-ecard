@@ -1053,10 +1053,10 @@ public class TinySAL implements SAL {
 	    //FIXME workaround for missing protocol URI from eID-Servers
 	    if (protocolURI == null) {
 		logger.warn("ProtocolURI was null");
-		protocolURI = ECardConstants.Protocol.EAC;
+		protocolURI = ECardConstants.Protocol.EAC_GENERIC;
 	    } else if (protocolURI.equals("urn:oid:1.0.24727.3.0.0.7.2")) {
 		logger.warn("ProtocolURI was urn:oid:1.0.24727.3.0.0.7.2");
-		protocolURI = ECardConstants.Protocol.EAC;
+		protocolURI = ECardConstants.Protocol.EAC_GENERIC;
 	    }
 
 	    Protocol protocol = getProtocol(connectionHandle, protocolURI);

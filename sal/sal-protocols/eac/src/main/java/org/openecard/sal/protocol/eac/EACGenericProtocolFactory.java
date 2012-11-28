@@ -33,11 +33,11 @@ import org.openecard.gui.UserConsent;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class EACProtocolFactory implements ProtocolFactory {
+public class EACGenericProtocolFactory implements ProtocolFactory {
 
     @Override
     public String getProtocol() {
-	return ECardConstants.Protocol.EAC;
+	return ECardConstants.Protocol.EAC_GENERIC;
     }
 
     @Override

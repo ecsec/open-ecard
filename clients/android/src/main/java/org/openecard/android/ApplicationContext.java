@@ -51,7 +51,8 @@ import org.openecard.ifd.scio.wrapper.IFDTerminalFactory;
 import org.openecard.management.TinyManagement;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.sal.TinySAL;
-import org.openecard.sal.protocol.eac.EACProtocolFactory;
+import org.openecard.sal.protocol.eac.EAC2ProtocolFactory;
+import org.openecard.sal.protocol.eac.EACGenericProtocolFactory;
 import org.openecard.sal.protocol.genericcryptography.GenericCryptoProtocolFactory;
 import org.openecard.sal.protocol.pincompare.PINCompareProtocolFactory;
 import org.openecard.transport.dispatcher.MessageDispatcher;
@@ -195,7 +196,8 @@ public class ApplicationContext extends Application {
 	// SAL
 	sal = new TinySAL(env, cardStates);
 	sal.setGUI(gui);
-	sal.addProtocol(ECardConstants.Protocol.EAC, new EACProtocolFactory());
+	sal.addProtocol(ECardConstants.Protocol.EAC2, new EAC2ProtocolFactory());
+	sal.addProtocol(ECardConstants.Protocol.EAC_GENERIC, new EACGenericProtocolFactory());
 	sal.addProtocol(ECardConstants.Protocol.PIN_COMPARE, new PINCompareProtocolFactory());
 	sal.addProtocol(ECardConstants.Protocol.GENERIC_CRYPTO, new GenericCryptoProtocolFactory());
 	env.setSAL(sal);

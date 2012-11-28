@@ -7,12 +7,12 @@
     <parent>
 	<groupId>org.openecard</groupId>
 	<artifactId>gui</artifactId>
-	<version>1.0.0-pre3</version>
+	<version>1.0.0-pre4-SNAPSHOT</version>
     </parent>
 
     <groupId>org.openecard.gui</groupId>
     <artifactId>graphics</artifactId>
-    <name>Graphics</name>
     <packaging>jar</packaging>
+    <name>Graphics</name>
 
 </project>

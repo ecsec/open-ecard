@@ -7,11 +7,12 @@
     <parent>
 	<groupId>org.openecard</groupId>
 	<artifactId>transport</artifactId>
-	<version>1.0.0-pre3</version>
+	<version>1.0.0-pre4-SNAPSHOT</version>
     </parent>
 
     <groupId>org.openecard.transport</groupId>
     <artifactId>http-core</artifactId>
+    <packaging>jar</packaging>
     <name>openecard HTTP core</name>
 
     <dependencies>

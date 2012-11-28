@@ -7,13 +7,13 @@
     <parent>
 	<groupId>org.openecard</groupId>
 	<artifactId>app</artifactId>
-	<version>1.0.0-pre3</version>
+	<version>1.0.0-pre4-SNAPSHOT</version>
     </parent>
 
     <groupId>org.openecard</groupId>
     <artifactId>browser</artifactId>
-    <name>Browser integration</name>
     <packaging>pom</packaging>
+    <name>Browser integration</name>
 
     <modules>
 	<module>pkcs11</module>

@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	 xmlns="http://maven.apache.org/POM/4.0.0"
-	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
 	<groupId>org.openecard</groupId>
 	<artifactId>browser</artifactId>
-	<version>1.0.0-pre3</version>
+	<version>1.0.0-pre4-SNAPSHOT</version>
     </parent>
 
     <groupId>org.openecard.browser</groupId>
     <artifactId>tls-channel-binding</artifactId>
+    <packaging>jar</packaging>
     <name>TLS Channel Binding</name>
 
 </project>

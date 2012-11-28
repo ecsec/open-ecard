@@ -7,12 +7,14 @@
     <parent>
 	<artifactId>crypto</artifactId>
 	<groupId>org.openecard</groupId>
-	<version>1.0.0-pre3</version>
+	<version>1.0.0-pre4-SNAPSHOT</version>
     </parent>
 
     <groupId>org.openecard.crypto</groupId>
     <artifactId>crypto-common</artifactId>
+    <packaging>jar</packaging>
     <name>Crypto common</name>
+
     <dependencies>
 	<dependency>
 	    <groupId>org.openecard</groupId>

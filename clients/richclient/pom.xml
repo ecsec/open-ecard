@@ -7,13 +7,13 @@
     <parent>
 	<groupId>org.openecard</groupId>
 	<artifactId>clients</artifactId>
-	<version>1.0.0-pre3</version>
+	<version>1.0.0-pre4-SNAPSHOT</version>
     </parent>
 
     <groupId>org.openecard.clients</groupId>
     <artifactId>richclient</artifactId>
-    <name>Rich Client</name>
     <packaging>jar</packaging>
+    <name>Rich Client</name>
 
     <build>
 	<plugins>

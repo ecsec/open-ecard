@@ -24,6 +24,7 @@ package org.openecard.gui.executor;
 
 import java.util.Map;
 import org.openecard.gui.StepResult;
+import org.openecard.gui.definition.Step;
 
 
 /**
@@ -39,16 +40,25 @@ public class DummyAction extends StepAction {
     public DummyAction(String stepID) {
 	super(stepID);
     }
+    /**
+     * {@inheritDoc}
+     */
+    public DummyAction(Step step) {
+	super(step);
+    }
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
+	// REPEAT must be performed explicitly
 	switch (result.getStatus()) {
 	    case BACK:
 		return new StepActionResult(StepActionResultStatus.BACK);
 	    case OK:
 		return new StepActionResult(StepActionResultStatus.NEXT);
-	    default:
-		return new StepActionResult(StepActionResultStatus.REPEAT); // cancel performed before
+	    case CANCEL:
+		return new StepActionResult(StepActionResultStatus.CANCEL);
+	    default: // for the sake of the mighty Java compiler
+		return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
     }
 

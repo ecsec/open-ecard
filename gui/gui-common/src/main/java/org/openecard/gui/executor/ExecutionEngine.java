@@ -50,15 +50,10 @@ public class ExecutionEngine {
 
     private final UserConsentNavigator navigator;
     private final TreeMap<String, ExecutionResults> results = new TreeMap<String, ExecutionResults>();
-    private TreeMap<String, StepAction> customActions;
 
 
     public ExecutionEngine(UserConsentNavigator navigator) {
 	this.navigator = navigator;
-    }
-
-    public void addCustomAction(StepAction action) {
-	getCustomActions().put(action.getStepID(), action);
     }
 
     public ResultStatus process() {
@@ -95,7 +90,7 @@ public class ExecutionEngine {
 	    }
 
 	    // perform action
-	    StepAction action = getAction(next.getStepID());
+	    StepAction action = next.getStep().getAction();
 	    StepActionCallable actionCallable = new StepActionCallable(action, oldResults, next);
 	    FutureTask<StepActionResult> actionFuture = new FutureTask<StepActionResult>(actionCallable);
 	    navigator.setRunningAction(actionFuture);
@@ -166,24 +161,6 @@ public class ExecutionEngine {
 
     public Map<String, ExecutionResults> getResults() {
 	return Collections.unmodifiableMap(results);
-    }
-
-    private TreeMap<String, StepAction> getCustomActions() {
-	if (customActions == null) {
-	    customActions = new TreeMap<String, StepAction>();
-	}
-	return customActions;
-    }
-
-    private StepAction getAction(String stepName) {
-	if (hasCustomAction(stepName)) {
-	    return getCustomActions().get(stepName);
-	}
-	return new DummyAction(stepName);
-    }
-
-    private boolean hasCustomAction(String stepName) {
-	return getCustomActions().containsKey(stepName);
     }
 
     private ResultStatus convertStatus(StepActionResultStatus in) {

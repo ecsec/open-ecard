@@ -24,39 +24,15 @@ package org.openecard.gui.definition;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import org.openecard.gui.StepResult;
 import org.openecard.gui.common.IDGenerator;
-import org.openecard.gui.executor.ExecutionResults;
+import org.openecard.gui.executor.DummyAction;
 import org.openecard.gui.executor.StepAction;
-import org.openecard.gui.executor.StepActionResult;
-import org.openecard.gui.executor.StepActionResultStatus;
 
 
 /**
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class Step {
-
-    private static class InnerAction extends StepAction {
-
-	public InnerAction(String stepID) {
-	    super(stepID);
-	}
-
-	@Override
-	public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	    switch (result.getStatus()) {
-		case BACK:
-		    return new StepActionResult(StepActionResultStatus.BACK);
-		case OK:
-		    return new StepActionResult(StepActionResultStatus.NEXT);
-		default:
-		    return new StepActionResult(StepActionResultStatus.REPEAT);
-	    }
-	}
-
-    }
 
     private String id;
     private String title;
@@ -139,7 +115,7 @@ public class Step {
 
     public StepAction getAction() {
 	if (action == null) {
-	    return new InnerAction(getID());
+	    return new DummyAction(this);
 	}
 	return action;
     }

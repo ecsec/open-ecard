@@ -29,13 +29,12 @@ import java.util.Enumeration;
 import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.openecard.bouncycastle.asn1.ASN1Sequence;
 import org.openecard.bouncycastle.asn1.ASN1Set;
+import org.openecard.bouncycastle.asn1.ASN1String;
 import org.openecard.bouncycastle.asn1.ASN1TaggedObject;
 import org.openecard.bouncycastle.asn1.DERIA5String;
 import org.openecard.bouncycastle.asn1.DEROctetString;
-import org.openecard.bouncycastle.asn1.DERPrintableString;
 import org.openecard.bouncycastle.asn1.DERSet;
 import org.openecard.bouncycastle.asn1.DERTaggedObject;
-import org.openecard.bouncycastle.asn1.DERUTF8String;
 import org.openecard.crypto.common.asn1.eac.oid.CVCertificatesObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,20 +112,20 @@ public class CertificateDescription {
 
 		switch (tag) {
 		    case 1:
-			issuerName = ((DERUTF8String) taggedObject.getObject()).getString();
+			issuerName = ((ASN1String) taggedObject.getObject()).getString();
 			break;
 		    case 2:
-			issuerURL = ((DERPrintableString) taggedObject.getObject()).getString();
+			issuerURL = ((ASN1String) taggedObject.getObject()).getString();
 			break;
 		    case 3:
-			subjectName = ((DERUTF8String) taggedObject.getObject()).getString();
+			subjectName = ((ASN1String) taggedObject.getObject()).getString();
 			break;
 		    case 4:
-			subjectURL = ((DERPrintableString) taggedObject.getObject()).getString();
+			subjectURL = ((ASN1String) taggedObject.getObject()).getString();
 			break;
 		    case 5:
 			if (descriptionType.equals(CVCertificatesObjectIdentifier.id_plainFormat)) {
-			    termsOfUsage = ((DERUTF8String) taggedObject.getObject()).getString();
+			    termsOfUsage = ((ASN1String) taggedObject.getObject()).getString();
 			} else if (descriptionType.equals(CVCertificatesObjectIdentifier.id_htmlFormat)) {
 			    termsOfUsage = ((DERIA5String) taggedObject.getObject()).getString();
 			} else if (descriptionType.equals(CVCertificatesObjectIdentifier.id_pdfFormat)) {
@@ -134,7 +133,7 @@ public class CertificateDescription {
 			}
 			break;
 		    case 6:
-			redirectURL = ((DERPrintableString) taggedObject.getObject()).getString();
+			redirectURL = ((ASN1String) taggedObject.getObject()).getString();
 			break;
 		    case 7:
 			Enumeration commCerts = ((DERSet) taggedObject.getObject()).getObjects();

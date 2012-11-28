@@ -24,23 +24,23 @@ package org.openecard.sal.protocol.eac.gui;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Map;
 import org.openecard.common.I18n;
-import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate;
-import org.openecard.crypto.common.asn1.cvc.CertificateDescription;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
 import org.openecard.gui.definition.ToggleText;
-import org.openecard.gui.executor.ExecutionResults;
+import org.openecard.sal.protocol.eac.EACData;
 
 
 /**
- * Implements a GUI user consent step for the CVC.
+ * CVC GUI step for EAC.
  *
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class CVCStep {
+public class CVCStep extends Step {
 
+    // step id
+    public static final String STEP_ID = "PROTOCOL_EAC_GUI_STEP_CVC";
     // GUI translation constants
     private static final String TITLE = "step_cvc_title";
     private static final String DESCRIPTION = "step_cvc_description";
@@ -53,100 +53,79 @@ public class CVCStep {
     private static final String VALIDITY_TO = "cvc_validity_to";
     private static final String ISSUER_NAME = "cvc_issuer_name";
     private static final String ISSUER_URL = "cvc_issuer_url";
-    //
-    private I18n lang = I18n.getTranslation("eac");
-    private Step step = new Step(lang.translationForKey(TITLE));
-    private CertificateDescription description;
-    private CardVerifiableCertificate certificate;
 
-    /**
-     * Creates a new GUI user consent step for the CVC.
-     *
-     * @param content GUI content
-     */
-    public CVCStep(GUIContentMap content) {
-	this.certificate = (CardVerifiableCertificate) content.get(GUIContentMap.ELEMENT.CERTIFICATE);
-	this.description = (CertificateDescription) content.get(GUIContentMap.ELEMENT.CERTIFICATE_DESCRIPTION);
-	initialize();
+    private final I18n lang = I18n.getTranslation("eac");
+    private final EACData eacData;
+
+    public CVCStep(EACData eacData) {
+	super(STEP_ID);
+	this.eacData = eacData;
+	setTitle(lang.translationForKey(TITLE));
+	setDescription(lang.translationForKey(DESCRIPTION));
+
+	// create step elements
+	addElements();
     }
 
-    private void initialize() {
-	Text decription = new Text();
-	decription.setText(lang.translationForKey(DESCRIPTION));
-	step.getInputInfoUnits().add(decription);
+    private void addElements() {
+	Text description = new Text();
+	description.setText(lang.translationForKey(DESCRIPTION));
+	getInputInfoUnits().add(description);
 
 	// SubjectName
 	ToggleText subjectName = new ToggleText();
 	subjectName.setTitle(lang.translationForKey(SUBJECT_NAME));
-	subjectName.setText(description.getSubjectName());
-	step.getInputInfoUnits().add(subjectName);
+	subjectName.setText(eacData.certificateDescription.getSubjectName());
+	getInputInfoUnits().add(subjectName);
 
 	// SubjectURL
 	ToggleText subjectURL = new ToggleText();
 	subjectURL.setTitle(lang.translationForKey(SUBJECT_URL));
-	subjectURL.setText(description.getSubjectURL());
-	step.getInputInfoUnits().add(subjectURL);
+	subjectURL.setText(eacData.certificateDescription.getSubjectURL());
+	getInputInfoUnits().add(subjectURL);
 
 	// TermsofUsage
 	ToggleText termsOfUsage = new ToggleText();
 	termsOfUsage.setTitle(lang.translationForKey(TERMS_OF_USAGE));
-	termsOfUsage.setText(description.getTermsOfUsage().toString());
+	termsOfUsage.setText(eacData.certificateDescription.getTermsOfUsage().toString());
 	termsOfUsage.setCollapsed(true);
-	step.getInputInfoUnits().add(termsOfUsage);
+	getInputInfoUnits().add(termsOfUsage);
 
 	// Validity
 	DateFormat dateFormat;
 	try {
 	    dateFormat = new SimpleDateFormat(lang.translationForKey(VALIDITY_FORMAT));
-	} catch (Exception e) {
+	} catch (IllegalArgumentException e) {
 	    dateFormat = new SimpleDateFormat();
 	}
 	StringBuilder sb = new StringBuilder(150);
 	sb.append(lang.translationForKey(VALIDITY_FROM));
 	sb.append(" ");
-	sb.append(dateFormat.format(certificate.getEffectiveDate().getTime()));
+	sb.append(dateFormat.format(eacData.certificate.getEffectiveDate().getTime()));
 	sb.append(" ");
 	sb.append(lang.translationForKey(VALIDITY_TO));
 	sb.append(" ");
-	sb.append(dateFormat.format(certificate.getExpirationDate().getTime()));
+	sb.append(dateFormat.format(eacData.certificate.getExpirationDate().getTime()));
 
 	ToggleText validity = new ToggleText();
 	validity.setTitle(lang.translationForKey(VALIDITY));
 	validity.setText(sb.toString());
 	validity.setCollapsed(true);
-	step.getInputInfoUnits().add(validity);
+	getInputInfoUnits().add(validity);
 
 	// IssuerName
 	ToggleText issuerName = new ToggleText();
 	issuerName.setTitle(lang.translationForKey(ISSUER_NAME));
-	issuerName.setText(description.getIssuerName());
+	issuerName.setText(eacData.certificateDescription.getIssuerName());
 	issuerName.setCollapsed(true);
-	step.getInputInfoUnits().add(issuerName);
+	getInputInfoUnits().add(issuerName);
 
 	// IssuerURL
 	ToggleText issuerURL = new ToggleText();
 	issuerURL.setTitle(lang.translationForKey(ISSUER_URL));
-	issuerURL.setText(description.getIssuerURL());
+	issuerURL.setText(eacData.certificateDescription.getIssuerURL());
 	issuerURL.setCollapsed(true);
-	step.getInputInfoUnits().add(issuerURL);
-    }
-
-    /**
-     * Returns the generated step.
-     *
-     * @return Step
-     */
-    public Step getStep() {
-	return step;
-    }
-
-    /**
-     * Processes the results of step.
-     *
-     * @param results Results
-     */
-    public void processResult(Map<String, ExecutionResults> results) {
-	// NOP
+	getInputInfoUnits().add(issuerURL);
     }
 
 }

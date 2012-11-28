@@ -22,77 +22,69 @@
 
 package org.openecard.sal.protocol.eac.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 import org.openecard.common.I18n;
 import org.openecard.crypto.common.asn1.cvc.CHAT;
-import org.openecard.crypto.common.asn1.cvc.CHAT.DataGroup;
-import org.openecard.crypto.common.asn1.cvc.CHAT.SpecialFunction;
-import org.openecard.crypto.common.asn1.cvc.CertificateDescription;
 import org.openecard.gui.definition.BoxItem;
 import org.openecard.gui.definition.Checkbox;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
 import org.openecard.gui.definition.ToggleText;
-import org.openecard.gui.executor.ExecutionResults;
+import org.openecard.sal.protocol.eac.EACData;
 
 
 /**
- * Implements a GUI user consent step for the CHAT.
+ * CHAT GUI step for EAC.
  *
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class CHATStep {
+public class CHATStep extends Step {
 
+    // step id
+    public static final String STEP_ID = "PROTOCOL_EAC_GUI_STEP_CHAT";
     // GUI translation constants
-    private static final String TITLE = "step_chat_title";
-    private static final String DESCRIPTION = "step_chat_description";
-    private static final String NOTE = "step_chat_note";
-    private static final String NOTE_CONTENT = "step_chat_note_content";
+    public static final String TITLE = "step_chat_title";
+    public static final String DESCRIPTION = "step_chat_description";
+    public static final String NOTE = "step_chat_note";
+    public static final String NOTE_CONTENT = "step_chat_note_content";
     // GUI element IDs
-    private static final String CHAT_BOXES = "CHATCheckBoxs";
-    private I18n lang = I18n.getTranslation("eac");
-    private Step step = new Step(lang.translationForKey(TITLE));
-    private CHAT requiredCHAT, optionalCHAT, selectedCHAT;
-    private CertificateDescription certificateDescription;
+    public static final String CHAT_BOXES = "CHATCheckBoxs";
 
-    /**
-     * Creates a new GUI user consent step for the CHAT.
-     *
-     * @param content GUI content
-     */
-    public CHATStep(GUIContentMap content) {
-	this.requiredCHAT = (CHAT) content.get(GUIContentMap.ELEMENT.REQUIRED_CHAT);
-	this.selectedCHAT = (CHAT) content.get(GUIContentMap.ELEMENT.REQUIRED_CHAT);
-	this.optionalCHAT = (CHAT) content.get(GUIContentMap.ELEMENT.OPTIONAL_CHAT);
+    private final I18n lang = I18n.getTranslation("eac");
+    private final EACData eacData;
 
-	certificateDescription = (CertificateDescription) content.get(GUIContentMap.ELEMENT.CERTIFICATE_DESCRIPTION);
-	initialize();
+    public CHATStep(EACData eacData) {
+	super(STEP_ID);
+	this.eacData = eacData;
+	setTitle(lang.translationForKey(TITLE));
+	setDescription(lang.translationForKey(DESCRIPTION));
+
+	// create step elements
+	addElements();
     }
 
-    private void initialize() {
+    private void addElements() {
 	String decriptionText = lang.translationForKey(DESCRIPTION);
-	decriptionText = decriptionText.replaceFirst("%s", certificateDescription.getSubjectName());
+	decriptionText = decriptionText.replaceFirst("%s", eacData.certificateDescription.getSubjectName());
 
 	Text decription = new Text();
 	decription.setText(decriptionText);
-	step.getInputInfoUnits().add(decription);
+	getInputInfoUnits().add(decription);
 
 	Checkbox readAccessCheckBox = new Checkbox(CHAT_BOXES);
-	TreeMap<CHAT.DataGroup, Boolean> requiredReadAccess = requiredCHAT.getReadAccess();
-	TreeMap<CHAT.DataGroup, Boolean> optionalReadAccess = optionalCHAT.getReadAccess();
-	TreeMap<SpecialFunction, Boolean> requiredSpecialFunctions = requiredCHAT.getSpecialFunctions();
-	TreeMap<SpecialFunction, Boolean> optionalSpecialFunctions = optionalCHAT.getSpecialFunctions();
+	TreeMap<CHAT.DataGroup, Boolean> requiredReadAccess = eacData.requiredCHAT.getReadAccess();
+	TreeMap<CHAT.DataGroup, Boolean> optionalReadAccess = eacData.optionalCHAT.getReadAccess();
+	TreeMap<CHAT.SpecialFunction, Boolean> requiredSpecialFunctions = eacData.requiredCHAT.getSpecialFunctions();
+	TreeMap<CHAT.SpecialFunction, Boolean> optionalSpecialFunctions = eacData.optionalCHAT.getSpecialFunctions();
 
-	DataGroup[] dataGroups = DataGroup.values();
-	SpecialFunction[] specialFunctions = SpecialFunction.values();
+	CHAT.DataGroup[] dataGroups = CHAT.DataGroup.values();
+	CHAT.SpecialFunction[] specialFunctions = CHAT.SpecialFunction.values();
 
 	// iterate over all 21 eID application data groups
 	for (int i = 0; i < 21; i++) {
-	    DataGroup dataGroup = dataGroups[i];
+	    CHAT.DataGroup dataGroup = dataGroups[i];
 	    if (requiredReadAccess.get(dataGroup)) {
 		readAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, true));
 	    } else if (optionalReadAccess.get(dataGroup)) {
@@ -102,7 +94,7 @@ public class CHATStep {
 
 	// iterate over all 8 special functions
 	for (int i = 0; i < 8; i++) {
-	    SpecialFunction specialFunction = specialFunctions[i];
+	    CHAT.SpecialFunction specialFunction = specialFunctions[i];
 	    if (requiredSpecialFunctions.get(specialFunction)) {
 		readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, true));
 	    } else if (optionalSpecialFunctions.get(specialFunction)) {
@@ -110,13 +102,13 @@ public class CHATStep {
 	    }
 	}
 
-	step.getInputInfoUnits().add(readAccessCheckBox);
+	getInputInfoUnits().add(readAccessCheckBox);
 
 	ToggleText requestedDataDescription = new ToggleText();
 	requestedDataDescription.setTitle(lang.translationForKey(NOTE));
 	requestedDataDescription.setText(lang.translationForKey(NOTE_CONTENT));
 	requestedDataDescription.setCollapsed(!true);
-	step.getInputInfoUnits().add(requestedDataDescription);
+	getInputInfoUnits().add(requestedDataDescription);
     }
 
     private BoxItem makeBoxItem(Enum<?> value, boolean checked, boolean disabled) {
@@ -128,63 +120,6 @@ public class CHATStep {
 	item.setText(lang.translationForKey(value.name()));
 
 	return item;
-    }
-
-    /**
-     * Returns the generated step.
-     *
-     * @return Step
-     */
-    public Step getStep() {
-	return step;
-    }
-
-    /**
-     * Processes the results of step.
-     *
-     * @param results Results
-     */
-    public void processResult(Map<String, ExecutionResults> results) {
-	List<String> dataGroupsNames = getDataGroupNames();
-	List<String> specialFunctionsNames = getSpecialFunctionNames();
-	ExecutionResults executionResults = results.get(step.getID());
-
-	if (executionResults == null) {
-	    return;
-	}
-
-	Checkbox cb = (Checkbox) executionResults.getResult(CHAT_BOXES);
-	for (BoxItem item : cb.getBoxItems()) {
-	    if (dataGroupsNames.contains(item.getName())) {
-		selectedCHAT.setReadAccess(item.getName(), item.isChecked());
-	    } else if (specialFunctionsNames.contains(item.getName())) {
-		selectedCHAT.setSpecialFunction(item.getName(), item.isChecked());
-	    }
-	}
-    }
-
-    /**
-     * Returns a list containing the names of all special functions.
-     * @return list containing the names of all special functions.
-     */
-    private List<String> getSpecialFunctionNames() {
-	List<String> specialFunctionNames = new ArrayList<String>();
-	for (SpecialFunction dg : SpecialFunction.values()) {
-	    specialFunctionNames.add(dg.name());
-	}
-	return specialFunctionNames;
-    }
-
-    /**
-     * Returns a list containing the names of all data groups.
-     * @return list containing the names of all data groups.
-     */
-    private List<String> getDataGroupNames() {
-	List<String> dataGroupNames = new ArrayList<String>();
-	for (DataGroup dg : DataGroup.values()) {
-	    dataGroupNames.add(dg.name());
-	}
-	return dataGroupNames;
     }
 
 }

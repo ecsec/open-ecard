@@ -103,7 +103,7 @@ public class ExecutionEngine {
 	    try {
 		actionFuture.run();
 		actionResult = actionFuture.get();
-	    }catch (CancellationException ex) {
+	    } catch (CancellationException ex) {
 		logger.info("StepAction was canceled.", ex);
 		navigator.close();
 		return ResultStatus.CANCEL;

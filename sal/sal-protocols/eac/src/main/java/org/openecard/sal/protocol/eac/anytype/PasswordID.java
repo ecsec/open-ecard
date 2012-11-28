@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.sal.protocol.eac.common;
+package org.openecard.sal.protocol.eac.anytype;
 
 
 /**

@@ -26,24 +26,21 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
-import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
-import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse;
 import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
 import java.util.List;
 import java.util.Map;
+import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
-import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.anytype.AuthDataMap;
-import org.openecard.common.anytype.AuthDataResponse;
 import org.openecard.common.ifd.PACECapabilities;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.FunctionType;
 import org.openecard.common.sal.ProtocolStep;
 import org.openecard.common.sal.state.CardStateEntry;
-import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.asn1.cvc.CHAT;
 import org.openecard.crypto.common.asn1.cvc.CHATVerifier;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate;
@@ -53,27 +50,40 @@ import org.openecard.crypto.common.asn1.cvc.CertificateDescription;
 import org.openecard.crypto.common.asn1.eac.SecurityInfos;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.UserConsent;
+import org.openecard.gui.UserConsentNavigator;
+import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.gui.executor.ExecutionEngine;
+import org.openecard.gui.executor.StepAction;
+import org.openecard.sal.protocol.eac.actions.CHATStepAction;
+import org.openecard.sal.protocol.eac.actions.PINStepAction;
 import org.openecard.sal.protocol.eac.anytype.EAC1InputType;
 import org.openecard.sal.protocol.eac.anytype.EAC1OutputType;
-import org.openecard.sal.protocol.eac.anytype.PACEInputType;
 import org.openecard.sal.protocol.eac.anytype.PACEOutputType;
-import org.openecard.sal.protocol.eac.common.PasswordID;
-import org.openecard.sal.protocol.eac.gui.GUIContentMap;
+import org.openecard.sal.protocol.eac.anytype.PasswordID;
+import org.openecard.sal.protocol.eac.gui.CHATStep;
+import org.openecard.sal.protocol.eac.gui.CVCStep;
+import org.openecard.sal.protocol.eac.gui.PINStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
  * Implements PACE protocol step according to BSI-TR-03112-7.
- * See BSI-TR-03112, version 1.1.2., part 7, section 4.6.5.
  *
+ * @see "BSI-TR-03112, version 1.1.2., part 7, section 4.6.5."
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(PACEStep.class.getName());
+
+    // GUI translation constants
+    private static final String TITLE = "eac_user_consent_title";
+
+    private final I18n lang = I18n.getTranslation("eac");
+
     private final Dispatcher dispatcher;
     private final UserConsent gui;
 
@@ -94,24 +104,27 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     }
 
     @Override
-    public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
+    public DIDAuthenticateResponse perform(DIDAuthenticate request, Map<String, Object> internalData) {
+	DIDAuthenticate didAuthenticate = request;
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
 	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
 
 	try {
-	    CardStateEntry cardState = (CardStateEntry) internalData.get(EACConstants.INTERNAL_DATA_CARD_STATE_ENTRY);
-	    boolean nativePace = genericPACESupport(cardState.handleCopy());
-	    EACUserConsent uc = new EACUserConsent(gui, !nativePace);
-
 	    EAC1InputType eac1Input = new EAC1InputType(didAuthenticate.getAuthenticationProtocolData());
 	    EAC1OutputType eac1Output = eac1Input.getOutputType();
 
+	    // determine PACE capabilities of the terminal
+	    CardStateEntry cardState = (CardStateEntry) internalData.get(EACConstants.INTERNAL_DATA_CARD_STATE_ENTRY);
+	    boolean nativePace = genericPACESupport(cardState.handleCopy());
+
 	    // Certificate chain
 	    CardVerifiableCertificateChain certChain = new CardVerifiableCertificateChain(eac1Input.getCertificates());
-	    CertificateDescription certDescription = CertificateDescription.getInstance(eac1Input.getCertificateDescription());
+	    byte[] rawCertificateDescription = eac1Input.getCertificateDescription();
+	    CertificateDescription certDescription = CertificateDescription.getInstance(rawCertificateDescription);
 	    CHAT requiredCHAT = new CHAT(eac1Input.getRequiredCHAT());
 	    CHAT optionalCHAT = new CHAT(eac1Input.getOptionalCHAT());
 	    byte pinID = PasswordID.valueOf(didAuthenticate.getDIDName()).getByte();
+	    String passwordType = PasswordID.parse(pinID).getString();
 
 	    // Verify that the certificate description matches the terminal certificate
 	    CardVerifiableCertificate taCert = certChain.getTerminalCertificates().get(0);
@@ -122,76 +135,77 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    CHATVerifier.verfiy(taCert.getCHAT(), requiredCHAT);
 	    CHATVerifier.verfiy(taCert.getCHAT(), optionalCHAT);
 
-	    // GUI request
-	    GUIContentMap content = new GUIContentMap();
-	    content.add(GUIContentMap.ELEMENT.CERTIFICATE, certChain.getTerminalCertificates().get(0));
-	    content.add(GUIContentMap.ELEMENT.CERTIFICATE_DESCRIPTION, certDescription);
-	    content.add(GUIContentMap.ELEMENT.REQUIRED_CHAT, requiredCHAT);
-	    content.add(GUIContentMap.ELEMENT.OPTIONAL_CHAT, optionalCHAT);
-	    content.add(GUIContentMap.ELEMENT.SELECTED_CHAT, requiredCHAT);
-	    content.add(GUIContentMap.ELEMENT.PIN_ID, pinID);
-	    ResultStatus guiStatus = uc.show(content);
 
-	    if (guiStatus.equals(ResultStatus.CANCEL)) {
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User Consent was cancelled by the user."));
+	    // Prepare data in DIDAuthenticate for GUI
+	    EACData eacData = new EACData();
+	    eacData.didRequest = didAuthenticate;
+	    eacData.certificate = certChain.getTerminalCertificates().get(0);
+	    eacData.certificateDescription = certDescription;
+	    eacData.rawCertificateDescription = rawCertificateDescription;
+	    eacData.requiredCHAT = requiredCHAT;
+	    eacData.optionalCHAT = optionalCHAT;
+	    eacData.selectedCHAT = requiredCHAT;
+	    eacData.pinID = pinID;
+	    eacData.passwordType = passwordType;
+
+	    // create GUI and init executor
+	    UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE));
+	    CVCStep cvcStep = new CVCStep(eacData);
+	    CHATStep chatStep = new CHATStep(eacData);
+	    PINStep pinStep = new PINStep(eacData, ! nativePace);
+
+	    uc.getSteps().add(cvcStep);
+	    uc.getSteps().add(chatStep);
+	    uc.getSteps().add(pinStep);
+
+	    UserConsentNavigator navigator = gui.obtainNavigator(uc);
+	    ExecutionEngine exec = new ExecutionEngine(navigator);
+
+	    StepAction chatAction = new CHATStepAction(eacData, chatStep);
+	    exec.addCustomAction(chatAction);
+	    StepAction pinAction = new PINStepAction(eacData, ! nativePace, slotHandle, dispatcher, pinStep);
+	    exec.addCustomAction(pinAction);
+
+	    // execute GUI
+	    ResultStatus guiResult = exec.process();
+
+	    if (guiResult == ResultStatus.CANCEL) {
+		String msg = "User Consent was cancelled by the user.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg);
+		response.setResult(r);
 		return response;
 	    }
 
-	    // GUI response
-	    CHAT selectedCHAT = (CHAT) content.get(GUIContentMap.ELEMENT.SELECTED_CHAT);
 
-	    // Create PACEInputType
-	    AuthDataMap paceAuthMap = new AuthDataMap(didAuthenticate.getAuthenticationProtocolData());
-	    AuthDataResponse paceInputMap = paceAuthMap.createResponse(didAuthenticate.getAuthenticationProtocolData());
+	    // prepare DIDAuthenticationResponse
+	    DIDAuthenticationDataType data = eacData.paceResponse.getAuthenticationProtocolData();
+	    AuthDataMap paceOutputMap = new AuthDataMap(data);
 
-	    if (!nativePace) {
-		String pin = (String) content.get(GUIContentMap.ELEMENT.PIN);
-		paceInputMap.addElement(PACEInputType.PIN, pin);
-	    }
-	    paceInputMap.addElement(PACEInputType.PIN_ID, PasswordID.parse(pinID).getByteAsString());
-	    paceInputMap.addElement(PACEInputType.CHAT, selectedCHAT.toString());
-	    paceInputMap.addElement(PACEInputType.CERTIFICATE_DESCRIPTION, ByteUtils.toHexString(eac1Input.getCertificateDescription()));
+	    int retryCounter = Integer.valueOf(paceOutputMap.getContentAsString(PACEOutputType.RETRY_COUNTER));
+	    byte[] efCardAccess = paceOutputMap.getContentAsBytes(PACEOutputType.EF_CARD_ACCESS);
+	    byte[] currentCAR = paceOutputMap.getContentAsBytes(PACEOutputType.CURRENT_CAR);
+	    byte[] previousCAR = paceOutputMap.getContentAsBytes(PACEOutputType.PREVIOUS_CAR);
+	    byte[] idpicc = paceOutputMap.getContentAsBytes(PACEOutputType.ID_PICC);
 
-	    // EstablishChannel
-	    EstablishChannel establishChannel = new EstablishChannel();
-	    establishChannel.setSlotHandle(slotHandle);
-	    establishChannel.setAuthenticationProtocolData(paceInputMap.getResponse());
-	    establishChannel.getAuthenticationProtocolData().setProtocol(ECardConstants.Protocol.PACE);
+	    // Store SecurityInfos
+	    SecurityInfos securityInfos = SecurityInfos.getInstance(efCardAccess);
+	    internalData.put(EACConstants.INTERNAL_DATA_SECURITY_INFOS, securityInfos);
+	    // Store additional data
+	    internalData.put(EACConstants.INTERNAL_DATA_AUTHENTICATED_AUXILIARY_DATA, eac1Input.getAuthenticatedAuxiliaryData());
+	    internalData.put(EACConstants.INTERNAL_DATA_CERTIFICATES, certChain);
+	    internalData.put(EACConstants.INTERNAL_DATA_CURRENT_CAR, currentCAR);
 
-	    EstablishChannelResponse establishChannelResponse = (EstablishChannelResponse) dispatcher.deliver(establishChannel);
+	    // Create response
+	    eac1Output.setEFCardAccess(efCardAccess);
+	    eac1Output.setRetryCounter(retryCounter);
+	    eac1Output.setIDPICC(idpicc);
+	    eac1Output.setCHAT(eacData.selectedCHAT.toByteArray());
+	    eac1Output.setCAR(currentCAR);
 
-	    if (!establishChannelResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
-		// TODO inform user an error happened while establishment of pace channel
-		response.setResult(WSHelper.makeResultUnknownError("Cannot establish channel"));
-	    } else {
-		DIDAuthenticationDataType data = establishChannelResponse.getAuthenticationProtocolData();
-		AuthDataMap paceOutputMap = new AuthDataMap(data);
+	    response.setResult(WSHelper.makeResultOK());
+	    response.setAuthenticationProtocolData(eac1Output.getAuthDataType());
 
-		int retryCounter = Integer.valueOf(paceOutputMap.getContentAsString(PACEOutputType.RETRY_COUNTER));
-		byte[] efCardAccess = paceOutputMap.getContentAsBytes(PACEOutputType.EF_CARD_ACCESS);
-		byte[] currentCAR = paceOutputMap.getContentAsBytes(PACEOutputType.CURRENT_CAR);
-		byte[] previousCAR = paceOutputMap.getContentAsBytes(PACEOutputType.PREVIOUS_CAR);
-		byte[] idpicc = paceOutputMap.getContentAsBytes(PACEOutputType.ID_PICC);
-
-		// Store SecurityInfos
-		SecurityInfos securityInfos = SecurityInfos.getInstance(efCardAccess);
-		internalData.put(EACConstants.INTERNAL_DATA_SECURITY_INFOS, securityInfos);
-		// Store additional data
-		internalData.put(EACConstants.INTERNAL_DATA_AUTHENTICATED_AUXILIARY_DATA, eac1Input.getAuthenticatedAuxiliaryData());
-		internalData.put(EACConstants.INTERNAL_DATA_CERTIFICATES, certChain);
-		internalData.put(EACConstants.INTERNAL_DATA_CURRENT_CAR, currentCAR);
-
-		// Create response
-		eac1Output.setEFCardAccess(efCardAccess);
-		eac1Output.setRetryCounter(retryCounter);
-		eac1Output.setIDPICC(idpicc);
-		eac1Output.setCHAT(selectedCHAT.toByteArray());
-		eac1Output.setCAR(currentCAR);
-
-		response.setResult(WSHelper.makeResultOK());
-		response.setAuthenticationProtocolData(eac1Output.getAuthDataType());
-	    }
-	} catch (WSException e) {
+	} catch (WSHelper.WSException e) {
 	    logger.error(e.getMessage(), e);
 	    response.setResult(e.getResult());
 	} catch (Exception e) {

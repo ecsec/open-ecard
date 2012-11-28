@@ -40,6 +40,11 @@ public class InstantReturnTest {
     private static final long DIFF_TIME = 2*1000; // 2 seconds
     private static final long VARIANCE = 1000;
 
+    // TODO: make Selenium test which really proves, that the GUI works correctly
+    /**
+     * Test if the GUI closes itself after executing an action with instantreturn set.
+     * There is no way to determine whether the GUI is displayed at all. This check must be part of a Selenium test.
+     */
     @Test(enabled = true)
     public void testInstantReturn() {
 	UserConsentNavigator nav = createNavigator();
@@ -49,12 +54,13 @@ public class InstantReturnTest {
 	WaitAction action = new WaitAction("step1", DIFF_TIME);
 	exec.addCustomAction(action);
 
-	long startTime = System.currentTimeMillis();
 	exec.process();
+	// eliminate most of the GUI overhead by retrieving start time from action
+	long startTime = action.getStartTime();
 	long stopTime = System.currentTimeMillis();
 
 	long act = stopTime - startTime;
-	long diff = act- DIFF_TIME;
+	long diff = act - DIFF_TIME;
 	String msg = "Display time of dialog differs " + diff + "ms from reference value (" + VARIANCE + "ms allowed).";
 	assertTrue(diff <= VARIANCE, msg);
     }

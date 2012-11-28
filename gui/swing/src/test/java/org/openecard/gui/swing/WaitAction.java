@@ -34,6 +34,7 @@ import org.openecard.gui.executor.StepActionResultStatus;
 public class WaitAction extends StepAction {
 
     private final long sleepTime;
+    private long startTime;
 
     public WaitAction(Step step, long sleepTime) {
 	this(step.getID(), sleepTime);
@@ -43,9 +44,14 @@ public class WaitAction extends StepAction {
 	this.sleepTime = sleepTime;
     }
 
+    public long getStartTime() {
+	return startTime;
+    }
+
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
 	System.out.println("sleeping for " + sleepTime + " ms.");
+	startTime = System.currentTimeMillis();
 	try {
 	    Thread.sleep(sleepTime);
 	} catch (InterruptedException e) {

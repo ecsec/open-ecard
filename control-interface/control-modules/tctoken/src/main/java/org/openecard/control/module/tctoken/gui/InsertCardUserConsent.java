@@ -35,6 +35,7 @@ import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
+import org.openecard.gui.executor.StepAction;
 import org.openecard.recognition.CardRecognition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,8 @@ public class InsertCardUserConsent {
     private CardStateMap cardStates;
 
     /**
-     *  Creates a new InsertCardUserConsent.
+     * Creates a new InsertCardUserConsent.
+     *
      * @param gui the UserConsent to show on
      * @param reg to get information out of the card info of the requested card
      * @param conHandle to get the requested card type from
@@ -76,11 +78,9 @@ public class InsertCardUserConsent {
      * @return the ConnectionHandle of the inserted card or null if no card was inserted
      */
     public ConnectionHandleType show() {
-	UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent());
-	ExecutionEngine exec = new ExecutionEngine(ucr);
-	// add custom insertCardAction to wait for card insertion
 	InsertCardStepAction insertCardAction = new InsertCardStepAction(cardStates, "insert-card", conHandle);
-	exec.addCustomAction(insertCardAction);
+	UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent(insertCardAction));
+	ExecutionEngine exec = new ExecutionEngine(ucr);
 	// run gui
 	ResultStatus status = exec.process();
 
@@ -90,16 +90,14 @@ public class InsertCardUserConsent {
 	return insertCardAction.getResponse();
     }
 
-    /**
-     * Creates the insert card user consent.
-     * @return the created user consent description
-     */
-    private UserConsentDescription createInsertCardUserConsent() {
+
+    private UserConsentDescription createInsertCardUserConsent(StepAction insertCardAction) {
 	UserConsentDescription uc = new UserConsentDescription(lang.translationForKey("title"));
 
 	// create step
 	Step s = new Step("insert-card", lang.translationForKey("step.title"));
 	s.setInstantReturn(true);
+	s.setAction(insertCardAction);
 
 	// create and add text instructing user
 	Text i1 = new Text();
@@ -114,8 +112,9 @@ public class InsertCardUserConsent {
     }
 
     /**
+     * Gets the translated card name for a card type.
      *
-     * @return a card name matching the users locale or the English name as default
+     * @return A card name matching the users locale or the english name as default.
      */
     private String getTranslatedCardName() {
 	CardInfoType info = reg.getCardInfo(conHandle.getRecognitionInfo().getCardType());

@@ -27,6 +27,7 @@ import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
+import org.openecard.gui.executor.StepAction;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
@@ -47,12 +48,11 @@ public class InstantReturnTest {
      */
     @Test(enabled = true)
     public void testInstantReturn() {
-	UserConsentNavigator nav = createNavigator();
-	ExecutionEngine exec = new ExecutionEngine(nav);
-
 	// create wait action
 	WaitAction action = new WaitAction("step1", DIFF_TIME);
-	exec.addCustomAction(action);
+	// create GUI
+	UserConsentNavigator nav = createNavigator(action);
+	ExecutionEngine exec = new ExecutionEngine(nav);
 
 	exec.process();
 	// eliminate most of the GUI overhead by retrieving start time from action
@@ -66,7 +66,7 @@ public class InstantReturnTest {
     }
 
 
-    private UserConsentNavigator createNavigator() {
+    private UserConsentNavigator createNavigator(StepAction waitAction) {
 	// create step
 	UserConsentDescription ucd = new UserConsentDescription("consent title");
 
@@ -74,6 +74,7 @@ public class InstantReturnTest {
 	ucd.getSteps().add(s);
 	s.setID("step1");
 	s.setInstantReturn(true);
+	s.setAction(waitAction);
 
 	Text desc1 = new Text();
 	s.getInputInfoUnits().add(desc1);

@@ -37,7 +37,6 @@ import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifyUser;
 import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse;
 import java.math.BigInteger;
-import java.util.Map;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
@@ -45,7 +44,6 @@ import org.openecard.common.apdu.common.CardCommandStatus;
 import org.openecard.common.util.PINUtils;
 import org.openecard.common.util.UtilException;
 import org.openecard.gui.ResultStatus;
-import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.PasswordField;
@@ -53,12 +51,7 @@ import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
-import org.openecard.gui.executor.ExecutionResults;
 import org.openecard.gui.executor.StepAction;
-import org.openecard.gui.executor.StepActionResult;
-import org.openecard.gui.executor.StepActionResultStatus;
-import org.openecard.ifd.scio.reader.PCSCFeatures;
-import org.openecard.ifd.scio.reader.PCSCPinVerify;
 import org.openecard.ifd.scio.wrapper.SCTerminal;
 import org.openecard.ifd.scio.wrapper.SCWrapper;
 import org.slf4j.Logger;
@@ -174,12 +167,12 @@ class AbstractTerminal {
 
 	    // we have a sophisticated card reader
 	    if (canNativePinVerify(handle)) {
-		// display message instructing user what to do
-		UserConsentNavigator ucr = gui.obtainNavigator(pinUserConsent(allMsgs.getAuthenticationRequestMessage()));
-		ExecutionEngine exec = new ExecutionEngine(ucr);
-		// add custom pinAction to submit pin to terminal
+		// create custom pinAction to submit pin to terminal
 		NativePinStepAction pinAction = new NativePinStepAction("enter-pin", pinInput, term, template);
-		exec.addCustomAction(pinAction);
+		// display message instructing user what to do
+		UserConsentDescription uc = pinUserConsent(allMsgs.getAuthenticationRequestMessage(), pinAction);
+		UserConsentNavigator ucr = gui.obtainNavigator(uc);
+		ExecutionEngine exec = new ExecutionEngine(ucr);
 		// run gui
 		ResultStatus status = exec.process();
 		if (status == ResultStatus.CANCEL) {
@@ -400,13 +393,7 @@ class AbstractTerminal {
 	}
     }
 
-    private byte[] nativePinVerify(PinInputType pinInput, SCTerminal term, byte[] template) throws IFDException {
-	// get data for verify command and perform it
-	PCSCPinVerify verifyStruct = new PCSCPinVerify(pinInput.getPasswordAttributes(), template);
-	byte[] verifyStructData = verifyStruct.toBytes();
-	byte[] result = term.executeCtrlCode(PCSCFeatures.VERIFY_PIN_DIRECT, verifyStructData);
-	return result;
-    }
+
 
     private static Result checkNativePinVerify(byte[] response) {
 	byte sw1 = response[0];
@@ -463,10 +450,11 @@ class AbstractTerminal {
 
 	return uc;
     }
-    private static UserConsentDescription pinUserConsent(String title) {
+    private static UserConsentDescription pinUserConsent(String title, StepAction action) {
 	UserConsentDescription uc = new UserConsentDescription(title);
 	// create step
 	Step s = new Step("enter-pin", "Enter PIN");
+	s.setAction(action);
 	uc.getSteps().add(s);
 	s.setInstantReturn(true);
 	// add text instructing user
@@ -480,36 +468,6 @@ class AbstractTerminal {
     private static String getPinFromUserConsent(ExecutionEngine response) {
 	PasswordField p = (PasswordField) response.getResults().get("enter-pin").getResult("pin");
 	return p.getValue();
-    }
-
-
-    /**
-     * Action to perform a native pin verify in the GUI executor.
-     */
-    private class NativePinStepAction extends StepAction {
-	public IFDException exception = null;
-	public byte[] response = null;
-	private final PinInputType pinInput;
-	private final SCTerminal term;
-	private final byte[] template;
-
-	public NativePinStepAction(String stepName, PinInputType pinInput, SCTerminal term, byte[] template) {
-	    super(stepName);
-	    this.pinInput = pinInput;
-	    this.term = term;
-	    this.template = template;
-	}
-
-	@Override
-	public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	    try {
-		response = nativePinVerify(pinInput, term, template);
-	    } catch (IFDException ex) {
-		exception = ex;
-	    }
-	    return new StepActionResult(StepActionResultStatus.NEXT);
-	}
-
     }
 
 }

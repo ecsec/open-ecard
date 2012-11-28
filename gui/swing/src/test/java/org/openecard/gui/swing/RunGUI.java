@@ -64,8 +64,9 @@ public class RunGUI {
 
 	uc.getSteps().add(identityCheckStep());
 	uc.getSteps().add(providerInfoStep());
-	uc.getSteps().add(reqestedDataStep());
-	uc.getSteps().add(pinInputStep());
+	Step requestedDataStep = requestedDataStep();
+	uc.getSteps().add(requestedDataStep);
+	uc.getSteps().add(pinInputStep(requestedDataStep));
 	uc.getSteps().add(checkDataStep());
 
 	GUIDefaults.initialize();
@@ -139,16 +140,17 @@ public class RunGUI {
 
 	return step;
     }
-    Step requestedData_Step1 = new Step("Angefragte Daten");
 
 
-    private Step reqestedDataStep() throws Exception {
+    private Step requestedDataStep() throws Exception {
+	Step requestedData_Step1 = new Step("Angefragte Daten");
+	requestedData_Step1.setAction(new RequestedDataAction(requestedData_Step1));
 	Text requestedDataDescription = new Text();
 	requestedDataDescription.setText("Der Anbieter \"Test-Diensteanbieter\"  fordert zum Zweck \"Entwicklung und Test von Software\" die folgenden Daten von Ihnen an:");
 	requestedData_Step1.getInputInfoUnits().add(requestedDataDescription);
 //	Hyperlink dataPrivacyDescriptionLink = new Hyperlink();
 //	dataPrivacyDescriptionLink.setHref("http://www.dataprivacy.eu");
-//	requestedData_Step.getInputInfoUnits().add(dataPrivacyDescriptionLink);
+//	pinInputStep.getInputInfoUnits().add(dataPrivacyDescriptionLink);
 
 	Checkbox dataToSendSelection = new Checkbox("c1");
 	BoxItem vornameBoxItem = new BoxItem();
@@ -276,12 +278,14 @@ public class RunGUI {
 
 	return dataTransaction_Step;
     }
-    Step requestedData_Step = new Step("PIN-Eingabe");
 
-    private Step pinInputStep() throws Exception {
+
+    private Step pinInputStep(Step requestedDataStep) throws Exception {
+	Step pinInputStep = new Step("PIN-Eingabe");
+	pinInputStep.setAction(new PinInputAction(pinInputStep, requestedDataStep));
 	Text t = new Text();
 	t.setText("Durch die Eingabe Ihrer PIN bestätigen Sie, dass folgende markierte Daten an den Anbieter übermittelt werden.");
-	requestedData_Step.getInputInfoUnits().add(t);
+	pinInputStep.getInputInfoUnits().add(t);
 	Checkbox dataToSendSelection = new Checkbox("c1");
 	BoxItem vornameBoxItem = new BoxItem();
 	vornameBoxItem.setName("vornameBoxItem");
@@ -357,11 +361,11 @@ public class RunGUI {
 //	dataToSendSelection.getBoxItems().add(certificationcountryBoxItem);
 //	dataToSendSelection.getBoxItems().add(habitationBoxItem);
 //	dataToSendSelection.getBoxItems().add(ageverificationBoxItem);
-	requestedData_Step.getInputInfoUnits().add(dataToSendSelection);
-//	requestedData_Step.getInputInfoUnits().add(sendAgreement_Text);
-	requestedData_Step.getInputInfoUnits().add(p1);
+	pinInputStep.getInputInfoUnits().add(dataToSendSelection);
+//	pinInputStep.getInputInfoUnits().add(sendAgreement_Text);
+	pinInputStep.getInputInfoUnits().add(p1);
 
-	return requestedData_Step;
+	return pinInputStep;
     }
 
     /**
@@ -375,29 +379,43 @@ public class RunGUI {
 	    SwingUserConsent ucEngine = new SwingUserConsent(dialog);
 	    UserConsentNavigator navigator = ucEngine.obtainNavigator(uc);
 	    ExecutionEngine exec = new ExecutionEngine(navigator);
-	    StepAction sp = new StepAction("Angefragte Daten") {
 
-		@Override
-		public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-		    Object[] d = result.getResults().toArray();
-		    Checkbox cc = null;
-		    for (int i = 0; i < d.length; i++) {
-			if (d[i] instanceof Checkbox) {
-			    cc = (Checkbox) d[i];
-			    System.out.println(cc.getBoxItems());
-			}
-		    }
+	    exec.process();
+	} catch (Throwable w) {
+	    _logger.error(w.getMessage(), w);
+	}
+    }
 
-		    List<BoxItem> l = cc.getBoxItems();
-		    for (BoxItem b : l) {
-			System.out.println(b.getName() + " " + b.isChecked());
-		    }
+    private static class RequestedDataAction extends StepAction {
 
-		    Object[] data = requestedData_Step.getInputInfoUnits().toArray();
+	private final Step step;
+
+	public RequestedDataAction(Step step) {
+	    super(step);
+	    this.step = step;
+	}
+
+	@Override
+	public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
+	    Object[] d = result.getResults().toArray();
+	    Checkbox cc = null;
+	    for (int i = 0; i < d.length; i++) {
+		if (d[i] instanceof Checkbox) {
+		    cc = (Checkbox) d[i];
+		    System.out.println(cc.getBoxItems());
+		}
+	    }
+
+	    List<BoxItem> l = cc.getBoxItems();
+	    for (BoxItem b : l) {
+		System.out.println(b.getName() + " " + b.isChecked());
+	    }
+
+	    Object[] data = step.getInputInfoUnits().toArray();
 //		    Object[] data = uc.getSteps().get(uc.getSteps().indexOf("PIN-Eingabe"));
-		    switch (result.getStatus()) {
+	    switch (result.getStatus()) {
 
-			case BACK:
+		case BACK:
 
 //			    for (int i = 0; i < data.length; i++) {
 //				if (data[i] instanceof Checkbox) {
@@ -406,25 +424,34 @@ public class RunGUI {
 //				    c.getBoxItems().addAll(cc.getBoxItems());
 //				}
 //			    }
-			    return new StepActionResult(StepActionResultStatus.BACK);
-			case OK:
-			    for (int i = 0; i < data.length; i++) {
-				if (data[i] instanceof Checkbox) {
-				    Checkbox c = (Checkbox) data[i];
-				    c.getBoxItems().clear();
-				    c.getBoxItems().addAll(cc.getBoxItems());
-				}
-			    }
-			    return new StepActionResult(StepActionResultStatus.NEXT);
-			default:
-			    return new StepActionResult(StepActionResultStatus.REPEAT);
+		    return new StepActionResult(StepActionResultStatus.BACK);
+		case OK:
+		    for (int i = 0; i < data.length; i++) {
+			if (data[i] instanceof Checkbox) {
+			    Checkbox c = (Checkbox) data[i];
+			    c.getBoxItems().clear();
+			    c.getBoxItems().addAll(cc.getBoxItems());
+			}
 		    }
-		}
-	    };
-	    StepAction sp1 = new StepAction("PIN-Eingabe") {
+		    return new StepActionResult(StepActionResultStatus.NEXT);
+		default:
+		    return new StepActionResult(StepActionResultStatus.REPEAT);
+	    }
+	}
 
-		@Override
-		public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
+    }
+
+    private static class PinInputAction extends StepAction {
+
+	private final Step requestedData_Step1;
+
+	public PinInputAction(Step step, Step requestedData_Step1) {
+	    super(step);
+	    this.requestedData_Step1 = requestedData_Step1;
+	}
+
+	@Override
+	public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
 //		    Object[] d = null;
 //		    for(ExecutionResults e : oldResults.values()){
 //			System.out.println(e.getStepName());
@@ -432,34 +459,33 @@ public class RunGUI {
 //			    d = e.getResults().toArray();
 //			}
 //		    }
-		    Object[] d = result.getResults().toArray();
-		    Checkbox cc = null;
-		    for (int i = 0; i < d.length; i++) {
-			if (d[i] instanceof Checkbox) {
-			    cc = (Checkbox) d[i];
-			    System.out.println(cc.getBoxItems());
+	    Object[] d = result.getResults().toArray();
+	    Checkbox cc = null;
+	    for (int i = 0; i < d.length; i++) {
+		if (d[i] instanceof Checkbox) {
+		    cc = (Checkbox) d[i];
+		    System.out.println(cc.getBoxItems());
+		}
+	    }
+	    List<BoxItem> l = cc.getBoxItems();
+	    for (BoxItem b : l) {
+		System.out.println(b.getName() + " " + b.isChecked());
+	    }
+//		    Object[] data = requestedData_Step1.getInputInfoUnits().toArray();
+	    Object[] data = requestedData_Step1.getInputInfoUnits().toArray();
+	    switch (result.getStatus()) {
+
+		case BACK:
+
+		    for (int i = 0; i < data.length; i++) {
+			if (data[i] instanceof Checkbox) {
+			    Checkbox c = (Checkbox) data[i];
+			    c.getBoxItems().clear();
+			    c.getBoxItems().addAll(cc.getBoxItems());
 			}
 		    }
-		    List<BoxItem> l = cc.getBoxItems();
-		    for (BoxItem b : l) {
-			System.out.println(b.getName() + " " + b.isChecked());
-		    }
-//		    Object[] data = requestedData_Step1.getInputInfoUnits().toArray();
-		    System.out.println(uc.getSteps().size());
-		    Object[] data = uc.getSteps().get(uc.getSteps().indexOf(requestedData_Step1)).getInputInfoUnits().toArray();
-		    switch (result.getStatus()) {
-
-			case BACK:
-
-			    for (int i = 0; i < data.length; i++) {
-				if (data[i] instanceof Checkbox) {
-				    Checkbox c = (Checkbox) data[i];
-				    c.getBoxItems().clear();
-				    c.getBoxItems().addAll(cc.getBoxItems());
-				}
-			    }
-			    return new StepActionResult(StepActionResultStatus.BACK);
-			case OK:
+		    return new StepActionResult(StepActionResultStatus.BACK);
+		case OK:
 //			    for (int i = 0; i < data.length; i++) {
 //				if (data[i] instanceof Checkbox) {
 //				    Checkbox c = (Checkbox) data[i];
@@ -467,19 +493,12 @@ public class RunGUI {
 //				    c.getBoxItems().addAll(cc.getBoxItems());
 //				}
 //			    }
-			    return new StepActionResult(StepActionResultStatus.NEXT);
-			default:
-			    return new StepActionResult(StepActionResultStatus.REPEAT);
-		    }
-		}
-	    };
-
-	    exec.addCustomAction(sp);
-	    exec.addCustomAction(sp1);
-	    exec.process();
-	} catch (Throwable w) {
-	    _logger.error(w.getMessage(), w);
+		    return new StepActionResult(StepActionResultStatus.NEXT);
+		default:
+		    return new StepActionResult(StepActionResultStatus.REPEAT);
+	    }
 	}
+
     }
 
 }

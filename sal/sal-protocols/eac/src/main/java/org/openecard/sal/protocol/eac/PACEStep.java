@@ -158,15 +158,14 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    uc.getSteps().add(chatStep);
 	    uc.getSteps().add(pinStep);
 
-	    UserConsentNavigator navigator = gui.obtainNavigator(uc);
-	    ExecutionEngine exec = new ExecutionEngine(navigator);
-
 	    StepAction chatAction = new CHATStepAction(eacData, chatStep);
-	    exec.addCustomAction(chatAction);
+	    chatStep.setAction(chatAction);
 	    StepAction pinAction = new PINStepAction(eacData, ! nativePace, slotHandle, dispatcher, pinStep);
-	    exec.addCustomAction(pinAction);
+	    pinStep.setAction(pinAction);
 
 	    // execute GUI
+	    UserConsentNavigator navigator = gui.obtainNavigator(uc);
+	    ExecutionEngine exec = new ExecutionEngine(navigator);
 	    ResultStatus guiResult = exec.process();
 
 	    if (guiResult == ResultStatus.CANCEL) {

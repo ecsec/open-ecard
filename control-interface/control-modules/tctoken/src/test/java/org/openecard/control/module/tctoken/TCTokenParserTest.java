@@ -37,7 +37,7 @@ import static org.testng.Assert.*;
  */
 public class TCTokenParserTest {
 
-    @Test(enabled = !true)
+    @Test(enabled = true)
     public void testParse() throws Exception {
 	InputStream testFile = FileUtils.resolveResourceAsStream(getClass(), "TCToken.xml");
 
@@ -45,7 +45,7 @@ public class TCTokenParserTest {
 	List<TCTokenType> tokens = parser.parse(testFile);
 
 	TCTokenType t = tokens.get(0);
-	assertEquals(t.getSessionIdentifier(), "3eab1b41ecc1ce5246acf6f4e275");
+	assertEquals(t.getSessionIdentifier(), "3eab1b41ecc1ce5246acf6f4e2751234");
 	assertEquals(t.getServerAddress().toString(), "https://eid-ref.my-service.de:443");
 	assertEquals(t.getRefreshAddress().toString(), "https://eid.services.my.net:443/?sessionID=D9D6851A7C02167A5699DA57657664715F4D9C44E50A94F7A83909D24AFA997A");
 	assertEquals(t.getBinding(), "urn:liberty:paos:2006-08");

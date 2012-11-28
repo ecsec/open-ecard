@@ -30,17 +30,32 @@ import org.testng.annotations.Test;
 
 
 /**
+ *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
 public class TCTokenFactoryTest {
 
     @Test
-    public void testGenerateTCToken() throws Exception {
+    public void testGenerateTCToken_String() throws Exception {
 	try {
-	    URL tcTokenURL = FileUtils.resolveResourceAsURL(TCTokenFactoryTest.class, "TCToken.xml");
-	    TCTokenType result = TCTokenFactory.generateTCToken(tcTokenURL);
+	    String tcToken = FileUtils.toString(FileUtils.resolveResourceAsStream(TCTokenFactoryTest.class, "TCToken.xml"), "UTF-8");
+	    TCTokenType result = TCTokenFactory.generateTCToken(tcToken);
+	    Assert.assertNotNull(result, "TCToken is null.");
 	} catch (Exception e) {
 	    Assert.fail(e.getMessage());
+	}
+    }
+
+    @Test
+    public void testGenerateTCToken_TCTokenType() {
+	try {
+	    URL tcTokenURL = FileUtils.resolveResourceAsURL(TCTokenFactoryTest.class, "TCToken.xml");
+	    // should fail, since a non-https-URL is used
+	    TCTokenType result = TCTokenFactory.generateTCToken(tcTokenURL);
+	    Assert.fail("TCTokenException expected.");
+	} catch (TCTokenException ex) {
+	    // do nothing; exception expected
 	}
     }
 

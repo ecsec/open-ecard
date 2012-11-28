@@ -39,6 +39,10 @@ public class TCTokenFactory {
 	TCTokenGrabber grabber = new TCTokenGrabber();
 	String data = grabber.getResource(tcTokenURL.toString());
 
+	return generateTCToken(data);
+    }
+
+    public static TCTokenType generateTCToken(String data) throws TCTokenException {
 	// FIXME: Hack
 	data = PathSecurityParameters.fix(data);
 	// FIXME: Hack

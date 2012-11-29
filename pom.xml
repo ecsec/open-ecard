@@ -191,6 +191,10 @@
 						    <displayName>Urgent</displayName>
 						    <tags>
 							<tag>
+							    <matchString>HACK</matchString>
+							    <matchType>ignoreCase</matchType>
+							</tag>
+							<tag>
 							    <matchString>FIXME</matchString>
 							    <matchType>ignoreCase</matchType>
 							</tag>
@@ -227,6 +231,10 @@
 						<tagClass>
 						    <displayName>Urgent</displayName>
 						    <tags>
+							<tag>
+							    <matchString>HACK</matchString>
+							    <matchType>ignoreCase</matchType>
+							</tag>
 							<tag>
 							    <matchString>FIXME</matchString>
 							    <matchType>ignoreCase</matchType>

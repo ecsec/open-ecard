@@ -20,18 +20,20 @@
  *
  ***************************************************************************/
 
-package org.openecard.crypto.tls;
+package org.openecard.control.module.tctoken;
 
 import java.io.IOException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.crypto.tls.TlsNoAuthentication;
+
 
 /**
  * This class extends {@link org.openecard.crypto.tls.TlsNoAuthentication TlsNoAuthentication} and adds an additional
- * getter for obtaining the processed certificate chain.
+ * getter for obtaining the last processed certificate chain.
  *
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
-public class TlsNoAuthentication2 extends TlsNoAuthentication {
+public class TlsAuthenticationCertSave extends TlsNoAuthentication {
 
     private Certificate lastCertChain;
 

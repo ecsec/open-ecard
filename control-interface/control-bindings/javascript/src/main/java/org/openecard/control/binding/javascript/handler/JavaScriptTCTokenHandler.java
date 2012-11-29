@@ -98,7 +98,7 @@ public class JavaScriptTCTokenHandler extends JavaScriptControlHandler {
 		// check content
 		if ("tcTokenURL".equals(e.getKey())) {
 		    // TCTokenURL
-		    String value = URLDecoder.decode(e.getValue().toString(), "UTF-8");
+		    String value = e.getValue().toString();
 		    TCTokenType token = TCTokenFactory.generateTCToken(new URL(value));
 		    tcTokenRequest.setTCToken(token);
 		} else if ("contextHandle".equals(e.getKey())) {

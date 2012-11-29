@@ -53,7 +53,6 @@ import org.openecard.crypto.tls.ClientCertPSKTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
 import org.openecard.crypto.tls.TlsNoAuthentication;
 import org.openecard.crypto.tls.TlsPSKIdentityImpl;
-import org.openecard.crypto.tls.verify.JavaSecVerifier;
 import org.openecard.gui.UserConsent;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.transport.paos.PAOS;
@@ -62,6 +61,8 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Transport binding agnostic TCToken handler.
+ *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
@@ -184,7 +185,8 @@ public class GenericTCTokenHandler {
 	    if (secProto.equals("urn:ietf:rfc:4279") || secProto.equals("urn:ietf:rfc:5487")) {
 		TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
 		tlsAuth.setHostname(serverHost);
-		tlsAuth.setCertificateVerifier(new JavaSecVerifier());
+		// FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
+		//tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 		byte[] psk = token.getPathSecurityParameters().getPSK();
 		TlsPSKIdentity pskId = new TlsPSKIdentityImpl(sessionIdentifier.getBytes(), psk);
 		tlsClient = new ClientCertPSKTlsClient(pskId, serverHost);
@@ -193,7 +195,8 @@ public class GenericTCTokenHandler {
 	    } else if (secProto.equals("urn:ietf:rfc:4346")) {
 		TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
 		tlsAuth.setHostname(serverHost);
-		tlsAuth.setCertificateVerifier(new JavaSecVerifier());
+		// FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
+		//tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 		tlsClient = new ClientCertDefaultTlsClient(serverHost);
 		tlsClient.setAuthentication(tlsAuth);
 		tlsClient.setClientVersion(ProtocolVersion.TLSv11);

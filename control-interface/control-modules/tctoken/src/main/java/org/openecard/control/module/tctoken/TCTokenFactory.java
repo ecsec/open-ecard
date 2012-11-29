@@ -30,14 +30,15 @@ import org.openecard.control.module.tctoken.hacks.PathSecurityParameters;
 
 
 /**
+ * Class to fetch a TCToken and return it as @{link TCTokenType}.
+ *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 public class TCTokenFactory {
 
     public static TCTokenType generateTCToken(URL tcTokenURL) throws TCTokenException {
 	// Get TCToken from the given url
-	TCTokenGrabber grabber = new TCTokenGrabber();
-	String data = grabber.getResource(tcTokenURL.toString());
+	String data = TCTokenGrabber.getResource(tcTokenURL);
 
 	return generateTCToken(data);
     }

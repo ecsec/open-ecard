@@ -22,7 +22,11 @@
 
 package org.openecard.gui.swing.steplayout;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
@@ -36,6 +40,7 @@ import org.openecard.gui.definition.TextField;
 import org.openecard.gui.swing.components.AbstractInput;
 import org.openecard.gui.swing.components.Checkbox;
 import org.openecard.gui.swing.components.Hyperlink;
+import org.openecard.gui.swing.components.ImageBox;
 import org.openecard.gui.swing.components.Radiobutton;
 import org.openecard.gui.swing.components.StepComponent;
 import org.openecard.gui.swing.components.Text;
@@ -87,6 +92,9 @@ public class DefaultStepLayouter extends StepLayouter {
 		case HYPERLINK:
 		    nextComponent = new Hyperlink((org.openecard.gui.definition.Hyperlink) next);
 		    break;
+		case IMAGE_BOX:
+		    nextComponent = new ImageBox((org.openecard.gui.definition.ImageBox) next);
+		    break;
 		case PASSWORD_FIELD:
 		    nextComponent = new AbstractInput((PasswordField) next);
 		    break;
@@ -101,7 +109,7 @@ public class DefaultStepLayouter extends StepLayouter {
 		case TEXT_FIELD:
 		    nextComponent = new AbstractInput((TextField) next);
 		    break;
-		case ToggleText:
+		case TOGGLE_TEXT:
 		    nextComponent = new ToggleText((org.openecard.gui.definition.ToggleText) next);
 		    break;
 	    }

@@ -40,6 +40,7 @@ import java.util.List;
 import org.openecard.gui.android.views.StepView;
 import org.openecard.gui.definition.AbstractBox;
 import org.openecard.gui.definition.Hyperlink;
+import org.openecard.gui.definition.ImageBox;
 import org.openecard.gui.definition.InfoUnitElementType;
 import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.gui.definition.OutputInfoUnit;
@@ -176,7 +177,9 @@ public class StepActivity extends Activity {
 			t = new org.openecard.gui.android.views.AbstractInput((TextField) infoUnitType, StepActivity.this);
 		    } else if (infoUnitType.type().equals(InfoUnitElementType.HYPERLINK)) {
 			t = new org.openecard.gui.android.views.Hyperlink((Hyperlink) infoUnitType, StepActivity.this);
-		    } else if(infoUnitType.type().equals(InfoUnitElementType.ToggleText)){
+		    } else if (infoUnitType.type().equals(InfoUnitElementType.IMAGE_BOX)) {
+			t = new org.openecard.gui.android.views.ImageBox((ImageBox) infoUnitType, StepActivity.this);
+		    } else if(infoUnitType.type().equals(InfoUnitElementType.TOGGLE_TEXT)){
 			t =  new org.openecard.gui.android.views.ToggleText((ToggleText) infoUnitType, StepActivity.this);
 		    } else {
 			// TODO: log warning

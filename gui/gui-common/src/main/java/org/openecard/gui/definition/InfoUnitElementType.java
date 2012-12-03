@@ -24,14 +24,16 @@ package org.openecard.gui.definition;
 
 
 /**
+ * GUI component types.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public enum InfoUnitElementType {
 
     TEXT,
-    ToggleText,
+    TOGGLE_TEXT,
     HYPERLINK,
+    IMAGE_BOX,
     CHECK_BOX,
     RADIO_BOX,
     TEXT_FIELD,

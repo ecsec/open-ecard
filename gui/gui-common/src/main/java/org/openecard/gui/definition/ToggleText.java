@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class ToggleText extends IDTrait implements InputInfoUnit {
 
-    private static final Logger _logger = LoggerFactory.getLogger(Text.class);
+    private static final Logger logger = LoggerFactory.getLogger(Text.class);
 
     private String title;
     private String text;
@@ -65,14 +65,14 @@ public final class ToggleText extends IDTrait implements InputInfoUnit {
 
     @Override
     public InfoUnitElementType type() {
-	return InfoUnitElementType.ToggleText;
+	return InfoUnitElementType.TOGGLE_TEXT;
     }
 
 
     @Override
     public void copyContentFrom(InfoUnit origin) {
-	if (!(this.getClass().equals(origin.getClass()))) {
-	    _logger.warn("Trying to copy content from type {} to type {}.", origin.getClass(), this.getClass());
+	if (! (this.getClass().equals(origin.getClass()))) {
+	    logger.warn("Trying to copy content from type {} to type {}.", origin.getClass(), this.getClass());
 	    return;
 	}
 	ToggleText other = (ToggleText) origin;

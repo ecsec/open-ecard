@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 public class GUIDefaults {
 
     private static final Logger logger = LoggerFactory.getLogger(GUIDefaults.class.getName());
+
     // Regex pattern for hex colors
     private static final String HEX_PATTERN = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$";
     private static final Pattern hexColorPattern = Pattern.compile(HEX_PATTERN);

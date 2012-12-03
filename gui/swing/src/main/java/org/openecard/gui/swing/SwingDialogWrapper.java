@@ -35,37 +35,42 @@ import org.openecard.gui.swing.common.GUIDefaults;
 public class SwingDialogWrapper implements DialogWrapper {
 
     private JFrame dialog;
+    private String title;
 
     public SwingDialogWrapper() {
 	// Initialize Look and Feel
 	GUIDefaults.initialize();
+    }
 
+    @Override
+    public void setTitle(String title) {
+	this.title = title;
+    }
+
+    @Override
+    public Container getContentPane() {
 	dialog = new JFrame();
+	dialog.setTitle(title);
 	dialog.setSize(640, 480);
 	dialog.setLocationRelativeTo(null);
 	dialog.setIconImage(GUIDefaults.getImage("Frame.icon", 45, 45).getImage());
 	dialog.setVisible(false);
 	dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-    }
 
-    @Override
-    public void setTitle(String title) {
-	dialog.setTitle(title);
-    }
-
-    @Override
-    public Container getContentPane() {
 	return dialog.getContentPane();
     }
 
     @Override
     public void show() {
-	this.dialog.setVisible(true);
+	dialog.setVisible(true);
+	dialog.setExtendedState(JFrame.NORMAL);
+	dialog.toFront();
+	dialog.requestFocus();
     }
 
     @Override
     public void hide() {
-	this.dialog.setVisible(false);
+	dialog.setVisible(false);
     }
 
 }

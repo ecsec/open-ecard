@@ -22,7 +22,7 @@
 
 package org.openecard.gui.definition;
 
-import org.openecard.gui.common.IDGenerator;
+import org.openecard.common.util.ValueGenerators;
 
 
 /**
@@ -34,7 +34,7 @@ public abstract class IDTrait implements InfoUnit {
     private String id;
 
     public IDTrait() {
-	this(IDGenerator.generateID());
+	this(ValueGenerators.generateSessionID());
     }
 
     public IDTrait(String id) {

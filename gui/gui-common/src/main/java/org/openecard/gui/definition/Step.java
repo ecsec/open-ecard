@@ -24,7 +24,7 @@ package org.openecard.gui.definition;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.openecard.gui.common.IDGenerator;
+import org.openecard.common.util.ValueGenerators;
 import org.openecard.gui.executor.DummyAction;
 import org.openecard.gui.executor.StepAction;
 
@@ -44,7 +44,7 @@ public class Step {
     private List<InputInfoUnit> inputInfoUnits;
 
     public Step(String title) {
-	this(IDGenerator.generateID(), title);
+	this(ValueGenerators.generateSessionID(), title);
     }
 
     public Step(String id, String title) {

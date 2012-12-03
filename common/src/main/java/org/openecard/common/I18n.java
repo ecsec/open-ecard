@@ -35,7 +35,7 @@ import org.openecard.common.util.FileUtils;
 
 
 /**
- * An internationalization component similar to Java's {@link ava.util.ResourceBundle}.
+ * An internationalization component similar to Java's {@link java.util.ResourceBundle}.
  * It is capable of providing translated versions of key identified values as well as complete files.
  * <p>
  * All translation files must be located below the folder <pre>openecard_i18n</pre> plus a component name.
@@ -47,7 +47,7 @@ import org.openecard.common.util.FileUtils;
  * language and country codes are allowed. The default language, which is English is described by C. The name of the
  * file and its language is separated by _. The file ending is optional for arbitrary files.<br/>
  * The following examples illustrate the scheme.
- * <pre>Messages_C.properties
+ * <pre> Messages_C.properties
  * Messages_de.properties
  * Messages_de_DE.properties
  * anyotherfile_C
@@ -152,7 +152,7 @@ public class I18n {
      *
      * @param key Key as defined in language properties file.
      * @param parameters If any parameters are given here, the string is interpreted as a template and the parameters
-     * are applied. The template interpretation uses {@link String#format()} as the rendering method.
+     *   are applied. The template interpretation uses {@link String#format()} as the rendering method.
      * @return Translation as specified in the translation, or default file.
      */
     public String translationForKey(String key, Object ... parameters) {
@@ -178,9 +178,9 @@ public class I18n {
     /**
      * Get translated version of a file depending on current locale.
      * <p>The file's base path equals the component directory. The language definition is enclosed between the filename
-     * and the filending plus a '.'.</p>
+     * and the file ending plus a '.'.</p>
      * <p>An example looks like this:<br/>
-     * <pre>I18n l = I18n.getTranslation("gui");
+     * <pre> I18n l = I18n.getTranslation("gui");
      * l.translationForFile("about", "html");
      * // this code in a german environment tries to load the following files until one is found
      * // - openecard_i18n/gui/about_de_DE.html

@@ -20,33 +20,26 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui;
+package org.openecard.gui.file;
 
-import org.openecard.gui.definition.UserConsentDescription;
+import java.io.File;
 
 
 /**
- * Abstract entry interface of every GUI implementation.
+ * File filter accepting all files.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public interface UserConsent {
+public class AcceptAllFilesFilter implements FileFilter {
 
-    /**
-     * Obtain an instance of a user consent navigator.
-     * It is up to the implementation whether the navigator can be reused after display.
-     *
-     * @param uc The abstract description of the user consent and its components. May not be null.
-     * @return A class instance implementing the {@link UserConsentNavigator} interface.
-     */
-    UserConsentNavigator obtainNavigator(UserConsentDescription uc);
+    @Override
+    public boolean accept(File f) {
+	return true;
+    }
 
-    /**
-     * Obtain an instance of a file dialog.
-     * It is up to the implementation whether the dialog can be reused after display.
-     *
-     * @return A class instance implementing the {@link FileDialog} interface.
-     */
-    FileDialog obtainFileDialog();
+    @Override
+    public String getDescription() {
+	return "*";
+    }
 
 }

@@ -20,33 +20,37 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui;
+package org.openecard.gui.file;
 
-import org.openecard.gui.definition.UserConsentDescription;
+import java.io.File;
 
 
 /**
- * Abstract entry interface of every GUI implementation.
+ * Class to filter out files in a {@link FileDialog}.
+ * Filters have two usages in the file dialog.
+ * <ol>
+ * <li>Restrict the visibility of files in the dialog.</li>
+ * <li>Present a selectable preset of visible files.</li>
+ * </ol>
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public interface UserConsent {
+public interface FileFilter {
 
     /**
-     * Obtain an instance of a user consent navigator.
-     * It is up to the implementation whether the navigator can be reused after display.
+     * Decide whether a file is accepted or not.
      *
-     * @param uc The abstract description of the user consent and its components. May not be null.
-     * @return A class instance implementing the {@link UserConsentNavigator} interface.
+     * @param file File to check whether it is accepted or not.
+     * @return <code>true</code> if the file is accepted, <code>false</code> otherwise.
      */
-    UserConsentNavigator obtainNavigator(UserConsentDescription uc);
+    boolean accept(File file);
 
     /**
-     * Obtain an instance of a file dialog.
-     * It is up to the implementation whether the dialog can be reused after display.
+     * Gets the description text of this filter.
+     * The description may be shown to the user, if a selection of filters is desirable.
      *
-     * @return A class instance implementing the {@link FileDialog} interface.
+     * @return The description text. <code>null</code> is not permitted.
      */
-    FileDialog obtainFileDialog();
+    String getDescription();
 
 }

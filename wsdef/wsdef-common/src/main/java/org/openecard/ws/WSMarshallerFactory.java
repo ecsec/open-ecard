@@ -27,6 +27,10 @@ import org.openecard.common.GenericFactoryException;
 
 
 /**
+ * Factory class for WSMarshaller instances.
+ * The WSMarshaller implementation is selected by setting the system property {@code org.openecard.ws.marshaller.impl}
+ * to a class implementing the WSMarshaller interface. The class needs a default constructor or it can not be
+ * instantiated.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -46,6 +50,12 @@ public class WSMarshallerFactory {
 
     private static WSMarshallerFactory inst;
 
+    /**
+     * Gets an new instance of the selected WSMarshaller implementation.
+     *
+     * @return WSMarshaller implementation instance.
+     * @throws WSMarshallerException In case the WSMarshaller instance could not be created.
+     */
     public static WSMarshaller createInstance() throws WSMarshallerException {
 	if (inst == null) {
 	    inst = new WSMarshallerFactory();

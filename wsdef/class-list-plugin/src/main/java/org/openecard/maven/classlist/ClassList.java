@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import org.apache.maven.plugin.AbstractMojo;
@@ -42,14 +43,22 @@ public class ClassList extends AbstractMojo {
 
     /**
      * Location of the file.
+     *
      * @parameter expression="${project.build.directory}/classes"
      */
     private File outputDirectory;
     /**
      * Name of the file.
+     *
      * @parameter expression="classes.lst"
      */
     private String fileName;
+    /**
+     * List of excluded classes.
+     *
+     * @parameter
+     */
+    private List excludes;
 
     /**
      * List of directories to look at.
@@ -125,7 +134,13 @@ public class ClassList extends AbstractMojo {
 		next = next.substring(0, next.length()-6);
 		next = next.substring(classDirectory.getCanonicalPath().length()+1);
 		next = next.replace(File.separator, ".");
-		name = next;
+		// consult excludes list
+		if (excludes.contains(next)) {
+		    getLog().info("Excluding class: " + next);
+		} else {
+		    getLog().debug("Adding class to list: " + next);
+		    name = next;
+		}
 	    }
 	} catch (IOException ex) {
 	    getLog().warn(ex);

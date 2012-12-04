@@ -72,6 +72,13 @@
 			<goals>
 			    <goal>class-list</goal>
 			</goals>
+			<configuration>
+			    <excludes>
+				<exclude>generated.ObjectFactory</exclude>
+				<exclude>generated.TCTokenType</exclude>
+				<exclude>generated.TCTokenType$PathSecurityParameters</exclude>
+			    </excludes>
+			</configuration>
 		    </execution>
 		</executions>
 	    </plugin>

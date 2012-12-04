@@ -34,6 +34,7 @@ import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import org.openecard.gui.FileDialog;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.Step;
@@ -130,6 +131,12 @@ public class SwingUserConsent implements UserConsent {
 
 	return navigator;
     }
+
+    @Override
+    public FileDialog obtainFileDialog() {
+	return new SwingFileDialog();
+    }
+
 
     private void initializeSidePanel(JPanel panel, JComponent... components) {
 	panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));

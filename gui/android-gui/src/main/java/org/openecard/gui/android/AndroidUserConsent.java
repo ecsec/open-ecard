@@ -23,6 +23,7 @@
 package org.openecard.gui.android;
 
 import android.content.Context;
+import org.openecard.gui.FileDialog;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 
@@ -42,6 +43,11 @@ public class AndroidUserConsent implements org.openecard.gui.UserConsent {
     @Override
     public UserConsentNavigator obtainNavigator(UserConsentDescription arg0) {
 	return new AndroidNavigator(arg0.getSteps(), this.context);
+    }
+
+    @Override
+    public FileDialog obtainFileDialog() {
+	throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

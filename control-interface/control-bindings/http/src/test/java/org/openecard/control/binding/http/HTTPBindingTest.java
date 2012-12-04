@@ -58,6 +58,8 @@ public final class HTTPBindingTest {
 	try {
 	    TestClient tc = new TestClient();
 	    m = WSMarshallerFactory.createInstance();
+	    m.removeAllTypeClasses();
+	    m.addXmlTypeClass(Status.class);
 
 	    // Wait some seconds until the SAL comes up
 	    Thread.sleep(2500);

@@ -45,6 +45,7 @@ public class TCTokenSAXHandler extends DefaultHandler {
     private static final String BINDING = "Binding";
     private static final String PATH_SECURITY_PARAMETERS = "PathSecurity-Parameters";
     private static final String PSK = "PSK";
+
     private boolean read;
     private StringBuilder sb;
     private List<TCTokenType> tokens;
@@ -76,7 +77,6 @@ public class TCTokenSAXHandler extends DefaultHandler {
 
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-
 	String value = sb.toString();
 	sb.delete(0, sb.length());
 
@@ -88,7 +88,7 @@ public class TCTokenSAXHandler extends DefaultHandler {
 	    token.setSessionIdentifier(value);
 	} else if (qName.equalsIgnoreCase(SERVER_ADDRESS)) {
 	    //FIXME: malformed URL hack
-	    if (!value.startsWith("https://") && !value.startsWith("http://")) {
+	    if (! value.startsWith("https://") && ! value.startsWith("http://")) {
 		value = "https://" + value;
 	    }
 
@@ -103,7 +103,6 @@ public class TCTokenSAXHandler extends DefaultHandler {
 	    byte[] b = StringUtils.toByteArray(value.toUpperCase());
 	    token.getPathSecurityParameters().setPSK(b);
 	}
-
     }
 
     @Override

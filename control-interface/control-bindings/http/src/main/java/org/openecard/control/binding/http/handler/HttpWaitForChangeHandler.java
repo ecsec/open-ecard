@@ -65,6 +65,8 @@ public class HttpWaitForChangeHandler extends HttpControlHandler {
 	this.genericWaitForChangeHandler = genericWaitForChangeHandler;
 	try {
 	    m = WSMarshallerFactory.createInstance();
+	    m.removeAllTypeClasses();
+	    m.addXmlTypeClass(StatusChange.class);
 	} catch (WSMarshallerException e) {
 	    logger.error(e.getMessage(), e);
 	    throw new RuntimeException(e);
@@ -97,11 +99,9 @@ public class HttpWaitForChangeHandler extends HttpControlHandler {
 
     /**
      *
-     * @param statusChange
-     *            the statusChange to respond
-     * @return a HttpResponse containing the statusChange as XML
-     * @throws HTTPException
-     *             if creating the HttpResponse fails
+     * @param statusChange The statusChange to respond.
+     * @return A HttpResponse containing the statusChange as XML.
+     * @throws HTTPException If creating the HttpResponse fails.
      */
     public HttpResponse handleResponse(StatusChange statusChange) throws HTTPException {
 	try {
@@ -120,8 +120,7 @@ public class HttpWaitForChangeHandler extends HttpControlHandler {
     }
 
     @Override
-    public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws
-	    IOException {
+    public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws IOException {
 	logger.debug("HTTP request: {}", request.toString());
 	HttpResponse httpResponse = null;
 	try {

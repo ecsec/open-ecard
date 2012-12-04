@@ -56,6 +56,8 @@ public final class JavaScriptBindingTest {
     public static void setUpClass() throws Exception {
 	try {
 	    m = WSMarshallerFactory.createInstance();
+	    m.removeAllTypeClasses();
+	    m.addXmlTypeClass(Status.class);
 
 	    // Start TestClient
 	    tc = new TestClient();

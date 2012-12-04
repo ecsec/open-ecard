@@ -159,6 +159,8 @@ public class JSEventCallback {
 		WSMarshaller m = null;
 		try {
 		    m = WSMarshallerFactory.createInstance();
+		    m.removeAllTypeClasses();
+		    m.addXmlTypeClass(StatusChange.class);
 		} catch (WSMarshallerException e) {
 		    logger.error(e.getMessage(), e);
 		    throw new RuntimeException(e);

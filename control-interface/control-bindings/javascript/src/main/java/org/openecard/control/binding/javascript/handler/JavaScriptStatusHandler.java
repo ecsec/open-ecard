@@ -60,6 +60,8 @@ public class JavaScriptStatusHandler extends JavaScriptControlHandler {
 	this.genericStatusHandler = genericStatusHandler;
 	try {
 	    m = WSMarshallerFactory.createInstance();
+	    m.removeAllTypeClasses();
+	    m.addXmlTypeClass(Status.class);
 	} catch (WSMarshallerException e) {
 	    logger.error(e.getMessage(), e);
 	    throw new RuntimeException(e);

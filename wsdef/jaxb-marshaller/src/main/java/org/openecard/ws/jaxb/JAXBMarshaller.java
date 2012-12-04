@@ -25,19 +25,10 @@ package org.openecard.ws.jaxb;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLOutputFactory;
@@ -56,6 +47,8 @@ import org.openecard.ws.soap.MessageFactory;
 import org.openecard.ws.soap.SOAPBody;
 import org.openecard.ws.soap.SOAPException;
 import org.openecard.ws.soap.SOAPMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -64,48 +57,36 @@ import org.xml.sax.SAXException;
 
 
 /**
+ * Implementation of a WSMarshaller utilizing JAXB and Javas default XML facilities.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public final class JAXBMarshaller implements WSMarshaller {
 
-    private final JAXBContext jaxbCtx;
-    private final Marshaller marshaller;
-    private final Unmarshaller unmarshaller;
+    private static final Logger logger = LoggerFactory.getLogger(JAXBMarshaller.class);
 
+    // Marshaller and Unmarshaller
+    private final MarshallerImpl marshaller;
     // w3 factory
     private final DocumentBuilderFactory w3Factory;
     private final DocumentBuilder w3Builder;
     private final Transformer serializer;
-
     // soap
     private final MessageFactory soapFactory;
 
+    /**
+     * Creates a JAXBMarshaller capable of marshalling und unmarshalling all JAXB element types found in the classpath
+     * resource classes.lst.
+     */
     public JAXBMarshaller() {
-	this(new Class[0]);
-    }
-
-    public JAXBMarshaller(Class... additionalClasses) {
-	JAXBContext tmpJaxbCtx = null;
-	Marshaller tmpMarshaller = null;
-	Unmarshaller tmpUnmarshaller = null;
+	MarshallerImpl tmpMarshaller = null;
 	DocumentBuilderFactory tmpW3Factory = null;
 	DocumentBuilder tmpW3Builder = null;
 	Transformer tmpSerializer = null;
 	MessageFactory tmpSoapFactory = null;
 
 	try {
-	    // prepare marshaller
-	    Class[] jaxbClasses = getJaxbClasses();
-	    LinkedList<Class> allClassesList = new LinkedList<Class>();
-	    allClassesList.addAll(Arrays.asList(jaxbClasses));       // add predefined classes
-	    allClassesList.addAll(Arrays.asList(additionalClasses)); // add additional classes from constructor call
-	    tmpJaxbCtx = JAXBContext.newInstance(allClassesList.toArray(new Class[0]));
-
-	    // prepare xml parser
-	    // create marshaller and unmarshaller
-	    tmpMarshaller = tmpJaxbCtx.createMarshaller();
-	    tmpUnmarshaller = tmpJaxbCtx.createUnmarshaller();
+	    tmpMarshaller = new MarshallerImpl();
 
 	    // instantiate w3 stuff
 	    tmpW3Factory = DocumentBuilderFactory.newInstance();
@@ -123,63 +104,33 @@ public final class JAXBMarshaller implements WSMarshaller {
 	    // instantiate soap stuff
 	    tmpSoapFactory = MessageFactory.newInstance();
 	} catch (Exception ex) {
-	    ex.printStackTrace(System.err);
+	    logger.error("Failed to initialize XML components.", ex);
 	    System.exit(1); // non recoverable
 	}
 
-	jaxbCtx = tmpJaxbCtx;
 	marshaller = tmpMarshaller;
-	unmarshaller = tmpUnmarshaller;
 	w3Factory = tmpW3Factory;
 	w3Builder = tmpW3Builder;
 	serializer = tmpSerializer;
 	soapFactory = tmpSoapFactory;
     }
 
-    private static Class[] getJaxbClasses() {
-	ClassLoader cl = Thread.currentThread().getContextClassLoader();
-	List<Class> classes = new LinkedList<Class>();
-	InputStream classListStream = cl.getResourceAsStream("classes.lst");
-	InputStream classListStreamC = cl.getResourceAsStream("/classes.lst");
-
-	if (classListStream == null && classListStreamC == null) {
-	    System.err.println("Error loading classes.lst");
-	} else {
-	    // select the one stream that is set
-	    classListStream = (classListStream != null) ? classListStream : classListStreamC;
-
-	    try {
-		LineNumberReader r = new LineNumberReader(new InputStreamReader(classListStream));
-		String next;
-		// read all entries from file
-		while ((next = r.readLine()) != null) {
-		    try {
-			// load class and see if it is a JAXB class
-			Class c = cl.loadClass(next);
-			if (c.getAnnotation(XmlType.class) != null) {
-			    classes.add(c);
-			}
-		    } catch (ClassNotFoundException ex) {
-			System.err.println(ex.getMessage());
-		    }
-		}
-	    } catch (IOException ex) {
-		System.err.println(ex.getMessage());
-	    }
-	}
-
-	return classes.toArray(new Class[classes.size()]);
-    }
 
 
     ////////////////////////////////////////////////////////////////////////////
     // public functions to marshal and convert stuff
     ////////////////////////////////////////////////////////////////////////////
 
-
-    public synchronized MessageFactory getSoapFactory() {
-	return soapFactory;
+    @Override
+    public void addXmlTypeClass(Class xmlTypeClass) throws MarshallingTypeException {
+	marshaller.addXmlClass(xmlTypeClass);
     }
+
+    @Override
+    public void removeAllTypeClasses() {
+	marshaller.removeAllClasses();
+    }
+
 
     @Override
     public synchronized Document str2doc(String docStr) throws SAXException {
@@ -235,7 +186,7 @@ public final class JAXBMarshaller implements WSMarshaller {
 
 	Object result;
 	try {
-	    result = unmarshaller.unmarshal(newDoc); //NOI18N
+	    result = marshaller.getUnmarshaller().unmarshal(newDoc); //NOI18N
 	} catch (JAXBException ex) {
 	    throw new MarshallingTypeException(ex);
 	}
@@ -249,7 +200,7 @@ public final class JAXBMarshaller implements WSMarshaller {
 	    XMLStreamWriter xmlStreamWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(sw);
 	    // wrap writer so specific ns prefixes are written out correctly
 	    XMLStreamWriterWrapper xmlwrap = new XMLStreamWriterWrapper(xmlStreamWriter);
-	    marshaller.marshal(o, xmlwrap);
+	    marshaller.getMarshaller().marshal(o, xmlwrap);
 	    return str2doc(sw.toString());
 	} catch (Exception ex) {
 	    throw new MarshallingTypeException(ex);

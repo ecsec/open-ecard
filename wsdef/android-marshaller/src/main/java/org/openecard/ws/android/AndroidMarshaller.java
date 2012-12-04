@@ -188,6 +188,18 @@ public class AndroidMarshaller implements WSMarshaller {
 	}
     }
 
+
+    @Override
+    public void addXmlTypeClass(Class xmlTypeClass) throws MarshallingTypeException {
+	// not available in this implementation
+    }
+
+    @Override
+    public void removeAllTypeClasses() {
+	// not available in this implementation
+    }
+
+
     @Override
     public synchronized String doc2str(Node doc) throws TransformerException {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();

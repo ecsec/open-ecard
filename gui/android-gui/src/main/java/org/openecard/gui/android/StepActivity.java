@@ -197,6 +197,12 @@ public class StepActivity extends Activity {
 		Button cancel = (Button) findViewById(R.id.button_cancel);
 		cancel.setOnClickListener(new OnClickListener() {
 		    public void onClick(View v) {
+			// in case there is a running action, kill it and bail out
+			if (AndroidNavigator.action != null && ! AndroidNavigator.action.isDone()) {
+			    //logger.debug("Canceling execution of the currently running StepAction.");
+			    AndroidNavigator.action.cancel(true);
+			    return;
+			}
 			try {
 			    AndroidNavigator.getInstance().setStepResult(false, true, getResultContent());
 			} catch (InterruptedException e) {
@@ -249,6 +255,8 @@ public class StepActivity extends Activity {
 		@Override
 		public void run() {
 		    try {
+			Button next = (Button) findViewById(R.id.button_next);
+			next.setVisibility(View.GONE);
 			AndroidNavigator.getInstance().setStepResult(false, false, getResultContent());
 		    } catch (InterruptedException ignore) {
 		    }

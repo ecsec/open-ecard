@@ -48,6 +48,7 @@ public class AndroidNavigator implements UserConsentNavigator {
     public static List<Step> steps;
     public static AndroidStepResult stepResult;
     private static AndroidNavigator instance = null;
+    static Future action;
 
     public static AndroidNavigator getInstance() {
 	return instance;
@@ -77,8 +78,7 @@ public class AndroidNavigator implements UserConsentNavigator {
 
     @Override
     public void setRunningAction(Future action) {
-	// TODO: implement cancel of the action as shown in SwingNavigator
-	throw new UnsupportedOperationException("Not supported yet.");
+	this.action = action;
     }
 
     @Override

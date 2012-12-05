@@ -25,19 +25,20 @@ package org.openecard.control.binding.http;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import org.apache.http.ConnectionReuseStrategy;
-import org.apache.http.HttpResponseFactory;
-import org.apache.http.impl.DefaultConnectionReuseStrategy;
-import org.apache.http.impl.DefaultHttpResponseFactory;
-import org.apache.http.impl.DefaultHttpServerConnection;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.BasicHttpProcessor;
-import org.apache.http.protocol.HttpProcessor;
-import org.apache.http.protocol.HttpRequestHandler;
-import org.apache.http.protocol.HttpRequestHandlerRegistry;
-import org.apache.http.protocol.HttpService;
-import org.apache.http.protocol.ImmutableHttpProcessor;
+import org.openecard.apache.http.ConnectionReuseStrategy;
+import org.openecard.apache.http.HttpResponseFactory;
+import org.openecard.apache.http.impl.DefaultConnectionReuseStrategy;
+import org.openecard.apache.http.impl.DefaultHttpResponseFactory;
+import org.openecard.apache.http.impl.DefaultHttpServerConnection;
+import org.openecard.apache.http.params.BasicHttpParams;
+import org.openecard.apache.http.params.HttpParams;
+import org.openecard.apache.http.protocol.BasicHttpContext;
+import org.openecard.apache.http.protocol.BasicHttpProcessor;
+import org.openecard.apache.http.protocol.HttpProcessor;
+import org.openecard.apache.http.protocol.HttpRequestHandler;
+import org.openecard.apache.http.protocol.HttpRequestHandlerRegistry;
+import org.openecard.apache.http.protocol.HttpService;
+import org.openecard.apache.http.protocol.ImmutableHttpProcessor;
 import org.openecard.control.handler.ControlHandler;
 import org.openecard.control.handler.ControlHandlers;
 import org.slf4j.Logger;
@@ -74,8 +75,6 @@ public class HTTPService implements Runnable {
 	HttpResponseFactory responseFactory = new DefaultHttpResponseFactory();
 	// Interceptors
 	HttpProcessor httpProcessor = new ImmutableHttpProcessor(interceptors, interceptors);
-	// Deprecated since 4.1 but the only constructor in Android
-	service = new HttpService(httpProcessor, connectionReuseStrategy, responseFactory);
 
 	// Set up handler registry
 	HttpRequestHandlerRegistry handlerRegistry = new HttpRequestHandlerRegistry();
@@ -88,8 +87,9 @@ public class HTTPService implements Runnable {
 	    }
 	}
 
-	// Add handler registry
-	service.setHandlerResolver(handlerRegistry);
+	// create service instance
+	HttpParams params = new BasicHttpParams();
+	service = new HttpService(httpProcessor, connectionReuseStrategy, responseFactory, handlerRegistry, params);
     }
 
     /**

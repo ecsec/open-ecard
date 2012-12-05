@@ -17,8 +17,9 @@
 
     <dependencies>
 	<dependency>
-	    <groupId>org.apache.httpcomponents</groupId>
-	    <artifactId>httpcore</artifactId>
+	    <groupId>org.openecard.transport</groupId>
+	    <artifactId>http-core-shade</artifactId>
+	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
 	    <groupId>org.openecard.control.module</groupId>

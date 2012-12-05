@@ -23,10 +23,10 @@
 package org.openecard.control.binding.http.interceptor;
 
 import java.io.IOException;
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.protocol.HttpContext;
+import org.openecard.apache.http.HttpException;
+import org.openecard.apache.http.HttpRequest;
+import org.openecard.apache.http.HttpRequestInterceptor;
+import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.control.binding.http.common.HttpRequestWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

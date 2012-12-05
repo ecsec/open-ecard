@@ -22,7 +22,7 @@
 
 package org.openecard.transport.httpcore;
 
-import org.apache.http.HttpRequest;
+import org.openecard.apache.http.HttpRequest;
 import org.openecard.common.Version;
 
 

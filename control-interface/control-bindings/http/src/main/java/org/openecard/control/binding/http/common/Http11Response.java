@@ -22,8 +22,13 @@
 
 package org.openecard.control.binding.http.common;
 
-import org.apache.http.*;
-import org.apache.http.message.BasicHttpResponse;
+import org.openecard.apache.http.Header;
+import org.openecard.apache.http.HeaderIterator;
+import org.openecard.apache.http.HttpEntity;
+import org.openecard.apache.http.HttpResponse;
+import org.openecard.apache.http.HttpVersion;
+import org.openecard.apache.http.StatusLine;
+import org.openecard.apache.http.message.BasicHttpResponse;
 
 
 /**

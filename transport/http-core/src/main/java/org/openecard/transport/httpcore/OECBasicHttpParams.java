@@ -22,9 +22,9 @@
 
 package org.openecard.transport.httpcore;
 
-import org.apache.http.HttpVersion;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreProtocolPNames;
+import org.openecard.apache.http.HttpVersion;
+import org.openecard.apache.http.params.BasicHttpParams;
+import org.openecard.apache.http.params.CoreProtocolPNames;
 import org.openecard.common.Version;
 
 

@@ -23,6 +23,7 @@
 package org.openecard.android;
 
 import android.app.Application;
+import de.bund.bsi.ecard.api._1.TerminateFramework;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
@@ -59,7 +60,6 @@ import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.openecard.ws.marshal.WsdefProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.bund.bsi.ecard.api._1.TerminateFramework;
 
 
 /**

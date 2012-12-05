@@ -120,11 +120,6 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.apache.httpcomponents</groupId>
-	    <artifactId>httpcore</artifactId>
-	    <scope>provided</scope>
-	</dependency>
-	<dependency>
 	    <groupId>org.openecard.control.bindings</groupId>
 	    <artifactId>intent</artifactId>
 	    <version>${project.version}</version>

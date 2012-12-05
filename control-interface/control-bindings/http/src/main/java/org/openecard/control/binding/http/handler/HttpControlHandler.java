@@ -23,10 +23,10 @@
 package org.openecard.control.binding.http.handler;
 
 import java.io.IOException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestHandler;
+import org.openecard.apache.http.HttpRequest;
+import org.openecard.apache.http.HttpResponse;
+import org.openecard.apache.http.protocol.HttpContext;
+import org.openecard.apache.http.protocol.HttpRequestHandler;
 import org.openecard.control.handler.ControlHandler;
 
 
@@ -54,7 +54,6 @@ public abstract class HttpControlHandler extends ControlHandler implements HttpR
      * @throws IOException
      */
     @Override
-    public abstract void handle(HttpRequest request, HttpResponse response, HttpContext context)
-	throws IOException;
+    public abstract void handle(HttpRequest request, HttpResponse response, HttpContext context) throws IOException;
 
 }

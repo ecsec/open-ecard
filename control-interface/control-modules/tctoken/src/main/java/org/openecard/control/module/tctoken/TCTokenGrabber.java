@@ -30,15 +30,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.message.BasicHttpEntityEnclosingRequest;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestExecutor;
+import org.openecard.apache.http.Header;
+import org.openecard.apache.http.HttpEntity;
+import org.openecard.apache.http.HttpException;
+import org.openecard.apache.http.HttpResponse;
+import org.openecard.apache.http.StatusLine;
+import org.openecard.apache.http.message.BasicHttpEntityEnclosingRequest;
+import org.openecard.apache.http.protocol.BasicHttpContext;
+import org.openecard.apache.http.protocol.HttpContext;
+import org.openecard.apache.http.protocol.HttpRequestExecutor;
 import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.crypto.tls.TlsProtocolHandler;
 import org.openecard.common.io.LimitedInputStream;
@@ -138,7 +138,6 @@ public class TCTokenGrabber {
 		    entity = response.getEntity();
 		    finished = true;
 	    }
-
 	}
 
 	LimitedInputStream is = new LimitedInputStream(entity.getContent());

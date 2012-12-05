@@ -23,8 +23,8 @@
 package org.openecard.transport.httpcore;
 
 import java.io.OutputStream;
-import org.apache.http.impl.io.AbstractSessionOutputBuffer;
-import org.apache.http.params.HttpParams;
+import org.openecard.apache.http.impl.io.AbstractSessionOutputBuffer;
+import org.openecard.apache.http.params.HttpParams;
 
 
 /**

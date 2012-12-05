@@ -32,8 +32,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.apache.http.impl.io.AbstractSessionInputBuffer;
-import org.apache.http.params.HttpParams;
+import org.openecard.apache.http.impl.io.AbstractSessionInputBuffer;
+import org.openecard.apache.http.params.HttpParams;
 
 
 /**

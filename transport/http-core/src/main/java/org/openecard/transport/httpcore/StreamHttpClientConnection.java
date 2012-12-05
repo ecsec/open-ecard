@@ -25,8 +25,8 @@ package org.openecard.transport.httpcore;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.apache.http.impl.AbstractHttpClientConnection;
-import org.apache.http.params.HttpParams;
+import org.openecard.apache.http.impl.AbstractHttpClientConnection;
+import org.openecard.apache.http.params.HttpParams;
 
 
 /**

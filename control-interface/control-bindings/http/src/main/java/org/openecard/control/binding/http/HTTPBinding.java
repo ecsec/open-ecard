@@ -23,7 +23,7 @@
 package org.openecard.control.binding.http;
 
 import java.io.IOException;
-import org.apache.http.protocol.BasicHttpProcessor;
+import org.openecard.apache.http.protocol.BasicHttpProcessor;
 import org.openecard.control.binding.ControlBinding;
 import org.openecard.control.binding.http.common.DocumentRoot;
 import org.openecard.control.binding.http.handler.common.DefaultHandler;

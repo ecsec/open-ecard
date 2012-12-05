@@ -15,48 +15,6 @@
     <packaging>jar</packaging>
     <name>Rich Client</name>
 
-    <build>
-	<plugins>
-	    <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-jar-plugin</artifactId>
-		<configuration>
-		    <archive>
-			<index>true</index>
-			<manifest>
-			    <addClasspath>true</addClasspath>
-			    <useUniqueVersions>false</useUniqueVersions>
-			    <mainClass>org.openecard.richclient.RichClient</mainClass>
-			</manifest>
-		    </archive>
-		</configuration>
-	    </plugin>
-	    <plugin>
-		<groupId>org.codehaus.mojo</groupId>
-		<artifactId>build-helper-maven-plugin</artifactId>
-		<executions>
-		    <execution>
-			<id>add-test-resource</id>
-			<phase>generate-test-sources</phase>
-			<goals>
-			    <goal>add-test-resource</goal>
-			</goals>
-			<configuration>
-			    <resources>
-				<resource>
-				    <directory>../client-connector/src/main/resources/</directory>
-				    <excludes>
-					<exclude>**/folder-to-exclude/**</exclude>
-				    </excludes>
-				</resource>
-			    </resources>
-			</configuration>
-		    </execution>
-		</executions>
-	    </plugin>
-	</plugins>
-    </build>
-
 
     <properties>
 	<!-- These properties can be set from the commandline to override the selected certificate -->
@@ -69,13 +27,36 @@
 	<wininstall.tmp.dirname>wix-tmp</wininstall.tmp.dirname>
 	<wininstall.tmp.dir>${project.build.directory}/${wininstall.tmp.dirname}</wininstall.tmp.dir>
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
-	<openecard.richclient.version>${project.version}-${maven.build.timestamp}</openecard.richclient.version>
     </properties>
+
+
+    <build>
+	<pluginManagement>
+	    <plugins>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-jar-plugin</artifactId>
+		    <configuration>
+			<archive>
+			    <index>true</index>
+			    <manifest>
+				<addClasspath>true</addClasspath>
+				<useUniqueVersions>false</useUniqueVersions>
+				<mainClass>org.openecard.richclient.RichClient</mainClass>
+			    </manifest>
+			</archive>
+		    </configuration>
+		</plugin>
+	    </plugins>
+	</pluginManagement>
+    </build>
 
     <profiles>
 	<profile>
 	    <id>bundled-jar</id>
+	    <activation>
+	    	<activeByDefault>true</activeByDefault>
+	    </activation>
 	    <build>
 		<plugins>
 		    <plugin>
@@ -88,43 +69,8 @@
 				    <goal>shade</goal>
 				</goals>
 				<configuration>
-				    <!--
-					The reduced pom excludes transitive dependencies of test scope
-					libraries, eg. com.beust.jcommander from org.testng.testng, so
-					a subsequent test run (eg. started by cobertura) will miss some
-					dependencies
-				    -->
-				    <createDependencyReducedPom>false</createDependencyReducedPom>
-				    <filters>
-					<filter>
-					    <artifact>*:*</artifact>
-					    <excludes>
-						<exclude>META-INF/**/pom.xml</exclude>
-						<exclude>META-INF/**/pom.properties</exclude>
-					    </excludes>
-					</filter>
-				    </filters>
-				</configuration>
-			    </execution>
-			</executions>
-		    </plugin>
-		</plugins>
-	    </build>
-	</profile>
-	<profile>
-	    <id>webstart</id>
-	    <build>
-		<plugins>
-		    <plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-shade-plugin</artifactId>
-			<executions>
-			    <execution>
-				<phase>package</phase>
-				<goals>
-				    <goal>shade</goal>
-				</goals>
-				<configuration>
+				    <shadedClassifierName>bundle</shadedClassifierName>
+				    <shadedArtifactAttached>true</shadedArtifactAttached>
 				    <!--
 					The reduced pom excludes transitive dependencies of test scope
 					libraries, eg. com.beust.jcommander from org.testng.testng, so
@@ -160,72 +106,12 @@
 				    <storepass>${sign.storepass}</storepass>
 				    <alias>${sign.alias}</alias>
 				    <keypass>${sign.keypass}</keypass>
-				    <archive>${project.build.directory}/${project.build.FinalName}.${project.packaging}</archive>
-				</configuration>
-			    </execution>
-			</executions>
-		    </plugin>
-		    <plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-dependency-plugin</artifactId>
-			<executions>
-			    <execution>
-				<phase>package</phase>
-				<goals>
-				    <goal>copy</goal>
-				</goals>
-				<configuration>
-				    <artifactItems>
-					<artifactItem>
-					    <groupId>${project.groupId}</groupId>
-					    <artifactId>${project.artifactId}</artifactId>
-					    <version>${project.version}</version>
-					    <type>${project.packaging}</type>
-					    <outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
-					    <destFileName>richclient-${openecard.richclient.version}__V${openecard.richclient.version}.jar</destFileName>
-					</artifactItem>
-				    </artifactItems>
-				</configuration>
-			    </execution>
-			</executions>
-		    </plugin>
-		    <plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-war-plugin</artifactId>
-			<executions>
-			    <execution>
-				<phase>package</phase>
-				<goals>
-				    <goal>war</goal>
-				</goals>
-				<configuration>
-				    <warSourceDirectory>src/main/webstart/webapp</warSourceDirectory>
-				    <packagingExcludes>
-					%regex[WEB-INF/lib/(?!jnlp-servlet).*],
-					WEB-INF/classes/
-				    </packagingExcludes>
-				    <webResources>
-					<resource>
-					    <directory>src/main/webstart/webapp</directory>
-					    <filtering>true</filtering>
-					    <includes>
-						<include>openecard.jnlp</include>
-					    </includes>
-					</resource>
-				    </webResources>
 				</configuration>
 			    </execution>
 			</executions>
 		    </plugin>
 		</plugins>
 	    </build>
-	    <dependencies>
-		<dependency>
-		    <groupId>jnlp.sample.servlet</groupId>
-		    <artifactId>jnlp-servlet</artifactId>
-		    <version>1.6.0_33</version>
-		</dependency>
-	    </dependencies>
 	</profile>
 	<profile>
 	    <id>windows-installer</id>

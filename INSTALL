@@ -80,8 +80,6 @@ Module `clients/applet`
   Bundle SLF4J extension artifact, so that the applet can emit trace logs.
 
 Module `clients/richclient`
-* `bundled-jar`
-  Create a fatjar (standalone executable) capable of starting the richclient.
 * `webstart`
   Create a war (Web ARchive) containing a JNLP file and the richclient
   artifact.

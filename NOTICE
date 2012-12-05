@@ -18,7 +18,6 @@ The following software projects are included/used(*) in this software distributi
  - cyberJack PCSC (http://www.reiner-sct.com/index.php?option=content&task=view&id=243)
  - Google Android SDK (http://source.android.com)
  - JNLP Sample Servlet (Oracle JDK Samples)
- - JSON Parser (http://www.json.org)
  - libusbx (http://libusbx.org/)
  - Logback (http://logback.qos.ch/)
  - OpenJDK (http://openjdk.java.net)

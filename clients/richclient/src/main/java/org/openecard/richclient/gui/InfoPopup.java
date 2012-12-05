@@ -24,7 +24,9 @@ package org.openecard.richclient.gui;
 
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.JDialog;
@@ -39,6 +41,8 @@ import javax.swing.JDialog;
 public class InfoPopup extends JDialog {
 
     private static final long serialVersionUID = 1L;
+
+    private static final int DISTANCE_TO_TASKBAR = 2; // in px
 
     private Point point;
 
@@ -75,21 +79,25 @@ public class InfoPopup extends JDialog {
     }
 
     private Point calculatePosition(Container c, Point p) {
+	GraphicsEnvironment gEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+	Rectangle scrnSize = gEnv.getDefaultScreenDevice().getDefaultConfiguration().getBounds();
+	Rectangle winSize = gEnv.getMaximumWindowBounds();
+	Dimension popupSize = c.getPreferredSize();
 	int x;
 	int y;
-	Dimension d = c.getPreferredSize();
 
-	// calculate X coordinate
-	if (p.x - d.width > 0) {
-	    x = p.x - d.width;
-	} else {
-	    x = p.x;
-	}
-	// calculate Y coordinate
-	if (p.y - d.height > 0) {
-	    y = p.y - d.height;
-	} else {
-	    y = p.y;
+	if (winSize.x > 5) { // taskbar left
+	    x = winSize.x + DISTANCE_TO_TASKBAR;
+	    y = p.y > (winSize.height / 2) ? p.y - popupSize.height : p.y;
+	} else if (winSize.y > 5) { // taskbar top
+	    x = p.x > (winSize.width / 2) ? p.x - popupSize.width : p.x;
+	    y = winSize.y + DISTANCE_TO_TASKBAR;
+	} else if (scrnSize.width > winSize.width) { // taskbar right
+	    x = winSize.width - popupSize.width - DISTANCE_TO_TASKBAR;
+	    y = p.y > (winSize.height / 2) ? p.y - popupSize.height : p.y;
+	} else { // taskbar bottom
+	    x = p.x > (winSize.width / 2) ? p.x - popupSize.width : p.x;
+	    y = winSize.height - popupSize.height - DISTANCE_TO_TASKBAR;
 	}
 
 	return new Point(x, y);

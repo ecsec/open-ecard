@@ -18,7 +18,7 @@
 
     <properties>
 	<!-- These properties can be set from the commandline to override the selected certificate -->
-	<sign.keystore>src/main/webstart/keystore.jks</sign.keystore>
+	<sign.keystore>src/package/resources/keystore/keystore.jks</sign.keystore>
 	<sign.storepass>123456</sign.storepass>
 	<sign.keypass>123456</sign.keypass>
 	<sign.alias>selfsigned</sign.alias>

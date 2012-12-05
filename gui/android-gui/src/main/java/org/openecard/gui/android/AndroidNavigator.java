@@ -24,9 +24,7 @@ package org.openecard.gui.android;
 
 import android.content.Context;
 import android.content.Intent;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Exchanger;
 import java.util.concurrent.Future;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
@@ -41,13 +39,13 @@ import org.openecard.gui.definition.Step;
  */
 public class AndroidNavigator implements UserConsentNavigator {
 
-    private int curStep = -1;
+    int curStep = -1;
     private final int numSteps;
     private Context context;
     private StepActivity activity;
     public static List<Step> steps;
     public static AndroidStepResult stepResult;
-    private static AndroidNavigator instance = null;
+    private static AndroidNavigator instance;
     static Future action;
 
     public static AndroidNavigator getInstance() {
@@ -86,10 +84,8 @@ public class AndroidNavigator implements UserConsentNavigator {
 	activity.finish();
     }
 
-    public void setStepResult(boolean back, boolean cancelled, List<OutputInfoUnit> results) throws InterruptedException {
-	AndroidNavigator.stepResult.done = true;
-	stepResult.back = back;
-	stepResult.cancelled = cancelled;
+    public void setStepResult(ResultStatus status, List<OutputInfoUnit> results) throws InterruptedException {
+	stepResult.status = status;
 	stepResult.results = results;
 	AndroidNavigator.stepResult.syncPoint.exchange(null);
     }
@@ -98,19 +94,19 @@ public class AndroidNavigator implements UserConsentNavigator {
 	return stepResult;
     }
 
-    public int getCurrentStep(){
+    public int getCurrentStep() {
 	return curStep;
     }
 
     @Override
     public StepResult current() {
-	AndroidNavigator.stepResult.done = false;
+	stepResult.status = null;
 	activity.showStep(steps.get(curStep));
 	return this.getStepResult();
     }
 
-    public boolean hasPrevious(){
-	return curStep>=1;
+    public boolean hasPrevious() {
+	return curStep >= 1;
     }
 
     @Override
@@ -120,7 +116,7 @@ public class AndroidNavigator implements UserConsentNavigator {
 
     @Override
     public StepResult next() {
-	AndroidNavigator.stepResult.done = false;
+	stepResult.status = null;
 	curStep++;
 	activity.showStep(steps.get(curStep));
 	return this.getStepResult();
@@ -128,7 +124,7 @@ public class AndroidNavigator implements UserConsentNavigator {
 
     @Override
     public StepResult previous() {
-	AndroidNavigator.stepResult.done = false;
+	stepResult.status = null;
 	curStep--;
 	activity.showStep(steps.get(curStep));
 	return this.getStepResult();
@@ -147,100 +143,6 @@ public class AndroidNavigator implements UserConsentNavigator {
     @Override
     public StepResult replacePrevious(Step arg0) {
 	throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    class AndroidStepResult implements StepResult {
-
-	public Exchanger syncPoint = new Exchanger();
-	public boolean done = false;
-	public boolean cancelled = false;
-	public boolean back = false;
-	public List<OutputInfoUnit> results = null;
-
-	@Override
-	public Step getStep() {
-	    return steps.get(curStep);
-	}
-
-	@Override
-	public String getStepID() {
-	    return getStep().getID();
-	}
-
-	@Override
-	public ResultStatus getStatus() {
-	    if (!done) {
-		try {
-		    syncPoint.exchange(null);
-		} catch (InterruptedException ex) {
-		}
-	    }
-	    // return appropriate result
-	    synchronized (this) {
-		if (cancelled) {
-		    return ResultStatus.CANCEL;
-		} else if (back) {
-		    return ResultStatus.BACK;
-		} else {
-		    return ResultStatus.OK;
-		}
-	    }
-	}
-
-	@Override
-	public boolean isOK() {
-	    if (!done) {
-		try {
-		    syncPoint.exchange(null);
-		} catch (InterruptedException ex) {
-		}
-	    }
-	    synchronized (this) {
-		return getStatus() == ResultStatus.OK;
-	    }
-	}
-
-	@Override
-	public boolean isBack() {
-	    if (!done) {
-		try {
-		    syncPoint.exchange(null);
-		} catch (InterruptedException ex) {
-		}
-	    }
-	    synchronized (this) {
-		return getStatus() == ResultStatus.BACK;
-	    }
-	}
-
-	@Override
-	public boolean isCancelled() {
-	    if (!done) {
-		try {
-		    syncPoint.exchange(null);
-		} catch (InterruptedException ex) {
-		}
-	    }
-	    synchronized (this) {
-		return getStatus() == ResultStatus.CANCEL;
-	    }
-	}
-
-	@Override
-	public List<OutputInfoUnit> getResults() {
-	    if (!done) {
-		try {
-		    syncPoint.exchange(null);
-		} catch (InterruptedException ex) {
-		}
-	    }
-	    synchronized (this) {
-		if (results == null && stepResult.results!=null) {
-		    results = Collections.unmodifiableList(stepResult.results);
-		}
-		return results;
-	    }
-	}
     }
 
 }

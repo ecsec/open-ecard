@@ -37,6 +37,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
+import org.openecard.gui.ResultStatus;
 import org.openecard.gui.android.views.StepView;
 import org.openecard.gui.definition.AbstractBox;
 import org.openecard.gui.definition.Hyperlink;
@@ -204,7 +205,7 @@ public class StepActivity extends Activity {
 			    return;
 			}
 			try {
-			    AndroidNavigator.getInstance().setStepResult(false, true, getResultContent());
+			    AndroidNavigator.getInstance().setStepResult(ResultStatus.CANCEL, getResultContent());
 			} catch (InterruptedException e) {
 			    e.printStackTrace();
 			}
@@ -222,7 +223,7 @@ public class StepActivity extends Activity {
 		    public void onClick(View v) {
 
 			try {
-			    AndroidNavigator.getInstance().setStepResult(true, false, getResultContent());
+			    AndroidNavigator.getInstance().setStepResult(ResultStatus.BACK, getResultContent());
 			} catch (InterruptedException e) {
 
 			    e.printStackTrace();
@@ -241,7 +242,7 @@ public class StepActivity extends Activity {
 		next.setOnClickListener(new OnClickListener() {
 		    public void onClick(View v) {
 			try {
-			    AndroidNavigator.getInstance().setStepResult(false, false, getResultContent());
+			    AndroidNavigator.getInstance().setStepResult(ResultStatus.OK, getResultContent());
 			} catch (InterruptedException e) {
 			    e.printStackTrace();
 			}
@@ -257,7 +258,7 @@ public class StepActivity extends Activity {
 		    try {
 			Button next = (Button) findViewById(R.id.button_next);
 			next.setVisibility(View.GONE);
-			AndroidNavigator.getInstance().setStepResult(false, false, getResultContent());
+			AndroidNavigator.getInstance().setStepResult(ResultStatus.OK, getResultContent());
 		    } catch (InterruptedException ignore) {
 		    }
 		}

@@ -506,7 +506,7 @@
 				<packages>org.openecard.client.maven.classlist</packages>
 			    </group>
 			</groups>
-			<!-- <excludePackageNames>org.openecard.client.maven.classlist</excludePackageNames> -->
+			<excludePackageNames>org.openecard.bouncycastle.*:org.openecard.apache.http.*</excludePackageNames>
 		    </configuration>
 		</plugin>
 		<plugin>

@@ -53,6 +53,7 @@ public class MainActivity extends Activity {
 	Editor editor = getSharedPreferences("clear_cache", Context.MODE_PRIVATE).edit();
 	editor.clear();
 	editor.commit();
+	super.onDestroy();
 	System.exit(0);
     }
 
@@ -101,13 +102,10 @@ public class MainActivity extends Activity {
 				break;
 			    }
 			}
-
-			startActivity(browserIntent);
-			Intent i = new Intent(MainActivity.this, AboutActivity.class);
-			i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(i);
-			onDestroy();
-
+			if (browserIntent != null) {
+			    startActivity(browserIntent);
+			}
+			MainActivity.this.finish();
 		    }
 		});
 

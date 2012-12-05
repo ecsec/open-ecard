@@ -59,6 +59,7 @@ import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.openecard.ws.WsdefProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.bund.bsi.ecard.api._1.TerminateFramework;
 
 
 /**
@@ -80,7 +81,7 @@ public class ApplicationContext extends Application {
     private TinyManagement management;
     private byte[] contextHandle;
     private Dispatcher dispatcher;
-    private boolean initialized = false;
+    private boolean initialized;
     private boolean recognizeCard = true;
     private UserConsent gui;
     private AndroidTerminalFactory terminalFactory;
@@ -105,18 +106,65 @@ public class ApplicationContext extends Application {
      * Shut down the whole client by shutting down components.
      */
     public void shutdown() {
-	// shutdwon event manager
-	em.terminate();
-
-	// shutdown SAL
-	Terminate terminate = new Terminate();
-	sal.terminate(terminate);
-
-	// shutdown IFD
-	ReleaseContext releaseContext = new ReleaseContext();
-	releaseContext.setContextHandle(contextHandle);
-	ifd.releaseContext(releaseContext);
-	terminalFactory.stop();
+	// destroy EventManager
+	try {
+	    if (em != null) {
+		em.terminate();
+	    }
+	} catch (Exception ex) {
+	    logger.error("An exception occurred while destroying EventManager.", ex);
+	} finally {
+	    em = null;
+	    recognition = null;
+	}
+	// destroy Management
+	try {
+	    if (management != null) {
+		TerminateFramework terminateFramework = new TerminateFramework();
+		management.terminateFramework(terminateFramework);
+	    }
+	} catch (Exception ex) {
+	    logger.error("An exception occurred while destroying Management.", ex);
+	} finally {
+	    management = null;
+	}
+	// destroy SAL
+	try {
+	    if (sal != null) {
+		Terminate terminate = new Terminate();
+		sal.terminate(terminate);
+	    }
+	} catch (Exception ex) {
+	    logger.error("An exception occurred while destroying SAL.", ex);
+	} finally {
+	    sal = null;
+	    cardStates = null;
+	}
+	// destroy IFD
+	try {
+	    if (ifd != null) {
+		ReleaseContext releaseContext = new ReleaseContext();
+		releaseContext.setContextHandle(contextHandle);
+		ifd.releaseContext(releaseContext);
+	    }
+	} catch (Exception ex) {
+	    logger.error("An exception occurred while destroying IFD.", ex);
+	} finally {
+	    ifd = null;
+	    contextHandle = null;
+	}
+	// destroy TerminalFactory
+	try {
+	    if (terminalFactory != null) {
+		terminalFactory.stop();
+	    }
+	} catch (Exception ex) {
+	    logger.error("An exception occurred while destroying TerminalFactory.", ex);
+	} finally {
+	    terminalFactory = null;
+	}
+	// destroy the remaining components
+	env = null;
     }
 
     /**

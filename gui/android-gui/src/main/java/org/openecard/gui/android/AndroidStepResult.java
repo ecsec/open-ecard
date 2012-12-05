@@ -32,9 +32,8 @@ import org.openecard.gui.definition.Step;
 
 
 /**
- * 
+ *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * 
  */
 class AndroidStepResult implements StepResult {
 
@@ -45,6 +44,10 @@ class AndroidStepResult implements StepResult {
 
     public AndroidStepResult() {
 	navigator = AndroidNavigator.getInstance();
+    }
+
+    public Exchanger getSyncPoint() {
+	return syncPoint;
     }
 
     public void setStatus(ResultStatus status) {
@@ -111,7 +114,7 @@ class AndroidStepResult implements StepResult {
 	}
     }
 
-    public void synchronize() {
+    private void synchronize() {
 	if (status == null) {
 	    try {
 		syncPoint.exchange(null);

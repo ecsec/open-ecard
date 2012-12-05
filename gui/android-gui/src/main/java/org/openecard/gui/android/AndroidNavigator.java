@@ -39,14 +39,14 @@ import org.openecard.gui.definition.Step;
  */
 public class AndroidNavigator implements UserConsentNavigator {
 
-    int curStep = -1;
+    private int curStep = -1;
     private final int numSteps;
     private Context context;
     private StepActivity activity;
-    public static List<Step> steps;
-    public static AndroidStepResult stepResult;
+    private static List<Step> steps;
+    private static AndroidStepResult stepResult;
     private static AndroidNavigator instance;
-    static Future action;
+    private static Future action;
 
     public static AndroidNavigator getInstance() {
 	return instance;
@@ -79,15 +79,20 @@ public class AndroidNavigator implements UserConsentNavigator {
 	this.action = action;
     }
 
+    public Future getRunningAction() {
+	return action;
+    }
+
     @Override
     public void close() {
 	activity.finish();
     }
 
     public void setStepResult(ResultStatus status, List<OutputInfoUnit> results) throws InterruptedException {
-	stepResult.status = status;
-	stepResult.results = results;
-	AndroidNavigator.stepResult.syncPoint.exchange(null);
+	stepResult.setStatus(status);
+	stepResult.setResults(results);
+	// don't call synchronize because of the set status it wouldn't call exchange
+	stepResult.getSyncPoint().exchange(null);
     }
 
     public StepResult getStepResult() {
@@ -98,9 +103,13 @@ public class AndroidNavigator implements UserConsentNavigator {
 	return curStep;
     }
 
+    public List<Step> getSteps() {
+	return steps;
+    }
+
     @Override
     public StepResult current() {
-	stepResult.status = null;
+	stepResult.setStatus(null);
 	activity.showStep(steps.get(curStep));
 	return this.getStepResult();
     }
@@ -116,7 +125,7 @@ public class AndroidNavigator implements UserConsentNavigator {
 
     @Override
     public StepResult next() {
-	stepResult.status = null;
+	stepResult.setStatus(null);
 	curStep++;
 	activity.showStep(steps.get(curStep));
 	return this.getStepResult();
@@ -124,7 +133,7 @@ public class AndroidNavigator implements UserConsentNavigator {
 
     @Override
     public StepResult previous() {
-	stepResult.status = null;
+	stepResult.setStatus(null);
 	curStep--;
 	activity.showStep(steps.get(curStep));
 	return this.getStepResult();

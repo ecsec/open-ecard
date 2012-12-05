@@ -37,6 +37,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
+import org.openecard.common.I18n;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.android.views.StepView;
 import org.openecard.gui.definition.AbstractBox;
@@ -50,22 +51,28 @@ import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
 import org.openecard.gui.definition.TextField;
 import org.openecard.gui.definition.ToggleText;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
- * This activity displays a specific step when showStep is called
+ * This activity displays a specific step when showStep is called.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class StepActivity extends Activity {
 
+    private static final Logger logger = LoggerFactory.getLogger(StepActivity.class.getName());
+    private final I18n lang = I18n.getTranslation("gui");
+
     private LinearLayout llGuiInterface;
-    ArrayList<StepView> views = new ArrayList<StepView>();
+    private ArrayList<StepView> views = new ArrayList<StepView>();
     private ActionBar actionBar;
     private LinearLayout llOutwards;
     private ScrollView scrollView;
     private View view;
     private LinearLayout ll1;
+    private AndroidNavigator navigator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,9 +84,10 @@ public class StepActivity extends Activity {
 	scrollView = (ScrollView) findViewById(R.id.scrollView1);
 	view = findViewById(R.id.view1);
 	ll1 = (LinearLayout) findViewById(R.id.linearLayout1);
-	AndroidNavigator.getInstance().setActivity(this);
-	if(savedInstanceState!=null){
-	    this.showStep(AndroidNavigator.steps.get(savedInstanceState.getInt("step")));
+	navigator = AndroidNavigator.getInstance();
+	navigator.setActivity(this);
+	if (savedInstanceState != null) {
+	    showStep(navigator.getSteps().get(savedInstanceState.getInt("step")));
 	}
     }
 
@@ -102,7 +110,7 @@ public class StepActivity extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
 	super.onSaveInstanceState(outState);
-	outState.putInt("step", AndroidNavigator.getInstance().getCurrentStep());
+	outState.putInt("step", navigator.getCurrentStep());
     }
 
     void showStep(final Step step) {
@@ -112,44 +120,21 @@ public class StepActivity extends Activity {
 	    @Override
 	    public void run() {
 		llOutwards.removeAllViews();
-		int i = 0;
-		for(Step p : AndroidNavigator.steps){
-		    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-			     LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-		    layoutParams.setMargins(0, 2, 0, 2);
-		    TextView test = new TextView(StepActivity.this);
-		    test.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
-			test.setText(p.getTitle());
-			test.setWidth(llOutwards.getWidth());
-			//TODO dont use fixed colors -> get from theme
-			test.setTextColor(Color.WHITE);
-			test.setBackgroundColor(0xFF909090);
-			llOutwards.addView(test, layoutParams);
 
-			i++;
-			if(p.getTitle().equals(step.getTitle())){
-			    test.setTypeface(null,Typeface.BOLD);
-			    test.setTextSize(TypedValue.COMPLEX_UNIT_PX, test.getTextSize()*1.2f);
-			    break;
-			}
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+			LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+		layoutParams.setMargins(0, 2, 0, 2);
 
-		}
+		for (Step p : navigator.getSteps()) {
+		    TextView titleBar = createStepTitleBar(p.getTitle());
+		    llOutwards.addView(titleBar, layoutParams);
 
-		llOutwards.addView(scrollView);
+		    if (p.getTitle().equals(step.getTitle())) {
+			titleBar.setTypeface(null, Typeface.BOLD);
+			titleBar.setTextSize(TypedValue.COMPLEX_UNIT_PX, titleBar.getTextSize() * 1.2f);
+			llOutwards.addView(scrollView);
+		    }
 
-		for(;i<AndroidNavigator.steps.size();i++){
-		    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-			     LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-		    layoutParams.setMargins(0, 2, 0, 2);
-		    TextView test = new TextView(StepActivity.this);
-		    test.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
-			test.setText(AndroidNavigator.steps.get(i).getTitle());
-			test.setWidth(llOutwards.getWidth());
-			//TODO dont use fixed colors -> get from theme
-			test.setTextColor(Color.WHITE);
-			test.setBackgroundColor(0xFF909090);
-
-			llOutwards.addView(test, layoutParams);
 		}
 
 		llOutwards.addView(view);
@@ -162,8 +147,9 @@ public class StepActivity extends Activity {
 	    public void run() {
 		llGuiInterface.removeAllViews();
 
-		if ((step.getTitle() != null))
+		if ((step.getTitle() != null)) {
 		    actionBar.setSubtitle(step.getTitle());
+		}
 		org.openecard.gui.android.views.StepView t = null;
 		for (InputInfoUnit infoUnitType : step.getInputInfoUnits()) {
 		    if (infoUnitType.type().equals(InfoUnitElementType.TEXT)) {
@@ -180,10 +166,11 @@ public class StepActivity extends Activity {
 			t = new org.openecard.gui.android.views.Hyperlink((Hyperlink) infoUnitType, StepActivity.this);
 		    } else if (infoUnitType.type().equals(InfoUnitElementType.IMAGE_BOX)) {
 			t = new org.openecard.gui.android.views.ImageBox((ImageBox) infoUnitType, StepActivity.this);
-		    } else if(infoUnitType.type().equals(InfoUnitElementType.TOGGLE_TEXT)){
+		    } else if (infoUnitType.type().equals(InfoUnitElementType.TOGGLE_TEXT)) {
 			t =  new org.openecard.gui.android.views.ToggleText((ToggleText) infoUnitType, StepActivity.this);
 		    } else {
-			// TODO: log warning
+			logger.warn("Not adding currently unsupported InputInfoUnit of type: {}", infoUnitType.type());
+			continue;
 		    }
 		    views.add(t);
 
@@ -199,13 +186,13 @@ public class StepActivity extends Activity {
 		cancel.setOnClickListener(new OnClickListener() {
 		    public void onClick(View v) {
 			// in case there is a running action, kill it and bail out
-			if (AndroidNavigator.action != null && ! AndroidNavigator.action.isDone()) {
-			    //logger.debug("Canceling execution of the currently running StepAction.");
-			    AndroidNavigator.action.cancel(true);
+			if (navigator.getRunningAction() != null && !navigator.getRunningAction().isDone()) {
+			    logger.debug("Canceling execution of the currently running StepAction.");
+			    navigator.getRunningAction().cancel(true);
 			    return;
 			}
 			try {
-			    AndroidNavigator.getInstance().setStepResult(ResultStatus.CANCEL, getResultContent());
+			    navigator.setStepResult(ResultStatus.CANCEL, getResultContent());
 			} catch (InterruptedException e) {
 			    e.printStackTrace();
 			}
@@ -213,7 +200,7 @@ public class StepActivity extends Activity {
 		});
 
 		Button b = (Button) findViewById(R.id.button_back);
-		if(!(AndroidNavigator.getInstance().hasPrevious())){
+		if (!(navigator.hasPrevious())) {
 		    b.setVisibility(View.GONE);
 		} else {
 		    b.setVisibility(View.VISIBLE);
@@ -223,7 +210,7 @@ public class StepActivity extends Activity {
 		    public void onClick(View v) {
 
 			try {
-			    AndroidNavigator.getInstance().setStepResult(ResultStatus.BACK, getResultContent());
+			    navigator.setStepResult(ResultStatus.BACK, getResultContent());
 			} catch (InterruptedException e) {
 
 			    e.printStackTrace();
@@ -233,16 +220,16 @@ public class StepActivity extends Activity {
 		});
 
 		Button next = (Button) findViewById(R.id.button_next);
-		//TODO internationalization
-		if(!AndroidNavigator.getInstance().hasNext()){
-		    next.setText("Senden");
+
+		if (!navigator.hasNext()) {
+		    next.setText(lang.translationForKey("button.finish"));
 		} else {
-		    next.setText("Weiter");
+		    next.setText(lang.translationForKey("button.next"));
 		}
 		next.setOnClickListener(new OnClickListener() {
 		    public void onClick(View v) {
 			try {
-			    AndroidNavigator.getInstance().setStepResult(ResultStatus.OK, getResultContent());
+			    navigator.setStepResult(ResultStatus.OK, getResultContent());
 			} catch (InterruptedException e) {
 			    e.printStackTrace();
 			}
@@ -258,12 +245,23 @@ public class StepActivity extends Activity {
 		    try {
 			Button next = (Button) findViewById(R.id.button_next);
 			next.setVisibility(View.GONE);
-			AndroidNavigator.getInstance().setStepResult(ResultStatus.OK, getResultContent());
+			navigator.setStepResult(ResultStatus.OK, getResultContent());
 		    } catch (InterruptedException ignore) {
 		    }
 		}
 	    });
 	}
+    }
+
+    private TextView createStepTitleBar(String title) {
+	TextView tv = new TextView(StepActivity.this);
+	tv.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
+	tv.setText(title);
+	tv.setWidth(llOutwards.getWidth());
+	// TODO dont use fixed colors -> get from theme
+	tv.setTextColor(Color.WHITE);
+	tv.setBackgroundColor(0xFF909090);
+	return tv;
     }
 
 }

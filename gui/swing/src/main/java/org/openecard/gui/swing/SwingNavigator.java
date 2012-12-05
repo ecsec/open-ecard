@@ -206,7 +206,7 @@ public class SwingNavigator implements UserConsentNavigator, ActionListener {
 	    return;
 	}
 
-	// in case there is a runnign action, kill it and bail out
+	// in case there is a running action, kill it and bail out
 	if (action != null && ! action.isDone()) {
 	    logger.debug("Canceling execution of the currently running StepAction.");
 	    action.cancel(true);

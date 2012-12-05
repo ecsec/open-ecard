@@ -33,8 +33,8 @@ import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.ws.GetCardInfoOrACD;
-import org.openecard.ws.WSMarshaller;
-import org.openecard.ws.WSMarshallerException;
+import org.openecard.ws.marshal.WSMarshaller;
+import org.openecard.ws.marshal.WSMarshallerException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 

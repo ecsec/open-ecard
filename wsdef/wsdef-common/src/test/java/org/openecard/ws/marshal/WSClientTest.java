@@ -20,27 +20,26 @@
  *
  ***************************************************************************/
 
-package org.openecard.ws;
+package org.openecard.ws.marshal;
+
+import org.openecard.ws.marshal.WSClassLoader;
+import java.lang.reflect.InvocationTargetException;
+import org.testng.annotations.Test;
+import static org.testng.Assert.*;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class WSMarshallerException extends Exception {
+public class WSClientTest {
 
-    private static final long serialVersionUID = 1L;
-
-    public WSMarshallerException(String message) {
-	super(message);
-    }
-
-    public WSMarshallerException(Throwable cause) {
-	super(cause);
-    }
-
-    public WSMarshallerException(String message, Throwable cause) {
-	super(message, cause);
+    @Test
+    public void instanceTest() throws NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
+	for (String serviceName : WSClassLoader.getSupportedServices()) {
+	    Object service = WSClassLoader.getClientService(serviceName);
+	    assertNotNull(service);
+	}
     }
 
 }

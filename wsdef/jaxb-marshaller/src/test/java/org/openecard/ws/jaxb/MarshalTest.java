@@ -34,7 +34,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
-import org.openecard.ws.MarshallingTypeException;
+import org.openecard.ws.marshal.MarshallingTypeException;
 import org.openecard.ws.soap.MessageFactory;
 import org.openecard.ws.soap.SOAPBody;
 import org.openecard.ws.soap.SOAPException;

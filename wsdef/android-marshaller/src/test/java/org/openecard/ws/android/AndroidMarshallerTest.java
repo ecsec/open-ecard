@@ -78,7 +78,7 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.sal.anytype.CryptoMarkerType;
 import org.openecard.common.util.StringUtils;
-import org.openecard.ws.WSMarshaller;
+import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.soap.SOAPHeader;
 import org.openecard.ws.soap.SOAPMessage;
 import org.testng.annotations.Test;

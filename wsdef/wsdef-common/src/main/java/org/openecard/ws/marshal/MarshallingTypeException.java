@@ -20,9 +20,27 @@
  *
  ***************************************************************************/
 
+package org.openecard.ws.marshal;
+
+
 /**
- * JAXB and JAX-WS abstractions to be able to run on platforms without the javax packages, e.g. Android.
- * These classes provide the necessary abstractions and a few helpers to simplify life when dealing with JAXB and
- * JAX-WS.
+ *
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-package org.openecard.ws;
+public class MarshallingTypeException extends WSMarshallerException {
+
+    private static final long serialVersionUID = 1L;
+
+    public MarshallingTypeException(String message) {
+	super(message);
+    }
+
+    public MarshallingTypeException(Throwable cause) {
+	super(cause);
+    }
+
+    public MarshallingTypeException(String message, Throwable cause) {
+	super(message, cause);
+    }
+
+}

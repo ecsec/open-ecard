@@ -22,7 +22,7 @@
 
 package org.openecard.ws.soap;
 
-import org.openecard.ws.WSMarshallerException;
+import org.openecard.ws.marshal.WSMarshallerException;
 
 
 /**

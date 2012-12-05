@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.ws;
+package org.openecard.ws.marshal;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

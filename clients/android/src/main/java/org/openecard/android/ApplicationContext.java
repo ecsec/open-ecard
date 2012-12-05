@@ -56,7 +56,7 @@ import org.openecard.sal.protocol.eac.EACGenericProtocolFactory;
 import org.openecard.sal.protocol.genericcryptography.GenericCryptoProtocolFactory;
 import org.openecard.sal.protocol.pincompare.PINCompareProtocolFactory;
 import org.openecard.transport.dispatcher.MessageDispatcher;
-import org.openecard.ws.WsdefProperties;
+import org.openecard.ws.marshal.WsdefProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import de.bund.bsi.ecard.api._1.TerminateFramework;

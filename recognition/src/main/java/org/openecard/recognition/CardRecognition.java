@@ -58,8 +58,8 @@ import org.openecard.recognition.staticrepo.LocalCifRepo;
 import org.openecard.recognition.statictree.LocalFileTree;
 import org.openecard.ws.GetRecognitionTree;
 import org.openecard.ws.IFD;
-import org.openecard.ws.WSMarshaller;
-import org.openecard.ws.WSMarshallerFactory;
+import org.openecard.ws.marshal.WSMarshaller;
+import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -31,7 +31,7 @@ import org.openecard.common.util.IFDStatusDiff;
 import org.openecard.ifd.scio.wrapper.SCTerminal;
 import org.openecard.ifd.scio.wrapper.SCWrapper;
 import org.openecard.ws.IFDCallback;
-import org.openecard.ws.WSClassLoader;
+import org.openecard.ws.marshal.WSClassLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

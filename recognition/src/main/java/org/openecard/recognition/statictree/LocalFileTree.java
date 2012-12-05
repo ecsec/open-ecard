@@ -27,8 +27,8 @@ import iso.std.iso_iec._24727.tech.schema.GetRecognitionTreeResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import org.openecard.common.util.FileUtils;
-import org.openecard.ws.WSMarshaller;
-import org.openecard.ws.WSMarshallerException;
+import org.openecard.ws.marshal.WSMarshaller;
+import org.openecard.ws.marshal.WSMarshallerException;
 import org.xml.sax.SAXException;
 
 

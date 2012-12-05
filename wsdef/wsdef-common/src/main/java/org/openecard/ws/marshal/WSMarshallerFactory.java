@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.ws;
+package org.openecard.ws.marshal;
 
 import org.openecard.common.GenericFactory;
 import org.openecard.common.GenericFactoryException;

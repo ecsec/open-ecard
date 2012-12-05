@@ -29,7 +29,7 @@ import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.recognition.staticrepo.LocalCifRepo;
-import org.openecard.ws.WSMarshallerException;
+import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.jaxb.JAXBMarshaller;
 import org.testng.Assert;
 import org.testng.annotations.Test;

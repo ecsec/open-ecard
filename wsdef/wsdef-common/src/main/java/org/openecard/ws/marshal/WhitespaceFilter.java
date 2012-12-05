@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.ws;
+package org.openecard.ws.marshal;
 
 import java.util.LinkedList;
 import org.w3c.dom.Node;

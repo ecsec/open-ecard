@@ -25,7 +25,6 @@ package org.openecard.gui;
 import java.util.List;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
-import org.openecard.gui.executor.ExecutionEngine;
 
 
 /**
@@ -37,6 +36,8 @@ public interface StepResult {
 
     /**
      * Get step definition of the matching step.
+     *
+     * @return The step instance which belongs to this result.
      */
     Step getStep();
     /**
@@ -49,8 +50,9 @@ public interface StepResult {
     /**
      * Get result status of the step this result belongs to.
      * The invocation of this function may block, if the result is not ready at the time this function is called. In the
-     * {@link ExecutionEngine}, the StepResult is returned right after calling the {@link UserConsentNavigator#next()}
-     * function. After that, the results status is checked, but the user might not have produced a result yet.
+     * {@link org.openecard.gui.executor.ExecutionEngine}, the StepResult is returned right after calling the
+     * {@link UserConsentNavigator#next()} function. After that, the results status is checked, but the user might not
+     * have produced a result yet.
      *
      * @return Result status of the step.
      */

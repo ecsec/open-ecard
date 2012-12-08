@@ -29,6 +29,7 @@ import java.util.List;
 
 /**
  * Result class of the file dialog.
+ * This class indicates the type of action, the user performed and if applicable also contains a list of selected files.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -49,6 +50,8 @@ public class FileDialogResult {
      * Creates a result with status OK.
      * The instance returned by this constructor returns <code>true</code> in the {@link #isOK()} method and returns
      * a non empty list in the {@link #getSelectedFiles()} method.
+     *
+     * @param selectedFiles The list of files selected in the dialog, or the empty list if no files were selected.
      */
     public FileDialogResult(List<File> selectedFiles) {
 	if (selectedFiles == null) {

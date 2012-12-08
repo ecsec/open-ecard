@@ -20,29 +20,16 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.definition;
-
-
 /**
- * Radiobox element for user consents.
- * Any radio box item can be checked or unchecked, but only one at a time can be checked.
- *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * Main interfaces of the user consent (or GUI).
+ * The user consent interfaces are an abstraction, so that user consent implementations can be implemented without
+ * exposing platform specific portions of the code.<br/>
+ * The user consent definition defines two kinds of dialogs:
+ * <ul>
+ * <li>Navigation based user consents (see {@link UserConsentNavigator})</li>
+ * <li>File dialogs (see {@link FileDialog})</li>
+ * </ul>
+ * These types can be created by a user consent implementation which is represented by the {@link UserConsent}
+ * interface.
  */
-public final class Radiobox extends AbstractBox {
-
-    /**
-     * Creates a new Radiobox instance and initializes it with the given ID.
-     *
-     * @param id The ID to initialize the instance with.
-     */
-    public Radiobox(String id) {
-	super(id);
-    }
-
-    @Override
-    public InfoUnitElementType type() {
-	return InfoUnitElementType.RADIO_BOX;
-    }
-
-}
+package org.openecard.gui;

@@ -25,6 +25,8 @@ package org.openecard.gui.definition;
 
 /**
  * Definition of a box item for use in selection box elements.
+ * A box item has a name to identify it, a text which is shown to the user and it is either checked or unchecked. The
+ * item can be disabled if the user has no choice to check or uncheck it.
  *
  * @see AbstractBox
  * @see Checkbox
@@ -35,8 +37,17 @@ public class BoxItem {
 
     private String name;
     private String text;
-    private boolean checked  = false;
-    private boolean disabled = false;
+    private boolean checked;
+    private boolean disabled;
+
+    /**
+     * Creates a box item.
+     */
+    public BoxItem() {
+	this.checked = false;
+	this.disabled = false;
+    }
+
 
     /**
      * Gets the name of the item.
@@ -52,7 +63,7 @@ public class BoxItem {
      * Sets the name of the item.
      * The name is used to identify the item and thus should be unique in the surrounding selection box group.
      *
-     * @return The name of the item.
+     * @param name The name of the item.
      */
     public void setName(String name) {
 	this.name = name;
@@ -72,7 +83,7 @@ public class BoxItem {
      * Sets the display text of the item.
      * The text is displayed on the GUI to indicate the meaning of the option to the user.
      *
-     * @return The text of the item.
+     * @param text The text of the item.
      */
     public void setText(String text) {
 	this.text = text;

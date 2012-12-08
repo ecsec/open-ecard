@@ -20,29 +20,10 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.definition;
-
-
 /**
- * Radiobox element for user consents.
- * Any radio box item can be checked or unchecked, but only one at a time can be checked.
- *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * Executor implementation for user consents. <br/>
+ * The {@link ExecutionEngine} is a helper to display the steps of a user consent. It displays one after the other
+ * and reacts differently depending of the outcome of a step. The {@link StepAction} class adds the possibility to run
+ * arbitrary code after a step.
  */
-public final class Radiobox extends AbstractBox {
-
-    /**
-     * Creates a new Radiobox instance and initializes it with the given ID.
-     *
-     * @param id The ID to initialize the instance with.
-     */
-    public Radiobox(String id) {
-	super(id);
-    }
-
-    @Override
-    public InfoUnitElementType type() {
-	return InfoUnitElementType.RADIO_BOX;
-    }
-
-}
+package org.openecard.gui.executor;

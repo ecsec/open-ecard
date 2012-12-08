@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Hyperlink element for user consents.
+ * This element should oben the address in the default browser when clicked.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -78,7 +79,11 @@ public final class Hyperlink extends IDTrait implements InputInfoUnit {
 	this.href = href;
     }
     /**
-     * @param href the href to set
+     * Sets the address part of the hyperlink.
+     * In an anchor tag, this would be the href attribute. This method converts the String instance to a URL instance.
+     * 
+     * @param href The address part of the link.
+     * @throws MalformedURLException Thrown if the given string is not a valid URL.
      */
     public void setHref(String href) throws MalformedURLException {
 	this.href = new URL(href);

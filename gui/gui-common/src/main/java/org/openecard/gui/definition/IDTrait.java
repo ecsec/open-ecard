@@ -27,6 +27,7 @@ import org.openecard.common.util.ValueGenerators;
 
 /**
  * Class implementing the ID portion common to all {@code InfoUnit)s.
+ * This class creates IDs if none are given and provides an implementation of the ID getter and setter.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */

@@ -48,7 +48,7 @@ public final class ImageBox extends IDTrait implements InputInfoUnit {
      * @return The raw image data.
      */
     public byte[] getImageData() {
-	return imageData;
+	return Arrays.copyOf(imageData, imageData.length);
     }
     /**
      * Sets the raw image data for this instance.
@@ -57,7 +57,7 @@ public final class ImageBox extends IDTrait implements InputInfoUnit {
      * @param imageData The raw image data.
      */
     public void setImageData(byte[] imageData) {
-	this.imageData = imageData;
+	this.imageData = Arrays.copyOf(imageData, imageData.length);
     }
 
     /**

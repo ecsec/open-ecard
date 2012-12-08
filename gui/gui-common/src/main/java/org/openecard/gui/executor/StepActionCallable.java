@@ -29,10 +29,12 @@ import org.openecard.gui.StepResult;
 
 /**
  * Wrapper class to embed a StepAction into a Callable, so that Futures can be created.
+ * This class is used only internally in the {@link ExecutionEngine} to be able to stop actions if the user cancels the
+ * process.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class StepActionCallable implements Callable<StepActionResult> {
+final class StepActionCallable implements Callable<StepActionResult> {
 
     private final StepAction action;
     private final Map<String, ExecutionResults> oldResults;

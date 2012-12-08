@@ -25,6 +25,8 @@ package org.openecard.gui.definition;
 
 /**
  * GUI component types.
+ * Each element type is listed in this enum to operate with the {@InfoUnit} type without performing the instanceof
+ * idiom.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */

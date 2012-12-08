@@ -40,8 +40,8 @@ public abstract class AbstractTextField extends IDTrait implements InputInfoUnit
 
     private String description;
     private String value;
-    private int minLength = 0;
-    private int maxLength = Integer.MAX_VALUE;
+    private int minLength;
+    private int maxLength;
 
     /**
      * Creates an instance initialized with a given ID.
@@ -50,6 +50,8 @@ public abstract class AbstractTextField extends IDTrait implements InputInfoUnit
      */
     public AbstractTextField(String id) {
 	super(id);
+	this.minLength = 0;
+	this.maxLength = Integer.MAX_VALUE;
     }
 
 
@@ -109,7 +111,7 @@ public abstract class AbstractTextField extends IDTrait implements InputInfoUnit
      * can notify the user and let him correct the value.
      *
      * @see #setMaxLength(int)
-     * @return The minimum length of the text value.
+     * @param minLength The minimum length of the text value.
      */
     public void setMinLength(int minLength) {
 	this.minLength = minLength;
@@ -133,13 +135,17 @@ public abstract class AbstractTextField extends IDTrait implements InputInfoUnit
      * can notify the user and let him correct the value.
      *
      * @see #setMinLength()
-     * @return The maximum length of the text value.
+     * @param maxLength The maximum length of the text value.
      */
     public void setMaxLength(int maxLength) {
 	this.maxLength = maxLength;
     }
 
 
+    /**
+     * {@inheritDoc}
+     * <p><b>NOTE:</b> It is important to override this method in subclasses if additional members are introduced.</p>
+     */
     @Override
     public void copyContentFrom(InfoUnit origin) {
 	if (!(this.getClass().equals(origin.getClass()))) {

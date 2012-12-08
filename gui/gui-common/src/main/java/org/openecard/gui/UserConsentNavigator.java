@@ -24,12 +24,11 @@ package org.openecard.gui;
 
 import java.util.concurrent.Future;
 import org.openecard.gui.definition.Step;
-import org.openecard.gui.executor.ExecutionEngine;
 
 
 /**
  * Navigator interface to control the execution of the user consent.
- * This interface is used in the {@link ExecutionEngine}.
+ * This interface is used in the {@link org.openecard.gui.executor.ExecutionEngine}.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */

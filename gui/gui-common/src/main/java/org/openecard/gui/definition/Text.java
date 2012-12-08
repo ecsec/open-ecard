@@ -28,10 +28,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Definition class for simple text elements.
+ * The Text element is a text displaying an information to the user.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class Text extends IDTrait implements InputInfoUnit {
+public final class Text extends IDTrait implements InputInfoUnit {
 
     private static final Logger _logger = LoggerFactory.getLogger(Text.class);
 

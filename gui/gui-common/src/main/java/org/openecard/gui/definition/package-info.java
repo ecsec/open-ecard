@@ -20,29 +20,12 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.definition;
-
-
 /**
- * Radiobox element for user consents.
- * Any radio box item can be checked or unchecked, but only one at a time can be checked.
- *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * User consent definition classes.
+ * The definition classes are used to describe the user consent.<br/>
+ * In order to create a user consent, {@link Step} instances must be added to a {@link UserConsent} instance. Each Step
+ * can contain elements (subclasses of {@link InfoUnit}. The {@link InputInfoUnit} interface is the base of elements
+ * which have no output values, while the {@link OutputInfoUnit} interface represents elements which do have an output
+ * value.
  */
-public final class Radiobox extends AbstractBox {
-
-    /**
-     * Creates a new Radiobox instance and initializes it with the given ID.
-     *
-     * @param id The ID to initialize the instance with.
-     */
-    public Radiobox(String id) {
-	super(id);
-    }
-
-    @Override
-    public InfoUnitElementType type() {
-	return InfoUnitElementType.RADIO_BOX;
-    }
-
-}
+package org.openecard.gui.definition;

@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.openecard.common.util.ValueGenerators;
 import org.openecard.gui.executor.DummyAction;
-import org.openecard.gui.executor.ExecutionEngine;
 import org.openecard.gui.executor.StepAction;
 
 
@@ -42,9 +41,9 @@ public class Step {
     private String title;
     private String description;
     private StepAction action;
-    private boolean reversible = true;
-    private boolean instantReturn = false;
-    private boolean resetOnLoad = false;
+    private boolean reversible;
+    private boolean instantReturn;
+    private boolean resetOnLoad;
     private List<InputInfoUnit> inputInfoUnits;
 
     /**
@@ -67,6 +66,9 @@ public class Step {
     public Step(String id, String title) {
 	this.id = id;
 	this.title = title;
+	this.reversible = true;
+	this.instantReturn = false;
+	this.resetOnLoad = false;
     }
 
 
@@ -196,7 +198,7 @@ public class Step {
     /**
      * Gets the action associated with this step.
      * Actions are a way to bind code to the step which is executed after the step is finished. The
-     * {@link ExecutionEngine} takes care of the action execution.
+     * {@link org.openecard.gui.executor.ExecutionEngine} takes care of the action execution.
      *
      * @return The action associated with this step, or a {@link DummyAction} if none is set.
      */
@@ -209,7 +211,7 @@ public class Step {
     /**
      * Sets the action to be associated with this step.
      * Actions are a way to bind code to the step which is executed after the step is finished. The
-     * {@link ExecutionEngine} takes care of the action execution.
+     * {@link org.openecard.gui.executor.ExecutionEngine} takes care of the action execution.
      *
      * @param action The action to be associated with this step, or {@code null} if the current action should be
      *   removed.

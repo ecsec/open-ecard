@@ -25,6 +25,7 @@ package org.openecard.gui.definition;
 
 /**
  * Base interface every info unit must implement.
+ * This interface defines the type and ID portions of user consent elements.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -32,17 +33,23 @@ public interface InfoUnit {
 
     /**
      * Get type of info unit.
+     *
+     * @return The type of this element.
      */
     InfoUnitElementType type();
 
     /**
      * Get ID of the info unit.
      * The id must be unique per step.
+     *
+     * @return The ID of this step.
      */
     String getID();
     /**
      * Set ID of the info unit.
      * The id must be unique per step.
+     *
+     * @param id The ID of this step.
      */
     void setID(String id);
 

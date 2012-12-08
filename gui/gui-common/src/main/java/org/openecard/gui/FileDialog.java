@@ -24,15 +24,14 @@ package org.openecard.gui;
 
 import java.io.File;
 import java.util.List;
-import javax.swing.JFileChooser;
 import org.openecard.gui.file.FileDialogResult;
 import org.openecard.gui.file.FileFilter;
 
 
 /**
  * Interface for a generic file dialog.
- * This and the interfaces used in this definition are modeled after Swings {@link JFileChooser}. However it should be
- * abstract enough to fit under other implementations as well.
+ * This and the interfaces used in this definition are modeled after Swings {@link javax.swing.JFileChooser}. However it
+ * should be abstract enough to fit under other implementations as well.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -147,6 +146,7 @@ public interface FileDialog {
      * The approval button's text is set to the given value. The text value should be localized. The value of the dialog
      * title is undefined if not set explicitly by an invocation of {@link #setTitle(java.lang.String)}.
      *
+     * @param approveButtonText The text of the approval button. This text must be localized.
      * @return Result containing the outcome of the dialog and a list of files if the dialog was not canceled.
      */
     FileDialogResult show(String approveButtonText);

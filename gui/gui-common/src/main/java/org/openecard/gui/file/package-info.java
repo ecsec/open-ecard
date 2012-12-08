@@ -20,29 +20,9 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.definition;
-
-
 /**
- * Radiobox element for user consents.
- * Any radio box item can be checked or unchecked, but only one at a time can be checked.
- *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * Definition of file dialog related items. <br/>
+ * The {@link FileFilter} interface can be used to filter out unwanted files in the file dialog. Additionally this
+ * package contains some of the most frequently needed file filters.
  */
-public final class Radiobox extends AbstractBox {
-
-    /**
-     * Creates a new Radiobox instance and initializes it with the given ID.
-     *
-     * @param id The ID to initialize the instance with.
-     */
-    public Radiobox(String id) {
-	super(id);
-    }
-
-    @Override
-    public InfoUnitElementType type() {
-	return InfoUnitElementType.RADIO_BOX;
-    }
-
-}
+package org.openecard.gui.file;

@@ -88,6 +88,10 @@ public abstract class AbstractBox extends IDTrait implements InputInfoUnit, Outp
     }
 
 
+    /**
+     * {@inheritDoc}
+     * <p><b>NOTE:</b> It is important to override this method in subclasses if additional members are introduced.</p>
+     */
     @Override
     public void copyContentFrom(InfoUnit origin) {
 	if (!(this.getClass().equals(origin.getClass()))) {

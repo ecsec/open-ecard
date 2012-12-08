@@ -41,7 +41,9 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Class capable of displaying and executing a user consent.
+ * Class capable of displaying and executing a user consent. <br/>
+ * This class is a helper to display the steps of a user consent. It displays one after the other and reacts differently
+ * depending of the outcome of a step. It also executes actions associated with the steps after they are finished.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -156,9 +158,12 @@ public class ExecutionEngine {
 		    case REPEAT:
 			next = navigator.replaceCurrent(actionResult.getReplacement());
 			break;
+		    default:
+			// fallthrough because CANCEL is already handled
+			break;
 		}
-		// no replacement just proceed
 	    } else {
+		// no replacement just proceed
 		switch (actionResult.getStatus()) {
 		    case BACK:
 			next = navigator.previous();
@@ -173,6 +178,9 @@ public class ExecutionEngine {
 			break;
 		    case REPEAT:
 			next = navigator.current();
+			break;
+		    default:
+			// fallthrough because CANCEL is already handled
 			break;
 		}
 	    }

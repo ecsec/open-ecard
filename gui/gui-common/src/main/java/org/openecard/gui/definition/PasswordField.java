@@ -24,11 +24,19 @@ package org.openecard.gui.definition;
 
 
 /**
+ * Definition class for password fields.
+ * Password fields have a field where text can be input. The text is masked, so that other persons watching the user
+ * enter his password can't see it.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public final class PasswordField extends AbstractTextField {
 
+    /**
+     * Creates a new PasswordField instance and initializes it with the given ID.
+     *
+     * @param id The ID to initialize the instance with.
+     */
     public PasswordField(String id) {
 	super(id);
     }

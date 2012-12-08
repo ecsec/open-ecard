@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Class capable of displaying and executing a user consent.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -52,10 +53,29 @@ public class ExecutionEngine {
     private final TreeMap<String, ExecutionResults> results = new TreeMap<String, ExecutionResults>();
 
 
+    /**
+     * Creates an ExecutionEngine instance and initializes it with the given navigator.
+     * The navigator must be previously obtained from a user consent implementation.
+     *
+     * @param navigator The navigator used to initialize this instance with.
+     */
     public ExecutionEngine(UserConsentNavigator navigator) {
 	this.navigator = navigator;
     }
 
+    /**
+     * Processes the user consent associated with this instance. <br/>
+     * The following algorithm is used to process the dialog.
+     * <ol>
+     * <li>Display the first step.</li>
+     * <li>Evaluate step result. Break execution on CANCEL.</li>
+     * <li>Execute step action. Break execution on CANCEL.</li>
+     * <li>Display either next previous or current step, or a replacement according to result.</li>
+     * <li>Proceed with point 2.</li>
+     * </ol>
+     *
+     * @return Overall result of the execution.
+     */
     public ResultStatus process() {
 	StepResult next = navigator.next(); // get first step
 	// loop over steps. break inside loop
@@ -159,6 +179,11 @@ public class ExecutionEngine {
 	}
     }
 
+    /**
+     * Get all step results of the execution.
+     *
+     * @return Mapping of the step results with step ID as key.
+     */
     public Map<String, ExecutionResults> getResults() {
 	return Collections.unmodifiableMap(results);
     }

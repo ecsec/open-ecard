@@ -27,10 +27,11 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Definition class for simple text elements.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public final class Text extends IDTrait implements InputInfoUnit {
+public class Text extends IDTrait implements InputInfoUnit {
 
     private static final Logger _logger = LoggerFactory.getLogger(Text.class);
 
@@ -38,14 +39,17 @@ public final class Text extends IDTrait implements InputInfoUnit {
 
 
     /**
-     * @return the text
+     * Gets the text set for this instance.
+     *
+     * @return The text of this instance.
      */
     public String getText() {
 	return text;
     }
-
     /**
-     * @param text the text to set
+     * Sets the text for this instance.
+     *
+     * @param text The text to set for this instance.
      */
     public void setText(String text) {
 	this.text = text;

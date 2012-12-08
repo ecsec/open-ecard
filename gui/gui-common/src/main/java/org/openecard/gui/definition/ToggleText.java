@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Definition class for a text element which can fold its content.
+ * The ToggleText has a title which is always displayed and a text which can be folded.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
@@ -39,35 +41,64 @@ public final class ToggleText extends IDTrait implements InputInfoUnit {
     private boolean collapsed;
 
 
+    /**
+     * Gets whether the text is collapsed or not.
+     * In the collapsed state, the element's text is not visible.
+     *
+     * @return {@code true} if the text is collapsed, {@code false} otherwise.
+     */
     public boolean isCollapsed() {
 	return collapsed;
     }
-
+    /**
+     * Sets whether the text is collapsed or not.
+     * In the collapsed state, the element's text is not visible.
+     *
+     * @param collapsed {@code true} if the text is collapsed, {@code false} otherwise.
+     */
     public void setCollapsed(boolean collapsed) {
 	this.collapsed = collapsed;
     }
 
+    /**
+     * Gets the title of this instance.
+     *
+     * @return The title of this instance.
+     */
     public String getTitle() {
 	return title;
     }
-
+    /**
+     * Sets the title of this instance.
+     *
+     * @param title The title of this instance.
+     */
     public void setTitle(String title) {
 	this.title = title;
     }
 
+    /**
+     * Gets the text of this instance.
+     *
+     * @return The text of this instance.
+     */
     public String getText() {
 	return text;
     }
-
+    /**
+     * Sets the text of this instance.
+     *
+     * @param text The text of this instance.
+     */
     public void setText(String text) {
 	this.text = text;
     }
+
 
     @Override
     public InfoUnitElementType type() {
 	return InfoUnitElementType.TOGGLE_TEXT;
     }
-
 
     @Override
     public void copyContentFrom(InfoUnit origin) {

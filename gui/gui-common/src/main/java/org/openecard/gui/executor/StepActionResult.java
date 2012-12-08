@@ -26,6 +26,7 @@ import org.openecard.gui.definition.Step;
 
 
 /**
+ * Result of a step action.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -34,24 +35,40 @@ public class StepActionResult {
     private final StepActionResultStatus status;
     private final Step replacement;
 
+    /**
+     * Creates a new StepActionResult instance and initializes it with the given status.
+     *
+     * @param status The result status of the step action.
+     */
     public StepActionResult(StepActionResultStatus status) {
 	this(status, null);
     }
 
+    /**
+     * Creates a new StepActionResult instance, initializes it with the given status and sets a replacement for the
+     * step referenced in the status.
+     *
+     * @param status The result status of the step action.
+     * @param replacement The replacement step for the step which is next according to the action status..
+     */
     public StepActionResult(StepActionResultStatus status, Step replacement) {
 	this.status = status;
 	this.replacement = replacement;
     }
 
     /**
-     * @return the status
+     * Gets the status of the action result.
+     *
+     * @return The status of the action result.
      */
     public StepActionResultStatus getStatus() {
 	return status;
     }
 
     /**
-     * @return the replacement
+     * Gets the replacement step for the step referenced by the status.
+     *
+     * @return The replacement for the referenced step, or null if none is set.
      */
     public Step getReplacement() {
 	return replacement;

@@ -29,7 +29,13 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Base definition for selection boxes.
+ * The boxes form a Group of options that can be selected.<br/>
+ * An AbstractBox can be identified by an ID.
  *
+ * @see Radiobox
+ * @see Checkbox
+ * @see BoxItem
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public abstract class AbstractBox extends IDTrait implements InputInfoUnit, OutputInfoUnit {
@@ -39,25 +45,41 @@ public abstract class AbstractBox extends IDTrait implements InputInfoUnit, Outp
     private String groupText;
     private List<BoxItem> boxItems;
 
+    /**
+     * Creates an instance initialized with a given ID.
+     *
+     * @param id The ID to initialize the instance with.
+     */
     public AbstractBox(String id) {
 	super(id);
     }
 
 
     /**
-     * @return the groupText
+     * Gets the group text of the selection box group.
+     *
+     * @return The text for title of this group.
      */
     public String getGroupText() {
 	return groupText;
     }
 
     /**
-     * @param groupText the groupText to set
+     * Sets the group text of the selection box group.
+     *
+     * @param groupText The text for title of this group.
      */
     public void setGroupText(String groupText) {
 	this.groupText = groupText;
     }
 
+    /**
+     * Get writable list of box items.
+     * The box items form the actual selectable content of this type. Modifications made to this list directly influence
+     * this instance.
+     *
+     * @return List of box items.
+     */
     public List<BoxItem> getBoxItems() {
 	if (boxItems == null) {
 	    boxItems = new ArrayList<BoxItem>();

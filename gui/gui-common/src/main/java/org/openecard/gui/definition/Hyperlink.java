@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Hyperlink element for user consents.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -40,28 +41,38 @@ public final class Hyperlink extends IDTrait implements InputInfoUnit {
     private URL href;
 
     /**
-     * @return the text
+     * Gets the text displayed of the hyperlink.
+     * In an anchor tag, this would be the element text.
+     *
+     * @return The displayed text of the link.
      */
     public String getText() {
 	return text;
     }
-
     /**
-     * @param text the text to set
+     * Sets the text displayed of the hyperlink.
+     * In an anchor tag, this would be the element text.
+     *
+     * @param text The displayed text of the link.
      */
     public void setText(String text) {
 	this.text = text;
     }
 
     /**
-     * @return the href
+     * Gets the address part of the hyperlink.
+     * In an anchor tag, this would be the href attribute.
+     *
+     * @return The address part of the link.
      */
     public URL getHref() {
 	return href;
     }
-
     /**
-     * @param href the href to set
+     * Sets the address part of the hyperlink.
+     * In an anchor tag, this would be the href attribute.
+     *
+     * @param href The address part of the link.
      */
     public void setHref(URL href) {
 	this.href = href;

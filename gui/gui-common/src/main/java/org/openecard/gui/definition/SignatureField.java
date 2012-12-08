@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Definition class for signature fields.
+ * Signature fields provide a drawing canvas where the user can create a signature.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -35,55 +37,53 @@ public final class SignatureField extends IDTrait implements InputInfoUnit, Outp
 
     private static final Logger _logger = LoggerFactory.getLogger(SignatureField.class);
 
-    private String name;
     private String text;
     private byte[] value;
 
-    public SignatureField() {
-    }
-
+    /**
+     * Creates a new SignatureField instance and initializes it with the given ID.
+     *
+     * @param id The ID to initialize the instance with.
+     */
     public SignatureField(String id) {
 	super(id);
     }
 
 
     /**
-     * @return the name
-     */
-    public String getName() {
-	return name;
-    }
-
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name) {
-	this.name = name;
-    }
-
-    /**
-     * @return the text
+     * Gets the description text of the signature field.
+     * The description text is shown besides the signature field.
+     *
+     * @return The description text of this element.
      */
     public String getText() {
 	return text;
     }
-
     /**
-     * @param text the text to set
+     * Sets the description text of the signature field.
+     * The description text is shown besides the signature field.
+     *
+     * @param text The description text of this element.
      */
     public void setText(String text) {
 	this.text = text;
     }
 
     /**
-     * @return the value
+     * Gets the value of the signature field.
+     * The signature is an image. The value of the signature field is encoded as a PNG image.
+     *
+     * @return The value of the signature field encoded as a PNG image.
      */
     public byte[] getValue() {
 	return (value == null) ? null : Arrays.copyOf(value, value.length);
     }
 
     /**
-     * @param value the value to set
+     * Sets the value of the signature field.
+     * The signature is an image. The value of the signature field is encoded as a PNG image.
+     *
+     * @param value The value of the signature field encoded as a PNG image.
      */
     public void setValue(byte[] value) {
 	this.value = Arrays.copyOf(value, value.length);
@@ -104,7 +104,6 @@ public final class SignatureField extends IDTrait implements InputInfoUnit, Outp
 	}
 	SignatureField other = (SignatureField) origin;
 	// do copy
-	this.name = other.name;
 	this.text = other.text;
 	if (other.value != null) {
 	    this.value = Arrays.copyOf(other.value, other.value.length);

@@ -50,6 +50,7 @@ public interface InfoUnit {
      * Copy the content of the given info unit to this instance.
      * Both instances must have the same type. If the types differ, a warning is logged and
      * the copy is not performed.
+     *
      * @param origin InfoUnit to copy from.
      */
     void copyContentFrom(final InfoUnit origin);

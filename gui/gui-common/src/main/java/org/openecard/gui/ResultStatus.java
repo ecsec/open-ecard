@@ -24,11 +24,15 @@ package org.openecard.gui;
 
 
 /**
+ * Result status of a GUI step.
+ * The statuses are equivalent to the buttons usually shown in the navigation section of the step.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public enum ResultStatus {
 
-    OK, BACK, CANCEL;
+    OK,
+    BACK,
+    CANCEL;
 
 }

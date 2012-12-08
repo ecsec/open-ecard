@@ -24,11 +24,17 @@ package org.openecard.gui.definition;
 
 
 /**
- * @see AbstractBox
+ * Checkbox element for user consents.
+ *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public final class Checkbox extends AbstractBox {
 
+    /**
+     * Creates a new Checkbox instance and initializes it with the given ID.
+     *
+     * @param id The ID to initialize the instance with.
+     */
     public Checkbox(String id) {
 	super(id);
     }

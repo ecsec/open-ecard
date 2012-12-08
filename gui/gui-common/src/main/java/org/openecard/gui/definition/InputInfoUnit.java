@@ -24,6 +24,8 @@ package org.openecard.gui.definition;
 
 
 /**
+ * Interface for all GUI description elements which have no output values.
+ * Output values are retrieved from the step after it is finished.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */

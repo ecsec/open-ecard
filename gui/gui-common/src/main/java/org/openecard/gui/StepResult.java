@@ -25,25 +25,64 @@ package org.openecard.gui;
 import java.util.List;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
+import org.openecard.gui.executor.ExecutionEngine;
 
 
 /**
+ * Interface for a step result with status and result values.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public interface StepResult {
 
+    /**
+     * Get step definition of the matching step.
+     */
     Step getStep();
+    /**
+     * Get ID value of the matching step.
+     *
+     * @return ID of the step.
+     */
     String getStepID();
 
+    /**
+     * Get result status of the step this result belongs to.
+     * The invocation of this function may block, if the result is not ready at the time this function is called. In the
+     * {@link ExecutionEngine}, the StepResult is returned right after calling the {@link UserConsentNavigator#next()}
+     * function. After that, the results status is checked, but the user might not have produced a result yet.
+     *
+     * @return Result status of the step.
+     */
     ResultStatus getStatus();
 
+    /**
+     * Convenience method for {@link #getStatus()} with check if the status is {@link ResultStatus#OK}.
+     *
+     * @return {@code true} if result status is OK, {@code false} otherwise.
+     */
     boolean isOK();
-
+    /**
+     * Convenience method for {@link #getStatus()} with check if the status is {@link ResultStatus#BACK}.
+     *
+     * @return {@code true} if result status is BACK, {@code false} otherwise.
+     */
     boolean isBack();
-
+    /**
+     * Convenience method for {@link #getStatus()} with check if the status is {@link ResultStatus#CANCEL}.
+     *
+     * @return {@code true} if result status is CANCEL, {@code false} otherwise.
+     */
     boolean isCancelled();
 
+    /**
+     * Return result values of all OutputInfoUnits of the step this result belongs to.
+     * This method blocks if the dialog is still displayed. The blocking behaviour is defined in the documentation for
+     * {@code getStatus}.
+     *
+     * @see #getStatus()
+     * @return List containing all results of the OutputInfoUnits of this step.
+     */
     List<OutputInfoUnit> getResults();
 
 }

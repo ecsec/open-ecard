@@ -26,6 +26,7 @@ import org.openecard.common.util.ValueGenerators;
 
 
 /**
+ * Class implementing the ID portion common to all {@code InfoUnit)s.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -33,10 +34,18 @@ public abstract class IDTrait implements InfoUnit {
 
     private String id;
 
+    /**
+     * Creates an IDTrait instance and initializes its ID to a generated value.
+     */
     public IDTrait() {
 	this(ValueGenerators.generateSessionID());
     }
 
+    /**
+     * Creates an IDTrait instance and initializes its ID to the given value.
+     *
+     * @param id The ID with which this instance will be initialized.
+     */
     public IDTrait(String id) {
 	this.id = id;
     }

@@ -28,6 +28,8 @@ import org.openecard.gui.definition.Step;
 
 
 /**
+ * Abstract base for all step actions.
+ * Actions are associated with a step and are executed by the {@link ExecutionEngine}.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -35,18 +37,41 @@ public abstract class StepAction {
 
     private final String stepID;
 
+    /**
+     * Creates a step action and saves the steps ID it is associated with.
+     *
+     * @param step The step whose ID is saved.
+     */
     public StepAction(Step step) {
 	this(step.getID());
     }
 
+    /**
+     * Creates a step action and saves the steps ID it is associated with.
+     *
+     * @param stepID The step ID that is saved.
+     */
     public StepAction(String stepID) {
 	this.stepID = stepID;
     }
 
+    /**
+     * Gets the ID of the associated step.
+     *
+     * @return The step ID that this instance is associated with.
+     */
     public String getStepID() {
 	return stepID;
     }
 
+    /**
+     * Runs the action this instance represents.
+     *
+     * @param oldResults Results available before execution of the action. This does not include element values of the
+     *   current step.
+     * @param result Result of the current step before execution of the action.
+     * @return Result of the action.
+     */
     public abstract StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result);
 
 }

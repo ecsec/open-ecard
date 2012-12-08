@@ -28,20 +28,22 @@ import org.openecard.gui.definition.Step;
 
 
 /**
- * Dummy action to produce step results for the execution engine.
+ * Dummy action to produce step results for the execution engine. <br/>
+ * The DummyAction is a no-OP action, which always returns a result according to the following mapping:
+ * <ul>
+ * <li>{@link ResultStatus#BACK} → {@link StepActionResultStatus#BACK}</li>
+ * <li>{@link ResultStatus#OK} → {@link StepActionResultStatus#NEXT}</li>
+ * <li>* → {@link StepActionResultStatus#CANCEL}</li>
+ * </ul>
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class DummyAction extends StepAction {
 
     /**
-     * {@inheritDoc}
-     */
-    public DummyAction(String stepID) {
-	super(stepID);
-    }
-    /**
-     * {@inheritDoc}
+     * Creates a DummyAction for the given step.
+     *
+     * @param step The step the action should be associated with.
      */
     public DummyAction(Step step) {
 	super(step);

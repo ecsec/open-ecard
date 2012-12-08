@@ -27,6 +27,7 @@ import org.openecard.gui.definition.OutputInfoUnit;
 
 
 /**
+ * Class wrapping the results of one step.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -35,27 +36,37 @@ public class ExecutionResults {
     private final String stepID;
     private final List<OutputInfoUnit> results;
 
+    /**
+     * Creates the execution result for the given step ID and wraps the given results.
+     *
+     * @param stepID The ID of the associated step.
+     * @param results The step results.
+     */
     public ExecutionResults(String stepID, List<OutputInfoUnit> results) {
 	this.stepID = stepID;
 	this.results = results;
     }
 
     /**
-     * @return the stepName
+     * Gets the ID of the associated step.
+     *
+     * @return The step ID.
      */
     public String getStepID() {
 	return stepID;
     }
 
     /**
-     * @return the results
+     * Gets all element result.
+     *
+     * @return The results of the step.
      */
     public List<OutputInfoUnit> getResults() {
 	return results;
     }
 
     /**
-     * Get result element with a specific ID.
+     * Gets element result with a specific element ID.
      *
      * @param id ID of the result element.
      * @return Result element or null if none exists for the given ID.

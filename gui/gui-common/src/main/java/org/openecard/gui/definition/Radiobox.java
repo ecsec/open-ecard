@@ -24,11 +24,17 @@ package org.openecard.gui.definition;
 
 
 /**
- * @see AbstractBox
+ * Radiobox element for user consents.
+ *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public final class Radiobox extends AbstractBox {
 
+    /**
+     * Creates a new Radiobox instance and initializes it with the given ID.
+     *
+     * @param id The ID to initialize the instance with.
+     */
     public Radiobox(String id) {
 	super(id);
     }

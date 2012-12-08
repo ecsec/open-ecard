@@ -27,9 +27,11 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Implements a abstract text field.
+ * Base definition for text fields.
  * A field can be identified by an ID.
  *
+ * @see TextField
+ * @see PasswordField
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public abstract class AbstractTextField extends IDTrait implements InputInfoUnit, OutputInfoUnit {
@@ -41,19 +43,21 @@ public abstract class AbstractTextField extends IDTrait implements InputInfoUnit
     private int minLength = 0;
     private int maxLength = Integer.MAX_VALUE;
 
-    public AbstractTextField() {
-    }
-
+    /**
+     * Creates an instance initialized with a given ID.
+     *
+     * @param id The id to initialize the instance with.
+     */
     public AbstractTextField(String id) {
 	super(id);
     }
 
 
     /**
-     *
      * Returns the description of the text field.
+     * The description can be used as a label in front of the field.
      *
-     * @return Description
+     * @return String describing the text field.
      */
     public String getDescription() {
 	return description;
@@ -61,50 +65,75 @@ public abstract class AbstractTextField extends IDTrait implements InputInfoUnit
 
     /**
      * Sets the description of the text field.
+     * The description can be used as a label in front of the field.
      *
-     * @param description Description
+     * @param description String describing the text field.
      */
     public void setDescription(String description) {
 	this.description = description;
     }
 
     /**
-     * @return the value
+     * Gets the value of the text field.
+     *
+     * @return The value of the text field.
      */
     public String getValue() {
 	return value;
     }
 
     /**
-     * @param value the value to set
+     * Sets the value of the text field.
+     *
+     * @param value The value of the text field.
      */
     public void setValue(String value) {
 	this.value = value;
     }
 
     /**
-     * @return the minLength
+     * Gets the minimum length of the text field value.
+     * The length of the value should be checked in the GUI implementation. If the length is wrong, the implementation
+     * can notify the user and let him correct the value.
+     *
+     * @see #setMaxLength(int)
+     * @return The minimum length of the text value.
      */
     public int getMinLength() {
 	return minLength;
     }
 
     /**
-     * @param minLength the minLength to set
+     * Sets the minimum length of the text field value.
+     * The length of the value should be checked in the GUI implementation. If the length is wrong, the implementation
+     * can notify the user and let him correct the value.
+     *
+     * @see #setMaxLength(int)
+     * @return The minimum length of the text value.
      */
     public void setMinLength(int minLength) {
 	this.minLength = minLength;
     }
 
     /**
-     * @return the maxLength
+     * Gets the maximum length of the text field value.
+     * The length of the value should be checked in the GUI implementation. If the length is wrong, the implementation
+     * can notify the user and let him correct the value.
+     *
+     * @see #getMinLength()
+     * @return The maximum length of the text value.
      */
     public int getMaxLength() {
 	return maxLength;
     }
 
     /**
-     * @param maxLength the maxLength to set
+     * Sets the maximum length of the text field value.
+     * The length of the value should be checked in the GUI implementation. If the length is wrong, the implementation
+     * can notify the user and let him correct the value.
+     *
+     * @see #setMinLength()
+     * @return The maximum length of the text value.
      */
     public void setMaxLength(int maxLength) {
 	this.maxLength = maxLength;

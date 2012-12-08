@@ -24,11 +24,18 @@ package org.openecard.gui.definition;
 
 
 /**
+ * Definition class for text fields.
+ * Text fields have a field where text can be input.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public final class TextField extends AbstractTextField {
 
+    /**
+     * Creates a new TextField instance and initializes it with the given ID.
+     *
+     * @param id The ID to initialize the instance with.
+     */
     public TextField(String id) {
 	super(id);
     }

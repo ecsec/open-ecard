@@ -28,20 +28,59 @@ import org.openecard.gui.executor.ExecutionEngine;
 
 
 /**
- * Navigator interface for use in the {@link ExecutionEngine}.
+ * Navigator interface to control the execution of the user consent.
+ * This interface is used in the {@link ExecutionEngine}.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public interface UserConsentNavigator {
 
+    /**
+     * Checks whether there is a successor step to display.
+     *
+     * @return {@code true} if a successor step can be displayed, {@code false} otherwise.
+     */
     boolean hasNext();
 
+    /**
+     * Redisplays current dialog step.
+     *
+     * @return Result of the step. The content of the result is available after the step is finished.
+     */
     StepResult current();
+    /**
+     * Displays next dialog step.
+     *
+     * @return Result of the step. The content of the result is available after the step is finished.
+     */
     StepResult next();
+    /**
+     * Displays previous dialog step.
+     *
+     * @return Result of the step. The content of the result is available after the step is finished.
+     */
     StepResult previous();
 
+    /**
+     * Replaces the current step in the step list and displays the new step.
+     *
+     * @param step Replacement for the current step.
+     * @return Result of the step. The content of the result is available after the step is finished.
+     */
     StepResult replaceCurrent(Step step);
+    /**
+     * Replaces the next step in the step list and displays the new step.
+     *
+     * @param step Replacement for the next step.
+     * @return Result of the step. The content of the result is available after the step is finished.
+     */
     StepResult replaceNext(Step step);
+    /**
+     * Replaces the previous step in the step list and displays the new step.
+     *
+     * @param step Replacement for the previous step.
+     * @return Result of the step. The content of the result is available after the step is finished.
+     */
     StepResult replacePrevious(Step step);
 
     /**

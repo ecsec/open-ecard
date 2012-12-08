@@ -49,6 +49,8 @@
 			<exclude>bouncycastle/operator/**/*.java</exclude>
 			<exclude>bouncycastle/pkcs/**/*.java</exclude>
 			<exclude>bouncycastle/tsp/**/*.java</exclude>
+			<!-- example packages -->
+			<exclude>bouncycastle/**/examples/*.java</exclude>
 		    </excludes>
 		    <regex>false</regex>
 		    <token>org.bouncycastle</token>

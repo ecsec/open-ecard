@@ -500,14 +500,14 @@
 			    </group>
 			    <group>
 				<title>JAXB and JAX-WS</title>
-				<packages>de.bund.bsi.ecard.api._1:iso.std.iso_iec._24727.tech.schema:oasis.names.tc.*:org.etsi.uri.*:org.setcce.schemas.ers:org.w3._*:org.openecard.ws</packages>
+				<packages>generated:de.bund.bsi.ecard.api._1:iso.std.iso_iec._24727.tech.schema:oasis.names.tc.*:org.etsi.uri.*:org.setcce.schemas.ers:org.w3._*:org.openecard.ws:org.openecard.ws.schema</packages>
 			    </group>
 			    <group>
 				<title>Support Plugins</title>
 				<packages>org.openecard.maven.classlist</packages>
 			    </group>
 			</groups>
-			<excludePackageNames>org.openecard.bouncycastle.*:org.openecard.apache.http.*</excludePackageNames>
+			<excludePackageNames>org.openecard.bouncycastle.*:org.openecard.apache.http.*:javax.smartcardio:sun.security.smartcardio</excludePackageNames>
 		    </configuration>
 		</plugin>
 		<plugin>

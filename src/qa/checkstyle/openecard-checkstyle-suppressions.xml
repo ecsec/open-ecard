@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE suppressions PUBLIC "-//Puppy Crawl//DTD Suppressions 1.0//EN" "http://www.puppycrawl.com/dtds/suppressions_1_0.dtd">
+<!DOCTYPE suppressions PUBLIC "-//Puppy Crawl//DTD Suppressions 1.1//EN" "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
     <!-- ignore all from imported bouncycastle -->
@@ -8,5 +8,9 @@
     <suppress checks=".*" files="^.*/ifd/scio-backend/android-scio/.*$" />
     <suppress checks=".*" files="^.*/ifd/scio-backend/android-pcsc/src/main/java/sun/security/smartcardio/.*$" />
     <!-- star imports (assert etc.) allowed for test code -->
-    <suppress checks="star_import" files="^.*/src/main/test/.*$" />
+    <suppress id="star_import" files="^.*/src/main/test/.*$" />
+    <!-- package-info files don't need to conform to some java class format checks-->
+    <suppress id="invalid_java_class_file_ending" files="package-info.java" />
+    <suppress id="invalid_class_declaration_format" files="package-info.java" />
+    <suppress id="package_import_header" files="package-info.java" />
 </suppressions>

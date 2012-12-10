@@ -28,25 +28,34 @@ import java.lang.reflect.Modifier;
 import java.util.TreeMap;
 import org.openecard.common.interfaces.Dispatchable;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.interfaces.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
+ * Implementation of the {@code Dispatcher} interface.
+ * This implementation defers its actual reflection work to the {@link Service} class.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class MessageDispatcher implements Dispatcher {
 
-    private static final Logger _logger = LoggerFactory.getLogger(MessageDispatcher.class);
+    private static final Logger logger = LoggerFactory.getLogger(MessageDispatcher.class);
 
     private final Environment environment;
     /** Key is parameter classname */
-    private final TreeMap<String,Service> serviceMap;
+    private final TreeMap<String, Service> serviceMap;
     /** Key is service interface classname */
-    private final TreeMap<String,Method> serviceInstMap;
+    private final TreeMap<String, Method> serviceInstMap;
 
+    /**
+     * Creates a new MessageDispatcher instance and loads all definitions from the webservice interfaces in the
+     * environment.
+     *
+     * @param environment The environment with the webservice interface getters.
+     */
     public MessageDispatcher(Environment environment) {
 	this.environment = environment;
 	serviceMap = new TreeMap<String, Service>();
@@ -56,25 +65,33 @@ public class MessageDispatcher implements Dispatcher {
 
 
     @Override
-    public Object deliver(Object req) throws IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-	Class reqClass = req.getClass();
-	Service s = getService(reqClass);
-	Object serviceImpl = getServiceImpl(s);
-	Object result =  s.invoke(serviceImpl, req);
-	return result;
+    public Object deliver(Object req) throws DispatcherException, InvocationTargetException {
+	try {
+	    Class reqClass = req.getClass();
+	    Service s = getService(reqClass);
+	    Object serviceImpl = getServiceImpl(s);
+	    Object result =  s.invoke(serviceImpl, req);
+	    return result;
+	} catch (IllegalAccessException ex) {
+	    throw new DispatcherException(ex);
+	} catch (IllegalArgumentException ex) {
+	    throw new DispatcherException(ex);
+	}
     }
 
     private Service getService(Class reqClass) throws IllegalAccessException {
 	if (! serviceMap.containsKey(reqClass.getName())) {
-	    throw new IllegalAccessException("No service with a method containing parameter type " + reqClass.getName() + " present.");
+	    String msg = "No service with a method containing parameter type " + reqClass.getName() + " present.";
+	    throw new IllegalAccessException();
 	}
 	return serviceMap.get(reqClass.getName());
     }
 
-    private Object getServiceImpl(Service s) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    private Object getServiceImpl(Service s) throws IllegalAccessException, InvocationTargetException {
 	Method m = serviceInstMap.get(s.getServiceInterface().getName());
 	if (m == null) {
-	    throw new IllegalAccessException("The environment does not contain a service for class " + s.getServiceInterface().getName());
+	    String msg = "The environment does not contain a service for class " + s.getServiceInterface().getName();
+	    throw new IllegalAccessException(msg);
 	}
 	Object impl = m.invoke(environment);
 	return impl;
@@ -103,13 +120,11 @@ public class MessageDispatcher implements Dispatcher {
 		// try to read class from annotation, if not take return value
 		Dispatchable methodAnnotation = nextAccessor.getAnnotation(Dispatchable.class);
 		Class returnType = methodAnnotation.interfaceClass();
-		if (returnType.equals(Object.class)) {
-		    returnType = nextAccessor.getReturnType();
-		}
 
 		// check if the service is already defined
 		if (this.serviceInstMap.containsKey(returnType.getName())) {
-		    _logger.warn("Omitting service with type {} because its type already associated with another service.", returnType.getName());
+		    String msg = "Omitting service type {}, because its type already associated with another service.";
+		    logger.warn(msg, returnType.getName());
 		    continue;
 		}
 		// add env method mapping
@@ -119,7 +134,9 @@ public class MessageDispatcher implements Dispatcher {
 		Service service = new Service(returnType);
 		for (Class reqClass : service.getRequestClasses()) {
 		    if (serviceMap.containsKey(reqClass.getName())) {
-			_logger.warn("Omitting method with parameter type {} in service interface {} because its type already associated with another service.", reqClass.getName(), returnType.getName());
+			String msg = "Omitting method with parameter type {} in service interface {} because its ";
+			msg += "type already associated with another service.";
+			logger.warn(msg, reqClass.getName(), returnType.getName());
 		    } else {
 			serviceMap.put(reqClass.getName(), service);
 		    }

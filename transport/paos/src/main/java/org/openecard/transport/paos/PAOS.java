@@ -44,6 +44,7 @@ import org.openecard.bouncycastle.crypto.tls.TlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsProtocolHandler;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.io.ProxySettings;
 import org.openecard.transport.httpcore.HttpRequestHelper;
 import org.openecard.transport.httpcore.StreamHttpClientConnection;
@@ -226,7 +227,7 @@ public class PAOS {
 	return msg;
     }
 
-    public StartPAOSResponse sendStartPAOS(StartPAOS message) throws Exception {
+    public StartPAOSResponse sendStartPAOS(StartPAOS message) throws DispatcherException, Exception {
 	Object msg = message;
 	String hostname = endpoint.getHost();
 	int port = endpoint.getPort();

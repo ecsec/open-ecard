@@ -34,6 +34,7 @@ import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.anytype.AuthDataResponse;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.PasswordField;
@@ -141,10 +142,7 @@ public class PINStepAction extends StepAction {
 		logger.warn("PIN not entered successfully in terminal.");
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
-	} catch (IllegalAccessException ex) {
-	    logger.error("Failed to dispatch EstablishChannelCommand.", ex);
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
-	} catch (NoSuchMethodException ex) {
+	} catch (DispatcherException ex) {
 	    logger.error("Failed to dispatch EstablishChannelCommand.", ex);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	} catch (InvocationTargetException ex) {

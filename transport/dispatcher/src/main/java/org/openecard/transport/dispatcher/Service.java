@@ -28,22 +28,30 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
+import org.openecard.common.interfaces.DispatcherException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
+ * Service class encapsulating one webservice for the {@link MessageDispatcher}.
+ * This class takes care of the actual interface analysis and reflection part.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class Service {
+class Service {
 
-    private static final Logger _logger = LoggerFactory.getLogger(Service.class);
+    private static final Logger logger = LoggerFactory.getLogger(Service.class);
 
     private final Class iface;
     private final ArrayList<Class> requestClasses;
-    private final TreeMap<String,Method> requestMethods;
+    private final TreeMap<String, Method> requestMethods;
 
+    /**
+     * Creates a new Service instance and initializes it with the given webservice interface class.
+     *
+     * @param iface The webservice interface class.
+     */
     public Service(Class iface) {
 	this.iface = iface;
 
@@ -54,7 +62,9 @@ public class Service {
 	    if (isReqParam(m)) {
 		Class reqClass = getReqParamClass(m);
 		if (requestMethods.containsKey(reqClass.getName())) {
-		    _logger.warn("Omitting method {} in service interface {} because its parameter type is already associated with another method.", m.getName(), iface.getName());
+		    String msg = "Omitting method {} in service interface {}, because its parameter type is already ";
+		    msg += "associated with another method.";
+		    logger.warn(msg, m.getName(), iface.getName());
 		} else {
 		    requestClasses.add(reqClass);
 		    requestMethods.put(reqClass.getName(), m);
@@ -64,15 +74,37 @@ public class Service {
     }
 
 
+    /**
+     * Gets the webservice interface class this instance is initialized with.
+     *
+     * @return The webservice interface belonging to this instance.
+     */
     public Class getServiceInterface() {
 	return iface;
     }
 
-    public Object invoke(Object ifaceImpl, Object req) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-	Class reqClass = req.getClass();
-	Method m = getMethod(reqClass.getName());
-	// invoke method
-	return m.invoke(ifaceImpl, req);
+    /**
+     * Invokes the webservice method related to the request object in the given webservice class instance.
+     *
+     * @param ifaceImpl The instance implementing the webservice interface this instance is responsible for.
+     * @param req The request object to dispatch.
+     * @return The result of the method invocation.
+     * @throws DispatcherException In case an error happens in the reflections part of the dispatcher.
+     * @throws InvocationTargetException In case the dispatched method throws en exception.
+     */
+    public Object invoke(Object ifaceImpl, Object req) throws DispatcherException, InvocationTargetException {
+	try {
+	    Class reqClass = req.getClass();
+	    Method m = getMethod(reqClass.getName());
+	    // invoke method
+	    return m.invoke(ifaceImpl, req);
+	} catch (IllegalAccessException ex) {
+	    throw new DispatcherException(ex);
+	} catch (NoSuchMethodException ex) {
+	    throw new DispatcherException(ex);
+	} catch (IllegalArgumentException ex) {
+	    throw new DispatcherException(ex);
+	}
     }
 
 
@@ -99,7 +131,8 @@ public class Service {
     private Method getMethod(String paramClass) throws NoSuchMethodException {
 	Method m = requestMethods.get(paramClass);
 	if (m == null) {
-	    String msg = "Method containing parameter with class '" + paramClass + "' does not exist in interface '" + iface.getName() + "'.";
+	    String msg = "Method containing parameter with class '" + paramClass + "' does not exist in interface '";
+	    msg += iface.getName() + "'.";
 	    throw new NoSuchMethodException(msg);
 	}
 	return m;

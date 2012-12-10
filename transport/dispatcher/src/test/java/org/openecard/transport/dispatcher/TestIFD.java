@@ -22,11 +22,49 @@
 
 package org.openecard.transport.dispatcher;
 
-import iso.std.iso_iec._24727.tech.schema.*;
+import iso.std.iso_iec._24727.tech.schema.BeginTransaction;
+import iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse;
+import iso.std.iso_iec._24727.tech.schema.Cancel;
+import iso.std.iso_iec._24727.tech.schema.CancelResponse;
+import iso.std.iso_iec._24727.tech.schema.Connect;
+import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
+import iso.std.iso_iec._24727.tech.schema.ControlIFD;
+import iso.std.iso_iec._24727.tech.schema.ControlIFDResponse;
+import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
+import iso.std.iso_iec._24727.tech.schema.DestroyChannelResponse;
+import iso.std.iso_iec._24727.tech.schema.Disconnect;
+import iso.std.iso_iec._24727.tech.schema.DisconnectResponse;
+import iso.std.iso_iec._24727.tech.schema.EndTransaction;
+import iso.std.iso_iec._24727.tech.schema.EndTransactionResponse;
+import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
+import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
+import iso.std.iso_iec._24727.tech.schema.EstablishContext;
+import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
+import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities;
+import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse;
+import iso.std.iso_iec._24727.tech.schema.GetStatus;
+import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
+import iso.std.iso_iec._24727.tech.schema.ListIFDs;
+import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
+import iso.std.iso_iec._24727.tech.schema.ModifyVerificationData;
+import iso.std.iso_iec._24727.tech.schema.ModifyVerificationDataResponse;
+import iso.std.iso_iec._24727.tech.schema.Output;
+import iso.std.iso_iec._24727.tech.schema.OutputResponse;
+import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
+import iso.std.iso_iec._24727.tech.schema.ReleaseContextResponse;
+import iso.std.iso_iec._24727.tech.schema.Transmit;
+import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
+import iso.std.iso_iec._24727.tech.schema.VerifyUser;
+import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse;
+import iso.std.iso_iec._24727.tech.schema.Wait;
+import iso.std.iso_iec._24727.tech.schema.WaitResponse;
 import org.openecard.ws.IFD;
 
 
 /**
+ * IFD implementation class to test the dispatcher.
+ * Most methods just return an UnsupportedOperationException. At the moment only EstablishContext returns a result
+ * which itself is not a valid response object.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */

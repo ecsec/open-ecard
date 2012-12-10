@@ -32,6 +32,8 @@ import org.openecard.ws.SAL;
 
 
 /**
+ * Test environment.
+ * The getIFD method has the Dispatchable annotation.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -45,7 +47,7 @@ public class TestEnv1 implements Environment {
     }
 
     @Override
-    @Dispatchable
+    @Dispatchable(interfaceClass = IFD.class)
     public IFD getIFD() {
 	return ifd;
     }

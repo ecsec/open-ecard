@@ -22,11 +22,18 @@
 
 package org.openecard.common.interfaces;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 
 /**
- * This method level annotation can be used in the environment to mark the return value of get methods as dispatchable type.
+ * This annotation is used in the environment to mark the return value of getters as dispatchable type.
+ * When the dispatcher is initialized, it searches the environment implementation for dispatchable types. All types
+ * which are found are then loaded into the dispatcher, so that messages defined for them can be dispatched at a later
+ * time.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -36,9 +43,11 @@ import java.lang.annotation.*;
 public @interface Dispatchable {
 
     /**
+     * Gets the class of the webservice interface associated with this getter.
+     * The class instance must be webservice interface and all of its methods must be webservice methods.
      *
-     * @return Class object representing the actual webservice interface.
+     * @return Class object representing the actual webservice interface, the Object class if none is set.
      */
-    public Class interfaceClass() default Object.class;
+    Class interfaceClass();
 
 }

@@ -26,11 +26,22 @@ import java.lang.reflect.InvocationTargetException;
 
 
 /**
+ * Interface for a webservice method dispatcher.
+ * The dispatcher receives an object which is a JAXB type parameter of a webservice method. The dispatcher the looks for
+ * a webservice with a suitable method and executes it.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public interface Dispatcher {
 
-    Object deliver(Object request) throws IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException;
+    /**
+     * Invokes the service which is responsible for messages of the type of the given request object.
+     *
+     * @param request Object to dispatch to related service.
+     * @return The result of the method invocation.
+     * @throws DispatcherException In case an error happens in the reflections part of the dispatcher.
+     * @throws InvocationTargetException In case the dispatched method throws en exception.
+     */
+    Object deliver(Object request) throws DispatcherException, InvocationTargetException;
 
 }

@@ -31,11 +31,18 @@ import static org.testng.Assert.*;
 
 
 /**
+ * Test of the dispatcher.
+ * The test checks if a environment can be loaded and if a method can be dispatched successfully.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class TestDispatcher {
 
+    /**
+     * Test instance of TestEnv1.
+     *
+     * @throws Exception If the test is a failure.
+     */
     @Test
     public void testDispatcher1() throws Exception {
 	// test with direct annotation with explicit class specification
@@ -51,26 +58,16 @@ public class TestDispatcher {
 	assertTrue(res instanceof EstablishContextResponse);
     }
 
+    /**
+     * Test instance of TestEnv2.
+     *
+     * @throws Exception If the test is a failure.
+     */
     @Test
     public void testDispatcher2() throws Exception {
-	// test with direct annotation without explicit class specification
-	IFD ifd = new TestIFD();
-	Environment env = new TestEnv2();
-	MessageDispatcher disp = new MessageDispatcher(env);
-
-	env.setIFD(ifd);
-
-	Object req = new EstablishContext();
-	Object res = disp.deliver(req);
-
-	assertTrue(res instanceof EstablishContextResponse);
-    }
-
-    @Test
-    public void testDispatcher3() throws Exception {
 	// test with inherited annotation without explicit class specification
 	IFD ifd = new TestIFD();
-	Environment env = new TestEnv3();
+	Environment env = new TestEnv2();
 	MessageDispatcher disp = new MessageDispatcher(env);
 
 	env.setIFD(ifd);

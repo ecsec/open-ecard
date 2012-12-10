@@ -20,13 +20,10 @@
  *
  ***************************************************************************/
 
-package org.openecard.transport.dispatcher;
-
-
 /**
+ * Java reflection based implementation of the Dispatcher interface.
+ * The interface definitions are loaded once when the dispatcher is created.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @see org.openecard.common.interfaces.Dispatcher
  */
-public class TestEnv3 extends TestEnv2 {
-
-}
+package org.openecard.transport.dispatcher;

@@ -57,7 +57,7 @@ public class ClientEnv implements Environment {
     }
 
     @Override
-    @Dispatchable
+    @Dispatchable(interfaceClass = IFD.class)
     public IFD getIFD() {
 	return ifd;
     }
@@ -78,7 +78,7 @@ public class ClientEnv implements Environment {
     }
 
     @Override
-    @Dispatchable
+    @Dispatchable(interfaceClass = SAL.class)
     public SAL getSAL() {
 	return sal;
     }
@@ -109,7 +109,7 @@ public class ClientEnv implements Environment {
     }
 
     @Override
-    @Dispatchable
+    @Dispatchable(interfaceClass = Management.class)
     public Management getManagement() {
 	return management;
     }

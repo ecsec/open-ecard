@@ -507,7 +507,7 @@
 				<packages>org.openecard.maven.classlist</packages>
 			    </group>
 			</groups>
-			<excludePackageNames>org.openecard.bouncycastle.*:org.openecard.apache.http.*:javax.smartcardio:sun.security.smartcardio</excludePackageNames>
+			<excludePackageNames>org.openecard.bouncycastle:org.openecard.bouncycastle.*:org.openecard.apache.http.*:javax.smartcardio:sun.security.smartcardio</excludePackageNames>
 		    </configuration>
 		</plugin>
 		<plugin>

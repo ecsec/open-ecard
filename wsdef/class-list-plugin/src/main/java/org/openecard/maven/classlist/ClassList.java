@@ -53,21 +53,24 @@ public class ClassList extends AbstractMojo {
      *
      * @parameter expression="${project.build.directory}/classes"
      */
-    @SuppressFBWarnings(value={"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"}, justification="Written by maven plugin.")
+    @SuppressFBWarnings(value = { "UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD" },
+			justification = "Written by maven plugin.")
     private File outputDirectory;
     /**
      * Name of the file.
      *
      * @parameter expression="classes.lst"
      */
-    @SuppressFBWarnings(value={"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"}, justification="Written by maven plugin.")
+    @SuppressFBWarnings(value = { "UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD" },
+			justification = "Written by maven plugin.")
     private String fileName;
     /**
      * List of excluded classes.
      *
      * @parameter
      */
-    @SuppressFBWarnings(value={"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"}, justification="Written by maven plugin.")
+    @SuppressFBWarnings(value = { "UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD" },
+			justification = "Written by maven plugin.")
     private List excludes;
 
     /**
@@ -75,7 +78,8 @@ public class ClassList extends AbstractMojo {
      * 
      * @parameter default-value="${project.build.directory}/classes"
      */
-    @SuppressFBWarnings(value={"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"}, justification="Written by maven plugin.")
+    @SuppressFBWarnings(value = { "UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD" },
+			justification = "Written by maven plugin.")
     private File classDirectory;
 
     @Override

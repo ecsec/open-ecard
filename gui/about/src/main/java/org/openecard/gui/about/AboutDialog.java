@@ -57,8 +57,9 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * This class is used to create an About dialog. It shows some information about the application, e.g. the version and
- * the license of the application, how to contribute to the project, how to submit bug reports and so on.
+ * This class is used to create a Swing based about dialog.
+ * The dialog is localized with the {@code about} properties from the i18n module and the HTML pages in this modules'
+ * {@code openecard_i18n/about} directory.
  *
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
@@ -67,10 +68,10 @@ public class AboutDialog extends JDialog {
     private static final Logger logger = LoggerFactory.getLogger(AboutDialog.class);
     private static final long serialVersionUID = 1L;
 
-    private final I18n lang = I18n.getTranslation("about");
+    private final transient I18n lang = I18n.getTranslation("about");
 
     /**
-     * Constructor of AboutDialog class.
+     * Creates a new instance of this class.
      */
     public AboutDialog() {
 	super();
@@ -78,7 +79,7 @@ public class AboutDialog extends JDialog {
     }
 
     /**
-     * Convenience method for showing an About dialog.
+     * Convenience method for showing an about dialog.
      * Since this method is static, there is no need to create an instance of AboutDialog to call it.
      */
     public static void showDialog() {

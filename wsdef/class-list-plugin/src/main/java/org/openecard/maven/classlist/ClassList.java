@@ -22,8 +22,8 @@
 
 package org.openecard.maven.classlist;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
@@ -34,10 +34,17 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 
 /**
- * Goal which appends an entry to a file when it is a jaxb class.
+ * Implementation of the {@code class-list} goal.
+ * The plugin creates a file named in the {@code fileName} parameter and places it into the the directory named by the
+ * parameter {@code outputDirectory}. The contents of the file are entries of fully qualified class names with all JAXB
+ * element classes found below the directory named by the {@code classDirectory} parameter. The {@code excludes} list
+ * can contain fully qualified class names which should not occur in the list.
+ * <p>
+ * The plugin is executed in the {@code process-classes} phase. The execution goal is named {@code class-list}.
  *
  * @goal class-list
  * @phase process-classes
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class ClassList extends AbstractMojo {
 
@@ -46,39 +53,46 @@ public class ClassList extends AbstractMojo {
      *
      * @parameter expression="${project.build.directory}/classes"
      */
+    @SuppressFBWarnings(value={"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"}, justification="Written by maven plugin.")
     private File outputDirectory;
     /**
      * Name of the file.
      *
      * @parameter expression="classes.lst"
      */
+    @SuppressFBWarnings(value={"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"}, justification="Written by maven plugin.")
     private String fileName;
     /**
      * List of excluded classes.
      *
      * @parameter
      */
+    @SuppressFBWarnings(value={"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"}, justification="Written by maven plugin.")
     private List excludes;
 
     /**
      * List of directories to look at.
+     * 
      * @parameter default-value="${project.build.directory}/classes"
      */
+    @SuppressFBWarnings(value={"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"}, justification="Written by maven plugin.")
     private File classDirectory;
 
     @Override
     public void execute() throws MojoExecutionException {
 	File f = outputDirectory;
 
-	if (!f.exists()) {
-	    f.mkdirs();
+	if (! f.exists()) {
+	    boolean created = f.mkdirs();
+	    if (! created) {
+		throw new MojoExecutionException("Directory could not be created: " + outputDirectory);
+	    }
 	}
 	File touch = new File(f, fileName);
 
-	FileWriter w = null;
+	PrintWriter pw = null;
 	try {
-	    w = new FileWriter(touch, false);
-	    PrintWriter pw = new PrintWriter(w);
+	    pw = new PrintWriter(touch, "UTF-8");
 
 	    // get list of all class files
 	    for (String next : getClassFiles()) {
@@ -88,12 +102,8 @@ public class ClassList extends AbstractMojo {
 	} catch (IOException e) {
 	    throw new MojoExecutionException("Error creating file " + touch, e);
 	} finally {
-	    if (w != null) {
-		try {
-		    w.close();
-		} catch (IOException e) {
-		    // ignore
-		}
+	    if (pw != null) {
+		pw.close();
 	    }
 	}
     }
@@ -131,8 +141,8 @@ public class ClassList extends AbstractMojo {
 	try {
 	    String next = classFile.getCanonicalPath();
 	    if (next.endsWith(".class")) {
-		next = next.substring(0, next.length()-6);
-		next = next.substring(classDirectory.getCanonicalPath().length()+1);
+		next = next.substring(0, next.length() - 6);
+		next = next.substring(classDirectory.getCanonicalPath().length() + 1);
 		next = next.replace(File.separator, ".");
 		// consult excludes list
 		if (excludes.contains(next)) {

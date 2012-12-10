@@ -8,7 +8,8 @@
     <suppress checks=".*" files="^.*/ifd/scio-backend/android-scio/.*$" />
     <suppress checks=".*" files="^.*/ifd/scio-backend/android-pcsc/src/main/java/sun/security/smartcardio/.*$" />
     <!-- star imports (assert etc.) allowed for test code -->
-    <suppress id="star_import" files="^.*/src/main/test/.*$" />
+    <suppress id="star_import" files="^.*/src/test/.*$" />
+    <!--<suppress checks="AvoidStarImportCheck" files="^.*/src/test/.*$" />-->
     <!-- package-info files don't need to conform to some java class format checks-->
     <suppress id="invalid_java_class_file_ending" files="package-info.java" />
     <suppress id="invalid_class_declaration_format" files="package-info.java" />

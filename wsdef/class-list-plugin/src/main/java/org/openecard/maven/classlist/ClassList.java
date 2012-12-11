@@ -26,6 +26,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -71,7 +72,7 @@ public class ClassList extends AbstractMojo {
      */
     @SuppressFBWarnings(value = { "UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD" },
 			justification = "Written by maven plugin.")
-    private List excludes;
+    private List<String> excludes;
 
     /**
      * List of directories to look at.
@@ -84,6 +85,11 @@ public class ClassList extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
+	// correct input parameters
+	if (excludes == null) {
+	    excludes = Collections.emptyList();
+	}
+
 	File f = outputDirectory;
 
 	if (! f.exists()) {

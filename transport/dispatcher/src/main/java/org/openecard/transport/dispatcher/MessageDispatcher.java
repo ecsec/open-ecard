@@ -82,7 +82,7 @@ public class MessageDispatcher implements Dispatcher {
     private Service getService(Class reqClass) throws IllegalAccessException {
 	if (! serviceMap.containsKey(reqClass.getName())) {
 	    String msg = "No service with a method containing parameter type " + reqClass.getName() + " present.";
-	    throw new IllegalAccessException();
+	    throw new IllegalAccessException(msg);
 	}
 	return serviceMap.get(reqClass.getName());
     }

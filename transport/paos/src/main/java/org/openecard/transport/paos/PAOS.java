@@ -22,7 +22,6 @@
 
 package org.openecard.transport.paos;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.io.IOException;
@@ -32,7 +31,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.List;
 import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerException;
 import org.openecard.apache.http.HttpEntity;
@@ -243,19 +241,6 @@ public class PAOS {
 	return result;
     }
 
-    private String createStartPAOS(String sessionIdentifier, List<ConnectionHandleType> connectionHandles)
-	    throws MarshallingTypeException, SOAPException, TransformerException {
-	StartPAOS startPAOS = new StartPAOS();
-	startPAOS.setSessionIdentifier(sessionIdentifier);
-	startPAOS.setProfile(ECardConstants.Profile.ECARD_1_1);
-	startPAOS.getConnectionHandle().addAll(connectionHandles);
-
-	SOAPMessage soapMsg = createSOAPMessage(startPAOS);
-	String responseStr = m.doc2str(soapMsg.getDocument());
-
-	return responseStr;
-    }
-
     private SOAPMessage createSOAPMessage(Object content) throws MarshallingTypeException, SOAPException {
 	Document contentDoc = m.marshal(content);
 	SOAPMessage msg = m.add2soap(contentDoc);
@@ -289,7 +274,7 @@ public class PAOS {
      * Sends start PAOS and answers all successor messages to the server associated with this instance.
      * Messages are exchanged until the server replies with a {@code StartPAOSResponse} message.
      *
-     * @param message
+     * @param message The StartPAOS message which is sent in the first message.
      * @return The {@code StartPAOSResponse} message from the server.
      * @throws DispatcherException In case there errors with the message conversion or the dispatcher.
      * @throws PAOSException In case there were errors in the transport layer.

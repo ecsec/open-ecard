@@ -36,7 +36,7 @@ public class PAOSException extends Exception {
     /**
      * Creates an instance and initializes the exception with a message.
      *
-     * @param message The message describing the error.
+     * @param msg The message describing the error.
      */
     public PAOSException(String msg) {
 	super(msg);
@@ -54,7 +54,7 @@ public class PAOSException extends Exception {
     /**
      * Creates an instance and initializes the exception with a message and a cause.
      *
-     * @param message The message describing the error.
+     * @param msg The message describing the error.
      * @param cause The exception causing the error.
      */
     public PAOSException(String msg, Throwable cause) {

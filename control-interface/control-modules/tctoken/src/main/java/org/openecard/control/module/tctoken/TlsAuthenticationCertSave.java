@@ -28,8 +28,9 @@ import org.openecard.crypto.tls.TlsNoAuthentication;
 
 
 /**
- * This class extends {@link org.openecard.crypto.tls.TlsNoAuthentication TlsNoAuthentication} and adds an additional
- * getter for obtaining the last processed certificate chain.
+ * This class extends {@code TlsNoAuthentication} and adds an additional getter for obtaining the last processed
+ * certificate chain.
+ * The certificate chain is needed for further certificate validations in the EAC protocol.
  *
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
@@ -46,7 +47,7 @@ public class TlsAuthenticationCertSave extends TlsNoAuthentication {
     /**
      * Returns the certificate chain which is processed during the TLS authentication.
      *
-     * @return certificate chain
+     * @return The certificate chain of the last certificate validation
      */
     public Certificate getCertificateChain() {
 	return lastCertChain;

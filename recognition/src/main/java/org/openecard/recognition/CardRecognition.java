@@ -45,8 +45,10 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.TreeMap;
+import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.apdu.common.CardResponseAPDU;
@@ -143,6 +145,31 @@ public class CardRecognition {
 	} else {
 	    return null;
 	}
+    }
+
+    /**
+     * Gets the translated card name for a card type.
+     *
+     * @param cardType The card type to get the card name for.
+     * @return A card name matching the users locale or the English name as default. If the card is not supported, the
+     *   string {@code Unknown card type} is returned.
+     */
+    public String getTranslatedCardName(String cardType) {
+	CardInfoType info = getCardInfo(cardType);
+
+	Locale userLocale = Locale.getDefault();
+	String langCode = userLocale.getLanguage();
+	String enFallback = "Unknown card type.";
+
+	for (InternationalStringType typ : info.getCardType().getCardTypeName()) {
+	    if (typ.getLang().equalsIgnoreCase("en")) {
+		enFallback = typ.getValue();
+	    }
+	    if (typ.getLang().equalsIgnoreCase(langCode)) {
+		return typ.getValue();
+	    }
+	}
+	return enFallback;
     }
 
     /**

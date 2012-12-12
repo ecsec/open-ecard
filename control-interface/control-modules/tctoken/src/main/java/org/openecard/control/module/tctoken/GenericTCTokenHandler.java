@@ -28,6 +28,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import java.io.UnsupportedEncodingException;
@@ -36,6 +37,7 @@ import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
@@ -48,7 +50,7 @@ import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.HttpRequestLineUtils;
-import org.openecard.control.module.tctoken.gui.InsertCardUserConsent;
+import org.openecard.control.module.tctoken.gui.InsertCardDialog;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertPSKTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
@@ -83,20 +85,37 @@ public class GenericTCTokenHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GenericTCTokenHandler.class);
 
-    final CardStateMap cardStates;
+    private final CardStateMap cardStates;
     private final Dispatcher dispatcher;
     private final UserConsent gui;
-    private CardRecognition reg;
+    private final CardRecognition rec;
 
-    public GenericTCTokenHandler(CardStateMap cardStates, Dispatcher dispatcher, UserConsent gui, CardRecognition reg){
+    /**
+     * Creates a TCToken handler instances and initializes it with the given parameters.
+     *
+     * @param cardStates Instance of the card states managed by the application.
+     * @param dispatcher The dispatcher used to deliver the messages to the webservice interface implementations.
+     * @param gui The implementation of the user consent interface.
+     * @param rec The card recognition engine.
+     */
+    public GenericTCTokenHandler(CardStateMap cardStates, Dispatcher dispatcher, UserConsent gui, CardRecognition rec) {
 	this.cardStates = cardStates;
 	this.dispatcher = dispatcher;
 	this.gui = gui;
-	this.reg = reg;
+	this.rec = rec;
     }
 
-    public TCTokenRequest parseTCTokenRequestURI(URI requestURI) throws UnsupportedEncodingException,
-	    MalformedURLException, TCTokenException {
+    /**
+     * Processes the activation request sent via the localhost binding.
+     *
+     * @param requestURI The request URI of the localhost server. This is not the tcTokenURL but the complete request
+     *   URI.
+     * @return A TCToken request for further processing in the TCToken handler.
+     * @throws UnsupportedEncodingException If the URI contains an invalid query string.
+     * @throws TCTokenException If the TCToken could not be fetched. That means either the URL is invalid, the server
+     *   was not reachable or the returned value was not a TCToken or TCToken like structure.
+     */
+    public TCTokenRequest parseTCTokenRequestURI(URI requestURI) throws UnsupportedEncodingException, TCTokenException {
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 	String queryStr = requestURI.getRawQuery();
 	Map<String, String> queries = HttpRequestLineUtils.transform(queryStr);
@@ -106,89 +125,104 @@ public class GenericTCTokenHandler {
 	    String v = next.getValue();
 
 	    if (k.equals("tcTokenURL")) {
-		if (v != null && !v.isEmpty()) {
-		    TCTokenType token = TCTokenFactory.generateTCToken(new URL(v));
-		    tcTokenRequest.setTCToken(token);
+		if (v != null && ! v.isEmpty()) {
+		    try {
+			TCTokenType token = TCTokenFactory.generateTCToken(new URL(v));
+			tcTokenRequest.setTCToken(token);
+		    } catch (MalformedURLException ex) {
+			String msg = "The tcTokenURL parameter contains an invalid URL: " + v;
+			throw new TCTokenException(msg, ex);
+		    }
 		} else {
-		    throw new IllegalArgumentException("Malformed TCTokenURL");
+		    throw new TCTokenException("Parameter tcTokenURL contains no value.");
 		}
 
 	    } else if (k.equals("ifdName")) {
-		if (v != null && !v.isEmpty()) {
+		if (v != null && ! v.isEmpty()) {
 		    tcTokenRequest.setIFDName(v);
 		} else {
-		    throw new IllegalArgumentException("Malformed IFDName");
+		    throw new TCTokenException("Parameter ifdName contains no value.");
 		}
 
 	    } else if (k.equals("contextHandle")) {
-		if (v != null && !v.isEmpty()) {
+		if (v != null && ! v.isEmpty()) {
 		    tcTokenRequest.setContextHandle(v);
 		} else {
-		    throw new IllegalArgumentException("Malformed ContextHandle");
+		    throw new TCTokenException("Parameter contextHandle contains no value.");
 		}
 
 	    } else if (k.equals("slotIndex")) {
-		if (v != null && !v.isEmpty()) {
+		if (v != null && ! v.isEmpty()) {
 		    tcTokenRequest.setSlotIndex(v);
 		} else {
-		    throw new IllegalArgumentException("Malformed SlotIndex");
+		    throw new TCTokenException("Parameter slotIndex contains no value.");
 		}
 	    } else if (k.equals("cardType")) {
-		if (v != null && !v.isEmpty()) {
+		if (v != null && ! v.isEmpty()) {
 		    tcTokenRequest.setCardType(v);
 		} else {
-		    throw new IllegalArgumentException("Malformed CardType");
+		    throw new TCTokenException("Parameter cardType contains no value.");
 		}
 	    } else {
-		logger.debug("Unknown query element: {}", k);
+		logger.info("Unknown query element: {}", k);
 	    }
 	}
 	return tcTokenRequest;
     }
 
     /**
-     * Get the first found handle of the given card type.
+     * Gets the first handle of the given card type.
      *
-     * @param type the card type to get the first handle for
+     * @param type The card type to get the first handle for.
      * @return Handle describing the given card type or null if none is present.
      */
     private ConnectionHandleType getFirstHandle(String type) {
+	String cardName = rec.getTranslatedCardName(type);
 	ConnectionHandleType conHandle = new ConnectionHandleType();
-	ConnectionHandleType.RecognitionInfo rec = new ConnectionHandleType.RecognitionInfo();
-	rec.setCardType(type);
-	conHandle.setRecognitionInfo(rec);
-	Set<CardStateEntry> entries;
-	entries = cardStates.getMatchingEntries(conHandle);
+	ConnectionHandleType.RecognitionInfo recInfo = new ConnectionHandleType.RecognitionInfo();
+	recInfo.setCardType(type);
+	conHandle.setRecognitionInfo(recInfo);
+	Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
 	if (entries.isEmpty()) {
-	    InsertCardUserConsent uc = new InsertCardUserConsent(gui, reg, conHandle, cardStates);
+	    InsertCardDialog uc = new InsertCardDialog(gui, cardStates, type, cardName);
 	    return uc.show();
 	} else {
 	    return entries.iterator().next().handleCopy();
 	}
     }
 
-    private TCTokenResponse doPAOS(TCTokenType token, ConnectionHandleType connectionHandle) throws WSException,
-	    DispatcherException, PAOSException {
+    /**
+     * Performs the actual PAOS procedure.
+     * Connects the given card, establishes the HTTP channel and talks to the server. Afterwards disconnects the card.
+     *
+     * @param token The TCToken containing the connection parameters.
+     * @param connectionHandle The handle of the card that will be used.
+     * @return A TCTokenResponse indicating success or failure.
+     * @throws DispatcherException If there was a problem dispatching a request from the server.
+     * @throws PAOSException If there was a transport error.
+     */
+    private TCTokenResponse doPAOS(TCTokenType token, ConnectionHandleType connectionHandle) throws PAOSException,
+	    DispatcherException {
 	try {
 	    // Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
-	    CardApplicationPath cardApplicationPath = new CardApplicationPath();
-	    cardApplicationPath.setCardAppPathRequest(connectionHandle);
-	    CardApplicationPathResponse cardApplicationPathResponse = (CardApplicationPathResponse) dispatcher
-		    .deliver(cardApplicationPath);
+	    CardApplicationPath appPath = new CardApplicationPath();
+	    appPath.setCardAppPathRequest(connectionHandle);
+	    CardApplicationPathResponse appPathRes = (CardApplicationPathResponse) dispatcher.deliver(appPath);
 
 	    // Check CardApplicationPathResponse
-	    WSHelper.checkResult(cardApplicationPathResponse);
+	    WSHelper.checkResult(appPathRes);
 
-	    CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
-	    cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet()
-		    .getCardApplicationPathResult().get(0));
-	    CardApplicationConnectResponse cardApplicationConnectResponse = (CardApplicationConnectResponse) dispatcher
-		    .deliver(cardApplicationConnect);
+	    CardApplicationConnect appConnect = new CardApplicationConnect();
+	    List<CardApplicationPathType> pathRes;
+	    pathRes = appPathRes.getCardAppPathResultSet().getCardApplicationPathResult();
+	    appConnect.setCardApplicationPath(pathRes.get(0));
+	    CardApplicationConnectResponse appConnectRes;
+	    appConnectRes = (CardApplicationConnectResponse) dispatcher.deliver(appConnect);
 	    // Update ConnectionHandle. It now includes a SlotHandle.
-	    connectionHandle = cardApplicationConnectResponse.getConnectionHandle();
+	    connectionHandle = appConnectRes.getConnectionHandle();
 
 	    // Check CardApplicationConnectResponse
-	    WSHelper.checkResult(cardApplicationConnectResponse);
+	    WSHelper.checkResult(appConnectRes);
 
 	    try {
 		String sessionIdentifier = token.getSessionIdentifier();
@@ -230,6 +264,7 @@ public class GenericTCTokenHandler {
 
 		// Send StartPAOS
 		StartPAOS sp = new StartPAOS();
+		sp.setProfile(ECardConstants.Profile.ECARD_1_1);
 		sp.getConnectionHandle().add(connectionHandle);
 		sp.setSessionIdentifier(sessionIdentifier);
 		p.sendStartPAOS(sp);
@@ -245,6 +280,8 @@ public class GenericTCTokenHandler {
 		appDis.setConnectionHandle(connectionHandle);
 		dispatcher.deliver(appDis);
 	    }
+	} catch (WSException ex) {
+	    throw new DispatcherException("Failed to connect to card.", ex);
 	} catch (InvocationTargetException ex) {
 	    throw new DispatcherException(ex);
 	} catch (MalformedURLException ex) {
@@ -253,7 +290,7 @@ public class GenericTCTokenHandler {
     }
 
     /**
-     * Activate the client according to the received TCToken..
+     * Activates the client according to the received TCToken.
      *
      * @param request The activation request containing the TCToken.
      * @return The response containing the result of the activation process.
@@ -278,8 +315,7 @@ public class GenericTCTokenHandler {
 	    requestedHandle.setSlotIndex(requestedSlotIndex);
 
 	    Set<CardStateEntry> matchingHandles = cardStates.getMatchingEntries(requestedHandle);
-
-	    if (!matchingHandles.isEmpty()) {
+	    if (! matchingHandles.isEmpty()) {
 		connectionHandle = matchingHandles.toArray(new CardStateEntry[] {})[0].handleCopy();
 	    }
 	}
@@ -293,10 +329,6 @@ public class GenericTCTokenHandler {
 
 	try {
 	    return doPAOS(request.getTCToken(), connectionHandle);
-	} catch (WSException w) {
-	    logger.error(w.getMessage(), w);
-	    response.setResult(w.getResult());
-	    return response;
 	} catch (DispatcherException w) {
 	    logger.error(w.getMessage(), w);
 	    // TODO: check for better matching minor type

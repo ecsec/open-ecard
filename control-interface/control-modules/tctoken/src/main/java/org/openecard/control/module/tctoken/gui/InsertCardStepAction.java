@@ -36,32 +36,40 @@ import org.openecard.gui.executor.StepActionResultStatus;
 
 /**
  * Action to wait for a card insertion in the GUI executor.
+ * The action contains getters for the obtained values.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class InsertCardStepAction extends StepAction {
 
-    private ConnectionHandleType conHandle;
+    private String cardType;
     private ConnectionHandleType response;
     private CardStateMap cardStates;
 
     /**
-     * Create a new InsertCardStep Action.
-     * @param cardStates cardStates to look for a matching ConnectionHandle
-     * @param stepName name of the step
-     * @param conHandle ConnectionHandle the inserted card must match
+     * Creates a new InsertCardStep Action.
+     *
+     * @param stepName The name of the step this action is run in.
+     * @param cardStates The card states instance to look for a matching ConnectionHandle.
+     * @param cardType Type URI of the card that must be inserted.
      */
-    public InsertCardStepAction(CardStateMap cardStates, String stepName, ConnectionHandleType conHandle) {
+    public InsertCardStepAction(String stepName, CardStateMap cardStates, String cardType) {
 	super(stepName);
 	this.cardStates = cardStates;
-	this.conHandle = conHandle;
+	this.cardType = cardType;
     }
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
 	Set<CardStateEntry> entries;
 
+	ConnectionHandleType conHandle = new ConnectionHandleType();
+	ConnectionHandleType.RecognitionInfo recInfo = new ConnectionHandleType.RecognitionInfo();
+	recInfo.setCardType(cardType);
+	conHandle.setRecognitionInfo(recInfo);
+
 	do {
+	    // TODO: find a method without calling sleep, probably extend CardStateMap to wait for changes
 	    entries = cardStates.getMatchingEntries(conHandle);
 	    try {
 		Thread.sleep(200);
@@ -70,16 +78,18 @@ public class InsertCardStepAction extends StepAction {
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
 	} while (entries.size() < 1);
-	setResponse(entries.iterator().next().handleCopy());
+
+	response = (entries.iterator().next().handleCopy());
 	return new StepActionResult(StepActionResultStatus.NEXT);
     }
 
+    /**
+     * Gets the connection handle of the inserted card.
+     *
+     * @return The connection handle of the first card of the specified type.
+     */
     public ConnectionHandleType getResponse() {
 	return response;
-    }
-
-    public void setResponse(ConnectionHandleType response) {
-	this.response = response;
     }
 
 }

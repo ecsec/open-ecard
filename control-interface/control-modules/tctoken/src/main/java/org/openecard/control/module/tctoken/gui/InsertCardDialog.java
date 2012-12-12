@@ -22,10 +22,7 @@
 
 package org.openecard.control.module.tctoken.gui;
 
-import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import java.util.Locale;
-import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import org.openecard.common.I18n;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.gui.ResultStatus;
@@ -36,49 +33,47 @@ import org.openecard.gui.definition.Text;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
 import org.openecard.gui.executor.StepAction;
-import org.openecard.recognition.CardRecognition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
- * Implements the insert card user consent dialog.
+ * Implements a insert card dialog.
+ * This dialog requests the user to insert a card of a specific type.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class InsertCardUserConsent {
+public class InsertCardDialog {
 
-    private static final Logger logger = LoggerFactory.getLogger(InsertCardUserConsent.class);
+    private static final String STEP_ID = "insert-card";
+
     private final I18n lang = I18n.getTranslation("tctoken");
 
     private final UserConsent gui;
-    private final CardRecognition reg;
-    private final ConnectionHandleType conHandle;
+    private final String cardType;
+    private final String cardName;
     private CardStateMap cardStates;
 
     /**
-     * Creates a new InsertCardUserConsent.
+     * Creates a new InsertCardDialog.
      *
-     * @param gui the UserConsent to show on
-     * @param reg to get information out of the card info of the requested card
-     * @param conHandle to get the requested card type from
-     * @param cardStates card states of the client
+     * @param gui The user consent implementation.
+     * @param cardStates The card states instance managing all cards of this client.
+     * @param cardType Type URI of the card that must be inserted.
+     * @param cardName The localized name of the card type.
      */
-    public InsertCardUserConsent(UserConsent gui, CardRecognition reg, ConnectionHandleType conHandle,
-	    CardStateMap cardStates) {
+    public InsertCardDialog(UserConsent gui, CardStateMap cardStates, String cardType, String cardName) {
 	this.gui = gui;
-	this.reg = reg;
-	this.conHandle = conHandle;
+	this.cardType = cardType;
+	this.cardName = cardName;
 	this.cardStates = cardStates;
     }
 
     /**
-     * Shows the GUI.
+     * Shows this InsertCardDialog dialog.
      *
-     * @return the ConnectionHandle of the inserted card or null if no card was inserted
+     * @return The ConnectionHandle of the inserted card or null if no card was inserted.
      */
     public ConnectionHandleType show() {
-	InsertCardStepAction insertCardAction = new InsertCardStepAction(cardStates, "insert-card", conHandle);
+	InsertCardStepAction insertCardAction = new InsertCardStepAction(STEP_ID, cardStates, cardType);
 	UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent(insertCardAction));
 	ExecutionEngine exec = new ExecutionEngine(ucr);
 	// run gui
@@ -95,13 +90,12 @@ public class InsertCardUserConsent {
 	UserConsentDescription uc = new UserConsentDescription(lang.translationForKey("title"));
 
 	// create step
-	Step s = new Step("insert-card", lang.translationForKey("step.title"));
+	Step s = new Step(STEP_ID, lang.translationForKey("step.title"));
 	s.setInstantReturn(true);
 	s.setAction(insertCardAction);
 
 	// create and add text instructing user
 	Text i1 = new Text();
-	String cardName = this.getTranslatedCardName();
 	i1.setText(lang.translationForKey("step.message", cardName));
 	s.getInputInfoUnits().add(i1);
 
@@ -109,29 +103,6 @@ public class InsertCardUserConsent {
 	uc.getSteps().add(s);
 
 	return uc;
-    }
-
-    /**
-     * Gets the translated card name for a card type.
-     *
-     * @return A card name matching the users locale or the english name as default.
-     */
-    private String getTranslatedCardName() {
-	CardInfoType info = reg.getCardInfo(conHandle.getRecognitionInfo().getCardType());
-
-	Locale userLocale = Locale.getDefault();
-	String lang = userLocale.getLanguage();
-	String enFallback = "";
-
-	for (InternationalStringType typ : info.getCardType().getCardTypeName()) {
-	    if (typ.getLang().equalsIgnoreCase("en")) {
-		enFallback = typ.getValue();
-	    }
-	    if (typ.getLang().equalsIgnoreCase(lang)) {
-		return typ.getValue();
-	    }
-	}
-	return enFallback;
     }
 
 }

@@ -70,7 +70,8 @@ public class ClassList extends AbstractMojo {
      *
      * @parameter
      */
-    @SuppressFBWarnings(value = { "UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD" },
+    @SuppressFBWarnings(value = { "UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD",
+				  "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR" },
 			justification = "Written by maven plugin.")
     private List<String> excludes;
 

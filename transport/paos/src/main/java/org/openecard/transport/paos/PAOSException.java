@@ -24,6 +24,8 @@ package org.openecard.transport.paos;
 
 
 /**
+ * Exception for the PAOS system.
+ * This exception abstracts transport specific exceptions.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -31,10 +33,30 @@ public class PAOSException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates an instance and initializes the exception with a message.
+     *
+     * @param message The message describing the error.
+     */
     public PAOSException(String msg) {
 	super(msg);
     }
 
+    /**
+     * Creates an instance and initializes the exception with a cause.
+     *
+     * @param cause The exception causing the error.
+     */
+    public PAOSException(Throwable cause) {
+	super(cause);
+    }
+
+    /**
+     * Creates an instance and initializes the exception with a message and a cause.
+     *
+     * @param message The message describing the error.
+     * @param cause The exception causing the error.
+     */
     public PAOSException(String msg, Throwable cause) {
 	super(msg, cause);
     }

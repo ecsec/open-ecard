@@ -26,19 +26,33 @@ import org.openecard.common.util.ValueGenerators;
 
 
 /**
+ * The MessageIdGenerator keeps track of the message IDs of the PAOS messages.
+ * The ID from the remote message is set and after that a new ID for the reply message can be obtained.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class MessageGenerator {
+final class MessageIdGenerator {
 
-    private static String otherMsg = null;
-    private static String myMsg = null;
+    private String otherMsg;
+    private String myMsg;
 
-    public static String getRemoteID() {
+    /**
+     * Gets the last remote message ID of this instance.
+     *
+     * @return The last remote message ID.
+     */
+    public String getRemoteID() {
 	return otherMsg;
     }
 
-    public static boolean setRemoteID(String newID) {
+    /**
+     * Sets the remote message ID of this instance.
+     * This function does nothing if the last ID does not match the given ID.
+     *
+     * @param newID The new remote message ID.
+     * @return {@code true} if the last ID matches, {@code false} otherwise.
+     */
+    public boolean setRemoteID(String newID) {
 	if (myMsg != null && newID.equals(myMsg)) {
 	    // messages don't fit together
 	    return false;
@@ -47,7 +61,14 @@ public class MessageGenerator {
 	return true;
     }
 
-    public static String createNewID() {
+    /**
+     * Create a new message ID for the local message that should be sent.
+     * This function also saves the new ID in order to match it in the next {@link #setRemoteID(java.lang.String)}
+     * invocation.
+     *
+     * @return The new ID for the message that should be sent.
+     */
+    public String createNewID() {
 	myMsg = ValueGenerators.generateUUID();
 	return myMsg;
     }

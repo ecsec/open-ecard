@@ -46,12 +46,12 @@ public class Logo extends JPanel {
      */
     public Logo() {
 	ImageIcon logo = new ImageIcon();
-	URL url = FileUtils.resolveResourceAsURL(Logo.class, "openecardwhite.gif");
+	URL url = FileUtils.resolveResourceAsURL(Logo.class, "openecard_logo.png");
 
 	if (url != null) {
 	    Toolkit toolkit = Toolkit.getDefaultToolkit();
 	    Image image = toolkit.getImage(url);
-	    image = image.getScaledInstance(45, 45, Image.SCALE_SMOOTH);
+	    image = image.getScaledInstance(60, 60, Image.SCALE_SMOOTH);
 	    logo.setImage(image);
 	}
 

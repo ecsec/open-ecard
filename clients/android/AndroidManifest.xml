@@ -58,9 +58,6 @@
             android:name=".activities.CardInfoActivity"
             android:configChanges="orientation|keyboardHidden" />
         <activity
-            android:name=".activities.PINManagementActivity"
-            android:configChanges="orientation|keyboardHidden" />
-        <activity
             android:name="org.openecard.gui.android.StepActivity"
             android:configChanges="orientation|keyboardHidden" />
 

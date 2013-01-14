@@ -25,9 +25,6 @@ package org.openecard.android.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
@@ -109,35 +106,5 @@ public class AboutActivity extends Activity {
 	tabs.getTabContentView().setPadding(0, topPadding, 0, 0);
     }
 
-    /**
-     * Overridden to inflate our own option menu.
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-	MenuInflater inflater = getMenuInflater();
-	inflater.inflate(R.menu.option_menu, menu);
-	return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-	Intent i;
-	switch (item.getItemId()) {
-	/*case R.id.about:
-	    i = new Intent(this, AboutActivity.class);
-	    startActivity(i);
-	    return true;*/
-	case R.id.cardinfo:
-	    i = new Intent(this, CardInfoActivity.class);
-	    startActivity(i);
-	    return true;
-	/*case R.id.pinmanagement:
-	    i = new Intent(this, PINManagementActivity.class);
-	    startActivity(i);
-	    return true;*/
-	}
-
-	return false;
-    }
 
 }

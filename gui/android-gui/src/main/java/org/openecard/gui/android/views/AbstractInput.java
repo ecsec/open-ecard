@@ -25,8 +25,10 @@ package org.openecard.gui.android.views;
 import android.content.Context;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -52,10 +54,11 @@ public class AbstractInput implements StepView {
 
     public AbstractInput(AbstractTextField input, Context ctx) {
 	tv = new TextView(ctx);
-	android.view.Display display = ((android.view.WindowManager)ctx.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+	WindowManager mgr = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
+	Display display = mgr.getDefaultDisplay();
 
-	if (input.getValue() != null) {
-	    tv.setText(input.getValue());
+	if (input.getDescription() != null) {
+	    tv.setText(input.getDescription());
 	} else {
 	    tv.setText(input.getID());
 	}

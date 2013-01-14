@@ -23,7 +23,10 @@
 package org.openecard.android;
 
 import android.app.Application;
+import android.app.Notification;
+import android.app.NotificationManager;
 import de.bund.bsi.ecard.api._1.TerminateFramework;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
@@ -31,8 +34,11 @@ import iso.std.iso_iec._24727.tech.schema.Terminate;
 import org.openecard.android.activities.MainActivity;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.I18n;
+import org.openecard.common.enums.EventType;
 import org.openecard.common.ifd.AndroidTerminalFactory;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
 import org.openecard.control.ControlInterface;
@@ -68,9 +74,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class ApplicationContext extends Application {
+public class ApplicationContext extends Application implements EventCallback {
 
-    private Logger logger = LoggerFactory.getLogger(ApplicationContext.class);
+    private static final int NOTIFICATION_ID = 22;
+    private static Logger logger = LoggerFactory.getLogger(ApplicationContext.class);
+    private final I18n lang = I18n.getTranslation("android");
 
     private ClientEnv env;
     private TinySAL sal;
@@ -85,6 +93,7 @@ public class ApplicationContext extends Application {
     private boolean recognizeCard = true;
     private UserConsent gui;
     private AndroidTerminalFactory terminalFactory;
+    private NotificationManager notificationManager; 
 
     public CardRecognition getRecognition() {
 	return recognition;
@@ -171,6 +180,12 @@ public class ApplicationContext extends Application {
      * Initialize the client by setting properties for Android and starting up each module.
      */
     public void initialize() {
+	if (initialized) {
+	    return;	
+	}
+
+	notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE); 
+
 	//IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl", "org.openecard.scio.VarioFactory");
 	IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl", "org.openecard.scio.AndroidPCSCFactory");
 	WsdefProperties.setProperty("org.openecard.ws.marshaller.impl", "org.openecard.ws.android.AndroidMarshaller");
@@ -240,6 +255,7 @@ public class ApplicationContext extends Application {
 	this.cardStates = new CardStateMap();
 	SALStateCallback salCallback = new SALStateCallback(recognition, cardStates);
 	em.registerAllEvents(salCallback);
+	em.registerAllEvents(this);
 
 	// SAL
 	sal = new TinySAL(env, cardStates);
@@ -266,6 +282,30 @@ public class ApplicationContext extends Application {
 	} catch (Exception e) {
 	    System.exit(0);
 	}
+	initialized = true;
+    }
+
+    @Override
+    public void signalEvent(EventType eventType, Object eventData) {
+	if (eventType.equals(EventType.CARD_RECOGNIZED)) {
+	    if (eventData instanceof ConnectionHandleType) {
+		ConnectionHandleType ch = (ConnectionHandleType) eventData;
+		String cardType = ch.getRecognitionInfo().getCardType();
+		String cardName = recognition.getTranslatedCardName(cardType);
+		showNotification(lang.translationForKey("android.notification.recognized", cardName));
+	    }
+	} else if (eventType.equals(EventType.CARD_REMOVED)) {
+	    showNotification(lang.translationForKey("android.notification.removed"));
+	}
+    }
+
+    private void showNotification(String message) {
+	long currentTime = System.currentTimeMillis();
+	Notification notification = new Notification(android.R.drawable.stat_notify_sync, message, currentTime);
+	notification.flags = Notification.FLAG_AUTO_CANCEL;
+	notification.setLatestEventInfo(this, "Open eCard App", "", null);
+	notificationManager.notify(NOTIFICATION_ID, notification);
+	notificationManager.cancel(NOTIFICATION_ID);
     }
 
 }

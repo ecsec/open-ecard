@@ -31,6 +31,7 @@ import android.widget.TextView;
 import java.net.URI;
 import org.openecard.android.ApplicationContext;
 import org.openecard.android.R;
+import org.openecard.common.I18n;
 import org.openecard.control.binding.intent.handler.IntentControlHandler;
 import org.openecard.control.handler.ControlHandler;
 import org.openecard.control.handler.ControlHandlers;
@@ -43,6 +44,8 @@ import org.openecard.control.handler.ControlHandlers;
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class MainActivity extends Activity {
+
+    private final I18n lang = I18n.getTranslation("android");
 
     private static ControlHandlers handlers;
     private ApplicationContext applicationContext;
@@ -69,9 +72,8 @@ public class MainActivity extends Activity {
 	final Intent intent = getIntent();
 
 	handleIntent(intent);
+	displayText(lang.translationForKey("android.main.info"));
 
-	displayText("Verbindung zum Server wird aufgebaut und Identitätsnachweis wird durchgeführt.\n\n"
-		    + "Sie werden anschließend auf die Seite des Diensteanbieters weitergeleitet.");
     }
 
     /**

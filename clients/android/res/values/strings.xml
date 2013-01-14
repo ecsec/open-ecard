@@ -1,39 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">Open eCard App</string>
     <string name="contentDescriptionImageViewCard">Abbildung der erkannten Karte</string>
-    <string name="menu_about">Über</string>
-    <string name="menu_cardinfo">Karteninformationen</string>
-    <string name="menu_pinmanagement">PIN-Verwaltung</string>
-    <string name="label_cardType">Kartentyp</string>
-    <string name="text_cardTye">Keine Karte erkannt</string>
-    <string name="label_atr">ATR</string>
-    <string name="text_atr">-</string>
-    <string name="button_changePIN">-</string>
-    <string name="error_no_nfc">Ihr Android-Gerät ist nicht NFC-fähig. Die
-		Anwendung wurde beendet.</string>
-    <string name="button_back">Zurück</string>
-    <string name="button_close">Beenden</string>
-       <string name="pinExplanatoryText">Wenn Sie mit der Übermittlung der ausgewählten Daten einverstanden sind, geben Sie bitte ihre 6-stellige Personalausweis-PIN ein.</string>
-              <string name="pinChangeText">Bitte geben Sie Ihre Personalausweis-PIN ein.</string>
-    <string name="text_about">Lorem ipsum dolor sit amet, consetetur sadipscing
-		elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore
-		magna aliquyam erat, sed diam voluptua. At vero eos et accusam et
-		justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea
-		takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit
-		amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
-		invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-		At vero eos et accusam et justo duo dolores et ea rebum. Stet clita
-		kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit
-		amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed
-		diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam
-		erat, sed diam voluptua. At vero eos et accusam et justo duo dolores
-		et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est
-		Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur
-		sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et
-		dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
-		et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea
-		takimata sanctus est Lorem ipsum dolor sit amet.</string>
-
 </resources>

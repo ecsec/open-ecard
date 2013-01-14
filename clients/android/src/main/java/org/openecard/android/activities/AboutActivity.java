@@ -22,8 +22,9 @@
 
 package org.openecard.android.activities;
 
-import android.app.Activity;
+import android.app.ActivityGroup;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -34,9 +35,15 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Locale;
+import org.openecard.android.ApplicationContext;
 import org.openecard.android.R;
 import org.openecard.android.TCTokenService;
 import org.openecard.common.I18n;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -44,46 +51,77 @@ import org.openecard.common.I18n;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class AboutActivity extends Activity {
+public class AboutActivity extends ActivityGroup {
 
-    private String[] tags = new String[] { "1", "2", "3" };
+    private static final Logger logger = LoggerFactory.getLogger(AboutActivity.class);
     private final I18n lang = I18n.getTranslation("about");
+    private final I18n langAndroid = I18n.getTranslation("android");
+
+    private static final String ASSET_PREFIX = "file:///android_asset/";
+
+    private String[] tags = new String[] { "1", "2", "3", "4" };
+    private ApplicationContext applicationContext;
+    private AssetManager assetManager;
+    private HashSet<String> assets = new HashSet<String>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 
-	Intent i = new Intent(this, TCTokenService.class);
-	this.startService(i);
-
 	// Set up the window layout
 	setContentView(R.layout.about);
+
+	applicationContext = (ApplicationContext) getApplicationContext();
+	applicationContext.initialize();
+
+	// fill asset set
+	assetManager = getAssets();
+	try {
+	    for (String asset : assetManager.list("")) {
+		assets.add(asset);
+	    }
+	} catch (IOException e) {
+	    logger.error("Coudn't get list of assets.", e);
+	}
 
 	Button b = (Button) findViewById(R.id.button_back);
 	b.setOnClickListener(new OnClickListener() {
 	    public void onClick(View v) {
+		onDestroy();
 		finish();
+		System.exit(0);
 	    }
 	});
 
+	b.setText(lang.translationForKey("about.button.close"));
+
+	Intent i = new Intent(this, TCTokenService.class);
+	this.startService(i);
+
 	TabHost tabs = (TabHost) this.findViewById(R.id.my_tabhost);
-	tabs.setup();
+	tabs.setup(this.getLocalActivityManager());
 
 	TabContentFactory tabContentFactory = new TabContentFactory() {
 
 	    @Override
 	    public View createTabContent(String tag) {
 		LinearLayout ll = new LinearLayout(AboutActivity.this);
-		ll.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		LinearLayout.LayoutParams fillLayoutParams = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,
+			LayoutParams.FILL_PARENT);
+		ll.setLayoutParams(fillLayoutParams);
 		WebView webView = new WebView(AboutActivity.this);
-		if (tag.equals(tags[0])) {
-		    webView.loadUrl("file:///android_asset/about_de.html");
-		} else if (tag.equals(tags[1])) {
-		    webView.loadUrl("file:///android_asset/feedback_de.html");
-		} else {
-		    webView.loadUrl("file:///android_asset/join_de.html");
+		webView.setLayoutParams(fillLayoutParams);
+		try {
+		    if (tag.equals(tags[0])) {
+			webView.loadUrl(ASSET_PREFIX + getTranslatedAsset("about", "html"));
+		    } else if (tag.equals(tags[2])) {
+			webView.loadUrl(ASSET_PREFIX + getTranslatedAsset("demo", "html"));
+		    } else if (tag.equals(tags[3])) {
+			webView.loadUrl(ASSET_PREFIX + getTranslatedAsset("join", "html"));
+		    }
+		} catch (IOException e) {
+		    logger.error(e.getMessage(), e);
 		}
-		webView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		ll.addView(webView);
 		return ll;
 	    }
@@ -94,17 +132,56 @@ public class AboutActivity extends Activity {
 	tspec1.setContent(tabContentFactory);
 	tabs.addTab(tspec1);
 	TabSpec tspec2 = tabs.newTabSpec(tags[1]);
-	tspec2.setIndicator(lang.translationForKey("about.tab.feedback"));
-	tspec2.setContent(tabContentFactory);
+	tspec2.setIndicator(langAndroid.translationForKey("about.tab.card"));
+	Intent cardIntent = new Intent(this, CardInfoActivity.class);
+	tspec2.setContent(cardIntent);
 	tabs.addTab(tspec2);
 	TabSpec tspec3 = tabs.newTabSpec(tags[2]);
-	tspec3.setIndicator(lang.translationForKey("about.tab.join"));
+	tspec3.setIndicator(langAndroid.translationForKey("about.tab.demo"));
 	tspec3.setContent(tabContentFactory);
 	tabs.addTab(tspec3);
+	TabSpec tspec4 = tabs.newTabSpec(tags[3]);
+	tspec4.setIndicator(langAndroid.translationForKey("about.tab.join"));
+	tspec4.setContent(tabContentFactory);
+	tabs.addTab(tspec4);
 	// pad as much as the tabs are high
 	int topPadding = tabs.getTabWidget().getChildAt(0).getLayoutParams().height;
 	tabs.getTabContentView().setPadding(0, topPadding, 0, 0);
     }
 
+    @Override
+    protected void onDestroy() {
+	applicationContext.shutdown();
+	super.onDestroy();
+    }
+
+    private String getTranslatedAsset(String name, String fileEnding) throws IOException {
+	fileEnding = fileEnding != null ? ("." + fileEnding) : "";
+	Locale locale = Locale.getDefault();
+	String lang = locale.getLanguage();
+	String country = locale.getCountry();
+	String fnameBase = name;
+	// try to guess correct file to load
+	if (!lang.isEmpty() && !country.isEmpty()) {
+	    String fileName = fnameBase + "_" + lang + "_" + country + fileEnding;
+	    if (assets.contains(fileName)) {
+		return fileName;
+	    }
+	}
+	if (!lang.isEmpty()) {
+	    String fileName = fnameBase + "_" + lang + fileEnding;
+	    if (assets.contains(fileName)) {
+		return fileName;
+	    }
+	}
+	// else
+	String fileName = fnameBase + "_C" + fileEnding;
+	if (assets.contains(fileName)) {
+	    return fileName;
+	}
+
+	// no file found
+	throw new IOException("No translation available for file '" + name + fileEnding + "'.");
+    }
 
 }

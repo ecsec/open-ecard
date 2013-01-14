@@ -26,16 +26,17 @@ import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.io.InputStream;
 import org.openecard.android.ApplicationContext;
 import org.openecard.android.R;
+import org.openecard.common.I18n;
 import org.openecard.common.enums.EventType;
 import org.openecard.common.interfaces.EventCallback;
+import org.openecard.common.sal.state.CardStateEntry;
+import org.openecard.recognition.CardRecognition;
 
 
 /**
@@ -45,9 +46,14 @@ import org.openecard.common.interfaces.EventCallback;
  */
 public class CardInfoActivity extends Activity implements EventCallback {
 
-    private ApplicationContext applicationContext;
+    private final I18n lang = I18n.getTranslation("android");
+
+    private ApplicationContext appContext;
+    private CardRecognition recognition;
     private ImageView imageView;
     private TextView textCardType;
+    private TextView textInfo;
+    private TextView labelCardType;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,24 +63,41 @@ public class CardInfoActivity extends Activity implements EventCallback {
 	// Set up the window layout
 	setContentView(R.layout.cardinfo);
 
-	// initialize and register for events
-	applicationContext = ((ApplicationContext) getApplicationContext());
-	applicationContext.initialize();
-	applicationContext.getEnv().getEventManager().registerAllEvents(this);
+	// register for events
+	appContext = ((ApplicationContext) getApplicationContext());
+	appContext.getEnv().getEventManager().registerAllEvents(this);
+
+	recognition = appContext.getRecognition();
 	imageView = (ImageView) findViewById(R.id.imageView_card);
-	textCardType  = (TextView) findViewById(R.id.text_cardType);
-	Button b = (Button) findViewById(R.id.button_back);
-	b.setOnClickListener(new OnClickListener() {
-	    public void onClick(View v) {
-		finish();
-	    }
-	});
+	textCardType = (TextView) findViewById(R.id.text_cardType);
+	textInfo = (TextView) findViewById(R.id.label_info);
+	labelCardType = (TextView) findViewById(R.id.label_cardType);
+	labelCardType.setText(lang.translationForKey("android.cardinfo.type"));
+	textInfo.setText(lang.translationForKey("android.cardinfo.request"));
+	textCardType.setText(lang.translationForKey("android.cardinfo.cardname"));
+
+	// test if there is already a card available and show the appropriate info
+	ConnectionHandleType cHandle = new ConnectionHandleType();
+	CardStateEntry entry = appContext.getCardStates().getEntry(cHandle);
+
+	if (entry == null) {
+	    InputStream is = recognition.getNoCardImage();
+	    Drawable drawable = Drawable.createFromStream(is, null);
+	    updateUI(drawable, lang.translationForKey("android.cardinfo.cardname"), true);
+	    return;
+	} else {
+	    cHandle = entry.handleCopy();
+	    String cardType = cHandle.getRecognitionInfo().getCardType();
+	    InputStream is = recognition.getCardImage(cardType);
+	    Drawable drawable = Drawable.createFromStream(is, null);
+	    updateUI(drawable, recognition.getTranslatedCardName(cardType), false);
+	}
 
     }
 
     @Override
     protected void onDestroy() {
-	applicationContext.shutdown();
+	appContext.shutdown();
 	super.onDestroy();
     }
 
@@ -83,28 +106,35 @@ public class CardInfoActivity extends Activity implements EventCallback {
 	if (eventType.equals(EventType.CARD_RECOGNIZED)) {
 	    if (eventData instanceof ConnectionHandleType) {
 		ConnectionHandleType ch = (ConnectionHandleType) eventData;
-		InputStream is = applicationContext.getRecognition()
-			.getCardImage(ch.getRecognitionInfo().getCardType());
+		String cardType = ch.getRecognitionInfo().getCardType();
+		InputStream is = recognition.getCardImage(cardType);
 		Drawable drawable = Drawable.createFromStream(is, null);
-		updateUI(drawable, ch.getRecognitionInfo().getCardType());
+		updateUI(drawable, recognition.getTranslatedCardName(cardType), false);
 	    }
 	} else if (eventType.equals(EventType.CARD_REMOVED)) {
-	    InputStream is = applicationContext.getRecognition().getNoCardImage();
+	    InputStream is = recognition.getNoCardImage();
 	    Drawable drawable = Drawable.createFromStream(is, null);
-	    updateUI(drawable, this.getString(R.string.text_cardTye));
+	    updateUI(drawable, lang.translationForKey("android.cardinfo.cardname"), true);
 	}
     }
 
     /**
      * Updates the UI with the new cardImage and CardType.
+     *
      * @param cardImage image to use
      * @param cardType card type as string
+     * @param infoVisible true if the info requesting a card is visible, else false
      */
-    private void updateUI(final Drawable cardImage, final String cardType) {
+    private void updateUI(final Drawable cardImage, final String cardType, final boolean infoVisible) {
 	runOnUiThread(new Runnable() {
 	    public void run() {
 		imageView.setImageDrawable(cardImage);
 		textCardType.setText(cardType);
+		if (infoVisible) {
+		    textInfo.setVisibility(View.VISIBLE);
+		} else {
+		    textInfo.setVisibility(View.INVISIBLE);
+		}
 	    }
 	});
     }

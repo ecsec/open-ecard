@@ -140,8 +140,12 @@ public class AndroidNavigator implements UserConsentNavigator {
     }
 
     @Override
-    public StepResult replaceCurrent(Step arg0) {
-	throw new UnsupportedOperationException("Not supported yet.");
+    public StepResult replaceCurrent(Step replacementStep) {
+	steps.remove(curStep);
+	steps.add(curStep, replacementStep);
+	stepResult.setStatus(null);
+	activity.showStep(steps.get(curStep));
+	return this.getStepResult();
     }
 
     @Override

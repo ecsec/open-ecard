@@ -49,10 +49,23 @@ public class NFCCardTerminal extends CardTerminal {
     private NFCCardTerminal() {
     }
 
-    public void setTag(IsoDep tag) {
+    public int getLengthOfLastAPDU() {
+	return ((NFCCardChannel) nfcCard.getBasicChannel()).getLengthOfLastAPDU();
+    }
+
+    public int getMaxTransceiveLength() {
+	return nfcCard.isodep.getMaxTransceiveLength();
+    }
+
+    public synchronized void setTag(IsoDep tag) {
 	nfcCard = new NFCCard(tag);
     }
 
+    /**
+     * Returns the NFCCardTerminal-Instance.
+     *
+     * @return The NFCCardTerminal-Instance
+     */
     public static synchronized NFCCardTerminal getInstance() {
 	if (instance == null) {
 	    instance = new NFCCardTerminal();
@@ -61,7 +74,7 @@ public class NFCCardTerminal extends CardTerminal {
     }
 
     @Override
-    public Card connect(String arg0) throws CardException {
+    public synchronized Card connect(String arg0) throws CardException {
 	if (nfcCard == null || this.nfcCard.isodep == null) {
 	    logger.warn("No tag present.");
 	    throw new CardNotPresentException("No tag present");
@@ -84,17 +97,8 @@ public class NFCCardTerminal extends CardTerminal {
     }
 
     @Override
-    public boolean isCardPresent() throws CardException {
-	// TODO delete the following sleep
-	try {
-	    Thread.sleep(1000);
-	} catch (InterruptedException e) {
-	    logger.error(e.getMessage(), e);
-	}
+    public synchronized boolean isCardPresent() throws CardException {
 	boolean ret = (nfcCard != null && nfcCard.isodep != null && nfcCard.isodep.isConnected());
-	if (! ret && nfcCard != null) {
-	    nfcCard.isodep = null;
-	}
 	return ret;
     }
 

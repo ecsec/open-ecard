@@ -31,6 +31,7 @@ import android.widget.TextView;
 import java.net.URI;
 import org.openecard.android.ApplicationContext;
 import org.openecard.android.R;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.control.binding.intent.handler.IntentControlHandler;
 import org.openecard.control.handler.ControlHandler;
@@ -38,9 +39,8 @@ import org.openecard.control.handler.ControlHandlers;
 
 
 /**
- * This is the main Activity. It is the first activity to open when the
- * Application is started.
- *
+ * This is the main Activity. It is the first activity to open when the Application is started.
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class MainActivity extends Activity {
@@ -62,7 +62,6 @@ public class MainActivity extends Activity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
 	super.onCreate(null);
 
 	setContentView(R.layout.main);
@@ -73,16 +72,14 @@ public class MainActivity extends Activity {
 
 	handleIntent(intent);
 	displayText(lang.translationForKey("android.main.info"));
-
     }
 
     /**
-     * Handles the intent the MainActivity was started with.</br> It's action
-     * should equal Intent.ACTION_VIEW because we've been started through a link
-     * to localhost.
-     *
-     * @param intent
-     *            The intent the application was started with.
+     * Handles the intent the MainActivity was started with.
+     * <br /> It's action should equal Intent.ACTION_VIEW because
+     * we've been started through a link to localhost.
+     * 
+     * @param intent The intent the application was started with.
      * @throws TCTokenException
      * @throws MalformedURLException
      * @throws UnsupportedEncodingException
@@ -104,10 +101,16 @@ public class MainActivity extends Activity {
 				break;
 			    }
 			}
-			if (browserIntent != null) {
+
+			if (browserIntent.getAction().equals(Intent.ACTION_VIEW)) {
 			    startActivity(browserIntent);
+			    MainActivity.this.finish();
+			} else if (browserIntent.getAction().equals(ECardConstants.Minor.SAL.CANCELLATION_BY_USER)) {
+			    MainActivity.this.finish();
+			} else {
+			    runOnUiThread(new ExtendedLengthAlertDialog(MainActivity.this));
 			}
-			MainActivity.this.finish();
+
 		    }
 		});
 

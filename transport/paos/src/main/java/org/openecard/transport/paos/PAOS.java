@@ -22,6 +22,7 @@
 
 package org.openecard.transport.paos;
 
+import iso.std.iso_iec._24727.tech.schema.ResponseType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.io.IOException;
@@ -46,6 +47,9 @@ import org.openecard.apache.http.protocol.HttpRequestExecutor;
 import org.openecard.bouncycastle.crypto.tls.TlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsProtocolHandler;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.ECardException;
+import org.openecard.common.WSHelper;
+import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.io.ProxySettings;
@@ -326,6 +330,8 @@ public class PAOS {
 		    req.setHeader("Content-Length", Long.toString(reqMsg.getContentLength()));
 		    // send request and receive response
 		    HttpResponse response = httpexecutor.execute(req, conn, ctx);
+		    int statusCode = response.getStatusLine().getStatusCode();
+		    checkHTTPStatusCode(msg, statusCode);
 		    conn.receiveResponseEntity(response);
 		    HttpEntity entity = response.getEntity();
 		    // consume entity
@@ -334,6 +340,7 @@ public class PAOS {
 		    // break when message is startpaosresponse
 		    if (requestObj instanceof StartPAOSResponse) {
 			StartPAOSResponse startPAOSResponse = (StartPAOSResponse) requestObj;
+			WSHelper.checkResult(startPAOSResponse);
 			return startPAOSResponse;
 		    }
 
@@ -358,6 +365,28 @@ public class PAOS {
 	    throw new DispatcherException("The dispatched method threw an exception.", ex);
 	} catch (TransformerException ex) {
 	    throw new DispatcherException(ex);
+	} catch (WSException ex) {
+	    throw new PAOSException(ex);
+	}
+    }
+
+    /**
+     * Check the status code returned from the server. 
+     * If the status code indicates an error, a PAOSException will be thrown.
+     * 
+     * @param msg The last message we sent to the server
+     * @param statusCode The status code we received from the server
+     * @throws PAOSException If the server returned a HTTP error code
+     */
+    private void checkHTTPStatusCode(Object msg, int statusCode) throws PAOSException {
+	if (statusCode < 200 || statusCode > 299) {
+	    ResponseType resp = (ResponseType) msg;
+	    try {
+		WSHelper.checkResult(resp);
+	    } catch (WSException ex) {
+		throw new PAOSException("Received HTML Error Code " + statusCode, ex);
+	    }
+	    throw new PAOSException("Received HTML Error Code " + statusCode);
 	}
     }
 

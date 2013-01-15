@@ -39,6 +39,7 @@ import javax.smartcardio.ResponseAPDU;
 public class NFCCardChannel extends CardChannel {
 
     private NFCCard card;
+    private int lengthOfLastAPDU;
 
     public NFCCardChannel(NFCCard card) {
 	this.card = card;
@@ -62,6 +63,7 @@ public class NFCCardChannel extends CardChannel {
     @Override
     public ResponseAPDU transmit(CommandAPDU arg0) throws CardException {
 	try {
+	    lengthOfLastAPDU = arg0.getBytes().length;
 	    return new ResponseAPDU(this.card.isodep.transceive(arg0.getBytes()));
 	} catch (IOException e) {
 	    throw new CardException("Transmit failed", e);
@@ -71,6 +73,10 @@ public class NFCCardChannel extends CardChannel {
     @Override
     public int transmit(ByteBuffer arg0, ByteBuffer arg1) throws CardException {
 	throw new CardException("not yet  implemented");
+    }
+
+    public int getLengthOfLastAPDU() {
+	return lengthOfLastAPDU;
     }
 
 }

@@ -323,7 +323,7 @@ public class GenericTCTokenHandler {
 	if (connectionHandle == null) {
 	    String msg = "No card available for the given ConnectionHandle.";
 	    logger.error(msg);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg));
 	    return response;
 	}
 
@@ -336,8 +336,13 @@ public class GenericTCTokenHandler {
 	    return response;
 	} catch (PAOSException w) {
 	    logger.error(w.getMessage(), w);
-	    // TODO: check for better matching minor type
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
+	    Throwable innerException = w.getCause();
+	    if(innerException != null && innerException instanceof WSException) {
+		response.setResult(((WSException) innerException).getResult());
+	    } else {
+		// TODO: check for better matching minor type
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
+	    } 
 	    return response;
 	}
     }

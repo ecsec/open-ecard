@@ -72,7 +72,7 @@ public class IntentTCTokenHandler extends IntentControlHandler {
 	    }
 	} else {
 	    if (result.getResultMessage().getValue() != null) {
-		return handleErrorResponse(result.getResultMessage().getValue());
+		return handleErrorResponse(response.getResult().getResultMinor());
 	    } else {
 		// TODO
 	    }
@@ -99,8 +99,7 @@ public class IntentTCTokenHandler extends IntentControlHandler {
      * @return HTTP response
      */
     private Intent handleErrorResponse(String message) {
-	//TODO
-	return null;
+	return new Intent(message);
     }
 
     @Override

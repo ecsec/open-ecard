@@ -97,6 +97,10 @@ public class AbstractInput implements StepView {
 	result.setID(input.getID());
     }
 
+    public EditText getEditText() {
+	return et;
+    }
+
     @Override
     public View getView() {
 	return this.tbl;

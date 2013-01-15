@@ -48,8 +48,7 @@
                 android:id="@+id/button_cancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minWidth="90dp"
-                android:text="Abbrechen" />
+                android:minWidth="90dp" />
 
         </LinearLayout>
         
@@ -65,15 +64,13 @@
                 android:id="@+id/button_back"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minWidth="90dp"
-                android:text="Zurück" />
+                android:minWidth="90dp" />
 
             <Button
                 android:id="@+id/button_next"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minWidth="90dp"
-                android:text="Weiter" />
+                android:minWidth="90dp" />
         </LinearLayout>
 
         

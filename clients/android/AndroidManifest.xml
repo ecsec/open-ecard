@@ -15,6 +15,9 @@
     <uses-permission android:name="com.reinersct.permission.CYBERJACK" />
     <uses-permission android:name="android.permission.BLUETOOTH"/>
 
+    <!--  NFC -->
+    <uses-permission  android:name="android.permission.NFC"/>
+
     <application
         android:name=".ApplicationContext"
         android:icon="@drawable/openecard"
@@ -44,6 +47,12 @@
                 <data android:port="24727" />
             </intent-filter>
         </activity>
+
+          <activity
+            android:name=".activities.NFCErrorActivity"
+            android:theme="@android:style/Theme.Dialog"
+            android:configChanges="orientation|keyboardHidden" />
+
         <activity
             android:name=".activities.AboutActivity"
             android:configChanges="orientation|keyboardHidden"

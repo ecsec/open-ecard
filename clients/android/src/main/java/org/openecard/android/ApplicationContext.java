@@ -25,6 +25,10 @@ package org.openecard.android;
 import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.content.Context;
+import android.content.Intent;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcManager;
 import de.bund.bsi.ecard.api._1.TerminateFramework;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
@@ -32,6 +36,7 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
 import org.openecard.android.activities.MainActivity;
+import org.openecard.android.activities.NFCErrorActivity;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
@@ -62,6 +67,7 @@ import org.openecard.sal.protocol.eac.EAC2ProtocolFactory;
 import org.openecard.sal.protocol.eac.EACGenericProtocolFactory;
 import org.openecard.sal.protocol.genericcryptography.GenericCryptoProtocolFactory;
 import org.openecard.sal.protocol.pincompare.PINCompareProtocolFactory;
+import org.openecard.scio.NFCFactory;
 import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.openecard.ws.marshal.WsdefProperties;
 import org.slf4j.Logger;
@@ -93,7 +99,13 @@ public class ApplicationContext extends Application implements EventCallback {
     private boolean recognizeCard = true;
     private UserConsent gui;
     private AndroidTerminalFactory terminalFactory;
+    private boolean usingNFC;
+
     private NotificationManager notificationManager; 
+
+    public boolean usingNFC() {
+	return usingNFC;
+    }
 
     public CardRecognition getRecognition() {
 	return recognition;
@@ -187,7 +199,8 @@ public class ApplicationContext extends Application implements EventCallback {
 	notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE); 
 
 	//IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl", "org.openecard.scio.VarioFactory");
-	IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl", "org.openecard.scio.AndroidPCSCFactory");
+	//IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl", "org.openecard.scio.AndroidPCSCFactory");
+	IFDProperties.setProperty("org.openecard.ifd.scio.factory.impl", "org.openecard.scio.NFCFactory");
 	WsdefProperties.setProperty("org.openecard.ws.marshaller.impl", "org.openecard.ws.android.AndroidMarshaller");
 
 	try {
@@ -196,6 +209,19 @@ public class ApplicationContext extends Application implements EventCallback {
 	    //TODO log
 	    System.exit(0);
 	}
+
+	usingNFC = terminalFactory instanceof NFCFactory;
+	if (usingNFC) {
+	    NfcManager manager = (NfcManager) this.getSystemService(Context.NFC_SERVICE);
+	    NfcAdapter adapter = manager.getDefaultAdapter();
+	    if (adapter == null || !adapter.isEnabled()) {
+		Intent i = new Intent(this, NFCErrorActivity.class);
+		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		this.startActivity(i);
+		return;
+	    }
+	}
+
 	terminalFactory.start(this);
 
 	// Client environment

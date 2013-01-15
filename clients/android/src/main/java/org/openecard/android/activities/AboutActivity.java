@@ -23,8 +23,12 @@
 package org.openecard.android.activities;
 
 import android.app.ActivityGroup;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.nfc.NfcAdapter;
+import android.nfc.Tag;
+import android.nfc.tech.IsoDep;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -35,13 +39,21 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
+import iso.std.iso_iec._24727.tech.schema.Connect;
+import iso.std.iso_iec._24727.tech.schema.EstablishContext;
+import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Locale;
 import org.openecard.android.ApplicationContext;
 import org.openecard.android.R;
 import org.openecard.android.TCTokenService;
 import org.openecard.common.I18n;
+import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.DispatcherException;
+import org.openecard.scio.NFCCardTerminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +75,7 @@ public class AboutActivity extends ActivityGroup {
     private ApplicationContext applicationContext;
     private AssetManager assetManager;
     private HashSet<String> assets = new HashSet<String>();
+    private boolean usingNFC;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -73,6 +86,7 @@ public class AboutActivity extends ActivityGroup {
 
 	applicationContext = (ApplicationContext) getApplicationContext();
 	applicationContext.initialize();
+	usingNFC = applicationContext.usingNFC();
 
 	// fill asset set
 	assetManager = getAssets();
@@ -147,6 +161,49 @@ public class AboutActivity extends ActivityGroup {
 	// pad as much as the tabs are high
 	int topPadding = tabs.getTabWidget().getChildAt(0).getLayoutParams().height;
 	tabs.getTabContentView().setPadding(0, topPadding, 0, 0);
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+	if (usingNFC) {
+	    Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+	    IsoDep tag = IsoDep.get(tagFromIntent);
+	    NFCCardTerminal.getInstance().setTag(tag);
+	    try {
+		EstablishContext establishContext = new EstablishContext();
+		ApplicationContext applicationContext = (ApplicationContext) this.getApplicationContext();
+		Dispatcher d = applicationContext.getEnv().getDispatcher();
+		EstablishContextResponse response = (EstablishContextResponse) d.deliver(establishContext);
+		Connect c = new Connect();
+		c.setContextHandle(response.getContextHandle());
+		c.setIFDName("Integrated NFC");
+		c.setSlot(new BigInteger("0"));
+		d.deliver(c);
+	    } catch (DispatcherException e) {
+		logger.error("Failure in the dispatcher.", e);
+	    } catch (InvocationTargetException e) {
+		logger.error("The dispatched method threw an exception", e);
+	    }
+	}
+    }
+
+    @Override
+    public synchronized void onResume() {
+	super.onResume();
+
+	if (usingNFC) {
+	    Intent activityIntent = new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+	    PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, activityIntent, 0);
+	    NfcAdapter.getDefaultAdapter(this).enableForegroundDispatch(this, pendingIntent, null, null);
+	}
+    }
+
+    @Override
+    public synchronized void onPause() {
+	super.onPause();
+	if (usingNFC) {
+	    NfcAdapter.getDefaultAdapter(this).disableForegroundDispatch(this);
+	}
     }
 
     @Override

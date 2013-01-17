@@ -380,6 +380,7 @@
 			<configuration>
 			    <!-- <debug>false</debug> -->
 			    <debuglevel>none</debuglevel>
+			    <optimize>true</optimize>
 			</configuration>
 		    </plugin>
 		</plugins>

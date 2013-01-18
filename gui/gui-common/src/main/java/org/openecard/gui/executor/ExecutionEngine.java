@@ -29,7 +29,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsentNavigator;
@@ -114,11 +116,12 @@ public class ExecutionEngine {
 	    // perform action
 	    StepAction action = next.getStep().getAction();
 	    StepActionCallable actionCallable = new StepActionCallable(action, oldResults, next);
-	    FutureTask<StepActionResult> actionFuture = new FutureTask<StepActionResult>(actionCallable);
+	    // use separate thread or tasks running outside the JVM context, like PCSC calls, won't stop on cancellation
+	    ExecutorService execService = Executors.newSingleThreadExecutor();
+	    Future<StepActionResult> actionFuture = execService.submit(actionCallable);
 	    navigator.setRunningAction(actionFuture);
 	    StepActionResult actionResult;
 	    try {
-		actionFuture.run();
 		actionResult = actionFuture.get();
 	    } catch (CancellationException ex) {
 		logger.info("StepAction was canceled.", ex);

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<include schemaLocation="CardInfo.xsd" />
+
+	<!-- =========================================       
+		Extension for Card Recognition Tree       
+		Version 0.3 (2011-03-29)
+		========================================== -->
+
+	<element name="RecognitionTree">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RecognitionTreeType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<complexType name="RecognitionTreeType">
+		<sequence>
+			<element name="ATRNode" maxOccurs="unbounded" minOccurs="0">
+				<complexType>
+					<sequence>
+							<element name="ATR" type="iso:ATRType"></element>
+							<element ref="iso:Conclusion"></element>
+					</sequence>
+				</complexType>
+			</element>
+			<element name="ATSNode" maxOccurs="unbounded" minOccurs="0">
+				<complexType>
+					<sequence>
+							<element name="ATS" type="iso:ATSType"></element>
+							<element ref="iso:Conclusion"></element>
+					</sequence>
+				</complexType>
+			</element>
+			<element ref="iso:CardCall" maxOccurs="unbounded"
+				minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<element name="GetRecognitionTree">
+		<complexType>
+			<sequence>
+				<element name="CardTypeIdentifier" type="anyURI" maxOccurs="unbounded" minOccurs="0"/>
+				<element name="Action" type="anyURI" maxOccurs="1" minOccurs="0"/>
+			</sequence>
+		</complexType>
+	</element>
+
+	<element name="GetRecognitionTreeResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element ref="iso:RecognitionTree" maxOccurs="1" minOccurs="0"/>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+</schema>

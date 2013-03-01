@@ -1,0 +1,77 @@
+/****************************************************************************
+ * Copyright (C) 2012 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
+package org.openecard.crypto.common.asn1.cvc;
+
+import java.util.GregorianCalendar;
+import org.openecard.common.util.StringUtils;
+import org.testng.annotations.Test;
+import static org.testng.Assert.*;
+
+
+/**
+ *
+ * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ */
+public class CardVerifiableCertificateTest {
+
+    @Test
+    public void test() throws Exception {
+	byte[] c = StringUtils.toByteArray("7F218201487F4E8201005F290100420E5A5A4456434141544230303030377F494F060A04007F0007020202020386410453107B1FA3767A3A36532A7CA1AE2BF2B3D08B6508CE03FECD9397CB107318519442980E9F17239A976FB1800A5515BC4AF61B013F7C5454A22A86D0CE18FADA5F20105A5A41546D74475465737430303030307F4C12060904007F0007030102025305300301FFB75F25060100010001035F2406010001000300655E732D060904007F00070301030280208FAC553CB79699D13E724E864BEBDD818DD550F7C34FC170ECDE2598A03F9EAC732D060904007F0007030103018020B48DA6DC54E8440F41EB20358CE8F640F45838D68B3E39812600047DBC5BB93B5F37405EE54A76BA698C098750E5E559F79CE2463E3F812083BB3815F4A7322C117C007C9D23958E99EC9542924BEF910A8C4C6462FB4D33B0F50F6B946F3A641C0DB1");
+	byte[] body = StringUtils.toByteArray("5F290100420E5A5A4456434141544230303030377F494F060A04007F0007020202020386410453107B1FA3767A3A36532A7CA1AE2BF2B3D08B6508CE03FECD9397CB107318519442980E9F17239A976FB1800A5515BC4AF61B013F7C5454A22A86D0CE18FADA5F20105A5A41546D74475465737430303030307F4C12060904007F0007030102025305300301FFB75F25060100010001035F2406010001000300655E732D060904007F00070301030280208FAC553CB79699D13E724E864BEBDD818DD550F7C34FC170ECDE2598A03F9EAC732D060904007F0007030103018020B48DA6DC54E8440F41EB20358CE8F640F45838D68B3E39812600047DBC5BB93B");
+	byte[] signature = StringUtils.toByteArray("5EE54A76BA698C098750E5E559F79CE2463E3F812083BB3815F4A7322C117C007C9D23958E99EC9542924BEF910A8C4C6462FB4D33B0F50F6B946F3A641C0DB1");
+	byte[] chat = StringUtils.toByteArray("7F4C12060904007F0007030102025305300301FFB7");
+	byte[] chr = StringUtils.toByteArray("5A5A41546D7447546573743030303030");
+	byte[] car = StringUtils.toByteArray("5A5A445643414154423030303037");
+	byte[] publicKey = StringUtils.toByteArray("060A04007F0007020202020386410453107B1FA3767A3A36532A7CA1AE2BF2B3D08B6508CE03FECD9397CB107318519442980E9F17239A976FB1800A5515BC4AF61B013F7C5454A22A86D0CE18FADA");
+	byte[] cpi = new byte[]{0x00};
+	byte[] encodedBodyAndSignature = StringUtils.toByteArray("7F4E8201005F290100420E5A5A4456434141544230303030377F494F060A04007F0007020202020386410453107B1FA3767A3A36532A7CA1AE2BF2B3D08B6508CE03FECD9397CB107318519442980E9F17239A976FB1800A5515BC4AF61B013F7C5454A22A86D0CE18FADA5F20105A5A41546D74475465737430303030307F4C12060904007F0007030102025305300301FFB75F25060100010001035F2406010001000300655E732D060904007F00070301030280208FAC553CB79699D13E724E864BEBDD818DD550F7C34FC170ECDE2598A03F9EAC732D060904007F0007030103018020B48DA6DC54E8440F41EB20358CE8F640F45838D68B3E39812600047DBC5BB93B5F37405EE54A76BA698C098750E5E559F79CE2463E3F812083BB3815F4A7322C117C007C9D23958E99EC9542924BEF910A8C4C6462FB4D33B0F50F6B946F3A641C0DB1");
+	byte[] extension = StringUtils.toByteArray("732D060904007F00070301030280208FAC553CB79699D13E724E864BEBDD818DD550F7C34FC170ECDE2598A03F9EAC732D060904007F0007030103018020B48DA6DC54E8440F41EB20358CE8F640F45838D68B3E39812600047DBC5BB93B");
+
+	CardVerifiableCertificate cvc = new CardVerifiableCertificate(c);
+
+	assertEquals(body, cvc.getBody());
+	assertEquals(signature, cvc.getSignature());
+	assertEquals(chat, cvc.getCHAT().toByteArray());
+	assertEquals(chr, cvc.getCHR().toByteArray());
+	assertEquals(car, cvc.getCAR().toByteArray());
+	assertEquals(publicKey, cvc.getPublicKey().getTLVEncoded().getValue());
+	assertEquals(cpi, cvc.getCPI());
+	assertEquals(encodedBodyAndSignature, cvc.getCertificate().getValue());
+	assertEquals(extension, cvc.getExtensions());
+
+	assertEquals(13, cvc.getEffectiveDate().get(GregorianCalendar.DAY_OF_MONTH));
+	assertEquals(9, cvc.getEffectiveDate().get(GregorianCalendar.MONTH));
+	assertEquals(2010, cvc.getEffectiveDate().get(GregorianCalendar.YEAR));
+
+	assertEquals(30, cvc.getExpirationDate().get(GregorianCalendar.DAY_OF_MONTH));
+	assertEquals(9, cvc.getExpirationDate().get(GregorianCalendar.MONTH));
+	assertEquals(2010, cvc.getExpirationDate().get(GregorianCalendar.YEAR));
+
+	try {
+	    cvc = new CardVerifiableCertificate(encodedBodyAndSignature);
+	} catch (Exception expected) {
+	}
+    }
+
+}

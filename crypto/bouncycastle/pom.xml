@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+	<groupId>org.openecard</groupId>
+	<artifactId>crypto</artifactId>
+	<version>1.0.0</version>
+    </parent>
+
+    <groupId>org.openecard.crypto</groupId>
+    <artifactId>bouncycastle</artifactId>
+    <packaging>jar</packaging>
+    <name>openecard Bouncy Castle</name>
+
+    <build>
+	<plugins>
+	    <!-- copy bouncycastle sources -->
+	    <plugin>
+		<groupId>com.google.code.maven-replacer-plugin</groupId>
+		<artifactId>maven-replacer-plugin</artifactId>
+		<executions>
+		    <execution>
+			<phase>generate-sources</phase>
+			<goals>
+			    <goal>replace</goal>
+			</goals>
+		    </execution>
+		</executions>
+		<configuration>
+		    <basedir>${basedir}/src/bc/src/org</basedir>
+		    <outputBasedir>${basedir}/target/generated-sources/bc</outputBasedir>
+		    <outputDir>org/openecard</outputDir>
+		    <encoding>${project.build.sourceEncoding}</encoding>
+		    <includes>
+			<include>**/*.java</include>
+		    </includes>
+		    <excludes>
+			<!-- unused and conflicting with android packages -->
+			<exclude>bouncycastle/**/jcajce/*.java</exclude>
+			<exclude>bouncycastle/cert/**/*.java</exclude>
+			<exclude>bouncycastle/cms/**/*.java</exclude>
+			<exclude>bouncycastle/mail/**/*.java</exclude>
+			<exclude>bouncycastle/mozilla/**/*.java</exclude>
+			<exclude>bouncycastle/openpgp/**/*.java</exclude>
+			<exclude>bouncycastle/openssl/**/*.java</exclude>
+			<exclude>bouncycastle/operator/**/*.java</exclude>
+			<exclude>bouncycastle/pkcs/**/*.java</exclude>
+			<exclude>bouncycastle/tsp/**/*.java</exclude>
+			<!-- example packages -->
+			<exclude>bouncycastle/**/examples/*.java</exclude>
+		    </excludes>
+		    <regex>false</regex>
+		    <token>org.bouncycastle</token>
+		    <value>org.openecard.bouncycastle</value>
+		</configuration>
+	    </plugin>
+
+	    <!-- add copied sources to normal build -->
+	    <plugin>
+		<groupId>org.codehaus.mojo</groupId>
+		<artifactId>build-helper-maven-plugin</artifactId>
+		<executions>
+		    <execution>
+			<id>add-source</id>
+			<phase>generate-sources</phase>
+			<goals>
+			    <goal>add-source</goal>
+			</goals>
+			<configuration>
+			    <sources>
+				<source>target/generated-sources/bc</source>
+			    </sources>
+			</configuration>
+		    </execution>
+		</executions>
+	    </plugin>
+	</plugins>
+    </build>
+
+</project>

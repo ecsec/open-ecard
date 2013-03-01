@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+
+	<!-- Definition of Basic Types -->
+
+	<include schemaLocation="ISOCommon.xsd" />
+	<include schemaLocation="ISO24727-3.xsd" />
+	<include schemaLocation="ISO24727-Protocols.xsd" />
+	
+	<!-- IFD-Extension -->
+
+	<!-- EstablishChannel  -->
+
+	<element name="EstablishChannel">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="SlotHandle"
+							type="iso:SlotHandleType" />
+						<element name="AuthenticationProtocolData"
+							type="iso:DIDAuthenticationDataType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="EstablishChannelResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="AuthenticationProtocolData" maxOccurs="1" minOccurs="0"
+							type="iso:DIDAuthenticationDataType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="PACEInputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="PinID" type="iso:ByteType" />
+					<element name="CHAT" type="hexBinary" maxOccurs="1" minOccurs="0"/>
+					<element name="PIN" type="string" maxOccurs="1" minOccurs="0" />
+					<element name="CertificateDescription" type="hexBinary"
+						maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="PACEOutputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="RetryCounter" type="nonNegativeInteger" maxOccurs="1" minOccurs="0" />
+					<element name="EFCardAccess" type="hexBinary" maxOccurs="1" minOccurs="0" />
+					<element name="CARcurr" type="hexBinary" maxOccurs="1" minOccurs="0" />
+					<element name="CARprev" type="hexBinary" maxOccurs="1" minOccurs="0" />
+					<element name="IDPICC" type="hexBinary" maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+
+	<!-- DestroyChannel -->
+
+	<element name="DestroyChannel">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="SlotHandle"
+							type="iso:SlotHandleType" maxOccurs="1" minOccurs="1" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DestroyChannelResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+
+</schema>

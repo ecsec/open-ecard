@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+	targetNamespace="urn:oasis:names:tc:dss:1.0:profiles:AdES:schema#"
+	xmlns="urn:oasis:names:tc:dss:1.0:profiles:AdES:schema#"
+	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+	xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:saml="urn:oasis:names:tc:SAML:1.0:assertion"
+	xmlns:xades="http://uri.etsi.org/01903/v1.3.2#"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="http://www.w3.org/2000/09/xmldsig#"
+		schemaLocation="xmldsig-core-schema.xsd" />
+	<xs:import namespace="urn:oasis:names:tc:SAML:1.0:assertion"
+		schemaLocation="oasis-sstc-saml-schema-protocol-1.1.xsd" />
+
+
+<!-- 
+     Because the "standard" XAdES.xsd at http://uri.etsi.org/01903/v1.3.2/XAdES.xsd 
+     refers to a seemingly different version of the xmldsig-core-schema.xsd (at http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd)
+     it is necessary to import the local version, which is slightly modified to include the 
+     schema from http://www.w3.org/TR/xmldsig-core/xmldsig-core-schema.xsd.     
+ -->
+
+	<xs:import namespace="http://uri.etsi.org/01903/v1.3.2#"
+		schemaLocation="XAdES-1-3-2.xsd" />
+	<xs:import namespace="http://www.w3.org/XML/1998/namespace"
+		schemaLocation="xml.xsd" />
+	<xs:import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
+		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
+
+	<xs:element name="RequestedCommitment">
+		<xs:complexType>
+			<xs:choice>
+				<xs:element ref="xades:CommitmentTypeIndication" />
+				<xs:element name="BinaryValue" type="xs:base64Binary" />
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="RequestedSignatureProductionPlace">
+		<xs:complexType>
+			<xs:choice>
+				<xs:element ref="xades:SignatureProductionPlace" />
+				<xs:element name="BinaryValue" type="xs:base64Binary" />
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="RequestedSignerRole">
+		<xs:complexType>
+			<xs:choice>
+				<xs:element ref="xades:SignerRole" />
+				<xs:element name="BinaryValue" type="xs:base64Binary" />
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="RequestedDocsFormat" type="DocsFormatType" />
+
+	<xs:complexType name="DocsFormatType">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="DocFormat" type="DocFormatType"
+					maxOccurs="unbounded" />
+				<xs:element name="BinaryValue" type="xs:base64Binary" />
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="DocFormatType">
+		<xs:complexContent>
+			<xs:extension base="DocReferenceType">
+				<xs:sequence>
+					<xs:element ref="xades:DataObjectFormat" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+
+	<xs:element name="DocsToBeTimeStamped" type="DocReferencesType" />
+
+	<xs:complexType name="DocReferencesType">
+		<xs:sequence>
+			<xs:element name="DocReference" maxOccurs="unbounded"
+				type="DocReferenceType" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="DocReferenceType">
+		<xs:attribute name="WhichDocument" type="xs:IDREF"
+			use="required" />
+		<xs:attribute name="RefId" type="xs:string" use="optional" />
+	</xs:complexType>
+
+</xs:schema>

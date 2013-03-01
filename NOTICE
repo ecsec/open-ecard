@@ -1,0 +1,31 @@
+Open eCard App
+Copyright 2011-2013 (see entries below)
+
+This product includes software developed at:
+ - Bremen Online Services (http://www.bos-bremen.de)
+ - ecsec GmbH (http://www.ecsec.de)
+ - HS Coburg (http://www.hs-coburg.de)
+ - Ruhr Uni Bochum (http://www.ruhr-uni-bochum.de)
+ - TU Darmstadt (http://www.tu-darmstadt.de)
+
+The following software projects are included/used(*) in this software distribution:
+ - Apache Commons (http://commons.apache.org)
+ - Apache HttpComponents (http://hc.apache.org)
+ - Apache Maven (https://maven.apache.org)
+ - Bouncy Castle Crypto API (http://www.bouncycastle.org)
+ - CCID driver (http://pcsclite.alioth.debian.org/ccid.html)
+ - Commons JCI FileAlterationMonitor (https://commons.apache.org/jci/commons-jci-fam)
+ - cyberJack PCSC (http://www.reiner-sct.com/index.php?option=content&task=view&id=243)
+ - FindBugs (http://findbugs.sourceforge.net)
+ - Google Android SDK (http://source.android.com)
+ - JSON in Java (http://www.json.org/java/index.html
+ - libusbx (http://libusbx.org/)
+ - Logback (http://logback.qos.ch/)
+ - OpenJDK (http://openjdk.java.net)
+ - PCSC-Lite (http://pcsclite.alioth.debian.org/pcsclite.html)
+ - SLF4J (http://www.slf4j.org)
+ - Seek for Android (https://code.google.com/p/seek-for-android)
+ - TestNG testing framework (http://testng.org)
+
+
+(*) Only direct dependencies are named

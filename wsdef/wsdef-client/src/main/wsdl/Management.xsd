@@ -1,0 +1,1246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.bsi.bund.de/ecard/api/1.1"
+	xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:ec="http://www.bsi.bund.de/ecard/api/1.1"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:XAdES="http://uri.etsi.org/01903/v1.3.2#"
+	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+	xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+	xmlns:tsl2="http://uri.etsi.org/02231/v2.1.1#"
+	xmlns:tslg="http://uri.etsi.org/02231/v2.x#"
+	xmlns:tsl="http://uri.etsi.org/02231/v3.1.2#"
+
+	xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
+	xmlns:xml="http://www.w3.org/XML/1998/namespace"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
+		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
+
+<!-- 
+     Because the "standard" XAdES.xsd at http://uri.etsi.org/01903/v1.3.2/XAdES.xsd 
+     refers to a seemingly different version of the xmldsig-core-schema.xsd (at http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd)
+     it is necessary to import the local version, which is slightly modified to include the 
+     schema from http://www.w3.org/TR/xmldsig-core/xmldsig-core-schema.xsd.     
+ -->
+
+	<import namespace="http://uri.etsi.org/01903/v1.3.2#"
+		schemaLocation="XAdES-1-3-2.xsd" />
+
+	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
+		schemaLocation="CardInfo.xsd" />
+	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
+		schemaLocation="ISOCommon.xsd" />
+	<import namespace="http://www.w3.org/2000/09/xmldsig#"
+		schemaLocation="xmldsig-core-schema.xsd" />
+
+	<!-- The XML-schema for the Trust-Service Status list according to 
+		ETSI TS 102231 Version 2.1.1 has been distributed as attachment
+		of the standard document (in a file draft_ts102231v020101xsd.xsd,
+		which is included in a file ts_102231v020101p0.zip, which may be 
+		downloaded from the ETSI web site http://www.etsi.org/). For easier
+		handling of this schema document, a copy of it may also be downloaded from
+		http://sdre.es/mirror/draft/ETSI/TS/102231/v2.1.1/schema.xsd.
+
+		As this version of the schema refers to a seemingly different version of the 
+		xmldsig-core-schema.xsd (at http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd)
+        it is necessary to import the local version, which is slightly modified to include the 
+        current xmldsig-core-schema.xsd. 
+	-->
+
+	<import namespace="http://uri.etsi.org/02231/v2.1.1#"
+		schemaLocation="draft_ts102231v020101xsd.xsd">
+	</import>
+
+	<!-- In order to support the TSLs issued by gematik (cf. http://www.d-trust.de/internet/content/gematik-tsl.html)
+	     it is necessary to import this schema. 
+	     
+		As the online version of the schema at http://www.d-trust.net/internet/files/02231v2.xsd 
+		refers to a seemingly different version of the xmldsig-core-schema.xsd (at http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd)
+        it is necessary to import the local version, which is slightly modified to include the 
+        current xmldsig-core-schema.xsd. 	     
+	-->
+
+	<import namespace="http://uri.etsi.org/02231/v2.x#"
+		schemaLocation="gematik-TSL-02231v2.xsd">
+	</import>
+
+
+	<!-- In order to support the TSLs issued by BNetzA (cf. http://www.nrca-ds.de/st/TSL_DE.XML.tsr.zip)
+	     it is necessary to import the schema for version 3.1.2. 
+	     
+		As the online version of the schema at http://uri.etsi.org/02231/v3.1.2/ts_102231v030102_xsd.xsd
+		refers to a seemingly different version of the xmldsig-core-schema.xsd (at http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd)
+        it is necessary to import the local version, which is slightly modified to include the 
+        current xmldsig-core-schema.xsd. 	     
+	-->
+
+	<import namespace="http://uri.etsi.org/02231/v3.1.2#"
+		schemaLocation="ts_102231v030102_xsd.xsd">
+	</import>
+
+
+<!-- 
+     Because the "standard" xenc-schema.xsd at http://www.w3.org/TR/xmlenc-core/xenc-schema.xsd 
+     refers to a seemingly different version of the xmldsig-core-schema.xsd (at http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd)
+     it is necessary to import the local version, which is slightly modified to include the 
+     current xmldsig-core-schema.xsd .     
+ -->
+
+	<import namespace="http://www.w3.org/2001/04/xmlenc#"
+		schemaLocation="xenc-schema.xsd">
+	</import>
+	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
+		schemaLocation="ISOIFD.xsd">
+	</import>
+	<import namespace="http://www.w3.org/XML/1998/namespace"
+		schemaLocation="xml.xsd">
+	</import>
+
+	<include schemaLocation="eCard.xsd" />
+	<include schemaLocation="eCard-Protocols.xsd" />
+
+ 
+	<!--  Management of eCard-API-Framework  -->
+	<!--         Section 3.1            	 -->
+	<!-- 		3.1.1 InitializeFramework	 -->
+
+
+	<element name="InitializeFramework">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="InitializeFrameworkResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="Version" maxOccurs="1"
+							minOccurs="1">
+							<complexType>
+								<sequence>
+									<element name="Major"
+										type="integer" />
+									<element name="Minor" type="integer"
+										maxOccurs="1" minOccurs="0" />
+									<element name="SubMinor"
+										type="integer" maxOccurs="1" minOccurs="0" />
+								</sequence>
+							</complexType>
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.1.2 TerminateFramework -->
+	<element name="TerminateFramework">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="TerminateFrameworkResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.1.3 APIACLList -->
+	<element name="APIACLList">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="APICall" type="string"
+							maxOccurs="unbounded" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="APIACLListResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element name="APIAccessControlList"
+							type="ec:APIAccessControlListType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="APIAccessControlListType">
+		<sequence minOccurs="0" maxOccurs="unbounded">
+			<element name="APIAccessRule" type="ec:APIAccessRuleType" />
+		</sequence>
+	</complexType>
+
+
+
+	<complexType name="APIAccessControlRuleType">
+		<sequence>
+			<element name="APIAccessRule" type="ec:APIAccessRuleType"
+				maxOccurs="1" minOccurs="1" />
+		</sequence>
+	</complexType>
+
+
+	<complexType name="APIAccessRuleType">
+		<sequence>
+			<element name="APICall" type="string" />
+			<element name="Address" type="string" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="TC_Protocol" type="anyURI" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="APISecurityCondition"
+				type="ec:APISecurityConditionType" />
+		</sequence>
+	</complexType>
+
+	<complexType name="APISecurityConditionType">
+		<choice>
+			<element name="APIAuthenticationState"
+				type="ec:APIAuthenticationStateType">
+			</element>
+			<element name="always" type="iso:TrueType" />
+			<element name="never" type="iso:FalseType" />
+			<element name="not" type="ec:APISecurityConditionType" />
+			<element name="and">
+				<complexType>
+					<sequence minOccurs="1" maxOccurs="255">
+						<element name="APISecurityCondition"
+							type="ec:APISecurityConditionType" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="or">
+				<complexType>
+					<sequence minOccurs="1" maxOccurs="255">
+						<element name="APISecurityCondition"
+							type="ec:APISecurityConditionType" />
+					</sequence>
+				</complexType>
+			</element>
+		</choice>
+	</complexType>
+
+	<complexType name="APIAuthenticationStateType">
+		<sequence>
+			<choice>
+				<sequence>
+					<element name="DIDName" type="iso:DIDNameType" />
+					<element name="DIDScope" type="iso:DIDScopeType"
+						maxOccurs="1" minOccurs="0" />
+					<element name="DIDStateQualifier" type="hexBinary"
+						maxOccurs="1" minOccurs="0">
+					</element>
+				</sequence>
+				<element name="Certificate"
+					type="ds:X509IssuerSerialType" />
+			</choice>
+			<element name="AuthenticationState" type="boolean"></element>
+
+		</sequence>
+	</complexType>
+
+	<!-- 3.1.4 APIACLModify -->
+	<element name="APIACLModify">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="APIAccessControlList"
+							type="ec:APIAccessControlListType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="APIACLModifyResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<!-- 3.1.5 FrameworkUpdate -->
+
+	<element name="FrameworkUpdate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="FrameworkUpdateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.1.6 GetDefaultParameters -->
+	<element name="GetDefaultParameters">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="GetDefaultParametersResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="DefaultParameters"
+							type="ec:DefaultParametersType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="DefaultParametersType">
+		<sequence>
+			<element name="DefaultFrameworkBehaviour" maxOccurs="1"
+				minOccurs="1">
+				<complexType>
+					<sequence>
+						<element name="VerbosityLevel"
+							type="nonNegativeInteger" />
+						<element name="VerifyAddedIdentity">
+							<complexType>
+								<sequence>
+									<element
+										name="AddTrustedIdentityCheckAlgorithm" type="boolean" />
+									<element name="AddCertificate"
+										type="ec:AddCertificateOptionsType" />
+								</sequence>
+							</complexType>
+						</element>
+					</sequence>
+				</complexType>
+			</element>
+			<element name="DefaultSignOptions" type="dss:AnyType" />
+			<element name="DefaultVerifyOptions" type="dss:AnyType" />
+			<element name="DefaultEncryptOptions" type="dss:AnyType" />
+			<element name="DefaultDecryptOptions" type="dss:AnyType"></element>
+			<element name="DefaultHashAlgorithm" type="anyURI" />
+			<element name="DefaultTSA" type="string"
+				maxOccurs="unbounded" minOccurs="0" />
+			<element name="DefaultMessages">
+				<complexType>
+					<sequence>
+						<element name="LocalizedMessages"
+							type="ec:LocalizedMessagesType" maxOccurs="unbounded"
+							minOccurs="1">
+						</element>
+					</sequence>
+				</complexType>
+			</element>
+			<element name="UpdateService">
+				<complexType>
+					<sequence>
+						<element name="Address"
+							type="iso:ChannelHandleType">
+						</element>
+						<element name="UpdateFrequency" type="time"
+							maxOccurs="1" minOccurs="0" />
+						<element name="AutomaticInstallation"
+							type="ec:UpdatePriorityType" maxOccurs="3" minOccurs="0">
+						</element>
+						<element name="Other" maxOccurs="1"
+							minOccurs="0">
+						</element>
+					</sequence>
+				</complexType>
+			</element>
+			<element name="DefaultCardInfoRepository" type="anyURI"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="OtherParameters" maxOccurs="1"
+				minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="SignOptionsType">
+		<sequence>
+			<element name="SignatureForm" type="anyURI" maxOccurs="1"
+				minOccurs="0" />
+			<element name="SignatureType" type="anyURI" maxOccurs="1"
+				minOccurs="0" />
+			<element ref="dss:Properties" maxOccurs="1" minOccurs="0" />
+			<element name="IncludeEContent" type="boolean" maxOccurs="1"
+				minOccurs="0" />
+			<element ref="dss:IncludeObject" maxOccurs="unbounded"
+				minOccurs="0" />
+			<element ref="dss:SignaturePlacement" maxOccurs="1"
+				minOccurs="0" />
+			<element ref="dss:Schemas" maxOccurs="1" minOccurs="0"></element>
+			<element name="TrustedViewerInfo"
+				type="ec:TrustedViewerInfoType" maxOccurs="1" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+
+	<complexType name="LocalizedMessagesType">
+		<sequence>
+			<element name="DefaultVUMessages"
+				type="iso:AltVUMessagesType" />
+			<element name="DefaultMVDMessages"
+				type="iso:AltMVDMessagesType" />
+		</sequence>
+		<attribute ref="xml:lang" use="required" />
+		<attribute name="Protocol" type="anyURI" use="optional"
+			default="urn:oid:1.0.24727.3.0.0.7" />
+	</complexType>
+
+
+	<!-- 3.1.7 SetDefaultParameters -->
+	<element name="SetDefaultParameters">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="DefaultParameters"
+							type="ec:DefaultParametersType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="SetDefaultParametersResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<!-- 	Card Management    	-->
+	<!--      Section 3.2         -->
+	<!-- 3.2.1 GetCardInfoList    -->
+	<element name="GetCardInfoList">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="GetCardInfoListResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="1">
+						<element ref="iso:CardInfo"
+							maxOccurs="unbounded" minOccurs="0">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.2.2 SetCardInfoList          -->
+	<element name="SetCardInfoList">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element ref="iso:CardInfo"
+							maxOccurs="unbounded" minOccurs="0">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="SetCardInfoListResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.2.3 AddCardInfoFiles         -->
+	<element name="AddCardInfoFiles">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element ref="iso:CardInfo"
+							maxOccurs="unbounded" minOccurs="1">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="AddCardInfoFilesResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.2.4 DeleteCardInfoFiles      -->
+	<element name="DeleteCardInfoFiles">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="CardTypeIdentifier" type="anyURI"
+							maxOccurs="unbounded" minOccurs="1" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="DeleteCardInfoFilesResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- Card Terminal Management   -->
+	<!--         Section 3.3        -->
+	<!--      3.3.1 RegisterIFD     -->
+	<element name="RegisterIFD">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="IFDName" type="string" maxOccurs="1" minOccurs="0"/>
+						<element name="IFDConfiguration" maxOccurs="1"
+							minOccurs="0" type="ec:IFDConfigurationType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="IFDConfigurationType">
+		<complexContent>
+			<extension base="anyType">
+				<attribute name="IFDType" type="anyURI" use="required" />
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<element name="RegisterIFDResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.3.2 UnregisterIFD       -->
+	<element name="UnregisterIFD">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="IFDName" type="string" />
+						<element name="Mode"
+							type="ec:UnregisterIFDModeType">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+       <element name="UnregisterIFDResponse">
+               <complexType>
+                       <complexContent>
+                               <extension base="iso:ResponseType">
+                                       <sequence />
+                               </extension>
+                       </complexContent>
+               </complexType>
+       </element>
+
+
+	<simpleType name="UnregisterIFDModeType">
+		<restriction base="string">
+			<enumeration value="temporary" />
+			<enumeration value="permanent" />
+		</restriction>
+	</simpleType>
+
+
+
+	<!-- 	Trusted Viewer Management   -->
+	<!--         Section 3.4            -->
+	<!--  3.4.1 GetTrustedViewerList    -->
+	<element name="GetTrustedViewerList">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="GetTrustedViewerListResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="TrustedViewerId"
+							type="ec:TrustedViewerIdType" maxOccurs="unbounded"
+							minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.4.2 GetTrustedViewerConfiguration-->
+	<element name="GetTrustedViewerConfiguration">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="TrustedViewerId"
+							type="ec:TrustedViewerIdType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="GetTrustedViewerConfigurationResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="ViewerConfiguration"
+							type="ec:ViewerConfigurationType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.4.3 SetTrustedViewerConfiguration-->
+	<element name="SetTrustedViewerConfiguration">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="TrustedViewerId"
+							type="ec:TrustedViewerIdType" />
+						<element name="ViewerConfiguration"
+							type="ec:ViewerConfigurationType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="SetTrustedViewerConfigurationResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<complexType name="ViewerConfigurationType">
+		<sequence>
+			<element name="SupportedDocumentTypes" maxOccurs="unbounded"
+				minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="MimeType" type="string" />
+						<element name="Application" type="string"
+							maxOccurs="1" minOccurs="0" />
+						<element name="StyleSheet"
+							type="dss:InlineXMLType" maxOccurs="unbounded" minOccurs="0" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="IFDName" type="string" maxOccurs="1"
+				minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<!-- 3.4.4 AddTrustedViewer             -->
+	<element name="AddTrustedViewer">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="TrustedViewerId"
+							type="ec:TrustedViewerIdType" />
+						<element name="ViewerConfiguration"
+							type="ec:ViewerConfigurationType" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="AddTrustedViewerResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.4.5 DeleteTrustedViewer          -->
+	<element name="DeleteTrustedViewer">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="TrustedViewerId"
+							type="ec:TrustedViewerIdType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="DeleteTrustedViewerResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!--     Identity Management        -->
+	<!--         Section 3.5            -->
+	<!-- 3.5.1 GetTrustedIdentities     -->
+
+	<element name="Certificate">
+		<complexType>
+			<simpleContent>
+				<extension base="base64Binary">
+					<attribute name="Type" type="anyURI" use="optional"
+						default="urn:ietf:rfc:3280">
+					</attribute>
+				</extension>
+			</simpleContent>
+		</complexType>
+	</element>
+
+
+	<complexType name="TSLType">
+		<choice>
+			<element name="TSLv2.1.1" type="tsl2:TrustStatusListType" />
+			<element name="TSLv2.x-gematik" type="tslg:TrustStatusListType" />
+			<element name="TSLv3.1.2" type="tsl:TrustStatusListType" />
+			<element name="Other" type="dss:AnyType"></element>
+		</choice>
+	</complexType>
+
+
+
+
+	<element name="GetTrustedIdentities">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="GetTrustedIdentitiesResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="TSL"
+							type="ec:TSLType" maxOccurs="unbounded" minOccurs="0" />
+						<element ref="ec:Certificate"
+							maxOccurs="unbounded" minOccurs="0">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.5.2 AddTrustedCertificate      -->
+	<element name="AddTrustedCertificate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element ref="ec:Certificate"></element>
+						<element name="CheckAlgorithms" type="boolean"
+							maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="AddTrustedCertificateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.5.3 AddCertificate             -->
+	<element name="AddCertificate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element ref="ec:Certificate"
+							maxOccurs="unbounded" minOccurs="1">
+						</element>
+						<element name="AddCertificateOptions"
+							maxOccurs="1" minOccurs="0" type="ec:AddCertificateOptionsType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="AddCertificateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="AddCertificateOptionsType">
+		<sequence>
+			<element name="CheckCertificatePath" type="boolean"
+				maxOccurs="1" minOccurs="0" />
+			<element name="CheckCertificateStatus" type="boolean"
+				maxOccurs="1" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<!-- 3.5.4 ExportCertificate          -->
+	<element name="ExportCertificate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" />
+						<element name="Certificate"
+							type="ds:X509IssuerSerialType" maxOccurs="unbounded"
+							minOccurs="1" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="ExportCertificateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element ref="ec:Certificate"
+							maxOccurs="unbounded" minOccurs="0">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.5.5 DeleteCertificate          -->
+	<element name="DeleteCertificate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="Certificate"
+							type="ds:X509IssuerSerialType" maxOccurs="unbounded"
+							minOccurs="1" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="DeleteCertificateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.5.6 AddTSL                     -->
+
+
+	<element name="AddTSL">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="TrustStatusList"
+							type="ec:TSLType" maxOccurs="unbounded"
+							minOccurs="1" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="AddTSLResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.5.7 ExportTSL                  -->
+	<element name="ExportTSL">
+		<complexType>
+			<complexContent>
+
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="SchemeName"
+							type="tsl:InternationalNamesType" maxOccurs="1" minOccurs="0"/>
+						<element name="TSLSequenceNumber"
+							type="positiveInteger" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="ExportTSLResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="TrustStatusList"
+							type="ec:TSLType" maxOccurs="unbounded"
+							minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.5.8 DeleteTSL                  -->
+	<element name="DeleteTSL">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="SchemeName"
+							type="tsl:InternationalNamesType" maxOccurs="1" minOccurs="0"/>
+						<element name="TSLSequenceNumber"
+							type="positiveInteger" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="DeleteTSLResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!--     Service Management         -->
+	<!--         Section 3.6            -->
+	<!-- 3.6.1 GetOCSPServices          -->
+	<element name="GetOCSPServices">		<complexType>			<complexContent>				<extension base="iso:RequestType">					<sequence>						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="ServiceType">
+		<sequence>
+			<element name="Name" type="string" maxOccurs="1"
+				minOccurs="0" />
+			<element name="Address" type="anyURI" />
+		</sequence>
+	</complexType>
+
+
+	<element name="GetOCSPServicesResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="OCSPService"
+							maxOccurs="unbounded" minOccurs="0" type="ec:ServiceType">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.6.2 SetOCSPService             -->
+	<element name="SetOCSPServices">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="OCSPService"
+							maxOccurs="unbounded" minOccurs="0" type="ec:ServiceType">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="SetOCSPServicesResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.6.3 GetDirectoryServices       -->
+	<element name="GetDirectoryServices">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="GetDirectoryServicesResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="DirectoryService"
+							maxOccurs="unbounded" minOccurs="0" type="ec:ServiceType">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.6.4 SetDirectoryServices             -->
+	<element name="SetDirectoryServices">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="DirectoryService"
+							maxOccurs="unbounded" minOccurs="0" type="ec:ServiceType">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="SetDirectoryServicesResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<!-- 3.6.5 GetTSServices              -->
+	<element name="GetTSServices">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="TSServiceType">
+		<complexContent>
+			<extension base="ec:ServiceType">
+				<sequence>
+					<element name="TimeStampType" type="anyURI"
+						maxOccurs="1" minOccurs="0" />
+					<element ref="dss:KeySelector" maxOccurs="1"
+						minOccurs="0">
+					</element>
+					<element name="PathSecurity"
+						type="iso:PathSecurityType" maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+
+	<element name="GetTSServicesResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="TimeStampingService"
+							maxOccurs="unbounded" minOccurs="0" type="ec:TSServiceType">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- 3.6.4 SetTSServices             -->
+	<element name="SetTSServices">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="TimeStampingService"
+							maxOccurs="unbounded" minOccurs="0" type="ec:TSServiceType">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<element name="SetTSServicesResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+
+
+</schema>

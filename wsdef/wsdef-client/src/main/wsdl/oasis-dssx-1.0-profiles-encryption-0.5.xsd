@@ -1,0 +1,775 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+	DSS-X encryption profile    
+	urn:oasis:names:tc:dss-x:1.0:profiles:encryption
+	
+	EncryptRequest: Encrypt data using one key (-set).
+	DecryptRequest: Decrypt data using any of the provided keys
+	
+	use cases:
+	1. encrypt (multiple) XML element(s) (content) using one key (-set) and REPLACE in provided document(s)
+	result: provided document(s)
+	2. encrypt (multiple) base64 encoded arbitrary data using one key (-set) and INSERT in provided document
+	result: provided document
+	3. combination of 1. (REPLACE) and 2. (INSERT) in provided document
+	result: provided document
+	4. (CREATE) encrypt base64 encoded arbitrary data (incl. entire XML documents) using one key (-set)
+	result: one of: xenc:EncryptedData (root elt) / base64 encoded CMS / base64 encoded CCE container
+	5. arbitrary sequence of 1.-4. (batch processing) using one key (-set)
+	result: sequence of provided documents/xenc:EncryptedData elements
+	
+	processing rules:
+	0. (INSERT/REPLACE) selectors MUST be unique and MUST NOT overlap
+	1. (INSERT) selector gives empty node set -> error
+	2. (REPLACE) selector gives empty node set -> error
+	
+	TODO / REMARK
+	- CipherReference: URI along with transforms necessary to obtain the encrypted data as octet sequence (TODO: transforms)
+	- symmetric key enc
+	- allow referenced input content?
+	- No transformations on input document allowed (out of scope)
+	- round-trip capable: f^-1(f(x)) = x
+	
+	
+	Reference
+	
+	naming conventions:
+	XxxSelector - type SelectorType
+	XxxDestination - type DestinationSelectorType
+	
+	common attributes:
+	reference ... URI to reference content to be encrypted external to request doc
+	id ... unique identifier attributed to corresponding xenc:EncryptedData elt in response
+	cipherReference ... URI to reference the (external) cipher data from an xenc:EncryptedData elt; 
+	the cipher data is included in the response and identified via the same URI
+	
+-->
+<xs:schema
+	xmlns:dsse="urn:oasis:names:tc:dss-x:1.0:profiles:encryption:schema#"
+	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+	xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+	xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="urn:oasis:names:tc:dss-x:1.0:profiles:encryption:schema#"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<xs:import namespace="http://www.w3.org/2000/09/xmldsig#"
+		schemaLocation="xmldsig-core-schema.xsd" />
+<!-- 
+     Because the "standard" xenc-schema.xsd at http://www.w3.org/TR/xmlenc-core/xenc-schema.xsd 
+     refers to a seemingly different version of the xmldsig-core-schema.xsd (at http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd)
+     it is necessary to import the local version, which is slightly modified to include the 
+     current xmldsig-core-schema.xsd .     
+ -->
+	<xs:import namespace="http://www.w3.org/2001/04/xmlenc#"
+		schemaLocation="xenc-schema.xsd" />
+	<xs:import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
+		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
+	<xs:import namespace="http://www.w3.org/XML/1998/namespace"
+		schemaLocation="xml.xsd" />
+
+	<xs:element name="EncryptRequest" type="dss:RequestBaseType">
+		<xs:annotation>
+			<xs:documentation>
+				Encryption protocol (encryption only) request message.
+				The server responds with a dsse:EncryptResponse.
+			</xs:documentation>
+			<xs:documentation>
+				EncryptionKeys are optinally included in OptionalInputs
+				(if none: default encryption key).
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="EncryptResponse" type="dss:ResponseBaseType">
+		<xs:annotation>
+			<xs:documentation>
+				Encryption protocol (encryption only) response message.
+			</xs:documentation>
+			<xs:documentation>
+				For every dsse:EncryptContent optional input, the
+				response contains one dsse:EncryptedContent (note the
+				difference) optional output if the referred document is
+				not already included in a dss:DocumentWithSignature or
+				ds:Object within a signature object (dss:SignRequest
+				only). (TODO: example IncludeObject/SignaturePlacement
+				and EncryptContent refer same document (whichDoc))
+				(TODO: problem mit includeObject, encryptcontent und
+				cipherref!)
+			</xs:documentation>
+			<xs:documentation>
+				xenc:EncryptedKey(s) optionally included in
+				OptionalOutputs. Arbitrary sequence of
+				EncryptedStructuredDataType/EncryptedOpaqueDataType in
+				OptionalOutputs.
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="DecryptRequest" type="dss:RequestBaseType">
+		<xs:annotation>
+			<xs:documentation>
+				Arbitrary sequence of
+				EncryptedStructuredDataType/EncryptedOpaqueDataType in
+				OptionalInputs referencing encrypted documents in
+				InputDocuments.
+			</xs:documentation>
+			<xs:documentation>
+				For every provided encrypted content
+				(EncryptedStructuredData or EncryptedOpaqueData), one
+				plaintext content (StructuredData or OpaqueData)
+				referencing a plaintext document is returned.
+			</xs:documentation>
+			<xs:documentation>
+				KeyInfos for encryption keys are optinally included in
+				OptionalInputs (if none: default encKey).
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="DecryptResponse" type="dss:ResponseBaseType">
+		<xs:annotation>
+			<xs:documentation>
+				The service might decide to put the key that was used to
+				decrypt the content encryption key (or even all provided
+				encryption keys) as KeySelector in OptionalOutputs.
+			</xs:documentation>
+			<xs:documentation>
+				Decrypted documents are placed in OutputDocuments,
+				referenced from StructureData and OpaqueData in
+				OptionalOutput. OpaqueData is returned for usage
+				scenario CREATE (i.e. for EncryptedOpaqueData or
+				EncryptedStructuredData with document-element
+				xenc:EncryptedData and @type != ELEMENT or CONTENT).
+				StructuredData is returned for usage scenario
+				REPLACE/INSERT (i.e. for EncryptedStructuredData in
+				request)
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+
+	<!--  ### END PROTOCOL MESSAGE DEFINITION ### -->
+
+
+	<!--  ### BEGIN KEYS ### -->
+
+	<xs:element name="ContentEncryptionMethod"
+		type="xenc:EncryptionMethodType">
+		<xs:annotation>
+			<xs:documentation>
+				TODO move to EncryptionContent? CMS/XMLEnc is supported
+				in parallel, why not different algorithms as well?
+			</xs:documentation>
+			<xs:documentation>
+				ContentEncryptionMethod is an optional element that
+				describes the encryption algorithm applied to the cipher
+				data. If the element is absent, the encryption algorithm
+				must be known by the recipient or the decryption will
+				fail. If present, the xenc:EncryptionMethod element will
+				be set for every xenc:EncryptedData produced for this
+				request. To be placed directly in OptionalInputs.
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+
+	<xs:element name="EncryptionKey"
+		type="dsse:EncryptionKeySelectorType">
+		<xs:annotation>
+			<xs:documentation>
+				To be placed directly in OptionalInputs.
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+
+	<xs:complexType name="EncryptionKeySelectorType">
+		<xs:annotation>
+			<xs:documentation>
+				Represents a recipient's key. For every
+				dsse:EncryptionKey, either a xenc:EncryptedKey element
+				(XMLEnc encryption) or a CMS RecipientInfo object (CMS
+				encryption) is created. The resulting structure
+				(xenc:EncryptedKey or CMS RecipientInfo) holds the
+				encrypted content encryption key for the respective
+				recipient.
+			</xs:documentation>
+			<xs:documentation>
+				This type could be an extension of dss:KeySelectorType.
+				It contains a KeyInfo element holding an unbounded list
+				of key descriptors, all identifying the same key. If
+				none of the descriptors can be resolved to an actual
+				key, the request returns an error. If the descriptors
+				are contradictory (e.g. they identify different keys)
+				the service MAY return an error. It is up to the service
+				to decide which of the provided key descriptors to
+				include in the resulting xenc:EncryptedKey's ds:KeyInfo
+				element (TODO: extend key descriptor elements with
+				@addToEncKeyKeyInfo? No. see also
+				AgreementMethod/RecipientKeyInfo). Depending on the
+				specified certificate validation policy (see
+				@certValidation), the service decides whether to return
+				an error, append a warning or do nothing if (any of) the
+				resolved encryption certificates is invalid.
+			</xs:documentation>
+			<xs:documentation></xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="ds:KeyInfo" />
+				<xs:element name="Other" type="dss:AnyType" />
+			</xs:choice>
+			<xs:element name="KeyEncryptionMethod"
+				type="xenc:EncryptionMethodType" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="EncryptedKeyId" type="xs:string"
+			use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Optional Id that will be given to the resulting
+					xenc:EncryptedKey element.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="CertificateValidation" type="xs:anyURI"
+			use="optional" default="urn:TODO:warn">
+			<xs:annotation>
+				<xs:documentation>
+					Optional URI, defining whether to validate
+					encryption certificates prior to use.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="IncludeEncryptedKey" type="xs:boolean"
+			use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>
+					If true, the resulting xenc:EncryptedKey element is
+					included directly in (every) xenc:EncryptedData (or
+					at some place within the document and referenced
+					from xenc:EncryptedData, if DetachEncryptedKeys was
+					set). If false, the resulting xenc:EncryptedKey
+					element is returned in OptionalOutputs and
+					referenced from xenc:EncryptedData. In this case,
+					the client SHOULD specify dsse:EncryptedKeyId, to
+					facilitate the referencing. EncryptedKey elements
+					are referenced using the ds:RetrievalMethod element.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="AddReferenceList" type="xs:boolean"
+			use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>
+					If true, the service adds a xenc:ReferenceList
+					identifying the encrypted objects (DataReference and
+					KeyReference) encrypted with this key. The
+					ReferenceList contains a list of references to data
+					encrypted by the symmetric key carried within the
+					resulting EncryptedKey structure. The service MAY
+					add additional child elements to aid the recipient
+					in retrieving the EncryptedKey and/or EncryptedData
+					elements (see xenc:ReferenceType).
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<!--  ### END KEYS ### -->
+
+	<!--  ### BEGIN TBE CONTENTS ### -->
+
+	<!-- Todo: check document order of optional inputs in core (keep document  order for profiles)
+		|     better(?): encryption profile : document order in optionalInputs relevant
+		|     list possible solutions to list (eigenes enc element mit document order relevant)
+		|-->
+	<!--
+		|    Todo: check all dss: optional inputs for usage in dsse (additionalProfile)
+		|    SignatureType: ignored (no point in combination of XMLEnc and CMS! -> two separate requests)
+		|    AddTimestamp: TODO (also support TimeStampTheGivenSignature) must appear prior to encryption! 
+		|    (check schema: type UpdateSigntureInstructionType for AddTimestamp?)
+		|    (check core: 3.5.2.2/3 does not contain AttachmentReference)
+		|    IntendedAudience: MAY be used to define encryption keys (no further committement, no MUST)
+		|    KeySelector: use as encryption key with default values for EncKeySelector extensions (TODO check if possible)
+		|    properties: does not interfere with enc
+		|    IncludeObject: enveloping signature (document order important! whichDocument references same document as enc)
+		|    Todo: any constraints on verifying protocol and optional inputs?
+		|-->
+
+	<xs:element name="EncryptionContent"
+		type="dsse:EncryptionContentType">
+		<xs:annotation>
+			<xs:documentation>
+				Optional input specifying one or several encryption
+				operations on a provided input document.
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="EncryptionContentType">
+		<xs:annotation>
+			<xs:documentation>
+				rename to EncryptContent? (request WHAT to do)
+			</xs:documentation>
+			<xs:documentation>
+				Could be rename to EncryptDocument since a dss:Document
+				is referenced. However, dss:Document is somewhat
+				misleading (also Base64Data), and several
+				EncryptionContents might result in one EncryptedDocument
+				(Enc-Sig-Enc). Do NOT rename to EncryptData, since one
+				EncryptionContent might result in multiple
+				xenc:EncryptedData elts.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="DetachEncryptedKeys"
+				type="dsse:DestinationSelectorType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>
+						Optional destination selector for all encryption
+						keys (with IncludeEncryptedKey=true). If
+						present, the the xenc:EncryptedKey elements will
+						be added at the specified destination in the
+						referenced document (see WhichDocument) and for
+						every key a xenc:RetrievalMethod element will be
+						added to every xenc:EncryptedData element (under
+						the ds:KeyInfo child). Multiple keys will be be
+						added in the same order as in the request. If
+						not present, the xenc:EncryptedKey elements will
+						be added directly to xenc:EncryptedData (under
+						ds:KeyInfo).
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="xenc:EncryptionProperties" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>
+						TODO If present, the individual properties MAY
+						be taken into account during request processing.
+						They MUST be added to the all resulting
+						xenc:EncryptedData elements. The service MAY add
+						additional properties.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>
+						These selectors specify which parts of the (XML)
+						input document are to be encrypted. If not
+						present, the entire content of the referenced
+						input document will be encrypted.
+					</xs:documentation>
+					<xs:documentation>
+						TODO allow ExtractData (alternative to unbounded
+						Replace/Insert)
+					</xs:documentation>
+					<xs:documentation>
+						Naming: ...Data since they result in one
+						xenc:EncryptedData each.
+					</xs:documentation>
+				</xs:annotation>
+				<xs:element name="EncryptAndReplaceData"
+					type="dsse:SelectorType">
+					<xs:annotation>
+						<xs:documentation>
+							Selects a element or element content to be
+							encrypted and replaced by the resulting
+							xenc:EncryptedData element.
+						</xs:documentation>
+						<xs:documentation>
+							TODO rename to EncryptAndReplace /
+							EncryptData (vs. EncryptInsertedData) /
+							ReplaceSelector
+						</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="InsertEncryptedData"
+					type="dsse:InsertEncryptedDataType">
+					<xs:annotation>
+						<xs:documentation>
+							References an input content to be encrypted.
+							The resulting xenc:EncryptedData will be
+							inserted at a given destination in the
+							dsse:EncryptedDocument.
+						</xs:documentation>
+						<xs:documentation>
+							TODO rename?
+						</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:choice>
+		</xs:sequence>
+		<xs:attribute name="WhichDocument" type="xs:IDREF"
+			use="required">
+			<xs:annotation>
+				<xs:documentation>
+					Identifies the input document (see ID attribute of
+					dss:DocumentBaseType) to be (partly) encrypted.
+				</xs:documentation>
+				<xs:documentation>
+					If the EncryptedDocumentId (see below) is not
+					present, the referenced document's Id will be given
+					to the resulting dsse:EncryptedDocument.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="EncryptedDocumentId" type="xs:string"
+			use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Optional Id that will be given to the resulting
+					dsse:EncryptedDocument. If not present, the input
+					document's Id (referenced by WhichDocument) will be
+					used.
+				</xs:documentation>
+				<xs:documentation>
+					If present, this attribute MUST be set to the same
+					value for all dsse:EncryptionContent elements
+					referencing the same input document (unless
+					different EncryptedDocuments are requested, e.g. CMS
+					and XMLEnc).
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="EncryptionSyntax" type="xs:anyURI"
+			use="optional" default="http://www.w3.org/2001/04/xmlenc#">
+			<xs:annotation>
+				<xs:documentation>
+					The encryption syntax/format (XMLEnc, CMS, CCE,
+					etc.) to be used. (TODO: CMS,CCE -> opaque data;
+					xmlenc -> opaque/structured data depends on presence
+					of transfoms/selectors) (TODO: selector for entire
+					document? docElt != doc (PI, comments). Difference
+					between type=xmlenc and selector present/not
+					present?) (TODO: depends on dss:Document whether to
+					xmlencrypt arbitrary binary data or entire document
+					(Base64Data vs. Base64XML/InlineXML/....)) (TODO:
+					entire XML document == arbitrary binary data (see
+					xmlenc introduction)) (TODO: xpath('/') selects
+					document element?)
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="EncryptedDataId" type="xs:string"
+			use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Optional Id that will be given to the resulting
+					xenc:EncryptedData element. Only valid for xmlenc
+					encryption and if the entire content of the document
+					referenced by the WhichDocument attribute is to be
+					encrypted, i.e. only for encryption of arbitrary
+					data (incl. entire XML documents).
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="CipherReference" type="xs:anyURI"
+			use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					If this attribute is present, a xenc:CipherReference
+					element containing this URI is added to the
+					resulting xenc:EncryptedData element. The actual
+					cipher data will be included in a dsse:CipherValue
+					(see dsse:EncryptedDocument) with the same reference
+					URI. Only valid for xmlenc encryption and if the
+					entire content of the document referenced by the
+					WhichDocument attribute is to be encrypted, i.e.
+					only for encryption of arbitrary data (incl. entire
+					XML documents).
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="MimeType" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Optional MIME type of the data to be encrypted. It
+					will be added to the resulting xenc:EncryptedData
+					element. Only valid for xmlenc encryption and if the
+					entire content of the document referenced by the
+					WhichDocument attribute is to be encrypted, i.e.
+					only for encryption of arbitrary data (incl. entire
+					XML documents).
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="Encoding" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Optional transfer encoding of the data to be
+					encrypted. It will be added to the resulting
+					xenc:EncryptedData element. Only valid for xmlenc
+					encryption and if the entire content of the document
+					referenced by the WhichDocument attribute is to be
+					encrypted, i.e. only for encryption of arbitrary
+					data (incl. entire XML documents).
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="InsertEncryptedDataType">
+		<xs:annotation>
+			<xs:documentation>
+				References an input content to be encrypted and
+				specifies where to insert the resulting
+				xenc:EncryptedData within the dsse:EncryptedDocument.
+			</xs:documentation>
+			<xs:documentation>
+				The resulting xenc:EncryptedData Type attribute is set
+				to 'Content'. The validity of the resulting document
+				(esp. its decrypted form) lies within the responsibility
+				of the caller.
+			</xs:documentation>
+			<xs:documentation>
+				TODO discuss use cases for InsertEncryptedDataType and
+				Type attribute (omit Type attribute? define new Type
+				attribute?).
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="EncryptedDataDestination"
+				type="dsse:DestinationSelectorType">
+				<xs:annotation>
+					<xs:documentation>
+						The destination selector SHOULD have its
+						FirstChild attribute set to true. (?)
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="WhichDocument" type="xs:IDREF">
+			<xs:annotation>
+				<xs:documentation>
+					Identifies the input content (see ID attribute of
+					dss:DocumentBaseType) to be encrypted. If the
+					referenced input document is of type dss:Base64Data
+					or Base64XML, the base64 decoded binary octets will
+					be encrypted. If the referenced input document is of
+					type dss:InlineXML or EscapedXML, the entire XML
+					document (TODO CDATA/octets?) will be encrypted. If
+					the referenced input document is of type
+					dss:AttachmentReference, the decoded (with the
+					respective transfer encoding) binary octets will be
+					encrypted.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="EncryptedDataId" type="xs:string"
+			use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Optional Id that will be given to the resulting
+					xenc:EncryptedData element.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="CipherReference" type="xs:anyURI"
+			use="optional">
+			<xs:annotation>
+				<xs:documentation>TODO REMOVE?</xs:documentation>
+				<xs:documentation>
+					If this attribute is present, a xenc:CipherReference
+					element containing this URI is added to the
+					resulting xenc:EncryptedData element. The actual
+					cipher data will be included in a dsse:CipherValue
+					(see dsse:EncryptedDocument) with the same reference
+					URI.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="MimeType" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Optional MIME type of the data to be encrypted. It
+					will be added to the resulting xenc:EncryptedData
+					element.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="Encoding" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Optional transfer encoding of the data to be
+					encrypted. It will be added to the resulting
+					xenc:EncryptedData element.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="DestinationSelectorType">
+		<xs:annotation>
+			<xs:documentation>
+				XPath expression pointing to where an element should be
+				inserted. If FirstChild is not present or false, the
+				element MUST be inserted after the node pointed to by
+				Selector. Otherwise, the element MUST be inserted as
+				first child of the node pointed to by Selector.
+			</xs:documentation>
+			<xs:documentation>
+				Be consistent with DSS core! rename XPathSelector?
+			</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="Selector" type="xs:token" use="required" />
+		<xs:attribute name="FirstChild" type="xs:boolean" use="optional"
+			default="false" />
+	</xs:complexType>
+
+	<xs:complexType name="SelectorType">
+		<xs:annotation>
+			<xs:documentation>
+				XPath expression pointing to an (existing) element
+				within an input or encrypted document.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="Selector" type="xs:token" use="required">
+			<xs:annotation>
+				<xs:documentation>
+					XPath expression pointing to an (existing) element
+					within an input/encrypted document.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="Type" type="xs:anyURI" use="optional"
+			default="http://www.w3.org/2001/04/xmlenc#Element">
+			<xs:annotation>
+				<xs:documentation>
+					Specifies whether to encrypt the element
+					(http://www.w3.org/2001/04/xmlenc#Element) pointed
+					to by the selector attribute or its content
+					(http://www.w3.org/2001/04/xmlenc#Content). Only
+					relevant if used for encryption, ie. the selector
+					points to an element to be encrypted (vs.
+					EncryptedKeyParentSelector).
+				</xs:documentation>
+				<xs:documentation>
+					TODO restrict to xenc:Element/Content URIs?
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="EncryptedDataId" type="xs:string"
+			use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Optional Id that will be given to the resulting
+					xenc:EncryptedData element. Only relevant if used
+					for encryption, ie. the selector points to an
+					element to be encrypted (vs.
+					EncryptedKeyParentSelector).
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="CipherReference" type="xs:anyURI"
+			use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					If this attribute is present, a xenc:CipherReference
+					element containing this URI is added to the
+					resulting xenc:EncryptedData element. The actual
+					cipher data will be included in a dsse:CipherValue
+					(see dsse:EncryptedDocument) with the same reference
+					URI. Only relevant if used for encryption, ie. the
+					selector points to an element to be encrypted (vs.
+					EncryptedKeyParentSelector).
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<!--  ### END TBE CONTENTS ### -->
+
+	<!--  ### BEGIN ENC CONTENTS  ### -->
+
+	<xs:element name="EncryptedDocument"
+		type="dsse:EncryptedDocumentType">
+		<xs:annotation>
+			<xs:documentation>
+				EncryptedDocument contains the encrypted input content
+				(XML document containing encrypted parts, base64 encoded
+				CMS object, etc.). For every input dss:Document, one
+				dsse:EncryptedDocument is produced and included in
+				optional outputs. If a document was requested to be
+				included as ds:Object in the signature or as enveloping
+				signature document, these take precedence. If a
+				ds:Object was requested, an dsse:EncryptedDocument might
+				still be included containing the cipher data referenced
+				from an encrypted part. If a signature placement was
+				requested for this document, a dsse:EncryptedDocument is
+				included as only child in the dss:DocumentWithSignature
+				element instead of dss:Document. (No need for grouping
+				all encrypted documents under one parent element; not
+				possible with IncludeObject/SignaturePlacement anyway.)
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+
+	<!-- EncryptedDocumentType provided in Version 0.4: 
+		
+		<xs:complexType name="EncryptedDocumentType">
+        <xs:complexContent>
+            <xs:extension base="dss:DocumentBaseType">
+                <xs:sequence>
+                    TODO SelectorNamespace (be consistent with DSS Core) 
+                    <xs:element name="EncryptedKeyParentSelector" type="dsse:SelectorType" minOccurs="0"
+                        maxOccurs="1">
+                        <xs:annotation>
+                            <xs:documentation>provided for VERBOSE/ACK operation only</xs:documentation>
+                            <xs:documentation>XPath pointer to parent of all encrypted keys 
+                                (keys with destination=content only, otherwise the encrypted keys are directly included in EncryptedData/KeyInfo)</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="EncryptedDataSelector" type="dsse:SelectorType" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                            <xs:documentation>provided for VERBOSE/ACK operation only</xs:documentation>
+                            <xs:documentation>Acknowledgement for all encrypted contents
+                                produced. One selector is added per dsse:ReplaceContent or
+                                dsse:InsertContent from the request.</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+		<xs:choice minOccurs="0">
+                         <xs:annotation>
+                             <xs:documentation>Same as dss:DocumentType, but optional (if included in a ds:Object elsewhere)</xs:documentation>
+                             <xs:documentation>The type (InlineXML, Base64XML, etc) is the same as in the original input document.</xs:documentation>
+                             <xs:documentation>TODO The dss elements InlineXML, Base64XML and EscapedXML should be made public and referenced here.</xs:documentation>
+                         </xs:annotation>
+                         <xs:element name="InlineXML" type="dss:InlineXMLType"/>
+                         <xs:element name="Base64XML" type="xs:base64Binary"/>
+                         <xs:element name="EscapedXML" type="xs:string"/>
+                         <xs:element ref="dss:Base64Data"/>
+                         <xs:element ref="dss:AttachmentReference"/>
+                    </xs:choice>
+                    <xs:element name="CipherValue" minOccurs="0" maxOccurs="unbounded">
+                        <xs:annotation>
+                            <xs:documentation>Cipher value referenced from a xenc:EncryptedData 
+                                within the same dsse:EncryptedDocument.</xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:simpleContent>
+                                <xs:extension base="xs:base64Binary">
+                                    <xs:attribute name="URI" type="xs:anyURI" use="optional"/>
+                                </xs:extension>
+                            </xs:simpleContent>
+                        </xs:complexType>
+                    </xs:element>
+                 </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+		
+		### END ENC CONTENTS ### -->
+
+	<xs:complexType name="EncryptedDocumentType">
+		<xs:complexContent>
+			<xs:extension base="dss:DocumentType">
+				<xs:sequence>
+					<xs:element name="EncryptedKeyParentSelector"
+						type="dsse:SelectorType" minOccurs="0" maxOccurs="1">
+					</xs:element>
+					<xs:element name="EncryptedDataSelector"
+						type="dsse:SelectorType" minOccurs="0" maxOccurs="unbounded">
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+
+</xs:schema>

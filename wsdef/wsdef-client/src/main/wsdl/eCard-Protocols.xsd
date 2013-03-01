@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.bsi.bund.de/ecard/api/1.1"
+	xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:ec="http://www.bsi.bund.de/ecard/api/1.1"
+	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<include schemaLocation="eCard.xsd"></include>
+	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
+		schemaLocation="ISO24727-Protocols.xsd" />
+	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
+		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
+
+
+	<!-- =============================== -->
+	<!--   Protocols for GetCertificate  -->
+	<!-- =============================== -->
+
+	<!-- GetCertificate with Simple Enrollment -->
+
+
+	<complexType name="SimpleEnrollmentInputType">
+		<complexContent>
+			<restriction base="ec:ProtocolDataType">
+				<sequence>
+					<element name="ConnectionHandle"
+						type="iso:ConnectionHandleType" />
+					<element name="DIDName" type="iso:DIDNameType"
+						minOccurs="1" maxOccurs="1" />
+					<element name="DIDScope" type="iso:DIDScopeType"
+						maxOccurs="1" minOccurs="0">
+					</element>
+					<element name="DIDUpdateData"
+						type="iso:DIDUpdateDataType" maxOccurs="1" minOccurs="0" />
+					<element name="RegistrationData" minOccurs="0"
+						maxOccurs="1">
+						<complexType>
+							<sequence>
+								<element name="Subject" type="string"
+									maxOccurs="1" minOccurs="0">
+								</element>
+								<element name="Attribute"
+									maxOccurs="unbounded" minOccurs="0">
+									<complexType>
+										<sequence>
+											<element name="Type"
+												type="anyURI">
+											</element>
+											<element name="Value">
+											</element>
+										</sequence>
+									</complexType>
+								</element>
+							</sequence>
+						</complexType>
+					</element>
+					<element name="CertificationAuthority"
+						type="iso:ChannelHandleType">
+					</element>
+					<element name="TransactionIdentifier" type="string"
+						maxOccurs="1" minOccurs="0">
+					</element>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="SimpleEnrollmentOutputType">
+		<complexContent>
+			<restriction base="ec:ProtocolDataType">
+				<sequence>
+					<element name="TransactionIdentifier" type="string"
+						maxOccurs="1" minOccurs="0">
+					</element>
+					<element ref="dss:Base64Data" maxOccurs="1"
+						minOccurs="0">
+					</element>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<!-- =============================== -->
+	<!-- Protocols for FrameworkUpdate   -->
+	<!-- =============================== -->
+
+	<!-- Basic Update Protocol -->
+
+	<complexType name="ModuleInfoType">
+		<sequence>
+			<element name="ModuleName" type="string" />
+			<element name="MajorVersion" type="nonNegativeInteger" />
+			<element name="MinorVersion" type="nonNegativeInteger" />
+			<element name="SubminorVersion" type="nonNegativeInteger" />
+		</sequence>
+	</complexType>
+
+	<element name="CheckFrameworkUpdate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="InstalledModule"
+							type="ec:InstalledModuleInfoType" maxOccurs="unbounded"
+							minOccurs="1">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CheckFrameworkUpdateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="UpdateModule"
+							type="ec:UpdateModuleInfoType" maxOccurs="unbounded"
+							minOccurs="0">
+						</element>
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<complexType name="InstalledModuleInfoType">
+		<complexContent>
+			<extension base="ec:ModuleInfoType">
+				<sequence>
+					<element name="OSVersion" type="string" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<simpleType name="UpdateActionType">
+		<restriction base="string">
+			<enumeration value="Execute" />
+			<enumeration value="Copy" />
+		</restriction>
+	</simpleType>
+
+	<complexType name="UpdateModuleInfoType">
+		<complexContent>
+			<extension base="ec:ModuleInfoType">
+				<sequence>
+					<element name="Description" type="string"
+						maxOccurs="1" minOccurs="0" />
+					<element name="UpdatePriority"
+						type="ec:UpdatePriorityType">
+					</element>
+					<element name="File" maxOccurs="unbounded"
+						minOccurs="0">
+						<complexType>
+							<sequence>
+								<element name="SourceURL" type="anyURI"
+									minOccurs="1" maxOccurs="1" />
+								<element name="UpdateAction"
+									type="ec:UpdateActionType" minOccurs="1" maxOccurs="1" />
+								<element name="DestinationURL"
+									type="anyURI" minOccurs="0" maxOccurs="1" />
+							</sequence>
+						</complexType>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<simpleType name="UpdatePriorityType">
+		<restriction base="string">
+			<enumeration value="Mandatory" />
+			<enumeration value="Recommended" />
+			<enumeration value="Optional" />
+		</restriction>
+	</simpleType>
+
+</schema>

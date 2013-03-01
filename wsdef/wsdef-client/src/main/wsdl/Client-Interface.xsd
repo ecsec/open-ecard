@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://ws.openecard.org/schema"
+	xmlns:oec="http://ws.openecard.org/schema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified" version="1.0.0">
+
+	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
+		schemaLocation="ISO24727-3.xsd" />
+	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
+		schemaLocation="ISOCommon.xsd" />
+
+
+	<!-- =============================== -->
+	<!--        Version / Date           -->
+	<!-- =============================== -->
+	<!--            28.01.2013           -->
+	<!-- =============================== -->
+
+	<complexType name="StatusType">
+		<sequence>
+			<element name="ConnectionHandle" type="iso:ConnectionHandleType" maxOccurs="unbounded" minOccurs="0" />
+			<element name="UserAgent" maxOccurs="1" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="Name" type="string" />
+						<element name="VersionMajor" type="integer" />
+						<element name="VersionMinor" type="integer" maxOccurs="1" minOccurs="0" />
+						<element name="VersionSubminor" type="integer" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="SupportedAPIVersions" maxOccurs="unbounded" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="Name" type="string" />
+						<element name="VersionMajor" type="integer" />
+						<element name="VersionMinor" type="integer" maxOccurs="1" minOccurs="0"/>
+						<element name="VersionSubminor" type="integer" maxOccurs="1" minOccurs="0"/>
+					</sequence>
+				</complexType>
+			</element>
+			<element name="SupportedCards" maxOccurs="unbounded" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="CardType" type="anyURI" maxOccurs="1" minOccurs="1" />
+						<element name="DIDProtocols" type="anyURI" maxOccurs="unbounded" minOccurs="0" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="SupportedDIDProtocols" type="anyURI" maxOccurs="unbounded" minOccurs="0" />
+			<element name="AdditionalFeatures" type="anyURI" maxOccurs="unbounded" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<element name="Status">
+		<complexType>
+			<complexContent>
+				<extension base="oec:StatusType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<complexType name="StatusChangeType">
+		<sequence>
+			<element name="ConnectionHandle" type="iso:ConnectionHandleType" maxOccurs="1" minOccurs="1" />
+			<element name="Action" type="anyURI" maxOccurs="1" minOccurs="1" />
+		</sequence>
+	</complexType>
+
+	<element name="StatusChange">
+		<complexType>
+			<complexContent>
+				<extension base="oec:StatusChangeType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+</schema>

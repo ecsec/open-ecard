@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.bsi.bund.de/ecard/api/1.1"
+	xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:ec="http://www.bsi.bund.de/ecard/api/1.1"
+	xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+	xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
+	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:vr="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#"
+	xmlns:ers="http://www.setcce.org/schemas/ers"
+	xmlns:XAdES="http://uri.etsi.org/01903/v1.3.2#"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<import namespace="http://www.w3.org/2000/09/xmldsig#"
+		schemaLocation="xmldsig-core-schema.xsd" />
+<!-- 
+     Because the "standard" xenc-schema.xsd at http://www.w3.org/TR/xmlenc-core/xenc-schema.xsd 
+     refers to a seemingly different version of the xmldsig-core-schema.xsd (at http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd)
+     it is necessary to import the local version, which is slightly modified to include the 
+     schema from http://www.w3.org/TR/xmldsig-core/xmldsig-core-schema.xsd.     
+ -->
+	<import namespace="http://www.w3.org/2001/04/xmlenc#"
+		schemaLocation="xenc-schema.xsd" />
+
+<!-- 
+     Because the "standard" XAdES.xsd at http://uri.etsi.org/01903/v1.3.2/XAdES.xsd 
+     refers to a seemingly different version of the xmldsig-core-schema.xsd (at http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd)
+     it is necessary to import the local version, which is slightly modified to include the 
+     schema from http://www.w3.org/TR/xmldsig-core/xmldsig-core-schema.xsd.     
+ -->
+
+	<import namespace="http://uri.etsi.org/01903/v1.3.2#"
+		schemaLocation="XAdES-1-3-2.xsd" />
+	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
+		schemaLocation="ISO24727-Protocols.xsd" />
+<!-- not necessary
+	<import namespace="urn:iso:std:iso-iec:24727:tech:schema"
+		schemaLocation="ISO24727-3.xsd" />
+-->
+	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
+		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
+	<import namespace="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#"
+		schemaLocation="oasis-dssx-1.0-profiles-verification-report-cs1.xsd" />
+	<import namespace="http://www.setcce.org/schemas/ers"
+		schemaLocation="xmlers-schema-draft-v0.3.xsd" />
+
+
+	<!-- =============================== -->
+	<!--        Identity Functions       -->
+	<!-- =============================== -->
+	<!--            Section 3.1          -->
+	<!-- =============================== -->
+
+	<!-- 3.1.1	GetCertificate -->
+
+	<element name="GetCertificate">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="Input"
+							type="ec:ProtocolDataType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<complexType name="ProtocolDataType" abstract="true">
+		<complexContent>
+			<extension base="anyType">
+				<attribute name="Protocol" type="anyURI" use="required" />
+			</extension>
+		</complexContent>
+	</complexType>
+
+
+	<element name="GetCertificateResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence>
+						<element name="Output"
+							type="ec:ProtocolDataType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<!-- =============================== -->
+	<!--      Signature Functions        -->
+	<!-- =============================== -->
+	<!--          Section 3.2            -->
+	<!-- =============================== -->
+
+	<!-- =============================== -->
+	<!-- 3.2.1 SignRequest               -->
+	<!-- =============================== -->
+
+	<element name="SignRequest">
+		<complexType>
+			<complexContent>
+				<extension base="dss:RequestBaseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- =============================== -->
+	<!-- optional inputs for SignRequest -->
+	<!-- =============================== -->
+
+	<element name="ConnectionHandle">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ConnectionHandleType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- <KeySelector> is defined in [OASIS-DSS] -->
+	<!-- child elements of <Other> within <KeySelector> -->
+	<element name="DIDName" type="iso:DIDNameType" />
+	<element name="DSIName" type="iso:DSINameType" />
+
+	<!-- <GenerateUnderSignaturePolicy> is defined in [OASIS-SigPol] -->
+
+	<!-- <ReturnSupportedSignaturePolicies> is defind in [OASIS-SigPol] -->
+
+	<element name="SignatureForm" type="anyURI" />
+
+	<!-- <SignatureType> is defined in [OASIS-DSS] -->
+
+	<!-- <Properties> is defined in [OASIS-DSS] -->
+	<!-- new child element of <SignedProperties> within <Properties> -->
+	<element name="PreviousTimeStampHash">
+		<complexType>
+			<complexContent>
+				<extension base="XAdES:DigestAlgAndValueType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="IncludeEContent" />
+
+	<!-- <IncludeObject> is defined in [OASIS-DSS] -->
+
+	<!-- <SignaturePlacement> is defined in [OASIS-DSS] -->
+
+	<!-- <Schemas> is defined in [OASIS-DSS] -->
+
+	<element name="TrustedViewerInfo">
+		<complexType>
+			<complexContent>
+				<extension base="ec:TrustedViewerInfoType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="TrustedViewerInfoType">
+		<sequence>
+			<element name="TrustedViewerId"
+				type="ec:TrustedViewerIdType" maxOccurs="1" minOccurs="0" />
+			<element name="StyleSheet" type="ec:StyleSheetType"
+				maxOccurs="1" minOccurs="0" />
+			<element name="IncludeViewerManifest" type="boolean"
+				maxOccurs="1" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<simpleType name="TrustedViewerIdType">
+		<restriction base="string">
+			<maxLength value="64" />
+		</restriction>
+	</simpleType>
+
+	<complexType name="StyleSheetType">
+		<simpleContent>
+			<extension base="base64Binary">
+				<attribute name="StyleSheetId" type="anyURI"
+					use="optional" />
+			</extension>
+		</simpleContent>
+	</complexType>
+
+
+
+	<!-- =============================== -->
+	<!-- 3.2.1 SignResponse              -->
+	<!-- =============================== -->
+
+	<element name="SignResponse">
+		<complexType>
+			<complexContent>
+				<extension base="dss:ResponseBaseType">
+					<sequence>
+						<element ref="dss:SignatureObject" minOccurs="0"
+							maxOccurs="unbounded" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<!-- ================================= -->
+	<!-- optional outputs for SignResponse -->
+	<!-- ================================= -->
+
+	<!-- <DocumentWithSignature> is defined in [OASIS-DSS] -->
+
+	<!-- <UsedSignaturePolicy> is defined in [OASIS-SigPol] -->
+
+	<!-- <SupportedSignaturePolicies> is defined in [OASIS-SigPol] -->
+
+
+
+	<!-- =============================== -->
+	<!-- 3.2.2 VerifyRequest             -->
+	<!-- =============================== -->
+
+	<element name="SignatureObject">
+		<complexType>
+			<sequence>
+				<choice>
+					<element ref="ds:Signature" />
+					<element ref="dss:Timestamp" />
+					<element ref="dss:Base64Signature" />
+					<element ref="dss:SignaturePtr" />
+					<element name="Other" type="dss:AnyType" />
+				</choice>
+			</sequence>
+			<attribute name="SchemaRefs" type="IDREFS" use="optional" />
+			<attribute name="SignedDocuments" type="IDREFS" use="optional" />
+		</complexType>
+	</element>
+
+
+	<element name="VerifyRequest">
+		<complexType>
+			<complexContent>
+				<extension base="dss:RequestBaseType">
+					<sequence>
+						<element ref="ec:SignatureObject"
+							maxOccurs="unbounded" minOccurs="0" />
+
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<!-- ================================= -->
+	<!-- optional inputs for VerifyRequest -->
+	<!-- ================================= -->
+
+	<element name="VerifyManifests" />
+	<!-- while <VerifyManifests> is explained in [OASIS-DSS] it is not included in the schema -->
+
+	<element name="UseVerificationTime">
+		<complexType>
+			<complexContent>
+				<extension base="dss:UseVerificationTimeType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<!-- while <UseVerificationTime> is explained in [OASIS-DSS] it is not included in the schema -->
+
+	<!-- <AdditionalKeyInfo> is defined in [OASIS-DSS] -->
+
+	<!-- <ReturnUpdatedSignature> is defined in [OASIS-DSS] -->
+
+	<!-- <VerifyUnderSignaturePolicy> is defined in [OASIS-SigPol] -->
+
+	<!-- <ReturnVerificationReport> is defined in [OASIS-VR] -->
+
+
+	<!-- ============================================== -->
+	<!-- new child-element of dss:SignatureObject/Other -->
+	<!-- ============================================== -->
+
+	<element name="EvidenceRecord">
+		<complexType>
+			<complexContent>
+				<extension base="ec:EvidenceRecordType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="EvidenceRecordType">
+		<choice>
+			<element name="xmlEvidenceRecord"
+				type="ers:EvidenceRecordType" />
+			<element name="asn1EvidenceRecord" type="base64Binary" />
+		</choice>
+	</complexType>
+
+
+	<!-- =============================== -->
+	<!-- 3.2.2 VerifyResponse            -->
+	<!-- =============================== -->
+
+	<element name="VerifyResponse">
+		<complexType>
+			<complexContent>
+				<extension base="dss:ResponseBaseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- =================================== -->
+	<!-- optional outputs for VerifyResponse -->
+	<!-- =================================== -->
+
+	<!-- <VerifyManifestResults> is defined in [OASIS-DSS] -->
+
+	<!-- <DocumentWithSignature> is defined in [OASIS-DSS] -->
+
+	<!-- <UpdatedSignature> is defined in [OASIS-DSS] -->
+
+	<!-- <VerifiedUnderSignaturePolicy> is defined in [OASIS-SigPol] -->
+
+	<!-- <VerificationReport> is defined in [OASIS-VR] -->
+
+
+
+	<!-- =============================== -->
+	<!-- 3.2.3 ShowViewer                -->
+	<!-- =============================== -->
+
+	<element name="ShowViewer">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="TrustedViewerId"
+							type="ec:TrustedViewerIdType" maxOccurs="1" minOccurs="0" />
+						<element name="Document" type="dss:DocumentType"
+							maxOccurs="unbounded" minOccurs="0">
+						</element>
+						<element name="StyleSheetContent"
+							type="base64Binary" maxOccurs="1" minOccurs="0" />
+						<element name="ViewerMessage" maxOccurs="1"
+							minOccurs="0">
+							<complexType>
+								<sequence>
+									<element name="FrameMessage"
+										type="string" maxOccurs="1" minOccurs="0" />
+									<element name="BodyMessage"
+										type="string" maxOccurs="1" minOccurs="0" />
+								</sequence>
+							</complexType>
+						</element>
+						<element name="Timeout"
+							type="nonNegativeInteger" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- =============================== -->
+	<!-- 3.2.3 ShowViewerResponse        -->
+	<!-- =============================== -->
+
+	<element name="ShowViewerResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- =============================== -->
+	<!--      Encryption Functions       -->
+	<!-- =============================== -->
+	<!--            Section 3.3          -->
+	<!-- =============================== -->
+
+	<!-- 3.3.1	EncryptRequest / EncryptResponse -->
+
+	<!-- See oasis-dssx-encryption-profile-0.5.xsd  -->
+
+
+	<!-- 3.3.2	DecryptRequest / DecryptResponse -->
+
+	<!-- See oasis-dssx-encryption-profile-0.5.xsd  -->
+
+
+
+</schema>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+		  xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+		  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+		  targetNamespace="urn:iso:std:iso-iec:24727:tech:schema">
+
+
+  <!-- =================== -->
+  <!-- Definition of types -->
+  <!-- (only include XSDs) -->
+  <!-- =================== -->
+
+  <wsdl:types>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		elementFormDefault="qualified"
+		targetNamespace="urn:iso:std:iso-iec:24727:tech:schema">
+      <xsd:include schemaLocation="RecognitionTreeRepository.xsd" />
+    </xsd:schema>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    </xsd:schema>
+  </wsdl:types>
+
+
+  <!-- ====================== -->
+  <!-- Definition of messages -->
+  <!-- ====================== -->
+
+  <wsdl:message name="RecognitionTreeRequest">
+    <wsdl:part name="parameters" element="iso:GetRecognitionTree" />
+  </wsdl:message>
+
+  <wsdl:message name="RecognitionTreeResponse">
+    <wsdl:part name="parameters" element="iso:GetRecognitionTreeResponse" />
+  </wsdl:message>
+
+
+  <!-- ====================== -->
+  <!-- Definition of portType -->
+  <!-- ====================== -->
+
+  <wsdl:portType name="GetRecognitionTree">
+    <wsdl:operation name="GetRecognitionTree">
+      <wsdl:input message="iso:RecognitionTreeRequest" />
+      <wsdl:output message="iso:RecognitionTreeResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+
+
+  <!-- ===================== -->
+  <!-- Definition of Binding -->
+  <!-- ===================== -->
+
+  <wsdl:binding name="GetRecognitionTree" type="iso:GetRecognitionTree">
+    <soap:binding style="document"
+		  transport="http://schemas.xmlsoap.org/soap/http" />
+
+    <wsdl:operation name="GetRecognitionTree">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:GetRecognitionTree" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+
+
+  <!-- Definition of Support-Service -->
+
+  <wsdl:service name="GetRecognitionTree">
+    <wsdl:port name="GetRecognitionTree" binding="iso:GetRecognitionTree">
+      <soap:address location="http://127.0.0.1:18080" />
+    </wsdl:port>
+  </wsdl:service>
+
+</wsdl:definitions>

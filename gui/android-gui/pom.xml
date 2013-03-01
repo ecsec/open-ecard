@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+	<groupId>org.openecard</groupId>
+	<artifactId>gui</artifactId>
+	<version>1.0.0</version>
+    </parent>
+
+    <groupId>org.openecard.gui</groupId>
+    <artifactId>android-gui</artifactId>
+    <packaging>apklib</packaging>
+    <name>Android GUI</name>
+
+    <dependencies>
+	<dependency>
+	    <groupId>org.openecard.gui</groupId>
+	    <artifactId>gui-common</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.wsdef</groupId>
+	    <artifactId>wsdef-client</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.ifd.scio-backend</groupId>
+	    <artifactId>android-nfc</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.google.android</groupId>
+	    <artifactId>android</artifactId>
+	    <scope>provided</scope>
+	</dependency>
+    </dependencies>
+
+    <build>
+	<plugins>
+	    <plugin>
+		<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+		<artifactId>android-maven-plugin</artifactId>
+		<extensions>true</extensions>
+		<configuration>
+		    <zipalign>
+			<verbose>true</verbose>
+			<skip>false</skip>
+			<inputApk>${project.build.directory}/${project.build.finalName}.apk</inputApk>
+			<outputApk>${project.build.directory}/${project.build.finalName}-aligned.apk</outputApk>
+		    </zipalign>
+		    <sdk>
+			<platform>12</platform>
+		    </sdk>
+		    <test>
+			<createReport>true</createReport>
+		    </test>
+		    <proguard>
+			<!-- skip as long as problems exist -->
+			<skip>true</skip>
+		    </proguard>
+		</configuration>
+	    </plugin>
+	</plugins>
+    </build>
+
+</project>

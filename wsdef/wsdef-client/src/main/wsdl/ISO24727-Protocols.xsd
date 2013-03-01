@@ -1,0 +1,1555 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	xmlns:ecdsa="http://www.w3.org/2001/04/xmldsig-more#"
+	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<!-- ======================== -->
+	<!--        21.03.2011        -->
+	<!-- ======================== -->
+
+	
+	<include schemaLocation="ISO24727-3.xsd" />
+	<include schemaLocation="ISOIFD.xsd" />
+
+
+	<import namespace="http://www.w3.org/2001/04/xmldsig-more#"
+		schemaLocation="ecdsa.xsd" />
+
+	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
+		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
+
+
+	<!-- ============================== -->
+	<!--      Connection Management     -->
+	<!-- ============================== -->
+
+
+	<!-- TC_API_Open -->
+
+	<element name="TC_API_Open">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="TC_API_OpenResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="0">
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<!-- TC_API_Close -->
+
+	<element name="TC_API_Close">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
+							type="iso:ChannelHandleType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="TC_API_CloseResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<complexType name="TLS_PSK_ParametersType">
+		<sequence>
+			<element name="PSK" type="hexBinary" />
+			<element name="CipherSuite" type="string"
+				maxOccurs="unbounded" minOccurs="0" />
+			<element name="DIDName" type="iso:DIDNameType" maxOccurs="1"
+				minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<!-- StartPAOS -->
+
+	<element name="StartPAOS">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="SessionIdentifier" type="string" />
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" maxOccurs="unbounded"
+							minOccurs="0">
+						</element>
+						<element name="UserAgent" maxOccurs="1" minOccurs="0">
+							<complexType>
+								<sequence>
+								  <element name="Name" type="string" />
+								  <element name="VersionMajor" type="integer" />
+								  <element name="VersionMinor" type="integer" />
+								  <element name="VersionSubminor" type="integer" maxOccurs="1" minOccurs="0" />
+								</sequence>
+							</complexType>
+						</element>
+						<element name="SupportedAPIVersions" maxOccurs="unbounded" minOccurs="0">
+							<complexType>
+								<sequence>
+								  <element name="Major" type="integer" />
+								  <element name="Minor" type="integer" maxOccurs="1" minOccurs="0" />
+								  <element name="Subminor" type="integer" maxOccurs="1" minOccurs="0" />
+								</sequence>
+							</complexType>
+						</element>
+						<element name="SupportedDIDProtocols" type="anyURI" maxOccurs="unbounded"	minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="StartPAOSResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+
+	<!-- ============================== -->
+	<!--   Definition of common types   -->
+	<!-- ============================== -->
+
+
+	<complexType name="AlgorithmIdentifierType">
+		<sequence>
+			<element name="Algorithm" type="anyURI" />
+			<element name="Parameters" type="anyType" maxOccurs="1"
+				minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<simpleType name="ByteType">
+		<restriction base="hexBinary">
+			<length value="1"/>
+		</restriction>
+	</simpleType>
+
+
+	<complexType name="CardCallSequenceType">
+		<sequence maxOccurs="unbounded" minOccurs="1">
+			<element ref="iso:CardCall" />
+		</sequence>
+	</complexType>
+
+	<element name="CardCall">
+		<complexType>
+			<complexContent>
+				<extension base="iso:CardCallType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="CardCallType">
+		<choice>
+			<sequence>
+				<element name="CommandAPDU" type="hexBinary" />
+				<element name="ResponseAPDU" type="iso:ResponseAPDUType"
+					maxOccurs="unbounded" minOccurs="1" />
+			</sequence>
+			<sequence>
+				<element name="APICall" type="dss:AnyType" />
+				<element name="APIResponse" type="dss:AnyType"
+					maxOccurs="unbounded" minOccurs="1" />
+			</sequence>
+		</choice>
+	</complexType>
+
+
+	<complexType name="CertificateRefType">
+		<complexContent>
+
+			<extension base="iso:DataRefType">
+				<sequence>
+					<element name="CertificateType" type="anyURI"
+						maxOccurs="1" minOccurs="0" />
+
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+
+	<complexType name="DataMaskType">
+		<sequence>
+			<element name="Tag" type="hexBinary" maxOccurs="1"
+				minOccurs="0" />
+			<choice>
+				<element name="MatchingData"
+					type="iso:MatchingDataType" />
+				<element name="DataObject" type="iso:DataMaskType" />
+			</choice>
+		</sequence>
+	</complexType>
+
+
+	<complexType name="DataRefType">
+		<sequence>
+			<element name="DataSetName" type="iso:DataSetNameType" />
+			<element name="DSIName" type="iso:DSINameType" maxOccurs="1"
+				minOccurs="0" />
+		</sequence>
+	</complexType>
+
+
+	<complexType name="DIDMarkerType">
+		<choice>
+			<element name="PinCompareMarker"
+				type="iso:PinCompareMarkerType" />
+			<element name="MutualAuthMarker"
+				type="iso:MutualAuthMarkerType" />
+			<element name="RSAAuthMarker" type="iso:RSAAuthMarkerType" />
+			<element name="CryptoMarker" type="iso:CryptoMarkerType" />
+			<element name="EACMarker" type="iso:EACMarkerType" />
+			<element name="PACEMarker" type="iso:PACEMarkerType" />
+			<element name="TAMarker" type="iso:TAMarkerType" />
+			<element name="CAMarker" type="iso:CAMarkerType" />
+			<element name="RIMarker" type="iso:RIMarkerType" />
+		</choice>
+	</complexType>
+
+
+	<complexType name="KeyValueType">
+		<sequence>
+			<element name="KeyValue" type="hexBinary" />
+			<element name="Format" type="anyURI" maxOccurs="1"
+				minOccurs="0" />
+		</sequence>
+	</complexType>
+
+
+	<complexType name="KeyRefType">
+		<sequence>
+			<element name="KeyRef" type="hexBinary" />
+			<element name="Protected" type="boolean" maxOccurs="1"
+				minOccurs="0" />
+		</sequence>
+	</complexType>
+
+
+	<complexType name="MatchingDataType">
+		<sequence>
+			<element name="Offset" type="hexBinary" maxOccurs="1"
+				minOccurs="0" />
+			<element name="Length" type="hexBinary" maxOccurs="1"
+				minOccurs="0" />
+			<element name="MatchingValue" type="hexBinary" />
+			<element name="Mask" type="hexBinary" maxOccurs="1"
+				minOccurs="0" />
+		</sequence>
+		<attribute name="MatchingRule" type="iso:MatchingRuleType"
+			use="optional" default="Equals" />
+	</complexType>
+
+	<simpleType name="MatchingRuleType">
+		<restriction base="string">
+			<enumeration value="Equals" />
+			<enumeration value="Contains" />
+		</restriction>
+	</simpleType>
+
+	<complexType name="ResponseAPDUType">
+		<sequence>
+			<element name="Body" type="iso:DataMaskType" maxOccurs="1"
+				minOccurs="0" />
+			<element name="Trailer" type="hexBinary" />
+			<element ref="iso:Conclusion" maxOccurs="1" minOccurs="0"/>
+		</sequence>
+	</complexType>
+
+
+	<complexType name="StartSessionInputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="SharedSecurityState" type="boolean"
+						maxOccurs="1" minOccurs="0" />
+
+					<element name="DisableImplicitAuthentication"
+						type="boolean" maxOccurs="1" minOccurs="0" />
+
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<complexType name="StartSessionOutputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="ConnectionHandle"
+						type="iso:ConnectionHandleType" maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<element name="Conclusion">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ConclusionType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="ConclusionType">
+		<choice>
+			<element name="RecognizedState" type="IDREF" />
+			<element name="RecognizedCardType" type="anyURI"></element>
+			<element ref="iso:CardCall" maxOccurs="unbounded" minOccurs="1">
+			</element>
+		</choice>
+	</complexType>
+
+	<element name="StateInfo">
+		<complexType>
+			<complexContent>
+				<extension base="iso:StateInfoType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<complexType name="StateInfoType">
+		<sequence>
+			<element name="StateRecognition" maxOccurs="1" minOccurs="0" type="iso:CardCallSequenceType" />
+			<element name="State" type="iso:StateType" maxOccurs="unbounded" minOccurs="1">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="StateType">
+		<sequence>
+			<element name="RetryCounter" type="nonNegativeInteger"
+				maxOccurs="1" minOccurs="0" />
+			<element name="UsageCounter" type="nonNegativeInteger" maxOccurs="1" minOccurs="0" />
+			<element name="StateTransition" maxOccurs="unbounded"
+				minOccurs="0" type="iso:StateTransitionType" />
+		</sequence>
+		<attribute name="StateName" type="ID" use="required" />
+		<attribute name="StateClass" type="iso:StateClassType" use="required" />
+	</complexType>
+
+	<simpleType name="StateClassType">
+		<restriction base="string">
+			<enumeration value="Operational" />
+			<enumeration value="NotOperational" />
+			<enumeration value="RecognitionNecessary" />
+		</restriction>
+	</simpleType>
+
+
+	<complexType name="StateTransitionType">
+		<sequence>
+			<choice maxOccurs="unbounded" minOccurs="1">
+				<element name="DIDAuthenticationState"
+					type="iso:DIDAuthenticationStateType" maxOccurs="1" minOccurs="1" />
+				<element name="RetryCounter" type="nonNegativeInteger"
+					maxOccurs="1" minOccurs="1" />
+				<element name="UsageCounter" type="nonNegativeInteger"
+					maxOccurs="1" minOccurs="1" />
+				<element name="FixedProcedure"
+					type="iso:CardCallSequenceType" />
+			</choice>			
+			<element name="UpdateCounter" maxOccurs="2" minOccurs="0" type="iso:UpdateCounterType" />
+		</sequence>
+		<attribute name="TargetState" type="IDREF" use="optional" />
+	</complexType>
+
+	<complexType name="UpdateCounterType">
+		<simpleContent>
+      		<extension base="integer">
+				<attribute name="operation" use="required">
+					<simpleType>
+						<!-- only the operations "set" and "add" are supported -->
+						<restriction base="string">
+							<enumeration value="set" />
+							<enumeration value="add" />
+						</restriction>
+					</simpleType>
+				</attribute>
+				<attribute name="variable" use="required">
+					<simpleType>
+						<!-- only the variables "RetryCounter" and "UsageCounter" are supported -->
+						<restriction base="string">
+							<enumeration value="RetryCounter" />
+							<enumeration value="UsageCounter" />
+						</restriction>
+					</simpleType>
+				</attribute>
+			</extension>
+		</simpleContent>
+	</complexType>
+
+
+
+	<!-- ============================= -->
+	<!--        A.9 PIN Compare        -->
+	<!-- ============================= -->
+	<!--   OID = 1.3.162.15480.3.0.9   -->
+	<!-- ============================= -->
+
+
+	<!-- ============================= -->
+	<!--           Marker              -->
+	<!-- ============================= -->
+
+	<complexType name="PinCompareMarkerType">
+		<complexContent>
+			<restriction base="iso:DIDAbstractMarkerType">
+				<sequence>
+					<element name="PinRef" type="iso:KeyRefType" />
+					<element name="PinValue" type="string" maxOccurs="1"
+						minOccurs="0" />
+					<element name="PasswordAttributes"
+						type="iso:PasswordAttributesType" maxOccurs="1" minOccurs="0" />
+					<element ref="iso:StateInfo" maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<!-- ============= -->
+	<!--   DIDCreate   -->
+	<!-- ============= -->
+	<!--   DIDUpdate   -->
+	<!-- ============= -->
+
+	<complexType name="PinCompareDIDUpdateDataType">
+		<complexContent>
+			<restriction base="iso:DIDUpdateDataType">
+				<sequence>
+					<element name="OldPinOrPUK" type="string"
+						maxOccurs="1" minOccurs="0" />
+					<element name="Marker"
+						type="iso:PinCompareMarkerType" maxOccurs="1" minOccurs="1" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<!-- ========== -->
+	<!--   DIDGet   -->
+	<!-- ========== -->
+
+	<!-- DIDStructure contains Marker -->
+
+	<!-- =================== -->
+	<!--   DIDAuthenticate   -->
+	<!-- =================== -->
+
+	<complexType name="PinCompareDIDAuthenticateInputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="Pin" type="string" maxOccurs="1"
+						minOccurs="0" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="PinCompareDIDAuthenticateOutputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="RetryCounter"
+						type="nonNegativeInteger" maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<!-- =============================== -->
+	<!--    A.11 Mutual Authentication   -->
+	<!--      with key establishment     -->
+	<!-- =============================== -->
+	<!--   OID = 1.3.162.15480.3.0.12    -->
+	<!-- =============================== -->
+
+
+	<!-- ============================= -->
+	<!--           Marker              -->
+	<!-- ============================= -->
+
+
+	<complexType name="MutualAuthMarkerType">
+		<complexContent>
+			<restriction base="iso:DIDAbstractMarkerType">
+				<sequence>
+
+					<element name="EncryptionAlgorithm" type="anyURI" maxOccurs="1" minOccurs="0"/>
+					<element name="MacAlgorithm" type="anyURI" maxOccurs="1" minOccurs="0" />
+					<element name="EncryptionAlgorithmForSessionKey"
+						type="anyURI" maxOccurs="1" minOccurs="0" />
+					<element name="MacAlgorithmForSessionKey"
+						type="anyURI" maxOccurs="1" minOccurs="0" />
+					<element
+						name="DerivationAlgorithmSessionKeysAndCounter" type="anyURI" maxOccurs="1" minOccurs="0"/>
+					<element name="CardAlgId" type="iso:ByteType"
+						maxOccurs="1" minOccurs="0" />
+					<element name="K_enc" type="hexBinary" maxOccurs="1"
+						minOccurs="0" />
+					<element name="K_mac" type="hexBinary" maxOccurs="1"
+						minOccurs="0" />
+					<element name="DIV_IFD" type="hexBinary"
+						maxOccurs="1" minOccurs="0" />
+					<element name="KeyEncMacRef" type="hexBinary"
+						maxOccurs="1" minOccurs="0" />
+					<element name="SecurityEnvironmentIdentifier"
+						type="iso:ByteType" maxOccurs="1" minOccurs="0" />
+					<element name="ICCSNRef" type="iso:DataRefType"
+						maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+
+	<!-- ============ -->
+	<!--   DIDCreate  -->
+	<!-- ============ -->
+	<!--   DIDUpdate  -->
+	<!-- ============ -->
+
+	<complexType name="MutualAuthDIDUpdateDataType">
+		<complexContent>
+			<restriction base="iso:DIDUpdateDataType">
+				<sequence>
+					<element name="Marker"
+						type="iso:MutualAuthMarkerType" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<!-- ========== -->
+	<!--   DIDGet   -->
+	<!-- ========== -->
+
+	<!-- DIDStructure contains Marker -->
+
+	<!-- =================== -->
+	<!--   DIDAuthenticate   -->
+	<!-- =================== -->
+
+	<complexType name="MutualAuthDIDAuthInternalAuthType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="Challenge" type="hexBinary" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="MutualAuthDIDAuthMutualAuthType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="InternalCryptogram" type="hexBinary" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="MutualAuthDIDAuthExternalAuthType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="MutualCryptogram" type="hexBinary" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<!-- ============================= -->
+	<!-- A.14 Extended Access Control  -->
+	<!-- ============================= -->
+	<!--   OID = 1.3.162.15480.3.0.14  -->
+	<!-- ============================= -->
+
+
+	<!-- ============================= -->
+	<!--           Marker              -->
+	<!-- ============================= -->
+
+	<complexType name="EACMarkerType">
+		<complexContent>
+			<restriction base="iso:DIDAbstractMarkerType">
+				<sequence>
+					<element name="PACEDID" type="iso:DIDNameType"
+						maxOccurs="1" minOccurs="0" />
+
+					<element name="CADID" type="iso:DIDNameType" />
+					<element name="TADID" type="iso:DIDNameType" />
+					<element name="RIDID" type="iso:DIDNameType"
+						maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<!-- ============================= -->
+	<!--  CardApplicationStartSession  -->
+	<!-- ============================= -->
+
+
+	<complexType name="EACSessionInputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="RequiredAge" type="positiveInteger"
+						maxOccurs="1" minOccurs="0" />
+
+					<element name="RequiredCommunity" type="string"
+						maxOccurs="1" minOccurs="0" />
+					<element name="VerifyDocumentValidity"
+						type="boolean" maxOccurs="1" minOccurs="0" />
+
+					<element name="PerformRestrictedIdentification"
+						type="boolean" maxOccurs="1" minOccurs="0" />
+
+					<element name="RequiredCHAT" type="hexBinary"
+						maxOccurs="1" minOccurs="0" />
+
+					<element name="OptionalCHAT" type="hexBinary"
+						maxOccurs="1" minOccurs="0">
+					</element>
+
+					<element name="DataSetToBeRead"
+						type="iso:DataSetNameType" maxOccurs="unbounded" minOccurs="0" />
+					<element name="TransactionInfo" type="string" maxOccurs="1" minOccurs="0"></element>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="EACSessionOutputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="AgeVerification" type="anyURI"
+						maxOccurs="1" minOccurs="0" />
+
+					<element name="CommunityVerification" type="anyURI"
+						maxOccurs="1" minOccurs="0" />
+
+					<element name="DocumentValidityVerification"
+						type="anyURI" maxOccurs="1" minOccurs="0" />
+
+					<element name="SectorSpecificIdentifier"
+						type="hexBinary" maxOccurs="1" minOccurs="0" />
+
+					<element name="DataSet" maxOccurs="unbounded"
+						minOccurs="0">
+						<complexType>
+							<sequence>
+								<element name="DataSetName"
+									type="iso:DataSetNameType" maxOccurs="1" minOccurs="1" />
+
+								<element ref="dss:Result" />
+								<element name="DSI"
+									maxOccurs="unbounded" minOccurs="0">
+									<complexType>
+										<sequence>
+											<element name="DSIName"
+												type="iso:DSINameType" />
+
+											<element ref="dss:Result" />
+
+											<element name="DSIContent"
+												type="hexBinary" maxOccurs="1" minOccurs="0" />
+										</sequence>
+									</complexType>
+								</element>
+							</sequence>
+						</complexType>
+					</element>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<!-- ============================= -->
+	<!--        DIDAuthenticate        -->
+	<!-- ============================= -->
+
+
+	<complexType name="EAC1InputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="Certificate" type="hexBinary"
+						maxOccurs="unbounded" minOccurs="1" />
+					<element name="CertificateDescription"
+						type="hexBinary" maxOccurs="unbounded" minOccurs="0" />
+					<element name="ProviderInfo" type="hexBinary"
+						maxOccurs="1" minOccurs="0">
+					</element>
+					<element name="RequiredCHAT" type="hexBinary"
+						maxOccurs="1" minOccurs="0" />
+					<element name="OptionalCHAT" type="hexBinary"
+						maxOccurs="1" minOccurs="0" />
+					<element name="AuthenticatedAuxiliaryData"
+						type="hexBinary" maxOccurs="1" minOccurs="0" />
+					<element name="TransactionInfo" type="string" maxOccurs="1" minOccurs="0"></element>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="EAC1OutputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="RetryCounter"
+						type="nonNegativeInteger" maxOccurs="1" minOccurs="0" />
+					<element
+						name="CertificateHolderAuthorizationTemplate" type="hexBinary"
+						maxOccurs="1" minOccurs="0" />
+					<element name="CertificationAuthorityReference"
+						 type="hexBinary" maxOccurs="2" minOccurs="0" />
+					<element name="EFCardAccess" type="hexBinary"
+						maxOccurs="1" minOccurs="0" />
+
+					<element name="IDPICC" type="hexBinary"
+						maxOccurs="1" minOccurs="0" />
+
+					<element name="Challenge" type="hexBinary"
+						maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="EAC2InputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<sequence maxOccurs="unbounded" minOccurs="0">
+						<element name="Certificate" type="hexBinary"
+							maxOccurs="1" minOccurs="1" />
+					</sequence>
+					<element name="EphemeralPublicKey" type="hexBinary"
+						maxOccurs="1" minOccurs="1" />
+
+					<element name="Signature" type="hexBinary"
+						maxOccurs="1" minOccurs="0" />
+
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="EAC2OutputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<choice>
+					<sequence>
+						<element name="EFCardSecurity" type="hexBinary" />
+						<element name="AuthenticationToken"
+							type="hexBinary" />
+						<element name="Nonce" type="hexBinary" />
+					</sequence>
+					<element name="Challenge" type="hexBinary" />
+
+				</choice>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="EACAdditionalInputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="Signature" type="hexBinary"
+						maxOccurs="1" minOccurs="1" />
+
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+
+
+
+
+	<!-- ================================== -->
+	<!--           A.14.1 PACE              -->
+	<!-- ================================== -->
+	<!--    OID = 0.4.0.127.0.7.2.2.4       -->
+	<!-- ================================== -->
+	<!--  PACE-DH:   0.4.0.127.0.7.2.2.4.1  -->
+	<!--  PACE-ECDH: 0.4.0.127.0.7.2.2.4.2  -->
+	<!-- ================================== -->
+
+	<!-- ============================= -->
+	<!--           Marker              -->
+	<!-- ============================= -->
+
+
+	<complexType name="PACEMarkerType">
+		<complexContent>
+			<restriction base="iso:DIDAbstractMarkerType">
+				<sequence>
+					<element name="PasswordRef" type="iso:KeyRefType" />
+
+					<element name="PasswordValue" type="string"
+						maxOccurs="1" minOccurs="0">
+					</element>
+					<element name="minLength" type="nonNegativeInteger" maxOccurs="1" minOccurs="0"/>
+					<element name="maxLength" type="nonNegativeInteger" maxOccurs="1" minOccurs="0" />
+					<element ref="iso:StateInfo" maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<!-- ============= -->
+	<!--   DIDCreate   -->
+	<!-- ============= -->
+	<!--   DIDUpdate   -->
+	<!-- ============= -->
+
+	<complexType name="PACEDIDUpdateDataType">
+		<complexContent>
+			<restriction base="iso:DIDUpdateDataType">
+				<sequence>
+					<element name="PasswordValue" type="string"
+						maxOccurs="1" minOccurs="0" />
+					<element name="Marker" type="iso:PACEMarkerType" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<!-- =================== -->
+	<!--   DIDAuthenticate   -->
+	<!-- =================== -->
+
+	<complexType name="PACEDIDAuthenticateInputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="Password" type="string" maxOccurs="1"
+						minOccurs="0" />
+					<element name="Certificate" type="hexBinary"
+						maxOccurs="unbounded" minOccurs="0" />
+					<element name="CertificateDescription"
+						type="hexBinary" maxOccurs="unbounded" minOccurs="0" />
+					<element name="RequestedCHAT" type="hexBinary"
+						maxOccurs="1" minOccurs="0" />
+					<element name="ReturnEFCardAccess" type="boolean"
+						maxOccurs="1" minOccurs="0" />
+
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="PACEDIDAuthenticateOutputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="RetryCounter"
+						type="nonNegativeInteger" maxOccurs="1" minOccurs="0" />
+					<element
+						name="CertificateHolderAuthorizationTemplate" type="hexBinary"
+						maxOccurs="1" minOccurs="0" />
+					<element name="CertificationAuthorityReference"
+						type="iso:DIDNameType" maxOccurs="2" minOccurs="0" />
+					<element name="EFCardAccess" type="hexBinary"
+						maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<!-- ================================== -->
+	<!--     A.14.2 Chip Authentication     -->
+	<!-- ================================== -->
+	<!--    OID = 0.4.0.127.0.7.2.2.3       -->
+	<!-- ================================== -->
+	<!--   CA-DH:   0.4.0.127.0.7.2.2.3.1   -->
+	<!--   CA-ECDH: 0.4.0.127.0.7.2.2.3.2   -->
+	<!-- ================================== -->
+
+	<!-- ============================= -->
+	<!--   Definition of basic types   -->
+	<!-- ============================= -->
+
+
+	<complexType name="SubjectPublicKeyInfoType">
+		<sequence>
+			<element name="Algorithm"
+				type="iso:AlgorithmIdentifierType" />
+			<element name="SubjectPublicKey" type="hexBinary" />
+		</sequence>
+	</complexType>
+
+
+	<!-- ============================= -->
+	<!--           Marker              -->
+	<!-- ============================= -->
+
+
+	<complexType name="CAMarkerType">
+		<complexContent>
+			<restriction base="iso:DIDAbstractMarkerType">
+				<sequence>
+					<element name="KeyId" type="integer" maxOccurs="1"
+						minOccurs="0">
+					</element>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<!-- ============= -->
+	<!--   DIDCreate   -->
+	<!-- ============= -->
+
+	<complexType name="CADIDCreateDataType">
+		<complexContent>
+			<restriction base="iso:DIDUpdateDataType">
+				<sequence>
+					<element name="KeyInfo" maxOccurs="1" minOccurs="1"
+						type="iso:CAKeyInfoType" />
+
+					<element name="Marker" type="iso:CAMarkerType"
+						maxOccurs="1" minOccurs="1" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<complexType name="CAKeyInfoType">
+		<choice>
+			<element name="PrivateKeyValue" type="iso:KeyValueType"
+				maxOccurs="1" minOccurs="1" />
+			<element name="generateFlag" type="iso:NULL" />
+		</choice>
+	</complexType>
+
+
+	<!-- ============= -->
+	<!--   DIDUpdate   -->
+	<!-- ============= -->
+
+	<complexType name="CADIDUpdateDataType">
+		<complexContent>
+			<restriction base="iso:DIDUpdateDataType">
+				<sequence>
+					<element name="KeyInfo" maxOccurs="1" minOccurs="1"
+						type="iso:CAKeyInfoType" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+
+
+	<!-- =================== -->
+	<!--   DIDAuthenticate   -->
+	<!-- =================== -->
+
+
+	<complexType name="CAInputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="PublicKey"
+						type="iso:SubjectPublicKeyInfoType" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="CAAuthenticationTokenType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="AuthenticationToken"
+						type="hexBinary" />
+					<element name="Nonce" type="hexBinary" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<!-- ================================== -->
+	<!--   A.14.3 Terminal Authentication   -->
+	<!-- ================================== -->
+	<!--    OID = 0.4.0.127.0.7.2.2.2       -->
+	<!-- ================================== -->
+	<!--   TA-RSA:   0.4.0.127.0.7.2.2.2.1  -->
+	<!--   TA-ECDSA: 0.4.0.127.0.7.2.2.2.2  -->
+	<!-- ================================== -->
+
+	<!-- ============================= -->
+	<!--           Marker              -->
+	<!-- ============================= -->
+
+	<complexType name="TAMarkerType">
+		<complexContent>
+			<restriction base="iso:DIDAbstractMarkerType">
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<!-- ============= -->
+	<!--   DIDCreate   -->
+	<!-- ============= -->
+	<!-- ============= -->
+	<!--   DIDUpdate   -->
+	<!-- ============= -->
+
+
+	<complexType name="TADIDUpdateDataType">
+		<complexContent>
+			<restriction base="iso:DIDUpdateDataType">
+				<sequence>
+					<element name="RootKey"
+						type="iso:SubjectPublicKeyInfoType" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+
+	<!-- =================== -->
+	<!--   DIDAuthenticate   -->
+	<!-- =================== -->
+
+	<complexType name="TADIDAuthInputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<sequence maxOccurs="unbounded" minOccurs="0">
+						<element name="Certificate" type="hexBinary"
+							maxOccurs="1" minOccurs="1" />
+						<element name="CertificateType" type="anyURI"
+							maxOccurs="1" minOccurs="0" />
+					</sequence>
+					<element name="AuthenticatedAuxiliaryData"
+						type="hexBinary" maxOccurs="1" minOccurs="0" />
+					<element name="CompressedEphemeralPublicKey"
+						type="hexBinary" maxOccurs="1" minOccurs="0" />
+
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="TADIDAuthOutputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="Challenge" type="hexBinary" />
+					<element name="IDPICC" type="hexBinary"
+						maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<complexType name="TADIDAuthExternalAuthType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="Signature" type="hexBinary" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="TAAuxInputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="AuthenticatedAuxiliaryData"
+						type="hexBinary" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<!-- ================================== -->
+	<!--   A.14.4 Restricted Identification -->
+	<!-- ================================== -->
+	<!--    OID = 0.4.0.127.0.7.2.2.5       -->
+	<!-- ================================== -->
+	<!--   RI-DH:   0.4.0.127.0.7.2.2.5.1   -->
+	<!--   RI-ECDH: 0.4.0.127.0.7.2.2.5.2   -->
+	<!-- ================================== -->
+
+	<!-- ============================= -->
+	<!--           Marker              -->
+	<!-- ============================= -->
+
+	<complexType name="RIMarkerType">
+		<complexContent>
+			<restriction base="iso:DIDAbstractMarkerType">
+				<sequence>
+					<element name="KeyId" type="integer" maxOccurs="1"
+						minOccurs="0">
+					</element>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<!-- ============= -->
+	<!--   DIDCreate   -->
+	<!-- ============= -->
+	<!-- ============= -->
+	<!--   DIDUpdate   -->
+	<!-- ============= -->
+
+
+	<complexType name="RIDIDUpdateDataType">
+		<complexContent>
+			<restriction base="iso:DIDUpdateDataType">
+				<sequence>
+					<element name="KeyInfo" type="iso:CAKeyInfoType" />
+					<element name="Marker" type="iso:RIMarkerType" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+
+	<!-- =================== -->
+	<!--   DIDAuthenticate   -->
+	<!-- =================== -->
+
+	<complexType name="RIDIDAuthInputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="SectorPublicKey" type="hexBinary" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<complexType name="RIDIDAuthOutputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="SectorSpecificIdentifier"
+						type="hexBinary" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<!-- =============================== -->
+	<!--  A.15 RSA Authentication with   -->
+	<!--  optional key transport         -->
+	<!-- =============================== -->
+	<!--    OID = 1.3.162.15480.3.0.15   -->
+	<!-- =============================== -->
+
+	<!-- ============================= -->
+	<!--           Marker              -->
+	<!-- ============================= -->
+
+
+	<complexType name="RSAAuthMarkerType">
+		<complexContent>
+			<restriction base="iso:DIDAbstractMarkerType">
+				<sequence>
+					<element name="EncryptionAlgorithm" type="anyURI"
+						maxOccurs="1" minOccurs="0" />
+					<element name="SignatureAlgorithm" type="anyURI" maxOccurs="1" minOccurs="0"/>
+					<element
+						name="DerivationAlgorithmSessionKeysAndCounter" type="anyURI"
+						maxOccurs="1" minOccurs="0" />
+					<element name="MacAlgorithmForSessionKey"
+						type="anyURI" maxOccurs="1" minOccurs="0" />
+					<element name="EncryptionAlgorithmForSessionKey"
+						type="anyURI" maxOccurs="1" minOccurs="0" />
+					<element name="CardAlgId" type="iso:ByteType"
+						maxOccurs="1" minOccurs="0">
+					</element>
+					<element name="KeySize" type="positiveInteger"
+						maxOccurs="1" minOccurs="0" />
+					<choice maxOccurs="1" minOccurs="0">
+						<sequence>
+							<element name="PrivateKeyValue"
+								type="iso:KeyValueType" maxOccurs="1" minOccurs="0" />
+							<element name="PublicKeyValue"
+								type="iso:KeyValueType" />
+						</sequence>
+						<element name="generateFlag" type="iso:NULL" />
+					</choice>
+					<element name="NonceSize" type="positiveInteger"
+						maxOccurs="1" minOccurs="0" />
+					<element name="KeyRef" type="iso:KeyRefType"
+						maxOccurs="1" minOccurs="1" />
+					<element name="RootRef" type="iso:KeyRefType"
+						maxOccurs="1" minOccurs="0" />
+					<element name="SecurityEnvironmentIdentifier"
+						type="iso:ByteType" maxOccurs="1" minOccurs="0" />
+					<element name="CertificateRef" maxOccurs="unbounded"
+						minOccurs="0" type="iso:CertificateRefType" />
+					<element name="ICCSNRef" type="iso:DataRefType"
+						maxOccurs="1" minOccurs="0" />
+					<element name="LegacyKeyName" type="string"
+						maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<!-- ============= -->
+	<!--   DIDCreate   -->
+	<!-- ============= -->
+	<!--   DIDUpdate   -->
+	<!-- ============= -->
+
+	<complexType name="RSAAuthDIDUpdateDataType">
+		<complexContent>
+			<restriction base="iso:DIDUpdateDataType">
+				<sequence>
+					<element name="Marker"
+						type="iso:RSAAuthMarkerType" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<!-- ========== -->
+	<!--   DIDGet   -->
+	<!-- ========== -->
+
+	<!-- DIDStructure contains Marker -->
+
+
+	<!-- =================== -->
+	<!--   DIDAuthenticate   -->
+	<!-- =================== -->
+
+	<complexType name="RSAAuthDIDAuthVerifyCertsType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence maxOccurs="unbounded" minOccurs="0">
+					<element name="Certificate" type="hexBinary"
+						maxOccurs="1" minOccurs="1" />
+					<element name="CertificateType" type="anyURI"
+						maxOccurs="1" minOccurs="0" />
+
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="RSAAuthDIDAuthInternalAuthType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="ExternalPublicKeyRef"
+						type="hexBinary" maxOccurs="1" minOccurs="1" />
+
+					<element name="Challenge" type="hexBinary" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="RSAAuthDIDAuthMutualAuthType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="Signature" type="hexBinary" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="RSAAuthDIDAuthExternalAuthType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="MutualCryptogram" type="hexBinary" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<complexType name="EmptyResponseDataType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+
+
+	<!-- =============================== -->
+	<!--  A.25 Cryptographic Protocol    -->
+	<!-- =============================== -->
+	<!--    OID = 1.3.162.15480.3.0.25   -->
+	<!-- =============================== -->
+
+	<!-- ============================= -->
+	<!--   Definition of basic types   -->
+	<!-- ============================= -->
+
+	<simpleType name="SupportedOperationsType">
+		<union memberTypes="iso:BitString">
+			<simpleType>
+				<list>
+					<simpleType>
+						<restriction base="token">
+							<enumeration value="Compute-checksum" />
+							<enumeration value="Compute-signature" />
+							<enumeration value="Verify-checksum" />
+							<enumeration value="Verify-signature" />
+							<enumeration value="Verify-certificate" />
+							<enumeration value="Encipher" />
+							<enumeration value="Decipher" />
+							<enumeration value="Hash" />
+							<enumeration value="Generate-key" />
+							<enumeration value="Internal-authenticate" />
+							<enumeration value="External-authenticate" />
+							<enumeration value="Mutual-authenticate" />
+							<enumeration value="General-authenticate" />
+							<enumeration value="Secure-messaging" />
+						</restriction>
+					</simpleType>
+				</list>
+			</simpleType>
+		</union>
+	</simpleType>
+
+	<complexType name="AlgorithmInfoType">
+		<sequence>
+			<element name="Algorithm" type="string" maxOccurs="1"
+				minOccurs="0" />
+			<element name="AlgorithmIdentifier"
+				type="iso:AlgorithmIdentifierType" maxOccurs="1" minOccurs="0"/>
+			<element name="SupportedOperations"
+				type="iso:SupportedOperationsType" />
+			<element name="CardAlgRef" type="hexBinary" maxOccurs="1" minOccurs="0" />
+			<element name="HashAlgRef" type="hexBinary" maxOccurs="1"
+				minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="PSSParameterType">
+		<sequence>
+			<element name="HashAlgorithm" type="iso:AlgorithmIdentifierType" maxOccurs="1" minOccurs="0" />
+			<element name="MaskGenAlgorithm" type="iso:AlgorithmIdentifierType" maxOccurs="1" minOccurs="0"/>
+			<element name="SaltLength" type="integer" maxOccurs="1" minOccurs="0" />
+			<element name="TrailerField" type="hexBinary" maxOccurs="1" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+
+	<complexType name="CryptoKeyInfoType">
+		<sequence>
+			<element name="KeyRef" type="iso:KeyRefType" maxOccurs="1"
+				minOccurs="0" />
+			<element name="KeySize" type="positiveInteger" maxOccurs="1"
+				minOccurs="0" />
+			<element name="NonceSize" type="positiveInteger"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<choice maxOccurs="1" minOccurs="0">
+				<element name="SecretKeyValue" type="iso:KeyValueType" />
+				<sequence>
+					<element name="PrivateKeyValue"
+						type="iso:KeyValueType" maxOccurs="1" minOccurs="0" />
+					<element name="PublicKeyValue"
+						type="iso:KeyValueType" />
+				</sequence>
+				<element name="generateFlag" type="iso:NULL" />
+			</choice>
+		</sequence>
+	</complexType>
+
+
+	<simpleType name="HashGenerationInfoType">
+		<restriction base="string">
+			<enumeration value="NotOnCard" />
+			<enumeration value="CompletelyOnCard" />
+			<enumeration value="LastRoundOnCard" />
+		</restriction>
+	</simpleType>
+
+
+	<simpleType name="HashHandleType">
+		<restriction base="hexBinary" />
+	</simpleType>
+
+
+	<simpleType name="SignatureGenerationType">
+		<list>
+			<simpleType>
+				<restriction base="token">
+					<enumeration value="MSE_RESTORE" />
+					<enumeration value="MSE_HASH" />
+					<enumeration value="PSO_HASH" />
+					<enumeration value="MSE_KEY" />
+					<enumeration value="MSE_DS" />
+					<enumeration value="MSE_KEY_DS" />
+					<enumeration value="PSO_CDS" />
+					<enumeration value="INT_AUTH" />
+				</restriction>
+			</simpleType>
+		</list>
+	</simpleType>
+
+
+	<!-- ============================= -->
+	<!--           Marker              -->
+	<!-- ============================= -->
+
+
+	<complexType name="CryptoMarkerType">
+		<complexContent>
+			<restriction base="iso:DIDAbstractMarkerType">
+				<sequence>
+					<element name="AlgorithmInfo"
+						type="iso:AlgorithmInfoType" />
+					<element name="KeyInfo" type="iso:CryptoKeyInfoType"
+						maxOccurs="1" minOccurs="0" />
+			   		<element name="SignatureGenerationInfo" type="iso:SignatureGenerationType" maxOccurs="1" minOccurs="0" />
+					<element name="HashGenerationInfo" type="iso:HashGenerationInfoType" maxOccurs="1" minOccurs="0" />
+					<element name="CertificateRef" maxOccurs="unbounded"
+						minOccurs="0" type="iso:CertificateRefType" />
+					<element name="LegacyKeyName" type="string"
+						maxOccurs="1" minOccurs="0" />
+					<element ref="iso:StateInfo" maxOccurs="1"
+						minOccurs="0">
+					</element>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<!-- ============= -->
+	<!--   DIDCreate   -->
+	<!-- ============= -->
+	<!--   DIDUpdate   -->
+	<!-- ============= -->
+
+
+	<complexType name="CryptoDIDUpdateDataType">
+		<complexContent>
+			<restriction base="iso:DIDUpdateDataType">
+				<sequence>
+					<element name="Marker"
+						type="iso:CryptoMarkerType" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+	<!-- ========== -->
+	<!--   DIDGet   -->
+	<!-- ========== -->
+
+	<!-- DIDStructure contains Marker -->
+
+	<!-- =================== -->
+	<!--   DIDAuthenticate   -->
+	<!-- =================== -->
+
+
+	<complexType name="HashInputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<sequence>
+					<element name="Data" type="hexBinary" />
+					<element name="HashHandle" type="iso:HashHandleType"
+						maxOccurs="1" minOccurs="0" />
+					<element name="More" maxOccurs="1" minOccurs="0"
+						type="boolean" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+	<complexType name="HashOutputType">
+		<complexContent>
+			<restriction base="iso:DIDAuthenticationDataType">
+				<choice>
+					<element name="HashValue" type="hexBinary" />
+					<element name="HashHandle"
+						type="iso:HashHandleType" />
+				</choice>
+			</restriction>
+		</complexContent>
+	</complexType>
+
+
+</schema>

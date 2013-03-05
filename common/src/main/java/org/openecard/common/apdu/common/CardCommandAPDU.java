@@ -27,7 +27,9 @@ import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
@@ -562,25 +564,28 @@ public class CardCommandAPDU extends CardAPDU {
 	    if (le > 256) {
 		// Write extended LE field.
 		if (lc < 256) {
-		    // Encoded extended LC field in three bytes.
+		    // Encoded extended LE field in three bytes.
 		    baos.write(x00);
 		}
-		// Encoded extended LC field in two bytes if extended LC field is present.
+		// Encoded extended LE field in two bytes if extended LC field is present.
 		if (le == 65536) {
 		    baos.write(x00);
 		    baos.write(x00);
 		}
 		baos.write((byte) (le >> 8));
 		baos.write((byte) le);
-	    } else if (le == 256) {
-		// Write short LE field
-		baos.write(x00);
 	    } else if (le > 0) {
-		// Write short LE field
-		baos.write((byte) le);
+		if (lc > 255) {
+		    // Write extended LE field in two bytes because extended LC field is present.
+		    baos.write((byte) (le >> 8));
+		    baos.write((byte) le);
+		} else {
+		    // Write short LE field
+		    baos.write((byte) le);
+		}
 	    }
-	} catch (Exception e) {
-	    logger.error("Exception", e);
+	} catch (IOException ex) {
+	    logger.error("Failed to create APDU in memory.", ex);
 	}
 
 	return baos.toByteArray();
@@ -612,11 +617,8 @@ public class CardCommandAPDU extends CardAPDU {
      * @return Transmit
      */
     public Transmit makeTransmit(byte[] slotHandle) {
-	ArrayList<byte[]> defaultResponses = new ArrayList<byte[]>() {
-	    {
-		add(new byte[]{(byte) 0x90, (byte) 0x00});
-	    }
-	};
+	ArrayList<byte[]> defaultResponses = new ArrayList<byte[]>(1);
+	Collections.addAll(defaultResponses, new byte[]{(byte) 0x90, (byte) 0x00});
 	return makeTransmit(slotHandle, defaultResponses);
     }
 
@@ -660,7 +662,8 @@ public class CardCommandAPDU extends CardAPDU {
      * @return Response APDU
      * @throws APDUException
      */
-    public CardResponseAPDU transmit(Dispatcher dispatcher, byte[] slotHandle, List<byte[]> responses) throws APDUException {
+    public CardResponseAPDU transmit(Dispatcher dispatcher, byte[] slotHandle, List<byte[]> responses)
+	    throws APDUException {
 	Transmit t;
 	TransmitResponse tr = null;
 

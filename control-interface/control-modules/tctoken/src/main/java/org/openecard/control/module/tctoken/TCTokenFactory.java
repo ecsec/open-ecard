@@ -25,8 +25,6 @@ package org.openecard.control.module.tctoken;
 import generated.TCTokenType;
 import java.net.URL;
 import java.util.List;
-import org.openecard.control.module.tctoken.hacks.ObjectTag;
-import org.openecard.control.module.tctoken.hacks.PathSecurityParameters;
 
 
 /**
@@ -45,9 +43,9 @@ public class TCTokenFactory {
 
     public static TCTokenType generateTCToken(String data) throws TCTokenException {
 	// FIXME: Hack
-	data = PathSecurityParameters.fix(data);
+	data = TCTokenHacks.fixObjectTag(data);
 	// FIXME: Hack
-	data = ObjectTag.fix(data);
+	data = TCTokenHacks.fixPathSecurityParaneters(data);
 
 	// Parse the TCToken
 	TCTokenParser parser = new TCTokenParser();

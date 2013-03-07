@@ -23,7 +23,6 @@
 package org.openecard.control.module.tctoken;
 
 import org.openecard.common.util.FileUtils;
-import org.openecard.control.module.tctoken.hacks.ObjectTag;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
@@ -38,7 +37,7 @@ public class TCTokenConverterTest {
 	try {
 	    String content = FileUtils.toString(FileUtils.resolveResourceAsStream(getClass(), "TCTokenObject.xml"));
 
-	    String data = ObjectTag.fix(content);
+	    String data = TCTokenHacks.fixObjectTag(content);
 
 	    assertEquals(data, "<TCTokenType><ServerAddress>fry.mtg.de:443</ServerAddress><SessionIdentifier>0B01699AC700B72C152DE59479C46D98020A97E68DD8BB18476C539A25497644</SessionIdentifier><Binding>urn:liberty:paos:2006-08</Binding><PathSecurity-Protocol>urn:ietf:rfc:4279</PathSecurity-Protocol><PathSecurity-Parameters><PSK>31C22F3B0778E64FB3425F768C2C881E5F60236F7717259FAECE10CE20B928A4</PSK></PathSecurity-Parameters><RefreshAddress>https://willow.mtg.de:443/eid-server-demo-app/result/response.html</RefreshAddress></TCTokenType>");
 	} catch (Exception e) {

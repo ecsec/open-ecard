@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.util.List;
 import org.openecard.common.util.FileUtils;
 import org.openecard.common.util.StringUtils;
-import org.openecard.control.module.tctoken.hacks.PathSecurityParameters;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
@@ -55,7 +54,7 @@ public class TCTokenParserTest {
     public void testParseMalformed() throws Exception {
 	String data = FileUtils.toString(FileUtils.resolveResourceAsStream(getClass(), "TCToken-malformed.xml"));
 
-	data = PathSecurityParameters.fix(data);
+	data = TCTokenHacks.fixPathSecurityParaneters(data);
 
 	TCTokenParser parser = new TCTokenParser();
 	List<TCTokenType> tokens = parser.parse(data);

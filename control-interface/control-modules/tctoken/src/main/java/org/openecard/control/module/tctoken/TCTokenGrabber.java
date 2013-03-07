@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,6 +30,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
+import javax.annotation.Nonnull;
 import org.openecard.apache.http.Header;
 import org.openecard.apache.http.HttpEntity;
 import org.openecard.apache.http.HttpException;
@@ -57,6 +58,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class TCTokenGrabber {
 
@@ -69,8 +71,8 @@ public class TCTokenGrabber {
      * @return Resource as a stream.
      * @throws TCTokenException
      */
-    public static InputStream getStream(URL url) throws TCTokenException, MalformedURLException, KeyStoreException,
-	    IOException, GeneralSecurityException, HttpException, URISyntaxException {
+    public static InputStream getStream(URL url) throws TCTokenException, MalformedURLException,
+	    KeyStoreException, IOException, GeneralSecurityException, HttpException, URISyntaxException {
 	HttpEntity entity = null;
 	boolean finished = false;
 
@@ -156,15 +158,16 @@ public class TCTokenGrabber {
     /**
      * Fetch the data from the URL.
      *
-     * @param url URL
-     * @return Resource fetched from the URI
-     * @throws TCTokenException
+     * @param url URL of the resource.
+     * @return Resource fetched from the URL.
+     * @throws TCTokenException Thrown in case there was a problem reading the data from the given location.
      */
-    public static String getResource(URL url) throws TCTokenException {
+    public static String getResource(@Nonnull URL url) throws IOException {
 	LimitedInputStream is = null;
 
 	try {
-	    is = new LimitedInputStream(TCTokenGrabber.getStream(url));
+	    InputStream data = TCTokenGrabber.getStream(url);
+	    is = new LimitedInputStream(data);
 	    StringBuilder sb = new StringBuilder(2048);
 	    byte[] buf = new byte[1024];
 
@@ -177,12 +180,16 @@ public class TCTokenGrabber {
 	    }
 
 	    return sb.toString();
+	} catch (IOException ex) {
+	    throw ex;
 	} catch (Exception e) {
-	    throw new TCTokenException(e.getMessage(), e);
+	    throw new IOException(e.getMessage(), e);
 	} finally {
-	    try {
-		is.close();
-	    } catch (Exception ignore) {
+	    if (is != null) {
+		try {
+		    is.close();
+		} catch (Exception ignore) {
+		}
 	    }
 	}
     }

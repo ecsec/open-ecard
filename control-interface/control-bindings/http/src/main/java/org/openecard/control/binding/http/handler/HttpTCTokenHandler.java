@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URL;
+import javax.annotation.Nonnull;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.apache.http.HttpRequest;
 import org.openecard.apache.http.HttpResponse;
@@ -58,11 +59,15 @@ public class HttpTCTokenHandler extends HttpControlHandler {
     /**
      * Create a new HttpTCTokenHandler.
      *
-     *  @param genericTCTokenHandler to handle the generic part of the TCToken request
-     *
+     * @param genericTCTokenHandler to handle the generic part of the TCToken request
      */
     public HttpTCTokenHandler(GenericTCTokenHandler genericTCTokenHandler) {
 	super("/eID-Client");
+	this.genericTCTokenHandler = genericTCTokenHandler;
+    }
+
+    protected HttpTCTokenHandler(@Nonnull String path, @Nonnull GenericTCTokenHandler genericTCTokenHandler) {
+	super(path);
 	this.genericTCTokenHandler = genericTCTokenHandler;
     }
 
@@ -133,7 +138,7 @@ public class HttpTCTokenHandler extends HttpControlHandler {
 	    if (!requestLine.getMethod().equals("GET")) {
 		throw new HTTPException(HttpStatus.SC_METHOD_NOT_ALLOWED);
 	    }
-	    TCTokenRequest tcTokenRequest = genericTCTokenHandler.parseTCTokenRequestURI(requestURI);
+	    TCTokenRequest tcTokenRequest = genericTCTokenHandler.parseRequestURI(requestURI);
 	    TCTokenResponse tcTokenResponse = genericTCTokenHandler.handleActivate(tcTokenRequest);
 	    response = this.handleResponse(tcTokenResponse);
 	    response.setParams(httpRequest.getParams());

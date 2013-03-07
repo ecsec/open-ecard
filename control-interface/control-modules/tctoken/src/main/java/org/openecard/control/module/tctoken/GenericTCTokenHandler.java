@@ -31,6 +31,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
@@ -115,10 +116,21 @@ public class GenericTCTokenHandler {
      * @throws TCTokenException If the TCToken could not be fetched. That means either the URL is invalid, the server
      *   was not reachable or the returned value was not a TCToken or TCToken like structure.
      */
-    public TCTokenRequest parseTCTokenRequestURI(URI requestURI) throws UnsupportedEncodingException, TCTokenException {
-	TCTokenRequest tcTokenRequest = new TCTokenRequest();
+    public TCTokenRequest parseRequestURI(URI requestURI) throws UnsupportedEncodingException, TCTokenException {
 	String queryStr = requestURI.getRawQuery();
 	Map<String, String> queries = HttpRequestLineUtils.transform(queryStr);
+
+	if (queries.containsKey("tcTokenURL")) {
+	    return parseTCTokenRequestURI(queries);
+	} else if (queries.containsKey("activationObject")) {
+	    return parseObjectURI(queries);
+	}
+
+	throw new TCTokenException("No suitable set of parameters given in the request.");
+    }
+
+    private TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries) throws TCTokenException {
+	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 
 	for (Map.Entry<String, String> next : queries.entrySet()) {
 	    String k = next.getKey();
@@ -132,6 +144,8 @@ public class GenericTCTokenHandler {
 		    } catch (MalformedURLException ex) {
 			String msg = "The tcTokenURL parameter contains an invalid URL: " + v;
 			throw new TCTokenException(msg, ex);
+		    } catch (IOException ex) {
+			throw new TCTokenException("Failed to fetch TCToken.", ex);
 		    }
 		} else {
 		    throw new TCTokenException("Parameter tcTokenURL contains no value.");
@@ -167,6 +181,23 @@ public class GenericTCTokenHandler {
 		logger.info("Unknown query element: {}", k);
 	    }
 	}
+
+	return tcTokenRequest;
+    }
+
+    private TCTokenRequest parseObjectURI(Map<String, String> queries) throws TCTokenException {
+	TCTokenRequest tcTokenRequest = new TCTokenRequest();
+
+	for (Map.Entry<String, String> next : queries.entrySet()) {
+	    String k = next.getKey();
+	    String v = next.getValue();
+
+	    if ("activationObject".equals(k)) {
+		TCTokenType token = TCTokenFactory.generateTCToken(v);
+		tcTokenRequest.setTCToken(token);
+	    }
+	}
+
 	return tcTokenRequest;
     }
 

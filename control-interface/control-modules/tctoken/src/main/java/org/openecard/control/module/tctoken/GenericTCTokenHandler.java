@@ -234,6 +234,11 @@ public class GenericTCTokenHandler {
 		String queryPart = serverAddress.getQuery();
 		if (queryPart == null || ! (queryPart.contains("?sessionid=") || queryPart.contains("&sessionid="))) {
 		    String sAddr = serverAddress.toString();
+		    // fix path of url
+		    if (serverAddress.getPath().isEmpty()) {
+			sAddr += "/";
+		    }
+		    // add parameter
 		    if (sAddr.endsWith("?")) {
 			sAddr += "sessionid=" + sessionIdentifier;
 		    } else if (sAddr.contains("?")) {

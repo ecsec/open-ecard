@@ -35,12 +35,35 @@ public class ValueValidator {
     /**
      * Check if the value contains at least the given number of bytes as hex digits.
      *
+     * @deprecated Renamed to {@link #checkHexByteStrength(java.lang.String, int)
      * @param value Value to test for hex digits.
      * @param numBytes Number of bytes that must be present in the value.
      * @return true if enough bytes are present, false otherwise.
      */
+    @Deprecated
     public static boolean checkHexStrength(String value, int numBytes) {
-	Pattern p = Pattern.compile("\\p{XDigit}{2}");
+	return checkHexNibbleStrength(value, numBytes * 2);
+    }
+    /**
+     * Check if the value contains at least the given number of bytes as hex digits.
+     *
+     * @param value Value to test for hex digits.
+     * @param numBytes Number of bytes that must be present in the value.
+     * @return true if enough bytes are present, false otherwise.
+     */
+    public static boolean checkHexByteStrength(String value, int numBytes) {
+	return checkHexNibbleStrength(value, numBytes * 2);
+    }
+
+    /**
+     * Check if the value contains at least the given number of half-bytes as hex digits.
+     *
+     * @param value Value to test for hex digits.
+     * @param numNibbles  Number of half-bytes that must be present in the value.
+     * @return true if enough bytes are present, false otherwise.
+     */
+    public static boolean checkHexNibbleStrength(String value, int numNibbles) {
+	Pattern p = Pattern.compile("\\p{XDigit}{1}");
 	Matcher m = p.matcher(value);
 
 	int count = 0;
@@ -48,7 +71,7 @@ public class ValueValidator {
 	    count++;
 	}
 
-	return count >= numBytes;
+	return count >= numNibbles;
     }
 
     /**
@@ -59,17 +82,18 @@ public class ValueValidator {
      * @return true if psk is strong enough, false otherwise.
      */
     public static boolean checkPSKStrength(String psk) {
-	return checkHexStrength(psk, 16);
+	return checkHexByteStrength(psk, 16);
     }
     /**
      * Check if the session ID value is strong enough.
-     * Session IDs must at least contain 16 bytes as hex digits. Usually UUIDs are used.
+     * Session IDs must at least contain 25 half-bytes as hex digits. BSI TR-03112 sec. 3.7.1 demands that session IDs
+     * must have at least 100 bits of entropy which is exactly 25 nibbles.
      *
      * @param session Session ID value to test.
      * @return true if session ID is strong enough, false otherwise.
      */
     public static boolean checkSessionStrength(String session) {
-	return checkHexStrength(session, 16);
+	return checkHexNibbleStrength(session, 25);
     }
 
 }

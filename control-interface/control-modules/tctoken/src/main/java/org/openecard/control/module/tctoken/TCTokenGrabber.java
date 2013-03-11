@@ -90,18 +90,27 @@ public class TCTokenGrabber {
 		throw new ControlException("Specified URL is not a https-URL.");
 	    }
 
-	    // TODO: verify server certificate in EAC, also discuss how it goes there
 	    TlsAuthenticationCertSave tlsAuth = new TlsAuthenticationCertSave();
 	    tlsAuth.setHostname(hostname);
-	    // FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
+	    // FIXME: verify certificate chain as soon as a usable solution exists for the trust problem
 	    // tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 	    ClientCertTlsClient tlsClient = new ClientCertDefaultTlsClient(hostname);
 	    tlsClient.setAuthentication(tlsAuth);
-	    tlsClient.setClientVersion(ProtocolVersion.TLSv11);
+	    TlsProtocolHandler h;
 
-	    Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
-	    TlsProtocolHandler h = new TlsProtocolHandler(socket.getInputStream(), socket.getOutputStream());
-	    h.connect(tlsClient);
+	    try {
+		tlsClient.setClientVersion(ProtocolVersion.TLSv11);
+		Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
+		h = new TlsProtocolHandler(socket.getInputStream(), socket.getOutputStream());
+		h.connect(tlsClient);
+	    } catch (IOException e) {
+		logger.error("Connecting to the TCToken-URL with TLSv1.1 failed. Falling back to TLSv1.0.");
+		tlsClient.setClientVersion(ProtocolVersion.TLSv10);
+		Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
+		h = new TlsProtocolHandler(socket.getInputStream(), socket.getOutputStream());
+		h.connect(tlsClient);
+	    }
+
 	    StreamHttpClientConnection conn = new StreamHttpClientConnection(h.getInputStream(), h.getOutputStream());
 
 	    HttpContext ctx = new BasicHttpContext();

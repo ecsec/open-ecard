@@ -44,6 +44,7 @@ import org.openecard.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openecard.apache.http.protocol.BasicHttpContext;
 import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.apache.http.protocol.HttpRequestExecutor;
+import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.crypto.tls.TlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsProtocolHandler;
 import org.openecard.common.ECardConstants;
@@ -294,19 +295,13 @@ public class PAOS {
 	try {
 	    // loop and send makes a computer happy
 	    while (true) {
-		// set up connection
-		Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
+		// set up connection to PAOS endpoint
 		StreamHttpClientConnection conn;
-		if (tlsClient != null) {
-		    // TLS
-		    InputStream sockIn = socket.getInputStream();
-		    OutputStream sockOut = socket.getOutputStream();
-		    TlsProtocolHandler handler = new TlsProtocolHandler(sockIn, sockOut);
-		    handler.connect(tlsClient);
-		    conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());
-		} else {
-		    // no TLS
-		    conn = new StreamHttpClientConnection(socket.getInputStream(), socket.getOutputStream());
+		try {
+		    conn = createTlsConnection(hostname, port, ProtocolVersion.TLSv11);
+		} catch (IOException ex) {
+		    logger.error("Connecting to the PAOS endpoint with TLSv1.1 failed. Falling back to TLSv1.0.", ex);
+		    conn = createTlsConnection(hostname, port, ProtocolVersion.TLSv10);
 		}
 
 		HttpContext ctx = new BasicHttpContext();
@@ -367,6 +362,25 @@ public class PAOS {
 	} catch (WSException ex) {
 	    throw new PAOSException(ex);
 	}
+    }
+
+    private StreamHttpClientConnection createTlsConnection(String hostname, int port, ProtocolVersion tlsVersion)
+	    throws IOException, URISyntaxException {
+	StreamHttpClientConnection conn;
+	Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
+	if (tlsClient != null) {
+	    tlsClient.setClientVersion(tlsVersion);
+	    // TLS
+	    InputStream sockIn = socket.getInputStream();
+	    OutputStream sockOut = socket.getOutputStream();
+	    TlsProtocolHandler handler = new TlsProtocolHandler(sockIn, sockOut);
+	    handler.connect(tlsClient);
+	    conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());
+	} else {
+	    // no TLS
+	    conn = new StreamHttpClientConnection(socket.getInputStream(), socket.getOutputStream());
+	}
+	return conn;
     }
 
     /**

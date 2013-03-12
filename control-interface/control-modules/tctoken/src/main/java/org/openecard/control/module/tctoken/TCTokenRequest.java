@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -39,6 +39,7 @@ public class TCTokenRequest extends ClientRequest {
     private BigInteger slotIndex;
     private byte[] contextHandle;
     private String cardType = "http://bsi.bund.de/cif/npa.xml";
+    private boolean tokenFromObject;
 
 
     /**
@@ -130,6 +131,24 @@ public class TCTokenRequest extends ClientRequest {
      */
     public void setCardType(String cardType) {
 	this.cardType = cardType;
+    }
+
+    /**
+     * Gets whether the token was created from an object tag or fetched from a URL.
+     *
+     * @return {@code true} when the token was created from an object tag, {@code false} otherwise.
+     */
+    public boolean isTokenFromObject() {
+	return tokenFromObject;
+    }
+
+    /**
+     * Sets whether the token was created from an object tag or fetched from a URL.
+     *
+     * @param tokenFromObject {@code true} when the token was created from an object tag, {@code false} otherwise.
+     */
+    public void setTokenFromObject(boolean tokenFromObject) {
+	this.tokenFromObject = tokenFromObject;
     }
 
 }

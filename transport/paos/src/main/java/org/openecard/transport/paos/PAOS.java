@@ -300,7 +300,7 @@ public class PAOS {
 		try {
 		    conn = createTlsConnection(hostname, port, ProtocolVersion.TLSv11);
 		} catch (IOException ex) {
-		    logger.error("Connecting to the PAOS endpoint with TLSv1.1 failed. Falling back to TLSv1.0.", ex);
+		    logger.error("Connecting to the PAOS endpoint with TLSv1.1 failed. Falling back to TLSv1.0.");
 		    conn = createTlsConnection(hostname, port, ProtocolVersion.TLSv10);
 		}
 
@@ -393,11 +393,13 @@ public class PAOS {
      */
     private void checkHTTPStatusCode(Object msg, int statusCode) throws PAOSException {
 	if (statusCode < 200 || statusCode > 299) {
-	    ResponseType resp = (ResponseType) msg;
-	    try {
-		WSHelper.checkResult(resp);
-	    } catch (WSException ex) {
-		throw new PAOSException("Received HTML Error Code " + statusCode, ex);
+	    if (msg instanceof ResponseType) {
+		ResponseType resp = (ResponseType) msg;
+		try {
+		    WSHelper.checkResult(resp);
+		} catch (WSException ex) {
+		    throw new PAOSException("Received HTML Error Code " + statusCode, ex);
+		}
 	    }
 	    throw new PAOSException("Received HTML Error Code " + statusCode);
 	}

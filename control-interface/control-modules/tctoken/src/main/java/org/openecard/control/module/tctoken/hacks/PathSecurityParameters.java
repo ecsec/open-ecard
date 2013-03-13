@@ -29,8 +29,14 @@ package org.openecard.control.module.tctoken.hacks;
 public class PathSecurityParameters {
 
     public static String fix(String input) {
-	if (!input.contains("PathSecurity-Parameters")) {
+	if (! input.contains("PathSecurity-Parameters")) {
 	    input = input.replace("PathSecurity-Parameter", "PathSecurity-Parameters");
+	}
+	if (input.contains("&lt;PSK&gt;")) {
+	    input = input.replace("&lt;PSK&gt;", "<PSK>");
+	}
+	if (input.contains("&lt;/PSK&gt;")) {
+	    input = input.replace("&lt;/PSK&gt;", "</PSK>");
 	}
 	return input;
     }

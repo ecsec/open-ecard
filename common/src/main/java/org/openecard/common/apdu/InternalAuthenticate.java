@@ -26,7 +26,7 @@ import org.openecard.common.apdu.common.CardCommandAPDU;
 
 
 /**
- * INTERNAL AUTHENTICATE command
+ * INTERNAL AUTHENTICATE command.
  * See ISO/IEC 7816-4 Section 7.5.2
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
@@ -55,6 +55,19 @@ public class InternalAuthenticate extends CardCommandAPDU {
     public InternalAuthenticate(byte[] data) {
 	super(x00, INTERNAL_AUTHENTICATE_INS, x00, x00);
 	setData(data);
+    }
+
+    /**
+     * Creates a new INTERNAL AUTHENTICATE command.
+     * APDU: 0x00 0x88 0x00 0x00 LC DATA
+     *
+     * @param data Data
+     * @param le expected length of the response
+     */
+    public InternalAuthenticate(byte[] data, byte le) {
+	super(x00, INTERNAL_AUTHENTICATE_INS, x00, x00);
+	setData(data);
+	setLE(le);
     }
 
 }

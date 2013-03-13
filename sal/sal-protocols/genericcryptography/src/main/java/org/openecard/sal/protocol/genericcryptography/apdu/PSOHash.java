@@ -38,7 +38,7 @@ public final class PSOHash extends PerformSecurityOperation {
      *
      * @param data Data to be hashed
      */
-    public PSOHash(byte[] data){
+    public PSOHash(byte[] data) {
 	super((byte) 0x90, (byte) 0x80);
 	setData(data);
     }

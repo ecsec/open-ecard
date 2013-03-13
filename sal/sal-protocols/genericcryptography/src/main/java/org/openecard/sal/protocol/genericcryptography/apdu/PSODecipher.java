@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,23 +26,23 @@ import org.openecard.common.apdu.PerformSecurityOperation;
 
 
 /**
- * Implements a Compute Digital Signature operation.
- * See ISO/IEC 7816-8, section 11.7.
+ * Implements a Deciper operation.
+ * See ISO/IEC 7816-8, section 11.13.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public final class PSOComputeDigitalSignature extends PerformSecurityOperation {
+public final class PSODecipher extends PerformSecurityOperation {
 
     /**
-     * Creates a new PSO Compute Cryptographic Checksum APDU.
+     * Creates a new PSO Decipher APDU.
      *
-     * @param message Message to be signed
-     * @param le expected length of the response
+     * @param message Message to be deciphered
+     * @param le expected length of response
      */
-    public PSOComputeDigitalSignature(byte[] message, byte le) {
-	super((byte) 0x9E, (byte) 0x9A);
-	setData(message);
+    public PSODecipher(byte[] message, byte le) {
+	super((byte) 0x80, (byte) 0x86);
 	setLE(le);
+	setData(message);
     }
 
 }

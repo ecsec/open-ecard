@@ -36,7 +36,7 @@ import org.openecard.common.anytype.AuthDataMap;
 public class PINCompareDIDAuthenticateInputType {
 
     private final AuthDataMap authMap;
-    private String pin = null;
+    private String pin;
 
     /**
      * Creates a new PINCompareDIDAuthenticateInputType.

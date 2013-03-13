@@ -113,9 +113,9 @@ public class VerifySignatureStep implements ProtocolStep<VerifySignature, Verify
 		signatureAlgorithm = Signature.getInstance("RAWRSASSA-PSS", new BouncyCastleProvider());
 		signatureAlgorithm.setParameter(new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 32, 1));
 	    } else if (algorithmIdentifier.equals(GenericCryptoObjectIdentifier.sigS_ISO9796_2)) {
-		return WSHelper.makeResponse(VerifySignatureResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+		return WSHelper.makeResponse(VerifySignatureResponse.class, WSHelper.makeResultUnknownError(algorithmIdentifier + " Not supported yet."));
 	    } else if (algorithmIdentifier.equals(GenericCryptoObjectIdentifier.sigS_ISO9796_2rnd)) {
-		return WSHelper.makeResponse(VerifySignatureResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+		return WSHelper.makeResponse(VerifySignatureResponse.class, WSHelper.makeResultUnknownError(algorithmIdentifier + " Not supported yet."));
 	    } else {
 		throw new IncorrectParameterException("Unknown signature algorithm.");
 	    }

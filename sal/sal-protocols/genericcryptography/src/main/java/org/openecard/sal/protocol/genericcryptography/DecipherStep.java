@@ -44,8 +44,9 @@ import org.openecard.common.sal.ProtocolStep;
 import org.openecard.common.sal.anytype.CryptoMarkerType;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.util.SALUtils;
+import org.openecard.common.tlv.TLV;
 import org.openecard.common.util.ByteUtils;
-import org.openecard.sal.protocol.genericcryptography.apdu.MSESet;
+import org.openecard.sal.protocol.genericcryptography.apdu.PSODecipher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +60,7 @@ import org.slf4j.LoggerFactory;
 public class DecipherStep implements ProtocolStep<Decipher, DecipherResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(DecipherStep.class);
+    private static final byte PADDING_INDICATOR_BYTE = (byte) 0x00;
     private final Dispatcher dispatcher;
 
     /**
@@ -99,7 +101,15 @@ public class DecipherStep implements ProtocolStep<Decipher, DecipherResponse> {
 		keyReference[0] = (byte) (0x80 | keyReference[0]);
 	    }
 
-	    CardCommandAPDU apdu = new MSESet(ManageSecurityEnvironment.CT, keyReference, algorithmIdentifier);
+	    TLV tagKeyReference = new TLV();
+	    tagKeyReference.setTagNumWithClass(0x84);
+	    tagKeyReference.setValue(keyReference);
+	    TLV tagAlgorithmIdentifier = new TLV();
+	    tagAlgorithmIdentifier.setTagNumWithClass(0x80);
+	    tagAlgorithmIdentifier.setValue(algorithmIdentifier);
+	    byte[] mseData = ByteUtils.concatenate(tagKeyReference.toBER(), tagAlgorithmIdentifier.toBER());
+
+	    CardCommandAPDU apdu = new ManageSecurityEnvironment((byte) 0x41, ManageSecurityEnvironment.CT, mseData);
 	    CardResponseAPDU responseAPDU = apdu.transmit(dispatcher, slotHandle);
 
 	    byte[] ciphertext = request.getCipherText();
@@ -117,10 +127,9 @@ public class DecipherStep implements ProtocolStep<Decipher, DecipherResponse> {
 	    // decrypt the ciphertext block for block
 	    for (int offset = 0; offset < ciphertext.length; offset += blocksize) {
 		byte[] ciphertextblock = ByteUtils.copy(ciphertext, offset, blocksize);
-//		rapdu = transmitSingleAPDU(
-//			CardCommands.PerformSecurityOperation.decipher(
-//			ByteUtils.concatenate((byte) 0x00, ciphertextblock), (short) blocksize), slotHandle);
-//		baos.write(rapdu.getData());
+		apdu = new PSODecipher(ByteUtils.concatenate(PADDING_INDICATOR_BYTE, ciphertextblock), (byte) blocksize);
+		responseAPDU = apdu.transmit(dispatcher, slotHandle);
+		baos.write(responseAPDU.getData());
 	    }
 
 	    response.setPlainText(baos.toByteArray());

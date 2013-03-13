@@ -852,7 +852,36 @@ public class TinySAL implements SAL {
      */
     @Override
     public VerifySignatureResponse verifySignature(VerifySignature request) {
-	return WSHelper.makeResponse(VerifySignatureResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	VerifySignatureResponse response = WSHelper.makeResponse(VerifySignatureResponse.class, WSHelper.makeResultOK());
+
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    byte[] applicationID = connectionHandle.getCardApplication();
+	    String didName = SALUtils.getDIDName(request);
+
+	    byte[] cipherText = request.getSignature();
+	    Assert.assertIncorrectParameter(cipherText, "The parameter Signature is empty.");
+
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
+	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	    String protocolURI = didStructure.getDIDMarker().getProtocol();
+	    Protocol protocol = getProtocol(connectionHandle, protocolURI);
+	    if (protocol.hasNextStep(FunctionType.VerifySignature)) {
+		response = protocol.verifySignature(request);
+		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
+	    } else {
+		throw new InappropriateProtocolForActionException("Decipher", protocol.toString());
+	    }
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
     /**

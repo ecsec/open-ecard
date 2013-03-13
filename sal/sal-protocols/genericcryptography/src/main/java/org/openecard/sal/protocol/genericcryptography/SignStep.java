@@ -43,6 +43,8 @@ import org.openecard.common.sal.anytype.CryptoMarkerType;
 import org.openecard.common.sal.exception.IncorrectParameterException;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.util.SALUtils;
+import org.openecard.common.tlv.TLV;
+import org.openecard.common.util.ByteUtils;
 import org.openecard.sal.protocol.genericcryptography.apdu.PSOComputeDigitalSignature;
 import org.openecard.sal.protocol.genericcryptography.apdu.PSOHash;
 import org.slf4j.Logger;
@@ -58,6 +60,10 @@ import org.slf4j.LoggerFactory;
 public class SignStep implements ProtocolStep<Sign, SignResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(SignStep.class);
+
+    //TODO extract the blocksize from somewhere
+    private static final byte BLOCKSIZE = (byte) 256;
+    private static final byte SET_COMPUTATION = (byte) 0x41;
     private final Dispatcher dispatcher;
 
     /**
@@ -89,44 +95,70 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    byte[] applicationID = connectionHandle.getCardApplication();
 	    Assert.securityConditionDID(cardStateEntry, applicationID, didName, CryptographicServiceActionName.SIGN);
 
-	    byte keyReference = cryptoMarker.getCryptoKeyInfo().getKeyRef().getKeyRef()[0];
+	    byte[] keyReference = cryptoMarker.getCryptoKeyInfo().getKeyRef().getKeyRef();
 	    byte[] algorithmIdentifier = cryptoMarker.getAlgorithmInfo().getCardAlgRef();
 
 
 	    if (didStructure.getDIDScope().equals(DIDScopeType.LOCAL)) {
-		keyReference = (byte) (0x80 | keyReference);
+		keyReference[0] = (byte) (0x80 | keyReference[0]);
 	    }
 	    byte[] message = sign.getMessage();
 	    byte[] signature = new byte[0];
 
-	    CardCommandAPDU commandAPDU = null;
+	    TLV tagAlgorithmIdentifier = new TLV();
+	    tagAlgorithmIdentifier.setTagNumWithClass(0x80);
+	    tagAlgorithmIdentifier.setValue(algorithmIdentifier);
+
+	    TLV tagKeyReference = null;
+	    CardCommandAPDU cmdAPDU = null;
 	    CardResponseAPDU responseAPDU = null;
 
 	    String[] signatureGenerationInfo = cryptoMarker.getSignatureGenerationInfo();
 	    for (int i = 0; i < signatureGenerationInfo.length; i++) {
 		String command = signatureGenerationInfo[i];
+		String nextCmd = "";
 
-		if (command.equals("MSE_KEY")) {
-		    commandAPDU = new ManageSecurityEnvironment.Set((byte) 0x41, ManageSecurityEnvironment.DST);
-		} else if (command.equals("PSO_CDS")) {
-		    commandAPDU = new PSOComputeDigitalSignature(message);
-		} else if (command.equals("INT_AUTH")) {
-		    commandAPDU = new InternalAuthenticate(message);
-		} else if (command.equals("MSE_RESTORE")) {
-		    commandAPDU = new ManageSecurityEnvironment.Restore(ManageSecurityEnvironment.DST);
-		} else if (command.equals("MSE_HASH")) {
-		    commandAPDU = new ManageSecurityEnvironment.Set((byte) 0x41, ManageSecurityEnvironment.HT);
-		} else if (command.equals("PSO_HASH")) {
-		    commandAPDU = new PSOHash(signature);
-		} else if (command.equals("MSE_DS")) {
-		    commandAPDU = new ManageSecurityEnvironment.Set((byte) 0x41, ManageSecurityEnvironment.DST);
-		} else if (command.equals("MSE_KEY_DS")) {
-		    commandAPDU = new ManageSecurityEnvironment.Set((byte) 0x41, ManageSecurityEnvironment.DST);
-		} else {
-		    throw new IncorrectParameterException("The signature generation command '" + command + "' is unknown.");
+		if (i < signatureGenerationInfo.length - 1) {
+		    nextCmd = signatureGenerationInfo[i + 1];
 		}
 
-		responseAPDU = commandAPDU.transmit(dispatcher, slotHandle);
+		if (command.equals("MSE_KEY")) {
+		    tagKeyReference = new TLV();
+		    if (nextCmd.equals("PSO_CDS")) {
+			tagKeyReference.setTagNumWithClass(0x84);
+			tagKeyReference.setValue(keyReference);
+			byte[] mseData = ByteUtils.concatenate(tagKeyReference.toBER(), tagAlgorithmIdentifier.toBER());
+			cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.DST, mseData);
+		    } else if (nextCmd.equals("INT_AUTH")) {
+			tagKeyReference.setTagNumWithClass(0x83);
+			tagKeyReference.setValue(keyReference);
+			byte[] mseData = ByteUtils.concatenate(tagKeyReference.toBER(), tagAlgorithmIdentifier.toBER());
+			cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.AT, mseData);
+		    } else {
+			String msg = "The command 'MSE_KEY' followed by '" + nextCmd + "' is currently not supported.";
+			logger.error(msg);
+			throw new IncorrectParameterException(msg);
+		    }
+		} else if (command.equals("PSO_CDS")) {
+		    cmdAPDU = new PSOComputeDigitalSignature(message, BLOCKSIZE);
+		} else if (command.equals("INT_AUTH")) {
+		    cmdAPDU = new InternalAuthenticate(message, BLOCKSIZE);
+		} else if (command.equals("MSE_RESTORE")) {
+		    cmdAPDU = new ManageSecurityEnvironment.Restore(ManageSecurityEnvironment.DST);
+		} else if (command.equals("MSE_HASH")) {
+		    cmdAPDU = new ManageSecurityEnvironment.Set(SET_COMPUTATION, ManageSecurityEnvironment.HT);
+		} else if (command.equals("PSO_HASH")) {
+		    cmdAPDU = new PSOHash(signature);
+		} else if (command.equals("MSE_DS")) {
+		    cmdAPDU = new ManageSecurityEnvironment.Set(SET_COMPUTATION, ManageSecurityEnvironment.DST);
+		} else if (command.equals("MSE_KEY_DS")) {
+		    cmdAPDU = new ManageSecurityEnvironment.Set(SET_COMPUTATION, ManageSecurityEnvironment.DST);
+		} else {
+		    String msg = "The signature generation command '" + command + "' is unknown.";
+		    throw new IncorrectParameterException(msg);
+		}
+
+		responseAPDU = cmdAPDU.transmit(dispatcher, slotHandle);
 	    }
 
 	    response.setSignature(responseAPDU.getData());

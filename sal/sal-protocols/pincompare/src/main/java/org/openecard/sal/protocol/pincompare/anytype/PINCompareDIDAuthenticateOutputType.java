@@ -38,7 +38,7 @@ import org.openecard.common.anytype.AuthDataResponse;
 public class PINCompareDIDAuthenticateOutputType {
 
     private final AuthDataMap authMap;
-    private BigInteger retryCounter = null;
+    private BigInteger retryCounter;
 
     /**
      * Creates a new PINCompareDIDAuthenticateOutputType.
@@ -82,7 +82,9 @@ public class PINCompareDIDAuthenticateOutputType {
      * @return the PinCompareDIDAuthenticateOutputType
      */
     public DIDAuthenticationDataType getAuthDataType() {
-	AuthDataResponse authResponse = authMap.createResponse(new iso.std.iso_iec._24727.tech.schema.PinCompareDIDAuthenticateOutputType());
+	iso.std.iso_iec._24727.tech.schema.PinCompareDIDAuthenticateOutputType pinCompareOutput;
+	pinCompareOutput = new iso.std.iso_iec._24727.tech.schema.PinCompareDIDAuthenticateOutputType();
+	AuthDataResponse authResponse = authMap.createResponse(pinCompareOutput);
 	if (retryCounter != null) {
 	    authResponse.addElement("RetryCounter", retryCounter.toString());
 	}

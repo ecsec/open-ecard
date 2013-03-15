@@ -321,7 +321,7 @@ public class PAOS {
 		    // prepare request
 		    BasicHttpEntityEnclosingRequest req = new BasicHttpEntityEnclosingRequest("POST", resource);
 		    req.setParams(conn.getParams());
-		    HttpRequestHelper.setDefaultHeader(req, hostname);
+		    HttpRequestHelper.setDefaultHeader(req, endpoint);
 		    req.setHeader(ECardConstants.HEADER_KEY_PAOS, ECardConstants.HEADER_VALUE_PAOS);
 		    req.setHeader("Accept", "application/vnd.paos+xml");
 		    ContentType reqContentType = ContentType.create("application/vnd.paos+xml", "UTF-8");

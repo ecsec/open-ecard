@@ -120,7 +120,7 @@ public class TCTokenGrabber {
 
 	    BasicHttpEntityEnclosingRequest req = new BasicHttpEntityEnclosingRequest("GET", resource);
 	    req.setParams(conn.getParams());
-	    HttpRequestHelper.setDefaultHeader(req, hostname);
+	    HttpRequestHelper.setDefaultHeader(req, url);
 	    req.setHeader("Accept", "text/xml, */*;q=0.8");
 	    req.setHeader("Accept-Charset", "utf-8, *;q=0.8");
 	    HttpResponse response = httpexecutor.execute(req, conn, ctx);

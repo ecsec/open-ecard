@@ -28,7 +28,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.RadioButton;
 import java.util.List;
 import org.openecard.gui.definition.AbstractBox;
@@ -45,10 +44,11 @@ import org.openecard.gui.definition.Radiobox;
  */
 public class BoxItemAdapter extends BaseAdapter {
 
-    private Context context;
-    private String id;
-    private List<BoxItem> boxItems;
-    private boolean useCheckboxes;
+    private final Context context;
+    private final String id;
+    private final List<BoxItem> boxItems;
+    private final boolean useCheckboxes;
+    private final CompoundButton[] itemViews;
 
     /**
      *
@@ -61,6 +61,7 @@ public class BoxItemAdapter extends BaseAdapter {
 	this.context = context;
 	this.id = abstractBox.getID();
 	this.boxItems =  abstractBox.getBoxItems();
+	itemViews = new CompoundButton[boxItems.size()];
     }
 
     @Override
@@ -82,22 +83,20 @@ public class BoxItemAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-	CompoundButton b = null;
+	CompoundButton b;
 	if (useCheckboxes) {
 	    b = new CheckBox(context);
-	    //b.setButtonDrawable(android.R.drawable.btn_radio);
+	    b.setOnCheckedChangeListener(new CheckboxChangeListener(boxItems.get(position)));
 	} else {
 	    b = new RadioButton(context);
-
+	    b.setOnCheckedChangeListener(new RadioboxChangeListener(this, position));
 	}
-	b.setText(boxItems.get(position).getText() != null ? boxItems.get(position).getText() : boxItems.get(position).getName());
+	String text = boxItems.get(position).getText();
+	String name = boxItems.get(position).getName();
+	b.setText(text != null ? text : name);
 	b.setChecked(boxItems.get(position).isChecked());
 	b.setEnabled(!boxItems.get(position).isDisabled());
-	b.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-	    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-		boxItems.get(position).setChecked(isChecked);
-	    }
-	});
+	itemViews[position] = b;
 	return b;
     }
 
@@ -105,6 +104,14 @@ public class BoxItemAdapter extends BaseAdapter {
 	AbstractBox result = useCheckboxes ? new Checkbox(id) :  new Radiobox(id);
 	result.getBoxItems().addAll(boxItems);
 	return result;
+    }
+
+    public List<BoxItem> getBoxItems() {
+	return boxItems;
+    }
+
+    public CompoundButton[] getItems() {
+	return itemViews;
     }
 
 }

@@ -38,6 +38,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationType;
 import iso.std.iso_iec._24727.tech.schema.CardCall;
 import iso.std.iso_iec._24727.tech.schema.CardInfo;
 import iso.std.iso_iec._24727.tech.schema.CardTypeType;
+import iso.std.iso_iec._24727.tech.schema.CardTypeType.Version;
 import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.Conclusion;
 import iso.std.iso_iec._24727.tech.schema.Connect;
@@ -46,6 +47,7 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.CryptoMarkerType;
 import iso.std.iso_iec._24727.tech.schema.CryptographicServiceActionName;
+import iso.std.iso_iec._24727.tech.schema.DIDAbstractMarkerType;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
@@ -78,12 +80,14 @@ import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
 import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
 import iso.std.iso_iec._24727.tech.schema.MatchingDataType;
+import iso.std.iso_iec._24727.tech.schema.MutualAuthMarkerType;
 import iso.std.iso_iec._24727.tech.schema.NamedDataServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.PACEMarkerType;
 import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
 import iso.std.iso_iec._24727.tech.schema.PathType;
 import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
 import iso.std.iso_iec._24727.tech.schema.RIMarkerType;
+import iso.std.iso_iec._24727.tech.schema.RSAAuthMarkerType;
 import iso.std.iso_iec._24727.tech.schema.RecognitionTree;
 import iso.std.iso_iec._24727.tech.schema.ResponseAPDUType;
 import iso.std.iso_iec._24727.tech.schema.SecurityConditionType;
@@ -108,6 +112,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -119,6 +126,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.openecard.bouncycastle.crypto.RuntimeCryptoException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
 import org.openecard.ws.marshal.MarshallingTypeException;
@@ -140,10 +148,11 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+
 /**
  * This class is a provisional and simple replacement for the JAXB-Marshaller
  * used in the applet and the rich client since JAXB is not available on
- * Android.</br>
+ * Android.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
@@ -152,7 +161,6 @@ public class AndroidMarshaller implements WSMarshaller {
     private static final Logger _logger = LoggerFactory.getLogger(AndroidMarshaller.class);
 
     private static final String iso = "iso:";
-    private static final String tls = "tls:";
     private static final String dss = "dss:";
     private static final String ecapi = "ecapi:"; // xmlns:ecapi="http://www.bsi.bund.de/ecard/api/1.1"
 
@@ -811,7 +819,7 @@ public class AndroidMarshaller implements WSMarshaller {
 	return c;
     }
 
-    private synchronized Object parse(XmlPullParser parser) throws XmlPullParserException, IOException, ParserConfigurationException {
+    private synchronized Object parse(XmlPullParser parser) throws XmlPullParserException, IOException, ParserConfigurationException, DatatypeConfigurationException {
 	if (parser.getName().equals("DestroyChannelResponse")) {
 	    DestroyChannelResponse destroyChannelResponse = new DestroyChannelResponse();
 	    int eventType;
@@ -1072,6 +1080,7 @@ public class AndroidMarshaller implements WSMarshaller {
 	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("TransmitResponse")));
 	    return transmitResponse;
 	} else if (parser.getName().equals("CardInfo")) {
+	    // TODO CardIdentification and CardCapabilities are ignored
 	    CardInfo cardInfo = new CardInfo();
 	    ApplicationCapabilitiesType applicationCapabilities = new ApplicationCapabilitiesType();
 	    int eventType;
@@ -1089,10 +1098,20 @@ public class AndroidMarshaller implements WSMarshaller {
 			applicationCapabilities.getCardApplication().add(this.parseCardApplication(parser));
 		    } else if (parser.getName().equals("CardTypeName")) {
 			InternationalStringType internationalString = new InternationalStringType();
-			internationalString.setLang(parser
-				.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+			String lang = parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang");
+			internationalString.setLang(lang);
 			internationalString.setValue(parser.nextText());
 			cardInfo.getCardType().getCardTypeName().add(internationalString);
+		    } else if (parser.getName().equals("SpecificationBodyOrIssuer")) {
+			cardInfo.getCardType().setSpecificationBodyOrIssuer(parser.nextText());
+		    } else if (parser.getName().equals("Status")) {
+			cardInfo.getCardType().setStatus(parser.nextText());
+		    } else if (parser.getName().equals("Date")) {
+			String text = parser.nextText();
+			XMLGregorianCalendar date = DatatypeFactory.newInstance().newXMLGregorianCalendar(text);
+			cardInfo.getCardType().setDate(date);
+		    } else if (parser.getName().equals("Version")) {
+			cardInfo.getCardType().setVersion(this.parseVersion(parser));
 		    }
 		}
 	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("CardInfo")));
@@ -1101,6 +1120,25 @@ public class AndroidMarshaller implements WSMarshaller {
 	} else {
 	    return null;
 	}
+    }
+
+    private Version parseVersion(XmlPullParser parser) throws XmlPullParserException, IOException {
+	Version version = new Version();
+	int eventType;
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("Major")) {
+		    version.setMajor(parser.nextText());
+		} else if (parser.getName().equals("Minor")) {
+		    version.setMinor(parser.nextText());
+		} else if (parser.getName().equals("SubMinor")) {
+		    version.setSubMinor(parser.nextText());
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("Version")));
+	return version;
     }
 
     private CardApplicationType parseCardApplication(XmlPullParser parser) throws XmlPullParserException, IOException {
@@ -1122,6 +1160,8 @@ public class AndroidMarshaller implements WSMarshaller {
 		    cardApplication.getDIDInfo().add(this.parseDIDInfo(parser));
 		} else if (parser.getName().equals("DataSetInfo")) {
 		    cardApplication.getDataSetInfo().add(this.parseDataSetInfo(parser));
+		} else if (parser.getName().equals("InterfaceProtocol")) {
+		    cardApplication.getInterfaceProtocol().add(parser.nextText());
 		}
 	    }
 	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("CardApplication")));
@@ -1230,17 +1270,21 @@ public class AndroidMarshaller implements WSMarshaller {
 	    eventType = parser.getEventType();
 	    if (eventType == XmlPullParser.START_TAG) {
 		if (parser.getName().equals("PACEMarker")) {
-		    didMarker.setPACEMarker(this.parsePACEMarker(parser));
+		    didMarker.setPACEMarker((PACEMarkerType) this.parseMarker(parser, PACEMarkerType.class));
 		} else if (parser.getName().equals("TAMarker")) {
-		    didMarker.setTAMarker(this.parseTAMarker(parser));
+		    didMarker.setTAMarker((TAMarkerType) this.parseMarker(parser, TAMarkerType.class));
 		} else if (parser.getName().equals("CAMarker")) {
-		    didMarker.setCAMarker(this.parseCAMarker(parser));
+		    didMarker.setCAMarker((CAMarkerType) this.parseMarker(parser, CAMarkerType.class));
 		} else if (parser.getName().equals("RIMarker")) {
-		    didMarker.setRIMarker(this.parseRIMarker(parser));
+		    didMarker.setRIMarker((RIMarkerType) this.parseMarker(parser, RIMarkerType.class));
 		} else if (parser.getName().equals("CryptoMarker")) {
-		    didMarker.setCryptoMarker(this.parseCryptoMarker(parser));
+		    didMarker.setCryptoMarker((CryptoMarkerType) this.parseMarker(parser, CryptoMarkerType.class));
 		} else if (parser.getName().equals("PinCompareMarker")) {
-		    didMarker.setPinCompareMarker(this.parsePINCompareMarker(parser));
+		    didMarker.setPinCompareMarker((PinCompareMarkerType) this.parseMarker(parser, PinCompareMarkerType.class));
+		} else if (parser.getName().equals("RSAAuthMarker")) {
+		    didMarker.setRSAAuthMarker((RSAAuthMarkerType) this.parseMarker(parser, RSAAuthMarkerType.class));
+		} else if (parser.getName().equals("MutualAuthMarker")) {
+		    didMarker.setMutualAuthMarker((MutualAuthMarkerType) this.parseMarker(parser, MutualAuthMarkerType.class));
 		} else {
 		    throw new IOException(parser.getName() + " not yet implemented");
 		}
@@ -1249,24 +1293,27 @@ public class AndroidMarshaller implements WSMarshaller {
 	return didMarker;
     }
 
-    private PinCompareMarkerType parsePINCompareMarker(XmlPullParser parser) throws XmlPullParserException, IOException {
-	PinCompareMarkerType pinCompareMarker = new PinCompareMarkerType();
-	pinCompareMarker.setProtocol(parser.getAttributeValue(null, "Protocol"));
-	Document d = documentBuilder.newDocument();
-	pinCompareMarker.getAny().addAll(parseAnyTypes(parser, "PinCompareMarker", parser.getNamespace(), d, false));
-	return pinCompareMarker;
-    }
-
-    private Collection<? extends Element> parseAnyTypes(XmlPullParser parser, String name, String ns, Document d, Boolean firstCall)
+    private Collection<? extends Element> parseAnyTypes(XmlPullParser parser, String name, String ns, Document d, Boolean firstCall, String[] attribNames, String[] attribValues)
 	    throws XmlPullParserException, IOException {
 	int eventType;
 	List<Element> elements = new ArrayList<Element>();
 	boolean terminalNode = false;
 	do {
+	    String[] attributeNames = new String[0];
+	    String[] attributeValues = new String[0];
 	    parser.next();
 	    eventType = parser.getEventType();
 	    if (eventType == XmlPullParser.START_TAG) {
-		elements.addAll(parseAnyTypes(parser, parser.getName(), parser.getNamespace(), d, true));
+		int attributeCount = parser.getAttributeCount();
+		if (attributeCount > 0) {
+		    attributeNames = new String[attributeCount];
+		    attributeValues = new String[attributeCount];
+		    for (int i = 0; i < attributeCount; i++) {
+			attributeNames[i] = parser.getAttributeName(i);
+			attributeValues[i] = parser.getAttributeValue(i);
+		    }
+		}
+		elements.addAll(parseAnyTypes(parser, parser.getName(), parser.getNamespace(), d, true, attributeNames, attributeValues));
 	    } else if (eventType == XmlPullParser.TEXT) {
 		if (parser.getText().trim().length() > 0) {
 		    Element em = d.createElementNS(ns, name);
@@ -1282,50 +1329,29 @@ public class AndroidMarshaller implements WSMarshaller {
 		test.appendChild(e);
 	    }
 	    List<Element> elements2 = new ArrayList<Element>();
+
+	    for (int i = 0; i < attribNames.length; i++) {
+		test.setAttribute(attribNames[i], attribValues[i]);
+	    }
 	    elements2.add(test);
 	    return elements2;
 	}
 	return elements;
     }
 
-    private CryptoMarkerType parseCryptoMarker(XmlPullParser parser) throws XmlPullParserException, IOException {
-	CryptoMarkerType cryptoMarker = new CryptoMarkerType();
-	cryptoMarker.setProtocol(parser.getAttributeValue(null, "Protocol"));
-	Document d = documentBuilder.newDocument();
-	cryptoMarker.getAny().addAll(parseAnyTypes(parser, "CryptoMarker", parser.getNamespace(), d, false));
-	return cryptoMarker;
-    }
-
-    private RIMarkerType parseRIMarker(XmlPullParser parser) throws XmlPullParserException, IOException {
-	RIMarkerType riMarker = new RIMarkerType();
-	riMarker.setProtocol(parser.getAttributeValue(null, "Protocol"));
-	Document d = documentBuilder.newDocument();
-	riMarker.getAny().addAll(parseAnyTypes(parser, "RIMarker", parser.getNamespace(), d, false));
-	return riMarker;
-    }
-
-    private CAMarkerType parseCAMarker(XmlPullParser parser) throws XmlPullParserException, IOException {
-	CAMarkerType caMarker = new CAMarkerType();
-	caMarker.setProtocol(parser.getAttributeValue(null, "Protocol"));
-	Document d = documentBuilder.newDocument();
-	caMarker.getAny().addAll(parseAnyTypes(parser, "CAMarker", parser.getNamespace(), d, false));
-	return caMarker;
-    }
-
-    private TAMarkerType parseTAMarker(XmlPullParser parser) throws XmlPullParserException, IOException {
-	TAMarkerType taMarker = new TAMarkerType();
-	taMarker.setProtocol(parser.getAttributeValue(null, "Protocol"));
-	Document d = documentBuilder.newDocument();
-	taMarker.getAny().addAll(parseAnyTypes(parser, "TAMarker", parser.getNamespace(), d, false));
-	return taMarker;
-    }
-
-    private PACEMarkerType parsePACEMarker(XmlPullParser parser) throws XmlPullParserException, IOException {
-	PACEMarkerType paceMarker = new PACEMarkerType();
-	paceMarker.setProtocol(parser.getAttributeValue(null, "Protocol"));
-	Document d = documentBuilder.newDocument();
-	paceMarker.getAny().addAll(parseAnyTypes(parser, "PACEMarker", parser.getNamespace(), d, false));
-	return paceMarker;
+    private DIDAbstractMarkerType parseMarker(XmlPullParser parser, Class<? extends DIDAbstractMarkerType> cls) throws XmlPullParserException, IOException {
+	try {
+	    DIDAbstractMarkerType paceMarker = cls.newInstance();
+	    paceMarker.setProtocol(parser.getAttributeValue(null, "Protocol"));
+	    Document d = documentBuilder.newDocument();
+	    String name = cls.getSimpleName().replace("Type", "");
+	    paceMarker.getAny().addAll(parseAnyTypes(parser, name, parser.getNamespace(), d, false, new String[0], new String[0]));
+	    return paceMarker;
+	} catch (InstantiationException e) {
+	    throw new RuntimeCryptoException();
+	} catch (IllegalAccessException e) {
+	    throw new RuntimeCryptoException();
+	}
     }
 
     private AccessControlListType parseACL(XmlPullParser parser, String endTag) throws XmlPullParserException, IOException {
@@ -1534,11 +1560,9 @@ public class AndroidMarshaller implements WSMarshaller {
 		    r.setResultMinor(parser.nextText());
 		} else if (parser.getName().equals("ResultMessage")) {
 		    InternationalStringType internationalStringType = new InternationalStringType();
-
-		    internationalStringType.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
-
+		    String lang = parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang");
+		    internationalStringType.setLang(lang);
 		    internationalStringType.setValue(parser.nextText());
-
 		    r.setResultMessage(internationalStringType);
 		}
 	    }

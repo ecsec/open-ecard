@@ -38,8 +38,10 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
+import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
 import iso.std.iso_iec._24727.tech.schema.DataSetInfoType;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
+import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityType;
 import iso.std.iso_iec._24727.tech.schema.Disconnect;
 import iso.std.iso_iec._24727.tech.schema.DisconnectResponse;
 import iso.std.iso_iec._24727.tech.schema.EAC1InputType;
@@ -84,7 +86,9 @@ import org.openecard.ws.soap.SOAPMessage;
 import org.testng.annotations.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 
 /**
@@ -175,8 +179,8 @@ public class AndroidMarshallerTest {
 	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().get(1).getDataSetInfo().get(0).getRequirementLevel(), BasicRequirementsType.PERSONALIZATION_MANDATORY);
 	assertEquals(cardInfo.getApplicationCapabilities().getCardApplication().get(1).getDataSetInfo().get(0).getDataSetACL().getAccessRule().get(0).getCardApplicationServiceName(), "NamedDataService");
 
-	for(DataSetInfoType dataSetInfo : cardInfo.getApplicationCapabilities().getCardApplication().get(2).getDataSetInfo()) {
-	    if(dataSetInfo.getDataSetName().equals("EF.C.ZDA.QES")){
+	for (DataSetInfoType dataSetInfo : cardInfo.getApplicationCapabilities().getCardApplication().get(2).getDataSetInfo()) {
+	    if (dataSetInfo.getDataSetName().equals("EF.C.ZDA.QES")) {
 		assertEquals(dataSetInfo.getLocalDataSetName().get(0).getLang(), "DE");
 		assertEquals(dataSetInfo.getLocalDataSetName().get(0).getValue(), "Zertifikat des ZDA für die QES");
 	    }
@@ -188,14 +192,26 @@ public class AndroidMarshallerTest {
 	    throw new Exception("Object should be an instace of CardInfo");
 	}
 	cardInfo = (CardInfo) o;
+
 	assertEquals("http://ws.gematik.de/egk/1.0.0", cardInfo.getCardType().getObjectIdentifier());
-	CardApplicationType cardApplicationESIGN = cardInfo.getApplicationCapabilities().getCardApplication().get(1);
-	assertEquals(cardApplicationESIGN.getDIDInfo().get(0).getDifferentialIdentity().getDIDName(), "PrK.CH.AUT_signPKCS1_V1_5");
-	assertEquals(cardApplicationESIGN.getDIDInfo().get(0).getDifferentialIdentity().getDIDProtocol(), "urn:oid:1.3.162.15480.3.0.25");
-	CryptoMarkerType cryptoMarkerType = new CryptoMarkerType(cardApplicationESIGN.getDIDInfo().get(0).getDifferentialIdentity().getDIDMarker().getCryptoMarker());
+	CardApplicationType cardApplicationESIGN = cardInfo.getApplicationCapabilities().getCardApplication().get(2);
+	DIDInfoType didInfo = cardApplicationESIGN.getDIDInfo().get(2);
+	DifferentialIdentityType differentialIdentity = didInfo.getDifferentialIdentity();
+	assertEquals(differentialIdentity.getDIDName(), "PrK.CH.AUT_signPKCS1_V1_5");
+	assertEquals(differentialIdentity.getDIDProtocol(), "urn:oid:1.3.162.15480.3.0.25");
+	CryptoMarkerType cryptoMarkerType = new CryptoMarkerType(differentialIdentity.getDIDMarker().getCryptoMarker());
 	assertEquals(cryptoMarkerType.getProtocol(), "urn:oid:1.3.162.15480.3.0.25");
 	assertEquals(cryptoMarkerType.getAlgorithmInfo().getSupportedOperations().get(0), "Compute-signature");
 
+	// uncomment to get output files to make a diff
+	/*WSMarshaller jaxbMarshaller = new JAXBMarshaller();
+	CardInfo cardInfoJM = (CardInfo) jaxbMarshaller.unmarshal(jaxbMarshaller.str2doc(egkCif));
+	File f = new File("cifJM.xml");
+	FileOutputStream fos = new FileOutputStream(f);
+	File f2 = new File("cifAM.xml");
+	FileOutputStream fos2 = new FileOutputStream(f2);
+	JAXB.marshal(cardInfoJM, fos);
+	JAXB.marshal(cardInfo, fos2);*/
     }
 
     @Test

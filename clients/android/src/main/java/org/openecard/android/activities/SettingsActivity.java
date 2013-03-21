@@ -63,10 +63,13 @@ public class SettingsActivity extends Activity {
      * Fills the lists containing the name of the settings and the intents.
      */
     private void fillLists() {
-	settings.add("Plugins");
-	intents.add(new Intent(SettingsActivity.this, PluginsActivity.class));
+	SettingsActivity context = SettingsActivity.this;
+	settings.add(lang.translationForKey("android.settings.plugins"));
+	intents.add(new Intent(context, PluginsActivity.class));
 	settings.add(lang.translationForKey("android.settings.comm_interface"));
-	intents.add(new Intent(SettingsActivity.this, TerminalFactoryActivity.class));
+	intents.add(new Intent(context, TerminalFactoryActivity.class));
+	settings.add(lang.translationForKey("android.settings.logging"));
+	intents.add(new Intent(context, LoggingActivity.class));
     }
 
     /**

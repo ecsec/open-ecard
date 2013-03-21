@@ -28,6 +28,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcManager;
 import android.preference.PreferenceManager;
@@ -37,6 +38,7 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
+import java.io.File;
 import org.openecard.android.activities.MainActivity;
 import org.openecard.android.activities.NFCErrorActivity;
 import org.openecard.android.activities.TerminalFactoryActivity;
@@ -87,9 +89,11 @@ import org.slf4j.LoggerFactory;
  */
 public class ApplicationContext extends Application implements EventCallback {
 
-    private static final int NOTIFICATION_ID = 22;
     private static final Logger logger = LoggerFactory.getLogger(ApplicationContext.class);
     private final I18n lang = I18n.getTranslation("android");
+
+    private static final String SDCARD_OPENECARD = "/sdcard/.openecard/";
+    private static final int NOTIFICATION_ID = 22;
 
     private ClientEnv env;
     private TinySAL sal;
@@ -194,6 +198,12 @@ public class ApplicationContext extends Application implements EventCallback {
 	}
 	// destroy the remaining components
 	env = null;
+
+	Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+	File f = new File(SDCARD_OPENECARD);
+	Uri uri = Uri.fromFile(f);
+	intent.setData(uri);
+	sendBroadcast(intent);
     }
 
     /**
@@ -205,6 +215,9 @@ public class ApplicationContext extends Application implements EventCallback {
 	}
 
 	notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE); 
+
+	// load logging config
+	AndroidUtils.initLogging(this);
 
 	// read factory out of preferences
 	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);

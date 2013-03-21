@@ -21,11 +21,11 @@ The following software projects are included/used(*) in this software distributi
  - JSON in Java (http://www.json.org/java/index.html
  - libusbx (http://libusbx.org/)
  - Logback (http://logback.qos.ch/)
+ - Logback-Android (https://github.com/tony19/logback-android)
  - OpenJDK (http://openjdk.java.net)
  - PCSC-Lite (http://pcsclite.alioth.debian.org/pcsclite.html)
  - SLF4J (http://www.slf4j.org)
  - Seek for Android (https://code.google.com/p/seek-for-android)
  - TestNG testing framework (http://testng.org)
-
 
 (*) Only direct dependencies are named

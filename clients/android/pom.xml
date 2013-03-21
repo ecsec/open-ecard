@@ -106,16 +106,14 @@
 	    <artifactId>android</artifactId>
 	    <scope>provided</scope>
 	</dependency>
-	<!-- Mark slf4j-api as private as it is already part of the slf4j-android lib.
-	     When not provided the build fails because of dup class -->
 	<dependency>
 	    <groupId>org.slf4j</groupId>
 	    <artifactId>slf4j-api</artifactId>
-	    <scope>provided</scope>
 	</dependency>
 	<dependency>
-	    <groupId>org.slf4j</groupId>
-	    <artifactId>slf4j-android</artifactId>
+	    <groupId>com.github.tony19</groupId>
+	    <artifactId>logback-android-classic</artifactId>
+	    <version>1.0.7-1</version>
 	</dependency>
 	<dependency>
 	    <groupId>org.openecard.gui</groupId>

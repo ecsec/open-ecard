@@ -92,6 +92,9 @@
         <activity
             android:name="org.openecard.gui.android.StepActivity"
             android:configChanges="orientation|keyboardHidden" />
+        <activity
+            android:name=".activities.LoggingActivity"
+            android:configChanges="orientation|keyboardHidden" />
 
         <service android:name=".TCTokenService" >
             <intent-filter>

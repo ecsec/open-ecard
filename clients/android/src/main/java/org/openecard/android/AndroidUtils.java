@@ -47,6 +47,7 @@ public class AndroidUtils {
 
     public static final String LOGGINGTYPE = "LOGGINGTYPE";
     public static final int NO_LOG = LoggingTypes.NONE.ordinal();
+    public static final String EXIT = "EXIT";
 
     /**
      * Initializes the logging according to the type currently stored in the preferences. 

@@ -39,6 +39,7 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
 import java.io.File;
+import org.openecard.android.activities.DeviceOpenActivity;
 import org.openecard.android.activities.MainActivity;
 import org.openecard.android.activities.NFCErrorActivity;
 import org.openecard.android.activities.TerminalFactoryActivity;
@@ -204,6 +205,12 @@ public class ApplicationContext extends Application implements EventCallback {
 	Uri uri = Uri.fromFile(f);
 	intent.setData(uri);
 	sendBroadcast(intent);
+
+	// let the DeviceOpenActivity be the only Activity on the ActivityStack on the next start
+	Intent i = new Intent(this, DeviceOpenActivity.class);
+	i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+	i.putExtra(AndroidUtils.EXIT, true);
+	startActivity(i);
     }
 
     /**

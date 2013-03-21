@@ -38,6 +38,7 @@ import android.util.Xml;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import org.openecard.android.AndroidUtils;
 import org.openecard.android.ApplicationContext;
 import org.openecard.android.R;
 import org.slf4j.Logger;
@@ -77,6 +78,10 @@ public class DeviceOpenActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 	intent = getIntent();
+	// finish, we've been only started to lay on top of the activity stack for the next start
+	if (intent.getBooleanExtra(AndroidUtils.EXIT, false)) {
+	    finish();
+	}
 	fdSocket = getFilesDir().getAbsolutePath() + "/socket";
 	pathSocket = getFilesDir().getAbsolutePath() + "/socket2";
 	if (t == null) {

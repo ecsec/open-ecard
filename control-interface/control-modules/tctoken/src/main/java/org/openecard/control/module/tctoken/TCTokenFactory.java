@@ -26,6 +26,8 @@ import generated.TCTokenType;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.common.util.Pair;
 import org.openecard.control.module.tctoken.hacks.ObjectTag;
 import org.openecard.control.module.tctoken.hacks.PathSecurityParameters;
 
@@ -37,10 +39,10 @@ import org.openecard.control.module.tctoken.hacks.PathSecurityParameters;
  */
 public class TCTokenFactory {
 
-    public static TCTokenType generateTCToken(URL tcTokenURL) throws TCTokenException, IOException {
+    public static Pair<TCTokenType, Certificate> generateTCToken(URL tcTokenURL) throws TCTokenException, IOException {
 	// Get TCToken from the given url
-	String data = TCTokenGrabber.getResource(tcTokenURL);
-	return generateTCToken(data);
+	Pair<String, Certificate> data = TCTokenGrabber.getResource(tcTokenURL);
+	return new Pair<TCTokenType, Certificate>(generateTCToken(data.p1), data.p2);
     }
 
     public static TCTokenType generateTCToken(String data) throws TCTokenException {

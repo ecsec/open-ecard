@@ -40,10 +40,13 @@ import org.openecard.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openecard.apache.http.protocol.BasicHttpContext;
 import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.apache.http.protocol.HttpRequestExecutor;
+import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.crypto.tls.TlsProtocolHandler;
 import org.openecard.common.io.LimitedInputStream;
 import org.openecard.common.io.ProxySettings;
+import org.openecard.common.util.FileUtils;
+import org.openecard.common.util.Pair;
 import org.openecard.control.ControlException;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
@@ -68,12 +71,13 @@ public class TCTokenGrabber {
      * Opens a stream to the given URL.
      *
      * @param url URL pointing to the TCToken.
-     * @return Resource as a stream.
+     * @return Resource as a stream and the certificate of the TCToken service.
      * @throws TCTokenException
      */
-    public static InputStream getStream(URL url) throws TCTokenException, MalformedURLException,
+    public static Pair<InputStream, Certificate> getStream(URL url) throws TCTokenException, MalformedURLException,
 	    KeyStoreException, IOException, GeneralSecurityException, HttpException, URISyntaxException {
 	HttpEntity entity = null;
+	Certificate cert = null;
 	boolean finished = false;
 
 	while (! finished) {
@@ -105,6 +109,7 @@ public class TCTokenGrabber {
 		Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
 		h = new TlsProtocolHandler(socket.getInputStream(), socket.getOutputStream());
 		h.connect(tlsClient);
+		cert = tlsAuth.getCertificateChain();
 	    } catch (IOException e) {
 		logger.error("Connecting to the TCToken-URL with TLSv1.1 failed. Falling back to TLSv1.0.");
 		tlsClient.setClientVersion(ProtocolVersion.TLSv10);
@@ -152,34 +157,24 @@ public class TCTokenGrabber {
 	}
 
 	LimitedInputStream is = new LimitedInputStream(entity.getContent());
-	return is;
+	return new Pair<InputStream, Certificate>(is, cert);
     }
 
     /**
      * Fetch the data from the URL.
      *
      * @param url URL of the resource.
-     * @return Resource fetched from the URL.
+     * @return Resource fetched from the URL and the certificate of the TCToken service.
      * @throws TCTokenException Thrown in case there was a problem reading the data from the given location.
      */
-    public static String getResource(@Nonnull URL url) throws IOException {
+    public static Pair<String, Certificate> getResource(@Nonnull URL url) throws IOException {
 	LimitedInputStream is = null;
 
 	try {
-	    InputStream data = TCTokenGrabber.getStream(url);
-	    is = new LimitedInputStream(data);
-	    StringBuilder sb = new StringBuilder(2048);
-	    byte[] buf = new byte[1024];
-
-	    while (true) {
-		int num = is.read(buf);
-		if (num == -1) {
-		    break;
-		}
-		sb.append(new String(buf, 0, num));
-	    }
-
-	    return sb.toString();
+	    Pair<InputStream, Certificate> data = TCTokenGrabber.getStream(url);
+	    is = new LimitedInputStream(data.p1);
+	    String stringData = FileUtils.toString(is);
+	    return new Pair<String, Certificate>(stringData, data.p2);
 	} catch (IOException ex) {
 	    throw ex;
 	} catch (Exception e) {

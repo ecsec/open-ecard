@@ -44,6 +44,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
@@ -52,6 +53,7 @@ import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.HttpRequestLineUtils;
+import org.openecard.common.util.Pair;
 import org.openecard.control.module.tctoken.gui.InsertCardDialog;
 import org.openecard.gui.UserConsent;
 import org.openecard.recognition.CardRecognition;
@@ -143,8 +145,9 @@ public class GenericTCTokenHandler {
 	    if (k.equals("tcTokenURL")) {
 		if (v != null && ! v.isEmpty()) {
 		    try {
-			TCTokenType token = TCTokenFactory.generateTCToken(new URL(v));
-			tcTokenRequest.setTCToken(token);
+			Pair<TCTokenType, Certificate> token = TCTokenFactory.generateTCToken(new URL(v));
+			tcTokenRequest.setTCToken(token.p1);
+			tcTokenRequest.setCertificate(token.p2);
 		    } catch (MalformedURLException ex) {
 			String msg = "The tcTokenURL parameter contains an invalid URL: " + v;
 			throw new TCTokenException(msg, ex);
@@ -199,6 +202,8 @@ public class GenericTCTokenHandler {
 	    if ("activationObject".equals(k)) {
 		TCTokenType token = TCTokenFactory.generateTCToken(v);
 		tcTokenRequest.setTCToken(token);
+	    } else if ("serverCertificate".equals(k)) {
+		// TODO: convert base64 and url encoded certificate to Certificate object
 	    }
 	}
 

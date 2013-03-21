@@ -27,6 +27,8 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Iterator;
 import java.util.Map;
+import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.common.util.Pair;
 import org.openecard.control.ControlException;
 import org.openecard.control.module.tctoken.GenericTCTokenHandler;
 import org.openecard.control.module.tctoken.TCTokenFactory;
@@ -99,8 +101,9 @@ public class JavaScriptTCTokenHandler extends JavaScriptControlHandler {
 		if ("tcTokenURL".equals(e.getKey())) {
 		    // TCTokenURL
 		    String value = e.getValue().toString();
-		    TCTokenType token = TCTokenFactory.generateTCToken(new URL(value));
-		    tcTokenRequest.setTCToken(token);
+		    Pair<TCTokenType, Certificate> token = TCTokenFactory.generateTCToken(new URL(value));
+		    tcTokenRequest.setTCToken(token.p1);
+		    tcTokenRequest.setCertificate(token.p2);
 		} else if ("contextHandle".equals(e.getKey())) {
 		    // ContextHandle
 		    tcTokenRequest.setContextHandle(e.getValue().toString());

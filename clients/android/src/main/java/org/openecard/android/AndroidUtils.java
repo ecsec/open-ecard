@@ -22,8 +22,13 @@
 
 package org.openecard.android;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
@@ -31,6 +36,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import org.openecard.android.activities.LoggingTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +51,7 @@ public class AndroidUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(AndroidUtils.class);
 
+    private static final String BROWSER_ACTIVITY_NAME = "BrowserActivity";
     public static final String LOGGINGTYPE = "LOGGINGTYPE";
     public static final int NO_LOG = LoggingTypes.NONE.ordinal();
     public static final String EXIT = "EXIT";
@@ -87,6 +94,37 @@ public class AndroidUtils {
 	    logger.error("Loading of logging config failed.", e);
 	}
 	StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
+    }
+
+    /**
+     * Send the Intent for displaying an Uri especially to the default browser. This prevents the 'browser choosing
+     * dialog' from popping up on system with more than one browser installed. We need this because if we close the App
+     * immediately after sending this intent, the choosing dialog will be closed too and the user won't see any site.
+     * 
+     * @param browserIntent The initial intent for displaying the Uri
+     * @param ctx Context of the App
+     */
+    public static void loadUriInDefaultBrowser(Intent browserIntent, Context ctx) {
+	Uri uri = browserIntent.getData();
+	PackageManager packageManager = ctx.getPackageManager();
+	List<ResolveInfo> list = packageManager.queryIntentActivities(browserIntent, 0);
+	logger.debug("Number of possibly matching activities: {}", list.size());
+	for (ResolveInfo resolveInfo : list) {
+	    String activityName = resolveInfo.activityInfo.name;
+	    String packageName = resolveInfo.activityInfo.packageName;
+	    logger.debug("checking activity {}", activityName);
+	    if (activityName.contains(BROWSER_ACTIVITY_NAME)) {
+		logger.debug("Found default browser: package: {} activity name: {}", packageName, activityName);
+		browserIntent = packageManager.getLaunchIntentForPackage(packageName);
+		ComponentName comp = new ComponentName(packageName, activityName);
+		browserIntent.setAction(Intent.ACTION_VIEW);
+		browserIntent.addCategory(Intent.CATEGORY_BROWSABLE);
+		browserIntent.setComponent(comp);
+		browserIntent.setData(uri);
+		break;
+	    }
+	}
+	ctx.startActivity(browserIntent);
     }
 
 }

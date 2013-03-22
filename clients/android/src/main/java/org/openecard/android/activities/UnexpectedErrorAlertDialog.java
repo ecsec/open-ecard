@@ -25,44 +25,38 @@ package org.openecard.android.activities;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
-import java.util.Locale;
-import org.openecard.android.AndroidUtils;
 import org.openecard.common.I18n;
-import org.openecard.scio.NFCCardTerminal;
 
 
 /**
- * The ExtendedLengthAlertDialog shows an AlertDialog in it's run-method describing the extended length Problem and
- * gives the user the possibility to show more information or close the app.
+ * The UnexpectedErrorAlertDialog shows an AlertDialog in it's run-method describing that there was an unexpected
+ * Problem and gives the user the possibility to view the log of the App.
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-final class ExtendedLengthAlertDialog implements Runnable {
+final class UnexpectedErrorAlertDialog implements Runnable {
 
-    private final MainActivity mainActivity;
+    private final MainActivity ctx;
     private final I18n lang = I18n.getTranslation("android");
 
-    ExtendedLengthAlertDialog(MainActivity mainActivity) {
-	this.mainActivity = mainActivity;
+    UnexpectedErrorAlertDialog(MainActivity ctx) {
+	this.ctx = ctx;
     }
 
     @Override
     public void run() {
-	AlertDialog ad = new AlertDialog.Builder(this.mainActivity).create();
+	AlertDialog ad = new AlertDialog.Builder(ctx).create();
 	ad.setCancelable(false); // This blocks the 'BACK' button
-	int lengthOfLastAPDU = NFCCardTerminal.getInstance().getLengthOfLastAPDU();
-	int maxTransceiveLength = NFCCardTerminal.getInstance().getMaxTransceiveLength();
 
 	// add description of the error
-	ad.setMessage(lang.translationForKey("android.error.ext_apdu", lengthOfLastAPDU, maxTransceiveLength));
+	ad.setMessage(lang.translationForKey("android.error.unexpected"));
 
 	// Add close button
 	ad.setButton(lang.translationForKey("android.dialogs.quit"), new DialogInterface.OnClickListener() {
 	    @Override
 	    public void onClick(DialogInterface dialog, int which) {
 		dialog.dismiss();
-		mainActivity.finish();
+		ctx.finish();
 	    }
 	});
 
@@ -70,19 +64,8 @@ final class ExtendedLengthAlertDialog implements Runnable {
 	ad.setButton2(lang.translationForKey("android.error.ext_apdu.more"), new DialogInterface.OnClickListener() {
 	    @Override
 	    public void onClick(DialogInterface dialog, int which) {
-		Intent i;
-		Locale locale = Locale.getDefault();
-		String lang = locale.getLanguage();
-		Uri uri;
-		if (lang.equalsIgnoreCase("de")) {
-		    uri = Uri.parse("https://www.openecard.org/de/framework/extendedlength");
-		} else {
-		    uri = Uri.parse("https://www.openecard.org/en/framework/extendedlength");
-		}
-		i = new Intent(Intent.ACTION_VIEW, uri);
-		AndroidUtils.loadUriInDefaultBrowser(i, mainActivity);
-		dialog.dismiss();
-		mainActivity.finish();
+		Intent intent = new Intent(ctx, LogViewerActivity.class);
+		ctx.startActivity(intent);
 	    }
 	});
 

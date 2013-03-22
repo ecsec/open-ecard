@@ -29,6 +29,7 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.widget.TextView;
 import java.net.URI;
+import org.openecard.android.AndroidUtils;
 import org.openecard.android.ApplicationContext;
 import org.openecard.android.R;
 import org.openecard.common.ECardConstants;
@@ -36,6 +37,7 @@ import org.openecard.common.I18n;
 import org.openecard.control.binding.intent.handler.IntentControlHandler;
 import org.openecard.control.handler.ControlHandler;
 import org.openecard.control.handler.ControlHandlers;
+import org.openecard.scio.NFCCardTerminal;
 
 
 /**
@@ -103,12 +105,22 @@ public class MainActivity extends Activity {
 			}
 
 			if (browserIntent.getAction().equals(Intent.ACTION_VIEW)) {
-			    startActivity(browserIntent);
+			    AndroidUtils.loadUriInDefaultBrowser(browserIntent, MainActivity.this);
 			    MainActivity.this.finish();
 			} else if (browserIntent.getAction().equals(ECardConstants.Minor.SAL.CANCELLATION_BY_USER)) {
 			    MainActivity.this.finish();
 			} else {
-			    runOnUiThread(new ExtendedLengthAlertDialog(MainActivity.this));
+			    try {
+				int lengthOfLastAPDU = NFCCardTerminal.getInstance().getLengthOfLastAPDU();
+				int maxTransceiveLength = NFCCardTerminal.getInstance().getMaxTransceiveLength();
+				if (lengthOfLastAPDU > maxTransceiveLength && maxTransceiveLength > 0) {
+				    runOnUiThread(new ExtendedLengthAlertDialog(MainActivity.this));
+				    return;
+				}
+			    } catch (Exception e) {
+				// ignore
+			    }
+			    runOnUiThread(new UnexpectedErrorAlertDialog(MainActivity.this));
 			}
 
 		    }

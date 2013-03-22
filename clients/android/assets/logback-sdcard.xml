@@ -5,7 +5,8 @@
         <file>/sdcard/.openecard/android_info.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
-            <fileNamePattern>/sdcard/.openecard/android_info.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>/sdcard/.openecard/android_info.%d{yyyy-MM-dd}_%d{HHmmss}.log</fileNamePattern>
+            <TimeBasedFileNamingAndTriggeringPolicy class="org.openecard.android.StartupTimeBasedTriggeringPolicy" />
             <!-- keep 30 days' worth of history -->
             <maxHistory>30</maxHistory>
         </rollingPolicy>

@@ -90,6 +90,10 @@ public class PAOS {
 
     private static final Logger logger = LoggerFactory.getLogger(PAOS.class);
 
+    public static final String HEADER_KEY_PAOS = "PAOS";
+    // TODO: add service and actions as stated in https://dev.openecard.org/issues/191
+    public static final String HEADER_VALUE_PAOS = "ver=\"" + ECardConstants.PAOS_VERSION_20 + "\"";
+
     public static final QName RELATES_TO = new QName(ECardConstants.WS_ADDRESSING, "RelatesTo");
     public static final QName REPLY_TO = new QName(ECardConstants.WS_ADDRESSING, "ReplyTo");
     public static final QName MESSAGE_ID = new QName(ECardConstants.WS_ADDRESSING, "MessageID");
@@ -322,8 +326,11 @@ public class PAOS {
 		    BasicHttpEntityEnclosingRequest req = new BasicHttpEntityEnclosingRequest("POST", resource);
 		    req.setParams(conn.getParams());
 		    HttpRequestHelper.setDefaultHeader(req, endpoint);
-		    req.setHeader(ECardConstants.HEADER_KEY_PAOS, ECardConstants.HEADER_VALUE_PAOS);
-		    req.setHeader("Accept", "application/vnd.paos+xml");
+		    req.setHeader(HEADER_KEY_PAOS, HEADER_VALUE_PAOS);
+		    // this is how it would be correct
+		    //req.setHeader("Accept", "text/html;q=0.2, application/vnd.paos+xml");
+		    // and this is how it works :-/
+		    req.setHeader("Accept", "text/html; application/vnd.paos+xml");
 		    ContentType reqContentType = ContentType.create("application/vnd.paos+xml", "UTF-8");
 		    dumpHttpRequest("HTTP Request (before adding content):", req);
 		    String reqMsgStr = createPAOSResponse(msg);

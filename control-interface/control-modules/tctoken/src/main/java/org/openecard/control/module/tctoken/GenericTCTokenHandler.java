@@ -352,7 +352,7 @@ public class GenericTCTokenHandler {
 	} catch (PAOSException w) {
 	    logger.error(w.getMessage(), w);
 	    Throwable innerException = w.getCause();
-	    if(innerException != null && innerException instanceof WSException) {
+	    if (innerException instanceof WSException) {
 		response.setResult(((WSException) innerException).getResult());
 	    } else {
 		// TODO: check for better matching minor type

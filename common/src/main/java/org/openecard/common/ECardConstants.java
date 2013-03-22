@@ -54,16 +54,9 @@ public class ECardConstants {
 
     public static final String ACTOR_NEXT = "http://schemas.xmlsoap.org/soap/actor/next";
     public static final String SOAP_ENVELOPE = "http://schemas.xmlsoap.org/soap/envelope/";
+    public static final String PAOS_VERSION_11 = "urn:liberty:paos:2003-08";
     public static final String PAOS_VERSION_20 = "urn:liberty:paos:2006-08";
     public static final String WS_ADDRESSING = "http://www.w3.org/2005/03/addressing";
-
-    public static final String HEADER_KEY_ACCEPT = "Accept";
-    public static final String HEADER_KEY_PAOS = "PAOS";
-    public static final String HEADER_KEY_CONTENT_TYPE = "Content-Type";
-
-    public static final String HEADER_VALUE_ACCEPT = "text/html; application/vnd.paos+xml";
-    public static final String HEADER_VALUE_PAOS = "ver=\"urn:liberty:2003-08\",\"urn:liberty:2006-08\";" + PAOS_NEXT;
-    public static final String HEADER_VALUE_CONTENT_TYPE = "text/xml";
 
 
     public static class CIF {

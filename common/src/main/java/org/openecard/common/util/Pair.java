@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,25 +24,25 @@ package org.openecard.common.util;
 
 
 /**
- * Generic pair class.
- * Handy when a function return has two values and the list interface is counter intuitive.
+ * Parameterized pair class.
+ * This simple immutable pair (or tuple) can hold arbitrary values, whose types must be specified by generics.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class Pair<T1,T2> {
+public class Pair <P1, P2> {
 
-    public final T1 e1;
-    public final T2 e2;
+    public final P1 p1;
+    public final P2 p2;
 
     /**
-     * Create a pair initialized with the two given values.
+     * Creates a Pair instance for the given parameters.
      *
-     * @param e1 Value of the first element
-     * @param e2 Value of the second element.
+     * @param p1 First value which is later accessible as {@code p1}.
+     * @param p2 Second value which is later accessible as {@code p2}.
      */
-    public Pair(T1 e1, T2 e2) {
-	this.e1 = e1;
-	this.e2 = e2;
+    public Pair(P1 p1, P2 p2) {
+	this.p1 = p1;
+	this.p2 = p2;
     }
 
 }

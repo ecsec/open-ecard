@@ -23,7 +23,6 @@
 package org.openecard.gui.swing;
 
 import java.awt.Container;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import org.openecard.gui.swing.common.GUIDefaults;
 
@@ -55,7 +54,7 @@ public class SwingDialogWrapper implements DialogWrapper {
 	dialog.setLocationRelativeTo(null);
 	dialog.setIconImage(GUIDefaults.getImage("Frame.icon", 45, 45).getImage());
 	dialog.setVisible(false);
-	dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+	dialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 	return dialog.getContentPane();
     }
@@ -63,9 +62,9 @@ public class SwingDialogWrapper implements DialogWrapper {
     @Override
     public void show() {
 	dialog.setVisible(true);
-	dialog.setExtendedState(JFrame.NORMAL);
 	dialog.toFront();
 	dialog.requestFocus();
+	dialog.setAlwaysOnTop(true);
     }
 
     @Override

@@ -22,6 +22,7 @@
 
 package org.openecard.transport.httpcore;
 
+import java.net.URL;
 import org.openecard.apache.http.HttpRequest;
 import org.openecard.common.Version;
 
@@ -47,6 +48,22 @@ public class HttpRequestHelper {
 	    request.setHeader("Host", host);
 	}
 	return request;
+    }
+
+    /**
+     * Modify the given request and add a common set of headers.
+     *
+     * @param request Request which should be modified.
+     * @param host URL of the endpoint for the Host header.
+     * @return Modified request instance for command chaining.
+     */
+    public static HttpRequest setDefaultHeader(HttpRequest request, URL endpoint) {
+	String host = null;
+	if (endpoint != null) {
+	    host = endpoint.getHost();
+	    host += endpoint.getPort() == -1 ? "" : (":" + endpoint.getPort());
+	}
+	return setDefaultHeader(request, host);
     }
 
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,8 +23,11 @@
 package org.openecard.control.module.tctoken;
 
 import generated.TCTokenType;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.common.util.Pair;
 
 
 /**
@@ -34,11 +37,10 @@ import java.util.List;
  */
 public class TCTokenFactory {
 
-    public static TCTokenType generateTCToken(URL tcTokenURL) throws TCTokenException {
+    public static Pair<TCTokenType, Certificate> generateTCToken(URL tcTokenURL) throws TCTokenException, IOException {
 	// Get TCToken from the given url
-	String data = TCTokenGrabber.getResource(tcTokenURL);
-
-	return generateTCToken(data);
+	Pair<String, Certificate> data = TCTokenGrabber.getResource(tcTokenURL);
+	return new Pair<TCTokenType, Certificate>(generateTCToken(data.p1), data.p2);
     }
 
     public static TCTokenType generateTCToken(String data) throws TCTokenException {

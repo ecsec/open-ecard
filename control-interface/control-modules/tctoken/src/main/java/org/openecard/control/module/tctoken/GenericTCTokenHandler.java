@@ -25,12 +25,12 @@ package org.openecard.control.module.tctoken;
 import generated.TCTokenType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.StartPAOS;
+import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
@@ -40,8 +40,11 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
-import org.openecard.bouncycastle.crypto.tls.TlsPSKIdentity;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
@@ -50,15 +53,10 @@ import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.HttpRequestLineUtils;
+import org.openecard.common.util.Pair;
 import org.openecard.control.module.tctoken.gui.InsertCardDialog;
-import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
-import org.openecard.crypto.tls.ClientCertPSKTlsClient;
-import org.openecard.crypto.tls.ClientCertTlsClient;
-import org.openecard.crypto.tls.TlsNoAuthentication;
-import org.openecard.crypto.tls.TlsPSKIdentityImpl;
 import org.openecard.gui.UserConsent;
 import org.openecard.recognition.CardRecognition;
-import org.openecard.transport.paos.PAOS;
 import org.openecard.transport.paos.PAOSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +83,8 @@ public class GenericTCTokenHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GenericTCTokenHandler.class);
 
+    private final ExecutorService executor;
+
     private final CardStateMap cardStates;
     private final Dispatcher dispatcher;
     private final UserConsent gui;
@@ -99,6 +99,8 @@ public class GenericTCTokenHandler {
      * @param rec The card recognition engine.
      */
     public GenericTCTokenHandler(CardStateMap cardStates, Dispatcher dispatcher, UserConsent gui, CardRecognition rec) {
+	this.executor = Executors.newCachedThreadPool();
+
 	this.cardStates = cardStates;
 	this.dispatcher = dispatcher;
 	this.gui = gui;
@@ -115,10 +117,26 @@ public class GenericTCTokenHandler {
      * @throws TCTokenException If the TCToken could not be fetched. That means either the URL is invalid, the server
      *   was not reachable or the returned value was not a TCToken or TCToken like structure.
      */
-    public TCTokenRequest parseTCTokenRequestURI(URI requestURI) throws UnsupportedEncodingException, TCTokenException {
-	TCTokenRequest tcTokenRequest = new TCTokenRequest();
+    public TCTokenRequest parseRequestURI(URI requestURI) throws UnsupportedEncodingException, TCTokenException {
 	String queryStr = requestURI.getRawQuery();
 	Map<String, String> queries = HttpRequestLineUtils.transform(queryStr);
+
+	TCTokenRequest result;
+	if (queries.containsKey("tcTokenURL")) {
+	    result = parseTCTokenRequestURI(queries);
+	    result.setTokenFromObject(false);
+	    return result;
+	} else if (queries.containsKey("activationObject")) {
+	    result = parseObjectURI(queries);
+	    result.setTokenFromObject(true);
+	    return result;
+	}
+
+	throw new TCTokenException("No suitable set of parameters given in the request.");
+    }
+
+    private TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries) throws TCTokenException {
+	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 
 	for (Map.Entry<String, String> next : queries.entrySet()) {
 	    String k = next.getKey();
@@ -127,11 +145,14 @@ public class GenericTCTokenHandler {
 	    if (k.equals("tcTokenURL")) {
 		if (v != null && ! v.isEmpty()) {
 		    try {
-			TCTokenType token = TCTokenFactory.generateTCToken(new URL(v));
-			tcTokenRequest.setTCToken(token);
+			Pair<TCTokenType, Certificate> token = TCTokenFactory.generateTCToken(new URL(v));
+			tcTokenRequest.setTCToken(token.p1);
+			tcTokenRequest.setCertificate(token.p2);
 		    } catch (MalformedURLException ex) {
 			String msg = "The tcTokenURL parameter contains an invalid URL: " + v;
 			throw new TCTokenException(msg, ex);
+		    } catch (IOException ex) {
+			throw new TCTokenException("Failed to fetch TCToken.", ex);
 		    }
 		} else {
 		    throw new TCTokenException("Parameter tcTokenURL contains no value.");
@@ -167,6 +188,25 @@ public class GenericTCTokenHandler {
 		logger.info("Unknown query element: {}", k);
 	    }
 	}
+
+	return tcTokenRequest;
+    }
+
+    private TCTokenRequest parseObjectURI(Map<String, String> queries) throws TCTokenException {
+	TCTokenRequest tcTokenRequest = new TCTokenRequest();
+
+	for (Map.Entry<String, String> next : queries.entrySet()) {
+	    String k = next.getKey();
+	    String v = next.getValue();
+
+	    if ("activationObject".equals(k)) {
+		TCTokenType token = TCTokenFactory.generateTCToken(v);
+		tcTokenRequest.setTCToken(token);
+	    } else if ("serverCertificate".equals(k)) {
+		// TODO: convert base64 and url encoded certificate to Certificate object
+	    }
+	}
+
 	return tcTokenRequest;
     }
 
@@ -201,8 +241,9 @@ public class GenericTCTokenHandler {
      * @throws DispatcherException If there was a problem dispatching a request from the server.
      * @throws PAOSException If there was a transport error.
      */
-    private TCTokenResponse doPAOS(TCTokenType token, ConnectionHandleType connectionHandle) throws PAOSException,
-	    DispatcherException {
+    private TCTokenResponse doPAOS(TCTokenRequest tokenRequest, ConnectionHandleType connectionHandle)
+	    throws PAOSException, DispatcherException {
+	TCTokenType token = tokenRequest.getTCToken();
 	try {
 	    // Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
 	    CardApplicationPath appPath = new CardApplicationPath();
@@ -224,89 +265,42 @@ public class GenericTCTokenHandler {
 	    // Check CardApplicationConnectResponse
 	    WSHelper.checkResult(appConnectRes);
 
-	    try {
-		String sessionIdentifier = token.getSessionIdentifier();
-		URL serverAddress = new URL(token.getServerAddress());
-		String serverHost = serverAddress.getHost();
-		String secProto = token.getPathSecurityProtocol();
-
-		// FIXME: remove this hilariously stupid bull*#@%&/ code which satisfies a mistake introduced by the AA
-		String queryPart = serverAddress.getQuery();
-		if (queryPart == null || ! (queryPart.contains("?sessionid=") || queryPart.contains("&sessionid="))) {
-		    String sAddr = serverAddress.toString();
-		    // fix path of url
-		    if (serverAddress.getPath().isEmpty()) {
-			sAddr += "/";
-		    }
-		    // add parameter
-		    if (sAddr.endsWith("?")) {
-			sAddr += "sessionid=" + sessionIdentifier;
-		    } else if (sAddr.contains("?")) {
-			sAddr += "&sessionid=" + sessionIdentifier;
-		    } else {
-			sAddr += "?sessionid=" + sessionIdentifier;
-		    }
-		    serverAddress = new URL(sAddr);
-		}
-		// END: ugly fix
-
-
-		// Set up TLS connection
-		ClientCertTlsClient tlsClient;
-		if (secProto.equals("urn:ietf:rfc:4279") || secProto.equals("urn:ietf:rfc:5487")) {
-		    TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
-		    tlsAuth.setHostname(serverHost);
-		    // FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
-		    //tlsAuth.setCertificateVerifier(new JavaSecVerifier());
-		    byte[] psk = token.getPathSecurityParameters().getPSK();
-		    TlsPSKIdentity pskId = new TlsPSKIdentityImpl(sessionIdentifier.getBytes(), psk);
-		    tlsClient = new ClientCertPSKTlsClient(pskId, serverHost);
-		    tlsClient.setAuthentication(tlsAuth);
-		    tlsClient.setClientVersion(ProtocolVersion.TLSv11);
-		} else if (secProto.equals("urn:ietf:rfc:4346")) {
-		    TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
-		    tlsAuth.setHostname(serverHost);
-		    // FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
-		    //tlsAuth.setCertificateVerifier(new JavaSecVerifier());
-		    tlsClient = new ClientCertDefaultTlsClient(serverHost);
-		    tlsClient.setAuthentication(tlsAuth);
-		    tlsClient.setClientVersion(ProtocolVersion.TLSv11);
-		} else {
-		    throw new PAOSException("Unknow security protocol '" + secProto + "' requested.");
-		}
-
-		// TODO: remove this workaround as soon as eGK server uses HTTPS
-		if (serverAddress.getProtocol().equals("http")) {
-		    tlsClient = null;
-		}
-
-		// Set up PAOS connection
-		PAOS p = new PAOS(serverAddress, dispatcher, tlsClient);
-
-		// Send StartPAOS
-		StartPAOS sp = new StartPAOS();
-		sp.setProfile(ECardConstants.Profile.ECARD_1_1);
-		sp.getConnectionHandle().add(connectionHandle);
-		sp.setSessionIdentifier(sessionIdentifier);
-		p.sendStartPAOS(sp);
-
-		TCTokenResponse response = new TCTokenResponse();
-		response.setRefreshAddress(new URL(token.getRefreshAddress()));
-		response.setResult(WSHelper.makeResultOK());
-
-		return response;
-	    } finally {
-		// disconnect card after authentication
-		CardApplicationDisconnect appDis = new CardApplicationDisconnect();
-		appDis.setConnectionHandle(connectionHandle);
-		dispatcher.deliver(appDis);
+	    // send StartPAOS
+	    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, tokenRequest);
+	    Future<StartPAOSResponse> paosTask = executor.submit(task);
+	    if (! tokenRequest.isTokenFromObject()) {
+		// wait for computation to finish
+		paosTask.get();
 	    }
+
+	    TCTokenResponse response = new TCTokenResponse();
+	    response.setRefreshAddress(new URL(token.getRefreshAddress()));
+	    response.setResult(WSHelper.makeResultOK());
+
+	    return response;
 	} catch (WSException ex) {
-	    throw new DispatcherException("Failed to connect to card.", ex);
+	    String msg = "Failed to connect to card.";
+	    logger.error(msg, ex);
+	    throw new DispatcherException(msg, ex);
 	} catch (InvocationTargetException ex) {
+	    logger.error(ex.getMessage(), ex);
 	    throw new DispatcherException(ex);
 	} catch (MalformedURLException ex) {
+	    logger.error(ex.getMessage(), ex);
 	    throw new PAOSException(ex);
+	} catch (InterruptedException ex) {
+	    logger.error(ex.getMessage(), ex);
+	    throw new PAOSException(ex);
+	} catch (ExecutionException ex) {
+	    logger.error(ex.getMessage(), ex);
+	    // perform conversion of ExecutionException from the Future to the really expected exceptions
+	    if (ex.getCause() instanceof PAOSException) {
+		throw (PAOSException) ex.getCause();
+	    } else if (ex.getCause() instanceof DispatcherException) {
+		throw (DispatcherException) ex.getCause();
+	    } else {
+		throw new PAOSException(ex);
+	    }
 	}
     }
 
@@ -349,7 +343,7 @@ public class GenericTCTokenHandler {
 	}
 
 	try {
-	    return doPAOS(request.getTCToken(), connectionHandle);
+	    return doPAOS(request, connectionHandle);
 	} catch (DispatcherException w) {
 	    logger.error(w.getMessage(), w);
 	    // TODO: check for better matching minor type
@@ -358,7 +352,7 @@ public class GenericTCTokenHandler {
 	} catch (PAOSException w) {
 	    logger.error(w.getMessage(), w);
 	    Throwable innerException = w.getCause();
-	    if(innerException != null && innerException instanceof WSException) {
+	    if (innerException instanceof WSException) {
 		response.setResult(((WSException) innerException).getResult());
 	    } else {
 		// TODO: check for better matching minor type

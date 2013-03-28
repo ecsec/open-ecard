@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,6 +24,7 @@ package org.openecard.control.module.tctoken;
 
 import generated.TCTokenType;
 import java.math.BigInteger;
+import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.util.StringUtils;
 import org.openecard.control.client.ClientRequest;
 
@@ -39,6 +40,8 @@ public class TCTokenRequest extends ClientRequest {
     private BigInteger slotIndex;
     private byte[] contextHandle;
     private String cardType = "http://bsi.bund.de/cif/npa.xml";
+    private boolean tokenFromObject;
+    private Certificate certificate;
 
 
     /**
@@ -130,6 +133,42 @@ public class TCTokenRequest extends ClientRequest {
      */
     public void setCardType(String cardType) {
 	this.cardType = cardType;
+    }
+
+    /**
+     * Gets whether the token was created from an object tag or fetched from a URL.
+     *
+     * @return {@code true} when the token was created from an object tag, {@code false} otherwise.
+     */
+    public boolean isTokenFromObject() {
+	return tokenFromObject;
+    }
+
+    /**
+     * Sets whether the token was created from an object tag or fetched from a URL.
+     *
+     * @param tokenFromObject {@code true} when the token was created from an object tag, {@code false} otherwise.
+     */
+    public void setTokenFromObject(boolean tokenFromObject) {
+	this.tokenFromObject = tokenFromObject;
+    }
+
+    /**
+     * Sets the certificate of the service where the TCToken has been received.
+     *
+     * @param certificate X509 certificate of the server.
+     */
+    public void setCertificate(Certificate certificate) {
+	this.certificate = certificate;
+    }
+
+    /**
+     * Gets the certificate of the service where the TCToken has been received.
+     *
+     * @return X509 certificate of the server. May be null, when no certificate is available, e.g. legacy activation.
+     */
+    public Certificate getCertificate() {
+	return certificate;
     }
 
 }

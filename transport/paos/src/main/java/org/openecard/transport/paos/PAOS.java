@@ -25,18 +25,25 @@ package org.openecard.transport.paos;
 import iso.std.iso_iec._24727.tech.schema.ResponseType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerException;
+import org.openecard.apache.http.Header;
 import org.openecard.apache.http.HttpEntity;
 import org.openecard.apache.http.HttpException;
+import org.openecard.apache.http.HttpRequest;
 import org.openecard.apache.http.HttpResponse;
+import org.openecard.apache.http.RequestLine;
+import org.openecard.apache.http.StatusLine;
 import org.openecard.apache.http.entity.ContentType;
 import org.openecard.apache.http.entity.StringEntity;
 import org.openecard.apache.http.impl.DefaultConnectionReuseStrategy;
@@ -53,6 +60,7 @@ import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.io.ProxySettings;
+import org.openecard.common.util.FileUtils;
 import org.openecard.transport.httpcore.HttpRequestHelper;
 import org.openecard.transport.httpcore.StreamHttpClientConnection;
 import org.openecard.ws.marshal.MarshallingTypeException;
@@ -81,6 +89,10 @@ import org.xml.sax.SAXException;
 public class PAOS {
 
     private static final Logger logger = LoggerFactory.getLogger(PAOS.class);
+
+    public static final String HEADER_KEY_PAOS = "PAOS";
+    // TODO: add service and actions as stated in https://dev.openecard.org/issues/191
+    public static final String HEADER_VALUE_PAOS = "ver=\"" + ECardConstants.PAOS_VERSION_20 + "\"";
 
     public static final QName RELATES_TO = new QName(ECardConstants.WS_ADDRESSING, "RelatesTo");
     public static final QName REPLY_TO = new QName(ECardConstants.WS_ADDRESSING, "ReplyTo");
@@ -313,11 +325,15 @@ public class PAOS {
 		    // prepare request
 		    BasicHttpEntityEnclosingRequest req = new BasicHttpEntityEnclosingRequest("POST", resource);
 		    req.setParams(conn.getParams());
-		    HttpRequestHelper.setDefaultHeader(req, hostname);
-		    String reqMsgStr = createPAOSResponse(msg);
-		    req.setHeader(ECardConstants.HEADER_KEY_PAOS, ECardConstants.HEADER_VALUE_PAOS);
-		    req.setHeader("Accept", "application/vnd.paos+xml");
+		    HttpRequestHelper.setDefaultHeader(req, endpoint);
+		    req.setHeader(HEADER_KEY_PAOS, HEADER_VALUE_PAOS);
+		    // this is how it would be correct
+		    //req.setHeader("Accept", "text/html;q=0.2, application/vnd.paos+xml");
+		    // and this is how it works :-/
+		    req.setHeader("Accept", "text/html; application/vnd.paos+xml");
 		    ContentType reqContentType = ContentType.create("application/vnd.paos+xml", "UTF-8");
+		    dumpHttpRequest("HTTP Request (before adding content):", req);
+		    String reqMsgStr = createPAOSResponse(msg);
 		    StringEntity reqMsg = new StringEntity(reqMsgStr, reqContentType);
 		    req.setEntity(reqMsg);
 		    req.setHeader(reqMsg.getContentType());
@@ -325,11 +341,13 @@ public class PAOS {
 		    // send request and receive response
 		    HttpResponse response = httpexecutor.execute(req, conn, ctx);
 		    int statusCode = response.getStatusLine().getStatusCode();
-		    checkHTTPStatusCode(msg, statusCode);
 		    conn.receiveResponseEntity(response);
 		    HttpEntity entity = response.getEntity();
+		    byte[] entityData = FileUtils.toByteArray(entity.getContent());
+		    dumpHttpResponse(response, entityData);
+		    checkHTTPStatusCode(msg, statusCode);
 		    // consume entity
-		    Object requestObj = processPAOSRequest(entity.getContent());
+		    Object requestObj = processPAOSRequest(new ByteArrayInputStream(entityData));
 
 		    // break when message is startpaosresponse
 		    if (requestObj instanceof StartPAOSResponse) {
@@ -393,13 +411,51 @@ public class PAOS {
      */
     private void checkHTTPStatusCode(Object msg, int statusCode) throws PAOSException {
 	if (statusCode < 200 || statusCode > 299) {
-	    ResponseType resp = (ResponseType) msg;
-	    try {
-		WSHelper.checkResult(resp);
-	    } catch (WSException ex) {
-		throw new PAOSException("Received HTML Error Code " + statusCode, ex);
+	    if (msg instanceof ResponseType) {
+		ResponseType resp = (ResponseType) msg;
+		try {
+		    WSHelper.checkResult(resp);
+		} catch (WSException ex) {
+		    throw new PAOSException("Received HTML Error Code " + statusCode, ex);
+		}
 	    }
 	    throw new PAOSException("Received HTML Error Code " + statusCode);
+	}
+    }
+
+    private static void dumpHttpRequest(String msg, HttpRequest req) {
+	if (logger.isDebugEnabled()) {
+	    StringWriter w = new StringWriter();
+	    PrintWriter pw = new PrintWriter(w);
+
+	    pw.println(msg);
+	    RequestLine rl = req.getRequestLine();
+	    pw.format("  %s %s %s%n", rl.getMethod(), rl.getUri(), rl.getProtocolVersion().toString());
+	    for (Header h : req.getAllHeaders()) {
+		pw.format("  %s: %s%n", h.getName(), h.getValue());
+	    }
+	    pw.flush();
+
+	    logger.debug(w.toString());
+	}
+    }
+
+    private static void dumpHttpResponse(HttpResponse res, byte[] entityData) {
+	if (logger.isDebugEnabled()) {
+	    StringWriter w = new StringWriter();
+	    PrintWriter pw = new PrintWriter(w);
+
+	    pw.println("HTTP Response:");
+	    StatusLine sl = res.getStatusLine();
+	    pw.format("  %s %d %s%n", sl.getProtocolVersion().toString(), sl.getStatusCode(), sl.getReasonPhrase());
+	    for (Header h : res.getAllHeaders()) {
+		pw.format("  %s: %s%n", h.getName(), h.getValue());
+	    }
+	    pw.format(new String(entityData));
+	    pw.println();
+	    pw.flush();
+
+	    logger.debug(w.toString());
 	}
     }
 

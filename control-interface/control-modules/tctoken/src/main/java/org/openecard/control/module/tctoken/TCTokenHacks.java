@@ -46,6 +46,12 @@ public class TCTokenHacks {
 	if (! input.contains("PathSecurity-Parameters")) {
 	    input = input.replace("PathSecurity-Parameter", "PathSecurity-Parameters");
 	}
+	if (input.contains("&lt;PSK&gt;")) {
+	    input = input.replace("&lt;PSK&gt;", "<PSK>");
+	}
+	if (input.contains("&lt;/PSK&gt;")) {
+	    input = input.replace("&lt;/PSK&gt;", "</PSK>");
+	}
 	return input;
     }
 
@@ -73,8 +79,8 @@ public class TCTokenHacks {
 	try {
 	    while (true) {
 		Pair<String, String> result = convertParameter(data);
-		out.append(result.e1);
-		data = result.e2;
+		out.append(result.p1);
+		data = result.p2;
 	    }
 	} catch (Exception ignore) {
 	}

@@ -81,7 +81,7 @@ public class MessageDialog extends JPanel {
 
 	layout.setHorizontalGroup(
 		layout.createSequentialGroup()
-		.addComponent(logo, 50, 50, 50)
+		.addComponent(logo, 60, 60, 60)
 		.addGap(20)
 		.addGroup(layout.createParallelGroup()
 		.addComponent(headlineLabel)

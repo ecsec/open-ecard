@@ -23,6 +23,7 @@
 package org.openecard.plugins.pinplugin;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.Disconnect;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import org.openecard.common.WSHelper.WSException;
@@ -101,6 +102,10 @@ public class UnblockPINAction extends AbstractPINAction {
 	}
 	UnblockPINDialog uc = new UnblockPINDialog(gui, dispatcher, cHandle, pinState, !nativePace);
 	uc.show();
+
+	Disconnect d = new Disconnect();
+	d.setSlotHandle(cHandle.getSlotHandle());
+	dispatcher.deliver(d);
     }
 
     @Override

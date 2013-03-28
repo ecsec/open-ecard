@@ -13,7 +13,7 @@
     <groupId>org.openecard.clients</groupId>
     <artifactId>android</artifactId>
     <packaging>apk</packaging>
-    <name>Andoid Client</name>
+    <name>Android Client</name>
 
     <properties>
 	<proguard.disabled>true</proguard.disabled>

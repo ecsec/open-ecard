@@ -106,7 +106,7 @@ public class IntentTCTokenHandler extends IntentControlHandler {
     public Intent handle(Intent i) {
 	try {
 	    URI requestURI = URI.create(i.getDataString());
-	    TCTokenRequest tcTokenRequest = genericTCTokenHandler.parseTCTokenRequestURI(requestURI);
+	    TCTokenRequest tcTokenRequest = genericTCTokenHandler.parseRequestURI(requestURI);
 	    TCTokenResponse response = genericTCTokenHandler.handleActivate(tcTokenRequest);
 	    Intent intentresponse = this.handleResponse(response);
 	    return intentresponse;

@@ -25,7 +25,6 @@ package org.openecard.plugins.pinplugin.gui;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ControlIFD;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
-import iso.std.iso_iec._24727.tech.schema.Disconnect;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
@@ -156,18 +155,7 @@ public class PINStepAction extends StepAction {
 	    } else {
 		sendModifyPIN();
 	    }
-	    // PIN modified successfully, disconnect and proceed with next step
-	    Disconnect disconnect = new Disconnect();
-	    disconnect.setSlotHandle(conHandle.getSlotHandle());
-	    try {
-		dispatcher.deliver(disconnect);
-	    } catch (IllegalArgumentException ex) {
-		logger.error("Failed to transmit Disconnect command.", ex);
-	    } catch (InvocationTargetException ex) {
-		logger.error("Failed to transmit Disconnect command.", ex);
-	    } catch (DispatcherException ex) {
-		logger.error("Failed to transmit Disconnect command.", ex);
-	    }
+	    // PIN modified successfully, proceed with next step
 	    return new StepActionResult(StepActionResultStatus.NEXT);
 	} catch (WSException ex) {
 	    if (capturePin) {

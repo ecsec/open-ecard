@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,6 +23,7 @@
 package org.openecard.control.module.tctoken;
 
 import generated.TCTokenType;
+import java.io.IOException;
 import java.net.URL;
 import org.openecard.common.util.FileUtils;
 import org.testng.Assert;
@@ -38,25 +39,16 @@ public class TCTokenFactoryTest {
 
     @Test
     public void testGenerateTCToken_String() throws Exception {
-	try {
-	    String tcToken = FileUtils.toString(FileUtils.resolveResourceAsStream(TCTokenFactoryTest.class, "TCToken.xml"), "UTF-8");
-	    TCTokenType result = TCTokenFactory.generateTCToken(tcToken);
-	    Assert.assertNotNull(result, "TCToken is null.");
-	} catch (Exception e) {
-	    Assert.fail(e.getMessage());
-	}
+	String tcToken = FileUtils.toString(FileUtils.resolveResourceAsStream(TCTokenFactoryTest.class, "TCToken.xml"), "UTF-8");
+	TCTokenType result = TCTokenFactory.generateTCToken(tcToken);
+	Assert.assertNotNull(result, "TCToken is null.");
     }
 
-    @Test
-    public void testGenerateTCToken_TCTokenType() {
-	try {
-	    URL tcTokenURL = FileUtils.resolveResourceAsURL(TCTokenFactoryTest.class, "TCToken.xml");
-	    // should fail, since a non-https-URL is used
-	    TCTokenType result = TCTokenFactory.generateTCToken(tcTokenURL);
-	    Assert.fail("TCTokenException expected.");
-	} catch (TCTokenException ex) {
-	    // do nothing; exception expected
-	}
+    @Test(expectedExceptions = {TCTokenException.class, IOException.class})
+    public void testGenerateTCToken_TCTokenType() throws TCTokenException, IOException {
+	URL tcTokenURL = FileUtils.resolveResourceAsURL(TCTokenFactoryTest.class, "TCToken.xml");
+	// should fail, since a non-https-URL is used
+	TCTokenFactory.generateTCToken(tcTokenURL);
     }
 
 }

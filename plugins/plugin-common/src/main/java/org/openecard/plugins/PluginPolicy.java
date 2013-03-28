@@ -23,12 +23,14 @@
 package org.openecard.plugins;
 
 import java.io.FilePermission;
+import java.net.URL;
 import java.security.CodeSource;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
 import java.security.Policy;
 import java.security.ProtectionDomain;
+import java.security.cert.Certificate;
 import java.util.PropertyPermission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,8 +68,14 @@ public class PluginPolicy extends Policy {
     @Override
     public boolean implies(ProtectionDomain domain, Permission permission) {
 	CodeSource source = domain.getCodeSource();
-	if (source.getLocation().toString().contains(pluginPath)) {
-	    logger.debug("Plugin {} is requesting permission {}", source.getLocation(), permission);
+	URL loc = source.getLocation();
+	Certificate[] certs = source.getCertificates();
+	// If CodeSource has a null location and a null certificate chain, then it implies every other CodeSource;
+	// see http://docs.oracle.com/javase/7/docs/api/java/security/CodeSource.html
+	if (loc == null && certs == null) {
+	    return true;
+	} else if (loc != null && loc.toString().contains(pluginPath)) {
+	    logger.debug("Plugin {} is requesting permission {}", loc, permission);
 	    boolean granted = allowedPermissions.implies(permission);
 	    logger.debug("Access granted: {}", granted);
 	    return granted;

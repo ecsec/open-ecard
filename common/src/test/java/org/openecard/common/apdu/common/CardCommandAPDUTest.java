@@ -66,7 +66,6 @@ public class CardCommandAPDUTest {
 	assertEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF});
 
 	apdu.setLE(1);
-
 	assertEquals(apdu.toByteArray(), new byte[]{(byte) 0x00, (byte) 0xB0, (byte) 0x00, (byte) 0xFF, (byte) 0x01});
 
 	apdu.setLE(255);
@@ -85,6 +84,13 @@ public class CardCommandAPDUTest {
 	apdu.setLE(65535);
 	assertEquals(apdu.getLC(), 65535);
 	assertEquals(apdu.getLE(), 65535);
+
+	// test an expected length of 256 with an extended length command apdu
+	// the expected LE is {0x01, 0x00}
+	apdu.setLE(256);
+	int length = apdu.toByteArray().length;
+	assertEquals(apdu.toByteArray()[length-2], 0x01);
+	assertEquals(apdu.toByteArray()[length-1], 0x00);
     }
 
     @Test

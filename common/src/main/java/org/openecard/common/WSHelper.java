@@ -22,10 +22,10 @@
 
 package org.openecard.common;
 
-import iso.std.iso_iec._24727.tech.schema.ResponseType;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.util.List;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
+import oasis.names.tc.dss._1_0.core.schema.ResponseBaseType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.apdu.common.CardCommandStatus;
 import org.openecard.common.apdu.common.CardResponseAPDU;
@@ -47,7 +47,7 @@ public class WSHelper {
 	}
     }
 
-    public static ResponseType checkResult(ResponseType response) throws WSException {
+    public static ResponseBaseType checkResult(ResponseBaseType response) throws WSException {
 	Result r = response.getResult();
 	if (r.getResultMajor().equals(ECardConstants.Major.ERROR)) {
 	    if (response instanceof TransmitResponse) {
@@ -117,7 +117,7 @@ public class WSHelper {
 	return r;
     }
 
-    public static <C extends Class<T>, T extends ResponseType> T makeResponse(C c, Result r) {
+    public static <C extends Class<T>, T extends ResponseBaseType> T makeResponse(C c, Result r) {
 	try {
 	    T t = c.getConstructor().newInstance();
 	    t.setProfile(ECardConstants.Profile.ECARD_1_1);

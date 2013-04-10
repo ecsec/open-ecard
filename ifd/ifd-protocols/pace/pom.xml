@@ -42,11 +42,6 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.wsdef</groupId>
-	    <artifactId>jaxb-marshaller</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
 	    <groupId>org.openecard.transport</groupId>
 	    <artifactId>dispatcher</artifactId>
 	    <version>${project.version}</version>
@@ -54,6 +49,12 @@
 	<dependency>
 	    <groupId>org.openecard.gui</groupId>
 	    <artifactId>swing</artifactId>
+	    <version>${project.version}</version>
+	    <scope>test</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.wsdef</groupId>
+	    <artifactId>jaxb-marshaller</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>
 	</dependency>

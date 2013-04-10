@@ -169,6 +169,8 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    ResultStatus guiResult = exec.process();
 
 	    if (guiResult == ResultStatus.CANCEL) {
+		String protocol = didAuthenticate.getAuthenticationProtocolData().getProtocol();
+		cardState.removeProtocol(protocol);
 		String msg = "User Consent was cancelled by the user.";
 		Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg);
 		response.setResult(r);

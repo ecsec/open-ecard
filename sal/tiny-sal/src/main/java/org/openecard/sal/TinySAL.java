@@ -1051,8 +1051,8 @@ public class TinySAL implements SAL {
 	    DIDAuthenticationDataType didAuthenticationData = request.getAuthenticationProtocolData();
 	    Assert.assertIncorrectParameter(didAuthenticationData, "The parameter AuthenticationProtocolData is empty.");
 
-	    String protocolURI = request.getAuthenticationProtocolData().getProtocol();
-	    //FIXME workaround for missing protocol URI from eID-Servers
+	    String protocolURI = didAuthenticationData.getProtocol();
+	    // FIXME: workaround for missing protocol URI from eID-Servers
 	    if (protocolURI == null) {
 		logger.warn("ProtocolURI was null");
 		protocolURI = ECardConstants.Protocol.EAC_GENERIC;
@@ -1060,6 +1060,7 @@ public class TinySAL implements SAL {
 		logger.warn("ProtocolURI was urn:oid:1.0.24727.3.0.0.7.2");
 		protocolURI = ECardConstants.Protocol.EAC_GENERIC;
 	    }
+	    didAuthenticationData.setProtocol(protocolURI);
 
 	    Protocol protocol = getProtocol(connectionHandle, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.DIDAuthenticate)) {

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,9 @@
 
 package org.openecard.scio;
 
+import org.openecard.common.util.LinuxLibraryFinder;
+import java.io.File;
+import java.io.FileNotFoundException;
 import javax.smartcardio.CardTerminals;
 import javax.smartcardio.TerminalFactory;
 
@@ -32,6 +35,17 @@ import javax.smartcardio.TerminalFactory;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class PCSCFactory implements org.openecard.common.ifd.TerminalFactory {
+
+    /**
+     * Default constructor with fixes for the faulty SmartcardIO library.
+     */
+    public PCSCFactory() throws FileNotFoundException {
+	String osName = System.getProperty("os.name");
+	if (osName.startsWith("Linux")) {
+	    File libFile = LinuxLibraryFinder.getLibraryPath("pcsclite", "1");
+	    System.setProperty("sun.security.smartcardio.library", libFile.getAbsolutePath());
+	}
+    }
 
     @Override
     public String getType() {

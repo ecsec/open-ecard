@@ -90,7 +90,7 @@ public class AboutDialog extends JDialog {
     private void setupUI() {
 	Image logo = GraphicsUtil.createImage(OecLogoBgWhite.class, 147, 147);
 
-	setSize(720, 480);
+	setSize(730, 480);
 	// use null layout with absolute positioning
 	getContentPane().setLayout(null);
 	getContentPane().setBackground(Color.white);
@@ -116,7 +116,7 @@ public class AboutDialog extends JDialog {
 	getContentPane().add(label);
 
 	JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-	tabbedPane.setBounds(185, 84, 519, 320);
+	tabbedPane.setBounds(185, 84, 529, 320);
 	tabbedPane.setBackground(Color.white);
 	tabbedPane.addTab(lang.translationForKey("about.tab.about"), createTabContent("about"));
 	tabbedPane.addTab(lang.translationForKey("about.tab.feedback"), createTabContent("feedback"));

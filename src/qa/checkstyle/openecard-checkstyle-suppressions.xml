@@ -7,6 +7,12 @@
     <!-- ignore imported smartcardio classes -->
     <suppress checks=".*" files="^.*/ifd/scio-backend/android-scio/.*$" />
     <suppress checks=".*" files="^.*/ifd/scio-backend/android-pcsc/src/main/java/sun/security/smartcardio/.*$" />
+    <suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/CardImpl.java$" />
+    <suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/ChannelImpl.java$" />
+    <suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/PCSC.java$" />
+    <suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/PCSCException.java$" />
+    <suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/PCSCTerminals.java$" />
+    <suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/TerminalImpl.java$" />
     <!-- star imports (assert etc.) allowed for test code -->
     <suppress id="star_import" files="^.*/src/test/.*$" />
     <!--<suppress checks="AvoidStarImportCheck" files="^.*/src/test/.*$" />-->

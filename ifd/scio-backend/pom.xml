@@ -20,6 +20,7 @@
 	<module>seek</module>
 	<module>android-nfc</module>
 	<module>android-scio</module>
+	<module>osx-pcsc</module>
     </modules>
 
     <profiles>

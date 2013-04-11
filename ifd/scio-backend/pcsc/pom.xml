@@ -15,4 +15,12 @@
     <packaging>jar</packaging>
     <name>PCSC SmartcardIO</name>
 
+    <dependencies>
+	<dependency>
+	    <groupId>org.openecard.ifd.scio-backend</groupId>
+	    <artifactId>osx-pcsc</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+    </dependencies>
+
 </project>

@@ -84,23 +84,7 @@ public class SCTerminal {
 
     public boolean isCardPresent() {
 	try {
-	    boolean result = terminal.isCardPresent();
-	    // isCardPresent has a bug in OS X, we've to try to connect
-	    // to check if a card is present
-	    if (!result && System.getProperty("os.name").contains("OS X")) {
-		if (scCard != null) {
-		    result = true;
-		} else {
-		    try {
-			terminal.connect("*");
-			// card present
-			result = true;
-		    } catch (CardException ignore) {
-			// no card present
-		    }
-		}
-	    }
-	    return result;
+	    return terminal.isCardPresent();
 	} catch (CardException ex) {
 	    return false;
 	}

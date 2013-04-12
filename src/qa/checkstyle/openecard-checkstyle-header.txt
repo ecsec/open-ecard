@@ -1,5 +1,5 @@
 ^/\*{76}$
-^ \* Copyright \(C\) \d{4} (?:\S+\s*\S+)+\.$
+^ \* Copyright \(C\) \d{4}(?:-\d{4})? (?:\S+\s*\S+)+\.$
 ^ \* All rights reserved\.$
 ^ \* Contact: ecsec GmbH \(info@ecsec\.de\)$
 ^ \*$

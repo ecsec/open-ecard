@@ -35,6 +35,7 @@ import javax.swing.JOptionPane;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
+import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.ProtocolInfo;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
@@ -160,16 +161,8 @@ public final class RichClient {
 	    // Perform an EstablishContext to get a ContextHandle
 	    EstablishContext establishContext = new EstablishContext();
 	    EstablishContextResponse establishContextResponse = ifd.establishContext(establishContext);
-
-	    if (establishContextResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
-		if (establishContextResponse.getContextHandle() != null) {
-		    contextHandle = ifd.establishContext(establishContext).getContextHandle();
-		} else {
-		    //TODO
-		}
-	    } else {
-		// TODO
-	    }
+	    WSHelper.checkResult(establishContextResponse);
+	    contextHandle = ifd.establishContext(establishContext).getContextHandle();
 
 	    // Set up CardRecognition
 	    recognition = new CardRecognition(ifd, contextHandle);

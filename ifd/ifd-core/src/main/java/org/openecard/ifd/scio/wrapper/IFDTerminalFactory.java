@@ -35,11 +35,13 @@ import org.openecard.ifd.scio.IFDProperties;
  */
 public class IFDTerminalFactory {
 
+    private static final String FACTORY_KEY = "org.openecard.ifd.scio.factory.impl";
+
     private GenericFactory<TerminalFactory> factory;
 
     private IFDTerminalFactory() throws IFDException {
 	try {
-	    factory = new GenericFactory<TerminalFactory>(IFDProperties.properties(), "org.openecard.ifd.scio.factory.impl");
+	    factory = new GenericFactory<TerminalFactory>(IFDProperties.properties(), FACTORY_KEY);
 	} catch (GenericFactoryException ex) {
 	    throw new IFDException(ex);
 	}

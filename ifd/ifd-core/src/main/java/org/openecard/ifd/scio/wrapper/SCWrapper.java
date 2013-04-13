@@ -31,7 +31,6 @@ import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CardTerminals;
 import org.openecard.common.ECardConstants;
-import org.openecard.common.ifd.TerminalFactory;
 import org.openecard.ifd.scio.IFDException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +50,7 @@ public class SCWrapper {
     private final ConcurrentSkipListMap<String,SCTerminal> scTerminals;
 
     public SCWrapper() throws IFDException {
-	TerminalFactory f = IFDTerminalFactory.getInstance();
-	terminals = f.terminals();
+	terminals = new DeadAndAliveTerminals();
 	secureRandom =  new SecureRandom();
 	scTerminals = new ConcurrentSkipListMap<String, SCTerminal>();
     }

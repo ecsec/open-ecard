@@ -22,11 +22,13 @@
 
 package org.openecard.android.activities;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import java.util.Locale;
+import org.openecard.android.AndroidUtils;
 import org.openecard.common.I18n;
 import org.openecard.scio.NFCCardTerminal;
 
@@ -39,16 +41,16 @@ import org.openecard.scio.NFCCardTerminal;
  */
 final class ExtendedLengthAlertDialog implements Runnable {
 
-    private final MainActivity mainActivity;
+    private final Activity activity;
     private final I18n lang = I18n.getTranslation("android");
 
-    ExtendedLengthAlertDialog(MainActivity mainActivity) {
-	this.mainActivity = mainActivity;
+    ExtendedLengthAlertDialog(Activity activity) {
+	this.activity = activity;
     }
 
     @Override
     public void run() {
-	AlertDialog ad = new AlertDialog.Builder(this.mainActivity).create();
+	AlertDialog ad = new AlertDialog.Builder(this.activity).create();
 	ad.setCancelable(false); // This blocks the 'BACK' button
 	int lengthOfLastAPDU = NFCCardTerminal.getInstance().getLengthOfLastAPDU();
 	int maxTransceiveLength = NFCCardTerminal.getInstance().getMaxTransceiveLength();
@@ -61,7 +63,7 @@ final class ExtendedLengthAlertDialog implements Runnable {
 	    @Override
 	    public void onClick(DialogInterface dialog, int which) {
 		dialog.dismiss();
-		mainActivity.finish();
+		activity.finish();
 	    }
 	});
 
@@ -72,16 +74,16 @@ final class ExtendedLengthAlertDialog implements Runnable {
 		Intent i;
 		Locale locale = Locale.getDefault();
 		String lang = locale.getLanguage();
+		Uri uri;
 		if (lang.equalsIgnoreCase("de")) {
-		    Uri uri = Uri.parse("https://www.openecard.org/de/framework/extendedlength");
-		    i = new Intent(Intent.ACTION_VIEW, uri);
+		    uri = Uri.parse("https://www.openecard.org/de/framework/extendedlength");
 		} else {
-		    Uri uri = Uri.parse("https://www.openecard.org/en/framework/extendedlength");
-		    i = new Intent(Intent.ACTION_VIEW, uri);
+		    uri = Uri.parse("https://www.openecard.org/en/framework/extendedlength");
 		}
-		ExtendedLengthAlertDialog.this.mainActivity.startActivity(i);
+		i = new Intent(Intent.ACTION_VIEW, uri);
+		AndroidUtils.loadUriInInvokingBrowser(i, activity);
 		dialog.dismiss();
-		mainActivity.finish();
+		activity.finish();
 	    }
 	});
 

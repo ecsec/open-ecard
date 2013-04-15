@@ -23,12 +23,11 @@
 package org.openecard.android.activities;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.widget.TextView;
 import java.net.URI;
+import org.openecard.android.AndroidUtils;
 import org.openecard.android.ApplicationContext;
 import org.openecard.android.R;
 import org.openecard.common.ECardConstants;
@@ -36,26 +35,29 @@ import org.openecard.common.I18n;
 import org.openecard.control.binding.intent.handler.IntentControlHandler;
 import org.openecard.control.handler.ControlHandler;
 import org.openecard.control.handler.ControlHandlers;
+import org.openecard.scio.NFCCardTerminal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
- * This is the main Activity. It is the first activity to open when the Application is started.
- * 
+ * This Activity is registered for all Intents that point to http://localhost:24727.
+ * <br />If such a Intent arrives it tries to start an appropriate ControlHandler depending on the requestUri.
+ *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class MainActivity extends Activity {
+public class IntentHandlerActivity extends Activity {
 
+    private static final Logger logger = LoggerFactory.getLogger(IntentHandlerActivity.class);
     private final I18n lang = I18n.getTranslation("android");
 
     private static ControlHandlers handlers;
     private ApplicationContext applicationContext;
+    private Intent responseIntent;
 
     @Override
     protected void onDestroy() {
 	applicationContext.shutdown();
-	Editor editor = getSharedPreferences("clear_cache", Context.MODE_PRIVATE).edit();
-	editor.clear();
-	editor.commit();
 	super.onDestroy();
 	System.exit(0);
     }
@@ -68,54 +70,55 @@ public class MainActivity extends Activity {
 	applicationContext = ((ApplicationContext) getApplicationContext());
 	applicationContext.initialize();
 
-	final Intent intent = getIntent();
+	handleIntent(getIntent());
 
-	handleIntent(intent);
 	displayText(lang.translationForKey("android.main.info"));
     }
 
     /**
-     * Handles the intent the MainActivity was started with.
+     * Handles the intent the IntentHandlerActivity was started with.
      * <br /> It's action should equal Intent.ACTION_VIEW because
      * we've been started through a link to localhost.
-     * 
+     *
      * @param intent The intent the application was started with.
-     * @throws TCTokenException
-     * @throws MalformedURLException
-     * @throws UnsupportedEncodingException
      */
-    private void handleIntent(final Intent intent) {
-	if (intent != null) {
-	    String action = intent.getAction();
-	    if (action == Intent.ACTION_VIEW) {
-		final URI requestURI = URI.create(intent.getDataString());
-		Thread t = new Thread(new Runnable() {
+    private void handleIntent(final Intent requestIntent) {
+	String action = requestIntent.getAction();
+	if (Intent.ACTION_VIEW.equals(action)) {
+	    final URI requestURI = URI.create(requestIntent.getDataString());
+	    Thread t = new Thread(new Runnable() {
 
-		    @Override
-		    public void run() {
-			Intent browserIntent = null;
-
-			for (ControlHandler handler : MainActivity.handlers.getControlHandlers()) {
-			    if (handler.getID().equals(requestURI.getPath())) {
-				browserIntent = ((IntentControlHandler) handler).handle(intent);
-				break;
-			    }
-			}
-
-			if (browserIntent.getAction().equals(Intent.ACTION_VIEW)) {
-			    startActivity(browserIntent);
-			    MainActivity.this.finish();
-			} else if (browserIntent.getAction().equals(ECardConstants.Minor.SAL.CANCELLATION_BY_USER)) {
-			    MainActivity.this.finish();
-			} else {
-			    runOnUiThread(new ExtendedLengthAlertDialog(MainActivity.this));
-			}
-
+		@Override
+		public void run() {
+		    IntentControlHandler handler = findResponsibleHandler(requestURI);
+		    if (handler == null) {
+			logger.error("No handler found for the requestURI {}", requestURI);
+			IntentHandlerActivity.this.finish();
 		    }
-		});
+		    responseIntent = handler.handle(requestIntent);
 
-		t.start();
-	    }
+		    if (responseIntent.getAction().equals(Intent.ACTION_VIEW)) {
+			AndroidUtils.loadUriInInvokingBrowser(responseIntent, IntentHandlerActivity.this);
+			// authentication is finished we can close the App immediately
+			IntentHandlerActivity.this.finish();
+		    } else if (responseIntent.getAction().equals(ECardConstants.Minor.SAL.CANCELLATION_BY_USER)) {
+			IntentHandlerActivity.this.finish();
+		    } else {
+			try {
+			    int lengthOfLastAPDU = NFCCardTerminal.getInstance().getLengthOfLastAPDU();
+			    int maxTransceiveLength = NFCCardTerminal.getInstance().getMaxTransceiveLength();
+			    if (lengthOfLastAPDU > maxTransceiveLength && maxTransceiveLength > 0) {
+				runOnUiThread(new ExtendedLengthAlertDialog(IntentHandlerActivity.this));
+			    }
+			} catch (Exception e) {
+			    // ignore
+			}
+		    }
+
+		}
+	    });
+
+	    t.start();
 	}
     }
 
@@ -131,7 +134,16 @@ public class MainActivity extends Activity {
     }
 
     public static void setHandlers(ControlHandlers handlers) {
-	MainActivity.handlers = handlers;
+	IntentHandlerActivity.handlers = handlers;
+    }
+
+    private IntentControlHandler findResponsibleHandler(URI requestURI) {
+	for (ControlHandler handler : IntentHandlerActivity.handlers.getControlHandlers()) {
+	    if (handler.getID().equals(requestURI.getPath())) {
+		return (IntentControlHandler) handler;
+	    }
+	}
+	return null;
     }
 
 }

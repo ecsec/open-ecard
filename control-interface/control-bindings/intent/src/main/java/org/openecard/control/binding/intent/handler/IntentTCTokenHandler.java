@@ -109,6 +109,7 @@ public class IntentTCTokenHandler extends IntentControlHandler {
 	    TCTokenRequest tcTokenRequest = genericTCTokenHandler.parseRequestURI(requestURI);
 	    TCTokenResponse response = genericTCTokenHandler.handleActivate(tcTokenRequest);
 	    Intent intentresponse = this.handleResponse(response);
+	    intentresponse.putExtra("isTokenFromObject", tcTokenRequest.isTokenFromObject());
 	    return intentresponse;
 	} catch (Exception e) {
 	    logger.error(e.getMessage(), e);

@@ -22,6 +22,7 @@
 
 package org.openecard.android.activities;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -40,16 +41,16 @@ import org.openecard.scio.NFCCardTerminal;
  */
 final class ExtendedLengthAlertDialog implements Runnable {
 
-    private final MainActivity mainActivity;
+    private final Activity activity;
     private final I18n lang = I18n.getTranslation("android");
 
-    ExtendedLengthAlertDialog(MainActivity mainActivity) {
-	this.mainActivity = mainActivity;
+    ExtendedLengthAlertDialog(Activity activity) {
+	this.activity = activity;
     }
 
     @Override
     public void run() {
-	AlertDialog ad = new AlertDialog.Builder(this.mainActivity).create();
+	AlertDialog ad = new AlertDialog.Builder(this.activity).create();
 	ad.setCancelable(false); // This blocks the 'BACK' button
 	int lengthOfLastAPDU = NFCCardTerminal.getInstance().getLengthOfLastAPDU();
 	int maxTransceiveLength = NFCCardTerminal.getInstance().getMaxTransceiveLength();
@@ -62,7 +63,7 @@ final class ExtendedLengthAlertDialog implements Runnable {
 	    @Override
 	    public void onClick(DialogInterface dialog, int which) {
 		dialog.dismiss();
-		mainActivity.finish();
+		activity.finish();
 	    }
 	});
 
@@ -80,9 +81,9 @@ final class ExtendedLengthAlertDialog implements Runnable {
 		    uri = Uri.parse("https://www.openecard.org/en/framework/extendedlength");
 		}
 		i = new Intent(Intent.ACTION_VIEW, uri);
-		AndroidUtils.loadUriInDefaultBrowser(i, mainActivity);
+		AndroidUtils.loadUriInInvokingBrowser(i, activity);
 		dialog.dismiss();
-		mainActivity.finish();
+		activity.finish();
 	    }
 	});
 

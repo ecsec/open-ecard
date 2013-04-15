@@ -51,7 +51,6 @@ public class AndroidUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(AndroidUtils.class);
 
-    private static final String BROWSER_ACTIVITY_NAME = "BrowserActivity";
     public static final String LOGGINGTYPE = "LOGGINGTYPE";
     public static final int NO_LOG = LoggingTypes.NONE.ordinal();
     public static final String EXIT = "EXIT";
@@ -97,14 +96,22 @@ public class AndroidUtils {
     }
 
     /**
-     * Send the Intent for displaying an Uri especially to the default browser. This prevents the 'browser choosing
-     * dialog' from popping up on system with more than one browser installed. We need this because if we close the App
-     * immediately after sending this intent, the choosing dialog will be closed too and the user won't see any site.
+     * Send the Intent for displaying an Uri especially to the browser that invoked the App. This prevents the 'browser
+     * choosing dialog' from popping up on system with more than one browser installed. We need this because if we close
+     * the App immediately after sending this intent, the choosing dialog will be closed too and the user won't see any
+     * site.
      * 
      * @param browserIntent The initial intent for displaying the Uri
      * @param ctx Context of the App
      */
-    public static void loadUriInDefaultBrowser(Intent browserIntent, Context ctx) {
+    public static void loadUriInInvokingBrowser(Intent browserIntent, Context ctx) {
+	String browserActivityName;
+	if (browserIntent.getBooleanExtra("isTokenFromObject", false)) {
+	    // currently only the firefox plugin starts the app this way
+	    browserActivityName = "firefox";
+	} else {
+	    browserActivityName = "browseractivity";
+	}
 	Uri uri = browserIntent.getData();
 	PackageManager packageManager = ctx.getPackageManager();
 	List<ResolveInfo> list = packageManager.queryIntentActivities(browserIntent, 0);
@@ -113,8 +120,8 @@ public class AndroidUtils {
 	    String activityName = resolveInfo.activityInfo.name;
 	    String packageName = resolveInfo.activityInfo.packageName;
 	    logger.debug("checking activity {}", activityName);
-	    if (activityName.contains(BROWSER_ACTIVITY_NAME)) {
-		logger.debug("Found default browser: package: {} activity name: {}", packageName, activityName);
+	    if (activityName.toLowerCase().contains(browserActivityName)) {
+		logger.debug("Found the sought browser: package: {} activity name: {}", packageName, activityName);
 		browserIntent = packageManager.getLaunchIntentForPackage(packageName);
 		ComponentName comp = new ComponentName(packageName, activityName);
 		browserIntent.setAction(Intent.ACTION_VIEW);

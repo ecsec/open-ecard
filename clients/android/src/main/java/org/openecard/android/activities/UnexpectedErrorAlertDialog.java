@@ -22,6 +22,7 @@
 
 package org.openecard.android.activities;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -36,10 +37,10 @@ import org.openecard.common.I18n;
  */
 final class UnexpectedErrorAlertDialog implements Runnable {
 
-    private final MainActivity ctx;
+    private final Activity ctx;
     private final I18n lang = I18n.getTranslation("android");
 
-    UnexpectedErrorAlertDialog(MainActivity ctx) {
+    UnexpectedErrorAlertDialog(Activity ctx) {
 	this.ctx = ctx;
     }
 

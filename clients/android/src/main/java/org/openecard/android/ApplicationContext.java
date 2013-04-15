@@ -40,7 +40,7 @@ import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
 import java.io.File;
 import org.openecard.android.activities.DeviceOpenActivity;
-import org.openecard.android.activities.MainActivity;
+import org.openecard.android.activities.IntentHandlerActivity;
 import org.openecard.android.activities.NFCErrorActivity;
 import org.openecard.android.activities.TerminalFactoryActivity;
 import org.openecard.common.ClientEnv;
@@ -345,7 +345,7 @@ public class ApplicationContext extends Application implements EventCallback {
 	    ControlInterface control = new ControlInterface(binding, handler);
 	    control.start();
 
-	    MainActivity.setHandlers(binding.getHandlers());
+	    IntentHandlerActivity.setHandlers(binding.getHandlers());
 	} catch (Exception e) {
 	    System.exit(0);
 	}

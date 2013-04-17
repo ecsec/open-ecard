@@ -24,11 +24,13 @@ package org.openecard.gui.android;
 
 import android.content.Context;
 import org.openecard.gui.FileDialog;
+import org.openecard.gui.MessageBox;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 
 
 /**
+ * Android implementation of the UserConsent interface.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
@@ -36,6 +38,11 @@ public class AndroidUserConsent implements org.openecard.gui.UserConsent {
 
     private Context context;
 
+    /**
+     * Instantiate AndroidUserConsent with the given context.
+     *
+     * @param context the Context of the App, needed to start new Activities
+     */
     public AndroidUserConsent(Context context) {
 	this.context = context;
     }
@@ -48,6 +55,11 @@ public class AndroidUserConsent implements org.openecard.gui.UserConsent {
     @Override
     public FileDialog obtainFileDialog() {
 	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public MessageBox obtainMessageBox() {
+	return new AndroidMessageBox(this.context);
     }
 
 }

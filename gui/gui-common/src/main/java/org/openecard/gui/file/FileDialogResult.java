@@ -70,6 +70,7 @@ public class FileDialogResult {
     public boolean isOK() {
 	return ! isCancel();
     }
+
     /**
      * Returns the result status of the file dialog.
      *

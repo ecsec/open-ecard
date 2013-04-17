@@ -25,6 +25,7 @@ package org.openecard.plugins.wrapper;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import org.openecard.gui.FileDialog;
+import org.openecard.gui.MessageBox;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
@@ -52,8 +53,8 @@ public class PluginUserConsent implements UserConsent {
 
     @Override
     public UserConsentNavigator obtainNavigator(final UserConsentDescription uc) {
-
 	UserConsentNavigator response = AccessController.doPrivileged(new PrivilegedAction<UserConsentNavigator>() {
+	    @Override
 	    public UserConsentNavigator run() {
 		return userconsent.obtainNavigator(uc);
 	    }
@@ -63,10 +64,21 @@ public class PluginUserConsent implements UserConsent {
 
     @Override
     public FileDialog obtainFileDialog() {
-
 	FileDialog response = AccessController.doPrivileged(new PrivilegedAction<FileDialog>() {
+	    @Override
 	    public FileDialog run() {
 		return userconsent.obtainFileDialog();
+	    }
+	});
+	return response;
+    }
+
+    @Override
+    public MessageBox obtainMessageBox() {
+	MessageBox response = AccessController.doPrivileged(new PrivilegedAction<MessageBox>() {
+	    @Override
+	    public MessageBox run() {
+		return userconsent.obtainMessageBox();
 	    }
 	});
 	return response;

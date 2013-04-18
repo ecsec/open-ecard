@@ -40,6 +40,9 @@ public class GuiUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(GuiUtils.class);
 
+    private static final int IMG_HEIGHT = 81;
+    private static final int IMG_WIDTH = 128;
+
     public static ImageIcon getImageIcon(String name) {
 	URL imageUrl = GuiUtils.class.getResource("images/" + name);
 	if (imageUrl == null) {
@@ -47,6 +50,7 @@ public class GuiUtils {
 	}
 
 	ImageIcon icon = new ImageIcon(imageUrl);
+	icon.setImage(icon.getImage().getScaledInstance(IMG_WIDTH, IMG_HEIGHT, Image.SCALE_SMOOTH));
 	return icon;
     }
 
@@ -54,6 +58,7 @@ public class GuiUtils {
 	ImageIcon icon = new ImageIcon();
 	try {
 	    icon = new ImageIcon(ImageIO.read(imageStream));
+	    icon.setImage(icon.getImage().getScaledInstance(IMG_WIDTH, IMG_HEIGHT, Image.SCALE_SMOOTH));
 	} catch (IOException ex) {
 	    logger.error("Failed to read image stream.", ex);
 	}

@@ -22,8 +22,6 @@
 
 package org.openecard.gui.messagebox;
 
-import org.openecard.gui.MessageBox;
-
 
 /**
  * Result class of the message box.
@@ -34,7 +32,7 @@ import org.openecard.gui.MessageBox;
 public class MessageBoxResult {
 
     private final String userInput;
-    private final int returnValue;
+    private final ReturnType returnValue;
 
     /**
      * Creates a result with the given user input. If the user input is null the returnValue will automatically be set
@@ -44,7 +42,7 @@ public class MessageBoxResult {
      * @param userInput user input as obtained from the dialog, may be null to signal it was canceled
      */
     public MessageBoxResult(String userInput) {
-	this.returnValue = (userInput == null ? MessageBox.CANCEL : MessageBox.OK);
+	this.returnValue = (userInput == null ? ReturnType.CANCEL : ReturnType.OK);
 	this.userInput = userInput;
     }
 
@@ -54,7 +52,7 @@ public class MessageBoxResult {
      * 
      * @param returnValue return value as obtained from the dialog
      */
-    public MessageBoxResult(int returnValue) {
+    public MessageBoxResult(ReturnType returnValue) {
 	this.returnValue = returnValue;
 	this.userInput = null;
     }
@@ -64,7 +62,7 @@ public class MessageBoxResult {
      *
      * @return an integer indicating the option selected by the user
      */
-    public int getReturnValue() {
+    public ReturnType getReturnValue() {
 	return returnValue;
     }
 

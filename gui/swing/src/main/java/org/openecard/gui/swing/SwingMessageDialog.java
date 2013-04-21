@@ -23,76 +23,66 @@
 package org.openecard.gui.swing;
 
 import java.awt.Image;
+import java.util.Arrays;
 import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-import org.openecard.common.I18n;
-import org.openecard.gui.MessageBox;
-import org.openecard.gui.messagebox.DialogType;
-import org.openecard.gui.messagebox.MessageBoxResult;
-import org.openecard.gui.messagebox.OptionType;
-import org.openecard.gui.messagebox.ReturnType;
+import org.openecard.gui.MessageDialog;
+import org.openecard.gui.message.DialogType;
+import org.openecard.gui.message.MessageDialogResult;
+import org.openecard.gui.message.OptionType;
+import org.openecard.gui.message.ReturnType;
 import org.openecard.gui.swing.common.GUIDefaults;
 
 
 /**
- * Swing based MessageBox implementation.
+ * Swing based MessageDialog implementation.
  * This implementation wraps the {@link JOptionPane} class.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class SwingMessageBox implements MessageBox {
+public class SwingMessageDialog implements MessageDialog {
 
     private static final Image frameIcon = GUIDefaults.getImage("Frame.icon", 45, 45).getImage();
-    private final I18n lang = I18n.getTranslation("gui");
-    private final String DEFAULT_TITLE_INPUT;
-    private final String DEFAULT_TITLE_MESSAGE;
-    private final String DEFAULT_TITLE_CONFIRM;
 
-    public SwingMessageBox() {
-	DEFAULT_TITLE_INPUT = lang.translationForKey("default_title_input");
-	DEFAULT_TITLE_MESSAGE = lang.translationForKey("default_title_message");
-	DEFAULT_TITLE_CONFIRM = lang.translationForKey("default_title_confirm");
+    @Override
+    public MessageDialogResult showMessageDialog(String msg, String title) {
+	return showMessageDialog(msg, title, DialogType.INFORMATION_MESSAGE);
     }
 
     @Override
-    public MessageBoxResult showMessage(String msg) {
-	return showMessage(msg, DEFAULT_TITLE_MESSAGE, DialogType.INFORMATION_MESSAGE);
-    }
-
-    @Override
-    public MessageBoxResult showMessage(String msg, String title, DialogType msgType) {
+    public MessageDialogResult showMessageDialog(String msg, String title, DialogType msgType) {
 	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType));
 	JDialog dialog = jop.createDialog(title);
 	dialog.setIconImage(frameIcon);
 	dialog.setVisible(true);
-	return new MessageBoxResult(ReturnType.OK);
+	return new MessageDialogResult(ReturnType.OK);
     }
 
     @Override
-    public MessageBoxResult showMessage(String msg, String title, DialogType msgType, byte[] iconData) {
+    public MessageDialogResult showMessageDialog(String msg, String title, DialogType msgType, byte[] iconData) {
 	ImageIcon icon = new ImageIcon(iconData);
 	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), JOptionPane.DEFAULT_OPTION, icon);
 	JDialog dialog = jop.createDialog(title);
 	dialog.setIconImage(frameIcon);
 	dialog.setVisible(true);
-	return new MessageBoxResult(ReturnType.OK);
+	return new MessageDialogResult(ReturnType.OK);
     }
 
     @Override
-    public MessageBoxResult showConfirmDialog(String msg) {
-	return showConfirmDialog(msg, DEFAULT_TITLE_CONFIRM, OptionType.YES_NO_CANCEL_OPTION);
+    public MessageDialogResult showConfirmDialog(String msg, String title) {
+	return showConfirmDialog(msg, title, OptionType.YES_NO_CANCEL_OPTION);
     }
 
     @Override
-    public MessageBoxResult showConfirmDialog(String msg, String title, OptionType optionType) {
+    public MessageDialogResult showConfirmDialog(String msg, String title, OptionType optionType) {
 	return showConfirmDialog(msg, title, optionType, DialogType.QUESTION_MESSAGE);
     }
 
     @Override
-    public MessageBoxResult showConfirmDialog(String msg, String title, OptionType optionType, DialogType msgType) {
+    public MessageDialogResult showConfirmDialog(String msg, String title, OptionType optionType, DialogType msgType) {
 	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), convertOptionType(optionType));
 	JDialog dialog = jop.createDialog(title);
 	dialog.setIconImage(frameIcon);
@@ -100,14 +90,14 @@ public class SwingMessageBox implements MessageBox {
 
 	Object returnValue = jop.getValue();
 	if (returnValue == null) {
-	    return new MessageBoxResult(ReturnType.CLOSED);
+	    return new MessageDialogResult(ReturnType.CANCEL);
 	} else {
-	    return new MessageBoxResult(convertReturnType((Integer) returnValue));
+	    return new MessageDialogResult(convertReturnType((Integer) returnValue));
 	}
     }
 
     @Override
-    public MessageBoxResult showConfirmDialog(String msg, String title, OptionType optionType, DialogType msgType,
+    public MessageDialogResult showConfirmDialog(String msg, String title, OptionType optionType, DialogType msgType,
 	    byte[] iconData) {
 	ImageIcon icon = new ImageIcon(iconData);
 	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), convertOptionType(optionType), icon);
@@ -117,95 +107,82 @@ public class SwingMessageBox implements MessageBox {
 
 	Object returnValue = jop.getValue();
 	if (returnValue == null) {
-	    return new MessageBoxResult(ReturnType.CLOSED);
+	    return new MessageDialogResult(ReturnType.CANCEL);
 	} else {
-	    return new MessageBoxResult(convertReturnType((Integer) returnValue));
+	    return new MessageDialogResult(convertReturnType((Integer) returnValue));
 	}
     }
 
     @Override
-    public MessageBoxResult showInputDialog(String msg) {
-	return showInputDialog(msg, "");
+    public MessageDialogResult showInputDialog(String msg, String title) {
+	return showInputDialog(msg, title, "");
     }
 
     @Override
-    public MessageBoxResult showInputDialog(String msg, String initialSelectionValue) {
-	JOptionPane jop = new JOptionPane(msg, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
-	JDialog dialog = jop.createDialog(DEFAULT_TITLE_INPUT);
-	dialog.setIconImage(frameIcon);
-	jop.setInitialSelectionValue(initialSelectionValue);
-	jop.setWantsInput(true);
-	dialog.setVisible(true);
-	Object returnValue = jop.getInputValue();
-	if (returnValue == null) {
-	    return new MessageBoxResult((String) null);
-	} else {
-	    return new MessageBoxResult((String) returnValue);
-	}
+    public MessageDialogResult showInputDialog(String msg, String title, String initialValue) {
+	return showInputDialog(msg, title, DialogType.QUESTION_MESSAGE, initialValue);
     }
 
     @Override
-    public MessageBoxResult showInputDialog(String msg, String title, DialogType msgType) {
+    public MessageDialogResult showInputDialog(String msg, String title, DialogType msgType, String initialValue) {
 	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), JOptionPane.OK_CANCEL_OPTION);
 	JDialog dialog = jop.createDialog(title);
 	dialog.setIconImage(frameIcon);
-	jop.setWantsInput(true);
-	dialog.setVisible(true);
-	Object returnValue = jop.getInputValue();
-	if (returnValue == null) {
-	    return new MessageBoxResult((String) null);
-	} else {
-	    return new MessageBoxResult((String) returnValue);
-	}
-    }
-
-    @Override
-    public MessageBoxResult showInputDialog(String msg, String title, DialogType msgType, byte[] iconData,
-	    List<String> options, int initialSelectedIndex) {
-	if (options.isEmpty()) {
-	    throw new IllegalArgumentException("List of options must be given.");
-	}
-	if (initialSelectedIndex > options.size()) {
-	    initialSelectedIndex = 0;
-	}
-	String initialValue = options.get(initialSelectedIndex);
-	ImageIcon icon = new ImageIcon(iconData);
-	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), JOptionPane.OK_CANCEL_OPTION, icon);
-	JDialog dialog = jop.createDialog(title);
-	dialog.setIconImage(frameIcon);
-	jop.setSelectionValues(options.toArray());
 	jop.setInitialSelectionValue(initialValue);
 	jop.setWantsInput(true);
 	dialog.setVisible(true);
 	Object returnValue = jop.getInputValue();
-	if ("uninitializedValue".equals(returnValue) && ! options.contains("uninitializedValue")) {
-	    return new MessageBoxResult(ReturnType.CANCEL);
+	if (returnValue == null) {
+	    return new MessageDialogResult((String) null);
 	} else {
-	    return new MessageBoxResult((String) returnValue);
+	    return new MessageDialogResult((String) returnValue);
 	}
     }
 
     @Override
-    public MessageBoxResult showOptionDialog(String msg, String title, OptionType optionType, DialogType msgType,
-	    byte[] iconData, List<String> options, int initialSelectedIndex) {
-	if (options.isEmpty()) {
+    public MessageDialogResult showInputDialog(String msg, String title, DialogType msgType, byte[] iconData,
+	    int initialSelectedIndex, String... options) {
+	List<String> optionsList = Arrays.asList(options);
+	if (optionsList.isEmpty()) {
 	    throw new IllegalArgumentException("List of options must be given.");
 	}
-	if (initialSelectedIndex > options.size()) {
+	if (initialSelectedIndex > optionsList.size()) {
 	    initialSelectedIndex = 0;
 	}
-	String initialValue = options.get(initialSelectedIndex);
+	String initialValue = optionsList.get(initialSelectedIndex);
+	ImageIcon icon = new ImageIcon(iconData);
+	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), JOptionPane.OK_CANCEL_OPTION, icon);
+	JDialog dialog = jop.createDialog(title);
+	dialog.setIconImage(frameIcon);
+	jop.setSelectionValues(options);
+	jop.setInitialSelectionValue(initialValue);
+	jop.setWantsInput(true);
+	dialog.setVisible(true);
+	Object returnValue = jop.getInputValue();
+	if ("uninitializedValue".equals(returnValue) && ! optionsList.contains("uninitializedValue")) {
+	    return new MessageDialogResult(ReturnType.CANCEL);
+	} else {
+	    return new MessageDialogResult((String) returnValue);
+	}
+    }
+
+    @Override
+    public MessageDialogResult showOptionDialog(String msg, String title, OptionType optionType, DialogType msgType,
+	    byte[] iconData, String... options) {
+	if (options.length == 0) {
+	    throw new IllegalArgumentException("List of options must be given.");
+	}
 	ImageIcon icon = new ImageIcon(iconData);
 	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), convertOptionType(optionType), icon,
-		options.toArray(), initialValue);
+		options);
 	JDialog dialog = jop.createDialog(title);
 	dialog.setIconImage(frameIcon);
 	dialog.setVisible(true);
 	Object returnValue = jop.getValue();
 	if (returnValue == null) {
-	    return new MessageBoxResult(ReturnType.CLOSED);
+	    return new MessageDialogResult(ReturnType.CANCEL);
 	}
-	return new MessageBoxResult((String) returnValue);
+	return new MessageDialogResult((String) returnValue);
     }
 
 
@@ -234,8 +211,8 @@ public class SwingMessageBox implements MessageBox {
 	    case 0:  return ReturnType.OK;
 	    case 1:  return ReturnType.NO;
 	    case 2:  return ReturnType.CANCEL;
-	    default: return ReturnType.CLOSED;
 	}
+	throw new IllegalArgumentException();
     }
 
 }

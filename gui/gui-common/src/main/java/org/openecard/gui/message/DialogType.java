@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.messagebox;
+package org.openecard.gui.message;
 
 
 /**

@@ -28,112 +28,111 @@ import android.content.DialogInterface;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import java.util.List;
-import org.openecard.gui.MessageBox;
-import org.openecard.gui.messagebox.DialogType;
-import org.openecard.gui.messagebox.MessageBoxResult;
-import org.openecard.gui.messagebox.OptionType;
-import org.openecard.gui.messagebox.ReturnType;
+import org.openecard.gui.MessageDialog;
+import org.openecard.gui.message.DialogType;
+import org.openecard.gui.message.MessageDialogResult;
+import org.openecard.gui.message.OptionType;
+import org.openecard.gui.message.ReturnType;
 
 
 /**
- * Android based MessageBox implementation.
+ * Android based MessageDialog implementation.
  * This implementation wraps the {@link AlertDialog} class.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class AndroidMessageBox implements MessageBox {
+public class AndroidMessageDialog implements MessageDialog {
 
     private final AlertDialog ad;
 
     /**
-     * Creates a new AndroidMessageBox using the given Context.
-     * 
+     * Creates a new AndroidMessageDialog using the given Context.
+     *
      * @param context current Context of the App
      */
-    public AndroidMessageBox(Context context) {
-	ad = new AlertDialog.Builder(context).create();  
+    public AndroidMessageDialog(Context context) {
+	ad = new AlertDialog.Builder(context).create();
     }
 
     @Override
-    public MessageBoxResult showMessage(String message) {
+    public MessageDialogResult showMessageDialog(String message, String title) {
 	prepareAlertDialogForShowMessage(message);
 	ad.show();
-	return new MessageBoxResult(ReturnType.OK);
+	return new MessageDialogResult(ReturnType.OK);
     }
 
     @Override
-    public MessageBoxResult showMessage(String message, String title, DialogType messageType) {
+    public MessageDialogResult showMessageDialog(String message, String title, DialogType messageType) {
 	// TODO messageType is currently ignored
 	prepareAlertDialogForShowMessage(message);
 	ad.setTitle(title);
 	ad.show();
-	return new MessageBoxResult(ReturnType.OK);
+	return new MessageDialogResult(ReturnType.OK);
     }
 
     @Override
-    public MessageBoxResult showMessage(String message, String title, DialogType messageType, byte[] iconData) {
+    public MessageDialogResult showMessageDialog(String message, String title, DialogType messageType, byte[] iconData) {
 	// TODO messageType is currently ignored
 	prepareAlertDialogForShowMessage(message);
 	ad.setTitle(title);
 	Drawable image = new BitmapDrawable(BitmapFactory.decodeByteArray(iconData, 0, iconData.length));
 	ad.setIcon(image);
 	ad.show();
-	return new MessageBoxResult(ReturnType.OK);
+	return new MessageDialogResult(ReturnType.OK);
     }
 
     @Override
-    public MessageBoxResult showConfirmDialog(String message) {
+    public MessageDialogResult showConfirmDialog(String message, String title) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public MessageBoxResult showConfirmDialog(String message, String title, OptionType optionType) {
+    public MessageDialogResult showConfirmDialog(String message, String title, OptionType optionType) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public MessageBoxResult showConfirmDialog(String message, String title, OptionType optionType,
+    public MessageDialogResult showConfirmDialog(String message, String title, OptionType optionType,
 	    DialogType messageType) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public MessageBoxResult showConfirmDialog(String message, String title, OptionType optionType,
+    public MessageDialogResult showConfirmDialog(String message, String title, OptionType optionType,
 	    DialogType messageType, byte[] iconData) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public MessageBoxResult showInputDialog(String message) {
+    public MessageDialogResult showInputDialog(String message, String title) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public MessageBoxResult showInputDialog(String message, String initialSelectionValue) {
+    public MessageDialogResult showInputDialog(String message, String title, String initialValue) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public MessageBoxResult showInputDialog(String message, String title, DialogType messageType) {
+    public MessageDialogResult showInputDialog(String message, String title, DialogType messageType, String initialValue) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public MessageBoxResult showInputDialog(String message, String title, DialogType messageType, byte[] iconData,
-	    List<String> selectionValues, int initialSelectionValue) {
+    public MessageDialogResult showInputDialog(String message, String title, DialogType messageType, byte[] iconData,
+	    int initialSelectionIndex, String... selectionValues) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public MessageBoxResult showOptionDialog(String message, String title, OptionType optionType,
-	    DialogType messageType, byte[] iconData, List<String> options, int initialValue) {
+    public MessageDialogResult showOptionDialog(String message, String title, OptionType optionType,
+	    DialogType messageType, byte[] iconData, String... options) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private void prepareAlertDialogForShowMessage(String message) {
-	ad.setCancelable(false); // This blocks the 'BACK' button  
-	ad.setMessage(message);  
+	ad.setCancelable(false); // This blocks the 'BACK' button
+	ad.setMessage(message);
 	ad.setButton("OK", new DialogInterface.OnClickListener() {
 	    @Override
 	    public void onClick(DialogInterface dialog, int which) {

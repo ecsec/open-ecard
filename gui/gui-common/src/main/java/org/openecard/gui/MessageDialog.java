@@ -22,29 +22,29 @@
 
 package org.openecard.gui;
 
-import java.util.List;
-import org.openecard.gui.messagebox.DialogType;
-import org.openecard.gui.messagebox.MessageBoxResult;
-import org.openecard.gui.messagebox.OptionType;
+import org.openecard.gui.message.DialogType;
+import org.openecard.gui.message.MessageDialogResult;
+import org.openecard.gui.message.OptionType;
 
 
 /**
- * Interface for a generic message box.
+ * Interface for a generic message dialog.
  * This and the interfaces used in this definition are modeled after Swings {@link javax.swing.JOptionPane}. However it
  * should be abstract enough to fit under other implementations as well.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public interface MessageBox {
+public interface MessageDialog {
 
     /**
-     * Brings up an information-message dialog with the default title of the implementation.
+     * Brings up an information-message dialog.
      *
      * @param message The message displayed in the box.
-     * @return MessageBoxResult with no return value.
+     * @param title The title string of the dialog.
+     * @return MessageDialogResult with no return value.
      */
-    MessageBoxResult showMessage(String message);
+    MessageDialogResult showMessageDialog(String message, String title);
 
     /**
      * Brings up a dialog that displays a message using the given title and a default icon determined by the messageType
@@ -53,9 +53,9 @@ public interface MessageBox {
      * @param message The message displayed in the dialog.
      * @param title The title string of the dialog.
      * @param messageType The type of message to be displayed.
-     * @return MessageBoxResult with no return value.
+     * @return MessageDialogResult with no return value.
      */
-    MessageBoxResult showMessage(String message, String title, DialogType messageType);
+    MessageDialogResult showMessageDialog(String message, String title, DialogType messageType);
 
     /**
      * Brings up a dialog displaying a message, specifying all parameters.
@@ -64,18 +64,19 @@ public interface MessageBox {
      * @param title The title string of the dialog.
      * @param messageType The type of message to be displayed.
      * @param iconData An icon to display in the dialog that helps the user identify the kind of message in the box.
-     * @return MessageBoxResult with no return value.
+     * @return MessageDialogResult with no return value.
      */
-    MessageBoxResult showMessage(String message, String title, DialogType messageType, byte[] iconData);
+    MessageDialogResult showMessageDialog(String message, String title, DialogType messageType, byte[] iconData);
 
     /**
      * Brings up a dialog with the options Yes, No and Cancel; with the internationalized version of the title 'Select
      * an Option'.
      *
      * @param message The message displayed in the dialog.
-     * @return MessageBoxResult with a result value set conforming to the option selected by the user.
+     * @param title The title string of the dialog.
+     * @return MessageDialogResult with a result value set conforming to the option selected by the user.
      */
-    MessageBoxResult showConfirmDialog(String message);
+    MessageDialogResult showConfirmDialog(String message, String title);
 
     /**
      * Brings up a dialog with the given title where the number of choices is determined by the optionType parameter.
@@ -83,9 +84,9 @@ public interface MessageBox {
      * @param message The message displayed in the dialog.
      * @param title The title string of the dialog.
      * @param optionType The option type of the dialog.
-     * @return MessageBoxResult with a result value set conforming to the option selected by the user.
+     * @return MessageDialogResult with a result value set conforming to the option selected by the user.
      */
-    MessageBoxResult showConfirmDialog(String message, String title, OptionType optionType);
+    MessageDialogResult showConfirmDialog(String message, String title, OptionType optionType);
 
     /**
      * Brings up a dialog using the given title and a default icon determined by the messageType parameter where the
@@ -95,9 +96,9 @@ public interface MessageBox {
      * @param title The title string of the dialog.
      * @param optionType The option type of the dialog.
      * @param messageType The type of message to be displayed.
-     * @return MessageBoxResult with a result value set conforming to the option selected by the user.
+     * @return MessageDialogResult with a result value set conforming to the option selected by the user.
      */
-    MessageBoxResult showConfirmDialog(String message, String title, OptionType optionType, DialogType messageType);
+    MessageDialogResult showConfirmDialog(String message, String title, OptionType optionType, DialogType messageType);
 
     /**
      * Brings up a dialog using the given title and a specified icon, where the number of choices is determined by the
@@ -110,18 +111,19 @@ public interface MessageBox {
      * @param optionType The option type of the dialog.
      * @param messageType The type of message to be displayed.
      * @param iconData An icon to display in the dialog that helps the user identify the kind of message in the box.
-     * @return MessageBoxResult with a result value set conforming to the option selected by the user.
+     * @return MessageDialogResult with a result value set conforming to the option selected by the user.
      */
-    MessageBoxResult showConfirmDialog(String message, String title, OptionType optionType, DialogType messageType,
+    MessageDialogResult showConfirmDialog(String message, String title, OptionType optionType, DialogType messageType,
 	    byte[] iconData);
 
     /**
      * Shows a question-message dialog requesting input from the user.
      *
      * @param message The message displayed in the dialog.
-     * @return a MessageBoxResult with the user's input.
+     * @param title The title string of the dialog.
+     * @return a MessageDialogResult with the user's input.
      */
-    MessageBoxResult showInputDialog(String message);
+    MessageDialogResult showInputDialog(String message, String title);
 
     /**
      * Shows a question-message dialog requesting input from the user, with the input value initialized to
@@ -129,10 +131,10 @@ public interface MessageBox {
      *
      * @param message The message displayed in the dialog.
      * @param title The title string of the dialog.
-     * @param initialSelectionValue The value to initialize the input field.
-     * @return a MessageBoxResult with the user's input.
+     * @param initialValue The value to initialize the input field.
+     * @return a MessageDialogResult with the user's input.
      */
-    MessageBoxResult showInputDialog(String message, String initialSelectionValue);
+    MessageDialogResult showInputDialog(String message, String title, String initialValue);
 
     /**
      * Shows a dialog requesting input from the user with the dialog having the title title and message type
@@ -141,9 +143,10 @@ public interface MessageBox {
      * @param message The message displayed in the dialog.
      * @param title The title string of the dialog.
      * @param messageType The type of message to be displayed.
-     * @return MessageBoxResult with the user's input.
+     * @param initialValue The value to initialize the input field.
+     * @return MessageDialogResult with the user's input.
      */
-    MessageBoxResult showInputDialog(String message, String title, DialogType messageType);
+    MessageDialogResult showInputDialog(String message, String title, DialogType messageType, String initialValue);
 
     /**
      * Prompts the user for input where the initial selection, possible selections, and all other options can be
@@ -156,12 +159,12 @@ public interface MessageBox {
      * @param title The title string of the dialog.
      * @param messageType The type of message to be displayed.
      * @param iconData An icon to display in the dialog that helps the user identify the kind of message in the box.
+     * @param initialSelectionIndex Zero based index of the initially selected value.
      * @param selectionValues Nonempty list of Strings that gives the possible selections.
-     * @param initialSelectionIndex Index of the initially selected value.
-     * @return MessageBoxResult with the user's input.
+     * @return MessageDialogResult with the user's input.
      */
-    MessageBoxResult showInputDialog(String message, String title, DialogType messageType, byte[] iconData,
-	    List<String> selectionValues, int initialSelectionIndex);
+    MessageDialogResult showInputDialog(String message, String title, DialogType messageType, byte[] iconData,
+	    int initialSelectionIndex, String... selectionValues);
 
     /**
      * Brings up a dialog with a specified icon, where the initial choice is determined by the initialValue parameter
@@ -169,17 +172,16 @@ public interface MessageBox {
      * If optionType is YES_NO_OPTION, or YES_NO_CANCEL_OPTION and the options parameter is null, then the options are
      * supplied by the implementation.
      * The messageType parameter is primarily used to supply a default icon from the implementation.
-     * 
+     *
      * @param message The message displayed in the dialog.
      * @param title The title string of the dialog
      * @param optionType The option type of the dialog.
      * @param messageType The type of message to be displayed.
      * @param iconData An icon to display in the dialog that helps the user identify the kind of message int the box.
      * @param options Nonempty list of Strings that gives the possible options.
-     * @param initialSelectionIndex Index of the initially selected value.
-     * @return MessageBoxResult with a result value set conforming to the option selected by the user.
+     * @return MessageDialogResult with a result value set conforming to the option selected by the user.
      */
-    MessageBoxResult showOptionDialog(String message, String title, OptionType optionType, DialogType messageType,
-	    byte[] iconData, List<String> options, int initialSelectionIndex);
+    MessageDialogResult showOptionDialog(String message, String title, OptionType optionType, DialogType messageType,
+	    byte[] iconData, String... options);
 
 }

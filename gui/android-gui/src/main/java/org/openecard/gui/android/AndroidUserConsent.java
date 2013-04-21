@@ -24,7 +24,7 @@ package org.openecard.gui.android;
 
 import android.content.Context;
 import org.openecard.gui.FileDialog;
-import org.openecard.gui.MessageBox;
+import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 
@@ -58,8 +58,8 @@ public class AndroidUserConsent implements org.openecard.gui.UserConsent {
     }
 
     @Override
-    public MessageBox obtainMessageBox() {
-	return new AndroidMessageBox(this.context);
+    public MessageDialog obtainMessageDialog() {
+	return new AndroidMessageDialog(this.context);
     }
 
 }

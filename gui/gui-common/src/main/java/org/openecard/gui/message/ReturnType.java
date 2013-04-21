@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.messagebox;
+package org.openecard.gui.message;
 
 
 /**
@@ -30,17 +30,12 @@ package org.openecard.gui.messagebox;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public enum ReturnType {
-    /** Return value if YES is chosen. */
-    YES,
-    /** Return value if NO is chosen. */
-    NO,
-    /** Return value if CANCEL is chosen. */
-    CANCEL,
-    /** Return value if OK is chosen. */
+
+    /** Return value if the dialog finished with a user acknowledge. */
     OK,
-    /**
-     * Return value if user closes window without selecting anything, more than likely this should be treated as either
-     * a <code>CANCEL_OPTION</code> or <code>NO_OPTION</code>.
-     */
-    CLOSED;
+    /** Return value if the dialog finished with a user deny. */
+    NO,
+    /** Return value if the dialog was cancelled or otherwise aborted. */
+    CANCEL,
+
 }

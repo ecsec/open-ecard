@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 HS Coburg.
+ * Copyright (C) 2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,8 +20,20 @@
  *
  ***************************************************************************/
 
+package org.openecard.gui.message;
+
+
 /**
- * Definition of message box related items. <br/>
- * Currently this only includes the MessageBoxResult class.
+ * Option type describing the messagebox.
+ * Options can be either a yes, no question box, a yes, no question box with a cancel button or an OK, cancel question
+ * box.
+ *
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-package org.openecard.gui.messagebox;
+public enum OptionType {
+
+    YES_NO_OPTION,
+    YES_NO_CANCEL_OPTION,
+    OK_CANCEL_OPTION;
+
+}

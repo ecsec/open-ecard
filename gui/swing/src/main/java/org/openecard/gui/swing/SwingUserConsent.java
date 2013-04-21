@@ -36,7 +36,7 @@ import javax.swing.GroupLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.openecard.gui.FileDialog;
-import org.openecard.gui.MessageBox;
+import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.Step;
@@ -139,8 +139,8 @@ public class SwingUserConsent implements UserConsent {
     }
 
     @Override
-    public MessageBox obtainMessageBox() {
-	return new SwingMessageBox();
+    public MessageDialog obtainMessageDialog() {
+	return new SwingMessageDialog();
     }
 
     private void initializeSidePanel(JPanel panel, JComponent... components) {

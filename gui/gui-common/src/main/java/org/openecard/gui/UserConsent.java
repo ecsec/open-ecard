@@ -50,11 +50,11 @@ public interface UserConsent {
     FileDialog obtainFileDialog();
 
     /**
-     * Obtain an instance of a message box.
+     * Obtain an instance of a message dialog.
      * It is up to the implementation whether the dialog can be reused after display.
      *
-     * @return A class instance implementing the {@link MessageBox} interface.
+     * @return A class instance implementing the {@link MessageDialog} interface.
      */
-    MessageBox obtainMessageBox();
+    MessageDialog obtainMessageDialog();
 
 }

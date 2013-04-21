@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2013 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,16 +25,16 @@ package org.openecard.plugins.wrapper;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import org.openecard.gui.FileDialog;
-import org.openecard.gui.MessageBox;
+import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 
 
 /**
- * Wrapper for implementations of the {@code UserConsent}-interface that should be used by plugins. Each method-call is
- * wrapped by a doPrivileged-call to give the plugins the possibility to call our code that performs actions, which they
- * would otherwise not have the permissions for.
+ * Wrapper for implementations of the {@code UserConsent}-interface that should be used by plugins.
+ * Each method-call is wrapped by a doPrivileged-call to give the plugins the possibility to call our code that performs
+ * actions, which they would otherwise not have the permissions for.
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
@@ -74,11 +74,11 @@ public class PluginUserConsent implements UserConsent {
     }
 
     @Override
-    public MessageBox obtainMessageBox() {
-	MessageBox response = AccessController.doPrivileged(new PrivilegedAction<MessageBox>() {
+    public MessageDialog obtainMessageDialog() {
+	MessageDialog response = AccessController.doPrivileged(new PrivilegedAction<MessageDialog>() {
 	    @Override
-	    public MessageBox run() {
-		return userconsent.obtainMessageBox();
+	    public MessageDialog run() {
+		return userconsent.obtainMessageDialog();
 	    }
 	});
 	return response;

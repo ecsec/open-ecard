@@ -20,47 +20,47 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.messagebox;
+package org.openecard.gui.message;
 
 
 /**
- * Result class of the message box.
+ * Result class of the message dialog.
  * This class holds the selection the user made and if applicable also the user's input.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class MessageBoxResult {
+public class MessageDialogResult {
 
     private final String userInput;
     private final ReturnType returnValue;
 
     /**
-     * Creates a result with the given user input. If the user input is null the returnValue will automatically be set
-     * to {@code MessageBox.CANCEL}, otherwise it will be set to {@code MessageBox.OK}. Should be used if the user is
-     * able to enter input into the message box.
-     * 
+     * Creates a result with the given user input.
+     * If the user input is null the returnValue will automatically be set to {@code ReturnType.CANCEL}, otherwise it
+     * will be set to {@code ReturnType.OK}. Should be used if the user is able to enter input into the message dialog.
+     *
      * @param userInput user input as obtained from the dialog, may be null to signal it was canceled
      */
-    public MessageBoxResult(String userInput) {
+    public MessageDialogResult(String userInput) {
 	this.returnValue = (userInput == null ? ReturnType.CANCEL : ReturnType.OK);
 	this.userInput = userInput;
     }
 
     /**
-     * Creates a result with the given return value and sets the input to null. Should be used if the user is NOT able
-     * to enter input into the message box.
-     * 
+     * Creates a result with the given return value and sets the input to null.
+     * Should be used if the user is NOT able to enter input into the message dialog.
+     *
      * @param returnValue return value as obtained from the dialog
      */
-    public MessageBoxResult(ReturnType returnValue) {
+    public MessageDialogResult(ReturnType returnValue) {
 	this.returnValue = returnValue;
 	this.userInput = null;
     }
 
     /**
-     * Returns the return value of the message box.
+     * Gets the return value of the message dialog.
      *
-     * @return an integer indicating the option selected by the user
+     * @return A result indicating the outcome of the dialog.
      */
     public ReturnType getReturnValue() {
 	return returnValue;
@@ -68,9 +68,8 @@ public class MessageBoxResult {
 
     /**
      * Returns the user's input.
-     * 
-     * @return if the message box allowed the user to enter something and it was not canceled, this returns the
-     *         user's input, otherwise null
+     *
+     * @return The user input or null if the dialog was cancelled.
      */
     public String getUserInput() {
 	return userInput;

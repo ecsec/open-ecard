@@ -83,43 +83,38 @@ public class IntentHandlerActivity extends Activity {
      * @param intent The intent the application was started with.
      */
     private void handleIntent(final Intent requestIntent) {
-	String action = requestIntent.getAction();
-	if (Intent.ACTION_VIEW.equals(action)) {
-	    final URI requestURI = URI.create(requestIntent.getDataString());
-	    Thread t = new Thread(new Runnable() {
-
-		@Override
-		public void run() {
-		    IntentControlHandler handler = findResponsibleHandler(requestURI);
-		    if (handler == null) {
-			logger.error("No handler found for the requestURI {}", requestURI);
-			IntentHandlerActivity.this.finish();
-		    }
-		    responseIntent = handler.handle(requestIntent);
-
-		    if (responseIntent.getAction().equals(Intent.ACTION_VIEW)) {
-			AndroidUtils.loadUriInInvokingBrowser(responseIntent, IntentHandlerActivity.this);
-			// authentication is finished we can close the App immediately
-			IntentHandlerActivity.this.finish();
-		    } else if (responseIntent.getAction().equals(ECardConstants.Minor.SAL.CANCELLATION_BY_USER)) {
-			IntentHandlerActivity.this.finish();
-		    } else {
-			try {
-			    int lengthOfLastAPDU = NFCCardTerminal.getInstance().getLengthOfLastAPDU();
-			    int maxTransceiveLength = NFCCardTerminal.getInstance().getMaxTransceiveLength();
-			    if (lengthOfLastAPDU > maxTransceiveLength && maxTransceiveLength > 0) {
-				runOnUiThread(new ExtendedLengthAlertDialog(IntentHandlerActivity.this));
-			    }
-			} catch (Exception e) {
-			    // ignore
-			}
-		    }
-
+	final URI requestURI = URI.create(requestIntent.getDataString());
+	Thread t = new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+		IntentControlHandler handler = findResponsibleHandler(requestURI);
+		if (handler == null) {
+		    logger.error("No handler found for the requestURI {}", requestURI);
+		    IntentHandlerActivity.this.finish();
 		}
-	    });
+		responseIntent = handler.handle(requestIntent);
 
-	    t.start();
-	}
+		if (responseIntent.getAction().equals(Intent.ACTION_VIEW)) {
+		    AndroidUtils.loadUriInInvokingBrowser(responseIntent, IntentHandlerActivity.this);
+		    // authentication is finished we can close the App immediately
+		    IntentHandlerActivity.this.finish();
+		} else if (responseIntent.getAction().equals(ECardConstants.Minor.SAL.CANCELLATION_BY_USER)) {
+		    IntentHandlerActivity.this.finish();
+		} else {
+		    try {
+			int lengthOfLastAPDU = NFCCardTerminal.getInstance().getLengthOfLastAPDU();
+			int maxTransceiveLength = NFCCardTerminal.getInstance().getMaxTransceiveLength();
+			if (lengthOfLastAPDU > maxTransceiveLength && maxTransceiveLength > 0) {
+			    runOnUiThread(new ExtendedLengthAlertDialog(IntentHandlerActivity.this));
+			}
+		    } catch (Exception e) {
+			// ignore
+		    }
+		}
+	    }
+	});
+
+	t.start();
     }
 
     private void displayText(final String text) {

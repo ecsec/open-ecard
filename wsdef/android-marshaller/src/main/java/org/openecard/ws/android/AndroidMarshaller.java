@@ -1093,6 +1093,10 @@ public class AndroidMarshaller implements WSMarshaller {
 				.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
 			internationalString.setValue(parser.nextText());
 			cardInfo.getCardType().getCardTypeName().add(internationalString);
+		    } else if (parser.getName().equals("SpecificationBodyOrIssuer")) {
+			cardInfo.getCardType().setSpecificationBodyOrIssuer(parser.nextText());
+		    } else if (parser.getName().equals("Status")) {
+			cardInfo.getCardType().setStatus(parser.nextText());
 		    }
 		}
 	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("CardInfo")));

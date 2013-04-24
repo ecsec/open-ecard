@@ -196,11 +196,8 @@ public class IFD implements org.openecard.ws.IFD {
 		    ctxHandle = null;
 		    numClients = null;
 		    // terminate thread pool
-		    threadPool.shutdown(); // wait for threads to die and block new requests
-		    if (! threadPool.isTerminated()) {
-			threadPool.awaitTermination(10, TimeUnit.SECONDS); // wait for a clean shutdown
-			threadPool.shutdownNow(); // force shutdown
-		    }
+		    threadPool.shutdownNow(); // wait for threads to die and block new requests
+		    // just assume it worked ... and don't wait
 		    threadPool = null;
 		    asyncWaitThreads = null;
 		}

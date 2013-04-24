@@ -313,6 +313,7 @@ public class ApplicationContext extends Application implements EventCallback {
 
 	try {
 	    recognition = new CardRecognition(ifd, contextHandle);
+	    recognition.setGUI(gui);
 	} catch (Exception ex) {
 	    logger.error(ex.getMessage(), ex);
 	    MessageDialog dialog = gui.obtainMessageDialog();

@@ -186,6 +186,7 @@ public final class RichClient {
 	    SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper());
 	    sal.setGUI(gui);
 	    ifd.setGUI(gui);
+	    recognition.setGUI(gui);
 
 	    tray.endSetup(recognition);
 	    em.registerAllEvents(tray.status());

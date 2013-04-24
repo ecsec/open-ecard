@@ -22,6 +22,8 @@
 
 package org.openecard.recognition;
 
+import iso.std.iso_iec._24727.tech.schema.BeginTransaction;
+import iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse;
 import iso.std.iso_iec._24727.tech.schema.CardCall;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.Connect;
@@ -30,6 +32,8 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import iso.std.iso_iec._24727.tech.schema.DataMaskType;
 import iso.std.iso_iec._24727.tech.schema.Disconnect;
 import iso.std.iso_iec._24727.tech.schema.DisconnectResponse;
+import iso.std.iso_iec._24727.tech.schema.EndTransaction;
+import iso.std.iso_iec._24727.tech.schema.EndTransactionResponse;
 import iso.std.iso_iec._24727.tech.schema.GetCardInfoOrACD;
 import iso.std.iso_iec._24727.tech.schema.GetCardInfoOrACDResponse;
 import iso.std.iso_iec._24727.tech.schema.GetRecognitionTreeResponse;
@@ -52,11 +56,15 @@ import java.util.TreeMap;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.I18n;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.FileUtils;
+import org.openecard.gui.MessageDialog;
+import org.openecard.gui.UserConsent;
+import org.openecard.gui.message.DialogType;
 import org.openecard.recognition.staticrepo.LocalCifRepo;
 import org.openecard.recognition.statictree.LocalFileTree;
 import org.openecard.ws.GetRecognitionTree;
@@ -74,6 +82,7 @@ import org.slf4j.LoggerFactory;
 public class CardRecognition {
 
     private static final Logger _logger = LoggerFactory.getLogger(CardRecognition.class);
+    private final I18n lang = I18n.getTranslation("recognition");
 
     private final RecognitionTree tree;
 
@@ -85,6 +94,7 @@ public class CardRecognition {
     private final IFD ifd;
     private final byte[] ctx;
 
+    private UserConsent gui;
 
     /**
      * Create recognizer with tree from local (file based) repository.
@@ -120,6 +130,9 @@ public class CardRecognition {
 	this.tree = resp.getRecognitionTree();
     }
 
+    public void setGUI(UserConsent gui) {
+	this.gui = gui;
+    }
 
     public List<CardInfoType> getCardInfos() {
 	// TODO: add caching
@@ -131,7 +144,7 @@ public class CardRecognition {
 	ArrayList<CardInfoType> result = new ArrayList<CardInfoType>();
 	for (Object next : cifs) {
 	    if (next instanceof CardInfoType) {
-			result.add((CardInfoType) next);
+		result.add((CardInfoType) next);
 	    }
 	}
 	return result;
@@ -277,6 +290,19 @@ public class CardRecognition {
 	}
     }
 
+    /**
+     * Returns the fibonacci number for a given index.
+     *
+     * @param idx index
+     * @return the fibonacci number for the given index
+     */
+    private long fibonacci(int idx) {
+	if (idx == 1 || idx == 2) {
+	    return 1;
+	} else {
+	    return fibonacci(idx - 1) + fibonacci(idx - 2);
+	}
+    }
 
     private byte[] connect(String ifdName, BigInteger slot) throws RecognitionException {
 	Connect c = new Connect();
@@ -287,13 +313,57 @@ public class CardRecognition {
 	ConnectResponse r = ifd.connect(c);
 	checkResult(r.getResult());
 
+	waitForExclusiveCardAccess(r.getSlotHandle(), ifdName);
+
 	return r.getSlotHandle();
     }
 
+    /**
+     * This method tries to get exclusive card access until it is granted.
+     * The waiting delay between the attempts is determined by the fibonacci numbers.
+     *
+     * @param slotHandle slot handle specifying the card to get exclusive access for
+     * @param ifdName Name of the IFD in which the card is inserted
+     */
+    private void waitForExclusiveCardAccess(byte[] slotHandle, String ifdName) {
+	String resultMajor;
+	int i = 2;
+	do {
+	    // try to get exclusive card access for the recognition run
+	    BeginTransaction trans = new BeginTransaction();
+	    trans.setSlotHandle(slotHandle);
+	    BeginTransactionResponse resp = ifd.beginTransaction(trans);
+	    resultMajor = resp.getResult().getResultMajor();
+
+	    if (! resultMajor.equals(ECardConstants.Major.OK)) {
+		// could not get exclusive card access, wait in increasingly longer intervals and retry
+		try {
+		    long waitInSeconds = fibonacci(i);
+		    i++;
+		    _logger.debug("Could not get exclusive card access. Trying again in {} seconds.", waitInSeconds);
+		    if (i == 6 && gui != null) {
+			MessageDialog dialog = gui.obtainMessageDialog();
+			String message = lang.translationForKey("message", ifdName);
+			String title = lang.translationForKey("error", ifdName);
+			dialog.showMessageDialog(message, title, DialogType.WARNING_MESSAGE);
+		    }
+		    Thread.sleep(1000 * waitInSeconds);
+		} catch (InterruptedException e) {
+		    // ignore
+		}
+	    }
+	} while (! resultMajor.equals(ECardConstants.Major.OK));
+    }
+
     private void disconnect(byte[] slotHandle) throws RecognitionException {
+	// end exclusive card access
+	EndTransaction end = new EndTransaction();
+	end.setSlotHandle(slotHandle);
+	EndTransactionResponse endTransactionResponse = ifd.endTransaction(end);
+	checkResult(endTransactionResponse.getResult());
+
 	Disconnect c = new Disconnect();
 	c.setSlotHandle(slotHandle);
-
 	DisconnectResponse r = ifd.disconnect(c);
 	checkResult(r.getResult());
     }

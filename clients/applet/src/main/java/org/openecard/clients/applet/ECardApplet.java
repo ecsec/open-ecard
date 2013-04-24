@@ -136,6 +136,7 @@ public class ECardApplet extends JApplet {
 	// CardRecognition
 	try {
 	    recognition = new CardRecognition(ifd, contextHandle);
+	    recognition.setGUI(gui);
 	} catch (Exception ex) {
 	    logger.error(ex.getMessage(), ex);
 	    JOptionPane.showMessageDialog(null, lang.translationForKey("recognition.error"), lang

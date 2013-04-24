@@ -77,6 +77,7 @@ public class DeviceOpenActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
+	logger.debug("onCreate");
 	intent = getIntent();
 	// finish, we've been only started to lay on top of the activity stack for the next start
 	if (intent.getBooleanExtra(AndroidUtils.EXIT, false)) {
@@ -93,6 +94,7 @@ public class DeviceOpenActivity extends Activity {
     @Override
     protected void onStart() {
 	super.onStart();
+	logger.debug("onStart");
 	permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(USB_PERMISSION), 0);
 	registerReceiver(mUsbReceiver, new IntentFilter(USB_PERMISSION));
 	findDevice(DeviceOpenActivity.this);
@@ -135,6 +137,7 @@ public class DeviceOpenActivity extends Activity {
      * @param ctx Context of the DeviceOpenActivity
      */
     public static void findDevice(final DeviceOpenActivity ctx) {
+	logger.debug("findDevice");
 	final UsbManager manager = (UsbManager) ctx.getSystemService(Context.USB_SERVICE);
 	UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
@@ -155,13 +158,21 @@ public class DeviceOpenActivity extends Activity {
 	} else {
 	    ctx.openDevice(device);
 	}
-	// no device found, just start without one
-	if (!((ApplicationContext) ctx.getApplicationContext()).isInitialized()) {
-	    Intent i = new Intent(ctx, AboutActivity.class);
-	    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-	    ctx.startActivity(i);
+	// all available devices added, start next activity
+	if (! ((ApplicationContext) ctx.getApplicationContext()).isInitialized()) {
+	    if (intent.getAction() == Intent.ACTION_VIEW) {
+		Intent i = new Intent(ctx, IntentHandlerActivity.class);
+		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		i.setData(intent.getData());
+		ctx.startActivity(i);
+	    } else {
+		Intent i = new Intent(ctx, AboutActivity.class);
+		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		ctx.startActivity(i);
+	    }
+	} else {
+	    ctx.finish();
 	}
-	ctx.finish();
     }
 
     /**
@@ -264,6 +275,7 @@ public class DeviceOpenActivity extends Activity {
 			startUnixSocketServer(fdSocket, deviceDescriptor);
 			break;
 		    }
+		    findDevice(DeviceOpenActivity.this);
 		    try {
 			logger.debug("No matching device descriptor recorded yet; waiting 1 second.");
 			Thread.sleep(1000);

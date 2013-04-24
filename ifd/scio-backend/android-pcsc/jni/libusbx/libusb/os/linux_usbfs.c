@@ -50,7 +50,7 @@
 
 #define MAXLINE (1024)
 #define CONTROLLEN  CMSG_LEN(sizeof(int))
-#define LOGI(...) /*((void)__android_log_print(ANDROID_LOG_INFO, "linux_usbfs.c", __VA_ARGS__))*/
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "linux_usbfs.c", __VA_ARGS__))
 
 static struct cmsghdr   *cmptr = NULL;      /* malloc'ed first time */
 

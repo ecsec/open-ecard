@@ -81,7 +81,7 @@
 #define LT_OBJDIR ".libs/"
 
 /* Disable logging support */
-#define NO_LOG 1
+#define NO_LOG 0
 
 /* Define to 1 if your C compiler doesn't accept -c and -o together. */
 /* #undef NO_MINUS_C_MINUS_O */

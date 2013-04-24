@@ -23,30 +23,6 @@
         android:icon="@drawable/openecard"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Holo.Light" >
-        <activity android:name=".activities.IntentHandlerActivity" >
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="http" />
-                <data android:host="127.0.0.1" />
-                <data android:port="24727" />
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="http" />
-                <data android:host="localhost" />
-                <data android:port="24727" />
-            </intent-filter>
-        </activity>
 
         <activity
             android:name=".activities.NFCErrorActivity"
@@ -58,11 +34,30 @@
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/app_name" 
             android:exported="true"
-            android:theme="@android:style/Theme.Translucent" >
+            android:theme="@android:style/Theme.Translucent"
+            android:clearTaskOnLaunch="true" >
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:host="127.0.0.1" />
+                <data android:port="24727" />
+            </intent-filter>
+
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:host="localhost" />
+                <data android:port="24727" />
             </intent-filter>
 
             <intent-filter>
@@ -103,7 +98,7 @@
             android:name=".activities.LogViewerActivity"
             android:configChanges="orientation|keyboardHidden" />
         <activity
-            android:name="org.openecard.gui.android.MessageDialogActivity"
+            android:name=".activities.IntentHandlerActivity"
             android:configChanges="orientation|keyboardHidden" />
 
         <service android:name=".TCTokenService" >

@@ -215,7 +215,7 @@ public class EventManager implements org.openecard.common.interfaces.EventManage
 
     @Override
     public synchronized Object initialize() {
-	this.threadPool = Executors.newCachedThreadPool();
+	threadPool = Executors.newCachedThreadPool();
 	// start watcher thread
 	watcher = threadPool.submit(new EventRunner(this));
 	// TODO: remove return value altogether
@@ -225,7 +225,7 @@ public class EventManager implements org.openecard.common.interfaces.EventManage
     @Override
     public synchronized void terminate() {
 	watcher.cancel(true);
-	this.threadPool.shutdown();
+	threadPool.shutdownNow();
     }
 
     protected synchronized void notify(EventType eventType, Object eventData) {

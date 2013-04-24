@@ -1107,9 +1107,10 @@ public class AndroidMarshaller implements WSMarshaller {
 		    } else if (parser.getName().equals("Status")) {
 			cardInfo.getCardType().setStatus(parser.nextText());
 		    } else if (parser.getName().equals("Date")) {
-			String text = parser.nextText();
+			// currently not working; see http://code.google.com/p/android/issues/detail?id=14379
+			/*String text = parser.nextText();
 			XMLGregorianCalendar date = DatatypeFactory.newInstance().newXMLGregorianCalendar(text);
-			cardInfo.getCardType().setDate(date);
+			cardInfo.getCardType().setDate(date);*/
 		    } else if (parser.getName().equals("Version")) {
 			cardInfo.getCardType().setVersion(this.parseVersion(parser));
 		    }

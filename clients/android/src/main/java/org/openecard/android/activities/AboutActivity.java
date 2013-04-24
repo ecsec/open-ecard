@@ -216,6 +216,7 @@ public class AboutActivity extends ActivityGroup {
 
     @Override
     protected void onDestroy() {
+	logger.debug("onDestroy");
 	applicationContext.shutdown();
 	super.onDestroy();
     }

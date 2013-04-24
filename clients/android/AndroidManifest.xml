@@ -72,9 +72,10 @@
             <meta-data
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
+
         </activity>
 
-         <activity
+        <activity
             android:name=".activities.AboutActivity"
             android:configChanges="orientation|keyboardHidden" />
         <activity
@@ -100,6 +101,9 @@
             android:configChanges="orientation|keyboardHidden" />
         <activity
             android:name=".activities.LogViewerActivity"
+            android:configChanges="orientation|keyboardHidden" />
+        <activity
+            android:name="org.openecard.gui.android.MessageDialogActivity"
             android:configChanges="orientation|keyboardHidden" />
 
         <service android:name=".TCTokenService" >

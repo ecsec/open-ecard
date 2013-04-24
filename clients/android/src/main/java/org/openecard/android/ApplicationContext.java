@@ -59,8 +59,10 @@ import org.openecard.control.handler.ControlHandler;
 import org.openecard.control.handler.ControlHandlers;
 import org.openecard.control.module.tctoken.GenericTCTokenHandler;
 import org.openecard.event.EventManager;
+import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.android.AndroidUserConsent;
+import org.openecard.gui.message.DialogType;
 import org.openecard.ifd.protocol.pace.PACEProtocolFactory;
 import org.openecard.ifd.scio.IFD;
 import org.openecard.ifd.scio.IFDException;
@@ -106,7 +108,6 @@ public class ApplicationContext extends Application implements EventCallback {
     private byte[] contextHandle;
     private Dispatcher dispatcher;
     private boolean initialized;
-    private boolean recognizeCard = true;
     private UserConsent gui;
     private AndroidTerminalFactory terminalFactory;
     private boolean usingNFC;
@@ -292,26 +293,34 @@ public class ApplicationContext extends Application implements EventCallback {
 	    if (establishContextResponse.getContextHandle() != null) {
 		contextHandle = establishContextResponse.getContextHandle();
 	    } else {
-		throw new RuntimeException("Cannot establish context");
+		logger.error("EstablishContext failed.");
+		MessageDialog dialog = gui.obtainMessageDialog();
+		String message = lang.translationForKey("ifd.context.error");
+		String title = lang.translationForKey("error");
+		dialog.showMessageDialog(message, title, DialogType.ERROR_MESSAGE);
+		shutdown();
+		System.exit(0);
 	    }
 	} else {
-	    throw new RuntimeException("Cannot establish context");
+	    logger.error("EstablishContext failed.");
+	    MessageDialog dialog = gui.obtainMessageDialog();
+	    String message = lang.translationForKey("ifd.context.error");
+	    String title = lang.translationForKey("error");
+	    dialog.showMessageDialog(message, title, DialogType.ERROR_MESSAGE);
+	    shutdown();
+	    System.exit(0);
 	}
 
-	if (recognizeCard) {
-	    try {
-		// TODO: reactivate remote tree repository as soon as it
-		// supports the embedded TLSMarker
-		// GetRecognitionTree client = (GetRecognitionTree)
-		// WSClassLoader.getClientService(RecognitionProperties.getServiceName(),
-		// RecognitionProperties.getServiceAddr());
-		recognition = new CardRecognition(ifd, contextHandle);
-	    } catch (Exception ex) {
-		// <editor-fold defaultstate="collapsed" desc="log exception">
-		// logger.error(LoggingConstants.THROWING, "Exception", ex);
-		// </editor-fold>
-		initialized = false;
-	    }
+	try {
+	    recognition = new CardRecognition(ifd, contextHandle);
+	} catch (Exception ex) {
+	    logger.error(ex.getMessage(), ex);
+	    MessageDialog dialog = gui.obtainMessageDialog();
+	    String message = lang.translationForKey("recognition.error");
+	    String title = lang.translationForKey("error");
+	    dialog.showMessageDialog(message, title, DialogType.ERROR_MESSAGE);
+	    shutdown();
+    	    System.exit(0);
 	}
 
 	// EventManager

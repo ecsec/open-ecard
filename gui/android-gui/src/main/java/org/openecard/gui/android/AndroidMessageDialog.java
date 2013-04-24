@@ -22,12 +22,8 @@
 
 package org.openecard.gui.android;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+import android.content.Intent;
 import org.openecard.gui.MessageDialog;
 import org.openecard.gui.message.DialogType;
 import org.openecard.gui.message.MessageDialogResult;
@@ -37,13 +33,18 @@ import org.openecard.gui.message.ReturnType;
 
 /**
  * Android based MessageDialog implementation.
- * This implementation wraps the {@link AlertDialog} class.
+ * This implementation uses an Activity to show the MessageDialogs.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class AndroidMessageDialog implements MessageDialog {
 
-    private final AlertDialog ad;
+    public static final String ICON = "Icon";
+    public static final String DIALOG_TYPE = "DialogType";
+    public static final String TITLE = "Title";
+    public static final String MESSAGE = "Message";
+    private final Context context;
+    private Intent intent;
 
     /**
      * Creates a new AndroidMessageDialog using the given Context.
@@ -51,33 +52,30 @@ public class AndroidMessageDialog implements MessageDialog {
      * @param context current Context of the App
      */
     public AndroidMessageDialog(Context context) {
-	ad = new AlertDialog.Builder(context).create();
+	this.context = context;
     }
 
     @Override
     public MessageDialogResult showMessageDialog(String message, String title) {
-	prepareAlertDialogForShowMessage(message);
-	ad.show();
+	createBasicMessageDialogIntent(message, title);
+	context.startActivity(intent);
 	return new MessageDialogResult(ReturnType.OK);
     }
 
     @Override
     public MessageDialogResult showMessageDialog(String message, String title, DialogType messageType) {
-	// TODO messageType is currently ignored
-	prepareAlertDialogForShowMessage(message);
-	ad.setTitle(title);
-	ad.show();
+	createBasicMessageDialogIntent(message, title);
+	intent.putExtra(DIALOG_TYPE, messageType);
+	context.startActivity(intent);
 	return new MessageDialogResult(ReturnType.OK);
     }
 
     @Override
     public MessageDialogResult showMessageDialog(String message, String title, DialogType messageType, byte[] iconData) {
-	// TODO messageType is currently ignored
-	prepareAlertDialogForShowMessage(message);
-	ad.setTitle(title);
-	Drawable image = new BitmapDrawable(BitmapFactory.decodeByteArray(iconData, 0, iconData.length));
-	ad.setIcon(image);
-	ad.show();
+	createBasicMessageDialogIntent(message, title);
+	intent.putExtra(DIALOG_TYPE, messageType);
+	intent.putExtra(ICON, iconData);
+	context.startActivity(intent);
 	return new MessageDialogResult(ReturnType.OK);
     }
 
@@ -130,15 +128,11 @@ public class AndroidMessageDialog implements MessageDialog {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    private void prepareAlertDialogForShowMessage(String message) {
-	ad.setCancelable(false); // This blocks the 'BACK' button
-	ad.setMessage(message);
-	ad.setButton("OK", new DialogInterface.OnClickListener() {
-	    @Override
-	    public void onClick(DialogInterface dialog, int which) {
-		dialog.dismiss();
-	    }
-	});
+    private void createBasicMessageDialogIntent(String message, String title) {
+	intent = new Intent(context, MessageDialogActivity.class);
+	intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+	intent.putExtra(MESSAGE, message);
+	intent.putExtra(TITLE, title);
     }
 
 }

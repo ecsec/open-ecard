@@ -22,14 +22,17 @@
 
 package org.openecard.gui.swing;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import org.openecard.gui.FileDialog;
 import org.openecard.gui.file.FileDialogResult;
 import org.openecard.gui.file.FileFilter;
+import org.openecard.gui.swing.common.GUIDefaults;
 import org.openecard.gui.swing.file.SwingFileFilterWrapper;
 
 
@@ -44,7 +47,14 @@ public class SwingFileDialog implements FileDialog {
     private final JFileChooser dialog;
 
     public SwingFileDialog() {
-	this.dialog = new JFileChooser();
+	this.dialog = new JFileChooser() {
+	    @Override
+	    protected JDialog createDialog(Component parent) {
+		JDialog dialog = super.createDialog(parent);
+		dialog.setIconImage(GUIDefaults.getImage("Frame.icon", 45, 45).getImage());
+		return dialog;
+	    }
+	};
 	this.dialog.setPreferredSize(new Dimension(800, 490));
     }
 

@@ -191,6 +191,11 @@ public class CardRecognition {
 	String langCode = userLocale.getLanguage();
 	String enFallback = "Unknown card type.";
 
+	if (info == null) {
+	    // we can identify the card but do not have a card info file for it
+	    return enFallback;
+	}
+
 	for (InternationalStringType typ : info.getCardType().getCardTypeName()) {
 	    if (typ.getLang().equalsIgnoreCase("en")) {
 		enFallback = typ.getValue();

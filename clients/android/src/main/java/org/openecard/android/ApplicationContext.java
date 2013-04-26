@@ -96,6 +96,8 @@ public class ApplicationContext extends Application implements EventCallback {
 
     private static final String SDCARD_OPENECARD = "/sdcard/.openecard/";
     private static final int NOTIFICATION_ID = 22;
+    public static final int RESULTCODE = 1;
+    public static final int REQUESTCODE = 1;
 
     private ClientEnv env;
     private TinySAL sal;
@@ -228,7 +230,7 @@ public class ApplicationContext extends Application implements EventCallback {
 	// if there was no factory set, start the activity to set one and return
 	if (factoryImpl.equals(noFactory)) {
 	    Intent i = new Intent(this, TerminalFactoryActivity.class);
-	    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+	    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	    i.putExtra("firstStart", true);
 	    this.startActivity(i);
 	    return;
@@ -251,7 +253,7 @@ public class ApplicationContext extends Application implements EventCallback {
 	    NfcAdapter adapter = manager.getDefaultAdapter();
 	    if (adapter == null || !adapter.isEnabled()) {
 		Intent i = new Intent(this, NFCErrorActivity.class);
-		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		this.startActivity(i);
 		return;
 	    }

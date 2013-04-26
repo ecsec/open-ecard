@@ -142,6 +142,11 @@ public class CardInfoActivity extends Activity implements EventCallback {
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        //No call for super(). Bug on API Level > 11.
+    }
+
+    @Override
     public void signalEvent(final EventType eventType, final Object eventData) {
 	runOnUiThread(new UiUpdateRunnable(eventType, eventData));
     }

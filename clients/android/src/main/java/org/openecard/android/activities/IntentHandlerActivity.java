@@ -57,9 +57,8 @@ public class IntentHandlerActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-	applicationContext.shutdown();
+	logger.debug("onDestroy");
 	super.onDestroy();
-	System.exit(0);
     }
 
     @Override
@@ -67,6 +66,7 @@ public class IntentHandlerActivity extends Activity {
 	super.onCreate(null);
 
 	setContentView(R.layout.main);
+	setResult(ApplicationContext.RESULTCODE);
 	applicationContext = ((ApplicationContext) getApplicationContext());
 	applicationContext.initialize();
 

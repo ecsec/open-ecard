@@ -38,7 +38,6 @@ import android.util.Xml;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import org.openecard.android.AndroidUtils;
 import org.openecard.android.ApplicationContext;
 import org.openecard.android.R;
 import org.slf4j.Logger;
@@ -64,6 +63,7 @@ public class DeviceOpenActivity extends Activity {
     private static HashMap<String, Integer> fileDescriptors = new HashMap<String, Integer>();
     private static Thread t;
     private static PendingIntent permissionIntent;
+    private static ApplicationContext applicationContext;
 
     private final BroadcastReceiver mUsbReceiver = new UsbPermissionReceiver();
 
@@ -79,12 +79,9 @@ public class DeviceOpenActivity extends Activity {
 	super.onCreate(savedInstanceState);
 	logger.debug("onCreate");
 	intent = getIntent();
-	// finish, we've been only started to lay on top of the activity stack for the next start
-	if (intent.getBooleanExtra(AndroidUtils.EXIT, false)) {
-	    finish();
-	}
 	fdSocket = getFilesDir().getAbsolutePath() + "/socket";
 	pathSocket = getFilesDir().getAbsolutePath() + "/socket2";
+	applicationContext = (ApplicationContext) this.getApplicationContext();
 	if (t == null) {
 	    t = new Thread(new SocketCommunicationRunnable());
 	    t.start();
@@ -101,9 +98,14 @@ public class DeviceOpenActivity extends Activity {
     }
 
     @Override
-    protected void onStop() {
-	super.onStop();
-	unregisterReceiver(mUsbReceiver);
+    protected void onDestroy() {
+	logger.debug("onDestroy");
+	super.onDestroy();
+	try {
+	    unregisterReceiver(mUsbReceiver);
+	} catch (IllegalArgumentException e) {
+	    logger.error(e.getMessage(), e);
+	}
     }
 
     /**
@@ -159,20 +161,32 @@ public class DeviceOpenActivity extends Activity {
 	    ctx.openDevice(device);
 	}
 	// all available devices added, start next activity
-	if (! ((ApplicationContext) ctx.getApplicationContext()).isInitialized()) {
-	    if (intent.getAction() == Intent.ACTION_VIEW) {
-		Intent i = new Intent(ctx, IntentHandlerActivity.class);
-		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-		i.setData(intent.getData());
-		ctx.startActivity(i);
-	    } else {
-		Intent i = new Intent(ctx, AboutActivity.class);
-		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-		ctx.startActivity(i);
-	    }
+	if (intent.getAction() == Intent.ACTION_VIEW) {
+	    // started by a link to localhost
+	    Intent i = new Intent(ctx, IntentHandlerActivity.class);
+	    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+	    i.setData(intent.getData());
+	    ctx.startActivityForResult(i, 1);
+	} else if (intent.getAction() == Intent.ACTION_MAIN || (! applicationContext.isInitialized())) {
+	    // user started the app manually OR attached a supported usb device and the app is closed
+	    Intent i = new Intent(ctx, AboutActivity.class);
+	    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+	    ctx.startActivityForResult(i, 1);
 	} else {
+	    // app is running and a usb device has been attached
 	    ctx.finish();
 	}
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	logger.debug("onActivityResult");
+	super.onActivityResult(requestCode, resultCode, data);
+	if (resultCode == 1) {
+	    ((ApplicationContext) getApplicationContext()).shutdown();
+	    System.exit(0);
+	}
+	finish();
     }
 
     /**
@@ -275,7 +289,6 @@ public class DeviceOpenActivity extends Activity {
 			startUnixSocketServer(fdSocket, deviceDescriptor);
 			break;
 		    }
-		    findDevice(DeviceOpenActivity.this);
 		    try {
 			logger.debug("No matching device descriptor recorded yet; waiting 1 second.");
 			Thread.sleep(1000);

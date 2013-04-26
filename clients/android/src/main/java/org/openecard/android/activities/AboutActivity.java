@@ -83,7 +83,7 @@ public class AboutActivity extends ActivityGroup {
 
 	// Set up the window layout
 	setContentView(R.layout.about);
-
+	setResult(ApplicationContext.RESULTCODE);
 	applicationContext = (ApplicationContext) getApplicationContext();
 	applicationContext.initialize();
 	usingNFC = applicationContext.usingNFC();
@@ -128,8 +128,6 @@ public class AboutActivity extends ActivityGroup {
 		try {
 		    if (tag.equals(tabIndexes[0])) {
 			webView.loadUrl(ASSET_PREFIX + getTranslatedAsset("about", "html"));
-		    } else if (tag.equals(tabIndexes[2])) {
-			webView.loadUrl(ASSET_PREFIX + getTranslatedAsset("demo", "html"));
 		    } else if (tag.equals(tabIndexes[3])) {
 			webView.loadUrl(ASSET_PREFIX + getTranslatedAsset("join", "html"));
 		    } else if (tag.equals(tabIndexes[5])) {
@@ -154,7 +152,8 @@ public class AboutActivity extends ActivityGroup {
 	tabs.addTab(tspec2);
 	TabSpec tspec3 = tabs.newTabSpec(tabIndexes[2]);
 	tspec3.setIndicator(langAndroid.translationForKey("about.tab.demo"));
-	tspec3.setContent(tabContentFactory);
+	Intent demoIntent = new Intent(this, DemoActivity.class);
+	tspec3.setContent(demoIntent);
 	tabs.addTab(tspec3);
 	TabSpec tspec4 = tabs.newTabSpec(tabIndexes[3]);
 	tspec4.setIndicator(langAndroid.translationForKey("about.tab.join"));
@@ -217,7 +216,6 @@ public class AboutActivity extends ActivityGroup {
     @Override
     protected void onDestroy() {
 	logger.debug("onDestroy");
-	applicationContext.shutdown();
 	super.onDestroy();
     }
 

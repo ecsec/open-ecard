@@ -93,6 +93,9 @@
         <activity
             android:name=".activities.IntentHandlerActivity"
             android:configChanges="orientation|keyboardHidden" />
+        <activity
+            android:name=".activities.DemoActivity"
+            android:configChanges="orientation|keyboardHidden" />
 
         <service android:name=".TCTokenService" >
             <intent-filter>

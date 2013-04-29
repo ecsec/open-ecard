@@ -24,14 +24,20 @@ package org.openecard.control.module.tctoken;
 
 import generated.TCTokenType;
 import java.math.BigInteger;
+import java.net.URL;
+import java.util.List;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.common.util.Pair;
 import org.openecard.common.util.StringUtils;
 import org.openecard.control.client.ClientRequest;
 
 
 /**
+ * This class represents a TC Token request to the client. It contains the {@link TCTokenType} and situational parts
+ * like the ifdName or the server certificates received while retrieving the TC Token.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class TCTokenRequest extends ClientRequest {
 
@@ -41,7 +47,8 @@ public class TCTokenRequest extends ClientRequest {
     private byte[] contextHandle;
     private String cardType = "http://bsi.bund.de/cif/npa.xml";
     private boolean tokenFromObject;
-    private Certificate certificate;
+    private List<Pair<URL, Certificate>> certificates;
+    private URL tcTokenURL;
 
 
     /**
@@ -154,21 +161,40 @@ public class TCTokenRequest extends ClientRequest {
     }
 
     /**
-     * Sets the certificate of the service where the TCToken has been received.
+     * Sets the server certificates that have been received when the TCToken was retrieved.
      *
-     * @param certificate X509 certificate of the server.
+     * @param certificates List of X509 certificates and the requested URLs of the servers passed.
      */
-    public void setCertificate(Certificate certificate) {
-	this.certificate = certificate;
+    public void setCertificates(List<Pair<URL, Certificate>> certificates) {
+	this.certificates = certificates;
     }
 
     /**
-     * Gets the certificate of the service where the TCToken has been received.
+     * Gets the certificates of the servers that have been passed while the TCToken was retrieved.
      *
-     * @return X509 certificate of the server. May be null, when no certificate is available, e.g. legacy activation.
+     * @return List of the X509 server certificates and the requested URLs. May be null under certain circumstances
+     *   (e.g. legacy activation).
      */
-    public Certificate getCertificate() {
-	return certificate;
+    public List<Pair<URL, Certificate>> getCertificates() {
+	return certificates;
+    }
+
+    /**
+     * Sets the TC Token URL.
+     *
+     * @param tcTokenURL TC Token URL
+     */
+    public void setTCTokenURL(URL tcTokenURL) {
+	this.tcTokenURL = tcTokenURL;
+    }
+
+    /**
+     * Gets the TC Token URL.
+     *
+     * @return TC Token URL
+     */
+    public URL getTCTokenURL() {
+	return tcTokenURL;
     }
 
 }

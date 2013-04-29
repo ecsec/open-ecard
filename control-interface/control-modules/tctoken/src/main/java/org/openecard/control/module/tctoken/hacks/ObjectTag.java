@@ -23,14 +23,41 @@
 package org.openecard.control.module.tctoken.hacks;
 
 import java.io.IOException;
+import java.net.URL;
+import org.openecard.control.module.tctoken.TCTokenRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class ObjectTag {
 
+    private static final Logger logger = LoggerFactory.getLogger(ObjectTag.class);
+
     private static String data;
+
+    /**
+     * Fixes PathSecurity-Parameters if the trailing s is missing.
+     *
+     * @param input Possibly errornous string containing the token.
+     * @return Fixed data.
+     */
+    public static String fixPathSecurityParaneters(String input) {
+	if (! input.contains("PathSecurity-Parameters")) {
+	    input = input.replace("PathSecurity-Parameter", "PathSecurity-Parameters");
+	}
+	if (input.contains("&lt;PSK&gt;")) {
+	    input = input.replace("&lt;PSK&gt;", "<PSK>");
+	}
+	if (input.contains("&lt;/PSK&gt;")) {
+	    input = input.replace("&lt;/PSK&gt;", "</PSK>");
+	}
+	return input;
+    }
 
     /**
      * Return TCTokenType.
@@ -84,6 +111,31 @@ public class ObjectTag {
 	data = input.substring(y + value.length(), input.length());
 
 	return out.toString();
+    }
+
+    /**
+     * Checks if checks according to BSI TR03112-7 3.4.2, 3.4.4 and 3.4.5 must be performed.
+     *
+     * @param tcTokenRequest TC Token request.
+     * @return {@code true} if checks should be performed, {@code false} otherwise.
+     */
+    public static boolean isPerformTR03112Checks(TCTokenRequest tcTokenRequest) {
+	boolean activationChecks = true;
+	String refreshAddress = tcTokenRequest.getTCToken().getRefreshAddress().toString();
+	URL tokenUrl = tcTokenRequest.getTCTokenURL();
+	// disable checks when not using the nPA
+	if (! tcTokenRequest.getCardType().equals("http://bsi.bund.de/cif/npa.xml")) {
+	    activationChecks = false;
+	// disable checks when using test servers with wrong certificates
+	} else if (refreshAddress.startsWith("https://eservice.openecard.org")) {
+	    activationChecks = false;
+	} else if (tokenUrl != null) {
+	    String tokenUrlStr = tokenUrl.toString();
+	    if (tokenUrlStr.startsWith("https://mtg.as.skidentity.de")) {
+		activationChecks = false;
+	    }
+	}
+	return activationChecks;
     }
 
 }

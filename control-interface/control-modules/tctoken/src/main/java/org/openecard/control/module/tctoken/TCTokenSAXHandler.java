@@ -106,7 +106,7 @@ public class TCTokenSAXHandler extends DefaultHandler {
     }
 
     @Override
-    public void characters(char ch[], int start, int length) throws SAXException {
+    public void characters(char[] ch, int start, int length) throws SAXException {
 	// Read only the TCToken.
 	if (read) {
 	    for (int i = start; i < (start + length); i++) {

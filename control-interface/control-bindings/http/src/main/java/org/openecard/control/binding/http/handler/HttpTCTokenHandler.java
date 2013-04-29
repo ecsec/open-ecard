@@ -73,12 +73,12 @@ public class HttpTCTokenHandler extends HttpControlHandler {
 
     /**
      *
-     * @param response
-     * @return
-     * @throws ControlException
+     * @param response TC Token response after handling the activation
+     * @return HTTP Response with a redirect to the determined refreshAddress or with status 400 or 500 in error
+     *    situations
      * @throws Exception
      */
-    private HttpResponse handleResponse(TCTokenResponse response) throws ControlException, Exception {
+    private HttpResponse handleResponse(TCTokenResponse response) throws Exception {
 	HttpResponse httpResponse = new Http11Response(HttpStatus.SC_BAD_REQUEST);
 
 	Result result = response.getResult();
@@ -103,8 +103,7 @@ public class HttpTCTokenHandler extends HttpControlHandler {
     /**
      * Handle a redirect response.
      *
-     * @param location
-     *            Redirect location
+     * @param location Redirect location
      * @return HTTP response
      */
     private HttpResponse handleRedirectResponse(URL location) {
@@ -116,6 +115,7 @@ public class HttpTCTokenHandler extends HttpControlHandler {
 
     /**
      * Handle a error response.
+     *
      * @param message an error message that serves as string entity for the HttpResponse
      * @return a HttpResponse with HttpStatus.SC_BAD_REQUEST containing the error message
      * @throws UnsupportedEncodingException if the charset of the message is not supported
@@ -143,19 +143,18 @@ public class HttpTCTokenHandler extends HttpControlHandler {
 	    response = this.handleResponse(tcTokenResponse);
 	    response.setParams(httpRequest.getParams());
 	    Http11Response.copyHttpResponse(response, httpResponse);
-
 	} catch (ControlException e) {
-	    httpResponse = new Http11Response(HttpStatus.SC_BAD_REQUEST);
+	    response = new Http11Response(HttpStatus.SC_BAD_REQUEST);
 
 	    if (e.getMessage() != null && !e.getMessage().isEmpty()) {
-		httpResponse.setEntity(new StringEntity(e.getMessage(), "UTF-8"));
+		response.setEntity(new StringEntity(e.getMessage(), "UTF-8"));
 	    }
 
 	    if (e instanceof HTTPException) {
-		httpResponse.setStatusCode(((HTTPException) e).getHTTPStatusCode());
+		response.setStatusCode(((HTTPException) e).getHTTPStatusCode());
 	    }
 	} catch (Exception e) {
-	    httpResponse = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+	    response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 	    logger.error(e.getMessage(), e);
 	} finally {
 	    Http11Response.copyHttpResponse(response, httpResponse);

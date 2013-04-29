@@ -22,7 +22,9 @@
 
 package org.openecard.control.module.tctoken;
 
+import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.net.URL;
+import java.util.concurrent.Future;
 import org.openecard.control.client.ClientResponse;
 
 
@@ -34,6 +36,7 @@ import org.openecard.control.client.ClientResponse;
 public class TCTokenResponse extends ClientResponse {
 
     private URL refreshAddress;
+    private Future<StartPAOSResponse> paosTask;
 
     /**
      * Returns the refresh address.
@@ -51,6 +54,14 @@ public class TCTokenResponse extends ClientResponse {
      */
     public void setRefreshAddress(URL refreshAddress) {
 	this.refreshAddress = refreshAddress;
+    }
+
+    public void setPAOSTask(Future<StartPAOSResponse> paosTask) {
+	this.paosTask = paosTask;
+    }
+
+    public Future<StartPAOSResponse> getPAOSTask() {
+	return paosTask;
     }
 
 }

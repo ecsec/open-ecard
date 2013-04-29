@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -279,11 +280,12 @@ public class GenericTCTokenHandler {
 	    paosThread.start();
 	    if (! tokenRequest.isTokenFromObject()) {
 		// wait for computation to finish
-		paosTask.get();
+		waitForTask(paosTask);
 	    }
 
 	    TCTokenResponse response = new TCTokenResponse();
 	    response.setRefreshAddress(new URL(token.getRefreshAddress()));
+	    response.setPAOSTask(paosTask);
 	    response.setResult(WSHelper.makeResultOK());
 
 	    return response;
@@ -297,19 +299,6 @@ public class GenericTCTokenHandler {
 	} catch (MalformedURLException ex) {
 	    logger.error(ex.getMessage(), ex);
 	    throw new PAOSException(ex);
-	} catch (InterruptedException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw new PAOSException(ex);
-	} catch (ExecutionException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    // perform conversion of ExecutionException from the Future to the really expected exceptions
-	    if (ex.getCause() instanceof PAOSException) {
-		throw (PAOSException) ex.getCause();
-	    } else if (ex.getCause() instanceof DispatcherException) {
-		throw (DispatcherException) ex.getCause();
-	    } else {
-		throw new PAOSException(ex);
-	    }
 	}
     }
 
@@ -369,6 +358,8 @@ public class GenericTCTokenHandler {
 	    // perform PAOS and correct redirect address afterwards
 	    response = doPAOS(request, connectionHandle);
 	    response = determineRefreshURL(request, response);
+	    // in case of an object activation we have to wait until the job is done, the future takes care of that
+	    waitForTask(response.getPAOSTask());
 	    return response;
 	} catch (IOException w) {
 	    logger.error(w.getMessage(), w);
@@ -393,6 +384,24 @@ public class GenericTCTokenHandler {
 	}
     }
 
+    private static void waitForTask(Future<?> task) throws PAOSException, DispatcherException {
+	try {
+	    task.get();
+	} catch (InterruptedException ex) {
+	    logger.error(ex.getMessage(), ex);
+	    throw new PAOSException(ex);
+	} catch (ExecutionException ex) {
+	    logger.error(ex.getMessage(), ex);
+	    // perform conversion of ExecutionException from the Future to the really expected exceptions
+	    if (ex.getCause() instanceof PAOSException) {
+		throw (PAOSException) ex.getCause();
+	    } else if (ex.getCause() instanceof DispatcherException) {
+		throw (DispatcherException) ex.getCause();
+	    } else {
+		throw new PAOSException(ex);
+	    }
+	}
+    }
 
     /**
      * Follow the URL in the RefreshAddress of the TCToken as long as it is a redirect (302, 303 or 307) AND is a

@@ -149,14 +149,6 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    CardApplicationDisconnect appDis = new CardApplicationDisconnect();
 	    appDis.setConnectionHandle(connectionHandle);
 	    dispatcher.deliver(appDis);
-
-	    // and clear dynamic context if object activation is used, if not it is performed by the tctoken handler
-	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	    Object objectActivation = dynCtx.get(TR03112Keys.OBJECT_ACTIVATION);
-	    if (objectActivation instanceof Boolean && ((Boolean) objectActivation).booleanValue() == true) {
-		dynCtx.clear();
-		DynamicContext.remove();
-	    }
 	}
     }
 

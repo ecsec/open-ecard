@@ -23,6 +23,7 @@
 package org.openecard.crypto.tls;
 
 import java.io.IOException;
+import javax.annotation.Nullable;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
@@ -42,6 +43,8 @@ public class TlsNoAuthentication implements TlsAuthentication {
 
     private String hostname = null;
     private CertificateVerifier certVerifier = null;
+
+    private Certificate lastCertChain;
 
     /**
      * Sets the host name for the certificate verification step.
@@ -77,6 +80,9 @@ public class TlsNoAuthentication implements TlsAuthentication {
      */
     @Override
     public void notifyServerCertificate(Certificate crtfct) throws IOException {
+	// save server certificate
+	this.lastCertChain = crtfct;
+	// try to validate
 	if (certVerifier != null) {
 	    // perform validation depending on the available parameters
 	    if (hostname != null) {
@@ -100,6 +106,16 @@ public class TlsNoAuthentication implements TlsAuthentication {
     public TlsCredentials getClientCredentials(CertificateRequest cr) throws IOException {
 	String msg = "Client authentication is not supported with this implementation.";
 	throw new UnsupportedOperationException(msg);
+    }
+
+    /**
+     * Returns the certificate chain which is processed during the TLS authentication.
+     *
+     * @return The certificate chain of the last certificate validation or null if none is available.
+     */
+    @Nullable
+    public Certificate getServerCertificate() {
+	return lastCertChain;
     }
 
 }

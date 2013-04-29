@@ -41,9 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
@@ -93,8 +91,6 @@ public class GenericTCTokenHandler {
     private static final Logger logger = LoggerFactory.getLogger(GenericTCTokenHandler.class);
     private final I18n lang = I18n.getTranslation("tctoken");
 
-    private final ExecutorService executor;
-
     private final CardStateMap cardStates;
     private final Dispatcher dispatcher;
     private final UserConsent gui;
@@ -109,8 +105,6 @@ public class GenericTCTokenHandler {
      * @param rec The card recognition engine.
      */
     public GenericTCTokenHandler(CardStateMap cardStates, Dispatcher dispatcher, UserConsent gui, CardRecognition rec) {
-	this.executor = Executors.newCachedThreadPool();
-
 	this.cardStates = cardStates;
 	this.dispatcher = dispatcher;
 	this.gui = gui;
@@ -279,7 +273,9 @@ public class GenericTCTokenHandler {
 
 	    // send StartPAOS
 	    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, tokenRequest);
-	    Future<StartPAOSResponse> paosTask = executor.submit(task);
+	    FutureTask<StartPAOSResponse> paosTask = new FutureTask<StartPAOSResponse>(task);
+	    Thread paosThread = new Thread(paosTask, "PAOS");
+	    paosThread.start();
 	    if (! tokenRequest.isTokenFromObject()) {
 		// wait for computation to finish
 		paosTask.get();
@@ -463,6 +459,7 @@ public class GenericTCTokenHandler {
 	Object objectActivation = dynCtx.get(TR03112Keys.OBJECT_ACTIVATION);
 	if (objectActivation instanceof Boolean && ((Boolean) objectActivation).booleanValue() == false) {
 	    dynCtx.clear();
+	    DynamicContext.remove();
 	}
 	logger.debug("Setting redirect address to '{}'.", endpoint);
 	response.setRefreshAddress(endpoint);

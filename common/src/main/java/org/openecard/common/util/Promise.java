@@ -41,7 +41,6 @@ public class Promise <T> {
 
     private final CountDownLatch gate;
 
-    private boolean isSet;
     private T value;
 
     /**
@@ -49,7 +48,6 @@ public class Promise <T> {
      */
     public Promise() {
 	gate = new CountDownLatch(1);
-	isSet = false;
     }
 
     /**
@@ -58,7 +56,13 @@ public class Promise <T> {
      * @return {@code true} if the promise is delivered, {@code false} otherwise.
      */
     public synchronized boolean isDelivered() {
-	return isSet;
+	try {
+	    boolean isSet = gate.await(0, TimeUnit.MILLISECONDS);
+	    return isSet;
+	} catch (InterruptedException ex) {
+	    // very unlikely if not impossible, but if it happens the right thing to do is probably kill the thread
+	    throw new RuntimeException("Promise interrupted while waiting. Shutting down.");
+	}
     }
 
     /**
@@ -72,9 +76,8 @@ public class Promise <T> {
      * @throws IllegalStateException Thrown in case the promise is already delivered when this function gets called.
      */
     public synchronized @Nullable T deliver(@Nullable final T value) throws IllegalStateException {
-	if (! isSet) {
+	if (! isDelivered()) {
 	    this.value = value;
-	    this.isSet = true;
 	    this.gate.countDown();
 	    return this.value;
 	} else {

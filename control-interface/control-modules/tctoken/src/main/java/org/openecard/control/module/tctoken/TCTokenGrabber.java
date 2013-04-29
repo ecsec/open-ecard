@@ -86,7 +86,7 @@ public class TCTokenGrabber {
 	ArrayList<Pair<URL, Certificate>> serverCerts = new ArrayList<Pair<URL, Certificate>>();
 
 	while (! finished) {
-	    logger.info("Trying to load TCToken from: {}", url);
+	    logger.info("Trying to load resource from: {}", url);
 
 	    if (maxRedirects == 0) {
 		throw new ControlException("Maximum number of redirects exceeded..");

@@ -140,8 +140,8 @@ public class DynamicContext {
     public synchronized Object put(@Nonnull String key, @Nullable Object value) {
 	Promise<Object> p = getPromise(key);
 	if (p.isDelivered()) {
-	    p = new Promise<Object>();
-	    context.put(key, p);
+	    remove(key);
+	    p = getPromise(key);
 	}
 	p.deliver(value);
 	return value;

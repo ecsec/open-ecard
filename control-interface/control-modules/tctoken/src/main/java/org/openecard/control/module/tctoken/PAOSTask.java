@@ -155,6 +155,7 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    Object objectActivation = dynCtx.get(TR03112Keys.OBJECT_ACTIVATION);
 	    if (objectActivation instanceof Boolean && ((Boolean) objectActivation).booleanValue() == true) {
 		dynCtx.clear();
+		DynamicContext.remove();
 	    }
 	}
     }

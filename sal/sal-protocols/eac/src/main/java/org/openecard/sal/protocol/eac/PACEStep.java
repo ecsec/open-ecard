@@ -29,11 +29,16 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse;
 import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
+import org.openecard.common.TR03112Keys;
 import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.ifd.PACECapabilities;
@@ -41,6 +46,9 @@ import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.FunctionType;
 import org.openecard.common.sal.ProtocolStep;
 import org.openecard.common.sal.state.CardStateEntry;
+import org.openecard.common.util.Pair;
+import org.openecard.common.util.Promise;
+import org.openecard.common.util.TR03112Utils;
 import org.openecard.crypto.common.asn1.cvc.CHAT;
 import org.openecard.crypto.common.asn1.cvc.CHATVerifier;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate;
@@ -121,6 +129,20 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    CardVerifiableCertificateChain certChain = new CardVerifiableCertificateChain(eac1Input.getCertificates());
 	    byte[] rawCertificateDescription = eac1Input.getCertificateDescription();
 	    CertificateDescription certDescription = CertificateDescription.getInstance(rawCertificateDescription);
+
+	    final DynamicContext dynCtx =  DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    // put CertificateDescription into DynamicContext which is needed for later checks
+	    //dynCtx.put(DynamicContext.ESERVICE_CERTIFICATE_DESC, certDescription);
+	    Promise<Object> promise = dynCtx.getPromise(TR03112Keys.ESERVICE_CERTIFICATE_DESC);
+	    promise.deliver(certDescription);
+
+	    // according to BSI-INSTANCE_KEY-7 we MUST perform some checks immediately after receiving the eService cert
+	    Result activationChecksResult = performChecks(certDescription, dynCtx);
+	    if (! ECardConstants.Major.OK.equals(activationChecksResult.getResultMajor())) {
+		response.setResult(activationChecksResult);
+		return response;
+	    }
+
 	    CHAT requiredCHAT = new CHAT(eac1Input.getRequiredCHAT());
 	    CHAT optionalCHAT = new CHAT(eac1Input.getOptionalCHAT());
 	    byte pinID = PasswordID.valueOf(didAuthenticate.getDIDName()).getByte();
@@ -215,6 +237,113 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	}
 
 	return response;
+    }
+
+    private boolean convertToBoolean(Object o) {
+	if (o instanceof Boolean) {
+	    return ((Boolean) o).booleanValue();
+	} else {
+	    return false;
+	}
+    }
+
+    /**
+     * Perform all checks as described in BSI-INSTANCE_KEY-7 3.4.4.
+     *
+     * @param certDescription CertificateDescription of the eService Certificate
+     * @param dynCtx Dynamic Context
+     * @return a {@link Result} set according to the results of the checks
+     */
+    private Result performChecks(CertificateDescription certDescription, DynamicContext dynCtx) {
+	Object objectActivation = dynCtx.get(TR03112Keys.OBJECT_ACTIVATION);
+	Object tokenChecks = dynCtx.get(TR03112Keys.TCTOKEN_CHECKS);
+	boolean checkPassed;
+	// omit these checks if explicitly disabled
+	if (convertToBoolean(tokenChecks)) {
+	    checkPassed = checkEserviceCertificate(certDescription, dynCtx);
+	    if (! checkPassed) {
+		String msg = "Hash of eService certificate is NOT contained in the CertificateDescription.";
+		// TODO check for the correct minor type
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.App.UNKNOWN_ERROR, msg);
+		return r;
+	    }
+
+	    // only perform the following checks if new activation is used
+	    if (! convertToBoolean(objectActivation)) {
+		checkPassed = checkTCTokenServerCertificates(certDescription, dynCtx);
+		if (! checkPassed) {
+		    String msg = "Hash of the TCToken server certificate is NOT contained in the CertificateDescription.";
+		    // TODO check for the correct minor type
+		    Result r = WSHelper.makeResultError(ECardConstants.Minor.App.UNKNOWN_ERROR, msg);
+		    return r;
+		}
+
+		checkPassed = checkTCTokenAndSubjectURL(certDescription, dynCtx);
+		if (! checkPassed) {
+		    String msg = "TCToken does not come from the server to which the authorization certificate was issued.";
+		    // TODO check for the correct minor type
+		    Result r = WSHelper.makeResultError(ECardConstants.Minor.App.UNKNOWN_ERROR, msg);
+		    return r;
+		}
+	    } else {
+		logger.warn("Checks according to BSI TR03112 3.4.4 (TCToken specific) skipped.");
+	    }
+	} else {
+	    logger.warn("Checks according to BSI TR03112 3.4.4 skipped.");
+	}
+
+	// all checks passed
+	return WSHelper.makeResultOK();
+    }
+
+    private boolean checkTCTokenAndSubjectURL(CertificateDescription certDescription, DynamicContext dynCtx) {
+	Object o = dynCtx.get(TR03112Keys.TCTOKEN_URL);
+	if (o instanceof URL) {
+	    URL tcTokenURL = (URL) o;
+	    try {
+		URL subjectURL = new URL(certDescription.getSubjectURL());
+		return TR03112Utils.checkSameOriginPolicy(tcTokenURL, subjectURL);
+	    } catch (MalformedURLException e) {
+		logger.error("SubjectURL in CertificateDescription is not a well formed URL.");
+		return false;
+	    }
+	} else {
+	    logger.error("No TC Token URL set in Dynamic Context.");
+	    return false;
+	}
+    }
+
+    private boolean checkEserviceCertificate(CertificateDescription certDescription, DynamicContext dynCtx) {
+	Object o = dynCtx.get(TR03112Keys.ESERVICE_CERTIFICATE);
+	if (o instanceof Certificate) {
+	    Certificate certificate = (Certificate) o;
+	    return TR03112Utils.isInCommCertificates(certificate, certDescription.getCommCertificates());
+	} else {
+	    logger.error("No eService TLS Certificate set in Dynamic Context.");
+	    return false;
+	}
+    }
+
+    private boolean checkTCTokenServerCertificates(CertificateDescription certDescription, DynamicContext dynCtx) {
+	Object o = dynCtx.get(TR03112Keys.TCTOKEN_SERVER_CERTIFICATES);
+	if (o instanceof List) {
+	    List certificates = (List) o;
+	    for (Object cert : certificates) {
+		if (cert instanceof Pair) {
+		    Pair p = (Pair) cert;
+		    if (p.p2 instanceof Certificate) {
+			Certificate bcCert = (Certificate) p.p2;
+			if (! TR03112Utils.isInCommCertificates(bcCert, certDescription.getCommCertificates())) {
+			    return false;
+			}
+		    }
+		}
+	    }
+	    return true;
+	} else {
+	    logger.error("No TC Token server certificates set in Dynamic Context.");
+	    return false;
+	}
     }
 
     /**

@@ -44,8 +44,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.I18n;
+import org.openecard.common.TR03112Keys;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
@@ -54,7 +59,11 @@ import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.HttpRequestLineUtils;
 import org.openecard.common.util.Pair;
+import org.openecard.common.util.Promise;
+import org.openecard.common.util.TR03112Utils;
+import org.openecard.control.ControlException;
 import org.openecard.control.module.tctoken.gui.InsertCardDialog;
+import org.openecard.crypto.common.asn1.cvc.CertificateDescription;
 import org.openecard.gui.UserConsent;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.transport.paos.PAOSException;
@@ -82,6 +91,7 @@ import org.slf4j.LoggerFactory;
 public class GenericTCTokenHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GenericTCTokenHandler.class);
+    private final I18n lang = I18n.getTranslation("tctoken");
 
     private final ExecutorService executor;
 
@@ -145,9 +155,11 @@ public class GenericTCTokenHandler {
 	    if (k.equals("tcTokenURL")) {
 		if (v != null && ! v.isEmpty()) {
 		    try {
-			Pair<TCTokenType, Certificate> token = TCTokenFactory.generateTCToken(new URL(v));
+			URL tcTokenURL = new URL(v);
+			Pair<TCTokenType, List<Pair<URL, Certificate>>> token = TCTokenFactory.generateTCToken(tcTokenURL);
 			tcTokenRequest.setTCToken(token.p1);
-			tcTokenRequest.setCertificate(token.p2);
+			tcTokenRequest.setCertificates(token.p2);
+			tcTokenRequest.setTCTokenURL(tcTokenURL);
 		    } catch (MalformedURLException ex) {
 			String msg = "The tcTokenURL parameter contains an invalid URL: " + v;
 			throw new TCTokenException(msg, ex);
@@ -311,6 +323,20 @@ public class GenericTCTokenHandler {
      * @return The response containing the result of the activation process.
      */
     public TCTokenResponse handleActivate(TCTokenRequest request) {
+	final DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	boolean performChecks = TCTokenHacks.isPerformTR03112Checks(request);
+	if (! performChecks) {
+	    logger.warn("Checks according to BSI TR03112 3.4.2, 3.4.4 (TCToken specific) and 3.4.5 are disabled.");
+	}
+	boolean isObjectActivation = request.getTCTokenURL() == null;
+	if (isObjectActivation) {
+	    logger.warn("Checks according to BSI TR03112 3.4.4 (TCToken specific) are disabled.");
+	}
+	dynCtx.put(TR03112Keys.TCTOKEN_CHECKS, performChecks);
+	dynCtx.put(TR03112Keys.OBJECT_ACTIVATION, isObjectActivation);
+	dynCtx.put(TR03112Keys.TCTOKEN_SERVER_CERTIFICATES, request.getCertificates());
+	dynCtx.put(TR03112Keys.TCTOKEN_URL, request.getTCTokenURL());
+
 	ConnectionHandleType connectionHandle = null;
 	TCTokenResponse response = new TCTokenResponse();
 
@@ -343,7 +369,15 @@ public class GenericTCTokenHandler {
 	}
 
 	try {
-	    return doPAOS(request, connectionHandle);
+	    // perform PAOS and correct redirect address afterwards
+	    response = doPAOS(request, connectionHandle);
+	    response = determineRefreshURL(request, response);
+	    return response;
+	} catch (IOException w) {
+	    logger.error(w.getMessage(), w);
+	    // TODO: check for better matching minor type
+	    response.setResult(WSHelper.makeResultUnknownError(w.getMessage()));
+	    return response;
 	} catch (DispatcherException w) {
 	    logger.error(w.getMessage(), w);
 	    // TODO: check for better matching minor type
@@ -360,6 +394,79 @@ public class GenericTCTokenHandler {
 	    } 
 	    return response;
 	}
+    }
+
+
+    /**
+     * Follow the URL in the RefreshAddress of the TCToken as long as it is a redirect (302, 303 or 307) AND is a
+     * https-URL AND the hash of the retrieved server certificate is contained in the CertificateDescrioption, else
+     * return 400. If the URL and the subjectURL in the CertificateDescription conform to the SOP we reached our final
+     * destination.
+     *
+     * @param endpoint current Redirect location
+     * @return HTTP redirect to the final address the browser should be redirected to
+     * @throws HttpException
+     * @throws IOException
+     * @throws URISyntaxException
+     */
+    private TCTokenResponse determineRefreshURL(TCTokenRequest request, TCTokenResponse response) throws IOException {
+	final DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	URL endpoint = response.getRefreshAddress();
+
+	// determine redirect
+	Pair<String, List<Pair<URL, Certificate>>> result = TCTokenGrabber.getResource(endpoint);
+	List<Pair<URL, Certificate>> resultPoints = result.p2;
+	Pair<URL, Certificate> last = resultPoints.get(resultPoints.size() - 1);
+
+	// disable certificate checks according to BSI INSTANCE_KEY-7 in some situations
+	boolean redirectChecks = TCTokenHacks.isPerformTR03112Checks(request);
+	if (redirectChecks) {
+	    CertificateDescription desc = null;
+	    Promise<Object> descPromise = dynCtx.getPromise(TR03112Keys.ESERVICE_CERTIFICATE_DESC);
+	    // wait for certificate description
+	    try {
+		desc = (CertificateDescription) descPromise.deref(60, TimeUnit.SECONDS);
+		// no error assumes that the promise is set a meaningful value
+	    } catch (InterruptedException ex) {
+		String msg = "Couldn't retrieve the CertificateDescription from the DynamicContext.";
+		logger.error(msg);
+		throw new IOException(msg);
+	    } catch (TimeoutException ex) {
+		String msg = "Couldn't retrieve the CertificateDescription from the DynamicContext.";
+		logger.error(msg);
+		throw new IOException(msg);
+	    }
+
+	    // check all points certificates'
+	    for (Pair<URL, Certificate> next : resultPoints) {
+		Certificate c = next.p2;
+		if (! TR03112Utils.isInCommCertificates(c, desc.getCommCertificates())) {
+		    logger.error("The retrieved server certificate is NOT contained in the CommCertificates of " +
+				"the CertificateDescription extension of the eService certificate.");
+		    throw new ControlException(lang.translationForKey("invalid_redirect"));
+		}
+	    }
+
+	    // check if we match the SOP
+	    URL subjectUrl = new URL(desc.getSubjectURL());
+	    boolean SOP = TR03112Utils.checkSameOriginPolicy(last.p1, subjectUrl);
+	    if (! SOP) {
+		logger.error("The final redirect of the TCToken does not conform to the same origin policy.");
+		throw new ControlException(lang.translationForKey("invalid_redirect"));
+	    } else {
+		endpoint = last.p1;
+	    }
+	}
+
+	// we finally found the refresh URL; redirect the browser to this location
+	// but first clear context if it is not needed elsewhere (i hope this bullcrap can be removed very soon)
+	Object objectActivation = dynCtx.get(TR03112Keys.OBJECT_ACTIVATION);
+	if (objectActivation instanceof Boolean && ((Boolean) objectActivation).booleanValue() == false) {
+	    dynCtx.clear();
+	}
+	logger.debug("Setting redirect address to '{}'.", endpoint);
+	response.setRefreshAddress(endpoint);
+	return response;
     }
 
 }

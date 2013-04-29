@@ -29,21 +29,15 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerException;
-import org.openecard.apache.http.Header;
 import org.openecard.apache.http.HttpEntity;
 import org.openecard.apache.http.HttpException;
-import org.openecard.apache.http.HttpRequest;
 import org.openecard.apache.http.HttpResponse;
-import org.openecard.apache.http.RequestLine;
-import org.openecard.apache.http.StatusLine;
 import org.openecard.apache.http.entity.ContentType;
 import org.openecard.apache.http.entity.StringEntity;
 import org.openecard.apache.http.impl.DefaultConnectionReuseStrategy;
@@ -52,16 +46,21 @@ import org.openecard.apache.http.protocol.BasicHttpContext;
 import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.apache.http.protocol.HttpRequestExecutor;
 import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
+import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsProtocolHandler;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.TR03112Keys;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.io.ProxySettings;
 import org.openecard.common.util.FileUtils;
+import org.openecard.crypto.tls.TlsNoAuthentication;
 import org.openecard.transport.httpcore.HttpRequestHelper;
+import org.openecard.transport.httpcore.HttpUtils;
 import org.openecard.transport.httpcore.StreamHttpClientConnection;
 import org.openecard.ws.marshal.MarshallingTypeException;
 import org.openecard.ws.marshal.WSMarshaller;
@@ -332,7 +331,7 @@ public class PAOS {
 		    // and this is how it works :-/
 		    req.setHeader("Accept", "text/html; application/vnd.paos+xml");
 		    ContentType reqContentType = ContentType.create("application/vnd.paos+xml", "UTF-8");
-		    dumpHttpRequest("HTTP Request (before adding content):", req);
+		    HttpUtils.dumpHttpRequest(logger, "before adding content", req);
 		    String reqMsgStr = createPAOSResponse(msg);
 		    StringEntity reqMsg = new StringEntity(reqMsgStr, reqContentType);
 		    req.setEntity(reqMsg);
@@ -344,7 +343,7 @@ public class PAOS {
 		    conn.receiveResponseEntity(response);
 		    HttpEntity entity = response.getEntity();
 		    byte[] entityData = FileUtils.toByteArray(entity.getContent());
-		    dumpHttpResponse(response, entityData);
+		    HttpUtils.dumpHttpResponse(logger, response, entityData);
 		    checkHTTPStatusCode(msg, statusCode);
 		    // consume entity
 		    Object requestObj = processPAOSRequest(new ByteArrayInputStream(entityData));
@@ -394,11 +393,34 @@ public class PAOS {
 	    TlsProtocolHandler handler = new TlsProtocolHandler(sockIn, sockOut);
 	    handler.connect(tlsClient);
 	    conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());
+	    saveServiceCertificate();
 	} else {
 	    // no TLS
 	    conn = new StreamHttpClientConnection(socket.getInputStream(), socket.getOutputStream());
 	}
 	return conn;
+    }
+
+    /**
+     * Stores the received eService certificate as {@link Certificate} in the dynamic context.
+     * This will only take place when {@link TlsNoAuthentication} is used as {@link TlsAuthentication}.
+     */
+    private void saveServiceCertificate() {
+	try {
+	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    TlsAuthentication authentication = tlsClient.getAuthentication();
+	    if (authentication instanceof TlsNoAuthentication) {
+		TlsNoAuthentication noAuth = (TlsNoAuthentication) authentication;
+		// server certificate is the first one in the chain
+		org.openecard.bouncycastle.crypto.tls.Certificate certificate = noAuth.getServerCertificate();
+		dynCtx.put(TR03112Keys.ESERVICE_CERTIFICATE, certificate);
+	    } else {
+		String msg = "eService Certificate not saved in DynamicContext.";
+		logger.debug(msg);
+	    }
+	} catch (IOException e) {
+	    logger.error("Certificate couldn't be encoded.", e);
+	}
     }
 
     /**
@@ -420,42 +442,6 @@ public class PAOS {
 		}
 	    }
 	    throw new PAOSException("Received HTML Error Code " + statusCode);
-	}
-    }
-
-    private static void dumpHttpRequest(String msg, HttpRequest req) {
-	if (logger.isDebugEnabled()) {
-	    StringWriter w = new StringWriter();
-	    PrintWriter pw = new PrintWriter(w);
-
-	    pw.println(msg);
-	    RequestLine rl = req.getRequestLine();
-	    pw.format("  %s %s %s%n", rl.getMethod(), rl.getUri(), rl.getProtocolVersion().toString());
-	    for (Header h : req.getAllHeaders()) {
-		pw.format("  %s: %s%n", h.getName(), h.getValue());
-	    }
-	    pw.flush();
-
-	    logger.debug(w.toString());
-	}
-    }
-
-    private static void dumpHttpResponse(HttpResponse res, byte[] entityData) {
-	if (logger.isDebugEnabled()) {
-	    StringWriter w = new StringWriter();
-	    PrintWriter pw = new PrintWriter(w);
-
-	    pw.println("HTTP Response:");
-	    StatusLine sl = res.getStatusLine();
-	    pw.format("  %s %d %s%n", sl.getProtocolVersion().toString(), sl.getStatusCode(), sl.getReasonPhrase());
-	    for (Header h : res.getAllHeaders()) {
-		pw.format("  %s: %s%n", h.getName(), h.getValue());
-	    }
-	    pw.format(new String(entityData));
-	    pw.println();
-	    pw.flush();
-
-	    logger.debug(w.toString());
 	}
     }
 

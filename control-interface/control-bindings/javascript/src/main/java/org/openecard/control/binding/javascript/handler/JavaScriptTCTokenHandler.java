@@ -26,6 +26,7 @@ import generated.TCTokenType;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.util.Pair;
@@ -101,9 +102,11 @@ public class JavaScriptTCTokenHandler extends JavaScriptControlHandler {
 		if ("tcTokenURL".equals(e.getKey())) {
 		    // TCTokenURL
 		    String value = e.getValue().toString();
-		    Pair<TCTokenType, Certificate> token = TCTokenFactory.generateTCToken(new URL(value));
+		    URL tcTokenURL = new URL(value);
+		    Pair<TCTokenType, List<Pair<URL, Certificate>>> token = TCTokenFactory.generateTCToken(tcTokenURL);
+		    tcTokenRequest.setTCTokenURL(tcTokenURL);
 		    tcTokenRequest.setTCToken(token.p1);
-		    tcTokenRequest.setCertificate(token.p2);
+		    tcTokenRequest.setCertificates(token.p2);
 		} else if ("contextHandle".equals(e.getKey())) {
 		    // ContextHandle
 		    tcTokenRequest.setContextHandle(e.getValue().toString());
@@ -129,7 +132,7 @@ public class JavaScriptTCTokenHandler extends JavaScriptControlHandler {
      * @param tcTokenResponse the response to build the response data
      * @return response data
      */
-    private Object[] handleResponse(TCTokenResponse tcTokenResponse)  {
+    private Object[] handleResponse(TCTokenResponse tcTokenResponse) {
 	TCTokenResponse response = tcTokenResponse;
 	return new Object[] { response.getResult(), response.getRefreshAddress() };
     }

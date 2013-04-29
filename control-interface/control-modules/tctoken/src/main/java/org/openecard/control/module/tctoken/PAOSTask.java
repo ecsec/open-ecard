@@ -33,7 +33,9 @@ import java.net.URL;
 import java.util.concurrent.Callable;
 import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.crypto.tls.TlsPSKIdentity;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.TR03112Keys;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
@@ -147,6 +149,13 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    CardApplicationDisconnect appDis = new CardApplicationDisconnect();
 	    appDis.setConnectionHandle(connectionHandle);
 	    dispatcher.deliver(appDis);
+
+	    // and clear dynamic context if object activation is used, if not it is performed by the tctoken handler
+	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    Object objectActivation = dynCtx.get(TR03112Keys.OBJECT_ACTIVATION);
+	    if (objectActivation instanceof Boolean && ((Boolean) objectActivation).booleanValue() == true) {
+		dynCtx.clear();
+	    }
 	}
     }
 

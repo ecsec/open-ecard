@@ -37,10 +37,10 @@ import org.openecard.common.util.Pair;
  */
 public class TCTokenFactory {
 
-    public static Pair<TCTokenType, Certificate> generateTCToken(URL tcTokenURL) throws TCTokenException, IOException {
+    public static Pair<TCTokenType, List<Pair<URL, Certificate>>> generateTCToken(URL tcTokenURL) throws TCTokenException, IOException {
 	// Get TCToken from the given url
-	Pair<String, Certificate> data = TCTokenGrabber.getResource(tcTokenURL);
-	return new Pair<TCTokenType, Certificate>(generateTCToken(data.p1), data.p2);
+	Pair<String, List<Pair<URL, Certificate>>> data = TCTokenGrabber.getResource(tcTokenURL);
+	return new Pair<TCTokenType, List<Pair<URL, Certificate>>>(generateTCToken(data.p1), data.p2);
     }
 
     public static TCTokenType generateTCToken(String data) throws TCTokenException {

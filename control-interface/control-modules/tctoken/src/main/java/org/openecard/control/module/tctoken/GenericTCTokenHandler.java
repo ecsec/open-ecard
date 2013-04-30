@@ -344,7 +344,7 @@ public class GenericTCTokenHandler {
 	}
 
 	if (connectionHandle == null) {
-	    String msg = "No card available for the given ConnectionHandle.";
+	    String msg = lang.translationForKey("cancel");
 	    logger.error(msg);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg));
 	    return response;

@@ -243,6 +243,13 @@ public class SwingNavigator implements UserConsentNavigator, ActionListener {
 	    return;
 	}
 
+	// in case the user wants to proceed check if all components are valid
+	StepFrame curStep = stepFrames.get(stepPointer);
+	if (event == NavigationEvent.NEXT && ! curStep.validateComponents()) {
+	    logger.debug("Validation of components failed.");
+	    return;
+	}
+
 	// in case there is a running action, kill it and bail out
 	if (action != null && ! action.isDone()) {
 	    logger.debug("Canceling execution of the currently running StepAction.");
@@ -251,7 +258,6 @@ public class SwingNavigator implements UserConsentNavigator, ActionListener {
 	}
 
 	// lock controls and update current step result
-	StepFrame curStep = stepFrames.get(stepPointer);
 	stepBar.enableLoaderImage();
 	navBar.lockControls();
 	curStep.lockControls();

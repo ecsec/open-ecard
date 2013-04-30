@@ -23,6 +23,8 @@
 package org.openecard.gui.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,9 +106,12 @@ public class StepFrame {
      */
     public boolean validateComponents() {
 	for (StepComponent next : components) {
-	    if (next.isValueType() && !next.validate()) {
+	    Component component = next.getComponent();
+	    if (next.isValueType() && ! next.validate()) {
+		component.setBackground(Color.RED);
 		return false;
 	    }
+	    component.setBackground(null);
 	}
 	return true;
     }

@@ -229,7 +229,7 @@ public class CardRecognition {
      * @see #getCardImage(java.lang.String)
      */
     public InputStream getNoCardImage() {
-	return loadCardImage("no_card.png");
+	return loadCardImage("no_card.jpg");
     }
     /**
      * @see #getCardImage(java.lang.String)

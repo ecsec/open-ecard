@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
+import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse;
 import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
@@ -45,6 +46,7 @@ import org.openecard.common.ifd.PACECapabilities;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.FunctionType;
 import org.openecard.common.sal.ProtocolStep;
+import org.openecard.common.sal.anytype.PACEMarkerType;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.Promise;
@@ -148,6 +150,9 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    byte pinID = PasswordID.valueOf(didAuthenticate.getDIDName()).getByte();
 	    String passwordType = PasswordID.parse(pinID).getString();
 
+	    // get the PACEMarker
+	    PACEMarkerType paceMarker = getPaceMarker(cardState, passwordType);
+
 	    // Verify that the certificate description matches the terminal certificate
 	    CardVerifiableCertificate taCert = certChain.getTerminalCertificates().get(0);
 	    CardVerifiableCertificateVerifier.verify(taCert, certDescription);
@@ -174,7 +179,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE));
 	    CVCStep cvcStep = new CVCStep(eacData);
 	    CHATStep chatStep = new CHATStep(eacData);
-	    PINStep pinStep = new PINStep(eacData, ! nativePace);
+	    PINStep pinStep = new PINStep(eacData, ! nativePace, paceMarker);
 
 	    uc.getSteps().add(cvcStep);
 	    uc.getSteps().add(chatStep);
@@ -237,6 +242,14 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	}
 
 	return response;
+    }
+
+    private PACEMarkerType getPaceMarker(CardStateEntry cardState, String pinType) {
+	byte[] applicationIdentifier = cardState.getCurrentCardApplication().getApplicationIdentifier();
+	DIDStructureType didStructure = cardState.getDIDStructure(pinType, applicationIdentifier);
+	iso.std.iso_iec._24727.tech.schema.PACEMarkerType didMarker;
+	didMarker = (iso.std.iso_iec._24727.tech.schema.PACEMarkerType) didStructure.getDIDMarker();
+	return new PACEMarkerType(didMarker);
     }
 
     private boolean convertToBoolean(Object o) {

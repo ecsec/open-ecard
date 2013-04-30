@@ -23,6 +23,7 @@
 package org.openecard.sal.protocol.eac.gui;
 
 import org.openecard.common.I18n;
+import org.openecard.common.sal.anytype.PACEMarkerType;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
@@ -51,10 +52,12 @@ public class PINStep extends Step {
     private final I18n langEac = I18n.getTranslation("eac");
     private final I18n langPace = I18n.getTranslation("pace");
     private final String pinType;
+    private PACEMarkerType paceMarker;
 
-    public PINStep(EACData eacData, boolean capturePin) {
+    public PINStep(EACData eacData, boolean capturePin, PACEMarkerType paceMarker) {
 	super(STEP_ID);
 	this.pinType = langPace.translationForKey(eacData.passwordType);
+	this.paceMarker = paceMarker;
 	setTitle(langPace.translationForKey(TITLE, pinType));
 	setDescription(langPace.translationForKey(DESCRIPTION, pinType));
 
@@ -74,6 +77,8 @@ public class PINStep extends Step {
 
 	PasswordField pinInputField = new PasswordField(PIN_FIELD);
 	pinInputField.setDescription(pinType);
+	pinInputField.setMinLength(paceMarker.getMinLength());
+	pinInputField.setMaxLength(paceMarker.getMaxLength());
 	getInputInfoUnits().add(pinInputField);
 
 	Text notice = new Text();
@@ -84,7 +89,6 @@ public class PINStep extends Step {
     private void addTerminalElements() {
 	setInstantReturn(true);
 	Text description = new Text();
-	// TODO: use translation
 	description.setText(langPace.translationForKey(DESCRIPTION_NATIVE, pinType));
 	getInputInfoUnits().add(description);
 

@@ -31,11 +31,13 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +45,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import org.openecard.apache.http.HttpException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
@@ -58,12 +59,8 @@ import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.HttpRequestLineUtils;
 import org.openecard.common.util.Pair;
-import org.openecard.common.util.Promise;
-import org.openecard.common.util.TR03112Utils;
-import org.openecard.control.ControlException;
 import org.openecard.control.module.tctoken.gui.InsertCardDialog;
 import org.openecard.control.module.tctoken.hacks.ObjectTag;
-import org.openecard.crypto.common.asn1.cvc.CertificateDescription;
 import org.openecard.gui.UserConsent;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.transport.paos.PAOSException;
@@ -416,64 +413,34 @@ public class GenericTCTokenHandler {
      * @throws URISyntaxException
      */
     private TCTokenResponse determineRefreshURL(TCTokenRequest request, TCTokenResponse response) throws IOException {
-	final DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	URL endpoint = response.getRefreshAddress();
+	try {
+	    URL endpoint = response.getRefreshAddress();
+	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    // disable certificate checks according to BSI TR03112-7 in some situations
+	    boolean redirectChecks = ObjectTag.isPerformTR03112Checks(request);
+	    RedirectCertificateVerifier verifier = new RedirectCertificateVerifier(redirectChecks);
+	    Pair<InputStream, List<Pair<URL, Certificate>>> result = TCTokenGrabber.getStream(endpoint, verifier);
 
-	// determine redirect
-	Pair<String, List<Pair<URL, Certificate>>> result = TCTokenGrabber.getResource(endpoint);
-	List<Pair<URL, Certificate>> resultPoints = result.p2;
-	Pair<URL, Certificate> last = resultPoints.get(resultPoints.size() - 1);
+	    // determine redirect
+	    List<Pair<URL, Certificate>> resultPoints = result.p2;
+	    Pair<URL, Certificate> last = resultPoints.get(resultPoints.size() - 1);
+	    endpoint = last.p1;
 
-	// disable certificate checks according to BSI INSTANCE_KEY-7 in some situations
-	boolean redirectChecks = ObjectTag.isPerformTR03112Checks(request);
-	if (redirectChecks) {
-	    CertificateDescription desc = null;
-	    Promise<Object> descPromise = dynCtx.getPromise(TR03112Keys.ESERVICE_CERTIFICATE_DESC);
-	    // wait for certificate description
-	    try {
-		desc = (CertificateDescription) descPromise.deref(60, TimeUnit.SECONDS);
-		// no error assumes that the promise is set a meaningful value
-	    } catch (InterruptedException ex) {
-		String msg = "Couldn't retrieve the CertificateDescription from the DynamicContext.";
-		logger.error(msg);
-		throw new IOException(msg);
-	    } catch (TimeoutException ex) {
-		String msg = "Couldn't retrieve the CertificateDescription from the DynamicContext.";
-		logger.error(msg);
-		throw new IOException(msg);
+	    // we finally found the refresh URL; redirect the browser to this location
+	    // but first clear context if it is not needed elsewhere (i hope this bullcrap can be removed very soon)
+	    Object objectActivation = dynCtx.get(TR03112Keys.OBJECT_ACTIVATION);
+	    if (objectActivation instanceof Boolean && ((Boolean) objectActivation).booleanValue() == false) {
+		dynCtx.clear();
+		DynamicContext.remove();
 	    }
-
-	    // check all points certificates'
-	    for (Pair<URL, Certificate> next : resultPoints) {
-		Certificate c = next.p2;
-		if (! TR03112Utils.isInCommCertificates(c, desc.getCommCertificates())) {
-		    logger.error("The retrieved server certificate is NOT contained in the CommCertificates of " +
-				"the CertificateDescription extension of the eService certificate.");
-		    throw new ControlException(lang.translationForKey("invalid_redirect"));
-		}
-	    }
-
-	    // check if we match the SOP
-	    URL subjectUrl = new URL(desc.getSubjectURL());
-	    boolean SOP = TR03112Utils.checkSameOriginPolicy(last.p1, subjectUrl);
-	    if (! SOP) {
-		logger.error("The final redirect of the TCToken does not conform to the same origin policy.");
-		throw new ControlException(lang.translationForKey("invalid_redirect"));
-	    } else {
-		endpoint = last.p1;
-	    }
+	    logger.debug("Setting redirect address to '{}'.", endpoint);
+	    response.setRefreshAddress(endpoint);
+	    return response;
+	} catch (HttpException ex) {
+	    throw new IOException(ex);
+	} catch (URISyntaxException ex) {
+	    throw new IOException(ex);
 	}
-
-	// we finally found the refresh URL; redirect the browser to this location
-	// but first clear context if it is not needed elsewhere (i hope this bullcrap can be removed very soon)
-	Object objectActivation = dynCtx.get(TR03112Keys.OBJECT_ACTIVATION);
-	if (objectActivation instanceof Boolean && ((Boolean) objectActivation).booleanValue() == false) {
-	    dynCtx.clear();
-	    DynamicContext.remove();
-	}
-	logger.debug("Setting redirect address to '{}'.", endpoint);
-	response.setRefreshAddress(endpoint);
-	return response;
     }
 
 }

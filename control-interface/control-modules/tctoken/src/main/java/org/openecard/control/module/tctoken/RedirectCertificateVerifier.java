@@ -102,7 +102,9 @@ public class RedirectCertificateVerifier implements CertificateVerifier {
 		    return VerifierResult.FINISH;
 		}
 	    } else {
-		return VerifierResult.CONTINE;
+		// without the nPA there is no sensible exit point and as a result the last call is executed twice
+		// in that case its equally valid to let the browser do the redirects
+		return VerifierResult.FINISH;
 	    }
 	} catch (MalformedURLException ex) {
 	    throw new ControlException("Failed to convert SubjectURL to URL class.", ex);

@@ -76,10 +76,10 @@ public class TCTokenGrabber {
      *
      * @param url URL pointing to the TCToken.
      * @return Resource as a stream and the server certificates plus chain received while retrieving the TC Token.
-     * @throws TCTokenException
+     * @throws ControlException
      */
-    public static Pair<InputStream, List<Pair<URL, Certificate>>> getStream(URL url) throws TCTokenException,
-	    MalformedURLException, IOException, HttpException, URISyntaxException {
+    public static Pair<InputStream, List<Pair<URL, Certificate>>> getStream(URL url, CertificateVerifier v)
+	    throws MalformedURLException, IOException, HttpException, URISyntaxException, ControlException {
 	HttpEntity entity = null;
 	int maxRedirects = 10;
 	boolean finished = false;
@@ -126,6 +126,12 @@ public class TCTokenGrabber {
 		h.connect(tlsClient);
 	    }
 	    serverCerts.add(new Pair<URL, Certificate>(url, tlsAuth.getServerCertificate()));
+	    // check result
+	    CertificateVerifier.VerifierResult verifyResult = v.verify(url, tlsAuth.getServerCertificate());
+	    if (verifyResult == CertificateVerifier.VerifierResult.FINISH) {
+		List<Pair<URL, Certificate>> pairs = Collections.unmodifiableList(serverCerts);
+		return new Pair<InputStream, List<Pair<URL, Certificate>>>(null, pairs);
+	    }
 
 	    StreamHttpClientConnection conn = new StreamHttpClientConnection(h.getInputStream(), h.getOutputStream());
 
@@ -149,7 +155,7 @@ public class TCTokenGrabber {
 		} else {
 		    // FIXME: refactor exception handling
 		    String msg = "Resource could not be retrieved. Missing Location header in HTTP response.";
-		    throw new TCTokenException(msg);
+		    throw new ControlException(msg);
 		}
 	    } else {
 		conn.receiveResponseEntity(response);
@@ -162,6 +168,16 @@ public class TCTokenGrabber {
 	return new Pair<InputStream, List<Pair<URL, Certificate>>>(is, Collections.unmodifiableList(serverCerts));
     }
 
+    public static Pair<String, List<Pair<URL, Certificate>>> getResource(@Nonnull URL url) throws IOException {
+	// use verifier which always returns
+	return getResource(url, new CertificateVerifier() {
+	    @Override
+	    public CertificateVerifier.VerifierResult verify(URL url, Certificate cert) throws ControlException {
+		return VerifierResult.CONTINE;
+	    }
+	});
+    }
+
     /**
      * Fetch the data from the URL.
      *
@@ -169,11 +185,12 @@ public class TCTokenGrabber {
      * @return Resource fetched from the possibly redirected URL and the certificates plus chain of the endpoints.
      * @throws TCTokenException Thrown in case there was a problem reading the data from the given location.
      */
-    public static Pair<String, List<Pair<URL, Certificate>>> getResource(@Nonnull URL url) throws IOException {
+    public static Pair<String, List<Pair<URL, Certificate>>> getResource(@Nonnull URL url, CertificateVerifier v)
+	    throws IOException {
 	LimitedInputStream is = null;
 
 	try {
-	    Pair<InputStream, List<Pair<URL, Certificate>>> data = TCTokenGrabber.getStream(url);
+	    Pair<InputStream, List<Pair<URL, Certificate>>> data = TCTokenGrabber.getStream(url, v);
 	    is = new LimitedInputStream(data.p1);
 	    String stringData = FileUtils.toString(is);
 	    return new Pair<String, List<Pair<URL, Certificate>>>(stringData, data.p2);

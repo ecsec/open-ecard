@@ -109,6 +109,18 @@ public class CardStateMap {
 	if (it.hasNext()) {
 	    CardStateEntry entry = it.next();
 	    removeMapEntry(handle.getSlotHandle(), slothandleMap, entry);
+
+	    clearProtocolsForEntry(entry);
+	}
+    }
+
+    private void clearProtocolsForEntry(CardStateEntry entry) {
+	Iterator<CardStateEntry> it = allEntries.iterator();
+	if (it.hasNext()) {
+	    CardStateEntry allEntriesEntry = it.next();
+	    if (entry.equals(allEntriesEntry)) {
+		allEntriesEntry.removeAllProtocols();
+	    }
 	}
     }
 
@@ -238,7 +250,7 @@ public class CardStateMap {
      * @param key
      * @return
      */
-    private static <K> Set<CardStateEntry> setFromMap(ConcurrentSkipListMap<K,Set<CardStateEntry>> map, K key) {
+    private static <K> Set<CardStateEntry> setFromMap(ConcurrentSkipListMap<K, Set<CardStateEntry>> map, K key) {
 	Set<CardStateEntry> result = null;
 	if (key != null) {
 	    result = map.get(key);
@@ -274,7 +286,7 @@ public class CardStateMap {
 	Iterator<CardStateEntry> it = entries.iterator();
 	while (it.hasNext()) {
 	    CardStateEntry next = it.next();
-	    if(next.getInfo().getCardApplication(cardApplication)==null){
+	    if (next.getInfo().getCardApplication(cardApplication) == null) {
 		it.remove();
 	    }
 	}

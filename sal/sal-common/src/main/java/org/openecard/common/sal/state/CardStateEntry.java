@@ -201,6 +201,10 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	protoObjects.remove(type);
     }
 
+    public void removeAllProtocols() {
+	protoObjects.clear();
+    }
+
 
     /**
      *

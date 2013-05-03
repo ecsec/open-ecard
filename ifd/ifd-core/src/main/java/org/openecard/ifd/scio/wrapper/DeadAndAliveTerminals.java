@@ -85,7 +85,8 @@ public class DeadAndAliveTerminals extends CardTerminals {
 	    NoSuchAlgorithmException destEx = ExceptionUtils.matchPath(ex, NoSuchAlgorithmException.class,
 		    InvocationTargetException.class, GenericFactoryException.class);
 	    // TODO: i can not access the PCSC code, as the class is part of the abstracted sun classes
-	    if (destEx.getCause() != null && destEx.getCause().getClass().getName().endsWith(".PCSCException")) {
+	    if (destEx != null && destEx.getCause() != null &&
+		destEx.getCause().getClass().getName().endsWith(".PCSCException")) {
 		error = true;
 	    } else {
 		// ok this is serious

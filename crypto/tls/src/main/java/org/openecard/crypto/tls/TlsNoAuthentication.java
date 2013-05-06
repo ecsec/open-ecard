@@ -98,14 +98,19 @@ public class TlsNoAuthentication implements TlsAuthentication {
     }
 
     /**
-     * This function is not implemented and always throws UnsupportedOperationException.
-     *
-     * @throws UnsupportedOperationException
+     * This function is not implemented and always returns an empty chain.
+     * From RFC 4346 sec. 7.4.6:
+     * <p>If no suitable certificate is available, the client SHOULD send a certificate message containing no
+     * certificates.</p>
      */
     @Override
-    public TlsCredentials getClientCredentials(CertificateRequest cr) throws IOException {
-	String msg = "Client authentication is not supported with this implementation.";
-	throw new UnsupportedOperationException(msg);
+    public TlsCredentials getClientCredentials(CertificateRequest cr) {
+	return new TlsCredentials() {
+	    @Override
+	    public Certificate getCertificate() {
+		return Certificate.EMPTY_CHAIN;
+	    }
+	};
     }
 
     /**

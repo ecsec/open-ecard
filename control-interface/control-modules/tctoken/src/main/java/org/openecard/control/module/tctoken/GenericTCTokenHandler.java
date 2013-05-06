@@ -420,6 +420,13 @@ public class GenericTCTokenHandler {
 	    RedirectCertificateVerifier verifier = new RedirectCertificateVerifier(redirectChecks);
 	    Pair<InputStream, List<Pair<URL, Certificate>>> result = TCTokenGrabber.getStream(endpoint, verifier);
 
+	    // using this verifier no result must be present, meaning no status code different than a redirect occurred
+	    if (result.p1 != null) {
+		// TODO: this error is expected according the spec, handle it in a different way
+		String msg = "Return-To-Websession yielded a non-redirect response.";
+		throw new IOException(msg);
+	    }
+
 	    // determine redirect
 	    List<Pair<URL, Certificate>> resultPoints = result.p2;
 	    Pair<URL, Certificate> last = resultPoints.get(resultPoints.size() - 1);

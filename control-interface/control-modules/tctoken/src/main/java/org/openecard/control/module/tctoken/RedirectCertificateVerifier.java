@@ -52,6 +52,9 @@ public class RedirectCertificateVerifier implements CertificateVerifier {
     private final Promise<Object> descPromise;
     private final boolean redirectChecks;
 
+    private boolean firstInvocation;
+    private boolean lastRedirect;
+
     /**
      * Creates an object of this class bound to the values in the current dynamic context.
      *
@@ -61,6 +64,8 @@ public class RedirectCertificateVerifier implements CertificateVerifier {
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	descPromise = dynCtx.getPromise(TR03112Keys.ESERVICE_CERTIFICATE_DESC);
 	this.redirectChecks = redirectChecks;
+	firstInvocation = true;
+	lastRedirect = false;
     }
 
 
@@ -95,11 +100,23 @@ public class RedirectCertificateVerifier implements CertificateVerifier {
 		URL subjectUrl = new URL(desc.getSubjectURL());
 		boolean SOP = TR03112Utils.checkSameOriginPolicy(url, subjectUrl);
 		if (! SOP) {
+		    firstInvocation = false;
 		    // there is more to come
 		    return VerifierResult.CONTINE;
 		} else {
-		    // same origin satisfied, stop execution
-		    return VerifierResult.FINISH;
+		    // if the refresh address is SOP, then no redirect is expected
+		    if (firstInvocation) {
+			return VerifierResult.FINISH;
+		    }
+
+		    if (lastRedirect) {
+			// stop execution
+			return VerifierResult.FINISH;
+		    } else {
+			// same origin satisfied, memorize this state and stop execution in the next invocation
+			lastRedirect = true;
+			return VerifierResult.CONTINE;
+		    }
 		}
 	    } else {
 		// without the nPA there is no sensible exit point and as a result the last call is executed twice

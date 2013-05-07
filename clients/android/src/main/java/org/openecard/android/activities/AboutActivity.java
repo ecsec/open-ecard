@@ -22,6 +22,7 @@
 
 package org.openecard.android.activities;
 
+import android.app.Activity;
 import android.app.ActivityGroup;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -83,9 +84,9 @@ public class AboutActivity extends ActivityGroup {
 
 	// Set up the window layout
 	setContentView(R.layout.about);
-	setResult(ApplicationContext.RESULTCODE);
+	setResult(Activity.RESULT_OK);
 	applicationContext = (ApplicationContext) getApplicationContext();
-	applicationContext.initialize();
+	applicationContext.initialize(this);
 	usingNFC = applicationContext.usingNFC();
 
 	// fill asset set
@@ -101,9 +102,8 @@ public class AboutActivity extends ActivityGroup {
 	Button b = (Button) findViewById(R.id.button_back);
 	b.setOnClickListener(new OnClickListener() {
 	    public void onClick(View v) {
-		onDestroy();
+		setResult(Activity.RESULT_OK);
 		finish();
-		System.exit(0);
 	    }
 	});
 
@@ -248,4 +248,12 @@ public class AboutActivity extends ActivityGroup {
 	throw new IOException("No translation available for file '" + name + fileEnding + "'.");
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	logger.debug("onActivityResult");
+	if (resultCode == Activity.RESULT_OK) {
+	    setResult(resultCode, data);
+	}
+	finish();
+    }
 }

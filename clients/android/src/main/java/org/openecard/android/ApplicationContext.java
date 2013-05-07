@@ -22,6 +22,7 @@
 
 package org.openecard.android;
 
+import android.app.Activity;
 import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -40,7 +41,6 @@ import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
 import java.io.File;
 import org.openecard.android.activities.IntentHandlerActivity;
-import org.openecard.android.activities.NFCErrorActivity;
 import org.openecard.android.activities.TerminalFactoryActivity;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
@@ -96,8 +96,6 @@ public class ApplicationContext extends Application implements EventCallback {
 
     private static final String SDCARD_OPENECARD = "/sdcard/.openecard/";
     private static final int NOTIFICATION_ID = 22;
-    public static final int RESULTCODE = 1;
-    public static final int REQUESTCODE = 1;
 
     private ClientEnv env;
     private TinySAL sal;
@@ -142,6 +140,7 @@ public class ApplicationContext extends Application implements EventCallback {
      * Shut down the whole client by shutting down components.
      */
     public void shutdown() {
+	logger.debug("shutdown");
 	// destroy EventManager
 	try {
 	    if (em != null) {
@@ -201,6 +200,7 @@ public class ApplicationContext extends Application implements EventCallback {
 	}
 	// destroy the remaining components
 	env = null;
+	initialized = false;
 
 	Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
 	File f = new File(SDCARD_OPENECARD);
@@ -212,10 +212,14 @@ public class ApplicationContext extends Application implements EventCallback {
     /**
      * Initialize the client by setting properties for Android and starting up each module.
      */
-    public void initialize() {
+    public void initialize(Activity activityContext) {
+	logger.debug("initialize");
 	if (initialized) {
 	    return;	
 	}
+
+	// GUI
+	gui = new AndroidUserConsent(activityContext);
 
 	notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE); 
 
@@ -252,9 +256,10 @@ public class ApplicationContext extends Application implements EventCallback {
 	    NfcManager manager = (NfcManager) this.getSystemService(Context.NFC_SERVICE);
 	    NfcAdapter adapter = manager.getDefaultAdapter();
 	    if (adapter == null || !adapter.isEnabled()) {
-		Intent i = new Intent(this, NFCErrorActivity.class);
-		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		this.startActivity(i);
+		MessageDialog dialog = gui.obtainMessageDialog();
+		String message = lang.translationForKey("android.error.nfc_error");
+		String title = lang.translationForKey("error");
+		dialog.showMessageDialog(message, title, DialogType.ERROR_MESSAGE);
 		return;
 	    }
 	}
@@ -271,9 +276,6 @@ public class ApplicationContext extends Application implements EventCallback {
 	// Dispatcher
 	dispatcher = new MessageDispatcher(env);
 	env.setDispatcher(dispatcher);
-
-	// GUI
-	gui = new AndroidUserConsent(this);
 
 	// IFD
 	ifd = new IFD();
@@ -293,8 +295,7 @@ public class ApplicationContext extends Application implements EventCallback {
 		String message = lang.translationForKey("ifd.context.error");
 		String title = lang.translationForKey("error");
 		dialog.showMessageDialog(message, title, DialogType.ERROR_MESSAGE);
-		shutdown();
-		System.exit(0);
+		return;
 	    }
 	} else {
 	    logger.error("EstablishContext failed.");
@@ -302,8 +303,7 @@ public class ApplicationContext extends Application implements EventCallback {
 	    String message = lang.translationForKey("ifd.context.error");
 	    String title = lang.translationForKey("error");
 	    dialog.showMessageDialog(message, title, DialogType.ERROR_MESSAGE);
-	    shutdown();
-	    System.exit(0);
+	    return;
 	}
 
 	try {
@@ -315,8 +315,7 @@ public class ApplicationContext extends Application implements EventCallback {
 	    String message = lang.translationForKey("recognition.error");
 	    String title = lang.translationForKey("error");
 	    dialog.showMessageDialog(message, title, DialogType.ERROR_MESSAGE);
-	    shutdown();
-    	    System.exit(0);
+	    return;
 	}
 
 	// EventManager

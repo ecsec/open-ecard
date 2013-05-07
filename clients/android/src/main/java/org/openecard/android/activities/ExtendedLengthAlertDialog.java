@@ -81,7 +81,8 @@ final class ExtendedLengthAlertDialog implements Runnable {
 		    uri = Uri.parse("https://www.openecard.org/en/framework/extendedlength");
 		}
 		i = new Intent(Intent.ACTION_VIEW, uri);
-		AndroidUtils.loadUriInInvokingBrowser(i, activity);
+		i = AndroidUtils.getRefreshIntent(i, activity);
+		activity.startActivity(i);
 		dialog.dismiss();
 		activity.finish();
 	    }

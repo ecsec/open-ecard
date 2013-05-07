@@ -103,8 +103,9 @@ public class AndroidUtils {
      * 
      * @param browserIntent The initial intent for displaying the Uri
      * @param ctx Context of the App
+     * @return an Intent to call the refresh URL in a browser activity
      */
-    public static void loadUriInInvokingBrowser(Intent browserIntent, Context ctx) {
+    public static Intent getRefreshIntent(Intent browserIntent, Context ctx) {
 	String browserActivityName;
 	if (browserIntent.getBooleanExtra("isTokenFromObject", false)) {
 	    // currently only the firefox plugin starts the app this way
@@ -131,7 +132,7 @@ public class AndroidUtils {
 		break;
 	    }
 	}
-	ctx.startActivity(browserIntent);
+	return browserIntent;
     }
 
 }

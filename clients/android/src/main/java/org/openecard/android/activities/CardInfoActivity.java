@@ -70,7 +70,7 @@ public class CardInfoActivity extends Activity implements EventCallback {
     private static final String NO_CARD = "android.cardinfo.cardname";
 
     private ApplicationContext appContext;
-    CardRecognition recognition;
+    private CardRecognition recognition;
     private HashMap<String, TerminalFragment> fragments = new HashMap<String, TerminalFragment>();
     private TextView textInfo;
     private LinearLayout linearLayoutCardInfoActivity;
@@ -143,7 +143,7 @@ public class CardInfoActivity extends Activity implements EventCallback {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        //No call for super(). Bug on API Level > 11.
+	// No call for super(). Bug on API Level > 11.
     }
 
     @Override

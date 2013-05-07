@@ -23,16 +23,24 @@
 package org.openecard.gui.android;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
+import org.openecard.common.I18n;
 import org.openecard.gui.message.DialogType;
+import org.openecard.gui.message.OptionType;
+import org.openecard.gui.message.ReturnType;
 
 
 /**
@@ -43,10 +51,24 @@ import org.openecard.gui.message.DialogType;
  */
 public class MessageDialogActivity extends Activity {
 
+    private final I18n lang = I18n.getTranslation("gui");
+
+    private static final int RESULT_CODE = 2;
     private String message;
     private String title;
     private byte[] iconData;
     private DialogType dialogType;
+    private String initialValue;
+    private String[] selectionValues;
+    private Integer selectionIndex;
+    private OptionType optionType;
+    private Button okButton;
+    private Button noButton;
+    private String[] options;
+    private Button cancelButton;
+    private EditText editText;
+    private Spinner s;
+    private Intent resultData = new Intent();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,15 +77,45 @@ public class MessageDialogActivity extends Activity {
 	// Set up the window layout
 	setContentView(R.layout.message_dialog);
 
-	Button okButton = (Button) findViewById(R.id.button_ok);
-	okButton.setOnClickListener(new OnClickListener() {
-	    public void onClick(View v) {
-		finish();
-	    }
-	}); 
-
+	setupButtons();
 	getParameters();
 	fillLayout();
+    }
+
+    private void setupButtons() {
+	okButton = (Button) findViewById(R.id.button_ok);
+	okButton.setText(lang.translationForKey("button.ok"));
+	okButton.setOnClickListener(new OnClickListener() {
+	    public void onClick(View v) {
+		if (initialValue != null) {
+		    resultData.putExtra(AndroidMessageDialog.USER_INPUT, editText.getText().toString());
+		} else if (selectionValues != null) {
+		    resultData.putExtra(AndroidMessageDialog.USER_INPUT, selectionValues[s.getSelectedItemPosition()]);
+		} else {
+		    resultData.putExtra(AndroidMessageDialog.RETURN_VALUE, ReturnType.OK);
+		}
+		setResult(RESULT_CODE, resultData);
+		finish();
+	    }
+	});
+	noButton = (Button) findViewById(R.id.button_no);
+	noButton.setText(lang.translationForKey("button.no"));
+	noButton.setOnClickListener(new OnClickListener() {
+	    public void onClick(View v) {
+		resultData.putExtra(AndroidMessageDialog.RETURN_VALUE, ReturnType.NO);
+		setResult(RESULT_CODE, resultData);
+		finish();
+	    }
+	});
+	cancelButton = (Button) findViewById(R.id.button_cancel);
+	cancelButton.setText(lang.translationForKey("button.cancel"));
+	cancelButton.setOnClickListener(new OnClickListener() {
+	    public void onClick(View v) {
+		resultData.putExtra(AndroidMessageDialog.RETURN_VALUE, ReturnType.CANCEL);
+		setResult(RESULT_CODE, resultData);
+		finish();
+	    }
+	});
     }
 
     private void fillLayout() {
@@ -90,14 +142,77 @@ public class MessageDialogActivity extends Activity {
 		    default: // PLAIN_MESSAGE no icon
 			break;
 		}
+	    } else { // iconData and dialogType are not set
+		if (initialValue != null) {
+		    iconView.setImageResource(R.drawable.question);
+		} else {
+		    iconView.setImageResource(R.drawable.info);
+		}
 	    }
 	} else {
 	    ByteArrayInputStream is = new ByteArrayInputStream(iconData);
 	    Drawable drw = Drawable.createFromStream(is, "icon");
 	    iconView.setImageDrawable(drw);
 	}
+	editText = (EditText) findViewById(R.id.userInput);
+	if (initialValue != null) {
+	    editText.setText(initialValue);
+	} else {
+	    editText.setVisibility(View.GONE);
+	}
+	s = (Spinner) findViewById(R.id.spinner);
+	if (selectionValues != null) {
+	    ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+		    android.R.layout.simple_spinner_item, selectionValues);
+	    dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+	    s.setAdapter(dataAdapter);
+	    s.setSelection(selectionIndex);
+	} else {
+	    s.setVisibility(View.GONE);
+	}
+	if (optionType != null) {
+	    switch (optionType) {
+		case OK_CANCEL_OPTION:
+		    noButton.setVisibility(View.GONE);
+		    break;
+
+		case YES_NO_OPTION:
+		    cancelButton.setVisibility(View.GONE);
+		    // fall through
+
+		default:  // YES_NO_CANCEL_OPTION
+		    okButton.setText(lang.translationForKey("button.yes"));
+		    break;
+	    }
+	} else {
+	    // only OK button is visible
+	    noButton.setVisibility(View.GONE);
+	    cancelButton.setVisibility(View.GONE);
+	}
+	if (options != null) {
+	    LinearLayout linearLayoutButtons = (LinearLayout) findViewById(R.id.linearLayoutButtons);
+	    linearLayoutButtons.removeAllViews();
+
+	    for (final String option : options) {
+		Button b = new Button(this);
+		b.setText(option);
+		b.setOnClickListener(new OnClickListener() {
+
+		    @Override
+		    public void onClick(View v) {
+			resultData.putExtra(AndroidMessageDialog.USER_INPUT, option);
+			setResult(RESULT_CODE, resultData);
+			finish();
+		    }
+		});
+		linearLayoutButtons.addView(b);
+	    }
+	}
     }
 
+    /**
+     * Extract the parameters from the calling intent.
+     */
     private void getParameters() {
 	Bundle extras = getIntent().getExtras();
 	message = extras.getString(AndroidMessageDialog.MESSAGE);
@@ -108,6 +223,14 @@ public class MessageDialogActivity extends Activity {
 	if (serializable != null) {
 	    dialogType = (DialogType) serializable;
 	}
+	initialValue = extras.getString(AndroidMessageDialog.INITIAL_VALUE);
+	selectionValues = extras.getStringArray(AndroidMessageDialog.SELECTION_VALUES);
+	selectionIndex = extras.getInt(AndroidMessageDialog.SELECTION_INDEX);
+	serializable = extras.getSerializable(AndroidMessageDialog.OPTION_TYPE);
+	if (serializable != null) {
+	    optionType = (OptionType)  serializable;
+	}
+	options = extras.getStringArray(AndroidMessageDialog.OPTIONS);
     }
 
 }

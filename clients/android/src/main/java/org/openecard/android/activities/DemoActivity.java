@@ -40,7 +40,8 @@ import org.openecard.android.R;
  */
 public class DemoActivity extends Activity {
 
-    private final Uri demoUri = Uri.parse("http://localhost:24727/eID-Client?tcTokenURL=https%3A%2F%2Feservice.openecard.org%2FtcToken%3Fcard-type%3Dhttp%253A%252F%252Fbsi.bund.de%252Fcif%252Fnpa.xml%26with-html%3D");
+    private static final int REQUEST_CODE = 0;
+    private static final Uri demoUri = Uri.parse("http://localhost:24727/eID-Client?tcTokenURL=https%3A%2F%2Feservice.openecard.org%2FtcToken%3Fcard-type%3Dhttp%253A%252F%252Fbsi.bund.de%252Fcif%252Fnpa.xml%26with-html%3D");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,9 +56,15 @@ public class DemoActivity extends Activity {
 	    public void onClick(View v) {
 		Intent i = new Intent(DemoActivity.this, IntentHandlerActivity.class);
 		i.setData(demoUri);
-		startActivity(i);
+		startActivityForResult(i, REQUEST_CODE);
 	    }
 	});
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	// set the result in the hosting aboutactivity
+	getParent().setResult(resultCode, data);
+	finish();
+    }
 }

@@ -160,17 +160,18 @@ public class DeviceOpenActivity extends Activity {
 	} else {
 	    ctx.openDevice(device);
 	}
+
 	// all available devices added, start next activity
 	if (intent.getAction() == Intent.ACTION_VIEW) {
 	    // started by a link to localhost
+	    logger.debug("Starting IntentHandlerActivity.");
 	    Intent i = new Intent(ctx, IntentHandlerActivity.class);
-	    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 	    i.setData(intent.getData());
 	    ctx.startActivityForResult(i, 1);
 	} else if (intent.getAction() == Intent.ACTION_MAIN || (! applicationContext.isInitialized())) {
 	    // user started the app manually OR attached a supported usb device and the app is closed
+	    logger.debug("Starting AboutActivity.");
 	    Intent i = new Intent(ctx, AboutActivity.class);
-	    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 	    ctx.startActivityForResult(i, 1);
 	} else {
 	    // app is running and a usb device has been attached
@@ -180,13 +181,16 @@ public class DeviceOpenActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-	logger.debug("onActivityResult");
-	super.onActivityResult(requestCode, resultCode, data);
-	if (resultCode == 1) {
-	    ((ApplicationContext) getApplicationContext()).shutdown();
-	    System.exit(0);
+	logger.debug("onActivityResult; resultCode: " + requestCode);
+	applicationContext.shutdown();
+	if (data != null) {
+	    logger.debug("Starting Activity with refresh URL Intent.");
+	    startActivity(data);
+	} else {
+	    logger.debug("No refresh URL Intent in onActivityResult.");
 	}
 	finish();
+	System.exit(0);
     }
 
     /**

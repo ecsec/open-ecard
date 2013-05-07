@@ -22,7 +22,7 @@
 
 package org.openecard.gui.android;
 
-import android.content.Context;
+import android.app.Activity;
 import org.openecard.gui.FileDialog;
 import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsentNavigator;
@@ -36,20 +36,20 @@ import org.openecard.gui.definition.UserConsentDescription;
  */
 public class AndroidUserConsent implements org.openecard.gui.UserConsent {
 
-    private Context context;
+    private Activity activityContext;
 
     /**
      * Instantiate AndroidUserConsent with the given context.
      *
      * @param context the Context of the App, needed to start new Activities
      */
-    public AndroidUserConsent(Context context) {
-	this.context = context;
+    public AndroidUserConsent(Activity context) {
+	activityContext = context;
     }
 
     @Override
     public UserConsentNavigator obtainNavigator(UserConsentDescription arg0) {
-	return new AndroidNavigator(arg0.getSteps(), this.context);
+	return new AndroidNavigator(arg0.getSteps(), activityContext);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class AndroidUserConsent implements org.openecard.gui.UserConsent {
 
     @Override
     public MessageDialog obtainMessageDialog() {
-	return new AndroidMessageDialog(this.context);
+	return new AndroidMessageDialog(activityContext);
     }
 
 }

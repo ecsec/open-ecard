@@ -66,9 +66,9 @@ public class IntentHandlerActivity extends Activity {
 	super.onCreate(null);
 
 	setContentView(R.layout.main);
-	setResult(ApplicationContext.RESULTCODE);
+	setResult(Activity.RESULT_OK);
 	applicationContext = ((ApplicationContext) getApplicationContext());
-	applicationContext.initialize();
+	applicationContext.initialize(this);
 
 	handleIntent(getIntent());
 
@@ -96,11 +96,12 @@ public class IntentHandlerActivity extends Activity {
 		responseIntent = handler.handle(requestIntent);
 
 		if (responseIntent.getAction().equals(Intent.ACTION_VIEW)) {
-		    AndroidUtils.loadUriInInvokingBrowser(responseIntent, IntentHandlerActivity.this);
-		    // authentication is finished we can close the App immediately
-		    IntentHandlerActivity.this.finish();
+		    // authentication is finished; return the refresh URL Intent and finish
+		    Intent refreshIntent = AndroidUtils.getRefreshIntent(responseIntent, applicationContext);
+		    setResult(Activity.RESULT_OK, refreshIntent);
+		    finish();
 		} else if (responseIntent.getAction().equals(ECardConstants.Minor.SAL.CANCELLATION_BY_USER)) {
-		    IntentHandlerActivity.this.finish();
+		    finish();
 		} else {
 		    try {
 			int lengthOfLastAPDU = NFCCardTerminal.getInstance().getLengthOfLastAPDU();

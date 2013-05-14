@@ -15,6 +15,10 @@
             android:name=".MessageDialogActivity"
             android:windowSoftInputMode="stateVisible|adjustResize"
             android:configChanges="orientation" />
+        <activity
+            android:name=".FileDialogActivity"
+            android:windowSoftInputMode="stateVisible|adjustResize"
+            android:configChanges="orientation" />
     </application>
 
 </manifest>

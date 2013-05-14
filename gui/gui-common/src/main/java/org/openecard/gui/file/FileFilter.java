@@ -23,6 +23,7 @@
 package org.openecard.gui.file;
 
 import java.io.File;
+import java.io.Serializable;
 
 
 /**
@@ -35,7 +36,7 @@ import java.io.File;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public interface FileFilter {
+public interface FileFilter extends Serializable {
 
     /**
      * Decide whether a file is accepted or not.

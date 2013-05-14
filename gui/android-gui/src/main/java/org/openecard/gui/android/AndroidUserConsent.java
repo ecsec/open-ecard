@@ -54,7 +54,7 @@ public class AndroidUserConsent implements org.openecard.gui.UserConsent {
 
     @Override
     public FileDialog obtainFileDialog() {
-	throw new UnsupportedOperationException("Not supported yet.");
+	return new AndroidFileDialog(activityContext);
     }
 
     @Override

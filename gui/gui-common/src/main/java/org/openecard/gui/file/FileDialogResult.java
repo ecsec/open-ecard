@@ -23,6 +23,7 @@
 package org.openecard.gui.file;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,7 +34,7 @@ import java.util.List;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class FileDialogResult {
+public class FileDialogResult implements Serializable {
 
     private final List<File> selectedFiles;
 

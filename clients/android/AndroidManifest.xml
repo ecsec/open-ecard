@@ -90,6 +90,9 @@
             android:name="org.openecard.gui.android.MessageDialogActivity"
             android:configChanges="orientation|keyboardHidden" />
         <activity
+            android:name="org.openecard.gui.android.FileDialogActivity"
+            android:configChanges="orientation|keyboardHidden" />
+        <activity
             android:name=".activities.LoggingActivity"
             android:configChanges="orientation|keyboardHidden" />
         <activity

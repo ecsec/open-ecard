@@ -23,6 +23,7 @@
 package org.openecard.crypto.common.asn1.cvc;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeMap;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
@@ -464,6 +465,25 @@ public final class CHAT {
 	while (it.hasNext()) {
 	    AccessRight item = it.next();
 	    this.accessRights.put(item, accessRights.get(item));
+	}
+    }
+
+    /**
+     * Restricts this CHAT by using the given CHAT as a mask.
+     *
+     * @param mask CHAT to use as mask.
+     */
+    public void restrictAccessRights(CHAT mask) {
+	removeRights(readAccess, mask.readAccess);
+	removeRights(writeAccess, mask.writeAccess);
+	removeRights(specialFunctions, mask.specialFunctions);
+	removeRights(accessRights, mask.accessRights);
+    }
+    private static <T> void removeRights(TreeMap<T, Boolean> orig, final TreeMap<T, Boolean> mask) {
+	for (Map.Entry<T, Boolean> entry : mask.entrySet()) {
+	    if (entry.getValue() == false) {
+		orig.put(entry.getKey(), false);
+	    }
 	}
     }
 

@@ -64,12 +64,6 @@ public class TCTokenVerifierTest {
     }
 
     @Test(expectedExceptions = TCTokenException.class)
-    public void testVerifySessionIdentifier2() throws Exception {
-	token.setSessionIdentifier("123456");
-	verifier.verifySessionIdentifier();
-    }
-
-    @Test(expectedExceptions = TCTokenException.class)
     public void testVerifyRefreshAddress() throws Exception {
 	token.setRefreshAddress(null);
 	verifier.verifyRefreshAddress();

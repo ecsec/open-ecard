@@ -54,6 +54,7 @@ import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
 import org.openecard.crypto.tls.TlsNoAuthentication;
 import org.openecard.transport.httpcore.HttpRequestHelper;
+import org.openecard.transport.httpcore.HttpUtils;
 import org.openecard.transport.httpcore.InvalidResultStatus;
 import org.openecard.transport.httpcore.StreamHttpClientConnection;
 import org.slf4j.Logger;
@@ -144,10 +145,12 @@ public class TCTokenGrabber {
 	    HttpRequestHelper.setDefaultHeader(req, url);
 	    req.setHeader("Accept", "text/xml, */*;q=0.8");
 	    req.setHeader("Accept-Charset", "utf-8, *;q=0.8");
+	    HttpUtils.dumpHttpRequest(logger, req);
 	    HttpResponse response = httpexecutor.execute(req, conn, ctx);
 	    StatusLine status = response.getStatusLine();
 	    int statusCode = status.getStatusCode();
 	    String reason = status.getReasonPhrase();
+	    HttpUtils.dumpHttpResponse(logger, response, null);
 
 	    if (TR03112Utils.isRedirectStatusCode(statusCode)) {
 		Header[] headers = response.getHeaders("Location");

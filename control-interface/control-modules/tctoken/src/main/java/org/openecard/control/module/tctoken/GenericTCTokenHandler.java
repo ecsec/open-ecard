@@ -355,8 +355,6 @@ public class GenericTCTokenHandler {
 	    // perform PAOS and correct redirect address afterwards
 	    response = doPAOS(request, connectionHandle);
 	    response = determineRefreshURL(request, response);
-	    // in case of an object activation we have to wait until the job is done, the future takes care of that
-	    waitForTask(response.getPAOSTask());
 	    return response;
 	} catch (IOException w) {
 	    logger.error(w.getMessage(), w);

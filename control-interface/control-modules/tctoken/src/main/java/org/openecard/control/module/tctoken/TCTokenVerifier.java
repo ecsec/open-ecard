@@ -92,7 +92,6 @@ public class TCTokenVerifier {
 	try {
 	    String value = token.getSessionIdentifier();
 	    assertRequired(value);
-	    checkSessionLength(value);
 	} catch (TCTokenException e) {
 	    throw new TCTokenException("Malformed SessionIdentifier");
 	}
@@ -229,12 +228,6 @@ public class TCTokenVerifier {
 	    new URL(value.toString());
 	} catch (Exception e) {
 	    throw new TCTokenException("Malformed URL");
-	}
-    }
-
-    private void checkSessionLength(String value) throws TCTokenException {
-	if (!ValueValidator.checkSessionStrength(value)) {
-	    throw new TCTokenException("The number of bytes in the session is too small.");
 	}
     }
 

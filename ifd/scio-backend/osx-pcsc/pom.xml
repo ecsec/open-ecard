@@ -6,7 +6,7 @@
     <parent>
 	<groupId>org.openecard.ifd</groupId>
 	<artifactId>scio-backend</artifactId>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.3</version>
     </parent>
 
     <artifactId>osx-pcsc</artifactId>

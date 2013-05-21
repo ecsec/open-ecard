@@ -416,6 +416,13 @@ public class GenericTCTokenHandler {
 	try {
 	    URL endpoint = response.getRefreshAddress();
 	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+
+	    // omit checks completely if this is an object tag activation
+	    Object objectActivation = dynCtx.get(TR03112Keys.OBJECT_ACTIVATION);
+	    if (objectActivation instanceof Boolean && ((Boolean) objectActivation).booleanValue() == true) {
+		return response;
+	    }
+
 	    // disable certificate checks according to BSI TR03112-7 in some situations
 	    boolean redirectChecks = ObjectTag.isPerformTR03112Checks(request);
 	    RedirectCertificateVerifier verifier = new RedirectCertificateVerifier(redirectChecks);
@@ -433,13 +440,10 @@ public class GenericTCTokenHandler {
 	    Pair<URL, Certificate> last = resultPoints.get(resultPoints.size() - 1);
 	    endpoint = last.p1;
 
-	    // we finally found the refresh URL; redirect the browser to this location
-	    // but first clear context if it is not needed elsewhere (i hope this bullcrap can be removed very soon)
-	    Object objectActivation = dynCtx.get(TR03112Keys.OBJECT_ACTIVATION);
-	    if (objectActivation instanceof Boolean && ((Boolean) objectActivation).booleanValue() == false) {
-		dynCtx.clear();
-		DynamicContext.remove();
-	    }
+	    // we finally found the refresh URL; redirect the browser to this location, but first clear context
+	    dynCtx.clear();
+	    DynamicContext.remove();
+
 	    logger.debug("Setting redirect address to '{}'.", endpoint);
 	    response.setRefreshAddress(endpoint);
 	    return response;

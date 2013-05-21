@@ -54,6 +54,7 @@ import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
 import org.openecard.crypto.tls.TlsNoAuthentication;
 import org.openecard.transport.httpcore.HttpRequestHelper;
+import org.openecard.transport.httpcore.InvalidResultStatus;
 import org.openecard.transport.httpcore.StreamHttpClientConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,6 +147,7 @@ public class TCTokenGrabber {
 	    HttpResponse response = httpexecutor.execute(req, conn, ctx);
 	    StatusLine status = response.getStatusLine();
 	    int statusCode = status.getStatusCode();
+	    String reason = status.getReasonPhrase();
 
 	    if (TR03112Utils.isRedirectStatusCode(statusCode)) {
 		Header[] headers = response.getHeaders("Location");
@@ -157,6 +159,10 @@ public class TCTokenGrabber {
 		    String msg = "Resource could not be retrieved. Missing Location header in HTTP response.";
 		    throw new ControlException(msg);
 		}
+	    } else if (statusCode >= 400) {
+		// according to the HTTP RFC, codes greater than 400 signal errors
+		String msg = String.format("Received a result code %d '%s' from server.", statusCode, reason);
+		throw new InvalidResultStatus(msg);
 	    } else {
 		conn.receiveResponseEntity(response);
 		entity = response.getEntity();

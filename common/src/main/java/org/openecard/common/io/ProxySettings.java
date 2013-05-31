@@ -56,14 +56,41 @@ public class ProxySettings {
 
     static {
 	Proxy p = null;
+
+	// try to load SOCKS proxy
 	String host = OpenecardProperties.getProperty("proxy.socks.host");
 	String port = OpenecardProperties.getProperty("proxy.socks.port");
+	// TODO: support SOCKS5 authentication
+	//String user = OpenecardProperties.getProperty("proxy.socks.user");
+	//String pass = OpenecardProperties.getProperty("proxy.socks.pass");
+	String user;
+	String pass;
 	try {
 	    if (host != null && port != null) {
 		p = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(host, Integer.parseInt(port)));
 	    }
 	} catch (NumberFormatException ex) {
 	}
+
+	// try to load HTTP proxy
+	if (p == null) {
+	    String scheme = OpenecardProperties.getProperty("proxy.http.scheme");
+	    host = OpenecardProperties.getProperty("proxy.http.host");
+	    port = OpenecardProperties.getProperty("proxy.http.port");
+	    user = OpenecardProperties.getProperty("proxy.http.user");
+	    pass = OpenecardProperties.getProperty("proxy.http.pass");
+	    try {
+		if (scheme != null && host != null && port != null) {
+		    if (! ("http".equals(scheme.toLowerCase()) || "https".equals(scheme.toLowerCase()))) {
+			logger.warn("Unsupported scheme {} used, falling back to http.", scheme);
+			scheme = "http";
+		    }
+		    p = new HttpConnectProxy(scheme, host, Integer.parseInt(port), user, pass);
+		}
+	    } catch (NumberFormatException ex) {
+	    }
+	}
+
 	systemProxy = p;
     }
 
@@ -105,7 +132,7 @@ public class ProxySettings {
      * @return Proxy object according to the configuration of the ProxySettings instance.
      * @throws URISyntaxException If host and/or port are invalid.
      */
-    public Proxy getProxy(String hostname, int port) throws URISyntaxException {
+    private Proxy getProxy(String hostname, int port) throws URISyntaxException {
 	Proxy p;
 	if (proxy == null) {
 	    // try to use the one from the system settings
@@ -133,12 +160,20 @@ public class ProxySettings {
      * @throws URISyntaxException If proxy could not be determined for the host-port combination.
      */
     public Socket getSocket(String hostname, int port) throws IOException, URISyntaxException {
-	Socket sock = new Socket(getProxy(hostname, port));
-	SocketAddress addr = new InetSocketAddress(hostname, port);
-	sock.setKeepAlive(true);
-	 // this is pretty much, but not a problem, as this only shifts the responsibility to the server
-	sock.setSoTimeout(5 * 60 * 1000);
-	sock.connect(addr, 60 * 1000);
+	Proxy p = getProxy(hostname, port);
+	Socket sock;
+	// HTTP CONNECT proxy is not handled by the Socket class, so do it ourselves
+	if (p instanceof HttpConnectProxy) {
+	    HttpConnectProxy hp = (HttpConnectProxy) p;
+	    sock = hp.getSocket(hostname, port);
+	} else {
+	    sock = new Socket(getProxy(hostname, port));
+	    SocketAddress addr = new InetSocketAddress(hostname, port);
+	    sock.setKeepAlive(true);
+	     // this is pretty much, but not a problem, as this only shifts the responsibility to the server
+	    sock.setSoTimeout(5 * 60 * 1000);
+	    sock.connect(addr, 60 * 1000);
+	}
 	return sock;
     }
 

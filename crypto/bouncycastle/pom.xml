@@ -42,6 +42,7 @@
 			<exclude>bouncycastle/**/jcajce/*.java</exclude>
 			<exclude>bouncycastle/cert/**/*.java</exclude>
 			<exclude>bouncycastle/cms/**/*.java</exclude>
+			<exclude>bouncycastle/dvcs/**/*.java</exclude>
 			<exclude>bouncycastle/mail/**/*.java</exclude>
 			<exclude>bouncycastle/mozilla/**/*.java</exclude>
 			<exclude>bouncycastle/openpgp/**/*.java</exclude>

@@ -93,7 +93,7 @@ public class CardUtils {
      */
     @Deprecated
     public void selectFile(byte[] slotHandle, short fileID) throws APDUException {
-	CardCommandAPDU selectFile = new Select.File(ShortUtils.toByteArray(fileID));
+	CardCommandAPDU selectFile = new Select.ChildFile(ShortUtils.toByteArray(fileID));
 	selectFile.transmit(dispatcher, slotHandle);
     }
 
@@ -119,7 +119,7 @@ public class CardUtils {
      * @throws APDUException
      */
     public static CardResponseAPDU selectFile(Dispatcher dispatcher, byte[] slotHandle, byte[] fileID) throws APDUException {
-	Select selectFile = new Select.File(fileID);
+	Select selectFile = new Select.ChildFile(fileID);
 	selectFile.setFCP();
 	return selectFile.transmit(dispatcher, slotHandle);
     }

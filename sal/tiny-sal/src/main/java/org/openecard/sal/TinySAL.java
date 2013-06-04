@@ -124,7 +124,6 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -278,6 +277,9 @@ public class TinySAL implements SAL {
 	     */
 	    CardStateEntry cardStateEntry = cardStateEntrySet.iterator().next();
 	    byte[] applicationID = cardAppPath.getCardApplication();
+	    if (applicationID == null) {
+		applicationID = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
+	    }
 	    Assert.securityConditionApplication(cardStateEntry, applicationID, ConnectionServiceActionName.CARD_APPLICATION_CONNECT);
 
 	    // Connect to the card
@@ -292,8 +294,9 @@ public class TinySAL implements SAL {
 
 	    // Select the card application
 	    CardCommandAPDU select;
-	    if (Arrays.equals(applicationID, Select.MasterFile.MF_FID)) {
-		select = new Select.MasterFile();
+	    // TODO: proper determination of path, file and app id
+	    if (applicationID.length == 2) {
+		select = new Select.File(applicationID);
 	    } else {
 		select = new Select.Application(applicationID);
 	    }
@@ -582,7 +585,7 @@ public class TinySAL implements SAL {
 
 	    byte[] fileID = dataSetInfo.getDataSetPath().getEfIdOrPath();
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
-	    CardCommandAPDU selectEF = new Select.File(fileID);
+	    CardCommandAPDU selectEF = new Select.ChildFile(fileID);
 	    selectEF.transmit(env.getDispatcher(), slotHandle);
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());

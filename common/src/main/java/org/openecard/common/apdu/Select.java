@@ -94,32 +94,47 @@ public class Select extends CardCommandAPDU {
     }
 
     /**
-     * Implements a Select APDU to select a directory.
-     */
-    public static final class Directory extends Select {
-
-	/**
-	 * Creates a new Select APDU to select a directory.
-	 *
-	 * @param fid File Identifier
-	 */
-	public Directory(byte[] fid) {
-	    super((byte) 0x01, (byte) 0x0C);
-	    setData(fid);
-	}
-    }
-
-    /**
-     * Implements a Select APDU to select a file.
+     * Implements a Select APDU to select a file (DF or EF).
      */
     public static final class File extends Select {
-
 	/**
 	 * Creates a new Select APDU to select a file.
 	 *
 	 * @param fid File Identifier
 	 */
 	public File(byte[] fid) {
+	    super((byte) 0x00, (byte) 0x0C);
+	    setData(fid);
+	}
+    }
+
+    /**
+     * Implements a Select APDU to select a directory (DF).
+     */
+    public static final class ChildDirectory extends Select {
+
+	/**
+	 * Creates a new Select APDU to select a directory.
+	 *
+	 * @param fid File Identifier
+	 */
+	public ChildDirectory(byte[] fid) {
+	    super((byte) 0x01, (byte) 0x0C);
+	    setData(fid);
+	}
+    }
+
+    /**
+     * Implements a Select APDU to select a file (EF).
+     */
+    public static final class ChildFile extends Select {
+
+	/**
+	 * Creates a new Select APDU to select a file.
+	 *
+	 * @param fid File Identifier
+	 */
+	public ChildFile(byte[] fid) {
 	    super((byte) 0x02, (byte) 0x0C);
 	    setData(fid);
 	}
@@ -127,9 +142,9 @@ public class Select extends CardCommandAPDU {
 	/**
 	 * Creates a new Select APDU to select a file.
 	 *
-	 * @param fid File Identifier
+	 * @param fid ChildFile Identifier
 	 */
-	public File(short fid){
+	public ChildFile(short fid){
 	    this(ShortUtils.toByteArray(fid));
 	}
     }

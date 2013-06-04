@@ -29,12 +29,18 @@ import java.net.Proxy;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.security.GeneralSecurityException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
 import org.openecard.bouncycastle.util.encoders.Base64;
+import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
+import org.openecard.crypto.tls.SocketWrapper;
+import org.openecard.crypto.tls.TlsNoAuthentication;
+import org.openecard.crypto.tls.verify.JavaSecVerifier;
 
 
 /**
@@ -47,6 +53,7 @@ import org.openecard.bouncycastle.util.encoders.Base64;
 public final class HttpConnectProxy extends Proxy {
 
     private final String proxyScheme;
+    private final boolean proxyValidate;
     private final String proxyHost;
     private final int proxyPort;
     private final String proxyUser;
@@ -62,10 +69,11 @@ public final class HttpConnectProxy extends Proxy {
      * @param proxyUser Optional username for authentication against the proxy.
      * @param proxyPass Optional pass for authentication against the proxy.
      */
-    public HttpConnectProxy(@Nonnull String proxyScheme, @Nonnull String proxyHost, @Nonnegative int proxyPort,
-	    @Nullable String proxyUser, @Nullable String proxyPass) {
+    public HttpConnectProxy(@Nonnull String proxyScheme, boolean proxyValidate, @Nonnull String proxyHost,
+	    @Nonnegative int proxyPort, @Nullable String proxyUser, @Nullable String proxyPass) {
 	super(Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
 	this.proxyScheme = proxyScheme;
+	this.proxyValidate = proxyValidate;
 	this.proxyHost = proxyHost;
 	this.proxyPort = proxyPort;
 	this.proxyUser = proxyUser;
@@ -101,7 +109,6 @@ public final class HttpConnectProxy extends Proxy {
     }
 
     private Socket connectSocket() throws IOException {
-	// TODO: evaluate scheme
 	// Socket object connecting to proxy
 	Socket sock = new Socket();
 	SocketAddress addr = new InetSocketAddress(proxyHost, proxyPort);
@@ -109,7 +116,28 @@ public final class HttpConnectProxy extends Proxy {
 	 // this is pretty much, but not a problem, as this only shifts the responsibility to the server
 	sock.setSoTimeout(5 * 60 * 1000);
 	sock.connect(addr, 60 * 1000);
-	return sock;
+
+	// evaluate scheme
+	if ("https".equals(proxyScheme)) {
+	    ClientCertDefaultTlsClient tlsClient = new ClientCertDefaultTlsClient(proxyHost);
+	    TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
+	    tlsAuth.setHostname(proxyHost);
+	    if (proxyValidate) {
+		try {
+		    tlsAuth.setCertificateVerifier(new JavaSecVerifier());
+		} catch (GeneralSecurityException ex) {
+		    throw new IOException("Failed to load certificate verifier.", ex);
+		}
+	    }
+	    tlsClient.setAuthentication(tlsAuth);
+	    TlsClientProtocol proto = new TlsClientProtocol(sock.getInputStream(), sock.getOutputStream());
+	    proto.connect(tlsClient);
+	    // wrap socket
+	    Socket tlsSock = new SocketWrapper(sock, proto.getInputStream(), proto.getOutputStream());
+	    return tlsSock;
+	} else {
+	    return sock;
+	}
     }
 
     private String makeRequestStr(String host, int port) {

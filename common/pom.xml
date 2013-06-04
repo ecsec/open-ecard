@@ -45,10 +45,9 @@
 	    <artifactId>i18n</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
-	<!-- TODO: remove when combidning EAC and activation module -->
 	<dependency>
 	    <groupId>org.openecard.crypto</groupId>
-	    <artifactId>bouncycastle</artifactId>
+	    <artifactId>tls</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>

@@ -75,17 +75,24 @@ public class ProxySettings {
 	// try to load HTTP proxy
 	if (p == null) {
 	    String scheme = OpenecardProperties.getProperty("proxy.http.scheme");
+	    String validateTls = OpenecardProperties.getProperty("proxy.http.validate_tls");
 	    host = OpenecardProperties.getProperty("proxy.http.host");
 	    port = OpenecardProperties.getProperty("proxy.http.port");
 	    user = OpenecardProperties.getProperty("proxy.http.user");
 	    pass = OpenecardProperties.getProperty("proxy.http.pass");
 	    try {
+		// the default is always validate
+		boolean validate = true;
+		if (validateTls != null) {
+		    validate = Boolean.parseBoolean(validateTls);
+		}
 		if (scheme != null && host != null && port != null) {
-		    if (! ("http".equals(scheme.toLowerCase()) || "https".equals(scheme.toLowerCase()))) {
+		    scheme = scheme.toLowerCase();
+		    if (! ("http".equals(scheme) || "https".equals(scheme))) {
 			logger.warn("Unsupported scheme {} used, falling back to http.", scheme);
 			scheme = "http";
 		    }
-		    p = new HttpConnectProxy(scheme, host, Integer.parseInt(port), user, pass);
+		    p = new HttpConnectProxy(scheme, validate, host, Integer.parseInt(port), user, pass);
 		}
 	    } catch (NumberFormatException ex) {
 	    }

@@ -24,6 +24,7 @@ package org.openecard.clients.applet;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.applet.Applet;
+import java.io.UnsupportedEncodingException;
 import java.security.AccessController;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -32,8 +33,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.ProtocolInfo;
 import org.openecard.common.sal.state.CardStateMap;
@@ -63,18 +67,25 @@ import org.xml.sax.SAXException;
 
 
 /**
+ * JavaScript communication handler.
+ *
+ * This class is used to handle all types of communication (eg. events and messages) between JavaScript
+ * and the applet.
  *
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
  */
-public class JSEventCallback {
+public class JSCommunicationHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(JSEventCallback.class);
+    private static final Logger logger = LoggerFactory.getLogger(JSCommunicationHandler.class);
 
     private final ExecutorService workerPool;
     private final JSObjectWrapper jsObjectWrapper;
+    private final String jsStartedCallback;
     private final String jsEventCallback;
     private final String jsMessageCallback;
+
+    private Future<?> eventThread;
 
     private JavaScriptBinding binding;
     private ControlInterface control;
@@ -82,17 +93,21 @@ public class JSEventCallback {
 
 
     /**
-     * Create a new JSEventCallback.
-     * @param applet
+     * Create a new JSCommunicationHandler.
+     *
+     * @param applet current applet
      * @param cardStates CardStateMap of the client
      * @param dispatcher dispatcher for sending messages
      * @param eventHandler to wait for status changes
      * @param gui to show card insertion dialog
+     * @param protocols for SAL protocol registry
      * @param reg to get card information shown in insertion dialog
      */
-    public JSEventCallback(ECardApplet applet, CardStateMap cardStates, Dispatcher dispatcher, EventHandler eventHandler, UserConsent gui, ProtocolInfo protocols, CardRecognition reg) {
+    public JSCommunicationHandler(ECardApplet applet, CardStateMap cardStates, Dispatcher dispatcher,
+	    EventHandler eventHandler, UserConsent gui, ProtocolInfo protocols, CardRecognition reg) {
 	workerPool = Executors.newCachedThreadPool();
 	jsObjectWrapper = new JSObjectWrapper(applet);
+	jsStartedCallback = applet.getParameter("jsStartedCallback");
 	jsEventCallback = applet.getParameter("jsEventCallback");
 	jsMessageCallback = applet.getParameter("jsMessageCallback");
 	binding = new JavaScriptBinding();
@@ -110,7 +125,8 @@ public class JSEventCallback {
      * @param gui to show card insertion dialog
      * @param reg to get card information shown in insertion dialog
      */
-    private void setupJSBinding(CardStateMap cardStates, Dispatcher dispatcher, EventHandler eventHandler, UserConsent gui, ProtocolInfo protocols, CardRecognition reg) {
+    private void setupJSBinding(CardStateMap cardStates, Dispatcher dispatcher, EventHandler eventHandler,
+	    UserConsent gui, ProtocolInfo protocols, CardRecognition reg) {
 	try {
 	    ControlHandlers handler = new ControlHandlers();
 	    GenericTCTokenHandler genericTCTokenHandler = new GenericTCTokenHandler(cardStates, dispatcher, gui, reg);
@@ -137,21 +153,23 @@ public class JSEventCallback {
      */
     public void stop() {
 	try {
+	    eventThread.cancel(true);
+	    workerPool.shutdownNow();
 	    control.stop();
 	} catch (Exception ex) {
+	    logger.error(ex.getMessage(), ex);
 	}
-	this.workerPool.shutdownNow();
     }
 
     /**
      * Start event polling and push available events to the JavaScript frontend.
      */
     public void startEventPush() {
-	if (this.jsEventCallback == null) {
+	if (jsEventCallback == null) {
 	    return;
 	}
 
-	this.workerPool.submit(new Runnable() {
+	eventThread = workerPool.submit(new Runnable() {
 	    @Override
 	    public void run() {
 		JSObject jsObject = jsObjectWrapper.getNamespacedJSObject(jsEventCallback);
@@ -168,7 +186,7 @@ public class JSEventCallback {
 		}
 
 		while (!Thread.currentThread().isInterrupted()) {
-		    Object[] waitForChangeResponse =  binding.handle("waitForChange", sessionMap);
+		    Object[] waitForChangeResponse = binding.handle("waitForChange", sessionMap);
 
 		    if (waitForChangeResponse != null) {
 			StatusChange statusChange;
@@ -191,17 +209,31 @@ public class JSEventCallback {
     }
 
     /**
+     * Send a started event to the JavaScript frontend.
+     */
+    public void sendStarted() {
+	if (jsStartedCallback == null) {
+	    return;
+	}
+
+	try {
+	    jsObjectWrapper.call(jsStartedCallback, this);
+	} catch (JSException ignore) {
+	}
+    }
+
+    /**
      * Send a message to the JavaScript frontend.
      *
      * @param message containing desired information
      */
     public void sendMessage(String message) {
-	if (this.jsMessageCallback == null) {
+	if (jsMessageCallback == null) {
 	    return;
 	}
 
 	try {
-	    this.jsObjectWrapper.call(this.jsMessageCallback, message);
+	    jsObjectWrapper.call(jsMessageCallback, message);
 	} catch (JSException ignore) {
 	}
     }
@@ -213,25 +245,52 @@ public class JSEventCallback {
      * @param id to identify the request
      * @param data as input parameters
      */
-    public void handle(final String callback, final String id, final Map data) {
-	this.workerPool.submit(new Runnable() {
-	    @Override
-	    public void run() {
-		// Some methods triggered by JavaScript calls need privileged access to various
-		// resources like network connections to external hosts (eg. to fetch the TcToken).
-		Object[] response = AccessController.doPrivileged(new PrivilegedAction<Object[]>() {
-		    @Override
-		    public Object[] run() {
-			return binding.handle(id, data);
-		    }
-		});
+    public void handle(final String callback, final String id, final String data) {
+	try {
+	    final Map<String, String> map = parseParameterJSONMap(data);
 
-		try {
-		    jsObjectWrapper.call(callback, response);
-		} catch (JSException ignore) {
+	    workerPool.submit(new Runnable() {
+		@Override
+		public void run() {
+		    JSObject jsObject = jsObjectWrapper.getNamespacedJSObject(callback);
+		    String function = JSObjectWrapper.getFunction(callback);
+
+		    // Some methods triggered by JavaScript calls need privileged access to various
+		    // resources like network connections to external hosts (eg. to fetch the TcToken).
+		    Object[] response = AccessController.doPrivileged(new PrivilegedAction<Object[]>() {
+			@Override
+			public Object[] run() {
+			    return binding.handle(id, map);
+			}
+		    });
+
+		    try {
+			jsObject.call(function, response);
+		    } catch (JSException ignore) {
+		    }
 		}
-	    }
-	});
+	    });
+	} catch (JSONException ex) {
+	    logger.error(ex.getMessage(), ex);
+	}
+    }
+
+    /**
+     * Parse parameter map from JSON data
+     *
+     * @param jsonData from JavaScript
+     * @return parameter hash map
+     * @throws JSONException
+     */
+    private static Map<String, String> parseParameterJSONMap(String jsonData) throws JSONException {
+	JSONObject json = new JSONObject(jsonData);
+	Map<String, String> map = new HashMap<String, String>();
+
+	for (String key : JSONObject.getNames(json)) {
+	    map.put(key, json.getString(key));
+	}
+
+	return map;
     }
 
     /**
@@ -264,9 +323,11 @@ public class JSEventCallback {
     private static String makeId(String input) {
 	try {
 	    MessageDigest md = MessageDigest.getInstance("SHA");
-	    byte[] bytes = md.digest(input.getBytes());
+	    byte[] bytes = md.digest(input.getBytes("UTF-8"));
 	    return ByteUtils.toHexString(bytes);
 	} catch (NoSuchAlgorithmException ex) {
+	    return input.replaceAll(" ", "_");
+	} catch (UnsupportedEncodingException ex) {
 	    return input.replaceAll(" ", "_");
 	}
     }
@@ -286,7 +347,7 @@ public class JSEventCallback {
 	 * @param applet to get JavaScript window object
 	 * @throws JSException throw by underlying JSObject.getWindow()
 	 */
-	public JSObjectWrapper(Applet applet) throws JSException {
+	public JSObjectWrapper(Applet applet) {
 	    this.jsObject = JSObject.getWindow(applet);
 	}
 
@@ -297,7 +358,7 @@ public class JSEventCallback {
 	 * @param parameter to use with the JavaScript function call
 	 * @throws JSException thrown by underlying JSObject.call() or namespace resolution
 	 */
-	public void call(String function, Object parameter) throws JSException {
+	public void call(String function, Object parameter) {
 	    call(function, new Object[] { parameter });
 	}
 
@@ -308,7 +369,7 @@ public class JSEventCallback {
 	 * @param parameters to use with the JavaScript function call
 	 * @throws JSException thrown by underlying JSObject.call() or namespace resolution
 	 */
-	public void call(String function, Object[] parameters)  throws JSException {
+	public void call(String function, Object[] parameters) {
 	    getNamespacedJSObject(function).call(getFunction(function), parameters);
 	}
 
@@ -320,7 +381,7 @@ public class JSEventCallback {
 	 * @return the matching JSObject
 	 * @throws JSException if JavaScript object can't be found
 	 */
-	public JSObject getNamespacedJSObject(String function) throws JSException {
+	public JSObject getNamespacedJSObject(String function) {
 	    JSObject jsObj = this.jsObject;
 	    String[] namespacesAndFunction = function.split("\\.");
 

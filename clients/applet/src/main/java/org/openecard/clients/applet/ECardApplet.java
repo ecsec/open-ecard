@@ -76,7 +76,7 @@ public class ECardApplet extends JApplet {
     private CardRecognition recognition;
     private CardStateMap cardStates;
     private EventManager em;
-    private JSEventCallback jsCallback;
+    private JSCommunicationHandler jsCommHandler;
     private TinyManagement management;
     private byte[] contextHandle;
 
@@ -120,15 +120,15 @@ public class ECardApplet extends JApplet {
 		contextHandle = establishContextResponse.getContextHandle();
 	    } else {
 		logger.error("EstablishContext failed.");
-		JOptionPane.showMessageDialog(null, lang.translationForKey("ifd.context.error"), lang
-			.translationForKey("error"), JOptionPane.ERROR_MESSAGE, getLogo());
+		JOptionPane.showMessageDialog(null, lang.translationForKey("ifd.context.error"),
+			lang.translationForKey("error"), JOptionPane.ERROR_MESSAGE, getLogo());
 		destroy();
 		return;
 	    }
 	} else {
 	    logger.error("EstablishContext failed.");
-	    JOptionPane.showMessageDialog(null, lang.translationForKey("ifd.context.error"), lang
-		    .translationForKey("error"), JOptionPane.ERROR_MESSAGE, getLogo());
+	    JOptionPane.showMessageDialog(null, lang.translationForKey("ifd.context.error"),
+		    lang.translationForKey("error"), JOptionPane.ERROR_MESSAGE, getLogo());
 	    destroy();
 	    return;
 	}
@@ -138,8 +138,8 @@ public class ECardApplet extends JApplet {
 	    recognition = new CardRecognition(ifd, contextHandle);
 	} catch (Exception ex) {
 	    logger.error(ex.getMessage(), ex);
-	    JOptionPane.showMessageDialog(null, lang.translationForKey("recognition.error"), lang
-		    .translationForKey("error"), JOptionPane.ERROR_MESSAGE, getLogo());
+	    JOptionPane.showMessageDialog(null, lang.translationForKey("recognition.error"),
+		    lang.translationForKey("error"), JOptionPane.ERROR_MESSAGE, getLogo());
 	    destroy();
 	    return;
 	}
@@ -162,7 +162,7 @@ public class ECardApplet extends JApplet {
 
 	// JavaScript Bridge
 	EventHandler evt = new EventHandler(em);
-	jsCallback = new JSEventCallback(this, cardStates, dispatcher, evt, gui, sal.getProtocolInfo(), recognition);
+	jsCommHandler = new JSCommunicationHandler(this, cardStates, dispatcher, evt, gui, sal.getProtocolInfo(), recognition);
 
 	// start EventManager
 	em.initialize();
@@ -170,7 +170,14 @@ public class ECardApplet extends JApplet {
 
     @Override
     public void start() {
-	this.jsCallback.startEventPush();
+	jsCommHandler.sendStarted();
+	jsCommHandler.sendMessage("Open eCard Applet started");
+	jsCommHandler.startEventPush();
+    }
+
+    @Override
+    public void stop() {
+	jsCommHandler.sendMessage("Open eCard Applet stopped");
     }
 
     @Override
@@ -224,24 +231,24 @@ public class ECardApplet extends JApplet {
 	}
 	// destroy JSEventCallback
 	try {
-	    if (jsCallback != null) {
-		jsCallback.stop();
+	    if (jsCommHandler != null) {
+		jsCommHandler.stop();
 	    }
 	} catch (Exception ex) {
-	    logger.error("An exception occurred while destroying JSEventCallback.", ex);
+	    logger.error("An exception occurred while destroying JSCommunicationHandler.", ex);
 	} finally {
-	    jsCallback = null;
+	    jsCommHandler = null;
 	}
 	// destroy the remaining components
 	env = null;
     }
 
     public CardStateMap getCardStates() {
-	return this.cardStates;
+	return cardStates;
     }
 
-    public JSEventCallback getCallback() {
-	return this.jsCallback;
+    public JSCommunicationHandler getJSCommunicationHandler() {
+	return jsCommHandler;
     }
 
     public Frame findParentFrame() {

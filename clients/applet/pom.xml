@@ -40,6 +40,18 @@
 	    <plugins>
 		<plugin>
 		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-jar-plugin</artifactId>
+		    <configuration>
+			<archive>
+			    <index>true</index>
+			    <manifestEntries>
+				<Trusted-Library>true</Trusted-Library>
+			    </manifestEntries>
+			</archive>
+		    </configuration>
+		</plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
 		    <artifactId>maven-shade-plugin</artifactId>
 		    <configuration>
 			<!--
@@ -218,6 +230,10 @@
 	    <groupId>openjdk</groupId>
 	    <artifactId>java-plugin</artifactId>
 	    <scope>provided</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.json</groupId>
+	    <artifactId>json</artifactId>
 	</dependency>
     </dependencies>
 

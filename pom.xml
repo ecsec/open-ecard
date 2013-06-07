@@ -637,8 +637,8 @@
 		</plugin>
 		<plugin>
 		    <groupId>de.ecsec.maven.plugins</groupId>
-		    <artifactId>maven-pack200-plugin</artifactId>
-		    <version>1.0.2</version>
+		    <artifactId>pack200-maven-plugin</artifactId>
+		    <version>1.0.0</version>
 		</plugin>
 		<plugin>
 		    <groupId>org.codehaus.mojo</groupId>
@@ -720,11 +720,11 @@
 		<artifactId>commons-jci-fam</artifactId>
 		<version>1.0</version>
 	    </dependency>
-            <dependency>
+	    <dependency>
 		<groupId>org.json</groupId>
 		<artifactId>json</artifactId>
 		<version>20090211</version>
-            </dependency>
+	    </dependency>
 	</dependencies>
     </dependencyManagement>
 
@@ -749,11 +749,11 @@
 	    </exclusions>
 	    <scope>test</scope>
 	</dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>annotations</artifactId>
+	<dependency>
+	    <groupId>com.google.code.findbugs</groupId>
+	    <artifactId>annotations</artifactId>
 	    <scope>provided</scope>
-        </dependency>
+	</dependency>
     </dependencies>
 
 </project>

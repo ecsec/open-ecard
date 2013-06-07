@@ -77,23 +77,16 @@
 	<plugins>
 	    <plugin>
 		<groupId>de.ecsec.maven.plugins</groupId>
-		<artifactId>maven-pack200-plugin</artifactId>
+		<artifactId>pack200-maven-plugin</artifactId>
 		<configuration>
-		    <processMainArtifact>true</processMainArtifact>
+		    <packLogLevel>SEVERE</packLogLevel>
 		    <effort>9</effort>
-		    <deflateHint>true</deflateHint>
-		    <!--<keepFileOrder>true</keepFileOrder>-->
-		    <stripCodeAttributes>
-			<!-- Comment the following lines to debug the applet -->
-			<param>SourceFile</param>
-			<param>LineNumberTable</param>
-			<param>LocalVariableTable</param>
-			<param>LocalVariableTypeTable</param>
-		    </stripCodeAttributes>
+		    <modificationTime>latest</modificationTime>
+		    <segmentLimit>-1</segmentLimit>
+		    <stripDebugAttributes>true</stripDebugAttributes>
 		</configuration>
 		<extensions>true</extensions>
 	    </plugin>
-
 	    <!-- Disabled until configured correctly -->
 	    <!--     <plugin> -->
 	    <!--         <groupId>com.github.wvengen</groupId> -->

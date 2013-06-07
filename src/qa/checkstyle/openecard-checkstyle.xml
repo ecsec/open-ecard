@@ -107,10 +107,16 @@
 	    <property name="authorFormat" value="\S+\s\S+"/>
 	</module>
 	<module name="JavadocStyle">
-	    <property name="severity" value="info"/>
-	    <property name="id" value="javadoc_class_style"/>
+	    <property name="severity" value="warning"/>
+	    <property name="id" value="javadoc_class_style1"/>
 	    <property name="scope" value="protected"/>
 	    <property name="checkEmptyJavadoc" value="true"/>
+	    <property name="tokens" value="CLASS_DEF"/>
+	</module>
+	<module name="JavadocStyle">
+	    <property name="severity" value="info"/>
+	    <property name="id" value="javadoc_class_style2"/>
+	    <property name="scope" value="protected"/>
 	    <property name="endOfSentenceFormat" value="([.?!][ \t\n\r\f&lt;])|([.?!]$){2,}"/>
 	    <property name="tokens" value="CLASS_DEF"/>
 	    <message key="javadoc.noperiod" value="Two sentences desired in Javadoc."/>

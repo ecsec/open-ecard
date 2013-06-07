@@ -117,6 +117,9 @@ public class JavaScriptTCTokenHandler extends JavaScriptControlHandler {
 		} else if ("slotIndex".equals(e.getKey())) {
 		    // SlotIndex
 		    tcTokenRequest.setSlotIndex(e.getValue().toString());
+		} else if ("cardType".equals(e.getKey())) {
+		    // CardType
+		    tcTokenRequest.setCardType(e.getValue().toString());
 		}
 	    }
 

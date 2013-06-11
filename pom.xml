@@ -45,6 +45,7 @@
 	<module>recognition</module>
 	<module>event-manager</module>
 	<module>plugins</module>
+	<module>addon</module>
 	<!-- client assemblies -->
 	<module>clients</module>
 	<module>control-interface</module>

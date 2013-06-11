@@ -53,8 +53,8 @@ import org.openecard.common.I18n;
 import org.openecard.common.enums.EventType;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.gui.about.AboutDialog;
-import org.openecard.gui.settings.SettingsDialog;
 import org.openecard.recognition.CardRecognition;
+import org.openecard.richclient.gui.manage.ManagementDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,7 +145,6 @@ public class Status implements EventCallback {
 
 	JButton btnExit = new JButton(lang.translationForKey("tray.exit"));
 	btnExit.addActionListener(new ActionListener() {
-
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
 		appTray.shutdown();
@@ -154,7 +153,6 @@ public class Status implements EventCallback {
 
 	JButton btnAbout = new JButton(lang.translationForKey("tray.about"));
 	btnAbout.addActionListener(new ActionListener() {
-
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
 		AboutDialog.showDialog();
@@ -163,10 +161,9 @@ public class Status implements EventCallback {
 
 	JButton btnSettings = new JButton(lang.translationForKey("tray.config"));
 	btnSettings.addActionListener(new ActionListener() {
-
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
-		SettingsDialog.showDialog();
+		ManagementDialog.showDialog();
 	    }
 	});
 

@@ -23,6 +23,7 @@ The following software projects are included/used(*) in this software distributi
  - Logback (http://logback.qos.ch/)
  - Logback-Android (https://github.com/tony19/logback-android)
  - OpenJDK (http://openjdk.java.net)
+ - Oxygen (http://www.oxygen-icons.org)
  - PCSC-Lite (http://pcsclite.alioth.debian.org/pcsclite.html)
  - SLF4J (http://www.slf4j.org)
  - Seek for Android (https://code.google.com/p/seek-for-android)

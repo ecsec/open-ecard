@@ -118,7 +118,7 @@ public final class HttpConnectProxy extends Proxy {
 	sock.connect(addr, 60 * 1000);
 
 	// evaluate scheme
-	if ("https".equals(proxyScheme)) {
+	if ("HTTPS".equals(proxyScheme)) {
 	    ClientCertDefaultTlsClient tlsClient = new ClientCertDefaultTlsClient(proxyHost);
 	    TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
 	    tlsAuth.setHostname(proxyHost);

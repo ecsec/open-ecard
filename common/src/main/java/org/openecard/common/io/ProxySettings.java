@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
  * The default is to use the system wide proxy settings, but it can also be overloaded with specific settings.
  * In order to overload the proxy settings, set the following values in {@link OpenecardProperties}:
  * <ul>
- *   <li>proxy.socks.host</li>
- *   <li>proxy.socks.port</li>
+ *   <li>proxy.host</li>
+ *   <li>proxy.port</li>
  * </ul>
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
@@ -50,55 +50,58 @@ public class ProxySettings {
 
     private static final Logger logger = LoggerFactory.getLogger(ProxySettings.class);
 
-    private static final ProxySettings defaultInstance = new ProxySettings();
-    private static final Proxy systemProxy;
+    private static ProxySettings defaultInstance;
+    private static Proxy systemProxy;
     private final Proxy proxy;
 
     static {
+	load();
+    }
+    /**
+     * Preload proxy settings according to the global options.
+     * The load must be performed when the settings change while running.
+     */
+    public static synchronized void load() {
 	Proxy p = null;
 
-	// try to load SOCKS proxy
-	String host = OpenecardProperties.getProperty("proxy.socks.host");
-	String port = OpenecardProperties.getProperty("proxy.socks.port");
-	// TODO: support SOCKS5 authentication
-	//String user = OpenecardProperties.getProperty("proxy.socks.user");
-	//String pass = OpenecardProperties.getProperty("proxy.socks.pass");
-	String user;
-	String pass;
-	try {
-	    if (host != null && port != null) {
-		p = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(host, Integer.parseInt(port)));
-	    }
-	} catch (NumberFormatException ex) {
-	}
+	// get config values
+	String scheme = OpenecardProperties.getProperty("proxy.scheme");
+	// the empty string is no defined value, thus it means scheme not defined
+	scheme = scheme != null ? scheme.toUpperCase() : "";
+	String validate = OpenecardProperties.getProperty("proxy.validate_tls");
+	String host = OpenecardProperties.getProperty("proxy.host");
+	String port = OpenecardProperties.getProperty("proxy.port");
+	String user = OpenecardProperties.getProperty("proxy.user");
+	String pass = OpenecardProperties.getProperty("proxy.pass");
 
-	// try to load HTTP proxy
-	if (p == null) {
-	    String scheme = OpenecardProperties.getProperty("proxy.http.scheme");
-	    String validateTls = OpenecardProperties.getProperty("proxy.http.validate_tls");
-	    host = OpenecardProperties.getProperty("proxy.http.host");
-	    port = OpenecardProperties.getProperty("proxy.http.port");
-	    user = OpenecardProperties.getProperty("proxy.http.user");
-	    pass = OpenecardProperties.getProperty("proxy.http.pass");
+	if ("SOCKS".equals(scheme)) {
+	    // try to load SOCKS proxy
 	    try {
-		// the default is always validate
-		boolean validate = true;
-		if (validateTls != null) {
-		    validate = Boolean.parseBoolean(validateTls);
-		}
-		if (scheme != null && host != null && port != null) {
-		    scheme = scheme.toLowerCase();
-		    if (! ("http".equals(scheme) || "https".equals(scheme))) {
-			logger.warn("Unsupported scheme {} used, falling back to http.", scheme);
-			scheme = "http";
-		    }
-		    p = new HttpConnectProxy(scheme, validate, host, Integer.parseInt(port), user, pass);
+		if (host != null && port != null) {
+		    p = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(host, Integer.parseInt(port)));
 		}
 	    } catch (NumberFormatException ex) {
 	    }
+	} else if ("HTTP".equals(scheme) || "HTTPS".equals(scheme)) {
+	    // try to load HTTP CONNECT proxy
+	    try {
+		// the default is always validate
+		boolean valid = true;
+		if (validate != null) {
+		    valid = Boolean.parseBoolean(validate);
+		}
+		if (host != null && port != null) {
+		    p = new HttpConnectProxy(scheme, valid, host, Integer.parseInt(port), user, pass);
+		}
+	    } catch (NumberFormatException ex) {
+	    }
+	} else if (! scheme.isEmpty()) {
+	    logger.warn("Unsupported proxy scheme {} used.", scheme);
 	}
 
 	systemProxy = p;
+	// instantiate default instance
+	defaultInstance = new ProxySettings();
     }
 
     /**

@@ -47,6 +47,8 @@ public class OpenecardProperties {
 
     private static final Logger _logger = LoggerFactory.getLogger(OpenecardProperties.class);
 
+    private static Internal properties;
+
     private static class Internal extends OverridingProperties {
 	public Internal(InputStream bundledProps, InputStream homeProps) throws IOException {
 	    super(bundledProps, homeProps);
@@ -54,11 +56,17 @@ public class OpenecardProperties {
     }
 
     static {
+	load();
+    }
+    /**
+     * Load properties from application bundle and disc.
+     */
+    public static synchronized void load() {
 	InputStream homeProps = null;
 	InputStream bundledProps = null;
 	try {
 	    File homePath = FileUtils.getHomeConfigDir();
-	    File cfgFile = new File(homePath + File.separator + "openecard.properties");
+	    File cfgFile = new File(homePath, "openecard.properties");
 	    homeProps = new FileInputStream(cfgFile);
 	} catch (IOException ex) {
 	    _logger.info("Failed to load bundled properties.", ex);
@@ -76,8 +84,6 @@ public class OpenecardProperties {
 	    _logger.error(ex.getMessage(), ex);
 	}
     }
-
-    private static Internal properties;
 
 
     /**

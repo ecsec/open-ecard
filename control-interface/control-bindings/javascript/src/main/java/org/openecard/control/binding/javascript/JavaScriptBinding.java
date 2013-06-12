@@ -41,12 +41,11 @@ public class JavaScriptBinding extends ControlBinding {
     @Override
     public void start() throws Exception {
 	service = new JavaScriptService(handlers);
-	service.start();
     }
 
     @Override
     public void stop() throws Exception {
-	service.interrupt();
+	// Nothing to do
     }
 
 }

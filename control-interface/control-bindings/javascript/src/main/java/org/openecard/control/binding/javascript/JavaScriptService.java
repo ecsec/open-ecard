@@ -33,17 +33,15 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class JavaScriptService implements Runnable {
+public class JavaScriptService {
 
     private static final Logger logger = LoggerFactory.getLogger(JavaScriptService.class);
 
     private final ControlHandlers handlers;
-    private final Thread thread;
 
     public JavaScriptService(ControlHandlers handlers) {
 	this.handlers = handlers;
 
-	thread = new Thread(this, "Open-eCard Localhost-Binding");
 	logger.debug("Starting JavaScriptBinding");
     }
 
@@ -63,30 +61,6 @@ public class JavaScriptService implements Runnable {
 	} catch (Exception e) {
 	    logger.error(e.getMessage(), e);
 	    return null;
-	}
-    }
-
-    /**
-     * Starts the server.
-     */
-    public void start() {
-	thread.start();
-    }
-
-    /**
-     * Interrupts the server.
-     */
-    public void interrupt() {
-	try {
-	    thread.interrupt();
-	} catch (Exception ignore) {
-	}
-    }
-
-    @Override
-    public void run() {
-	while (! Thread.interrupted()) {
-	    //TODO
 	}
     }
 

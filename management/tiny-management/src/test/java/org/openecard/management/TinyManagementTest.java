@@ -57,13 +57,14 @@ public class TinyManagementTest {
 	InitializeFrameworkResponse initializeFrameworkResponse = instance.initializeFramework(initializeFramework);
 	assertEquals(ECardConstants.Major.OK, initializeFrameworkResponse.getResult().getResultMajor());
 	//TODO version should be a constant somewhere else
-	assertEquals(new BigInteger("1"), initializeFrameworkResponse.getVersion().getMajor());
-	assertEquals(new BigInteger("8"), initializeFrameworkResponse.getVersion().getMinor());
-	assertEquals(new BigInteger("0"), initializeFrameworkResponse.getVersion().getSubMinor());
+	assertEquals(BigInteger.valueOf(1), initializeFrameworkResponse.getVersion().getMajor());
+	assertEquals(BigInteger.valueOf(10), initializeFrameworkResponse.getVersion().getMinor());
+	assertEquals(BigInteger.valueOf(0), initializeFrameworkResponse.getVersion().getSubMinor());
     }
 
     @Test
-    public void testRest() throws InstantiationException, IllegalAccessException {
+    public void testRest() throws InstantiationException, IllegalAccessException, IllegalArgumentException,
+	    InvocationTargetException {
 	for (Method m : instance.getClass().getDeclaredMethods()) {
 	    if (m.getName().equals("initializeFramework")) {
 		continue;
@@ -72,19 +73,8 @@ public class TinyManagementTest {
 
 	    Object o = m.getParameterTypes()[0].newInstance();
 
-	    try {
-		ResponseType result = (ResponseType) m.invoke(instance, o);
-		assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
-	    } catch (IllegalArgumentException e) {
-
-		e.printStackTrace();
-	    } catch (InvocationTargetException e) {
-
-		e.printStackTrace();
-	    } catch (SecurityException e) {
-
-		e.printStackTrace();
-	    }
+	    ResponseType result = (ResponseType) m.invoke(instance, o);
+	    assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
 	}
     }
 

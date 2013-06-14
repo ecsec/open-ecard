@@ -24,10 +24,13 @@ package org.openecard.sal.protocol.eac.anytype;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate;
+import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -67,14 +70,6 @@ public class EAC1InputType {
 	authMap = new AuthDataMap(baseType);
 
 	certificateDescription = authMap.getContentAsBytes(CERTIFICATE_DESCRIPTION);
-	requiredCHAT = authMap.getContentAsBytes(REQUIRED_CHAT);
-	optionalCHAT = authMap.getContentAsBytes(OPTIONAL_CHAT);
-	// HACK: this is only done because some eID Server vendors send raw CHAT values
-	requiredCHAT = fixChatValue(requiredCHAT);
-	optionalCHAT = fixChatValue(optionalCHAT);
-
-	authenticatedAuxiliaryData = authMap.getContentAsBytes(AUTHENTICATED_AUXILIARY_DATA);
-
 	certificates = new ArrayList<CardVerifiableCertificate>();
 	for (Element element : baseType.getAny()) {
 	    if (element.getLocalName().equals(CERTIFICATE)) {
@@ -83,6 +78,26 @@ public class EAC1InputType {
 		certificates.add(cvc);
 	    }
 	}
+
+	requiredCHAT = authMap.getContentAsBytes(REQUIRED_CHAT);
+	optionalCHAT = authMap.getContentAsBytes(OPTIONAL_CHAT);
+	// HACK: this is only done because some eID Server vendors send raw CHAT values
+	// if not present use chat from CVC
+	if (requiredCHAT == null) {
+	    CardVerifiableCertificateChain certChain = new CardVerifiableCertificateChain(certificates);
+	    List<CardVerifiableCertificate> terminalCerts = certChain.getTerminalCertificates();
+	    requiredCHAT = terminalCerts.get(0).getCHAT().toByteArray();
+	} else {
+	    requiredCHAT = fixChatValue(requiredCHAT);
+	}
+	// if not present, use required as optional
+	if (optionalCHAT == null) {
+	    optionalCHAT = Arrays.copyOf(requiredCHAT, requiredCHAT.length);
+	} else {
+	    optionalCHAT = fixChatValue(optionalCHAT);
+	}
+
+	authenticatedAuxiliaryData = authMap.getContentAsBytes(AUTHENTICATED_AUXILIARY_DATA);
     }
 
     /**

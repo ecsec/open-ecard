@@ -100,7 +100,7 @@ public class TR03112Utils {
 	try {
 	    // calculate hash of first certificate in chain
 	    MessageDigest md = MessageDigest.getInstance(SHA256);
-	    md.update(serverCertificate.getCerts()[0].getEncoded());
+	    md.update(serverCertificate.getCertificateAt(0).getEncoded());
 	    byte[] hash = md.digest();
 
 	    // prepend with tag

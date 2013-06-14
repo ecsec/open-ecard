@@ -43,7 +43,7 @@ import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.apache.http.protocol.HttpRequestExecutor;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
-import org.openecard.bouncycastle.crypto.tls.TlsProtocolHandler;
+import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
 import org.openecard.common.io.LimitedInputStream;
 import org.openecard.common.io.ProxySettings;
 import org.openecard.common.util.FileUtils;
@@ -109,7 +109,7 @@ public class TCTokenGrabber {
 	    }
 
 	    // open a TLS connection, retrieve the server certificate and save it
-	    TlsProtocolHandler h;
+	    TlsClientProtocol h;
 	    TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
 	    // FIXME: verify certificate chain as soon as a usable solution exists for the trust problem
 	    // tlsAuth.setCertificateVerifier(new JavaSecVerifier());
@@ -118,13 +118,13 @@ public class TCTokenGrabber {
 	    try {
 		tlsClient.setClientVersion(ProtocolVersion.TLSv11);
 		Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
-		h = new TlsProtocolHandler(socket.getInputStream(), socket.getOutputStream());
+		h = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream());
 		h.connect(tlsClient);
 	    } catch (IOException e) {
 		logger.error("Connecting to the TCToken-URL with TLSv1.1 failed. Falling back to TLSv1.0.");
 		tlsClient.setClientVersion(ProtocolVersion.TLSv10);
 		Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
-		h = new TlsProtocolHandler(socket.getInputStream(), socket.getOutputStream());
+		h = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream());
 		h.connect(tlsClient);
 	    }
 	    serverCerts.add(new Pair<URL, Certificate>(url, tlsAuth.getServerCertificate()));

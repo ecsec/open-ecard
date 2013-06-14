@@ -143,7 +143,7 @@ public class JavaSecVerifier implements CertificateVerifier {
     public void isValid(Certificate chain, String hostname) throws CertificateVerificationException {
 	// check hostname
 	if (hostname != null) {
-	    org.openecard.bouncycastle.asn1.x509.Certificate cert = chain.getCerts()[0];
+	    org.openecard.bouncycastle.asn1.x509.Certificate cert = chain.getCertificateAt(0);
 	    RDN[] cn = cert.getSubject().getRDNs(BCStrictStyle.CN);
 	    if (cn.length != 1) {
 		throw new CertificateVerificationException("Multiple CN entries in certificate's Subject.");
@@ -176,11 +176,11 @@ public class JavaSecVerifier implements CertificateVerifier {
 
 
     private CertPath convertChain(Certificate chain) throws CertificateException, IOException {
-	final int numCerts = chain.getCerts().length;
+	final int numCerts = chain.getCertificateList().length;
 	ArrayList<java.security.cert.Certificate> result = new ArrayList<java.security.cert.Certificate>(numCerts);
 	CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
-	for (org.openecard.bouncycastle.asn1.x509.Certificate next : chain.getCerts()) {
+	for (org.openecard.bouncycastle.asn1.x509.Certificate next : chain.getCertificateList()) {
 	    byte[] nextData = next.getEncoded();
 	    ByteArrayInputStream nextDataStream = new ByteArrayInputStream(nextData);
 	    java.security.cert.Certificate nextConverted = cf.generateCertificate(nextDataStream);

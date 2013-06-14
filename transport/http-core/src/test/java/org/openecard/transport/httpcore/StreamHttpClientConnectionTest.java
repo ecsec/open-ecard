@@ -36,7 +36,7 @@ import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.apache.http.protocol.HttpRequestExecutor;
 import org.openecard.apache.http.util.EntityUtils;
 import org.openecard.bouncycastle.crypto.tls.DefaultTlsClient;
-import org.openecard.bouncycastle.crypto.tls.TlsProtocolHandler;
+import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
 import org.openecard.common.util.FileUtils;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -67,7 +67,7 @@ public class StreamHttpClientConnectionTest {
 	Socket socket = new Socket(hostName, 443);
 	assertTrue(socket.isConnected());
 	DefaultTlsClient tlsClient = new DefaultTlsClientImpl(hostName);
-	TlsProtocolHandler handler = new TlsProtocolHandler(socket.getInputStream(), socket.getOutputStream());
+	TlsClientProtocol handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream());
 	handler.connect(tlsClient);
 	StreamHttpClientConnection conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());
 	assertTrue(conn.isOpen());

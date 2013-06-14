@@ -24,7 +24,7 @@ package org.openecard.crypto.tls.verify;
 
 import java.io.IOException;
 import java.net.Socket;
-import org.openecard.bouncycastle.crypto.tls.TlsProtocolHandler;
+import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
 import org.testng.SkipException;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -39,14 +39,14 @@ public class JavaSecVerifierTest {
     @Test
     public void testVerificationNoError() throws IOException {
 	final String hostName = "www.google.com";
-	TlsProtocolHandler handler;
+	TlsClientProtocol handler;
 	try {
 	    // open connection
 	    Socket socket = new Socket(hostName, 443);
 	    assertTrue(socket.isConnected());
 	    // connect client
 	    DefaultTlsClientImpl c = new DefaultTlsClientImpl(hostName);
-	    handler = new TlsProtocolHandler(socket.getInputStream(), socket.getOutputStream());
+	    handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream());
 	    handler.connect(c);
 	} catch (Exception ex) {
 	    throw new SkipException("Unable to create TLS client.");
@@ -58,7 +58,7 @@ public class JavaSecVerifierTest {
     public void testVerificationError() throws IOException {
 	final String hostName = "www.google.com";
 	final String actualHostName = "www.verisign.de";
-	TlsProtocolHandler handler = null;
+	TlsClientProtocol handler = null;
 	DefaultTlsClientImpl c = null;
 	try {
 	    // open connection
@@ -66,7 +66,7 @@ public class JavaSecVerifierTest {
 	    assertTrue(socket.isConnected());
 	    // connect client
 	    c = new DefaultTlsClientImpl(hostName);
-	    handler = new TlsProtocolHandler(socket.getInputStream(), socket.getOutputStream());
+	    handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream());
 	} catch (Exception ex) {
 	    throw new SkipException("Unable to create TLS client.");
 	}

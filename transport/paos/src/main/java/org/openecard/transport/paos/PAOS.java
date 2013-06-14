@@ -48,7 +48,7 @@ import org.openecard.apache.http.protocol.HttpRequestExecutor;
 import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsClient;
-import org.openecard.bouncycastle.crypto.tls.TlsProtocolHandler;
+import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.TR03112Keys;
@@ -390,7 +390,7 @@ public class PAOS {
 	    // TLS
 	    InputStream sockIn = socket.getInputStream();
 	    OutputStream sockOut = socket.getOutputStream();
-	    TlsProtocolHandler handler = new TlsProtocolHandler(sockIn, sockOut);
+	    TlsClientProtocol handler = new TlsClientProtocol(sockIn, sockOut);
 	    handler.connect(tlsClient);
 	    conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());
 	    saveServiceCertificate();

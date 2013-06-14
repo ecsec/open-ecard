@@ -145,7 +145,7 @@ public final class HttpConnectProxy extends Proxy {
 	StringBuilder requestStr = new StringBuilder(1024);
 	requestStr.append("CONNECT ").append(host).append(":").append(port). append(" HTTP/1.0\r\n");
 	// Add Proxy Authorization if proxyUser and proxyPass is set
-	if (proxyUser != null && proxyPass != null) {
+	if (proxyUser != null && ! proxyUser.isEmpty() && proxyPass != null && ! proxyPass.isEmpty()) {
 	    String proxyUserPass = String.format("%s:%s", proxyUser, proxyPass);
 	    proxyUserPass = Base64.toBase64String(proxyUserPass.getBytes());
 	    requestStr.append("Proxy-Authorization: Basic ").append(proxyUserPass).append("\r\n");

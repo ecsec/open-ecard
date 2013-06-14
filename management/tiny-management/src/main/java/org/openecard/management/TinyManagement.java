@@ -101,6 +101,8 @@ import org.openecard.ws.Management;
  */
 public class TinyManagement implements  Management {
 
+    private static final int[] VERSION = {1, 10, 0};
+
     private Environment env;
 
     public TinyManagement(Environment env) {
@@ -222,9 +224,9 @@ public class TinyManagement implements  Management {
 	InitializeFrameworkResponse initializeFrameworkResponse = new InitializeFrameworkResponse();
 	Version version = new Version();
 	// TODO: version should be a constant somewhere else
-	version.setMajor(new BigInteger("1"));
-	version.setMinor(new BigInteger("8"));
-	version.setSubMinor(new BigInteger("0"));
+	version.setMajor(BigInteger.valueOf(VERSION[0]));
+	version.setMinor(BigInteger.valueOf(VERSION[1]));
+	version.setSubMinor(BigInteger.valueOf(VERSION[2]));
 	initializeFrameworkResponse.setVersion(version);
 	Result r = new Result();
 	r.setResultMajor(ECardConstants.Major.OK);

@@ -23,32 +23,43 @@
 package org.openecard.addon.bind;
 
 import javax.xml.bind.JAXBElement;
-import org.w3c.dom.Node;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class Body {
 
-    private String _mIMEType;
-    private Node _value;
+    private String mimeType;
+    @Deprecated
+    private byte[] value;
 
-    public void setValue(JAXBElement aObj) {
+    public Body(byte[] value, String mimeType) {
+	this.value = value;
+	this.mimeType = mimeType;
+    }
+
+    @Deprecated
+    public byte[] getValue() {
+	return value;
+    }
+
+    public void setValue(JAXBElement<?> jaxbElement) {
 	throw new UnsupportedOperationException();
     }
 
-    public void setValue(Node aXml) {
+    public void setValue(String data) {
 	throw new UnsupportedOperationException();
     }
 
-    public void setValue(String aData) {
+    public void setValue(Number num) {
 	throw new UnsupportedOperationException();
     }
 
-    public void setValue(Number aNum) {
-	throw new UnsupportedOperationException();
+    public String getMimeType() {
+	return mimeType;
     }
 
 }

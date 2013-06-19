@@ -29,6 +29,7 @@ import org.openecard.addon.manifest.AddonBundleDescription;
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public interface AddonRegistry {
 
@@ -37,6 +38,8 @@ public interface AddonRegistry {
     AddonBundleDescription search(String aId);
 
     Set<AddonBundleDescription> searchByName(String aName);
+
+    Set<AddonBundleDescription> searchByResourceName(String resourceName);
 
     Set<AddonBundleDescription> searchProtocol(String aUri);
 

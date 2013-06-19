@@ -29,7 +29,7 @@ package org.openecard.addon;
  */
 public interface FactoryBaseType {
 
-    void init(Context aCtx);
+    void init(Context aCtx) throws FactoryInitializationException;
 
     void destroy();
 

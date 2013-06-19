@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,21 +20,26 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon.manifest;
-
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
+package org.openecard.addon;
 
 /**
- *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@XmlRootElement(name = "EnumEntry")
-@XmlType(propOrder = { "key", "localizedName", "localizedDescription" })
-public class EnumEntry extends ConfigurationEntry {
+public class FactoryInitializationException extends Exception {
 
-    private Object _value;
+    private static final long serialVersionUID = -2587833834285178408L;
+
+    public FactoryInitializationException(String message, Throwable e) {
+	super(message, e);
+    }
+
+    public FactoryInitializationException(String message) {
+	super(message);
+    }
+
+    public FactoryInitializationException(Throwable e) {
+	super(e);
+    }
 
 }

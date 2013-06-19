@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,38 +22,88 @@
 
 package org.openecard.addon;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Set;
+import org.apache.commons.jci.monitor.FilesystemAlterationMonitor;
 import org.openecard.addon.manifest.AddonBundleDescription;
 import org.openecard.addon.manifest.AppPluginActionDescription;
 import org.openecard.addon.manifest.ProtocolPluginDescription;
+import org.openecard.common.util.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
- * Addon registry serving add-ons from the classpath of the base app.
- * This type of registry works for JNLP and integrated plugins.
- *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * This registry provides access to all addons in the plugins directory.
+ * Adding and removing addon-files at runtime is supported.
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class ClasspathRegistry implements AddonRegistry {
+public class FileRegistry implements AddonRegistry {
+
+    private static final Logger logger = LoggerFactory.getLogger(FileRegistry.class.getName());
 
     private static final ArrayList<AddonBundleDescription> registeredAddons = new ArrayList<AddonBundleDescription>();
-    private static ClasspathRegistry instance;
+    private static final HashMap<String, File> files = new HashMap<String, File>();
+    private static FileRegistry instance;
 
-    private ClasspathRegistry() {
+    private FileRegistry() {
+	String pluginsPath;
+	try {
+	    pluginsPath = FileUtils.getHomeConfigDir() + File.separator + "plugins" + File.separator;
+	} catch (SecurityException e) {
+	    logger.error("Failed to get plugin directory; FileRegistry won't work.", e);
+	    return;
+	} catch (IOException e) {
+	    logger.error("Failed to get plugin directory; FileRegistry won't work.", e);
+	    return;
+	}
+	startFileMonitor(pluginsPath);
     }
 
-    public static ClasspathRegistry getInstance() {
+    private void startFileMonitor(String pluginsPath) {
+	File f = new File(pluginsPath);
+	logger.debug("Starting FilesystemAlterationMonitor on Path: {}", f.getPath());
+	FilesystemAlterationMonitor fam = new FilesystemAlterationMonitor();
+	fam.addListener(f, new PluginDirectoryAlterationListener(this));
+	fam.start();
+    }
+
+    public static FileRegistry getInstance() {
 	if (instance == null) {
-	    instance = new ClasspathRegistry();
+	    instance = new FileRegistry();
 	}
 	return instance;
     }
 
-    public void register(AddonBundleDescription desc) {
+    public void register(AddonBundleDescription desc, File file) {
 	registeredAddons.add(desc);
+	files.put(desc.getId(), file);
+    }
+
+    public void unregister(File file) {
+	Set<Entry<String, File>> entrySet = files.entrySet();
+	Iterator<Entry<String, File>> iterator = entrySet.iterator();
+	while (iterator.hasNext()) {
+	    Entry<String, File> next = iterator.next();
+	    if (next.getValue().equals(file)) {
+		String id = next.getKey();
+		AddonBundleDescription desc = this.search(id);
+		registeredAddons.remove(desc);
+		files.remove(id);
+		logger.debug("Successfully removed addon {}", file.getName());
+		break;
+	    }
+	}
     }
 
     @Override
@@ -97,7 +147,15 @@ public class ClasspathRegistry implements AddonRegistry {
     @Override
     public ClassLoader downloadPlugin(String aId) {
 	// TODO use other own classloader impl with security features
-	return this.getClass().getClassLoader();
+	URL[] url = new URL[1];
+	try {
+	    url[0] = files.get(aId).toURI().toURL();
+	} catch (MalformedURLException e) {
+	    // TODO will this ever happen?
+	    e.printStackTrace();
+	}
+	URLClassLoader ucl = new URLClassLoader(url);
+	return ucl;
     }
 
     @Override

@@ -51,132 +51,137 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
 import java.util.Map;
+import org.openecard.addon.AbstractFactory;
 import org.openecard.addon.Context;
+import org.openecard.addon.FactoryInitializationException;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class SALProtocolFactory implements SALProtocol {
+public class SALProtocolFactory extends AbstractFactory implements SALProtocol {
 
-    public void ProtocolFactory(String protocolClass) {
-	throw new UnsupportedOperationException();
+    private SALProtocol c;
+
+    public SALProtocolFactory(String protocolClass, ClassLoader classLoader) {
+	super(protocolClass, classLoader);
     }
 
     @Override
-    public ProtocolStep[] getSteps() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public ProtocolStep<?, ?>[] getSteps() {
+	return c.getSteps();
     }
 
     @Override
     public Map<String, Object> getInternalData() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.getInternalData();
     }
 
     @Override
     public boolean hasNextStep(FunctionType aFunction) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.hasNextStep(aFunction);
     }
 
     @Override
     public boolean isFinished() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.isFinished();
     }
 
     @Override
     public CardApplicationStartSessionResponse cardApplicationStartSession(CardApplicationStartSession aParam) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.cardApplicationStartSession(aParam);
     }
 
     @Override
     public CardApplicationEndSessionResponse cardApplicationEndSession(CardApplicationEndSession aParam) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.cardApplicationEndSession(aParam);
     }
 
     @Override
     public EncipherResponse encipher(Encipher aParam) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.encipher(aParam);
     }
 
     @Override
     public DecipherResponse decipher(Decipher aParam) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.decipher(aParam);
     }
 
     @Override
     public GetRandomResponse getRandom(GetRandom aParam) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.getRandom(aParam);
     }
 
     @Override
     public HashResponse hash(Hash aParam) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.hash(aParam);
     }
 
     @Override
     public SignResponse sign(Sign aParam) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.sign(aParam);
     }
 
     @Override
     public VerifySignatureResponse verifySignature(VerifySignature aParam) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.verifySignature(aParam);
     }
 
     @Override
     public VerifyCertificateResponse verifyCertificate(VerifyCertificate aParam) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.verifyCertificate(aParam);
     }
 
     @Override
     public DIDCreateResponse didCreate(DIDCreate aParam) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.didCreate(aParam);
     }
 
     @Override
     public DIDGetResponse didGet(DIDGet aParam) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.didGet(aParam);
     }
 
     @Override
     public DIDUpdateResponse didUpdate(DIDUpdate aParam) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.didUpdate(aParam);
     }
 
     @Override
     public DIDDeleteResponse didDelete(DIDDelete aParam) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.didDelete(aParam);
     }
 
     @Override
     public DIDAuthenticateResponse didAuthenticate(DIDAuthenticate aParam) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.didAuthenticate(aParam);
     }
 
     @Override
     public boolean needsSM() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.needsSM();
     }
 
     @Override
     public byte[] applySM(byte[] aCommandAPDU) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.applySM(aCommandAPDU);
     }
 
     @Override
     public byte[] removeSM(byte[] aResponseAPDU) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.removeSM(aResponseAPDU);
     }
 
     @Override
-    public void init(Context aCtx) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void init(Context aCtx) throws FactoryInitializationException {
+	    c = super.initialize(aCtx, SALProtocol.class);
     }
 
     @Override
     public void destroy() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	c.destroy();
     }
 
 }

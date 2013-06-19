@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2012 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,21 +20,32 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon.manifest;
+package org.openecard.addon;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import java.io.File;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 
 /**
- *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * This is the Test for the JARFileFilter.
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@XmlRootElement(name = "EnumEntry")
-@XmlType(propOrder = { "key", "localizedName", "localizedDescription" })
-public class EnumEntry extends ConfigurationEntry {
+public class JARFileFilterTest {
 
-    private Object _value;
+    /**
+     * Test if the filter accepts files with jar ending and rejects other files.
+     */
+    @Test
+    public void test() {
+	JARFileFilter filter = new JARFileFilter();
+	File a = new File("a.jar");
+	File b = new File("b.JAR");
+	File c = new File("c.exe");
+	Assert.assertTrue(filter.accept(a));
+	Assert.assertTrue(filter.accept(b));
+	Assert.assertFalse(filter.accept(c));
+    }
 
 }

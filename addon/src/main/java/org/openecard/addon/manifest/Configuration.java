@@ -23,15 +23,37 @@
 package org.openecard.addon.manifest;
 
 import java.util.ArrayList;
+import java.util.List;
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementRefs;
+import javax.xml.bind.annotation.XmlMixed;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 
 /**
  * 
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
+@XmlRootElement(name = "Configuration")
+@XmlType(propOrder = { "entries" })
 public class Configuration {
 
-    public AddonBundleDescription _configDescription;
-    public ArrayList<ConfigurationEntry> _entries = new ArrayList<ConfigurationEntry>();
+    @XmlElementRefs({
+	@XmlElementRef(name = "EnumEntry", type = EnumEntry.class),
+	@XmlElementRef(name = "EnumListEntry", type = EnumListEntry.class),
+	@XmlElementRef(name = "FileEntry", type = FileEntry.class),
+	@XmlElementRef(name = "ScalarEntry", type = ScalarEntry.class),
+	@XmlElementRef(name = "ScalarListEntry", type = ScalarListEntry.class),
+    })
+    @XmlMixed
+    @XmlAnyElement(lax = true)
+    private final List<ConfigurationEntry> entries = new ArrayList<ConfigurationEntry>();
+
+    public List<ConfigurationEntry> getEntries() {
+	return entries;
+    }
 
 }

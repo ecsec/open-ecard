@@ -22,16 +22,41 @@
 
 package org.openecard.addon.manifest;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class ConfigurationEntry {
+@XmlTransient
+public abstract class ConfigurationEntry {
 
-    private String _key;
-    private Object _localizedName;
-    private Object _localizedDescription;
-    public Configuration _entries;
+    protected String key;
+    protected final List<LocalizedString> localizedName = new ArrayList<LocalizedString>();
+    protected final List<LocalizedString> localizedDescription = new ArrayList<LocalizedString>();
+
+    @XmlElement(name = "Key")
+    public String getKey() {
+	return key;
+    }
+
+    @XmlElement(name = "LocalizedName")
+    public List<LocalizedString> getLocalizedName() {
+	return localizedName;
+    }
+
+    @XmlElement(name = "LocalizedDescription")
+    public List<LocalizedString> getLocalizedDescription() {
+	return localizedDescription;
+    }
+
+    public void setKey(String key) {
+	this.key = key;
+    }
 
 }

@@ -22,10 +22,36 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
+	    <groupId>org.openecard.gui</groupId>
+	    <artifactId>gui-common</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard</groupId>
+	    <artifactId>recognition</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.sal</groupId>
+	    <artifactId>sal-common</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.wsdef</groupId>
+	    <artifactId>jaxb-marshaller</artifactId>
+	    <version>${project.version}</version>
+	    <scope>test</scope>
+	</dependency>
+	<dependency>
 	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>wsdef-client</artifactId>
 	    <version>${project.version}</version>
 	    <scope>provided</scope>
+	</dependency>
+	<!-- needed by PluginDirectoryAlterationListener -->
+	<dependency>
+	    <groupId>org.apache.commons</groupId>
+	    <artifactId>commons-jci-fam</artifactId>
 	</dependency>
     </dependencies>
 

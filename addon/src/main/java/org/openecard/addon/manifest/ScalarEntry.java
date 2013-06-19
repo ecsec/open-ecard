@@ -22,11 +22,17 @@
 
 package org.openecard.addon.manifest;
 
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
 
 /**
- *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- */
+*
+* @author Tobias Wich <tobias.wich@ecsec.de>
+* @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+*/
+@XmlRootElement(name = "ScalarEntry")
+@XmlType(propOrder = { "key", "localizedName", "localizedDescription" })
 public class ScalarEntry extends ConfigurationEntry {
 
     private String _type;

@@ -23,17 +23,22 @@
 package org.openecard.addon.bind;
 
 import java.util.Map;
+import org.openecard.addon.AbstractFactory;
 import org.openecard.addon.Context;
+import org.openecard.addon.FactoryInitializationException;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class AppPluginActionFactory implements AppPluginAction {
+public class AppPluginActionFactory  extends AbstractFactory implements AppPluginAction {
 
-    public AppPluginActionFactory(String implClass) {
-	throw new UnsupportedOperationException();
+    private AppPluginAction c;
+
+    public AppPluginActionFactory(String implClass, ClassLoader classLoader) {
+	super(implClass, classLoader);
     }
 
     public void getActionDescription() {
@@ -42,17 +47,18 @@ public class AppPluginActionFactory implements AppPluginAction {
 
     @Override
     public BindingResult execute(Body body, Map<String, String> parameters, Attachment attachments) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void init(Context aCtx) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	//TODO use annotations to find the right function
+	return c.execute(body, parameters, attachments);
     }
 
     @Override
     public void destroy() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	c.destroy();
+    }
+
+    @Override
+    public void init(Context aCtx) throws FactoryInitializationException {
+	c = super.initialize(aCtx, AppPluginAction.class);
     }
 
 }

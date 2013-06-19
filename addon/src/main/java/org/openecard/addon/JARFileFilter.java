@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2012 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,21 +20,26 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon.manifest;
+package org.openecard.addon;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import java.io.File;
+import java.io.FileFilter;
 
 
 /**
- *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * A {@code FileFilter} accepting only jar-files.
+ * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@XmlRootElement(name = "EnumEntry")
-@XmlType(propOrder = { "key", "localizedName", "localizedDescription" })
-public class EnumEntry extends ConfigurationEntry {
+final class JARFileFilter implements FileFilter {
 
-    private Object _value;
+    @Override
+    public boolean accept(File pathname) {
+	String name = pathname.getName();
+	if (name.endsWith(".jar") || name.endsWith(".JAR")) {
+	    return true;
+	}
+	return false;
+    }
 
 }

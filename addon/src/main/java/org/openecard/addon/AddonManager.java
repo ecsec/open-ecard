@@ -22,39 +22,105 @@
 
 package org.openecard.addon;
 
-import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.AppExtensionAction;
+import org.openecard.addon.bind.AppExtensionActionFactory;
+import org.openecard.addon.bind.AppPluginAction;
+import org.openecard.addon.bind.AppPluginActionFactory;
 import org.openecard.addon.ifd.IFDProtocol;
+import org.openecard.addon.ifd.IFDProtocolFactory;
+import org.openecard.addon.manifest.AddonBundleDescription;
+import org.openecard.addon.manifest.AppExtensionActionDescription;
+import org.openecard.addon.manifest.AppPluginActionDescription;
+import org.openecard.addon.manifest.ProtocolPluginDescription;
 import org.openecard.addon.sal.SALProtocol;
+import org.openecard.addon.sal.SALProtocolFactory;
+import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.sal.state.CardStateMap;
+import org.openecard.gui.UserConsent;
+import org.openecard.recognition.CardRecognition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class AddonManager {
 
-    public AddonRegistry _unnamed_AddonRegistry_;
-    public Context _unnamed_Context_;
+    private static final Logger logger = LoggerFactory.getLogger(AddonManager.class);
+    private AddonRegistry registry = CombiningRegistry.getInstance();
+    private Dispatcher dispatcher;
+    private UserConsent userConsent;
+    private CardStateMap cardStates;
+    private CardRecognition recognition;
+
+    public AddonManager(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition) {
+	this.dispatcher = dispatcher;
+	this.userConsent = userConsent;
+	this.cardStates = cardStates;
+	this.recognition = recognition;
+    }
 
     public AddonRegistry getRegistry() {
-	throw new UnsupportedOperationException();
+	return registry;
     }
 
-    public IFDProtocol getIFDAction(String aUri) {
-	throw new UnsupportedOperationException();
+    public IFDProtocol getIFDAction(String uri) {
+	AddonBundleDescription addonBundleDescription = registry.searchProtocol(uri).iterator().next();
+	ProtocolPluginDescription searchByResourceName = addonBundleDescription.searchSALActionByURI(uri);
+	String className = searchByResourceName.getClassName();
+	IFDProtocolFactory appPluginActionFactory = new IFDProtocolFactory(className, registry.downloadPlugin(addonBundleDescription.getId()));
+	try {
+	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition));
+	    return appPluginActionFactory;
+	} catch (FactoryInitializationException e) {
+	    logger.error("Initialization of IFDAction failed", e);
+	}
+	return null;
     }
 
-    public SALProtocol getSALAction(String aUri) {
-	throw new UnsupportedOperationException();
+    public SALProtocol getSALAction(String uri) {
+	AddonBundleDescription addonBundleDescription = registry.searchProtocol(uri).iterator().next();
+	ProtocolPluginDescription searchByResourceName = addonBundleDescription.searchSALActionByURI(uri);
+	String className = searchByResourceName.getClassName();
+	SALProtocolFactory appPluginActionFactory = new SALProtocolFactory(className, registry.downloadPlugin(addonBundleDescription.getId()));
+	try {
+	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition));
+	    return appPluginActionFactory;
+	} catch (FactoryInitializationException e) {
+	    logger.error("Initialization of SALAction failed", e);
+	    return null;
+	}
     }
 
-    public AppExtensionAction getAppExtensionAction(String aPluginId, String aActionId) {
-	throw new UnsupportedOperationException();
+    public AppExtensionAction getAppExtensionAction(String pluginId, String actionId) {
+	AddonBundleDescription addonBundleDescription = registry.search(pluginId);
+	AppExtensionActionDescription searchByResourceName = addonBundleDescription.searchByActionId(actionId);
+	String className = searchByResourceName.getClassName();
+	AppExtensionActionFactory appPluginActionFactory = new AppExtensionActionFactory(className, registry.downloadPlugin(pluginId));
+	try {
+	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition));
+	    return appPluginActionFactory;
+	} catch (FactoryInitializationException e) {
+	    logger.error("Initialization of AppExtensionAction failed", e);
+	    return null;
+	}
     }
 
-    public AppPluginAction getAppPluginAction(String aPluginId, String aResourceName) {
-	throw new UnsupportedOperationException();
+    public AppPluginAction getAppPluginAction(String pluginId, String resourceName) {
+	AddonBundleDescription addonBundleDescription = registry.search(pluginId);
+	AppPluginActionDescription searchByResourceName = addonBundleDescription.searchByResourceName(resourceName);
+	String className = searchByResourceName.getClassName();
+	AppPluginActionFactory appPluginActionFactory = new AppPluginActionFactory(className, registry.downloadPlugin(pluginId));
+	try {
+	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition));
+	    return appPluginActionFactory;
+	} catch (FactoryInitializationException e) {
+	    logger.error("Initialization of AppPluginAction failed", e);
+	    return null;
+	}
     }
 
 }

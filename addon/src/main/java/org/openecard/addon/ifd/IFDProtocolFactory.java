@@ -1,12 +1,22 @@
 /****************************************************************************
- *  Copyright (C) 2013 ecsec GmbH.
- *  All rights reserved.
- *  Contact: ecsec GmbH (info@ecsec.de)
+ * Copyright (C) 2013 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
  *
- *  This file is part of SkIDentity.
+ * This file is part of the Open eCard App.
  *
- *  This file may be used in accordance with the terms and conditions
- *  contained in a signed written agreement between you and ecsec GmbH.
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
  *
  ***************************************************************************/
 
@@ -14,38 +24,47 @@ package org.openecard.addon.ifd;
 
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
+import org.openecard.addon.AbstractFactory;
 import org.openecard.addon.Context;
+import org.openecard.addon.FactoryInitializationException;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class IFDProtocolFactory implements IFDProtocol {
+public class IFDProtocolFactory extends AbstractFactory implements IFDProtocol {
+
+    IFDProtocol c;
+
+    public IFDProtocolFactory(String protocolClass, ClassLoader classLoader) {
+	super(protocolClass, classLoader);
+    }
 
     @Override
     public EstablishChannelResponse establish(EstablishChannel req) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.establish(req);
     }
 
     @Override
     public byte[] applySM(byte[] commandAPDU) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.applySM(commandAPDU);
     }
 
     @Override
     public byte[] removeSM(byte[] responseAPDU) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return c.removeSM(responseAPDU);
     }
 
     @Override
-    public void init(Context aCtx) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void init(Context aCtx) throws FactoryInitializationException {
+	c = super.initialize(aCtx, IFDProtocol.class);
     }
 
     @Override
     public void destroy() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	c.destroy();
     }
 
 }

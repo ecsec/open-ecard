@@ -22,18 +22,63 @@
 
 package org.openecard.addon.manifest;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
+@XmlRootElement(name = "AppExtensionActionDescription")
+@XmlType(propOrder = { "id", "className", "localizedName", "localizedDescription", "configDescription" })
 public class AppExtensionActionDescription {
 
-    private Object _id;
-    private Object _className;
-    private Object _localizedName;
-    private Object _localizedDescription;
-    public AddonBundleDescription _applicationActions;
-    public Configuration _configDescription;
+    private String id;
+    private String className;
+    private final List<LocalizedString> localizedName = new ArrayList<LocalizedString>();
+    private final List<LocalizedString> localizedDescription = new ArrayList<LocalizedString>();
+    private Configuration configDescription;
+
+    @XmlElement(name = "ID")
+    public String getId() {
+	return id;
+    }
+
+    @XmlElement(name = "ClassName")
+    public String getClassName() {
+	return className;
+    }
+
+    @XmlElement(name = "LocalizedName")
+    public List<LocalizedString> getLocalizedName() {
+	return localizedName;
+    }
+
+    @XmlElement(name = "LocalizedDescription")
+    public List<LocalizedString> getLocalizedDescription() {
+	return localizedDescription;
+    }
+
+    @XmlElement(name = "ConfigDescription")
+    public Configuration getConfigDescription() {
+	return configDescription;
+    }
+
+    public void setId(String id) {
+	this.id = id;
+    }
+
+    public void setClassName(String className) {
+	this.className = className;
+    }
+
+    public void setConfigDescription(Configuration configDescription) {
+	this.configDescription = configDescription;
+    }
 
 }

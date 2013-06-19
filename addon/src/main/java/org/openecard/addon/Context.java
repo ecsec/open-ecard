@@ -22,26 +22,43 @@
 
 package org.openecard.addon;
 
+import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.sal.state.CardStateMap;
+import org.openecard.gui.UserConsent;
+import org.openecard.recognition.CardRecognition;
+
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class Context {
 
-    public AddonManager _unnamed_AddonManager_;
-    public AddonProperties _unnamed_AddonProperties_;
+    private AddonProperties _unnamed_AddonProperties_;
+    private Dispatcher dispatcher;
+    private UserConsent userConsent;
 
-    public void getDispatcher() {
-	throw new UnsupportedOperationException();
+    private CardStateMap cardStates;
+    private CardRecognition recognition;
+
+    public Context(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition) {
+	this.dispatcher = dispatcher;
+	this.userConsent = userConsent;
+	this.cardStates = cardStates;
+	this.recognition = recognition;
+    }
+
+    public Dispatcher getDispatcher() {
+	return dispatcher;
     }
 
     public void getEventManager() {
 	throw new UnsupportedOperationException();
     }
 
-    public void getUserConsent() {
-	throw new UnsupportedOperationException();
+    public UserConsent getUserConsent() {
+	return userConsent;
     }
 
     public AddonProperties getAddonProperties() {
@@ -50,6 +67,14 @@ public class Context {
 
     public AddonProperties getActionProperties() {
 	throw new UnsupportedOperationException();
+    }
+
+    public CardStateMap getCardStates() {
+	return cardStates;
+    }
+
+    public CardRecognition getRecognition() {
+	return recognition;
     }
 
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,19 +22,35 @@
 
 package org.openecard.addon.manifest;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlValue;
 
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@XmlRootElement(name = "EnumEntry")
-@XmlType(propOrder = { "key", "localizedName", "localizedDescription" })
-public class EnumEntry extends ConfigurationEntry {
+public class LocalizedString {
 
-    private Object _value;
+    private String value;
+    private String lang;
+
+    public String getValue() {
+	return value;
+    }
+
+    @XmlValue
+    public void setValue(String value) {
+	this.value = value;
+    }
+
+    @XmlAttribute(namespace = "http://www.w3.org/XML/1998/namespace", required = true)
+    public String getLang() {
+	return lang;
+    }
+
+    public void setLang(String value) {
+	this.lang = value;
+    }
 
 }

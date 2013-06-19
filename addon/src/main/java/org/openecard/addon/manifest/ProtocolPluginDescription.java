@@ -22,19 +22,63 @@
 
 package org.openecard.addon.manifest;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
+@XmlRootElement(name = "ProtocolPluginDescription")
+@XmlType(propOrder = { "uri", "className", "localizedName", "localizedDescription", "configDescription" })
 public class ProtocolPluginDescription {
 
-    private Object _className;
-    private Object _uri;
-    private Object _localizedName;
-    private Object _localizedDescription;
-    public AddonBundleDescription _iFDActions;
-    public AddonBundleDescription _sALActions;
-    public Configuration _configDescription;
+    private String className;
+    private String uri;
+    private final List<LocalizedString> localizedName = new ArrayList<LocalizedString>();
+    private final List<LocalizedString> localizedDescription = new ArrayList<LocalizedString>();
+    private Configuration configDescription;
+
+    @XmlElement(name = "ClassName")
+    public String getClassName() {
+	return className;
+    }
+
+    public void setClassName(String className) {
+	this.className = className;
+    }
+
+    @XmlElement(name = "URI")
+    public String getUri() {
+	return uri;
+    }
+
+    public void setUri(String uri) {
+	this.uri = uri;
+    }
+
+    @XmlElement(name = "LocalizedName")
+    public List<LocalizedString> getLocalizedName() {
+	return localizedName;
+    }
+
+    @XmlElement(name = "LocalizedDescription")
+    public List<LocalizedString> getLocalizedDescription() {
+	return localizedDescription;
+    }
+
+    @XmlElement(name = "ConfigDescription")
+    public Configuration getConfigDescription() {
+	return configDescription;
+    }
+
+    public void setConfigDescription(Configuration configDescription) {
+	this.configDescription = configDescription;
+    }
 
 }

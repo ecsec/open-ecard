@@ -22,16 +22,23 @@
 
 package org.openecard.addon.bind;
 
-import org.openecard.addon.manifest.AppPluginActionDescription;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class ResourceNameType {
-
-    private Object _value;
-    public AppPluginActionDescription _resourceName;
+@Documented
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface ResourceNameType {
 
 }

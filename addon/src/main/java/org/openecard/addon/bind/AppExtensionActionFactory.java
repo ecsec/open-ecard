@@ -22,33 +22,36 @@
 
 package org.openecard.addon.bind;
 
+import org.openecard.addon.AbstractFactory;
 import org.openecard.addon.Context;
-import org.openecard.addon.bind.AppExtensionAction;
+import org.openecard.addon.FactoryInitializationException;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class AppExtensionActionFactory implements AppExtensionAction {
+public class AppExtensionActionFactory extends AbstractFactory implements AppExtensionAction {
+    private AppExtensionAction c;
 
-    public void StandaloneActionFactory(Object aClass_action) {
-	throw new UnsupportedOperationException();
+    public AppExtensionActionFactory(String implClass, ClassLoader classLoader) {
+	super(implClass, classLoader);
     }
 
     @Override
     public void execute() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	c.execute();
     }
 
-    @Override
-    public void init(Context aCtx) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @Override 
+    public void init(Context ctx) throws FactoryInitializationException {
+	c = super.initialize(ctx, AppExtensionAction.class);
     }
 
     @Override
     public void destroy() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	c.destroy();
     }
 
 }

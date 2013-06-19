@@ -22,37 +22,73 @@
 
 package org.openecard.addon.bind;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class BindingResult {
 
-    public Body getBody() {
-	throw new UnsupportedOperationException();
+    private BindingResultCode resultCode;
+    private Body body;
+    private String resultMessage;
+    private Map<String, String> parameters = new HashMap<String, String>();
+
+    public BindingResult() {
+	resultCode = BindingResultCode.OK;
     }
 
-    public Map<String, String> getParameters() {
-	throw new UnsupportedOperationException();
+    public BindingResult(BindingResultCode resultCode) {
+	this.resultCode = resultCode;
     }
 
-    public Attachment[] getAttachments() {
-	throw new UnsupportedOperationException();
+    public void setResultCode(BindingResultCode resultCode) {
+	this.resultCode = resultCode;
     }
 
     public BindingResultCode getResultCode() {
+	return resultCode;
+    }
+
+    public void setBody(Body body) {
+	this.body = body;
+    }
+
+    public Body getBody() {
+	return this.body;
+    }
+
+    public Map<String, String> getParameters() {
+	return this.parameters;
+    }
+
+    public String addParameter(String key, String value) {
+	return parameters.put(key, value);
+    }
+
+    public void addParameters(Map<String, String> parameters) {
+	this.parameters.putAll(parameters);
+    }
+
+    public List<Attachment> getAttachments() {
 	throw new UnsupportedOperationException();
     }
 
     public String getResultMessage() {
-	throw new UnsupportedOperationException();
+	return resultMessage;
     }
 
     public Map<String, String> getAuxResultData() {
 	throw new UnsupportedOperationException();
+    }
+
+    public void setResultMessage(String resultMessage) {
+	this.resultMessage = resultMessage;
     }
 
 }

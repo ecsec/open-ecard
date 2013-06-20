@@ -7,7 +7,7 @@
     <parent>
 	<groupId>org.openecard.ifd</groupId>
 	<artifactId>ifd-protocols</artifactId>
-	<version>1.0.4-SNAPSHOT</version>
+	<version>1.0.4</version>
     </parent>
 
     <groupId>org.openecard.ifd.protocols</groupId>

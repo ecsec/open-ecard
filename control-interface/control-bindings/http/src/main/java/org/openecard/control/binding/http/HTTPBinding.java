@@ -23,12 +23,11 @@
 package org.openecard.control.binding.http;
 
 import java.io.IOException;
+import org.openecard.addon.AddonManager;
 import org.openecard.apache.http.protocol.BasicHttpProcessor;
 import org.openecard.control.binding.ControlBinding;
 import org.openecard.control.binding.http.common.DocumentRoot;
-import org.openecard.control.binding.http.handler.common.DefaultHandler;
-import org.openecard.control.binding.http.handler.common.FileHandler;
-import org.openecard.control.binding.http.handler.common.IndexHandler;
+import org.openecard.control.binding.http.handler.HttpAppPluginActionHandler;
 import org.openecard.control.binding.http.interceptor.CORSRequestInterceptor;
 import org.openecard.control.binding.http.interceptor.CORSResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.ErrorResponseInterceptor;
@@ -49,6 +48,11 @@ public class HTTPBinding extends ControlBinding {
     private final DocumentRoot documentRoot;
     private BasicHttpProcessor interceptors;
     private HTTPService service;
+    private AddonManager addonManager;
+
+    public void setAddonManager(AddonManager addonManager) {
+	this.addonManager = addonManager;
+    }
 
     /**
      * Creates a new HTTPBinding using a random port.
@@ -102,13 +106,12 @@ public class HTTPBinding extends ControlBinding {
 	    interceptors.addInterceptor(new StatusLineResponseInterceptor());
 	    interceptors.addInterceptor(new ErrorResponseInterceptor(documentRoot, "/templates/error.html"));
 	    interceptors.addInterceptor(new CORSResponseInterceptor());
-	    interceptors.addInterceptor(new CORSRequestInterceptor());
+	    //FIXME the CORSRequestInterceptor consumes the request entity
+	    //interceptors.addInterceptor(new CORSRequestInterceptor());
 	}
 
-	// add default handlers
-	handlers.addControlHandler(new IndexHandler());
-	handlers.addControlHandler(new FileHandler(documentRoot));
-	handlers.addControlHandler(new DefaultHandler());
+	// add default handler
+	handlers.addControlHandler(new HttpAppPluginActionHandler(addonManager));
 
 	service = new HTTPService(port, handlers, interceptors);
 	service.start();

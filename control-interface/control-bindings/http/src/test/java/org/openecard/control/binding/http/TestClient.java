@@ -22,14 +22,18 @@
 
 package org.openecard.control.binding.http;
 
+import java.io.InputStream;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
+import org.openecard.addon.AddonManager;
+import org.openecard.addon.ClasspathRegistry;
+import org.openecard.addon.manifest.AddonBundleDescription;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
+import org.openecard.common.util.FileUtils;
 import org.openecard.control.ControlInterface;
 import org.openecard.control.binding.http.handler.HttpStatusHandler;
-import org.openecard.control.binding.http.handler.HttpTCTokenHandler;
 import org.openecard.control.binding.http.handler.HttpWaitForChangeHandler;
 import org.openecard.control.binding.http.handler.common.DefaultHandler;
 import org.openecard.control.binding.http.handler.common.IndexHandler;
@@ -38,7 +42,7 @@ import org.openecard.control.handler.ControlHandlers;
 import org.openecard.control.module.status.EventHandler;
 import org.openecard.control.module.status.GenericStatusHandler;
 import org.openecard.control.module.status.GenericWaitForChangeHandler;
-import org.openecard.control.module.tctoken.GenericTCTokenHandler;
+import org.openecard.control.module.tctoken.TCTokenAction;
 import org.openecard.event.EventManager;
 import org.openecard.gui.swing.SwingDialogWrapper;
 import org.openecard.gui.swing.SwingUserConsent;
@@ -47,8 +51,11 @@ import org.openecard.management.TinyManagement;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
+import org.openecard.ws.marshal.WSMarshaller;
+import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 
 /**
@@ -120,16 +127,20 @@ public final class TestClient {
 	// Initialize the EventManager
 	em.initialize();
 
+	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
+	marshaller.addXmlTypeClass(AddonBundleDescription.class);
+	InputStream manifestStream = FileUtils.resolveResourceAsStream(TCTokenAction.class, "Manifest.xml");
+	Document manifestDoc = marshaller.str2doc(manifestStream);
+	ClasspathRegistry.getInstance().register((AddonBundleDescription) marshaller.unmarshal(manifestDoc));
+
 	HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
+	binding.setAddonManager(new AddonManager(dispatcher, gui, cardStates, recognition));
 	ControlHandlers handler = new ControlHandlers();
 	EventHandler eventHandler = new EventHandler(em);
 	GenericStatusHandler genericStatusHandler = new GenericStatusHandler(cardStates, eventHandler, sal.getProtocolInfo(), recognition);
 	GenericWaitForChangeHandler genericWaitForChangeHandler = new GenericWaitForChangeHandler(eventHandler);
-	GenericTCTokenHandler genericTCTokenHandler = new GenericTCTokenHandler(cardStates, dispatcher, gui, recognition);
-	ControlHandler tcTokenHandler = new HttpTCTokenHandler(genericTCTokenHandler);
 	ControlHandler statusHandler = new HttpStatusHandler(genericStatusHandler);
 	ControlHandler waitForChangeHandler = new HttpWaitForChangeHandler(genericWaitForChangeHandler);
-	handler.addControlHandler(tcTokenHandler);
 	handler.addControlHandler(statusHandler);
 	handler.addControlHandler(waitForChangeHandler);
 	handler.addControlHandler(new IndexHandler());

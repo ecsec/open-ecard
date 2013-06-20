@@ -137,7 +137,7 @@ public class GenericTCTokenHandler {
 	throw new TCTokenException("No suitable set of parameters given in the request.");
     }
 
-    private TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries) throws TCTokenException {
+    public TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries) throws TCTokenException {
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 
 	for (Map.Entry<String, String> next : queries.entrySet()) {
@@ -196,7 +196,7 @@ public class GenericTCTokenHandler {
 	return tcTokenRequest;
     }
 
-    private TCTokenRequest parseObjectURI(Map<String, String> queries) throws TCTokenException {
+    public TCTokenRequest parseObjectURI(Map<String, String> queries) throws TCTokenException {
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 
 	for (Map.Entry<String, String> next : queries.entrySet()) {

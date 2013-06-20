@@ -22,16 +22,19 @@
 
 package org.openecard.richclient;
 
-import ch.qos.logback.core.joran.spi.JoranException;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.BindException;
 import java.security.Policy;
 import javax.swing.JOptionPane;
+import org.openecard.addon.AddonManager;
+import org.openecard.addon.ClasspathRegistry;
+import org.openecard.addon.manifest.AddonBundleDescription;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
@@ -43,14 +46,13 @@ import org.openecard.common.util.FileUtils;
 import org.openecard.control.ControlInterface;
 import org.openecard.control.binding.http.HTTPBinding;
 import org.openecard.control.binding.http.handler.HttpStatusHandler;
-import org.openecard.control.binding.http.handler.HttpTCTokenHandler;
 import org.openecard.control.binding.http.handler.HttpWaitForChangeHandler;
 import org.openecard.control.handler.ControlHandler;
 import org.openecard.control.handler.ControlHandlers;
 import org.openecard.control.module.status.EventHandler;
 import org.openecard.control.module.status.GenericStatusHandler;
 import org.openecard.control.module.status.GenericWaitForChangeHandler;
-import org.openecard.control.module.tctoken.GenericTCTokenHandler;
+import org.openecard.control.module.tctoken.TCTokenAction;
 import org.openecard.event.EventManager;
 import org.openecard.gui.swing.SwingDialogWrapper;
 import org.openecard.gui.swing.SwingUserConsent;
@@ -68,8 +70,15 @@ import org.openecard.sal.TinySAL;
 import org.openecard.sal.protocol.eac.EAC2ProtocolFactory;
 import org.openecard.sal.protocol.eac.EACGenericProtocolFactory;
 import org.openecard.transport.dispatcher.MessageDispatcher;
+import org.openecard.ws.marshal.MarshallingTypeException;
+import org.openecard.ws.marshal.WSMarshaller;
+import org.openecard.ws.marshal.WSMarshallerException;
+import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+import ch.qos.logback.core.joran.spi.JoranException;
 
 
 /**
@@ -193,19 +202,20 @@ public final class RichClient {
 
 	    // Initialize the EventManager
 	    em.initialize();
+
+	    registerAddOns();
+
 	    // Start up control interface
 	    try {
 		HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
+		binding.setAddonManager(new AddonManager(dispatcher, gui, cardStates, recognition));
 		ControlHandlers handler = new ControlHandlers();
-		GenericTCTokenHandler genericTCTokenHandler = new GenericTCTokenHandler(cardStates, dispatcher, gui, recognition);
 		EventHandler eventHandler = new EventHandler(em);
 		ProtocolInfo pInfo = sal.getProtocolInfo();
 		GenericStatusHandler genericStatusHandler = new GenericStatusHandler(cardStates, eventHandler, pInfo, recognition);
 		GenericWaitForChangeHandler genericWaitHandler = new GenericWaitForChangeHandler(eventHandler);
-		ControlHandler tcTokenHandler = new HttpTCTokenHandler(genericTCTokenHandler);
 		ControlHandler statusHandler = new HttpStatusHandler(genericStatusHandler);
 		ControlHandler waitHandler = new HttpWaitForChangeHandler(genericWaitHandler);
-		handler.addControlHandler(tcTokenHandler);
 		handler.addControlHandler(statusHandler);
 		handler.addControlHandler(waitHandler);
 		control = new ControlInterface(binding, handler);
@@ -234,6 +244,14 @@ public final class RichClient {
 	    JOptionPane.showMessageDialog(null, dialog, "Open eCard App", JOptionPane.PLAIN_MESSAGE);
 	    teardown();
 	}
+    }
+
+    private void registerAddOns() throws WSMarshallerException, MarshallingTypeException, IOException, SAXException {
+	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
+	marshaller.addXmlTypeClass(AddonBundleDescription.class);
+	InputStream manifestStream = FileUtils.resolveResourceAsStream(TCTokenAction.class, "TCToken-Manifest.xml");
+	Document manifestDoc = marshaller.str2doc(manifestStream);
+	ClasspathRegistry.getInstance().register((AddonBundleDescription) marshaller.unmarshal(manifestDoc));
     }
 
     public void teardown() {

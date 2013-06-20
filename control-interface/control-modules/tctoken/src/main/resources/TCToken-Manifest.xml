@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<AddonBundleDescription>
+  <ID>TCToken</ID>
+  <Version>1.0</Version>
+  <About/>
+  <License/>
+  <LocalizedName xml:lang="DE">Plugin für die eID Aktivierung</LocalizedName>
+  <LocalizedDescription xml:lang="DE">Testbeschreibung</LocalizedDescription>
+  <Logo/>
+  <ConfigDescription/>
+  <BindingActions>
+    <AppPluginActionDescription>
+      <ClassName>org.openecard.control.module.tctoken.TCTokenAction</ClassName>
+      <LocalizedName xml:lang="DE">TODO</LocalizedName>
+      <LocalizedDescription xml:lang="DE">TODO</LocalizedDescription>
+      <ResourceName>eID-Client</ResourceName>
+      <ConfigDescription/>
+    </AppPluginActionDescription>
+  </BindingActions>
+  <ApplicationActions/>
+  <IFDActions/>
+  <SALActions/>
+</AddonBundleDescription>

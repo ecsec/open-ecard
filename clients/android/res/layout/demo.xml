@@ -5,10 +5,10 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <ImageView android:id="@+id/imageViewDemo"
+    <WebView android:id="@+id/demoWebView"
 	android:layout_width="wrap_content"
 	android:layout_height="wrap_content"
 	android:layout_gravity="center_horizontal"
-	android:src="@drawable/open_ecard_start" />
+    />
 
 </LinearLayout>

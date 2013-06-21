@@ -40,7 +40,10 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
 import java.io.File;
-import org.openecard.android.activities.IntentHandlerActivity;
+import java.io.IOException;
+import java.io.InputStream;
+import org.openecard.addon.ClasspathRegistry;
+import org.openecard.addon.manifest.AddonBundleDescription;
 import org.openecard.android.activities.TerminalFactoryActivity;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
@@ -51,12 +54,8 @@ import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
-import org.openecard.control.ControlInterface;
-import org.openecard.control.binding.intent.IntentBinding;
-import org.openecard.control.binding.intent.handler.IntentTCTokenHandler;
-import org.openecard.control.handler.ControlHandler;
-import org.openecard.control.handler.ControlHandlers;
-import org.openecard.control.module.tctoken.GenericTCTokenHandler;
+import org.openecard.common.util.FileUtils;
+import org.openecard.control.module.tctoken.TCTokenAction;
 import org.openecard.event.EventManager;
 import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsent;
@@ -78,9 +77,15 @@ import org.openecard.sal.protocol.genericcryptography.GenericCryptoProtocolFacto
 import org.openecard.sal.protocol.pincompare.PINCompareProtocolFactory;
 import org.openecard.scio.NFCFactory;
 import org.openecard.transport.dispatcher.MessageDispatcher;
+import org.openecard.ws.marshal.MarshallingTypeException;
+import org.openecard.ws.marshal.WSMarshaller;
+import org.openecard.ws.marshal.WSMarshallerException;
+import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.openecard.ws.marshal.WsdefProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 
 /**
@@ -141,6 +146,8 @@ public class ApplicationContext extends Application implements EventCallback {
      */
     public void shutdown() {
 	logger.debug("shutdown");
+	// shutdown is currently disabled because of the binding changeover
+	/*
 	// destroy EventManager
 	try {
 	    if (em != null) {
@@ -201,6 +208,7 @@ public class ApplicationContext extends Application implements EventCallback {
 	// destroy the remaining components
 	env = null;
 	initialized = false;
+	*/
 
 	Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
 	File f = new File(SDCARD_OPENECARD);
@@ -339,26 +347,26 @@ public class ApplicationContext extends Application implements EventCallback {
 
 	em.initialize();
 
-	// Start up control interface
-	try {
-	    IntentBinding binding = new IntentBinding();
-	    ControlHandlers handler = new ControlHandlers();
-	    GenericTCTokenHandler genericTCTokenHandler = new GenericTCTokenHandler(cardStates, dispatcher, gui, recognition);
-	    ControlHandler tcTokenHandler = new IntentTCTokenHandler(genericTCTokenHandler);
-	    handler.addControlHandler(tcTokenHandler);
-	    ControlInterface control = new ControlInterface(binding, handler);
-	    control.start();
-
-	    IntentHandlerActivity.setHandlers(binding.getHandlers());
-	} catch (Exception e) {
-	    System.exit(0);
-	}
-
 	// Set up PluginManager
 	PluginManager pm = new PluginManager(dispatcher, gui, recognition, cardStates, null);
 	pm.addPlugin(new PINPlugin());
+	try {
+	    registerAddOns();
+	} catch (Exception e) {
+	    logger.error("Registering of core add-ons failed.", e);
+	    System.exit(-1);
+	}
+	// control interface is started in the TCTokenService
 
 	initialized = true;
+    }
+
+    private void registerAddOns() throws WSMarshallerException, MarshallingTypeException, IOException, SAXException {
+	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
+	marshaller.addXmlTypeClass(AddonBundleDescription.class);
+	InputStream manifestStream = FileUtils.resolveResourceAsStream(TCTokenAction.class, "TCToken-Manifest.xml");
+	Document manifestDoc = marshaller.str2doc(manifestStream);
+	ClasspathRegistry.getInstance().register((AddonBundleDescription) marshaller.unmarshal(manifestDoc));
     }
 
     @Override

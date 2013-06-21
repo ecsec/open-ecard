@@ -18,7 +18,6 @@
     <modules>
 	<module>http</module>
 	<module>javascript</module>
-	<module>intent</module>
     </modules>
 
     <dependencies>

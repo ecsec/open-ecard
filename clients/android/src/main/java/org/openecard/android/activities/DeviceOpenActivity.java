@@ -162,13 +162,7 @@ public class DeviceOpenActivity extends Activity {
 	}
 
 	// all available devices added, start next activity
-	if (intent.getAction() == Intent.ACTION_VIEW) {
-	    // started by a link to localhost
-	    logger.debug("Starting IntentHandlerActivity.");
-	    Intent i = new Intent(ctx, IntentHandlerActivity.class);
-	    i.setData(intent.getData());
-	    ctx.startActivityForResult(i, 1);
-	} else if (intent.getAction() == Intent.ACTION_MAIN || (! applicationContext.isInitialized())) {
+	if (intent.getAction() == Intent.ACTION_MAIN || (! applicationContext.isInitialized())) {
 	    // user started the app manually OR attached a supported usb device and the app is closed
 	    logger.debug("Starting AboutActivity.");
 	    Intent i = new Intent(ctx, AboutActivity.class);
@@ -190,7 +184,6 @@ public class DeviceOpenActivity extends Activity {
 	    logger.debug("No refresh URL Intent in onActivityResult.");
 	}
 	finish();
-	System.exit(0);
     }
 
     /**

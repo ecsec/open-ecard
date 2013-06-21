@@ -75,6 +75,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.openecard.addon.manifest.AddonBundleDescription;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.AuthDataMap;
@@ -115,6 +116,8 @@ public class AndroidMarshallerTest {
     private static final String startPAOS;
     private static final String transmit;
 
+    private static final String testAddonBundleDescripion;
+
     static {
 	try {
 	    getRecognitionTreeResponseXML = loadXML("GetRecognitionTreeResponse.xml");
@@ -134,6 +137,7 @@ public class AndroidMarshallerTest {
 	    destroyChannel = loadXML("DestroyChannel.xml");
 	    startPAOS = loadXML("StartPAOS.xml");
 	    transmit = loadXML("Transmit.xml");
+	    testAddonBundleDescripion = loadXML("TestAddonBundleDescription.xml");
 	} catch (IOException ex) {
 	    throw new RuntimeException(ex);
 	}
@@ -749,6 +753,16 @@ public class AndroidMarshallerTest {
 
 	String s = m.doc2str(d);
 	System.out.println(s);
+    }
+
+    @Test
+    public void testConversionOfAddonBundleDescription() throws Exception {
+	WSMarshaller m = new AndroidMarshaller();
+	Object o = m.unmarshal(m.str2doc(testAddonBundleDescripion));
+	if (!(o instanceof AddonBundleDescription)) {
+	    throw new Exception("Object should be an instace of AddonBundleDescription");
+	}
+	JAXB.marshal(o, System.out);
     }
 
 }

@@ -24,11 +24,8 @@ package org.openecard.android.activities;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.ImageView;
+import android.webkit.WebView;
 import org.openecard.android.R;
 
 
@@ -40,25 +37,14 @@ import org.openecard.android.R;
  */
 public class DemoActivity extends Activity {
 
-    private static final int REQUEST_CODE = 0;
-    private static final Uri demoUri = Uri.parse("http://localhost:24727/eID-Client?tcTokenURL=https%3A%2F%2Feservice.openecard.org%2FtcToken%3Fcard-type%3Dhttp%253A%252F%252Fbsi.bund.de%252Fcif%252Fnpa.xml%26with-html%3D");
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 
 	setContentView(R.layout.demo);
 
-	ImageView imageView = (ImageView) findViewById(R.id.imageViewDemo);
-	imageView.setOnClickListener(new OnClickListener() {
-
-	    @Override
-	    public void onClick(View v) {
-		Intent i = new Intent(DemoActivity.this, IntentHandlerActivity.class);
-		i.setData(demoUri);
-		startActivityForResult(i, REQUEST_CODE);
-	    }
-	});
+	WebView webView = (WebView) findViewById(R.id.demoWebView);
+	webView.loadUrl("file:///android_asset/demo_C.html");
     }
 
     @Override

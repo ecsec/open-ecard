@@ -137,11 +137,6 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.control.bindings</groupId>
-	    <artifactId>intent</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
 	    <groupId>org.openecard.plugins</groupId>
 	    <artifactId>plugin-pinplugin</artifactId>
 	    <version>${project.version}</version>

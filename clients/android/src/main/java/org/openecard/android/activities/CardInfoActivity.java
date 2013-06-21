@@ -224,7 +224,11 @@ public class CardInfoActivity extends Activity implements EventCallback {
 	    }
 
 	    // pending transactions must be executed before invalidating the layout
-	    fragmentManager.executePendingTransactions();
+	    try {
+		fragmentManager.executePendingTransactions();
+	    } catch (NullPointerException e) {
+		// ignore
+	    }
 
 	    if (numTerminals == 0) {
 		textInfo.setText(lang.translationForKey(REQUEST_TEMINAL));

@@ -113,8 +113,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -126,6 +124,14 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.openecard.addon.manifest.AddonBundleDescription;
+import org.openecard.addon.manifest.AppExtensionActionDescription;
+import org.openecard.addon.manifest.AppPluginActionDescription;
+import org.openecard.addon.manifest.Configuration;
+import org.openecard.addon.manifest.ConfigurationEntry;
+import org.openecard.addon.manifest.EnumEntry;
+import org.openecard.addon.manifest.LocalizedString;
+import org.openecard.addon.manifest.ProtocolPluginDescription;
 import org.openecard.bouncycastle.crypto.RuntimeCryptoException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
@@ -196,7 +202,6 @@ public class AndroidMarshaller implements WSMarshaller {
 	}
     }
 
-
     @Override
     public void addXmlTypeClass(Class xmlTypeClass) throws MarshallingTypeException {
 	// not available in this implementation
@@ -206,7 +211,6 @@ public class AndroidMarshaller implements WSMarshaller {
     public void removeAllTypeClasses() {
 	// not available in this implementation
     }
-
 
     @Override
     public synchronized String doc2str(Node doc) throws TransformerException {
@@ -533,7 +537,6 @@ public class AndroidMarshaller implements WSMarshaller {
 		    em.appendChild(em2);
 		}
 	    }
-
 	} else if (o instanceof RecognitionTree) {
 	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
 	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
@@ -542,7 +545,6 @@ public class AndroidMarshaller implements WSMarshaller {
 	    for (CardCall c : recognitionTree.getCardCall()) {
 		rootElement.appendChild(marshalCardCall(c, document));
 	    }
-
 	} else if (o instanceof DisconnectResponse) {
 	    rootElement = document.createElement(iso + o.getClass().getSimpleName());
 	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
@@ -1118,9 +1120,249 @@ public class AndroidMarshaller implements WSMarshaller {
 	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("CardInfo")));
 	    cardInfo.setApplicationCapabilities(applicationCapabilities);
 	    return cardInfo;
+	} else if (parser.getName().equals("AddonBundleDescription")) {
+	    AddonBundleDescription addonBundleDescription = new AddonBundleDescription();
+	    int eventType;
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("ID")) {
+			addonBundleDescription.setId(parser.nextText());
+		    } else if (parser.getName().equals("Version")) {
+			addonBundleDescription.setVersion(parser.nextText());
+		    } else if (parser.getName().equals("License")) {
+			addonBundleDescription.setLicense(parser.nextText());
+		    } else if (parser.getName().equals("LocalizedName")) {
+			LocalizedString string = new LocalizedString();
+			string.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+			string.setValue(parser.nextText());
+			addonBundleDescription.getLocalizedName().add(string);
+		    } else if (parser.getName().equals("LocalizedDescription")) {
+			LocalizedString string = new LocalizedString();
+			string.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+			string.setValue(parser.nextText());
+			addonBundleDescription.getLocalizedDescription().add(string);
+		    } else if (parser.getName().equals("About")) {
+			LocalizedString string = new LocalizedString();
+			string.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+			string.setValue(parser.nextText());
+			addonBundleDescription.getAbout().add(string);
+		    } else if (parser.getName().equals("Logo")) {
+			addonBundleDescription.setLogo(parser.nextText());
+		    } else if (parser.getName().equals("ConfigDescription")) {
+			addonBundleDescription.setConfigDescription(parseConfigDescription(parser));
+		    } else if (parser.getName().equals("BindingActions")) {
+			addonBundleDescription.getBindingActions().addAll(parseBindingActions(parser));
+		    } else if (parser.getName().equals("ApplicationActions")) {
+			addonBundleDescription.getApplicationActions().addAll(parseApplicationActions(parser));
+		    } else if (parser.getName().equals("IFDActions")) {
+			addonBundleDescription.getIfdActions().addAll(
+				parseProtocolPluginDescription(parser, "IFDActions"));
+		    } else if (parser.getName().equals("SALActions")) {
+			addonBundleDescription.getSalActions().addAll(
+				parseProtocolPluginDescription(parser, "SALActions"));
+		    } else {
+			throw new IllegalArgumentException(parser.getName()
+				+ " in AddonBundleDescription is not supported.");
+		    }
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("AddonBundleDescription")));
+	    return addonBundleDescription;
 	} else {
-	    return null;
+	    throw new IOException("Unmarshalling of " + parser.getName() + " is not yet supported.");
 	}
+    }
+
+    private Collection<? extends ProtocolPluginDescription> parseProtocolPluginDescription(XmlPullParser parser,
+	    String tagName) throws XmlPullParserException, IOException {
+	ArrayList<ProtocolPluginDescription> list = new ArrayList<ProtocolPluginDescription>();
+	int eventType;
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("ProtocolPluginDescription")) {
+		    list.add(parseProtocolPluginDescription(parser));
+		} else {
+		    throw new IllegalArgumentException("Unexpected Tag found: " + parser.getName());
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals(tagName)));
+	return list;
+    }
+
+    private ProtocolPluginDescription parseProtocolPluginDescription(XmlPullParser parser)
+	    throws XmlPullParserException, IOException {
+	ProtocolPluginDescription protocolPluginDescription = new ProtocolPluginDescription();
+	int eventType;
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("ClassName")) {
+		    protocolPluginDescription.setClassName(parser.nextText());
+		} else if (parser.getName().equals("LocalizedName")) {
+		    LocalizedString localizedString = new LocalizedString();
+		    localizedString.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+		    localizedString.setValue(parser.nextText());
+		    protocolPluginDescription.getLocalizedName().add(localizedString);
+		} else if (parser.getName().equals("LocalizedDescription")) {
+		    LocalizedString localizedString = new LocalizedString();
+		    localizedString.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+		    localizedString.setValue(parser.nextText());
+		    protocolPluginDescription.getLocalizedDescription().add(localizedString);
+		} else if (parser.getName().equals("URI")) {
+		    protocolPluginDescription.setUri(parser.nextText());
+		} else if (parser.getName().equals("ConfigDescription")) {
+		    protocolPluginDescription.setConfigDescription(parseConfigDescription(parser));
+		} else {
+		    throw new IllegalArgumentException("Unexpected Tag found: " + parser.getName());
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ProtocolPluginDescription")));
+	return protocolPluginDescription;
+    }
+
+    private Collection<? extends AppExtensionActionDescription> parseApplicationActions(XmlPullParser parser)
+	    throws XmlPullParserException, IOException {
+	ArrayList<AppExtensionActionDescription> list = new ArrayList<AppExtensionActionDescription>();
+	int eventType;
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("AppExtensionActionDescription")) {
+		    list.add(parseAppExtensionActionDescription(parser));
+		} else {
+		    throw new IllegalArgumentException("Unexpected Tag found: " + parser.getName());
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ApplicationActions")));
+	return list;
+    }
+
+    private AppExtensionActionDescription parseAppExtensionActionDescription(XmlPullParser parser)
+	    throws XmlPullParserException, IOException {
+	AppExtensionActionDescription appExtensionActionDescription = new AppExtensionActionDescription();
+	int eventType;
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("ClassName")) {
+		    appExtensionActionDescription.setClassName(parser.nextText());
+		} else if (parser.getName().equals("LocalizedName")) {
+		    LocalizedString localizedString = new LocalizedString();
+		    localizedString.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+		    localizedString.setValue(parser.nextText());
+		    appExtensionActionDescription.getLocalizedName().add(localizedString);
+		} else if (parser.getName().equals("LocalizedDescription")) {
+		    LocalizedString localizedString = new LocalizedString();
+		    localizedString.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+		    localizedString.setValue(parser.nextText());
+		    appExtensionActionDescription.getLocalizedDescription().add(localizedString);
+		} else if (parser.getName().equals("ID")) {
+		    appExtensionActionDescription.setId(parser.nextText());
+		} else if (parser.getName().equals("ConfigDescription")) {
+		    appExtensionActionDescription.setConfigDescription(parseConfigDescription(parser));
+		} else {
+		    throw new IllegalArgumentException("Unexpected Tag found: " + parser.getName());
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("AppExtensionActionDescription")));
+	return appExtensionActionDescription;
+    }
+
+    private Collection<? extends AppPluginActionDescription> parseBindingActions(XmlPullParser parser)
+	    throws XmlPullParserException, IOException {
+	ArrayList<AppPluginActionDescription> list = new ArrayList<AppPluginActionDescription>();
+	int eventType;
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("AppPluginActionDescription")) {
+		    list.add(parseAppPluginActionDescription(parser));
+		} else {
+		    throw new IllegalArgumentException("Unexpected Tag found: " + parser.getName());
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("BindingActions")));
+	return list;
+    }
+
+    private AppPluginActionDescription parseAppPluginActionDescription(XmlPullParser parser)
+	    throws XmlPullParserException, IOException {
+	AppPluginActionDescription appPluginActionDescription = new AppPluginActionDescription();
+	int eventType;
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("ClassName")) {
+		    appPluginActionDescription.setClassName(parser.nextText());
+		} else if (parser.getName().equals("LocalizedName")) {
+		    LocalizedString localizedString = new LocalizedString();
+		    localizedString.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+		    localizedString.setValue(parser.nextText());
+		    appPluginActionDescription.getLocalizedName().add(localizedString);
+		} else if (parser.getName().equals("LocalizedDescription")) {
+		    LocalizedString localizedString = new LocalizedString();
+		    localizedString.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+		    localizedString.setValue(parser.nextText());
+		    appPluginActionDescription.getLocalizedDescription().add(localizedString);
+		} else if (parser.getName().equals("ResourceName")) {
+		    appPluginActionDescription.setResourceName(parser.nextText());
+		} else if (parser.getName().equals("ConfigDescription")) {
+		    appPluginActionDescription.setConfigDescription(parseConfigDescription(parser));
+		} else {
+		    throw new IllegalArgumentException("Unexpected Tag found: " + parser.getName());
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("AppPluginActionDescription")));
+	return appPluginActionDescription;
+    }
+
+    private Configuration parseConfigDescription(XmlPullParser parser) throws XmlPullParserException, IOException {
+	Configuration c = new Configuration();
+	List<ConfigurationEntry> entries = c.getEntries();
+	int eventType;
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("EnumEntry")) {
+		    entries.add(parseEnumEntry(parser));
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ConfigDescription")));
+	return c;
+    }
+
+    private EnumEntry parseEnumEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
+	EnumEntry entry = new EnumEntry();
+	int eventType;
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("Key")) {
+		    entry.setKey(parser.nextText());
+		} else if (parser.getName().equals("LocalizedName")) {
+		    LocalizedString localizedString = new LocalizedString();
+		    localizedString.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+		    localizedString.setValue(parser.nextText());
+		    entry.getLocalizedName().add(localizedString);
+		} else if (parser.getName().equals("LocalizedDescription")) {
+		    LocalizedString localizedString = new LocalizedString();
+		    localizedString.setLang(parser.getAttributeValue("http://www.w3.org/XML/1998/namespace", "lang"));
+		    localizedString.setValue(parser.nextText());
+		    entry.getLocalizedDescription().add(localizedString);
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("EnumEntry")));
+	return entry;
     }
 
     private Version parseVersion(XmlPullParser parser) throws XmlPullParserException, IOException {

@@ -24,101 +24,52 @@ package org.openecard.android;
 
 import android.app.Service;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.*;
-import java.util.Arrays;
+import org.openecard.addon.AddonManager;
+import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.sal.state.CardStateMap;
+import org.openecard.control.ControlInterface;
+import org.openecard.control.binding.http.HTTPBinding;
+import org.openecard.control.handler.ControlHandlers;
+import org.openecard.gui.UserConsent;
+import org.openecard.recognition.CardRecognition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
- * This Service listens to connection on localhost:24727 and sends an intent to
- * start the open ecard app when an incoming request receives.
+ * This Service starts the control interface. <br />
+ * It get's started when the app is opened or when the boot completed event is received.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class TCTokenService extends Service implements Runnable {
 
-    private static final int port = 24727;
+    private static final Logger logger = LoggerFactory.getLogger(AndroidUtils.class);
+
     private final IBinder mBinder = new MyBinder();
-    private static ServerSocket serverSocket;
-    private static Socket socket = null;
-    private static DataInputStream dataInputStream = null;
-    private static DataOutputStream dataOutputStream = null;
+    // Control interface
+    private ControlInterface control;
 
     public void run() {
+	ApplicationContext appCtx = (ApplicationContext) getApplicationContext();
+	HTTPBinding binding;
 	try {
-	    serverSocket = new ServerSocket(port);
-	    serverSocket.setSoTimeout(0);
-	    while (true) {
-		socket = serverSocket.accept();
-		SocketAddress remote = socket.getRemoteSocketAddress();
-		// only accept local connections
-		if(!remote.toString().contains("127.0.0.1")){
-		    socket.close();
-		    continue;
-		}
-		BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
-		BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
-		byte[] buffer = new byte[70000];
-
-		int length = bis.read(buffer);
-
-		try {
-		    if (length > 0) {
-			// build uri for intent
-			String url = new String(Arrays.copyOf(buffer, length));
-			url = url.substring(url.indexOf("/eID"), url.indexOf("HTTP") - 1);
-			String prefix = "http://localhost:24727";
-			Uri uri = Uri.parse(prefix + url);
-
-			// build intent to start open ecard app
-			Intent intent = new Intent(Intent.ACTION_VIEW);
-			intent.setData(uri);
-			intent.addCategory("android.intent.category.BROWSABLE");
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			this.startActivity(intent);
-			String s = "<html><head></head><body><p>Diese Seite kann geschlossen werden.</p></body></html>";
-			bos.write(s.getBytes());
-			bos.flush();
-			bos.close();
-			bis.close();
-
-		    }
-		} catch (Exception e) {
-		    // TODO
-		    e.printStackTrace();
-		} finally {
-		    socket.close();
-		}
-
-	    }
-	} catch (IOException e) {
-	    // TODO
-	    e.printStackTrace();
-	} finally {
-	    try {
-		if (socket != null)
-		    socket.close();
-	    } catch (IOException e) {
-	    }
-	    try {
-		if (dataInputStream != null)
-		    dataInputStream.close();
-	    } catch (IOException e) {
-	    }
-	    try {
-		if (dataOutputStream != null)
-		    dataOutputStream.close();
-	    } catch (IOException e) {
-	    }
+	    binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
+	    Dispatcher dispatcher = appCtx.getEnv().getDispatcher();
+	    UserConsent gui = appCtx.getGUI();
+	    CardStateMap cardStates = appCtx.getCardStates();
+	    CardRecognition recognition = appCtx.getRecognition();
+	    AddonManager addonManager = new AddonManager(dispatcher, gui, cardStates, recognition);
+	    binding.setAddonManager(addonManager);
+	    ControlHandlers handler = new ControlHandlers();
+	    control = new ControlInterface(binding, handler);
+	    control.start();
+	} catch (Exception e) {
+	    logger.error("Starting of control interface failed", e);
+	    System.exit(-1);
 	}
-
     }
 
     // for pre-2.0 devices

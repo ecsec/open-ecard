@@ -23,7 +23,9 @@
 package org.openecard.control.module.tctoken.gui;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import java.util.Set;
 import org.openecard.common.I18n;
+import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.UserConsent;
@@ -73,18 +75,26 @@ public class InsertCardDialog {
      * @return The ConnectionHandle of the inserted card or null if no card was inserted.
      */
     public ConnectionHandleType show() {
-	InsertCardStepAction insertCardAction = new InsertCardStepAction(STEP_ID, cardStates, cardType);
-	UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent(insertCardAction));
-	ExecutionEngine exec = new ExecutionEngine(ucr);
-	// run gui
-	ResultStatus status = exec.process();
+	ConnectionHandleType conHandle = new ConnectionHandleType();
+	ConnectionHandleType.RecognitionInfo recInfo = new ConnectionHandleType.RecognitionInfo();
+	recInfo.setCardType(cardType);
+	conHandle.setRecognitionInfo(recInfo);
+	Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
+	if (entries.size() == 1) {
+	    return entries.iterator().next().handleCopy();
+	} else {
+	    InsertCardStepAction insertCardAction = new InsertCardStepAction(STEP_ID, cardStates, cardType);
+	    UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent(insertCardAction));
+	    ExecutionEngine exec = new ExecutionEngine(ucr);
+	    // run gui
+	    ResultStatus status = exec.process();
 
-	if (status == ResultStatus.CANCEL) {
-	    return null;
+	    if (status == ResultStatus.CANCEL) {
+		return null;
+	    }
+	    return insertCardAction.getResponse();
 	}
-	return insertCardAction.getResponse();
     }
-
 
     private UserConsentDescription createInsertCardUserConsent(StepAction insertCardAction) {
 	UserConsentDescription uc = new UserConsentDescription(lang.translationForKey("title"));

@@ -44,6 +44,9 @@
     <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
       <xsd:import namespace="http://ws.openecard.org/schema" schemaLocation="Client-Interface.xsd" />
     </xsd:schema>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+      <xsd:import namespace="http://www.w3.org/2007/05/xmldsig-more#" schemaLocation="rsa-pss.xsd" />
+    </xsd:schema>
   </wsdl:types>
 
 

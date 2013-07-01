@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Schema for XML Signatures (more types)
+http://www.w3.org/2000/09/xmldsig-more#
+
+Refer to RFC 6931 2.3.9 [1].
+
+[1] https://tools.ietf.org/html/rfc6931
+-->
+
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+		xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+		xmlns:dsm="http://www.w3.org/2007/05/xmldsig-more#"
+		targetNamespace="http://www.w3.org/2007/05/xmldsig-more#"
+		version="0.1" elementFormDefault="qualified">
+
+	<import namespace="http://www.w3.org/2000/09/xmldsig#"
+			schemaLocation="xmldsig-core-schema.xsd" />
+
+	<element name="RSAPSSParams">
+		<annotation>
+			<documentation>
+				Top level element that can be used in xs:any namespace="#other"
+				wildcard of ds:SignatureMethod content.
+			</documentation>
+		</annotation>
+		<complexType>
+			<complexContent>
+				<extension base="dsm:RSAPSSParamsType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<complexType name="RSAPSSParamsType">
+		<sequence>
+			<element ref="ds:DigestMethod" minOccurs="0"/>
+			<element name="MaskGenerationFunction"
+					 type="dsm:MaskGenerationFunctionType" minOccurs="0"/>
+			<element name="SaltLength" type="int"
+					 minOccurs="0"/>
+			<element name="TrailerField" type="int"
+					 minOccurs="0"/>
+		</sequence>
+	</complexType>
+
+	<complexType name="MaskGenerationFunctionType">
+		<sequence>
+			<element ref="ds:DigestMethod" minOccurs="0"/>
+		</sequence>
+		<attribute name="Algorithm" type="anyURI"
+				   default="http://www.w3.org/2007/05/xmldsig-more#MGF1"/>
+	</complexType>
+
+</schema>

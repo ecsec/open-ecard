@@ -23,18 +23,18 @@ Quick Start
 
 The simplified build instructions are as follows:
 
-  $ git clone git://github.com/ecsec/open-ecard.git
-  $ cd open-ecard
-  $ git submodule update --init
-  $ mvn clean install
+    $ git clone git://github.com/ecsec/open-ecard.git
+    $ cd open-ecard
+    $ git submodule update --init
+    $ mvn clean install
 
 
 In case you received a preassembled source bundle, the build instructions are
 as follows:
 
-  $ tar xaf open-ecard-${version}.tar.xz
-  $ cd open-ecard-$version
-  $ mvn clean install
+    $ tar xaf open-ecard-${version}.tar.xz
+    $ cd open-ecard-$version
+    $ mvn clean install
 
 
 License

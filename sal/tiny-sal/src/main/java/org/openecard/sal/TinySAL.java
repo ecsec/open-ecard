@@ -654,7 +654,35 @@ public class TinySAL implements SAL {
      */
     @Override
     public DSIWriteResponse dsiWrite(DSIWrite request) {
-	return WSHelper.makeResponse(DSIWriteResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	DSIWriteResponse response = WSHelper.makeResponse(DSIWriteResponse.class, WSHelper.makeResultOK());
+
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    byte[] applicationID = connectionHandle.getCardApplication();
+	    String dsiName = request.getDSIName();
+	    byte[] updateData = request.getDSIContent();
+
+	    Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
+	    Assert.assertIncorrectParameter(updateData, "The parameter DSIContent is empty.");
+
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dsiName, applicationID);
+	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DSIName cannot be found.");
+
+	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dsiName, NamedDataServiceActionName.DSI_WRITE);
+
+	    byte[] fileID = dataSetInfo.getDataSetPath().getEfIdOrPath();
+	    byte[] slotHandle = connectionHandle.getSlotHandle();
+	    CardUtils.writeFile(env.getDispatcher(), slotHandle, fileID, updateData);
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
     /**

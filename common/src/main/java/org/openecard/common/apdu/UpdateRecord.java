@@ -22,8 +22,6 @@
 
 package org.openecard.common.apdu;
 
-import iso.std.iso_iec._24727.tech.schema.Transmit;
-import java.util.ArrayList;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.ShortUtils;

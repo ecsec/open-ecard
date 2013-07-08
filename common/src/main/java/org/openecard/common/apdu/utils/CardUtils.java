@@ -26,6 +26,7 @@ import java.io.IOException;
 import org.openecard.common.apdu.ReadBinary;
 import org.openecard.common.apdu.ReadRecord;
 import org.openecard.common.apdu.Select;
+import org.openecard.common.apdu.UpdateRecord;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.exception.APDUException;
@@ -168,6 +169,27 @@ public class CardUtils {
 	    } else {
 		return false;
 	    }
+	}
+    }
+
+    public static void writeFile(Dispatcher dispatcher, byte[] slotHandle, byte[] fileID, byte[] data) throws APDUException {
+	CardResponseAPDU selectResponse = selectFile(dispatcher, slotHandle, fileID);
+	FCP fcp = null;
+	try {
+	    fcp = new FCP(selectResponse.getData());
+	} catch (TLVException e) {
+	    logger.warn("Couldn't get File Control Parameters from Select response.", e);
+	}
+	writeFile(fcp, dispatcher, slotHandle, data);
+    }
+
+    private static void writeFile(FCP fcp, Dispatcher dispatcher, byte[] slotHandle, byte[] data) throws APDUException {
+	if (isRecordEF(fcp)) {
+	    UpdateRecord updateRecord = new UpdateRecord(data);
+	    updateRecord.transmit(dispatcher, slotHandle);
+	} else {
+	    // TODO implement writing for non record files
+	    throw new UnsupportedOperationException("Not yet implemented.");
 	}
     }
 

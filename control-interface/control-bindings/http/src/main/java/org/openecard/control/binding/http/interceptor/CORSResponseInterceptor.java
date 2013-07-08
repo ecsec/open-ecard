@@ -29,6 +29,7 @@ import org.openecard.apache.http.HttpResponse;
 import org.openecard.apache.http.HttpResponseInterceptor;
 import org.openecard.apache.http.HttpStatus;
 import org.openecard.apache.http.entity.StringEntity;
+import org.openecard.apache.http.message.BasicHttpRequest;
 import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.control.binding.http.common.HeaderTypes;
 import org.slf4j.Logger;
@@ -49,7 +50,7 @@ public class CORSResponseInterceptor implements HttpResponseInterceptor {
 	// enable CORS for all types of HTTP responses
 	httpResponse.setHeader(HeaderTypes.ACCESS_CONTROL_ALLOW_ORIGIN.fieldName(), "*");
 
-	if (httpResponse.getParams().isParameterTrue("disable-CORS-redirect")
+	if (((BasicHttpRequest) httpContext.getAttribute("http.request")).getParams().isParameterTrue("disable-CORS-redirect")
 		&& httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_SEE_OTHER) {
 	    _logger.debug("CORS redirect not supported");
 

@@ -168,6 +168,8 @@ public class AppTray {
 	    } else {
 		return getImageLinux(name, dim);
 	    }
+	} else if (isMacOSX()) {
+	    return getImageMacOSX(name, dim);
 	} else {
 	    return getImageDefault(name, dim);
 	}
@@ -201,6 +203,9 @@ public class AppTray {
 	}
     }
 
+    private Image getImageMacOSX(String name, Dimension dim) {
+	return GraphicsUtil.createImage(OecLogoBgWhite.class, dim.width - 2, dim.height - 2, dim.width, dim.height, 1, 1);
+    }
 
     private Image getImageDefault(String name, Dimension dim) {
 	if (name.equals(ICON_LOADER)) {
@@ -210,6 +215,9 @@ public class AppTray {
 	}
     }
 
+    private boolean isMacOSX() {
+	return System.getProperty("os.name").contains("OS X");
+    }
 
     private boolean isLinux() {
 	if (isLinux == null) {

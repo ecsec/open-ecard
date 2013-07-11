@@ -70,6 +70,16 @@ public class DynamicAuthentication implements TlsAuthentication {
 	this.certVerifier = certVerifier;
     }
 
+    /**
+     * Sets the factory which is used to find and create a credential reference for the authentication.
+     *
+     * @see #getClientCredentials(org.openecard.bouncycastle.crypto.tls.CertificateRequest)
+     * @param credentialFactory
+     */
+    public void setCredentialFactory(@Nullable CredentialFactory credentialFactory) {
+	this.credentialFactory = credentialFactory;
+    }
+
 
     /**
      * Verify the server certificate of the TLS handshake.
@@ -102,7 +112,7 @@ public class DynamicAuthentication implements TlsAuthentication {
     }
 
     /**
-     * This function is not implemented and always returns an empty chain.
+     * Gets the client credentials based on the credential factory saved in this instance, or an empty credential.
      * From RFC 4346 sec. 7.4.6:
      * <p>If no suitable certificate is available, the client SHOULD send a certificate message containing no
      * certificates.</p>
@@ -111,6 +121,13 @@ public class DynamicAuthentication implements TlsAuthentication {
      */
     @Override
     public TlsCredentials getClientCredentials(CertificateRequest cr) {
+	if (credentialFactory != null) {
+	    List<TlsCredentials> credentials = credentialFactory.getClientCredentials(cr);
+	    if (! credentials.isEmpty()) {
+		return credentials.get(0);
+	    }
+	}
+	// fall back to no auth, when no credential is found
 	return new TlsCredentials() {
 	    @Override
 	    public Certificate getCertificate() {

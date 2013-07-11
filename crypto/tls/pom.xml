@@ -16,8 +16,15 @@
 
     <dependencies>
 	<dependency>
+	    <groupId>org.openecard.wsdef</groupId>
+	    <artifactId>wsdef-client</artifactId>
+	    <version>${project.version}</version>
+	    <scope>provided</scope>
+	</dependency>
+
+	<dependency>
 	    <groupId>org.openecard.crypto</groupId>
-	    <artifactId>bouncycastle</artifactId>
+	    <artifactId>crypto-common</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
     </dependencies>

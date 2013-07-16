@@ -56,7 +56,7 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.common.io.ProxySettings;
+import org.openecard.crypto.tls.proxy.ProxySettings;
 import org.openecard.common.util.FileUtils;
 import org.openecard.crypto.tls.TlsNoAuthentication;
 import org.openecard.transport.httpcore.HttpRequestHelper;

@@ -47,7 +47,7 @@
 	</dependency>
 	<dependency>
 	    <groupId>org.openecard.crypto</groupId>
-	    <artifactId>tls</artifactId>
+	    <artifactId>bouncycastle</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>

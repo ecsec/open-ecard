@@ -45,7 +45,7 @@ import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
 import org.openecard.common.io.LimitedInputStream;
-import org.openecard.common.io.ProxySettings;
+import org.openecard.crypto.tls.proxy.ProxySettings;
 import org.openecard.common.util.FileUtils;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.TR03112Utils;

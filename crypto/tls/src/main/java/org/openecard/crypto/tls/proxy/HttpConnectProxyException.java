@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.io;
+package org.openecard.crypto.tls.proxy;
 
 import java.net.SocketException;
 

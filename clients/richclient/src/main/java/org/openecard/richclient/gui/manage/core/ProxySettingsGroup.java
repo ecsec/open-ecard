@@ -32,7 +32,7 @@ import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import org.openecard.common.I18n;
 import org.openecard.common.OpenecardProperties;
-import org.openecard.common.io.ProxySettings;
+import org.openecard.crypto.tls.proxy.ProxySettings;
 import org.openecard.common.util.FileUtils;
 import org.openecard.richclient.gui.manage.SettingsGroup;
 

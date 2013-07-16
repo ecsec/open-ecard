@@ -58,7 +58,7 @@ import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.crypto.tls.proxy.ProxySettings;
 import org.openecard.common.util.FileUtils;
-import org.openecard.crypto.tls.TlsNoAuthentication;
+import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import org.openecard.transport.httpcore.HttpRequestHelper;
 import org.openecard.transport.httpcore.HttpUtils;
 import org.openecard.transport.httpcore.StreamHttpClientConnection;
@@ -403,14 +403,14 @@ public class PAOS {
 
     /**
      * Stores the received eService certificate as {@link Certificate} in the dynamic context.
-     * This will only take place when {@link TlsNoAuthentication} is used as {@link TlsAuthentication}.
+     * This will only take place when {@link DynamicAuthentication} is used as {@link TlsAuthentication}.
      */
     private void saveServiceCertificate() {
 	try {
 	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	    TlsAuthentication authentication = tlsClient.getAuthentication();
-	    if (authentication instanceof TlsNoAuthentication) {
-		TlsNoAuthentication noAuth = (TlsNoAuthentication) authentication;
+	    if (authentication instanceof DynamicAuthentication) {
+		DynamicAuthentication noAuth = (DynamicAuthentication) authentication;
 		// server certificate is the first one in the chain
 		org.openecard.bouncycastle.crypto.tls.Certificate certificate = noAuth.getServerCertificate();
 		dynCtx.put(TR03112Keys.ESERVICE_CERTIFICATE, certificate);

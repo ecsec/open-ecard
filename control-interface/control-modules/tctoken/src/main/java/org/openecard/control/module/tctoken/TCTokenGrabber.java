@@ -52,7 +52,7 @@ import org.openecard.common.util.TR03112Utils;
 import org.openecard.control.ControlException;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
-import org.openecard.crypto.tls.TlsNoAuthentication;
+import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import org.openecard.transport.httpcore.HttpRequestHelper;
 import org.openecard.transport.httpcore.HttpUtils;
 import org.openecard.transport.httpcore.InvalidResultStatus;
@@ -110,7 +110,7 @@ public class TCTokenGrabber {
 
 	    // open a TLS connection, retrieve the server certificate and save it
 	    TlsClientProtocol h;
-	    TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
+	    DynamicAuthentication tlsAuth = new DynamicAuthentication();
 	    // FIXME: verify certificate chain as soon as a usable solution exists for the trust problem
 	    // tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 	    ClientCertTlsClient tlsClient = new ClientCertDefaultTlsClient(hostname);

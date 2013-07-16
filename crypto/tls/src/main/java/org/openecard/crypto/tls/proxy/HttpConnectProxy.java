@@ -39,7 +39,7 @@ import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
 import org.openecard.bouncycastle.util.encoders.Base64;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.SocketWrapper;
-import org.openecard.crypto.tls.TlsNoAuthentication;
+import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import org.openecard.crypto.tls.verify.JavaSecVerifier;
 
 
@@ -120,7 +120,7 @@ public final class HttpConnectProxy extends Proxy {
 	// evaluate scheme
 	if ("HTTPS".equals(proxyScheme)) {
 	    ClientCertDefaultTlsClient tlsClient = new ClientCertDefaultTlsClient(proxyHost);
-	    TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
+	    DynamicAuthentication tlsAuth = new DynamicAuthentication();
 	    tlsAuth.setHostname(proxyHost);
 	    if (proxyValidate) {
 		try {

@@ -39,7 +39,7 @@ import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertPSKTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
-import org.openecard.crypto.tls.TlsNoAuthentication;
+import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import org.openecard.crypto.tls.TlsPSKIdentityImpl;
 import org.openecard.transport.paos.PAOS;
 import org.openecard.transport.paos.PAOSException;
@@ -106,7 +106,7 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    // Set up TLS connection
 	    ClientCertTlsClient tlsClient;
 	    if (secProto.equals("urn:ietf:rfc:4279") || secProto.equals("urn:ietf:rfc:5487")) {
-		TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
+		DynamicAuthentication tlsAuth = new DynamicAuthentication();
 		tlsAuth.setHostname(serverHost);
 		// FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
 		//tlsAuth.setCertificateVerifier(new JavaSecVerifier());
@@ -116,7 +116,7 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 		tlsClient.setAuthentication(tlsAuth);
 		tlsClient.setClientVersion(ProtocolVersion.TLSv11);
 	    } else if (secProto.equals("urn:ietf:rfc:4346")) {
-		TlsNoAuthentication tlsAuth = new TlsNoAuthentication();
+		DynamicAuthentication tlsAuth = new DynamicAuthentication();
 		tlsAuth.setHostname(serverHost);
 		// FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
 		//tlsAuth.setCertificateVerifier(new JavaSecVerifier());

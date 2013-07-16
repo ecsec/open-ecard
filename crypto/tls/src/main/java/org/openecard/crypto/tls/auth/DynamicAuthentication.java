@@ -20,14 +20,16 @@
  *
  ***************************************************************************/
 
-package org.openecard.crypto.tls;
+package org.openecard.crypto.tls.auth;
 
 import java.io.IOException;
+import java.util.List;
 import javax.annotation.Nullable;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
+import org.openecard.crypto.tls.CertificateVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,12 +39,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class TlsNoAuthentication implements TlsAuthentication {
+public class DynamicAuthentication implements TlsAuthentication {
 
-    private static final Logger logger = LoggerFactory.getLogger(TlsNoAuthentication.class);
+    private static final Logger logger = LoggerFactory.getLogger(DynamicAuthentication.class);
 
     private String hostname = null;
     private CertificateVerifier certVerifier = null;
+
+    private CredentialFactory credentialFactory = null;
 
     private Certificate lastCertChain;
 
@@ -102,6 +106,8 @@ public class TlsNoAuthentication implements TlsAuthentication {
      * From RFC 4346 sec. 7.4.6:
      * <p>If no suitable certificate is available, the client SHOULD send a certificate message containing no
      * certificates.</p>
+     *
+     * @see CredentialFactory
      */
     @Override
     public TlsCredentials getClientCredentials(CertificateRequest cr) {

@@ -22,6 +22,7 @@
 
 package org.openecard.crypto.tls;
 
+import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import java.io.IOException;
 import org.openecard.bouncycastle.crypto.tls.PSKTlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
@@ -32,7 +33,7 @@ import org.openecard.bouncycastle.crypto.tls.TlsPSKIdentity;
 /**
  * PSK TLS client also implementing the ClientCertTlsClient interface. <br/>
  * If not modified, the TlsAuthentication instance returned by {@link #getAuthentication()} is of type
- * {@link TlsNoAuthentication} without further modifications.
+ * {@link DynamicAuthentication} without further modifications.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -69,7 +70,7 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
     @Override
     public synchronized TlsAuthentication getAuthentication() throws IOException {
 	if (tlsAuth == null) {
-	    TlsNoAuthentication tlsAuthTmp = new TlsNoAuthentication();
+	    DynamicAuthentication tlsAuthTmp = new DynamicAuthentication();
 	    tlsAuthTmp.setHostname(fqdn);
 	    tlsAuth = tlsAuthTmp;
 	}

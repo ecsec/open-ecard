@@ -1,41 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema targetNamespace="urn:iso:std:iso-iec:24727:tech:schema"
-	xmlns="http://www.w3.org/2001/XMLSchema"
-	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
-	elementFormDefault="qualified" attributeFormDefault="unqualified">
+		xmlns="http://www.w3.org/2001/XMLSchema"
+		xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+		elementFormDefault="qualified" attributeFormDefault="unqualified">
 
 	<include schemaLocation="ISOCommon.xsd" />
-
-
 	<include schemaLocation="ISOIFD.xsd" />
-
 
 	<!-- Define names of card application services -->
 
-
 	<!-- Define actions within card application services -->
-
 
 	<complexType name="ActionNameType">
 		<choice>
-			<element name="APIAccessEntryPoint"
-				type="iso:APIAccessEntryPointName" />
-			<element name="ConnectionServiceAction"
-				type="iso:ConnectionServiceActionName" />
-			<element name="CardApplicationServiceAction"
-				type="iso:CardApplicationServiceActionName" />
-			<element name="NamedDataServiceAction"
-				type="iso:NamedDataServiceActionName" />
-			<element name="CryptographicServiceAction"
-				type="iso:CryptographicServiceActionName" />
-			<element name="DifferentialIdentityServiceAction"
-				type="iso:DifferentialIdentityServiceActionName" />
-			<element name="AuthorizationServiceAction"
-				type="iso:AuthorizationServiceActionName" />
+			<element name="APIAccessEntryPoint"	type="iso:APIAccessEntryPointName" />
+			<element name="ConnectionServiceAction"	type="iso:ConnectionServiceActionName" />
+			<element name="CardApplicationServiceAction" type="iso:CardApplicationServiceActionName" />
+			<element name="NamedDataServiceAction" type="iso:NamedDataServiceActionName" />
+			<element name="CryptographicServiceAction" type="iso:CryptographicServiceActionName" />
+			<element name="DifferentialIdentityServiceAction" type="iso:DifferentialIdentityServiceActionName" />
+			<element name="AuthorizationServiceAction" type="iso:AuthorizationServiceActionName" />
 			<element name="LoadedAction" type="string" />
 		</choice>
 	</complexType>
-
 
 	<simpleType name="APIAccessEntryPointName">
 		<restriction base="string">
@@ -45,7 +32,6 @@
 		</restriction>
 	</simpleType>
 
-
 	<simpleType name="ConnectionServiceActionName">
 		<restriction base="string">
 			<enumeration value="CardApplicationConnect" />
@@ -54,7 +40,6 @@
 			<enumeration value="CardApplicationEndSession" />
 		</restriction>
 	</simpleType>
-
 
 	<simpleType name="CardApplicationServiceActionName">
 		<restriction base="string">
@@ -70,7 +55,6 @@
 		</restriction>
 	</simpleType>
 
-
 	<simpleType name="NamedDataServiceActionName">
 		<restriction base="string">
 			<enumeration value="DataSetList" />
@@ -85,7 +69,6 @@
 		</restriction>
 	</simpleType>
 
-
 	<simpleType name="CryptographicServiceActionName">
 		<restriction base="string">
 			<enumeration value="Encipher" />
@@ -98,7 +81,6 @@
 		</restriction>
 	</simpleType>
 
-
 	<simpleType name="DifferentialIdentityServiceActionName">
 		<restriction base="string">
 			<enumeration value="DIDList" />
@@ -110,7 +92,6 @@
 		</restriction>
 	</simpleType>
 
-
 	<simpleType name="AuthorizationServiceActionName">
 		<restriction base="string">
 			<enumeration value="ACLList" />
@@ -118,14 +99,11 @@
 		</restriction>
 	</simpleType>
 
-
 	<!-- Define other basic types -->
 
-
 	<complexType name="AccessControlListType">
-		<sequence minOccurs="1" maxOccurs="1">
-			<element name="AccessRule" type="iso:AccessRuleType"
-				maxOccurs="unbounded" minOccurs="0" />
+		<sequence>
+			<element name="AccessRule" type="iso:AccessRuleType" minOccurs="0" maxOccurs="unbounded" />
 		</sequence>
 	</complexType>
 
@@ -133,8 +111,7 @@
 		<sequence>
 			<element name="CardApplicationServiceName" type="string" />
 			<element name="Action" type="iso:ActionNameType" />
-			<element name="SecurityCondition"
-				type="iso:SecurityConditionType" />
+			<element name="SecurityCondition" type="iso:SecurityConditionType" />
 		</sequence>
 	</complexType>
 
@@ -148,19 +125,11 @@
 
 	<complexType name="CardApplicationPathType">
 		<sequence>
-			<element name="ChannelHandle" type="iso:ChannelHandleType"
-				maxOccurs="1" minOccurs="0" />
-			<element name="ContextHandle" type="iso:ContextHandleType"
-				maxOccurs="1" minOccurs="0" />
-			<element name="IFDName" maxOccurs="1" minOccurs="0"
-				type="string" />
-
-			<element name="SlotIndex" type="nonNegativeInteger"
-				maxOccurs="1" minOccurs="0" />
-
-			<element name="CardApplication" maxOccurs="1" minOccurs="0"
-				type="iso:ApplicationIdentifierType" />
-
+			<element name="ChannelHandle" type="iso:ChannelHandleType" minOccurs="0" />
+			<element name="ContextHandle" type="iso:ContextHandleType" minOccurs="0" />
+			<element name="IFDName" type="string" minOccurs="0" />
+			<element name="SlotIndex" type="nonNegativeInteger" minOccurs="0" />
+			<element name="CardApplication" type="iso:ApplicationIdentifierType" minOccurs="0" />
 		</sequence>
 	</complexType>
 
@@ -175,23 +144,13 @@
 		<complexContent>
 			<extension base="iso:CardApplicationPathType">
 				<sequence>
-					<element name="SlotHandle" type="iso:SlotHandleType"
-						maxOccurs="1" minOccurs="0" />
-
-
-					<element name="RecognitionInfo" maxOccurs="1"
-						minOccurs="0">
+					<element name="SlotHandle" type="iso:SlotHandleType" minOccurs="0" />
+					<element name="RecognitionInfo" minOccurs="0">
 						<complexType>
 							<sequence>
-								<element name="CardType" type="anyURI"
-									maxOccurs="1" minOccurs="0" />
-
-								<element name="CardIdentifier"
-									type="hexBinary" maxOccurs="1" minOccurs="0" />
-
-								<element name="CaptureTime"
-									type="dateTime" maxOccurs="1" minOccurs="0" />
-
+								<element name="CardType" type="anyURI" minOccurs="0" />
+								<element name="CardIdentifier" type="hexBinary" minOccurs="0" />
+								<element name="CaptureTime" type="dateTime" minOccurs="0" />
 							</sequence>
 						</complexType>
 					</element>
@@ -200,19 +159,15 @@
 		</complexContent>
 	</complexType>
 
-
 	<complexType name="DataSetNameListType">
 		<sequence>
-			<element name="DataSetName" type="iso:DataSetNameType"
-				maxOccurs="unbounded" minOccurs="0" />
-
+			<element name="DataSetName" type="iso:DataSetNameType" minOccurs="0" maxOccurs="unbounded" />
 		</sequence>
 	</complexType>
 
 	<simpleType name="DataSetNameType">
 		<restriction base="iso:NameType" />
 	</simpleType>
-
 
 	<complexType name="DIDAbstractMarkerType">
 		<complexContent>
@@ -221,7 +176,6 @@
 			</extension>
 		</complexContent>
 	</complexType>
-
 
 	<complexType name="DIDAuthenticationDataType">
 		<complexContent>
@@ -234,12 +188,9 @@
 	<complexType name="DIDAuthenticationStateType">
 		<sequence>
 			<element name="DIDName" type="iso:NameType" />
-			<element name="DIDScope" type="iso:DIDScopeType"
-				maxOccurs="1" minOccurs="0" />
+			<element name="DIDScope" type="iso:DIDScopeType" minOccurs="0" />
 			<element name="DIDState" type="boolean" />
-			<element name="DIDStateQualifier" type="hexBinary"
-				maxOccurs="1" minOccurs="0" />
-
+			<element name="DIDStateQualifier" type="hexBinary" minOccurs="0" />
 		</sequence>
 	</complexType>
 
@@ -249,22 +200,17 @@
 
 	<complexType name="DIDNameListType">
 		<sequence>
-			<element name="DIDName" type="iso:DIDNameType"
-				maxOccurs="unbounded" minOccurs="0" />
-
+			<element name="DIDName" type="iso:DIDNameType" minOccurs="0" maxOccurs="unbounded" />
 		</sequence>
 	</complexType>
 
-
 	<complexType name="DIDQualifierType">
 		<choice>
-			<element name="ApplicationIdentifier"
-				type="iso:ApplicationIdentifierType" />
+			<element name="ApplicationIdentifier" type="iso:ApplicationIdentifierType" />
 			<element name="ObjectIdentifier" type="anyURI" />
 			<element name="ApplicationFunction" type="iso:BitString" />
 		</choice>
 	</complexType>
-
 
 	<complexType name="DIDStructureType">
 		<sequence>
@@ -272,11 +218,9 @@
 			<element name="DIDScope" type="iso:DIDScopeType" />
 			<element name="Authenticated" type="boolean" />
 			<element name="DIDMarker" type="iso:DIDAbstractMarkerType" />
-			<element name="DIDQualifier" type="iso:DIDQualifierType"
-				minOccurs="0" maxOccurs="1" />
+			<element name="DIDQualifier" type="iso:DIDQualifierType" minOccurs="0" />
 		</sequence>
 	</complexType>
-
 
 	<simpleType name="DIDScopeType">
 		<restriction base="string">
@@ -285,9 +229,15 @@
 		</restriction>
 	</simpleType>
 
-
-
 	<complexType name="DIDUpdateDataType" abstract="true">
+		<complexContent>
+			<extension base="anyType">
+				<attribute name="Protocol" type="anyURI" use="required" />
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="DIDCreateDataType" abstract="true">
 		<complexContent>
 			<extension base="anyType">
 				<attribute name="Protocol" type="anyURI" use="required" />
@@ -301,26 +251,21 @@
 
 	<complexType name="DSINameListType">
 		<sequence>
-			<element name="DSIName" type="iso:DSINameType"
-				maxOccurs="unbounded" minOccurs="0" />
-
+			<element name="DSIName" type="iso:DSINameType" minOccurs="0" maxOccurs="unbounded" />
 		</sequence>
 	</complexType>
-
 
 	<simpleType name="ExecuteActionConfirmationType">
 		<restriction base="hexBinary" />
 	</simpleType>
 
-
 	<simpleType name="ExecuteActionRequestType">
 		<restriction base="hexBinary" />
 	</simpleType>
 
-
 	<simpleType name="FalseType">
 		<restriction base="boolean">
-			<pattern value='false' />
+			<pattern value="false" />
 		</restriction>
 	</simpleType>
 
@@ -328,12 +273,11 @@
 		<restriction base="normalizedString">
 			<minLength value="1" />
 			<maxLength value="255" />
-			<whiteSpace value='collapse' />
+			<whiteSpace value="collapse" />
 		</restriction>
 	</simpleType>
 
 	<complexType name="NULL" final="#all" />
-
 
 	<complexType name="PathType">
 		<sequence>
@@ -343,9 +287,7 @@
 					<complexType>
 						<sequence>
 							<element name="tag" type="hexBinary" />
-							<element name="efIdOrPath" type="hexBinary"
-								maxOccurs="1" minOccurs="0" />
-
+							<element name="efIdOrPath" type="hexBinary" minOccurs="0" />
 						</sequence>
 					</complexType>
 				</element>
@@ -354,7 +296,6 @@
 						<sequence>
 							<element name="aid" type="hexBinary" />
 							<element name="efIDOrPath" type="hexBinary" />
-
 						</sequence>
 					</complexType>
 				</element>
@@ -363,66 +304,52 @@
 						<sequence>
 							<element name="aid" type="hexBinary" />
 							<element name="tag" type="string" />
-							<element name="efIdOrPath" type="hexBinary"
-								maxOccurs="1" minOccurs="0" />
-
+							<element name="efIdOrPath" type="hexBinary" minOccurs="0" />
 						</sequence>
 					</complexType>
 				</element>
 			</choice>
-			<element name="Index" type="hexBinary" maxOccurs="1"
-				minOccurs="0" />
-			<element name="Length" type="hexBinary" maxOccurs="1"
-				minOccurs="0" />
+			<element name="Index" type="hexBinary" minOccurs="0" />
+			<element name="Length" type="hexBinary" minOccurs="0" />
 		</sequence>
 	</complexType>
 
-
 	<complexType name="SecurityConditionType">
 		<choice>
-			<element name="DIDAuthentication"
-				type="iso:DIDAuthenticationStateType" />
-
+			<element name="DIDAuthentication" type="iso:DIDAuthenticationStateType" />
 			<element name="always" type="iso:TrueType" />
 			<element name="never" type="iso:FalseType" />
 			<element name="not" type="iso:SecurityConditionType" />
 			<element name="and">
 				<complexType>
-					<sequence minOccurs="1" maxOccurs="255">
-						<element name="SecurityCondition"
-							type="iso:SecurityConditionType" />
+					<sequence>
+						<element name="SecurityCondition" type="iso:SecurityConditionType" maxOccurs="255" />
 					</sequence>
 				</complexType>
 			</element>
 			<element name="or">
 				<complexType>
-					<sequence minOccurs="1" maxOccurs="255">
-						<element name="SecurityCondition"
-							type="iso:SecurityConditionType" />
+					<sequence>
+						<element name="SecurityCondition" type="iso:SecurityConditionType" maxOccurs="255" />
 					</sequence>
 				</complexType>
 			</element>
 		</choice>
 	</complexType>
 
-
 	<complexType name="TargetNameType">
 		<choice>
 			<element name="DataSetName" type="iso:DataSetNameType" />
 			<element name="DIDName" type="iso:DIDNameType" />
-			<element name="CardApplicationName"
-				type="iso:ApplicationIdentifierType" />
-
+			<element name="CardApplicationName" type="iso:ApplicationIdentifierType" />
 		</choice>
 	</complexType>
 
-
 	<simpleType name="TrueType">
 		<restriction base="boolean">
-			<pattern value='true' />
+			<pattern value="true" />
 		</restriction>
 	</simpleType>
-
 
 	<!-- =============================== -->
 	<!-- Card-application-service access -->
@@ -474,17 +401,14 @@
 		</complexType>
 	</element>
 
-
 	<!-- 6.3 CardApplicationPath -->
-
 
 	<element name="CardApplicationPath">
 		<complexType>
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="CardAppPathRequest"
-							type="iso:CardApplicationPathType" maxOccurs="1" minOccurs="1" />
+						<element name="CardAppPathRequest" type="iso:CardApplicationPathType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -495,15 +419,11 @@
 		<complexType>
 			<complexContent>
 				<extension base="iso:ResponseType">
-					<sequence maxOccurs="1" minOccurs="1">
+					<sequence>
 						<element name="CardAppPathResultSet">
 							<complexType>
-								<sequence maxOccurs="unbounded"
-									minOccurs="0">
-									<element
-										name="CardApplicationPathResult"
-										type="iso:CardApplicationPathType" />
-
+								<sequence>
+									<element name="CardApplicationPathResult" type="iso:CardApplicationPathType" minOccurs="0" maxOccurs="unbounded" />
 								</sequence>
 							</complexType>
 						</element>
@@ -526,13 +446,9 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="CardApplicationPath"
-							type="iso:CardApplicationPathType" maxOccurs="1" minOccurs="1" />
-						<element name="Output" type="iso:OutputInfoType"
-							maxOccurs="1" minOccurs="0" />
-
-						<element name="ExclusiveUse" type="boolean"
-							maxOccurs="1" minOccurs="0" default="false" />
+						<element name="CardApplicationPath" type="iso:CardApplicationPathType" />
+						<element name="Output" type="iso:OutputInfoType" minOccurs="0" />
+						<element name="ExclusiveUse" type="boolean" minOccurs="0" default="false" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -543,10 +459,8 @@
 		<complexType>
 			<complexContent>
 				<extension base="iso:ResponseType">
-					<sequence maxOccurs="1" minOccurs="0">
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-
+					<sequence>
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -560,11 +474,8 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="Action" type="iso:ActionType"
-							maxOccurs="1" minOccurs="0" />
-
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="Action" type="iso:ActionType" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -588,15 +499,11 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="DIDScope" type="iso:DIDScopeType"
-							maxOccurs="1" minOccurs="0" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType" minOccurs="0" />
 						<element name="DIDName" type="iso:NameType" />
-						<element name="AuthenticationProtocolData"
-							type="iso:DIDAuthenticationDataType" />
-						<element name="SAMConnectionHandle"
-							type="iso:ConnectionHandleType" maxOccurs="1" minOccurs="0" />
+						<element name="AuthenticationProtocolData" type="iso:DIDAuthenticationDataType" />
+						<element name="SAMConnectionHandle" type="iso:ConnectionHandleType" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -608,9 +515,7 @@
 			<complexContent>
 				<extension base="iso:ResponseType">
 					<sequence>
-						<element name="AuthenticationProtocolData"
-							type="iso:DIDAuthenticationDataType" />
-
+						<element name="AuthenticationProtocolData" type="iso:DIDAuthenticationDataType" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -624,8 +529,7 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -650,14 +554,12 @@
 
 	<!-- 8.2 CardApplicationList -->
 
-
 	<element name="CardApplicationList">
 		<complexType>
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -668,15 +570,11 @@
 		<complexType>
 			<complexContent>
 				<extension base="iso:ResponseType">
-					<sequence maxOccurs="1" minOccurs="1">
+					<sequence>
 						<element name="CardApplicationNameList">
 							<complexType>
-								<sequence maxOccurs="unbounded"
-									minOccurs="1">
-									<element name="CardApplicationName"
-										type="iso:ApplicationIdentifierType" maxOccurs="1"
-										minOccurs="1" />
-
+								<sequence>
+									<element name="CardApplicationName" type="iso:ApplicationIdentifierType" minOccurs="0" maxOccurs="unbounded" />
 								</sequence>
 							</complexType>
 						</element>
@@ -693,13 +591,9 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="CardApplicationName"
-							type="iso:ApplicationIdentifierType" />
-						<element name="CardApplicationACL"
-							type="iso:AccessControlListType" />
-
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="CardApplicationName" type="iso:ApplicationIdentifierType" />
+						<element name="CardApplicationACL" type="iso:AccessControlListType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -723,11 +617,8 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="CardApplicationName"
-							type="iso:ApplicationIdentifierType" />
-
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="CardApplicationName" type="iso:ApplicationIdentifierType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -751,8 +642,7 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -763,15 +653,11 @@
 		<complexType>
 			<complexContent>
 				<extension base="iso:ResponseType">
-					<sequence maxOccurs="1" minOccurs="1">
-						<element name="CardApplicationServiceNameList"
-							maxOccurs="1" minOccurs="1">
+					<sequence>
+						<element name="CardApplicationServiceNameList" minOccurs="0">
 							<complexType>
 								<sequence>
-									<element
-										name="CardApplicationServiceName" type="string"
-										maxOccurs="unbounded" minOccurs="0" />
-
+									<element name="CardApplicationServiceName" type="string" minOccurs="0" maxOccurs="unbounded" />
 								</sequence>
 							</complexType>
 						</element>
@@ -788,10 +674,8 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="CardApplicationServiceName"
-							type="string" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="CardApplicationServiceName" type="string" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -815,12 +699,9 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="CardApplicationServiceName"
-							type="string" />
-						<element name="Code"
-							type="iso:CardApplicationServiceLoadPackageType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="CardApplicationServiceName" type="string" />
+						<element name="Code" type="iso:CardApplicationServiceLoadPackageType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -839,16 +720,13 @@
 
 	<!-- 8.8 CardApplicationServiceDelete -->
 
-
 	<element name="CardApplicationServiceDelete">
 		<complexType>
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="CardApplicationServiceName"
-							type="string" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="CardApplicationServiceName" type="string" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -872,10 +750,8 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="CardApplicationServiceName"
-							type="string" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="CardApplicationServiceName" type="string" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -886,9 +762,8 @@
 		<complexType>
 			<complexContent>
 				<extension base="iso:ResponseType">
-					<sequence maxOccurs="1" minOccurs="1">
-						<element name="ServiceDescription"
-							type="iso:CardApplicationServiceDescriptionType" />
+					<sequence>
+						<element name="ServiceDescription" type="iso:CardApplicationServiceDescriptionType" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -902,15 +777,10 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="CardApplicationServiceName"
-							type="string" />
-
-						<element name="ActionName"
-							type="iso:ActionNameType" />
-						<element name="Request"
-							type="iso:ExecuteActionRequestType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="CardApplicationServiceName" type="string" />
+						<element name="ActionName" type="iso:ActionNameType" />
+						<element name="Request" type="iso:ExecuteActionRequestType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -921,9 +791,8 @@
 		<complexType>
 			<complexContent>
 				<extension base="iso:ResponseType">
-					<sequence maxOccurs="1" minOccurs="0">
-						<element name="Confirmation"
-							type="iso:ExecuteActionConfirmationType" />
+					<sequence>
+						<element name="Confirmation" type="iso:ExecuteActionConfirmationType" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -943,8 +812,7 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -955,16 +823,13 @@
 		<complexType>
 			<complexContent>
 				<extension base="iso:ResponseType">
-					<sequence maxOccurs="1" minOccurs="1">
-						<element name="DataSetNameList"
-							type="iso:DataSetNameListType" />
-
+					<sequence>
+						<element name="DataSetNameList" type="iso:DataSetNameListType" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
 		</complexType>
 	</element>
-
 
 	<!-- 9.3 DataSetCreate -->
 
@@ -973,12 +838,9 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="DataSetName"
-							type="iso:DataSetNameType" />
-						<element name="DataSetACL"
-							type="iso:AccessControlListType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="DataSetName" type="iso:DataSetNameType" />
+						<element name="DataSetACL" type="iso:AccessControlListType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1002,10 +864,8 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="DataSetName"
-							type="iso:DataSetNameType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="DataSetName" type="iso:DataSetNameType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1029,10 +889,8 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="DataSetName"
-							type="iso:DataSetNameType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="DataSetName" type="iso:DataSetNameType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1056,8 +914,7 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1068,10 +925,8 @@
 		<complexType>
 			<complexContent>
 				<extension base="iso:ResponseType">
-					<sequence maxOccurs="1" minOccurs="1">
-						<element name="DSINameList"
-							type="iso:DSINameListType" />
-
+					<sequence>
+						<element name="DSINameList" type="iso:DSINameListType" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1085,8 +940,7 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
 						<element name="DSIName" type="iso:DSINameType" />
 						<element name="DSIContent" type="hexBinary" />
 					</sequence>
@@ -1112,8 +966,7 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
 						<element name="DSIName" type="iso:DSINameType" />
 					</sequence>
 				</extension>
@@ -1138,8 +991,7 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
 						<element name="DSIName" type="iso:DSINameType" />
 						<element name="DSIContent" type="hexBinary" />
 					</sequence>
@@ -1165,8 +1017,7 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
 						<element name="DSIName" type="iso:DSINameType" />
 					</sequence>
 				</extension>
@@ -1179,15 +1030,12 @@
 			<complexContent>
 				<extension base="iso:ResponseType">
 					<sequence>
-						<element name="DSIContent" type="hexBinary"
-							maxOccurs="1" minOccurs="0" />
+						<element name="DSIContent" type="hexBinary" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
 		</complexType>
 	</element>
-
-
 
 	<!-- =========================== -->
 	<!--    Cryptographic service    -->
@@ -1202,10 +1050,8 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="DIDScope" type="iso:DIDScopeType"
-							maxOccurs="1" minOccurs="0" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType" minOccurs="0" />
 						<element name="DIDName" type="iso:NameType" />
 						<element name="PlainText" type="hexBinary" />
 					</sequence>
@@ -1218,9 +1064,8 @@
 		<complexType>
 			<complexContent>
 				<extension base="iso:ResponseType">
-					<sequence maxOccurs="1" minOccurs="1">
-						<element name="CipherText" type="hexBinary"
-							maxOccurs="1" minOccurs="0" />
+					<sequence>
+						<element name="CipherText" type="hexBinary" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1234,10 +1079,8 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="DIDScope" type="iso:DIDScopeType"
-							maxOccurs="1" minOccurs="0" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType" minOccurs="0" />
 						<element name="DIDName" type="iso:NameType" />
 						<element name="CipherText" type="hexBinary" />
 					</sequence>
@@ -1250,9 +1093,8 @@
 		<complexType>
 			<complexContent>
 				<extension base="iso:ResponseType">
-					<sequence maxOccurs="1" minOccurs="1">
-						<element name="PlainText" type="hexBinary"
-							maxOccurs="1" minOccurs="0" />
+					<sequence>
+						<element name="PlainText" type="hexBinary" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1266,10 +1108,8 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="DIDScope" type="iso:DIDScopeType"
-							maxOccurs="1" minOccurs="0" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType" minOccurs="0" />
 						<element name="DIDName" type="iso:NameType" />
 					</sequence>
 				</extension>
@@ -1281,9 +1121,8 @@
 		<complexType>
 			<complexContent>
 				<extension base="iso:ResponseType">
-					<sequence maxOccurs="1" minOccurs="1">
-						<element name="Random" type="hexBinary"
-							maxOccurs="1" minOccurs="0" />
+					<sequence>
+						<element name="Random" type="hexBinary" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1297,14 +1136,10 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="DIDScope" type="iso:DIDScopeType"
-							maxOccurs="1" minOccurs="0" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType" minOccurs="0" />
 						<element name="DIDName" type="iso:NameType" />
-						<element name="Message" type="hexBinary"
-							maxOccurs="1" minOccurs="1" />
-
+						<element name="Message" type="hexBinary" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1316,9 +1151,7 @@
 			<complexContent>
 				<extension base="iso:ResponseType">
 					<sequence>
-						<element name="Hash" type="hexBinary"
-							maxOccurs="1" minOccurs="0" />
-
+						<element name="Hash" type="hexBinary" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1327,16 +1160,13 @@
 
 	<!-- 10.6 Sign -->
 
-
 	<element name="Sign">
 		<complexType>
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="DIDScope" type="iso:DIDScopeType"
-							maxOccurs="1" minOccurs="0" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType" minOccurs="0" />
 						<element name="DIDName" type="iso:NameType" />
 						<element name="Message" type="hexBinary" />
 					</sequence>
@@ -1349,15 +1179,13 @@
 		<complexType>
 			<complexContent>
 				<extension base="iso:ResponseType">
-					<sequence maxOccurs="1" minOccurs="1">
-						<element name="Signature" type="hexBinary"
-							maxOccurs="1" minOccurs="0" />
+					<sequence>
+						<element name="Signature" type="hexBinary" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
 		</complexType>
 	</element>
-
 
 	<!-- 10.7 VerifySignature -->
 
@@ -1366,15 +1194,11 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="DIDScope" type="iso:DIDScopeType"
-							maxOccurs="1" minOccurs="0" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType" minOccurs="0" />
 						<element name="DIDName" type="iso:NameType" />
 						<element name="Signature" type="hexBinary" />
-						<element name="Message" type="hexBinary"
-							maxOccurs="1" minOccurs="0" />
-
+						<element name="Message" type="hexBinary" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1398,19 +1222,11 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="DIDScope" type="iso:DIDScopeType"
-							maxOccurs="1" minOccurs="0" />
-
-						<element name="RootCert" type="iso:DIDNameType"
-							maxOccurs="1" minOccurs="0" />
-						<element name="CertificateType" type="anyURI"
-							maxOccurs="1" minOccurs="0" />
-
-						<element name="Certificate" type="hexBinary"
-							maxOccurs="1" minOccurs="1" />
-
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType" minOccurs="0" />
+						<element name="RootCert" type="iso:DIDNameType" minOccurs="0" />
+						<element name="CertificateType" type="anyURI" minOccurs="0" />
+						<element name="Certificate" type="hexBinary" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1427,8 +1243,6 @@
 		</complexType>
 	</element>
 
-
-
 	<!-- =================================== -->
 	<!--    Differential-Identity service    -->
 	<!-- =================================== -->
@@ -1442,11 +1256,8 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="Filter"
-							type="iso:DIDQualifierType" maxOccurs="1" minOccurs="0" />
-
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="Filter" type="iso:DIDQualifierType" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1458,8 +1269,7 @@
 			<complexContent>
 				<extension base="iso:ResponseType">
 					<sequence>
-						<element name="DIDNameList"
-							type="iso:DIDNameListType" />
+						<element name="DIDNameList" type="iso:DIDNameListType" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1473,25 +1283,23 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
 						<element name="DIDName" type="iso:DIDNameType" />
-						<element name="DIDUpdateData"
-							type="iso:DIDUpdateDataType" />
-						<element name="DIDACL"
-							type="iso:AccessControlListType" />
+						<element name="DIDCreateData" type="iso:DIDCreateDataType" />
+						<element name="DIDACL" type="iso:AccessControlListType" />
 					</sequence>
 				</extension>
 			</complexContent>
 		</complexType>
 	</element>
 
-
 	<element name="DIDCreateResponse">
 		<complexType>
 			<complexContent>
 				<extension base="iso:ResponseType">
-					<sequence />
+					<sequence>
+						<element name="DIDCreateData" type="iso:DIDCreateDataType" minOccurs="0" />
+					</sequence>
 				</extension>
 			</complexContent>
 		</complexType>
@@ -1504,10 +1312,8 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="DIDScope" type="iso:DIDScopeType"
-							maxOccurs="1" minOccurs="0" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType" minOccurs="0" />
 						<element name="DIDName" type="iso:NameType" />
 					</sequence>
 				</extension>
@@ -1519,9 +1325,8 @@
 		<complexType>
 			<complexContent>
 				<extension base="iso:ResponseType">
-					<sequence maxOccurs="1" minOccurs="1">
-						<element name="DIDStructure"
-							type="iso:DIDStructureType" />
+					<sequence>
+						<element name="DIDStructure" type="iso:DIDStructureType" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1535,12 +1340,9 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
 						<element name="DIDName" type="iso:NameType" />
-						<element name="DIDUpdateData"
-							type="iso:DIDUpdateDataType" />
-
+						<element name="DIDUpdateData" type="iso:DIDUpdateDataType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1564,8 +1366,7 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
 						<element name="DIDName" type="iso:NameType" />
 					</sequence>
 				</extension>
@@ -1590,16 +1391,11 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="DIDScope" type="iso:DIDScopeType"
-							maxOccurs="1" minOccurs="0" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType" minOccurs="0" />
 						<element name="DIDName" type="iso:NameType" />
-						<element name="AuthenticationProtocolData"
-							type="iso:DIDAuthenticationDataType" />
-						<element name="SAMConnectionHandle"
-							type="iso:ConnectionHandleType" maxOccurs="1" minOccurs="0" />
-
+						<element name="AuthenticationProtocolData" type="iso:DIDAuthenticationDataType" />
+						<element name="SAMConnectionHandle" type="iso:ConnectionHandleType" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1610,9 +1406,8 @@
 		<complexType>
 			<complexContent>
 				<extension base="iso:ResponseType">
-					<sequence maxOccurs="1" minOccurs="1">
-						<element name="AuthenticationProtocolData"
-							type="iso:DIDAuthenticationDataType" />
+					<sequence>
+						<element name="AuthenticationProtocolData" type="iso:DIDAuthenticationDataType" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1632,10 +1427,8 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" maxOccurs="1" minOccurs="1" />
-						<element name="TargetName"
-							type="iso:TargetNameType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="TargetName" type="iso:TargetNameType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1647,8 +1440,7 @@
 			<complexContent>
 				<extension base="iso:ResponseType">
 					<sequence>
-						<element name="TargetACL"
-							type="iso:AccessControlListType" />
+						<element name="TargetACL" type="iso:AccessControlListType" minOccurs="0" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1662,21 +1454,17 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
-						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" />
-						<element name="TargetName"
-							type="iso:TargetNameType" />
-						<element name="CardApplicationServiceName"
-							type="string" maxOccurs="1" minOccurs="1" />
-						<element name="ActionName"
-							type="iso:ActionNameType" />
-						<element name="SecurityCondition"
-							type="iso:SecurityConditionType" />
+						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="TargetName" type="iso:TargetNameType" />
+						<element name="CardApplicationServiceName" type="string" />
+						<element name="ActionName" type="iso:ActionNameType" />
+						<element name="SecurityCondition" type="iso:SecurityConditionType" />
 					</sequence>
 				</extension>
 			</complexContent>
 		</complexType>
 	</element>
+
 	<element name="ACLModifyResponse">
 		<complexType>
 			<complexContent>

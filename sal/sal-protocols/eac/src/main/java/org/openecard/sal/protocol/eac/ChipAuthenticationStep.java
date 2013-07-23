@@ -85,8 +85,7 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    ta.externalAuthentication(eacAdditionalInput.getSignature());
 
 	    // Read EF.CardSecurity
-	    CardUtils cardUtils = new CardUtils(dispatcher);
-	    byte[] efCardSecurity = cardUtils.readFile(slotHandle, EACConstants.EF_CARDSECURITY_FID);
+	    byte[] efCardSecurity = CardUtils.readFile(dispatcher, slotHandle, EACConstants.EF_CARDSECURITY_FID);
 
 	    // CA: Step 1 - MSE:SET AT
 	    SecurityInfos securityInfos = (SecurityInfos) internalData.get(EACConstants.INTERNAL_DATA_SECURITY_INFOS);

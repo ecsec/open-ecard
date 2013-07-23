@@ -82,8 +82,7 @@ public class PACEProtocol implements Protocol {
 
 	    // Read EF.CardAccess from card
 	    byte[] slotHandle = req.getSlotHandle();
-	    CardUtils cardUtils = new CardUtils(dispatcher);
-	    byte[] efcadata = cardUtils.readFile(slotHandle, PACEConstants.EF_CARDACCESS_FID);
+	    byte[] efcadata = CardUtils.readFile(dispatcher, slotHandle, PACEConstants.EF_CARDACCESS_FID);
 
 	    // Parse SecurityInfos and get PACESecurityInfos
 	    SecurityInfos sis = SecurityInfos.getInstance(efcadata);

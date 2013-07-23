@@ -48,30 +48,6 @@ public class CardUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(CardUtils.class);
 
-    private Dispatcher dispatcher;
-
-    /**
-     * Creates a new utility class for file operations.
-     *
-     * @param dispatcher Dispatcher
-     */
-    @Deprecated
-    public CardUtils(Dispatcher dispatcher) {
-	this.dispatcher = dispatcher;
-    }
-
-    /**
-     * Select the Master File.
-     *
-     * @param slotHandle Slot handle
-     * @throws APDUException
-     */
-    @Deprecated
-    public void selectMF(byte[] slotHandle) throws APDUException {
-	CardCommandAPDU selectMF = new Select.MasterFile();
-	selectMF.transmit(dispatcher, slotHandle);
-    }
-
     /**
      * Selects the Master File.
      *
@@ -82,19 +58,6 @@ public class CardUtils {
     public static void selectMF(Dispatcher dispatcher, byte[] slotHandle) throws APDUException {
 	CardCommandAPDU selectMF = new Select.MasterFile();
 	selectMF.transmit(dispatcher, slotHandle);
-    }
-
-    /**
-     * Select a File.
-     *
-     * @param slotHandle Slot handle
-     * @param fileID File identifier
-     * @throws APDUException
-     */
-    @Deprecated
-    public void selectFile(byte[] slotHandle, short fileID) throws APDUException {
-	CardCommandAPDU selectFile = new Select.ChildFile(ShortUtils.toByteArray(fileID));
-	selectFile.transmit(dispatcher, slotHandle);
     }
 
     /**
@@ -122,40 +85,6 @@ public class CardUtils {
 	Select selectFile = new Select.ChildFile(fileID);
 	selectFile.setFCP();
 	return selectFile.transmit(dispatcher, slotHandle);
-    }
-
-    /**
-     * Read a file.
-     *
-     * @param slotHandle Slot handle
-     * @param fileID File identifier
-     * @return Read file content.
-     * @throws Exception
-     */
-    @Deprecated
-    public byte[] readFile(byte[] slotHandle, short fileID) throws Exception {
-	// Select MF
-	selectMF(slotHandle);
-	// Select file
-	selectFile(slotHandle, fileID);
-
-	// Read file
-	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	byte length = (byte) 0xFF;
-	int i = 0;
-	CardResponseAPDU response;
-
-	do {
-	    CardCommandAPDU readBinary = new ReadBinary((short) (i * (length & 0xFF)), length);
-	    response = readBinary.transmit(dispatcher, slotHandle);
-
-	    baos.write(response.getData());
-	    i++;
-
-	} while (response.isNormalProcessed());
-	baos.close();
-
-	return baos.toByteArray();
     }
 
     /**

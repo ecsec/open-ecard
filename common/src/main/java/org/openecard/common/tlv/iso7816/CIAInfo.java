@@ -131,4 +131,56 @@ public class CIAInfo extends TLV {
 	}
     }
 
+    public long getVersion() {
+	return version;
+    }
+
+    public byte[] getSerialNumber() {
+	return serialNumber;
+    }
+
+    public String getManufacturerID() {
+	return manufacturerID;
+    }
+
+    public String getLabel() {
+	return label;
+    }
+
+    public CardFlags getCardFlags() {
+	return cardFlags;
+    }
+
+    public List<TLV> getSeInfo() {
+	return seInfo;
+    }
+
+    public TLV getRecordInfo() {
+	return recordInfo;
+    }
+
+    public List<TLV> getSupportedAlgorithms() {
+	return supportedAlgorithms;
+    }
+
+    public String getIssuerId() {
+	return issuerId;
+    }
+
+    public String getHolderId() {
+	return holderId;
+    }
+
+    public TLV getLastUpdate() {
+	return lastUpdate;
+    }
+
+    public String getPreferredLanguage() {
+	return preferredLanguage;
+    }
+
+    public List<TLV> getProfileIndication() {
+	return profileIndication;
+    }
+
 }

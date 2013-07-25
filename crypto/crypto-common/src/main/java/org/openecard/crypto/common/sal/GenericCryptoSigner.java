@@ -23,8 +23,16 @@
 package org.openecard.crypto.common.sal;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.DIDGet;
+import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
+import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
+import iso.std.iso_iec._24727.tech.schema.DSIRead;
+import iso.std.iso_iec._24727.tech.schema.DSIReadResponse;
+import iso.std.iso_iec._24727.tech.schema.Sign;
+import iso.std.iso_iec._24727.tech.schema.SignResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -32,16 +40,24 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.common.WSHelper;
+import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.DispatcherException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * Wrapper for the sign functionality of generic crypto DIDs.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
  */
 public class GenericCryptoSigner {
 
+    private static final Logger logger = LoggerFactory.getLogger(GenericCryptoSigner.class);
     private final Dispatcher dispatcher;
     private final ConnectionHandleType handle;
     private final String didName;
@@ -73,18 +89,34 @@ public class GenericCryptoSigner {
      * certificate is not converted whatsoever.
      *
      * @return Certificate of this DID in encoded form.
-     * @throws CredentialPermissionDenied In case the certifcate could not be read from the token.
-     * @throws IOException In case any other error occured during the reading of the certificate.
+     * @throws CredentialPermissionDenied In case the certificate could not be read from the token.
+     * @throws IOException In case any other error occurred during the reading of the certificate.
      */
     public synchronized byte[] getCertificateChain() throws CredentialPermissionDenied, IOException {
-	// TODO: cache certificate
-	throw new UnsupportedOperationException("Not implemented yet!");
+	if (rawCertData == null) {
+	    String dataSetName = getCertificateDataSetName();
+	    if (dataSetName != null) {
+		rawCertData = readCertificateDataset(handle, dataSetName);
+	    } else {
+		throw new IOException("Could not get the certificate data set name.");
+	    }
+	    if (rawCertData == null) {
+		throw new IOException("Failed to read certificate contents.");
+	    }
+	}
+	return rawCertData;
     }
 
     /**
      * Gets the certificate for this generic crypto DID converted to a Java security certificate.
      * This method is just a convenience function to call the equivalent with the parameter {@code X.509}.
      *
+     * @return An array representing the certificate chain (in X.509 format) of this DID.
+     * @throws CredentialPermissionDenied In case the certificate could not be read from the token. See
+     *   {@link #getCertificateChain()}.
+     * @throws IOException In case any other error occurred during the reading of the certificate. See
+     *   {@link #getCertificateChain()}.
+     * @throws CertificateException In case the certificate could not be converted.
      * @see #getJavaSecCertificateChain(java.lang.String)
      */
     public java.security.cert.Certificate[] getJavaSecCertificateChain() throws CredentialPermissionDenied,
@@ -96,12 +128,12 @@ public class GenericCryptoSigner {
      * The type parameter is used to determine the requested certificate type. Each certificate type is cached once it is
      * requested.
      *
-     * @param certType Certificate typoe according to <a href="http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#CertificateFactory">
+     * @param certType Certificate type according to <a href="http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#CertificateFactory">
      *   CertificateFactory Types</a>
      * @return An array representing the certificate chain of this DID.
-     * @throws CredentialPermissionDenied In case the certifcate could not be read from the token. See
+     * @throws CredentialPermissionDenied In case the certificate could not be read from the token. See
      *   {@link #getCertificateChain()}.
-     * @throws IOException In case any other error occured during the reading of the certificate. See
+     * @throws IOException In case any other error occurred during the reading of the certificate. See
      *   {@link #getCertificateChain()}.
      * @throws CertificateException In case the certificate could not be converted.
      */
@@ -124,9 +156,9 @@ public class GenericCryptoSigner {
      * Gets the certificate for this generic crypto DID converted to a BouncyCastle TLS certificate.
      *
      * @return The certificate chain in BouncyCastle format.
-     * @throws CredentialPermissionDenied In case the certifcate could not be read from the token. See
+     * @throws CredentialPermissionDenied In case the certificate could not be read from the token. See
      *   {@link #getCertificateChain()}.
-     * @throws IOException In case any other error occured during the reading of the certificate. See
+     * @throws IOException In case any other error occurred during the reading of the certificate. See
      *   {@link #getCertificateChain()}.
      * @throws CertificateException In case the certificate could not be converted.
      */
@@ -136,11 +168,7 @@ public class GenericCryptoSigner {
 	// is the certificate already available in BC form?
 	if (bcCert == null) {
 	    byte[] certs = getCertificateChain();
-	    try {
-		bcCert = org.openecard.bouncycastle.crypto.tls.Certificate.parse(new ByteArrayInputStream(certs));
-	    } catch (IOException ex) {
-		throw new CertificateException(ex);
-	    }
+	    bcCert = convertToCertificate(certs);
 	}
 
 	return bcCert;
@@ -157,7 +185,91 @@ public class GenericCryptoSigner {
      *   permissions.
      */
     public byte[] sign(@Nonnull byte[] hash) throws SignatureException, CredentialPermissionDenied {
-	throw new UnsupportedOperationException("Not implemented yet!");
+	try {
+	    Sign sign = new Sign();
+	    sign.setMessage(hash);
+	    sign.setDIDName(didName);
+	    sign.setDIDScope(DIDScopeType.LOCAL);
+	    sign.setConnectionHandle(handle);
+	    SignResponse res = (SignResponse) dispatcher.deliver(sign);
+	    WSHelper.checkResult(res);
+	    return res.getSignature();
+	} catch (InvocationTargetException e) {
+	    logger.error("Signature generation failed", e);
+	    throw new SignatureException(e);
+	} catch (DispatcherException e) {
+	    logger.error("Signature generation failed", e);
+	    throw new SignatureException(e);
+	} catch (WSException e) {
+	    logger.error("Signature generation failed", e);
+	    throw new SignatureException(e);
+	}
+	//TODO CredentialPermissionDeniedException
+    }
+
+    private Certificate convertToCertificate(byte[] certificateBytes) throws CertificateException {
+	org.openecard.bouncycastle.asn1.x509.Certificate x509Certificate = 
+		org.openecard.bouncycastle.asn1.x509.Certificate.getInstance(certificateBytes);
+	if(x509Certificate == null) {
+	    throw new CertificateException("Couldn't convert to x509Certificate.");
+	}
+	org.openecard.bouncycastle.asn1.x509.Certificate[] certs = 
+		new org.openecard.bouncycastle.asn1.x509.Certificate[] { x509Certificate };
+	Certificate cert = new Certificate(certs);
+	return cert;
+    }
+
+    /**
+     * Read the given DSI from the card application and card identified through the given connection handle.
+     * 
+     * @param cHandle connection handle identifying the card and card application
+     * @param dsiName name of the DSI to read
+     * @return the contents of the DSI, or null if an error occurred
+     */
+    private byte[] readCertificateDataset(ConnectionHandleType cHandle, String dsiName) throws CredentialPermissionDenied {
+	byte[] content = null;
+	try {
+	    DSIRead dsiRead = new DSIRead();
+	    dsiRead.setConnectionHandle(cHandle);
+	    dsiRead.getConnectionHandle().setCardApplication(cHandle.getCardApplication());
+	    dsiRead.setDSIName(dsiName);
+	    DSIReadResponse dsiReadResponse = (DSIReadResponse) dispatcher.deliver(dsiRead);
+	    WSHelper.checkResult(dsiReadResponse);
+	    content = dsiReadResponse.getDSIContent();
+	} catch (WSException e) {
+	    logger.error("Failed to read certificate data set for DSI: {}.", dsiName, e);
+	} catch (InvocationTargetException e) {
+	    logger.error("Failed to read certificate data set for DSI: {}.", dsiName, e);
+	} catch (DispatcherException e) {
+	    logger.error("Failed to read certificate data set for DSI: {}.", dsiName, e);
+	}
+	//TODO CredentialPermissionDenied
+	return content;
+    }
+
+    /**
+     * Get the Name of the certificate reference data set.
+     * 
+     * @return name of the data set, or null if an error occurred
+     */
+    private String getCertificateDataSetName() {
+	String dataSetName = null;
+	try {
+	    DIDGet didGet = new DIDGet();
+	    didGet.setConnectionHandle(handle);
+	    didGet.setDIDName(didName);
+	    didGet.setDIDScope(DIDScopeType.LOCAL);
+	    DIDGetResponse response = (DIDGetResponse) dispatcher.deliver(didGet);
+	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(response.getDIDStructure().getDIDMarker());
+	    dataSetName = cryptoMarker.getCertificateRef().getDataSetName();
+	} catch (DispatcherException e) {
+	    logger.error("Failed to get DataSetName for DID: {}.", didName, e);
+	} catch (InvocationTargetException e) {
+	    logger.error("Failed to get DataSetName for DID: {}.", didName, e);
+	} catch (NullPointerException e) {
+	    logger.error("Failed to get DataSetName for DID: {}.", didName, e);
+	}
+	return dataSetName;
     }
 
 }

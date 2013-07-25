@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,47 +23,37 @@
 package org.openecard.crypto.tls.auth;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
 import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
-import org.openecard.crypto.common.sal.CredentialNotFound;
 import org.openecard.crypto.common.sal.GenericCryptoSigner;
-import org.openecard.crypto.common.sal.GenericCryptoSignerFinder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
- * Implementation of CredentialFactory operating on generic crypto SAL DIDs.
- *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * This factory simply returns the one credential it was given in the constructor.
+ * 
  * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
  */
-public class SmartCardCredentialFactory implements CredentialFactory {
+public class SimpleSmartCardCredentialFactory implements CredentialFactory {
 
-    private static final Logger logger = LoggerFactory.getLogger(SmartCardCredentialFactory.class);
+    private final List<TlsCredentials> credentials;
 
-    private final GenericCryptoSignerFinder finder;
-    private final List<TlsCredentials> credentials = new ArrayList<TlsCredentials>();
-
-    public SmartCardCredentialFactory(@Nonnull GenericCryptoSignerFinder finder) {
-	this.finder = finder;
+    /**
+     * Create a new factory for the given generic crypto signer.
+     * 
+     * @param signer Generic crypto signer that will be wrapped in the credential.
+     */
+    public SimpleSmartCardCredentialFactory(GenericCryptoSigner signer) {
+	ArrayList<TlsCredentials> c = new ArrayList<TlsCredentials>(1);
+    	c.add(new SmartCardSignerCredential(signer));
+	credentials = Collections.unmodifiableList(c);
     }
 
     @Override
+    @Nonnull
     public List<TlsCredentials> getClientCredentials(CertificateRequest cr) {
-	SmartCardSignerCredential cred;
-	// TODO: clarify if the result needs to be cached or not (remove member in case)
-	credentials.clear();
-	try {
-	    // TODO: just one? perhaps return a lazy list with all matches
-	    GenericCryptoSigner result = finder.findFirstMatching(cr);
-	    cred = new SmartCardSignerCredential(result);
-	    credentials.add(cred);
-	} catch (CredentialNotFound e) {
-	    logger.error("No suitable credential found. Returning empty list.");
-	}
 	return credentials;
     }
 

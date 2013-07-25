@@ -43,28 +43,50 @@ public class DynamicAuthentication implements TlsAuthentication {
 
     private static final Logger logger = LoggerFactory.getLogger(DynamicAuthentication.class);
 
-    private String hostname = null;
-    private CertificateVerifier certVerifier = null;
-
-    private CredentialFactory credentialFactory = null;
-
+    private String hostname;
+    private CertificateVerifier certVerifier;
+    private CredentialFactory credentialFactory;
     private Certificate lastCertChain;
+
+    /**
+     * Nullary constructor.
+     * If no parameters are set later through setter functions, this instance will perform no server certificate checks
+     * and return an empty client certificate list.
+     */
+    public DynamicAuthentication() {
+    }
+
+    /**
+     * Create a new DynamicAuthentication using the given parameters. 
+     * They can later be changed using the setter functions.
+     * 
+     * @param hostName Name of the host that will be used for certificate validation when a verifier is set.
+     * @param certVerifier Verifier used for server certificate checks.
+     * @param credentialFactory Factory that provides client credentials when they are requested from the server.
+     */
+    public DynamicAuthentication(@Nullable String hostName, @Nullable CertificateVerifier certVerifier,
+	    @Nullable CredentialFactory credentialFactory) {
+	this.hostname = hostName;
+	this.certVerifier = certVerifier;
+	this.credentialFactory = credentialFactory;
+    }
 
     /**
      * Sets the host name for the certificate verification step.
      *
      * @see #notifyServerCertificate(org.openecard.bouncycastle.crypto.tls.Certificate)
-     * @param hostname
+     * @param hostname Name of the host that will be used for certificate validation, when a verifier is set.
      */
     public void setHostname(String hostname) {
 	this.hostname = hostname;
     }
+
     /**
      * Sets the implementation for the certificate verification step.
      *
      * @see #notifyServerCertificate(org.openecard.bouncycastle.crypto.tls.Certificate)
      * @see CertificateVerifier
-     * @param certVerifier
+     * @param certVerifier Verifier to use for server certificate checks.
      */
     public void setCertificateVerifier(CertificateVerifier certVerifier) {
 	this.certVerifier = certVerifier;
@@ -74,7 +96,7 @@ public class DynamicAuthentication implements TlsAuthentication {
      * Sets the factory which is used to find and create a credential reference for the authentication.
      *
      * @see #getClientCredentials(org.openecard.bouncycastle.crypto.tls.CertificateRequest)
-     * @param credentialFactory
+     * @param credentialFactory Factory that provides client credentials when they are requested from the server.
      */
     public void setCredentialFactory(@Nullable CredentialFactory credentialFactory) {
 	this.credentialFactory = credentialFactory;
@@ -117,6 +139,7 @@ public class DynamicAuthentication implements TlsAuthentication {
      * <p>If no suitable certificate is available, the client SHOULD send a certificate message containing no
      * certificates.</p>
      *
+     * @param cr Certificate request as received in the TLS handshake.
      * @see CredentialFactory
      */
     @Override

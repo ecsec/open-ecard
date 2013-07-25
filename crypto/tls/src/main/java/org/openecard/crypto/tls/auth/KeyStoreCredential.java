@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -28,46 +28,34 @@ import java.security.cert.CertificateException;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.TlsSignerCredentials;
+import org.openecard.crypto.common.keystore.KeyStoreSigner;
 import org.openecard.crypto.common.sal.CredentialPermissionDenied;
-import org.openecard.crypto.common.sal.GenericCryptoSigner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
- * Signing credential delegating all calls to a wrapped GenericCryptoSigner.
+ * Signer credential wrapping the given KeyStoreSigner.
  *
- * @see GenericCryptoSigner
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @see KeyStoreSigner
+ * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
  */
-public class SmartCardSignerCredential implements TlsSignerCredentials {
+public class KeyStoreCredential implements TlsSignerCredentials {
 
     private static final Logger logger = LoggerFactory.getLogger(SmartCardSignerCredential.class);
 
-    private final GenericCryptoSigner signerImpl;
+    private final KeyStoreSigner signer;
     private Certificate certificate = Certificate.EMPTY_CHAIN;
 
-    public SmartCardSignerCredential(@Nonnull GenericCryptoSigner signerImpl) {
-	this.signerImpl = signerImpl;
+    public KeyStoreCredential(@Nonnull KeyStoreSigner signer) {
+	this.signer = signer;
     }
 
     @Override
-    public byte[] generateCertificateSignature(@Nonnull byte[] md5andsha1) throws IOException {
-	try {
-	    return signerImpl.sign(md5andsha1);
-	} catch (SignatureException ex) {
-	    throw new IOException("Failed to create signature because of an unknown error.", ex);
-	} catch (CredentialPermissionDenied ex) {
-	    throw new IOException("Failed to create signature because of missing permissions.", ex);
-	}
-    }
-
-    @Override
-    public synchronized Certificate getCertificate() {
+    public Certificate getCertificate() {
 	if (certificate.equals(Certificate.EMPTY_CHAIN)) {
 	    try {
-		certificate = signerImpl.getBCCertificateChain();
+		certificate = signer.getBCCertificateChain();
 	    } catch (IOException ex) {
 		logger.error("Failed to read certificate due to an unknown error.", ex);
 	    } catch (CredentialPermissionDenied ex) {
@@ -77,6 +65,17 @@ public class SmartCardSignerCredential implements TlsSignerCredentials {
 	    }
 	}
 	return certificate;
+    }
+
+    @Override
+    public byte[] generateCertificateSignature(byte[] md5andsha1) throws IOException {
+	try {
+	    return signer.sign(md5andsha1);
+	}  catch (SignatureException ex) {
+	    throw new IOException("Failed to create signature because of an unknown error.", ex);
+	} catch (CredentialPermissionDenied ex) {
+	    throw new IOException("Failed to create signature because of missing permissions.", ex);
+	}
     }
 
 }

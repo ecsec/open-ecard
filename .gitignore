@@ -2,6 +2,8 @@ bin
 gen
 target
 *~
+*.orig
+*.log
 .settings
 .project
 .classpath

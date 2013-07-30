@@ -92,6 +92,7 @@ import org.openecard.common.ifd.ProtocolFactory;
 import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.ifd.anytype.PACEOutputType;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.ValueGenerators;
 import org.openecard.gui.UserConsent;
 import org.openecard.ifd.scio.reader.EstablishPACERequest;
@@ -857,8 +858,10 @@ public class IFD implements org.openecard.ws.IFD {
 		// TODO: check if this additional check is really necessary
 		if (estPaceReq.isSupportedType(paceCapabilities)) {
 		    byte[] reqData = execPaceReq.toBytes();
+		    _logger.debug("executeCtrlCode request: {}", ByteUtils.toHexString(reqData));
 		    // execute pace
 		    byte[] resData = term.executeCtrlCode(PCSCFeatures.EXECUTE_PACE, reqData);
+		    _logger.debug("Response of executeCtrlCode: {}", ByteUtils.toHexString(resData));
 		    // evaluate response
 		    ExecutePACEResponse execPaceRes = new ExecutePACEResponse(resData);
 		    if (execPaceRes.isError()) {

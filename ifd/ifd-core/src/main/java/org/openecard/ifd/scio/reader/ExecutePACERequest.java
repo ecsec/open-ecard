@@ -33,9 +33,9 @@ import org.openecard.common.util.ShortUtils;
 public class ExecutePACERequest {
 
     public enum Function {
-	GetReaderPACECapabilities((byte)1),
-	EstablishPACEChannel((byte)2),
-	DestroyPACEChannel((byte)3);
+	GetReaderPACECapabilities((byte) 1),
+	EstablishPACEChannel((byte) 2),
+	DestroyPACEChannel((byte) 3);
 
 	private byte code;
 
@@ -69,11 +69,11 @@ public class ExecutePACERequest {
 	o.write(function.getCode());
 	// write data length
 	byte[] dataLength_bytes = ShortUtils.toByteArray(dataLength);
-	for (int i=dataLength_bytes.length-1; i>=0; i--) {
+	for (int i = dataLength_bytes.length - 1; i >= 0; i--) {
 	    o.write(dataLength_bytes[i]);
 	}
 	// write missing bytes to length field
-	for (int i=dataLength_bytes.length; i<2; i++) {
+	for (int i = dataLength_bytes.length; i < 2; i++) {
 	    o.write(0);
 	}
 	// write data if there is a positive length

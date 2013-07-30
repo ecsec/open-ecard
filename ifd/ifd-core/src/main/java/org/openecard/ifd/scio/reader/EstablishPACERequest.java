@@ -35,11 +35,11 @@ import org.openecard.common.util.ShortUtils;
 public class EstablishPACERequest {
 
     private byte passwordType;
-    private byte chatLength = 0;
+    private byte chatLength;
     private byte[] chat;
-    private byte passwordLength = 0;
+    private byte passwordLength;
     private byte[] password;
-    private short certDescLength = 0;
+    private short certDescLength;
     private byte[] certDesc;
 
     public EstablishPACERequest(byte passwordType, byte[] chat, byte[] password, byte[] certDesc) {
@@ -102,6 +102,13 @@ public class EstablishPACERequest {
 		// write data
 		o.write(certDesc, 0, certDesc.length);
 	    }
+	} else {
+	    // PACE is not followed by TA v2, e.g. PIN Management
+	    // fill up to a total length of five
+	    o.write(0x00);
+	    o.write(0x00);
+	    o.write(0x00);
+	    o.write(0x00);
 	}
 
 	return o.toByteArray();

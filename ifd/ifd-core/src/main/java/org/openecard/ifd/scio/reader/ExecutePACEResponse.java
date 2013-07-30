@@ -28,6 +28,9 @@ import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.common.CardCommandStatus;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.common.util.IntegerUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -36,14 +39,16 @@ import org.openecard.common.util.ByteUtils;
  */
 public class ExecutePACEResponse {
 
+    private static final Logger logger = LoggerFactory.getLogger(ExecutePACEResponse.class);
+
     final int result;
     final short length;
     final byte[] data;
 
     public ExecutePACEResponse(byte[] response) {
 	result = ByteUtils.toInteger(Arrays.copyOfRange(response, 0, 4));
-	length = ByteUtils.toShort(new byte[]{response[5], response[4]});
-	data   = Arrays.copyOfRange(response, 6, 6+length);
+	length = ByteUtils.toShort(new byte[] { response[5], response[4] });
+	data   = Arrays.copyOfRange(response, 6, 6 + length);
     }
 
     public boolean isError() {
@@ -81,6 +86,8 @@ public class ExecutePACEResponse {
 	if (result ==  0xF0200001) return WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "Abort.");
 	if (result ==  0xF0200002) return WSHelper.makeResultError(ECardConstants.Minor.IFD.TIMEOUT_ERROR, "Timeout.");
 	// unknown error
+	String hexStringResult = ByteUtils.toHexString(IntegerUtils.toByteArray(result));
+	logger.warn("Unknown error in ExecutePACEResponse: {}", hexStringResult);
 	return WSHelper.makeResultUnknownError(null);
     }
 

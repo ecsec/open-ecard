@@ -6,6 +6,59 @@
 	<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
     </dss:Result>
     <iso:RecognitionTree>
+	<iso:CardCall xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema">
+	    <iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
+	    <iso:ResponseAPDU>
+		<iso:Trailer>9000</iso:Trailer>
+		<iso:Conclusion>
+		    <iso:CardCall>
+			<iso:CommandAPDU>00A4010C02AB00</iso:CommandAPDU>
+			<iso:ResponseAPDU>
+			    <iso:Trailer>9000</iso:Trailer>
+			    <iso:Conclusion>
+				<iso:CardCall>
+				    <iso:CommandAPDU>00A4020C021F00</iso:CommandAPDU>
+				    <iso:ResponseAPDU>
+					<iso:Trailer>9000</iso:Trailer>
+					<iso:Conclusion>
+					    <iso:CardCall>
+						<iso:CommandAPDU>00B00000FF</iso:CommandAPDU>
+						<iso:ResponseAPDU>
+						    <iso:Body>
+							<iso:MatchingData>
+							    <iso:Offset>00</iso:Offset>
+							    <iso:Length>0D</iso:Length>
+							    <iso:MatchingValue>A00B8004002000815F2F028010</iso:MatchingValue>
+							</iso:MatchingData>
+						    </iso:Body>
+						    <iso:Trailer>9000</iso:Trailer>
+						    <iso:Conclusion>
+							<iso:RecognizedCardType>https://www.s-trust.de/produkte/strust_massensignaturkarte</iso:RecognizedCardType>
+						    </iso:Conclusion>
+						</iso:ResponseAPDU>
+						<iso:ResponseAPDU>
+						    <iso:Body>
+							<iso:MatchingData>
+							    <iso:Offset>00</iso:Offset>
+							    <iso:Length>0D</iso:Length>
+							    <iso:MatchingValue>A00B8004002000815F2F028011</iso:MatchingValue>
+							</iso:MatchingData>
+						    </iso:Body>
+						    <iso:Trailer>9000</iso:Trailer>
+						    <iso:Conclusion>
+							<iso:RecognizedCardType>https://www.s-trust.de/produkte/strust_einzelsignaturkarte</iso:RecognizedCardType>
+						    </iso:Conclusion>
+						</iso:ResponseAPDU>
+					    </iso:CardCall>
+					</iso:Conclusion>
+				    </iso:ResponseAPDU>
+				</iso:CardCall>
+			    </iso:Conclusion>
+			</iso:ResponseAPDU>
+		    </iso:CardCall>
+		</iso:Conclusion>
+	    </iso:ResponseAPDU>
+	</iso:CardCall>
 	<iso:CardCall>
 	    <iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
 	    <iso:ResponseAPDU>

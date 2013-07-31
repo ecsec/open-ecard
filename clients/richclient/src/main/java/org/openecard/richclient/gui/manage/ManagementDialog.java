@@ -24,41 +24,48 @@ package org.openecard.richclient.gui.manage;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import java.awt.GridBagLayout;
-import javax.swing.JList;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import javax.swing.ListSelectionModel;
-import javax.swing.JLabel;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import javax.annotation.Nonnull;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.ListSelectionModel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import org.openecard.addon.ClasspathRegistry;
+import org.openecard.addon.manifest.AddonBundleDescription;
+import org.openecard.addon.manifest.AppExtensionActionDescription;
 import org.openecard.common.I18n;
+import org.openecard.common.util.FileUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
 import org.openecard.gui.graphics.OecLogoBgWhite;
-import org.openecard.richclient.gui.manage.core.PINAddon;
 import org.openecard.richclient.gui.manage.core.ConnectionSettingsAddon;
 
 
 /**
  * Dialog for the management of add-ons and builtin functionality.
  * The dialog hosts a sidebar where one can select the add-on or builtin item to display. The items are
- * {@link AddonPanel}s which are configured approprietly.
+ * {@link AddonPanel}s which are configured appropriately.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class ManagementDialog extends JDialog {
 
     private static final long serialVersionUID = 1L;
+    private static final String LANGUAGE_CODE = System.getProperty("user.language");
 
     private static ManagementDialog runningDialog;
 
@@ -194,9 +201,55 @@ public class ManagementDialog extends JDialog {
 	addWindowListener(model); // save current addon settings when closed
 	// add addon panels
 	model.addElement(lang.translationForKey("addon.list.core.connection"), new ConnectionSettingsAddon());
-	model.addElement(lang.translationForKey("addon.list.core.pin_management"), new PINAddon());
+
+	// this assumes that all addons in the ClasspathRegistry are core addons
+	// an ActionPanel or every addon that has one ore more AppExtensionActions will be added
+	for (AddonBundleDescription desc : ClasspathRegistry.getInstance().listPlugins()) {
+	    ArrayList<AppExtensionActionDescription> applicationActions = desc.getApplicationActions();
+	    if (applicationActions.size() > 0) {
+		String description  = desc.getLocalizedDescription(LANGUAGE_CODE);
+		String name = desc.getLocalizedName(LANGUAGE_CODE);
+		Image logo = loadLogo(desc.getLogo());
+		JPanel actionPanel = createActionPanel(desc);
+		AddonPanel addonPanel = new AddonPanel(actionPanel, name, description, logo);
+		model.addElement(name, addonPanel);
+	    }
+	}
 
 	selectionPanel.add(coreList, coreListConstraints);
+    }
+
+    /**
+     * Creates an ActionPanel that has an ActionEntryPanel for every AppExtensionAction of the given addon.
+     * 
+     * @param desc AddonBundleDescription for the addon
+     * @return the created ActionPanel
+     */
+    private ActionPanel createActionPanel(AddonBundleDescription desc) {
+	ActionPanel actionPanel = new ActionPanel();
+	for (AppExtensionActionDescription action : desc.getApplicationActions()) {
+	    ActionEntryPanel actionEntryPanel = new ActionEntryPanel(desc.getId(), action);
+	    actionPanel.addActionEntry(actionEntryPanel);
+	}
+	return actionPanel;
+    }
+
+    /**
+     * Load the logo from the given path as {@link Image}.
+     * 
+     * @param logoPath path to the logo
+     * @return the logo-{@link Image} if loading was successful, otherwise {@code null}
+     */
+    private static Image loadLogo(String logoPath) {
+	try {
+	    String fName = logoPath;
+	    InputStream in = FileUtils.resolveResourceAsStream(ManagementDialog.class, fName);
+	    ImageIcon icon = new ImageIcon(FileUtils.toByteArray(in));
+	    return icon.getImage();
+	} catch (IOException ex) {
+	    // ignore and let the default decide
+	    return null;
+	}
     }
 
     private void createAddonList() {

@@ -22,15 +22,14 @@
 
 package org.openecard.richclient;
 
+import ch.qos.logback.core.joran.spi.JoranException;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.BindException;
-import java.security.Policy;
 import javax.swing.JOptionPane;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.ClasspathRegistry;
@@ -54,9 +53,7 @@ import org.openecard.gui.swing.common.GUIDefaults;
 import org.openecard.ifd.protocol.pace.PACEProtocolFactory;
 import org.openecard.ifd.scio.IFD;
 import org.openecard.management.TinyManagement;
-import org.openecard.plugins.PluginPolicy;
-import org.openecard.plugins.manager.PluginManager;
-import org.openecard.plugins.pinplugin.PINPlugin;
+import org.openecard.plugins.pinplugin.ChangePINAction;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.richclient.gui.AppTray;
 import org.openecard.richclient.gui.MessageDialog;
@@ -72,7 +69,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import ch.qos.logback.core.joran.spi.JoranException;
 
 
 /**
@@ -105,9 +101,6 @@ public final class RichClient {
     private CardStateMap cardStates;
     // ContextHandle determines a specific IFD layer context
     private byte[] contextHandle;
-    // Plugin manager
-    private PluginManager pluginManager;
-
 
     static {
 	try {
@@ -202,7 +195,8 @@ public final class RichClient {
 	    // Start up control interface
 	    try {
 		HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
-		binding.setAddonManager(new AddonManager(dispatcher, gui, cardStates, recognition, em, sal.getProtocolInfo()));
+		AddonManager manager = AddonManager.createInstance(dispatcher, gui, cardStates, recognition, em, sal.getProtocolInfo());
+		binding.setAddonManager(manager);
 		ControlHandlers handler = new ControlHandlers();
 		control = new ControlInterface(binding, handler);
 		control.start();
@@ -210,13 +204,6 @@ public final class RichClient {
 		dialog.setMessage(lang.translationForKey("client.startup.failed.portinuse"));
 		throw e;
 	    }
-
-	    // Set up PluginManager
-	    String pluginsPath = FileUtils.getHomeConfigDir() + File.separator + "plugins" + File.separator;
-	    Policy.setPolicy(new PluginPolicy(pluginsPath));
-	    System.setSecurityManager(new SecurityManager());
-	    pluginManager = new PluginManager(dispatcher, gui, recognition, cardStates, pluginsPath);
-	    pluginManager.addPlugin(new PINPlugin());
 
 	} catch (Exception e) {
 	    _logger.error(e.getMessage(), e);
@@ -241,12 +228,14 @@ public final class RichClient {
 	manifestStream = FileUtils.resolveResourceAsStream(StatusAction.class, "Status-Manifest.xml");
 	manifestDoc = marshaller.str2doc(manifestStream);
 	ClasspathRegistry.getInstance().register((AddonBundleDescription) marshaller.unmarshal(manifestDoc));
+	manifestStream = FileUtils.resolveResourceAsStream(ChangePINAction.class, "PIN-Plugin-Manifest.xml");
+	manifestDoc = marshaller.str2doc(manifestStream);
+	ClasspathRegistry.getInstance().register((AddonBundleDescription) marshaller.unmarshal(manifestDoc));
     }
 
     public void teardown() {
 	try {
-	    // shutdown plugin manager
-	    pluginManager.shutDown();
+	    // TODO shutdown addon manager and related components?
 
 	    // shutdown control modules
 	    control.stop();

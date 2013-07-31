@@ -54,7 +54,7 @@ public class ConnectionSettingsAddon extends AddonPanel {
     private static Image loadLogo() {
 	try {
 	    String fName = "images/network-wired.png";
-	    InputStream in = FileUtils.resolveResourceAsStream(PINAddon.class, fName);
+	    InputStream in = FileUtils.resolveResourceAsStream(ConnectionSettingsAddon.class, fName);
 	    ImageIcon icon = new ImageIcon(FileUtils.toByteArray(in));
 	    return icon.getImage();
 	} catch (IOException ex) {

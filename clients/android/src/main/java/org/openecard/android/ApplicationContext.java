@@ -67,8 +67,7 @@ import org.openecard.ifd.scio.IFDException;
 import org.openecard.ifd.scio.IFDProperties;
 import org.openecard.ifd.scio.wrapper.IFDTerminalFactory;
 import org.openecard.management.TinyManagement;
-import org.openecard.plugins.manager.PluginManager;
-import org.openecard.plugins.pinplugin.PINPlugin;
+import org.openecard.plugins.pinplugin.ChangePINAction;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.sal.TinySAL;
 import org.openecard.sal.protocol.eac.EAC2ProtocolFactory;
@@ -347,9 +346,6 @@ public class ApplicationContext extends Application implements EventCallback {
 
 	em.initialize();
 
-	// Set up PluginManager
-	PluginManager pm = new PluginManager(dispatcher, gui, recognition, cardStates, null);
-	pm.addPlugin(new PINPlugin());
 	try {
 	    registerAddOns();
 	} catch (Exception e) {
@@ -366,6 +362,9 @@ public class ApplicationContext extends Application implements EventCallback {
 	marshaller.addXmlTypeClass(AddonBundleDescription.class);
 	InputStream manifestStream = FileUtils.resolveResourceAsStream(TCTokenAction.class, "TCToken-Manifest.xml");
 	Document manifestDoc = marshaller.str2doc(manifestStream);
+	ClasspathRegistry.getInstance().register((AddonSpecification) marshaller.unmarshal(manifestDoc));
+	manifestStream = FileUtils.resolveResourceAsStream(ChangePINAction.class, "PIN-Plugin-Manifest.xml");
+	manifestDoc = marshaller.str2doc(manifestStream);
 	ClasspathRegistry.getInstance().register((AddonBundleDescription) marshaller.unmarshal(manifestDoc));
     }
 

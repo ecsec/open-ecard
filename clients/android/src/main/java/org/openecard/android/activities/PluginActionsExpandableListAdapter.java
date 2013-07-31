@@ -30,12 +30,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SimpleExpandableListAdapter;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
+import org.openecard.addon.AddonManager;
+import org.openecard.addon.manifest.AppExtensionActionDescription;
 import org.openecard.common.I18n;
-import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.plugins.PluginAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +49,7 @@ final class PluginActionsExpandableListAdapter extends SimpleExpandableListAdapt
 
     // logger and translation
     private static final Logger logger = LoggerFactory.getLogger(PluginActionsExpandableListAdapter.class);
-    private final I18n lang = I18n.getTranslation("settings");
+    private final I18n lang = I18n.getTranslation("android");
 
     private PluginActivity pluginActivity;
     private Context context;
@@ -74,7 +73,7 @@ final class PluginActionsExpandableListAdapter extends SimpleExpandableListAdapt
 	    childView.removeViewAt(1);
 	}
 
-	PluginAction action = pluginActivity.getPlugin().getActions().get(groupPosition);
+	AppExtensionActionDescription action = pluginActivity.getPlugin().getApplicationActions().get(groupPosition);
 
 	// set orientation to vertical so the button will be under the description text
 	childView.setOrientation(LinearLayout.VERTICAL);
@@ -97,7 +96,7 @@ final class PluginActionsExpandableListAdapter extends SimpleExpandableListAdapt
      *            The action to create a Button for.
      * @return The Button with a corresponding OnClickListener set.
      */
-    private Button setUpStartActionButton(final PluginAction action) {
+    private Button setUpStartActionButton(final AppExtensionActionDescription action) {
 	Button btnStartAction = new Button(context);
 	btnStartAction.setText(lang.translationForKey("settings.plugins.actions.start"));
 	btnStartAction.setOnClickListener(new OnClickListener() {
@@ -107,13 +106,9 @@ final class PluginActionsExpandableListAdapter extends SimpleExpandableListAdapt
 		Thread actionThread = new Thread(new Runnable() {
 		    @Override
 		    public void run() {
-			try {
-			    action.perform();
-			} catch (InvocationTargetException ex) {
-			    logger.error(ex.getMessage(), ex);
-			} catch (DispatcherException ex) {
-			    logger.error(ex.getMessage(), ex);
-			}
+			String pluginId = pluginActivity.getPlugin().getId();
+			String actionId = action.getId();
+			AddonManager.getInstance().getAppExtensionAction(pluginId, actionId).execute();
 		    }
 		});
 		actionThread.start();

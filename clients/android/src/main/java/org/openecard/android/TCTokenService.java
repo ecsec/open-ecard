@@ -62,7 +62,7 @@ public class TCTokenService extends Service implements Runnable {
 	    UserConsent gui = appCtx.getGUI();
 	    CardStateMap cardStates = appCtx.getCardStates();
 	    CardRecognition recognition = appCtx.getRecognition();
-	    AddonManager addonManager = new AddonManager(dispatcher, gui, cardStates, recognition, appCtx.getEnv().getEventManager(),((TinySAL) appCtx.getEnv().getSAL()).getProtocolInfo());
+	    AddonManager addonManager = AddonManager.createInstance(dispatcher, gui, cardStates, recognition, appCtx.getEnv().getEventManager(),((TinySAL) appCtx.getEnv().getSAL()).getProtocolInfo());
 	    binding.setAddonManager(addonManager);
 	    ControlHandlers handler = new ControlHandlers();
 	    control = new ControlInterface(binding, handler);

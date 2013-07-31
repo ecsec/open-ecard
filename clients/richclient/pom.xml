@@ -264,11 +264,6 @@
 	</dependency>
 	<dependency>
 	    <groupId>org.openecard.plugins</groupId>
-	    <artifactId>plugin-manager</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.plugins</groupId>
 	    <artifactId>plugin-pinplugin</artifactId>
 	    <version>${project.version}</version>
 	</dependency>

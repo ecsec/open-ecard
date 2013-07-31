@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<AddonBundleDescription>
+  <ID>PIN-Plugin</ID>
+  <Version>1.0</Version>
+  <About/>
+  <License/>
+  <LocalizedName xml:lang="DE">PIN Verwaltung</LocalizedName>
+  <LocalizedDescription xml:lang="DE">Verwaltung von PIN/ PUK und gegebenenfalls anderen Geheimnissen der Chipkarte.</LocalizedDescription>
+  <LocalizedName xml:lang="EN">PIN Management</LocalizedName>
+  <LocalizedDescription xml:lang="EN">Management of PIN/ PUK and possibly other secrets of the smart-card.</LocalizedDescription>
+  <Logo>images/pin-management.png</Logo>
+  <ConfigDescription/>
+  <BindingActions/>
+  <ApplicationActions>
+<AppExtensionActionDescription>
+      <ID>ChangePINAction</ID>
+      <ClassName>org.openecard.plugins.pinplugin.ChangePINAction</ClassName>
+      <LocalizedName xml:lang="DE">PIN ändern</LocalizedName>
+      <LocalizedDescription xml:lang="DE">Mit dieser Aktion können Sie ihre PIN ändern.</LocalizedDescription>
+      <LocalizedName xml:lang="EN">Change PIN</LocalizedName>
+      <LocalizedDescription xml:lang="EN">With this action you can change your PIN.</LocalizedDescription>
+      <ConfigDescription/>
+</AppExtensionActionDescription>
+<AppExtensionActionDescription>
+      <ID>UnblockPINAction</ID>
+      <ClassName>org.openecard.plugins.pinplugin.UnblockPINAction</ClassName>
+      <LocalizedName xml:lang="DE">PIN entsperren</LocalizedName>
+      <LocalizedDescription xml:lang="DE">Mit dieser Aktion können Sie ihre PIN entsperren.</LocalizedDescription>
+       <LocalizedName xml:lang="EN">Unblock PIN</LocalizedName>
+      <LocalizedDescription xml:lang="EN">With this action you can unblock your PIN.</LocalizedDescription>
+      <ConfigDescription/>
+</AppExtensionActionDescription>
+  </ApplicationActions>
+  <IFDActions/>
+  <SALActions/>
+</AddonBundleDescription>

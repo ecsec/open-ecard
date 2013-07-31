@@ -35,18 +35,18 @@ import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import org.openecard.bouncycastle.pqc.math.linearalgebra.ByteUtils;
+import org.openecard.addon.bind.AppExtensionAction;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.ifd.PACECapabilities;
+import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.sal.state.CardStateMap;
+import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
 import org.openecard.control.module.tctoken.gui.InsertCardDialog;
-import org.openecard.plugins.PluginAction;
-import org.openecard.plugins.wrapper.PluginDispatcher;
-import org.openecard.plugins.wrapper.PluginUserConsent;
+import org.openecard.gui.UserConsent;
 import org.openecard.recognition.CardRecognition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public abstract class AbstractPINAction implements PluginAction {
+public abstract class AbstractPINAction implements AppExtensionAction {
 
     // translation and logger
     protected final I18n lang = I18n.getTranslation("pinplugin");
@@ -73,25 +73,10 @@ public abstract class AbstractPINAction implements PluginAction {
     private static final byte[] RESPONSE_RC2 = new byte[] { (byte) 0x63, (byte) 0xC2 };
     private static final byte[] RESPONSE_DEACTIVATED = new byte[] { (byte) 0x62, (byte) 0x83 };
 
-    protected final PluginDispatcher dispatcher;
-    protected final PluginUserConsent gui;
-    protected final CardRecognition recognition;
-    protected final CardStateMap cardStates;
-
-    /**
-     * Creates a new instance of AbstractPINAction.
-     * 
-     * @param dispatcher PluginDispatcher wrapper the dispatcher to use
-     * @param gui PluginUserConsent wrapping the UserConsent to use
-     * @param rec CardRecognition to use
-     * @param map CardStateMap of the client
-     */
-    protected AbstractPINAction(PluginDispatcher dispatcher, PluginUserConsent gui, CardRecognition rec, CardStateMap map) {
-	this.dispatcher = dispatcher;
-	this.gui = gui;
-	this.recognition = rec;
-	this.cardStates = map;
-    }
+    protected Dispatcher dispatcher;
+    protected UserConsent gui;
+    protected CardRecognition recognition;
+    protected CardStateMap cardStates;
 
     /**
      * Recognize the PIN state of the card given through the connection handle.
@@ -115,15 +100,15 @@ public abstract class AbstractPINAction implements PluginAction {
 	byte[] responseAPDU = response.getOutputAPDU().get(0);
 
 	RecognizedState state;
-	if (ByteUtils.equals(RESPONSE_RC3, responseAPDU)) {
+	if (ByteUtils.compare(RESPONSE_RC3, responseAPDU)) {
 	    state = RecognizedState.PIN_activated_RC3;
-	} else if (ByteUtils.equals(RESPONSE_DEACTIVATED, responseAPDU)) {
+	} else if (ByteUtils.compare(RESPONSE_DEACTIVATED, responseAPDU)) {
 	    state = RecognizedState.PIN_deactivated;
-	} else if (ByteUtils.equals(RESPONSE_RC2, responseAPDU)) {
+	} else if (ByteUtils.compare(RESPONSE_RC2, responseAPDU)) {
 	    state = RecognizedState.PIN_activated_RC2;
-	} else if (ByteUtils.equals(RESPONSE_SUSPENDED, responseAPDU)) {
+	} else if (ByteUtils.compare(RESPONSE_SUSPENDED, responseAPDU)) {
 	    state = RecognizedState.PIN_suspended;
-	} else if (ByteUtils.equals(RESPONSE_BLOCKED, responseAPDU)) {
+	} else if (ByteUtils.compare(RESPONSE_BLOCKED, responseAPDU)) {
 	    state = RecognizedState.PIN_blocked;
 	} else {
 	    logger.error("Unhandled response to the PIN state recognition APDU: {}\n");

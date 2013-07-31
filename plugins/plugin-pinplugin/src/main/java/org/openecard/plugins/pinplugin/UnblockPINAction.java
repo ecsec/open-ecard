@@ -24,15 +24,12 @@ package org.openecard.plugins.pinplugin;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.Disconnect;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import org.openecard.addon.Context;
+import org.openecard.addon.FactoryInitializationException;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.plugins.pinplugin.gui.UnblockPINDialog;
-import org.openecard.plugins.wrapper.PluginDispatcher;
-import org.openecard.plugins.wrapper.PluginUserConsent;
-import org.openecard.recognition.CardRecognition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,71 +43,51 @@ public class UnblockPINAction extends AbstractPINAction {
 
     private static final Logger logger = LoggerFactory.getLogger(UnblockPINAction.class);
 
-    private static final String ID = "UnblockPINAction";
-
-    /**
-     * Create a new instance of UnblockPINAction.
-     * 
-     * @param dispatcher PluginDispatcher wrapper the dispatcher to use
-     * @param gui PluginUserConsent wrapping the UserConsent to use
-     * @param rec CardRecognition to use
-     * @param map CardStateMap of the client
-     */
-    public UnblockPINAction(PluginDispatcher dispatcher, PluginUserConsent gui, CardRecognition rec, CardStateMap map) {
-	super(dispatcher, gui, rec, map);
-    }
-
     @Override
-    public String getID() {
-	return ID;
-    }
-
-    @Override
-    public String getName() {
-	return lang.translationForKey("action.unblockpin.name");
-    }
-
-    @Override
-    public String getDescription() {
-	return lang.translationForKey("action.unblockpin.description");
-    }
-
-    @Override
-    public InputStream getLogo() {
-	return null;
-    }
-
-    @Override
-    public void perform() throws DispatcherException, InvocationTargetException {
-	// check if a german identity card is inserted, if not wait for it
-	ConnectionHandleType cHandle = waitForCardType(GERMAN_IDENTITY_CARD);
-
-	if (cHandle == null) {
-	    logger.debug("User cancelled card insertion.");
-	    return;
-	}
-
-	cHandle = connectToRootApplication(cHandle);
-
-	RecognizedState pinState = recognizeState(cHandle);
-	boolean nativePace;
+    public void execute() {
 	try {
-	    nativePace = genericPACESupport(cHandle);
-	} catch (WSException e) {
-	    logger.error("Could not get capabilities from reader.");
-	    return;
-	}
-	UnblockPINDialog uc = new UnblockPINDialog(gui, dispatcher, cHandle, pinState, !nativePace);
-	uc.show();
+	    // check if a german identity card is inserted, if not wait for it
+	    ConnectionHandleType cHandle = waitForCardType(GERMAN_IDENTITY_CARD);
 
-	Disconnect d = new Disconnect();
-	d.setSlotHandle(cHandle.getSlotHandle());
-	dispatcher.deliver(d);
+	    if (cHandle == null) {
+		logger.debug("User cancelled card insertion.");
+		return;
+	    }
+
+	    cHandle = connectToRootApplication(cHandle);
+
+	    RecognizedState pinState = recognizeState(cHandle);
+	    boolean nativePace;
+	    try {
+		nativePace = genericPACESupport(cHandle);
+	    } catch (WSException e) {
+		logger.error("Could not get capabilities from reader.");
+		return;
+	    }
+	    UnblockPINDialog uc = new UnblockPINDialog(gui, dispatcher, cHandle, pinState, !nativePace);
+	    uc.show();
+
+	    Disconnect d = new Disconnect();
+	    d.setSlotHandle(cHandle.getSlotHandle());
+	    dispatcher.deliver(d);
+	} catch (InvocationTargetException e) {
+	    logger.error("Failed to execute Action.", e);
+	} catch (DispatcherException e) {
+	    logger.error("Failed to execute Action.", e);
+	}
     }
 
     @Override
-    public boolean isMainActivity() {
-	return false;
+    public void init(Context aCtx) throws FactoryInitializationException {
+	this.dispatcher = aCtx.getDispatcher();
+	this.gui = aCtx.getUserConsent();
+	this.recognition = aCtx.getRecognition();
+	this.cardStates = aCtx.getCardStates();
+    }
+
+    @Override
+    public void destroy() {
+	// ignore
     }
 
 }

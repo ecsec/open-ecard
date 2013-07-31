@@ -127,7 +127,7 @@ public final class TestClient {
 	registerAddOns();
 
 	HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
-	binding.setAddonManager(new AddonManager(dispatcher, gui, cardStates, recognition, em, sal.getProtocolInfo()));
+	binding.setAddonManager(AddonManager.createInstance(dispatcher, gui, cardStates, recognition, em, sal.getProtocolInfo()));
 	ControlHandlers handler = new ControlHandlers();
 	ControlInterface control = new ControlInterface(binding, handler);
 	control.start();

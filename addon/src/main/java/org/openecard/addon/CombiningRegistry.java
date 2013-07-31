@@ -73,7 +73,11 @@ public class CombiningRegistry implements AddonRegistry {
 
     @Override
     public Set<AddonBundleDescription> searchByName(String name) {
-	throw new UnsupportedOperationException("Not supported yet.");
+	Set<AddonBundleDescription> searchByName = classpathRegistry.searchByName(name);
+	if (searchByName.isEmpty()) {
+	    searchByName = fileRegistry.searchByName(name);
+	}
+	return searchByName;
     }
 
     @Override

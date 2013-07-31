@@ -38,13 +38,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import org.openecard.addon.AddonManager;
+import org.openecard.addon.manifest.AddonBundleDescription;
+import org.openecard.addon.manifest.AppExtensionActionDescription;
 import org.openecard.android.R;
 import org.openecard.common.I18n;
-import org.openecard.plugins.PluginAction;
-import org.openecard.plugins.PluginInterface;
-import org.openecard.plugins.manager.PluginManager;
 
 
 /**
@@ -55,7 +54,7 @@ import org.openecard.plugins.manager.PluginManager;
  */
 public class PluginActivity extends Activity {
 
-    private final I18n lang = I18n.getTranslation("settings");
+    private final I18n lang = I18n.getTranslation("android");
 
     // gui constants
     private static final String SETTINGS_NOSETTINGS = "settings.plugins.settings.nosettings";
@@ -66,27 +65,28 @@ public class PluginActivity extends Activity {
     private static final String NAME = "name";
 
     private static final String[] tabIndexes = new String[] { "1", "2", "3" };
+    private static final String LANGUAGE_CODE = System.getProperty("user.language");
 
-    private PluginInterface plugin;
+    private AddonBundleDescription plugin;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 	setContentView(R.layout.plugin);
 
-	Set<Entry<PluginInterface, Boolean>> pluginsSet = PluginManager.getLoadedPlugins().entrySet();
-	final List<PluginInterface> plugins = new ArrayList<PluginInterface>(pluginsSet.size());
+	Set<AddonBundleDescription> listPlugins = AddonManager.getInstance().getRegistry().listPlugins();
+	List<String> pluginNames = new ArrayList<String>();
 
-	for (Entry<PluginInterface, Boolean> plugin : pluginsSet) {
-	    plugins.add(plugin.getKey());
+	for (AddonBundleDescription addon : listPlugins) {
+	    pluginNames.add(addon.getLocalizedName(LANGUAGE_CODE));
 	}
 	int index = (Integer) getIntent().getExtras().get(PluginsActivity.PLUGIN_INDEX);
-	plugin = plugins.get(index);
+	plugin = AddonManager.getInstance().getRegistry().searchByName(pluginNames.get(index)).iterator().next();
 
 	setUpTabHost();
     }
 
-    public PluginInterface getPlugin() {
+    public AddonBundleDescription getPlugin() {
 	return plugin;
     }
 
@@ -185,7 +185,7 @@ public class PluginActivity extends Activity {
      */
     private TextView createDescriptionView() {
 	TextView tv = new TextView(PluginActivity.this);
-	tv.setText(plugin.getDescription());
+	tv.setText(plugin.getLocalizedDescription(LANGUAGE_CODE));
 	int padding = this.getResources().getDimensionPixelSize(R.dimen.padding);
 	tv.setPadding(padding, padding, padding, padding);
 	return tv;
@@ -199,10 +199,10 @@ public class PluginActivity extends Activity {
      */
     private List<? extends List<? extends Map<String, ?>>> createChildList() {
 	ArrayList<ArrayList<HashMap<String, String>>> result = new ArrayList<ArrayList<HashMap<String, String>>>();
-	for (PluginAction action : plugin.getActions()) {
+	for (AppExtensionActionDescription action : plugin.getApplicationActions()) {
 	    ArrayList<HashMap<String, String>> secList = new ArrayList<HashMap<String, String>>();
 	    HashMap<String, String> child = new HashMap<String, String>();
-	    child.put(DESC, action.getDescription());
+	    child.put(DESC, action.getLocalizedDescription(LANGUAGE_CODE));
 	    secList.add(child);
 	    result.add(secList);
 	}
@@ -216,9 +216,9 @@ public class PluginActivity extends Activity {
      */
     private List<? extends Map<String, ?>> createGroupList() {
 	ArrayList<HashMap<String, String>> result = new ArrayList<HashMap<String, String>>();
-	for (PluginAction action : plugin.getActions()) {
+	for (AppExtensionActionDescription action : plugin.getApplicationActions()) {
 	    HashMap<String, String> m = new HashMap<String, String>();
-	    m.put(NAME, action.getName());
+	    m.put(NAME, action.getLocalizedName(LANGUAGE_CODE));
 	    result.add(m);
 	}
 	return result;

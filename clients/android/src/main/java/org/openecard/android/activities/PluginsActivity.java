@@ -32,11 +32,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
+import org.openecard.addon.AddonManager;
+import org.openecard.addon.manifest.AddonBundleDescription;
 import org.openecard.android.R;
-import org.openecard.plugins.PluginInterface;
-import org.openecard.plugins.manager.PluginManager;
 
 
 /**
@@ -48,6 +47,7 @@ import org.openecard.plugins.manager.PluginManager;
 public class PluginsActivity extends Activity {
 
     public static final String PLUGIN_INDEX = "PLUGIN_INDEX";
+    private static final String LANGUAGE_CODE = System.getProperty("user.language");
     private ArrayAdapter<String> listAdapter;
 
     @Override
@@ -62,11 +62,11 @@ public class PluginsActivity extends Activity {
      */
     private void setUpListViewPlugins() {
 	ListView listViewPlugins = (ListView) findViewById(R.id.listViewPlugins);
-	Set<Entry<PluginInterface, Boolean>> pluginsSet = PluginManager.getLoadedPlugins().entrySet();
-	List<String> pluginNames = new ArrayList<String>(pluginsSet.size());
+	Set<AddonBundleDescription> listPlugins = AddonManager.getInstance().getRegistry().listPlugins();
+	List<String> pluginNames = new ArrayList<String>();
 
-	for (Entry<PluginInterface, Boolean> plugin : pluginsSet) {
-	    pluginNames.add(plugin.getKey().getName());
+	for (AddonBundleDescription addon : listPlugins) {
+	    pluginNames.add(addon.getLocalizedName(LANGUAGE_CODE));
 	}
 
 	listAdapter = new ArrayAdapter<String>(this, R.layout.plugin_row, pluginNames);

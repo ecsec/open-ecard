@@ -36,6 +36,7 @@ import java.util.Set;
 import org.apache.commons.jci.monitor.FilesystemAlterationMonitor;
 import org.openecard.addon.manifest.AddonBundleDescription;
 import org.openecard.addon.manifest.AppPluginActionDescription;
+import org.openecard.addon.manifest.LocalizedString;
 import org.openecard.addon.manifest.ProtocolPluginDescription;
 import org.openecard.common.util.FileUtils;
 import org.slf4j.Logger;
@@ -125,7 +126,15 @@ public class FileRegistry implements AddonRegistry {
 
     @Override
     public Set<AddonBundleDescription> searchByName(String name) {
-	throw new UnsupportedOperationException("Not supported yet.");
+	Set<AddonBundleDescription> matchingAddons = new HashSet<AddonBundleDescription>();
+	for (AddonBundleDescription desc : registeredAddons) {
+	    for (LocalizedString s : desc.getLocalizedName()) {
+		if (s.getValue().equals(name)) {
+		    matchingAddons.add(desc);
+		}
+	    }
+	}
+	return matchingAddons;
     }
 
     @Override

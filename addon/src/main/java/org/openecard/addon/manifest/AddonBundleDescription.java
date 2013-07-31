@@ -73,8 +73,15 @@ public class AddonBundleDescription {
     }
 
     public String getLocalizedName(String languageCode) {
-	//TODO implement
-	throw new UnsupportedOperationException("Not yet implemented.");
+	String fallback = "No localized Name found.";
+	for (LocalizedString s : localizedName) {
+	    if (s.getLang().equalsIgnoreCase(languageCode)) {
+		return s.getValue();
+	    } else if (s.getLang().equalsIgnoreCase("EN")) {
+		fallback = s.getValue();
+	    }
+	}
+	return fallback;
     }
 
     @XmlElement(name = "LocalizedDescription")
@@ -83,8 +90,15 @@ public class AddonBundleDescription {
     }
 
     public String getLocalizedDescription(String languageCode) {
-	//TODO implement
-	throw new UnsupportedOperationException("Not yet implemented.");
+	String fallback = "No localized Description found.";
+	for (LocalizedString s : localizedDescription) {
+	    if (s.getLang().equalsIgnoreCase(languageCode)) {
+		return s.getValue();
+	    } else if (s.getLang().equalsIgnoreCase("EN")) {
+		fallback = s.getValue();
+	    }
+	}
+	return fallback;
     }
 
     @XmlElement(name = "Logo")

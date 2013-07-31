@@ -22,21 +22,21 @@
 
 package org.openecard.richclient.gui.manage;
 
-import javax.swing.JPanel;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import java.awt.Component;
-import javax.swing.Box;
-import javax.swing.JLabel;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.InvocationTargetException;
 import javax.annotation.Nonnull;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingWorker;
-import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.plugins.PluginAction;
+import org.openecard.addon.AddonManager;
+import org.openecard.addon.bind.AppExtensionAction;
+import org.openecard.addon.manifest.AppExtensionActionDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
 public class ActionEntryPanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
+    private static final String LANGUAGE_CODE = System.getProperty("user.language");
     private static final Logger logger = LoggerFactory.getLogger(ActionEntryPanel.class);
 
     protected final JButton actionBtn;
@@ -57,11 +58,14 @@ public class ActionEntryPanel extends JPanel {
     /**
      * Creates an entry without the actual action added.
      *
-     * @param name Name of the action which is displayed on the button.
-     * @param description Name of the description which is displayed besides the button.
+     * @param addonId Id of the addon this action belongs to.
+     * @param actionDescription ActionDescription for which this ActionEntryPanel is constructed.
      */
-    public ActionEntryPanel(@Nonnull String name, @Nonnull String description) {
+    public ActionEntryPanel(@Nonnull String addonId, @Nonnull AppExtensionActionDescription actionDescription) {
 	setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+
+	String name = actionDescription.getLocalizedName(LANGUAGE_CODE);
+	String description = actionDescription.getLocalizedDescription(LANGUAGE_CODE);
 
 	actionBtn = new JButton(name);
 	add(actionBtn);
@@ -72,16 +76,18 @@ public class ActionEntryPanel extends JPanel {
 	JLabel desc = new JLabel(description);
 	desc.setFont(desc.getFont().deriveFont(Font.PLAIN));
 	add(desc);
+
+	AddonManager manager = AddonManager.getInstance();
+	AppExtensionAction action = manager.getAppExtensionAction(addonId, actionDescription.getId());
+	addAction(action);
     }
 
     /**
-     * Adds an action from the old plugin mechanism to the entry.
+     * Adds an action to the entry.
      *
      * @param action Action to perform when the button is pressed.
-     * @deprecated Gets removed as soon as the new add-on mechanism is ready.
      */
-    @Deprecated
-    public void addAction(final PluginAction action) {
+    private void addAction(final AppExtensionAction action) {
 	actionBtn.addActionListener(new ActionListener() {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
@@ -89,13 +95,7 @@ public class ActionEntryPanel extends JPanel {
 		    @Override
 		    protected Object doInBackground() throws Exception {
 			actionBtn.setEnabled(false);
-			try {
-			    action.perform();
-			} catch (DispatcherException ex) {
-			    logger.error("Failed to dispatch a critical message.", ex);
-			} catch (InvocationTargetException ex) {
-			    logger.error("Failed to execute plugin successfully.", ex);
-			}
+			action.execute();
 			actionBtn.setEnabled(true);
 			return null;
 		    }

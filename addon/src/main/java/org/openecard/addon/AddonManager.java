@@ -60,8 +60,9 @@ public class AddonManager {
     private EventManager eventManager;
     private ProtocolInfo protocolInfo;
     private EventHandler eventHandler;
+    private static AddonManager instance;
 
-    public AddonManager(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition, EventManager eventManager, ProtocolInfo info) {
+    private AddonManager(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition, EventManager eventManager, ProtocolInfo info) {
 	this.dispatcher = dispatcher;
 	this.userConsent = userConsent;
 	this.cardStates = cardStates;
@@ -69,6 +70,15 @@ public class AddonManager {
 	this.eventManager = eventManager;
 	this.protocolInfo = info;
 	eventHandler = new EventHandler(eventManager);
+    }
+
+    public static AddonManager getInstance() {
+	return instance;
+    }
+
+    public static AddonManager createInstance(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition, EventManager eventManager, ProtocolInfo info) {
+	instance = new AddonManager(dispatcher, userConsent, cardStates, recognition, eventManager, info);
+	return instance;
     }
 
     public AddonRegistry getRegistry() {
@@ -81,7 +91,8 @@ public class AddonManager {
 	String className = searchByResourceName.getClassName();
 	IFDProtocolFactory appPluginActionFactory = new IFDProtocolFactory(className, registry.downloadPlugin(addonBundleDescription.getId()));
 	try {
-	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler));
+	    Context aCtx = new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler);
+	    appPluginActionFactory.init(aCtx);
 	    return appPluginActionFactory;
 	} catch (FactoryInitializationException e) {
 	    logger.error("Initialization of IFDAction failed", e);
@@ -95,7 +106,8 @@ public class AddonManager {
 	String className = searchByResourceName.getClassName();
 	SALProtocolFactory appPluginActionFactory = new SALProtocolFactory(className, registry.downloadPlugin(addonBundleDescription.getId()));
 	try {
-	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler));
+	    Context aCtx = new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler);
+	    appPluginActionFactory.init(aCtx);
 	    return appPluginActionFactory;
 	} catch (FactoryInitializationException e) {
 	    logger.error("Initialization of SALAction failed", e);
@@ -109,7 +121,8 @@ public class AddonManager {
 	String className = searchByResourceName.getClassName();
 	AppExtensionActionFactory appPluginActionFactory = new AppExtensionActionFactory(className, registry.downloadPlugin(pluginId));
 	try {
-	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler));
+	    Context ctx = new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler);
+	    appPluginActionFactory.init(ctx);
 	    return appPluginActionFactory;
 	} catch (FactoryInitializationException e) {
 	    logger.error("Initialization of AppExtensionAction failed", e);
@@ -124,7 +137,8 @@ public class AddonManager {
 	String className = searchByResourceName.getClassName();
 	AppPluginActionFactory appPluginActionFactory = new AppPluginActionFactory(className, registry.downloadPlugin(pluginId));
 	try {
-	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler));
+	    Context aCtx = new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler);
+	    appPluginActionFactory.init(aCtx);
 	    return appPluginActionFactory;
 	} catch (FactoryInitializationException e) {
 	    logger.error("Initialization of AppPluginAction failed", e);

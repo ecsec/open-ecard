@@ -16,8 +16,6 @@
     <name>Application Plugins</name>
 
     <modules>
-	<module>plugin-common</module>
-	<module>plugin-manager</module>
 	<module>plugin-pinplugin</module>
     </modules>
 

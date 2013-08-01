@@ -716,7 +716,7 @@ static int sysfs_get_active_config_descriptor(struct libusb_device *dev,
 			r = LIBUSB_ERROR_NOT_FOUND;
 		} else if (r < len - sizeof(tmp)) {
 			usbi_err(DEVICE_CTX(dev), "short read %d/%d", r, len);
-			r = LIBUSB_ERROR_IO;
+			r = 0;
 		}
 	} else {
 		r = 0;
@@ -766,7 +766,6 @@ static int get_config_descriptor(struct libusb_context *ctx, int fd,
 		return LIBUSB_ERROR_IO;
 	} else if (r < len) {
 		usbi_err(ctx, "short output read %d/%d", r, len);
-		return LIBUSB_ERROR_IO;
 	}
 
 	return 0;
@@ -1910,7 +1909,7 @@ static int submit_bulk_transfer(struct usbi_transfer *itransfer,
 		urb->type = urb_type;
 		urb->endpoint = transfer->endpoint;
 		urb->buffer = transfer->buffer + (i * bulk_buffer_len);
-		if (use_bulk_continuation && !is_out)
+		if (use_bulk_continuation && !is_out && (i != num_urbs - 1))
 			urb->flags = USBFS_URB_SHORT_NOT_OK;
 		if (i == num_urbs - 1 && last_urb_partial)
 			urb->buffer_length = transfer->length % bulk_buffer_len;
@@ -2646,7 +2645,9 @@ static int op_handle_events(struct libusb_context *ctx,
 			continue;
 		}
 
-		r = reap_for_handle(handle);
+		do {
+			r = reap_for_handle(handle);
+		} while (r == 0);
 		if (r == 1 || r == LIBUSB_ERROR_NO_DEVICE)
 			continue;
 		else if (r < 0)
@@ -2681,6 +2682,7 @@ static clockid_t op_get_timerfd_clockid(void)
 
 const struct usbi_os_backend linux_usbfs_backend = {
 	.name = "Linux usbfs",
+	.caps = USBI_CAP_HAS_HID_ACCESS|USBI_CAP_SUPPORTS_DETACH_KERNEL_DRIVER,
 	.init = op_init,
 	.exit = NULL,
 	.get_device_list = op_get_device_list,

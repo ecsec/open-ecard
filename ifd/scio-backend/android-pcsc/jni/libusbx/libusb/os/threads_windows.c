@@ -25,6 +25,7 @@
 
 #include "libusbi.h"
 
+extern const uint64_t epoch_time;
 
 int usbi_mutex_init(usbi_mutex_t *mutex,
 					const usbi_mutexattr_t *attr) {
@@ -80,8 +81,6 @@ int usbi_mutex_static_unlock(usbi_mutex_static_t *mutex) {
 	return 0;
 }
 
-
-
 int usbi_cond_init(usbi_cond_t *cond,
 				   const usbi_condattr_t *attr) {
 	UNUSED(attr);
@@ -129,7 +128,7 @@ int usbi_cond_signal(usbi_cond_t *cond) {
 	// The wait function will remove its respective item from the list.
 	return SetEvent(pos->event) ? 0 : ((errno=EINVAL));
 }
-static int __inline usbi_cond_intwait(usbi_cond_t *cond,
+__inline static int usbi_cond_intwait(usbi_cond_t *cond,
 									  usbi_mutex_t *mutex,
 									  DWORD timeout_ms) {
 	struct usbi_cond_perthread *pos;
@@ -182,9 +181,11 @@ int usbi_cond_timedwait(usbi_cond_t *cond,
 	struct timeval targ_time, cur_time, delta_time;
 	struct timespec cur_time_ns;
 	DWORD millis;
-	extern const uint64_t epoch_time;
 
-	GetSystemTimeAsFileTime(&filetime);
+	// GetSystemTimeAsFileTime() is not available on CE
+	SYSTEMTIME st;
+	GetSystemTime(&st);
+	SystemTimeToFileTime(&st, &filetime);
 	rtime.LowPart   = filetime.dwLowDateTime;
 	rtime.HighPart  = filetime.dwHighDateTime;
 	rtime.QuadPart -= epoch_time;

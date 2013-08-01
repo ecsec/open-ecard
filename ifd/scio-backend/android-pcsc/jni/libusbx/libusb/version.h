@@ -7,7 +7,7 @@
 #define LIBUSB_MINOR 0
 #endif
 #ifndef LIBUSB_MICRO
-#define LIBUSB_MICRO 14
+#define LIBUSB_MICRO 15
 #endif
 #ifndef LIBUSB_NANO
 #define LIBUSB_NANO 0

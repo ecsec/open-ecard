@@ -21,7 +21,7 @@
 #ifndef LIBUSBI_H
 #define LIBUSBI_H
 
-#include <config.h>
+#include "config.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -31,7 +31,10 @@
 #include <poll.h>
 #endif
 
-#include <libusb.h>
+#ifdef HAVE_MISSING_H
+#include "missing.h"
+#endif
+#include "libusb.h"
 #include "version.h"
 
 /* Inside the libusbx code, mark all public functions as follows:
@@ -49,8 +52,12 @@
 #define USB_MAXINTERFACES	32
 #define USB_MAXCONFIG		8
 
+/* Backend specific capabilities */
+#define USBI_CAP_HAS_HID_ACCESS					0x00010000
+#define USBI_CAP_SUPPORTS_DETACH_KERNEL_DRIVER	0x00020000
+
 /* The following is used to silence warnings for unused variables */
-#define UNUSED(var)			(void)(var)
+#define UNUSED(var)			do { (void)(var); } while(0)
 
 struct list_head {
 	struct list_head *prev, *next;
@@ -62,7 +69,7 @@ struct list_head {
  * 	member - the list_head element in "type"
  */
 #define list_entry(ptr, type, member) \
-	((type *)((uintptr_t)(ptr) - (uintptr_t)(&((type *)0L)->member)))
+	((type *)((uintptr_t)(ptr) - (uintptr_t)offsetof(type, member)))
 
 /* Get each entry from a list
  *	pos - A structure pointer has a "member" element
@@ -192,30 +199,11 @@ static inline void usbi_dbg(const char *format, ...)
 #define IS_XFERIN(xfer) (0 != ((xfer)->endpoint & LIBUSB_ENDPOINT_IN))
 #define IS_XFEROUT(xfer) (!IS_XFERIN(xfer))
 
-/* Internal abstractions for thread synchronization and poll */
+/* Internal abstraction for thread synchronization */
 #if defined(THREADS_POSIX)
-#include <os/threads_posix.h>
-#elif defined(OS_WINDOWS)
+#include "os/threads_posix.h"
+#elif defined(OS_WINDOWS) || defined(OS_WINCE)
 #include <os/threads_windows.h>
-#endif
-
-#if defined(OS_LINUX) || defined(OS_DARWIN) || defined(OS_OPENBSD)
-#include <unistd.h>
-#include <os/poll_posix.h>
-#elif defined(OS_WINDOWS)
-#include <os/poll_windows.h>
-#endif
-
-#if defined(OS_WINDOWS) && !defined(__GCC__)
-#undef HAVE_GETTIMEOFDAY
-int usbi_gettimeofday(struct timeval *tp, void *tzp);
-#define LIBUSB_GETTIMEOFDAY_WIN32
-#define HAVE_USBI_GETTIMEOFDAY
-#else
-#ifdef HAVE_GETTIMEOFDAY
-#define usbi_gettimeofday(tv, tz) gettimeofday((tv), (tz))
-#define HAVE_USBI_GETTIMEOFDAY
-#endif
 #endif
 
 extern struct libusb_context *usbi_default_context;
@@ -407,7 +395,25 @@ int usbi_parse_descriptor(unsigned char *source, const char *descriptor,
 int usbi_get_config_index_by_value(struct libusb_device *dev,
 	uint8_t bConfigurationValue, int *idx);
 
-/* polling */
+/* Internal abstraction for poll (needs struct usbi_transfer on Windows) */
+#if defined(OS_LINUX) || defined(OS_DARWIN) || defined(OS_OPENBSD)
+#include <unistd.h>
+#include "os/poll_posix.h"
+#elif defined(OS_WINDOWS) || defined(OS_WINCE)
+#include <os/poll_windows.h>
+#endif
+
+#if (defined(OS_WINDOWS) || defined(OS_WINCE)) && !defined(__GCC__)
+#undef HAVE_GETTIMEOFDAY
+int usbi_gettimeofday(struct timeval *tp, void *tzp);
+#define LIBUSB_GETTIMEOFDAY_WIN32
+#define HAVE_USBI_GETTIMEOFDAY
+#else
+#ifdef HAVE_GETTIMEOFDAY
+#define usbi_gettimeofday(tv, tz) gettimeofday((tv), (tz))
+#define HAVE_USBI_GETTIMEOFDAY
+#endif
+#endif
 
 struct usbi_pollfd {
 	/* must come first */
@@ -443,6 +449,9 @@ struct discovered_devs *discovered_devs_append(
 struct usbi_os_backend {
 	/* A human-readable name for your backend, e.g. "Linux usbfs" */
 	const char *name;
+
+	/* Binary mask for backend specific capabilities */
+	uint32_t caps;
 
 	/* Perform initialization of your backend. You might use this function
 	 * to determine specific capabilities of the system, allocate required
@@ -906,5 +915,6 @@ extern const struct usbi_os_backend linux_usbfs_backend;
 extern const struct usbi_os_backend darwin_backend;
 extern const struct usbi_os_backend openbsd_backend;
 extern const struct usbi_os_backend windows_backend;
+extern const struct usbi_os_backend wince_backend;
 
 #endif

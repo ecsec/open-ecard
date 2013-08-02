@@ -40,6 +40,7 @@ import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.openecard.ws.schema.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
 
 
 /**
@@ -128,8 +129,8 @@ public class StatusAction implements AppPluginAction {
 	// TODO was bad request
 	BindingResult httpResponse = new BindingResult(BindingResultCode.OK);
 
-	String xml = m.doc2str(m.marshal(response));
-	Body body = new Body(xml.getBytes(), "text/xml");
+	Node xml = m.marshal(response);
+	Body body = new Body(xml, "text/xml");
 	httpResponse.setBody(body);
 
 	return httpResponse;

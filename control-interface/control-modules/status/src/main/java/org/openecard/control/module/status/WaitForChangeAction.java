@@ -36,6 +36,7 @@ import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.openecard.ws.schema.StatusChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
 
 
 /**
@@ -124,8 +125,8 @@ public class WaitForChangeAction implements AppPluginAction {
     private BindingResult handleResponse(StatusChange response) throws Exception {
 	BindingResult httpResponse = new BindingResult(BindingResultCode.OK);
 
-	String xml = m.doc2str(m.marshal(response));
-	Body body = new Body(xml.getBytes(), "text/xml");
+	Node xml = m.marshal(response);
+	Body body = new Body(xml, "text/xml");
 	httpResponse.setBody(body);
 
 	return httpResponse;

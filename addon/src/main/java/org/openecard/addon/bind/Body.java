@@ -23,6 +23,7 @@
 package org.openecard.addon.bind;
 
 import javax.xml.bind.JAXBElement;
+import org.w3c.dom.Node;
 
 
 /**
@@ -33,16 +34,14 @@ import javax.xml.bind.JAXBElement;
 public class Body {
 
     private String mimeType;
-    @Deprecated
-    private byte[] value;
+    private Node value;
 
-    public Body(byte[] value, String mimeType) {
+    public Body(Node value, String mimeType) {
 	this.value = value;
 	this.mimeType = mimeType;
     }
 
-    @Deprecated
-    public byte[] getValue() {
+    public Node getValue() {
 	return value;
     }
 

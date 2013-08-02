@@ -94,7 +94,8 @@ public class SOAPMessage {
 		    throw new SOAPException("Undefined namespace (" + e.getNamespaceURI() + ") in SOAP message.");
 		}
 	    } else if (n.getNodeType() == Node.TEXT_NODE || n.getNodeType() == Node.CDATA_SECTION_NODE) {
-		throw new SOAPException("Undefined node type in SOAP message.");
+		//throw new SOAPException("Undefined node type in SOAP message.");
+		System.out.println("Undefined node type in SOAP message: " + n.getNodeType() + n.getNodeName() + n.getNodeValue() + n.getTextContent());
 	    }
 	}
 

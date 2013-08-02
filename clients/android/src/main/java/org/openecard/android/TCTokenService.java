@@ -34,6 +34,7 @@ import org.openecard.control.binding.http.HTTPBinding;
 import org.openecard.control.handler.ControlHandlers;
 import org.openecard.gui.UserConsent;
 import org.openecard.recognition.CardRecognition;
+import org.openecard.sal.TinySAL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +62,7 @@ public class TCTokenService extends Service implements Runnable {
 	    UserConsent gui = appCtx.getGUI();
 	    CardStateMap cardStates = appCtx.getCardStates();
 	    CardRecognition recognition = appCtx.getRecognition();
-	    AddonManager addonManager = new AddonManager(dispatcher, gui, cardStates, recognition);
+	    AddonManager addonManager = new AddonManager(dispatcher, gui, cardStates, recognition, appCtx.getEnv().getEventManager(),((TinySAL) appCtx.getEnv().getSAL()).getProtocolInfo());
 	    binding.setAddonManager(addonManager);
 	    ControlHandlers handler = new ControlHandlers();
 	    control = new ControlInterface(binding, handler);

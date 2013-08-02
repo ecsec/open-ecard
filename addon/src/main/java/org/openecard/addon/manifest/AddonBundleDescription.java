@@ -181,9 +181,6 @@ public class AddonBundleDescription {
 
     public AppPluginActionDescription searchByResourceName(String resourceName) {
 	for (AppPluginActionDescription desc : appPluginActions) {
-	    System.out.println(resourceName);
-	    System.out.println(desc.getClassName());
-	    System.out.println(desc.getResourceName());
 	    if (resourceName.equals(desc.getResourceName())) {
 		return desc;
 	    }

@@ -26,6 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Map;
+import org.openecard.addon.EventHandler;
 import org.openecard.common.util.HttpRequestLineUtils;
 import org.openecard.ws.schema.StatusChange;
 import org.slf4j.Logger;
@@ -59,7 +60,7 @@ public class GenericWaitForChangeHandler {
      * @return status change for the session
      */
     public StatusChange getStatusChange(StatusChangeRequest statusRequest) {
-	return eventHandler.next(statusRequest);
+	return eventHandler.next(statusRequest.getSessionIdentifier());
     }
 
     /**

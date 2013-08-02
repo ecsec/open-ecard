@@ -38,6 +38,7 @@ import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openecard.addon.EventHandler;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.ProtocolInfo;
 import org.openecard.common.sal.state.CardStateMap;
@@ -50,7 +51,6 @@ import org.openecard.control.binding.javascript.handler.JavaScriptTCTokenHandler
 import org.openecard.control.binding.javascript.handler.JavaScriptWaitForChangeHandler;
 import org.openecard.control.handler.ControlHandler;
 import org.openecard.control.handler.ControlHandlers;
-import org.openecard.control.module.status.EventHandler;
 import org.openecard.control.module.status.GenericStatusHandler;
 import org.openecard.control.module.status.GenericWaitForChangeHandler;
 import org.openecard.control.module.tctoken.GenericTCTokenHandler;

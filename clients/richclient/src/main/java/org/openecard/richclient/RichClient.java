@@ -39,19 +39,13 @@ import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
-import org.openecard.common.interfaces.ProtocolInfo;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
 import org.openecard.common.util.FileUtils;
 import org.openecard.control.ControlInterface;
 import org.openecard.control.binding.http.HTTPBinding;
-import org.openecard.control.binding.http.handler.HttpStatusHandler;
-import org.openecard.control.binding.http.handler.HttpWaitForChangeHandler;
-import org.openecard.control.handler.ControlHandler;
 import org.openecard.control.handler.ControlHandlers;
-import org.openecard.control.module.status.EventHandler;
-import org.openecard.control.module.status.GenericStatusHandler;
-import org.openecard.control.module.status.GenericWaitForChangeHandler;
+import org.openecard.control.module.status.StatusAction;
 import org.openecard.control.module.tctoken.TCTokenAction;
 import org.openecard.event.EventManager;
 import org.openecard.gui.swing.SwingDialogWrapper;
@@ -208,16 +202,8 @@ public final class RichClient {
 	    // Start up control interface
 	    try {
 		HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
-		binding.setAddonManager(new AddonManager(dispatcher, gui, cardStates, recognition));
+		binding.setAddonManager(new AddonManager(dispatcher, gui, cardStates, recognition, em, sal.getProtocolInfo()));
 		ControlHandlers handler = new ControlHandlers();
-		EventHandler eventHandler = new EventHandler(em);
-		ProtocolInfo pInfo = sal.getProtocolInfo();
-		GenericStatusHandler genericStatusHandler = new GenericStatusHandler(cardStates, eventHandler, pInfo, recognition);
-		GenericWaitForChangeHandler genericWaitHandler = new GenericWaitForChangeHandler(eventHandler);
-		ControlHandler statusHandler = new HttpStatusHandler(genericStatusHandler);
-		ControlHandler waitHandler = new HttpWaitForChangeHandler(genericWaitHandler);
-		handler.addControlHandler(statusHandler);
-		handler.addControlHandler(waitHandler);
 		control = new ControlInterface(binding, handler);
 		control.start();
 	    } catch (BindException e) {
@@ -251,6 +237,9 @@ public final class RichClient {
 	marshaller.addXmlTypeClass(AddonBundleDescription.class);
 	InputStream manifestStream = FileUtils.resolveResourceAsStream(TCTokenAction.class, "TCToken-Manifest.xml");
 	Document manifestDoc = marshaller.str2doc(manifestStream);
+	ClasspathRegistry.getInstance().register((AddonBundleDescription) marshaller.unmarshal(manifestDoc));
+	manifestStream = FileUtils.resolveResourceAsStream(StatusAction.class, "Status-Manifest.xml");
+	manifestDoc = marshaller.str2doc(manifestStream);
 	ClasspathRegistry.getInstance().register((AddonBundleDescription) marshaller.unmarshal(manifestDoc));
     }
 

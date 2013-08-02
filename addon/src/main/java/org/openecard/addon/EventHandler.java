@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.control.module.status;
+package org.openecard.addon;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.HashMap;
@@ -67,8 +67,8 @@ public class EventHandler implements EventCallback {
      * @return a StatusChange containing the new status, or null if no eventQueue for the given session exists or if
      *   interrupted
      */
-    public StatusChange next(StatusChangeRequest statusChangeRequest) {
-	String session = statusChangeRequest.getSessionIdentifier();
+    public StatusChange next(String session) {
+	//String session = statusChangeRequest.getSessionIdentifier();
 	StatusChange handle = null;
 	LinkedBlockingQueue<StatusChange> queue = eventQueues.get(session);
 	if (queue == null) {
@@ -77,14 +77,13 @@ public class EventHandler implements EventCallback {
 	}
 	do {
 	    try {
-		timers.get(statusChangeRequest.getSessionIdentifier()).reschedule(deleteDelay);
-		handle = eventQueues.get(statusChangeRequest.getSessionIdentifier()).poll(30, TimeUnit.SECONDS);
+		timers.get(session).reschedule(deleteDelay);
+		handle = eventQueues.get(session).poll(30, TimeUnit.SECONDS);
 		logger.debug("WaitForChange event pulled from event queue.");
 	    } catch (InterruptedException ex) {
 		return null;
 	    }
 	} while (handle == null);
-	
 	return handle;
     }
 

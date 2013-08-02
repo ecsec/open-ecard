@@ -35,6 +35,8 @@ import org.openecard.addon.manifest.ProtocolPluginDescription;
 import org.openecard.addon.sal.SALProtocol;
 import org.openecard.addon.sal.SALProtocolFactory;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.EventManager;
+import org.openecard.common.interfaces.ProtocolInfo;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.gui.UserConsent;
 import org.openecard.recognition.CardRecognition;
@@ -55,12 +57,18 @@ public class AddonManager {
     private UserConsent userConsent;
     private CardStateMap cardStates;
     private CardRecognition recognition;
+    private EventManager eventManager;
+    private ProtocolInfo protocolInfo;
+    private EventHandler eventHandler;
 
-    public AddonManager(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition) {
+    public AddonManager(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition, EventManager eventManager, ProtocolInfo info) {
 	this.dispatcher = dispatcher;
 	this.userConsent = userConsent;
 	this.cardStates = cardStates;
 	this.recognition = recognition;
+	this.eventManager = eventManager;
+	this.protocolInfo = info;
+	eventHandler = new EventHandler(eventManager);
     }
 
     public AddonRegistry getRegistry() {
@@ -73,7 +81,7 @@ public class AddonManager {
 	String className = searchByResourceName.getClassName();
 	IFDProtocolFactory appPluginActionFactory = new IFDProtocolFactory(className, registry.downloadPlugin(addonBundleDescription.getId()));
 	try {
-	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition));
+	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler));
 	    return appPluginActionFactory;
 	} catch (FactoryInitializationException e) {
 	    logger.error("Initialization of IFDAction failed", e);
@@ -87,7 +95,7 @@ public class AddonManager {
 	String className = searchByResourceName.getClassName();
 	SALProtocolFactory appPluginActionFactory = new SALProtocolFactory(className, registry.downloadPlugin(addonBundleDescription.getId()));
 	try {
-	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition));
+	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler));
 	    return appPluginActionFactory;
 	} catch (FactoryInitializationException e) {
 	    logger.error("Initialization of SALAction failed", e);
@@ -101,7 +109,7 @@ public class AddonManager {
 	String className = searchByResourceName.getClassName();
 	AppExtensionActionFactory appPluginActionFactory = new AppExtensionActionFactory(className, registry.downloadPlugin(pluginId));
 	try {
-	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition));
+	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler));
 	    return appPluginActionFactory;
 	} catch (FactoryInitializationException e) {
 	    logger.error("Initialization of AppExtensionAction failed", e);
@@ -112,10 +120,11 @@ public class AddonManager {
     public AppPluginAction getAppPluginAction(String pluginId, String resourceName) {
 	AddonBundleDescription addonBundleDescription = registry.search(pluginId);
 	AppPluginActionDescription searchByResourceName = addonBundleDescription.searchByResourceName(resourceName);
+	// TODO may be null
 	String className = searchByResourceName.getClassName();
 	AppPluginActionFactory appPluginActionFactory = new AppPluginActionFactory(className, registry.downloadPlugin(pluginId));
 	try {
-	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition));
+	    appPluginActionFactory.init(new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler));
 	    return appPluginActionFactory;
 	} catch (FactoryInitializationException e) {
 	    logger.error("Initialization of AppPluginAction failed", e);

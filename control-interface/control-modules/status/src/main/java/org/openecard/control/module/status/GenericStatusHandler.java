@@ -35,6 +35,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.openecard.addon.EventHandler;
 import org.openecard.common.Version;
 import org.openecard.common.interfaces.ProtocolInfo;
 import org.openecard.common.sal.state.CardStateEntry;
@@ -140,7 +141,7 @@ public class GenericStatusHandler {
 	    return statusRequest;
 	}
 
-	String query[] = requestURI.getQuery().split("&");
+	String[] query = requestURI.getQuery().split("&");
 
 	for (String q : query) {
 	    String name = q.substring(0, q.indexOf("="));

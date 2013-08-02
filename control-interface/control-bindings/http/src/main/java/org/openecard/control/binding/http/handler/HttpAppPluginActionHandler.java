@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.openecard.addon.AddonManager;
@@ -91,7 +92,11 @@ public class HttpAppPluginActionHandler extends ControlHandler implements HttpRe
 		StringEntity entity = new StringEntity("Addon initialization failed.", "UTF-8");
 		response.setEntity(entity);
 	    } else {
-		Map<String, String> queries = HttpRequestLineUtils.transform(requestURI.getRawQuery());
+		String rawQuery = requestURI.getRawQuery();
+		Map<String, String> queries = new HashMap<String, String>(0);
+		if (rawQuery != null) {
+		    queries = HttpRequestLineUtils.transform(rawQuery);
+		}
 		Body body = null;
 		if (httpRequest instanceof HttpEntityEnclosingRequest) {
 		    body = getRequestBody(httpRequest);

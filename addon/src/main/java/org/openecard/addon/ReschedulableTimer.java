@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.control.module.status;
+package org.openecard.addon;
 
 import java.util.Timer;
 import java.util.TimerTask;

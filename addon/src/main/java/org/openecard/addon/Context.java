@@ -23,6 +23,8 @@
 package org.openecard.addon;
 
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.EventManager;
+import org.openecard.common.interfaces.ProtocolInfo;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.gui.UserConsent;
 import org.openecard.recognition.CardRecognition;
@@ -41,20 +43,26 @@ public class Context {
 
     private CardStateMap cardStates;
     private CardRecognition recognition;
+    private EventManager eventManager;
+    private ProtocolInfo protocolInfo;
+    private EventHandler eventHandler;
 
-    public Context(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition) {
+    public Context(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition, EventManager eventManager, ProtocolInfo info, EventHandler eventHandler) {
 	this.dispatcher = dispatcher;
 	this.userConsent = userConsent;
 	this.cardStates = cardStates;
 	this.recognition = recognition;
+	this.eventManager = eventManager;
+	this.protocolInfo = info;
+	this.eventHandler = eventHandler;
     }
 
     public Dispatcher getDispatcher() {
 	return dispatcher;
     }
 
-    public void getEventManager() {
-	throw new UnsupportedOperationException();
+    public EventManager getEventManager() {
+	return eventManager;
     }
 
     public UserConsent getUserConsent() {
@@ -75,6 +83,14 @@ public class Context {
 
     public CardRecognition getRecognition() {
 	return recognition;
+    }
+
+    public ProtocolInfo getProtocolInfo() {
+	return protocolInfo;
+    }
+
+    public EventHandler getEventHandler() {
+	return eventHandler;
     }
 
 }

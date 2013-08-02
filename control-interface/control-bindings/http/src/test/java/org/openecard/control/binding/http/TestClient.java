@@ -22,9 +22,10 @@
 
 package org.openecard.control.binding.http;
 
-import java.io.InputStream;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
+import java.io.IOException;
+import java.io.InputStream;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.ClasspathRegistry;
 import org.openecard.addon.manifest.AddonBundleDescription;
@@ -33,15 +34,8 @@ import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
 import org.openecard.common.util.FileUtils;
 import org.openecard.control.ControlInterface;
-import org.openecard.control.binding.http.handler.HttpStatusHandler;
-import org.openecard.control.binding.http.handler.HttpWaitForChangeHandler;
-import org.openecard.control.binding.http.handler.common.DefaultHandler;
-import org.openecard.control.binding.http.handler.common.IndexHandler;
-import org.openecard.control.handler.ControlHandler;
 import org.openecard.control.handler.ControlHandlers;
-import org.openecard.control.module.status.EventHandler;
-import org.openecard.control.module.status.GenericStatusHandler;
-import org.openecard.control.module.status.GenericWaitForChangeHandler;
+import org.openecard.control.module.status.StatusAction;
 import org.openecard.control.module.tctoken.TCTokenAction;
 import org.openecard.event.EventManager;
 import org.openecard.gui.swing.SwingDialogWrapper;
@@ -51,11 +45,14 @@ import org.openecard.management.TinyManagement;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
+import org.openecard.ws.marshal.MarshallingTypeException;
 import org.openecard.ws.marshal.WSMarshaller;
+import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 
 /**
@@ -127,28 +124,24 @@ public final class TestClient {
 	// Initialize the EventManager
 	em.initialize();
 
-	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
-	marshaller.addXmlTypeClass(AddonBundleDescription.class);
-	InputStream manifestStream = FileUtils.resolveResourceAsStream(TCTokenAction.class, "Manifest.xml");
-	Document manifestDoc = marshaller.str2doc(manifestStream);
-	ClasspathRegistry.getInstance().register((AddonBundleDescription) marshaller.unmarshal(manifestDoc));
+	registerAddOns();
 
 	HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
-	binding.setAddonManager(new AddonManager(dispatcher, gui, cardStates, recognition));
+	binding.setAddonManager(new AddonManager(dispatcher, gui, cardStates, recognition, em, sal.getProtocolInfo()));
 	ControlHandlers handler = new ControlHandlers();
-	EventHandler eventHandler = new EventHandler(em);
-	GenericStatusHandler genericStatusHandler = new GenericStatusHandler(cardStates, eventHandler, sal.getProtocolInfo(), recognition);
-	GenericWaitForChangeHandler genericWaitForChangeHandler = new GenericWaitForChangeHandler(eventHandler);
-	ControlHandler statusHandler = new HttpStatusHandler(genericStatusHandler);
-	ControlHandler waitForChangeHandler = new HttpWaitForChangeHandler(genericWaitForChangeHandler);
-	handler.addControlHandler(statusHandler);
-	handler.addControlHandler(waitForChangeHandler);
-	handler.addControlHandler(new IndexHandler());
-	//TODO
-	// handlers.addControlHandler(new FileHandler(documentRoot));
-	handler.addControlHandler(new DefaultHandler());
 	ControlInterface control = new ControlInterface(binding, handler);
 	control.start();
+    }
+
+    private void registerAddOns() throws WSMarshallerException, MarshallingTypeException, IOException, SAXException {
+	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
+	marshaller.addXmlTypeClass(AddonBundleDescription.class);
+	InputStream manifestStream = FileUtils.resolveResourceAsStream(TCTokenAction.class, "TCToken-Manifest.xml");
+	Document manifestDoc = marshaller.str2doc(manifestStream);
+	ClasspathRegistry.getInstance().register((AddonBundleDescription) marshaller.unmarshal(manifestDoc));
+	manifestStream = FileUtils.resolveResourceAsStream(StatusAction.class, "Status-Manifest.xml");
+	manifestDoc = marshaller.str2doc(manifestStream);
+	ClasspathRegistry.getInstance().register((AddonBundleDescription) marshaller.unmarshal(manifestDoc));
     }
 
 }

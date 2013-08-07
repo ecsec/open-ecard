@@ -73,7 +73,8 @@ public class AddonBundleDescriptionTest {
 	InputStream logoStream = FileUtils.resolveResourceAsStream(AddonBundleDescriptionTest.class, OPENECARD_LOGO);
 	byte[] expectedLogo = FileUtils.toByteArray(logoStream);
 	assertEquals(actualLogo, expectedLogo);
-
+	assertEquals(addonBundleDescription.getConfigDescription().getEntries().size(), 1);
+	assertEquals(addonBundleDescription.getConfigDescription().getEntries().get(0).getKey(), "Testkey");
 	// marshal it back and compare the xml's
 	Document d = marshaller.marshal(addonBundleDescription);
 	// remove xml namespaces and whitespaces

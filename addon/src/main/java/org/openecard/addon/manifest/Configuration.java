@@ -24,12 +24,10 @@ package org.openecard.addon.manifest;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlElementRefs;
-import javax.xml.bind.annotation.XmlMixed;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 
 
 /**
@@ -38,20 +36,17 @@ import javax.xml.bind.annotation.XmlType;
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 @XmlRootElement(name = "Configuration")
-@XmlType(propOrder = { "entries" })
 public class Configuration {
 
-    @XmlElementRefs({
-	@XmlElementRef(name = "EnumEntry", type = EnumEntry.class),
-	@XmlElementRef(name = "EnumListEntry", type = EnumListEntry.class),
-	@XmlElementRef(name = "FileEntry", type = FileEntry.class),
-	@XmlElementRef(name = "ScalarEntry", type = ScalarEntry.class),
-	@XmlElementRef(name = "ScalarListEntry", type = ScalarListEntry.class),
-    })
-    @XmlMixed
-    @XmlAnyElement(lax = true)
     private final List<ConfigurationEntry> entries = new ArrayList<ConfigurationEntry>();
 
+    @XmlElements({
+	    @XmlElement(name = "FileEntry", type = FileEntry.class),
+	    @XmlElement(name = "EnumEntry", type = EnumEntry.class),
+	    @XmlElement(name = "EnumListEntry", type = EnumListEntry.class),
+	    @XmlElement(name = "ScalarEntry", type = ScalarEntry.class),
+	    @XmlElement(name = "ScalarListEntry", type = ScalarListEntry.class) })
+    @XmlElementWrapper(name = "Entries")
     public List<ConfigurationEntry> getEntries() {
 	return entries;
     }

@@ -22,6 +22,8 @@
 
 package org.openecard.addon.manifest;
 
+import java.util.List;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -32,9 +34,32 @@ import javax.xml.bind.annotation.XmlType;
 * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
 */
 @XmlRootElement(name = "ScalarEntry")
-@XmlType(propOrder = { "key", "localizedName", "localizedDescription" })
+@XmlType(propOrder = { "key", "type", "localizedName", "localizedDescription" })
 public class ScalarEntry extends ConfigurationEntry {
 
-    private String _type;
+    private String type;
 
+    @XmlElement(name = "Type")
+    public String getType() {
+	return type;
+    }
+
+    public void setType(String type) {
+	this.type = type;
+    }
+
+    @XmlElement(name = "Key")
+    public String getKey() {
+	return key;
+    }
+
+    @XmlElement(name = "LocalizedName")
+    public List<LocalizedString> getLocalizedName() {
+	return localizedName;
+    }
+
+    @XmlElement(name = "LocalizedDescription")
+    public List<LocalizedString> getLocalizedDescription() {
+	return localizedDescription;
+    }
 }

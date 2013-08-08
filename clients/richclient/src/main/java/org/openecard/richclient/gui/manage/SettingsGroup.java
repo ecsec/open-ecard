@@ -22,30 +22,35 @@
 
 package org.openecard.richclient.gui.manage;
 
-import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import javax.swing.JLabel;
-import java.awt.Insets;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.Vector;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
 
 
 /**
@@ -159,6 +164,75 @@ public abstract class SettingsGroup extends JPanel {
 	itemIdx++;
 
 	return input;
+    }
+
+    protected void addListInputItem(@Nonnull String name, @Nullable String description, final @Nonnull String property) {
+	JLabel label = addLabel(name, description);
+
+	String values = properties.getProperty(property);
+	String[] entries = values.split(";");
+	Vector<Vector<String>> rowData = new Vector<Vector<String>>();
+	Vector<String> columnData = new Vector<String>();
+	columnData.add("Provider ID");
+	columnData.add("URL");
+	final DefaultTableModel model = new DefaultTableModel() {
+
+	    @Override
+	    public void setValueAt(Object aValue, int row, int column) {
+		super.setValueAt(aValue, row, column);
+		if (! aValue.toString().trim().isEmpty()) {
+		    if (shouldAddRow(row, column)) {
+			addRow(new Object[] {});
+		    }
+		}
+	    }
+
+	    private boolean shouldAddRow(int lastEditedRow, int lastEditedColumn) {
+		// true if we are in the last row
+		return lastEditedRow == getRowCount() - 1;
+	    }
+
+	};
+
+	model.addTableModelListener(new TableModelListener() {
+	    @Override
+	    public void tableChanged(TableModelEvent e) {
+		StringBuilder sb = new StringBuilder();
+		for (int rowNumber = 0; rowNumber < model.getRowCount(); rowNumber++) {
+		    for (int columnNumber = 0; columnNumber < model.getColumnCount(); columnNumber++) {
+			Object valueAt = model.getValueAt(rowNumber, columnNumber);
+			if (valueAt != null && !valueAt.toString().trim().isEmpty()) {
+			    sb.append(valueAt.toString());
+			    if (columnNumber == model.getColumnCount() - 1) {
+				sb.append(";");
+			    } else {
+				sb.append(",");
+			    }
+			}
+		    }
+		}
+		properties.setProperty(property, sb.toString());
+	    }
+
+	});
+	for (String entry : entries) {
+	    if (entry.split(",").length < 2) {
+		continue;
+	    }
+	    String key = entry.split(",")[0];
+	    String value = entry.split(",")[1];
+	    Vector<String> row = new Vector<String>();
+	    row.add(key);
+	    row.add(value);
+	    rowData.add(row);
+	}
+	JTable jTable = new JTable(model);
+	model.setDataVector(rowData, columnData);
+	model.addRow(new Object[] {});
+	fieldLabels.put(jTable, label);
+	addComponent(jTable);
+	itemIdx++;
+	return;
     }
 
     /**

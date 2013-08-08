@@ -31,9 +31,12 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Properties;
 import javax.annotation.Nonnull;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -46,6 +49,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.openecard.addon.ClasspathRegistry;
+import org.openecard.addon.FileRegistry;
 import org.openecard.addon.manifest.AddonBundleDescription;
 import org.openecard.addon.manifest.AppExtensionActionDescription;
 import org.openecard.common.I18n;
@@ -53,6 +57,8 @@ import org.openecard.common.util.FileUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
 import org.openecard.gui.graphics.OecLogoBgWhite;
 import org.openecard.richclient.gui.manage.core.ConnectionSettingsAddon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -66,6 +72,7 @@ public class ManagementDialog extends JDialog {
 
     private static final long serialVersionUID = 1L;
     private static final String LANGUAGE_CODE = System.getProperty("user.language");
+    private static final Logger logger = LoggerFactory.getLogger(ManagementDialog.class);
 
     private static ManagementDialog runningDialog;
 
@@ -203,7 +210,7 @@ public class ManagementDialog extends JDialog {
 	model.addElement(lang.translationForKey("addon.list.core.connection"), new ConnectionSettingsAddon());
 
 	// this assumes that all addons in the ClasspathRegistry are core addons
-	// an ActionPanel or every addon that has one ore more AppExtensionActions will be added
+	// an ActionPanel for every addon that has one ore more AppExtensionActions will be added
 	for (AddonBundleDescription desc : ClasspathRegistry.getInstance().listPlugins()) {
 	    ArrayList<AppExtensionActionDescription> applicationActions = desc.getApplicationActions();
 	    if (applicationActions.size() > 0) {
@@ -269,8 +276,9 @@ public class ManagementDialog extends JDialog {
 	addonList.setFont(addonList.getFont().deriveFont(Font.PLAIN));
 	addonList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	GridBagConstraints addonListConstraints = new GridBagConstraints();
-	addonListConstraints.insets = new Insets(0, 5, 0, 10);
-	addonListConstraints.fill = GridBagConstraints.BOTH;
+	addonListConstraints.insets = new Insets(0, 5, 5, 10);
+	addonListConstraints.fill = GridBagConstraints.HORIZONTAL;
+	addonListConstraints.anchor = GridBagConstraints.NORTH;
 	addonListConstraints.gridx = 0;
 	addonListConstraints.gridy = 4;
 
@@ -279,6 +287,31 @@ public class ManagementDialog extends JDialog {
 	addonList.addListSelectionListener(model);
 	addWindowListener(model); // save current addon settings when closed
 	// add addon panels
+
+	// this assumes that all addons in the FileRegistry are non core addons
+	for (AddonBundleDescription desc : FileRegistry.getInstance().listPlugins()) {
+	    String description = desc.getLocalizedDescription(LANGUAGE_CODE);
+	    String name = desc.getLocalizedName(LANGUAGE_CODE);
+	    Image logo = loadLogo(desc.getLogo());
+	    Properties properties = new Properties();
+	    try {
+		File config = new File(FileUtils.getHomeConfigDir().getAbsolutePath() + File.separatorChar + "plugins"
+			+ File.separatorChar + desc.getId() + ".properties");
+		if (config.exists()) {
+		    properties.load(new FileReader(config));
+		} else {
+		    logger.debug("A properties file for the addon with id {} does not yet exist", desc.getId());
+		}
+	    } catch (SecurityException e) {
+		logger.error("Failed to load properties file for addon with id " + desc.getId(), e);
+	    } catch (IOException e) {
+		logger.error("Failed to load properties file for addon with id " + desc.getId(), e);
+	    }
+	    // TODO what title should we set?
+	    SettingsGroup settingsGroup = new DefaultSettingsGroup("", properties, desc);
+	    AddonPanel addonPanel = new AddonPanel(new DefaultSettingsPanel(settingsGroup), name, description, logo);
+	    model.addElement(name, addonPanel);
+	}
 
 	selectionPanel.add(addonList, addonListConstraints);
     }

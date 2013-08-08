@@ -124,14 +124,14 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
-import org.openecard.addon.manifest.AddonBundleDescription;
-import org.openecard.addon.manifest.AppExtensionActionDescription;
-import org.openecard.addon.manifest.AppPluginActionDescription;
+import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.manifest.AppExtensionSpecification;
+import org.openecard.addon.manifest.AppPluginSpecification;
 import org.openecard.addon.manifest.Configuration;
 import org.openecard.addon.manifest.ConfigurationEntry;
 import org.openecard.addon.manifest.EnumEntry;
 import org.openecard.addon.manifest.LocalizedString;
-import org.openecard.addon.manifest.ProtocolPluginDescription;
+import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.bouncycastle.crypto.RuntimeCryptoException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
@@ -1120,8 +1120,8 @@ public class AndroidMarshaller implements WSMarshaller {
 	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("CardInfo")));
 	    cardInfo.setApplicationCapabilities(applicationCapabilities);
 	    return cardInfo;
-	} else if (parser.getName().equals("AddonBundleDescription")) {
-	    AddonBundleDescription addonBundleDescription = new AddonBundleDescription();
+	} else if (parser.getName().equals("AddonSpecification")) {
+	    AddonSpecification addonBundleDescription = new AddonSpecification();
 	    int eventType;
 	    do {
 		parser.next();
@@ -1158,32 +1158,32 @@ public class AndroidMarshaller implements WSMarshaller {
 			addonBundleDescription.getApplicationActions().addAll(parseApplicationActions(parser));
 		    } else if (parser.getName().equals("IFDActions")) {
 			addonBundleDescription.getIfdActions().addAll(
-				parseProtocolPluginDescription(parser, "IFDActions"));
+				parseProtocolPluginSpecification(parser, "IFDActions"));
 		    } else if (parser.getName().equals("SALActions")) {
 			addonBundleDescription.getSalActions().addAll(
-				parseProtocolPluginDescription(parser, "SALActions"));
+				parseProtocolPluginSpecification(parser, "SALActions"));
 		    } else {
 			throw new IllegalArgumentException(parser.getName()
-				+ " in AddonBundleDescription is not supported.");
+				+ " in AddonSpecification is not supported.");
 		    }
 		}
-	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("AddonBundleDescription")));
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("AddonSpecification")));
 	    return addonBundleDescription;
 	} else {
 	    throw new IOException("Unmarshalling of " + parser.getName() + " is not yet supported.");
 	}
     }
 
-    private Collection<? extends ProtocolPluginDescription> parseProtocolPluginDescription(XmlPullParser parser,
+    private Collection<? extends ProtocolPluginSpecification> parseProtocolPluginSpecification(XmlPullParser parser,
 	    String tagName) throws XmlPullParserException, IOException {
-	ArrayList<ProtocolPluginDescription> list = new ArrayList<ProtocolPluginDescription>();
+	ArrayList<ProtocolPluginSpecification> list = new ArrayList<ProtocolPluginSpecification>();
 	int eventType;
 	do {
 	    parser.next();
 	    eventType = parser.getEventType();
 	    if (eventType == XmlPullParser.START_TAG) {
-		if (parser.getName().equals("ProtocolPluginDescription")) {
-		    list.add(parseProtocolPluginDescription(parser));
+		if (parser.getName().equals("ProtocolPluginSpecification")) {
+		    list.add(parseProtocolPluginSpecification(parser));
 		} else {
 		    throw new IllegalArgumentException("Unexpected Tag found: " + parser.getName());
 		}
@@ -1192,9 +1192,9 @@ public class AndroidMarshaller implements WSMarshaller {
 	return list;
     }
 
-    private ProtocolPluginDescription parseProtocolPluginDescription(XmlPullParser parser)
+    private ProtocolPluginSpecification parseProtocolPluginSpecification(XmlPullParser parser)
 	    throws XmlPullParserException, IOException {
-	ProtocolPluginDescription protocolPluginDescription = new ProtocolPluginDescription();
+	ProtocolPluginSpecification protocolPluginDescription = new ProtocolPluginSpecification();
 	int eventType;
 	do {
 	    parser.next();
@@ -1220,20 +1220,20 @@ public class AndroidMarshaller implements WSMarshaller {
 		    throw new IllegalArgumentException("Unexpected Tag found: " + parser.getName());
 		}
 	    }
-	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ProtocolPluginDescription")));
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ProtocolPluginSpecification")));
 	return protocolPluginDescription;
     }
 
-    private Collection<? extends AppExtensionActionDescription> parseApplicationActions(XmlPullParser parser)
+    private Collection<? extends AppExtensionSpecification> parseApplicationActions(XmlPullParser parser)
 	    throws XmlPullParserException, IOException {
-	ArrayList<AppExtensionActionDescription> list = new ArrayList<AppExtensionActionDescription>();
+	ArrayList<AppExtensionSpecification> list = new ArrayList<AppExtensionSpecification>();
 	int eventType;
 	do {
 	    parser.next();
 	    eventType = parser.getEventType();
 	    if (eventType == XmlPullParser.START_TAG) {
-		if (parser.getName().equals("AppExtensionActionDescription")) {
-		    list.add(parseAppExtensionActionDescription(parser));
+		if (parser.getName().equals("AppExtensionSpecification")) {
+		    list.add(parseAppExtensionSpecification(parser));
 		} else {
 		    throw new IllegalArgumentException("Unexpected Tag found: " + parser.getName());
 		}
@@ -1242,9 +1242,9 @@ public class AndroidMarshaller implements WSMarshaller {
 	return list;
     }
 
-    private AppExtensionActionDescription parseAppExtensionActionDescription(XmlPullParser parser)
+    private AppExtensionSpecification parseAppExtensionSpecification(XmlPullParser parser)
 	    throws XmlPullParserException, IOException {
-	AppExtensionActionDescription appExtensionActionDescription = new AppExtensionActionDescription();
+	AppExtensionSpecification appExtensionActionDescription = new AppExtensionSpecification();
 	int eventType;
 	do {
 	    parser.next();
@@ -1270,20 +1270,20 @@ public class AndroidMarshaller implements WSMarshaller {
 		    throw new IllegalArgumentException("Unexpected Tag found: " + parser.getName());
 		}
 	    }
-	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("AppExtensionActionDescription")));
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("AppExtensionSpecification")));
 	return appExtensionActionDescription;
     }
 
-    private Collection<? extends AppPluginActionDescription> parseBindingActions(XmlPullParser parser)
+    private Collection<? extends AppPluginSpecification> parseBindingActions(XmlPullParser parser)
 	    throws XmlPullParserException, IOException {
-	ArrayList<AppPluginActionDescription> list = new ArrayList<AppPluginActionDescription>();
+	ArrayList<AppPluginSpecification> list = new ArrayList<AppPluginSpecification>();
 	int eventType;
 	do {
 	    parser.next();
 	    eventType = parser.getEventType();
 	    if (eventType == XmlPullParser.START_TAG) {
-		if (parser.getName().equals("AppPluginActionDescription")) {
-		    list.add(parseAppPluginActionDescription(parser));
+		if (parser.getName().equals("AppPluginSpecification")) {
+		    list.add(parseAppPluginSpecification(parser));
 		} else {
 		    throw new IllegalArgumentException("Unexpected Tag found: " + parser.getName());
 		}
@@ -1292,9 +1292,9 @@ public class AndroidMarshaller implements WSMarshaller {
 	return list;
     }
 
-    private AppPluginActionDescription parseAppPluginActionDescription(XmlPullParser parser)
+    private AppPluginSpecification parseAppPluginSpecification(XmlPullParser parser)
 	    throws XmlPullParserException, IOException {
-	AppPluginActionDescription appPluginActionDescription = new AppPluginActionDescription();
+	AppPluginSpecification appPluginActionDescription = new AppPluginSpecification();
 	int eventType;
 	do {
 	    parser.next();
@@ -1320,7 +1320,7 @@ public class AndroidMarshaller implements WSMarshaller {
 		    throw new IllegalArgumentException("Unexpected Tag found: " + parser.getName());
 		}
 	    }
-	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("AppPluginActionDescription")));
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("AppPluginSpecification")));
 	return appPluginActionDescription;
     }
 

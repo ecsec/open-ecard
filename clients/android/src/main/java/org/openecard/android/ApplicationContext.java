@@ -43,7 +43,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import org.openecard.addon.ClasspathRegistry;
-import org.openecard.addon.manifest.AddonBundleDescription;
+import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.android.activities.TerminalFactoryActivity;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
@@ -359,7 +359,7 @@ public class ApplicationContext extends Application implements EventCallback {
 
     private void registerAddOns() throws WSMarshallerException, MarshallingTypeException, IOException, SAXException {
 	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
-	marshaller.addXmlTypeClass(AddonBundleDescription.class);
+	marshaller.addXmlTypeClass(AddonSpecification.class);
 	InputStream manifestStream = FileUtils.resolveResourceAsStream(TCTokenAction.class, "TCToken-Manifest.xml");
 	Document manifestDoc = marshaller.str2doc(manifestStream);
 	ClasspathRegistry.getInstance().register((AddonSpecification) marshaller.unmarshal(manifestDoc));

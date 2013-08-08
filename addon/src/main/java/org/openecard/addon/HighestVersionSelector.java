@@ -20,19 +20,22 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon.bind;
+package org.openecard.addon;
 
-import java.util.List;
-import java.util.Map;
-import org.openecard.addon.LifecycleTrait;
+import java.util.Set;
+import org.openecard.addon.manifest.AddonSpecification;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public interface AppPluginAction extends LifecycleTrait {
+public class HighestVersionSelector implements SelectionStrategy {
 
-    BindingResult execute(Body body, Map<String, String> parameters, List<Attachment> attachments);
+    @Override
+    public AddonSpecification select(Set<AddonSpecification> addons) {
+	// TODO: implement correct strategy, for now just use first addon
+	return addons.iterator().next();
+    }
 
 }

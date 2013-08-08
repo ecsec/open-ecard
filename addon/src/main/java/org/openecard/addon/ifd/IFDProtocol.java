@@ -24,14 +24,14 @@ package org.openecard.addon.ifd;
 
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
-import org.openecard.addon.FactoryBaseType;
+import org.openecard.addon.LifecycleTrait;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public interface IFDProtocol extends FactoryBaseType {
+public interface IFDProtocol extends LifecycleTrait {
 
     EstablishChannelResponse establish(EstablishChannel req);
 

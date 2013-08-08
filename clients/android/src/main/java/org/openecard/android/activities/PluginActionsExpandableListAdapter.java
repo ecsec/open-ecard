@@ -33,7 +33,8 @@ import android.widget.SimpleExpandableListAdapter;
 import java.util.List;
 import java.util.Map;
 import org.openecard.addon.AddonManager;
-import org.openecard.addon.manifest.AppExtensionActionDescription;
+import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.manifest.AppExtensionSpecification;
 import org.openecard.common.I18n;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +74,7 @@ final class PluginActionsExpandableListAdapter extends SimpleExpandableListAdapt
 	    childView.removeViewAt(1);
 	}
 
-	AppExtensionActionDescription action = pluginActivity.getPlugin().getApplicationActions().get(groupPosition);
+	AppExtensionSpecification action = pluginActivity.getAddon().getApplicationActions().get(groupPosition);
 
 	// set orientation to vertical so the button will be under the description text
 	childView.setOrientation(LinearLayout.VERTICAL);
@@ -92,11 +93,10 @@ final class PluginActionsExpandableListAdapter extends SimpleExpandableListAdapt
     /**
      * Creates the Button to start the given action.
      * 
-     * @param action
-     *            The action to create a Button for.
+     * @param action The action to create a Button for.
      * @return The Button with a corresponding OnClickListener set.
      */
-    private Button setUpStartActionButton(final AppExtensionActionDescription action) {
+    private Button setUpStartActionButton(final AppExtensionSpecification action) {
 	Button btnStartAction = new Button(context);
 	btnStartAction.setText(lang.translationForKey("settings.plugins.actions.start"));
 	btnStartAction.setOnClickListener(new OnClickListener() {
@@ -106,9 +106,9 @@ final class PluginActionsExpandableListAdapter extends SimpleExpandableListAdapt
 		Thread actionThread = new Thread(new Runnable() {
 		    @Override
 		    public void run() {
-			String pluginId = pluginActivity.getPlugin().getId();
+			AddonSpecification addonSpec = pluginActivity.getAddon();
 			String actionId = action.getId();
-			AddonManager.getInstance().getAppExtensionAction(pluginId, actionId).execute();
+			AddonManager.getInstance().getAppExtensionAction(addonSpec, actionId).execute();
 		    }
 		});
 		actionThread.start();

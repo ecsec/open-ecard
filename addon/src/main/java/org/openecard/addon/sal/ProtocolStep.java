@@ -30,13 +30,12 @@ import java.util.Map;
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
- * @param <Request>
- * @param <Response>
  */
-public interface ProtocolStep<Request extends RequestType, Response extends ResponseType> {
+public interface ProtocolStep {
 
     FunctionType getFunctionType();
 
+    <Request extends RequestType, Response extends ResponseType>
     Response perform(Request req, Map<String, Object> internalData);
 
 }

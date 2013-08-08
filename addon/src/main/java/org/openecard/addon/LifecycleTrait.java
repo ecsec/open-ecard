@@ -20,19 +20,17 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon.bind;
-
-import java.util.List;
-import java.util.Map;
-import org.openecard.addon.LifecycleTrait;
+package org.openecard.addon;
 
 
 /**
- *
+ * 
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public interface AppPluginAction extends LifecycleTrait {
+public interface LifecycleTrait {
 
-    BindingResult execute(Body body, Map<String, String> parameters, List<Attachment> attachments);
+    void init(Context aCtx) throws ActionInitializationException;
+
+    void destroy();
 
 }

@@ -25,10 +25,11 @@ package org.openecard.addon;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import org.openecard.addon.manifest.AddonBundleDescription;
-import org.openecard.addon.manifest.AppPluginActionDescription;
+import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.manifest.AppExtensionSpecification;
+import org.openecard.addon.manifest.AppPluginSpecification;
 import org.openecard.addon.manifest.LocalizedString;
-import org.openecard.addon.manifest.ProtocolPluginDescription;
+import org.openecard.addon.manifest.ProtocolPluginSpecification;
 
 
 /**
@@ -40,7 +41,7 @@ import org.openecard.addon.manifest.ProtocolPluginDescription;
  */
 public class ClasspathRegistry implements AddonRegistry {
 
-    private static final ArrayList<AddonBundleDescription> registeredAddons = new ArrayList<AddonBundleDescription>();
+    private static final ArrayList<AddonSpecification> registeredAddons = new ArrayList<AddonSpecification>();
     private static ClasspathRegistry instance;
 
     private ClasspathRegistry() {
@@ -53,20 +54,20 @@ public class ClasspathRegistry implements AddonRegistry {
 	return instance;
     }
 
-    public void register(AddonBundleDescription desc) {
+    public void register(AddonSpecification desc) {
 	registeredAddons.add(desc);
     }
 
     @Override
-    public Set<AddonBundleDescription> listPlugins() {
-	Set<AddonBundleDescription> list = new HashSet<AddonBundleDescription>();
+    public Set<AddonSpecification> listPlugins() {
+	Set<AddonSpecification> list = new HashSet<AddonSpecification>();
 	list.addAll(registeredAddons);
 	return list;
     }
 
     @Override
-    public AddonBundleDescription search(String id) {
-	for (AddonBundleDescription desc : registeredAddons) {
+    public AddonSpecification search(String id) {
+	for (AddonSpecification desc : registeredAddons) {
 	    if (desc.getId().equals(id)) {
 		return desc;
 	    }
@@ -75,9 +76,9 @@ public class ClasspathRegistry implements AddonRegistry {
     }
 
     @Override
-    public Set<AddonBundleDescription> searchByName(String name) {
-	Set<AddonBundleDescription> matchingAddons = new HashSet<AddonBundleDescription>();
-	for (AddonBundleDescription desc : registeredAddons) {
+    public Set<AddonSpecification> searchByName(String name) {
+	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	for (AddonSpecification desc : registeredAddons) {
 	    for (LocalizedString s : desc.getLocalizedName()) {
 		if (s.getValue().equals(name)) {
 		    matchingAddons.add(desc);
@@ -88,14 +89,10 @@ public class ClasspathRegistry implements AddonRegistry {
     }
 
     @Override
-    public Set<AddonBundleDescription> searchProtocol(String uri) {
-	Set<AddonBundleDescription> matchingAddons = new HashSet<AddonBundleDescription>();
-	for (AddonBundleDescription desc : registeredAddons) {
-	    ProtocolPluginDescription protocolDesc = desc.searchIFDActionByURI(uri);
-	    if (protocolDesc != null) {
-		matchingAddons.add(desc);
-	    }
-	    protocolDesc = desc.searchSALActionByURI(uri);
+    public Set<AddonSpecification> searchIFDProtocol(String uri) {
+	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	for (AddonSpecification desc : registeredAddons) {
+	    ProtocolPluginSpecification protocolDesc = desc.searchIFDActionByURI(uri);
 	    if (protocolDesc != null) {
 		matchingAddons.add(desc);
 	    }
@@ -104,16 +101,40 @@ public class ClasspathRegistry implements AddonRegistry {
     }
 
     @Override
-    public ClassLoader downloadPlugin(String aId) {
+    public Set<AddonSpecification> searchSALProtocol(String uri) {
+	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	for (AddonSpecification desc : registeredAddons) {
+	    ProtocolPluginSpecification protocolDesc = desc.searchSALActionByURI(uri);
+	    if (protocolDesc != null) {
+		matchingAddons.add(desc);
+	    }
+	}
+	return matchingAddons;
+    }
+
+    @Override
+    public ClassLoader downloadPlugin(AddonSpecification addonSpec) {
 	// TODO use other own classloader impl with security features
 	return this.getClass().getClassLoader();
     }
 
     @Override
-    public Set<AddonBundleDescription> searchByResourceName(String resourceName) {
-	Set<AddonBundleDescription> matchingAddons = new HashSet<AddonBundleDescription>();
-	for (AddonBundleDescription desc : registeredAddons) {
-	    AppPluginActionDescription actionDesc = desc.searchByResourceName(resourceName);
+    public Set<AddonSpecification> searchByResourceName(String resourceName) {
+	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	for (AddonSpecification desc : registeredAddons) {
+	    AppPluginSpecification actionDesc = desc.searchByResourceName(resourceName);
+	    if (actionDesc != null) {
+		matchingAddons.add(desc);
+	    }
+	}
+	return matchingAddons;
+    }
+
+    @Override
+    public Set<AddonSpecification> searchByActionId(String actionId) {
+	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	for (AddonSpecification desc : registeredAddons) {
+	    AppExtensionSpecification actionDesc = desc.searchByActionId(actionId);
 	    if (actionDesc != null) {
 		matchingAddons.add(desc);
 	    }

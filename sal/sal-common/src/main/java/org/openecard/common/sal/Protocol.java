@@ -133,6 +133,7 @@ public class Protocol {
 	}
     }
 
+
     public CardApplicationStartSessionResponse cardApplicationStartSession(CardApplicationStartSession param) {
 	return (CardApplicationStartSessionResponse) perform(CardApplicationEndSessionResponse.class, next(), param, internalData);
     }

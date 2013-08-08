@@ -22,6 +22,7 @@
 
 package org.openecard.control.module.status;
 
+import java.util.List;
 import java.util.Map;
 import org.openecard.addon.Context;
 import org.openecard.addon.EventHandler;
@@ -76,7 +77,7 @@ public class StatusAction implements AppPluginAction {
     }
 
     @Override
-    public BindingResult execute(Body body, Map<String, String> parameters, Attachment attachments) {
+    public BindingResult execute(Body body, Map<String, String> parameters, List<Attachment> attachments) {
 	BindingResult response = null;
 	try {
 	    StatusRequest statusRequest = checkParameters(parameters);

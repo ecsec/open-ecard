@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 HS Coburg.
+ * Copyright (C) 2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,26 +20,39 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon;
+package org.openecard.addon.bind;
+
+import org.openecard.addon.AbstractFactory;
+import org.openecard.addon.Context;
+import org.openecard.addon.ActionInitializationException;
+
 
 /**
- * 
+ *
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class FactoryInitializationException extends Exception {
+public class AppExtensionActionProxy extends AbstractFactory<AppExtensionAction> implements AppExtensionAction {
 
-    private static final long serialVersionUID = -2587833834285178408L;
+    private AppExtensionAction c;
 
-    public FactoryInitializationException(String message, Throwable e) {
-	super(message, e);
+    public AppExtensionActionProxy(String implClass, ClassLoader classLoader) {
+	super(implClass, classLoader);
     }
 
-    public FactoryInitializationException(String message) {
-	super(message);
+    @Override
+    public void execute() {
+	c.execute();
     }
 
-    public FactoryInitializationException(Throwable e) {
-	super(e);
+    @Override 
+    public void init(Context ctx) throws ActionInitializationException {
+	c = loadInstance(ctx, AppExtensionAction.class);
+    }
+
+    @Override
+    public void destroy() {
+	c.destroy();
     }
 
 }

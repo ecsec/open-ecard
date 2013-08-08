@@ -22,7 +22,7 @@
 
 package org.openecard.addon.sal;
 
-import org.openecard.addon.FactoryBaseType;
+import org.openecard.addon.LifecycleTrait;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationEndSession;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationEndSessionResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSession;
@@ -58,9 +58,7 @@ import java.util.Map;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public interface SALProtocol extends FactoryBaseType {
-
-    ProtocolStep[] getSteps();
+public interface SALProtocol extends LifecycleTrait {
 
     Map<String, Object> getInternalData();
 

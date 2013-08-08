@@ -29,10 +29,11 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * 
+ *
+ * @param <C> 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class AbstractFactory {
+public class AbstractFactory <C extends LifecycleTrait> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractFactory.class);
     private final String implClass;
@@ -43,36 +44,33 @@ public class AbstractFactory {
 	this.classLoader = classLoader;
     }
 
-    public <T extends FactoryBaseType> T initialize(Context aCtx, Class<T> clazz) throws FactoryInitializationException {
+    protected C loadInstance(Context ctx, Class<C> clazz) throws ActionInitializationException {
 	try {
 	    Class<?> classToLoad = classLoader.loadClass(implClass);
-	    Constructor<?>[] ctors = classToLoad.getDeclaredConstructors();
-	    Constructor<?> ctor = null;
-	    for (int i = 0; i < ctors.length; i++) {
-		ctor = ctors[i];
-		if (ctor.getGenericParameterTypes().length == 0) {
-		    break;
-		}
-	    }
+	    Class<? extends C> typedClass = classToLoad.asSubclass(clazz);
+	    Constructor<? extends C> ctor = typedClass.getConstructor();
 	    ctor.setAccessible(true);
-	    T c = (T) ctor.newInstance();
-	    c.init(aCtx);
+	    C c = typedClass.cast(ctor.newInstance());
+	    c.init(ctx);
 	    return c;
 	} catch (InstantiationException e) {
 	    logger.error("Given class could not be instantiated.", e);
-	    throw new FactoryInitializationException(e);
+	    throw new ActionInitializationException(e);
 	} catch (InvocationTargetException e) {
 	    logger.error("Exception in nullary constructor of given class.", e);
-	    throw new FactoryInitializationException(e);
+	    throw new ActionInitializationException(e);
 	} catch (IllegalAccessException e) {
 	    logger.error("The class or its nullary constructor is not accessible.", e);
-	    throw new FactoryInitializationException(e);
+	    throw new ActionInitializationException(e);
 	} catch (ClassNotFoundException e) {
 	    logger.error("Given class could not be found.", e);
-	    throw new FactoryInitializationException(e);
+	    throw new ActionInitializationException(e);
 	} catch (ClassCastException e) {
 	    logger.error("Given class does not extend FactoryBaseType.", e);
-	    throw new FactoryInitializationException(e);
+	    throw new ActionInitializationException(e);
+	} catch (NoSuchMethodException e) {
+	    logger.error("Default constructor does not exist in action implementation.", e);
+	    throw new ActionInitializationException(e);
 	}
     }
 

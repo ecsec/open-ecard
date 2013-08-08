@@ -30,17 +30,17 @@ import java.net.URI;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import org.openecard.addon.AddonManager;
+import org.openecard.addon.AddonNotFoundException;
+import org.openecard.addon.AddonSelector;
 import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.bind.Body;
-import org.openecard.addon.manifest.AddonBundleDescription;
 import org.openecard.apache.http.HttpEntity;
 import org.openecard.apache.http.HttpEntityEnclosingRequest;
 import org.openecard.apache.http.HttpException;
@@ -79,12 +79,16 @@ import org.w3c.dom.Node;
 public class HttpAppPluginActionHandler extends ControlHandler implements HttpRequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpAppPluginActionHandler.class);
+
     private final AddonManager addonManager;
+    private final AddonSelector selector;
     private final WSMarshaller marshaller;
 
     public HttpAppPluginActionHandler(AddonManager addonManager) {
 	super("*");
+
 	this.addonManager = addonManager;
+	this.selector = new AddonSelector(addonManager);
 	try {
 	    marshaller = WSMarshallerFactory.createInstance();
 	} catch (WSMarshallerException e) {
@@ -96,14 +100,15 @@ public class HttpAppPluginActionHandler extends ControlHandler implements HttpRe
     public void handle(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext context) throws HttpException,
 	    IOException {
 	logger.debug("HTTP request: {}", httpRequest.toString());
+	// deconstruct request uri
 	String uri = httpRequest.getRequestLine().getUri();
 	URI requestURI = URI.create(uri);
 	String path = requestURI.getPath();
 	String resourceName = path.substring(1, path.length()); // remove leading '/'
-	Set<AddonBundleDescription> matchingAddons = addonManager.getRegistry().searchByResourceName(resourceName);
-	if (matchingAddons.size() > 0) {
-	    String id = matchingAddons.iterator().next().getId();
-	    AppPluginAction appPluginAction = addonManager.getAppPluginAction(id, resourceName);
+
+	// find suitable addon
+	try {
+	    AppPluginAction action = selector.getAppPluginAction(resourceName);
 	    HttpResponse response;
 	    if (addonManager == null) {
 		response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -120,13 +125,13 @@ public class HttpAppPluginActionHandler extends ControlHandler implements HttpRe
 		    logger.debug("Request contains an entity.");
 		    body = getRequestBody(httpRequest);
 		}
-		BindingResult bindingResult = appPluginAction.execute(body, queries, null);
+		BindingResult bindingResult = action.execute(body, queries, null);
 		response = createHTTPResponseFromBindingResult(bindingResult);
 	    }
 	    response.setParams(httpRequest.getParams());
 	    logger.debug("HTTP response: {}", response);
 	    Http11Response.copyHttpResponse(response, httpResponse);
-	} else {
+	} catch (AddonNotFoundException ex) {
 	    if (path.equals("/")) {
 		new IndexHandler().handle(httpRequest, httpResponse, context);
 	    } else if (path.startsWith("/")) {

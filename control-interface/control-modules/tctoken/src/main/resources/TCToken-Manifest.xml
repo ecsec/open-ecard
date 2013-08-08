@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<AddonBundleDescription>
+<AddonSpecification>
   <ID>TCToken</ID>
   <Version>1.0</Version>
   <About/>
@@ -9,15 +9,15 @@
   <Logo/>
   <ConfigDescription/>
   <BindingActions>
-    <AppPluginActionDescription>
+    <AppPluginSpecification>
       <ClassName>org.openecard.control.module.tctoken.TCTokenAction</ClassName>
       <LocalizedName xml:lang="DE">TODO</LocalizedName>
       <LocalizedDescription xml:lang="DE">TODO</LocalizedDescription>
       <ResourceName>eID-Client</ResourceName>
       <ConfigDescription/>
-    </AppPluginActionDescription>
+    </AppPluginSpecification>
   </BindingActions>
   <ApplicationActions/>
   <IFDActions/>
   <SALActions/>
-</AddonBundleDescription>
+</AddonSpecification>

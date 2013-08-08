@@ -41,7 +41,6 @@ public class Configuration {
     private final List<ConfigurationEntry> entries = new ArrayList<ConfigurationEntry>();
 
     @XmlElements({
-	    @XmlElement(name = "FileEntry", type = FileEntry.class),
 	    @XmlElement(name = "EnumEntry", type = EnumEntry.class),
 	    @XmlElement(name = "EnumListEntry", type = EnumListEntry.class),
 	    @XmlElement(name = "ScalarEntry", type = ScalarEntry.class),

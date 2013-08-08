@@ -20,38 +20,27 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon.bind;
-
-import org.openecard.addon.AbstractFactory;
-import org.openecard.addon.Context;
-import org.openecard.addon.FactoryInitializationException;
+package org.openecard.addon;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class AppExtensionActionFactory extends AbstractFactory implements AppExtensionAction {
-    private AppExtensionAction c;
+public class AddonNotFoundException extends AddonException {
 
-    public AppExtensionActionFactory(String implClass, ClassLoader classLoader) {
-	super(implClass, classLoader);
+    private static final long serialVersionUID = 1L;
+
+    public AddonNotFoundException(String message) {
+	super(message);
     }
 
-    @Override
-    public void execute() {
-	c.execute();
+    public AddonNotFoundException(Throwable cause) {
+	super(cause);
     }
 
-    @Override 
-    public void init(Context ctx) throws FactoryInitializationException {
-	c = super.initialize(ctx, AppExtensionAction.class);
-    }
-
-    @Override
-    public void destroy() {
-	c.destroy();
+    public AddonNotFoundException(String message, Throwable cause) {
+	super(message, cause);
     }
 
 }

@@ -23,6 +23,7 @@
 package org.openecard.control.module.tctoken;
 
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.Context;
@@ -57,7 +58,7 @@ public class TCTokenAction implements AppPluginAction {
     }
 
     @Override
-    public BindingResult execute(Body body, Map<String, String> parameters, Attachment attachments) {
+    public BindingResult execute(Body body, Map<String, String> parameters, List<Attachment> attachments) {
 	BindingResult response = null;
 	try {
 	    TCTokenRequest tcTokenRequest = parseParameters(parameters);

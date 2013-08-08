@@ -30,7 +30,7 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import org.apache.commons.jci.monitor.FilesystemAlterationListener;
 import org.apache.commons.jci.monitor.FilesystemAlterationObserver;
-import org.openecard.addon.manifest.AddonBundleDescription;
+import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.ws.marshal.MarshallingTypeException;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
@@ -43,7 +43,7 @@ import org.xml.sax.SAXException;
 
 /**
  * Simple listener for changes in the plugin directory.
- * <br/> It will add or unload a plugin in the plugin manager if it detects a file creation or removal.
+ * <br/>It will add or unload a plugin in the plugin manager if it detects a file creation or removal.
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
@@ -72,12 +72,12 @@ final class PluginDirectoryAlterationListener implements FilesystemAlterationLis
     @Override
     public void onFileCreate(File file) {
 	String name = file.getName();
-	AddonBundleDescription abd = getAddonBundleDescriptionFromFile(file);
+	AddonSpecification abd = getAddonSpecificationFromFile(file);
 	if (abd == null) {
 	    return;
 	}
-	Set<AddonBundleDescription> plugins = fileRegistry.listPlugins();
-	for (AddonBundleDescription desc : plugins) {
+	Set<AddonSpecification> plugins = fileRegistry.listPlugins();
+	for (AddonSpecification desc : plugins) {
 	    if (desc.getId().equals(abd.getId())) {
 		logger.debug("Addon {} is already registered", name);
 		return;
@@ -87,10 +87,10 @@ final class PluginDirectoryAlterationListener implements FilesystemAlterationLis
 	logger.debug("Successfully registered {} as addon", name);
     }
 
-    private AddonBundleDescription getAddonBundleDescriptionFromFile(File file) {
+    private AddonSpecification getAddonSpecificationFromFile(File file) {
 	String name = file.getName();
 	JarFile jarFile;
-	AddonBundleDescription abd;
+	AddonSpecification abd;
 	try {
 	    jarFile = new JarFile(file);
 	} catch (IOException e) {
@@ -104,9 +104,9 @@ final class PluginDirectoryAlterationListener implements FilesystemAlterationLis
 		logger.error("File {} will not be registered as plugin because it doesn't contain a Manifest.xml.", name);
 		return null;
 	    } else {
-		marshaller.addXmlTypeClass(AddonBundleDescription.class);
+		marshaller.addXmlTypeClass(AddonSpecification.class);
 		Document manifestDoc = marshaller.str2doc(manifestStream);
-		abd = (AddonBundleDescription) marshaller.unmarshal(manifestDoc);
+		abd = (AddonSpecification) marshaller.unmarshal(manifestDoc);
 	    }
 	} catch (IOException ex) {
 	    logger.error("Failed to process Manifest.xml entry for file " + name, ex);

@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.ClasspathRegistry;
-import org.openecard.addon.manifest.AddonBundleDescription;
+import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
@@ -135,13 +135,13 @@ public final class TestClient {
 
     private void registerAddOns() throws WSMarshallerException, MarshallingTypeException, IOException, SAXException {
 	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
-	marshaller.addXmlTypeClass(AddonBundleDescription.class);
+	marshaller.addXmlTypeClass(AddonSpecification.class);
 	InputStream manifestStream = FileUtils.resolveResourceAsStream(TCTokenAction.class, "TCToken-Manifest.xml");
 	Document manifestDoc = marshaller.str2doc(manifestStream);
-	ClasspathRegistry.getInstance().register((AddonBundleDescription) marshaller.unmarshal(manifestDoc));
+	ClasspathRegistry.getInstance().register((AddonSpecification) marshaller.unmarshal(manifestDoc));
 	manifestStream = FileUtils.resolveResourceAsStream(StatusAction.class, "Status-Manifest.xml");
 	manifestDoc = marshaller.str2doc(manifestStream);
-	ClasspathRegistry.getInstance().register((AddonBundleDescription) marshaller.unmarshal(manifestDoc));
+	ClasspathRegistry.getInstance().register((AddonSpecification) marshaller.unmarshal(manifestDoc));
     }
 
 }

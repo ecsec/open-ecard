@@ -20,13 +20,13 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon.ifd;
+package org.openecard.addon.bind;
 
-import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
-import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
+import java.util.List;
+import java.util.Map;
 import org.openecard.addon.AbstractFactory;
 import org.openecard.addon.Context;
-import org.openecard.addon.FactoryInitializationException;
+import org.openecard.addon.ActionInitializationException;
 
 
 /**
@@ -34,32 +34,27 @@ import org.openecard.addon.FactoryInitializationException;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class IFDProtocolFactory extends AbstractFactory implements IFDProtocol {
+public class AppPluginActionProxy  extends AbstractFactory<AppPluginAction> implements AppPluginAction {
 
-    IFDProtocol c;
+    private AppPluginAction c;
 
-    public IFDProtocolFactory(String protocolClass, ClassLoader classLoader) {
-	super(protocolClass, classLoader);
+    public AppPluginActionProxy(String implClass, ClassLoader classLoader) {
+	super(implClass, classLoader);
+    }
+
+    public void getActionDescription() {
+	throw new UnsupportedOperationException();
     }
 
     @Override
-    public EstablishChannelResponse establish(EstablishChannel req) {
-	return c.establish(req);
+    public BindingResult execute(Body body, Map<String, String> parameters, List<Attachment> attachments) {
+	//TODO use annotations to find the right function
+	return c.execute(body, parameters, attachments);
     }
 
     @Override
-    public byte[] applySM(byte[] commandAPDU) {
-	return c.applySM(commandAPDU);
-    }
-
-    @Override
-    public byte[] removeSM(byte[] responseAPDU) {
-	return c.removeSM(responseAPDU);
-    }
-
-    @Override
-    public void init(Context aCtx) throws FactoryInitializationException {
-	c = super.initialize(aCtx, IFDProtocol.class);
+    public void init(Context ctx) throws ActionInitializationException {
+	c = loadInstance(ctx, AppPluginAction.class);
     }
 
     @Override

@@ -34,24 +34,32 @@ import javax.xml.bind.annotation.XmlType;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@XmlRootElement(name = "AppExtensionActionDescription")
-@XmlType(propOrder = { "id", "className", "localizedName", "localizedDescription", "configDescription" })
-public class AppExtensionActionDescription {
+@XmlRootElement(name = "ProtocolPluginSpecification")
+@XmlType(propOrder = { "uri", "className", "localizedName", "localizedDescription", "configDescription" })
+public class ProtocolPluginSpecification {
 
-    private String id;
     private String className;
+    private String uri;
     private final List<LocalizedString> localizedName = new ArrayList<LocalizedString>();
     private final List<LocalizedString> localizedDescription = new ArrayList<LocalizedString>();
     private Configuration configDescription;
 
-    @XmlElement(name = "ID")
-    public String getId() {
-	return id;
-    }
-
     @XmlElement(name = "ClassName")
     public String getClassName() {
 	return className;
+    }
+
+    public void setClassName(String className) {
+	this.className = className;
+    }
+
+    @XmlElement(name = "URI")
+    public String getUri() {
+	return uri;
+    }
+
+    public void setUri(String uri) {
+	this.uri = uri;
     }
 
     @XmlElement(name = "LocalizedName")
@@ -69,40 +77,8 @@ public class AppExtensionActionDescription {
 	return configDescription;
     }
 
-    public void setId(String id) {
-	this.id = id;
-    }
-
-    public void setClassName(String className) {
-	this.className = className;
-    }
-
     public void setConfigDescription(Configuration configDescription) {
 	this.configDescription = configDescription;
-    }
-
-    public String getLocalizedName(String languageCode) {
-	String fallback = "No localized Name found.";
-	for (LocalizedString s : localizedName) {
-	    if (s.getLang().equalsIgnoreCase(languageCode)) {
-		return s.getValue();
-	    } else if (s.getLang().equalsIgnoreCase("EN")) {
-		fallback = s.getValue();
-	    }
-	}
-	return fallback;
-    }
-
-    public String getLocalizedDescription(String languageCode) {
-	String fallback = "No localized Description found.";
-	for (LocalizedString s : localizedDescription) {
-	    if (s.getLang().equalsIgnoreCase(languageCode)) {
-		return s.getValue();
-	    } else if (s.getLang().equalsIgnoreCase("EN")) {
-		fallback = s.getValue();
-	    }
-	}
-	return fallback;
     }
 
 }

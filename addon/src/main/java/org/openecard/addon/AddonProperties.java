@@ -29,7 +29,7 @@ package org.openecard.addon;
  */
 public class AddonProperties {
 
-    public Context _unnamed_Context_;
+    private Context ctx;
 
     public void loadProperties() {
 	throw new UnsupportedOperationException();
@@ -39,11 +39,11 @@ public class AddonProperties {
 	throw new UnsupportedOperationException();
     }
 
-    public void setProperty(String aKey, String aValue) {
+    public void setProperty(String key, String value) {
 	throw new UnsupportedOperationException();
     }
 
-    public void getProperty(String aKey) {
+    public String getProperty(String key) {
 	throw new UnsupportedOperationException();
     }
 

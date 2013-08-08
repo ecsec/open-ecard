@@ -53,7 +53,7 @@ import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
 import java.util.Map;
 import org.openecard.addon.AbstractFactory;
 import org.openecard.addon.Context;
-import org.openecard.addon.FactoryInitializationException;
+import org.openecard.addon.ActionInitializationException;
 
 
 /**
@@ -61,17 +61,12 @@ import org.openecard.addon.FactoryInitializationException;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class SALProtocolFactory extends AbstractFactory implements SALProtocol {
+public class SALProtocolProxy extends AbstractFactory<SALProtocol> implements SALProtocol {
 
     private SALProtocol c;
 
-    public SALProtocolFactory(String protocolClass, ClassLoader classLoader) {
+    public SALProtocolProxy(String protocolClass, ClassLoader classLoader) {
 	super(protocolClass, classLoader);
-    }
-
-    @Override
-    public ProtocolStep<?, ?>[] getSteps() {
-	return c.getSteps();
     }
 
     @Override
@@ -175,8 +170,8 @@ public class SALProtocolFactory extends AbstractFactory implements SALProtocol {
     }
 
     @Override
-    public void init(Context aCtx) throws FactoryInitializationException {
-	    c = super.initialize(aCtx, SALProtocol.class);
+    public void init(Context aCtx) throws ActionInitializationException {
+	c = loadInstance(aCtx, SALProtocol.class);
     }
 
     @Override

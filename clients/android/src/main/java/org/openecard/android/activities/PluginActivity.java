@@ -40,8 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.openecard.addon.AddonManager;
-import org.openecard.addon.manifest.AddonBundleDescription;
-import org.openecard.addon.manifest.AppExtensionActionDescription;
+import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.manifest.AppExtensionSpecification;
 import org.openecard.android.R;
 import org.openecard.common.I18n;
 
@@ -67,17 +67,17 @@ public class PluginActivity extends Activity {
     private static final String[] tabIndexes = new String[] { "1", "2", "3" };
     private static final String LANGUAGE_CODE = System.getProperty("user.language");
 
-    private AddonBundleDescription plugin;
+    private AddonSpecification plugin;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 	setContentView(R.layout.plugin);
 
-	Set<AddonBundleDescription> listPlugins = AddonManager.getInstance().getRegistry().listPlugins();
+	Set<AddonSpecification> listPlugins = AddonManager.getInstance().getRegistry().listPlugins();
 	List<String> pluginNames = new ArrayList<String>();
 
-	for (AddonBundleDescription addon : listPlugins) {
+	for (AddonSpecification addon : listPlugins) {
 	    pluginNames.add(addon.getLocalizedName(LANGUAGE_CODE));
 	}
 	int index = (Integer) getIntent().getExtras().get(PluginsActivity.PLUGIN_INDEX);
@@ -86,7 +86,7 @@ public class PluginActivity extends Activity {
 	setUpTabHost();
     }
 
-    public AddonBundleDescription getPlugin() {
+    public AddonSpecification getAddon() {
 	return plugin;
     }
 
@@ -199,7 +199,7 @@ public class PluginActivity extends Activity {
      */
     private List<? extends List<? extends Map<String, ?>>> createChildList() {
 	ArrayList<ArrayList<HashMap<String, String>>> result = new ArrayList<ArrayList<HashMap<String, String>>>();
-	for (AppExtensionActionDescription action : plugin.getApplicationActions()) {
+	for (AppExtensionSpecification action : plugin.getApplicationActions()) {
 	    ArrayList<HashMap<String, String>> secList = new ArrayList<HashMap<String, String>>();
 	    HashMap<String, String> child = new HashMap<String, String>();
 	    child.put(DESC, action.getLocalizedDescription(LANGUAGE_CODE));
@@ -216,7 +216,7 @@ public class PluginActivity extends Activity {
      */
     private List<? extends Map<String, ?>> createGroupList() {
 	ArrayList<HashMap<String, String>> result = new ArrayList<HashMap<String, String>>();
-	for (AppExtensionActionDescription action : plugin.getApplicationActions()) {
+	for (AppExtensionSpecification action : plugin.getApplicationActions()) {
 	    HashMap<String, String> m = new HashMap<String, String>();
 	    m.put(NAME, action.getLocalizedName(LANGUAGE_CODE));
 	    result.add(m);

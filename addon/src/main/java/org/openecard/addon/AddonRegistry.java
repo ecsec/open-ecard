@@ -23,7 +23,7 @@
 package org.openecard.addon;
 
 import java.util.Set;
-import org.openecard.addon.manifest.AddonBundleDescription;
+import org.openecard.addon.manifest.AddonSpecification;
 
 
 /**
@@ -33,16 +33,20 @@ import org.openecard.addon.manifest.AddonBundleDescription;
  */
 public interface AddonRegistry {
 
-    Set<AddonBundleDescription>listPlugins();
+    Set<AddonSpecification> listPlugins();
 
-    AddonBundleDescription search(String aId);
+    AddonSpecification search(String aId) throws AddonNotFoundException;
 
-    Set<AddonBundleDescription> searchByName(String aName);
+    Set<AddonSpecification> searchByName(String aName);
 
-    Set<AddonBundleDescription> searchByResourceName(String resourceName);
+    Set<AddonSpecification> searchIFDProtocol(String protocolUri);
 
-    Set<AddonBundleDescription> searchProtocol(String aUri);
+    Set<AddonSpecification> searchSALProtocol(String protocolUri);
 
-    ClassLoader downloadPlugin(String aId);
+    Set<AddonSpecification> searchByActionId(String actionId);
+
+    Set<AddonSpecification> searchByResourceName(String resourceName);
+
+    ClassLoader downloadPlugin(AddonSpecification addonSpec);
 
 }

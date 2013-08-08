@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<AddonBundleDescription>
+<AddonSpecification>
   <ID>PIN-Plugin</ID>
   <Version>1.0</Version>
   <About/>
@@ -12,7 +12,7 @@
   <ConfigDescription/>
   <BindingActions/>
   <ApplicationActions>
-<AppExtensionActionDescription>
+<AppExtensionSpecification>
       <ID>ChangePINAction</ID>
       <ClassName>org.openecard.plugins.pinplugin.ChangePINAction</ClassName>
       <LocalizedName xml:lang="DE">PIN ändern</LocalizedName>
@@ -20,8 +20,8 @@
       <LocalizedName xml:lang="EN">Change PIN</LocalizedName>
       <LocalizedDescription xml:lang="EN">With this action you can change your PIN.</LocalizedDescription>
       <ConfigDescription/>
-</AppExtensionActionDescription>
-<AppExtensionActionDescription>
+</AppExtensionSpecification>
+<AppExtensionSpecification>
       <ID>UnblockPINAction</ID>
       <ClassName>org.openecard.plugins.pinplugin.UnblockPINAction</ClassName>
       <LocalizedName xml:lang="DE">PIN entsperren</LocalizedName>
@@ -29,8 +29,8 @@
        <LocalizedName xml:lang="EN">Unblock PIN</LocalizedName>
       <LocalizedDescription xml:lang="EN">With this action you can unblock your PIN.</LocalizedDescription>
       <ConfigDescription/>
-</AppExtensionActionDescription>
+</AppExtensionSpecification>
   </ApplicationActions>
   <IFDActions/>
   <SALActions/>
-</AddonBundleDescription>
+</AddonSpecification>

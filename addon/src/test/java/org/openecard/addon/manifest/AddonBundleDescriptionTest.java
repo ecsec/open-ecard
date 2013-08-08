@@ -39,7 +39,7 @@ import static org.testng.Assert.assertEquals;
 
 
 /**
- * Test if an AddonBundleDescription is marshalled and unmarshalled properly.
+ * Test if an AddonSpecification is marshalled and unmarshalled properly.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
@@ -65,9 +65,9 @@ public class AddonBundleDescriptionTest {
 
 	// unmarshal it and check fields of POJO
 	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
-	marshaller.addXmlTypeClass(AddonBundleDescription.class);
+	marshaller.addXmlTypeClass(AddonSpecification.class);
 	Object o = marshaller.unmarshal(marshaller.str2doc(s));
-	AddonBundleDescription addonBundleDescription = (AddonBundleDescription) o;
+	AddonSpecification addonBundleDescription = (AddonSpecification) o;
 	assertEquals(addonBundleDescription.getBindingActions().get(0).getResourceName(), "test-Client");
 	byte[] actualLogo = addonBundleDescription.getLogoBytes();
 	InputStream logoStream = FileUtils.resolveResourceAsStream(AddonBundleDescriptionTest.class, OPENECARD_LOGO);

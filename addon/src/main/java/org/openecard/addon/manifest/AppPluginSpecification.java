@@ -27,6 +27,9 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import org.openecard.addon.bind.AttachmentType;
+import org.openecard.addon.bind.BodyType;
+import org.openecard.addon.bind.ParameterType;
 
 
 /**
@@ -34,32 +37,27 @@ import javax.xml.bind.annotation.XmlType;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@XmlRootElement(name = "ProtocolPluginDescription")
-@XmlType(propOrder = { "uri", "className", "localizedName", "localizedDescription", "configDescription" })
-public class ProtocolPluginDescription {
+@XmlRootElement(name = "AppPluginSpecification")
+@XmlType(propOrder = { "className", "localizedName", "localizedDescription", "resourceName", "configDescription" })
+public class AppPluginSpecification {
 
     private String className;
-    private String uri;
     private final List<LocalizedString> localizedName = new ArrayList<LocalizedString>();
     private final List<LocalizedString> localizedDescription = new ArrayList<LocalizedString>();
     private Configuration configDescription;
+    private final List<ParameterType> parameters = new ArrayList<ParameterType>();
+    private String resourceName;
+    private BodyType body;
+    private final List<AttachmentType> attachments = new ArrayList<AttachmentType>();
 
     @XmlElement(name = "ClassName")
     public String getClassName() {
 	return className;
     }
 
-    public void setClassName(String className) {
-	this.className = className;
-    }
-
-    @XmlElement(name = "URI")
-    public String getUri() {
-	return uri;
-    }
-
-    public void setUri(String uri) {
-	this.uri = uri;
+    @XmlElement(name = "ResourceName")
+    public String getResourceName() {
+	return resourceName;
     }
 
     @XmlElement(name = "LocalizedName")
@@ -77,8 +75,16 @@ public class ProtocolPluginDescription {
 	return configDescription;
     }
 
+    public void setClassName(String className) {
+	this.className = className;
+    }
+
     public void setConfigDescription(Configuration configDescription) {
 	this.configDescription = configDescription;
+    }
+
+    public void setResourceName(String resourceName) {
+	this.resourceName = resourceName;
     }
 
 }

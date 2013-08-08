@@ -75,7 +75,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
-import org.openecard.addon.manifest.AddonBundleDescription;
+import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.AuthDataMap;
@@ -759,8 +759,8 @@ public class AndroidMarshallerTest {
     public void testConversionOfAddonBundleDescription() throws Exception {
 	WSMarshaller m = new AndroidMarshaller();
 	Object o = m.unmarshal(m.str2doc(testAddonBundleDescripion));
-	if (!(o instanceof AddonBundleDescription)) {
-	    throw new Exception("Object should be an instace of AddonBundleDescription");
+	if (!(o instanceof AddonSpecification)) {
+	    throw new Exception("Object should be an instace of AddonSpecification");
 	}
 	JAXB.marshal(o, System.out);
     }

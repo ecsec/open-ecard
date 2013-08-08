@@ -22,15 +22,16 @@
 
 package org.openecard.addon;
 
+import java.util.Set;
+import org.openecard.addon.manifest.AddonSpecification;
+
 
 /**
- * 
+ *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public interface FactoryBaseType {
+public interface SelectionStrategy {
 
-    void init(Context aCtx) throws FactoryInitializationException;
-
-    void destroy();
+    AddonSpecification select(Set<AddonSpecification> addons);
 
 }

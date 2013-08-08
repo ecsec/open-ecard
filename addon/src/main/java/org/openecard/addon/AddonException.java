@@ -20,42 +20,27 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon.manifest;
-
-import java.util.List;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+package org.openecard.addon;
 
 
 /**
-*
-* @author Tobias Wich <tobias.wich@ecsec.de>
-* @author Dirk Petrautzki <petrautzki@hs-coburg.de>
-*/
-@XmlRootElement(name = "FileEntry")
-@XmlType(propOrder = { "key", "path", "localizedName", "localizedDescription" })
-public class FileEntry extends ConfigurationEntry {
+ *
+ * @author Tobias Wich <tobias.wich@ecsec.de>
+ */
+public class AddonException extends Exception {
 
-    private String path;
+    private static final long serialVersionUID = 1L;
 
-    @XmlElement(name = "path")
-    public String getPath() {
-	return path;
+    public AddonException(String message) {
+	super(message);
     }
 
-    @XmlElement(name = "Key")
-    public String getKey() {
-	return key;
+    public AddonException(Throwable cause) {
+	super(cause);
     }
 
-    @XmlElement(name = "LocalizedName")
-    public List<LocalizedString> getLocalizedName() {
-	return localizedName;
+    public AddonException(String message, Throwable cause) {
+	super(message, cause);
     }
 
-    @XmlElement(name = "LocalizedDescription")
-    public List<LocalizedString> getLocalizedDescription() {
-	return localizedDescription;
-    }
 }

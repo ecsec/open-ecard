@@ -34,10 +34,11 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.jci.monitor.FilesystemAlterationMonitor;
-import org.openecard.addon.manifest.AddonBundleDescription;
-import org.openecard.addon.manifest.AppPluginActionDescription;
+import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.manifest.AppExtensionSpecification;
+import org.openecard.addon.manifest.AppPluginSpecification;
 import org.openecard.addon.manifest.LocalizedString;
-import org.openecard.addon.manifest.ProtocolPluginDescription;
+import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.common.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,7 @@ public class FileRegistry implements AddonRegistry {
 
     private static final Logger logger = LoggerFactory.getLogger(FileRegistry.class.getName());
 
-    private static final ArrayList<AddonBundleDescription> registeredAddons = new ArrayList<AddonBundleDescription>();
+    private static final ArrayList<AddonSpecification> registeredAddons = new ArrayList<AddonSpecification>();
     private static final HashMap<String, File> files = new HashMap<String, File>();
     private static FileRegistry instance;
 
@@ -86,7 +87,7 @@ public class FileRegistry implements AddonRegistry {
 	return instance;
     }
 
-    public void register(AddonBundleDescription desc, File file) {
+    public void register(AddonSpecification desc, File file) {
 	registeredAddons.add(desc);
 	files.put(desc.getId(), file);
     }
@@ -98,7 +99,7 @@ public class FileRegistry implements AddonRegistry {
 	    Entry<String, File> next = iterator.next();
 	    if (next.getValue().equals(file)) {
 		String id = next.getKey();
-		AddonBundleDescription desc = this.search(id);
+		AddonSpecification desc = this.search(id);
 		registeredAddons.remove(desc);
 		files.remove(id);
 		logger.debug("Successfully removed addon {}", file.getName());
@@ -108,15 +109,15 @@ public class FileRegistry implements AddonRegistry {
     }
 
     @Override
-    public Set<AddonBundleDescription> listPlugins() {
-	Set<AddonBundleDescription> list = new HashSet<AddonBundleDescription>();
+    public Set<AddonSpecification> listPlugins() {
+	Set<AddonSpecification> list = new HashSet<AddonSpecification>();
 	list.addAll(registeredAddons);
 	return list;
     }
 
     @Override
-    public AddonBundleDescription search(String id) {
-	for (AddonBundleDescription desc : registeredAddons) {
+    public AddonSpecification search(String id) {
+	for (AddonSpecification desc : registeredAddons) {
 	    if (desc.getId().equals(id)) {
 		return desc;
 	    }
@@ -125,9 +126,9 @@ public class FileRegistry implements AddonRegistry {
     }
 
     @Override
-    public Set<AddonBundleDescription> searchByName(String name) {
-	Set<AddonBundleDescription> matchingAddons = new HashSet<AddonBundleDescription>();
-	for (AddonBundleDescription desc : registeredAddons) {
+    public Set<AddonSpecification> searchByName(String name) {
+	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	for (AddonSpecification desc : registeredAddons) {
 	    for (LocalizedString s : desc.getLocalizedName()) {
 		if (s.getValue().equals(name)) {
 		    matchingAddons.add(desc);
@@ -138,14 +139,10 @@ public class FileRegistry implements AddonRegistry {
     }
 
     @Override
-    public Set<AddonBundleDescription> searchProtocol(String uri) {
-	Set<AddonBundleDescription> matchingAddons = new HashSet<AddonBundleDescription>();
-	for (AddonBundleDescription desc : registeredAddons) {
-	    ProtocolPluginDescription protocolDesc = desc.searchIFDActionByURI(uri);
-	    if (protocolDesc != null) {
-		matchingAddons.add(desc);
-	    }
-	    protocolDesc = desc.searchSALActionByURI(uri);
+    public Set<AddonSpecification> searchIFDProtocol(String uri) {
+	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	for (AddonSpecification desc : registeredAddons) {
+	    ProtocolPluginSpecification protocolDesc = desc.searchIFDActionByURI(uri);
 	    if (protocolDesc != null) {
 		matchingAddons.add(desc);
 	    }
@@ -154,24 +151,49 @@ public class FileRegistry implements AddonRegistry {
     }
 
     @Override
-    public ClassLoader downloadPlugin(String aId) {
+    public Set<AddonSpecification> searchSALProtocol(String uri) {
+	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	for (AddonSpecification desc : registeredAddons) {
+	    ProtocolPluginSpecification protocolDesc = desc.searchSALActionByURI(uri);
+	    if (protocolDesc != null) {
+		matchingAddons.add(desc);
+	    }
+	}
+	return matchingAddons;
+    }
+
+    @Override
+    public ClassLoader downloadPlugin(AddonSpecification addonSpec) {
+	String aId = addonSpec.getId();
 	// TODO use other own classloader impl with security features
 	URL[] url = new URL[1];
 	try {
 	    url[0] = files.get(aId).toURI().toURL();
 	} catch (MalformedURLException e) {
 	    // TODO will this ever happen?
-	    e.printStackTrace();
+	    logger.error(e.getMessage(), e);
 	}
 	URLClassLoader ucl = new URLClassLoader(url);
 	return ucl;
     }
 
     @Override
-    public Set<AddonBundleDescription> searchByResourceName(String resourceName) {
-	Set<AddonBundleDescription> matchingAddons = new HashSet<AddonBundleDescription>();
-	for (AddonBundleDescription desc : registeredAddons) {
-	    AppPluginActionDescription actionDesc = desc.searchByResourceName(resourceName);
+    public Set<AddonSpecification> searchByResourceName(String resourceName) {
+	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	for (AddonSpecification desc : registeredAddons) {
+	    AppPluginSpecification actionDesc = desc.searchByResourceName(resourceName);
+	    if (actionDesc != null) {
+		matchingAddons.add(desc);
+	    }
+	}
+	return matchingAddons;
+    }
+
+    @Override
+    public Set<AddonSpecification> searchByActionId(String actionId) {
+	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	for (AddonSpecification desc : registeredAddons) {
+	    AppExtensionSpecification actionDesc = desc.searchByActionId(actionId);
 	    if (actionDesc != null) {
 		matchingAddons.add(desc);
 	    }

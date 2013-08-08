@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,19 +20,27 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon.bind;
-
-import java.util.List;
-import java.util.Map;
-import org.openecard.addon.LifecycleTrait;
+package org.openecard.addon;
 
 
 /**
- *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * 
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public interface AppPluginAction extends LifecycleTrait {
+public class ActionInitializationException extends AddonException {
 
-    BindingResult execute(Body body, Map<String, String> parameters, List<Attachment> attachments);
+    private static final long serialVersionUID = -2587833834285178408L;
+
+    public ActionInitializationException(String message, Throwable e) {
+	super(message, e);
+    }
+
+    public ActionInitializationException(String message) {
+	super(message);
+    }
+
+    public ActionInitializationException(Throwable e) {
+	super(e);
+    }
 
 }

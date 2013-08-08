@@ -22,14 +22,14 @@
 
 package org.openecard.addon.bind;
 
-import org.openecard.addon.FactoryBaseType;
+import org.openecard.addon.LifecycleTrait;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public interface AppExtensionAction extends FactoryBaseType {
+public interface AppExtensionAction extends LifecycleTrait {
 
     void execute();
 

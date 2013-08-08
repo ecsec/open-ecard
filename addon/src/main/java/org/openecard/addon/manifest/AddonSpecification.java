@@ -41,12 +41,12 @@ import org.slf4j.LoggerFactory;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@XmlRootElement(name = "AddonBundleDescription")
+@XmlRootElement(name = "AddonSpecification")
 @XmlType(propOrder = { "id", "version", "license", "localizedName", "localizedDescription", "about", "logo",
 	"configDescription", "bindingActions", "applicationActions", "ifdActions", "salActions" })
-public class AddonBundleDescription {
+public class AddonSpecification {
 
-    private static final Logger logger = LoggerFactory.getLogger(AddonBundleDescription.class);
+    private static final Logger logger = LoggerFactory.getLogger(AddonSpecification.class);
 
     private String id;
     private String logoFile;
@@ -57,10 +57,10 @@ public class AddonBundleDescription {
     private final List<LocalizedString> localizedName = new ArrayList<LocalizedString>();
     private final List<LocalizedString> localizedDescription = new ArrayList<LocalizedString>();
     private final List<LocalizedString> about = new ArrayList<LocalizedString>();
-    private final ArrayList<AppExtensionActionDescription> appExtensionActions = new ArrayList<AppExtensionActionDescription>();
-    private final ArrayList<AppPluginActionDescription> appPluginActions = new ArrayList<AppPluginActionDescription>();
-    private final ArrayList<ProtocolPluginDescription> ifdActions = new ArrayList<ProtocolPluginDescription>();
-    private final ArrayList<ProtocolPluginDescription> salActions = new ArrayList<ProtocolPluginDescription>();
+    private final ArrayList<AppExtensionSpecification> appExtensionActions = new ArrayList<AppExtensionSpecification>();
+    private final ArrayList<AppPluginSpecification> appPluginActions = new ArrayList<AppPluginSpecification>();
+    private final ArrayList<ProtocolPluginSpecification> ifdActions = new ArrayList<ProtocolPluginSpecification>();
+    private final ArrayList<ProtocolPluginSpecification> salActions = new ArrayList<ProtocolPluginSpecification>();
 
     @XmlElement(name = "ID")
     public String getId() {
@@ -127,26 +127,26 @@ public class AddonBundleDescription {
     }
 
     @XmlElementWrapper(name = "BindingActions")
-    @XmlElement(name = "AppPluginActionDescription")
-    public ArrayList<AppPluginActionDescription> getBindingActions() {
+    @XmlElement(name = "AppPluginSpecification")
+    public ArrayList<AppPluginSpecification> getBindingActions() {
 	return appPluginActions;
     }
 
     @XmlElementWrapper(name = "IFDActions")
-    @XmlElement(name = "ProtocolPluginDescription")
-    public ArrayList<ProtocolPluginDescription> getIfdActions() {
+    @XmlElement(name = "ProtocolPluginSpecification")
+    public ArrayList<ProtocolPluginSpecification> getIfdActions() {
 	return ifdActions;
     }
 
     @XmlElementWrapper(name = "ApplicationActions")
-    @XmlElement(name = "AppExtensionActionDescription")
-    public ArrayList<AppExtensionActionDescription> getApplicationActions() {
+    @XmlElement(name = "AppExtensionSpecification")
+    public ArrayList<AppExtensionSpecification> getApplicationActions() {
 	return appExtensionActions;
     }
 
     @XmlElementWrapper(name = "SALActions")
-    @XmlElement(name = "ProtocolPluginDescription")
-    public ArrayList<ProtocolPluginDescription> getSalActions() {
+    @XmlElement(name = "ProtocolPluginSpecification")
+    public ArrayList<ProtocolPluginSpecification> getSalActions() {
 	return salActions;
     }
 
@@ -165,7 +165,7 @@ public class AddonBundleDescription {
 	if (logoFile != null && !logoFile.isEmpty()) {
 	    try {
 		// TODO security checks and maybe modified loading
-		InputStream logoStream = FileUtils.resolveResourceAsStream(AddonBundleDescription.class, logoFile);
+		InputStream logoStream = FileUtils.resolveResourceAsStream(AddonSpecification.class, logoFile);
 		this.logoBytes = FileUtils.toByteArray(logoStream);
 	    } catch (FileNotFoundException e) {
 		logger.error("Logo file couldn't be found.", e);
@@ -193,8 +193,8 @@ public class AddonBundleDescription {
 	this.configDescription = configDescription;
     }
 
-    public AppPluginActionDescription searchByResourceName(String resourceName) {
-	for (AppPluginActionDescription desc : appPluginActions) {
+    public AppPluginSpecification searchByResourceName(String resourceName) {
+	for (AppPluginSpecification desc : appPluginActions) {
 	    if (resourceName.equals(desc.getResourceName())) {
 		return desc;
 	    }
@@ -202,8 +202,8 @@ public class AddonBundleDescription {
 	return null;
     }
 
-    public AppExtensionActionDescription searchByActionId(String id) {
-	for (AppExtensionActionDescription desc : appExtensionActions) {
+    public AppExtensionSpecification searchByActionId(String id) {
+	for (AppExtensionSpecification desc : appExtensionActions) {
 	    if (desc.getId().equals(id)) {
 		return desc;
 	    }
@@ -211,8 +211,8 @@ public class AddonBundleDescription {
 	return null;
     }
 
-    public ProtocolPluginDescription searchIFDActionByURI(String uri) {
-	for (ProtocolPluginDescription desc : ifdActions) {
+    public ProtocolPluginSpecification searchIFDActionByURI(String uri) {
+	for (ProtocolPluginSpecification desc : ifdActions) {
 	    if (desc.getUri().equals(uri)) {
 		return desc;
 	    }
@@ -220,8 +220,8 @@ public class AddonBundleDescription {
 	return null;
     }
 
-    public ProtocolPluginDescription searchSALActionByURI(String uri) {
-	for (ProtocolPluginDescription desc : salActions) {
+    public ProtocolPluginSpecification searchSALActionByURI(String uri) {
+	for (ProtocolPluginSpecification desc : salActions) {
 	    if (desc.getUri().equals(uri)) {
 		return desc;
 	    }

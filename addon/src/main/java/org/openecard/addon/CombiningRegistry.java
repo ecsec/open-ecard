@@ -23,7 +23,7 @@
 package org.openecard.addon;
 
 import java.util.Set;
-import org.openecard.addon.manifest.AddonBundleDescription;
+import org.openecard.addon.manifest.AddonSpecification;
 
 
 /**
@@ -51,20 +51,20 @@ public class CombiningRegistry implements AddonRegistry {
 	fileRegistry = FileRegistry.getInstance();
     }
 
-    public void register(AddonBundleDescription desc) {
+    public void register(AddonSpecification desc) {
 	throw new UnsupportedOperationException("Not supported.");
     }
 
     @Override
-    public Set<AddonBundleDescription> listPlugins() {
-	Set<AddonBundleDescription> list = classpathRegistry.listPlugins();
+    public Set<AddonSpecification> listPlugins() {
+	Set<AddonSpecification> list = classpathRegistry.listPlugins();
 	list.addAll(fileRegistry.listPlugins());
 	return list;
     }
 
     @Override
-    public AddonBundleDescription search(String id) {
-	AddonBundleDescription desc = classpathRegistry.search(id);
+    public AddonSpecification search(String id) {
+	AddonSpecification desc = classpathRegistry.search(id);
 	if (desc == null) {
 	    desc = fileRegistry.search(id);
 	}
@@ -72,8 +72,8 @@ public class CombiningRegistry implements AddonRegistry {
     }
 
     @Override
-    public Set<AddonBundleDescription> searchByName(String name) {
-	Set<AddonBundleDescription> searchByName = classpathRegistry.searchByName(name);
+    public Set<AddonSpecification> searchByName(String name) {
+	Set<AddonSpecification> searchByName = classpathRegistry.searchByName(name);
 	if (searchByName.isEmpty()) {
 	    searchByName = fileRegistry.searchByName(name);
 	}
@@ -81,30 +81,47 @@ public class CombiningRegistry implements AddonRegistry {
     }
 
     @Override
-    public Set<AddonBundleDescription> searchProtocol(String uri) {
-	Set<AddonBundleDescription> matchingAddons = classpathRegistry.searchProtocol(uri);
+    public Set<AddonSpecification> searchIFDProtocol(String uri) {
+	Set<AddonSpecification> matchingAddons = classpathRegistry.searchIFDProtocol(uri);
 	if (matchingAddons.isEmpty()) {
-	    matchingAddons = fileRegistry.searchProtocol(uri);
+	    matchingAddons = fileRegistry.searchIFDProtocol(uri);
 	}
 	return matchingAddons;
     }
 
     @Override
-    public ClassLoader downloadPlugin(String aId) {
-	AddonBundleDescription desc = classpathRegistry.search(aId);
-	if (desc != null) {
-	    return classpathRegistry.downloadPlugin(aId);
-	} else {
-	    return fileRegistry.downloadPlugin(aId);
+    public Set<AddonSpecification> searchSALProtocol(String uri) {
+	Set<AddonSpecification> matchingAddons = classpathRegistry.searchSALProtocol(uri);
+	if (matchingAddons.isEmpty()) {
+	    matchingAddons = fileRegistry.searchSALProtocol(uri);
 	}
-
+	return matchingAddons;
     }
 
     @Override
-    public Set<AddonBundleDescription> searchByResourceName(String resourceName) {
-	Set<AddonBundleDescription> matchingAddons = classpathRegistry.searchByResourceName(resourceName);
+    public ClassLoader downloadPlugin(AddonSpecification addonSpec) {
+	AddonSpecification desc = classpathRegistry.search(addonSpec.getId());
+	if (desc != null) {
+	    return classpathRegistry.downloadPlugin(addonSpec);
+	} else {
+	    return fileRegistry.downloadPlugin(addonSpec);
+	}
+    }
+
+    @Override
+    public Set<AddonSpecification> searchByResourceName(String resourceName) {
+	Set<AddonSpecification> matchingAddons = classpathRegistry.searchByResourceName(resourceName);
 	if (matchingAddons.isEmpty()) {
 	    matchingAddons = fileRegistry.searchByResourceName(resourceName);
+	}
+	return matchingAddons;
+    }
+
+    @Override
+    public Set<AddonSpecification> searchByActionId(String actionId) {
+	Set<AddonSpecification> matchingAddons = classpathRegistry.searchByActionId(actionId);
+	if (matchingAddons.isEmpty()) {
+	    matchingAddons = fileRegistry.searchByResourceName(actionId);
 	}
 	return matchingAddons;
     }

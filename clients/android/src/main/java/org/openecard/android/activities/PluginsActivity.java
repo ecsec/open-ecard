@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.openecard.addon.AddonManager;
-import org.openecard.addon.manifest.AddonBundleDescription;
+import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.android.R;
 
 
@@ -62,10 +62,10 @@ public class PluginsActivity extends Activity {
      */
     private void setUpListViewPlugins() {
 	ListView listViewPlugins = (ListView) findViewById(R.id.listViewPlugins);
-	Set<AddonBundleDescription> listPlugins = AddonManager.getInstance().getRegistry().listPlugins();
+	Set<AddonSpecification> listPlugins = AddonManager.getInstance().getRegistry().listPlugins();
 	List<String> pluginNames = new ArrayList<String>();
 
-	for (AddonBundleDescription addon : listPlugins) {
+	for (AddonSpecification addon : listPlugins) {
 	    pluginNames.add(addon.getLocalizedName(LANGUAGE_CODE));
 	}
 

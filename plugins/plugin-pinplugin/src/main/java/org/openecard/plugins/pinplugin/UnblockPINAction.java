@@ -26,7 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.Disconnect;
 import java.lang.reflect.InvocationTargetException;
 import org.openecard.addon.Context;
-import org.openecard.addon.FactoryInitializationException;
+import org.openecard.addon.ActionInitializationException;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.plugins.pinplugin.gui.UnblockPINDialog;
@@ -78,7 +78,7 @@ public class UnblockPINAction extends AbstractPINAction {
     }
 
     @Override
-    public void init(Context aCtx) throws FactoryInitializationException {
+    public void init(Context aCtx) throws ActionInitializationException {
 	this.dispatcher = aCtx.getDispatcher();
 	this.gui = aCtx.getUserConsent();
 	this.recognition = aCtx.getRecognition();

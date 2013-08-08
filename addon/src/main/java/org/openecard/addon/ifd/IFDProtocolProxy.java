@@ -20,12 +20,13 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon.bind;
+package org.openecard.addon.ifd;
 
-import java.util.Map;
+import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
+import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import org.openecard.addon.AbstractFactory;
 import org.openecard.addon.Context;
-import org.openecard.addon.FactoryInitializationException;
+import org.openecard.addon.ActionInitializationException;
 
 
 /**
@@ -33,32 +34,37 @@ import org.openecard.addon.FactoryInitializationException;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class AppPluginActionFactory  extends AbstractFactory implements AppPluginAction {
+public class IFDProtocolProxy extends AbstractFactory<IFDProtocol> implements IFDProtocol {
 
-    private AppPluginAction c;
+    private IFDProtocol c;
 
-    public AppPluginActionFactory(String implClass, ClassLoader classLoader) {
-	super(implClass, classLoader);
-    }
-
-    public void getActionDescription() {
-	throw new UnsupportedOperationException();
+    public IFDProtocolProxy(String protocolClass, ClassLoader classLoader) {
+	super(protocolClass, classLoader);
     }
 
     @Override
-    public BindingResult execute(Body body, Map<String, String> parameters, Attachment attachments) {
-	//TODO use annotations to find the right function
-	return c.execute(body, parameters, attachments);
+    public EstablishChannelResponse establish(EstablishChannel req) {
+	return c.establish(req);
+    }
+
+    @Override
+    public byte[] applySM(byte[] commandAPDU) {
+	return c.applySM(commandAPDU);
+    }
+
+    @Override
+    public byte[] removeSM(byte[] responseAPDU) {
+	return c.removeSM(responseAPDU);
+    }
+
+    @Override
+    public void init(Context aCtx) throws ActionInitializationException {
+	c = loadInstance(aCtx, IFDProtocol.class);
     }
 
     @Override
     public void destroy() {
 	c.destroy();
-    }
-
-    @Override
-    public void init(Context aCtx) throws FactoryInitializationException {
-	c = super.initialize(aCtx, AppPluginAction.class);
     }
 
 }

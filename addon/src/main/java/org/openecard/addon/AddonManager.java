@@ -22,18 +22,19 @@
 
 package org.openecard.addon;
 
+import javax.annotation.Nonnull;
 import org.openecard.addon.bind.AppExtensionAction;
-import org.openecard.addon.bind.AppExtensionActionFactory;
+import org.openecard.addon.bind.AppExtensionActionProxy;
 import org.openecard.addon.bind.AppPluginAction;
-import org.openecard.addon.bind.AppPluginActionFactory;
+import org.openecard.addon.bind.AppPluginActionProxy;
 import org.openecard.addon.ifd.IFDProtocol;
-import org.openecard.addon.ifd.IFDProtocolFactory;
-import org.openecard.addon.manifest.AddonBundleDescription;
-import org.openecard.addon.manifest.AppExtensionActionDescription;
-import org.openecard.addon.manifest.AppPluginActionDescription;
-import org.openecard.addon.manifest.ProtocolPluginDescription;
+import org.openecard.addon.ifd.IFDProtocolProxy;
+import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.manifest.AppExtensionSpecification;
+import org.openecard.addon.manifest.AppPluginSpecification;
+import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.addon.sal.SALProtocol;
-import org.openecard.addon.sal.SALProtocolFactory;
+import org.openecard.addon.sal.SALProtocolProxy;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.interfaces.ProtocolInfo;
@@ -52,17 +53,19 @@ import org.slf4j.LoggerFactory;
 public class AddonManager {
 
     private static final Logger logger = LoggerFactory.getLogger(AddonManager.class);
-    private AddonRegistry registry = CombiningRegistry.getInstance();
-    private Dispatcher dispatcher;
-    private UserConsent userConsent;
-    private CardStateMap cardStates;
-    private CardRecognition recognition;
-    private EventManager eventManager;
-    private ProtocolInfo protocolInfo;
-    private EventHandler eventHandler;
+
     private static AddonManager instance;
+    private final AddonRegistry registry;
+    private final Dispatcher dispatcher;
+    private final UserConsent userConsent;
+    private final CardStateMap cardStates;
+    private final CardRecognition recognition;
+    private final EventManager eventManager;
+    private final ProtocolInfo protocolInfo;
+    private final EventHandler eventHandler;
 
     private AddonManager(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition, EventManager eventManager, ProtocolInfo info) {
+	this.registry = CombiningRegistry.getInstance();
 	this.dispatcher = dispatcher;
 	this.userConsent = userConsent;
 	this.cardStates = cardStates;
@@ -81,69 +84,69 @@ public class AddonManager {
 	return instance;
     }
 
+
     public AddonRegistry getRegistry() {
 	return registry;
     }
 
-    public IFDProtocol getIFDAction(String uri) {
-	AddonBundleDescription addonBundleDescription = registry.searchProtocol(uri).iterator().next();
-	ProtocolPluginDescription searchByResourceName = addonBundleDescription.searchSALActionByURI(uri);
-	String className = searchByResourceName.getClassName();
-	IFDProtocolFactory appPluginActionFactory = new IFDProtocolFactory(className, registry.downloadPlugin(addonBundleDescription.getId()));
+    public IFDProtocol getIFDProtocol(@Nonnull AddonSpecification addonSpec, @Nonnull String uri) {
+	ProtocolPluginSpecification protoSpec = addonSpec.searchIFDActionByURI(uri);
+	String className = protoSpec.getClassName();
+	ClassLoader cl = registry.downloadPlugin(addonSpec);
+	IFDProtocolProxy protoFactory = new IFDProtocolProxy(className, cl);
 	try {
 	    Context aCtx = new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler);
-	    appPluginActionFactory.init(aCtx);
-	    return appPluginActionFactory;
-	} catch (FactoryInitializationException e) {
-	    logger.error("Initialization of IFDAction failed", e);
+	    protoFactory.init(aCtx);
+	    return protoFactory;
+	} catch (ActionInitializationException e) {
+	    logger.error("Initialization of IFD Protocol failed", e);
 	}
 	return null;
     }
 
-    public SALProtocol getSALAction(String uri) {
-	AddonBundleDescription addonBundleDescription = registry.searchProtocol(uri).iterator().next();
-	ProtocolPluginDescription searchByResourceName = addonBundleDescription.searchSALActionByURI(uri);
-	String className = searchByResourceName.getClassName();
-	SALProtocolFactory appPluginActionFactory = new SALProtocolFactory(className, registry.downloadPlugin(addonBundleDescription.getId()));
+    public SALProtocol getSALProtocol(@Nonnull AddonSpecification addonSpec, @Nonnull String uri) {
+	ProtocolPluginSpecification protoSpec = addonSpec.searchIFDActionByURI(uri);
+	String className = protoSpec.getClassName();
+	ClassLoader cl = registry.downloadPlugin(addonSpec);
+	SALProtocolProxy protoFactory = new SALProtocolProxy(className, cl);
 	try {
 	    Context aCtx = new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler);
-	    appPluginActionFactory.init(aCtx);
-	    return appPluginActionFactory;
-	} catch (FactoryInitializationException e) {
-	    logger.error("Initialization of SALAction failed", e);
-	    return null;
+	    protoFactory.init(aCtx);
+	    return protoFactory;
+	} catch (ActionInitializationException e) {
+	    logger.error("Initialization of SAL Protocol failed", e);
 	}
+	return null;
     }
 
-    public AppExtensionAction getAppExtensionAction(String pluginId, String actionId) {
-	AddonBundleDescription addonBundleDescription = registry.search(pluginId);
-	AppExtensionActionDescription searchByResourceName = addonBundleDescription.searchByActionId(actionId);
-	String className = searchByResourceName.getClassName();
-	AppExtensionActionFactory appPluginActionFactory = new AppExtensionActionFactory(className, registry.downloadPlugin(pluginId));
+    public AppExtensionAction getAppExtensionAction(@Nonnull AddonSpecification addonSpec, @Nonnull String actionId) {
+	AppExtensionSpecification protoSpec = addonSpec.searchByActionId(actionId);
+	String className = protoSpec.getClassName();
+	ClassLoader cl = registry.downloadPlugin(addonSpec);
+	AppExtensionActionProxy protoFactory = new AppExtensionActionProxy(className, cl);
 	try {
-	    Context ctx = new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler);
-	    appPluginActionFactory.init(ctx);
-	    return appPluginActionFactory;
-	} catch (FactoryInitializationException e) {
+	    Context aCtx = new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler);
+	    protoFactory.init(aCtx);
+	    return protoFactory;
+	} catch (ActionInitializationException e) {
 	    logger.error("Initialization of AppExtensionAction failed", e);
-	    return null;
 	}
+	return null;
     }
 
-    public AppPluginAction getAppPluginAction(String pluginId, String resourceName) {
-	AddonBundleDescription addonBundleDescription = registry.search(pluginId);
-	AppPluginActionDescription searchByResourceName = addonBundleDescription.searchByResourceName(resourceName);
-	// TODO may be null
-	String className = searchByResourceName.getClassName();
-	AppPluginActionFactory appPluginActionFactory = new AppPluginActionFactory(className, registry.downloadPlugin(pluginId));
+    public AppPluginAction getAppPluginAction(@Nonnull AddonSpecification addonSpec, @Nonnull String resourceName) {
+	AppPluginSpecification protoSpec = addonSpec.searchByResourceName(resourceName);
+	String className = protoSpec.getClassName();
+	ClassLoader cl = registry.downloadPlugin(addonSpec);
+	AppPluginActionProxy protoFactory = new AppPluginActionProxy(className, cl);
 	try {
 	    Context aCtx = new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler);
-	    appPluginActionFactory.init(aCtx);
-	    return appPluginActionFactory;
-	} catch (FactoryInitializationException e) {
+	    protoFactory.init(aCtx);
+	    return protoFactory;
+	} catch (ActionInitializationException e) {
 	    logger.error("Initialization of AppPluginAction failed", e);
-	    return null;
 	}
+	return null;
     }
 
 }

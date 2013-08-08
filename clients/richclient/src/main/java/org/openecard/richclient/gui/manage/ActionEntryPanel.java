@@ -36,7 +36,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.bind.AppExtensionAction;
-import org.openecard.addon.manifest.AppExtensionActionDescription;
+import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.manifest.AppExtensionSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,14 +59,14 @@ public class ActionEntryPanel extends JPanel {
     /**
      * Creates an entry without the actual action added.
      *
-     * @param addonId Id of the addon this action belongs to.
-     * @param actionDescription ActionDescription for which this ActionEntryPanel is constructed.
+     * @param addonSpec Id of the addon this action belongs to.
+     * @param actionSpec ActionDescription for which this ActionEntryPanel is constructed.
      */
-    public ActionEntryPanel(@Nonnull String addonId, @Nonnull AppExtensionActionDescription actionDescription) {
+    public ActionEntryPanel(@Nonnull AddonSpecification addonSpec, @Nonnull AppExtensionSpecification actionSpec) {
 	setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
-	String name = actionDescription.getLocalizedName(LANGUAGE_CODE);
-	String description = actionDescription.getLocalizedDescription(LANGUAGE_CODE);
+	String name = actionSpec.getLocalizedName(LANGUAGE_CODE);
+	String description = actionSpec.getLocalizedDescription(LANGUAGE_CODE);
 
 	actionBtn = new JButton(name);
 	add(actionBtn);
@@ -78,7 +79,7 @@ public class ActionEntryPanel extends JPanel {
 	add(desc);
 
 	AddonManager manager = AddonManager.getInstance();
-	AppExtensionAction action = manager.getAppExtensionAction(addonId, actionDescription.getId());
+	AppExtensionAction action = manager.getAppExtensionAction(addonSpec, actionSpec.getId());
 	addAction(action);
     }
 

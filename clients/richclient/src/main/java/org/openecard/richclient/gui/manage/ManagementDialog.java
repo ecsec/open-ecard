@@ -50,8 +50,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.openecard.addon.ClasspathRegistry;
 import org.openecard.addon.FileRegistry;
-import org.openecard.addon.manifest.AddonBundleDescription;
-import org.openecard.addon.manifest.AppExtensionActionDescription;
+import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.manifest.AppExtensionSpecification;
 import org.openecard.common.I18n;
 import org.openecard.common.util.FileUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
@@ -211,8 +211,8 @@ public class ManagementDialog extends JDialog {
 
 	// this assumes that all addons in the ClasspathRegistry are core addons
 	// an ActionPanel for every addon that has one ore more AppExtensionActions will be added
-	for (AddonBundleDescription desc : ClasspathRegistry.getInstance().listPlugins()) {
-	    ArrayList<AppExtensionActionDescription> applicationActions = desc.getApplicationActions();
+	for (AddonSpecification desc : ClasspathRegistry.getInstance().listPlugins()) {
+	    ArrayList<AppExtensionSpecification> applicationActions = desc.getApplicationActions();
 	    if (applicationActions.size() > 0) {
 		String description  = desc.getLocalizedDescription(LANGUAGE_CODE);
 		String name = desc.getLocalizedName(LANGUAGE_CODE);
@@ -229,13 +229,13 @@ public class ManagementDialog extends JDialog {
     /**
      * Creates an ActionPanel that has an ActionEntryPanel for every AppExtensionAction of the given addon.
      * 
-     * @param desc AddonBundleDescription for the addon
+     * @param desc AddonSpecification for the addon
      * @return the created ActionPanel
      */
-    private ActionPanel createActionPanel(AddonBundleDescription desc) {
+    private ActionPanel createActionPanel(AddonSpecification desc) {
 	ActionPanel actionPanel = new ActionPanel();
-	for (AppExtensionActionDescription action : desc.getApplicationActions()) {
-	    ActionEntryPanel actionEntryPanel = new ActionEntryPanel(desc.getId(), action);
+	for (AppExtensionSpecification action : desc.getApplicationActions()) {
+	    ActionEntryPanel actionEntryPanel = new ActionEntryPanel(desc, action);
 	    actionPanel.addActionEntry(actionEntryPanel);
 	}
 	return actionPanel;
@@ -289,7 +289,7 @@ public class ManagementDialog extends JDialog {
 	// add addon panels
 
 	// this assumes that all addons in the FileRegistry are non core addons
-	for (AddonBundleDescription desc : FileRegistry.getInstance().listPlugins()) {
+	for (AddonSpecification desc : FileRegistry.getInstance().listPlugins()) {
 	    String description = desc.getLocalizedDescription(LANGUAGE_CODE);
 	    String name = desc.getLocalizedName(LANGUAGE_CODE);
 	    Image logo = loadLogo(desc.getLogo());

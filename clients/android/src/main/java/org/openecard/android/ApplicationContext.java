@@ -365,7 +365,7 @@ public class ApplicationContext extends Application implements EventCallback {
 	ClasspathRegistry.getInstance().register((AddonSpecification) marshaller.unmarshal(manifestDoc));
 	manifestStream = FileUtils.resolveResourceAsStream(ChangePINAction.class, "PIN-Plugin-Manifest.xml");
 	manifestDoc = marshaller.str2doc(manifestStream);
-	ClasspathRegistry.getInstance().register((AddonBundleDescription) marshaller.unmarshal(manifestDoc));
+	ClasspathRegistry.getInstance().register((AddonSpecification) marshaller.unmarshal(manifestDoc));
     }
 
     @Override

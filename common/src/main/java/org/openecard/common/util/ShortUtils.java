@@ -49,7 +49,18 @@ public class ShortUtils {
      * @return byte[]
      */
     public static byte[] toByteArray(short value, int numBits) {
-	return LongUtils.toByteArray(value, numBits);
+	return toByteArray(value, numBits, true);
+    }
+    /**
+     * Convert a short integer to a byte array with a given bit size per byte.
+     *
+     * @param value short integer to be converted
+     * @param numBits Number of bits
+     * @param bigEndian {@code true} when output should be in Big Endian, {@code false} for Little Endian.
+     * @return byte[]
+     */
+    public static byte[] toByteArray(short value, int numBits, boolean bigEndian) {
+	return LongUtils.toByteArray(value, numBits, bigEndian);
     }
 
     /**
@@ -61,7 +72,19 @@ public class ShortUtils {
      * @return byte[]
      */
     public static byte[] toByteArray(short value, boolean padArrayToTypeLength) {
-	byte[] result = toByteArray(value, 8);
+	return toByteArray(value, padArrayToTypeLength, true);
+    }
+    /**
+     * Convert a short integer to a byte array.
+     * If the resulting array contains less bytes than 2 bytes, a 0 byte is prepended if the flag is set.
+     *
+     * @param value short integer to be converted
+     * @param padArrayToTypeLength
+     * @param bigEndian {@code true} when output should be in Big Endian, {@code false} for Little Endian.
+     * @return byte[]
+     */
+    public static byte[] toByteArray(short value, boolean padArrayToTypeLength, boolean bigEndian) {
+	byte[] result = toByteArray(value, 8, bigEndian);
 	if (padArrayToTypeLength && result.length < 2) {
 	    result = ByteUtils.concatenate(new byte[2 - result.length], result);
 	}

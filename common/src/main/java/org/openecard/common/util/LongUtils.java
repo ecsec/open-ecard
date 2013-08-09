@@ -44,10 +44,22 @@ public class LongUtils {
      * Convert a long integer to a byte array with a given bit size per byte.
      *
      * @param value - long integer to be converted
-     * @param numBits Number of bizs
+     * @param numBits Number of bits to use per byte.
      * @return byte[]
      */
     public static byte[] toByteArray(long value, int numBits) {
+	return toByteArray(value, numBits, true);
+    }
+    /**
+     * Convert a long integer to a byte array with a given bit size per byte.
+     *
+     * @param value Long integer to be converted.
+     * @param numBits Number of bits to use per byte.
+     * @param bigEndian {@code true} when output should be in Big Endian, {@code false} for Little Endian.
+     * @return byte[]
+     * @throws IllegalArgumentException Thrown in case one of the inputs is not within the permitted range.
+     */
+    public static byte[] toByteArray(long value, int numBits, boolean bigEndian) {
 	if (value < 0) {
 	    throw new IllegalArgumentException("Value must not be negative.");
 	}
@@ -86,6 +98,11 @@ public class LongUtils {
 	    j++;
 	}
 
+	// when emitting little endian, reverse the array
+	if (! bigEndian) {
+	    buffer = ByteUtils.reverse(buffer);
+	}
+
 	return buffer;
     }
 
@@ -106,7 +123,19 @@ public class LongUtils {
      * @return byte[]
      */
     public static byte[] toByteArray(long value, boolean padArrayToTypeLength) {
-	byte[] result = toByteArray(value, 8);
+	return toByteArray(value, padArrayToTypeLength, true);
+    }
+    /**
+     * Convert a long integer to a byte array.
+     * If the resulting array contains less bytes than 8 bytes, 0 bytes are prepended if the flag is set.
+     *
+     * @param value long integer to be converted
+     * @param padArrayToTypeLength
+     * @param bigEndian {@code true} when output should be in Big Endian, {@code false} for Little Endian.
+     * @return byte[]
+     */
+    public static byte[] toByteArray(long value, boolean padArrayToTypeLength, boolean bigEndian) {
+	byte[] result = toByteArray(value, 8, bigEndian);
 	if (padArrayToTypeLength && result.length < 8) {
 	    result = ByteUtils.concatenate(new byte[8 - result.length], result);
 	}

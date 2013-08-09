@@ -214,6 +214,24 @@ public class ByteUtils {
     }
 
     /**
+     * Create a reversed version of the given array.
+     * This function copies the value leaving the input untouched.
+     *
+     * @param in The array to reverse.
+     * @return The reversed array or null, if null was given.
+     */
+    public static byte[] reverse(byte[] in) {
+	if (in == null) {
+	    return null;
+	}
+	byte[] out = new byte[in.length];
+	for (int i = 0; i < in.length; i++) {
+	    out[out.length - 1 - i] = in[i];
+	}
+	return out;
+    }
+
+    /**
      * Convert a byte array to a hex string suitable for use as XML's hexBinary type.
      *
      * @param bytes Input
@@ -271,51 +289,96 @@ public class ByteUtils {
     }
 
     /**
-     * Convert a byte array to an integer.<br/> Size of byte array must be between 1 and 4.
+     * Convert a byte array to a short integer.
+     * The size of byte array must be between 1 and 2. The input is treated as Big Endian.
      *
-     * @param bytes byte array to be converted
-     * @return int
-     */
-    public static int toInteger(byte[] bytes) {
-	if (bytes.length > 4 || bytes.length < 1) {
-	    throw new IllegalArgumentException("Size of byte array must be between 1 and 4.");
-	}
-
-	return (int) toLong(bytes);
-    }
-
-    /**
-     * Convert a byte array to a long integer.<br/> Size of byte array must be between 1 and 8.
-     *
-     * @param bytes byte array to be converted
-     * @return long
-     */
-    public static long toLong(byte[] bytes) {
-	if (bytes.length > 8 || bytes.length < 1) {
-	    throw new IllegalArgumentException("Size of byte array must be between 1 and 8.");
-	}
-
-	long value = 0;
-
-	for (int i = 0; i < bytes.length; i++) {
-	    value |= ((long) 0xFF & bytes[bytes.length - 1 - i]) << i * 8;
-	}
-
-	return value;
-    }
-
-    /**
-     * Convert a byte array to a short integer.<br/> Size of byte array must be between 1 and 2.
-     *
-     * @param bytes byte array to be converted
+     * @param bytes Byte array to be converted.
      * @return short
      */
     public static short toShort(byte[] bytes) {
+	return toShort(bytes, true);
+    }
+    /**
+     * Convert a byte array to a short integer.
+     * The size of byte array must be between 1 and 2. The endianess of the input is determined by the respective
+     * parameter.
+     *
+     * @param bytes Byte array to be converted.
+     * @param bigEndian {@code true} when input should be treated as Big Endian, {@code false} for Little Endian.
+     * @return short
+     */
+    public static short toShort(byte[] bytes, boolean bigEndian) {
 	if (bytes.length > 2 || bytes.length < 1) {
 	    throw new IllegalArgumentException("Size of byte array must be between 1 and 2.");
 	}
 
-	return (short) toLong(bytes);
+	return (short) toLong(bytes, bigEndian);
+    }
+
+    /**
+     * Convert a byte array to an integer.
+     * The size of byte array must be between 1 and 4. The input is treated as Big Endian.
+     *
+     * @param bytes Byte array to be converted.
+     * @return int
+     */
+    public static int toInteger(byte[] bytes) {
+	return toInteger(bytes, true);
+    }
+    /**
+     * Convert a byte array to an integer.
+     * The size of byte array must be between 1 and 4. The endianess of the input is determined by the respective
+     * parameter.
+     *
+     * @param bytes Byte array to be converted.
+     * @param bigEndian {@code true} when input should be treated as Big Endian, {@code false} for Little Endian.
+     * @return int
+     */
+    public static int toInteger(byte[] bytes, boolean bigEndian) {
+	if (bytes.length > 4 || bytes.length < 1) {
+	    throw new IllegalArgumentException("Size of byte array must be between 1 and 4.");
+	}
+
+	return (int) toLong(bytes, bigEndian);
+    }
+
+    /**
+     * Convert a byte array to a long integer.
+     * The size of byte array must be between 1 and 8. The input is treated as Big Endian.
+     *
+     * @param bytes Byte array to be converted.
+     * @return long
+     */
+    public static long toLong(byte[] bytes) {
+	return toLong(bytes, true);
+    }
+    /**
+     * Convert a byte array to a long integer.
+     * The size of byte array must be between 1 and 8. The endianess of the input is determined by the respective
+     * parameter.
+     *
+     * @param bytes Byte array to be converted.
+     * @param bigEndian {@code true} when input should be treated as Big Endian, {@code false} for Little Endian.
+     * @return long
+     */
+    public static long toLong(byte[] bytes, boolean bigEndian) {
+	if (bytes.length > 8 || bytes.length < 1) {
+	    throw new IllegalArgumentException("Size of byte array must be between 1 and 8.");
+	}
+
+	long result = 0;
+
+	if (bigEndian) {
+	    for (int i = 0; i < bytes.length; i++) {
+		result |= ((long) 0xFF & bytes[bytes.length - 1 - i]) << i * 8;
+	    }
+	} else {
+	    for (int i = 0; i < bytes.length; i++) {
+		result |= ((long) 0xFF & bytes[i]) << i * 8;
+	    }
+	}
+
+	return result;
     }
 
     /**

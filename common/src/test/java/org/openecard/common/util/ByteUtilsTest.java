@@ -137,6 +137,38 @@ public class ByteUtilsTest {
     }
 
     @Test
+    public void testToShort() {
+	byte[] input = new byte[] { (byte) 0xFF, (byte) 0xFF };
+	short s = ByteUtils.toShort(input);
+	assertEquals(-1, s);
+
+	input = new byte[] { (byte) 0x7F, (byte) 0xFF };
+	s = ByteUtils.toShort(input);
+	assertEquals(Short.MAX_VALUE, s);
+
+	input = new byte[] { (byte) 0x80, (byte) 0x00 };
+	s = ByteUtils.toShort(input);
+	assertEquals(Short.MIN_VALUE, s);
+
+	input = new byte[3];
+	try {
+	    ByteUtils.toShort(input);
+	    fail("An IllegalArgumentException should have been thrown.");
+	} catch (IllegalArgumentException e) {
+	    // expected
+	}
+
+	input = new byte[0];
+
+	try {
+	    ByteUtils.toShort(input);
+	    fail("An IllegalArgumentException should have been thrown.");
+	} catch (IllegalArgumentException e) {
+	    // expected
+	}
+    }
+
+    @Test
     public void testToInteger() {
 	byte[] input = new byte[] { (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF };
 	int s = ByteUtils.toInteger(input);
@@ -203,35 +235,18 @@ public class ByteUtilsTest {
     }
 
     @Test
-    public void testToShort() {
-	byte[] input = new byte[] { (byte) 0xFF, (byte) 0xFF };
-	short s = ByteUtils.toShort(input);
-	assertEquals(-1, s);
+    public void testLittleEndian() {
+	byte[] input = new byte[] { (byte) 0xFF, (byte) 0x00 };
+	short s = ByteUtils.toShort(input, false);
+	assertEquals(s, 0x00FF);
 
-	input = new byte[] { (byte) 0x7F, (byte) 0xFF };
-	s = ByteUtils.toShort(input);
-	assertEquals(Short.MAX_VALUE, s);
+	input = new byte[] { (byte) 0xFF, (byte) 0x11, (byte) 0x00 };
+	int i = ByteUtils.toInteger(input, false);
+	assertEquals(i, 0x0011FF);
 
-	input = new byte[] { (byte) 0x80, (byte) 0x00 };
-	s = ByteUtils.toShort(input);
-	assertEquals(Short.MIN_VALUE, s);
-
-	input = new byte[3];
-	try {
-	    ByteUtils.toShort(input);
-	    fail("An IllegalArgumentException should have been thrown.");
-	} catch (IllegalArgumentException e) {
-	    // expected
-	}
-
-	input = new byte[0];
-
-	try {
-	    ByteUtils.toShort(input);
-	    fail("An IllegalArgumentException should have been thrown.");
-	} catch (IllegalArgumentException e) {
-	    // expected
-	}
+	input = new byte[] { (byte) 0x12, (byte) 0x34, (byte) 0x56, (byte) 0x78, (byte) 0x9A, (byte) 0xBC };
+	long l = ByteUtils.toLong(input, false);
+	assertEquals(l, 0xBC9A78563412L);
     }
 
     @Test

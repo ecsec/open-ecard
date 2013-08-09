@@ -36,11 +36,15 @@ import org.openecard.bouncycastle.crypto.tls.TlsPSKIdentity;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
+import org.openecard.crypto.common.sal.GenericCryptoSignerFinder;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertPSKTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import org.openecard.crypto.tls.TlsPSKIdentityImpl;
+import org.openecard.crypto.tls.auth.CredentialFactory;
+import org.openecard.crypto.tls.auth.SimpleSmartCardCredentialFactory;
+import org.openecard.crypto.tls.auth.SmartCardCredentialFactory;
 import org.openecard.transport.paos.PAOS;
 import org.openecard.transport.paos.PAOSException;
 
@@ -118,6 +122,8 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    } else if (secProto.equals("urn:ietf:rfc:4346")) {
 		DynamicAuthentication tlsAuth = new DynamicAuthentication();
 		tlsAuth.setHostname(serverHost);
+		// use a smartcard for client authentication if needed
+		tlsAuth.setCredentialFactory(makeSmartCardCredential());
 		// FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
 		//tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 		tlsClient = new ClientCertDefaultTlsClient(noSni ? null : serverHost);
@@ -148,6 +154,12 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    appDis.setConnectionHandle(connectionHandle);
 	    dispatcher.deliver(appDis);
 	}
+    }
+
+    private CredentialFactory makeSmartCardCredential() {
+	GenericCryptoSignerFinder finder = new GenericCryptoSignerFinder(dispatcher, connectionHandle, false);
+	SmartCardCredentialFactory scFac = new SmartCardCredentialFactory(finder);
+	return scFac;
     }
 
 }

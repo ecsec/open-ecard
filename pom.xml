@@ -49,7 +49,6 @@
 	<module>addons</module>
 	<!-- client assemblies -->
 	<module>clients</module>
-	<module>control-interface</module>
     </modules>
 
     <properties>

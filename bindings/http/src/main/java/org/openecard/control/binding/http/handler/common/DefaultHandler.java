@@ -25,7 +25,7 @@ package org.openecard.control.binding.http.handler.common;
 import org.openecard.apache.http.HttpRequest;
 import org.openecard.apache.http.HttpResponse;
 import org.openecard.apache.http.HttpStatus;
-import org.openecard.control.ControlException;
+import org.openecard.control.binding.http.HTTPException;
 import org.openecard.control.binding.http.common.Http11Response;
 import org.openecard.control.binding.http.handler.ControlCommonHandler;
 
@@ -44,7 +44,7 @@ public class DefaultHandler extends ControlCommonHandler {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws ControlException, Exception {
+    public HttpResponse handle(HttpRequest httpRequest) throws HTTPException, Exception {
 	// Always return 404 Not Found
 	return new Http11Response(HttpStatus.SC_NOT_FOUND);
     }

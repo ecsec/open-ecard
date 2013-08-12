@@ -20,12 +20,4 @@
 	<module>javascript</module>
     </modules>
 
-    <dependencies>
-	<dependency>
-	    <groupId>org.openecard.control</groupId>
-	    <artifactId>control-common</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-    </dependencies>
-
 </project>

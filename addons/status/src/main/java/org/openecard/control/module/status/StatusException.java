@@ -20,36 +20,42 @@
  *
  ***************************************************************************/
 
-package org.openecard.control.binding.http.handler.common;
-
-import org.openecard.apache.http.HttpRequest;
-import org.openecard.apache.http.HttpResponse;
-import org.openecard.apache.http.HttpStatus;
-import org.openecard.control.binding.http.HTTPException;
-import org.openecard.control.binding.http.common.HeaderTypes;
-import org.openecard.control.binding.http.common.Http11Response;
-import org.openecard.control.binding.http.handler.ControlCommonHandler;
+package org.openecard.control.module.status;
 
 
 /**
+ * Implements an exception for connector errors.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class IndexHandler extends ControlCommonHandler {
+public class StatusException extends RuntimeException {
+
+    private static final long serialVersionUID = 1L;
 
     /**
-     * Create a new debug handler.
+     * Create a new StatusException.
      */
-    public IndexHandler() {
-	super("/");
+    public StatusException() {
+	super();
     }
 
-    @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws HTTPException, Exception {
-	HttpResponse httpResponse = new Http11Response(HttpStatus.SC_SEE_OTHER);
-	httpResponse.setHeader(HeaderTypes.LOCATION.fieldName(), "/index.html");
+    /**
+     * Create a new StatusException.
+     *
+     * @param message Message
+     */
+    public StatusException(String message) {
+	super(message);
+    }
 
-	return httpResponse;
+    /**
+     * Create a new StatusException.
+     *
+     * @param message Message
+     * @param throwable Throwable
+     */
+    public StatusException(String message, Throwable throwable) {
+	super(message, throwable);
     }
 
 }

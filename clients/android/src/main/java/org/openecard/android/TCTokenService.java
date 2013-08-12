@@ -29,9 +29,7 @@ import android.os.IBinder;
 import org.openecard.addon.AddonManager;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.state.CardStateMap;
-import org.openecard.control.ControlInterface;
 import org.openecard.control.binding.http.HTTPBinding;
-import org.openecard.control.handler.ControlHandlers;
 import org.openecard.gui.UserConsent;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.sal.TinySAL;
@@ -51,11 +49,10 @@ public class TCTokenService extends Service implements Runnable {
 
     private final IBinder mBinder = new MyBinder();
     // Control interface
-    private ControlInterface control;
+    private HTTPBinding binding;
 
     public void run() {
 	ApplicationContext appCtx = (ApplicationContext) getApplicationContext();
-	HTTPBinding binding;
 	try {
 	    binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
 	    Dispatcher dispatcher = appCtx.getEnv().getDispatcher();
@@ -64,9 +61,7 @@ public class TCTokenService extends Service implements Runnable {
 	    CardRecognition recognition = appCtx.getRecognition();
 	    AddonManager addonManager = AddonManager.createInstance(dispatcher, gui, cardStates, recognition, appCtx.getEnv().getEventManager(),((TinySAL) appCtx.getEnv().getSAL()).getProtocolInfo());
 	    binding.setAddonManager(addonManager);
-	    ControlHandlers handler = new ControlHandlers();
-	    control = new ControlInterface(binding, handler);
-	    control.start();
+	    binding.start();
 	} catch (Exception e) {
 	    logger.error("Starting of control interface failed", e);
 	    System.exit(-1);

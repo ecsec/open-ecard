@@ -22,13 +22,8 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.control.module</groupId>
-	    <artifactId>tctoken</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.control.module</groupId>
-	    <artifactId>status</artifactId>
+	    <groupId>org.openecard</groupId>
+	    <artifactId>addon</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
@@ -87,9 +82,16 @@
 	    <scope>test</scope>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard</groupId>
-	    <artifactId>addon</artifactId>
+	    <groupId>org.openecard.addons</groupId>
+	    <artifactId>tr03112</artifactId>
 	    <version>${project.version}</version>
+	    <scope>test</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.addons</groupId>
+	    <artifactId>status</artifactId>
+	    <version>${project.version}</version>
+	    <scope>test</scope>
 	</dependency>
     </dependencies>
 

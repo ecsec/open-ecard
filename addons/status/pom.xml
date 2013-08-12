@@ -11,9 +11,9 @@
     </parent>
 
     <groupId>org.openecard.addons</groupId>
-    <artifactId>tr03112</artifactId>
+    <artifactId>status</artifactId>
     <packaging>jar</packaging>
-    <name>TR-03112 Add-on</name>
+    <name>Status</name>
 
     <dependencies>
 	<dependency>
@@ -23,14 +23,8 @@
 	    <scope>provided</scope>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.crypto</groupId>
-	    <artifactId>tls</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-
-	<dependency>
-	    <groupId>org.openecard.transport</groupId>
-	    <artifactId>http-core</artifactId>
+	    <groupId>org.openecard.sal</groupId>
+	    <artifactId>sal-common</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
     </dependencies>

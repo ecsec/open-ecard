@@ -186,12 +186,12 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.control.bindings</groupId>
+	    <groupId>org.openecard.bindings</groupId>
 	    <artifactId>http</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.control.bindings</groupId>
+	    <groupId>org.openecard.bindings</groupId>
 	    <artifactId>javascript</artifactId>
 	    <version>${project.version}</version>
 	</dependency>

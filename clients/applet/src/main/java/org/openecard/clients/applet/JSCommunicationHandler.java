@@ -38,24 +38,10 @@ import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openecard.addon.EventHandler;
-import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.ProtocolInfo;
-import org.openecard.common.sal.state.CardStateMap;
+import org.openecard.addon.AddonManager;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.ValueGenerators;
-import org.openecard.control.ControlInterface;
 import org.openecard.control.binding.javascript.JavaScriptBinding;
-import org.openecard.control.binding.javascript.handler.JavaScriptStatusHandler;
-import org.openecard.control.binding.javascript.handler.JavaScriptTCTokenHandler;
-import org.openecard.control.binding.javascript.handler.JavaScriptWaitForChangeHandler;
-import org.openecard.control.handler.ControlHandler;
-import org.openecard.control.handler.ControlHandlers;
-import org.openecard.control.module.status.GenericStatusHandler;
-import org.openecard.control.module.status.GenericWaitForChangeHandler;
-import org.openecard.control.module.tctoken.GenericTCTokenHandler;
-import org.openecard.gui.UserConsent;
-import org.openecard.recognition.CardRecognition;
 import org.openecard.ws.marshal.MarshallingTypeException;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
@@ -88,7 +74,6 @@ public class JSCommunicationHandler {
     private Future<?> eventThread;
 
     private JavaScriptBinding binding;
-    private ControlInterface control;
     private HashMap<String, String> sessionMap; // this is just one session for waitForChange
 
 
@@ -96,24 +81,18 @@ public class JSCommunicationHandler {
      * Create a new JSCommunicationHandler.
      *
      * @param applet current applet
-     * @param cardStates CardStateMap of the client
-     * @param dispatcher dispatcher for sending messages
-     * @param eventHandler to wait for status changes
-     * @param gui to show card insertion dialog
-     * @param protocols for SAL protocol registry
-     * @param reg to get card information shown in insertion dialog
+     * @param manager Manager instance containing available add-ons.
      */
-    public JSCommunicationHandler(ECardApplet applet, CardStateMap cardStates, Dispatcher dispatcher,
-	    EventHandler eventHandler, UserConsent gui, ProtocolInfo protocols, CardRecognition reg) {
+    public JSCommunicationHandler(ECardApplet applet, AddonManager manager) {
 	workerPool = Executors.newCachedThreadPool();
 	jsObjectWrapper = new JSObjectWrapper(applet);
 	jsStartedCallback = applet.getParameter("jsStartedCallback");
 	jsEventCallback = applet.getParameter("jsEventCallback");
 	jsMessageCallback = applet.getParameter("jsMessageCallback");
-	binding = new JavaScriptBinding();
+	binding = new JavaScriptBinding(manager);
 	sessionMap = new HashMap<String, String>();
 	sessionMap.put("session", ValueGenerators.generateSessionID());
-	setupJSBinding(cardStates, dispatcher, eventHandler, gui, protocols, reg);
+	setupJSBinding();
     }
 
     /**
@@ -125,22 +104,8 @@ public class JSCommunicationHandler {
      * @param gui to show card insertion dialog
      * @param reg to get card information shown in insertion dialog
      */
-    private void setupJSBinding(CardStateMap cardStates, Dispatcher dispatcher, EventHandler eventHandler,
-	    UserConsent gui, ProtocolInfo protocols, CardRecognition reg) {
+    private void setupJSBinding() {
 	try {
-	    ControlHandlers handler = new ControlHandlers();
-	    GenericTCTokenHandler genericTCTokenHandler = new GenericTCTokenHandler(cardStates, dispatcher, gui, reg);
-	    GenericStatusHandler genericStatusHandler = new GenericStatusHandler(cardStates, eventHandler, protocols, reg);
-	    GenericWaitForChangeHandler genericWaitForChangeHandler = new GenericWaitForChangeHandler(eventHandler);
-	    ControlHandler tcTokenHandler = new JavaScriptTCTokenHandler(genericTCTokenHandler);
-	    ControlHandler statusHandler = new JavaScriptStatusHandler(genericStatusHandler);
-	    ControlHandler waitForChangeHandler = new JavaScriptWaitForChangeHandler(genericWaitForChangeHandler);
-	    handler.addControlHandler(tcTokenHandler);
-	    handler.addControlHandler(statusHandler);
-	    handler.addControlHandler(waitForChangeHandler);
-	    control = new ControlInterface(binding, handler);
-	    control.start();
-
 	    // send initial Status and thereby register session
 	    binding.handle("getStatus", sessionMap);
 	} catch (Exception ex) {
@@ -155,7 +120,6 @@ public class JSCommunicationHandler {
 	try {
 	    eventThread.cancel(true);
 	    workerPool.shutdownNow();
-	    control.stop();
 	} catch (Exception ex) {
 	    logger.error(ex.getMessage(), ex);
 	}

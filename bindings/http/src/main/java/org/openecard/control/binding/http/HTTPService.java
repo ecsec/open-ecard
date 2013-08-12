@@ -39,8 +39,6 @@ import org.openecard.apache.http.protocol.HttpRequestHandler;
 import org.openecard.apache.http.protocol.HttpRequestHandlerRegistry;
 import org.openecard.apache.http.protocol.HttpService;
 import org.openecard.apache.http.protocol.ImmutableHttpProcessor;
-import org.openecard.control.handler.ControlHandler;
-import org.openecard.control.handler.ControlHandlers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,11 +58,11 @@ public class HTTPService implements Runnable {
      * Creates a new HTTPService.
      *
      * @param port Port
-     * @param handlers Handlers
+     * @param handler Handler
      * @param interceptors Interceptors
      * @throws Exception
      */
-    public HTTPService(int port, ControlHandlers handlers, BasicHttpProcessor interceptors) throws Exception {
+    public HTTPService(int port, HttpRequestHandler handler, BasicHttpProcessor interceptors) throws Exception {
 	thread = new Thread(this, "Open-eCard Localhost-Binding");
 	server = new ServerSocket(port, backlog, InetAddress.getByName("127.0.0.1"));
 	logger.debug("Starting HTTPBinding on port {}", server.getLocalPort());
@@ -78,14 +76,8 @@ public class HTTPService implements Runnable {
 
 	// Set up handler registry
 	HttpRequestHandlerRegistry handlerRegistry = new HttpRequestHandlerRegistry();
-	for (ControlHandler handler : handlers.getControlHandlers()) {
-	    if (handler instanceof HttpRequestHandler) {
-		logger.debug("Add handler [{}] for ID [{}]", new Object[]{handler.getClass().getCanonicalName(), handler.getID()});
-		handlerRegistry.register(handler.getID(), (HttpRequestHandler) handler);
-	    } else {
-		logger.error("Handler [{}] is not supported by the HTTPBinding");
-	    }
-	}
+	logger.debug("Add handler [{}] for ID [{}]", new Object[]{handler.getClass().getCanonicalName(), "*"});
+	handlerRegistry.register("*", handler);
 
 	// create service instance
 	HttpParams params = new BasicHttpParams();

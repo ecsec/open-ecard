@@ -34,6 +34,7 @@ import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JApplet;
 import javax.swing.JOptionPane;
+import org.openecard.addon.AddonManager;
 import org.openecard.addon.EventHandler;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
@@ -161,9 +162,12 @@ public class ECardApplet extends JApplet {
 	sal.addProtocol(ECardConstants.Protocol.EAC2, new EAC2ProtocolFactory());
 	env.setSAL(sal);
 
+	// AddonManager
+	// TODO: provide protocol info
+	AddonManager manager = AddonManager.createInstance(dispatcher, gui, cardStates, recognition, em, sal.getProtocolInfo());
+
 	// JavaScript Bridge
-	EventHandler evt = new EventHandler(em);
-	jsCommHandler = new JSCommunicationHandler(this, cardStates, dispatcher, evt, gui, sal.getProtocolInfo(), recognition);
+	jsCommHandler = new JSCommunicationHandler(this, manager);
 
 	// start EventManager
 	em.initialize();

@@ -22,13 +22,11 @@
 
 package org.openecard.control.binding.http;
 
-import org.openecard.control.ControlException;
-
 
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class HTTPException extends ControlException {
+public class HTTPException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
@@ -40,7 +38,6 @@ public class HTTPException extends ControlException {
      * @param httpStatusCode HTTPStatusCode
      */
     public HTTPException(int httpStatusCode) {
-	super("");
 	this.httpStatusCode = httpStatusCode;
     }
 

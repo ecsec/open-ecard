@@ -22,38 +22,33 @@
 
 package org.openecard.control.binding.http.handler;
 
-import java.io.IOException;
-import org.openecard.apache.http.HttpRequest;
-import org.openecard.apache.http.HttpResponse;
-import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.apache.http.protocol.HttpRequestHandler;
-import org.openecard.control.handler.ControlHandler;
 
 
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public abstract class HttpControlHandler extends ControlHandler implements HttpRequestHandler {
+public abstract class HttpControlHandler implements HttpRequestHandler {
+
+    /** Identifier to register the handler for */
+    protected String resource;
 
     /**
-     * Creates a new HttpControlHandler.
+     * Create a new HttpControlHandler.
      *
-     * @param path Path
+     * @param resource Identifier
      */
-    public HttpControlHandler(String path) {
-	super(path);
+    protected HttpControlHandler(String resource) {
+	this.resource = resource;
     }
 
     /**
-     * Handles a HTTP request.
+     * Return the ID to register the handler for.
      *
-     * @param request HttpRequest
-     * @param response HttpResponse
-     * @param context HttpContext
-     * @throws HttpException
-     * @throws IOException
+     * @return Identifier
      */
-    @Override
-    public abstract void handle(HttpRequest request, HttpResponse response, HttpContext context) throws IOException;
+    public String getResourcePath() {
+	return resource;
+    }
 
 }

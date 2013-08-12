@@ -92,7 +92,7 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.control.bindings</groupId>
+	    <groupId>org.openecard.bindings</groupId>
 	    <artifactId>http</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
@@ -116,6 +116,13 @@
 	    <version>${project.version}</version>
 	    <type>apklib</type>
 	</dependency>
+
+	<dependency>
+	    <groupId>org.openecard</groupId>
+	    <artifactId>addon</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+
 	<dependency>
 	    <groupId>org.openecard.sal.protocols</groupId>
 	    <artifactId>eac</artifactId>
@@ -131,9 +138,15 @@
 	    <artifactId>pincompare</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
+
 	<dependency>
 	    <groupId>org.openecard.addons</groupId>
-	    <artifactId>plugin-pinplugin</artifactId>
+	    <artifactId>pin-management</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.addons</groupId>
+	    <artifactId>tr03112</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
     </dependencies>

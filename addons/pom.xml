@@ -16,14 +16,15 @@
     <name>Integrated Add-ons</name>
 
     <modules>
-	<module>plugin-pinplugin</module>
+	<module>pin-management</module>
 	<module>tr03112</module>
+	<module>status</module>
     </modules>
 
     <dependencies>
 	<dependency>
 	    <groupId>org.openecard</groupId>
-	    <artifactId>common</artifactId>
+	    <artifactId>addon</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>

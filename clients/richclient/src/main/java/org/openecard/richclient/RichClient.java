@@ -41,9 +41,7 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
 import org.openecard.common.util.FileUtils;
-import org.openecard.control.ControlInterface;
 import org.openecard.control.binding.http.HTTPBinding;
-import org.openecard.control.handler.ControlHandlers;
 import org.openecard.control.module.status.StatusAction;
 import org.openecard.control.module.tctoken.TCTokenAction;
 import org.openecard.event.EventManager;
@@ -86,7 +84,7 @@ public final class RichClient {
     // Tray icon
     private AppTray tray;
     // Control interface
-    private ControlInterface control;
+    private HTTPBinding binding;
     // Client environment
     private ClientEnv env = new ClientEnv();
     // Interface Device Layer (IFD)
@@ -194,12 +192,10 @@ public final class RichClient {
 
 	    // Start up control interface
 	    try {
-		HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
+		binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
 		AddonManager manager = AddonManager.createInstance(dispatcher, gui, cardStates, recognition, em, sal.getProtocolInfo());
 		binding.setAddonManager(manager);
-		ControlHandlers handler = new ControlHandlers();
-		control = new ControlInterface(binding, handler);
-		control.start();
+		binding.start();
 	    } catch (BindException e) {
 		dialog.setMessage(lang.translationForKey("client.startup.failed.portinuse"));
 		throw e;
@@ -238,7 +234,7 @@ public final class RichClient {
 	    // TODO shutdown addon manager and related components?
 
 	    // shutdown control modules
-	    control.stop();
+	    binding.stop();
 
 	    // shutdwon event manager
 	    em.terminate();

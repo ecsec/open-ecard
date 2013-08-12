@@ -17,15 +17,15 @@
 
     <dependencies>
 	<dependency>
-	    <groupId>org.openecard.control.module</groupId>
-	    <artifactId>status</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
 	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>wsdef-client</artifactId>
 	    <version>${project.version}</version>
 	    <scope>provided</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard</groupId>
+	    <artifactId>addon</artifactId>
+	    <version>${project.version}</version>
 	</dependency>
 
 	<dependency>
@@ -79,6 +79,12 @@
 	<dependency>
 	    <groupId>org.openecard.gui</groupId>
 	    <artifactId>swing</artifactId>
+	    <version>${project.version}</version>
+	    <scope>test</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.addons</groupId>
+	    <artifactId>status</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>
 	</dependency>

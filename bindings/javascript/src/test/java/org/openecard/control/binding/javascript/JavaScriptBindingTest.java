@@ -24,10 +24,7 @@ package org.openecard.control.binding.javascript;
 
 import java.util.HashMap;
 import javax.xml.transform.TransformerException;
-import org.openecard.control.ControlInterface;
-import org.openecard.control.binding.javascript.handler.JavaScriptTCTokenHandler;
-import org.openecard.control.handler.ControlHandlers;
-import org.openecard.control.module.tctoken.GenericTCTokenHandler;
+import org.openecard.addon.AddonManager;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.marshal.WSMarshallerFactory;
@@ -65,13 +62,9 @@ public final class JavaScriptBindingTest {
 	    // Wait some seconds until the SAL comes up
 	    Thread.sleep(2500);
 	    // Start control interface and binding
-	    ControlHandlers handler = new ControlHandlers();
-	    GenericTCTokenHandler genericTCTokenHandler = new GenericTCTokenHandler(tc.getCardStates(), tc.getDispatcher(), tc.getGUI(), tc.getCardRecognition());
-	    JavaScriptTCTokenHandler jsTCTokenHandler = new JavaScriptTCTokenHandler(genericTCTokenHandler);
-	    handler.addControlHandler(jsTCTokenHandler);
-	    binding = new JavaScriptBinding();
-	    ControlInterface controlInterface = new ControlInterface(binding);
-	    controlInterface.start();
+	    // TODO: add protocol info
+	    AddonManager manager = AddonManager.createInstance(tc.getDispatcher(), tc.getGUI(), tc.getCardStates(), tc.getCardRecognition(), tc.getEventManager(), null);
+	    binding = new JavaScriptBinding(manager);
 
 	} catch (Exception e) {
 	    logger.debug(e.getMessage(), e);

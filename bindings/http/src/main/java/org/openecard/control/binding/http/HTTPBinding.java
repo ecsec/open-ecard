@@ -25,10 +25,8 @@ package org.openecard.control.binding.http;
 import java.io.IOException;
 import org.openecard.addon.AddonManager;
 import org.openecard.apache.http.protocol.BasicHttpProcessor;
-import org.openecard.control.binding.ControlBinding;
 import org.openecard.control.binding.http.common.DocumentRoot;
 import org.openecard.control.binding.http.handler.HttpAppPluginActionHandler;
-import org.openecard.control.binding.http.interceptor.CORSRequestInterceptor;
 import org.openecard.control.binding.http.interceptor.CORSResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.ErrorResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.StatusLineResponseInterceptor;
@@ -40,7 +38,7 @@ import org.openecard.control.binding.http.interceptor.StatusLineResponseIntercep
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class HTTPBinding extends ControlBinding {
+public class HTTPBinding {
 
     /** Uses the default port 24727 according to BSI-TR-03112 */
     public static final int DEFAULT_PORT = 24727;
@@ -79,6 +77,7 @@ public class HTTPBinding extends ControlBinding {
      *
      * @param port Port
      * @param documentRootPath Path of the document root
+     * @param listFile
      * @throws IOException If the document root cannot be read
      * @throws Exception
      */
@@ -98,7 +97,6 @@ public class HTTPBinding extends ControlBinding {
 	this.interceptors = interceptors;
     }
 
-    @Override
     public void start() throws Exception {
 	// Add default interceptors if none are given
 	if (interceptors == null || interceptors.getRequestInterceptorCount() == 0 || interceptors.getResponseInterceptorCount() == 0) {
@@ -110,14 +108,10 @@ public class HTTPBinding extends ControlBinding {
 	    //interceptors.addInterceptor(new CORSRequestInterceptor());
 	}
 
-	// add default handler
-	handlers.addControlHandler(new HttpAppPluginActionHandler(addonManager));
-
-	service = new HTTPService(port, handlers, interceptors);
+	service = new HTTPService(port, new HttpAppPluginActionHandler(addonManager), interceptors);
 	service.start();
     }
 
-    @Override
     public void stop() throws Exception {
 	service.interrupt();
     }

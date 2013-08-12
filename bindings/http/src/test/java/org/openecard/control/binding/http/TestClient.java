@@ -33,8 +33,6 @@ import org.openecard.common.ClientEnv;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
 import org.openecard.common.util.FileUtils;
-import org.openecard.control.ControlInterface;
-import org.openecard.control.handler.ControlHandlers;
 import org.openecard.control.module.status.StatusAction;
 import org.openecard.control.module.tctoken.TCTokenAction;
 import org.openecard.event.EventManager;
@@ -128,9 +126,7 @@ public final class TestClient {
 
 	HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
 	binding.setAddonManager(AddonManager.createInstance(dispatcher, gui, cardStates, recognition, em, sal.getProtocolInfo()));
-	ControlHandlers handler = new ControlHandlers();
-	ControlInterface control = new ControlInterface(binding, handler);
-	control.start();
+	binding.start();
     }
 
     private void registerAddOns() throws WSMarshallerException, MarshallingTypeException, IOException, SAXException {

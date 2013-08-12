@@ -258,12 +258,7 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.addons</groupId>
-	    <artifactId>plugin-pinplugin</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.control.bindings</groupId>
+	    <groupId>org.openecard.bindings</groupId>
 	    <artifactId>http</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
@@ -272,11 +267,28 @@
 	    <artifactId>jaxb-marshaller</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
+
 	<dependency>
 	    <groupId>org.openecard</groupId>
 	    <artifactId>addon</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
+	<dependency>
+	    <groupId>org.openecard.addons</groupId>
+	    <artifactId>tr03112</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.addons</groupId>
+	    <artifactId>status</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.addons</groupId>
+	    <artifactId>pin-management</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+
 	<dependency>
 	    <groupId>ch.qos.logback</groupId>
 	    <artifactId>logback-classic</artifactId>

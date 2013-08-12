@@ -20,36 +20,39 @@
  *
  ***************************************************************************/
 
-package org.openecard.control.binding.http.handler.common;
+package org.openecard.control.module.status;
 
-import org.openecard.apache.http.HttpRequest;
-import org.openecard.apache.http.HttpResponse;
-import org.openecard.apache.http.HttpStatus;
-import org.openecard.control.binding.http.HTTPException;
-import org.openecard.control.binding.http.common.HeaderTypes;
-import org.openecard.control.binding.http.common.Http11Response;
-import org.openecard.control.binding.http.handler.ControlCommonHandler;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import java.util.List;
 
 
 /**
- *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class IndexHandler extends ControlCommonHandler {
+public final class StatusResponse {
+
+    private List<ConnectionHandleType> connectionHandles;
 
     /**
-     * Create a new debug handler.
+     * Returns the list of connection handles.
+     *
+     * TODO: replace ConnectionHandleType with StatusType
+     *
+     * @return List of connection handles
      */
-    public IndexHandler() {
-	super("/");
+    public List<ConnectionHandleType> getConnectionHandles() {
+	return connectionHandles;
     }
 
-    @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws HTTPException, Exception {
-	HttpResponse httpResponse = new Http11Response(HttpStatus.SC_SEE_OTHER);
-	httpResponse.setHeader(HeaderTypes.LOCATION.fieldName(), "/index.html");
-
-	return httpResponse;
+    /**
+     * Sets the list of connection handles.
+     *
+     * TODO: replace ConnectionHandleType with StatusType
+     *
+     * @param connectionHandles List of connection handles
+     */
+    public void setConnectionHandles(List<ConnectionHandleType> connectionHandles) {
+	this.connectionHandles = connectionHandles;
     }
 
 }

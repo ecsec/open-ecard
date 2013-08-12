@@ -52,7 +52,6 @@ import org.openecard.apache.http.entity.BasicHttpEntity;
 import org.openecard.apache.http.entity.ContentType;
 import org.openecard.apache.http.entity.StringEntity;
 import org.openecard.apache.http.protocol.HttpContext;
-import org.openecard.apache.http.protocol.HttpRequestHandler;
 import org.openecard.common.util.FileUtils;
 import org.openecard.common.util.HttpRequestLineUtils;
 import org.openecard.control.binding.http.common.DocumentRoot;
@@ -61,7 +60,6 @@ import org.openecard.control.binding.http.common.Http11Response;
 import org.openecard.control.binding.http.handler.common.DefaultHandler;
 import org.openecard.control.binding.http.handler.common.FileHandler;
 import org.openecard.control.binding.http.handler.common.IndexHandler;
-import org.openecard.control.handler.ControlHandler;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.marshal.WSMarshallerFactory;
@@ -76,7 +74,7 @@ import org.w3c.dom.Node;
  * 
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class HttpAppPluginActionHandler extends ControlHandler implements HttpRequestHandler {
+public class HttpAppPluginActionHandler extends HttpControlHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpAppPluginActionHandler.class);
 

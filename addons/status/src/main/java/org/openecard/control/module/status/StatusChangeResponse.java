@@ -20,36 +20,36 @@
  *
  ***************************************************************************/
 
-package org.openecard.control.binding.http.handler.common;
+package org.openecard.control.module.status;
 
-import org.openecard.apache.http.HttpRequest;
-import org.openecard.apache.http.HttpResponse;
-import org.openecard.apache.http.HttpStatus;
-import org.openecard.control.binding.http.HTTPException;
-import org.openecard.control.binding.http.common.HeaderTypes;
-import org.openecard.control.binding.http.common.Http11Response;
-import org.openecard.control.binding.http.handler.ControlCommonHandler;
+import org.openecard.ws.schema.StatusChange;
 
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
  */
-public class IndexHandler extends ControlCommonHandler {
+public final class StatusChangeResponse {
+
+    private StatusChange statusChange;
 
     /**
-     * Create a new debug handler.
+     * Returns the status change element.
+     *
+     * @return the status change type
      */
-    public IndexHandler() {
-	super("/");
+    public StatusChange getStatusChange() {
+	return statusChange;
     }
 
-    @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws HTTPException, Exception {
-	HttpResponse httpResponse = new Http11Response(HttpStatus.SC_SEE_OTHER);
-	httpResponse.setHeader(HeaderTypes.LOCATION.fieldName(), "/index.html");
-
-	return httpResponse;
+    /**
+     * Sets the status change element.
+     *
+     * @param statusChange the status change element
+     */
+    public void setStatusChange(StatusChange statusChange) {
+	this.statusChange = statusChange;
     }
 
 }

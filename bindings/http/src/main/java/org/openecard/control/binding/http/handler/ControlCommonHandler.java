@@ -29,11 +29,8 @@ import org.openecard.apache.http.HttpResponse;
 import org.openecard.apache.http.HttpStatus;
 import org.openecard.apache.http.entity.StringEntity;
 import org.openecard.apache.http.protocol.HttpContext;
-import org.openecard.apache.http.protocol.HttpRequestHandler;
-import org.openecard.control.ControlException;
 import org.openecard.control.binding.http.HTTPException;
 import org.openecard.control.binding.http.common.Http11Response;
-import org.openecard.control.handler.ControlHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public abstract class ControlCommonHandler extends ControlHandler implements HttpRequestHandler {
+public abstract class ControlCommonHandler extends HttpControlHandler {
 
     private static final Logger _logger = LoggerFactory.getLogger(ControlCommonHandler.class);
 
@@ -66,10 +63,10 @@ public abstract class ControlCommonHandler extends ControlHandler implements Htt
      *
      * @param httpRequest HTTPRequest
      * @return HTTPResponse
-     * @throws ControlException
+     * @throws HTTPException
      * @throws Exception
      */
-    public abstract HttpResponse handle(HttpRequest httpRequest) throws ControlException, Exception;
+    public abstract HttpResponse handle(HttpRequest httpRequest) throws HTTPException, Exception;
 
     /**
      * Handles a HTTP request.
@@ -90,7 +87,7 @@ public abstract class ControlCommonHandler extends ControlHandler implements Htt
 	    response.setParams(request.getParams());
 
 	    httpResponse = handle(request);
-	} catch (ControlException e) {
+	} catch (HTTPException e) {
 	    httpResponse = new Http11Response(HttpStatus.SC_BAD_REQUEST);
 	    httpResponse.setEntity(new StringEntity(e.getMessage(), "UTF-8"));
 
@@ -98,9 +95,7 @@ public abstract class ControlCommonHandler extends ControlHandler implements Htt
 		httpResponse.setEntity(new StringEntity(e.getMessage(), "UTF-8"));
 	    }
 
-	    if (e instanceof HTTPException) {
-		httpResponse.setStatusCode(((HTTPException) e).getHTTPStatusCode());
-	    }
+	    httpResponse.setStatusCode(e.getHTTPStatusCode());
 	} catch (Exception e) {
 	    httpResponse = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 	    _logger.error(e.getMessage(), e);

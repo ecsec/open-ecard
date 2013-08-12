@@ -49,7 +49,6 @@ import org.openecard.crypto.tls.proxy.ProxySettings;
 import org.openecard.common.util.FileUtils;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.TR03112Utils;
-import org.openecard.control.legacy.ControlException;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;

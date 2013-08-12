@@ -25,7 +25,8 @@ package org.openecard.control.module.tctoken;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.net.URL;
 import java.util.concurrent.Future;
-import org.openecard.control.legacy.client.ClientResponse;
+import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.openecard.common.WSHelper;
 
 
 /**
@@ -33,10 +34,32 @@ import org.openecard.control.legacy.client.ClientResponse;
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class TCTokenResponse extends ClientResponse {
+public class TCTokenResponse {
 
+    private Result result;
     private URL refreshAddress;
     private Future<StartPAOSResponse> bindingTask;
+
+    /**
+     * Returns the result of the client request.
+     *
+     * @return Result
+     */
+    public Result getResult() {
+	if (result == null) {
+	    result = WSHelper.makeResultOK();
+	}
+	return result;
+    }
+
+    /**
+     * Sets the result of the client request.
+     *
+     * @param result
+     */
+    public void setResult(Result result) {
+	this.result = result;
+    }
 
     /**
      * Returns the refresh address.

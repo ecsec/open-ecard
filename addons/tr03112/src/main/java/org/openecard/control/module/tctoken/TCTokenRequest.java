@@ -29,7 +29,6 @@ import java.util.List;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.StringUtils;
-import org.openecard.control.legacy.client.ClientRequest;
 
 
 /**
@@ -39,7 +38,7 @@ import org.openecard.control.legacy.client.ClientRequest;
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class TCTokenRequest extends ClientRequest {
+public class TCTokenRequest {
 
     private TCTokenType token;
     private String ifdName;

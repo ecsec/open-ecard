@@ -32,7 +32,6 @@ import org.openecard.common.I18n;
 import org.openecard.common.TR03112Keys;
 import org.openecard.common.util.Promise;
 import org.openecard.common.util.TR03112Utils;
-import org.openecard.control.legacy.ControlException;
 import org.openecard.crypto.common.asn1.cvc.CertificateDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

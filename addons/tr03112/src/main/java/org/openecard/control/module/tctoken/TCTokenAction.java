@@ -33,7 +33,6 @@ import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.bind.Body;
 import org.openecard.common.ECardConstants;
-import org.openecard.control.legacy.ControlException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

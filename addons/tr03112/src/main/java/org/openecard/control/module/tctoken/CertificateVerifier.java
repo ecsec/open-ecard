@@ -24,7 +24,6 @@ package org.openecard.control.module.tctoken;
 
 import java.net.URL;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
-import org.openecard.control.legacy.ControlException;
 
 
 /**

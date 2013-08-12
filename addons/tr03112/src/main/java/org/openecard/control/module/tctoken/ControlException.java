@@ -20,33 +20,42 @@
  *
  ***************************************************************************/
 
-package org.openecard.control.legacy.handler;
+package org.openecard.control.module.tctoken;
 
 
 /**
+ * Implements an exception for connector errors.
+ *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public abstract class ControlHandler {
+public class ControlException extends RuntimeException {
 
-    /** Identifier to register the handler for */
-    protected String id;
+    private static final long serialVersionUID = 1L;
 
     /**
-     * Create a new ControlHandler.
-     *
-     * @param id Identifier
+     * Create a new ControlException.
      */
-    protected ControlHandler(String id) {
-	this.id = id;
+    public ControlException() {
+	super("");
     }
 
     /**
-     * Return the ID to register the handler for.
+     * Create a new ControlException.
      *
-     * @return Identifier
+     * @param message Message
      */
-    public String getID() {
-	return id;
+    public ControlException(String message) {
+	super(message);
+    }
+
+    /**
+     * Create a new ControlException.
+     *
+     * @param message Message
+     * @param throwable Throwable
+     */
+    public ControlException(String message, Throwable throwable) {
+	super(message, throwable);
     }
 
 }

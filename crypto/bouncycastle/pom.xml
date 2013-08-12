@@ -13,7 +13,7 @@
     <groupId>org.openecard.crypto</groupId>
     <artifactId>bouncycastle</artifactId>
     <packaging>jar</packaging>
-    <name>openecard Bouncy Castle</name>
+    <name>Open eCard Bouncy Castle</name>
 
     <build>
 	<plugins>

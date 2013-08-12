@@ -11,16 +11,27 @@
     </parent>
 
     <groupId>org.openecard</groupId>
-    <artifactId>wsdef</artifactId>
+    <artifactId>addons</artifactId>
     <packaging>pom</packaging>
-    <name>Open eCard Webservice Definitions</name>
+    <name>Integrated Add-ons</name>
 
     <modules>
-	<module>class-list-plugin</module>
-	<module>wsdef-common</module>
-	<module>wsdef-client</module>
-	<module>jaxb-marshaller</module>
-	<module>android-marshaller</module>
+	<module>plugin-pinplugin</module>
+	<module>tr03112</module>
     </modules>
+
+    <dependencies>
+	<dependency>
+	    <groupId>org.openecard</groupId>
+	    <artifactId>common</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.wsdef</groupId>
+	    <artifactId>wsdef-client</artifactId>
+	    <version>${project.version}</version>
+	    <scope>provided</scope>
+	</dependency>
+    </dependencies>
 
 </project>

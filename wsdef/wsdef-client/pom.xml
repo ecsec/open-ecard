@@ -13,7 +13,7 @@
     <groupId>org.openecard.wsdef</groupId>
     <artifactId>wsdef-client</artifactId>
     <packaging>jar</packaging>
-    <name>openecard WS classes</name>
+    <name>Open eCard WS classes</name>
 
     <build>
 	<resources>

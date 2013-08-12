@@ -38,14 +38,15 @@
 	<module>i18n</module>
 	<module>crypto</module>
 	<module>transport</module>
+	<module>bindings</module>
 	<module>gui</module>
 	<module>ifd</module>
 	<module>sal</module>
 	<module>management</module>
 	<module>recognition</module>
 	<module>event-manager</module>
-	<module>plugins</module>
 	<module>addon</module>
+	<module>addons</module>
 	<!-- client assemblies -->
 	<module>clients</module>
 	<module>control-interface</module>

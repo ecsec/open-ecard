@@ -103,7 +103,7 @@
 	    <artifactId>graphics</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
-	
+
 	<dependency>
 	    <groupId>org.openecard.control.bindings</groupId>
 	    <artifactId>http</artifactId>

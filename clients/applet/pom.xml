@@ -201,11 +201,6 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.transport</groupId>
-	    <artifactId>paos</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
 	    <groupId>org.openecard.sal.protocols</groupId>
 	    <artifactId>eac</artifactId>
 	    <version>${project.version}</version>

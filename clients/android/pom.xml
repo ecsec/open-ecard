@@ -87,11 +87,6 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.transport</groupId>
-	    <artifactId>paos</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
 	    <groupId>org.openecard.ifd.protocols</groupId>
 	    <artifactId>pace</artifactId>
 	    <version>${project.version}</version>
@@ -137,7 +132,7 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.plugins</groupId>
+	    <groupId>org.openecard.addons</groupId>
 	    <artifactId>plugin-pinplugin</artifactId>
 	    <version>${project.version}</version>
 	</dependency>

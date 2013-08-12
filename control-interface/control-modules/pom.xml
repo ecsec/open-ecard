@@ -16,7 +16,6 @@
     <name>Control Interface Modules</name>
 
     <modules>
-	<module>tctoken</module>
 	<module>status</module>
     </modules>
 

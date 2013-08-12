@@ -67,9 +67,12 @@ public class MessageDispatcher implements Dispatcher {
     @Override
     public Object deliver(Object req) throws DispatcherException, InvocationTargetException {
 	try {
-	    Class reqClass = req.getClass();
+	    Class<?> reqClass = req.getClass();
 	    Service s = getService(reqClass);
 	    Object serviceImpl = getServiceImpl(s);
+
+	    logger.debug("Delivering message of type: {}", req.getClass().getName());
+
 	    Object result =  s.invoke(serviceImpl, req);
 	    return result;
 	} catch (IllegalAccessException ex) {
@@ -79,7 +82,7 @@ public class MessageDispatcher implements Dispatcher {
 	}
     }
 
-    private Service getService(Class reqClass) throws IllegalAccessException {
+    private Service getService(Class<?> reqClass) throws IllegalAccessException {
 	if (! serviceMap.containsKey(reqClass.getName())) {
 	    String msg = "No service with a method containing parameter type " + reqClass.getName() + " present.";
 	    throw new IllegalAccessException(msg);
@@ -100,7 +103,7 @@ public class MessageDispatcher implements Dispatcher {
 
     private void initDefinitions() {
 	// load all annotated service methods from environment
-	Class envClass = this.environment.getClass();
+	Class<?> envClass = this.environment.getClass();
 	Method[] envMethods = envClass.getMethods();
 
 	// loop over methods and build index structure
@@ -119,7 +122,7 @@ public class MessageDispatcher implements Dispatcher {
 
 		// try to read class from annotation, if not take return value
 		Dispatchable methodAnnotation = nextAccessor.getAnnotation(Dispatchable.class);
-		Class returnType = methodAnnotation.interfaceClass();
+		Class<?> returnType = methodAnnotation.interfaceClass();
 
 		// check if the service is already defined
 		if (this.serviceInstMap.containsKey(returnType.getName())) {
@@ -132,7 +135,7 @@ public class MessageDispatcher implements Dispatcher {
 
 		// create service and map its request parameters
 		Service service = new Service(returnType);
-		for (Class reqClass : service.getRequestClasses()) {
+		for (Class<?> reqClass : service.getRequestClasses()) {
 		    if (serviceMap.containsKey(reqClass.getName())) {
 			String msg = "Omitting method with parameter type {} in service interface {} because its ";
 			msg += "type already associated with another service.";

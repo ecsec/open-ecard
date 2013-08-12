@@ -60,7 +60,7 @@ import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.HttpRequestLineUtils;
 import org.openecard.common.util.Pair;
-import org.openecard.control.module.tctoken.gui.InsertCardDialog;
+import org.openecard.common.sal.util.InsertCardDialog;
 import org.openecard.gui.UserConsent;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.transport.paos.PAOSException;

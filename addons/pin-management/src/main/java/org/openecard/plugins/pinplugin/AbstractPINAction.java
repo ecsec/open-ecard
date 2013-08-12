@@ -45,7 +45,7 @@ import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
-import org.openecard.control.module.tctoken.gui.InsertCardDialog;
+import org.openecard.common.sal.util.InsertCardDialog;
 import org.openecard.gui.UserConsent;
 import org.openecard.recognition.CardRecognition;
 import org.slf4j.Logger;

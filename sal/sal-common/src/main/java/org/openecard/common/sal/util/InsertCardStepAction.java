@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.control.module.tctoken.gui;
+package org.openecard.common.sal.util;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.Map;

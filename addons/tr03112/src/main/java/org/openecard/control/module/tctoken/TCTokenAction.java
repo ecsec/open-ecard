@@ -45,11 +45,11 @@ public class TCTokenAction implements AppPluginAction {
 
     private static final Logger logger = LoggerFactory.getLogger(TCTokenAction.class);
 
-    private GenericTCTokenHandler genericTCTokenHandler;
+    private TCTokenHandler genericTCTokenHandler;
 
     @Override
     public void init(Context ctx) {
-	this.genericTCTokenHandler = new GenericTCTokenHandler(ctx.getCardStates(), ctx.getDispatcher(), ctx.getUserConsent(), ctx.getRecognition());
+	this.genericTCTokenHandler = new TCTokenHandler(ctx.getCardStates(), ctx.getDispatcher(), ctx.getUserConsent(), ctx.getRecognition());
     }
 
     @Override

@@ -50,7 +50,7 @@ import org.w3c.dom.Node;
 public class StatusAction implements AppPluginAction {
 
     private static final Logger logger = LoggerFactory.getLogger(StatusAction.class);
-    private GenericStatusHandler genericStatusHandler;
+    private StatusHandler genericStatusHandler;
     private WSMarshaller m;
 
     @Override
@@ -67,7 +67,7 @@ public class StatusAction implements AppPluginAction {
 	ProtocolInfo protocolInfo = ctx.getProtocolInfo();
 	CardStateMap cardStates = ctx.getCardStates();
 	EventHandler eventHandler = ctx.getEventHandler();
-	this.genericStatusHandler = new GenericStatusHandler(cardStates, eventHandler, protocolInfo, rec);
+	this.genericStatusHandler = new StatusHandler(cardStates, eventHandler, protocolInfo, rec);
     }
 
     @Override

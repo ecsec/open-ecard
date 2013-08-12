@@ -85,9 +85,9 @@ import org.slf4j.LoggerFactory;
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class GenericTCTokenHandler {
+public class TCTokenHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(GenericTCTokenHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(TCTokenHandler.class);
     private final I18n lang = I18n.getTranslation("tctoken");
 
     private final CardStateMap cardStates;
@@ -103,7 +103,7 @@ public class GenericTCTokenHandler {
      * @param gui The implementation of the user consent interface.
      * @param rec The card recognition engine.
      */
-    public GenericTCTokenHandler(CardStateMap cardStates, Dispatcher dispatcher, UserConsent gui, CardRecognition rec) {
+    public TCTokenHandler(CardStateMap cardStates, Dispatcher dispatcher, UserConsent gui, CardRecognition rec) {
 	this.cardStates = cardStates;
 	this.dispatcher = dispatcher;
 	this.gui = gui;

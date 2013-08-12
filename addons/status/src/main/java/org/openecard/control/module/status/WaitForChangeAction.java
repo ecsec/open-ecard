@@ -46,7 +46,7 @@ import org.w3c.dom.Node;
 public class WaitForChangeAction implements AppPluginAction {
 
     private static final Logger logger = LoggerFactory.getLogger(WaitForChangeAction.class);
-    private GenericWaitForChangeHandler genericWaitForChangeHandler;
+    private WaitForChangeHandler genericWaitForChangeHandler;
     private WSMarshaller m;
 
     @Override
@@ -59,7 +59,7 @@ public class WaitForChangeAction implements AppPluginAction {
 	    logger.error(e.getMessage(), e);
 	    throw new RuntimeException(e);
 	}
-	this.genericWaitForChangeHandler = new GenericWaitForChangeHandler(ctx.getEventHandler());
+	this.genericWaitForChangeHandler = new WaitForChangeHandler(ctx.getEventHandler());
     }
 
     @Override

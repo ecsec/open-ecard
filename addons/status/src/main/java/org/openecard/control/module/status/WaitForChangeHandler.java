@@ -38,18 +38,18 @@ import org.slf4j.LoggerFactory;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class GenericWaitForChangeHandler {
+public class WaitForChangeHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(GenericStatusHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(StatusHandler.class);
 
     private final EventHandler eventHandler;
 
     /**
-     * Creates a new GenericWaitForChangeHandler.
+     * Creates a new WaitForChangeHandler.
      *
      * @param eventHandler to query for a status change
      */
-    public GenericWaitForChangeHandler(EventHandler eventHandler) {
+    public WaitForChangeHandler(EventHandler eventHandler) {
 	this.eventHandler = eventHandler;
     }
 

@@ -52,9 +52,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class GenericStatusHandler {
+public class StatusHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(GenericStatusHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(StatusHandler.class);
 
     private CardStateMap cardStates;
     private EventHandler eventHandler;
@@ -62,12 +62,12 @@ public class GenericStatusHandler {
     private CardRecognition rec;
 
     /**
-     * Create a new GenericStatusHandler.
+     * Create a new StatusHandler.
      *
      * @param cardStates CardStateMap of the client for querying all ConnectionHandles
      * @param eventHandler for adding eventQueues
      */
-    public GenericStatusHandler(CardStateMap cardStates, EventHandler eventHandler, ProtocolInfo protocols, CardRecognition rec) {
+    public StatusHandler(CardStateMap cardStates, EventHandler eventHandler, ProtocolInfo protocols, CardRecognition rec) {
 	this.cardStates = cardStates;
 	this.eventHandler = eventHandler;
 	this.protocols = protocols;

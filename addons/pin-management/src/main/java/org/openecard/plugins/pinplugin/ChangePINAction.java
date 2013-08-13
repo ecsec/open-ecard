@@ -79,10 +79,11 @@ public class ChangePINAction extends AbstractPINAction {
     }
 
     @Override
-    public void init(Context aCtx) throws ActionInitializationException {
-	this.dispatcher = aCtx.getDispatcher();
-	this.gui = aCtx.getUserConsent();
-	this.recognition = aCtx.getRecognition();
+    public void init(Context ctx) throws ActionInitializationException {
+	this.dispatcher = ctx.getDispatcher();
+	this.gui = ctx.getUserConsent();
+	this.recognition = ctx.getRecognition();
+	this.cardStates = ctx.getCardStates();
     }
 
     @Override

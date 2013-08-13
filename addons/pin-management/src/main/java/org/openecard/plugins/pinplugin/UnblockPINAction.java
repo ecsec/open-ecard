@@ -82,6 +82,7 @@ public class UnblockPINAction extends AbstractPINAction {
 	this.dispatcher = aCtx.getDispatcher();
 	this.gui = aCtx.getUserConsent();
 	this.recognition = aCtx.getRecognition();
+	this.cardStates = aCtx.getCardStates();
     }
 
     @Override

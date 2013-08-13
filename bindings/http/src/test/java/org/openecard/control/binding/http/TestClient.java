@@ -24,17 +24,10 @@ package org.openecard.control.binding.http;
 
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
-import java.io.IOException;
-import java.io.InputStream;
 import org.openecard.addon.AddonManager;
-import org.openecard.addon.ClasspathRegistry;
-import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
-import org.openecard.common.util.FileUtils;
-import org.openecard.control.module.status.StatusAction;
-import org.openecard.control.module.tctoken.TCTokenAction;
 import org.openecard.event.EventManager;
 import org.openecard.gui.swing.SwingDialogWrapper;
 import org.openecard.gui.swing.SwingUserConsent;
@@ -43,14 +36,8 @@ import org.openecard.management.TinyManagement;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
-import org.openecard.ws.marshal.MarshallingTypeException;
-import org.openecard.ws.marshal.WSMarshaller;
-import org.openecard.ws.marshal.WSMarshallerException;
-import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 
 /**
@@ -122,22 +109,12 @@ public final class TestClient {
 	// Initialize the EventManager
 	em.initialize();
 
-	registerAddOns();
+	AddonManager manager = new AddonManager(dispatcher, gui, cardStates, recognition, em);
+	sal.setAddonManager(manager);
 
 	HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
-	binding.setAddonManager(AddonManager.createInstance(dispatcher, gui, cardStates, recognition, em, sal.getProtocolInfo()));
+	binding.setAddonManager(manager);
 	binding.start();
-    }
-
-    private void registerAddOns() throws WSMarshallerException, MarshallingTypeException, IOException, SAXException {
-	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
-	marshaller.addXmlTypeClass(AddonSpecification.class);
-	InputStream manifestStream = FileUtils.resolveResourceAsStream(TCTokenAction.class, "TCToken-Manifest.xml");
-	Document manifestDoc = marshaller.str2doc(manifestStream);
-	ClasspathRegistry.getInstance().register((AddonSpecification) marshaller.unmarshal(manifestDoc));
-	manifestStream = FileUtils.resolveResourceAsStream(StatusAction.class, "Status-Manifest.xml");
-	manifestDoc = marshaller.str2doc(manifestStream);
-	ClasspathRegistry.getInstance().register((AddonSpecification) marshaller.unmarshal(manifestDoc));
     }
 
 }

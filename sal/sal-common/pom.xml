@@ -23,6 +23,11 @@
 	</dependency>
 	<dependency>
 	    <groupId>org.openecard</groupId>
+	    <artifactId>addon</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard</groupId>
 	    <artifactId>recognition</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
@@ -42,6 +47,7 @@
 	    <version>${project.version}</version>
 	    <scope>provided</scope>
 	</dependency>
+
 	<dependency>
 	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>jaxb-marshaller</artifactId>

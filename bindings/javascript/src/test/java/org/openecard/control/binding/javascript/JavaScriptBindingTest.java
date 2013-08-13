@@ -63,7 +63,7 @@ public final class JavaScriptBindingTest {
 	    Thread.sleep(2500);
 	    // Start control interface and binding
 	    // TODO: add protocol info
-	    AddonManager manager = AddonManager.createInstance(tc.getDispatcher(), tc.getGUI(), tc.getCardStates(), tc.getCardRecognition(), tc.getEventManager(), null);
+	    AddonManager manager = new AddonManager(tc.getDispatcher(), tc.getGUI(), tc.getCardStates(), tc.getCardRecognition(), tc.getEventManager());
 	    binding = new JavaScriptBinding(manager);
 
 	} catch (Exception e) {
@@ -117,7 +117,6 @@ public final class JavaScriptBindingTest {
     @Test(enabled = !true)
     public void testWaitForChange() {
 	try {
-
 	    // Request a "get status"
 	    HashMap<String, Object> parameters = new HashMap<String, Object>();
 	    Object[] response = binding.handle("getStatus", parameters);

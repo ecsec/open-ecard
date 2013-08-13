@@ -22,6 +22,8 @@
 
 package org.openecard.addon;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,6 +32,14 @@ import org.openecard.addon.manifest.AppExtensionSpecification;
 import org.openecard.addon.manifest.AppPluginSpecification;
 import org.openecard.addon.manifest.LocalizedString;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
+import org.openecard.common.util.FileUtils;
+import org.openecard.ws.marshal.WSMarshaller;
+import org.openecard.ws.marshal.WSMarshallerException;
+import org.openecard.ws.marshal.WSMarshallerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 
 /**
@@ -41,20 +51,73 @@ import org.openecard.addon.manifest.ProtocolPluginSpecification;
  */
 public class ClasspathRegistry implements AddonRegistry {
 
-    private static final ArrayList<AddonSpecification> registeredAddons = new ArrayList<AddonSpecification>();
-    private static ClasspathRegistry instance;
+    private static final Logger logger = LoggerFactory.getLogger(ClasspathRegistry.class);
 
-    private ClasspathRegistry() {
-    }
+    private final ArrayList<AddonSpecification> registeredAddons = new ArrayList<AddonSpecification>();
 
-    public static ClasspathRegistry getInstance() {
-	if (instance == null) {
-	    instance = new ClasspathRegistry();
+
+    public ClasspathRegistry() throws WSMarshallerException {
+	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
+	marshaller.addXmlTypeClass(AddonSpecification.class);
+
+	try {
+	    String name = "TCToken-Manifest.xml";
+	    InputStream manifestStream = FileUtils.resolveResourceAsStream(ClasspathRegistry.class, name);
+	    Document manifestDoc = marshaller.str2doc(manifestStream);
+	    register((AddonSpecification) marshaller.unmarshal(manifestDoc));
+	    logger.info("Loaded TR-03112 Add-on.");
+	} catch (IOException ex) {
+	    logger.warn("Failed to load TR-03112 Add-on.", ex);
+	} catch (SAXException ex) {
+	    logger.warn("Failed to load TR-03112 Add-on.", ex);
+	} catch (WSMarshallerException ex) {
+	    logger.warn("Failed to load TR-03112 Add-on.", ex);
 	}
-	return instance;
+
+	try {
+	    String name = "PIN-Plugin-Manifest.xml";
+	    InputStream manifestStream = FileUtils.resolveResourceAsStream(ClasspathRegistry.class, name);
+	    Document manifestDoc = marshaller.str2doc(manifestStream);
+	    register((AddonSpecification) marshaller.unmarshal(manifestDoc));
+	    logger.info("Loaded PIN-Management Add-on.");
+	} catch (IOException ex) {
+	    logger.warn("Failed to load PIN-Management Add-on.", ex);
+	} catch (SAXException ex) {
+	    logger.warn("Failed to load PIN-Management Add-on.", ex);
+	} catch (WSMarshallerException ex) {
+	    logger.warn("Failed to load PIN-Management Add-on.", ex);
+	}
+
+	try {
+	    String name = "GenericCrypto-Plugin-Manifest.xml";
+	    InputStream manifestStream = FileUtils.resolveResourceAsStream(ClasspathRegistry.class, name);
+	    Document manifestDoc = marshaller.str2doc(manifestStream);
+	    register((AddonSpecification) marshaller.unmarshal(manifestDoc));
+	    logger.info("Loaded GenericCrypto Add-on.");
+	} catch (IOException ex) {
+	    logger.warn("Failed to load GenericCrypto Add-on.", ex);
+	} catch (SAXException ex) {
+	    logger.warn("Failed to load GenericCrypto Add-on.", ex);
+	} catch (WSMarshallerException ex) {
+	    logger.warn("Failed to load GenericCrypto Add-on.", ex);
+	}
+
+	try {
+	    String name = "Status-Plugin-Manifest.xml";
+	    InputStream manifestStream = FileUtils.resolveResourceAsStream(ClasspathRegistry.class, name);
+	    Document manifestDoc = marshaller.str2doc(manifestStream);
+	    register((AddonSpecification) marshaller.unmarshal(manifestDoc));
+	    logger.info("Loaded Status Add-on.");
+	} catch (IOException ex) {
+	    logger.warn("Failed to load Status Add-on.", ex);
+	} catch (SAXException ex) {
+	    logger.warn("Failed to load Status Add-on.", ex);
+	} catch (WSMarshallerException ex) {
+	    logger.warn("Failed to load Status Add-on.", ex);
+	}
     }
 
-    public void register(AddonSpecification desc) {
+    public final void register(AddonSpecification desc) {
 	registeredAddons.add(desc);
     }
 

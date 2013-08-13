@@ -228,11 +228,6 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.sal.protocols</groupId>
-	    <artifactId>eac</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
 	    <groupId>org.openecard.management</groupId>
 	    <artifactId>tiny-management</artifactId>
 	    <version>${project.version}</version>
@@ -286,6 +281,11 @@
 	<dependency>
 	    <groupId>org.openecard.addons</groupId>
 	    <artifactId>pin-management</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.addons</groupId>
+	    <artifactId>genericcryptography</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 

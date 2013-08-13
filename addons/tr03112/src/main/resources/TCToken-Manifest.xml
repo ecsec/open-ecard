@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <AddonSpecification>
-  <ID>TCToken</ID>
-  <Version>1.0</Version>
+  <ID>TR-03112</ID>
+  <Version>1.0.0</Version>
   <About/>
   <License/>
   <LocalizedName xml:lang="DE">Plugin für die eID Aktivierung</LocalizedName>
@@ -19,5 +19,20 @@
   </BindingActions>
   <ApplicationActions/>
   <IFDActions/>
-  <SALActions/>
+  <SALActions>
+      <ProtocolPluginSpecification>
+	  <URI>urn:oid:1.3.162.15480.3.0.14.2</URI>
+	  <ClassName>org.openecard.sal.protocol.eac.EACProtocol</ClassName>
+	  <LocalizedName xml:lang="EN">EAC2 Protocol Implementation</LocalizedName>
+	  <LocalizedDescription xml:lang="EN">TODO</LocalizedDescription>
+	  <ConfigDescription/>
+      </ProtocolPluginSpecification>
+      <ProtocolPluginSpecification>
+	  <URI>urn:oid:1.3.162.15480.3.0.14</URI>
+	  <ClassName>org.openecard.sal.protocol.eac.EACProtocol</ClassName>
+	  <LocalizedName xml:lang="EN">Generic EAC Protocol Implementation</LocalizedName>
+	  <LocalizedDescription xml:lang="EN">TODO</LocalizedDescription>
+	  <ConfigDescription/>
+      </ProtocolPluginSpecification>
+  </SALActions>
 </AddonSpecification>

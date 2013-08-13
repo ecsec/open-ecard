@@ -57,7 +57,8 @@ public class RichClientTest {
 		   "/eID-Client?tcTokenURL=http%3A%2F%2Fopenecard-demo.vserver-001.urospace.de%2FtcToken%3Fcard-type%3Dhttp%3A%2F%2Fbsi.bund.de%2Fcif%2Fnpa.xml");
 	    statusURL = new URL("http", "127.0.0.1", 24727, "/getStatus");
 	    waitForChangeURL = new URL("http", "127.0.0.1", 24727, "/waitForChange");
-	    RichClient client = RichClient.getInstance();
+	    RichClient client = new RichClient();
+	    client.setup();
 	    // Wait some seconds until the client comes up
 	    Thread.sleep(2500);
 	} catch (Exception e) {

@@ -48,7 +48,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import org.openecard.addon.AddonManager;
 import org.openecard.addon.ClasspathRegistry;
+import org.openecard.addon.CombiningRegistry;
 import org.openecard.addon.FileRegistry;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.AppExtensionSpecification;
@@ -77,6 +79,9 @@ public class ManagementDialog extends JDialog {
     private static ManagementDialog runningDialog;
 
     private final I18n lang = I18n.getTranslation("addon");
+    private final AddonManager manager;
+    private final ClasspathRegistry cpReg;
+    private final FileRegistry fileReg;
 
     private JPanel selectionPanel;
     private JPanel contentPane;
@@ -88,10 +93,12 @@ public class ManagementDialog extends JDialog {
     /**
      * Creates a new instance of the dialog and displays it.
      * This method only permits a single instance, so this is the preferred way to open the dialog.
+     *
+     * @param manager
      */
-    public static synchronized void showDialog() {
+    public static synchronized void showDialog(AddonManager manager) {
 	if (runningDialog == null) {
-	    ManagementDialog dialog = new ManagementDialog();
+	    ManagementDialog dialog = new ManagementDialog(manager);
 	    dialog.addWindowListener(new WindowListener() {
 		@Override
 		public void windowOpened(WindowEvent e) {
@@ -129,8 +136,14 @@ public class ManagementDialog extends JDialog {
      * Create a ManagementDialog instance.
      * The preferred way of opening this dialog is the {@link #showDialog()} function which also makes the dialog
      * visible and only permits one open instance at a time.
+     *
+     * @param manager
      */
-    public ManagementDialog() {
+    public ManagementDialog(AddonManager manager) {
+	this.manager = manager;
+	cpReg = ((CombiningRegistry) manager.getRegistry()).getClasspathRegistry();
+	fileReg = ((CombiningRegistry) manager.getRegistry()).getFileRegistry();
+
 	Image logo = GraphicsUtil.createImage(OecLogoBgWhite.class, 147, 147);
 	setIconImage(logo);
 	setTitle(lang.translationForKey("addon.title"));
@@ -211,7 +224,7 @@ public class ManagementDialog extends JDialog {
 
 	// this assumes that all addons in the ClasspathRegistry are core addons
 	// an ActionPanel for every addon that has one ore more AppExtensionActions will be added
-	for (AddonSpecification desc : ClasspathRegistry.getInstance().listPlugins()) {
+	for (AddonSpecification desc : cpReg.listPlugins()) {
 	    ArrayList<AppExtensionSpecification> applicationActions = desc.getApplicationActions();
 	    if (applicationActions.size() > 0) {
 		String description  = desc.getLocalizedDescription(LANGUAGE_CODE);
@@ -235,7 +248,7 @@ public class ManagementDialog extends JDialog {
     private ActionPanel createActionPanel(AddonSpecification desc) {
 	ActionPanel actionPanel = new ActionPanel();
 	for (AppExtensionSpecification action : desc.getApplicationActions()) {
-	    ActionEntryPanel actionEntryPanel = new ActionEntryPanel(desc, action);
+	    ActionEntryPanel actionEntryPanel = new ActionEntryPanel(desc, action, manager);
 	    actionPanel.addActionEntry(actionEntryPanel);
 	}
 	return actionPanel;
@@ -289,7 +302,7 @@ public class ManagementDialog extends JDialog {
 	// add addon panels
 
 	// this assumes that all addons in the FileRegistry are non core addons
-	for (AddonSpecification desc : FileRegistry.getInstance().listPlugins()) {
+	for (AddonSpecification desc : fileReg.listPlugins()) {
 	    String description = desc.getLocalizedDescription(LANGUAGE_CODE);
 	    String name = desc.getLocalizedName(LANGUAGE_CODE);
 	    Image logo = loadLogo(desc.getLogo());

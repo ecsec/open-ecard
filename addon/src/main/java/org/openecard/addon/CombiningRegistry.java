@@ -24,6 +24,7 @@ package org.openecard.addon;
 
 import java.util.Set;
 import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.ws.marshal.WSMarshallerException;
 
 
 /**
@@ -35,25 +36,23 @@ import org.openecard.addon.manifest.AddonSpecification;
  */
 public class CombiningRegistry implements AddonRegistry {
 
-    private static CombiningRegistry instance;
-    private static ClasspathRegistry classpathRegistry;
-    private static FileRegistry fileRegistry;
+    private ClasspathRegistry classpathRegistry;
+    private FileRegistry fileRegistry;
 
-    public static CombiningRegistry getInstance() {
-	if (instance == null) {
-	    instance = new CombiningRegistry();
-	}
-	return instance;
+
+    public CombiningRegistry() throws WSMarshallerException {
+	classpathRegistry = new ClasspathRegistry();
+	fileRegistry = new FileRegistry();
     }
 
-    private CombiningRegistry() {
-	classpathRegistry = ClasspathRegistry.getInstance();
-	fileRegistry = FileRegistry.getInstance();
+    public ClasspathRegistry getClasspathRegistry() {
+	return classpathRegistry;
     }
 
-    public void register(AddonSpecification desc) {
-	throw new UnsupportedOperationException("Not supported.");
+    public FileRegistry getFileRegistry() {
+	return fileRegistry;
     }
+
 
     @Override
     public Set<AddonSpecification> listPlugins() {

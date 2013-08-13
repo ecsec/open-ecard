@@ -49,6 +49,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
+import org.openecard.addon.AddonManager;
 import org.openecard.common.I18n;
 import org.openecard.common.enums.EventType;
 import org.openecard.common.interfaces.EventCallback;
@@ -81,16 +82,19 @@ public class Status implements EventCallback {
     private InfoPopup popup;
     private final AppTray appTray;
     private final CardRecognition recognition;
+    private final AddonManager manager;
 
     /**
      * Constructor of Status class.
      *
      * @param appTray tray icon
      * @param recognition card recognition
+     * @param manager 
      */
-    public Status(AppTray appTray, CardRecognition recognition) {
+    public Status(AppTray appTray, CardRecognition recognition, AddonManager manager) {
 	this.appTray = appTray;
 	this.recognition = recognition;
+	this.manager = manager;
 	setupBaseUI();
     }
 
@@ -163,7 +167,7 @@ public class Status implements EventCallback {
 	btnSettings.addActionListener(new ActionListener() {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
-		ManagementDialog.showDialog();
+		ManagementDialog.showDialog(manager);
 	    }
 	});
 

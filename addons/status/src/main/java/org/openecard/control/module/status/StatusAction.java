@@ -22,8 +22,13 @@
 
 package org.openecard.control.module.status;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import org.openecard.addon.AddonManager;
+import org.openecard.addon.AddonRegistry;
 import org.openecard.addon.Context;
 import org.openecard.addon.EventHandler;
 import org.openecard.addon.bind.AppPluginAction;
@@ -31,7 +36,8 @@ import org.openecard.addon.bind.Attachment;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.bind.Body;
-import org.openecard.common.interfaces.ProtocolInfo;
+import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.ws.marshal.WSMarshaller;
@@ -50,7 +56,7 @@ import org.w3c.dom.Node;
 public class StatusAction implements AppPluginAction {
 
     private static final Logger logger = LoggerFactory.getLogger(StatusAction.class);
-    private StatusHandler genericStatusHandler;
+    private StatusHandler statusHandler;
     private WSMarshaller m;
 
     @Override
@@ -64,10 +70,10 @@ public class StatusAction implements AppPluginAction {
 	    throw new RuntimeException(e);
 	}
 	CardRecognition rec = ctx.getRecognition();
-	ProtocolInfo protocolInfo = ctx.getProtocolInfo();
+	List<String> protocolInfo = getProtocolInfo(ctx.getManager());
 	CardStateMap cardStates = ctx.getCardStates();
 	EventHandler eventHandler = ctx.getEventHandler();
-	this.genericStatusHandler = new StatusHandler(cardStates, eventHandler, protocolInfo, rec);
+	this.statusHandler = new StatusHandler(cardStates, eventHandler, protocolInfo, rec);
     }
 
     @Override
@@ -77,10 +83,10 @@ public class StatusAction implements AppPluginAction {
 
     @Override
     public BindingResult execute(Body body, Map<String, String> parameters, List<Attachment> attachments) {
-	BindingResult response = null;
+	BindingResult response;
 	try {
 	    StatusRequest statusRequest = checkParameters(parameters);
-	    Status statusResponse = genericStatusHandler.handleRequest(statusRequest);
+	    Status statusResponse = statusHandler.handleRequest(statusRequest);
 	    response = this.handleResponse(statusResponse);
 	} catch (StatusException e) {
 	    response = new BindingResult(BindingResultCode.WRONG_PARAMETER);
@@ -134,6 +140,21 @@ public class StatusAction implements AppPluginAction {
 	httpResponse.setBody(body);
 
 	return httpResponse;
+    }
+
+    private List<String> getProtocolInfo(AddonManager manager) {
+	TreeSet<String> result = new TreeSet<String>();
+
+	// check all sal protocols in the
+	AddonRegistry registry = manager.getRegistry();
+	Set<AddonSpecification> addons = registry.listPlugins();
+	for (AddonSpecification addon : addons) {
+	    for (ProtocolPluginSpecification proto : addon.getSalActions()) {
+		result.add(proto.getUri());
+	    }
+	}
+
+	return new ArrayList<String>(result);
     }
 
 }

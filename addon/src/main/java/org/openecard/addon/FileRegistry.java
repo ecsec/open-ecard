@@ -40,6 +40,7 @@ import org.openecard.addon.manifest.AppPluginSpecification;
 import org.openecard.addon.manifest.LocalizedString;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.common.util.FileUtils;
+import org.openecard.ws.marshal.WSMarshallerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,9 +57,9 @@ public class FileRegistry implements AddonRegistry {
 
     private static final ArrayList<AddonSpecification> registeredAddons = new ArrayList<AddonSpecification>();
     private static final HashMap<String, File> files = new HashMap<String, File>();
-    private static FileRegistry instance;
 
-    private FileRegistry() {
+
+    public FileRegistry() throws WSMarshallerException {
 	String pluginsPath;
 	try {
 	    pluginsPath = FileUtils.getHomeConfigDir() + File.separator + "plugins" + File.separator;
@@ -72,19 +73,12 @@ public class FileRegistry implements AddonRegistry {
 	startFileMonitor(pluginsPath);
     }
 
-    private void startFileMonitor(String pluginsPath) {
+    private void startFileMonitor(String pluginsPath) throws WSMarshallerException {
 	File f = new File(pluginsPath);
 	logger.debug("Starting FilesystemAlterationMonitor on Path: {}", f.getPath());
 	FilesystemAlterationMonitor fam = new FilesystemAlterationMonitor();
 	fam.addListener(f, new PluginDirectoryAlterationListener(this));
 	fam.start();
-    }
-
-    public static FileRegistry getInstance() {
-	if (instance == null) {
-	    instance = new FileRegistry();
-	}
-	return instance;
     }
 
     public void register(AddonSpecification desc, File file) {

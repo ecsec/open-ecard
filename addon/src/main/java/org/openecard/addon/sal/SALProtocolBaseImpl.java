@@ -71,14 +71,14 @@ public abstract class SALProtocolBaseImpl implements SALProtocol {
     /** Object map to transport protocol specific parameters. Used when executing ProtocolStep. */
     protected final TreeMap<String, Object> internalData;
     /** List of ProtocolSteps, which are per default executed in order. */
-    protected final ArrayList<ProtocolStep> steps;
+    protected final ArrayList<ProtocolStep<?, ?>> steps;
 
     /** Index marking current step in the step list. */
     protected int curStep = 0;
 
     public SALProtocolBaseImpl() {
 	this.internalData = new TreeMap<String, Object>();
-	this.steps = new ArrayList<ProtocolStep>();
+	this.steps = new ArrayList<ProtocolStep<?, ?>>();
     }
 
 
@@ -114,9 +114,9 @@ public abstract class SALProtocolBaseImpl implements SALProtocol {
      * Get next step and advance counter.
      * @return next step or null if none exists.
      */
-    private ProtocolStep next() {
+    private ProtocolStep<? extends RequestType, ? extends ResponseType> next() {
 	if (steps.size() > curStep) {
-	    ProtocolStep step = steps.get(curStep);
+	    ProtocolStep<?, ?> step = steps.get(curStep);
 	    curStep++;
 	    return step;
 	} else {

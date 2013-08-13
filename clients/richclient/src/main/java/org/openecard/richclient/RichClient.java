@@ -28,22 +28,16 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.BindException;
 import javax.swing.JOptionPane;
 import org.openecard.addon.AddonManager;
-import org.openecard.addon.ClasspathRegistry;
-import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
-import org.openecard.common.util.FileUtils;
 import org.openecard.control.binding.http.HTTPBinding;
-import org.openecard.control.module.status.StatusAction;
-import org.openecard.control.module.tctoken.TCTokenAction;
 import org.openecard.event.EventManager;
 import org.openecard.gui.swing.SwingDialogWrapper;
 import org.openecard.gui.swing.SwingUserConsent;
@@ -51,22 +45,13 @@ import org.openecard.gui.swing.common.GUIDefaults;
 import org.openecard.ifd.protocol.pace.PACEProtocolFactory;
 import org.openecard.ifd.scio.IFD;
 import org.openecard.management.TinyManagement;
-import org.openecard.plugins.pinplugin.ChangePINAction;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.richclient.gui.AppTray;
 import org.openecard.richclient.gui.MessageDialog;
 import org.openecard.sal.TinySAL;
-import org.openecard.sal.protocol.eac.EAC2ProtocolFactory;
-import org.openecard.sal.protocol.eac.EACGenericProtocolFactory;
 import org.openecard.transport.dispatcher.MessageDispatcher;
-import org.openecard.ws.marshal.MarshallingTypeException;
-import org.openecard.ws.marshal.WSMarshaller;
-import org.openecard.ws.marshal.WSMarshallerException;
-import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 
 /**
@@ -79,8 +64,6 @@ public final class RichClient {
     private static final Logger _logger = LoggerFactory.getLogger(RichClient.class.getName());
     private static final I18n lang = I18n.getTranslation("richclient");
 
-    // Rich client
-    private static RichClient client;
     // Tray icon
     private AppTray tray;
     // Control interface
@@ -91,6 +74,8 @@ public final class RichClient {
     private IFD ifd;
     // Service Access Layer (SAL)
     private TinySAL sal;
+    // AddonManager
+    private AddonManager manager;
     // Event manager
     private EventManager em;
     // Card recognition
@@ -113,15 +98,8 @@ public final class RichClient {
 
 
     public static void main(String[] args) {
-	RichClient.getInstance();
-    }
-
-    public static synchronized RichClient getInstance() {
-	if (client == null) {
-	    client = new RichClient();
-	    client.setup();
-	}
-	return client;
+	RichClient client = new RichClient();
+	client.setup();
     }
 
     public void setup() {
@@ -131,7 +109,6 @@ public final class RichClient {
 	dialog.setHeadline(lang.translationForKey("client.startup.failed.headline"));
 
 	try {
-
 	    tray = new AppTray(this);
 	    tray.beginSetup();
 
@@ -172,8 +149,6 @@ public final class RichClient {
 
 	    // Set up SAL
 	    sal = new TinySAL(env, cardStates);
-	    sal.addProtocol(ECardConstants.Protocol.EAC_GENERIC, new EACGenericProtocolFactory());
-	    sal.addProtocol(ECardConstants.Protocol.EAC2, new EAC2ProtocolFactory());
 	    env.setSAL(sal);
 
 	    // Set up GUI
@@ -182,24 +157,23 @@ public final class RichClient {
 	    ifd.setGUI(gui);
 	    recognition.setGUI(gui);
 
-	    tray.endSetup(recognition);
-	    em.registerAllEvents(tray.status());
-
-	    // Initialize the EventManager
-	    em.initialize();
-
-	    registerAddOns();
-
 	    // Start up control interface
 	    try {
 		binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
-		AddonManager manager = AddonManager.createInstance(dispatcher, gui, cardStates, recognition, em, sal.getProtocolInfo());
+		manager = new AddonManager(dispatcher, gui, cardStates, recognition, em);
+		sal.setAddonManager(manager);
 		binding.setAddonManager(manager);
 		binding.start();
 	    } catch (BindException e) {
 		dialog.setMessage(lang.translationForKey("client.startup.failed.portinuse"));
 		throw e;
 	    }
+
+	    tray.endSetup(recognition, manager);
+
+	    // Initialize the EventManager
+	    em.registerAllEvents(tray.status());
+	    em.initialize();
 
 	} catch (Exception e) {
 	    _logger.error(e.getMessage(), e);
@@ -213,20 +187,6 @@ public final class RichClient {
 	    JOptionPane.showMessageDialog(null, dialog, "Open eCard App", JOptionPane.PLAIN_MESSAGE);
 	    teardown();
 	}
-    }
-
-    private void registerAddOns() throws WSMarshallerException, MarshallingTypeException, IOException, SAXException {
-	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
-	marshaller.addXmlTypeClass(AddonSpecification.class);
-	InputStream manifestStream = FileUtils.resolveResourceAsStream(TCTokenAction.class, "TCToken-Manifest.xml");
-	Document manifestDoc = marshaller.str2doc(manifestStream);
-	ClasspathRegistry.getInstance().register((AddonSpecification) marshaller.unmarshal(manifestDoc));
-	manifestStream = FileUtils.resolveResourceAsStream(StatusAction.class, "Status-Manifest.xml");
-	manifestDoc = marshaller.str2doc(manifestStream);
-	ClasspathRegistry.getInstance().register((AddonSpecification) marshaller.unmarshal(manifestDoc));
-	manifestStream = FileUtils.resolveResourceAsStream(ChangePINAction.class, "PIN-Plugin-Manifest.xml");
-	manifestDoc = marshaller.str2doc(manifestStream);
-	ClasspathRegistry.getInstance().register((AddonSpecification) marshaller.unmarshal(manifestDoc));
     }
 
     public void teardown() {

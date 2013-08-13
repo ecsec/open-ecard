@@ -61,8 +61,10 @@ public class ActionEntryPanel extends JPanel {
      *
      * @param addonSpec Id of the addon this action belongs to.
      * @param actionSpec ActionDescription for which this ActionEntryPanel is constructed.
+     * @param manager
      */
-    public ActionEntryPanel(@Nonnull AddonSpecification addonSpec, @Nonnull AppExtensionSpecification actionSpec) {
+    public ActionEntryPanel(@Nonnull AddonSpecification addonSpec, @Nonnull AppExtensionSpecification actionSpec,
+	    @Nonnull AddonManager manager) {
 	setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
 	String name = actionSpec.getLocalizedName(LANGUAGE_CODE);
@@ -78,7 +80,6 @@ public class ActionEntryPanel extends JPanel {
 	desc.setFont(desc.getFont().deriveFont(Font.PLAIN));
 	add(desc);
 
-	AddonManager manager = AddonManager.getInstance();
 	AppExtensionAction action = manager.getAppExtensionAction(addonSpec, actionSpec.getId());
 	addAction(action);
     }

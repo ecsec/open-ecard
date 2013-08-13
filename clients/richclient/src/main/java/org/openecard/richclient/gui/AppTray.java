@@ -35,6 +35,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import org.openecard.addon.AddonManager;
 import org.openecard.common.I18n;
 import org.openecard.gui.graphics.GraphicsUtil;
 import org.openecard.gui.graphics.OecLogoBgWhite;
@@ -94,8 +95,11 @@ public class AppTray {
     /**
      * Finishes the setup process.
      * The loading icon is replaced with the eCard logo.
+     *
+     * @param rec
+     * @param manager
      */
-    public void endSetup(CardRecognition rec) {
+    public void endSetup(CardRecognition rec, AddonManager manager) {
 	if (trayAvailable) {
 	    trayIcon.setImage(getTrayIconImage(ICON_LOGO));
 	    trayIcon.setToolTip(lang.translationForKey("tray.title"));
@@ -103,7 +107,7 @@ public class AppTray {
 	    label.setIcon(new ImageIcon(GraphicsUtil.createImage(OecLogoBgWhite.class, 256, 256)));
 	}
 
-	status = new Status(this, rec);
+	status = new Status(this, rec, manager);
     }
 
     /**

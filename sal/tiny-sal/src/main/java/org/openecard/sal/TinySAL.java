@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.ACLList;
 import iso.std.iso_iec._24727.tech.schema.ACLListResponse;
 import iso.std.iso_iec._24727.tech.schema.ACLModify;
 import iso.std.iso_iec._24727.tech.schema.ACLModifyResponse;
+import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType;
 import iso.std.iso_iec._24727.tech.schema.AuthorizationServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
@@ -127,7 +128,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
+import org.openecard.addon.AddonManager;
+import org.openecard.addon.AddonNotFoundException;
+import org.openecard.addon.AddonSelector;
+import org.openecard.addon.HighestVersionSelector;
+import org.openecard.addon.sal.FunctionType;
+import org.openecard.addon.sal.SALProtocol;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
@@ -135,11 +141,7 @@ import org.openecard.common.apdu.Select;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.utils.CardUtils;
 import org.openecard.common.interfaces.Environment;
-import org.openecard.common.interfaces.ProtocolInfo;
 import org.openecard.common.sal.Assert;
-import org.openecard.common.sal.FunctionType;
-import org.openecard.common.sal.Protocol;
-import org.openecard.common.sal.ProtocolFactory;
 import org.openecard.common.sal.anytype.CryptoMarkerType;
 import org.openecard.common.sal.exception.InappropriateProtocolForActionException;
 import org.openecard.common.sal.exception.IncorrectParameterException;
@@ -171,7 +173,7 @@ public class TinySAL implements SAL {
 
     private final Environment env;
     private final CardStateMap states;
-    private ProtocolFactories protocolFactories = new ProtocolFactories();
+    private AddonSelector protocolSelector;
     private UserConsent userConsent;
 
     /**
@@ -183,6 +185,11 @@ public class TinySAL implements SAL {
     public TinySAL(Environment env, CardStateMap states) {
 	this.env = env;
 	this.states = states;
+    }
+
+    public void setAddonManager(AddonManager manager) {
+	protocolSelector = new AddonSelector(manager);
+	protocolSelector.setStrategy(new HighestVersionSelector());
     }
 
     /**
@@ -750,7 +757,7 @@ public class TinySAL implements SAL {
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    Protocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.Encipher)) {
 		response = protocol.encipher(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -792,7 +799,7 @@ public class TinySAL implements SAL {
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    Protocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.Decipher)) {
 		response = protocol.decipher(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -857,7 +864,7 @@ public class TinySAL implements SAL {
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    Protocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.Sign)) {
 		response = protocol.sign(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -898,7 +905,7 @@ public class TinySAL implements SAL {
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    Protocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.VerifySignature)) {
 		response = protocol.verifySignature(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -1000,8 +1007,11 @@ public class TinySAL implements SAL {
 		    if (next.getDifferentialIdentity().getDIDMarker().getCryptoMarker() == null) {
 			it.remove();
 		    } else {
-			CryptoMarkerType cryptoMarker = new CryptoMarkerType(next.getDifferentialIdentity().getDIDMarker().getCryptoMarker());
-			if (!cryptoMarker.getAlgorithmInfo().getSupportedOperations().contains(applicationFunctionFilter)) {
+			iso.std.iso_iec._24727.tech.schema.CryptoMarkerType rawMarker;
+			rawMarker = next.getDifferentialIdentity().getDIDMarker().getCryptoMarker();
+			CryptoMarkerType cryptoMarker = new CryptoMarkerType(rawMarker);
+			AlgorithmInfoType algInfo = cryptoMarker.getAlgorithmInfo();
+			if (! algInfo.getSupportedOperations().contains(applicationFunctionFilter)) {
 			    it.remove();
 			}
 		    }
@@ -1054,7 +1064,7 @@ public class TinySAL implements SAL {
 	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, cardStateEntry, connectionHandle);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    Protocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.DIDGet)) {
 		response = protocol.didGet(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -1122,7 +1132,7 @@ public class TinySAL implements SAL {
 	    }
 	    didAuthenticationData.setProtocol(protocolURI);
 
-	    Protocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.DIDAuthenticate)) {
 		response = protocol.didAuthenticate(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -1236,28 +1246,6 @@ public class TinySAL implements SAL {
     }
 
     /**
-     * Gets the ProtocolInfo instance associated with this SAL.
-     * Changes to the protocol registry are reflected in the instance.
-     *
-     * @return ProtocolInfo instance.
-     */
-    @Nonnull
-    public ProtocolInfo getProtocolInfo() {
-	return protocolFactories;
-    }
-
-    /**
-     * Adds a protocol to the SAL instance.
-     *
-     * @param protocolURI Protocol URI
-     * @param factory Protocol factory
-     * @return True if the protocol is added, otherwise false
-     */
-    public boolean addProtocol(String protocolURI, ProtocolFactory factory) {
-	return protocolFactories.add(protocolURI, factory);
-    }
-
-    /**
      * Removes a finished protocol from the SAL instance.
      *
      * @param handle Connection Handle
@@ -1265,7 +1253,7 @@ public class TinySAL implements SAL {
      * @param protocol Protocol
      * @throws UnknownConnectionHandleException
      */
-    public void removeFinishedProtocol(ConnectionHandleType handle, String protocolURI, Protocol protocol)
+    public void removeFinishedProtocol(ConnectionHandleType handle, String protocolURI, SALProtocol protocol)
 	    throws UnknownConnectionHandleException {
 	if (protocol.isFinished()) {
 	    CardStateEntry entry = SALUtils.getCardStateEntry(states, handle);
@@ -1273,16 +1261,16 @@ public class TinySAL implements SAL {
 	}
     }
 
-    private Protocol getProtocol(ConnectionHandleType handle, String protocolURI)
+    private SALProtocol getProtocol(ConnectionHandleType handle, String protocolURI)
 	    throws UnknownProtocolException, UnknownConnectionHandleException {
 	CardStateEntry entry = SALUtils.getCardStateEntry(states, handle);
-	Protocol protocol = entry.getProtocol(protocolURI);
+	SALProtocol protocol = entry.getProtocol(protocolURI);
 	if (protocol == null) {
-	    if (protocolFactories.contains(protocolURI)) {
-		protocol = protocolFactories.get(protocolURI).createInstance(env.getDispatcher(), this.userConsent);
+	    try {
+		protocol = protocolSelector.getSALProtocol(protocolURI);
 		entry.setProtocol(protocolURI, protocol);
-	    } else {
-		throw new UnknownProtocolException("The protocol URI '" + protocolURI + "' is not registered in this SAL component.");
+	    } catch (AddonNotFoundException ex) {
+		throw new UnknownProtocolException("The protocol URI '" + protocolURI + "' is not available.");
 	    }
 	}
 	protocol.getInternalData().put("cardState", entry);

@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @param <C> 
+ * @param <C>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class AbstractFactory <C extends LifecycleTrait> {

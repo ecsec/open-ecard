@@ -36,7 +36,8 @@ final class JARFileFilter implements FileFilter {
     @Override
     public boolean accept(File pathname) {
 	String name = pathname.getName();
-	if (name.endsWith(".jar") || name.endsWith(".JAR")) {
+	name = name.toLowerCase();
+	if (name.endsWith(".jar")) {
 	    return true;
 	}
 	return false;

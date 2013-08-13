@@ -32,9 +32,9 @@ import android.widget.LinearLayout;
 import android.widget.SimpleExpandableListAdapter;
 import java.util.List;
 import java.util.Map;
-import org.openecard.addon.AddonManager;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.AppExtensionSpecification;
+import org.openecard.android.AddonManagerSingleton;
 import org.openecard.common.I18n;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,7 +108,7 @@ final class PluginActionsExpandableListAdapter extends SimpleExpandableListAdapt
 		    public void run() {
 			AddonSpecification addonSpec = pluginActivity.getAddon();
 			String actionId = action.getId();
-			AddonManager.getInstance().getAppExtensionAction(addonSpec, actionId).execute();
+			AddonManagerSingleton.getInstance().getAppExtensionAction(addonSpec, actionId).execute();
 		    }
 		});
 		actionThread.start();

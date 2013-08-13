@@ -35,7 +35,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JApplet;
 import javax.swing.JOptionPane;
 import org.openecard.addon.AddonManager;
-import org.openecard.addon.EventHandler;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
@@ -52,9 +51,8 @@ import org.openecard.ifd.scio.IFD;
 import org.openecard.management.TinyManagement;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.sal.TinySAL;
-import org.openecard.sal.protocol.eac.EAC2ProtocolFactory;
-import org.openecard.sal.protocol.eac.EACGenericProtocolFactory;
 import org.openecard.transport.dispatcher.MessageDispatcher;
+import org.openecard.ws.marshal.WSMarshallerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,13 +156,16 @@ public class ECardApplet extends JApplet {
 	// SAL
 	sal = new TinySAL(env, cardStates);
 	sal.setGUI(gui);
-	sal.addProtocol(ECardConstants.Protocol.EAC_GENERIC, new EACGenericProtocolFactory());
-	sal.addProtocol(ECardConstants.Protocol.EAC2, new EAC2ProtocolFactory());
 	env.setSAL(sal);
 
 	// AddonManager
-	// TODO: provide protocol info
-	AddonManager manager = AddonManager.createInstance(dispatcher, gui, cardStates, recognition, em, sal.getProtocolInfo());
+	AddonManager manager;
+	try {
+	    manager = new AddonManager(dispatcher, gui, cardStates, recognition, em);
+	    sal.setAddonManager(manager);
+	} catch (WSMarshallerException ex) {
+	    throw new RuntimeException("Failed to instantiate AddonManager.", ex);
+	}
 
 	// JavaScript Bridge
 	jsCommHandler = new JSCommunicationHandler(this, manager);

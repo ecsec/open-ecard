@@ -55,13 +55,10 @@ final class PluginDirectoryAlterationListener implements FilesystemAlterationLis
     private final FileRegistry fileRegistry;
     private final WSMarshaller marshaller;
 
-    PluginDirectoryAlterationListener(FileRegistry fileRegistry) {
+    PluginDirectoryAlterationListener(FileRegistry fileRegistry) throws WSMarshallerException {
 	this.fileRegistry = fileRegistry;
-	try {
-	    marshaller = WSMarshallerFactory.createInstance();
-	} catch (WSMarshallerException e) {
-	    throw new RuntimeException(e);
-	}
+	marshaller = WSMarshallerFactory.createInstance();
+	marshaller.addXmlTypeClass(AddonSpecification.class);
     }
 
     @Override

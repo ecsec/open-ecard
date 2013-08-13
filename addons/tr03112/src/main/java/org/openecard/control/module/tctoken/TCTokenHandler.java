@@ -51,7 +51,6 @@ import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
-import org.openecard.common.TR03112Keys;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;

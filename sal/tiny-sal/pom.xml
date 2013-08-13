@@ -27,11 +27,17 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
+	    <groupId>org.openecard</groupId>
+	    <artifactId>addon</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
 	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>wsdef-client</artifactId>
 	    <version>${project.version}</version>
 	    <scope>provided</scope>
 	</dependency>
+
 	<dependency>
 	    <groupId>org.openecard.ifd</groupId>
 	    <artifactId>ifd-core</artifactId>

@@ -28,14 +28,17 @@ import java.util.Map;
 
 
 /**
+ * Interface which must be implemented to perform a step in the protocol.<br/>
+ * The request and response parameters are parameterized, so that the actual type becomes apparent in the step.
  *
+ * @param <Request>
+ * @param <Response> 
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public interface ProtocolStep {
+public interface ProtocolStep <Request extends RequestType, Response extends ResponseType> {
 
     FunctionType getFunctionType();
 
-    <Request extends RequestType, Response extends ResponseType>
     Response perform(Request req, Map<String, Object> internalData);
 
 }

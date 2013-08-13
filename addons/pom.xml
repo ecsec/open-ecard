@@ -17,6 +17,7 @@
 
     <modules>
 	<module>pin-management</module>
+	<module>genericcryptography</module>
 	<module>tr03112</module>
 	<module>status</module>
     </modules>

@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Set;
 import org.openecard.addon.EventHandler;
 import org.openecard.common.Version;
-import org.openecard.common.interfaces.ProtocolInfo;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.recognition.CardRecognition;
@@ -58,7 +57,7 @@ public class StatusHandler {
 
     private CardStateMap cardStates;
     private EventHandler eventHandler;
-    private ProtocolInfo protocols;
+    private List<String> protocols;
     private CardRecognition rec;
 
     /**
@@ -66,8 +65,10 @@ public class StatusHandler {
      *
      * @param cardStates CardStateMap of the client for querying all ConnectionHandles
      * @param eventHandler for adding eventQueues
+     * @param protocols
+     * @param rec 
      */
-    public StatusHandler(CardStateMap cardStates, EventHandler eventHandler, ProtocolInfo protocols, CardRecognition rec) {
+    public StatusHandler(CardStateMap cardStates, EventHandler eventHandler, List<String> protocols, CardRecognition rec) {
 	this.cardStates = cardStates;
 	this.eventHandler = eventHandler;
 	this.protocols = protocols;
@@ -102,10 +103,10 @@ public class StatusHandler {
 	status.getSupportedAPIVersions().add(apiVersion);
 	// TODO: supported cards
 	List<CardInfoType> cifs = rec.getCardInfos();
-	List<StatusType.SupportedCards> supportedCards = getSupportedCards(protocols.protocols(), cifs);
+	List<StatusType.SupportedCards> supportedCards = getSupportedCards(protocols, cifs);
 	status.getSupportedCards().addAll(supportedCards);
 	// supported DID protocols
-	status.getSupportedDIDProtocols().addAll(protocols.protocols());
+	status.getSupportedDIDProtocols().addAll(protocols);
 	// TODO: additional features
 
 	if (sessionIdentifier != null) {
@@ -126,12 +127,10 @@ public class StatusHandler {
 
     /**
      *
-     * @param requestURI
-     *            Status request URI
+     * @param requestURI Status request URI
      * @return StatusRequest containing an optional session identifier
      * @throws UnsupportedEncodingException
-     * @throws MalformedURLException
-     *             if mandatory parameters or values are missing
+     * @throws MalformedURLException If mandatory parameters or values are missing
      */
     public StatusRequest parseStatusRequestURI(URI requestURI) throws UnsupportedEncodingException,
 	    MalformedURLException {
@@ -144,8 +143,8 @@ public class StatusHandler {
 	String[] query = requestURI.getQuery().split("&");
 
 	for (String q : query) {
-	    String name = q.substring(0, q.indexOf("="));
-	    String value = q.substring(q.indexOf("=") + 1, q.length());
+	    String name = q.substring(0, q.indexOf('='));
+	    String value = q.substring(q.indexOf('=') + 1, q.length());
 
 	    if (name.startsWith("session")) {
 		if (!value.isEmpty()) {
@@ -173,7 +172,8 @@ public class StatusHandler {
 	    for (CardApplicationType app : cif.getApplicationCapabilities().getCardApplication()) {
 		for (DIDInfoType did : app.getDIDInfo()) {
 		    String proto = did.getDifferentialIdentity().getDIDProtocol();
-		    if (protocols.contains(proto)) {
+		    // add protocol to list only if it is supported by the application and not yet added
+		    if (protocols.contains(proto) && ! supportedCard.getDIDProtocols().contains(proto)) {
 			supportedCard.getDIDProtocols().add(proto);
 		    }
 		}

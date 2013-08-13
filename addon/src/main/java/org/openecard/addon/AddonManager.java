@@ -37,10 +37,10 @@ import org.openecard.addon.sal.SALProtocol;
 import org.openecard.addon.sal.SALProtocolProxy;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.EventManager;
-import org.openecard.common.interfaces.ProtocolInfo;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.gui.UserConsent;
 import org.openecard.recognition.CardRecognition;
+import org.openecard.ws.marshal.WSMarshallerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,34 +54,22 @@ public class AddonManager {
 
     private static final Logger logger = LoggerFactory.getLogger(AddonManager.class);
 
-    private static AddonManager instance;
     private final AddonRegistry registry;
     private final Dispatcher dispatcher;
     private final UserConsent userConsent;
     private final CardStateMap cardStates;
     private final CardRecognition recognition;
     private final EventManager eventManager;
-    private final ProtocolInfo protocolInfo;
     private final EventHandler eventHandler;
 
-    private AddonManager(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition, EventManager eventManager, ProtocolInfo info) {
-	this.registry = CombiningRegistry.getInstance();
+    public AddonManager(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition, EventManager eventManager) throws WSMarshallerException {
+	this.registry = new CombiningRegistry();
 	this.dispatcher = dispatcher;
 	this.userConsent = userConsent;
 	this.cardStates = cardStates;
 	this.recognition = recognition;
 	this.eventManager = eventManager;
-	this.protocolInfo = info;
 	eventHandler = new EventHandler(eventManager);
-    }
-
-    public static AddonManager getInstance() {
-	return instance;
-    }
-
-    public static AddonManager createInstance(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition, EventManager eventManager, ProtocolInfo info) {
-	instance = new AddonManager(dispatcher, userConsent, cardStates, recognition, eventManager, info);
-	return instance;
     }
 
 
@@ -95,7 +83,7 @@ public class AddonManager {
 	ClassLoader cl = registry.downloadPlugin(addonSpec);
 	IFDProtocolProxy protoFactory = new IFDProtocolProxy(className, cl);
 	try {
-	    Context aCtx = new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler);
+	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);
 	    protoFactory.init(aCtx);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
@@ -105,12 +93,12 @@ public class AddonManager {
     }
 
     public SALProtocol getSALProtocol(@Nonnull AddonSpecification addonSpec, @Nonnull String uri) {
-	ProtocolPluginSpecification protoSpec = addonSpec.searchIFDActionByURI(uri);
+	ProtocolPluginSpecification protoSpec = addonSpec.searchSALActionByURI(uri);
 	String className = protoSpec.getClassName();
 	ClassLoader cl = registry.downloadPlugin(addonSpec);
 	SALProtocolProxy protoFactory = new SALProtocolProxy(className, cl);
 	try {
-	    Context aCtx = new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler);
+	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);
 	    protoFactory.init(aCtx);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
@@ -125,7 +113,7 @@ public class AddonManager {
 	ClassLoader cl = registry.downloadPlugin(addonSpec);
 	AppExtensionActionProxy protoFactory = new AppExtensionActionProxy(className, cl);
 	try {
-	    Context aCtx = new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler);
+	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);
 	    protoFactory.init(aCtx);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
@@ -140,7 +128,7 @@ public class AddonManager {
 	ClassLoader cl = registry.downloadPlugin(addonSpec);
 	AppPluginActionProxy protoFactory = new AppPluginActionProxy(className, cl);
 	try {
-	    Context aCtx = new Context(dispatcher, userConsent, cardStates, recognition, eventManager, protocolInfo, eventHandler);
+	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);
 	    protoFactory.init(aCtx);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {

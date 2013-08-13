@@ -29,7 +29,6 @@ import java.util.concurrent.TimeoutException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.I18n;
-import org.openecard.common.TR03112Keys;
 import org.openecard.common.util.Promise;
 import org.openecard.common.util.TR03112Utils;
 import org.openecard.crypto.common.asn1.cvc.CertificateDescription;

@@ -38,7 +38,6 @@ import org.openecard.ifd.protocol.pace.PACEProtocolFactory;
 import org.openecard.ifd.scio.IFD;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.sal.TinySAL;
-import org.openecard.sal.protocol.genericcryptography.GenericCryptoProtocolFactory;
 import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +114,6 @@ public class PKCS11Impl implements PKCS11Interface {
 
 	    // Set up SAL
 	    sal = new TinySAL(env, cardStates);
-	    sal.addProtocol(ECardConstants.Protocol.GENERIC_CRYPTO, new GenericCryptoProtocolFactory());
 	    env.setSAL(sal);
 
 	    // Set up GUI

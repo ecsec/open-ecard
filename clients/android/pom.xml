@@ -124,21 +124,10 @@
 	</dependency>
 
 	<dependency>
-	    <groupId>org.openecard.sal.protocols</groupId>
-	    <artifactId>eac</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.sal.protocols</groupId>
+	    <groupId>org.openecard.addons</groupId>
 	    <artifactId>genericcryptography</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
-	<dependency>
-	    <groupId>org.openecard.sal.protocols</groupId>
-	    <artifactId>pincompare</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-
 	<dependency>
 	    <groupId>org.openecard.addons</groupId>
 	    <artifactId>pin-management</artifactId>

@@ -37,10 +37,7 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import org.openecard.addon.ClasspathRegistry;
-import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.AddonManager;
 import org.openecard.android.activities.TerminalFactoryActivity;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
@@ -51,8 +48,6 @@ import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
-import org.openecard.common.util.FileUtils;
-import org.openecard.control.module.tctoken.TCTokenAction;
 import org.openecard.event.EventManager;
 import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsent;
@@ -64,24 +59,14 @@ import org.openecard.ifd.scio.IFDException;
 import org.openecard.ifd.scio.IFDProperties;
 import org.openecard.ifd.scio.wrapper.IFDTerminalFactory;
 import org.openecard.management.TinyManagement;
-import org.openecard.plugins.pinplugin.ChangePINAction;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.sal.TinySAL;
-import org.openecard.sal.protocol.eac.EAC2ProtocolFactory;
-import org.openecard.sal.protocol.eac.EACGenericProtocolFactory;
-import org.openecard.sal.protocol.genericcryptography.GenericCryptoProtocolFactory;
-import org.openecard.sal.protocol.pincompare.PINCompareProtocolFactory;
 import org.openecard.scio.NFCFactory;
 import org.openecard.transport.dispatcher.MessageDispatcher;
-import org.openecard.ws.marshal.MarshallingTypeException;
-import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
-import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.openecard.ws.marshal.WsdefProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 
 /**
@@ -112,6 +97,7 @@ public class ApplicationContext extends Application implements EventCallback {
     private AndroidTerminalFactory terminalFactory;
     private boolean usingNFC;
     private NotificationManager notificationManager;
+    private AddonManager manager;
 
     public boolean usingNFC() {
 	return usingNFC;
@@ -135,6 +121,10 @@ public class ApplicationContext extends Application implements EventCallback {
 
     public UserConsent getGUI() {
 	return gui;
+    }
+
+    public AddonManager getManager() {
+	return manager;
     }
 
     /**
@@ -215,6 +205,8 @@ public class ApplicationContext extends Application implements EventCallback {
 
     /**
      * Initialize the client by setting properties for Android and starting up each module.
+     *
+     * @param activityContext 
      */
     public void initialize(Activity activityContext) {
 	logger.debug("initialize");
@@ -257,8 +249,8 @@ public class ApplicationContext extends Application implements EventCallback {
 
 	usingNFC = terminalFactory instanceof NFCFactory;
 	if (usingNFC) {
-	    NfcManager manager = (NfcManager) this.getSystemService(Context.NFC_SERVICE);
-	    NfcAdapter adapter = manager.getDefaultAdapter();
+	    NfcManager nfcManager = (NfcManager) this.getSystemService(Context.NFC_SERVICE);
+	    NfcAdapter adapter = nfcManager.getDefaultAdapter();
 	    if (adapter == null || !adapter.isEnabled()) {
 		MessageDialog dialog = gui.obtainMessageDialog();
 		String message = lang.translationForKey("android.error.nfc_error");
@@ -335,34 +327,21 @@ public class ApplicationContext extends Application implements EventCallback {
 	// SAL
 	sal = new TinySAL(env, cardStates);
 	sal.setGUI(gui);
-	sal.addProtocol(ECardConstants.Protocol.EAC2, new EAC2ProtocolFactory());
-	sal.addProtocol(ECardConstants.Protocol.EAC_GENERIC, new EACGenericProtocolFactory());
-	sal.addProtocol(ECardConstants.Protocol.PIN_COMPARE, new PINCompareProtocolFactory());
-	sal.addProtocol(ECardConstants.Protocol.GENERIC_CRYPTO, new GenericCryptoProtocolFactory());
 	env.setSAL(sal);
 
 	em.initialize();
 
 	try {
-	    registerAddOns();
-	} catch (Exception e) {
+	    manager = new AddonManager(dispatcher, gui, cardStates, recognition, em);
+	    sal.setAddonManager(manager);
+	    AddonManagerSingleton.setInstance(manager);
+	} catch (WSMarshallerException e) {
 	    logger.error("Registering of core add-ons failed.", e);
 	    System.exit(-1);
 	}
 	// control interface is started in the TCTokenService
 
 	initialized = true;
-    }
-
-    private void registerAddOns() throws WSMarshallerException, MarshallingTypeException, IOException, SAXException {
-	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
-	marshaller.addXmlTypeClass(AddonSpecification.class);
-	InputStream manifestStream = FileUtils.resolveResourceAsStream(TCTokenAction.class, "TCToken-Manifest.xml");
-	Document manifestDoc = marshaller.str2doc(manifestStream);
-	ClasspathRegistry.getInstance().register((AddonSpecification) marshaller.unmarshal(manifestDoc));
-	manifestStream = FileUtils.resolveResourceAsStream(ChangePINAction.class, "PIN-Plugin-Manifest.xml");
-	manifestDoc = marshaller.str2doc(manifestStream);
-	ClasspathRegistry.getInstance().register((AddonSpecification) marshaller.unmarshal(manifestDoc));
     }
 
     @Override

@@ -49,7 +49,7 @@ import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
-import org.openecard.common.TR03112Keys;
+import org.openecard.control.module.tctoken.TR03112Keys;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;

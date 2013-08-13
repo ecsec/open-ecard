@@ -39,9 +39,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.openecard.addon.AddonManager;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.AppExtensionSpecification;
+import org.openecard.android.AddonManagerSingleton;
 import org.openecard.android.R;
 import org.openecard.common.I18n;
 
@@ -74,14 +74,14 @@ public class PluginActivity extends Activity {
 	super.onCreate(savedInstanceState);
 	setContentView(R.layout.plugin);
 
-	Set<AddonSpecification> listPlugins = AddonManager.getInstance().getRegistry().listPlugins();
+	Set<AddonSpecification> listPlugins = AddonManagerSingleton.getInstance().getRegistry().listPlugins();
 	List<String> pluginNames = new ArrayList<String>();
 
 	for (AddonSpecification addon : listPlugins) {
 	    pluginNames.add(addon.getLocalizedName(LANGUAGE_CODE));
 	}
 	int index = (Integer) getIntent().getExtras().get(PluginsActivity.PLUGIN_INDEX);
-	plugin = AddonManager.getInstance().getRegistry().searchByName(pluginNames.get(index)).iterator().next();
+	plugin = AddonManagerSingleton.getInstance().getRegistry().searchByName(pluginNames.get(index)).iterator().next();
 
 	setUpTabHost();
     }

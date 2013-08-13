@@ -17,7 +17,6 @@
 
     <modules>
 	<module>sal-common</module>
-	<module>sal-protocols</module>
 	<module>tiny-sal</module>
     </modules>
 

@@ -22,6 +22,8 @@
 
 package org.openecard.crypto.common.sal;
 
+import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDGet;
 import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
@@ -65,6 +67,7 @@ public class GenericCryptoSigner {
     private byte[] rawCertData;
     private Map<String, java.security.cert.Certificate[]> javaCerts;
     private org.openecard.bouncycastle.crypto.tls.Certificate bcCert;
+    private boolean connected;
 
     /**
      * Creates a Generic Crypto signer and defines the card, application and target DID through the parameters.
@@ -186,6 +189,8 @@ public class GenericCryptoSigner {
      */
     public byte[] sign(@Nonnull byte[] hash) throws SignatureException, CredentialPermissionDenied {
 	try {
+	    connectApplication();
+
 	    Sign sign = new Sign();
 	    sign.setMessage(hash);
 	    sign.setDIDName(didName);
@@ -193,6 +198,7 @@ public class GenericCryptoSigner {
 	    sign.setConnectionHandle(handle);
 	    SignResponse res = (SignResponse) dispatcher.deliver(sign);
 	    WSHelper.checkResult(res);
+
 	    return res.getSignature();
 	} catch (InvocationTargetException e) {
 	    logger.error("Signature generation failed", e);
@@ -229,6 +235,8 @@ public class GenericCryptoSigner {
     private byte[] readCertificateDataset(ConnectionHandleType cHandle, String dsiName) throws CredentialPermissionDenied {
 	byte[] content = null;
 	try {
+	    connectApplication();
+
 	    DSIRead dsiRead = new DSIRead();
 	    dsiRead.setConnectionHandle(cHandle);
 	    dsiRead.getConnectionHandle().setCardApplication(cHandle.getCardApplication());
@@ -270,6 +278,19 @@ public class GenericCryptoSigner {
 	    logger.error("Failed to get DataSetName for DID: {}.", didName, e);
 	}
 	return dataSetName;
+    }
+
+    private ConnectionHandleType connectApplication() throws DispatcherException, InvocationTargetException, WSException {
+	if (! connected) {
+	    CardApplicationConnect req = new CardApplicationConnect();
+	    req.setCardApplicationPath(handle);
+	    CardApplicationConnectResponse res = (CardApplicationConnectResponse) dispatcher.deliver(req);
+	    WSHelper.checkResult(res);
+	    connected = true;
+	    return res.getConnectionHandle();
+	} else {
+	    return handle;
+	}
     }
 
 }

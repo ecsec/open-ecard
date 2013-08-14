@@ -34,11 +34,10 @@ import org.openecard.common.tlv.TagClass;
 
 
 /**
- * This class can't be used outside of the package as its definitifely not safe to use for arbitrary types.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-final class GenericPathOrObjects<KeyType extends TLVType> extends TLV {
+public final class GenericPathOrObjects<KeyType extends TLVType> extends TLV {
 
     private Path path;
     private List<KeyType> objects;

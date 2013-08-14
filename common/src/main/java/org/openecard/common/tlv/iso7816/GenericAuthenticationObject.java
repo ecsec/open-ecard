@@ -32,11 +32,10 @@ import org.openecard.common.tlv.TagClass;
 
 
 /**
- * This class can't be used outside of the package as its definitifely not safe to use for arbitrary types.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-class GenericAuthenticationObject <AuthAttributes> {
+public class GenericAuthenticationObject <AuthAttributes> {
 
     private TLV tlv;
 

@@ -24,26 +24,23 @@ package org.openecard.common.sal.state;
 
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
-import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationStateType;
 import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
-import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
 import iso.std.iso_iec._24727.tech.schema.SecurityConditionType;
 import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import javax.xml.datatype.XMLGregorianCalendar;
 import org.openecard.addon.sal.SALProtocol;
+import org.openecard.common.WSHelper;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.sal.state.cif.DIDInfoWrapper;
 import org.openecard.common.sal.state.cif.DataSetInfoWrapper;
 import org.openecard.common.util.ByteArrayWrapper;
-import org.openecard.common.util.ByteUtils;
 
 
 /**
@@ -104,60 +101,11 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
     }
 
     public ConnectionHandleType handleCopy() {
-	ConnectionHandleType result = new ConnectionHandleType();
-	copyPath(result, handle);
-	result.setSlotHandle(ByteUtils.clone(handle.getSlotHandle()));
-	result.setRecognitionInfo(copyRecognition(handle.getRecognitionInfo()));
-	return result;
+	return WSHelper.copyHandle(handle);
     }
 
     public CardApplicationPathType pathCopy() {
-	CardApplicationPathType result = new CardApplicationPathType();
-	copyPath(result, handle);
-	return result;
-    }
-
-    private static void copyPath(CardApplicationPathType out, CardApplicationPathType in) {
-	out.setCardApplication(ByteUtils.clone(in.getCardApplication()));
-	out.setChannelHandle(copyChannel(in.getChannelHandle()));
-	out.setContextHandle(ByteUtils.clone(in.getContextHandle()));
-	out.setIFDName(in.getIFDName());
-	out.setSlotIndex(in.getSlotIndex()); // TODO: copy bigint
-    }
-
-    private static ChannelHandleType copyChannel(ChannelHandleType handle) {
-	if (handle == null) {
-	    return null;
-	}
-	ChannelHandleType result = new ChannelHandleType();
-	result.setBinding(handle.getBinding());
-	result.setPathSecurity(copyPathSec(handle.getPathSecurity()));
-	result.setProtocolTerminationPoint(handle.getProtocolTerminationPoint());
-	result.setSessionIdentifier(handle.getSessionIdentifier());
-	return result;
-    }
-
-    private static ConnectionHandleType.RecognitionInfo copyRecognition(ConnectionHandleType.RecognitionInfo rec) {
-	if (rec == null) {
-	    return null;
-	}
-	ConnectionHandleType.RecognitionInfo result = new ConnectionHandleType.RecognitionInfo();
-	if (rec.getCaptureTime() != null) {
-	    result.setCaptureTime((XMLGregorianCalendar)rec.getCaptureTime().clone());
-	}
-	result.setCardIdentifier(ByteUtils.clone(rec.getCardIdentifier()));
-	result.setCardType(rec.getCardType());
-	return result;
-    }
-
-    private static PathSecurityType copyPathSec(PathSecurityType sec) {
-	if (sec == null) {
-	    return null;
-	}
-	PathSecurityType result = new PathSecurityType();
-	result.setParameters(sec.getParameters()); // TODO: copy depending on actual content
-	result.setProtocol(sec.getProtocol());
-	return result;
+	return WSHelper.copyPath(handle);
     }
 
 

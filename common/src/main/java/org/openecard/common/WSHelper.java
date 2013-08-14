@@ -22,13 +22,19 @@
 
 package org.openecard.common;
 
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
+import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.util.List;
+import javax.xml.datatype.XMLGregorianCalendar;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.ResponseBaseType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.apdu.common.CardCommandStatus;
 import org.openecard.common.apdu.common.CardResponseAPDU;
+import org.openecard.common.util.ByteUtils;
 
 
 /**
@@ -126,6 +132,64 @@ public class WSHelper {
 	} catch (Exception ignore) {
 	    return null;
 	}
+    }
+
+
+    public static ConnectionHandleType copyHandle(ConnectionHandleType handle) {
+	ConnectionHandleType result = new ConnectionHandleType();
+	copyPath(result, handle);
+	result.setSlotHandle(ByteUtils.clone(handle.getSlotHandle()));
+	result.setRecognitionInfo(copyRecognition(handle.getRecognitionInfo()));
+	return result;
+    }
+
+    public static CardApplicationPathType copyPath(CardApplicationPathType handle) {
+	CardApplicationPathType result = new CardApplicationPathType();
+	copyPath(result, handle);
+	return result;
+    }
+
+    private static void copyPath(CardApplicationPathType out, CardApplicationPathType in) {
+	out.setCardApplication(ByteUtils.clone(in.getCardApplication()));
+	out.setChannelHandle(copyChannel(in.getChannelHandle()));
+	out.setContextHandle(ByteUtils.clone(in.getContextHandle()));
+	out.setIFDName(in.getIFDName());
+	out.setSlotIndex(in.getSlotIndex()); // TODO: copy bigint
+    }
+
+    private static ChannelHandleType copyChannel(ChannelHandleType handle) {
+	if (handle == null) {
+	    return null;
+	}
+	ChannelHandleType result = new ChannelHandleType();
+	result.setBinding(handle.getBinding());
+	result.setPathSecurity(copyPathSec(handle.getPathSecurity()));
+	result.setProtocolTerminationPoint(handle.getProtocolTerminationPoint());
+	result.setSessionIdentifier(handle.getSessionIdentifier());
+	return result;
+    }
+
+    private static ConnectionHandleType.RecognitionInfo copyRecognition(ConnectionHandleType.RecognitionInfo rec) {
+	if (rec == null) {
+	    return null;
+	}
+	ConnectionHandleType.RecognitionInfo result = new ConnectionHandleType.RecognitionInfo();
+	if (rec.getCaptureTime() != null) {
+	    result.setCaptureTime((XMLGregorianCalendar) rec.getCaptureTime().clone());
+	}
+	result.setCardIdentifier(ByteUtils.clone(rec.getCardIdentifier()));
+	result.setCardType(rec.getCardType());
+	return result;
+    }
+
+    private static PathSecurityType copyPathSec(PathSecurityType sec) {
+	if (sec == null) {
+	    return null;
+	}
+	PathSecurityType result = new PathSecurityType();
+	result.setParameters(sec.getParameters()); // TODO: copy depending on actual content
+	result.setProtocol(sec.getProtocol());
+	return result;
     }
 
 }

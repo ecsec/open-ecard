@@ -71,7 +71,7 @@ public class TCTokenVerifier {
     /**
      * Verifies the ServerAddress element of the TCToken.
      *
-     * @throws Exception
+     * @throws TCTokenException
      */
     public void verifyServerAddress() throws TCTokenException {
 	try {
@@ -86,7 +86,7 @@ public class TCTokenVerifier {
     /**
      * Verifies the SessionIdentifier element of the TCToken.
      *
-     * @throws Exception
+     * @throws TCTokenException
      */
     public void verifySessionIdentifier() throws TCTokenException {
 	try {
@@ -100,7 +100,7 @@ public class TCTokenVerifier {
     /**
      * Verifies the RefreshAddress element of the TCToken.
      *
-     * @throws Exception
+     * @throws TCTokenException
      */
     public void verifyRefreshAddress() throws TCTokenException {
 	try {
@@ -115,13 +115,13 @@ public class TCTokenVerifier {
     /**
      * Verifies the Binding element of the TCToken.
      *
-     * @throws Exception
+     * @throws TCTokenException
      */
     public void verifyBinding() throws TCTokenException {
 	try {
 	    String value = token.getBinding();
 	    assertRequired(value);
-	    checkEqual(value, "urn:liberty:paos:2006-08");
+	    checkEqualOR(value, "urn:liberty:paos:2006-08", "urn:ietf:rfc:2616");
 	} catch (TCTokenException e) {
 	    throw new TCTokenException("Malformed Binding");
 	}
@@ -130,7 +130,7 @@ public class TCTokenVerifier {
     /**
      * Verifies the PathSecurity-Protocol element of the TCToken.
      *
-     * @throws Exception
+     * @throws TCTokenException
      */
     public void verifyPathSecurityProtocol() throws TCTokenException {
 	try {
@@ -146,7 +146,7 @@ public class TCTokenVerifier {
     /**
      * Verifies the PathSecurity-Parameter element of the TCToken.
      *
-     * @throws Exception
+     * @throws TCTokenException
      */
     public void verifyPathSecurityParameters() throws TCTokenException {
 	try {

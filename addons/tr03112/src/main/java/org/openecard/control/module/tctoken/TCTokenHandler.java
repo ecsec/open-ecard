@@ -292,10 +292,12 @@ public class TCTokenHandler {
 		}
 
 		response.setBindingTask(paosTask);
-	    } else if (binding == null) {
+	    } else if ("urn:ietf:rfc:2616".equals(binding)) {
 		// no actual binding, just connect via tls and authenticate the user with that connection
 		HttpGetTask task = new HttpGetTask(dispatcher, connectionHandle, tokenRequest);
 		FutureTask<StartPAOSResponse> tlsTask = new FutureTask<StartPAOSResponse>(task);
+		Thread tlsThread = new Thread(tlsTask, "TLS Auth");
+		tlsThread.start();
 		waitForTask(tlsTask);
 
 		response.setBindingTask(tlsTask);

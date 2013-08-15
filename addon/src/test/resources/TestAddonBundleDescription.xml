@@ -6,7 +6,7 @@
   <LocalizedName xml:lang="DE">Test-Addon</LocalizedName>
   <LocalizedName xml:lang="EN">Test-Addon</LocalizedName>
   <LocalizedDescription xml:lang="DE">Testbeschreibung</LocalizedDescription>
-  <About>About</About>
+  <About xml:lang="EN">About</About>
   <Logo>openecard_logo.png</Logo>
   <ConfigDescription>
     <Entries>

@@ -2,10 +2,10 @@
 <AddonSpecification>
   <ID>Status</ID>
   <Version>1.0</Version>
-  <About/>
   <License/>
   <LocalizedName xml:lang="DE">Plugin für die eID Aktivierung</LocalizedName>
   <LocalizedDescription xml:lang="DE">Testbeschreibung</LocalizedDescription>
+  <About xml:lang="EN">Status functionality belonging to the Open eCard core.</About>
   <Logo/>
   <ConfigDescription/>
   <BindingActions>

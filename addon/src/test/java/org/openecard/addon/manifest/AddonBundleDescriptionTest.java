@@ -24,9 +24,6 @@ package org.openecard.addon.manifest;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
-import javax.xml.bind.JAXB;
 import javax.xml.transform.TransformerException;
 import org.openecard.common.util.FileUtils;
 import org.openecard.ws.marshal.WSMarshaller;

@@ -2,10 +2,10 @@
 <AddonSpecification>
   <ID>TR-03112</ID>
   <Version>1.0.0</Version>
-  <About/>
   <License/>
   <LocalizedName xml:lang="DE">Plugin für die eID Aktivierung</LocalizedName>
   <LocalizedDescription xml:lang="DE">Testbeschreibung</LocalizedDescription>
+  <About xml:lang="EN">TR-03112 functionality belonging to the Open eCard core.</About>
   <Logo/>
   <ConfigDescription/>
   <BindingActions>

@@ -2,9 +2,9 @@
 <AddonSpecification>
     <ID>GenericCrypto-Plugin</ID>
     <Version>1.0.0</Version>
-    <About/>
     <License/>
     <LocalizedName xml:lang="EN">Generic Crypto Protocol Add-on</LocalizedName>
+    <About xml:lang="EN">Generic Crypto functionality belonging to the Open eCard core.</About>
     <ConfigDescription/>
     <BindingActions/>
     <ApplicationActions/>

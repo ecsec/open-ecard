@@ -33,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -86,6 +87,7 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 
     private final IFD ifd;
     private final SCWrapper scWrapper;
+    private final ExecutorService threadPool;
     private final byte[] ctxHandle;
     private final boolean withNew;
 
@@ -97,15 +99,17 @@ public class EventListener implements Callable<List<IFDStatusType>> {
     private Future<Void> termWatcher;
 
 
-    public EventListener(IFD ifd, SCWrapper scWrapper, byte[] ctxHandle, long timeout, ChannelHandleType callback, List<IFDStatusType> expectedStatuses, boolean withNew) {
+    public EventListener(IFD ifd, SCWrapper scWrapper, ExecutorService threadPool, byte[] ctxHandle, long timeout,
+	    ChannelHandleType callback, List<IFDStatusType> expectedStatuses, boolean withNew) {
 	this.ifd = ifd;
 	this.scWrapper = scWrapper;
+	this.threadPool = threadPool;
 	this.ctxHandle = ctxHandle;
 	this.timeout = timeout;
 	this.callback = callback;
 	this.expectedStatuses = expectedStatuses;
 	this.withNew = withNew;
-	startTime = System.currentTimeMillis();
+	this.startTime = System.currentTimeMillis();
     }
 
     /**
@@ -148,9 +152,10 @@ public class EventListener implements Callable<List<IFDStatusType>> {
 
 
 
-    private List<IFDStatusType> waitForEvent() throws IFDException, InterruptedException, ExecutionException, TimeoutException {
+    private List<IFDStatusType> waitForEvent() throws IFDException, InterruptedException, ExecutionException,
+	    TimeoutException {
 	// start watch thread
-	termWatcher = ifd.runCallable(new TerminalWatcher());
+	termWatcher = threadPool.submit(new TerminalWatcher());
 
 	// get current status and compare it
 	List<IFDStatusType> currentStatus = getCurrentStatus();
@@ -195,7 +200,8 @@ public class EventListener implements Callable<List<IFDStatusType>> {
      */
     private void sendResult(List<IFDStatusType> result) {
 	try {
-	    IFDCallback endpoint = (IFDCallback) WSClassLoader.getClientService("IFDCallback", callback.getProtocolTerminationPoint());
+	    String endpointAddr = callback.getProtocolTerminationPoint();
+	    IFDCallback endpoint = (IFDCallback) WSClassLoader.getClientService("IFDCallback", endpointAddr);
 
 	    SignalEvent sevt = new SignalEvent();
 	    sevt.setContextHandle(ctxHandle);

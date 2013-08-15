@@ -53,7 +53,8 @@ public class PINUtils {
      * @return Transmit containing the built verify APDU
      * @throws UtilException if an pin related error occurs (e.g. wrong PIN length)
      */
-    public static Transmit buildVerifyTransmit(String rawPIN, PasswordAttributesType attributes, byte[] template, byte[] slotHandle) throws UtilException {
+    public static Transmit buildVerifyTransmit(String rawPIN, PasswordAttributesType attributes, byte[] template,
+	    byte[] slotHandle) throws UtilException {
 
 	// concatenate template with encoded pin
 	byte[] pin = PINUtils.encodePin(rawPIN, attributes);
@@ -64,6 +65,7 @@ public class PINUtils {
 	transmit.setSlotHandle(slotHandle);
 	InputAPDUInfoType pinApdu = new InputAPDUInfoType();
 	pinApdu.setInputAPDU(pinCmd);
+	pinApdu.getAcceptableStatusCode().add(new byte[] {(byte)0x90, (byte)0x00});
 	transmit.getInputAPDUInfo().add(pinApdu);
 	return transmit;
     }
@@ -84,8 +86,9 @@ public class PINUtils {
 	int minLen = attributes.getMinLength().intValue();
 	int maxLen = (attributes.getMaxLength() == null) ? storedLen : attributes.getMaxLength().intValue();
 	// check if pin is within boundaries
-	if (!(minLen <= rawPin.length() && rawPin.length() <= maxLen)) {
-	    UtilException ex = new UtilException("Supplied PIN has wrong length: minLen(" + minLen + ") <= PIN(" + rawPin.length() + ") <= maxLen(" + maxLen + ")");
+	if (! (minLen <= rawPin.length() && rawPin.length() <= maxLen)) {
+	    String msg = String.format("Supplied PIN has wrong length: minLen(%d) <= PIN(%d) <= maxLen(%d)", minLen, rawPin.length(), maxLen);
+	    UtilException ex = new UtilException(msg);
 	    logger.error(ex.getMessage(), ex);
 	}
 
@@ -124,7 +127,8 @@ public class PINUtils {
 		    mask[i] = (byte) (high | low);
 		    break;
 		default:
-		    UtilException ex = new UtilException(ECardConstants.Minor.IFD.IO.UNKNOWN_PIN_FORMAT, "UTF-8 PINs are not supported.");
+		    String msg = "UTF-8 PINs are not supported.";
+		    UtilException ex = new UtilException(ECardConstants.Minor.IFD.IO.UNKNOWN_PIN_FORMAT, msg);
 		    logger.error(ex.getMessage(), ex);
 		    throw ex;
 	    }
@@ -189,7 +193,8 @@ public class PINUtils {
 		}
 		break;
 	    default:
-		UtilException ex = new UtilException(ECardConstants.Minor.IFD.IO.UNKNOWN_PIN_FORMAT, "Pin with format '" + pwdType.name() + "' not supported.");
+		String msg = "Pin with format '" + pwdType.name() + "' not supported.";
+		UtilException ex = new UtilException(ECardConstants.Minor.IFD.IO.UNKNOWN_PIN_FORMAT, msg);
 		logger.error(ex.getMessage(), ex);
 		throw ex;
 	}

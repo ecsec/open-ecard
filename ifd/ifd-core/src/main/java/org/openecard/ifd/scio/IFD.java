@@ -72,14 +72,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.jws.WebService;
 import javax.smartcardio.CardException;
@@ -126,20 +124,13 @@ public class IFD implements org.openecard.ws.IFD {
     private AtomicInteger numClients;
     private ExecutorService threadPool;
     private ConcurrentSkipListMap<String,Future<List<IFDStatusType>>> asyncWaitThreads;
-    private Future syncWaitThread;
+    private Future<List<IFDStatusType>> syncWaitThread;
 
 
     protected synchronized void removeAsnycTerminal(String session) {
 	if (asyncWaitThreads != null) { // be sure the list still exists
 	    asyncWaitThreads.remove(session);
 	}
-    }
-
-    protected Future runThread(Runnable r) {
-	return threadPool.submit(r);
-    }
-    protected Future<Void> runCallable(Callable<Void> c) {
-	return threadPool.submit(c);
     }
 
     private boolean hasContext() {
@@ -206,7 +197,9 @@ public class IFD implements org.openecard.ws.IFD {
 		response = WSHelper.makeResponse(ReleaseContextResponse.class, WSHelper.makeResultOK());
 		return response;
 	    } else {
-		response = WSHelper.makeResponse(ReleaseContextResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
+		String msg = "Invalid context handle specified.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg);
+		response = WSHelper.makeResponse(ReleaseContextResponse.class, r);
 		return response;
 	    }
 	} catch (Exception ex) {
@@ -224,7 +217,9 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    ListIFDsResponse response;
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
-		response = WSHelper.makeResponse(ListIFDsResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
+		String msg = "Invalid context handle specified.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg);
+		response = WSHelper.makeResponse(ListIFDsResponse.class, r);
 		return response;
 	    } else {
 		try {
@@ -261,7 +256,9 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    GetIFDCapabilitiesResponse response;
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
-		response = WSHelper.makeResponse(GetIFDCapabilitiesResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
+		String msg = "Invalid context handle specified.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg);
+		response = WSHelper.makeResponse(GetIFDCapabilitiesResponse.class, r);
 		return response;
 	    } else {
 		try {
@@ -334,7 +331,9 @@ public class IFD implements org.openecard.ws.IFD {
 	    GetStatusResponse response;
 	    //FIXME
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
-		response = WSHelper.makeResponse(GetStatusResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
+		String msg = "Invalid context handle specified.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg);
+		response = WSHelper.makeResponse(GetStatusResponse.class, r);
 		return response;
 	    } else {
 		// get ifd name from request or directly from the sc-io
@@ -344,7 +343,8 @@ public class IFD implements org.openecard.ws.IFD {
 		    if (parameters.getIFDName() != null) {
 			SCTerminal t = scwrapper.getTerminal(parameters.getIFDName(), true);
 			if (t == null) {
-			    response = WSHelper.makeResponse(GetStatusResponse.class, WSHelper.makeResult(ECardConstants.Major.ERROR, ECardConstants.Minor.IFD.UNKNOWN_IFD, "Unknown IFD."));
+			    Result r = WSHelper.makeResult(ECardConstants.Major.ERROR, ECardConstants.Minor.IFD.UNKNOWN_IFD, "Unknown IFD.");
+			    response = WSHelper.makeResponse(GetStatusResponse.class, r);
 			    return response;
 			} else {
 			    ifds.add(t);
@@ -391,7 +391,9 @@ public class IFD implements org.openecard.ws.IFD {
 	    WaitResponse response;
 	    // check for context handle
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
-		response = WSHelper.makeResponse(WaitResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
+		String msg = "Invalid context handle specified.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg);
+		response = WSHelper.makeResponse(WaitResponse.class, r);
 		return response;
 	    } else {
 		BigInteger timeout = parameters.getTimeOut();
@@ -421,7 +423,9 @@ public class IFD implements org.openecard.ws.IFD {
 		    // check that ifdname is present, needed for comparison
 		    for (IFDStatusType s : expectedStatuses) {
 			if (s.getIFDName() == null) {
-			    response = WSHelper.makeResponse(WaitResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.UNKNOWN_IFD, "IFD in a request IFDStatus not known."));
+			    String msg = "IFD in a request IFDStatus not known.";
+			    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.UNKNOWN_IFD, msg);
+			    response = WSHelper.makeResponse(WaitResponse.class, r);
 			    return response;
 			}
 		    }
@@ -438,7 +442,7 @@ public class IFD implements org.openecard.ws.IFD {
 		}
 
 		// create the event and fire
-		EventListener l = new EventListener(this, scwrapper, ctxHandle, timeout.longValue(), callback, expectedStatuses, withNew);
+		EventListener l = new EventListener(this, scwrapper, threadPool, ctxHandle, timeout.longValue(), callback, expectedStatuses, withNew);
 		FutureTask<List<IFDStatusType>> future = new FutureTask<List<IFDStatusType>>(l);
 
 		if (l.isAsync()) {
@@ -485,7 +489,9 @@ public class IFD implements org.openecard.ws.IFD {
 	    CancelResponse response = null;
 	    // check for context handle
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
-		response = WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
+		String msg = "Invalid context handle specified.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg);
+		response = WSHelper.makeResponse(CancelResponse.class, r);
 	    } else {
 		if (parameters.getSessionIdentifier() != null) {
 		    // async wait
@@ -503,7 +509,9 @@ public class IFD implements org.openecard.ws.IFD {
 			    syncWaitThread = null; // not really needed but seems cleaner
 			    response = WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResultOK());
 			} else {
-			    response = WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.IO.CANCEL_NOT_POSSIBLE, "No synchronous Wait to cancel."));
+			    String msg = "No synchronous Wait to cancel.";
+			    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.IO.CANCEL_NOT_POSSIBLE, msg);
+			    response = WSHelper.makeResponse(CancelResponse.class, r);
 			}
 		    }
 		}
@@ -512,7 +520,8 @@ public class IFD implements org.openecard.ws.IFD {
 
 	    if (response == null) {
 		// nothing to cancel
-		response = WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResultUnknownError("No cancelable command matches the given parameters."));
+		String msg = "No cancelable command matches the given parameters.";
+		response = WSHelper.makeResponse(CancelResponse.class, WSHelper.makeResultUnknownError(msg));
 	    }
 	    return response;
 	} catch (Exception ex) {
@@ -533,7 +542,9 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    ControlIFDResponse response;
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
-		response = WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
+		String msg = "Invalid context handle specified.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg);
+		response = WSHelper.makeResponse(ControlIFDResponse.class, r);
 		return response;
 	    } else {
 		try {
@@ -568,13 +579,17 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    ConnectResponse response;
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
-		response = WSHelper.makeResponse(ConnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
+		String msg = "Invalid context handle specified.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg);
+		response = WSHelper.makeResponse(ConnectResponse.class, r);
 		return response;
 	    } else {
 		try {
 		    //FIXME
 		    if (!IFDUtils.getSlotIndex(parameters.getIFDName()).equals(parameters.getSlot())) {
-			response = WSHelper.makeResponse(ConnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Invalid slot handle."));
+			String msg = "Invalid slot handle.";
+			Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);
+			response = WSHelper.makeResponse(ConnectResponse.class, r);
 			return response;
 		    } else {
 			SCTerminal t = scwrapper.getTerminal(parameters.getIFDName());
@@ -616,7 +631,9 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    DisconnectResponse response;
 	    if (!hasContext()) {
-		response = WSHelper.makeResponse(DisconnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Context not initialized."));
+		String msg = "Context not initialized.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);
+		response = WSHelper.makeResponse(DisconnectResponse.class, r);
 		return response;
 	    }
 
@@ -647,7 +664,9 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    BeginTransactionResponse response;
 	    if (!hasContext()) {
-		response = WSHelper.makeResponse(BeginTransactionResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Context not initialized."));
+		String msg = "Context not initialized.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);
+		response = WSHelper.makeResponse(BeginTransactionResponse.class, r);
 		return response;
 	    }
 	    byte[] handle = beginTransaction.getSlotHandle();
@@ -680,7 +699,9 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    EndTransactionResponse response;
 	    if (!hasContext()) {
-		response = WSHelper.makeResponse(EndTransactionResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Context not initialized."));
+		String msg = "Context not initialized.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);
+		response = WSHelper.makeResponse(EndTransactionResponse.class, r);
 		return response;
 	    }
 	    byte[] handle = parameters.getSlotHandle();
@@ -714,7 +735,9 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    TransmitResponse response;
 	    if (!hasContext()) {
-		response = WSHelper.makeResponse(TransmitResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Context not initialized."));
+		String msg = "Context not initialized.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);
+		response = WSHelper.makeResponse(TransmitResponse.class, r);
 		return response;
 	    }
 
@@ -754,8 +777,10 @@ public class IFD implements org.openecard.ws.IFD {
     public VerifyUserResponse verifyUser(VerifyUser parameters) {
 	try {
 	    VerifyUserResponse response;
-	    if (!hasContext()) {
-		response = WSHelper.makeResponse(VerifyUserResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Context not initialized."));
+	    if (! hasContext()) {
+		String msg = "Context not initialized.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);
+		response = WSHelper.makeResponse(VerifyUserResponse.class, r);
 		return response;
 	    }
 
@@ -781,7 +806,9 @@ public class IFD implements org.openecard.ws.IFD {
     public ModifyVerificationDataResponse modifyVerificationData(ModifyVerificationData parameters) {
 	try {
 	    if (!hasContext()) {
-		return WSHelper.makeResponse(ModifyVerificationDataResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Context not initialized."));
+		String msg = "Context not initialized.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);
+		return WSHelper.makeResponse(ModifyVerificationDataResponse.class, r);
 	    }
 	    throw new UnsupportedOperationException("Not supported yet.");
 	} catch (Exception ex) {
@@ -799,7 +826,9 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    OutputResponse response;
 	    if (!IFDUtils.arrayEquals(ctxHandle, parameters.getContextHandle())) {
-		response = WSHelper.makeResponse(OutputResponse.class, WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, "Invalid context handle specified."));
+		String msg = "Invalid context handle specified.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg);
+		response = WSHelper.makeResponse(OutputResponse.class, r);
 		return response;
 	    } else {
 		String ifdName = parameters.getIFDName();
@@ -841,7 +870,9 @@ public class IFD implements org.openecard.ws.IFD {
 	    List<String> supportedProtos = buildPACEProtocolList(paceCapabilities);
 	    // check out if this actually a PACE request
 	    // FIXME: check type of protocol
-	    if (!supportedProtos.isEmpty() && supportedProtos.get(0).startsWith(protocol)) { // i don't care which type is supported, i try it anyways
+
+	    // i don't care which type is supported, i try it anyways
+	    if (!supportedProtos.isEmpty() && supportedProtos.get(0).startsWith(protocol)) {
 		// yeah, PACE seems to be supported by the reader, big win
 		PACEInputType paceParam = new PACEInputType(protoParam);
 		// extract variables needed for pace
@@ -903,7 +934,8 @@ public class IFD implements org.openecard.ws.IFD {
 	    }
 
 	    // if this point is reached a native implementation is not present, try registered protocols
-	    return WSHelper.makeResponse(EstablishChannelResponse.class, WSHelper.makeResultUnknownError("No such protocol available in this IFD."));
+	    Result r = WSHelper.makeResultUnknownError("No such protocol available in this IFD.");
+	    return WSHelper.makeResponse(EstablishChannelResponse.class, r);
 	} catch (Throwable t) {
 	    return WSHelper.makeResponse(EstablishChannelResponse.class, WSHelper.makeResult(t));
 	}
@@ -913,14 +945,14 @@ public class IFD implements org.openecard.ws.IFD {
     public DestroyChannelResponse destroyChannel(DestroyChannel parameters) {
 	try {
 	    byte[] slotHandle = parameters.getSlotHandle();
-		 SCCard card = this.scwrapper.getCard(slotHandle);
-		 SCChannel channel = card.getChannel(slotHandle);
-		 channel.removeSecureMessaging();
-		 DestroyChannelResponse destroyChannelResponse = new DestroyChannelResponse();
-		 Result r = new Result();
-		 r.setResultMajor(ECardConstants.Major.OK);
-		 destroyChannelResponse.setResult(r);
-		 return destroyChannelResponse;
+	    SCCard card = this.scwrapper.getCard(slotHandle);
+	    SCChannel channel = card.getChannel(slotHandle);
+	    channel.removeSecureMessaging();
+	    DestroyChannelResponse destroyChannelResponse = new DestroyChannelResponse();
+	    Result r = new Result();
+	    r.setResultMajor(ECardConstants.Major.OK);
+	    destroyChannelResponse.setResult(r);
+	    return destroyChannelResponse;
 	} catch (Throwable t) {
 	    return WSHelper.makeResponse(DestroyChannelResponse.class, WSHelper.makeResult(t));
 	}

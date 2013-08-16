@@ -568,6 +568,72 @@
 			<!--    MF: Differential Identities   -->
 			<!-- ================================ -->
 
+			<iso:DIDInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>EAC</iso:DIDName>
+					<iso:LocalDIDName xml:lang="DE">EAC Protokoll</iso:LocalDIDName>
+					<iso:LocalDIDName xml:lang="EN">EAC Protocol</iso:LocalDIDName>
+					<iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.14</iso:DIDProtocol>
+
+					<iso:DIDMarker>
+						<iso:EACMarker Protocol="urn:oid:1.3.162.15480.3.0.14">
+						    <iso:PACEDID>PIN</iso:PACEDID>
+						    <iso:CADID>CAKey</iso:CADID>
+						    <iso:TADID>TAKey</iso:TADID>
+						    <iso:RIDID>RIKey</iso:RIDID>
+						</iso:EACMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDUpdate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>false</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>ACLList</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>ACLModify</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>false</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
 
 
 			<!-- CAN - Card Access Number	-->

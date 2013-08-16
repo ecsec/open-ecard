@@ -54,7 +54,7 @@ public class CardApplicationWrapperTest {
 
 	assertEquals(cardAppWrapper.getApplicationIdentifier(), rootApplication);
 	assertEquals(cardAppWrapper.getDataSetNameList().getDataSetName().size(), 5);
-	assertEquals(cardAppWrapper.getDIDInfoList().size(), 8);
+	assertEquals(cardAppWrapper.getDIDInfoList().size(), 9);
 	assertEquals(cardAppWrapper.getCardApplicationACL().getAccessRule().size(), 40);
 	assertNotNull(cardAppWrapper.getSecurityCondition(CardApplicationServiceActionName.CARD_APPLICATION_LIST));
 

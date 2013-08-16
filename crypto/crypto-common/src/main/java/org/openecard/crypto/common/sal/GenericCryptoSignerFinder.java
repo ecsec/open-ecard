@@ -51,7 +51,6 @@ import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.util.Pair;
-import org.openecard.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +78,7 @@ public class GenericCryptoSignerFinder {
     public GenericCryptoSignerFinder(@Nonnull Dispatcher dispatcher, @Nonnull ConnectionHandleType handle, boolean filterAlwaysReadable) {
 	this.filterAlwaysReadable = filterAlwaysReadable;
 	this.dispatcher = dispatcher;
-	this.handle = handle;
+	this.handle = WSHelper.copyHandle(handle);
     }
 
     @Nonnull
@@ -122,26 +121,29 @@ public class GenericCryptoSignerFinder {
 	handle.setCardApplication(firstResult.p2);
 	return new GenericCryptoSigner(dispatcher, handle, firstResult.p1);
     }
+
     // TODO: add more useful search functions
 
     private List<Pair<String, byte[]>> findDID(Dispatcher dispatcher, ConnectionHandleType handle) {
 	List<Pair<String, byte[]>> result = new ArrayList<Pair<String, byte[]>>();
+	// copy handle to be safe from spaghetti code
+	handle = WSHelper.copyHandle(handle);
+
 	try {
-	    CardApplicationList cardApplicationList = new CardApplicationList();
-	    // TODO replace with root app from card info
-	    handle.setCardApplication(StringUtils.toByteArray("D2760001448000"));
-	    cardApplicationList.setConnectionHandle(handle);
-	    CardApplicationListResponse applicationListResponse = 
-		    (CardApplicationListResponse) dispatcher.deliver(cardApplicationList);
-	    WSHelper.checkResult(applicationListResponse);
-	    CardApplicationNameList cardApplicationNameList = applicationListResponse.getCardApplicationNameList();
+	    CardApplicationList listReq = new CardApplicationList();
+	    handle.setCardApplication(null);
+	    listReq.setConnectionHandle(handle);
+	    CardApplicationListResponse listRes = (CardApplicationListResponse) dispatcher.deliver(listReq);
+	    WSHelper.checkResult(listRes);
+	    CardApplicationNameList cardApplicationNameList = listRes.getCardApplicationNameList();
 	    List<byte[]> cardApplicationName = cardApplicationNameList.getCardApplicationName();
 
 	    for (byte[] appIdentifier : cardApplicationName) {
-		List<String> didNamesList = getSignatureCapableDIDs(dispatcher, handle, appIdentifier);
-		didNamesList = filterTLSCapableDIDs(dispatcher, handle, appIdentifier, didNamesList);
+		handle.setCardApplication(appIdentifier);
+		List<String> didNamesList = getSignatureCapableDIDs(dispatcher, handle);
+		didNamesList = filterTLSCapableDIDs(dispatcher, handle, didNamesList);
 		if (filterAlwaysReadable) {
-		    didNamesList = filterAlwaysReadable(dispatcher, handle, didNamesList, appIdentifier);
+		    didNamesList = filterAlwaysReadable(dispatcher, handle, didNamesList);
 		}
 		for (String didName : didNamesList) {
 		    result.add(new Pair<String, byte[]>(didName, appIdentifier));
@@ -157,15 +159,13 @@ public class GenericCryptoSignerFinder {
 	return result;
     }
 
-    private List<String> filterTLSCapableDIDs(Dispatcher dispatcher, ConnectionHandleType handle, byte[] appIdentifier,
-	    List<String> didNamesList) throws DispatcherException, InvocationTargetException {
+    private List<String> filterTLSCapableDIDs(Dispatcher dispatcher, ConnectionHandleType handle,
+	    List<String> didNames) throws DispatcherException, InvocationTargetException {
 	List<String> remainingDIDs = new ArrayList<String>();
-	for (String didName : didNamesList) {
+	for (String didName : didNames) {
 	    DIDGet didGet = new DIDGet();
-	    handle.setCardApplication(appIdentifier);
 	    didGet.setConnectionHandle(handle);
 	    didGet.setDIDName(didName);
-	    didGet.setDIDScope(DIDScopeType.LOCAL);
 	    DIDGetResponse didGetResponse = (DIDGetResponse) dispatcher.deliver(didGet);
 	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didGetResponse.getDIDStructure().getDIDMarker());
 	    String algorithm = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
@@ -179,13 +179,12 @@ public class GenericCryptoSignerFinder {
 	return remainingDIDs;
     }
 
-    private List<String> filterAlwaysReadable(Dispatcher dispatcher, ConnectionHandleType handle, List<String> didNamesList, byte[] appIdentifier) 
+    private List<String> filterAlwaysReadable(Dispatcher dispatcher, ConnectionHandleType handle, List<String> didNames) 
 	    throws DispatcherException, InvocationTargetException, WSException {
 	List<String> remainingDIDs = new ArrayList<String>();
-	for (String didName : didNamesList) {
+	for (String didName : didNames) {
 	    // perform DIDGet for this DID
 	    DIDGet didGet = new DIDGet();
-	    handle.setCardApplication(appIdentifier);
 	    didGet.setConnectionHandle(handle);
 	    didGet.setDIDName(didName);
 	    didGet.setDIDScope(DIDScopeType.LOCAL);
@@ -230,25 +229,24 @@ public class GenericCryptoSignerFinder {
      * 
      * @param dispatcher
      * @param handle
-     * @param appIdentifier
      * @return Maybe empty list of DIDs
      * @throws DispatcherException
      * @throws InvocationTargetException
      * @throws WSException
      */
-    private List<String> getSignatureCapableDIDs(Dispatcher dispatcher, ConnectionHandleType handle,
-	    byte[] appIdentifier) throws DispatcherException, InvocationTargetException, WSException {
+    private List<String> getSignatureCapableDIDs(Dispatcher dispatcher, ConnectionHandleType handle)
+	    throws DispatcherException, InvocationTargetException, WSException {
 	DIDList didList = new DIDList();
 	didList.setConnectionHandle(handle);
 	DIDQualifierType filter = new DIDQualifierType();
 	filter.setApplicationFunction(COMPUTE_SIGNATURE);
 	filter.setObjectIdentifier(OID_GENERIC_CRYPTO);
-	filter.setApplicationIdentifier(appIdentifier);
+	filter.setApplicationIdentifier(handle.getCardApplication());
 	didList.setFilter(filter);
 	DIDListResponse didListResponse = (DIDListResponse) dispatcher.deliver(didList);
 	WSHelper.checkResult(didListResponse);
-	List<String> didNamesList = didListResponse.getDIDNameList().getDIDName();
-	return didNamesList;
+	List<String> didNames = didListResponse.getDIDNameList().getDIDName();
+	return didNames;
     }
 
 }

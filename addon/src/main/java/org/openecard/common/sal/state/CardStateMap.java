@@ -28,6 +28,7 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
@@ -53,7 +54,10 @@ public class CardStateMap {
 
 
     public synchronized CardStateEntry getEntry(ConnectionHandleType handle) {
-	Set<CardStateEntry> entry = getMatchingEntries(handle);
+	return getEntry(handle);
+    }
+    public synchronized CardStateEntry getEntry(ConnectionHandleType handle, boolean filterAppId) {
+	Set<CardStateEntry> entry = getMatchingEntries(handle, filterAppId);
 	int size = entry.size();
 	if (size == 1) {
 	    return entry.iterator().next();
@@ -176,14 +180,21 @@ public class CardStateMap {
 
 
     public Set<CardStateEntry> getMatchingEntries(ConnectionHandleType cHandle) {
-	return getMatchingEntries(cHandle, cHandle.getSlotHandle(), cHandle.getRecognitionInfo());
+	return getMatchingEntries(cHandle, true);
+    }
+    public Set<CardStateEntry> getMatchingEntries(ConnectionHandleType cHandle, boolean filterAppId) {
+	return getMatchingEntries(cHandle, cHandle.getSlotHandle(), cHandle.getRecognitionInfo(), filterAppId);
     }
 
     public Set<CardStateEntry> getMatchingEntries(CardApplicationPathType cHandle) {
-	return getMatchingEntries(cHandle, null, null);
+	return getMatchingEntries(cHandle, true);
+    }
+    public Set<CardStateEntry> getMatchingEntries(CardApplicationPathType cHandle, boolean filterAppId) {
+	return getMatchingEntries(cHandle, null, null, filterAppId);
     }
 
-    private synchronized Set<CardStateEntry> getMatchingEntries(CardApplicationPathType cHandle, byte[] slotHandle, RecognitionInfo recInfo) {
+    private synchronized Set<CardStateEntry> getMatchingEntries(CardApplicationPathType cHandle, byte[] slotHandle,
+	    RecognitionInfo recInfo, boolean filterAppId) {
 	// extract values from map
 	ChannelHandleType channel = cHandle.getChannelHandle();
 	String session = (channel != null) ? channel.getSessionIdentifier() : null;
@@ -225,7 +236,7 @@ public class CardStateMap {
 	    filterIfdname(mergedSets, ifdname);
 	}
 
-	if (cardApplication != null) {
+	if (filterAppId && cardApplication != null) {
 	    filterCardApplication(mergedSets, cardApplication);
 	} else {
 	    // [TR-03112-4] If no card application is specified, paths to all
@@ -282,11 +293,11 @@ public class CardStateMap {
      * @param entries
      * @param cardApplication
      */
-    private void filterCardApplication(Set<CardStateEntry> entries, byte[] cardApplication) {
+    private static void filterCardApplication(Set<CardStateEntry> entries, byte[] cardApplication) {
 	Iterator<CardStateEntry> it = entries.iterator();
 	while (it.hasNext()) {
 	    CardStateEntry next = it.next();
-	    if (next.getInfo().getCardApplication(cardApplication) == null) {
+	    if (! Arrays.equals(next.getCurrentCardApplication().getApplicationIdentifier(), cardApplication)) {
 		it.remove();
 	    }
 	}

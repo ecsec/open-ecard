@@ -24,14 +24,22 @@ package org.openecard.crypto.common.sal;
 
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.DIDGet;
 import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
+import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DSIRead;
 import iso.std.iso_iec._24727.tech.schema.DSIReadResponse;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
+import iso.std.iso_iec._24727.tech.schema.TargetNameType;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -40,9 +48,11 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
@@ -67,7 +77,6 @@ public class GenericCryptoSigner {
     private byte[] rawCertData;
     private Map<String, java.security.cert.Certificate[]> javaCerts;
     private org.openecard.bouncycastle.crypto.tls.Certificate bcCert;
-    private boolean connected;
 
     /**
      * Creates a Generic Crypto signer and defines the card, application and target DID through the parameters.
@@ -190,6 +199,9 @@ public class GenericCryptoSigner {
     public byte[] sign(@Nonnull byte[] hash) throws SignatureException, CredentialPermissionDenied {
 	try {
 	    connectApplication();
+	    TargetNameType target = new TargetNameType();
+	    target.setDIDName(didName);
+	    performMissingAuthentication(target);
 
 	    Sign sign = new Sign();
 	    sign.setMessage(hash);
@@ -201,16 +213,18 @@ public class GenericCryptoSigner {
 
 	    return res.getSignature();
 	} catch (InvocationTargetException e) {
-	    logger.error("Signature generation failed", e);
+	    logger.error("Signature generation failed.", e);
 	    throw new SignatureException(e);
 	} catch (DispatcherException e) {
-	    logger.error("Signature generation failed", e);
+	    logger.error("Signature generation failed.", e);
 	    throw new SignatureException(e);
 	} catch (WSException e) {
-	    logger.error("Signature generation failed", e);
+	    logger.error("Signature generation failed.", e);
 	    throw new SignatureException(e);
+	} catch (SecurityConditionUnsatisfiable e) {
+	    logger.error("Signature generation failed.", e);
+	    throw new CredentialPermissionDenied(e);
 	}
-	//TODO CredentialPermissionDeniedException
     }
 
     private Certificate convertToCertificate(byte[] certificateBytes) throws CertificateException {
@@ -227,15 +241,19 @@ public class GenericCryptoSigner {
 
     /**
      * Read the given DSI from the card application and card identified through the given connection handle.
-     * 
+     *
      * @param cHandle connection handle identifying the card and card application
      * @param dsiName name of the DSI to read
      * @return the contents of the DSI, or null if an error occurred
      */
-    private byte[] readCertificateDataset(ConnectionHandleType cHandle, String dsiName) throws CredentialPermissionDenied {
+    private byte[] readCertificateDataset(ConnectionHandleType cHandle, String dsiName)
+	    throws CredentialPermissionDenied {
 	byte[] content = null;
 	try {
 	    connectApplication();
+	    TargetNameType target = new TargetNameType();
+	    target.setDataSetName(dsiName);
+	    performMissingAuthentication(target);
 
 	    DSIRead dsiRead = new DSIRead();
 	    dsiRead.setConnectionHandle(cHandle);
@@ -250,8 +268,11 @@ public class GenericCryptoSigner {
 	    logger.error("Failed to read certificate data set for DSI: {}.", dsiName, e);
 	} catch (DispatcherException e) {
 	    logger.error("Failed to read certificate data set for DSI: {}.", dsiName, e);
+	} catch (SecurityConditionUnsatisfiable e) {
+	    logger.error("Failed to read certificate data set for DSI: {}.", dsiName, e);
+	    throw new CredentialPermissionDenied(e);
 	}
-	//TODO CredentialPermissionDenied
+
 	return content;
     }
 
@@ -281,15 +302,54 @@ public class GenericCryptoSigner {
     }
 
     private ConnectionHandleType connectApplication() throws DispatcherException, InvocationTargetException, WSException {
+	// is the application already connected?
+	boolean connected = false;
+	CardApplicationPath pathReq = new CardApplicationPath();
+	CardApplicationPathType pathType = new CardApplicationPathType();
+	pathReq.setCardAppPathRequest(pathType);
+	pathType.setChannelHandle(handle.getChannelHandle());
+	pathType.setContextHandle(handle.getContextHandle());
+	pathType.setIFDName(handle.getIFDName());
+	pathType.setCardApplication(handle.getCardApplication());
+	CardApplicationPathResponse pathRes = (CardApplicationPathResponse) dispatcher.deliver(pathReq);
+	WSHelper.checkResult(pathRes);
+	List<CardApplicationPathType> paths = pathRes.getCardAppPathResultSet().getCardApplicationPathResult();
+	if (! paths.isEmpty()) {
+	    connected = true;
+	}
+
 	if (! connected) {
 	    CardApplicationConnect req = new CardApplicationConnect();
 	    req.setCardApplicationPath(handle);
 	    CardApplicationConnectResponse res = (CardApplicationConnectResponse) dispatcher.deliver(req);
 	    WSHelper.checkResult(res);
-	    connected = true;
 	    return res.getConnectionHandle();
 	} else {
 	    return handle;
+	}
+    }
+
+    private void performMissingAuthentication(TargetNameType target) throws DispatcherException, WSException,
+	    InvocationTargetException, SecurityConditionUnsatisfiable {
+	// get unauthenticated DID
+	ACLResolver resolver = new ACLResolver(dispatcher, handle);
+	List<DIDStructureType> missingDIDs = resolver.getUnsatisfiedDIDs(target);
+
+	// authenticate those DIDs
+	for (DIDStructureType did : missingDIDs) {
+	    DIDAuthenticate req = new DIDAuthenticate();
+	    req.setConnectionHandle(handle);
+	    req.setDIDName(did.getDIDName());
+	    req.setDIDScope(did.getDIDScope());
+
+	    DIDAuthenticationDataType authData = new DIDAuthenticationDataType();
+	    authData.setProtocol(did.getDIDMarker().getProtocol());
+	    // TODO: no further content does not work for all protocols
+	    // however it does work for PIN Compare, which seems enough so far
+	    req.setAuthenticationProtocolData(authData);
+
+	    DIDAuthenticateResponse res = (DIDAuthenticateResponse) dispatcher.deliver(req);
+	    WSHelper.checkResult(res);
 	}
     }
 

@@ -20,28 +20,22 @@
  *
  ***************************************************************************/
 
-package org.openecard.crypto.common.sal;
+package org.openecard.common;
+
+import org.openecard.common.ECardConstants;
+import org.openecard.common.ECardException;
 
 
 /**
- * Exception stating that a signing credential has missing permissions to fulfil the operation.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class CredentialPermissionDenied extends Exception {
+public class SecurityConditionUnsatisfiable extends ECardException {
 
     private static final long serialVersionUID = 1L;
 
-    public CredentialPermissionDenied(String message) {
-	super(message);
-    }
-
-    public CredentialPermissionDenied(Throwable cause) {
-	super(cause);
-    }
-
-    public CredentialPermissionDenied(String message, Throwable cause) {
-	super(message, cause);
+    public SecurityConditionUnsatisfiable(String msg) {
+	makeException(this, ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, msg);
     }
 
 }

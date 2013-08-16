@@ -225,6 +225,9 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
     }
 
     public boolean checkApplicationSecurityCondition(byte[] applicationIdentifier, Enum<?> serviceAction) {
+	if (applicationIdentifier == null) {
+	    applicationIdentifier = infoObject.getImplicitlySelectedApplication();
+	}
 	CardApplicationWrapper application = this.infoObject.getCardApplications().get(new ByteArrayWrapper(applicationIdentifier));
 	SecurityConditionType securityCondition = application.getSecurityCondition(serviceAction);
 	if (securityCondition != null) {

@@ -33,6 +33,7 @@ import org.openecard.common.sal.exception.NamedEntityNotFoundException;
 import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
+import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 
 
 /**
@@ -59,10 +60,17 @@ public class SALUtils {
     public static DIDStructureType getDIDStructure(Object object, String didName, CardStateEntry entry, ConnectionHandleType connectionHandle)
 	    throws NamedEntityNotFoundException, Exception {
 	DIDScopeType didScope = (DIDScopeType) get(object, "getDIDScope");
-	DIDStructureType didStructure;
+	DIDStructureType didStructure = null;
 
 	if (didScope != null && didScope.equals(DIDScopeType.GLOBAL)) {
-	    didStructure = entry.getDIDStructure(didName, entry.getImplicitlySelectedApplicationIdentifier());
+	    // search all applications
+	    for (CardApplicationWrapper app : entry.getInfo().getCardApplications().values()) {
+		didStructure = entry.getDIDStructure(didName, app.getApplicationIdentifier());
+		// stop when we have a match
+		if (didStructure != null) {
+		    break;
+		}
+	    }
 	} else {
 	    didStructure = entry.getDIDStructure(didName, connectionHandle.getCardApplication());
 	}
@@ -74,7 +82,11 @@ public class SALUtils {
 
     public static CardStateEntry getCardStateEntry(CardStateMap states, ConnectionHandleType connectionHandle)
 	    throws UnknownConnectionHandleException {
-	CardStateEntry value = states.getEntry(connectionHandle);
+	return getCardStateEntry(states, connectionHandle, true);
+    }
+    public static CardStateEntry getCardStateEntry(CardStateMap states, ConnectionHandleType connectionHandle, boolean filterAppId)
+	    throws UnknownConnectionHandleException {
+	CardStateEntry value = states.getEntry(connectionHandle, filterAppId);
 	if (value == null) {
 	    throw new UnknownConnectionHandleException(connectionHandle);
 	}

@@ -275,7 +275,7 @@ public class TinySAL implements SAL {
 	    CardApplicationPathType cardAppPath = request.getCardApplicationPath();
 	    Assert.assertIncorrectParameter(cardAppPath, "The parameter CardAppPathRequest is empty.");
 
-	    Set<CardStateEntry> cardStateEntrySet = states.getMatchingEntries(cardAppPath);
+	    Set<CardStateEntry> cardStateEntrySet = states.getMatchingEntries(cardAppPath, false);
 	    Assert.assertIncorrectParameter(cardStateEntrySet, "The given ConnectionHandle is invalid.");
 
 	    /*
@@ -948,10 +948,10 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] applicationID = connectionHandle.getCardApplication();
+	    byte[] appId = connectionHandle.getCardApplication();
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
 
-	    Assert.securityConditionApplication(cardStateEntry, applicationID, DifferentialIdentityServiceActionName.DID_LIST);
+	    Assert.securityConditionApplication(cardStateEntry, appId, DifferentialIdentityServiceActionName.DID_LIST);
 
 	    byte[] applicationIDFilter = null;
 	    String objectIDFilter = null;
@@ -1059,18 +1059,22 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    // handle must be requested without application, as it is irrelevant for this call
+	    CardStateEntry stateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
 	    String didName = SALUtils.getDIDName(request);
-	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, cardStateEntry, connectionHandle);
 
-	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
-	    if (protocol.hasNextStep(FunctionType.DIDGet)) {
-		response = protocol.didGet(request);
-		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
-	    } else {
-		throw new InappropriateProtocolForActionException("DIDGet", protocol.toString());
-	    }
+	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, stateEntry, connectionHandle);
+	    response.setDIDStructure(didStructure);
+
+//	    String protocolURI = didStructure.getDIDMarker().getProtocol();
+//	    connectionHandle.setCardApplication(null);
+//	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+//	    if (protocol.hasNextStep(FunctionType.DIDGet)) {
+//		response = protocol.didGet(request);
+//		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
+//	    } else {
+//		throw new InappropriateProtocolForActionException("DIDGet", protocol.toString());
+//	    }
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
@@ -1162,38 +1166,34 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
 
 	    TargetNameType targetName = request.getTargetName();
 	    Assert.assertIncorrectParameter(targetName, "The parameter TargetName is empty.");
 
-	    String dataSetName = targetName.getDataSetName();
-	    String didName;
-	    if(targetName.getDIDName()!=null) {
-		didName = SALUtils.getDIDName(targetName);
-	    } else {
-		didName = null;
-	    }
-	    byte[] cardApplicationID = targetName.getCardApplicationName();
+	    // get the target values, according to the schema only one must exist, we pick the first existing ;-)
+	    byte[] targetAppId = targetName.getCardApplicationName();
+	    String targetDataSet = targetName.getDataSetName();
+	    String targetDid = targetName.getDIDName();
 
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-	    byte[] applicationIdentifier = connectionHandle.getCardApplication();
+	    byte[] handleAppId = connectionHandle.getCardApplication();
 
-	    if (dataSetName != null) {
-		DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dataSetName, applicationIdentifier);
+	    if (targetDataSet != null) {
+		DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(targetDataSet, handleAppId);
 		Assert.assertNamedEntityNotFound(dataSetInfo, "The given DataSet cannot be found.");
-		response.setTargetACL(cardInfoWrapper.getDataSet(dataSetName, applicationIdentifier).getDataSetACL());
-	    } else if (didName != null) {
-		DIDInfoType didInfo = cardInfoWrapper.getDIDInfo(didName, applicationIdentifier);
+		response.setTargetACL(cardInfoWrapper.getDataSet(targetDataSet, handleAppId).getDataSetACL());
+	    } else if (targetDid != null) {
+		DIDInfoType didInfo = cardInfoWrapper.getDIDInfo(targetDid, handleAppId);
 		Assert.assertNamedEntityNotFound(didInfo, "The given DIDInfo cannot be found.");
 		//TODO Check security condition ?
-		response.setTargetACL(cardInfoWrapper.getDIDInfo(didName, applicationIdentifier).getDIDACL());
-	    } else if (cardApplicationID != null) {
-		CardApplicationWrapper cardApplication = cardInfoWrapper.getCardApplication(cardApplicationID);
+		response.setTargetACL(cardInfoWrapper.getDIDInfo(targetDid, handleAppId).getDIDACL());
+	    } else if (targetAppId != null) {
+		CardApplicationWrapper cardApplication = cardInfoWrapper.getCardApplication(targetAppId);
 		Assert.assertNamedEntityNotFound(cardApplication, "The given CardApplication cannot be found.");
-		Assert.securityConditionApplication(cardStateEntry, cardApplicationID, AuthorizationServiceActionName.ACL_LIST);
+		Assert.securityConditionApplication(cardStateEntry, targetAppId, AuthorizationServiceActionName.ACL_LIST);
 
-		response.setTargetACL(cardInfoWrapper.getCardApplication(cardApplicationID).getCardApplicationACL());
+		response.setTargetACL(cardInfoWrapper.getCardApplication(targetAppId).getCardApplicationACL());
 	    } else {
 		throw new IncorrectParameterException("The given TargetName is invalid.");
 	    }

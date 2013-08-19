@@ -599,15 +599,6 @@
 					<iso:AccessRule>
 						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
 						<iso:Action>
-							<iso:DifferentialIdentityServiceAction>DIDUpdate</iso:DifferentialIdentityServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:always>false</iso:always>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
-						<iso:Action>
 							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
 						</iso:Action>
 						<iso:SecurityCondition>
@@ -621,15 +612,6 @@
 						</iso:Action>
 						<iso:SecurityCondition>
 							<iso:always>true</iso:always>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:DifferentialIdentityServiceAction>ACLModify</iso:DifferentialIdentityServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:always>false</iso:always>
 						</iso:SecurityCondition>
 					</iso:AccessRule>
 				</iso:DIDACL>

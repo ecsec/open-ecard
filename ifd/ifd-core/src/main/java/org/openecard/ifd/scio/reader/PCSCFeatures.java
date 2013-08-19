@@ -63,7 +63,7 @@ public class PCSCFeatures {
     private static int SCARD_CTL_CODE(int code) {
 	if (isWindows()) {
 	    return (0x31 << 16 | code << 2);
-	}else {
+	} else {
 	    return 0x42000000 + code;
 	}
     }

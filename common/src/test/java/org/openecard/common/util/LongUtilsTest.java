@@ -74,14 +74,6 @@ public class LongUtilsTest {
 
 	try {
 	    expected = new byte[] { 0x01, 0x00, 0x00, 0x00 };
-	    assertEquals(expected, LongUtils.toByteArray(-8, 5));
-	    fail("A negative value for value should give an IllegalArgumentException");
-	} catch (IllegalArgumentException e) {
-	    // expected
-	}
-
-	try {
-	    expected = new byte[] { 0x01, 0x00, 0x00, 0x00 };
 	    assertEquals(expected, LongUtils.toByteArray(8, 9));
 	    fail("A value above 8 for numbits should give an IllegalArgumentException");
 	} catch (IllegalArgumentException e) {

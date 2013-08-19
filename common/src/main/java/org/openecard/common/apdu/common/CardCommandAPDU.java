@@ -29,7 +29,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
@@ -617,9 +616,7 @@ public class CardCommandAPDU extends CardAPDU {
      * @return Transmit
      */
     public Transmit makeTransmit(byte[] slotHandle) {
-	ArrayList<byte[]> defaultResponses = new ArrayList<byte[]>(1);
-	Collections.addAll(defaultResponses, new byte[]{(byte) 0x90, (byte) 0x00});
-	return makeTransmit(slotHandle, defaultResponses);
+	return makeTransmit(slotHandle, new ArrayList<byte[]>(0));
     }
 
     /**
@@ -643,6 +640,8 @@ public class CardCommandAPDU extends CardAPDU {
 
     /**
      * Transmit the APDU.
+     * This function uses 0x9000 as expected status code and raises an error if a different result is returned by the
+     * card.
      *
      * @param dispatcher Dispatcher
      * @param slotHandle Slot handle
@@ -650,7 +649,7 @@ public class CardCommandAPDU extends CardAPDU {
      * @throws APDUException
      */
     public CardResponseAPDU transmit(Dispatcher dispatcher, byte[] slotHandle) throws APDUException {
-	return transmit(dispatcher, slotHandle, null);
+	return transmit(dispatcher, slotHandle, CardCommandStatus.responseOk());
     }
 
     /**

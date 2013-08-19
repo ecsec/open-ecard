@@ -60,7 +60,11 @@ public class ShortUtils {
      * @return byte[]
      */
     public static byte[] toByteArray(short value, int numBits, boolean bigEndian) {
-	return LongUtils.toByteArray(value, numBits, bigEndian);
+	byte[] result = LongUtils.toByteArray(value, numBits, bigEndian);
+	if (result.length > 2) {
+	    result = ByteUtils.copy(result, result.length - 2, 2);
+	}
+	return result;
     }
 
     /**

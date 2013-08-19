@@ -50,13 +50,10 @@ public class ShortUtilsTest {
 	expected = new byte[] { 0x00 };
 	assertEquals(expected, result);
 
-	try {
-	    expected = new byte[] { 0x01, 0x00, 0x00, 0x00 };
-	    assertEquals(expected, ShortUtils.toByteArray((short) -8, 5));
-	    fail("A negative value for value should give an IllegalArgumentException");
-	} catch (IllegalArgumentException e) {
-	    // expected
-	}
+	// and a real life example
+	result = ShortUtils.toByteArray((short) 0x9000);
+	expected = new byte[] { (byte) 0x90, 0x00 };
+	assertEquals(expected, result);
     }
 
 }

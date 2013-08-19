@@ -57,12 +57,9 @@ public class LongUtils {
      * @param numBits Number of bits to use per byte.
      * @param bigEndian {@code true} when output should be in Big Endian, {@code false} for Little Endian.
      * @return byte[]
-     * @throws IllegalArgumentException Thrown in case one of the inputs is not within the permitted range.
+     * @throws IllegalArgumentException Thrown in case the numBits value is not within the permitted range.
      */
     public static byte[] toByteArray(long value, int numBits, boolean bigEndian) {
-	if (value < 0) {
-	    throw new IllegalArgumentException("Value must not be negative.");
-	}
 	if (numBits <= 0 || numBits > 8) {
 	    throw new IllegalArgumentException("Numbits must be between 0 and 8.");
 	}

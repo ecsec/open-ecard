@@ -28,6 +28,7 @@ import org.openecard.common.apdu.ReadRecord;
 import org.openecard.common.apdu.Select;
 import org.openecard.common.apdu.UpdateRecord;
 import org.openecard.common.apdu.common.CardCommandAPDU;
+import org.openecard.common.apdu.common.CardCommandStatus;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.interfaces.Dispatcher;
@@ -108,10 +109,10 @@ public class CardUtils {
 	    do {
 		if (! isRecordEF(fcp)) {
 		    CardCommandAPDU readBinary = new ReadBinary((short) (i * (length & 0xFF)), length);
-		    response = readBinary.transmit(dispatcher, slotHandle);
+		    response = readBinary.transmit(dispatcher, slotHandle, CardCommandStatus.response(0x9000, 0x6282));
 		} else {
 		    CardCommandAPDU readRecord = new ReadRecord();
-		    response = readRecord.transmit(dispatcher, slotHandle);
+		    response = readRecord.transmit(dispatcher, slotHandle, CardCommandStatus.response(0x9000, 0x6282));
 		}
 
 		baos.write(response.getData());

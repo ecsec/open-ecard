@@ -176,7 +176,7 @@ class AbstractTerminal {
 		// create custom pinAction to submit pin to terminal
 		NativePinStepAction pinAction = new NativePinStepAction("enter-pin", pinInput, term, template);
 		// display message instructing user what to do
-		UserConsentDescription uc = pinUserConsent("step_pace_userconsent", pinAction);
+		UserConsentDescription uc = pinUserConsent("step_pin_userconsent", pinAction);
 		UserConsentNavigator ucr = gui.obtainNavigator(uc);
 		ExecutionEngine exec = new ExecutionEngine(ucr);
 		// run gui
@@ -202,7 +202,7 @@ class AbstractTerminal {
 		// get pin, encode and send
 		int minLength = pinInput.getPasswordAttributes().getMinLength().intValue();
 		int maxLength = pinInput.getPasswordAttributes().getMaxLength().intValue();
-		UserConsentDescription uc = pinUserConsent("step_pace_userconsent", minLength, maxLength);
+		UserConsentDescription uc = pinUserConsent("step_pin_userconsent", minLength, maxLength);
 		UserConsentNavigator ucr = gui.obtainNavigator(uc);
 		ExecutionEngine exec = new ExecutionEngine(ucr);
 		ResultStatus status = exec.process();
@@ -462,7 +462,7 @@ class AbstractTerminal {
 	return uc;
     }
     private UserConsentDescription pinUserConsent(String title, StepAction action) {
-	UserConsentDescription uc = new UserConsentDescription(title);
+	UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(title));
 	// create step
 	Step s = new Step("enter-pin", lang.translationForKey("step_pace_title", "PIN"));
 	s.setAction(action);

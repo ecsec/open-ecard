@@ -23,7 +23,6 @@
 package org.openecard.ifd.scio;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 
 /**
@@ -40,15 +39,6 @@ public class IFDUtils {
      */
     public static BigInteger getSlotIndex(String name) throws IFDException {
 	return BigInteger.ZERO;
-    }
-
-    public static boolean arrayEquals(byte[] a, byte[] b) {
-	if (a == null && b == null) {
-	    return false;
-	} else {
-	    Boolean result = Arrays.equals(a, b);
-	    return result.booleanValue();
-	}
     }
 
 }

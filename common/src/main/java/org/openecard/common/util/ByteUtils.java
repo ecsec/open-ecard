@@ -24,6 +24,7 @@ package org.openecard.common.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import org.openecard.bouncycastle.util.Arrays;
 
 
 /**
@@ -164,20 +165,13 @@ public class ByteUtils {
      * @return true if x = y, otherwise false
      */
     public static boolean compare(byte[] x, byte[] y) {
-	if (y == null) {
-	    return false;
-	} else if (x == null) {
+	if (y == null || x == null) {
 	    return false;
 	}
 	if (x.length != y.length) {
 	    return false;
 	}
-	for (int i = 0; i < x.length; i++) {
-	    if (x[i] != y[i]) {
-		return false;
-	    }
-	}
-	return true;
+	return Arrays.areEqual(x, y);
     }
 
     /**

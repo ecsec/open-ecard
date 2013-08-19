@@ -40,7 +40,6 @@ public enum FunctionType {
     VerifySignature,
     VerifyCertificate,
     DIDCreate,
-    DIDGet,
     DIDUpdate,
     DIDDelete,
     DIDAuthenticate;

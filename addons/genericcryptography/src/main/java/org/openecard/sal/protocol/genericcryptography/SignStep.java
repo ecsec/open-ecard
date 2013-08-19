@@ -109,7 +109,6 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    tagAlgorithmIdentifier.setTagNumWithClass(0x80);
 	    tagAlgorithmIdentifier.setValue(algorithmIdentifier);
 
-	    TLV tagKeyReference = null;
 	    CardCommandAPDU cmdAPDU = null;
 	    CardResponseAPDU responseAPDU = null;
 
@@ -123,7 +122,7 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 		}
 
 		if (command.equals("MSE_KEY")) {
-		    tagKeyReference = new TLV();
+		    TLV tagKeyReference = new TLV();
 		    if (nextCmd.equals("PSO_CDS")) {
 			tagKeyReference.setTagNumWithClass(0x84);
 			tagKeyReference.setValue(keyReference);

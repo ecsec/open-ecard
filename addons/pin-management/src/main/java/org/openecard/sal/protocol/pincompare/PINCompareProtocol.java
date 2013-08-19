@@ -24,7 +24,6 @@ package org.openecard.sal.protocol.pincompare;
 
 import org.openecard.addon.ActionInitializationException;
 import org.openecard.addon.Context;
-import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.SALProtocolBaseImpl;
 
 
@@ -37,21 +36,9 @@ import org.openecard.addon.sal.SALProtocolBaseImpl;
 public class PINCompareProtocol extends SALProtocolBaseImpl {
 
     @Override
-    public boolean hasNextStep(FunctionType functionName) {
-	for (int i = 0; i < steps.size(); i++) {
-	    if (steps.get(i).getFunctionType().equals(functionName)) {
-		super.curStep = i;
-		return true;
-	    }
-	}
-	return false;
-    }
-
-    @Override
     public void init(Context ctx) throws ActionInitializationException {
-	steps.add(new DIDCreateStep(ctx.getDispatcher()));
-	steps.add(new DIDUpdateStep(ctx.getDispatcher()));
-	steps.add(new DIDAuthenticateStep(ctx.getDispatcher()));
+	addStatelessStep(new DIDUpdateStep(ctx.getDispatcher()));
+	addStatelessStep(new DIDAuthenticateStep(ctx.getDispatcher()));
     }
 
     @Override

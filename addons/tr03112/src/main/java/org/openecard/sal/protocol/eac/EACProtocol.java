@@ -35,9 +35,9 @@ public class EACProtocol extends SALProtocolBaseImpl {
 
     @Override
     public void init(Context ctx) throws ActionInitializationException {
-	steps.add(new PACEStep(ctx.getDispatcher(), ctx.getUserConsent()));
-	steps.add(new TerminalAuthenticationStep(ctx.getDispatcher()));
-	steps.add(new ChipAuthenticationStep(ctx.getDispatcher()));
+	addOrderStep(new PACEStep(ctx.getDispatcher(), ctx.getUserConsent()));
+	addOrderStep(new TerminalAuthenticationStep(ctx.getDispatcher()));
+	addOrderStep(new ChipAuthenticationStep(ctx.getDispatcher()));
     }
 
     @Override

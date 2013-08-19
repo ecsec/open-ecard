@@ -24,7 +24,6 @@ package org.openecard.sal.protocol.genericcryptography;
 
 import org.openecard.addon.ActionInitializationException;
 import org.openecard.addon.Context;
-import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.SALProtocolBaseImpl;
 
 
@@ -37,20 +36,10 @@ import org.openecard.addon.sal.SALProtocolBaseImpl;
 public class GenericCryptoProtocol extends SALProtocolBaseImpl {
 
     @Override
-    public boolean hasNextStep(FunctionType functionName) {
-	for (int i = 0; i < steps.size(); i++) {
-	    if (steps.get(i).getFunctionType().equals(functionName)) {
-		super.curStep = i;
-	    }
-	}
-	return true;
-    }
-
-    @Override
     public void init(Context ctx) throws ActionInitializationException {
-	steps.add(new SignStep(ctx.getDispatcher()));
-	steps.add(new DecipherStep(ctx.getDispatcher()));
-	steps.add(new VerifySignatureStep(ctx.getDispatcher()));
+	addStatelessStep(new SignStep(ctx.getDispatcher()));
+	addStatelessStep(new DecipherStep(ctx.getDispatcher()));
+	addStatelessStep(new VerifySignatureStep(ctx.getDispatcher()));
     }
 
     @Override

@@ -32,8 +32,6 @@ import iso.std.iso_iec._24727.tech.schema.DIDCreate;
 import iso.std.iso_iec._24727.tech.schema.DIDCreateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDDelete;
 import iso.std.iso_iec._24727.tech.schema.DIDDeleteResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDGet;
-import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDUpdate;
 import iso.std.iso_iec._24727.tech.schema.DIDUpdateResponse;
 import iso.std.iso_iec._24727.tech.schema.Decipher;
@@ -132,11 +130,6 @@ public class SALProtocolProxy extends AbstractFactory<SALProtocol> implements SA
     @Override
     public DIDCreateResponse didCreate(DIDCreate aParam) {
 	return c.didCreate(aParam);
-    }
-
-    @Override
-    public DIDGetResponse didGet(DIDGet aParam) {
-	return c.didGet(aParam);
     }
 
     @Override

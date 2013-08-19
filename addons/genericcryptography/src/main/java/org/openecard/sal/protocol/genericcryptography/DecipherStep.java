@@ -110,7 +110,7 @@ public class DecipherStep implements ProtocolStep<Decipher, DecipherResponse> {
 	    byte[] mseData = ByteUtils.concatenate(tagKeyReference.toBER(), tagAlgorithmIdentifier.toBER());
 
 	    CardCommandAPDU apdu = new ManageSecurityEnvironment((byte) 0x41, ManageSecurityEnvironment.CT, mseData);
-	    CardResponseAPDU responseAPDU = apdu.transmit(dispatcher, slotHandle);
+	    apdu.transmit(dispatcher, slotHandle);
 
 	    byte[] ciphertext = request.getCipherText();
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -128,7 +128,7 @@ public class DecipherStep implements ProtocolStep<Decipher, DecipherResponse> {
 	    for (int offset = 0; offset < ciphertext.length; offset += blocksize) {
 		byte[] ciphertextblock = ByteUtils.copy(ciphertext, offset, blocksize);
 		apdu = new PSODecipher(ByteUtils.concatenate(PADDING_INDICATOR_BYTE, ciphertextblock), (byte) blocksize);
-		responseAPDU = apdu.transmit(dispatcher, slotHandle);
+		CardResponseAPDU responseAPDU = apdu.transmit(dispatcher, slotHandle);
 		baos.write(responseAPDU.getData());
 	    }
 

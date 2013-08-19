@@ -86,8 +86,6 @@ public interface SALProtocol extends LifecycleTrait {
 
     DIDCreateResponse didCreate(DIDCreate aParam);
 
-    DIDGetResponse didGet(DIDGet aParam);
-
     DIDUpdateResponse didUpdate(DIDUpdate aParam);
 
     DIDDeleteResponse didDelete(DIDDelete aParam);

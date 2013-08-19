@@ -32,8 +32,6 @@ import iso.std.iso_iec._24727.tech.schema.DIDCreate;
 import iso.std.iso_iec._24727.tech.schema.DIDCreateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDDelete;
 import iso.std.iso_iec._24727.tech.schema.DIDDeleteResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDGet;
-import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDUpdate;
 import iso.std.iso_iec._24727.tech.schema.DIDUpdateResponse;
 import iso.std.iso_iec._24727.tech.schema.Decipher;
@@ -53,7 +51,11 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.TreeMap;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
@@ -72,13 +74,15 @@ public abstract class SALProtocolBaseImpl implements SALProtocol {
     protected final TreeMap<String, Object> internalData;
     /** List of ProtocolSteps, which are per default executed in order. */
     protected final ArrayList<ProtocolStep<?, ?>> steps;
+    protected final Map<FunctionType, ProtocolStep<?, ?>> statelessSteps;
 
     /** Index marking current step in the step list. */
     protected int curStep = 0;
 
-    public SALProtocolBaseImpl() {
+    protected SALProtocolBaseImpl() {
 	this.internalData = new TreeMap<String, Object>();
 	this.steps = new ArrayList<ProtocolStep<?, ?>>();
+	this.statelessSteps = new EnumMap<FunctionType, ProtocolStep<?, ?>>(FunctionType.class);
     }
 
 
@@ -91,8 +95,7 @@ public abstract class SALProtocolBaseImpl implements SALProtocol {
 	return steps.size() > curStep;
     }
 
-    @Override
-    public boolean hasNextStep(FunctionType functionName) {
+    private boolean hasNextProcessStep(FunctionType functionName) {
 	if (hasNextStep()) {
 	    if (steps.get(curStep).getFunctionType() == functionName) {
 		return true;
@@ -104,9 +107,37 @@ public abstract class SALProtocolBaseImpl implements SALProtocol {
 	}
     }
 
+    private boolean hasStatelessStep(FunctionType functionName) {
+	return statelessSteps.containsKey(functionName);
+    }
+
+    @Override
+    public boolean hasNextStep(FunctionType functionName) {
+	if (hasStatelessStep(functionName)) {
+	    return true;
+	}
+	// check for a step in the process order
+	return hasNextProcessStep(functionName);
+    }
+
     @Override
     public boolean isFinished() {
 	return ! hasNextStep();
+    }
+
+    protected @Nonnull ProtocolStep<?, ?> addOrderStep(@Nonnull ProtocolStep<?, ?> step) {
+	steps.add(step);
+	return step;
+    }
+
+    /**
+     * Adds the given step to the stateless steps of this protocol.
+     *
+     * @param step The protocol step to add to the map.
+     * @return The previously associated step, or null if there was no previous association.
+     */
+    protected @Nullable ProtocolStep<?, ?> addStatelessStep(@Nonnull ProtocolStep<?, ?> step) {
+	return statelessSteps.put(step.getFunctionType(), step);
     }
 
 
@@ -114,13 +145,14 @@ public abstract class SALProtocolBaseImpl implements SALProtocol {
      * Get next step and advance counter.
      * @return next step or null if none exists.
      */
-    private ProtocolStep<? extends RequestType, ? extends ResponseType> next() {
-	if (steps.size() > curStep) {
+    private ProtocolStep<? extends RequestType, ? extends ResponseType> next(FunctionType functionName) {
+	// process order step takes precedence over stateless steps
+	if (hasNextProcessStep(functionName)) {
 	    ProtocolStep<?, ?> step = steps.get(curStep);
 	    curStep++;
 	    return step;
 	} else {
-	    return null;
+	    return statelessSteps.get(functionName); // returns null if nothing found
 	}
     }
 
@@ -138,72 +170,82 @@ public abstract class SALProtocolBaseImpl implements SALProtocol {
 
     @Override
     public CardApplicationStartSessionResponse cardApplicationStartSession(CardApplicationStartSession param) {
-	return (CardApplicationStartSessionResponse) perform(CardApplicationEndSessionResponse.class, next(), param, internalData);
+	ProtocolStep<?, ?> s = next(FunctionType.CardApplicationStartSession);
+	Class<? extends ResponseType> c = CardApplicationStartSessionResponse.class;
+	return (CardApplicationStartSessionResponse) perform(c, s, param, internalData);
     }
 
     @Override
     public CardApplicationEndSessionResponse cardApplicationEndSession(CardApplicationEndSession param) {
-	return (CardApplicationEndSessionResponse) perform(CardApplicationEndSessionResponse.class, next(), param, internalData);
+	ProtocolStep<?, ?> s = next(FunctionType.CardApplicationEndSession);
+	Class<? extends ResponseType> c = CardApplicationEndSessionResponse.class;
+	return (CardApplicationEndSessionResponse) perform(c, s, param, internalData);
     }
 
     @Override
     public EncipherResponse encipher(Encipher param) {
-	return (EncipherResponse) perform(EncipherResponse.class, next(), param, internalData);
+	ProtocolStep<?, ?> s = next(FunctionType.Encipher);
+	return (EncipherResponse) perform(EncipherResponse.class, s, param, internalData);
     }
 
     @Override
     public DecipherResponse decipher(Decipher param) {
-	return (DecipherResponse) perform(DecipherResponse.class, next(), param, internalData);
+	ProtocolStep<?, ?> s = next(FunctionType.Decipher);
+	return (DecipherResponse) perform(DecipherResponse.class, s, param, internalData);
     }
 
     @Override
     public GetRandomResponse getRandom(GetRandom param) {
-	return (GetRandomResponse) perform(GetRandomResponse.class, next(), param, internalData);
+	ProtocolStep<?, ?> s = next(FunctionType.GetRandom);
+	return (GetRandomResponse) perform(GetRandomResponse.class, s, param, internalData);
     }
 
     @Override
     public HashResponse hash(Hash param) {
-	return (HashResponse) perform(HashResponse.class, next(), param, internalData);
+	ProtocolStep<?, ?> s = next(FunctionType.Hash);
+	return (HashResponse) perform(HashResponse.class, s, param, internalData);
     }
 
     @Override
     public SignResponse sign(Sign param) {
-	return (SignResponse) perform(SignResponse.class, next(), param, internalData);
+	ProtocolStep<?, ?> s = next(FunctionType.Sign);
+	return (SignResponse) perform(SignResponse.class, s, param, internalData);
     }
 
     @Override
     public VerifySignatureResponse verifySignature(VerifySignature param) {
-	return (VerifySignatureResponse) perform(VerifySignatureResponse.class, next(), param, internalData);
+	ProtocolStep<?, ?> s = next(FunctionType.VerifySignature);
+	return (VerifySignatureResponse) perform(VerifySignatureResponse.class, s, param, internalData);
     }
 
     @Override
     public VerifyCertificateResponse verifyCertificate(VerifyCertificate param) {
-	return (VerifyCertificateResponse) perform(VerifyCertificateResponse.class, next(), param, internalData);
+	ProtocolStep<?, ?> s = next(FunctionType.VerifyCertificate);
+	return (VerifyCertificateResponse) perform(VerifyCertificateResponse.class, s, param, internalData);
     }
 
     @Override
     public DIDCreateResponse didCreate(DIDCreate param) {
-	return (DIDCreateResponse) perform(DIDCreateResponse.class, next(), param, internalData);
-    }
-
-    @Override
-    public DIDGetResponse didGet(DIDGet param) {
-	return (DIDGetResponse) perform(DIDGetResponse.class, next(), param, internalData);
+	ProtocolStep<?, ?> s = next(FunctionType.DIDCreate);
+	return (DIDCreateResponse) perform(DIDCreateResponse.class, s, param, internalData);
     }
 
     @Override
     public DIDUpdateResponse didUpdate(DIDUpdate param) {
-	return (DIDUpdateResponse) perform(DIDUpdateResponse.class, next(), param, internalData);
+	ProtocolStep<?, ?> s = next(FunctionType.DIDUpdate);
+	return (DIDUpdateResponse) perform(DIDUpdateResponse.class, s, param, internalData);
     }
 
     @Override
     public DIDDeleteResponse didDelete(DIDDelete param) {
-	return (DIDDeleteResponse) perform(DIDDeleteResponse.class, next(), param, internalData);
+	ProtocolStep<?, ?> s = next(FunctionType.DIDDelete);
+	return (DIDDeleteResponse) perform(DIDDeleteResponse.class, s, param, internalData);
     }
 
     @Override
     public DIDAuthenticateResponse didAuthenticate(DIDAuthenticate param) {
-	return (DIDAuthenticateResponse) perform(DIDAuthenticateResponse.class, next(), param, internalData);
+	ProtocolStep<?, ?> s = next(FunctionType.DIDAuthenticate);
+	return (DIDAuthenticateResponse) perform(DIDAuthenticateResponse.class, s, param, internalData);
     }
 
 

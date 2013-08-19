@@ -1065,16 +1065,6 @@ public class TinySAL implements SAL {
 
 	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, stateEntry, connectionHandle);
 	    response.setDIDStructure(didStructure);
-
-//	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-//	    connectionHandle.setCardApplication(null);
-//	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
-//	    if (protocol.hasNextStep(FunctionType.DIDGet)) {
-//		response = protocol.didGet(request);
-//		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
-//	    } else {
-//		throw new InappropriateProtocolForActionException("DIDGet", protocol.toString());
-//	    }
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {

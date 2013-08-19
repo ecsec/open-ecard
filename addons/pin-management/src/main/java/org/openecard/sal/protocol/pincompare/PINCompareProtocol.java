@@ -51,7 +51,6 @@ public class PINCompareProtocol extends SALProtocolBaseImpl {
     public void init(Context ctx) throws ActionInitializationException {
 	steps.add(new DIDCreateStep(ctx.getDispatcher()));
 	steps.add(new DIDUpdateStep(ctx.getDispatcher()));
-	steps.add(new DIDGetStep());
 	steps.add(new DIDAuthenticateStep(ctx.getDispatcher()));
     }
 

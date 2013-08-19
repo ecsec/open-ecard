@@ -49,7 +49,6 @@ public class GenericCryptoProtocol extends SALProtocolBaseImpl {
     @Override
     public void init(Context ctx) throws ActionInitializationException {
 	steps.add(new SignStep(ctx.getDispatcher()));
-	steps.add(new DIDGetStep());
 	steps.add(new DecipherStep(ctx.getDispatcher()));
 	steps.add(new VerifySignatureStep(ctx.getDispatcher()));
     }

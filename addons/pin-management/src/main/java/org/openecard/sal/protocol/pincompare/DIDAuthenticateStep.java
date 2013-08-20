@@ -125,10 +125,12 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 
 		verify.setTemplate(template);
 		VerifyUserResponse verifyR = (VerifyUserResponse) dispatcher.deliver(verify);
+		WSHelper.checkResult(verifyR);
 		responseCode = verifyR.getResponse();
 	    } else {
 		Transmit verifyTransmit = PINUtils.buildVerifyTransmit(rawPIN, attributes, template, slotHandle);
 		TransmitResponse transResp = (TransmitResponse) dispatcher.deliver(verifyTransmit);
+		WSHelper.checkResult(transResp);
 		responseCode = transResp.getOutputAPDU().get(0);
 	    }
 

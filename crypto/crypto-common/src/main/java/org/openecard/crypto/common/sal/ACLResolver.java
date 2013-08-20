@@ -134,7 +134,7 @@ public class ACLResolver {
 
     private static SecurityConditionType normalize(SecurityConditionType cond) {
 	// in some cases the acl is super flat, make it disjunct
-	if (cond.isAlways() != null) {
+	if (cond.getOr() == null) {
 	    SecurityConditionType result = new SecurityConditionType();
 	    SecurityConditionType.Or or = new SecurityConditionType.Or();
 	    result.setOr(or);
@@ -147,7 +147,7 @@ public class ACLResolver {
 
     private static SecurityConditionType getBestSecurityCondition(SecurityConditionType securityCondition) {
 	// TODO: do it right
-	// the condition is disjunctive, so we hope the first one is the best match
+	// the condition is disjunctive, so we cross fingers and hope the first one is the best match
 	return securityCondition.getOr().getSecurityCondition().get(0);
     }
 

@@ -64,6 +64,8 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
     //TODO extract the blocksize from somewhere
     private static final byte BLOCKSIZE = (byte) 256;
     private static final byte SET_COMPUTATION = (byte) 0x41;
+    private static final byte KEY_REFERENCE_PRIVATE_KEY = (byte) 0x84;
+
     private final Dispatcher dispatcher;
 
     /**
@@ -98,7 +100,6 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    byte[] keyReference = cryptoMarker.getCryptoKeyInfo().getKeyRef().getKeyRef();
 	    byte[] algorithmIdentifier = cryptoMarker.getAlgorithmInfo().getCardAlgRef();
 
-
 	    if (didStructure.getDIDScope().equals(DIDScopeType.LOCAL)) {
 		keyReference[0] = (byte) (0x80 | keyReference[0]);
 	    }
@@ -123,14 +124,12 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 
 		if (command.equals("MSE_KEY")) {
 		    TLV tagKeyReference = new TLV();
+		    tagKeyReference.setTagNumWithClass(KEY_REFERENCE_PRIVATE_KEY);
+		    tagKeyReference.setValue(keyReference);
 		    if (nextCmd.equals("PSO_CDS")) {
-			tagKeyReference.setTagNumWithClass(0x84);
-			tagKeyReference.setValue(keyReference);
 			byte[] mseData = ByteUtils.concatenate(tagKeyReference.toBER(), tagAlgorithmIdentifier.toBER());
 			cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.DST, mseData);
 		    } else if (nextCmd.equals("INT_AUTH")) {
-			tagKeyReference.setTagNumWithClass(0x83);
-			tagKeyReference.setValue(keyReference);
 			byte[] mseData = ByteUtils.concatenate(tagKeyReference.toBER(), tagAlgorithmIdentifier.toBER());
 			cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.AT, mseData);
 		    } else {

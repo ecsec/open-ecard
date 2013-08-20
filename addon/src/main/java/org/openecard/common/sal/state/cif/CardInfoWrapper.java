@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationType;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
 import iso.std.iso_iec._24727.tech.schema.DIDMarkerType;
+import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DataSetInfoType;
 import iso.std.iso_iec._24727.tech.schema.DataSetNameListType;
@@ -168,6 +169,10 @@ public class CardInfoWrapper {
 	DIDStructureType didStructure = new DIDStructureType();
 	didStructure.setDIDName(didInfo.getDifferentialIdentity().getDIDName());
 	didStructure.setDIDScope(didInfo.getDifferentialIdentity().getDIDScope());
+	if (didStructure.getDIDScope() == null) {
+	    // no scope is equal to local
+	    didStructure.setDIDScope(DIDScopeType.LOCAL);
+	}
 	DIDMarkerType didMarker = didInfo.getDifferentialIdentity().getDIDMarker();
 	if (didMarker.getCAMarker() != null) {
 	    didStructure.setDIDMarker(didMarker.getCAMarker());

@@ -1173,6 +1173,7 @@
 				</sequence>
 				<element name="generateFlag" type="iso:NULL" />
 			</choice>
+			<element name="SecurityEnvironmentIdentifier" type="iso:ByteType" minOccurs="0" />
 		</sequence>
 	</complexType>
 

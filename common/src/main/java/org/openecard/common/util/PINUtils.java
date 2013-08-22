@@ -24,9 +24,14 @@ package org.openecard.common.util;
 
 import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
 import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
+import static iso.std.iso_iec._24727.tech.schema.PasswordTypeType.*;
 import iso.std.iso_iec._24727.tech.schema.PasswordTypeType;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import org.openecard.common.ECardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,9 +60,8 @@ public class PINUtils {
      */
     public static Transmit buildVerifyTransmit(String rawPIN, PasswordAttributesType attributes, byte[] template,
 	    byte[] slotHandle) throws UtilException {
-
 	// concatenate template with encoded pin
-	byte[] pin = PINUtils.encodePin(rawPIN, attributes);
+    	byte[] pin = PINUtils.encodePin(rawPIN, attributes);
 	byte[] pinCmd = ByteUtils.concatenate(template, (byte) pin.length);
 	pinCmd = ByteUtils.concatenate(pinCmd, pin);
 
@@ -71,136 +75,152 @@ public class PINUtils {
     }
 
     public static byte[] encodePin(String rawPin, PasswordAttributesType attributes) throws UtilException {
-	byte[] mask = createPinMask(attributes);
+	// extract attributes
 	PasswordTypeType pwdType = attributes.getPwdType();
-	int startByte = 0;
-
-	boolean nibbleHandling = pwdType == PasswordTypeType.BCD || pwdType == PasswordTypeType.ISO_9564_1;
-	int storedLen = attributes.getStoredLength().intValue();
-	if (nibbleHandling) {
-	    storedLen *= 2;
-	    if (pwdType == PasswordTypeType.ISO_9564_1) {
-		storedLen -= 2;
-	    }
-	}
 	int minLen = attributes.getMinLength().intValue();
-	int maxLen = (attributes.getMaxLength() == null) ? storedLen : attributes.getMaxLength().intValue();
-	// check if pin is within boundaries
-	if (! (minLen <= rawPin.length() && rawPin.length() <= maxLen)) {
-	    String msg = String.format("Supplied PIN has wrong length: minLen(%d) <= PIN(%d) <= maxLen(%d)", minLen, rawPin.length(), maxLen);
-	    UtilException ex = new UtilException(msg);
-	    logger.error(ex.getMessage(), ex);
-	}
+	int maxLen = (attributes.getMaxLength() == null) ? 0 : attributes.getMaxLength().intValue();
+	int storedLen = attributes.getStoredLength().intValue();
+	boolean needsPadding = needsPadding(attributes);
+	// check if padding is inferred
 
-	// correct pin length if iso encoding
-	if (pwdType == PasswordTypeType.ISO_9564_1) {
-	    byte pinLen = (byte) rawPin.length();
-	    mask[0] = (byte) ((mask[0] & 0xF0) | (pinLen & 0x0F));
-	    startByte++;
-	}
+	byte padChar = getPadChar(attributes, needsPadding);
 
-	int j = 0;
-	for (int i = startByte; i < mask.length; i++) {
-	    if (j >= rawPin.length()) {
-		break;
-	    }
-	    byte correction = 0;
+	// helper variables
+	String encoding = "UTF-8";
+
+	try {
 	    switch (pwdType) {
 		case ASCII_NUMERIC:
-		    correction = '0';
-		    mask[i] = (byte) (getByte(rawPin.charAt(j)) + correction);
-		    j++;
-		    break;
-		case HALF_NIBBLE_BCD:
-		    mask[i] = (byte) (0xF0 | (getByte(rawPin.charAt(j)) + correction));
-		    j++;
-		    break;
+		    encoding = "US-ASCII";
+		case UTF_8:
+		    byte[] textPin = encodeTextPin(encoding, rawPin, minLen, storedLen, maxLen, needsPadding, padChar);
+		    return textPin;
 		case ISO_9564_1:
 		case BCD:
-		    byte high = (byte) ((getByte(rawPin.charAt(j)) << 4) & 0xF0);
-		    j++;
-		    byte low = (byte) (0x0F & mask[i]);
-		    if (j < rawPin.length()) {
-			low = getByte(rawPin.charAt(j));
-			j++;
-		    }
-		    mask[i] = (byte) (high | low);
-		    break;
+		case HALF_NIBBLE_BCD:
+		    byte[] bcdPin = encodeBcdPin(pwdType, rawPin, minLen, storedLen, maxLen, needsPadding, padChar);
+		    return bcdPin;
 		default:
-		    String msg = "UTF-8 PINs are not supported.";
+		    String msg = "Unsupported PIN encoding requested.";
 		    UtilException ex = new UtilException(ECardConstants.Minor.IFD.IO.UNKNOWN_PIN_FORMAT, msg);
 		    logger.error(ex.getMessage(), ex);
 		    throw ex;
 	    }
+	} catch (UnsupportedEncodingException ex) {
+	    throw new UtilException(ex);
+	} catch (IOException ex) {
+	    throw new UtilException(ex);
+	}
+    }
+
+    public static byte[] createPinMask(PasswordAttributesType attributes) throws UtilException {
+	// extract attributes
+	PasswordTypeType pwdType = attributes.getPwdType();
+	int minLen = attributes.getMinLength().intValue();
+	int maxLen = (attributes.getMaxLength() == null) ? 0 : attributes.getMaxLength().intValue();
+	int storedLen = attributes.getStoredLength().intValue();
+	boolean needsPadding = needsPadding(attributes);
+
+	// opt out if needs-padding is not on
+	if (! needsPadding) {
+	    return new byte[0];
+	}
+
+	byte padChar = getPadChar(attributes, needsPadding);
+
+	if (storedLen <= 0) {
+	    throw new UtilException("PIN mask can only be created when storage size is known.");
+	}
+
+	// they are all the same except half nibble which
+	if (HALF_NIBBLE_BCD == pwdType) {
+	    padChar = (byte) (padChar | 0xF0);
+	}
+
+	byte[] mask = new byte[storedLen];
+	Arrays.fill(mask, padChar);
+
+	// iso needs a sligth correction
+	if (ISO_9564_1 == pwdType) {
+	    mask[0] = 0x20;
 	}
 
 	return mask;
     }
 
-    public static byte[] createPinMask(PasswordAttributesType attributes) throws UtilException {
-	PasswordTypeType pwdType = attributes.getPwdType();
-	boolean nibbleHandling = pwdType == PasswordTypeType.BCD || pwdType == PasswordTypeType.ISO_9564_1;
-	boolean needsPadding = attributes.getPwdFlags().contains("needs-padding");
-	int storedLen = attributes.getStoredLength().intValue();
-	if (nibbleHandling) {
-	    storedLen *= 2;
-	    if (pwdType == PasswordTypeType.ISO_9564_1) {
-		storedLen -= 2;
-	    }
+    public static byte[] encodeTextPin(String encoding, String rawPin, int minLen, int storedLen, int maxLen,
+	    boolean needsPadding, byte padChar) throws UnsupportedEncodingException, UtilException {
+	// perform some basic checks
+	if (needsPadding && storedLen <= 0) {
+	    String msg = "Padding is required, but no stored length is given.";
+	    throw new UtilException(msg);
 	}
-	int minLen = attributes.getMinLength().intValue();
-
-	// check if pad char and stuff is correctly supplied
-	if (minLen < storedLen) {
-	    // if minlength is smaller than storedlength
-	    needsPadding = true;
-	} else if (nibbleHandling && (storedLen % 2) != 0) {
-	    // bcd and iso use only nibbles so the stored length must be even or padding is needed
-	    needsPadding = true;
+	if (rawPin.length() < minLen) {
+	    String msg = String.format("Entered PIN is too short, enter at least %d characters.", minLen);
+	    throw new UtilException(msg);
+	    //throw new UtilException("PIN contains invalid symbols.");
 	}
-	byte padChar;
-	if (pwdType == PasswordTypeType.ISO_9564_1) {
-	    needsPadding = true; // if not already set
-	    padChar = (byte) 0xFF;
-	} else if (needsPadding) {
-	    byte[] padChars = attributes.getPadChar();
-	    if (padChars == null || padChars.length == 0) {
-		UtilException ex = new UtilException("Unsupported combination of PIN parameters concerning padding.");
-		logger.error(ex.getMessage(), ex);
-		throw ex;
-	    } else {
-		padChar = padChars[0];
-	    }
-	} else {
-	    // half-nibble BCD may fall into this category
-	    padChar = (byte) 0xFF;
+	if (maxLen > 0 && rawPin.length() > maxLen) {
+	    String msg = String.format("Entered PIN is too long, enter at most %d characters.", maxLen);
+	    throw new UtilException(msg);
 	}
 
-	// assemble mask for pin
+	// get the pin string and validate it is within stored length
+	Charset charset = Charset.forName(encoding);
+	byte[] pinBytes = rawPin.getBytes(charset);
+	if (storedLen > 0 && pinBytes.length > storedLen) {
+	    String msg = String.format("Storage size for PIN exceeded, only %d bytes are allowed.", storedLen);
+	    throw new UtilException(msg);
+	}
+	// if the pin is too short, append the necessary padding bytes
+	if (needsPadding && pinBytes.length < storedLen) {
+	    int missingBytes = storedLen - pinBytes.length;
+	    byte[] filler = new byte[missingBytes];
+	    Arrays.fill(filler, padChar);
+	    pinBytes = ByteUtils.concatenate(pinBytes, filler);
+	}
+
+	return pinBytes;
+    }
+
+    public static byte[] encodeBcdPin(PasswordTypeType pwdType, String rawPin, int minLen, int storedLen, int maxLen,
+	    boolean needsPadding, byte padChar) throws UtilException, IOException {
 	ByteArrayOutputStream o = new ByteArrayOutputStream();
-	switch (pwdType) {
-	    case ISO_9564_1:
-		o.write(0x20);
-	    case BCD:
-		for (int i = 0; i < storedLen; i += 2) {
-		    o.write(padChar);
-		}
-		break;
-	    case ASCII_NUMERIC:
-	    case HALF_NIBBLE_BCD:
-		for (int i = 0; i < storedLen; i++) {
-		    o.write(padChar);
-		}
-		break;
-	    default:
-		String msg = "Pin with format '" + pwdType.name() + "' not supported.";
-		UtilException ex = new UtilException(ECardConstants.Minor.IFD.IO.UNKNOWN_PIN_FORMAT, msg);
-		logger.error(ex.getMessage(), ex);
-		throw ex;
+	int pinSize = rawPin.length();
+
+	if (ISO_9564_1 == pwdType) {
+	    byte head = (byte) (0x20 | (0x0F & pinSize));
+	    o.write(head);
 	}
 
-	byte[] result = o.toByteArray();
-	return result;
+	if (HALF_NIBBLE_BCD == pwdType) {
+	    for (int i = 0; i < pinSize; i++) {
+		char nextChar = rawPin.charAt(i);
+		byte digit = (byte) (0xF0 | getByte(nextChar));
+		o.write(digit);
+	    }
+	} else if (BCD == pwdType || ISO_9564_1 == pwdType) {
+	    for (int i = 0; i < pinSize; i += 2) {
+		byte b1 = (byte) (getByte(rawPin.charAt(i)) << 4);
+		byte b2 = (byte) (padChar & 0x0F); // lower nibble set to pad byte
+		// one char left, replace pad nibble with it
+		if (i + 1 < pinSize) {
+		    b2 = (byte) (getByte(rawPin.charAt(i + 1)) & 0x0F);
+		}
+		byte b = (byte) (b1 | b2);
+		o.write(b);
+	    }
+	}
+
+	// add padding bytes if needed
+	if (needsPadding && o.size() < storedLen) {
+	    int missingBytes = storedLen - o.size();
+	    byte[] filler = new byte[missingBytes];
+	    Arrays.fill(filler, padChar);
+	    o.write(filler);
+	}
+
+	return o.toByteArray();
     }
 
     private static byte getByte(char c) throws UtilException {
@@ -210,6 +230,33 @@ public class PINUtils {
 	    UtilException ex = new UtilException("Entered PIN contains invalid characters.");
 	    logger.error(ex.getMessage(), ex);
 	    throw ex;
+	}
+    }
+
+    private static byte getPadChar(PasswordAttributesType attributes, boolean needsPadding) throws UtilException {
+	if (PasswordTypeType.ISO_9564_1.equals(attributes.getPwdType())) {
+	    return (byte) 0xFF;
+	} else {
+	    byte[] padChars = attributes.getPadChar();
+	    if (padChars != null && padChars.length == 1) {
+		return padChars[0];
+	    } else if (needsPadding) {
+		UtilException ex = new UtilException("Unsupported combination of PIN parameters concerning padding.");
+		throw ex;
+	    } else {
+		// just return a value, it is not gonna be used in this case
+		return 0;
+	    }
+	}
+    }
+
+    private static boolean needsPadding(PasswordAttributesType attributes) {
+	PasswordTypeType pwdType = attributes.getPwdType();
+	if (ISO_9564_1 == pwdType) {
+	    return true;
+	} else {
+	    boolean needsPadding = attributes.getPwdFlags().contains("needs-padding");
+	    return needsPadding;
 	}
     }
 

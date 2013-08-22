@@ -74,8 +74,12 @@ public class PCSCPinModify {
 	    throw ex;
 	}
 
-	byte[] template = ByteUtils.concatenate(cmdTemplate, (byte) pinTemplate.length);
-	setData(ByteUtils.concatenate(template, pinTemplate));
+	byte[] template = cmdTemplate;
+	if (pinTemplate.length > 0) {
+	    template = ByteUtils.concatenate(cmdTemplate, (byte) pinTemplate.length);
+	    template = ByteUtils.concatenate(template, pinTemplate);
+	}
+	setData(template);
 
 	boolean nibbleHandling = pwdType == PasswordTypeType.BCD || pwdType == PasswordTypeType.ISO_9564_1;
 	boolean isoPin = pwdType == PasswordTypeType.ISO_9564_1;

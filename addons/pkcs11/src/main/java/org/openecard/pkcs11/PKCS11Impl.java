@@ -22,23 +22,8 @@
 
 package org.openecard.pkcs11;
 
-import iso.std.iso_iec._24727.tech.schema.EstablishContext;
-import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
-import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
-import iso.std.iso_iec._24727.tech.schema.Terminate;
 import org.json.JSONObject;
-import org.openecard.common.ClientEnv;
-import org.openecard.common.ECardConstants;
-import org.openecard.common.sal.state.CardStateMap;
-import org.openecard.common.sal.state.SALStateCallback;
-import org.openecard.event.EventManager;
-import org.openecard.gui.swing.SwingDialogWrapper;
-import org.openecard.gui.swing.SwingUserConsent;
-import org.openecard.ifd.protocol.pace.PACEProtocolFactory;
-import org.openecard.ifd.scio.IFD;
-import org.openecard.recognition.CardRecognition;
-import org.openecard.sal.TinySAL;
-import org.openecard.transport.dispatcher.MessageDispatcher;
+import org.openecard.addon.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,98 +38,24 @@ public class PKCS11Impl implements PKCS11Interface {
 
     private static final Logger logger = LoggerFactory.getLogger(PKCS11Impl.class);
 
-    // Client environment
-    private ClientEnv env = new ClientEnv();
-    // Interface Device Layer (IFD)
-    private IFD ifd;
-    // Service Access Layer (SAL)
-    private TinySAL sal;
-    // Event manager
-    private EventManager em;
-    // Card recognition
-    private CardRecognition recognition;
-    // card states
-    private CardStateMap cardStates;
-    // ContextHandle determines a specific IFD layer context
-    private byte[] contextHandle;
+    private final Context ctx;
+
+    public PKCS11Impl(Context ctx) {
+	this.ctx = ctx;
+    }
 
 
     @PKCS11Dispatchable
     @Override
     public PKCS11Result C_Initialize(JSONObject obj) {
-	try {
-	    // Set up client environment
-	    env = new ClientEnv();
-
-	    // Set up the IFD
-	    ifd = new IFD();
-	    ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
-	    env.setIFD(ifd);
-
-	    // Set up the Dispatcher
-	    MessageDispatcher dispatcher = new MessageDispatcher(env);
-	    env.setDispatcher(dispatcher);
-	    ifd.setDispatcher(dispatcher);
-
-	    // Perform an EstablishContext to get a ContextHandle
-	    EstablishContext establishContext = new EstablishContext();
-	    EstablishContextResponse establishContextResponse = ifd.establishContext(establishContext);
-
-	    if (establishContextResponse.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
-		if (establishContextResponse.getContextHandle() != null) {
-		    contextHandle = ifd.establishContext(establishContext).getContextHandle();
-		} else {
-		    //TODO
-		}
-	    } else {
-		// TODO
-	    }
-
-	    // Set up CardRecognition
-	    recognition = new CardRecognition(ifd, contextHandle);
-
-	    // Set up EventManager
-	    em = new EventManager(recognition, env, contextHandle);
-	    env.setEventManager(em);
-
-	    // Set up SALStateCallback
-	    cardStates = new CardStateMap();
-	    SALStateCallback salCallback = new SALStateCallback(recognition, cardStates);
-	    em.registerAllEvents(salCallback);
-
-	    // Set up SAL
-	    sal = new TinySAL(env, cardStates);
-	    env.setSAL(sal);
-
-	    // Set up GUI
-	    SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper());
-	    sal.setGUI(gui);
-	    ifd.setGUI(gui);
-
-	    // Initialize the EventManager
-	    em.initialize();
-
-	    return new PKCS11Result(PKCS11ReturnCode.CKR_OK);
-	} catch (Exception ex) {
-	    return new PKCS11Result(PKCS11ReturnCode.CKR_GENERAL_ERROR);
-	}
+	// i don't see what needs to be done here
+	return new PKCS11Result(PKCS11ReturnCode.CKR_OK);
     }
 
     @PKCS11Dispatchable
     @Override
     public PKCS11Result C_Finalize(JSONObject obj) {
-	// shutdwon event manager
-	em.terminate();
-
-	// shutdown SAL
-	Terminate terminate = new Terminate();
-	sal.terminate(terminate);
-
-	// shutdown IFD
-	ReleaseContext releaseContext = new ReleaseContext();
-	releaseContext.setContextHandle(contextHandle);
-	ifd.releaseContext(releaseContext);
-
+	// i don't see what needs to be done here
 	return new PKCS11Result(PKCS11ReturnCode.CKR_OK);
     }
 

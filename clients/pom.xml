@@ -18,7 +18,6 @@
     <modules>
 	<module>applet</module>
 	<module>richclient</module>
-	<module>pkcs11</module>
     </modules>
 
     <profiles>

@@ -60,60 +60,25 @@ public class ClasspathRegistry implements AddonRegistry {
 	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
 	marshaller.addXmlTypeClass(AddonSpecification.class);
 
-	try {
-	    String name = "TCToken-Manifest.xml";
-	    InputStream manifestStream = FileUtils.resolveResourceAsStream(ClasspathRegistry.class, name);
-	    Document manifestDoc = marshaller.str2doc(manifestStream);
-	    register((AddonSpecification) marshaller.unmarshal(manifestDoc));
-	    logger.info("Loaded TR-03112 Add-on.");
-	} catch (IOException ex) {
-	    logger.warn("Failed to load TR-03112 Add-on.", ex);
-	} catch (SAXException ex) {
-	    logger.warn("Failed to load TR-03112 Add-on.", ex);
-	} catch (WSMarshallerException ex) {
-	    logger.warn("Failed to load TR-03112 Add-on.", ex);
-	}
+	loadManifest(marshaller, "TR-03112", "TCToken-Manifest.xml");
+	loadManifest(marshaller, "PIN-Management", "PIN-Plugin-Manifest.xml");
+	loadManifest(marshaller, "GenericCrypto", "GenericCrypto-Plugin-Manifest.xml");
+	loadManifest(marshaller, "Status", "Status-Plugin-Manifest.xml");
+	loadManifest(marshaller, "PKCS#11", "PKCS11-Manifest.xml");
+    }
 
+    private void loadManifest(WSMarshaller marshaller, String addonName, String fileName) {
 	try {
-	    String name = "PIN-Plugin-Manifest.xml";
-	    InputStream manifestStream = FileUtils.resolveResourceAsStream(ClasspathRegistry.class, name);
+	    InputStream manifestStream = FileUtils.resolveResourceAsStream(ClasspathRegistry.class, fileName);
 	    Document manifestDoc = marshaller.str2doc(manifestStream);
 	    register((AddonSpecification) marshaller.unmarshal(manifestDoc));
-	    logger.info("Loaded PIN-Management Add-on.");
+	    logger.info("Loaded {} Add-on.", addonName);
 	} catch (IOException ex) {
-	    logger.warn("Failed to load PIN-Management Add-on.", ex);
+	    logger.warn(String.format("Failed to load %s Add-on.", addonName), ex);
 	} catch (SAXException ex) {
-	    logger.warn("Failed to load PIN-Management Add-on.", ex);
+	    logger.warn(String.format("Failed to load %s Add-on.", addonName), ex);
 	} catch (WSMarshallerException ex) {
-	    logger.warn("Failed to load PIN-Management Add-on.", ex);
-	}
-
-	try {
-	    String name = "GenericCrypto-Plugin-Manifest.xml";
-	    InputStream manifestStream = FileUtils.resolveResourceAsStream(ClasspathRegistry.class, name);
-	    Document manifestDoc = marshaller.str2doc(manifestStream);
-	    register((AddonSpecification) marshaller.unmarshal(manifestDoc));
-	    logger.info("Loaded GenericCrypto Add-on.");
-	} catch (IOException ex) {
-	    logger.warn("Failed to load GenericCrypto Add-on.", ex);
-	} catch (SAXException ex) {
-	    logger.warn("Failed to load GenericCrypto Add-on.", ex);
-	} catch (WSMarshallerException ex) {
-	    logger.warn("Failed to load GenericCrypto Add-on.", ex);
-	}
-
-	try {
-	    String name = "Status-Plugin-Manifest.xml";
-	    InputStream manifestStream = FileUtils.resolveResourceAsStream(ClasspathRegistry.class, name);
-	    Document manifestDoc = marshaller.str2doc(manifestStream);
-	    register((AddonSpecification) marshaller.unmarshal(manifestDoc));
-	    logger.info("Loaded Status Add-on.");
-	} catch (IOException ex) {
-	    logger.warn("Failed to load Status Add-on.", ex);
-	} catch (SAXException ex) {
-	    logger.warn("Failed to load Status Add-on.", ex);
-	} catch (WSMarshallerException ex) {
-	    logger.warn("Failed to load Status Add-on.", ex);
+	    logger.warn(String.format("Failed to load %s Add-on.", addonName), ex);
 	}
     }
 

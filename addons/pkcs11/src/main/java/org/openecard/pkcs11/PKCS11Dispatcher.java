@@ -22,14 +22,13 @@
 
 package org.openecard.pkcs11;
 
-import ch.qos.logback.core.joran.spi.JoranException;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.EnumMap;
 import javax.annotation.Nonnull;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openecard.addon.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,23 +49,14 @@ public class PKCS11Dispatcher {
     private final Object instance;
     private EnumMap<PKCS11Functions, Method> functionIndex;
 
-    static {
-	try {
-	    // load logger config from HOME if set
-	    LogbackConfig.load();
-	} catch (IOException ex) {
-	    logger.error("Failed to load logback config from user config.", ex);
-	} catch (JoranException ex) {
-	    logger.error("Failed to load logback config from user config.", ex);
-	}
-    }
 
     /**
      * Creates a dispatcher instance using {@link PKCS11Impl} as the PKCS11 implementation.
+     *
+     * @param ctx
      */
-    public PKCS11Dispatcher() {
-	instance = new PKCS11Impl();
-	this.functionIndex = buildIndex(instance);
+    public PKCS11Dispatcher(Context ctx) {
+	this(new PKCS11Impl(ctx));
     }
 
     /**

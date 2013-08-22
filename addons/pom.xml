@@ -20,6 +20,7 @@
 	<module>genericcryptography</module>
 	<module>tr03112</module>
 	<module>status</module>
+	<module>pkcs11</module>
     </modules>
 
     <dependencies>

@@ -188,10 +188,6 @@ public class ECardConstants {
 	    public static final String INVALID_SLOT_HANDLE = IFD_PREFIX + "/common#invalidSlotHandle";
 	    public static final String TIMEOUT_ERROR = IFD_PREFIX + "/common#timeoutError";
 
-	    public static final String NO_TRANSACTION_STARTED = IFD_PREFIX + "/IO#noTransactionStarted";
-	    public static final String UNKNOWN_INPUT_UNIT = IFD_PREFIX + "/IO#unknownInputUnit";
-	    public static final String UNKNOWN_PIN_FORMAT = IFD_PREFIX + "/IO#unknownPINFormat";
-
 	    public static final String IFD_SHARING_VIOLATION = IFD_PREFIX + "/terminal#IFDSharingViolation";
 	    public static final String NO_CARD = IFD_PREFIX + "/terminal#noCard";
 	    public static final String UNKNOWN_ACTION = IFD_PREFIX + "/terminal#unknownAction";
@@ -209,6 +205,8 @@ public class ECardConstants {
 	    public static class IO {
 
 		private static final String IO_PREFIX = IFD_PREFIX + "/IO";
+
+		public static final String NO_TRANSACTION_STARTED = IFD_PREFIX + "#noTransactionStarted";
 
 		public static final String UNKNOWN_DISPLAY_INDEX = IO_PREFIX + "#unknownDisplayIndex";
 		public static final String UNKNOWN_OUTPUT_DEVICE = IO_PREFIX + "#unknownOutputDevice";

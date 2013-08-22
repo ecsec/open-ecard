@@ -111,7 +111,7 @@ public class PACEProtocol implements Protocol {
 	} catch (UnsupportedEncodingException ex) {
 	    logger.error(ex.getMessage(), ex);
 	    response.setResult(WSHelper.makeResultError(
-		    ECardConstants.Minor.IFD.UNKNOWN_PIN_FORMAT,
+		    ECardConstants.Minor.IFD.IO.UNKNOWN_PIN_FORMAT,
 		    "Cannot encode the PIN in " + PACEConstants.PIN_CHARSET + " charset."));
 	} catch (ProtocolException ex) {
 	    logger.error(ex.getMessage(), ex);

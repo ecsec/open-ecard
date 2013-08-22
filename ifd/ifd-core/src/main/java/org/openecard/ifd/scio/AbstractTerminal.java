@@ -165,7 +165,7 @@ class AbstractTerminal {
 	if (inputUnit.getBiometricInput() != null) {
 	    // TODO: implement
 	    String msg = "Biometric authentication not supported by IFD.";
-	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.UNKNOWN_INPUT_UNIT, msg);
+	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.IO.UNKNOWN_INPUT_UNIT, msg);
 	    _logger.warn(ex.getMessage(), ex);
 	    throw ex;
 	} else if (inputUnit.getPinInput() != null) {
@@ -249,7 +249,7 @@ class AbstractTerminal {
 		throw ex;
 	    }
 	} else {
-	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.UNKNOWN_INPUT_UNIT, "Unsupported authentication input method requested.");
+	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.IO.UNKNOWN_INPUT_UNIT, "Unsupported authentication input method requested.");
 	    _logger.warn(ex.getMessage(), ex);
 	    throw ex;
 	}

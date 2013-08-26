@@ -60,22 +60,22 @@ public class FileRegistry implements AddonRegistry {
 
 
     public FileRegistry() throws WSMarshallerException {
-	String pluginsPath;
+	String addonPath;
 	try {
-	    pluginsPath = FileUtils.getHomeConfigDir() + File.separator + "plugins" + File.separator;
+	    addonPath = FileUtils.getHomeConfigDir() + File.separator + "addons" + File.separator;
 	} catch (SecurityException e) {
-	    logger.error("Failed to get plugin directory; FileRegistry won't work.", e);
+	    logger.error("Failed to get add-on directory; FileRegistry won't work.", e);
 	    return;
 	} catch (IOException e) {
-	    logger.error("Failed to get plugin directory; FileRegistry won't work.", e);
+	    logger.error("Failed to get add-on directory; FileRegistry won't work.", e);
 	    return;
 	}
-	startFileMonitor(pluginsPath);
+	startFileMonitor(addonPath);
     }
 
-    private void startFileMonitor(String pluginsPath) throws WSMarshallerException {
-	File f = new File(pluginsPath);
-	logger.debug("Starting FilesystemAlterationMonitor on Path: {}", f.getPath());
+    private void startFileMonitor(String addonPath) throws WSMarshallerException {
+	File f = new File(addonPath);
+	logger.debug("Starting file alteration monitor on path: {}", f.getPath());
 	FilesystemAlterationMonitor fam = new FilesystemAlterationMonitor();
 	fam.addListener(f, new PluginDirectoryAlterationListener(this));
 	fam.start();

@@ -22,6 +22,8 @@
 
 package org.openecard.addon;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 import javax.annotation.Nonnull;
 import org.openecard.addon.bind.AppExtensionAction;
 import org.openecard.addon.bind.AppExtensionActionProxy;
@@ -38,6 +40,7 @@ import org.openecard.addon.sal.SALProtocolProxy;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.sal.state.CardStateMap;
+import org.openecard.common.util.FacadeInvocationHandler;
 import org.openecard.gui.UserConsent;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.ws.marshal.WSMarshallerException;
@@ -54,7 +57,8 @@ public class AddonManager {
 
     private static final Logger logger = LoggerFactory.getLogger(AddonManager.class);
 
-    private final AddonRegistry registry;
+    private final CombiningRegistry registry;
+    private final AddonRegistry protectedRegistry;
     private final Dispatcher dispatcher;
     private final UserConsent userConsent;
     private final CardStateMap cardStates;
@@ -62,8 +66,10 @@ public class AddonManager {
     private final EventManager eventManager;
     private final EventHandler eventHandler;
 
-    public AddonManager(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition, EventManager eventManager) throws WSMarshallerException {
+    public AddonManager(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates,
+	    CardRecognition recognition, EventManager eventManager) throws WSMarshallerException {
 	this.registry = new CombiningRegistry();
+	this.protectedRegistry = getProtectedRegistry(registry);
 	this.dispatcher = dispatcher;
 	this.userConsent = userConsent;
 	this.cardStates = cardStates;
@@ -72,9 +78,27 @@ public class AddonManager {
 	eventHandler = new EventHandler(eventManager);
     }
 
+    /**
+     * This method returns an instance of the given registry where only the interface methods are accessible.
+     *
+     * @param registry Unprotected registry instance.
+     * @return Protected registry instance.
+     */
+    private static AddonRegistry getProtectedRegistry(AddonRegistry registry) {
+	ClassLoader cl = AddonManager.class.getClassLoader();
+	Class<?>[] interfaces = new Class<?>[] { AddonRegistry.class };
+	InvocationHandler handler = new FacadeInvocationHandler();
+	Object o = Proxy.newProxyInstance(cl, interfaces, handler);
+	return (AddonRegistry) o;
+    }
 
     public AddonRegistry getRegistry() {
-	return registry;
+	return protectedRegistry;
+    }
+
+    public void registerClasspathAddon(AddonSpecification desc) {
+	// TODO: protect this method from the sandbox
+	this.registry.getClasspathRegistry().register(desc);
     }
 
     public IFDProtocol getIFDProtocol(@Nonnull AddonSpecification addonSpec, @Nonnull String uri) {

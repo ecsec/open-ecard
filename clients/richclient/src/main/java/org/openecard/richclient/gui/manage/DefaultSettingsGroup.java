@@ -54,7 +54,9 @@ final class DefaultSettingsGroup extends SettingsGroup {
 	for (ConfigurationEntry entry : desc.getConfigDescription().getEntries()) {
 	    String name = entry.getLocalizedName(LANGUAGE_CODE);
 	    String description = entry.getLocalizedDescription(LANGUAGE_CODE);
-	    if (entry instanceof ScalarEntry) {
+
+	    // match entry types with class, else the type hierarchy is implicit in the if an that is a bad thing
+	    if (ScalarEntry.class.equals(entry.getClass())) {
 		ScalarEntry scalarEntry = (ScalarEntry) entry;
 		if (scalarEntry.getType().equalsIgnoreCase("string")) {
 		    addInputItem(name, description, entry.getKey());
@@ -63,19 +65,21 @@ final class DefaultSettingsGroup extends SettingsGroup {
 		} else {
 		    logger.error("Untreated ScalarEntry type: {}", scalarEntry.getType());
 		}
-	    } else if (entry instanceof ScalarListEntry) {
+	    } else if (ScalarListEntry.class.equals(entry.getClass())) {
 		addListInputItem(name, description, entry.getKey());
 	    } else {
 		logger.error("Untreated entry type: {}", entry.getClass().getName());
 	    }
+	    // TODO: implement missing types EnumEntry, EnumListEntry
 	}
     }
 
     @Override
     protected void saveProperties() throws IOException, SecurityException {
-	String path = FileUtils.getHomeConfigDir().getAbsolutePath() + File.separatorChar + "plugins"
-		+ File.separatorChar + desc.getId() + ".properties";
-	File config = new File(path);
+	File home = FileUtils.getHomeConfigDir();
+	File path = new File(home, "addons");
+	path = new File(path, desc.getId());
+	File config = new File(path, "settings" + ".properties");
 	FileWriter writer = new FileWriter(config);
 	properties.store(writer, null);
     }

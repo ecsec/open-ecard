@@ -170,7 +170,12 @@ public abstract class SettingsGroup extends JPanel {
 	JLabel label = addLabel(name, description);
 
 	String values = properties.getProperty(property);
-	String[] entries = values.split(";");
+	String[] entries;
+	if (values == null) {
+	    entries = new String[0];
+	} else {
+	    entries = values.split(";");
+	}
 	Vector<Vector<String>> rowData = new Vector<Vector<String>>();
 	Vector<String> columnData = new Vector<String>();
 	columnData.add("Provider ID");

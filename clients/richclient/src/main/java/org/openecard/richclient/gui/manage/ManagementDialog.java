@@ -229,8 +229,8 @@ public class ManagementDialog extends JDialog {
 		String name = desc.getLocalizedName(LANGUAGE_CODE);
 		Image logo = loadLogo(desc.getLogo());
 		JPanel actionPanel = createActionPanel(desc);
-		AddonPanel addonPanel = new AddonPanel(actionPanel, name, description, logo);
-		model.addElement(name, addonPanel);
+		AddonPanel nextPanel = new AddonPanel(actionPanel, name, description, logo);
+		model.addElement(name, nextPanel);
 	    }
 	}
 
@@ -318,10 +318,10 @@ public class ManagementDialog extends JDialog {
 	    } catch (IOException e) {
 		logger.error("Failed to load properties file for addon with id " + desc.getId(), e);
 	    }
-	    // TODO what title should we set?
+	    // TODO: what title should we set?
 	    SettingsGroup settingsGroup = new DefaultSettingsGroup("", properties, desc);
-	    AddonPanel addonPanel = new AddonPanel(new DefaultSettingsPanel(settingsGroup), name, description, logo);
-	    model.addElement(name, addonPanel);
+	    AddonPanel nextPanel = new AddonPanel(new DefaultSettingsPanel(settingsGroup), name, description, logo);
+	    model.addElement(name, nextPanel);
 	}
 
 	selectionPanel.add(addonList, addonListConstraints);

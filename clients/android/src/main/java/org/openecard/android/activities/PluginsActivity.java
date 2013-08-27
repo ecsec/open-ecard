@@ -62,7 +62,7 @@ public class PluginsActivity extends Activity {
      */
     private void setUpListViewPlugins() {
 	ListView listViewPlugins = (ListView) findViewById(R.id.listViewPlugins);
-	Set<AddonSpecification> listPlugins = AddonManagerSingleton.getInstance().getRegistry().listPlugins();
+	Set<AddonSpecification> listPlugins = AddonManagerSingleton.getInstance().getRegistry().listAddons();
 	List<String> pluginNames = new ArrayList<String>();
 
 	for (AddonSpecification addon : listPlugins) {

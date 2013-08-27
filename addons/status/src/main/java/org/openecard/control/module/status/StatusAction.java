@@ -147,7 +147,7 @@ public class StatusAction implements AppPluginAction {
 
 	// check all sal protocols in the
 	AddonRegistry registry = manager.getRegistry();
-	Set<AddonSpecification> addons = registry.listPlugins();
+	Set<AddonSpecification> addons = registry.listAddons();
 	for (AddonSpecification addon : addons) {
 	    for (ProtocolPluginSpecification proto : addon.getSalActions()) {
 		result.add(proto.getUri());

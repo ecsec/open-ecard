@@ -104,7 +104,7 @@ public class AddonManager {
     public IFDProtocol getIFDProtocol(@Nonnull AddonSpecification addonSpec, @Nonnull String uri) {
 	ProtocolPluginSpecification protoSpec = addonSpec.searchIFDActionByURI(uri);
 	String className = protoSpec.getClassName();
-	ClassLoader cl = registry.downloadPlugin(addonSpec);
+	ClassLoader cl = registry.downloadAddon(addonSpec);
 	IFDProtocolProxy protoFactory = new IFDProtocolProxy(className, cl);
 	try {
 	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);
@@ -119,7 +119,7 @@ public class AddonManager {
     public SALProtocol getSALProtocol(@Nonnull AddonSpecification addonSpec, @Nonnull String uri) {
 	ProtocolPluginSpecification protoSpec = addonSpec.searchSALActionByURI(uri);
 	String className = protoSpec.getClassName();
-	ClassLoader cl = registry.downloadPlugin(addonSpec);
+	ClassLoader cl = registry.downloadAddon(addonSpec);
 	SALProtocolProxy protoFactory = new SALProtocolProxy(className, cl);
 	try {
 	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);
@@ -134,7 +134,7 @@ public class AddonManager {
     public AppExtensionAction getAppExtensionAction(@Nonnull AddonSpecification addonSpec, @Nonnull String actionId) {
 	AppExtensionSpecification protoSpec = addonSpec.searchByActionId(actionId);
 	String className = protoSpec.getClassName();
-	ClassLoader cl = registry.downloadPlugin(addonSpec);
+	ClassLoader cl = registry.downloadAddon(addonSpec);
 	AppExtensionActionProxy protoFactory = new AppExtensionActionProxy(className, cl);
 	try {
 	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);
@@ -149,7 +149,7 @@ public class AddonManager {
     public AppPluginAction getAppPluginAction(@Nonnull AddonSpecification addonSpec, @Nonnull String resourceName) {
 	AppPluginSpecification protoSpec = addonSpec.searchByResourceName(resourceName);
 	String className = protoSpec.getClassName();
-	ClassLoader cl = registry.downloadPlugin(addonSpec);
+	ClassLoader cl = registry.downloadAddon(addonSpec);
 	AppPluginActionProxy protoFactory = new AppPluginActionProxy(className, cl);
 	try {
 	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);

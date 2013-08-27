@@ -73,7 +73,7 @@ final class PluginDirectoryAlterationListener implements FilesystemAlterationLis
 	if (abd == null) {
 	    return;
 	}
-	Set<AddonSpecification> plugins = fileRegistry.listPlugins();
+	Set<AddonSpecification> plugins = fileRegistry.listAddons();
 	for (AddonSpecification desc : plugins) {
 	    if (desc.getId().equals(abd.getId())) {
 		logger.debug("Addon {} is already registered", name);

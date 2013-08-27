@@ -87,7 +87,7 @@ public class ClasspathRegistry implements AddonRegistry {
     }
 
     @Override
-    public Set<AddonSpecification> listPlugins() {
+    public Set<AddonSpecification> listAddons() {
 	Set<AddonSpecification> list = new HashSet<AddonSpecification>();
 	list.addAll(registeredAddons);
 	return list;
@@ -141,7 +141,7 @@ public class ClasspathRegistry implements AddonRegistry {
     }
 
     @Override
-    public ClassLoader downloadPlugin(AddonSpecification addonSpec) {
+    public ClassLoader downloadAddon(AddonSpecification addonSpec) {
 	// TODO use other own classloader impl with security features
 	return this.getClass().getClassLoader();
     }

@@ -33,11 +33,11 @@ import org.openecard.addon.manifest.AddonSpecification;
  */
 public interface AddonRegistry {
 
-    Set<AddonSpecification> listPlugins();
+    Set<AddonSpecification> listAddons();
 
-    AddonSpecification search(String aId) throws AddonNotFoundException;
+    AddonSpecification search(String id) throws AddonNotFoundException;
 
-    Set<AddonSpecification> searchByName(String aName);
+    Set<AddonSpecification> searchByName(String name);
 
     Set<AddonSpecification> searchIFDProtocol(String protocolUri);
 
@@ -47,6 +47,6 @@ public interface AddonRegistry {
 
     Set<AddonSpecification> searchByResourceName(String resourceName);
 
-    ClassLoader downloadPlugin(AddonSpecification addonSpec);
+    ClassLoader downloadAddon(AddonSpecification addonSpec);
 
 }

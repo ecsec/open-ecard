@@ -55,9 +55,9 @@ public class CombiningRegistry implements AddonRegistry {
 
 
     @Override
-    public Set<AddonSpecification> listPlugins() {
-	Set<AddonSpecification> list = classpathRegistry.listPlugins();
-	list.addAll(fileRegistry.listPlugins());
+    public Set<AddonSpecification> listAddons() {
+	Set<AddonSpecification> list = classpathRegistry.listAddons();
+	list.addAll(fileRegistry.listAddons());
 	return list;
     }
 
@@ -98,12 +98,12 @@ public class CombiningRegistry implements AddonRegistry {
     }
 
     @Override
-    public ClassLoader downloadPlugin(AddonSpecification addonSpec) {
+    public ClassLoader downloadAddon(AddonSpecification addonSpec) {
 	AddonSpecification desc = classpathRegistry.search(addonSpec.getId());
 	if (desc != null) {
-	    return classpathRegistry.downloadPlugin(addonSpec);
+	    return classpathRegistry.downloadAddon(addonSpec);
 	} else {
-	    return fileRegistry.downloadPlugin(addonSpec);
+	    return fileRegistry.downloadAddon(addonSpec);
 	}
     }
 

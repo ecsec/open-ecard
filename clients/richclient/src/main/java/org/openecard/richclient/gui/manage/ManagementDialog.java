@@ -224,7 +224,7 @@ public class ManagementDialog extends JDialog {
 
 	// this assumes that all addons in the ClasspathRegistry are core addons
 	// an ActionPanel for every addon that has one ore more AppExtensionActions will be added
-	for (AddonSpecification desc : cpReg.listPlugins()) {
+	for (AddonSpecification desc : cpReg.listAddons()) {
 	    ArrayList<AppExtensionSpecification> applicationActions = desc.getApplicationActions();
 	    if (applicationActions.size() > 0) {
 		String description  = desc.getLocalizedDescription(LANGUAGE_CODE);
@@ -302,7 +302,7 @@ public class ManagementDialog extends JDialog {
 	// add addon panels
 
 	// this assumes that all addons in the FileRegistry are non core addons
-	for (AddonSpecification desc : fileReg.listPlugins()) {
+	for (AddonSpecification desc : fileReg.listAddons()) {
 	    String description = desc.getLocalizedDescription(LANGUAGE_CODE);
 	    String name = desc.getLocalizedName(LANGUAGE_CODE);
 	    Image logo = loadLogo(desc.getLogo());

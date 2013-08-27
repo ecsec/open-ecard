@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.richclient.gui.manage;
+package org.openecard.richclient.gui.manage.addon;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -31,6 +31,7 @@ import org.openecard.addon.manifest.ConfigurationEntry;
 import org.openecard.addon.manifest.ScalarEntry;
 import org.openecard.addon.manifest.ScalarListEntry;
 import org.openecard.common.util.FileUtils;
+import org.openecard.richclient.gui.manage.SettingsGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,14 +42,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
  */
-final class DefaultSettingsGroup extends SettingsGroup {
+public class DefaultSettingsGroup extends SettingsGroup {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultSettingsGroup.class);
     private static final long serialVersionUID = 1L;
     private static final String LANGUAGE_CODE = System.getProperty("user.language");
     private AddonSpecification desc;
 
-    DefaultSettingsGroup(String title, Properties properties, AddonSpecification desc) {
+    public DefaultSettingsGroup(String title, Properties properties, AddonSpecification desc) {
 	super(title, properties);
 	this.desc = desc;
 	for (ConfigurationEntry entry : desc.getConfigDescription().getEntries()) {

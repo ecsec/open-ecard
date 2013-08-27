@@ -22,6 +22,8 @@
 
 package org.openecard.richclient.gui.manage;
 
+import org.openecard.richclient.gui.manage.addon.DefaultSettingsGroup;
+import org.openecard.richclient.gui.manage.addon.DefaultSettingsPanel;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;

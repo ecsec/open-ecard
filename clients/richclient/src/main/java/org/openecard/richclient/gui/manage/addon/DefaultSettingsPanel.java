@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.richclient.gui.manage;
+package org.openecard.richclient.gui.manage.addon;
 
 import org.openecard.richclient.gui.manage.SettingsGroup;
 import org.openecard.richclient.gui.manage.SettingsPanel;

@@ -23,6 +23,7 @@
 package org.openecard.common.util;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 
@@ -32,9 +33,19 @@ import java.lang.reflect.Method;
  */
 public class FacadeInvocationHandler implements InvocationHandler {
 
+    private final Object target;
+
+    public FacadeInvocationHandler(Object target) {
+	this.target = target;
+    }
+
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-	return method.invoke(proxy, args);
+	try {
+	    return method.invoke(target, args);
+	} catch (InvocationTargetException ex) {
+	    throw ex.getCause();
+	}
     }
 
 }

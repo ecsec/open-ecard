@@ -87,7 +87,7 @@ public class AddonManager {
     private static AddonRegistry getProtectedRegistry(AddonRegistry registry) {
 	ClassLoader cl = AddonManager.class.getClassLoader();
 	Class<?>[] interfaces = new Class<?>[] { AddonRegistry.class };
-	InvocationHandler handler = new FacadeInvocationHandler();
+	InvocationHandler handler = new FacadeInvocationHandler(registry);
 	Object o = Proxy.newProxyInstance(cl, interfaces, handler);
 	return (AddonRegistry) o;
     }

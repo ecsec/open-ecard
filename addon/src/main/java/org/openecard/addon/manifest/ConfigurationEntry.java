@@ -25,6 +25,7 @@ package org.openecard.addon.manifest;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlTransient;
 
 
@@ -34,11 +35,12 @@ import javax.xml.bind.annotation.XmlTransient;
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 @XmlTransient
+@XmlSeeAlso({EnumEntry.class, EnumListEntry.class, ScalarEntry.class, ScalarListEntry.class})
 public abstract class ConfigurationEntry {
 
-    protected String key;
-    protected final List<LocalizedString> localizedName = new ArrayList<LocalizedString>();
-    protected final List<LocalizedString> localizedDescription = new ArrayList<LocalizedString>();
+    private String key;
+    private final List<LocalizedString> localizedName = new ArrayList<LocalizedString>();
+    private final List<LocalizedString> localizedDescription = new ArrayList<LocalizedString>();
 
     @XmlElement(name = "Key")
     public String getKey() {

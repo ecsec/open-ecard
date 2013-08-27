@@ -22,6 +22,7 @@
 
 package org.openecard.addon.manifest;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -34,28 +35,14 @@ import javax.xml.bind.annotation.XmlType;
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 @XmlRootElement(name = "EnumEntry")
-@XmlType(propOrder = { "key", "value", "localizedName", "localizedDescription" })
+@XmlType(propOrder = { "key", "values", "localizedName", "localizedDescription" })
 public class EnumEntry extends ConfigurationEntry {
 
-    private String value;
+    private final ArrayList<String> values = new ArrayList<String>();
 
-    @XmlElement(name = "Value")
-    public String getValue() {
-	return value;
+    @XmlElement(name = "Value", required = true)
+    public List<String> getValues() {
+	return values;
     }
 
-    @XmlElement(name = "Key")
-    public String getKey() {
-	return key;
-    }
-
-    @XmlElement(name = "LocalizedName")
-    public List<LocalizedString> getLocalizedName() {
-	return localizedName;
-    }
-
-    @XmlElement(name = "LocalizedDescription")
-    public List<LocalizedString> getLocalizedDescription() {
-	return localizedDescription;
-    }
 }

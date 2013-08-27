@@ -22,39 +22,15 @@
 
 package org.openecard.addon.manifest;
 
-import java.util.List;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 
 
 /**
-*
-* @author Tobias Wich <tobias.wich@ecsec.de>
-* @author Dirk Petrautzki <petrautzki@hs-coburg.de>
-*/
+ *
+ * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ */
 @XmlRootElement(name = "EnumListEntry")
-@XmlType(propOrder = { "key", "value", "localizedName", "localizedDescription" })
-public class EnumListEntry extends ConfigurationEntry {
-    private String value;
+public class EnumListEntry extends EnumEntry {
 
-    @XmlElement(name = "Value")
-    public String getValue() {
-	return value;
-    }
-
-    @XmlElement(name = "Key")
-    public String getKey() {
-	return key;
-    }
-
-    @XmlElement(name = "LocalizedName")
-    public List<LocalizedString> getLocalizedName() {
-	return localizedName;
-    }
-
-    @XmlElement(name = "LocalizedDescription")
-    public List<LocalizedString> getLocalizedDescription() {
-	return localizedDescription;
-    }
 }

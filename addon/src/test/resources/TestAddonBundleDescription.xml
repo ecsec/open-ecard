@@ -12,6 +12,8 @@
     <Entries>
       <EnumEntry>
             <Key>Testkey</Key>
+	    <Value>foo</Value>
+	    <Value>bar</Value>
             <LocalizedName xml:lang="DE">Test-ConfigurationEntry</LocalizedName>
             <LocalizedDescription xml:lang="DE">Testbeschreibung</LocalizedDescription>
       </EnumEntry>

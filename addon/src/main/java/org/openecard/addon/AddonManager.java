@@ -96,6 +96,13 @@ public class AddonManager {
 	return protectedRegistry;
     }
 
+    public AddonRegistry getBuiltinRegistry() {
+	return getProtectedRegistry(registry.getClasspathRegistry());
+    }
+    public AddonRegistry getExternalRegistry() {
+	return getProtectedRegistry(registry.getFileRegistry());
+    }
+
     public void registerClasspathAddon(AddonSpecification desc) {
 	// TODO: protect this method from the sandbox
 	this.registry.getClasspathRegistry().register(desc);

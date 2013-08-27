@@ -70,15 +70,19 @@ public class ClasspathRegistry implements AddonRegistry {
     private void loadManifest(WSMarshaller marshaller, String addonName, String fileName) {
 	try {
 	    InputStream manifestStream = FileUtils.resolveResourceAsStream(ClasspathRegistry.class, fileName);
+	    if (manifestStream == null) {
+		logger.warn("Skipped loading internal add-on {}, because it is not available.", addonName);
+		return;
+	    }
 	    Document manifestDoc = marshaller.str2doc(manifestStream);
 	    register((AddonSpecification) marshaller.unmarshal(manifestDoc));
-	    logger.info("Loaded {} Add-on.", addonName);
+	    logger.info("Loaded internal {} add-on.", addonName);
 	} catch (IOException ex) {
-	    logger.warn(String.format("Failed to load %s Add-on.", addonName), ex);
+	    logger.warn(String.format("Failed to load internal %s add-on.", addonName), ex);
 	} catch (SAXException ex) {
-	    logger.warn(String.format("Failed to load %s Add-on.", addonName), ex);
+	    logger.warn(String.format("Failed to load internal %s add-on.", addonName), ex);
 	} catch (WSMarshallerException ex) {
-	    logger.warn(String.format("Failed to load %s Add-on.", addonName), ex);
+	    logger.warn(String.format("Failed to load internal %s add-on.", addonName), ex);
 	}
     }
 

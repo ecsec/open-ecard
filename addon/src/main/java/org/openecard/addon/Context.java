@@ -80,6 +80,14 @@ public class Context {
 	throw new UnsupportedOperationException();
     }
 
+    /**
+     * Gets the card states representing the internal state of the SAL.
+     *
+     * @return Current card states.
+     * @deprecated Because this element leaks SAL internals which are better accessed with the SAL functions. Will be
+     *   removed in version 1.2.0.
+     */
+    @Deprecated
     public CardStateMap getCardStates() {
 	return cardStates;
     }

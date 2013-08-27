@@ -49,9 +49,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.openecard.addon.AddonManager;
-import org.openecard.addon.ClasspathRegistry;
-import org.openecard.addon.CombiningRegistry;
-import org.openecard.addon.FileRegistry;
+import org.openecard.addon.AddonRegistry;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.AppExtensionSpecification;
 import org.openecard.common.I18n;
@@ -80,8 +78,8 @@ public class ManagementDialog extends JDialog {
 
     private final I18n lang = I18n.getTranslation("addon");
     private final AddonManager manager;
-    private final ClasspathRegistry cpReg;
-    private final FileRegistry fileReg;
+    private final AddonRegistry cpReg;
+    private final AddonRegistry fileReg;
 
     private JPanel selectionPanel;
     private JPanel contentPane;
@@ -141,8 +139,8 @@ public class ManagementDialog extends JDialog {
      */
     public ManagementDialog(AddonManager manager) {
 	this.manager = manager;
-	cpReg = ((CombiningRegistry) manager.getRegistry()).getClasspathRegistry();
-	fileReg = ((CombiningRegistry) manager.getRegistry()).getFileRegistry();
+	cpReg = manager.getBuiltinRegistry();
+	fileReg = manager.getExternalRegistry();
 
 	Image logo = GraphicsUtil.createImage(OecLogoBgWhite.class, 147, 147);
 	setIconImage(logo);

@@ -31,13 +31,18 @@ import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Properties;
 import java.util.Vector;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -166,7 +171,8 @@ public abstract class SettingsGroup extends JPanel {
 	return input;
     }
 
-    protected void addListInputItem(@Nonnull String name, @Nullable String description, final @Nonnull String property) {
+    @Deprecated
+    private void addListInputItem(@Nonnull String name, @Nullable String description, final @Nonnull String property) {
 	JLabel label = addLabel(name, description);
 
 	String values = properties.getProperty(property);
@@ -237,7 +243,45 @@ public abstract class SettingsGroup extends JPanel {
 	fieldLabels.put(jTable, label);
 	addComponent(jTable);
 	itemIdx++;
-	return;
+    }
+
+    protected JTable addScalarListItem(@Nonnull String name, @Nullable String desc, final @Nonnull String property) {
+	JLabel label = addLabel(name, desc);
+
+	String value = properties.getProperty(property);
+	ArrayList<String> entries = new ArrayList<String>(10);
+	if (value != null) {
+	    String[] arrayEntries = value.split("\n");
+	    Collections.addAll(entries, arrayEntries);
+
+	    // remove leading and trailing ws and remove empty entries
+	    ListIterator<String> it = entries.listIterator();
+	    while (it.hasNext()) {
+		String next = it.next();
+		next = next.trim();
+		if (next.isEmpty()) {
+		    it.remove();
+		} else {
+		    it.set(next);
+		}
+	    }
+	}
+
+	final JTable input = new JTable(entries.size() + 1, 2);
+	// fill in the values from entries
+	for (int i = 0; i < entries.size(); i++) {
+	    input.getModel().setValueAt(entries.get(i), i, 0);
+	    JButton removeButton = new JButton("x");
+	    input.getModel().setValueAt(removeButton, i, 1);
+	}
+	fieldLabels.put(input, label);
+
+	// TODO: add listener
+
+	addComponent(input);
+	itemIdx++;
+
+	return input;
     }
 
     /**
@@ -278,6 +322,7 @@ public abstract class SettingsGroup extends JPanel {
      * @param name Name displayed on the label besides the input element.
      * @param description Optional tooltip description visible when hovering the label.
      * @param property Property entry this element is bound to.
+     * @param values
      * @return The selection element which has been created and added to the entry.
      */
     protected JComboBox addSelectionItem(@Nonnull String name, @Nullable String description,
@@ -307,13 +352,15 @@ public abstract class SettingsGroup extends JPanel {
      * @param name Name displayed on the label besides the input element.
      * @param description Optional tooltip description visible when hovering the label.
      * @param property Property entry this element is bound to.
+     * @param values Selectable values.
      * @return The selection element which has been created and added to the entry.
      */
-    protected void addMultiSelectionItem(@Nonnull String name, @Nullable String description,
-	    final @Nonnull String property, @Nonnull String... values) {
+    protected JComboBox addMultiSelectionItem(@Nonnull String name, @Nullable String description,
+	    final @Nonnull String property, @Nonnull List<String> values) {
 	addLabel(name, description);
-	// TODO:
-	itemIdx++;
+	// TODO: implement
+
+	throw new UnsupportedOperationException("Not implemented yet.");
     }
 
     private JLabel addLabel(@Nonnull String name, @Nullable String description) {
@@ -324,6 +371,7 @@ public abstract class SettingsGroup extends JPanel {
 	constraints.insets = new Insets(5, 10, 0, 5);
 	constraints.gridx = 0;
 	constraints.gridy = itemIdx;
+	constraints.anchor = GridBagConstraints.WEST;
 	container.add(label, constraints);
 	return label;
     }

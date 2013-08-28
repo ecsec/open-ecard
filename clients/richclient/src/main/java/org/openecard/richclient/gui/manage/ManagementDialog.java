@@ -40,6 +40,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Properties;
 import javax.annotation.Nonnull;
+import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -158,8 +159,12 @@ public class ManagementDialog extends JDialog {
 	addonPanel = new JPanel(new BorderLayout(), true);
 	contentPane.add(addonPanel, BorderLayout.CENTER);
 
+	JPanel selectionWrapper = new JPanel(new BorderLayout());
+	contentPane.add(selectionWrapper, BorderLayout.WEST);
 	selectionPanel = new JPanel();
-	contentPane.add(selectionPanel, BorderLayout.WEST);
+	selectionWrapper.add(selectionPanel, BorderLayout.NORTH);
+	selectionWrapper.add(Box.createHorizontalGlue(), BorderLayout.CENTER);
+
 	GridBagLayout selectionLayout = new GridBagLayout();
 	selectionLayout.rowHeights = new int[]{0, 0, 0, 0};
 	selectionLayout.columnWeights = new double[]{1.0};
@@ -261,10 +266,16 @@ public class ManagementDialog extends JDialog {
      * @return the logo-{@link Image} if loading was successful, otherwise {@code null}
      */
     private static Image loadLogo(String logoPath) {
+	if (logoPath == null || logoPath.isEmpty()) {
+	    return null;
+	}
 	try {
-	    String fName = logoPath;
-	    InputStream in = FileUtils.resolveResourceAsStream(ManagementDialog.class, fName);
+	    InputStream in = FileUtils.resolveResourceAsStream(ManagementDialog.class, logoPath);
 	    ImageIcon icon = new ImageIcon(FileUtils.toByteArray(in));
+	    if (icon.getIconHeight() < 0 || icon.getIconWidth() < 0) {
+		// supplied data was no image, btw the image API sucks
+		return null;
+	    }
 	    return icon.getImage();
 	} catch (IOException ex) {
 	    // ignore and let the default decide
@@ -289,8 +300,8 @@ public class ManagementDialog extends JDialog {
 	addonList.setFont(addonList.getFont().deriveFont(Font.PLAIN));
 	addonList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	GridBagConstraints addonListConstraints = new GridBagConstraints();
-	addonListConstraints.insets = new Insets(0, 5, 5, 10);
 	addonListConstraints.fill = GridBagConstraints.HORIZONTAL;
+	addonListConstraints.insets = new Insets(0, 5, 5, 10);
 	addonListConstraints.anchor = GridBagConstraints.NORTH;
 	addonListConstraints.gridx = 0;
 	addonListConstraints.gridy = 4;

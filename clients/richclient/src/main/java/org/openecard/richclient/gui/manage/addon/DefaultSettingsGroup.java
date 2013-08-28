@@ -25,9 +25,12 @@ package org.openecard.richclient.gui.manage.addon;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ConfigurationEntry;
+import org.openecard.addon.manifest.EnumEntry;
+import org.openecard.addon.manifest.EnumListEntry;
 import org.openecard.addon.manifest.ScalarEntry;
 import org.openecard.addon.manifest.ScalarListEntry;
 import org.openecard.common.util.FileUtils;
@@ -44,9 +47,11 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultSettingsGroup extends SettingsGroup {
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultSettingsGroup.class);
     private static final long serialVersionUID = 1L;
+    private static final Logger logger = LoggerFactory.getLogger(DefaultSettingsGroup.class);
+
     private static final String LANGUAGE_CODE = System.getProperty("user.language");
+
     private AddonSpecification desc;
 
     public DefaultSettingsGroup(String title, Properties properties, AddonSpecification desc) {
@@ -67,7 +72,18 @@ public class DefaultSettingsGroup extends SettingsGroup {
 		    logger.error("Untreated ScalarEntry type: {}", scalarEntry.getType());
 		}
 	    } else if (ScalarListEntry.class.equals(entry.getClass())) {
-		addListInputItem(name, description, entry.getKey());
+		addScalarListItem(name, description, entry.getKey());
+	    } else if (EnumEntry.class.equals(entry.getClass())) {
+		EnumEntry enumEntry = (EnumEntry) entry;
+		List<String> values = enumEntry.getValues();
+		// TODO: implement function
+		//addMultiSelectionItem(name, description, entry.getKey(), values);
+	    } else if (EnumListEntry.class.equals(entry.getClass())) {
+		EnumListEntry enumEntry = (EnumListEntry) entry;
+		List<String> values = enumEntry.getValues();
+		// TODO: use correct function
+		// addMultiSelectionItem(name, description, entry.getKey(), values);
+		logger.error("Yet unsupported entry type: {}", entry.getClass().getName());
 	    } else {
 		logger.error("Untreated entry type: {}", entry.getClass().getName());
 	    }

@@ -31,6 +31,7 @@ import iso.std.iso_iec._24727.tech.schema.SignResponse;
 import java.util.Map;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
+import org.openecard.bouncycastle.util.Arrays;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.InternalAuthenticate;
@@ -159,8 +160,17 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 		responseAPDU = cmdAPDU.transmit(dispatcher, slotHandle);
 	    }
 
-	    response.setSignature(responseAPDU.getData());
+	    byte[] signedMessage = responseAPDU.getData();
 
+	    // check if further response data is available
+	    while (responseAPDU.getTrailer()[0] == (byte) 0x61) {
+		CardCommandAPDU getResponseData = new CardCommandAPDU((byte) 0x00, (byte) 0xC0, (byte) 0x00, (byte) 0x00,
+			responseAPDU.getTrailer()[1]);
+		responseAPDU = getResponseData.transmit(dispatcher, slotHandle);
+		signedMessage = Arrays.concatenate(signedMessage, responseAPDU.getData());
+	    }
+
+	    response.setSignature(signedMessage);
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {

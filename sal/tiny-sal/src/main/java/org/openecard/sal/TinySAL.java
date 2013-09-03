@@ -743,9 +743,8 @@ public class TinySAL implements SAL {
 
 	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dsiName, NamedDataServiceActionName.DSI_READ);
 
-	    byte[] fileID = dataSetInfo.getDataSetPath().getEfIdOrPath();
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
-	    byte[] fileContent = CardUtils.readFile(env.getDispatcher(), slotHandle, fileID);
+	    byte[] fileContent = CardUtils.readFile(lastSelectedFileFCP, env.getDispatcher(), slotHandle);
 
 	    response.setDSIContent(fileContent);
 	} catch (ECardException e) {

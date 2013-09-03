@@ -152,6 +152,7 @@ import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.sal.util.SALUtils;
+import org.openecard.common.tlv.iso7816.FCP;
 import org.openecard.gui.UserConsent;
 import org.openecard.ws.SAL;
 import org.slf4j.Logger;
@@ -175,6 +176,7 @@ public class TinySAL implements SAL {
     private final Environment env;
     private final CardStateMap states;
     private AddonSelector protocolSelector;
+    private FCP lastSelectedFileFCP;
     private UserConsent userConsent;
 
     /**
@@ -594,7 +596,7 @@ public class TinySAL implements SAL {
 	    byte[] fileID = dataSetInfo.getDataSetPath().getEfIdOrPath();
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
 	    CardCommandAPDU selectEF = new Select.ChildFile(fileID);
-	    selectEF.transmit(env.getDispatcher(), slotHandle);
+	    lastSelectedFileFCP = new FCP(selectEF.transmit(env.getDispatcher(), slotHandle).getData());
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {

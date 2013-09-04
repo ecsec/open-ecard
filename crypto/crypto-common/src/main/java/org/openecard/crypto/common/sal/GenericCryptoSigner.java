@@ -37,6 +37,8 @@ import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DSIRead;
 import iso.std.iso_iec._24727.tech.schema.DSIReadResponse;
+import iso.std.iso_iec._24727.tech.schema.DataSetSelect;
+import iso.std.iso_iec._24727.tech.schema.DataSetSelectResponse;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
 import iso.std.iso_iec._24727.tech.schema.TargetNameType;
@@ -228,12 +230,12 @@ public class GenericCryptoSigner {
     }
 
     private Certificate convertToCertificate(byte[] certificateBytes) throws CertificateException {
-	org.openecard.bouncycastle.asn1.x509.Certificate x509Certificate = 
+	org.openecard.bouncycastle.asn1.x509.Certificate x509Certificate =
 		org.openecard.bouncycastle.asn1.x509.Certificate.getInstance(certificateBytes);
 	if(x509Certificate == null) {
 	    throw new CertificateException("Couldn't convert to x509Certificate.");
 	}
-	org.openecard.bouncycastle.asn1.x509.Certificate[] certs = 
+	org.openecard.bouncycastle.asn1.x509.Certificate[] certs =
 		new org.openecard.bouncycastle.asn1.x509.Certificate[] { x509Certificate };
 	Certificate cert = new Certificate(certs);
 	return cert;
@@ -255,6 +257,14 @@ public class GenericCryptoSigner {
 	    target.setDataSetName(dsiName);
 	    performMissingAuthentication(target);
 
+	    // select the dataset which contains the dsi
+	    DataSetSelect dataSetSelect = new DataSetSelect();
+	    dataSetSelect.setConnectionHandle(cHandle);
+	    dataSetSelect.setDataSetName(dsiName);
+	    DataSetSelectResponse dataSetSelectResponse = (DataSetSelectResponse) dispatcher.deliver(dataSetSelect);
+	    WSHelper.checkResult(dataSetSelectResponse);
+
+	    // read dsi
 	    DSIRead dsiRead = new DSIRead();
 	    dsiRead.setConnectionHandle(cHandle);
 	    dsiRead.getConnectionHandle().setCardApplication(cHandle.getCardApplication());
@@ -278,7 +288,7 @@ public class GenericCryptoSigner {
 
     /**
      * Get the Name of the certificate reference data set.
-     * 
+     *
      * @return name of the data set, or null if an error occurred
      */
     private String getCertificateDataSetName() {

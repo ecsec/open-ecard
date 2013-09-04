@@ -178,7 +178,6 @@ public class TinySAL implements SAL {
     private final Environment env;
     private final CardStateMap states;
     private AddonSelector protocolSelector;
-    private FCP lastSelectedFileFCP;
     private UserConsent userConsent;
 
     /**
@@ -316,6 +315,8 @@ public class TinySAL implements SAL {
 
 	    cardStateEntry.setCurrentCardApplication(applicationID);
 	    cardStateEntry.setSlotHandle(connectResponse.getSlotHandle());
+	    // reset the ef FCP
+	    cardStateEntry.unsetFCPOfSelectedEF();
 	    states.addEntry(cardStateEntry);
 
 	    response.setConnectionHandle(cardStateEntry.handleCopy());
@@ -618,7 +619,7 @@ public class TinySAL implements SAL {
 	    }
 
 	    if (result != null) {
-		lastSelectedFileFCP = new FCP(result.getData());
+		cardStateEntry.setFCPOfSelectedEF(new FCP(result.getData()));
 	    }
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
@@ -744,7 +745,8 @@ public class TinySAL implements SAL {
 	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dsiName, NamedDataServiceActionName.DSI_READ);
 
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
-	    byte[] fileContent = CardUtils.readFile(lastSelectedFileFCP, env.getDispatcher(), slotHandle);
+	    // throws a null pointer if no ef is selected
+	    byte[] fileContent = CardUtils.readFile(cardStateEntry.getFCPOfSelectedEF(), env.getDispatcher(), slotHandle);
 
 	    response.setDSIContent(fileContent);
 	} catch (ECardException e) {

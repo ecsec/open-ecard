@@ -40,6 +40,7 @@ import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.sal.state.cif.DIDInfoWrapper;
 import org.openecard.common.sal.state.cif.DataSetInfoWrapper;
+import org.openecard.common.tlv.iso7816.FCP;
 import org.openecard.common.util.ByteArrayWrapper;
 
 
@@ -65,6 +66,7 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 
     private final CardInfoWrapper infoObject;
     private Map<String, SALProtocol> protoObjects = new TreeMap<String, SALProtocol>();
+    private FCP lastSelectedEfFCP;
 
     public CardStateEntry(ConnectionHandleType handle, CardInfoType cif) {
 	serialNumber = nextNumber();
@@ -153,6 +155,16 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	protoObjects.clear();
     }
 
+    public void setFCPOfSelectedEF(FCP fcp) {
+	lastSelectedEfFCP = fcp;
+    }
+    public void unsetFCPOfSelectedEF() {
+	lastSelectedEfFCP = null;
+    }
+
+    public FCP getFCPOfSelectedEF() {
+	return lastSelectedEfFCP;
+    }
 
     /**
      *

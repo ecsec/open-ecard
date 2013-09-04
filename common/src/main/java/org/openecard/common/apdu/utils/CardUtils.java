@@ -23,9 +23,11 @@ package org.openecard.common.apdu.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import org.openecard.common.apdu.ReadBinary;
 import org.openecard.common.apdu.ReadRecord;
 import org.openecard.common.apdu.Select;
+import org.openecard.common.apdu.Select.MasterFile;
 import org.openecard.common.apdu.UpdateRecord;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardCommandStatus;
@@ -68,10 +70,11 @@ public class CardUtils {
      * @param dispatcher Dispatcher
      * @param slotHandle Slot handle
      * @param fileID File ID
+     * @return The CardResponseAPDU from the selection of the file
      * @throws APDUException
      */
-    public static void selectFile(Dispatcher dispatcher, byte[] slotHandle, short fileID) throws APDUException {
-	selectFile(dispatcher, slotHandle, ShortUtils.toByteArray(fileID));
+    public static CardResponseAPDU selectFile(Dispatcher dispatcher, byte[] slotHandle, short fileID) throws APDUException {
+	return selectFile(dispatcher, slotHandle, ShortUtils.toByteArray(fileID));
     }
 
     /**
@@ -84,9 +87,28 @@ public class CardUtils {
      * @throws APDUException
      */
     public static CardResponseAPDU selectFile(Dispatcher dispatcher, byte[] slotHandle, byte[] fileID) throws APDUException {
-	Select selectFile = new Select.ChildFile(fileID);
-	selectFile.setFCP();
-	return selectFile.transmit(dispatcher, slotHandle);
+	Select selectFile;
+	CardResponseAPDU result = null;
+
+	// respect the possibility that fileID could be a path
+	int i = 0;
+	while (i < fileID.length) {
+	    if (fileID[0] == (byte) 0x3F && fileID[1] == (byte) 0x00) {
+		selectFile = new MasterFile();
+		i = i + 2;
+	    } else if (i == fileID.length - 2) {
+		selectFile = new Select.ChildFile(new byte[]{fileID[i], fileID[i + 1]});
+		selectFile.setFCP();
+		i = i + 2;
+	    } else {
+		selectFile = new Select.ChildDirectory(new byte[]{fileID[i], fileID[i + 1]});
+		i = i + 2;
+	    }
+
+	    result = selectFile.transmit(dispatcher, slotHandle);
+	}
+
+	return result;
     }
 
     /**
@@ -109,13 +131,17 @@ public class CardUtils {
 	    do {
 		if (! isRecordEF(fcp)) {
 		    CardCommandAPDU readBinary = new ReadBinary((short) (i * (length & 0xFF)), length);
-		    response = readBinary.transmit(dispatcher, slotHandle, CardCommandStatus.response(0x9000, 0x6282));
+		    // 0x6A84 code for the estonian identity card. The card returns this code
+		    // after the last read process.
+		    response = readBinary.transmit(dispatcher, slotHandle, CardCommandStatus.response(0x9000, 0x6282, 0x6A84));
 		} else {
-		    CardCommandAPDU readRecord = new ReadRecord();
+		    CardCommandAPDU readRecord = new ReadRecord((byte) i);
 		    response = readRecord.transmit(dispatcher, slotHandle, CardCommandStatus.response(0x9000, 0x6282));
 		}
 
-		baos.write(response.getData());
+		if (! Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x6A, (byte) 0x84})) {
+		    baos.write(response.getData());
+		}
 		i++;
 	    } while (response.isNormalProcessed());
 	    baos.close();
@@ -135,6 +161,7 @@ public class CardUtils {
      * @return File content
      * @throws APDUException
      */
+    @Deprecated
     public static byte[] readFile(Dispatcher dispatcher, byte[] slotHandle, short fileID) throws APDUException {
 	return readFile(dispatcher, slotHandle, ShortUtils.toByteArray(fileID));
     }
@@ -148,6 +175,7 @@ public class CardUtils {
      * @return File content
      * @throws APDUException
      */
+    @Deprecated
     public static byte[] readFile(Dispatcher dispatcher, byte[] slotHandle, byte[] fileID) throws APDUException {
 	CardResponseAPDU selectResponse = selectFile(dispatcher, slotHandle, fileID);
 	FCP fcp = null;
@@ -157,6 +185,14 @@ public class CardUtils {
 	    logger.warn("Couldn't get File Control Parameters from Select response.", e);
 	}
 	return readFile(fcp, dispatcher, slotHandle);
+    }
+
+    public static byte[] selectReadFile(Dispatcher dispatcher, byte[] slotHandle, short fileID) throws APDUException {
+	return readFile(dispatcher, slotHandle, fileID);
+    }
+
+    public static byte[] selectReadFile(Dispatcher dispatcher, byte[] slotHandle, byte[] fileID) throws APDUException {
+	return readFile(dispatcher, slotHandle, fileID);
     }
 
     private static boolean isRecordEF(FCP fcp) {

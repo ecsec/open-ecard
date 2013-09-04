@@ -54,12 +54,18 @@ public class SmartCardSignerCredential implements TlsSignerCredentials {
 
     @Override
     public byte[] generateCertificateSignature(@Nonnull byte[] md5andsha1) throws IOException {
-	try {
-	    return signerImpl.sign(md5andsha1);
-	} catch (SignatureException ex) {
-	    throw new IOException("Failed to create signature because of an unknown error.", ex);
-	} catch (CredentialPermissionDenied ex) {
-	    throw new IOException("Failed to create signature because of missing permissions.", ex);
+	// Note: this check is necessary to avoid the pin dialog when the certificate is
+	//       Certificate.EMPTY_CHAIN
+	if (! certificate.equals(Certificate.EMPTY_CHAIN)) {
+	    try {
+		return signerImpl.sign(md5andsha1);
+	    } catch (SignatureException ex) {
+		throw new IOException("Failed to create signature because of an unknown error.", ex);
+	    } catch (CredentialPermissionDenied ex) {
+		throw new IOException("Failed to create signature because of missing permissions.", ex);
+	    }
+	} else {
+	    return new byte[]{};
 	}
     }
 

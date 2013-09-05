@@ -166,7 +166,9 @@ import org.slf4j.LoggerFactory;
  * @author Simon Potzernheim <potzernheim@hs-coburg.de>
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Antonio de la Piedra <a.delapiedra@cs.ru.nl>
  */
+
 public class TinySAL implements SAL {
 
     private static final Logger logger = LoggerFactory.getLogger(TinySAL.class);

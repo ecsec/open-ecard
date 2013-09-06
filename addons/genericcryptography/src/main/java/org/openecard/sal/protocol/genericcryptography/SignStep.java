@@ -28,6 +28,8 @@ import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
+import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
+import java.util.Collections;
 import java.util.Map;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
@@ -157,7 +159,7 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 		    throw new IncorrectParameterException(msg);
 		}
 
-		responseAPDU = cmdAPDU.transmit(dispatcher, slotHandle);
+		responseAPDU = cmdAPDU.transmit(dispatcher, slotHandle, Collections.<byte[]>emptyList());
 	    }
 
 	    byte[] signedMessage = responseAPDU.getData();
@@ -166,8 +168,14 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    while (responseAPDU.getTrailer()[0] == (byte) 0x61) {
 		CardCommandAPDU getResponseData = new CardCommandAPDU((byte) 0x00, (byte) 0xC0, (byte) 0x00, (byte) 0x00,
 			responseAPDU.getTrailer()[1]);
-		responseAPDU = getResponseData.transmit(dispatcher, slotHandle);
+		responseAPDU = getResponseData.transmit(dispatcher, slotHandle, Collections.<byte[]>emptyList());
 		signedMessage = Arrays.concatenate(signedMessage, responseAPDU.getData());
+	    }
+
+	    if (! Arrays.areEqual(responseAPDU.getTrailer(), new byte[] {(byte) 0x90, (byte) 0x00})) {
+		TransmitResponse tr = new TransmitResponse();
+		tr.getOutputAPDU().add(responseAPDU.toByteArray());
+		WSHelper.checkResult(response);
 	    }
 
 	    response.setSignature(signedMessage);

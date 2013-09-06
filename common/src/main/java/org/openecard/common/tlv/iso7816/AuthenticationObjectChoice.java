@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,8 +30,10 @@ import org.openecard.common.tlv.TagClass;
 
 
 /**
+ * The class implements a data type which represents the ASN.1 notation of the AuthenticationObjectChoice in ISO7816-15.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class AuthenticationObjectChoice extends TLVType {
 
@@ -41,7 +43,12 @@ public class AuthenticationObjectChoice extends TLVType {
     private GenericAuthenticationObject<TLV> external; // ExternalAuthObjectAttributes
     private TLV ext;
 
-
+    /**
+     * The constructor parses the input {@link TLV} to set the element which is chosen.
+     *
+     * @param tlv The {@link TLV} which represents the AuthenticationObjectChoice.
+     * @throws TLVException
+     */
     public AuthenticationObjectChoice(TLV tlv) throws TLVException {
 	super(tlv);
 
@@ -58,6 +65,26 @@ public class AuthenticationObjectChoice extends TLVType {
 	} else {
 	    ext = p.next(0);
 	}
+    }
+
+    public GenericAuthenticationObject<PasswordAttributes> getPasswordObject() {
+	return pwd;
+    }
+
+    public GenericAuthenticationObject<TLV> getBiometricTemplate() {
+	return biometricTemplate;
+    }
+
+    public GenericAuthenticationObject<TLV> getAuthenticationKey() {
+	return authKey;
+    }
+
+    public GenericAuthenticationObject<TLV> getExternalAuthObject() {
+	return external;
+    }
+
+    public TLV getFutureExtension() {
+	return ext;
     }
 
 }

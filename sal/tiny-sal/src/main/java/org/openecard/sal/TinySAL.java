@@ -166,7 +166,9 @@ import org.slf4j.LoggerFactory;
  * @author Simon Potzernheim <potzernheim@hs-coburg.de>
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Antonio de la Piedra <a.delapiedra@cs.ru.nl>
  */
+
 public class TinySAL implements SAL {
 
     private static final Logger logger = LoggerFactory.getLogger(TinySAL.class);
@@ -825,7 +827,33 @@ public class TinySAL implements SAL {
      */
     @Override
     public GetRandomResponse getRandom(GetRandom request) {
-	return WSHelper.makeResponse(GetRandomResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	GetRandomResponse response = WSHelper.makeResponse(GetRandomResponse.class, WSHelper.makeResultOK());
+
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    byte[] applicationID = connectionHandle.getCardApplication();
+	    String didName = SALUtils.getDIDName(request);
+
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
+	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	    String protocolURI = didStructure.getDIDMarker().getProtocol();
+	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    if (protocol.hasNextStep(FunctionType.GetRandom)) {
+		response = protocol.getRandom(request);
+		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
+	    } else {
+		throw new InappropriateProtocolForActionException("GetRandom", protocol.toString());
+	    }
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
     /**
@@ -837,7 +865,36 @@ public class TinySAL implements SAL {
      */
     @Override
     public HashResponse hash(Hash request) {
-	return WSHelper.makeResponse(HashResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	HashResponse response = WSHelper.makeResponse(HashResponse.class, WSHelper.makeResultOK());
+
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    byte[] applicationID = connectionHandle.getCardApplication();
+	    String didName = SALUtils.getDIDName(request);
+
+	    byte[] message = request.getMessage();
+    	    Assert.assertIncorrectParameter(message, "The parameter Message is empty.");
+    	    
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
+	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	    String protocolURI = didStructure.getDIDMarker().getProtocol();
+	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    if (protocol.hasNextStep(FunctionType.Hash)) {
+		response = protocol.hash(request);
+		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
+	    } else {
+		throw new InappropriateProtocolForActionException("Hash", protocol.toString());
+	    }
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
     /**
@@ -898,8 +955,8 @@ public class TinySAL implements SAL {
 	    byte[] applicationID = connectionHandle.getCardApplication();
 	    String didName = SALUtils.getDIDName(request);
 
-	    byte[] cipherText = request.getSignature();
-	    Assert.assertIncorrectParameter(cipherText, "The parameter Signature is empty.");
+	    byte[] signature = request.getSignature();
+	    Assert.assertIncorrectParameter(signature, "The parameter Signature is empty.");
 
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
@@ -910,7 +967,7 @@ public class TinySAL implements SAL {
 		response = protocol.verifySignature(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
 	    } else {
-		throw new InappropriateProtocolForActionException("Decipher", protocol.toString());
+		throw new InappropriateProtocolForActionException("VerifySignature", protocol.toString());
 	    }
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
@@ -931,7 +988,42 @@ public class TinySAL implements SAL {
      */
     @Override
     public VerifyCertificateResponse verifyCertificate(VerifyCertificate request) {
-	return WSHelper.makeResponse(VerifyCertificateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	VerifyCertificateResponse response = WSHelper.makeResponse(VerifyCertificateResponse.class, WSHelper.makeResultOK());
+
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    byte[] applicationID = connectionHandle.getCardApplication();
+	    String didName = SALUtils.getDIDName(request);
+
+	    byte[] certificate = request.getCertificate();
+	    Assert.assertIncorrectParameter(certificate, "The parameter Certificate is empty.");
+
+	    String certificateType = request.getCertificateType();
+	    Assert.assertIncorrectParameter(certificateType, "The parameter CertificateType is empty.");
+
+	    String rootCert = request.getRootCert();
+	    Assert.assertIncorrectParameter(rootCert, "The parameter RootCert is empty.");
+
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
+	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	    String protocolURI = didStructure.getDIDMarker().getProtocol();
+	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    if (protocol.hasNextStep(FunctionType.VerifyCertificate)) {
+		response = protocol.verifyCertificate(request);
+		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
+	    } else {
+		throw new InappropriateProtocolForActionException("VerifyCertificate", protocol.toString());
+	    }
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
     /**

@@ -915,6 +915,7 @@
 				<extension base="iso:RequestType">
 					<sequence>
 						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="DataSetName" type="iso:DataSetNameType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -943,6 +944,8 @@
 						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
 						<element name="DSIName" type="iso:DSINameType" />
 						<element name="DSIContent" type="hexBinary" />
+						<element name="DataSetName" type="iso:DataSetNameType" />
+						<element name="DSIPath" type="iso:PathType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -968,6 +971,7 @@
 					<sequence>
 						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
 						<element name="DSIName" type="iso:DSINameType" />
+						<element name="DataSetName" type="iso:DataSetNameType" />
 					</sequence>
 				</extension>
 			</complexContent>

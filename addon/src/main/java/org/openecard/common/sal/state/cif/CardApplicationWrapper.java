@@ -117,7 +117,7 @@ public class CardApplicationWrapper {
      * @return list of DIDInfos in this card application
      */
     public List<DIDInfoType> getDIDInfoList() {
-	return Collections.unmodifiableList(cardApplication.getDIDInfo());
+	return cardApplication.getDIDInfo();
     }
 
     /**

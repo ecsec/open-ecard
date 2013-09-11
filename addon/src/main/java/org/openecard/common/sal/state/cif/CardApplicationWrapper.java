@@ -130,6 +130,14 @@ public class CardApplicationWrapper {
 
     /**
      *
+     * @return list of DataSetInfos in this card application
+     */
+    public List<DataSetInfoType> getDataSetInfoList() {
+	return cardApplication.getDataSetInfo();
+    }
+
+    /**
+     *
      * @return list of data set names in this card application
      */
     public DataSetNameListType getDataSetNameList() {

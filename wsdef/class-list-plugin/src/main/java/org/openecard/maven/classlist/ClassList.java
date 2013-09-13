@@ -22,7 +22,6 @@
 
 package org.openecard.maven.classlist;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -32,6 +31,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 
 /**
@@ -41,47 +43,33 @@ import org.apache.maven.plugin.MojoExecutionException;
  * element classes found below the directory named by the {@code classDirectory} parameter. The {@code excludes} list
  * can contain fully qualified class names which should not occur in the list.
  * <p>
- * The plugin is executed in the {@code process-classes} phase. The execution goal is named {@code class-list}.
+ * The plugin is executed in the {@code process-classes} phase. The goal is named {@code class-list}.
  *
- * @goal class-list
- * @phase process-classes
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
+@Mojo(name = "class-list", defaultPhase = LifecyclePhase.PROCESS_CLASSES, threadSafe = true)
 public class ClassList extends AbstractMojo {
 
     /**
      * Location of the file.
-     *
-     * @parameter expression="${project.build.directory}/classes"
      */
-    @SuppressFBWarnings(value = { "UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD" },
-			justification = "Written by maven plugin.")
+    @Parameter(defaultValue = "${project.build.directory}/classes")
     private File outputDirectory;
     /**
      * Name of the file.
-     *
-     * @parameter expression="classes.lst"
      */
-    @SuppressFBWarnings(value = { "UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD" },
-			justification = "Written by maven plugin.")
+    @Parameter(defaultValue = "classes.lst")
     private String fileName;
     /**
      * List of excluded classes.
-     *
-     * @parameter
      */
-    @SuppressFBWarnings(value = { "UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD",
-				  "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR" },
-			justification = "Written by maven plugin.")
+    @Parameter
     private List<String> excludes;
 
     /**
      * List of directories to look at.
-     * 
-     * @parameter default-value="${project.build.directory}/classes"
      */
-    @SuppressFBWarnings(value = { "UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD" },
-			justification = "Written by maven plugin.")
+    @Parameter(defaultValue = "${project.build.directory}/classes")
     private File classDirectory;
 
     @Override

@@ -12,7 +12,7 @@
 
     <groupId>org.openecard.crypto</groupId>
     <artifactId>tls</artifactId>
-    <name>openecard TLS</name>
+    <name>Open eCard TLS</name>
 
     <dependencies>
 	<dependency>

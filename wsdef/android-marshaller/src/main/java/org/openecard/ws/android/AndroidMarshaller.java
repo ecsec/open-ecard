@@ -1529,7 +1529,7 @@ public class AndroidMarshaller implements WSMarshaller {
 		} else if (parser.getName().equals("MutualAuthMarker")) {
 		    didMarker.setMutualAuthMarker((MutualAuthMarkerType) this.parseMarker(parser, MutualAuthMarkerType.class));
 		} else {
-		    throw new IOException(parser.getName() + " not yet implemented");
+		    _logger.error(parser.getName() + " not yet implemented");
 		}
 	    }
 	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("DIDMarker")));

@@ -608,7 +608,7 @@
 					<iso:AccessRule>
 						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
 						<iso:Action>
-							<iso:DifferentialIdentityServiceAction>ACLList</iso:DifferentialIdentityServiceAction>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
 						</iso:Action>
 						<iso:SecurityCondition>
 							<iso:always>true</iso:always>

@@ -68,7 +68,7 @@ public class LoggingActivity extends Activity {
      */
     private void fillArrays() {
 	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-	int loggingTypeIndex = preferences.getInt(LOGGINGTYPE, AndroidUtils.NO_LOG);
+	int loggingTypeIndex = preferences.getInt(LOGGINGTYPE, AndroidUtils.DEFAULT);
 	LoggingTypes loggingType = LoggingTypes.values()[loggingTypeIndex];
 	logTypes[0] = lang.translationForKey(LOGCAT);
 	logTypes[1] = lang.translationForKey(SDCARD);

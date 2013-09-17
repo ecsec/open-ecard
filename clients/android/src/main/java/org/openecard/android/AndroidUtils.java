@@ -52,7 +52,7 @@ public class AndroidUtils {
     private static final Logger logger = LoggerFactory.getLogger(AndroidUtils.class);
 
     public static final String LOGGINGTYPE = "LOGGINGTYPE";
-    public static final int NO_LOG = LoggingTypes.NONE.ordinal();
+    public static final int DEFAULT = LoggingTypes.LOGCAT.ordinal();
     public static final String EXIT = "EXIT";
 
     /**
@@ -64,7 +64,7 @@ public class AndroidUtils {
     public static void initLogging(Context ctx) {
 	// load logging type from preferences with no logging as default
 	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
-	LoggingTypes loggingType = LoggingTypes.values()[preferences.getInt(LOGGINGTYPE, NO_LOG)];
+	LoggingTypes loggingType = LoggingTypes.values()[preferences.getInt(LOGGINGTYPE, DEFAULT)];
 
 	LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 	try {

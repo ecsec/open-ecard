@@ -530,6 +530,7 @@
 				<extension base="iso:RequestType">
 					<sequence>
 						<element name="ConnectionHandle" type="iso:ConnectionHandleType" />
+						<element name="DIDName" type="iso:NameType" />
 					</sequence>
 				</extension>
 			</complexContent>

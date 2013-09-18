@@ -22,6 +22,8 @@
 
 package org.openecard.common.sal.state.cif;
 
+
+import iso.std.iso_iec._24727.tech.schema.ApplicationCapabilitiesType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationType;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
@@ -73,6 +75,14 @@ public class CardInfoWrapper {
      */
     public byte[] getImplicitlySelectedApplication() {
 	return cif.getApplicationCapabilities().getImplicitlySelectedApplication();
+    }
+
+    /**
+     *
+     * @return the application capabilities of this card
+     */
+    public ApplicationCapabilitiesType getApplicationCapabilities() {
+	return cif.getApplicationCapabilities();
     }
 
     /**

@@ -284,13 +284,7 @@ public class PAOS {
 	    // loop and send makes a computer happy
 	    while (true) {
 		// set up connection to PAOS endpoint
-		StreamHttpClientConnection conn;
-		try {
-		    conn = openHttpStream(ProtocolVersion.TLSv11);
-		} catch (IOException ex) {
-		    logger.error("Connecting to the PAOS endpoint with TLSv1.1 failed. Falling back to TLSv1.0.", ex);
-		    conn = openHttpStream(ProtocolVersion.TLSv10);
-		}
+		StreamHttpClientConnection conn = openHttpStream(ProtocolVersion.TLSv12);
 
 		HttpContext ctx = new BasicHttpContext();
 		HttpRequestExecutor httpexecutor = new HttpRequestExecutor();

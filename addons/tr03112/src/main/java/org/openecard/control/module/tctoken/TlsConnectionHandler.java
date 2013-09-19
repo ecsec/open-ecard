@@ -118,7 +118,7 @@ public class TlsConnectionHandler {
 		TlsPSKIdentity pskId = new TlsPSKIdentityImpl(sessionId.getBytes(), psk);
 		tlsClient = new ClientCertPSKTlsClient(pskId, noSni ? null : serverHost);
 		tlsClient.setAuthentication(tlsAuth);
-		tlsClient.setClientVersion(ProtocolVersion.TLSv11);
+		tlsClient.setClientVersion(ProtocolVersion.TLSv12);
 	    } else if (secProto.equals("urn:ietf:rfc:4346")) {
 		DynamicAuthentication tlsAuth = new DynamicAuthentication();
 		tlsAuth.setHostname(serverHost);
@@ -128,7 +128,7 @@ public class TlsConnectionHandler {
 		//tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 		tlsClient = new ClientCertDefaultTlsClient(noSni ? null : serverHost);
 		tlsClient.setAuthentication(tlsAuth);
-		tlsClient.setClientVersion(ProtocolVersion.TLSv11);
+		tlsClient.setClientVersion(ProtocolVersion.TLSv12);
 	    } else {
 		throw new ConnectionError("Unknow security protocol '" + secProto + "' requested.");
 	    }

@@ -82,13 +82,7 @@ public class HttpGetTask implements Callable<StartPAOSResponse> {
 	tlsHandler.setUpClient();
 
 	// connect the tls endpoint and make a get request
-	TlsClientProtocol handler;
-	try {
-	    handler = tlsHandler.createTlsConnection(ProtocolVersion.TLSv11);
-	} catch (IOException ex) {
-	    logger.error("Connecting to the TLS endpoint with TLSv1.1 failed. Falling back to TLSv1.0.", ex);
-	    handler = tlsHandler.createTlsConnection(ProtocolVersion.TLSv10);
-	}
+	TlsClientProtocol handler = tlsHandler.createTlsConnection(ProtocolVersion.TLSv12);
 
 	// set up connection to endpoint
 	InputStream in = handler.getInputStream();

@@ -114,18 +114,13 @@ public class TCTokenGrabber {
 	    // tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 	    ClientCertTlsClient tlsClient = new ClientCertDefaultTlsClient(hostname);
 	    tlsClient.setAuthentication(tlsAuth);
-	    try {
-		tlsClient.setClientVersion(ProtocolVersion.TLSv11);
-		Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
-		h = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream());
-		h.connect(tlsClient);
-	    } catch (IOException e) {
-		logger.error("Connecting to the TCToken-URL with TLSv1.1 failed. Falling back to TLSv1.0.");
-		tlsClient.setClientVersion(ProtocolVersion.TLSv10);
-		Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
-		h = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream());
-		h.connect(tlsClient);
-	    }
+
+	    // connect tls client
+	    tlsClient.setClientVersion(ProtocolVersion.TLSv12);
+	    Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
+	    h = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream());
+	    h.connect(tlsClient);
+
 	    serverCerts.add(new Pair<URL, Certificate>(url, tlsAuth.getServerCertificate()));
 	    // check result
 	    CertificateVerifier.VerifierResult verifyResult = v.verify(url, tlsAuth.getServerCertificate());

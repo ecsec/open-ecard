@@ -22,6 +22,7 @@
 
 package org.openecard.crypto.tls;
 
+import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsClient;
 
@@ -39,5 +40,20 @@ public interface ClientCertTlsClient extends TlsClient {
      * @param tlsAuth TlsAuthentication implementation.
      */
     void setAuthentication(TlsAuthentication tlsAuth);
+
+    /**
+     * Sets the desired TLS protocol version.
+     *
+     * @param version TLS protocol version.
+     */
+    void setClientVersion(ProtocolVersion version);
+
+    /**
+     * Sets the minimum accepted TLS protocol version.
+     * In case the server tries to use a lower version, an error will occur in the TLS stack.
+     *
+     * @param minClientVersion Minimum accepted TLS protocol version.
+     */
+    void setMinimumVersion(ProtocolVersion minClientVersion);
 
 }

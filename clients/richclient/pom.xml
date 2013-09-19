@@ -54,6 +54,13 @@
 
     <profiles>
 	<profile>
+	    <!-- normal jar profile, needed because netbeans does not recognize the signed-packed-jar type -->
+	    <id>normal-jar</id>
+	    <properties>
+		<packaging.type>jar</packaging.type>
+	    </properties>
+	</profile>
+	<profile>
 	    <id>bundled-jar</id>
 	    <activation>
 		<activeByDefault>true</activeByDefault>

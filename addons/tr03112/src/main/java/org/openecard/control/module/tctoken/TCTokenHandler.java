@@ -317,16 +317,19 @@ public class TCTokenHandler {
 	} catch (MalformedURLException ex) {
 	    logger.error(ex.getMessage(), ex);
 	    throw new PAOSException(ex);
-	} finally {
-	    try {
-		// disconnect card after authentication
-		CardApplicationDisconnect appDis = new CardApplicationDisconnect();
-		appDis.setConnectionHandle(connectionHandle);
-		dispatcher.deliver(appDis);
-	    } catch (InvocationTargetException ex) {
-		logger.error(ex.getMessage(), ex);
-		throw new DispatcherException(ex);
-	    }
+	}
+    }
+
+    public static void disconnectHandle(Dispatcher dispatcher, ConnectionHandleType connectionHandle)
+	   throws DispatcherException {
+	try {
+	    // disconnect card after authentication
+	    CardApplicationDisconnect appDis = new CardApplicationDisconnect();
+	    appDis.setConnectionHandle(connectionHandle);
+	    dispatcher.deliver(appDis);
+	} catch (InvocationTargetException ex) {
+	    logger.error(ex.getMessage(), ex);
+	    throw new DispatcherException(ex);
 	}
     }
 

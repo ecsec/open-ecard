@@ -70,7 +70,11 @@ public class HttpGetTask implements Callable<StartPAOSResponse> {
 
     @Override
     public StartPAOSResponse call() throws Exception {
-	getRequest();
+	try {
+	    getRequest();
+	} finally {
+	    TCTokenHandler.disconnectHandle(dispatcher, connectionHandle);
+	}
 
 	// produce a positive result
 	StartPAOSResponse response = WSHelper.makeResponse(StartPAOSResponse.class, WSHelper.makeResultOK());

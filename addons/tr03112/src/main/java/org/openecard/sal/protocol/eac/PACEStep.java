@@ -244,6 +244,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     }
 
     private PACEMarkerType getPaceMarker(CardStateEntry cardState, String pinType) {
+	// TODO: replace with DIDGet call
 	byte[] applicationIdentifier = cardState.getCurrentCardApplication().getApplicationIdentifier();
 	DIDStructureType didStructure = cardState.getDIDStructure(pinType, applicationIdentifier);
 	iso.std.iso_iec._24727.tech.schema.PACEMarkerType didMarker;

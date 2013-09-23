@@ -56,19 +56,23 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
     public StartPAOSResponse call()
 	    throws MalformedURLException, PAOSException, DispatcherException, InvocationTargetException,
 	    ConnectionError {
-	TlsConnectionHandler tlsHandler = new TlsConnectionHandler(dispatcher, tokenRequest, connectionHandle);
-	tlsHandler.setUpClient();
+	try {
+	    TlsConnectionHandler tlsHandler = new TlsConnectionHandler(dispatcher, tokenRequest, connectionHandle);
+	    tlsHandler.setUpClient();
 
-	// Set up PAOS connection
-	PAOS p = new PAOS(dispatcher, tlsHandler);
+	    // Set up PAOS connection
+	    PAOS p = new PAOS(dispatcher, tlsHandler);
 
-	// Create StartPAOS message
-	StartPAOS sp = new StartPAOS();
-	sp.setProfile(ECardConstants.Profile.ECARD_1_1);
-	sp.getConnectionHandle().add(connectionHandle);
-	sp.setSessionIdentifier(tlsHandler.getSessionId());
+	    // Create StartPAOS message
+	    StartPAOS sp = new StartPAOS();
+	    sp.setProfile(ECardConstants.Profile.ECARD_1_1);
+	    sp.getConnectionHandle().add(connectionHandle);
+	    sp.setSessionIdentifier(tlsHandler.getSessionId());
 
-	return p.sendStartPAOS(sp);
+	    return p.sendStartPAOS(sp);
+	} finally {
+	    TCTokenHandler.disconnectHandle(dispatcher, connectionHandle);
+	}
     }
 
 

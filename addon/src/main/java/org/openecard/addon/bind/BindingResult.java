@@ -22,6 +22,7 @@
 
 package org.openecard.addon.bind;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,9 @@ public class BindingResult {
     private BindingResultCode resultCode;
     private Body body;
     private String resultMessage;
-    private Map<String, String> parameters = new HashMap<String, String>();
+    private final Map<String, String> parameters = new HashMap<String, String>();
+    private final Map<String, String> auxData = new HashMap<String, String>();
+    private final List<Attachment> attachments = new ArrayList<Attachment>(10);
 
     public BindingResult() {
 	resultCode = BindingResultCode.OK;
@@ -76,7 +79,7 @@ public class BindingResult {
     }
 
     public List<Attachment> getAttachments() {
-	throw new UnsupportedOperationException();
+	return attachments;
     }
 
     public String getResultMessage() {
@@ -84,7 +87,7 @@ public class BindingResult {
     }
 
     public Map<String, String> getAuxResultData() {
-	throw new UnsupportedOperationException();
+	return this.auxData;
     }
 
     public void setResultMessage(String resultMessage) {

@@ -29,6 +29,7 @@ import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.Context;
 import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.Attachment;
+import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.bind.Body;
@@ -136,7 +137,7 @@ public class TCTokenAction implements AppPluginAction {
      */
     private BindingResult handleRedirectResponse(URL location) {
 	BindingResult response = new BindingResult(BindingResultCode.REDIRECT);
-	response.addParameter("Location", location.toString());
+	response.getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, location.toString());
 	return response;
     }
 

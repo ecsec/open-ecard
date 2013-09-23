@@ -38,6 +38,7 @@ import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.AddonSelector;
 import org.openecard.addon.bind.AppPluginAction;
+import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.bind.Body;
@@ -185,7 +186,14 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	    response = new Http11Response(HttpStatus.SC_OK);
 	} else if (resultCode.equals(BindingResultCode.REDIRECT)) {
 	    response = new Http11Response(HttpStatus.SC_SEE_OTHER);
-	    response.addHeader(HeaderTypes.LOCATION.fieldName(), bindingResult.getParameters().get("Location"));
+	    String location = bindingResult.getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION);
+	    if (location != null && ! location.isEmpty()) {
+		response.addHeader(HeaderTypes.LOCATION.fieldName(), location);
+	    } else {
+		// redirect requires a location field
+		logger.error("No redirect address available in given BindingResult instance.");
+		response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+	    }
 	} else if (resultCode.equals(BindingResultCode.WRONG_PARAMETER)) {
 	    response = new Http11Response(HttpStatus.SC_BAD_REQUEST);
 	} else if (resultCode.equals(BindingResultCode.INTERNAL_ERROR)) {

@@ -128,7 +128,7 @@ public class TlsConnectionHandler {
 		//tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 		tlsClient = new ClientCertDefaultTlsClient(noSni ? null : serverHost);
 		tlsClient.setAuthentication(tlsAuth);
-		tlsClient.setClientVersion(ProtocolVersion.TLSv12);
+		tlsClient.setClientVersion(ProtocolVersion.TLSv11);
 	    } else {
 		throw new ConnectionError("Unknow security protocol '" + secProto + "' requested.");
 	    }
@@ -166,6 +166,9 @@ public class TlsConnectionHandler {
 	return tlsClient;
     }
 
+    public TlsClientProtocol createTlsConnection() throws IOException, URISyntaxException {
+	return createTlsConnection(tlsClient.getClientVersion());
+    }
     public TlsClientProtocol createTlsConnection(ProtocolVersion tlsVersion)
 	    throws IOException, URISyntaxException {
 	Socket socket = ProxySettings.getDefault().getSocket(hostname, port);

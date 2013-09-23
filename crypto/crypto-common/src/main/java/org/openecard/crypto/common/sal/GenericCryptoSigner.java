@@ -213,7 +213,13 @@ public class GenericCryptoSigner {
 	    SignResponse res = (SignResponse) dispatcher.deliver(sign);
 	    WSHelper.checkResult(res);
 
-	    return res.getSignature();
+	    byte[] sig = res.getSignature();
+	    if (sig == null) {
+		logger.error("Failed to create signature for TLS connection.");
+		return new byte[] {};
+	    } else {
+		return sig;
+	    }
 	} catch (InvocationTargetException e) {
 	    logger.error("Signature generation failed.", e);
 	    throw new SignatureException(e);

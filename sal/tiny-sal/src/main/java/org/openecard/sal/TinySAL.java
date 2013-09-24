@@ -377,7 +377,46 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationStartSessionResponse cardApplicationStartSession(CardApplicationStartSession request) {
-	return WSHelper.makeResponse(CardApplicationStartSessionResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	CardApplicationStartSessionResponse response = WSHelper.makeResponse(CardApplicationStartSessionResponse.class, WSHelper.makeResultOK());
+
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+	    
+	    String didName = SALUtils.getDIDName(request);
+	    Assert.assertIncorrectParameter(didName, "The parameter didName is empty.");
+
+	    DIDAuthenticationDataType didAuthenticationProtocolData = request.getAuthenticationProtocolData();
+	    Assert.assertIncorrectParameter(didAuthenticationProtocolData, "The parameter didAuthenticationProtocolData is empty.");
+	    
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
+	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	    DIDScopeType didScope = request.getDIDScope();
+	    Assert.assertIncorrectParameter(didScope, "The parameter DIDScope is empty.");
+
+	    ConnectionHandleType samConnectionHandle = request.getSAMConnectionHandle();
+	    Assert.assertIncorrectParameter(samConnectionHandle, "The parameter SAMConnectionHandle is empty.");
+
+	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID, ConnectionServiceActionName.CARD_APPLICATION_START_SESSION);
+
+	    String protocolURI = didStructure.getDIDMarker().getProtocol();
+	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    if (protocol.hasNextStep(FunctionType.CardApplicationStartSession)) {
+		response = protocol.cardApplicationStartSession(request);
+		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
+	    } else {
+		throw new InappropriateProtocolForActionException("CardApplicationStartSession", protocol.toString());
+	    }
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
     /**
@@ -389,7 +428,40 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationEndSessionResponse cardApplicationEndSession(CardApplicationEndSession request) {
-	return WSHelper.makeResponse(CardApplicationEndSessionResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	CardApplicationEndSessionResponse response = WSHelper.makeResponse(CardApplicationEndSessionResponse.class, WSHelper.makeResultOK());
+
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+	    
+	    /* DIDName is required for accesing the DID structure. However,
+	       this parameter does not appears at ISO-24727-3.xsd. I've added it. */
+	    
+	    String didName = SALUtils.getDIDName(request);
+	    Assert.assertIncorrectParameter(didName, "The parameter didName is empty.");
+	    
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
+	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID, ConnectionServiceActionName.CARD_APPLICATION_END_SESSION);
+
+	    String protocolURI = didStructure.getDIDMarker().getProtocol();
+	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    if (protocol.hasNextStep(FunctionType.CardApplicationEndSession)) {
+		response = protocol.cardApplicationEndSession(request);
+		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
+	    } else {
+		throw new InappropriateProtocolForActionException("CardApplicationEndSession", protocol.toString());
+	    }
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
     /**
@@ -1142,7 +1214,43 @@ public class TinySAL implements SAL {
      */
     @Override
     public DIDCreateResponse didCreate(DIDCreate request) {
-	return WSHelper.makeResponse(DIDCreateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	DIDCreateResponse response = WSHelper.makeResponse(DIDCreateResponse.class, WSHelper.makeResultOK());
+
+	try {
+            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+            byte[] cardApplicationID = connectionHandle.getCardApplication();
+            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+                                        
+	    String didName = request.getDIDName();
+	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
+
+	    DIDCreateDataType didCreateData = request.getDIDCreateData();
+	    Assert.assertIncorrectParameter(didCreateData, "The parameter DIDCreateData is empty.");
+
+	    AccessControlListType DidAcl = request.getDIDACL();
+	    Assert.assertIncorrectParameter(DidAcl, "The parameter DIDCreateData is empty.");
+	    
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
+	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+            Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, DifferentialIdentityServiceActionName.DID_CREATE);
+
+	    String protocolURI = didStructure.getDIDMarker().getProtocol();
+	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    if (protocol.hasNextStep(FunctionType.DIDCreate)) {
+		response = protocol.didCreate(request);
+		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
+	    } else {
+		throw new InappropriateProtocolForActionException("DIDCreate", protocol.toString());
+	    }
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
     /**
@@ -1158,11 +1266,20 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // handle must be requested without application, as it is irrelevant for this call
-	    CardStateEntry stateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
-	    String didName = SALUtils.getDIDName(request);
+            byte[] cardApplicationID = connectionHandle.getCardApplication();
 
-	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, stateEntry, connectionHandle);
+	    // handle must be requested without application, as it is irrelevant for this call
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
+	    String didName = SALUtils.getDIDName(request);
+	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
+
+	    DIDScopeType didScope = request.getDIDScope();
+	    Assert.assertIncorrectParameter(didScope, "The parameter DIDScope is empty.");
+
+            Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, DifferentialIdentityServiceActionName.DID_GET);
+	    
+	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, cardStateEntry, connectionHandle);
 	    response.setDIDStructure(didStructure);
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
@@ -1183,7 +1300,40 @@ public class TinySAL implements SAL {
      */
     @Override
     public DIDUpdateResponse didUpdate(DIDUpdate request) {
-	return WSHelper.makeResponse(DIDUpdateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	DIDUpdateResponse response = WSHelper.makeResponse(DIDUpdateResponse.class, WSHelper.makeResultOK());
+
+	try {
+            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+            byte[] cardApplicationID = connectionHandle.getCardApplication();
+            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+                                        
+	    String didName = request.getDIDName();
+	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
+
+	    DIDUpdateDataType didUpdateData = request.getDIDUpdateData();
+	    Assert.assertIncorrectParameter(didUpdateData, "The parameter DIDUpdateData is empty.");
+	    
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
+	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+            Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, DifferentialIdentityServiceActionName.DID_UPDATE);
+
+	    String protocolURI = didStructure.getDIDMarker().getProtocol();
+	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    if (protocol.hasNextStep(FunctionType.DIDUpdate)) {
+		response = protocol.didUpdate(request);
+		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
+	    } else {
+		throw new InappropriateProtocolForActionException("DIDUpdate", protocol.toString());
+	    }
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+	
+	return response;
     }
 
     /**
@@ -1195,7 +1345,38 @@ public class TinySAL implements SAL {
      */
     @Override
     public DIDDeleteResponse didDelete(DIDDelete request) {
-	return WSHelper.makeResponse(DIDDeleteResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	DIDDeleteResponse response = WSHelper.makeResponse(DIDDeleteResponse.class, WSHelper.makeResultOK());
+
+	try {
+            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+            byte[] cardApplicationID = connectionHandle.getCardApplication();
+            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+                                        
+	    String didName = request.getDIDName();
+	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
+	    
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
+	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+            Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, DifferentialIdentityServiceActionName.DID_DELETE);
+
+	    String protocolURI = didStructure.getDIDMarker().getProtocol();
+	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    if (protocol.hasNextStep(FunctionType.DIDDelete)) {
+		response = protocol.didDelete(request);
+		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
+	    } else {
+		throw new InappropriateProtocolForActionException("DIDDelete", protocol.toString());
+	    }
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
+
     }
 
     /**
@@ -1211,6 +1392,9 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+            byte[] cardApplicationID = connectionHandle.getCardApplication();
+            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
 	    DIDAuthenticationDataType didAuthenticationData = request.getAuthenticationProtocolData();
 	    Assert.assertIncorrectParameter(didAuthenticationData, "The parameter AuthenticationProtocolData is empty.");
 
@@ -1223,7 +1407,22 @@ public class TinySAL implements SAL {
 		logger.warn("ProtocolURI was urn:oid:1.0.24727.3.0.0.7.2");
 		protocolURI = ECardConstants.Protocol.EAC_GENERIC;
 	    }
+
 	    didAuthenticationData.setProtocol(protocolURI);
+
+            String didName = SALUtils.getDIDName(request);
+	    Assert.assertIncorrectParameter(didName, "The parameter didName is empty.");
+	    
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
+	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	    DIDScopeType didScope = request.getDIDScope();
+	    Assert.assertIncorrectParameter(didScope, "The parameter DIDScope is empty.");
+
+	    ConnectionHandleType samConnectionHandle = request.getSAMConnectionHandle();
+	    Assert.assertIncorrectParameter(samConnectionHandle, "The parameter SAMConnectionHandle is empty.");
+
+            Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, DifferentialIdentityServiceActionName.DID_AUTHENTICATE);
 
 	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.DIDAuthenticate)) {
@@ -1240,6 +1439,7 @@ public class TinySAL implements SAL {
 	}
 
 	return response;
+
     }
 
     /**

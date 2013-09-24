@@ -821,14 +821,21 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] applicationID = connectionHandle.getCardApplication();
-	    String didName = SALUtils.getDIDName(request);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+
+	    String didName = request.getDIDName();
+	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
+
+	    DIDScopeType didScope = request.getDIDScope();
+	    Assert.assertIncorrectParameter(didScope, "The parameter DIDScope is empty.");
 
 	    byte[] plainText = request.getPlainText();
 	    Assert.assertIncorrectParameter(plainText, "The parameter PlainText is empty.");
 
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	    Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, CryptographicServiceActionName.ENCIPHER);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
@@ -863,14 +870,21 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] applicationID = connectionHandle.getCardApplication();
-	    String didName = SALUtils.getDIDName(request);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+
+	    String didName = request.getDIDName();
+	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
+
+	    DIDScopeType didScope = request.getDIDScope();
+	    Assert.assertIncorrectParameter(didScope, "The parameter DIDScope is empty.");
 
 	    byte[] cipherText = request.getCipherText();
 	    Assert.assertIncorrectParameter(cipherText, "The parameter CipherText is empty.");
 
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	    Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, CryptographicServiceActionName.DECIPHER);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
@@ -904,11 +918,18 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] applicationID = connectionHandle.getCardApplication();
-	    String didName = SALUtils.getDIDName(request);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
+	    String didName = request.getDIDName();
+	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
+
+	    DIDScopeType didScope = request.getDIDScope();
+	    Assert.assertIncorrectParameter(didScope, "The parameter DIDScope is empty.");
+
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	    Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, CryptographicServiceActionName.GET_RANDOM);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
@@ -942,14 +963,21 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] applicationID = connectionHandle.getCardApplication();
-	    String didName = SALUtils.getDIDName(request);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+
+	    String didName = request.getDIDName();
+	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
+
+	    DIDScopeType didScope = request.getDIDScope();
+	    Assert.assertIncorrectParameter(didScope, "The parameter DIDScope is empty.");
 
 	    byte[] message = request.getMessage();
     	    Assert.assertIncorrectParameter(message, "The parameter Message is empty.");
-    	    
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
+
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	    Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, CryptographicServiceActionName.HASH);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
@@ -983,14 +1011,21 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] applicationID = connectionHandle.getCardApplication();
-	    String didName = SALUtils.getDIDName(request);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+
+	    String didName = request.getDIDName();
+	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
+
+	    DIDScopeType didScope = request.getDIDScope();
+	    Assert.assertIncorrectParameter(didScope, "The parameter DIDScope is empty.");
 
 	    byte[] message = request.getMessage();
-	    Assert.assertIncorrectParameter(message, "The parameter Message is empty.");
+    	    Assert.assertIncorrectParameter(message, "The parameter Message is empty.");
 
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	    Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, CryptographicServiceActionName.SIGN);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
@@ -1024,14 +1059,24 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] applicationID = connectionHandle.getCardApplication();
-	    String didName = SALUtils.getDIDName(request);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+
+	    String didName = request.getDIDName();
+	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
+
+	    DIDScopeType didScope = request.getDIDScope();
+	    Assert.assertIncorrectParameter(didScope, "The parameter DIDScope is empty.");
+
+	    byte[] message = request.getMessage();
+    	    Assert.assertIncorrectParameter(message, "The parameter Message is empty.");
 
 	    byte[] signature = request.getSignature();
 	    Assert.assertIncorrectParameter(signature, "The parameter Signature is empty.");
 
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	    Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, CryptographicServiceActionName.VERIFY_SIGNATURE);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
@@ -1065,8 +1110,13 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] applicationID = connectionHandle.getCardApplication();
-	    String didName = SALUtils.getDIDName(request);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+	    
+	    String didName = request.getRootCert();
+	    Assert.assertIncorrectParameter(didName, "The parameter RootCert is empty.");
+
+	    DIDScopeType didScope = request.getDIDScope();
+	    Assert.assertIncorrectParameter(didScope, "The parameter DIDScope is empty.");
 
 	    byte[] certificate = request.getCertificate();
 	    Assert.assertIncorrectParameter(certificate, "The parameter Certificate is empty.");
@@ -1074,11 +1124,10 @@ public class TinySAL implements SAL {
 	    String certificateType = request.getCertificateType();
 	    Assert.assertIncorrectParameter(certificateType, "The parameter CertificateType is empty.");
 
-	    String rootCert = request.getRootCert();
-	    Assert.assertIncorrectParameter(rootCert, "The parameter RootCert is empty.");
-
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	    Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, CryptographicServiceActionName.VERIFY_CERTIFICATE);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);

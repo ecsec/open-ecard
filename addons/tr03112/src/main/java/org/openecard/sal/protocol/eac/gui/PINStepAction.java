@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.sal.protocol.eac.actions;
+package org.openecard.sal.protocol.eac.gui;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
@@ -46,7 +46,6 @@ import org.openecard.gui.executor.StepActionResultStatus;
 import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.anytype.PACEInputType;
 import org.openecard.sal.protocol.eac.anytype.PasswordID;
-import org.openecard.sal.protocol.eac.gui.PINStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

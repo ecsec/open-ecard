@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.sal.protocol.eac.actions;
+package org.openecard.sal.protocol.eac.gui;
 
 import java.util.ArrayList;
 import java.util.List;

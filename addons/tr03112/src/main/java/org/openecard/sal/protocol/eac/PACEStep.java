@@ -64,8 +64,8 @@ import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
 import org.openecard.gui.executor.StepAction;
-import org.openecard.sal.protocol.eac.actions.CHATStepAction;
-import org.openecard.sal.protocol.eac.actions.PINStepAction;
+import org.openecard.sal.protocol.eac.gui.CHATStepAction;
+import org.openecard.sal.protocol.eac.gui.PINStepAction;
 import org.openecard.sal.protocol.eac.anytype.EAC1InputType;
 import org.openecard.sal.protocol.eac.anytype.EAC1OutputType;
 import org.openecard.sal.protocol.eac.anytype.PACEOutputType;
@@ -132,7 +132,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    byte[] rawCertificateDescription = eac1Input.getCertificateDescription();
 	    CertificateDescription certDescription = CertificateDescription.getInstance(rawCertificateDescription);
 
-	    final DynamicContext dynCtx =  DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    final DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	    // put CertificateDescription into DynamicContext which is needed for later checks
 	    //dynCtx.put(DynamicContext.ESERVICE_CERTIFICATE_DESC, certDescription);
 	    Promise<Object> promise = dynCtx.getPromise(TR03112Keys.ESERVICE_CERTIFICATE_DESC);

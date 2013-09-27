@@ -124,12 +124,13 @@ public class CardUtils {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	// Read 255 bytes per APDU
 	byte length = (byte) 0xFF;
-	int i = 0;
-	CardResponseAPDU response;
+	boolean isRecord = isRecordEF(fcp);
+	int i = isRecord ? 1 : 0; // records start at index 1
 
 	try {
+	    CardResponseAPDU response;
 	    do {
-		if (! isRecordEF(fcp)) {
+		if (! isRecord) {
 		    CardCommandAPDU readBinary = new ReadBinary((short) (i * (length & 0xFF)), length);
 		    // 0x6A84 code for the estonian identity card. The card returns this code
 		    // after the last read process.

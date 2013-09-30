@@ -168,16 +168,19 @@ public class ACLResolver {
 	    ArrayList<DIDAuthenticationStateType> result = new ArrayList<DIDAuthenticationStateType>();
 	    result.add(conds.getDIDAuthentication());
 	    return result;
-	} else if (conds.isAlways() != null && conds.isAlways()) {
+	} else if ((conds.isAlways() != null && conds.isAlways()) ||
+		(conds.isNever() != null && conds.isNever() == false)) {
 	    return Collections.emptyList();
-	} else if (conds.isNever() != null && conds.isNever()) {
+	} else if ((conds.isNever() != null && conds.isNever()) ||
+		(conds.isAlways() != null && conds.isAlways() == false)) {
 	    String msg = "The ACL of the object states, that it is never satisfiable (never=true).";
 	    throw new SecurityConditionUnsatisfiable(msg);
 	}
 	// TODO: add support for not cases
 
-	// nothing in the acl, we assum it is always=true
-	return Collections.emptyList();
+	// nothing in the acl, we assume it is never=true
+	String msg = "The ACL of the object is empty, defaulting to never satisfiable (never=true).";
+	throw new SecurityConditionUnsatisfiable(msg);
     }
 
     private List<DIDStructureType> filterSatisfiedDIDs(List<DIDAuthenticationStateType> states)

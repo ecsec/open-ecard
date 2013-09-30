@@ -3925,6 +3925,15 @@
 					<iso:AccessRule>
 						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
 						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
 							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
 						</iso:Action>
 						<iso:SecurityCondition>

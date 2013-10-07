@@ -216,7 +216,14 @@ public class CardInfoWrapper {
 	    for (CardApplicationType cardApplication : cif.getApplicationCapabilities().getCardApplication()) {
 		cardApplicationNames.add(cardApplication.getApplicationIdentifier());
 	    }
+	} else {
+	    cardApplicationNames.clear();
+
+	    for (CardApplicationType cardApplication : cif.getApplicationCapabilities().getCardApplication()) {
+		cardApplicationNames.add(cardApplication.getApplicationIdentifier());
+	    }
 	}
+	
 	return cardApplicationNames;
     }
 

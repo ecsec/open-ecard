@@ -22,6 +22,7 @@
 
 package org.openecard.sal;
 
+import iso.std.iso_iec._24727.tech.schema.AccessControlListType;
 import iso.std.iso_iec._24727.tech.schema.ACLList;
 import iso.std.iso_iec._24727.tech.schema.ACLListResponse;
 import iso.std.iso_iec._24727.tech.schema.ACLModify;
@@ -112,6 +113,8 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
 import java.math.BigInteger;
+import java.util.Iterator;
+import java.util.Arrays;
 import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.bouncycastle.util.encoders.Hex;
@@ -131,7 +134,6 @@ import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
-
 
 /**
  *
@@ -440,12 +442,57 @@ public class TinySALTest {
     /**
      * Test of cardApplicationCreate method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)    
     public void testCardApplicationCreate() {
 	System.out.println("cardApplicationCreate");
+	
+	List<ConnectionHandleType> cHandles = instance.getConnectionHandles();
+	byte[] appName = {(byte)0x74, (byte)0x65, (byte)0x73, (byte)0x74};
+	
 	CardApplicationCreate parameters = new CardApplicationCreate();
+	parameters.setConnectionHandle(cHandles.get(0));
+	parameters.setCardApplicationName(appName);
+
+        AccessControlListType cardApplicationACL = new AccessControlListType();
+	parameters.setCardApplicationACL(cardApplicationACL);
+	
 	CardApplicationCreateResponse result = instance.cardApplicationCreate(parameters);
-	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
+	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
+
+	// get path to root
+	CardApplicationPath cardApplicationPath = new CardApplicationPath();
+	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
+	cardApplicationPathType.setCardApplication(appIdentifier_ESIGN);
+	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
+	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
+
+	// connect to root
+	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
+	CardApplicationConnectResponse resultConnect = instance.cardApplicationConnect(cardApplicationConnect);
+	assertEquals(ECardConstants.Major.OK, resultConnect.getResult().getResultMajor());
+
+	CardApplicationList cardApplicationList = new CardApplicationList();
+	cardApplicationList.setConnectionHandle(cHandles.get(0));
+	CardApplicationListResponse cardApplicationListResponse = instance.cardApplicationList(cardApplicationList);
+
+        Iterator<byte[]> it = cardApplicationListResponse.getCardApplicationNameList().getCardApplicationName().iterator();
+        boolean appFound = false;
+
+        try {
+            while (it.hasNext()) {
+                byte[] val = it.next();
+
+                if (Arrays.equals(val, appName))
+                    appFound = true;
+            }
+
+            assertTrue(appFound);
+    
+	} catch (Exception e) {
+	    assertTrue(appFound);
+	    System.out.println(e);
+        } 
     }
 
     /**

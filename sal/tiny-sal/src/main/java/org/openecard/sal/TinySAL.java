@@ -506,7 +506,35 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationCreateResponse cardApplicationCreate(CardApplicationCreate request) {
-	return WSHelper.makeResponse(CardApplicationCreateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	CardApplicationCreateResponse response = WSHelper.makeResponse(CardApplicationCreateResponse.class, WSHelper.makeResultOK());
+
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = states.getEntry(connectionHandle, false);
+	    
+	    SALUtils.getCardStateEntry(states, connectionHandle);
+	    	    
+	    byte[] cardApplicationName = request.getCardApplicationName();
+	    Assert.assertIncorrectParameter(cardApplicationName, "The parameter CardApplicationName is empty.");
+
+	    AccessControlListType cardApplicationACL = request.getCardApplicationACL();
+	    Assert.assertIncorrectParameter(cardApplicationACL, "The parameter CardApplicationACL is empty.");
+	    
+	    CardApplicationType cardApplicationType = new CardApplicationType();
+	    cardApplicationType.setApplicationIdentifier(cardApplicationName);
+	    cardApplicationType.setCardApplicationACL(cardApplicationACL);
+	    
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    cardInfoWrapper.getApplicationCapabilities().getCardApplication().add(cardApplicationType);
+
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
     /**

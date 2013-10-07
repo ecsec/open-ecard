@@ -543,7 +543,7 @@ public class TinySALTest {
             assertTrue(!appFound);
     
 	} catch (Exception e) {
-	    assertTrue(appFound);
+	    assertTrue(!appFound);
 	    System.out.println(e);
         } 
     }

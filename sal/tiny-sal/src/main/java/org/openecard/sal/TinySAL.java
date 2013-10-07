@@ -144,6 +144,7 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificate;
 import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -564,7 +565,34 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationDeleteResponse cardApplicationDelete(CardApplicationDelete request) {
-	return WSHelper.makeResponse(CardApplicationDeleteResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	CardApplicationDeleteResponse response = WSHelper.makeResponse(CardApplicationDeleteResponse.class, WSHelper.makeResultOK());
+
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+
+	    byte[] cardApplicationName = request.getCardApplicationName();
+	    Assert.assertIncorrectParameter(cardApplicationName, "The parameter CardApplicationName is empty.");
+	    
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    Iterator<CardApplicationType> it = cardInfoWrapper.getApplicationCapabilities().getCardApplication().iterator();
+
+            while (it.hasNext()) {
+                CardApplicationType next = it.next();
+                byte[] appNameNext = next.getApplicationIdentifier();
+                
+                if (Arrays.equals(appNameNext, cardApplicationName))
+                    it.remove();
+            }
+
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
     /**

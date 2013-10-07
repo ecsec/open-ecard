@@ -530,9 +530,7 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = states.getEntry(connectionHandle, false);
-	    
-	    SALUtils.getCardStateEntry(states, connectionHandle);
-	    	    
+	    	    	    
 	    byte[] cardApplicationName = request.getCardApplicationName();
 	    Assert.assertIncorrectParameter(cardApplicationName, "The parameter CardApplicationName is empty.");
 

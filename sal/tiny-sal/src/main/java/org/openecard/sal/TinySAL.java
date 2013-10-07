@@ -726,7 +726,46 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationServiceDescribeResponse cardApplicationServiceDescribe(CardApplicationServiceDescribe request) {
-	return WSHelper.makeResponse(CardApplicationServiceDescribeResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	 CardApplicationServiceDescribeResponse response = WSHelper.makeResponse(CardApplicationServiceDescribeResponse.class, WSHelper.makeResultOK());
+
+	 try {  
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+            
+	    String cardApplicationServiceName = request.getCardApplicationServiceName();
+	    Assert.assertIncorrectParameter(cardApplicationServiceName, "The parameter CardApplicationServiceName is empty.");
+
+	    //Assert.securityConditionApplication(cardStateEntry, cardApplicationID, CardApplicationServiceActionName.CARD_APPLICATION_SERVICE_DESCRIBE);
+                            
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+
+	    Iterator<CardApplicationType> it = cardInfoWrapper.getApplicationCapabilities().getCardApplication().iterator();
+
+            while (it.hasNext()) {
+                CardApplicationType next = it.next();
+                byte[] appName = next.getApplicationIdentifier();
+                
+                if (Arrays.equals(appName, cardApplicationID)){
+                    
+                    Iterator<CardApplicationServiceType> itt = next.getCardApplicationServiceInfo().iterator();
+                    
+                    while (itt.hasNext()) {
+                        CardApplicationServiceType nextt = itt.next();
+                        if (nextt.getCardApplicationServiceName().equals(cardApplicationServiceName)) {
+                            response.setServiceDescription(nextt.getCardApplicationServiceDescription());
+                        }    
+                    }
+                }
+            }
+         } catch (ECardException e) {
+	    response.setResult(e.getResult());
+	 } catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	 }
+
+	return response;
     }
 
     /**

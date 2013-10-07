@@ -498,12 +498,54 @@ public class TinySALTest {
     /**
      * Test of cardApplicationDelete method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)    
     public void testCardApplicationDelete() {
 	System.out.println("cardApplicationDelete");
+
+	List<ConnectionHandleType> cHandles = instance.getConnectionHandles();
+	byte[] appName = {(byte)0x74, (byte)0x65, (byte)0x73, (byte)0x74};
+	
 	CardApplicationDelete parameters = new CardApplicationDelete();
+	parameters.setConnectionHandle(cHandles.get(0));
+	parameters.setCardApplicationName(appName);
+    	
 	CardApplicationDeleteResponse result = instance.cardApplicationDelete(parameters);
-	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
+	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
+
+	// get path to root
+	CardApplicationPath cardApplicationPath = new CardApplicationPath();
+	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
+	cardApplicationPathType.setCardApplication(appIdentifier_ESIGN);
+	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
+	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
+
+	// connect to root
+	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
+	CardApplicationConnectResponse resultConnect = instance.cardApplicationConnect(cardApplicationConnect);
+	assertEquals(ECardConstants.Major.OK, resultConnect.getResult().getResultMajor());
+
+	CardApplicationList cardApplicationList = new CardApplicationList();
+	cardApplicationList.setConnectionHandle(cHandles.get(0));
+	CardApplicationListResponse cardApplicationListResponse = instance.cardApplicationList(cardApplicationList);
+
+        Iterator<byte[]> it = cardApplicationListResponse.getCardApplicationNameList().getCardApplicationName().iterator();
+        boolean appFound = false;
+
+        try {
+            while (it.hasNext()) {
+                byte[] val = it.next();
+
+                if (Arrays.equals(val, appName))
+                    appFound = true;
+            }
+
+            assertTrue(!appFound);
+    
+	} catch (Exception e) {
+	    assertTrue(appFound);
+	    System.out.println(e);
+        } 
     }
 
     /**

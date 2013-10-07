@@ -640,12 +640,45 @@ public class TinySALTest {
     /**
      * Test of cardApplicationServiceDelete method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testCardApplicationServiceDelete() {
 	System.out.println("cardApplicationServiceDelete");
+
 	CardApplicationServiceDelete parameters = new CardApplicationServiceDelete();
-	CardApplicationServiceDeleteResponse result = instance.cardApplicationServiceDelete(parameters);
-	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
+	
+        // get path to esign
+	CardApplicationPath cardApplicationPath = new CardApplicationPath();
+	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
+	cardApplicationPathType.setCardApplication(appIdentifier_ESIGN);
+	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
+	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
+	
+	assertTrue(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().size() > 0);
+	assertEquals(cardApplicationPathResponse.getResult().getResultMajor(), ECardConstants.Major.OK);
+
+	// connect to esign
+	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
+	
+	CardApplicationConnectResponse result = instance.cardApplicationConnect(cardApplicationConnect);
+	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
+	assertEquals(appIdentifier_ESIGN, result.getConnectionHandle().getCardApplication());
+
+	parameters.setConnectionHandle(result.getConnectionHandle());
+	parameters.setCardApplicationServiceName("testService");
+	
+	CardApplicationServiceDeleteResponse resultServiceDelete = instance.cardApplicationServiceDelete(parameters);
+	assertEquals(ECardConstants.Major.OK, resultServiceDelete.getResult().getResultMajor());
+
+	CardApplicationServiceList parametersServiceList = new CardApplicationServiceList();
+	parametersServiceList.setConnectionHandle(result.getConnectionHandle());
+	
+	CardApplicationServiceListResponse resultServiceList = instance.cardApplicationServiceList(parametersServiceList);
+        CardApplicationServiceNameList cardApplicationServiceNameList = resultServiceList.getCardApplicationServiceNameList();
+
+	assertEquals(ECardConstants.Major.OK, resultServiceList.getResult().getResultMajor());
+	assertTrue(cardApplicationServiceNameList.getCardApplicationServiceName().size() == 0); 
+
     }
 
     /**

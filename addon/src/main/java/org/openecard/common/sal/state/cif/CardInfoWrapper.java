@@ -211,13 +211,13 @@ public class CardInfoWrapper {
      *
      * @return list of application identifiers in this cardinfo
      */
-    public List<String> getCardApplicationNameList() {
+    public List<byte[]> getCardApplicationNameList() {
 	if (!cardApplicationNames.isEmpty()) {
 	    cardApplicationNames.clear();
 	} 
 	    
         for (CardApplicationType cardApplication : cif.getApplicationCapabilities().getCardApplication()) {
-		cardApplicationNames.add(cardApplication.getApplicationName());
+		cardApplicationNames.add(cardApplication.getApplicationIdentifier());
         }
 	
 	return cardApplicationNames;

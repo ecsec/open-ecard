@@ -585,7 +585,45 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationServiceListResponse cardApplicationServiceList(CardApplicationServiceList request) {
-	return WSHelper.makeResponse(CardApplicationServiceListResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	CardApplicationServiceListResponse response = WSHelper.makeResponse(CardApplicationServiceListResponse.class, WSHelper.makeResultOK());
+
+	 try {  
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+
+	    //Assert.securityConditionApplication(cardStateEntry, cardApplicationID, CardApplicationServiceActionName.CARD_APPLICATION_SERVICE_LIST);
+
+	    CardApplicationServiceNameList cardApplicationServiceNameList = new CardApplicationServiceNameList();
+                            
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    Iterator<CardApplicationType> it = cardInfoWrapper.getApplicationCapabilities().getCardApplication().iterator();
+
+            while (it.hasNext()) {
+                CardApplicationType next = it.next();
+            
+                byte[] appName = next.getApplicationIdentifier();
+                
+                if (Arrays.equals(appName, cardApplicationID)) {
+                    Iterator<CardApplicationServiceType> itt = next.getCardApplicationServiceInfo().iterator();
+                
+                    while (itt.hasNext()) {
+                        CardApplicationServiceType nextt = itt.next();
+                        cardApplicationServiceNameList.getCardApplicationServiceName().add(nextt.getCardApplicationServiceName());
+                    }
+                }
+            }
+            
+            response.setCardApplicationServiceNameList(cardApplicationServiceNameList);
+
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
     /**

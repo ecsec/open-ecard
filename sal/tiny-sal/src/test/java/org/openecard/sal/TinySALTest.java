@@ -50,6 +50,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceDescribe;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceDescribeResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceList;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceListResponse;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceListResponse.CardApplicationServiceNameList;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceLoad;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceLoadResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSession;
@@ -459,14 +460,14 @@ public class TinySALTest {
 	CardApplicationCreateResponse result = instance.cardApplicationCreate(parameters);
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
 
-	// get path to root
+	// get path to esign
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
 	cardApplicationPathType.setCardApplication(appIdentifier_ESIGN);
 	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
 	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
 
-	// connect to root
+	// connect to esign
 	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
 	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
 	CardApplicationConnectResponse resultConnect = instance.cardApplicationConnect(cardApplicationConnect);
@@ -512,14 +513,14 @@ public class TinySALTest {
 	CardApplicationDeleteResponse result = instance.cardApplicationDelete(parameters);
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
 
-	// get path to root
+	// get path to esign
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
 	cardApplicationPathType.setCardApplication(appIdentifier_ESIGN);
 	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
 	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
 
-	// connect to root
+	// connect to esign
 	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
 	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
 	CardApplicationConnectResponse resultConnect = instance.cardApplicationConnect(cardApplicationConnect);
@@ -551,14 +552,38 @@ public class TinySALTest {
     /**
      * Test of cardApplicationServiceList method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)    
     public void testCardApplicationServiceList() {
 	System.out.println("cardApplicationServiceList");
 	CardApplicationServiceList parameters = new CardApplicationServiceList();
-	CardApplicationServiceListResponse result = instance.cardApplicationServiceList(parameters);
-	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
-    }
+	
+        // get path to esign
+	CardApplicationPath cardApplicationPath = new CardApplicationPath();
+	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
+	cardApplicationPathType.setCardApplication(appIdentifier_ESIGN);
+	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
+	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
+	
+	assertTrue(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().size() > 0);
+	assertEquals(cardApplicationPathResponse.getResult().getResultMajor(), ECardConstants.Major.OK);
 
+	// connect to esign
+	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
+	
+	CardApplicationConnectResponse result = instance.cardApplicationConnect(cardApplicationConnect);
+	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
+	assertEquals(appIdentifier_ESIGN, result.getConnectionHandle().getCardApplication());
+
+	parameters.setConnectionHandle(result.getConnectionHandle());
+	
+	CardApplicationServiceListResponse resultServiceList = instance.cardApplicationServiceList(parameters);
+        CardApplicationServiceNameList cardApplicationServiceNameList = resultServiceList.getCardApplicationServiceNameList();
+
+	assertEquals(ECardConstants.Major.OK, resultServiceList.getResult().getResultMajor());
+	assertTrue(cardApplicationServiceNameList.getCardApplicationServiceName().size() == 0); 
+    }
+    
     /**
      * Test of cardApplicationServiceCreate method, of class TinySAL.
      */

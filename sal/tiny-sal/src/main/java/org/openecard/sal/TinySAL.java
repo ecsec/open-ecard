@@ -654,7 +654,41 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationServiceCreateResponse cardApplicationServiceCreate(CardApplicationServiceCreate request) {
-	return WSHelper.makeResponse(CardApplicationServiceCreateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	 CardApplicationServiceCreateResponse response = WSHelper.makeResponse(CardApplicationServiceCreateResponse.class, WSHelper.makeResultOK());
+
+	 try {  
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+            
+	    String cardApplicationServiceName = request.getCardApplicationServiceName();
+	    Assert.assertIncorrectParameter(cardApplicationServiceName, "The parameter CardApplicationServiceName is empty.");
+
+	    //Assert.securityConditionApplication(cardStateEntry, cardApplicationID, CardApplicationServiceActionName.CARD_APPLICATION_SERVICE_CREATE);
+                            
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    CardApplicationServiceType cardApplicationServiceType = new CardApplicationServiceType();
+	    cardApplicationServiceType.setCardApplicationServiceName(cardApplicationServiceName);
+
+	    Iterator<CardApplicationType> it = cardInfoWrapper.getApplicationCapabilities().getCardApplication().iterator();
+
+            while (it.hasNext()) {
+                CardApplicationType next = it.next();
+                byte[] appName = next.getApplicationIdentifier();
+                
+                if (Arrays.equals(appName, cardApplicationID)) 
+                    next.getCardApplicationServiceInfo().add(cardApplicationServiceType);
+            }
+
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
+
     }
 
     /**

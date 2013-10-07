@@ -212,17 +212,13 @@ public class CardInfoWrapper {
      * @return list of application identifiers in this cardinfo
      */
     public List<byte[]> getCardApplicationNameList() {
-	if (cardApplicationNames.isEmpty()) {
-	    for (CardApplicationType cardApplication : cif.getApplicationCapabilities().getCardApplication()) {
-		cardApplicationNames.add(cardApplication.getApplicationIdentifier());
-	    }
-	} else {
+	if (!cardApplicationNames.isEmpty()) {
 	    cardApplicationNames.clear();
-
-	    for (CardApplicationType cardApplication : cif.getApplicationCapabilities().getCardApplication()) {
+	} 
+	    
+        for (CardApplicationType cardApplication : cif.getApplicationCapabilities().getCardApplication()) {
 		cardApplicationNames.add(cardApplication.getApplicationIdentifier());
-	    }
-	}
+        }
 	
 	return cardApplicationNames;
     }

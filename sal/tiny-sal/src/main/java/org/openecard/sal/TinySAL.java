@@ -1092,7 +1092,45 @@ public class TinySAL implements SAL {
      */
     @Override
     public DSIDeleteResponse dsiDelete(DSIDelete request) {
-	return WSHelper.makeResponse(DSIDeleteResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	 DSIDeleteResponse response = WSHelper.makeResponse(DSIDeleteResponse.class, WSHelper.makeResultOK());
+
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+            
+            String dsiName = request.getDSIName();
+            Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
+
+            String dataSetName = request.getDataSetName();
+            Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
+
+	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dataSetName, cardApplicationID);
+	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DataSet cannot be found.");
+
+            //Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, dataSetName, NamedDataServiceActionName.DSI_DELETE);
+
+	    Iterator<DSIType> it = dataSetInfo.getDSI().iterator();
+                        
+            while (it.hasNext()) {
+                DSIType next = it.next();
+                if (next.getDSIName().equals(dsiName)) {
+                    it.remove();
+                }
+            }
+
+            // XXXX: Now we should send the correspondent APDU (DELETE) to the given DSI.
+            
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
     /**

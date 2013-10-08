@@ -886,12 +886,52 @@ public class TinySALTest {
     /**
      * Test of dataSetDelete method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)    
     public void testDataSetDelete() {
 	System.out.println("dataSetDelete");
+	
 	DataSetDelete parameters = new DataSetDelete();
-	DataSetDeleteResponse result = instance.dataSetDelete(parameters);
-	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
+
+	// get path to esign
+	CardApplicationPath cardApplicationPath = new CardApplicationPath();
+	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
+	cardApplicationPathType.setCardApplication(appIdentifier_ESIGN);
+	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
+	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
+
+	// connect to esign
+	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult()
+		.get(0));
+	CardApplicationConnectResponse result = instance.cardApplicationConnect(cardApplicationConnect);
+	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
+
+	parameters.setConnectionHandle(result.getConnectionHandle());
+
+	String dataSetName = "DataSetTest";
+	parameters.setDataSetName(dataSetName);
+
+	DataSetDeleteResponse resultDataSetDelete = instance.dataSetDelete(parameters);
+	assertEquals(ECardConstants.Major.OK, resultDataSetDelete.getResult().getResultMajor());
+	
+	// list datasets of esign
+	DataSetList dataSetList = new DataSetList();
+	dataSetList.setConnectionHandle(result.getConnectionHandle());
+	DataSetListResponse dataSetListResponse = instance.dataSetList(dataSetList);
+		
+        Iterator<String> it = dataSetListResponse.getDataSetNameList().getDataSetName().iterator();
+        boolean appFound = false;
+
+        while (it.hasNext()) {
+                String val = it.next();
+
+                if (val.equals(dataSetName))
+                    appFound = true;
+
+        }
+        
+        assertTrue(!appFound);
+	assertEquals(ECardConstants.Major.OK, dataSetListResponse.getResult().getResultMajor());	
     }
 
     /**

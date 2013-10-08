@@ -946,7 +946,40 @@ public class TinySAL implements SAL {
      */
     @Override
     public DataSetDeleteResponse dataSetDelete(DataSetDelete request) {
-	return WSHelper.makeResponse(DataSetDeleteResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	DataSetDeleteResponse response = WSHelper.makeResponse(DataSetDeleteResponse.class, WSHelper.makeResultOK());
+
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+            
+            String dataSetName = request.getDataSetName();
+            Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
+
+	    //Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, dataSetName, NamedDataServiceActionName.DATA_SET_DELETE);
+            
+	    cardInfoWrapper.getDataSetNameList(cardApplicationID).getDataSetName().remove(dataSetName);
+            Iterator<DataSetInfoType> it = cardInfoWrapper.getCardApplication(cardApplicationID).getDataSetInfoList().iterator();
+            
+            while (it.hasNext()) {
+                DataSetInfoType next = it.next();
+                if (next.getDataSetName().equals(dataSetName)) {
+			it.remove();
+                }
+            }
+
+            // XXXX: We should delete the list of DSIs under this dataSet when the Delete command/APDU is implemented.
+
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
     /**

@@ -104,6 +104,7 @@ import iso.std.iso_iec._24727.tech.schema.Initialize;
 import iso.std.iso_iec._24727.tech.schema.InitializeResponse;
 import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
+import iso.std.iso_iec._24727.tech.schema.PathType;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
 import iso.std.iso_iec._24727.tech.schema.TargetNameType;
@@ -913,12 +914,72 @@ public class TinySALTest {
     /**
      * Test of dsiCreate method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = false)
     public void testDsiCreate() {
 	System.out.println("dsiCreate");
-	DSICreate parameters = new DSICreate();
-	DSICreateResponse result = instance.dsiCreate(parameters);
-	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
+
+	// get path to esign
+	CardApplicationPath cardApplicationPath = new CardApplicationPath();
+	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
+	cardApplicationPathType.setCardApplication(appIdentifier_ESIGN);
+	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
+	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
+
+	// connect to esign
+	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult()
+		.get(0));
+	CardApplicationConnectResponse result = instance.cardApplicationConnect(cardApplicationConnect);
+	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
+
+	// list datasets of esign
+	DataSetList dataSetList = new DataSetList();
+	dataSetList.setConnectionHandle(result.getConnectionHandle());
+	DataSetListResponse dataSetListResponse = instance.dataSetList(dataSetList);
+
+	Assert.assertTrue(dataSetListResponse.getDataSetNameList().getDataSetName().size() > 0);
+	assertEquals(ECardConstants.Major.OK, dataSetListResponse.getResult().getResultMajor());
+	
+        String dataSetName = dataSetListResponse.getDataSetNameList().getDataSetName().get(0);
+        byte[] dsiContent = {(byte)0x74, (byte)0x65, (byte)0x73, (byte)0x74};
+        String dsiName = "DsiTest";
+        PathType dsiPath = new PathType();
+        byte[] dsiEF = {(byte)0x03, (byte)0x00};
+        dsiPath.setEfIdOrPath(dsiEF);
+
+	DSICreate parameters = new DSICreate();	
+	parameters.setConnectionHandle(result.getConnectionHandle());
+	parameters.setDataSetName(dataSetName);
+	parameters.setDSIContent(dsiContent);
+	parameters.setDSIName(dsiName);
+	parameters.setDSIPath(dsiPath);
+	
+	DSICreateResponse resultDSICreate = instance.dsiCreate(parameters);
+	assertEquals(ECardConstants.Major.OK, resultDSICreate.getResult().getResultMajor());
+
+	// list DSIs of DataSetName
+
+	DSIList parametersDSI = new DSIList();
+	parametersDSI.setDataSetName(dataSetName);
+	parametersDSI.setConnectionHandle(result.getConnectionHandle());
+	
+	DSIListResponse resultDSIList = instance.dsiList(parametersDSI);
+	assertEquals(ECardConstants.Major.OK, resultDSIList.getResult().getResultMajor());
+
+	// try to find new DSI
+
+        Iterator<String> it = resultDSIList.getDSINameList().getDSIName().iterator();
+        boolean dsiFound = false;
+
+        while (it.hasNext()) {
+                String val = it.next();
+
+                if (val.equals(dsiName))
+                    dsiFound = true;
+
+        }
+        
+        assertTrue(dsiFound);
     }
 
     /**

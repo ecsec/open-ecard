@@ -873,12 +873,41 @@ public class TinySALTest {
     /**
      * Test of dsiList method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)    
     public void testDsiList() {
 	System.out.println("dsiList");
+	
+	// get path to esign
+	CardApplicationPath cardApplicationPath = new CardApplicationPath();
+	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
+	cardApplicationPathType.setCardApplication(appIdentifier_ESIGN);
+	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
+	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
+
+	// connect to esign
+	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult()
+		.get(0));
+	CardApplicationConnectResponse result = instance.cardApplicationConnect(cardApplicationConnect);
+	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
+
+	// list datasets of esign
+	DataSetList dataSetList = new DataSetList();
+	dataSetList.setConnectionHandle(result.getConnectionHandle());
+	DataSetListResponse dataSetListResponse = instance.dataSetList(dataSetList);
+
+	Assert.assertTrue(dataSetListResponse.getDataSetNameList().getDataSetName().size() > 0);
+	assertEquals(ECardConstants.Major.OK, dataSetListResponse.getResult().getResultMajor());
+	
+        String dataSetName = dataSetListResponse.getDataSetNameList().getDataSetName().get(0);
+		
 	DSIList parameters = new DSIList();
-	DSIListResponse result = instance.dsiList(parameters);
-	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
+	parameters.setDataSetName(dataSetName);
+	parameters.setConnectionHandle(result.getConnectionHandle());
+	
+	DSIListResponse resultDSIList = instance.dsiList(parameters);
+	assertEquals(ECardConstants.Major.OK, resultDSIList.getResult().getResultMajor());
+	assertTrue(resultDSIList.getDSINameList().getDSIName().size() == 0);
     }
 
     /**

@@ -1036,7 +1036,51 @@ public class TinySAL implements SAL {
      */
     @Override
     public DSICreateResponse dsiCreate(DSICreate request) {
-	return WSHelper.makeResponse(DSICreateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	DSICreateResponse response = WSHelper.makeResponse(DSICreateResponse.class, WSHelper.makeResultOK());
+
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+
+            byte[] dsiContent = request.getDSIContent();
+	    Assert.assertIncorrectParameter(dsiContent, "The parameter DSIContent is empty.");
+
+            String dataSetName = request.getDataSetName();
+            Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
+
+            String dsiName = request.getDSIName();
+	    Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
+
+            PathType dsiPath = request.getDSIPath();
+	    Assert.assertIncorrectParameter(dsiPath, "The parameter DSIPath is empty.");
+
+            //Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, dataSetName, NamedDataServiceActionName.DSI_CREATE);
+
+	    DSIType dsi = new DSIType();
+
+	    dsi.setDSIName(dsiName);
+	    dsi.setDSIPath(dsiPath);
+	    
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();	    
+
+	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dataSetName, cardApplicationID);
+	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DataSet cannot be found.");
+
+	    dataSetInfo.getDSI().add(dsi);
+
+	    byte[] fileID = dsi.getDSIPath().getEfIdOrPath();
+	    byte[] slotHandle = connectionHandle.getSlotHandle();
+	    CardUtils.writeFile(env.getDispatcher(), slotHandle, fileID, dsiContent);
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
+
     }
 
     /**

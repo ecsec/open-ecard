@@ -101,7 +101,7 @@ import org.openecard.ws.Management;
  */
 public class TinyManagement implements  Management {
 
-    private static final int[] VERSION = {1, 10, 0};
+    private static final int[] VERSION = {1, 11, 0};
 
     private Environment env;
 

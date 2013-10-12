@@ -23,6 +23,9 @@
 package org.openecard.sal;
 
 import iso.std.iso_iec._24727.tech.schema.AccessControlListType;
+import iso.std.iso_iec._24727.tech.schema.AccessRuleType;
+import iso.std.iso_iec._24727.tech.schema.ActionNameType;
+import iso.std.iso_iec._24727.tech.schema.APIAccessEntryPointName;   
 import iso.std.iso_iec._24727.tech.schema.ACLList;
 import iso.std.iso_iec._24727.tech.schema.ACLListResponse;
 import iso.std.iso_iec._24727.tech.schema.ACLModify;
@@ -105,6 +108,7 @@ import iso.std.iso_iec._24727.tech.schema.InitializeResponse;
 import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
 import iso.std.iso_iec._24727.tech.schema.PathType;
+import iso.std.iso_iec._24727.tech.schema.SecurityConditionType;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
 import iso.std.iso_iec._24727.tech.schema.TargetNameType;
@@ -1516,12 +1520,90 @@ public class TinySALTest {
     /**
      * Test of aclModify method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = false)
     public void testAclModify() {
 	System.out.println("aclModify");
+
+	// get path to esign
+	CardApplicationPath cardApplicationPath = new CardApplicationPath();
+	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
+	cardApplicationPathType.setCardApplication(appIdentifier_ESIGN);
+	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
+	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
+
+	// connect to esign
+	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult()
+		.get(0));
+	CardApplicationConnectResponse result = instance.cardApplicationConnect(cardApplicationConnect);
+	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
+
+	ACLList aclList = new ACLList();
+	aclList.setConnectionHandle(result.getConnectionHandle());
+	TargetNameType targetName = new TargetNameType();
+	targetName.setCardApplicationName(appIdentifier_ESIGN);
+	aclList.setTargetName(targetName);
+	ACLListResponse aclListResponse = instance.aclList(aclList);
+	assertEquals(aclListResponse.getResult().getResultMajor(), ECardConstants.Major.OK);
+	assertTrue(aclListResponse.getTargetACL().getAccessRule().size()>0);
+
+        AccessRuleType accessRuleFirst = aclListResponse.getTargetACL().getAccessRule().get(0);
+        String cardApplicationServiceName = accessRuleFirst.getCardApplicationServiceName();
+        ActionNameType actionName = accessRuleFirst.getAction();
+        assertEquals(actionName.getAPIAccessEntryPoint(), APIAccessEntryPointName.INITIALIZE);
+        SecurityConditionType securityCondition = accessRuleFirst.getSecurityCondition();
+
+        // modify first rule
+
 	ACLModify parameters = new ACLModify();
-	ACLModifyResponse result = instance.aclModify(parameters);
-	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
+	parameters.setConnectionHandle(result.getConnectionHandle());
+        parameters.setTargetName(targetName);	
+	parameters.setCardApplicationServiceName(cardApplicationServiceName);
+
+        actionName.setAPIAccessEntryPoint(APIAccessEntryPointName.TERMINATE);	
+	parameters.setActionName(actionName);
+	parameters.setSecurityCondition(securityCondition);
+	
+	ACLModifyResponse resultACLModify = instance.aclModify(parameters);
+	assertEquals(ECardConstants.Major.OK, resultACLModify.getResult().getResultMajor());
+
+	// Check modify
+
+	aclList = new ACLList();
+	aclList.setConnectionHandle(result.getConnectionHandle());
+	aclList.setTargetName(targetName);
+	aclListResponse = instance.aclList(aclList);
+	assertEquals(aclListResponse.getResult().getResultMajor(), ECardConstants.Major.OK);
+	assertTrue(aclListResponse.getTargetACL().getAccessRule().size()>0);
+
+        accessRuleFirst = aclListResponse.getTargetACL().getAccessRule().get(0);
+        assertEquals(actionName.getAPIAccessEntryPoint(), APIAccessEntryPointName.TERMINATE);
+
+        // Undo modify
+
+	parameters = new ACLModify();
+	parameters.setConnectionHandle(result.getConnectionHandle());
+        parameters.setTargetName(targetName);	
+	parameters.setCardApplicationServiceName(cardApplicationServiceName);
+
+        actionName.setAPIAccessEntryPoint(APIAccessEntryPointName.INITIALIZE);	
+	parameters.setActionName(actionName);
+	parameters.setSecurityCondition(securityCondition);
+	
+	resultACLModify = instance.aclModify(parameters);
+	assertEquals(ECardConstants.Major.OK, resultACLModify.getResult().getResultMajor());
+
+	// Check modify
+
+	aclList = new ACLList();
+	aclList.setConnectionHandle(result.getConnectionHandle());
+	aclList.setTargetName(targetName);
+	aclListResponse = instance.aclList(aclList);
+	assertEquals(aclListResponse.getResult().getResultMajor(), ECardConstants.Major.OK);
+	assertTrue(aclListResponse.getTargetACL().getAccessRule().size()>0);
+
+        accessRuleFirst = aclListResponse.getTargetACL().getAccessRule().get(0);
+        assertEquals(actionName.getAPIAccessEntryPoint(), APIAccessEntryPointName.INITIALIZE);	
     }
 
     /**

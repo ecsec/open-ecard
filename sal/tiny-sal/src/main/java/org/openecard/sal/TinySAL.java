@@ -1954,7 +1954,99 @@ public class TinySAL implements SAL {
      */
     @Override
     public ACLModifyResponse aclModify(ACLModify request) {
-	return WSHelper.makeResponse(ACLModifyResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+        ACLModifyResponse response = WSHelper.makeResponse(ACLModifyResponse.class, WSHelper.makeResultOK());
+
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
+	    TargetNameType targetName = request.getTargetName();
+	    Assert.assertIncorrectParameter(targetName, "The parameter TargetName is empty.");
+
+	    String cardApplicationServiceName = request.getCardApplicationServiceName();
+	    Assert.assertIncorrectParameter(cardApplicationServiceName, "The parameter CardApplicationServiceName is empty.");
+
+	    ActionNameType actionName = request.getActionName();
+	    Assert.assertIncorrectParameter(actionName, "The parameter ActionName is empty.");
+
+	    SecurityConditionType securityCondition = request.getSecurityCondition();
+	    Assert.assertIncorrectParameter(securityCondition, "The parameter securityCondition is empty.");
+
+	    // get the target values, according to the schema only one must exist, we pick the first existing ;-)
+	    byte[] targetAppId = targetName.getCardApplicationName();
+	    String targetDataSet = targetName.getDataSetName();
+	    String targetDid = targetName.getDIDName();
+
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+
+	    if (targetDataSet != null) {
+		DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(targetDataSet, cardApplicationID);
+		Assert.assertNamedEntityNotFound(dataSetInfo, "The given DataSet cannot be found.");
+                //Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, targetDataSet, AuthorizationServiceActionName.ACL_MODIFY);
+                
+                AccessControlListType accessControlList = cardInfoWrapper.getDataSet(targetDataSet, cardApplicationID).getDataSetACL();	    
+                ListIterator<AccessRuleType> it = accessControlList.getAccessRule().listIterator();
+                        
+                while (it.hasNext()) {
+            
+                    AccessRuleType next = it.next();
+            
+                    if (next.getCardApplicationServiceName().equals(cardApplicationServiceName)) {
+                            next.setAction(actionName);
+                            next.setSecurityCondition(securityCondition);
+                    }     
+                }
+            
+            } else if (targetDid != null) {
+	    	DIDInfoType didInfo = cardInfoWrapper.getDIDInfo(targetDid, cardApplicationID);
+	    	Assert.assertNamedEntityNotFound(didInfo, "The given DIDInfo cannot be found.");
+		//Assert.securityConditionDID(cardStateEntry, cardApplicationID, targetDid, AuthorizationServiceActionName.ACL_MODIFY);
+
+	    	AccessControlListType accessControlList = cardInfoWrapper.getDIDInfo(targetDid, cardApplicationID).getDIDACL();                       
+                ListIterator<AccessRuleType> it = accessControlList.getAccessRule().listIterator();
+                        
+                while (it.hasNext()) {
+            
+                    AccessRuleType next = it.next();
+            
+                    if (next.getCardApplicationServiceName().equals(cardApplicationServiceName)) {
+                            next.setAction(actionName);
+                            next.setSecurityCondition(securityCondition);
+                    }     
+                }
+	    
+	    } else if (targetAppId != null) {
+	    	CardApplicationWrapper cardApplication = cardInfoWrapper.getCardApplication(targetAppId);
+	    	Assert.assertNamedEntityNotFound(cardApplication, "The given CardApplication cannot be found.");
+	    	//Assert.securityConditionApplication(cardStateEntry, targetAppId, AuthorizationServiceActionName.ACL_MODIFY);
+
+	    	AccessControlListType accessControlList = cardInfoWrapper.getCardApplication(targetAppId).getCardApplicationACL();
+                ListIterator<AccessRuleType> it = accessControlList.getAccessRule().listIterator();
+                        
+                while (it.hasNext()) {
+            
+                    AccessRuleType next = it.next();
+            
+                    System.out.println(next.getCardApplicationServiceName());
+            
+                    if (next.getCardApplicationServiceName().equals(cardApplicationServiceName)) {
+                            next.setAction(actionName);
+                            next.setSecurityCondition(securityCondition);
+                    }     
+                }
+	    		    	
+	    } else {
+            		throw new IncorrectParameterException("The given TargetName is invalid.");
+	    }
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+        return response;
     }
 
     /**

@@ -1302,12 +1302,46 @@ public class TinySALTest {
     /**
      * Test of didGet method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = false)
     public void testDidGet() {
 	System.out.println("didGet");
+
+	// get path to esign
+	CardApplicationPath cardApplicationPath = new CardApplicationPath();
+	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
+	cardApplicationPathType.setCardApplication(appIdentifier_ESIGN);
+	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
+	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
+
+	// connect to esign
+	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
+	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult()
+		.get(0));
+	CardApplicationConnectResponse result = instance.cardApplicationConnect(cardApplicationConnect);
+	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
+
+	DIDList didList = new DIDList();
+	didList.setConnectionHandle(result.getConnectionHandle());
+	DIDQualifierType didQualifier = new DIDQualifierType();
+	didQualifier.setApplicationIdentifier(appIdentifier_ESIGN);
+	didQualifier.setObjectIdentifier("urn:oid:1.3.162.15480.3.0.25");
+	didQualifier.setApplicationFunction("Compute-signature");
+	didList.setFilter(didQualifier);
+
+	DIDListResponse didListResponse = instance.didList(didList);
+
+	Assert.assertTrue(didListResponse.getDIDNameList().getDIDName().size() > 0);
+	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
+
+        String didName = didListResponse.getDIDNameList().getDIDName().get(0);
+	
 	DIDGet parameters = new DIDGet();
-	DIDGetResponse result = instance.didGet(parameters);
-	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
+	parameters.setDIDName(didName);
+	parameters.setConnectionHandle(result.getConnectionHandle());
+	
+	DIDGetResponse resultDIDGet = instance.didGet(parameters);
+	assertEquals(ECardConstants.Major.OK, resultDIDGet.getResult().getResultMajor());
+	assertTrue(resultDIDGet.getDIDStructure() != null);
     }
 
     /**

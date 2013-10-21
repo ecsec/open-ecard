@@ -148,6 +148,11 @@ import static org.testng.Assert.*;
  */
 public class TinySALTest {
 
+    @BeforeClass
+    public static void disable() {
+        throw new SkipException("Test completely disabled.");
+    }
+
     private static ClientEnv env;
     private static TinySAL instance;
     private static CardStateMap states;

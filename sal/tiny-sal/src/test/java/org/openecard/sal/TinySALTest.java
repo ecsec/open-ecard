@@ -148,10 +148,10 @@ import static org.testng.Assert.*;
  */
 public class TinySALTest {
 
-    @BeforeClass
-    public static void disable() {
-        throw new SkipException("Test completely disabled.");
-    }
+    //@BeforeClass
+    //public static void disable() {
+    //    throw new SkipException("Test completely disabled.");
+    //}
 
     private static ClientEnv env;
     private static TinySAL instance;
@@ -211,7 +211,7 @@ public class TinySALTest {
     /**
      * Test of initialize method, of class TinySAL.
      */
-    @Test
+    @Test(priority = 1)
     public void testInitialize() {
 	System.out.println("initialize");
 	Initialize parameters = new Initialize();
@@ -222,7 +222,7 @@ public class TinySALTest {
     /**
      * Test of terminate method, of class TinySAL.
      */
-    @Test
+    @Test(priority = 100)
     public void testTerminate() {
 	System.out.println("terminate");
 	Terminate parameters = new Terminate();
@@ -233,7 +233,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationPath method, of class TinySAL.
      */
-    @Test
+    @Test(priority = 2)
     public void testCardApplicationPath() {
 	System.out.println("cardApplicationPath");
 	// test normal case
@@ -282,7 +282,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationConnect method, of class TinySAL.
      */
-    @Test
+    @Test(priority = 3)
     public void testCardApplicationConnect() {
 	System.out.println("cardApplicationConnect");
 	// test normal case
@@ -306,7 +306,7 @@ public class TinySALTest {
 	cardApplicationConnect.setCardApplicationPath(wrongCardApplicationPath);
 	result = instance.cardApplicationConnect(cardApplicationConnect);
 	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, result.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.App.UNKNOWN_ERROR, result.getResult().getResultMinor());
 
 	// test nullpointer
 	cardApplicationConnect = new CardApplicationConnect();
@@ -320,7 +320,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationDisconnect method, of class TinySAL.
      */
-    @Test
+    @Test(priority = 4)
     public void testCardApplicationDisconnect() {
 	System.out.println("cardApplicationDisconnect");
 	// test normal case
@@ -355,7 +355,7 @@ public class TinySALTest {
 	cardApplicationDisconnect.getConnectionHandle().setSlotHandle(new byte[]{0x0, 0x0, 0x0});
 	cardApplicationDisconnectResponse = instance.cardApplicationDisconnect(cardApplicationDisconnect);
 	assertEquals(ECardConstants.Major.ERROR, cardApplicationDisconnectResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, cardApplicationDisconnectResponse.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, cardApplicationDisconnectResponse.getResult().getResultMinor());
 
 	// test nullpointer
 	// connect to esign
@@ -375,7 +375,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationStartSession method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testCardApplicationStartSession() {
 	System.out.println("cardApplicationStartSession");
 	CardApplicationStartSession parameters = new CardApplicationStartSession();
@@ -386,7 +386,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationEndSession method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testCardApplicationEndSession() {
 	System.out.println("cardApplicationEndSession");
 	CardApplicationEndSession parameters = new CardApplicationEndSession();
@@ -397,7 +397,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationList method, of class TinySAL.
      */
-    @Test
+    @Test(priority = 5)
     public void testCardApplicationList() {
 	System.out.println("cardApplicationList");
 	// get path to root
@@ -417,7 +417,6 @@ public class TinySALTest {
 	CardApplicationList cardApplicationList = new CardApplicationList();
 	cardApplicationList.setConnectionHandle(result.getConnectionHandle());
 	CardApplicationListResponse cardApplicationListResponse = instance.cardApplicationList(cardApplicationList);
-	System.out.println(cardApplicationListResponse.getResult().getResultMinor());
 	assertEquals(ECardConstants.Major.OK, cardApplicationListResponse.getResult().getResultMajor());
 	assertTrue(cardApplicationListResponse.getCardApplicationNameList().getCardApplicationName().size() > 0);
 
@@ -441,7 +440,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationCreate method, of class TinySAL.
      */
-    @Test(enabled=false)    
+    @Test(priority = 6)
     public void testCardApplicationCreate() {
 	System.out.println("cardApplicationCreate");
 	
@@ -497,7 +496,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationDelete method, of class TinySAL.
      */
-    @Test(enabled=false)    
+    @Test(priority = 7)
     public void testCardApplicationDelete() {
 	System.out.println("cardApplicationDelete");
 
@@ -550,7 +549,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationServiceList method, of class TinySAL.
      */
-    @Test(enabled=false)    
+    @Test(priority = 8)
     public void testCardApplicationServiceList() {
 	System.out.println("cardApplicationServiceList");
 	CardApplicationServiceList parameters = new CardApplicationServiceList();
@@ -585,7 +584,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationServiceCreate method, of class TinySAL.
      */
-    @Test(enabled=false)    
+    @Test(priority = 9)
     public void testCardApplicationServiceCreate() {
 	System.out.println("cardApplicationServiceCreate");	
 	CardApplicationServiceCreate parameters = new CardApplicationServiceCreate();
@@ -627,7 +626,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationServiceLoad method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testCardApplicationServiceLoad() {
 	System.out.println("cardApplicationServiceLoad");
 	CardApplicationServiceLoad parameters = new CardApplicationServiceLoad();
@@ -638,7 +637,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationServiceDelete method, of class TinySAL.
      */
-    @Test(enabled=false)
+    @Test(priority = 10)
     public void testCardApplicationServiceDelete() {
 	System.out.println("cardApplicationServiceDelete");
 
@@ -682,7 +681,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationServiceDescribe method, of class TinySAL.
      */
-    @Test(enabled=false)    
+    @Test(priority = 11)
     public void testCardApplicationServiceDescribe() {
 	System.out.println("cardApplicationServiceDescribe");
 	CardApplicationServiceDescribe parameters = new CardApplicationServiceDescribe();
@@ -715,7 +714,7 @@ public class TinySALTest {
     /**
      * Test of executeAction method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testExecuteAction() {
 	System.out.println("executeAction");
 	ExecuteAction parameters = new ExecuteAction();
@@ -726,7 +725,7 @@ public class TinySALTest {
     /**
      * Test of dataSetList method, of class TinySAL.
      */
-    @Test
+    @Test(priority = 12)
     public void testDataSetList() {
 	System.out.println("dataSetList");
 
@@ -774,7 +773,7 @@ public class TinySALTest {
     /**
      * Test of dataSetCreate method, of class TinySAL.
      */
-    @Test(enabled=false)    
+    @Test(priority = 13)
     public void testDataSetCreate() {
 	System.out.println("dataSetCreate");
 	
@@ -811,24 +810,24 @@ public class TinySALTest {
 	DataSetListResponse dataSetListResponse = instance.dataSetList(dataSetList);
 		
         Iterator<String> it = dataSetListResponse.getDataSetNameList().getDataSetName().iterator();
-        boolean appFound = false;
+        boolean dataSetFound = false;
 
         while (it.hasNext()) {
                 String val = it.next();
 
                 if (val.equals(dataSetName))
-                    appFound = true;
+                    dataSetFound = true;
 
         }
         
-        assertTrue(appFound);
+        assertTrue(dataSetFound);
 	assertEquals(ECardConstants.Major.OK, dataSetListResponse.getResult().getResultMajor());	
     }
 
     /**
      * Test of dataSetSelect method, of class TinySAL.
      */
-    @Test
+    @Test(priority = 14)
     public void testDataSetSelect() {
 	System.out.println("dataSetSelect");
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
@@ -884,7 +883,7 @@ public class TinySALTest {
     /**
      * Test of dataSetDelete method, of class TinySAL.
      */
-    @Test(enabled=false)    
+    @Test(priority = 15)
     public void testDataSetDelete() {
 	System.out.println("dataSetDelete");
 	
@@ -918,24 +917,24 @@ public class TinySALTest {
 	DataSetListResponse dataSetListResponse = instance.dataSetList(dataSetList);
 		
         Iterator<String> it = dataSetListResponse.getDataSetNameList().getDataSetName().iterator();
-        boolean appFound = false;
+        boolean dataSetFound = false;
 
         while (it.hasNext()) {
                 String val = it.next();
 
                 if (val.equals(dataSetName))
-                    appFound = true;
+                    dataSetFound = true;
 
         }
         
-        assertTrue(!appFound);
+        assertTrue(!dataSetFound);
 	assertEquals(ECardConstants.Major.OK, dataSetListResponse.getResult().getResultMajor());	
     }
 
     /**
      * Test of dsiList method, of class TinySAL.
      */
-    @Test(enabled=false)    
+    @Test(priority = 16)
     public void testDsiList() {
 	System.out.println("dsiList");
 	
@@ -1046,7 +1045,7 @@ public class TinySALTest {
     /**
      * Test of dsiDelete method, of class TinySAL.
      */
-    @Test(enabled=false)
+    @Test(enabled = false)
     public void testDsiDelete() {
 	System.out.println("dsiDelete");
 
@@ -1111,7 +1110,7 @@ public class TinySALTest {
     /**
      * Test of dsiWrite method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testDsiWrite() {
 	System.out.println("dsiWrite");
 	DSIWrite parameters = new DSIWrite();
@@ -1122,7 +1121,7 @@ public class TinySALTest {
     /**
      * Test of dsiRead method, of class TinySAL.
      */
-    @Test
+    @Test(priority = 17)
     public void testDsiRead() {
 	System.out.println("dsiRead");
 	// test normal case
@@ -1195,7 +1194,7 @@ public class TinySALTest {
     /**
      * Test of encipher method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testEncipher() {
 	System.out.println("encipher");
 	Encipher parameters = new Encipher();
@@ -1206,7 +1205,7 @@ public class TinySALTest {
     /**
      * Test of decipher method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testDecipher() {
 	System.out.println("decipher");
 	Decipher parameters = new Decipher();
@@ -1217,7 +1216,7 @@ public class TinySALTest {
     /**
      * Test of getRandom method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testGetRandom() {
 	System.out.println("getRandom");
 	GetRandom parameters = new GetRandom();
@@ -1228,7 +1227,7 @@ public class TinySALTest {
     /**
      * Test of hash method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testHash() {
 	System.out.println("hash");
 	Hash parameters = new Hash();
@@ -1239,7 +1238,7 @@ public class TinySALTest {
     /**
      * Test of sign method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testSign() {
 	System.out.println("sign");
 	Sign parameters = new Sign();
@@ -1250,7 +1249,7 @@ public class TinySALTest {
     /**
      * Test of verifySignature method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testVerifySignature() {
 	System.out.println("verifySignature");
 	VerifySignature parameters = new VerifySignature();
@@ -1261,7 +1260,7 @@ public class TinySALTest {
     /**
      * Test of verifyCertificate method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testVerifyCertificate() {
 	System.out.println("verifyCertificate");
 	VerifyCertificate parameters = new VerifyCertificate();
@@ -1273,7 +1272,7 @@ public class TinySALTest {
      * Test of didList method, of class TinySAL.
      */
 
-    @Test
+    @Test(priority = 18)
     public void testDidList() {
 	System.out.println("didList");
 
@@ -1352,7 +1351,7 @@ public class TinySALTest {
     /**
      * Test of didCreate method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testDidCreate() {
 	System.out.println("didCreate");
 	DIDCreate parameters = new DIDCreate();
@@ -1363,7 +1362,7 @@ public class TinySALTest {
     /**
      * Test of didGet method, of class TinySAL.
      */
-    @Test(enabled = false)
+    @Test(priority = 19)
     public void testDidGet() {
 	System.out.println("didGet");
 
@@ -1408,7 +1407,7 @@ public class TinySALTest {
     /**
      * Test of didUpdate method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testDidUpdate() {
 	System.out.println("didUpdate");
 	DIDUpdate parameters = new DIDUpdate();
@@ -1419,7 +1418,7 @@ public class TinySALTest {
     /**
      * Test of didDelete method, of class TinySAL.
      */
-    @Test
+    @Test(enabled=false)
     public void testDidDelete() {
 	System.out.println("didDelete");
 	DIDDelete parameters = new DIDDelete();
@@ -1432,7 +1431,7 @@ public class TinySALTest {
      *
      * @throws ParserConfigurationException
      */
-    @Test
+    @Test(enabled=false)
     public void testDidAuthenticate() throws ParserConfigurationException {
 	System.out.println("didAuthenticate");
 	DIDAuthenticate parameters = new DIDAuthenticate();
@@ -1443,7 +1442,7 @@ public class TinySALTest {
     /**
      * Test of aclList method, of class TinySAL.
      */
-    @Test
+    @Test(priority = 20)
     public void testAclList() {
 	System.out.println("aclList");
 	// get path to esign
@@ -1513,7 +1512,7 @@ public class TinySALTest {
     /**
      * Test of aclModify method, of class TinySAL.
      */
-    @Test(enabled = false)
+    @Test(priority = 21)
     public void testAclModify() {
 	System.out.println("aclModify");
 

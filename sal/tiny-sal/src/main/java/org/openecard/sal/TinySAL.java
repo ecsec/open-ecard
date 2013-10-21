@@ -1253,7 +1253,8 @@ public class TinySAL implements SAL {
                 }
             }
 
-            // XXXX: Now we should send the correspondent APDU (DELETE) to the given DSI.
+            // XXXX: TODO, Now we should send the correspondent APDU (DELETE) to the given DSI.
+            // (not implemented).
             
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());

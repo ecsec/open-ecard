@@ -117,7 +117,7 @@ public class CardApplicationWrapper {
      * @return list of DIDInfos in this card application
      */
     public List<DIDInfoType> getDIDInfoList() {
-	return Collections.unmodifiableList(cardApplication.getDIDInfo());
+	return cardApplication.getDIDInfo();
     }
 
     /**
@@ -126,6 +126,14 @@ public class CardApplicationWrapper {
      */
     public AccessControlListType getCardApplicationACL() {
 	return cardApplication.getCardApplicationACL();
+    }
+
+    /**
+     *
+     * @return list of DataSetInfos in this card application
+     */
+    public List<DataSetInfoType> getDataSetInfoList() {
+	return cardApplication.getDataSetInfo();
     }
 
     /**

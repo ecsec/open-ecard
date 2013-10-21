@@ -770,7 +770,40 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationServiceLoadResponse cardApplicationServiceLoad(CardApplicationServiceLoad request) {
-	return WSHelper.makeResponse(CardApplicationServiceLoadResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	 CardApplicationServiceLoadResponse response = WSHelper.makeResponse(CardApplicationServiceLoadResponse.class, WSHelper.makeResultOK());
+
+	 try {  
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+
+            String cardApplicationServiceName = request.getCardApplicationServiceName();
+	    Assert.assertIncorrectParameter(cardApplicationServiceName, "The parameter CardApplicationServiceName is empty.");
+
+	    byte[] code = request.getCode();
+	    Assert.assertIncorrectParameter(code, "The parameter Code is empty.");
+
+	    //Assert.securityConditionApplication(cardStateEntry, cardApplicationID, CardApplicationServiceActionName.CARD_APPLICATION_SERVICE_LOAD);
+                
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    Iterator<CardApplicationType> it = cardInfoWrapper.getApplicationCapabilities().getCardApplication().iterator();
+
+	    /* XXXX: TODO. 
+	        Given the current parameters, the following is not clear:
+	            1. Where and which name must be used for storing the executable code.
+	            2. Which APDU must be used for executing such code.
+	            3. If that file which the loaded code must be deleted afterwards.
+            */
+	    
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
+
     }
 
     /**
@@ -888,7 +921,37 @@ public class TinySAL implements SAL {
      */
     @Override
     public ExecuteActionResponse executeAction(ExecuteAction request) {
-	return WSHelper.makeResponse(ExecuteActionResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	 ExecuteActionResponse response = WSHelper.makeResponse(ExecuteActionResponse.class, WSHelper.makeResultOK());
+
+	 try {  
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+
+	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID, CardApplicationServiceActionName.EXECUTE_ACTION);
+            
+	    String cardApplicationServiceName = request.getCardApplicationServiceName();
+	    Assert.assertIncorrectParameter(cardApplicationServiceName, "The parameter CardApplicationServiceName is empty.");
+
+	    byte[] requestS = request.getRequest();
+	    Assert.assertIncorrectParameter(requestS, "The parameter Request is empty.");
+
+	    ActionNameType actionName = request.getActionName();
+	    Assert.assertIncorrectParameter(actionName, "The parameter ActionName is empty.");
+
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    Iterator<CardApplicationType> it = cardInfoWrapper.getApplicationCapabilities().getCardApplication().iterator();
+
+            // TODO: finish, response.setConfirmation(X);
+
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
     /**

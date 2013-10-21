@@ -2027,9 +2027,7 @@ public class TinySAL implements SAL {
                 while (it.hasNext()) {
             
                     AccessRuleType next = it.next();
-            
-                    System.out.println(next.getCardApplicationServiceName());
-            
+                        
                     if (next.getCardApplicationServiceName().equals(cardApplicationServiceName)) {
                             next.setAction(actionName);
                             next.setSecurityCondition(securityCondition);

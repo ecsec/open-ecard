@@ -381,7 +381,7 @@ public class TinySAL implements SAL {
 	    if (applicationID == null) {
 		applicationID = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
 	    }
-	    Assert.securityConditionApplication(cardStateEntry, applicationID, ConnectionServiceActionName.CARD_APPLICATION_CONNECT);
+	    //Assert.securityConditionApplication(cardStateEntry, applicationID, ConnectionServiceActionName.CARD_APPLICATION_CONNECT);
 
 	    // Connect to the card
 	    CardApplicationPathType cardApplicationPath = cardStateEntry.pathCopy();
@@ -569,7 +569,7 @@ public class TinySAL implements SAL {
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
-	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID, CardApplicationServiceActionName.CARD_APPLICATION_LIST);
+	    //Assert.securityConditionApplication(cardStateEntry, cardApplicationID, CardApplicationServiceActionName.CARD_APPLICATION_LIST);
 
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    CardApplicationNameList cardApplicationNameList = new CardApplicationNameList();
@@ -1793,9 +1793,8 @@ public class TinySAL implements SAL {
 	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
 
 	    DIDScopeType didScope = request.getDIDScope();
-	    Assert.assertIncorrectParameter(didScope, "The parameter DIDScope is empty.");
 
-            Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, DifferentialIdentityServiceActionName.DID_GET);
+            //Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, DifferentialIdentityServiceActionName.DID_GET);
 	    
 	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, cardStateEntry, connectionHandle);
 	    response.setDIDStructure(didStructure);
@@ -2175,4 +2174,12 @@ public class TinySAL implements SAL {
 	return protocol;
     }
 
+    /**
+     * Return the contextHandle between the SAL and IFD.
+     *
+     */
+
+    public byte[] getContextHandle() {
+	return contextHandle;
+    }
 }

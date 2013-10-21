@@ -148,45 +148,28 @@ import static org.testng.Assert.*;
  */
 public class TinySALTest {
 
-//    @BeforeClass
-//    public static void disable() {
-//	throw new SkipException("Test completely disabled.");
-//    }
-
     private static ClientEnv env;
     private static TinySAL instance;
     private static CardStateMap states;
-    private static byte[] contextHandle = null;
+    private static IFD ifd;
+    private static Dispatcher dispatcher;
+
     byte[] appIdentifier_ESIGN = Hex.decode("A000000167455349474E");
     byte[] appIdentifier_ROOT = Hex.decode("D2760001448000");
 
     @BeforeClass
     public static void setUp() throws Exception {
+
 	env = new ClientEnv();
-	Dispatcher dispatcher = new MessageDispatcher(env);
-	env.setDispatcher(dispatcher);
-	IFD ifd = new IFD();
+        IFD ifd = new IFD();
+        states = new CardStateMap();
+        dispatcher = new MessageDispatcher(env);
+
 	env.setIFD(ifd);
-	states = new CardStateMap();
+        env.setDispatcher(dispatcher);
 
-	EstablishContextResponse ecr = env.getIFD().establishContext(new EstablishContext());
-	CardRecognition cr = new CardRecognition(ifd, ecr.getContextHandle());
-	ListIFDs listIFDs = new ListIFDs();
-	contextHandle = ecr.getContextHandle();
-	listIFDs.setContextHandle(ecr.getContextHandle());
-	ListIFDsResponse listIFDsResponse = ifd.listIFDs(listIFDs);
-	RecognitionInfo recognitionInfo = cr.recognizeCard(listIFDsResponse.getIFDName().get(0), new BigInteger("0"));
-	SALStateCallback salCallback = new SALStateCallback(cr, states);
+        instance = new TinySAL(env, states);
 
-	ConnectionHandleType connectionHandleType = new ConnectionHandleType();
-	connectionHandleType.setContextHandle(ecr.getContextHandle());
-	connectionHandleType.setRecognitionInfo(recognitionInfo);
-	connectionHandleType.setIFDName(listIFDsResponse.getIFDName().get(0));
-	connectionHandleType.setSlotIndex(new BigInteger("0"));
-
-	salCallback.signalEvent(EventType.CARD_RECOGNIZED, connectionHandleType);
-	instance = new TinySAL(env, states);
-	env.setSAL(instance);
     }
 
     /**
@@ -252,29 +235,34 @@ public class TinySALTest {
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
 	cardApplicationPathType.setCardApplication(this.appIdentifier_ESIGN);
-	cardApplicationPathType.setContextHandle(contextHandle);
+	cardApplicationPathType.setContextHandle(instance.getContextHandle());
 	cardApplicationPathType.setSlotIndex(new BigInteger("0"));
 	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
+	
 	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
-	assertTrue(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().size()>0);
+	assertTrue(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().size() > 0);
 	assertEquals(cardApplicationPathResponse.getResult().getResultMajor(), ECardConstants.Major.OK);
 
 	// test return of alpha card application
+
 	cardApplicationPath = new CardApplicationPath();
 	cardApplicationPathType = new CardApplicationPathType();
 	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
 	cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
+
 	assertTrue(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().size()>0);
 	assertNotNull(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0).getCardApplication());
 	assertEquals(cardApplicationPathResponse.getResult().getResultMajor(), ECardConstants.Major.OK);
 
 	// test non existent card application identifier
+
 	cardApplicationPathType = new CardApplicationPathType();
 	cardApplicationPathType.setCardApplication(Hex.decode("C0CA"));
-	cardApplicationPathType.setContextHandle(contextHandle);
+	cardApplicationPathType.setContextHandle(instance.getContextHandle());
 	cardApplicationPathType.setSlotIndex(new BigInteger("0"));
 	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
 	cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
+
 	assertEquals(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().size(), 0);
 	assertEquals(cardApplicationPathResponse.getResult().getResultMajor(), ECardConstants.Major.OK);
 

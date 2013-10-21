@@ -242,7 +242,41 @@ public class TinySAL implements SAL {
      */
     @Override
     public InitializeResponse initialize(Initialize request) {
-	return WSHelper.makeResponse(InitializeResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	InitializeResponse response = WSHelper.makeResponse(InitializeResponse.class, WSHelper.makeResultOK());
+
+	try {	    	
+
+	    EstablishContextResponse ecr = env.getIFD().establishContext(new EstablishContext());
+	    this.contextHandle = ecr.getContextHandle();
+	    this.cr = new CardRecognition(env.getIFD(), ecr.getContextHandle());
+	    
+	    this.listIFDs = new ListIFDs();
+	    listIFDs.setContextHandle(ecr.getContextHandle());
+	    	    
+	    this.listIFDsResponse = env.getIFD().listIFDs(listIFDs);
+	    
+	    if (listIFDsResponse.getIFDName().size() == 0) {
+	        response.setResult(WSHelper.makeResultError("listIFDsResponse", "The selected IFD is null"));
+	    } else  {
+	        // XXXX: We always take the first IFD.
+	        this.recognitionInfo = cr.recognizeCard(listIFDsResponse.getIFDName().get(0), new BigInteger("0"));
+	    
+	        this.salCallback = new SALStateCallback(cr, states);
+
+	        ConnectionHandleType connectionHandle = new ConnectionHandleType();
+	        connectionHandle.setContextHandle(ecr.getContextHandle());
+	        connectionHandle.setRecognitionInfo(recognitionInfo);
+	        connectionHandle.setIFDName(listIFDsResponse.getIFDName().get(0));
+	        connectionHandle.setSlotIndex(new BigInteger("0"));
+
+	        this.salCallback.signalEvent(EventType.CARD_RECOGNIZED, connectionHandle);
+            }
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+        
+	return response;
     }
 
     /**
@@ -255,7 +289,27 @@ public class TinySAL implements SAL {
      */
     @Override
     public TerminateResponse terminate(Terminate request) {
-	return WSHelper.makeResponse(TerminateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	TerminateResponse response = WSHelper.makeResponse(TerminateResponse.class, WSHelper.makeResultOK());
+
+	try {
+
+            Iterator<ConnectionHandleType> it = this.getConnectionHandles().iterator();
+
+            while (it.hasNext()) {
+                ConnectionHandleType next = it.next();
+                this.salCallback.signalEvent(EventType.CARD_REMOVED, next);
+            }
+
+            ReleaseContext releaseContext = new ReleaseContext();
+            releaseContext.setContextHandle(contextHandle);
+	    env.getIFD().releaseContext(releaseContext);
+	    	    
+	} catch (Exception e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
     /**

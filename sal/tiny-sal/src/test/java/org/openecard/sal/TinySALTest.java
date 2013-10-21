@@ -148,10 +148,10 @@ import static org.testng.Assert.*;
  */
 public class TinySALTest {
 
-    @BeforeClass
-    public static void disable() {
-	throw new SkipException("Test completely disabled.");
-    }
+//    @BeforeClass
+//    public static void disable() {
+//	throw new SkipException("Test completely disabled.");
+//    }
 
     private static ClientEnv env;
     private static TinySAL instance;
@@ -228,7 +228,7 @@ public class TinySALTest {
 	System.out.println("initialize");
 	Initialize parameters = new Initialize();
 	InitializeResponse result = instance.initialize(parameters);
-	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
+	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
     }
 
     /**
@@ -239,7 +239,7 @@ public class TinySALTest {
 	System.out.println("terminate");
 	Terminate parameters = new Terminate();
 	TerminateResponse result = instance.terminate(parameters);
-	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
+	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
     }
 
     /**

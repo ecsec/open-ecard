@@ -70,6 +70,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSessionResponse;
 import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import iso.std.iso_iec._24727.tech.schema.ConnectionServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.CryptographicServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
@@ -131,6 +132,8 @@ import iso.std.iso_iec._24727.tech.schema.Hash;
 import iso.std.iso_iec._24727.tech.schema.HashResponse;
 import iso.std.iso_iec._24727.tech.schema.Initialize;
 import iso.std.iso_iec._24727.tech.schema.InitializeResponse;
+import iso.std.iso_iec._24727.tech.schema.ListIFDs;
+import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
 import iso.std.iso_iec._24727.tech.schema.NamedDataServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.PathType;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
@@ -165,21 +168,25 @@ import org.openecard.common.apdu.Select;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.utils.CardUtils;
 import org.openecard.common.interfaces.Environment;
+import org.openecard.common.enums.EventType;
 import org.openecard.common.sal.Assert;
-import org.openecard.common.sal.anytype.CryptoMarkerType;
 import org.openecard.common.sal.exception.InappropriateProtocolForActionException;
 import org.openecard.common.sal.exception.IncorrectParameterException;
 import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.exception.UnknownProtocolException;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
+import org.openecard.common.sal.state.SALStateCallback;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.sal.util.SALUtils;
+import org.openecard.crypto.common.sal.CryptoMarkerType;
+import org.openecard.recognition.CardRecognition;
 import org.openecard.gui.UserConsent;
 import org.openecard.ws.SAL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.math.BigInteger;
 
 /**
  * Implements a Service Access Layer (SAL).
@@ -200,6 +207,14 @@ public class TinySAL implements SAL {
     private final CardStateMap states;
     private AddonSelector protocolSelector;
     private UserConsent userConsent;
+
+    private byte[] contextHandle;
+
+    private CardRecognition cr; 
+    private ListIFDs listIFDs; 
+    private RecognitionInfo recognitionInfo;
+    private ListIFDsResponse listIFDsResponse;
+    private SALStateCallback salCallback;
 
     /**
      * Creates a new TinySAL.

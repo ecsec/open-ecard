@@ -93,7 +93,7 @@ public class CardUtils {
 	// respect the possibility that fileID could be a path
 	int i = 0;
 	while (i < fileID.length) {
-	    if (fileID[0] == (byte) 0x3F && fileID[1] == (byte) 0x00) {
+	    if (fileID[i] == (byte) 0x3F && fileID[i + 1] == (byte) 0x00 && i == 0 && i + 1 == 1) {
 		selectFile = new MasterFile();
 		i = i + 2;
 	    } else if (i == fileID.length - 2) {

@@ -71,10 +71,12 @@ public class TinyManagementTest {
 	    }
 	    System.out.println(m.getName());
 
-	    Object o = m.getParameterTypes()[0].newInstance();
+	    if (m.getParameterTypes().length == 1) {
+		Object o = m.getParameterTypes()[0].newInstance();
 
-	    ResponseType result = (ResponseType) m.invoke(instance, o);
-	    assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
+		ResponseType result = (ResponseType) m.invoke(instance, o);
+		assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
+	    }
 	}
     }
 

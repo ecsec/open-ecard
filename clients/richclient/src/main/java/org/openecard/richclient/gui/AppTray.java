@@ -124,7 +124,10 @@ public class AppTray {
      */
     public void shutdown() {
 	if (trayAvailable) {
-	    trayIcon.displayMessage("Open eCard App", lang.translationForKey("tray.message.shutdown"), TrayIcon.MessageType.INFO);
+	    if (! isMacOSX()) {
+		String desc = lang.translationForKey("tray.message.shutdown");
+		trayIcon.displayMessage("Open eCard App", desc, TrayIcon.MessageType.INFO);
+	    }
 	    client.teardown();
 	    tray.remove(trayIcon);
 	} else {

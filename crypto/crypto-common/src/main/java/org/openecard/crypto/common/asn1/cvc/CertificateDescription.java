@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -27,13 +27,12 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.openecard.bouncycastle.asn1.ASN1OctetString;
+import org.openecard.bouncycastle.asn1.ASN1Primitive;
 import org.openecard.bouncycastle.asn1.ASN1Sequence;
 import org.openecard.bouncycastle.asn1.ASN1Set;
 import org.openecard.bouncycastle.asn1.ASN1String;
 import org.openecard.bouncycastle.asn1.ASN1TaggedObject;
-import org.openecard.bouncycastle.asn1.DERIA5String;
-import org.openecard.bouncycastle.asn1.DEROctetString;
-import org.openecard.bouncycastle.asn1.DERSet;
 import org.openecard.bouncycastle.asn1.DERTaggedObject;
 import org.openecard.crypto.common.asn1.eac.oid.CVCertificatesObjectIdentifier;
 import org.slf4j.Logger;
@@ -57,6 +56,7 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class CertificateDescription {
 
@@ -77,6 +77,7 @@ public class CertificateDescription {
      *
      * @param obj Encoded CertificateDescription
      * @return CertificateDescription
+     * @throws CertificateException
      */
     public static CertificateDescription getInstance(Object obj) throws CertificateException {
 	if (obj instanceof CertificateDescription) {
@@ -102,55 +103,55 @@ public class CertificateDescription {
     private CertificateDescription(ASN1Sequence seq) throws CertificateException {
 	try {
 	    encoded = seq.getEncoded();
-	    Enumeration elements = seq.getObjects();
+	    Enumeration<?> elements = seq.getObjects();
 	    descriptionType = ASN1ObjectIdentifier.getInstance(elements.nextElement()).toString();
 
 	    while (elements.hasMoreElements()) {
 		ASN1TaggedObject taggedObject = DERTaggedObject.getInstance(elements.nextElement());
 		int tag = taggedObject.getTagNo();
-
+		ASN1Primitive obj = taggedObject.getObject();
 
 		switch (tag) {
 		    case 1:
-			issuerName = ((ASN1String) taggedObject.getObject()).getString();
+			issuerName = ((ASN1String) obj).getString();
 			break;
 		    case 2:
-			issuerURL = ((ASN1String) taggedObject.getObject()).getString();
+			issuerURL = ((ASN1String) obj).getString();
 			break;
 		    case 3:
-			subjectName = ((ASN1String) taggedObject.getObject()).getString();
+			subjectName = ((ASN1String) obj).getString();
 			break;
 		    case 4:
-			subjectURL = ((ASN1String) taggedObject.getObject()).getString();
+			subjectURL = ((ASN1String) obj).getString();
 			break;
 		    case 5:
-			if (descriptionType.equals(CVCertificatesObjectIdentifier.id_plainFormat)) {
-			    termsOfUsage = ((ASN1String) taggedObject.getObject()).getString();
-			} else if (descriptionType.equals(CVCertificatesObjectIdentifier.id_htmlFormat)) {
-			    termsOfUsage = ((DERIA5String) taggedObject.getObject()).getString();
-			} else if (descriptionType.equals(CVCertificatesObjectIdentifier.id_pdfFormat)) {
-			    termsOfUsage = ((DEROctetString) taggedObject.getObject()).getEncoded();
+			if (CVCertificatesObjectIdentifier.id_plainFormat.equals(descriptionType)) {
+			    termsOfUsage = ((ASN1String) obj).getString();
+			} else if (CVCertificatesObjectIdentifier.id_htmlFormat.equals(descriptionType)) {
+			    termsOfUsage = ((ASN1String) obj).getString();
+			} else if (CVCertificatesObjectIdentifier.id_pdfFormat.equals(descriptionType)) {
+			    termsOfUsage = ((ASN1OctetString) obj).getOctets();
 			}
 			break;
 		    case 6:
-			redirectURL = ((ASN1String) taggedObject.getObject()).getString();
+			redirectURL = ((ASN1String) obj).getString();
 			break;
 		    case 7:
-			Enumeration commCerts = ((DERSet) taggedObject.getObject()).getObjects();
+			Enumeration<?> commCerts = ((ASN1Set) obj).getObjects();
 			commCertificates = new ArrayList<byte[]>();
 
 			while (commCerts.hasMoreElements()) {
-			    commCertificates.add(((DEROctetString) commCerts.nextElement()).getEncoded());
+			    commCertificates.add(((ASN1OctetString) commCerts.nextElement()).getOctets());
 			}
 			break;
 		    default:
-			throw new IllegalArgumentException("Unknown object in CertificateDescription");
+			throw new IllegalArgumentException("Unknown object in CertificateDescription.");
 		}
 
 	    }
 	} catch (IOException e) {
-	    _logger.error("Cannot parse CertificateDescription", e);
-	    throw new CertificateException("Cannot parse CertificateDescription");
+	    _logger.error("Cannot parse CertificateDescription.", e);
+	    throw new CertificateException("Cannot parse CertificateDescription.");
 	}
     }
 

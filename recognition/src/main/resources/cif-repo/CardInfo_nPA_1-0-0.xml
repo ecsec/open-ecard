@@ -9,6 +9,7 @@
 		<iso:CardTypeName xml:lang="DE">Personalausweis</iso:CardTypeName>
 		<iso:CardTypeName xml:lang="EN">Electronic Identity Card</iso:CardTypeName>
 		<iso:Version>
+			<!-- Version number corresponds to the version of the cif -->
 			<iso:Major>1</iso:Major>
 			<iso:Minor>0</iso:Minor>
 			<iso:SubMinor>0</iso:SubMinor>

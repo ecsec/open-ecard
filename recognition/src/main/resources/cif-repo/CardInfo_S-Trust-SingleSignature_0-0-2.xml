@@ -4,6 +4,13 @@
 	<iso:ObjectIdentifier>https://www.s-trust.de/produkte/strust_einzelsignaturkarte</iso:ObjectIdentifier>
 	<iso:SpecificationBodyOrIssuer>Deutscher Sparkassen Verlag GmbH</iso:SpecificationBodyOrIssuer>
 	<iso:CardTypeName xml:lang="en">S-Trust Single Signature Card</iso:CardTypeName>
+	<iso:CardTypeName xml:lang="de">S-Trust Einzelsignaturkarte</iso:CardTypeName>
+	<iso:Version>
+	    <!-- Version number corresponds to the version of the cif -->
+	    <iso:Major>0</iso:Major>
+	    <iso:Minor>0</iso:Minor>
+	    <iso:SubMinor>2</iso:SubMinor>
+	</iso:Version>
 	<iso:Status>Final Release</iso:Status>
 	<iso:Date>2013-07-16Z</iso:Date>
     </iso:CardType>
@@ -228,7 +235,7 @@
 		    </iso:Action>
 		    <iso:SecurityCondition>
 			<iso:DIDAuthentication>
-			    <iso:DIDName>KCard</iso:DIDName>
+			    <iso:DIDName>KCard_MAC</iso:DIDName>
 			    <iso:DIDState>true</iso:DIDState>
 			</iso:DIDAuthentication>
 		    </iso:SecurityCondition>
@@ -239,10 +246,30 @@
 			<iso:CardApplicationServiceAction>CardApplicationCreate</iso:CardApplicationServiceAction>
 		    </iso:Action>
 		    <iso:SecurityCondition>
-			<iso:DIDAuthentication>
-			    <iso:DIDName>KCard</iso:DIDName>
-			    <iso:DIDState>true</iso:DIDState>
-			</iso:DIDAuthentication>
+			<iso:or>
+			    <iso:SecurityCondition>
+				<iso:DIDAuthentication>
+				    <iso:DIDName>KCard_MAC</iso:DIDName>
+				    <iso:DIDState>true</iso:DIDState>
+				</iso:DIDAuthentication>
+			    </iso:SecurityCondition>
+			    <iso:SecurityCondition>
+				<iso:and>
+				    <iso:SecurityCondition>
+					<iso:DIDAuthentication>
+					    <iso:DIDName>KCard_MAC</iso:DIDName>
+					    <iso:DIDState>true</iso:DIDState>
+					</iso:DIDAuthentication>
+				    </iso:SecurityCondition>
+				    <iso:SecurityCondition>
+					<iso:DIDAuthentication>
+					    <iso:DIDName>KCard_CENC</iso:DIDName>
+					    <iso:DIDState>true</iso:DIDState>
+					</iso:DIDAuthentication>
+				    </iso:SecurityCondition>
+				</iso:and>
+			    </iso:SecurityCondition>
+			</iso:or>
 		    </iso:SecurityCondition>
 		</iso:AccessRule>
 		<iso:AccessRule>
@@ -629,32 +656,156 @@
 			    <iso:always>true</iso:always>
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
 		</iso:DIDACL>
 	    </iso:DIDInfo>
 	    <iso:DIDInfo>
 		<iso:DifferentialIdentity>
-		    <iso:DIDName>KCard</iso:DIDName>
-		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
+		    <iso:DIDName>KCard_MAC</iso:DIDName>
+		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.12</iso:DIDProtocol>
 		    <iso:DIDMarker>
-			<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
-			    <iso:AlgorithmInfo>
-				<iso:SupportedOperations>Compute-checksum</iso:SupportedOperations>
-				<iso:CardAlgRef>1222</iso:CardAlgRef>
-			    </iso:AlgorithmInfo>
-			    <iso:KeyInfo>
-				<iso:KeyRef>
-				    <iso:KeyRef>0001FF</iso:KeyRef>
-				</iso:KeyRef>
-			    </iso:KeyInfo>
-			</iso:CryptoMarker>
+			<iso:MutualAuthMarker Protocol="urn:oid:1.3.162.15480.3.0.12">
+			    <iso:CardAlgRef>1222</iso:CardAlgRef>
+			    <iso:KeyEncMacRef>01</iso:KeyEncMacRef>
+			    <iso:SecurityEnvironmentIdentitfier>02</iso:SecurityEnvironmentIdentitfier>
+			    <iso:ICCSNRef>
+				<iso:DataSetName>EF_SN</iso:DataSetName>
+			    </iso:ICCSNRef>
+			</iso:MutualAuthMarker>
 		    </iso:DIDMarker>
-		    <iso:DIDScope>global</iso:DIDScope>
+		    <iso:DIDScope>local</iso:DIDScope>
 		</iso:DifferentialIdentity>
 		<iso:DIDACL>
 		    <iso:AccessRule>
 			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
 			<iso:Action>
 			    <iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		</iso:DIDACL>
+	    </iso:DIDInfo>
+	    <iso:DIDInfo>
+		<iso:DifferentialIdentity>
+		    <iso:DIDName>KCard_CENC</iso:DIDName>
+		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.12</iso:DIDProtocol>
+		    <iso:DIDMarker>
+			<iso:MutualAuthMarker Protocol="urn:oid:1.3.162.15480.3.0.12">
+			    <iso:CardAlgRef>1123</iso:CardAlgRef>
+			    <iso:KeyEncMacRef>01</iso:KeyEncMacRef>
+			    <iso:SecurityEnvironmentIdentitfier>02</iso:SecurityEnvironmentIdentitfier>
+			    <iso:ICCSNRef>
+				<iso:DataSetName>EF_SN</iso:DataSetName>
+			    </iso:ICCSNRef>
+			</iso:MutualAuthMarker>
+		    </iso:DIDMarker>
+		    <iso:DIDScope>local</iso:DIDScope>
+		</iso:DifferentialIdentity>
+		<iso:DIDACL>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		</iso:DIDACL>
+	    </iso:DIDInfo>
+	    <iso:DIDInfo>
+		<iso:DifferentialIdentity>
+		    <iso:DIDName>KCard_Sig_MAC</iso:DIDName>
+		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.12</iso:DIDProtocol>
+		    <iso:DIDMarker>
+			<iso:MutualAuthMarker Protocol="urn:oid:1.3.162.15480.3.0.12">
+			    <iso:CardAlgRef>1222</iso:CardAlgRef>
+			    <iso:KeyEncMacRef>0B</iso:KeyEncMacRef>
+			    <iso:ICCSNRef>
+				<iso:DataSetName>EF_SN</iso:DataSetName>
+			    </iso:ICCSNRef>
+			</iso:MutualAuthMarker>
+		    </iso:DIDMarker>
+		    <iso:DIDScope>local</iso:DIDScope>
+		</iso:DifferentialIdentity>
+		<iso:DIDACL>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		</iso:DIDACL>
+	    </iso:DIDInfo>
+	    <iso:DIDInfo>
+		<iso:DifferentialIdentity>
+		    <iso:DIDName>KCard_Sig_CENC</iso:DIDName>
+		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.12</iso:DIDProtocol>
+		    <iso:DIDMarker>
+			<iso:MutualAuthMarker Protocol="urn:oid:1.3.162.15480.3.0.12">
+			    <iso:CardAlgRef>1123</iso:CardAlgRef>
+			    <iso:KeyEncMacRef>0B</iso:KeyEncMacRef>
+			    <iso:ICCSNRef>
+				<iso:DataSetName>EF_SN</iso:DataSetName>
+			    </iso:ICCSNRef>
+			</iso:MutualAuthMarker>
+		    </iso:DIDMarker>
+		    <iso:DIDScope>local</iso:DIDScope>
+		</iso:DifferentialIdentity>
+		<iso:DIDACL>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
 			</iso:Action>
 			<iso:SecurityCondition>
 			    <iso:always>true</iso:always>
@@ -779,57 +930,13 @@
 			    <iso:and>
 				<iso:SecurityCondition>
 				    <iso:DIDAuthentication>
-					<iso:DIDName>KCardSig</iso:DIDName>
+					<iso:DIDName>KCard_MAC</iso:DIDName>
 					<iso:DIDState>true</iso:DIDState>
 				    </iso:DIDAuthentication>
 				</iso:SecurityCondition>
 				<iso:SecurityCondition>
 				    <iso:DIDAuthentication>
-					<iso:DIDName>KCardSig</iso:DIDName>
-					<iso:DIDState>true</iso:DIDState>
-				    </iso:DIDAuthentication>
-				</iso:SecurityCondition>
-			    </iso:and>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:NamedDataServiceAction>DSIDelete</iso:NamedDataServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:and>
-				<iso:SecurityCondition>
-				    <iso:DIDAuthentication>
-					<iso:DIDName>KCardSig</iso:DIDName>
-					<iso:DIDState>true</iso:DIDState>
-				    </iso:DIDAuthentication>
-				</iso:SecurityCondition>
-				<iso:SecurityCondition>
-				    <iso:DIDAuthentication>
-					<iso:DIDName>KCardSig</iso:DIDName>
-					<iso:DIDState>true</iso:DIDState>
-				    </iso:DIDAuthentication>
-				</iso:SecurityCondition>
-			    </iso:and>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:and>
-				<iso:SecurityCondition>
-				    <iso:DIDAuthentication>
-					<iso:DIDName>KCardSig</iso:DIDName>
-					<iso:DIDState>true</iso:DIDState>
-				    </iso:DIDAuthentication>
-				</iso:SecurityCondition>
-				<iso:SecurityCondition>
-				    <iso:DIDAuthentication>
-					<iso:DIDName>KCardSig</iso:DIDName>
+					<iso:DIDName>KCard_CENC</iso:DIDName>
 					<iso:DIDState>true</iso:DIDState>
 				    </iso:DIDAuthentication>
 				</iso:SecurityCondition>
@@ -941,57 +1048,13 @@
 			    <iso:and>
 				<iso:SecurityCondition>
 				    <iso:DIDAuthentication>
-					<iso:DIDName>KCard</iso:DIDName>
+					<iso:DIDName>KCard_MAC</iso:DIDName>
 					<iso:DIDState>true</iso:DIDState>
 				    </iso:DIDAuthentication>
 				</iso:SecurityCondition>
 				<iso:SecurityCondition>
 				    <iso:DIDAuthentication>
-					<iso:DIDName>KCard</iso:DIDName>
-					<iso:DIDState>true</iso:DIDState>
-				    </iso:DIDAuthentication>
-				</iso:SecurityCondition>
-			    </iso:and>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:NamedDataServiceAction>DSIDelete</iso:NamedDataServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:and>
-				<iso:SecurityCondition>
-				    <iso:DIDAuthentication>
-					<iso:DIDName>KCard</iso:DIDName>
-					<iso:DIDState>true</iso:DIDState>
-				    </iso:DIDAuthentication>
-				</iso:SecurityCondition>
-				<iso:SecurityCondition>
-				    <iso:DIDAuthentication>
-					<iso:DIDName>KCard</iso:DIDName>
-					<iso:DIDState>true</iso:DIDState>
-				    </iso:DIDAuthentication>
-				</iso:SecurityCondition>
-			    </iso:and>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:and>
-				<iso:SecurityCondition>
-				    <iso:DIDAuthentication>
-					<iso:DIDName>KCard</iso:DIDName>
-					<iso:DIDState>true</iso:DIDState>
-				    </iso:DIDAuthentication>
-				</iso:SecurityCondition>
-				<iso:SecurityCondition>
-				    <iso:DIDAuthentication>
-					<iso:DIDName>KCard</iso:DIDName>
+					<iso:DIDName>KCard_CENC</iso:DIDName>
 					<iso:DIDState>true</iso:DIDState>
 				    </iso:DIDAuthentication>
 				</iso:SecurityCondition>
@@ -3263,20 +3326,10 @@
 			    <iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
 			</iso:Action>
 			<iso:SecurityCondition>
-			    <iso:and>
-				<iso:SecurityCondition>
-				    <iso:DIDAuthentication>
-					<iso:DIDName>PWD-CSA</iso:DIDName>
-					<iso:DIDState>true</iso:DIDState>
-				    </iso:DIDAuthentication>
-				</iso:SecurityCondition>
-				<iso:SecurityCondition>
-				    <iso:DIDAuthentication>
-					<iso:DIDName>PWD-CSA</iso:DIDName>
-					<iso:DIDState>true</iso:DIDState>
-				    </iso:DIDAuthentication>
-				</iso:SecurityCondition>
-			    </iso:and>
+			    <iso:DIDAuthentication>
+				<iso:DIDName>PWD-CSA</iso:DIDName>
+				<iso:DIDState>true</iso:DIDState>
+			    </iso:DIDAuthentication>
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		    <iso:AccessRule>
@@ -3285,42 +3338,10 @@
 			    <iso:NamedDataServiceAction>DSIDelete</iso:NamedDataServiceAction>
 			</iso:Action>
 			<iso:SecurityCondition>
-			    <iso:and>
-				<iso:SecurityCondition>
-				    <iso:DIDAuthentication>
-					<iso:DIDName>PWD-CSA</iso:DIDName>
-					<iso:DIDState>true</iso:DIDState>
-				    </iso:DIDAuthentication>
-				</iso:SecurityCondition>
-				<iso:SecurityCondition>
-				    <iso:DIDAuthentication>
-					<iso:DIDName>PWD-CSA</iso:DIDName>
-					<iso:DIDState>true</iso:DIDState>
-				    </iso:DIDAuthentication>
-				</iso:SecurityCondition>
-			    </iso:and>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:and>
-				<iso:SecurityCondition>
-				    <iso:DIDAuthentication>
-					<iso:DIDName>PWD-CSA</iso:DIDName>
-					<iso:DIDState>true</iso:DIDState>
-				    </iso:DIDAuthentication>
-				</iso:SecurityCondition>
-				<iso:SecurityCondition>
-				    <iso:DIDAuthentication>
-					<iso:DIDName>PWD-CSA</iso:DIDName>
-					<iso:DIDState>true</iso:DIDState>
-				    </iso:DIDAuthentication>
-				</iso:SecurityCondition>
-			    </iso:and>
+			    <iso:DIDAuthentication>
+				<iso:DIDName>PWD-CSA</iso:DIDName>
+				<iso:DIDState>true</iso:DIDState>
+			    </iso:DIDAuthentication>
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		    <iso:AccessRule>

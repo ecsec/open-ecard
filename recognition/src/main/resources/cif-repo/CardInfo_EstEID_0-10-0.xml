@@ -9,6 +9,12 @@
 	<iso:ObjectIdentifier>http://cif.id.ee/eid</iso:ObjectIdentifier>
 	<iso:CardTypeName xml:lang="EN">Estonian Identity Card</iso:CardTypeName>
 	<iso:CardTypeName xml:lang="DE">Estnischer Personalausweis</iso:CardTypeName>
+	<iso:Version>
+		<!-- Version number corresponds to the version of the cif -->
+		<iso:Major>0</iso:Major>
+		<iso:Minor>0</iso:Minor>
+		<iso:SubMinor>1</iso:SubMinor>
+	</iso:Version>
 	<iso:Status>Draft</iso:Status>
 	<iso:Date>2012-11-12</iso:Date>
     </iso:CardType>

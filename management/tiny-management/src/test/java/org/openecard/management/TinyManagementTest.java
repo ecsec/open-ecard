@@ -66,7 +66,8 @@ public class TinyManagementTest {
     public void testRest() throws InstantiationException, IllegalAccessException, IllegalArgumentException,
 	    InvocationTargetException {
 	for (Method m : instance.getClass().getDeclaredMethods()) {
-	    if (m.getName().equals("initializeFramework")) {
+	    // cobertura adds methods whose names start with '__cobertura'
+	    if (m.getName().equals("initializeFramework") || m.getName().startsWith("__cobertura")) {
 		continue;
 	    }
 	    System.out.println(m.getName());

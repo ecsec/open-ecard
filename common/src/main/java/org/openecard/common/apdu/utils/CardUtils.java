@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -134,17 +134,21 @@ public class CardUtils {
 		    CardCommandAPDU readBinary = new ReadBinary((short) (i * (length & 0xFF)), length);
 		    // 0x6A84 code for the estonian identity card. The card returns this code
 		    // after the last read process.
-		    response = readBinary.transmit(dispatcher, slotHandle, CardCommandStatus.response(0x9000, 0x6282, 0x6A84));
+		    response = readBinary.transmit(dispatcher, slotHandle, CardCommandStatus.response(0x9000, 0x6282,
+			    0x6A84, 0x6A83));
 		} else {
 		    CardCommandAPDU readRecord = new ReadRecord((byte) i);
-		    response = readRecord.transmit(dispatcher, slotHandle, CardCommandStatus.response(0x9000, 0x6282));
+		    response = readRecord.transmit(dispatcher, slotHandle, CardCommandStatus.response(0x9000, 0x6282,
+			    0x6A84, 0x6A83));
 		}
 
-		if (! Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x6A, (byte) 0x84})) {
+		if (! Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x6A, (byte) 0x84}) &&
+			! Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x6A, (byte) 0x83})) {
 		    baos.write(response.getData());
 		}
 		i++;
-	    } while (response.isNormalProcessed());
+	    } while (response.isNormalProcessed() ||
+		    (Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x62, (byte) 0x82}) && isRecord));
 	    baos.close();
 	} catch (IOException e) {
 	    throw new APDUException(e);

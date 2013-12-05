@@ -27,6 +27,7 @@ import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.TlsSignerCredentials;
 import org.openecard.crypto.common.sal.CredentialPermissionDenied;
 import org.openecard.crypto.common.sal.GenericCryptoSigner;
@@ -83,6 +84,11 @@ public class SmartCardSignerCredential implements TlsSignerCredentials {
 	    }
 	}
 	return certificate;
+    }
+
+    @Override
+    public SignatureAndHashAlgorithm getSignatureAndHashAlgorithm() {
+	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

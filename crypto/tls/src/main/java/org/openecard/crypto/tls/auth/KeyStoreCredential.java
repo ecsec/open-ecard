@@ -27,6 +27,7 @@ import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.TlsSignerCredentials;
 import org.openecard.crypto.common.keystore.KeyStoreSigner;
 import org.openecard.crypto.common.sal.CredentialPermissionDenied;
@@ -76,6 +77,11 @@ public class KeyStoreCredential implements TlsSignerCredentials {
 	} catch (CredentialPermissionDenied ex) {
 	    throw new IOException("Failed to create signature because of missing permissions.", ex);
 	}
+    }
+
+    @Override
+    public SignatureAndHashAlgorithm getSignatureAndHashAlgorithm() {
+	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

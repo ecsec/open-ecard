@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -42,8 +42,7 @@ public class CommonAuthenticationObjectAttributes extends TLVType {
     public CommonAuthenticationObjectAttributes(TLV tlv) {
 	super(tlv);
 
-	Parser p = new Parser(tlv);
-
+	Parser p = new Parser(tlv.getChild());
 	if (p.match(new Tag(TagClass.UNIVERSAL, true, 4))) {
 	    authId = p.next(0).getValue();
 	}

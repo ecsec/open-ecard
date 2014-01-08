@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -34,6 +34,8 @@ import org.openecard.common.tlv.TagClass;
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @param <CertAttributes>
  */
 public class GenericCertificateObject <CertAttributes> {
 
@@ -79,6 +81,43 @@ public class GenericCertificateObject <CertAttributes> {
 		throw new TLVException("CertAttributes supplied doesn't have a constructor CertAttributes(TLV).");
 	    }
 	}
+    }
+
+    /**
+     * Gets the CommonObjectAttributes of the certificate object.
+     *
+     * @return The {@link CommonObjectAttributes} of the certificate.
+     */
+    public CommonObjectAttributes getCommonObjectAttributes() {
+	return commonObjectAttributes;
+    }
+
+    /**
+     * Gets the class attributes of the certificate here the CommonCertificateAttributes.
+     *
+     * @return The CommonCertificateAttributes of the certificate.
+     */
+    public TLV getClassAttributes() {
+	return classAttributes;
+    }
+
+    /**
+     * Gets the sub class attributes of the certificate. This value is always null.
+     *
+     * @return null.
+     */
+    public TLV getSubClassAttributes() {
+	return subClassAttributes;
+    }
+
+    /**
+     * Gets the attributes which are specific for the type of the certificate.
+     * (The generic part of this data type.)
+     *
+     * @return The type attributes of the certificate.
+     */
+    public CertAttributes getTypeAttributes() {
+	return typeAttributes;
     }
 
 }

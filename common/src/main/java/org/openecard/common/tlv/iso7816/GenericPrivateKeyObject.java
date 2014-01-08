@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -34,6 +34,8 @@ import org.openecard.common.tlv.TagClass;
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Hans-Martin Haase <hans-martin dot haase at ecsec dot de>
+ * @param <KeyAttributes>
  */
 public class GenericPrivateKeyObject <KeyAttributes> {
 
@@ -79,6 +81,22 @@ public class GenericPrivateKeyObject <KeyAttributes> {
 		throw new TLVException("KeyAttributes supplied doesn't have a constructor KeyAttributes(TLV).");
 	    }
 	}
+    }
+
+    public CommonObjectAttributes getCommonObjectAttributes() {
+	return commonObjectAttributes;
+    }
+
+    public CommonKeyAttributes getClassAttributes() {
+	return classAttributes;
+    }
+
+    public TLV getSubClassAttributes() {
+	return subClassAttributes;
+    }
+
+    public KeyAttributes getTypeAttributes() {
+	return typeAttributes;
     }
 
 }

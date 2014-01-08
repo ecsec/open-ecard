@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,6 +32,7 @@ import org.openecard.common.tlv.TagClass;
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class CertificateChoice extends TLVType {
 
@@ -70,6 +71,42 @@ public class CertificateChoice extends TLVType {
 	} else {
 	    ext = p.next(0);
 	}
+    }
+
+    public GenericCertificateObject<X509CertificateAttribute> getX509Certificate() {
+	return x509Certificate;
+    }
+
+    public GenericCertificateObject<TLV> getX509AttributeCertificate() {
+	return x509AttributeCertificate;
+    }
+
+    public GenericCertificateObject<TLV> getSpkiCertificate() {
+	return spkiCertificate;
+    }
+
+    public GenericCertificateObject<TLV> getPgpCertificate() {
+	return pgpCertificate;
+    }
+
+    public GenericCertificateObject<TLV> getWtlsCertificate() {
+	return wtlsCertificate;
+    }
+
+    public GenericCertificateObject<TLV> getX9_68Certificate() {
+	return x9_68Certificate;
+    }
+
+    public GenericCertificateObject<TLV> getCvCertificate() {
+	return cvCertificate;
+    }
+
+    public GenericCertificateObject<TLV> getGenericCertificateObject() {
+	return genericCertificateObject;
+    }
+
+    public TLV getExtension() {
+	return ext;
     }
 
 }

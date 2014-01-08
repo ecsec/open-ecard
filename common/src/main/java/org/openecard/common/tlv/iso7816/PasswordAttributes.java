@@ -33,18 +33,20 @@ import org.openecard.common.util.ByteUtils;
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Hans-Martin Haase <hans-martin dot haase at ecsec dot de>
  */
 public class PasswordAttributes extends TLVType {
 
+    // NOTE: initialize the optional parts, if it is not done the compiler will return a error
     private TLVBitString passwordFlags;
     private int passwordType; // enum PasswordType
     private int minLength;
     private int storedLength;
-    private Integer maxLength;
+    private Integer maxLength = null;
     private Integer passwordReference;
-    private Byte padChar;
-    private TLV lastPasswordChange;
-    private Path path;
+    private Byte padChar = null;
+    private TLV lastPasswordChange = null;
+    private Path path = null;
 
 
     public PasswordAttributes(TLV tlv) throws TLVException {
@@ -87,6 +89,42 @@ public class PasswordAttributes extends TLVType {
 	if (p.match(Tag.SEQUENCE_TAG)) {
 	    path = new Path(p.next(0));
 	}
+    }
+
+    public TLVBitString getPasswordFlags() {
+	return passwordFlags;
+    }
+
+    public int getPasswordType() {
+	return passwordType;
+    }
+
+    public int getMinLength() {
+	return minLength;
+    }
+
+    public int getStoredLength() {
+	return storedLength;
+    }
+
+    public Integer getMaxLength() {
+	return maxLength;
+    }
+
+    public Integer getPasswordReference() {
+	return passwordReference;
+    }
+
+    public Byte getPadChar() {
+	return padChar;
+    }
+
+    public TLV getLastPasswordChange() {
+	return lastPasswordChange;
+    }
+
+    public Path getPath() {
+	return path;
     }
 
 }

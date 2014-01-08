@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,11 +32,17 @@ import org.openecard.common.tlv.TagClass;
 
 
 /**
- *
+ * The class implements a data type which corresponds to the ASN.1 type AuthenticationObject in ISO7816-15.
+ * 
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Hans-Martin Haase <hans-martin dot haase at ecsec dot de>
+ * @param <AuthAttributes>
  */
 public class GenericAuthenticationObject <AuthAttributes> {
 
+    /**
+     * The TLV which represents this object
+     */
     private TLV tlv;
 
     // from CIO
@@ -45,7 +51,13 @@ public class GenericAuthenticationObject <AuthAttributes> {
     private TLV subClassAttributes;        // NULL
     private AuthAttributes typeAttributes; // AuthObjectAttributes
 
-
+    /**
+     * The constructor parses the input TLV and instantiates the generic part of the class.
+     *
+     * @param tlv The {@link TLV} which will be used to create the object.
+     * @param clazz Class type of the generic attribute.
+     * @throws TLVException
+     */
     public GenericAuthenticationObject(TLV tlv, Class<AuthAttributes> clazz) throws TLVException {
 	Constructor<AuthAttributes> c;
 	try {
@@ -56,6 +68,7 @@ public class GenericAuthenticationObject <AuthAttributes> {
 
 	this.tlv = tlv;
 
+	// parse the tlv
 	Parser p = new Parser(tlv.getChild());
 	if (p.match(Tag.SEQUENCE_TAG)) {
 	    commonObjectAttributes = new CommonObjectAttributes(p.next(0));
@@ -79,6 +92,52 @@ public class GenericAuthenticationObject <AuthAttributes> {
 		throw new TLVException("AuthAttributes supplied doesn't have a constructor AuthAttributes(TLV).");
 	    }
 	}
+    }
+
+    /**
+     * Gets the {@link CommonObjectAttributes} of the object.
+     *
+     * @return The CommonObjectAttribute of the object.
+     */
+    public CommonObjectAttributes getCommonObjectAttributes() {
+	return commonObjectAttributes;
+    }
+
+    /**
+     * Gets the generic object of this datatype.
+     * The returned data type depends on the specification in the constructor.
+     *
+     * @return The authentication attributes of the object.
+     */
+    public AuthAttributes getAuthAttributes() {
+	return typeAttributes;
+    }
+
+    /**
+     * Gets the class attributes of this object.
+     *
+     * @return The class attributes of the object as TLV.
+     */
+    public TLV getClassAttributes() {
+	return classAttributes;
+    }
+
+    /**
+     * Gets the sub class attributes of the object.
+     *
+     * @return The sub class attributes as TLV.
+     */
+    public TLV getSubClassAttributes() {
+	return subClassAttributes;
+    }
+
+    /**
+     * Gets the object itself as TLV.
+     *
+     * @return The object as TLV.
+     */
+    public TLV getGenericAuthenticationObjectTLV() {
+	return tlv;
     }
 
 }

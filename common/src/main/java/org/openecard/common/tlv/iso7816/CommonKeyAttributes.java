@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -35,17 +35,18 @@ import org.openecard.common.util.ByteUtils;
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class CommonKeyAttributes extends TLVType {
 
     private byte[] id;
     private TLVBitString usage;
     private boolean nativeFlag = true;
-    private TLVBitString accessFlags;
-    private Integer keyReference;
-    private TLV startDate;
-    private TLV endDate;
-    private List<Integer> algRefs;
+    private TLVBitString accessFlags = null;
+    private Integer keyReference = null;
+    private TLV startDate = null;
+    private TLV endDate = null;
+    private List<Integer> algRefs = null;
 
 
     public CommonKeyAttributes(TLV tlv) throws TLVException {
@@ -85,6 +86,42 @@ public class CommonKeyAttributes extends TLVType {
 		algRefs.add(ByteUtils.toInteger(next.getValue()));
 	    }
 	}
+    }
+
+    public byte[] getId() {
+	return id;
+    }
+
+    public TLVBitString getUsage() {
+	return usage;
+    }
+
+    public boolean isNativeFlag() {
+	return nativeFlag;
+    }
+
+    public TLVBitString getAccessFlags() {
+	return accessFlags;
+    }
+
+    public Integer getKeyReference() {
+	if (keyReference != null) {
+	    return keyReference;
+	} else {
+	    return -1;
+	}
+    }
+
+    public TLV getStartDate() {
+	return startDate;
+    }
+
+    public TLV getEndDate() {
+	return endDate;
+    }
+
+    public List<Integer> getAlgRefs() {
+	return algRefs;
     }
 
 }

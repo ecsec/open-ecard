@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,16 +32,17 @@ import org.openecard.common.tlv.TagClass;
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Hans-Martin Haase <hans-martin dot haase at ecsec dot de>
  */
 public class PrivateKeyChoice extends TLVType {
 
-    private GenericPrivateKeyObject<PrivateRSAKeyAttribute> privateRSAKey;
-    private GenericPrivateKeyObject<PrivateECKeyAttribute> privateECKey;
-    private GenericPrivateKeyObject<TLV> privateDHKey;
-    private GenericPrivateKeyObject<TLV> privateDSAKey;
-    private GenericPrivateKeyObject<TLV> privateKEAKey;
-    private GenericPrivateKeyObject<TLV> genericPrivateKey;
-    private TLV ext;
+    private GenericPrivateKeyObject<PrivateRSAKeyAttributes> privateRSAKey = null;
+    private GenericPrivateKeyObject<PrivateECKeyAttributes> privateECKey = null;
+    private GenericPrivateKeyObject<TLV> privateDHKey = null;
+    private GenericPrivateKeyObject<TLV> privateDSAKey = null;
+    private GenericPrivateKeyObject<TLV> privateKEAKey = null;
+    private GenericPrivateKeyObject<TLV> genericPrivateKey = null;
+    private TLV ext = null;
 
     public PrivateKeyChoice(TLV tlv) throws TLVException {
 	super(tlv);
@@ -49,9 +50,9 @@ public class PrivateKeyChoice extends TLVType {
 	Parser p = new Parser(tlv);
 
 	if (p.match(new Tag(TagClass.UNIVERSAL, false, 16))) {
-	    privateRSAKey = new GenericPrivateKeyObject<PrivateRSAKeyAttribute>(p.next(0), PrivateRSAKeyAttribute.class);
+	    privateRSAKey = new GenericPrivateKeyObject<PrivateRSAKeyAttributes>(p.next(0), PrivateRSAKeyAttributes.class);
 	} else if (p.match(new Tag(TagClass.CONTEXT, false, 0))) {
-	    privateECKey = new GenericPrivateKeyObject<PrivateECKeyAttribute>(p.next(0), PrivateECKeyAttribute.class);
+	    privateECKey = new GenericPrivateKeyObject<PrivateECKeyAttributes>(p.next(0), PrivateECKeyAttributes.class);
 	} else if (p.match(new Tag(TagClass.CONTEXT, false, 1))) {
 	    privateDHKey = new GenericPrivateKeyObject<TLV>(p.next(0), TLV.class);
 	} else if (p.match(new Tag(TagClass.CONTEXT, false, 2))) {
@@ -63,6 +64,34 @@ public class PrivateKeyChoice extends TLVType {
 	} else {
 	    ext = p.next(0);
 	}
+    }
+
+    public GenericPrivateKeyObject<PrivateRSAKeyAttributes> getPrivateRSAKey() {
+	return privateRSAKey;
+    }
+
+    public GenericPrivateKeyObject<PrivateECKeyAttributes> getPrivateECKey() {
+	return privateECKey;
+    }
+
+    public GenericPrivateKeyObject<TLV> getPrivateDHKey() {
+	return privateDHKey;
+    }
+
+    public GenericPrivateKeyObject<TLV> getPrivateDSAKey() {
+	return privateDSAKey;
+    }
+
+    public GenericPrivateKeyObject<TLV> getPrivateKEAKey() {
+	return privateKEAKey;
+    }
+
+    public GenericPrivateKeyObject<TLV> getGenericPrivateKey() {
+	return genericPrivateKey;
+    }
+
+    public TLV getExt() {
+	return ext;
     }
 
 }

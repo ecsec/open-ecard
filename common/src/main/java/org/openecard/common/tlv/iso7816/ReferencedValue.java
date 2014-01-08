@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,6 +32,7 @@ import org.openecard.common.tlv.TagClass;
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class ReferencedValue extends TLVType {
 
@@ -52,6 +53,14 @@ public class ReferencedValue extends TLVType {
 	} else {
 	    throw new TLVException("Unexpected element in ObjectValue.");
 	}
+    }
+
+    public Path getPath() {
+	return path;
+    }
+
+    public TLV getURL() {
+	return url;
     }
 
 }

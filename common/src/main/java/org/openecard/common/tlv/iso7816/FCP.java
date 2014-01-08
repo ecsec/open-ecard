@@ -163,6 +163,11 @@ public class FCP {
 	this(TLV.fromBER(data));
     }
 
+    /**
+     * Gets the corresponding byte array of the FCP object.
+     *
+     * @return The byte array representation of the FCP.
+     */
     public byte[] toBER() {
 	try {
 	    return tlv.toBER();
@@ -172,29 +177,237 @@ public class FCP {
     }
 
 
+    /**
+     * Gets the number of bytes in the select EF.
+     * Just present in EFs (once).
+     * (Tag 80)
+     *
+     * @return The number of byte without structural information in the file.
+     */
     public Long getNumBytes() {
 	return this.numBytes;
     }
 
+    /**
+     * Gets the data elements contained in the file descriptor byte.
+     * Present in every file.
+     * (Tag 82)
+     *
+     * @return The data elements contained in the file descriptor byte.
+     */
     public DataElements getDataElements() {
 	return dataElements;
     }
 
-    /** len=2 */
-    public List<byte[]> fileIdentifiers() {
+    /**
+     * Gets the file identifier of the selected file.
+     * len=2
+     * Present in every file.
+     * (Tag 83)
+     *
+     * @return A list of byte arrays which contain the file identifiers for the file.
+     */
+    public List<byte[]> getFileIdentifiers() {
 	return fileIdentifiers;
     }
 
-    /** len=..* */
-    public List<byte[]> DF_Names() {
+    /**
+     * Gets the name of the selected DF as list of byte arrays.
+     * len=..*
+     * Just present in DFs.
+     * (Tag 84)
+     *
+     * @return A list of byte arrays which contain the names of a DF.
+     */
+    public List<byte[]> getDfNames() {
 	return dfNames;
     }
 
+    /**
+     * Gets the number of bytes contained in the file (including structural information).
+     * present in any file (once)
+     * (Tag 81)
+     *
+     * @return The number of bytes of the file including structural information.
+     */
+    public Long getNumBytesStructure() {
+	return numBytesStructure;
+    }
 
+    /**
+     * Gets proprietary information which is not encoded as TLV.
+     * present in any file
+     * (Tag 85)
+     *
+     * @return List of byte arrays which contain proprietary information which is not encoded in BER_TLV.
+     */
+    public List<byte[]> getProprietaryInformationNoTLV() {
+	return proprietaryInformationNoTLV;
+    }
+
+    /**
+     * Gets the proprietary security attributes.
+     * present in any file.
+     * (Tag 86)
+     *
+     * @return A list of byte array where the byte array contains a proprietary security attribute.
+     */
+    public List<byte[]> getProprietarySecurityAttribute() {
+	return proprietarySecurityAttribute;
+    }
+
+    /**
+     * Gets the file id of a EF which contains more information about the file control information.
+     * present in DFs (only once)
+     * (Tag 87)
+     *
+     * @return A byte array containing a file identifier.
+     */
+    public byte[] getFciExtensionEf() {
+	return fciExtensionEf;
+    }
+
+    /**
+     * Gets the short identifier for a EF (just one or zero bytes).
+     * present in EFs (only once)
+     * (Tag 88)
+     *
+     * @return The short EF identifier of the file.
+     */
+    public byte[] getShortEfIdentifier() {
+	return shortEfIdentifier;
+    }
+
+    /**
+     * Get the life cycle status byte of the file.
+     * present in every file (only once)
+     * (Tag 8A)
+     *
+     * @return The value of the life cycle status byte property.
+     */
+    public Byte getLifeCycleStatusByte() {
+	return lifeCycleStatusByte;
+    }
+
+    /**
+     * Gets a security attribute which references the expanded format.
+     * present in any file (only once).
+     * (Tag 8B)
+     *
+     * @return A security attribute in expanded format as byte array.
+     */
+    public byte[] getSecurityAttributeReferenceExpanded() {
+	return securityAttributeReferenceExpanded;
+    }
+
+    /**
+     * Gets a security attribute in compact format.
+     * present in any file (only once).
+     * (Tag 8C)
+     *
+     * @return A security attribute in compact format as byte array.
+     */
+    public byte[] getSecurityAttributeCompact() {
+	return securityAttributeCompact;
+    }
+
+    /**
+     * Gets EF identifier for files which contain SecurityEnvironmentTemplates.
+     * present in DFs only
+     * (Tag 8D)
+     *
+     * @return List of byte arrays where the byte arrays contain a file identifier.
+     */
+    public List<byte[]> getSecurityEnvironmentTemplateEfs() {
+	return securityEnvironmentTemplateEfs;
+    }
+
+    /**
+     * Gets the channel security attribute property.
+     * present in any file (only once)
+     * (Tag 8E)
+     *
+     * @return A byte containing the security attributes for the channel.
+     */
+    public Byte getChannelSecurityAttribute() {
+	return channelSecurityAttribute;
+    }
+
+    /**
+     * Gets the security template for data objects.
+     * present in any file (only once)
+     * (Tag A0)
+     *
+     * @return A byte array containing a security attribute template for data objects.
+     */
+    public byte[] getSecurityAttributeTemplateForDataObject() {
+	return securityAttributeTemplateForDataObject;
+    }
+
+    /**
+     * Gets the security attribute template in a proprietary format.
+     * present in any file.
+     * (Tag A1)
+     *
+     * @return Gets the proprietary security attribute as byte array.
+     */
+    public byte[] getSecurityAttributeTemplateProprietary() {
+	return securityAttributeTemplateProprietary;
+    }
+
+    /**
+     * Gets the data objects which contain file references to EFs.
+     * present in DFs only.
+     * (Tag A2)
+     *
+     * @return A list of TLVs which contain the data objects.
+     */
+    public List<TLV> getDataObjectTemplates() {
+	return dataObjectTemplates;
+    }
+
+    /**
+     * Gets proprietary information in TLV format.
+     * present in any file.
+     * (Tag A5)
+     *
+     * @return A TLV containing proprietary information encoded as TLV.
+     */
+    public TLV getProprietaryInformationTLV() {
+	return proprietaryInformationTLV;
+    }
+
+    /**
+     * Gets the security template in expanded format.
+     * present in any file (only once).
+     * (Tag AB)
+     *
+     * @return A byte array containing a security attribute template in expanded format.
+     */
+    public byte[] getSecurityAttributeTemplateExpanded() {
+	return securityAttributeTemplateExpanded;
+    }
+
+    /**
+     * Get the value of the cryptographic mechanism identifier template.
+     * present in DFs only
+     * (Tag AC)
+     *
+     * @return A byte array containing a cryptographic mechanism template.
+     */
+    public byte[] getCryptographicMechanismIdentifierTemplate() {
+	return cryptographicMechanismIdentifierTemplate;
+    }
 
     // TODO: implement further tags in FCP
 
 
+    /**
+     * Create a string from the object which contains all collected information.
+     *
+     * @param prefix
+     * @return A string containing all collected information.
+     */
     public String toString(String prefix) {
 	StringBuilder b = new StringBuilder(4096);
 	String indent = prefix + " ";
@@ -255,6 +468,11 @@ public class FCP {
 	return b.toString();
     }
 
+    /**
+     * Calls the toString(String) method with the empty string as parameter.
+     *
+     * @return A string containing all collected information.
+     */
     @Override
     public String toString() {
 	return toString("");

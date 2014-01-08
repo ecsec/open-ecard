@@ -110,6 +110,54 @@ public class CardUtils {
 
 	return result;
     }
+    
+    /**
+     * Select an application by it's file identifier.
+     * 
+     * @param dispatcher The message dispatcher for the interaction with the card.
+     * @param slotHandle
+     * @param fileID File identitfier of an application or a path to the application.
+     * @return The {@link CardResponseAPDU} from the last select which means the select of the application to select.
+     * @throws APDUException 
+     */
+    public static CardResponseAPDU selectApplicationByFID(Dispatcher dispatcher, byte[] slotHandle, byte[] fileID) throws APDUException {
+	Select selectApp;
+	CardResponseAPDU result = null;
+	
+	// respect the possibility that fileID could be a path
+	int i = 0;
+	while (i < fileID.length) {
+	    if (fileID[i] == (byte) 0x3F && fileID[i + 1] == (byte) 0x00 && i == 0 && i + 1 == 1) {
+		selectApp = new MasterFile();
+		i = i + 2;
+	    } else {
+		selectApp = new Select.ChildDirectory(new byte[]{fileID[i], fileID[i + 1]});
+		selectApp.setLE((byte) 0xFF);
+		selectApp.setFCP();
+		i = i + 2;
+	    }
+
+	    result = selectApp.transmit(dispatcher, slotHandle);
+	}
+
+	return result;
+    }
+    
+    /**
+     * Select an application by the application identifier.
+     * 
+     * @param dispatcher
+     * @param slotHandle
+     * @param aid Application identifier
+     * @return
+     * @throws APDUException 
+     */
+    public static CardResponseAPDU selectApplicationByAID(Dispatcher dispatcher, byte[] slotHandle, byte[] aid) throws APDUException {
+	Select.Application selectApp = new Select.Application(aid);
+	selectApp.setLE((byte) 0xFF);
+	CardResponseAPDU result = selectApp.transmit(dispatcher, slotHandle);
+	return result;
+    }
 
     /**
      * Reads a file.
@@ -135,7 +183,7 @@ public class CardUtils {
 		    // 0x6A84 code for the estonian identity card. The card returns this code
 		    // after the last read process.
 		    response = readBinary.transmit(dispatcher, slotHandle, CardCommandStatus.response(0x9000, 0x6282,
-			    0x6A84, 0x6A83));
+			    0x6A84, 0x6A83, 0x6A86));
 		} else {
 		    CardCommandAPDU readRecord = new ReadRecord((byte) i);
 		    response = readRecord.transmit(dispatcher, slotHandle, CardCommandStatus.response(0x9000, 0x6282,
@@ -143,7 +191,8 @@ public class CardUtils {
 		}
 
 		if (! Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x6A, (byte) 0x84}) &&
-			! Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x6A, (byte) 0x83})) {
+			! Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x6A, (byte) 0x83}) &&
+			! Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x6A, (byte) 0x86})) {
 		    baos.write(response.getData());
 		}
 		i++;

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -36,6 +36,7 @@ import org.openecard.common.tlv.Tag;
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class EF_DIR {
 
@@ -72,7 +73,7 @@ public class EF_DIR {
 
     public static EF_DIR selectAndRead(Dispatcher dispatcher, byte[] slotHandle) throws APDUException, TLVException {
 	// Select and read EF.DIR
-	byte[] data = CardUtils.readFile(dispatcher, slotHandle, EF_DIR_FID);
+	byte[] data = CardUtils.selectReadFile(dispatcher, slotHandle, EF_DIR_FID);
 
 	return new EF_DIR(data);
     }

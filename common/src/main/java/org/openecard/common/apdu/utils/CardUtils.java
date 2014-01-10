@@ -145,6 +145,7 @@ public class CardUtils {
     
     /**
      * Select an application by the application identifier.
+     * This method requests the FCP of the application.
      * 
      * @param dispatcher
      * @param slotHandle
@@ -153,7 +154,8 @@ public class CardUtils {
      * @throws APDUException 
      */
     public static CardResponseAPDU selectApplicationByAID(Dispatcher dispatcher, byte[] slotHandle, byte[] aid) throws APDUException {
-	Select.Application selectApp = new Select.Application(aid);
+	Select selectApp = new Select((byte) 0x04, (byte) 0x04);
+	selectApp.setData(aid);
 	selectApp.setLE((byte) 0xFF);
 	CardResponseAPDU result = selectApp.transmit(dispatcher, slotHandle);
 	return result;

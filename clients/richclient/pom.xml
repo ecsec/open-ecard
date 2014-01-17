@@ -27,6 +27,8 @@
 	<wininstall.tmp.dirname>wix-tmp</wininstall.tmp.dirname>
 	<wininstall.tmp.dir>${project.build.directory}/${wininstall.tmp.dirname}</wininstall.tmp.dir>
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+	<application.name>Open eCard App</application.name>
     </properties>
 
 
@@ -44,6 +46,12 @@
 				<useUniqueVersions>false</useUniqueVersions>
 				<mainClass>org.openecard.richclient.RichClient</mainClass>
 			    </manifest>
+			    <manifestEntries>
+				<Permissions>all-permissions</Permissions>
+				<Codebase>*</Codebase>
+				<Application-Name>${application.name}</Application-Name>
+				<Trusted-Only>true</Trusted-Only>
+			    </manifestEntries>
 			</archive>
 		    </configuration>
 		</plugin>
@@ -87,6 +95,13 @@
 					    </excludes>
 					</filter>
 				    </filters>
+				    <transformers>
+					<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+					    <manifestEntries>
+						<Class-Path></Class-Path>
+					    </manifestEntries>
+					</transformer>
+				    </transformers>
 				</configuration>
 			    </execution>
 			</executions>

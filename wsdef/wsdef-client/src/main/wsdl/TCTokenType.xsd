@@ -9,9 +9,10 @@
 			<xs:element name="ServerAddress" type="xs:anyURI" />
 			<xs:element name="SessionIdentifier" type="xs:string" />
 			<xs:element name="RefreshAddress" type="xs:anyURI" />
-			<xs:element name="Binding" type="xs:anyURI" maxOccurs="1" minOccurs="0" />
-			<xs:element name="PathSecurity-Protocol" type="xs:anyURI" />
-			<xs:element name="PathSecurity-Parameters" maxOccurs="1" minOccurs="0">
+			<xs:element name="CommunicationErrorAddress" type="xs:anyURI" minOccurs="0" />
+			<xs:element name="Binding" type="xs:anyURI" />
+			<xs:element name="PathSecurity-Protocol" type="xs:anyURI" minOccurs="0" />
+			<xs:element name="PathSecurity-Parameters" minOccurs="0">
 				<xs:complexType>
 					<xs:choice>
 						<xs:element name="PSK" type="xs:hexBinary" />

@@ -35,7 +35,7 @@ import org.openecard.common.util.ValueValidator;
  */
 public class TCTokenVerifier {
 
-    private TCTokenType token;
+    private final TCTokenType token;
 
     /**
      * Creates a new TCTokenVerifier to verify a TCToken.
@@ -60,6 +60,7 @@ public class TCTokenVerifier {
 	    verifyServerAddress();
 	    verifySessionIdentifier();
 	    verifyRefreshAddress();
+	    verifyCommunicationErrorAddress();
 	    verifyBinding();
 	    verifyPathSecurityParameters();
 	    verifyPathSecurityProtocol();
@@ -113,6 +114,23 @@ public class TCTokenVerifier {
     }
 
     /**
+     * Verifies the CommunicationErrorAddress element of the TCToken.
+     *
+     * @throws TCTokenException
+     */
+    public void verifyCommunicationErrorAddress() throws TCTokenException {
+	try {
+	    String value = token.getCommunicationErrorAddress();
+	    if (! checkEmpty(value)) {
+		assertURL(value);
+		assertRequired(value);
+	    }
+	} catch (TCTokenException e) {
+	    throw new TCTokenException("Malformed CommunicationErrorAddress");
+	}
+    }
+
+    /**
      * Verifies the Binding element of the TCToken.
      *
      * @throws TCTokenException
@@ -120,8 +138,10 @@ public class TCTokenVerifier {
     public void verifyBinding() throws TCTokenException {
 	try {
 	    String value = token.getBinding();
-	    assertRequired(value);
-	    checkEqualOR(value, "urn:liberty:paos:2006-08", "urn:ietf:rfc:2616");
+	    if (! checkEmpty(value)) {
+		assertRequired(value);
+		checkEqualOR(value, "urn:liberty:paos:2006-08", "urn:ietf:rfc:2616");
+	    }
 	} catch (TCTokenException e) {
 	    throw new TCTokenException("Malformed Binding");
 	}
@@ -135,7 +155,7 @@ public class TCTokenVerifier {
     public void verifyPathSecurityProtocol() throws TCTokenException {
 	try {
 	    String value = token.getPathSecurityProtocol();
-	    if (!checkEmpty(value)) {
+	    if (! checkEmpty(value)) {
 		checkEqualOR(value, "urn:ietf:rfc:4346", "urn:ietf:rfc:4279", "urn:ietf:rfc:5487");
 	    }
 	} catch (TCTokenException e) {
@@ -150,10 +170,10 @@ public class TCTokenVerifier {
      */
     public void verifyPathSecurityParameters() throws TCTokenException {
 	try {
-	    if (token.getPathSecurityProtocol().equals("urn:ietf:rfc:4279")
-		    || token.getPathSecurityProtocol().equals("urn:ietf:rfc:5487")) {
+	    if ("urn:ietf:rfc:4279".equals(token.getPathSecurityProtocol())
+		    || "urn:ietf:rfc:5487".equals(token.getPathSecurityProtocol())) {
 		TCTokenType.PathSecurityParameters psp = token.getPathSecurityParameters();
-		if (!checkEmpty(psp)) {
+		if (! checkEmpty(psp)) {
 		    assertRequired(psp.getPSK());
 		    checkPSKLength(ByteUtils.toHexString(psp.getPSK()));
 		}
@@ -223,9 +243,9 @@ public class TCTokenVerifier {
 	}
     }
 
-    private void assertURL(Object value) throws TCTokenException {
+    private URL assertURL(Object value) throws TCTokenException {
 	try {
-	    new URL(value.toString());
+	    return new URL(value.toString());
 	} catch (Exception e) {
 	    throw new TCTokenException("Malformed URL");
 	}

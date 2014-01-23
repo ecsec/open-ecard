@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,6 +26,7 @@ import generated.TCTokenType;
 import java.util.ArrayList;
 import java.util.List;
 import org.openecard.common.util.StringUtils;
+import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -40,6 +41,7 @@ public class TCTokenSAXHandler extends DefaultHandler {
     private static final String TC_TOKEN_TYPE = "TCTokenType";
     private static final String SERVER_ADDRESS = "ServerAddress";
     private static final String SESSION_IDENTIFIER = "SessionIdentifier";
+    private static final String ERROR_ADDRESS = "CommunicationErrorAddress";
     private static final String REFRESH_ADDRESS = "RefreshAddress";
     private static final String PATH_SECURITY_PROTOCOL = "PathSecurity-Protocol";
     private static final String BINDING = "Binding";
@@ -65,7 +67,7 @@ public class TCTokenSAXHandler extends DefaultHandler {
     }
 
     @Override
-    public void startElement(String uri, String localName, String qName, org.xml.sax.Attributes attributes) throws SAXException {
+    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 	// Consider only the TCTokens.
 	if (qName.equalsIgnoreCase(TC_TOKEN_TYPE)) {
 	    read = true;
@@ -95,6 +97,8 @@ public class TCTokenSAXHandler extends DefaultHandler {
 	    token.setServerAddress(value);
 	} else if (qName.equalsIgnoreCase(REFRESH_ADDRESS)) {
 	    token.setRefreshAddress(value);
+	} else if (qName.equalsIgnoreCase(ERROR_ADDRESS)) {
+	    token.setCommunicationErrorAddress(value);
 	} else if (qName.equalsIgnoreCase(PATH_SECURITY_PROTOCOL)) {
 	    token.setPathSecurityProtocol(value);
 	} else if (qName.equalsIgnoreCase(BINDING)) {

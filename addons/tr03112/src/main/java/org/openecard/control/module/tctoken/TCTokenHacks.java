@@ -48,7 +48,7 @@ public class TCTokenHacks {
      * @param input Possibly errornous string containing the token.
      * @return Fixed data.
      */
-    public static String fixPathSecurityParaneters(String input) {
+    public static String fixPathSecurityParameters(String input) {
 	if (! input.contains("PathSecurity-Parameters")) {
 	    input = input.replace("PathSecurity-Parameter", "PathSecurity-Parameters");
 	}

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2013 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -47,7 +47,7 @@ public class TCTokenFactory {
 	// FIXME: Hack
 	data = TCTokenHacks.fixObjectTag(data);
 	// FIXME: Hack
-	data = TCTokenHacks.fixPathSecurityParaneters(data);
+	data = TCTokenHacks.fixPathSecurityParameters(data);
 
 	// Parse the TCToken
 	TCTokenParser parser = new TCTokenParser();

@@ -54,7 +54,7 @@ public class TCTokenParserTest {
     public void testParseMalformed() throws Exception {
 	String data = FileUtils.toString(FileUtils.resolveResourceAsStream(getClass(), "TCToken-malformed.xml"));
 
-	data = TCTokenHacks.fixPathSecurityParaneters(data);
+	data = TCTokenHacks.fixPathSecurityParameters(data);
 
 	TCTokenParser parser = new TCTokenParser();
 	List<TCTokenType> tokens = parser.parse(data);

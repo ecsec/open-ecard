@@ -103,27 +103,19 @@ public class TR03112Utils {
 	    md.update(serverCertificate.getCertificateAt(0).getEncoded());
 	    byte[] hash = md.digest();
 
-	    // prepend with tag
-	    TLV tlv = new TLV();
-	    tlv.setTagNumWithClass(TAG_OCTET_STRING);
-	    tlv.setValue(hash);
-	    byte[] hashTag = tlv.toBER();
 	    if (logger.isDebugEnabled()) {
-		logger.debug("Hash (with tag) of the retrieved server certificate: {}", ByteUtils.toHexString(hashTag));
+		logger.debug("Hash of the retrieved server certificate: {}", ByteUtils.toHexString(hash));
 	    }
 
 	    // finally check if contained in the CommCertificates
 	    for (byte[] commCertificate : commCertificates) {
 		logger.debug("CommCertificate: {}", ByteUtils.toHexString(commCertificate));
-		if (ByteUtils.compare(commCertificate, hashTag)) {
+		if (ByteUtils.compare(commCertificate, hash)) {
 		    return true;
 		}
 	    }
 	} catch (NoSuchAlgorithmException e) {
 	    logger.error("SHA-256 digest algorithm is not available.");
-	    return false;
-	} catch (TLVException e) {
-	    logger.error("TLV construction failed.");
 	    return false;
 	} catch (IOException e) {
 	    logger.error("Server certificate couldn't be encoded.");

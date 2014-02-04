@@ -51,7 +51,7 @@ public interface WSMarshaller {
      * @param xmlTypeClass Class of the JAXB element type.
      * @throws MarshallingTypeException If the type can not be added.
      */
-    void addXmlTypeClass(Class xmlTypeClass) throws MarshallingTypeException;
+    void addXmlTypeClass(Class<?> xmlTypeClass) throws MarshallingTypeException;
     /**
      * Remove all JAXB element types from this instance.
      * New types must be added first before this instance is usable for marshalling and unmarshalling again.
@@ -74,6 +74,7 @@ public interface WSMarshaller {
      * @param docStr InputStream containing the XML document.
      * @return DOM instance of the given XML document.
      * @throws SAXException If the XML document contains errors.
+     * @throws java.io.IOException If the stream produced an error while reading.
      */
     Document str2doc(InputStream docStr) throws SAXException, IOException;
     /**

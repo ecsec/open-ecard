@@ -50,19 +50,19 @@ public class MarshallerImpl {
 
     private static final Logger logger = LoggerFactory.getLogger(MarshallerImpl.class);
 
-    private static final List<Class> baseXmlElementClasses;
+    private static final List<Class<?>> baseXmlElementClasses;
     private static final JAXBContext baseJaxbContext;
 
     private boolean userOverride;
-    private final Set<Class> userClasses;
+    private final Set<Class<?>> userClasses;
 
     private Marshaller marshaller;
     private Unmarshaller unmarshaller;
 
     static {
 	// load predefined classes
-	Class[] jaxbClasses = getJaxbClasses();
-	baseXmlElementClasses = new ArrayList<Class>(jaxbClasses.length);
+	Class<?>[] jaxbClasses = getJaxbClasses();
+	baseXmlElementClasses = new ArrayList<Class<?>>(jaxbClasses.length);
 	baseXmlElementClasses.addAll(Arrays.asList(jaxbClasses));
 
 	try {
@@ -79,7 +79,7 @@ public class MarshallerImpl {
      */
     public MarshallerImpl() {
 	userOverride = false;
-	userClasses = new HashSet<Class>(baseXmlElementClasses);
+	userClasses = new HashSet<Class<?>>(baseXmlElementClasses);
     }
 
 
@@ -89,7 +89,7 @@ public class MarshallerImpl {
      *
      * @param c Class of the JAXB element type.
      */
-    public synchronized void addXmlClass(Class c) {
+    public synchronized void addXmlClass(Class<?> c) {
 	if (! userClasses.contains(c)) {
 	    //addJaxbClasses(c);
 	    userClasses.add(c);
@@ -145,7 +145,7 @@ public class MarshallerImpl {
     private void loadInstances() throws JAXBException {
 	JAXBContext jaxbCtx;
 	if (userOverride) {
-	    jaxbCtx = JAXBContext.newInstance(userClasses.toArray(new Class[userClasses.size()]));
+	    jaxbCtx = JAXBContext.newInstance(userClasses.toArray(new Class<?>[userClasses.size()]));
 	} else {
 	    jaxbCtx = baseJaxbContext;
 	}
@@ -155,9 +155,9 @@ public class MarshallerImpl {
 
 
 
-    private static Class[] getJaxbClasses() {
+    private static Class<?>[] getJaxbClasses() {
 	ClassLoader cl = Thread.currentThread().getContextClassLoader();
-	List<Class> classes = new LinkedList<Class>();
+	List<Class<?>> classes = new LinkedList<Class<?>>();
 	InputStream classListStream = cl.getResourceAsStream("classes.lst");
 	InputStream classListStreamC = cl.getResourceAsStream("/classes.lst");
 
@@ -187,7 +187,7 @@ public class MarshallerImpl {
 	    logger.error("Failed to read classes from file classes.lst.", ex);
 	}
 
-	return classes.toArray(new Class[classes.size()]);
+	return classes.toArray(new Class<?>[classes.size()]);
     }
 
     private static boolean isJaxbClass(Class<?> c) {

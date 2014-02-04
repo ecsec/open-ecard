@@ -122,7 +122,7 @@ public final class JAXBMarshaller implements WSMarshaller {
     ////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void addXmlTypeClass(Class xmlTypeClass) throws MarshallingTypeException {
+    public void addXmlTypeClass(Class<?> xmlTypeClass) throws MarshallingTypeException {
 	marshaller.addXmlClass(xmlTypeClass);
     }
 

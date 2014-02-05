@@ -176,7 +176,7 @@ public final class JAXBMarshaller implements WSMarshaller {
 	Document newDoc = null;
 	if (n instanceof Document) {
 	    newDoc = (Document) n;
-	} else if(n instanceof Element) {
+	} else if (n instanceof Element) {
 	    newDoc = w3Builder.newDocument();
 	    Node root = newDoc.importNode(n, true);
 	    newDoc.appendChild(root);

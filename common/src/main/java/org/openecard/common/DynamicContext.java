@@ -40,7 +40,11 @@ import org.openecard.common.util.Promise;
  */
 public class DynamicContext {
 
-    private static InheritableThreadLocal<Map<String, DynamicContext>> localMap;
+    private static final InheritableThreadLocal<Map<String, DynamicContext>> localMap;
+
+    private final Map<String, Promise<Object>> context;
+
+
     static {
 	localMap = new InheritableThreadLocal<Map<String, DynamicContext>>() {
 	    @Override
@@ -58,6 +62,7 @@ public class DynamicContext {
      * Gets the thread local instance of the context.
      * If no instance exists yet, a new one is created possibly based on the one from the parent thread.
      *
+     * @param key Lookup key for the desired variable.
      * @return The DynamicContext instance of this thread.
      */
     @Nonnull
@@ -86,7 +91,6 @@ public class DynamicContext {
 	localMap.remove();
     }
 
-    private final Map<String, Promise<Object>> context;
 
     private DynamicContext() {
 	this.context = new HashMap<String, Promise<Object>>();

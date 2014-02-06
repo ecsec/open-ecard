@@ -28,8 +28,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
-import org.openecard.common.tlv.TLV;
-import org.openecard.common.tlv.TLVException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +41,6 @@ public class TR03112Utils {
 
     private static final Logger logger = LoggerFactory.getLogger(TR03112Utils.class.getName());
 
-    private static final int TAG_OCTET_STRING = 0x04;
     private static final String SHA256 = "SHA-256";
 
     /**

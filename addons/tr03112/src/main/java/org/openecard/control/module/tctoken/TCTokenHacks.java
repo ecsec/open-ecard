@@ -105,10 +105,10 @@ public class TCTokenHacks {
 	} else {
 	    x += 13;
 	}
-	String element = input.substring(x, input.indexOf("\"", x));
+	String element = input.substring(x, input.indexOf('"', x));
 
 	int y = input.indexOf("value=", x) + 7;
-	String value = input.substring(y, input.indexOf("\"", y));
+	String value = input.substring(y, input.indexOf('"', y));
 
 	out.append("<").append(element).append(">");
 	out.append(value);

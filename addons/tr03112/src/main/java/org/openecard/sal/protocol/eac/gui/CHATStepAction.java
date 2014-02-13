@@ -35,7 +35,6 @@ import org.openecard.gui.executor.StepAction;
 import org.openecard.gui.executor.StepActionResult;
 import org.openecard.gui.executor.StepActionResultStatus;
 import org.openecard.sal.protocol.eac.EACData;
-import org.openecard.sal.protocol.eac.gui.CHATStep;
 
 
 /**

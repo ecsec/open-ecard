@@ -134,7 +134,7 @@ public class CVCStep extends Step {
 	    ToggleText transactionInfoField = new ToggleText();
 	    transactionInfoField.setTitle(lang.translationForKey(TRANSACTION_INFO));
 	    transactionInfoField.setText(transactionInfo);
-	    transactionInfoField.setCollapsed(true);
+	    transactionInfoField.setCollapsed(false);
 	    getInputInfoUnits().add(transactionInfoField);
 	}
     }

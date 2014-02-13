@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -52,7 +52,7 @@ public class PINStep extends Step {
     private final I18n langEac = I18n.getTranslation("eac");
     private final I18n langPace = I18n.getTranslation("pace");
     private final String pinType;
-    private PACEMarkerType paceMarker;
+    private final PACEMarkerType paceMarker;
 
     public PINStep(EACData eacData, boolean capturePin, PACEMarkerType paceMarker) {
 	super(STEP_ID);

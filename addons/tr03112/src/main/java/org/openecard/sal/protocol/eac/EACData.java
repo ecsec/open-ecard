@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -43,6 +43,7 @@ public class EACData {
     public CardVerifiableCertificate certificate;
     public CertificateDescription certificateDescription;
     public byte[] rawCertificateDescription;
+    public String transactionInfo;
 
 
     ///

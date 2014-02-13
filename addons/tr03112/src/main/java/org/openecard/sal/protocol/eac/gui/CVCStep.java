@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -53,6 +53,7 @@ public class CVCStep extends Step {
     private static final String VALIDITY_TO = "cvc_validity_to";
     private static final String ISSUER_NAME = "cvc_issuer_name";
     private static final String ISSUER_URL = "cvc_issuer_url";
+    private static final String TRANSACTION_INFO = "transaction_info";
 
     private final I18n lang = I18n.getTranslation("eac");
     private final EACData eacData;
@@ -126,6 +127,16 @@ public class CVCStep extends Step {
 	issuerURL.setText(eacData.certificateDescription.getIssuerURL());
 	issuerURL.setCollapsed(true);
 	getInputInfoUnits().add(issuerURL);
+
+	// TransactionInfo
+	String transactionInfo = eacData.transactionInfo;
+	if (transactionInfo != null) {
+	    ToggleText transactionInfoField = new ToggleText();
+	    transactionInfoField.setTitle(lang.translationForKey(TRANSACTION_INFO));
+	    transactionInfoField.setText(transactionInfo);
+	    transactionInfoField.setCollapsed(true);
+	    getInputInfoUnits().add(transactionInfoField);
+	}
     }
 
 }

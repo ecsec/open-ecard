@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.Nullable;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
@@ -42,6 +43,7 @@ import org.w3c.dom.Element;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class EAC1InputType {
 
@@ -52,13 +54,15 @@ public class EAC1InputType {
     public static final String REQUIRED_CHAT = "RequiredCHAT";
     public static final String OPTIONAL_CHAT = "OptionalCHAT";
     public static final String AUTHENTICATED_AUXILIARY_DATA = "AuthenticatedAuxiliaryData";
+    public static final String TRANSACTION_INFO = "TransactionInfo";
 
     private final AuthDataMap authMap;
-    private ArrayList<CardVerifiableCertificate> certificates;
-    private byte[] certificateDescription;
-    private byte[] requiredCHAT;
-    private byte[] optionalCHAT;
-    private byte[] authenticatedAuxiliaryData;
+    private final ArrayList<CardVerifiableCertificate> certificates;
+    private final byte[] certificateDescription;
+    private final byte[] requiredCHAT;
+    private final byte[] optionalCHAT;
+    private final byte[] authenticatedAuxiliaryData;
+    private final String transactionInfo;
 
     /**
      * Creates a new EAC1InputType.
@@ -79,25 +83,29 @@ public class EAC1InputType {
 	    }
 	}
 
-	requiredCHAT = authMap.getContentAsBytes(REQUIRED_CHAT);
-	optionalCHAT = authMap.getContentAsBytes(OPTIONAL_CHAT);
+	byte[] requiredCHATtmp = authMap.getContentAsBytes(REQUIRED_CHAT);
+	byte[] optionalCHATtmp = authMap.getContentAsBytes(OPTIONAL_CHAT);
 	// HACK: this is only done because some eID Server vendors send raw CHAT values
 	// if not present use chat from CVC
-	if (requiredCHAT == null) {
+	if (requiredCHATtmp == null) {
 	    CardVerifiableCertificateChain certChain = new CardVerifiableCertificateChain(certificates);
 	    List<CardVerifiableCertificate> terminalCerts = certChain.getTerminalCertificates();
-	    requiredCHAT = terminalCerts.get(0).getCHAT().toByteArray();
+	    requiredCHATtmp = terminalCerts.get(0).getCHAT().toByteArray();
 	} else {
-	    requiredCHAT = fixChatValue(requiredCHAT);
+	    requiredCHATtmp = fixChatValue(requiredCHATtmp);
 	}
 	// if not present, use required as optional
-	if (optionalCHAT == null) {
-	    optionalCHAT = Arrays.copyOf(requiredCHAT, requiredCHAT.length);
+	if (optionalCHATtmp == null) {
+	    optionalCHATtmp = Arrays.copyOf(requiredCHATtmp, requiredCHATtmp.length);
 	} else {
-	    optionalCHAT = fixChatValue(optionalCHAT);
+	    optionalCHATtmp = fixChatValue(optionalCHATtmp);
 	}
+	requiredCHAT = requiredCHATtmp;
+	optionalCHAT = optionalCHATtmp;
 
 	authenticatedAuxiliaryData = authMap.getContentAsBytes(AUTHENTICATED_AUXILIARY_DATA);
+
+	transactionInfo = authMap.getContentAsString(TRANSACTION_INFO);
     }
 
     /**
@@ -143,6 +151,16 @@ public class EAC1InputType {
      */
     public byte[] getAuthenticatedAuxiliaryData() {
 	return authenticatedAuxiliaryData;
+    }
+
+    /**
+     * Gets the value from the TransactionInfo element.
+     *
+     * @return Value in the TransactionInfo element, or {@code null} if none is present.
+     */
+    @Nullable
+    public String getTransactionInfo() {
+	return transactionInfo;
     }
 
     /**

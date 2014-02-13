@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -168,6 +168,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    eacData.certificate = certChain.getTerminalCertificates().get(0);
 	    eacData.certificateDescription = certDescription;
 	    eacData.rawCertificateDescription = rawCertificateDescription;
+	    eacData.transactionInfo = eac1Input.getTransactionInfo();
 	    eacData.requiredCHAT = requiredCHAT;
 	    eacData.optionalCHAT = optionalCHAT;
 	    eacData.selectedCHAT = requiredCHAT;
@@ -340,10 +341,10 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     private boolean checkTCTokenServerCertificates(CertificateDescription certDescription, DynamicContext dynCtx) {
 	Object o = dynCtx.get(TR03112Keys.TCTOKEN_SERVER_CERTIFICATES);
 	if (o instanceof List) {
-	    List certificates = (List) o;
+	    List<?> certificates = (List<?>) o;
 	    for (Object cert : certificates) {
 		if (cert instanceof Pair) {
-		    Pair p = (Pair) cert;
+		    Pair<?, ?> p = (Pair<?, ?>) cert;
 		    if (p.p2 instanceof Certificate) {
 			Certificate bcCert = (Certificate) p.p2;
 			if (! TR03112Utils.isInCommCertificates(bcCert, certDescription.getCommCertificates())) {

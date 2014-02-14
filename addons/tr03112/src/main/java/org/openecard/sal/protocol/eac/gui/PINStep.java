@@ -46,6 +46,7 @@ public class PINStep extends Step {
     private static final String DESCRIPTION = "step_pace_description";
     private static final String DESCRIPTION_NATIVE = "step_pace_native_description";
     private static final String NOTICE = "eac_forward_notice";
+    private static final String TRANSACTION_INFO = "transaction_info";
     // GUI element IDs
     public static final String PIN_FIELD = "PACE_PIN_FIELD";
 
@@ -66,6 +67,14 @@ public class PINStep extends Step {
 	    addSoftwareElements();
 	} else {
 	    addTerminalElements();
+	}
+
+	// TransactionInfo
+	String transactionInfo = eacData.transactionInfo;
+	if (transactionInfo != null) {
+	    Text transactionInfoField = new Text();
+	    transactionInfoField.setText(langEac.translationForKey(TRANSACTION_INFO, transactionInfo));
+	    getInputInfoUnits().add(transactionInfoField);
 	}
     }
 

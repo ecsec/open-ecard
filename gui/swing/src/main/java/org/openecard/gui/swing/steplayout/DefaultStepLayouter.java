@@ -24,12 +24,12 @@ package org.openecard.gui.swing.steplayout;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -40,6 +40,7 @@ import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Radiobox;
 import org.openecard.gui.definition.TextField;
+import org.openecard.gui.swing.ScrollPanel;
 import org.openecard.gui.swing.components.AbstractInput;
 import org.openecard.gui.swing.components.Checkbox;
 import org.openecard.gui.swing.components.Hyperlink;
@@ -79,18 +80,9 @@ public class DefaultStepLayouter extends StepLayouter {
 	pageStart.setBorder(new EmptyBorder(0, 0, 15, 0));
 	rootPanel.add(pageStart, BorderLayout.PAGE_START);
 
-	GridBagLayout layout = new GridBagLayout();
-	GridBagConstraints gbc = new GridBagConstraints();
-
-	JPanel contentPanel = new JPanel();
+	final ScrollPanel contentPanel = new ScrollPanel();
 	contentPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 20));
-	contentPanel.setLayout(layout);
-
-	gbc.fill = GridBagConstraints.HORIZONTAL;
-	gbc.anchor = GridBagConstraints.WEST;
-	gbc.weightx = 0.5;
-	gbc.gridwidth = GridBagConstraints.REMAINDER;
-	gbc.insets = new Insets(0, 0, 10, 0);
+	contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
 	// Create content
 	for (InputInfoUnit next : infoUnits) {
@@ -126,20 +118,16 @@ public class DefaultStepLayouter extends StepLayouter {
 	    }
 	    if (nextComponent != null) {
 		components.add(nextComponent);
-		contentPanel.add(nextComponent.getComponent(), gbc);
+		contentPanel.add(nextComponent.getComponent());
+		contentPanel.add(Box.createRigidArea(new Dimension(0, 6)));
 	    }
 	}
 
-	// Add empty dummy element
-	gbc.weighty = 1.0;
-	contentPanel.add(new JLabel(), gbc);
+	JScrollPane scrollPane = new JScrollPane(contentPanel);
+	scrollPane.setBorder(BorderFactory.createEmptyBorder());
+	scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-	JScrollPane pane = new JScrollPane(contentPanel);
-	pane.setBorder(BorderFactory.createEmptyBorder());
-	pane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-	layout.setConstraints(pane, gbc);
-
-	rootPanel.add(pane, BorderLayout.CENTER);
+	rootPanel.add(scrollPane, BorderLayout.CENTER);
     }
 
     @Override

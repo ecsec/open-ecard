@@ -88,7 +88,7 @@ public interface UserConsentNavigator {
      *
      * @param action Future of the StepAction that is executed next.
      */
-    void setRunningAction(Future action);
+    void setRunningAction(Future<?> action);
 
     /**
      * Closes the open dialog.

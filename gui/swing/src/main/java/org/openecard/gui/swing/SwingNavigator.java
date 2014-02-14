@@ -58,7 +58,7 @@ public class SwingNavigator implements UserConsentNavigator, ActionListener {
     private final String dialogType;
 
     private int stepPointer;
-    private Future action;
+    private Future<?> action;
 
 
     public SwingNavigator(DialogWrapper dialogWrapper, String dialogType, List<Step> steps, Container stepContainer,
@@ -173,7 +173,7 @@ public class SwingNavigator implements UserConsentNavigator, ActionListener {
 
 
     @Override
-    public void setRunningAction(Future action) {
+    public void setRunningAction(Future<?> action) {
 	this.action = action;
     }
 

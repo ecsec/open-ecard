@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -50,7 +50,7 @@ public class SwingDialogWrapper implements DialogWrapper {
     public Container getContentPane() {
 	dialog = new JFrame();
 	dialog.setTitle(title);
-	dialog.setSize(640, 480);
+	dialog.setSize(690, 500);
 	dialog.setLocationRelativeTo(null);
 	dialog.setIconImage(GUIDefaults.getImage("Frame.icon", 45, 45).getImage());
 	dialog.setVisible(false);

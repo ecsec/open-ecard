@@ -25,7 +25,6 @@ package org.openecard.gui.swing.common;
 import java.awt.event.ActionEvent;
 
 
-
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>

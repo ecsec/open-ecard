@@ -54,11 +54,11 @@ public class StepFrame {
     private static final Logger logger = LoggerFactory.getLogger(StepFrame.class);
     private static final long serialVersionUID = 1L;
 
-    private JPanel panel;
-    private Step step;
+    private final JPanel panel;
+    private final Step step;
+    private final String dialogType;
     private SwingStepResult stepResult;
     private List<StepComponent> components;
-    private String dialogType;
 
     public StepFrame(Step step, String dialogType) {
 	this.panel = new JPanel();

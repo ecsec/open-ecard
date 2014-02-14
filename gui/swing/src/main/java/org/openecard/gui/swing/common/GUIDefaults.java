@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -52,7 +52,8 @@ public class GUIDefaults {
     // Swing UIDefaults
     private static final UIDefaults defaults = UIManager.getDefaults();
     private static final UIDefaults ownDefaults = new UIDefaults();
-    private static ArrayList<String> colorProperties = new ArrayList<String>() {
+    private static final ArrayList<String> colorProperties = new ArrayList<String>() {
+	private static final long serialVersionUID = 1L;
 	{
 	    add("foreground");
 	    add("background");
@@ -61,14 +62,16 @@ public class GUIDefaults {
 	    add("disabledText");
 	}
     };
-    private static ArrayList<String> fontProperties = new ArrayList<String>() {
+    private static final ArrayList<String> fontProperties = new ArrayList<String>() {
+	private static final long serialVersionUID = 1L;
 	{
 	    add("font");
 	    add("titleFont");
 	    add("acceleratorFont");
 	}
     };
-    private static ArrayList<String> iconProperties = new ArrayList<String>() {
+    private static final ArrayList<String> iconProperties = new ArrayList<String>() {
+	private static final long serialVersionUID = 1L;
 	{
 	    add("icon");
 	    add("selectedIcon");
@@ -129,7 +132,7 @@ public class GUIDefaults {
 		String property = (String) entry.getKey();
 
 		try {
-		    String propertyName = property.substring(0, property.indexOf("."));
+		    String propertyName = property.substring(0, property.indexOf('.'));
 		    String propertyAttribute = property.substring(propertyName.length() + 1, property.length());
 		    String value = (String) entry.getValue();
 

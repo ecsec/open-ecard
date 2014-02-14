@@ -157,10 +157,7 @@ public class ToggleText implements StepComponent {
 	if (fgIndicator == null) {
 	    fgIndicator = Color.LIGHT_GRAY;
 	}
-	Font font = (Font) defaults.get(TOGGLETEXT_FONT);
-	if (font == null) {
-	    font = button.getFont();
-	}
+	Font font = UIManager.getFont("Label.font");
 
 	button.setOpaque(true);
 	button.setFocusPainted(false);
@@ -176,7 +173,7 @@ public class ToggleText implements StepComponent {
 	text.setEditable(false);
 	text.setLineWrap(true);
 	text.setWrapStyleWord(true);
-	text.setFont(font);
+	text.setFont(font.deriveFont(Font.PLAIN));
 
 	rootPanel.setBackground(bg);
 	rootPanel.setForeground(fg);

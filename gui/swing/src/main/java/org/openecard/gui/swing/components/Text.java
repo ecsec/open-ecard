@@ -23,9 +23,11 @@
 package org.openecard.gui.swing.components;
 
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Insets;
-import javax.swing.JButton;
-import javax.swing.JTextArea;
+import javax.swing.JTextPane;
+import javax.swing.UIManager;
+import javax.swing.text.html.HTMLDocument;
 import org.openecard.gui.definition.OutputInfoUnit;
 
 
@@ -36,15 +38,25 @@ import org.openecard.gui.definition.OutputInfoUnit;
  */
 public class Text implements StepComponent {
 
-    private JTextArea textArea;
+    private final JTextPane textArea;
 
     public Text(org.openecard.gui.definition.Text text) {
-	textArea = new JTextArea(text.getText());
+	String textValue = text.getText();
+	if (! (textValue.startsWith("<html>") && textValue.endsWith("</html>"))) {
+	    textValue = "<html><body>" + textValue + "</body></html>";
+	}
+
+	textArea = new JTextPane();
+	textArea.setContentType("text/html");
 	textArea.setMargin(new Insets(0, 0, 0, 0));
 	textArea.setEditable(false);
-	textArea.setLineWrap(true);
-	textArea.setWrapStyleWord(true);
-	textArea.setFont(new JButton().getFont());
+
+	Font font = UIManager.getFont("Label.font");
+	String bodyRule = "body { font-family: " + font.getFamily() + "; " + "font-size: " + font.getSize() + "pt; }";
+	HTMLDocument doc = (HTMLDocument) textArea.getDocument();
+	doc.getStyleSheet().addRule(bodyRule);
+
+	textArea.setText(textValue);
     }
 
     @Override

@@ -1,48 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-	<groupId>org.openecard</groupId>
-	<artifactId>addons</artifactId>
-	<version>1.1.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>org.openecard</groupId>
+		<artifactId>addons</artifactId>
+		<version>1.1.0-SNAPSHOT</version>
+	</parent>
 
-    <groupId>org.openecard.addons</groupId>
-    <artifactId>tr03112</artifactId>
-    <packaging>jar</packaging>
-    <name>TR-03112 Add-on</name>
+	<groupId>org.openecard.addons</groupId>
+	<artifactId>tr03112</artifactId>
+	<packaging>jar</packaging>
+	<name>TR-03112 Add-on</name>
 
-    <dependencies>
-	<dependency>
-	    <groupId>org.openecard.wsdef</groupId>
-	    <artifactId>wsdef-client</artifactId>
-	    <version>${project.version}</version>
-	    <scope>provided</scope>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.crypto</groupId>
-	    <artifactId>tls</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.ifd</groupId>
-	    <artifactId>ifd-common</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.sal</groupId>
-	    <artifactId>sal-common</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
+	<dependencies>
+		<dependency>
+			<groupId>org.openecard.wsdef</groupId>
+			<artifactId>wsdef-client</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.crypto</groupId>
+			<artifactId>tls</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.ifd</groupId>
+			<artifactId>ifd-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.sal</groupId>
+			<artifactId>sal-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-	<dependency>
-	    <groupId>org.openecard.transport</groupId>
-	    <artifactId>http-core</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-    </dependencies>
+		<dependency>
+			<groupId>org.openecard.transport</groupId>
+			<artifactId>http-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 
 </project>

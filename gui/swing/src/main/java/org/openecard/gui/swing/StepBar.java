@@ -23,6 +23,7 @@
 package org.openecard.gui.swing;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.net.URL;
@@ -31,6 +32,7 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 import org.openecard.common.util.FileUtils;
 import org.openecard.gui.definition.Step;
 import org.slf4j.Logger;
@@ -137,8 +139,10 @@ public final class StepBar extends JPanel {
 	gbc.gridwidth = GridBagConstraints.REMAINDER;
 	gbc.weightx = 1.0;
 
-	for (String names : getStepNames(steps)) {
-	    JLabel l = new JLabel(names);
+	Font font = UIManager.getFont("Label.font").deriveFont(Font.PLAIN);
+	for (String name : getStepNames(steps)) {
+	    JLabel l = new JLabel(name);
+	    l.setFont(font);
 	    labels.add(l);
 	    l.setIconTextGap(10);
 	    l.setHorizontalTextPosition(JLabel.LEFT);

@@ -62,19 +62,19 @@ public class PINStep extends Step {
 	setTitle(langPace.translationForKey(TITLE, pinType));
 	setDescription(langPace.translationForKey(DESCRIPTION, pinType));
 
-	// create step elements
-	if (capturePin) {
-	    addSoftwareElements();
-	} else {
-	    addTerminalElements();
-	}
-
 	// TransactionInfo
 	String transactionInfo = eacData.transactionInfo;
 	if (transactionInfo != null) {
 	    Text transactionInfoField = new Text();
 	    transactionInfoField.setText(langEac.translationForKey(TRANSACTION_INFO, transactionInfo));
 	    getInputInfoUnits().add(transactionInfoField);
+	}
+
+	// create step elements
+	if (capturePin) {
+	    addSoftwareElements();
+	} else {
+	    addTerminalElements();
 	}
     }
 

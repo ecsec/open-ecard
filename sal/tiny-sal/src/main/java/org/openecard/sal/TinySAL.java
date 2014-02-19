@@ -138,7 +138,6 @@ import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.Select;
-import org.openecard.common.apdu.Select.MasterFile;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.utils.CardUtils;
@@ -598,25 +597,7 @@ public class TinySAL implements SAL {
 
 	    byte[] fileID = dataSetInfo.getDataSetPath().getEfIdOrPath();
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
-	    Select selectEF;
-	    CardResponseAPDU result = null;
-
-	    int i = 0;
-	    while (i < fileID.length) {
-		if (fileID[0] == (byte) 0x3F && fileID[1] == (byte) 0x00) {
-		    selectEF = new MasterFile();
-		    i = i + 2;
-		} else if (i == fileID.length - 2) {
-		    selectEF = new Select.ChildFile(new byte[] {fileID[i], fileID[i + 1]});
-		    selectEF.setFCP();
-		    i = i + 2;
-		} else {
-		    selectEF = new Select.ChildDirectory(new byte[] {fileID[i], fileID[i + 1]});
-		    i = i + 2;
-		}
-
-		result = selectEF.transmit(env.getDispatcher(), slotHandle);
-	    }
+	    CardResponseAPDU result = CardUtils.selectFile(env.getDispatcher(), slotHandle, fileID);
 
 	    if (result != null) {
 		cardStateEntry.setFCPOfSelectedEF(new FCP(result.getData()));

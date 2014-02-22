@@ -23,11 +23,6 @@
 	<sign.keypass>123456</sign.keypass>
 	<sign.alias>selfsigned</sign.alias>
 
-	<wininstall.resources.dir>${basedir}/src/main/windows-installer</wininstall.resources.dir>
-	<wininstall.tmp.dirname>wix-tmp</wininstall.tmp.dirname>
-	<wininstall.tmp.dir>${project.build.directory}/${wininstall.tmp.dirname}</wininstall.tmp.dir>
-
-	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	<packaging.type>jar</packaging.type>
 
 	<application.name>Open eCard App</application.name>
@@ -138,101 +133,6 @@
 			    <stripDebugAttributes>true</stripDebugAttributes>
 			</configuration>
 			<extensions>true</extensions>
-		    </plugin>
-		</plugins>
-	    </build>
-	</profile>
-	<profile>
-	    <id>windows-installer</id>
-	    <build>
-		<plugins>
-		    <plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-antrun-plugin</artifactId>
-			<executions>
-			    <execution>
-				<id>antrun</id>
-				<phase>package</phase>
-				<configuration>
-				    <target>
-					<property name="version" value="${project.build.version}" />
-					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/Open-eCard-Logo.ico" />
-					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/WixUIDialog.bmp" />
-					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/WixUIBanner.bmp" />
-					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/WindowsInstallerTexts.de-de.wxl" />
-					<copy todir="${wininstall.tmp.dir}" file="${wininstall.resources.dir}/License.de-de.rtf" />
-					<copy todir="${wininstall.tmp.dir}/lib" flatten="true">
-					    <path>
-						<path refid="maven.runtime.classpath" />
-						<pathelement location="${project.build.directory}/${project.build.finalName}.${project.packaging}" />
-					    </path>
-					</copy>
-
-
-					<!-- build dependency string for replacement in WIX configuration file -->
-					<fileset id="alljars.fileset" dir="${wininstall.tmp.dir}/lib" includes="*.jar" />
-					<pathconvert pathsep=";" property="alljars.property" refid="alljars.fileset">
-					    <mapper type="flatten" />
-					</pathconvert>
-					<echo file="${wininstall.tmp.dir}/filelist.tmp">${alljars.property}</echo>
-					<replaceregexp file="${wininstall.tmp.dir}/filelist.tmp" match="\A" replace="&lt;File Source='lib/"/>
-					<replaceregexp file="${wininstall.tmp.dir}/filelist.tmp" match=";" replace="'/>&lt;File Source='lib/" flags="g" />
-					<replaceregexp file="${wininstall.tmp.dir}/filelist.tmp" match="\Z" replace="'/>"/>
-					<loadfile property="all_jars" srcfile="${wininstall.tmp.dir}/filelist.tmp" />
-
-					<!-- build windows conforming version number string -->
-					<echo file="${wininstall.tmp.dir}/version_number.txt">${project.version}</echo>
-					<replaceregexp file="${wininstall.tmp.dir}/version_number.txt" match="((\d)*(\.(\d)*){0,3})(.*)" replace="\1"/>
-					<loadfile property="version_number" srcfile="${wininstall.tmp.dir}/version_number.txt" />
-
-					<!-- replace variables in wix config file -->
-					<copy tofile="${wininstall.tmp.dir}/WindowsInstaller.wxs"
-					      file="${wininstall.resources.dir}/WindowsInstaller.wxs">
-					    <filterset>
-						<filter token="ALL_JARS" value="${all_jars}" />
-						<filter token="VERSION" value="${project.version}" />
-						<filter token="VERSION_NUMBER" value="${version_number}" />
-					    </filterset>
-					</copy>
-				    </target>
-				</configuration>
-				<goals>
-				    <goal>run</goal>
-				</goals>
-			    </execution>
-			</executions>
-		    </plugin>
-		    <plugin>
-			<groupId>org.apache.npanday.plugins</groupId>
-			<artifactId>wix-maven-plugin</artifactId>
-			<configuration>
-			    <sourceFiles>
-				<sourceFile>${wininstall.tmp.dir}/WindowsInstaller.wxs</sourceFile>
-			    </sourceFiles>
-			    <outputDirectory>${wininstall.tmp.dir}</outputDirectory>
-			    <objectFiles>
-				<objectFile>${wininstall.tmp.dir}/WindowsInstaller.wixobj</objectFile>
-			    </objectFiles>
-			    <outputFile>${project.build.directory}/${project.build.finalName}.msi</outputFile>
-			    <arguments>-sice:ICE57 -cultures:de-de</arguments>
-			    <localizationFiles>
-				<localizationFile>${wininstall.tmp.dir}/WindowsInstallerTexts.de-de.wxl</localizationFile>
-			    </localizationFiles>
-			    <extensions>
-				<extension>WixUIExtension</extension>
-				<extension>WixUtilExtension</extension>
-			    </extensions>
-			</configuration>
-			<executions>
-			    <execution>
-				<id>wix</id>
-				<phase>package</phase>
-				<goals>
-				    <goal>candle</goal>
-				    <goal>light</goal>
-				</goals>
-			    </execution>
-			</executions>
 		    </plugin>
 		</plugins>
 	    </build>

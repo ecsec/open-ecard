@@ -22,6 +22,7 @@
 
 package org.openecard.control.binding.http.common;
 
+import java.util.Locale;
 import org.openecard.apache.http.Header;
 import org.openecard.apache.http.HeaderIterator;
 import org.openecard.apache.http.HttpEntity;
@@ -86,7 +87,10 @@ public class Http11Response extends BasicHttpResponse {
 	}
 
 	// copy rest
-	out.setLocale(in.getLocale());
+	Locale l = in.getLocale();
+	if (l != null) {
+	    out.setLocale(l);
+	}
 	out.setStatusLine(in.getStatusLine());
     }
 

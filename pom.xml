@@ -655,7 +655,14 @@
 		<plugin>
 			<groupId>org.jvnet.jax-ws-commons</groupId>
 			<artifactId>jaxws-maven-plugin</artifactId>
+			<!-- path quating fixed in unreleased version 2.3.1  -->
+			<!-- https://java.net/jira/browse/JAX_WS_COMMONS-113 -->
 			<version>2.3</version>
+		</plugin>
+		<plugin>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>jaxws-maven-plugin</artifactId>
+			<version>1.12</version>
 		</plugin>
 	    </plugins>
 	</pluginManagement>

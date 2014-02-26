@@ -25,8 +25,6 @@ package org.openecard.addons.status;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -37,8 +35,6 @@ import org.slf4j.LoggerFactory;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public final class StatusRequest {
-
-    private static final Logger logger = LoggerFactory.getLogger(StatusRequest.class);
 
     private final String sessionIdentifier;
 

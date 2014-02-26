@@ -46,20 +46,20 @@ public final class WaitForChangeResponse extends BindingResult {
 	if (status == null) {
 	    setResultCode(BindingResultCode.RESOURCE_UNAVAILABLE);
 	    setResultMessage("The requested session does not exist.");
-	}
+	} else {
+	    try {
+		WSMarshaller m = WSMarshallerFactory.createInstance();
+		m.removeAllTypeClasses();
+		m.addXmlTypeClass(StatusChange.class);
 
-	try {
-	    WSMarshaller m = WSMarshallerFactory.createInstance();
-	    m.removeAllTypeClasses();
-	    m.addXmlTypeClass(StatusChange.class);
-
-	    Node xml = m.marshal(status);
-	    Body body = new Body(xml, "text/xml");
-	    setBody(body);
-	    setResultCode(BindingResultCode.OK);
-	} catch (WSMarshallerException ex) {
-	    setResultCode(BindingResultCode.INTERNAL_ERROR);
-	    setResultMessage("Failed to marshal StatusChange message.\n  " + ex.getMessage());
+		Node xml = m.marshal(status);
+		Body body = new Body(xml, "text/xml");
+		setBody(body);
+		setResultCode(BindingResultCode.OK);
+	    } catch (WSMarshallerException ex) {
+		setResultCode(BindingResultCode.INTERNAL_ERROR);
+		setResultMessage("Failed to marshal StatusChange message.\n  " + ex.getMessage());
+	    }
 	}
     }
 

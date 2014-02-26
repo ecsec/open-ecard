@@ -26,11 +26,21 @@ import org.openecard.common.enums.EventType;
 
 
 /**
+ * Interface for event callback handlers.
+ * This interface must be implemented by a callback registering itself in the event system.
  *
+ * @see EventManager
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
  */
 public interface EventCallback {
 
+    /**
+     * Callback funtion for IFD events.
+     * This function gets called for each registered event in the {@link EventManager}.
+     *
+     * @param eventType Type of the event.
+     * @param eventData Data describing the event further.
+     */
     void signalEvent(EventType eventType, Object eventData);
 
 }

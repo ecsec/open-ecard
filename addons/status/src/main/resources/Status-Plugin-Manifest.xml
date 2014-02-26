@@ -2,24 +2,30 @@
 <AddonSpecification>
   <ID>Status</ID>
   <Version>1.0</Version>
-  <License/>
-  <LocalizedName xml:lang="DE">Plugin für die eID Aktivierung</LocalizedName>
-  <LocalizedDescription xml:lang="DE">Testbeschreibung</LocalizedDescription>
-  <About xml:lang="EN">Status functionality belonging to the Open eCard core.</About>
+  <License>GPL v3 or proprietary License agreement</License>
+  <LocalizedName xml:lang="EN">Status Plugin</LocalizedName>
+  <LocalizedDescription xml:lang="EN">
+	  Capability status and status information of the available cards.
+  </LocalizedDescription>
+  <About xml:lang="EN">Status plugin built into the Open eCard core.</About>
   <Logo/>
   <ConfigDescription/>
   <BindingActions>
     <AppPluginSpecification>
-      <ClassName>org.openecard.control.module.status.StatusAction</ClassName>
-      <LocalizedName xml:lang="DE">TODO</LocalizedName>
-      <LocalizedDescription xml:lang="DE">TODO</LocalizedDescription>
+      <ClassName>org.openecard.addons.status.StatusAction</ClassName>
+      <LocalizedName xml:lang="EN">Status</LocalizedName>
+      <LocalizedDescription xml:lang="EN">
+		  Function returning the current status and possibly registering a session for wait for change messages.
+	  </LocalizedDescription>
       <ResourceName>getStatus</ResourceName>
       <ConfigDescription/>
     </AppPluginSpecification>
     <AppPluginSpecification>
-      <ClassName>org.openecard.control.module.status.WaitForChangeAction</ClassName>
-      <LocalizedName xml:lang="DE">TODO</LocalizedName>
-      <LocalizedDescription xml:lang="DE">TODO</LocalizedDescription>
+      <ClassName>org.openecard.addons.status.WaitForChangeAction</ClassName>
+      <LocalizedName xml:lang="EN">Wait for Change</LocalizedName>
+      <LocalizedDescription xml:lang="DE">
+		  Function blocking until an event occurs. This function needs a previously registered session.
+	  </LocalizedDescription>
       <ResourceName>waitForChange</ResourceName>
       <ConfigDescription/>
     </AppPluginSpecification>

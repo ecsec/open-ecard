@@ -75,7 +75,7 @@ public class AddonManager {
 	this.cardStates = cardStates;
 	this.recognition = recognition;
 	this.eventManager = eventManager;
-	eventHandler = new EventHandler(eventManager);
+	this.eventHandler = new EventHandler(eventManager);
     }
 
     /**

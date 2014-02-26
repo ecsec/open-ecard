@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,32 +20,36 @@
  *
  ***************************************************************************/
 
-package org.openecard.control.module.status;
+package org.openecard.addons.status;
 
 
 /**
+ * Implements an exception for connector errors.
  *
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public final class StatusChangeRequest {
+public class StatusException extends RuntimeException {
 
-    private final String sessionIdentifier;
+    private static final long serialVersionUID = 1L;
 
     /**
-     * Create a new StatusChangeReuquest.
-     * @param sessionIdentfier session identifier
+     * Create a new StatusException.
+     *
+     * @param message Message
      */
-    public StatusChangeRequest(String sessionIdentfier) {
-	this.sessionIdentifier = sessionIdentfier;
+    public StatusException(String message) {
+	super(message);
     }
 
     /**
-     * Returns the session identifier.
-     * @return the session identifier
+     * Create a new StatusException.
+     *
+     * @param message Message
+     * @param throwable Throwable
      */
-    public String getSessionIdentifier() {
-	return sessionIdentifier;
+    public StatusException(String message, Throwable throwable) {
+	super(message, throwable);
     }
 
 }

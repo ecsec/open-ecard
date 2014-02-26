@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,23 +20,26 @@
  *
  ***************************************************************************/
 
-package org.openecard.control.module.status;
+package org.openecard.addons.status;
 
 import iso.std.iso_iec._24727.tech.schema.CardApplicationType;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
-import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
+import javax.annotation.Nonnull;
+import org.openecard.addon.AddonManager;
+import org.openecard.addon.AddonRegistry;
+import org.openecard.addon.Context;
 import org.openecard.addon.EventHandler;
+import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.common.Version;
+import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.recognition.CardRecognition;
@@ -47,47 +50,39 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Handles the generic part of status requests.
+ * Handles the status request.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class StatusHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(StatusHandler.class);
 
-    private CardStateMap cardStates;
-    private EventHandler eventHandler;
-    private List<String> protocols;
-    private CardRecognition rec;
+    private final CardStateMap cardStates;
+    private final Dispatcher dispatcher;
+    private final EventHandler eventHandler;
+    private final List<String> protocols;
+    private final CardRecognition rec;
 
-    /**
-     * Create a new StatusHandler.
-     *
-     * @param cardStates CardStateMap of the client for querying all ConnectionHandles
-     * @param eventHandler for adding eventQueues
-     * @param protocols
-     * @param rec 
-     */
-    public StatusHandler(CardStateMap cardStates, EventHandler eventHandler, List<String> protocols, CardRecognition rec) {
-	this.cardStates = cardStates;
-	this.eventHandler = eventHandler;
-	this.protocols = protocols;
-	this.rec = rec;
+
+    public StatusHandler(Context ctx) {
+	cardStates = ctx.getCardStates();
+	dispatcher = ctx.getDispatcher();
+	eventHandler = ctx.getEventHandler();
+	protocols = getProtocolInfo(ctx.getManager());
+	rec = ctx.getRecognition();
     }
 
     /**
-     * Handles a Status-Request by returning a status including list of all known ConnectionHandles (including
-     * unrecognized cards).
+     * Handles a Status-Request by returning a status message describing the capabilities if the App.
      *
-     * @param statusRequest Status Request containing an optional session identifier
-     * @return Status including list of all known ConnectionHandles
+     * @param statusRequest Status Request possibly containing a session identifier for event registration.
+     * @return Status message.
      */
-    public Status handleRequest(StatusRequest statusRequest) {
-	String sessionIdentifier = statusRequest.getSessionIdentifier();
+    public StatusResponse handleRequest(StatusRequest statusRequest) {
 	Status status = new Status();
-	ConnectionHandleType handle = new ConnectionHandleType();
 
-	// fill in static values
 	// user agent
 	StatusType.UserAgent ua = new StatusType.UserAgent();
 	ua.setName("Open eCard App");
@@ -95,71 +90,37 @@ public class StatusHandler {
 	ua.setVersionMinor(BigInteger.valueOf(Version.getMinor()));
 	ua.setVersionSubminor(BigInteger.valueOf(Version.getPatch()));
 	status.setUserAgent(ua);
+
 	// API versions
 	StatusType.SupportedAPIVersions apiVersion = new StatusType.SupportedAPIVersions();
 	apiVersion.setName("http://www.bsi.bund.de/ecard/api");
 	apiVersion.setVersionMajor(BigInteger.ONE);
 	apiVersion.setVersionMinor(BigInteger.ONE);
 	status.getSupportedAPIVersions().add(apiVersion);
-	// TODO: supported cards
+
+	// supported cards
 	List<CardInfoType> cifs = rec.getCardInfos();
 	List<StatusType.SupportedCards> supportedCards = getSupportedCards(protocols, cifs);
 	status.getSupportedCards().addAll(supportedCards);
+
 	// supported DID protocols
 	status.getSupportedDIDProtocols().addAll(protocols);
+
 	// TODO: additional features
 
-	if (sessionIdentifier != null) {
-	    ChannelHandleType channelHandle = new ChannelHandleType();
-	    channelHandle.setSessionIdentifier(sessionIdentifier);
-	    handle.setChannelHandle(channelHandle);
+	// add available cards
+	status.getConnectionHandle().addAll(getCardHandles());
+
+	// register session for wait for change
+	if (statusRequest.hasSessionIdentifier()) {
+	    String sessionIdentifier = statusRequest.getSessionIdentifier();
 	    eventHandler.addQueue(sessionIdentifier);
 	}
 
-	Set<CardStateEntry> entries = this.cardStates.getMatchingEntries(handle);
-
-	for (CardStateEntry entry : entries) {
-	    status.getConnectionHandle().add(entry.handleCopy());
-	}
-
-	return status;
+	return new StatusResponse(status);
     }
 
-    /**
-     *
-     * @param requestURI Status request URI
-     * @return StatusRequest containing an optional session identifier
-     * @throws UnsupportedEncodingException
-     * @throws MalformedURLException If mandatory parameters or values are missing
-     */
-    public StatusRequest parseStatusRequestURI(URI requestURI) throws UnsupportedEncodingException,
-	    MalformedURLException {
-	StatusRequest statusRequest = new StatusRequest();
-
-	if (requestURI.getQuery() == null) {
-	    return statusRequest;
-	}
-
-	String[] query = requestURI.getQuery().split("&");
-
-	for (String q : query) {
-	    String name = q.substring(0, q.indexOf('='));
-	    String value = q.substring(q.indexOf('=') + 1, q.length());
-
-	    if (name.startsWith("session")) {
-		if (!value.isEmpty()) {
-		    value = URLDecoder.decode(value, "UTF-8");
-		    statusRequest.setSessionIdentifier(value);
-		} else {
-		    throw new MalformedURLException("Value for session parameter is missing.");
-		}
-	    } else {
-		logger.debug("Unknown query element: {}", name);
-	    }
-	}
-	return statusRequest;
-    }
-
+    @Nonnull
     private static List<StatusType.SupportedCards> getSupportedCards(List<String> protocols, List<CardInfoType> cifs) {
 	List<StatusType.SupportedCards> result = new ArrayList<StatusType.SupportedCards>();
 
@@ -178,6 +139,35 @@ public class StatusHandler {
 		    }
 		}
 	    }
+	}
+
+	return result;
+    }
+
+    @Nonnull
+    private List<String> getProtocolInfo(AddonManager manager) {
+	TreeSet<String> result = new TreeSet<String>();
+
+	// check all sal protocols in the
+	AddonRegistry registry = manager.getRegistry();
+	Set<AddonSpecification> addons = registry.listAddons();
+	for (AddonSpecification addon : addons) {
+	    for (ProtocolPluginSpecification proto : addon.getSalActions()) {
+		result.add(proto.getUri());
+	    }
+	}
+
+	return new ArrayList<String>(result);
+    }
+
+    @Nonnull
+    private List<ConnectionHandleType> getCardHandles() {
+	ConnectionHandleType handle = new ConnectionHandleType();
+	Set<CardStateEntry> entries = cardStates.getMatchingEntries(handle, false);
+
+	ArrayList<ConnectionHandleType> result = new ArrayList<ConnectionHandleType>(entries.size());
+	for (CardStateEntry entry : entries) {
+	    result.add(entry.handleCopy());
 	}
 
 	return result;

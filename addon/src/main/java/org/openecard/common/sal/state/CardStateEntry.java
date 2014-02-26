@@ -60,12 +60,12 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
     }
 
     private final int serialNumber;
-    private Set<DIDInfoType> authenticatedDIDs = new HashSet<DIDInfoType>();
+    private final Set<DIDInfoType> authenticatedDIDs = new HashSet<DIDInfoType>();
 
     private final ConnectionHandleType handle;
 
     private final CardInfoWrapper infoObject;
-    private Map<String, SALProtocol> protoObjects = new TreeMap<String, SALProtocol>();
+    private final Map<String, SALProtocol> protoObjects = new TreeMap<String, SALProtocol>();
     private FCP lastSelectedEfFCP;
 
     public CardStateEntry(ConnectionHandleType handle, CardInfoType cif) {
@@ -117,8 +117,8 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 
     public boolean matchSlotIdx(BigInteger idx) {
 	BigInteger otherIdx = handle.getSlotIndex();
-	if (idx != null && otherIdx != null && otherIdx.equals(idx)) {
-	    return true;
+	if (idx != null && otherIdx != null) {
+	    return otherIdx.equals(idx);
 	}
 	return false;
     }
@@ -182,11 +182,8 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
     }
 
     public boolean isAuthenticated(String didName, byte[] cardApplication) {
-	if (this.getAuthenticatedDIDs().contains(this.infoObject.getDIDInfo(didName, cardApplication))) {
-	    return true;
-	} else {
-	    return false;
-	}
+	DIDInfoType didInfo = infoObject.getDIDInfo(didName, cardApplication);
+	return getAuthenticatedDIDs().contains(didInfo);
     }
 
     private boolean checkSecurityCondition(SecurityConditionType securityCondition) {

@@ -44,7 +44,7 @@ public class EventRunner implements Callable<Void> {
     private final EventManager evtManager;
 
     private List<IFDStatusType> oldStati;
-    private Future wait;
+    private Future<Boolean> wait;
 
     public EventRunner(EventManager evtManager) {
 	this.evtManager = evtManager;

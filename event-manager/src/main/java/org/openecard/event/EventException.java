@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -27,6 +27,7 @@ import org.openecard.common.ECardException;
 
 
 /**
+ * Exception describing an error in the event system.
  *
  * @author Johannes.Schmoelz <johannes.schmoelz@ecsec.de>
  */

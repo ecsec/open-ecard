@@ -41,7 +41,7 @@ public class Dispatcher {
 
     private static class EventTypeFilter implements EventFilter {
 
-	private ArrayList<EventType> eventType;
+	private final ArrayList<EventType> eventType;
 
 	public EventTypeFilter(EventType ... eventType) {
 	    if (eventType.length == 0) {

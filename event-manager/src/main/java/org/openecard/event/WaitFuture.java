@@ -53,7 +53,7 @@ public class WaitFuture implements Callable<Boolean> {
 	WaitResponse waitResponse = evtManager.env.getIFD().wait(wait);
 	try {
 	    WSHelper.checkResult(waitResponse);
-	    return !waitResponse.getIFDEvent().isEmpty();
+	    return ! waitResponse.getIFDEvent().isEmpty();
 	} catch (WSException ex) {
 	    _logger.warn(ex.getMessage(), ex);
 	    return false;

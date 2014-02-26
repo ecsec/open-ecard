@@ -71,7 +71,7 @@ public class EventManager implements org.openecard.common.interfaces.EventManage
     private final Dispatcher dispatcher;
 
     protected ExecutorService threadPool;
-    private Future watcher;
+    private Future<Void> watcher;
 
 
     public EventManager(CardRecognition cr, Environment env, byte[] ctx) {

@@ -22,56 +22,50 @@
 
 package org.openecard.event;
 
-import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import iso.std.iso_iec._24727.tech.schema.GetStatus;
 import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
-import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import javax.annotation.Nonnull;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
-import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.enums.EventType;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventFilter;
+import org.openecard.common.util.HandlerBuilder;
 import org.openecard.common.util.ValueGenerators;
 import org.openecard.recognition.CardRecognition;
-import org.openecard.recognition.RecognitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
+ * Main class of the event system.
+ * Use this to create and operate an event manager.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class EventManager implements org.openecard.common.interfaces.EventManager {
 
-    private static final Logger _logger = LoggerFactory.getLogger(EventManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(EventManager.class);
 
     protected final CardRecognition cr;
     protected final Environment env;
     protected final byte[] ctx;
     protected final String sessionId;
     protected final boolean recognize;
-
-    private final Dispatcher dispatcher;
+    private final HandlerBuilder builder;
+    private final EventDispatcher dispatcher;
 
     protected ExecutorService threadPool;
-    private Future<Void> watcher;
+
+    private Future<?> watcher;
 
 
     public EventManager(CardRecognition cr, Environment env, byte[] ctx) {
@@ -80,7 +74,25 @@ public class EventManager implements org.openecard.common.interfaces.EventManage
 	this.env = env;
 	this.ctx = ctx;
 	this.sessionId = ValueGenerators.generateSessionID();
-	this.dispatcher = new Dispatcher(this);
+	this.builder = HandlerBuilder.create()
+		.setContextHandle(ctx)
+		.setSessionId(sessionId);
+	this.dispatcher = new EventDispatcher(this);
+    }
+
+    @Override
+    public synchronized Object initialize() {
+	threadPool = Executors.newCachedThreadPool();
+	// start watcher thread
+	watcher = threadPool.submit(new EventRunner(this, builder));
+	// TODO: remove return value altogether
+	return new ArrayList<ConnectionHandleType>();
+    }
+
+    @Override
+    public synchronized void terminate() {
+	watcher.cancel(true);
+	threadPool.shutdownNow();
     }
 
 
@@ -95,138 +107,6 @@ public class EventManager implements org.openecard.common.interfaces.EventManage
 	return result;
     }
 
-
-    private ConnectionHandleType makeConnectionHandle(String ifdName) {
-	return makeConnectionHandle(ifdName, null, null);
-    }
-
-    private ConnectionHandleType makeConnectionHandle(String ifdName, BigInteger slotIdx) {
-	return makeConnectionHandle(ifdName, slotIdx, null);
-    }
-
-    private ConnectionHandleType makeConnectionHandle(String ifdName, RecognitionInfo info) {
-	return makeConnectionHandle(ifdName, null, info);
-    }
-
-    private ConnectionHandleType makeConnectionHandle(String ifdName, BigInteger slotIdx, RecognitionInfo info) {
-	ChannelHandleType chan = new ChannelHandleType();
-	chan.setSessionIdentifier(sessionId);
-	ConnectionHandleType cHandle = new ConnectionHandleType();
-	cHandle.setChannelHandle(chan);
-	cHandle.setContextHandle(ctx);
-	cHandle.setIFDName(ifdName);
-	cHandle.setSlotIndex(slotIdx);
-	cHandle.setRecognitionInfo(info);
-	return cHandle;
-    }
-
-    protected ConnectionHandleType recognizeSlot(String ifdName, SlotStatusType status, boolean withRecognition) {
-	// build recognition info in any way
-	RecognitionInfo rInfo = null;
-	if (recognize && withRecognition) {
-	    try {
-		rInfo = cr.recognizeCard(ifdName, status.getIndex());
-	    } catch (RecognitionException ex) {
-		// ignore, card is just unknown
-	    }
-	    // no card found build unknown structure
-	}
-	// in case recognition is off, or unkown card
-	if (rInfo == null) {
-	    rInfo = new RecognitionInfo();
-	    rInfo.setCardType(ECardConstants.UNKNOWN_CARD);
-	    rInfo.setCardIdentifier(status.getATRorATS());
-	    XMLGregorianCalendar cal = null;
-	    try {
-		cal = DatatypeFactory.newInstance().newXMLGregorianCalendar();
-	    } catch (DatatypeConfigurationException ex) {
-		// ignore error
-	    }
-	    rInfo.setCaptureTime(cal);
-	}
-	return makeConnectionHandle(ifdName, status.getIndex(), rInfo);
-    }
-
-
-    private IFDStatusType getCorresponding(String ifdName, List<IFDStatusType> statuses) {
-	for (IFDStatusType next : statuses) {
-	    if (next.getIFDName().equals(ifdName)) {
-		return next;
-	    }
-	}
-	return null;
-    }
-    private SlotStatusType getCorresponding(BigInteger idx, List<SlotStatusType> statuses) {
-	for (SlotStatusType next : statuses) {
-	    if (next.getIndex().equals(idx)) {
-		return next;
-	    }
-	}
-	return null;
-    }
-
-    private void sendAsyncEvents(String ifdName, SlotStatusType nextSlot, EventType... types) {
-	threadPool.submit(new Recognizer(this, ifdName, nextSlot, types));
-    }
-
-    protected void sendEvents(List<IFDStatusType> oldS, List<IFDStatusType> changed) {
-	for (IFDStatusType next : changed) {
-	    IFDStatusType counterPart = getCorresponding(next.getIFDName(), oldS);
-	    // next is completely new
-	    if (counterPart == null) {
-		notify(EventType.TERMINAL_ADDED, makeConnectionHandle(next.getIFDName()));
-		// create empty counterPart so all slots raise events
-		counterPart = new IFDStatusType();
-		counterPart.setIFDName(next.getIFDName());
-	    }
-	    // inspect every slot
-	    for (SlotStatusType nextSlot : next.getSlotStatus()) {
-		SlotStatusType counterPartSlot = getCorresponding(nextSlot.getIndex(), counterPart.getSlotStatus());
-		if (counterPartSlot == null) {
-		    // slot is new, send event when card is present
-		    if (nextSlot.isCardAvailable()) {
-			sendAsyncEvents(next.getIFDName(), nextSlot, EventType.CARD_INSERTED, EventType.CARD_RECOGNIZED);
-		    }
-		} else {
-		    // compare slot for difference
-		    if (nextSlot.isCardAvailable() != counterPartSlot.isCardAvailable()) {
-			if (nextSlot.isCardAvailable()) {
-			    sendAsyncEvents(next.getIFDName(), nextSlot, EventType.CARD_INSERTED, EventType.CARD_RECOGNIZED);
-			} else {
-			    notify(EventType.CARD_REMOVED, makeConnectionHandle(next.getIFDName(), nextSlot.getIndex()));
-			}
-		    } else {
-			// compare atr
-			if (nextSlot.isCardAvailable()) {
-			    if (! Arrays.equals(nextSlot.getATRorATS(), counterPartSlot.getATRorATS())) {
-				sendAsyncEvents(next.getIFDName(), nextSlot, EventType.CARD_RECOGNIZED);
-			    }
-			}
-		    }
-		}
-	    }
-	    // remove terminal
-	    if (! next.isConnected()) {
-		notify(EventType.TERMINAL_REMOVED, makeConnectionHandle(next.getIFDName()));
-	    }
-	}
-    }
-
-
-    @Override
-    public synchronized Object initialize() {
-	threadPool = Executors.newCachedThreadPool();
-	// start watcher thread
-	watcher = threadPool.submit(new EventRunner(this));
-	// TODO: remove return value altogether
-	return new ArrayList<ConnectionHandleType>();
-    }
-
-    @Override
-    public synchronized void terminate() {
-	watcher.cancel(true);
-	threadPool.shutdownNow();
-    }
 
     protected synchronized void notify(EventType eventType, Object eventData) {
 	dispatcher.notify(eventType, eventData);

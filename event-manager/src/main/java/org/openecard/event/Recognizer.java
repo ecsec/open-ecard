@@ -23,44 +23,54 @@
 package org.openecard.event;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import org.openecard.common.enums.EventType;
+import org.openecard.common.util.HandlerUtils;
+import org.openecard.recognition.RecognitionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
+ * Wrapper to start the card recognition easily as a thread.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class Recognizer implements Runnable {
 
-    private final EventManager manager;
-    private final EventType[] events;
-    private final String ifdName;
-    private final SlotStatusType status;
+    private final static Logger logger = LoggerFactory.getLogger(Recognizer.class);
 
-    public Recognizer(EventManager manager, String ifdName, SlotStatusType status, EventType... events) {
+    private final EventManager manager;
+    private final ConnectionHandleType handle;
+
+    public Recognizer(EventManager manager, ConnectionHandleType handle) {
 	this.manager = manager;
-	this.events = events;
-	this.ifdName = ifdName;
-	this.status = status;
+	this.handle = handle;
     }
 
     @Override
     public void run() {
-	if (events.length > 0) {
-	    ConnectionHandleType conHandle = manager.recognizeSlot(ifdName, status, false);
-	    ConnectionHandleType conHandleRecog = null;
-	    for (EventType type : events) {
-		// let's hope, that CARD_RECOGNIZED comes last
-		if (type.equals(EventType.CARD_RECOGNIZED)) {
-		    if (conHandleRecog == null) {
-			conHandleRecog = manager.recognizeSlot(ifdName, status, true);
-			manager.notify(type, conHandleRecog);
-		    }
-		} else {
-		    manager.notify(type, conHandle);
-		}
-	    }
+	ConnectionHandleType newHandle = recognizeSlot();
+	if (newHandle != null) {
+	    logger.debug("Found a recognized card event ({}).", handle.getIFDName());
+	    manager.notify(EventType.CARD_RECOGNIZED, newHandle);
+	}
+    }
+
+    private ConnectionHandleType recognizeSlot() {
+	RecognitionInfo rInfo = null;
+	try {
+	    rInfo = manager.cr.recognizeCard(handle.getIFDName(), handle.getSlotIndex());
+	} catch (RecognitionException ex) {
+	    // ignore, card is just unknown
+	}
+
+	if (rInfo != null) {
+	    ConnectionHandleType newHandle = HandlerUtils.copyHandle(handle);
+	    newHandle.getRecognitionInfo().setCardType(rInfo.getCardType());
+	    return newHandle;
+	} else {
+	    return null;
 	}
     }
 

@@ -34,10 +34,12 @@ import org.openecard.common.interfaces.EventFilter;
 
 
 /**
+ * EventDispatcher class distributing the events to all registered listeners.
+ * Filtering is applied as reequested at registration of the listenmer.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class Dispatcher {
+public class EventDispatcher {
 
     private static class EventTypeFilter implements EventFilter {
 
@@ -85,7 +87,7 @@ public class Dispatcher {
     private final Semaphore guard;
     private final ConcurrentHashMap<EventCallback,ArrayList<EventFilter>> eventFilter;
 
-    public Dispatcher(EventManager manager) {
+    public EventDispatcher(EventManager manager) {
 	this.manager = manager;
 	this.guard = new Semaphore(1);
 	this.eventFilter = new ConcurrentHashMap<EventCallback, ArrayList<EventFilter>>();

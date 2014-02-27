@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,12 +32,13 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Future performing nothing more than a wait in the IFD.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class WaitFuture implements Callable<Boolean> {
+class WaitFuture implements Callable<Boolean> {
 
-    private static final Logger _logger = LoggerFactory.getLogger(WaitFuture.class);
+    private static final Logger logger = LoggerFactory.getLogger(WaitFuture.class);
 
     private final EventManager evtManager;
 
@@ -55,7 +56,7 @@ public class WaitFuture implements Callable<Boolean> {
 	    WSHelper.checkResult(waitResponse);
 	    return ! waitResponse.getIFDEvent().isEmpty();
 	} catch (WSException ex) {
-	    _logger.warn(ex.getMessage(), ex);
+	    logger.warn(ex.getMessage(), ex);
 	    return false;
 	}
     }

@@ -400,7 +400,7 @@
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-compiler-plugin</artifactId>
 			<configuration>
-			    <!-- <debug>false</debug> -->
+			    <debug>false</debug>
 			    <debuglevel>none</debuglevel>
 			    <optimize>true</optimize>
 			</configuration>
@@ -453,6 +453,9 @@
 			<encoding>${project.build.sourceEncoding}</encoding>
 			<showDeprecation>true</showDeprecation>
 			<showWarnings>true</showWarnings>
+			<debug>true</debug>
+			<debuglevel>source,lines,vars</debuglevel>
+			<optimize>false</optimize>
 		    </configuration>
 		</plugin>
 		<plugin>

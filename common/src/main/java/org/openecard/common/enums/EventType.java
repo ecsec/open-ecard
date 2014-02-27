@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,6 +24,7 @@ package org.openecard.common.enums;
 
 
 /**
+ * Event types of the Open eCard event system.
  *
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
  * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
@@ -36,14 +37,14 @@ public enum EventType {
     TERMINAL_ADDED("http://openecard.org/event/terminal_added"),
     TERMINAL_REMOVED("http://openecard.org/event/terminal_removed");
 
-    private String eventTypeIdentifier;
+    private final String eventTypeIdentifier;
 
     /**
      * Return the unique event type identifier.
      *
      * @param eventTypeIdentifier the event type identifier
      */
-    EventType(String eventTypeIdentifier) {
+    private EventType(String eventTypeIdentifier) {
 	this.eventTypeIdentifier = eventTypeIdentifier;
     }
 

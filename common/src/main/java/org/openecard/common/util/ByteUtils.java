@@ -24,6 +24,7 @@ package org.openecard.common.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import javax.annotation.Nullable;
 import org.openecard.bouncycastle.util.Arrays;
 
 
@@ -231,7 +232,7 @@ public class ByteUtils {
      * @param bytes Input
      * @return Hex string only compose of digits, no 0x and no spaces.
      */
-    public static String toHexString(byte[] bytes) {
+    public static String toHexString(@Nullable byte[] bytes) {
 	return toHexString(bytes, "%02X", false);
     }
 
@@ -242,7 +243,7 @@ public class ByteUtils {
      * @param formatted If true the string is formatted to 0xXX presentation
      * @return Hex string
      */
-    public static String toHexString(byte[] bytes, boolean formatted) {
+    public static String toHexString(@Nullable byte[] bytes, boolean formatted) {
 	return toHexString(bytes, formatted, false);
     }
 
@@ -254,7 +255,7 @@ public class ByteUtils {
      * @param addLinebreak If true the string is formatted to 16 value per line
      * @return Hex string
      */
-    public static String toHexString(byte[] bytes, boolean formatted, boolean addLinebreak) {
+    public static String toHexString(@Nullable byte[] bytes, boolean formatted, boolean addLinebreak) {
 	if (formatted) {
 	    return toHexString(bytes, "0x%02X ", addLinebreak);
 	} else {
@@ -262,7 +263,7 @@ public class ByteUtils {
 	}
     }
 
-    private static String toHexString(byte[] bytes, String format, boolean addLinebreak) {
+    private static String toHexString(@Nullable byte[] bytes, String format, boolean addLinebreak) {
 	if (bytes == null) {
 	    return null;
 	}

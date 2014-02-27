@@ -59,6 +59,7 @@ public class LinuxLibraryFinder {
      * @param name Name of the library, such as pcsclite.
      * @param version Version suffix such as 1, 1.0 or null if no suffix is desired.
      * @return The file object to the library.
+     * @throws java.io.FileNotFoundException Thrown if the requested library could not be found.
      */
     @Nonnull
     public static File getLibraryPath(@Nonnull String name, @Nullable String version) throws FileNotFoundException {

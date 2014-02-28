@@ -91,7 +91,7 @@ public class JSCommunicationHandler {
 	jsMessageCallback = applet.getParameter("jsMessageCallback");
 	binding = new JavaScriptBinding(manager);
 	sessionMap = new HashMap<String, String>();
-	sessionMap.put("session", ValueGenerators.generateSessionID());
+	sessionMap.put("session", ValueGenerators.genBase64Session());
 	setupJSBinding();
     }
 

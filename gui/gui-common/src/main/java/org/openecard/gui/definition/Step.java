@@ -53,7 +53,7 @@ public class Step {
      * @param title Title string of the step.
      */
     public Step(String title) {
-	this(ValueGenerators.generateSessionID(), title);
+	this(ValueGenerators.genBase64Session(16), title);
     }
 
     /**

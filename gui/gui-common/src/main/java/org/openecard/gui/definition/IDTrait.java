@@ -39,7 +39,7 @@ public abstract class IDTrait implements InfoUnit {
      * Creates an IDTrait instance and initializes its ID to a generated value.
      */
     public IDTrait() {
-	this(ValueGenerators.generateSessionID());
+	this(ValueGenerators.genBase64Session(16));
     }
 
     /**

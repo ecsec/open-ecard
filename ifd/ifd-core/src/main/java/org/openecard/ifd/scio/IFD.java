@@ -437,7 +437,7 @@ public class IFD implements org.openecard.ws.IFD {
 		    newCallback.setBinding(callback.getBinding());
 		    newCallback.setPathSecurity(callback.getPathSecurity());
 		    newCallback.setProtocolTerminationPoint(callback.getProtocolTerminationPoint());
-		    newCallback.setSessionIdentifier(ValueGenerators.generateSessionID());
+		    newCallback.setSessionIdentifier(ValueGenerators.genBase64Session());
 		    callback = newCallback;
 		}
 

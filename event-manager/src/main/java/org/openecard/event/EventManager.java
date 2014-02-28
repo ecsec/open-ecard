@@ -73,7 +73,7 @@ public class EventManager implements org.openecard.common.interfaces.EventManage
 	this.recognize = cr != null;
 	this.env = env;
 	this.ctx = ctx;
-	this.sessionId = ValueGenerators.generateSessionID();
+	this.sessionId = ValueGenerators.genBase64Session();
 	this.builder = HandlerBuilder.create()
 		.setContextHandle(ctx)
 		.setSessionId(sessionId);

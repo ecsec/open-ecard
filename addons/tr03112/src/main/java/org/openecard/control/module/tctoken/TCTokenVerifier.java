@@ -24,8 +24,6 @@ package org.openecard.control.module.tctoken;
 
 import generated.TCTokenType;
 import java.net.URL;
-import org.openecard.common.util.ByteUtils;
-import org.openecard.common.util.ValueValidator;
 
 
 /**
@@ -175,7 +173,6 @@ public class TCTokenVerifier {
 		TCTokenType.PathSecurityParameters psp = token.getPathSecurityParameters();
 		if (! checkEmpty(psp)) {
 		    assertRequired(psp.getPSK());
-		    checkPSKLength(ByteUtils.toHexString(psp.getPSK()));
 		}
 	    }
 	} catch (TCTokenException e) {
@@ -209,18 +206,6 @@ public class TCTokenVerifier {
 	return true;
     }
 
-    /**
-     * Checks if the value is equal.
-     *
-     * @param value Value
-     * @param equal Equal
-     * @throws Exception
-     */
-    private void checkEqual(String value, String equal) throws TCTokenException {
-	if (!value.equals(equal)) {
-	    throw new TCTokenException("Element is not equal to " + equal);
-	}
-    }
 
     private void checkEqualOR(String value, String... equal) throws TCTokenException {
 	for (String string : equal) {
@@ -248,12 +233,6 @@ public class TCTokenVerifier {
 	    return new URL(value.toString());
 	} catch (Exception e) {
 	    throw new TCTokenException("Malformed URL");
-	}
-    }
-
-    private void checkPSKLength(String value) throws TCTokenException {
-	if (!ValueValidator.checkPSKStrength(value)) {
-	    throw new TCTokenException("The number of bytes in the PSK is too small.");
 	}
     }
 

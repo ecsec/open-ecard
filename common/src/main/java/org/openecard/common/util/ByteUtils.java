@@ -283,6 +283,53 @@ public class ByteUtils {
 	return writer.toString();
     }
 
+
+    /**
+     * Encode a byte array as file safe base 64 string.
+     *
+     * @param bytes Date to be base 64 encoded.
+     * @return Base 64 coded string or {@code null} if no data was given.
+     * @see #toFileSafeBase64String(byte[], boolean)
+     */
+    public static String toFileSafeBase64String(@Nullable byte[] bytes) {
+	return toFileSafeBase64String(bytes, true);
+    }
+
+    /**
+     * Encode a byte array as web safe base 64 string.
+     * The padding is removed, so that the resulting value can be used in URLs without extra escaping.
+     *
+     * @param bytes Date to be base 64 encoded.
+     * @return Base 64 coded string or {@code null} if no data was given.
+     * @see #toFileSafeBase64String(byte[], boolean)
+     */
+    public static String toWebSafeBase64String(@Nullable byte[] bytes) {
+	return toFileSafeBase64String(bytes, false);
+    }
+
+    /**
+     * Encode a byte array as file safe base 64 string.
+     * The padding is removed according to the respective parameter.
+     *
+     * @param bytes Date to be base 64 encoded.
+     * @param withPadding If {@code true} the result contains pad characters when needed, if {@code false} the pad
+     *   characters are cut off.
+     * @return Base 64 coded string or {@code null} if no data was given.
+     * @see FileSafeBase64
+     */
+    public static String toFileSafeBase64String(@Nullable byte[] bytes, boolean withPadding) {
+	if (bytes == null) {
+	    return null;
+	}
+
+	String result = FileSafeBase64.toBase64String(bytes);
+	if (! withPadding) {
+	    result = result.replaceAll("=*$", "");
+	}
+	return result;
+    }
+
+
     /**
      * Convert a byte array to a short integer.
      * The size of byte array must be between 1 and 2. The input is treated as Big Endian.

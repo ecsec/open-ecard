@@ -36,7 +36,7 @@ public class ValueGenerators {
     /**
      * Generates a new pre-shared key (PSK).
      *
-     * @return PSK
+     * @return PSK in hex notation.
      */
     public static String generatePSK() {
 	return generatePSK(64);
@@ -45,37 +45,81 @@ public class ValueGenerators {
     /**
      * Generates a new pre-shared key (PSK).
      *
-     * @param bitLength Length of the PSK
-     * @return PSK
+     * @param nibbleLength Length of the PSK in nibbles.
+     * @return PSK in hex notation.
      */
-    public static String generatePSK(int bitLength) {
-	return generateRandomHex(bitLength);
+    public static String generatePSK(int nibbleLength) {
+	return generateRandomHex(nibbleLength);
     }
+
+    /**
+     * Generates a secure session identifier encoded as web safe base 64
+     *
+     * @return Session identifier.
+     */
+    public static String genBase64Session() {
+	return genBase64Session(32);
+    }
+
+    /**
+     * Generates a secure session identifier encoded as web safe base 64
+     *
+     * @param nibbleLength Length of the session identifier in nibbles.
+     * @return Session identifier.
+     */
+    public static String genBase64Session(int nibbleLength) {
+	byte[] random = generateRandom(nibbleLength);
+	return ByteUtils.toWebSafeBase64String(random);
+    }
+
+    /**
+     * Generates a secure session identifier in hex format.
+     *
+     * @return Session identifier.
+     */
+    public static String genHexSession() {
+	return genHexSession(32);
+    }
+
+    /**
+     * Generates a secure session identifier in hex format.
+     *
+     * @param nibbleLength Length of the session identifier in nibbles.
+     * @return Session identifier.
+     */
+    public static String genHexSession(int nibbleLength) {
+	return generateRandomHex(nibbleLength);
+    }
+
 
     /**
      * Generates a secure session identifier.
      *
-     * @return Session identifier
+     * @return Session identifier.
+     * @deprecated Replaced by {@link #genHexSession()}
      */
+    @Deprecated
     public static String generateSessionID() {
-	return generateSessionID(32);
+	return genHexSession();
     }
 
     /**
      * Generates a secure session identifier.
      *
-     * @param bitLength Length of the session identifier
-     * @return Session identifier
+     * @param nibbleLength Length of the session identifier in nibbles.
+     * @return Session identifier.
+     * @deprecated Replaced by {@link #genHexSession(int)}
      */
-    public static String generateSessionID(int bitLength) {
-	return generateRandomHex(bitLength);
+    @Deprecated
+    public static String generateSessionID(int nibbleLength) {
+	return genHexSession(nibbleLength);
     }
 
     /**
      * Generates a UUID.
      * Using Java UUID and adds the prefix 'urn:uuid:'.
      *
-     * @return UUID
+     * @return UUID urn.
      */
     public static String generateUUID() {
 	String uuid = UUID.randomUUID().toString();
@@ -85,29 +129,29 @@ public class ValueGenerators {
     /**
      * Generates a secure random hex string.
      *
-     * @param bitLength Length of the random
-     * @return Secure random hex string
+     * @param nibbleLength Length of the random in nibbles.
+     * @return Secure random hex string.
      */
-    public static String generateRandomHex(int bitLength) {
-	return ByteUtils.toHexString(generateRandom(bitLength));
+    public static String generateRandomHex(int nibbleLength) {
+	return ByteUtils.toHexString(generateRandom(nibbleLength));
     }
 
     /**
      * Generates a secure random value.
      * Using 'java.security.SecureRandom'.
      *
-     * @param length Length of the random
+     * @param nibbleLength Length of the random in nibbles
      * @return Secure random value
      */
-    public static byte[] generateRandom(int bitLength) {
-	if (bitLength < 1) {
+    public static byte[] generateRandom(int nibbleLength) {
+	if (nibbleLength < 1) {
 	    return null;
 	}
 
-	bitLength = (bitLength / 2 + bitLength % 2);
+	nibbleLength = (nibbleLength / 2 + nibbleLength % 2);
 
 	SecureRandom rand = new SecureRandom();
-	byte[] randomBytes = new byte[bitLength];
+	byte[] randomBytes = new byte[nibbleLength];
 	rand.nextBytes(randomBytes);
 
 	return randomBytes;

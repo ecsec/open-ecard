@@ -35,26 +35,36 @@ public class ValueGeneratorsTest {
     @Test
     public void testGeneratePSK() {
 	String psk = ValueGenerators.generatePSK();
-	assertEquals(64, psk.length());
+	assertEquals(psk.length(), 64);
     }
 
     @Test
-    public void testGenerateSessionID() {
-	String session = ValueGenerators.generateSessionID();
-	assertEquals(32, session.length());
+    public void testGenHexSession() {
+	String session = ValueGenerators.genHexSession();
+	assertEquals(session.length(), 32);
+	session = ValueGenerators.genHexSession(64);
+	assertEquals(session.length(), 64);
+    }
+
+    @Test
+    public void testGenBase64Session() {
+	String session = ValueGenerators.genBase64Session();
+	assertEquals(session.length(), 22);
+	session = ValueGenerators.genBase64Session(64);
+	assertEquals(session.length(), 43);
     }
 
     @Test
     public void testGenerateRandomHex() {
 	String randomHex = ValueGenerators.generateRandomHex(40);
-	assertEquals(40, randomHex.length());
+	assertEquals(randomHex.length(), 40);
     }
 
     @Test
     public void testGenerateUUID() {
 	String uuid = ValueGenerators.generateUUID();
 	assertTrue(uuid.startsWith("urn:uuid:"));
-	assertEquals(45, uuid.length());
+	assertEquals(uuid.length(), 45);
     }
 
 }

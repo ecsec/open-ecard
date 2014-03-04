@@ -29,7 +29,7 @@ package org.openecard.addons.status;
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class StatusException extends RuntimeException {
+public class StatusException extends Exception {
 
     private static final long serialVersionUID = 1L;
 

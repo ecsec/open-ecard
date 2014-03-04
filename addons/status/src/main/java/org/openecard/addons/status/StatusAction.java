@@ -62,9 +62,6 @@ public class StatusAction implements AppPluginAction {
 	try {
 	    StatusRequest statusRequest = StatusRequest.convert(parameters);
 	    response = statusHandler.handleRequest(statusRequest);
-	} catch (StatusException e) {
-	    response = new BindingResult(BindingResultCode.WRONG_PARAMETER);
-	    response.setResultMessage(e.getMessage());
 	} catch (Exception e) {
 	    response = new BindingResult(BindingResultCode.INTERNAL_ERROR);
 	    logger.error(e.getMessage(), e);

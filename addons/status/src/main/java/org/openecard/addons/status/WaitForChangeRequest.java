@@ -60,8 +60,9 @@ public final class WaitForChangeRequest {
      *
      * @param parameters The request parameters.
      * @return A WaitForChangeRequest wrapping the parameters.
+     * @throws StatusException Thrown in case not all required parameters are present.
      */
-    public static WaitForChangeRequest convert(Map<String, String> parameters) {
+    public static WaitForChangeRequest convert(Map<String, String> parameters) throws StatusException {
 	String session = null;
 
 	if (parameters.containsKey("session")) {

@@ -157,12 +157,6 @@ public final class RichClient {
 	    ifd.setGUI(gui);
 	    recognition.setGUI(gui);
 
-	    tray.endSetup(recognition, manager);
-
-	    // Initialize the EventManager
-	    em.registerAllEvents(tray.status());
-	    em.initialize();
-
 	    // Start up control interface
 	    try {
 		binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
@@ -174,6 +168,12 @@ public final class RichClient {
 		dialog.setMessage(lang.translationForKey("client.startup.failed.portinuse"));
 		throw e;
 	    }
+
+	    tray.endSetup(recognition, manager);
+
+	    // Initialize the EventManager
+	    em.registerAllEvents(tray.status());
+	    em.initialize();
 
 	} catch (Exception e) {
 	    _logger.error(e.getMessage(), e);

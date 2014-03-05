@@ -24,8 +24,11 @@ package org.openecard.control.binding.http.handler;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import javax.annotation.Nonnull;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.apache.http.HttpRequest;
@@ -140,6 +143,8 @@ public class HttpTCTokenHandler extends HttpControlHandler {
 	    }
 	    TCTokenRequest tcTokenRequest = genericTCTokenHandler.parseRequestURI(requestURI);
 	    TCTokenResponse tcTokenResponse = genericTCTokenHandler.handleActivate(tcTokenRequest);
+	    addResultParams(tcTokenResponse);
+
 	    response = this.handleResponse(tcTokenResponse);
 	    response.setParams(httpRequest.getParams());
 	    Http11Response.copyHttpResponse(response, httpResponse);
@@ -160,6 +165,56 @@ public class HttpTCTokenHandler extends HttpControlHandler {
 	    Http11Response.copyHttpResponse(response, httpResponse);
 	    logger.debug("HTTP response: {}", response);
 	    logger.debug("HTTP request handled by: {}", this.getClass().getName());
+	}
+    }
+
+    private void addResultParams(TCTokenResponse response) {
+	URL url = response.getRefreshAddress();
+	Result r = response.getResult();
+	try {
+	    if (url != null && r != null) {
+		if (ECardConstants.Major.OK.equals(r.getResultMajor())) {
+		    url = addQueryParam(url, "ResultMajor", "ok");
+		} else {
+		    url = addQueryParam(url, "ResultMajor", "error");
+		    String minor = getErrorString(r.getResultMinor());
+		    url = addQueryParam(url, "ResultMinor", minor);
+		}
+	    }
+	} catch (MalformedURLException ex) {
+	    logger.warn("Produced RefreshAddress is not a valid URL, omitting error parameters.", ex);
+	} catch (UnsupportedEncodingException ex) {
+	    logger.error("Unkown encoding used.", ex);
+	}
+	// write back the result
+	response.setRefreshAddress(url);
+    }
+
+    private URL addQueryParam(URL base, String key, String value) throws MalformedURLException {
+	String url = base.toString();
+	if (base.getFile().isEmpty() && ! url.endsWith("/")) {
+	    url += "/";
+	}
+	if (! url.contains("?")) {
+	    url += "?";
+	}
+	if (url.endsWith("?")) {
+	    return new URL(url + key + "=" + value);
+	} else {
+	    return new URL(url + "&" + key + "=" + value);
+	}
+    }
+
+    private String getErrorString(String errorUri) throws UnsupportedEncodingException {
+	int idx = errorUri.lastIndexOf('#');
+	if (idx == -1) {
+	    idx = errorUri.lastIndexOf('/');
+	}
+	if (idx == -1 || errorUri.length() == idx + 1) {
+	    return "";
+	} else {
+	    String sub = errorUri.substring(idx + 1);
+	    return URLEncoder.encode(sub, "UTF-8");
 	}
     }
 

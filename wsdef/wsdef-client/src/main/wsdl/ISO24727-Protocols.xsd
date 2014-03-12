@@ -1206,6 +1206,43 @@
 		</list>
 	</simpleType>
 
+
+	<simpleType name="APDUTemplateValueType">
+		<annotation>
+			<documentation>
+				A APDUTemplateValue consists of a hexBinary value or a template expression intermixed in arbitrary
+				multiplicity.<br/>
+				The template expression is a simplified S-Expression initiated and terminated by curly braces
+				(<pre>{</pre> and <pre>}</pre>). The first symbol must be a template symbol which is defined as
+				<pre>[a-zA-Z][a-zA-Z0-9]*</pre>. The following elements are seperated by any whitespace. For the
+				following symbols either a template symbol or a hexBinary string string starting with <pre>0x</pre> can
+				be used.<br/>
+				The evaluation sematic of the symbols is as follows. In the single element form, the S-Expression is
+				evaluated depending on its type in the context. That means it is either a function, or a value fitting
+				in the hexBinary value of the whole value. If multiple elements are inside the S-Expression, the first
+				element MUST denote a function while the remaining ones MUST be symbolic values.
+			</documentation>
+		</annotation>
+		<restriction base="normalizedString">
+		 <pattern value="^([0-9a-fA-F]{2}|(\{[a-zA-Z][a-zA-Z0-9]*(\s+(([a-zA-Z][a-zA-Z0-9]*)|(0x([0-9a-fA-F]{2})+)))*\}))+$" />
+		</restriction>
+	</simpleType>
+
+	<complexType name="CardCallTemplateType">
+		<sequence>
+			<element name="HeaderTemplate" type="iso:APDUTemplateValueType" />
+			<element name="DataTemplate" type="iso:APDUTemplateValueType" minOccurs="0" />
+			<element name="ExpectedLength" type="nonNegativeInteger" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<complexType name="LegacySignatureGenerationType">
+		<sequence>
+			<element name="CardCommand" type="iso:CardCallTemplateType" minOccurs="1" />
+		</sequence>
+	</complexType>
+
+
 	<!-- ============================= -->
 	<!--           Marker              -->
 	<!-- ============================= -->
@@ -1216,7 +1253,10 @@
 				<sequence>
 					<element name="AlgorithmInfo" type="iso:AlgorithmInfoType" />
 					<element name="KeyInfo" type="iso:CryptoKeyInfoType" minOccurs="0" />
-					<element name="SignatureGenerationInfo" type="iso:SignatureGenerationType" minOccurs="0" />
+					<choice minOccurs="0">
+						<element name="SignatureGenerationInfo" type="iso:SignatureGenerationType"  />
+						<element name="LegacySignatureGenerationInfo" type="iso:LegacySignatureGenerationType" />
+					</choice>
 					<element name="HashGenerationInfo" type="iso:HashGenerationInfoType" minOccurs="0" />
 					<element name="CertificateRef" type="iso:CertificateRefType" minOccurs="0" maxOccurs="unbounded" />
 					<element name="LegacyKeyName" type="string" minOccurs="0" />

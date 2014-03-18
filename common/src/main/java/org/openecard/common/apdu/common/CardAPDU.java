@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,11 +24,13 @@ package org.openecard.common.apdu.common;
 
 
 /**
+ * Base for all APDU types.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
 class CardAPDU {
 
+    // TODO: what is this comment "do not use with bitmask
     /**
      * 0x00 byte. Do not use me with a bit mask!
      */
@@ -37,6 +39,7 @@ class CardAPDU {
      * 0xFF byte. Do not use me with a bit mask!
      */
     protected static final byte xFF = (byte) 0xFF;
+    // TODO: make field inaccessible
     /**
      * Data field of the APDU.
      */

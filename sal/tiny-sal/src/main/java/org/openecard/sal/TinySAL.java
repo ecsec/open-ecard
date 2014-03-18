@@ -597,7 +597,8 @@ public class TinySAL implements SAL {
 
 	    byte[] fileID = dataSetInfo.getDataSetPath().getEfIdOrPath();
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
-	    CardResponseAPDU result = CardUtils.selectFile(env.getDispatcher(), slotHandle, fileID);
+	    CardResponseAPDU result = CardUtils.selectFileWithOptions(env.getDispatcher(), slotHandle, fileID,
+		    null, CardUtils.FCP_RESPONSE_DATA);
 
 	    if (result != null) {
 		cardStateEntry.setFCPOfSelectedEF(new FCP(result.getData()));

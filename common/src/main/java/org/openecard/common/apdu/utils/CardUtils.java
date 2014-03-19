@@ -24,6 +24,7 @@ package org.openecard.common.apdu.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import org.openecard.common.apdu.ReadBinary;
 import org.openecard.common.apdu.ReadRecord;
 import org.openecard.common.apdu.Select;
@@ -51,6 +52,11 @@ import org.slf4j.LoggerFactory;
 public class CardUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(CardUtils.class);
+
+    public static final int NO_RESPONSE_DATA = 0;
+    public static final int FCP_RESPONSE_DATA = 1;
+    public static final int FCI_RESPONSE_DATA = 2;
+    public static final int FMD_RESPONSE_DATA = 3;
 
     /**
      * Selects the Master File.
@@ -87,30 +93,68 @@ public class CardUtils {
      * @throws APDUException
      */
     public static CardResponseAPDU selectFile(Dispatcher dispatcher, byte[] slotHandle, byte[] fileID) throws APDUException {
+	return selectFileWithOptions(dispatcher, slotHandle, fileID, null, NO_RESPONSE_DATA);
+    }
+
+    /**
+     * Select a file with different options.
+     *
+     * @param dispatcher The Dispatcher for dispatching of the card commands.
+     * @param slotHandle The SlotHandle which identifies the card terminal.
+     * @param fileIdOrPath File identifier or path to the file to select.
+     * @param responses List of byte arrays with the trailers which should not thrown as errors.
+     * @param resultType Int value which indicates whether the select should be performed with a request of the FCP, FCI,
+     * FMD or without any data. There are four public variables available in this class to use.
+     * @return A CardResponseAPDU object with the requested response data.
+     * @throws APDUException Thrown if the selection of a file failed.
+     */
+    public static CardResponseAPDU selectFileWithOptions(Dispatcher dispatcher, byte[] slotHandle, byte[] fileIdOrPath,
+	    List<byte[]> responses, int resultType) throws APDUException {
 	Select selectFile;
 	CardResponseAPDU result = null;
 
 	// respect the possibility that fileID could be a path
 	int i = 0;
-	while (i < fileID.length) {
-	    if (fileID[i] == (byte) 0x3F && fileID[i + 1] == (byte) 0x00 && i == 0 && i + 1 == 1) {
+	while (i < fileIdOrPath.length) {
+	    if (fileIdOrPath[i] == (byte) 0x3F && fileIdOrPath[i + 1] == (byte) 0x00 && i == 0 && i + 1 == 1) {
 		selectFile = new MasterFile();
 		i = i + 2;
-	    } else if (i == fileID.length - 2) {
-		selectFile = new Select.ChildFile(new byte[]{fileID[i], fileID[i + 1]});
-		selectFile.setFCP();
+	    } else if (i == fileIdOrPath.length - 2) {
+		selectFile = new Select.ChildFile(new byte[]{fileIdOrPath[i], fileIdOrPath[i + 1]});
+		switch(resultType) {
+		    case 0:
+			// do nothing except of break 0x0C is the initialization value of P2
+			break;
+		    case 1:
+			selectFile.setFCP();
+			break;
+		    case 2:
+			selectFile.setFCI();
+			break;
+		    case 3:
+			selectFile.setFMD();
+			break;
+		    default:
+			throw new APDUException("There is no value assoziated with the returnType value " + resultType);
+		}
+
 		i = i + 2;
 	    } else {
-		selectFile = new Select.ChildDirectory(new byte[]{fileID[i], fileID[i + 1]});
+		selectFile = new Select.ChildDirectory(new byte[]{fileIdOrPath[i], fileIdOrPath[i + 1]});
 		i = i + 2;
 	    }
 
-	    result = selectFile.transmit(dispatcher, slotHandle);
+	    if (responses == null) {
+		result = selectFile.transmit(dispatcher, slotHandle);
+	    } else {
+		result = selectFile.transmit(dispatcher, slotHandle, responses);
+	    }
+
 	}
 
 	return result;
     }
-    
+
     /**
      * Select an application by it's file identifier.
      * 

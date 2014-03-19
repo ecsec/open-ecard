@@ -29,6 +29,7 @@ import org.openecard.common.util.IntegerUtils;
 
 
 /**
+ * Internal class representing one entry with a TLV definition.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -90,6 +91,9 @@ class TagLengthValue {
     }
     public void setTagNumWithClass(long tagNumWithClass) throws TLVException {
 	this.tag.setTagNumWithClass(tagNumWithClass);
+    }
+    public void setTagNumWithClass(byte[] tagNumWithClass) throws TLVException {
+	this.tag = Tag.fromBER(tagNumWithClass);
     }
 
     public int getValueLength() {

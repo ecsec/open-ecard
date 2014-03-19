@@ -30,15 +30,17 @@ import org.openecard.common.util.ByteUtils;
 
 
 /**
+ * Class representing a TLV object according to the ASN1 specification.
+ * This class is capable of representing sequences and has features to navigation in an ASN1 tree.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class TLV {
 
-    TagLengthValue tag;
+    private TagLengthValue tag;
     //protected TLV parent = null;
-    protected TLV next = null;
-    protected TLV child = null;
+    TLV next = null;
+    TLV child = null;
 
     public TLV() {
 	tag = new TagLengthValue();
@@ -88,6 +90,9 @@ public class TLV {
     public void setTagNumWithClass(long tagNumWithClass) throws TLVException {
 	tag.setTagNumWithClass(tagNumWithClass);
     }
+    public void setTagNumWithClass(byte[] tagNumWithClass) throws TLVException {
+	tag.setTagNumWithClass(tagNumWithClass);
+    }
 
     public int getValueLength() {
 	return tag.getValueLength();
@@ -114,7 +119,10 @@ public class TLV {
     }
 
     /**
-     * Remove next which is indicated by n. 0 means direct sibling.
+     * Remove next which is indicated by n.
+     * 0 means direct sibling.
+     * @param n Index of the sibling.
+     * @return Removed node.
      */
     public TLV remove(int n) {
 	if (n == 0) {

@@ -128,6 +128,7 @@ public class TlsConnectionHandler {
 		//tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 		tlsClient = new ClientCertDefaultTlsClient(noSni ? null : serverHost);
 		tlsClient.setAuthentication(tlsAuth);
+		// TODO: bouncycastle 1.50 has problems with client auth in 1.2, fix this
 		tlsClient.setClientVersion(ProtocolVersion.TLSv11);
 	    } else {
 		throw new ConnectionError("Unknow security protocol '" + secProto + "' requested.");

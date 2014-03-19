@@ -404,6 +404,19 @@
 													<iso:RecognizedCardType>https://www.d-trust.net/produkte/d-trust-signaturkarten/d-trust-card/multi_v3</iso:RecognizedCardType>
 												</iso:Conclusion>
 											</iso:ResponseAPDU>
+											<iso:ResponseAPDU>
+												<iso:Body>
+													<iso:MatchingData>
+														<iso:Offset>1B</iso:Offset>
+														<iso:Length>17</iso:Length>
+														<iso:MatchingValue>442D545255535420436172642056332E30206261746368</iso:MatchingValue>
+													</iso:MatchingData>
+												</iso:Body>
+												<iso:Trailer>6282</iso:Trailer>
+												<iso:Conclusion>
+													<iso:RecognizedCardType>https://www.d-trust.net/produkte/d-trust-signaturkarten/d-trust-card/batch_v3</iso:RecognizedCardType>
+												</iso:Conclusion>
+											</iso:ResponseAPDU>
 										</iso:CardCall>
 									</iso:Conclusion>
 								</iso:ResponseAPDU>

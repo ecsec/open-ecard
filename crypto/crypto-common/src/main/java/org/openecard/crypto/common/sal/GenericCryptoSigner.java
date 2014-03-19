@@ -54,6 +54,9 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.crypto.tls.HashAlgorithm;
+import org.openecard.bouncycastle.crypto.tls.SignatureAlgorithm;
+import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
 import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
@@ -77,7 +80,7 @@ public class GenericCryptoSigner {
     private final String didName;
 
     private byte[] rawCertData;
-    private Map<String, java.security.cert.Certificate[]> javaCerts;
+    private final Map<String, java.security.cert.Certificate[]> javaCerts;
     private org.openecard.bouncycastle.crypto.tls.Certificate bcCert;
 
     /**
@@ -367,6 +370,11 @@ public class GenericCryptoSigner {
 	    DIDAuthenticateResponse res = (DIDAuthenticateResponse) dispatcher.deliver(req);
 	    WSHelper.checkResult(res);
 	}
+    }
+
+    public SignatureAndHashAlgorithm getSignatureAndHashAlgorithm() {
+	// TODO: read correct hash and signature algo from CryptoMarker
+	return new SignatureAndHashAlgorithm(HashAlgorithm.sha256, SignatureAlgorithm.rsa);
     }
 
 }

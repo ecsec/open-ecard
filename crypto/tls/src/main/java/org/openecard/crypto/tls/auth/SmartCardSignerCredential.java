@@ -88,7 +88,7 @@ public class SmartCardSignerCredential implements TlsSignerCredentials {
 
     @Override
     public SignatureAndHashAlgorithm getSignatureAndHashAlgorithm() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return signerImpl.getSignatureAndHashAlgorithm();
     }
 
 }

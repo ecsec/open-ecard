@@ -27,6 +27,8 @@ import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.crypto.tls.HashAlgorithm;
+import org.openecard.bouncycastle.crypto.tls.SignatureAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.TlsSignerCredentials;
 import org.openecard.crypto.common.keystore.KeyStoreSigner;
@@ -46,10 +48,12 @@ public class KeyStoreCredential implements TlsSignerCredentials {
     private static final Logger logger = LoggerFactory.getLogger(SmartCardSignerCredential.class);
 
     private final KeyStoreSigner signer;
+    private final SignatureAndHashAlgorithm signatureAndHashAlgorithm;
     private Certificate certificate = Certificate.EMPTY_CHAIN;
 
     public KeyStoreCredential(@Nonnull KeyStoreSigner signer) {
 	this.signer = signer;
+	signatureAndHashAlgorithm = new SignatureAndHashAlgorithm(HashAlgorithm.sha256, SignatureAlgorithm.rsa);
     }
 
     @Override
@@ -81,7 +85,7 @@ public class KeyStoreCredential implements TlsSignerCredentials {
 
     @Override
     public SignatureAndHashAlgorithm getSignatureAndHashAlgorithm() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return signatureAndHashAlgorithm;
     }
 
 }

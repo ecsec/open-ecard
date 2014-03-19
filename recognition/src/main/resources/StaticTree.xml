@@ -361,5 +361,45 @@
 		</iso:Conclusion>
 	    </iso:ResponseAPDU>
 	</iso:CardCall>
-    </iso:RecognitionTree>
+	<iso:CardCall>
+		<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
+		<iso:ResponseAPDU>
+			<iso:Trailer>9000</iso:Trailer>
+			<iso:Conclusion>
+				<iso:CardCall>
+					<iso:CommandAPDU>00A4010C025015</iso:CommandAPDU>
+					<iso:ResponseAPDU>
+						<iso:Trailer>9000</iso:Trailer>
+						<iso:Conclusion>
+							<iso:CardCall>
+								<iso:CommandAPDU>00A4020C025032</iso:CommandAPDU>
+								<iso:ResponseAPDU>
+									<iso:Trailer>9000</iso:Trailer>
+									<iso:Conclusion>
+										<iso:CardCall>
+											<iso:CommandAPDU>00B00000FF</iso:CommandAPDU>
+											<iso:ResponseAPDU>
+												<iso:Body>
+													<iso:MatchingData>
+														<iso:Offset>1B</iso:Offset>
+														<iso:Length>1A</iso:Length>
+														<iso:MatchingValue>442D545255535420436172642056332E30207374616E64617264</iso:MatchingValue>
+													</iso:MatchingData>
+												</iso:Body>
+												<iso:Trailer>6282</iso:Trailer>
+												<iso:Conclusion>
+													<iso:RecognizedCardType>https://www.d-trust.net/produkte/d-trust-signaturkarten/d-trust-card/standard_v3</iso:RecognizedCardType>
+												</iso:Conclusion>
+											</iso:ResponseAPDU>
+										</iso:CardCall>
+									</iso:Conclusion>
+								</iso:ResponseAPDU>
+							</iso:CardCall>
+						</iso:Conclusion>
+					</iso:ResponseAPDU>
+				</iso:CardCall>
+			</iso:Conclusion>
+		</iso:ResponseAPDU>
+	</iso:CardCall>
+	</iso:RecognitionTree>
 </iso:GetRecognitionTreeResponse>

@@ -277,7 +277,7 @@ public class CardUtils {
      */
     @Deprecated
     public static byte[] readFile(Dispatcher dispatcher, byte[] slotHandle, byte[] fileID) throws APDUException {
-	CardResponseAPDU selectResponse = selectFile(dispatcher, slotHandle, fileID);
+	CardResponseAPDU selectResponse = selectFileWithOptions(dispatcher, slotHandle, fileID, null, FCP_RESPONSE_DATA);
 	FCP fcp = null;
 	try {
 	    fcp = new FCP(selectResponse.getData());

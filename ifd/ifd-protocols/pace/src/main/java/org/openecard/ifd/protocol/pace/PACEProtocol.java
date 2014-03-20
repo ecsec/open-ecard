@@ -27,12 +27,16 @@ import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import java.io.UnsupportedEncodingException;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
+import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.utils.CardUtils;
 import org.openecard.common.ifd.Protocol;
 import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.ifd.anytype.PACEOutputType;
 import org.openecard.common.ifd.protocol.exception.ProtocolException;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.tlv.TLV;
+import org.openecard.common.tlv.iso7816.FCP;
+import org.openecard.common.util.ShortUtils;
 import org.openecard.crypto.common.asn1.eac.PACESecurityInfos;
 import org.openecard.crypto.common.asn1.eac.SecurityInfos;
 import org.openecard.crypto.common.asn1.eac.ef.EFCardAccess;
@@ -82,7 +86,10 @@ public class PACEProtocol implements Protocol {
 
 	    // Read EF.CardAccess from card
 	    byte[] slotHandle = req.getSlotHandle();
-	    byte[] efcadata = CardUtils.readFile(dispatcher, slotHandle, PACEConstants.EF_CARDACCESS_FID);
+	    CardResponseAPDU resp = CardUtils.selectFileWithOptions(dispatcher, slotHandle,
+		    ShortUtils.toByteArray(PACEConstants.EF_CARDACCESS_FID), null, CardUtils.FCP_RESPONSE_DATA);
+	    FCP efCardAccessFCP = new FCP(TLV.fromBER(resp.getData()));
+	    byte[] efcadata = CardUtils.readFile(efCardAccessFCP, dispatcher, slotHandle);
 
 	    // Parse SecurityInfos and get PACESecurityInfos
 	    SecurityInfos sis = SecurityInfos.getInstance(efcadata);

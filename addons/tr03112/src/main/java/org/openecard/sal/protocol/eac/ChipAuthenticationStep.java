@@ -29,10 +29,13 @@ import java.util.Map;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.common.WSHelper;
+import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.utils.CardUtils;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.tlv.TLV;
+import org.openecard.common.tlv.iso7816.FCP;
 import org.openecard.common.util.IntegerUtils;
+import org.openecard.common.util.ShortUtils;
 import org.openecard.crypto.common.asn1.eac.CASecurityInfos;
 import org.openecard.crypto.common.asn1.eac.SecurityInfos;
 import org.openecard.crypto.common.asn1.eac.ef.EFCardAccess;
@@ -85,7 +88,10 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    ta.externalAuthentication(eacAdditionalInput.getSignature());
 
 	    // Read EF.CardSecurity
-	    byte[] efCardSecurity = CardUtils.readFile(dispatcher, slotHandle, EACConstants.EF_CARDSECURITY_FID);
+	    CardResponseAPDU resp = CardUtils.selectFileWithOptions(dispatcher, slotHandle,
+		    ShortUtils.toByteArray(EACConstants.EF_CARDSECURITY_FID), null, CardUtils.FCP_RESPONSE_DATA);
+	    FCP efCardSecurityFCP = new FCP(TLV.fromBER(resp.getData()));
+	    byte[] efCardSecurity = CardUtils.readFile(efCardSecurityFCP, dispatcher, slotHandle);
 
 	    // CA: Step 1 - MSE:SET AT
 	    SecurityInfos securityInfos = (SecurityInfos) internalData.get(EACConstants.INTERNAL_DATA_SECURITY_INFOS);

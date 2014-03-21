@@ -138,6 +138,8 @@ import org.openecard.addon.sal.SALProtocol;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
+import org.openecard.common.apdu.EraseBinary;
+import org.openecard.common.apdu.EraseRecord;
 import org.openecard.common.apdu.Select;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
@@ -170,6 +172,7 @@ import org.slf4j.LoggerFactory;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  * @author Antonio de la Piedra <a.delapiedra@cs.ru.nl>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class TinySAL implements SAL {
 
@@ -1002,38 +1005,51 @@ public class TinySAL implements SAL {
      */
     @Override
     public DSIDeleteResponse dsiDelete(DSIDelete request) {
-	 DSIDeleteResponse response = WSHelper.makeResponse(DSIDeleteResponse.class, WSHelper.makeResultOK());
+	DSIDeleteResponse response = WSHelper.makeResponse(DSIDeleteResponse.class, WSHelper.makeResultOK());
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 
-	    byte[] cardApplicationID = connectionHandle.getCardApplication();
-            
-            String dsiName = request.getDSIName();
-            Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
+	    String dsiName = request.getDSIName();
+	    Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
+	    // TODO check security conditions for dsiDelete
+	    //Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, dataSetName, NamedDataServiceActionName.DSI_DELETE);
+	    DSIType dsi = cardInfoWrapper.getDSIbyName(dsiName);
 
-            String dataSetName = request.getDataSetName();
-            Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
+	    ArrayList<byte[]> responses = new ArrayList<byte[]>() {
+		{
+		    add(new byte[] {(byte) 0x90, (byte) 0x00});
+		    add(new byte[] {(byte) 0x63, (byte) 0xC1});
+		    add(new byte[] {(byte) 0x63, (byte) 0xC2});
+		    add(new byte[] {(byte) 0x63, (byte) 0xC3});
+		    add(new byte[] {(byte) 0x63, (byte) 0xC4});
+		    add(new byte[] {(byte) 0x63, (byte) 0xC5});
+		    add(new byte[] {(byte) 0x63, (byte) 0xC6});
+		    add(new byte[] {(byte) 0x63, (byte) 0xC7});
+		    add(new byte[] {(byte) 0x63, (byte) 0xC8});
+		    add(new byte[] {(byte) 0x63, (byte) 0xC9});
+		    add(new byte[] {(byte) 0x63, (byte) 0xCA});
+		    add(new byte[] {(byte) 0x63, (byte) 0xCB});
+		    add(new byte[] {(byte) 0x63, (byte) 0xCC});
+		    add(new byte[] {(byte) 0x63, (byte) 0xCD});
+		    add(new byte[] {(byte) 0x63, (byte) 0xCE});
+		    add(new byte[] {(byte) 0x63, (byte) 0xCF});
+		}
+	    };
 
-	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dataSetName, cardApplicationID);
-	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DataSet cannot be found.");
-
-            //Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, dataSetName, NamedDataServiceActionName.DSI_DELETE);
-
-	    Iterator<DSIType> it = dataSetInfo.getDSI().iterator();
-                        
-            while (it.hasNext()) {
-                DSIType next = it.next();
-                if (next.getDSIName().equals(dsiName)) {
-                    it.remove();
-                }
-            }
-
-            // XXXX: Now we should send the correspondent APDU (DELETE) to the given DSI.
-            
+	    if (cardStateEntry.getFCPOfSelectedEF().getDataElements().isLinear()) {
+		EraseRecord rmRecord = new EraseRecord(dsi.getDSIPath().getIndex()[0], EraseRecord.ERASE_JUST_P1);
+		rmRecord.transmit(env.getDispatcher(), connectionHandle.getSlotHandle(), responses);
+	    } else {
+		// NOTE: Erase binary allows to erase only every after the offset or everything in front of the offset.
+		// currently erasing everything after the offset is used.
+		EraseBinary rmBinary = new EraseBinary((byte) 0x00, (byte) 0x00, dsi.getDSIPath().getIndex());
+		rmBinary.transmit(env.getDispatcher(), connectionHandle.getSlotHandle(), responses);
+	    }
 	} catch (ECardException e) {
+	    logger.error(e.getMessage(), e);
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
 	    logger.error(e.getMessage(), e);

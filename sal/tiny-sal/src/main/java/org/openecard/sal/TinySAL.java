@@ -143,6 +143,8 @@ import org.openecard.common.apdu.EraseRecord;
 import org.openecard.common.apdu.Select;
 import org.openecard.common.apdu.UpdateBinary;
 import org.openecard.common.apdu.UpdateRecord;
+import org.openecard.common.apdu.WriteBinary;
+import org.openecard.common.apdu.WriteRecord;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.utils.CardUtils;
@@ -151,6 +153,7 @@ import org.openecard.common.sal.Assert;
 import org.openecard.common.sal.anytype.CryptoMarkerType;
 import org.openecard.common.sal.exception.InappropriateProtocolForActionException;
 import org.openecard.common.sal.exception.IncorrectParameterException;
+import org.openecard.common.sal.exception.NameExistsException;
 import org.openecard.common.sal.exception.PrerequisitesNotSatisfiedException;
 import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.exception.UnknownProtocolException;
@@ -159,6 +162,7 @@ import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.sal.util.SALUtils;
+import org.openecard.common.tlv.iso7816.DataElements;
 import org.openecard.common.tlv.iso7816.FCP;
 import org.openecard.gui.UserConsent;
 import org.openecard.ws.SAL;
@@ -946,6 +950,12 @@ public class TinySAL implements SAL {
     /**
      * The DSICreate function creates a DSI (Data Structure for Interoperability) in the currently selected data set.
      * See BSI-TR-03112-4, version 1.1.2, section 3.4.6.
+     * <br>
+     * <br>
+     * Preconditions: <br>
+     * - Connection to a card application established via CardApplicationConnect <br>
+     * - A data set has been selected with DataSetSelect <br>
+     * - The DSI does not exist in the data set. <br>
      *
      * @param request DSICreate
      * @return DSICreateResponse
@@ -957,37 +967,43 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
             byte[] dsiContent = request.getDSIContent();
 	    Assert.assertIncorrectParameter(dsiContent, "The parameter DSIContent is empty.");
 
-            String dataSetName = request.getDataSetName();
-            Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
-
             String dsiName = request.getDSIName();
 	    Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
 
-            PathType dsiPath = request.getDSIPath();
-	    Assert.assertIncorrectParameter(dsiPath, "The parameter DSIPath is empty.");
+	    DSIType dsi = cardInfoWrapper.getDSIbyName(dsiName);
+	    if (dsi != null) {
+		throw new NameExistsException("There is already an DSI with the name " + dsiName + " in the current EF.");
+	    }
 
-            //Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, dataSetName, NamedDataServiceActionName.DSI_CREATE);
-
-	    DSIType dsi = new DSIType();
-
-	    dsi.setDSIName(dsiName);
-	    dsi.setDSIPath(dsiPath);
-	    
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();	    
-
-	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dataSetName, cardApplicationID);
-	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DataSet cannot be found.");
-
-	    dataSetInfo.getDSI().add(dsi);
-
-	    byte[] fileID = dsi.getDSIPath().getEfIdOrPath();
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
-	    CardUtils.writeFile(env.getDispatcher(), slotHandle, fileID, dsiContent);
+
+	    if (cardStateEntry.getFCPOfSelectedEF() == null) {
+		throw new PrerequisitesNotSatisfiedException("No data set for writing selected.");
+	    } else {
+		DataSetInfoType dataSet = cardInfoWrapper.getDataSetByFid(
+			cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0));
+		Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, dataSet.getDataSetName(),
+			NamedDataServiceActionName.DSI_CREATE);
+		DataElements dElements = cardStateEntry.getFCPOfSelectedEF().getDataElements();
+
+		if (dElements.isTransparent()) {
+		    WriteBinary writeBin = new WriteBinary(WriteBinary.INS_WRITE_BINARY_DATA, (byte) 0x00, (byte) 0x00,
+			    dsiContent);
+		    writeBin.transmit(env.getDispatcher(), slotHandle);
+		} else if (dElements.isCyclic()) {
+		    WriteRecord writeRec = new WriteRecord((byte) 0x00, WriteRecord.WRITE_PREVIOUS, dsiContent);
+		    writeRec.transmit(env.getDispatcher(), slotHandle);
+		} else {
+		    WriteRecord writeRec = new WriteRecord((byte) 0x00, WriteRecord.WRITE_LAST, dsiContent);
+		    writeRec.transmit(env.getDispatcher(), slotHandle);
+		}
+	    }
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {

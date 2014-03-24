@@ -22,7 +22,6 @@
 
 package org.openecard.common.sal.state.cif;
 
-
 import iso.std.iso_iec._24727.tech.schema.ApplicationCapabilitiesType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationType;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
@@ -30,6 +29,7 @@ import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
 import iso.std.iso_iec._24727.tech.schema.DIDMarkerType;
 import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
+import iso.std.iso_iec._24727.tech.schema.DSIType;
 import iso.std.iso_iec._24727.tech.schema.DataSetInfoType;
 import iso.std.iso_iec._24727.tech.schema.DataSetNameListType;
 import java.util.ArrayList;
@@ -45,6 +45,7 @@ import org.openecard.common.util.ByteArrayWrapper;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class CardInfoWrapper {
 
@@ -218,6 +219,28 @@ public class CardInfoWrapper {
 	    }
 	}
 	return cardApplicationNames;
+    }
+
+    /**
+     * The method searches a specific DSI by name.
+     *
+     * @param dsiName The name of the DSI to look for.
+     * @return A DSIType object which contains the given DSI name or null if no DSI with such a name was found.
+     */
+    public DSIType getDSIbyName(String dsiName) {
+	for (CardApplicationWrapper cardAppWrapper : cardApplications.values()) {
+	    for (DataSetInfoType dSetInfoWrapper : cardAppWrapper.getDataSetInfoList()) {
+		if (dSetInfoWrapper.getDSI() != null) {
+		    for (DSIType dsi : dSetInfoWrapper.getDSI()) {
+			if (dsi.getDSIName().equals(dsiName)) {
+			    return dsi;
+			}
+		    }
+		}
+	    }
+	}
+
+	return null;
     }
 
 }

@@ -141,6 +141,8 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.EraseBinary;
 import org.openecard.common.apdu.EraseRecord;
 import org.openecard.common.apdu.Select;
+import org.openecard.common.apdu.UpdateBinary;
+import org.openecard.common.apdu.UpdateRecord;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.utils.CardUtils;
@@ -149,6 +151,7 @@ import org.openecard.common.sal.Assert;
 import org.openecard.common.sal.anytype.CryptoMarkerType;
 import org.openecard.common.sal.exception.InappropriateProtocolForActionException;
 import org.openecard.common.sal.exception.IncorrectParameterException;
+import org.openecard.common.sal.exception.PrerequisitesNotSatisfiedException;
 import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.exception.UnknownProtocolException;
 import org.openecard.common.sal.state.CardStateEntry;
@@ -1062,6 +1065,10 @@ public class TinySAL implements SAL {
     /**
      * The DSIWrite function changes the content of a DSI (Data Structure for Interoperability).
      * See BSI-TR-03112-4, version 1.1.2, section 3.4.8.
+     * For clarification this method updates an existing DSI and does not create a new one.
+     *
+     * The precondition for this method is that a connection to a card application was established and a data set was
+     * selected. Furthermore the DSI exists already.
      *
      * @param request DSIWrite
      * @return DSIWriteResponse
@@ -1082,13 +1089,30 @@ public class TinySAL implements SAL {
 
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dsiName, applicationID);
+	    DSIType dsi = cardInfoWrapper.getDSIbyName(dsiName);
 	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DSIName cannot be found.");
-
 	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dsiName, NamedDataServiceActionName.DSI_WRITE);
 
-	    byte[] fileID = dataSetInfo.getDataSetPath().getEfIdOrPath();
+	    if (! Arrays.equals(dataSetInfo.getDataSetPath().getEfIdOrPath(), 
+		    cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0))) {
+		throw new PrerequisitesNotSatisfiedException("The currently selected data set does not contain the DSI "
+			+ "to be updated.");
+	    }
+
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
-	    CardUtils.writeFile(env.getDispatcher(), slotHandle, fileID, updateData);
+	    if (cardStateEntry.getFCPOfSelectedEF() == null) {
+		throw new PrerequisitesNotSatisfiedException("No EF with DSI selected.");
+	    } else if (cardStateEntry.getFCPOfSelectedEF().getDataElements().isTransparent()) {
+		// currently assuming that the index encodes the offset
+		byte[] index = dsi.getDSIPath().getIndex();
+		UpdateBinary updateBin = new UpdateBinary(index[0], index[1], updateData);
+		updateBin.transmit(env.getDispatcher(), slotHandle);
+	    } else {
+		// currently assuming that the index encodes the record number
+		byte index = dsi.getDSIPath().getIndex()[0];
+		UpdateRecord updateRec = new UpdateRecord(index, updateData);
+		updateRec.transmit(env.getDispatcher(), slotHandle);
+	    }
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {

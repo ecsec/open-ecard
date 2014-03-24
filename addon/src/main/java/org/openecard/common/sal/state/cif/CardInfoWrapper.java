@@ -243,4 +243,25 @@ public class CardInfoWrapper {
 	return null;
     }
 
+    /**
+     * The method searches a specific data set by the DSI name.
+     *
+     * @param fileIdentifier The DSIName which shall be found in a data set.
+     * @return A DataSetInfoType object containing which contains the DSI which is referenced by the given dsiName. The
+     * method returns NULL if no data set was found.
+     */
+    public DataSetInfoType getDataSetByFid(byte[] fileIdentifier) {
+	for (CardApplicationWrapper cardAppWrapper : cardApplications.values()) {
+	    for (DataSetInfoType dSetInfoWrapper : cardAppWrapper.getDataSetInfoList()) {
+		byte[] dataSetPath = dSetInfoWrapper.getDataSetPath().getEfIdOrPath();
+		int pathLength = dataSetPath.length;
+		if (dataSetPath[pathLength - 2] == fileIdentifier[0] && dataSetPath[pathLength - 1] == fileIdentifier[1]) {
+		    return dSetInfoWrapper;
+		}
+	    }
+	}
+
+	return null;
+    }
+
 }

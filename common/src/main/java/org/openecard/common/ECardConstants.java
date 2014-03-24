@@ -179,7 +179,8 @@ public class ECardConstants {
 	    public static final String INVALID_SIGNATURE = SAL_PREFIX + "#invalidSignature";
 
 	    public static final String PREREQUISITES_NOT_SATISFIED = SAL_PREFIX + "#prerequisitesNotSatisfied";
-	    
+
+	    public static final String NAME_EXISTS = SAL_PREFIX + "#nameExists";
 	};
 
 	public static class IFD {

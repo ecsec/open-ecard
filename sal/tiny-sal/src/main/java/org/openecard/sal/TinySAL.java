@@ -903,8 +903,13 @@ public class TinySAL implements SAL {
     }
 
     /**
-     * The function DSIList supplies the list of the DSI (Data Structure for Interoperability) which exist in the selected data set.
-     * See BSI-TR-03112-4, version 1.1.2, section 3.4.5.
+     * The function DSIList supplies the list of the DSI (Data Structure for Interoperability) which exist in the
+     * selected data set.
+     * See BSI-TR-03112-4, version 1.1.2, section 3.4.5. <br>
+     * <br>
+     * Prerequisites: <br>
+     * - a connection to a card application has been established <br>
+     * - a data set has been selected <br>
      *
      * @param request DSIList
      * @return DSIListResponse
@@ -916,27 +921,24 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
-            String dataSetName = request.getDataSetName();
-            Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
+	    if (cardStateEntry.getFCPOfSelectedEF() == null) {
+		throw new PrerequisitesNotSatisfiedException("No EF selected.");
+	    }
 
-            //Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, dataSetName, NamedDataServiceActionName.DSI_LIST);
+            DataSetInfoType dataSet = cardInfoWrapper.getDataSetByFid(
+		    cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0));
+            Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, dataSet.getDataSetName(),
+		    NamedDataServiceActionName.DSI_LIST);
 
-            CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-            DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dataSetName, cardApplicationID);
-	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DataSet cannot be found.");
-	    	    
-	    Iterator<DSIType> it = dataSetInfo.getDSI().iterator();
             DSINameListType dsiNameList = new DSINameListType();
-                        
-            while (it.hasNext()) {
-                DSIType next = it.next();
-                dsiNameList.getDSIName().add(next.getDSIName());
+	    for (DSIType dsi : dataSet.getDSI()) {
+                dsiNameList.getDSIName().add(dsi.getDSIName());
             }
 
             response.setDSINameList(dsiNameList);
-	    
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {

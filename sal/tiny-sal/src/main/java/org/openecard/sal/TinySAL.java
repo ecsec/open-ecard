@@ -1520,43 +1520,7 @@ public class TinySAL implements SAL {
      */
     @Override
     public DIDCreateResponse didCreate(DIDCreate request) {
-	DIDCreateResponse response = WSHelper.makeResponse(DIDCreateResponse.class, WSHelper.makeResultOK());
-
-	try {
-            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-            byte[] cardApplicationID = connectionHandle.getCardApplication();
-            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
-                                        
-	    String didName = request.getDIDName();
-	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
-
-	    DIDCreateDataType didCreateData = request.getDIDCreateData();
-	    Assert.assertIncorrectParameter(didCreateData, "The parameter DIDCreateData is empty.");
-
-	    AccessControlListType DidAcl = request.getDIDACL();
-	    Assert.assertIncorrectParameter(DidAcl, "The parameter DIDCreateData is empty.");
-	    
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
-	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
-
-            Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, DifferentialIdentityServiceActionName.DID_CREATE);
-
-	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
-	    if (protocol.hasNextStep(FunctionType.DIDCreate)) {
-		response = protocol.didCreate(request);
-		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
-	    } else {
-		throw new InappropriateProtocolForActionException("DIDCreate", protocol.toString());
-	    }
-	} catch (ECardException e) {
-	    response.setResult(e.getResult());
-	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
-	    response.setResult(WSHelper.makeResult(e));
-	}
-
-	return response;
+	return WSHelper.makeResponse(DIDCreateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
     /**

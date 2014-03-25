@@ -138,6 +138,7 @@ import org.openecard.addon.sal.SALProtocol;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
+import org.openecard.common.apdu.DeleteFile;
 import org.openecard.common.apdu.EraseBinary;
 import org.openecard.common.apdu.EraseRecord;
 import org.openecard.common.apdu.Select;
@@ -154,6 +155,7 @@ import org.openecard.common.sal.anytype.CryptoMarkerType;
 import org.openecard.common.sal.exception.InappropriateProtocolForActionException;
 import org.openecard.common.sal.exception.IncorrectParameterException;
 import org.openecard.common.sal.exception.NameExistsException;
+import org.openecard.common.sal.exception.NamedEntityNotFoundException;
 import org.openecard.common.sal.exception.PrerequisitesNotSatisfiedException;
 import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.exception.UnknownProtocolException;
@@ -837,7 +839,8 @@ public class TinySAL implements SAL {
 	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dataSetName, applicationID);
 	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DataSet cannot be found.");
 
-	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dataSetName, NamedDataServiceActionName.DATA_SET_SELECT);
+	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dataSetName,
+		    NamedDataServiceActionName.DATA_SET_SELECT);
 
 	    byte[] fileID = dataSetInfo.getDataSetPath().getEfIdOrPath();
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
@@ -872,26 +875,23 @@ public class TinySAL implements SAL {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
-
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
             
             String dataSetName = request.getDataSetName();
             Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
+	    Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, dataSetName,
+		    NamedDataServiceActionName.DATA_SET_DELETE);
 
-	    //Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, dataSetName, NamedDataServiceActionName.DATA_SET_DELETE);
-            
-	    cardInfoWrapper.getDataSetNameList(cardApplicationID).getDataSetName().remove(dataSetName);
-            Iterator<DataSetInfoType> it = cardInfoWrapper.getCardApplication(cardApplicationID).getDataSetInfoList().iterator();
-            
-            while (it.hasNext()) {
-                DataSetInfoType next = it.next();
-                if (next.getDataSetName().equals(dataSetName)) {
-			it.remove();
-                }
-            }
+	    DataSetInfoType dataSet = cardInfoWrapper.getDataSet(dataSetName, cardApplicationID);
+	    if (dataSet == null) {
+		throw new NamedEntityNotFoundException("The data set " + dataSetName + " does not exist.");
+	    }
 
-            // XXXX: We should delete the list of DSIs under this dataSet when the Delete command/APDU is implemented.
-
+	    byte[] path = dataSet.getDataSetPath().getEfIdOrPath();
+	    int len = path.length;
+	    byte[] fid = new byte[] {path[len - 2], path[len - 1]};
+	    DeleteFile delFile = new DeleteFile.ChildFile(fid);
+	    delFile.transmit(env.getDispatcher(), connectionHandle.getSlotHandle());
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {

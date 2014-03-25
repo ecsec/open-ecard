@@ -390,7 +390,8 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationStartSessionResponse cardApplicationStartSession(CardApplicationStartSession request) {
-	CardApplicationStartSessionResponse response = WSHelper.makeResponse(CardApplicationStartSessionResponse.class, WSHelper.makeResultOK());
+	CardApplicationStartSessionResponse response = WSHelper.makeResponse(CardApplicationStartSessionResponse.class,
+		WSHelper.makeResultOK());
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
@@ -401,17 +402,11 @@ public class TinySAL implements SAL {
 	    Assert.assertIncorrectParameter(didName, "The parameter didName is empty.");
 
 	    DIDAuthenticationDataType didAuthenticationProtocolData = request.getAuthenticationProtocolData();
-	    Assert.assertIncorrectParameter(didAuthenticationProtocolData, "The parameter didAuthenticationProtocolData is empty.");
+	    Assert.assertIncorrectParameter(didAuthenticationProtocolData, "The parameter didAuthenticationProtocolData "
+		    + "is empty.");
 	    
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
-
-	    DIDScopeType didScope = request.getDIDScope();
-	    Assert.assertIncorrectParameter(didScope, "The parameter DIDScope is empty.");
-
-	    ConnectionHandleType samConnectionHandle = request.getSAMConnectionHandle();
-	    Assert.assertIncorrectParameter(samConnectionHandle, "The parameter SAMConnectionHandle is empty.");
-
 	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
 		    ConnectionServiceActionName.CARD_APPLICATION_START_SESSION);
 
@@ -448,14 +443,8 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] cardApplicationID = connectionHandle.getCardApplication();
-	    
-	    /* DIDName is required for accesing the DID structure. However,
-	       this parameter does not appears at ISO-24727-3.xsd. I've added it. */
-	    
-	    String didName = SALUtils.getDIDName(request);
-	    Assert.assertIncorrectParameter(didName, "The parameter didName is empty.");
-	    
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();    
+	    String didName = SALUtils.getDIDName(request);    
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 

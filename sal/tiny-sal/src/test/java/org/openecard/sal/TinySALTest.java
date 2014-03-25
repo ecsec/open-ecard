@@ -903,7 +903,6 @@ public class TinySALTest {
         String dataSetName = dataSetListResponse.getDataSetNameList().getDataSetName().get(0);
 		
 	DSIList parameters = new DSIList();
-	parameters.setDataSetName(dataSetName);
 	parameters.setConnectionHandle(result.getConnectionHandle());
 	
 	DSIListResponse resultDSIList = instance.dsiList(parameters);
@@ -949,10 +948,8 @@ public class TinySALTest {
 
 	DSICreate parameters = new DSICreate();	
 	parameters.setConnectionHandle(result.getConnectionHandle());
-	parameters.setDataSetName(dataSetName);
 	parameters.setDSIContent(dsiContent);
 	parameters.setDSIName(dsiName);
-	parameters.setDSIPath(dsiPath);
 	
 	DSICreateResponse resultDSICreate = instance.dsiCreate(parameters);
 	assertEquals(ECardConstants.Major.OK, resultDSICreate.getResult().getResultMajor());
@@ -960,7 +957,6 @@ public class TinySALTest {
 	// list DSIs of DataSetName
 
 	DSIList parametersDSI = new DSIList();
-	parametersDSI.setDataSetName(dataSetName);
 	parametersDSI.setConnectionHandle(result.getConnectionHandle());
 	
 	DSIListResponse resultDSIList = instance.dsiList(parametersDSI);
@@ -1016,7 +1012,6 @@ public class TinySALTest {
 
 	DSIDelete parameters = new DSIDelete();
 	parameters.setConnectionHandle(result.getConnectionHandle());
-	parameters.setDataSetName(dataSetName);
 	parameters.setDSIName(dsiName);
 
 	DSIDeleteResponse resultDSIDelete = instance.dsiDelete(parameters);
@@ -1025,7 +1020,6 @@ public class TinySALTest {
 	// try to find dsiName under dataSetName
 
 	DSIList parametersDSI = new DSIList();
-	parametersDSI.setDataSetName("EF.C.ICC.QES");
 	parametersDSI.setConnectionHandle(result.getConnectionHandle());
 	
 	DSIListResponse resultDSIList = instance.dsiList(parametersDSI);

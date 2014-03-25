@@ -969,8 +969,10 @@ public class TinySAL implements SAL {
 
 	    String dsiName = request.getDSIName();
 	    Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
-	    // TODO check security conditions for dsiDelete
-	    //Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, dataSetName, NamedDataServiceActionName.DSI_DELETE);
+	    DataSetInfoType dSet =
+		    cardInfoWrapper.getDataSetByFid(cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0));
+	    Assert.securityConditionDataSet(cardStateEntry, connectionHandle.getCardApplication(), dSet.getDataSetName(),
+		    NamedDataServiceActionName.DSI_DELETE);
 	    DSIType dsi = cardInfoWrapper.getDSIbyName(dsiName);
 
 	    ArrayList<byte[]> responses = new ArrayList<byte[]>() {
@@ -1200,7 +1202,8 @@ public class TinySAL implements SAL {
     }
 
     /**
-     * The GetRandom function returns a random number which is suitable for authentication with the DID addressed with DIDName.
+     * The GetRandom function returns a random number which is suitable for authentication with the DID addressed with
+     * DIDName.
      * See BSI-TR-03112-4, version 1.1.2, section 3.5.3.
      *
      * @param request GetRandom
@@ -1369,7 +1372,8 @@ public class TinySAL implements SAL {
      */
     @Override
     public VerifyCertificateResponse verifyCertificate(VerifyCertificate request) {
-	VerifyCertificateResponse response = WSHelper.makeResponse(VerifyCertificateResponse.class, WSHelper.makeResultOK());
+	VerifyCertificateResponse response = WSHelper.makeResponse(VerifyCertificateResponse.class,
+		WSHelper.makeResultOK());
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);

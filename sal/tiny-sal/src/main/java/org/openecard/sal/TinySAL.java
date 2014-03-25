@@ -1533,18 +1533,9 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-            byte[] cardApplicationID = connectionHandle.getCardApplication();
-
 	    // handle must be requested without application, as it is irrelevant for this call
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
-
 	    String didName = SALUtils.getDIDName(request);
-	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
-
-	    DIDScopeType didScope = request.getDIDScope();
-	    Assert.assertIncorrectParameter(didScope, "The parameter DIDScope is empty.");
-
-            Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, DifferentialIdentityServiceActionName.DID_GET);
 	    
 	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, cardStateEntry, connectionHandle);
 	    response.setDIDStructure(didStructure);
@@ -1661,9 +1652,6 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-            byte[] cardApplicationID = connectionHandle.getCardApplication();
-            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
-
 	    DIDAuthenticationDataType didAuthenticationData = request.getAuthenticationProtocolData();
 	    Assert.assertIncorrectParameter(didAuthenticationData, "The parameter AuthenticationProtocolData is empty.");
 
@@ -1676,22 +1664,7 @@ public class TinySAL implements SAL {
 		logger.warn("ProtocolURI was urn:oid:1.0.24727.3.0.0.7.2");
 		protocolURI = ECardConstants.Protocol.EAC_GENERIC;
 	    }
-
 	    didAuthenticationData.setProtocol(protocolURI);
-
-            String didName = SALUtils.getDIDName(request);
-	    Assert.assertIncorrectParameter(didName, "The parameter didName is empty.");
-	    
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
-	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
-
-	    DIDScopeType didScope = request.getDIDScope();
-	    Assert.assertIncorrectParameter(didScope, "The parameter DIDScope is empty.");
-
-	    ConnectionHandleType samConnectionHandle = request.getSAMConnectionHandle();
-	    Assert.assertIncorrectParameter(samConnectionHandle, "The parameter SAMConnectionHandle is empty.");
-
-            Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName, DifferentialIdentityServiceActionName.DID_AUTHENTICATE);
 
 	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.DIDAuthenticate)) {
@@ -1708,7 +1681,6 @@ public class TinySAL implements SAL {
 	}
 
 	return response;
-
     }
 
     /**

@@ -519,33 +519,7 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationCreateResponse cardApplicationCreate(CardApplicationCreate request) {
-	CardApplicationCreateResponse response = WSHelper.makeResponse(CardApplicationCreateResponse.class, WSHelper.makeResultOK());
-
-	try {
-	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = states.getEntry(connectionHandle, false);
-	    	    	    
-	    byte[] cardApplicationName = request.getCardApplicationName();
-	    Assert.assertIncorrectParameter(cardApplicationName, "The parameter CardApplicationName is empty.");
-
-	    AccessControlListType cardApplicationACL = request.getCardApplicationACL();
-	    Assert.assertIncorrectParameter(cardApplicationACL, "The parameter CardApplicationACL is empty.");
-	    
-	    CardApplicationType cardApplicationType = new CardApplicationType();
-	    cardApplicationType.setApplicationIdentifier(cardApplicationName);
-	    cardApplicationType.setCardApplicationACL(cardApplicationACL);
-	    
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-	    cardInfoWrapper.getApplicationCapabilities().getCardApplication().add(cardApplicationType);
-
-	} catch (ECardException e) {
-	    response.setResult(e.getResult());
-	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
-	    response.setResult(WSHelper.makeResult(e));
-	}
-
-	return response;
+	return WSHelper.makeResponse(CardApplicationCreateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
     /**
@@ -782,38 +756,7 @@ public class TinySAL implements SAL {
      */
     @Override
     public DataSetCreateResponse dataSetCreate(DataSetCreate request) {
-	 DataSetCreateResponse response = WSHelper.makeResponse(DataSetCreateResponse.class, WSHelper.makeResultOK());
-
-	try {
-	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] cardApplicationID = connectionHandle.getCardApplication();
-	    
-	    AccessControlListType accessControlList = request.getDataSetACL();
-            Assert.assertIncorrectParameter(accessControlList, "The parameter AccessControlListType is empty.");
-            
-            String dataSetName = request.getDataSetName();
-            Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
-
-            //Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, dataSetName, NamedDataServiceActionName.DATA_SET_CREATE);
-
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-	    cardInfoWrapper.getDataSetNameList(cardApplicationID).getDataSetName().add(dataSetName);
-
-	    DataSetInfoType dataSetInfo = new DataSetInfoType();
-	    dataSetInfo.setDataSetName(dataSetName);
-	    dataSetInfo.setDataSetACL(accessControlList);
-	    
-	    cardInfoWrapper.getCardApplication(cardApplicationID).getDataSetInfoList().add(dataSetInfo);
-	    
-	} catch (ECardException e) {
-	    response.setResult(e.getResult());
-	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
-	    response.setResult(WSHelper.makeResult(e));
-	}
-
-	return response;
+	 return WSHelper.makeResponse(DataSetCreateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
     /**

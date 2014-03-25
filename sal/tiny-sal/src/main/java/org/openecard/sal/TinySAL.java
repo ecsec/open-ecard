@@ -537,21 +537,12 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-
 	    byte[] cardApplicationName = request.getCardApplicationName();
 	    Assert.assertIncorrectParameter(cardApplicationName, "The parameter CardApplicationName is empty.");
-	    
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-	    Iterator<CardApplicationType> it = cardInfoWrapper.getApplicationCapabilities().getCardApplication().iterator();
-
-            while (it.hasNext()) {
-                CardApplicationType next = it.next();
-                byte[] appNameNext = next.getApplicationIdentifier();
-                
-                if (Arrays.equals(appNameNext, cardApplicationName))
-                    it.remove();
-            }
-
+	    Assert.securityConditionApplication(cardStateEntry, connectionHandle.getCardApplication(),
+		    CardApplicationServiceActionName.CARD_APPLICATION_DELETE);
+	    DeleteFile delFile = new DeleteFile.Application(connectionHandle.getCardApplication());
+	    delFile.transmit(env.getDispatcher(), connectionHandle.getSlotHandle());
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
@@ -563,7 +554,7 @@ public class TinySAL implements SAL {
     }
 
     /**
-     * The CardApplicationServiceList function returns a list of all avail-able services of a card application.
+     * The CardApplicationServiceList function returns a list of all available services of a card application.
      * See BSI-TR-03112-4, version 1.1.2, section 3.3.4.
      *
      * @param request CardApplicationServiceList

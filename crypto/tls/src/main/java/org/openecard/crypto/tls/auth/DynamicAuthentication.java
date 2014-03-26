@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
+import org.openecard.bouncycastle.crypto.tls.TlsContext;
 import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
 import org.openecard.crypto.tls.CertificateVerifier;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class DynamicAuthentication implements TlsAuthentication {
+public class DynamicAuthentication implements TlsAuthentication, ContextAware {
 
     private static final Logger logger = LoggerFactory.getLogger(DynamicAuthentication.class);
 
@@ -47,6 +48,7 @@ public class DynamicAuthentication implements TlsAuthentication {
     private CertificateVerifier certVerifier;
     private CredentialFactory credentialFactory;
     private Certificate lastCertChain;
+    private TlsContext context;
 
     /**
      * Nullary constructor.
@@ -69,6 +71,11 @@ public class DynamicAuthentication implements TlsAuthentication {
 	this.hostname = hostName;
 	this.certVerifier = certVerifier;
 	this.credentialFactory = credentialFactory;
+    }
+
+    @Override
+    public void setContext(TlsContext context) {
+	this.context = context;
     }
 
     /**
@@ -147,7 +154,12 @@ public class DynamicAuthentication implements TlsAuthentication {
 	if (credentialFactory != null) {
 	    List<TlsCredentials> credentials = credentialFactory.getClientCredentials(cr);
 	    if (! credentials.isEmpty()) {
-		return credentials.get(0);
+		TlsCredentials cred = credentials.get(0);
+		// in case the credential understands the context supply it
+		if (cred instanceof ContextAware) {
+		    ((ContextAware) cred).setContext(context);
+		}
+		return cred;
 	    }
 	}
 	// fall back to no auth, when no credential is found

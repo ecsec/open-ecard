@@ -27,6 +27,7 @@ import java.io.IOException;
 import org.openecard.bouncycastle.crypto.tls.DefaultTlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsCipherFactory;
+import org.openecard.crypto.tls.auth.ContextAware;
 
 
 /**
@@ -70,6 +71,9 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	    DynamicAuthentication tlsAuthTmp = new DynamicAuthentication();
 	    tlsAuthTmp.setHostname(fqdn);
 	    tlsAuth = tlsAuthTmp;
+	}
+	if (tlsAuth instanceof ContextAware) {
+	    ((ContextAware) tlsAuth).setContext(context);
 	}
 	return tlsAuth;
     }

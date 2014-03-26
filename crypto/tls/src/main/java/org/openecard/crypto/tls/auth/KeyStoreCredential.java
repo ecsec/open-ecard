@@ -30,6 +30,7 @@ import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.HashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.SignatureAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
+import org.openecard.bouncycastle.crypto.tls.TlsContext;
 import org.openecard.bouncycastle.crypto.tls.TlsSignerCredentials;
 import org.openecard.crypto.common.keystore.KeyStoreSigner;
 import org.openecard.crypto.common.sal.CredentialPermissionDenied;
@@ -43,17 +44,23 @@ import org.slf4j.LoggerFactory;
  * @see KeyStoreSigner
  * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
  */
-public class KeyStoreCredential implements TlsSignerCredentials {
+public class KeyStoreCredential implements TlsSignerCredentials, ContextAware {
 
     private static final Logger logger = LoggerFactory.getLogger(SmartCardSignerCredential.class);
 
     private final KeyStoreSigner signer;
     private final SignatureAndHashAlgorithm signatureAndHashAlgorithm;
+    private TlsContext context;
     private Certificate certificate = Certificate.EMPTY_CHAIN;
 
     public KeyStoreCredential(@Nonnull KeyStoreSigner signer) {
 	this.signer = signer;
 	signatureAndHashAlgorithm = new SignatureAndHashAlgorithm(HashAlgorithm.sha256, SignatureAlgorithm.rsa);
+    }
+
+    @Override
+    public void setContext(TlsContext context) {
+	this.context = context;
     }
 
     @Override
@@ -73,9 +80,9 @@ public class KeyStoreCredential implements TlsSignerCredentials {
     }
 
     @Override
-    public byte[] generateCertificateSignature(byte[] md5andsha1) throws IOException {
+    public byte[] generateCertificateSignature(byte[] hash) throws IOException {
 	try {
-	    return signer.sign(md5andsha1);
+	    return signer.sign(hash);
 	}  catch (SignatureException ex) {
 	    throw new IOException("Failed to create signature because of an unknown error.", ex);
 	} catch (CredentialPermissionDenied ex) {

@@ -28,6 +28,7 @@ import org.openecard.bouncycastle.crypto.tls.PSKTlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsCipherFactory;
 import org.openecard.bouncycastle.crypto.tls.TlsPSKIdentity;
+import org.openecard.crypto.tls.auth.ContextAware;
 
 
 /**
@@ -73,6 +74,9 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 	    DynamicAuthentication tlsAuthTmp = new DynamicAuthentication();
 	    tlsAuthTmp.setHostname(fqdn);
 	    tlsAuth = tlsAuthTmp;
+	}
+	if (tlsAuth instanceof ContextAware) {
+	    ((ContextAware) tlsAuth).setContext(context);
 	}
 	return tlsAuth;
     }

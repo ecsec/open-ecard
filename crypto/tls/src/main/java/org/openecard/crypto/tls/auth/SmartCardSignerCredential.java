@@ -26,9 +26,11 @@ import java.io.IOException;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import javax.annotation.Nonnull;
+import org.openecard.bouncycastle.crypto.tls.AbstractTlsSignerCredentials;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
-import org.openecard.bouncycastle.crypto.tls.TlsSignerCredentials;
+import org.openecard.bouncycastle.crypto.tls.TlsContext;
+import org.openecard.bouncycastle.crypto.tls.TlsUtils;
 import org.openecard.crypto.common.sal.CredentialPermissionDenied;
 import org.openecard.crypto.common.sal.GenericCryptoSigner;
 import org.slf4j.Logger;
@@ -42,11 +44,12 @@ import org.slf4j.LoggerFactory;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class SmartCardSignerCredential implements TlsSignerCredentials {
+public class SmartCardSignerCredential extends AbstractTlsSignerCredentials implements ContextAware {
 
     private static final Logger logger = LoggerFactory.getLogger(SmartCardSignerCredential.class);
 
     private final GenericCryptoSigner signerImpl;
+    private TlsContext context;
     private Certificate certificate = Certificate.EMPTY_CHAIN;
 
     public SmartCardSignerCredential(@Nonnull GenericCryptoSigner signerImpl) {
@@ -54,12 +57,17 @@ public class SmartCardSignerCredential implements TlsSignerCredentials {
     }
 
     @Override
-    public byte[] generateCertificateSignature(@Nonnull byte[] md5andsha1) throws IOException {
+    public void setContext(TlsContext context) {
+	this.context = context;
+    }
+
+    @Override
+    public byte[] generateCertificateSignature(@Nonnull byte[] hash) throws IOException {
 	// Note: this check is necessary to avoid the pin dialog when the certificate is
 	//       Certificate.EMPTY_CHAIN
 	if (! certificate.equals(Certificate.EMPTY_CHAIN)) {
 	    try {
-		return signerImpl.sign(md5andsha1);
+		return signerImpl.sign(hash);
 	    } catch (SignatureException ex) {
 		throw new IOException("Failed to create signature because of an unknown error.", ex);
 	    } catch (CredentialPermissionDenied ex) {

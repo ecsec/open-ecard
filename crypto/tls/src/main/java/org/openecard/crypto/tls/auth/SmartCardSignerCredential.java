@@ -26,8 +26,13 @@ import java.io.IOException;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import javax.annotation.Nonnull;
+import org.openecard.bouncycastle.asn1.ASN1Encoding;
+import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.openecard.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.openecard.bouncycastle.asn1.x509.DigestInfo;
 import org.openecard.bouncycastle.crypto.tls.AbstractTlsSignerCredentials;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.crypto.tls.SignatureAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.TlsContext;
 import org.openecard.bouncycastle.crypto.tls.TlsUtils;
@@ -66,6 +71,17 @@ public class SmartCardSignerCredential extends AbstractTlsSignerCredentials impl
 	// Note: this check is necessary to avoid the pin dialog when the certificate is
 	//       Certificate.EMPTY_CHAIN
 	if (! certificate.equals(Certificate.EMPTY_CHAIN)) {
+	    // When using TLS 1.2, a real PKCs#1 1.5 signature must be made, no raw RSA signature as in older versions
+	    // see http://tools.ietf.org/html/rfc5246#section-4.7
+	    if (TlsUtils.isTLSv12(context)) {
+		SignatureAndHashAlgorithm sigAlg = getSignatureAndHashAlgorithm();
+		if (sigAlg.getSignature() == SignatureAlgorithm.rsa) {
+		    ASN1ObjectIdentifier hashAlgId = TlsUtils.getOIDForHashAlgorithm(sigAlg.getHash());
+		    DigestInfo digestInfo = new DigestInfo(new AlgorithmIdentifier(hashAlgId), hash);
+		    hash = digestInfo.getEncoded(ASN1Encoding.DER);
+		}
+	    }
+	    // perform the signature on the card
 	    try {
 		return signerImpl.sign(hash);
 	    } catch (SignatureException ex) {

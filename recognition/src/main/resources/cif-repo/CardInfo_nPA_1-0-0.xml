@@ -4172,7 +4172,7 @@
 									<iso:Protected>true</iso:Protected>
 								</iso:KeyRef>
 							</iso:KeyInfo>
-							<iso:SignatureGenerationInfo>MSE_KEY PSO_CDS</iso:SignatureGenerationInfo>
+							<iso:SignatureGenerationInfo>MSE_KEY_DS PSO_CDS</iso:SignatureGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>EF.C.ZDA.QES</iso:DataSetName>
 							</iso:CertificateRef>

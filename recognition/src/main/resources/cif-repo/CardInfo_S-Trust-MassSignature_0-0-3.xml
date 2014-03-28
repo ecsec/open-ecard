@@ -2153,7 +2153,7 @@
 				</iso:KeyRef>
 				<iso:SecurityEnvironmentIdentifier>02</iso:SecurityEnvironmentIdentifier>
 			    </iso:KeyInfo>
-			    <iso:SignatureGenerationInfo>MSE_KEY INT_AUTH</iso:SignatureGenerationInfo>
+			    <iso:SignatureGenerationInfo>MSE_KEY_DS INT_AUTH</iso:SignatureGenerationInfo>
 			    <iso:CertificateRef>
 				<iso:DataSetName>EF_C_X509_CH_AUT</iso:DataSetName>
 			    </iso:CertificateRef>

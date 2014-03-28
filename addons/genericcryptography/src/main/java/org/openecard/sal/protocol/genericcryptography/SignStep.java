@@ -77,6 +77,7 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
     private static final byte BLOCKSIZE = (byte) 256;
     private static final byte SET_COMPUTATION = (byte) 0x41;
     private static final byte KEY_REFERENCE_PRIVATE_KEY = (byte) 0x84;
+    private static final byte CARD_ALG_REF = (byte) 0x80;
 
     private static final String HASHTOSIGN = "hashToSign";
     private static final String KEYREFERENCE = "keyReference";
@@ -164,8 +165,12 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	byte[] signature = new byte[0];
 
 	TLV tagAlgorithmIdentifier = new TLV();
-	tagAlgorithmIdentifier.setTagNumWithClass(0x80);
+	tagAlgorithmIdentifier.setTagNumWithClass(CARD_ALG_REF);
 	tagAlgorithmIdentifier.setValue(algorithmIdentifier);
+
+	TLV tagKeyReference = new TLV();
+	tagKeyReference.setTagNumWithClass(KEY_REFERENCE_PRIVATE_KEY);
+	tagKeyReference.setValue(keyReference);
 
 	CardCommandAPDU cmdAPDU = null;
 	CardResponseAPDU responseAPDU = null;
@@ -180,22 +185,14 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    }
 
 	    if (command.equals("MSE_KEY")) {
-		TLV tagKeyReference = new TLV();
-		tagKeyReference.setTagNumWithClass(KEY_REFERENCE_PRIVATE_KEY);
-		tagKeyReference.setValue(keyReference);
+		byte[] mseData = tagKeyReference.toBER();
+
 		if (nextCmd.equals("PSO_CDS")) {
-		    byte[] mseData = ByteUtils.concatenate(tagKeyReference.toBER(),
-			    tagAlgorithmIdentifier.toBER());
-		    cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.DST,
-			    mseData);
+		    cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.DST, mseData);
 		} else if (nextCmd.equals("INT_AUTH")) {
-		    byte[] mseData = ByteUtils.concatenate(tagKeyReference.toBER(),
-			    tagAlgorithmIdentifier.toBER());
-		    cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.AT,
-			    mseData);
+		    cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.AT, mseData);
 		} else {
-		    String msg = "The command 'MSE_KEY' followed by '" + nextCmd + "' is currently not "
-			    + "supported.";
+		    String msg = "The command 'MSE_KEY' followed by '" + nextCmd + "' is currently not supported.";
 		    logger.error(msg);
 		    throw new IncorrectParameterException(msg);
 		}
@@ -210,9 +207,11 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    } else if (command.equals("PSO_HASH")) {
 		cmdAPDU = new PSOHash(signature);
 	    } else if (command.equals("MSE_DS")) {
-		cmdAPDU = new ManageSecurityEnvironment.Set(SET_COMPUTATION, ManageSecurityEnvironment.DST);
+		byte[] mseData = tagAlgorithmIdentifier.toBER();
+		cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.DST, mseData);
 	    } else if (command.equals("MSE_KEY_DS")) {
-		cmdAPDU = new ManageSecurityEnvironment.Set(SET_COMPUTATION, ManageSecurityEnvironment.DST);
+		byte[] mseData = ByteUtils.concatenate(tagKeyReference.toBER(), tagAlgorithmIdentifier.toBER());
+		cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.DST, mseData);
 	    } else {
 		String msg = "The signature generation command '" + command + "' is unknown.";
 		throw new IncorrectParameterException(msg);

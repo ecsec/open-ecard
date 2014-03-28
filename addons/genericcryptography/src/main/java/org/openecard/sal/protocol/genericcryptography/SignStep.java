@@ -27,6 +27,7 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.CryptographicServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
+import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
@@ -82,6 +83,7 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
     private static final String HASHTOSIGN = "hashToSign";
     private static final String KEYREFERENCE = "keyReference";
     private static final String ALGORITHMIDENTIFIER = "algorithmIdentifier";
+    private static final String HASHALGORITHMREFERENCE = "hashAlgorithmReference";
 
     private final Dispatcher dispatcher;
 
@@ -117,19 +119,23 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    byte[] message = sign.getMessage();
 	    byte[] keyReference = cryptoMarker.getCryptoKeyInfo().getKeyRef().getKeyRef();
 	    byte[] algorithmIdentifier = cryptoMarker.getAlgorithmInfo().getCardAlgRef();
+	    byte[] hashRef = cryptoMarker.getAlgorithmInfo().getHashAlgRef();
+	    HashGenerationInfoType hashInfo = cryptoMarker.getHashGenerationInfo();
 
 	    if (didStructure.getDIDScope().equals(DIDScopeType.LOCAL)) {
 		keyReference[0] = (byte) (0x80 | keyReference[0]);
 	    }
 
 	    if (cryptoMarker.getSignatureGenerationInfo() != null) {
-		response = performSignature(cryptoMarker, keyReference, algorithmIdentifier, message, slotHandle);
+		response = performSignature(cryptoMarker, keyReference, algorithmIdentifier, message, slotHandle,
+			hashRef, hashInfo);
 	    } else {
 		// assuming that legacySignatureInformation exists
 		BaseTemplateContext templateContext = new BaseTemplateContext();
 		templateContext.put(HASHTOSIGN, message);
 		templateContext.put(KEYREFERENCE, keyReference);
 		templateContext.put(ALGORITHMIDENTIFIER, algorithmIdentifier);
+		templateContext.put(HASHALGORITHMREFERENCE, hashRef);
 		response = performLegacySignature(cryptoMarker, slotHandle, templateContext);
 	    }
 	} catch (ECardException e) {
@@ -150,6 +156,8 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
      * @param algorithmIdentifier A byte array containing the identifier of the signing algorithm.
      * @param message The message to sign.
      * @param slotHandle The slotHandle identifying the card.
+     * @param hashRef The variable contains the reference for the hash algorithm which have to be used.
+     * @param hashInfo A HashGenerationInfo object which indicates how the hash computation is to perform.
      * @return A {@link SignResponse} object containing the signature of the <b>message</b>.
      * @throws TLVException Thrown if the TLV creation for the key identifier or algorithm identifier failed.
      * @throws IncorrectParameterException Thrown if the SignatureGenerationInfo does not contain PSO_CDS or INT_AUTH
@@ -158,11 +166,9 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
      * @throws org.openecard.common.WSHelper.WSException Thrown if the checkResults method of WSHelper failed.
      */
     private SignResponse performSignature(CryptoMarkerType cryptoMarker, byte[] keyReference, byte[] algorithmIdentifier,
-	    byte[] message, byte[] slotHandle) throws TLVException, IncorrectParameterException, APDUException,
-	    WSHelper.WSException {
+	    byte[] message, byte[] slotHandle, byte[] hashRef, HashGenerationInfoType hashInfo) throws TLVException,
+	    IncorrectParameterException, APDUException, WSHelper.WSException {
 	SignResponse response = WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultOK());
-	
-	byte[] signature = new byte[0];
 
 	TLV tagAlgorithmIdentifier = new TLV();
 	tagAlgorithmIdentifier.setTagNumWithClass(CARD_ALG_REF);
@@ -204,8 +210,17 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 		cmdAPDU = new ManageSecurityEnvironment.Restore(ManageSecurityEnvironment.DST);
 	    } else if (command.equals("MSE_HASH")) {
 		cmdAPDU = new ManageSecurityEnvironment.Set(SET_COMPUTATION, ManageSecurityEnvironment.HT);
+		TLV mseDataTLV = new TLV();
+		mseDataTLV.setTagNumWithClass((byte) 0x80);
+		mseDataTLV.setValue(hashRef);
+		cmdAPDU.setData(mseDataTLV.toBER());
 	    } else if (command.equals("PSO_HASH")) {
-		cmdAPDU = new PSOHash(signature);
+		if (hashInfo.value().equals(HashGenerationInfoType.LAST_ROUND_ON_CARD.value()) ||
+			hashInfo.value().equals(HashGenerationInfoType.NOT_ON_CARD.value())) {
+		    cmdAPDU = new PSOHash(PSOHash.P2_SET_HASH_OR_PART, message);
+		} else {
+		    cmdAPDU = new PSOHash(PSOHash.P2_HASH_MESSAGE, message);
+		}
 	    } else if (command.equals("MSE_DS")) {
 		byte[] mseData = tagAlgorithmIdentifier.toBER();
 		cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.DST, mseData);

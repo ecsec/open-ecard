@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,16 +30,30 @@ import org.openecard.common.apdu.PerformSecurityOperation;
  * See ISO/IEC 7816-8, section 11.8.
  *
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public final class PSOHash extends PerformSecurityOperation {
 
     /**
-     * Creates a new PSO Hash APDU.
-     *
-     * @param data Data to be hashed
+     * P2 value for complete hash generation on the card.
      */
-    public PSOHash(byte[] data) {
-	super((byte) 0x90, (byte) 0x80);
+    public static final byte P2_HASH_MESSAGE = (byte) 0x80;
+
+    /**
+     * P2 value for setting a HashValue or specific parameters.
+     */
+    public static final byte P2_SET_HASH_OR_PART = (byte) 0xA0;
+
+    /**
+     * Creates a new PSO Hash APDU.
+     * APDU: 0x00 0x2A 0x90 0x80|0xA0 Lc data
+     *
+     * @param data Data to be hashed or hash or parameters for the hash according to ISO7816-8 section 11.8.3.
+     * @param p2 P2 value according to ISO7816-98 section 11.8.3. The class provides two public variables for this
+     * purpose.
+     */
+    public PSOHash(byte p2, byte[] data) {
+	super((byte) 0x90, p2);
 	setData(data);
     }
 

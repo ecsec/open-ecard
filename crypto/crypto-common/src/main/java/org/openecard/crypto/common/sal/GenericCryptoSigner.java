@@ -373,8 +373,30 @@ public class GenericCryptoSigner {
     }
 
     public SignatureAndHashAlgorithm getSignatureAndHashAlgorithm() {
-	// TODO: read correct hash and signature algo from CryptoMarker
-	return new SignatureAndHashAlgorithm(HashAlgorithm.sha256, SignatureAlgorithm.rsa);
+	SignatureAndHashAlgorithm sigAndHash = new SignatureAndHashAlgorithm(HashAlgorithm.sha256, SignatureAlgorithm.rsa);
+	try {
+	    DIDGet didGet = new DIDGet();
+	    didGet.setConnectionHandle(handle);
+	    didGet.setDIDName(didName);
+	    didGet.setDIDScope(DIDScopeType.LOCAL);
+	    DIDGetResponse response = (DIDGetResponse) dispatcher.deliver(didGet);
+	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(response.getDIDStructure().getDIDMarker());
+	    String algorithm = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
+	    sigAndHash = AlgorithmResolver.getSignatureAndHashFromAlgorithm(algorithm);
+
+	    if (sigAndHash == null) {
+		throw new IllegalArgumentException("Illegal oid for the signature algorithm.");
+	    }
+	} catch (DispatcherException ex) {
+	    logger.error("Failed to get DID for DIDName: {}.", didName, ex);
+	} catch (InvocationTargetException ex) {
+	    logger.error("Failed to get DID for DIDName: {}.", didName, ex);
+	} catch (IllegalArgumentException ex) {
+	    logger.error("Failed to find a valid SignatureAndHashAlgorithm object for the OID used in the CryptoMarker "
+		    + "of the DID with the DIDName: {}.", didName, ex);
+	}
+
+	return sigAndHash;
     }
 
 }

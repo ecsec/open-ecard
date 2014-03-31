@@ -67,7 +67,18 @@ public class GenericCryptoSignerFinder {
 
     private static final Logger logger = LoggerFactory.getLogger(GenericCryptoSignerFinder.class);
 
-    private static final String OID_PKCS_1 = "urn:oid:1.2.840.113549.1.1";
+    private static final String OID_PKCS_1_PURE_RSA_SIGNATURE_LEGACY = "urn:oid:1.2.840.113549.1.1";
+    private static final String OID_PKCS_1_PURE_RSA_SIGNATURE = "urn:oid:1.2.840.113549.1.1.1";
+    private static final String OID_PKCS_1_RSA_SHA1 = "urn:oid:1.2.840.113549.1.1.5";
+    private static final String OID_PKCS_1_RSA_SHA256 = "urn:oid:1.2.840.113549.1.1.11";
+    private static final String OID_PKCS_1_RSA_SHA384 = "urn:oid:1.2.840.113549.1.1.12";
+    private static final String OID_PKCS_1_RSA_SHA512 = "urn:oid:1.2.840.113549.1.1.13";
+    private static final String OID_PKCS_1_RSA_SHA224 = "urn:oid:1.2.840.113549.1.1.14";
+    private static final String OID_ECDSA_SHA1 = "urn:oid:1.2.840.10045.4.1";
+    private static final String OID_ECDSA_SHA224 = "urn:oid:1.2.840.10045.4.3.1";
+    private static final String OID_ECDSA_SHA256 = "urn:oid:1.2.840.10045.4.3.2";
+    private static final String OID_ECDSA_SHA384 = "urn:oid:1.2.840.10045.4.3.3";
+    private static final String OID_ECDSA_SHA512 = "urn:oid:1.2.840.10045.4.3.4";
     private static final String OID_GENERIC_CRYPTO = "urn:oid:1.3.162.15480.3.0.25";
     private static final String COMPUTE_SIGNATURE = "Compute-signature";
 
@@ -169,8 +180,41 @@ public class GenericCryptoSignerFinder {
 	    DIDGetResponse didGetResponse = (DIDGetResponse) dispatcher.deliver(didGet);
 	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didGetResponse.getDIDStructure().getDIDMarker());
 	    String algorithm = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
-	    if (algorithm.equals(OID_PKCS_1)) {
-		logger.debug("{} is usable for TLS signatures.", didName);
+	    if (algorithm.equals(OID_PKCS_1_PURE_RSA_SIGNATURE_LEGACY)) {
+		logger.debug("{} is usable for TLSv1.1 and TLS1.2 signatures.", didName);
+		remainingDIDs.add(didName);
+	    } else if(algorithm.equals(OID_PKCS_1_PURE_RSA_SIGNATURE)) {
+		logger.debug("{} is usable for TLSv1.1 and TLS1.2 signatures.", didName);
+		remainingDIDs.add(didName);
+	    } else if (algorithm.equals(OID_PKCS_1_RSA_SHA1)) {
+		logger.debug("{} is usable for TLSv1.1 and TLS1.2 signatures.", didName);
+		remainingDIDs.add(didName);
+	    } else if (algorithm.equals(OID_PKCS_1_RSA_SHA256)) {
+		logger.debug("{} is usable for TLSv1.1 and TLS1.2 signatures.", didName);
+		remainingDIDs.add(didName);
+	    } else if (algorithm.equals(OID_PKCS_1_RSA_SHA224)) {
+		logger.debug("{} is usable for TLS1.2 signatures.", didName);
+		remainingDIDs.add(didName);
+	    } else if (algorithm.equals(OID_PKCS_1_RSA_SHA384)) {
+		logger.debug("{} is usable for TLS1.2 signatures.", didName);
+		remainingDIDs.add(didName);
+	    } else if (algorithm.equals(OID_PKCS_1_RSA_SHA512)) {
+		logger.debug("{} is usable for TLS1.2 signatures.", didName);
+		remainingDIDs.add(didName);
+	    } else if (algorithm.equals(OID_ECDSA_SHA1)) {
+		logger.debug("{} is usable for TLSv1.2 signatures.", didName);
+		remainingDIDs.add(didName);
+	    } else if (algorithm.equals(OID_ECDSA_SHA224)) {
+		logger.debug("{} is usable for TLSv1.2 signatures.", didName);
+		remainingDIDs.add(didName);
+	    } else if (algorithm.equals(OID_ECDSA_SHA256)) {
+		logger.debug("{} is usable for TLSv1.2 signatures.", didName);
+		remainingDIDs.add(didName);
+	    } else if (algorithm.equals(OID_ECDSA_SHA384)) {
+		logger.debug("{} is usable for TLSv1.2 signatures.", didName);
+		remainingDIDs.add(didName);
+	    } else if (algorithm.equals(OID_ECDSA_SHA512)) {
+		logger.debug("{} is usable for TLSv1.2 signatures.", didName);
 		remainingDIDs.add(didName);
 	    } else {
 		logger.debug("{} is not usable for TLS signatures.", didName);

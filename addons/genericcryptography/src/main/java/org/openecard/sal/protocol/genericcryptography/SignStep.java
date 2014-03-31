@@ -32,6 +32,7 @@ import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.openecard.addon.sal.FunctionType;
@@ -182,23 +183,18 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	CardResponseAPDU responseAPDU = null;
 
 	String[] signatureGenerationInfo = cryptoMarker.getSignatureGenerationInfo();
-	for (int i = 0; i < signatureGenerationInfo.length; i++) {
-	    String command = signatureGenerationInfo[i];
-	    String nextCmd = "";
-
-	    if (i < signatureGenerationInfo.length - 1) {
-		nextCmd = signatureGenerationInfo[i + 1];
-	    }
+	for (String command : signatureGenerationInfo) {
+	    HashSet<String> signGenInfo = new HashSet<String>(java.util.Arrays.asList(signatureGenerationInfo));
 
 	    if (command.equals("MSE_KEY")) {
 		byte[] mseData = tagKeyReference.toBER();
 
-		if (nextCmd.equals("PSO_CDS")) {
+		if (signGenInfo.contains("PSO_CDS")) {
 		    cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.DST, mseData);
-		} else if (nextCmd.equals("INT_AUTH")) {
+		} else if (signGenInfo.contains("INT_AUTH") && ! signGenInfo.contains("PSO_CDS")) {
 		    cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.AT, mseData);
 		} else {
-		    String msg = "The command 'MSE_KEY' followed by '" + nextCmd + "' is currently not supported.";
+		    String msg = "The command 'MSE_KEY' followed by 'INT_AUTH' and 'PSO_CDS' is currently not supported.";
 		    logger.error(msg);
 		    throw new IncorrectParameterException(msg);
 		}

@@ -223,6 +223,12 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    } else if (command.equals("MSE_KEY_DS")) {
 		byte[] mseData = ByteUtils.concatenate(tagKeyReference.toBER(), tagAlgorithmIdentifier.toBER());
 		cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.DST, mseData);
+	    } else if (command.equals("MSE_INT_AUTH")) {
+		byte[] mseData = tagKeyReference.toBER();
+		cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.AT, mseData);
+	    } else if (command.equals("MSE_KEY_INT_AUTH")) {
+		byte[] mseData = ByteUtils.concatenate(tagKeyReference.toBER(), tagAlgorithmIdentifier.toBER());
+		cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.AT, mseData);
 	    } else {
 		String msg = "The signature generation command '" + command + "' is unknown.";
 		throw new IncorrectParameterException(msg);

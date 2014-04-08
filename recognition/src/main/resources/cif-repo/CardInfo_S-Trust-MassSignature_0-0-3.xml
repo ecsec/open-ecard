@@ -1564,24 +1564,26 @@
 	    </iso:DIDInfo>
 	    <iso:DIDInfo>
 		<iso:DifferentialIdentity>
-		    <iso:DIDName>SK.CH.DS_ISO9796-2Withrsa_sha1</iso:DIDName>
+		    <iso:DIDName>SK.CH.DS_RSA_SHA1_PKCS1_v1_5</iso:DIDName>
 		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
 		    <iso:DIDMarker>
 			<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 			    <iso:AlgorithmInfo>
-				<iso:Algorithm>ISO9796-2Withrsa_sha1</iso:Algorithm>
+				<iso:Algorithm>RSA_SHA1_PKCS1_v1_5</iso:Algorithm>
 				<iso:AlgorithmIdentifier>
-				    <iso:Algorithm>urn:oid:1.3.36.3.4.2.2.1</iso:Algorithm>
+				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.5</iso:Algorithm>
 				</iso:AlgorithmIdentifier>
 				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 				<iso:CardAlgRef>12</iso:CardAlgRef>
+				<iso:HashAlgRef>10</iso:HashAlgRef>
 			    </iso:AlgorithmInfo>
 			    <iso:KeyInfo>
 				<iso:KeyRef>
 				    <iso:KeyRef>04</iso:KeyRef>
 				</iso:KeyRef>
 			    </iso:KeyInfo>
-			    <iso:SignatureGenerationInfo>PSO_HASH PSO_CDS</iso:SignatureGenerationInfo>
+			    <iso:SignatureGenerationInfo>MSE_DS MSE_HASH PSO_HASH PSO_CDS</iso:SignatureGenerationInfo>
+				<iso:HashGenerationInfo>NotOnCard</iso:HashGenerationInfo>
 			    <iso:CertificateRef>
 				<iso:DataSetName>EF_C_X509_CH_DS</iso:DataSetName>
 			    </iso:CertificateRef>
@@ -1635,24 +1637,26 @@
 	    </iso:DIDInfo>
 	    <iso:DIDInfo>
 		<iso:DifferentialIdentity>
-		    <iso:DIDName>SK.CH.DS_ISO9796-2Withrsa_sha256</iso:DIDName>
+		    <iso:DIDName>SK.CH.DS_RSA_SHA256_PKCS1_v1_5</iso:DIDName>
 		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
 		    <iso:DIDMarker>
 			<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 			    <iso:AlgorithmInfo>
-				<iso:Algorithm>ISO9796-2Withrsa_sha256</iso:Algorithm>
+				<iso:Algorithm>RSA_SHA256_PKCS1_v1_5</iso:Algorithm>
 				<iso:AlgorithmIdentifier>
-				    <iso:Algorithm>urn:oid:1.3.36.3.4.2.2.4</iso:Algorithm>
+				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.11</iso:Algorithm>
 				</iso:AlgorithmIdentifier>
 				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 				<iso:CardAlgRef>42</iso:CardAlgRef>
+				<iso:HashAlgRef>40</iso:HashAlgRef>
 			    </iso:AlgorithmInfo>
 			    <iso:KeyInfo>
 				<iso:KeyRef>
 				    <iso:KeyRef>04</iso:KeyRef>
 				</iso:KeyRef>
 			    </iso:KeyInfo>
-			    <iso:SignatureGenerationInfo>PSO_HASH PSO_CDS</iso:SignatureGenerationInfo>
+			    <iso:SignatureGenerationInfo>MSE_DS MSE_HASH PSO_HASH PSO_CDS</iso:SignatureGenerationInfo>
+				<iso:HashGenerationInfo>NotOnCard</iso:HashGenerationInfo>
 			    <iso:CertificateRef>
 				<iso:DataSetName>EF_C_X509_CH_DS</iso:DataSetName>
 			    </iso:CertificateRef>
@@ -1706,24 +1710,26 @@
 	    </iso:DIDInfo>
 	    <iso:DIDInfo>
 		<iso:DifferentialIdentity>
-		    <iso:DIDName>SK.CH.DS_ISO9796-2Withrsa_sha384</iso:DIDName>
+		    <iso:DIDName>SK.CH.DS_RSA_SHA384_PKCS1_v1_5</iso:DIDName>
 		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
 		    <iso:DIDMarker>
 			<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 			    <iso:AlgorithmInfo>
-				<iso:Algorithm>ISO9796-2Withrsa_sha384</iso:Algorithm>
+				<iso:Algorithm>RSA_SHA384_PKCS1_v1_5</iso:Algorithm>
 				<iso:AlgorithmIdentifier>
-				    <iso:Algorithm>urn:oid:1.3.36.3.4.2.2.5</iso:Algorithm>
+				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.12</iso:Algorithm>
 				</iso:AlgorithmIdentifier>
 				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 				<iso:CardAlgRef>52</iso:CardAlgRef>
+				<iso:HashAlgRef>50</iso:HashAlgRef>
 			    </iso:AlgorithmInfo>
 			    <iso:KeyInfo>
 				<iso:KeyRef>
 				    <iso:KeyRef>04</iso:KeyRef>
 				</iso:KeyRef>
 			    </iso:KeyInfo>
-			    <iso:SignatureGenerationInfo>PSO_HASH PSO_CDS</iso:SignatureGenerationInfo>
+			    <iso:SignatureGenerationInfo>MSE_DS MSE_HASH PSO_HASH PSO_CDS</iso:SignatureGenerationInfo>
+				<iso:HashGenerationInfo>NotOnCard</iso:HashGenerationInfo>
 			    <iso:CertificateRef>
 				<iso:DataSetName>EF_C_X509_CH_DS</iso:DataSetName>
 			    </iso:CertificateRef>
@@ -1777,95 +1783,26 @@
 	    </iso:DIDInfo>
 	    <iso:DIDInfo>
 		<iso:DifferentialIdentity>
-		    <iso:DIDName>SK.CH.DS_ISO9796-2Withrsa_sha512</iso:DIDName>
+		    <iso:DIDName>SK.CH.DS_RSA_SHA512_PKCS1_v1_5</iso:DIDName>
 		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
 		    <iso:DIDMarker>
 			<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 			    <iso:AlgorithmInfo>
-				<iso:Algorithm>ISO9796-2Withrsa_sha512</iso:Algorithm>
+				<iso:Algorithm>RSA_SHA512_PKCS1_v1_5</iso:Algorithm>
 				<iso:AlgorithmIdentifier>
-				    <iso:Algorithm>urn:oid:1.3.36.3.4.2.2.6</iso:Algorithm>
+				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.13</iso:Algorithm>
 				</iso:AlgorithmIdentifier>
 				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 				<iso:CardAlgRef>62</iso:CardAlgRef>
+				<iso:HashAlgRef>60</iso:HashAlgRef>
 			    </iso:AlgorithmInfo>
 			    <iso:KeyInfo>
 				<iso:KeyRef>
 				    <iso:KeyRef>04</iso:KeyRef>
 				</iso:KeyRef>
 			    </iso:KeyInfo>
-			    <iso:SignatureGenerationInfo>PSO_HASH PSO_CDS</iso:SignatureGenerationInfo>
-			    <iso:CertificateRef>
-				<iso:DataSetName>EF_C_X509_CH_DS</iso:DataSetName>
-			    </iso:CertificateRef>
-			    <iso:CertificateRef>
-				<iso:DataSetName>EF_C_X509_CA_CS_DS</iso:DataSetName>
-			    </iso:CertificateRef>
-			</iso:CryptoMarker>
-		    </iso:DIDMarker>
-		</iso:DifferentialIdentity>
-		<iso:DIDACL>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:always>true</iso:always>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:always>true</iso:always>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:DIDAuthentication>
-				<iso:DIDName>PIN-SIG</iso:DIDName>
-				<iso:DIDState>true</iso:DIDState>
-			    </iso:DIDAuthentication>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:always>true</iso:always>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		</iso:DIDACL>
-	    </iso:DIDInfo>
-	    <iso:DIDInfo>
-		<iso:DifferentialIdentity>
-		    <iso:DIDName>SK.CH.DS_ISO9796-2Withrsa_ripemd160</iso:DIDName>
-		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
-		    <iso:DIDMarker>
-			<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
-			    <iso:AlgorithmInfo>
-				<iso:Algorithm>ISO9796-2Withrsa_ripemd160</iso:Algorithm>
-				<iso:AlgorithmIdentifier>
-				    <iso:Algorithm>urn:oid:1.3.36.3.4.2.2.2</iso:Algorithm>
-				</iso:AlgorithmIdentifier>
-				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
-				<iso:CardAlgRef>21</iso:CardAlgRef>
-			    </iso:AlgorithmInfo>
-			    <iso:KeyInfo>
-				<iso:KeyRef>
-				    <iso:KeyRef>04</iso:KeyRef>
-				</iso:KeyRef>
-			    </iso:KeyInfo>
-			    <iso:SignatureGenerationInfo>PSO_HASH PSO_CDS</iso:SignatureGenerationInfo>
+			    <iso:SignatureGenerationInfo>MSE_DS MSE_HASH PSO_HASH PSO_CDS</iso:SignatureGenerationInfo>
+				<iso:HashGenerationInfo>NotOnCard</iso:HashGenerationInfo>
 			    <iso:CertificateRef>
 				<iso:DataSetName>EF_C_X509_CH_DS</iso:DataSetName>
 			    </iso:CertificateRef>
@@ -1931,13 +1868,15 @@
 				</iso:AlgorithmIdentifier>
 				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 				<iso:CardAlgRef>45</iso:CardAlgRef>
+				<iso:HashAlgRef>40</iso:HashAlgRef>
 			    </iso:AlgorithmInfo>
 			    <iso:KeyInfo>
 				<iso:KeyRef>
 				    <iso:KeyRef>04</iso:KeyRef>
 				</iso:KeyRef>
 			    </iso:KeyInfo>
-			    <iso:SignatureGenerationInfo>PSO_HASH PSO_CDS</iso:SignatureGenerationInfo>
+			    <iso:SignatureGenerationInfo>MSE_DS MSE_HASH PSO_HASH PSO_CDS</iso:SignatureGenerationInfo>
+				<iso:HashGenerationInfo>NotOnCard</iso:HashGenerationInfo>
 			    <iso:CertificateRef>
 				<iso:DataSetName>EF_C_X509_CH_DS</iso:DataSetName>
 			    </iso:CertificateRef>
@@ -2003,13 +1942,15 @@
 				</iso:AlgorithmIdentifier>
 				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 				<iso:CardAlgRef>55</iso:CardAlgRef>
+				<iso:HashAlgRef>50</iso:HashAlgRef>
 			    </iso:AlgorithmInfo>
 			    <iso:KeyInfo>
 				<iso:KeyRef>
 				    <iso:KeyRef>04</iso:KeyRef>
 				</iso:KeyRef>
 			    </iso:KeyInfo>
-			    <iso:SignatureGenerationInfo>PSO_HASH PSO_CDS</iso:SignatureGenerationInfo>
+			    <iso:SignatureGenerationInfo>MSE_DS MSE_HASH PSO_HASH PSO_CDS</iso:SignatureGenerationInfo>
+				<iso:HashGenerationInfo>NotOnCard</iso:HashGenerationInfo>
 			    <iso:CertificateRef>
 				<iso:DataSetName>EF_C_X509_CH_DS</iso:DataSetName>
 			    </iso:CertificateRef>
@@ -2075,13 +2016,15 @@
 				</iso:AlgorithmIdentifier>
 				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 				<iso:CardAlgRef>65</iso:CardAlgRef>
+				<iso:HashAlgRef>60</iso:HashAlgRef>
 			    </iso:AlgorithmInfo>
 			    <iso:KeyInfo>
 				<iso:KeyRef>
 				    <iso:KeyRef>04</iso:KeyRef>
 				</iso:KeyRef>
 			    </iso:KeyInfo>
-			    <iso:SignatureGenerationInfo>PSO_HASH PSO_CDS</iso:SignatureGenerationInfo>
+			    <iso:SignatureGenerationInfo>MSE_DS MSE_HASH PSO_HASH PSO_CDS</iso:SignatureGenerationInfo>
+				<iso:HashGenerationInfo>NotOnCard</iso:HashGenerationInfo>
 			    <iso:CertificateRef>
 				<iso:DataSetName>EF_C_X509_CH_DS</iso:DataSetName>
 			    </iso:CertificateRef>
@@ -2153,7 +2096,7 @@
 				</iso:KeyRef>
 				<iso:SecurityEnvironmentIdentifier>02</iso:SecurityEnvironmentIdentifier>
 			    </iso:KeyInfo>
-			    <iso:SignatureGenerationInfo>MSE_KEY_DS INT_AUTH</iso:SignatureGenerationInfo>
+			    <iso:SignatureGenerationInfo>MSE_KEY_INT_AUTH INT_AUTH</iso:SignatureGenerationInfo>
 			    <iso:CertificateRef>
 				<iso:DataSetName>EF_C_X509_CH_AUT</iso:DataSetName>
 			    </iso:CertificateRef>
@@ -2167,10 +2110,7 @@
 			    <iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
 			</iso:Action>
 			<iso:SecurityCondition>
-			    <iso:DIDAuthentication>
-				<iso:DIDName>PWD-CSA</iso:DIDName>
-				<iso:DIDState>true</iso:DIDState>
-			    </iso:DIDAuthentication>
+				<iso:always>true</iso:always>
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		    <iso:AccessRule>
@@ -2198,6 +2138,331 @@
 			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
 			<iso:Action>
 			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+			<iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		</iso:DIDACL>
+	    </iso:DIDInfo>
+		<iso:DIDInfo>
+		<iso:DifferentialIdentity>
+		    <iso:DIDName>SK.CH.AUT_signPKCS1-PSS_SHA1</iso:DIDName>
+		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
+		    <iso:DIDMarker>
+			<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
+			    <iso:AlgorithmInfo>
+				<iso:Algorithm>signPKCS1-PSS_SHA1</iso:Algorithm>
+				<iso:AlgorithmIdentifier>
+				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.10</iso:Algorithm>
+					<iso:Parameter>urn:oid:urn:oid:1.3.14.3.2.26</iso:Parameter>
+				</iso:AlgorithmIdentifier>
+				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
+				<iso:CardAlgRef>16</iso:CardAlgRef>
+			    </iso:AlgorithmInfo>
+			    <iso:KeyInfo>
+				<iso:KeyRef>
+				    <iso:KeyRef>02</iso:KeyRef>
+				</iso:KeyRef>
+				<iso:SecurityEnvironmentIdentifier>02</iso:SecurityEnvironmentIdentifier>
+			    </iso:KeyInfo>
+			    <iso:SignatureGenerationInfo>MSE_KEY_INT_AUTH INT_AUTH</iso:SignatureGenerationInfo>
+			    <iso:CertificateRef>
+				<iso:DataSetName>EF_C_X509_CH_AUT</iso:DataSetName>
+			    </iso:CertificateRef>
+			</iso:CryptoMarker>
+		    </iso:DIDMarker>
+		</iso:DifferentialIdentity>
+		<iso:DIDACL>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+				<iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:DIDAuthentication>
+				<iso:DIDName>PWD-CSA</iso:DIDName>
+				<iso:DIDState>true</iso:DIDState>
+			    </iso:DIDAuthentication>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:CryptographicServiceAction>Decipher</iso:CryptographicServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+			<iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		</iso:DIDACL>
+	    </iso:DIDInfo>
+		<iso:DIDInfo>
+		<iso:DifferentialIdentity>
+		    <iso:DIDName>SK.CH.AUT_signPKCS1-PSS_SHA256</iso:DIDName>
+		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
+		    <iso:DIDMarker>
+			<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
+			    <iso:AlgorithmInfo>
+				<iso:Algorithm>signPKCS1-PSS_SHA256</iso:Algorithm>
+				<iso:AlgorithmIdentifier>
+				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.10</iso:Algorithm>
+					<iso:Parameter>urn:oid:urn:oid:2.16.840.1.101.3.4.2.1</iso:Parameter>
+				</iso:AlgorithmIdentifier>
+				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
+				<iso:CardAlgRef>46</iso:CardAlgRef>
+			    </iso:AlgorithmInfo>
+			    <iso:KeyInfo>
+				<iso:KeyRef>
+				    <iso:KeyRef>02</iso:KeyRef>
+				</iso:KeyRef>
+				<iso:SecurityEnvironmentIdentifier>02</iso:SecurityEnvironmentIdentifier>
+			    </iso:KeyInfo>
+			    <iso:SignatureGenerationInfo>MSE_KEY_INT_AUTH INT_AUTH</iso:SignatureGenerationInfo>
+			    <iso:CertificateRef>
+				<iso:DataSetName>EF_C_X509_CH_AUT</iso:DataSetName>
+			    </iso:CertificateRef>
+			</iso:CryptoMarker>
+		    </iso:DIDMarker>
+		</iso:DifferentialIdentity>
+		<iso:DIDACL>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+				<iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:DIDAuthentication>
+				<iso:DIDName>PWD-CSA</iso:DIDName>
+				<iso:DIDState>true</iso:DIDState>
+			    </iso:DIDAuthentication>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:CryptographicServiceAction>Decipher</iso:CryptographicServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+			<iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		</iso:DIDACL>
+	    </iso:DIDInfo>
+		<iso:DIDInfo>
+		<iso:DifferentialIdentity>
+		    <iso:DIDName>SK.CH.AUT_signPKCS1-PSS_SHA384</iso:DIDName>
+		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
+		    <iso:DIDMarker>
+			<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
+			    <iso:AlgorithmInfo>
+				<iso:Algorithm>signPKCS1-PSS_SHA384</iso:Algorithm>
+				<iso:AlgorithmIdentifier>
+				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.10</iso:Algorithm>
+					<iso:Parameter>urn:oid:urn:oid:2.16.840.1.101.3.4.2.2</iso:Parameter>
+				</iso:AlgorithmIdentifier>
+				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
+				<iso:CardAlgRef>56</iso:CardAlgRef>
+			    </iso:AlgorithmInfo>
+			    <iso:KeyInfo>
+				<iso:KeyRef>
+				    <iso:KeyRef>02</iso:KeyRef>
+				</iso:KeyRef>
+				<iso:SecurityEnvironmentIdentifier>02</iso:SecurityEnvironmentIdentifier>
+			    </iso:KeyInfo>
+			    <iso:SignatureGenerationInfo>MSE_KEY_INT_AUTH INT_AUTH</iso:SignatureGenerationInfo>
+			    <iso:CertificateRef>
+				<iso:DataSetName>EF_C_X509_CH_AUT</iso:DataSetName>
+			    </iso:CertificateRef>
+			</iso:CryptoMarker>
+		    </iso:DIDMarker>
+		</iso:DifferentialIdentity>
+		<iso:DIDACL>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+				<iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:DIDAuthentication>
+				<iso:DIDName>PWD-CSA</iso:DIDName>
+				<iso:DIDState>true</iso:DIDState>
+			    </iso:DIDAuthentication>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:CryptographicServiceAction>Decipher</iso:CryptographicServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+			<iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		</iso:DIDACL>
+	    </iso:DIDInfo>
+		<iso:DIDInfo>
+		<iso:DifferentialIdentity>
+		    <iso:DIDName>SK.CH.AUT_signPKCS1-PSS_SHA512</iso:DIDName>
+		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
+		    <iso:DIDMarker>
+			<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
+			    <iso:AlgorithmInfo>
+				<iso:Algorithm>signPKCS1-PSS_SHA512</iso:Algorithm>
+				<iso:AlgorithmIdentifier>
+				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.10</iso:Algorithm>
+					<iso:Parameter>urn:oid:urn:oid:2.16.840.1.101.3.4.2.3</iso:Parameter>
+				</iso:AlgorithmIdentifier>
+				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
+				<iso:CardAlgRef>66</iso:CardAlgRef>
+			    </iso:AlgorithmInfo>
+			    <iso:KeyInfo>
+				<iso:KeyRef>
+				    <iso:KeyRef>02</iso:KeyRef>
+				</iso:KeyRef>
+				<iso:SecurityEnvironmentIdentifier>02</iso:SecurityEnvironmentIdentifier>
+			    </iso:KeyInfo>
+			    <iso:SignatureGenerationInfo>MSE_KEY_INT_AUTH INT_AUTH</iso:SignatureGenerationInfo>
+			    <iso:CertificateRef>
+				<iso:DataSetName>EF_C_X509_CH_AUT</iso:DataSetName>
+			    </iso:CertificateRef>
+			</iso:CryptoMarker>
+		    </iso:DIDMarker>
+		</iso:DifferentialIdentity>
+		<iso:DIDACL>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+				<iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:DIDAuthentication>
+				<iso:DIDName>PWD-CSA</iso:DIDName>
+				<iso:DIDState>true</iso:DIDState>
+			    </iso:DIDAuthentication>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:CryptographicServiceAction>Decipher</iso:CryptographicServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+			<iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
 			</iso:Action>
 			<iso:SecurityCondition>
 			    <iso:always>true</iso:always>
@@ -2251,6 +2516,15 @@
 			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
 			<iso:Action>
 			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+			<iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
 			</iso:Action>
 			<iso:SecurityCondition>
 			    <iso:always>true</iso:always>

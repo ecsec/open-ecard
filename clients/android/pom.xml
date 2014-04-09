@@ -26,6 +26,16 @@
 		<proguard.disabled>false</proguard.disabled>
 	    </properties>
 	</profile>
+		<profile>
+			<activation>
+				<os>
+					<family>windows</family>
+				</os>
+			</activation>
+			<properties>
+				<proguard.disabled>true</proguard.disabled>
+			</properties>
+		</profile>
     </profiles>
 
     <dependencies>

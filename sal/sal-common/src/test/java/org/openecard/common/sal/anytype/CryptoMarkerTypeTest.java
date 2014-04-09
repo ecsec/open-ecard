@@ -60,7 +60,7 @@ public class CryptoMarkerTypeTest {
 	DifferentialIdentityType diffId = app.getDIDInfo(didName).getDIDInfo().getDifferentialIdentity();
 	CryptoMarkerType cryptoMarker = new CryptoMarkerType(diffId.getDIDMarker().getCryptoMarker());
 	assertTrue(cryptoMarker.getAlgorithmInfo().getSupportedOperations().size() > 0);
-	assertEquals(cryptoMarker.getSignatureGenerationInfo(), new String[] { "MSE_KEY", "PSO_CDS" });
+	assertEquals(cryptoMarker.getSignatureGenerationInfo(), new String[] { "MSE_KEY_DS", "PSO_CDS" });
 	assertEquals(cryptoMarker.getCryptoKeyInfo().getKeyRef().getKeyRef(), new byte[] { 0x02 });
 	assertEquals(cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm(),
 		"urn:oid:1.2.840.113549.1.1");

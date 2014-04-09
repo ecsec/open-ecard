@@ -6382,7 +6382,7 @@
 								</iso:KeyRef>
 								<iso:KeySize>2048</iso:KeySize>
 							</iso:KeyInfo>
-							<iso:SignatureGenerationInfo>MSE_KEY INT_AUTH</iso:SignatureGenerationInfo>
+							<iso:SignatureGenerationInfo>MSE_KEY_DS INT_AUTH</iso:SignatureGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>EF.C.CH.AUT</iso:DataSetName>
 							</iso:CertificateRef>
@@ -6592,7 +6592,7 @@
 								</iso:KeyRef>
 								<iso:KeySize>2048</iso:KeySize>
 							</iso:KeyInfo>
-							<iso:SignatureGenerationInfo>MSE_KEY PSO_CDS</iso:SignatureGenerationInfo>
+							<iso:SignatureGenerationInfo>MSE_KEY_DS PSO_CDS</iso:SignatureGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>EF.C.CH.AUT</iso:DataSetName>
 							</iso:CertificateRef>
@@ -6802,7 +6802,7 @@
 								</iso:KeyRef>
 								<iso:KeySize>2048</iso:KeySize>
 							</iso:KeyInfo>
-							<iso:SignatureGenerationInfo>MSE_KEY PSO_CDS</iso:SignatureGenerationInfo>
+							<iso:SignatureGenerationInfo>MSE_KEY_DS PSO_CDS</iso:SignatureGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>EF.C.CH.AUT</iso:DataSetName>
 							</iso:CertificateRef>
@@ -7012,7 +7012,7 @@
 								</iso:KeyRef>
 								<iso:KeySize>2048</iso:KeySize>
 							</iso:KeyInfo>
-							<iso:SignatureGenerationInfo>MSE_KEY PSO_CDS</iso:SignatureGenerationInfo>
+							<iso:SignatureGenerationInfo>MSE_KEY_DS PSO_CDS</iso:SignatureGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>EF.C.CH.AUT</iso:DataSetName>
 							</iso:CertificateRef>
@@ -7236,7 +7236,7 @@
 								</iso:KeyRef>
 								<iso:KeySize>2048</iso:KeySize>
 							</iso:KeyInfo>
-							<iso:SignatureGenerationInfo>MSE_KEY INT_AUTH</iso:SignatureGenerationInfo>
+							<iso:SignatureGenerationInfo>MSE_KEY_DS INT_AUTH</iso:SignatureGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>EF.C.CH.AUTN</iso:DataSetName>
 							</iso:CertificateRef>
@@ -7446,7 +7446,7 @@
 								</iso:KeyRef>
 								<iso:KeySize>2048</iso:KeySize>
 							</iso:KeyInfo>
-							<iso:SignatureGenerationInfo>MSE_KEY PSO_CDS</iso:SignatureGenerationInfo>
+							<iso:SignatureGenerationInfo>MSE_KEY_DS PSO_CDS</iso:SignatureGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>EF.C.CH.AUTN</iso:DataSetName>
 							</iso:CertificateRef>

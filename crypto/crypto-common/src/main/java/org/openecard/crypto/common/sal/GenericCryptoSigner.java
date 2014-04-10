@@ -26,6 +26,8 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
+import iso.std.iso_iec._24727.tech.schema.DIDGet;
+import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DSIRead;
@@ -74,7 +76,7 @@ public class GenericCryptoSigner {
     private final Dispatcher dispatcher;
     private final ConnectionHandleType handle;
     private final String didName;
-    private final DIDCertificate cert;
+    private final DIDCertificate didCert;
     private byte[] rawCertData;
     private final Map<String, java.security.cert.Certificate[]> javaCerts;
     private org.openecard.bouncycastle.crypto.tls.Certificate bcCert;
@@ -94,7 +96,7 @@ public class GenericCryptoSigner {
 	this.handle = handle;
 	didName = cert.getDIDName();
 	rawCertData = cert.getRawCertificate();
-	this.cert = cert;
+	this.didCert = cert;
 	this.handle.setCardApplication(cert.getApplicationIdentifier());
     }
 
@@ -110,7 +112,7 @@ public class GenericCryptoSigner {
      */
     public synchronized byte[] getCertificateChain() throws CredentialPermissionDenied, IOException {
 	if (rawCertData == null) {
-	    String dataSetName = cert.getDataSetName();
+	    String dataSetName = didCert.getDataSetName();
 	    if (dataSetName != null) {
 		rawCertData = readCertificateDataset(handle, dataSetName);
 	    } else {
@@ -202,8 +204,8 @@ public class GenericCryptoSigner {
      */
     public byte[] sign(@Nonnull byte[] hash) throws SignatureException, CredentialPermissionDenied {
 	try {
-	    SALFileUtils.selectApplication(cert.getApplicationIdentifier(), dispatcher, handle);
-	    handle.setCardApplication(cert.getApplicationIdentifier());
+	    SALFileUtils.selectApplication(didCert.getApplicationIdentifier(), dispatcher, handle);
+	    handle.setCardApplication(didCert.getApplicationIdentifier());
 	    TargetNameType target = new TargetNameType();
 	    target.setDIDName(didName);
 	    performMissingAuthentication(target);

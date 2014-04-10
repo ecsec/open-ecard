@@ -25,6 +25,8 @@ package org.openecard.clients.applet;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.applet.Applet;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -312,7 +314,34 @@ public class JSCommunicationHandler {
 	 * @throws JSException throw by underlying JSObject.getWindow()
 	 */
 	public JSObjectWrapper(Applet applet) {
-	    this.jsObject = JSObject.getWindow(applet);
+	    // When JFX is available on the classpath the getWindow method is not found. Unless someone finds a way to
+	    // change the ordering of the system classpath, we call this method with reflections.
+	    // The correct code is commented out as a reference.
+	    //this.jsObject = JSObject.getWindow(applet);
+	    try {
+		Method m = JSObject.class.getMethod("getWindow", Applet.class);
+		this.jsObject = (JSObject) m.invoke(null, applet);
+	    } catch (NoSuchMethodException ex) {
+		String msg = "Failed to get window object.";
+		logger.error(msg, ex);
+		throw new RuntimeException(msg, ex);
+	    } catch (SecurityException ex) {
+		String msg = "Failed to get window object.";
+		logger.error(msg, ex);
+		throw new RuntimeException(msg, ex);
+	    } catch (IllegalAccessException ex) {
+		String msg = "Failed to get window object.";
+		logger.error(msg, ex);
+		throw new RuntimeException(msg, ex);
+	    } catch (IllegalArgumentException ex) {
+		String msg = "Failed to get window object.";
+		logger.error(msg, ex);
+		throw new RuntimeException(msg, ex);
+	    } catch (InvocationTargetException ex) {
+		String msg = "Failed to get window object.";
+		logger.error(msg, ex);
+		throw new RuntimeException(msg, ex);
+	    }
 	}
 
 	/**

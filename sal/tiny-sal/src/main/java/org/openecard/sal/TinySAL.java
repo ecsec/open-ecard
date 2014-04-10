@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -56,8 +56,11 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceList;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceListResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceLoad;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceLoadResponse;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceListResponse.CardApplicationServiceNameList;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSession;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSessionResponse;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationType;
 import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
@@ -78,6 +81,7 @@ import iso.std.iso_iec._24727.tech.schema.DIDNameListType;
 import iso.std.iso_iec._24727.tech.schema.DIDQualifierType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DIDUpdate;
+import iso.std.iso_iec._24727.tech.schema.DIDUpdateDataType;
 import iso.std.iso_iec._24727.tech.schema.DIDUpdateResponse;
 import iso.std.iso_iec._24727.tech.schema.DSICreate;
 import iso.std.iso_iec._24727.tech.schema.DSICreateResponse;
@@ -85,10 +89,12 @@ import iso.std.iso_iec._24727.tech.schema.DSIDelete;
 import iso.std.iso_iec._24727.tech.schema.DSIDeleteResponse;
 import iso.std.iso_iec._24727.tech.schema.DSIList;
 import iso.std.iso_iec._24727.tech.schema.DSIListResponse;
+import iso.std.iso_iec._24727.tech.schema.DSINameListType;
 import iso.std.iso_iec._24727.tech.schema.DSIRead;
 import iso.std.iso_iec._24727.tech.schema.DSIReadResponse;
 import iso.std.iso_iec._24727.tech.schema.DSIWrite;
 import iso.std.iso_iec._24727.tech.schema.DSIWriteResponse;
+import iso.std.iso_iec._24727.tech.schema.DSIType;
 import iso.std.iso_iec._24727.tech.schema.DataSetCreate;
 import iso.std.iso_iec._24727.tech.schema.DataSetCreateResponse;
 import iso.std.iso_iec._24727.tech.schema.DataSetDelete;
@@ -243,7 +249,8 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationPathResponse cardApplicationPath(CardApplicationPath request) {
-	CardApplicationPathResponse response = WSHelper.makeResponse(CardApplicationPathResponse.class, WSHelper.makeResultOK());
+	CardApplicationPathResponse response = WSHelper.makeResponse(CardApplicationPathResponse.class,
+		WSHelper.makeResultOK());
 
 	try {
 	    CardApplicationPathType cardAppPath = request.getCardAppPathRequest();
@@ -285,7 +292,8 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationConnectResponse cardApplicationConnect(CardApplicationConnect request) {
-	CardApplicationConnectResponse response = WSHelper.makeResponse(CardApplicationConnectResponse.class, WSHelper.makeResultOK());
+	CardApplicationConnectResponse response = WSHelper.makeResponse(CardApplicationConnectResponse.class,
+		WSHelper.makeResultOK());
 
 	try {
 	    CardApplicationPathType cardAppPath = request.getCardApplicationPath();
@@ -303,7 +311,8 @@ public class TinySAL implements SAL {
 	    if (applicationID == null) {
 		applicationID = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
 	    }
-	    Assert.securityConditionApplication(cardStateEntry, applicationID, ConnectionServiceActionName.CARD_APPLICATION_CONNECT);
+	    Assert.securityConditionApplication(cardStateEntry, applicationID,
+		    ConnectionServiceActionName.CARD_APPLICATION_CONNECT);
 
 	    // Connect to the card
 	    CardApplicationPathType cardApplicationPath = cardStateEntry.pathCopy();
@@ -352,7 +361,8 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationDisconnectResponse cardApplicationDisconnect(CardApplicationDisconnect request) {
-	CardApplicationDisconnectResponse response = WSHelper.makeResponse(CardApplicationDisconnectResponse.class, WSHelper.makeResultOK());
+	CardApplicationDisconnectResponse response = WSHelper.makeResponse(CardApplicationDisconnectResponse.class,
+		WSHelper.makeResultOK());
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
@@ -360,7 +370,8 @@ public class TinySAL implements SAL {
 
 	    // check existence of required parameters
 	    if (slotHandle == null) {
-		return WSHelper.makeResponse(CardApplicationDisconnectResponse.class, WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "ConnectionHandle is null"));
+		return WSHelper.makeResponse(CardApplicationDisconnectResponse.class,
+			WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "ConnectionHandle is null"));
 	    }
 
 	    Disconnect disconnect = new Disconnect();
@@ -402,8 +413,8 @@ public class TinySAL implements SAL {
 	    Assert.assertIncorrectParameter(didName, "The parameter didName is empty.");
 
 	    DIDAuthenticationDataType didAuthenticationProtocolData = request.getAuthenticationProtocolData();
-	    Assert.assertIncorrectParameter(didAuthenticationProtocolData, "The parameter didAuthenticationProtocolData "
-		    + "is empty.");
+	    Assert.assertIncorrectParameter(didAuthenticationProtocolData,
+		    "The parameter didAuthenticationProtocolData is empty.");
 	    
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
@@ -443,7 +454,7 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] cardApplicationID = connectionHandle.getCardApplication();    
+	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 	    String didName = SALUtils.getDIDName(request);    
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
@@ -566,7 +577,8 @@ public class TinySAL implements SAL {
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
-	    //Assert.securityConditionApplication(cardStateEntry, cardApplicationID, CardApplicationServiceActionName.CARD_APPLICATION_SERVICE_LIST);
+	    //Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
+	    //	    CardApplicationServiceActionName.CARD_APPLICATION_SERVICE_LIST);
 
 	    CardApplicationServiceNameList cardApplicationServiceNameList = new CardApplicationServiceNameList();
                             
@@ -609,7 +621,8 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationServiceCreateResponse cardApplicationServiceCreate(CardApplicationServiceCreate request) {
-	return WSHelper.makeResponse(CardApplicationServiceCreateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	return WSHelper.makeResponse(CardApplicationServiceCreateResponse.class,
+		WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
     /**
@@ -622,7 +635,8 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationServiceLoadResponse cardApplicationServiceLoad(CardApplicationServiceLoad request) {
-	return WSHelper.makeResponse(CardApplicationServiceLoadResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	return WSHelper.makeResponse(CardApplicationServiceLoadResponse.class,
+		WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
     /**
@@ -634,7 +648,8 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationServiceDeleteResponse cardApplicationServiceDelete(CardApplicationServiceDelete request) {
-	return WSHelper.makeResponse(CardApplicationServiceDeleteResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	return WSHelper.makeResponse(CardApplicationServiceDeleteResponse.class,
+		WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
     /**
@@ -647,7 +662,8 @@ public class TinySAL implements SAL {
      */
     @Override
     public CardApplicationServiceDescribeResponse cardApplicationServiceDescribe(CardApplicationServiceDescribe request) {
-	 CardApplicationServiceDescribeResponse response = WSHelper.makeResponse(CardApplicationServiceDescribeResponse.class, WSHelper.makeResultOK());
+	 CardApplicationServiceDescribeResponse response =
+		 WSHelper.makeResponse(CardApplicationServiceDescribeResponse.class, WSHelper.makeResultOK());
 
 	 try {  
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
@@ -655,9 +671,11 @@ public class TinySAL implements SAL {
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
             
 	    String cardApplicationServiceName = request.getCardApplicationServiceName();
-	    Assert.assertIncorrectParameter(cardApplicationServiceName, "The parameter CardApplicationServiceName is empty.");
+	    Assert.assertIncorrectParameter(cardApplicationServiceName,
+		    "The parameter CardApplicationServiceName is empty.");
 
-	    //Assert.securityConditionApplication(cardStateEntry, cardApplicationID, CardApplicationServiceActionName.CARD_APPLICATION_SERVICE_DESCRIBE);
+	    //Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
+	    //	    CardApplicationServiceActionName.CARD_APPLICATION_SERVICE_DESCRIBE);
                             
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 
@@ -703,7 +721,8 @@ public class TinySAL implements SAL {
     }
 
     /**
-     * The DataSetList function returns the list of the data sets in the card application addressed with the ConnectionHandle.
+     * The DataSetList function returns the list of the data sets in the card application addressed with the
+     * ConnectionHandle.
      * See BSI-TR-03112-4, version 1.1.2, section 3.4.1.
      *
      * @param request DataSetList
@@ -718,7 +737,8 @@ public class TinySAL implements SAL {
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
-	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID, NamedDataServiceActionName.DATA_SET_LIST);
+	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
+		    NamedDataServiceActionName.DATA_SET_LIST);
 
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    DataSetNameListType dataSetNameList = cardInfoWrapper.getDataSetNameList(cardApplicationID);
@@ -972,6 +992,8 @@ public class TinySAL implements SAL {
 		    NamedDataServiceActionName.DSI_DELETE);
 	    DSIType dsi = cardInfoWrapper.getDSIbyName(dsiName);
 
+	    // We have to define some allowed answers because if the file has an write operation counter we wont get an
+	    // 9000 response.
 	    ArrayList<byte[]> responses = new ArrayList<byte[]>() {
 		{
 		    add(new byte[] {(byte) 0x90, (byte) 0x00});
@@ -997,7 +1019,7 @@ public class TinySAL implements SAL {
 		EraseRecord rmRecord = new EraseRecord(dsi.getDSIPath().getIndex()[0], EraseRecord.ERASE_JUST_P1);
 		rmRecord.transmit(env.getDispatcher(), connectionHandle.getSlotHandle(), responses);
 	    } else {
-		// NOTE: Erase binary allows to erase only every after the offset or everything in front of the offset.
+		// NOTE: Erase binary allows to erase only everything after the offset or everything in front of the offset.
 		// currently erasing everything after the offset is used.
 		EraseBinary rmBinary = new EraseBinary((byte) 0x00, (byte) 0x00, dsi.getDSIPath().getIndex());
 		rmBinary.transmit(env.getDispatcher(), connectionHandle.getSlotHandle(), responses);

@@ -497,8 +497,8 @@ public class TinySAL implements SAL {
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
-	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
-		    CardApplicationServiceActionName.CARD_APPLICATION_LIST);
+	    //Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
+	    //	    CardApplicationServiceActionName.CARD_APPLICATION_LIST);
 
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    CardApplicationNameList cardApplicationNameList = new CardApplicationNameList();
@@ -734,7 +734,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
 	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID,

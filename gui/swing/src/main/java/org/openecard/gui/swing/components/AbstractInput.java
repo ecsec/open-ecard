@@ -45,7 +45,7 @@ import org.openecard.gui.definition.TextField;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class AbstractInput implements StepComponent {
+public class AbstractInput implements StepComponent, Focusable {
 
     private final String name;
     private final int minLength;
@@ -138,6 +138,11 @@ public class AbstractInput implements StepComponent {
 
 	result.setValue(textValue);
 	return result;
+    }
+
+    @Override
+    public void setFocus() {
+	textField.requestFocusInWindow();
     }
 
 }

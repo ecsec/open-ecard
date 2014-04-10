@@ -43,7 +43,7 @@ import org.openecard.gui.definition.OutputInfoUnit;
  * @author Florian Feldmann <florian.feldmann@rub.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class Checkbox implements StepComponent {
+public class Checkbox implements StepComponent, Focusable {
 
     private final org.openecard.gui.definition.Checkbox result;
     private final ArrayList<JCheckBox> boxButtons;
@@ -101,9 +101,9 @@ public class Checkbox implements StepComponent {
     public void resetSelection() {
 	for (int i = 0; i < contentPanel.getComponentCount(); i++) {
 	    JCheckBox b = (JCheckBox) contentPanel.getComponent(i);
-	    for (int j = 0; j < defaultCheckbox.size(); j++) {
-		if (b.getName().equals(defaultCheckbox.get(j).getName())) {
-		    b.setSelected(defaultCheckbox.get(j).isChecked());
+	    for (BoxItem defaultCheckbox1 : defaultCheckbox) {
+		if (b.getName().equals(defaultCheckbox1.getName())) {
+		    b.setSelected(defaultCheckbox1.isChecked());
 		}
 	    }
 	}
@@ -133,6 +133,13 @@ public class Checkbox implements StepComponent {
 	}
 	// prepare result
 	return result;
+    }
+
+    @Override
+    public void setFocus() {
+	if (! boxButtons.isEmpty()) {
+	    boxButtons.get(0).requestFocusInWindow();
+	}
     }
 
 }

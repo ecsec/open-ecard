@@ -38,7 +38,7 @@ import org.openecard.gui.definition.Radiobox;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class Radiobutton implements StepComponent {
+public class Radiobutton implements StepComponent, Focusable {
 
     private final Radiobox result;
     private final ArrayList<JRadioButton> buttons;
@@ -105,6 +105,13 @@ public class Radiobutton implements StepComponent {
 	    result.getBoxItems().get(i).setChecked(component.isSelected());
 	}
 	return result;
+    }
+
+    @Override
+    public void setFocus() {
+	if (! buttons.isEmpty()) {
+	    buttons.get(0).requestFocusInWindow();
+	}
     }
 
 }

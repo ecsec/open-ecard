@@ -35,6 +35,7 @@ import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.swing.common.NavigationEvent;
+import org.openecard.gui.swing.components.Focusable;
 import org.openecard.gui.swing.components.StepComponent;
 import org.openecard.gui.swing.steplayout.StepLayouter;
 import org.slf4j.Logger;
@@ -135,6 +136,7 @@ public class StepFrame {
 	panel.removeAll();
 	initComponents();
 	revalidate(panel);
+	setFocus();
     }
 
     public StepResult getStepResult() {
@@ -148,6 +150,15 @@ public class StepFrame {
 	}
 	c.revalidate();
 	c.repaint();
+    }
+
+    private void setFocus() {
+	for (StepComponent next : components) {
+	    if (next instanceof Focusable) {
+		((Focusable) next).setFocus();
+		return;
+	    }
+	}
     }
 
 

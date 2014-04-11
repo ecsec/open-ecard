@@ -552,11 +552,13 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
 	    byte[] cardApplicationName = request.getCardApplicationName();
 	    Assert.assertIncorrectParameter(cardApplicationName, "The parameter CardApplicationName is empty.");
 	    Assert.securityConditionApplication(cardStateEntry, connectionHandle.getCardApplication(),
 		    CardApplicationServiceActionName.CARD_APPLICATION_DELETE);
+	    // TODO: determine how the deletion have to be performed. A card don't have to support the Deletion by
+	    // application identifier. Necessary attributes should be available in the ATR or EF.ATR.
 	    DeleteFile delFile = new DeleteFile.Application(cardApplicationName);
 	    delFile.transmit(env.getDispatcher(), connectionHandle.getSlotHandle());
 	} catch (ECardException e) {

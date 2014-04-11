@@ -704,6 +704,7 @@ public class TinySAL implements SAL {
                         CardApplicationServiceType nextt = itt.next();
                         if (nextt.getCardApplicationServiceName().equals(cardApplicationServiceName)) {
                             response.setServiceDescription(nextt.getCardApplicationServiceDescription());
+			    return response;
                         }    
                     }
                 }

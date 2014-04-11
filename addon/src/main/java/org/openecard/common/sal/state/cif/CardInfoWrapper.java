@@ -122,6 +122,33 @@ public class CardInfoWrapper {
 
     /**
      *
+     * @param didName name of the did to get the DIDInfo for
+     * @param didScope Scope of the DID
+     * @return the DIDInfo of the specified DID or null, if either the card application or the DID do not exist
+     */
+    public DIDInfoType getDIDInfo(String didName, DIDScopeType didScope) {
+	List<CardApplicationType> cardApps = cif.getApplicationCapabilities().getCardApplication();
+	for (CardApplicationType cardApp : cardApps) {
+	    for (DIDInfoType did : cardApp.getDIDInfo()) {
+		if (did.getDifferentialIdentity().getDIDName().equals(didName)) {
+		    if (did.getDifferentialIdentity().getDIDScope() != null) {
+			if (didScope != null) {
+			    if (didScope.value().equals(did.getDifferentialIdentity().getDIDScope().value())) {
+				return did;
+			    }
+			}
+		    } else if (didScope == null) {
+			return did;
+		    }
+		}
+	    }
+	}
+
+	return null;
+    }
+
+    /**
+     *
      * @param cardApplication identifier of the application to get the list of data set names from
      * @return list of data set names contained in this application or null, if no such card application exists
      */
@@ -174,6 +201,48 @@ public class CardInfoWrapper {
      */
     public DIDStructureType getDIDStructure(String didName, byte[] cardApplication) {
 	DIDInfoType didInfo = this.getDIDInfo(didName, cardApplication);
+	if (didInfo == null) {
+	    return null;
+	}
+	DIDStructureType didStructure = new DIDStructureType();
+	didStructure.setDIDName(didInfo.getDifferentialIdentity().getDIDName());
+	didStructure.setDIDScope(didInfo.getDifferentialIdentity().getDIDScope());
+	if (didStructure.getDIDScope() == null) {
+	    // no scope is equal to local
+	    didStructure.setDIDScope(DIDScopeType.LOCAL);
+	}
+	DIDMarkerType didMarker = didInfo.getDifferentialIdentity().getDIDMarker();
+	if (didMarker.getCAMarker() != null) {
+	    didStructure.setDIDMarker(didMarker.getCAMarker());
+	} else if (didMarker.getCryptoMarker() != null) {
+	    didStructure.setDIDMarker(didMarker.getCryptoMarker());
+	} else if (didMarker.getEACMarker() != null) {
+	    didStructure.setDIDMarker(didMarker.getEACMarker());
+	} else if (didMarker.getMutualAuthMarker() != null) {
+	    didStructure.setDIDMarker(didMarker.getMutualAuthMarker());
+	} else if (didMarker.getPACEMarker() != null) {
+	    didStructure.setDIDMarker(didMarker.getPACEMarker());
+	} else if (didMarker.getPinCompareMarker() != null) {
+	    didStructure.setDIDMarker(didMarker.getPinCompareMarker());
+	} else if (didMarker.getRIMarker() != null) {
+	    didStructure.setDIDMarker(didMarker.getRIMarker());
+	} else if (didMarker.getRSAAuthMarker() != null) {
+	    didStructure.setDIDMarker(didMarker.getRSAAuthMarker());
+	} else if (didMarker.getTAMarker() != null) {
+	    didStructure.setDIDMarker(didMarker.getTAMarker());
+	}
+	didStructure.setDIDQualifier(didInfo.getDifferentialIdentity().getDIDQualifier());
+	return didStructure;
+    }
+
+    /**
+     *
+     * @param didName Name of the DID to get the structure for
+     * @param  didScope Scope of the DID
+     * @return DIDStructure for the specified didName and card application or null, if no such did exists.
+     */
+    public DIDStructureType getDIDStructure(String didName, DIDScopeType didScope) {
+	DIDInfoType didInfo = this.getDIDInfo(didName, didScope);
 	if (didInfo == null) {
 	    return null;
 	}
@@ -264,4 +333,25 @@ public class CardInfoWrapper {
 	return null;
     }
 
+    public byte[] getApplicationIdByDidname(String didName, DIDScopeType didScope) {
+	List<CardApplicationType> cardApps = cif.getApplicationCapabilities().getCardApplication();
+	for (CardApplicationType cardApp : cardApps) {
+	    for (DIDInfoType did : cardApp.getDIDInfo()) {
+		if (did.getDifferentialIdentity().getDIDName().equals(didName)) {
+		    if (did.getDifferentialIdentity().getDIDScope() != null) {
+			if (didScope != null) {
+			    if (didScope.value().equals(did.getDifferentialIdentity().getDIDScope().value())) {
+				return cardApp.getApplicationIdentifier();
+			    }
+			}
+		    } else if (didScope == null) {
+			return cardApp.getApplicationIdentifier();
+		    }
+		}
+	    }
+	}
+
+	return null;
+    }
+    
 }

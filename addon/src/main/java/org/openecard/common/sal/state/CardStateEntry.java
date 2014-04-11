@@ -27,6 +27,7 @@ import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationStateType;
 import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
+import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.SecurityConditionType;
 import java.math.BigInteger;
@@ -181,8 +182,28 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	return didStructure;
     }
 
+    /**
+     *
+     * @param didName Name of the DID
+     * @param didScope Scope of the DID
+     * @return DIDStructure for the specified didName and cardapplication or null,
+     *         if no such did exists.
+     */
+    public DIDStructureType getDIDStructure(String didName, DIDScopeType didScope) {
+	DIDStructureType didStructure = this.infoObject.getDIDStructure(didName, didScope);
+	if (didStructure != null) {
+	    didStructure.setAuthenticated(this.isAuthenticated(didName, didScope));
+	}
+	return didStructure;
+    }
+
     public boolean isAuthenticated(String didName, byte[] cardApplication) {
 	DIDInfoType didInfo = infoObject.getDIDInfo(didName, cardApplication);
+	return getAuthenticatedDIDs().contains(didInfo);
+    }
+
+     public boolean isAuthenticated(String didName, DIDScopeType didScope) {
+	DIDInfoType didInfo = infoObject.getDIDInfo(didName, didScope);
 	return getAuthenticatedDIDs().contains(didInfo);
     }
 

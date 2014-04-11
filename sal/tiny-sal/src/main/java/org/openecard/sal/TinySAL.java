@@ -552,7 +552,7 @@ public class TinySAL implements SAL {
 	    Assert.assertIncorrectParameter(cardApplicationName, "The parameter CardApplicationName is empty.");
 	    Assert.securityConditionApplication(cardStateEntry, connectionHandle.getCardApplication(),
 		    CardApplicationServiceActionName.CARD_APPLICATION_DELETE);
-	    DeleteFile delFile = new DeleteFile.Application(connectionHandle.getCardApplication());
+	    DeleteFile delFile = new DeleteFile.Application(cardApplicationName);
 	    delFile.transmit(env.getDispatcher(), connectionHandle.getSlotHandle());
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());

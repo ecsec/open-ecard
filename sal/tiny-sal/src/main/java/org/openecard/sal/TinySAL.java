@@ -130,6 +130,7 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificate;
 import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -155,6 +156,7 @@ import org.openecard.common.apdu.WriteRecord;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.utils.CardUtils;
+import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.sal.Assert;
 import org.openecard.common.sal.anytype.CryptoMarkerType;
@@ -272,11 +274,8 @@ public class TinySAL implements SAL {
 	    }
 
 	    response.setCardAppPathResultSet(resultSet);
-	} catch (ECardException e) {
+	} catch (IncorrectParameterException e) {
 	    response.setResult(e.getResult());
-	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
-	    response.setResult(WSHelper.makeResult(e));
 	}
 
 	return response;
@@ -344,7 +343,10 @@ public class TinySAL implements SAL {
 	    response.getConnectionHandle().setCardApplication(applicationID);
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
-	} catch (Exception e) {
+	} catch (DispatcherException e) {
+	    logger.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	} catch (InvocationTargetException e) {
 	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}

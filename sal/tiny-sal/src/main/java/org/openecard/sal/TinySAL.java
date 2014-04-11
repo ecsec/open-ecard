@@ -995,9 +995,22 @@ public class TinySAL implements SAL {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-
 	    String dsiName = request.getDSIName();
 	    Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
+
+	    if (cardStateEntry.getFCPOfSelectedEF() == null) {
+		String msg = "No DataSet selected for deleting the DSI " + request.getDSIName();
+		throw new PrerequisitesNotSatisfiedException(msg);
+	    }
+
+	    DataSetInfoType dataSet = cardInfoWrapper.getDataSetByDsiName(request.getDSIName());
+	    byte[] fidOrPath = dataSet.getDataSetPath().getEfIdOrPath();
+	    byte[] dataSetFid = new byte[] {fidOrPath[fidOrPath.length - 2], fidOrPath[fidOrPath.length - 1]};
+	    if (! Arrays.equals(dataSetFid, cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0))) {
+		String msg = "The wrong DataSet for the deletion of DSI " + request.getDSIName() + " is selected.";
+		throw new PrerequisitesNotSatisfiedException(msg);
+	    }
+	    
 	    DataSetInfoType dSet =
 		    cardInfoWrapper.getDataSetByFid(cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0));
 	    Assert.securityConditionDataSet(cardStateEntry, connectionHandle.getCardApplication(), dSet.getDataSetName(),

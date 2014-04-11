@@ -79,6 +79,7 @@ import iso.std.iso_iec._24727.tech.schema.DIDList;
 import iso.std.iso_iec._24727.tech.schema.DIDListResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDNameListType;
 import iso.std.iso_iec._24727.tech.schema.DIDQualifierType;
+import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DIDUpdate;
 import iso.std.iso_iec._24727.tech.schema.DIDUpdateDataType;
@@ -165,6 +166,7 @@ import org.openecard.common.sal.exception.IncorrectParameterException;
 import org.openecard.common.sal.exception.NameExistsException;
 import org.openecard.common.sal.exception.NamedEntityNotFoundException;
 import org.openecard.common.sal.exception.PrerequisitesNotSatisfiedException;
+import org.openecard.common.sal.exception.SecurityConditionNotSatisfiedException;
 import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.exception.UnknownProtocolException;
 import org.openecard.common.sal.state.CardStateEntry;
@@ -499,8 +501,8 @@ public class TinySAL implements SAL {
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
-	    //Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
-	    //	    CardApplicationServiceActionName.CARD_APPLICATION_LIST);
+	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
+		    CardApplicationServiceActionName.CARD_APPLICATION_LIST);
 
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    CardApplicationNameList cardApplicationNameList = new CardApplicationNameList();
@@ -1236,9 +1238,21 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] applicationID = connectionHandle.getCardApplication();
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String didName = SALUtils.getDIDName(request);
+
+	    DIDScopeType didScope = request.getDIDScope();
+	    if (didScope == null) {
+		didScope = DIDScopeType.LOCAL;
+	    }
+
+	    if (didScope.equals(DIDScopeType.LOCAL)) {
+		byte[] necessaryApp = cardStateEntry.getInfo().getApplicationIdByDidName(didName, didScope);
+		if (! Arrays.equals(necessaryApp, applicationID)) {
+		    throw new SecurityConditionNotSatisfiedException("The wrong application is selected for getRandom()");
+		}
+	    }
 
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");

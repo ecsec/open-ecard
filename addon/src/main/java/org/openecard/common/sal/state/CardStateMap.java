@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -54,7 +54,7 @@ public class CardStateMap {
 
 
     public synchronized CardStateEntry getEntry(ConnectionHandleType handle) {
-	return getEntry(handle);
+	return getEntry(handle, true);
     }
     public synchronized CardStateEntry getEntry(ConnectionHandleType handle, boolean filterAppId) {
 	Set<CardStateEntry> entry = getMatchingEntries(handle, filterAppId);

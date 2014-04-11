@@ -8468,6 +8468,15 @@
 							</iso:or>
 						</iso:SecurityCondition>
 					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
 				</iso:DataSetACL>
 				<iso:DataSetPath>
 					<iso:efIdOrPath>C500</iso:efIdOrPath>
@@ -8482,6 +8491,15 @@
 						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
 						<iso:Action>
 							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
 						</iso:Action>
 						<iso:SecurityCondition>
 							<iso:always>true</iso:always>

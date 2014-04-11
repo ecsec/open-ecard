@@ -22,11 +22,6 @@
 
 package org.openecard.crypto.common.sal;
 
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
@@ -60,8 +55,10 @@ import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
 import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
+import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
+import org.openecard.common.util.SALFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +68,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class GenericCryptoSigner {
 
@@ -78,7 +76,7 @@ public class GenericCryptoSigner {
     private final Dispatcher dispatcher;
     private final ConnectionHandleType handle;
     private final String didName;
-
+    private final DIDCertificate didCert;
     private byte[] rawCertData;
     private final Map<String, java.security.cert.Certificate[]> javaCerts;
     private org.openecard.bouncycastle.crypto.tls.Certificate bcCert;
@@ -89,14 +87,17 @@ public class GenericCryptoSigner {
      * @param dispatcher Dispatcher used to talk to the SAL.
      * @param handle Handle naming the SAL, card and application of the DID. The application connection can change over
      *   time and does not even have to be selected when this method is called.
-     * @param didName Name of the DID this instance encapsulates.
+     * @param cert
      */
     public GenericCryptoSigner(@Nonnull Dispatcher dispatcher, @Nonnull ConnectionHandleType handle,
-	    @Nonnull String didName) {
+	    @Nonnull DIDCertificate cert) {
+	this.javaCerts = new HashMap<String, java.security.cert.Certificate[]>();
 	this.dispatcher = dispatcher;
 	this.handle = handle;
-	this.didName = didName;
-	this.javaCerts = new HashMap<String, java.security.cert.Certificate[]>();
+	didName = cert.getDIDName();
+	rawCertData = cert.getRawCertificate();
+	this.didCert = cert;
+	this.handle.setCardApplication(cert.getApplicationIdentifier());
     }
 
 
@@ -111,7 +112,7 @@ public class GenericCryptoSigner {
      */
     public synchronized byte[] getCertificateChain() throws CredentialPermissionDenied, IOException {
 	if (rawCertData == null) {
-	    String dataSetName = getCertificateDataSetName();
+	    String dataSetName = didCert.getDataSetName();
 	    if (dataSetName != null) {
 		rawCertData = readCertificateDataset(handle, dataSetName);
 	    } else {
@@ -203,7 +204,8 @@ public class GenericCryptoSigner {
      */
     public byte[] sign(@Nonnull byte[] hash) throws SignatureException, CredentialPermissionDenied {
 	try {
-	    connectApplication();
+	    SALFileUtils.selectApplication(didCert.getApplicationIdentifier(), dispatcher, handle);
+	    handle.setCardApplication(didCert.getApplicationIdentifier());
 	    TargetNameType target = new TargetNameType();
 	    target.setDIDName(didName);
 	    performMissingAuthentication(target);
@@ -261,7 +263,7 @@ public class GenericCryptoSigner {
 	    throws CredentialPermissionDenied {
 	byte[] content = null;
 	try {
-	    connectApplication();
+	    SALFileUtils.selectApplicationByDataSetName(dsiName, dispatcher, cHandle);
 	    TargetNameType target = new TargetNameType();
 	    target.setDataSetName(dsiName);
 	    performMissingAuthentication(target);
@@ -290,62 +292,11 @@ public class GenericCryptoSigner {
 	} catch (SecurityConditionUnsatisfiable e) {
 	    logger.error("Failed to read certificate data set for DSI: {}.", dsiName, e);
 	    throw new CredentialPermissionDenied(e);
+	} catch (APDUException e) {
+	    logger.error("Failed to read certificate data set for DSI: {}. The selection was not possible.", dsiName, e);
 	}
 
 	return content;
-    }
-
-    /**
-     * Get the Name of the certificate reference data set.
-     *
-     * @return name of the data set, or null if an error occurred
-     */
-    private String getCertificateDataSetName() {
-	String dataSetName = null;
-	try {
-	    DIDGet didGet = new DIDGet();
-	    didGet.setConnectionHandle(handle);
-	    didGet.setDIDName(didName);
-	    didGet.setDIDScope(DIDScopeType.LOCAL);
-	    DIDGetResponse response = (DIDGetResponse) dispatcher.deliver(didGet);
-	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(response.getDIDStructure().getDIDMarker());
-	    dataSetName = cryptoMarker.getCertificateRef().getDataSetName();
-	} catch (DispatcherException e) {
-	    logger.error("Failed to get DataSetName for DID: {}.", didName, e);
-	} catch (InvocationTargetException e) {
-	    logger.error("Failed to get DataSetName for DID: {}.", didName, e);
-	} catch (NullPointerException e) {
-	    logger.error("Failed to get DataSetName for DID: {}.", didName, e);
-	}
-	return dataSetName;
-    }
-
-    private ConnectionHandleType connectApplication() throws DispatcherException, InvocationTargetException, WSException {
-	// is the application already connected?
-	boolean connected = false;
-	CardApplicationPath pathReq = new CardApplicationPath();
-	CardApplicationPathType pathType = new CardApplicationPathType();
-	pathReq.setCardAppPathRequest(pathType);
-	pathType.setChannelHandle(handle.getChannelHandle());
-	pathType.setContextHandle(handle.getContextHandle());
-	pathType.setIFDName(handle.getIFDName());
-	pathType.setCardApplication(handle.getCardApplication());
-	CardApplicationPathResponse pathRes = (CardApplicationPathResponse) dispatcher.deliver(pathReq);
-	WSHelper.checkResult(pathRes);
-	List<CardApplicationPathType> paths = pathRes.getCardAppPathResultSet().getCardApplicationPathResult();
-	if (! paths.isEmpty()) {
-	    connected = true;
-	}
-
-	if (! connected) {
-	    CardApplicationConnect req = new CardApplicationConnect();
-	    req.setCardApplicationPath(handle);
-	    CardApplicationConnectResponse res = (CardApplicationConnectResponse) dispatcher.deliver(req);
-	    WSHelper.checkResult(res);
-	    return res.getConnectionHandle();
-	} else {
-	    return handle;
-	}
     }
 
     private void performMissingAuthentication(TargetNameType target) throws DispatcherException, WSException,

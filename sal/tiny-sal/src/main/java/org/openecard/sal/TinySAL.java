@@ -498,11 +498,16 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] cardApplicationID = connectionHandle.getCardApplication();
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
 
-	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
-		    CardApplicationServiceActionName.CARD_APPLICATION_LIST);
+	    /*
+		TR-03112-4 section 3.3.2 states that the alpha application have to be connected with
+		CardApplicationConnect.
+		In case of using CardInfo file descriptions this is not necessary because we just work on a file.
+	    */
+	    // byte[] cardApplicationID = connectionHandle.getCardApplication();
+	    // Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
+	    //	    CardApplicationServiceActionName.CARD_APPLICATION_LIST);
 
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    CardApplicationNameList cardApplicationNameList = new CardApplicationNameList();

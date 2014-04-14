@@ -1516,8 +1516,8 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] applicationID = connectionHandle.getCardApplication();
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String didName = SALUtils.getDIDName(request);
 
 	    byte[] certificate = request.getCertificate();
@@ -1531,6 +1531,20 @@ public class TinySAL implements SAL {
 
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	    DIDScopeType didScope = request.getDIDScope();
+	    if (didScope == null) {
+		didScope = DIDScopeType.LOCAL;
+	    }
+
+	    if (didScope.equals(DIDScopeType.LOCAL)) {
+		byte[] necessarySelectedApp = cardStateEntry.getInfo().getApplicationIdByDidName(didName, didScope);
+		if (! Arrays.equals(necessarySelectedApp, applicationID)) {
+		    String msg = "Wrong application selected for the execution of VerifyCertificate with the DID " +
+			    didName + ".";
+		    throw new SecurityConditionNotSatisfiedException(msg);
+		}
+	    }
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);

@@ -119,7 +119,7 @@ public class IFD implements org.openecard.ws.IFD {
     private SCWrapper scwrapper;
     private Dispatcher dispatcher;
     private UserConsent gui = null;
-    private ProtocolFactories protocolFactories = new ProtocolFactories();
+    private final ProtocolFactories protocolFactories = new ProtocolFactories();
 
     private AtomicInteger numClients;
     private ExecutorService threadPool;
@@ -134,8 +134,8 @@ public class IFD implements org.openecard.ws.IFD {
     }
 
     private boolean hasContext() {
-	Boolean hasContext = ctxHandle != null;
-	return hasContext.booleanValue();
+	boolean hasContext = ctxHandle != null;
+	return hasContext;
     }
 
     public void setGUI(UserConsent gui) {
@@ -343,7 +343,8 @@ public class IFD implements org.openecard.ws.IFD {
 		    if (parameters.getIFDName() != null) {
 			SCTerminal t = scwrapper.getTerminal(parameters.getIFDName(), true);
 			if (t == null) {
-			    Result r = WSHelper.makeResult(ECardConstants.Major.ERROR, ECardConstants.Minor.IFD.UNKNOWN_IFD, "Unknown IFD.");
+			    String minor = ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD;
+			    Result r = WSHelper.makeResult(ECardConstants.Major.ERROR, minor, "Unknown IFD.");
 			    response = WSHelper.makeResponse(GetStatusResponse.class, r);
 			    return response;
 			} else {
@@ -424,7 +425,7 @@ public class IFD implements org.openecard.ws.IFD {
 		    for (IFDStatusType s : expectedStatuses) {
 			if (s.getIFDName() == null) {
 			    String msg = "IFD in a request IFDStatus not known.";
-			    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.UNKNOWN_IFD, msg);
+			    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD, msg);
 			    response = WSHelper.makeResponse(WaitResponse.class, r);
 			    return response;
 			}

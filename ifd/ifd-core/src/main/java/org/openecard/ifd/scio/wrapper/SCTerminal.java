@@ -91,13 +91,13 @@ public class SCTerminal {
     }
 
     public boolean isConnected() {
-	Boolean result = scCard != null;
-	return result.booleanValue();
+	boolean result = scCard != null;
+	return result;
     }
 
     public synchronized SCCard getCard() throws IFDException {
 	if (scCard == null) {
-	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.NO_CARD, "No card inserted in terminal.");
+	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.Terminal.NO_CARD, "No card inserted in terminal.");
 	    _logger.warn(ex.getMessage(), ex);
 	    throw ex;
 	}
@@ -140,13 +140,13 @@ public class SCTerminal {
 
 
     public boolean equals(String ifdName) {
-	Boolean result = terminal.getName().equals(ifdName);
-	return result.booleanValue();
+	boolean result = terminal.getName().equals(ifdName);
+	return result;
     }
 
     public boolean equals(CardTerminal other) {
-	Boolean result = terminal.getName().equals(other.getName());
-	return result.booleanValue();
+	boolean result = terminal.getName().equals(other.getName());
+	return result;
     }
 
 
@@ -181,7 +181,7 @@ public class SCTerminal {
 		Card c = terminal.connect("*");
 		scCard = new SCCard(c, this);
 	    } catch (CardNotPresentException ex) {
-		IFDException ifdex = new IFDException(ECardConstants.Minor.IFD.NO_CARD, ex.getMessage());
+		IFDException ifdex = new IFDException(ECardConstants.Minor.IFD.Terminal.NO_CARD, ex.getMessage());
 		_logger.warn(ifdex.getMessage(), ifdex);
 		throw ifdex;
 	    } catch (CardException ex) {
@@ -217,7 +217,7 @@ public class SCTerminal {
 	    // no way to ask PCSC this question
 	    return false;
 	}
-	return acoustic.booleanValue();
+	return acoustic;
     }
 
     public synchronized boolean isOpticalSignal() throws IFDException {
@@ -225,7 +225,7 @@ public class SCTerminal {
 	    // no way to ask PCSC this question
 	    return false;
 	}
-	return acoustic.booleanValue();
+	return acoustic;
     }
 
     public synchronized DisplayCapabilityType getDisplayCapability() throws IFDException {

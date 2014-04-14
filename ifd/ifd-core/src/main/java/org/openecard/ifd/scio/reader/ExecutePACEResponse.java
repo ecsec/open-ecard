@@ -73,7 +73,7 @@ public class ExecutePACEResponse {
 	    case 0xE0000006: return WSHelper.makeResultUnknownError("Wrong Authentication Token.");
 	    // Others
 	    case 0xF0100001: return WSHelper.makeResultUnknownError("Communication abort.");
-	    case 0xF0100002: return WSHelper.makeResultError(ECardConstants.Minor.IFD.NO_CARD, "No card.");
+	    case 0xF0100002: return WSHelper.makeResultError(ECardConstants.Minor.IFD.Terminal.NO_CARD, "No card.");
 	    case 0xF0200001: return WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "Abort.");
 	    case 0xF0200002: return WSHelper.makeResultError(ECardConstants.Minor.IFD.TIMEOUT_ERROR, "Timeout.");
 	    // Response APDU of the card reports error

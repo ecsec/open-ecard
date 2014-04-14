@@ -127,7 +127,8 @@ public class SCWrapper {
 	}
 	SCTerminal t = scTerminals.get(ifdName);
 	if (t == null) {
-	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.UNKNOWN_IFD, "IFD with name '" + ifdName + "' does not exist.");
+	    String msg = "IFD with name '" + ifdName + "' does not exist.";
+	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD, msg);
 	    _logger.warn(ex.getMessage(), ex);
 	    throw ex;
 	}

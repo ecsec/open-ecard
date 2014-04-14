@@ -1592,6 +1592,7 @@
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
 				</iso:DifferentialIdentity>
 				<iso:DIDACL>
 					<iso:AccessRule>
@@ -1665,6 +1666,7 @@
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
 				</iso:DifferentialIdentity>
 				<iso:DIDACL>
 					<iso:AccessRule>
@@ -1738,6 +1740,7 @@
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
 				</iso:DifferentialIdentity>
 				<iso:DIDACL>
 					<iso:AccessRule>
@@ -1811,6 +1814,7 @@
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
 				</iso:DifferentialIdentity>
 				<iso:DIDACL>
 					<iso:AccessRule>
@@ -1885,6 +1889,7 @@
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
 				</iso:DifferentialIdentity>
 				<iso:DIDACL>
 					<iso:AccessRule>
@@ -1959,6 +1964,7 @@
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
 				</iso:DifferentialIdentity>
 				<iso:DIDACL>
 					<iso:AccessRule>
@@ -2033,6 +2039,7 @@
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
 				</iso:DifferentialIdentity>
 				<iso:DIDACL>
 					<iso:AccessRule>
@@ -2102,6 +2109,7 @@
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
 				</iso:DifferentialIdentity>
 				<iso:DIDACL>
 					<iso:AccessRule>
@@ -2181,6 +2189,7 @@
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
 				</iso:DifferentialIdentity>
 				<iso:DIDACL>
 					<iso:AccessRule>
@@ -2260,6 +2269,7 @@
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
 				</iso:DifferentialIdentity>
 				<iso:DIDACL>
 					<iso:AccessRule>
@@ -2339,6 +2349,7 @@
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
 				</iso:DifferentialIdentity>
 				<iso:DIDACL>
 					<iso:AccessRule>
@@ -2418,6 +2429,7 @@
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
 				</iso:DifferentialIdentity>
 				<iso:DIDACL>
 					<iso:AccessRule>

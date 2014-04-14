@@ -333,7 +333,7 @@ public class CardInfoWrapper {
 	return null;
     }
 
-    public byte[] getApplicationIdByDidname(String didName, DIDScopeType didScope) {
+    public byte[] getApplicationIdByDidName(String didName, DIDScopeType didScope) {
 	List<CardApplicationType> cardApps = cif.getApplicationCapabilities().getCardApplication();
 	for (CardApplicationType cardApp : cardApps) {
 	    for (DIDInfoType did : cardApp.getDIDInfo()) {
@@ -353,5 +353,21 @@ public class CardInfoWrapper {
 
 	return null;
     }
-    
+
+    public DataSetInfoType getDataSetByDsiName(String dsiName) {
+	for (CardApplicationWrapper cardAppWrapper : cardApplications.values()) {
+	    for (DataSetInfoType dSetInfoWrapper : cardAppWrapper.getDataSetInfoList()) {
+		if (dSetInfoWrapper.getDSI() != null) {
+		    for (DSIType dsi : dSetInfoWrapper.getDSI()) {
+			if (dsi.getDSIName().equals(dsiName)) {
+			    return dSetInfoWrapper;
+			}
+		    }
+		}
+	    }
+	}
+
+	return null;
+    }
+
 }

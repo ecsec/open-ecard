@@ -1137,19 +1137,40 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] applicationID = connectionHandle.getCardApplication();
+	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String dsiName = request.getDSIName();
-
 	    Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
 
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dsiName, applicationID);
-	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DSIName cannot be found.");
+	    if (cardStateEntry.getFCPOfSelectedEF() == null) {
+		throw new PrerequisitesNotSatisfiedException("No DataSet to read selected.");
+	    }
 
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSetByDsiName(dsiName);
+
+	    // It is possible that the last command deliverd null if the complete file should be read and
+	    // the dsiName equals the DataSetName.
+	    if (dataSetInfo == null) {
+		dataSetInfo = cardInfoWrapper.getDataSetByFid(
+			cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0));
+		if (! dataSetInfo.getDataSetName().equals(dsiName)) {
+		    String msg = "The wrong DataSet is selected for reading the stated DSI name + " + dsiName +".";
+		    throw new PrerequisitesNotSatisfiedException(msg);
+		}
+	    }
+
+	    if (! Arrays.equals(dataSetInfo.getDataSetPath().getEfIdOrPath(),
+		    cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0))) {
+		String msg = "Wrong DataSet for reading the DSI " + dsiName + " is selected.";
+		throw new PrerequisitesNotSatisfiedException(msg);
+	    }
+
+	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DSIName cannot be found.");
 	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dsiName, NamedDataServiceActionName.DSI_READ);
 
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
 	    // throws a null pointer if no ef is selected
+	    // FIXME: reads always the complete file but what if the dsi is e.g. just a single record?
 	    byte[] fileContent = CardUtils.readFile(cardStateEntry.getFCPOfSelectedEF(), env.getDispatcher(), slotHandle);
 
 	    response.setDSIContent(fileContent);

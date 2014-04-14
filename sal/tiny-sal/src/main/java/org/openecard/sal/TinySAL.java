@@ -1198,14 +1198,26 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] applicationID = connectionHandle.getCardApplication();
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String didName = SALUtils.getDIDName(request);
 
 	    byte[] plainText = request.getPlainText();
 	    Assert.assertIncorrectParameter(plainText, "The parameter PlainText is empty.");
 
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
+	    DIDScopeType didScope = request.getDIDScope();
+	    if (didScope == null) {
+		didScope = DIDScopeType.LOCAL;
+	    }
+
+	    if (didScope.equals(DIDScopeType.LOCAL)) {
+		byte[] necessaryCardApp = cardStateEntry.getInfo().getApplicationIdByDidName(didName, didScope);
+		if (! Arrays.equals(necessaryCardApp, applicationID)) {
+		    throw new SecurityConditionNotSatisfiedException("Wrong application selected.");
+		}
+	    }
+
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, didScope);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
@@ -1298,7 +1310,7 @@ public class TinySAL implements SAL {
 		}
 	    }
 
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, didScope);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();

@@ -360,7 +360,8 @@ public class GenericCryptoSignerFinder {
     private byte[] readCertificate(CryptoMarkerType cryptoMarker, Dispatcher dispatcher, ConnectionHandleType handle)
 	    throws DispatcherException, InvocationTargetException {
 	try {
-	    SALFileUtils.selectApplicationByDataSetName(cryptoMarker.getCertificateRef().getDataSetName(), dispatcher, handle);
+	    handle = SALFileUtils.selectApplicationByDataSetName(cryptoMarker.getCertificateRef().getDataSetName(),
+		    dispatcher, handle);
 	    // resolve acls of the certificate data set
 	    TargetNameType targetName = new TargetNameType();
 	    targetName.setDataSetName(cryptoMarker.getCertificateRef().getDataSetName());

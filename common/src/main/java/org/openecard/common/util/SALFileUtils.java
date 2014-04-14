@@ -60,8 +60,9 @@ public class SALFileUtils {
      * @throws InvocationTargetException
      * @throws org.openecard.common.WSHelper.WSException
      * @throws APDUException
+     * @return 
      */
-    public static void selectApplicationByDataSetName(String dataSetName, Dispatcher dispatcher,
+    public static ConnectionHandleType selectApplicationByDataSetName(String dataSetName, Dispatcher dispatcher,
 	    ConnectionHandleType connectionHandle) throws DispatcherException, InvocationTargetException, WSException,
 	    APDUException {
 	CardApplicationPath appPathReq = new CardApplicationPath();
@@ -118,10 +119,12 @@ public class SALFileUtils {
 	    WSHelper.checkResult(dataSetListResp);
 	    
 	    if (dataSetListResp.getDataSetNameList().getDataSetName().contains(dataSetName)) {
-		selectApplication(app, dispatcher, handle2);
+		connectionHandle = selectApplication(app, dispatcher, handle2);
 		break;
 	    }
 	}
+
+	return connectionHandle;
     }
     
     /**
@@ -158,7 +161,7 @@ public class SALFileUtils {
 	}
     }
 
-    public static void selectApplication(byte[] applicationIdentifier, Dispatcher dispatcher, ConnectionHandleType handle)
+    public static ConnectionHandleType selectApplication(byte[] applicationIdentifier, Dispatcher dispatcher, ConnectionHandleType handle)
 	    throws DispatcherException, InvocationTargetException, WSException {
 	CardApplicationConnect appConnectReq = new CardApplicationConnect();
 	CardApplicationPathType path = new CardApplicationPathType();
@@ -166,6 +169,7 @@ public class SALFileUtils {
 	appConnectReq.setCardApplicationPath(path);
 	CardApplicationConnectResponse appConnectResp = (CardApplicationConnectResponse) dispatcher.deliver(appConnectReq);
 	WSHelper.checkResult(appConnectResp);
+	return appConnectResp.getConnectionHandle();
     }
 
 }

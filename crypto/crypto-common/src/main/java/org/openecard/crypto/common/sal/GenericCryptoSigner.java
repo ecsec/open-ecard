@@ -263,7 +263,7 @@ public class GenericCryptoSigner {
 	    throws CredentialPermissionDenied {
 	byte[] content = null;
 	try {
-	    SALFileUtils.selectApplicationByDataSetName(dsiName, dispatcher, cHandle);
+	    cHandle = SALFileUtils.selectApplicationByDataSetName(dsiName, dispatcher, cHandle);
 	    TargetNameType target = new TargetNameType();
 	    target.setDataSetName(dsiName);
 	    performMissingAuthentication(target);

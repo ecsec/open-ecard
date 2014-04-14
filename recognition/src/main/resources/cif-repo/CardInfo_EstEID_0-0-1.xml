@@ -493,6 +493,7 @@
 			    </iso:StateInfo>
 			</iso:PinCompareMarker>
 		    </iso:DIDMarker>
+			<iso:DIDScope>local</iso:DIDScope>
 		</iso:DifferentialIdentity>
 		<iso:DIDACL>
 		    <iso:AccessRule>
@@ -661,6 +662,7 @@
 			    </iso:StateInfo>
 			</iso:PinCompareMarker>
 		    </iso:DIDMarker>
+			<iso:DIDScope>global</iso:DIDScope>
 		</iso:DifferentialIdentity>
 		<iso:DIDACL>
 		    <iso:AccessRule>
@@ -723,6 +725,7 @@
 			    </iso:CertificateRef>
 			</iso:CryptoMarker>
 		    </iso:DIDMarker>
+			<iso:DIDScope>local</iso:DIDScope>
 		</iso:DifferentialIdentity>
 		<iso:DIDACL>
 		    <iso:AccessRule>
@@ -770,6 +773,7 @@
 			    </iso:CertificateRef>
 			</iso:CryptoMarker>
 		    </iso:DIDMarker>
+			<iso:DIDScope>local</iso:DIDScope>
 		</iso:DifferentialIdentity>
 		<iso:DIDACL>
 		    <iso:AccessRule>
@@ -927,7 +931,7 @@
 		    </iso:AccessRule>
 		</iso:DataSetACL>
 		<iso:DataSetPath>
-		    <iso:efIdOrPath>EEEEDDCE</iso:efIdOrPath>
+		    <iso:efIdOrPath>3F00EEEEDDCE</iso:efIdOrPath>
 		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 	    <!-- Certificate for digital identication -->
@@ -954,7 +958,7 @@
 		    </iso:AccessRule>
 		</iso:DataSetACL>
 		<iso:DataSetPath>
-		    <iso:efIdOrPath>EEEEAACE</iso:efIdOrPath>
+		    <iso:efIdOrPath>3F00EEEEAACE</iso:efIdOrPath>
 		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 	    <!-- PD a EF with the personal data of the card holder -->
@@ -982,7 +986,7 @@
 		    </iso:AccessRule>
 		</iso:DataSetACL>
 		<iso:DataSetPath>
-		    <iso:efIdOrPath>EEEE5044</iso:efIdOrPath>
+		    <iso:efIdOrPath>3F00EEEE5044</iso:efIdOrPath>
 		</iso:DataSetPath>
 				<!--
 					Contains the following information
@@ -1027,7 +1031,7 @@
 		    </iso:AccessRule>
 		</iso:DataSetACL>
 		<iso:DataSetPath>
-		    <iso:efIdOrPath>EEEE0013</iso:efIdOrPath>
+		    <iso:efIdOrPath>3F00EEEE0013</iso:efIdOrPath>
 		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 	    <!-- key references -->
@@ -1054,7 +1058,7 @@
 		    </iso:AccessRule>
 		</iso:DataSetACL>
 		<iso:DataSetPath>
-		    <iso:efIdOrPath>EEEE0033</iso:efIdOrPath>
+		    <iso:efIdOrPath>3F00EEEE0033</iso:efIdOrPath>
 		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 	</iso:CardApplication>

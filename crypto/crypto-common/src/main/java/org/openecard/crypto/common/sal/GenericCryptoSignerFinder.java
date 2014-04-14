@@ -341,10 +341,12 @@ public class GenericCryptoSignerFinder {
 	    X509Certificate x509cert = (X509Certificate) cf.generateCertificate(bIn);
 	    // get the extensions which should contain the client authentication oid 1.3.6.1.5.5.7.3.2
 	    List<String> extendedKeyUsage = x509cert.getExtendedKeyUsage();
-	    for (String oid : extendedKeyUsage) {
-		if (oid.equals("1.3.6.1.5.5.7.3.2")) {
-		    hasAuthCert = true;
-		    break;
+	    if (extendedKeyUsage != null) {
+		for (String oid : extendedKeyUsage) {
+		    if (oid.equals("1.3.6.1.5.5.7.3.2")) {
+			hasAuthCert = true;
+			break;
+		    }
 		}
 	    }
 

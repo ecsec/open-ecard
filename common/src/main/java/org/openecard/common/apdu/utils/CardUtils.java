@@ -23,6 +23,7 @@ package org.openecard.common.apdu.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.openecard.common.apdu.ReadBinary;
@@ -145,7 +146,19 @@ public class CardUtils {
 	    }
 
 	    if (responses == null) {
-		result = selectFile.transmit(dispatcher, slotHandle);
+		// not all cards, e.g. Estonian id card, support P1 = 00 and DataFile filled with MF Fid so work around this
+		if (i == 2 && fileIdOrPath[0] == (byte) 0x3F && fileIdOrPath[1] == (byte) 0x00) {
+		    responses = new ArrayList<byte[]>();
+		    responses.add(new byte[] {(byte) 0x90, (byte) 0x00});
+		    responses.add(new byte[] {(byte) 0x67, (byte) 0x00});
+		}
+		result = selectFile.transmit(dispatcher, slotHandle, responses);
+
+		if (! Arrays.equals(result.getTrailer(), new byte[] {(byte) 0x90, (byte) 0x00}) && i == 2 &&
+			fileIdOrPath[0] == (byte) 0x3F && fileIdOrPath[1] == (byte) 0x00) {
+		    selectFile = new Select((byte) 0x00, (byte) 0x0c);
+		    result = selectFile.transmit(dispatcher, slotHandle);
+		}
 	    } else {
 		result = selectFile.transmit(dispatcher, slotHandle, responses);
 	    }

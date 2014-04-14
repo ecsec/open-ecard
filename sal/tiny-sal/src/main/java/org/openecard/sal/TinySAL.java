@@ -1086,10 +1086,14 @@ public class TinySAL implements SAL {
 	    Assert.assertIncorrectParameter(updateData, "The parameter DSIContent is empty.");
 
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dsiName, applicationID);
+	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSetByDsiName(dsiName);
 	    DSIType dsi = cardInfoWrapper.getDSIbyName(dsiName);
 	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DSIName cannot be found.");
 	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dsiName, NamedDataServiceActionName.DSI_WRITE);
+
+	    if (cardStateEntry.getFCPOfSelectedEF() == null) {
+		throw new PrerequisitesNotSatisfiedException("No EF with DSI selected.");
+	    }
 
 	    if (! Arrays.equals(dataSetInfo.getDataSetPath().getEfIdOrPath(), 
 		    cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0))) {
@@ -1098,9 +1102,7 @@ public class TinySAL implements SAL {
 	    }
 
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
-	    if (cardStateEntry.getFCPOfSelectedEF() == null) {
-		throw new PrerequisitesNotSatisfiedException("No EF with DSI selected.");
-	    } else if (cardStateEntry.getFCPOfSelectedEF().getDataElements().isTransparent()) {
+	    if (cardStateEntry.getFCPOfSelectedEF().getDataElements().isTransparent()) {
 		// currently assuming that the index encodes the offset
 		byte[] index = dsi.getDSIPath().getIndex();
 		UpdateBinary updateBin = new UpdateBinary(index[0], index[1], updateData);

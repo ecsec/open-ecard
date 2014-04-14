@@ -1408,14 +1408,26 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] applicationID = connectionHandle.getCardApplication();
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String didName = SALUtils.getDIDName(request);
-
 	    byte[] message = request.getMessage();
 	    Assert.assertIncorrectParameter(message, "The parameter Message is empty.");
+	    DIDScopeType didScope = request.getDIDScope();
 
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
+	    if (didScope == null) {
+		didScope = DIDScopeType.LOCAL;
+	    }
+
+	    if (didScope.equals(DIDScopeType.LOCAL)) {
+		byte[] necessarySelectedApp = cardStateEntry.getInfo().getApplicationIdByDidName(didName, didScope);
+		if (! Arrays.equals(necessarySelectedApp, applicationID)) {
+		    String msg = "Wrong application selected for the execution of Sign with the DID " + didName + ".";
+		    throw new SecurityConditionNotSatisfiedException(msg);
+		}
+	    }
+
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, didScope);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();

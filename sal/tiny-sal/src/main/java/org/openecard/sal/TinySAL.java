@@ -883,7 +883,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 

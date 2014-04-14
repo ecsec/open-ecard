@@ -1252,18 +1252,29 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    byte[] applicationID = connectionHandle.getCardApplication();
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String didName = SALUtils.getDIDName(request);
-
 	    byte[] cipherText = request.getCipherText();
 	    Assert.assertIncorrectParameter(cipherText, "The parameter CipherText is empty.");
 
-	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, applicationID);
-	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+	    DIDScopeType didScope = request.getDIDScope();
+	    if (didScope == null) {
+		didScope = DIDScopeType.LOCAL;
+	    }
 
+	    if (didScope.equals(DIDScopeType.LOCAL)) {
+		byte[] necessaryCardApp = cardStateEntry.getInfo().getApplicationIdByDidName(didName, didScope);
+		if (! Arrays.equals(necessaryCardApp, applicationID)) {
+		    throw new SecurityConditionNotSatisfiedException("Wrong application selected.");
+		}
+	    }
+
+	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, didScope);
+	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    
 	    if (protocol.hasNextStep(FunctionType.Decipher)) {
 		response = protocol.decipher(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);

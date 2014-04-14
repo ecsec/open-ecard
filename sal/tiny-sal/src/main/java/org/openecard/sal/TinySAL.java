@@ -196,6 +196,7 @@ import org.slf4j.LoggerFactory;
 public class TinySAL implements SAL {
 
     private static final Logger logger = LoggerFactory.getLogger(TinySAL.class);
+    private static final byte[] MF = new byte[] {(byte) 0x3F, (byte) 0x00};
 
     private final Environment env;
     private final CardStateMap states;
@@ -270,7 +271,12 @@ public class TinySAL implements SAL {
 		if (cardAppPath.getCardApplication() != null) {
 		    pathCopy.setCardApplication(cardAppPath.getCardApplication());
 		} else {
-		    pathCopy.setCardApplication(entry.getImplicitlySelectedApplicationIdentifier());
+		    if (entry.getImplicitlySelectedApplicationIdentifier() != null) {
+			pathCopy.setCardApplication(entry.getImplicitlySelectedApplicationIdentifier());
+		    } else {
+			logger.warn("No CardApplication and ImplicitlySelectedApplication available using MF now.");
+			pathCopy.setCardApplication(MF);
+		    }
 		}
 		resultPaths.add(pathCopy);
 	    }
@@ -310,7 +316,11 @@ public class TinySAL implements SAL {
 	    CardStateEntry cardStateEntry = cardStateEntrySet.iterator().next();
 	    byte[] applicationID = cardAppPath.getCardApplication();
 	    if (applicationID == null) {
-		applicationID = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
+		if (cardStateEntry.getImplicitlySelectedApplicationIdentifier() != null) {
+		    applicationID = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
+		} else {
+		    applicationID = MF;
+		}
 	    }
 	    Assert.securityConditionApplication(cardStateEntry, applicationID,
 		    ConnectionServiceActionName.CARD_APPLICATION_CONNECT);

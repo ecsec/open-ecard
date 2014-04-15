@@ -43,6 +43,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -54,6 +55,7 @@ import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
+import org.openecard.common.util.Pair;
 import org.openecard.common.util.SALFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -194,6 +196,7 @@ public class GenericCryptoSignerFinder {
 	    List<String> didNames) throws DispatcherException, InvocationTargetException, WSException {
 	ConnectionHandleType handle2 = WSHelper.copyHandle(handle);
 	List<DIDCertificate> remainingDIDs = new ArrayList<DIDCertificate>();
+	HashMap<String, Pair<byte[], Boolean>> dataSetWithCert = new HashMap<String, Pair<byte[], Boolean>>();
 	for (String didName : didNames) {
 	    DIDGet didGet = new DIDGet();
 	    didGet.setConnectionHandle(handle2);
@@ -250,23 +253,37 @@ public class GenericCryptoSignerFinder {
 		continue;
 	    }
 
-	    byte[] cert = readCertificate(cryptoMarker, dispatcher, handle);
-	    if (cert == null) {
-		// this means the certificate is not readable without authentication (or an error occured)
-		// so save this in the list for later if there exists the possibility to select a certificate for 
-		// authentication.
+	    if (dataSetWithCert.containsKey(cryptoMarker.getCertificateRef().getDataSetName())) {
+		Pair<byte[], Boolean> certAndTlsAuth = dataSetWithCert.get(
+			cryptoMarker.getCertificateRef().getDataSetName());
 		cardCert.setApplicationID(handle2.getCardApplication());
 		cardCert.setDIDName(didName);
 		cardCert.setDataSetName(cryptoMarker.getCertificateRef().getDataSetName());
+		cardCert.setRawCertificate(certAndTlsAuth.p1);
 		remainingDIDs.add(cardCert);
-	    } else if (containsAuthenticationCertificate(cert)) {
-		// put certificates which are always readable always at the beginning of the list
-		cardCert.setApplicationID(handle2.getCardApplication());
-		cardCert.setDIDName(didName);
-		cardCert.setDataSetName(cryptoMarker.getCertificateRef().getDataSetName());
-		cardCert.setRawCertificate(cert);
-		cardCert.setAlwaysReadable();
-		remainingDIDs.add(0, cardCert);
+	    } else {
+		byte[] cert = readCertificate(cryptoMarker, dispatcher, handle);
+		if (cert == null) {
+		    // this means the certificate is not readable without authentication (or an error occured)
+		    // so save this in the list for later if there exists the possibility to select a certificate for
+		    // authentication.
+		    cardCert.setApplicationID(handle2.getCardApplication());
+		    cardCert.setDIDName(didName);
+		    cardCert.setDataSetName(cryptoMarker.getCertificateRef().getDataSetName());
+		    remainingDIDs.add(cardCert);
+		    Pair<byte[], Boolean> certAndTLSAuth = new Pair<byte[], Boolean>(cert, false);
+		    dataSetWithCert.put(cryptoMarker.getCertificateRef().getDataSetName(), certAndTLSAuth);
+		} else if (containsAuthenticationCertificate(cert)) {
+		    // put certificates which are always readable always at the beginning of the list
+		    cardCert.setApplicationID(handle2.getCardApplication());
+		    cardCert.setDIDName(didName);
+		    cardCert.setDataSetName(cryptoMarker.getCertificateRef().getDataSetName());
+		    cardCert.setRawCertificate(cert);
+		    cardCert.setAlwaysReadable();
+		    remainingDIDs.add(0, cardCert);
+		    Pair<byte[], Boolean> certAndTLSAuth = new Pair<byte[], Boolean>(cert, true);
+		    dataSetWithCert.put(cryptoMarker.getCertificateRef().getDataSetName(), certAndTLSAuth);
+		}
 	    }
 	}
 

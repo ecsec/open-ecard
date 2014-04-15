@@ -377,6 +377,12 @@ public class GenericCryptoSignerFinder {
 				break;
 			    }
 			}
+		    } else {
+			// The certificate does not have the extension for TLS client authentication so just look for
+			// the Digital Signature usage flag.
+			if (x509cert.getKeyUsage()[0] == true && x509cert.getKeyUsage()[1] == false) {
+			    hasAuthCert = true;
+			}
 		    }
 
 		    return hasAuthCert;

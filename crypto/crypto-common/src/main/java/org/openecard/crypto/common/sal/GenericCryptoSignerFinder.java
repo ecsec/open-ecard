@@ -43,11 +43,18 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.openecard.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.openecard.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.openecard.bouncycastle.asn1.x509.Certificate;
+import org.openecard.bouncycastle.asn1.x509.KeyPurposeId;
+import org.openecard.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
 import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.WSHelper;
@@ -55,6 +62,7 @@ import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
+import org.openecard.common.util.HandlerUtils;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.SALFileUtils;
 import org.slf4j.Logger;
@@ -73,31 +81,42 @@ public class GenericCryptoSignerFinder {
 
     private static final Logger logger = LoggerFactory.getLogger(GenericCryptoSignerFinder.class);
 
-    private static final String OID_PKCS_1_PURE_RSA_SIGNATURE_LEGACY = "urn:oid:1.2.840.113549.1.1";
-    private static final String OID_PKCS_1_PURE_RSA_SIGNATURE = "urn:oid:1.2.840.113549.1.1.1";
-    private static final String OID_PKCS_1_RSA_SHA1 = "urn:oid:1.2.840.113549.1.1.5";
-    private static final String OID_PKCS_1_RSA_SHA256 = "urn:oid:1.2.840.113549.1.1.11";
-    private static final String OID_PKCS_1_RSA_SHA384 = "urn:oid:1.2.840.113549.1.1.12";
-    private static final String OID_PKCS_1_RSA_SHA512 = "urn:oid:1.2.840.113549.1.1.13";
-    private static final String OID_PKCS_1_RSA_SHA224 = "urn:oid:1.2.840.113549.1.1.14";
-    private static final String OID_ECDSA_SHA1 = "urn:oid:1.2.840.10045.4.1";
-    private static final String OID_ECDSA_SHA224 = "urn:oid:1.2.840.10045.4.3.1";
-    private static final String OID_ECDSA_SHA256 = "urn:oid:1.2.840.10045.4.3.2";
-    private static final String OID_ECDSA_SHA384 = "urn:oid:1.2.840.10045.4.3.3";
-    private static final String OID_ECDSA_SHA512 = "urn:oid:1.2.840.10045.4.3.4";
-    private static final String OID_DSA_SHA224 = "urn:oid:2.16.840.1.101.3.4.3.1";
-    private static final String OID_DSA_SHA256 = "urn:oid:2.16.840.1.101.3.4.3.2";
     private static final String OID_GENERIC_CRYPTO = "urn:oid:1.3.162.15480.3.0.25";
     private static final String COMPUTE_SIGNATURE = "Compute-signature";
+
+    //@SafeVarargs
+    private static <T> Set<T> set(T... ts) {
+	return new HashSet<>(Arrays.asList(ts));
+    }
+
+    private static final Set<String> PRE_TLS12 = set(
+	"urn:oid:" + PKCSObjectIdentifiers.pkcs_1.getId(),
+	"urn:oid:" + PKCSObjectIdentifiers.rsaEncryption.getId(),
+	"urn:oid:" + PKCSObjectIdentifiers.sha1WithRSAEncryption.getId(),
+	"urn:oid:" + PKCSObjectIdentifiers.sha256WithRSAEncryption.getId()
+    );
+    private static final Set<String> POST_TLS12 = set(
+	"urn:oid:" + PKCSObjectIdentifiers.sha224WithRSAEncryption.getId(),
+	"urn:oid:" + PKCSObjectIdentifiers.sha384WithRSAEncryption.getId(),
+	"urn:oid:" + PKCSObjectIdentifiers.sha512WithRSAEncryption.getId(),
+	"urn:oid:" + X9ObjectIdentifiers.ecdsa_with_SHA1.getId(),
+	"urn:oid:" + X9ObjectIdentifiers.ecdsa_with_SHA224.getId(),
+	"urn:oid:" + X9ObjectIdentifiers.ecdsa_with_SHA256.getId(),
+	"urn:oid:" + X9ObjectIdentifiers.ecdsa_with_SHA384.getId(),
+	"urn:oid:" + X9ObjectIdentifiers.ecdsa_with_SHA512.getId(),
+	"urn:oid:" + NISTObjectIdentifiers.dsa_with_sha224.getId(),
+	"urn:oid:" + NISTObjectIdentifiers.dsa_with_sha256.getId()
+    );
 
     private final Dispatcher dispatcher;
     private final ConnectionHandleType handle;
     private final boolean filterAlwaysReadable;
 
-    public GenericCryptoSignerFinder(@Nonnull Dispatcher dispatcher, @Nonnull ConnectionHandleType handle, boolean filterAlwaysReadable) {
+    public GenericCryptoSignerFinder(@Nonnull Dispatcher dispatcher, @Nonnull ConnectionHandleType handle,
+	    boolean filterAlwaysReadable) {
 	this.filterAlwaysReadable = filterAlwaysReadable;
 	this.dispatcher = dispatcher;
-	this.handle = WSHelper.copyHandle(handle);
+	this.handle = HandlerUtils.copyHandle(handle);
     }
 
     @Nonnull
@@ -144,9 +163,9 @@ public class GenericCryptoSignerFinder {
     // TODO: add more useful search functions
 
     private List<DIDCertificate>findDID(Dispatcher dispatcher, ConnectionHandleType handle) {
-	List<DIDCertificate> result = new ArrayList<DIDCertificate>();
+	List<DIDCertificate> result = new ArrayList<>();
 	// copy handle to be safe from spaghetti code
-	handle = WSHelper.copyHandle(handle);
+	handle = HandlerUtils.copyHandle(handle);
 
 	try {
 	    CardApplicationList listReq = new CardApplicationList();
@@ -171,11 +190,7 @@ public class GenericCryptoSignerFinder {
 		    result.addAll(certList);
 		}
 	    }
-	} catch (InvocationTargetException e) {
-	    logger.error("Searching for DID failed", e);
-	} catch (DispatcherException e) {
-	    logger.error("Searching for DID failed", e);
-	} catch (WSException e) {
+	} catch (InvocationTargetException | DispatcherException | WSException e) {
 	    logger.error("Searching for DID failed", e);
 	}
 	return result;
@@ -194,9 +209,9 @@ public class GenericCryptoSignerFinder {
      */
     private List<DIDCertificate> filterTLSCapableDIDs(Dispatcher dispatcher, ConnectionHandleType handle,
 	    List<String> didNames) throws DispatcherException, InvocationTargetException, WSException {
-	ConnectionHandleType handle2 = WSHelper.copyHandle(handle);
-	List<DIDCertificate> remainingDIDs = new ArrayList<DIDCertificate>();
-	HashMap<String, Pair<byte[], Boolean>> dataSetWithCert = new HashMap<String, Pair<byte[], Boolean>>();
+	ConnectionHandleType handle2 = HandlerUtils.copyHandle(handle);
+	List<DIDCertificate> remainingDIDs = new ArrayList<>();
+	HashMap<String, Pair<byte[], Boolean>> dataSetWithCert = new HashMap<>();
 	for (String didName : didNames) {
 	    DIDGet didGet = new DIDGet();
 	    didGet.setConnectionHandle(handle2);
@@ -206,46 +221,12 @@ public class GenericCryptoSignerFinder {
 	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didGetResponse.getDIDStructure().getDIDMarker());
 	    String algorithm = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
 	    DIDCertificate cardCert= new DIDCertificate();
-	    if (algorithm.equals(OID_PKCS_1_PURE_RSA_SIGNATURE_LEGACY)) {
+
+	    // determine possible TLS versions
+	    if (PRE_TLS12.contains(algorithm)) {
 		logger.debug("{} is usable for TLSv1.1 and TLS1.2 signatures.", didName);
 		cardCert.setMinTLSVersion(DIDCertificate.TLSv10);
-	    } else if(algorithm.equals(OID_PKCS_1_PURE_RSA_SIGNATURE)) {
-		logger.debug("{} is usable for TLSv1.1 and TLS1.2 signatures.", didName);
-		cardCert.setMinTLSVersion(DIDCertificate.TLSv10);
-	    } else if (algorithm.equals(OID_PKCS_1_RSA_SHA1)) {
-		logger.debug("{} is usable for TLSv1.1 and TLS1.2 signatures.", didName);
-		cardCert.setMinTLSVersion(DIDCertificate.TLSv10);
-	    } else if (algorithm.equals(OID_PKCS_1_RSA_SHA256)) {
-		logger.debug("{} is usable for TLSv1.1 and TLS1.2 signatures.", didName);
-		cardCert.setMinTLSVersion(DIDCertificate.TLSv10);
-	    } else if (algorithm.equals(OID_PKCS_1_RSA_SHA224)) {
-		logger.debug("{} is usable for TLS1.2 signatures.", didName);
-		cardCert.setMinTLSVersion(DIDCertificate.TLSv12);
-	    } else if (algorithm.equals(OID_PKCS_1_RSA_SHA384)) {
-		logger.debug("{} is usable for TLS1.2 signatures.", didName);
-		cardCert.setMinTLSVersion(DIDCertificate.TLSv12);
-	    } else if (algorithm.equals(OID_PKCS_1_RSA_SHA512)) {
-		logger.debug("{} is usable for TLS1.2 signatures.", didName);
-		cardCert.setMinTLSVersion(DIDCertificate.TLSv12);
-	    } else if (algorithm.equals(OID_ECDSA_SHA1)) {
-		logger.debug("{} is usable for TLSv1.2 signatures.", didName);
-		cardCert.setMinTLSVersion(DIDCertificate.TLSv12);
-	    } else if (algorithm.equals(OID_ECDSA_SHA224)) {
-		logger.debug("{} is usable for TLSv1.2 signatures.", didName);
-		cardCert.setMinTLSVersion(DIDCertificate.TLSv12);
-	    } else if (algorithm.equals(OID_ECDSA_SHA256)) {
-		logger.debug("{} is usable for TLSv1.2 signatures.", didName);
-		cardCert.setMinTLSVersion(DIDCertificate.TLSv12);
-	    } else if (algorithm.equals(OID_ECDSA_SHA384)) {
-		logger.debug("{} is usable for TLSv1.2 signatures.", didName);
-		cardCert.setMinTLSVersion(DIDCertificate.TLSv12);
-	    } else if (algorithm.equals(OID_ECDSA_SHA512)) {
-		logger.debug("{} is usable for TLSv1.2 signatures.", didName);
-		cardCert.setMinTLSVersion(DIDCertificate.TLSv12);
-	    } else if (algorithm.equals(OID_DSA_SHA224)) {
-		logger.debug("{} is usable for TLSv1.2 signatures.", didName);
-		cardCert.setMinTLSVersion(DIDCertificate.TLSv12);
-	    } else if (algorithm.equals(OID_DSA_SHA256)) {
+	    } else if (POST_TLS12.contains(algorithm)) {
 		logger.debug("{} is usable for TLSv1.2 signatures.", didName);
 		cardCert.setMinTLSVersion(DIDCertificate.TLSv12);
 	    } else {
@@ -271,7 +252,7 @@ public class GenericCryptoSignerFinder {
 		    cardCert.setDIDName(didName);
 		    cardCert.setDataSetName(cryptoMarker.getCertificateRef().getDataSetName());
 		    remainingDIDs.add(cardCert);
-		    Pair<byte[], Boolean> certAndTLSAuth = new Pair<byte[], Boolean>(cert, false);
+		    Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, false);
 		    dataSetWithCert.put(cryptoMarker.getCertificateRef().getDataSetName(), certAndTLSAuth);
 		} else if (containsAuthenticationCertificate(cert)) {
 		    // put certificates which are always readable always at the beginning of the list
@@ -281,7 +262,7 @@ public class GenericCryptoSignerFinder {
 		    cardCert.setRawCertificate(cert);
 		    cardCert.setAlwaysReadable();
 		    remainingDIDs.add(0, cardCert);
-		    Pair<byte[], Boolean> certAndTLSAuth = new Pair<byte[], Boolean>(cert, true);
+		    Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, true);
 		    dataSetWithCert.put(cryptoMarker.getCertificateRef().getDataSetName(), certAndTLSAuth);
 		}
 	    }
@@ -297,13 +278,13 @@ public class GenericCryptoSignerFinder {
      * @return A list of {@link DIDCertificate} objects to filter.
      */
     private List<DIDCertificate> filterAlwaysReadable(List<DIDCertificate> certList) {
-	List<DIDCertificate> remainingDIDs = new ArrayList<DIDCertificate>();
-	for (int i = 0; i < certList.size(); i++) {
-	    if (certList.get(i).isAlwaysReadable()) {
+	List<DIDCertificate> remainingDIDs = new ArrayList<>();
+	for (DIDCertificate certList1 : certList) {
+	    if (certList1.isAlwaysReadable()) {
 		logger.debug("Certificate is always readable.");
-		remainingDIDs.add(certList.get(i));
+		remainingDIDs.add(certList1);
 	    } else {
-	        logger.debug("Certificate needs did authentication to be readable.");
+		logger.debug("Certificate needs did authentication to be readable.");
 	    }
 	}
 	
@@ -372,7 +353,7 @@ public class GenericCryptoSignerFinder {
 		    List<String> extendedKeyUsage = x509cert.getExtendedKeyUsage();
 		    if (extendedKeyUsage != null) {
 			for (String oid : extendedKeyUsage) {
-			    if (oid.equals("1.3.6.1.5.5.7.3.2")) {
+			    if (oid.equals(KeyPurposeId.id_kp_clientAuth.getId())) {
 				hasAuthCert = true;
 				break;
 			    }

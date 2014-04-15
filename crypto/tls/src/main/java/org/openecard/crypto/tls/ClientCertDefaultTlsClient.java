@@ -24,6 +24,7 @@ package org.openecard.crypto.tls;
 
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import java.io.IOException;
+import org.openecard.bouncycastle.crypto.tls.CipherSuite;
 import org.openecard.bouncycastle.crypto.tls.DefaultTlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsCipherFactory;
@@ -64,6 +65,63 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	this.fqdn = fqdn;
     }
 
+
+    @Override
+    public int[] getCipherSuites() {
+	return new int[] {
+	    // recommended ciphers from TR-02102-2 sec. 3.3.1
+	    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+	    CipherSuite.TLS_DHE_DSS_WITH_AES_256_GCM_SHA384,
+	    CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
+	    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+	    CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256,
+	    CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
+	    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+	    CipherSuite.TLS_DHE_DSS_WITH_AES_128_GCM_SHA256,
+	    CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+	    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+	    CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256,
+	    CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
+	    // acceptable in case DHE is not available
+	    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,
+	    CipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,
+	    CipherSuite.TLS_DH_DSS_WITH_AES_256_GCM_SHA384,
+	    CipherSuite.TLS_DH_RSA_WITH_AES_256_GCM_SHA384,
+	    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,
+	    CipherSuite.TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,
+	    CipherSuite.TLS_DH_DSS_WITH_AES_128_GCM_SHA256,
+	    CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256,
+	    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384,
+	    CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,
+	    CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA256,
+	    CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256,
+	    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256,
+	    CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,
+	    CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA256,
+	    CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256,
+	    // SHA1 is acceptable until 2015
+	    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+	    CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
+	    CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+	    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA,
+	    CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,
+	    CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA,
+	    CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
+	    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+	    CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
+	    CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+	    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,
+	    CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
+	    CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA,
+	    CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA,
+	};
+    }
 
     @Override
     public synchronized TlsAuthentication getAuthentication() throws IOException {

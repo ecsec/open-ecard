@@ -24,6 +24,7 @@ package org.openecard.crypto.tls;
 
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import java.io.IOException;
+import org.openecard.bouncycastle.crypto.tls.CipherSuite;
 import org.openecard.bouncycastle.crypto.tls.PSKTlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsCipherFactory;
@@ -67,6 +68,30 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 	this.fqdn = fqdn;
     }
 
+
+    @Override
+    public int[] getCipherSuites() {
+	return new int[] {
+	    // recommended ciphers from TR-02102-2 sec. 3.3.1
+	    CipherSuite.TLS_DHE_PSK_WITH_AES_256_GCM_SHA384,
+	    CipherSuite.TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA384,
+	    CipherSuite.TLS_DHE_PSK_WITH_AES_256_CBC_SHA384,
+	    CipherSuite.TLS_DHE_PSK_WITH_AES_128_GCM_SHA256,
+	    CipherSuite.TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256,
+	    CipherSuite.TLS_DHE_PSK_WITH_AES_128_CBC_SHA256,
+	    CipherSuite.TLS_RSA_PSK_WITH_AES_256_GCM_SHA384,
+	    CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA384,
+	    CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
+	    CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256,
+	    // SHA1 is acceptable until 2015
+	    CipherSuite.TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA,
+	    CipherSuite.TLS_DHE_PSK_WITH_AES_256_CBC_SHA,
+	    CipherSuite.TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA,
+	    CipherSuite.TLS_DHE_PSK_WITH_AES_128_CBC_SHA,
+	    CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA,
+	    CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA,
+	};
+    }
 
     @Override
     public synchronized TlsAuthentication getAuthentication() throws IOException {

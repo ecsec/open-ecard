@@ -333,24 +333,38 @@ public class GenericCryptoSignerFinder {
     private boolean containsAuthenticationCertificate(byte[] rawCert) throws DispatcherException, InvocationTargetException {
 	try {
 	    boolean hasAuthCert = false;
-	    // transform the byte array into an certificate object
-	    Certificate cert = Certificate.getInstance(rawCert);
-	    cert.getTBSCertificate();
-	    CertificateFactory cf = CertificateFactory.getInstance("X509");
-	    ByteArrayInputStream bIn = new ByteArrayInputStream(rawCert);
-	    X509Certificate x509cert = (X509Certificate) cf.generateCertificate(bIn);
-	    // get the extensions which should contain the client authentication oid 1.3.6.1.5.5.7.3.2
-	    List<String> extendedKeyUsage = x509cert.getExtendedKeyUsage();
-	    if (extendedKeyUsage != null) {
-		for (String oid : extendedKeyUsage) {
-		    if (oid.equals("1.3.6.1.5.5.7.3.2")) {
-			hasAuthCert = true;
-			break;
+	    // check whether certificate EF was empty or contains just 0
+	    if (rawCert.length == 0) {
+		return false;
+	    } else {
+		int counter = 0;
+		for (byte b : rawCert) {
+		    if (b == 0) {
+			counter++;
 		    }
 		}
-	    }
 
-	    return hasAuthCert;
+		if (counter != rawCert.length) {
+		    // transform the byte array into an certificate object
+		    Certificate cert = Certificate.getInstance(rawCert);
+		    cert.getTBSCertificate();
+		    CertificateFactory cf = CertificateFactory.getInstance("X509");
+		    ByteArrayInputStream bIn = new ByteArrayInputStream(rawCert);
+		    X509Certificate x509cert = (X509Certificate) cf.generateCertificate(bIn);
+		    // get the extensions which should contain the client authentication oid 1.3.6.1.5.5.7.3.2
+		    List<String> extendedKeyUsage = x509cert.getExtendedKeyUsage();
+		    if (extendedKeyUsage != null) {
+			for (String oid : extendedKeyUsage) {
+			    if (oid.equals("1.3.6.1.5.5.7.3.2")) {
+				hasAuthCert = true;
+				break;
+			    }
+			}
+		    }
+
+		    return hasAuthCert;
+		}
+	    }
 	} catch (CertificateException ex) {
 	    logger.error("Failed to instantiate or parse the certificate.", ex);
 	}

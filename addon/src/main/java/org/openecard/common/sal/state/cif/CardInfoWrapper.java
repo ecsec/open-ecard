@@ -137,7 +137,7 @@ public class CardInfoWrapper {
 				return did;
 			    }
 			}
-		    } else if (didScope == null) {
+		    } else {
 			return did;
 		    }
 		}
@@ -344,7 +344,7 @@ public class CardInfoWrapper {
 				return cardApp.getApplicationIdentifier();
 			    }
 			}
-		    } else if (didScope == null) {
+		    } else {
 			return cardApp.getApplicationIdentifier();
 		    }
 		}
@@ -363,6 +363,18 @@ public class CardInfoWrapper {
 			    return dSetInfoWrapper;
 			}
 		    }
+		}
+	    }
+	}
+
+	return null;
+    }
+
+    public DataSetInfoType getDataSetByName(String dataSetName) {
+	for (CardApplicationWrapper cardAppWrapper : cardApplications.values()) {
+	    for (DataSetInfoType dSetInfoWrapper : cardAppWrapper.getDataSetInfoList()) {
+		if (dSetInfoWrapper.getDataSetName().equals(dataSetName)) {
+		    return dSetInfoWrapper;
 		}
 	    }
 	}

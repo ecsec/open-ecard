@@ -93,7 +93,7 @@ public class PCSCPinVerify {
 	byte bmPinType = 0; // binary
 	if (nibbleHandling) {
 	    bmPinType = 1;
-	} else if (pwdType == PasswordTypeType.ASCII_NUMERIC) {
+	} else if (pwdType == PasswordTypeType.ASCII_NUMERIC || pwdType == PasswordTypeType.UTF_8) {
 	    bmPinType = 2;
 	}
 	this.bmFormatString = (byte) ((bmSysUnits<<7) | (bmPinPos<<3) | (bmJustify<<2) | bmPinType);

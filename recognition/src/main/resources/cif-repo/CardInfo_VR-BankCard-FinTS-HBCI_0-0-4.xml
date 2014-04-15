@@ -1661,9 +1661,6 @@
 							<iso:CertificateRef>
 								<iso:DataSetName>EF_C_X509_CH_DS</iso:DataSetName>
 							</iso:CertificateRef>
-							<iso:CertificateRef>
-								<iso:DataSetName>EF_C_X509_CA_CS_DS</iso:DataSetName>
-							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
 				</iso:DifferentialIdentity>
@@ -1733,9 +1730,6 @@
 							<iso:HashGenerationInfo>NotOnCard</iso:HashGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>EF_C_X509_CH_DS</iso:DataSetName>
-							</iso:CertificateRef>
-							<iso:CertificateRef>
-								<iso:DataSetName>EF_C_X509_CA_CS_DS</iso:DataSetName>
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
@@ -1807,9 +1801,6 @@
 							<iso:CertificateRef>
 								<iso:DataSetName>EF_C_X509_CH_DS</iso:DataSetName>
 							</iso:CertificateRef>
-							<iso:CertificateRef>
-								<iso:DataSetName>EF_C_X509_CA_CS_DS</iso:DataSetName>
-							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
 				</iso:DifferentialIdentity>
@@ -1879,9 +1870,6 @@
 							<iso:HashGenerationInfo>NotOnCard</iso:HashGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>EF_C_X509_CH_DS</iso:DataSetName>
-							</iso:CertificateRef>
-							<iso:CertificateRef>
-								<iso:DataSetName>EF_C_X509_CA_CS_DS</iso:DataSetName>
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
@@ -1954,9 +1942,6 @@
 							<iso:CertificateRef>
 								<iso:DataSetName>EF_C_X509_CH_DS</iso:DataSetName>
 							</iso:CertificateRef>
-							<iso:CertificateRef>
-								<iso:DataSetName>EF_C_X509_CA_CS_DS</iso:DataSetName>
-							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
 				</iso:DifferentialIdentity>
@@ -2028,9 +2013,6 @@
 							<iso:CertificateRef>
 								<iso:DataSetName>EF_C_X509_CH_DS</iso:DataSetName>
 							</iso:CertificateRef>
-							<iso:CertificateRef>
-								<iso:DataSetName>EF_C_X509_CA_CS_DS</iso:DataSetName>
-							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
 				</iso:DifferentialIdentity>
@@ -2101,9 +2083,6 @@
 							<iso:HashGenerationInfo>NotOnCard</iso:HashGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>EF_C_X509_CH_DS</iso:DataSetName>
-							</iso:CertificateRef>
-							<iso:CertificateRef>
-								<iso:DataSetName>EF_C_X509_CA_CS_DS</iso:DataSetName>
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>

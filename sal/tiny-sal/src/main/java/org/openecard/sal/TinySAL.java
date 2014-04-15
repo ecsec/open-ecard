@@ -1158,24 +1158,25 @@ public class TinySAL implements SAL {
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSetByDsiName(dsiName);
 
-	    // It is possible that the last command deliverd null if the complete file should be read and
-	    // the dsiName equals the DataSetName.
 	    if (dataSetInfo == null) {
-		dataSetInfo = cardInfoWrapper.getDataSetByFid(
-			cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0));
-		if (! dataSetInfo.getDataSetName().equals(dsiName)) {
-		    String msg = "The wrong DataSet is selected for reading the stated DSI name + " + dsiName +".";
-		    throw new PrerequisitesNotSatisfiedException(msg);
+		dataSetInfo = cardInfoWrapper.getDataSetByName(dsiName);
+
+		if (dataSetInfo != null) {
+		    if (!cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().isEmpty()) {
+
+			byte[] path = dataSetInfo.getDataSetPath().getEfIdOrPath();
+			byte[] fid = Arrays.copyOfRange(path, path.length - 2, path.length);
+			if (!Arrays.equals(fid, cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0))) {
+			    String msg = "Wrong DataSet for reading the DSI " + dsiName + " is selected.";
+			    throw new PrerequisitesNotSatisfiedException(msg);
+			}
+		    }
+		} else {
+		    String msg = "The given DSIName does not related to any know DSI or DataSet.";
+		    throw new IncorrectParameterException(msg);
 		}
 	    }
 
-	    if (! Arrays.equals(dataSetInfo.getDataSetPath().getEfIdOrPath(),
-		    cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0))) {
-		String msg = "Wrong DataSet for reading the DSI " + dsiName + " is selected.";
-		throw new PrerequisitesNotSatisfiedException(msg);
-	    }
-
-	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DSIName cannot be found.");
 	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dsiName, NamedDataServiceActionName.DSI_READ);
 
 	    byte[] slotHandle = connectionHandle.getSlotHandle();

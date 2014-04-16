@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -136,6 +136,7 @@ import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
+
 
 /**
  *
@@ -275,7 +276,6 @@ public class TinySALTest {
 	assertEquals(cardApplicationPathResponse.getResult().getResultMajor(), ECardConstants.Major.OK);
 
 	// test nullpointer
-	cardApplicationPathType = new CardApplicationPathType();
 	cardApplicationPath.setCardAppPathRequest(null);
 	cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
 	assertEquals(cardApplicationPathResponse.getResult().getResultMajor(), ECardConstants.Major.ERROR);
@@ -342,7 +342,7 @@ public class TinySALTest {
 	// disconnect
 	CardApplicationDisconnect cardApplicationDisconnect = new CardApplicationDisconnect();
 	cardApplicationDisconnect.setConnectionHandle(result.getConnectionHandle());
-	CardApplicationDisconnectResponse cardApplicationDisconnectResponse = instance.cardApplicationDisconnect(cardApplicationDisconnect);
+	instance.cardApplicationDisconnect(cardApplicationDisconnect);
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
 
 	// test invalid connectionhandle
@@ -356,9 +356,9 @@ public class TinySALTest {
 	cardApplicationDisconnect = new CardApplicationDisconnect();
 	cardApplicationDisconnect.setConnectionHandle(result.getConnectionHandle());
 	cardApplicationDisconnect.getConnectionHandle().setSlotHandle(new byte[]{0x0, 0x0, 0x0});
-	cardApplicationDisconnectResponse = instance.cardApplicationDisconnect(cardApplicationDisconnect);
+	CardApplicationDisconnectResponse cardApplicationDisconnectResponse = instance.cardApplicationDisconnect(cardApplicationDisconnect);
 	assertEquals(ECardConstants.Major.ERROR, cardApplicationDisconnectResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, cardApplicationDisconnectResponse.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, cardApplicationDisconnectResponse.getResult().getResultMinor());
 
 	// test nullpointer
 	// connect to esign
@@ -431,7 +431,7 @@ public class TinySALTest {
 	cardApplicationList.getConnectionHandle().setIFDName("invalid");
 	cardApplicationListResponse = instance.cardApplicationList(cardApplicationList);
 	assertEquals(ECardConstants.Major.ERROR, cardApplicationListResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, cardApplicationListResponse.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, cardApplicationListResponse.getResult().getResultMinor());
 
 	// test nullpointer
 	cardApplicationList = new CardApplicationList();
@@ -444,20 +444,20 @@ public class TinySALTest {
     /**
      * Test of cardApplicationCreate method, of class TinySAL.
      */
-    @Test(enabled=false)    
+    @Test(enabled=false)
     public void testCardApplicationCreate() {
 	System.out.println("cardApplicationCreate");
-	
+
 	List<ConnectionHandleType> cHandles = instance.getConnectionHandles();
 	byte[] appName = {(byte)0x74, (byte)0x65, (byte)0x73, (byte)0x74};
-	
+
 	CardApplicationCreate parameters = new CardApplicationCreate();
 	parameters.setConnectionHandle(cHandles.get(0));
 	parameters.setCardApplicationName(appName);
 
-        AccessControlListType cardApplicationACL = new AccessControlListType();
+	AccessControlListType cardApplicationACL = new AccessControlListType();
 	parameters.setCardApplicationACL(cardApplicationACL);
-	
+
 	CardApplicationCreateResponse result = instance.cardApplicationCreate(parameters);
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
 
@@ -478,39 +478,40 @@ public class TinySALTest {
 	cardApplicationList.setConnectionHandle(cHandles.get(0));
 	CardApplicationListResponse cardApplicationListResponse = instance.cardApplicationList(cardApplicationList);
 
-        Iterator<byte[]> it = cardApplicationListResponse.getCardApplicationNameList().getCardApplicationName().iterator();
-        boolean appFound = false;
+	Iterator<byte[]> it = cardApplicationListResponse.getCardApplicationNameList().getCardApplicationName().iterator();
+	boolean appFound = false;
 
-        try {
-            while (it.hasNext()) {
-                byte[] val = it.next();
+	try {
+	    while (it.hasNext()) {
+		byte[] val = it.next();
 
-                if (Arrays.equals(val, appName))
-                    appFound = true;
-            }
+		if (Arrays.equals(val, appName)) {
+		    appFound = true;
+		}
+	    }
 
-            assertTrue(appFound);
-    
+	    assertTrue(appFound);
+
 	} catch (Exception e) {
 	    assertTrue(appFound);
 	    System.out.println(e);
-        } 
+	}
     }
 
     /**
      * Test of cardApplicationDelete method, of class TinySAL.
      */
-    @Test(enabled=false)    
+    @Test(enabled=false)
     public void testCardApplicationDelete() {
 	System.out.println("cardApplicationDelete");
 
 	List<ConnectionHandleType> cHandles = instance.getConnectionHandles();
 	byte[] appName = {(byte)0x74, (byte)0x65, (byte)0x73, (byte)0x74};
-	
+
 	CardApplicationDelete parameters = new CardApplicationDelete();
 	parameters.setConnectionHandle(cHandles.get(0));
 	parameters.setCardApplicationName(appName);
-    	
+
 	CardApplicationDeleteResponse result = instance.cardApplicationDelete(parameters);
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
 
@@ -531,60 +532,61 @@ public class TinySALTest {
 	cardApplicationList.setConnectionHandle(cHandles.get(0));
 	CardApplicationListResponse cardApplicationListResponse = instance.cardApplicationList(cardApplicationList);
 
-        Iterator<byte[]> it = cardApplicationListResponse.getCardApplicationNameList().getCardApplicationName().iterator();
-        boolean appFound = false;
+	Iterator<byte[]> it = cardApplicationListResponse.getCardApplicationNameList().getCardApplicationName().iterator();
+	boolean appFound = false;
 
-        try {
-            while (it.hasNext()) {
-                byte[] val = it.next();
+	try {
+	    while (it.hasNext()) {
+		byte[] val = it.next();
 
-                if (Arrays.equals(val, appName))
-                    appFound = true;
-            }
+		if (Arrays.equals(val, appName)) {
+		    appFound = true;
+		}
+	    }
 
-            assertTrue(!appFound);
-    
+	    assertTrue(!appFound);
+
 	} catch (Exception e) {
 	    assertTrue(!appFound);
 	    System.out.println(e);
-        } 
+	}
     }
 
     /**
      * Test of cardApplicationServiceList method, of class TinySAL.
      */
-    @Test(enabled=false)    
+    @Test(enabled=false)
     public void testCardApplicationServiceList() {
 	System.out.println("cardApplicationServiceList");
 	CardApplicationServiceList parameters = new CardApplicationServiceList();
-	
-        // get path to esign
+
+	// get path to esign
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
 	cardApplicationPathType.setCardApplication(appIdentifier_ESIGN);
 	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
 	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
-	
+
 	assertTrue(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().size() > 0);
 	assertEquals(cardApplicationPathResponse.getResult().getResultMajor(), ECardConstants.Major.OK);
 
 	// connect to esign
 	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
 	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
-	
+
 	CardApplicationConnectResponse result = instance.cardApplicationConnect(cardApplicationConnect);
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
 	assertEquals(appIdentifier_ESIGN, result.getConnectionHandle().getCardApplication());
 
 	parameters.setConnectionHandle(result.getConnectionHandle());
-	
+
 	CardApplicationServiceListResponse resultServiceList = instance.cardApplicationServiceList(parameters);
-        CardApplicationServiceNameList cardApplicationServiceNameList = resultServiceList.getCardApplicationServiceNameList();
+	CardApplicationServiceNameList cardApplicationServiceNameList = resultServiceList.getCardApplicationServiceNameList();
 
 	assertEquals(ECardConstants.Major.OK, resultServiceList.getResult().getResultMajor());
-	assertTrue(cardApplicationServiceNameList.getCardApplicationServiceName().size() == 0); 
+	assertTrue(cardApplicationServiceNameList.getCardApplicationServiceName().isEmpty());
     }
-    
+
     /**
      * Test of cardApplicationServiceCreate method, of class TinySAL.
      */
@@ -621,32 +623,32 @@ public class TinySALTest {
     /**
      * Test of cardApplicationServiceDescribe method, of class TinySAL.
      */
-    @Test(enabled=false)    
+    @Test(enabled=false)
     public void testCardApplicationServiceDescribe() {
 	System.out.println("cardApplicationServiceDescribe");
 	CardApplicationServiceDescribe parameters = new CardApplicationServiceDescribe();
 
-        // get path to esign
+	// get path to esign
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
 	cardApplicationPathType.setCardApplication(appIdentifier_ESIGN);
 	cardApplicationPath.setCardAppPathRequest(cardApplicationPathType);
 	CardApplicationPathResponse cardApplicationPathResponse = instance.cardApplicationPath(cardApplicationPath);
-	
+
 	assertTrue(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().size() > 0);
 	assertEquals(cardApplicationPathResponse.getResult().getResultMajor(), ECardConstants.Major.OK);
 
 	// connect to esign
 	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
 	cardApplicationConnect.setCardApplicationPath(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
-	
+
 	CardApplicationConnectResponse result = instance.cardApplicationConnect(cardApplicationConnect);
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
 	assertEquals(appIdentifier_ESIGN, result.getConnectionHandle().getCardApplication());
 
 	parameters.setConnectionHandle(result.getConnectionHandle());
-	parameters.setCardApplicationServiceName("testService"); 
-	
+	parameters.setCardApplicationServiceName("testService");
+
 	CardApplicationServiceDescribeResponse resultServiceDescribe = instance.cardApplicationServiceDescribe(parameters);
 	assertEquals(ECardConstants.Major.OK, resultServiceDescribe.getResult().getResultMajor());
     }
@@ -698,7 +700,7 @@ public class TinySALTest {
 	dataSetList.setConnectionHandle(wrongConnectionHandle);
 	dataSetListResponse = instance.dataSetList(dataSetList);
 	assertEquals(ECardConstants.Major.ERROR, dataSetListResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, dataSetListResponse.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, dataSetListResponse.getResult().getResultMinor());
 
 	// test null connectionhandle
 	dataSetList = new DataSetList();
@@ -713,10 +715,10 @@ public class TinySALTest {
     /**
      * Test of dataSetCreate method, of class TinySAL.
      */
-    @Test(enabled=false)    
+    @Test(enabled=false)
     public void testDataSetCreate() {
 	System.out.println("dataSetCreate");
-	
+
 	DataSetCreate parameters = new DataSetCreate();
 
 	// get path to esign
@@ -733,7 +735,7 @@ public class TinySALTest {
 	CardApplicationConnectResponse result = instance.cardApplicationConnect(cardApplicationConnect);
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
 
-        AccessControlListType accessControlList = new AccessControlListType();
+	AccessControlListType accessControlList = new AccessControlListType();
 
 	parameters.setConnectionHandle(result.getConnectionHandle());
 
@@ -743,25 +745,25 @@ public class TinySALTest {
 
 	DataSetCreateResponse resultDataSetCreate = instance.dataSetCreate(parameters);
 	assertEquals(ECardConstants.Major.OK, resultDataSetCreate.getResult().getResultMajor());
-	
+
 	// list datasets of esign
 	DataSetList dataSetList = new DataSetList();
 	dataSetList.setConnectionHandle(result.getConnectionHandle());
 	DataSetListResponse dataSetListResponse = instance.dataSetList(dataSetList);
-		
-        Iterator<String> it = dataSetListResponse.getDataSetNameList().getDataSetName().iterator();
-        boolean appFound = false;
 
-        while (it.hasNext()) {
-                String val = it.next();
+	Iterator<String> it = dataSetListResponse.getDataSetNameList().getDataSetName().iterator();
+	boolean appFound = false;
 
-                if (val.equals(dataSetName))
-                    appFound = true;
+	while (it.hasNext()) {
+	    String val = it.next();
 
-        }
-        
-        assertTrue(appFound);
-	assertEquals(ECardConstants.Major.OK, dataSetListResponse.getResult().getResultMajor());	
+	    if (val.equals(dataSetName)) {
+		appFound = true;
+	    }
+	}
+
+	assertTrue(appFound);
+	assertEquals(ECardConstants.Major.OK, dataSetListResponse.getResult().getResultMajor());
     }
 
     /**
@@ -817,16 +819,16 @@ public class TinySALTest {
 	dataSetSelect.setDataSetName("EF.C.CH.AUT");
 	dataSetSelectResponse = instance.dataSetSelect(dataSetSelect);
 	assertEquals(ECardConstants.Major.ERROR, dataSetSelectResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, dataSetSelectResponse.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, dataSetSelectResponse.getResult().getResultMinor());
     }
 
     /**
      * Test of dataSetDelete method, of class TinySAL.
      */
-    @Test(enabled=false)    
+    @Test(enabled=false)
     public void testDataSetDelete() {
 	System.out.println("dataSetDelete");
-	
+
 	DataSetDelete parameters = new DataSetDelete();
 
 	// get path to esign
@@ -850,34 +852,34 @@ public class TinySALTest {
 
 	DataSetDeleteResponse resultDataSetDelete = instance.dataSetDelete(parameters);
 	assertEquals(ECardConstants.Major.OK, resultDataSetDelete.getResult().getResultMajor());
-	
+
 	// list datasets of esign
 	DataSetList dataSetList = new DataSetList();
 	dataSetList.setConnectionHandle(result.getConnectionHandle());
 	DataSetListResponse dataSetListResponse = instance.dataSetList(dataSetList);
-		
-        Iterator<String> it = dataSetListResponse.getDataSetNameList().getDataSetName().iterator();
-        boolean appFound = false;
 
-        while (it.hasNext()) {
-                String val = it.next();
+	Iterator<String> it = dataSetListResponse.getDataSetNameList().getDataSetName().iterator();
+	boolean appFound = false;
 
-                if (val.equals(dataSetName))
-                    appFound = true;
+	while (it.hasNext()) {
+	    String val = it.next();
 
-        }
-        
-        assertTrue(!appFound);
-	assertEquals(ECardConstants.Major.OK, dataSetListResponse.getResult().getResultMajor());	
+	    if (val.equals(dataSetName)) {
+		appFound = true;
+	    }
+	}
+
+	assertTrue(!appFound);
+	assertEquals(ECardConstants.Major.OK, dataSetListResponse.getResult().getResultMajor());
     }
 
     /**
      * Test of dsiList method, of class TinySAL.
      */
-    @Test(enabled=false)    
+    @Test(enabled=false)
     public void testDsiList() {
 	System.out.println("dsiList");
-	
+
 	// get path to esign
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
@@ -899,15 +901,15 @@ public class TinySALTest {
 
 	Assert.assertTrue(dataSetListResponse.getDataSetNameList().getDataSetName().size() > 0);
 	assertEquals(ECardConstants.Major.OK, dataSetListResponse.getResult().getResultMajor());
-	
-        String dataSetName = dataSetListResponse.getDataSetNameList().getDataSetName().get(0);
-		
+
+	String dataSetName = dataSetListResponse.getDataSetNameList().getDataSetName().get(0);
+
 	DSIList parameters = new DSIList();
 	parameters.setConnectionHandle(result.getConnectionHandle());
-	
+
 	DSIListResponse resultDSIList = instance.dsiList(parameters);
 	assertEquals(ECardConstants.Major.OK, resultDSIList.getResult().getResultMajor());
-	assertTrue(resultDSIList.getDSINameList().getDSIName().size() == 0);
+	assertTrue(resultDSIList.getDSINameList().getDSIName().isEmpty());
     }
 
     /**
@@ -938,19 +940,19 @@ public class TinySALTest {
 
 	Assert.assertTrue(dataSetListResponse.getDataSetNameList().getDataSetName().size() > 0);
 	assertEquals(ECardConstants.Major.OK, dataSetListResponse.getResult().getResultMajor());
-	
-        String dataSetName = dataSetListResponse.getDataSetNameList().getDataSetName().get(0);
-        byte[] dsiContent = {(byte)0x74, (byte)0x65, (byte)0x73, (byte)0x74};
-        String dsiName = "DsiTest";
-        PathType dsiPath = new PathType();
-        byte[] dsiEF = {(byte)0x03, (byte)0x00};
-        dsiPath.setEfIdOrPath(dsiEF);
 
-	DSICreate parameters = new DSICreate();	
+	String dataSetName = dataSetListResponse.getDataSetNameList().getDataSetName().get(0);
+	byte[] dsiContent = {(byte)0x74, (byte)0x65, (byte)0x73, (byte)0x74};
+	String dsiName = "DsiTest";
+	PathType dsiPath = new PathType();
+	byte[] dsiEF = {(byte)0x03, (byte)0x00};
+	dsiPath.setEfIdOrPath(dsiEF);
+
+	DSICreate parameters = new DSICreate();
 	parameters.setConnectionHandle(result.getConnectionHandle());
 	parameters.setDSIContent(dsiContent);
 	parameters.setDSIName(dsiName);
-	
+
 	DSICreateResponse resultDSICreate = instance.dsiCreate(parameters);
 	assertEquals(ECardConstants.Major.OK, resultDSICreate.getResult().getResultMajor());
 
@@ -958,24 +960,24 @@ public class TinySALTest {
 
 	DSIList parametersDSI = new DSIList();
 	parametersDSI.setConnectionHandle(result.getConnectionHandle());
-	
+
 	DSIListResponse resultDSIList = instance.dsiList(parametersDSI);
 	assertEquals(ECardConstants.Major.OK, resultDSIList.getResult().getResultMajor());
 
 	// try to find new DSI
 
-        Iterator<String> it = resultDSIList.getDSINameList().getDSIName().iterator();
-        boolean dsiFound = false;
+	Iterator<String> it = resultDSIList.getDSINameList().getDSIName().iterator();
+	boolean dsiFound = false;
 
-        while (it.hasNext()) {
-                String val = it.next();
+	while (it.hasNext()) {
+	    String val = it.next();
 
-                if (val.equals(dsiName))
-                    dsiFound = true;
+	    if (val.equals(dsiName)) {
+		dsiFound = true;
+	    }
+	}
 
-        }
-        
-        assertTrue(dsiFound);
+	assertTrue(dsiFound);
     }
 
     /**
@@ -1006,9 +1008,9 @@ public class TinySALTest {
 
 	Assert.assertTrue(dataSetListResponse.getDataSetNameList().getDataSetName().size() > 0);
 	assertEquals(ECardConstants.Major.OK, dataSetListResponse.getResult().getResultMajor());
-	
-        String dataSetName = dataSetListResponse.getDataSetNameList().getDataSetName().get(0);
-        String dsiName = "dsiTest";
+
+	String dataSetName = dataSetListResponse.getDataSetNameList().getDataSetName().get(0);
+	String dsiName = "dsiTest";
 
 	DSIDelete parameters = new DSIDelete();
 	parameters.setConnectionHandle(result.getConnectionHandle());
@@ -1021,24 +1023,24 @@ public class TinySALTest {
 
 	DSIList parametersDSI = new DSIList();
 	parametersDSI.setConnectionHandle(result.getConnectionHandle());
-	
+
 	DSIListResponse resultDSIList = instance.dsiList(parametersDSI);
 	assertEquals(ECardConstants.Major.OK, resultDSIList.getResult().getResultMajor());
 
 	// try to find new DSI
 
-        Iterator<String> it = resultDSIList.getDSINameList().getDSIName().iterator();
-        boolean dsiFound = false;
+	Iterator<String> it = resultDSIList.getDSINameList().getDSIName().iterator();
+	boolean dsiFound = false;
 
-        while (it.hasNext()) {
-                String val = it.next();
+	while (it.hasNext()) {
+	    String val = it.next();
 
-                if (val.equals(dsiName))
-                    dsiFound = true;
+	    if (val.equals(dsiName)) {
+		dsiFound = true;
+	    }
+	}
 
-        }
-        
-        assertTrue(!dsiFound);
+	assertTrue(!dsiFound);
     }
 
     /**
@@ -1122,7 +1124,7 @@ public class TinySALTest {
 	dsiRead.setDSIName(null);
 	dsiReadResponse = instance.dsiRead(dsiRead);
 	assertEquals(ECardConstants.Major.ERROR, dsiReadResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, dsiReadResponse.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, dsiReadResponse.getResult().getResultMinor());
     }
 
     /**
@@ -1205,7 +1207,6 @@ public class TinySALTest {
     /**
      * Test of didList method, of class TinySAL.
      */
-
     @Test
     public void testDidList() {
 	System.out.println("didList");
@@ -1278,8 +1279,7 @@ public class TinySALTest {
 	didList.getConnectionHandle().setIFDName("invalid");
 	didListResponse = instance.didList(didList);
 	assertEquals(ECardConstants.Major.ERROR, didListResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, didListResponse.getResult().getResultMinor());
-
+	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, didListResponse.getResult().getResultMinor());
     }
 
     /**
@@ -1327,12 +1327,12 @@ public class TinySALTest {
 	Assert.assertTrue(didListResponse.getDIDNameList().getDIDName().size() > 0);
 	assertEquals(ECardConstants.Major.OK, result.getResult().getResultMajor());
 
-        String didName = didListResponse.getDIDNameList().getDIDName().get(0);
-	
+	String didName = didListResponse.getDIDNameList().getDIDName().get(0);
+
 	DIDGet parameters = new DIDGet();
 	parameters.setDIDName(didName);
 	parameters.setConnectionHandle(result.getConnectionHandle());
-	
+
 	DIDGetResponse resultDIDGet = instance.didGet(parameters);
 	assertEquals(ECardConstants.Major.OK, resultDIDGet.getResult().getResultMajor());
 	assertTrue(resultDIDGet.getDIDStructure() != null);
@@ -1440,7 +1440,7 @@ public class TinySALTest {
 	aclList.setTargetName(targetName);
 	aclListResponse = instance.aclList(aclList);
 	assertEquals(ECardConstants.Major.ERROR, aclListResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, aclListResponse.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.App.INCORRECT_PARM, aclListResponse.getResult().getResultMinor());
     }
 
     /**

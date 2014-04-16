@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -37,7 +37,7 @@ public final class UnknownConnectionHandleException extends ECardException {
     private static final long serialVersionUID = 1L;
 
     public UnknownConnectionHandleException(ConnectionHandleType handle) {
-	makeException(this, ECardConstants.Minor.SAL.UNKNOWN_HANDLE, HandlePrinter.printHandle(handle));
+	makeException(this, ECardConstants.Minor.App.INCORRECT_PARM, HandlePrinter.printHandle(handle));
     }
 
 }

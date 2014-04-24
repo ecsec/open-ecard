@@ -84,6 +84,8 @@ import org.openecard.common.util.StringUtils;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.soap.SOAPHeader;
 import org.openecard.ws.soap.SOAPMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -97,6 +99,8 @@ import static org.testng.Assert.assertTrue;
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class AndroidMarshallerTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(AndroidMarshallerTest.class);
 
     private static final String getRecognitionTreeResponseXML;
     private static final String establishContextXML;
@@ -141,6 +145,12 @@ public class AndroidMarshallerTest {
 	} catch (IOException ex) {
 	    throw new RuntimeException(ex);
 	}
+    }
+
+    private static void marshalLog(Object o) {
+	StringWriter w = new StringWriter();
+	JAXB.marshal(o, w);
+	logger.debug(w.toString());
     }
 
     private static String loadXML(String resourcePath) throws IOException {
@@ -214,8 +224,8 @@ public class AndroidMarshallerTest {
 	FileOutputStream fos = new FileOutputStream(f);
 	File f2 = new File("cifAM.xml");
 	FileOutputStream fos2 = new FileOutputStream(f2);
-	JAXB.marshal(cardInfoJM, fos);
-	JAXB.marshal(cardInfo, fos2);*/
+	marshalLog(cardInfoJM, fos);
+	marshalLog(cardInfo, fos2);*/
     }
 
     @Test
@@ -363,7 +373,7 @@ public class AndroidMarshallerTest {
 	elem.setTextContent("messageid");
 
 	String responseStr = m.doc2str(msg.getDocument());
-	System.out.println(responseStr);
+	logger.debug(responseStr);
 
     }
 
@@ -377,7 +387,7 @@ public class AndroidMarshallerTest {
 	Document d = m.marshal(internationalStringType);
 
 	String s = m.doc2str(d);
-	System.out.println(s);
+	logger.debug(s);
     }
 
     @Test
@@ -394,7 +404,7 @@ public class AndroidMarshallerTest {
 	Document d = m.marshal(r);
 
 	String s = m.doc2str(d);
-	System.out.println(s);
+	logger.debug(s);
     }
 
     @Test
@@ -430,12 +440,12 @@ public class AndroidMarshallerTest {
 	establishChannelInput.getAny().add(e);
 	establishChannel.setAuthenticationProtocolData(establishChannelInput);
 
-	JAXB.marshal(establishChannel, System.out);
+	marshalLog(establishChannel);
 	WSMarshaller m = new AndroidMarshaller();
 	Document doc = m.marshal(establishChannel);
 
 	String s = m.doc2str(doc);
-	System.out.println(s);
+	logger.debug(s);
     }
 
     @Test
@@ -465,16 +475,16 @@ public class AndroidMarshallerTest {
 
 	didAuthResponse.setAuthenticationProtocolData(didAuthenticationDataType);
 
-	JAXB.marshal(didAuthResponse, System.out);
+	marshalLog(didAuthResponse);
 
 	Document doc = m.marshal(didAuthResponse);
 
 	String s = m.doc2str(doc);
-	System.out.println(s);
+	logger.debug(s);
 	StringReader sr = new StringReader(s);
 	DIDAuthenticateResponse didaresp = JAXB.unmarshal(sr, DIDAuthenticateResponse.class);
 
-	JAXB.marshal(didaresp, System.out);
+	marshalLog(didaresp);
     }
 
     @Test
@@ -503,16 +513,16 @@ public class AndroidMarshallerTest {
 
 	didAuthResponse.setAuthenticationProtocolData(didAuthenticationDataType);
 
-	JAXB.marshal(didAuthResponse, System.out);
+	marshalLog(didAuthResponse);
 
 	Document doc = m.marshal(didAuthResponse);
 
 	String s = m.doc2str(doc);
-	System.out.println(s);
+	logger.debug(s);
 	StringReader sr = new StringReader(s);
 	DIDAuthenticateResponse didaresp = JAXB.unmarshal(sr, DIDAuthenticateResponse.class);
 
-	JAXB.marshal(didaresp, System.out);
+	marshalLog(didaresp);
     }
 
     @Test
@@ -557,16 +567,16 @@ public class AndroidMarshallerTest {
 
 	didAuthResponse.setAuthenticationProtocolData(didAuthenticationDataType);
 
-	JAXB.marshal(didAuthResponse, System.out);
+	marshalLog(didAuthResponse);
 
 	Document doc = m.marshal(didAuthResponse);
 
 	String s = m.doc2str(doc);
-	System.out.println(s);
+	logger.debug(s);
 	StringReader sr = new StringReader(s);
 	DIDAuthenticateResponse didaresp = JAXB.unmarshal(sr, DIDAuthenticateResponse.class);
 
-	JAXB.marshal(didaresp, System.out);
+	marshalLog(didaresp);
     }
 
     @Test
@@ -619,7 +629,7 @@ public class AndroidMarshallerTest {
 	assertEquals(eac2input.getContentAsString("Certificate"),
 		"7F218201427F4E81FB5F290100420E5A5A4456434141544130303030357F494F060A04007F0007020202020386410470C07FAA329E927D961F490F5430B395EECF3D2A538194D8B637DE0F8ACF60A9031816AC51B594097EB211FB8F55FAA8507D5800EF7B94E024F9630314116C755F200B5A5A444B423230303033557F4C12060904007F0007030102025305000301DF045F25060100000601085F2406010000070001655E732D060904007F00070301030280207C1901932DB75D08539F2D4A27C938F79E69E083C442C068B299D185BC8AFA78732D060904007F0007030103018020BFD2A6A2E4237948D7DCCF7975D71D40F15307AA59F580A48777CBEED093F54B5F3740618F584E4293F75DDE8977311694B69A3ED73BBE43FDAFEC11B7ECF054F84ACB1231615338CE8D6EC332480883E14E0664950F85134290DD716B7C153232BC96");
 
-	JAXB.marshal(didAuthenticate, System.out);
+	marshalLog(didAuthenticate);
 
 	d = m.str2doc(didAuthenticateCA);
 
@@ -638,7 +648,7 @@ public class AndroidMarshallerTest {
 	// assertEquals(eac2input.getContentAsString("Certificate"),
 	// "7F2181E47F4E819D5F290100420D5A5A43564341415441303030317F494F060A04007F0007020202020386410452DD32EAFE1FBBB4000CD9CE75F66636CFCF1EDD44F7B1EDAE25B84193DA04A91C77EE87F5C8F959ED276200DE33AB574CE9801135FF4497A37162B7C8548A0C5F200E5A5A4456434141544130303030357F4C12060904007F0007030102025305700301FFB75F25060100000601015F24060100010003015F37406F13AE9A6F4EDDB7839FF3F04D71E0DC377BC4B08FAD295EED241B524328AD0730EB553497B4FB66E9BB7AB90815F04273F09E751D7FD4B861439B4EE65381C3");
 
-	JAXB.marshal(didAuthenticate, System.out);
+	marshalLog(didAuthenticate);
     }
 
     @Test
@@ -660,12 +670,12 @@ public class AndroidMarshallerTest {
 	r.setResultMessage(internationalStringType);
 	initializeFrameworkResponse.setResult(r);
 
-	JAXB.marshal(initializeFrameworkResponse, System.out);
+	marshalLog(initializeFrameworkResponse);
 	WSMarshaller m = new AndroidMarshaller();
 	Document d = m.marshal(initializeFrameworkResponse);
 
 	String s = m.doc2str(d);
-	System.out.println(s);
+	logger.debug(s);
     }
 
     @Test
@@ -693,7 +703,7 @@ public class AndroidMarshallerTest {
 	    Document d = m.marshal(tree);
 
 	    String s = m.doc2str(d);
-	    System.out.println(s);
+	    logger.debug(s);
 	} else {
 	    throw new Exception("Object should be an instace of GetRecognitionTreeResponse");
 	}
@@ -721,7 +731,7 @@ public class AndroidMarshallerTest {
 	Document d = m.marshal(getStatus);
 
 	String s = m.doc2str(d);
-	System.out.println(s);
+	logger.debug(s);
     }
 
     @Test
@@ -752,7 +762,7 @@ public class AndroidMarshallerTest {
 	Document d = m.marshal(w);
 
 	String s = m.doc2str(d);
-	System.out.println(s);
+	logger.debug(s);
     }
 
     @Test
@@ -762,7 +772,7 @@ public class AndroidMarshallerTest {
 	if (!(o instanceof AddonSpecification)) {
 	    throw new Exception("Object should be an instace of AddonSpecification");
 	}
-	JAXB.marshal(o, System.out);
+	marshalLog(o);
     }
 
 }

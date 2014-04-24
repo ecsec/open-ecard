@@ -164,7 +164,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
  */
 public class AndroidMarshaller implements WSMarshaller {
 
-    private static final Logger _logger = LoggerFactory.getLogger(AndroidMarshaller.class);
+    private static final Logger logger = LoggerFactory.getLogger(AndroidMarshaller.class);
 
     private static final String iso = "iso:";
     private static final String dss = "dss:";
@@ -197,7 +197,7 @@ public class AndroidMarshaller implements WSMarshaller {
 
 	    soapFactory = MessageFactory.newInstance();
 	} catch (Exception ex) {
-	    ex.printStackTrace(System.err);
+	    logger.error(ex.getMessage(), ex);
 	    System.exit(1); // non recoverable
 	}
     }
@@ -1529,7 +1529,7 @@ public class AndroidMarshaller implements WSMarshaller {
 		} else if (parser.getName().equals("MutualAuthMarker")) {
 		    didMarker.setMutualAuthMarker((MutualAuthMarkerType) this.parseMarker(parser, MutualAuthMarkerType.class));
 		} else {
-		    _logger.error(parser.getName() + " not yet implemented");
+		    logger.error(parser.getName() + " not yet implemented");
 		}
 	    }
 	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("DIDMarker")));

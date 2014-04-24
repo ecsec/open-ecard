@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.openecard.apache.http.Header;
 import org.openecard.apache.http.HttpEntity;
 import org.openecard.apache.http.HttpException;
@@ -70,15 +71,22 @@ public class ResourceContext {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceContext.class);
 
+    private final ClientCertTlsClient tlsClient;
     private final TlsClientProtocol tlsClientProto;
     private final List<Pair<URL, Certificate>> certs;
 
     private InputStream stream;
     private String data;
 
-    protected ResourceContext(@Nonnull TlsClientProtocol tlsClientProto, @Nonnull List<Pair<URL, Certificate>> certs) {
+    protected ResourceContext(@Nullable ClientCertTlsClient tlsClient, @Nullable TlsClientProtocol tlsClientProto,
+	    @Nonnull List<Pair<URL, Certificate>> certs) {
+	this.tlsClient = tlsClient;
 	this.tlsClientProto = tlsClientProto;
 	this.certs = certs;
+    }
+
+    public ClientCertTlsClient getTlsClient() {
+	return tlsClient;
     }
 
     public TlsClientProtocol getTlsClientProto() {
@@ -198,7 +206,7 @@ public class ResourceContext {
 	    CertificateValidator.VerifierResult verifyResult = v.validate(url, tlsAuth.getServerCertificate());
 	    if (verifyResult == CertificateValidator.VerifierResult.FINISH) {
 		List<Pair<URL, Certificate>> pairs = Collections.unmodifiableList(serverCerts);
-		return new ResourceContext(h, pairs);
+		return new ResourceContext(tlsClient, h, pairs);
 	    }
 
 	    StreamHttpClientConnection conn = new StreamHttpClientConnection(h.getInputStream(), h.getOutputStream());
@@ -242,7 +250,7 @@ public class ResourceContext {
 
 	    // follow next redirect or finish?
 	    if (finished) {
-		ResourceContext result = new ResourceContext(h, serverCerts);
+		ResourceContext result = new ResourceContext(tlsClient, h, serverCerts);
 		LimitedInputStream is = new LimitedInputStream(entity.getContent());
 		result.setStream(is);
 		return result;

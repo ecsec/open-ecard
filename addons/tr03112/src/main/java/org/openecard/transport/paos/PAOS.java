@@ -281,7 +281,13 @@ public class PAOS {
 
 	try {
 	    // loop and send makes a computer happy
+	    boolean firstLoop = true;
 	    while (true) {
+		if (! firstLoop && tlsHandler.isSameChannel()) {
+		    throw new PAOSException("PAOS connection closed and reestablishment is forbidden.");
+		}
+		firstLoop = false;
+
 		// set up connection to PAOS endpoint
 		StreamHttpClientConnection conn = openHttpStream();
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -64,6 +64,7 @@ public class TlsConnectionHandler {
     private String sessionId;
     private ClientCertTlsClient tlsClient;
     private boolean usesTls = false;
+    private boolean sameChannel = false;
 
     public TlsConnectionHandler(Dispatcher dispatcher, TCTokenRequest tokenRequest, ConnectionHandleType handle)
 	    throws ConnectionError {
@@ -83,12 +84,12 @@ public class TlsConnectionHandler {
 		cardType = tokenRequest.getCardType();
 	    }
 	    // eID servers usually have problems with sni, so disable it for them
+	    // TODO: check occasionally if this still holds
 	    boolean noSni = "http://bsi.bund.de/cif/npa.xml".equals(cardType);
 
 	    sessionId = token.getSessionIdentifier();
 	    serverAddress = new URL(token.getServerAddress());
 	    String serverHost = serverAddress.getHost();
-	    String secProto = token.getPathSecurityProtocol();
 
 	    serverAddress = fixServerAddress(serverAddress, sessionId);
 
@@ -108,29 +109,36 @@ public class TlsConnectionHandler {
 		usesTls = true;
 	    }
 
-	    // Set up TLS connection
-	    if (secProto.equals("urn:ietf:rfc:4279") || secProto.equals("urn:ietf:rfc:5487")) {
-		DynamicAuthentication tlsAuth = new DynamicAuthentication();
-		tlsAuth.setHostname(serverHost);
-		// FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
-		//tlsAuth.setCertificateVerifier(new JavaSecVerifier());
-		byte[] psk = token.getPathSecurityParameters().getPSK();
-		TlsPSKIdentity pskId = new TlsPSKIdentityImpl(sessionId.getBytes(), psk);
-		tlsClient = new ClientCertPSKTlsClient(pskId, noSni ? null : serverHost);
-		tlsClient.setAuthentication(tlsAuth);
-		tlsClient.setClientVersion(ProtocolVersion.TLSv12);
-	    } else if (secProto.equals("urn:ietf:rfc:4346")) {
-		DynamicAuthentication tlsAuth = new DynamicAuthentication();
-		tlsAuth.setHostname(serverHost);
-		// use a smartcard for client authentication if needed
-		tlsAuth.setCredentialFactory(makeSmartCardCredential());
-		// FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
-		//tlsAuth.setCertificateVerifier(new JavaSecVerifier());
-		tlsClient = new ClientCertDefaultTlsClient(noSni ? null : serverHost);
-		tlsClient.setAuthentication(tlsAuth);
-		tlsClient.setClientVersion(ProtocolVersion.TLSv12);
+	    String secProto = token.getPathSecurityProtocol();
+	    // use same channel as demanded in TR-03124 sec. 2.4.3
+	    if (secProto == null) {
+		sameChannel = true;
+		tlsClient = tokenRequest.getTokenContext().getTlsClient();
 	    } else {
-		throw new ConnectionError("Unknow security protocol '" + secProto + "' requested.");
+		// Set up TLS connection
+		if (secProto.equals("urn:ietf:rfc:4279") || secProto.equals("urn:ietf:rfc:5487")) {
+		    DynamicAuthentication tlsAuth = new DynamicAuthentication();
+		    tlsAuth.setHostname(serverHost);
+		    // FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
+		    //tlsAuth.setCertificateVerifier(new JavaSecVerifier());
+		    byte[] psk = token.getPathSecurityParameters().getPSK();
+		    TlsPSKIdentity pskId = new TlsPSKIdentityImpl(sessionId.getBytes(), psk);
+		    tlsClient = new ClientCertPSKTlsClient(pskId, noSni ? null : serverHost);
+		    tlsClient.setAuthentication(tlsAuth);
+		    tlsClient.setClientVersion(ProtocolVersion.TLSv12);
+		} else if (secProto.equals("urn:ietf:rfc:4346")) {
+		    DynamicAuthentication tlsAuth = new DynamicAuthentication();
+		    tlsAuth.setHostname(serverHost);
+		    // use a smartcard for client authentication if needed
+		    tlsAuth.setCredentialFactory(makeSmartCardCredential());
+		    // FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
+		    //tlsAuth.setCertificateVerifier(new JavaSecVerifier());
+		    tlsClient = new ClientCertDefaultTlsClient(noSni ? null : serverHost);
+		    tlsClient.setAuthentication(tlsAuth);
+		    tlsClient.setClientVersion(ProtocolVersion.TLSv12);
+		} else {
+		    throw new ConnectionError("Unknow security protocol '" + secProto + "' requested.");
+		}
 	    }
 
 	} catch (MalformedURLException ex) {
@@ -140,6 +148,10 @@ public class TlsConnectionHandler {
 
     public boolean usesTls() {
 	return usesTls;
+    }
+
+    public boolean isSameChannel() {
+	return sameChannel;
     }
 
     public URL getServerAddress() {
@@ -171,15 +183,22 @@ public class TlsConnectionHandler {
     }
     public TlsClientProtocol createTlsConnection(ProtocolVersion tlsVersion)
 	    throws IOException, URISyntaxException {
-	Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
-	tlsClient.setClientVersion(tlsVersion);
-	// TLS
-	InputStream sockIn = socket.getInputStream();
-	OutputStream sockOut = socket.getOutputStream();
-	TlsClientProtocol handler = new TlsClientProtocol(sockIn, sockOut);
-	handler.connect(tlsClient);
+	if (sameChannel) {
+	    // if something fucks up the channel we are out of luck creating a new one as the TR demands to use the
+	    // exact same channel
+	    return tokenRequest.getTokenContext().getTlsClientProto();
+	} else {
+	    // normal procedure, create a new channel
+	    Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
+	    tlsClient.setClientVersion(tlsVersion);
+	    // TLS
+	    InputStream sockIn = socket.getInputStream();
+	    OutputStream sockOut = socket.getOutputStream();
+	    TlsClientProtocol handler = new TlsClientProtocol(sockIn, sockOut);
+	    handler.connect(tlsClient);
 
-	return handler;
+	    return handler;
+	}
     }
 
     private static URL fixServerAddress(URL serverAddress, String sessionIdentifier) throws MalformedURLException {

@@ -22,9 +22,6 @@
 
 package org.openecard.binding.tctoken;
 
-import org.openecard.binding.tctoken.TCTokenVerifier;
-import org.openecard.binding.tctoken.TCTokenException;
-import org.openecard.binding.tctoken.TCTokenParser;
 import generated.TCTokenType;
 import java.io.InputStream;
 import java.util.List;
@@ -37,8 +34,8 @@ import org.testng.annotations.Test;
  */
 public class TCTokenVerifierTest {
 
-    private TCTokenType token;
-    private TCTokenVerifier verifier;
+    private final TCTokenType token;
+    private final TCTokenVerifier verifier;
 
     public TCTokenVerifierTest() throws Exception {
 	InputStream testFile = FileUtils.resolveResourceAsStream(getClass(), "TCToken.xml");
@@ -81,14 +78,14 @@ public class TCTokenVerifierTest {
     @Test(expectedExceptions = TCTokenException.class)
     public void testVerifyPathSecurityProtocol() throws Exception {
 	token.setPathSecurityProtocol("urn:ietf:rfc:42791");
-	verifier.verifyPathSecurityProtocol();
+	verifier.verifyPathSecurity();
     }
 
     @Test
     public void testVerifyPathSecurityParameters() throws Exception {
 	token.setPathSecurityProtocol("urn:ietf:rfc:4279");
 	token.setPathSecurityParameters(null);
-	verifier.verifyPathSecurityParameters();
+	verifier.verifyPathSecurity();
     }
 
     @Test(expectedExceptions = TCTokenException.class)
@@ -96,7 +93,7 @@ public class TCTokenVerifierTest {
 	TCTokenType.PathSecurityParameters psp = new TCTokenType.PathSecurityParameters();
 	psp.setPSK(null);
 	token.setPathSecurityParameters(psp);
-	verifier.verifyPathSecurityParameters();
+	verifier.verifyPathSecurity();
     }
 
 }

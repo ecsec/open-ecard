@@ -39,7 +39,7 @@ public class TCTokenContext extends ResourceContext {
     private final TCTokenType token;
 
     private TCTokenContext(TCTokenType token, ResourceContext base) {
-	super(base.getTlsClientProto(), base.getCerts());
+	super(base.getTlsClient(), base.getTlsClientProto(), base.getCerts());
 	this.token = token;
     }
 
@@ -55,7 +55,7 @@ public class TCTokenContext extends ResourceContext {
     }
 
     public static TCTokenContext generateTCToken(String data) throws TCTokenException {
-	return generateTCToken(data, new ResourceContext(null, Collections.EMPTY_LIST));
+	return generateTCToken(data, new ResourceContext(null, null, Collections.EMPTY_LIST));
     }
 
     private static TCTokenContext generateTCToken(String data, ResourceContext base) throws TCTokenException {

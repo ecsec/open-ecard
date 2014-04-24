@@ -60,8 +60,7 @@ public class TCTokenVerifier {
 	    verifyRefreshAddress();
 	    verifyCommunicationErrorAddress();
 	    verifyBinding();
-	    verifyPathSecurityParameters();
-	    verifyPathSecurityProtocol();
+	    verifyPathSecurity();
 	} catch (TCTokenException e) {
 	    throw new TCTokenException("TCToken is malformed", e);
 	}
@@ -146,37 +145,35 @@ public class TCTokenVerifier {
     }
 
     /**
-     * Verifies the PathSecurity-Protocol element of the TCToken.
+     * Verifies the PathSecurity-Protocol and PathSecurity-Parameters element of the TCToken.
      *
      * @throws TCTokenException
      */
-    public void verifyPathSecurityProtocol() throws TCTokenException {
+    public void verifyPathSecurity() throws TCTokenException {
 	try {
-	    String value = token.getPathSecurityProtocol();
-	    if (! checkEmpty(value)) {
-		checkEqualOR(value, "urn:ietf:rfc:4346", "urn:ietf:rfc:4279", "urn:ietf:rfc:5487");
+	    String proto = token.getPathSecurityProtocol();
+	    TCTokenType.PathSecurityParameters psp = token.getPathSecurityParameters();
+	    if (! checkEmpty(proto)) {
+		checkEqualOR(proto, "urn:ietf:rfc:4346", "urn:ietf:rfc:4279", "urn:ietf:rfc:5487");
+		if ("urn:ietf:rfc:4279".equals(proto)
+			|| "urn:ietf:rfc:5487".equals(proto)) {
+		    if (! checkEmpty(psp)) {
+			assertRequired(psp.getPSK());
+		    }
+		}
+		return;
+	    }
+
+	    // TR-03124 sec. 2.4.3
+	    // If no PathSecurity-Protocol/PSK is given in the TC Token, the same TLS channel as established to
+	    // retrieve the TC Token MUST be used for the PAOS connection, i.e. a new channel MUST NOT be established.
+	    if (checkEmpty(proto) || checkEmpty(psp)) {
+		// make sure both are empty to prevent confusion
+		token.setPathSecurityProtocol(null);
+		token.setPathSecurityParameters(null);
 	    }
 	} catch (TCTokenException e) {
 	    throw new TCTokenException("Malformed PathSecurityProtocol");
-	}
-    }
-
-    /**
-     * Verifies the PathSecurity-Parameter element of the TCToken.
-     *
-     * @throws TCTokenException
-     */
-    public void verifyPathSecurityParameters() throws TCTokenException {
-	try {
-	    if ("urn:ietf:rfc:4279".equals(token.getPathSecurityProtocol())
-		    || "urn:ietf:rfc:5487".equals(token.getPathSecurityProtocol())) {
-		TCTokenType.PathSecurityParameters psp = token.getPathSecurityParameters();
-		if (! checkEmpty(psp)) {
-		    assertRequired(psp.getPSK());
-		}
-	    }
-	} catch (TCTokenException e) {
-	    throw new TCTokenException("Malformed PathSecurityParameters");
 	}
     }
 

@@ -25,20 +25,23 @@ package org.openecard.control.binding.http;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
+import java.util.List;
 import org.openecard.apache.http.ConnectionReuseStrategy;
+import org.openecard.apache.http.HttpRequestInterceptor;
 import org.openecard.apache.http.HttpResponseFactory;
+import org.openecard.apache.http.HttpResponseInterceptor;
+import org.openecard.apache.http.impl.DefaultBHttpServerConnection;
 import org.openecard.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.openecard.apache.http.impl.DefaultHttpResponseFactory;
-import org.openecard.apache.http.impl.DefaultHttpServerConnection;
-import org.openecard.apache.http.params.BasicHttpParams;
-import org.openecard.apache.http.params.HttpParams;
 import org.openecard.apache.http.protocol.BasicHttpContext;
-import org.openecard.apache.http.protocol.BasicHttpProcessor;
 import org.openecard.apache.http.protocol.HttpProcessor;
 import org.openecard.apache.http.protocol.HttpRequestHandler;
-import org.openecard.apache.http.protocol.HttpRequestHandlerRegistry;
 import org.openecard.apache.http.protocol.HttpService;
 import org.openecard.apache.http.protocol.ImmutableHttpProcessor;
+import org.openecard.apache.http.protocol.UriHttpRequestHandlerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,10 +62,12 @@ public class HTTPService implements Runnable {
      *
      * @param port Port
      * @param handler Handler
-     * @param interceptors Interceptors
+     * @param reqInterceptors
+     * @param respInterceptors
      * @throws Exception
      */
-    public HTTPService(int port, HttpRequestHandler handler, BasicHttpProcessor interceptors) throws Exception {
+    public HTTPService(int port, HttpRequestHandler handler, List<HttpRequestInterceptor> reqInterceptors,
+	    List<HttpResponseInterceptor> respInterceptors) throws Exception {
 	thread = new Thread(this, "Open-eCard Localhost-Binding");
 	server = new ServerSocket(port, backlog, InetAddress.getByName("127.0.0.1"));
 	logger.debug("Starting HTTPBinding on port {}", server.getLocalPort());
@@ -72,16 +77,15 @@ public class HTTPService implements Runnable {
 	// Response factory
 	HttpResponseFactory responseFactory = new DefaultHttpResponseFactory();
 	// Interceptors
-	HttpProcessor httpProcessor = new ImmutableHttpProcessor(interceptors, interceptors);
+	HttpProcessor httpProcessor = new ImmutableHttpProcessor(reqInterceptors, respInterceptors);
 
 	// Set up handler registry
-	HttpRequestHandlerRegistry handlerRegistry = new HttpRequestHandlerRegistry();
+	UriHttpRequestHandlerMapper handlerRegistry = new UriHttpRequestHandlerMapper();
 	logger.debug("Add handler [{}] for ID [{}]", new Object[]{handler.getClass().getCanonicalName(), "*"});
 	handlerRegistry.register("*", handler);
 
 	// create service instance
-	HttpParams params = new BasicHttpParams();
-	service = new HttpService(httpProcessor, connectionReuseStrategy, responseFactory, handlerRegistry, params);
+	service = new HttpService(httpProcessor, connectionReuseStrategy, responseFactory, handlerRegistry);
     }
 
     /**
@@ -104,10 +108,13 @@ public class HTTPService implements Runnable {
 
     @Override
     public void run() {
-	while (!Thread.interrupted()) {
+	while (! Thread.interrupted()) {
 	    try {
-		final DefaultHttpServerConnection connection = new DefaultHttpServerConnection();
-		connection.bind(this.server.accept(), new BasicHttpParams());
+		final DefaultBHttpServerConnection connection;
+		CharsetDecoder dec = Charset.forName("UTF-8").newDecoder();
+		CharsetEncoder enc = Charset.forName("UTF-8").newEncoder();
+		connection = new DefaultBHttpServerConnection(8192, dec, enc, null);
+		connection.bind(this.server.accept());
 
 		new Thread() {
 		    @Override

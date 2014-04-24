@@ -23,8 +23,12 @@
 package org.openecard.control.binding.http;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.openecard.addon.AddonManager;
-import org.openecard.apache.http.protocol.BasicHttpProcessor;
+import org.openecard.apache.http.HttpRequestInterceptor;
+import org.openecard.apache.http.HttpResponseInterceptor;
 import org.openecard.control.binding.http.common.DocumentRoot;
 import org.openecard.control.binding.http.handler.HttpAppPluginActionHandler;
 import org.openecard.control.binding.http.interceptor.CORSResponseInterceptor;
@@ -44,7 +48,8 @@ public class HTTPBinding {
     public static final int DEFAULT_PORT = 24727;
     private final int port;
     private final DocumentRoot documentRoot;
-    private BasicHttpProcessor interceptors;
+    private List<HttpRequestInterceptor> reqInterceptors;
+    private List<HttpResponseInterceptor> respInterceptors;
     private HTTPService service;
     private AddonManager addonManager;
 
@@ -88,27 +93,30 @@ public class HTTPBinding {
 	documentRoot = new DocumentRoot(documentRootPath, listFile);
     }
 
-    /**
-     * Sets the interceptors.
-     *
-     * @param interceptors Interceptors
-     */
-    public void setInterceptors(BasicHttpProcessor interceptors) {
-	this.interceptors = interceptors;
+    public void setRequestInterceptors(List<HttpRequestInterceptor> reqInterceptors) {
+	this.reqInterceptors = reqInterceptors;
+    }
+
+    public void setResponseInterceptors(List<HttpResponseInterceptor> respInterceptors) {
+	this.respInterceptors = respInterceptors;
     }
 
     public void start() throws Exception {
 	// Add default interceptors if none are given
-	if (interceptors == null || interceptors.getRequestInterceptorCount() == 0 || interceptors.getResponseInterceptorCount() == 0) {
-	    interceptors = new BasicHttpProcessor();
-	    interceptors.addInterceptor(new StatusLineResponseInterceptor());
-	    interceptors.addInterceptor(new ErrorResponseInterceptor(documentRoot, "/templates/error.html"));
-	    interceptors.addInterceptor(new CORSResponseInterceptor());
+	if (reqInterceptors == null) {
+	    reqInterceptors = Collections.emptyList();
+	}
+	if (respInterceptors == null) {
+	    respInterceptors = new ArrayList<>(3);
+	    respInterceptors.add(new StatusLineResponseInterceptor());
+	    respInterceptors.add(new ErrorResponseInterceptor(documentRoot, "/templates/error.html"));
+	    respInterceptors.add(new CORSResponseInterceptor());
 	    //FIXME the CORSRequestInterceptor consumes the request entity
 	    //interceptors.addInterceptor(new CORSRequestInterceptor());
 	}
 
-	service = new HTTPService(port, new HttpAppPluginActionHandler(addonManager), interceptors);
+	HttpAppPluginActionHandler handler = new HttpAppPluginActionHandler(addonManager);
+	service = new HTTPService(port, handler, reqInterceptors, respInterceptors);
 	service.start();
     }
 

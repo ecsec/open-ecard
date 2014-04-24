@@ -61,8 +61,21 @@ public class TCTokenAction implements AppPluginAction {
     public BindingResult execute(Body body, Map<String, String> parameters, List<Attachment> attachments) {
 	BindingResult response;
 	try {
-	    TCTokenRequest tcTokenRequest = TCTokenRequest.convert(parameters);
-	    response = tokenHandler.handleActivate(tcTokenRequest);
+	    try {
+		TCTokenRequest tcTokenRequest = TCTokenRequest.convert(parameters);
+		response = tokenHandler.handleActivate(tcTokenRequest);
+	    } catch (CommunicationError ex) {
+		String msg = "Redirect Address: {}\nCause: {}";
+		logger.debug(msg, ex.communicationErrorAddress, ex.getMessage());
+		response = ex.getResult();
+		logger.info("Authentication failed, redirecting to error address.");
+	    } catch (TCTokenException ex) {
+		logger.info(ex.getMessage(), ex);
+		// TODO: translate message
+		String msg = "Could not fetch or create TCToken.";
+		response = new BindingResult(BindingResultCode.RESOURCE_UNAVAILABLE);
+		response.setResultMessage(msg);
+	    }
 	} catch (Exception e) {
 	    response = new BindingResult(BindingResultCode.INTERNAL_ERROR);
 	    logger.error(e.getMessage(), e);

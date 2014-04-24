@@ -64,8 +64,9 @@ public class TCTokenRequest {
      * @param parameters The request parameters.
      * @return A TCTokenRequest wrapping the parameters.
      * @throws TCTokenException Thrown in case not all required parameters are available.
+     * @throws CommunicationError Thrown when the eService has internal problems and wants the client to abort.
      */
-    public static TCTokenRequest convert(Map<String, String> parameters) throws TCTokenException {
+    public static TCTokenRequest convert(Map<String, String> parameters) throws TCTokenException, CommunicationError {
 	TCTokenRequest result;
 	if (parameters.containsKey("tcTokenURL")) {
 	    result = parseTCTokenRequestURI(parameters);
@@ -81,7 +82,8 @@ public class TCTokenRequest {
     }
 
 
-    private static TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries) throws TCTokenException {
+    private static TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries) throws TCTokenException,
+	    CommunicationError {
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 
 	for (Map.Entry<String, String> next : queries.entrySet()) {
@@ -140,7 +142,8 @@ public class TCTokenRequest {
 	return tcTokenRequest;
     }
 
-    private static TCTokenRequest parseObjectURI(Map<String, String> queries) throws TCTokenException {
+    private static TCTokenRequest parseObjectURI(Map<String, String> queries) throws TCTokenException,
+	    CommunicationError {
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 
 	for (Map.Entry<String, String> next : queries.entrySet()) {

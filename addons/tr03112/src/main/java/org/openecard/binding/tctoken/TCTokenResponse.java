@@ -45,6 +45,7 @@ public class TCTokenResponse extends BindingResult {
 
     private Result result;
     private URL refreshAddress;
+    private URL communicationErrorAddress;
     private Future<StartPAOSResponse> bindingTask;
 
     /**
@@ -86,6 +87,26 @@ public class TCTokenResponse extends BindingResult {
 	this.refreshAddress = refreshAddress;
     }
 
+    public void setRefreshAddress(String refreshAddress) throws MalformedURLException {
+	if (refreshAddress != null) {
+	    this.refreshAddress = new URL(refreshAddress);
+	}
+    }
+
+    public URL getCommunicationErrorAddress() {
+	return communicationErrorAddress;
+    }
+
+    public void setCommunicationErrorAddress(URL communicationErrorAddress) {
+	this.communicationErrorAddress = communicationErrorAddress;
+    }
+
+    public void setCommunicationErrorAddress(String communicationErrorAddress) throws MalformedURLException {
+	if (communicationErrorAddress != null) {
+	    this.communicationErrorAddress = new URL(communicationErrorAddress);
+	}
+    }
+
     public void setBindingTask(Future<StartPAOSResponse> bindingTask) {
 	this.bindingTask = bindingTask;
     }
@@ -94,26 +115,35 @@ public class TCTokenResponse extends BindingResult {
 	return bindingTask;
     }
 
-    public void finishResponse() throws MalformedURLException, UnsupportedEncodingException {
-	BindingResult httpResponse = new BindingResult(BindingResultCode.WRONG_PARAMETER);
+    public void finishResponse() throws MalformedURLException, UnsupportedEncodingException, CommunicationError {
+	// TODO: localize these error messages
+	BindingResult httpResponse = new BindingResult();
 
-	if (result.getResultMajor().equals(ECardConstants.Major.OK)) {
-	    if (getRefreshAddress() != null) {
-		URL refreshURL = new URL(getRefreshAddress().toString() + "&ResultMajor=ok");
-		setResultCode(BindingResultCode.REDIRECT);
-		getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, refreshURL.toString());
+	if (getRefreshAddress() == null) {
+	    if (getCommunicationErrorAddress() == null) {
+		httpResponse.setResultCode(BindingResultCode.WRONG_PARAMETER);
+		httpResponse.setResultMessage("No refresh or error address could be determined.");
 	    } else {
-		httpResponse.setResultCode(BindingResultCode.INTERNAL_ERROR);
+		String msg = "No refresh address could be determined.";
+		throw new CommunicationError(getCommunicationErrorAddress().toString(), "communicationError", msg);
 	    }
 	} else {
-	    if (getRefreshAddress() != null) {
-		String encodedResultMinor = URLDecoder.decode(result.getResultMinor(), "UTF-8");
-	    }
-	    if (result.getResultMessage().getValue() != null) {
-		setResultCode(BindingResultCode.WRONG_PARAMETER);
-		setResultMessage(result.getResultMessage().getValue());
+	    // address available
+	    if (ECardConstants.Major.OK.equals(result.getResultMajor())) {
+		setResultCode(BindingResultCode.REDIRECT);
+		URL refreshURL = TCTokenHacks.addParameterToUrl(getRefreshAddress(), "ResultMajor", "ok");
+		getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, refreshURL.toString());
 	    } else {
-		httpResponse.setResultCode(BindingResultCode.INTERNAL_ERROR);
+		setResultCode(BindingResultCode.REDIRECT);
+		URL refreshURL = TCTokenHacks.addParameterToUrl(getRefreshAddress(), "ResultMajor", "error");
+		// TODO: set ResultMinor
+		String encodedResultMinor = URLDecoder.decode(result.getResultMinor(), "UTF-8");
+		refreshURL = TCTokenHacks.addParameterToUrl(refreshURL, "ResultMinor", encodedResultMinor);
+		getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, refreshURL.toString());
+
+		if (result.getResultMessage().getValue() != null) {
+		    setResultMessage(result.getResultMessage().getValue());
+		}
 	    }
 	}
     }

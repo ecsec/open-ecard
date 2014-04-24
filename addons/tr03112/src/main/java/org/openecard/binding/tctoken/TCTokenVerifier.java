@@ -24,6 +24,7 @@ package org.openecard.binding.tctoken;
 
 import generated.TCTokenType;
 import java.net.URL;
+import javax.annotation.Nonnull;
 
 
 /**
@@ -40,8 +41,22 @@ public class TCTokenVerifier {
      *
      * @param token Token
      */
-    public TCTokenVerifier(TCTokenType token) {
+    public TCTokenVerifier(@Nonnull TCTokenType token) {
 	this.token = token;
+    }
+
+    /**
+     * Checks if the token is a response to an error.
+     * These kind of token only contain the CommunicationErrorAdress field.
+     *
+     * @return {@code true} if this is an error token, {@code false} otherwise.
+     */
+    public boolean isErrorToken() {
+	if (token.getCommunicationErrorAddress() != null) {
+	    // refresh address is essential, if that one is missing, it must be an error token
+	    return token.getRefreshAddress() == null;
+	}
+	return false;
     }
 
     /**
@@ -50,10 +65,6 @@ public class TCTokenVerifier {
      * @throws TCTokenException
      */
     public void verify() throws TCTokenException {
-	if (token == null) {
-	    throw new IllegalStateException();
-	}
-
 	try {
 	    verifyServerAddress();
 	    verifySessionIdentifier();

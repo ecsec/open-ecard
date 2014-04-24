@@ -45,7 +45,7 @@ public class TCTokenFactoryTest {
 
     @Test(expectedExceptions = {ResourceException.class})
     public void testGenerateTCToken_TCTokenType() throws TCTokenException, IOException, ResourceException,
-	    ValidationError {
+	    ValidationError, CommunicationError {
 	URL tcTokenURL = FileUtils.resolveResourceAsURL(TCTokenFactoryTest.class, "TCToken.xml");
 	// should fail, since a non-https-URL is used
 	TCTokenContext.generateTCToken(tcTokenURL);

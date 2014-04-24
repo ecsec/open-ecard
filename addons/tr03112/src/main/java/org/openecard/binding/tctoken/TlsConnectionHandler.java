@@ -202,28 +202,8 @@ public class TlsConnectionHandler {
     }
 
     private static URL fixServerAddress(URL serverAddress, String sessionIdentifier) throws MalformedURLException {
-	URL realServerAddress = serverAddress;
 	// FIXME: remove this hilariously stupid bull*#@%&/ code which satisfies a mistake introduced by the AA
-	String queryPart = serverAddress.getQuery();
-	if (queryPart == null || ! (queryPart.contains("?sessionid=") || queryPart.contains("&sessionid="))) {
-	    String sAddr = serverAddress.toString();
-	    // fix path of url
-	    if (serverAddress.getPath().isEmpty()) {
-		sAddr += "/";
-	    }
-	    // add parameter
-	    if (sAddr.endsWith("?")) {
-		sAddr += "sessionid=" + sessionIdentifier;
-	    } else if (sAddr.contains("?")) {
-		sAddr += "&sessionid=" + sessionIdentifier;
-	    } else {
-		sAddr += "?sessionid=" + sessionIdentifier;
-	    }
-	    realServerAddress = new URL(sAddr);
-	}
-	// END: ugly fix
-
-	return realServerAddress;
+	return TCTokenHacks.addParameterToUrl(serverAddress, "sessionid", sessionIdentifier);
     }
 
     private CredentialFactory makeSmartCardCredential() {

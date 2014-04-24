@@ -48,17 +48,18 @@ public class TCTokenContext extends ResourceContext {
     }
 
     public static TCTokenContext generateTCToken(URL tcTokenURL) throws TCTokenException, IOException,
-	    ResourceException, ValidationError {
+	    ResourceException, ValidationError, CommunicationError {
 	// Get TCToken from the given url
 	ResourceContext ctx = ResourceContext.getStream(tcTokenURL);
 	return generateTCToken(ctx.getData(), ctx);
     }
 
-    public static TCTokenContext generateTCToken(String data) throws TCTokenException {
+    public static TCTokenContext generateTCToken(String data) throws TCTokenException, CommunicationError {
 	return generateTCToken(data, new ResourceContext(null, null, Collections.EMPTY_LIST));
     }
 
-    private static TCTokenContext generateTCToken(String data, ResourceContext base) throws TCTokenException {
+    private static TCTokenContext generateTCToken(String data, ResourceContext base) throws TCTokenException,
+	    CommunicationError {
 	// FIXME: Hack
 	data = TCTokenHacks.fixObjectTag(data);
 	// FIXME: Hack
@@ -73,10 +74,18 @@ public class TCTokenContext extends ResourceContext {
 	}
 
 	// Verify the TCToken
-	TCTokenVerifier ver = new TCTokenVerifier(tokens.get(0));
+	TCTokenType token = tokens.get(0);
+	TCTokenVerifier ver = new TCTokenVerifier(token);
+	boolean isError = ver.isErrorToken();
+	if (isError) {
+	    // TODO: find out what is the correct minor type
+	    String msg = "eService indicated an error.";
+	    throw new CommunicationError(token.getCommunicationErrorAddress(), null, msg);
+	}
+
 	ver.verify();
 
-	return new TCTokenContext(tokens.get(0), base);
+	return new TCTokenContext(token, base);
     }
 
 }

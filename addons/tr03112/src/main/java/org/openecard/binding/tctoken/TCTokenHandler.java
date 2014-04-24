@@ -165,6 +165,7 @@ public class TCTokenHandler {
 
 	    TCTokenResponse response = new TCTokenResponse();
 	    response.setRefreshAddress(new URL(token.getRefreshAddress()));
+	    response.setCommunicationErrorAddress(token.getCommunicationErrorAddress());
 	    response.setResult(WSHelper.makeResultOK());
 
 	    String binding = token.getBinding();
@@ -229,9 +230,10 @@ public class TCTokenHandler {
      * @throws MalformedURLException
      * @throws UnsupportedEncodingException
      * @throws InvalidRedirect
+     * @throws CommunicationError Thrown when the process should be terminated after a specified error.
      */
     public TCTokenResponse handleActivate(TCTokenRequest request) throws MalformedURLException,
-	    UnsupportedEncodingException, InvalidRedirect, IOException {
+	    UnsupportedEncodingException, InvalidRedirect, IOException, CommunicationError {
 	final DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	boolean performChecks = isPerformTR03112Checks(request);
 	if (! performChecks) {
@@ -248,6 +250,8 @@ public class TCTokenHandler {
 
 	ConnectionHandleType connectionHandle = null;
 	TCTokenResponse response = new TCTokenResponse();
+	response.setRefreshAddress(request.getTCToken().getRefreshAddress());
+	response.setCommunicationErrorAddress(request.getTCToken().getCommunicationErrorAddress());
 
 	byte[] requestedContextHandle = request.getContextHandle();
 	String ifdName = request.getIFDName();
@@ -280,7 +284,6 @@ public class TCTokenHandler {
 	try {
 	    // process binding and follow redirect addresses afterwards
 	    response = processBinding(request, connectionHandle);
-	    response = determineRefreshURL(request, response);
 	    return response;
 	} catch (DispatcherException w) {
 	    logger.error(w.getMessage(), w);
@@ -299,6 +302,7 @@ public class TCTokenHandler {
 	    return response;
 	} finally {
 	    // fill in values, so it is usuable by the transport module
+	    response = determineRefreshURL(request, response);
 	    response.finishResponse();
 	}
     }
@@ -335,6 +339,9 @@ public class TCTokenHandler {
 	    throws InvalidRedirect, IOException {
 	try {
 	    URL endpoint = response.getRefreshAddress();
+	    if (endpoint == null) {
+		throw new IOException("No endpoint address available for redirect detection.");
+	    }
 	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 	    // omit checks completely if this is an object tag activation
@@ -380,7 +387,7 @@ public class TCTokenHandler {
      */
     private static boolean isPerformTR03112Checks(TCTokenRequest tcTokenRequest) {
 	boolean activationChecks = true;
-	String refreshAddress = tcTokenRequest.getTCToken().getRefreshAddress().toString();
+	String refreshAddress = tcTokenRequest.getTCToken().getRefreshAddress();
 	URL tokenUrl = tcTokenRequest.getTCTokenURL();
 	// disable checks when not using the nPA
 	if (! tcTokenRequest.getCardType().equals("http://bsi.bund.de/cif/npa.xml")) {

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -53,7 +53,7 @@ public final class CAKey {
     private static final Logger logger = LoggerFactory.getLogger(CAKey.class);
     private AsymmetricKeyParameter sk;
     private AsymmetricKeyParameter pk;
-    private CADomainParameter cdp;
+    private final CADomainParameter cdp;
 
     /**
      * Creates a new key for CA.
@@ -167,7 +167,7 @@ public final class CAKey {
 		throw new RuntimeException(e);
 	    }
 	} else if (cdp.isECDH()) {
-	    byte[] compKey = ((ECPublicKeyParameters) pk).getQ().getX().toBigInteger().toByteArray();
+	    byte[] compKey = ((ECPublicKeyParameters) pk).getQ().getAffineXCoord().toBigInteger().toByteArray();
 	    return ByteUtils.cutLeadingNullByte(compKey);
 	} else {
 	    throw new IllegalArgumentException();

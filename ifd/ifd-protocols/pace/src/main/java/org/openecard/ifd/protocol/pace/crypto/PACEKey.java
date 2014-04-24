@@ -54,7 +54,7 @@ public final class PACEKey {
 
     private AsymmetricKeyParameter sk;
     private AsymmetricKeyParameter pk;
-    private PACEDomainParameter pdp;
+    private final PACEDomainParameter pdp;
 
     /**
      * Creates a new key for PACE.
@@ -167,7 +167,7 @@ public final class PACEKey {
 		throw new RuntimeException(ex);
 	    }
 	} else if (pdp.isECDH()) {
-	    byte[] compKey = ((ECPublicKeyParameters) pk).getQ().getX().toBigInteger().toByteArray();
+	    byte[] compKey = ((ECPublicKeyParameters) pk).getQ().getAffineXCoord().toBigInteger().toByteArray();
 	    return ByteUtils.cutLeadingNullByte(compKey);
 	} else {
 	    throw new IllegalArgumentException();

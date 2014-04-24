@@ -43,8 +43,8 @@ public final class PACECryptoSuite {
 
     private static final Logger logger = LoggerFactory.getLogger(PACECryptoSuite.class.getName());
 
-    private PACESecurityInfos psi;
-    private PACEDomainParameter domainParameter;
+    private final PACESecurityInfos psi;
+    private final PACEDomainParameter domainParameter;
 
     /**
      * Create a new crypto suite for PACE.
@@ -99,7 +99,7 @@ public final class PACECryptoSuite {
 		ECPoint q = p.getCurve().decodePoint(pk);
 		ECPoint k = q.multiply(d);
 
-		return ByteUtils.cutLeadingNullBytes(k.getX().toBigInteger().toByteArray());
+		return ByteUtils.cutLeadingNullBytes(k.normalize().getXCoord().toBigInteger().toByteArray());
 	    } else {
 		throw new UnsupportedOperationException("Not implemented yet!");
 	    }

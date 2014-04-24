@@ -23,7 +23,7 @@
 package org.openecard.sal.protocol.eac.gui;
 
 import org.openecard.common.I18n;
-import org.openecard.common.sal.anytype.PACEMarkerType;
+import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;

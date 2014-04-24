@@ -46,6 +46,7 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
+import org.openecard.common.util.HandlerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +63,7 @@ public class ACLResolver {
 
     public ACLResolver(Dispatcher dispatcher, ConnectionHandleType handle) {
 	this.dispatcher = dispatcher;
-	this.handle = WSHelper.copyHandle(handle);
+	this.handle = HandlerUtils.copyHandle(handle);
     }
 
     public List<DIDStructureType> getUnsatisfiedDIDs(TargetNameType target) throws DispatcherException, WSException,
@@ -83,7 +84,7 @@ public class ACLResolver {
     private List<DIDStructureType> getMissingDids(List<AccessRuleType> acls, TargetNameType target)
 	    throws DispatcherException, InvocationTargetException, SecurityConditionUnsatisfiable, WSException {
 	// find the sign acl
-	ArrayList<AccessRuleType> tmpAcls = new ArrayList<AccessRuleType>();
+	ArrayList<AccessRuleType> tmpAcls = new ArrayList<>();
 	for (AccessRuleType next : acls) {
 	    if (target.getDIDName() != null) {
 		CryptographicServiceActionName action = next.getAction().getCryptographicServiceAction();
@@ -105,7 +106,7 @@ public class ACLResolver {
 	    }
 	}
 
-	ArrayList<DIDStructureType> result = new ArrayList<DIDStructureType>();
+	ArrayList<DIDStructureType> result = new ArrayList<>();
 	for (AccessRuleType acl : tmpAcls) {
 	    // get the most suitable DID in the tree
 	    SecurityConditionType cond = normalize(acl.getSecurityCondition());
@@ -117,7 +118,7 @@ public class ACLResolver {
 	}
 
 	// remove duplicates
-	TreeSet<String> newDids = new TreeSet<String>();
+	TreeSet<String> newDids = new TreeSet<>();
 	Iterator<DIDStructureType> it = result.iterator();
 	while (it.hasNext()) {
 	    // this code bluntly assumes, that did names are unique per cardinfo file
@@ -155,7 +156,7 @@ public class ACLResolver {
 	    throws SecurityConditionUnsatisfiable {
 	// the condition at this place must be in the form (A & B & C) or simply (A)
 	if (conds.getAnd() != null) {
-	    ArrayList<DIDAuthenticationStateType> result = new ArrayList<DIDAuthenticationStateType>();
+	    ArrayList<DIDAuthenticationStateType> result = new ArrayList<>();
 	    for (SecurityConditionType cond : conds.getAnd().getSecurityCondition()) {
 		// add all authentication states
 		DIDAuthenticationStateType state = cond.getDIDAuthentication();
@@ -165,7 +166,7 @@ public class ACLResolver {
 	    }
 	    return result;
 	} else if (conds.getDIDAuthentication() != null) {
-	    ArrayList<DIDAuthenticationStateType> result = new ArrayList<DIDAuthenticationStateType>();
+	    ArrayList<DIDAuthenticationStateType> result = new ArrayList<>();
 	    result.add(conds.getDIDAuthentication());
 	    return result;
 	} else if ((conds.isAlways() != null && conds.isAlways()) ||
@@ -185,7 +186,7 @@ public class ACLResolver {
 
     private List<DIDStructureType> filterSatisfiedDIDs(List<DIDAuthenticationStateType> states)
 	    throws DispatcherException, InvocationTargetException, WSException {
-	ArrayList<DIDStructureType> result = new ArrayList<DIDStructureType>(states.size());
+	ArrayList<DIDStructureType> result = new ArrayList<>(states.size());
 
 	for (DIDAuthenticationStateType state : states) {
 	    if (state.isDIDState()) {

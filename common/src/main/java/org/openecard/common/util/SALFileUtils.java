@@ -88,7 +88,7 @@ public class SALFileUtils {
 	CardApplicationListResponse cardAppsResp = (CardApplicationListResponse) dispatcher.deliver(cardApps);
 	WSHelper.checkResult(cardAppsResp);
 
-	ConnectionHandleType handle2 = WSHelper.copyHandle(connectionHandle);
+	ConnectionHandleType handle2 = HandlerUtils.copyHandle(connectionHandle);
 	appPathReq = new CardApplicationPath();
 	pType = new CardApplicationPathType();
 	pType.setIFDName(handle2.getIFDName());

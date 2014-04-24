@@ -36,13 +36,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import org.openecard.addon.sal.SALProtocol;
-import org.openecard.common.WSHelper;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.sal.state.cif.DIDInfoWrapper;
 import org.openecard.common.sal.state.cif.DataSetInfoWrapper;
 import org.openecard.common.tlv.iso7816.FCP;
 import org.openecard.common.util.ByteArrayWrapper;
+import org.openecard.common.util.HandlerUtils;
 
 
 /**
@@ -61,12 +61,12 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
     }
 
     private final int serialNumber;
-    private final Set<DIDInfoType> authenticatedDIDs = new HashSet<DIDInfoType>();
+    private final Set<DIDInfoType> authenticatedDIDs = new HashSet<>();
 
     private final ConnectionHandleType handle;
 
     private final CardInfoWrapper infoObject;
-    private final Map<String, SALProtocol> protoObjects = new TreeMap<String, SALProtocol>();
+    private final Map<String, SALProtocol> protoObjects = new TreeMap<>();
     private FCP lastSelectedEfFCP;
 
     public CardStateEntry(ConnectionHandleType handle, CardInfoType cif) {
@@ -104,11 +104,11 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
     }
 
     public ConnectionHandleType handleCopy() {
-	return WSHelper.copyHandle(handle);
+	return HandlerUtils.copyHandle(handle);
     }
 
     public CardApplicationPathType pathCopy() {
-	return WSHelper.copyPath(handle);
+	return HandlerUtils.copyPath(handle);
     }
 
 

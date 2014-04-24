@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public class HTTPTemplate {
 
     private static final Logger _logger = LoggerFactory.getLogger(HTTPTemplate.class);
-    private HashMap<String, String> properties = new HashMap<String, String>();
+    private HashMap<String, String> properties = new HashMap<>();
     private String content;
 
     /**

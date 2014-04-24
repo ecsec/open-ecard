@@ -115,7 +115,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 		response.setEntity(entity);
 	    } else {
 		String rawQuery = requestURI.getRawQuery();
-		Map<String, String> queries = new HashMap<String, String>(0);
+		Map<String, String> queries = new HashMap<>(0);
 		if (rawQuery != null) {
 		    queries = HttpRequestLineUtils.transform(rawQuery);
 		}
@@ -182,25 +182,37 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	BindingResultCode resultCode = bindingResult.getResultCode();
 	logger.debug("Recieved BindingResult with ResultCode {}", resultCode);
 	HttpResponse response;
-	if (resultCode.equals(BindingResultCode.OK)) {
-	    response = new Http11Response(HttpStatus.SC_OK);
-	} else if (resultCode.equals(BindingResultCode.REDIRECT)) {
-	    response = new Http11Response(HttpStatus.SC_SEE_OTHER);
-	    String location = bindingResult.getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION);
-	    if (location != null && ! location.isEmpty()) {
-		response.addHeader(HeaderTypes.LOCATION.fieldName(), location);
-	    } else {
-		// redirect requires a location field
-		logger.error("No redirect address available in given BindingResult instance.");
+	switch (resultCode) {
+	    case OK:
+		response = new Http11Response(HttpStatus.SC_OK);
+		break;
+	    case REDIRECT:
+		response = new Http11Response(HttpStatus.SC_SEE_OTHER);
+		String location = bindingResult.getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION);
+		if (location != null && ! location.isEmpty()) {
+		    response.addHeader(HeaderTypes.LOCATION.fieldName(), location);
+		} else {
+		    // redirect requires a location field
+		    logger.error("No redirect address available in given BindingResult instance.");
+		    response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+		}
+		break;
+	    case WRONG_PARAMETER:
+		response = new Http11Response(HttpStatus.SC_BAD_REQUEST);
+		break;
+	    case INTERNAL_ERROR:
 		response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-	    }
-	} else if (resultCode.equals(BindingResultCode.WRONG_PARAMETER)) {
-	    response = new Http11Response(HttpStatus.SC_BAD_REQUEST);
-	} else if (resultCode.equals(BindingResultCode.INTERNAL_ERROR)) {
-	    response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-	} else {
-	    logger.error("Untreated result code: " + resultCode);
-	    response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+		break;
+	    case RESOURCE_UNAVAILABLE:
+		response = new Http11Response(HttpStatus.SC_NOT_FOUND);
+		break;
+	    case DEPENDING_HOST_UNREACHABLE:
+	    case MISSING_PARAMETER:
+	    case TIMEOUT:
+		// TODO: find HTTP codes for these codes
+	    default:
+		logger.error("Untreated result code: " + resultCode);
+		response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 	}
 	HttpEntity entity = createHTTPEntity(bindingResult);
 	response.setEntity(entity);

@@ -32,6 +32,11 @@
 	    <artifactId>bouncycastle</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
+	<dependency>
+	    <groupId>org.openecard.sal</groupId>
+	    <artifactId>sal-common</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
     </dependencies>
 
 </project>

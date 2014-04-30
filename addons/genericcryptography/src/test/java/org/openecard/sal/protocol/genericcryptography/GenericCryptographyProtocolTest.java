@@ -216,7 +216,7 @@ public class GenericCryptographyProtocolTest {
 	org.openecard.common.sal.anytype.CryptoMarkerType cryptoMarker =
 		new org.openecard.common.sal.anytype.CryptoMarkerType(
 			(CryptoMarkerType) didGetResponse.getDIDStructure().getDIDMarker());
-	assertEquals(cryptoMarker.getCertificateRef().getDataSetName(), "EF.C.CH.AUT");
+	assertEquals(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), "EF.C.CH.AUT");
     }
 
     /**
@@ -393,7 +393,7 @@ public class GenericCryptographyProtocolTest {
 	    DSIRead dsiRead = new DSIRead();
 	    dsiRead.setConnectionHandle(result.getConnectionHandle());
 	    dsiRead.getConnectionHandle().setCardApplication(cardApplication);
-	    dsiRead.setDSIName(cryptoMarker.getCertificateRef().getDataSetName());
+	    dsiRead.setDSIName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
 	    DSIReadResponse dsiReadResponse = instance.dsiRead(dsiRead);
 	    assertEquals(ECardConstants.Major.OK, dsiReadResponse.getResult().getResultMajor());
 	    assertTrue(dsiReadResponse.getDSIContent().length > 0);

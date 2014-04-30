@@ -62,6 +62,7 @@ import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
+import org.openecard.common.sal.anytype.CryptoMarkerType;
 import org.openecard.common.util.HandlerUtils;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.SALFileUtils;
@@ -234,36 +235,36 @@ public class GenericCryptoSignerFinder {
 		continue;
 	    }
 
-	    if (dataSetWithCert.containsKey(cryptoMarker.getCertificateRef().getDataSetName())) {
+	    if (dataSetWithCert.containsKey(cryptoMarker.getCertificateRefs().get(0).getDataSetName())) {
 		Pair<byte[], Boolean> certAndTlsAuth = dataSetWithCert.get(
-			cryptoMarker.getCertificateRef().getDataSetName());
+			cryptoMarker.getCertificateRefs().get(0).getDataSetName());
 		cardCert.setApplicationID(handle2.getCardApplication());
 		cardCert.setDIDName(didName);
-		cardCert.setDataSetName(cryptoMarker.getCertificateRef().getDataSetName());
+		cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
 		cardCert.setRawCertificate(certAndTlsAuth.p1);
 		remainingDIDs.add(cardCert);
 	    } else {
-		byte[] cert = readCertificate(cryptoMarker, dispatcher, handle);
+		byte[] cert = readCertificate(cryptoMarker, 0, dispatcher, handle);
 		if (cert == null) {
 		    // this means the certificate is not readable without authentication (or an error occured)
 		    // so save this in the list for later if there exists the possibility to select a certificate for
 		    // authentication.
 		    cardCert.setApplicationID(handle2.getCardApplication());
 		    cardCert.setDIDName(didName);
-		    cardCert.setDataSetName(cryptoMarker.getCertificateRef().getDataSetName());
+		    cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
 		    remainingDIDs.add(cardCert);
 		    Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, false);
-		    dataSetWithCert.put(cryptoMarker.getCertificateRef().getDataSetName(), certAndTLSAuth);
+		    dataSetWithCert.put(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), certAndTLSAuth);
 		} else if (containsAuthenticationCertificate(cert)) {
 		    // put certificates which are always readable always at the beginning of the list
 		    cardCert.setApplicationID(handle2.getCardApplication());
 		    cardCert.setDIDName(didName);
-		    cardCert.setDataSetName(cryptoMarker.getCertificateRef().getDataSetName());
+		    cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
 		    cardCert.setRawCertificate(cert);
 		    cardCert.setAlwaysReadable();
 		    remainingDIDs.add(0, cardCert);
 		    Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, true);
-		    dataSetWithCert.put(cryptoMarker.getCertificateRef().getDataSetName(), certAndTLSAuth);
+		    dataSetWithCert.put(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), certAndTLSAuth);
 		}
 	    }
 	}
@@ -375,14 +376,26 @@ public class GenericCryptoSignerFinder {
 	return false;
     }
 
-    private byte[] readCertificate(CryptoMarkerType cryptoMarker, Dispatcher dispatcher, ConnectionHandleType handle)
-	    throws DispatcherException, InvocationTargetException {
+    /**
+     * The method reads a given certificate file.
+     *
+     * @param cryptoMarker CryptoMarkerType object containing the certificate references.
+     * @param certNumber Number of the certificate in the list of certificate references in the CryptoMarkerType. Note:
+     * The list of certificate references starts with element 0.
+     * @param dispatcher Dispatcher for message delivery.
+     * @param handle SlotHandle which identifies the card and the terminal to use.
+     * @return A byte array containing the extracted certificate or NULL if an error occurred.
+     * @throws DispatcherException
+     * @throws InvocationTargetException
+     */
+    private byte[] readCertificate(CryptoMarkerType cryptoMarker, int certNumber, Dispatcher dispatcher,
+	    ConnectionHandleType handle) throws DispatcherException, InvocationTargetException {
 	try {
-	    handle = SALFileUtils.selectApplicationByDataSetName(cryptoMarker.getCertificateRef().getDataSetName(),
-		    dispatcher, handle);
+	    handle = SALFileUtils.selectApplicationByDataSetName(
+		    cryptoMarker.getCertificateRefs().get(certNumber).getDataSetName(), dispatcher, handle);
 	    // resolve acls of the certificate data set
 	    TargetNameType targetName = new TargetNameType();
-	    targetName.setDataSetName(cryptoMarker.getCertificateRef().getDataSetName());
+	    targetName.setDataSetName(cryptoMarker.getCertificateRefs().get(certNumber).getDataSetName());
 	    ACLResolver aclResolver = new ACLResolver(dispatcher, handle);
 	    List<DIDStructureType> didList = aclResolver.getUnsatisfiedDIDs(targetName);
 	    // no dids necessary to work with the certificate
@@ -390,11 +403,11 @@ public class GenericCryptoSignerFinder {
 		// select the certificate data set
 		DataSetSelect dSelect = new DataSetSelect();
 		dSelect.setConnectionHandle(handle);
-		dSelect.setDataSetName(cryptoMarker.getCertificateRef().getDataSetName());
+		dSelect.setDataSetName(cryptoMarker.getCertificateRefs().get(certNumber).getDataSetName());
 		DataSetSelectResponse selResp = (DataSetSelectResponse) dispatcher.deliver(dSelect);
 		WSHelper.checkResult(selResp);
 		// read the certificate
-		String dsiName = cryptoMarker.getCertificateRef().getDataSetName();
+		String dsiName = cryptoMarker.getCertificateRefs().get(certNumber).getDataSetName();
 		DSIRead dsiRead = new DSIRead();
 		dsiRead.setDSIName(dsiName);
 		dsiRead.setConnectionHandle(handle);
@@ -408,7 +421,8 @@ public class GenericCryptoSignerFinder {
 	} catch (SecurityConditionUnsatisfiable ex) {
 	    logger.error("The ACLList operation is not allowed for the certificate data set.", ex);
 	} catch (APDUException ex) {
-	    logger.error("Failed to select or read the DataSet: " + cryptoMarker.getCertificateRef().getDataSetName(), ex);
+	    logger.error("Failed to select or read the DataSet: " + 
+		    cryptoMarker.getCertificateRefs().get(0).getDataSetName(), ex);
 	}
 
 	return null;

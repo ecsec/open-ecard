@@ -93,7 +93,7 @@ public class VerifySignatureStep implements ProtocolStep<VerifySignature, Verify
 
 	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didStructure.getDIDMarker());
 
-	    String dataSetNameCertificate = cryptoMarker.getCertificateRef().getDataSetName();
+	    String dataSetNameCertificate = cryptoMarker.getCertificateRefs().get(0).getDataSetName();
 	    String algorithmIdentifier = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
 
 	    DSIRead dsiRead = new DSIRead();

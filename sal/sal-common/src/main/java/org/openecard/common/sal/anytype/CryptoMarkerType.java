@@ -53,7 +53,7 @@ public class CryptoMarkerType {
     private String legacyKeyName = null;
     private AlgorithmInfoType algorithmInfo = null;
     private HashGenerationInfoType hashGenerationInfo = null;
-    private CertificateRefType certificateRef = null;
+    private List<CertificateRefType> certificateRefs = null;
     private CryptoKeyInfoType cryptoKeyInfo = null;
     private String[] signatureGenerationInfo = null;
     private List<CardCallTemplateType> legacySignatureGenerationInfo = null;
@@ -136,7 +136,11 @@ public class CryptoMarkerType {
 	    } else if (elem.getLocalName().equals("HashGenerationInfo")) {
 		hashGenerationInfo = HashGenerationInfoType.fromValue(elem.getTextContent());
 	    } else if (elem.getLocalName().equals("CertificateRef")) {
-		certificateRef = new CertificateRefType();
+		if (certificateRefs == null) {
+		    certificateRefs = new ArrayList<>();
+		}
+
+		CertificateRefType certificateRef = new CertificateRefType();
 		NodeList nodeList = elem.getChildNodes();
 		for (int i = 0; i < nodeList.getLength(); i++) {
 		    Node n = nodeList.item(i);
@@ -148,6 +152,8 @@ public class CryptoMarkerType {
 			certificateRef.setCertificateType(n.getTextContent());
 		    }
 		}
+
+		certificateRefs.add(certificateRef);
 	    } else if (elem.getLocalName().equals("LegacyKeyName")) {
 		this.legacyKeyName = elem.getTextContent();
 	    } else if (elem.getLocalName().equals("StateInfo")) {
@@ -222,13 +228,15 @@ public class CryptoMarkerType {
     }
 
     /**
-     * Get the value of the property CertificateRef if it exists.
+     * Get the value of the property CertificateRefs if it exists.
+     * Per convention the first certificate in the list is the one to use for TLS authentication or signature creation
+     * all other certificates are part of the certificate chain for the validation.
      *
-     * @return A {@link CertificateRefType} object which contains a reference to a certificate object. If no such object
-     * exists NULL is returned.
+     * @return A list of {@link CertificateRefType} object which contains references to a certificate object and the
+     * possible chain. If no such object exists NULL is returned.
      */
-    public CertificateRefType getCertificateRef() {
-	return certificateRef;
+    public List<CertificateRefType> getCertificateRefs() {
+	return certificateRefs;
     }
 
     /**

@@ -66,7 +66,7 @@ public class CryptoMarkerTypeTest {
 		"urn:oid:1.2.840.113549.1.1");
 	assertNull(cryptoMarker.getLegacyKeyName());
 	assertNull(cryptoMarker.getHashGenerationInfo());
-	assertEquals(cryptoMarker.getCertificateRef().getDataSetName(), "EF.C.CH.AUT");
+	assertEquals(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), "EF.C.CH.AUT");
 	// assertEquals(cryptoMarker.getStateInfo(), "");
 	assertEquals(cryptoMarker.getProtocol(), ECardConstants.Protocol.GENERIC_CRYPTO);
     }

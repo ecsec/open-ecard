@@ -89,8 +89,13 @@ public class I18n {
     private final Properties translation;
     private final TreeMap<String, URL> translatedFiles;
 
+    public static Locale getLocale() {
+	return Locale.getDefault();
+    }
+
+
     private I18n(String component) {
-	Locale userLocale = Locale.getDefault();
+	Locale userLocale = getLocale();
 	String lang = userLocale.getLanguage();
 	String country = userLocale.getCountry();
 	// load applicable language files

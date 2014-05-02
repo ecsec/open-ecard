@@ -22,6 +22,8 @@
 
 package org.openecard.common;
 
+import java.util.Locale;
+
 
 /**
  * Taken from http://www.usb.org/developers/docs/USB_LANGIDs.pdf
@@ -188,6 +190,53 @@ public enum USBLangID {
 
     public short getCode() {
 	return this.code;
+    }
+
+    public static short getCode(Locale l) {
+	String lang = l.getLanguage();
+	String country = l.getCountry();
+
+	if (lang.equals(new Locale("de").getLanguage())) {
+	    if (country.equals(new Locale("ch").getCountry())) {
+		return German_Switzerland.getCode();
+	    } else if (country.equals(new Locale("at").getCountry())) {
+		return German_Austria.getCode();
+	    } else if (country.equals(new Locale("li").getCountry())) {
+		return German_Liechtenstein.getCode();
+	    } else if (country.equals(new Locale("lu").getCountry())) {
+		return German_Luxembourg.getCode();
+	    } else {
+		return German_Standard.getCode();
+	    }
+	} else if (lang.equals(new Locale("en").getLanguage())) {
+	    if (country.equals(new Locale("gb").getCountry()))
+		return English_United_Kingdom.getCode();
+	    else if (country.equals(new Locale("us").getCountry())) {
+		return English_United_States.getCode();
+	    } else if (country.equals(new Locale("au").getCountry())) {
+		return English_Australian.getCode();
+	    } else if (country.equals(new Locale("bz").getCountry())) {
+		return English_Belize.getCode();
+	    } else if (country.equals(new Locale("ca").getCountry())) {
+		return English_Canadian.getCode();
+	    } else if (country.equals(new Locale("ie").getCountry())) {
+		return English_Ireland.getCode();
+	    } else if (country.equals(new Locale("jm").getCountry())) {
+		return English_Jamaica.getCode();
+	    } else if (country.equals(new Locale("nz").getCountry())) {
+		return English_New_Zealand.getCode();
+	    } else if (country.equals(new Locale("ph").getCountry())) {
+		return English_Philippines.getCode();
+	    } else if (country.equals(new Locale("za").getCountry())) {
+		return English_South_Africa.getCode();
+	    } else if (country.equals(new Locale("tt").getCountry())) {
+		return English_Trinidad.getCode();
+	    } else if (country.equals(new Locale("zw").getCountry())) {
+		return English_Zimbabwe.getCode();
+	    }
+	}
+
+	return English_United_States.getCode();
     }
 
 }

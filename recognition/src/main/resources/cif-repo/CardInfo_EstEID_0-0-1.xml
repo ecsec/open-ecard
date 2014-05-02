@@ -195,7 +195,7 @@
 			    <iso:StateInfo>
 				<iso:StateRecognition>
 				    <iso:CardCall>
-					<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
+					<iso:CommandAPDU>00A4000C00</iso:CommandAPDU>
 					<iso:ResponseAPDU>
 					    <iso:Trailer>9000</iso:Trailer>
 					</iso:ResponseAPDU>
@@ -370,7 +370,7 @@
 			    <iso:StateInfo>
 				<iso:StateRecognition>
 				    <iso:CardCall>
-					<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
+					<iso:CommandAPDU>00A4000C00</iso:CommandAPDU>
 					<iso:ResponseAPDU>
 					    <iso:Trailer>9000</iso:Trailer>
 					</iso:ResponseAPDU>
@@ -545,7 +545,7 @@
 			    <iso:StateInfo>
 				<iso:StateRecognition>
 				    <iso:CardCall>
-					<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
+					<iso:CommandAPDU>00A4000C00</iso:CommandAPDU>
 					<iso:ResponseAPDU>
 					    <iso:Trailer>9000</iso:Trailer>
 					</iso:ResponseAPDU>

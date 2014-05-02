@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -229,7 +229,7 @@ public class GenericCryptoSigner {
 	    logger.error("Signature generation failed.", e);
 	    throw new SignatureException(e);
 	} catch (DispatcherException e) {
-	    logger.error("Signature generation failed.", e);
+	   logger.error("Signature generation failed.", e);
 	    throw new SignatureException(e);
 	} catch (WSException e) {
 	    logger.error("Signature generation failed.", e);

@@ -2154,6 +2154,9 @@
 							<iso:CertificateRef>
 								<iso:DataSetName>EF_C_X509_CH_AUT</iso:DataSetName>
 							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF_C_X509_CA_CS_AUT</iso:DataSetName>
+							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
 				</iso:DifferentialIdentity>
@@ -2232,6 +2235,9 @@
 							<iso:SignatureGenerationInfo>MSE_KEY_INT_AUTH INT_AUTH</iso:SignatureGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>EF_C_X509_CH_AUT</iso:DataSetName>
+							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF_C_X509_CA_CS_AUT</iso:DataSetName>
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
@@ -2312,6 +2318,9 @@
 							<iso:CertificateRef>
 								<iso:DataSetName>EF_C_X509_CH_AUT</iso:DataSetName>
 							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF_C_X509_CA_CS_AUT</iso:DataSetName>
+							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
 				</iso:DifferentialIdentity>
@@ -2391,6 +2400,9 @@
 							<iso:CertificateRef>
 								<iso:DataSetName>EF_C_X509_CH_AUT</iso:DataSetName>
 							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF_C_X509_CA_CS_AUT</iso:DataSetName>
+							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
 				</iso:DifferentialIdentity>
@@ -2469,6 +2481,9 @@
 							<iso:SignatureGenerationInfo>MSE_KEY_INT_AUTH INT_AUTH</iso:SignatureGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>EF_C_X509_CH_AUT</iso:DataSetName>
+							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF_C_X509_CA_CS_AUT</iso:DataSetName>
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>

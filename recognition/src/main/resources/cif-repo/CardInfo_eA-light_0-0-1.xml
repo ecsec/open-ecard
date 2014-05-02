@@ -762,6 +762,9 @@
 							<iso:CertificateRef>
 								<iso:DataSetName>Authentication_Certificate</iso:DataSetName>
 							</iso:CertificateRef>
+							<iso:certificateRef>
+								<iso:DataSetName>Authentication_Certificate_CA</iso:DataSetName>
+							</iso:certificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
 					<iso:DIDScope>local</iso:DIDScope>
@@ -850,6 +853,41 @@
 				</iso:DataSetACL>
 				<iso:DataSetPath>
 					<iso:efIdOrPath>C500</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+			<iso:DataSetInfo>
+				<iso:DataSetName>Authentication_Certificate_CA</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>C100</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 			<iso:DataSetInfo>

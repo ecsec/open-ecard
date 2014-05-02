@@ -56,13 +56,13 @@ import org.openecard.bouncycastle.asn1.x509.Certificate;
 import org.openecard.bouncycastle.asn1.x509.KeyPurposeId;
 import org.openecard.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
+import org.openecard.bouncycastle.pqc.math.linearalgebra.ByteUtils;
 import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.common.sal.anytype.CryptoMarkerType;
 import org.openecard.common.util.HandlerUtils;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.SALFileUtils;
@@ -253,6 +253,12 @@ public class GenericCryptoSignerFinder {
 		    cardCert.setDIDName(didName);
 		    cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
 		    remainingDIDs.add(cardCert);
+
+		    // add chain if available
+		    byte[] certChain = readChain(cryptoMarker, dispatcher, handle);
+
+		    // concatenate with the certificate to use for TLS or signature creation
+		    cert = ByteUtils.concatenate(cert, certChain);
 		    Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, false);
 		    dataSetWithCert.put(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), certAndTLSAuth);
 		} else if (containsAuthenticationCertificate(cert)) {
@@ -263,6 +269,12 @@ public class GenericCryptoSignerFinder {
 		    cardCert.setRawCertificate(cert);
 		    cardCert.setAlwaysReadable();
 		    remainingDIDs.add(0, cardCert);
+		   
+		    // add chain if located in other files
+		    byte[] certChain = readChain(cryptoMarker, dispatcher, handle);
+		    
+		    // concatenate with the certificate to use for TLS or signature creation
+		    cert = ByteUtils.concatenate(cert, certChain);
 		    Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, true);
 		    dataSetWithCert.put(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), certAndTLSAuth);
 		}
@@ -270,6 +282,30 @@ public class GenericCryptoSignerFinder {
 	}
 
 	return remainingDIDs;
+    }
+
+    /**
+     * The method reads the certificate chain.
+     *
+     * @param cryptoMarker CryptoMarker which contains the certificate references to the certificates of the chain.
+     * @param dispatcher Dispatcher object for message delivery.
+     * @param handle ConnectionHandleType object which identifies the card and terminal to use.
+     * @return A byte array containing the certificate chain.
+     * @throws DispatcherException
+     * @throws InvocationTargetException
+     */
+    private byte[] readChain(CryptoMarkerType cryptoMarker, Dispatcher dispatcher, ConnectionHandleType handle)
+	    throws DispatcherException, InvocationTargetException {
+	byte[] certChain = new byte[0];
+
+	if (cryptoMarker.getCertificateRefs().size() > 1) {
+	    for (int i = 1; i < cryptoMarker.getCertificateRefs().size(); i++) {
+		byte[] certChainPart = readCertificate(cryptoMarker, i, dispatcher, handle);
+		certChain = ByteUtils.concatenate(certChain, certChainPart);
+	    }
+	}
+
+	return certChain;
     }
 
     /**

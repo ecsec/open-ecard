@@ -160,7 +160,7 @@ import org.openecard.common.apdu.utils.CardUtils;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.sal.Assert;
-import org.openecard.common.sal.anytype.CryptoMarkerType;
+import org.openecard.crypto.common.sal.CryptoMarkerType;
 import org.openecard.common.sal.exception.InappropriateProtocolForActionException;
 import org.openecard.common.sal.exception.IncorrectParameterException;
 import org.openecard.common.sal.exception.NameExistsException;

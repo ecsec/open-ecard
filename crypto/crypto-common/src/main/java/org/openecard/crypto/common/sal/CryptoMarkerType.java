@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.sal.anytype;
+package org.openecard.crypto.common.sal;
 
 import iso.std.iso_iec._24727.tech.schema.AlgorithmIdentifierType;
 import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType;

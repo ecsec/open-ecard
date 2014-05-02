@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -58,7 +58,6 @@ import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.common.sal.anytype.CryptoMarkerType;
 import org.openecard.common.util.SALFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -230,7 +229,7 @@ public class GenericCryptoSigner {
 	    logger.error("Signature generation failed.", e);
 	    throw new SignatureException(e);
 	} catch (DispatcherException e) {
-	    logger.error("Signature generation failed.", e);
+	   logger.error("Signature generation failed.", e);
 	    throw new SignatureException(e);
 	} catch (WSException e) {
 	    logger.error("Signature generation failed.", e);

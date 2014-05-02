@@ -79,7 +79,7 @@ import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.AuthDataMap;
-import org.openecard.common.sal.anytype.CryptoMarkerType;
+import org.openecard.crypto.common.sal.CryptoMarkerType;
 import org.openecard.common.util.StringUtils;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.soap.SOAPHeader;

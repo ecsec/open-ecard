@@ -735,6 +735,12 @@
 							<iso:CertificateRef>
 								<iso:DataSetName>DTRUSTAuthenticationKey</iso:DataSetName>
 							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.SCA.eSIGN</iso:DataSetName>
+							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.RCA.eSIGN</iso:DataSetName>
+							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
 				</iso:DifferentialIdentity>
@@ -831,6 +837,12 @@
 							<iso:CertificateRef>
 								<iso:DataSetName>DTRUSTAuthenticationKey</iso:DataSetName>
 							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.SCA.eSIGN</iso:DataSetName>
+							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.RCA.eSIGN</iso:DataSetName>
+							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
 				</iso:DifferentialIdentity>
@@ -924,6 +936,12 @@
 							</iso:LegacySignatureGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>DTRUSTAuthenticationKey</iso:DataSetName>
+							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.SCA.eSIGN</iso:DataSetName>
+							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.RCA.eSIGN</iso:DataSetName>
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
@@ -1430,6 +1448,7 @@
 					</iso:SecurityCondition>
 				</iso:AccessRule>
 			</iso:CardApplicationACL>
+			<!-- Authentication Key Certificate -->
 			<iso:DataSetInfo>
 				<iso:DataSetName>DTRUSTAuthenticationKey</iso:DataSetName>
 				<iso:DataSetACL>
@@ -1489,6 +1508,127 @@
 					<iso:efIdOrPath>C100</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
+			<!-- Authentication key sub CA -->
+			<iso:DataSetInfo>
+				<iso:DataSetName>EF.C.SCA.eSIGN</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>Karten-PIN</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIDelete</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>Karten-PIN</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>C101</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+			<!-- Authentication key CA -->
+			<iso:DataSetInfo>
+				<iso:DataSetName>EF.C.RCA.eSIGN</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>Karten-PIN</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIDelete</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>Karten-PIN</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>C102</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+			<!-- Signature key certificate -->
 			<iso:DataSetInfo>
 				<iso:DataSetName>SigGSignatureKey</iso:DataSetName>
 				<iso:DataSetACL>
@@ -1546,6 +1686,126 @@
 				</iso:DataSetACL>
 				<iso:DataSetPath>
 					<iso:efIdOrPath>C103</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+			<!-- Signature key sub CA -->
+			<iso:DataSetInfo>
+				<iso:DataSetName>EF.C.SCA.QES</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>Karten-PIN</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIDelete</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>Karten-PIN</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>C104</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+			<!-- Signature key root CA -->
+			<iso:DataSetInfo>
+				<iso:DataSetName>EF.C.RCA.QES</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>Karten-PIN</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIDelete</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>Karten-PIN</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>C105</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 		</iso:CardApplication>
@@ -2066,6 +2326,12 @@
 							<iso:CertificateRef>
 								<iso:DataSetName>SigGSignatureKey</iso:DataSetName>
 							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.SCA.QES</iso:DataSetName>
+							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.RCA.QES</iso:DataSetName>
+							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
 				</iso:DifferentialIdentity>
@@ -2161,6 +2427,12 @@
 							<iso:CertificateRef>
 								<iso:DataSetName>SigGSignatureKey</iso:DataSetName>
 							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.SCA.QES</iso:DataSetName>
+							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.RCA.QES</iso:DataSetName>
+							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
 				</iso:DifferentialIdentity>
@@ -2254,6 +2526,12 @@
 							</iso:LegacySignatureGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>SigGSignatureKey</iso:DataSetName>
+							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.SCA.QES</iso:DataSetName>
+							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.RCA.QES</iso:DataSetName>
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>

@@ -122,6 +122,7 @@ import iso.std.iso_iec._24727.tech.schema.HashResponse;
 import iso.std.iso_iec._24727.tech.schema.Initialize;
 import iso.std.iso_iec._24727.tech.schema.InitializeResponse;
 import iso.std.iso_iec._24727.tech.schema.NamedDataServiceActionName;
+import iso.std.iso_iec._24727.tech.schema.PathType;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
 import iso.std.iso_iec._24727.tech.schema.TargetNameType;
@@ -149,6 +150,8 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.DeleteFile;
 import org.openecard.common.apdu.EraseBinary;
 import org.openecard.common.apdu.EraseRecord;
+import org.openecard.common.apdu.ReadBinary;
+import org.openecard.common.apdu.ReadRecord;
 import org.openecard.common.apdu.Select;
 import org.openecard.common.apdu.UpdateBinary;
 import org.openecard.common.apdu.UpdateRecord;
@@ -176,6 +179,7 @@ import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.sal.util.SALUtils;
 import org.openecard.common.tlv.iso7816.DataElements;
 import org.openecard.common.tlv.iso7816.FCP;
+import org.openecard.common.util.ByteUtils;
 import org.openecard.gui.UserConsent;
 import org.openecard.ws.SAL;
 import org.slf4j.Logger;
@@ -1149,7 +1153,9 @@ public class TinySAL implements SAL {
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String dsiName = request.getDSIName();
+	    byte[] slotHandle = connectionHandle.getSlotHandle();
 	    Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
+	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dsiName, NamedDataServiceActionName.DSI_READ);
 
 	    if (cardStateEntry.getFCPOfSelectedEF() == null) {
 		throw new PrerequisitesNotSatisfiedException("No DataSet to read selected.");
@@ -1159,6 +1165,7 @@ public class TinySAL implements SAL {
 	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSetByDsiName(dsiName);
 
 	    if (dataSetInfo == null) {
+		// there is no data set which contains the given dsi name so the name should be an data set name
 		dataSetInfo = cardInfoWrapper.getDataSetByName(dsiName);
 
 		if (dataSetInfo != null) {
@@ -1171,20 +1178,47 @@ public class TinySAL implements SAL {
 			    throw new PrerequisitesNotSatisfiedException(msg);
 			}
 		    }
+
+		    byte[] fileContent = CardUtils.readFile(cardStateEntry.getFCPOfSelectedEF(), env.getDispatcher(),
+			    slotHandle);
+		    response.setDSIContent(fileContent);
 		} else {
 		    String msg = "The given DSIName does not related to any know DSI or DataSet.";
 		    throw new IncorrectParameterException(msg);
 		}
+	    } else {
+		// There exists a data set with the given dsi name
+		// check whether the correct file is selected
+		byte[] dataSetPath = dataSetInfo.getDataSetPath().getEfIdOrPath();
+		byte[] dataSetFID = new byte[] {dataSetPath[dataSetPath.length - 2], dataSetPath[dataSetPath.length - 1]};
+
+		if (Arrays.equals(dataSetFID, cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0))) {
+		    DSIType dsi = cardInfoWrapper.getDSIbyName(dsiName);
+		    PathType dsiPath = dsi.getDSIPath();
+		    byte[] index = dsiPath.getIndex();
+		    byte[] length = dsiPath.getLength();
+
+		    if (cardStateEntry.getFCPOfSelectedEF().getDataElements().isLinear()) {
+			// in this case we use the index as record number and the length as length of record
+			ReadRecord readRecord = new ReadRecord(index[0]);
+			// NOTE: For record based files TR-0312-4 states to ignore the length field in case of records
+			List<byte[]> allowedResponse = new ArrayList<>();
+			allowedResponse.add(new byte[] {(byte) 0x90, (byte) 0x00});
+			allowedResponse.add(new byte[] {(byte) 0x62, (byte) 0x82});
+			CardResponseAPDU cardResponse = readRecord.transmit(env.getDispatcher(), slotHandle,
+				allowedResponse);
+			response.setDSIContent(cardResponse.getData());
+		    } else {
+			// in this case we use index as offset and length as the expected length
+			ReadBinary readBinary = new ReadBinary(ByteUtils.toShort(index), ByteUtils.toShort(length));
+			CardResponseAPDU cardResponse = readBinary.transmit(env.getDispatcher(), slotHandle);
+			response.setDSIContent(cardResponse.getData());
+		    }
+		} else {
+		    String msg = "The currently selected data set does not contain the DSI with the name " + dsiName;
+		    throw new PrerequisitesNotSatisfiedException(msg);
+		}
 	    }
-
-	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dsiName, NamedDataServiceActionName.DSI_READ);
-
-	    byte[] slotHandle = connectionHandle.getSlotHandle();
-	    // throws a null pointer if no ef is selected
-	    // FIXME: reads always the complete file but what if the dsi is e.g. just a single record?
-	    byte[] fileContent = CardUtils.readFile(cardStateEntry.getFCPOfSelectedEF(), env.getDispatcher(), slotHandle);
-
-	    response.setDSIContent(fileContent);
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {

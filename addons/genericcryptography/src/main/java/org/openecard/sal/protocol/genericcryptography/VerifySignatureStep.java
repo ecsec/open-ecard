@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -42,7 +42,7 @@ import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.sal.anytype.CryptoMarkerType;
+import org.openecard.crypto.common.sal.CryptoMarkerType;
 import org.openecard.common.sal.exception.IncorrectParameterException;
 import org.openecard.common.sal.exception.InvalidSignatureException;
 import org.openecard.common.sal.state.CardStateEntry;
@@ -93,7 +93,7 @@ public class VerifySignatureStep implements ProtocolStep<VerifySignature, Verify
 
 	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didStructure.getDIDMarker());
 
-	    String dataSetNameCertificate = cryptoMarker.getCertificateRef().getDataSetName();
+	    String dataSetNameCertificate = cryptoMarker.getCertificateRefs().get(0).getDataSetName();
 	    String algorithmIdentifier = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
 
 	    DSIRead dsiRead = new DSIRead();

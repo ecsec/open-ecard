@@ -144,7 +144,7 @@ public class PINTest {
 	PCSCPinVerify ctrlStruct = new PCSCPinVerify(pwdAttr, StringUtils.toByteArray("00200001"));
 	byte[] structData = ctrlStruct.toBytes();
 	String pinStr = "00 20 00 01 08 20 FF FF FF FF FF FF FF"; // length=13
-	String ctrlStr = "00 0F 89 47 04 0E04 02 FF 0407 00 000000 0D000000";
+	String ctrlStr = "3C 00 89 47 04 0E04 02 01 0704 00 000000 0D000000";
 	byte[] referenceData = StringUtils.toByteArray(ctrlStr + pinStr, true);
 	assertEquals(referenceData, structData);
     }
@@ -155,7 +155,7 @@ public class PINTest {
 	PCSCPinVerify ctrlStruct = new PCSCPinVerify(pwdAttr, StringUtils.toByteArray("00200001"));
 	byte[] structData = ctrlStruct.toBytes();
 	String pinStr = "00 20 00 01"; // length=5
-	String ctrlStr = "00 0F 82 04 00 0404 02 FF 0407 00 000000 04000000";
+	String ctrlStr = "3C 00 82 04 00 0404 02 01 0704 00 000000 04000000";
 	byte[] referenceData = StringUtils.toByteArray(ctrlStr + pinStr, true);
 	assertEquals(referenceData, structData);
     }

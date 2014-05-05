@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -213,10 +213,10 @@ public class GenericCryptographyProtocolTest {
 	DIDGetResponse didGetResponse = instance.didGet(didGet);
 
 	assertEquals(ECardConstants.Major.OK, didGetResponse.getResult().getResultMajor());
-	org.openecard.common.sal.anytype.CryptoMarkerType cryptoMarker =
-		new org.openecard.common.sal.anytype.CryptoMarkerType(
+	org.openecard.crypto.common.sal.CryptoMarkerType cryptoMarker =
+		new org.openecard.crypto.common.sal.CryptoMarkerType(
 			(CryptoMarkerType) didGetResponse.getDIDStructure().getDIDMarker());
-	assertEquals(cryptoMarker.getCertificateRef().getDataSetName(), "EF.C.CH.AUT");
+	assertEquals(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), "EF.C.CH.AUT");
     }
 
     /**
@@ -279,8 +279,8 @@ public class GenericCryptographyProtocolTest {
 	    didGet.getConnectionHandle().setCardApplication(cardApplication);
 	    DIDGetResponse didGetResponse = instance.didGet(didGet);
 
-	    org.openecard.common.sal.anytype.CryptoMarkerType cryptoMarker =
-		    new org.openecard.common.sal.anytype.CryptoMarkerType(
+	    org.openecard.crypto.common.sal.CryptoMarkerType cryptoMarker =
+		    new org.openecard.crypto.common.sal.CryptoMarkerType(
 			    (CryptoMarkerType) didGetResponse.getDIDStructure().getDIDMarker());
 
 	    Sign sign = new Sign();
@@ -383,8 +383,8 @@ public class GenericCryptographyProtocolTest {
 	    didGet.getConnectionHandle().setCardApplication(cardApplication);
 	    DIDGetResponse didGetResponse = instance.didGet(didGet);
 
-	    org.openecard.common.sal.anytype.CryptoMarkerType cryptoMarker =
-		    new org.openecard.common.sal.anytype.CryptoMarkerType(
+	    org.openecard.crypto.common.sal.CryptoMarkerType cryptoMarker =
+		    new org.openecard.crypto.common.sal.CryptoMarkerType(
 			    (CryptoMarkerType) didGetResponse.getDIDStructure().getDIDMarker());
 
 	    ByteArrayOutputStream ciphertext = new ByteArrayOutputStream();
@@ -393,7 +393,7 @@ public class GenericCryptographyProtocolTest {
 	    DSIRead dsiRead = new DSIRead();
 	    dsiRead.setConnectionHandle(result.getConnectionHandle());
 	    dsiRead.getConnectionHandle().setCardApplication(cardApplication);
-	    dsiRead.setDSIName(cryptoMarker.getCertificateRef().getDataSetName());
+	    dsiRead.setDSIName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
 	    DSIReadResponse dsiReadResponse = instance.dsiRead(dsiRead);
 	    assertEquals(ECardConstants.Major.OK, dsiReadResponse.getResult().getResultMajor());
 	    assertTrue(dsiReadResponse.getDSIContent().length > 0);
@@ -528,8 +528,8 @@ public class GenericCryptographyProtocolTest {
 
 	    Sign sign = new Sign();
 	    byte[] message = new byte[] { 0x01, 0x02, 0x03 };
-	    org.openecard.common.sal.anytype.CryptoMarkerType cryptoMarker =
-		    new org.openecard.common.sal.anytype.CryptoMarkerType(
+	    org.openecard.crypto.common.sal.CryptoMarkerType cryptoMarker =
+		    new org.openecard.crypto.common.sal.CryptoMarkerType(
 			    (CryptoMarkerType) didGetResponse.getDIDStructure().getDIDMarker());
 
 	    String algorithmIdentifier = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();

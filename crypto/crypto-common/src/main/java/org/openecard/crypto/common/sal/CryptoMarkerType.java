@@ -24,13 +24,18 @@ package org.openecard.crypto.common.sal;
 
 import iso.std.iso_iec._24727.tech.schema.AlgorithmIdentifierType;
 import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType;
+import iso.std.iso_iec._24727.tech.schema.CardCallTemplateType;
 import iso.std.iso_iec._24727.tech.schema.CertificateRefType;
 import iso.std.iso_iec._24727.tech.schema.CryptoKeyInfoType;
+import iso.std.iso_iec._24727.tech.schema.DIDAbstractMarkerType;
 import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
 import iso.std.iso_iec._24727.tech.schema.KeyRefType;
 import iso.std.iso_iec._24727.tech.schema.StateInfo;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.openecard.common.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -38,19 +43,28 @@ import org.w3c.dom.NodeList;
 
 
 /**
+ * The class implements a CryptoMarkerType object according to BSI TR-0312 part 7.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class CryptoMarkerType {
 
-    private String legacyKeyName;
-    private AlgorithmInfoType algorithmInfo;
-    private HashGenerationInfoType hashGenerationInfo;
-    private CertificateRefType certificateRef;
-    private CryptoKeyInfoType cryptoKeyInfo;
-    private String[] signatureGenerationInfo;
+    private String legacyKeyName = null;
+    private AlgorithmInfoType algorithmInfo = null;
+    private HashGenerationInfoType hashGenerationInfo = null;
+    private List<CertificateRefType> certificateRefs = null;
+    private CryptoKeyInfoType cryptoKeyInfo = null;
+    private String[] signatureGenerationInfo = null;
+    private List<CardCallTemplateType> legacySignatureGenerationInfo = null;
     private final String protocol;
 
+    /**
+     * The constructor gets an {@link DIDAbstractMarkerType} object and parses the object to a CryptoMarkerType object.
+     * The CryptoMarkerType object is based on the CryptoMarkerType from BSI TR-03112-7
+     *
+     * @param baseType a {@link DIDAbstractMarkerType} object to parse.
+     */
     public CryptoMarkerType(iso.std.iso_iec._24727.tech.schema.DIDAbstractMarkerType baseType) {
 	protocol = baseType.getProtocol();
 	for (Element elem : baseType.getAny()) {
@@ -97,10 +111,36 @@ public class CryptoMarkerType {
 		}
 	    } else if (elem.getLocalName().equals("SignatureGenerationInfo")) {
 		signatureGenerationInfo = elem.getTextContent().split(" ");
+	    } else if (elem.getLocalName().equals("LegacySignatureGenerationInfo")) {
+		NodeList nodeList = elem.getChildNodes();
+		legacySignatureGenerationInfo = new ArrayList<CardCallTemplateType>();
+		for (int i = 0; i < nodeList.getLength(); i++) {
+		    Node n = nodeList.item(i);
+		    if (n.getLocalName().equals("CardCommand")) {
+			NodeList nodeList2 = n.getChildNodes();
+			CardCallTemplateType cctt = new CardCallTemplateType();
+			for (int j = 0; j < nodeList2.getLength(); j++) {
+			    Node n2 = nodeList2.item(j);
+			    String localName = n2.getLocalName();
+			    if (localName.equals("HeaderTemplate")) {
+				cctt.setHeaderTemplate(n2.getTextContent());
+			    } else if (localName.equals("DataTemplate")) {
+				cctt.setDataTemplate(n2.getTextContent());
+			    } else if (localName.equals("ExpectedLength")) {
+				cctt.setExpectedLength(BigInteger.valueOf(Integer.parseInt(n2.getTextContent())));
+			    }
+			}
+			legacySignatureGenerationInfo.add(cctt);
+		    }
+		}
 	    } else if (elem.getLocalName().equals("HashGenerationInfo")) {
 		hashGenerationInfo = HashGenerationInfoType.fromValue(elem.getTextContent());
 	    } else if (elem.getLocalName().equals("CertificateRef")) {
-		certificateRef = new CertificateRefType();
+		if (certificateRefs == null) {
+		    certificateRefs = new ArrayList<>();
+		}
+
+		CertificateRefType certificateRef = new CertificateRefType();
 		NodeList nodeList = elem.getChildNodes();
 		for (int i = 0; i < nodeList.getLength(); i++) {
 		    Node n = nodeList.item(i);
@@ -112,6 +152,8 @@ public class CryptoMarkerType {
 			certificateRef.setCertificateType(n.getTextContent());
 		    }
 		}
+
+		certificateRefs.add(certificateRef);
 	    } else if (elem.getLocalName().equals("LegacyKeyName")) {
 		this.legacyKeyName = elem.getTextContent();
 	    } else if (elem.getLocalName().equals("StateInfo")) {
@@ -120,34 +162,100 @@ public class CryptoMarkerType {
 	}
     }
 
+    /**
+     * Get the value of the property SignatureGenerationInfo if it exists.
+     *
+     * @return An array containing predefined strings from BSI TR-03112-7 page 82 SignatureGenerationInfo.  If no such
+     * information is available NULL is returned.
+     */
     public String[] getSignatureGenerationInfo() {
+	if (signatureGenerationInfo == null) {
+	    return null;
+	}
 	return signatureGenerationInfo.clone();
     }
 
+    /**
+     * Get the value of the property LegacySignatureGenerationIndo if it exists.
+     *
+     * @return A list of {@link CardCallTemplateType} objects which contain specific APDUs to generate a signature with
+     * the currently used card. If no such information is available NULL is returned.
+     */
+    public List<CardCallTemplateType> getLegacySignatureGenerationInfo() {
+	if (legacySignatureGenerationInfo == null) {
+	    return null;
+	}
+	return Collections.unmodifiableList(legacySignatureGenerationInfo);
+    }
+
+    /**
+     * Get the value of the property cryptoKeyInfo if it exists.
+     *
+     * @return A {@link CryptokeyInfoType} object which contains all known information about a key. If no such
+     * information is available NULL is returned.
+     */
     public CryptoKeyInfoType getCryptoKeyInfo() {
 	return cryptoKeyInfo;
     }
 
+    /**
+     * Get the value of the property LegacyKeyName if it exists.
+     *
+     * @return A string containing a key name. If no such key name is available NULL is returned.
+     */
     public String getLegacyKeyName() {
 	return legacyKeyName;
     }
 
+    /**
+     * Get the value of the property AlgorithmInfo if it exists.
+     *
+     * @return An {@link AlgorithmInfoType} object which contains all information available about a key. If no such
+     * information exists NULL is returned.
+     */
     public AlgorithmInfoType getAlgorithmInfo() {
 	return algorithmInfo;
     }
 
+    /**
+     * Get the value of the property HashGenetationInfo if it exists.
+     *
+     * @return A {@link HashGenerationInfoType} object containing all necessary information about the creation of a hash.
+     * If no such information is available NULL is returned.
+     */
     public HashGenerationInfoType getHashGenerationInfo() {
 	return hashGenerationInfo;
     }
 
-    public CertificateRefType getCertificateRef() {
-	return certificateRef;
+    /**
+     * Get the value of the property CertificateRefs if it exists.
+     * Per convention the first certificate in the list is the one to use for TLS authentication or signature creation
+     * all other certificates are part of the certificate chain for the validation.
+     *
+     * @return A list of {@link CertificateRefType} object which contains references to a certificate object and the
+     * possible chain. If no such object exists NULL is returned.
+     */
+    public List<CertificateRefType> getCertificateRefs() {
+	return certificateRefs;
     }
 
+    /**
+     * Get the value of the property StateInfo if it exists.
+     *
+     * @return A {@link StateInfo} object which contains information about the available states. If no such information
+     * exists NULL is returned.
+     *
+     * NOTE: This method is currently not implemented and throws an UnsupportedOperationException if the method is called.
+     */
     public StateInfo getStateInfo() {
 	throw new UnsupportedOperationException("Not yet implemented");
     }
 
+    /**
+     * Get the value of the property Protocol.
+     *
+     * @return A string containing the protocol uri of this marker type.
+     */
     public String getProtocol() {
 	return protocol;
     }

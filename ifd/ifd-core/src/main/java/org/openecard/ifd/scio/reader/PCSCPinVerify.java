@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,6 +25,7 @@ package org.openecard.ifd.scio.reader;
 import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
 import iso.std.iso_iec._24727.tech.schema.PasswordTypeType;
 import java.io.ByteArrayOutputStream;
+import org.openecard.common.I18n;
 import org.openecard.common.USBLangID;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.IntegerUtils;
@@ -93,7 +94,7 @@ public class PCSCPinVerify {
 	byte bmPinType = 0; // binary
 	if (nibbleHandling) {
 	    bmPinType = 1;
-	} else if (pwdType == PasswordTypeType.ASCII_NUMERIC) {
+	} else if (pwdType == PasswordTypeType.ASCII_NUMERIC || pwdType == PasswordTypeType.UTF_8) {
 	    bmPinType = 2;
 	}
 	this.bmFormatString = (byte) ((bmSysUnits<<7) | (bmPinPos<<3) | (bmJustify<<2) | bmPinType);
@@ -116,9 +117,9 @@ public class PCSCPinVerify {
 
 
     /** timeout in seconds, 0 means default */
-    public byte bTimeOut = 0;
+    public byte bTimeOut = (byte) 0x3C;
     /** timeout in seconds after first keystroke */
-    public byte bTimeOut2 = 15;
+    public byte bTimeOut2 = 0;
     /** formatting options, USB_CCID_PIN_FORMAT */
     public byte bmFormatString = 0;
     /** bits 7-4 bit size of PIN length in APDU, bits 3-0 PIN block size in bytes after justification and formatting */
@@ -138,9 +139,9 @@ public class PCSCPinVerify {
      * <ul><li>0x0 no string</li>
      *     <li>0x1 Message indicated by msg idx</li>
      *     <li>0xFF default CCID message</li></ul></p> */
-    private byte bNumberMessage = (byte) 0xFF;
+    private byte bNumberMessage = (byte) 0x01;
     /** Language for messages */
-    private short wLangId = USBLangID.German_Standard.getCode(); // this software is international, so use german of couse ;-)
+    private short wLangId = USBLangID.getCode(I18n.getLocale());
     /** Message index (should be 00).
      * <p>The first three messages should be as follows in the reader:
      * <ul><li>0x0 PIN insertion prompt: "ENTER PIN"</li>
@@ -189,8 +190,10 @@ public class PCSCPinVerify {
 	o.write(getMinPINSize());
 	o.write(bEntryValidationCondition);
 	o.write(bNumberMessage);
-	byte lang_low  = (byte) (wLangId & 0xFF);
-	byte lang_high = (byte) ((wLangId >> 8) & 0xFF);
+	//byte lang_low  = (byte) (wLangId & 0xFF);
+	//byte lang_high = (byte) ((wLangId >> 8) & 0xFF);
+	byte lang_low  = (byte) ((wLangId >> 8) & 0xFF);
+	byte lang_high = (byte) (wLangId & 0xFF);
 	o.write(lang_high);
 	o.write(lang_low);
 	o.write(bMsgIndex);

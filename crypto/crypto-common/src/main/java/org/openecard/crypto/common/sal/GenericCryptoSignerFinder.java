@@ -257,8 +257,9 @@ public class GenericCryptoSignerFinder {
 		    // add chain if available
 		    byte[] certChain = readChain(cryptoMarker, dispatcher, handle);
 
-		    // concatenate with the certificate to use for TLS or signature creation
-		    cert = ByteUtils.concatenate(cert, certChain);
+		    // cert contains the chain (if available) only because we can't read the certificate without using
+		    // the pin
+		    cert = certChain;
 		    Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, false);
 		    dataSetWithCert.put(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), certAndTLSAuth);
 		} else if (containsAuthenticationCertificate(cert)) {

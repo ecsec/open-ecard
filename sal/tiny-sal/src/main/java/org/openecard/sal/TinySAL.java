@@ -123,6 +123,7 @@ import iso.std.iso_iec._24727.tech.schema.Initialize;
 import iso.std.iso_iec._24727.tech.schema.InitializeResponse;
 import iso.std.iso_iec._24727.tech.schema.NamedDataServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.PathType;
+import iso.std.iso_iec._24727.tech.schema.PathType.TagRef;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
 import iso.std.iso_iec._24727.tech.schema.TargetNameType;
@@ -135,6 +136,7 @@ import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -150,6 +152,8 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.DeleteFile;
 import org.openecard.common.apdu.EraseBinary;
 import org.openecard.common.apdu.EraseRecord;
+import org.openecard.common.apdu.GetData;
+import org.openecard.common.apdu.GetResponse;
 import org.openecard.common.apdu.ReadBinary;
 import org.openecard.common.apdu.ReadRecord;
 import org.openecard.common.apdu.Select;
@@ -1195,28 +1199,74 @@ public class TinySAL implements SAL {
 		if (Arrays.equals(dataSetFID, cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0))) {
 		    DSIType dsi = cardInfoWrapper.getDSIbyName(dsiName);
 		    PathType dsiPath = dsi.getDSIPath();
-		    byte[] index = dsiPath.getIndex();
-		    byte[] length = dsiPath.getLength();
 
-		    if (cardStateEntry.getFCPOfSelectedEF().getDataElements().isLinear()) {
-			// in this case we use the index as record number and the length as length of record
-			ReadRecord readRecord = new ReadRecord(index[0]);
-			// NOTE: For record based files TR-0312-4 states to ignore the length field in case of records
+		    if (dsiPath.getTagRef() != null) {
+			TagRef tagReference = dsiPath.getTagRef();
+			byte[] tag = tagReference.getTag();
+			GetData getDataRequest;
+			if (tag.length == 2) {
+			    getDataRequest = new GetData(GetData.INS_DATA, tag[0], tag[1]);
+			    CardResponseAPDU cardResponse = getDataRequest.transmit(env.getDispatcher(), slotHandle,
+				    Collections.EMPTY_LIST);
+			    byte[] responseData = cardResponse.getData();
+
+			    while (cardResponse.getTrailer()[0] == (byte) 0x61) {
+				GetResponse allData = new GetResponse();
+				cardResponse = allData.transmit(env.getDispatcher(), slotHandle, Collections.EMPTY_LIST);
+				responseData = ByteUtils.concatenate(responseData, cardResponse.getData());
+			    }
+			    
+			    response.setDSIContent(responseData);
+			} else if (tag.length == 1) {
+			    // how to determine Simple- or BER-TLV in this case correctly?
+			    // Now try Simple-TLV first and if it fail try BER-TLV
+			    getDataRequest = new GetData(GetData.INS_DATA, GetData.SIMPLE_TLV, tag[0]);
+			    CardResponseAPDU cardResponse = getDataRequest.transmit(env.getDispatcher(), slotHandle,
+				    Collections.EMPTY_LIST);
+			    byte[] responseData = cardResponse.getData();
+
+			    // just an assumption
+			    if (Arrays.equals(cardResponse.getTrailer(), new byte[] {(byte) 0x6A, (byte) 0x88})) {
+				getDataRequest = new GetData(GetData.INS_DATA, GetData.BER_TLV_ONE_BYTE, tag[0]);
+				cardResponse = getDataRequest.transmit(env.getDispatcher(), slotHandle,
+					Collections.EMPTY_LIST);
+				responseData = cardResponse.getData();
+			    }
+
+			    while (cardResponse.getTrailer()[0] == (byte) 0x61) {
+				GetResponse allData = new GetResponse();
+				cardResponse = allData.transmit(env.getDispatcher(), slotHandle, Collections.EMPTY_LIST);
+				responseData = ByteUtils.concatenate(responseData, cardResponse.getData());
+			    }
+
+			    response.setDSIContent(responseData);
+			}
+		    } else if (dsiPath.getIndex() != null) {
+			byte[] index = dsiPath.getIndex();
+			byte[] length = dsiPath.getLength();
+
 			List<byte[]> allowedResponse = new ArrayList<>();
-			allowedResponse.add(new byte[] {(byte) 0x90, (byte) 0x00});
-			allowedResponse.add(new byte[] {(byte) 0x62, (byte) 0x82});
-			CardResponseAPDU cardResponse = readRecord.transmit(env.getDispatcher(), slotHandle,
-				allowedResponse);
-			response.setDSIContent(cardResponse.getData());
+			allowedResponse.add(new byte[]{(byte) 0x90, (byte) 0x00});
+			allowedResponse.add(new byte[]{(byte) 0x62, (byte) 0x82});
+			
+			if (cardStateEntry.getFCPOfSelectedEF().getDataElements().isLinear()) {
+			    // in this case we use the index as record number and the length as length of record
+			    ReadRecord readRecord = new ReadRecord(index[0]);
+			    // NOTE: For record based files TR-0312-4 states to ignore the length field in case of records    
+			    CardResponseAPDU cardResponse = readRecord.transmit(env.getDispatcher(), slotHandle,
+				    allowedResponse);
+			    response.setDSIContent(cardResponse.getData());
+			} else {
+			    // in this case we use index as offset and length as the expected length
+			    ReadBinary readBinary = new ReadBinary(ByteUtils.toShort(index), ByteUtils.toShort(length));
+			    CardResponseAPDU cardResponse = readBinary.transmit(env.getDispatcher(), slotHandle,
+				    allowedResponse);
+			    response.setDSIContent(cardResponse.getData());
+			}
 		    } else {
-			// in this case we use index as offset and length as the expected length
-			ReadBinary readBinary = new ReadBinary(ByteUtils.toShort(index), ByteUtils.toShort(length));
-			CardResponseAPDU cardResponse = readBinary.transmit(env.getDispatcher(), slotHandle);
-			response.setDSIContent(cardResponse.getData());
+			String msg = "The currently selected data set does not contain the DSI with the name " + dsiName;
+			throw new PrerequisitesNotSatisfiedException(msg);
 		    }
-		} else {
-		    String msg = "The currently selected data set does not contain the DSI with the name " + dsiName;
-		    throw new PrerequisitesNotSatisfiedException(msg);
 		}
 	    }
 	} catch (ECardException e) {

@@ -40,6 +40,7 @@ import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.bouncycastle.util.Arrays;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
+import org.openecard.common.apdu.GetResponse;
 import org.openecard.common.apdu.InternalAuthenticate;
 import org.openecard.common.apdu.ManageSecurityEnvironment;
 import org.openecard.common.apdu.common.APDUTemplateException;
@@ -241,8 +242,7 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 
 	// check if further response data is available
 	while (responseAPDU.getTrailer()[0] == (byte) 0x61) {
-	    CardCommandAPDU getResponseData = new CardCommandAPDU((byte) 0x00, (byte) 0xC0, (byte) 0x00, (byte) 0x00,
-		    responseAPDU.getTrailer()[1]);
+	    GetResponse getResponseData = new GetResponse();
 	    responseAPDU = getResponseData.transmit(dispatcher, slotHandle, Collections.<byte[]>emptyList());
 	    signedMessage = Arrays.concatenate(signedMessage, responseAPDU.getData());
 	}

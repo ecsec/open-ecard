@@ -363,10 +363,7 @@ public class TinySAL implements SAL {
 	    response.getConnectionHandle().setCardApplication(applicationID);
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
-	} catch (DispatcherException e) {
-	    logger.error(e.getMessage(), e);
-	    response.setResult(WSHelper.makeResult(e));
-	} catch (InvocationTargetException e) {
+	} catch (DispatcherException | InvocationTargetException e) {
 	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
@@ -1703,7 +1700,7 @@ public class TinySAL implements SAL {
 		cardApplication = cardStateEntry.getCurrentCardApplication();
 	    }
 
-	    List<DIDInfoType> didInfos = new ArrayList<DIDInfoType>(cardApplication.getDIDInfoList());
+	    List<DIDInfoType> didInfos = new ArrayList<>(cardApplication.getDIDInfoList());
 
 	    /*
 	     * Filter by ObjectIdentifier.
@@ -2017,7 +2014,7 @@ public class TinySAL implements SAL {
     public List<ConnectionHandleType> getConnectionHandles() {
 	ConnectionHandleType handle = new ConnectionHandleType();
 	Set<CardStateEntry> entries = states.getMatchingEntries(handle);
-	ArrayList<ConnectionHandleType> result = new ArrayList<ConnectionHandleType>(entries.size());
+	ArrayList<ConnectionHandleType> result = new ArrayList<>(entries.size());
 
 	for (CardStateEntry entry : entries) {
 	    result.add(entry.handleCopy());

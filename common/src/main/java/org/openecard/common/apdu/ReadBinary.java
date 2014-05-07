@@ -104,6 +104,21 @@ public class ReadBinary extends CardCommandAPDU {
 
     /**
      * Creates an new READ BINARY APDU.
+     * Bit 8 of P1 is set to 0, and P1-P2 (fifteen bits) encodes an
+     * offset from zero to 32 767.
+     *
+     * @param offset Offset
+     * @param length Expected length
+     */
+    public ReadBinary(short offset, short length) {
+	setINS(READ_BINARY_INS_1);
+	setP1((byte) (((byte) (offset >> 8)) & 0x7F));
+	setP2((byte) (offset & xFF));
+	setLE(length);
+    }
+
+    /**
+     * Creates an new READ BINARY APDU.
      * P1-P2 set to '0000' identifies the current EF.
      * The offset data object with tag '54' is encoded in the command data field.
      *

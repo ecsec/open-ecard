@@ -106,8 +106,8 @@ public class PlatformPCSC {
 
 	if (javaVersion.startsWith("1.6")) {
 	    return "jre6." + PCSC_JNI_LIBRARY_NAME;
-	} else if (javaVersion.startsWith("1.7")) {
-	    return "jre7." + PCSC_JNI_LIBRARY_NAME;
+	} else if (javaVersion.startsWith("1.7") || javaVersion.startsWith("1.8")) {
+	    return "jre7_8." + PCSC_JNI_LIBRARY_NAME;
 	}
 
 	return null;

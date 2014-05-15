@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -333,6 +333,15 @@ public class CardInfoWrapper {
 	return null;
     }
 
+    /**
+     * The method searches an application ID by a DIDName and a DIDScope.
+     *
+     * @param didName Name of the DID to search.
+     * @param didScope Scope of the DID to look for.
+     * @return The application ID of  the application which contains the DID with DIDName and DIDScope or NULL if no
+     * such application was found. NOTE: If the parameter didScope is NULL then the application ID of the application
+     * with the first occurrence of didName is returned.
+     */
     public byte[] getApplicationIdByDidName(String didName, DIDScopeType didScope) {
 	List<CardApplicationType> cardApps = cif.getApplicationCapabilities().getCardApplication();
 	for (CardApplicationType cardApp : cardApps) {
@@ -343,6 +352,8 @@ public class CardInfoWrapper {
 			    if (didScope.value().equals(did.getDifferentialIdentity().getDIDScope().value())) {
 				return cardApp.getApplicationIdentifier();
 			    }
+			} else {
+			    return cardApp.getApplicationIdentifier();
 			}
 		    } else {
 			return cardApp.getApplicationIdentifier();

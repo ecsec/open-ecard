@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -208,7 +208,7 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
     }
 
     private boolean checkSecurityCondition(SecurityConditionType securityCondition) {
-	byte[] cardApplication = infoObject.getImplicitlySelectedApplication();
+	byte[] cardApplication;
 	try{
 	    if(securityCondition.isAlways()) {
 		return true;
@@ -218,6 +218,7 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	}
 	if (securityCondition.getDIDAuthentication()!=null) {
 	    DIDAuthenticationStateType didAuthenticationState = securityCondition.getDIDAuthentication();
+	    cardApplication = getInfo().getApplicationIdByDidName(didAuthenticationState.getDIDName(), null);
 	    if (didAuthenticationState.isDIDState()) {
 		return isAuthenticated(didAuthenticationState.getDIDName(), cardApplication);
 	    } else {

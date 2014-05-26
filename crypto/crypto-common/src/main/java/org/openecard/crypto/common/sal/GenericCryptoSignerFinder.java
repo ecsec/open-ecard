@@ -22,6 +22,9 @@
 
 package org.openecard.crypto.common.sal;
 
+import iso.std.iso_iec._24727.tech.schema.ACLList;
+import iso.std.iso_iec._24727.tech.schema.ACLListResponse;
+import iso.std.iso_iec._24727.tech.schema.AccessRuleType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationList;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationListResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationListResponse.CardApplicationNameList;
@@ -36,6 +39,7 @@ import iso.std.iso_iec._24727.tech.schema.DSIRead;
 import iso.std.iso_iec._24727.tech.schema.DSIReadResponse;
 import iso.std.iso_iec._24727.tech.schema.DataSetSelect;
 import iso.std.iso_iec._24727.tech.schema.DataSetSelectResponse;
+import iso.std.iso_iec._24727.tech.schema.NamedDataServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.TargetNameType;
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -77,6 +81,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class GenericCryptoSignerFinder {
 
@@ -269,7 +274,35 @@ public class GenericCryptoSignerFinder {
 		    cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
 		    cardCert.setRawCertificate(cert);
 		    cardCert.setAlwaysReadable();
-		    remainingDIDs.add(0, cardCert);
+
+		    /**************************************************************************************************/
+		    /***** TODO:										  *****/
+		    /***** The following is just a workaround used for the eGK and should be reworked as soon as  *****/
+		    /***** there is a better possibility to let the user choose between the certificates	  *****/
+		    /**************************************************************************************************/
+
+		    String certName = cryptoMarker.getCertificateRefs().get(0).getDataSetName();
+		    ACLList certAcl = new ACLList();
+		    TargetNameType targetName = new TargetNameType();
+		    targetName.setDataSetName(certName);
+		    certAcl.setTargetName(targetName);
+		    certAcl.setConnectionHandle(handle2);
+		    ACLListResponse resp = (ACLListResponse) dispatcher.deliver(certAcl);
+
+		    for (AccessRuleType rule : resp.getTargetACL().getAccessRule()) {
+			if (rule.getAction().getNamedDataServiceAction() != null) {
+			    if (rule.getAction().getNamedDataServiceAction().equals(NamedDataServiceActionName.DSI_READ)) {
+				if (rule.getSecurityCondition().isAlways() != null &&
+					rule.getSecurityCondition().isAlways().booleanValue()) {
+				    remainingDIDs.add(0, cardCert);
+				    break;
+				} else {
+				    remainingDIDs.add(cardCert);
+				    break;
+				}
+			    }
+			}
+		    }
 		   
 		    // add chain if located in other files
 		    byte[] certChain = readChain(cryptoMarker, dispatcher, handle);

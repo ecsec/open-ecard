@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -60,6 +60,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
@@ -93,7 +94,8 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 
 	    byte[] cardApplication;
 	    if (request.getDIDScope() != null && request.getDIDScope().equals(DIDScopeType.GLOBAL)) {
-		cardApplication = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
+		cardApplication = cardStateEntry.getInfo().getApplicationIdByDidName(request.getDIDName(),
+			request.getDIDScope());
 	    } else {
 		cardApplication = connectionHandle.getCardApplication();
 	    }

@@ -228,89 +228,92 @@ public class GenericCryptoSignerFinder {
 	    String algorithm = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
 	    DIDCertificate cardCert= new DIDCertificate();
 
-	    // determine possible TLS versions
-	    if (PRE_TLS12.contains(algorithm)) {
-		logger.debug("{} is usable for TLSv1.1 and TLS1.2 signatures.", didName);
-		cardCert.setMinTLSVersion(DIDCertificate.TLSv10);
-	    } else if (POST_TLS12.contains(algorithm)) {
-		logger.debug("{} is usable for TLSv1.2 signatures.", didName);
-		cardCert.setMinTLSVersion(DIDCertificate.TLSv12);
-	    } else {
-		logger.debug("{} is not usable for TLS signatures.", didName);
-		continue;
-	    }
+	    // just do the certificate magic if we have certificates in the did
+	    if (cryptoMarker.getCertificateRefs() != null && ! cryptoMarker.getCertificateRefs().isEmpty()) {
+		// determine possible TLS versions
+		if (PRE_TLS12.contains(algorithm)) {
+		    logger.debug("{} is usable for TLSv1.1 and TLS1.2 signatures.", didName);
+		    cardCert.setMinTLSVersion(DIDCertificate.TLSv10);
+		} else if (POST_TLS12.contains(algorithm)) {
+		    logger.debug("{} is usable for TLSv1.2 signatures.", didName);
+		    cardCert.setMinTLSVersion(DIDCertificate.TLSv12);
+		} else {
+		    logger.debug("{} is not usable for TLS signatures.", didName);
+		    continue;
+		}
 
-	    if (dataSetWithCert.containsKey(cryptoMarker.getCertificateRefs().get(0).getDataSetName())) {
-		Pair<byte[], Boolean> certAndTlsAuth = dataSetWithCert.get(
-			cryptoMarker.getCertificateRefs().get(0).getDataSetName());
-		cardCert.setApplicationID(handle2.getCardApplication());
-		cardCert.setDIDName(didName);
-		cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
-		cardCert.setRawCertificate(certAndTlsAuth.p1);
-		remainingDIDs.add(cardCert);
-	    } else {
-		byte[] cert = readCertificate(cryptoMarker, 0, dispatcher, handle);
-		if (cert == null) {
-		    // this means the certificate is not readable without authentication (or an error occured)
-		    // so save this in the list for later if there exists the possibility to select a certificate for
-		    // authentication.
+		if (dataSetWithCert.containsKey(cryptoMarker.getCertificateRefs().get(0).getDataSetName())) {
+		    Pair<byte[], Boolean> certAndTlsAuth = dataSetWithCert.get(
+			    cryptoMarker.getCertificateRefs().get(0).getDataSetName());
 		    cardCert.setApplicationID(handle2.getCardApplication());
 		    cardCert.setDIDName(didName);
 		    cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
+		    cardCert.setRawCertificate(certAndTlsAuth.p1);
 		    remainingDIDs.add(cardCert);
+		} else {
+		    byte[] cert = readCertificate(cryptoMarker, 0, dispatcher, handle);
+		    if (cert == null) {
+			// this means the certificate is not readable without authentication (or an error occured)
+			// so save this in the list for later if there exists the possibility to select a certificate for
+			// authentication.
+			cardCert.setApplicationID(handle2.getCardApplication());
+			cardCert.setDIDName(didName);
+			cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
+			remainingDIDs.add(cardCert);
 
-		    // add chain if available
-		    byte[] certChain = readChain(cryptoMarker, dispatcher, handle);
+			// add chain if available
+			byte[] certChain = readChain(cryptoMarker, dispatcher, handle);
 
 		    // cert contains the chain (if available) only because we can't read the certificate without using
-		    // the pin
-		    cert = certChain;
-		    Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, false);
-		    dataSetWithCert.put(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), certAndTLSAuth);
-		} else if (containsAuthenticationCertificate(cert)) {
-		    // put certificates which are always readable always at the beginning of the list
-		    cardCert.setApplicationID(handle2.getCardApplication());
-		    cardCert.setDIDName(didName);
-		    cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
-		    cardCert.setRawCertificate(cert);
-		    cardCert.setAlwaysReadable();
+			// the pin
+			cert = certChain;
+			Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, false);
+			dataSetWithCert.put(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), certAndTLSAuth);
+		    } else if (containsAuthenticationCertificate(cert)) {
+			// put certificates which are always readable always at the beginning of the list
+			cardCert.setApplicationID(handle2.getCardApplication());
+			cardCert.setDIDName(didName);
+			cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
+			cardCert.setRawCertificate(cert);
+			cardCert.setAlwaysReadable();
 
-		    /**************************************************************************************************/
-		    /***** TODO:										  *****/
-		    /***** The following is just a workaround used for the eGK and should be reworked as soon as  *****/
-		    /***** there is a better possibility to let the user choose between the certificates	  *****/
-		    /**************************************************************************************************/
+			/**************************************************************************************************/
+			/***** TODO:										  *****/
+			/***** The following is just a workaround used for the eGK and should be reworked as soon as  *****/
+			/***** there is a better possibility to let the user choose between the certificates	  *****/
+			/**************************************************************************************************/
 
-		    String certName = cryptoMarker.getCertificateRefs().get(0).getDataSetName();
-		    ACLList certAcl = new ACLList();
-		    TargetNameType targetName = new TargetNameType();
-		    targetName.setDataSetName(certName);
-		    certAcl.setTargetName(targetName);
-		    certAcl.setConnectionHandle(handle2);
-		    ACLListResponse resp = (ACLListResponse) dispatcher.deliver(certAcl);
+			String certName = cryptoMarker.getCertificateRefs().get(0).getDataSetName();
+			ACLList certAcl = new ACLList();
+			TargetNameType targetName = new TargetNameType();
+			targetName.setDataSetName(certName);
+			certAcl.setTargetName(targetName);
+			certAcl.setConnectionHandle(handle2);
+			ACLListResponse resp = (ACLListResponse) dispatcher.deliver(certAcl);
 
-		    for (AccessRuleType rule : resp.getTargetACL().getAccessRule()) {
-			if (rule.getAction().getNamedDataServiceAction() != null) {
-			    if (rule.getAction().getNamedDataServiceAction().equals(NamedDataServiceActionName.DSI_READ)) {
-				if (rule.getSecurityCondition().isAlways() != null &&
+			for (AccessRuleType rule : resp.getTargetACL().getAccessRule()) {
+			    if (rule.getAction().getNamedDataServiceAction() != null) {
+				if (rule.getAction().getNamedDataServiceAction().equals(NamedDataServiceActionName.DSI_READ)) {
+				    if (rule.getSecurityCondition().isAlways() != null &&
 					rule.getSecurityCondition().isAlways().booleanValue()) {
-				    remainingDIDs.add(0, cardCert);
-				    break;
-				} else {
-				    remainingDIDs.add(cardCert);
-				    break;
+					remainingDIDs.add(0, cardCert);
+					break;
+				    } else {
+					remainingDIDs.add(cardCert);
+					break;
+				    }
 				}
 			    }
 			}
+
+			// add chain if located in other files
+			byte[] certChain = readChain(cryptoMarker, dispatcher, handle);
+
+			// concatenate with the certificate to use for TLS or signature creation
+			cert = ByteUtils.concatenate(cert, certChain);
+			Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, true);
+			dataSetWithCert.put(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), certAndTLSAuth);
 		    }
-		   
-		    // add chain if located in other files
-		    byte[] certChain = readChain(cryptoMarker, dispatcher, handle);
-		    
-		    // concatenate with the certificate to use for TLS or signature creation
-		    cert = ByteUtils.concatenate(cert, certChain);
-		    Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, true);
-		    dataSetWithCert.put(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), certAndTLSAuth);
 		}
 	    }
 	}

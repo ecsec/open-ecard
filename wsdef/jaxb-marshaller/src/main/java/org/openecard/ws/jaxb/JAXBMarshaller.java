@@ -26,13 +26,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -196,13 +193,10 @@ public final class JAXBMarshaller implements WSMarshaller {
     @Override
     public synchronized Document marshal(Object o) throws MarshallingTypeException {
 	try {
-	    StringWriter sw = new StringWriter();
-	    XMLStreamWriter xmlStreamWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(sw);
-	    // wrap writer so specific ns prefixes are written out correctly
-	    XMLStreamWriterWrapper xmlwrap = new XMLStreamWriterWrapper(xmlStreamWriter);
-	    marshaller.getMarshaller().marshal(o, xmlwrap);
-	    return str2doc(sw.toString());
-	} catch (Exception ex) {
+	    Document d = w3Builder.newDocument();
+	    marshaller.getMarshaller().marshal(o, d);
+	    return d;
+	} catch (JAXBException ex) {
 	    throw new MarshallingTypeException(ex);
 	}
     }

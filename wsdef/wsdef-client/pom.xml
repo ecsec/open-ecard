@@ -26,6 +26,19 @@
 	    </resource>
 	</resources>
 
+	<pluginManagement>
+		<plugins>
+			<!-- Set javadoc to be skipped as there are no classes in src/main and this will result in an error -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</pluginManagement>
+
 	<plugins>
 	    <plugin>
 		<groupId>org.codehaus.mojo</groupId>

@@ -1,101 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-	<groupId>org.openecard</groupId>
-	<artifactId>wsdef</artifactId>
-	<version>1.1.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>org.openecard</groupId>
+		<artifactId>wsdef</artifactId>
+		<version>1.1.0-SNAPSHOT</version>
+	</parent>
 
-    <groupId>org.openecard.wsdef</groupId>
-    <artifactId>wsdef-client</artifactId>
-    <packaging>jar</packaging>
-    <name>Open eCard WS classes</name>
+	<groupId>org.openecard.wsdef</groupId>
+	<artifactId>wsdef-client</artifactId>
+	<packaging>jar</packaging>
+	<name>Open eCard WS classes</name>
 
-    <build>
-	<resources>
-	    <resource>
-		<directory>src/main/wsdl</directory>
-		<includes>
-		    <include>**/ALL.wsdl</include>
-		    <include>**/*.xsd</include>
-		</includes>
-	    </resource>
-	</resources>
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/wsdl</directory>
+				<includes>
+					<include>**/ALL.wsdl</include>
+					<include>**/*.xsd</include>
+				</includes>
+			</resource>
+		</resources>
 
-	<pluginManagement>
+		<pluginManagement>
+			<plugins>
+				<!-- Set javadoc to be skipped as there are no classes in src/main and this will result in an error -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<configuration>
+						<skip>true</skip>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 		<plugins>
-			<!-- Set javadoc to be skipped as there are no classes in src/main and this will result in an error -->
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
+				<groupId>org.jvnet.jax-ws-commons</groupId>
+				<artifactId>jaxws-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>All other Services</id>
+						<goals>
+							<goal>wsimport</goal>
+						</goals>
+						<configuration>
+							<wsdlDirectory>${basedir}/src/main/wsdl</wsdlDirectory>
+							<wsdlFiles>
+								<wsdlFile>ALL.wsdl</wsdlFile>
+							</wsdlFiles>
+							<sourceDestDir>${project.build.directory}/generated-sources/jaxws</sourceDestDir>
+							<target>2.1</target>
+							<xjcArgs>
+								<xjcArg>-npa</xjcArg>
+							</xjcArgs>
+							<!-- newer java versions have too strict restritctions on loading referenced schemas -->
+							<vmArgs>
+								<vmArg>-Djavax.xml.accessExternalSchema=file</vmArg>
+							</vmArgs>
+							<!-- <keep>true</keep> -->
+							<!-- <verbose>true</verbose> -->
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.glassfish.metro</groupId>
+						<artifactId>webservices-tools</artifactId>
+						<version>2.3</version>
+					</dependency>
+					<dependency>
+						<groupId>org.glassfish.metro</groupId>
+						<artifactId>webservices-rt</artifactId>
+						<version>2.3</version>
+					</dependency>
+				</dependencies>
 			</plugin>
+
+			<plugin>
+				<groupId>org.openecard.wsdef</groupId>
+				<artifactId>class-list-plugin</artifactId>
+				<version>${project.version}</version>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>class-list</goal>
+						</goals>
+						<configuration>
+							<excludes>
+								<exclude>generated.ObjectFactory</exclude>
+								<exclude>generated.TCTokenType</exclude>
+								<exclude>generated.TCTokenType$PathSecurityParameters</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
-	</pluginManagement>
-
-	<plugins>
-	    <plugin>
-		<groupId>org.codehaus.mojo</groupId>
-		<artifactId>jaxws-maven-plugin</artifactId>
-		<executions>
-		    <!-- rest -->
-		    <execution>
-			<id>All other Services</id>
-			<goals>
-			    <goal>wsimport</goal>
-			</goals>
-			<configuration>
-			    <wsdlDirectory>${basedir}/src/main/wsdl</wsdlDirectory>
-			    <wsdlFiles><wsdlFile>ALL.wsdl</wsdlFile></wsdlFiles>
-			    <sourceDestDir>${project.build.directory}/generated-sources/jaxws</sourceDestDir>
-			    <target>2.1</target>
-			    <xjcArgs>
-				<xjcArg>-npa</xjcArg>
-			    </xjcArgs>
-			    <wsdlLocation>ALL.wsdl</wsdlLocation>
-			    <!-- <keep>true</keep> -->
-			    <!-- <verbose>true</verbose> -->
-			</configuration>
-		    </execution>
-		</executions>
-		<dependencies>
-		    <!-- use version 2.1 as long as there are java6 users out there -->
-		    <dependency>
-			<groupId>com.sun.xml.ws</groupId>
-			<artifactId>jaxws-tools</artifactId>
-			<version>2.2.7</version>
-		    </dependency>
-		</dependencies>
-	    </plugin>
-
-	    <plugin>
-		<groupId>org.openecard.wsdef</groupId>
-		<artifactId>class-list-plugin</artifactId>
-		<version>${project.version}</version>
-		<executions>
-		    <execution>
-			<phase>process-classes</phase>
-			<goals>
-			    <goal>class-list</goal>
-			</goals>
-			<configuration>
-			    <excludes>
-				<exclude>generated.ObjectFactory</exclude>
-				<exclude>generated.TCTokenType</exclude>
-				<exclude>generated.TCTokenType$PathSecurityParameters</exclude>
-			    </excludes>
-			</configuration>
-		    </execution>
-		</executions>
-	    </plugin>
-
-	</plugins>
-    </build>
+	</build>
 
 </project>

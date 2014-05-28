@@ -657,11 +657,6 @@
 			<!-- https://java.net/jira/browse/JAX_WS_COMMONS-113 -->
 			<version>2.3</version>
 		</plugin>
-		<plugin>
-			<groupId>org.codehaus.mojo</groupId>
-			<artifactId>jaxws-maven-plugin</artifactId>
-			<version>1.12</version>
-		</plugin>
 	    </plugins>
 	</pluginManagement>
     </build>

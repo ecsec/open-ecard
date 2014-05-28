@@ -41,8 +41,11 @@
 
 		<plugins>
 			<plugin>
-				<groupId>org.jvnet.jax-ws-commons</groupId>
+				<!-- use this fork as long as there is a problem with maven greater 3.1 -->
+				<!-- https://java.net/jira/browse/JAX_WS_COMMONS-121 -->
+				<groupId>net.trajano.mojo</groupId>
 				<artifactId>jaxws-maven-plugin</artifactId>
+				<version>2.3.2</version>
 				<executions>
 					<execution>
 						<id>All other Services</id>

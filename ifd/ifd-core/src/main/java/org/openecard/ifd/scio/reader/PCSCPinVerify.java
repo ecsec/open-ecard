@@ -25,6 +25,7 @@ package org.openecard.ifd.scio.reader;
 import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
 import iso.std.iso_iec._24727.tech.schema.PasswordTypeType;
 import java.io.ByteArrayOutputStream;
+import java.util.Locale;
 import org.openecard.common.I18n;
 import org.openecard.common.USBLangID;
 import org.openecard.common.util.ByteUtils;
@@ -175,6 +176,10 @@ public class PCSCPinVerify {
 	    ulDataLength = data.length;
 	    abData = data;
 	}
+    }
+
+    public void setLang(Locale l) {
+	wLangId = USBLangID.getCode(l);
     }
 
 

@@ -54,6 +54,7 @@ import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.testng.annotations.Test;
 import org.xml.sax.SAXException;
 import static iso.std.iso_iec._24727.tech.schema.PasswordTypeType.*;
+import java.util.Locale;
 import static org.testng.Assert.*;
 
 
@@ -142,6 +143,7 @@ public class PINTest {
     public void verifyISO() throws IFDException {
 	PasswordAttributesType pwdAttr = create(true, ISO_9564_1, 4, 8);
 	PCSCPinVerify ctrlStruct = new PCSCPinVerify(pwdAttr, StringUtils.toByteArray("00200001"));
+	ctrlStruct.setLang(Locale.GERMANY);
 	byte[] structData = ctrlStruct.toBytes();
 	String pinStr = "00 20 00 01 08 20 FF FF FF FF FF FF FF"; // length=13
 	String ctrlStr = "3C 00 89 47 04 0E04 02 01 0704 00 000000 0D000000";
@@ -153,6 +155,7 @@ public class PINTest {
     public void verifyASCII() throws IFDException {
 	PasswordAttributesType pwdAttr = create(false, ASCII_NUMERIC, 4, 4);
 	PCSCPinVerify ctrlStruct = new PCSCPinVerify(pwdAttr, StringUtils.toByteArray("00200001"));
+	ctrlStruct.setLang(Locale.GERMANY);
 	byte[] structData = ctrlStruct.toBytes();
 	String pinStr = "00 20 00 01"; // length=5
 	String ctrlStr = "3C 00 82 04 00 0404 02 01 0704 00 000000 04000000";

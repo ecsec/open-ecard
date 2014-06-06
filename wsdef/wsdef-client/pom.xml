@@ -62,6 +62,7 @@
 							<xjcArgs>
 								<xjcArg>-npa</xjcArg>
 							</xjcArgs>
+							<wsdlLocation>ALL.wsdl</wsdlLocation>
 							<!-- newer java versions have too strict restritctions on loading referenced schemas -->
 							<vmArgs>
 								<vmArg>-Djavax.xml.accessExternalSchema=file</vmArg>

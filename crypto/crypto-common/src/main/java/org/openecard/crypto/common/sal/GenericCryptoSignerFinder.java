@@ -288,8 +288,9 @@ public class GenericCryptoSignerFinder {
 			TargetNameType targetName = new TargetNameType();
 			targetName.setDataSetName(certName);
 			certAcl.setTargetName(targetName);
-			certAcl.setConnectionHandle(handle2);
+			certAcl.setConnectionHandle(handle);
 			ACLListResponse resp = (ACLListResponse) dispatcher.deliver(certAcl);
+			WSHelper.checkResult(resp);
 
 			for (AccessRuleType rule : resp.getTargetACL().getAccessRule()) {
 			    if (rule.getAction().getNamedDataServiceAction() != null) {
@@ -361,13 +362,13 @@ public class GenericCryptoSignerFinder {
 		logger.debug("Certificate needs did authentication to be readable.");
 	    }
 	}
-	
+
 	return remainingDIDs;
     }
 
     /**
      * Get a list of DIDs suitable for generic cryptography signature creation.
-     * 
+     *
      * @param dispatcher
      * @param handle
      * @return Maybe empty list of DIDs
@@ -494,7 +495,7 @@ public class GenericCryptoSignerFinder {
 	} catch (SecurityConditionUnsatisfiable ex) {
 	    logger.error("The ACLList operation is not allowed for the certificate data set.", ex);
 	} catch (APDUException ex) {
-	    logger.error("Failed to select or read the DataSet: " + 
+	    logger.error("Failed to select or read the DataSet: " +
 		    cryptoMarker.getCertificateRefs().get(0).getDataSetName(), ex);
 	}
 

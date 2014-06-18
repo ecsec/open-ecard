@@ -7,7 +7,7 @@ Required dependencies are:
 * Java JDK 6 or higher
   Oracle JDK and OpenJDK are working correctly
 
-* Maven 3.0.3 or higher
+* Maven in at least version 3.0.3 for JRE builds and 3.1.1 for Android builds
   https://maven.apache.org/download.html
 
 * Git 1.7.11 or higher (older versions are probably also ok)

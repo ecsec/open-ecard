@@ -56,7 +56,7 @@
 			<id>ant-compile</id>
 			<phase>initialize</phase>
 			<configuration>
-			    <tasks>
+			    <target>
 				<exec executable="${env.ANDROID_NDK_HOME}/${ndk.executable}" failonerror="true" />
 				<move file="libs/armeabi/pcscd" tofile="libs/armeabi/libpcscd.so" />
 				<mkdir dir="res/raw" />
@@ -69,7 +69,7 @@
 				<!-- remove to prevent packaging into apk -->
 				<delete file="libs/armeabi/libcyberjack.so" />
 				<delete file="libs/armeabi/libccid.so" />
-			    </tasks>
+			    </target>
 			</configuration>
 			<goals>
 			    <goal>run</goal>
@@ -79,14 +79,14 @@
 			<id>ant-install</id>
 			<phase>clean</phase>
 			<configuration>
-			    <tasks>
+			    <target>
 				<delete file="res/raw/drivers.zip" />
 				<delete dir="libs" />
 				<delete dir="obj" />
 				<exec executable="${env.ANDROID_NDK_HOME}/${ndk.executable}" failonerror="true">
 				    <arg value="clean" />
 				</exec>
-			    </tasks>
+			    </target>
 			</configuration>
 			<goals>
 			    <goal>run</goal>
@@ -107,7 +107,7 @@
 			<outputApk>${project.build.directory}/${project.build.finalName}-aligned.apk</outputApk>
 		    </zipalign>
 		    <sdk>
-			<platform>12</platform>
+			<platform>${android.api.version}</platform>
 		    </sdk>
 		    <test>
 			<createReport>true</createReport>

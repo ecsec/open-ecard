@@ -52,7 +52,7 @@
 			<outputApk>${project.build.directory}/${project.build.finalName}-aligned.apk</outputApk>
 		    </zipalign>
 		    <sdk>
-			<platform>12</platform>
+			<platform>${android.api.version}</platform>
 		    </sdk>
 		    <test>
 			<createReport>true</createReport>

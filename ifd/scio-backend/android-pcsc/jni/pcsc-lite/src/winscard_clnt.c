@@ -74,7 +74,6 @@
  *    \ref SCARD_SHARE_DIRECT is used but the card has @b already
  *    negotiated its protocol.
  */
-#define sa_family_t unsigned short
 
 #include "config.h"
 #include <stdlib.h>

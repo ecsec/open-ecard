@@ -34,6 +34,7 @@ import org.openecard.common.apdu.UpdateRecord;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardCommandStatus;
 import org.openecard.common.apdu.common.CardResponseAPDU;
+import org.openecard.common.apdu.common.TrailerConstants;
 import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.tlv.TLVException;
@@ -153,13 +154,25 @@ public class CardUtils {
 		    responses = new ArrayList<>();
 		    responses.add(new byte[] {(byte) 0x90, (byte) 0x00});
 		    responses.add(new byte[] {(byte) 0x67, (byte) 0x00});
+		    responses.add(new byte[] {(byte) 0x6A, (byte) 0x86});
 		}
 		result = selectFile.transmit(dispatcher, slotHandle, responses);
 
 		if (! Arrays.equals(result.getTrailer(), new byte[] {(byte) 0x90, (byte) 0x00}) && i == 2 &&
 			fileIdOrPath[0] == (byte) 0x3F && fileIdOrPath[1] == (byte) 0x00) {
 		    selectFile = new Select((byte) 0x00, (byte) 0x0c);
-		    result = selectFile.transmit(dispatcher, slotHandle);
+		    result = selectFile.transmit(dispatcher, slotHandle, responses);
+
+		    // if the result is still not 9000 the card probably does not support single directory/file selection
+		    // so lets try selection by path
+		    if (! Arrays.equals(result.getTrailer(), new byte[] {(byte) 0x90, (byte) 0x00}) &&
+			    fileIdOrPath.length > 2) {
+			selectFile = new Select.AbsolutePath(fileIdOrPath);
+			result = selectFile.transmit(dispatcher, slotHandle);
+			if (Arrays.equals(result.getTrailer(), TrailerConstants.Success.OK)) {
+			    return result;
+			}
+		    }
 		}
 	    } else {
 		result = selectFile.transmit(dispatcher, slotHandle, responses);
@@ -172,17 +185,17 @@ public class CardUtils {
 
     /**
      * Select an application by it's file identifier.
-     * 
+     *
      * @param dispatcher The message dispatcher for the interaction with the card.
      * @param slotHandle
      * @param fileID File identitfier of an application or a path to the application.
      * @return The {@link CardResponseAPDU} from the last select which means the select of the application to select.
-     * @throws APDUException 
+     * @throws APDUException
      */
     public static CardResponseAPDU selectApplicationByFID(Dispatcher dispatcher, byte[] slotHandle, byte[] fileID) throws APDUException {
 	Select selectApp;
 	CardResponseAPDU result = null;
-	
+
 	// respect the possibility that fileID could be a path
 	int i = 0;
 	while (i < fileID.length) {
@@ -201,16 +214,16 @@ public class CardUtils {
 
 	return result;
     }
-    
+
     /**
      * Select an application by the application identifier.
      * This method requests the FCP of the application.
-     * 
+     *
      * @param dispatcher
      * @param slotHandle
      * @param aid Application identifier
      * @return
-     * @throws APDUException 
+     * @throws APDUException
      */
     public static CardResponseAPDU selectApplicationByAID(Dispatcher dispatcher, byte[] slotHandle, byte[] aid) throws APDUException {
 	Select selectApp = new Select((byte) 0x04, (byte) 0x04);
@@ -247,7 +260,7 @@ public class CardUtils {
 		    // 0x6A84 code for the estonian identity card. The card returns this code
 		    // after the last read process.
 		    response = readBinary.transmit(dispatcher, slotHandle, CardCommandStatus.response(0x9000, 0x6282,
-			    0x6A84, 0x6A83, 0x6A86));
+			    0x6A84, 0x6A83, 0x6A86, 0x6B00));
 		} else {
 		    CardCommandAPDU readRecord = new ReadRecord((byte) i);
 		    response = readRecord.transmit(dispatcher, slotHandle, CardCommandStatus.response(0x9000, 0x6282,

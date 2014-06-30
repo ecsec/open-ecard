@@ -39,6 +39,7 @@ import org.openecard.addon.AddonManager;
 import org.openecard.common.I18n;
 import org.openecard.gui.graphics.GraphicsUtil;
 import org.openecard.gui.graphics.OecLogoBgWhite;
+import org.openecard.gui.graphics.OecLogoBlackBgWhite;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.richclient.RichClient;
 import org.slf4j.Logger;
@@ -211,7 +212,7 @@ public class AppTray {
     }
 
     private Image getImageMacOSX(String name, Dimension dim) {
-	return GraphicsUtil.createImage(OecLogoBgWhite.class, dim.width - 2, dim.height - 2, dim.width, dim.height, 1, 1);
+	return GraphicsUtil.createImage(OecLogoBlackBgWhite.class, dim.width - 2, dim.height - 2, dim.width, dim.height, 1, 1);
     }
 
     private Image getImageDefault(String name, Dimension dim) {

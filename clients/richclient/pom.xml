@@ -16,17 +16,17 @@
     <name>Rich Client</name>
 
 
-    <properties>
-	<!-- These properties can be set from the commandline to override the selected certificate -->
-	<sign.keystore>src/package/resources/keystore/keystore.jks</sign.keystore>
-	<sign.storepass>123456</sign.storepass>
-	<sign.keypass>123456</sign.keypass>
-	<sign.alias>selfsigned</sign.alias>
+	<properties>
+		<!-- These properties can be set from the commandline to override the selected certificate -->
+		<sign.keystore>../../src/package/resources/keystore/keystore.jks</sign.keystore>
+		<sign.storepass>123456</sign.storepass>
+		<sign.keypass>123456</sign.keypass>
+		<sign.alias>selfsigned</sign.alias>
 
-	<packaging.type>jar</packaging.type>
+		<packaging.type>jar</packaging.type>
 
-	<application.name>Open eCard App</application.name>
-    </properties>
+		<application.name>Open eCard App</application.name>
+	</properties>
 
 
     <build>
@@ -159,11 +159,6 @@
 								-->
 								<createDependencyReducedPom>false</createDependencyReducedPom>
 								<artifactSet>
-									<!--
-									<includes>
-										<include>org.apache.maven:*</include>
-									</includes>
-									-->
 									<excludes>
 										<exclude>org.openecard:cifs</exclude>
 									</excludes>

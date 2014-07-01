@@ -56,99 +56,174 @@
 	</pluginManagement>
     </build>
 
-    <profiles>
-	<profile>
-	    <!-- normal jar profile, needed because netbeans does not recognize the signed-packed-jar type -->
-	    <id>normal-jar</id>
-	    <properties>
-		<packaging.type>jar</packaging.type>
-	    </properties>
-	</profile>
-	<profile>
-	    <id>bundled-jar</id>
-	    <activation>
-		<activeByDefault>true</activeByDefault>
-	    </activation>
-	    <properties>
-		<packaging.type>signed-packed-jar</packaging.type>
-	    </properties>
-	    <build>
-		<pluginManagement>
-		    <plugins>
-			<plugin>
-			    <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-shade-plugin</artifactId>
-			    <configuration>
-				<shadedClassifierName>bundle</shadedClassifierName>
-				<shadedArtifactAttached>true</shadedArtifactAttached>
-				<!--
-				    The reduced pom excludes transitive
-				    dependencies of test scope libraries, eg. com.beust.jcommander from org.testng.testng,
-				    so a subsequent test run (eg. started by cobertura) will miss some dependencies:
-				    see http://jira.codehaus.org/browse/MSHADE-95
-				-->
-				<createDependencyReducedPom>false</createDependencyReducedPom>
-				<filters>
-				    <filter>
-					<artifact>*:*</artifact>
-					<excludes>
-					    <exclude>META-INF/**/pom.xml</exclude>
-					    <exclude>META-INF/**/pom.properties</exclude>
-					</excludes>
-				    </filter>
-				</filters>
-				<transformers>
-				    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-					<manifestEntries>
-					    <Class-Path></Class-Path>
-					</manifestEntries>
-				    </transformer>
-				</transformers>
-			    </configuration>
-			</plugin>
-			<plugin>
-			    <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-jarsigner-plugin</artifactId>
-			    <configuration>
-				<keystore>${sign.keystore}</keystore>
-				<storepass>${sign.storepass}</storepass>
-				<alias>${sign.alias}</alias>
-				<keypass>${sign.keypass}</keypass>
-			    </configuration>
-			</plugin>
-		    </plugins>
-		</pluginManagement>
-		<plugins>
-		    <plugin>
-			<groupId>de.ecsec.maven.plugins</groupId>
-			<artifactId>pack200-maven-plugin</artifactId>
-			<configuration>
-			    <includeClassifiers>
-				<param>bundle</param>
-			    </includeClassifiers>
-			    <packLogLevel>SEVERE</packLogLevel>
-			    <effort>9</effort>
-			    <modificationTime>latest</modificationTime>
-			    <segmentLimit>-1</segmentLimit>
-			    <stripDebugAttributes>true</stripDebugAttributes>
-			</configuration>
-			<extensions>true</extensions>
-		    </plugin>
-		</plugins>
-	    </build>
-	</profile>
-    </profiles>
+	<profiles>
+		<profile>
+			<!-- normal jar profile, needed because netbeans does not recognize the signed-packed-jar type -->
+			<id>normal-jar</id>
+			<properties>
+				<packaging.type>jar</packaging.type>
+			</properties>
+		</profile>
+		<profile>
+			<id>bundled-jar-cifs</id>
+			<properties>
+				<packaging.type>signed-packed-jar</packaging.type>
+			</properties>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-shade-plugin</artifactId>
+							<configuration>
+								<shadedClassifierName>bundle-cifs</shadedClassifierName>
+								<shadedArtifactAttached>true</shadedArtifactAttached>
+								<!--
+									The reduced pom excludes transitive
+									dependencies of test scope libraries, eg. com.beust.jcommander from org.testng.testng,
+									so a subsequent test run (eg. started by cobertura) will miss some dependencies:
+									see http://jira.codehaus.org/browse/MSHADE-95
+								-->
+								<createDependencyReducedPom>false</createDependencyReducedPom>
+								<filters>
+									<filter>
+										<artifact>*:*</artifact>
+										<excludes>
+											<exclude>META-INF/**/pom.xml</exclude>
+											<exclude>META-INF/**/pom.properties</exclude>
+										</excludes>
+									</filter>
+								</filters>
+								<transformers>
+									<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+										<manifestEntries>
+											<Class-Path></Class-Path>
+										</manifestEntries>
+									</transformer>
+								</transformers>
+							</configuration>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-jarsigner-plugin</artifactId>
+							<configuration>
+								<keystore>${sign.keystore}</keystore>
+								<storepass>${sign.storepass}</storepass>
+								<alias>${sign.alias}</alias>
+								<keypass>${sign.keypass}</keypass>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+				<plugins>
+					<plugin>
+						<groupId>de.ecsec.maven.plugins</groupId>
+						<artifactId>pack200-maven-plugin</artifactId>
+						<configuration>
+							<includeClassifiers>
+								<param>bundle-cifs</param>
+							</includeClassifiers>
+							<packLogLevel>SEVERE</packLogLevel>
+							<effort>9</effort>
+							<modificationTime>latest</modificationTime>
+							<segmentLimit>-1</segmentLimit>
+							<stripDebugAttributes>true</stripDebugAttributes>
+						</configuration>
+						<extensions>true</extensions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>bundled-jar</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<packaging.type>signed-packed-jar</packaging.type>
+			</properties>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-shade-plugin</artifactId>
+							<configuration>
+								<shadedClassifierName>bundle</shadedClassifierName>
+								<shadedArtifactAttached>true</shadedArtifactAttached>
+								<!--
+									The reduced pom excludes transitive
+									dependencies of test scope libraries, eg. com.beust.jcommander from org.testng.testng,
+									so a subsequent test run (eg. started by cobertura) will miss some dependencies:
+									see http://jira.codehaus.org/browse/MSHADE-95
+								-->
+								<createDependencyReducedPom>false</createDependencyReducedPom>
+								<artifactSet>
+									<!--
+									<includes>
+										<include>org.apache.maven:*</include>
+									</includes>
+									-->
+									<excludes>
+										<exclude>org.openecard:cifs</exclude>
+									</excludes>
+								</artifactSet>
+								<filters>
+									<filter>
+										<artifact>*:*</artifact>
+										<excludes>
+											<exclude>META-INF/**/pom.xml</exclude>
+											<exclude>META-INF/**/pom.properties</exclude>
+										</excludes>
+									</filter>
+								</filters>
+								<transformers>
+									<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+										<manifestEntries>
+											<Class-Path></Class-Path>
+										</manifestEntries>
+									</transformer>
+								</transformers>
+							</configuration>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-jarsigner-plugin</artifactId>
+							<configuration>
+								<keystore>${sign.keystore}</keystore>
+								<storepass>${sign.storepass}</storepass>
+								<alias>${sign.alias}</alias>
+								<keypass>${sign.keypass}</keypass>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+				<plugins>
+					<plugin>
+						<groupId>de.ecsec.maven.plugins</groupId>
+						<artifactId>pack200-maven-plugin</artifactId>
+						<configuration>
+							<includeClassifiers>
+								<param>bundle</param>
+							</includeClassifiers>
+							<packLogLevel>SEVERE</packLogLevel>
+							<effort>9</effort>
+							<modificationTime>latest</modificationTime>
+							<segmentLimit>-1</segmentLimit>
+							<stripDebugAttributes>true</stripDebugAttributes>
+						</configuration>
+						<extensions>true</extensions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 
     <dependencies>
 	<dependency>
 	    <groupId>org.openecard.sal</groupId>
 	    <artifactId>tiny-sal</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.transport</groupId>
-	    <artifactId>dispatcher</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
@@ -173,11 +248,6 @@
 	</dependency>
 	<dependency>
 	    <groupId>org.openecard.gui</groupId>
-	    <artifactId>graphics</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.gui</groupId>
 	    <artifactId>about</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
@@ -192,11 +262,6 @@
 	    <version>${project.version}</version>
 	</dependency>
 
-	<dependency>
-	    <groupId>org.openecard</groupId>
-	    <artifactId>addon</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
 	<dependency>
 	    <groupId>org.openecard.addons</groupId>
 	    <artifactId>tr03112</artifactId>

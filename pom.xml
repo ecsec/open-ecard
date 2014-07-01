@@ -49,6 +49,7 @@
 	<module>ifd</module>
 	<module>sal</module>
 	<module>management</module>
+	<module>cifs</module>
 	<module>recognition</module>
 	<module>event-manager</module>
 	<module>addon</module>

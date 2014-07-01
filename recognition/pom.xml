@@ -27,6 +27,11 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
+	    <groupId>org.openecard</groupId>
+	    <artifactId>cifs</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
 	    <groupId>org.openecard.wsdef</groupId>
 	    <artifactId>wsdef-client</artifactId>
 	    <version>${project.version}</version>

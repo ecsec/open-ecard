@@ -40,7 +40,7 @@
 	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
 		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
 	<import namespace="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#"
-		schemaLocation="oasis-dssx-1.0-profiles-verification-report-cs1.xsd" />
+		schemaLocation="oasis-dssx-1.0-profiles-verification-report-cs1-local.xsd" />
 	<import namespace="http://www.setcce.org/schemas/ers"
 		schemaLocation="xmlers-schema-draft-v0.3.xsd" />
 

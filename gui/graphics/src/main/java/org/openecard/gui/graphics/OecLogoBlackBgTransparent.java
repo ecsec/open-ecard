@@ -30,7 +30,7 @@ import javax.swing.Icon;
  * This class has been automatically generated using svg2java
  *
  */
-public class OecLogoBlackBgWhite implements Icon {
+public class OecLogoBlackBgTransparent implements Icon {
 
 	private float origAlpha = 1.0f;
 
@@ -63,7 +63,7 @@ public class OecLogoBlackBgWhite implements Icon {
 
 	private void paintShapeNode_0_0_0_0_0(Graphics2D g) {
 		RoundRectangle2D.Double shape0 = new RoundRectangle2D.Double(129.79100036621094, 71.53150177001953, 49.44599914550781, 49.50519943237305, 20.475799560546875, 20.475799560546875);
-		g.setPaint(new Color(255, 255, 255, 255));
+		g.setPaint(new Color(255, 255, 255, 0));
 		g.fill(shape0);
 	}
 
@@ -214,7 +214,7 @@ public class OecLogoBlackBgWhite implements Icon {
 	/**
 	 * Creates a new transcoded SVG image.
 	 */
-	public OecLogoBlackBgWhite() {
+	public OecLogoBlackBgTransparent() {
         this.width = getOrigWidth();
         this.height = getOrigHeight();
 	}

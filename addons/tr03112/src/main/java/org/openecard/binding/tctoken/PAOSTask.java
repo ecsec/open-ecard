@@ -26,9 +26,12 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigInteger;
 import java.net.MalformedURLException;
+import java.util.List;
 import java.util.concurrent.Callable;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.Version;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.transport.paos.PAOS;
@@ -43,11 +46,14 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 
     private final Dispatcher dispatcher;
     private final ConnectionHandleType connectionHandle;
+    private final List<String> supportedDIDs;
     private final TCTokenRequest tokenRequest;
 
-    public PAOSTask(Dispatcher dispatcher, ConnectionHandleType connectionHandle, TCTokenRequest tokenRequest) {
+    public PAOSTask(Dispatcher dispatcher, ConnectionHandleType connectionHandle, List<String> supportedDIDs,
+	    TCTokenRequest tokenRequest) {
 	this.dispatcher = dispatcher;
 	this.connectionHandle = connectionHandle;
+	this.supportedDIDs = supportedDIDs;
 	this.tokenRequest = tokenRequest;
     }
 
@@ -68,6 +74,21 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    sp.setProfile(ECardConstants.Profile.ECARD_1_1);
 	    sp.getConnectionHandle().add(connectionHandle);
 	    sp.setSessionIdentifier(tlsHandler.getSessionId());
+
+	    StartPAOS.UserAgent ua = new StartPAOS.UserAgent();
+	    ua.setName(Version.getName());
+	    ua.setVersionMajor(BigInteger.valueOf(Version.getMajor()));
+	    ua.setVersionMinor(BigInteger.valueOf(Version.getMinor()));
+	    ua.setVersionSubminor(BigInteger.valueOf(Version.getPatch()));
+	    sp.setUserAgent(ua);
+
+	    StartPAOS.SupportedAPIVersions sv = new StartPAOS.SupportedAPIVersions();
+	    sv.setMajor(ECardConstants.ECARD_API_VERSION_MAJOR);
+	    sv.setMinor(ECardConstants.ECARD_API_VERSION_MINOR);
+	    sv.setSubminor(ECardConstants.ECARD_API_VERSION_SUBMINOR);
+	    sp.getSupportedAPIVersions().add(sv);
+
+	    sp.getSupportedDIDProtocols().addAll(supportedDIDs);
 
 	    return p.sendStartPAOS(sp);
 	} finally {

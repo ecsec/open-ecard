@@ -37,12 +37,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import org.openecard.addon.AddonManager;
+import org.openecard.addon.AddonRegistry;
 import org.openecard.addon.Context;
+import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
@@ -88,6 +94,7 @@ public class TCTokenHandler {
     private final Dispatcher dispatcher;
     private final UserConsent gui;
     private final CardRecognition rec;
+    private final AddonManager manager;
 
     /**
      * Creates a TCToken handler instances and initializes it with the given parameters.
@@ -99,6 +106,7 @@ public class TCTokenHandler {
 	this.dispatcher = ctx.getDispatcher();
 	this.gui = ctx.getUserConsent();
 	this.rec = ctx.getRecognition();
+	this.manager = ctx.getManager();
     }
 
 
@@ -171,7 +179,8 @@ public class TCTokenHandler {
 	    String binding = token.getBinding();
 	    if ("urn:liberty:paos:2006-08".equals(binding)) {
 		// send StartPAOS
-		PAOSTask task = new PAOSTask(dispatcher, connectionHandle, tokenRequest);
+		List<String> supportedDIDs = getSupportedDIDs();
+		PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest);
 		FutureTask<StartPAOSResponse> paosTask = new FutureTask<>(task);
 		Thread paosThread = new Thread(paosTask, "PAOS");
 		paosThread.start();
@@ -377,6 +386,21 @@ public class TCTokenHandler {
 	} catch (ResourceException | ValidationError ex) {
 	    throw new InvalidRedirect(ex.getMessage(), ex);
 	}
+    }
+
+    private List<String> getSupportedDIDs() {
+	TreeSet<String> result = new TreeSet<>();
+
+	// check all sal protocols in the
+	AddonRegistry registry = manager.getRegistry();
+	Set<AddonSpecification> addons = registry.listAddons();
+	for (AddonSpecification addon : addons) {
+	    for (ProtocolPluginSpecification proto : addon.getSalActions()) {
+		result.add(proto.getUri());
+	    }
+	}
+
+	return new ArrayList<>(result);
     }
 
     /**

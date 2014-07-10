@@ -38,6 +38,7 @@ import org.openecard.addon.Context;
 import org.openecard.addon.EventHandler;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.Version;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.state.CardStateEntry;
@@ -85,7 +86,7 @@ public class StatusHandler {
 
 	// user agent
 	StatusType.UserAgent ua = new StatusType.UserAgent();
-	ua.setName("Open eCard App");
+	ua.setName(Version.getName());
 	ua.setVersionMajor(BigInteger.valueOf(Version.getMajor()));
 	ua.setVersionMinor(BigInteger.valueOf(Version.getMinor()));
 	ua.setVersionSubminor(BigInteger.valueOf(Version.getPatch()));
@@ -94,8 +95,9 @@ public class StatusHandler {
 	// API versions
 	StatusType.SupportedAPIVersions apiVersion = new StatusType.SupportedAPIVersions();
 	apiVersion.setName("http://www.bsi.bund.de/ecard/api");
-	apiVersion.setVersionMajor(BigInteger.ONE);
-	apiVersion.setVersionMinor(BigInteger.ONE);
+	apiVersion.setVersionMajor(ECardConstants.ECARD_API_VERSION_MAJOR);
+	apiVersion.setVersionMinor(ECardConstants.ECARD_API_VERSION_MINOR);
+	apiVersion.setVersionSubminor(ECardConstants.ECARD_API_VERSION_SUBMINOR);
 	status.getSupportedAPIVersions().add(apiVersion);
 
 	// supported cards
@@ -122,7 +124,7 @@ public class StatusHandler {
 
     @Nonnull
     private static List<StatusType.SupportedCards> getSupportedCards(List<String> protocols, List<CardInfoType> cifs) {
-	List<StatusType.SupportedCards> result = new ArrayList<StatusType.SupportedCards>();
+	List<StatusType.SupportedCards> result = new ArrayList<>();
 
 	for (CardInfoType cif : cifs) {
 	    StatusType.SupportedCards supportedCard = new StatusType.SupportedCards();
@@ -146,7 +148,7 @@ public class StatusHandler {
 
     @Nonnull
     private List<String> getProtocolInfo(AddonManager manager) {
-	TreeSet<String> result = new TreeSet<String>();
+	TreeSet<String> result = new TreeSet<>();
 
 	// check all sal protocols in the
 	AddonRegistry registry = manager.getRegistry();
@@ -157,7 +159,7 @@ public class StatusHandler {
 	    }
 	}
 
-	return new ArrayList<String>(result);
+	return new ArrayList<>(result);
     }
 
     @Nonnull
@@ -165,7 +167,7 @@ public class StatusHandler {
 	ConnectionHandleType handle = new ConnectionHandleType();
 	Set<CardStateEntry> entries = cardStates.getMatchingEntries(handle, false);
 
-	ArrayList<ConnectionHandleType> result = new ArrayList<ConnectionHandleType>(entries.size());
+	ArrayList<ConnectionHandleType> result = new ArrayList<>(entries.size());
 	for (CardStateEntry entry : entries) {
 	    result.add(entry.handleCopy());
 	}

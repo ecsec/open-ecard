@@ -60,7 +60,7 @@ public class ClassList extends AbstractMojo {
     /**
      * Name of the file.
      *
-     * @parameter expression="classes.lst"
+     * @parameter default-value="classes.lst"
      */
     @SuppressFBWarnings(value = { "UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD" },
 			justification = "Written by maven plugin.")

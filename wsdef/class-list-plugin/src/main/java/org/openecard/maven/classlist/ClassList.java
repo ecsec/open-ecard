@@ -42,8 +42,7 @@ import org.apache.maven.plugins.annotations.Parameter;
  * parameter {@code outputDirectory}. The contents of the file are entries of fully qualified class names with all JAXB
  * element classes found below the directory named by the {@code classDirectory} parameter. The {@code excludes} list
  * can contain fully qualified class names which should not occur in the list.
- * <p>
- * The plugin is executed in the {@code process-classes} phase. The goal is named {@code class-list}.
+ * <p>The plugin is executed in the {@code process-classes} phase. The goal is named {@code class-list}.</p>
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
@@ -89,26 +88,18 @@ public class ClassList extends AbstractMojo {
 	}
 	File touch = new File(f, fileName);
 
-	PrintWriter pw = null;
-	try {
-	    pw = new PrintWriter(touch, "UTF-8");
-
+	try (PrintWriter pw = new PrintWriter(touch, "UTF-8")) {
 	    // get list of all class files
 	    for (String next : getClassFiles()) {
 		pw.println(next);
 	    }
-
 	} catch (IOException e) {
 	    throw new MojoExecutionException("Error creating file " + touch, e);
-	} finally {
-	    if (pw != null) {
-		pw.close();
-	    }
 	}
     }
 
     private Set<String> getClassFiles() {
-	Set<String> result = new TreeSet<String>();
+	Set<String> result = new TreeSet<>();
 
 	getLog().info("Checking dir: " + classDirectory.getPath());
 	result.addAll(getClassFiles(classDirectory));
@@ -117,7 +108,7 @@ public class ClassList extends AbstractMojo {
     }
 
     private Set<String> getClassFiles(File dir) {
-	Set<String> result = new TreeSet<String>();
+	Set<String> result = new TreeSet<>();
 
 	File[] files = dir.listFiles();
 

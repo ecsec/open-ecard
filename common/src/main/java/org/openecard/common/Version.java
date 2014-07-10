@@ -26,6 +26,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.openecard.common.util.FileUtils;
@@ -40,29 +42,53 @@ import org.openecard.common.util.FileUtils;
  */
 public class Version {
 
+    private static final String appnameFile = "openecard/APPNAME";
     private static final String versionFile = "openecard/VERSION";
+    private static final String unknownName = "UNKNOWN";
     private static final String unknownVersion = "UNKNOWN";
 
     private static final String version;
 
+    private static final String name;
     private static final int major;
     private static final int minor;
     private static final int patch;
     private static final String buildId;
 
     static {
-	InputStream in;
+	InputStream inName, inVer;
 	try {
-	    in = FileUtils.resolveResourceAsStream(Version.class, versionFile);
+	    inName = FileUtils.resolveResourceAsStream(Version.class, appnameFile);
 	} catch (IOException ex) {
-	    in = null;
+	    inName = null;
 	}
-	version = loadVersionLine(in);
+	try {
+	    inVer = FileUtils.resolveResourceAsStream(Version.class, versionFile);
+	} catch (IOException ex) {
+	    inVer = null;
+	}
+	name = loadName(inName);
+	version = loadVersionLine(inVer);
 	String[] groups = splitVersion(version);
 	major = Integer.parseInt(groups[0]);
 	minor = Integer.parseInt(groups[1]);
 	patch = Integer.parseInt(groups[2]);
 	buildId = groups[3];
+    }
+
+    private static String loadName(InputStream in) {
+	if (in == null) {
+	    return unknownName;
+	} else {
+	    Scanner s = new Scanner(in, "UTF-8").useDelimiter("\\A");
+	    try {
+		String nameStr = s.next();
+		return nameStr.trim();
+	    } catch (NoSuchElementException ex) {
+		// empty file
+		return unknownName;
+	    }
+	}
     }
 
     private static String loadVersionLine(InputStream in) {
@@ -106,6 +132,14 @@ public class Version {
 	return groups;
     }
 
+
+    /**
+     * Gets the name of the application.
+     * @return Name of the app or the UNKNOWN if the name is unavailable.
+     */
+    public static String getName() {
+	return name;
+    }
 
     /**
      * Get complete version string with major, minor and patch version separated by dots.

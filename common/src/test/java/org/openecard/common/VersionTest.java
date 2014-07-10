@@ -34,6 +34,9 @@ public class VersionTest {
 
     @Test
     public void testVersion() {
+	String name = Version.getName();
+	Assert.assertEquals(name, "Open eCard App");
+
 	String version = Version.getVersion();
 	int major = Version.getMajor();
 	int minor = Version.getMinor();

@@ -58,7 +58,7 @@ public class TinyManagementTest {
 	assertEquals(ECardConstants.Major.OK, initializeFrameworkResponse.getResult().getResultMajor());
 	//TODO version should be a constant somewhere else
 	assertEquals(BigInteger.valueOf(1), initializeFrameworkResponse.getVersion().getMajor());
-	assertEquals(BigInteger.valueOf(11), initializeFrameworkResponse.getVersion().getMinor());
+	assertEquals(BigInteger.valueOf(13), initializeFrameworkResponse.getVersion().getMinor());
 	assertEquals(BigInteger.valueOf(0), initializeFrameworkResponse.getVersion().getSubMinor());
     }
 

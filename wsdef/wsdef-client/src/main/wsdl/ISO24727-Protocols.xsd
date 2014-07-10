@@ -100,11 +100,9 @@
 					<sequence>
 						<element name="SessionIdentifier" type="string" />
 						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" maxOccurs="unbounded"
-							minOccurs="0">
+							type="iso:ConnectionHandleType" maxOccurs="unbounded">
 						</element>
-						<!--
-						<element name="UserAgent" minOccurs="0">
+						<element name="UserAgent">
 							<complexType>
 								<sequence>
 									<element name="Name" type="string" />
@@ -114,7 +112,7 @@
 								</sequence>
 							</complexType>
 						</element>
-						<element name="SupportedAPIVersions" minOccurs="0" maxOccurs="unbounded">
+						<element name="SupportedAPIVersions" maxOccurs="unbounded">
 							<complexType>
 								<sequence>
 									<element name="Major" type="integer" />
@@ -124,7 +122,6 @@
 							</complexType>
 						</element>
 						<element name="SupportedDIDProtocols" type="anyURI" minOccurs="0" maxOccurs="unbounded"	/>
-						-->
 					</sequence>
 				</extension>
 			</complexContent>

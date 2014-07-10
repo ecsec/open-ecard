@@ -22,6 +22,7 @@
 
 package org.openecard.common;
 
+import java.math.BigInteger;
 import java.util.TreeMap;
 
 
@@ -54,6 +55,10 @@ public class ECardConstants {
     public static final String PAOS_VERSION_11 = "urn:liberty:paos:2003-08";
     public static final String PAOS_VERSION_20 = "urn:liberty:paos:2006-08";
     public static final String WS_ADDRESSING = "http://www.w3.org/2005/03/addressing";
+
+    public static final BigInteger ECARD_API_VERSION_MAJOR = BigInteger.valueOf(1);
+    public static final BigInteger ECARD_API_VERSION_MINOR = BigInteger.valueOf(1);
+    public static final BigInteger ECARD_API_VERSION_SUBMINOR = BigInteger.valueOf(4);
 
 
     public static class CIF {

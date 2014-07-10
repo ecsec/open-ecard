@@ -87,7 +87,6 @@ import de.bund.bsi.ecard.api._1.TerminateFramework;
 import de.bund.bsi.ecard.api._1.TerminateFrameworkResponse;
 import de.bund.bsi.ecard.api._1.UnregisterIFD;
 import de.bund.bsi.ecard.api._1.UnregisterIFDResponse;
-import java.math.BigInteger;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
@@ -101,9 +100,7 @@ import org.openecard.ws.Management;
  */
 public class TinyManagement implements  Management {
 
-    private static final int[] VERSION = {1, 11, 0};
-
-    private Environment env;
+    private final Environment env;
 
     public TinyManagement(Environment env) {
 	this.env = env;
@@ -223,10 +220,9 @@ public class TinyManagement implements  Management {
     public InitializeFrameworkResponse initializeFramework(InitializeFramework arg0) {
 	InitializeFrameworkResponse initializeFrameworkResponse = new InitializeFrameworkResponse();
 	Version version = new Version();
-	// TODO: version should be a constant somewhere else
-	version.setMajor(BigInteger.valueOf(VERSION[0]));
-	version.setMinor(BigInteger.valueOf(VERSION[1]));
-	version.setSubMinor(BigInteger.valueOf(VERSION[2]));
+	version.setMajor(ECardConstants.ECARD_API_VERSION_MAJOR);
+	version.setMinor(ECardConstants.ECARD_API_VERSION_MINOR);
+	version.setSubMinor(ECardConstants.ECARD_API_VERSION_SUBMINOR);
 	initializeFrameworkResponse.setVersion(version);
 	Result r = new Result();
 	r.setResultMajor(ECardConstants.Major.OK);

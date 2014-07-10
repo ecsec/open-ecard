@@ -27,7 +27,6 @@ import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
 import iso.std.iso_iec._24727.tech.schema.ResponseType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.math.BigInteger;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.testng.annotations.BeforeMethod;
@@ -56,10 +55,9 @@ public class TinyManagementTest {
 	InitializeFramework initializeFramework = new InitializeFramework();
 	InitializeFrameworkResponse initializeFrameworkResponse = instance.initializeFramework(initializeFramework);
 	assertEquals(ECardConstants.Major.OK, initializeFrameworkResponse.getResult().getResultMajor());
-	//TODO version should be a constant somewhere else
-	assertEquals(BigInteger.valueOf(1), initializeFrameworkResponse.getVersion().getMajor());
-	assertEquals(BigInteger.valueOf(11), initializeFrameworkResponse.getVersion().getMinor());
-	assertEquals(BigInteger.valueOf(0), initializeFrameworkResponse.getVersion().getSubMinor());
+	assertEquals(ECardConstants.ECARD_API_VERSION_MAJOR, initializeFrameworkResponse.getVersion().getMajor());
+	assertEquals(ECardConstants.ECARD_API_VERSION_MINOR, initializeFrameworkResponse.getVersion().getMinor());
+	assertEquals(ECardConstants.ECARD_API_VERSION_SUBMINOR, initializeFrameworkResponse.getVersion().getSubMinor());
     }
 
     @Test

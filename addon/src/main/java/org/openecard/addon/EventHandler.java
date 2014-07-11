@@ -45,8 +45,8 @@ public class EventHandler implements EventCallback {
 
     private static final Logger logger = LoggerFactory.getLogger(EventHandler.class);
 
-    private Map<String, LinkedBlockingQueue<StatusChange>> eventQueues;
-    private Map<String, ReschedulableTimer> timers;
+    private final Map<String, LinkedBlockingQueue<StatusChange>> eventQueues;
+    private final Map<String, ReschedulableTimer> timers;
     // after this delay of inactivity an event queue (and it's timer) will be deleted
     private static final int deleteDelay = 60 * 1000;
 
@@ -56,14 +56,14 @@ public class EventHandler implements EventCallback {
      * @param eventManager event manager to get events (status changes) from
      */
     public EventHandler(EventManager eventManager) {
-	eventQueues = new HashMap<String, LinkedBlockingQueue<StatusChange>>();
-	timers = new HashMap<String, ReschedulableTimer>();
+	eventQueues = new HashMap<>();
+	timers = new HashMap<>();
 	eventManager.registerAllEvents(this);
     }
 
     /**
      *
-     * @param statusChangeRequest a status change request for a specific session
+     * @param session
      * @return a StatusChange containing the new status, or null if no eventQueue for the given session exists or if
      *   interrupted
      */

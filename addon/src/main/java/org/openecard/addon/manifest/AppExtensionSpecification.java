@@ -40,8 +40,9 @@ public class AppExtensionSpecification {
 
     private String id;
     private String className;
-    private final List<LocalizedString> localizedName = new ArrayList<LocalizedString>();
-    private final List<LocalizedString> localizedDescription = new ArrayList<LocalizedString>();
+    private Boolean loadOnStartup;
+    private final List<LocalizedString> localizedName = new ArrayList<>();
+    private final List<LocalizedString> localizedDescription = new ArrayList<>();
     private Configuration configDescription;
 
     @XmlElement(name = "ID")
@@ -52,6 +53,14 @@ public class AppExtensionSpecification {
     @XmlElement(name = "ClassName")
     public String getClassName() {
 	return className;
+    }
+
+    @XmlElement(name = "LoadOnStartup", required = false, defaultValue = "false")
+    public Boolean isLoadOnStartup() {
+	if (loadOnStartup == null) {
+	    return false;
+	}
+	return loadOnStartup;
     }
 
     @XmlElement(name = "LocalizedName")
@@ -75,6 +84,10 @@ public class AppExtensionSpecification {
 
     public void setClassName(String className) {
 	this.className = className;
+    }
+
+    public void setLoadOnStartup(boolean loadOnStartup) {
+	this.loadOnStartup = loadOnStartup;
     }
 
     public void setConfigDescription(Configuration configDescription) {

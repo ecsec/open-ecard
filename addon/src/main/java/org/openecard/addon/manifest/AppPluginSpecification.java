@@ -42,17 +42,30 @@ import org.openecard.addon.bind.ParameterType;
 public class AppPluginSpecification {
 
     private String className;
-    private final List<LocalizedString> localizedName = new ArrayList<LocalizedString>();
-    private final List<LocalizedString> localizedDescription = new ArrayList<LocalizedString>();
+    private Boolean loadOnStartup;
+    private final List<LocalizedString> localizedName = new ArrayList<>();
+    private final List<LocalizedString> localizedDescription = new ArrayList<>();
     private Configuration configDescription;
-    private final List<ParameterType> parameters = new ArrayList<ParameterType>();
+    private final List<ParameterType> parameters = new ArrayList<>();
     private String resourceName;
     private BodyType body;
-    private final List<AttachmentType> attachments = new ArrayList<AttachmentType>();
+    private final List<AttachmentType> attachments = new ArrayList<>();
 
     @XmlElement(name = "ClassName")
     public String getClassName() {
 	return className;
+    }
+
+    public void setClassName(String className) {
+	this.className = className;
+    }
+
+    @XmlElement(name = "LoadOnStartup", required = false, defaultValue = "false")
+    public Boolean isLoadOnStartup() {
+	if (loadOnStartup == null) {
+	    return false;
+	}
+	return loadOnStartup;
     }
 
     @XmlElement(name = "ResourceName")
@@ -75,8 +88,9 @@ public class AppPluginSpecification {
 	return configDescription;
     }
 
-    public void setClassName(String className) {
-	this.className = className;
+
+    public void setLoadOnStartup(Boolean loadOnStartup) {
+	this.loadOnStartup = loadOnStartup;
     }
 
     public void setConfigDescription(Configuration configDescription) {

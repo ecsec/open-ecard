@@ -22,6 +22,7 @@
 
 package org.openecard.addon;
 
+import org.openecard.addon.sal.CredentialManager;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.sal.state.CardStateMap;
@@ -45,6 +46,7 @@ public class Context {
     private CardRecognition recognition;
     private EventManager eventManager;
     private EventHandler eventHandler;
+    private CredentialManager credMan;
 
     public Context(AddonManager manager, Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition, EventManager eventManager, EventHandler eventHandler) {
 	this.manager = manager;

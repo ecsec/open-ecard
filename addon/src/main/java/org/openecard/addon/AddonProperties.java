@@ -29,7 +29,12 @@ package org.openecard.addon;
  */
 public class AddonProperties {
 
+    private final String id;
     private Context ctx;
+
+    public AddonProperties(String id) {
+	this.id = id;
+    }
 
     public void loadProperties() {
 	throw new UnsupportedOperationException();

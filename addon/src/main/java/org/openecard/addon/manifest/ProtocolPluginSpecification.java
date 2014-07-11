@@ -39,9 +39,10 @@ import javax.xml.bind.annotation.XmlType;
 public class ProtocolPluginSpecification {
 
     private String className;
+    private Boolean loadOnStartup;
     private String uri;
-    private final List<LocalizedString> localizedName = new ArrayList<LocalizedString>();
-    private final List<LocalizedString> localizedDescription = new ArrayList<LocalizedString>();
+    private final List<LocalizedString> localizedName = new ArrayList<>();
+    private final List<LocalizedString> localizedDescription = new ArrayList<>();
     private Configuration configDescription;
 
     @XmlElement(name = "ClassName")
@@ -51,6 +52,18 @@ public class ProtocolPluginSpecification {
 
     public void setClassName(String className) {
 	this.className = className;
+    }
+
+    @XmlElement(name = "LoadOnStartup", required = false, defaultValue = "false")
+    public Boolean isLoadOnStartup() {
+	if (loadOnStartup == null) {
+	    return false;
+	}
+	return loadOnStartup;
+    }
+
+    public void setLoadOnStartup(boolean loadOnStartup) {
+	this.loadOnStartup = loadOnStartup;
     }
 
     @XmlElement(name = "URI")

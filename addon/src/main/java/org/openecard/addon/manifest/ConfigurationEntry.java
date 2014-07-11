@@ -39,8 +39,8 @@ import javax.xml.bind.annotation.XmlTransient;
 public abstract class ConfigurationEntry {
 
     private String key;
-    private final List<LocalizedString> localizedName = new ArrayList<LocalizedString>();
-    private final List<LocalizedString> localizedDescription = new ArrayList<LocalizedString>();
+    private final List<LocalizedString> localizedName = new ArrayList<>();
+    private final List<LocalizedString> localizedDescription = new ArrayList<>();
 
     @XmlElement(name = "Key")
     public String getKey() {

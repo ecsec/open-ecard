@@ -52,10 +52,10 @@ public class AddonSelector {
     public AddonSelector(AddonManager manager) {
 	this.manager = manager;
 
-	ifdCache = new HashMap<String, AddonSpecification>();
-	salCache = new HashMap<String, AddonSpecification>();
-	extensionCache = new HashMap<String, AddonSpecification>();
-	pluginCache = new HashMap<String, AddonSpecification>();
+	ifdCache = new HashMap<>();
+	salCache = new HashMap<>();
+	extensionCache = new HashMap<>();
+	pluginCache = new HashMap<>();
 
 	setStrategy(new HighestVersionSelector());
     }

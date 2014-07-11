@@ -159,6 +159,7 @@
 				</iso:ResponseAPDU>
 			</iso:CardCall>
 		</iso:CharacteristicFeature>
+		<!-- Check the institute type-->
 		<iso:CharacteristicFeature>
 			<iso:CardCall>
 				<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
@@ -178,14 +179,71 @@
 					<iso:Body>
 						<iso:MatchingData>
 							<iso:Offset>00</iso:Offset>
-							<iso:Length>03</iso:Length>
-							<iso:MatchingValue>672595</iso:MatchingValue>
+							<iso:Length>02</iso:Length>
+							<iso:MatchingValue>6725</iso:MatchingValue>
 						</iso:MatchingData>
 					</iso:Body>
 					<iso:Trailer>9000</iso:Trailer>
 				</iso:ResponseAPDU>
 			</iso:CardCall>
 		</iso:CharacteristicFeature>
+		<!-- Check the country code in case we get sparkasse cards from other countries -->
+		<iso:CharacteristicFeature>
+			<iso:CardCall>
+				<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<iso:Trailer>9000</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+			<iso:CardCall>
+				<iso:CommandAPDU>00A4020C020003</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<iso:Trailer>9000</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+			<iso:CardCall>
+				<iso:CommandAPDU>00B20104FF</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<iso:Body>
+						<iso:MatchingData>
+							<iso:Offset>0E</iso:Offset>
+							<iso:Length>02</iso:Length>
+							<iso:MatchingValue>0280</iso:MatchingValue>
+						</iso:MatchingData>
+					</iso:Body>
+					<iso:Trailer>9000</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+		</iso:CharacteristicFeature>
+		<!-- Check the OS version to avoid conflicts with previous and posterior versions -->
+		<iso:CharacteristicFeature>
+			<iso:CardCall>
+				<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<iso:Trailer>9000</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+			<iso:CardCall>
+				<iso:CommandAPDU>00A4020C020003</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<iso:Trailer>9000</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+			<iso:CardCall>
+				<iso:CommandAPDU>00B20104FF</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<iso:Body>
+						<iso:MatchingData>
+							<iso:Offset>17</iso:Offset>
+							<iso:Length>01</iso:Length>
+							<iso:MatchingValue>06</iso:MatchingValue>
+						</iso:MatchingData>
+					</iso:Body>
+					<iso:Trailer>9000</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+		</iso:CharacteristicFeature>
+		<!-- Check for single signature card -->
 		<iso:CharacteristicFeature>
 			<iso:CardCall>
 				<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>

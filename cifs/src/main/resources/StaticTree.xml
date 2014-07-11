@@ -52,7 +52,7 @@
 									    </iso:Body>
 									    <iso:Trailer>9000</iso:Trailer>
 									    <iso:Conclusion>
-										<iso:RecognizedCardType>http://www.diebank.de/die_privatkunden/konto___karte/vr-bankcard0.html</iso:RecognizedCardType>
+										<iso:RecognizedCardType>1.3.6.1.4.1.17696.4.3.1.6.1</iso:RecognizedCardType>
 									    </iso:Conclusion>
 									</iso:ResponseAPDU>
 								    </iso:CardCall>

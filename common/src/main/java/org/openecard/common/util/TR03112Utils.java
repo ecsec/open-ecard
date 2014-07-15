@@ -54,14 +54,14 @@ public class TR03112Utils {
 	logger.debug("Checking SOP for {} and {}.", url1, url2);
 	String endpointProtocol = url1.getProtocol();
 	String subjectProtocol = url2.getProtocol();
-	if (!endpointProtocol.equals(subjectProtocol)) {
+	if (! endpointProtocol.equalsIgnoreCase(subjectProtocol)) {
 	    logger.error("SOP violated; the protocols do not match.");
 	    return false;
 	}
 
 	String endpointHost = url1.getHost();
 	String subjectHost = url2.getHost();
-	if (!endpointHost.equals(subjectHost)) {
+	if (! endpointHost.equalsIgnoreCase(subjectHost)) {
 	    logger.error("SOP violated; the hosts do not match.");
 	    return false;
 	}
@@ -76,7 +76,7 @@ public class TR03112Utils {
 	    subjectPort = url2.getDefaultPort();
 	}
 
-	if (!(endpointPort == subjectPort)) {
+	if (! (endpointPort == subjectPort)) {
 	    logger.error("SOP violated; the ports do not match");
 	    return false;
 	}

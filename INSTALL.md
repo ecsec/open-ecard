@@ -4,7 +4,7 @@ Prerequisites
 In order to build the Open eCard project, some additional tools are needed.
 
 Required dependencies are:
-* Java JDK 6 or higher
+* Java JDK 7 or higher
   Oracle JDK and OpenJDK are working correctly
 
 * Maven in at least version 3.0.3 for JRE builds and 3.1.1 for Android builds
@@ -29,11 +29,6 @@ Optional dependencies are:
   enforcing that the Android SDK must also be configured.
 
   https://developer.android.com/tools/sdk/ndk/index.html
-
-* WiX
-  The WiX executables must be available in the PATH environment variable.
-
-  http://wixtoolset.org/
 
 
 Prior to starting the build, all Git submodules must be initialized with the
@@ -80,8 +75,9 @@ Module `clients/applet`
   Bundle SLF4J extension artifact, so that the applet can emit trace logs.
 
 Module `clients/richclient`
-* `windows-installer`
-  Use the WiX tools to create an msi (MicroSoft Installer) package.
+* `bundles-jar-cifs`
+  Usually the cifs are provided by a seperate artifact. This profile creates
+  a 'contains everything' jar file for direct execution.
 
 
 Code Signing

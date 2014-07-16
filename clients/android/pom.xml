@@ -61,12 +61,6 @@
 	<!-- </dependency> -->
 	<dependency>
 	    <groupId>org.openecard.ifd.scio-backend</groupId>
-	    <artifactId>android-pcsc</artifactId>
-	    <version>${project.version}</version>
-	    <type>apklib</type>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.ifd.scio-backend</groupId>
 	    <artifactId>android-nfc</artifactId>
 	    <version>${project.version}</version>
 	    <type>jar</type>

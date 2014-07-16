@@ -22,15 +22,15 @@
 
 package org.openecard.ifd.scio.wrapper;
 
+import org.openecard.common.ifd.scio.SCIOTerminals;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
-import javax.smartcardio.CardException;
-import javax.smartcardio.CardTerminal;
-import javax.smartcardio.CardTerminals;
 import org.openecard.common.GenericFactoryException;
 import org.openecard.common.ifd.TerminalFactory;
+import org.openecard.common.ifd.scio.SCIOException;
+import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.util.ExceptionUtils;
 import org.openecard.ifd.scio.IFDException;
 import org.slf4j.Logger;
@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class DeadAndAliveTerminals extends CardTerminals {
+public class DeadAndAliveTerminals extends SCIOTerminals {
 
     private static final Logger logger = LoggerFactory.getLogger(DeadAndAliveTerminals.class);
 
@@ -62,7 +62,7 @@ public class DeadAndAliveTerminals extends CardTerminals {
 
     private boolean error;
     private long lastTry;
-    private CardTerminals terminals;
+    private SCIOTerminals terminals;
 
     /**
      * Creates an instance of the DeadAndAliveTerminals.
@@ -129,7 +129,7 @@ public class DeadAndAliveTerminals extends CardTerminals {
     }
 
     @Override
-    public synchronized List<CardTerminal> list(State state) throws CardException {
+    public synchronized List<SCIOTerminal> list(State state) throws SCIOException {
 	if (isDead()) {
 	    return Collections.emptyList();
 	} else {
@@ -138,7 +138,7 @@ public class DeadAndAliveTerminals extends CardTerminals {
     }
 
     @Override
-    public boolean waitForChange(long timeout) throws CardException {
+    public boolean waitForChange(long timeout) throws SCIOException {
 	if (timeout < 0) {
 	    throw new IllegalArgumentException("Timeout is negative.");
 	} else if (timeout == 0) {

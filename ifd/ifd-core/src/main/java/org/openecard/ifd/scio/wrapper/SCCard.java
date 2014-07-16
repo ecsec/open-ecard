@@ -22,14 +22,14 @@
 
 package org.openecard.ifd.scio.wrapper;
 
+import org.openecard.common.ifd.scio.SCIOATR;
+import org.openecard.common.ifd.scio.SCIOCard;
+import org.openecard.common.ifd.scio.SCIOChannel;
+import org.openecard.common.ifd.scio.SCIOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 import javax.annotation.Nonnull;
-import javax.smartcardio.ATR;
-import javax.smartcardio.Card;
-import javax.smartcardio.CardChannel;
-import javax.smartcardio.CardException;
 import org.openecard.common.ECardConstants;
 import org.openecard.ifd.scio.EventListener;
 import org.openecard.ifd.scio.IFDException;
@@ -46,21 +46,20 @@ public class SCCard {
 
     private static final Logger _logger = LoggerFactory.getLogger(SCCard.class);
 
-    private final Card card;
+    private final SCIOCard card;
     private final SCTerminal terminal;
 
-    private Map<Integer,Integer> featureCodes;
+    private Map<Integer, Integer> featureCodes;
 
-    private final ConcurrentSkipListMap<byte[],SCChannel> scChannels;
+    private final ConcurrentSkipListMap<byte[], SCChannel> scChannels;
 
-    public SCCard(Card card, SCTerminal terminal) {
+    public SCCard(SCIOCard card, SCTerminal terminal) {
 	this.card = card;
 	this.terminal = terminal;
 	this.scChannels = new ConcurrentSkipListMap<byte[], SCChannel>(new ByteArrayComparator());
     }
 
-
-    public byte[] controlCommand(int controlCode, byte[] commandData) throws CardException {
+    public byte[] controlCommand(int controlCode, byte[] commandData) throws SCIOException {
 	// pause background threads talking to PCSC
 	EventListener.pause();
 
@@ -69,15 +68,15 @@ public class SCCard {
     }
 
     @Nonnull
-    public Map<Integer,Integer> getFeatureCodes() throws CardException {
+    public Map<Integer, Integer> getFeatureCodes() throws SCIOException {
 	if (featureCodes == null) {
 	    int code = PCSCFeatures.GET_FEATURE_REQUEST_CTLCODE();
 	    try {
 		byte[] response = controlCommand(code, new byte[0]);
 		featureCodes = PCSCFeatures.featureMapFromRequest(response);
-	    } catch (CardException ex) {
+	    } catch (SCIOException ex) {
 		// TODO: remove this workaround by supporting feature requests under all systems and all readers
-		_logger.warn("Unable to request features from reader." ,ex);
+		_logger.warn("Unable to request features from reader.", ex);
 		featureCodes = new HashMap<Integer, Integer>();
 	    }
 	}
@@ -96,7 +95,7 @@ public class SCCard {
 	}
     }
 
-    public ATR getATR() {
+    public SCIOATR getATR() {
 	return card.getATR();
     }
 
@@ -120,34 +119,33 @@ public class SCCard {
 		terminal.removeCard();
 		card.disconnect(reset);
 	    }
-	} catch (CardException ex) {
+	} catch (SCIOException ex) {
 	    IFDException ifdex = new IFDException(ex);
 	    _logger.warn(ifdex.getMessage(), ifdex);
 	    throw ifdex;
 	}
     }
 
-
-    public SCChannel addChannel(byte[] handle) throws CardException {
-	CardChannel channel = card.getBasicChannel();
-	SCChannel scChannel = new SCChannel(channel, handle);
+    public SCChannel addChannel(byte[] handle) throws SCIOException {
+	SCIOChannel scioChannel = card.getBasicChannel();
+	SCChannel scChannel = new SCChannel(scioChannel, handle);
 	scChannels.put(handle, scChannel);
 	return scChannel;
     }
 
-    synchronized void disconnect() throws CardException {
+    synchronized void disconnect() throws SCIOException {
 	card.disconnect(true);
     }
 
-    public void beginExclusive() throws CardException {
+    public void beginExclusive() throws SCIOException {
 	card.beginExclusive();
     }
 
-    public void endExclusive() throws CardException {
+    public void endExclusive() throws SCIOException {
 	card.endExclusive();
     }
 
-    public boolean equalCardObj(Card other) {
+    public boolean equalCardObj(SCIOCard other) {
 	return card == other;
     }
 

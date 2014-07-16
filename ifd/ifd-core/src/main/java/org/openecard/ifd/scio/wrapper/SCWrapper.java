@@ -26,11 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-import javax.smartcardio.CardException;
-import javax.smartcardio.CardTerminal;
-import javax.smartcardio.CardTerminals;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.util.ValueGenerators;
+import org.openecard.common.ifd.scio.SCIOException;
+import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.ifd.scio.IFDException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,9 +43,9 @@ public class SCWrapper {
 
     private static final Logger _logger = LoggerFactory.getLogger(SCWrapper.class);
 
-    private final CardTerminals terminals;
+    private final SCIOTerminals terminals;
 
-    private final ConcurrentSkipListMap<String,SCTerminal> scTerminals;
+    private final ConcurrentSkipListMap<String, SCTerminal> scTerminals;
 
     public SCWrapper() throws IFDException {
 	terminals = new DeadAndAliveTerminals();
@@ -171,13 +170,13 @@ public class SCWrapper {
 	ConcurrentSkipListSet<String> deleted = new ConcurrentSkipListSet<>(scTerminals.keySet());
 
 	// get list and check all entries
-	List<CardTerminal> ts;
+	List<SCIOTerminal> ts;
 	try {
 	    ts = terminals.list();
-	} catch (CardException ex) {
+	} catch (SCIOException ex) {
 	    ts = new ArrayList<>(0); // empty list because list call can fail with exception on some systems
 	}
-	for (CardTerminal t : ts) {
+	for (SCIOTerminal t : ts) {
 	    if (scTerminals.containsKey(t.getName())) {
 		// remove from deleted list
 		deleted.remove(t.getName());
@@ -199,7 +198,7 @@ public class SCWrapper {
     public synchronized boolean waitForChange(long timeout) throws IFDException {
 	try {
 	    return terminals.waitForChange(timeout);
-	} catch (CardException ex) {
+	} catch (SCIOException ex) {
 	    throw new IFDException(ex);
 	}
     }
@@ -216,7 +215,7 @@ public class SCWrapper {
 	for (SCTerminal t : getTerminals()) {
 	    try {
 		t.disconnect();
-	    } catch (CardException ex) {
+	    } catch (SCIOException ignore) {
 	    }
 	}
     }

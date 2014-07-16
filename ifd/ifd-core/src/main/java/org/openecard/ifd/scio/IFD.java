@@ -81,7 +81,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.jws.WebService;
-import javax.smartcardio.CardException;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
@@ -90,6 +89,7 @@ import org.openecard.common.ifd.Protocol;
 import org.openecard.common.ifd.ProtocolFactory;
 import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.ifd.anytype.PACEOutputType;
+import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.Publish;
 import org.openecard.common.util.ByteUtils;
@@ -689,7 +689,7 @@ public class IFD implements org.openecard.ws.IFD {
 		c.beginExclusive();
 		response = WSHelper.makeResponse(BeginTransactionResponse.class, WSHelper.makeResultOK());
 		return response;
-	    } catch (CardException ex) {
+	    } catch (SCIOException ex) {
 		response = WSHelper.makeResponse(BeginTransactionResponse.class, WSHelper.makeResult(ex));
 		_logger.warn(ex.getMessage(), ex);
 		return response;
@@ -724,7 +724,7 @@ public class IFD implements org.openecard.ws.IFD {
 		c.endExclusive();
 		response = WSHelper.makeResponse(EndTransactionResponse.class, WSHelper.makeResultOK());
 		return response;
-	    } catch (CardException ex) {
+	    } catch (SCIOException ex) {
 		response = WSHelper.makeResponse(EndTransactionResponse.class, WSHelper.makeResult(ex));
 		_logger.warn(ex.getMessage(), ex);
 		return response;

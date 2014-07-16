@@ -22,6 +22,9 @@
 
 package org.openecard.ifd.scio.wrapper;
 
+import org.openecard.common.ifd.scio.SCIOATR;
+import org.openecard.common.ifd.scio.SCIOCard;
+import org.openecard.common.ifd.scio.SCIOTerminal;
 import iso.std.iso_iec._24727.tech.schema.DisplayCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
 import iso.std.iso_iec._24727.tech.schema.KeyPadCapabilityType;
@@ -32,13 +35,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import javax.smartcardio.ATR;
-import javax.smartcardio.Card;
-import javax.smartcardio.CardException;
-import javax.smartcardio.CardNotPresentException;
-import javax.smartcardio.CardTerminal;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ifd.PACECapabilities;
+import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.ifd.scio.IFDException;
 import org.openecard.ifd.scio.IFDUtils;
@@ -57,7 +56,7 @@ public class SCTerminal {
 
     private static final Logger _logger = LoggerFactory.getLogger(SCTerminal.class);
 
-    private final CardTerminal terminal;
+    private final SCIOTerminal terminal;
     private final SCWrapper scwrapper;
 
     // capabilities entries
@@ -71,8 +70,7 @@ public class SCTerminal {
     // card if available
     private SCCard scCard = null;
 
-
-    public SCTerminal(CardTerminal terminal, SCWrapper scwrapper) {
+    public SCTerminal(SCIOTerminal terminal, SCWrapper scwrapper) {
 	this.terminal = terminal;
 	this.scwrapper = scwrapper;
     }
@@ -85,7 +83,7 @@ public class SCTerminal {
     public boolean isCardPresent() {
 	try {
 	    return terminal.isCardPresent();
-	} catch (CardException ex) {
+	} catch (SCIOException ex) {
 	    return false;
 	}
     }
@@ -119,12 +117,12 @@ public class SCTerminal {
 	    // get card status and stuff
 	    if (cardPresent) {
 		if (isConnected()) {
-		    ATR atr = scCard.getATR();
+		    SCIOATR atr = scCard.getATR();
 		    stype.setATRorATS(atr.getBytes());
 		} else {
 		    // connect ourselves
-		    Card c = terminal.connect("*");
-		    ATR atr = c.getATR();
+		    SCIOCard c = terminal.connect("*");
+		    SCIOATR atr = c.getATR();
 		    stype.setATRorATS(atr.getBytes());
 		    c.disconnect(false);
 		}
@@ -144,7 +142,7 @@ public class SCTerminal {
 	return result;
     }
 
-    public boolean equals(CardTerminal other) {
+    public boolean equals(SCIOTerminal other) {
 	boolean result = terminal.getName().equals(other.getName());
 	return result;
     }
@@ -161,12 +159,12 @@ public class SCTerminal {
 	    try {
 		if (scCard != null) {
 		    // check if it is the same card, else remove
-		    Card newCard = terminal.connect("*");
+		    SCIOCard newCard = terminal.connect("*");
 		    if (! scCard.equalCardObj(newCard)) {
 			scCard = null;
 		    }
 		}
-	    } catch (CardException ex) {
+	    } catch (SCIOException ignore) {
 		// error means delete it anyways
 		scCard = null;
 	    }
@@ -178,13 +176,9 @@ public class SCTerminal {
 	// connect card if needed
 	if (! isConnected()) {
 	    try {
-		Card c = terminal.connect("*");
+		SCIOCard c = terminal.connect("*");
 		scCard = new SCCard(c, this);
-	    } catch (CardNotPresentException ex) {
-		IFDException ifdex = new IFDException(ECardConstants.Minor.IFD.Terminal.NO_CARD, ex.getMessage());
-		_logger.warn(ifdex.getMessage(), ifdex);
-		throw ifdex;
-	    } catch (CardException ex) {
+	    } catch (SCIOException ex) {
 		IFDException ifdex = new IFDException(ex);
 		_logger.warn(ifdex.getMessage(), ifdex);
 		throw ifdex;
@@ -193,7 +187,7 @@ public class SCTerminal {
 	try {
 	    SCChannel scChannel = scCard.addChannel(handle);
 	    return scChannel;
-	} catch (CardException ex) {
+	} catch (SCIOException ex) {
 	    IFDException ifdex = new IFDException(ex.getMessage());
 	    _logger.warn(ifdex.getMessage(), ifdex);
 	    throw ifdex;
@@ -201,7 +195,7 @@ public class SCTerminal {
     }
 
     // for use in release context
-    synchronized void disconnect() throws CardException {
+    synchronized void disconnect() throws SCIOException {
 	if (isConnected()) {
 	    scCard.disconnect();
 	}
@@ -248,7 +242,7 @@ public class SCTerminal {
 		    }
 		    // regardless whether the data has been successfully extracted, or not, the data has been read
 		    dispCapRead = true;
-		} catch (CardException ex) {
+		} catch (SCIOException ex) {
 		    throw new IFDException(ex);
 		}
 	    }
@@ -272,7 +266,7 @@ public class SCTerminal {
 		    }
 		    // regardless whether the data has been successfully extracted, or not, the data has been read
 		    keyCapRead = true;
-		} catch (CardException ex) {
+		} catch (SCIOException ex) {
 		    throw new IFDException(ex);
 		}
 	    }
@@ -291,7 +285,7 @@ public class SCTerminal {
 		} else {
 		    throw new IFDException("The requested control code is not supported by the terminal");
 		}
-	    } catch (CardException ex) {
+	    } catch (SCIOException ex) {
 		throw new IFDException(ex);
 	    }
 	}
@@ -305,7 +299,7 @@ public class SCTerminal {
 		if (features.containsKey(PCSCFeatures.EXECUTE_PACE)) {
 		    return features.get(PCSCFeatures.EXECUTE_PACE);
 		}
-	    } catch (CardException ex) {
+	    } catch (SCIOException ex) {
 		throw new IFDException(ex);
 	    }
 	}
@@ -333,7 +327,7 @@ public class SCTerminal {
 			PACECapabilities cap = new PACECapabilities(paceResponse.getData());
 			PACECapabilities = cap.getFeaturesEnum();
 			result.addAll(PACECapabilities);
-		    } catch (CardException e) {
+		    } catch (SCIOException e) {
 			IFDException ex = new IFDException(e);
 			throw ex;
 		    }
@@ -353,7 +347,7 @@ public class SCTerminal {
 		if (features.containsKey(PCSCFeatures.VERIFY_PIN_DIRECT)) {
 		    return features.get(PCSCFeatures.VERIFY_PIN_DIRECT);
 		}
-	    } catch (CardException ex) {
+	    } catch (SCIOException ex) {
 		throw new IFDException(ex);
 	    }
 	}

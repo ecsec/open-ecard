@@ -22,7 +22,7 @@
 
 package org.openecard.common.ifd;
 
-import javax.smartcardio.CardTerminals;
+import org.openecard.common.ifd.scio.SCIOTerminals;
 
 
 /**
@@ -44,14 +44,14 @@ public interface TerminalFactory {
     String getType();
 
     /**
-     * Returns a new CardTerminals object encapsulating the terminals
+     * Returns a new SCIOTerminals object encapsulating the terminals
      * supported by this factory.
-     * See the class comment of the {@linkplain CardTerminals} class
+     * See the class comment of the {@linkplain SCIOTerminals} class
      * regarding how the returned objects can be shared and reused.
      *
-     * @return a new CardTerminals object encapsulating the terminals
+     * @return a new SCIOTerminals object encapsulating the terminals
      * supported by this factory.
      */
-    CardTerminals terminals();
+    SCIOTerminals terminals();
 
 }

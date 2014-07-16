@@ -23,12 +23,12 @@
 package org.openecard.ifd.scio.wrapper;
 
 import java.util.List;
-import javax.smartcardio.CardChannel;
-import javax.smartcardio.CardException;
-import javax.smartcardio.CommandAPDU;
-import javax.smartcardio.ResponseAPDU;
+import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardCommandStatus;
+import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.ifd.Protocol;
+import org.openecard.common.ifd.scio.SCIOChannel;
+import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.ifd.scio.EventListener;
 import org.openecard.ifd.scio.IFDException;
@@ -45,14 +45,14 @@ public class SCChannel {
 
     private static final Logger _logger = LoggerFactory.getLogger(SCChannel.class);
 
-    private final CardChannel channel;
+    private final SCIOChannel channel;
     private final byte[] handle;
     /**
      * Currently active secure messaging protocol.
      */
     private Protocol smProtocol = null;
 
-    public SCChannel(CardChannel channel, byte[] handle) {
+    public SCChannel(SCIOChannel channel, byte[] handle) {
 	this.channel = channel;
 	this.handle = handle;
     }
@@ -61,7 +61,7 @@ public class SCChannel {
 	return handle;
     }
 
-    void close() throws CardException {
+    void close() throws SCIOException {
 	if (channel.getChannelNumber() != 0) {
 	    channel.close(); // this only closes logical channels
 	}
@@ -78,9 +78,9 @@ public class SCChannel {
 		inputAPDU = smProtocol.applySM(inputAPDU);
 	    }
 	    _logger.debug("Send APDU: {}", ByteUtils.toHexString(inputAPDU, true));
-	    CommandAPDU capdu = new CommandAPDU(inputAPDU);
-	    ResponseAPDU rapdu = channel.transmit(capdu);
-	    byte[] result = rapdu.getBytes();
+	    CardCommandAPDU capdu = new CardCommandAPDU(inputAPDU);
+	    CardResponseAPDU rapdu = channel.transmit(capdu);
+	    byte[] result = rapdu.toByteArray();
 	    _logger.debug("Receive APDU: {}", ByteUtils.toHexString(result, true));
 	    if (isSM()) {
 		result = smProtocol.removeSM(result);
@@ -108,11 +108,7 @@ public class SCChannel {
 	    String msg = "The returned status code is not in the list of expected status codes. The returned code is:\n";
 	    TransmitException tex = new TransmitException(result, msg + CardCommandStatus.getMessage(sw));
 	    throw tex;
-	} catch (IllegalArgumentException ex) {
-	    IFDException ifdex = new IFDException(ex);
-	    _logger.error(ifdex.getMessage(), ifdex);
-	    throw ifdex;
-	} catch (CardException ex) {
+	} catch (SCIOException ex) {
 	    IFDException ifdex = new IFDException(ex);
 	    _logger.error(ifdex.getMessage(), ifdex);
 	    throw ifdex;

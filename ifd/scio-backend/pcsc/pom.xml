@@ -21,6 +21,16 @@
 	    <artifactId>osx-pcsc</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
+        <dependency>
+            <artifactId>common</artifactId>
+            <groupId>org.openecard</groupId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openecard.wsdef</groupId>
+            <artifactId>wsdef-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

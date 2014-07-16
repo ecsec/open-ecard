@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -37,37 +39,52 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * 
+ *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 @XmlRootElement(name = "AddonSpecification")
 @XmlType(propOrder = { "id", "version", "license", "localizedName", "localizedDescription", "about", "logo",
 	"configDescription", "bindingActions", "applicationActions", "ifdActions", "salActions" })
+@XmlAccessorType(XmlAccessType.FIELD)
 public class AddonSpecification {
 
     private static final Logger logger = LoggerFactory.getLogger(AddonSpecification.class);
 
+    @XmlElement(name = "ID", required = true)
     private String id;
-    private String logoFile;
-    private byte[] logoBytes;
+    @XmlElement(name = "Logo", required = true)
+    private String logo;
+    //private byte[] logoBytes;
+    @XmlElement(name = "Version", required = true)
     private String version;
+    @XmlElement(name = "License", required = true)
     private String license;
+    @XmlElement(name = "ConfigDescription", required = true)
     private Configuration configDescription;
-    private final List<LocalizedString> localizedName = new ArrayList<LocalizedString>();
-    private final List<LocalizedString> localizedDescription = new ArrayList<LocalizedString>();
-    private final List<LocalizedString> about = new ArrayList<LocalizedString>();
-    private final ArrayList<AppExtensionSpecification> appExtensionActions = new ArrayList<AppExtensionSpecification>();
-    private final ArrayList<AppPluginSpecification> appPluginActions = new ArrayList<AppPluginSpecification>();
-    private final ArrayList<ProtocolPluginSpecification> ifdActions = new ArrayList<ProtocolPluginSpecification>();
-    private final ArrayList<ProtocolPluginSpecification> salActions = new ArrayList<ProtocolPluginSpecification>();
+    @XmlElement(name = "LocalizedName", type = LocalizedString.class, required = false)
+    private final List<LocalizedString> localizedName = new ArrayList<>();
+    @XmlElement(name = "LocalizedDescription", type = LocalizedString.class, required = false)
+    private final List<LocalizedString> localizedDescription = new ArrayList<>();
+    @XmlElement(name = "About", type = LocalizedString.class, required = false)
+    private final List<LocalizedString> about = new ArrayList<>();
+    @XmlElement(name = "AppExtensionSpecification", type = AppExtensionSpecification.class, required = false)
+    @XmlElementWrapper(name = "ApplicationActions", required = false)
+    private final ArrayList<AppExtensionSpecification> applicationActions = new ArrayList<>();
+    @XmlElementWrapper(name = "BindingActions", required = false)
+    @XmlElement(name = "AppPluginSpecification", type = AppPluginSpecification.class, required = false)
+    private final ArrayList<AppPluginSpecification> bindingActions = new ArrayList<>();
+    @XmlElementWrapper(name = "IFDActions", required = false)
+    @XmlElement(name = "ProtocolPluginSpecification", type = ProtocolPluginSpecification.class, required = false)
+    private final ArrayList<ProtocolPluginSpecification> ifdActions = new ArrayList<>();
+    @XmlElementWrapper(name = "SALActions", required = false)
+    @XmlElement(name = "ProtocolPluginSpecification", type = ProtocolPluginSpecification.class, required = false)
+    private final ArrayList<ProtocolPluginSpecification> salActions = new ArrayList<>();
 
-    @XmlElement(name = "ID")
     public String getId() {
 	return id;
     }
 
-    @XmlElement(name = "LocalizedName")
     public List<LocalizedString> getLocalizedName() {
 	return localizedName;
     }
@@ -84,7 +101,6 @@ public class AddonSpecification {
 	return fallback;
     }
 
-    @XmlElement(name = "LocalizedDescription")
     public List<LocalizedString> getLocalizedDescription() {
 	return localizedDescription;
     }
@@ -101,17 +117,14 @@ public class AddonSpecification {
 	return fallback;
     }
 
-    @XmlElement(name = "Logo")
     public String getLogo() {
-	return logoFile;
+	return logo;
     }
 
-    @XmlElement(name = "Version")
     public String getVersion() {
 	return version;
     }
 
-    @XmlElement(name = "About")
     public List<LocalizedString> getAbout() {
 	return about;
     }
@@ -121,36 +134,27 @@ public class AddonSpecification {
 	throw new UnsupportedOperationException("Not yet implemented.");
     }
 
-    @XmlElement(name = "License")
     public String getLicense() {
 	return license;
     }
 
-    @XmlElementWrapper(name = "BindingActions")
-    @XmlElement(name = "AppPluginSpecification")
     public ArrayList<AppPluginSpecification> getBindingActions() {
-	return appPluginActions;
+	return bindingActions;
     }
 
-    @XmlElementWrapper(name = "IFDActions")
-    @XmlElement(name = "ProtocolPluginSpecification")
     public ArrayList<ProtocolPluginSpecification> getIfdActions() {
 	return ifdActions;
     }
 
-    @XmlElementWrapper(name = "ApplicationActions")
-    @XmlElement(name = "AppExtensionSpecification")
     public ArrayList<AppExtensionSpecification> getApplicationActions() {
-	return appExtensionActions;
+	return applicationActions;
     }
 
-    @XmlElementWrapper(name = "SALActions")
-    @XmlElement(name = "ProtocolPluginSpecification")
     public ArrayList<ProtocolPluginSpecification> getSalActions() {
 	return salActions;
     }
 
-    @XmlElement(name = "ConfigDescription")
+
     public Configuration getConfigDescription() {
 	return configDescription;
     }
@@ -160,25 +164,32 @@ public class AddonSpecification {
     }
 
     public void setLogo(String logo) {
-	this.logoFile = logo;
-	logger.debug("LogoFile: " + logoFile);
-	if (logoFile != null && !logoFile.isEmpty()) {
-	    try {
-		// TODO security checks and maybe modified loading
-		InputStream logoStream = FileUtils.resolveResourceAsStream(AddonSpecification.class, logoFile);
-		this.logoBytes = FileUtils.toByteArray(logoStream);
-	    } catch (FileNotFoundException e) {
-		logger.error("Logo file couldn't be found.", e);
-	    } catch (IOException e) {
-		logger.error("Logo file couldn't be read.", e);
-	    } catch (NullPointerException e) {
-		logger.error("Logo file couldn't be read.", e);
-	    }
-	}
+	this.logo = logo;
+	logger.debug("LogoFile: " + logo);
     }
 
+    /**
+     * Get a byte array containing the logo.
+     * <br />
+     * Note: This method creates always a new input stream and does not store the byte array internally.
+     *
+     * @return A byte array containing the logo bytes or null if no logo is present or an error occurred.
+     */
     public byte[] getLogoBytes() {
-	return logoBytes;
+	if (logo != null && !logo.isEmpty()) {
+	    try {
+		// TODO security checks and maybe modified loading
+		InputStream logoStream = FileUtils.resolveResourceAsStream(AddonSpecification.class, logo);
+		return FileUtils.toByteArray(logoStream);
+	    } catch (FileNotFoundException e) {
+		logger.error("Logo file couldn't be found.", e);
+		return null;
+	    } catch (IOException | NullPointerException e) {
+		logger.error("Logo file couldn't be read.", e);
+		return null;
+	    }
+	}
+	return null;
     }
 
     public void setVersion(String version) {
@@ -189,12 +200,12 @@ public class AddonSpecification {
 	this.license = license;
     }
 
-    public void setConfigDescription(Configuration configDescription) {
+    public void setConfigDescription(Configuration configDescriptionNew) {
 	this.configDescription = configDescription;
     }
 
     public AppPluginSpecification searchByResourceName(String resourceName) {
-	for (AppPluginSpecification desc : appPluginActions) {
+	for (AppPluginSpecification desc : bindingActions) {
 	    if (resourceName.equals(desc.getResourceName())) {
 		return desc;
 	    }
@@ -203,7 +214,7 @@ public class AddonSpecification {
     }
 
     public AppExtensionSpecification searchByActionId(String id) {
-	for (AppExtensionSpecification desc : appExtensionActions) {
+	for (AppExtensionSpecification desc : applicationActions) {
 	    if (desc.getId().equals(id)) {
 		return desc;
 	    }

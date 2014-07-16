@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 HS Coburg.
+ * Copyright (C) 2013-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,7 +22,10 @@
 
 package org.openecard.addon.manifest;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 
 
@@ -30,21 +33,23 @@ import javax.xml.bind.annotation.XmlValue;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
+@XmlRootElement(name = "LocalizedString")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class LocalizedString {
 
-    private String value;
+    @XmlAttribute(namespace = "http://www.w3.org/XML/1998/namespace", required = true)
     private String lang;
+    @XmlValue()
+    private String value;
 
     public String getValue() {
 	return value;
     }
 
-    @XmlValue
     public void setValue(String value) {
 	this.value = value;
     }
 
-    @XmlAttribute(namespace = "http://www.w3.org/XML/1998/namespace", required = true)
     public String getLang() {
 	return lang;
     }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -31,14 +31,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 
 /**
- * 
+ *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 @XmlRootElement(name = "Configuration")
 public class Configuration {
-
-    private final List<ConfigurationEntry> entries = new ArrayList<ConfigurationEntry>();
 
     @XmlElements({
 	    @XmlElement(name = "EnumEntry", type = EnumEntry.class),
@@ -46,6 +44,8 @@ public class Configuration {
 	    @XmlElement(name = "ScalarEntry", type = ScalarEntry.class),
 	    @XmlElement(name = "ScalarListEntry", type = ScalarListEntry.class) })
     @XmlElementWrapper(name = "Entries")
+    private final List<ConfigurationEntry> entries = new ArrayList<>();
+
     public List<ConfigurationEntry> getEntries() {
 	return entries;
     }

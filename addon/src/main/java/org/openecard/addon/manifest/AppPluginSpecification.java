@@ -24,12 +24,11 @@ package org.openecard.addon.manifest;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import org.openecard.addon.bind.AttachmentType;
-import org.openecard.addon.bind.BodyType;
-import org.openecard.addon.bind.ParameterType;
 
 
 /**
@@ -38,20 +37,30 @@ import org.openecard.addon.bind.ParameterType;
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 @XmlRootElement(name = "AppPluginSpecification")
-@XmlType(propOrder = { "className", "localizedName", "localizedDescription", "resourceName", "configDescription" })
+@XmlType(propOrder = { "className", "loadOnStartup", "localizedName", "localizedDescription", "resourceName",
+	    "configDescription", "parameters", "body", "attachments" })
+@XmlAccessorType(XmlAccessType.FIELD)
 public class AppPluginSpecification {
 
+    @XmlElement(name = "ClassName")
     private String className;
+    @XmlElement(name = "LoadOnStartup", required = false, defaultValue = "false")
     private Boolean loadOnStartup;
+    @XmlElement(name = "LocalizedName")
     private final List<LocalizedString> localizedName = new ArrayList<>();
+    @XmlElement(name = "LocalizedDescription")
     private final List<LocalizedString> localizedDescription = new ArrayList<>();
+    @XmlElement(name = "ConfigDescription")
     private Configuration configDescription;
+    @XmlElement(name = "Parameters")
     private final List<ParameterType> parameters = new ArrayList<>();
+    @XmlElement(name = "ResourceName")
     private String resourceName;
+    @XmlElement(name = "Body")
     private BodyType body;
+    @XmlElement(name = "Attachments")
     private final List<AttachmentType> attachments = new ArrayList<>();
 
-    @XmlElement(name = "ClassName")
     public String getClassName() {
 	return className;
     }
@@ -60,7 +69,7 @@ public class AppPluginSpecification {
 	this.className = className;
     }
 
-    @XmlElement(name = "LoadOnStartup", required = false, defaultValue = "false")
+
     public Boolean isLoadOnStartup() {
 	if (loadOnStartup == null) {
 	    return false;
@@ -68,22 +77,22 @@ public class AppPluginSpecification {
 	return loadOnStartup;
     }
 
-    @XmlElement(name = "ResourceName")
+
     public String getResourceName() {
 	return resourceName;
     }
 
-    @XmlElement(name = "LocalizedName")
+
     public List<LocalizedString> getLocalizedName() {
 	return localizedName;
     }
 
-    @XmlElement(name = "LocalizedDescription")
+
     public List<LocalizedString> getLocalizedDescription() {
 	return localizedDescription;
     }
 
-    @XmlElement(name = "ConfigDescription")
+
     public Configuration getConfigDescription() {
 	return configDescription;
     }
@@ -99,6 +108,22 @@ public class AppPluginSpecification {
 
     public void setResourceName(String resourceName) {
 	this.resourceName = resourceName;
+    }
+
+    public void setBody(BodyType body) {
+	this.body = body;
+    }
+
+    public BodyType getBody() {
+	return body;
+    }
+
+    public List<ParameterType> getParameters() {
+	return parameters;
+    }
+
+    public List<AttachmentType> getAttachments() {
+	return attachments;
     }
 
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,6 +24,8 @@ package org.openecard.addon.manifest;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -35,27 +37,31 @@ import javax.xml.bind.annotation.XmlType;
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 @XmlRootElement(name = "AppExtensionSpecification")
-@XmlType(propOrder = { "id", "className", "localizedName", "localizedDescription", "configDescription" })
+@XmlType(propOrder = { "id", "className", "loadOnStartup", "localizedName", "localizedDescription", "configDescription" })
+@XmlAccessorType(XmlAccessType.FIELD)
 public class AppExtensionSpecification {
 
+    @XmlElement(name = "ID", required = true)
     private String id;
+    @XmlElement(name = "ClassName", required = true)
     private String className;
+    @XmlElement(name = "LoadOnStartup", required = false, defaultValue = "false")
     private Boolean loadOnStartup;
+    @XmlElement(name = "LocalizedName", required = false)
     private final List<LocalizedString> localizedName = new ArrayList<>();
+    @XmlElement(name = "LocalizedDescription", required = false)
     private final List<LocalizedString> localizedDescription = new ArrayList<>();
+    @XmlElement(name = "ConfigDescription", required = true)
     private Configuration configDescription;
 
-    @XmlElement(name = "ID")
     public String getId() {
 	return id;
     }
 
-    @XmlElement(name = "ClassName")
     public String getClassName() {
 	return className;
     }
 
-    @XmlElement(name = "LoadOnStartup", required = false, defaultValue = "false")
     public Boolean isLoadOnStartup() {
 	if (loadOnStartup == null) {
 	    return false;
@@ -63,17 +69,14 @@ public class AppExtensionSpecification {
 	return loadOnStartup;
     }
 
-    @XmlElement(name = "LocalizedName")
     public List<LocalizedString> getLocalizedName() {
 	return localizedName;
     }
 
-    @XmlElement(name = "LocalizedDescription")
     public List<LocalizedString> getLocalizedDescription() {
 	return localizedDescription;
     }
 
-    @XmlElement(name = "ConfigDescription")
     public Configuration getConfigDescription() {
 	return configDescription;
     }

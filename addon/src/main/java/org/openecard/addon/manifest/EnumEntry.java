@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -38,9 +38,9 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(propOrder = { "key", "values", "localizedName", "localizedDescription" })
 public class EnumEntry extends ConfigurationEntry {
 
-    private final ArrayList<String> values = new ArrayList<String>();
-
     @XmlElement(name = "Value", required = true)
+    private final ArrayList<String> values = new ArrayList<>();
+
     public List<String> getValues() {
 	return values;
     }

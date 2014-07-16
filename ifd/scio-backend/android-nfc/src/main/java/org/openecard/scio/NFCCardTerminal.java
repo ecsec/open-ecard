@@ -41,11 +41,19 @@ import org.slf4j.LoggerFactory;
 public class NFCCardTerminal implements SCIOTerminal {
 
     private static final Logger logger = LoggerFactory.getLogger(NFCCardTerminal.class);
-
     private static NFCCardTerminal instance;
     private NFCCard nfcCard;
 
-    private NFCCardTerminal() {
+    /**
+     * Returns the NFCCardTerminal-Instance.
+     *
+     * @return The NFCCardTerminal-Instance
+     */
+    public static synchronized NFCCardTerminal getInstance() {
+	if (instance == null) {
+	    instance = new NFCCardTerminal();
+	}
+	return instance;
     }
 
     public int getLengthOfLastAPDU() {
@@ -60,18 +68,6 @@ public class NFCCardTerminal implements SCIOTerminal {
 	nfcCard = new NFCCard(tag);
     }
 
-    /**
-     * Returns the NFCCardTerminal-Instance.
-     *
-     * @return The NFCCardTerminal-Instance
-     */
-    public static synchronized NFCCardTerminal getInstance() {
-	if (instance == null) {
-	    instance = new NFCCardTerminal();
-	}
-	return instance;
-    }
-
     @Override
     public synchronized SCIOCard connect(String arg0) throws SCIOException {
 	if (nfcCard == null || this.nfcCard.isodep == null) {
@@ -79,7 +75,7 @@ public class NFCCardTerminal implements SCIOTerminal {
 	    throw new SCIOException("No tag present");
 	}
 	try {
-	    if (! nfcCard.isodep.isConnected()) {
+	    if (!nfcCard.isodep.isConnected()) {
 		nfcCard.isodep.setTimeout(3000);
 		nfcCard.isodep.connect();
 	    }
@@ -97,19 +93,18 @@ public class NFCCardTerminal implements SCIOTerminal {
 
     @Override
     public synchronized boolean isCardPresent() throws SCIOException {
-	boolean ret = (nfcCard != null && nfcCard.isodep != null && nfcCard.isodep.isConnected());
-	return ret;
+	return nfcCard != null && nfcCard.isodep != null && nfcCard.isodep.isConnected();
     }
 
     @Override
     public boolean waitForCardAbsent(long arg0) throws SCIOException {
-	// TODO Auto-generated method stub
+	logger.warn("waitForCardAbsent not supported");
 	return false;
     }
 
     @Override
     public boolean waitForCardPresent(long arg0) throws SCIOException {
-	// TODO Auto-generated method stub
+	logger.warn("waitForCardPresent not supported");
 	return false;
     }
 

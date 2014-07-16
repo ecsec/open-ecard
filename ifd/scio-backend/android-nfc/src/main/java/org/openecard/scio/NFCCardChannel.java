@@ -29,6 +29,8 @@ import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOChannel;
 import org.openecard.common.ifd.scio.SCIOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -38,7 +40,8 @@ import org.openecard.common.ifd.scio.SCIOException;
  */
 public class NFCCardChannel implements SCIOChannel {
 
-    private NFCCard card;
+    private static final Logger logger = LoggerFactory.getLogger(NFCCardChannel.class);
+    private final NFCCard card;
     private int lengthOfLastAPDU;
 
     public NFCCardChannel(NFCCard card) {
@@ -47,6 +50,7 @@ public class NFCCardChannel implements SCIOChannel {
 
     @Override
     public void close() throws SCIOException {
+	logger.warn("close not supported");
 	// we only have one channel and this will be open as long as we are connected to the tag
     }
 
@@ -76,8 +80,13 @@ public class NFCCardChannel implements SCIOChannel {
     }
 
     @Override
-    public int transmit(ByteBuffer arg0, ByteBuffer arg1) throws SCIOException {
-	throw new SCIOException("Not yet implemented");
+    public int transmit(ByteBuffer command, ByteBuffer response) throws SCIOException {
+	CardCommandAPDU cca = new CardCommandAPDU(command.array());
+	CardResponseAPDU cra = transmit(cca);
+	byte[] data = cra.toByteArray();
+	response.put(data);
+
+	return data.length;
     }
 
     public int getLengthOfLastAPDU() {

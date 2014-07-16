@@ -28,44 +28,47 @@ import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOChannel;
 import org.openecard.common.ifd.scio.SCIOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
- * NFC implementation of smartcardio's Card interface.
+ * NFC implementation of SCIO API card interface.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- *
  */
 public class NFCCard implements SCIOCard {
 
-    protected IsoDep isodep = null;
-    private NFCCardChannel nfcCardChannel = new NFCCardChannel(this);
+    private static final Logger logger = LoggerFactory.getLogger(NFCCard.class);
+    private final NFCCardChannel nfcCardChannel = new NFCCardChannel(this);
+    protected IsoDep isodep;
 
     public NFCCard(IsoDep tag) {
-	this.isodep = tag;
+	isodep = tag;
     }
 
     @Override
     public void beginExclusive() throws SCIOException {
-	// TODO
+	logger.warn("beginExclusive not supported");
+    }
+
+    @Override
+    public void endExclusive() throws SCIOException {
+	logger.warn("endExclusive not supported");
     }
 
     @Override
     public void disconnect(boolean arg0) throws SCIOException {
 	try {
-	    this.isodep.close();
+	    isodep.close();
 	} catch (IOException e) {
 	    throw new SCIOException("Disconnect failed", e);
 	}
     }
 
     @Override
-    public void endExclusive() throws SCIOException {
-	// TODO
-    }
-
-    @Override
     public SCIOATR getATR() {
+	logger.warn("getATR not supported");
 	// for now there is no way to get the ATR in android nfc api
 	return new SCIOATR(new byte[0]);
     }
@@ -77,17 +80,19 @@ public class NFCCard implements SCIOCard {
 
     @Override
     public String getProtocol() {
+	logger.warn("getProtocol not supported");
 	// for now theres no way to get the used protocol in android nfc api
 	return "";
     }
 
     @Override
     public SCIOChannel openLogicalChannel() throws SCIOException {
-	return this.nfcCardChannel;
+	return nfcCardChannel;
     }
 
     @Override
     public byte[] transmitControlCommand(int arg0, byte[] arg1) throws SCIOException {
+	logger.warn("transmitControlCommand not supported");
 	return new byte[0];
     }
 

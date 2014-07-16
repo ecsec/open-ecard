@@ -24,10 +24,9 @@ package org.openecard.scio;
 
 import android.nfc.tech.IsoDep;
 import java.io.IOException;
-import javax.smartcardio.Card;
-import javax.smartcardio.CardException;
-import javax.smartcardio.CardNotPresentException;
-import javax.smartcardio.CardTerminal;
+import org.openecard.common.ifd.scio.SCIOCard;
+import org.openecard.common.ifd.scio.SCIOException;
+import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class NFCCardTerminal extends CardTerminal {
+public class NFCCardTerminal implements SCIOTerminal {
 
     private static final Logger logger = LoggerFactory.getLogger(NFCCardTerminal.class);
 
@@ -74,10 +73,10 @@ public class NFCCardTerminal extends CardTerminal {
     }
 
     @Override
-    public synchronized Card connect(String arg0) throws CardException {
+    public synchronized SCIOCard connect(String arg0) throws SCIOException {
 	if (nfcCard == null || this.nfcCard.isodep == null) {
 	    logger.warn("No tag present.");
-	    throw new CardNotPresentException("No tag present");
+	    throw new SCIOException("No tag present");
 	}
 	try {
 	    if (! nfcCard.isodep.isConnected()) {
@@ -86,7 +85,7 @@ public class NFCCardTerminal extends CardTerminal {
 	    }
 	} catch (IOException e) {
 	    nfcCard = null;
-	    throw new CardException("No connection could be established", e);
+	    throw new SCIOException("No connection could be established", e);
 	}
 	return nfcCard;
     }
@@ -97,19 +96,19 @@ public class NFCCardTerminal extends CardTerminal {
     }
 
     @Override
-    public synchronized boolean isCardPresent() throws CardException {
+    public synchronized boolean isCardPresent() throws SCIOException {
 	boolean ret = (nfcCard != null && nfcCard.isodep != null && nfcCard.isodep.isConnected());
 	return ret;
     }
 
     @Override
-    public boolean waitForCardAbsent(long arg0) throws CardException {
+    public boolean waitForCardAbsent(long arg0) throws SCIOException {
 	// TODO Auto-generated method stub
 	return false;
     }
 
     @Override
-    public boolean waitForCardPresent(long arg0) throws CardException {
+    public boolean waitForCardPresent(long arg0) throws SCIOException {
 	// TODO Auto-generated method stub
 	return false;
     }

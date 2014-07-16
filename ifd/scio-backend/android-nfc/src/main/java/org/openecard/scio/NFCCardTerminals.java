@@ -24,28 +24,27 @@ package org.openecard.scio;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.smartcardio.CardException;
-import javax.smartcardio.CardTerminal;
-import javax.smartcardio.CardTerminals;
-
+import org.openecard.common.ifd.scio.SCIOException;
+import org.openecard.common.ifd.scio.SCIOTerminal;
+import org.openecard.common.ifd.scio.SCIOTerminals;
+import org.openecard.common.ifd.scio.SCIOTerminals.State;
 
 /**
  * NFC implementation of smartcardio's CardTerminals interface.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class NFCCardTerminals extends CardTerminals {
+public class NFCCardTerminals extends SCIOTerminals {
 
     @Override
-    public List<CardTerminal> list(State arg0) throws CardException {
-	List<CardTerminal> list = new ArrayList<CardTerminal>();
+    public List<SCIOTerminal> list(State arg0) throws SCIOException {
+	List<SCIOTerminal> list = new ArrayList<SCIOTerminal>();
 	list.add(NFCCardTerminal.getInstance());
 	return list;
     }
 
     @Override
-    public boolean waitForChange(long arg0) throws CardException {
-	// TODO Auto-generated method stub
+    public boolean waitForChange(long arg0) throws SCIOException {
 	return false;
     }
 

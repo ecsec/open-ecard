@@ -24,11 +24,11 @@ package org.openecard.scio;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import javax.smartcardio.Card;
-import javax.smartcardio.CardChannel;
-import javax.smartcardio.CardException;
-import javax.smartcardio.CommandAPDU;
-import javax.smartcardio.ResponseAPDU;
+import org.openecard.common.apdu.common.CardCommandAPDU;
+import org.openecard.common.apdu.common.CardResponseAPDU;
+import org.openecard.common.ifd.scio.SCIOCard;
+import org.openecard.common.ifd.scio.SCIOChannel;
+import org.openecard.common.ifd.scio.SCIOException;
 
 
 /**
@@ -36,7 +36,7 @@ import javax.smartcardio.ResponseAPDU;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class NFCCardChannel extends CardChannel {
+public class NFCCardChannel implements SCIOChannel {
 
     private NFCCard card;
     private int lengthOfLastAPDU;
@@ -46,13 +46,13 @@ public class NFCCardChannel extends CardChannel {
     }
 
     @Override
-    public void close() throws CardException {
-	 // we only have one channel and this will be open as long as we are connected to the tag
+    public void close() throws SCIOException {
+	// we only have one channel and this will be open as long as we are connected to the tag
     }
 
     @Override
-    public Card getCard() {
-	return this.card;
+    public SCIOCard getCard() {
+	return card;
     }
 
     @Override
@@ -61,18 +61,23 @@ public class NFCCardChannel extends CardChannel {
     }
 
     @Override
-    public ResponseAPDU transmit(CommandAPDU arg0) throws CardException {
+    public CardResponseAPDU transmit(CardCommandAPDU apdu) throws SCIOException {
 	try {
-	    lengthOfLastAPDU = arg0.getBytes().length;
-	    return new ResponseAPDU(this.card.isodep.transceive(arg0.getBytes()));
+	    lengthOfLastAPDU = apdu.toByteArray().length;
+	    return new CardResponseAPDU(card.isodep.transceive(apdu.toByteArray()));
 	} catch (IOException e) {
-	    throw new CardException("Transmit failed", e);
+	    throw new SCIOException("Transmit failed", e);
 	}
     }
 
     @Override
-    public int transmit(ByteBuffer arg0, ByteBuffer arg1) throws CardException {
-	throw new CardException("not yet  implemented");
+    public CardResponseAPDU transmit(byte[] apdu) throws SCIOException {
+	return transmit(new CardCommandAPDU(apdu));
+    }
+
+    @Override
+    public int transmit(ByteBuffer arg0, ByteBuffer arg1) throws SCIOException {
+	throw new SCIOException("Not yet implemented");
     }
 
     public int getLengthOfLastAPDU() {

@@ -24,10 +24,10 @@ package org.openecard.scio;
 
 import android.nfc.tech.IsoDep;
 import java.io.IOException;
-import javax.smartcardio.ATR;
-import javax.smartcardio.Card;
-import javax.smartcardio.CardChannel;
-import javax.smartcardio.CardException;
+import org.openecard.common.ifd.scio.SCIOATR;
+import org.openecard.common.ifd.scio.SCIOCard;
+import org.openecard.common.ifd.scio.SCIOChannel;
+import org.openecard.common.ifd.scio.SCIOException;
 
 
 /**
@@ -36,7 +36,7 @@ import javax.smartcardio.CardException;
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  *
  */
-public class NFCCard extends Card {
+public class NFCCard implements SCIOCard {
 
     protected IsoDep isodep = null;
     private NFCCardChannel nfcCardChannel = new NFCCardChannel(this);
@@ -46,32 +46,32 @@ public class NFCCard extends Card {
     }
 
     @Override
-    public void beginExclusive() throws CardException {
+    public void beginExclusive() throws SCIOException {
 	// TODO
     }
 
     @Override
-    public void disconnect(boolean arg0) throws CardException {
+    public void disconnect(boolean arg0) throws SCIOException {
 	try {
 	    this.isodep.close();
 	} catch (IOException e) {
-	    throw new CardException("Disconnect failed", e);
+	    throw new SCIOException("Disconnect failed", e);
 	}
     }
 
     @Override
-    public void endExclusive() throws CardException {
+    public void endExclusive() throws SCIOException {
 	// TODO
     }
 
     @Override
-    public ATR getATR() {
+    public SCIOATR getATR() {
 	// for now there is no way to get the ATR in android nfc api
-	return new ATR(new byte[0]);
+	return new SCIOATR(new byte[0]);
     }
 
     @Override
-    public CardChannel getBasicChannel() {
+    public SCIOChannel getBasicChannel() {
 	return this.nfcCardChannel;
     }
 
@@ -82,12 +82,12 @@ public class NFCCard extends Card {
     }
 
     @Override
-    public CardChannel openLogicalChannel() throws CardException {
+    public SCIOChannel openLogicalChannel() throws SCIOException {
 	return this.nfcCardChannel;
     }
 
     @Override
-    public byte[] transmitControlCommand(int arg0, byte[] arg1) throws CardException {
+    public byte[] transmitControlCommand(int arg0, byte[] arg1) throws SCIOException {
 	return new byte[0];
     }
 

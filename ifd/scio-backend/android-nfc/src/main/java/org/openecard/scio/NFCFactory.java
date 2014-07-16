@@ -22,8 +22,8 @@
 
 package org.openecard.scio;
 
-import javax.smartcardio.CardTerminals;
 import org.openecard.common.ifd.AndroidTerminalFactory;
+import org.openecard.common.ifd.scio.SCIOTerminals;
 
 
 /**
@@ -39,7 +39,7 @@ public class NFCFactory implements AndroidTerminalFactory {
     }
 
     @Override
-    public CardTerminals terminals() {
+    public SCIOTerminals terminals() {
 	return new NFCCardTerminals();
     }
 

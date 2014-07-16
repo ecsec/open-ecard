@@ -23,10 +23,10 @@
 package org.openecard.scio;
 
 import java.io.IOException;
-import javax.smartcardio.ATR;
-import javax.smartcardio.Card;
-import javax.smartcardio.CardChannel;
-import javax.smartcardio.CardException;
+import org.openecard.common.ifd.scio.SCIOATR;
+import org.openecard.common.ifd.scio.SCIOCard;
+import org.openecard.common.ifd.scio.SCIOChannel;
+import org.openecard.common.ifd.scio.SCIOException;
 import org.simalliance.openmobileapi.Session;
 
 
@@ -35,7 +35,7 @@ import org.simalliance.openmobileapi.Session;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class SeekCard extends Card {
+public class SeekCard implements SCIOCard {
 
     private static byte[] aid = null;
     private Session session;
@@ -55,27 +55,27 @@ public class SeekCard extends Card {
     }
 
     @Override
-    public void beginExclusive() throws CardException {
+    public void beginExclusive() throws SCIOException {
 	// TODO
     }
 
     @Override
-    public void disconnect(boolean arg0) throws CardException {
+    public void disconnect(boolean arg0) throws SCIOException {
 	this.session.close();
     }
 
     @Override
-    public void endExclusive() throws CardException {
+    public void endExclusive() throws SCIOException {
 	// TODO
     }
 
     @Override
-    public ATR getATR() {
-	return new ATR(this.session.getATR());
+    public SCIOATR getATR() {
+	return new SCIOATR(this.session.getATR());
     }
 
     @Override
-    public CardChannel getBasicChannel() {
+    public SCIOChannel getBasicChannel() {
 	try {
 	    return new SeekChannel(this.session.openBasicChannel(aid));
 	} catch (IOException e) {
@@ -90,16 +90,16 @@ public class SeekCard extends Card {
     }
 
     @Override
-    public CardChannel openLogicalChannel() throws CardException {
+    public SCIOChannel openLogicalChannel() throws SCIOException {
 	try {
 	    return new SeekChannel(this.session.openLogicalChannel(aid));
 	} catch (IOException e) {
-	    throw new CardException(e);
+	    throw new SCIOException(e);
 	}
     }
 
     @Override
-    public byte[] transmitControlCommand(int arg0, byte[] arg1) throws CardException {
+    public byte[] transmitControlCommand(int arg0, byte[] arg1) throws SCIOException {
 	return new byte[0];
     }
 

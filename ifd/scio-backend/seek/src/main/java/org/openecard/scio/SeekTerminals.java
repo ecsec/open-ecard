@@ -25,9 +25,9 @@ package org.openecard.scio;
 import android.content.Context;
 import java.util.ArrayList;
 import java.util.List;
-import javax.smartcardio.CardException;
-import javax.smartcardio.CardTerminal;
-import javax.smartcardio.CardTerminals;
+import org.openecard.common.ifd.scio.SCIOException;
+import org.openecard.common.ifd.scio.SCIOTerminal;
+import org.openecard.common.ifd.scio.SCIOTerminals;
 import org.simalliance.openmobileapi.Reader;
 import org.simalliance.openmobileapi.SEService;
 
@@ -37,28 +37,28 @@ import org.simalliance.openmobileapi.SEService;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class SeekTerminals extends CardTerminals implements SEService.CallBack {
+public class SeekTerminals extends SCIOTerminals implements SEService.CallBack {
 
     private SEService seService;
-    private static SeekTerminals instance;
+    private static SCIOTerminals instance;
 
-    public static SeekTerminals getInstance() {
+    public static SCIOTerminals getInstance() {
 	return instance;
     }
 
-    public SeekTerminals(Context c) throws CardException {
+    public SeekTerminals(Context c) throws SCIOException {
 	try {
 	    seService = new SEService(c, this);
 	    instance = this;
 	} catch (SecurityException e) {
-	    throw new CardException("Binding not allowed, uses-permission org.simalliance.openmobileapi.SMARTCARD?");
+	    throw new SCIOException("Binding not allowed, uses-permission org.simalliance.openmobileapi.SMARTCARD?");
 	} catch (Exception e) {
-	    throw new CardException(e);
+	    throw new SCIOException(e);
 	}
     }
 
     @Override
-    public List<CardTerminal> list(State arg0) throws CardException {
+    public List<SCIOTerminal> list(State arg0) throws SCIOException {
 	while (!seService.isConnected()) {
 	    try {
 		Thread.sleep(100);
@@ -67,7 +67,7 @@ public class SeekTerminals extends CardTerminals implements SEService.CallBack {
 		e.printStackTrace();
 	    }
 	}
-	List<CardTerminal> list = new ArrayList<CardTerminal>();
+	List<SCIOTerminal> list = new ArrayList<SCIOTerminal>();
 	for (Reader r : seService.getReaders()) {
 	    list.add(new SeekTerminal(r));
 	}
@@ -75,7 +75,7 @@ public class SeekTerminals extends CardTerminals implements SEService.CallBack {
     }
 
     @Override
-    public boolean waitForChange(long arg0) throws CardException {
+    public boolean waitForChange(long arg0) throws SCIOException {
 	// TODO
 	return false;
     }

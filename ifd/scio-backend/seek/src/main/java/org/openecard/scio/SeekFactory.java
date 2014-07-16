@@ -22,8 +22,8 @@
 
 package org.openecard.scio;
 
-import javax.smartcardio.CardTerminals;
 import org.openecard.common.ifd.TerminalFactory;
+import org.openecard.common.ifd.scio.SCIOTerminals;
 
 
 /**
@@ -39,7 +39,7 @@ public class SeekFactory implements TerminalFactory {
     }
 
     @Override
-    public CardTerminals terminals() {
+    public SCIOTerminals terminals() {
 	try {
 	    return SeekTerminals.getInstance();
 	} catch (Exception e) {

@@ -23,9 +23,9 @@
 package org.openecard.scio;
 
 import java.io.IOException;
-import javax.smartcardio.Card;
-import javax.smartcardio.CardException;
-import javax.smartcardio.CardTerminal;
+import org.openecard.common.ifd.scio.SCIOCard;
+import org.openecard.common.ifd.scio.SCIOException;
+import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.simalliance.openmobileapi.Reader;
 
 
@@ -34,7 +34,7 @@ import org.simalliance.openmobileapi.Reader;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class SeekTerminal extends CardTerminal {
+public class SeekTerminal implements SCIOTerminal {
 
     private Reader reader;
 
@@ -43,11 +43,11 @@ public class SeekTerminal extends CardTerminal {
     }
 
     @Override
-    public Card connect(String arg0) throws CardException {
+    public SCIOCard connect(String arg0) throws SCIOException {
 	try {
 	    return new SeekCard(reader.openSession());
 	} catch (IOException e) {
-	    throw new CardException(e);
+	    throw new SCIOException(e);
 	}
     }
 
@@ -57,18 +57,18 @@ public class SeekTerminal extends CardTerminal {
     }
 
     @Override
-    public boolean isCardPresent() throws CardException {
+    public boolean isCardPresent() throws SCIOException {
 	return reader.isSecureElementPresent();
     }
 
     @Override
-    public boolean waitForCardAbsent(long arg0) throws CardException {
+    public boolean waitForCardAbsent(long arg0) throws SCIOException {
 	// TODO
 	return false;
     }
 
     @Override
-    public boolean waitForCardPresent(long arg0) throws CardException {
+    public boolean waitForCardPresent(long arg0) throws SCIOException {
 	// TODO
 	return false;
     }

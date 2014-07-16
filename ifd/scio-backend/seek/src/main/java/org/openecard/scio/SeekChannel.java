@@ -22,12 +22,13 @@
 
 package org.openecard.scio;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import javax.smartcardio.Card;
-import javax.smartcardio.CardChannel;
-import javax.smartcardio.CardException;
-import javax.smartcardio.CommandAPDU;
-import javax.smartcardio.ResponseAPDU;
+import org.openecard.common.apdu.common.CardCommandAPDU;
+import org.openecard.common.apdu.common.CardResponseAPDU;
+import org.openecard.common.ifd.scio.SCIOCard;
+import org.openecard.common.ifd.scio.SCIOChannel;
+import org.openecard.common.ifd.scio.SCIOException;
 import org.simalliance.openmobileapi.Channel;
 
 
@@ -36,7 +37,7 @@ import org.simalliance.openmobileapi.Channel;
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-public class SeekChannel extends CardChannel {
+public class SeekChannel implements SCIOChannel {
 
     private Channel channel;
 
@@ -45,13 +46,13 @@ public class SeekChannel extends CardChannel {
     }
 
     @Override
-    public void close() throws CardException {
+    public void close() throws SCIOException {
 	channel.close();
 
     }
 
     @Override
-    public Card getCard() {
+    public SCIOCard getCard() {
 	return new SeekCard(channel.getSession());
     }
 
@@ -61,17 +62,26 @@ public class SeekChannel extends CardChannel {
     }
 
     @Override
-    public ResponseAPDU transmit(CommandAPDU arg0) throws CardException {
+    public CardResponseAPDU transmit(CardCommandAPDU apdu) throws SCIOException {
 	try {
-	    return new ResponseAPDU(channel.transmit(arg0.getBytes()));
+	    return new CardResponseAPDU(channel.transmit(apdu.toByteArray()));
+	} catch (IOException e) {
+	    throw new SCIOException("Transmit failed", e);
+	}
+    }
+    
+    @Override
+    public CardResponseAPDU transmit(byte[] apdu) throws SCIOException {
+        try {
+	    return new CardResponseAPDU(channel.transmit(apdu));
 	} catch (Exception e) {
-	    throw new CardException("Transmit failed", e);
+	    throw new SCIOException("Transmit failed", e);
 	}
     }
 
     @Override
-    public int transmit(ByteBuffer arg0, ByteBuffer arg1) throws CardException {
-	throw new CardException("not yet implemented");
+    public int transmit(ByteBuffer arg0, ByteBuffer arg1) throws SCIOException {
+	throw new SCIOException("not yet implemented");
     }
 
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,18 +29,23 @@ import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 class AndroidStepResult implements StepResult {
 
-    private Exchanger syncPoint = new Exchanger();
+    private final static Logger logger = LoggerFactory.getLogger(AndroidStepResult.class);
+
+    private final Exchanger syncPoint = new Exchanger();
+    private final AndroidNavigator navigator;
     private ResultStatus status;
     private List<OutputInfoUnit> results;
-    private AndroidNavigator navigator;
 
     public AndroidStepResult() {
 	navigator = AndroidNavigator.getInstance();
@@ -103,15 +108,30 @@ class AndroidStepResult implements StepResult {
     }
 
     @Override
+    public boolean isReload() {
+	// wait until values are present
+	synchronize();
+	synchronized (this) {
+	    return getStatus() == ResultStatus.RELOAD;
+	}
+    }
+
+    @Override
     public List<OutputInfoUnit> getResults() {
 	// wait until values are present
 	synchronize();
 	synchronized (this) {
-	    if (results == null && navigator.getStepResult().getResults() != null) {
+	    if (results == null) {
 		results = Collections.unmodifiableList(navigator.getStepResult().getResults());
 	    }
 	    return results;
 	}
+    }
+
+    @Override
+    public Step getReplacement() {
+	logger.warn("Function AndroidStepResult.getReplacement is not implemented. Returning no replacement step.");
+	return null;
     }
 
     private void synchronize() {

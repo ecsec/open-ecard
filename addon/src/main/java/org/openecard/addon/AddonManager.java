@@ -114,7 +114,11 @@ public class AddonManager {
 	ClassLoader cl = registry.downloadAddon(addonSpec);
 	IFDProtocolProxy protoFactory = new IFDProtocolProxy(className, cl);
 	try {
-	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);
+	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
+	    aCtx.setCardRecognition(recognition);
+	    aCtx.setCardStateMap(cardStates);
+	    aCtx.setEventHandle(eventHandler);
+	    aCtx.setUserConsent(userConsent);
 	    protoFactory.init(aCtx);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
@@ -129,7 +133,11 @@ public class AddonManager {
 	ClassLoader cl = registry.downloadAddon(addonSpec);
 	SALProtocolProxy protoFactory = new SALProtocolProxy(className, cl);
 	try {
-	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);
+	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
+	    aCtx.setCardRecognition(recognition);
+	    aCtx.setCardStateMap(cardStates);
+	    aCtx.setEventHandle(eventHandler);
+	    aCtx.setUserConsent(userConsent);
 	    protoFactory.init(aCtx);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
@@ -144,7 +152,11 @@ public class AddonManager {
 	ClassLoader cl = registry.downloadAddon(addonSpec);
 	AppExtensionActionProxy protoFactory = new AppExtensionActionProxy(className, cl);
 	try {
-	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);
+	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
+	    aCtx.setCardRecognition(recognition);
+	    aCtx.setCardStateMap(cardStates);
+	    aCtx.setEventHandle(eventHandler);
+	    aCtx.setUserConsent(userConsent);
 	    protoFactory.init(aCtx);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
@@ -159,7 +171,11 @@ public class AddonManager {
 	ClassLoader cl = registry.downloadAddon(addonSpec);
 	AppPluginActionProxy protoFactory = new AppPluginActionProxy(className, cl);
 	try {
-	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);
+	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
+	    aCtx.setCardRecognition(recognition);
+	    aCtx.setCardStateMap(cardStates);
+	    aCtx.setEventHandle(eventHandler);
+	    aCtx.setUserConsent(userConsent);
 	    protoFactory.init(aCtx);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {

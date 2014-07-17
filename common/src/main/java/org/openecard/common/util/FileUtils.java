@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -72,6 +72,38 @@ public class FileUtils {
 	} else {
 	    throw new IOException("Home path can not be determined.");
 	}
+    }
+
+    /**
+     * Finds and returns the user specific addons directory.
+     * The addons directory is defined as '$HOME/.openecard/addons'. This function evaluates the system property 'user.home'
+     * and simply appends '.openecard/addons'. <br/>
+     * The addons directory can be used to save addons, theire configuration and related stuff.
+     *
+     * @return File object pointing to the addons directory.
+     * @throws IOException In case the directory can not be found.
+     * @throws SecurityException In case the directory and/or one of its parents could not be created.
+     */
+    public static File getAddonsDir() throws IOException, SecurityException {
+	File path = new File(getHomeConfigDir(), "addons");
+	path.mkdirs();
+	return path;
+    }
+
+    /**
+     * Finds and returns the user specific addons configuration directory.
+     * The addons directory is defined as '$HOME/.openecard/addons/conf'. This function evaluates the system property
+     * 'user.home' and simply appends '.openecard/addons/conf'. <br/>
+     * The addons conf directory can be used to save the configuration of the specific addon.
+     *
+     * @return File object pointing to the addons directory.
+     * @throws IOException In case the directory can not be found.
+     * @throws SecurityException In case the directory and/or one of its parents could not be created.
+     */
+    public static File getAddonsConfDir() throws IOException, SecurityException {
+	File path = new File(getAddonsDir(), "conf");
+	path.mkdirs();
+	return path;
     }
 
     /**

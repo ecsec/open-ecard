@@ -185,7 +185,7 @@ public class SwingNavigator implements UserConsentNavigator, ActionListener {
 
 
     private ArrayList<StepFrame> createStepFrames(List<Step> steps, String dialogType) {
-	ArrayList<StepFrame> frames = new ArrayList<StepFrame>(steps.size());
+	ArrayList<StepFrame> frames = new ArrayList<>(steps.size());
 	for (int i = 0; i < steps.size(); i++) {
 	    if (i == 0) {
 		steps.get(0).setReversible(false);

@@ -41,9 +41,10 @@ import org.openecard.gui.definition.Step;
  */
 public class SwingStepResult implements StepResult {
 
-    public Exchanger<Void> syncPoint = new Exchanger<Void>();
+    public Exchanger<Void> syncPoint = new Exchanger<>();
     private Step step;
     private ResultStatus status;
+    private Step replacement;
     private List<OutputInfoUnit> results;
 
     public SwingStepResult(Step step) {
@@ -106,6 +107,14 @@ public class SwingStepResult implements StepResult {
     }
 
     @Override
+    public boolean isReload() {
+	// wait until values are present
+	synchronize();
+	synchronized (this) {
+	    return getStatus() == ResultStatus.RELOAD;
+	}    }
+
+    @Override
     public List<OutputInfoUnit> getResults() {
 	// wait until values are present
 	synchronize();
@@ -115,6 +124,15 @@ public class SwingStepResult implements StepResult {
 	    }
 	    return results;
 	}
+    }
+
+    public void setReplacement(Step replacement) {
+	this.replacement = replacement;
+    }
+
+    @Override
+    public Step getReplacement() {
+	return replacement;
     }
 
     private void synchronize() {

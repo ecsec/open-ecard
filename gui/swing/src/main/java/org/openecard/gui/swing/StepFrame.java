@@ -34,6 +34,8 @@ import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
+import org.openecard.gui.executor.BackgroundTask;
+import org.openecard.gui.executor.StepActionResult;
 import org.openecard.gui.swing.common.NavigationEvent;
 import org.openecard.gui.swing.components.Focusable;
 import org.openecard.gui.swing.components.StepComponent;
@@ -60,6 +62,8 @@ public class StepFrame {
     private final String dialogType;
     private SwingStepResult stepResult;
     private List<StepComponent> components;
+
+    private Thread bgThread;
 
     public StepFrame(Step step, String dialogType) {
 	this.panel = new JPanel();
@@ -123,7 +127,7 @@ public class StepFrame {
      * @return List containing all result values. As a matter of fact this list can be empty.
      */
     public List<OutputInfoUnit> getResultContent() {
-	ArrayList<OutputInfoUnit> result = new ArrayList<OutputInfoUnit>(components.size());
+	ArrayList<OutputInfoUnit> result = new ArrayList<>(components.size());
 	for (StepComponent next : components) {
 	    if (next.isValueType()) {
 		result.add(next.getValue());
@@ -137,6 +141,7 @@ public class StepFrame {
 	initComponents();
 	revalidate(panel);
 	setFocus();
+	runBackgroundTask();
     }
 
     public StepResult getStepResult() {
@@ -187,20 +192,81 @@ public class StepFrame {
      * @param event Event describing which button has been clicked.
      */
     public void updateResult(NavigationEvent event) {
-	if (event == NavigationEvent.BACK) {
-	    stepResult.setResult(getResultContent());
-	    stepResult.setResultStatus(ResultStatus.BACK);
-	} else if (event == NavigationEvent.NEXT) {
-	    stepResult.setResult(getResultContent());
-	    stepResult.setResultStatus(ResultStatus.OK);
-	} else if (event == NavigationEvent.CANCEL) {
-	    stepResult.setResultStatus(ResultStatus.CANCEL);
+	killBackgroundTask();
+
+	// update issued result
+	switch (event) {
+	    case BACK:
+		stepResult.setResult(getResultContent());
+		stepResult.setResultStatus(ResultStatus.BACK);
+		break;
+	    case NEXT:
+		stepResult.setResult(getResultContent());
+		stepResult.setResultStatus(ResultStatus.OK);
+		break;
+	    case CANCEL:
+	    default:
+		stepResult.setResultStatus(ResultStatus.CANCEL);
 	}
 
 	try {
 	    logger.debug("Exchange result for step '{}", step.getTitle());
 	    stepResult.syncPoint.exchange(null);
-	} catch (Exception ignore) {
+	} catch (InterruptedException ignore) {
+	}
+    }
+
+    private void forceResult(StepActionResult result) {
+	// update issued result
+	stepResult.setReplacement(result.getReplacement());
+	switch (result.getStatus()) {
+	    case BACK:
+		stepResult.setResult(getResultContent());
+		stepResult.setResultStatus(ResultStatus.BACK);
+		break;
+	    case NEXT:
+		stepResult.setResult(getResultContent());
+		stepResult.setResultStatus(ResultStatus.OK);
+		break;
+	    case REPEAT:
+		stepResult.setResult(getResultContent());
+		stepResult.setResultStatus(ResultStatus.RELOAD);
+		break;
+	    case CANCEL:
+	    default:
+		stepResult.setResultStatus(ResultStatus.CANCEL);
+	}
+
+	try {
+	    logger.debug("Exchange result for step '{}", step.getTitle());
+	    stepResult.syncPoint.exchange(null);
+	} catch (InterruptedException ignore) {
+	}
+    }
+
+    public void killBackgroundTask() {
+	// kill running thread
+	if (bgThread != null && bgThread.isAlive()) {
+	    bgThread.interrupt();
+	}
+    }
+
+    private void runBackgroundTask() {
+	final BackgroundTask task = step.getBackgroundTask();
+	if (task != null) {
+	    bgThread = new Thread(new Runnable() {
+		@Override
+		public void run() {
+		    try {
+			StepActionResult result = task.call();
+			forceResult(result);
+		    } catch (Exception ex) {
+			logger.error("Background task terminated with an exception.", ex);
+		    }
+		}
+	    }, "Swing-GUI-BG-Task");
+	    bgThread.setDaemon(true);
+	    bgThread.start();
 	}
     }
 

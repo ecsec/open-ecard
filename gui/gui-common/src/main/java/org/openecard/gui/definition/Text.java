@@ -38,6 +38,13 @@ public final class Text extends IDTrait implements InputInfoUnit {
 
     private String text;
 
+    public Text() {
+    }
+
+    public Text(String text) {
+	this.text = text;
+    }
+
 
     /**
      * Gets the text set for this instance.

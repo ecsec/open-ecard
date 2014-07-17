@@ -54,7 +54,7 @@ public class ExecutionEngine {
     private static final Logger logger = LoggerFactory.getLogger(ExecutionEngine.class);
 
     private final UserConsentNavigator navigator;
-    private final TreeMap<String, ExecutionResults> results = new TreeMap<String, ExecutionResults>();
+    private final TreeMap<String, ExecutionResults> results = new TreeMap<>();
 
 
     /**
@@ -100,7 +100,7 @@ public class ExecutionEngine {
 	    if (! next.getStep().isResetOnLoad()) {
 		Step s = next.getStep();
 		List<InputInfoUnit> inputInfo = s.getInputInfoUnits();
-		Map<String, InputInfoUnit> infoMap = new HashMap<String, InputInfoUnit>();
+		Map<String, InputInfoUnit> infoMap = new HashMap<>();
 		// create index over infos
 		for (InputInfoUnit nextInfo : inputInfo) {
 		    infoMap.put(nextInfo.getID(), nextInfo);
@@ -110,6 +110,29 @@ public class ExecutionEngine {
 		    // an entry must exist, otherwise this is an error in the GUI implementation
 		    // this type of error should be found in tests
 		    matchingInfo.copyContentFrom(nextOut);
+		}
+	    }
+
+	    // replace step if told by result value
+	    if (next.getReplacement() != null) {
+		switch (next.getStatus()) {
+		    case BACK:
+			next = navigator.replacePrevious(next.getReplacement());
+			break;
+		    case OK:
+			if (navigator.hasNext()) {
+			    next = navigator.replaceNext(next.getReplacement());
+			} else {
+			    navigator.close();
+			    return convertStatus(StepActionResultStatus.NEXT);
+			}
+			break;
+		    case RELOAD:
+			next = navigator.replaceCurrent(next.getReplacement());
+			break;
+		    default:
+			// fallthrough because CANCEL is already handled
+			break;
 		}
 	    }
 

@@ -23,6 +23,8 @@
 package org.openecard.gui;
 
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
 
@@ -76,6 +78,12 @@ public interface StepResult {
      * @return {@code true} if result status is CANCEL, {@code false} otherwise.
      */
     boolean isCancelled();
+    /**
+     * Convenience method for {@link #getStatus()} with check if the status is {@link ResultStatus#RELOAD}.
+     *
+     * @return {@code true} if result status is RELOAD, {@code false} otherwise.
+     */
+    boolean isReload();
 
     /**
      * Return result values of all OutputInfoUnits of the step this result belongs to.
@@ -85,6 +93,17 @@ public interface StepResult {
      * @see #getStatus()
      * @return List containing all results of the OutputInfoUnits of this step.
      */
+    @Nonnull
     List<OutputInfoUnit> getResults();
+
+    /**
+     * Returns the replacement step for the next display.
+     * This method blocks if the dialog is still displayed. The blocking behaviour is defined in the documentation for
+     * {@code getStatus}.
+     *
+     * @return The replacement step, or {@code null} if no replacement should be performed.
+     */
+    @Nullable
+    Step getReplacement();
 
 }

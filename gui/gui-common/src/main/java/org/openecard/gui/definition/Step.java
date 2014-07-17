@@ -24,7 +24,10 @@ package org.openecard.gui.definition;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.openecard.common.util.ValueGenerators;
+import org.openecard.gui.executor.BackgroundTask;
 import org.openecard.gui.executor.DummyAction;
 import org.openecard.gui.executor.StepAction;
 
@@ -41,6 +44,7 @@ public class Step {
     private String title;
     private String description;
     private StepAction action;
+    private BackgroundTask backgroundTask;
     private boolean reversible;
     private boolean instantReturn;
     private boolean resetOnLoad;
@@ -186,7 +190,7 @@ public class Step {
      */
     public List<InputInfoUnit> getInputInfoUnits() {
 	if (inputInfoUnits == null) {
-	    inputInfoUnits = new ArrayList<InputInfoUnit>();
+	    inputInfoUnits = new ArrayList<>();
 	}
 	return inputInfoUnits;
     }
@@ -202,6 +206,7 @@ public class Step {
      *
      * @return The action associated with this step, or a {@link DummyAction} if none is set.
      */
+    @Nonnull
     public StepAction getAction() {
 	if (action == null) {
 	    return new DummyAction(this);
@@ -216,8 +221,31 @@ public class Step {
      * @param action The action to be associated with this step, or {@code null} if the current action should be
      *   removed.
      */
-    public void setAction(StepAction action) {
+    public void setAction(@Nullable StepAction action) {
 	this.action = action;
+    }
+
+    /**
+     * Gets the background task associated with this step.
+     * Background tasks must be started by the GUI implementation in parallel to the display of the step. For detailed
+     * information about background tasks, refer to {@link BackgroundTask}.
+     *
+     * @return The background task associated with this step, or {@code null} if none is set.
+     */
+    @Nullable
+    public BackgroundTask getBackgroundTask() {
+	return backgroundTask;
+    }
+    /**
+     * Sets the background task to be associated with this step.
+     * Background tasks must be started by the GUI implementation in parallel to the display of the step. For detailed
+     * information about background tasks, refer to {@link BackgroundTask}.
+     *
+     * @param backgroundTask The background task to be associated with this step, or {@code null} if the current
+     *   background task should be removed.
+     */
+    public void setBackgroundTask(@Nullable BackgroundTask backgroundTask) {
+	this.backgroundTask = backgroundTask;
     }
 
 }

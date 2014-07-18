@@ -67,6 +67,10 @@
 				<excludes>
 				    <exclude>META-INF/**/pom.xml</exclude>
 				    <exclude>META-INF/**/pom.properties</exclude>
+					<exclude>META-INF/*.SF</exclude>
+					<exclude>META-INF/*.DSA</exclude>
+					<exclude>META-INF/*.RSA</exclude>
+					<exclude>META-INF/*.EC</exclude>
 				</excludes>
 			    </filter>
 			</filters>
@@ -237,8 +241,8 @@
 	    <scope>provided</scope>
 	</dependency>
 	<dependency>
-	    <groupId>org.json</groupId>
-	    <artifactId>json</artifactId>
+	    <groupId>com.google.code.gson</groupId>
+	    <artifactId>gson</artifactId>
 	</dependency>
     </dependencies>
 

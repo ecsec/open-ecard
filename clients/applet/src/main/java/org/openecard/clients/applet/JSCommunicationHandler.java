@@ -22,6 +22,11 @@
 
 package org.openecard.clients.applet;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.applet.Applet;
 import java.io.UnsupportedEncodingException;
@@ -31,6 +36,8 @@ import java.security.AccessController;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivilegedAction;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -38,8 +45,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.openecard.addon.AddonManager;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.ValueGenerators;
@@ -75,8 +80,8 @@ public class JSCommunicationHandler {
 
     private Future<?> eventThread;
 
-    private JavaScriptBinding binding;
-    private HashMap<String, String> sessionMap; // this is just one session for waitForChange
+    private final JavaScriptBinding binding;
+    private final HashMap<String, String> sessionMap; // this is just one session for waitForChange
 
 
     /**
@@ -92,7 +97,7 @@ public class JSCommunicationHandler {
 	jsEventCallback = applet.getParameter("jsEventCallback");
 	jsMessageCallback = applet.getParameter("jsMessageCallback");
 	binding = new JavaScriptBinding(manager);
-	sessionMap = new HashMap<String, String>();
+	sessionMap = new HashMap<>();
 	sessionMap.put("session", ValueGenerators.genBase64Session());
 	setupJSBinding();
     }
@@ -236,7 +241,7 @@ public class JSCommunicationHandler {
 		    }
 		}
 	    });
-	} catch (JSONException ex) {
+	} catch (JsonSyntaxException ex) {
 	    logger.error(ex.getMessage(), ex);
 	}
     }
@@ -248,15 +253,21 @@ public class JSCommunicationHandler {
      * @return parameter hash map
      * @throws JSONException
      */
-    private static Map<String, String> parseParameterJSONMap(String jsonData) throws JSONException {
-	JSONObject json = new JSONObject(jsonData);
-	Map<String, String> map = new HashMap<String, String>();
+    private static Map<String, String> parseParameterJSONMap(String jsonData) throws JsonSyntaxException {
+	JsonParser jp = new JsonParser();
+	JsonElement je = jp.parse(jsonData);
+	if (je.isJsonObject()) {
+	    JsonObject jo = je.getAsJsonObject();
+	    Map<String, String> map = new HashMap<>();
 
-	for (String key : JSONObject.getNames(json)) {
-	    map.put(key, json.getString(key));
+	    for (Map.Entry<String, JsonElement> entry : jo.entrySet()) {
+		map.put(entry.getKey(), entry.getValue().toString());
+	    }
+
+	    return map;
+	} else {
+	    return Collections.emptyMap();
 	}
-
-	return map;
     }
 
     /**

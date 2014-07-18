@@ -1,5 +1,5 @@
 Open eCard App
-Copyright 2011-2013 (see entries below)
+Copyright 2011-2014 (see entries below)
 
 This product includes software developed at:
  - Bremen Online Services (http://www.bos-bremen.de)
@@ -18,7 +18,8 @@ The following software projects are included/used(*) in this software distributi
  - cyberJack PCSC (http://www.reiner-sct.com/index.php?option=content&task=view&id=243)
  - FindBugs (http://findbugs.sourceforge.net)
  - Google Android SDK (http://source.android.com)
- - JSON in Java (http://www.json.org/java/index.html
+ - Gson (https://code.google.com/p/google-gson/)
+ - JMockit (http://jmockit.github.io/)
  - libusbx (http://libusbx.org/)
  - Logback (http://logback.qos.ch/)
  - Logback-Android (https://github.com/tony19/logback-android)

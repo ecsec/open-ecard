@@ -81,7 +81,7 @@ public abstract class SettingsGroup extends JPanel {
      */
     public SettingsGroup(@Nullable String title, @Nonnull Properties properties) {
 	this.properties = properties;
-	this.fieldLabels = new HashMap<Component, JLabel>();
+	this.fieldLabels = new HashMap<>();
 
 	Border frameBorder = BorderFactory.createEmptyBorder(2, 2, 2, 2);
 	if (title != null) {
@@ -182,8 +182,8 @@ public abstract class SettingsGroup extends JPanel {
 	} else {
 	    entries = values.split(";");
 	}
-	Vector<Vector<String>> rowData = new Vector<Vector<String>>();
-	Vector<String> columnData = new Vector<String>();
+	Vector<Vector<String>> rowData = new Vector<>();
+	Vector<String> columnData = new Vector<>();
 	columnData.add("Provider ID");
 	columnData.add("URL");
 	final DefaultTableModel model = new DefaultTableModel() {
@@ -232,7 +232,7 @@ public abstract class SettingsGroup extends JPanel {
 	    }
 	    String key = entry.split(",")[0];
 	    String value = entry.split(",")[1];
-	    Vector<String> row = new Vector<String>();
+	    Vector<String> row = new Vector<>();
 	    row.add(key);
 	    row.add(value);
 	    rowData.add(row);
@@ -249,7 +249,7 @@ public abstract class SettingsGroup extends JPanel {
 	JLabel label = addLabel(name, desc);
 
 	String value = properties.getProperty(property);
-	ArrayList<String> entries = new ArrayList<String>(10);
+	ArrayList<String> entries = new ArrayList<>(10);
 	if (value != null) {
 	    String[] arrayEntries = value.split("\n");
 	    Collections.addAll(entries, arrayEntries);
@@ -306,7 +306,7 @@ public abstract class SettingsGroup extends JPanel {
 	input.addItemListener(new ItemListener() {
 	    @Override
 	    public void itemStateChanged(ItemEvent e) {
-		properties.setProperty(property, Boolean.valueOf(input.isSelected()).toString());
+		properties.setProperty(property, Boolean.toString(input.isSelected()));
 	    }
 	});
 	addComponent(input);

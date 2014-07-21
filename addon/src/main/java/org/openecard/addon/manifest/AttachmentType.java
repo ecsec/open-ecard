@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,9 +24,10 @@ package org.openecard.addon.manifest;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 
 
 /**
@@ -34,15 +35,24 @@ import javax.xml.bind.annotation.XmlType;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@XmlRootElement(name = "EnumEntry")
-@XmlType(propOrder = { "key", "values", "localizedName", "localizedDescription" })
-public class EnumEntry extends ConfigurationEntry {
+@XmlRootElement(name = "AttachmentType")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class AttachmentType {
 
-    @XmlElement(name = "Value", required = true)
-    private final ArrayList<String> values = new ArrayList<>();
+    @XmlElement(name = "MIMEType")
+    private final ArrayList<String> mimeType = new ArrayList<>();
+    @XmlElement(name = "Name")
+    private String name;
 
-    public List<String> getValues() {
-	return values;
+    public List<String> getMimeType() {
+	return mimeType;
     }
 
+    public void setName(String name) {
+	this.name = name;
+    }
+
+    public String getName() {
+	return name;
+    }
 }

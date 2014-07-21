@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 HS Coburg.
+ * Copyright (C) 2013-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -31,7 +31,7 @@ import org.openecard.ws.marshal.WSMarshallerException;
  * This AddonRegistry is a combination of {@link ClasspathRegistry} and {@link FileRegistry}.
  * All calls to this registry are forwarded to the appropriate registry for a given addon.
  * In case of conflicts (e.g. same addon twice), the {@link ClasspathRegistry} has priority.
- * 
+ *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class CombiningRegistry implements AddonRegistry {
@@ -40,9 +40,9 @@ public class CombiningRegistry implements AddonRegistry {
     private FileRegistry fileRegistry;
 
 
-    public CombiningRegistry() throws WSMarshallerException {
+    public CombiningRegistry(AddonManager manager) throws WSMarshallerException {
 	classpathRegistry = new ClasspathRegistry();
-	fileRegistry = new FileRegistry();
+	fileRegistry = new FileRegistry(manager);
     }
 
     public ClasspathRegistry getClasspathRegistry() {
@@ -123,6 +123,13 @@ public class CombiningRegistry implements AddonRegistry {
 	    matchingAddons = fileRegistry.searchByResourceName(actionId);
 	}
 	return matchingAddons;
+    }
+
+    @Override
+    public Set<AddonSpecification> listInstalledAddons() {
+	Set<AddonSpecification> addons = fileRegistry.listInstalledAddons();
+	addons.addAll(classpathRegistry.listInstalledAddons());
+	return addons;
     }
 
 }

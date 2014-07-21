@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,6 +24,7 @@ package org.openecard.common.sal.state;
 
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import org.openecard.addon.sal.CredentialManager;
 import org.openecard.common.enums.EventType;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.recognition.CardRecognition;
@@ -40,12 +41,12 @@ public class SALStateCallback implements EventCallback {
     private static final Logger logger = LoggerFactory.getLogger(SALStateCallback.class);
 
     private final CardRecognition recognition;
-    private final CardStateMap cardState;
+    private final CredentialManager manager;
 
 
     public SALStateCallback(CardRecognition recognition, CardStateMap cardState) {
 	this.recognition = recognition;
-	this.cardState = cardState;
+	this.manager = new CredentialManager(cardState);
     }
 
 
@@ -59,15 +60,14 @@ public class SALStateCallback implements EventCallback {
 		    logger.info("Add ConnectionHandle to SAL:\n{}", HandlePrinter.printHandle(handle));
 		    CardInfoType cif = recognition.getCardInfo(handle.getRecognitionInfo().getCardType());
 		    if (cif != null) {
-			CardStateEntry entry = new CardStateEntry(handle, cif);
-			cardState.addEntry(entry);
+			manager.addCredential(handle, cif);
 		    } else {
 			logger.info("Not adding card to SAL, because it has no CardInfo file.");
 		    }
 		    break;
 		case CARD_REMOVED:
 		    logger.info("Remove ConnectionHandle from SAL.\n{}", HandlePrinter.printHandle(handle));
-		    cardState.removeEntry(handle);
+		    manager.removeCredential(handle);
 		    break;
 		default:
 		    // not a relevant event

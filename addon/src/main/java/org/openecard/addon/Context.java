@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,8 @@
 
 package org.openecard.addon;
 
+import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.sal.CredentialManager;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.sal.state.CardStateMap;
@@ -33,27 +35,45 @@ import org.openecard.recognition.CardRecognition;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class Context {
 
-    private AddonProperties _unnamed_AddonProperties_;
+    private final AddonProperties addonProperties;
     private final AddonManager manager;
-    private Dispatcher dispatcher;
-    private UserConsent userConsent;
+    private final Dispatcher dispatcher;
+    private final EventManager eventManager;
+    private final String id;
 
+    private CredentialManager credMan;
+    private UserConsent userConsent;
     private CardStateMap cardStates;
     private CardRecognition recognition;
-    private EventManager eventManager;
     private EventHandler eventHandler;
 
-    public Context(AddonManager manager, Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates, CardRecognition recognition, EventManager eventManager, EventHandler eventHandler) {
+    public Context(AddonManager manager, Dispatcher dispatcher, EventManager eventManager, AddonSpecification spec) {
 	this.manager = manager;
 	this.dispatcher = dispatcher;
-	this.userConsent = userConsent;
-	this.cardStates = cardStates;
-	this.recognition = recognition;
 	this.eventManager = eventManager;
+	this.id = spec.getId();
+	addonProperties = new AddonProperties(spec);
+    }
+
+    public void setCardRecognition(CardRecognition cardRec) {
+	recognition = cardRec;
+    }
+
+    public void setEventHandle(EventHandler eventHandler) {
 	this.eventHandler = eventHandler;
+    }
+
+    public void setCardStateMap(CardStateMap cardStates) {
+	this.cardStates = cardStates;
+	credMan = new CredentialManager(cardStates);
+    }
+
+    public void setUserConsent(UserConsent uConsent) {
+	userConsent = uConsent;
     }
 
     public AddonManager getManager() {
@@ -73,11 +93,7 @@ public class Context {
     }
 
     public AddonProperties getAddonProperties() {
-	throw new UnsupportedOperationException();
-    }
-
-    public AddonProperties getActionProperties() {
-	throw new UnsupportedOperationException();
+	return addonProperties;
     }
 
     /**
@@ -98,6 +114,14 @@ public class Context {
 
     public EventHandler getEventHandler() {
 	return eventHandler;
+    }
+
+    public CredentialManager getCredentialManager() {
+	return credMan;
+    }
+
+    public String getId() {
+	return id;
     }
 
 }

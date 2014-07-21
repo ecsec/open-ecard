@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,6 +24,8 @@ package org.openecard.addon.manifest;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -35,16 +37,23 @@ import javax.xml.bind.annotation.XmlType;
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 @XmlRootElement(name = "ProtocolPluginSpecification")
-@XmlType(propOrder = { "uri", "className", "localizedName", "localizedDescription", "configDescription" })
+@XmlType(propOrder = { "uri", "className", "loadOnStartup", "localizedName", "localizedDescription", "configDescription" })
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ProtocolPluginSpecification {
 
+    @XmlElement(name = "ClassName")
     private String className;
+    @XmlElement(name = "LoadOnStartup", required = false, defaultValue = "false")
+    private Boolean loadOnStartup;
+    @XmlElement(name = "URI")
     private String uri;
-    private final List<LocalizedString> localizedName = new ArrayList<LocalizedString>();
-    private final List<LocalizedString> localizedDescription = new ArrayList<LocalizedString>();
+    @XmlElement(name = "LocalizedName")
+    private final List<LocalizedString> localizedName = new ArrayList<>();
+    @XmlElement(name = "LocalizedDescription")
+    private final List<LocalizedString> localizedDescription = new ArrayList<>();
+    @XmlElement(name = "ConfigDescription")
     private Configuration configDescription;
 
-    @XmlElement(name = "ClassName")
     public String getClassName() {
 	return className;
     }
@@ -53,7 +62,17 @@ public class ProtocolPluginSpecification {
 	this.className = className;
     }
 
-    @XmlElement(name = "URI")
+    public Boolean isLoadOnStartup() {
+	if (loadOnStartup == null) {
+	    return false;
+	}
+	return loadOnStartup;
+    }
+
+    public void setLoadOnStartup(boolean loadOnStartup) {
+	this.loadOnStartup = loadOnStartup;
+    }
+
     public String getUri() {
 	return uri;
     }
@@ -62,17 +81,14 @@ public class ProtocolPluginSpecification {
 	this.uri = uri;
     }
 
-    @XmlElement(name = "LocalizedName")
     public List<LocalizedString> getLocalizedName() {
 	return localizedName;
     }
 
-    @XmlElement(name = "LocalizedDescription")
     public List<LocalizedString> getLocalizedDescription() {
 	return localizedDescription;
     }
 
-    @XmlElement(name = "ConfigDescription")
     public Configuration getConfigDescription() {
 	return configDescription;
     }

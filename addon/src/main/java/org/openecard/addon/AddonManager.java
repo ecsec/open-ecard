@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,6 +24,7 @@ package org.openecard.addon;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import org.openecard.addon.bind.AppExtensionAction;
 import org.openecard.addon.bind.AppExtensionActionProxy;
@@ -52,6 +53,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class AddonManager {
 
@@ -68,7 +70,8 @@ public class AddonManager {
 
     public AddonManager(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates,
 	    CardRecognition recognition, EventManager eventManager) throws WSMarshallerException {
-	this.registry = new CombiningRegistry();
+
+	this.registry = new CombiningRegistry(this);
 	this.protectedRegistry = getProtectedRegistry(registry);
 	this.dispatcher = dispatcher;
 	this.userConsent = userConsent;
@@ -76,7 +79,62 @@ public class AddonManager {
 	this.recognition = recognition;
 	this.eventManager = eventManager;
 	this.eventHandler = new EventHandler(eventManager);
+
+	loadLoadOnStartAddons();
     }
+
+    /**
+     * Load all addons which contain an loadOnStart = true.
+     *
+     * @throws WSMarshallerException
+     */
+    private void loadLoadOnStartAddons() throws WSMarshallerException {
+	// load plugins which have an loadOnStartup = true
+	Set<AddonSpecification> specs = protectedRegistry.listAddons();
+	for (AddonSpecification addonSpec : specs) {
+	    loadLoadOnStartupActions(addonSpec);
+	}
+    }
+
+    /**
+     * Load a single addon which contains a LoadOnStartup = true.
+     *
+     * @param addonSpec The {@link AddonSpecification} of the addon.
+     */
+    void loadLoadOnStartupActions(AddonSpecification addonSpec) {
+	if (!addonSpec.getApplicationActions().isEmpty()) {
+	    for (AppExtensionSpecification appExSpec : addonSpec.getApplicationActions()) {
+		if (appExSpec.isLoadOnStartup()) {
+		    getAppExtensionAction(addonSpec, appExSpec.getId());
+		}
+	    }
+	}
+
+	if (!addonSpec.getBindingActions().isEmpty()) {
+	    for (AppPluginSpecification appPlugSpec : addonSpec.getBindingActions()) {
+		if (appPlugSpec.isLoadOnStartup()) {
+		    getAppPluginAction(addonSpec, appPlugSpec.getResourceName());
+		}
+	    }
+	}
+
+	if (!addonSpec.getIfdActions().isEmpty()) {
+	    for (ProtocolPluginSpecification protPlugSpec : addonSpec.getIfdActions()) {
+		if (protPlugSpec.isLoadOnStartup()) {
+		    getIFDProtocol(addonSpec, protPlugSpec.getUri());
+		}
+	    }
+	}
+
+	if (!addonSpec.getSalActions().isEmpty()) {
+	    for (ProtocolPluginSpecification protPlugSpec : addonSpec.getSalActions()) {
+		if (protPlugSpec.isLoadOnStartup()) {
+		    getSALProtocol(addonSpec, protPlugSpec.getUri());
+		}
+	    }
+	}
+    }
+
 
     /**
      * This method returns an instance of the given registry where only the interface methods are accessible.
@@ -114,7 +172,11 @@ public class AddonManager {
 	ClassLoader cl = registry.downloadAddon(addonSpec);
 	IFDProtocolProxy protoFactory = new IFDProtocolProxy(className, cl);
 	try {
-	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);
+	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
+	    aCtx.setCardRecognition(recognition);
+	    aCtx.setCardStateMap(cardStates);
+	    aCtx.setEventHandle(eventHandler);
+	    aCtx.setUserConsent(userConsent);
 	    protoFactory.init(aCtx);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
@@ -129,7 +191,11 @@ public class AddonManager {
 	ClassLoader cl = registry.downloadAddon(addonSpec);
 	SALProtocolProxy protoFactory = new SALProtocolProxy(className, cl);
 	try {
-	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);
+	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
+	    aCtx.setCardRecognition(recognition);
+	    aCtx.setCardStateMap(cardStates);
+	    aCtx.setEventHandle(eventHandler);
+	    aCtx.setUserConsent(userConsent);
 	    protoFactory.init(aCtx);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
@@ -144,7 +210,11 @@ public class AddonManager {
 	ClassLoader cl = registry.downloadAddon(addonSpec);
 	AppExtensionActionProxy protoFactory = new AppExtensionActionProxy(className, cl);
 	try {
-	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);
+	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
+	    aCtx.setCardRecognition(recognition);
+	    aCtx.setCardStateMap(cardStates);
+	    aCtx.setEventHandle(eventHandler);
+	    aCtx.setUserConsent(userConsent);
 	    protoFactory.init(aCtx);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
@@ -159,7 +229,11 @@ public class AddonManager {
 	ClassLoader cl = registry.downloadAddon(addonSpec);
 	AppPluginActionProxy protoFactory = new AppPluginActionProxy(className, cl);
 	try {
-	    Context aCtx = new Context(this, dispatcher, userConsent, cardStates, recognition, eventManager, eventHandler);
+	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
+	    aCtx.setCardRecognition(recognition);
+	    aCtx.setCardStateMap(cardStates);
+	    aCtx.setEventHandle(eventHandler);
+	    aCtx.setUserConsent(userConsent);
 	    protoFactory.init(aCtx);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {

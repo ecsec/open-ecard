@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 HS Coburg.
+ * Copyright (C) 2013-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -48,21 +48,22 @@ import org.slf4j.LoggerFactory;
 /**
  * This registry provides access to all addons in the plugins directory.
  * Adding and removing addon-files at runtime is supported.
- * 
+ *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 public class FileRegistry implements AddonRegistry {
 
     private static final Logger logger = LoggerFactory.getLogger(FileRegistry.class.getName());
 
-    private static final ArrayList<AddonSpecification> registeredAddons = new ArrayList<AddonSpecification>();
-    private static final HashMap<String, File> files = new HashMap<String, File>();
+    private static final ArrayList<AddonSpecification> registeredAddons = new ArrayList<>();
+    private static final HashMap<String, File> files = new HashMap<>();
+    private final AddonManager manager;
 
-
-    public FileRegistry() throws WSMarshallerException {
+    public FileRegistry(AddonManager manager) throws WSMarshallerException {
+	this.manager = manager;
 	String addonPath;
 	try {
-	    addonPath = FileUtils.getHomeConfigDir() + File.separator + "addons" + File.separator;
+	    addonPath = FileUtils.getAddonsDir() + File.separator;
 	} catch (SecurityException e) {
 	    logger.error("Failed to get add-on directory; FileRegistry won't work.", e);
 	    return;
@@ -70,6 +71,7 @@ public class FileRegistry implements AddonRegistry {
 	    logger.error("Failed to get add-on directory; FileRegistry won't work.", e);
 	    return;
 	}
+	loadExistingAddons();
 	startFileMonitor(addonPath);
     }
 
@@ -77,7 +79,7 @@ public class FileRegistry implements AddonRegistry {
 	File f = new File(addonPath);
 	logger.debug("Starting file alteration monitor on path: {}", f.getPath());
 	FilesystemAlterationMonitor fam = new FilesystemAlterationMonitor();
-	fam.addListener(f, new PluginDirectoryAlterationListener(this));
+	fam.addListener(f, new PluginDirectoryAlterationListener(this, manager));
 	fam.start();
     }
 
@@ -104,7 +106,7 @@ public class FileRegistry implements AddonRegistry {
 
     @Override
     public Set<AddonSpecification> listAddons() {
-	Set<AddonSpecification> list = new HashSet<AddonSpecification>();
+	Set<AddonSpecification> list = new HashSet<>();
 	list.addAll(registeredAddons);
 	return list;
     }
@@ -121,7 +123,7 @@ public class FileRegistry implements AddonRegistry {
 
     @Override
     public Set<AddonSpecification> searchByName(String name) {
-	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	Set<AddonSpecification> matchingAddons = new HashSet<>();
 	for (AddonSpecification desc : registeredAddons) {
 	    for (LocalizedString s : desc.getLocalizedName()) {
 		if (s.getValue().equals(name)) {
@@ -134,7 +136,7 @@ public class FileRegistry implements AddonRegistry {
 
     @Override
     public Set<AddonSpecification> searchIFDProtocol(String uri) {
-	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	Set<AddonSpecification> matchingAddons = new HashSet<>();
 	for (AddonSpecification desc : registeredAddons) {
 	    ProtocolPluginSpecification protocolDesc = desc.searchIFDActionByURI(uri);
 	    if (protocolDesc != null) {
@@ -146,7 +148,7 @@ public class FileRegistry implements AddonRegistry {
 
     @Override
     public Set<AddonSpecification> searchSALProtocol(String uri) {
-	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	Set<AddonSpecification> matchingAddons = new HashSet<>();
 	for (AddonSpecification desc : registeredAddons) {
 	    ProtocolPluginSpecification protocolDesc = desc.searchSALActionByURI(uri);
 	    if (protocolDesc != null) {
@@ -173,7 +175,7 @@ public class FileRegistry implements AddonRegistry {
 
     @Override
     public Set<AddonSpecification> searchByResourceName(String resourceName) {
-	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	Set<AddonSpecification> matchingAddons = new HashSet<>();
 	for (AddonSpecification desc : registeredAddons) {
 	    AppPluginSpecification actionDesc = desc.searchByResourceName(resourceName);
 	    if (actionDesc != null) {
@@ -185,7 +187,7 @@ public class FileRegistry implements AddonRegistry {
 
     @Override
     public Set<AddonSpecification> searchByActionId(String actionId) {
-	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	Set<AddonSpecification> matchingAddons = new HashSet<>();
 	for (AddonSpecification desc : registeredAddons) {
 	    AppExtensionSpecification actionDesc = desc.searchByActionId(actionId);
 	    if (actionDesc != null) {
@@ -193,6 +195,38 @@ public class FileRegistry implements AddonRegistry {
 	    }
 	}
 	return matchingAddons;
+    }
+
+    /**
+     * Register all addons which are already installed in the addons directory.
+     *
+     * @throws WSMarshallerException Thrown if the instantiation of the marshaler for the AddonSpecification marshaling
+     * failed.
+     */
+    private void loadExistingAddons() throws WSMarshallerException {
+	try {
+	    File addonsDir = FileUtils.getAddonsDir();
+	    File[] addons = addonsDir.listFiles(new JARFileFilter());
+	    ManifestExtractor mEx = new ManifestExtractor();
+
+	    for (File addon : addons) {
+		AddonSpecification addonSpec = mEx.getAddonSpecificationFromFile(addon);
+		if (addonSpec != null) {
+		    register(addonSpec, addon);
+		    logger.info("Loaded external addon {}", addon.getName());
+		}
+	    }
+	} catch (IOException ex) {
+	    logger.error("Failed to load addons directory.", ex);
+	} catch (SecurityException ex) {
+	    logger.error("SecurityException seems like you don't have permissions to access the addons directory.", ex);
+	}
+    }
+
+    @Override
+    public Set<AddonSpecification> listInstalledAddons() {
+	// This registry does not provide a AppStore based system so just return the result of listAddons() method.
+	return listAddons();
     }
 
 }

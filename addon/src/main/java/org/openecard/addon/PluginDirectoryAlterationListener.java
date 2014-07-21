@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 HS Coburg.
+ * Copyright (C) 2013-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,42 +23,32 @@
 package org.openecard.addon;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Set;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
 import org.apache.commons.jci.monitor.FilesystemAlterationListener;
 import org.apache.commons.jci.monitor.FilesystemAlterationObserver;
 import org.openecard.addon.manifest.AddonSpecification;
-import org.openecard.ws.marshal.MarshallingTypeException;
-import org.openecard.ws.marshal.WSMarshaller;
+import org.openecard.addon.manifest.AppExtensionSpecification;
 import org.openecard.ws.marshal.WSMarshallerException;
-import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 
 /**
  * Simple listener for changes in the plugin directory.
  * <br/>It will add or unload a plugin in the plugin manager if it detects a file creation or removal.
- * 
+ *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 final class PluginDirectoryAlterationListener implements FilesystemAlterationListener {
 
     private static final Logger logger = LoggerFactory.getLogger(PluginDirectoryAlterationListener.class.getName());
-
-    private static final String MANIFEST_XML = "META-INF/Addon.xml";
     private final FileRegistry fileRegistry;
-    private final WSMarshaller marshaller;
+    private final AddonManager manager;
 
-    PluginDirectoryAlterationListener(FileRegistry fileRegistry) throws WSMarshallerException {
+
+    PluginDirectoryAlterationListener(FileRegistry fileRegistry, AddonManager addonManager) {
 	this.fileRegistry = fileRegistry;
-	marshaller = WSMarshallerFactory.createInstance();
-	marshaller.addXmlTypeClass(AddonSpecification.class);
+	manager = addonManager;
     }
 
     @Override
@@ -69,7 +59,15 @@ final class PluginDirectoryAlterationListener implements FilesystemAlterationLis
     @Override
     public void onFileCreate(File file) {
 	String name = file.getName();
-	AddonSpecification abd = getAddonSpecificationFromFile(file);
+	AddonSpecification abd = null;
+
+	try {
+	    ManifestExtractor maniEx = new ManifestExtractor();
+	    abd = maniEx.getAddonSpecificationFromFile(file);
+	} catch (WSMarshallerException ex) {
+	    logger.error("Failed to initalize marshaller for AddonSpecification marshalling.", ex);
+	}
+
 	if (abd == null) {
 	    return;
 	}
@@ -81,59 +79,8 @@ final class PluginDirectoryAlterationListener implements FilesystemAlterationLis
 	    }
 	}
 	fileRegistry.register(abd, file);
+	manager.loadLoadOnStartupActions(abd);
 	logger.debug("Successfully registered {} as addon", name);
-    }
-
-    private AddonSpecification getAddonSpecificationFromFile(File file) {
-	String name = file.getName();
-	JarFile jarFile;
-	AddonSpecification abd;
-	try {
-	    jarFile = new JarFile(file);
-	} catch (IOException e) {
-	    logger.error("File {} will not be registered as plugin because it's not a JarFile.", name);
-	    return null;
-	}
-	try {
-	    InputStream manifestStream = getPluginEntryClass(jarFile);
-
-	    if (manifestStream == null) {
-		logger.error("File {} will not be registered as plugin because it doesn't contain a Manifest.xml.", name);
-		return null;
-	    } else {
-		marshaller.addXmlTypeClass(AddonSpecification.class);
-		Document manifestDoc = marshaller.str2doc(manifestStream);
-		abd = (AddonSpecification) marshaller.unmarshal(manifestDoc);
-	    }
-	} catch (IOException ex) {
-	    logger.error("Failed to process Manifest.xml entry for file " + name, ex);
-	    return null;
-	} catch (MarshallingTypeException e) {
-	    logger.error("Failed to process Manifest.xml entry for file " + name, e);
-	    return null;
-	} catch (SAXException e) {
-	    logger.error("Failed to process Manifest.xml entry for file " + name, e);
-	    return null;
-	} catch (WSMarshallerException e) {
-	    logger.error("Failed to process Manifest.xml entry for file " + name, e);
-	    return null;
-	} finally {
-	    try {
-		jarFile.close();
-	    } catch (IOException ex) {
-		logger.error("Failed to close jar file.", ex);
-	    }
-	}
-	return abd;
-    }
-
-    private InputStream getPluginEntryClass(JarFile jarFile) throws IOException {
-	ZipEntry manifest = jarFile.getEntry(MANIFEST_XML);
-	if (manifest == null) {
-	    return null;
-	} else {
-	    return jarFile.getInputStream(manifest);
-	}
     }
 
     @Override

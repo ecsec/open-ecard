@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -36,9 +36,9 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(propOrder = { "key", "type", "localizedName", "localizedDescription" })
 public class ScalarEntry extends ConfigurationEntry {
 
+    @XmlElement(name = "Type", required = true)
     private String type;
 
-    @XmlElement(name = "Type", required = true)
     public String getType() {
 	return type;
     }

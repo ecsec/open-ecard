@@ -47,10 +47,10 @@ public class CardStateMap {
 
     private static final Logger _logger = LoggerFactory.getLogger(CardStateMap.class);
 
-    private final TreeSet<CardStateEntry> allEntries = new TreeSet<CardStateEntry>();
-    private final ConcurrentSkipListMap<String,Set<CardStateEntry>> sessionMap = new ConcurrentSkipListMap<String,Set<CardStateEntry>>();
-    private final ConcurrentSkipListMap<byte[],Set<CardStateEntry>> contextMap = new ConcurrentSkipListMap<byte[],Set<CardStateEntry>>(new ByteComparator());
-    private final ConcurrentSkipListMap<byte[],Set<CardStateEntry>> slothandleMap = new ConcurrentSkipListMap<byte[],Set<CardStateEntry>>(new ByteComparator());
+    private final TreeSet<CardStateEntry> allEntries = new TreeSet<>();
+    private final ConcurrentSkipListMap<String,Set<CardStateEntry>> sessionMap = new ConcurrentSkipListMap<>();
+    private final ConcurrentSkipListMap<byte[],Set<CardStateEntry>> contextMap = new ConcurrentSkipListMap<>(new ByteComparator());
+    private final ConcurrentSkipListMap<byte[],Set<CardStateEntry>> slothandleMap = new ConcurrentSkipListMap<>(new ByteComparator());
 
 
     public synchronized CardStateEntry getEntry(ConnectionHandleType handle) {
@@ -206,7 +206,7 @@ public class CardStateMap {
 	// when nothing has been specified, return all elements
 	Set<CardStateEntry> mergedSets;
 	if (session == null && ctx == null && slotHandle == null) {
-	    mergedSets = new TreeSet<CardStateEntry>(allEntries);
+	    mergedSets = new TreeSet<>(allEntries);
 	} else {
 	    // fetch applicable lists from maps
 	    Set<CardStateEntry> sessionEntries = setFromMap(sessionMap, session);
@@ -214,7 +214,7 @@ public class CardStateMap {
 	    Set<CardStateEntry> slothandleEntries = setFromMap(slothandleMap, slotHandle);
 
 	    // merge entries
-	    ArrayList<Set<CardStateEntry>> setsToMerge = new ArrayList<Set<CardStateEntry>>(3);
+	    ArrayList<Set<CardStateEntry>> setsToMerge = new ArrayList<>(3);
 	    if (session != null) {
 		setsToMerge.add(sessionEntries);
 	    }
@@ -341,7 +341,7 @@ public class CardStateMap {
 
 
     private static Set<CardStateEntry> mergeSets(ArrayList<Set<CardStateEntry>> setsToMerge) {
-	TreeSet<CardStateEntry> result = new TreeSet<CardStateEntry>();
+	TreeSet<CardStateEntry> result = new TreeSet<>();
 
 	if (setsToMerge.isEmpty()) {
 	    return Collections.emptySet();

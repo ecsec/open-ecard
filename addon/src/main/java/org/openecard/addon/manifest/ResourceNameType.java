@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 
 
 /**
@@ -34,15 +33,12 @@ import javax.xml.bind.annotation.XmlType;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@XmlRootElement(name = "EnumEntry")
-@XmlType(propOrder = { "key", "values", "localizedName", "localizedDescription" })
-public class EnumEntry extends ConfigurationEntry {
+@XmlRootElement
+public class ResourceNameType {
+    @XmlElement(name = "value")
+    private final List<String> value = new ArrayList<>();
 
-    @XmlElement(name = "Value", required = true)
-    private final ArrayList<String> values = new ArrayList<>();
-
-    public List<String> getValues() {
-	return values;
+    public List<String> getValue() {
+	return value;
     }
-
 }

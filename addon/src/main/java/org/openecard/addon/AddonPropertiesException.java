@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,29 +20,26 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon.manifest;
-
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
+package org.openecard.addon;
 
 /**
+ * Exception type for all exceptions related to the AddonProperties.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
-@XmlRootElement(name = "EnumEntry")
-@XmlType(propOrder = { "key", "values", "localizedName", "localizedDescription" })
-public class EnumEntry extends ConfigurationEntry {
+public class AddonPropertiesException extends Exception {
 
-    @XmlElement(name = "Value", required = true)
-    private final ArrayList<String> values = new ArrayList<>();
+    private static final long serialVersionUID = 1L;
 
-    public List<String> getValues() {
-	return values;
+    public AddonPropertiesException(String message) {
+	super(message);
     }
 
+    public AddonPropertiesException(Throwable cause) {
+	super(cause);
+    }
+
+    public AddonPropertiesException(String message, Throwable cause) {
+	super(message, cause);
+    }
 }

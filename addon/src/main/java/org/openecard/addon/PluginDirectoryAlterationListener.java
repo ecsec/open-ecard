@@ -27,6 +27,7 @@ import java.util.Set;
 import org.apache.commons.jci.monitor.FilesystemAlterationListener;
 import org.apache.commons.jci.monitor.FilesystemAlterationObserver;
 import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.manifest.AppExtensionSpecification;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,13 +42,13 @@ import org.slf4j.LoggerFactory;
 final class PluginDirectoryAlterationListener implements FilesystemAlterationListener {
 
     private static final Logger logger = LoggerFactory.getLogger(PluginDirectoryAlterationListener.class.getName());
-
-
     private final FileRegistry fileRegistry;
+    private final AddonManager manager;
 
 
-    PluginDirectoryAlterationListener(FileRegistry fileRegistry) {
+    PluginDirectoryAlterationListener(FileRegistry fileRegistry, AddonManager addonManager) {
 	this.fileRegistry = fileRegistry;
+	manager = addonManager;
     }
 
     @Override
@@ -78,6 +79,7 @@ final class PluginDirectoryAlterationListener implements FilesystemAlterationLis
 	    }
 	}
 	fileRegistry.register(abd, file);
+	manager.loadLoadOnStartupActions(abd);
 	logger.debug("Successfully registered {} as addon", name);
     }
 

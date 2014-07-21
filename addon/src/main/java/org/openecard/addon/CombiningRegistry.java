@@ -40,9 +40,9 @@ public class CombiningRegistry implements AddonRegistry {
     private FileRegistry fileRegistry;
 
 
-    public CombiningRegistry() throws WSMarshallerException {
+    public CombiningRegistry(AddonManager manager) throws WSMarshallerException {
 	classpathRegistry = new ClasspathRegistry();
-	fileRegistry = new FileRegistry();
+	fileRegistry = new FileRegistry(manager);
     }
 
     public ClasspathRegistry getClasspathRegistry() {

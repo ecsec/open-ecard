@@ -57,8 +57,10 @@ public class FileRegistry implements AddonRegistry {
 
     private static final ArrayList<AddonSpecification> registeredAddons = new ArrayList<>();
     private static final HashMap<String, File> files = new HashMap<>();
+    private final AddonManager manager;
 
-    public FileRegistry() throws WSMarshallerException {
+    public FileRegistry(AddonManager manager) throws WSMarshallerException {
+	this.manager = manager;
 	String addonPath;
 	try {
 	    addonPath = FileUtils.getAddonsDir() + File.separator;
@@ -77,7 +79,7 @@ public class FileRegistry implements AddonRegistry {
 	File f = new File(addonPath);
 	logger.debug("Starting file alteration monitor on path: {}", f.getPath());
 	FilesystemAlterationMonitor fam = new FilesystemAlterationMonitor();
-	fam.addListener(f, new PluginDirectoryAlterationListener(this));
+	fam.addListener(f, new PluginDirectoryAlterationListener(this, manager));
 	fam.start();
     }
 

@@ -71,7 +71,7 @@ public class AddonManager {
     public AddonManager(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates,
 	    CardRecognition recognition, EventManager eventManager) throws WSMarshallerException {
 
-	this.registry = new CombiningRegistry();
+	this.registry = new CombiningRegistry(this);
 	this.protectedRegistry = getProtectedRegistry(registry);
 	this.dispatcher = dispatcher;
 	this.userConsent = userConsent;
@@ -84,7 +84,7 @@ public class AddonManager {
     }
 
     /**
-     * The method loads all addons which contain an loadOnStart = true.
+     * Load all addons which contain an loadOnStart = true.
      *
      * @throws WSMarshallerException
      */
@@ -92,39 +92,49 @@ public class AddonManager {
 	// load plugins which have an loadOnStartup = true
 	Set<AddonSpecification> specs = protectedRegistry.listAddons();
 	for (AddonSpecification addonSpec : specs) {
-	    if (! addonSpec.getApplicationActions().isEmpty()) {
-		for (AppExtensionSpecification appExSpec : addonSpec.getApplicationActions()) {
-		    if (appExSpec.isLoadOnStartup()) {
-			getAppExtensionAction(addonSpec, appExSpec.getId());
-		    }
+	    loadLoadOnStartupActions(addonSpec);
+	}
+    }
+
+    /**
+     * Load a single addon which contains a LoadOnStartup = true.
+     *
+     * @param addonSpec The {@link AddonSpecification} of the addon.
+     */
+    void loadLoadOnStartupActions(AddonSpecification addonSpec) {
+	if (!addonSpec.getApplicationActions().isEmpty()) {
+	    for (AppExtensionSpecification appExSpec : addonSpec.getApplicationActions()) {
+		if (appExSpec.isLoadOnStartup()) {
+		    getAppExtensionAction(addonSpec, appExSpec.getId());
 		}
 	    }
+	}
 
-	    if (! addonSpec.getBindingActions().isEmpty()) {
-		for (AppPluginSpecification appPlugSpec : addonSpec.getBindingActions()) {
-		    if (appPlugSpec.isLoadOnStartup()) {
-			getAppPluginAction(addonSpec, appPlugSpec.getResourceName());
-		    }
+	if (!addonSpec.getBindingActions().isEmpty()) {
+	    for (AppPluginSpecification appPlugSpec : addonSpec.getBindingActions()) {
+		if (appPlugSpec.isLoadOnStartup()) {
+		    getAppPluginAction(addonSpec, appPlugSpec.getResourceName());
 		}
 	    }
+	}
 
-	    if (! addonSpec.getIfdActions().isEmpty()) {
-		for (ProtocolPluginSpecification protPlugSpec : addonSpec.getIfdActions()) {
-		    if (protPlugSpec.isLoadOnStartup()) {
-			getIFDProtocol(addonSpec, protPlugSpec.getUri());
-		    }
+	if (!addonSpec.getIfdActions().isEmpty()) {
+	    for (ProtocolPluginSpecification protPlugSpec : addonSpec.getIfdActions()) {
+		if (protPlugSpec.isLoadOnStartup()) {
+		    getIFDProtocol(addonSpec, protPlugSpec.getUri());
 		}
 	    }
+	}
 
-	    if (! addonSpec.getSalActions().isEmpty()) {
-		for (ProtocolPluginSpecification protPlugSpec : addonSpec.getSalActions()) {
-		    if (protPlugSpec.isLoadOnStartup()) {
-			getSALProtocol(addonSpec, protPlugSpec.getUri());
-		    }
+	if (!addonSpec.getSalActions().isEmpty()) {
+	    for (ProtocolPluginSpecification protPlugSpec : addonSpec.getSalActions()) {
+		if (protPlugSpec.isLoadOnStartup()) {
+		    getSALProtocol(addonSpec, protPlugSpec.getUri());
 		}
 	    }
 	}
     }
+
 
     /**
      * This method returns an instance of the given registry where only the interface methods are accessible.

@@ -221,4 +221,10 @@ public class FileRegistry implements AddonRegistry {
 	}
     }
 
+    @Override
+    public Set<AddonSpecification> listInstalledAddons() {
+	// This registry does not provide a AppStore based system so just return the result of listAddons() method.
+	return listAddons();
+    }
+
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -53,7 +53,7 @@ public class ClasspathRegistry implements AddonRegistry {
 
     private static final Logger logger = LoggerFactory.getLogger(ClasspathRegistry.class);
 
-    private final ArrayList<AddonSpecification> registeredAddons = new ArrayList<AddonSpecification>();
+    private final ArrayList<AddonSpecification> registeredAddons = new ArrayList<>();
 
 
     public ClasspathRegistry() throws WSMarshallerException {
@@ -92,7 +92,7 @@ public class ClasspathRegistry implements AddonRegistry {
 
     @Override
     public Set<AddonSpecification> listAddons() {
-	Set<AddonSpecification> list = new HashSet<AddonSpecification>();
+	Set<AddonSpecification> list = new HashSet<>();
 	list.addAll(registeredAddons);
 	return list;
     }
@@ -109,7 +109,7 @@ public class ClasspathRegistry implements AddonRegistry {
 
     @Override
     public Set<AddonSpecification> searchByName(String name) {
-	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	Set<AddonSpecification> matchingAddons = new HashSet<>();
 	for (AddonSpecification desc : registeredAddons) {
 	    for (LocalizedString s : desc.getLocalizedName()) {
 		if (s.getValue().equals(name)) {
@@ -122,7 +122,7 @@ public class ClasspathRegistry implements AddonRegistry {
 
     @Override
     public Set<AddonSpecification> searchIFDProtocol(String uri) {
-	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	Set<AddonSpecification> matchingAddons = new HashSet<>();
 	for (AddonSpecification desc : registeredAddons) {
 	    ProtocolPluginSpecification protocolDesc = desc.searchIFDActionByURI(uri);
 	    if (protocolDesc != null) {
@@ -134,7 +134,7 @@ public class ClasspathRegistry implements AddonRegistry {
 
     @Override
     public Set<AddonSpecification> searchSALProtocol(String uri) {
-	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	Set<AddonSpecification> matchingAddons = new HashSet<>();
 	for (AddonSpecification desc : registeredAddons) {
 	    ProtocolPluginSpecification protocolDesc = desc.searchSALActionByURI(uri);
 	    if (protocolDesc != null) {
@@ -152,7 +152,7 @@ public class ClasspathRegistry implements AddonRegistry {
 
     @Override
     public Set<AddonSpecification> searchByResourceName(String resourceName) {
-	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	Set<AddonSpecification> matchingAddons = new HashSet<>();
 	for (AddonSpecification desc : registeredAddons) {
 	    AppPluginSpecification actionDesc = desc.searchByResourceName(resourceName);
 	    if (actionDesc != null) {
@@ -164,7 +164,7 @@ public class ClasspathRegistry implements AddonRegistry {
 
     @Override
     public Set<AddonSpecification> searchByActionId(String actionId) {
-	Set<AddonSpecification> matchingAddons = new HashSet<AddonSpecification>();
+	Set<AddonSpecification> matchingAddons = new HashSet<>();
 	for (AddonSpecification desc : registeredAddons) {
 	    AppExtensionSpecification actionDesc = desc.searchByActionId(actionId);
 	    if (actionDesc != null) {
@@ -172,6 +172,12 @@ public class ClasspathRegistry implements AddonRegistry {
 	    }
 	}
 	return matchingAddons;
+    }
+
+    @Override
+    public Set<AddonSpecification> listInstalledAddons() {
+	// There aren't addons which are not installed so just return the output of listAddons()
+	return listAddons();
     }
 
 }

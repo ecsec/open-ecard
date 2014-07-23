@@ -66,6 +66,9 @@
 		</profile>
 		<profile>
 			<id>bundled-jar-cifs</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 			<properties>
 				<packaging.type>signed-packed-jar</packaging.type>
 			</properties>
@@ -140,9 +143,6 @@
 		</profile>
 		<profile>
 			<id>bundled-jar</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<properties>
 				<packaging.type>signed-packed-jar</packaging.type>
 			</properties>

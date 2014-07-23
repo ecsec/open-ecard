@@ -217,9 +217,14 @@
 		    </configuration>
 		</plugin>
 		<plugin>
-		    <groupId>org.codehaus.mojo</groupId>
-		    <artifactId>license-maven-plugin</artifactId>
-		    <version>1.7</version>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>license-maven-plugin</artifactId>
+			<version>1.7</version>
+			<configuration>
+				<licenseFile>LICENSE.Open-eCard</licenseFile>
+				<generateBundle>true</generateBundle>
+				<bundleLicensePath>META-INF/LICENSE-${project.artifactId}</bundleLicensePath>
+			</configuration>
 		</plugin>
 		<plugin>
 		    <groupId>org.apache.maven.plugins</groupId>
@@ -292,19 +297,28 @@
 		    </dependencies>
 		</plugin>
 		<plugin>
-		    <groupId>org.apache.maven.plugins</groupId>
-		    <artifactId>maven-site-plugin</artifactId>
-		    <version>3.4</version>
-		</plugin>
-		<plugin>
-		    <groupId>org.apache.maven.plugins</groupId>
-		    <artifactId>maven-jxr-plugin</artifactId>
-		    <version>2.4</version>
-		</plugin>
-		<plugin>
-		    <groupId>org.apache.maven.plugins</groupId>
-		    <artifactId>maven-project-info-reports-plugin</artifactId>
-		    <version>2.7</version>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-site-plugin</artifactId>
+			<version>3.4</version>
+			<configuration>
+				<reportPlugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<reports>
+							<report>checkstyle</report>
+						</reports>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>cobertura-maven-plugin</artifactId>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>findbugs-maven-plugin</artifactId>
+					</plugin>
+				</reportPlugins>
+			</configuration>
 		</plugin>
 		<plugin>
 		    <groupId>org.apache.maven.plugins</groupId>
@@ -351,39 +365,58 @@
 		    </configuration>
 		</plugin>
 		<plugin>
-		    <groupId>org.apache.maven.plugins</groupId>
-		    <artifactId>maven-checkstyle-plugin</artifactId>
-		    <version>2.12.1</version>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-checkstyle-plugin</artifactId>
+			<version>2.12.1</version>
+			<configuration>
+				<configLocation>src/qa/checkstyle/openecard-checkstyle.xml</configLocation>
+				<headerLocation>src/qa/checkstyle/openecard-checkstyle-header.txt</headerLocation>
+				<suppressionsLocation>src/qa/checkstyle/openecard-checkstyle-suppressions.xml</suppressionsLocation>
+				<includeTestSourceDirectory>true</includeTestSourceDirectory>
+				<enableRSS>false</enableRSS>
+				<enableFilesSummary>false</enableFilesSummary>
+				<enableRulesSummary>false</enableRulesSummary>
+				<enableSeveritySummary>false</enableSeveritySummary>
+				<linkXRef>false</linkXRef>
+			</configuration>
 		</plugin>
 		<plugin>
-		    <groupId>org.codehaus.mojo</groupId>
-		    <artifactId>taglist-maven-plugin</artifactId>
-		    <version>2.4</version>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>cobertura-maven-plugin</artifactId>
+			<version>2.6</version>
+			<configuration>
+				<aggregate>true</aggregate>
+				<quiet>true</quiet>
+				<maxmem>2048m</maxmem>
+				<formats>
+					<format>xml</format>
+				</formats>
+				<instrumentation>
+					<includes>
+						<include>org/openecard/**/*.class</include>
+					</includes>
+					<excludes>
+						<exclude>org/openecard/bouncycastle/**/*.class</exclude>
+						<exclude>org/openecard/apache/http/**/*.class</exclude>
+						<exclude>org/openecard/ws/*.class</exclude>
+						<exclude>org/openecard/ws/schema/**/*.class</exclude>
+					</excludes>
+				</instrumentation>
+			</configuration>
 		</plugin>
 		<plugin>
-		    <groupId>org.codehaus.mojo</groupId>
-		    <artifactId>cobertura-maven-plugin</artifactId>
-		    <version>2.6</version>
-		    <configuration>
-			<quiet>true</quiet>
-			<maxmem>1024m</maxmem>
-			<instrumentation>
-			    <includes>
-				<include>org/openecard/**/*.class</include>
-			    </includes>
-			    <excludes>
-				<exclude>org/openecard/bouncycastle/**/*.class</exclude>
-				<exclude>org/openecard/apache/http/**/*.class</exclude>
-				<exclude>org/openecard/ws/*.class</exclude>
-				<exclude>org/openecard/ws/schema/**/*.class</exclude>
-			    </excludes>
-			</instrumentation>
-		    </configuration>
-		</plugin>
-		<plugin>
-		    <groupId>org.codehaus.mojo</groupId>
-		    <artifactId>findbugs-maven-plugin</artifactId>
-		    <version>3.0.0</version>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>findbugs-maven-plugin</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
+			<configuration>
+				<effort>Max</effort>
+				<threshold>Low</threshold>
+				<includeTests>true</includeTests>
+				<maxHeap>2048</maxHeap>
+				<onlyAnalyze>${findbugs.packages}</onlyAnalyze>
+				<xmlOutput>true</xmlOutput>
+				<failOnError>false</failOnError>
+			</configuration>
 		</plugin>
 		    <plugin>
 		    <groupId>org.codehaus.mojo</groupId>
@@ -484,11 +517,6 @@
 				<executions>
 					<execution>
 						<id>add-license</id>
-						<configuration>
-							<licenseFile>LICENSE.Open-eCard</licenseFile>
-							<generateBundle>true</generateBundle>
-							<bundleLicensePath>META-INF/LICENSE-${project.artifactId}</bundleLicensePath>
-						</configuration>
 						<goals>
 							<goal>update-project-license</goal>
 						</goals>

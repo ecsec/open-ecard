@@ -126,4 +126,27 @@ public class AppPluginSpecification {
 	return attachments;
     }
 
+    public String getLocalizedName(String languageCode) {
+	String fallback = "";
+	for (LocalizedString s : localizedName) {
+	    if (s.getLang().equalsIgnoreCase(languageCode)) {
+		return s.getValue();
+	    } else if (s.getLang().equalsIgnoreCase("EN")) {
+		fallback = s.getValue();
+	    }
+	}
+	return fallback;
+    }
+
+    public String getLocalizedDescription(String languageCode) {
+	String fallback = "";
+	for (LocalizedString s : localizedDescription) {
+	    if (s.getLang().equalsIgnoreCase(languageCode)) {
+		return s.getValue();
+	    } else if (s.getLang().equalsIgnoreCase("EN")) {
+		fallback = s.getValue();
+	    }
+	}
+	return fallback;
+    }
 }

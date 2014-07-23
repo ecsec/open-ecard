@@ -98,7 +98,7 @@ public class AppExtensionSpecification {
     }
 
     public String getLocalizedName(String languageCode) {
-	String fallback = "No localized Name found.";
+	String fallback = "";
 	for (LocalizedString s : localizedName) {
 	    if (s.getLang().equalsIgnoreCase(languageCode)) {
 		return s.getValue();
@@ -110,7 +110,7 @@ public class AppExtensionSpecification {
     }
 
     public String getLocalizedDescription(String languageCode) {
-	String fallback = "No localized Description found.";
+	String fallback = "";
 	for (LocalizedString s : localizedDescription) {
 	    if (s.getLang().equalsIgnoreCase(languageCode)) {
 		return s.getValue();

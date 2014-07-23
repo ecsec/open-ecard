@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
 @XmlRootElement(name = "AddonSpecification")
-@XmlType(propOrder = { "id", "version", "license", "localizedName", "localizedDescription", "about", "logo",
+@XmlType(propOrder = { "id", "version", "license", "licenseText", "localizedName", "localizedDescription", "about", "logo",
 	"configDescription", "bindingActions", "applicationActions", "ifdActions", "salActions" })
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AddonSpecification {
@@ -60,6 +60,8 @@ public class AddonSpecification {
     private String version;
     @XmlElement(name = "License", required = true)
     private String license;
+    @XmlElement(name = "LicenseText", required = false)
+    private final List<LocalizedString> licenseText = new ArrayList<>();
     @XmlElement(name = "ConfigDescription", required = true)
     private Configuration configDescription;
     @XmlElement(name = "LocalizedName", type = LocalizedString.class, required = false)
@@ -90,7 +92,7 @@ public class AddonSpecification {
     }
 
     public String getLocalizedName(String languageCode) {
-	String fallback = "No localized Name found.";
+	String fallback = "";
 	for (LocalizedString s : localizedName) {
 	    if (s.getLang().equalsIgnoreCase(languageCode)) {
 		return s.getValue();
@@ -106,7 +108,7 @@ public class AddonSpecification {
     }
 
     public String getLocalizedDescription(String languageCode) {
-	String fallback = "No localized Description found.";
+	String fallback = "";
 	for (LocalizedString s : localizedDescription) {
 	    if (s.getLang().equalsIgnoreCase(languageCode)) {
 		return s.getValue();
@@ -130,12 +132,35 @@ public class AddonSpecification {
     }
 
     public String getAbout(String languageCode) {
-	//TODO implement
-	throw new UnsupportedOperationException("Not yet implemented.");
+	String fallback = "";
+	for (LocalizedString s : about) {
+	    if (s.getLang().equalsIgnoreCase(languageCode)) {
+		return s.getValue();
+	    } else if (s.getLang().equalsIgnoreCase("EN")) {
+		fallback = s.getValue();
+	    }
+	}
+	return fallback;
     }
 
     public String getLicense() {
 	return license;
+    }
+
+    public List<LocalizedString> getLicenseText() {
+	return licenseText;
+    }
+
+    public String getLicenseText(String languageCode) {
+	String fallback = "";
+	for (LocalizedString s : licenseText) {
+	    if (s.getLang().equalsIgnoreCase(languageCode)) {
+		return s.getValue();
+	    } else if (s.getLang().equalsIgnoreCase("EN")) {
+		fallback = s.getValue();
+	    }
+	}
+	return fallback;
     }
 
     public ArrayList<AppPluginSpecification> getBindingActions() {
@@ -201,7 +226,7 @@ public class AddonSpecification {
     }
 
     public void setConfigDescription(Configuration configDescriptionNew) {
-	this.configDescription = configDescription;
+	this.configDescription = configDescriptionNew;
     }
 
     public AppPluginSpecification searchByResourceName(String resourceName) {

@@ -27,7 +27,6 @@ import java.util.Set;
 import org.apache.commons.jci.monitor.FilesystemAlterationListener;
 import org.apache.commons.jci.monitor.FilesystemAlterationObserver;
 import org.openecard.addon.manifest.AddonSpecification;
-import org.openecard.addon.manifest.AppExtensionSpecification;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +52,14 @@ final class PluginDirectoryAlterationListener implements FilesystemAlterationLis
 
     @Override
     public void onFileDelete(File file) {
+	String name = file.getName();
+	AddonSpecification abd = fileRegistry.getAddonSpecByFileName(name);
+	// call the destroy method of all actions and protocols
+	manager.unloadAddon(abd);
+	// remove configuration file
+	AddonProperties addonProps = new AddonProperties(abd);
+	addonProps.removeConfFile();
+	// remove from file registry
 	fileRegistry.unregister(file);
     }
 

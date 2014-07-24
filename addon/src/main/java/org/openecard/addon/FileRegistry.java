@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -55,7 +54,7 @@ public class FileRegistry implements AddonRegistry {
 
     private static final Logger logger = LoggerFactory.getLogger(FileRegistry.class.getName());
 
-    private static final ArrayList<AddonSpecification> registeredAddons = new ArrayList<>();
+    private static final HashMap<String, AddonSpecification> registeredAddons = new HashMap<>();
     private static final HashMap<String, File> files = new HashMap<>();
     private final AddonManager manager;
 
@@ -84,7 +83,7 @@ public class FileRegistry implements AddonRegistry {
     }
 
     public void register(AddonSpecification desc, File file) {
-	registeredAddons.add(desc);
+	registeredAddons.put(file.getName(), desc);
 	files.put(desc.getId(), file);
     }
 
@@ -95,8 +94,7 @@ public class FileRegistry implements AddonRegistry {
 	    Entry<String, File> next = iterator.next();
 	    if (next.getValue().equals(file)) {
 		String id = next.getKey();
-		AddonSpecification desc = this.search(id);
-		registeredAddons.remove(desc);
+		registeredAddons.remove(file.getName());
 		files.remove(id);
 		logger.debug("Successfully removed addon {}", file.getName());
 		break;
@@ -107,13 +105,13 @@ public class FileRegistry implements AddonRegistry {
     @Override
     public Set<AddonSpecification> listAddons() {
 	Set<AddonSpecification> list = new HashSet<>();
-	list.addAll(registeredAddons);
+	list.addAll(registeredAddons.values());
 	return list;
     }
 
     @Override
     public AddonSpecification search(String id) {
-	for (AddonSpecification desc : registeredAddons) {
+	for (AddonSpecification desc : registeredAddons.values()) {
 	    if (desc.getId().equals(id)) {
 		return desc;
 	    }
@@ -124,7 +122,7 @@ public class FileRegistry implements AddonRegistry {
     @Override
     public Set<AddonSpecification> searchByName(String name) {
 	Set<AddonSpecification> matchingAddons = new HashSet<>();
-	for (AddonSpecification desc : registeredAddons) {
+	for (AddonSpecification desc : registeredAddons.values()) {
 	    for (LocalizedString s : desc.getLocalizedName()) {
 		if (s.getValue().equals(name)) {
 		    matchingAddons.add(desc);
@@ -137,7 +135,7 @@ public class FileRegistry implements AddonRegistry {
     @Override
     public Set<AddonSpecification> searchIFDProtocol(String uri) {
 	Set<AddonSpecification> matchingAddons = new HashSet<>();
-	for (AddonSpecification desc : registeredAddons) {
+	for (AddonSpecification desc : registeredAddons.values()) {
 	    ProtocolPluginSpecification protocolDesc = desc.searchIFDActionByURI(uri);
 	    if (protocolDesc != null) {
 		matchingAddons.add(desc);
@@ -149,7 +147,7 @@ public class FileRegistry implements AddonRegistry {
     @Override
     public Set<AddonSpecification> searchSALProtocol(String uri) {
 	Set<AddonSpecification> matchingAddons = new HashSet<>();
-	for (AddonSpecification desc : registeredAddons) {
+	for (AddonSpecification desc : registeredAddons.values()) {
 	    ProtocolPluginSpecification protocolDesc = desc.searchSALActionByURI(uri);
 	    if (protocolDesc != null) {
 		matchingAddons.add(desc);
@@ -176,7 +174,7 @@ public class FileRegistry implements AddonRegistry {
     @Override
     public Set<AddonSpecification> searchByResourceName(String resourceName) {
 	Set<AddonSpecification> matchingAddons = new HashSet<>();
-	for (AddonSpecification desc : registeredAddons) {
+	for (AddonSpecification desc : registeredAddons.values()) {
 	    AppPluginSpecification actionDesc = desc.searchByResourceName(resourceName);
 	    if (actionDesc != null) {
 		matchingAddons.add(desc);
@@ -188,7 +186,7 @@ public class FileRegistry implements AddonRegistry {
     @Override
     public Set<AddonSpecification> searchByActionId(String actionId) {
 	Set<AddonSpecification> matchingAddons = new HashSet<>();
-	for (AddonSpecification desc : registeredAddons) {
+	for (AddonSpecification desc : registeredAddons.values()) {
 	    AppExtensionSpecification actionDesc = desc.searchByActionId(actionId);
 	    if (actionDesc != null) {
 		matchingAddons.add(desc);
@@ -227,6 +225,10 @@ public class FileRegistry implements AddonRegistry {
     public Set<AddonSpecification> listInstalledAddons() {
 	// This registry does not provide a AppStore based system so just return the result of listAddons() method.
 	return listAddons();
+    }
+
+    protected AddonSpecification getAddonSpecByFileName(String fileName) {
+	return registeredAddons.get(fileName);
     }
 
 }

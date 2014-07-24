@@ -17,6 +17,12 @@
             <LocalizedName xml:lang="DE">Test-ConfigurationEntry</LocalizedName>
             <LocalizedDescription xml:lang="DE">Testbeschreibung</LocalizedDescription>
       </EnumEntry>
+      <FileEntry>
+	  <Key>Blub</Key>
+	  <RequiredBeforeAction>true</RequiredBeforeAction>
+	  <LocalizedName xml:lang="EN">Certificate file</LocalizedName>
+	  <LocalizedDescription xml:lang="EN">Enter the path to the certificate in pem format.</LocalizedDescription>
+      </FileEntry>
     </Entries>
   </ConfigDescription>
   <BindingActions>

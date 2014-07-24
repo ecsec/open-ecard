@@ -48,11 +48,11 @@ public class AddonBundleDescriptionTest {
     /**
      * This test unmarshals the test xml file, checks some fields of the generated POJO and afterwards marshals it back
      * to xml. Finally the resulting xml and the original xml are compared.
-     * 
+     *
      * @throws IOException when a {@link FileUtils} operation fails
-     * @throws SAXException 
-     * @throws WSMarshallerException 
-     * @throws TransformerException 
+     * @throws SAXException
+     * @throws WSMarshallerException
+     * @throws TransformerException
      */
     @Test(enabled=true)
     public void testloadFromManifest() throws IOException, WSMarshallerException, SAXException, TransformerException {
@@ -70,7 +70,7 @@ public class AddonBundleDescriptionTest {
 	InputStream logoStream = FileUtils.resolveResourceAsStream(AddonBundleDescriptionTest.class, OPENECARD_LOGO);
 	byte[] expectedLogo = FileUtils.toByteArray(logoStream);
 	assertEquals(actualLogo, expectedLogo);
-	assertEquals(addonBundleDescription.getConfigDescription().getEntries().size(), 1);
+	assertEquals(addonBundleDescription.getConfigDescription().getEntries().size(), 2);
 	assertEquals(addonBundleDescription.getConfigDescription().getEntries().get(0).getKey(), "Testkey");
 	// marshal it back and compare the xml's
 	Document d = marshaller.marshal(addonBundleDescription);

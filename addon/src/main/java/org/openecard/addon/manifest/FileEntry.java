@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,34 +22,39 @@
 
 package org.openecard.addon.manifest;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
-@XmlRootElement(name = "Configuration")
-public class Configuration {
+@XmlRootElement(name = "FileEntry")
+@XmlType(propOrder = { "key", "requiredBeforeAction", "fileType", "localizedName", "localizedDescription" })
+public class FileEntry extends ConfigurationEntry {
 
-    @XmlElements({
-	    @XmlElement(name = "EnumEntry", type = EnumEntry.class),
-	    @XmlElement(name = "EnumListEntry", type = EnumListEntry.class),
-	    @XmlElement(name = "FileEntry", type = FileEntry.class),
-	    @XmlElement(name = "FileListEntry", type = FileListEntry.class),
-	    @XmlElement(name = "ScalarEntry", type = ScalarEntry.class),
-	    @XmlElement(name = "ScalarListEntry", type = ScalarListEntry.class) })
-    @XmlElementWrapper(name = "Entries")
-    private final List<ConfigurationEntry> entries = new ArrayList<>();
+    @XmlElement(name = "RequiredBeforeAction", required = true)
+    private Boolean requiredBeforeAction;
 
-    public List<ConfigurationEntry> getEntries() {
-	return entries;
+    @XmlElement(name = "FileType", required = true)
+    private String fileType;
+
+    /**
+     * Set the FileEntry as required.
+     *
+     * @param required
+     */
+    public void setRequiredBeforeAction(boolean required) {
+	requiredBeforeAction = required;
     }
 
+    public boolean isRequiredBeforeAction() {
+	return requiredBeforeAction;
+    }
+
+    public String getFileType() {
+	return fileType;
+    }
 }

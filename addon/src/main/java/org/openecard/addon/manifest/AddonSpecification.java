@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 @XmlType(propOrder = { "id", "version", "license", "licenseText", "localizedName", "localizedDescription", "about", "logo",
 	"configDescription", "bindingActions", "applicationActions", "ifdActions", "salActions" })
 @XmlAccessorType(XmlAccessType.FIELD)
-public class AddonSpecification {
+public class AddonSpecification implements Comparable<AddonSpecification> {
 
     private static final Logger logger = LoggerFactory.getLogger(AddonSpecification.class);
 
@@ -263,5 +263,67 @@ public class AddonSpecification {
 	    }
 	}
 	return null;
+    }
+
+    @Override
+    public int compareTo(AddonSpecification o) {
+	int versionRes = version.compareTo(o.getVersion());
+	int idRes = id.compareTo(o.getId());
+
+	// Same id and version so they are equal
+	if (versionRes == 0 && idRes == 0) {
+	    return 0;
+	} else if (versionRes == 0) {
+	    // the version equals so we have differnt addons with the same version
+	    if (idRes > 0) {
+		return 1;
+	    }
+
+	    if (idRes < 0) {
+		return -1;
+	    }
+	    return -2;
+	} else if (idRes == 0) {
+	    // same addon in different versions
+	    if (versionRes > 0) {
+		return 1;
+	    }
+	    if (versionRes < 0) {
+		return -1;
+	    }
+	    return -2;
+	} else {
+	    // different addons with different versions
+	    // convention the id is higher rated.
+	    if (idRes > 0) {
+		return 1;
+	    }
+
+	    if (idRes < 0) {
+		return -1;
+	    }
+	    return -2;
+	}
+
+    }
+
+    @Override
+    public int hashCode() {
+	int versionHash = version.hashCode();
+	int idHash = id.hashCode();
+	return versionHash + idHash;
+    }
+
+    @Override
+    public boolean equals(Object addonSpec) {
+	if (addonSpec instanceof AddonSpecification) {
+	    if (compareTo((AddonSpecification) addonSpec) == 0) {
+		return true;
+	    } else {
+		return false;
+	    }
+	} else {
+	    return false;
+	}
     }
 }

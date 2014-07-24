@@ -41,10 +41,13 @@ public class HighestVersionSelectorTest {
     public void testSemanticVersioning() {
 	AddonSpecification spec1 = new AddonSpecification();
 	spec1.setVersion("1.0.0");
+	spec1.setId("Test");
 	AddonSpecification spec2 = new AddonSpecification();
 	spec2.setVersion("2.5.0");
+	spec2.setId("Test");
 	AddonSpecification spec3 = new AddonSpecification();
 	spec3.setVersion("0.2.1");
+	spec3.setId("Test");
 
 	HashSet<AddonSpecification> set = new HashSet<>();
 	set.add(spec3);
@@ -63,10 +66,13 @@ public class HighestVersionSelectorTest {
     public void testSemanticVersioningWithAdditionalLabel() {
 	AddonSpecification spec1 = new AddonSpecification();
 	spec1.setVersion("1.0.0-alpha");
+	spec1.setId("Test");
 	AddonSpecification spec2 = new AddonSpecification();
 	spec2.setVersion("1.0.0-alpha.5");
+	spec2.setId("Test");
 	AddonSpecification spec3 = new AddonSpecification();
 	spec3.setVersion("1.0.0");
+	spec3.setId("Test");
 
 	HashSet<AddonSpecification> set1 = new HashSet<>();
 	set1.add(spec3);
@@ -79,6 +85,7 @@ public class HighestVersionSelectorTest {
 
 	AddonSpecification spec4 = new AddonSpecification();
 	spec4.setVersion("1.0.0-beta");
+	spec4.setId("Test");
 	HashSet<AddonSpecification> set2 = new HashSet<>();
 	set2.add(spec4);
 	set2.add(spec2);
@@ -95,10 +102,13 @@ public class HighestVersionSelectorTest {
     public void testLexicalVersioning() {
 	AddonSpecification spec1 = new AddonSpecification();
 	spec1.setVersion("moonshine release");
+	spec1.setId("Test");
 	AddonSpecification spec2 = new AddonSpecification();
 	spec2.setVersion("alpha");
+	spec2.setId("Test");
 	AddonSpecification spec3 = new AddonSpecification();
 	spec3.setVersion("zeta");
+	spec3.setId("Test");
 
 	HashSet<AddonSpecification> set1 = new HashSet<>();
 	set1.add(spec3);
@@ -117,10 +127,13 @@ public class HighestVersionSelectorTest {
     public void testLexicalAndSemanticVersioning() {
 	AddonSpecification spec1 = new AddonSpecification();
 	spec1.setVersion("moonshine release");
+	spec1.setId("Test");
 	AddonSpecification spec2 = new AddonSpecification();
 	spec2.setVersion("1.0.2");
+	spec2.setId("Test");
 	AddonSpecification spec3 = new AddonSpecification();
 	spec3.setVersion("1.0.2-pre1");
+	spec3.setId("Test");
 
 	HashSet<AddonSpecification> set1 = new HashSet<>();
 	set1.add(spec3);

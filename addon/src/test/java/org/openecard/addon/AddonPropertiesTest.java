@@ -60,7 +60,7 @@ public class AddonPropertiesTest {
     @BeforeTest
     public void init() throws IOException {
 	addonSpec.setId("test-addon");
-	path = FileUtils.getAddonsConfDir();
+	path = new File(FileUtils.getAddonsConfDir(), addonSpec.getId());
 	if (! path.exists()) {
 	    path.mkdirs();
 	    addonsExists = false;

@@ -78,7 +78,7 @@ public class AddonProperties {
 	id = addonSpec.getId();
 
 	try {
-	    configFile = new File(FileUtils.getAddonsConfDir(), id + FILE_EXTENSION);
+	    configFile = new File(FileUtils.getAddonsConfDir(), id + "/" + id + FILE_EXTENSION);
 	} catch (IOException ex) {
 	    logger.error("Couldn't create file object to the config directory.", ex);
 	} catch (SecurityException ex) {

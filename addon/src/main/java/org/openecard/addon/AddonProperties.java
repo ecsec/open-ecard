@@ -157,4 +157,12 @@ public class AddonProperties {
 	return props.getProperty(key);
     }
 
+    /**
+     * Delete the file containing the users configuration of the addon.
+     * This method should be called just in case the user uninstalls/removes the addon.
+     */
+    protected void removeConfFile() {
+	configFile.delete();
+    }
+
 }

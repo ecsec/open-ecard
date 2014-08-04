@@ -46,8 +46,7 @@ public class AddonBundleDescriptionTest {
     private static final String OPENECARD_LOGO = "openecard_logo.png";
 
     /**
-     * This test unmarshals the test xml file, checks some fields of the generated POJO and afterwards marshals it back
-     * to xml. Finally the resulting xml and the original xml are compared.
+     * This test unmarshals the test xml file, checks some fields of the generated POJO.
      *
      * @throws IOException when a {@link FileUtils} operation fails
      * @throws SAXException
@@ -72,14 +71,6 @@ public class AddonBundleDescriptionTest {
 	assertEquals(actualLogo, expectedLogo);
 	assertEquals(addonBundleDescription.getConfigDescription().getEntries().size(), 2);
 	assertEquals(addonBundleDescription.getConfigDescription().getEntries().get(0).getKey(), "Testkey");
-	// marshal it back and compare the xml's
-	Document d = marshaller.marshal(addonBundleDescription);
-	// remove xml namespaces and whitespaces
-	String expected = s.substring(s.indexOf("<ID")).replaceAll("\\s", "");
-	String actual = marshaller.doc2str(d);
-	System.out.println(actual);
-	actual = actual.substring(actual.indexOf("<ID")).replaceAll("\\s", "");
-	assertEquals(actual, expected);
     }
 
 }

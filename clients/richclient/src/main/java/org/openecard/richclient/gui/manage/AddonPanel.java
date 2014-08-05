@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,24 +23,30 @@
 package org.openecard.richclient.gui.manage;
 
 import java.awt.AlphaComposite;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import javax.swing.JLabel;
-import java.awt.Font;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import org.openecard.addon.AddonPropertiesException;
 import org.openecard.common.I18n;
 import org.openecard.gui.graphics.GraphicsUtil;
 import org.openecard.gui.graphics.OecLogoBgWhite;
@@ -69,6 +75,8 @@ public class AddonPanel extends JPanel {
     private Image logo;
     private SettingsPanel settingsPanel;
 
+    private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder();
+
 
     /**
      * Creates an AddonPanel with the given panels.
@@ -84,16 +92,22 @@ public class AddonPanel extends JPanel {
      *   If not present a default will be used.
      */
     public AddonPanel(@Nullable ActionPanel actionPanel, @Nullable SettingsPanel settingsPanel,
-	    @Nullable JPanel aboutPanel, @Nonnull String name, @Nullable String description, @Nullable Image logo) {
+	    @Nullable AboutPanel aboutPanel, @Nonnull String name, @Nullable String description, @Nullable Image logo) {
 	setLayout(new BorderLayout(0, 0));
 
 	this.logo = logo;
-
 	JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	add(tabbedPane);
+	Dimension dim = new Dimension(100,100);
 
 	if (actionPanel != null) {
-	    tabbedPane.addTab(lang.translationForKey("addon.panel.tab.function"), null, actionPanel, null);
+	    JScrollPane actionScrollPane = new JScrollPane(actionPanel);
+	    actionScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+	    actionScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+	    actionScrollPane.setMinimumSize(dim);
+	    actionScrollPane.setPreferredSize(dim);
+	    actionScrollPane.setBorder(EMPTY_BORDER);
+	    tabbedPane.addTab(lang.translationForKey("addon.panel.tab.function"), null, actionScrollPane, null);
 	}
 	if (settingsPanel != null) {
 	    if (settingsPanel instanceof SettingsPanel) {
@@ -121,15 +135,28 @@ public class AddonPanel extends JPanel {
     public AddonPanel(@Nonnull JPanel singlePanel, @Nonnull String name, @Nullable String description,
 	    @Nullable Image logo) {
 	setLayout(new BorderLayout(0, 0));
-
 	this.logo = logo;
-
-	add(singlePanel);
 	createHeader(name, description);
+
+	JComponent panel;
+	if (!(singlePanel instanceof AboutPanel) && !(singlePanel instanceof SettingsPanel)) {
+	    JScrollPane singleScrollPane = new JScrollPane(singlePanel);
+	    singleScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+	    singleScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+	    Dimension dim = new Dimension(this.getWidth(), this.getHeight() - 75);
+	    singleScrollPane.setMinimumSize(dim);
+	    singleScrollPane.setPreferredSize(dim);
+	    singleScrollPane.setBorder(EMPTY_BORDER);
+	    panel = singleScrollPane;
+	} else {
+	    panel = singlePanel;
+	}
 
 	if (singlePanel instanceof SettingsPanel) {
 	    this.settingsPanel = (SettingsPanel) singlePanel;
 	}
+
+	add(panel);
     }
 
     /**
@@ -144,6 +171,8 @@ public class AddonPanel extends JPanel {
 	    logger.error("Failed to save settings.", ex);
 	} catch (SecurityException ex) {
 	    logger.error("Missing permissions to save settings.", ex);
+	} catch (AddonPropertiesException ex) {
+	    logger.error("Failed to save addon settings.", ex);
 	}
     }
 

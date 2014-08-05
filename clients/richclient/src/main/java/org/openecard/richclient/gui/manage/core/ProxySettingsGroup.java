@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,16 +24,15 @@ package org.openecard.richclient.gui.manage.core;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
+import org.openecard.addon.AddonPropertiesException;
 import org.openecard.common.I18n;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.crypto.tls.proxy.ProxySettings;
-import org.openecard.common.util.FileUtils;
+import org.openecard.richclient.gui.manage.SettingsFactory;
 import org.openecard.richclient.gui.manage.SettingsGroup;
 
 
@@ -42,6 +41,7 @@ import org.openecard.richclient.gui.manage.SettingsGroup;
  * The settings are made dynamic to reflect the choice made by the user.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class ProxySettingsGroup extends SettingsGroup {
 
@@ -70,7 +70,7 @@ public class ProxySettingsGroup extends SettingsGroup {
 
 
     public ProxySettingsGroup() {
-	super(lang.translationForKey(GROUP), OpenecardProperties.properties());
+	super(lang.translationForKey(GROUP), SettingsFactory.getInstance(OpenecardProperties.properties()));
 
 	selection = addSelectionItem(lang.translationForKey(SCHEME), lang.translationForKey(SCHEME_DESC),
 		"proxy.scheme", "", "SOCKS", "HTTP", "HTTPS");
@@ -89,11 +89,8 @@ public class ProxySettingsGroup extends SettingsGroup {
     }
 
     @Override
-    protected void saveProperties() throws IOException, SecurityException {
-	File home = FileUtils.getHomeConfigDir();
-	File config = new File(home, "openecard.properties");
-	FileWriter writer = new FileWriter(config);
-	properties.store(writer, null);
+    protected void saveProperties() throws IOException, SecurityException, AddonPropertiesException {
+	super.saveProperties();
 	// reload global properties and proxy settings
 	OpenecardProperties.load();
 	ProxySettings.load();

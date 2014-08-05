@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,8 +22,6 @@
 
 package org.openecard.richclient.gui.manage;
 
-import org.openecard.richclient.gui.manage.addon.DefaultSettingsGroup;
-import org.openecard.richclient.gui.manage.addon.DefaultSettingsPanel;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -33,12 +31,9 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Properties;
 import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -52,13 +47,19 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.openecard.addon.AddonManager;
+import org.openecard.addon.AddonProperties;
 import org.openecard.addon.AddonRegistry;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.AppExtensionSpecification;
+import org.openecard.addon.manifest.AppPluginSpecification;
+import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.common.I18n;
 import org.openecard.common.util.FileUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
 import org.openecard.gui.graphics.OecLogoBgWhite;
+import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
+import org.openecard.richclient.gui.manage.addon.DefaultSettingsGroup;
+import org.openecard.richclient.gui.manage.addon.DefaultSettingsPanel;
 import org.openecard.richclient.gui.manage.core.ConnectionSettingsAddon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,11 +85,11 @@ public class ManagementDialog extends JDialog {
     private final AddonRegistry cpReg;
     private final AddonRegistry fileReg;
 
-    private JPanel selectionPanel;
-    private JPanel contentPane;
+    private final JPanel selectionPanel;
+    private final JPanel contentPane;
     private JList coreList;
     private JList addonList;
-    private JPanel addonPanel;
+    private final JPanel addonPanel;
     private JLabel lastImage;
 
     /**
@@ -230,47 +231,30 @@ public class ManagementDialog extends JDialog {
 	// this assumes that all addons in the ClasspathRegistry are core addons
 	// an ActionPanel for every addon that has one ore more AppExtensionActions will be added
 	for (AddonSpecification desc : cpReg.listAddons()) {
-	    ArrayList<AppExtensionSpecification> applicationActions = desc.getApplicationActions();
-	    if (applicationActions.size() > 0) {
-		String description  = desc.getLocalizedDescription(LANGUAGE_CODE);
-		String name = desc.getLocalizedName(LANGUAGE_CODE);
-		Image logo = loadLogo(desc.getLogo());
-		JPanel actionPanel = createActionPanel(desc);
-		AddonPanel nextPanel = new AddonPanel(actionPanel, name, description, logo);
-		model.addElement(name, nextPanel);
-	    }
+	    createAddonPaneFromAddonSpec(desc, model, true);
 	}
 
 	selectionPanel.add(coreList, coreListConstraints);
     }
 
     /**
-     * Creates an ActionPanel that has an ActionEntryPanel for every AppExtensionAction of the given addon.
-     * 
-     * @param desc AddonSpecification for the addon
-     * @return the created ActionPanel
-     */
-    private ActionPanel createActionPanel(AddonSpecification desc) {
-	ActionPanel actionPanel = new ActionPanel();
-	for (AppExtensionSpecification action : desc.getApplicationActions()) {
-	    ActionEntryPanel actionEntryPanel = new ActionEntryPanel(desc, action, manager);
-	    actionPanel.addActionEntry(actionEntryPanel);
-	}
-	return actionPanel;
-    }
-
-    /**
      * Load the logo from the given path as {@link Image}.
-     * 
+     *
      * @param logoPath path to the logo
      * @return the logo-{@link Image} if loading was successful, otherwise {@code null}
      */
-    private static Image loadLogo(String logoPath) {
+    private static Image loadLogo(ClassLoader loader, String logoPath) {
 	if (logoPath == null || logoPath.isEmpty()) {
 	    return null;
 	}
 	try {
-	    InputStream in = FileUtils.resolveResourceAsStream(ManagementDialog.class, logoPath);
+	    InputStream in;
+	    if (loader == null) {
+		in = FileUtils.resolveResourceAsStream(ManagementDialog.class, logoPath);
+	    } else {
+		in = FileUtils.resolveResourceAsStream(loader, logoPath);
+	    }
+
 	    ImageIcon icon = new ImageIcon(FileUtils.toByteArray(in));
 	    if (icon.getIconHeight() < 0 || icon.getIconWidth() < 0) {
 		// supplied data was no image, btw the image API sucks
@@ -314,27 +298,7 @@ public class ManagementDialog extends JDialog {
 
 	// this assumes that all addons in the FileRegistry are non core addons
 	for (AddonSpecification desc : fileReg.listAddons()) {
-	    String description = desc.getLocalizedDescription(LANGUAGE_CODE);
-	    String name = desc.getLocalizedName(LANGUAGE_CODE);
-	    Image logo = loadLogo(desc.getLogo());
-	    Properties properties = new Properties();
-	    try {
-		File config = new File(FileUtils.getHomeConfigDir().getAbsolutePath() + File.separatorChar + "plugins"
-			+ File.separatorChar + desc.getId() + ".properties");
-		if (config.exists()) {
-		    properties.load(new FileReader(config));
-		} else {
-		    logger.debug("A properties file for the addon with id {} does not yet exist", desc.getId());
-		}
-	    } catch (SecurityException e) {
-		logger.error("Failed to load properties file for addon with id " + desc.getId(), e);
-	    } catch (IOException e) {
-		logger.error("Failed to load properties file for addon with id " + desc.getId(), e);
-	    }
-	    // TODO: what title should we set?
-	    SettingsGroup settingsGroup = new DefaultSettingsGroup("", properties, desc);
-	    AddonPanel nextPanel = new AddonPanel(new DefaultSettingsPanel(settingsGroup), name, description, logo);
-	    model.addElement(name, nextPanel);
+	    createAddonPaneFromAddonSpec(desc, model, false);
 	}
 
 	selectionPanel.add(addonList, addonListConstraints);
@@ -365,6 +329,120 @@ public class ManagementDialog extends JDialog {
 		    otherList.clearSelection();
 		}
 	    }
+	}
+    }
+
+    private void createAddonPaneFromAddonSpec(AddonSpecification desc, AddonSelectionModel model, boolean coreAddon) {
+	String description = desc.getLocalizedDescription(LANGUAGE_CODE);
+	String name = desc.getLocalizedName(LANGUAGE_CODE);
+	Image logo;
+
+	if (coreAddon) {
+	    logo = loadLogo(null, desc.getLogo());
+	} else {
+	    ClassLoader loader = manager.getRegistry().downloadAddon(desc);
+	    logo = loadLogo(loader, "META-INF/" + desc.getLogo());
+	}
+
+	// setup about panel but just if we don't have a core addon
+	String about = desc.getAbout(LANGUAGE_CODE);
+	String licenseText = desc.getLicenseText(LANGUAGE_CODE);
+	AboutPanel aboutPanel = null;
+	if ((!about.equals("") || ! licenseText.equals("")) && !coreAddon) {
+	    aboutPanel = new AboutPanel(desc);
+	}
+
+
+	// inital setup of settings panel if the addon has general settings in the non protocol/action specific
+	// declaration
+	DefaultSettingsPanel settingsPanel = null;
+	ArrayList<DefaultSettingsGroup> settingsGroups = new ArrayList<>();
+	AddonProperties addonProps = new AddonProperties(desc);
+	Settings settings = SettingsFactory.getInstance(addonProps);
+	if (desc.getConfigDescription() != null && !desc.getConfigDescription().getEntries().isEmpty()) {
+	    DefaultSettingsGroup group = new DefaultSettingsGroup(lang.translationForKey("addon.settings.general"),
+		    settings, desc.getConfigDescription().getEntries());
+	    settingsGroups.add(group);
+	}
+
+	// iteration over the configuration of actions and protocols
+	// AppExtensionActions
+	if (!desc.getApplicationActions().isEmpty()) {
+	    for (AppExtensionSpecification appExtSpec : desc.getApplicationActions()) {
+		if (appExtSpec.getConfigDescription() != null && !appExtSpec.getConfigDescription().getEntries().isEmpty()) {
+		    DefaultSettingsGroup group = new DefaultSettingsGroup(appExtSpec.getLocalizedName(LANGUAGE_CODE)
+			    + " " + lang.translationForKey("addon.settings.settings"), settings,
+			    appExtSpec.getConfigDescription().getEntries());
+		    settingsGroups.add(group);
+		}
+	    }
+	}
+
+	// Binding actions
+	if (!desc.getBindingActions().isEmpty()) {
+	    for (AppPluginSpecification appPluginSpec : desc.getBindingActions()) {
+		if (appPluginSpec.getConfigDescription() != null && !appPluginSpec.getConfigDescription().getEntries().isEmpty()) {
+		    DefaultSettingsGroup group = new DefaultSettingsGroup(appPluginSpec.getLocalizedName(LANGUAGE_CODE) +
+			    " " + lang.translationForKey("addon.settings.settings"), settings,
+			    appPluginSpec.getConfigDescription().getEntries());
+		    settingsGroups.add(group);
+		}
+	    }
+	}
+
+	// IFD Actions
+	if (!desc.getIfdActions().isEmpty()) {
+	    for (ProtocolPluginSpecification protPluginSpec : desc.getIfdActions()) {
+		if (protPluginSpec.getConfigDescription() != null && !protPluginSpec.getConfigDescription().getEntries().isEmpty()) {
+		    DefaultSettingsGroup group = new DefaultSettingsGroup(protPluginSpec.getLocalizedName(LANGUAGE_CODE) +
+			    " " + lang.translationForKey("addon.settings.settings"), settings,
+			    protPluginSpec.getConfigDescription().getEntries());
+		    settingsGroups.add(group);
+		}
+	    }
+	}
+
+	// SAL Actions
+	if (!desc.getSalActions().isEmpty()) {
+	    for (ProtocolPluginSpecification protPluginSpec : desc.getSalActions()) {
+		if (protPluginSpec.getConfigDescription() != null && !protPluginSpec.getConfigDescription().getEntries().isEmpty()) {
+		    DefaultSettingsGroup group = new DefaultSettingsGroup(protPluginSpec.getLocalizedName(LANGUAGE_CODE)
+			    + " " + lang.translationForKey("addon.settings.settings"), settings,
+			    protPluginSpec.getConfigDescription().getEntries());
+		    settingsGroups.add(group);
+		}
+	    }
+	}
+
+	if (!settingsGroups.isEmpty()) {
+	    settingsPanel = new DefaultSettingsPanel(settingsGroups.toArray(
+		    new DefaultSettingsGroup[settingsGroups.size()]));
+	}
+
+	// create the actions panel
+	ActionPanel actionPanel = null;
+	if (!desc.getApplicationActions().isEmpty()) {
+	    actionPanel = new ActionPanel();
+	    for (AppExtensionSpecification appExtSpec : desc.getApplicationActions()) {
+		ActionEntryPanel entry = new ActionEntryPanel(desc, appExtSpec, manager);
+		actionPanel.addActionEntry(entry);
+	    }
+	}
+
+	AddonPanel nextPanel = null;
+	// check whether to use a tabbed pane or not
+	if (actionPanel != null && settingsPanel == null && aboutPanel == null) {
+	    nextPanel = new AddonPanel(actionPanel, name, description, logo);
+	} else if (actionPanel == null && settingsPanel != null && aboutPanel == null) {
+	    nextPanel = new AddonPanel(settingsPanel, name, description, logo);
+	} else if (actionPanel == null && settingsPanel == null && aboutPanel != null) {
+	    nextPanel = new AddonPanel(aboutPanel, name, description, logo);
+	} else if (actionPanel != null || settingsPanel != null || aboutPanel != null) {
+	    nextPanel = new AddonPanel(actionPanel, settingsPanel, aboutPanel, name, description, logo);
+	}
+
+	if (nextPanel != null) {
+	    model.addElement(name, nextPanel);
 	}
     }
 

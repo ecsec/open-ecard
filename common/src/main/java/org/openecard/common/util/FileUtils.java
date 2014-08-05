@@ -212,7 +212,7 @@ public class FileUtils {
 	    String jarUrl = dirURL.toExternalForm().substring(0, dirURL.toExternalForm().indexOf("!"));
 	    JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
 	    Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
-	    TreeMap<String,URL> result = new TreeMap<String,URL>(); //avoid duplicates in case it is a subdirectory
+	    TreeMap<String,URL> result = new TreeMap<>(); //avoid duplicates in case it is a subdirectory
 	    while (entries.hasMoreElements()) {
 		JarEntry nextEntry = entries.nextElement();
 		// skip directory entries
@@ -232,7 +232,7 @@ public class FileUtils {
     }
 
     private static TreeMap<String,URL> getSubdirFileListing(File dir, String base) throws MalformedURLException {
-	TreeMap<String,URL> resultList = new TreeMap<String,URL>();
+	TreeMap<String,URL> resultList = new TreeMap<>();
 	for (File next : dir.listFiles()) {
 	    if (next.canRead() && next.isDirectory()) {
 		resultList.putAll(getSubdirFileListing(next, base));
@@ -266,7 +266,7 @@ public class FileUtils {
 	String fileValue = toString(fileStream);
 	String[] files = fileValue.split(":");
 
-	TreeMap<String,URL> result = new TreeMap<String,URL>();
+	TreeMap<String,URL> result = new TreeMap<>();
 	for (String file : files) {
 	    URL fileUrl = resolveResourceAsURL(clazz, file);
 	    if (fileUrl != null) {
@@ -294,6 +294,7 @@ public class FileUtils {
 	}
 	return null;
     }
+
     /**
      * Same as {@link java.lang.Class#getResource()} but works with and without jars reliably.
      * In fact the resource is tried to be loaded with and without / in front of the path.
@@ -301,13 +302,48 @@ public class FileUtils {
      * @param clazz Base for the <code>getResource()</code> operation.
      * @param name name of the resource.
      * @return URL to the resource or null if none found.
-     * @throws IOException
      */
     public static URL resolveResourceAsURL(Class clazz, String name) {
 	URL url = clazz.getResource(name);
 	if (url == null) {
 	    name = name.startsWith("/") ? name.substring(1) : "/" + name;
 	    url = clazz.getResource(name);
+	}
+	return url;
+    }
+
+    /**
+     * Same as {@link java.lang.Class#getResourceAsStream()} but works with and without jars reliably.
+     * In fact the resource is tried to be loaded with and without / in front of the path. The method needs ClassLoader
+     * to be able to load the resource. This is mainly intended for the usage with an add-on jar file.
+     *
+     * @param loader ClassLoader to use for resolving the source.
+     * @param name Name of the resource.
+     * @return Open stream to the resource or null if none found.
+     * @throws IOException
+     */
+    public static InputStream resolveResourceAsStream(ClassLoader loader, String name) throws IOException {
+	URL url = resolveResourceAsURL(loader, name);
+	if (url != null) {
+	    return url.openStream();
+	}
+	return null;
+    }
+
+    /**
+     * Same as {@link java.lang.Class#getResource()} but works with and without jars reliably.
+     * In fact the resource is tried to be loaded with and without / in front of the path. The method needs ClassLoader
+     * to be able to resolve the resource as URL. This is mainly intended for the usage with add-on jar file.
+     *
+     * @param loader
+     * @param name
+     * @return
+     */
+    public static URL resolveResourceAsURL(ClassLoader loader, String name) {
+	URL url = loader.getResource(name);
+	if (url == null ) {
+	    name = name.startsWith("/") ? name.substring(1) : "/" + name;
+	    url = loader.getResource(name);
 	}
 	return url;
     }

@@ -29,12 +29,14 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import org.openecard.addon.utils.LocalizedStringExtractor;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 @XmlRootElement(name = "AppExtensionSpecification")
 @XmlType(propOrder = { "id", "className", "loadOnStartup", "localizedName", "localizedDescription", "configDescription" })
@@ -98,27 +100,11 @@ public class AppExtensionSpecification {
     }
 
     public String getLocalizedName(String languageCode) {
-	String fallback = "";
-	for (LocalizedString s : localizedName) {
-	    if (s.getLang().equalsIgnoreCase(languageCode)) {
-		return s.getValue();
-	    } else if (s.getLang().equalsIgnoreCase("EN")) {
-		fallback = s.getValue();
-	    }
-	}
-	return fallback;
+	return LocalizedStringExtractor.getLocalizedString(localizedName, languageCode);
     }
 
     public String getLocalizedDescription(String languageCode) {
-	String fallback = "";
-	for (LocalizedString s : localizedDescription) {
-	    if (s.getLang().equalsIgnoreCase(languageCode)) {
-		return s.getValue();
-	    } else if (s.getLang().equalsIgnoreCase("EN")) {
-		fallback = s.getValue();
-	    }
-	}
-	return fallback;
+	return LocalizedStringExtractor.getLocalizedString(localizedDescription, languageCode);
     }
 
 }

@@ -29,12 +29,14 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlTransient;
+import org.openecard.addon.utils.LocalizedStringExtractor;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 @XmlTransient
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -65,27 +67,11 @@ public abstract class ConfigurationEntry {
     }
 
     public String getLocalizedName(String languageCode) {
-	String fallback = "No localized Name found.";
-	for (LocalizedString s : localizedName) {
-	    if (s.getLang().equalsIgnoreCase(languageCode)) {
-		return s.getValue();
-	    } else if (s.getLang().equalsIgnoreCase("EN")) {
-		fallback = s.getValue();
-	    }
-	}
-	return fallback;
+	return LocalizedStringExtractor.getLocalizedString(localizedName, languageCode);
     }
 
     public String getLocalizedDescription(String languageCode) {
-	String fallback = "No localized Description found.";
-	for (LocalizedString s : localizedDescription) {
-	    if (s.getLang().equalsIgnoreCase(languageCode)) {
-		return s.getValue();
-	    } else if (s.getLang().equalsIgnoreCase("EN")) {
-		fallback = s.getValue();
-	    }
-	}
-	return fallback;
+	return LocalizedStringExtractor.getLocalizedString(localizedDescription, languageCode);
     }
 
 }

@@ -33,6 +33,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import org.openecard.addon.utils.LocalizedStringExtractor;
 import org.openecard.common.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 @XmlRootElement(name = "AddonSpecification")
 @XmlType(propOrder = { "id", "version", "license", "licenseText", "localizedName", "localizedDescription", "about", "logo",
@@ -92,15 +94,7 @@ public class AddonSpecification implements Comparable<AddonSpecification> {
     }
 
     public String getLocalizedName(String languageCode) {
-	String fallback = "";
-	for (LocalizedString s : localizedName) {
-	    if (s.getLang().equalsIgnoreCase(languageCode)) {
-		return s.getValue();
-	    } else if (s.getLang().equalsIgnoreCase("EN")) {
-		fallback = s.getValue();
-	    }
-	}
-	return fallback;
+	return LocalizedStringExtractor.getLocalizedString(localizedName, languageCode);
     }
 
     public List<LocalizedString> getLocalizedDescription() {
@@ -108,15 +102,7 @@ public class AddonSpecification implements Comparable<AddonSpecification> {
     }
 
     public String getLocalizedDescription(String languageCode) {
-	String fallback = "";
-	for (LocalizedString s : localizedDescription) {
-	    if (s.getLang().equalsIgnoreCase(languageCode)) {
-		return s.getValue();
-	    } else if (s.getLang().equalsIgnoreCase("EN")) {
-		fallback = s.getValue();
-	    }
-	}
-	return fallback;
+	return LocalizedStringExtractor.getLocalizedString(localizedDescription, languageCode);
     }
 
     public String getLogo() {
@@ -132,15 +118,7 @@ public class AddonSpecification implements Comparable<AddonSpecification> {
     }
 
     public String getAbout(String languageCode) {
-	String fallback = "";
-	for (LocalizedString s : about) {
-	    if (s.getLang().equalsIgnoreCase(languageCode)) {
-		return s.getValue();
-	    } else if (s.getLang().equalsIgnoreCase("EN")) {
-		fallback = s.getValue();
-	    }
-	}
-	return fallback;
+	return LocalizedStringExtractor.getLocalizedString(about, languageCode);
     }
 
     public String getLicense() {
@@ -152,15 +130,7 @@ public class AddonSpecification implements Comparable<AddonSpecification> {
     }
 
     public String getLicenseText(String languageCode) {
-	String fallback = "";
-	for (LocalizedString s : licenseText) {
-	    if (s.getLang().equalsIgnoreCase(languageCode)) {
-		return s.getValue();
-	    } else if (s.getLang().equalsIgnoreCase("EN")) {
-		fallback = s.getValue();
-	    }
-	}
-	return fallback;
+	return LocalizedStringExtractor.getLocalizedString(licenseText, languageCode);
     }
 
     public ArrayList<AppPluginSpecification> getBindingActions() {

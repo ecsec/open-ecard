@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,11 +32,11 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Properties;
 import java.util.Vector;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -56,6 +56,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import org.openecard.addon.AddonPropertiesException;
+import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
 
 
 /**
@@ -63,12 +65,13 @@ import javax.swing.table.DefaultTableModel;
  * The entries form a group with an optional caption.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
-public abstract class SettingsGroup extends JPanel {
+public class SettingsGroup extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
-    protected final Properties properties;
+    protected final Settings properties;
     private final JPanel container;
     private final HashMap<Component, JLabel> fieldLabels;
     private int itemIdx;
@@ -77,10 +80,10 @@ public abstract class SettingsGroup extends JPanel {
      * Creates an instance bound to a set of properties.
      *
      * @param title Optional title to display as group caption.
-     * @param properties Properties bound to the entries in this group.
+     * @param settings Settings object which wraps a Properties object or an AddonProperties object.
      */
-    public SettingsGroup(@Nullable String title, @Nonnull Properties properties) {
-	this.properties = properties;
+    public SettingsGroup(@Nullable String title, @Nonnull Settings settings) {
+	this.properties = settings;
 	this.fieldLabels = new HashMap<>();
 
 	Border frameBorder = BorderFactory.createEmptyBorder(2, 2, 2, 2);
@@ -111,8 +114,11 @@ public abstract class SettingsGroup extends JPanel {
      *
      * @throws IOException Thrown in case the properties could not be written to the output device.
      * @throws SecurityException Thrown in case the permission to save the properties is missing.
+     * @throws org.openecard.addon.AddonPropertiesException
      */
-    protected abstract void saveProperties() throws IOException, SecurityException;
+    protected void saveProperties() throws IOException, SecurityException, AddonPropertiesException {
+	properties.store();
+    }
 
     /**
      * Enables or disables entries in the group.
@@ -355,12 +361,74 @@ public abstract class SettingsGroup extends JPanel {
      * @param values Selectable values.
      * @return The selection element which has been created and added to the entry.
      */
-    protected JComboBox addMultiSelectionItem(@Nonnull String name, @Nullable String description,
+    protected JPanel addMultiSelectionItem(@Nonnull String name, @Nullable String description,
 	    final @Nonnull String property, @Nonnull List<String> values) {
-	addLabel(name, description);
-	// TODO: implement
+	JLabel optionName = new JLabel(name);
+	optionName.setFont(optionName.getFont().deriveFont(Font.PLAIN));
+	optionName.setToolTipText(description);
+	JPanel contentPane = new JPanel(new GridBagLayout());
+	JPanel checkboxPane = new JPanel(new GridBagLayout());
 
-	throw new UnsupportedOperationException("Not implemented yet.");
+	int row = 0;
+	int col = 0;
+	String property2 = properties.getProperty(property);
+	for (String value : values) {
+	    GridBagConstraints c = new GridBagConstraints();
+	    if (col != 0) {
+		if (col % 3 == 0) {
+		    col = 0;
+		    row = row + 1;
+		}
+	    }
+	    c.gridx = col;
+	    c.gridy = row;
+	    c.fill = GridBagConstraints.HORIZONTAL;
+	    c.anchor = GridBagConstraints.NORTHWEST;
+
+	    if (property2 != null) {
+		String[] multProps = property2.split(";");
+		List<String> selectedOpts = Arrays.asList(multProps);
+		if (selectedOpts.contains(value)) {
+		    checkboxPane.add(new CheckboxListItem(value, true, property), c);
+		} else {
+		    checkboxPane.add(new CheckboxListItem(value, false, property), c);
+		}
+	    } else {
+		checkboxPane.add(new CheckboxListItem(value, false, property), c);
+	    }
+	    col++;
+	}
+
+	GridBagConstraints c2 = new GridBagConstraints();
+	c2.anchor = GridBagConstraints.NORTHWEST;
+	c2.fill = GridBagConstraints.HORIZONTAL;
+	c2.gridx = 0;
+	c2.gridy = 0;
+	c2.weightx = 1.0;
+	c2.weighty = 1.0;
+	contentPane.add(optionName, c2);
+
+	GridBagConstraints c3 = new GridBagConstraints();
+	c3.anchor = GridBagConstraints.NORTHWEST;
+	c3.fill = GridBagConstraints.HORIZONTAL;
+	c3.gridwidth = GridBagConstraints.REMAINDER;
+	c3.gridheight = 2;
+	c3.gridx = 1;
+	c3.gridy = 0;
+	c3.weightx = 4.0;
+	c3.weighty = 5.0;
+	contentPane.add(checkboxPane, c3);
+
+	// add content panel to the group
+	GridBagConstraints c = new GridBagConstraints();
+	c.insets = new Insets(5, 3, 0, 5);
+	c.fill = GridBagConstraints.HORIZONTAL;
+	c.gridx = 2;
+	c.gridy = itemIdx;
+	container.add(contentPane, c);
+	//addComponent(contentPane);
+	itemIdx++;
+	return contentPane;
     }
 
     private JLabel addLabel(@Nonnull String name, @Nullable String description) {
@@ -383,6 +451,59 @@ public abstract class SettingsGroup extends JPanel {
 	constraints.gridx = 2;
 	constraints.gridy = itemIdx;
 	container.add(component, constraints);
+    }
+
+    private class CheckboxListItem extends JCheckBox {
+
+	private final String itemLabel;
+	private final String propName;
+
+	private CheckboxListItem(String name, boolean selected, String propertyName) {
+	    this.setSelected(selected);
+	    this.setBackground(container.getBackground());
+	    setText(name);
+	    itemLabel = name;
+	    propName = propertyName;
+	    construct();
+	}
+
+	private void construct() {
+	    addItemListener(new ItemListener() {
+		@Override
+		public void itemStateChanged(ItemEvent e) {
+		    String propValue = properties.getProperty(propName);
+		    if (e.getStateChange() == ItemEvent.SELECTED) {
+			if (propValue == null) {
+			    properties.setProperty(propName, itemLabel);
+			} else {
+			    // property value is not null so some other options are selected so append the now selected
+			    // option
+			    properties.setProperty(propName, propValue.concat(";" + itemLabel));
+			}
+		    } else if (e.getStateChange() == ItemEvent.DESELECTED) {
+			if (propValue.equals(itemLabel)) {
+			    // just the current was selected so set an empty string
+			    properties.setProperty(propName, "");
+			} else {
+			    // element somewhere between all others
+			    if (propValue.contains(";" + itemLabel + ";")) {
+				propValue = propValue.replace(";" + itemLabel + ";", ";");
+				properties.setProperty(propName, propValue);
+			    } else if (propValue.contains(";" + itemLabel)) {
+				// last element
+				propValue = propValue.replace(";" + itemLabel, ";");
+				properties.setProperty(propName, propValue);
+			    } else {
+				// first element
+				propValue = propValue.replace(itemLabel + ";", "");
+				properties.setProperty(propName, propValue);
+			    }
+			}
+		    }
+		}
+
+	    });
+	}
     }
 
 }

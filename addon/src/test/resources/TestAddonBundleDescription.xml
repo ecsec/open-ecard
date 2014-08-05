@@ -27,7 +27,7 @@
       </FileEntry>
       <ScalarEntry>
 	  <Key>ScalarKey</Key>
-	  <Type>int</Type>
+	  <Type>BIGINTEGER</Type>
 	  <LocalizedName xml:lang="EN">Test number</LocalizedName>
 	  <LocalizedDescription xml:lang="EN">A random test number.</LocalizedDescription>
       </ScalarEntry>

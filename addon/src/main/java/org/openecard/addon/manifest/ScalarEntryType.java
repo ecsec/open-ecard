@@ -1,5 +1,5 @@
-/****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+/*
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,33 +18,23 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
 
 package org.openecard.addon.manifest;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
-@XmlRootElement(name = "ScalarEntry")
-@XmlType(propOrder = { "key", "type", "localizedName", "localizedDescription" })
-public class ScalarEntry extends ConfigurationEntry {
-
-    @XmlElement(name = "Type", required = true)
-    private ScalarEntryType type;
-
-    public String getType() {
-	return type.name();
-    }
-
-    public void setType(String type) {
-	this.type = ScalarEntryType.valueOf(type);
-    }
-
+@XmlType(name = "ScalarEntryType")
+@XmlEnum
+public enum ScalarEntryType {
+    STRING,
+    BOOLEAN,
+    BIGINTEGER,
+    BIGDECIMAL;
 }

@@ -113,7 +113,7 @@ public class AddonBundleDescriptionTest {
 	    } else if (entry instanceof ScalarEntry) {
 		ScalarEntry sEntry = (ScalarEntry) entry;
 		assertEquals(sEntry.getKey(), "ScalarKey");
-		assertEquals(sEntry.getType(), "int");
+		assertEquals(sEntry.getType(), "BIGINTEGER");
 	    }
 	}
     }

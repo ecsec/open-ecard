@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 HS Coburg.
+ * Copyright (C) 2013-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,18 +22,15 @@
 
 package org.openecard.richclient.gui.manage.addon;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
-import java.util.Properties;
-import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.AddonPropertiesException;
 import org.openecard.addon.manifest.ConfigurationEntry;
 import org.openecard.addon.manifest.EnumEntry;
 import org.openecard.addon.manifest.EnumListEntry;
 import org.openecard.addon.manifest.ScalarEntry;
 import org.openecard.addon.manifest.ScalarListEntry;
-import org.openecard.common.util.FileUtils;
+import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
 import org.openecard.richclient.gui.manage.SettingsGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,20 +41,17 @@ import org.slf4j.LoggerFactory;
  * For every ConfigurationEntry in the given AddonSpecification an according item will be added.
  *
  * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class DefaultSettingsGroup extends SettingsGroup {
 
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(DefaultSettingsGroup.class);
-
     private static final String LANGUAGE_CODE = System.getProperty("user.language");
 
-    private AddonSpecification desc;
-
-    public DefaultSettingsGroup(String title, Properties properties, AddonSpecification desc) {
-	super(title, properties);
-	this.desc = desc;
-	for (ConfigurationEntry entry : desc.getConfigDescription().getEntries()) {
+    public DefaultSettingsGroup(String title, Settings settings, List<ConfigurationEntry> configEntries) {
+	super(title, settings);
+	for (ConfigurationEntry entry : configEntries) {
 	    String name = entry.getLocalizedName(LANGUAGE_CODE);
 	    String description = entry.getLocalizedDescription(LANGUAGE_CODE);
 
@@ -76,29 +70,23 @@ public class DefaultSettingsGroup extends SettingsGroup {
 	    } else if (EnumEntry.class.equals(entry.getClass())) {
 		EnumEntry enumEntry = (EnumEntry) entry;
 		List<String> values = enumEntry.getValues();
-		// TODO: implement function
-		//addMultiSelectionItem(name, description, entry.getKey(), values);
+		addMultiSelectionItem(entry.getLocalizedName(LANGUAGE_CODE), entry.getLocalizedDescription(LANGUAGE_CODE),
+			enumEntry.getKey(), values);
 	    } else if (EnumListEntry.class.equals(entry.getClass())) {
 		EnumListEntry enumEntry = (EnumListEntry) entry;
 		List<String> values = enumEntry.getValues();
-		// TODO: use correct function
-		// addMultiSelectionItem(name, description, entry.getKey(), values);
+		addMultiSelectionItem(enumEntry.getLocalizedName(LANGUAGE_CODE), enumEntry.getLocalizedDescription(LANGUAGE_CODE),
+			enumEntry.getKey(), values);
 		logger.error("Yet unsupported entry type: {}", entry.getClass().getName());
 	    } else {
 		logger.error("Untreated entry type: {}", entry.getClass().getName());
 	    }
-	    // TODO: implement missing types EnumEntry, EnumListEntry
 	}
     }
 
     @Override
-    protected void saveProperties() throws IOException, SecurityException {
-	File home = FileUtils.getHomeConfigDir();
-	File path = new File(home, "addons");
-	path = new File(path, desc.getId());
-	File config = new File(path, "settings" + ".properties");
-	FileWriter writer = new FileWriter(config);
-	properties.store(writer, null);
+    protected void saveProperties() throws IOException, SecurityException, AddonPropertiesException {
+	super.saveProperties();
     }
 
 }

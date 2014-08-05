@@ -52,13 +52,13 @@ public class AppPluginSpecification {
     private final List<LocalizedString> localizedDescription = new ArrayList<>();
     @XmlElement(name = "ConfigDescription")
     private Configuration configDescription;
-    @XmlElement(name = "Parameters")
+    @XmlElement(name = "Parameter")
     private final List<ParameterType> parameters = new ArrayList<>();
     @XmlElement(name = "ResourceName")
     private String resourceName;
     @XmlElement(name = "Body")
     private BodyType body;
-    @XmlElement(name = "Attachments")
+    @XmlElement(name = "Attachment")
     private final List<AttachmentType> attachments = new ArrayList<>();
 
     public String getClassName() {

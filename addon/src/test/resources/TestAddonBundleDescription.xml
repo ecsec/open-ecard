@@ -3,6 +3,7 @@
   <ID>123</ID>
   <Version>1.0</Version>
   <License>License</License>
+  <LicenseText xml:lang="EN">This is a dummy license text.</LicenseText>
   <LocalizedName xml:lang="DE">Test-Addon</LocalizedName>
   <LocalizedName xml:lang="EN">Test-Addon</LocalizedName>
   <LocalizedDescription xml:lang="DE">Testbeschreibung</LocalizedDescription>
@@ -20,14 +21,22 @@
       <FileEntry>
 	  <Key>Blub</Key>
 	  <RequiredBeforeAction>true</RequiredBeforeAction>
+	  <FileType>pem</FileType>
 	  <LocalizedName xml:lang="EN">Certificate file</LocalizedName>
 	  <LocalizedDescription xml:lang="EN">Enter the path to the certificate in pem format.</LocalizedDescription>
       </FileEntry>
+      <ScalarEntry>
+	  <Key>ScalarKey</Key>
+	  <Type>int</Type>
+	  <LocalizedName xml:lang="EN">Test number</LocalizedName>
+	  <LocalizedDescription xml:lang="EN">A random test number.</LocalizedDescription>
+      </ScalarEntry>
     </Entries>
   </ConfigDescription>
   <BindingActions>
     <AppPluginSpecification>
       <ClassName>de.test.class</ClassName>
+      <LoadOnStartup>true</LoadOnStartup>
       <LocalizedName xml:lang="DE">Test-PluginAction</LocalizedName>
       <LocalizedDescription xml:lang="DE">Testbeschreibung</LocalizedDescription>
       <ResourceName>test-Client</ResourceName>
@@ -35,17 +44,40 @@
         <Entries>
           <EnumEntry>
             <Key>Testkey</Key>
+	    <Value>test</Value>
             <LocalizedName xml:lang="DE">Test-ConfigurationEntry</LocalizedName>
             <LocalizedDescription xml:lang="DE">Testbeschreibung</LocalizedDescription>
           </EnumEntry>
         </Entries>
       </ConfigDescription>
+      <Parameter>
+	<Name>Test parameter</Name>
+	<Value>Test value</Value>
+      </Parameter>
+      <Parameter>
+	<Name>Test parameter 2</Name>
+	<Value>Test Value2</Value>
+      </Parameter>
+      <Body>
+	  <MIMEType>application/ogg</MIMEType>
+	  <Node><![CDATA[<html><body>test</body></html>]]>
+	  </Node>
+      </Body>
+      <Attachment>
+	  <MIMEType>application/pdf</MIMEType>
+	  <Name>Documentation</Name>
+      </Attachment>
+      <Attachment>
+	  <MIMEType>text/plain</MIMEType>
+	  <Name>plaintext</Name>
+      </Attachment>
     </AppPluginSpecification>
   </BindingActions>
   <ApplicationActions>
     <AppExtensionSpecification>
       <ID>123</ID>
       <ClassName>de.test.class</ClassName>
+      <LoadOnStartup>false</LoadOnStartup>
       <LocalizedName xml:lang="DE">Test-ExtensionAction</LocalizedName>
       <LocalizedDescription xml:lang="DE">Testbeschreibung</LocalizedDescription>
       <ConfigDescription>

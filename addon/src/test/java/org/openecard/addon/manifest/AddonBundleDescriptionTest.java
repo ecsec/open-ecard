@@ -24,15 +24,18 @@ package org.openecard.addon.manifest;
 
 import java.io.IOException;
 import java.io.InputStream;
-import javax.xml.transform.TransformerException;
 import org.openecard.common.util.FileUtils;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.marshal.WSMarshallerFactory;
-import org.testng.annotations.Test;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertTrue;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
+import org.xml.sax.SAXException;
 
 
 /**
@@ -44,17 +47,12 @@ public class AddonBundleDescriptionTest {
 
     private static final String TEST_DESCRIPTION = "TestAddonBundleDescription.xml";
     private static final String OPENECARD_LOGO = "openecard_logo.png";
+    private static final String LICENSE_TEXT_EN = "This is a dummy license text.";
 
-    /**
-     * This test unmarshals the test xml file, checks some fields of the generated POJO.
-     *
-     * @throws IOException when a {@link FileUtils} operation fails
-     * @throws SAXException
-     * @throws WSMarshallerException
-     * @throws TransformerException
-     */
-    @Test(enabled=true)
-    public void testloadFromManifest() throws IOException, WSMarshallerException, SAXException, TransformerException {
+    private AddonSpecification addonBundleDescription;
+
+    @BeforeSuite
+    public void setup() throws IOException, WSMarshallerException, SAXException {
 	// read the test xml
 	InputStream descriptionStream = FileUtils.resolveResourceAsStream(AddonBundleDescriptionTest.class, TEST_DESCRIPTION);
 	String s = FileUtils.toString(descriptionStream);
@@ -63,14 +61,104 @@ public class AddonBundleDescriptionTest {
 	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
 	marshaller.addXmlTypeClass(AddonSpecification.class);
 	Object o = marshaller.unmarshal(marshaller.str2doc(s));
-	AddonSpecification addonBundleDescription = (AddonSpecification) o;
-	assertEquals(addonBundleDescription.getBindingActions().get(0).getResourceName(), "test-Client");
-	byte[] actualLogo = addonBundleDescription.getLogoBytes();
-	InputStream logoStream = FileUtils.resolveResourceAsStream(AddonBundleDescriptionTest.class, OPENECARD_LOGO);
-	byte[] expectedLogo = FileUtils.toByteArray(logoStream);
-	assertEquals(actualLogo, expectedLogo);
-	assertEquals(addonBundleDescription.getConfigDescription().getEntries().size(), 2);
-	assertEquals(addonBundleDescription.getConfigDescription().getEntries().get(0).getKey(), "Testkey");
+	addonBundleDescription = (AddonSpecification) o;
+    }
+
+    /**
+     * This test unmarshals the test xml file, checks some fields of the generated POJO.
+     */
+    @Test(enabled=true)
+    public void testBaseInformation() {
+
+	// check base add-on information
+	assertEquals(addonBundleDescription.getId(), "123");
+	assertEquals(addonBundleDescription.getVersion(), "1.0");
+	assertEquals(addonBundleDescription.getLicense(), "License");
+	assertEquals(addonBundleDescription.getLicenseText("EN"), LICENSE_TEXT_EN);
+	assertEquals(addonBundleDescription.getLocalizedName("EN"), "Test-Addon");
+	assertEquals(addonBundleDescription.getLocalizedDescription("DE"), "Testbeschreibung");
+	assertEquals(addonBundleDescription.getAbout("DE"), "About");
+	assertEquals(addonBundleDescription.getLogo(), OPENECARD_LOGO);
+	assertEquals(addonBundleDescription.getLocalizedName().size(), 2);
+
+
+
+
+
+//	assertEquals(addonBundleDescription.getBindingActions().get(0).getResourceName(), "test-Client");
+//	byte[] actualLogo = addonBundleDescription.getLogoBytes();
+//	InputStream logoStream = FileUtils.resolveResourceAsStream(AddonBundleDescriptionTest.class, OPENECARD_LOGO);
+//	byte[] expectedLogo = FileUtils.toByteArray(logoStream);
+//	assertEquals(actualLogo, expectedLogo);
+//	assertEquals(addonBundleDescription.getConfigDescription().getEntries().size(), 2);
+//	assertEquals(addonBundleDescription.getConfigDescription().getEntries().get(0).getKey(), "Testkey");
+    }
+
+    @Test
+    public void testBaseConfiguration() {
+	for (ConfigurationEntry entry : addonBundleDescription.getConfigDescription().getEntries()) {
+	    if (entry instanceof FileEntry) {
+		FileEntry fEntry = (FileEntry) entry;
+		assertEquals(fEntry.getFileType(), "pem");
+		assertEquals(fEntry.isRequiredBeforeAction(), true);
+		assertEquals(fEntry.getLocalizedName("EN"), "Certificate file");
+		assertEquals(fEntry.getLocalizedDescription("EN"), "Enter the path to the certificate in pem format.");
+		assertEquals(fEntry.getKey(), "Blub");
+	    } else if (entry instanceof EnumEntry) {
+		EnumEntry eEntry = (EnumEntry) entry;
+		assertEquals(eEntry.getKey(), "Testkey");
+		assertEquals(eEntry.getValues().get(0), "foo");
+		assertEquals(eEntry.getValues().get(1), "bar");
+		assertEquals(eEntry.getValues().size(), 2);
+	    } else if (entry instanceof ScalarEntry) {
+		ScalarEntry sEntry = (ScalarEntry) entry;
+		assertEquals(sEntry.getKey(), "ScalarKey");
+		assertEquals(sEntry.getType(), "int");
+	    }
+	}
+    }
+
+    @Test
+    public void testBindingAction() {
+	AppPluginSpecification appPluginSpec = addonBundleDescription.getBindingActions().get(0);
+	assertEquals(appPluginSpec.getClassName(), "de.test.class");
+	assertEquals(appPluginSpec.getResourceName(), "test-Client");
+	assertTrue(appPluginSpec.isLoadOnStartup());
+	assertEquals(appPluginSpec.getParameters().get(0).getName(), "Test parameter");
+	assertEquals(appPluginSpec.getParameters().get(0).getValue(), "Test value");
+	assertEquals(appPluginSpec.getParameters().get(1).getName(), "Test parameter 2");
+	assertEquals(appPluginSpec.getParameters().get(1).getValue(), "Test Value2");
+	assertEquals(appPluginSpec.getBody().getMimeType(), "application/ogg");
+	assertEquals(appPluginSpec.getBody().getNode(), "<html><body>test</body></html>");
+	assertEquals(appPluginSpec.getAttachments().size(), 2);
+	assertEquals(appPluginSpec.getAttachments().get(0).getMimeType().get(0), "application/pdf");
+	assertEquals(appPluginSpec.getAttachments().get(0).getName(), "Documentation");
+	assertEquals(appPluginSpec.getAttachments().get(1).getMimeType().get(0), "text/plain");
+	assertEquals(appPluginSpec.getAttachments().get(1).getName(), "plaintext");
+    }
+
+    @Test
+    public void testApplicationAction() {
+	AppExtensionSpecification appExtSpec = addonBundleDescription.getApplicationActions().get(0);
+	assertEquals(appExtSpec.getClassName(), "de.test.class");
+	assertFalse(appExtSpec.isLoadOnStartup());
+	assertEquals(appExtSpec.getId(), "123");
+    }
+
+    @Test
+    public void testIFDAction() {
+	ProtocolPluginSpecification protPlugSpec = addonBundleDescription.getIfdActions().get(0);
+	assertEquals(protPlugSpec.getClassName(), "de.test.class");
+	assertEquals(protPlugSpec.getUri(), "http://www.test.de");
+	assertFalse(protPlugSpec.isLoadOnStartup());
+    }
+
+    @Test
+    public void testSALAction() {
+	ProtocolPluginSpecification protPlugSpec = addonBundleDescription.getSalActions().get(0);
+	assertEquals(protPlugSpec.getClassName(), "de.test.class");
+	assertEquals(protPlugSpec.getUri(), "http://www.test.de");
+	assertFalse(protPlugSpec.isLoadOnStartup());
     }
 
 }

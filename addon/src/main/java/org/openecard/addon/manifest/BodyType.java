@@ -26,7 +26,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.w3c.dom.Node;
 
 
 /**
@@ -39,7 +38,7 @@ import org.w3c.dom.Node;
 public class BodyType {
     @XmlElement(name = "MIMEType")
     private String mimeType;
-    @XmlElement(name = "node")
+    @XmlElement(name = "Node")
     private String node;
 
     public void setMimeType(String mimeT) {

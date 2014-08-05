@@ -33,12 +33,12 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
-@XmlRootElement
+@XmlRootElement(name = "ParameterType")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ParameterType {
-    @XmlElement(name = "name")
+    @XmlElement(name = "Name")
     private String name;
-    @XmlElement(name = "value")
+    @XmlElement(name = "Value")
     private String value;
 
     public void setName(String name) {

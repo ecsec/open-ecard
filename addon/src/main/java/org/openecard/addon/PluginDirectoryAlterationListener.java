@@ -52,42 +52,47 @@ final class PluginDirectoryAlterationListener implements FilesystemAlterationLis
 
     @Override
     public void onFileDelete(File file) {
-	String name = file.getName();
-	AddonSpecification abd = fileRegistry.getAddonSpecByFileName(name);
-	// call the destroy method of all actions and protocols
-	manager.unloadAddon(abd);
-	// remove configuration file
-	AddonProperties addonProps = new AddonProperties(abd);
-	addonProps.removeConfFile();
-	// remove from file registry
-	fileRegistry.unregister(file);
+	// Seems like the Monitor monitor the directory recursively so just become active if a jar file was deleted.
+	if (file.getName().endsWith(".jar")) {
+	    String name = file.getName();
+	    AddonSpecification abd = fileRegistry.getAddonSpecByFileName(name);
+	    // call the destroy method of all actions and protocols
+	    manager.unloadAddon(abd);
+	    // remove configuration file
+	    AddonProperties addonProps = new AddonProperties(abd);
+	    addonProps.removeConfFile();
+	    // remove from file registry
+	    fileRegistry.unregister(file);
+	}
     }
 
     @Override
     public void onFileCreate(File file) {
 	String name = file.getName();
 	AddonSpecification abd = null;
+	// Seems like the Monitor monitor the directory recursively so just become active if a jar file was added.
+	if (name.endsWith(".jar")) {
+	    try {
+		ManifestExtractor maniEx = new ManifestExtractor();
+		abd = maniEx.getAddonSpecificationFromFile(file);
+	    } catch (WSMarshallerException ex) {
+		logger.error("Failed to initalize marshaller for AddonSpecification marshalling.", ex);
+	    }
 
-	try {
-	    ManifestExtractor maniEx = new ManifestExtractor();
-	    abd = maniEx.getAddonSpecificationFromFile(file);
-	} catch (WSMarshallerException ex) {
-	    logger.error("Failed to initalize marshaller for AddonSpecification marshalling.", ex);
-	}
-
-	if (abd == null) {
-	    return;
-	}
-	Set<AddonSpecification> plugins = fileRegistry.listAddons();
-	for (AddonSpecification desc : plugins) {
-	    if (desc.getId().equals(abd.getId())) {
-		logger.debug("Addon {} is already registered", name);
+	    if (abd == null) {
 		return;
 	    }
+	    Set<AddonSpecification> plugins = fileRegistry.listAddons();
+	    for (AddonSpecification desc : plugins) {
+		if (desc.getId().equals(abd.getId())) {
+		    logger.debug("Addon {} is already registered", name);
+		    return;
+		}
+	    }
+	    fileRegistry.register(abd, file);
+	    manager.loadLoadOnStartupActions(abd);
+	    logger.debug("Successfully registered {} as addon", name);
 	}
-	fileRegistry.register(abd, file);
-	manager.loadLoadOnStartupActions(abd);
-	logger.debug("Successfully registered {} as addon", name);
     }
 
     @Override

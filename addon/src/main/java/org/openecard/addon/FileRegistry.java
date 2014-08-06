@@ -45,8 +45,8 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * This registry provides access to all addons in the plugins directory.
- * Adding and removing addon-files at runtime is supported.
+ * This registry provides access to all add-ons in the plug-ins directory.
+ * Adding and removing add-on-files at runtime is supported.
  *
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
  */
@@ -58,6 +58,15 @@ public class FileRegistry implements AddonRegistry {
     private static final HashMap<String, File> files = new HashMap<>();
     private final AddonManager manager;
 
+    /**
+     * Creates a new FileRegistry.
+     * On the creation of the registry the add-on directory is retrieved and all existing add-ons are loaded.
+     * Furthermore a {@link FilesystemAlterationMonitor} is started to be able to register newly added add-ons and
+     * remove add-ons.
+     *
+     * @param manager {@link AddonManager} which takes care for the installed add-ons.
+     * @throws WSMarshallerException
+     */
     public FileRegistry(AddonManager manager) throws WSMarshallerException {
 	this.manager = manager;
 	String addonPath;
@@ -74,7 +83,14 @@ public class FileRegistry implements AddonRegistry {
 	startFileMonitor(addonPath);
     }
 
-    private void startFileMonitor(String addonPath) throws WSMarshallerException {
+    /**
+     * Starts the FilesystemAlterationMonitor.
+     * The method sets up a {@link FilesystemAlterationMonitor} and registers a {@link PluginDirectoryAlterationListener}.
+     * After the setup the monitor is started.
+     *
+     * @param addonPath Path to the directory which shall be monitored.
+     */
+    private void startFileMonitor(String addonPath) {
 	File f = new File(addonPath);
 	logger.debug("Starting file alteration monitor on path: {}", f.getPath());
 	FilesystemAlterationMonitor fam = new FilesystemAlterationMonitor();
@@ -82,11 +98,22 @@ public class FileRegistry implements AddonRegistry {
 	fam.start();
     }
 
+    /**
+     * Registers a new add-on.
+     *
+     * @param desc The {@link AddonSpecification} of the add-on to add.
+     * @param file A {@link File} object which points to the add-ons jar file.
+     */
     public void register(AddonSpecification desc, File file) {
 	registeredAddons.put(file.getName(), desc);
 	files.put(desc.getId(), file);
     }
 
+    /**
+     * Unregister a specific add-on.
+     *
+     * @param file A {@link File} object which points to the jar file of the add-on.
+     */
     public void unregister(File file) {
 	Set<Entry<String, File>> entrySet = files.entrySet();
 	Iterator<Entry<String, File>> iterator = entrySet.iterator();
@@ -196,7 +223,7 @@ public class FileRegistry implements AddonRegistry {
     }
 
     /**
-     * Register all addons which are already installed in the addons directory.
+     * Register all add-ons which are already installed in the add-ons directory.
      *
      * @throws WSMarshallerException Thrown if the instantiation of the marshaler for the AddonSpecification marshaling
      * failed.
@@ -227,8 +254,27 @@ public class FileRegistry implements AddonRegistry {
 	return listAddons();
     }
 
+    /**
+     * Get an AddonSpecification by the file name of the add-on.
+     *
+     * @param fileName Name of the add-ons jar file.
+     * @return The {@link AddonSpecification} of add-on with the name {@code fileName}.
+     */
     protected AddonSpecification getAddonSpecByFileName(String fileName) {
 	return registeredAddons.get(fileName);
+    }
+
+    /**
+     * Uninstall an add-on.
+     * The method removes the jar file containing the add-on. The cleanup is done by the
+     * {@link PluginDirectoryAlterationListener}. This method is intended just for the {@link AddonManager} and should
+     * not be called in any other class.
+     *
+     * @param addonSpec The {@link AddonSpecification} of the add-on to uninstall.
+     */
+    protected void uninstallAddon(AddonSpecification addonSpec) {
+	File addonJar = files.get(addonSpec.getId());
+	addonJar.delete();
     }
 
 }

@@ -51,6 +51,11 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Implementation of a AddonManager.
+ *
+ * The AddonManager takes care for the management of the add-on. This covers the initialization startup, registering of
+ * new add-ons, unloading of add-ons on shut down and removal and the uninstalling of an add-on. Furthermore the
+ * AddonManager provides methods to retrieve specific parts of a add-on.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
@@ -73,6 +78,16 @@ public class AddonManager {
     private final TreeMap<AddonSpecification, TreeMap<String, AppExtensionAction>> appExtActionCache = new TreeMap<>();
     private final TreeMap<AddonSpecification, TreeMap<String, AppPluginAction>> appPluginActionCache = new TreeMap<>();
 
+    /**
+     * Creates a new AddonManager.
+     *
+     * @param dispatcher
+     * @param userConsent
+     * @param cardStates
+     * @param recognition
+     * @param eventManager
+     * @throws WSMarshallerException
+     */
     public AddonManager(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates,
 	    CardRecognition recognition, EventManager eventManager) throws WSMarshallerException {
 
@@ -140,6 +155,9 @@ public class AddonManager {
 	}
     }
 
+    /**
+     * Unload all add-ons.
+     */
     private void unloadAllAddons() {
 	Set<AddonSpecification> addons = protectedRegistry.listInstalledAddons();
 	for (AddonSpecification addonSpec : addons) {
@@ -147,6 +165,11 @@ public class AddonManager {
 	}
     }
 
+    /**
+     * Unload all actions and protocols of a specific add-on.
+     *
+     * @param addonSpec The {@link AddonSpecification} of the add-on to unload.
+     */
     protected void unloadAddon(AddonSpecification addonSpec) {
 	TreeMap<String, IFDProtocol> ifdAddon = ifdProtocolCache.get(addonSpec);
 	if (ifdAddon != null) {
@@ -196,22 +219,53 @@ public class AddonManager {
 	return (AddonRegistry) o;
     }
 
+    /**
+     * Get the CombiningRigistry.
+     *
+     * @return A {@link AddonRegistry} object which provides access just to the interface methods of the
+     * {@link CombiningRegistry}.
+     */
     public AddonRegistry getRegistry() {
 	return protectedRegistry;
     }
 
+    /**
+     * Get the ClasspathRegistry.
+     *
+     * @return A {@link AddonRegistry} object which provides access just to the interface methods of the
+     * {@link ClasspathRegistry}.
+     */
     public AddonRegistry getBuiltinRegistry() {
 	return getProtectedRegistry(registry.getClasspathRegistry());
     }
+
+    /**
+     * Get the FileRegistry.
+     *
+     * @return A {@link AddonRegistry} object which provides access just to the interface methods of the
+     * {@link FileRegistry}.
+     */
     public AddonRegistry getExternalRegistry() {
 	return getProtectedRegistry(registry.getFileRegistry());
     }
 
+    /**
+     * Register a new add-on which is located in the class path.
+     *
+     * @param desc {@link AddonSpecification} of the add-on which shall be registered.
+     */
     public void registerClasspathAddon(AddonSpecification desc) {
 	// TODO: protect this method from the sandbox
 	this.registry.getClasspathRegistry().register(desc);
     }
 
+    /**
+     * Get a specific IFDProtocol.
+     *
+     * @param addonSpec {@link AddonSpecification} which contains the description of the {@link IFDProtocol}.
+     * @param uri The {@link ProtocolPluginSpecification#uri} to identify the requested IFDProtocol.
+     * @return The requested IFDProtocol object or NULL if no such object was found.
+     */
     public IFDProtocol getIFDProtocol(@Nonnull AddonSpecification addonSpec, @Nonnull String uri) {
 	TreeMap<String, IFDProtocol> addon = ifdProtocolCache.get(addonSpec);
 
@@ -250,6 +304,13 @@ public class AddonManager {
 	return null;
     }
 
+    /**
+     * Get a specific SALProtocol.
+     *
+     * @param addonSpec {@link AddonSpecification} which contains the description of the {@link SALProtocol}.
+     * @param uri The {@link ProtocolPluginSpecification#uri} to identify the requested SALProtocol.
+     * @return The requested SALProtocol object or NULL if no such object was found.
+     */
     public SALProtocol getSALProtocol(@Nonnull AddonSpecification addonSpec, @Nonnull String uri) {
 	TreeMap<String, SALProtocol> addon = salProtocolCache.get(addonSpec);
 
@@ -288,6 +349,14 @@ public class AddonManager {
 	return null;
     }
 
+    /**
+     * Get a specific AppExtensionAction.
+     *
+     * @param addonSpec {@link AddonSpecification} which contains the description of the {@link AppExtensionAction}.
+     * @param actionId	The {@link AppExtensionSpecification#id} to identify the requested AppExtensionAction.
+     * @return The AppExtensionAction which corresponds the given {@code actionId} or NULL if no AppExtensionAction with
+     * the given {@code actionId} exists.
+     */
     public AppExtensionAction getAppExtensionAction(@Nonnull AddonSpecification addonSpec, @Nonnull String actionId) {
 	TreeMap<String, AppExtensionAction> addon = appExtActionCache.get(addonSpec);
 
@@ -326,6 +395,15 @@ public class AddonManager {
 	return null;
     }
 
+    /**
+     * Get a specific AppPluginAction.
+     *
+     * @param addonSpec {@link AddonSpecification} which contains the description of the {@link AppPluginAction}.
+     * @param resourceName The {@link AppPluginSpecification#resourceName} to identify the @{@link AppPluginAction} to
+     * return.
+     * @return A AppPluginAction which corresponds to the {@link AddonSpecification} and the {@code resourceName}. If no
+     * such AppPluginAction exists NULL is returned.
+     */
     public AppPluginAction getAppPluginAction(@Nonnull AddonSpecification addonSpec, @Nonnull String resourceName) {
 	TreeMap<String, AppPluginAction> addon = appPluginActionCache.get(addonSpec);
 
@@ -364,8 +442,24 @@ public class AddonManager {
 	return null;
     }
 
+    /**
+     * Shut down the AddonManager.
+     * The method unloads all installed add-ons.
+     */
     public void shutdown() {
 	unloadAllAddons();
+    }
+
+    /**
+     * Uninstall an add-on.
+     * This i primarily a wrapper method for the
+     * {@link FileRegistry#uninstallAddon(org.openecard.addon.manifest.AddonSpecification)
+     *
+     * @param addonSpec The {@link AddonSpecification} of the add-on to uninstall.
+     */
+    public void uninstallAddon(@Nonnull AddonSpecification addonSpec) {
+	// unloading is done by the PluginDirectoryAlterationListener
+	registry.getFileRegistry().uninstallAddon(addonSpec);
     }
 
 }

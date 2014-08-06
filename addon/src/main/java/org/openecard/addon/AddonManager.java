@@ -24,6 +24,7 @@ package org.openecard.addon;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
+import java.util.Collection;
 import java.util.Set;
 import java.util.TreeMap;
 import javax.annotation.Nonnull;
@@ -77,6 +78,7 @@ public class AddonManager {
     private final TreeMap<AddonSpecification, TreeMap<String, SALProtocol>> salProtocolCache = new TreeMap<>();
     private final TreeMap<AddonSpecification, TreeMap<String, AppExtensionAction>> appExtActionCache = new TreeMap<>();
     private final TreeMap<AddonSpecification, TreeMap<String, AppPluginAction>> appPluginActionCache = new TreeMap<>();
+    private final Cache cache = new Cache();
 
     /**
      * Creates a new AddonManager.
@@ -171,37 +173,22 @@ public class AddonManager {
      * @param addonSpec The {@link AddonSpecification} of the add-on to unload.
      */
     protected void unloadAddon(AddonSpecification addonSpec) {
-	TreeMap<String, IFDProtocol> ifdAddon = ifdProtocolCache.get(addonSpec);
-	if (ifdAddon != null) {
-	    for (IFDProtocol prot : ifdAddon.values()) {
-		prot.destroy();
+	Collection<Object> actionsAndProtocols = cache.getAllAddonData(addonSpec);
+	for (Object obj : actionsAndProtocols) {
+	    if (obj instanceof IFDProtocol) {
+		((IFDProtocol) obj).destroy();
+	    } else if (obj instanceof SALProtocol) {
+		((SALProtocol) obj).destroy();
+	    } else if (obj instanceof AppExtensionAction) {
+		((AppExtensionAction) obj).destroy();
+	    } else if (obj instanceof AppPluginAction) {
+		((AppPluginAction) obj).destroy();
+	    } else {
+		logger.warn("The cache contains invalid objects.");
 	    }
-	    ifdProtocolCache.remove(addonSpec);
 	}
 
-	TreeMap<String, SALProtocol> salAddon = salProtocolCache.get(addonSpec);
-	if (salAddon != null) {
-	    for (SALProtocol prot : salAddon.values()) {
-		prot.destroy();
-	    }
-	    salProtocolCache.remove(addonSpec);
-	}
-
-	TreeMap<String, AppExtensionAction> appExtActionAddon = appExtActionCache.get(addonSpec);
-	if (appExtActionAddon != null) {
-	    for (AppExtensionAction action : appExtActionAddon.values()) {
-		action.destroy();
-	    }
-	    appExtActionCache.remove(addonSpec);
-	}
-
-	TreeMap<String, AppPluginAction> appPluginActionAddon = appPluginActionCache.get(addonSpec);
-	if (appPluginActionAddon != null) {
-	    for (AppPluginAction appPlugAction : appPluginActionAddon.values()) {
-		appPlugAction.destroy();
-	    }
-	    appPluginActionCache.remove(addonSpec);
-	}
+	cache.removeCompleteAddonCache(addonSpec);
     }
 
 
@@ -267,15 +254,10 @@ public class AddonManager {
      * @return The requested IFDProtocol object or NULL if no such object was found.
      */
     public IFDProtocol getIFDProtocol(@Nonnull AddonSpecification addonSpec, @Nonnull String uri) {
-	TreeMap<String, IFDProtocol> addon = ifdProtocolCache.get(addonSpec);
-
-	if (addon != null) {
-	    // addon spec cached and has IFDProtocols so check whether we have the one requested
-	    IFDProtocol ifdProt = addon.get(uri);
-	    if (ifdProt != null) {
-		// protocol cached so return it
-		return ifdProt;
-	    }
+	IFDProtocol ifdProt = cache.getIFDProtocol(addonSpec, uri);
+	if (ifdProt != null) {
+	    // protocol cached so return it
+	    return ifdProt;
 	}
 
 	ProtocolPluginSpecification protoSpec = addonSpec.searchIFDActionByURI(uri);
@@ -289,14 +271,7 @@ public class AddonManager {
 	    aCtx.setEventHandle(eventHandler);
 	    aCtx.setUserConsent(userConsent);
 	    protoFactory.init(aCtx);
-	    if (addon == null) {
-		TreeMap<String, IFDProtocol> cacheEntry = new TreeMap<>();
-		cacheEntry.put(uri, protoFactory);
-		ifdProtocolCache.put(addonSpec, cacheEntry);
-	    } else {
-		addon.put(uri, protoFactory);
-		ifdProtocolCache.put(addonSpec, addon);
-	    }
+	    cache.addIFDProtocol(addonSpec, uri, protoFactory);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
 	    logger.error("Initialization of IFD Protocol failed", e);
@@ -312,15 +287,10 @@ public class AddonManager {
      * @return The requested SALProtocol object or NULL if no such object was found.
      */
     public SALProtocol getSALProtocol(@Nonnull AddonSpecification addonSpec, @Nonnull String uri) {
-	TreeMap<String, SALProtocol> addon = salProtocolCache.get(addonSpec);
-
-	if (addon != null) {
-	    // addon spec cached and has SALProtocols so check whether we have the one requested
-	    SALProtocol salProt = addon.get(uri);
-	    if (salProt != null) {
-		// protocol cached so return it
-		return salProt;
-	    }
+	SALProtocol salProt = cache.getSALProtocol(addonSpec, uri);
+	if (salProt != null) {
+	    // protocol cached so return it
+	    return salProt;
 	}
 
 	ProtocolPluginSpecification protoSpec = addonSpec.searchSALActionByURI(uri);
@@ -334,14 +304,7 @@ public class AddonManager {
 	    aCtx.setEventHandle(eventHandler);
 	    aCtx.setUserConsent(userConsent);
 	    protoFactory.init(aCtx);
-	    if (addon == null) {
-		TreeMap<String, SALProtocol> cacheEntry = new TreeMap<>();
-		cacheEntry.put(uri, protoFactory);
-		salProtocolCache.put(addonSpec, cacheEntry);
-	    } else {
-		addon.put(uri, protoFactory);
-		salProtocolCache.put(addonSpec, addon);
-	    }
+	    cache.addSALProtocol(addonSpec, uri, protoFactory);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
 	    logger.error("Initialization of SAL Protocol failed", e);
@@ -358,16 +321,11 @@ public class AddonManager {
      * the given {@code actionId} exists.
      */
     public AppExtensionAction getAppExtensionAction(@Nonnull AddonSpecification addonSpec, @Nonnull String actionId) {
-	TreeMap<String, AppExtensionAction> addon = appExtActionCache.get(addonSpec);
-
-	if (addon != null) {
-	    // addon spec cached and has AppExtensionAction so check whether we have the one requested
-	    AppExtensionAction appExtAction = addon.get(actionId);
+	    AppExtensionAction appExtAction = cache.getAppExtensionAction(addonSpec, actionId);
 	    if (appExtAction != null) {
 		// AppExtensionAction cached so return it
 		return appExtAction;
 	    }
-	}
 
 	AppExtensionSpecification protoSpec = addonSpec.searchByActionId(actionId);
 	String className = protoSpec.getClassName();
@@ -380,14 +338,7 @@ public class AddonManager {
 	    aCtx.setEventHandle(eventHandler);
 	    aCtx.setUserConsent(userConsent);
 	    protoFactory.init(aCtx);
-	    if (addon == null) {
-		TreeMap<String, AppExtensionAction> cacheEntry = new TreeMap<>();
-		cacheEntry.put(actionId, protoFactory);
-		appExtActionCache.put(addonSpec, cacheEntry);
-	    } else {
-		addon.put(actionId, protoFactory);
-		appExtActionCache.put(addonSpec, addon);
-	    }
+	    cache.addAppExtensionAction(addonSpec, actionId, protoFactory);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
 	    logger.error("Initialization of AppExtensionAction failed", e);
@@ -405,15 +356,10 @@ public class AddonManager {
      * such AppPluginAction exists NULL is returned.
      */
     public AppPluginAction getAppPluginAction(@Nonnull AddonSpecification addonSpec, @Nonnull String resourceName) {
-	TreeMap<String, AppPluginAction> addon = appPluginActionCache.get(addonSpec);
-
-	if (addon != null) {
-	    // addon spec cached and has AppExtensionAction so check whether we have the one requested
-	    AppPluginAction appPluginAction = addon.get(resourceName);
-	    if (appPluginAction != null) {
-		// AppExtensionAction cached so return it
-		return appPluginAction;
-	    }
+	AppPluginAction appPluginAction = cache.getAppPluginAction(addonSpec, resourceName);
+	if (appPluginAction != null) {
+	    // AppExtensionAction cached so return it
+	    return appPluginAction;
 	}
 
 	AppPluginSpecification protoSpec = addonSpec.searchByResourceName(resourceName);
@@ -427,14 +373,7 @@ public class AddonManager {
 	    aCtx.setEventHandle(eventHandler);
 	    aCtx.setUserConsent(userConsent);
 	    protoFactory.init(aCtx);
-	    if (addon == null) {
-		TreeMap<String, AppPluginAction> cacheEntry = new TreeMap<>();
-		cacheEntry.put(resourceName, protoFactory);
-		appPluginActionCache.put(addonSpec, cacheEntry);
-	    } else {
-		addon.put(resourceName, protoFactory);
-		appPluginActionCache.put(addonSpec, addon);
-	    }
+	    cache.addAppPluginAction(addonSpec, resourceName, protoFactory);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
 	    logger.error("Initialization of AppPluginAction failed", e);

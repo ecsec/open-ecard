@@ -62,7 +62,7 @@ public class AboutPanel extends JPanel {
      *
      * @param addonSpecification The addon manifest content which is the information source.
      */
-    public AboutPanel(AddonSpecification addonSpecification) {
+    public AboutPanel(AddonSpecification addonSpecification, boolean coreAddon) {
 	this.setLayout(layout);
 	this.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 	addonSpec = addonSpecification;
@@ -70,7 +70,7 @@ public class AboutPanel extends JPanel {
 	about = addonSpecification.getAbout(LANGUAGE_CODE);
 	setupHead();
 	setupBody();
-	setupFooter();
+	setupFooter(coreAddon);
     }
 
     /**
@@ -211,21 +211,23 @@ public class AboutPanel extends JPanel {
     }
 
     /**
-     * Setup the footer which contains only the uninstall button.
+     * Setup the footer which contains only the uninstall button but just for non core add-ons.
      */
-    private void setupFooter() {
-	JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));
-	JButton uninstallButton = new JButton(lang.translationForKey("addon.about.uninstall"));
-	panel.add(uninstallButton);
+    private void setupFooter(boolean coreAddon) {
+	if (!coreAddon) {
+	    JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+	    JButton uninstallButton = new JButton(lang.translationForKey("addon.about.uninstall"));
+	    panel.add(uninstallButton);
 
-	GridBagConstraints c = new GridBagConstraints();
-	c.fill = GridBagConstraints.HORIZONTAL;
-	c.gridwidth = GridBagConstraints.REMAINDER;
-	c.weightx = 1.0;
-	c.weighty = 1.0;
-	c.anchor = GridBagConstraints.SOUTH;
-	layout.setConstraints(panel, c);
-	add(panel);
+	    GridBagConstraints c = new GridBagConstraints();
+	    c.fill = GridBagConstraints.HORIZONTAL;
+	    c.gridwidth = GridBagConstraints.REMAINDER;
+	    c.weightx = 1.0;
+	    c.weighty = 1.0;
+	    c.anchor = GridBagConstraints.SOUTH;
+	    layout.setConstraints(panel, c);
+	    add(panel);
+	}
     }
 
     /**

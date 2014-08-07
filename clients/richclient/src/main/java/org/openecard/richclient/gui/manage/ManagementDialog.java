@@ -349,7 +349,7 @@ public class ManagementDialog extends JDialog {
 	String licenseText = desc.getLicenseText(LANGUAGE_CODE);
 	AboutPanel aboutPanel = null;
 	if ((!about.equals("") || ! licenseText.equals("")) && !coreAddon) {
-	    aboutPanel = new AboutPanel(desc);
+	    aboutPanel = new AboutPanel(desc, coreAddon);
 	}
 
 

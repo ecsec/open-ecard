@@ -28,7 +28,10 @@ import org.openecard.addon.AddonPropertiesException;
 import org.openecard.addon.manifest.ConfigurationEntry;
 import org.openecard.addon.manifest.EnumEntry;
 import org.openecard.addon.manifest.EnumListEntry;
+import org.openecard.addon.manifest.FileEntry;
+import org.openecard.addon.manifest.FileListEntry;
 import org.openecard.addon.manifest.ScalarEntry;
+import org.openecard.addon.manifest.ScalarEntryType;
 import org.openecard.addon.manifest.ScalarListEntry;
 import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
 import org.openecard.richclient.gui.manage.SettingsGroup;
@@ -58,26 +61,34 @@ public class DefaultSettingsGroup extends SettingsGroup {
 	    // match entry types with class, else the type hierarchy is implicit in the if an that is a bad thing
 	    if (ScalarEntry.class.equals(entry.getClass())) {
 		ScalarEntry scalarEntry = (ScalarEntry) entry;
-		if (scalarEntry.getType().equalsIgnoreCase("string")) {
+		if (scalarEntry.getType().equals(ScalarEntryType.STRING.name())) {
 		    addInputItem(name, description, entry.getKey());
-		} else if (scalarEntry.getType().equalsIgnoreCase("boolean")) {
+		} else if (scalarEntry.getType().equals(ScalarEntryType.BOOLEAN.name())) {
 		    addBoolItem(name, description, entry.getKey());
+		} else if (scalarEntry.getType().equals(ScalarEntryType.BIGDECIMAL.name())) {
+		    // TODO
+		} else if (scalarEntry.getType().equals(ScalarEntryType.BIGINTEGER.name())) {
+		    // TODO
 		} else {
 		    logger.error("Untreated ScalarEntry type: {}", scalarEntry.getType());
 		}
 	    } else if (ScalarListEntry.class.equals(entry.getClass())) {
+		// TODO should not allow boolean type
 		addScalarListItem(name, description, entry.getKey());
 	    } else if (EnumEntry.class.equals(entry.getClass())) {
 		EnumEntry enumEntry = (EnumEntry) entry;
 		List<String> values = enumEntry.getValues();
-		addMultiSelectionItem(entry.getLocalizedName(LANGUAGE_CODE), entry.getLocalizedDescription(LANGUAGE_CODE),
+		addSingleSelectionItem(entry.getLocalizedName(LANGUAGE_CODE), entry.getLocalizedDescription(LANGUAGE_CODE),
 			enumEntry.getKey(), values);
 	    } else if (EnumListEntry.class.equals(entry.getClass())) {
 		EnumListEntry enumEntry = (EnumListEntry) entry;
 		List<String> values = enumEntry.getValues();
 		addMultiSelectionItem(enumEntry.getLocalizedName(LANGUAGE_CODE), enumEntry.getLocalizedDescription(LANGUAGE_CODE),
 			enumEntry.getKey(), values);
-		logger.error("Yet unsupported entry type: {}", entry.getClass().getName());
+	    } else if (FileEntry.class.equals(entry.getClass())) {
+		// TODO
+	    } else if (FileListEntry.class.equals(entry.getClass())) {
+		// TODO
 	    } else {
 		logger.error("Untreated entry type: {}", entry.getClass().getName());
 	    }

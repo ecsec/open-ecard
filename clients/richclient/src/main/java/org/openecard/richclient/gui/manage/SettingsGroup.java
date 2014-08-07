@@ -41,6 +41,7 @@ import java.util.Vector;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -58,6 +59,8 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import org.openecard.addon.AddonPropertiesException;
 import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -70,6 +73,7 @@ import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
 public class SettingsGroup extends JPanel {
 
     private static final long serialVersionUID = 1L;
+    private static final Logger logger = LoggerFactory.getLogger(SettingsGroup.class);
 
     protected final Settings properties;
     private final JPanel container;
@@ -389,12 +393,12 @@ public class SettingsGroup extends JPanel {
 		String[] multProps = property2.split(";");
 		List<String> selectedOpts = Arrays.asList(multProps);
 		if (selectedOpts.contains(value)) {
-		    checkboxPane.add(new CheckboxListItem(value, true, property), c);
+		    checkboxPane.add(new CheckboxListItem(value, true, property, properties), c);
 		} else {
-		    checkboxPane.add(new CheckboxListItem(value, false, property), c);
+		    checkboxPane.add(new CheckboxListItem(value, false, property, properties), c);
 		}
 	    } else {
-		checkboxPane.add(new CheckboxListItem(value, false, property), c);
+		checkboxPane.add(new CheckboxListItem(value, false, property, properties), c);
 	    }
 	    col++;
 	}
@@ -453,57 +457,75 @@ public class SettingsGroup extends JPanel {
 	container.add(component, constraints);
     }
 
-    private class CheckboxListItem extends JCheckBox {
 
-	private final String itemLabel;
-	private final String propName;
 
-	private CheckboxListItem(String name, boolean selected, String propertyName) {
-	    this.setSelected(selected);
-	    this.setBackground(container.getBackground());
-	    setText(name);
-	    itemLabel = name;
-	    propName = propertyName;
-	    construct();
-	}
+    protected JPanel addSingleSelectionItem(@Nonnull String name, @Nonnull String description,
+	    @Nonnull final String enumKey, @Nonnull List<String> values) {
+	JLabel optionName = new JLabel(name);
+	optionName.setFont(optionName.getFont().deriveFont(Font.PLAIN));
+	optionName.setToolTipText(description);
+	JPanel contentPane = new JPanel(new GridBagLayout());
+	JPanel radioButtonPane = new JPanel(new GridBagLayout());
 
-	private void construct() {
-	    addItemListener(new ItemListener() {
-		@Override
-		public void itemStateChanged(ItemEvent e) {
-		    String propValue = properties.getProperty(propName);
-		    if (e.getStateChange() == ItemEvent.SELECTED) {
-			if (propValue == null) {
-			    properties.setProperty(propName, itemLabel);
-			} else {
-			    // property value is not null so some other options are selected so append the now selected
-			    // option
-			    properties.setProperty(propName, propValue.concat(";" + itemLabel));
-			}
-		    } else if (e.getStateChange() == ItemEvent.DESELECTED) {
-			if (propValue.equals(itemLabel)) {
-			    // just the current was selected so set an empty string
-			    properties.setProperty(propName, "");
-			} else {
-			    // element somewhere between all others
-			    if (propValue.contains(";" + itemLabel + ";")) {
-				propValue = propValue.replace(";" + itemLabel + ";", ";");
-				properties.setProperty(propName, propValue);
-			    } else if (propValue.contains(";" + itemLabel)) {
-				// last element
-				propValue = propValue.replace(";" + itemLabel, ";");
-				properties.setProperty(propName, propValue);
-			    } else {
-				// first element
-				propValue = propValue.replace(itemLabel + ";", "");
-				properties.setProperty(propName, propValue);
-			    }
-			}
-		    }
+	int row = 0;
+	int col = 0;
+	String property2 = properties.getProperty(enumKey);
+	ButtonGroup bGroup = new ButtonGroup();
+	for (String value : values) {
+	    GridBagConstraints c = new GridBagConstraints();
+	    if (col != 0) {
+		if (col % 3 == 0) {
+		    col = 0;
+		    row = row + 1;
 		}
+	    }
+	    c.gridx = col;
+	    c.gridy = row;
+	    c.fill = GridBagConstraints.HORIZONTAL;
+	    c.anchor = GridBagConstraints.NORTHWEST;
 
-	    });
+	    if (property2 != null) {
+		RadioButtonItem rButton = new RadioButtonItem(value, true, enumKey, properties);
+		radioButtonPane.add(rButton, c);
+		bGroup.add(rButton);
+	    } else {
+		RadioButtonItem rButton = new RadioButtonItem(value, false, enumKey, properties);
+		radioButtonPane.add(rButton, c);
+		bGroup.add(rButton);
+	    }
+	    col++;
 	}
+
+	GridBagConstraints c2 = new GridBagConstraints();
+	c2.anchor = GridBagConstraints.NORTHWEST;
+	c2.fill = GridBagConstraints.HORIZONTAL;
+	c2.gridx = 0;
+	c2.gridy = 0;
+	c2.weightx = 1.0;
+	c2.weighty = 1.0;
+	contentPane.add(optionName, c2);
+
+	GridBagConstraints c3 = new GridBagConstraints();
+	c3.anchor = GridBagConstraints.NORTHWEST;
+	c3.fill = GridBagConstraints.HORIZONTAL;
+	c3.gridwidth = GridBagConstraints.REMAINDER;
+	c3.gridheight = 2;
+	c3.gridx = 1;
+	c3.gridy = 0;
+	c3.weightx = 4.0;
+	c3.weighty = 5.0;
+	contentPane.add(radioButtonPane, c3);
+
+	// add content panel to the group
+	GridBagConstraints c = new GridBagConstraints();
+	c.insets = new Insets(5, 3, 0, 5);
+	c.fill = GridBagConstraints.HORIZONTAL;
+	c.gridx = 2;
+	c.gridy = itemIdx;
+	container.add(contentPane, c);
+	//addComponent(contentPane);
+	itemIdx++;
+	return contentPane;
     }
 
 }

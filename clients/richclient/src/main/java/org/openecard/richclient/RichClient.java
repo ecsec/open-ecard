@@ -192,6 +192,7 @@ public final class RichClient {
     public void teardown() {
 	try {
 	    // TODO shutdown addon manager and related components?
+	    manager.shutdown();
 
 	    // shutdown control modules
 	    binding.stop();

@@ -78,6 +78,7 @@ public class AddonProperties {
 	id = addonSpec.getId();
 
 	try {
+	    // create a pointer to the configuration file. The file is created on the first time store is called.
 	    configFile = new File(FileUtils.getAddonsConfDir(), id + "/" + id + FILE_EXTENSION);
 	} catch (IOException ex) {
 	    logger.error("Couldn't create file object to the config directory.", ex);
@@ -122,6 +123,13 @@ public class AddonProperties {
      */
     public void saveProperties() throws AddonPropertiesException {
 	try {
+	    // create add-on specific configuration directory
+	    File addonDir = new File(FileUtils.getAddonsConfDir(), id);
+	    if (! addonDir.exists()) {
+		if (! addonDir.mkdirs()) {
+		    logger.error(id);
+		}
+	    }
 	    OutputStream out = new FileOutputStream(configFile, false);
 	    props.store(out, "Configuration file of the " + id + "addon.");
 	} catch (FileNotFoundException ex) {
@@ -161,8 +169,34 @@ public class AddonProperties {
      * Delete the file containing the users configuration of the addon.
      * This method should be called just in case the user uninstalls/removes the addon.
      */
-    protected void removeConfFile() {
+    protected void removeConfiguration() {
+	try {
+	    File confDir = new File(FileUtils.getAddonsConfDir(), id);
+	    removeDirectory(confDir);
+	} catch (IOException ex) {
+	    logger.error("Failed to get the Addon configuration directory.", ex);
+	} catch (SecurityException ex) {
+	    logger.error("Failed to access the Addon configuration directory.", ex);
+	}
 	configFile.delete();
+    }
+
+    /**
+     * Remove a directory recursively.
+     *
+     * @param directoryToRemove The directory to remove.
+     */
+    private void removeDirectory(File directoryToRemove) {
+	String[] files = directoryToRemove.list();
+	for (String item : files) {
+	    File fileItem = new File(directoryToRemove, item);
+	    if (fileItem.isFile()) {
+		fileItem.delete();
+	    } else {
+		removeDirectory(fileItem);
+		fileItem.delete();
+	    }
+	}
     }
 
 }

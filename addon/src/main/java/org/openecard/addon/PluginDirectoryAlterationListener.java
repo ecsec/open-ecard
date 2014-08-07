@@ -60,7 +60,7 @@ final class PluginDirectoryAlterationListener implements FilesystemAlterationLis
 	    manager.unloadAddon(abd);
 	    // remove configuration file
 	    AddonProperties addonProps = new AddonProperties(abd);
-	    addonProps.removeConfFile();
+	    addonProps.removeConfiguration();
 	    // remove from file registry
 	    fileRegistry.unregister(file);
 	}

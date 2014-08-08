@@ -29,6 +29,8 @@ import java.util.Properties;
 import org.openecard.addon.AddonProperties;
 import org.openecard.addon.AddonPropertiesException;
 import org.openecard.common.util.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -37,6 +39,8 @@ import org.openecard.common.util.FileUtils;
  * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class SettingsFactory {
+
+    private static Logger logger = LoggerFactory.getLogger(AddonPropertiesWrapper.class);
 
     /**
      * A Settings object which wraps the Properties and AddonProperties functionality.
@@ -131,6 +135,12 @@ public class SettingsFactory {
 
 	private AddonPropertiesWrapper(AddonProperties props) {
 	    this.props = props;
+
+	    try {
+		props.loadProperties();
+	    } catch (AddonPropertiesException ex) {
+		logger.error("Failed to load AddonProperties.", ex);
+	    }
 	}
 
 	@Override

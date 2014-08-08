@@ -20,12 +20,12 @@
  *
  ***************************************************************************/
 
-package org.openecard.richclient.gui.manage;
+package org.openecard.richclient.gui.components;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.IOException;
-import javax.swing.JCheckBox;
+import javax.swing.JRadioButton;
 import org.openecard.addon.AddonPropertiesException;
 import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
 import org.slf4j.Logger;
@@ -36,20 +36,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
-public class CheckboxListItem extends JCheckBox {
+public class RadioButtonItem extends JRadioButton {
 
-    private static final Logger logger = LoggerFactory.getLogger(CheckboxListItem.class);
+    private static final Logger logger = LoggerFactory.getLogger(RadioButtonItem.class);
 
-    private final String itemLabel;
-    private final String propName;
     private final Settings properties;
+    private final String name;
+    private final String propertyName;
 
-    public CheckboxListItem(String name, boolean selected, String propertyName, Settings props) {
-	setSelected(selected);
-	setText(name);
-	itemLabel = name;
-	propName = propertyName;
+    public RadioButtonItem(String name, boolean selected, String propertyName, Settings props) {
 	properties = props;
+	this.name = name;
+	this.propertyName = propertyName;
+	setText(name);
+	setSelected(selected);
 	construct();
     }
 
@@ -57,42 +57,17 @@ public class CheckboxListItem extends JCheckBox {
 	addItemListener(new ItemListener() {
 	    @Override
 	    public void itemStateChanged(ItemEvent e) {
-		String propValue = properties.getProperty(propName);
 		if (e.getStateChange() == ItemEvent.SELECTED) {
-		    if (propValue == null) {
-			properties.setProperty(propName, itemLabel);
-		    } else {
-			    // property value is not null so some other options are selected so append the now selected
-			// option
-			properties.setProperty(propName, propValue.concat(";" + itemLabel));
-		    }
-		} else if (e.getStateChange() == ItemEvent.DESELECTED) {
-		    if (propValue.equals(itemLabel)) {
-			// just the current was selected so set an empty string
-			properties.setProperty(propName, "");
-		    } else {
-			// element somewhere between all others
-			if (propValue.contains(";" + itemLabel + ";")) {
-			    propValue = propValue.replace(";" + itemLabel + ";", ";");
-			    properties.setProperty(propName, propValue);
-			} else if (propValue.contains(";" + itemLabel)) {
-			    // last element
-			    propValue = propValue.replace(";" + itemLabel, ";");
-			    properties.setProperty(propName, propValue);
-			} else {
-			    // first element
-			    propValue = propValue.replace(itemLabel + ";", "");
-			    properties.setProperty(propName, propValue);
-			}
-		    }
+		    properties.setProperty(propertyName, name);
 		}
+
 		try {
 		    properties.store();
 		} catch (AddonPropertiesException | IOException ex) {
 		    logger.error("Failed to save settings.", ex);
 		}
 	    }
-
 	});
     }
+    
 }

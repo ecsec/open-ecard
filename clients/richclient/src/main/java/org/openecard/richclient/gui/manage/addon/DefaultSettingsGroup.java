@@ -66,9 +66,9 @@ public class DefaultSettingsGroup extends SettingsGroup {
 		} else if (scalarEntry.getType().equals(ScalarEntryType.BOOLEAN.name())) {
 		    addBoolItem(name, description, entry.getKey());
 		} else if (scalarEntry.getType().equals(ScalarEntryType.BIGDECIMAL.name())) {
-		    // TODO
+		    addScalarEntryTypNumber(name, description, scalarEntry.getKey(), scalarEntry.getType());
 		} else if (scalarEntry.getType().equals(ScalarEntryType.BIGINTEGER.name())) {
-		    // TODO
+		    addScalarEntryTypNumber(name, description, scalarEntry.getKey(), scalarEntry.getType());
 		} else {
 		    logger.error("Untreated ScalarEntry type: {}", scalarEntry.getType());
 		}

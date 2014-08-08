@@ -31,6 +31,9 @@ import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,16 +51,24 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import org.openecard.addon.AddonPropertiesException;
+import org.openecard.addon.manifest.ScalarEntryType;
+import org.openecard.richclient.gui.components.CheckboxListItem;
+import org.openecard.richclient.gui.components.MathNumberEditor;
+import org.openecard.richclient.gui.components.RadioButtonItem;
+import org.openecard.richclient.gui.components.SpinnerMathNumberModel;
 import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -526,6 +537,51 @@ public class SettingsGroup extends JPanel {
 	//addComponent(contentPane);
 	itemIdx++;
 	return contentPane;
+    }
+
+    protected JSpinner addScalarEntryTypNumber(@Nonnull String name, @Nullable String description,
+	    final @Nonnull String property, @Nonnull String type) {
+	JLabel label = addLabel(name, description);
+	String value = properties.getProperty(property);
+	SpinnerMathNumberModel model;
+
+
+	if (type.equals(ScalarEntryType.BIGDECIMAL.name())) {
+	    System.out.println(BigDecimal.ZERO.toString());
+	    System.out.println(BigDecimal.ONE.toString());
+	    if (value == null || value.equals("")) {
+		model = new SpinnerMathNumberModel(new BigDecimal("0.0"), null, null, new BigDecimal("0.1"));
+	    } else {
+		BigDecimal convertedValue = new BigDecimal(value);
+		model = new SpinnerMathNumberModel(convertedValue, null, null, new BigDecimal("0.1"));
+	    }
+	} else if (type.equals(ScalarEntryType.BIGINTEGER.name())) {
+	    if (value == null || value.equals("")) {
+		model = new SpinnerMathNumberModel(BigInteger.ZERO, null, null, BigInteger.ONE);
+	    } else {
+		BigInteger convertedValue = new BigInteger(value);
+		model = new SpinnerMathNumberModel(convertedValue, null, null, BigInteger.ONE);
+	    }
+	} else {
+	    logger.error("Type STRING and BOOLEAN are not allowed for the use of this function.");
+	    return null;
+	}
+
+	final JSpinner spinner = new JSpinner(model);
+	spinner.addChangeListener(new ChangeListener() {
+
+	    @Override
+	    public void stateChanged(ChangeEvent e) {
+		properties.setProperty(property, spinner.getModel().getValue().toString());
+
+	    }
+	});
+	spinner.setEnabled(true);
+	spinner.setEditor(new MathNumberEditor(spinner, (DecimalFormat) DecimalFormat.getInstance(spinner.getLocale())));
+	addComponent(spinner);
+	fieldLabels.put(spinner, label);
+	itemIdx++;
+	return spinner;
     }
 
 }

@@ -319,6 +319,9 @@ public class SettingsGroup extends JPanel {
 	JLabel label = addLabel(name, description);
 
 	String value = properties.getProperty(property);
+	if (value == null || value.equals("")) {
+	    properties.setProperty(property, Boolean.FALSE.toString());
+	}
 	Boolean boolValue = Boolean.parseBoolean(value);
 	final JCheckBox input = new JCheckBox();
 	input.setSelected(boolValue);
@@ -482,7 +485,7 @@ public class SettingsGroup extends JPanel {
 	int col = 0;
 	String property2 = properties.getProperty(enumKey);
 	ButtonGroup bGroup = new ButtonGroup();
-	for (String value : values) {
+	for (int i = 0; i < values.size(); i++) {
 	    GridBagConstraints c = new GridBagConstraints();
 	    if (col != 0) {
 		if (col % 3 == 0) {
@@ -495,12 +498,15 @@ public class SettingsGroup extends JPanel {
 	    c.fill = GridBagConstraints.HORIZONTAL;
 	    c.anchor = GridBagConstraints.NORTHWEST;
 
-	    if (property2 != null) {
-		RadioButtonItem rButton = new RadioButtonItem(value, true, enumKey, properties);
+	    if (property2 != null && property2.equals(values.get(i))) {
+		RadioButtonItem rButton = new RadioButtonItem(values.get(i), true, enumKey, properties);
 		radioButtonPane.add(rButton, c);
 		bGroup.add(rButton);
 	    } else {
-		RadioButtonItem rButton = new RadioButtonItem(value, false, enumKey, properties);
+		RadioButtonItem rButton = new RadioButtonItem(values.get(i), false, enumKey, properties);
+		if (property2 == null && i == 0) {
+		    rButton.setSelected(true);
+		}
 		radioButtonPane.add(rButton, c);
 		bGroup.add(rButton);
 	    }

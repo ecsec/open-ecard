@@ -24,12 +24,14 @@ package org.openecard.richclient.gui.manage;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -65,8 +67,10 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import org.openecard.addon.AddonPropertiesException;
 import org.openecard.addon.manifest.ScalarEntryType;
+import org.openecard.common.I18n;
 import org.openecard.richclient.gui.components.CheckboxListItem;
 import org.openecard.richclient.gui.components.MathNumberEditor;
+import org.openecard.richclient.gui.components.OpenFileBrowserListener;
 import org.openecard.richclient.gui.components.RadioButtonItem;
 import org.openecard.richclient.gui.components.SpinnerMathNumberModel;
 import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
@@ -87,9 +91,11 @@ public class SettingsGroup extends JPanel {
     private static final Logger logger = LoggerFactory.getLogger(SettingsGroup.class);
 
     protected final Settings properties;
+    private final I18n lang = I18n.getTranslation("addon");
     private final JPanel container;
     private final HashMap<Component, JLabel> fieldLabels;
     private int itemIdx;
+
 
     /**
      * Creates an instance bound to a set of properties.
@@ -551,10 +557,7 @@ public class SettingsGroup extends JPanel {
 	String value = properties.getProperty(property);
 	SpinnerMathNumberModel model;
 
-
 	if (type.equals(ScalarEntryType.BIGDECIMAL.name())) {
-	    System.out.println(BigDecimal.ZERO.toString());
-	    System.out.println(BigDecimal.ONE.toString());
 	    if (value == null || value.equals("")) {
 		model = new SpinnerMathNumberModel(new BigDecimal("0.0"), null, null, new BigDecimal("0.1"));
 	    } else {
@@ -588,6 +591,80 @@ public class SettingsGroup extends JPanel {
 	fieldLabels.put(spinner, label);
 	itemIdx++;
 	return spinner;
+    }
+
+    protected JPanel addFileEntry(@Nonnull String name, @Nullable String description, final @Nonnull String property,
+	    @Nonnull String fileType, boolean requiredBeforeAction) {
+	JPanel filePanel = new JPanel(new GridBagLayout());
+	JLabel label = addLabel(name, description);
+
+	String currentValue = properties.getProperty(property);
+
+	final JTextField filePathField = new JTextField(){
+
+	    // the following is necessary because most path are longer than the field and GridBagLayout does not care
+	    // about MaximumSize. The following seems good for the default size of the configuration window but is does
+	    // not scale good if the size of the window becomes bigger.
+	    @Override
+	    public Dimension getPreferredSize() {
+		Dimension dim = super.getPreferredSize();
+		dim.width = 280;
+		return dim;
+	    }
+	};
+
+	if (currentValue != null) {
+	    filePathField.setText(currentValue);
+	    filePathField.setToolTipText(currentValue);
+	}
+
+	filePathField.setCaretPosition(filePathField.getText().length() - 1);
+
+	filePathField.getDocument().addDocumentListener(new DocumentListener() {
+	    @Override
+	    public void insertUpdate(DocumentEvent e) {
+		File file = new File(filePathField.getText());
+		if (file.exists() && file.isFile()) {
+		    properties.setProperty(property, filePathField.getText());
+		}
+	    }
+	    @Override
+	    public void removeUpdate(DocumentEvent e) {
+		File file = new File(filePathField.getText());
+		if ((file.exists() && file.isFile()) || filePathField.getText().equals("")) {
+		    properties.setProperty(property, filePathField.getText());
+		}
+	    }
+	    @Override
+	    public void changedUpdate(DocumentEvent e) {
+		// ignore
+	    }
+	});
+
+	GridBagConstraints fieldConstraint = new GridBagConstraints();
+	fieldConstraint.anchor = GridBagConstraints.WEST;
+	fieldConstraint.fill = GridBagConstraints.HORIZONTAL;
+	fieldConstraint.gridwidth = GridBagConstraints.RELATIVE;
+	fieldConstraint.gridx = 0;
+	fieldConstraint.gridy = 0;
+	fieldConstraint.weightx = 1;
+	filePanel.add(filePathField, fieldConstraint);
+
+	JButton browseButton = new JButton(lang.translationForKey("addon.settings.browse"));
+	browseButton.addActionListener(new OpenFileBrowserListener(fileType, filePathField));
+	GridBagConstraints buttonConstraint = new GridBagConstraints();
+	buttonConstraint.anchor = GridBagConstraints.EAST;
+	buttonConstraint.fill = GridBagConstraints.NONE;
+	buttonConstraint.gridx = 1;
+	buttonConstraint.gridy = 0;
+	buttonConstraint.weightx = 1;
+	buttonConstraint.gridwidth = GridBagConstraints.REMAINDER;
+	filePanel.add(browseButton, buttonConstraint);
+
+	addComponent(filePanel);
+	itemIdx++;
+	fieldLabels.put(filePanel, label);
+	return filePanel;
     }
 
 }

@@ -78,15 +78,14 @@ public class DefaultSettingsGroup extends SettingsGroup {
 	    } else if (EnumEntry.class.equals(entry.getClass())) {
 		EnumEntry enumEntry = (EnumEntry) entry;
 		List<String> values = enumEntry.getValues();
-		addSingleSelectionItem(entry.getLocalizedName(LANGUAGE_CODE), entry.getLocalizedDescription(LANGUAGE_CODE),
-			enumEntry.getKey(), values);
+		addSingleSelectionItem(name, description, enumEntry.getKey(), values);
 	    } else if (EnumListEntry.class.equals(entry.getClass())) {
 		EnumListEntry enumEntry = (EnumListEntry) entry;
 		List<String> values = enumEntry.getValues();
-		addMultiSelectionItem(enumEntry.getLocalizedName(LANGUAGE_CODE), enumEntry.getLocalizedDescription(LANGUAGE_CODE),
-			enumEntry.getKey(), values);
+		addMultiSelectionItem(name, description, entry.getKey(), values);
 	    } else if (FileEntry.class.equals(entry.getClass())) {
-		// TODO
+		FileEntry fEntry = (FileEntry) entry;
+		addFileEntry(name, description, entry.getKey(), fEntry.getFileType(), fEntry.isRequiredBeforeAction());
 	    } else if (FileListEntry.class.equals(entry.getClass())) {
 		// TODO
 	    } else {

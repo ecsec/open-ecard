@@ -29,7 +29,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.net.Socket;
 import java.net.URISyntaxException;
 import javax.annotation.Nonnull;
 import javax.xml.namespace.QName;
@@ -53,7 +52,6 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.crypto.tls.proxy.ProxySettings;
 import org.openecard.common.util.FileUtils;
 import org.openecard.binding.tctoken.TlsConnectionHandler;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
@@ -362,16 +360,9 @@ public class PAOS {
     private StreamHttpClientConnection openHttpStream()
 	    throws IOException, URISyntaxException {
 	StreamHttpClientConnection conn;
-	if (tlsHandler.usesTls()) {
-	    TlsClientProtocol handler = tlsHandler.createTlsConnection();
-	    conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());
-	    saveServiceCertificate();
-	} else {
-	    // TODO: remove some time
-	    // no TLS
-	    Socket socket = ProxySettings.getDefault().getSocket(tlsHandler.getHostname(), tlsHandler.getPort());
-	    conn = new StreamHttpClientConnection(socket.getInputStream(), socket.getOutputStream());
-	}
+	TlsClientProtocol handler = tlsHandler.createTlsConnection();
+	conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());
+	saveServiceCertificate();
 	return conn;
     }
 

@@ -63,8 +63,6 @@ public class TlsConnectionHandler {
     private String resource;
     private String sessionId;
     private ClientCertTlsClient tlsClient;
-    private boolean usesTls = false;
-    private boolean sameChannel = false;
 
     public TlsConnectionHandler(Dispatcher dispatcher, TCTokenRequest tokenRequest, ConnectionHandleType handle)
 	    throws ConnectionError {
@@ -101,18 +99,9 @@ public class TlsConnectionHandler {
 	    }
 	    resource = serverAddress.getFile();
 
-	    // TODO: remove this workaround as soon as eGK server uses HTTPS
-	    if (serverAddress.getProtocol().equals("http")) {
-		usesTls = false;
-		return;
-	    } else {
-		usesTls = true;
-	    }
-
 	    String secProto = token.getPathSecurityProtocol();
 	    // use same channel as demanded in TR-03124 sec. 2.4.3
-	    if (secProto == null) {
-		sameChannel = true;
+	    if (isSameChannel()) {
 		tlsClient = tokenRequest.getTokenContext().getTlsClient();
 	    } else {
 		// Set up TLS connection
@@ -146,12 +135,20 @@ public class TlsConnectionHandler {
 	}
     }
 
-    public boolean usesTls() {
-	return usesTls;
-    }
-
     public boolean isSameChannel() {
-	return sameChannel;
+	TCTokenType token = tokenRequest.getTCToken();
+	String secProto = token.getPathSecurityProtocol();
+	// check security proto
+	if (secProto == null || "".equals(secProto)) {
+	    return true;
+	}
+	// check PSK value
+	if (secProto.equals("urn:ietf:rfc:4279") || secProto.equals("urn:ietf:rfc:5487")) {
+	    TCTokenType.PathSecurityParameters pathsecParams = token.getPathSecurityParameters();
+	    return pathsecParams == null || pathsecParams.getPSK() == null || pathsecParams.getPSK().length == 0;
+	} else {
+	    return false;
+	}
     }
 
     public URL getServerAddress() {
@@ -183,7 +180,7 @@ public class TlsConnectionHandler {
     }
     public TlsClientProtocol createTlsConnection(ProtocolVersion tlsVersion)
 	    throws IOException, URISyntaxException {
-	if (sameChannel) {
+	if (isSameChannel()) {
 	    // if something fucks up the channel we are out of luck creating a new one as the TR demands to use the
 	    // exact same channel
 	    return tokenRequest.getTokenContext().getTlsClientProto();

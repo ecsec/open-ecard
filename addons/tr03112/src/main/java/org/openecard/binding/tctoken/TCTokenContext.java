@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -36,6 +38,7 @@ import java.util.List;
  */
 public class TCTokenContext extends ResourceContext {
 
+    private static final Logger logger = LoggerFactory.getLogger(TCTokenContext.class);
     private final TCTokenType token;
 
     private TCTokenContext(TCTokenType token, ResourceContext base) {
@@ -64,6 +67,7 @@ public class TCTokenContext extends ResourceContext {
 	data = TCTokenHacks.fixObjectTag(data);
 	// FIXME: Hack
 	data = TCTokenHacks.fixPathSecurityParameters(data);
+	logger.debug("Cleaned up TCToken:\n{}", data);
 
 	// Parse the TCToken
 	TCTokenParser parser = new TCTokenParser();

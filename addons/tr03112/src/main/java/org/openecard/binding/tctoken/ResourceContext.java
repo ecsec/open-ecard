@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -168,12 +169,12 @@ public class ResourceContext {
 	    Certificate>> serverCerts, int maxRedirects) throws IOException, ResourceException, ValidationError {
 	try {
 	    logger.info("Trying to load resource from: {}", url);
-	    
+
 	    if (maxRedirects == 0) {
 		throw new ResourceException("Maximum number of redirects exceeded.");
 	    }
 	    maxRedirects--;
-	    
+
 	    String protocol = url.getProtocol();
 	    String hostname = url.getHost();
 	    int port = url.getPort();
@@ -194,13 +195,13 @@ public class ResourceContext {
 	    // tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 	    ClientCertTlsClient tlsClient = new ClientCertDefaultTlsClient(hostname);
 	    tlsClient.setAuthentication(tlsAuth);
-	    
+
 	    // connect tls client
 	    tlsClient.setClientVersion(ProtocolVersion.TLSv12);
 	    Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
-	    h = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream());
+	    h = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), new SecureRandom());
 	    h.connect(tlsClient);
-	    
+
 	    serverCerts.add(new Pair<>(url, tlsAuth.getServerCertificate()));
 	    // check result
 	    CertificateValidator.VerifierResult verifyResult = v.validate(url, tlsAuth.getServerCertificate());

@@ -44,6 +44,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import javax.xml.transform.TransformerException;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonRegistry;
 import org.openecard.addon.Context;
@@ -64,6 +65,9 @@ import org.openecard.common.sal.util.InsertCardDialog;
 import org.openecard.gui.UserConsent;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.transport.paos.PAOSException;
+import org.openecard.ws.marshal.WSMarshaller;
+import org.openecard.ws.marshal.WSMarshallerException;
+import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -243,6 +247,16 @@ public class TCTokenHandler {
      */
     public TCTokenResponse handleActivate(TCTokenRequest request) throws MalformedURLException,
 	    UnsupportedEncodingException, InvalidRedirect, IOException, CommunicationError {
+	TCTokenType token = request.getTCToken();
+	if (logger.isDebugEnabled()) {
+	    try {
+		WSMarshaller m = WSMarshallerFactory.createInstance();
+		logger.debug("TCToken:\n{}", m.doc2str(m.marshal(token)));
+	    } catch (TransformerException | WSMarshallerException ex) {
+		// it's no use
+	    }
+	}
+
 	final DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	boolean performChecks = isPerformTR03112Checks(request);
 	if (! performChecks) {
@@ -259,8 +273,8 @@ public class TCTokenHandler {
 
 	ConnectionHandleType connectionHandle = null;
 	TCTokenResponse response = new TCTokenResponse();
-	response.setRefreshAddress(request.getTCToken().getRefreshAddress());
-	response.setCommunicationErrorAddress(request.getTCToken().getCommunicationErrorAddress());
+	response.setRefreshAddress(token.getRefreshAddress());
+	response.setCommunicationErrorAddress(token.getCommunicationErrorAddress());
 
 	byte[] requestedContextHandle = request.getContextHandle();
 	String ifdName = request.getIFDName();

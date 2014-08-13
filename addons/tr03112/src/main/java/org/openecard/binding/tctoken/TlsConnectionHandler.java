@@ -126,7 +126,7 @@ public class TlsConnectionHandler {
 		    tlsClient.setAuthentication(tlsAuth);
 		    tlsClient.setClientVersion(ProtocolVersion.TLSv12);
 		} else {
-		    throw new ConnectionError("Unknow security protocol '" + secProto + "' requested.");
+		    throw new ConnectionError("Unknown security protocol '" + secProto + "' requested.");
 		}
 	    }
 
@@ -180,11 +180,7 @@ public class TlsConnectionHandler {
     }
     public TlsClientProtocol createTlsConnection(ProtocolVersion tlsVersion)
 	    throws IOException, URISyntaxException {
-	if (isSameChannel()) {
-	    // if something fucks up the channel we are out of luck creating a new one as the TR demands to use the
-	    // exact same channel
-	    return tokenRequest.getTokenContext().getTlsClientProto();
-	} else {
+	if (! isSameChannel()) {
 	    // normal procedure, create a new channel
 	    Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
 	    tlsClient.setClientVersion(tlsVersion);
@@ -195,6 +191,10 @@ public class TlsConnectionHandler {
 	    handler.connect(tlsClient);
 
 	    return handler;
+	} else {
+	    // if something fucks up the channel we are out of luck creating a new one as the TR demands to use the
+	    // exact same channel
+	    return tokenRequest.getTokenContext().getTlsClientProto();
 	}
     }
 

@@ -95,6 +95,7 @@ public class TCTokenRequest {
 		    try {
 			URL tokenUrl = new URL(v);
 			TCTokenContext tokenCtx = TCTokenContext.generateTCToken(tokenUrl);
+			tcTokenRequest.tokenCtx = tokenCtx;
 			tcTokenRequest.token = tokenCtx.getToken();
 			tcTokenRequest.certificates = tokenCtx.getCerts();
 			tcTokenRequest.tcTokenURL = tokenUrl;

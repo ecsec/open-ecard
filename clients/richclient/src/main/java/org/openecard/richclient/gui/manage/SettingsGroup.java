@@ -69,6 +69,7 @@ import org.openecard.addon.AddonPropertiesException;
 import org.openecard.addon.manifest.ScalarEntryType;
 import org.openecard.common.I18n;
 import org.openecard.richclient.gui.components.CheckboxListItem;
+import org.openecard.richclient.gui.components.FileListEntryItem;
 import org.openecard.richclient.gui.components.MathNumberEditor;
 import org.openecard.richclient.gui.components.OpenFileBrowserListener;
 import org.openecard.richclient.gui.components.RadioButtonItem;
@@ -647,7 +648,7 @@ public class SettingsGroup extends JPanel {
 	fieldConstraint.gridwidth = GridBagConstraints.RELATIVE;
 	fieldConstraint.gridx = 0;
 	fieldConstraint.gridy = 0;
-	fieldConstraint.weightx = 1;
+	fieldConstraint.weightx = 2;
 	filePanel.add(filePathField, fieldConstraint);
 
 	JButton browseButton = new JButton(lang.translationForKey("addon.settings.browse"));
@@ -657,14 +658,43 @@ public class SettingsGroup extends JPanel {
 	buttonConstraint.fill = GridBagConstraints.NONE;
 	buttonConstraint.gridx = 1;
 	buttonConstraint.gridy = 0;
-	buttonConstraint.weightx = 1;
+	buttonConstraint.weightx = 0;
 	buttonConstraint.gridwidth = GridBagConstraints.REMAINDER;
+	buttonConstraint.insets = new Insets(0, 5, 0, 5);
 	filePanel.add(browseButton, buttonConstraint);
 
 	addComponent(filePanel);
 	itemIdx++;
 	fieldLabels.put(filePanel, label);
 	return filePanel;
+    }
+
+    public JPanel addFileListEntry(@Nonnull String name, @Nonnull String description, @Nonnull String property,
+	    @Nonnull String fileType, boolean isRequired) {
+	JLabel label = new JLabel(name);
+	label.setToolTipText(description);
+	label.setFont(label.getFont().deriveFont(Font.PLAIN));
+	GridBagConstraints constraints = new GridBagConstraints();
+	constraints.insets = new Insets(5, 10, 0, 5);
+	constraints.gridx = 0;
+	constraints.gridy = itemIdx;
+	constraints.anchor = GridBagConstraints.NORTHWEST;
+	container.add(label, constraints);
+
+	FileListEntryItem item = new FileListEntryItem(fileType, property, properties);
+
+	GridBagConstraints constraints2 = new GridBagConstraints();
+	constraints2.anchor = GridBagConstraints.NORTHWEST;
+	constraints2.insets = new Insets(5, 3, 0, 5);
+	constraints2.fill = GridBagConstraints.HORIZONTAL;
+	constraints2.gridx = 2;
+	constraints2.gridy = itemIdx;
+	container.add(item, constraints2);
+
+	itemIdx++;
+	fieldLabels.put(item, label);
+
+	return item;
     }
 
 }

@@ -619,8 +619,6 @@ public class SettingsGroup extends JPanel {
 	    filePathField.setToolTipText(currentValue);
 	}
 
-	filePathField.setCaretPosition(filePathField.getText().length() - 1);
-
 	filePathField.getDocument().addDocumentListener(new DocumentListener() {
 	    @Override
 	    public void insertUpdate(DocumentEvent e) {

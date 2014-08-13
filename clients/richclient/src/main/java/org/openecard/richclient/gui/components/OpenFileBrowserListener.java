@@ -24,24 +24,46 @@ package org.openecard.richclient.gui.components;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
 
 
 /**
+ * ActionListener implementation which opens a FileChooser.
  *
  * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class OpenFileBrowserListener implements ActionListener {
+
+    /**
+     * A semicolon separated list of accepted file types.
+     */
     private final String fileType;
+
+    /**
+     * The JTextField which is modified when a file was selected.
+     */
     private final JTextField value;
 
+    /**
+     * Creates a new OpenFileBrowserListener object.
+     *
+     * @param fileTypes A semicolon separated list of accepted file types.
+     * @param currentvalue A {@link JTextField} which registers this listener.
+     */
     public OpenFileBrowserListener(String fileTypes, JTextField currentvalue) {
 	fileType = fileTypes;
 	value = currentvalue;
     }
 
+    /**
+     * Creates a new FileChooserItem and make it appear on the screen.
+     *
+     * The method creates a {@link FileChooserItem} and makes it visible on the screen. If the user has selected a valid
+     * file according to the restrictions stored in the {@code fileType} field.
+     *
+     * @param e An {@link ActionEvent}.
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
 	FileChooserItem fChooser = new FileChooserItem(fileType);

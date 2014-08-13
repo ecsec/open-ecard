@@ -87,7 +87,8 @@ public class DefaultSettingsGroup extends SettingsGroup {
 		FileEntry fEntry = (FileEntry) entry;
 		addFileEntry(name, description, entry.getKey(), fEntry.getFileType(), fEntry.isRequiredBeforeAction());
 	    } else if (FileListEntry.class.equals(entry.getClass())) {
-		// TODO
+		FileListEntry fEntry = (FileListEntry) entry;
+		addFileListEntry(name, description, entry.getKey(), fEntry.getFileType(), fEntry.isRequiredBeforeAction());
 	    } else {
 		logger.error("Untreated entry type: {}", entry.getClass().getName());
 	    }

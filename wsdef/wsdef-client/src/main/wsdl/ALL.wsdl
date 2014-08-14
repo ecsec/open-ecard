@@ -29,7 +29,6 @@
       <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="ISOIFDCallback.xsd" />
       <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="ISOIFD-Extension.xsd" />
       <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="ISOIFD.xsd" />
-      <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="ISOSALCallback.xsd" />
       <xsd:import namespace="urn:iso:std:iso-iec:24727:tech:schema" schemaLocation="RecognitionTreeRepository.xsd" />
       <xsd:import namespace="http://www.bsi.bund.de/ecard/api/1.1"  schemaLocation="Management.xsd" />
     </xsd:schema>
@@ -875,25 +874,6 @@
 
 
 
-  <!-- Publish, Subscribe -->
-  <wsdl:message name="PublishRequest">
-    <wsdl:part name="parameters" element="iso:PublishRequest" />
-  </wsdl:message>
-
-  <wsdl:message name="PublishResponse">
-    <wsdl:part name="parameters" element="iso:PublishResponse" />
-  </wsdl:message>
-
-  <wsdl:message name="SubscribeRequest">
-    <wsdl:part name="parameters" element="iso:SubscribeRequest" />
-  </wsdl:message>
-
-  <wsdl:message name="SubscribeResponse">
-    <wsdl:part name="parameters" element="iso:SubscribeResponse" />
-  </wsdl:message>
-
-
-
   <!-- Recognition Tree -->
   <wsdl:message name="RecognitionTreeRequest">
     <wsdl:part name="parameters" element="iso:GetRecognitionTree" />
@@ -1653,20 +1633,6 @@
       <wsdl:output message="oec:OutputResponse" />
     </wsdl:operation>
 
-  </wsdl:portType>
-
-
-  <wsdl:portType name="Publish">
-    <wsdl:operation name="Publish">
-      <wsdl:input message="oec:PublishRequest" />
-      <wsdl:output message="oec:PublishResponse" />
-    </wsdl:operation>
-  </wsdl:portType>
-  <wsdl:portType name="Subscribe">
-    <wsdl:operation name="Subscribe">
-      <wsdl:input message="oec:SubscribeRequest" />
-      <wsdl:output message="oec:SubscribeResponse" />
-    </wsdl:operation>
   </wsdl:portType>
 
 
@@ -2987,39 +2953,6 @@
 
 
 
-  <wsdl:binding name="Publish" type="oec:Publish">
-    <soap:binding style="document"
-		  transport="http://schemas.xmlsoap.org/soap/http" />
-
-    <wsdl:operation name="Publish">
-      <soap:operation
-	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Publish" />
-      <wsdl:input>
-	<soap:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-	<soap:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-  </wsdl:binding>
-  <wsdl:binding name="Subscribe" type="oec:Subscribe">
-    <soap:binding style="document"
-		  transport="http://schemas.xmlsoap.org/soap/http" />
-
-    <wsdl:operation name="Subscribe">
-      <soap:operation
-	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:Subscribe" />
-      <wsdl:input>
-	<soap:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-	<soap:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-  </wsdl:binding>
-
-
-
   <wsdl:binding name="GetRecognitionTree" type="oec:GetRecognitionTree">
     <soap:binding style="document"
 		  transport="http://schemas.xmlsoap.org/soap/http" />
@@ -3098,17 +3031,6 @@
 
   <wsdl:service name="IFD">
     <wsdl:port name="IFDPort" binding="oec:IFD">
-      <soap:address location="http://127.0.0.1:18080" />
-    </wsdl:port>
-  </wsdl:service>
-
-  <wsdl:service name="Publish">
-    <wsdl:port name="Publish" binding="oec:Publish">
-      <soap:address location="http://127.0.0.1:18080" />
-    </wsdl:port>
-  </wsdl:service>
-  <wsdl:service name="Subscribe">
-    <wsdl:port name="Subscribe" binding="oec:Subscribe">
       <soap:address location="http://127.0.0.1:18080" />
     </wsdl:port>
   </wsdl:service>

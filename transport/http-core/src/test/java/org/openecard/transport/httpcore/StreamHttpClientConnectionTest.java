@@ -24,6 +24,7 @@ package org.openecard.transport.httpcore;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.security.SecureRandom;
 import org.openecard.apache.http.Header;
 import org.openecard.apache.http.HttpEntity;
 import org.openecard.apache.http.HttpException;
@@ -40,6 +41,7 @@ import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
 import org.openecard.common.util.FileUtils;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
+import org.testng.annotations.BeforeClass;
 
 
 /**
@@ -47,6 +49,13 @@ import static org.testng.Assert.*;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class StreamHttpClientConnectionTest {
+
+    private SecureRandom rand;
+
+    @BeforeClass
+    public void setup() {
+	rand = new SecureRandom();
+    }
 
     @Test
     public void testRequestHttpGoogle() throws IOException, HttpException {
@@ -67,7 +76,7 @@ public class StreamHttpClientConnectionTest {
 	Socket socket = new Socket(hostName, 443);
 	assertTrue(socket.isConnected());
 	DefaultTlsClient tlsClient = new DefaultTlsClientImpl(hostName);
-	TlsClientProtocol handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream());
+	TlsClientProtocol handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), rand);
 	handler.connect(tlsClient);
 	StreamHttpClientConnection conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());
 	assertTrue(conn.isOpen());

@@ -30,11 +30,13 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.openecard.bouncycastle.crypto.prng.FixedSecureRandom;
 import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
 import org.openecard.bouncycastle.util.encoders.Base64;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
@@ -130,7 +132,8 @@ public final class HttpConnectProxy extends Proxy {
 		}
 	    }
 	    tlsClient.setAuthentication(tlsAuth);
-	    TlsClientProtocol proto = new TlsClientProtocol(sock.getInputStream(), sock.getOutputStream());
+	    SecureRandom rand = new SecureRandom();
+	    TlsClientProtocol proto = new TlsClientProtocol(sock.getInputStream(), sock.getOutputStream(), rand);
 	    proto.connect(tlsClient);
 	    // wrap socket
 	    Socket tlsSock = new SocketWrapper(sock, proto.getInputStream(), proto.getOutputStream());

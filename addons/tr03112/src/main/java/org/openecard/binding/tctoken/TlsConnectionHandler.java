@@ -31,6 +31,7 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.SecureRandom;
 import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.crypto.tls.TlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
@@ -187,7 +188,7 @@ public class TlsConnectionHandler {
 	    // TLS
 	    InputStream sockIn = socket.getInputStream();
 	    OutputStream sockOut = socket.getOutputStream();
-	    TlsClientProtocol handler = new TlsClientProtocol(sockIn, sockOut);
+	    TlsClientProtocol handler = new TlsClientProtocol(sockIn, sockOut, new SecureRandom());
 	    handler.connect(tlsClient);
 
 	    return handler;

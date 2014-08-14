@@ -46,8 +46,6 @@ import java.util.Vector;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -72,7 +70,6 @@ import org.openecard.richclient.gui.components.CheckboxListItem;
 import org.openecard.richclient.gui.components.FileListEntryItem;
 import org.openecard.richclient.gui.components.MathNumberEditor;
 import org.openecard.richclient.gui.components.OpenFileBrowserListener;
-import org.openecard.richclient.gui.components.RadioButtonItem;
 import org.openecard.richclient.gui.components.SpinnerMathNumberModel;
 import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
 import org.slf4j.Logger;
@@ -356,12 +353,25 @@ public class SettingsGroup extends JPanel {
      * @param values
      * @return The selection element which has been created and added to the entry.
      */
-    protected JComboBox addSelectionItem(@Nonnull String name, @Nullable String description,
+    protected JComboBox<String> addSelectionItem(@Nonnull String name, @Nullable String description,
 	    final @Nonnull String property, @Nonnull String... values) {
-	addLabel(name, description);
-	final JComboBox comboBox = new JComboBox();
-	comboBox.setModel(new DefaultComboBoxModel(values));
-	comboBox.setSelectedItem(properties.getProperty(property));
+	JLabel label = addLabel(name, description);
+	JPanel test = new JPanel();
+	final JComboBox<String> comboBox = new JComboBox<>(values);
+
+	if (Arrays.asList(values).contains("")) {
+	    comboBox.setSelectedItem(properties.getProperty(property));
+	} else {
+	    // in this case the empty string is not allowed so an option have to be set. We take the first element in the
+	    // array.
+	    String prop = properties.getProperty(property);
+	    if (prop == null || prop.equals("")) {
+		comboBox.setSelectedItem(values[0]);
+	    } else {
+		comboBox.setSelectedItem(prop);
+	    }
+	}
+
 	comboBox.addItemListener(new ItemListener() {
 	    @Override
 	    public void itemStateChanged(ItemEvent e) {
@@ -370,9 +380,10 @@ public class SettingsGroup extends JPanel {
 		}
 	    }
 	});
-	addComponent(comboBox);
-	itemIdx++;
 
+	addComponent(comboBox);
+	fieldLabels.put(test, label);
+	itemIdx++;
 	return comboBox;
     }
 
@@ -478,80 +489,6 @@ public class SettingsGroup extends JPanel {
 	container.add(component, constraints);
     }
 
-
-
-    protected JPanel addSingleSelectionItem(@Nonnull String name, @Nonnull String description,
-	    @Nonnull final String enumKey, @Nonnull List<String> values) {
-	JLabel optionName = new JLabel(name);
-	optionName.setFont(optionName.getFont().deriveFont(Font.PLAIN));
-	optionName.setToolTipText(description);
-	JPanel contentPane = new JPanel(new GridBagLayout());
-	JPanel radioButtonPane = new JPanel(new GridBagLayout());
-
-	int row = 0;
-	int col = 0;
-	String property2 = properties.getProperty(enumKey);
-	ButtonGroup bGroup = new ButtonGroup();
-	for (int i = 0; i < values.size(); i++) {
-	    GridBagConstraints c = new GridBagConstraints();
-	    if (col != 0) {
-		if (col % 3 == 0) {
-		    col = 0;
-		    row = row + 1;
-		}
-	    }
-	    c.gridx = col;
-	    c.gridy = row;
-	    c.fill = GridBagConstraints.HORIZONTAL;
-	    c.anchor = GridBagConstraints.NORTHWEST;
-
-	    if (property2 != null && property2.equals(values.get(i))) {
-		RadioButtonItem rButton = new RadioButtonItem(values.get(i), true, enumKey, properties);
-		radioButtonPane.add(rButton, c);
-		bGroup.add(rButton);
-	    } else {
-		RadioButtonItem rButton = new RadioButtonItem(values.get(i), false, enumKey, properties);
-		if (property2 == null && i == 0) {
-		    rButton.setSelected(true);
-		}
-		radioButtonPane.add(rButton, c);
-		bGroup.add(rButton);
-	    }
-	    col++;
-	}
-
-	GridBagConstraints c2 = new GridBagConstraints();
-	c2.anchor = GridBagConstraints.NORTHWEST;
-	c2.fill = GridBagConstraints.HORIZONTAL;
-	c2.gridx = 0;
-	c2.gridy = 0;
-	c2.weightx = 1.0;
-	c2.weighty = 1.0;
-	contentPane.add(optionName, c2);
-
-	GridBagConstraints c3 = new GridBagConstraints();
-	c3.anchor = GridBagConstraints.NORTHWEST;
-	c3.fill = GridBagConstraints.HORIZONTAL;
-	c3.gridwidth = GridBagConstraints.REMAINDER;
-	c3.gridheight = 2;
-	c3.gridx = 1;
-	c3.gridy = 0;
-	c3.weightx = 4.0;
-	c3.weighty = 5.0;
-	contentPane.add(radioButtonPane, c3);
-
-	// add content panel to the group
-	GridBagConstraints c = new GridBagConstraints();
-	c.insets = new Insets(5, 3, 0, 5);
-	c.fill = GridBagConstraints.HORIZONTAL;
-	c.gridx = 2;
-	c.gridy = itemIdx;
-	container.add(contentPane, c);
-	//addComponent(contentPane);
-	itemIdx++;
-	return contentPane;
-    }
-
     protected JSpinner addScalarEntryTypNumber(@Nonnull String name, @Nullable String description,
 	    final @Nonnull String property, @Nonnull String type) {
 	JLabel label = addLabel(name, description);
@@ -609,7 +546,7 @@ public class SettingsGroup extends JPanel {
 	    @Override
 	    public Dimension getPreferredSize() {
 		Dimension dim = super.getPreferredSize();
-		dim.width = 280;
+		dim.width = 100;
 		return dim;
 	    }
 	};
@@ -643,7 +580,6 @@ public class SettingsGroup extends JPanel {
 	GridBagConstraints fieldConstraint = new GridBagConstraints();
 	fieldConstraint.anchor = GridBagConstraints.WEST;
 	fieldConstraint.fill = GridBagConstraints.HORIZONTAL;
-	fieldConstraint.gridwidth = GridBagConstraints.RELATIVE;
 	fieldConstraint.gridx = 0;
 	fieldConstraint.gridy = 0;
 	fieldConstraint.weightx = 2;
@@ -658,7 +594,7 @@ public class SettingsGroup extends JPanel {
 	buttonConstraint.gridy = 0;
 	buttonConstraint.weightx = 0;
 	buttonConstraint.gridwidth = GridBagConstraints.REMAINDER;
-	buttonConstraint.insets = new Insets(0, 5, 0, 5);
+	buttonConstraint.insets = new Insets(0, 5, 0, 0);
 	filePanel.add(browseButton, buttonConstraint);
 
 	addComponent(filePanel);
@@ -683,7 +619,7 @@ public class SettingsGroup extends JPanel {
 
 	GridBagConstraints constraints2 = new GridBagConstraints();
 	constraints2.anchor = GridBagConstraints.NORTHWEST;
-	constraints2.insets = new Insets(5, 3, 0, 5);
+	constraints2.insets = new Insets(5, 3, 0, 0);
 	constraints2.fill = GridBagConstraints.HORIZONTAL;
 	constraints2.gridx = 2;
 	constraints2.gridy = itemIdx;

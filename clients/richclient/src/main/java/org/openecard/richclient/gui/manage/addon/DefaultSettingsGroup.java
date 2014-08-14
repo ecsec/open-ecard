@@ -78,7 +78,7 @@ public class DefaultSettingsGroup extends SettingsGroup {
 	    } else if (EnumEntry.class.equals(entry.getClass())) {
 		EnumEntry enumEntry = (EnumEntry) entry;
 		List<String> values = enumEntry.getValues();
-		addSingleSelectionItem(name, description, enumEntry.getKey(), values);
+		addSelectionItem(name, description, enumEntry.getKey(), values.toArray(new String[values.size()]));
 	    } else if (EnumListEntry.class.equals(entry.getClass())) {
 		EnumListEntry enumEntry = (EnumListEntry) entry;
 		List<String> values = enumEntry.getValues();

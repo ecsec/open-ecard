@@ -276,7 +276,7 @@ public class SettingsGroup extends JPanel {
 	String value = properties.getProperty(property);
 	ArrayList<String> entries = new ArrayList<>(10);
 	if (value != null) {
-	    String[] arrayEntries = value.split("\n");
+	    String[] arrayEntries = value.split(";");
 	    Collections.addAll(entries, arrayEntries);
 
 	    // remove leading and trailing ws and remove empty entries

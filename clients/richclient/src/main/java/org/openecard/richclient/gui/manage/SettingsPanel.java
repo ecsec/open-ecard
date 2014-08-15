@@ -24,6 +24,7 @@ package org.openecard.richclient.gui.manage;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
@@ -83,6 +84,7 @@ public abstract class SettingsPanel extends JPanel {
 	c.weightx = 1.0;
 	c.weighty = 1.0;
 	c.anchor = GridBagConstraints.NORTHWEST;
+	c.insets = new Insets(10, 0, 0, 0);
 	contentPane.add(item, c);
 	groups.add(item);
     }

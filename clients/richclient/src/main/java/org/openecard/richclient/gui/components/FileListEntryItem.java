@@ -227,16 +227,16 @@ public class FileListEntryItem extends JPanel {
 	GridBagConstraints plusConstraint = new GridBagConstraints();
 	plusConstraint.anchor = GridBagConstraints.WEST;
 	plusConstraint.fill = GridBagConstraints.NONE;
-	plusConstraint.gridx = 2;
+	plusConstraint.gridx = 3;
 	plusConstraint.gridy = currentYCoordinate;
+	plusConstraint.gridwidth = GridBagConstraints.REMAINDER;
 	plusConstraint.insets = new Insets(0, 5, 0, 5);
 
 	GridBagConstraints minusConstraint = new GridBagConstraints();
 	minusConstraint.anchor = GridBagConstraints.WEST;
 	minusConstraint.fill = GridBagConstraints.NONE;
-	minusConstraint.gridx = 3;
+	minusConstraint.gridx = 2;
 	minusConstraint.gridy = currentYCoordinate;
-	minusConstraint.gridwidth = GridBagConstraints.REMAINDER;
 	minusConstraint.insets = new Insets(0, 5, 0, 5);
 
 	GridBagConstraints browseConstrain = new GridBagConstraints();

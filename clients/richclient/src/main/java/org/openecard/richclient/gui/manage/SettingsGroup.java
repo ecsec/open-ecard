@@ -39,7 +39,6 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
@@ -337,21 +336,10 @@ public class SettingsGroup extends JPanel {
 	c3.anchor = GridBagConstraints.NORTHWEST;
 	c3.fill = GridBagConstraints.HORIZONTAL;
 	c3.gridwidth = GridBagConstraints.REMAINDER;
-	c3.gridheight = 2;
-	c3.gridx = 1;
-	c3.gridy = 0;
-	c3.weightx = 4.0;
-	c3.weighty = 5.0;
+	c3.weightx = 1.0;
 	contentPane.add(checkboxPane, c3);
 
-	// add content panel to the group
-	GridBagConstraints c = new GridBagConstraints();
-	c.insets = new Insets(5, 3, 0, 5);
-	c.fill = GridBagConstraints.HORIZONTAL;
-	c.gridx = 2;
-	c.gridy = itemIdx;
-	container.add(contentPane, c);
-	//addComponent(contentPane);
+	addComponent(contentPane);
 	itemIdx++;
 	fieldLabels.put(contentPane, optionName);
 	return contentPane;

@@ -49,7 +49,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
@@ -57,9 +56,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableModel;
 import org.openecard.addon.AddonPropertiesException;
 import org.openecard.addon.manifest.ScalarEntryType;
 import org.openecard.common.I18n;
@@ -303,9 +299,7 @@ public class SettingsGroup extends JPanel {
      */
     protected JPanel addMultiSelectionItem(@Nonnull String name, @Nullable String description,
 	    final @Nonnull String property, @Nonnull List<String> values) {
-	JLabel optionName = new JLabel(name);
-	optionName.setFont(optionName.getFont().deriveFont(Font.PLAIN));
-	optionName.setToolTipText(description);
+	JLabel optionName = addListLabel(name, description);
 	JPanel contentPane = new JPanel(new GridBagLayout());
 	JPanel checkboxPane = new JPanel(new GridBagLayout());
 
@@ -339,15 +333,6 @@ public class SettingsGroup extends JPanel {
 	    col++;
 	}
 
-	GridBagConstraints c2 = new GridBagConstraints();
-	c2.anchor = GridBagConstraints.NORTHWEST;
-	c2.fill = GridBagConstraints.HORIZONTAL;
-	c2.gridx = 0;
-	c2.gridy = 0;
-	c2.weightx = 1.0;
-	c2.weighty = 1.0;
-	contentPane.add(optionName, c2);
-
 	GridBagConstraints c3 = new GridBagConstraints();
 	c3.anchor = GridBagConstraints.NORTHWEST;
 	c3.fill = GridBagConstraints.HORIZONTAL;
@@ -368,6 +353,7 @@ public class SettingsGroup extends JPanel {
 	container.add(contentPane, c);
 	//addComponent(contentPane);
 	itemIdx++;
+	fieldLabels.put(contentPane, optionName);
 	return contentPane;
     }
 

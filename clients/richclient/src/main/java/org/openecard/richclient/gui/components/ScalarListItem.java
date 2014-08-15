@@ -48,7 +48,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import org.openecard.addon.manifest.ScalarEntryType;
+import org.openecard.addon.manifest.ScalarListEntryType;
 import org.openecard.gui.swing.common.GUIDefaults;
 import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
 
@@ -82,14 +82,9 @@ public class ScalarListItem extends JPanel {
     private final ArrayList<JSpinner> spinnerList;
 
     /**
-     * Indicates whether we have a boolean type ListEntry.
+     * The type of the ScalarListEntry.
      */
-    private final boolean IS_BOOLEAN;
-
-    /**
-     * The type of the ScalarEntry.
-     */
-    private final ScalarEntryType type;
+    private final ScalarListEntryType type;
 
     /**
      * Setting object which contains the value of the property {@link ScalarListItem#property}.
@@ -120,15 +115,13 @@ public class ScalarListItem extends JPanel {
      * @param properties Settings object which manages the setting of changed property values in the configuration file.
      * @param type The type of the ScalarListEntry which is managed by this ScalarListItem.
      */
-    public ScalarListItem(@Nonnull String property, @Nonnull Settings properties, @Nonnull ScalarEntryType type) {
-	if (type.equals(ScalarEntryType.BIGDECIMAL)) {
-	    this.type = ScalarEntryType.BIGDECIMAL;
-	} else if (type.equals(ScalarEntryType.BIGINTEGER)) {
-	    this.type = ScalarEntryType.BIGINTEGER;
-	} else if (type.equals(ScalarEntryType.BOOLEAN)) {
-	    this.type = ScalarEntryType.BOOLEAN;
+    public ScalarListItem(@Nonnull String property, @Nonnull Settings properties, @Nonnull ScalarListEntryType type) {
+	if (type.equals(ScalarListEntryType.BIGDECIMAL)) {
+	    this.type = ScalarListEntryType.BIGDECIMAL;
+	} else if (type.equals(ScalarListEntryType.BIGINTEGER)) {
+	    this.type = ScalarListEntryType.BIGINTEGER;
 	} else {
-	    this.type = ScalarEntryType.STRING;
+	    this.type = ScalarListEntryType.STRING;
 	}
 
 	// basic variable and set layout
@@ -137,19 +130,12 @@ public class ScalarListItem extends JPanel {
 	setLayout(new GridBagLayout());
 
 	// initialize the managed list dependent on the type.
-	if (this.type.equals(ScalarEntryType.BOOLEAN)) {
-	    IS_BOOLEAN = true;
+	if (type.equals(ScalarListEntryType.BIGDECIMAL) || type.equals(ScalarListEntryType.BIGINTEGER)) {
+	    spinnerList = new ArrayList<>();
 	    textFieldList = null;
-	    spinnerList = null;
 	} else {
-	    IS_BOOLEAN = false;
-	    if (type.equals(ScalarEntryType.BIGDECIMAL) || type.equals(ScalarEntryType.BIGINTEGER)) {
-		spinnerList = new ArrayList<>();
-		textFieldList = null;
-	    } else {
-		textFieldList = new ArrayList<>();
-		spinnerList = null;
-	    }
+	    textFieldList = new ArrayList<>();
+	    spinnerList = null;
 	}
 
 	// fill the GUI with stored entries
@@ -178,32 +164,24 @@ public class ScalarListItem extends JPanel {
      * @param entry Value to set in the spinner or text field.
      */
     private void addRow(String entry) {
-	if (IS_BOOLEAN) {
-	    // nice joke how do you want to asign multiple values to a variable of a type which knows only two values?
-	    GridBagConstraints boxConstraints = new GridBagConstraints();
-	    boxConstraints.anchor = GridBagConstraints.WEST;
-	    boxConstraints.fill = GridBagConstraints.HORIZONTAL;
-	    boxConstraints.weightx = 1.0;
-	    boxConstraints.gridwidth = GridBagConstraints.REMAINDER;
-	    add(createBooleanEntry(entry), boxConstraints);
-	} else {
-	    JComponent item = null;
-	    switch (type) {
-		case BIGDECIMAL:
-		case BIGINTEGER:
-		    JSpinner spinner = createNumberEntry(entry);
-		    spinnerList.add(spinner);
-		    item = spinner;
-		    break;
-		case STRING:
-		    JTextField field = createStringEntry(entry);
-		    textFieldList.add(field);
-		    item = field;
-		    break;
-	    }
 
-	    addComponent(item);
+	JComponent item = null;
+	switch (type) {
+	    case BIGDECIMAL:
+	    case BIGINTEGER:
+		JSpinner spinner = createNumberEntry(entry);
+		spinnerList.add(spinner);
+		item = spinner;
+		break;
+	    case STRING:
+		JTextField field = createStringEntry(entry);
+		textFieldList.add(field);
+		item = field;
+		break;
 	}
+
+	addComponent(item);
+
     }
 
     /**
@@ -297,7 +275,7 @@ public class ScalarListItem extends JPanel {
 		return dim;
 	    }
 	};
-	if (type.equals(ScalarEntryType.BIGDECIMAL)) {
+	if (type.equals(ScalarListEntryType.BIGDECIMAL)) {
 	    BigDecimal val;
 	    if (value == null || value.equals("")) {
 		val = new BigDecimal("0");
@@ -440,7 +418,7 @@ public class ScalarListItem extends JPanel {
 	public void stateChanged(ChangeEvent e) {
 	    StringBuilder sb = new StringBuilder();
 	    for (JSpinner spinner : spinnerList) {
-		if (type.equals(ScalarEntryType.BIGDECIMAL)) {
+		if (type.equals(ScalarListEntryType.BIGDECIMAL)) {
 		    BigDecimal dec = (BigDecimal) spinner.getModel().getValue();
 		    sb.append(dec.toPlainString());
 		} else {
@@ -507,7 +485,7 @@ public class ScalarListItem extends JPanel {
 	public void actionPerformed(ActionEvent e) {
 	    if (properties.getProperty(property) != null) {
 		if (textFieldList == null) {
-		    if (type.equals(ScalarEntryType.BIGDECIMAL)) {
+		    if (type.equals(ScalarListEntryType.BIGDECIMAL)) {
 			String currentVal = ((BigDecimal) ((JSpinner) item).getModel().getValue()).toPlainString() + ";";
 			String props = properties.getProperty(property);
 			props = props.replaceFirst(currentVal, "");

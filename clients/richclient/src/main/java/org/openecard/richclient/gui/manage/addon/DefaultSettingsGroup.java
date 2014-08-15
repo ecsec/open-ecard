@@ -33,6 +33,7 @@ import org.openecard.addon.manifest.FileListEntry;
 import org.openecard.addon.manifest.ScalarEntry;
 import org.openecard.addon.manifest.ScalarEntryType;
 import org.openecard.addon.manifest.ScalarListEntry;
+import org.openecard.addon.manifest.ScalarListEntryType;
 import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
 import org.openecard.richclient.gui.manage.SettingsGroup;
 import org.slf4j.Logger;
@@ -73,8 +74,8 @@ public class DefaultSettingsGroup extends SettingsGroup {
 		    logger.error("Untreated ScalarEntry type: {}", scalarEntry.getType());
 		}
 	    } else if (ScalarListEntry.class.equals(entry.getClass())) {
-		ScalarListEntry slEntry = (ScalarListEntry) entry;
-		addScalarListItem(name, description, entry.getKey(), ScalarEntryType.valueOf(slEntry.getType()));
+		addScalarListItem(name, description, entry.getKey(),
+			ScalarListEntryType.valueOf(((ScalarListEntry) entry).getType()));
 	    } else if (EnumEntry.class.equals(entry.getClass())) {
 		EnumEntry enumEntry = (EnumEntry) entry;
 		List<String> values = enumEntry.getValues();

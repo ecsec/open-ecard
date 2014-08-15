@@ -57,6 +57,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import org.openecard.addon.AddonPropertiesException;
 import org.openecard.addon.manifest.ScalarEntryType;
+import org.openecard.addon.manifest.ScalarListEntryType;
 import org.openecard.common.I18n;
 import org.openecard.richclient.gui.components.CheckboxListItem;
 import org.openecard.richclient.gui.components.FileListEntryItem;
@@ -197,7 +198,7 @@ public class SettingsGroup extends JPanel {
     }
 
     protected ScalarListItem addScalarListItem(@Nonnull String name, @Nullable String desc, final @Nonnull String property,
-	    @Nonnull ScalarEntryType entry) {
+	    @Nonnull ScalarListEntryType entry) {
 	JLabel label = addListLabel(name, desc);
 
 	ScalarListItem item = new ScalarListItem(property, properties, entry);

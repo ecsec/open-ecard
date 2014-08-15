@@ -313,6 +313,13 @@ public class ManagementDialog extends JDialog {
 	addonList.addListSelectionListener(new ClearSelectionListener(coreList));
     }
 
+    protected void updateGui() {
+	selectionPanel.removeAll();
+	createCoreList();
+	createAddonList();
+	coreList.setSelectedIndex(0);
+    }
+
     private class ClearSelectionListener implements ListSelectionListener {
 	private final JList otherList;
 
@@ -349,7 +356,7 @@ public class ManagementDialog extends JDialog {
 	String licenseText = desc.getLicenseText(LANGUAGE_CODE);
 	AboutPanel aboutPanel = null;
 	if ((!about.equals("") || ! licenseText.equals("")) && !coreAddon) {
-	    aboutPanel = new AboutPanel(desc, coreAddon);
+	    aboutPanel = new AboutPanel(desc, coreAddon, manager, this);
 	}
 
 

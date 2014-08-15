@@ -27,6 +27,8 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import javax.swing.BorderFactory;
@@ -38,6 +40,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import org.openecard.addon.AddonManager;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.common.I18n;
 
@@ -52,18 +55,25 @@ public class AboutPanel extends JPanel {
     private static final String LANGUAGE_CODE = System.getProperty("user.language");
     private final I18n lang = I18n.getTranslation("addon");
     private final AddonSpecification addonSpec;
+    private final AddonManager manager;
     private final GridBagLayout layout = new GridBagLayout();
     private final String license;
     private final String about;
+    private final ManagementDialog dialog;
     private JEditorPane display;
 
     /**
      * Creates an new AboutPanel instance.
      *
-     * @param addonSpecification The addon manifest content which is the information source.
+     * @param addonSpecification The add-on manifest content which is the information source.
+     * @param coreAddon Indicates whether the add-on is a core add-on or not.
+     * @param manager
+     * @param dialog
      */
-    public AboutPanel(AddonSpecification addonSpecification, boolean coreAddon) {
+    public AboutPanel(AddonSpecification addonSpecification, boolean coreAddon, AddonManager manager, ManagementDialog dialog) {
 	this.setLayout(layout);
+	this.manager = manager;
+	this.dialog = dialog;
 	this.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 	addonSpec = addonSpecification;
 	license = addonSpecification.getLicenseText(LANGUAGE_CODE);
@@ -217,6 +227,20 @@ public class AboutPanel extends JPanel {
 	if (!coreAddon) {
 	    JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));
 	    JButton uninstallButton = new JButton(lang.translationForKey("addon.about.uninstall"));
+	    uninstallButton.addActionListener(new ActionListener() {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+		    manager.uninstallAddon(addonSpec);
+		    // let's sleep a bit the file registry takes a bit to remove everything
+		    try {
+			Thread.sleep(3000);
+		    } catch (InterruptedException ex) {
+			// ignore
+		    }
+		    dialog.updateGui();
+		}
+	    });
 	    panel.add(uninstallButton);
 
 	    GridBagConstraints c = new GridBagConstraints();

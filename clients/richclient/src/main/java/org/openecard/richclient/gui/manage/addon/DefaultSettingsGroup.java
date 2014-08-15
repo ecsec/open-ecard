@@ -73,8 +73,8 @@ public class DefaultSettingsGroup extends SettingsGroup {
 		    logger.error("Untreated ScalarEntry type: {}", scalarEntry.getType());
 		}
 	    } else if (ScalarListEntry.class.equals(entry.getClass())) {
-		// TODO should not allow boolean type
-		addScalarListItem(name, description, entry.getKey());
+		ScalarListEntry slEntry = (ScalarListEntry) entry;
+		addScalarListItem(name, description, entry.getKey(), ScalarEntryType.valueOf(slEntry.getType()));
 	    } else if (EnumEntry.class.equals(entry.getClass())) {
 		EnumEntry enumEntry = (EnumEntry) entry;
 		List<String> values = enumEntry.getValues();

@@ -36,12 +36,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Vector;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -70,6 +67,7 @@ import org.openecard.richclient.gui.components.CheckboxListItem;
 import org.openecard.richclient.gui.components.FileListEntryItem;
 import org.openecard.richclient.gui.components.MathNumberEditor;
 import org.openecard.richclient.gui.components.OpenFileBrowserListener;
+import org.openecard.richclient.gui.components.ScalarListItem;
 import org.openecard.richclient.gui.components.SpinnerMathNumberModel;
 import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
 import org.slf4j.Logger;
@@ -173,7 +171,14 @@ public class SettingsGroup extends JPanel {
 
 	String value = properties.getProperty(property);
 	value = value == null ? "" : value;
-	final JTextField input = new JTextField(value);
+	final JTextField input = new JTextField(value) {
+	    @Override
+	    public Dimension getPreferredSize() {
+		Dimension dim = super.getPreferredSize();
+		dim.width = 100;
+		return dim;
+	    }
+	};
 	fieldLabels.put(input, label);
 	// add listener for value changes
 	input.getDocument().addDocumentListener(new DocumentListener() {
@@ -270,43 +275,16 @@ public class SettingsGroup extends JPanel {
 	itemIdx++;
     }
 
-    protected JTable addScalarListItem(@Nonnull String name, @Nullable String desc, final @Nonnull String property) {
-	JLabel label = addLabel(name, desc);
+    protected ScalarListItem addScalarListItem(@Nonnull String name, @Nullable String desc, final @Nonnull String property,
+	    @Nonnull ScalarEntryType entry) {
+	JLabel label = addListLabel(name, desc);
 
-	String value = properties.getProperty(property);
-	ArrayList<String> entries = new ArrayList<>(10);
-	if (value != null) {
-	    String[] arrayEntries = value.split(";");
-	    Collections.addAll(entries, arrayEntries);
-
-	    // remove leading and trailing ws and remove empty entries
-	    ListIterator<String> it = entries.listIterator();
-	    while (it.hasNext()) {
-		String next = it.next();
-		next = next.trim();
-		if (next.isEmpty()) {
-		    it.remove();
-		} else {
-		    it.set(next);
-		}
-	    }
-	}
-
-	final JTable input = new JTable(entries.size() + 1, 2);
-	// fill in the values from entries
-	for (int i = 0; i < entries.size(); i++) {
-	    input.getModel().setValueAt(entries.get(i), i, 0);
-	    JButton removeButton = new JButton("x");
-	    input.getModel().setValueAt(removeButton, i, 1);
-	}
-	fieldLabels.put(input, label);
-
-	// TODO: add listener
-
-	addComponent(input);
+	ScalarListItem item = new ScalarListItem(property, properties, entry);
+	fieldLabels.put(item, label);
+	addComponent(item);
 	itemIdx++;
 
-	return input;
+	return item;
     }
 
     /**
@@ -480,6 +458,19 @@ public class SettingsGroup extends JPanel {
 	return label;
     }
 
+    private JLabel addListLabel(@Nonnull String name, @Nullable String description) {
+	JLabel label = new JLabel(name);
+	label.setToolTipText(description);
+	label.setFont(label.getFont().deriveFont(Font.PLAIN));
+	GridBagConstraints constraints = new GridBagConstraints();
+	constraints.insets = new Insets(5, 10, 0, 5);
+	constraints.gridx = 0;
+	constraints.gridy = itemIdx;
+	constraints.anchor = GridBagConstraints.NORTHWEST;
+	container.add(label, constraints);
+	return label;
+    }
+
     private void addComponent(@Nonnull Component component) {
 	GridBagConstraints constraints = new GridBagConstraints();
 	constraints.insets = new Insets(5, 3, 0, 5);
@@ -514,7 +505,14 @@ public class SettingsGroup extends JPanel {
 	    return null;
 	}
 
-	final JSpinner spinner = new JSpinner(model);
+	final JSpinner spinner = new JSpinner(model) {
+	    @Override
+	    public Dimension getPreferredSize() {
+		Dimension dim = super.getPreferredSize();
+		dim.width = 100;
+		return dim;
+	    }
+	};
 	spinner.addChangeListener(new ChangeListener() {
 
 	    @Override
@@ -605,15 +603,7 @@ public class SettingsGroup extends JPanel {
 
     public JPanel addFileListEntry(@Nonnull String name, @Nonnull String description, @Nonnull String property,
 	    @Nonnull String fileType, boolean isRequired) {
-	JLabel label = new JLabel(name);
-	label.setToolTipText(description);
-	label.setFont(label.getFont().deriveFont(Font.PLAIN));
-	GridBagConstraints constraints = new GridBagConstraints();
-	constraints.insets = new Insets(5, 10, 0, 5);
-	constraints.gridx = 0;
-	constraints.gridy = itemIdx;
-	constraints.anchor = GridBagConstraints.NORTHWEST;
-	container.add(label, constraints);
+	JLabel label = addListLabel(name, description);
 
 	FileListEntryItem item = new FileListEntryItem(fileType, property, properties);
 

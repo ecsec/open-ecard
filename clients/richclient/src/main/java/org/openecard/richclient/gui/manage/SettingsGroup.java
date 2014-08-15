@@ -316,7 +316,7 @@ public class SettingsGroup extends JPanel {
 	    }
 	    c.gridx = col;
 	    c.gridy = row;
-	    c.fill = GridBagConstraints.HORIZONTAL;
+	    c.fill = GridBagConstraints.NONE;
 	    c.anchor = GridBagConstraints.NORTHWEST;
 
 	    if (property2 != null) {
@@ -330,7 +330,18 @@ public class SettingsGroup extends JPanel {
 	    } else {
 		checkboxPane.add(new CheckboxListItem(value, false, property, properties), c);
 	    }
+
+	    if (col == 2) {
+		GridBagConstraints c2 = new GridBagConstraints();
+		c2.fill = GridBagConstraints.BOTH;
+		c2.weightx = 1.0;
+		c2.gridx = 3;
+		c2.gridy = row;
+		checkboxPane.add(new JLabel(), c2);
+	    }
+
 	    col++;
+
 	}
 
 	GridBagConstraints c3 = new GridBagConstraints();

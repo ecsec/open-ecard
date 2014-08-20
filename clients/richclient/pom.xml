@@ -231,8 +231,8 @@
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.management</groupId>
-	    <artifactId>tiny-management</artifactId>
+	    <groupId>org.openecard</groupId>
+	    <artifactId>management</artifactId>
 	    <version>${project.version}</version>
 	</dependency>
 	<dependency>

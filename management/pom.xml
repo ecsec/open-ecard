@@ -12,11 +12,21 @@
 
     <groupId>org.openecard</groupId>
     <artifactId>management</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <name>Management</name>
 
-    <modules>
-	<module>tiny-management</module>
-    </modules>
+    <dependencies>
+	<dependency>
+	    <groupId>org.openecard</groupId>
+	    <artifactId>common</artifactId>
+	    <version>${project.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.openecard.wsdef</groupId>
+	    <artifactId>wsdef-client</artifactId>
+	    <version>${project.version}</version>
+	    <scope>provided</scope>
+	</dependency>
+    </dependencies>
 
 </project>

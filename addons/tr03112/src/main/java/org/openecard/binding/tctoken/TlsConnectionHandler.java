@@ -105,29 +105,59 @@ public class TlsConnectionHandler {
 	    if (isSameChannel()) {
 		tlsClient = tokenRequest.getTokenContext().getTlsClient();
 	    } else {
+		// determine TLS version to use
+		ProtocolVersion version = ProtocolVersion.TLSv12;
+		ProtocolVersion minVersion = ProtocolVersion.TLSv12;
+		switch (secProto) {
+		    case "urn:ietf:rfc:4346":
+			minVersion = ProtocolVersion.TLSv11;
+			version = ProtocolVersion.TLSv11;
+			break;
+		    case "urn:ietf:rfc:5246":
+			// no changes
+			break;
+		    case "urn:ietf:rfc:4279":
+			minVersion = ProtocolVersion.TLSv10;
+			break;
+		    case "urn:ietf:rfc:5487":
+			minVersion = ProtocolVersion.TLSv10;
+			break;
+		}
+
 		// Set up TLS connection
-		if (secProto.equals("urn:ietf:rfc:4279") || secProto.equals("urn:ietf:rfc:5487")) {
-		    DynamicAuthentication tlsAuth = new DynamicAuthentication();
-		    tlsAuth.setHostname(serverHost);
-		    // FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
-		    //tlsAuth.setCertificateVerifier(new JavaSecVerifier());
-		    byte[] psk = token.getPathSecurityParameters().getPSK();
-		    TlsPSKIdentity pskId = new TlsPSKIdentityImpl(sessionId.getBytes(), psk);
-		    tlsClient = new ClientCertPSKTlsClient(pskId, noSni ? null : serverHost);
-		    tlsClient.setAuthentication(tlsAuth);
-		    tlsClient.setClientVersion(ProtocolVersion.TLSv12);
-		} else if (secProto.equals("urn:ietf:rfc:4346")) {
-		    DynamicAuthentication tlsAuth = new DynamicAuthentication();
-		    tlsAuth.setHostname(serverHost);
-		    // use a smartcard for client authentication if needed
-		    tlsAuth.setCredentialFactory(makeSmartCardCredential());
-		    // FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
-		    //tlsAuth.setCertificateVerifier(new JavaSecVerifier());
-		    tlsClient = new ClientCertDefaultTlsClient(noSni ? null : serverHost);
-		    tlsClient.setAuthentication(tlsAuth);
-		    tlsClient.setClientVersion(ProtocolVersion.TLSv12);
-		} else {
-		    throw new ConnectionError("Unknown security protocol '" + secProto + "' requested.");
+		switch (secProto) {
+		    case "urn:ietf:rfc:4279":
+		    case "urn:ietf:rfc:5487":
+			{
+			    DynamicAuthentication tlsAuth = new DynamicAuthentication();
+			    tlsAuth.setHostname(serverHost);
+			    // FIXME: verify certificate chain as soon as a usable solution exists for the trust problem
+			    //tlsAuth.setCertificateVerifier(new JavaSecVerifier());
+			    byte[] psk = token.getPathSecurityParameters().getPSK();
+			    TlsPSKIdentity pskId = new TlsPSKIdentityImpl(sessionId.getBytes(), psk);
+			    tlsClient = new ClientCertPSKTlsClient(pskId, noSni ? null : serverHost);
+			    tlsClient.setAuthentication(tlsAuth);
+			    tlsClient.setClientVersion(version);
+			    tlsClient.setMinimumVersion(minVersion);
+			    break;
+			}
+		    case "urn:ietf:rfc:4346":
+		    case "urn:ietf:rfc:5246":
+			{
+			    DynamicAuthentication tlsAuth = new DynamicAuthentication();
+			    tlsAuth.setHostname(serverHost);
+			    // use a smartcard for client authentication if needed
+			    tlsAuth.setCredentialFactory(makeSmartCardCredential());
+			    // FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
+			    //tlsAuth.setCertificateVerifier(new JavaSecVerifier());
+			    tlsClient = new ClientCertDefaultTlsClient(noSni ? null : serverHost);
+			    tlsClient.setAuthentication(tlsAuth);
+			    tlsClient.setClientVersion(version);
+			    tlsClient.setMinimumVersion(minVersion);
+			    break;
+			}
+		    default:
+			throw new ConnectionError("Unknown security protocol '" + secProto + "' requested.");
 		}
 	    }
 

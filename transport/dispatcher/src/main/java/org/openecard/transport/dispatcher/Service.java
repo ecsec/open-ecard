@@ -22,6 +22,7 @@
 
 package org.openecard.transport.dispatcher;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -29,8 +30,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
+import javax.jws.WebMethod;
 import javax.xml.transform.TransformerException;
 import org.openecard.common.interfaces.DispatcherException;
+import org.openecard.common.interfaces.Publish;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.marshal.WSMarshallerFactory;
@@ -52,6 +55,8 @@ class Service {
     private final ArrayList<Class<?>> requestClasses;
     private final TreeMap<String, Method> requestMethods;
     private final HashMap<Class<?>, MessageLogger> objectLoggers;
+    private final List<String> actions;
+    private final boolean isFilter;
 
     /**
      * Creates a new Service instance and initializes it with the given webservice interface class.
@@ -61,21 +66,48 @@ class Service {
     public Service(Class<?> iface) {
 	this.iface = iface;
 
-	requestClasses = new ArrayList<Class<?>>();
-	requestMethods = new TreeMap<String, Method>();
-	objectLoggers = new HashMap<Class<?>, MessageLogger>();
+	requestClasses = new ArrayList<>();
+	requestMethods = new TreeMap<>();
+	objectLoggers = new HashMap<>();
+	actions = new ArrayList<>();
+	isFilter = false;
 
+	init();
+    }
+
+    protected Service(Class<?> iface, boolean isFilter) {
+	this.iface = iface;
+
+	requestClasses = new ArrayList<>();
+	requestMethods = new TreeMap<>();
+	objectLoggers = new HashMap<>();
+	actions = new ArrayList<>();
+	this.isFilter = isFilter;
+
+	init();
+    }
+
+    private void init() {
 	Method[] methods = iface.getDeclaredMethods();
 	for (Method m : methods) {
-	    if (isReqParam(m)) {
+	    Annotation annotation = m.getAnnotation(WebMethod.class);
+	    if (isReqParam(m) &&  annotation != null) {
+		actions.add(parseAnnotation(annotation));
 		Class<?> reqClass = getReqParamClass(m);
 		if (requestMethods.containsKey(reqClass.getName())) {
 		    String msg = "Omitting method {} in service interface {}, because its parameter type is already ";
 		    msg += "associated with another method.";
 		    logger.warn(msg, m.getName(), iface.getName());
 		} else {
-		    requestClasses.add(reqClass);
-		    requestMethods.put(reqClass.getName(), m);
+		    if (isFilter) {
+			if (m.getAnnotation(Publish.class) != null) {
+			    requestClasses.add(reqClass);
+			    requestMethods.put(reqClass.getName(), m);
+			}
+		    } else {
+			requestClasses.add(reqClass);
+			requestMethods.put(reqClass.getName(), m);
+		    }
 		}
 	    }
 	}
@@ -169,6 +201,28 @@ class Service {
 	    throw new NoSuchMethodException(msg);
 	}
 	return m;
+    }
+
+    private String parseAnnotation(Annotation annotation) {
+	StringBuilder builder = new StringBuilder();
+	builder.append(annotation.toString());
+	int lastSpace = builder.lastIndexOf(" ");
+	// remove everything before the action name
+	builder.replace(0, lastSpace + 1, "");
+	// remove the tailing brace
+	int lastBrace = builder.lastIndexOf(")");
+	builder.replace(lastBrace, lastBrace + 1, "");
+
+	return builder.toString();
+    }
+
+    /**
+     * Get a list with all the action names of this service.
+     *
+     * @return An unmodifiable list containing all the action names of this service.
+     */
+    protected List<String> getActionList() {
+	return Collections.unmodifiableList(actions);
     }
 
 

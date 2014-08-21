@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -163,11 +163,7 @@ class Service {
 	    Object res = m.invoke(ifaceImpl, req);
 	    l.logResponse(res);
 	    return res;
-	} catch (IllegalAccessException ex) {
-	    throw new DispatcherException(ex);
-	} catch (NoSuchMethodException ex) {
-	    throw new DispatcherException(ex);
-	} catch (IllegalArgumentException ex) {
+	} catch (IllegalAccessException | NoSuchMethodException | IllegalArgumentException ex) {
 	    throw new DispatcherException(ex);
 	}
     }
@@ -263,10 +259,8 @@ class Service {
 		    String msgObjStr = m.doc2str(m.marshal(msgObj));
 		    logger.trace("{}\n{}", msg, msgObjStr);
 		}
-	    } catch (TransformerException ex) {
-		logger.error("Failed to log message.");
-	    } catch (WSMarshallerException ex) {
-		logger.error("Failed to log message.");
+	    } catch (TransformerException | WSMarshallerException ex) {
+		logger.error("Failed to log message.", ex);
 	    }
 	}
 

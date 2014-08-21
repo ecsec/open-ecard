@@ -75,12 +75,12 @@
 		<repository>
 			<id>openecard-repos</id>
 			<name>Openecard Release Repo</name>
-			<url>http://mvn.ecsec.de/content/repositories/openecard-release</url>
+			<url>https://mvn.ecsec.de/content/repositories/openecard-release</url>
 		</repository>
 		<snapshotRepository>
 			<id>openecard-repos</id>
 			<name>Openecard Snapshot Repo</name>
-			<url>http://mvn.ecsec.de/content/repositories/openecard-snapshot</url>
+			<url>https://mvn.ecsec.de/content/repositories/openecard-snapshot</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -88,14 +88,14 @@
 		<repository>
 			<id>openecard-repos</id>
 			<name>Openecard Repos</name>
-			<url>http://mvn.ecsec.de/content/groups/openecard-public</url>
+			<url>https://mvn.ecsec.de/content/groups/openecard-public</url>
 		</repository>
 	</repositories>
 
 	<pluginRepositories>
 		<pluginRepository>
 			<id>openecard-repos</id>
-			<url>http://mvn.ecsec.de/content/groups/openecard-public</url>
+			<url>https://mvn.ecsec.de/content/groups/openecard-public</url>
 		</pluginRepository>
 	</pluginRepositories>
 

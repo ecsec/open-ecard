@@ -65,6 +65,7 @@
 		<license.licenseName>gpl_v3</license.licenseName>
 		<findbugs.packages>org.openecard.clients.-,org.openecard.android.-,org.openecard.richclient.-,org.openecard.common.-,org.openecard.control.-,org.openecard.crypto.-,org.openecard.esign.-,org.openecard.event.-,org.openecard.scio.-,org.openecard.management.-,org.openecard.recognition.-,org.openecard.sal.-,org.openecard.saml.-,org.openecard.transport.-,org.openecard.ws.android.-,org.openecard.ws.jaxb.-,org.openecard.ws.marshal.-,org.openecard.ws.common.-,org.openecard.ws.,org.openecard.i18n.-,org.openecard.gui.-,org.openecard.ifd.-,org.openecard.browser.-,org.openecard.maven.-</findbugs.packages>
 		<android.api.version>15</android.api.version>
+		<javadoc.check>-Xdoclint:none</javadoc.check>
 	</properties>
 
 	<distributionManagement>
@@ -110,6 +111,15 @@
 			</activation>
 			<properties>
 				<maven.min.version>3.1.1</maven.min.version>
+			</properties>
+		</profile>
+		<profile>
+			<id>javadoc-fix</id>
+			<activation>
+				<jdk>1.8</jdk>
+			</activation>
+			<properties>
+				<javadoc.check>-Xdoclint:none</javadoc.check>
 			</properties>
 		</profile>
 		<profile>
@@ -302,6 +312,7 @@
 					<configuration>
 						<show>protected</show>
 						<linksource>true</linksource>
+						<additionalparam>${javadoc.check}</additionalparam>
 						<groups>
 							<group>
 								<title>Open eCard Client Classes</title>

@@ -112,6 +112,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -689,16 +690,7 @@ public class AndroidMarshaller implements WSMarshaller {
 
     @Override
     public synchronized Object unmarshal(Node n) throws MarshallingTypeException, WSMarshallerException {
-	Document newDoc = null;
-	if (n instanceof Document) {
-	    newDoc = (Document) n;
-	} else if (n instanceof Element) {
-	    newDoc = documentBuilder.newDocument();
-	    Node root = newDoc.importNode(n, true);
-	    newDoc.appendChild(root);
-	} else {
-	    throw new WSMarshallerException("Only w3c Document and Element are accepted.");
-	}
+	Document newDoc = createDoc(n);
 
 	try {
 	    XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
@@ -717,6 +709,33 @@ public class AndroidMarshaller implements WSMarshaller {
 	} catch (Exception e) {
 	    throw new MarshallingTypeException(e);
 	}
+    }
+
+    @Override
+    public synchronized <T> JAXBElement<T> unmarshal(Node n, Class<T> c) throws MarshallingTypeException,
+	    WSMarshallerException {
+	Object result = unmarshal(n);
+	if (result instanceof JAXBElement) {
+	    JAXBElement jaxbElem = (JAXBElement) result;
+	    if (jaxbElem.getDeclaredType().equals(c)) {
+		return jaxbElem;
+	    }
+	}
+	throw new MarshallingTypeException(String.format("Invalid type requested for unmarshalling: '%s'", c));
+    }
+
+    private Document createDoc(Node n) throws WSMarshallerException {
+	Document newDoc = null;
+	if (n instanceof Document) {
+	    newDoc = (Document) n;
+	} else if (n instanceof Element) {
+	    newDoc = documentBuilder.newDocument();
+	    Node root = newDoc.importNode(n, true);
+	    newDoc.appendChild(root);
+	} else {
+	    throw new WSMarshallerException("Only w3c Document and Element are accepted.");
+	}
+	return newDoc;
     }
 
     private synchronized ResponseAPDUType parseResponseAPDUType(XmlPullParser parser) throws XmlPullParserException,

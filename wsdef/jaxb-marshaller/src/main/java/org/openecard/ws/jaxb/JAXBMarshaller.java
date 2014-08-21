@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -170,6 +171,30 @@ public final class JAXBMarshaller implements WSMarshaller {
 
     @Override
     public synchronized Object unmarshal(Node n) throws MarshallingTypeException, WSMarshallerException {
+	Document newDoc = createDoc(n);
+	Object result;
+	try {
+	    result = marshaller.getUnmarshaller().unmarshal(newDoc); //NOI18N
+	} catch (JAXBException ex) {
+	    throw new MarshallingTypeException(ex);
+	}
+	return result;
+    }
+
+    @Override
+    public synchronized <T> JAXBElement<T> unmarshal(Node n, Class<T> c) throws MarshallingTypeException,
+	    WSMarshallerException {
+	Document newDoc = createDoc(n);
+	JAXBElement<T> result;
+	try {
+	    result = marshaller.getUnmarshaller().unmarshal(newDoc, c); //NOI18N
+	} catch (JAXBException ex) {
+	    throw new MarshallingTypeException(ex);
+	}
+	return result;
+    }
+
+    private Document createDoc(Node n) throws WSMarshallerException {
 	Document newDoc = null;
 	if (n instanceof Document) {
 	    newDoc = (Document) n;
@@ -180,14 +205,7 @@ public final class JAXBMarshaller implements WSMarshaller {
 	} else {
 	    throw new WSMarshallerException("Only w3c Document and Element are accepted.");
 	}
-
-	Object result;
-	try {
-	    result = marshaller.getUnmarshaller().unmarshal(newDoc); //NOI18N
-	} catch (JAXBException ex) {
-	    throw new MarshallingTypeException(ex);
-	}
-	return result;
+	return newDoc;
     }
 
     @Override

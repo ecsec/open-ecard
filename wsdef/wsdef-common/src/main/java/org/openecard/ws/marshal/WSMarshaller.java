@@ -24,6 +24,7 @@ package org.openecard.ws.marshal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import javax.xml.bind.JAXBElement;
 import javax.xml.transform.TransformerException;
 import org.openecard.ws.soap.SOAPException;
 import org.openecard.ws.soap.SOAPMessage;
@@ -97,6 +98,18 @@ public interface WSMarshaller {
      *   org.w3c.dom.Element}.
      */
     Object unmarshal(Node n) throws MarshallingTypeException, WSMarshallerException;
+    /**
+     * Unmarshal the given document node.
+     *
+     * @param <T> JAXB type of the root element.
+     * @param n The DOM node to unmarshal.
+     * @param c Class instance of the root element's type.
+     * @return The JAXB object representing the given DOM node.
+     * @throws MarshallingTypeException If the given node represents an unsupported JAXB type.
+     * @throws WSMarshallerException If the given node is neither a {@link org.w3c.dom.Document}, nor an {@link
+     *   org.w3c.dom.Element}.
+     */
+    <T> JAXBElement<T> unmarshal(Node n, Class<T> c) throws MarshallingTypeException, WSMarshallerException;
     /**
      * Marshal the given JAXB object.
      *

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -80,14 +80,13 @@ import org.xml.sax.SAXException;
  * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
  * @author Tobias Wich <tobias.wich@ecsec.de>
  * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class PAOS {
 
     private static final Logger logger = LoggerFactory.getLogger(PAOS.class);
 
     public static final String HEADER_KEY_PAOS = "PAOS";
-    // TODO: add service and actions as stated in https://dev.openecard.org/issues/191
-    public static final String HEADER_VALUE_PAOS = "ver=\"" + ECardConstants.PAOS_VERSION_20 + "\"";
 
     public static final QName RELATES_TO = new QName(ECardConstants.WS_ADDRESSING, "RelatesTo");
     public static final QName REPLY_TO = new QName(ECardConstants.WS_ADDRESSING, "ReplyTo");
@@ -101,11 +100,13 @@ public class PAOS {
     public static final QName PAOS_METADATA = new QName(ECardConstants.PAOS_VERSION_20, "MetaData");
     public static final QName PAOS_SERVICETYPE = new QName(ECardConstants.PAOS_VERSION_20, "ServiceType");
 
+    private final String headerValuePaos;
     private final MessageIdGenerator idGenerator;
     private final WSMarshaller m;
     private final Dispatcher dispatcher;
     private final TlsConnectionHandler tlsHandler;
-    
+
+    private final String serviceString;
 
     /**
      * Creates a PAOS instance and configures it for a given endpoint.
@@ -117,8 +118,10 @@ public class PAOS {
      * @throws PAOSException In case the PAOS module could not be initialized.
      */
     public PAOS(@Nonnull Dispatcher dispatcher, @Nonnull TlsConnectionHandler tlsHandler) throws PAOSException {
-	this.dispatcher = dispatcher;
+	this.dispatcher = dispatcher.getFilter();
 	this.tlsHandler = tlsHandler;
+	serviceString = buildServiceString();
+	headerValuePaos = "ver=\"" + ECardConstants.PAOS_VERSION_20 + "\"; " + serviceString;
 
 	try {
 	    this.idGenerator = new MessageIdGenerator();
@@ -201,6 +204,7 @@ public class PAOS {
 	try {
 	    Document doc = m.str2doc(content);
 	    SOAPMessage msg = m.doc2soap(doc);
+	   // msg.getSOAPHeader().
 	    updateMessageID(msg);
 
 	    if (logger.isDebugEnabled()) {
@@ -300,11 +304,9 @@ public class PAOS {
 		    BasicHttpEntityEnclosingRequest req = new BasicHttpEntityEnclosingRequest("POST", resource);
 		    req.setParams(conn.getParams());
 		    HttpRequestHelper.setDefaultHeader(req, tlsHandler.getServerAddress());
-		    req.setHeader(HEADER_KEY_PAOS, HEADER_VALUE_PAOS);
-		    // this is how it would be correct
-		    //req.setHeader("Accept", "text/html;q=0.2, application/vnd.paos+xml");
-		    // and this is how it works :-/
-		    req.setHeader("Accept", "text/html; application/vnd.paos+xml");
+		    req.setHeader(HEADER_KEY_PAOS, headerValuePaos);
+		    req.setHeader("Accept", "text/xml, application/xml, application/vnd.paos+xml");
+
 		    ContentType reqContentType = ContentType.create("application/vnd.paos+xml", "UTF-8");
 		    HttpUtils.dumpHttpRequest(logger, "before adding content", req);
 		    String reqMsgStr = createPAOSResponse(msg);
@@ -389,9 +391,9 @@ public class PAOS {
     }
 
     /**
-     * Check the status code returned from the server. 
+     * Check the status code returned from the server.
      * If the status code indicates an error, a PAOSException will be thrown.
-     * 
+     *
      * @param msg The last message we sent to the server
      * @param statusCode The status code we received from the server
      * @throws PAOSException If the server returned a HTTP error code
@@ -408,6 +410,29 @@ public class PAOS {
 	    }
 	    throw new PAOSException("Received HTML Error Code " + statusCode);
 	}
+    }
+
+    /**
+     * Creates a String with all available services.
+     *
+     * @return A String containing all available services.
+     */
+    private String buildServiceString() {
+	StringBuilder builder = new StringBuilder();
+
+	// iterate separately over the list just in case someone mixed the order
+	// first bund namespace services
+	for (String service : dispatcher.getServiceList()) {
+	    builder.append("\"");
+	    builder.append(service);
+	    builder.append("\", ");
+	}
+
+	// remove last colon
+	int lastColon = builder.lastIndexOf(", ");
+	builder.replace(lastColon, lastColon + 2, "");
+
+	return builder.toString();
     }
 
 }

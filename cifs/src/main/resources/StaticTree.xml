@@ -494,5 +494,44 @@
 			</iso:Conclusion>
 		</iso:ResponseAPDU>
 	</iso:CardCall>
+	<iso:CardCall>
+	    <iso:CommandAPDU>00A4080C063F00DF005032</iso:CommandAPDU>
+	    <iso:ResponseAPDU>
+		<iso:Trailer>9000</iso:Trailer>
+		<iso:Conclusion>
+		    <iso:CardCall>
+			<iso:CommandAPDU>00B0001906</iso:CommandAPDU>
+			<iso:ResponseAPDU>
+			    <iso:Body>
+				<iso:MatchingData>
+				    <iso:Offset>00</iso:Offset>
+				    <iso:Length>06</iso:Length>
+				    <iso:MatchingValue>42454C504943</iso:MatchingValue>
+				</iso:MatchingData>
+			    </iso:Body>
+			    <iso:Trailer>9000</iso:Trailer>
+			    <iso:Conclusion>
+				<iso:CardCall>
+				    <iso:CommandAPDU>80E400001C</iso:CommandAPDU>
+				    <iso:ResponseAPDU>
+					<iso:Body>
+					    <iso:MatchingData>
+						<iso:Offset>15</iso:Offset>
+						<iso:Length>01</iso:Length>
+						<iso:MatchingValue>11</iso:MatchingValue>
+					    </iso:MatchingData>
+					</iso:Body>
+					<iso:Trailer>9000</iso:Trailer>
+					<iso:Conclusion>
+					    <iso:RecognizedCardType>http://eid.belgium.be/en/find_out_more_about_the_eid/the_electronic_identity_documents/the_eid/v1.01</iso:RecognizedCardType>
+					</iso:Conclusion>
+				    </iso:ResponseAPDU>
+				</iso:CardCall>
+			    </iso:Conclusion>
+			</iso:ResponseAPDU>
+		    </iso:CardCall>
+		</iso:Conclusion>
+		</iso:ResponseAPDU>
+	    </iso:CardCall>
 	</iso:RecognitionTree>
 </iso:GetRecognitionTreeResponse>

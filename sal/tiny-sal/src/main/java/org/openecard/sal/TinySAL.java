@@ -509,6 +509,7 @@ public class TinySAL implements SAL {
      * @param request CardApplicationList
      * @return CardApplicationListResponse
      */
+    @Publish
     @Override
     public CardApplicationListResponse cardApplicationList(CardApplicationList request) {
 	CardApplicationListResponse response = WSHelper.makeResponse(CardApplicationListResponse.class,
@@ -596,6 +597,7 @@ public class TinySAL implements SAL {
      * @param request CardApplicationServiceList
      * @return CardApplicationServiceListResponse
      */
+    @Publish
     @Override
     public CardApplicationServiceListResponse cardApplicationServiceList(CardApplicationServiceList request) {
 	CardApplicationServiceListResponse response = WSHelper.makeResponse(CardApplicationServiceListResponse.class,

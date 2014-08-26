@@ -43,11 +43,11 @@ public class ClientEnv implements Environment {
     private SAL sal;
     private EventManager manager;
     private Dispatcher dispatcher;
-    private Map<String, Object> genericComponents;
     private Management management;
+    private final Map<String, Object> genericComponents;
 
     public ClientEnv() {
-	genericComponents = new ConcurrentSkipListMap<String, Object>();
+	genericComponents = new ConcurrentSkipListMap<>();
     }
 
 

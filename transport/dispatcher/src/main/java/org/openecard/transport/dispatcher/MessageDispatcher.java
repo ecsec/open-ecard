@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import org.openecard.common.interfaces.Dispatchable;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
@@ -153,13 +154,20 @@ public class MessageDispatcher implements Dispatcher {
 		// add env method mapping
 		this.serviceInstMap.put(returnType.getName(), nextAccessor);
 
-		// create service and map its request parameters
-		Service service;
-		if (isFilter) {
-		    service = new Service(returnType, isFilter);
-		} else {
-		    service = new Service(returnType);
+		// update type mentioned in Dispatchable annotation to the actual type returned by the function
+		Class<?> returnTypeImpl = returnType;
+		try {
+		    Object result = nextAccessor.invoke(environment);
+		    if (result != null) {
+			returnTypeImpl = result.getClass();
+		    }
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+		    logger.error("Actual type could not be retrieved from method " + nextAccessor + ".", ex);
+		    continue;
 		}
+
+		// create service and map its request parameters
+		Service service = new Service(returnType, returnTypeImpl, isFilter);
 
 		for (Class<?> reqClass : service.getRequestClasses()) {
 		    if (serviceMap.containsKey(reqClass.getName())) {
@@ -188,7 +196,9 @@ public class MessageDispatcher implements Dispatcher {
     }
 
     private void createServiceList() {
-	for (Service service : serviceMap.values()) {
+	TreeSet<Service> services = new TreeSet<>();
+	services.addAll(serviceMap.values());
+	for (Service service : services) {
 	    availableServiceNames.addAll(service.getActionList());
 	}
     }

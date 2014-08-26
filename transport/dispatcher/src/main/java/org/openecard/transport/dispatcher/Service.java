@@ -26,6 +26,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -47,11 +48,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-class Service {
+class Service implements Comparable<Service> {
 
     private static final Logger logger = LoggerFactory.getLogger(Service.class);
 
     private final Class<?> iface;
+    private final Class<?> impl;
     private final ArrayList<Class<?>> requestClasses;
     private final TreeMap<String, Method> requestMethods;
     private final HashMap<Class<?>, MessageLogger> objectLoggers;
@@ -63,20 +65,13 @@ class Service {
      *
      * @param iface The webservice interface class.
      */
-    public Service(Class<?> iface) {
-	this.iface = iface;
-
-	requestClasses = new ArrayList<>();
-	requestMethods = new TreeMap<>();
-	objectLoggers = new HashMap<>();
-	actions = new ArrayList<>();
-	isFilter = false;
-
-	init();
+    public Service(Class<?> iface, Class<?> impl) {
+	this(iface, impl, false);
     }
 
-    protected Service(Class<?> iface, boolean isFilter) {
+    protected Service(Class<?> iface, Class<?> impl, boolean isFilter) {
 	this.iface = iface;
+	this.impl = impl;
 
 	requestClasses = new ArrayList<>();
 	requestMethods = new TreeMap<>();
@@ -88,28 +83,62 @@ class Service {
     }
 
     private void init() {
-	Method[] methods = iface.getDeclaredMethods();
+	Method[] methods = impl.getDeclaredMethods();
 	for (Method m : methods) {
-	    Annotation annotation = m.getAnnotation(WebMethod.class);
-	    if (isReqParam(m) &&  annotation != null) {
-		actions.add(parseAnnotation(annotation));
+	    WebMethod webAnnotation = getAnnotation(m, WebMethod.class);
+	    if (isReqParam(m) &&  webAnnotation != null) {
 		Class<?> reqClass = getReqParamClass(m);
 		if (requestMethods.containsKey(reqClass.getName())) {
-		    String msg = "Omitting method {} in service interface {}, because its parameter type is already ";
-		    msg += "associated with another method.";
-		    logger.warn(msg, m.getName(), iface.getName());
+		    String msg = "Omitting method {} in service interface {}, because its parameter type is ";
+		    msg += "already associated with another method.";
+		    logger.warn(msg, m.getName(), impl.getName());
 		} else {
+		    String action = webAnnotation.action();
 		    if (isFilter) {
-			if (m.getAnnotation(Publish.class) != null) {
+			if (getAnnotation(m, Publish.class) != null) {
 			    requestClasses.add(reqClass);
 			    requestMethods.put(reqClass.getName(), m);
+			    actions.add(action);
 			}
 		    } else {
 			requestClasses.add(reqClass);
 			requestMethods.put(reqClass.getName(), m);
+			actions.add(action);
 		    }
 		}
 	    }
+	}
+    }
+
+    private static <A extends Annotation> A getAnnotation(Method m, final Class<? extends A> aClass) {
+	// direct lookup
+	A a = m.getAnnotation(aClass);
+	if (a != null) {
+	    return a;
+	} else {
+	    // try interfaces and superclass
+	    List<Class<?>> children = new ArrayList<>();
+	    Class<?> declaringClass = m.getDeclaringClass();
+	    // find all interfaces and the super class
+	    children.addAll(Arrays.asList(declaringClass.getInterfaces()));
+	    if (declaringClass.getSuperclass() != null) {
+		children.add(declaringClass.getSuperclass());
+	    }
+
+	    // try to find annotation in any of the childs
+	    for (Class<?> c : children) {
+		try {
+		    m = c.getDeclaredMethod(m.getName(), m.getParameterTypes());
+		} catch (NoSuchMethodException | SecurityException ex) {
+		    continue;
+		}
+		a = getAnnotation(m, aClass);
+		if (a != null) {
+		    return a;
+		}
+	    }
+	    // nothing found
+	    return null;
 	}
     }
 
@@ -199,19 +228,6 @@ class Service {
 	return m;
     }
 
-    private String parseAnnotation(Annotation annotation) {
-	StringBuilder builder = new StringBuilder();
-	builder.append(annotation.toString());
-	int lastSpace = builder.lastIndexOf(" ");
-	// remove everything before the action name
-	builder.replace(0, lastSpace + 1, "");
-	// remove the tailing brace
-	int lastBrace = builder.lastIndexOf(")");
-	builder.replace(lastBrace, lastBrace + 1, "");
-
-	return builder.toString();
-    }
-
     /**
      * Get a list with all the action names of this service.
      *
@@ -264,6 +280,11 @@ class Service {
 	    }
 	}
 
+    }
+
+    @Override
+    public int compareTo(Service o) {
+	return this.iface.toString().compareTo(o.iface.toString());
     }
 
 }

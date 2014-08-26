@@ -121,7 +121,7 @@ public class PAOS {
 	this.dispatcher = dispatcher.getFilter();
 	this.tlsHandler = tlsHandler;
 	serviceString = buildServiceString();
-	headerValuePaos = "ver=\"" + ECardConstants.PAOS_VERSION_20 + "\"; " + serviceString;
+	headerValuePaos = String.format("ver=\"%s\" %s", ECardConstants.PAOS_VERSION_20, serviceString);
 
 	try {
 	    this.idGenerator = new MessageIdGenerator();
@@ -419,19 +419,12 @@ public class PAOS {
      */
     private String buildServiceString() {
 	StringBuilder builder = new StringBuilder();
-
-	// iterate separately over the list just in case someone mixed the order
-	// first bund namespace services
 	for (String service : dispatcher.getServiceList()) {
-	    builder.append("\"");
+	    builder.append(";");
+	    builder.append('"');
 	    builder.append(service);
-	    builder.append("\", ");
+	    builder.append("'");
 	}
-
-	// remove last colon
-	int lastColon = builder.lastIndexOf(", ");
-	builder.replace(lastColon, lastColon + 2, "");
-
 	return builder.toString();
     }
 

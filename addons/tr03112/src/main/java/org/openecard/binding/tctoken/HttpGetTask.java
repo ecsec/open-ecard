@@ -44,7 +44,6 @@ import org.openecard.common.util.FileUtils;
 import org.openecard.transport.httpcore.HttpRequestHelper;
 import org.openecard.transport.httpcore.HttpUtils;
 import org.openecard.transport.httpcore.StreamHttpClientConnection;
-import static org.openecard.transport.paos.PAOS.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +101,6 @@ public class HttpGetTask implements Callable<StartPAOSResponse> {
 	BasicHttpEntityEnclosingRequest req = new BasicHttpEntityEnclosingRequest("GET", resource);
 	req.setParams(conn.getParams());
 	HttpRequestHelper.setDefaultHeader(req, tlsHandler.getServerAddress());
-	req.setHeader(HEADER_KEY_PAOS, HEADER_VALUE_PAOS);
 	req.setHeader("Accept", "text/html; */*");
 	HttpUtils.dumpHttpRequest(logger, req);
 

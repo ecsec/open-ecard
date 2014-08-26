@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,6 +25,9 @@ package org.openecard.transport.dispatcher;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.TreeMap;
 import org.openecard.common.interfaces.Dispatchable;
 import org.openecard.common.interfaces.Dispatcher;
@@ -39,6 +42,7 @@ import org.slf4j.LoggerFactory;
  * This implementation defers its actual reflection work to the {@link Service} class.
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
  */
 public class MessageDispatcher implements Dispatcher {
 
@@ -50,6 +54,10 @@ public class MessageDispatcher implements Dispatcher {
     /** Key is service interface classname */
     private final TreeMap<String, Method> serviceInstMap;
 
+    private final List<String> availableServiceNames;
+
+    private final boolean isFilter;
+
     /**
      * Creates a new MessageDispatcher instance and loads all definitions from the webservice interfaces in the
      * environment.
@@ -58,9 +66,22 @@ public class MessageDispatcher implements Dispatcher {
      */
     public MessageDispatcher(Environment environment) {
 	this.environment = environment;
-	serviceMap = new TreeMap<String, Service>();
-	serviceInstMap = new TreeMap<String, Method>();
+	isFilter = false;
+	serviceMap = new TreeMap<>();
+	serviceInstMap = new TreeMap<>();
 	initDefinitions();
+	availableServiceNames = new ArrayList<>();
+	createServiceList();
+    }
+
+    private MessageDispatcher(Environment environment, boolean isFilter) {
+	this.environment = environment;
+	this.isFilter = isFilter;
+	serviceMap = new TreeMap<>();
+	serviceInstMap = new TreeMap<>();
+	initDefinitions();
+	availableServiceNames = new ArrayList<>();
+	createServiceList();
     }
 
 
@@ -75,9 +96,7 @@ public class MessageDispatcher implements Dispatcher {
 
 	    Object result =  s.invoke(serviceImpl, req);
 	    return result;
-	} catch (IllegalAccessException ex) {
-	    throw new DispatcherException(ex);
-	} catch (IllegalArgumentException ex) {
+	} catch (IllegalAccessException | IllegalArgumentException ex) {
 	    throw new DispatcherException(ex);
 	}
     }
@@ -130,11 +149,18 @@ public class MessageDispatcher implements Dispatcher {
 		    logger.warn(msg, returnType.getName());
 		    continue;
 		}
+
 		// add env method mapping
 		this.serviceInstMap.put(returnType.getName(), nextAccessor);
 
 		// create service and map its request parameters
-		Service service = new Service(returnType);
+		Service service;
+		if (isFilter) {
+		    service = new Service(returnType, isFilter);
+		} else {
+		    service = new Service(returnType);
+		}
+
 		for (Class<?> reqClass : service.getRequestClasses()) {
 		    if (serviceMap.containsKey(reqClass.getName())) {
 			String msg = "Omitting method with parameter type {} in service interface {} because its ";
@@ -145,6 +171,25 @@ public class MessageDispatcher implements Dispatcher {
 		    }
 		}
 	    }
+	}
+    }
+
+    @Override
+    public List<String> getServiceList() {
+	return Collections.unmodifiableList(availableServiceNames);
+    }
+
+    @Override
+    public Dispatcher getFilter() {
+	if (isFilter) {
+	    return this;
+	}
+	return new MessageDispatcher(this.environment, true);
+    }
+
+    private void createServiceList() {
+	for (Service service : serviceMap.values()) {
+	    availableServiceNames.addAll(service.getActionList());
 	}
     }
 

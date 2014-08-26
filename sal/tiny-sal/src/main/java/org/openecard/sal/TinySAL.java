@@ -54,9 +54,9 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceDescribe;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceDescribeResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceList;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceListResponse;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceListResponse.CardApplicationServiceNameList;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceLoad;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceLoadResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceListResponse.CardApplicationServiceNameList;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSession;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSessionResponse;
@@ -93,9 +93,9 @@ import iso.std.iso_iec._24727.tech.schema.DSIListResponse;
 import iso.std.iso_iec._24727.tech.schema.DSINameListType;
 import iso.std.iso_iec._24727.tech.schema.DSIRead;
 import iso.std.iso_iec._24727.tech.schema.DSIReadResponse;
+import iso.std.iso_iec._24727.tech.schema.DSIType;
 import iso.std.iso_iec._24727.tech.schema.DSIWrite;
 import iso.std.iso_iec._24727.tech.schema.DSIWriteResponse;
-import iso.std.iso_iec._24727.tech.schema.DSIType;
 import iso.std.iso_iec._24727.tech.schema.DataSetCreate;
 import iso.std.iso_iec._24727.tech.schema.DataSetCreateResponse;
 import iso.std.iso_iec._24727.tech.schema.DataSetDelete;
@@ -134,8 +134,8 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -167,7 +167,6 @@ import org.openecard.common.apdu.utils.CardUtils;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.sal.Assert;
-import org.openecard.crypto.common.sal.CryptoMarkerType;
 import org.openecard.common.sal.exception.InappropriateProtocolForActionException;
 import org.openecard.common.sal.exception.IncorrectParameterException;
 import org.openecard.common.sal.exception.NameExistsException;
@@ -184,6 +183,7 @@ import org.openecard.common.sal.util.SALUtils;
 import org.openecard.common.tlv.iso7816.DataElements;
 import org.openecard.common.tlv.iso7816.FCP;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.crypto.common.sal.CryptoMarkerType;
 import org.openecard.gui.UserConsent;
 import org.openecard.ws.SAL;
 import org.slf4j.Logger;
@@ -618,7 +618,7 @@ public class TinySAL implements SAL {
                 
                 if (Arrays.equals(appName, cardApplicationID)) {
                     Iterator<CardApplicationServiceType> itt = next.getCardApplicationServiceInfo().iterator();
-                
+
                     while (itt.hasNext()) {
                         CardApplicationServiceType nextt = itt.next();
                         cardApplicationServiceNameList.getCardApplicationServiceName().add(nextt.getCardApplicationServiceName());
@@ -1112,8 +1112,8 @@ public class TinySAL implements SAL {
 
 	    if (! Arrays.equals(dataSetInfo.getDataSetPath().getEfIdOrPath(), 
 		    cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0))) {
-		throw new PrerequisitesNotSatisfiedException("The currently selected data set does not contain the DSI "
-			+ "to be updated.");
+		String msg = "The currently selected data set does not contain the DSI to be updated.";
+		throw new PrerequisitesNotSatisfiedException(msg);
 	    }
 
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
@@ -1784,7 +1784,7 @@ public class TinySAL implements SAL {
 	    // handle must be requested without application, as it is irrelevant for this call
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
 	    String didName = SALUtils.getDIDName(request);
-	    
+
 	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, cardStateEntry, connectionHandle);
 	    response.setDIDStructure(didStructure);
 	} catch (ECardException e) {
@@ -1804,6 +1804,7 @@ public class TinySAL implements SAL {
      * @param request DIDUpdate
      * @return DIDUpdateResponse
      */
+    // TODO: discuss whether we should publish this @Publish
     @Override
     public DIDUpdateResponse didUpdate(DIDUpdate request) {
 	DIDUpdateResponse response = WSHelper.makeResponse(DIDUpdateResponse.class, WSHelper.makeResultOK());
@@ -1812,13 +1813,13 @@ public class TinySAL implements SAL {
             ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
             byte[] cardApplicationID = connectionHandle.getCardApplication();
             CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
-                                        
+
 	    String didName = request.getDIDName();
 	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
 
 	    DIDUpdateDataType didUpdateData = request.getDIDUpdateData();
 	    Assert.assertIncorrectParameter(didUpdateData, "The parameter DIDUpdateData is empty.");
-	    
+
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
@@ -1839,7 +1840,7 @@ public class TinySAL implements SAL {
 	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
-	
+
 	return response;
     }
 
@@ -2006,22 +2007,6 @@ public class TinySAL implements SAL {
 	this.userConsent = uc;
     }
 
-    /**
-     * Returns a list of ConnectionHandles.
-     *
-     * @return List of ConnectionHandles
-     */
-    public List<ConnectionHandleType> getConnectionHandles() {
-	ConnectionHandleType handle = new ConnectionHandleType();
-	Set<CardStateEntry> entries = states.getMatchingEntries(handle);
-	ArrayList<ConnectionHandleType> result = new ArrayList<>(entries.size());
-
-	for (CardStateEntry entry : entries) {
-	    result.add(entry.handleCopy());
-	}
-
-	return result;
-    }
 
     /**
      * Removes a finished protocol from the SAL instance.
@@ -2031,7 +2016,7 @@ public class TinySAL implements SAL {
      * @param protocol Protocol
      * @throws UnknownConnectionHandleException
      */
-    public void removeFinishedProtocol(ConnectionHandleType handle, String protocolURI, SALProtocol protocol)
+    private void removeFinishedProtocol(ConnectionHandleType handle, String protocolURI, SALProtocol protocol)
 	    throws UnknownConnectionHandleException {
 	if (protocol.isFinished()) {
 	    CardStateEntry entry = SALUtils.getCardStateEntry(states, handle);

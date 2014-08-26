@@ -160,7 +160,7 @@ public class IFD implements org.openecard.ws.IFD {
 		ctxHandle = scwrapper.createHandle(ECardConstants.CONTEXT_HANDLE_DEFAULT_SIZE);
 		numClients = new AtomicInteger(1);
 		threadPool = Executors.newCachedThreadPool();
-		asyncWaitThreads = new ConcurrentSkipListMap<String, Future<List<IFDStatusType>>>();
+		asyncWaitThreads = new ConcurrentSkipListMap<>();
 	    } else {
 		// on second or further calls, increment usage counter
 		numClients.incrementAndGet();
@@ -244,7 +244,7 @@ public class IFD implements org.openecard.ws.IFD {
 
 
     private List<String> buildPACEProtocolList(List<PACECapabilities.PACECapability> paceCapabilities) {
-	List<String> supportedProtos = new LinkedList<String>();
+	List<String> supportedProtos = new LinkedList<>();
 	for (PACECapabilities.PACECapability next : paceCapabilities) {
 	    supportedProtos.add(next.getProtocol());
 	}
@@ -337,7 +337,7 @@ public class IFD implements org.openecard.ws.IFD {
 		return response;
 	    } else {
 		// get ifd name from request or directly from the sc-io
-		List<SCTerminal> ifds = new LinkedList<SCTerminal>();
+		List<SCTerminal> ifds = new LinkedList<>();
 		// get ifd names which should be investigated
 		try {
 		    if (parameters.getIFDName() != null) {
@@ -444,7 +444,7 @@ public class IFD implements org.openecard.ws.IFD {
 
 		// create the event and fire
 		EventListener l = new EventListener(this, scwrapper, threadPool, ctxHandle, timeout.longValue(), callback, expectedStatuses, withNew);
-		FutureTask<List<IFDStatusType>> future = new FutureTask<List<IFDStatusType>>(l);
+		FutureTask<List<IFDStatusType>> future = new FutureTask<>(l);
 
 		if (l.isAsync()) {
 		    // add future to async wait list
@@ -597,7 +597,7 @@ public class IFD implements org.openecard.ws.IFD {
 			SCChannel channel = t.connect();
 			// make connection exclusive
 			Boolean exclusive = parameters.isExclusive();
-			if (exclusive != null && exclusive.booleanValue() == true) {
+			if (exclusive != null && exclusive == true) {
 			    BeginTransaction transact = new BeginTransaction();
 			    transact.setSlotHandle(channel.getHandle());
 			    BeginTransactionResponse resp = beginTransaction(transact);

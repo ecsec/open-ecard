@@ -118,6 +118,7 @@ import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.common.ClientEnv;
@@ -184,37 +185,6 @@ public class TinySALTest {
 	salCallback.signalEvent(EventType.CARD_RECOGNIZED, connectionHandleType);
 	instance = new TinySAL(env, states);
 	env.setSAL(instance);
-    }
-
-    /**
-     * Test of getConnectionHandles method, of class TinySAL.
-     */
-    @Test(enabled=false)
-    public void testGetConnectionHandles() {
-	System.out.println("getConnectionHandles");
-	List<ConnectionHandleType> cHandles = instance.getConnectionHandles();
-	assertTrue(cHandles.isEmpty());
-	String[] readers = { "Reader 1", "Reader 2" };
-	ConnectionHandleType cHandle1 = new ConnectionHandleType();
-	cHandle1.setIFDName(readers[0]);
-	ConnectionHandleType cHandle2 = new ConnectionHandleType();
-	cHandle2.setIFDName(readers[1]);
-	// add connection handles to microSAL
-	CardStateEntry entry1 = new CardStateEntry(cHandle1, null); // TODO: null works as long as
-								    // there is no cif support
-	states.addEntry(entry1);
-	CardStateEntry entry2 = new CardStateEntry(cHandle2, null);
-	states.addEntry(entry2);
-	cHandles = instance.getConnectionHandles();
-	assertTrue(cHandles.size() == 2);
-	for (int i = 0; i < cHandles.size(); i++) {
-	    assertEquals(readers[i], cHandles.get(i).getIFDName());
-	}
-	// remove one connection handle from microSAL
-	states.removeEntry(cHandle1);
-	cHandles = instance.getConnectionHandles();
-	assertTrue(cHandles.size() == 1);
-	assertEquals(cHandles.get(0).getIFDName(), readers[1]);
     }
 
     /**
@@ -448,11 +418,11 @@ public class TinySALTest {
     public void testCardApplicationCreate() {
 	System.out.println("cardApplicationCreate");
 
-	List<ConnectionHandleType> cHandles = instance.getConnectionHandles();
+	Set<CardStateEntry> cHandles = states.getMatchingEntries(new ConnectionHandleType());
 	byte[] appName = {(byte)0x74, (byte)0x65, (byte)0x73, (byte)0x74};
 
 	CardApplicationCreate parameters = new CardApplicationCreate();
-	parameters.setConnectionHandle(cHandles.get(0));
+	parameters.setConnectionHandle(cHandles.iterator().next().handleCopy());
 	parameters.setCardApplicationName(appName);
 
 	AccessControlListType cardApplicationACL = new AccessControlListType();
@@ -475,7 +445,7 @@ public class TinySALTest {
 	assertEquals(ECardConstants.Major.OK, resultConnect.getResult().getResultMajor());
 
 	CardApplicationList cardApplicationList = new CardApplicationList();
-	cardApplicationList.setConnectionHandle(cHandles.get(0));
+	cardApplicationList.setConnectionHandle(cHandles.iterator().next().handleCopy());
 	CardApplicationListResponse cardApplicationListResponse = instance.cardApplicationList(cardApplicationList);
 
 	Iterator<byte[]> it = cardApplicationListResponse.getCardApplicationNameList().getCardApplicationName().iterator();
@@ -505,11 +475,11 @@ public class TinySALTest {
     public void testCardApplicationDelete() {
 	System.out.println("cardApplicationDelete");
 
-	List<ConnectionHandleType> cHandles = instance.getConnectionHandles();
+	Set<CardStateEntry> cHandles = states.getMatchingEntries(new ConnectionHandleType());
 	byte[] appName = {(byte)0x74, (byte)0x65, (byte)0x73, (byte)0x74};
 
 	CardApplicationDelete parameters = new CardApplicationDelete();
-	parameters.setConnectionHandle(cHandles.get(0));
+	parameters.setConnectionHandle(cHandles.iterator().next().handleCopy());
 	parameters.setCardApplicationName(appName);
 
 	CardApplicationDeleteResponse result = instance.cardApplicationDelete(parameters);
@@ -529,7 +499,7 @@ public class TinySALTest {
 	assertEquals(ECardConstants.Major.OK, resultConnect.getResult().getResultMajor());
 
 	CardApplicationList cardApplicationList = new CardApplicationList();
-	cardApplicationList.setConnectionHandle(cHandles.get(0));
+	cardApplicationList.setConnectionHandle(cHandles.iterator().next().handleCopy());
 	CardApplicationListResponse cardApplicationListResponse = instance.cardApplicationList(cardApplicationList);
 
 	Iterator<byte[]> it = cardApplicationListResponse.getCardApplicationNameList().getCardApplicationName().iterator();
@@ -1452,16 +1422,6 @@ public class TinySALTest {
 	ACLModify parameters = new ACLModify();
 	ACLModifyResponse result = instance.aclModify(parameters);
 	assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());
-    }
-
-    /**
-     * Test of singalEvent method, of class TinySAL.
-     */
-    @Test(enabled=false)
-    public void testSingalEvent() {
-	System.out.println("singalEvent");
-	// same as getconnectionhandles, so call this one instead
-	testGetConnectionHandles();
     }
 
 }

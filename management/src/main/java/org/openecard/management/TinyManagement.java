@@ -91,6 +91,7 @@ import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Environment;
+import org.openecard.common.interfaces.Publish;
 import org.openecard.ws.Management;
 
 
@@ -216,6 +217,7 @@ public class TinyManagement implements  Management {
 	 return WSHelper.makeResponse(GetTrustedViewerListResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
     }
 
+    @Publish
     @Override
     public InitializeFrameworkResponse initializeFramework(InitializeFramework arg0) {
 	InitializeFrameworkResponse initializeFrameworkResponse = new InitializeFrameworkResponse();

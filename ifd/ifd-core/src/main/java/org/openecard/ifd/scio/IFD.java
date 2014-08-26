@@ -90,6 +90,7 @@ import org.openecard.common.ifd.ProtocolFactory;
 import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.ifd.anytype.PACEOutputType;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.Publish;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.ValueGenerators;
 import org.openecard.gui.UserConsent;
@@ -731,6 +732,7 @@ public class IFD implements org.openecard.ws.IFD {
     }
 
 
+    @Publish
     @Override
     public TransmitResponse transmit(Transmit parameters) {
 	try {

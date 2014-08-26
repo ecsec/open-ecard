@@ -166,6 +166,7 @@ import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.utils.CardUtils;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.interfaces.Environment;
+import org.openecard.common.interfaces.Publish;
 import org.openecard.common.sal.Assert;
 import org.openecard.common.sal.exception.InappropriateProtocolForActionException;
 import org.openecard.common.sal.exception.IncorrectParameterException;
@@ -418,6 +419,7 @@ public class TinySAL implements SAL {
      * @param request CardApplicationStartSession
      * @return CardApplicationStartSessionResponse
      */
+    @Publish
     @Override
     public CardApplicationStartSessionResponse cardApplicationStartSession(CardApplicationStartSession request) {
 	CardApplicationStartSessionResponse response = WSHelper.makeResponse(CardApplicationStartSessionResponse.class,
@@ -465,6 +467,7 @@ public class TinySAL implements SAL {
      * @param request CardApplicationEndSession
      * @return CardApplicationEndSessionResponse
      */
+    @Publish
     @Override
     public CardApplicationEndSessionResponse cardApplicationEndSession(CardApplicationEndSession request) {
 	CardApplicationEndSessionResponse response = WSHelper.makeResponse(CardApplicationEndSessionResponse.class,
@@ -686,6 +689,7 @@ public class TinySAL implements SAL {
      * @param request CardApplicationServiceDescribe
      * @return CardApplicationServiceDescribeResponse
      */
+    @Publish
     @Override
     public CardApplicationServiceDescribeResponse cardApplicationServiceDescribe(CardApplicationServiceDescribe request) {
 	 CardApplicationServiceDescribeResponse response =
@@ -755,6 +759,7 @@ public class TinySAL implements SAL {
      * @param request DataSetList
      * @return DataSetListResponse
      */
+    @Publish
     @Override
     public DataSetListResponse dataSetList(DataSetList request) {
 	DataSetListResponse response = WSHelper.makeResponse(DataSetListResponse.class, WSHelper.makeResultOK());
@@ -801,6 +806,7 @@ public class TinySAL implements SAL {
      * @param request DataSetSelect
      * @return DataSetSelectResponse
      */
+    @Publish
     @Override
     public DataSetSelectResponse dataSetSelect(DataSetSelect request) {
 	DataSetSelectResponse response = WSHelper.makeResponse(DataSetSelectResponse.class, WSHelper.makeResultOK());
@@ -892,6 +898,7 @@ public class TinySAL implements SAL {
      * @param request DSIList
      * @return DSIListResponse
      */
+    @Publish
     @Override
     public DSIListResponse dsiList(DSIList request) {
         DSIListResponse response = WSHelper.makeResponse(DSIListResponse.class, WSHelper.makeResultOK());
@@ -1002,6 +1009,7 @@ public class TinySAL implements SAL {
      * @param request DSIDelete
      * @return DSIDeleteResponse
      */
+    //TODO: rewiew function and add @Publish annotation
     @Override
     public DSIDeleteResponse dsiDelete(DSIDelete request) {
 	DSIDeleteResponse response = WSHelper.makeResponse(DSIDeleteResponse.class, WSHelper.makeResultOK());
@@ -1086,6 +1094,7 @@ public class TinySAL implements SAL {
      * @param request DSIWrite
      * @return DSIWriteResponse
      */
+    @Publish
     @Override
     public DSIWriteResponse dsiWrite(DSIWrite request) {
 	DSIWriteResponse response = WSHelper.makeResponse(DSIWriteResponse.class, WSHelper.makeResultOK());
@@ -1145,6 +1154,7 @@ public class TinySAL implements SAL {
      * @param request DSIRead
      * @return DSIReadResponse
      */
+    @Publish
     @Override
     public DSIReadResponse dsiRead(DSIRead request) {
 	DSIReadResponse response = WSHelper.makeResponse(DSIReadResponse.class, WSHelper.makeResultOK());
@@ -1284,6 +1294,7 @@ public class TinySAL implements SAL {
      * @param request Encipher
      * @return EncipherResponse
      */
+    @Publish
     @Override
     public EncipherResponse encipher(Encipher request) {
 	EncipherResponse response = WSHelper.makeResponse(EncipherResponse.class, WSHelper.makeResultOK());
@@ -1391,6 +1402,7 @@ public class TinySAL implements SAL {
      * @param request GetRandom
      * @return GetRandomResponse
      */
+    @Publish
     @Override
     public GetRandomResponse getRandom(GetRandom request) {
 	GetRandomResponse response = WSHelper.makeResponse(GetRandomResponse.class, WSHelper.makeResultOK());
@@ -1441,6 +1453,7 @@ public class TinySAL implements SAL {
      * @param request Hash
      * @return HashResponse
      */
+    @Publish
     @Override
     public HashResponse hash(Hash request) {
 	HashResponse response = WSHelper.makeResponse(HashResponse.class, WSHelper.makeResultOK());
@@ -1664,6 +1677,7 @@ public class TinySAL implements SAL {
      * @param request DIDList
      * @return DIDListResponse
      */
+    @Publish
     @Override
     public DIDListResponse didList(DIDList request) {
 	DIDListResponse response = WSHelper.makeResponse(DIDListResponse.class, WSHelper.makeResultOK());
@@ -1775,6 +1789,7 @@ public class TinySAL implements SAL {
      * @param request DIDGet
      * @return DIDGetResponse
      */
+    @Publish
     @Override
     public DIDGetResponse didGet(DIDGet request) {
 	DIDGetResponse response = WSHelper.makeResponse(DIDGetResponse.class, WSHelper.makeResultOK());
@@ -1895,6 +1910,7 @@ public class TinySAL implements SAL {
      * @param request DIDAuthenticate
      * @return DIDAuthenticateResponse
      */
+    @Publish
     @Override
     public DIDAuthenticateResponse didAuthenticate(DIDAuthenticate request) {
 	DIDAuthenticateResponse response = WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultOK());
@@ -1939,6 +1955,7 @@ public class TinySAL implements SAL {
      * @param request ACLList
      * @return ACLListResponse
      */
+    @Publish
     @Override
     public ACLListResponse aclList(ACLList request) {
 	ACLListResponse response = WSHelper.makeResponse(ACLListResponse.class, WSHelper.makeResultOK());

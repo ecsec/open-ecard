@@ -255,10 +255,11 @@ public class AddonManager {
      */
     public IFDProtocol getIFDProtocol(@Nonnull AddonSpecification addonSpec, @Nonnull String uri) {
 	IFDProtocol ifdProt = cache.getIFDProtocol(addonSpec, uri);
-	if (ifdProt != null) {
-	    // protocol cached so return it
-	    return ifdProt;
-	}
+	// TODO: find a better way to deal with the reuse of protocol plugins
+//	if (ifdProt != null) {
+//	    // protocol cached so return it
+//	    return ifdProt;
+//	}
 
 	ProtocolPluginSpecification protoSpec = addonSpec.searchIFDActionByURI(uri);
 	String className = protoSpec.getClassName();
@@ -288,10 +289,11 @@ public class AddonManager {
      */
     public SALProtocol getSALProtocol(@Nonnull AddonSpecification addonSpec, @Nonnull String uri) {
 	SALProtocol salProt = cache.getSALProtocol(addonSpec, uri);
-	if (salProt != null) {
-	    // protocol cached so return it
-	    return salProt;
-	}
+	// TODO: find a better way to deal with the reuse of protocol plugins
+//	if (salProt != null) {
+//	    // protocol cached so return it
+//	    return salProt;
+//	}
 
 	ProtocolPluginSpecification protoSpec = addonSpec.searchSALActionByURI(uri);
 	String className = protoSpec.getClassName();

@@ -125,6 +125,7 @@ public class SCTerminal {
 		    SCIOATR atr = c.getATR();
 		    stype.setATRorATS(atr.getBytes());
 		    c.disconnect(false);
+		    scCard = new SCCard(c, this);
 		}
 	    }
 	    // ifd status completely constructed

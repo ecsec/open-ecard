@@ -32,6 +32,7 @@ import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse;
 import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Map;
 import oasis.names.tc.dss._1_0.core.schema.Result;
@@ -233,6 +234,10 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    response.setResult(WSHelper.makeResultOK());
 	    response.setAuthenticationProtocolData(eac1Output.getAuthDataType());
 
+	} catch (CertificateException ex) {
+	    logger.error(ex.getMessage(), ex);
+	    String msg = ex.getMessage();
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED, msg));
 	} catch (WSHelper.WSException e) {
 	    logger.error(e.getMessage(), e);
 	    response.setResult(e.getResult());

@@ -389,6 +389,7 @@ public class ECardConstants {
 
 	    private static final String SAL_PFX     = MINOR_PREFIX + "sal";
 	    private static final String SUPPORT_PFX = SAL_PFX + "/support#";
+	    private static final String EAC_PFX = SAL_PFX + "/mEAC#";
 
 	    public static final String CANCELLATION_BY_USER = SAL_PFX + "#cancellationByUser";
 	    public static final String NAME_EXISTS = SAL_PFX + "#nameExists";
@@ -426,6 +427,17 @@ public class ECardConstants {
 		public static final String SCHEMA_VAILD_WARN = SUPPORT_PFX + "schemaValidationWarning";
 		public static final String NO_SCHEMA = SUPPORT_PFX + "noAppropriateSchema";
 		public static final String REPO_UNREACHABLE = SUPPORT_PFX + "cardInfoRepositoryUnreachable";
+
+	    };
+
+	    /**
+	     * Service-Access layer - EAC minor codes.
+	     */
+	    public static class EAC {
+
+		public static final String AGE_VERIF_FAILED = EAC_PFX + "AgeVerificationFailedWarning";
+		public static final String COMMUNITY_VERIF_FAILED = EAC_PFX + "CommunityVerificationFailedWarning";
+		public static final String DOC_VALID_FAILED = EAC_PFX + "DocumentValidityVerificationFailed";
 
 	    };
 

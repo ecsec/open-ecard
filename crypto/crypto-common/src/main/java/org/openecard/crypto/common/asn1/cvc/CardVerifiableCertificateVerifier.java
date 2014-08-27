@@ -25,7 +25,9 @@ package org.openecard.crypto.common.asn1.cvc;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Date;
 import java.util.List;
+import org.openecard.common.WSHelper;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.asn1.eac.oid.CVCertificatesObjectIdentifier;
@@ -53,7 +55,10 @@ public class CardVerifiableCertificateVerifier {
      * @param description Description
      * @throws CertificateException
      */
-    public static void verify(CardVerifiableCertificate certificate, CertificateDescription description) throws CertificateException {
+    public static void verify(CardVerifiableCertificate certificate, CertificateDescription description)
+	    throws CertificateException {
+	checkDate(certificate);
+	
 	try {
 	    byte[] extentions = certificate.getExtensions();
 	    TLV extentionObject = TLV.fromBER(extentions);
@@ -91,6 +96,16 @@ public class CardVerifiableCertificateVerifier {
 	} catch (Exception e) {
 	    _logger.debug(e.getMessage());
 	    throw new CertificateException("Verification failed", e);
+	}
+    }
+
+    private static void checkDate(CardVerifiableCertificate certificate) throws CertificateException {
+	Date systemDate = new Date();
+	Date expDate = certificate.getExpirationDate().getTime();
+	Date effDate = certificate.getEffectiveDate().getTime();
+	if (systemDate.after(expDate) || systemDate.before(effDate)) {
+	    String msg = "CV Certificate's validity date is different than the current date.";
+	    throw new CertificateException(msg);
 	}
     }
 

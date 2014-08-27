@@ -41,10 +41,10 @@ import org.slf4j.LoggerFactory;
 public class CardVerifiableCertificateChain {
 
     private static final Logger _logger = LoggerFactory.getLogger(CertificateDescription.class);
-    private ArrayList<CardVerifiableCertificate> certs = new ArrayList<CardVerifiableCertificate>();
-    private ArrayList<CardVerifiableCertificate> cvcaCerts = new ArrayList<CardVerifiableCertificate>();
-    private ArrayList<CardVerifiableCertificate> dvCerts = new ArrayList<CardVerifiableCertificate>();
-    private ArrayList<CardVerifiableCertificate> terminalCerts = new ArrayList<CardVerifiableCertificate>();
+    private final ArrayList<CardVerifiableCertificate> certs = new ArrayList<>();
+    private final ArrayList<CardVerifiableCertificate> cvcaCerts = new ArrayList<>();
+    private final ArrayList<CardVerifiableCertificate> dvCerts = new ArrayList<>();
+    private final ArrayList<CardVerifiableCertificate> terminalCerts = new ArrayList<>();
 
     /**
      * Creates a new certificate chain.
@@ -104,19 +104,20 @@ public class CardVerifiableCertificateChain {
 	verify(cvcaCerts, cvcaCerts);
     }
 
-    private void verify(List<CardVerifiableCertificate> authorities, List<CardVerifiableCertificate> holders) throws CertificateException {
+    private void verify(List<CardVerifiableCertificate> authorities, List<CardVerifiableCertificate> holders)
+	    throws CertificateException {
 	for (Iterator<CardVerifiableCertificate> ai = authorities.iterator(); ai.hasNext();) {
 	    CardVerifiableCertificate authority = ai.next();
 
-	    for (Iterator<CardVerifiableCertificate> hi = holders.iterator(); hi.hasNext();) {
-		CardVerifiableCertificate holder = hi.next();
+	    for (CardVerifiableCertificate holder : holders) {
 		if (authority.getCAR().equals(holder.getCHR())) {
 		    break;
 		}
 
 		if (!ai.hasNext()) {
-		    throw new CertificateException(
-			    "Malformed certificate chain: Cannot find a CHR for the CAR (" + authority.getCAR().toString() + ").");
+		    String msg = String.format("Malformed certificate chain: Cannot find a CHR for the CAR (%s).",
+			    authority.getCAR());
+		    throw new CertificateException(msg);
 		}
 	    }
 	}
@@ -221,7 +222,7 @@ public class CardVerifiableCertificateChain {
     }
 
     private ArrayList<CardVerifiableCertificate> buildChain(ArrayList<CardVerifiableCertificate> certs, PublicKeyReference car) {
-	ArrayList<CardVerifiableCertificate> certChain = new ArrayList<CardVerifiableCertificate>();
+	ArrayList<CardVerifiableCertificate> certChain = new ArrayList<>();
 
 	for (CardVerifiableCertificate c : certs) {
 	    if (c.getCAR().compare(car)) {

@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
 public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(TerminalAuthenticationStep.class.getName());
-    private Dispatcher dispatcher;
+    private final Dispatcher dispatcher;
 
 
     /**

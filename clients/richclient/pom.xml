@@ -134,7 +134,7 @@
 							<effort>9</effort>
 							<modificationTime>latest</modificationTime>
 							<segmentLimit>-1</segmentLimit>
-							<stripDebugAttributes>true</stripDebugAttributes>
+							<stripDebugAttributes>${strip.debug.symbols}</stripDebugAttributes>
 						</configuration>
 						<extensions>true</extensions>
 					</plugin>
@@ -209,7 +209,7 @@
 							<effort>9</effort>
 							<modificationTime>latest</modificationTime>
 							<segmentLimit>-1</segmentLimit>
-							<stripDebugAttributes>true</stripDebugAttributes>
+							<stripDebugAttributes>${strip.debug.symbols}</stripDebugAttributes>
 						</configuration>
 						<extensions>true</extensions>
 					</plugin>

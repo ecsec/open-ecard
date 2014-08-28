@@ -74,8 +74,8 @@ public class Status implements EventCallback {
 
     private final I18n lang = I18n.getTranslation("richclient");
 
-    private Map<String, JPanel> infoMap = new ConcurrentSkipListMap<String, JPanel>();
-    private HashMap<String, ImageIcon> cardIcons = new HashMap<String, ImageIcon>();
+    private final Map<String, JPanel> infoMap = new ConcurrentSkipListMap<>();
+    private final HashMap<String, ImageIcon> cardIcons = new HashMap<>();
     private JPanel contentPane;
     private JPanel infoView;
     private JPanel noTerminal;

@@ -29,6 +29,8 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,6 +39,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -63,10 +66,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
  */
-public class AboutDialog extends JDialog {
+public class AboutDialog extends JFrame {
 
     private static final Logger logger = LoggerFactory.getLogger(AboutDialog.class);
     private static final long serialVersionUID = 1L;
+
+    private static AboutDialog runningDialog;
 
     private final transient I18n lang = I18n.getTranslation("about");
 
@@ -83,8 +88,31 @@ public class AboutDialog extends JDialog {
      * Since this method is static, there is no need to create an instance of AboutDialog to call it.
      */
     public static void showDialog() {
-	AboutDialog dialog = new AboutDialog();
-	dialog.setVisible(true);
+	if (runningDialog == null) {
+	    AboutDialog dialog = new AboutDialog();
+	    dialog.addWindowListener(new WindowListener() {
+		@Override
+		public void windowOpened(WindowEvent e) { }
+		@Override
+		public void windowClosing(WindowEvent e) { }
+		@Override
+		public void windowClosed(WindowEvent e) {
+		    runningDialog = null;
+		}
+		@Override
+		public void windowIconified(WindowEvent e) { }
+		@Override
+		public void windowDeiconified(WindowEvent e) { }
+		@Override
+		public void windowActivated(WindowEvent e) { }
+		@Override
+		public void windowDeactivated(WindowEvent e) { }
+	    });
+	    dialog.setVisible(true);
+	    runningDialog = dialog;
+	} else {
+	    runningDialog.toFront();
+	}
     }
 
     private void setupUI() {
@@ -127,7 +155,6 @@ public class AboutDialog extends JDialog {
 	JButton btnClose = new JButton(lang.translationForKey("about.button.close"));
 	btnClose.setBounds(587, 416, 117, 25);
 	btnClose.addActionListener(new ActionListener() {
-
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
 		dispose();
@@ -159,7 +186,6 @@ public class AboutDialog extends JDialog {
 	}
 
 	editorPane.addHyperlinkListener(new HyperlinkListener() {
-
 	    @Override
 	    public void hyperlinkUpdate(HyperlinkEvent e) {
 		openUrl(e);

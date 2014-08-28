@@ -39,6 +39,7 @@ import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -72,7 +73,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class ManagementDialog extends JDialog {
+public class ManagementDialog extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private static final String LANGUAGE_CODE = System.getProperty("user.language");
@@ -103,27 +104,21 @@ public class ManagementDialog extends JDialog {
 	    ManagementDialog dialog = new ManagementDialog(manager);
 	    dialog.addWindowListener(new WindowListener() {
 		@Override
-		public void windowOpened(WindowEvent e) {
-		}
+		public void windowOpened(WindowEvent e) { }
 		@Override
-		public void windowClosing(WindowEvent e) {
-		}
+		public void windowClosing(WindowEvent e) { }
 		@Override
 		public void windowClosed(WindowEvent e) {
 		    ManagementDialog.runningDialog = null;
 		}
 		@Override
-		public void windowIconified(WindowEvent e) {
-		}
+		public void windowIconified(WindowEvent e) { }
 		@Override
-		public void windowDeiconified(WindowEvent e) {
-		}
+		public void windowDeiconified(WindowEvent e) { }
 		@Override
-		public void windowActivated(WindowEvent e) {
-		}
+		public void windowActivated(WindowEvent e) { }
 		@Override
-		public void windowDeactivated(WindowEvent e) {
-		}
+		public void windowDeactivated(WindowEvent e) { }
 	    });
 	    dialog.setVisible(true);
 	    runningDialog = dialog;

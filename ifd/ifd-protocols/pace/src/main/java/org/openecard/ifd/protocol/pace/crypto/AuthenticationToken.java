@@ -22,13 +22,13 @@
 
 package org.openecard.ifd.protocol.pace.crypto;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.List;
 import org.openecard.bouncycastle.crypto.engines.AESEngine;
 import org.openecard.bouncycastle.crypto.macs.CMac;
 import org.openecard.bouncycastle.crypto.params.KeyParameter;
 import org.openecard.common.tlv.TLV;
+import org.openecard.common.tlv.TLVException;
 import org.openecard.common.tlv.TagClass;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.asn1.eac.PACESecurityInfos;
@@ -40,16 +40,18 @@ import org.slf4j.LoggerFactory;
 /**
  * See BSI-TR-03110, version 2.10, part 3, section B.1.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public final class AuthenticationToken {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationToken.class.getName());
+
+    private final PACESecurityInfos psi;
     // Byte encoded token
-    private byte[] token = new byte[8];
+    private final byte[] token = new byte[8];
     // Certificate Authority Reference (CAR)
     private byte[] currentCAR, previousCAR;
-    private PACESecurityInfos psi;
 
     /**
      * Creates a new AuthenticationToken.
@@ -100,66 +102,55 @@ public final class AuthenticationToken {
      * @throws GeneralSecurityException
      */
     public boolean verifyToken(byte[] T_PICC, boolean specifiedCHAT) throws GeneralSecurityException {
-	final ByteArrayInputStream bais = new ByteArrayInputStream(T_PICC);
-
-	byte tag = (byte) bais.read();
-	byte size = (byte) bais.read();
-
-	// Verify tag and size
-	if (tag == (byte) 0x7C && (size & 0xFF) == bais.available()) {
-	    tag = (byte) bais.read();
-	    size = (byte) bais.read();
-	} else {
-	    throw new GeneralSecurityException("Malformed authentication token");
-	}
-
-	// Verify authentication token T_PICC
-	if (tag == (byte) 0x86 && (size & 0xFF) == 8) {
-	    byte[] buf = new byte[8];
-	    bais.read(buf, 0, 8);
-	    if (!ByteUtils.compare(buf, token)) {
-		throw new GeneralSecurityException("Cannot verify authentication token");
+	try {
+	    TLV dataSet = TLV.fromBER(T_PICC);
+	    // set of dynamic authentication data
+	    if (dataSet.getTagNumWithClass() != 0x7C) {
+		throw new GeneralSecurityException("The returned object is not a set of dynamic authentication data.");
 	    }
-	    // Read next bytes
-	    tag = (byte) bais.read();
-	    size = (byte) bais.read();
-	} else {
-	    throw new GeneralSecurityException("Malformed authentication token");
-	}
 
-	// if PACE is used with a CHAT
-	if (specifiedCHAT) {
-	    // Read current CAR
-	    if (tag == (byte) 0x87 && size == (byte) 0x0E) {
-		currentCAR = new byte[size];
-		bais.read(currentCAR, 0, size);
-
-		// Read next bytes
-		tag = (byte) bais.read();
-		size = (byte) bais.read();
+	    // Authentication Token
+	    List<TLV> authTokens = dataSet.findChildTags(0x86);
+	    if (authTokens.isEmpty()) {
+		String msg = "Authentication Token is missing in set of dynamic authentication data.";
+		throw new GeneralSecurityException(msg);
+	    } else if (authTokens.size() > 1) {
+		String msg = "Authentication Token is present multiple times in set of dynamic authentication data.";
+		throw new GeneralSecurityException(msg);
 	    } else {
-		throw new GeneralSecurityException("Malformed authentication token");
-	    }
-
-	    // Read optional previous CAR
-	    if (bais.available() > 0) {
-		if (tag == (byte) 0x88 && size == (byte) 0x0E) {
-		    previousCAR = new byte[size];
-		    bais.read(previousCAR, 0, size);
-		} else {
-		    throw new GeneralSecurityException("Malformed authentication token");
+		byte[] newToken = authTokens.get(0).getValue();
+		if (! ByteUtils.compare(newToken, token)) {
+		    throw new GeneralSecurityException("Can not verify authentication token.");
 		}
 	    }
-	}
 
-	// ensure bais is empty
-	if (bais.available() != 0) {
-	    throw new GeneralSecurityException("Malformed authentication token");
-	}
+	    // CAR
+	    if (specifiedCHAT) {
+		// current CAR
+		List<TLV> car1 = dataSet.findChildTags(0x87);
+		if (car1.isEmpty()) {
+		    String msg = "Current CAR is missing in set of dynamic authentication data.";
+		    throw new GeneralSecurityException(msg);
+		} else if (car1.size() > 1) {
+		    String msg = "Current CAR is present multiple times in set of dynamic authentication data.";
+		    throw new GeneralSecurityException(msg);
+		} else {
+		    currentCAR = car1.get(0).getValue();
+		    verifyCAR("Current CAR", currentCAR);
+		}
 
-	try {
-	    bais.close();
-	} catch (IOException ignore) {
+		// last CAR
+		List<TLV> car2 = dataSet.findChildTags(0x88);
+		if (car2.size() > 1) {
+		    String msg = "Previous CAR is present multiple times in set of dynamic authentication data.";
+		    throw new GeneralSecurityException(msg);
+		} else if (car2.size() == 1) {
+		    previousCAR = car2.get(0).getValue();
+		    verifyCAR("Previous CAR", previousCAR);
+		}
+	    }
+	} catch (TLVException ex) {
+	    throw new GeneralSecurityException("Given data is not a valid ASN.1 object.", ex);
 	}
 
 	return true;
@@ -223,6 +214,13 @@ public final class AuthenticationToken {
 	}
 
 	return ret;
+    }
+
+    private static void verifyCAR(String name, byte[] car) throws GeneralSecurityException {
+	int s = car.length;
+	if (! ((8 <= s) && (s <= 16))) {
+	    throw new GeneralSecurityException(String.format("%s is not withing specified size.", name));
+	}
     }
 
 }

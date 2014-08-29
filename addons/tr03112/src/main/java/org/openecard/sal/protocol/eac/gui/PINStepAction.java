@@ -109,7 +109,7 @@ public class PINStepAction extends StepAction {
 	if (result.isBack()) {
 	    return new StepActionResult(StepActionResultStatus.BACK);
 	}
-
+	
 	if (retryCounter == 2) {
 	    try {
 		EstablishChannelResponse response = performPACEWithCAN(oldResults);
@@ -146,7 +146,7 @@ public class PINStepAction extends StepAction {
 			if (retryCounter == 3) {
 			    logger.warn("Wrong PIN entered. The PIN is blocked.");
 			    return new StepActionResult(StepActionResultStatus.REPEAT, 
-				    new ErrorStep(lang.translationForKey("step_error_title"),
+				    new ErrorStep(lang.translationForKey("step_error_title_blocked"),
 					    lang.translationForKey("step_error_pin_blocked")));
 			}
 			logger.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
@@ -154,7 +154,7 @@ public class PINStepAction extends StepAction {
 		    } else {
 			logger.warn("Wrong PIN entered. The PIN is blocked.");
 			return new StepActionResult(StepActionResultStatus.REPEAT, 
-				new ErrorStep(lang.translationForKey("step_error_title"),
+				new ErrorStep(lang.translationForKey("step_error_title_blocked"),
 					lang.translationForKey("step_error_pin_blocked")));
 		    }
 		} else {
@@ -168,7 +168,7 @@ public class PINStepAction extends StepAction {
 	} else {
 	    logger.error("The PIN is block and can't be used for authentication.");
 	    return new StepActionResult(StepActionResultStatus.NEXT, 
-		    new ErrorStep(lang.translationForKey("step_error_title"),
+		    new ErrorStep(lang.translationForKey("step_error_title_blocked"),
 			    lang.translationForKey("step_error_pin_blocked")));
 	}
     }

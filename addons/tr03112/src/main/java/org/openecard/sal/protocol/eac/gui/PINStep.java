@@ -23,6 +23,7 @@
 package org.openecard.sal.protocol.eac.gui;
 
 import org.openecard.common.I18n;
+import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
@@ -49,6 +50,10 @@ public class PINStep extends Step {
     private static final String TRANSACTION_INFO = "transaction_info";
     // GUI element IDs
     public static final String PIN_FIELD = "PACE_PIN_FIELD";
+    public static final String CAN_FIELD = "PACE_CAN_FIELD";
+
+    private static final String CAN_NOTICE_ID = "PACE_CAN_NOTICE";
+    private static final String PIN_ATTEMPTS_ID = "PACE_PIN_ATTEMPTS";
 
     private final I18n langEac = I18n.getTranslation("eac");
     private final I18n langPace = I18n.getTranslation("pace");
@@ -90,6 +95,11 @@ public class PINStep extends Step {
 	pinInputField.setMaxLength(paceMarker.getMaxLength());
 	getInputInfoUnits().add(pinInputField);
 
+	Text attemptCount = new Text();
+	attemptCount.setText(langPace.translationForKey("step_pin_retrycount", 3));
+	attemptCount.setID(PIN_ATTEMPTS_ID);
+	getInputInfoUnits().add(attemptCount);
+
 	Text notice = new Text();
 	notice.setText(langEac.translationForKey(NOTICE, pinType));
 	getInputInfoUnits().add(notice);
@@ -104,6 +114,28 @@ public class PINStep extends Step {
 	Text notice = new Text();
 	notice.setText(langEac.translationForKey(NOTICE, pinType));
 	getInputInfoUnits().add(notice);
+    }
+
+    protected void addCANEntry() {
+	PasswordField canField = new PasswordField(CAN_FIELD);
+	canField.setDescription(langPace.translationForKey("can"));
+	canField.setMaxLength(6);
+	canField.setMinLength(6);
+	getInputInfoUnits().add(canField);
+
+	Text canNotice = new Text();
+	canNotice.setText(langEac.translationForKey("eac_can_notice"));
+	canNotice.setID(CAN_NOTICE_ID);
+	getInputInfoUnits().add(canNotice);
+    }
+
+    protected void updateAttemptsDisplay(int newValue) {
+	for (InputInfoUnit unit : getInputInfoUnits()) {
+	    if (unit.getID().equals(PIN_ATTEMPTS_ID)) {
+		Text text = (Text) unit;
+		text.setText(langPace.translationForKey("step_pin_retrycount", newValue));
+	    }
+	}
     }
 
 }

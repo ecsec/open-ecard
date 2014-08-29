@@ -29,15 +29,15 @@ import org.openecard.gui.definition.Text;
 /**
  * Implements a Step which displays an error message.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class ErrorStep extends Step {
 
     public ErrorStep(String title, String errorText) {
 	super(title);
 	setReversible(false);
-	Text pinBlockedNote = new Text();
-	setTitle(errorText);
+	setAction(new ErrorStepAction("Error"));
+	Text pinBlockedNote = new Text(errorText);
 	getInputInfoUnits().add(pinBlockedNote);
     }
 

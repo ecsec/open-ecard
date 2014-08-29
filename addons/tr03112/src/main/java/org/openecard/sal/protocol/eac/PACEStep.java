@@ -29,25 +29,28 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse;
+import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
 import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
+import iso.std.iso_iec._24727.tech.schema.Transmit;
+import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
+import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
-import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.ifd.PACECapabilities;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.Promise;
@@ -65,15 +68,18 @@ import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
 import org.openecard.gui.executor.StepAction;
-import org.openecard.sal.protocol.eac.gui.CHATStepAction;
-import org.openecard.sal.protocol.eac.gui.PINStepAction;
 import org.openecard.sal.protocol.eac.anytype.EAC1InputType;
 import org.openecard.sal.protocol.eac.anytype.EAC1OutputType;
+import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
 import org.openecard.sal.protocol.eac.anytype.PACEOutputType;
 import org.openecard.sal.protocol.eac.anytype.PasswordID;
 import org.openecard.sal.protocol.eac.gui.CHATStep;
+import org.openecard.sal.protocol.eac.gui.CHATStepAction;
 import org.openecard.sal.protocol.eac.gui.CVCStep;
+import org.openecard.sal.protocol.eac.gui.ErrorStep;
+import org.openecard.sal.protocol.eac.gui.ErrorStepAction;
 import org.openecard.sal.protocol.eac.gui.PINStep;
+import org.openecard.sal.protocol.eac.gui.PINStepAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,6 +100,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     private static final String TITLE = "eac_user_consent_title";
 
     private final I18n lang = I18n.getTranslation("eac");
+    private final I18n langPace = I18n.getTranslation("pace");
 
     private final Dispatcher dispatcher;
     private final UserConsent gui;
@@ -176,20 +183,48 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    eacData.pinID = pinID;
 	    eacData.passwordType = passwordType;
 
-	    // create GUI and init executor
+	    // get initial pin status
+	    InputAPDUInfoType input = new InputAPDUInfoType();
+	    input.setInputAPDU(new byte[] {(byte) 0x00, (byte) 0x22, (byte) 0xC1, (byte) 0xA4, (byte) 0x0F, (byte) 0x80,
+		(byte) 0x0A, (byte) 0x04, (byte) 0x00, (byte) 0x7F, (byte) 0x00, (byte) 0x07, (byte) 0x02, (byte) 0x02,
+		(byte) 0x04, (byte) 0x02, (byte) 0x02, (byte) 0x83, (byte) 0x01, (byte) 0x03});
+	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x90, (byte) 0x00}); // pin activated 3 tries left
+	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x63, (byte) 0xC2}); // pin activated 2 tires left
+	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x63, (byte) 0xC1}); // pin suspended 1 try left CAN
+											// needs to be entered
+	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x63, (byte) 0xC0}); // pin blocked 0 tries left
+	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x62, (byte) 0x83}); // pin deaktivated
+
+	    Transmit transmit = new Transmit();
+	    transmit.setSlotHandle(slotHandle);
+	    transmit.getInputAPDUInfo().add(input);
+
+	    TransmitResponse pinCheckResponse = (TransmitResponse) dispatcher.deliver(transmit);
+	    byte[] output = pinCheckResponse.getOutputAPDU().get(0);
+							//inclusive         exclusive
+	    byte[] status = Arrays.copyOfRange(output, output.length - 2, output.length);
+
 	    UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE));
-	    CVCStep cvcStep = new CVCStep(eacData);
-	    CHATStep chatStep = new CHATStep(eacData);
-	    PINStep pinStep = new PINStep(eacData, ! nativePace, paceMarker);
+	    // create GUI and init executor
+	    if (! Arrays.equals(status, new byte[]{(byte) 0x63, (byte) 0xC0})) {
+		CVCStep cvcStep = new CVCStep(eacData);
+		CHATStep chatStep = new CHATStep(eacData);
+		PINStep pinStep = new PINStep(eacData, !nativePace, paceMarker);
 
-	    uc.getSteps().add(cvcStep);
-	    uc.getSteps().add(chatStep);
-	    uc.getSteps().add(pinStep);
-
-	    StepAction chatAction = new CHATStepAction(eacData, chatStep);
-	    chatStep.setAction(chatAction);
-	    StepAction pinAction = new PINStepAction(eacData, ! nativePace, slotHandle, dispatcher, pinStep);
-	    pinStep.setAction(pinAction);
+		uc.getSteps().add(cvcStep);
+		uc.getSteps().add(chatStep);
+		uc.getSteps().add(pinStep);
+		StepAction chatAction = new CHATStepAction(eacData, chatStep);
+		chatStep.setAction(chatAction);
+		StepAction pinAction = new PINStepAction(eacData, !nativePace, slotHandle, dispatcher, pinStep, status);
+		pinStep.setAction(pinAction);
+	    } else {
+		StepAction errorAction = new ErrorStepAction("Error");
+		ErrorStep eStep = new ErrorStep(langPace.translationForKey("step_error_title"),
+			langPace.translationForKey("step_error_pin_blocked"));
+		eStep.setAction(errorAction);
+		uc.getSteps().add(eStep);
+	    }
 
 	    // execute GUI
 	    UserConsentNavigator navigator = gui.obtainNavigator(uc);
@@ -204,7 +239,6 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		response.setResult(r);
 		return response;
 	    }
-
 
 	    // prepare DIDAuthenticationResponse
 	    DIDAuthenticationDataType data = eacData.paceResponse.getAuthenticationProtocolData();

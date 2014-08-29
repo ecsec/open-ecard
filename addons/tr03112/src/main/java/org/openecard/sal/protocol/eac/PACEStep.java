@@ -220,7 +220,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		pinStep.setAction(pinAction);
 	    } else {
 		StepAction errorAction = new ErrorStepAction("Error");
-		ErrorStep eStep = new ErrorStep(langPace.translationForKey("step_error_title"),
+		ErrorStep eStep = new ErrorStep(langPace.translationForKey("step_error_title_blocked"),
 			langPace.translationForKey("step_error_pin_blocked"));
 		eStep.setAction(errorAction);
 		uc.getSteps().add(eStep);

@@ -65,7 +65,6 @@ import org.openecard.richclient.gui.components.MathNumberEditor;
 import org.openecard.richclient.gui.components.OpenFileBrowserListener;
 import org.openecard.richclient.gui.components.ScalarListItem;
 import org.openecard.richclient.gui.components.SpinnerMathNumberModel;
-import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

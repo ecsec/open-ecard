@@ -50,7 +50,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import org.openecard.addon.manifest.ScalarListEntryType;
 import org.openecard.gui.swing.common.GUIDefaults;
-import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
+import org.openecard.richclient.gui.manage.Settings;
 
 
 /**

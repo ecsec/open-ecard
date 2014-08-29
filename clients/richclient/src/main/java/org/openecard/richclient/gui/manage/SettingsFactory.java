@@ -40,12 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SettingsFactory {
 
-    private static Logger logger = LoggerFactory.getLogger(AddonPropertiesWrapper.class);
-
-    /**
-     * A Settings object which wraps the Properties and AddonProperties functionality.
-     */
-    private final Settings settings;
+    private static final Logger logger = LoggerFactory.getLogger(AddonPropertiesWrapper.class);
 
     /**
      * The instance of the factory.
@@ -59,8 +54,7 @@ public class SettingsFactory {
      * @return A Settings object which wraps the {@code pops} object.
      */
     public static Settings getInstance(Properties props) {
-	instance = new SettingsFactory(props);
-	return instance.settings;
+	return new OpenecardPropertiesWrapper(props);
     }
 
     /**
@@ -70,57 +64,7 @@ public class SettingsFactory {
      * @return A Settings object which wraps the {@code props} object.
      */
     public static Settings getInstance(AddonProperties props) {
-	instance = new SettingsFactory(props);
-	return instance.settings;
-    }
-
-    /**
-     * Creates a new SettingsFactory instance and initializes the Settings member as OpenecardPropertiesWrapper.
-     *
-     * @param props Properties object which represents the global openecard settings/properties.
-     */
-    private SettingsFactory(Properties props) {
-	settings = new OpenecardPropertiesWrapper(props);
-    }
-
-    /**
-     * Creates a new SettingsFactory instance and initializes the Settings member as AddonPropertiesWrapper.
-     *
-     * @param props An AddonProperties object which represents the settings of a single addon.
-     */
-    private SettingsFactory(AddonProperties props) {
-	settings = new AddonPropertiesWrapper(props);
-    }
-
-    /**
-     * Wrapper class which provides access to the functions setProperty(), getProperty and store.
-     */
-    public abstract class Settings {
-
-	/**
-	 * Set a property with the property name {@code key} and the value {@code value}.
-	 *
-	 * @param key The key name of the property to set.
-	 * @param value The value of the property to set.
-	 */
-	public abstract void setProperty(String key, String value);
-
-	/**
-	 * Get a property by a key.
-	 *
-	 * @param key The key to look for in the properties.
-	 * @return The value of the property which corresponds to the {@code key}.
-	 */
-	public abstract String getProperty(String key);
-
-	/**
-	 * Save the currently set properties to a file.
-	 *
-	 * @throws AddonPropertiesException Thrown in case an exception occurred in the saveProperties() function of a
-	 * wrapped AddonProeprties object.
-	 * @throws IOException Thrown in case of an error while writing the openecard.properties file.
-	 */
-	public abstract void store() throws AddonPropertiesException, IOException ;
+	return new AddonPropertiesWrapper(props);
     }
 
 
@@ -129,7 +73,7 @@ public class SettingsFactory {
      *
      * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
      */
-    public class AddonPropertiesWrapper extends Settings {
+    public static class AddonPropertiesWrapper extends Settings {
 
 	private final AddonProperties props;
 
@@ -165,7 +109,7 @@ public class SettingsFactory {
      *
      * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
      */
-    public class OpenecardPropertiesWrapper extends Settings {
+    public static class OpenecardPropertiesWrapper extends Settings {
 
 	private final Properties props;
 

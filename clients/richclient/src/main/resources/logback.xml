@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <property name="destination" value="${user.home}/.openecard/logs" />
+	<property name="destination" value="${user.home}/.openecard/logs" />
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-	<file>${destination}/richclient_info.log</file>
-	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-	    <!-- daily rollover -->
-	    <fileNamePattern>${destination}/richclient_info.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
-	    <!-- keep 30 days' worth of history -->
-	    <maxHistory>30</maxHistory>
-	</rollingPolicy>
-	<encoder>
-	    <pattern>%date{ISO8601} [%thread] %-5level %class{35}:%line - %msg%n</pattern>
-	</encoder>
-    </appender>
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${destination}/richclient_info.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>${destination}/richclient_info.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+			<!-- keep 30 days' worth of history -->
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%date{ISO8601} [%thread] %-5level %class{35}:%line - %msg%n</pattern>
+		</encoder>
+	</appender>
 
-    <logger name="org.openecard.richclient" level="INFO" />
-
-    <root level="WARN">
-	<appender-ref ref="FILE" />
-    </root>
+	<root level="ERROR">
+		<appender-ref ref="FILE" />
+	</root>
 
 </configuration>

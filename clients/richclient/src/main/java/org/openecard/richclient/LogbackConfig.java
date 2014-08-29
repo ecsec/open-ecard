@@ -40,21 +40,26 @@ import org.slf4j.LoggerFactory;
 public class LogbackConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(LogbackConfig.class);
-    private static final String cfgFileName = "richclient_logback.xml";
+    private static final String CFG_FILENAME = "richclient_logback.xml";
+
+    public static File getConfFile() throws IOException {
+	File cfgDir = FileUtils.getHomeConfigDir();
+	String logFileStr = cfgDir + File.separator + CFG_FILENAME;
+	File logFile = new File(logFileStr);
+	return logFile;
+    }
 
     /**
      * Load Logback configuration.
      * At first the code tries to load the file '$HOME/.openecard/richclient_logback.xml', if it does not exist, then
-     * the default config is used. The default configuration is loaded from withing the richclient jar.
+     * the default config is used. The default configuration is loaded from within the richclient jar.
      *
      * @throws IOException If no config could be loaded.
      * @throws SecurityException If the config dir is not writable.
      * @throws JoranException If the config file contains invalid content.
      */
     public static void load() throws IOException, SecurityException, JoranException {
-	File cfgDir = FileUtils.getHomeConfigDir();
-	String logFileStr = cfgDir + File.separator + cfgFileName;
-	File logFile = new File(logFileStr);
+	File logFile = getConfFile();
 
 	if (logFile.canRead() && logFile.isFile()) {
 	    LoggerContext ctx = (LoggerContext) LoggerFactory.getILoggerFactory();

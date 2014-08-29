@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,28 +22,27 @@
 
 package org.openecard.richclient.gui.manage.core;
 
-import org.openecard.richclient.gui.manage.SettingsGroup;
 import org.openecard.richclient.gui.manage.SettingsPanel;
 
 
 /**
- * Settings panel for connection related properties.
+ * Settings panel for logging related properties.
  * This panel hosts the following settings groups:
  * <ul>
- * <li>Proxy</li>
+ * <li>Logging</li>
  * </ul>
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
-public class ConnectionsSettingsPanel extends SettingsPanel {
+public class LogSettingsPanel extends SettingsPanel {
 
     private static final long serialVersionUID = 1L;
 
-    private final SettingsGroup proxy;
+    private final LogSettingsGroup logging;
 
-    public ConnectionsSettingsPanel() {
-	proxy = new ProxySettingsGroup();
-	addSettingsGroup(proxy);
+    public LogSettingsPanel() {
+	logging = new LogSettingsGroup();
+	addSettingsGroup(logging);
     }
 
 }

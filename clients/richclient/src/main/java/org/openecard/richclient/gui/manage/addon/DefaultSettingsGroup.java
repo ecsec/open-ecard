@@ -34,7 +34,7 @@ import org.openecard.addon.manifest.ScalarEntry;
 import org.openecard.addon.manifest.ScalarEntryType;
 import org.openecard.addon.manifest.ScalarListEntry;
 import org.openecard.addon.manifest.ScalarListEntryType;
-import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
+import org.openecard.richclient.gui.manage.Settings;
 import org.openecard.richclient.gui.manage.SettingsGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

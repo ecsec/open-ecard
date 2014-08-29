@@ -58,10 +58,10 @@ import org.openecard.common.I18n;
 import org.openecard.common.util.FileUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
 import org.openecard.gui.graphics.OecLogoBgWhite;
-import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
 import org.openecard.richclient.gui.manage.addon.DefaultSettingsGroup;
 import org.openecard.richclient.gui.manage.addon.DefaultSettingsPanel;
 import org.openecard.richclient.gui.manage.core.ConnectionSettingsAddon;
+import org.openecard.richclient.gui.manage.core.LogSettingsAddon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -222,6 +222,7 @@ public class ManagementDialog extends JFrame {
 	addWindowListener(model); // save current addon settings when closed
 	// add addon panels
 	model.addElement(lang.translationForKey("addon.list.core.connection"), new ConnectionSettingsAddon());
+	model.addElement(lang.translationForKey("addon.list.core.logging"), new LogSettingsAddon());
 
 	// this assumes that all addons in the ClasspathRegistry are core addons
 	// an ActionPanel for every addon that has one ore more AppExtensionActions will be added

@@ -27,7 +27,7 @@ import java.awt.event.ItemListener;
 import java.io.IOException;
 import javax.swing.JCheckBox;
 import org.openecard.addon.AddonPropertiesException;
-import org.openecard.richclient.gui.manage.SettingsFactory.Settings;
+import org.openecard.richclient.gui.manage.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -24,6 +24,7 @@ package org.openecard.binding.tctoken;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import javax.annotation.Nullable;
 import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
@@ -40,22 +41,28 @@ public class CommunicationError extends Exception {
     public final String communicationErrorAddress;
     public final String minor;
 
-    public CommunicationError(String communicationErrorAddress, String minor, String msg) {
+    public CommunicationError(@Nullable String communicationErrorAddress, String minor, String msg) {
 	this(communicationErrorAddress, minor, msg, null);
     }
 
-    public CommunicationError(String communicationErrorAddress, String minor, String msg, Throwable cause) {
+    public CommunicationError(@Nullable String communicationErrorAddress, String minor, String msg, Throwable cause) {
 	super(msg, cause);
 	this.communicationErrorAddress = communicationErrorAddress;
 	this.minor = minor;
     }
 
     public BindingResult getResult() throws MalformedURLException {
-	BindingResult result = new BindingResult(BindingResultCode.REDIRECT);
-	URL commUrl = new URL(communicationErrorAddress);
-	commUrl = TCTokenHacks.addParameterToUrl(commUrl, "ResultMajor", "error");
-	commUrl = TCTokenHacks.addParameterToUrl(commUrl, "ResultMinor", minor);
-	result.getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, commUrl.toString());
+	BindingResult result;
+	// no address means 400
+	if (communicationErrorAddress == null) {
+	    result = new BindingResult(BindingResultCode.WRONG_PARAMETER);
+	} else {
+	    result = new BindingResult(BindingResultCode.REDIRECT);
+	    URL commUrl = new URL(communicationErrorAddress);
+	    commUrl = TCTokenHacks.addParameterToUrl(commUrl, "ResultMajor", "error");
+	    commUrl = TCTokenHacks.addParameterToUrl(commUrl, "ResultMinor", minor);
+	    result.getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, commUrl.toString());
+	}
 	result.setResultMessage(getMessage());
 	return result;
     }

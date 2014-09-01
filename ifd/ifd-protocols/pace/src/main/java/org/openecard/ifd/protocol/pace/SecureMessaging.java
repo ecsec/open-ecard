@@ -150,8 +150,6 @@ public class SecureMessaging {
 	if (baos.size() > 0) {
 	    byte[] paddedData = pad(baos.toByteArray(), 16);
 	    cmac.update(paddedData, 0, paddedData.length);
-
-	    lc = baos.size();
 	}
 
 	cmac.doFinal(mac, 0);
@@ -159,39 +157,20 @@ public class SecureMessaging {
 
 	//
 	// Build APDU
-	ByteArrayOutputStream out = new ByteArrayOutputStream();
+	TLV macStructure = new TLV();
+	macStructure.setTagNumWithClass((byte) 0x8E);
+	macStructure.setValue(mac);	
+	byte[] secureData = ByteUtils.concatenate(baos.toByteArray(), macStructure.toBER());
 
-	// Write header
-	out.write(header);
-
-	// Add MAC length to LC
-	lc += 10;
-
-	// Write LC field
+	CardCommandAPDU secureCommand = new CardCommandAPDU(header[0], header[1], header[2], header[3], secureData);
+	// set LE explicitely to 0x00 or in case of extended length 0x00 0x00
 	if ((lc > 0xFF) || (le > 0x100)) {
-	    out.write(NULL);
-	    out.write((lc >> 8) & 0xFF);
-	    out.write(lc & 0xFF);
+	    secureCommand.setLE(65536);
 	} else {
-	    out.write(lc & 0xFF);
+	    secureCommand.setLE(256);
 	}
 
-	// Write data if present
-	if (baos.size() > 0) {
-	    out.write(baos.toByteArray());
-	}
-	// Write SM tag
-	out.write(new byte[]{(byte) 0x8E, (byte) 0x08});
-
-	// Write SM MAC
-	out.write(mac);
-	out.write(NULL);
-
-	if ((lc > 0xFF) || (le > 0x100)) {
-	    out.write(NULL);
-	}
-
-	return out.toByteArray();
+	return secureCommand.toByteArray();
     }
 
     /**

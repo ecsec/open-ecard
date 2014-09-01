@@ -25,8 +25,12 @@ package org.openecard.binding.tctoken;
 import generated.TCTokenType;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import javax.annotation.Nonnull;
+import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.util.Pair;
+import org.openecard.common.util.TR03112Utils;
 
 
 /**
@@ -38,14 +42,17 @@ import org.openecard.common.ECardConstants;
 public class TCTokenVerifier {
 
     private final TCTokenType token;
+    private final ResourceContext ctx;
 
     /**
      * Creates a new TCTokenVerifier to verify a TCToken.
      *
      * @param token Token
+     * @param ctx Context over which the token has been received.
      */
-    public TCTokenVerifier(@Nonnull TCTokenType token) {
+    public TCTokenVerifier(@Nonnull TCTokenType token, ResourceContext ctx) {
 	this.token = token;
+	this.ctx = ctx;
     }
 
     /**
@@ -84,8 +91,8 @@ public class TCTokenVerifier {
      */
     public void verifyServerAddress() throws TCTokenException {
 	String value = token.getServerAddress();
-	assertURL(value);
 	assertRequired("ServerAddress", value);
+	assertURL("ServerAddress", value);
     }
 
     /**
@@ -105,8 +112,8 @@ public class TCTokenVerifier {
      */
     public void verifyRefreshAddress() throws TCTokenException {
 	String value = token.getRefreshAddress();
-	assertURL(value);
 	assertRequired("RefreshAddress", value);
+	assertURL("RefreshAddress", value);
     }
 
     /**
@@ -117,7 +124,7 @@ public class TCTokenVerifier {
     public void verifyCommunicationErrorAddress() throws TCTokenException {
 	String value = token.getCommunicationErrorAddress();
 	if (! checkEmpty(value)) {
-	    assertURL(value);
+	    assertURL("CommunicationErrorAddress", value);
 	    assertRequired("CommunicationErrorAddress", value);
 	}
     }
@@ -129,10 +136,8 @@ public class TCTokenVerifier {
      */
     public void verifyBinding() throws TCTokenException {
 	String value = token.getBinding();
-	if (! checkEmpty(value)) {
-	    assertRequired("Binding", value);
-	    checkEqualOR("Binding", value, "urn:liberty:paos:2006-08", "urn:ietf:rfc:2616");
-	}
+	assertRequired("Binding", value);
+	checkEqualOR("Binding", value, "urn:liberty:paos:2006-08", "urn:ietf:rfc:2616");
     }
 
     /**
@@ -144,26 +149,22 @@ public class TCTokenVerifier {
     public void verifyPathSecurity() throws TCTokenException, CommunicationError {
 	String proto = token.getPathSecurityProtocol();
 	TCTokenType.PathSecurityParameters psp = token.getPathSecurityParameters();
-	if (! checkEmpty(proto)) {
-	    String[] protos = {"urn:ietf:rfc:4346", "urn:ietf:rfc:5246", "urn:ietf:rfc:4279", "urn:ietf:rfc:5487"};
-	    checkEqualOR("PathSecurityProtocol", proto, protos);
-	    if ("urn:ietf:rfc:4279".equals(proto)
-		    || "urn:ietf:rfc:5487".equals(proto)) {
-		if (! checkEmpty(psp)) {
-		    assertRequired("PSK", psp.getPSK());
-		    assertEvenNumber(psp.getPSK());
-		}
-	    }
-	    return;
-	}
 
 	// TR-03124 sec. 2.4.3
 	// If no PathSecurity-Protocol/PSK is given in the TC Token, the same TLS channel as established to
 	// retrieve the TC Token MUST be used for the PAOS connection, i.e. a new channel MUST NOT be established.
-	if (checkEmpty(proto) || checkEmpty(psp)) {
-	    // make sure both are empty to prevent confusion
-	    token.setPathSecurityProtocol(null);
-	    token.setPathSecurityParameters(null);
+	if (checkEmpty(proto) && checkEmpty(psp)) {
+	    assertSameChannel();
+	    return;
+	}
+
+	assertRequired("PathSecurityProtocol", proto);
+	String[] protos = {"urn:ietf:rfc:4346", "urn:ietf:rfc:5246", "urn:ietf:rfc:4279", "urn:ietf:rfc:5487"};
+	checkEqualOR("PathSecurityProtocol", proto, protos);
+	if ("urn:ietf:rfc:4279".equals(proto) || "urn:ietf:rfc:5487".equals(proto)) {
+	    assertRequired("PathSecurityParameters", psp);
+	    assertRequired("PSK", psp.getPSK());
+	    assertEvenNumber(psp.getPSK());
 	}
     }
 
@@ -215,18 +216,32 @@ public class TCTokenVerifier {
 	}
     }
 
-    private URL assertURL(String value) throws TCTokenException {
+    private URL assertURL(String name, String value) throws TCTokenException {
 	try {
 	    return new URL(value);
 	} catch (MalformedURLException e) {
-	    throw new TCTokenException("Malformed URL");
+	    throw new TCTokenException(String.format("Malformed %s URL", name));
 	}
     }
 
     private void assertEvenNumber(byte[] val) throws CommunicationError {
 	if ((val.length % 2) != 0) {
 	    String msg = "";
-	    throw new CommunicationError(token.getCommunicationErrorAddress(), ECardConstants.Minor.App.INCORRECT_PARM, msg);
+	    String errorAddr = token.getCommunicationErrorAddress();
+	    throw new CommunicationError(errorAddr, ECardConstants.Minor.App.INCORRECT_PARM, msg);
+	}
+    }
+
+    private void assertSameChannel() throws TCTokenException {
+	// check that everything can be handled over the same channel
+	// TR-03124-1 does not mention that redirects on the TCToken address are possible and it also states that there
+	// are only two channels. So I guess we should force this here as well.
+	URL paosUrl = assertURL("ServerAddress", token.getServerAddress());
+	List<Pair<URL, Certificate>> urls = ctx.getCerts();
+	for (Pair<URL, Certificate> next : urls) {
+	    if (! TR03112Utils.checkSameOriginPolicy(paosUrl, next.p1)) {
+		throw new TCTokenException("The same origin policy is violated for the PAOS channel (TLS-2).");
+	    }
 	}
     }
 

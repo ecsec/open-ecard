@@ -24,6 +24,7 @@ package org.openecard.binding.tctoken;
 
 import generated.TCTokenType;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 import org.openecard.common.util.FileUtils;
 import org.testng.annotations.Test;
@@ -43,7 +44,7 @@ public class TCTokenVerifierTest {
 	TCTokenParser parser = new TCTokenParser();
 	List<TCTokenType> tokens = parser.parse(testFile);
 	token = tokens.get(0);
-	verifier = new TCTokenVerifier(token);
+	verifier = new TCTokenVerifier(token, new ResourceContext(null, null, Collections.EMPTY_LIST));
     }
 
     @Test
@@ -81,7 +82,7 @@ public class TCTokenVerifierTest {
 	verifier.verifyPathSecurity();
     }
 
-    @Test
+    @Test(expectedExceptions = TCTokenException.class)
     public void testVerifyPathSecurityParameters() throws Exception {
 	token.setPathSecurityProtocol("urn:ietf:rfc:4279");
 	token.setPathSecurityParameters(null);

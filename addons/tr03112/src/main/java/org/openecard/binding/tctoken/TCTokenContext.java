@@ -79,7 +79,7 @@ public class TCTokenContext extends ResourceContext {
 
 	// Verify the TCToken
 	TCTokenType token = tokens.get(0);
-	TCTokenVerifier ver = new TCTokenVerifier(token);
+	TCTokenVerifier ver = new TCTokenVerifier(token, base);
 	boolean isError = ver.isErrorToken();
 	if (isError) {
 	    // TODO: find out what is the correct minor type

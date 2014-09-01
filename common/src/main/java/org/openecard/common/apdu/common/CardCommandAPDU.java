@@ -49,7 +49,7 @@ public class CardCommandAPDU extends CardAPDU {
 
     private static final Logger logger = LoggerFactory.getLogger(CardCommandAPDU.class);
 
-    private byte[] header = new byte[4];
+    private final byte[] header = new byte[4];
     private int le = -1;
     private int lc = -1;
 
@@ -542,13 +542,13 @@ public class CardCommandAPDU extends CardAPDU {
      * @return Encoded APDU
      */
     public final byte[] toByteArray() {
-	ByteArrayOutputStream baos = new ByteArrayOutputStream(data.length + 10);
+	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 	try {
 	    // Write APDU header
 	    baos.write(header);
 	    // Write APDU LC field.
-	    if (lc > 255) {
+	    if (lc > 255 || (le > 256 && lc > 0)) {
 		// Encoded extended LC field in three bytes.
 		baos.write(x00);
 		baos.write((byte) (lc >> 8));
@@ -562,17 +562,19 @@ public class CardCommandAPDU extends CardAPDU {
 	    // Write APDU LE field.
 	    if (le > 256) {
 		// Write extended LE field.
-		if (lc < 256) {
+		if (lc == 0 || lc == -1) {
 		    // Encoded extended LE field in three bytes.
 		    baos.write(x00);
 		}
 		// Encoded extended LE field in two bytes if extended LC field is present.
-		if (le == 65536) {
+		// If more bytes are requested than possible, assume the maximum.
+		if (le >= 65536) {
 		    baos.write(x00);
 		    baos.write(x00);
+		} else {
+		    baos.write((byte) (le >> 8));
+		    baos.write((byte) le);
 		}
-		baos.write((byte) (le >> 8));
-		baos.write((byte) le);
 	    } else if (le > 0) {
 		if (lc > 255) {
 		    // Write extended LE field in two bytes because extended LC field is present.

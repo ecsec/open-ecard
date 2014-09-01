@@ -129,7 +129,7 @@ public class SecureMessagingTest {
 	//
 	byte[] plainAPDU = new byte[] { 0x00, (byte) 0x84, 0x00, 0x00 };
 	byte[] encryptedAPDU = sm.encrypt(plainAPDU);
-	byte[] expectedEncryptedAPDU = StringUtils.toByteArray("0C840000098E08F146CA58D9D8796200");
+	byte[] expectedEncryptedAPDU = StringUtils.toByteArray("0C8400000A8E08F146CA58D9D8796200");
 	Assert.assertEquals(expectedEncryptedAPDU, encryptedAPDU);
 
 	//

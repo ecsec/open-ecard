@@ -33,8 +33,10 @@ public enum RecognizedState {
     PIN_activated_RC3,
     PIN_activated_RC2,
     PIN_suspended,
+    PIN_resumed,
     PIN_deactivated,
     PIN_blocked,
+    PUK_blocked,
     UNKNOWN
 
 }

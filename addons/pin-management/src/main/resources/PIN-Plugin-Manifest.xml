@@ -13,15 +13,15 @@
     <BindingActions/>
     <ApplicationActions>
 	<AppExtensionSpecification>
-	    <ID>ChangePINAction</ID>
-	    <ClassName>org.openecard.plugins.pinplugin.ChangePINAction</ClassName>
-	    <LocalizedName xml:lang="EN">Change PIN</LocalizedName>
-	    <LocalizedName xml:lang="DE">PIN ändern</LocalizedName>
-	    <LocalizedDescription xml:lang="EN">With this action you can change your PIN.</LocalizedDescription>
-	    <LocalizedDescription xml:lang="DE">Mit dieser Aktion können Sie ihre PIN ändern.</LocalizedDescription>
+	    <ID>GetCardsAndPINStatusAction</ID>
+	    <ClassName>org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction</ClassName>
+	    <LocalizedName xml:lang="EN">Open PIN-Management</LocalizedName>
+	    <LocalizedName xml:lang="DE">PIN Verwaltung öffnen</LocalizedName>
+	    <LocalizedDescription xml:lang="EN">With this action you can open the PIN Management.</LocalizedDescription>
+	    <LocalizedDescription xml:lang="DE">Mit dieser Aktion können Sie die PIN-Verwaltung öffnen.</LocalizedDescription>
 	    <ConfigDescription/>
 	</AppExtensionSpecification>
-	<AppExtensionSpecification>
+	<!--<AppExtensionSpecification>
 	    <ID>UnblockPINAction</ID>
 	    <ClassName>org.openecard.plugins.pinplugin.UnblockPINAction</ClassName>
 	    <LocalizedName xml:lang="EN">Unblock PIN</LocalizedName>
@@ -29,7 +29,7 @@
 	    <LocalizedDescription xml:lang="EN">With this action you can unblock your PIN.</LocalizedDescription>
 	    <LocalizedDescription xml:lang="DE">Mit dieser Aktion können Sie ihre PIN entsperren.</LocalizedDescription>
 	    <ConfigDescription/>
-	</AppExtensionSpecification>
+	</AppExtensionSpecification>-->
     </ApplicationActions>
     <IFDActions/>
     <SALActions>

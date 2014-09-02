@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import static org.openecard.addon.bind.BindingResultCode.*;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.StringUtils;
@@ -101,9 +102,13 @@ public class TCTokenRequest {
 			tcTokenRequest.tcTokenURL = tokenUrl;
 		    } catch (MalformedURLException ex) {
 			String msg = "The tcTokenURL parameter contains an invalid URL: " + v;
-			throw new TCTokenException(msg, ex);
-		    } catch (IOException | TCTokenException | ResourceException | ValidationError ex) {
-			throw new TCTokenException("Failed to fetch TCToken.", ex);
+			throw new TCTokenException(msg, WRONG_PARAMETER, ex);
+		    } catch (ResourceException ex) {
+			throw new TCTokenException("Failed to fetch TCToken.", WRONG_PARAMETER, ex);
+		    } catch (ValidationError ex) {
+			throw new TCTokenException("Failed to validate TCToken.", WRONG_PARAMETER, ex);
+		    } catch (IOException ex) {
+			throw new TCTokenException("Failed to fetch TCToken.", RESOURCE_UNAVAILABLE, ex);
 		    }
 		} else {
 		    throw new TCTokenException("Parameter tcTokenURL contains no value.");

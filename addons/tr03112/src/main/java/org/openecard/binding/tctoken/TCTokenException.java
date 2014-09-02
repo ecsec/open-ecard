@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,22 +22,21 @@
 
 package org.openecard.binding.tctoken;
 
+import org.openecard.addon.bind.BindingResultCode;
+
 
 /**
  * Implements an exception for TCToken verification errors.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class TCTokenException extends Exception {
 
     private static final long serialVersionUID = 1L;
+    private static final BindingResultCode DEFAULT_CODE = BindingResultCode.RESOURCE_UNAVAILABLE;
 
-    /**
-     * Creates an new TCTokenException.
-     */
-    public TCTokenException() {
-	super();
-    }
+    private final BindingResultCode code;
 
     /**
      * Creates an new TCTokenException.
@@ -45,16 +44,18 @@ public class TCTokenException extends Exception {
      * @param message Message
      */
     public TCTokenException(String message) {
-	super(message);
+	this(message, DEFAULT_CODE);
     }
 
     /**
      * Creates an new TCTokenException.
      *
-     * @param throwable Throwable
+     * @param message Message
+     * @param code Code used in the {@link TCTokenAction} to produce a result for the binding.
      */
-    public TCTokenException(Throwable throwable) {
-	super(throwable);
+    public TCTokenException(String message, BindingResultCode code) {
+	super(message);
+	this.code = code;
     }
 
     /**
@@ -64,7 +65,19 @@ public class TCTokenException extends Exception {
      * @param throwable Throwable
      */
     public TCTokenException(String message, Throwable throwable) {
+	this(message, DEFAULT_CODE, throwable);
+    }
+
+    /**
+     * Creates an new TCTokenException.
+     *
+     * @param message Message
+     * @param code Code used in the {@link TCTokenAction} to produce a result for the binding.
+     * @param throwable Throwable
+     */
+    public TCTokenException(String message, BindingResultCode code, Throwable throwable) {
 	super(message, throwable);
+	this.code = code;
     }
 
 }

@@ -40,6 +40,7 @@ public class StringUtils {
      *
      * @param hex string
      * @return Byte array
+     * @throws NumberFormatException Thrown in case the hex string contains invalid characters.
      */
     public static byte[] toByteArray(String hex) {
 	if ((hex.length() % 2) != 0) {

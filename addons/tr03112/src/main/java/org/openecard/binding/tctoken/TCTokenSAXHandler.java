@@ -104,8 +104,15 @@ public class TCTokenSAXHandler extends DefaultHandler {
 	} else if (qName.equalsIgnoreCase(BINDING)) {
 	    token.setBinding(value);
 	} else if (qName.equalsIgnoreCase(PSK)) {
-	    byte[] b = StringUtils.toByteArray(value.toUpperCase());
-	    token.getPathSecurityParameters().setPSK(b);
+	    try {
+		// check that an even number of characters (2 per byte) is present
+		if ((value.length() % 2) == 0) {
+		    byte[] b = StringUtils.toByteArray(value.toUpperCase());
+		    token.getPathSecurityParameters().setPSK(b);
+		}
+	    } catch (NumberFormatException ex) {
+		// too bad, verifier will see the null value and react accordingly
+	    }
 	}
     }
 

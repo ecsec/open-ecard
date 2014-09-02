@@ -76,10 +76,11 @@ public class TCTokenVerifier {
      * @throws org.openecard.binding.tctoken.CommunicationError
      */
     public void verify() throws TCTokenException, CommunicationError {
-	verifyServerAddress();
-	verifySessionIdentifier();
+	// ordering is important because of the raised errors in case the first two are not https URLs
 	verifyRefreshAddress();
 	verifyCommunicationErrorAddress();
+	verifyServerAddress();
+	verifySessionIdentifier();
 	verifyBinding();
 	verifyPathSecurity();
     }
@@ -88,10 +89,11 @@ public class TCTokenVerifier {
      * Verifies the ServerAddress element of the TCToken.
      *
      * @throws TCTokenException
+     * @throws CommunicationError
      */
-    public void verifyServerAddress() throws TCTokenException {
+    public void verifyServerAddress() throws TCTokenException, CommunicationError {
 	String value = token.getServerAddress();
-	assertRequired("ServerAddress", value);
+	assertRequired("ServerAddress", value, true);
 	assertHttpsURL("ServerAddress", value);
     }
 
@@ -99,33 +101,36 @@ public class TCTokenVerifier {
      * Verifies the SessionIdentifier element of the TCToken.
      *
      * @throws TCTokenException
+     * @throws CommunicationError
      */
-    public void verifySessionIdentifier() throws TCTokenException {
+    public void verifySessionIdentifier() throws TCTokenException, CommunicationError {
 	String value = token.getSessionIdentifier();
-	assertRequired("SessionIdentifier", value);
+	assertRequired("SessionIdentifier", value, true);
     }
 
     /**
      * Verifies the RefreshAddress element of the TCToken.
      *
      * @throws TCTokenException
+     * @throws CommunicationError
      */
-    public void verifyRefreshAddress() throws TCTokenException {
+    public void verifyRefreshAddress() throws TCTokenException, CommunicationError {
 	String value = token.getRefreshAddress();
-	assertRequired("RefreshAddress", value);
-	assertURL("RefreshAddress", value);
+	assertRequired("RefreshAddress", value, true);
+	assertHttpsURL("RefreshAddress", value);
     }
 
     /**
      * Verifies the CommunicationErrorAddress element of the TCToken.
      *
      * @throws TCTokenException
+     * @throws CommunicationError
      */
-    public void verifyCommunicationErrorAddress() throws TCTokenException {
+    public void verifyCommunicationErrorAddress() throws TCTokenException, CommunicationError {
 	String value = token.getCommunicationErrorAddress();
 	if (! checkEmpty(value)) {
-	    assertURL("CommunicationErrorAddress", value);
-	    assertRequired("CommunicationErrorAddress", value);
+	    assertRequired("CommunicationErrorAddress", value, true);
+	    assertHttpsURL("CommunicationErrorAddress", value);
 	}
     }
 
@@ -133,10 +138,11 @@ public class TCTokenVerifier {
      * Verifies the Binding element of the TCToken.
      *
      * @throws TCTokenException
+     * @throws CommunicationError
      */
-    public void verifyBinding() throws TCTokenException {
+    public void verifyBinding() throws TCTokenException, CommunicationError {
 	String value = token.getBinding();
-	assertRequired("Binding", value);
+	assertRequired("Binding", value, true);
 	checkEqualOR("Binding", value, "urn:liberty:paos:2006-08", "urn:ietf:rfc:2616");
     }
 
@@ -158,13 +164,12 @@ public class TCTokenVerifier {
 	    return;
 	}
 
-	assertRequired("PathSecurityProtocol", proto);
+	assertRequired("PathSecurityProtocol", proto, true);
 	String[] protos = {"urn:ietf:rfc:4346", "urn:ietf:rfc:5246", "urn:ietf:rfc:4279", "urn:ietf:rfc:5487"};
 	checkEqualOR("PathSecurityProtocol", proto, protos);
 	if ("urn:ietf:rfc:4279".equals(proto) || "urn:ietf:rfc:5487".equals(proto)) {
-	    assertRequired("PathSecurityParameters", psp);
-	    assertRequired("PSK", psp.getPSK());
-	    assertEvenNumber(psp.getPSK());
+	    assertRequired("PathSecurityParameters", psp, true);
+	    assertRequired("PSK", psp.getPSK(), true);
 	}
     }
 
@@ -195,13 +200,15 @@ public class TCTokenVerifier {
     }
 
 
-    private void checkEqualOR(String name, String value, String... equal) throws TCTokenException {
+    private void checkEqualOR(String name, String value, String... equal) throws TCTokenException, CommunicationError {
 	for (String string : equal) {
 	    if (value.equals(string)) {
 		return;
 	    }
 	}
-	throw new TCTokenException(String.format("Invalid %s in TCToken.", name));
+	String msg = String.format("Invalid %s in TCToken.", name);
+	String minor = ECardConstants.Minor.App.PARM_ERROR;
+	throw new CommunicationError(getErrorRefreshAddr(), minor, msg);
     }
 
     /**
@@ -210,9 +217,16 @@ public class TCTokenVerifier {
      * @param value Value
      * @throws Exception
      */
-    private void assertRequired(String name, Object value) throws TCTokenException {
+    private void assertRequired(String name, Object value, boolean redirect) throws TCTokenException,
+	    CommunicationError {
 	if (checkEmpty(value)) {
-	    throw new TCTokenException(String.format("Element %s is required.", name));
+	    String msg = String.format("Element %s is required.", name);
+	    if (redirect) {
+		String minor = ECardConstants.Minor.App.PARM_ERROR;
+		throw new CommunicationError(getErrorRefreshAddr(), minor, msg);
+	    } else {
+		throw new TCTokenException(msg);
+	    }
 	}
     }
 
@@ -233,15 +247,7 @@ public class TCTokenVerifier {
 	}
     }
 
-    private void assertEvenNumber(byte[] val) throws CommunicationError {
-	if ((val.length % 2) != 0) {
-	    String msg = "";
-	    String errorAddr = token.getCommunicationErrorAddress();
-	    throw new CommunicationError(errorAddr, ECardConstants.Minor.App.INCORRECT_PARM, msg);
-	}
-    }
-
-    private void assertSameChannel() throws TCTokenException {
+    private void assertSameChannel() throws TCTokenException, CommunicationError {
 	// check that everything can be handled over the same channel
 	// TR-03124-1 does not mention that redirects on the TCToken address are possible and it also states that there
 	// are only two channels. So I guess we should force this here as well.
@@ -249,9 +255,21 @@ public class TCTokenVerifier {
 	List<Pair<URL, Certificate>> urls = ctx.getCerts();
 	for (Pair<URL, Certificate> next : urls) {
 	    if (! TR03112Utils.checkSameOriginPolicy(paosUrl, next.p1)) {
-		throw new TCTokenException("The same origin policy is violated for the PAOS channel (TLS-2).");
+		String msg = "The same origin policy is violated for the PAOS channel (TLS-2).";
+		String minor = ECardConstants.Minor.App.PARM_ERROR;
+		throw new CommunicationError(getErrorRefreshAddr(), minor, msg);
 	    }
 	}
+    }
+
+    private String getErrorRefreshAddr() throws TCTokenException {
+	String addr = token.getCommunicationErrorAddress();
+	assertHttpsURL("CommunicationErrorAddress", addr);
+	if (addr == null || addr.isEmpty()) {
+	    addr = token.getRefreshAddress();
+	    assertHttpsURL("RefreshAddress", addr);
+	}
+	return addr;
     }
 
 }

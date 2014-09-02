@@ -98,7 +98,11 @@ public class PINStepAction extends StepAction {
 	} else if (Arrays.equals(status, RC1)) {
 	    retryCounter = 2;
 	    step.updateAttemptsDisplay(1);
-	    step.addCANEntry();
+	    if (capturePin) {
+		step.addCANEntry();
+	    } else {
+		step.addNativeCANNotice();
+	    }
 	} else if (Arrays.equals(status, DEAKTIVATED)) {
 	    retryCounter = -1;
 	}
@@ -135,32 +139,34 @@ public class PINStepAction extends StepAction {
 		// PACE completed successfully, proceed with next step
 		return new StepActionResult(StepActionResultStatus.NEXT);
 	    } catch (WSException ex) {
-		if (capturePin) {
-		    if (retryCounter < 3) {
-			retryCounter++;
-			step.updateAttemptsDisplay(3 - retryCounter);
-			if (retryCounter == 2) {
-			    step.addCANEntry();
-			}
-
-			if (retryCounter == 3) {
-			    logger.warn("Wrong PIN entered. The PIN is blocked.");
-			    return new StepActionResult(StepActionResultStatus.REPEAT, 
-				    new ErrorStep(lang.translationForKey("step_error_title_blocked"),
-					    lang.translationForKey("step_error_pin_blocked")));
-			}
-			logger.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
-			return new StepActionResult(StepActionResultStatus.REPEAT);
-		    } else {
-			logger.warn("Wrong PIN entered. The PIN is blocked.");
-			return new StepActionResult(StepActionResultStatus.REPEAT, 
-				new ErrorStep(lang.translationForKey("step_error_title_blocked"),
-					lang.translationForKey("step_error_pin_blocked")));
-		    }
-		} else {
-		    logger.warn("PIN not entered successfully in terminal.");
+		// This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
+		if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
+		    logger.error("User canceled the authentication manually.", ex);
 		    return new StepActionResult(StepActionResultStatus.CANCEL);
 		}
+
+		// increase counters and the related displays
+		retryCounter++;
+		step.updateAttemptsDisplay(3 - retryCounter);
+
+		// check whether the PIN is blocked
+		if (retryCounter >= 3) {
+		    logger.warn("Wrong PIN entered. The PIN is blocked.");
+		    return new StepActionResult(StepActionResultStatus.REPEAT,
+			    new ErrorStep(lang.translationForKey("step_error_title_blocked"),
+				    lang.translationForKey("step_error_pin_blocked")));
+		}
+
+		// check whether entering the can is necessary
+		if (retryCounter == 2 && capturePin) {
+		    step.addCANEntry();
+		} else if (retryCounter == 2) {
+		    step.addNativeCANNotice();
+		}
+
+		// repeat the step
+		logger.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
+		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    } catch (DispatcherException | InvocationTargetException ex) {
 		logger.error("Failed to dispatch EstablishChannelCommand.", ex);
 		return new StepActionResult(StepActionResultStatus.CANCEL);

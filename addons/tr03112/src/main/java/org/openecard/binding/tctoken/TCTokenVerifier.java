@@ -92,7 +92,7 @@ public class TCTokenVerifier {
     public void verifyServerAddress() throws TCTokenException {
 	String value = token.getServerAddress();
 	assertRequired("ServerAddress", value);
-	assertURL("ServerAddress", value);
+	assertHttpsURL("ServerAddress", value);
     }
 
     /**
@@ -221,6 +221,15 @@ public class TCTokenVerifier {
 	    return new URL(value);
 	} catch (MalformedURLException e) {
 	    throw new TCTokenException(String.format("Malformed %s URL", name));
+	}
+    }
+
+    private URL assertHttpsURL(String name, String value) throws TCTokenException {
+	URL url = assertURL(name, value);
+	if (! "https".equals(url.getProtocol())) {
+	    throw new TCTokenException(String.format("%s is not a https URL.", name));
+	} else {
+	    return url;
 	}
     }
 

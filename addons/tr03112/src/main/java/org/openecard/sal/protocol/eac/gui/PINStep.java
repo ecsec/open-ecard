@@ -114,6 +114,11 @@ public class PINStep extends Step {
 	Text notice = new Text();
 	notice.setText(langEac.translationForKey(NOTICE, pinType));
 	getInputInfoUnits().add(notice);
+
+	Text attemptCount = new Text();
+	attemptCount.setText(langPace.translationForKey("step_pin_retrycount", 3));
+	attemptCount.setID(PIN_ATTEMPTS_ID);
+	getInputInfoUnits().add(attemptCount);
     }
 
     protected void addCANEntry() {
@@ -125,6 +130,13 @@ public class PINStep extends Step {
 
 	Text canNotice = new Text();
 	canNotice.setText(langEac.translationForKey("eac_can_notice"));
+	canNotice.setID(CAN_NOTICE_ID);
+	getInputInfoUnits().add(canNotice);
+    }
+
+    protected void addNativeCANNotice() {
+	Text canNotice = new Text();
+	canNotice.setText(langEac.translationForKey("eac_can_notice_native"));
 	canNotice.setID(CAN_NOTICE_ID);
 	getInputInfoUnits().add(canNotice);
     }

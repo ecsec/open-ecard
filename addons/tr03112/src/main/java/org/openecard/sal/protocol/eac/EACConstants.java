@@ -26,18 +26,18 @@ package org.openecard.sal.protocol.eac;
 /**
  * Defines constants for the EAC protocol.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class EACConstants {
 
     // EF.CardSecurity file identifier
     public static final short EF_CARDSECURITY_FID = (short) 0x011D;
     // Internal data
-    protected static final String INTERNAL_DATA_CERTIFICATES = "Certificates";
-    protected static final String INTERNAL_DATA_AUTHENTICATED_AUXILIARY_DATA = "AuthenticatedAuxiliaryData";
-    protected static final String INTERNAL_DATA_PK_PCD = "PKPCD";
-    protected static final String INTERNAL_DATA_SECURITY_INFOS = "SecurityInfos";
-    protected static final String INTERNAL_DATA_CARD_STATE_ENTRY = "cardState";
-    protected static final String INTERNAL_DATA_CURRENT_CAR = "CurrentCAR";
+    protected static final String IDATA_CERTIFICATES = "Certificates";
+    protected static final String IDATA_AUTHENTICATED_AUXILIARY_DATA = "AuthenticatedAuxiliaryData";
+    protected static final String IDATA_PK_PCD = "PKPCD";
+    protected static final String IDATA_SECURITY_INFOS = "SecurityInfos";
+    protected static final String IDATA_CARD_STATE_ENTRY = "cardState";
+    protected static final String IDATA_CURRENT_CAR = "CurrentCAR";
 
 }

@@ -31,7 +31,7 @@ import org.openecard.common.tlv.Tag;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class TLVList {
 
@@ -70,7 +70,7 @@ public class TLVList {
 	if (tlv.hasChild()) {
 	    return tlv.getChild().asList();
 	}
-	return new LinkedList<TLV>();
+	return new LinkedList<>();
     }
 
 }

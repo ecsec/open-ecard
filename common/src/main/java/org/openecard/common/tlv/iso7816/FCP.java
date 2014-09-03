@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -41,20 +41,20 @@ public class FCP {
     private Long numBytes;
     private Long numBytesStructure;
     private DataElements dataElements;
-    private List<byte[]> fileIdentifiers = new LinkedList<byte[]>();
-    private List<byte[]> dfNames = new LinkedList<byte[]>();
-    private List<byte[]> proprietaryInformationNoTLV = new LinkedList<byte[]>();
-    private List<byte[]> proprietarySecurityAttribute = new LinkedList<byte[]>();
+    private final List<byte[]> fileIdentifiers = new LinkedList<>();
+    private final List<byte[]> dfNames = new LinkedList<>();
+    private final List<byte[]> proprietaryInformationNoTLV = new LinkedList<>();
+    private final List<byte[]> proprietarySecurityAttribute = new LinkedList<>();
     private byte[] fciExtensionEf;
     private byte[] shortEfIdentifier;
     private Byte lifeCycleStatusByte;
     private byte[] securityAttributeReferenceExpanded;
     private byte[] securityAttributeCompact;
-    private List<byte[]> securityEnvironmentTemplateEfs = new LinkedList<byte[]>();
+    private final List<byte[]> securityEnvironmentTemplateEfs = new LinkedList<>();
     private Byte channelSecurityAttribute;
     private byte[] securityAttributeTemplateForDataObject;
     private byte[] securityAttributeTemplateProprietary;
-    private List<TLV> dataObjectTemplates = new LinkedList<TLV>();
+    private final List<TLV> dataObjectTemplates = new LinkedList<>();
     private TLV proprietaryInformationTLV;
     private byte[] securityAttributeTemplateExpanded;
     private byte[] cryptographicMechanismIdentifierTemplate;
@@ -66,18 +66,18 @@ public class FCP {
 	}
 
 	// declare helper variables
-	List<byte[]> descriptorBytes = new LinkedList<byte[]>();
+	List<byte[]> descriptorBytes = new LinkedList<>();
 
 	Parser p = new Parser(tlv.getChild());
 	TLV next;
 	while ((next = p.next(0)) != null) {
 	    // num bytes
 	    if (next.getTagNumWithClass() == 0x80) {
-		numBytes = new Long(ByteUtils.toLong(next.getValue()));
+		numBytes = ByteUtils.toLong(next.getValue());
 	    }
 	    if (next.getTagNumWithClass() == 0x81) {
 		// length == 2
-		numBytesStructure = new Long(ByteUtils.toLong(next.getValue()));
+		numBytesStructure = ByteUtils.toLong(next.getValue());
 	    }
 	    // descriptor bytes
 	    if (next.getTagNumWithClass() == 0x82) {
@@ -109,7 +109,7 @@ public class FCP {
 	    }
 	    // lifecycle status byte
 	    if (next.getTagNumWithClass() == 0x8A) {
-		lifeCycleStatusByte = new Byte(next.getValue()[0]);
+		lifeCycleStatusByte = next.getValue()[0];
 	    }
 	    // security attribute reference expanded form
 	    // TODO: make subtype
@@ -127,7 +127,7 @@ public class FCP {
 	    }
 	    // channel security attribute
 	    if (next.getTagNumWithClass() == 0x8E) {
-		channelSecurityAttribute = new Byte(next.getValue()[0]);
+		channelSecurityAttribute = next.getValue()[0];
 	    }
 	    // securityAttributeTemplateForDataObject
 	    if (next.getTagNumWithClass() == 0xA0) {
@@ -169,11 +169,7 @@ public class FCP {
      * @return The byte array representation of the FCP.
      */
     public byte[] toBER() {
-	try {
-	    return tlv.toBER();
-	} catch (TLVException ex) {
-	    return null; // can not happen as it is created fom byte[] before
-	}
+	return tlv.toBER();
     }
 
 

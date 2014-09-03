@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -33,7 +33,7 @@ import org.openecard.common.util.ByteUtils;
  * Class representing a TLV object according to the ASN1 specification.
  * This class is capable of representing sequences and has features to navigation in an ASN1 tree.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class TLV {
 
@@ -158,7 +158,7 @@ public class TLV {
     }
 
     public List<TLV> asList() {
-	LinkedList<TLV> result = new LinkedList<TLV>();
+	LinkedList<TLV> result = new LinkedList<>();
 
 	TLV nextTag = this;
 	while (nextTag != null) {
@@ -174,7 +174,7 @@ public class TLV {
 
     public List<TLV> findNextTags(long num) {
 	List<TLV> all = asList();
-	LinkedList<TLV> result = new LinkedList<TLV>();
+	LinkedList<TLV> result = new LinkedList<>();
 
 	for (TLV nextTLV : all) {
 	    if (nextTLV.getTagNumWithClass() == num) {
@@ -189,7 +189,7 @@ public class TLV {
 	if (hasChild()) {
 	    return getChild().findNextTags(num);
 	} else {
-	    return new LinkedList<TLV>();
+	    return new LinkedList<>();
 	}
     }
 
@@ -240,31 +240,32 @@ public class TLV {
     }
 
 
-    public byte[] toBER() throws TLVException {
+    public byte[] toBER() {
 	return toBER(false);
     }
 
-    public byte[] toBER(boolean withSuccessors) throws TLVException {
-	ByteArrayOutputStream out = new ByteArrayOutputStream();
-	// value calculated from child if any
-	toBER(out, withSuccessors);
-	return out.toByteArray();
+    public byte[] toBER(boolean withSuccessors) {
+	try {
+	    ByteArrayOutputStream out = new ByteArrayOutputStream();
+	    // value calculated from child if any
+	    toBER(out, withSuccessors);
+	    return out.toByteArray();
+	} catch (IOException ex) {
+	    // IOException depends solely on the stream. The only thing that can happen here is OOM.
+	    throw new RuntimeException(ex);
+	}
     }
 
-    private void toBER(ByteArrayOutputStream out, boolean withSuccessors) throws TLVException {
+    private void toBER(ByteArrayOutputStream out, boolean withSuccessors) throws IOException {
 	if (child != null) {
-	    byte[] childBytes = child.toBER(withSuccessors);
+	    byte[] childBytes = child.toBER(true);
 	    tag.setPrimitive(false);
 	    tag.setValue(childBytes);
 	} else {
 	    tag.setPrimitive(true);
 	}
 	// write child to output stream
-	try {
-	    out.write(tag.toBER());
-	} catch (IOException ex) {
-	    throw new TLVException(ex);
-	}
+	out.write(tag.toBER());
 
 	if (withSuccessors && next != null) {
 	    next.toBER(out, withSuccessors);

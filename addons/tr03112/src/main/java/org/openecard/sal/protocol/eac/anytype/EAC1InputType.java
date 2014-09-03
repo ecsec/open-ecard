@@ -41,9 +41,9 @@ import org.w3c.dom.Element;
  * Implements the EAC1InputType data structure.
  * See BSI-TR-03112, version 1.1.2, part 7, section 4.6.5.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class EAC1InputType {
 
@@ -74,7 +74,7 @@ public class EAC1InputType {
 	authMap = new AuthDataMap(baseType);
 
 	certificateDescription = authMap.getContentAsBytes(CERTIFICATE_DESCRIPTION);
-	certificates = new ArrayList<CardVerifiableCertificate>();
+	certificates = new ArrayList<>();
 	for (Element element : baseType.getAny()) {
 	    if (element.getLocalName().equals(CERTIFICATE)) {
 		byte[] value = StringUtils.toByteArray(element.getTextContent());

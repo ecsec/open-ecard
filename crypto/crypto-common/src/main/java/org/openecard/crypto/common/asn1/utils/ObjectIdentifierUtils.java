@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -28,8 +28,9 @@ import org.openecard.common.tlv.TLVException;
 
 
 /**
+ * Helper class to convert ASN1 object identifier.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class ObjectIdentifierUtils {
 
@@ -49,10 +50,10 @@ public final class ObjectIdentifierUtils {
     }
 
     /**
-     * Converts a ASN1 object identifier to a byte array
+     * Converts a ASN1 object identifier in byte array form to a String.
      *
-     * @param oid String
-     * @return TLV encoded object identifier
+     * @param oid Object Identifier either as TLV structure or plain.
+     * @return Object Identifier string.
      * @throws TLVException
      */
     public static String toString(byte[] oid) throws TLVException {

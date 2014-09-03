@@ -39,6 +39,7 @@ import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import javax.smartcardio.ResponseAPDU;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
@@ -61,6 +62,7 @@ import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificateVerifier;
 import org.openecard.crypto.common.asn1.cvc.CertificateDescription;
+import org.openecard.crypto.common.asn1.eac.AuthenticatedAuxiliaryData;
 import org.openecard.crypto.common.asn1.eac.SecurityInfos;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.UserConsent;
@@ -85,12 +87,12 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Implements PACE protocol step according to BSI-TR-03112-7.
+ * Implements PACE protocol step according to BSI TR-03112-7.
  *
  * @see "BSI-TR-03112, version 1.1.2., part 7, section 4.6.5."
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Tobias Wich
+ * @author Moritz Horsch
+ * @author Dirk Petrautzki
  */
 public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
@@ -132,7 +134,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    EAC1OutputType eac1Output = eac1Input.getOutputType();
 
 	    // determine PACE capabilities of the terminal
-	    CardStateEntry cardState = (CardStateEntry) internalData.get(EACConstants.INTERNAL_DATA_CARD_STATE_ENTRY);
+	    CardStateEntry cardState = (CardStateEntry) internalData.get(EACConstants.IDATA_CARD_STATE_ENTRY);
 	    boolean nativePace = genericPACESupport(cardState.handleCopy());
 
 	    // Certificate chain
@@ -155,6 +157,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 	    CHAT requiredCHAT = new CHAT(eac1Input.getRequiredCHAT());
 	    CHAT optionalCHAT = new CHAT(eac1Input.getOptionalCHAT());
+	    AuthenticatedAuxiliaryData aad = new AuthenticatedAuxiliaryData(eac1Input.getAuthenticatedAuxiliaryData());
 	    byte pinID = PasswordID.valueOf(didAuthenticate.getDIDName()).getByte();
 	    String passwordType = PasswordID.parse(pinID).getString();
 
@@ -180,6 +183,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    eacData.requiredCHAT = requiredCHAT;
 	    eacData.optionalCHAT = optionalCHAT;
 	    eacData.selectedCHAT = requiredCHAT;
+	    eacData.aad = aad;
 	    eacData.pinID = pinID;
 	    eacData.passwordType = passwordType;
 
@@ -201,8 +205,8 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 	    TransmitResponse pinCheckResponse = (TransmitResponse) dispatcher.deliver(transmit);
 	    byte[] output = pinCheckResponse.getOutputAPDU().get(0);
-							//inclusive         exclusive
-	    byte[] status = Arrays.copyOfRange(output, output.length - 2, output.length);
+	    ResponseAPDU outputApdu = new ResponseAPDU(output);
+	    byte[] status = {(byte) outputApdu.getSW1(), (byte) outputApdu.getSW2()};
 
 	    UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE));
 	    // create GUI and init executor
@@ -252,11 +256,11 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 	    // Store SecurityInfos
 	    SecurityInfos securityInfos = SecurityInfos.getInstance(efCardAccess);
-	    internalData.put(EACConstants.INTERNAL_DATA_SECURITY_INFOS, securityInfos);
+	    internalData.put(EACConstants.IDATA_SECURITY_INFOS, securityInfos);
 	    // Store additional data
-	    internalData.put(EACConstants.INTERNAL_DATA_AUTHENTICATED_AUXILIARY_DATA, eac1Input.getAuthenticatedAuxiliaryData());
-	    internalData.put(EACConstants.INTERNAL_DATA_CERTIFICATES, certChain);
-	    internalData.put(EACConstants.INTERNAL_DATA_CURRENT_CAR, currentCAR);
+	    internalData.put(EACConstants.IDATA_AUTHENTICATED_AUXILIARY_DATA, aad);
+	    internalData.put(EACConstants.IDATA_CERTIFICATES, certChain);
+	    internalData.put(EACConstants.IDATA_CURRENT_CAR, currentCAR);
 
 	    // Create response
 	    eac1Output.setEFCardAccess(efCardAccess);
@@ -294,7 +298,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
     private boolean convertToBoolean(Object o) {
 	if (o instanceof Boolean) {
-	    return ((Boolean) o).booleanValue();
+	    return ((Boolean) o);
 	} else {
 	    return false;
 	}

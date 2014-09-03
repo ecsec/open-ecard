@@ -27,12 +27,13 @@ import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import org.openecard.crypto.common.asn1.cvc.CHAT;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.crypto.common.asn1.cvc.CertificateDescription;
+import org.openecard.crypto.common.asn1.eac.AuthenticatedAuxiliaryData;
 
 
 /**
  * Data structure carrying all information from DID request and the user interaction.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class EACData {
 
@@ -53,6 +54,7 @@ public class EACData {
     public CHAT requiredCHAT;
     public CHAT optionalCHAT;
     public CHAT selectedCHAT;
+    public AuthenticatedAuxiliaryData aad;
 
 
     ///

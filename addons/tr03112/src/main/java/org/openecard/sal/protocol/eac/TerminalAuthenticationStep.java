@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -31,6 +31,7 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
+import org.openecard.crypto.common.asn1.eac.AuthenticatedAuxiliaryData;
 import org.openecard.crypto.common.asn1.eac.CADomainParameter;
 import org.openecard.crypto.common.asn1.eac.CASecurityInfos;
 import org.openecard.crypto.common.asn1.eac.SecurityInfos;
@@ -47,8 +48,9 @@ import org.slf4j.LoggerFactory;
  * Implements TerminalAuthentication protocol step according to BSI-TR-03112-7.
  * See BSI-TR-03112, version 1.1.2, part 7, section 4.6.6.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch
+ * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
@@ -82,23 +84,26 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    TerminalAuthentication ta = new TerminalAuthentication(dispatcher, slotHandle);
 
 	    // Build certificate chain
-	    CardVerifiableCertificateChain certificateChain = (CardVerifiableCertificateChain) internalData.get(EACConstants.INTERNAL_DATA_CERTIFICATES);
+	    CardVerifiableCertificateChain certificateChain;
+	    certificateChain = (CardVerifiableCertificateChain) internalData.get(EACConstants.IDATA_CERTIFICATES);
 	    certificateChain.addCertificates(eac2Input.getCertificates());
 
-	    byte[] currentCAR = (byte[]) internalData.get(EACConstants.INTERNAL_DATA_CURRENT_CAR);
+	    byte[] currentCAR = (byte[]) internalData.get(EACConstants.IDATA_CURRENT_CAR);
 	    certificateChain = certificateChain.getCertificateChainFromCAR(currentCAR);
 
 	    // TA: Step 1 - Verify certificates
 	    ta.verifyCertificates(certificateChain);
 
 	    // TA: Step 2 - MSE:SET AT
-	    SecurityInfos securityInfos = (SecurityInfos) internalData.get(EACConstants.INTERNAL_DATA_SECURITY_INFOS);
+	    SecurityInfos securityInfos = (SecurityInfos) internalData.get(EACConstants.IDATA_SECURITY_INFOS);
 
 	    CardVerifiableCertificate terminalCertificate = certificateChain.getTerminalCertificates().get(0);
 	    byte[] oid = ObjectIdentifierUtils.getValue(terminalCertificate.getPublicKey().getObjectIdentifier());
 	    byte[] chr = terminalCertificate.getCHR().toByteArray();
 	    byte[] key = eac2Input.getEphemeralPublicKey();
-	    byte[] aad = (byte[]) internalData.get(EACConstants.INTERNAL_DATA_AUTHENTICATED_AUXILIARY_DATA);
+	    AuthenticatedAuxiliaryData aadObj;
+	    aadObj = (AuthenticatedAuxiliaryData) internalData.get(EACConstants.IDATA_AUTHENTICATED_AUXILIARY_DATA);
+	    byte[] aad = aadObj.getData();
 
 	    // Calculate comp(key)
 	    EFCardAccess efca = new EFCardAccess(securityInfos);
@@ -114,7 +119,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    byte[] rPICC = ta.getChallenge();
 
 	    // Store public key for Chip Authentication
-	    internalData.put(EACConstants.INTERNAL_DATA_PK_PCD, eac2Input.getEphemeralPublicKey());
+	    internalData.put(EACConstants.IDATA_PK_PCD, eac2Input.getEphemeralPublicKey());
 
 	    // Create response
 	    eac2Output.setChallenge(rPICC);

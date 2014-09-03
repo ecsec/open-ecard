@@ -194,4 +194,21 @@ public class Tag {
 	    tagNum + " (0x" + Long.toHexString(tagNumWithClass) + ")]";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+	if (obj instanceof Tag) {
+	    Tag other = (Tag) obj;
+	    return this.getTagNumWithClass() == other.getTagNumWithClass();
+	} else {
+	    return false;
+	}
+    }
+
+    @Override
+    public int hashCode() {
+	int hash = 7;
+	hash = 79 * hash + (int) (this.tagNumWithClass ^ (this.tagNumWithClass >>> 32));
+	return hash;
+    }
+
 }

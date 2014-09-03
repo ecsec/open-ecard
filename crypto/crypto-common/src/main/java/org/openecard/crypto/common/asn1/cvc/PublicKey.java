@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,7 +23,6 @@
 package org.openecard.crypto.common.asn1.cvc;
 
 import org.openecard.common.tlv.TLV;
-import org.openecard.common.tlv.TLVException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.asn1.eac.oid.TAObjectIdentifier;
 import org.openecard.crypto.common.asn1.utils.ObjectIdentifierUtils;
@@ -32,7 +31,7 @@ import org.openecard.crypto.common.asn1.utils.ObjectIdentifierUtils;
 /**
  * See BSI-TR-03110, version 2.10, part 3, section D.3.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public abstract class PublicKey {
 
@@ -83,11 +82,7 @@ public abstract class PublicKey {
      * @return True if they are equal, otherwise false
      */
     public boolean compare(PublicKey pk) {
-	try {
-	    return ByteUtils.compare(getTLVEncoded().toBER(), pk.getTLVEncoded().toBER());
-	} catch (TLVException ignore) {
-	    return false;
-	}
+	return ByteUtils.compare(getTLVEncoded().toBER(), pk.getTLVEncoded().toBER());
     }
 
     /**

@@ -22,6 +22,7 @@
 
 package org.openecard.sal.protocol.eac.gui;
 
+import java.util.Calendar;
 import java.util.TreeMap;
 import org.openecard.common.I18n;
 import org.openecard.crypto.common.asn1.cvc.CHAT;
@@ -93,10 +94,21 @@ public class CHATStep extends Step {
 	// iterate over all 8 special functions
 	for (int i = 0; i < 8; i++) {
 	    CHAT.SpecialFunction specialFunction = specialFunctions[i];
+
+	    // determine if extra data is necessary
+	    Object[] textData = new Object[0];
+	    if (CHAT.SpecialFunction.AGE_VERIFICATION == specialFunction) {
+		Calendar c = eacData.aad.getAgeVerificationData();
+		if (c != null) {
+		    int yearDiff = getYearDifference(c);
+		    textData = new Object[] { yearDiff };
+		}
+	    }
+
 	    if (requiredSpecialFunctions.get(specialFunction)) {
-		readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, true));
+		readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, true, textData));
 	    } else if (optionalSpecialFunctions.get(specialFunction)) {
-		readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, false));
+		readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, false, textData));
 	    }
 	}
 
@@ -109,15 +121,25 @@ public class CHATStep extends Step {
 	getInputInfoUnits().add(requestedDataDescription);
     }
 
-    private BoxItem makeBoxItem(Enum<?> value, boolean checked, boolean disabled) {
+    private BoxItem makeBoxItem(Enum<?> value, boolean checked, boolean disabled, Object... textData) {
 	BoxItem item = new BoxItem();
 
 	item.setName(value.name());
 	item.setChecked(checked);
 	item.setDisabled(disabled);
-	item.setText(lang.translationForKey(value.name()));
+	item.setText(lang.translationForKey(value.name(), textData));
 
 	return item;
+    }
+
+    private static int getYearDifference(Calendar c) {
+	Calendar now = Calendar.getInstance();
+	now.add(Calendar.DAY_OF_MONTH, -1 * c.get(Calendar.DAY_OF_MONTH));
+	now.add(Calendar.DAY_OF_MONTH, 1);
+	now.add(Calendar.MONTH, -1 * c.get(Calendar.MONTH));
+	now.add(Calendar.MONTH, 1);
+	now.add(Calendar.YEAR, -1 * c.get(Calendar.YEAR));
+	return now.get(Calendar.YEAR);
     }
 
 }

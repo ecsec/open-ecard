@@ -94,7 +94,7 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    byte[] efCardSecurity = CardUtils.readFile(efCardSecurityFCP, dispatcher, slotHandle);
 
 	    // CA: Step 1 - MSE:SET AT
-	    SecurityInfos securityInfos = (SecurityInfos) internalData.get(EACConstants.INTERNAL_DATA_SECURITY_INFOS);
+	    SecurityInfos securityInfos = (SecurityInfos) internalData.get(EACConstants.IDATA_SECURITY_INFOS);
 	    EFCardAccess efca = new EFCardAccess(securityInfos);
 	    CASecurityInfos cas = efca.getCASecurityInfos();
 
@@ -103,7 +103,7 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    ca.mseSetAT(oID, keyID);
 
 	    // CA: Step 2 - General Authenticate
-	    byte[] key = (byte[]) internalData.get(EACConstants.INTERNAL_DATA_PK_PCD);
+	    byte[] key = (byte[]) internalData.get(EACConstants.IDATA_PK_PCD);
 	    byte[] responseData = ca.generalAuthenticate(key);
 
 	    TLV tlv = TLV.fromBER(responseData);

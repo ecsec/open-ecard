@@ -50,42 +50,10 @@ public final class CHAT {
     private String oid;
     private Role role;
     private byte[] discretionaryData;
-    private TreeMap<DataGroup, Boolean> writeAccess = new TreeMap<DataGroup, Boolean>() {
-	{
-	    DataGroup[] data = DataGroup.values();
-	    for (int i = 16; i < 21; i++) {
-		put(data[i], false);
-	    }
-	}
-
-    };
-    private TreeMap<DataGroup, Boolean> readAccess = new TreeMap<DataGroup, Boolean>() {
-	{
-	    DataGroup[] data = DataGroup.values();
-	    for (int i = 0; i < 21; i++) {
-		put(data[i], false);
-	    }
-	}
-
-    };
-    private TreeMap<SpecialFunction, Boolean> specialFunctions = new TreeMap<SpecialFunction, Boolean>() {
-	{
-	    SpecialFunction[] data = SpecialFunction.values();
-	    for (int i = 0; i < data.length; i++) {
-		put(data[i], false);
-	    }
-	}
-
-    };
-    private TreeMap<AccessRight, Boolean> accessRights = new TreeMap<AccessRight, Boolean>() {
-	{
-	    AccessRight[] data = AccessRight.values();
-	    for (int i = 0; i < data.length; i++) {
-		put(data[i], false);
-	    }
-	}
-
-    };
+    private final TreeMap<DataGroup, Boolean> writeAccess;
+    private final TreeMap<DataGroup, Boolean> readAccess;
+    private final TreeMap<SpecialFunction, Boolean> specialFunctions;
+    private final TreeMap<AccessRight, Boolean> accessRights;
 
     /**
      * Represents the roles.
@@ -94,7 +62,6 @@ public final class CHAT {
      * See BSI-TR-03110, version 2.10, part 3, section C.4.3.
      */
     public enum Role {
-
 	CVCA, DV_OFFICIAL, DV_NON_OFFICIAL,
 	AUTHENTICATION_TERMINAL, INSPECTION_TERMINAL, SIGNATURE_TERMINAL
     }
@@ -104,19 +71,17 @@ public final class CHAT {
      * See BSI-TR-03110, version 2.10, part 3, section C.4.2.
      */
     public enum SpecialFunction {
-
 	INSTALL_QUALIFIED_CERTIFICATE, INSTALL_CERTIFICATE, PIN_MANAGEMENT,
 	CAN_ALLOWED, PRIVILEGED_TERMINAL, RESTRICTED_IDENTIFICATION,
 	COMMUNITY_ID_VERIFICATION, AGE_VERIFICATION;
     }
 
     /**
-     * Represents the data groups.
+     * Represents the specialData groups.
      * See BSI-TR-03110, version 2.10, part 3, section C.4.2.
      * See BSI-TR-03110, version 2.10, part 2, section A.1.
      */
     public enum DataGroup {
-
 	DG01, DG02, DG03, DG04, DG05, DG06, DG07,
 	DG08, DG09, DG10, DG11, DG12, DG13, DG14,
 	DG15, DG16, DG17, DG18, DG19, DG20, DG21;
@@ -128,7 +93,6 @@ public final class CHAT {
      * See BSI-TR-03110, version 2.10, part 3, section C.4.3.
      */
     public enum AccessRight {
-
 	DG03, DG04, GENERATE_SIGNATURE, GENERATE_QUALIFIED_SIGNATURE;
     }
 
@@ -152,23 +116,51 @@ public final class CHAT {
 	oid = ObjectIdentifierUtils.toString(tlv.findChildTags(0x06).get(0).getValue());
 	discretionaryData = tlv.findChildTags(0x53).get(0).getValue();
 
-	if (oid.equals(CVCertificatesObjectIdentifier.id_IS)) {
-	    // Inspection systems
-	    parseRole(discretionaryData[0]);
-	    parseAccessRights(discretionaryData[0]);
-	} else if (oid.equals(CVCertificatesObjectIdentifier.id_AT)) {
-	    // Authentication terminal
-	    parseRole(discretionaryData[0]);
-	    parseWriteAccess(discretionaryData);
-	    parseReadAccess(discretionaryData);
-	    parseSpecialFunctions(discretionaryData);
-	} else if (oid.equals(CVCertificatesObjectIdentifier.id_ST)) {
-	    // Signature terminal
-	    parseRole(discretionaryData[0]);
-	    parseAccessRights(discretionaryData[0]);
+	writeAccess = new TreeMap<>();
+	DataGroup[] writeData = DataGroup.values();
+	for (int i = 16; i < 21; i++) {
+	    writeAccess.put(writeData[i], false);
+	}
+	readAccess = new TreeMap<>();
+	DataGroup[] readData = DataGroup.values();
+	for (int i = 0; i < 21; i++) {
+	    readAccess.put(readData[i], false);
+	}
+	specialFunctions = new TreeMap<>();
+	for (SpecialFunction data : SpecialFunction.values()) {
+	    specialFunctions.put(data, false);
+	}
+	accessRights = new TreeMap<>();
+	for (AccessRight data : AccessRight.values()) {
+	    accessRights.put(data, false);
+	}
+
+	switch (oid) {
+	    case CVCertificatesObjectIdentifier.id_IS:
+		// Inspection systems
+		parseRole(discretionaryData[0]);
+		parseAccessRights(discretionaryData[0]);
+		break;
+	    case CVCertificatesObjectIdentifier.id_AT:
+		// Authentication terminal
+		parseRole(discretionaryData[0]);
+		parseWriteAccess(discretionaryData);
+		parseReadAccess(discretionaryData);
+		parseSpecialFunctions(discretionaryData);
+		break;
+	    case CVCertificatesObjectIdentifier.id_ST:
+		// Signature terminal
+		parseRole(discretionaryData[0]);
+		parseAccessRights(discretionaryData[0]);
+		break;
 	}
     }
 
+    /**
+     * Parse the role of the CHAT.
+     *
+     * @param roleByte Role
+     */
     /**
      * Parse the role of the CHAT.
      *
@@ -188,12 +180,16 @@ public final class CHAT {
 		role = Role.DV_NON_OFFICIAL;
 		break;
 	    case (byte) 0x00:
-		if (oid.equals(CVCertificatesObjectIdentifier.id_IS)) {
-		    role = Role.INSPECTION_TERMINAL;
-		} else if (oid.equals(CVCertificatesObjectIdentifier.id_AT)) {
-		    role = Role.AUTHENTICATION_TERMINAL;
-		} else if (oid.equals(CVCertificatesObjectIdentifier.id_ST)) {
-		    role = Role.SIGNATURE_TERMINAL;
+		switch (oid) {
+		    case CVCertificatesObjectIdentifier.id_IS:
+			role = Role.INSPECTION_TERMINAL;
+			break;
+		    case CVCertificatesObjectIdentifier.id_AT:
+			role = Role.AUTHENTICATION_TERMINAL;
+			break;
+		    case CVCertificatesObjectIdentifier.id_ST:
+			role = Role.SIGNATURE_TERMINAL;
+			break;
 		}
 		break;
 	    default:
@@ -231,7 +227,7 @@ public final class CHAT {
     /**
      * Parse the write access of the CHAT.
      *
-     * @param discretionaryData Discretionary data
+     * @param discretionaryData Discretionary specialData
      */
     private void parseWriteAccess(byte[] discretionaryData) {
 	Iterator<DataGroup> it = writeAccess.keySet().iterator();
@@ -244,7 +240,7 @@ public final class CHAT {
     /**
      * Parse the read access of the CHAT.
      *
-     * @param discretionaryData Discretionary data
+     * @param discretionaryData Discretionary specialData
      */
     private void parseReadAccess(byte[] discretionaryData) {
 	Iterator<DataGroup> it = readAccess.keySet().iterator();
@@ -257,7 +253,7 @@ public final class CHAT {
     /**
      * Parse the special functions of the CHAT.
      *
-     * @param discretionaryData Discretionary data
+     * @param discretionaryData Discretionary specialData
      */
     private void parseSpecialFunctions(byte[] discretionaryData) {
 	Iterator<SpecialFunction> it = specialFunctions.keySet().iterator();
@@ -290,7 +286,7 @@ public final class CHAT {
      *
      * @param dataGroup Data group
      * @param selected Selected
-     * @return True if data group is set, otherwise false
+     * @return True if specialData group is set, otherwise false
      */
     public boolean setWriteAccess(DataGroup dataGroup, boolean selected) {
 	if (writeAccess.containsKey(dataGroup)) {
@@ -305,7 +301,7 @@ public final class CHAT {
      *
      * @param dataGroup Data Group
      * @param selected Selected
-     * @return True if data group is set, otherwise false
+     * @return True if specialData group is set, otherwise false
      */
     public boolean setWriteAccess(String dataGroup, boolean selected) {
 	return setWriteAccess(DataGroup.valueOf(dataGroup), selected);
@@ -338,7 +334,7 @@ public final class CHAT {
      *
      * @param dataGroup Data group
      * @param selected Selected
-     * @return True if the data group is set, otherwise false
+     * @return True if the specialData group is set, otherwise false
      */
     public boolean setReadAccess(DataGroup dataGroup, boolean selected) {
 	if (readAccess.containsKey(dataGroup)) {
@@ -353,7 +349,7 @@ public final class CHAT {
      *
      * @param dataGroup Data group
      * @param selected Selected
-     * @return True if the data group is set, otherwise false
+     * @return True if the specialData group is set, otherwise false
      */
     public boolean setReadAccess(String dataGroup, boolean selected) {
 	return setReadAccess(DataGroup.valueOf(dataGroup), selected);

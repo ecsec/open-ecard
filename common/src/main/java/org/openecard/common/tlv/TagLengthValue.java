@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -31,7 +31,7 @@ import org.openecard.common.util.IntegerUtils;
 /**
  * Internal class representing one entry with a TLV definition.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 class TagLengthValue {
 
@@ -205,7 +205,7 @@ class TagLengthValue {
     }
 
 
-    byte[] toBER() throws TLVException {
+    byte[] toBER() {
 	try {
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -229,7 +229,8 @@ class TagLengthValue {
 
 	    return out.toByteArray();
 	} catch (IOException ex) {
-	    throw new TLVException(ex);
+	    // IOException depends solely on the stream. The only thing that can happen here is OOM.
+	    throw new RuntimeException(ex);
 	}
     }
 

@@ -39,4 +39,8 @@ public class TLVException extends Exception {
 	super(t);
     }
 
+    public TLVException(String msg, Throwable t) {
+	super(msg, t);
+    }
+
 }

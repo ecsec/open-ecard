@@ -101,7 +101,7 @@ public class CHATTest {
 	chatBytes = StringUtils.toByteArray("7f4c12060904007f0007030102025305000301ffb7");
 	chat.setWriteAccess(CHAT.DataGroup.DG17, false);
 	chat.setWriteAccess("DG18", false);
-	assertEquals(chatBytes, chat.toByteArray());
+	assertEquals(chat.toByteArray(), chatBytes);
     }
 
     @Test
@@ -111,7 +111,7 @@ public class CHATTest {
 	chat.setReadAccess(CHAT.DataGroup.DG02, false);
 	chat.setReadAccess(CHAT.DataGroup.DG03.name(), false);
 	chat.setReadAccess("DG04", false);
-	assertEquals(chatBytes, chat.toByteArray());
+	assertEquals(chat.toByteArray(), chatBytes);
     }
 
     @Test
@@ -119,7 +119,7 @@ public class CHATTest {
 	chatBytes = StringUtils.toByteArray("7f4c12060904007f0007030102025305300301ffAF");
 	chat.setSpecialFunctions(CHAT.SpecialFunction.PRIVILEGED_TERMINAL, true);
 	chat.setSpecialFunction("CAN_ALLOWED", false);
-	assertEquals(chatBytes, chat.toByteArray());
+	assertEquals(chat.toByteArray(), chatBytes);
     }
 
 }

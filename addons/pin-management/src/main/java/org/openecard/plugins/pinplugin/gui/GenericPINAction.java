@@ -24,6 +24,7 @@ package org.openecard.plugins.pinplugin.gui;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ControlIFD;
+import iso.std.iso_iec._24727.tech.schema.ControlIFDResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
@@ -265,10 +266,12 @@ public class GenericPINAction extends StepAction {
 		// pace with the old pin was successful now modify the pin
 
 		if (newPINValue.equals(newPINRepeatValue) && newPINValue.length() == 6) {
-		    sendResetRetryCounter(newPINValue.getBytes(ISO_8859_1));
+		    CardResponseAPDU resp = sendResetRetryCounter(newPINValue.getBytes(ISO_8859_1));
+		    // TODO check result
 		}
 	    } else {
-		sendModifyPIN();
+		ControlIFDResponse resp = sendModifyPIN();
+		WSHelper.checkResult(resp);
 	    }
 
 	    // PIN modified successfully, proceed with next step
@@ -279,6 +282,11 @@ public class GenericPINAction extends StepAction {
 	} catch (DispatcherException ex) {
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	} catch (WSHelper.WSException ex) {
+	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
+	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
+		logger.error("User canceled the authentication manually.", ex);
+		return new StepActionResult(StepActionResultStatus.CANCEL);
+	    }
 	    gPINStep.setFailedPINVerify(true);
 	    gPINStep.setWrongPINFormat(false);
 	    switch(state) {
@@ -326,6 +334,11 @@ public class GenericPINAction extends StepAction {
 	} catch (InvocationTargetException ex) {
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	} catch (WSHelper.WSException ex) {
+	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
+	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
+		logger.error("User canceled the authentication manually.", ex);
+		return new StepActionResult(StepActionResultStatus.CANCEL);
+	    }
 	    gPINStep.setWrongCANFormat(false);
 	    gPINStep.setFailedCANVerify(true);
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
@@ -367,6 +380,11 @@ public class GenericPINAction extends StepAction {
 	} catch (InvocationTargetException ex) {
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	} catch (WSHelper.WSException ex) {
+	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
+	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
+		logger.error("User canceled the authentication manually.", ex);
+		return new StepActionResult(StepActionResultStatus.CANCEL);
+	    }
 	    gPINStep.decreasePUKCounter();
 	    gPINStep.setWrongPUKFormat(false);
 	    gPINStep.setFailedPUKVerify(true);
@@ -386,7 +404,7 @@ public class GenericPINAction extends StepAction {
      * @throws InvocationTargetException If the ControlIFD command fails.
      * @throws DispatcherException If an error in the dispatcher occurs.
      */
-    private void sendModifyPIN() throws IFDException, InvocationTargetException, DispatcherException {
+    private ControlIFDResponse sendModifyPIN() throws IFDException, InvocationTargetException, DispatcherException {
 	PasswordAttributesType pwdAttr = create(true, ASCII_NUMERIC, 6, 6, 6);
 	pwdAttr.setPadChar(new byte[] { (byte) 0x3F });
 	PCSCPinModify ctrlStruct = new PCSCPinModify(pwdAttr, StringUtils.toByteArray("002C0203"));
@@ -396,7 +414,7 @@ public class GenericPINAction extends StepAction {
 	controlIFD.setCommand(ByteUtils.concatenate((byte) PCSCFeatures.MODIFY_PIN_DIRECT, structData));
 	controlIFD.setContextHandle(cHandle.getContextHandle());
 	controlIFD.setIFDName(cHandle.getIFDName());
-	dispatcher.deliver(controlIFD);
+	return (ControlIFDResponse) dispatcher.deliver(controlIFD);
     }
 
     /**
@@ -404,9 +422,9 @@ public class GenericPINAction extends StepAction {
      *
      * @throws APDUException if the RRC-APDU could not be sent successfully
      */
-    private void sendResetRetryCounter(byte[] newPIN) throws APDUException {
+    private CardResponseAPDU sendResetRetryCounter(byte[] newPIN) throws APDUException {
 	ResetRetryCounter apdu = new ResetRetryCounter(newPIN, (byte) 0x03);
-	apdu.transmit(dispatcher, cHandle.getSlotHandle());
+	return apdu.transmit(dispatcher, cHandle.getSlotHandle());
     }
 
     private static PasswordAttributesType create(boolean needsPadding, PasswordTypeType pwdType, int minLen,

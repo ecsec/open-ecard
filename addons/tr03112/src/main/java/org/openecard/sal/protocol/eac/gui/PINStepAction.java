@@ -153,8 +153,8 @@ public class PINStepAction extends StepAction {
 		if (retryCounter >= 3) {
 		    logger.warn("Wrong PIN entered. The PIN is blocked.");
 		    return new StepActionResult(StepActionResultStatus.REPEAT,
-			    new ErrorStep(lang.translationForKey("step_error_title_blocked"),
-				    lang.translationForKey("step_error_pin_blocked")));
+			    new ErrorStep(lang.translationForKey("step_error_title_blocked", "PIN"),
+				    lang.translationForKey("step_error_pin_blocked", "PIN")));
 		}
 
 		// check whether entering the can is necessary

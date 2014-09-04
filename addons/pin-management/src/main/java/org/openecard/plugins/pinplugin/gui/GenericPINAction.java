@@ -84,6 +84,7 @@ public class GenericPINAction extends StepAction {
     private static final String CAN_SUCCESS = "action.changepin.userconsent.canstep.can_success";
     private static final String PUK_SUCCESS = "action.unblockpin.userconsent.pukstep.puk_success";
     private static final String CHANGE_SUCCESS = "action.changepin.userconsent.successstep.description";
+    private static final String ERROR_CARD_REMOVED = "action.error.card.removed";
 
     private final I18n lang = I18n.getTranslation("pinplugin");
     private final boolean capturePin;
@@ -287,6 +288,14 @@ public class GenericPINAction extends StepAction {
 		logger.error("User canceled the authentication manually.", ex);
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
+
+	    // for people which think they have to remove the card in the process
+	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
+		logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.");
+		return new StepActionResult(StepActionResultStatus.REPEAT,
+			generateErrorStep(lang.translationForKey(ERROR_CARD_REMOVED)));
+	    }
+
 	    gPINStep.setFailedPINVerify(true);
 	    gPINStep.setWrongPINFormat(false);
 	    switch(state) {
@@ -339,6 +348,14 @@ public class GenericPINAction extends StepAction {
 		logger.error("User canceled the authentication manually.", ex);
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
+
+	    // for people which think they have to remove the card in the process
+	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
+		logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.");
+		return new StepActionResult(StepActionResultStatus.REPEAT,
+			generateErrorStep(lang.translationForKey(ERROR_CARD_REMOVED)));
+	    }
+	    
 	    gPINStep.setWrongCANFormat(false);
 	    gPINStep.setFailedCANVerify(true);
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
@@ -385,6 +402,14 @@ public class GenericPINAction extends StepAction {
 		logger.error("User canceled the authentication manually.", ex);
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
+
+	    // for people which think they have to remove the card in the process
+	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
+		logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.");
+		return new StepActionResult(StepActionResultStatus.REPEAT,
+			generateErrorStep(lang.translationForKey(ERROR_CARD_REMOVED)));
+	    }
+	    
 	    gPINStep.decreasePUKCounter();
 	    gPINStep.setWrongPUKFormat(false);
 	    gPINStep.setFailedPUKVerify(true);
@@ -443,10 +468,17 @@ public class GenericPINAction extends StepAction {
     private Step generateSuccessStep(String successMessage) {
 	Step successStep = new Step("Success");
 	successStep.setReversible(false);
-	Text successText = new Text();
-	successText.setText(successMessage);
+	Text successText = new Text(successMessage);
 	successStep.getInputInfoUnits().add(successText);
 	return successStep;
+    }
+
+    private Step generateErrorStep(String errorMessage) {
+	Step errorStep = new Step("Error");
+	errorStep.setReversible(false);
+	Text errorText = new Text(errorMessage);
+	errorStep.getInputInfoUnits().add(errorText);
+	return errorStep;
     }
 
 }

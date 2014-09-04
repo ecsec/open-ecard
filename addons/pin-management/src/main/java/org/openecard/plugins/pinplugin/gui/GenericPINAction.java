@@ -81,7 +81,6 @@ public class GenericPINAction extends StepAction {
     private static final String ISO_8859_1 = "ISO-8859-1";
 
     // Translation constants
-    private static final String CAN_SUCCESS = "action.changepin.userconsent.canstep.can_success";
     private static final String PUK_SUCCESS = "action.unblockpin.userconsent.pukstep.puk_success";
     private static final String CHANGE_SUCCESS = "action.changepin.userconsent.successstep.description";
     private static final String ERROR_CARD_REMOVED = "action.error.card.removed";

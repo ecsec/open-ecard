@@ -44,7 +44,6 @@ public class GenericPINStep extends Step {
     private static final String PINSTEP_NEWPIN = "action.changepin.userconsent.pinstep.newpin";
     private static final String PINSTEP_OLDPIN = "action.changepin.userconsent.pinstep.oldpin";
     private static final String PINSTEP_DESCRIPTION = "action.changepin.userconsent.pinstep.description";
-    private static final String PINSTEP_NATIVE_DESCRIPTION = "action.changepin.userconsent.pinstep.native_description";
     private static final String REMAINING_ATTEMPTS = "action.changepin.userconsent.pinstep.remaining_attempts";
     private static final String WRONG_ENTRY = "action.changepin.userconsent.pinstep.wrong_entry";
     private static final String INCORRECT_INPUT = "action.changepin.userconsent.pinstep.incorrect_input";
@@ -52,7 +51,6 @@ public class GenericPINStep extends Step {
 
     // translation constants PUK entring
     private static final String PUKSTEP_DESCRIPTION = "action.unblockpin.userconsent.pukstep.description";
-    private static final String PUKSTEP_NATIVE_DESCRIPTION = "action.unblockpin.userconsent.pukstep.native_description";
     private static final String PUKSTEP_TITLE = "action.unblockpin.userconsent.pukstep.title";
     private static final String PUKSTEP_PUK = "action.unblockpin.userconsent.pukstep.puk";
     private static final String PUKSTEP_START_NATIV_DESCRIPTION = "action.unblockpin.userconsent.pukstep.nativ_start_description";
@@ -62,7 +60,6 @@ public class GenericPINStep extends Step {
     private static final String CANSTEP_NOTICE = "action.changepin.userconsent.canstep.notice";
     private static final String CANSTEP_CAN = "action.changepin.userconsent.canstep.can";
     private static final String CANSTEP_DESCRIPTION = "action.changepin.userconsent.canstep.description";
-    private static final String CANSTEP_NATIVE_DESCRIPTION = "action.changepin.userconsent.canstep.native_description";
     private static final String WRONG_CAN = "action.changepin.userconsent.canstepaction.wrong_can";
     private static final String CANSTEP_START_NATIV_DESCRIPTION = "action.changepin.userconsent.canstepaction.nativ_start_description";
 
@@ -181,23 +178,32 @@ public class GenericPINStep extends Step {
 
     private void createPINChangeGui() {
 	
-	Text pinChangeDescription = new Text();
-	pinChangeDescription.setText(lang.translationForKey(PINSTEP_DESCRIPTION));
+	Text pinChangeDescription = new Text(lang.translationForKey(PINSTEP_DESCRIPTION, "PIN"));
+	getInputInfoUnits().add(pinChangeDescription);
+
+	Text dummy = new Text(" ");
+	getInputInfoUnits().add(dummy);
+
+	Text pinText = new Text(lang.translationForKey(PINSTEP_OLDPIN));
+	getInputInfoUnits().add(pinText);
 
 	PasswordField oldPIN = new PasswordField(OLD_PIN_FIELD);
-	oldPIN.setDescription(lang.translationForKey(PINSTEP_OLDPIN));
 	oldPIN.setMinLength(5); // in case of transport pin
 	oldPIN.setMaxLength(6);
 	getInputInfoUnits().add(oldPIN);
 
+	Text newPinText = new Text(lang.translationForKey(PINSTEP_NEWPIN));
+	getInputInfoUnits().add(newPinText);
+
 	PasswordField newPIN = new PasswordField(NEW_PIN_FIELD);
-	newPIN.setDescription(lang.translationForKey(PINSTEP_NEWPIN));
 	newPIN.setMaxLength(6);
 	newPIN.setMinLength(6);
 	getInputInfoUnits().add(newPIN);
 
+	Text newPinAgainText = new Text(lang.translationForKey(PINSTEP_NEWPINREPEAT));
+	getInputInfoUnits().add(newPinAgainText);
+
 	PasswordField newPINRepeat = new PasswordField(NEW_PIN_REPEAT_FIELD);
-	newPINRepeat.setDescription(lang.translationForKey(PINSTEP_NEWPINREPEAT));
 	newPINRepeat.setMaxLength(6);
 	newPINRepeat.setMinLength(6);
 	getInputInfoUnits().add(newPINRepeat);

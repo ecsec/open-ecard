@@ -85,6 +85,9 @@ public class GenericPINAction extends StepAction {
     private static final String PUK_SUCCESS = "action.unblockpin.userconsent.pukstep.puk_success";
     private static final String CHANGE_SUCCESS = "action.changepin.userconsent.successstep.description";
     private static final String ERROR_CARD_REMOVED = "action.error.card.removed";
+    private static final String ERROR_INTERNAL = "action.error.internal";
+    private static final String ERROR_TITLE = "action.error.title";
+    private static final String SUCCESS_TITLE = "action.success.title";
 
     private final I18n lang = I18n.getTranslation("pinplugin");
     private final boolean capturePin;
@@ -267,8 +270,8 @@ public class GenericPINAction extends StepAction {
 		// pace with the old pin was successful now modify the pin
 
 		if (newPINValue.equals(newPINRepeatValue) && newPINValue.length() == 6) {
-		    CardResponseAPDU resp = sendResetRetryCounter(newPINValue.getBytes(ISO_8859_1));
-		    // TODO check result
+		    // no result check necessary everything except a 9000 leads to an APDU exception
+		    sendResetRetryCounter(newPINValue.getBytes(ISO_8859_1));
 		}
 	    } else {
 		ControlIFDResponse resp = sendModifyPIN();
@@ -278,10 +281,14 @@ public class GenericPINAction extends StepAction {
 	    // PIN modified successfully, proceed with next step
 	    return new StepActionResult(StepActionResultStatus.REPEAT, 
 		    generateSuccessStep(lang.translationForKey(CHANGE_SUCCESS)));
-	} catch (InvocationTargetException ex) {
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
-	} catch (DispatcherException ex) {
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
+	} catch (InvocationTargetException | DispatcherException | APDUException | IFDException |
+		ParserConfigurationException ex) {
+	    logger.error("An internal error occured while trying to change the PIN", ex);
+	    return new StepActionResult(StepActionResultStatus.REPEAT,
+		    generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
+	}  catch (UnsupportedEncodingException ex) {
+	    logger.warn("The encoding of the PIN is wrong.", ex);
+	    return new StepActionResult(StepActionResultStatus.REPEAT);
 	} catch (WSHelper.WSException ex) {
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
@@ -315,14 +322,6 @@ public class GenericPINAction extends StepAction {
 		    // This should never happen
 		    return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
-	} catch (APDUException ex) {
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
-	} catch (IFDException ex) {
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
-	} catch (ParserConfigurationException ex) {
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
-	} catch (UnsupportedEncodingException ex) {
-	    return new StepActionResult(StepActionResultStatus.REPEAT);
 	}
     }
 
@@ -338,10 +337,10 @@ public class GenericPINAction extends StepAction {
 	    gPINStep.updateState(RecognizedState.PIN_resumed);
 	    state = RecognizedState.PIN_resumed;
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
-	} catch (DispatcherException ex) {
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
-	} catch (InvocationTargetException ex) {
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
+	} catch (DispatcherException | InvocationTargetException | ParserConfigurationException ex) {
+	    logger.error("An internal error occured while trying to resume the PIN.", ex);
+	    return new StepActionResult(StepActionResultStatus.REPEAT,
+		    generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
 	} catch (WSHelper.WSException ex) {
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
@@ -359,8 +358,6 @@ public class GenericPINAction extends StepAction {
 	    gPINStep.setWrongCANFormat(false);
 	    gPINStep.setFailedCANVerify(true);
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
-	} catch (ParserConfigurationException ex) {
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
     }
 
@@ -392,10 +389,10 @@ public class GenericPINAction extends StepAction {
 		gPINStep.updateState(RecognizedState.UNKNOWN);
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
-	} catch (DispatcherException ex) {
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
-	} catch (InvocationTargetException ex) {
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
+	} catch (DispatcherException | InvocationTargetException | APDUException | ParserConfigurationException ex) {
+	    logger.error("An internal error occured while trying to unblock the PIN.", ex);
+	    return new StepActionResult(StepActionResultStatus.REPEAT,
+		    generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
 	} catch (WSHelper.WSException ex) {
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
@@ -414,10 +411,6 @@ public class GenericPINAction extends StepAction {
 	    gPINStep.setWrongPUKFormat(false);
 	    gPINStep.setFailedPUKVerify(true);
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
-	} catch (APDUException ex) {
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
-	} catch (ParserConfigurationException ex) {
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
 
     }
@@ -466,7 +459,7 @@ public class GenericPINAction extends StepAction {
     }
 
     private Step generateSuccessStep(String successMessage) {
-	Step successStep = new Step("Success");
+	Step successStep = new Step(lang.translationForKey(SUCCESS_TITLE));
 	successStep.setReversible(false);
 	Text successText = new Text(successMessage);
 	successStep.getInputInfoUnits().add(successText);
@@ -474,7 +467,7 @@ public class GenericPINAction extends StepAction {
     }
 
     private Step generateErrorStep(String errorMessage) {
-	Step errorStep = new Step("Error");
+	Step errorStep = new Step(lang.translationForKey(ERROR_TITLE));
 	errorStep.setReversible(false);
 	Text errorText = new Text(errorMessage);
 	errorStep.getInputInfoUnits().add(errorText);

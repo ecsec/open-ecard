@@ -37,6 +37,7 @@ import org.openecard.bouncycastle.jce.spec.ECParameterSpec;
 import org.openecard.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.openecard.bouncycastle.math.ec.ECPoint;
 import org.openecard.common.tlv.TLV;
+import org.openecard.common.tlv.TLVException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.asn1.eac.CADomainParameter;
 import org.slf4j.Logger;
@@ -69,9 +70,10 @@ public final class CAKey {
      *
      * @param data Encoded key
      * @return Decoded key
-     * @throws Exception
+     * @throws TLVException
+     * @throws IllegalArgumentException
      */
-    public byte[] decodePublicKey(byte[] data) throws Exception {
+    public byte[] decodePublicKey(byte[] data) throws TLVException {
 	byte[] keyBytes;
 
 	if (data[0] == (byte) 0x7C) {

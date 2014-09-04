@@ -30,9 +30,9 @@ import org.openecard.common.util.ByteUtils;
 
 /**
  * Implements the PACEOutputType data structure.
- * See BSI-TR-03112, version 1.1.2, part 7, section 4.3.5.
+ * See BSI-TR-03112, version 1.1.2, part 7, section 3.3.5.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class PACEOutputType {
 

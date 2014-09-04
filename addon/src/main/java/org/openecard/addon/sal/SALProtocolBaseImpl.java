@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -62,11 +62,11 @@ import org.openecard.common.WSHelper;
 
 
 /**
- * Basic implementation of a SAL protocol.<br/>
+ * Basic implementation of a SAL protocol.
  * Some protocols may need to override this implementation in order to control Secure Messaging or
  * provide a customized protocol flow.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public abstract class SALProtocolBaseImpl implements SALProtocol {
 
@@ -80,9 +80,9 @@ public abstract class SALProtocolBaseImpl implements SALProtocol {
     protected int curStep = 0;
 
     protected SALProtocolBaseImpl() {
-	this.internalData = new TreeMap<String, Object>();
-	this.steps = new ArrayList<ProtocolStep<?, ?>>();
-	this.statelessSteps = new EnumMap<FunctionType, ProtocolStep<?, ?>>(FunctionType.class);
+	this.internalData = new TreeMap<>();
+	this.steps = new ArrayList<>();
+	this.statelessSteps = new EnumMap<>(FunctionType.class);
     }
 
 
@@ -97,11 +97,7 @@ public abstract class SALProtocolBaseImpl implements SALProtocol {
 
     private boolean hasNextProcessStep(FunctionType functionName) {
 	if (hasNextStep()) {
-	    if (steps.get(curStep).getFunctionType() == functionName) {
-		return true;
-	    } else {
-		return false;
-	    }
+	    return steps.get(curStep).getFunctionType() == functionName;
 	} else {
 	    return false;
 	}

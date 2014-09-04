@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,23 +32,27 @@ import org.openecard.common.util.ByteUtils;
  * Implements the EAC1OutputType data structure.
  * See BSI-TR-03112, version 1.1.2, part 7, section 4.6.5.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Dirk Petrautzki
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class EAC1OutputType {
 
     public static final String RETRY_COUNTER = "RetryCounter";
-    public static final String EF_CARDACCESS = "EFCardAccess";
-    public static final String CAR = "CertificationAuthorityReference";
     public static final String CHAT = "CertificateHolderAuthorizationTemplate";
+    public static final String CAR = "CertificationAuthorityReference";
+    public static final String EF_CARDACCESS = "EFCardAccess";
     public static final String ID_PICC = "IDPICC";
+    public static final String CHALLENGE = "Challenge";
 
     private final AuthDataMap authMap;
-    private byte[] efCardAccess;
-    private byte[] car;
+    private Integer retryCounter;
     private byte[] chat;
+    private byte[] currentCar;
+    private byte[] previousCar;
+    private byte[] efCardAccess;
     private byte[] idpicc;
-    private int retryCounter;
+    private byte[] challenge;
 
     /**
      * Creates a new EAC1OutputType.
@@ -60,21 +64,12 @@ public class EAC1OutputType {
     }
 
     /**
-     * Sets the file content of the EF.CardAccess.
+     * Sets the retry counter.
      *
-     * @param efCardAccess EF.CardAccess
+     * @param retryCounter Retry counter.
      */
-    public void setEFCardAccess(byte[] efCardAccess) {
-	this.efCardAccess = efCardAccess;
-    }
-
-    /**
-     * Sets the Certification Authority Reference (CAR).
-     *
-     * @param car Certification Authority Reference (CAR).
-     */
-    public void setCAR(byte[] car) {
-	this.car = car;
+    public void setRetryCounter(Integer retryCounter) {
+	this.retryCounter = retryCounter;
     }
 
     /**
@@ -87,7 +82,34 @@ public class EAC1OutputType {
     }
 
     /**
-     * Sets the card identifier ID_PICC..
+     * Sets the most recent Certification Authority Reference (CAR).
+     *
+     * @param car Certification Authority Reference (CAR).
+     */
+    public void setCurrentCAR(byte[] car) {
+	this.currentCar = car;
+    }
+
+    /**
+     * Sets the previous Certification Authority Reference (CAR).
+     *
+     * @param car Certification Authority Reference (CAR).
+     */
+    public void setPreviousCAR(byte[] car) {
+	this.previousCar = car;
+    }
+
+    /**
+     * Sets the file content of the EF.CardAccess.
+     *
+     * @param efCardAccess EF.CardAccess
+     */
+    public void setEFCardAccess(byte[] efCardAccess) {
+	this.efCardAccess = efCardAccess;
+    }
+
+    /**
+     * Sets the card identifier ID_PICC.
      *
      * @param idpicc Card identifier ID_PICC.
      */
@@ -96,12 +118,12 @@ public class EAC1OutputType {
     }
 
     /**
-     * Sets the retry counter.
+     * Sets the challenge.
      *
-     * @param retryCounter Retry counter.
+     * @param challenge Challenge.
      */
-    public void setRetryCounter(int retryCounter) {
-	this.retryCounter = retryCounter;
+    public void setChallenge(byte[] challenge) {
+	this.challenge = challenge;
     }
 
     /**
@@ -112,11 +134,17 @@ public class EAC1OutputType {
     public DIDAuthenticationDataType getAuthDataType() {
 	AuthDataResponse authResponse = authMap.createResponse(new iso.std.iso_iec._24727.tech.schema.EAC1OutputType());
 
-	authResponse.addElement(RETRY_COUNTER, String.valueOf(retryCounter));
-	authResponse.addElement(EF_CARDACCESS, ByteUtils.toHexString(efCardAccess));
-	authResponse.addElement(CAR, new String(car));
+	if (retryCounter != null) {
+	    authResponse.addElement(RETRY_COUNTER, String.valueOf(retryCounter));
+	}
 	authResponse.addElement(CHAT, ByteUtils.toHexString(chat));
+	authResponse.addElement(CAR, new String(currentCar));
+	if (previousCar != null) {
+	    authResponse.addElement(CAR, new String(previousCar));
+	}
+	authResponse.addElement(EF_CARDACCESS, ByteUtils.toHexString(efCardAccess));
 	authResponse.addElement(ID_PICC, ByteUtils.toHexString(idpicc));
+	authResponse.addElement(CHALLENGE, ByteUtils.toHexString(challenge));
 
 	return authResponse.getResponse();
     }

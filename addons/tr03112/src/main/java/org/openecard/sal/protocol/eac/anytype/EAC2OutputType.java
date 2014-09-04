@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,8 +32,9 @@ import org.openecard.common.util.ByteUtils;
  * Implements the EAC2OutputType data structure.
  * See BSI-TR-03112, version 1.1.2, part 7, section 4.6.6.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Dirk Petrautzki
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class EAC2OutputType {
 
@@ -102,14 +103,9 @@ public class EAC2OutputType {
 	AuthDataResponse authResponse = authMap.createResponse(new iso.std.iso_iec._24727.tech.schema.EAC2OutputType());
 	if (challenge != null) {
 	    authResponse.addElement(CHALLENGE, ByteUtils.toHexString(challenge));
-	}
-	if (efCardSecurity != null) {
+	} else {
 	    authResponse.addElement(EF_CARDSECURITY, ByteUtils.toHexString(efCardSecurity));
-	}
-	if (token != null) {
 	    authResponse.addElement(TOKEN, ByteUtils.toHexString(token));
-	}
-	if (nonce != null) {
 	    authResponse.addElement(NONCE, ByteUtils.toHexString(nonce));
 	}
 	return authResponse.getResponse();

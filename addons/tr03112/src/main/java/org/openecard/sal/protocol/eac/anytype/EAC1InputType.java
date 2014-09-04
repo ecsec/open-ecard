@@ -51,6 +51,7 @@ public class EAC1InputType {
 
     public static final String CERTIFICATE = "Certificate";
     public static final String CERTIFICATE_DESCRIPTION = "CertificateDescription";
+    public static final String PROVIDER_INFO = "ProviderInfo";
     public static final String REQUIRED_CHAT = "RequiredCHAT";
     public static final String OPTIONAL_CHAT = "OptionalCHAT";
     public static final String AUTHENTICATED_AUXILIARY_DATA = "AuthenticatedAuxiliaryData";
@@ -59,6 +60,7 @@ public class EAC1InputType {
     private final AuthDataMap authMap;
     private final ArrayList<CardVerifiableCertificate> certificates;
     private final byte[] certificateDescription;
+    private final byte[] providerInfo;
     private final byte[] requiredCHAT;
     private final byte[] optionalCHAT;
     private final byte[] authenticatedAuxiliaryData;
@@ -73,7 +75,6 @@ public class EAC1InputType {
     public EAC1InputType(DIDAuthenticationDataType baseType) throws Exception {
 	authMap = new AuthDataMap(baseType);
 
-	certificateDescription = authMap.getContentAsBytes(CERTIFICATE_DESCRIPTION);
 	certificates = new ArrayList<>();
 	for (Element element : baseType.getAny()) {
 	    if (element.getLocalName().equals(CERTIFICATE)) {
@@ -82,6 +83,9 @@ public class EAC1InputType {
 		certificates.add(cvc);
 	    }
 	}
+	certificateDescription = authMap.getContentAsBytes(CERTIFICATE_DESCRIPTION);
+
+	providerInfo = authMap.getContentAsBytes(PROVIDER_INFO);
 
 	byte[] requiredCHATtmp = authMap.getContentAsBytes(REQUIRED_CHAT);
 	byte[] optionalCHATtmp = authMap.getContentAsBytes(OPTIONAL_CHAT);
@@ -121,9 +125,20 @@ public class EAC1InputType {
      * Returns the certificate description.
      *
      * @return Certificate description
+     * @deprecated See BSI TR-03112-7 Sec. 3.6.4.1
      */
+    @Deprecated
     public byte[] getCertificateDescription() {
 	return certificateDescription;
+    }
+
+    /**
+     * Gets the provider info.
+     *
+     * @return Provider info.
+     */
+    public byte[] getProviderInfo() {
+	return providerInfo;
     }
 
     /**

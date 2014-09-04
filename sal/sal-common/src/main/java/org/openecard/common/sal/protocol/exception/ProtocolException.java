@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -27,9 +27,9 @@ import org.openecard.common.ECardException;
 
 
 /**
- * Exception class for IFD protocols.
+ * Exception class for IFD and SAL protocols.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class ProtocolException extends ECardException {
 
@@ -49,6 +49,10 @@ public class ProtocolException extends ECardException {
 
     public ProtocolException(Throwable cause) {
 	makeException(this, cause);
+    }
+
+    public ProtocolException(String msg, Throwable cause) {
+	makeException(this, cause, msg);
     }
 
 }

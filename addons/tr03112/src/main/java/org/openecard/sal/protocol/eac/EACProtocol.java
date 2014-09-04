@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -28,8 +28,9 @@ import org.openecard.addon.sal.SALProtocolBaseImpl;
 
 
 /**
+ * Implementation of the EACProtocol using only DIDAuthenticate messages.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class EACProtocol extends SALProtocolBaseImpl {
 

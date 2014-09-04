@@ -244,11 +244,15 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		return response;
 	    }
 
+	    // get challenge from card
+	    TerminalAuthentication ta = new TerminalAuthentication(dispatcher, slotHandle);
+	    byte[] challenge = ta.getChallenge();
+
 	    // prepare DIDAuthenticationResponse
 	    DIDAuthenticationDataType data = eacData.paceResponse.getAuthenticationProtocolData();
 	    AuthDataMap paceOutputMap = new AuthDataMap(data);
 
-	    int retryCounter = Integer.valueOf(paceOutputMap.getContentAsString(PACEOutputType.RETRY_COUNTER));
+	    //int retryCounter = Integer.valueOf(paceOutputMap.getContentAsString(PACEOutputType.RETRY_COUNTER));
 	    byte[] efCardAccess = paceOutputMap.getContentAsBytes(PACEOutputType.EF_CARD_ACCESS);
 	    byte[] currentCAR = paceOutputMap.getContentAsBytes(PACEOutputType.CURRENT_CAR);
 	    byte[] previousCAR = paceOutputMap.getContentAsBytes(PACEOutputType.PREVIOUS_CAR);
@@ -261,12 +265,16 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    internalData.put(EACConstants.IDATA_AUTHENTICATED_AUXILIARY_DATA, aad);
 	    internalData.put(EACConstants.IDATA_CERTIFICATES, certChain);
 	    internalData.put(EACConstants.IDATA_CURRENT_CAR, currentCAR);
+	    internalData.put(EACConstants.IDATA_CHALLENGE, challenge);
 
 	    // Create response
+	    //eac1Output.setRetryCounter(retryCounter);
+	    eac1Output.setCHAT(eacData.selectedCHAT.toByteArray());
+	    eac1Output.setCurrentCAR(currentCAR);
+	    eac1Output.setPreviousCAR(previousCAR);
 	    eac1Output.setEFCardAccess(efCardAccess);
 	    eac1Output.setIDPICC(idpicc);
-	    eac1Output.setCHAT(eacData.selectedCHAT.toByteArray());
-	    eac1Output.setCAR(currentCAR);
+	    eac1Output.setChallenge(challenge);
 
 	    response.setResult(WSHelper.makeResultOK());
 	    response.setAuthenticationProtocolData(eac1Output.getAuthDataType());
@@ -304,7 +312,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     }
 
     /**
-     * Perform all checks as described in BSI-INSTANCE_KEY-7 3.4.4.
+     * Perform all checks as described in BSI TR-03112-7 3.4.4.
      *
      * @param certDescription CertificateDescription of the eService Certificate
      * @param dynCtx Dynamic Context

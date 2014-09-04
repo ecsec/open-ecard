@@ -39,5 +39,8 @@ public class EACConstants {
     protected static final String IDATA_SECURITY_INFOS = "SecurityInfos";
     protected static final String IDATA_CARD_STATE_ENTRY = "cardState";
     protected static final String IDATA_CURRENT_CAR = "CurrentCAR";
+    protected static final String IDATA_CHALLENGE = "Challenge";
+    protected static final String IDATA_SIGNATURE = "Signature";
+    protected static final String IDATA_TERMINAL_CERTIFICATE = "TerminalCertificate";
 
 }

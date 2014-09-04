@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -34,8 +34,9 @@ import org.w3c.dom.Element;
  * Implements the EAC2InputType data structure.
  * See BSI-TR-03112, version 1.1.2, part 7, section 4.6.6.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Dirk Petrautzki
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public final class EAC2InputType {
 
@@ -44,9 +45,9 @@ public final class EAC2InputType {
     public static final String EPHEMERAL_PUBLIC_KEY = "EphemeralPublicKey";
     //
     private final AuthDataMap authMap;
-    private ArrayList<CardVerifiableCertificate> certificates = new ArrayList<CardVerifiableCertificate>();
-    private byte[] ephemeralPublicKey;
-    private byte[] signature;
+    private final ArrayList<CardVerifiableCertificate> certificates;
+    private final byte[] ephemeralPublicKey;
+    private final byte[] signature;
 
     /**
      * Creates a new EAC2InputType.
@@ -57,9 +58,7 @@ public final class EAC2InputType {
     public EAC2InputType(DIDAuthenticationDataType baseType) throws Exception {
 	this.authMap = new AuthDataMap(baseType);
 
-	ephemeralPublicKey = authMap.getContentAsBytes(EPHEMERAL_PUBLIC_KEY);
-	signature = authMap.getContentAsBytes(SIGNATURE);
-
+	certificates = new ArrayList<>();
 	for (Element element : baseType.getAny()) {
 	    if (element.getLocalName().equals(CERTIFICATE)) {
 		byte[] value = StringUtils.toByteArray(element.getTextContent());
@@ -67,6 +66,8 @@ public final class EAC2InputType {
 		certificates.add(cvc);
 	    }
 	}
+	ephemeralPublicKey = authMap.getContentAsBytes(EPHEMERAL_PUBLIC_KEY);
+	signature = authMap.getContentAsBytes(SIGNATURE);
     }
 
     /**

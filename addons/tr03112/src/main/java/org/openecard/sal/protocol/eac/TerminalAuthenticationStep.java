@@ -31,15 +31,8 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
-import org.openecard.crypto.common.asn1.eac.AuthenticatedAuxiliaryData;
-import org.openecard.crypto.common.asn1.eac.CADomainParameter;
-import org.openecard.crypto.common.asn1.eac.CASecurityInfos;
-import org.openecard.crypto.common.asn1.eac.SecurityInfos;
-import org.openecard.crypto.common.asn1.eac.ef.EFCardAccess;
-import org.openecard.crypto.common.asn1.utils.ObjectIdentifierUtils;
 import org.openecard.sal.protocol.eac.anytype.EAC2InputType;
 import org.openecard.sal.protocol.eac.anytype.EAC2OutputType;
-import org.openecard.sal.protocol.eac.crypto.CAKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +48,7 @@ import org.slf4j.LoggerFactory;
 public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(TerminalAuthenticationStep.class.getName());
+    
     private final Dispatcher dispatcher;
 
 
@@ -94,35 +88,29 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    // TA: Step 1 - Verify certificates
 	    ta.verifyCertificates(certificateChain);
 
-	    // TA: Step 2 - MSE:SET AT
-	    SecurityInfos securityInfos = (SecurityInfos) internalData.get(EACConstants.IDATA_SECURITY_INFOS);
-
+	    // save values for later use
 	    CardVerifiableCertificate terminalCertificate = certificateChain.getTerminalCertificates().get(0);
-	    byte[] oid = ObjectIdentifierUtils.getValue(terminalCertificate.getPublicKey().getObjectIdentifier());
-	    byte[] chr = terminalCertificate.getCHR().toByteArray();
 	    byte[] key = eac2Input.getEphemeralPublicKey();
-	    AuthenticatedAuxiliaryData aadObj;
-	    aadObj = (AuthenticatedAuxiliaryData) internalData.get(EACConstants.IDATA_AUTHENTICATED_AUXILIARY_DATA);
-	    byte[] aad = aadObj.getData();
+	    byte[] signature = eac2Input.getSignature();
+	    internalData.put(EACConstants.IDATA_PK_PCD, key);
+	    internalData.put(EACConstants.IDATA_SIGNATURE, signature);
+	    internalData.put(EACConstants.IDATA_TERMINAL_CERTIFICATE, terminalCertificate);
 
-	    // Calculate comp(key)
-	    EFCardAccess efca = new EFCardAccess(securityInfos);
-	    CASecurityInfos cas = efca.getCASecurityInfos();
-	    CADomainParameter cdp = new CADomainParameter(cas);
-	    CAKey caKey = new CAKey(cdp);
-	    caKey.decodePublicKey(key);
-	    byte[] compKey = caKey.getEncodedCompressedPublicKey();
+	    if (signature != null) {
+		logger.trace("Signature has been provided in EAC2InputType.");
 
-	    ta.mseSetAT(oid, chr, compKey, aad);
+		// perform TA and CA authentication
+		ChipAuthentication ca = new ChipAuthentication(dispatcher, slotHandle);
+		AuthenticationHelper auth = new AuthenticationHelper(ta, ca);
+		eac2Output = auth.performAuth(eac2Output, internalData);
 
-	    // TA: Step 3 - Get challenge
-	    byte[] rPICC = ta.getChallenge();
+	    } else {
+		logger.trace("Signature has not been provided in EAC2InputType.");
 
-	    // Store public key for Chip Authentication
-	    internalData.put(EACConstants.IDATA_PK_PCD, eac2Input.getEphemeralPublicKey());
-
-	    // Create response
-	    eac2Output.setChallenge(rPICC);
+		// send challenge again
+		byte[] rPICC = (byte[]) internalData.get(EACConstants.IDATA_CHALLENGE);
+		eac2Output.setChallenge(rPICC);
+	    }
 
 	    response.setResult(WSHelper.makeResultOK());
 	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());

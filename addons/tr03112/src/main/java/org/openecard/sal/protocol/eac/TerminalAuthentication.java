@@ -104,6 +104,23 @@ public class TerminalAuthentication {
     }
 
     /**
+     * Performs an External Authentication.
+     * Sends an External Authentication APDU. (Protocol step 4)
+     * See BSI-TR-03110, version 2.10, part 3, B.11.7.
+     *
+     * @param terminalSignature Terminal signature
+     * @throws ProtocolException
+     */
+    public void externalAuthentication(byte[] terminalSignature) throws ProtocolException {
+	try {
+	    CardCommandAPDU externalAuthentication = new ExternalAuthentication(terminalSignature);
+	    externalAuthentication.transmit(dispatcher, slotHandle);
+	} catch (APDUException e) {
+	    throw new ProtocolException(e.getResult());
+	}
+    }
+
+    /**
      * Gets a challenge from the PICC.
      * Sends a Get Challenge APDU. (Protocol step 3)
      * See BSI-TR-03110, version 2.10, part 3, B.11.6.
@@ -117,23 +134,6 @@ public class TerminalAuthentication {
 	    CardResponseAPDU response = getChallenge.transmit(dispatcher, slotHandle);
 
 	    return response.getData();
-	} catch (APDUException e) {
-	    throw new ProtocolException(e.getResult());
-	}
-    }
-
-    /**
-     * Performs an External Authentication.
-     * Sends an External Authentication APDU. (Protocol step 4)
-     * See BSI-TR-03110, version 2.10, part 3, B.11.7.
-     *
-     * @param terminalSignature Terminal signature
-     * @throws ProtocolException
-     */
-    public void externalAuthentication(byte[] terminalSignature) throws ProtocolException {
-	try {
-	    CardCommandAPDU externalAuthentication = new ExternalAuthentication(terminalSignature);
-	    externalAuthentication.transmit(dispatcher, slotHandle);
 	} catch (APDUException e) {
 	    throw new ProtocolException(e.getResult());
 	}

@@ -264,7 +264,6 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 	    // Create response
 	    eac1Output.setEFCardAccess(efCardAccess);
-	    eac1Output.setRetryCounter(retryCounter);
 	    eac1Output.setIDPICC(idpicc);
 	    eac1Output.setCHAT(eacData.selectedCHAT.toByteArray());
 	    eac1Output.setCAR(currentCAR);

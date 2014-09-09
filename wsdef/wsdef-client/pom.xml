@@ -36,6 +36,14 @@
 						<skip>true</skip>
 					</configuration>
 				</plugin>
+				<!-- skip java 6 compat checker, JAXB is irellevant for android and only SE 7 is supported -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>animal-sniffer-maven-plugin</artifactId>
+					<configuration>
+						<skip>true</skip>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -45,7 +53,7 @@
 				<!-- https://java.net/jira/browse/JAX_WS_COMMONS-121 -->
 				<groupId>net.trajano.mojo</groupId>
 				<artifactId>jaxws-maven-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>2.3.6</version>
 				<executions>
 					<execution>
 						<id>All other Services</id>
@@ -58,7 +66,7 @@
 								<wsdlFile>ALL.wsdl</wsdlFile>
 							</wsdlFiles>
 							<sourceDestDir>${project.build.directory}/generated-sources/jaxws</sourceDestDir>
-							<target>2.1</target>
+							<target>2.2</target>
 							<xjcArgs>
 								<xjcArg>-npa</xjcArg>
 							</xjcArgs>
@@ -106,7 +114,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
 	</build>
 

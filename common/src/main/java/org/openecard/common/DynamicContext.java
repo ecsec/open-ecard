@@ -30,13 +30,13 @@ import javax.annotation.Nullable;
 import org.openecard.common.util.Promise;
 
 
-/**i
+/**
  * Thread local dynamic context implemented as a singleton.
  * Dynamic context information is needed at various places in the app. Perhaps the most important use case is the
  * eService certificate validation as defined in TR-03112-7.<br/>
- * The underlying datastructure does permit {@null null} values to be saved.
+ * The underlying datastructure does permit {@code null} values to be saved.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class DynamicContext {
 
@@ -49,7 +49,7 @@ public class DynamicContext {
 	localMap = new InheritableThreadLocal<Map<String, DynamicContext>>() {
 	    @Override
 	    protected Map<String, DynamicContext> initialValue() {
-		return new ConcurrentSkipListMap<String, DynamicContext>();
+		return new ConcurrentSkipListMap<>();
 	    }
 	    @Override
 	    protected Map<String, DynamicContext> childValue(Map<String, DynamicContext> parentValue) {
@@ -93,7 +93,7 @@ public class DynamicContext {
 
 
     private DynamicContext() {
-	this.context = new HashMap<String, Promise<Object>>();
+	this.context = new HashMap<>();
     }
 
 
@@ -110,7 +110,7 @@ public class DynamicContext {
 	if (p != null) {
 	    return p;
 	} else {
-	    p = new Promise<Object>();
+	    p = new Promise<>();
 	    context.put(key, p);
 	    return p;
 	}

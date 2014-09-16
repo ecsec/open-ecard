@@ -59,11 +59,12 @@ public class BindingResult {
 	this.resultCode = resultCode;
     }
 
-    public void setResultCode(@Nonnull BindingResultCode resultCode) {
+    public BindingResult setResultCode(@Nonnull BindingResultCode resultCode) {
 	if (resultCode == null) {
 	    throw new IllegalArgumentException("No result code given in constructor invocation.");
 	}
 	this.resultCode = resultCode;
+	return this;
     }
 
     @Nonnull
@@ -71,8 +72,9 @@ public class BindingResult {
 	return resultCode;
     }
 
-    public void setBody(@Nullable Body body) {
+    public BindingResult setBody(@Nullable Body body) {
 	this.body = body;
+	return this;
     }
 
     @Nullable
@@ -85,12 +87,14 @@ public class BindingResult {
 	return this.parameters;
     }
 
-    public String addParameter(@Nonnull String key, @Nullable String value) {
-	return parameters.put(key, value);
+    public BindingResult addParameter(@Nonnull String key, @Nullable String value) {
+	parameters.put(key, value);
+	return this;
     }
 
-    public void addParameters(@Nonnull Map<String, String> parameters) {
+    public BindingResult addParameters(@Nonnull Map<String, String> parameters) {
 	this.parameters.putAll(parameters);
+	return this;
     }
 
     @Nullable
@@ -108,8 +112,14 @@ public class BindingResult {
 	return this.auxData;
     }
 
-    public void setResultMessage(@Nullable String resultMessage) {
+    public BindingResult addAuxResultData(@Nonnull String key, @Nullable String value) {
+	this.auxData.put(key, value);
+	return this;
+    }
+
+    public BindingResult setResultMessage(@Nullable String resultMessage) {
 	this.resultMessage = resultMessage;
+	return this;
     }
 
     @Nullable

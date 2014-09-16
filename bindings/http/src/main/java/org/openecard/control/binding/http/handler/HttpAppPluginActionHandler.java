@@ -73,7 +73,7 @@ import org.w3c.dom.Node;
 
 /**
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class HttpAppPluginActionHandler extends HttpControlHandler {
 
@@ -198,16 +198,16 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 		}
 		break;
 	    case WRONG_PARAMETER:
+	    case MISSING_PARAMETER:
 		response = new Http11Response(HttpStatus.SC_BAD_REQUEST);
 		break;
 	    case INTERNAL_ERROR:
 		response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 		break;
 	    case RESOURCE_UNAVAILABLE:
+	    case DEPENDING_HOST_UNREACHABLE:
 		response = new Http11Response(HttpStatus.SC_NOT_FOUND);
 		break;
-	    case DEPENDING_HOST_UNREACHABLE:
-	    case MISSING_PARAMETER:
 	    case TIMEOUT:
 		// TODO: find HTTP codes for these codes
 	    default:

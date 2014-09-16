@@ -12,7 +12,7 @@
 	<ConfigDescription/>
 	<BindingActions>
 		<AppPluginSpecification>
-			<ClassName>org.openecard.binding.tctoken.TCTokenAction</ClassName>
+			<ClassName>org.openecard.binding.tctoken.ActivationAction</ClassName>
 			<LocalizedName xml:lang="DE">TODO</LocalizedName>
 			<LocalizedDescription xml:lang="DE">TODO</LocalizedDescription>
 			<ResourceName>eID-Client</ResourceName>

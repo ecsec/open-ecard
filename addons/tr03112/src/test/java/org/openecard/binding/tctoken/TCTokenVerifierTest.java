@@ -22,6 +22,8 @@
 
 package org.openecard.binding.tctoken;
 
+import org.openecard.binding.tctoken.ex.InvalidTCTokenElement;
+import org.openecard.binding.tctoken.ex.ActivationError;
 import generated.TCTokenType;
 import java.io.InputStream;
 import java.util.Collections;
@@ -35,14 +37,14 @@ import org.testng.annotations.Test;
  */
 public class TCTokenVerifierTest {
 
-    private final TCTokenType token;
+    private final TCToken token;
     private final TCTokenVerifier verifier;
 
     public TCTokenVerifierTest() throws Exception {
 	InputStream testFile = FileUtils.resolveResourceAsStream(getClass(), "TCToken.xml");
 
 	TCTokenParser parser = new TCTokenParser();
-	List<TCTokenType> tokens = parser.parse(testFile);
+	List<TCToken> tokens = parser.parse(testFile);
 	token = tokens.get(0);
 	verifier = new TCTokenVerifier(token, new ResourceContext(null, null, Collections.EMPTY_LIST));
     }
@@ -52,45 +54,45 @@ public class TCTokenVerifierTest {
 	verifier.verify();
     }
 
-    @Test(expectedExceptions = TCTokenException.class)
-    public void testVerifyServerAddress() throws Exception {
+    @Test(expectedExceptions = InvalidTCTokenElement.class)
+    public void testVerifyServerAddress() throws ActivationError {
 	token.setServerAddress(null);
 	verifier.verifyServerAddress();
     }
 
-    @Test(expectedExceptions = TCTokenException.class)
-    public void testVerifySessionIdentifier() throws Exception {
+    @Test(expectedExceptions = InvalidTCTokenElement.class)
+    public void testVerifySessionIdentifier() throws ActivationError {
 	token.setSessionIdentifier("");
 	verifier.verifySessionIdentifier();
     }
 
-    @Test(expectedExceptions = TCTokenException.class)
-    public void testVerifyRefreshAddress() throws Exception {
+    @Test(expectedExceptions = InvalidTCTokenElement.class)
+    public void testVerifyRefreshAddress() throws ActivationError {
 	token.setRefreshAddress(null);
 	verifier.verifyRefreshAddress();
     }
 
-    @Test(expectedExceptions = TCTokenException.class)
-    public void testVerifyBinding() throws Exception {
+    @Test(expectedExceptions = InvalidTCTokenElement.class)
+    public void testVerifyBinding() throws ActivationError {
 	token.setBinding("urn:liberty:city:2006-08");
 	verifier.verifyBinding();
     }
 
-    @Test(expectedExceptions = TCTokenException.class)
-    public void testVerifyPathSecurityProtocol() throws Exception {
+    @Test(expectedExceptions = InvalidTCTokenElement.class)
+    public void testVerifyPathSecurityProtocol() throws ActivationError {
 	token.setPathSecurityProtocol("urn:ietf:rfc:42791");
 	verifier.verifyPathSecurity();
     }
 
-    @Test(expectedExceptions = TCTokenException.class)
-    public void testVerifyPathSecurityParameters() throws Exception {
+    @Test(expectedExceptions = InvalidTCTokenElement.class)
+    public void testVerifyPathSecurityParameters() throws ActivationError {
 	token.setPathSecurityProtocol("urn:ietf:rfc:4279");
 	token.setPathSecurityParameters(null);
 	verifier.verifyPathSecurity();
     }
 
-    @Test(expectedExceptions = TCTokenException.class)
-    public void testVerifyPathSecurityParameters2() throws Exception {
+    @Test(expectedExceptions = InvalidTCTokenElement.class)
+    public void testVerifyPathSecurityParameters2() throws ActivationError {
 	TCTokenType.PathSecurityParameters psp = new TCTokenType.PathSecurityParameters();
 	psp.setPSK(null);
 	token.setPathSecurityParameters(psp);

@@ -22,6 +22,8 @@
 
 package org.openecard.binding.tctoken;
 
+import org.openecard.binding.tctoken.ex.ActivationError;
+import org.openecard.binding.tctoken.ex.FatalActivationError;
 import java.util.List;
 import java.util.Map;
 import org.openecard.addon.Context;
@@ -37,13 +39,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of a plugin action performing a client activation with a TCToken.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki
+ * @author Benedikt Biallowons
+ * @author Tobias Wich
  */
-public class TCTokenAction implements AppPluginAction {
+public class ActivationAction implements AppPluginAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(TCTokenAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(ActivationAction.class);
 
     private TCTokenHandler tokenHandler;
 
@@ -64,19 +66,18 @@ public class TCTokenAction implements AppPluginAction {
 	    try {
 		TCTokenRequest tcTokenRequest = TCTokenRequest.convert(parameters);
 		response = tokenHandler.handleActivate(tcTokenRequest);
-	    } catch (CommunicationError ex) {
-		String msg = "Redirect Address: {}\nCause: {}";
-		logger.debug(msg, ex.communicationErrorAddress, ex.getMessage());
-		response = ex.getResult();
-		logger.info("Authentication failed, redirecting to error address.");
-	    } catch (TCTokenException ex) {
-		logger.info(ex.getMessage(), ex);
-		// TODO: translate message
-		String msg = "Could not fetch or create TCToken.";
-		response = new BindingResult(BindingResultCode.RESOURCE_UNAVAILABLE);
-		response.setResultMessage(msg);
+	    } catch (ActivationError ex) {
+		logger.error(ex.getMessage());
+		logger.debug(ex.getMessage(), ex); // stack trace only in debug level
+		logger.debug("Returning result: \n{}", ex.getBindingResult());
+		if (ex instanceof FatalActivationError) {
+		    logger.info("Authentication failed, displaying error in Browser.");
+		} else {
+		    logger.info("Authentication failed, redirecting to with errors attached to the URL.");
+		}
+		response = ex.getBindingResult();
 	    }
-	} catch (Exception e) {
+	} catch (RuntimeException e) {
 	    response = new BindingResult(BindingResultCode.INTERNAL_ERROR);
 	    logger.error(e.getMessage(), e);
 	}

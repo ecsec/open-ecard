@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2013 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,14 +22,19 @@
 
 package org.openecard.binding.tctoken;
 
+import org.openecard.binding.tctoken.ex.InvalidTCTokenElement;
+import org.openecard.binding.tctoken.ex.InvalidTCTokenUrlException;
+import org.openecard.binding.tctoken.ex.InvalidTCTokenException;
+import org.openecard.binding.tctoken.ex.SecurityViolationException;
+import org.openecard.binding.tctoken.ex.AuthServerException;
+import org.openecard.binding.tctoken.ex.MissingActivationParameterException;
+import org.openecard.binding.tctoken.ex.InvalidRedirectUrl;
 import generated.TCTokenType;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-import static org.openecard.addon.bind.BindingResultCode.*;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.StringUtils;
@@ -41,8 +46,8 @@ import org.slf4j.LoggerFactory;
  * This class represents a TC Token request to the client. It contains the {@link TCTokenType} and situational parts
  * like the ifdName or the server certificates received while retrieving the TC Token.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch
+ * @author Dirk Petrautzki
  */
 public class TCTokenRequest {
 
@@ -60,14 +65,21 @@ public class TCTokenRequest {
 
 
     /**
-     * Check the request parameters and wrap them in a {@code TCTokenRequest} class.
+     * Check and evaluate the request parameters and wrap the result in a {@code TCTokenRequest} class.
      *
      * @param parameters The request parameters.
      * @return A TCTokenRequest wrapping the parameters.
-     * @throws TCTokenException Thrown in case not all required parameters are available.
-     * @throws CommunicationError Thrown when the eService has internal problems and wants the client to abort.
+     * @throws InvalidTCTokenException
+     * @throws MissingActivationParameterException
+     * @throws AuthServerException
+     * @throws InvalidRedirectUrl
+     * @throws InvalidTCTokenElement
+     * @throws InvalidTCTokenUrlException
+     * @throws SecurityViolationException
      */
-    public static TCTokenRequest convert(Map<String, String> parameters) throws TCTokenException, CommunicationError {
+    public static TCTokenRequest convert(Map<String, String> parameters) throws InvalidTCTokenException,
+	    MissingActivationParameterException, AuthServerException, InvalidRedirectUrl, InvalidTCTokenElement,
+	    InvalidTCTokenUrlException, SecurityViolationException {
 	TCTokenRequest result;
 	if (parameters.containsKey("tcTokenURL")) {
 	    result = parseTCTokenRequestURI(parameters);
@@ -79,91 +91,96 @@ public class TCTokenRequest {
 	    return result;
 	}
 
-	throw new TCTokenException("No suitable set of parameters given in the request.");
+	throw new MissingActivationParameterException("No suitable set of parameters given in the request.");
     }
 
 
-    private static TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries) throws TCTokenException,
-	    CommunicationError {
+    private static TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries) throws InvalidTCTokenException,
+	    MissingActivationParameterException, AuthServerException, InvalidRedirectUrl, InvalidTCTokenElement,
+	    InvalidTCTokenUrlException, SecurityViolationException {
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 
 	for (Map.Entry<String, String> next : queries.entrySet()) {
 	    String k = next.getKey();
+	    k = k == null ? "" : k;
 	    String v = next.getValue();
 
-	    if (k.equals("tcTokenURL")) {
-		if (v != null && ! v.isEmpty()) {
-		    try {
-			URL tokenUrl = new URL(v);
-			TCTokenContext tokenCtx = TCTokenContext.generateTCToken(tokenUrl);
-			tcTokenRequest.tokenCtx = tokenCtx;
-			tcTokenRequest.token = tokenCtx.getToken();
-			tcTokenRequest.certificates = tokenCtx.getCerts();
-			tcTokenRequest.tcTokenURL = tokenUrl;
-		    } catch (MalformedURLException ex) {
-			String msg = "The tcTokenURL parameter contains an invalid URL: " + v;
-			throw new TCTokenException(msg, WRONG_PARAMETER, ex);
-		    } catch (ResourceException ex) {
-			throw new TCTokenException("Failed to fetch TCToken.", WRONG_PARAMETER, ex);
-		    } catch (ValidationError ex) {
-			throw new TCTokenException("Failed to validate TCToken.", WRONG_PARAMETER, ex);
-		    } catch (IOException ex) {
-			throw new TCTokenException("Failed to fetch TCToken.", RESOURCE_UNAVAILABLE, ex);
-		    }
-		} else {
-		    throw new TCTokenException("Parameter tcTokenURL contains no value.");
-		}
-
-	    } else if (k.equals("ifdName")) {
-		if (v != null && ! v.isEmpty()) {
-		    tcTokenRequest.ifdName = v;
-		} else {
-		    throw new TCTokenException("Parameter ifdName contains no value.");
-		}
-
-	    } else if (k.equals("contextHandle")) {
-		if (v != null && ! v.isEmpty()) {
-		    tcTokenRequest.contextHandle = StringUtils.toByteArray(v);
-		} else {
-		    throw new TCTokenException("Parameter contextHandle contains no value.");
-		}
-
-	    } else if (k.equals("slotIndex")) {
-		if (v != null && ! v.isEmpty()) {
-		    tcTokenRequest.slotIndex = new BigInteger(v);
-		} else {
-		    throw new TCTokenException("Parameter slotIndex contains no value.");
-		}
-	    } else if (k.equals("cardType")) {
-		if (v != null && ! v.isEmpty()) {
-		    tcTokenRequest.cardType = v;
-		} else {
-		    throw new TCTokenException("Parameter cardType contains no value.");
-		}
+	    if (v == null || v.isEmpty()) {
+		logger.info("Skipping query parameter '{}' because it does not contain a value.", k);
 	    } else {
-		logger.info("Unknown query element: {}", k);
+		switch (k) {
+		    case "tcTokenURL":
+			try {
+			    URL tokenUrl = new URL(v);
+			    TCTokenContext tokenCtx = TCTokenContext.generateTCToken(tokenUrl);
+			    tcTokenRequest.tokenCtx = tokenCtx;
+			    tcTokenRequest.token = tokenCtx.getToken();
+			    tcTokenRequest.certificates = tokenCtx.getCerts();
+			    tcTokenRequest.tcTokenURL = tokenUrl;
+			} catch (MalformedURLException ex) {
+			    String msg = "The tcTokenURL parameter contains an invalid URL: " + v;
+			    // TODO: check if the error type is correct, was WRONG_PARAMETER before
+			    throw new InvalidTCTokenUrlException(msg, ex);
+			}
+			break;
+		    case "ifdName":
+			tcTokenRequest.ifdName = v;
+			break;
+		    case "contextHandle":
+			tcTokenRequest.contextHandle = StringUtils.toByteArray(v);
+			break;
+		    case "slotIndex":
+			tcTokenRequest.slotIndex = new BigInteger(v);
+			break;
+		    case "cardType":
+			tcTokenRequest.cardType = v;
+			break;
+		    default:
+			logger.info("Unknown query element: {}", k);
+			break;
+		}
 	    }
+	}
+
+	if (tcTokenRequest.token == null) {
+	    throw new MissingActivationParameterException("No valid TCToken available in request.");
 	}
 
 	return tcTokenRequest;
     }
 
-    private static TCTokenRequest parseObjectURI(Map<String, String> queries) throws TCTokenException,
-	    CommunicationError {
+    private static TCTokenRequest parseObjectURI(Map<String, String> queries) throws InvalidTCTokenException,
+	    MissingActivationParameterException, AuthServerException, InvalidRedirectUrl, InvalidTCTokenElement,
+	    InvalidTCTokenUrlException, SecurityViolationException {
+	// TODO: get rid of this crap as soon as possible
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 
 	for (Map.Entry<String, String> next : queries.entrySet()) {
 	    String k = next.getKey();
+	    k = k == null ? "" : k;
 	    String v = next.getValue();
 
-	    if ("activationObject".equals(k)) {
-		TCTokenContext tcToken = TCTokenContext.generateTCToken(v);
-		tcTokenRequest.token = tcToken.getToken();
-	    } else if ("serverCertificate".equals(k)) {
-		// TODO: convert base64 and url encoded certificate to Certificate object
+	    if (v == null || v.isEmpty()) {
+		logger.info("Skipping query parameter '{}' because it does not contain a value.", k);
+	    } else {
+		switch (k) {
+		    case "activationObject":
+			TCTokenContext tcToken = TCTokenContext.generateTCToken(v);
+			tcTokenRequest.token = tcToken.getToken();
+			break;
+		    case "serverCertificate":
+			// TODO: convert base64 and url encoded certificate to Certificate object
+			break;
+		    default:
+			logger.info("Unknown query element: {}", k);
+			break;
+		}
 	    }
 	}
 
+	if (tcTokenRequest.token == null) {
+	    throw new MissingActivationParameterException("No valid TCToken available in request.");
+	}
 	return tcTokenRequest;
     }
 

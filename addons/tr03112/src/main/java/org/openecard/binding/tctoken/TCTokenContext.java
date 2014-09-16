@@ -22,7 +22,13 @@
 
 package org.openecard.binding.tctoken;
 
-import generated.TCTokenType;
+import org.openecard.binding.tctoken.ex.InvalidTCTokenElement;
+import org.openecard.binding.tctoken.ex.InvalidTCTokenUrlException;
+import org.openecard.binding.tctoken.ex.InvalidTCTokenException;
+import org.openecard.binding.tctoken.ex.TCTokenRetrievalException;
+import org.openecard.binding.tctoken.ex.SecurityViolationException;
+import org.openecard.binding.tctoken.ex.AuthServerException;
+import org.openecard.binding.tctoken.ex.InvalidRedirectUrl;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
@@ -32,37 +38,44 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Class to fetch a TCToken and return it as @{link TCTokenType}.
+ * Class to fetch a TCToken.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class TCTokenContext extends ResourceContext {
 
     private static final Logger logger = LoggerFactory.getLogger(TCTokenContext.class);
-    private final TCTokenType token;
+    private final TCToken token;
 
-    private TCTokenContext(TCTokenType token, ResourceContext base) {
+    private TCTokenContext(TCToken token, ResourceContext base) {
 	super(base.getTlsClient(), base.getTlsClientProto(), base.getCerts());
 	this.token = token;
     }
 
-    public TCTokenType getToken() {
+    public TCToken getToken() {
 	return token;
     }
 
-    public static TCTokenContext generateTCToken(URL tcTokenURL) throws TCTokenException, IOException,
-	    ResourceException, ValidationError, CommunicationError {
+    public static TCTokenContext generateTCToken(URL tcTokenURL) throws InvalidTCTokenException, AuthServerException,
+	    InvalidRedirectUrl, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException {
 	// Get TCToken from the given url
-	ResourceContext ctx = ResourceContext.getStream(tcTokenURL);
-	return generateTCToken(ctx.getData(), ctx);
+	try {
+	    ResourceContext ctx = ResourceContext.getStream(tcTokenURL);
+	    return generateTCToken(ctx.getData(), ctx);
+	} catch (IOException | ResourceException | ValidationError ex) {
+	    throw new TCTokenRetrievalException("Failed to retrieve the TCToken.", ex);
+	}
     }
 
-    public static TCTokenContext generateTCToken(String data) throws TCTokenException, CommunicationError {
+    public static TCTokenContext generateTCToken(String data) throws InvalidTCTokenException, AuthServerException,
+	    InvalidRedirectUrl, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException {
 	return generateTCToken(data, new ResourceContext(null, null, Collections.EMPTY_LIST));
     }
 
-    private static TCTokenContext generateTCToken(String data, ResourceContext base) throws TCTokenException,
-	    CommunicationError {
+    private static TCTokenContext generateTCToken(String data, ResourceContext base) throws InvalidTCTokenException,
+	    AuthServerException, InvalidRedirectUrl, InvalidTCTokenElement, InvalidTCTokenUrlException,
+	    SecurityViolationException {
 	// FIXME: Hack
 	data = TCTokenHacks.fixObjectTag(data);
 	// FIXME: Hack
@@ -71,20 +84,20 @@ public class TCTokenContext extends ResourceContext {
 
 	// Parse the TCToken
 	TCTokenParser parser = new TCTokenParser();
-	List<TCTokenType> tokens = parser.parse(data);
+	List<TCToken> tokens = parser.parse(data);
 
 	if (tokens.isEmpty()) {
-	    throw new TCTokenException("TCToken not available");
+	    throw new InvalidTCTokenException("No TCToken found in the given data.");
 	}
 
 	// Verify the TCToken
-	TCTokenType token = tokens.get(0);
+	TCToken token = tokens.get(0);
 	TCTokenVerifier ver = new TCTokenVerifier(token, base);
-	boolean isError = ver.isErrorToken();
-	if (isError) {
+	if (ver.isErrorToken()) {
 	    // TODO: find out what is the correct minor type
+	    String minor = "";
 	    String msg = "eService indicated an error.";
-	    throw new CommunicationError(token.getCommunicationErrorAddress(), null, msg);
+	    throw new AuthServerException(token.getErrorRedirectAddress(minor), msg);
 	}
 
 	ver.verify();

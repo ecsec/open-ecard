@@ -34,7 +34,7 @@ import org.xml.sax.helpers.DefaultHandler;
 /**
  * Implements a SAX handler to parse TCTokens.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class TCTokenSAXHandler extends DefaultHandler {
 
@@ -50,8 +50,8 @@ public class TCTokenSAXHandler extends DefaultHandler {
 
     private boolean read;
     private StringBuilder sb;
-    private List<TCTokenType> tokens;
-    private TCTokenType token;
+    private List<TCToken> tokens;
+    private TCToken token;
 
     @Override
     public void startDocument() throws SAXException {
@@ -71,7 +71,7 @@ public class TCTokenSAXHandler extends DefaultHandler {
 	// Consider only the TCTokens.
 	if (qName.equalsIgnoreCase(TC_TOKEN_TYPE)) {
 	    read = true;
-	    token = new TCTokenType();
+	    token = new TCToken();
 	} else if (qName.equalsIgnoreCase(PATH_SECURITY_PARAMETERS)) {
 	    token.setPathSecurityParameters(new TCTokenType.PathSecurityParameters());
 	}
@@ -84,14 +84,19 @@ public class TCTokenSAXHandler extends DefaultHandler {
 
 	if (qName.equalsIgnoreCase(TC_TOKEN_TYPE)) {
 	    tokens.add(token);
-	    token = new TCTokenType();
+	    token = new TCToken();
 	    read = false;
 	} else if (qName.equalsIgnoreCase(SESSION_IDENTIFIER)) {
 	    token.setSessionIdentifier(value);
 	} else if (qName.equalsIgnoreCase(SERVER_ADDRESS)) {
-	    //FIXME: malformed URL hack
+	    // correct malformed URL
 	    if (! value.startsWith("https://") && ! value.startsWith("http://")) {
-		value = "https://" + value;
+		// protocol relative or completely missing scheme
+		if (value.startsWith("//")) {
+		    value = "https:" + value;
+		} else {
+		    value = "https://" + value;
+		}
 	    }
 
 	    token.setServerAddress(value);
@@ -134,7 +139,7 @@ public class TCTokenSAXHandler extends DefaultHandler {
      *
      * @return TCTokens
      */
-    public List<TCTokenType> getTCTokens() {
+    public List<TCToken> getTCTokens() {
 	return tokens;
     }
 

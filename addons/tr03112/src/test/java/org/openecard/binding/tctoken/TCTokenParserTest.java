@@ -22,8 +22,6 @@
 
 package org.openecard.binding.tctoken;
 
-import org.openecard.binding.tctoken.TCTokenHacks;
-import org.openecard.binding.tctoken.TCTokenParser;
 import generated.TCTokenType;
 import java.io.InputStream;
 import java.util.List;
@@ -43,7 +41,7 @@ public class TCTokenParserTest {
 	InputStream testFile = FileUtils.resolveResourceAsStream(getClass(), "TCToken.xml");
 
 	TCTokenParser parser = new TCTokenParser();
-	List<TCTokenType> tokens = parser.parse(testFile);
+	List<TCToken> tokens = parser.parse(testFile);
 
 	TCTokenType t = tokens.get(0);
 	assertEquals(t.getSessionIdentifier(), "3eab1b41ecc1ce5246acf6f4e2751234");
@@ -59,7 +57,7 @@ public class TCTokenParserTest {
 	data = TCTokenHacks.fixPathSecurityParameters(data);
 
 	TCTokenParser parser = new TCTokenParser();
-	List<TCTokenType> tokens = parser.parse(data);
+	List<TCToken> tokens = parser.parse(data);
 
 	TCTokenType t = tokens.get(0);
 	assertEquals(t.getSessionIdentifier(), "3eab1b41ecc1ce5246acf6f4e275");

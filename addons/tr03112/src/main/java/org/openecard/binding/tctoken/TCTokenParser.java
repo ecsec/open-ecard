@@ -22,30 +22,39 @@
 
 package org.openecard.binding.tctoken;
 
-import generated.TCTokenType;
+import org.openecard.binding.tctoken.ex.InvalidTCTokenException;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.openecard.common.io.LimitedInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 
 
 /**
  * Implements a parser for TCTokens.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class TCTokenParser {
 
-    private static final Logger _logger = LoggerFactory.getLogger(TCTokenParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(TCTokenParser.class);
     private SAXParserFactory saxFactory;
     private TCTokenSAXHandler saxHandler;
 
     /**
      * Creates a new parser for TCTokens.
+     *
+     * @throws IllegalArgumentException Thrown when the parser could not be initilized with the specified parameters.
      */
     public TCTokenParser() {
 	saxFactory = SAXParserFactory.newInstance();
@@ -53,8 +62,9 @@ public class TCTokenParser {
 
 	try {
 	    saxFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-	} catch (Exception e) {
-	    _logger.error(e.getMessage(), e);
+	} catch (ParserConfigurationException | SAXNotRecognizedException | SAXNotSupportedException ex) {
+	    logger.error(ex.getMessage(), ex);
+	    throw new IllegalArgumentException("Unsupported XML parser feature requested.", ex);
 	}
     }
 
@@ -63,20 +73,20 @@ public class TCTokenParser {
      *
      * @param data Data
      * @return List of TCTokens
-     * @throws TCTokenException
+     * @throws InvalidTCTokenException Thrown in case the SAX parser had an error.
      */
-    public List<TCTokenType> parse(String data) throws TCTokenException {
+    public List<TCToken> parse(@Nonnull String data) throws InvalidTCTokenException {
 	return parse(new ByteArrayInputStream(data.getBytes()));
     }
 
     /**
-     * Parse TCTokens from the input stream.
+     * Parse TCTokens from given the input stream.
      *
      * @param inputStream Input stream
      * @return List of TCTokens
-     * @throws TCTokenException
+     * @throws InvalidTCTokenException Thrown in case the SAX parser had an error reading the stream.
      */
-    public List<TCTokenType> parse(InputStream inputStream) throws TCTokenException {
+    public List<TCToken> parse(@Nonnull InputStream inputStream) throws InvalidTCTokenException {
 	try {
 	    // Parse TCTokens
 	    SAXParser saxParser = saxFactory.newSAXParser();
@@ -84,12 +94,12 @@ public class TCTokenParser {
 	    saxParser.parse(stream, saxHandler);
 
 	    // Get TCTokens
-	    List<TCTokenType> tokens = saxHandler.getTCTokens();
+	    List<TCToken> tokens = saxHandler.getTCTokens();
 
 	    return tokens;
-	} catch (Exception e) {
-	    _logger.error(e.getMessage(), e);
-	    throw new TCTokenException("TCToken is malformed", e);
+	} catch (ParserConfigurationException | SAXException | IOException ex) {
+	    logger.error(ex.getMessage(), ex);
+	    throw new InvalidTCTokenException("TCToken is malformed and could not be parsed.", ex);
 	}
     }
 

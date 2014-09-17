@@ -25,7 +25,7 @@ package org.openecard.binding.tctoken;
 import org.openecard.binding.tctoken.ex.InvalidTCTokenElement;
 import org.openecard.binding.tctoken.ex.InvalidTCTokenUrlException;
 import org.openecard.binding.tctoken.ex.SecurityViolationException;
-import org.openecard.binding.tctoken.ex.InvalidRedirectUrl;
+import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
 import generated.TCTokenType;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -76,12 +76,12 @@ public class TCTokenVerifier {
     /**
      * Verifies the elements of the TCToken.
      *
-     * @throws InvalidRedirectUrl Thrown in case no redirect URL could be determined.
+     * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      * @throws InvalidTCTokenElement Thrown in case one of the values to test is errornous.
      * @throws InvalidTCTokenUrlException Thrown in case a tested URL does not conform to the specification.
      * @throws SecurityViolationException Thrown in case the same origin policy is violated.
      */
-    public void verify() throws InvalidRedirectUrl, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException {
+    public void verify() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException {
 	// ordering is important because of the raised errors in case the first two are not https URLs
 	verifyRefreshAddress();
 	verifyCommunicationErrorAddress();
@@ -94,11 +94,11 @@ public class TCTokenVerifier {
     /**
      * Verifies the ServerAddress element of the TCToken.
      *
-     * @throws InvalidRedirectUrl Thrown in case no redirect URL could be determined.
+     * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      * @throws InvalidTCTokenElement Thrown in case one of the values to test is errornous.
      * @throws InvalidTCTokenUrlException Thrown in case a tested URL does not conform to the specification.
      */
-    public void verifyServerAddress() throws InvalidRedirectUrl, InvalidTCTokenElement, InvalidTCTokenUrlException {
+    public void verifyServerAddress() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException {
 	String value = token.getServerAddress();
 	assertRequired("ServerAddress", value);
 	assertHttpsURL("ServerAddress", value);
@@ -107,10 +107,10 @@ public class TCTokenVerifier {
     /**
      * Verifies the SessionIdentifier element of the TCToken.
      *
-     * @throws InvalidRedirectUrl Thrown in case no redirect URL could be determined.
+     * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      * @throws InvalidTCTokenElement Thrown in case one of the values to test is errornous.
      */
-    public void verifySessionIdentifier() throws InvalidRedirectUrl, InvalidTCTokenElement {
+    public void verifySessionIdentifier() throws InvalidRedirectUrlException, InvalidTCTokenElement {
 	String value = token.getSessionIdentifier();
 	assertRequired("SessionIdentifier", value);
     }
@@ -118,11 +118,11 @@ public class TCTokenVerifier {
     /**
      * Verifies the RefreshAddress element of the TCToken.
      *
-     * @throws InvalidRedirectUrl Thrown in case no redirect URL could be determined.
+     * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      * @throws InvalidTCTokenElement Thrown in case one of the values to test is errornous.
      * @throws InvalidTCTokenUrlException Thrown in case a tested URL does not conform to the specification.
      */
-    public void verifyRefreshAddress() throws InvalidRedirectUrl, InvalidTCTokenElement, InvalidTCTokenUrlException {
+    public void verifyRefreshAddress() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException {
 	String value = token.getRefreshAddress();
 	assertRequired("RefreshAddress", value);
 	assertHttpsURL("RefreshAddress", value);
@@ -131,11 +131,11 @@ public class TCTokenVerifier {
     /**
      * Verifies the CommunicationErrorAddress element of the TCToken.
      *
-     * @throws InvalidRedirectUrl Thrown in case no redirect URL could be determined.
+     * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      * @throws InvalidTCTokenElement Thrown in case one of the values to test is errornous.
      * @throws InvalidTCTokenUrlException Thrown in case a tested URL does not conform to the specification.
      */
-    public void verifyCommunicationErrorAddress() throws InvalidRedirectUrl, InvalidTCTokenElement,
+    public void verifyCommunicationErrorAddress() throws InvalidRedirectUrlException, InvalidTCTokenElement,
 	    InvalidTCTokenUrlException {
 	String value = token.getCommunicationErrorAddress();
 	if (! checkEmpty(value)) {
@@ -147,10 +147,10 @@ public class TCTokenVerifier {
     /**
      * Verifies the Binding element of the TCToken.
      *
-     * @throws InvalidRedirectUrl Thrown in case no redirect URL could be determined.
+     * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      * @throws InvalidTCTokenElement Thrown in case one of the values to test is errornous.
      */
-    public void verifyBinding() throws InvalidRedirectUrl, InvalidTCTokenElement {
+    public void verifyBinding() throws InvalidRedirectUrlException, InvalidTCTokenElement {
 	String value = token.getBinding();
 	assertRequired("Binding", value);
 	checkEqualOR("Binding", value, "urn:liberty:paos:2006-08", "urn:ietf:rfc:2616");
@@ -159,12 +159,12 @@ public class TCTokenVerifier {
     /**
      * Verifies the PathSecurity-Protocol and PathSecurity-Parameters element of the TCToken.
      *
-     * @throws InvalidRedirectUrl Thrown in case no redirect URL could be determined.
+     * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      * @throws InvalidTCTokenElement Thrown in case one of the values to test is errornous.
      * @throws InvalidTCTokenUrlException Thrown in case a tested URL does not conform to the specification.
      * @throws SecurityViolationException Thrown in case the same origin policy is violated.
      */
-    public void verifyPathSecurity() throws InvalidRedirectUrl, InvalidTCTokenElement, InvalidTCTokenUrlException,
+    public void verifyPathSecurity() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException,
 	    SecurityViolationException {
 	String proto = token.getPathSecurityProtocol();
 	TCTokenType.PathSecurityParameters psp = token.getPathSecurityParameters();
@@ -219,10 +219,10 @@ public class TCTokenVerifier {
      * @param name Name of the element to check. This value is used to provide a concise error message.
      * @param value Value to test.
      * @param reference Reference values to test equality against.
-     * @throws InvalidRedirectUrl Thrown in case no redirect URL could be determined.
+     * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      * @throws InvalidTCTokenElement Thrown in case the value is not equal to any of the reference values.
      */
-    private void checkEqualOR(String name, String value, String... reference) throws InvalidRedirectUrl,
+    private void checkEqualOR(String name, String value, String... reference) throws InvalidRedirectUrlException,
 	    InvalidTCTokenElement {
 	for (String string : reference) {
 	    if (value.equals(string)) {
@@ -240,10 +240,10 @@ public class TCTokenVerifier {
      *
      * @param name Name of the element to check. This value is used to provide a concise error message.
      * @param value Value to test.
-     * @throws InvalidRedirectUrl Thrown in case no redirect URL could be determined.
+     * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      * @throws InvalidTCTokenElement Thrown in case the value is null or empty.
      */
-    private void assertRequired(String name, Object value) throws InvalidRedirectUrl, InvalidTCTokenElement {
+    private void assertRequired(String name, Object value) throws InvalidRedirectUrlException, InvalidTCTokenElement {
 	if (checkEmpty(value)) {
 	    String msg = String.format("Element %s is required.", name);
 	    String minor = ECardConstants.Minor.App.PARM_ERROR;
@@ -269,7 +269,7 @@ public class TCTokenVerifier {
 	}
     }
 
-    private void assertSameChannel() throws InvalidRedirectUrl, InvalidTCTokenUrlException, SecurityViolationException {
+    private void assertSameChannel() throws InvalidRedirectUrlException, InvalidTCTokenUrlException, SecurityViolationException {
 	// check that everything can be handled over the same channel
 	// TR-03124-1 does not mention that redirects on the TCToken address are possible and it also states that there
 	// are only two channels. So I guess we should force this here as well.

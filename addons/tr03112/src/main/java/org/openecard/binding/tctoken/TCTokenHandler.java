@@ -22,7 +22,6 @@
 
 package org.openecard.binding.tctoken;
 
-import generated.TCTokenType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnect;
@@ -32,7 +31,6 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -50,6 +48,7 @@ import org.openecard.addon.AddonRegistry;
 import org.openecard.addon.Context;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
+import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
@@ -86,8 +85,9 @@ import org.slf4j.LoggerFactory;
  * <li>PLS-PSK-RSA</li>
  * </ul>
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Dirk Petrautzki
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class TCTokenHandler {
 
@@ -171,41 +171,42 @@ public class TCTokenHandler {
      */
     private TCTokenResponse processBinding(TCTokenRequest tokenRequest, ConnectionHandleType connectionHandle)
 	    throws PAOSException, DispatcherException {
-	TCTokenType token = tokenRequest.getTCToken();
+	TCToken token = tokenRequest.getTCToken();
 	try {
 	    connectionHandle = prepareHandle(connectionHandle);
 
 	    TCTokenResponse response = new TCTokenResponse();
-	    response.setRefreshAddress(new URL(token.getRefreshAddress()));
-	    response.setCommunicationErrorAddress(token.getCommunicationErrorAddress());
+	    response.setTCToken(token);
 	    response.setResult(WSHelper.makeResultOK());
 
 	    String binding = token.getBinding();
-	    if ("urn:liberty:paos:2006-08".equals(binding)) {
-		// send StartPAOS
-		List<String> supportedDIDs = getSupportedDIDs();
-		PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest);
-		FutureTask<StartPAOSResponse> paosTask = new FutureTask<>(task);
-		Thread paosThread = new Thread(paosTask, "PAOS");
-		paosThread.start();
-		if (! tokenRequest.isTokenFromObject()) {
-		    // wait for computation to finish
-		    waitForTask(paosTask);
+	    switch (binding) {
+	    	case "urn:liberty:paos:2006-08":{
+		    // send StartPAOS
+		    List<String> supportedDIDs = getSupportedDIDs();
+		    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest);
+		    FutureTask<StartPAOSResponse> paosTask = new FutureTask<>(task);
+		    Thread paosThread = new Thread(paosTask, "PAOS");
+		    paosThread.start();
+		    if (! tokenRequest.isTokenFromObject()) {
+			// wait for computation to finish
+			waitForTask(paosTask);
+		}	response.setBindingTask(paosTask);
+			break;
+		    }
+		case "urn:ietf:rfc:2616":{
+		    // no actual binding, just connect via tls and authenticate the user with that connection
+		    HttpGetTask task = new HttpGetTask(dispatcher, connectionHandle, tokenRequest);
+		    FutureTask<StartPAOSResponse> tlsTask = new FutureTask<>(task);
+		    Thread tlsThread = new Thread(tlsTask, "TLS Auth");
+		    tlsThread.start();
+		    waitForTask(tlsTask);
+		    response.setBindingTask(tlsTask);
+		    break;
 		}
-
-		response.setBindingTask(paosTask);
-	    } else if ("urn:ietf:rfc:2616".equals(binding)) {
-		// no actual binding, just connect via tls and authenticate the user with that connection
-		HttpGetTask task = new HttpGetTask(dispatcher, connectionHandle, tokenRequest);
-		FutureTask<StartPAOSResponse> tlsTask = new FutureTask<>(task);
-		Thread tlsThread = new Thread(tlsTask, "TLS Auth");
-		tlsThread.start();
-		waitForTask(tlsTask);
-
-		response.setBindingTask(tlsTask);
-	    } else {
-		// unknown binding
-		throw new RuntimeException("Unsupported binding in TCToken.");
+		default:
+		    // unknown binding
+		    throw new RuntimeException("Unsupported binding in TCToken.");
 	    }
 
 	    return response;
@@ -216,9 +217,6 @@ public class TCTokenHandler {
 	} catch (InvocationTargetException ex) {
 	    logger.error(ex.getMessage(), ex);
 	    throw new DispatcherException(ex);
-	} catch (MalformedURLException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw new PAOSException(ex);
 	}
     }
 
@@ -240,14 +238,10 @@ public class TCTokenHandler {
      *
      * @param request The activation request containing the TCToken.
      * @return The response containing the result of the activation process.
-     * @throws MalformedURLException
-     * @throws UnsupportedEncodingException
-     * @throws InvalidRedirect
-     * @throws CommunicationError Thrown when the process should be terminated after a specified error.
+     * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      */
-    public TCTokenResponse handleActivate(TCTokenRequest request) throws MalformedURLException,
-	    UnsupportedEncodingException, InvalidRedirect, IOException, CommunicationError {
-	TCTokenType token = request.getTCToken();
+    public TCTokenResponse handleActivate(TCTokenRequest request) throws InvalidRedirectUrlException {
+	TCToken token = request.getTCToken();
 	if (logger.isDebugEnabled()) {
 	    try {
 		WSMarshaller m = WSMarshallerFactory.createInstance();
@@ -273,8 +267,7 @@ public class TCTokenHandler {
 
 	ConnectionHandleType connectionHandle = null;
 	TCTokenResponse response = new TCTokenResponse();
-	response.setRefreshAddress(token.getRefreshAddress());
-	response.setCommunicationErrorAddress(token.getCommunicationErrorAddress());
+	response.setTCToken(token);
 
 	byte[] requestedContextHandle = request.getContextHandle();
 	String ifdName = request.getIFDName();
@@ -350,21 +343,23 @@ public class TCTokenHandler {
     }
 
     /**
-     * Follow the URL in the RefreshAddress of the TCToken as long as it is a redirect (302, 303 or 307) AND is a
+     * Follow the URL in the RefreshAddress and update it in the response.
+     * The redirect is followed as long as the response is a redirect (302, 303 or 307) AND is a
      * https-URL AND the hash of the retrieved server certificate is contained in the CertificateDescrioption, else
      * return 400. If the URL and the subjectURL in the CertificateDescription conform to the SOP we reached our final
      * destination.
      *
-     * @param endpoint current Redirect location
-     * @return HTTP redirect to the final address the browser should be redirected to
+     * @param request TCToken request used to determine which security checks to perform..
+     * @param response The TCToken response in which the original refresh address is defined and where it will be
+     *	 updated.
+     * @return Modified response with the final address the browser should be redirected to.
+     * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      */
     private static TCTokenResponse determineRefreshURL(TCTokenRequest request, TCTokenResponse response)
-	    throws InvalidRedirect, IOException {
+	    throws InvalidRedirectUrlException {
 	try {
-	    URL endpoint = response.getRefreshAddress();
-	    if (endpoint == null) {
-		throw new IOException("No endpoint address available for redirect detection.");
-	    }
+	    String endpointStr = response.getRefreshAddress();
+	    URL endpoint = new URL(endpointStr);
 	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 	    // omit checks completely if this is an object tag activation
@@ -395,10 +390,13 @@ public class TCTokenHandler {
 	    DynamicContext.remove();
 
 	    logger.debug("Setting redirect address to '{}'.", endpoint);
-	    response.setRefreshAddress(endpoint);
+	    response.setRefreshAddress(endpoint.toString());
 	    return response;
-	} catch (ResourceException | ValidationError ex) {
-	    throw new InvalidRedirect(ex.getMessage(), ex);
+	} catch (MalformedURLException ex) {
+	    String msg = "Refresh address in TCToken is invalid. This indicates an error in the TCToken verification.";
+	    throw new IllegalStateException(msg, ex);
+	} catch (ResourceException | ValidationError | IOException ex) {
+	    throw new InvalidRedirectUrlException("Failed to determine redirect address.", ex);
 	}
     }
 

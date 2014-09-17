@@ -28,7 +28,7 @@ import org.openecard.binding.tctoken.ex.InvalidTCTokenException;
 import org.openecard.binding.tctoken.ex.TCTokenRetrievalException;
 import org.openecard.binding.tctoken.ex.SecurityViolationException;
 import org.openecard.binding.tctoken.ex.AuthServerException;
-import org.openecard.binding.tctoken.ex.InvalidRedirectUrl;
+import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
@@ -58,7 +58,7 @@ public class TCTokenContext extends ResourceContext {
     }
 
     public static TCTokenContext generateTCToken(URL tcTokenURL) throws InvalidTCTokenException, AuthServerException,
-	    InvalidRedirectUrl, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException {
+	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException {
 	// Get TCToken from the given url
 	try {
 	    ResourceContext ctx = ResourceContext.getStream(tcTokenURL);
@@ -69,12 +69,12 @@ public class TCTokenContext extends ResourceContext {
     }
 
     public static TCTokenContext generateTCToken(String data) throws InvalidTCTokenException, AuthServerException,
-	    InvalidRedirectUrl, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException {
+	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException {
 	return generateTCToken(data, new ResourceContext(null, null, Collections.EMPTY_LIST));
     }
 
     private static TCTokenContext generateTCToken(String data, ResourceContext base) throws InvalidTCTokenException,
-	    AuthServerException, InvalidRedirectUrl, InvalidTCTokenElement, InvalidTCTokenUrlException,
+	    AuthServerException, InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException,
 	    SecurityViolationException {
 	// FIXME: Hack
 	data = TCTokenHacks.fixObjectTag(data);

@@ -28,7 +28,7 @@ import org.openecard.binding.tctoken.ex.InvalidTCTokenException;
 import org.openecard.binding.tctoken.ex.SecurityViolationException;
 import org.openecard.binding.tctoken.ex.AuthServerException;
 import org.openecard.binding.tctoken.ex.MissingActivationParameterException;
-import org.openecard.binding.tctoken.ex.InvalidRedirectUrl;
+import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
 import generated.TCTokenType;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -53,7 +53,7 @@ public class TCTokenRequest {
 
     private static final Logger logger = LoggerFactory.getLogger(TCTokenRequest.class);
 
-    private TCTokenType token;
+    private TCToken token;
     private String ifdName;
     private BigInteger slotIndex;
     private byte[] contextHandle;
@@ -72,13 +72,13 @@ public class TCTokenRequest {
      * @throws InvalidTCTokenException
      * @throws MissingActivationParameterException
      * @throws AuthServerException
-     * @throws InvalidRedirectUrl
+     * @throws InvalidRedirectUrlException
      * @throws InvalidTCTokenElement
      * @throws InvalidTCTokenUrlException
      * @throws SecurityViolationException
      */
     public static TCTokenRequest convert(Map<String, String> parameters) throws InvalidTCTokenException,
-	    MissingActivationParameterException, AuthServerException, InvalidRedirectUrl, InvalidTCTokenElement,
+	    MissingActivationParameterException, AuthServerException, InvalidRedirectUrlException, InvalidTCTokenElement,
 	    InvalidTCTokenUrlException, SecurityViolationException {
 	TCTokenRequest result;
 	if (parameters.containsKey("tcTokenURL")) {
@@ -96,7 +96,7 @@ public class TCTokenRequest {
 
 
     private static TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries) throws InvalidTCTokenException,
-	    MissingActivationParameterException, AuthServerException, InvalidRedirectUrl, InvalidTCTokenElement,
+	    MissingActivationParameterException, AuthServerException, InvalidRedirectUrlException, InvalidTCTokenElement,
 	    InvalidTCTokenUrlException, SecurityViolationException {
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 
@@ -150,7 +150,7 @@ public class TCTokenRequest {
     }
 
     private static TCTokenRequest parseObjectURI(Map<String, String> queries) throws InvalidTCTokenException,
-	    MissingActivationParameterException, AuthServerException, InvalidRedirectUrl, InvalidTCTokenElement,
+	    MissingActivationParameterException, AuthServerException, InvalidRedirectUrlException, InvalidTCTokenElement,
 	    InvalidTCTokenUrlException, SecurityViolationException {
 	// TODO: get rid of this crap as soon as possible
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
@@ -190,7 +190,7 @@ public class TCTokenRequest {
      *
      * @return TCToken
      */
-    public TCTokenType getTCToken() {
+    public TCToken getTCToken() {
 	return token;
     }
 

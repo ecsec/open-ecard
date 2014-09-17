@@ -23,8 +23,10 @@
 package org.openecard.binding.tctoken;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.common.util.Pair;
@@ -127,10 +129,16 @@ public class TCTokenHacks {
      * @param key Parameter without {@code &} or with {@code ?}.
      * @param value Value belonging to {@code key}. This value may be {@code null} or empty.
      * @return Newly constructed URL.
-     * @throws java.net.MalformedURLException
+     * @throws MalformedURLException Thrown in case the new URL is not a valid URL.
+     * @throws IllegalStateException Thrown in case UTF-8 is not supported on this system.
      */
     public static URL addParameterToUrl(@Nonnull URL url, @Nonnull String key, @Nullable String value)
 	    throws MalformedURLException {
+	try {
+	    value = URLDecoder.decode(value, "UTF-8");
+	} catch (UnsupportedEncodingException ex) {
+	    throw new IllegalStateException("UTF-8 encoding is not supported. This should never be the case.");
+	}
 	String queryPart = url.getQuery();
 	if (queryPart == null || ! (queryPart.contains("?" + key) || queryPart.contains("&" + key))) {
 	    String sAddr = url.toString();
@@ -165,7 +173,8 @@ public class TCTokenHacks {
      * @param key Parameter without {@code &} or with {@code ?}.
      * @param value Value belonging to {@code key}. This value may be {@code null} or empty.
      * @return Newly constructed URL.
-     * @throws java.net.MalformedURLException
+     * @throws MalformedURLException Thrown in case the new URL is not a valid URL.
+     * @throws IllegalStateException Thrown in case UTF-8 is not supported on this system.
      */
     public static String addParameterToUrl(@Nonnull String url, @Nonnull String key, @Nullable String value)
 	    throws MalformedURLException {

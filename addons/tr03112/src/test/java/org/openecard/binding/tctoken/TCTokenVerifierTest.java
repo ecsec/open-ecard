@@ -29,18 +29,20 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import org.openecard.common.util.FileUtils;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 
 /**
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class TCTokenVerifierTest {
 
-    private final TCToken token;
-    private final TCTokenVerifier verifier;
+    private TCToken token;
+    private TCTokenVerifier verifier;
 
-    public TCTokenVerifierTest() throws Exception {
+    @BeforeTest
+    public void initTestObject() throws Exception {
 	InputStream testFile = FileUtils.resolveResourceAsStream(getClass(), "TCToken.xml");
 
 	TCTokenParser parser = new TCTokenParser();
@@ -69,6 +71,7 @@ public class TCTokenVerifierTest {
     @Test(expectedExceptions = InvalidTCTokenElement.class)
     public void testVerifyRefreshAddress() throws ActivationError {
 	token.setRefreshAddress(null);
+	token.setCommunicationErrorAddress("https://localhost/error");
 	verifier.verifyRefreshAddress();
     }
 

@@ -20,21 +20,24 @@
  *
  ***************************************************************************/
 
-package org.openecard.binding.tctoken;
+package org.openecard.binding.tctoken.ex;
+
+import org.openecard.addon.bind.BindingResultCode;
 
 
 /**
+ * Error indicating a missing redirect URL for errors.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
-public class InvalidRedirect extends Exception {
+public class InvalidRedirectUrlException extends FatalActivationError {
 
-    public InvalidRedirect(String msg) {
-	super(msg);
+    public InvalidRedirectUrlException(String msg) {
+	this(msg, null);
     }
 
-    public InvalidRedirect(String msg, Throwable cause) {
-	super(msg, cause);
+    public InvalidRedirectUrlException(String msg, Throwable cause) {
+	super(BindingResultCode.WRONG_PARAMETER, msg, cause);
     }
 
 }

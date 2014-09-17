@@ -23,15 +23,13 @@
 package org.openecard.binding.tctoken;
 
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.util.concurrent.Future;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
+import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 
@@ -44,8 +42,7 @@ import org.openecard.common.WSHelper;
 public class TCTokenResponse extends BindingResult {
 
     private Result result;
-    private URL refreshAddress;
-    private URL communicationErrorAddress;
+    private TCToken token;
     private Future<StartPAOSResponse> bindingTask;
 
     /**
@@ -70,41 +67,39 @@ public class TCTokenResponse extends BindingResult {
     }
 
     /**
+     * Sets the TCToken as received in the request.
+     *
+     * @param token The TCToken.
+     */
+    public void setTCToken(TCToken token) {
+	this.token = token;
+    }
+
+    /**
+     * Gtes the TCToken of the request.
+     *
+     * @return The TCToken.
+     */
+    public TCToken getTCToken() {
+	return token;
+    }
+
+    /**
      * Returns the refresh address.
      *
      * @return Refresh address
      */
-    public URL getRefreshAddress() {
-	return refreshAddress;
+    public String getRefreshAddress() {
+	return token.getRefreshAddress();
     }
 
     /**
-     * Sets the refresh address.
+     * Sets the refresh address in the underlying TCToken.
      *
-     * @param refreshAddress Refresh address
+     * @param addr The new refresh address.
      */
-    public void setRefreshAddress(URL refreshAddress) {
-	this.refreshAddress = refreshAddress;
-    }
-
-    public void setRefreshAddress(String refreshAddress) throws MalformedURLException {
-	if (refreshAddress != null) {
-	    this.refreshAddress = new URL(refreshAddress);
-	}
-    }
-
-    public URL getCommunicationErrorAddress() {
-	return communicationErrorAddress;
-    }
-
-    public void setCommunicationErrorAddress(URL communicationErrorAddress) {
-	this.communicationErrorAddress = communicationErrorAddress;
-    }
-
-    public void setCommunicationErrorAddress(String communicationErrorAddress) throws MalformedURLException {
-	if (communicationErrorAddress != null) {
-	    this.communicationErrorAddress = new URL(communicationErrorAddress);
-	}
+    public void setRefreshAddress(String addr) {
+	token.setRefreshAddress(addr);
     }
 
     public void setBindingTask(Future<StartPAOSResponse> bindingTask) {
@@ -115,36 +110,31 @@ public class TCTokenResponse extends BindingResult {
 	return bindingTask;
     }
 
-    public void finishResponse() throws MalformedURLException, UnsupportedEncodingException, CommunicationError {
-	// TODO: localize these error messages
-	BindingResult httpResponse = new BindingResult();
-
-	if (getRefreshAddress() == null) {
-	    if (getCommunicationErrorAddress() == null) {
-		httpResponse.setResultCode(BindingResultCode.WRONG_PARAMETER);
-		httpResponse.setResultMessage("No refresh or error address could be determined.");
-	    } else {
-		String msg = "No refresh address could be determined.";
-		throw new CommunicationError(getCommunicationErrorAddress().toString(), "communicationError", msg);
-	    }
-	} else {
-	    // address available
+    /**
+     * Completes the response, so that it can be used in the binding.
+     * The values extended include result code, result message and the redirect address.
+     *
+     * @throws InvalidRedirectUrlException Thrown in case the error redirect URL could not be determined.
+     */
+    public void finishResponse() throws InvalidRedirectUrlException {
+	try {
 	    if (ECardConstants.Major.OK.equals(result.getResultMajor())) {
 		setResultCode(BindingResultCode.REDIRECT);
-		URL refreshURL = TCTokenHacks.addParameterToUrl(getRefreshAddress(), "ResultMajor", "ok");
-		getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, refreshURL.toString());
+		String refreshURL = TCTokenHacks.addParameterToUrl(getRefreshAddress(), "ResultMajor", "ok");
+		getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, refreshURL);
 	    } else {
 		setResultCode(BindingResultCode.REDIRECT);
-		URL refreshURL = TCTokenHacks.addParameterToUrl(getRefreshAddress(), "ResultMajor", "error");
-		// TODO: set ResultMinor
-		String encodedResultMinor = URLDecoder.decode(result.getResultMinor(), "UTF-8");
-		refreshURL = TCTokenHacks.addParameterToUrl(refreshURL, "ResultMinor", encodedResultMinor);
-		getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, refreshURL.toString());
+		String refreshURL = token.getErrorRedirectAddress(result.getResultMinor());
+		getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, refreshURL);
 
 		if (result.getResultMessage().getValue() != null) {
 		    setResultMessage(result.getResultMessage().getValue());
 		}
 	    }
+	} catch (MalformedURLException ex) {
+	    // this is a code failure as the URLs are verified upfront
+	    String msg = "The TCToken contains an invalid URL which should have been detected before.";
+	    throw new IllegalArgumentException(msg, ex);
 	}
     }
 

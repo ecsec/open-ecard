@@ -318,6 +318,7 @@ public class GenericPINStep extends Step {
 		errorText.setText(lang.translationForKey(ERRORSTEP_UNKNOWN));
 		break;
 	}
+	getInputInfoUnits().add(errorText);
     }
 
     protected void setWrongPINFormat(boolean wrongFormat) {
@@ -346,6 +347,8 @@ public class GenericPINStep extends Step {
 
     protected void decreasePUKCounter() {
 	retryCounterPUK--;
+	getInputInfoUnits().clear();
+	generateGenericGui();
     }
 
 }

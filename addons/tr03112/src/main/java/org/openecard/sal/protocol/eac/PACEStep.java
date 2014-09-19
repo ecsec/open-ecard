@@ -101,6 +101,10 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     // GUI translation constants
     private static final String TITLE = "eac_user_consent_title";
 
+    // gui translations
+    private final String pin;
+    private final String puk;
+
     private final I18n lang = I18n.getTranslation("eac");
     private final I18n langPace = I18n.getTranslation("pace");
 
@@ -116,6 +120,8 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     public PACEStep(Dispatcher dispatcher, UserConsent gui) {
 	this.dispatcher = dispatcher;
 	this.gui = gui;
+	pin = langPace.translationForKey("pin");
+	puk = langPace.translationForKey("puk");
     }
 
     @Override
@@ -210,7 +216,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 	    UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE));
 	    // create GUI and init executor
-	    if (! Arrays.equals(status, new byte[]{(byte) 0x63, (byte) 0xC0})) {
+	    if (!Arrays.equals(status, new byte[]{(byte) 0x63, (byte) 0xC0})) {
 		CVCStep cvcStep = new CVCStep(eacData);
 		CHATStep chatStep = new CHATStep(eacData);
 		PINStep pinStep = new PINStep(eacData, !nativePace, paceMarker);
@@ -224,8 +230,8 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		pinStep.setAction(pinAction);
 	    } else {
 		StepAction errorAction = new ErrorStepAction("Error");
-		ErrorStep eStep = new ErrorStep(langPace.translationForKey("step_error_title_blocked"),
-			langPace.translationForKey("step_error_pin_blocked"));
+		ErrorStep eStep = new ErrorStep(langPace.translationForKey("step_error_title_blocked", pin),
+			langPace.translationForKey("step_error_pin_blocked", pin, pin, puk, pin));
 		eStep.setAction(errorAction);
 		uc.getSteps().add(eStep);
 	    }

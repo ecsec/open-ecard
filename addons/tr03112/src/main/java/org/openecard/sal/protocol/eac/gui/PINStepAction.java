@@ -61,13 +61,16 @@ public class PINStepAction extends StepAction {
 
     private static final Logger logger = LoggerFactory.getLogger(PINStepAction.class);
     
-    private static final byte[] BLOCKED = new byte[] {(byte) 0x63, (byte) 0xC0};
     private static final byte[] DEAKTIVATED = new byte[] {(byte) 0x62, (byte) 0x83};
     private static final byte[] RC3 = new byte[] {(byte) 0x90, (byte) 0x00};
     private static final byte[] RC1 = new byte[] {(byte) 0x63, (byte) 0xC1};
     private static final byte[] RC2 = new byte[] {(byte) 0x63, (byte) 0xC2};
 
     private static final String PIN_ID_CAN = "2";
+
+    // did translations
+    private final String pin;
+    private final String puk;
 
     private final EACData eacData;
     private final boolean capturePin;
@@ -88,9 +91,7 @@ public class PINStepAction extends StepAction {
 	this.step = step;
 
 	// check pin status
-	if (Arrays.equals(status, BLOCKED)) {
-	    retryCounter = 3;
-	} else if (Arrays.equals(status, RC3)) {
+	if (Arrays.equals(status, RC3)) {
 	    retryCounter = 0;
 	} else if (Arrays.equals(status, RC2)) {
 	    retryCounter = 1;
@@ -106,6 +107,10 @@ public class PINStepAction extends StepAction {
 	} else if (Arrays.equals(status, DEAKTIVATED)) {
 	    retryCounter = -1;
 	}
+
+	// get some important translations
+	pin = lang.translationForKey("pin");
+	puk = lang.translationForKey("puk");
     }
 
     @Override
@@ -131,51 +136,44 @@ public class PINStepAction extends StepAction {
 	    }
 	}
 
-	if (retryCounter < 3) {
-	    try {
-		EstablishChannelResponse establishChannelResponse = performPACEWithPIN(oldResults);
-		WSHelper.checkResult(establishChannelResponse);
-		eacData.paceResponse = establishChannelResponse;
-		// PACE completed successfully, proceed with next step
-		return new StepActionResult(StepActionResultStatus.NEXT);
-	    } catch (WSException ex) {
-		// This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
-		if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
-		    logger.error("User canceled the authentication manually.", ex);
-		    return new StepActionResult(StepActionResultStatus.CANCEL);
-		}
-
-		// increase counters and the related displays
-		retryCounter++;
-		step.updateAttemptsDisplay(3 - retryCounter);
-
-		// check whether the PIN is blocked
-		if (retryCounter >= 3) {
-		    logger.warn("Wrong PIN entered. The PIN is blocked.");
-		    return new StepActionResult(StepActionResultStatus.REPEAT,
-			    new ErrorStep(lang.translationForKey("step_error_title_blocked", "PIN"),
-				    lang.translationForKey("step_error_pin_blocked", "PIN")));
-		}
-
-		// check whether entering the can is necessary
-		if (retryCounter == 2 && capturePin) {
-		    step.addCANEntry();
-		} else if (retryCounter == 2) {
-		    step.addNativeCANNotice();
-		}
-
-		// repeat the step
-		logger.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
-		return new StepActionResult(StepActionResultStatus.REPEAT);
-	    } catch (DispatcherException | InvocationTargetException ex) {
-		logger.error("Failed to dispatch EstablishChannelCommand.", ex);
+	try {
+	    EstablishChannelResponse establishChannelResponse = performPACEWithPIN(oldResults);
+	    WSHelper.checkResult(establishChannelResponse);
+	    eacData.paceResponse = establishChannelResponse;
+	    // PACE completed successfully, proceed with next step
+	    return new StepActionResult(StepActionResultStatus.NEXT);
+	} catch (WSException ex) {
+	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
+	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
+		logger.error("User canceled the authentication manually.", ex);
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
-	} else {
-	    logger.error("The PIN is block and can't be used for authentication.");
-	    return new StepActionResult(StepActionResultStatus.NEXT, 
-		    new ErrorStep(lang.translationForKey("step_error_title_blocked"),
-			    lang.translationForKey("step_error_pin_blocked")));
+
+	    // increase counters and the related displays
+	    retryCounter++;
+	    step.updateAttemptsDisplay(3 - retryCounter);
+
+	    // check whether the PIN is blocked
+	    if (retryCounter >= 3) {
+		logger.warn("Wrong PIN entered. The PIN is blocked.");
+		return new StepActionResult(StepActionResultStatus.REPEAT,
+			new ErrorStep(lang.translationForKey("step_error_title_blocked", pin),
+				lang.translationForKey("step_error_pin_blocked", pin, pin, puk, pin)));
+	    }
+
+	    // check whether entering the can is necessary
+	    if (retryCounter == 2 && capturePin) {
+		step.addCANEntry();
+	    } else if (retryCounter == 2) {
+		step.addNativeCANNotice();
+	    }
+
+	    // repeat the step
+	    logger.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
+	    return new StepActionResult(StepActionResultStatus.REPEAT);
+	} catch (DispatcherException | InvocationTargetException ex) {
+	    logger.error("Failed to dispatch EstablishChannelCommand.", ex);
+	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
     }
 
@@ -194,13 +192,13 @@ public class PINStepAction extends StepAction {
 	if (capturePin) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField p = (PasswordField) executionResults.getResult(PINStep.PIN_FIELD);
-	    String pin = p.getValue();
+	    String pinIn = p.getValue();
 	    // let the user enter the pin again, when there is none entered
 	    // TODO: check pin length and possibly allowed charset with CardInfo file
-	    if (pin.isEmpty()) {
+	    if (pinIn.isEmpty()) {
 		return null;
 	    } else {
-		paceInputMap.addElement(PACEInputType.PIN, pin);
+		paceInputMap.addElement(PACEInputType.PIN, pinIn);
 	    }
 	}
 

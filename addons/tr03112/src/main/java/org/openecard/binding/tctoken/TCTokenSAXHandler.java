@@ -89,13 +89,15 @@ public class TCTokenSAXHandler extends DefaultHandler {
 	} else if (qName.equalsIgnoreCase(SESSION_IDENTIFIER)) {
 	    token.setSessionIdentifier(value);
 	} else if (qName.equalsIgnoreCase(SERVER_ADDRESS)) {
-	    // correct malformed URL
-	    if (! value.startsWith("https://") && ! value.startsWith("http://")) {
-		// protocol relative or completely missing scheme
-		if (value.startsWith("//")) {
-		    value = "https:" + value;
-		} else {
-		    value = "https://" + value;
+	    if (! value.isEmpty()) {
+		// correct malformed URL
+		if (! value.startsWith("https://") && ! value.startsWith("http://")) {
+		    // protocol relative or completely missing scheme
+		    if (value.startsWith("//")) {
+			value = "https:" + value;
+		    } else {
+			value = "https://" + value;
+		    }
 		}
 	    }
 

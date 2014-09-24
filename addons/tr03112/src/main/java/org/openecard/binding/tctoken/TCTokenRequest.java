@@ -35,6 +35,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.StringUtils;
@@ -76,10 +77,11 @@ public class TCTokenRequest {
      * @throws InvalidTCTokenElement
      * @throws InvalidTCTokenUrlException
      * @throws SecurityViolationException
+     * @throws InvalidAddressException
      */
     public static TCTokenRequest convert(Map<String, String> parameters) throws InvalidTCTokenException,
 	    MissingActivationParameterException, AuthServerException, InvalidRedirectUrlException, InvalidTCTokenElement,
-	    InvalidTCTokenUrlException, SecurityViolationException {
+	    InvalidTCTokenUrlException, SecurityViolationException, InvalidAddressException {
 	TCTokenRequest result;
 	if (parameters.containsKey("tcTokenURL")) {
 	    result = parseTCTokenRequestURI(parameters);
@@ -97,7 +99,7 @@ public class TCTokenRequest {
 
     private static TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries) throws InvalidTCTokenException,
 	    MissingActivationParameterException, AuthServerException, InvalidRedirectUrlException, InvalidTCTokenElement,
-	    InvalidTCTokenUrlException, SecurityViolationException {
+	    InvalidTCTokenUrlException, SecurityViolationException, InvalidAddressException {
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 
 	for (Map.Entry<String, String> next : queries.entrySet()) {

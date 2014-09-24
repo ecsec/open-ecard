@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -48,6 +48,7 @@ import org.openecard.addon.AddonRegistry;
 import org.openecard.addon.Context;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
+import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
@@ -239,8 +240,10 @@ public class TCTokenHandler {
      * @param request The activation request containing the TCToken.
      * @return The response containing the result of the activation process.
      * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
+     * @throws InvalidAddressException
      */
-    public TCTokenResponse handleActivate(TCTokenRequest request) throws InvalidRedirectUrlException {
+    public TCTokenResponse handleActivate(TCTokenRequest request) throws InvalidRedirectUrlException,
+	    InvalidAddressException {
 	TCToken token = request.getTCToken();
 	if (logger.isDebugEnabled()) {
 	    try {
@@ -356,7 +359,7 @@ public class TCTokenHandler {
      * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      */
     private static TCTokenResponse determineRefreshURL(TCTokenRequest request, TCTokenResponse response)
-	    throws InvalidRedirectUrlException {
+	    throws InvalidRedirectUrlException, InvalidAddressException {
 	try {
 	    String endpointStr = response.getRefreshAddress();
 	    URL endpoint = new URL(endpointStr);

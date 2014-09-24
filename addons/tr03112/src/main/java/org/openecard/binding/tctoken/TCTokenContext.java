@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,8 @@ public class TCTokenContext extends ResourceContext {
     }
 
     public static TCTokenContext generateTCToken(URL tcTokenURL) throws InvalidTCTokenException, AuthServerException,
-	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException {
+	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException,
+	    InvalidAddressException {
 	// Get TCToken from the given url
 	try {
 	    ResourceContext ctx = ResourceContext.getStream(tcTokenURL);

@@ -25,7 +25,7 @@ package org.openecard.binding.tctoken;
 import org.openecard.binding.tctoken.ex.ActivationError;
 import java.io.IOException;
 import java.net.URL;
-import org.openecard.binding.tctoken.ex.TCTokenRetrievalException;
+import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.common.util.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -45,7 +45,7 @@ public class TCTokenFactoryTest {
 	Assert.assertNotNull(result.getToken(), "TCToken is null.");
     }
 
-    @Test(expectedExceptions = {TCTokenRetrievalException.class})
+    @Test(expectedExceptions = {InvalidAddressException.class})
     public void testGenerateTCToken_TCTokenType() throws ActivationError {
 	URL tcTokenURL = FileUtils.resolveResourceAsURL(TCTokenFactoryTest.class, "TCToken.xml");
 	// should fail, since a non-https-URL is used

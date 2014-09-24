@@ -42,6 +42,7 @@ import org.openecard.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openecard.apache.http.protocol.BasicHttpContext;
 import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.apache.http.protocol.HttpRequestExecutor;
+import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
@@ -137,8 +138,10 @@ public class ResourceContext {
      * @throws IOException Thrown in case something went wrong in the connection layer.
      * @throws ResourceException Thrown when an unexpected condition (not TR-03112 conforming) occured.
      * @throws ValidationError The validator could not validate at least one host.
+     * @throws InvalidAddressException
      */
-    public static ResourceContext getStream(URL url) throws IOException, ResourceException, ValidationError {
+    public static ResourceContext getStream(URL url) throws IOException, ResourceException, ValidationError,
+	    InvalidAddressException {
 	// use verifier which always returns
 	return getStream(url, new CertificateValidator() {
 	    @Override
@@ -158,15 +161,17 @@ public class ResourceContext {
      * @throws IOException Thrown in case something went wrong in the connection layer.
      * @throws ResourceException Thrown when an unexpected condition (not TR-03112 conforming) occured.
      * @throws ValidationError The validator could not validate at least one host.
+     * @throws InvalidAddressException
      */
     public static ResourceContext getStream(URL url, CertificateValidator v) throws IOException, ResourceException,
-	    ValidationError {
+	    ValidationError, InvalidAddressException {
 	ArrayList<Pair<URL, Certificate>> serverCerts = new ArrayList<>();
 	return getStreamInt(url, v, serverCerts, 10);
     }
 
     private static ResourceContext getStreamInt(URL url, CertificateValidator v, List<Pair<URL,
-	    Certificate>> serverCerts, int maxRedirects) throws IOException, ResourceException, ValidationError {
+	    Certificate>> serverCerts, int maxRedirects) throws IOException, ResourceException, ValidationError,
+	    InvalidAddressException {
 	try {
 	    logger.info("Trying to load resource from: {}", url);
 
@@ -184,8 +189,7 @@ public class ResourceContext {
 	    String resource = url.getFile();
 
 	    if (! "https".equals(protocol)) {
-		// FIXME: refactor exception handling
-		throw new ResourceException("Specified URL is not a https-URL.");
+		throw new InvalidAddressException("Specified URL is not a https-URL.");
 	    }
 
 	    // open a TLS connection, retrieve the server certificate and save it

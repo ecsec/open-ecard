@@ -27,7 +27,7 @@ import org.openecard.addon.bind.BindingResultCode;
 
 
 /**
- * Specialisation of an ActivationError which does not permit the user to continue after returning to the Browser.
+ * Specialization of an ActivationError which does not permit the user to continue after returning to the Browser.
  *
  * @author Tobias Wich
  */

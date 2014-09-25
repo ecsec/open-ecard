@@ -49,8 +49,8 @@ public class TCTokenContext extends ResourceContext {
     private static final Logger logger = LoggerFactory.getLogger(TCTokenContext.class);
     private final TCToken token;
 
-    private TCTokenContext(TCToken token, ResourceContext base) {
-	super(base.getTlsClient(), base.getTlsClientProto(), base.getCerts());
+    private TCTokenContext(TCToken token, ResourceContext base, URL finalResourceAddres) {
+	super(base.getTlsClient(), base.getTlsClientProto(), base.getCerts(), finalResourceAddres);
 	this.token = token;
     }
 
@@ -64,7 +64,7 @@ public class TCTokenContext extends ResourceContext {
 	// Get TCToken from the given url
 	try {
 	    ResourceContext ctx = ResourceContext.getStream(tcTokenURL);
-	    return generateTCToken(ctx.getData(), ctx);
+	    return generateTCToken(ctx.getData(), ctx, ctx.getFinalResourceAddress());
 	} catch (IOException | ResourceException | ValidationError ex) {
 	    throw new TCTokenRetrievalException("Failed to retrieve the TCToken.", ex);
 	}
@@ -72,10 +72,10 @@ public class TCTokenContext extends ResourceContext {
 
     public static TCTokenContext generateTCToken(String data) throws InvalidTCTokenException, AuthServerException,
 	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException {
-	return generateTCToken(data, new ResourceContext(null, null, Collections.EMPTY_LIST));
+	return generateTCToken(data, new ResourceContext(null, null, Collections.EMPTY_LIST, null), null);
     }
 
-    private static TCTokenContext generateTCToken(String data, ResourceContext base) throws InvalidTCTokenException,
+    private static TCTokenContext generateTCToken(String data, ResourceContext base, URL url) throws InvalidTCTokenException,
 	    AuthServerException, InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException,
 	    SecurityViolationException {
 	// FIXME: Hack
@@ -104,7 +104,7 @@ public class TCTokenContext extends ResourceContext {
 
 	ver.verify();
 
-	return new TCTokenContext(token, base);
+	return new TCTokenContext(token, base, url);
     }
 
 }

@@ -27,14 +27,23 @@ import org.openecard.binding.tctoken.ex.InvalidTCTokenUrlException;
 import org.openecard.binding.tctoken.ex.SecurityViolationException;
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
 import generated.TCTokenType;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nonnull;
+import org.openecard.binding.tctoken.ex.InvalidActivationAddressException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.util.Pair;
+import org.openecard.common.util.Promise;
 import org.openecard.common.util.TR03112Utils;
+import org.openecard.crypto.common.asn1.cvc.CertificateDescription;
 
 
 /**
@@ -97,10 +106,61 @@ public class TCTokenVerifier {
      * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      * @throws InvalidTCTokenElement Thrown in case one of the values to test is errornous.
      * @throws InvalidTCTokenUrlException Thrown in case a tested URL does not conform to the specification.
+     * @throws SecurityViolationException
      */
-    public void verifyServerAddress() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException {
+    public void verifyServerAddress() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException,
+	    SecurityViolationException {
 	String value = token.getServerAddress();
-	assertRequired("ServerAddress", value);
+	try {
+	    assertRequired("ServerAddress", value);
+	} catch (InvalidTCTokenElement ex) {
+	    try {
+		if (token.getRefreshAddress() != null) {
+		    // if a RefreshAddress is given we have to check the same origin policy
+		    try {
+			assertSameChannel("RefreshAddress", token.getRefreshAddress());
+			// the assert function sets a redirect to the errorAddress but TR-03124-1 states we have to
+			// return to the web session. So lets rewrite the exception
+			throw new InvalidTCTokenElement(token.getRefreshAddress(), ex.getMessage());
+		    } catch (InvalidRedirectUrlException ex1) {
+
+		    } catch (InvalidTCTokenUrlException ex1) {
+
+		    } catch (SecurityViolationException ex1) {
+			// the same origin policy is not met so we have to call the refreshAddress and see if the answer
+			// is a ridirect or type 302, 303 or 307
+			ResourceContext newResCtx = ResourceContext.getStream(new URL(token.getRefreshAddress()));
+			URL resAddr = newResCtx.getFinalResourceAddress();
+			try {
+			    assertSameChannel("RefreshAddress", resAddr.toString());
+			    // the assert function sets a redirect to the errorAddress but TR-03124-1 states we have to
+			    // return to the web session. So lets rewrite the exception
+			    throw new InvalidTCTokenElement(token.getRefreshAddress(), ex.getMessage());
+			} catch (InvalidRedirectUrlException ex2) {
+
+			} catch (InvalidTCTokenUrlException ex2) {
+
+			} catch (SecurityViolationException ex2) {
+
+			}
+
+			
+		    }
+		} else {
+		    throw new InvalidTCTokenElement(token.getErrorRedirectAddress(), "No refreshAddress available.");
+		}
+	    } catch (ValidationError ex1) {
+
+	    } catch (MalformedURLException ex1) {
+		Logger.getLogger(TCTokenVerifier.class.getName()).log(Level.SEVERE, null, ex1);
+	    } catch (IOException ex1) {
+		Logger.getLogger(TCTokenVerifier.class.getName()).log(Level.SEVERE, null, ex1);
+	    } catch (ResourceException ex1) {
+		Logger.getLogger(TCTokenVerifier.class.getName()).log(Level.SEVERE, null, ex1);
+	    } catch (InvalidActivationAddressException ex1) {
+		Logger.getLogger(TCTokenVerifier.class.getName()).log(Level.SEVERE, null, ex1);
+	    }
+	}
 	assertHttpsURL("ServerAddress", value);
     }
 
@@ -173,7 +233,7 @@ public class TCTokenVerifier {
 	// If no PathSecurity-Protocol/PSK is given in the TC Token, the same TLS channel as established to
 	// retrieve the TC Token MUST be used for the PAOS connection, i.e. a new channel MUST NOT be established.
 	if (checkEmpty(proto) && checkEmpty(psp)) {
-	    assertSameChannel();
+	    assertSameChannel("ServerAddress", token.getServerAddress());
 	    return;
 	}
 
@@ -269,19 +329,43 @@ public class TCTokenVerifier {
 	}
     }
 
-    private void assertSameChannel() throws InvalidRedirectUrlException, InvalidTCTokenUrlException, SecurityViolationException {
+    private void assertSameChannel(String name, String address) throws InvalidRedirectUrlException,
+	    InvalidTCTokenUrlException, SecurityViolationException {
 	// check that everything can be handled over the same channel
 	// TR-03124-1 does not mention that redirects on the TCToken address are possible and it also states that there
 	// are only two channels. So I guess we should force this here as well.
-	URL paosUrl = assertURL("ServerAddress", token.getServerAddress());
+	URL paosUrl = assertURL(name, address);
 	List<Pair<URL, Certificate>> urls = ctx.getCerts();
 	for (Pair<URL, Certificate> next : urls) {
 	    if (! TR03112Utils.checkSameOriginPolicy(paosUrl, next.p1)) {
-		String msg = "The same origin policy is violated for the PAOS channel (TLS-2).";
+		String msg = "The same origin policy is violated for the second channel (TLS-2).";
 		String minor = ECardConstants.Minor.App.PARM_ERROR;
 		String errorUrl = token.getErrorRedirectAddress(minor);
 		throw new SecurityViolationException(errorUrl, msg);
 	    }
+	}
+    }
+
+    /**
+     * Checks whether a given URL matches the same origin policy with the subjectURL of the eService certificate.
+     *
+     * @param url The URL to check.
+     * @return True if the given {@code url} fulfills the same origin policy together with the subjectURL of the
+     * eService certificate, otherwise false.
+     */
+    private boolean checkSameOriginPolicy(URL url) throws InvalidTCTokenUrlException, ValidationError {
+	try {
+	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    Promise<Object> descPromise = dynCtx.getPromise(TR03112Keys.ESERVICE_CERTIFICATE_DESC);
+	    CertificateDescription desc = (CertificateDescription) descPromise.deref(60, TimeUnit.SECONDS);
+	    URL subjectUrl = new URL(desc.getSubjectURL());
+	    return TR03112Utils.checkSameOriginPolicy(url, subjectUrl);
+	} catch (InterruptedException | TimeoutException ex) {
+	    String msg = "Couldn't retrieve the CertificateDescription from the DynamicContext.";
+	    throw new ValidationError(msg, ex);
+	} catch (MalformedURLException ex) {
+	    String msg = "The given url (" + url + ") is malformed and the same origin policy cant be performed";
+	    throw new InvalidTCTokenUrlException(msg, ex);
 	}
     }
 

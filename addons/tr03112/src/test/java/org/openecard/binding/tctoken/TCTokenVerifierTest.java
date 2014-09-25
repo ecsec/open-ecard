@@ -48,7 +48,7 @@ public class TCTokenVerifierTest {
 	TCTokenParser parser = new TCTokenParser();
 	List<TCToken> tokens = parser.parse(testFile);
 	token = tokens.get(0);
-	verifier = new TCTokenVerifier(token, new ResourceContext(null, null, Collections.EMPTY_LIST));
+	verifier = new TCTokenVerifier(token, new ResourceContext(null, null, Collections.EMPTY_LIST, null));
     }
 
     @Test

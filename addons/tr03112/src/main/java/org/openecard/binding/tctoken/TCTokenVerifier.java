@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -31,19 +31,13 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.Nonnull;
-import org.openecard.binding.tctoken.ex.InvalidActivationAddressException;
+import org.openecard.binding.tctoken.ex.ActivationError;
+import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
-import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.util.Pair;
-import org.openecard.common.util.Promise;
 import org.openecard.common.util.TR03112Utils;
-import org.openecard.crypto.common.asn1.cvc.CertificateDescription;
 
 
 /**
@@ -51,6 +45,7 @@ import org.openecard.crypto.common.asn1.cvc.CertificateDescription;
  *
  * @author Moritz Horsch
  * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class TCTokenVerifier {
 
@@ -92,6 +87,7 @@ public class TCTokenVerifier {
      */
     public void verify() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException {
 	// ordering is important because of the raised errors in case the first two are not https URLs
+	initialCheck();
 	verifyRefreshAddress();
 	verifyCommunicationErrorAddress();
 	verifyServerAddress();
@@ -114,54 +110,14 @@ public class TCTokenVerifier {
 	try {
 	    assertRequired("ServerAddress", value);
 	} catch (InvalidTCTokenElement ex) {
-	    try {
-		if (token.getRefreshAddress() != null) {
-		    // if a RefreshAddress is given we have to check the same origin policy
-		    try {
-			assertSameChannel("RefreshAddress", token.getRefreshAddress());
-			// the assert function sets a redirect to the errorAddress but TR-03124-1 states we have to
-			// return to the web session. So lets rewrite the exception
-			throw new InvalidTCTokenElement(token.getRefreshAddress(), ex.getMessage());
-		    } catch (InvalidRedirectUrlException ex1) {
-
-		    } catch (InvalidTCTokenUrlException ex1) {
-
-		    } catch (SecurityViolationException ex1) {
-			// the same origin policy is not met so we have to call the refreshAddress and see if the answer
-			// is a ridirect or type 302, 303 or 307
-			ResourceContext newResCtx = ResourceContext.getStream(new URL(token.getRefreshAddress()));
-			URL resAddr = newResCtx.getFinalResourceAddress();
-			try {
-			    assertSameChannel("RefreshAddress", resAddr.toString());
-			    // the assert function sets a redirect to the errorAddress but TR-03124-1 states we have to
-			    // return to the web session. So lets rewrite the exception
-			    throw new InvalidTCTokenElement(token.getRefreshAddress(), ex.getMessage());
-			} catch (InvalidRedirectUrlException ex2) {
-
-			} catch (InvalidTCTokenUrlException ex2) {
-
-			} catch (SecurityViolationException ex2) {
-
-			}
-
-			
-		    }
-		} else {
-		    throw new InvalidTCTokenElement(token.getErrorRedirectAddress(), "No refreshAddress available.");
-		}
-	    } catch (ValidationError ex1) {
-
-	    } catch (MalformedURLException ex1) {
-		Logger.getLogger(TCTokenVerifier.class.getName()).log(Level.SEVERE, null, ex1);
-	    } catch (IOException ex1) {
-		Logger.getLogger(TCTokenVerifier.class.getName()).log(Level.SEVERE, null, ex1);
-	    } catch (ResourceException ex1) {
-		Logger.getLogger(TCTokenVerifier.class.getName()).log(Level.SEVERE, null, ex1);
-	    } catch (InvalidActivationAddressException ex1) {
-		Logger.getLogger(TCTokenVerifier.class.getName()).log(Level.SEVERE, null, ex1);
-	    }
+	    determineRefreshAddress(ex, "No ServerAddress given in the TCToken.");
 	}
-	assertHttpsURL("ServerAddress", value);
+
+	try {
+	    assertHttpsURL("ServerAddress", value);
+	} catch (InvalidTCTokenUrlException ex) {
+	    determineRefreshAddress(ex, ex.getMessage());
+	}
     }
 
     /**
@@ -181,11 +137,17 @@ public class TCTokenVerifier {
      * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      * @throws InvalidTCTokenElement Thrown in case one of the values to test is errornous.
      * @throws InvalidTCTokenUrlException Thrown in case a tested URL does not conform to the specification.
+     * @throws SecurityViolationException
      */
-    public void verifyRefreshAddress() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException {
+    public void verifyRefreshAddress() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException,
+	    SecurityViolationException {
 	String value = token.getRefreshAddress();
 	assertRequired("RefreshAddress", value);
-	assertHttpsURL("RefreshAddress", value);
+	try {
+	    assertHttpsURL("RefreshAddress", value);
+	} catch (InvalidTCTokenUrlException ex) {
+	    throw new InvalidTCTokenElement(token.getErrorRedirectAddress("communicationError"), ex.getMessage());
+	}
     }
 
     /**
@@ -241,8 +203,16 @@ public class TCTokenVerifier {
 	String[] protos = {"urn:ietf:rfc:4346", "urn:ietf:rfc:5246", "urn:ietf:rfc:4279", "urn:ietf:rfc:5487"};
 	checkEqualOR("PathSecurityProtocol", proto, protos);
 	if ("urn:ietf:rfc:4279".equals(proto) || "urn:ietf:rfc:5487".equals(proto)) {
-	    assertRequired("PathSecurityParameters", psp);
-	    assertRequired("PSK", psp.getPSK());
+	    try {
+		assertRequired("PathSecurityParameters", psp);
+	    } catch (InvalidTCTokenElement ex) {
+		determineRefreshAddress(ex, ex.getMessage());
+	    }
+	    try {
+		assertRequired("PSK", psp.getPSK());
+	    } catch (InvalidTCTokenElement ex) {
+		determineRefreshAddress(ex, ex.getMessage());
+	    }
 	}
     }
 
@@ -347,25 +317,69 @@ public class TCTokenVerifier {
     }
 
     /**
-     * Checks whether a given URL matches the same origin policy with the subjectURL of the eService certificate.
+     * Creates an{@link URL} with a communication error as parameters and also a given error message.
      *
-     * @param url The URL to check.
-     * @return True if the given {@code url} fulfills the same origin policy together with the subjectURL of the
-     * eService certificate, otherwise false.
+     * @param refreshAddress The address which should get the error parameters.
+     * @param minorMessage The result message.
+     * @return An {@link URL} object containing the error query parameters.
+     * @throws MalformedURLException Thrown if the given {@code refreshAddress} is not a valid URL.
      */
-    private boolean checkSameOriginPolicy(URL url) throws InvalidTCTokenUrlException, ValidationError {
-	try {
-	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	    Promise<Object> descPromise = dynCtx.getPromise(TR03112Keys.ESERVICE_CERTIFICATE_DESC);
-	    CertificateDescription desc = (CertificateDescription) descPromise.deref(60, TimeUnit.SECONDS);
-	    URL subjectUrl = new URL(desc.getSubjectURL());
-	    return TR03112Utils.checkSameOriginPolicy(url, subjectUrl);
-	} catch (InterruptedException | TimeoutException ex) {
-	    String msg = "Couldn't retrieve the CertificateDescription from the DynamicContext.";
-	    throw new ValidationError(msg, ex);
-	} catch (MalformedURLException ex) {
-	    String msg = "The given url (" + url + ") is malformed and the same origin policy cant be performed";
-	    throw new InvalidTCTokenUrlException(msg, ex);
+    private URL createUrlWithErrorParams(String refreshAddress, String minorMessage) throws MalformedURLException {
+
+	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMajor", "error");
+	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMinor", "communicationError");
+	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMessage", minorMessage);
+	return new URL(refreshAddress);
+    }
+
+    /**
+     * Checks whether the TCToken is empty except the CommunicationErrorAddress.
+     *
+     * @throws InvalidRedirectUrlException
+     * @throws InvalidTCTokenElement
+     */
+    private void initialCheck() throws InvalidRedirectUrlException, InvalidTCTokenElement {
+	if (token.getCommunicationErrorAddress() != null && ! token.getCommunicationErrorAddress().isEmpty() &&
+		token.getRefreshAddress().isEmpty() && token.getServerAddress().isEmpty() &&
+		token.getSessionIdentifier().isEmpty() && token.getBinding().isEmpty() &&
+		token.getPathSecurityProtocol().isEmpty()) {
+	    String msg = "This happend probably on the side of the eService because the TCToken does "
+		    + "not contain required information";
+	    String minor = "communicationError";
+	    String errorUrl = token.getErrorRedirectAddress(minor);
+	    throw new InvalidTCTokenElement(errorUrl, msg);
+	}
+    }
+
+    /**
+     * Determines the refresh URL.
+     *
+     * @param ex
+     * @param errorMsg
+     * @throws InvalidRedirectUrlException
+     * @throws InvalidTCTokenUrlException
+     * @throws SecurityViolationException
+     * @throws InvalidTCTokenElement
+     */
+    private void determineRefreshAddress(ActivationError ex, String errorMsg) throws InvalidRedirectUrlException,
+	    InvalidTCTokenUrlException, SecurityViolationException, InvalidTCTokenElement {
+	if (token.getRefreshAddress() != null) {
+	    try {
+		String refreshUrl = null;
+		ResourceContext newResCtx = ResourceContext.getStream(new URL(token.getRefreshAddress()),
+			new RedirectCertificateValidator(true));
+		URL resAddr = newResCtx.getFinalResourceAddress();
+		refreshUrl = resAddr.toString();
+
+		URL refreshUrlAsUrl = createUrlWithErrorParams(refreshUrl, errorMsg);
+		throw new InvalidTCTokenElement(refreshUrlAsUrl.toString(), ex.getMessage());
+	    } catch (IOException | ResourceException | InvalidAddressException | ValidationError ex1) {
+		String msg = "Invalid RefreshAddress";
+		throw new InvalidTCTokenElement(token.getErrorRedirectAddress(msg), msg, ex1);
+	    }
+	} else {
+	    throw new InvalidTCTokenElement(token.getErrorRedirectAddress("communicationError"),
+		    "No refreshAddress available.");
 	}
     }
 

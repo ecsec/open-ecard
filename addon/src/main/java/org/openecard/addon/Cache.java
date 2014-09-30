@@ -23,6 +23,7 @@
 package org.openecard.addon;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.TreeMap;
 import org.openecard.addon.bind.AppExtensionAction;
 import org.openecard.addon.bind.AppPluginAction;
@@ -201,10 +202,16 @@ public class Cache {
      * Get a collection containing all identifiers and Actions/Protocols of a specific add-on.
      *
      * @param spec The {@link AddonSpecification} which refers the add-on.
-     * @return A Collection containing all loaded Actions and Protocols of a add-on.
+     * @return A Collection containing all loaded Actions and Protocols of a add-on. If no entries for the given
+     * {@link AddonSpecification} exists an empty collection is returned.
      */
     protected Collection<Object> getAllAddonData(AddonSpecification spec) {
-	return addonSpecAndId.get(spec).values();
+	TreeMap<String, Object> data = addonSpecAndId.get(spec);
+	if (data != null) {
+	    return data.values();
+	} else {
+	    return Collections.EMPTY_LIST;
+	}
     }
 
     /**

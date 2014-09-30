@@ -269,11 +269,54 @@
 				<iso:State StateClass="RecognitionNecessary" StateName="PIN1_START"/>
 				<iso:State StateClass="NotOperational" StateName="PIN1_BLOCKED">
 				    <iso:RetryCounter>0</iso:RetryCounter>
+				    <!-- Unblock PIN with PUK -->
 				    <iso:StateTransition TargetState="PIN1_ACTIVATED_RC3">
 					<iso:DIDAuthenticationState>
 					    <iso:DIDName>PUK</iso:DIDName>
 					    <iso:DIDState>true</iso:DIDState>
 					</iso:DIDAuthenticationState>
+					<iso:FixedProcedure>
+					    <iso:CardCall>
+						<!-- Reset Retry Counter without new reference data -->
+						<iso:CommandAPDU>002C0301</iso:CommandAPDU>
+						<iso:ResponseAPDU>
+						    <iso:Trailer>9000</iso:Trailer>
+						</iso:ResponseAPDU>
+					    </iso:CardCall>
+					</iso:FixedProcedure>
+				    </iso:StateTransition>
+				    <!-- Unblock PIN with PUK and set new PIN -->
+				    <iso:StateTransition TargetState="PIN1_ACTIVATED_RC3">
+					<iso:FixedProcedure>
+					    <!-- Case P1='00' (PUK and PIN) -->
+					    <iso:CardCall>
+						<iso:APICall>
+						    <iso:ModifyVerificationData>
+							<iso:SlotHandle></iso:SlotHandle>
+							<iso:InputUnit>
+							    <iso:PinInput>
+								<iso:Index>0</iso:Index>
+								<iso:PasswordAttributes>
+								    <iso:pwdType>ascii-numeric</iso:pwdType>
+								    <iso:minLength>4</iso:minLength>
+								    <iso:storedLength>12</iso:storedLength>
+								    <iso:maxLength>12</iso:maxLength>
+								</iso:PasswordAttributes>
+							    </iso:PinInput>
+							</iso:InputUnit>
+							<iso:Template>002C0001</iso:Template>
+						    </iso:ModifyVerificationData>
+						</iso:APICall>
+						<iso:APIResponse>
+						    <iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+							<dss:Result>
+							    <dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+							</dss:Result>
+							<iso:Response>9000</iso:Response>
+						    </iso:ModifyVerificationDataResponse>
+						</iso:APIResponse>
+					    </iso:CardCall>
+					</iso:FixedProcedure>
 				    </iso:StateTransition>
 				</iso:State>
 				<iso:State StateClass="Operational" StateName="PIN1_ACTIVATED_RC2">
@@ -444,11 +487,54 @@
 				<iso:State StateClass="RecognitionNecessary" StateName="PIN2_START"/>
 				<iso:State StateClass="NotOperational" StateName="PIN2_BLOCKED">
 				    <iso:RetryCounter>0</iso:RetryCounter>
+				    <!-- Unblock PIN with PUK -->
 				    <iso:StateTransition TargetState="PIN2_ACTIVATED_RC3">
 					<iso:DIDAuthenticationState>
 					    <iso:DIDName>PUK</iso:DIDName>
 					    <iso:DIDState>true</iso:DIDState>
 					</iso:DIDAuthenticationState>
+					<iso:FixedProcedure>
+					    <iso:CardCall>
+						<!-- Reset Retry Counter without new reference data -->
+						<iso:CommandAPDU>002C0302</iso:CommandAPDU>
+						<iso:ResponseAPDU>
+						    <iso:Trailer>9000</iso:Trailer>
+						</iso:ResponseAPDU>
+					    </iso:CardCall>
+					</iso:FixedProcedure>
+				    </iso:StateTransition>
+				    <!-- Unblock PIN with PUK and set new PIN -->
+				    <iso:StateTransition TargetState="PIN2_ACTIVATED_RC3">
+					<iso:FixedProcedure>
+					    <!-- Case P1='00' (PUK and PIN) -->
+					    <iso:CardCall>
+						<iso:APICall>
+						    <iso:ModifyVerificationData>
+							<iso:SlotHandle></iso:SlotHandle>
+							<iso:InputUnit>
+							    <iso:PinInput>
+								<iso:Index>0</iso:Index>
+								<iso:PasswordAttributes>
+								    <iso:pwdType>ascii-numeric</iso:pwdType>
+								    <iso:minLength>5</iso:minLength>
+								    <iso:storedLength>12</iso:storedLength>
+								    <iso:maxLength>12</iso:maxLength>
+								</iso:PasswordAttributes>
+							    </iso:PinInput>
+							</iso:InputUnit>
+							<iso:Template>002C0002</iso:Template>
+						    </iso:ModifyVerificationData>
+						</iso:APICall>
+						<iso:APIResponse>
+						    <iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+							<dss:Result>
+							    <dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+							</dss:Result>
+							<iso:Response>9000</iso:Response>
+						    </iso:ModifyVerificationDataResponse>
+						</iso:APIResponse>
+					    </iso:CardCall>
+					</iso:FixedProcedure>
 				    </iso:StateTransition>
 				</iso:State>
 				<iso:State StateClass="Operational" StateName="PIN2_ACTIVATED_RC2">

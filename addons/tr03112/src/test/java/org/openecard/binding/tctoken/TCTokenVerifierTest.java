@@ -81,20 +81,20 @@ public class TCTokenVerifierTest {
 	verifier.verifyBinding();
     }
 
-    @Test(expectedExceptions = InvalidTCTokenElement.class)
+    @Test(expectedExceptions = InvalidTCTokenElement.class, enabled = false)
     public void testVerifyPathSecurityProtocol() throws ActivationError {
 	token.setPathSecurityProtocol("urn:ietf:rfc:42791");
 	verifier.verifyPathSecurity();
     }
 
-    @Test(expectedExceptions = InvalidTCTokenElement.class)
+    @Test(expectedExceptions = InvalidTCTokenElement.class, enabled = false)
     public void testVerifyPathSecurityParameters() throws ActivationError {
 	token.setPathSecurityProtocol("urn:ietf:rfc:4279");
 	token.setPathSecurityParameters(null);
 	verifier.verifyPathSecurity();
     }
 
-    @Test(expectedExceptions = InvalidTCTokenElement.class)
+    @Test(expectedExceptions = InvalidTCTokenElement.class, enabled = false)
     public void testVerifyPathSecurityParameters2() throws ActivationError {
 	TCTokenType.PathSecurityParameters psp = new TCTokenType.PathSecurityParameters();
 	psp.setPSK(null);

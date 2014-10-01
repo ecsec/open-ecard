@@ -571,14 +571,128 @@
 											</iso:Body>
 											<iso:Trailer>9000</iso:Trailer>
 											<iso:Conclusion>
-												<iso:RecognizedState>PWD_BLOCKED</iso:RecognizedState>
+											    <!-- Check whether the SM variants are usable for normal users -->
+											    <iso:CardCall>
+												<iso:CommandAPDU>00A4020C020030</iso:CommandAPDU>
+												<iso:ResponseAPDU>
+												    <iso:Trailer>9000</iso:Trailer>
+												</iso:ResponseAPDU>
+											    </iso:CardCall>
+											    <iso:CardCall>
+												<iso:CommandAPDU>00B20704FF</iso:CommandAPDU>
+												<iso:ResponseAPDU>
+												    <iso:Body>
+													<iso:MatchingData>
+													    <iso:MatchingValue>86022C03B4058303000BFF8C040C200C24AF0EB4058303000DFFB8058303000CFF8C04002000249000</iso:MatchingValue>
+													</iso:MatchingData>
+												    </iso:Body>
+												    <iso:Trailer>9000</iso:Trailer>
+												    <iso:Conclusion>
+													<iso:RecognizedState>PWD_BLOCKED_NO_RETURN</iso:RecognizedState>
+												    </iso:Conclusion>
+												</iso:ResponseAPDU>
+												<iso:ResponseAPDU>
+												    <iso:Body>
+													<iso:MatchingData>
+													    <iso:MatchingValue>86022C03B4058303000BFF86102C012C112C212C312C412C512C022C0397008C060C200C240C2CAF0EB4058303000DFFB8058303000CFF8C0600200024002C9000</iso:MatchingValue>
+													</iso:MatchingData>
+												    </iso:Body>
+												    <iso:Trailer>9000</iso:Trailer>
+												    <iso:Conclusion>
+													<iso:RecognizedState>PWD_BLOCKED_RRC_WITH_PUK</iso:RecognizedState>
+												    </iso:Conclusion>
+												</iso:ResponseAPDU>
+												<iso:ResponseAPDU>
+												    <iso:Body>
+													<iso:MatchingData>
+													    <iso:MatchingValue>86022C03B4058303000BFF86102C002C102C202C302C402C502C022C0397008C060C200C240C2CAF0EB4058303000DFFB8058303000CFF8C0600200024002C9000</iso:MatchingValue>
+													</iso:MatchingData>
+												    </iso:Body>
+												    <iso:Trailer>9000</iso:Trailer>
+												    <iso:Conclusion>
+													<iso:RecognizedState>PWD_BLOCKED_RRC_WITH_PUK_AND_NEW_PIN</iso:RecognizedState>
+												    </iso:Conclusion>
+												</iso:ResponseAPDU>
+											    </iso:CardCall>
 											</iso:Conclusion>
 										</iso:ResponseAPDU>
 									</iso:CardCall>
 								</iso:StateRecognition>
 								<iso:State StateClass="RecognitionNecessary" StateName="PWD_START"/>
-								<iso:State StateClass="NotOperational" StateName="PWD_BLOCKED">
-									<iso:RetryCounter>0</iso:RetryCounter>
+								<iso:State StateClass="NotOperational" StateName="PWD_BLOCKED_NO_RETURN">
+								    <iso:RetryCounter>0</iso:RetryCounter>
+								</iso:State>
+								<iso:State StateClass="NotOperational" StateName="PWD_BLOCKED_RRC_WITH_PUK">
+								    <iso:RetryCounter>0</iso:RetryCounter>
+								    <iso:StateTransition TargetState="PWD_ACTIVATED_RC3">
+									<iso:FixedProcedure>
+									    <!-- Case P1='01' (PUK only) -->
+									    <iso:CardCall>
+										<iso:APICall>
+										    <iso:ModifyVerificationData>
+											<iso:SlotHandle></iso:SlotHandle>
+											<iso:InputUnit>
+											    <iso:PinInput>
+												<iso:Index>0</iso:Index>
+												<iso:PasswordAttributes>
+												    <iso:pwdType>ascii-numeric</iso:pwdType>
+												    <iso:minLength>6</iso:minLength>
+												    <iso:storedLength>8</iso:storedLength>
+												    <iso:maxLength>8</iso:maxLength>
+												    <iso:padChar>00</iso:padChar>
+												</iso:PasswordAttributes>
+											    </iso:PinInput>
+											</iso:InputUnit>
+											<iso:Template>002C0103</iso:Template>
+										    </iso:ModifyVerificationData>
+										</iso:APICall>
+										<iso:APIResponse>
+										    <iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+											<dss:Result>
+											    <dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+											</dss:Result>
+											<iso:Response>9000</iso:Response>
+										    </iso:ModifyVerificationDataResponse>
+										</iso:APIResponse>
+									    </iso:CardCall>
+									</iso:FixedProcedure>
+								    </iso:StateTransition>
+								</iso:State>
+								<iso:State StateClass="NotOperational" StateName="PWD_BLOCKED_RRC_WITH_PUK_AND_NEW_PIN">
+								    <iso:RetryCounter>0</iso:RetryCounter>
+								    <iso:StateTransition TargetState="PWD_ACTIVATED_RC3">
+									<iso:FixedProcedure>
+									    <!-- Case P1='00' (PUK and PIN) -->
+									    <iso:CardCall>
+										<iso:APICall>
+										    <iso:ModifyVerificationData>
+											<iso:SlotHandle></iso:SlotHandle>
+											<iso:InputUnit>
+											    <iso:PinInput>
+												<iso:Index>0</iso:Index>
+												<iso:PasswordAttributes>
+												    <iso:pwdType>ascii-numeric</iso:pwdType>
+												    <iso:minLength>6</iso:minLength>
+												    <iso:storedLength>8</iso:storedLength>
+												    <iso:maxLength>8</iso:maxLength>
+												    <iso:padChar>00</iso:padChar>
+												</iso:PasswordAttributes>
+											    </iso:PinInput>
+											</iso:InputUnit>
+											<iso:Template>002C0003</iso:Template>
+										    </iso:ModifyVerificationData>
+										</iso:APICall>
+										<iso:APIResponse>
+										    <iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+											<dss:Result>
+											    <dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+											</dss:Result>
+											<iso:Response>9000</iso:Response>
+										    </iso:ModifyVerificationDataResponse>
+										</iso:APIResponse>
+									    </iso:CardCall>
+									</iso:FixedProcedure>
+								    </iso:StateTransition>
 								</iso:State>
 								<iso:State StateClass="Operational" StateName="PWD_ACTIVATED_RC1">
 									<iso:RetryCounter>1</iso:RetryCounter>
@@ -1569,14 +1683,113 @@
 											</iso:Body>
 											<iso:Trailer>9000</iso:Trailer>
 											<iso:Conclusion>
-												<iso:RecognizedState>PIN_BLOCKED</iso:RecognizedState>
+											    <iso:CardCall>
+												<iso:CardCommandAPDU>00A4020C020030</iso:CardCommandAPDU>
+												<iso:ResponseAPDU>
+												    <iso:Trailer>9000</iso:Trailer>
+												</iso:ResponseAPDU>
+											    </iso:CardCall>
+											    <iso:CardCall>
+												<iso:CardCommandAPDU>00B20204FF</iso:CardCommandAPDU>
+												<iso:ResponseAPDU>
+												    <iso:Body>
+													<iso:MatchingData>
+													    <iso:MatchingValue>8001018C0200248E12002C01002C11002C21002C31002C41002C519000</iso:MatchingValue>
+													</iso:MatchingData>
+												    </iso:Body>
+												    <iso:Trailer>9000</iso:Trailer>
+												    <iso:Conclusion>
+													<iso:RecognizedState>PIN_BLOCKED_RRC_WITH_PUK</iso:RecognizedState>
+												    </iso:Conclusion>
+												</iso:ResponseAPDU>
+												<iso:ResponseAPDU>
+												    <iso:Body>
+													<iso:MatchingData>
+													    <iso:MatchingValue>8001018C0200248E12002C00002C10002C20002C30002C40002C509000</iso:MatchingValue>
+													</iso:MatchingData>
+												    </iso:Body>
+												    <iso:Trailer>9000</iso:Trailer>
+												    <iso:Conclusion>
+													<iso:RecognizedState>PIN_BLOCKED_RCC_WITH_PUK_AND_NEW_PIN</iso:RecognizedState>
+												    </iso:Conclusion>
+												</iso:ResponseAPDU>
+											    </iso:CardCall>
 											</iso:Conclusion>
 										</iso:ResponseAPDU>
 									</iso:CardCall>
 								</iso:StateRecognition>
 								<iso:State StateClass="RecognitionNecessary" StateName="PIN_START"/>
-								<iso:State StateClass="NotOperational" StateName="PIN_BLOCKED">
+								<iso:State StateClass="NotOperational" StateName="PIN_BLOCKED_RCC_WITH_PUK">
 									<iso:RetryCounter>0</iso:RetryCounter>
+									<iso:StateTransition targetState="PIN_ACTIVATED_RC3">
+									    <iso:FixedProcedure>
+										<!-- Case P1='01' (PUK only) -->
+										<iso:CardCall>
+										    <iso:APICall>
+											<iso:ModifyVerificationData>
+											    <iso:SlotHandle></iso:SlotHandle>
+											    <iso:InputUnit>
+												<iso:PinInput>
+												    <iso:Index>0</iso:Index>
+												    <iso:PasswordAttributes>
+													<iso:pwdFlags>needs-padding</iso:pwdFlags>
+													<iso:pwdType>iso9564-1</iso:pwdType>
+													<iso:minLength>6</iso:minLength>
+													<iso:storedLength>8</iso:storedLength>
+													<iso:padChar>FF</iso:padChar>
+												    </iso:PasswordAttributes>
+												</iso:PinInput>
+											    </iso:InputUnit>
+											    <iso:Template>002C0181</iso:Template>
+											</iso:ModifyVerificationData>
+										    </iso:APICall>
+										    <iso:APIResponse>
+											<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+											    <dss:Result>
+												<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+											    </dss:Result>
+											    <iso:Response>9000</iso:Response>
+											</iso:ModifyVerificationDataResponse>
+										    </iso:APIResponse>
+										</iso:CardCall>
+									    </iso:FixedProcedure>
+									</iso:StateTransition>
+								</iso:State>
+								<iso:State StateClass="NotOperational" StateName="PIN_BLOCKED_RCC_WITH_PUK_AND_NEW_PIN">
+									<iso:RetryCounter>0</iso:RetryCounter>
+									<iso:StateTransition>
+									    <iso:FixedProcedure>
+										<!-- Case P1='00' (PUK and PIN) -->
+										<iso:CardCall>
+										    <iso:APICall>
+											<iso:ModifyVerificationData>
+											    <iso:SlotHandle></iso:SlotHandle>
+											    <iso:InputUnit>
+												<iso:PinInput>
+												    <iso:Index>0</iso:Index>
+												    <iso:PasswordAttributes>
+													<iso:pwdFlags>needs-padding</iso:pwdFlags>
+													<iso:pwdType>iso9564-1</iso:pwdType>
+													<iso:minLength>6</iso:minLength>
+													<iso:storedLength>8</iso:storedLength>
+													<iso:padChar>FF</iso:padChar>
+												    </iso:PasswordAttributes>
+												</iso:PinInput>
+											    </iso:InputUnit>
+											    <iso:Template>002C0081</iso:Template>
+											</iso:ModifyVerificationData>
+										    </iso:APICall>
+										    <iso:APIResponse>
+											<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+											    <dss:Result>
+												<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+											    </dss:Result>
+											    <iso:Response>9000</iso:Response>
+											</iso:ModifyVerificationDataResponse>
+										    </iso:APIResponse>
+										</iso:CardCall>
+									    </iso:FixedProcedure>
+									</iso:StateTransition>
 								</iso:State>
 								<iso:State StateClass="Operational" StateName="PIN_ACTIVATED_RC1">
 									<iso:RetryCounter>1</iso:RetryCounter>

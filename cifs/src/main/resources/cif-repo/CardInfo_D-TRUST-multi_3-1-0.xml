@@ -429,13 +429,13 @@
 									<iso:RetryCounter>1</iso:RetryCounter>
 									<iso:StateTransition TargetState="PIN1_BLOCKED">
 										<iso:DIDAuthenticationState>
-											<iso:DIDName>PIN1</iso:DIDName>
+											<iso:DIDName>Karten-PIN</iso:DIDName>
 											<iso:DIDState>false</iso:DIDState>
 										</iso:DIDAuthenticationState>
 									</iso:StateTransition>
 									<iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
 										<iso:DIDAuthenticationState>
-											<iso:DIDName>PIN1</iso:DIDName>
+											<iso:DIDName>Karten-PIN</iso:DIDName>
 											<iso:DIDState>true</iso:DIDState>
 										</iso:DIDAuthenticationState>
 									</iso:StateTransition>
@@ -444,13 +444,13 @@
 									<iso:RetryCounter>2</iso:RetryCounter>
 									<iso:StateTransition TargetState="PIN1_ACTIVATE_RC1">
 										<iso:DIDAuthenticationState>
-											<iso:DIDName>PIN1</iso:DIDName>
+											<iso:DIDName>Karten-PIN</iso:DIDName>
 											<iso:DIDState>false</iso:DIDState>
 										</iso:DIDAuthenticationState>
 									</iso:StateTransition>
 									<iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
 										<iso:DIDAuthenticationState>
-											<iso:DIDName>PIN1</iso:DIDName>
+											<iso:DIDName>Karten-PIN</iso:DIDName>
 											<iso:DIDState>true</iso:DIDState>
 										</iso:DIDAuthenticationState>
 									</iso:StateTransition>
@@ -459,13 +459,13 @@
 									<iso:RetryCounter>3</iso:RetryCounter>
 									<iso:StateTransition TargetState="PIN1_ACTIVATE_RC2">
 										<iso:DIDAuthenticationState>
-											<iso:DIDName>PIN1</iso:DIDName>
+											<iso:DIDName>Karten-PIN</iso:DIDName>
 											<iso:DIDState>false</iso:DIDState>
 										</iso:DIDAuthenticationState>
 									</iso:StateTransition>
 									<iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
 										<iso:DIDAuthenticationState>
-											<iso:DIDName>PIN1</iso:DIDName>
+											<iso:DIDName>Karten-PIN</iso:DIDName>
 											<iso:DIDState>true</iso:DIDState>
 										</iso:DIDAuthenticationState>
 									</iso:StateTransition>

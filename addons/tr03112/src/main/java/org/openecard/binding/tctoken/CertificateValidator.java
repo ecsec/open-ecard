@@ -39,7 +39,7 @@ public interface CertificateValidator {
      * Errors in the validation are signaled with exceptions in the {@code validate} function itself.
      */
     public static enum VerifierResult {
-	CONTINE,
+	CONTINUE,
 	FINISH;
     }
 

@@ -152,7 +152,7 @@ public class ResourceContext {
 	return getStream(url, new CertificateValidator() {
 	    @Override
 	    public CertificateValidator.VerifierResult validate(URL url, Certificate cert) throws ValidationError {
-		return CertificateValidator.VerifierResult.CONTINE;
+		return CertificateValidator.VerifierResult.CONTINUE;
 	    }
 	});
     }

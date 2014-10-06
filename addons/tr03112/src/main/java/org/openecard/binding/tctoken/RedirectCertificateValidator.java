@@ -96,7 +96,7 @@ public class RedirectCertificateValidator implements CertificateValidator {
 		if (! SOP) {
 		    firstInvocation = false;
 		    // there is more to come
-		    return VerifierResult.CONTINE;
+		    return VerifierResult.CONTINUE;
 		} else {
 		    // if the refresh address is SOP, then no redirect is expected
 		    if (firstInvocation) {
@@ -107,7 +107,7 @@ public class RedirectCertificateValidator implements CertificateValidator {
 		    } else {
 			// same origin satisfied, memorize this state and stop execution in the next invocation
 			lastRedirect = true;
-			return VerifierResult.CONTINE;
+			return VerifierResult.CONTINUE;
 		    }
 		}
 	    } else {

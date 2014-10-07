@@ -50,6 +50,7 @@ import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
+import org.openecard.binding.tctoken.ex.SecurityViolationException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
@@ -182,19 +183,20 @@ public class TCTokenHandler {
 
 	    String binding = token.getBinding();
 	    switch (binding) {
-	    	case "urn:liberty:paos:2006-08":{
+	    	case "urn:liberty:paos:2006-08": {
 		    // send StartPAOS
 		    List<String> supportedDIDs = getSupportedDIDs();
 		    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest);
 		    FutureTask<StartPAOSResponse> paosTask = new FutureTask<>(task);
 		    Thread paosThread = new Thread(paosTask, "PAOS");
 		    paosThread.start();
-		    if (! tokenRequest.isTokenFromObject()) {
+		    if (!tokenRequest.isTokenFromObject()) {
 			// wait for computation to finish
 			waitForTask(paosTask);
-		}	response.setBindingTask(paosTask);
-			break;
 		    }
+		    response.setBindingTask(paosTask);
+		    break;
+		}
 		case "urn:ietf:rfc:2616":{
 		    // no actual binding, just connect via tls and authenticate the user with that connection
 		    HttpGetTask task = new HttpGetTask(dispatcher, connectionHandle, tokenRequest);
@@ -241,9 +243,10 @@ public class TCTokenHandler {
      * @return The response containing the result of the activation process.
      * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      * @throws InvalidAddressException
+     * @throws SecurityViolationException
      */
     public TCTokenResponse handleActivate(TCTokenRequest request) throws InvalidRedirectUrlException,
-	    InvalidAddressException {
+	    InvalidAddressException, SecurityViolationException {
 	TCToken token = request.getTCToken();
 	if (logger.isDebugEnabled()) {
 	    try {
@@ -359,7 +362,7 @@ public class TCTokenHandler {
      * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      */
     private static TCTokenResponse determineRefreshURL(TCTokenRequest request, TCTokenResponse response)
-	    throws InvalidRedirectUrlException, InvalidAddressException {
+	    throws InvalidRedirectUrlException, InvalidAddressException, SecurityViolationException {
 	try {
 	    String endpointStr = response.getRefreshAddress();
 	    URL endpoint = new URL(endpointStr);
@@ -399,6 +402,10 @@ public class TCTokenHandler {
 	    String msg = "Refresh address in TCToken is invalid. This indicates an error in the TCToken verification.";
 	    throw new IllegalStateException(msg, ex);
 	} catch (ResourceException | ValidationError | IOException ex) {
+	    String communicationErrorAddress = response.getTCToken().getCommunicationErrorAddress();
+	    if (communicationErrorAddress != null && ! communicationErrorAddress.isEmpty()) {
+		throw new SecurityViolationException(communicationErrorAddress, ex.getMessage(), ex);
+	    }
 	    throw new InvalidRedirectUrlException("Failed to determine redirect address.", ex);
 	}
     }

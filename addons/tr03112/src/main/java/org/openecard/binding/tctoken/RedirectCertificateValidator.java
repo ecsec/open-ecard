@@ -24,8 +24,6 @@ package org.openecard.binding.tctoken;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.I18n;
@@ -52,6 +50,7 @@ public class RedirectCertificateValidator implements CertificateValidator {
 
     private boolean firstInvocation;
     private boolean lastRedirect;
+    private boolean certDescribtionExists;
 
     /**
      * Creates an object of this class bound to the values in the current dynamic context.
@@ -73,26 +72,27 @@ public class RedirectCertificateValidator implements CertificateValidator {
 	    // disable certificate checks according to BSI TR03112-7 in some situations
 	    if (redirectChecks) {
 		CertificateDescription desc = null;
-		// wait for certificate description
-		try {
-		    desc = (CertificateDescription) descPromise.deref(60, TimeUnit.SECONDS);
-		    // no error assumes that the promise is set a meaningful value
-		} catch (InterruptedException | TimeoutException ex) {
-		    String msg = "Couldn't retrieve the CertificateDescription from the DynamicContext.";
-		    logger.error(msg);
-		    throw new ValidationError(msg);
-		}
+		desc = (CertificateDescription) descPromise.derefNonblocking();
 
-		// check points certificate
-		if (! TR03112Utils.isInCommCertificates(cert, desc.getCommCertificates())) {
-		    logger.error("The retrieved server certificate is NOT contained in the CommCertificates of " +
-				"the CertificateDescription extension of the eService certificate.");
+		certDescribtionExists = desc != null;
+
+		// check points certificate (but just in case we have a certificate description)
+		if (certDescribtionExists && ! TR03112Utils.isInCommCertificates(cert, desc.getCommCertificates())) {
+		    logger.error("The retrieved server certificate is NOT contained in the CommCertificates of "
+			    +	"the CertificateDescription extension of the eService certificate.");
 		    throw new ValidationError(lang.translationForKey("invalid_redirect"));
 		}
 
 		// check if we match the SOP
-		URL subjectUrl = new URL(desc.getSubjectURL());
-		boolean SOP = TR03112Utils.checkSameOriginPolicy(url, subjectUrl);
+		URL sopUrl;
+		if (certDescribtionExists) {
+		    sopUrl = new URL(desc.getSubjectURL());
+		} else {
+		    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+		    sopUrl = new URL((String) dynCtx.get(TR03112Keys.TCTOKEN_URL));
+		}
+
+		boolean SOP = TR03112Utils.checkSameOriginPolicy(url, sopUrl);
 		if (! SOP) {
 		    firstInvocation = false;
 		    // there is more to come

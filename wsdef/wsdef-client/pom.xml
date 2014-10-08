@@ -53,7 +53,7 @@
 				<!-- https://java.net/jira/browse/JAX_WS_COMMONS-121 -->
 				<groupId>net.trajano.mojo</groupId>
 				<artifactId>jaxws-maven-plugin</artifactId>
-				<version>2.3.6</version>
+				<version>2.3.8</version>
 				<executions>
 					<execution>
 						<id>All other Services</id>
@@ -90,6 +90,12 @@
 						<groupId>org.glassfish.metro</groupId>
 						<artifactId>webservices-rt</artifactId>
 						<version>2.3</version>
+					</dependency>
+					<!-- needed or build will fail on JDK 8 -->
+					<dependency>
+						<groupId>com.sun.xml.ws</groupId>
+						<artifactId>policy</artifactId>
+						<version>2.4</version>
 					</dependency>
 				</dependencies>
 			</plugin>

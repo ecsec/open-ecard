@@ -22,16 +22,19 @@
 
 package org.openecard.crypto.tls.auth;
 
+import java.io.IOException;
 import java.security.PublicKey;
-import java.security.cert.CertificateParsingException;
+import java.security.cert.CertPath;
+import java.security.cert.CertificateException;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
-import org.openecard.bouncycastle.jce.provider.X509CertificateObject;
 import org.openecard.crypto.common.keystore.KeyTools;
 import org.openecard.crypto.tls.CertificateVerificationException;
 import org.openecard.crypto.tls.CertificateVerifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -41,6 +44,8 @@ import org.openecard.crypto.tls.CertificateVerifier;
  */
 public class KeyLengthVerifier implements CertificateVerifier {
 
+    private static final Logger logger = LoggerFactory.getLogger(KeyLengthVerifier.class);
+
     @Override
     public void isValid(Certificate chain) throws CertificateVerificationException {
 	isValid(chain, null);
@@ -48,12 +53,10 @@ public class KeyLengthVerifier implements CertificateVerifier {
 
     @Override
     public void isValid(Certificate chain, String hostname) throws CertificateVerificationException {
-	// check each certificate
-	for (org.openecard.bouncycastle.asn1.x509.Certificate certStruct : chain.getCertificateList()) {
-	    certStruct.getSubjectPublicKeyInfo().getAlgorithm();
-	    try {
-		X509CertificateObject c = new X509CertificateObject(certStruct);
-
+	try {
+	    CertPath path = KeyTools.convertCertificates(chain);
+	    // check each certificate
+	    for (java.security.cert.Certificate c : path.getCertificates()) {
 		// get public key and determine minimum size for the actual type
 		PublicKey pk = c.getPublicKey();
 		int reference;
@@ -69,9 +72,11 @@ public class KeyLengthVerifier implements CertificateVerifier {
 		}
 
 		assertKeyLength(reference, KeyTools.getKeySize(pk));
-	    } catch (CertificateParsingException ex) {
-		throw new CertificateVerificationException("Failed to convert public key to JCA type.");
 	    }
+	} catch (CertificateException | IOException ex) {
+	    String msg = "Failed to convert certificates to JCA format.";
+	    logger.error(msg);
+	    throw new CertificateVerificationException(msg);
 	}
     }
 

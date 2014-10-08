@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -36,12 +36,14 @@ import java.util.regex.Pattern;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.openecard.bouncycastle.crypto.prng.FixedSecureRandom;
 import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
 import org.openecard.bouncycastle.util.encoders.Base64;
+import org.openecard.crypto.tls.CertificateVerifier;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.SocketWrapper;
+import org.openecard.crypto.tls.auth.CertificateVerifierBuilder;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
+import org.openecard.crypto.tls.auth.KeyLengthVerifier;
 import org.openecard.crypto.tls.verify.JavaSecVerifier;
 
 
@@ -66,6 +68,7 @@ public final class HttpConnectProxy extends Proxy {
      * This method does not perform any reachability checks, it only saves the values for later use.
      *
      * @param proxyScheme HTTP or HTTPS
+     * @param proxyValidate Flag indicating whether to perform a certificate validation of the proxy server connection.
      * @param proxyHost Hostname of the proxy
      * @param proxyPort Port of the proxy.
      * @param proxyUser Optional username for authentication against the proxy.
@@ -126,7 +129,11 @@ public final class HttpConnectProxy extends Proxy {
 	    tlsAuth.setHostname(proxyHost);
 	    if (proxyValidate) {
 		try {
-		    tlsAuth.setCertificateVerifier(new JavaSecVerifier());
+		    CertificateVerifier cv = new CertificateVerifierBuilder()
+			    .and(new JavaSecVerifier())
+			    .and(new KeyLengthVerifier())
+			    .build();
+		    tlsAuth.setCertificateVerifier(cv);
 		} catch (GeneralSecurityException ex) {
 		    throw new IOException("Failed to load certificate verifier.", ex);
 		}

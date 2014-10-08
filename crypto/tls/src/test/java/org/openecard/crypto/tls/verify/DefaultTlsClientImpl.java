@@ -28,6 +28,9 @@ import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
 import org.openecard.bouncycastle.crypto.tls.DefaultTlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
+import org.openecard.crypto.tls.CertificateVerifier;
+import org.openecard.crypto.tls.auth.CertificateVerifierBuilder;
+import org.openecard.crypto.tls.auth.KeyLengthVerifier;
 
 
 /**
@@ -52,7 +55,11 @@ public class DefaultTlsClientImpl extends DefaultTlsClient {
 		} catch (Exception ex) {
 		    throw new IOException(ex);
 		}
-		v.isValid(crtfct, "www.google.com");
+		CertificateVerifier cv = new CertificateVerifierBuilder()
+			.and(v)
+			.and(new KeyLengthVerifier())
+			.build();
+		cv.isValid(crtfct, "www.google.com");
 	    }
 	    @Override
 	    public TlsCredentials getClientCredentials(CertificateRequest cr) throws IOException {

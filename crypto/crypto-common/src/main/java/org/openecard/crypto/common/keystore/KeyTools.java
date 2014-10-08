@@ -22,13 +22,20 @@
 
 package org.openecard.crypto.common.keystore;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.Key;
+import java.security.cert.CertPath;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.interfaces.DSAKey;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
+import java.util.ArrayList;
 import javax.crypto.SecretKey;
 import javax.crypto.interfaces.DHKey;
+import org.openecard.bouncycastle.crypto.tls.Certificate;
 
 
 /**
@@ -66,6 +73,43 @@ public class KeyTools {
 	}
 	// unkown or inaccessible key (e.g. on secure storage device)
 	return -1;
+    }
+
+
+    /**
+     * Converts the given certificate chain to a JCA CertPath.
+     *
+     * @param chain BouncyCastle certificates instance.
+     * @return CertPath instance with the exact same certificate chain.
+     * @throws CertificateException Thrown in case the JCA has problems supporting X509 or one of the certificates.
+     * @throws IOException Thrown in case there is en encoding error.
+     */
+    public static CertPath convertCertificates(Certificate chain) throws CertificateException, IOException {
+	return convertCertificates(chain.getCertificateList());
+    }
+
+    /**
+     * Converts the given certificate chain to a JCA CertPath.
+     *
+     * @param chain BouncyCastle list of certificates.
+     * @return CertPath instance with the exact same certificate chain.
+     * @throws CertificateException Thrown in case the JCA has problems supporting X509 or one of the certificates.
+     * @throws IOException Thrown in case there is en encoding error.
+     */
+    public static CertPath convertCertificates(org.openecard.bouncycastle.asn1.x509.Certificate... chain)
+	    throws CertificateException, IOException {
+	final int numCerts = chain.length;
+	ArrayList<java.security.cert.Certificate> result = new ArrayList<>(numCerts);
+	CertificateFactory cf = CertificateFactory.getInstance("X.509");
+
+	for (org.openecard.bouncycastle.asn1.x509.Certificate next : chain) {
+	    byte[] nextData = next.getEncoded();
+	    ByteArrayInputStream nextDataStream = new ByteArrayInputStream(nextData);
+	    java.security.cert.Certificate nextConverted = cf.generateCertificate(nextDataStream);
+	    result.add(nextConverted);
+	}
+
+	return cf.generateCertPath(result);
     }
 
 }

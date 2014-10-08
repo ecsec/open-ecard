@@ -41,26 +41,29 @@ public class JavaSecVerifierTest {
     public void testVerificationNoError() throws IOException {
 	final String hostName = "www.google.com";
 	TlsClientProtocol handler;
+	DefaultTlsClientImpl c;
 	try {
 	    // open connection
 	    Socket socket = new Socket(hostName, 443);
 	    assertTrue(socket.isConnected());
 	    // connect client
-	    DefaultTlsClientImpl c = new DefaultTlsClientImpl(hostName);
+	    c = new DefaultTlsClientImpl(hostName);
 	    handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), new SecureRandom());
-	    handler.connect(c);
 	} catch (Exception ex) {
 	    throw new SkipException("Unable to create TLS client.");
 	}
+	// do TLS handshake
+	handler.connect(c);
+	handler.close();
     }
 
     // TODO: enable as soon as the modified bouncycastle does not block in case of an error anymore
-    //@Test(expectedExceptions=IOException.class)
+    @Test(expectedExceptions=IOException.class)
     public void testVerificationError() throws IOException {
 	final String hostName = "www.google.com";
 	final String actualHostName = "www.verisign.de";
-	TlsClientProtocol handler = null;
-	DefaultTlsClientImpl c = null;
+	TlsClientProtocol handler;
+	DefaultTlsClientImpl c;
 	try {
 	    // open connection
 	    Socket socket = new Socket(actualHostName, 443);
@@ -73,6 +76,7 @@ public class JavaSecVerifierTest {
 	}
 	// do TLS handshake
 	handler.connect(c);
+	handler.close();
     }
 
 }

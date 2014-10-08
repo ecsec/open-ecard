@@ -177,7 +177,7 @@ public class JavaSecVerifier implements CertificateVerifier {
 
     private CertPath convertChain(Certificate chain) throws CertificateException, IOException {
 	final int numCerts = chain.getCertificateList().length;
-	ArrayList<java.security.cert.Certificate> result = new ArrayList<java.security.cert.Certificate>(numCerts);
+	ArrayList<java.security.cert.Certificate> result = new ArrayList<>(numCerts);
 	CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
 	for (org.openecard.bouncycastle.asn1.x509.Certificate next : chain.getCertificateList()) {

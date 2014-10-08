@@ -56,6 +56,7 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
      * and return an empty client certificate list.
      */
     public DynamicAuthentication() {
+	this.certVerifier = new KeyLengthVerifier();
     }
 
     /**

@@ -43,6 +43,7 @@ import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.SocketWrapper;
 import org.openecard.crypto.tls.auth.CertificateVerifierBuilder;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
+import org.openecard.crypto.tls.auth.HostnameVerifier;
 import org.openecard.crypto.tls.auth.KeyLengthVerifier;
 import org.openecard.crypto.tls.verify.JavaSecVerifier;
 
@@ -130,8 +131,9 @@ public final class HttpConnectProxy extends Proxy {
 	    if (proxyValidate) {
 		try {
 		    CertificateVerifier cv = new CertificateVerifierBuilder()
-			    .and(new JavaSecVerifier())
+			    .and(new HostnameVerifier())
 			    .and(new KeyLengthVerifier())
+			    .and(new JavaSecVerifier())
 			    .build();
 		    tlsAuth.setCertificateVerifier(cv);
 		} catch (GeneralSecurityException ex) {

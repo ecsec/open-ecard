@@ -30,6 +30,7 @@ import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
 import org.openecard.crypto.tls.CertificateVerifier;
 import org.openecard.crypto.tls.auth.CertificateVerifierBuilder;
+import org.openecard.crypto.tls.auth.HostnameVerifier;
 import org.openecard.crypto.tls.auth.KeyLengthVerifier;
 
 
@@ -56,6 +57,7 @@ public class DefaultTlsClientImpl extends DefaultTlsClient {
 		    throw new IOException(ex);
 		}
 		CertificateVerifier cv = new CertificateVerifierBuilder()
+			.and(new HostnameVerifier())
 			.and(v)
 			.and(new KeyLengthVerifier())
 			.build();

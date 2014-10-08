@@ -39,8 +39,6 @@ import java.security.cert.PKIXParameters;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import org.openecard.bouncycastle.asn1.x500.RDN;
-import org.openecard.bouncycastle.asn1.x500.style.BCStrictStyle;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.crypto.tls.CertificateVerificationException;
 import org.openecard.crypto.tls.CertificateVerifier;
@@ -141,19 +139,6 @@ public class JavaSecVerifier implements CertificateVerifier {
 
     @Override
     public void isValid(Certificate chain, String hostname) throws CertificateVerificationException {
-	// check hostname
-	if (hostname != null) {
-	    org.openecard.bouncycastle.asn1.x509.Certificate cert = chain.getCertificateAt(0);
-	    RDN[] cn = cert.getSubject().getRDNs(BCStrictStyle.CN);
-	    if (cn.length != 1) {
-		throw new CertificateVerificationException("Multiple CN entries in certificate's Subject.");
-	    }
-	    // extract hostname from certificate
-	    // TODO: add safeguard code if cn doesn't contain a string
-	    String hostNameReference = cn[0].getFirst().getValue().toString();
-	    checkWildcardName(hostname, hostNameReference);
-	}
-
 	try {
 	    CertPath certPath = convertChain(chain);
 
@@ -188,26 +173,6 @@ public class JavaSecVerifier implements CertificateVerifier {
 	}
 
 	return cf.generateCertPath(result);
-    }
-
-    private static void checkWildcardName(String givenHost, String wildcardHost) throws CertificateVerificationException {
-	final String errorMsg = "Hostname in certificate differs from actually requested host.";
-	String[] givenToken = givenHost.split("\\.");
-	String[] wildToken = wildcardHost.split("\\.");
-	// error if number of token is different
-	if (givenToken.length != wildToken.length) {
-	    throw new CertificateVerificationException(errorMsg);
-	}
-	// compare entries
-	for (int i = 0; i < givenToken.length; i++) {
-	    if (wildToken[i].equals("*")) {
-		// skip wildcard part
-		continue;
-	    }
-	    if (!givenToken[i].equals(wildToken[i])) {
-		throw new CertificateVerificationException(errorMsg);
-	    }
-	}
     }
 
 }

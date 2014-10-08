@@ -57,7 +57,6 @@ public class JavaSecVerifierTest {
 	handler.close();
     }
 
-    // TODO: enable as soon as the modified bouncycastle does not block in case of an error anymore
     @Test(expectedExceptions=IOException.class)
     public void testVerificationError() throws IOException {
 	final String hostName = "www.google.com";

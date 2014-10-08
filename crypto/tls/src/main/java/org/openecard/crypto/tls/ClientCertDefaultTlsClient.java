@@ -24,10 +24,14 @@ package org.openecard.crypto.tls;
 
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import java.io.IOException;
+import java.util.Hashtable;
 import org.openecard.bouncycastle.crypto.tls.CipherSuite;
 import org.openecard.bouncycastle.crypto.tls.DefaultTlsClient;
+import org.openecard.bouncycastle.crypto.tls.NamedCurve;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsCipherFactory;
+import org.openecard.bouncycastle.crypto.tls.TlsECCUtils;
+import org.openecard.bouncycastle.crypto.tls.TlsExtensionsUtils;
 import org.openecard.crypto.tls.auth.ContextAware;
 
 
@@ -139,6 +143,25 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
     @Override
     public synchronized void setAuthentication(TlsAuthentication tlsAuth) {
 	this.tlsAuth = tlsAuth;
+    }
+
+    @Override
+    public Hashtable getClientExtensions() throws IOException {
+	Hashtable clientExtensions = super.getClientExtensions();
+	clientExtensions = TlsExtensionsUtils.ensureExtensionsInitialised(clientExtensions);
+	// code taken from AbstractTlsClient, if that should ever change modify it here too
+	if (TlsECCUtils.containsECCCipherSuites(getCipherSuites())) {
+            this.namedCurves = new int[] {
+		// required parameters TR-03116-4 sec. 4.1.4
+		NamedCurve.secp224r1, NamedCurve.secp256r1, NamedCurve.brainpoolP256r1,
+		// other possible parameters TR-02102-2 sec. 3.6
+		NamedCurve.secp384r1, NamedCurve.brainpoolP384r1, NamedCurve.brainpoolP512r1,
+	    };
+
+            TlsECCUtils.addSupportedEllipticCurvesExtension(clientExtensions, namedCurves);
+	}
+
+	return clientExtensions;
     }
 
 }

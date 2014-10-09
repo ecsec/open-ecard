@@ -37,24 +37,19 @@ import org.openecard.crypto.tls.CertificateVerifier;
 public class HostnameVerifier implements CertificateVerifier {
 
     @Override
-    public void isValid(Certificate chain) throws CertificateVerificationException {
-	// no hostname, no verification
-    }
-
-    @Override
-    public void isValid(Certificate chain, String hostname) throws CertificateVerificationException {
+    public void isValid(Certificate chain, String hostOrIp) throws CertificateVerificationException {
 	// check hostname
-	if (hostname != null) {
-	    org.openecard.bouncycastle.asn1.x509.Certificate cert = chain.getCertificateAt(0);
-	    RDN[] cn = cert.getSubject().getRDNs(BCStrictStyle.CN);
-	    if (cn.length != 1) {
-		throw new CertificateVerificationException("Multiple CN entries in certificate's Subject.");
-	    }
-	    // extract hostname from certificate
-	    // TODO: add safeguard code if cn doesn't contain a string
-	    String hostNameReference = cn[0].getFirst().getValue().toString();
-	    checkWildcardName(hostname, hostNameReference);
+	org.openecard.bouncycastle.asn1.x509.Certificate cert = chain.getCertificateAt(0);
+	RDN[] cn = cert.getSubject().getRDNs(BCStrictStyle.CN);
+	if (cn.length != 1) {
+	    throw new CertificateVerificationException("Multiple CN entries in certificate's Subject.");
 	}
+	// TODO: evaluate subject alternative name
+	// TODO: validate IP Addresses
+	// extract hostname from certificate
+	// TODO: add safeguard code if cn doesn't contain a string
+	String hostNameReference = cn[0].getFirst().getValue().toString();
+	checkWildcardName(hostOrIp, hostNameReference);
     }
 
 

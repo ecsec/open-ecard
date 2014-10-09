@@ -24,6 +24,7 @@ package org.openecard.crypto.tls.auth;
 
 import java.io.IOException;
 import java.util.List;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
@@ -54,23 +55,26 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
      * Nullary constructor.
      * If no parameters are set later through setter functions, this instance will perform no server certificate checks
      * and return an empty client certificate list.
+     *
+     * @param hostName Name or IP of the host that will be used for certificate validation when a verifier is set.
      */
-    public DynamicAuthentication() {
-	this.certVerifier = new CertificateVerifierBuilder()
+    public DynamicAuthentication(@Nonnull String hostName) {
+	this(hostName, new CertificateVerifierBuilder()
 		.and(new HostnameVerifier())
 		.and(new KeyLengthVerifier())
-		.build();
+		.build(),
+		null);
     }
 
     /**
      * Create a new DynamicAuthentication using the given parameters. 
      * They can later be changed using the setter functions.
      * 
-     * @param hostName Name of the host that will be used for certificate validation when a verifier is set.
+     * @param hostName Name or IP of the host that will be used for certificate validation when a verifier is set.
      * @param certVerifier Verifier used for server certificate checks.
      * @param credentialFactory Factory that provides client credentials when they are requested from the server.
      */
-    public DynamicAuthentication(@Nullable String hostName, @Nullable CertificateVerifier certVerifier,
+    public DynamicAuthentication(@Nonnull String hostName, @Nullable CertificateVerifier certVerifier,
 	    @Nullable CredentialFactory credentialFactory) {
 	this.hostname = hostName;
 	this.certVerifier = certVerifier;
@@ -86,9 +90,9 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
      * Sets the host name for the certificate verification step.
      *
      * @see #notifyServerCertificate(org.openecard.bouncycastle.crypto.tls.Certificate)
-     * @param hostname Name of the host that will be used for certificate validation, when a verifier is set.
+     * @param hostname Name or IP of the host that will be used for certificate validation, when a verifier is set.
      */
-    public void setHostname(String hostname) {
+    public void setHostname(@Nonnull String hostname) {
 	this.hostname = hostname;
     }
 
@@ -132,12 +136,7 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
 	// try to validate
 	if (certVerifier != null) {
 	    // perform validation depending on the available parameters
-	    if (hostname != null) {
-		certVerifier.isValid(crtfct, hostname);
-	    } else {
-		logger.warn("Hostname not available for certificate verification.");
-		certVerifier.isValid(crtfct);
-	    }
+	    certVerifier.isValid(crtfct, hostname);
 	} else {
 	    // no verifier available
 	    logger.warn("No certificate verifier available, skipping certificate verification.");

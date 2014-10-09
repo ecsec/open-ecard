@@ -190,10 +190,10 @@ public class ResourceContext {
 
 	    // open a TLS connection, retrieve the server certificate and save it
 	    TlsClientProtocol h;
-	    DynamicAuthentication tlsAuth = new DynamicAuthentication();
+	    DynamicAuthentication tlsAuth = new DynamicAuthentication(hostname);
 	    // FIXME: validate certificate chain as soon as a usable solution exists for the trust problem
 	    // tlsAuth.setCertificateVerifier(new JavaSecVerifier());
-	    ClientCertTlsClient tlsClient = new ClientCertDefaultTlsClient(hostname);
+	    ClientCertTlsClient tlsClient = new ClientCertDefaultTlsClient(hostname, true);
 	    tlsClient.setAuthentication(tlsAuth);
 
 	    // connect tls client

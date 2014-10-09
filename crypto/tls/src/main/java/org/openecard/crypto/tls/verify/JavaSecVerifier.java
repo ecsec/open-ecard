@@ -133,11 +133,6 @@ public class JavaSecVerifier implements CertificateVerifier {
 
 
     @Override
-    public void isValid(Certificate chain) throws CertificateVerificationException {
-	isValid(chain, null);
-    }
-
-    @Override
     public void isValid(Certificate chain, String hostname) throws CertificateVerificationException {
 	try {
 	    CertPath certPath = convertChain(chain);

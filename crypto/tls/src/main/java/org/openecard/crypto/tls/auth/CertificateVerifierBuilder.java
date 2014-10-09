@@ -137,35 +137,18 @@ public class CertificateVerifierBuilder {
 
 	return new CertificateVerifier() {
 	    @Override
-	    public void isValid(Certificate chain) throws CertificateVerificationException {
-		isValidInternal(chain, null, false);
-	    }
-	    @Override
 	    public void isValid(Certificate chain, String hostname) throws CertificateVerificationException {
-		isValidInternal(chain, hostname, true);
-	    }
-
-	    private void isValidInternal(Certificate chain, String hostname, boolean withHostname)
-		    throws CertificateVerificationException {
 		if (! andCopy.isEmpty()) {
 		    // process each AND check and pass if none failed
 		    for (CertificateVerifier cv : andCopy) {
-			if (withHostname) {
-			    cv.isValid(chain, hostname);
-			} else {
-			    cv.isValid(chain);
-			}
+			cv.isValid(chain, hostname);
 		    }
 		} else if (! orCopy.isEmpty()) {
 		    // process all OR values and fail if none passed
 		    boolean noSuccess = true;
 		    for (CertificateVerifier cv : orCopy) {
 			try {
-			    if (withHostname) {
-				cv.isValid(chain, hostname);
-			    } else {
-				cv.isValid(chain);
-			    }
+			    cv.isValid(chain, hostname);
 			    // a successful outcome means we passed, so break the loop
 			    break;
 			} catch (CertificateVerificationException ex) {

@@ -47,11 +47,6 @@ public class KeyLengthVerifier implements CertificateVerifier {
     private static final Logger logger = LoggerFactory.getLogger(KeyLengthVerifier.class);
 
     @Override
-    public void isValid(Certificate chain) throws CertificateVerificationException {
-	isValid(chain, null);
-    }
-
-    @Override
     public void isValid(Certificate chain, String hostname) throws CertificateVerificationException {
 	try {
 	    CertPath path = KeyTools.convertCertificates(chain);

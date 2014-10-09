@@ -84,7 +84,7 @@ public class TlsConnectionHandler {
 	    }
 	    // eID servers usually have problems with sni, so disable it for them
 	    // TODO: check occasionally if this still holds
-	    boolean noSni = "http://bsi.bund.de/cif/npa.xml".equals(cardType);
+	    boolean doSni = ! "http://bsi.bund.de/cif/npa.xml".equals(cardType);
 
 	    sessionId = token.getSessionIdentifier();
 	    serverAddress = new URL(token.getServerAddress());
@@ -129,13 +129,12 @@ public class TlsConnectionHandler {
 		    case "urn:ietf:rfc:4279":
 		    case "urn:ietf:rfc:5487":
 			{
-			    DynamicAuthentication tlsAuth = new DynamicAuthentication();
-			    tlsAuth.setHostname(serverHost);
+			    DynamicAuthentication tlsAuth = new DynamicAuthentication(serverHost);
 			    // FIXME: verify certificate chain as soon as a usable solution exists for the trust problem
 			    //tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 			    byte[] psk = token.getPathSecurityParameters().getPSK();
 			    TlsPSKIdentity pskId = new TlsPSKIdentityImpl(sessionId.getBytes(), psk);
-			    tlsClient = new ClientCertPSKTlsClient(pskId, noSni ? null : serverHost);
+			    tlsClient = new ClientCertPSKTlsClient(pskId, serverHost, doSni);
 			    tlsClient.setAuthentication(tlsAuth);
 			    tlsClient.setClientVersion(version);
 			    tlsClient.setMinimumVersion(minVersion);
@@ -144,13 +143,12 @@ public class TlsConnectionHandler {
 		    case "urn:ietf:rfc:4346":
 		    case "urn:ietf:rfc:5246":
 			{
-			    DynamicAuthentication tlsAuth = new DynamicAuthentication();
-			    tlsAuth.setHostname(serverHost);
+			    DynamicAuthentication tlsAuth = new DynamicAuthentication(serverHost);
 			    // use a smartcard for client authentication if needed
 			    tlsAuth.setCredentialFactory(makeSmartCardCredential());
 			    // FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
 			    //tlsAuth.setCertificateVerifier(new JavaSecVerifier());
-			    tlsClient = new ClientCertDefaultTlsClient(noSni ? null : serverHost);
+			    tlsClient = new ClientCertDefaultTlsClient(serverHost, doSni);
 			    tlsClient.setAuthentication(tlsAuth);
 			    tlsClient.setClientVersion(version);
 			    tlsClient.setMinimumVersion(minVersion);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,7 @@
 
 package org.openecard.crypto.tls;
 
+import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 
 
@@ -35,21 +36,12 @@ public interface CertificateVerifier {
     /**
      * Verify the given certificate chain.
      * An invalid certificate is indicated by a CertificateVerificationException.<br/>
-     * The verification must at least check the certificate chain.
-     *
-     * @param chain Certificate chain to be verified.
-     * @throws CertificateVerificationException Thrown in case the verification failed.
-     */
-    void isValid(Certificate chain) throws CertificateVerificationException;
-    /**
-     * Verify the given certificate chain.
-     * An invalid certificate is indicated by a CertificateVerificationException.<br/>
      * The verification must at least check the certificate chain and the hosts name.
      *
      * @param chain Certificate chain to be verified.
-     * @param hostname Name of the host used in the validation. Null if hostname is not available.
+     * @param hostOrIP Name of the host or its IP address used in the validation.
      * @throws CertificateVerificationException Thrown in case the verification failed.
      */
-    void isValid(Certificate chain, String hostname) throws CertificateVerificationException;
+    void isValid(@Nonnull Certificate chain, @Nonnull String hostOrIP) throws CertificateVerificationException;
 
 }

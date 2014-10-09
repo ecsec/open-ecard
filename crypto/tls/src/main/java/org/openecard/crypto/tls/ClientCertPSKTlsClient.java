@@ -25,6 +25,7 @@ package org.openecard.crypto.tls;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import java.io.IOException;
 import java.util.Hashtable;
+import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.CipherSuite;
 import org.openecard.bouncycastle.crypto.tls.NamedCurve;
 import org.openecard.bouncycastle.crypto.tls.PSKTlsClient;
@@ -45,31 +46,32 @@ import org.openecard.crypto.tls.auth.ContextAware;
  */
 public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTlsClient {
 
-    private final String fqdn;
+    private final String host;
     private TlsAuthentication tlsAuth;
 
     /**
      * Create a ClientCertPSKTlsClient for the given parameters.
      *
      * @param pskId PSK to use for this connection.
-     * @param fqdn Fully qualified domain name of the server. This parameter is needed for SNI and for the creation
-     * of the certificate verifier.
+     * @param host Host or IP address. Value must not be null.
+     * @param doSni Control whether the server should send the SNI Header in the Client Hello.
      */
-    public ClientCertPSKTlsClient(TlsPSKIdentity pskId, String fqdn) {
-	super(pskId, fqdn);
-	this.fqdn = fqdn;
+    public ClientCertPSKTlsClient(@Nonnull TlsPSKIdentity pskId, @Nonnull String host, boolean doSni) {
+	super(pskId, doSni ? host : null);
+	this.host = host;
     }
     /**
      * Create a ClientCertPSKTlsClient for the given parameters.
      *
      * @param tcf Cipher factory to use in this client.
      * @param pskId PSK to use for this connection.
-     * @param fqdn Fully qualified domain name of the server. This parameter is needed for SNI and for the creation
-     * of the certificate verifier.
+     * @param host Host or IP address. Value must not be null.
+     * @param doSni Control whether the server should send the SNI Header in the Client Hello.
      */
-    public ClientCertPSKTlsClient(TlsCipherFactory tcf, TlsPSKIdentity pskId, String fqdn) {
-	super(tcf, pskId, fqdn);
-	this.fqdn = fqdn;
+    public ClientCertPSKTlsClient(@Nonnull TlsCipherFactory tcf, @Nonnull TlsPSKIdentity pskId, @Nonnull String host,
+	    boolean doSni) {
+	super(tcf, pskId, host);
+	this.host = host;
     }
 
 
@@ -100,9 +102,7 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
     @Override
     public synchronized TlsAuthentication getAuthentication() throws IOException {
 	if (tlsAuth == null) {
-	    DynamicAuthentication tlsAuthTmp = new DynamicAuthentication();
-	    tlsAuthTmp.setHostname(fqdn);
-	    tlsAuth = tlsAuthTmp;
+	    tlsAuth = new DynamicAuthentication(host);
 	}
 	if (tlsAuth instanceof ContextAware) {
 	    ((ContextAware) tlsAuth).setContext(context);

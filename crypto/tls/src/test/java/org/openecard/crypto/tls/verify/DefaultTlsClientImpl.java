@@ -61,7 +61,7 @@ public class DefaultTlsClientImpl extends DefaultTlsClient {
 			.and(v)
 			.and(new KeyLengthVerifier())
 			.build();
-		cv.isValid(crtfct, "www.google.com");
+		cv.isValid(crtfct, serverNames.get(0).toString());
 	    }
 	    @Override
 	    public TlsCredentials getClientCredentials(CertificateRequest cr) throws IOException {

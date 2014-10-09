@@ -25,6 +25,7 @@ package org.openecard.crypto.tls;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import java.io.IOException;
 import java.util.Hashtable;
+import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.CipherSuite;
 import org.openecard.bouncycastle.crypto.tls.DefaultTlsClient;
 import org.openecard.bouncycastle.crypto.tls.NamedCurve;
@@ -44,29 +45,29 @@ import org.openecard.crypto.tls.auth.ContextAware;
  */
 public class ClientCertDefaultTlsClient extends DefaultTlsClient implements ClientCertTlsClient {
 
-    private final String fqdn;
+    private final String host;
     private TlsAuthentication tlsAuth;
 
     /**
      * Create a ClientCertDefaultTlsClient for the given parameters.
      *
-     * @param fqdn Fully qualified domain name of the server. This parameter is needed for SNI and for the creation
-     * of the certificate verifier.
+     * @param host Host or IP address. Value must not be null.
+     * @param doSni Control whether the server should send the SNI Header in the Client Hello.
      */
-    public ClientCertDefaultTlsClient(String fqdn) {
-	super(fqdn);
-	this.fqdn = fqdn;
+    public ClientCertDefaultTlsClient(@Nonnull String host, boolean doSni) {
+	super(doSni ? host : null);
+	this.host = host;
     }
     /**
      * Create a ClientCertDefaultTlsClient for the given parameters.
      *
      * @param tcf Cipher factory to use in this client.
-     * @param fqdn Fully qualified domain name of the server. This parameter is needed for SNI and for the creation
-     * of the certificate verifier.
+     * @param host Host or IP address. Value must not be null.
+     * @param doSni Control whether the server should send the SNI Header in the Client Hello.
      */
-    public ClientCertDefaultTlsClient(TlsCipherFactory tcf, String fqdn) {
-	super(tcf, fqdn);
-	this.fqdn = fqdn;
+    public ClientCertDefaultTlsClient(@Nonnull TlsCipherFactory tcf, @Nonnull String host, boolean doSni) {
+	super(tcf, doSni ? host : null);
+	this.host = host;
     }
 
 
@@ -130,9 +131,7 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
     @Override
     public synchronized TlsAuthentication getAuthentication() throws IOException {
 	if (tlsAuth == null) {
-	    DynamicAuthentication tlsAuthTmp = new DynamicAuthentication();
-	    tlsAuthTmp.setHostname(fqdn);
-	    tlsAuth = tlsAuthTmp;
+	    tlsAuth = new DynamicAuthentication(host);
 	}
 	if (tlsAuth instanceof ContextAware) {
 	    ((ContextAware) tlsAuth).setContext(context);

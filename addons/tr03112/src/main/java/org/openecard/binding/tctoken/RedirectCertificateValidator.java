@@ -89,7 +89,7 @@ public class RedirectCertificateValidator implements CertificateValidator {
 		    sopUrl = new URL(desc.getSubjectURL());
 		} else {
 		    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-		    sopUrl = new URL((String) dynCtx.get(TR03112Keys.TCTOKEN_URL));
+		    sopUrl = (URL) dynCtx.get(TR03112Keys.TCTOKEN_URL);
 		}
 
 		boolean SOP = TR03112Utils.checkSameOriginPolicy(url, sopUrl);

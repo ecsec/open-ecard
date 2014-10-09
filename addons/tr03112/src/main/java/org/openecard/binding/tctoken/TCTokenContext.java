@@ -34,6 +34,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
+import org.openecard.common.DynamicContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,6 +101,11 @@ public class TCTokenContext extends ResourceContext {
 	    String minor = "";
 	    String msg = "eService indicated an error.";
 	    throw new AuthServerException(token.getErrorRedirectAddress(minor), msg);
+	}
+
+	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	if (url != null) {
+	    dynCtx.put(TR03112Keys.TCTOKEN_URL, url);
 	}
 
 	ver.verify();

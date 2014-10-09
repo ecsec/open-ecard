@@ -269,7 +269,6 @@ public class TCTokenHandler {
 	dynCtx.put(TR03112Keys.TCTOKEN_CHECKS, performChecks);
 	dynCtx.put(TR03112Keys.OBJECT_ACTIVATION, isObjectActivation);
 	dynCtx.put(TR03112Keys.TCTOKEN_SERVER_CERTIFICATES, request.getCertificates());
-	dynCtx.put(TR03112Keys.TCTOKEN_URL, request.getTCTokenURL());
 
 	ConnectionHandleType connectionHandle = null;
 	TCTokenResponse response = new TCTokenResponse();

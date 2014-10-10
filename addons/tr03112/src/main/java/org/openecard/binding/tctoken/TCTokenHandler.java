@@ -90,6 +90,7 @@ import org.slf4j.LoggerFactory;
  * @author Dirk Petrautzki
  * @author Moritz Horsch
  * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class TCTokenHandler {
 
@@ -389,11 +390,7 @@ public class TCTokenHandler {
 	    List<Pair<URL, Certificate>> resultPoints = ctx.getCerts();
 	    Pair<URL, Certificate> last = resultPoints.get(resultPoints.size() - 1);
 	    endpoint = last.p1;
-
-	    // we finally found the refresh URL; redirect the browser to this location, but first clear context
-	    dynCtx.clear();
-	    DynamicContext.remove();
-
+	    dynCtx.put(TR03112Keys.IS_REFRESH_URL_VALID, true);
 	    logger.debug("Setting redirect address to '{}'.", endpoint);
 	    response.setRefreshAddress(endpoint.toString());
 	    return response;

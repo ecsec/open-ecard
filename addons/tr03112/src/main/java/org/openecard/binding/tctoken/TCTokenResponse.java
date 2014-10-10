@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,6 +30,7 @@ import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 
@@ -37,7 +38,8 @@ import org.openecard.common.WSHelper;
 /**
  * Implements a TCTokenResponse.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
+ * @author Hans-Martin Haase
  */
 public class TCTokenResponse extends BindingResult {
 
@@ -118,19 +120,32 @@ public class TCTokenResponse extends BindingResult {
      */
     public void finishResponse() throws InvalidRedirectUrlException {
 	try {
+	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	    if (ECardConstants.Major.OK.equals(result.getResultMajor())) {
 		setResultCode(BindingResultCode.REDIRECT);
 		String refreshURL = TCTokenHacks.addParameterToUrl(getRefreshAddress(), "ResultMajor", "ok");
 		getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, refreshURL);
 	    } else {
+		boolean isRefreshAddressValid = (Boolean) dynCtx.get(TR03112Keys.IS_REFRESH_URL_VALID);
 		setResultCode(BindingResultCode.REDIRECT);
-		String refreshURL = token.getErrorRedirectAddress(result.getResultMinor());
+		String refreshURL;
+		if (isRefreshAddressValid) {
+		    refreshURL = TCTokenHacks.addParameterToUrl(getRefreshAddress(), "ResultMajor", "error");
+		    refreshURL = TCTokenHacks.addParameterToUrl(refreshURL, "ResultMinor", result.getResultMinor());
+		} else {
+		    refreshURL = token.getErrorRedirectAddress(result.getResultMinor());
+		}
+		
 		getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, refreshURL);
 
 		if (result.getResultMessage().getValue() != null) {
 		    setResultMessage(result.getResultMessage().getValue());
 		}
 	    }
+
+	    // clear and remove the DynamicContext
+	    dynCtx.clear();
+	    DynamicContext.remove();
 	} catch (MalformedURLException ex) {
 	    // this is a code failure as the URLs are verified upfront
 	    String msg = "The TCToken contains an invalid URL which should have been detected before.";

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,7 +26,8 @@ package org.openecard.binding.tctoken;
 /**
  * Class with keys to access values inside a DynamicContext.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class TR03112Keys {
 
@@ -38,5 +39,6 @@ public class TR03112Keys {
     public static final String ESERVICE_CERTIFICATE = "eservice_certificate";
     public static final String TCTOKEN_URL = "TCTokenURL";
     public static final String TCTOKEN_SERVER_CERTIFICATES = "tctoken_server_certificates";
+    public static final String IS_REFRESH_URL_VALID = "is_refresh_url_valid";
 
 }

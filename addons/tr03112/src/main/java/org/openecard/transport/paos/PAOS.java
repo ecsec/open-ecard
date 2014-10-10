@@ -317,6 +317,17 @@ public class PAOS {
 		    // send request and receive response
 		    HttpResponse response = httpexecutor.execute(req, conn, ctx);
 		    int statusCode = response.getStatusLine().getStatusCode();
+		    // Check the result code. According to the PAOS Spec section 9.4 the server has to send 202
+		    // All tested test servers return 200 so accept both but generate a warning message in case of 200
+		    if (statusCode != 200 && statusCode != 202) {
+			String msg2 = "Invalid http status code " + statusCode + " recieved from the PAOS endpoint.";
+			throw new PAOSException(msg2);
+		    } else if (statusCode == 200) {
+			String msg2 = "The PAOS endpoint sent the http status code 200 which does not conform to the"
+				+ "PAOS specification. (See section 9.4 Processing Rules of the PAOS Specification)";
+			logger.warn(msg2);
+		    }
+
 		    conn.receiveResponseEntity(response);
 		    HttpEntity entity = response.getEntity();
 		    byte[] entityData = FileUtils.toByteArray(entity.getContent());

@@ -365,11 +365,12 @@ public class TCTokenVerifier {
 	    InvalidTCTokenUrlException, SecurityViolationException, InvalidTCTokenElement {
 	if (token.getRefreshAddress() != null) {
 	    try {
-		String refreshUrl = null;
-		ResourceContext newResCtx = ResourceContext.getStream(new URL(token.getRefreshAddress()),
-			new RedirectCertificateValidator(true));
-		URL resAddr = newResCtx.getFinalResourceAddress();
-		refreshUrl = resAddr.toString();
+		CertificateValidator validator = new RedirectCertificateValidator(true);
+		ResourceContext newResCtx = ResourceContext.getStream(new URL(token.getRefreshAddress()), validator);
+		List<Pair<URL, Certificate>> resultPoints = newResCtx.getCerts();
+		Pair<URL, Certificate> last = resultPoints.get(resultPoints.size() - 1);
+		URL resAddr = last.p1;
+		String refreshUrl = resAddr.toString();
 
 		URL refreshUrlAsUrl = createUrlWithErrorParams(refreshUrl, errorMsg);
 		throw new InvalidTCTokenElement(refreshUrlAsUrl.toString(), ex.getMessage());

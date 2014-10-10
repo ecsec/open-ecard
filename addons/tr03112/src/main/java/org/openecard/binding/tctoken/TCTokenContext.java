@@ -34,7 +34,9 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
+import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +52,8 @@ public class TCTokenContext extends ResourceContext {
     private static final Logger logger = LoggerFactory.getLogger(TCTokenContext.class);
     private final TCToken token;
 
-    private TCTokenContext(TCToken token, ResourceContext base, URL finalResourceAddres) {
-	super(base.getTlsClient(), base.getTlsClientProto(), base.getCerts(), finalResourceAddres);
+    private TCTokenContext(TCToken token, ResourceContext base) {
+	super(base.getTlsClient(), base.getTlsClientProto(), base.getCerts());
 	this.token = token;
     }
 
@@ -65,7 +67,7 @@ public class TCTokenContext extends ResourceContext {
 	// Get TCToken from the given url
 	try {
 	    ResourceContext ctx = ResourceContext.getStream(tcTokenURL);
-	    return generateTCToken(ctx.getData(), ctx, ctx.getFinalResourceAddress());
+	    return generateTCToken(ctx.getData(), ctx);
 	} catch (IOException | ResourceException | ValidationError ex) {
 	    throw new TCTokenRetrievalException("Failed to retrieve the TCToken.", ex);
 	}
@@ -73,10 +75,10 @@ public class TCTokenContext extends ResourceContext {
 
     public static TCTokenContext generateTCToken(String data) throws InvalidTCTokenException, AuthServerException,
 	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException {
-	return generateTCToken(data, new ResourceContext(null, null, Collections.EMPTY_LIST, null), null);
+	return generateTCToken(data, new ResourceContext(null, null, Collections.EMPTY_LIST));
     }
 
-    private static TCTokenContext generateTCToken(String data, ResourceContext base, URL url) throws InvalidTCTokenException,
+    private static TCTokenContext generateTCToken(String data, ResourceContext base) throws InvalidTCTokenException,
 	    AuthServerException, InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException,
 	    SecurityViolationException {
 	// FIXME: Hack
@@ -104,13 +106,16 @@ public class TCTokenContext extends ResourceContext {
 	}
 
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	if (url != null) {
-	    dynCtx.put(TR03112Keys.TCTOKEN_URL, url);
+	List<Pair<URL, Certificate>> resultPoints = base.getCerts();
+	// probably just for tests
+	if (! resultPoints.isEmpty()) {
+	    Pair<URL, Certificate> last = resultPoints.get(resultPoints.size() - 1);
+	    dynCtx.put(TR03112Keys.TCTOKEN_URL, last.p1);
 	}
 
 	ver.verify();
 
-	return new TCTokenContext(token, base, url);
+	return new TCTokenContext(token, base);
     }
 
 }

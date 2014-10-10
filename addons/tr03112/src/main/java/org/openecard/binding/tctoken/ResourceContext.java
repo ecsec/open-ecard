@@ -79,14 +79,12 @@ public class ResourceContext {
 
     private InputStream stream;
     private String data;
-    private URL finalResourceAddress;
 
     protected ResourceContext(@Nullable ClientCertTlsClient tlsClient, @Nullable TlsClientProtocol tlsClientProto,
-	    @Nonnull List<Pair<URL, Certificate>> certs, URL url) {
+	    @Nonnull List<Pair<URL, Certificate>> certs) {
 	this.tlsClient = tlsClient;
 	this.tlsClientProto = tlsClientProto;
 	this.certs = certs;
-	finalResourceAddress = url;
     }
 
     public ClientCertTlsClient getTlsClient() {
@@ -107,10 +105,6 @@ public class ResourceContext {
 
     public List<Pair<URL, Certificate>> getCerts() {
 	return certs;
-    }
-
-    public URL getFinalResourceAddress() {
-	return finalResourceAddress;
     }
 
     public synchronized String getData() throws IOException {
@@ -217,7 +211,7 @@ public class ResourceContext {
 	    CertificateValidator.VerifierResult verifyResult = v.validate(url, tlsAuth.getServerCertificate());
 	    if (verifyResult == CertificateValidator.VerifierResult.FINISH) {
 		List<Pair<URL, Certificate>> pairs = Collections.unmodifiableList(serverCerts);
-		return new ResourceContext(tlsClient, h, pairs, url);
+		return new ResourceContext(tlsClient, h, pairs);
 	    }
 
 	    StreamHttpClientConnection conn = new StreamHttpClientConnection(h.getInputStream(), h.getOutputStream());
@@ -261,7 +255,7 @@ public class ResourceContext {
 
 	    // follow next redirect or finish?
 	    if (finished) {
-		ResourceContext result = new ResourceContext(tlsClient, h, serverCerts, url);
+		ResourceContext result = new ResourceContext(tlsClient, h, serverCerts);
 		LimitedInputStream is = new LimitedInputStream(entity.getContent());
 		result.setStream(is);
 		return result;

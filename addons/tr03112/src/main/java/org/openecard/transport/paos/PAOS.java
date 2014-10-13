@@ -280,6 +280,7 @@ public class PAOS {
      */
     public StartPAOSResponse sendStartPAOS(StartPAOS message) throws DispatcherException, PAOSException {
 	Object msg = message;
+	StreamHttpClientConnection conn = null;
 
 	try {
 	    // loop and send makes a computer happy
@@ -291,7 +292,7 @@ public class PAOS {
 		firstLoop = false;
 
 		// set up connection to PAOS endpoint
-		StreamHttpClientConnection conn = openHttpStream();
+		conn = openHttpStream();
 
 		HttpContext ctx = new BasicHttpContext();
 		HttpRequestExecutor httpexecutor = new HttpRequestExecutor();
@@ -366,6 +367,14 @@ public class PAOS {
 	    throw new DispatcherException(ex);
 	} catch (WSException ex) {
 	    throw new PAOSException(ex);
+	} finally {
+	    try {
+		if (conn != null) {
+		    conn.close();
+		}
+	    } catch (IOException ex) {
+		throw new PAOSException(ex);
+	    }
 	}
     }
 

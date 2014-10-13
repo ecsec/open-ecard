@@ -42,27 +42,17 @@ public class TCToken extends TCTokenType {
     private static final Logger logger = LoggerFactory.getLogger(TCToken.class);
 
     /**
-     * Gets the redirect address for use in error conditions.
-     * If the CommunicationErrorAddress is available this one is used. The RefreshAddress is used as a fallback.
+     * Gets the CoomunicationErrorAddress for use in error conditions.
+     * If the CommunicationErrorAddress is available this one is used.
      *
+     * @param minor The ResultMinor string.
      * @return The error URL.
      * @throws InvalidRedirectUrlException In case the address is not present or a valid URL.
      */
-    public String getErrorRedirectAddress() throws InvalidRedirectUrlException {
+    public String getComErrorAddressWithParams(@Nonnull String minor) throws InvalidRedirectUrlException {
 	try {
-	    checkHttpsUrl(communicationErrorAddress);
-	    return communicationErrorAddress;
-	} catch (InvalidRedirectUrlException ex) {
-	    // try next
-	    logger.info("Not CommunicationErrorAddress present in TCToken, trying RefreshUrl instead.");
-	}
-	checkHttpsUrl(refreshAddress);
-	return refreshAddress;
-    }
-
-    public String getErrorRedirectAddress(@Nonnull String minor) throws InvalidRedirectUrlException {
-	try {
-	    String errorUrl = getErrorRedirectAddress();
+	    String errorUrl = TCToken.this.getCommunicationErrorAddress();
+	    checkUrl(errorUrl);
 	    String result = TCTokenHacks.addParameterToUrl(errorUrl, "ResultMajor", "error");
 	    result = TCTokenHacks.addParameterToUrl(result, "ResultMinor", minor);
 	    return result;
@@ -72,13 +62,10 @@ public class TCToken extends TCTokenType {
 	}
     }
 
-    private static void checkHttpsUrl(@Nullable String urlStr) throws InvalidRedirectUrlException {
+    private static void checkUrl(@Nullable String urlStr) throws InvalidRedirectUrlException {
 	if (urlStr != null && ! urlStr.isEmpty()) {
 	    try {
 		URL url = new URL(urlStr);
-		if (! "https".equals(url.getProtocol())) {
-		    throw new InvalidRedirectUrlException("Error redirect URL is not an HTTPS URL.");
-		}
 	    } catch (MalformedURLException ex) {
 		throw new InvalidRedirectUrlException("Error redirect URL is not a URL.");
 	    }

@@ -102,7 +102,7 @@ public class TCTokenContext extends ResourceContext {
 	    // TODO: find out what is the correct minor type
 	    String minor = "";
 	    String msg = "eService indicated an error.";
-	    throw new AuthServerException(token.getErrorRedirectAddress(minor), msg);
+	    throw new AuthServerException(token.getComErrorAddressWithParams(minor), msg);
 	}
 
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);

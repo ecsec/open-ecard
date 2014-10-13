@@ -42,6 +42,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.logging.Level;
 import javax.xml.transform.TransformerException;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonRegistry;
@@ -400,7 +401,13 @@ public class TCTokenHandler {
 	} catch (ResourceException | ValidationError | IOException ex) {
 	    String communicationErrorAddress = response.getTCToken().getCommunicationErrorAddress();
 	    if (communicationErrorAddress != null && ! communicationErrorAddress.isEmpty()) {
-		throw new SecurityViolationException(communicationErrorAddress, ex.getMessage(), ex);
+		String url = null;
+		try {
+		    url = TCTokenHacks.addParameterToUrl(communicationErrorAddress, "ResultMinor", "communicationError");
+		} catch (MalformedURLException ex1) {
+		   // should not happen the communicationErrorAddress is checked in the TCTokenVerifier
+		}
+		throw new SecurityViolationException(url, ex.getMessage(), ex);
 	    }
 	    throw new InvalidRedirectUrlException("Failed to determine redirect address.", ex);
 	}

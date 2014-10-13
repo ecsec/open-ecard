@@ -133,7 +133,7 @@ public class TCTokenResponse extends BindingResult {
 		    refreshURL = TCTokenHacks.addParameterToUrl(getRefreshAddress(), "ResultMajor", "error");
 		    refreshURL = TCTokenHacks.addParameterToUrl(refreshURL, "ResultMinor", result.getResultMinor());
 		} else {
-		    refreshURL = token.getErrorRedirectAddress(result.getResultMinor());
+		    refreshURL = token.getComErrorAddressWithParams(result.getResultMinor());
 		}
 		
 		getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, refreshURL);

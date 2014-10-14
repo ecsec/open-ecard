@@ -62,6 +62,7 @@ public class AbstractInput implements StepComponent, Focusable {
     }
     public AbstractInput(PasswordField input) {
 	this(input, new PasswordField(input.getID()), new JPasswordField(12));
+	this.panel.add(new VirtualPinPadButton(textField, input));
     }
 
     private AbstractInput(AbstractTextField input, AbstractTextField output, JTextComponent textFieldImpl) {

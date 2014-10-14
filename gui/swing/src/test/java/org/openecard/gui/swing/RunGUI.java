@@ -350,6 +350,7 @@ public class RunGUI {
 	PasswordField p1 = new PasswordField("pf1");
 	p1.setDescription("pass input1");
 	p1.setDescription("PIN:");
+	p1.setMaxLength(6);
 
 	dataToSendSelection.getBoxItems().add(vornameBoxItem);
 	dataToSendSelection.getBoxItems().add(nameBoxItem);

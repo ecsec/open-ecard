@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -34,13 +34,16 @@ import org.openecard.common.ECardConstants;
 import org.openecard.common.Version;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
+import org.openecard.gui.UserConsent;
 import org.openecard.transport.paos.PAOS;
+import org.openecard.transport.paos.PAOSConnectionException;
 import org.openecard.transport.paos.PAOSException;
 
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class PAOSTask implements Callable<StartPAOSResponse> {
 
@@ -48,20 +51,22 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
     private final ConnectionHandleType connectionHandle;
     private final List<String> supportedDIDs;
     private final TCTokenRequest tokenRequest;
+    private final UserConsent gui;
 
     public PAOSTask(Dispatcher dispatcher, ConnectionHandleType connectionHandle, List<String> supportedDIDs,
-	    TCTokenRequest tokenRequest) {
+	    TCTokenRequest tokenRequest, UserConsent gui) {
 	this.dispatcher = dispatcher;
 	this.connectionHandle = connectionHandle;
 	this.supportedDIDs = supportedDIDs;
 	this.tokenRequest = tokenRequest;
+	this.gui = gui;
     }
 
 
     @Override
     public StartPAOSResponse call()
 	    throws MalformedURLException, PAOSException, DispatcherException, InvocationTargetException,
-	    ConnectionError {
+	    ConnectionError, PAOSConnectionException {
 	try {
 	    TlsConnectionHandler tlsHandler = new TlsConnectionHandler(dispatcher, tokenRequest, connectionHandle);
 	    tlsHandler.setUpClient();
@@ -89,11 +94,9 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    sp.getSupportedAPIVersions().add(sv);
 
 	    sp.getSupportedDIDProtocols().addAll(supportedDIDs);
-
 	    return p.sendStartPAOS(sp);
 	} finally {
 	    TCTokenHandler.disconnectHandle(dispatcher, connectionHandle);
 	}
     }
-
 }

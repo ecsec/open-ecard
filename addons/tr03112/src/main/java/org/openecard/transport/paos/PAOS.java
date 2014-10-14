@@ -77,10 +77,10 @@ import org.xml.sax.SAXException;
  * This implementation can be configured to speak TLS by creating the instance with a TlsClient. The dispatcher instance
  * is used to deliver the messages to the instances implementing the webservice interfaces.
  *
- * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Johannes Schmoelz
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 public class PAOS {
 
@@ -277,8 +277,10 @@ public class PAOS {
      * @return The {@code StartPAOSResponse} message from the server.
      * @throws DispatcherException In case there errors with the message conversion or the dispatcher.
      * @throws PAOSException In case there were errors in the transport layer.
+     * @throws PAOSConnectionException
      */
-    public StartPAOSResponse sendStartPAOS(StartPAOS message) throws DispatcherException, PAOSException {
+    public StartPAOSResponse sendStartPAOS(StartPAOS message) throws DispatcherException, PAOSException, 
+	    PAOSConnectionException {
 	Object msg = message;
 	StreamHttpClientConnection conn = null;
 
@@ -357,8 +359,6 @@ public class PAOS {
 	    throw new PAOSException(ex);
 	} catch (SOAPException ex) {
 	    throw new PAOSException("Failed to create SOAP message instance from given JAXB message.", ex);
-	} catch (URISyntaxException ex) {
-	    throw new PAOSException("Hostname or port of the remote server are invalid.", ex);
 	} catch (MarshallingTypeException ex) {
 	    throw new DispatcherException("Failed to marshal JAXB object.", ex);
 	} catch (InvocationTargetException ex) {
@@ -379,13 +379,16 @@ public class PAOS {
     }
 
 
-    private StreamHttpClientConnection openHttpStream()
-	    throws IOException, URISyntaxException {
-	StreamHttpClientConnection conn;
-	TlsClientProtocol handler = tlsHandler.createTlsConnection();
-	conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());
-	saveServiceCertificate();
-	return conn;
+     private StreamHttpClientConnection openHttpStream() throws PAOSConnectionException {
+        StreamHttpClientConnection conn;
+	try {
+            TlsClientProtocol handler = tlsHandler.createTlsConnection();
+            conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());
+            saveServiceCertificate();
+            return conn;
+        } catch (IOException | URISyntaxException ex) {
+            throw new PAOSConnectionException("Failed to establish a connection to the eID-Server.", ex);
+        }
     }
 
     /**

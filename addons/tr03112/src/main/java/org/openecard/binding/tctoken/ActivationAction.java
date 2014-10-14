@@ -32,6 +32,11 @@ import org.openecard.addon.bind.Attachment;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.bind.Body;
+import org.openecard.binding.tctoken.ex.NonGuiException;
+import org.openecard.common.ECardConstants;
+import org.openecard.common.I18n;
+import org.openecard.gui.UserConsent;
+import org.openecard.gui.message.DialogType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,16 +47,28 @@ import org.slf4j.LoggerFactory;
  * @author Dirk Petrautzki
  * @author Benedikt Biallowons
  * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class ActivationAction implements AppPluginAction {
 
     private static final Logger logger = LoggerFactory.getLogger(ActivationAction.class);
+    // Translation constants
+    private static final String ERROR_TITLE = "error";
+    private static final String SUCCESS_TITLE = "success";
+    private static final String SUCCESS_MSG = "success_msg";
+    private static final String ERROR_HEADER = "err_header";
+    private static final String ERROR_MSG_IND = "err_msg_indicator";
+    private static final String ERROR_FOOTER = "err_footer";
+
+    private final I18n lang = I18n.getTranslation("tr03112");
 
     private TCTokenHandler tokenHandler;
+    private UserConsent gui;
 
     @Override
     public void init(Context ctx) {
 	tokenHandler = new TCTokenHandler(ctx);
+	gui = ctx.getUserConsent();
     }
 
     @Override
@@ -66,7 +83,15 @@ public class ActivationAction implements AppPluginAction {
 	    try {
 		TCTokenRequest tcTokenRequest = TCTokenRequest.convert(parameters);
 		response = tokenHandler.handleActivate(tcTokenRequest);
+		// Show success message. If we get here we have a valid StartPAOSResponse and a valid refreshURL
+		showSuccessMessage(response);
 	    } catch (ActivationError ex) {
+		if (ex instanceof NonGuiException) {
+		    // error already displayed to the user so do not repeat it here
+		} else {
+		    gui.obtainMessageDialog().showMessageDialog(generateErrorMessage(ex.getMessage()), 
+			    lang.translationForKey(ERROR_TITLE), DialogType.ERROR_MESSAGE);
+		}
 		logger.error(ex.getMessage());
 		logger.debug(ex.getMessage(), ex); // stack trace only in debug level
 		logger.debug("Returning result: \n{}", ex.getBindingResult());
@@ -82,6 +107,26 @@ public class ActivationAction implements AppPluginAction {
 	    logger.error(e.getMessage(), e);
 	}
 	return response;
+    }
+
+    /**
+     * Use the {@link UserConsent} to display the success message.
+     */
+    private void showSuccessMessage(BindingResult response) {
+	if (((TCTokenResponse) response).getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
+            // Make translateable
+            String msg = lang.translationForKey(SUCCESS_MSG);
+            gui.obtainMessageDialog().showMessageDialog(msg, lang.translationForKey(SUCCESS_TITLE),
+                    DialogType.INFORMATION_MESSAGE);
+        }
+    }
+
+    private String generateErrorMessage(String errMsg) {
+	String baseHeader = lang.translationForKey(ERROR_HEADER);
+	String exceptionPart = lang.translationForKey(ERROR_MSG_IND);
+	String baseFooter = lang.translationForKey(ERROR_FOOTER);
+	String msg = baseHeader + exceptionPart + errMsg + baseFooter;
+	return msg;
     }
 
 }

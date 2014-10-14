@@ -46,10 +46,12 @@ import javax.xml.transform.TransformerException;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonRegistry;
 import org.openecard.addon.Context;
+import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
+import org.openecard.binding.tctoken.ex.NonGuiException;
 import org.openecard.binding.tctoken.ex.SecurityViolationException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
@@ -63,7 +65,9 @@ import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.Pair;
 import org.openecard.common.sal.util.InsertCardDialog;
+import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsent;
+import org.openecard.gui.message.DialogType;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.transport.paos.PAOSException;
 import org.openecard.ws.marshal.WSMarshaller;
@@ -95,6 +99,15 @@ import org.slf4j.LoggerFactory;
 public class TCTokenHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(TCTokenHandler.class);
+    // Translation constants
+    private static final String ERROR_TITLE = "error";
+    private static final String INT_ERROR_TITLE = "int_error";
+    private static final String ERROR_HEADER = "err_header";
+    private static final String ERROR_MSG_IND = "err_msg_indicator";
+    private static final String ERROR_FOOTER = "err_footer";
+
+    private final I18n langTr03112 = I18n.getTranslation("tr03112");
+
     private final I18n lang = I18n.getTranslation("tctoken");
 
     private final CardStateMap cardStates;
@@ -187,7 +200,7 @@ public class TCTokenHandler {
 	    	case "urn:liberty:paos:2006-08": {
 		    // send StartPAOS
 		    List<String> supportedDIDs = getSupportedDIDs();
-		    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest);
+		    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest, gui);
 		    FutureTask<StartPAOSResponse> paosTask = new FutureTask<>(task);
 		    Thread paosThread = new Thread(paosTask, "PAOS");
 		    paosThread.start();
@@ -243,11 +256,11 @@ public class TCTokenHandler {
      * @param request The activation request containing the TCToken.
      * @return The response containing the result of the activation process.
      * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
-     * @throws InvalidAddressException
      * @throws SecurityViolationException
+     * @throws NonGuiException
      */
     public TCTokenResponse handleActivate(TCTokenRequest request) throws InvalidRedirectUrlException,
-	    InvalidAddressException, SecurityViolationException {
+	    SecurityViolationException, NonGuiException {
 	TCToken token = request.getTCToken();
 	if (logger.isDebugEnabled()) {
 	    try {
@@ -300,32 +313,60 @@ public class TCTokenHandler {
 	    String msg = lang.translationForKey("cancel");
 	    logger.error(msg);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg));
+	    // fill in values, so it is usuable by the transport module
+	    response = determineRefreshURL(request, response);
+	    response.finishResponse();
 	    return response;
 	}
 
 	try {
 	    // process binding and follow redirect addresses afterwards
 	    response = processBinding(request, connectionHandle);
-	    return response;
-	} catch (DispatcherException w) {
-	    logger.error(w.getMessage(), w);
-	    // TODO: check for better matching minor type
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
-	    return response;
-	} catch (PAOSException w) {
-	    logger.error(w.getMessage(), w);
-	    Throwable innerException = w.getCause();
-	    if (innerException instanceof WSException) {
-		response.setResult(((WSException) innerException).getResult());
-	    } else {
-		// TODO: check for better matching minor type
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
-	    }
-	    return response;
-	} finally {
 	    // fill in values, so it is usuable by the transport module
 	    response = determineRefreshURL(request, response);
 	    response.finishResponse();
+	    return response;
+	} catch (DispatcherException w) {
+	    logger.error(w.getMessage(), w);
+	    response.setResultCode(BindingResultCode.INTERNAL_ERROR);
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, w.getMessage()));
+	    MessageDialog msgBox = gui.obtainMessageDialog();
+	    msgBox.showMessageDialog(generateErrorMessage(w.getMessage()), lang.translationForKey(INT_ERROR_TITLE),
+		    DialogType.ERROR_MESSAGE);
+	    throw new NonGuiException(response, w.getMessage(), w);
+	} catch (PAOSException w) {
+	    logger.error(w.getMessage(), w);
+	    MessageDialog msgBox = gui.obtainMessageDialog();
+	    Throwable innerException = w.getCause();
+	    if (innerException instanceof WSException) {
+		response.setResult(((WSException) innerException).getResult());
+		msgBox.showMessageDialog(generateErrorMessage(innerException.getMessage()),
+			langTr03112.translationForKey(ERROR_TITLE), DialogType.ERROR_MESSAGE);
+	    } else {
+		if (innerException instanceof ExecutionException) {
+                    innerException = innerException.getCause();
+                }
+
+		if (innerException == null) {
+                    innerException = w;
+                }
+
+		msgBox.showMessageDialog(generateErrorMessage(innerException.getMessage()),
+			langTr03112.translationForKey(ERROR_TITLE), DialogType.ERROR_MESSAGE);
+		
+		try {
+		    // TODO: check for better matching minor type
+		    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
+		    // fill in values, so it is usuable by the transport module
+		    response = determineRefreshURL(request, response);
+		    response.finishResponse();
+		} catch (InvalidRedirectUrlException | SecurityViolationException ex) {
+		    response.setResultCode(BindingResultCode.INTERNAL_ERROR);
+		    throw new NonGuiException(response, ex.getMessage(), ex);
+		}
+
+	    }
+	    return response;
 	}
     }
 
@@ -362,7 +403,7 @@ public class TCTokenHandler {
      * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      */
     private static TCTokenResponse determineRefreshURL(TCTokenRequest request, TCTokenResponse response)
-	    throws InvalidRedirectUrlException, InvalidAddressException, SecurityViolationException {
+	    throws InvalidRedirectUrlException, SecurityViolationException {
 	try {
 	    String endpointStr = response.getRefreshAddress();
 	    URL endpoint = new URL(endpointStr);
@@ -397,7 +438,7 @@ public class TCTokenHandler {
 	} catch (MalformedURLException ex) {
 	    String msg = "Refresh address in TCToken is invalid. This indicates an error in the TCToken verification.";
 	    throw new IllegalStateException(msg, ex);
-	} catch (ResourceException | ValidationError | IOException ex) {
+	} catch (ResourceException | InvalidAddressException | ValidationError | IOException ex) {
 	    String communicationErrorAddress = response.getTCToken().getComErrorAddressWithParams("communicationError");
 	    if (communicationErrorAddress != null && ! communicationErrorAddress.isEmpty()) {
 		throw new SecurityViolationException(communicationErrorAddress, ex.getMessage(), ex);
@@ -444,6 +485,14 @@ public class TCTokenHandler {
 	    }
 	}
 	return activationChecks;
+    }
+
+    private String generateErrorMessage(String message) {
+	String baseHeader = langTr03112.translationForKey(ERROR_HEADER);
+	String exceptionPart = langTr03112.translationForKey(ERROR_MSG_IND);
+	String baseFooter = langTr03112.translationForKey(ERROR_FOOTER);
+	String msg = baseHeader + exceptionPart + message + baseFooter;
+	return msg;
     }
 
 }

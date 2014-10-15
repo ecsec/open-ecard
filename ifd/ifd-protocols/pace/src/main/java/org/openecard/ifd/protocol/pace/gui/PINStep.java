@@ -34,18 +34,20 @@ import org.openecard.ifd.protocol.pace.common.PasswordID;
 /**
  * Implements a GUI user consent step for the PIN.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class PINStep {
 
+    private static final I18n lang = I18n.getTranslation("pace");
     // GUI translation constants
+    private static final String STEP_ID = "PROTOCOL_PACE_GUI_STEP_PIN";
     private static final String TITLE = "step_pace_title";
+    private static final String STEP_DESCRIPTION = "step_pace_step_description";
     private static final String DESCRIPTION = "step_pace_description";
 
-    private I18n lang = I18n.getTranslation("pace");
-    private Step step = new Step(lang.translationForKey(TITLE));
-    private GUIContentMap content;
-    private String passwordType;
+    private final Step step;
+    private final GUIContentMap content;
+    private final String passwordType;
 
     /**
      * Creates a new GUI user consent step for the PIN.
@@ -54,19 +56,15 @@ public class PINStep {
      */
     public PINStep(GUIContentMap content) {
 	this.content = content;
-
-	passwordType = PasswordID.parse((Byte) (content.get(GUIContentMap.ELEMENT.PIN_ID))).getString();
+	this.passwordType = PasswordID.parse((Byte) (content.get(GUIContentMap.ELEMENT.PIN_ID))).getString();
+	this.step = new Step(STEP_ID, lang.translationForKey(TITLE, passwordType));
 	initialize();
     }
 
     private void initialize() {
-	String stepTitle = lang.translationForKey(TITLE);
-	stepTitle = stepTitle.replaceFirst("%s", passwordType);
-	step.setTitle(stepTitle);
+	step.setDescription(lang.translationForKey(STEP_DESCRIPTION));
 
-	String decriptionText = lang.translationForKey(DESCRIPTION);
-	decriptionText = decriptionText.replaceFirst("%s", passwordType);
-
+	String decriptionText = lang.translationForKey(DESCRIPTION, passwordType);
 	Text description = new Text();
 	description.setText(decriptionText);
 	step.getInputInfoUnits().add(description);

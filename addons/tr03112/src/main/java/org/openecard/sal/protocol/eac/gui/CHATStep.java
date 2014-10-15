@@ -43,27 +43,35 @@ import org.openecard.sal.protocol.eac.EACData;
  */
 public class CHATStep extends Step {
 
+    private static final I18n lang = I18n.getTranslation("eac");
     // step id
     public static final String STEP_ID = "PROTOCOL_EAC_GUI_STEP_CHAT";
     // GUI translation constants
     public static final String TITLE = "step_chat_title";
+    public static final String STEP_DESCRIPTION = "step_chat_step_description";
     public static final String DESCRIPTION = "step_chat_description";
     public static final String NOTE = "step_chat_note";
     public static final String NOTE_CONTENT = "step_chat_note_content";
     // GUI element IDs
     public static final String CHAT_BOXES = "CHATCheckBoxs";
 
-    private final I18n lang = I18n.getTranslation("eac");
     private final EACData eacData;
 
     public CHATStep(EACData eacData) {
 	super(STEP_ID);
 	this.eacData = eacData;
 	setTitle(lang.translationForKey(TITLE));
-	setDescription(lang.translationForKey(DESCRIPTION));
+	setDescription(lang.translationForKey(STEP_DESCRIPTION));
 
 	// create step elements
 	addElements();
+    }
+
+    public static Step createDummy() {
+	Step s = new Step(STEP_ID);
+	s.setTitle(lang.translationForKey(TITLE));
+	s.setDescription(lang.translationForKey(STEP_DESCRIPTION));
+	return s;
     }
 
     private void addElements() {

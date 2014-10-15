@@ -27,6 +27,8 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import java.util.Map;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
+import org.openecard.binding.tctoken.TR03112Keys;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate;
@@ -104,6 +106,9 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 		AuthenticationHelper auth = new AuthenticationHelper(ta, ca);
 		eac2Output = auth.performAuth(eac2Output, internalData);
 
+		// no third step needed, notify GUI
+		DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+		ctx.put(EACProtocol.AUTHENTICATION_DONE, true);
 	    } else {
 		logger.trace("Signature has not been provided in EAC2InputType.");
 

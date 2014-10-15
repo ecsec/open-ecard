@@ -39,10 +39,12 @@ import org.openecard.sal.protocol.eac.EACData;
  */
 public class CVCStep extends Step {
 
+    private static final I18n lang = I18n.getTranslation("eac");
     // step id
     public static final String STEP_ID = "PROTOCOL_EAC_GUI_STEP_CVC";
     // GUI translation constants
     private static final String TITLE = "step_cvc_title";
+    private static final String STEP_DESCRIPTION = "step_cvc_step_description";
     private static final String DESCRIPTION = "step_cvc_description";
     private static final String SUBJECT_NAME = "cvc_subject_name";
     private static final String SUBJECT_URL = "cvc_subject_url";
@@ -54,17 +56,23 @@ public class CVCStep extends Step {
     private static final String ISSUER_NAME = "cvc_issuer_name";
     private static final String ISSUER_URL = "cvc_issuer_url";
 
-    private final I18n lang = I18n.getTranslation("eac");
     private final EACData eacData;
 
     public CVCStep(EACData eacData) {
 	super(STEP_ID);
 	this.eacData = eacData;
 	setTitle(lang.translationForKey(TITLE));
-	setDescription(lang.translationForKey(DESCRIPTION));
+	setDescription(lang.translationForKey(STEP_DESCRIPTION));
 
 	// create step elements
 	addElements();
+    }
+
+    public static Step createDummy() {
+	Step s = new Step(STEP_ID);
+	s.setTitle(lang.translationForKey(TITLE));
+	s.setDescription(lang.translationForKey(STEP_DESCRIPTION));
+	return s;
     }
 
     private void addElements() {

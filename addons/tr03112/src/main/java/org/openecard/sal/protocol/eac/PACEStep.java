@@ -69,19 +69,18 @@ import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
-import org.openecard.gui.executor.StepAction;
 import org.openecard.sal.protocol.eac.anytype.EAC1InputType;
 import org.openecard.sal.protocol.eac.anytype.EAC1OutputType;
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
 import org.openecard.sal.protocol.eac.anytype.PACEOutputType;
 import org.openecard.sal.protocol.eac.anytype.PasswordID;
 import org.openecard.sal.protocol.eac.gui.CHATStep;
-import org.openecard.sal.protocol.eac.gui.CHATStepAction;
 import org.openecard.sal.protocol.eac.gui.CVCStep;
+import org.openecard.sal.protocol.eac.gui.CVCStepAction;
 import org.openecard.sal.protocol.eac.gui.ErrorStep;
-import org.openecard.sal.protocol.eac.gui.ErrorStepAction;
 import org.openecard.sal.protocol.eac.gui.PINStep;
-import org.openecard.sal.protocol.eac.gui.PINStepAction;
+import org.openecard.sal.protocol.eac.gui.ProcessingStep;
+import org.openecard.sal.protocol.eac.gui.ProcessingStepAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,15 +97,11 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
     private static final Logger logger = LoggerFactory.getLogger(PACEStep.class.getName());
 
+    private static final I18n lang = I18n.getTranslation("eac");
+    private static final I18n langPace = I18n.getTranslation("pace");
+
     // GUI translation constants
     private static final String TITLE = "eac_user_consent_title";
-
-    // gui translations
-    private final String pin;
-    private final String puk;
-
-    private final I18n lang = I18n.getTranslation("eac");
-    private final I18n langPace = I18n.getTranslation("pace");
 
     private final Dispatcher dispatcher;
     private final UserConsent gui;
@@ -120,8 +115,6 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     public PACEStep(Dispatcher dispatcher, UserConsent gui) {
 	this.dispatcher = dispatcher;
 	this.gui = gui;
-	pin = langPace.translationForKey("pin");
-	puk = langPace.translationForKey("puk");
     }
 
     @Override
@@ -131,28 +124,35 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate request, Map<String, Object> internalData) {
+	// get context to save values in
+	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+
 	DIDAuthenticate didAuthenticate = request;
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
 	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
+	dynCtx.put(EACProtocol.SLOT_HANDLE, slotHandle);
+	dynCtx.put(EACProtocol.DISPATCHER, dispatcher);
 
 	try {
 	    EAC1InputType eac1Input = new EAC1InputType(didAuthenticate.getAuthenticationProtocolData());
 	    EAC1OutputType eac1Output = eac1Input.getOutputType();
 
+	    AuthenticatedAuxiliaryData aad = new AuthenticatedAuxiliaryData(eac1Input.getAuthenticatedAuxiliaryData());
+	    byte pinID = PasswordID.valueOf(didAuthenticate.getDIDName()).getByte();
+	    final String passwordType = PasswordID.parse(pinID).getString();
+
 	    // determine PACE capabilities of the terminal
 	    CardStateEntry cardState = (CardStateEntry) internalData.get(EACConstants.IDATA_CARD_STATE_ENTRY);
 	    boolean nativePace = genericPACESupport(cardState.handleCopy());
+	    dynCtx.put(EACProtocol.IS_NATIVE_PACE, nativePace);
 
 	    // Certificate chain
 	    CardVerifiableCertificateChain certChain = new CardVerifiableCertificateChain(eac1Input.getCertificates());
 	    byte[] rawCertificateDescription = eac1Input.getCertificateDescription();
 	    CertificateDescription certDescription = CertificateDescription.getInstance(rawCertificateDescription);
 
-	    final DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	    // put CertificateDescription into DynamicContext which is needed for later checks
-	    //dynCtx.put(DynamicContext.ESERVICE_CERTIFICATE_DESC, certDescription);
-	    Promise<Object> promise = dynCtx.getPromise(TR03112Keys.ESERVICE_CERTIFICATE_DESC);
-	    promise.deliver(certDescription);
+	    dynCtx.put(TR03112Keys.ESERVICE_CERTIFICATE_DESC, certDescription);
 
 	    // according to BSI-INSTANCE_KEY-7 we MUST perform some checks immediately after receiving the eService cert
 	    Result activationChecksResult = performChecks(certDescription, dynCtx);
@@ -163,12 +163,10 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 	    CHAT requiredCHAT = new CHAT(eac1Input.getRequiredCHAT());
 	    CHAT optionalCHAT = new CHAT(eac1Input.getOptionalCHAT());
-	    AuthenticatedAuxiliaryData aad = new AuthenticatedAuxiliaryData(eac1Input.getAuthenticatedAuxiliaryData());
-	    byte pinID = PasswordID.valueOf(didAuthenticate.getDIDName()).getByte();
-	    String passwordType = PasswordID.parse(pinID).getString();
 
 	    // get the PACEMarker
 	    PACEMarkerType paceMarker = getPaceMarker(cardState, passwordType);
+	    dynCtx.put(EACProtocol.PACE_MARKER, paceMarker);
 
 	    // Verify that the certificate description matches the terminal certificate
 	    CardVerifiableCertificate taCert = certChain.getTerminalCertificates().get(0);
@@ -180,7 +178,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 
 	    // Prepare data in DIDAuthenticate for GUI
-	    EACData eacData = new EACData();
+	    final EACData eacData = new EACData();
 	    eacData.didRequest = didAuthenticate;
 	    eacData.certificate = certChain.getTerminalCertificates().get(0);
 	    eacData.certificateDescription = certDescription;
@@ -192,6 +190,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    eacData.aad = aad;
 	    eacData.pinID = pinID;
 	    eacData.passwordType = passwordType;
+	    dynCtx.put(EACProtocol.EAC_DATA, eacData);
 
 	    // get initial pin status
 	    InputAPDUInfoType input = new InputAPDUInfoType();
@@ -199,7 +198,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		(byte) 0x0A, (byte) 0x04, (byte) 0x00, (byte) 0x7F, (byte) 0x00, (byte) 0x07, (byte) 0x02, (byte) 0x02,
 		(byte) 0x04, (byte) 0x02, (byte) 0x02, (byte) 0x83, (byte) 0x01, (byte) 0x03});
 	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x90, (byte) 0x00}); // pin activated 3 tries left
-	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x63, (byte) 0xC2}); // pin activated 2 tires left
+	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x63, (byte) 0xC2}); // pin activated 2 tries left
 	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x63, (byte) 0xC1}); // pin suspended 1 try left CAN
 											// needs to be entered
 	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x63, (byte) 0xC0}); // pin blocked 0 tries left
@@ -213,38 +212,66 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    byte[] output = pinCheckResponse.getOutputAPDU().get(0);
 	    ResponseAPDU outputApdu = new ResponseAPDU(output);
 	    byte[] status = {(byte) outputApdu.getSW1(), (byte) outputApdu.getSW2()};
+	    dynCtx.put(EACProtocol.PIN_STATUS_BYTES, status);
 
-	    UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE));
-	    // create GUI and init executor
-	    if (!Arrays.equals(status, new byte[]{(byte) 0x63, (byte) 0xC0})) {
+	    boolean pinUsable = ! Arrays.equals(status, new byte[]{(byte) 0x63, (byte) 0xC0});
+
+	    // define GUI depending on the PIN status
+	    final UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE));
+	    if (pinUsable) {
+		// create GUI and init executor
 		CVCStep cvcStep = new CVCStep(eacData);
-		CHATStep chatStep = new CHATStep(eacData);
-		PINStep pinStep = new PINStep(eacData, !nativePace, paceMarker);
-
+		CVCStepAction cvcStepAction = new CVCStepAction(cvcStep);
+		cvcStep.setAction(cvcStepAction);
 		uc.getSteps().add(cvcStep);
-		uc.getSteps().add(chatStep);
-		uc.getSteps().add(pinStep);
-		StepAction chatAction = new CHATStepAction(eacData, chatStep);
-		chatStep.setAction(chatAction);
-		StepAction pinAction = new PINStepAction(eacData, !nativePace, slotHandle, dispatcher, pinStep, status);
-		pinStep.setAction(pinAction);
+		uc.getSteps().add(CHATStep.createDummy());
+		uc.getSteps().add(PINStep.createDummy(passwordType));
+		ProcessingStep procStep = new ProcessingStep();
+		ProcessingStepAction procStepAction = new ProcessingStepAction(procStep);
+		procStep.setAction(procStepAction);
+		uc.getSteps().add(procStep);
 	    } else {
-		StepAction errorAction = new ErrorStepAction("Error");
-		ErrorStep eStep = new ErrorStep(langPace.translationForKey("step_error_title_blocked", pin),
-			langPace.translationForKey("step_error_pin_blocked", pin, pin, puk, pin));
-		eStep.setAction(errorAction);
+		String pin = langPace.translationForKey("pin");
+		String puk = langPace.translationForKey("puk");
+		String title = langPace.translationForKey("step_error_title_blocked", pin);
+		String errorMsg = langPace.translationForKey("step_error_pin_blocked", pin, pin, puk, pin);
+		ErrorStep eStep = new ErrorStep(title, errorMsg);
 		uc.getSteps().add(eStep);
+
+		dynCtx.put(EACProtocol.PACE_SUCCESSFUL, false);
 	    }
 
-	    // execute GUI
-	    UserConsentNavigator navigator = gui.obtainNavigator(uc);
-	    ExecutionEngine exec = new ExecutionEngine(navigator);
-	    ResultStatus guiResult = exec.process();
+	    Thread guiThread = new Thread(new Runnable() {
+		@Override
+		public void run() {
+		    // get context here because it is thread local
+		    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
-	    if (guiResult == ResultStatus.CANCEL) {
+		    UserConsentNavigator navigator = gui.obtainNavigator(uc);
+		    dynCtx.put(TR03112Keys.OPEN_USER_CONSENT_NAVIGATOR, navigator);
+		    ExecutionEngine exec = new ExecutionEngine(navigator);
+		    ResultStatus guiResult = exec.process();
+
+		    dynCtx.put(EACProtocol.GUI_RESULT, guiResult);
+
+		    if (guiResult == ResultStatus.CANCEL) {
+			Promise<Object> pPaceSuccessful = dynCtx.getPromise(EACProtocol.PACE_SUCCESSFUL);
+			if (! pPaceSuccessful.isDelivered()) {
+			    pPaceSuccessful.deliver(false);
+			}
+		    }
+		}
+	    }, "EAC-GUI");
+	    guiThread.start();
+
+	    // wait for PACE to finish
+	    Promise<Object> pPaceSuccessful = dynCtx.getPromise(EACProtocol.PACE_SUCCESSFUL);
+	    boolean paceSuccessful = (boolean) pPaceSuccessful.deref();
+	    if (! paceSuccessful) {
+		// TODO: differentiate between cancel and pin error
 		String protocol = didAuthenticate.getAuthenticationProtocolData().getProtocol();
 		cardState.removeProtocol(protocol);
-		String msg = "User Consent was cancelled by the user.";
+		String msg = "Failure in PACE authentication.";
 		Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg);
 		response.setResult(r);
 		return response;

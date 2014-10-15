@@ -27,6 +27,8 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import java.util.Map;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
+import org.openecard.binding.tctoken.TR03112Keys;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.sal.protocol.eac.anytype.EAC2OutputType;
@@ -88,6 +90,10 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	}
+
+	// authentication finished, notify GUI
+	DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	ctx.put(EACProtocol.AUTHENTICATION_DONE, true);
 
 	return response;
     }

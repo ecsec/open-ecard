@@ -2,9 +2,9 @@
  * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
- * 
+ *
  * This file is part of the Open eCard App.
- * 
+ *
  * GNU General Public License Usage
  * This file may be used under the terms of the GNU General Public
  * License version 3.0 as published by the Free Software Foundation
@@ -12,45 +12,47 @@
  * this file. Please review the following information to ensure the
  * GNU General Public License version 3.0 requirements will be met:
  * http://www.gnu.org/copyleft/gpl.html.
- * 
+ *
  * Other Usage
  * Alternatively, this file may be used in accordance with the terms
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
- * 
+ *
  ***************************************************************************/
 
 package org.openecard.sal.protocol.eac.gui;
 
-import java.util.Map;
-import org.openecard.gui.StepResult;
+import org.openecard.common.I18n;
+import org.openecard.common.Version;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
-import org.openecard.gui.executor.ExecutionResults;
-import org.openecard.gui.executor.StepAction;
-import org.openecard.gui.executor.StepActionResult;
-import org.openecard.gui.executor.StepActionResultStatus;
 
 
 /**
- * Implements a Step which displays an error message.
+ * Step with instructing the user to wait for the authentication to finish.
  *
- * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
-public class ErrorStep extends Step {
+public class ProcessingStep extends Step {
 
-    public ErrorStep(String title, String errorText) {
-	super(title);
+    private static final I18n lang = I18n.getTranslation("eac");
+    // step id
+    public static final String STEP_ID = "PROTOCOL_GUI_STEP_INIT";
+    // GUI translation constants
+    private static final String TITLE = "step_processing_title";
+    private static final String STEP_DESCRIPTION = "step_processing_step_description";
+    private static final String DESCRIPTION = "step_processing_description";
+
+    public ProcessingStep() {
+	super(STEP_ID);
+	setTitle(lang.translationForKey(TITLE));
+	setDescription(lang.translationForKey(STEP_DESCRIPTION));
+	setInstantReturn(true);
 	setReversible(false);
-	Text pinBlockedNote = new Text(errorText);
-	getInputInfoUnits().add(pinBlockedNote);
 
-	setAction(new StepAction(getID()) {
-	    @Override
-	    public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-		return new StepActionResult(StepActionResultStatus.CANCEL);
-	    }
-	});
+	Text desc = new Text();
+	desc.setText(lang.translationForKey(DESCRIPTION, Version.getName()));
+	getInputInfoUnits().add(desc);
     }
 
 }

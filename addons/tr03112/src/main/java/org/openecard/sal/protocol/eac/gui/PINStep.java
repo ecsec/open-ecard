@@ -35,15 +35,18 @@ import org.openecard.sal.protocol.eac.EACData;
  * PIN GUI step for EAC.
  * This GUI step behaves differently
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich
+ * @author Moritz Horsch
  */
 public class PINStep extends Step {
 
+    private static final I18n langEac = I18n.getTranslation("eac");
+    private static final I18n langPace = I18n.getTranslation("pace");
     // step id
     public static final String STEP_ID = "PROTOCOL_EAC_GUI_STEP_PIN";
     // GUI translation constants
     private static final String TITLE = "step_pace_title";
+    private static final String STEP_DESCRIPTION = "step_pace_step_description";
     private static final String DESCRIPTION = "step_pace_description";
     private static final String DESCRIPTION_NATIVE = "step_pace_native_description";
     private static final String NOTICE = "eac_forward_notice";
@@ -55,8 +58,6 @@ public class PINStep extends Step {
     private static final String CAN_NOTICE_ID = "PACE_CAN_NOTICE";
     private static final String PIN_ATTEMPTS_ID = "PACE_PIN_ATTEMPTS";
 
-    private final I18n langEac = I18n.getTranslation("eac");
-    private final I18n langPace = I18n.getTranslation("pace");
     private final String pinType;
     private final PACEMarkerType paceMarker;
 
@@ -65,7 +66,7 @@ public class PINStep extends Step {
 	this.pinType = langPace.translationForKey(eacData.passwordType);
 	this.paceMarker = paceMarker;
 	setTitle(langPace.translationForKey(TITLE, pinType));
-	setDescription(langPace.translationForKey(DESCRIPTION, pinType));
+	setDescription(langPace.translationForKey(STEP_DESCRIPTION));
 
 	// TransactionInfo
 	String transactionInfo = eacData.transactionInfo;
@@ -81,6 +82,14 @@ public class PINStep extends Step {
 	} else {
 	    addTerminalElements();
 	}
+    }
+
+    public static Step createDummy(String passwordType) {
+	Step s = new Step(STEP_ID);
+	String pinType = langPace.translationForKey(passwordType);
+	s.setTitle(langPace.translationForKey(TITLE, pinType));
+	s.setDescription(langPace.translationForKey(STEP_DESCRIPTION));
+	return s;
     }
 
     private void addSoftwareElements() {

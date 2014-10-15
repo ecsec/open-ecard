@@ -29,6 +29,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
+import org.openecard.binding.tctoken.TR03112Keys;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
@@ -45,6 +47,7 @@ import org.openecard.gui.executor.StepAction;
 import org.openecard.gui.executor.StepActionResult;
 import org.openecard.gui.executor.StepActionResultStatus;
 import org.openecard.sal.protocol.eac.EACData;
+import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.anytype.PACEInputType;
 import org.openecard.sal.protocol.eac.anytype.PasswordID;
 import org.slf4j.Logger;
@@ -54,8 +57,8 @@ import org.slf4j.LoggerFactory;
 /**
  * StepAction for capturing the user PIN on the EAC GUI.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class PINStepAction extends StepAction {
 
@@ -141,6 +144,8 @@ public class PINStepAction extends StepAction {
 	    WSHelper.checkResult(establishChannelResponse);
 	    eacData.paceResponse = establishChannelResponse;
 	    // PACE completed successfully, proceed with next step
+	    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    ctx.put(EACProtocol.PACE_SUCCESSFUL, true);
 	    return new StepActionResult(StepActionResultStatus.NEXT);
 	} catch (WSException ex) {
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.

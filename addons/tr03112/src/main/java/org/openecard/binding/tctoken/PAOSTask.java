@@ -97,6 +97,7 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    return p.sendStartPAOS(sp);
 	} finally {
 	    TCTokenHandler.disconnectHandle(dispatcher, connectionHandle);
+	    TCTokenHandler.killUserConsent();
 	}
     }
 }

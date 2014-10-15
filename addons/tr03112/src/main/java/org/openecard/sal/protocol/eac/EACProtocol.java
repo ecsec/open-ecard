@@ -25,14 +25,29 @@ package org.openecard.sal.protocol.eac;
 import org.openecard.addon.ActionInitializationException;
 import org.openecard.addon.Context;
 import org.openecard.addon.sal.SALProtocolBaseImpl;
+import org.openecard.common.DynamicContext;
 
 
 /**
  * Implementation of the EACProtocol using only DIDAuthenticate messages.
+ * This class also contains lookup keys for {@link DynamicContext}.
  *
  * @author Dirk Petrautzki
  */
 public class EACProtocol extends SALProtocolBaseImpl {
+
+    private static final String PREFIX = "org.openecard.tr03112.eac.";
+
+    public static final String EAC_DATA = PREFIX + "eac_data";
+    public static final String PIN_STATUS_BYTES = PREFIX + "pin_status_bytes";
+    public static final String IS_NATIVE_PACE = PREFIX + "is_native_pace";
+    public static final String PACE_MARKER = PREFIX + "pace_marker";
+    public static final String PACE_SUCCESSFUL = PREFIX + "pace_successful";
+    public static final String GUI_RESULT = PREFIX + "gui_result";
+    public static final String SLOT_HANDLE = PREFIX + "slot_handle";
+    public static final String DISPATCHER = PREFIX + "dispatcher";
+    public static final String AUTHENTICATION_DONE = PREFIX + "authentication_done";
+
 
     @Override
     public void init(Context ctx) throws ActionInitializationException {

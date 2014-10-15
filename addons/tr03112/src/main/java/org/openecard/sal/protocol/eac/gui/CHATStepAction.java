@@ -25,6 +25,9 @@ package org.openecard.sal.protocol.eac.gui;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.openecard.binding.tctoken.TR03112Keys;
+import org.openecard.common.DynamicContext;
+import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.crypto.common.asn1.cvc.CHAT;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.BoxItem;
@@ -35,12 +38,14 @@ import org.openecard.gui.executor.StepAction;
 import org.openecard.gui.executor.StepActionResult;
 import org.openecard.gui.executor.StepActionResultStatus;
 import org.openecard.sal.protocol.eac.EACData;
+import org.openecard.sal.protocol.eac.EACProtocol;
+import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
 
 
 /**
  * StepAction for evaluation of CHAT value items on the EAC GUI.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class CHATStepAction extends StepAction {
 
@@ -56,7 +61,19 @@ public class CHATStepAction extends StepAction {
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
 	if (result.isOK()) {
 	    processResult(oldResults);
-	    return new StepActionResult(StepActionResultStatus.NEXT);
+
+	    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    boolean nativePace = (boolean) ctx.get(EACProtocol.IS_NATIVE_PACE);
+	    PACEMarkerType paceMarker = (PACEMarkerType) ctx.get(EACProtocol.PACE_MARKER);
+	    byte[] status = (byte[]) ctx.get(EACProtocol.PIN_STATUS_BYTES);
+	    byte[] slotHandle = (byte[]) ctx.get(EACProtocol.SLOT_HANDLE);
+	    Dispatcher dispatcher = (Dispatcher) ctx.get(EACProtocol.DISPATCHER);
+
+	    PINStep pinStep = new PINStep(eacData, ! nativePace, paceMarker);
+	    StepAction pinAction = new PINStepAction(eacData, ! nativePace, slotHandle, dispatcher, pinStep, status);
+	    pinStep.setAction(pinAction);
+
+	    return new StepActionResult(StepActionResultStatus.NEXT, pinStep);
 	} else {
 	    // cancel can not happen, so only back is left to be handled
 	    return new StepActionResult(StepActionResultStatus.BACK);
@@ -85,7 +102,7 @@ public class CHATStepAction extends StepAction {
      * @return list containing the names of all special functions.
      */
     private List<String> getSpecialFunctionNames() {
-	List<String> specialFunctionNames = new ArrayList<String>();
+	List<String> specialFunctionNames = new ArrayList<>();
 	for (CHAT.SpecialFunction dg : CHAT.SpecialFunction.values()) {
 	    specialFunctionNames.add(dg.name());
 	}
@@ -97,7 +114,7 @@ public class CHATStepAction extends StepAction {
      * @return list containing the names of all data groups.
      */
     private List<String> getDataGroupNames() {
-	List<String> dataGroupNames = new ArrayList<String>();
+	List<String> dataGroupNames = new ArrayList<>();
 	for (CHAT.DataGroup dg : CHAT.DataGroup.values()) {
 	    dataGroupNames.add(dg.name());
 	}

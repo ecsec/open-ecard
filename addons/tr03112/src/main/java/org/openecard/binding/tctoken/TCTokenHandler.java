@@ -67,6 +67,7 @@ import org.openecard.common.util.Pair;
 import org.openecard.common.sal.util.InsertCardDialog;
 import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsent;
+import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.message.DialogType;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.transport.paos.PAOSException;
@@ -204,7 +205,7 @@ public class TCTokenHandler {
 		    FutureTask<StartPAOSResponse> paosTask = new FutureTask<>(task);
 		    Thread paosThread = new Thread(paosTask, "PAOS");
 		    paosThread.start();
-		    if (!tokenRequest.isTokenFromObject()) {
+		    if (! tokenRequest.isTokenFromObject()) {
 			// wait for computation to finish
 			waitForTask(paosTask);
 		    }
@@ -247,6 +248,16 @@ public class TCTokenHandler {
 	} catch (InvocationTargetException ex) {
 	    logger.error(ex.getMessage(), ex);
 	    throw new DispatcherException(ex);
+	}
+    }
+
+    public static void killUserConsent() {
+	// kill any open dialog
+	DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	Object navObj = ctx.get(TR03112Keys.OPEN_USER_CONSENT_NAVIGATOR);
+	if (navObj instanceof UserConsentNavigator) {
+	    UserConsentNavigator nav = (UserConsentNavigator) navObj;
+	    nav.close();
 	}
     }
 
@@ -328,32 +339,32 @@ public class TCTokenHandler {
 	    return response;
 	} catch (DispatcherException w) {
 	    logger.error(w.getMessage(), w);
+
 	    response.setResultCode(BindingResultCode.INTERNAL_ERROR);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, w.getMessage()));
 	    MessageDialog msgBox = gui.obtainMessageDialog();
-	    msgBox.showMessageDialog(generateErrorMessage(w.getMessage()), lang.translationForKey(INT_ERROR_TITLE),
-		    DialogType.ERROR_MESSAGE);
+	    String title = lang.translationForKey(INT_ERROR_TITLE);
+	    msgBox.showMessageDialog(generateErrorMessage(w.getMessage()), title, DialogType.ERROR_MESSAGE);
 	    throw new NonGuiException(response, w.getMessage(), w);
 	} catch (PAOSException w) {
 	    logger.error(w.getMessage(), w);
-	    MessageDialog msgBox = gui.obtainMessageDialog();
+
+	    // find actual error to display to the user
 	    Throwable innerException = w.getCause();
+	    if (innerException == null) {
+		innerException = w;
+	    } else if (innerException instanceof ExecutionException) {
+		innerException = innerException.getCause();
+	    }
+
+	    MessageDialog msgBox = gui.obtainMessageDialog();
+	    String msg = generateErrorMessage(innerException.getMessage());
+	    String title = langTr03112.translationForKey(ERROR_TITLE);
+	    msgBox.showMessageDialog(msg, title, DialogType.ERROR_MESSAGE);
+
 	    if (innerException instanceof WSException) {
 		response.setResult(((WSException) innerException).getResult());
-		msgBox.showMessageDialog(generateErrorMessage(innerException.getMessage()),
-			langTr03112.translationForKey(ERROR_TITLE), DialogType.ERROR_MESSAGE);
 	    } else {
-		if (innerException instanceof ExecutionException) {
-                    innerException = innerException.getCause();
-                }
-
-		if (innerException == null) {
-                    innerException = w;
-                }
-
-		msgBox.showMessageDialog(generateErrorMessage(innerException.getMessage()),
-			langTr03112.translationForKey(ERROR_TITLE), DialogType.ERROR_MESSAGE);
-		
 		try {
 		    // TODO: check for better matching minor type
 		    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
@@ -364,7 +375,6 @@ public class TCTokenHandler {
 		    response.setResultCode(BindingResultCode.INTERNAL_ERROR);
 		    throw new NonGuiException(response, ex.getMessage(), ex);
 		}
-
 	    }
 	    return response;
 	}

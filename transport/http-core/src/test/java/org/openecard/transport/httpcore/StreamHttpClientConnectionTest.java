@@ -48,6 +48,7 @@ import org.testng.annotations.BeforeClass;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
+@Test(groups = "it")
 public class StreamHttpClientConnectionTest {
 
     private SecureRandom rand;

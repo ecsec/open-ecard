@@ -283,6 +283,29 @@
 							<version>2.17</version>
 						</dependency>
 					</dependencies>
+					<configuration>
+						<trimStackTrace>false</trimStackTrace>
+						<excludedGroups>.*</excludedGroups>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>2.17</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.maven.surefire</groupId>
+							<artifactId>surefire-testng</artifactId>
+							<version>2.17</version>
+						</dependency>
+					</dependencies>
+					<configuration>
+						<trimStackTrace>false</trimStackTrace>
+						<includes>
+							<includes>**/*.java</includes>
+						</includes>
+						<groups>it</groups>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -494,6 +517,18 @@
 						<id>add-license</id>
 						<goals>
 							<goal>update-project-license</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
 						</goals>
 					</execution>
 				</executions>

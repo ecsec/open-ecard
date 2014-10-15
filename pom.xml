@@ -409,7 +409,7 @@
 					<configuration>
 						<effort>Max</effort>
 						<threshold>Low</threshold>
-						<includeTests>true</includeTests>
+						<includeTests>false</includeTests>
 						<maxHeap>2048</maxHeap>
 						<onlyAnalyze>${findbugs.packages}</onlyAnalyze>
 						<xmlOutput>true</xmlOutput>

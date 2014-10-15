@@ -35,6 +35,7 @@ import static org.testng.Assert.*;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
+@Test(groups={"it"})
 public class JavaSecVerifierTest {
 
     @Test

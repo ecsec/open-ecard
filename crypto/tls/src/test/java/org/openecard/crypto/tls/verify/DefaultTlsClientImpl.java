@@ -25,10 +25,10 @@ package org.openecard.crypto.tls.verify;
 import java.io.IOException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
-import org.openecard.bouncycastle.crypto.tls.DefaultTlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
 import org.openecard.crypto.tls.CertificateVerifier;
+import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.auth.CertificateVerifierBuilder;
 import org.openecard.crypto.tls.auth.HostnameVerifier;
 import org.openecard.crypto.tls.auth.KeyLengthVerifier;
@@ -39,10 +39,10 @@ import org.openecard.crypto.tls.auth.KeyLengthVerifier;
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class DefaultTlsClientImpl extends DefaultTlsClient {
+public class DefaultTlsClientImpl extends ClientCertDefaultTlsClient {
 
     public DefaultTlsClientImpl(String hostName) {
-	super(hostName);
+	super(hostName, true);
     }
 
     @Override

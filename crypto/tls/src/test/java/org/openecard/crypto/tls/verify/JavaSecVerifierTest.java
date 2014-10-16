@@ -40,7 +40,7 @@ public class JavaSecVerifierTest {
 
     @Test
     public void testVerificationNoError() throws IOException {
-	final String hostName = "www.google.com";
+	final String hostName = "www.heise.de";
 	TlsClientProtocol handler;
 	DefaultTlsClientImpl c;
 	try {
@@ -61,7 +61,7 @@ public class JavaSecVerifierTest {
     @Test(expectedExceptions=IOException.class)
     public void testVerificationError() throws IOException {
 	final String hostName = "www.google.com";
-	final String actualHostName = "www.verisign.de";
+	final String actualHostName = "www.heise.de";
 	TlsClientProtocol handler;
 	DefaultTlsClientImpl c;
 	try {

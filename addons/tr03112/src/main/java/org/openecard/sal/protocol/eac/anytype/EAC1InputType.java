@@ -72,6 +72,7 @@ public class EAC1InputType {
      * @throws Exception
      */
     public EAC1InputType(DIDAuthenticationDataType baseType) throws Exception {
+	parseCertificateDescriptionElement(baseType);
 	authMap = new AuthDataMap(baseType);
 
 	certificates = new ArrayList<>();
@@ -204,6 +205,23 @@ public class EAC1InputType {
 	    return result;
 	} else {
 	    return chat;
+	}
+    }
+
+    private void parseCertificateDescriptionElement(DIDAuthenticationDataType baseType) throws ElementParsingException {
+	int counter = 0;
+	String msg = "Invalid number of CertificateDescription elements in EACAdditionalType.";
+	for (Element element : baseType.getAny()) {
+	    if (element.getLocalName().equals(CERTIFICATE_DESCRIPTION)) {
+		counter++;
+		if (counter > 1) {
+		    throw new ElementParsingException(msg);
+		}
+	    }
+	}
+
+	if (counter == 0) {
+	    throw new ElementParsingException(msg);
 	}
     }
 

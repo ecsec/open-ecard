@@ -365,17 +365,19 @@ public class TCTokenHandler {
 	    if (innerException instanceof WSException) {
 		response.setResult(((WSException) innerException).getResult());
 	    } else {
-		try {
-		    // TODO: check for better matching minor type
-		    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
-		    // fill in values, so it is usuable by the transport module
-		    response = determineRefreshURL(request, response);
-		    response.finishResponse();
-		} catch (InvalidRedirectUrlException | SecurityViolationException ex) {
-		    response.setResultCode(BindingResultCode.INTERNAL_ERROR);
-		    throw new NonGuiException(response, ex.getMessage(), ex);
-		}
+		// TODO: check for better matching minor type
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
 	    }
+
+	    try {
+		// fill in values, so it is usuable by the transport module
+		response = determineRefreshURL(request, response);
+		response.finishResponse();
+	    } catch (InvalidRedirectUrlException | SecurityViolationException ex) {
+		response.setResultCode(BindingResultCode.INTERNAL_ERROR);
+		throw new NonGuiException(response, ex.getMessage(), ex);
+	    }
+
 	    return response;
 	}
     }

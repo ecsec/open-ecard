@@ -47,6 +47,8 @@ public class JavaSecVerifierTest {
 	    // open connection
 	    Socket socket = new Socket(hostName, 443);
 	    assertTrue(socket.isConnected());
+	    assertTrue(socket.isBound());
+	    assertFalse(socket.isClosed());
 	    // connect client
 	    c = new DefaultTlsClientImpl(hostName);
 	    handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), new SecureRandom());
@@ -68,6 +70,8 @@ public class JavaSecVerifierTest {
 	    // open connection
 	    Socket socket = new Socket(actualHostName, 443);
 	    assertTrue(socket.isConnected());
+	    assertTrue(socket.isBound());
+	    assertFalse(socket.isClosed());
 	    // connect client
 	    c = new DefaultTlsClientImpl(hostName);
 	    handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), new SecureRandom());

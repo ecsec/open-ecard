@@ -29,6 +29,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.util.Pair;
 
 
@@ -179,6 +180,24 @@ public class TCTokenHacks {
     public static String addParameterToUrl(@Nonnull String url, @Nonnull String key, @Nullable String value)
 	    throws MalformedURLException {
 	return addParameterToUrl(new URL(url), key, value).toString();
+    }
+
+    /**
+     * Replace minor code for use in refresh URLs.
+     * BSI TR-03124-1 defines non URL versions of the ResultMinor codes from BSI TR-03112.
+     *
+     * @param minor
+     * @return
+     */
+    public static String fixResultMinor(@Nonnull String minor) {
+	switch (minor) {
+	    case ECardConstants.Minor.App.UNKNOWN_ERROR:
+		minor = "unknownError";
+		break;
+	    default:
+		// we're fine for things not mentioned in the spec
+	}
+	return minor;
     }
 
 }

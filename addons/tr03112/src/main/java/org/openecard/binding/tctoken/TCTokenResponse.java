@@ -129,9 +129,10 @@ public class TCTokenResponse extends BindingResult {
 		boolean isRefreshAddressValid = (Boolean) dynCtx.get(TR03112Keys.IS_REFRESH_URL_VALID);
 		setResultCode(BindingResultCode.REDIRECT);
 		String refreshURL;
+		String fixedMinor = TCTokenHacks.fixResultMinor(result.getResultMinor());
 		if (isRefreshAddressValid) {
 		    refreshURL = TCTokenHacks.addParameterToUrl(getRefreshAddress(), "ResultMajor", "error");
-		    refreshURL = TCTokenHacks.addParameterToUrl(refreshURL, "ResultMinor", result.getResultMinor());
+		    refreshURL = TCTokenHacks.addParameterToUrl(refreshURL, "ResultMinor", fixedMinor);
 		} else {
 		    refreshURL = token.getComErrorAddressWithParams(result.getResultMinor());
 		}

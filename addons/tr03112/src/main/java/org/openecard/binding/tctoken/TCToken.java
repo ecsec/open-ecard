@@ -54,7 +54,7 @@ public class TCToken extends TCTokenType {
 	    String errorUrl = TCToken.this.getCommunicationErrorAddress();
 	    checkUrl(errorUrl);
 	    String result = TCTokenHacks.addParameterToUrl(errorUrl, "ResultMajor", "error");
-	    result = TCTokenHacks.addParameterToUrl(result, "ResultMinor", minor);
+	    result = TCTokenHacks.addParameterToUrl(result, "ResultMinor", TCTokenHacks.fixResultMinor(minor));
 	    return result;
 	} catch (MalformedURLException ex) {
 	    // should not happen, but here it is anyways

@@ -85,7 +85,7 @@ public class RedirectCertificateValidator implements CertificateValidator {
 
 		// check if we match the SOP
 		URL sopUrl;
-		if (certDescribtionExists) {
+		if (certDescribtionExists && desc.getSubjectURL() != null && ! desc.getSubjectURL().isEmpty()) {
 		    sopUrl = new URL(desc.getSubjectURL());
 		} else {
 		    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);

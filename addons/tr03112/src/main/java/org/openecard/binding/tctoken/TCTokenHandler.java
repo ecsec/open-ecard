@@ -451,7 +451,9 @@ public class TCTokenHandler {
 	    String msg = "Refresh address in TCToken is invalid. This indicates an error in the TCToken verification.";
 	    throw new IllegalStateException(msg, ex);
 	} catch (ResourceException | InvalidAddressException | ValidationError | IOException ex) {
-	    String communicationErrorAddress = response.getTCToken().getComErrorAddressWithParams("communicationError");
+	    String communicationErrorAddress = 
+		    response.getTCToken().getComErrorAddressWithParams(ECardConstants.Minor.App.COMMUNICATION_ERROR);
+	    
 	    if (communicationErrorAddress != null && ! communicationErrorAddress.isEmpty()) {
 		throw new SecurityViolationException(communicationErrorAddress, ex.getMessage(), ex);
 	    }

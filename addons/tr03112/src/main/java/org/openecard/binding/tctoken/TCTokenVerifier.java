@@ -146,7 +146,8 @@ public class TCTokenVerifier {
 	try {
 	    assertHttpsURL("RefreshAddress", value);
 	} catch (InvalidTCTokenUrlException ex) {
-	    throw new InvalidTCTokenElement(token.getComErrorAddressWithParams("communicationError"), ex.getMessage());
+	    throw new InvalidTCTokenElement(token.getComErrorAddressWithParams(
+		    ECardConstants.Minor.App.COMMUNICATION_ERROR), ex.getMessage());
 	}
     }
 
@@ -327,7 +328,8 @@ public class TCTokenVerifier {
     private URL createUrlWithErrorParams(String refreshAddress, String minorMessage) throws MalformedURLException {
 
 	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMajor", "error");
-	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMinor", "communicationError");
+	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMinor", 
+		ECardConstants.Minor.App.COMMUNICATION_ERROR);
 	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMessage", minorMessage);
 	return new URL(refreshAddress);
     }
@@ -345,8 +347,7 @@ public class TCTokenVerifier {
 		token.getPathSecurityProtocol().isEmpty()) {
 	    String msg = "This happend probably on the side of the eService because the TCToken does "
 		    + "not contain required information";
-	    String minor = "communicationError";
-	    String errorUrl = token.getComErrorAddressWithParams(minor);
+	    String errorUrl = token.getComErrorAddressWithParams(ECardConstants.Minor.App.COMMUNICATION_ERROR);
 	    throw new InvalidTCTokenElement(errorUrl, msg);
 	}
     }
@@ -379,7 +380,7 @@ public class TCTokenVerifier {
 		throw new InvalidTCTokenElement(token.getComErrorAddressWithParams(msg), msg, ex1);
 	    }
 	} else {
-	    throw new InvalidTCTokenElement(token.getComErrorAddressWithParams("communicationError"),
+	    throw new InvalidTCTokenElement(token.getComErrorAddressWithParams(ECardConstants.Minor.App.COMMUNICATION_ERROR),
 		    "No refreshAddress available.");
 	}
     }

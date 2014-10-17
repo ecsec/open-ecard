@@ -406,7 +406,7 @@ public class TCTokenHandler {
      * return 400. If the URL and the subjectURL in the CertificateDescription conform to the SOP we reached our final
      * destination.
      *
-     * @param request TCToken request used to determine which security checks to perform..
+     * @param request TCToken request used to determine which security checks to perform.
      * @param response The TCToken response in which the original refresh address is defined and where it will be
      *	 updated.
      * @return Modified response with the final address the browser should be redirected to.
@@ -480,19 +480,9 @@ public class TCTokenHandler {
      */
     private static boolean isPerformTR03112Checks(TCTokenRequest tcTokenRequest) {
 	boolean activationChecks = true;
-	String refreshAddress = tcTokenRequest.getTCToken().getRefreshAddress();
-	URL tokenUrl = tcTokenRequest.getTCTokenURL();
 	// disable checks when not using the nPA
 	if (! tcTokenRequest.getCardType().equals("http://bsi.bund.de/cif/npa.xml")) {
 	    activationChecks = false;
-	// disable checks when using test servers with wrong certificates
-	} else if (refreshAddress.startsWith("https://eservice.openecard.org")) {
-	    activationChecks = false;
-	} else if (tokenUrl != null) {
-	    String tokenUrlStr = tokenUrl.toString();
-	    if (tokenUrlStr.startsWith("https://mtg.as.skidentity.de")) {
-		activationChecks = false;
-	    }
 	}
 	return activationChecks;
     }

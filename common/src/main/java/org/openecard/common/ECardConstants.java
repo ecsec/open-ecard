@@ -148,6 +148,7 @@ public class ECardConstants {
 	    public static final String CON_DISCONNECT = APP_PREFIX + "/common#warningConnectionDisconnected";
 	    public static final String SESS_TERMINATED = APP_PREFIX + "/common#SessionTerminatedWarning";
 	    public static final String INCORRECT_PARM = APP_PREFIX + "/common#incorrectParameter";
+	    public static final String COMMUNICATION_ERROR = APP_PREFIX + "/common#communicationError";
 
 	    /**
 	     * Application layer - CardInfo management minor codes.

@@ -33,7 +33,6 @@ import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.bind.Body;
 import org.openecard.binding.tctoken.ex.NonGuiException;
-import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.message.DialogType;
@@ -54,11 +53,10 @@ public class ActivationAction implements AppPluginAction {
     private static final Logger logger = LoggerFactory.getLogger(ActivationAction.class);
     // Translation constants
     private static final String ERROR_TITLE = "error";
-    private static final String SUCCESS_TITLE = "success";
-    private static final String SUCCESS_MSG = "success_msg";
+    private static final String FINISH_TITLE = "finish";
+    private static final String REMOVE_CARD = "remove_card_msg";
     private static final String ERROR_HEADER = "err_header";
     private static final String ERROR_MSG_IND = "err_msg_indicator";
-    private static final String ERROR_FOOTER = "err_footer";
 
     private final I18n lang = I18n.getTranslation("tr03112");
 
@@ -84,13 +82,12 @@ public class ActivationAction implements AppPluginAction {
 		TCTokenRequest tcTokenRequest = TCTokenRequest.convert(parameters);
 		response = tokenHandler.handleActivate(tcTokenRequest);
 		// Show success message. If we get here we have a valid StartPAOSResponse and a valid refreshURL
-		showSuccessMessage(response);
+		showFinishMessage();
 	    } catch (ActivationError ex) {
 		if (ex instanceof NonGuiException) {
 		    // error already displayed to the user so do not repeat it here
 		} else {
-		    gui.obtainMessageDialog().showMessageDialog(generateErrorMessage(ex.getMessage()), 
-			    lang.translationForKey(ERROR_TITLE), DialogType.ERROR_MESSAGE);
+		    showErrorMessage(ex.getMessage());
 		}
 		logger.error(ex.getMessage());
 		logger.debug(ex.getMessage(), ex); // stack trace only in debug level
@@ -112,21 +109,28 @@ public class ActivationAction implements AppPluginAction {
     /**
      * Use the {@link UserConsent} to display the success message.
      */
-    private void showSuccessMessage(BindingResult response) {
-	if (((TCTokenResponse) response).getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
-            // Make translateable
-            String msg = lang.translationForKey(SUCCESS_MSG);
-            gui.obtainMessageDialog().showMessageDialog(msg, lang.translationForKey(SUCCESS_TITLE),
-                    DialogType.INFORMATION_MESSAGE);
-        }
+    private void showFinishMessage() {
+	String title = lang.translationForKey(FINISH_TITLE);
+	String msg = lang.translationForKey(REMOVE_CARD);
+	showBackgroundMessage(msg, title, DialogType.INFORMATION_MESSAGE);
     }
 
-    private String generateErrorMessage(String errMsg) {
+    private void showBackgroundMessage(final String msg, final String title, final DialogType dialogType) {
+	new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+		gui.obtainMessageDialog().showMessageDialog(msg, title, dialogType);
+	    }
+	}, "Background_MsgBox").start();
+    }
+
+    private void showErrorMessage(String errMsg) {
+	String title = lang.translationForKey(ERROR_TITLE);
 	String baseHeader = lang.translationForKey(ERROR_HEADER);
 	String exceptionPart = lang.translationForKey(ERROR_MSG_IND);
-	String baseFooter = lang.translationForKey(ERROR_FOOTER);
-	String msg = baseHeader + exceptionPart + errMsg + baseFooter;
-	return msg;
+	String removeCard = lang.translationForKey(REMOVE_CARD);
+	String msg = String.format("%s\n\n%s\n%s\n\n%s", baseHeader, exceptionPart, errMsg, removeCard);
+	showBackgroundMessage(msg, title, DialogType.ERROR_MESSAGE);
     }
 
 }

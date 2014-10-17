@@ -46,6 +46,7 @@ import javax.xml.transform.TransformerException;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonRegistry;
 import org.openecard.addon.Context;
+import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
@@ -373,9 +374,16 @@ public class TCTokenHandler {
 		// fill in values, so it is usuable by the transport module
 		response = determineRefreshURL(request, response);
 		response.finishResponse();
-	    } catch (InvalidRedirectUrlException | SecurityViolationException ex) {
+	    } catch (InvalidRedirectUrlException ex) {
+		String msg2 = "Failed to determine a valid Redirect URL.";
+		logger.error(msg2, ex);
 		response.setResultCode(BindingResultCode.INTERNAL_ERROR);
 		throw new NonGuiException(response, ex.getMessage(), ex);
+	    } catch (SecurityViolationException ex) {
+		String msg2 = "The RefreshAddress contained in the TCToken is invalid. Redirecting to the "
+			+ "CommunicationErrorAddress.";
+		logger.error(msg2, ex);
+		response.setRefreshAddress(ex.getBindingResult().getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION));
 	    }
 
 	    return response;

@@ -98,7 +98,7 @@ public class CardVerifiableCertificateChain {
      *
      * @throws CertificateException
      */
-    private void verify() throws CertificateException {
+    public void verify() throws CertificateException {
 	verify(terminalCerts, dvCerts);
 	verify(dvCerts, cvcaCerts);
 	verify(cvcaCerts, cvcaCerts);
@@ -114,7 +114,7 @@ public class CardVerifiableCertificateChain {
 		    break;
 		}
 
-		if (!ai.hasNext()) {
+		if (! ai.hasNext()) {
 		    String msg = String.format("Malformed certificate chain: Cannot find a CHR for the CAR (%s).",
 			    authority.getCAR());
 		    throw new CertificateException(msg);

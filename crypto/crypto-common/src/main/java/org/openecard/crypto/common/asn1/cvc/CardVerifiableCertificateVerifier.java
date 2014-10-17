@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -27,7 +27,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Date;
 import java.util.List;
-import org.openecard.common.WSHelper;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.asn1.eac.oid.CVCertificatesObjectIdentifier;
@@ -39,7 +38,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class CardVerifiableCertificateVerifier {
 
@@ -57,8 +57,6 @@ public class CardVerifiableCertificateVerifier {
      */
     public static void verify(CardVerifiableCertificate certificate, CertificateDescription description)
 	    throws CertificateException {
-	checkDate(certificate);
-	
 	try {
 	    byte[] extentions = certificate.getExtensions();
 	    TLV extentionObject = TLV.fromBER(extentions);
@@ -99,7 +97,7 @@ public class CardVerifiableCertificateVerifier {
 	}
     }
 
-    private static void checkDate(CardVerifiableCertificate certificate) throws CertificateException {
+    public static void checkDate(CardVerifiableCertificate certificate) throws CertificateException {
 	Date systemDate = new Date();
 	Date expDate = certificate.getExpirationDate().getTime();
 	Date effDate = certificate.getEffectiveDate().getTime();

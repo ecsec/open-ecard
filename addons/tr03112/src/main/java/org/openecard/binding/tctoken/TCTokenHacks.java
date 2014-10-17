@@ -194,6 +194,11 @@ public class TCTokenHacks {
 	    case ECardConstants.Minor.App.UNKNOWN_ERROR:
 		minor = "unknownError";
 		break;
+	    case ECardConstants.Minor.App.INT_ERROR:
+		minor = "internalError";
+		break;
+	    case ECardConstants.Minor.App.COMMUNICATION_ERROR:
+		minor = "communicationError";
 	    default:
 		// we're fine for things not mentioned in the spec
 	}

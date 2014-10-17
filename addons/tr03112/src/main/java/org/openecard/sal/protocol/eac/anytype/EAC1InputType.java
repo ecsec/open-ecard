@@ -25,7 +25,6 @@ package org.openecard.sal.protocol.eac.anytype;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import javax.annotation.Nullable;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.util.ByteUtils;
@@ -93,8 +92,8 @@ public class EAC1InputType {
 	// if not present use chat from CVC
 	if (requiredCHATtmp == null) {
 	    CardVerifiableCertificateChain certChain = new CardVerifiableCertificateChain(certificates);
-	    List<CardVerifiableCertificate> terminalCerts = certChain.getTerminalCertificates();
-	    requiredCHATtmp = terminalCerts.get(0).getCHAT().toByteArray();
+	    CardVerifiableCertificate terminalCert = certChain.getTerminalCertificate();
+	    requiredCHATtmp = terminalCert.getCHAT().toByteArray();
 	} else {
 	    requiredCHATtmp = fixChatValue(requiredCHATtmp);
 	}

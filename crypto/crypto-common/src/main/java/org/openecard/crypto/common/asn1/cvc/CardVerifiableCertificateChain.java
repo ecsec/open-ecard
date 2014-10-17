@@ -24,8 +24,8 @@ package org.openecard.crypto.common.asn1.cvc;
 
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +33,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Implements a chain of Card Verifiable Certificates.
- * See BSI-TR-03110, version 2.10, part 3, section 2.
- * See BSI-TR-03110, version 2.10, part 3, section C.
+ * <p>See BSI-TR-03110, version 2.10, part 3, section 2.</p>
+ * <p>See BSI-TR-03110, version 2.10, part 3, section C.</p>
+ * This class only accepts one terminal certificate. All further instances must be of type DV or CA.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class CardVerifiableCertificateChain {
 
@@ -44,7 +45,7 @@ public class CardVerifiableCertificateChain {
     private final ArrayList<CardVerifiableCertificate> certs = new ArrayList<>();
     private final ArrayList<CardVerifiableCertificate> cvcaCerts = new ArrayList<>();
     private final ArrayList<CardVerifiableCertificate> dvCerts = new ArrayList<>();
-    private final ArrayList<CardVerifiableCertificate> terminalCerts = new ArrayList<>();
+    private CardVerifiableCertificate terminalCert;
 
     /**
      * Creates a new certificate chain.
@@ -66,7 +67,7 @@ public class CardVerifiableCertificateChain {
      */
     private void parseChain(List<CardVerifiableCertificate> certificates) throws CertificateException {
 	for (CardVerifiableCertificate cvc : certificates) {
-	    if (containsChertificate(cvc)) {
+	    if (containsCertificate(cvc)) {
 		break;
 	    }
 
@@ -82,8 +83,10 @@ public class CardVerifiableCertificateChain {
 	    } else if (role.equals(CHAT.Role.AUTHENTICATION_TERMINAL)
 		    || role.equals(CHAT.Role.INSPECTION_TERMINAL)
 		    || role.equals(CHAT.Role.SIGNATURE_TERMINAL)) {
-		terminalCerts.add(cvc);
-		certs.add(cvc);
+		if (terminalCert == null) {
+		    terminalCert = cvc;
+		    certs.add(cvc);
+		}
 	    } else {
 		throw new CertificateException("Malformed certificate.");
 	    }
@@ -99,7 +102,7 @@ public class CardVerifiableCertificateChain {
      * @throws CertificateException
      */
     public void verify() throws CertificateException {
-	verify(terminalCerts, dvCerts);
+	verify(Arrays.asList(terminalCert), dvCerts);
 	verify(dvCerts, cvcaCerts);
 	verify(cvcaCerts, cvcaCerts);
     }
@@ -129,7 +132,7 @@ public class CardVerifiableCertificateChain {
      * @param cvc Certificate
      * @return True if the chain contains the certificate, false otherwise
      */
-    public boolean containsChertificate(CardVerifiableCertificate cvc) {
+    public boolean containsCertificate(CardVerifiableCertificate cvc) {
 	for (CardVerifiableCertificate c : certs) {
 	    if (c.compare(cvc)) {
 		return true;
@@ -145,11 +148,7 @@ public class CardVerifiableCertificateChain {
      * @throws CertificateException
      */
     public void addCertificate(final CardVerifiableCertificate certificate) throws CertificateException {
-	parseChain(new LinkedList<CardVerifiableCertificate>() {
-	    {
-		add(certificate);
-	    }
-	});
+	parseChain(Arrays.asList(certificate));
     }
 
     /**
@@ -185,8 +184,8 @@ public class CardVerifiableCertificateChain {
      *
      * @return Terminal certificates
      */
-    public List<CardVerifiableCertificate> getTerminalCertificates() {
-	return terminalCerts;
+    public CardVerifiableCertificate getTerminalCertificate() {
+	return terminalCert;
     }
 
     /**

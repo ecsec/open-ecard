@@ -32,13 +32,13 @@ import static org.testng.Assert.*;
 
 /**
  *
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch
+ * @author Dirk Petrautzki
  */
 public class CardVerifiableCertificateChainTest {
 
-    private ArrayList<CardVerifiableCertificate> certificates = new ArrayList<CardVerifiableCertificate>();
-    private ArrayList<CardVerifiableCertificate> malformedCertificates = new ArrayList<CardVerifiableCertificate>();
+    private ArrayList<CardVerifiableCertificate> certificates = new ArrayList<>();
+    private ArrayList<CardVerifiableCertificate> malformedCertificates = new ArrayList<>();
     private byte[] cvca, dv, at, malformedAT;
 
     public void init() {
@@ -67,7 +67,7 @@ public class CardVerifiableCertificateChainTest {
 	CardVerifiableCertificateChain chain = new CardVerifiableCertificateChain(certificates);
 	assertEquals(certificates.get(0), chain.getCVCACertificates().get(0));
 	assertEquals(certificates.get(1), chain.getDVCertificates().get(0));
-	assertEquals(certificates.get(2), chain.getTerminalCertificates().get(0));
+	assertEquals(certificates.get(2), chain.getTerminalCertificate());
 
 	/*
 	 * test missing cvca certificate
@@ -75,12 +75,12 @@ public class CardVerifiableCertificateChainTest {
 	certificates.remove(0);
 	chain = new CardVerifiableCertificateChain(certificates);
 	assertEquals(certificates.get(0), chain.getDVCertificates().get(0));
-	assertEquals(certificates.get(1), chain.getTerminalCertificates().get(0));
+	assertEquals(certificates.get(1), chain.getTerminalCertificate());
 
 	/*
 	 * test add
 	 */
-	certificates = new ArrayList<CardVerifiableCertificate>();
+	certificates = new ArrayList<>();
 	certificates.add(new CardVerifiableCertificate(cvca));
 	certificates.add(new CardVerifiableCertificate(dv));
 	certificates.add(new CardVerifiableCertificate(at));
@@ -88,7 +88,7 @@ public class CardVerifiableCertificateChainTest {
 
 	assertTrue(certificates.get(0).compare(chain.getCVCACertificates().get(0)));
 	assertTrue(certificates.get(1).compare(chain.getDVCertificates().get(0)));
-	assertTrue(certificates.get(2).compare(chain.getTerminalCertificates().get(0)));
+	assertTrue(certificates.get(2).compare(chain.getTerminalCertificate()));
     }
 
     private byte[] loadTestFile(String file) throws Exception {

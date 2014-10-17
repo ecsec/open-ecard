@@ -169,7 +169,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    dynCtx.put(EACProtocol.PACE_MARKER, paceMarker);
 
 	    // Verify that the certificate description matches the terminal certificate
-	    CardVerifiableCertificate taCert = certChain.getTerminalCertificates().get(0);
+	    CardVerifiableCertificate taCert = certChain.getTerminalCertificate();
 	    CardVerifiableCertificateVerifier.verify(taCert, certDescription);
 	    // Verify that the required CHAT matches the terminal certificate's CHAT
 	    CHATVerifier.verfiy(taCert.getCHAT(), requiredCHAT);
@@ -180,7 +180,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    // Prepare data in DIDAuthenticate for GUI
 	    final EACData eacData = new EACData();
 	    eacData.didRequest = didAuthenticate;
-	    eacData.certificate = certChain.getTerminalCertificates().get(0);
+	    eacData.certificate = certChain.getTerminalCertificate();
 	    eacData.certificateDescription = certDescription;
 	    eacData.rawCertificateDescription = rawCertificateDescription;
 	    eacData.transactionInfo = eac1Input.getTransactionInfo();

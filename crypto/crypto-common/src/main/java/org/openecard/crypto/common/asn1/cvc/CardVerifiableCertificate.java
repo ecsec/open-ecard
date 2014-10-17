@@ -25,7 +25,6 @@ package org.openecard.crypto.common.asn1.cvc;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.List;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
@@ -37,8 +36,8 @@ import org.openecard.common.util.ByteUtils;
  *
  * See BSI-TR-03110, version 2.10, part 3, section C.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch
+ * @author Dirk Petrautzki
  */
 public class CardVerifiableCertificate {
 
@@ -120,8 +119,7 @@ public class CardVerifiableCertificate {
 	    // Certificate body elements
 	    List<TLV> bodyElements = bodyObject.getChild().asList();
 
-	    for (Iterator<TLV> it = bodyElements.iterator(); it.hasNext();) {
-		TLV item = it.next();
+	    for (TLV item : bodyElements) {
 		int itemTag = (int) item.getTagNumWithClass();
 
 		switch (itemTag) {

@@ -91,7 +91,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    ta.verifyCertificates(certificateChain);
 
 	    // save values for later use
-	    CardVerifiableCertificate terminalCertificate = certificateChain.getTerminalCertificates().get(0);
+	    CardVerifiableCertificate terminalCertificate = certificateChain.getTerminalCertificate();
 	    byte[] key = eac2Input.getEphemeralPublicKey();
 	    byte[] signature = eac2Input.getSignature();
 	    internalData.put(EACConstants.IDATA_PK_PCD, key);

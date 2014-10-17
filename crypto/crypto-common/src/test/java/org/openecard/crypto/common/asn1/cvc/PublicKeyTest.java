@@ -34,7 +34,7 @@ import static org.testng.Assert.*;
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class PublicKeyTest {
 
@@ -48,7 +48,7 @@ public class PublicKeyTest {
 	    byte[] dv = loadTestFile("cert_dv.cvcert");
 	    byte[] at = loadTestFile("cert_at.cvcert");
 
-	    ArrayList<CardVerifiableCertificate> certificates = new ArrayList<CardVerifiableCertificate>();
+	    ArrayList<CardVerifiableCertificate> certificates = new ArrayList<>();
 	    certificates.add(new CardVerifiableCertificate(cvca));
 	    certificates.add(new CardVerifiableCertificate(dv));
 	    certificates.add(new CardVerifiableCertificate(at));
@@ -73,7 +73,7 @@ public class PublicKeyTest {
 
     @Test
     public void testKeyTerminal() throws Exception {
-	PublicKey pk = chain.getTerminalCertificates().get(0).getPublicKey();
+	PublicKey pk = chain.getTerminalCertificate().getPublicKey();
 	assertEquals(pk.getObjectIdentifier(), TAObjectIdentifier.id_TA_ECDSA_SHA_512);
     }
 

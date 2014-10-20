@@ -44,10 +44,12 @@ public class GenericPINStep extends Step {
     private static final String PINSTEP_NEWPIN = "action.changepin.userconsent.pinstep.newpin";
     private static final String PINSTEP_OLDPIN = "action.changepin.userconsent.pinstep.oldpin";
     private static final String PINSTEP_DESCRIPTION = "action.changepin.userconsent.pinstep.description";
+    private static final String PINSTEP_DESCRIPTION_AFTER_CAN = "action.changepin.userconsent.pinstep.description_after_can";
     private static final String REMAINING_ATTEMPTS = "action.changepin.userconsent.pinstep.remaining_attempts";
     private static final String WRONG_ENTRY = "action.changepin.userconsent.pinstep.wrong_entry";
     private static final String INCORRECT_INPUT = "action.changepin.userconsent.pinstep.incorrect_input";
     private static final String PINSTEP_NATIV_CHANGE_DESCRIPTION = "action.changepin.userconsent.pinstep.native_start_description";
+    private static final String PINSTEP_NATIV_CHANGE_DESCRIPTION_AFTER_CAN = "action.changepin.userconsent.pinstep.native_start_description_after_can";
 
     // translation constants PUK entring
     private static final String PUKSTEP_DESCRIPTION = "action.unblockpin.userconsent.pukstep.description";
@@ -82,6 +84,7 @@ public class GenericPINStep extends Step {
     private boolean failedCANVerify;
     private boolean wrongPUKFormat;
     private boolean failedPUKVerify;
+    private boolean canSuccess;
 
     private int retryCounterPIN;
     private int retryCounterPUK = 10;
@@ -137,6 +140,7 @@ public class GenericPINStep extends Step {
 	    case PIN_resumed:
 		setTitle(lang.translationForKey(CHANGE_PIN_TITLE));
 		retryCounterPIN = 1;
+		canSuccess = true;
 		if (capturePin) {
 		    createPINChangeGui();
 		} else {
@@ -167,18 +171,32 @@ public class GenericPINStep extends Step {
     }
 
     private void createPINChangeGuiNativ() {
-	Text nativPinChangeText = new Text(lang.translationForKey(PINSTEP_NATIV_CHANGE_DESCRIPTION));
-	getInputInfoUnits().add(nativPinChangeText);
 
-	// display the remaining attempts
-	Text txtRemainingAttempts = new Text();
-	txtRemainingAttempts.setText(lang.translationForKey(REMAINING_ATTEMPTS, retryCounterPIN));
-	getInputInfoUnits().add(txtRemainingAttempts);
+	String nativPinChangeDescriptionText;
+
+	if (canSuccess) {
+	    nativPinChangeDescriptionText = lang.translationForKey(PINSTEP_NATIV_CHANGE_DESCRIPTION_AFTER_CAN);
+	} else {
+	    nativPinChangeDescriptionText = lang.translationForKey(PINSTEP_NATIV_CHANGE_DESCRIPTION);
+	}
+
+	Text nativPinChangeDescription = new Text(nativPinChangeDescriptionText);
+	getInputInfoUnits().add(nativPinChangeDescription);
+
+	addRemainingAttempts();
     }
 
     private void createPINChangeGui() {
-	
-	Text pinChangeDescription = new Text(lang.translationForKey(PINSTEP_DESCRIPTION, "PIN"));
+
+	String pinChangeDescriptionText;
+
+	if (canSuccess) {
+	    pinChangeDescriptionText = lang.translationForKey(PINSTEP_DESCRIPTION_AFTER_CAN, "PIN");
+	} else {
+	    pinChangeDescriptionText = lang.translationForKey(PINSTEP_DESCRIPTION, "PIN");
+	}
+
+	Text pinChangeDescription = new Text(pinChangeDescriptionText);
 	getInputInfoUnits().add(pinChangeDescription);
 
 	Text dummy = new Text(" ");
@@ -222,10 +240,7 @@ public class GenericPINStep extends Step {
 	    getInputInfoUnits().add(incorrectInput);
 	}
 
-	// display the remaining attempts
-	Text txtRemainingAttempts = new Text();
-	txtRemainingAttempts.setText(lang.translationForKey(REMAINING_ATTEMPTS, retryCounterPIN));
-	getInputInfoUnits().add(txtRemainingAttempts);
+	addRemainingAttempts();
     }
 
     private void createPUKGuiNativ() {
@@ -349,6 +364,12 @@ public class GenericPINStep extends Step {
 	retryCounterPUK--;
 	getInputInfoUnits().clear();
 	generateGenericGui();
+    }
+
+    private void addRemainingAttempts() {
+	Text txtRemainingAttempts = new Text();
+	txtRemainingAttempts.setText(lang.translationForKey(REMAINING_ATTEMPTS, retryCounterPIN));
+	getInputInfoUnits().add(txtRemainingAttempts);
     }
 
 }

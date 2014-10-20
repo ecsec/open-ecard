@@ -57,6 +57,7 @@ public class ActivationAction implements AppPluginAction {
     private static final String REMOVE_CARD = "remove_card_msg";
     private static final String ERROR_HEADER = "err_header";
     private static final String ERROR_MSG_IND = "err_msg_indicator";
+    private static final String INVALID_REFRESH_ADDRESS = "invalid_refresh_address";
 
     private final I18n lang = I18n.getTranslation("tr03112");
 
@@ -87,7 +88,11 @@ public class ActivationAction implements AppPluginAction {
 		if (ex instanceof NonGuiException) {
 		    // error already displayed to the user so do not repeat it here
 		} else {
-		    showErrorMessage(ex.getMessage());
+		    if (ex.getMessage().equals("Invalid HTTP message received.")) {
+			showErrorMessage(lang.translationForKey(INVALID_REFRESH_ADDRESS));
+		    } else {
+			showErrorMessage(ex.getMessage());
+		    }
 		}
 		logger.error(ex.getMessage());
 		logger.debug(ex.getMessage(), ex); // stack trace only in debug level

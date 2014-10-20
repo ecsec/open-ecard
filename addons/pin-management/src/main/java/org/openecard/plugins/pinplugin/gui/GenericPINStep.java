@@ -183,6 +183,10 @@ public class GenericPINStep extends Step {
 	Text nativPinChangeDescription = new Text(nativPinChangeDescriptionText);
 	getInputInfoUnits().add(nativPinChangeDescription);
 
+	if (failedPINVerify || canSuccess) {
+	    addVerifyFailed("PIN");
+	}
+
 	addRemainingAttempts();
     }
 
@@ -235,9 +239,7 @@ public class GenericPINStep extends Step {
 
 	if (failedPINVerify) {
 	    // add note for incorrect input
-	    Text incorrectInput = new Text();
-	    incorrectInput.setText(lang.translationForKey(INCORRECT_INPUT, "PIN"));
-	    getInputInfoUnits().add(incorrectInput);
+	    addVerifyFailed("PIN");
 	}
 
 	addRemainingAttempts();
@@ -251,6 +253,10 @@ public class GenericPINStep extends Step {
 	Text pukTryCounter = new Text();
 	pukTryCounter.setText(lang.translationForKey(REMAINING_ATTEMPTS, retryCounterPUK));
 	getInputInfoUnits().add(pukTryCounter);
+
+	if (failedPUKVerify) {
+	    addVerifyFailed("PUK");
+	}
     }
 
     private void createPUKGui() {
@@ -278,15 +284,17 @@ public class GenericPINStep extends Step {
 
 	if (failedPUKVerify) {
 	    // add note for incorrect input
-	    Text incorrectInput = new Text();
-	    incorrectInput.setText(lang.translationForKey(INCORRECT_INPUT, "PUK"));
-	    getInputInfoUnits().add(incorrectInput);
+	    addVerifyFailed("PUK");
 	}
     }
 
     private void createCANGuiNativ() {
 	Text nativCANText = new Text(lang.translationForKey(CANSTEP_START_NATIV_DESCRIPTION));
 	getInputInfoUnits().add(nativCANText);
+
+	if (failedCANVerify) {
+	    addVerifyFailed("CAN");
+	}
     }
 
     private void createCANGui() {
@@ -313,9 +321,7 @@ public class GenericPINStep extends Step {
 
 	if (failedCANVerify) {
 	    // add note for incorrect input
-	    Text incorrectInput = new Text();
-	    incorrectInput.setText(lang.translationForKey(INCORRECT_INPUT, "CAN"));
-	    getInputInfoUnits().add(incorrectInput);
+	    addVerifyFailed("CAN");
 	}
     }
 
@@ -370,6 +376,12 @@ public class GenericPINStep extends Step {
 	Text txtRemainingAttempts = new Text();
 	txtRemainingAttempts.setText(lang.translationForKey(REMAINING_ATTEMPTS, retryCounterPIN));
 	getInputInfoUnits().add(txtRemainingAttempts);
+    }
+
+    private void addVerifyFailed(String did) {
+	Text incorrectInput = new Text();
+	incorrectInput.setText(lang.translationForKey(INCORRECT_INPUT, did));
+	getInputInfoUnits().add(incorrectInput);
     }
 
 }

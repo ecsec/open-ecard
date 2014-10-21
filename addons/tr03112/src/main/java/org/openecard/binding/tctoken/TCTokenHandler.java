@@ -106,7 +106,7 @@ public class TCTokenHandler {
     private static final String INT_ERROR_TITLE = "int_error";
     private static final String ERROR_HEADER = "err_header";
     private static final String ERROR_MSG_IND = "err_msg_indicator";
-    private static final String ERROR_FOOTER = "err_footer";
+    private static final String REMOVE_CARD = "remove_card_msg";
 
     private final I18n langTr03112 = I18n.getTranslation("tr03112");
 
@@ -343,9 +343,7 @@ public class TCTokenHandler {
 
 	    response.setResultCode(BindingResultCode.INTERNAL_ERROR);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, w.getMessage()));
-	    MessageDialog msgBox = gui.obtainMessageDialog();
-	    String title = lang.translationForKey(INT_ERROR_TITLE);
-	    msgBox.showMessageDialog(generateErrorMessage(w.getMessage()), title, DialogType.ERROR_MESSAGE);
+	    showErrorMessage(w.getMessage());
 	    throw new NonGuiException(response, w.getMessage(), w);
 	} catch (PAOSException w) {
 	    logger.error(w.getMessage(), w);
@@ -358,10 +356,7 @@ public class TCTokenHandler {
 		innerException = innerException.getCause();
 	    }
 
-	    MessageDialog msgBox = gui.obtainMessageDialog();
-	    String msg = generateErrorMessage(innerException.getMessage());
-	    String title = langTr03112.translationForKey(ERROR_TITLE);
-	    msgBox.showMessageDialog(msg, title, DialogType.ERROR_MESSAGE);
+	    showErrorMessage(innerException.getMessage());
 
 	    if (innerException instanceof WSException) {
 		response.setResult(((WSException) innerException).getResult());
@@ -499,12 +494,22 @@ public class TCTokenHandler {
 	return activationChecks;
     }
 
-    private String generateErrorMessage(String message) {
+    private void showBackgroundMessage(final String msg, final String title, final DialogType dialogType) {
+	new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+		gui.obtainMessageDialog().showMessageDialog(msg, title, dialogType);
+	    }
+	}, "Background_MsgBox").start();
+    }
+
+    private void showErrorMessage(String errMsg) {
+	String title = langTr03112.translationForKey(ERROR_TITLE);
 	String baseHeader = langTr03112.translationForKey(ERROR_HEADER);
 	String exceptionPart = langTr03112.translationForKey(ERROR_MSG_IND);
-	String baseFooter = langTr03112.translationForKey(ERROR_FOOTER);
-	String msg = baseHeader + exceptionPart + message + baseFooter;
-	return msg;
+	String removeCard = langTr03112.translationForKey(REMOVE_CARD);
+	String msg = String.format("%s\n\n%s\n%s\n\n%s", baseHeader, exceptionPart, errMsg, removeCard);
+	showBackgroundMessage(msg, title, DialogType.ERROR_MESSAGE);
     }
 
 }

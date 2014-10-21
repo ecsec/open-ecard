@@ -89,13 +89,8 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 	    CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA384,
 	    CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
 	    CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256,
-	    // SHA1 is acceptable until 2015
-	    CipherSuite.TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA,
-	    CipherSuite.TLS_DHE_PSK_WITH_AES_256_CBC_SHA,
-	    CipherSuite.TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA,
-	    CipherSuite.TLS_DHE_PSK_WITH_AES_128_CBC_SHA,
+	    // must have according to TR-03124-1 sec. 4.4
 	    CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA,
-	    CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA,
 	};
     }
 

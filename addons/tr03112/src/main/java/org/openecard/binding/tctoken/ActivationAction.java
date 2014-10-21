@@ -33,6 +33,7 @@ import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.bind.Body;
 import org.openecard.binding.tctoken.ex.NonGuiException;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.message.DialogType;
@@ -83,7 +84,7 @@ public class ActivationAction implements AppPluginAction {
 		TCTokenRequest tcTokenRequest = TCTokenRequest.convert(parameters);
 		response = tokenHandler.handleActivate(tcTokenRequest);
 		// Show success message. If we get here we have a valid StartPAOSResponse and a valid refreshURL
-		showFinishMessage();
+		showFinishMessage((TCTokenResponse) response);
 	    } catch (ActivationError ex) {
 		if (ex instanceof NonGuiException) {
 		    // error already displayed to the user so do not repeat it here
@@ -114,10 +115,13 @@ public class ActivationAction implements AppPluginAction {
     /**
      * Use the {@link UserConsent} to display the success message.
      */
-    private void showFinishMessage() {
-	String title = lang.translationForKey(FINISH_TITLE);
-	String msg = lang.translationForKey(REMOVE_CARD);
-	showBackgroundMessage(msg, title, DialogType.INFORMATION_MESSAGE);
+    private void showFinishMessage(TCTokenResponse response) {
+	// show the finish message just if we have a major ok
+	if (response.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
+	    String title = lang.translationForKey(FINISH_TITLE);
+	    String msg = lang.translationForKey(REMOVE_CARD);
+	    showBackgroundMessage(msg, title, DialogType.INFORMATION_MESSAGE);
+	}
     }
 
     private void showBackgroundMessage(final String msg, final String title, final DialogType dialogType) {

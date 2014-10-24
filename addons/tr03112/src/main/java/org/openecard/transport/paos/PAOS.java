@@ -431,16 +431,23 @@ public class PAOS {
      * @throws PAOSException If the server returned a HTTP error code
      */
     private void checkHTTPStatusCode(Object msg, int statusCode) throws PAOSException {
-	if (statusCode < 200 || statusCode > 299) {
-	    if (msg instanceof ResponseType) {
-		ResponseType resp = (ResponseType) msg;
-		try {
-		    WSHelper.checkResult(resp);
-		} catch (WSException ex) {
-		    throw new PAOSException("Received HTML Error Code " + statusCode, ex);
-		}
+	// Check the result code. According to the PAOS Spec section 9.4 the server has to send 202
+	// All tested test servers return 200 so accept both but generate a warning message in case of 200
+	if (statusCode != 200 && statusCode != 202) {
+	    throw new PAOSException(INVALID_HTTP_STATUS, statusCode);
+	} else if (statusCode == 200) {
+	    String msg2 = "The PAOS endpoint sent the http status code 200 which does not conform to the"
+		    + "PAOS specification. (See section 9.4 Processing Rules of the PAOS Specification)";
+	    logger.warn(msg2);
+	}
+
+	if (msg instanceof ResponseType) {
+	    ResponseType resp = (ResponseType) msg;
+	    try {
+		WSHelper.checkResult(resp);
+	    } catch (WSException ex) {
+		throw new PAOSException("Received HTML Error Code " + statusCode, ex);
 	    }
-	    throw new PAOSException("Received HTML Error Code " + statusCode);
 	}
     }
 

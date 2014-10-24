@@ -22,6 +22,8 @@
 
 package org.openecard.binding.tctoken;
 
+import org.openecard.common.I18n;
+
 
 /**
  *
@@ -29,18 +31,54 @@ package org.openecard.binding.tctoken;
  */
 public class ConnectionError extends Exception {
 
+    private static final I18n lang = I18n.getTranslation("tr03112");
+    private final String errMsg;
+    private Object[] params;
+
     private static final long serialVersionUID = 1L;
 
-    public ConnectionError(String message) {
+    public ConnectionError(String message, Object ... params) {
 	super(message);
+	errMsg = message;
+	this.params = params;
     }
 
     public ConnectionError(Throwable cause) {
 	super(cause);
+	errMsg = "";
     }
 
-    public ConnectionError(String message, Throwable cause) {
+    public ConnectionError(String message, Throwable cause, Object ... params) {
 	super(message, cause);
+	errMsg = message;
+	this.params = params;
+
+    }
+
+    @Override
+    public String getMessage() {
+	if (! errMsg.isEmpty()) {
+	    if (params != null) {
+		return lang.getOriginalMessage(errMsg, params);
+	    } else {
+		return lang.getOriginalMessage(errMsg);
+	    }
+	} else {
+	    return super.getMessage();
+	}
+    }
+
+    @Override
+    public String getLocalizedMessage() {
+	if (errMsg.isEmpty()) {
+	    return super.getLocalizedMessage();
+	} else {
+	    if (params == null ) {
+		return lang.translationForKey(errMsg);
+	    } else {
+		return lang.translationForKey(errMsg, params);
+	    }
+	}
     }
 
 }

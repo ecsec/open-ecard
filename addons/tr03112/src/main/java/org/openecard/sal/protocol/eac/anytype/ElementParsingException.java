@@ -22,13 +22,31 @@
 
 package org.openecard.sal.protocol.eac.anytype;
 
+import org.openecard.common.I18n;
+
+
 /**
  *
  * @author Hans-Martin Haase
  */
 public class ElementParsingException extends Exception {
 
+    private static final I18n lang = I18n.getTranslation("tr03112");
+
+    private final String msg;
+
     public ElementParsingException(String msg) {
 	super(msg);
+	this.msg = msg;
+    }
+
+    @Override
+    public String getMessage() {
+	return lang.getOriginalMessage(msg);
+    }
+
+    @Override
+    public String getLocalizedMessage() {
+	return lang.translationForKey(msg);
     }
 }

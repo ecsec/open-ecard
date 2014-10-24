@@ -49,6 +49,17 @@ import org.openecard.common.util.TR03112Utils;
  */
 public class TCTokenVerifier {
 
+    // Translation constants
+    private static final String INVALID_ELEMENT = "invalid.tctoken.element.invalid_element";
+    private static final String MISSING_ELEMENT = "invalid.tctoken.element.missing_element";
+    private static final String MALFORMED_URL = "invalid.tctoken.url.exception.malformed_url";
+    private static final String NO_HTTPS_URL = "invalid.tctoken.url.exception.no_https_url";
+    private static final String FAILED_SOP = "security.violation.exception.no_sop_tls2";
+    private static final String ESERVICE_FAIL = "invalid.tctoken.element.eservice";
+    private static final String INVALID_REFRESH_ADDRESS = "invalid.tctoken.element.invalid_refresh_address";
+    private static final String NO_REFRESH_ADDRESS = "invalid.tctoken.element.no_refresh_address";
+    private static final String NO_SERVER_ADDRESS = "invalid.tctoken.element.no_server_address";
+
     private final TCToken token;
     private final ResourceContext ctx;
 
@@ -110,13 +121,13 @@ public class TCTokenVerifier {
 	try {
 	    assertRequired("ServerAddress", value);
 	} catch (InvalidTCTokenElement ex) {
-	    determineRefreshAddress(ex, "No ServerAddress given in the TCToken.");
+	    determineRefreshAddress(ex);
 	}
 
 	try {
 	    assertHttpsURL("ServerAddress", value);
 	} catch (InvalidTCTokenUrlException ex) {
-	    determineRefreshAddress(ex, ex.getMessage());
+	    determineRefreshAddress(ex);
 	}
     }
 
@@ -146,8 +157,7 @@ public class TCTokenVerifier {
 	try {
 	    assertHttpsURL("RefreshAddress", value);
 	} catch (InvalidTCTokenUrlException ex) {
-	    throw new InvalidTCTokenElement(token.getComErrorAddressWithParams(
-		    ECardConstants.Minor.App.COMMUNICATION_ERROR), ex.getMessage());
+	    determineRefreshAddress(ex);
 	}
     }
 
@@ -207,12 +217,12 @@ public class TCTokenVerifier {
 	    try {
 		assertRequired("PathSecurityParameters", psp);
 	    } catch (InvalidTCTokenElement ex) {
-		determineRefreshAddress(ex, ex.getMessage());
+		determineRefreshAddress(ex);
 	    }
 	    try {
 		assertRequired("PSK", psp.getPSK());
 	    } catch (InvalidTCTokenElement ex) {
-		determineRefreshAddress(ex, ex.getMessage());
+		determineRefreshAddress(ex);
 	    }
 	}
     }
@@ -260,10 +270,10 @@ public class TCTokenVerifier {
 		return;
 	    }
 	}
-	String msg = String.format("Invalid %s in TCToken.", name);
+
 	String minor = ECardConstants.Minor.App.PARM_ERROR;
 	String errorUrl = token.getComErrorAddressWithParams(minor);
-	throw new InvalidTCTokenElement(errorUrl, msg);
+	throw new InvalidTCTokenElement(errorUrl, INVALID_ELEMENT, (Object) name);
     }
 
     /**
@@ -276,10 +286,9 @@ public class TCTokenVerifier {
      */
     private void assertRequired(String name, Object value) throws InvalidRedirectUrlException, InvalidTCTokenElement {
 	if (checkEmpty(value)) {
-	    String msg = String.format("Element %s is required.", name);
 	    String minor = ECardConstants.Minor.App.PARM_ERROR;
 	    String errorUrl = token.getComErrorAddressWithParams(minor);
-	    throw new InvalidTCTokenElement(errorUrl, msg);
+	    throw new InvalidTCTokenElement(errorUrl, MISSING_ELEMENT, name);
 	}
     }
 
@@ -287,14 +296,14 @@ public class TCTokenVerifier {
 	try {
 	    return new URL(value);
 	} catch (MalformedURLException e) {
-	    throw new InvalidTCTokenUrlException(String.format("Malformed %s URL", name));
+	    throw new InvalidTCTokenUrlException(MALFORMED_URL, name);
 	}
     }
 
     private URL assertHttpsURL(String name, String value) throws InvalidTCTokenUrlException {
 	URL url = assertURL(name, value);
 	if (! "https".equals(url.getProtocol())) {
-	    throw new InvalidTCTokenUrlException(String.format("%s is not a https URL.", name));
+	    throw new InvalidTCTokenUrlException(NO_HTTPS_URL, name);
 	} else {
 	    return url;
 	}
@@ -309,10 +318,9 @@ public class TCTokenVerifier {
 	List<Pair<URL, Certificate>> urls = ctx.getCerts();
 	for (Pair<URL, Certificate> next : urls) {
 	    if (! TR03112Utils.checkSameOriginPolicy(paosUrl, next.p1)) {
-		String msg = "The same origin policy is violated for the second channel (TLS-2).";
 		String minor = ECardConstants.Minor.App.PARM_ERROR;
 		String errorUrl = token.getComErrorAddressWithParams(minor);
-		throw new SecurityViolationException(errorUrl, msg);
+		throw new SecurityViolationException(errorUrl, FAILED_SOP);
 	    }
 	}
     }
@@ -345,10 +353,8 @@ public class TCTokenVerifier {
 		token.getRefreshAddress().isEmpty() && token.getServerAddress().isEmpty() &&
 		token.getSessionIdentifier().isEmpty() && token.getBinding().isEmpty() &&
 		token.getPathSecurityProtocol().isEmpty()) {
-	    String msg = "This happend probably on the side of the eService because the TCToken does "
-		    + "not contain required information";
 	    String errorUrl = token.getComErrorAddressWithParams(ECardConstants.Minor.App.COMMUNICATION_ERROR);
-	    throw new InvalidTCTokenElement(errorUrl, msg);
+	    throw new InvalidTCTokenElement(errorUrl, ESERVICE_FAIL);
 	}
     }
 
@@ -362,7 +368,7 @@ public class TCTokenVerifier {
      * @throws SecurityViolationException
      * @throws InvalidTCTokenElement
      */
-    private void determineRefreshAddress(ActivationError ex, String errorMsg) throws InvalidRedirectUrlException,
+    private void determineRefreshAddress(ActivationError ex) throws InvalidRedirectUrlException,
 	    InvalidTCTokenUrlException, SecurityViolationException, InvalidTCTokenElement {
 	if (token.getRefreshAddress() != null) {
 	    try {
@@ -373,15 +379,15 @@ public class TCTokenVerifier {
 		URL resAddr = last.p1;
 		String refreshUrl = resAddr.toString();
 
-		URL refreshUrlAsUrl = createUrlWithErrorParams(refreshUrl, errorMsg);
-		throw new InvalidTCTokenElement(refreshUrlAsUrl.toString(), ex.getMessage());
+		URL refreshUrlAsUrl = createUrlWithErrorParams(refreshUrl, ex.getMessage());
+		throw new InvalidTCTokenElement(refreshUrlAsUrl.toString(), null, ex);
 	    } catch (IOException | ResourceException | InvalidAddressException | ValidationError ex1) {
-		String msg = "Invalid RefreshAddress";
-		throw new InvalidTCTokenElement(token.getComErrorAddressWithParams(msg), msg, ex1);
+		throw new InvalidTCTokenElement(token.getComErrorAddressWithParams(
+			ECardConstants.Minor.App.COMMUNICATION_ERROR), INVALID_REFRESH_ADDRESS, ex1);
 	    }
 	} else {
 	    throw new InvalidTCTokenElement(token.getComErrorAddressWithParams(ECardConstants.Minor.App.COMMUNICATION_ERROR),
-		    "No refreshAddress available.");
+		    NO_REFRESH_ADDRESS);
 	}
     }
 

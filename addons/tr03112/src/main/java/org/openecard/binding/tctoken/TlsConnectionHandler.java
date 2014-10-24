@@ -54,6 +54,9 @@ import org.openecard.crypto.tls.proxy.ProxySettings;
  */
 public class TlsConnectionHandler {
 
+    // translation constants
+    private static final String UNKNOWN_SEC_PROTOCOL = "connection.error.unknown_sec_protocol";
+
     private final Dispatcher dispatcher;
     private final TCTokenRequest tokenRequest;
     private final ConnectionHandleType handle;
@@ -155,7 +158,7 @@ public class TlsConnectionHandler {
 			    break;
 			}
 		    default:
-			throw new ConnectionError("Unknown security protocol '" + secProto + "' requested.");
+			throw new ConnectionError(UNKNOWN_SEC_PROTOCOL, secProto);
 		}
 	    }
 

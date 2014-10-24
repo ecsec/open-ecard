@@ -53,6 +53,10 @@ import org.slf4j.LoggerFactory;
 public class TCTokenRequest {
 
     private static final Logger logger = LoggerFactory.getLogger(TCTokenRequest.class);
+    // Translation constants
+    private static final String NO_PARAMS = "missing.activation.parameter.exception.no_suitable_parameters";
+    private static final String NO_TOKEN = "missing.activation.parameter.exception.no_valid_tctoken_available";
+    private static final String INVALID_URL = "invalid.tctoken.url.exception.invalid_tctoken_url";
 
     private TCToken token;
     private String ifdName;
@@ -93,7 +97,7 @@ public class TCTokenRequest {
 	    return result;
 	}
 
-	throw new MissingActivationParameterException("No suitable set of parameters given in the request.");
+	throw new MissingActivationParameterException(NO_PARAMS);
     }
 
 
@@ -120,9 +124,8 @@ public class TCTokenRequest {
 			    tcTokenRequest.certificates = tokenCtx.getCerts();
 			    tcTokenRequest.tcTokenURL = tokenUrl;
 			} catch (MalformedURLException ex) {
-			    String msg = "The tcTokenURL parameter contains an invalid URL: " + v;
 			    // TODO: check if the error type is correct, was WRONG_PARAMETER before
-			    throw new InvalidTCTokenUrlException(msg, ex);
+			    throw new InvalidTCTokenUrlException(INVALID_URL, ex, v);
 			}
 			break;
 		    case "ifdName":
@@ -145,7 +148,7 @@ public class TCTokenRequest {
 	}
 
 	if (tcTokenRequest.token == null) {
-	    throw new MissingActivationParameterException("No valid TCToken available in request.");
+	    throw new MissingActivationParameterException(NO_TOKEN);
 	}
 
 	return tcTokenRequest;
@@ -181,7 +184,7 @@ public class TCTokenRequest {
 	}
 
 	if (tcTokenRequest.token == null) {
-	    throw new MissingActivationParameterException("No valid TCToken available in request.");
+	    throw new MissingActivationParameterException(NO_TOKEN);
 	}
 	return tcTokenRequest;
     }

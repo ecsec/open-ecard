@@ -66,7 +66,6 @@ import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.Pair;
 import org.openecard.common.sal.util.InsertCardDialog;
-import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.message.DialogType;
@@ -103,12 +102,15 @@ public class TCTokenHandler {
     private static final Logger logger = LoggerFactory.getLogger(TCTokenHandler.class);
     // Translation constants
     private static final String ERROR_TITLE = "error";
-    private static final String INT_ERROR_TITLE = "int_error";
     private static final String ERROR_HEADER = "err_header";
     private static final String ERROR_MSG_IND = "err_msg_indicator";
     private static final String REMOVE_CARD = "remove_card_msg";
+    private static final String REFRESH_DETERMINATION_FAILED = "invalid.redirect.url.exception.refresh_address_determination_failed";
+    private static final String REFRESH_URL_ERROR = "illegal.state.exception.invalid_refresh_address_in_tctoken";
+    private static final String NO_RESPONSE_FROM_SERVER = "paos.exception.no_response_from_server";
+    private static final String UNKNOWN_ECARD_ERROR = "paos.exception.unknown_ecard_exception";
 
-    private final I18n langTr03112 = I18n.getTranslation("tr03112");
+    private static final I18n langTr03112 = I18n.getTranslation("tr03112");
 
     private final I18n lang = I18n.getTranslation("tctoken");
 
@@ -356,7 +358,17 @@ public class TCTokenHandler {
 		innerException = innerException.getCause();
 	    }
 
-	    showErrorMessage(innerException.getMessage());
+	    String errorMsg = innerException.getLocalizedMessage();
+	    switch (errorMsg) {
+		case "The target server failed to respond":
+		    errorMsg = langTr03112.translationForKey(NO_RESPONSE_FROM_SERVER);
+		    break;
+		case ECardConstants.Minor.App.INT_ERROR + " ==> Unknown eCard exception occurred.":
+		    errorMsg = langTr03112.translationForKey(UNKNOWN_ECARD_ERROR);
+		    break;
+	    }
+		
+	    showErrorMessage(errorMsg);
 
 	    if (innerException instanceof WSException) {
 		response.setResult(((WSException) innerException).getResult());
@@ -370,8 +382,7 @@ public class TCTokenHandler {
 		response = determineRefreshURL(request, response);
 		response.finishResponse();
 	    } catch (InvalidRedirectUrlException ex) {
-		String msg2 = "Failed to determine a valid Redirect URL.";
-		logger.error(msg2, ex);
+		logger.error(ex.getMessage(), ex);
 		response.setResultCode(BindingResultCode.INTERNAL_ERROR);
 		throw new NonGuiException(response, ex.getMessage(), ex);
 	    } catch (SecurityViolationException ex) {
@@ -453,16 +464,15 @@ public class TCTokenHandler {
 	    response.setRefreshAddress(endpoint.toString());
 	    return response;
 	} catch (MalformedURLException ex) {
-	    String msg = "Refresh address in TCToken is invalid. This indicates an error in the TCToken verification.";
-	    throw new IllegalStateException(msg, ex);
+	    throw new IllegalStateException(langTr03112.translationForKey(REFRESH_URL_ERROR), ex);
 	} catch (ResourceException | InvalidAddressException | ValidationError | IOException ex) {
 	    String communicationErrorAddress = 
 		    response.getTCToken().getComErrorAddressWithParams(ECardConstants.Minor.App.COMMUNICATION_ERROR);
 	    
 	    if (communicationErrorAddress != null && ! communicationErrorAddress.isEmpty()) {
-		throw new SecurityViolationException(communicationErrorAddress, ex.getMessage(), ex);
+		throw new SecurityViolationException(communicationErrorAddress, ex);
 	    }
-	    throw new InvalidRedirectUrlException("Failed to determine redirect address.", ex);
+	    throw new InvalidRedirectUrlException(REFRESH_DETERMINATION_FAILED, ex);
 	}
     }
 

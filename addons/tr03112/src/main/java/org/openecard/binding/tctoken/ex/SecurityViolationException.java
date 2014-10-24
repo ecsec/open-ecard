@@ -39,4 +39,8 @@ public class SecurityViolationException extends RedirectionBaseError {
 	super(errorUrl, message, cause);
     }
 
+    public SecurityViolationException(String errorUrl, Throwable cause) {
+	super(errorUrl, cause);
+    }
+
 }

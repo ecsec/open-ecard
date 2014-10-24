@@ -22,6 +22,8 @@
 
 package org.openecard.transport.paos;
 
+import org.openecard.common.I18n;
+
 
 /**
  * Exception for the PAOS system.
@@ -32,14 +34,20 @@ package org.openecard.transport.paos;
 public class PAOSException extends Exception {
 
     private static final long serialVersionUID = 1L;
+    private static final I18n lang = I18n.getTranslation("tr03112");
+    private String errMsg;
+    private Object[] params;
 
     /**
      * Creates an instance and initializes the exception with a message.
      *
      * @param msg The message describing the error.
+     * @param params
      */
-    public PAOSException(String msg) {
+    public PAOSException(String msg, Object ... params) {
 	super(msg);
+	errMsg = msg;
+	this.params = params;
     }
 
     /**
@@ -56,9 +64,38 @@ public class PAOSException extends Exception {
      *
      * @param msg The message describing the error.
      * @param cause The exception causing the error.
+     * @param params
      */
-    public PAOSException(String msg, Throwable cause) {
+    public PAOSException(String msg, Throwable cause, Object ... params) {
 	super(msg, cause);
+	errMsg = msg;
+	this.params = params;
+    }
+
+    @Override
+    public String getMessage() {
+	if (errMsg == null || errMsg.isEmpty()) {
+	    return super.getCause().getMessage();
+	} else {
+	    if (params != null) {
+		return lang.getOriginalMessage(errMsg, params);
+	    } else {
+		return lang.getOriginalMessage(errMsg);
+	    }
+	}
+    }
+
+    @Override
+    public String getLocalizedMessage() {
+	if (errMsg == null || errMsg.isEmpty()) {
+	    return super.getCause().getLocalizedMessage();
+	} else {
+	    if (params == null ) {
+		return lang.translationForKey(errMsg);
+	    } else {
+		return lang.translationForKey(errMsg, params);
+	    }
+	}
     }
 
 }

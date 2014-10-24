@@ -32,12 +32,14 @@ import org.w3c.dom.Element;
  * Implements the EACAdditionalInputType data structure.
  * See BSI-TR-03112, version 1.1.2, part 7, section 4.6.7.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Dirk Petrautzki
+ * @author Moritz Horsch
  */
 public class EACAdditionalInputType {
 
     public static final String SIGNATURE = "Signature";
+
+    private static final String ERROR = "element.parsing.exception.invalid_signature_number";
     //
     private final AuthDataMap authMap;
     private final byte[] signature;
@@ -82,18 +84,17 @@ public class EACAdditionalInputType {
      */
     private void parseSignatureElement(DIDAuthenticationDataType baseType) throws ElementParsingException {
 	int counter = 0;
-	String msg = "Invalid number of Signature elements in EACAdditionalType.";
 	for (Element element : baseType.getAny()) {
 	    if (element.getLocalName().equals(SIGNATURE)) {
 		counter++;
 		if (counter > 1) {    
-		    throw new ElementParsingException(msg);
+		    throw new ElementParsingException(ERROR);
 		}
 	    }
 	}
 
 	if (counter == 0) {
-	    throw new ElementParsingException(msg);
+	    throw new ElementParsingException(ERROR);
 	}
     }
 

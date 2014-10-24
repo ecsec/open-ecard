@@ -56,6 +56,8 @@ public class EAC1InputType {
     public static final String AUTHENTICATED_AUXILIARY_DATA = "AuthenticatedAuxiliaryData";
     public static final String TRANSACTION_INFO = "TransactionInfo";
 
+    private static final String ERROR = "element.parsing.exception.invalid_cert_number";
+
     private final AuthDataMap authMap;
     private final ArrayList<CardVerifiableCertificate> certificates;
     private final byte[] certificateDescription;
@@ -210,18 +212,17 @@ public class EAC1InputType {
 
     private void parseCertificateDescriptionElement(DIDAuthenticationDataType baseType) throws ElementParsingException {
 	int counter = 0;
-	String msg = "Invalid number of CertificateDescription elements in EACAdditionalType.";
 	for (Element element : baseType.getAny()) {
 	    if (element.getLocalName().equals(CERTIFICATE_DESCRIPTION)) {
 		counter++;
 		if (counter > 1) {
-		    throw new ElementParsingException(msg);
+		    throw new ElementParsingException(ERROR);
 		}
 	    }
 	}
 
 	if (counter == 0) {
-	    throw new ElementParsingException(msg);
+	    throw new ElementParsingException(ERROR);
 	}
     }
 

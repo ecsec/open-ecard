@@ -37,16 +37,16 @@ public class InvalidTCTokenException extends FatalActivationError {
 	super(BindingResultCode.RESOURCE_UNAVAILABLE, msg);
     }
 
-    public InvalidTCTokenException(String msg, Throwable ex) {
-	super(BindingResultCode.RESOURCE_UNAVAILABLE, msg, ex);
+    public InvalidTCTokenException(String msg, Throwable ex, Object ... params) {
+	super(BindingResultCode.RESOURCE_UNAVAILABLE, msg, ex, params);
     }
 
-    protected InvalidTCTokenException(BindingResultCode code, String msg) {
-	super(code, msg);
+    protected InvalidTCTokenException(BindingResultCode code, String msg, Object ... params) {
+	super(code, msg, params);
     }
 
-    protected InvalidTCTokenException(BindingResultCode code, String msg, Throwable ex) {
-	super(code, msg, ex);
+    protected InvalidTCTokenException(BindingResultCode code, String msg, Throwable ex, Object ... params) {
+	super(code, msg, ex, params);
     }
 
 }

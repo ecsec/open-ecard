@@ -30,12 +30,12 @@ package org.openecard.binding.tctoken.ex;
  */
 public class InvalidTCTokenElement extends RedirectionBaseError {
 
-    public InvalidTCTokenElement(String errorUrl, String message) {
-	super(errorUrl, message);
+    public InvalidTCTokenElement(String errorUrl, String message, Object ... params) {
+	super(errorUrl, message, null, params);
     }
 
-    public InvalidTCTokenElement(String errorUrl, String message, Throwable cause) {
-	super(errorUrl, message, cause);
+    public InvalidTCTokenElement(String errorUrl, String message, Throwable cause, Object ... params) {
+	super(errorUrl, message, cause, params);
     }
 
 }

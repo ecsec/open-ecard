@@ -24,6 +24,7 @@ package org.openecard.binding.tctoken.ex;
 
 import javax.annotation.Nonnull;
 import org.openecard.addon.bind.BindingResult;
+import org.openecard.common.I18n;
 
 
 /**
@@ -35,18 +36,54 @@ import org.openecard.addon.bind.BindingResult;
 public abstract class ActivationError extends Exception {
 
     private final BindingResult result;
+    private final Object[] params;
+    private final String msgCode;
 
-    public ActivationError(@Nonnull BindingResult result, @Nonnull String message) {
-	this(result, message, null);
+    protected final I18n lang = I18n.getTranslation("tr03112");
+
+    public ActivationError(@Nonnull BindingResult result, @Nonnull String message, Object ... params) {
+	this(result, message, null, params);
     }
 
-    public ActivationError(@Nonnull BindingResult result, @Nonnull String message, Throwable cause) {
+    public ActivationError(@Nonnull BindingResult result, @Nonnull String message, Throwable cause, Object ... params) {
 	super(message, cause);
 	this.result = result;
+	this.params = params;
+	this.msgCode = message;
     }
 
     public BindingResult getBindingResult() {
 	return result;
+    }
+
+    @Override
+    public String getMessage() {
+	if (msgCode == null || msgCode.isEmpty()) {
+	    if (super.getCause().getMessage() != null) {
+		return super.getCause().getMessage();
+	    } else {
+		return "";
+	    }
+	} else {
+	    if (params != null) {
+		return lang.getOriginalMessage(msgCode, params);
+	    } else {
+		return lang.getOriginalMessage(msgCode);
+	    }
+	}
+    }
+
+    @Override
+    public String getLocalizedMessage() {
+	if (msgCode == null || msgCode.isEmpty()) {
+	    return super.getCause().getLocalizedMessage();
+	} else {
+	    if (params != null) {
+		return lang.translationForKey(msgCode, params);
+	    } else {
+		return lang.translationForKey(msgCode);
+	    }
+	}
     }
 
 }

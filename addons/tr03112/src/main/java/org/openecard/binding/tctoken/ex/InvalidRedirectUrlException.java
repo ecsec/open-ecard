@@ -36,8 +36,8 @@ public class InvalidRedirectUrlException extends FatalActivationError {
 	this(msg, null);
     }
 
-    public InvalidRedirectUrlException(String msg, Throwable cause) {
-	super(BindingResultCode.WRONG_PARAMETER, msg, cause);
+    public InvalidRedirectUrlException(String msg, Throwable cause, Object ... params) {
+	super(BindingResultCode.WRONG_PARAMETER, msg, cause, params);
     }
 
 }

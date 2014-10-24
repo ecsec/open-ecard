@@ -56,6 +56,9 @@ public class HttpGetTask implements Callable<StartPAOSResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpGetTask.class);
 
+    // translation constants
+    private static final String WRONG_SERVER_RESULT = "connection.error.invalid_status_code";
+
     private final Dispatcher dispatcher;
     private final ConnectionHandleType connectionHandle;
     private final TCTokenRequest tokenRequest;
@@ -115,7 +118,7 @@ public class HttpGetTask implements Callable<StartPAOSResponse> {
 	conn.close();
 
 	if (statusCode < 200 || statusCode > 299) {
-	    throw new ConnectionError("Result returned from server is not OK (" + statusCode + ")");
+	    throw new ConnectionError(WRONG_SERVER_RESULT, statusCode);
 	}
     }
 

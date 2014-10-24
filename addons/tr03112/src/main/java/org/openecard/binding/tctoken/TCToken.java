@@ -41,6 +41,10 @@ public class TCToken extends TCTokenType {
 
     private static final Logger logger = LoggerFactory.getLogger(TCToken.class);
 
+    // Translation constants
+    private static final String NO_URL = "invalid.redirect.url.exception.no_url";
+    private static final String NO_REDIRECT_AVAILABLE = "invalid.redirect.url.exception.no_url_available";
+
     /**
      * Gets the CoomunicationErrorAddress for use in error conditions.
      * If the CommunicationErrorAddress is available this one is used.
@@ -58,7 +62,7 @@ public class TCToken extends TCTokenType {
 	    return result;
 	} catch (MalformedURLException ex) {
 	    // should not happen, but here it is anyways
-	    throw new InvalidRedirectUrlException("Error redirect URL is not a URL.");
+	    throw new InvalidRedirectUrlException(NO_URL);
 	}
     }
 
@@ -67,10 +71,10 @@ public class TCToken extends TCTokenType {
 	    try {
 		URL url = new URL(urlStr);
 	    } catch (MalformedURLException ex) {
-		throw new InvalidRedirectUrlException("Error redirect URL is not a URL.");
+		throw new InvalidRedirectUrlException(NO_URL);
 	    }
 	} else {
-	    throw new InvalidRedirectUrlException("No redirect address available for an error redirect.");
+	    throw new InvalidRedirectUrlException(NO_REDIRECT_AVAILABLE);
 	}
     }
 

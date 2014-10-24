@@ -38,11 +38,13 @@ import org.slf4j.LoggerFactory;
  * Implementation performing the redirect checks according to TR-03112.
  * The checks are described in BSI TR-03112 sec. 3.4.5.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class RedirectCertificateValidator implements CertificateValidator {
 
     private static final Logger logger = LoggerFactory.getLogger(RedirectCertificateValidator.class);
+    private static final String MALFORMED_URL = "redirect.cert.validator.malformed_subject_url";
+    private static final String INVALID_REDIRECT = "redirect.cert.validator.invalid_redirect";
     private final I18n lang = I18n.getTranslation("tctoken");
 
     private final Promise<Object> descPromise;
@@ -80,7 +82,7 @@ public class RedirectCertificateValidator implements CertificateValidator {
 		if (certDescribtionExists && ! TR03112Utils.isInCommCertificates(cert, desc.getCommCertificates())) {
 		    logger.error("The retrieved server certificate is NOT contained in the CommCertificates of "
 			    +	"the CertificateDescription extension of the eService certificate.");
-		    throw new ValidationError(lang.translationForKey("invalid_redirect"));
+		    throw new ValidationError(INVALID_REDIRECT);
 		}
 
 		// check if we match the SOP
@@ -116,7 +118,7 @@ public class RedirectCertificateValidator implements CertificateValidator {
 		return VerifierResult.FINISH;
 	    }
 	} catch (MalformedURLException ex) {
-	    throw new ValidationError("Failed to convert SubjectURL to URL class.", ex);
+	    throw new ValidationError(MALFORMED_URL, ex);
 	}
     }
 

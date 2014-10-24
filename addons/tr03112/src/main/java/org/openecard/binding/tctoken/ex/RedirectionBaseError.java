@@ -38,10 +38,14 @@ public abstract class RedirectionBaseError extends ActivationError {
 	this(errorUrl, message, null);
     }
 
-    public RedirectionBaseError(String errorUrl, String message, Throwable cause) {
+    public RedirectionBaseError(String errorUrl, Throwable cause) {
+	this(errorUrl, null, cause);
+    }
+
+    public RedirectionBaseError(String errorUrl, String message, Throwable cause, Object ... params) {
 	super(new BindingResult(BindingResultCode.REDIRECT)
 		.addAuxResultData(AuxDataKeys.REDIRECT_LOCATION, errorUrl),
-		message, cause);
+		message, cause, params);
     }
 
 }

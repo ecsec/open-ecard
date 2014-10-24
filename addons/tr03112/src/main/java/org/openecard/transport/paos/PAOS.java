@@ -100,6 +100,16 @@ public class PAOS {
     public static final QName PAOS_METADATA = new QName(ECardConstants.PAOS_VERSION_20, "MetaData");
     public static final QName PAOS_SERVICETYPE = new QName(ECardConstants.PAOS_VERSION_20, "ServiceType");
 
+    // Translation constants
+    private static final String NO_MESSAGE_ID = "paos.exception.no_message_id";
+    private static final String MESSAGE_ID_MISSMATCH = "paos.exception.message_id_mismatch";
+    private static final String CONNECTION_CLOSED = "paos.exception.conncetion_closed";
+    private static final String INVALID_HTTP_STATUS = "paos.exception.invalid_http_status_code";
+    private static final String DELIVERY_FAILED = "paos.exception.failed_delivery";
+    private static final String SOAP_MESSAGE_FAILURE = "paos.exception.soap_message_creation_failed";
+    private static final String MARSHALLING_ERROR = "dispatcher.exception.failed_jaxb_object_marshaling";
+    private static final String DISPATCHER_ERROR = "dispatcher.exception.dispatched_method_exception";
+
     private final String headerValuePaos;
     private final MessageIdGenerator idGenerator;
     private final WSMarshaller m;
@@ -179,11 +189,11 @@ public class PAOS {
 	try {
 	    String id = getMessageID(msg);
 	    if (id == null) {
-		throw new PAOSException("No MessageID in PAOS header.");
+		throw new PAOSException(NO_MESSAGE_ID);
 	    }
 	    if (! idGenerator.setRemoteID(id)) {
 		// IDs don't match throw exception
-		throw new PAOSException("MessageID from result doesn't match.");
+		throw new PAOSException(MESSAGE_ID_MISSMATCH);
 	    }
 	} catch (SOAPException e) {
 	    logger.error(e.getMessage(), e);
@@ -289,7 +299,7 @@ public class PAOS {
 	    boolean firstLoop = true;
 	    while (true) {
 		if (! firstLoop && tlsHandler.isSameChannel()) {
-		    throw new PAOSException("PAOS connection closed and reestablishment is forbidden.");
+		    throw new PAOSException(CONNECTION_CLOSED);
 		}
 		firstLoop = false;
 
@@ -323,8 +333,7 @@ public class PAOS {
 		    // Check the result code. According to the PAOS Spec section 9.4 the server has to send 202
 		    // All tested test servers return 200 so accept both but generate a warning message in case of 200
 		    if (statusCode != 200 && statusCode != 202) {
-			String msg2 = "Invalid http status code " + statusCode + " recieved from the PAOS endpoint.";
-			throw new PAOSException(msg2);
+			throw new PAOSException(INVALID_HTTP_STATUS, statusCode);
 		    } else if (statusCode == 200) {
 			String msg2 = "The PAOS endpoint sent the http status code 200 which does not conform to the"
 				+ "PAOS specification. (See section 9.4 Processing Rules of the PAOS Specification)";
@@ -354,15 +363,15 @@ public class PAOS {
 		} while (isReusable);
 	    }
 	} catch (HttpException ex) {
-	    throw new PAOSException("Failed to deliver or receive PAOS HTTP message.", ex);
+	    throw new PAOSException(DELIVERY_FAILED, ex);
 	} catch (IOException ex) {
 	    throw new PAOSException(ex);
 	} catch (SOAPException ex) {
-	    throw new PAOSException("Failed to create SOAP message instance from given JAXB message.", ex);
+	    throw new PAOSException(SOAP_MESSAGE_FAILURE, ex);
 	} catch (MarshallingTypeException ex) {
-	    throw new DispatcherException("Failed to marshal JAXB object.", ex);
+	    throw new DispatcherException(MARSHALLING_ERROR, ex);
 	} catch (InvocationTargetException ex) {
-	    throw new DispatcherException("The dispatched method threw an exception.", ex);
+	    throw new DispatcherException(DISPATCHER_ERROR, ex);
 	} catch (TransformerException ex) {
 	    throw new DispatcherException(ex);
 	} catch (WSException ex) {
@@ -373,7 +382,7 @@ public class PAOS {
 		    conn.close();
 		}
 	    } catch (IOException ex) {
-		throw new PAOSException(ex);
+//		throw new PAOSException(ex);
 	    }
 	}
     }
@@ -387,7 +396,7 @@ public class PAOS {
             saveServiceCertificate();
             return conn;
         } catch (IOException | URISyntaxException ex) {
-            throw new PAOSConnectionException("Failed to establish a connection to the eID-Server.", ex);
+            throw new PAOSConnectionException(ex);
         }
     }
 

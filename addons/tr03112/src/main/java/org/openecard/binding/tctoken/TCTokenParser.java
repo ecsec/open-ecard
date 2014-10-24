@@ -31,6 +31,7 @@ import javax.annotation.Nonnull;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import org.openecard.common.I18n;
 import org.openecard.common.io.LimitedInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,13 +49,16 @@ import org.xml.sax.SAXNotSupportedException;
 public class TCTokenParser {
 
     private static final Logger logger = LoggerFactory.getLogger(TCTokenParser.class);
+    private static final String MALFORMED_TOKEN = "invalid.tctoken.exception.malformed_tctoken";
+    private static final String UNSUPPORTED_FEATURE = "illegal.argument.exception.unsupported_parser_feature";
+    private final I18n lang = I18n.getTranslation("tr03112");
     private SAXParserFactory saxFactory;
     private TCTokenSAXHandler saxHandler;
 
     /**
      * Creates a new parser for TCTokens.
      *
-     * @throws IllegalArgumentException Thrown when the parser could not be initilized with the specified parameters.
+     * @throws IllegalArgumentException Thrown when the parser could not be initialized with the specified parameters.
      */
     public TCTokenParser() {
 	saxFactory = SAXParserFactory.newInstance();
@@ -64,7 +68,7 @@ public class TCTokenParser {
 	    saxFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 	} catch (ParserConfigurationException | SAXNotRecognizedException | SAXNotSupportedException ex) {
 	    logger.error(ex.getMessage(), ex);
-	    throw new IllegalArgumentException("Unsupported XML parser feature requested.", ex);
+	    throw new IllegalArgumentException(lang.translationForKey(UNSUPPORTED_FEATURE), ex);
 	}
     }
 
@@ -99,7 +103,7 @@ public class TCTokenParser {
 	    return tokens;
 	} catch (ParserConfigurationException | SAXException | IOException ex) {
 	    logger.error(ex.getMessage(), ex);
-	    throw new InvalidTCTokenException("TCToken is malformed and could not be parsed.", ex);
+	    throw new InvalidTCTokenException(MALFORMED_TOKEN, ex);
 	}
     }
 

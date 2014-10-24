@@ -21,6 +21,8 @@
  ***************************************************************************/
 package org.openecard.transport.paos;
 
+import org.openecard.common.I18n;
+
 
 /**
  *
@@ -28,11 +30,24 @@ package org.openecard.transport.paos;
  */
 public class PAOSConnectionException extends Exception {
 
-    public PAOSConnectionException(String msg) {
-	super(msg);
+    private static final I18n lang = I18n.getTranslation("tr03112");
+    private static final String EXCEPTION = "paos.connection.exception";
+
+    public PAOSConnectionException() {
+	super();
     }
 
-    public PAOSConnectionException(String msg, Throwable ex) {
-	super(msg, ex);
+    public PAOSConnectionException(Throwable ex) {
+	super(ex);
+    }
+
+    @Override
+    public String getMessage() {
+	return lang.getOriginalMessage(EXCEPTION);
+    }
+
+    @Override
+    public String getLocalizedMessage() {
+	return lang.translationForKey(EXCEPTION);
     }
 }

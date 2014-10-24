@@ -50,6 +50,12 @@ import org.slf4j.LoggerFactory;
 public class TCTokenContext extends ResourceContext {
 
     private static final Logger logger = LoggerFactory.getLogger(TCTokenContext.class);
+
+    // translation constants
+    private static final String RETRIEVAL_FAILED = "tctoken.retrieval.exception";
+    private static final String NO_TCTOKEN_IN_DATA = "invalid.tctoken.exception.no_tctoken";
+    private static final String ESERVICE_ERROR = "auth.server.exception";
+
     private final TCToken token;
 
     private TCTokenContext(TCToken token, ResourceContext base) {
@@ -69,7 +75,7 @@ public class TCTokenContext extends ResourceContext {
 	    ResourceContext ctx = ResourceContext.getStream(tcTokenURL);
 	    return generateTCToken(ctx.getData(), ctx);
 	} catch (IOException | ResourceException | ValidationError ex) {
-	    throw new TCTokenRetrievalException("Failed to retrieve the TCToken.", ex);
+	    throw new TCTokenRetrievalException(RETRIEVAL_FAILED, ex);
 	}
     }
 
@@ -92,7 +98,7 @@ public class TCTokenContext extends ResourceContext {
 	List<TCToken> tokens = parser.parse(data);
 
 	if (tokens.isEmpty()) {
-	    throw new InvalidTCTokenException("No TCToken found in the given data.");
+	    throw new InvalidTCTokenException(NO_TCTOKEN_IN_DATA);
 	}
 
 	// Verify the TCToken
@@ -101,8 +107,7 @@ public class TCTokenContext extends ResourceContext {
 	if (ver.isErrorToken()) {
 	    // TODO: find out what is the correct minor type
 	    String minor = "";
-	    String msg = "eService indicated an error.";
-	    throw new AuthServerException(token.getComErrorAddressWithParams(minor), msg);
+	    throw new AuthServerException(token.getComErrorAddressWithParams(minor), ESERVICE_ERROR);
 	}
 
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);

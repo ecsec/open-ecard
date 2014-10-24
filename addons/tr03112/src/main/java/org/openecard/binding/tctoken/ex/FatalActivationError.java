@@ -33,12 +33,12 @@ import org.openecard.addon.bind.BindingResultCode;
  */
 public abstract class FatalActivationError extends ActivationError {
 
-    public FatalActivationError(BindingResultCode code, String msg) {
-	super(new BindingResult(code).setResultMessage(msg), msg);
+    public FatalActivationError(BindingResultCode code, String msg, Object ... params) {
+	super(new BindingResult(code).setResultMessage(msg), msg, params);
     }
 
-    public FatalActivationError(BindingResultCode code, String msg, Throwable ex) {
-	super(new BindingResult(code).setResultMessage(msg), msg, ex);
+    public FatalActivationError(BindingResultCode code, String msg, Throwable ex, Object ... params) {
+	super(new BindingResult(code).setResultMessage(msg), msg, ex, params);
     }
 
 }

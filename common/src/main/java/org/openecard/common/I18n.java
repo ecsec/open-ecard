@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -53,14 +53,14 @@ import org.openecard.common.util.FileUtils;
  * anyotherfile_C
  * anyotherfile_C.html</pre>
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class I18n {
 
     private static final ConcurrentSkipListMap<String,I18n> translations;
 
     static {
-	translations = new ConcurrentSkipListMap<String,I18n>();
+	translations = new ConcurrentSkipListMap<>();
 	// preload important components
 	getTranslation("ifd");
 	getTranslation("sal");
@@ -87,6 +87,7 @@ public class I18n {
 
     private final String component;
     private final Properties translation;
+    private final Properties original;
     private final TreeMap<String, URL> translatedFiles;
 
     public static Locale getLocale() {
@@ -101,6 +102,7 @@ public class I18n {
 	// load applicable language files
 	// the order is: C -> lang -> lang_country
 	Properties defaults = loadFile(component, "C");
+	this.original = (Properties) defaults.clone();
 	if (!lang.isEmpty()) {
 	    Properties target = loadFile(component, lang);
 	    defaults = mergeProperties(defaults, target);
@@ -112,7 +114,7 @@ public class I18n {
 
 	this.component = component;
 	this.translation = defaults;
-	this.translatedFiles = new TreeMap<String, URL>();
+	this.translatedFiles = new TreeMap<>();
     }
 
     private static Properties loadFile(String component, String locale) {
@@ -175,6 +177,9 @@ public class I18n {
 
     /**
      * Calls {@link #translationForFile(java.lang.String, java.lang.String)} with the second parameter set to null.
+     * @param name
+     * @return
+     * @throws IOException
      */
     public URL translationForFile(String name) throws IOException {
 	return translationForFile(name, null);
@@ -243,6 +248,25 @@ public class I18n {
 	// no file found
 	translatedFiles.put(mapKey, null);
 	throw new IOException("No translation available for file '" + name + fileEnding + "'.");
+    }
+
+    /**
+     * Get the original English text which is referenced by the key.
+     *
+     * @param key Reference to the requested text.
+     * @param parameters
+     * @return A {@link String} containing the original English text of the message.
+     */
+    public String getOriginalMessage(String key, Object ... parameters) {
+	String result = original.getProperty(key.toLowerCase());
+	if (result == null) {
+	    return "<<No translation for key <" + key + ">>";
+	} else if (parameters.length != 0) {
+	    String formattedResult = String.format(result, parameters);
+	    return formattedResult;
+	} else {
+	    return result;
+	}
     }
 
 }

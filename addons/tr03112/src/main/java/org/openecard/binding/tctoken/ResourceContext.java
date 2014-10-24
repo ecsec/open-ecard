@@ -46,6 +46,7 @@ import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
+import org.openecard.common.I18n;
 import org.openecard.common.io.LimitedInputStream;
 import org.openecard.crypto.tls.proxy.ProxySettings;
 import org.openecard.common.util.FileUtils;
@@ -72,6 +73,15 @@ import org.slf4j.LoggerFactory;
 public class ResourceContext {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceContext.class);
+
+    // translation constants
+    private static final String INVALID_ADDRESS = "invalid.address.exception.no_https";
+    private static final String MAX_REDIRECTS = "resource.exception.max_redirects_exceeded";
+    private static final String MISSING_LOCATION_HEADER = "resource.exception.no_location_header";
+    private static final String INVALID_RESULT_STATUS = "invalid.result.status.exception";
+    private static final String FAILED_PROXY = "io.exception.failed_proxy_initialization";
+
+    private static final I18n lang = I18n.getTranslation("tr03112");
 
     private final ClientCertTlsClient tlsClient;
     private final TlsClientProtocol tlsClientProto;
@@ -176,7 +186,7 @@ public class ResourceContext {
 	    logger.info("Trying to load resource from: {}", url);
 
 	    if (maxRedirects == 0) {
-		throw new ResourceException("Maximum number of redirects exceeded.");
+		throw new ResourceException(MAX_REDIRECTS);
 	    }
 	    maxRedirects--;
 
@@ -189,7 +199,7 @@ public class ResourceContext {
 	    String resource = url.getFile();
 
 	    if (! "https".equals(protocol)) {
-		throw new InvalidAddressException("Specified URL is not a https-URL.");
+		throw new InvalidAddressException(INVALID_ADDRESS);
 	    }
 
 	    // open a TLS connection, retrieve the server certificate and save it
@@ -240,13 +250,12 @@ public class ResourceContext {
 		    url = new URL(uri);
 		} else {
 		    // FIXME: refactor exception handling
-		    String msg = "Resource could not be retrieved. Missing Location header in HTTP response.";
-		    throw new ResourceException(msg);
+		    throw new ResourceException(MISSING_LOCATION_HEADER);
 		}
 	    } else if (statusCode >= 400) {
 		// according to the HTTP RFC, codes greater than 400 signal errors
 		String msg = String.format("Received a result code %d '%s' from server.", statusCode, reason);
-		throw new InvalidResultStatus(msg);
+		throw new InvalidResultStatus(lang.translationForKey(INVALID_RESULT_STATUS, new Object[] {statusCode, reason}));
 	    } else {
 		conn.receiveResponseEntity(response);
 		entity = response.getEntity();
@@ -263,8 +272,9 @@ public class ResourceContext {
 		return getStreamInt(url, v, serverCerts, maxRedirects);
 	    }
 	} catch (URISyntaxException ex) {
-	    throw new IOException("Failed to initialize proxy.", ex);
+	    throw new IOException(lang.translationForKey(FAILED_PROXY), ex);
 	} catch (HttpException ex) {
+	    // don't translate this, it is handled in the ActivationAction
 	    throw new IOException("Invalid HTTP message received.", ex);
 	}
     }

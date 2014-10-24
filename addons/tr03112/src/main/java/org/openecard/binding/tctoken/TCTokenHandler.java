@@ -378,7 +378,9 @@ public class TCTokenHandler {
 		String msg2 = "The RefreshAddress contained in the TCToken is invalid. Redirecting to the "
 			+ "CommunicationErrorAddress.";
 		logger.error(msg2, ex);
-		response.setRefreshAddress(ex.getBindingResult().getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION));
+		response.setResultCode(BindingResultCode.REDIRECT);
+		response.addAuxResultData(AuxDataKeys.REDIRECT_LOCATION, ex.getBindingResult().getAuxResultData().get(
+			AuxDataKeys.REDIRECT_LOCATION));
 	    }
 
 	    return response;

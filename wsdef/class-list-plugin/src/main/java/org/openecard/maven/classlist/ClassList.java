@@ -25,10 +25,13 @@ package org.openecard.maven.classlist;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import javax.xml.bind.annotation.XmlRegistry;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -40,11 +43,11 @@ import org.apache.maven.plugins.annotations.Parameter;
  * Implementation of the {@code class-list} goal.
  * The plugin creates a file named in the {@code fileName} parameter and places it into the the directory named by the
  * parameter {@code outputDirectory}. The contents of the file are entries of fully qualified class names with all JAXB
- * element classes found below the directory named by the {@code classDirectory} parameter. The {@code excludes} list
- * can contain fully qualified class names which should not occur in the list.
+ * ObjectFactory classes found below the directory named by the {@code classDirectory} parameter. The {@code excludes}
+ * list can contain fully qualified class names which should not occur in the list.
  * <p>The plugin is executed in the {@code process-classes} phase. The goal is named {@code class-list}.</p>
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 @Mojo(name = "class-list", defaultPhase = LifecyclePhase.PROCESS_CLASSES, threadSafe = true)
 public class ClassList extends AbstractMojo {
@@ -129,20 +132,28 @@ public class ClassList extends AbstractMojo {
     private String getClassName(File classFile) {
 	String name = null;
 	try {
-	    String next = classFile.getCanonicalPath();
+	    String classFilePath = classFile.getCanonicalPath();
+	    String next = classFilePath;
 	    if (next.endsWith(".class")) {
 		next = next.substring(0, next.length() - 6);
 		next = next.substring(classDirectory.getCanonicalPath().length() + 1);
 		next = next.replace(File.separator, ".");
 		// consult excludes list
 		if (excludes.contains(next)) {
-		    getLog().info("Excluding class: " + next);
+		    getLog().info("Excluding class because of exclude list: " + next);
 		} else {
-		    getLog().debug("Adding class to list: " + next);
-		    name = next;
+		    URL url = classDirectory.toURI().toURL();
+		    URLClassLoader cl = new URLClassLoader(new URL[] {url});
+		    Class<?> c = cl.loadClass(next);
+		    if (c.isAnnotationPresent(XmlRegistry.class)) {
+			getLog().debug("Adding class to list: " + next);
+			name = next;
+		    } else {
+			getLog().info("Excluding class because of annotation mismatch: " + next);
+		    }
 		}
 	    }
-	} catch (IOException ex) {
+	} catch (IOException | ClassNotFoundException ex) {
 	    getLog().warn(ex);
 	}
 	return name;

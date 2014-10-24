@@ -36,6 +36,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.bind.annotation.XmlType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,7 @@ public class MarshallerImpl {
     static {
 	// load predefined classes
 	Class<?>[] jaxbClasses = getJaxbClasses();
-	baseXmlElementClasses = new ArrayList<Class<?>>(jaxbClasses.length);
+	baseXmlElementClasses = new ArrayList<>(jaxbClasses.length);
 	baseXmlElementClasses.addAll(Arrays.asList(jaxbClasses));
 
 	try {
@@ -79,7 +80,7 @@ public class MarshallerImpl {
      */
     public MarshallerImpl() {
 	userOverride = false;
-	userClasses = new HashSet<Class<?>>(baseXmlElementClasses);
+	userClasses = new HashSet<>(baseXmlElementClasses);
     }
 
 
@@ -157,7 +158,7 @@ public class MarshallerImpl {
 
     private static Class<?>[] getJaxbClasses() {
 	ClassLoader cl = Thread.currentThread().getContextClassLoader();
-	List<Class<?>> classes = new LinkedList<Class<?>>();
+	List<Class<?>> classes = new LinkedList<>();
 	InputStream classListStream = cl.getResourceAsStream("classes.lst");
 	InputStream classListStreamC = cl.getResourceAsStream("/classes.lst");
 
@@ -191,7 +192,8 @@ public class MarshallerImpl {
     }
 
     private static boolean isJaxbClass(Class<?> c) {
-	return c.getAnnotation(XmlType.class) != null;
+	return c.isAnnotationPresent(XmlType.class) ||
+		c.isAnnotationPresent(XmlRegistry.class);
     }
 
 }

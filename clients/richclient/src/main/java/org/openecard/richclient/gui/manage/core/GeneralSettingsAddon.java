@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -33,28 +33,28 @@ import org.openecard.richclient.gui.manage.AddonPanel;
 
 
 /**
- * Convenience class to create a connection settings add-on panel.
- * The panel only hosts a connection settings page.
+ * Convenience class to create a general settings add-on panel.
+ * The panel only hosts a general settings page.
  *
  * @author Tobias Wich
  */
-public class ConnectionSettingsAddon extends AddonPanel {
+public class GeneralSettingsAddon extends AddonPanel {
 
     private static final long serialVersionUID = 1L;
     private static final I18n lang = I18n.getTranslation("addon");
 
-    public ConnectionSettingsAddon() {
-	super(createAction(), lang.translationForKey("addon.list.core.connection"), null, loadLogo());
+    public GeneralSettingsAddon() {
+	super(createAction(), lang.translationForKey("addon.list.core.general"), null, loadLogo());
     }
 
     private static JPanel createAction() {
-	return new ConnectionsSettingsPanel();
+	return new GeneralSettingsPanel();
     }
 
     private static Image loadLogo() {
 	try {
-	    String fName = "images/network-wired.png";
-	    InputStream in = FileUtils.resolveResourceAsStream(ConnectionSettingsAddon.class, fName);
+	    String fName = "images/general.png";
+	    InputStream in = FileUtils.resolveResourceAsStream(GeneralSettingsAddon.class, fName);
 	    ImageIcon icon = new ImageIcon(FileUtils.toByteArray(in));
 	    return icon.getImage();
 	} catch (IOException ex) {

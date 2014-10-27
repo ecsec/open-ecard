@@ -40,10 +40,10 @@ import org.openecard.richclient.gui.manage.SettingsGroup;
  * Custom settings group for proxy settings.
  * The settings are made dynamic to reflect the choice made by the user.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
-public class ProxySettingsGroup extends SettingsGroup {
+public class ConnectionSettingsGroup extends SettingsGroup {
 
     private static final long serialVersionUID = 1L;
     private static final I18n lang = I18n.getTranslation("addon");
@@ -69,7 +69,7 @@ public class ProxySettingsGroup extends SettingsGroup {
     private final JTextField pass;
 
 
-    public ProxySettingsGroup() {
+    public ConnectionSettingsGroup() {
 	super(lang.translationForKey(GROUP), SettingsFactory.getInstance(OpenecardProperties.properties()));
 
 	selection = addSelectionItem(lang.translationForKey(SCHEME), lang.translationForKey(SCHEME_DESC),

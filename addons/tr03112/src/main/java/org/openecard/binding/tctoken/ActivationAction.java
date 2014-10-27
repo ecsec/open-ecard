@@ -35,6 +35,7 @@ import org.openecard.addon.bind.Body;
 import org.openecard.binding.tctoken.ex.NonGuiException;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
+import org.openecard.common.OpenecardProperties;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.message.DialogType;
 import org.slf4j.Logger;
@@ -112,12 +113,17 @@ public class ActivationAction implements AppPluginAction {
 	return response;
     }
 
+    private boolean isShowRemoveCard() {
+	String str = OpenecardProperties.getProperty("notification.omit_show_remove_card");
+	return ! Boolean.valueOf(str);
+    }
+
     /**
      * Use the {@link UserConsent} to display the success message.
      */
     private void showFinishMessage(TCTokenResponse response) {
 	// show the finish message just if we have a major ok
-	if (response.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
+	if (ECardConstants.Major.OK.equals(response.getResult().getResultMajor()) && isShowRemoveCard()) {
 	    String title = lang.translationForKey(FINISH_TITLE);
 	    String msg = lang.translationForKey(REMOVE_CARD);
 	    showBackgroundMessage(msg, title, DialogType.INFORMATION_MESSAGE);

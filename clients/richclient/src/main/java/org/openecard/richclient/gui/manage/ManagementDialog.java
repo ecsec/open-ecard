@@ -61,6 +61,7 @@ import org.openecard.gui.graphics.OecLogoBgWhite;
 import org.openecard.richclient.gui.manage.addon.DefaultSettingsGroup;
 import org.openecard.richclient.gui.manage.addon.DefaultSettingsPanel;
 import org.openecard.richclient.gui.manage.core.ConnectionSettingsAddon;
+import org.openecard.richclient.gui.manage.core.GeneralSettingsAddon;
 import org.openecard.richclient.gui.manage.core.LogSettingsAddon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -221,6 +222,7 @@ public class ManagementDialog extends JFrame {
 	coreList.addListSelectionListener(model);
 	addWindowListener(model); // save current addon settings when closed
 	// add addon panels
+	model.addElement(lang.translationForKey("addon.list.core.general"), new GeneralSettingsAddon());
 	model.addElement(lang.translationForKey("addon.list.core.connection"), new ConnectionSettingsAddon());
 	model.addElement(lang.translationForKey("addon.list.core.logging"), new LogSettingsAddon());
 

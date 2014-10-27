@@ -68,6 +68,9 @@ public class Recognizer implements Runnable {
 	if (rInfo != null) {
 	    ConnectionHandleType newHandle = HandlerUtils.copyHandle(handle);
 	    newHandle.getRecognitionInfo().setCardType(rInfo.getCardType());
+	    // Remove card identifier (ATR/ATS) as TR-03112-4 states that this should contain the ATR/ATS for unknown
+	    // cards and the ICCSN or something similar for known cards. Until we extract the ICCSN just remove the ATR.
+	    newHandle.getRecognitionInfo().setCardIdentifier(null);
 	    return newHandle;
 	} else {
 	    return null;

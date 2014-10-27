@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.TreeMap;
+import javax.annotation.Nullable;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
@@ -76,8 +77,10 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Interface to use the card recognition.
+ * This implementation provides card recognition based on a static tree.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class CardRecognition {
 
@@ -87,7 +90,7 @@ public class CardRecognition {
     private final RecognitionTree tree;
 
     private final org.openecard.ws.GetCardInfoOrACD cifRepo;
-    private final TreeMap<String, CardInfoType> cifCache = new TreeMap<String, CardInfoType>();
+    private final TreeMap<String, CardInfoType> cifCache = new TreeMap<>();
 
     private final Properties cardImagesMap = new Properties();
 
@@ -141,7 +144,7 @@ public class CardRecognition {
 	GetCardInfoOrACDResponse res = cifRepo.getCardInfoOrACD(req);
 	// checkout response if it contains our cardinfo
 	List<Object> cifs = res.getCardInfoOrCapabilityInfo();
-	ArrayList<CardInfoType> result = new ArrayList<CardInfoType>();
+	ArrayList<CardInfoType> result = new ArrayList<>();
 	for (Object next : cifs) {
 	    if (next instanceof CardInfoType) {
 		result.add((CardInfoType) next);
@@ -225,18 +228,21 @@ public class CardRecognition {
     }
 
     /**
+     * @return Stream containing the requested image.
      * @see #getCardImage(java.lang.String)
      */
     public InputStream getUnknownCardImage() {
 	return loadCardImage("unknown_card.png");
     }
     /**
+     * @return Stream containing the requested image.
      * @see #getCardImage(java.lang.String)
      */
     public InputStream getNoCardImage() {
 	return loadCardImage("no_card.jpg");
     }
     /**
+     * @return Stream containing the requested image.
      * @see #getCardImage(java.lang.String)
      */
     public InputStream getNoTerminalImage() {
@@ -258,6 +264,16 @@ public class CardRecognition {
     }
 
 
+    /**
+     * Recognizes the card in the defined reader.
+     *
+     * @param ifdName Name of the crad reader.
+     * @param slot Index of the slot in the reader.
+     * @return RecognitionInfo structure containing the card type of the detected card or {@code null} if no card could
+     *   be detected.
+     * @throws RecognitionException Thrown in case there was an error in the recognition.
+     */
+    @Nullable
     public RecognitionInfo recognizeCard(String ifdName, BigInteger slot) throws RecognitionException {
 	// connect card
 	byte[] slotHandle = connect(ifdName, slot);
@@ -393,7 +409,7 @@ public class CardRecognition {
 
 
     private List<CardCall> branch2list(CardCall first) {
-	LinkedList<CardCall> calls = new LinkedList<CardCall>();
+	LinkedList<CardCall> calls = new LinkedList<>();
 	calls.add(first);
 
 	CardCall next = first;

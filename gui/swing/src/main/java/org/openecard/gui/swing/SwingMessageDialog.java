@@ -38,10 +38,10 @@ import org.openecard.gui.swing.common.GUIDefaults;
 
 /**
  * Swing based MessageDialog implementation.
- * This implementation wraps the {@link JOptionPane} class.
+ * This implementation wraps the {@link JOptionPane} class from Swing.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public class SwingMessageDialog implements MessageDialog {
 
@@ -172,7 +172,10 @@ public class SwingMessageDialog implements MessageDialog {
 	if (options.length == 0) {
 	    throw new IllegalArgumentException("List of options must be given.");
 	}
-	ImageIcon icon = new ImageIcon(iconData);
+	ImageIcon icon = null;
+	if (iconData != null) {
+	    icon = new ImageIcon(iconData);
+	}
 	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), convertOptionType(optionType), icon,
 		options);
 	JDialog dialog = jop.createDialog(title);
@@ -188,29 +191,29 @@ public class SwingMessageDialog implements MessageDialog {
 
     private static int convertOptionType(OptionType optionType) {
 	switch (optionType) {
-	    case YES_NO_OPTION:        return 0;
-	    case YES_NO_CANCEL_OPTION: return 1;
-	    case OK_CANCEL_OPTION:     return 2;
+	    case YES_NO_OPTION:        return JOptionPane.YES_NO_OPTION;
+	    case YES_NO_CANCEL_OPTION: return JOptionPane.YES_NO_CANCEL_OPTION;
+	    case OK_CANCEL_OPTION:     return JOptionPane.OK_CANCEL_OPTION;
 	}
 	throw new IllegalArgumentException();
     }
 
     private static int convertDialogType(DialogType dialogType) {
 	switch (dialogType) {
-	    case ERROR_MESSAGE:       return 0;
-	    case INFORMATION_MESSAGE: return 1;
-	    case WARNING_MESSAGE:     return 2;
-	    case QUESTION_MESSAGE:    return 3;
-	    case PLAIN_MESSAGE:       return -1;
+	    case ERROR_MESSAGE:       return JOptionPane.ERROR_MESSAGE;
+	    case INFORMATION_MESSAGE: return JOptionPane.INFORMATION_MESSAGE;
+	    case WARNING_MESSAGE:     return JOptionPane.WARNING_MESSAGE;
+	    case QUESTION_MESSAGE:    return JOptionPane.QUESTION_MESSAGE;
+	    case PLAIN_MESSAGE:       return JOptionPane.PLAIN_MESSAGE;
 	}
 	throw new IllegalArgumentException();
     }
 
     private static ReturnType convertReturnType(int returnValue) {
 	switch (returnValue) {
-	    case 0:  return ReturnType.OK;
-	    case 1:  return ReturnType.NO;
-	    case 2:  return ReturnType.CANCEL;
+	    case JOptionPane.OK_OPTION:     return ReturnType.OK;
+	    case JOptionPane.NO_OPTION:     return ReturnType.NO;
+	    case JOptionPane.CANCEL_OPTION: return ReturnType.CANCEL;
 	}
 	throw new IllegalArgumentException();
     }

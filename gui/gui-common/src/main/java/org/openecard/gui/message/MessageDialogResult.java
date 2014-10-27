@@ -27,7 +27,7 @@ package org.openecard.gui.message;
  * Result class of the message dialog.
  * This class holds the selection the user made and if applicable also the user's input.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class MessageDialogResult {
 

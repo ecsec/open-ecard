@@ -32,6 +32,8 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import org.openecard.common.util.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -57,6 +59,7 @@ import org.openecard.common.util.FileUtils;
  */
 public class I18n {
 
+    private static final Logger logger = LoggerFactory.getLogger(I18n.class);
     private static final ConcurrentSkipListMap<String,I18n> translations;
 
     static {
@@ -67,24 +70,41 @@ public class I18n {
     }
 
     /**
-     * Load a translation for the specified component. If no translation for a
-     * component exists, a fallback method is used according to {@link java.util.ResourceBundle} and in case no
-     * translation exists at all, an empty I18n instance is returned.
+     * Load a translation for the specified component.
+     * If no translation for a component exists, a fallback method is used according to {@link java.util.ResourceBundle}
+     * and in case no translation exists at all, an empty I18n instance is returned.
+     * <p>This method uses the I18n class as a reference to find resources.</p>
      *
      * @param component String describing the component. This must also be the filename prefix of the translation.
      * @return I18n instance responsible for specified component.
+     * @see #getTranslation(java.lang.Class, java.lang.String)
      */
-    public synchronized static I18n getTranslation(String component) {
+    public static I18n getTranslation(String component) {
+	return getTranslation(I18n.class, component);
+    }
+
+    /**
+     * Load a translation for the specified component.
+     * If no translation for a component exists, a fallback method is used according to {@link java.util.ResourceBundle}
+     * and in case no translation exists at all, an empty I18n instance is returned.
+     * <p>This method uses the given class as a reference to find resources.</p>
+     *
+     * @param loaderReference Class used to resolve the classloader used to find the I18n resources.
+     * @param component String describing the component. This must also be the filename prefix of the translation.
+     * @return I18n instance responsible for specified component.
+     */
+    public synchronized static I18n getTranslation(Class<?> loaderReference, String component) {
 	if (translations.containsKey(component)) {
 	    return translations.get(component);
 	} else {
-	    I18n t = new I18n(component);
+	    I18n t = new I18n(loaderReference, component);
 	    translations.put(component, t);
 	    return t;
 	}
     }
 
 
+    private final Class<?> loaderReference;
     private final String component;
     private final Properties translation;
     private final Properties original;
@@ -95,7 +115,8 @@ public class I18n {
     }
 
 
-    private I18n(String component) {
+    private I18n(Class<?> loaderReference, String component) {
+	this.loaderReference = loaderReference;
 	Locale userLocale = getLocale();
 	String lang = userLocale.getLanguage();
 	String country = userLocale.getCountry();
@@ -117,18 +138,17 @@ public class I18n {
 	this.translatedFiles = new TreeMap<>();
     }
 
-    private static Properties loadFile(String component, String locale) {
+    private Properties loadFile(String component, String locale) {
 	// load properties or die tryin'
 	try {
 	    String fileName = "/openecard_i18n/" + component + "/Messages_" + locale + ".properties";
-	    InputStream in = FileUtils.resolveResourceAsStream(I18n.class, fileName);
+	    InputStream in = FileUtils.resolveResourceAsStream(loaderReference, fileName);
 	    Properties props = new Properties();
 	    Reader r = new InputStreamReader(in, "utf-8");
 	    props.load(r);
 	    return props;
-	} catch (IOException ex) {
-	    return new Properties();
-	} catch (RuntimeException ex) { // no such file and stuff
+	} catch (IOException | RuntimeException ex) {
+	    logger.warn("Failed to load resource {} for lang {}.", component, locale);
 	    return new Properties();
 	}
     }
@@ -223,7 +243,7 @@ public class I18n {
 	// try to guess correct file to load
 	if (!lang.isEmpty() && !country.isEmpty()) {
 	    String fileName = fnameBase + "_" + lang + "_" + country + fileEnding;
-	    URL url = FileUtils.resolveResourceAsURL(I18n.class, fileName);
+	    URL url = FileUtils.resolveResourceAsURL(loaderReference, fileName);
 	    if (url != null) {
 		translatedFiles.put(mapKey, url);
 		return url;
@@ -231,7 +251,7 @@ public class I18n {
 	}
 	if (!lang.isEmpty()) {
 	    String fileName = fnameBase + "_" + lang + fileEnding;
-	    URL url = FileUtils.resolveResourceAsURL(I18n.class, fileName);
+	    URL url = FileUtils.resolveResourceAsURL(loaderReference, fileName);
 	    if (url != null) {
 		translatedFiles.put(mapKey, url);
 		return url;
@@ -239,7 +259,7 @@ public class I18n {
 	}
 	// else
 	String fileName = fnameBase + "_C" + fileEnding;
-	URL url = FileUtils.resolveResourceAsURL(I18n.class, fileName);
+	URL url = FileUtils.resolveResourceAsURL(loaderReference, fileName);
 	if (url != null) {
 	    translatedFiles.put(mapKey, url);
 	    return url;

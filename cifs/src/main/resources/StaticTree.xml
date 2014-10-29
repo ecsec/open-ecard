@@ -482,6 +482,19 @@
 													<iso:RecognizedCardType>https://www.d-trust.net/produkte/d-trust-signaturkarten/d-trust-card/batch_v3</iso:RecognizedCardType>
 												</iso:Conclusion>
 											</iso:ResponseAPDU>
+											<iso:ResponseAPDU>
+												<iso:Body>
+													<iso:MatchingData>
+														<iso:Offset>1B</iso:Offset>
+														<iso:Length>1E</iso:Length>
+														<iso:MatchingValue>44415445562043617264202056332E30207374616E646172642020326761</iso:MatchingValue>
+													</iso:MatchingData>
+												</iso:Body>
+												<iso:Trailer>6282</iso:Trailer>
+												<iso:Conclusion>
+													<iso:RecognizedCardType>http://www.datev.de/smartcard</iso:RecognizedCardType>
+												</iso:Conclusion>
+											</iso:ResponseAPDU>
 										</iso:CardCall>
 									</iso:Conclusion>
 								</iso:ResponseAPDU>

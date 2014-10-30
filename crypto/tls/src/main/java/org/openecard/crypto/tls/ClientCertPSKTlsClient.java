@@ -79,12 +79,6 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
     public int[] getCipherSuites() {
 	return new int[] {
 	    // recommended ciphers from TR-02102-2 sec. 3.3.1
-	    CipherSuite.TLS_DHE_PSK_WITH_AES_256_GCM_SHA384,
-	    CipherSuite.TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA384,
-	    CipherSuite.TLS_DHE_PSK_WITH_AES_256_CBC_SHA384,
-	    CipherSuite.TLS_DHE_PSK_WITH_AES_128_GCM_SHA256,
-	    CipherSuite.TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256,
-	    CipherSuite.TLS_DHE_PSK_WITH_AES_128_CBC_SHA256,
 	    CipherSuite.TLS_RSA_PSK_WITH_AES_256_GCM_SHA384,
 	    CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA384,
 	    CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,

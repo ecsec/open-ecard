@@ -440,15 +440,6 @@ public class PAOS {
 		    + "PAOS specification. (See section 9.4 Processing Rules of the PAOS Specification)";
 	    logger.warn(msg2);
 	}
-
-	if (msg instanceof ResponseType) {
-	    ResponseType resp = (ResponseType) msg;
-	    try {
-		WSHelper.checkResult(resp);
-	    } catch (WSException ex) {
-		throw new PAOSException("Received HTML Error Code " + statusCode, ex);
-	    }
-	}
     }
 
     /**

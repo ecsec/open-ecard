@@ -70,8 +70,8 @@
 	    <scope>test</scope>
 	</dependency>
 	<dependency>
-	    <groupId>org.openecard.management</groupId>
-	    <artifactId>tiny-management</artifactId>
+	    <groupId>org.openecard</groupId>
+	    <artifactId>management</artifactId>
 	    <version>${project.version}</version>
 	    <scope>test</scope>
 	</dependency>

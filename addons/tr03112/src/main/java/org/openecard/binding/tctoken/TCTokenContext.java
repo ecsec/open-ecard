@@ -114,7 +114,7 @@ public class TCTokenContext extends ResourceContext {
 	List<Pair<URL, Certificate>> resultPoints = base.getCerts();
 	// probably just for tests
 	if (! resultPoints.isEmpty()) {
-	    Pair<URL, Certificate> last = resultPoints.get(resultPoints.size() - 1);
+	    Pair<URL, Certificate> last = resultPoints.get(0);
 	    dynCtx.put(TR03112Keys.TCTOKEN_URL, last.p1);
 	}
 

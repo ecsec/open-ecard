@@ -22,7 +22,6 @@
 
 package org.openecard.transport.paos;
 
-import iso.std.iso_iec._24727.tech.schema.ResponseType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.io.ByteArrayInputStream;
@@ -229,13 +228,7 @@ public class PAOS {
 	} catch (MarshallingTypeException ex) {
 	    logger.error(ex.getMessage(), ex);
 	    throw new PAOSException(ex.getMessage(), ex);
-	} catch (WSMarshallerException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw new PAOSException(ex.getMessage(), ex);
-	} catch (IOException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw new PAOSException(ex.getMessage(), ex);
-	} catch (SAXException ex) {
+	} catch (WSMarshallerException | IOException | SAXException ex) {
 	    logger.error(ex.getMessage(), ex);
 	    throw new PAOSException(ex.getMessage(), ex);
 	}
@@ -293,10 +286,14 @@ public class PAOS {
 	    PAOSConnectionException {
 	Object msg = message;
 	StreamHttpClientConnection conn = null;
+	HttpContext ctx = new BasicHttpContext();
+	HttpRequestExecutor httpexecutor = new HttpRequestExecutor();
+	DefaultConnectionReuseStrategy reuse = new DefaultConnectionReuseStrategy();
+	boolean firstLoop = true;
+	boolean connectionDropped = false;
 
 	try {
 	    // loop and send makes a computer happy
-	    boolean firstLoop = true;
 	    while (true) {
 		if (! firstLoop && tlsHandler.isSameChannel()) {
 		    throw new PAOSException(CONNECTION_CLOSED);
@@ -306,66 +303,64 @@ public class PAOS {
 		// set up connection to PAOS endpoint
 		conn = openHttpStream();
 
-		HttpContext ctx = new BasicHttpContext();
-		HttpRequestExecutor httpexecutor = new HttpRequestExecutor();
-		DefaultConnectionReuseStrategy reuse = new DefaultConnectionReuseStrategy();
 		boolean isReusable;
 		// send as long as connection is valid
-		do {
-		    // prepare request
-		    String resource = tlsHandler.getResource();
-		    BasicHttpEntityEnclosingRequest req = new BasicHttpEntityEnclosingRequest("POST", resource);
-		    req.setParams(conn.getParams());
-		    HttpRequestHelper.setDefaultHeader(req, tlsHandler.getServerAddress());
-		    req.setHeader(HEADER_KEY_PAOS, headerValuePaos);
-		    req.setHeader("Accept", "text/xml, application/xml, application/vnd.paos+xml");
+		try {
+		    do {
+			// prepare request
+			String resource = tlsHandler.getResource();
+			BasicHttpEntityEnclosingRequest req = new BasicHttpEntityEnclosingRequest("POST", resource);
+			req.setParams(conn.getParams());
+			HttpRequestHelper.setDefaultHeader(req, tlsHandler.getServerAddress());
+			req.setHeader(HEADER_KEY_PAOS, headerValuePaos);
+			req.setHeader("Accept", "text/xml, application/xml, application/vnd.paos+xml");
 
-		    ContentType reqContentType = ContentType.create("application/vnd.paos+xml", "UTF-8");
-		    HttpUtils.dumpHttpRequest(logger, "before adding content", req);
-		    String reqMsgStr = createPAOSResponse(msg);
-		    StringEntity reqMsg = new StringEntity(reqMsgStr, reqContentType);
-		    req.setEntity(reqMsg);
-		    req.setHeader(reqMsg.getContentType());
-		    req.setHeader("Content-Length", Long.toString(reqMsg.getContentLength()));
-		    // send request and receive response
-		    HttpResponse response = httpexecutor.execute(req, conn, ctx);
-		    int statusCode = response.getStatusLine().getStatusCode();
-		    // Check the result code. According to the PAOS Spec section 9.4 the server has to send 202
-		    // All tested test servers return 200 so accept both but generate a warning message in case of 200
-		    if (statusCode != 200 && statusCode != 202) {
-			throw new PAOSException(INVALID_HTTP_STATUS, statusCode);
-		    } else if (statusCode == 200) {
-			String msg2 = "The PAOS endpoint sent the http status code 200 which does not conform to the"
-				+ "PAOS specification. (See section 9.4 Processing Rules of the PAOS Specification)";
-			logger.warn(msg2);
+			ContentType reqContentType = ContentType.create("application/vnd.paos+xml", "UTF-8");
+			HttpUtils.dumpHttpRequest(logger, "before adding content", req);
+			String reqMsgStr = createPAOSResponse(msg);
+			StringEntity reqMsg = new StringEntity(reqMsgStr, reqContentType);
+			req.setEntity(reqMsg);
+			req.setHeader(reqMsg.getContentType());
+			req.setHeader("Content-Length", Long.toString(reqMsg.getContentLength()));
+			// send request and receive response
+			HttpResponse response = httpexecutor.execute(req, conn, ctx);
+			int statusCode = response.getStatusLine().getStatusCode();
+			checkHTTPStatusCode(statusCode);
+
+			conn.receiveResponseEntity(response);
+			HttpEntity entity = response.getEntity();
+			byte[] entityData = FileUtils.toByteArray(entity.getContent());
+			HttpUtils.dumpHttpResponse(logger, response, entityData);
+			// consume entity
+			Object requestObj = processPAOSRequest(new ByteArrayInputStream(entityData));
+
+			// break when message is startpaosresponse
+			if (requestObj instanceof StartPAOSResponse) {
+			    StartPAOSResponse startPAOSResponse = (StartPAOSResponse) requestObj;
+			    WSHelper.checkResult(startPAOSResponse);
+			    return startPAOSResponse;
+			}
+
+			// send via dispatcher
+			msg = dispatcher.deliver(requestObj);
+
+			// check if connection can be used one more time
+			isReusable = reuse.keepAlive(response, ctx);
+			connectionDropped = false;
+		    } while (isReusable);
+		} catch (IOException ex) {
+		    connectionDropped = true;
+		    if (! connectionDropped) {
+			logger.warn("PAOS server closed the connection. Trying to connect again. (Try {})");
+		    } else {
+			String errMsg = "Error in the link to the PAOS server.";
+			logger.error(errMsg);
+			throw new PAOSException(DELIVERY_FAILED, ex);
 		    }
-
-		    conn.receiveResponseEntity(response);
-		    HttpEntity entity = response.getEntity();
-		    byte[] entityData = FileUtils.toByteArray(entity.getContent());
-		    HttpUtils.dumpHttpResponse(logger, response, entityData);
-		    checkHTTPStatusCode(msg, statusCode);
-		    // consume entity
-		    Object requestObj = processPAOSRequest(new ByteArrayInputStream(entityData));
-
-		    // break when message is startpaosresponse
-		    if (requestObj instanceof StartPAOSResponse) {
-			StartPAOSResponse startPAOSResponse = (StartPAOSResponse) requestObj;
-			WSHelper.checkResult(startPAOSResponse);
-			return startPAOSResponse;
-		    }
-
-		    // send via dispatcher
-		    msg = dispatcher.deliver(requestObj);
-
-		    // check if connection can be used one more time
-		    isReusable = reuse.keepAlive(response, ctx);
-		} while (isReusable);
+		}
 	    }
 	} catch (HttpException ex) {
 	    throw new PAOSException(DELIVERY_FAILED, ex);
-	} catch (IOException ex) {
-	    throw new PAOSException(ex);
 	} catch (SOAPException ex) {
 	    throw new PAOSException(SOAP_MESSAGE_FAILURE, ex);
 	} catch (MarshallingTypeException ex) {
@@ -426,11 +421,10 @@ public class PAOS {
      * Check the status code returned from the server.
      * If the status code indicates an error, a PAOSException will be thrown.
      *
-     * @param msg The last message we sent to the server
      * @param statusCode The status code we received from the server
      * @throws PAOSException If the server returned a HTTP error code
      */
-    private void checkHTTPStatusCode(Object msg, int statusCode) throws PAOSException {
+    private void checkHTTPStatusCode(int statusCode) throws PAOSException {
 	// Check the result code. According to the PAOS Spec section 9.4 the server has to send 202
 	// All tested test servers return 200 so accept both but generate a warning message in case of 200
 	if (statusCode != 200 && statusCode != 202) {

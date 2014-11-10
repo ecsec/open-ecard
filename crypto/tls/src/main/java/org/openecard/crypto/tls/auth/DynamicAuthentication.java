@@ -108,6 +108,19 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
     }
 
     /**
+     * Adds a certificate verifier to the chain of the certificate verifiers.
+     *
+     * @param certVerifier The verifier to add.
+     */
+    public void addCertificateVerifier(@Nonnull CertificateVerifier certVerifier) {
+	CertificateVerifierBuilder builder = new CertificateVerifierBuilder();
+	if (this.certVerifier != null) {
+	    builder = builder.and(this.certVerifier);
+	}
+	this.certVerifier = builder.and(certVerifier).build();
+    }
+
+    /**
      * Sets the factory which is used to find and create a credential reference for the authentication.
      *
      * @see #getClientCredentials(org.openecard.bouncycastle.crypto.tls.CertificateRequest)

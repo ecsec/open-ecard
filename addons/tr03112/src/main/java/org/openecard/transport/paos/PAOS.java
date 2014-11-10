@@ -42,18 +42,14 @@ import org.openecard.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openecard.apache.http.protocol.BasicHttpContext;
 import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.apache.http.protocol.HttpRequestExecutor;
-import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
-import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
-import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.util.FileUtils;
 import org.openecard.binding.tctoken.TlsConnectionHandler;
-import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import org.openecard.transport.httpcore.HttpRequestHelper;
 import org.openecard.transport.httpcore.HttpUtils;
 import org.openecard.transport.httpcore.StreamHttpClientConnection;
@@ -349,8 +345,8 @@ public class PAOS {
 			connectionDropped = false;
 		    } while (isReusable);
 		} catch (IOException ex) {
-		    connectionDropped = true;
 		    if (! connectionDropped) {
+			connectionDropped = true;
 			logger.warn("PAOS server closed the connection. Trying to connect again. (Try {})");
 		    } else {
 			String errMsg = "Error in the link to the PAOS server.";
@@ -388,33 +384,10 @@ public class PAOS {
 	try {
             TlsClientProtocol handler = tlsHandler.createTlsConnection();
             conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());
-            saveServiceCertificate();
             return conn;
         } catch (IOException | URISyntaxException ex) {
             throw new PAOSConnectionException(ex);
         }
-    }
-
-    /**
-     * Stores the received eService certificate as {@link Certificate} in the dynamic context.
-     * This will only take place when {@link DynamicAuthentication} is used as {@link TlsAuthentication}.
-     */
-    private void saveServiceCertificate() {
-	try {
-	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	    TlsAuthentication authentication = tlsHandler.getTlsClient().getAuthentication();
-	    if (authentication instanceof DynamicAuthentication) {
-		DynamicAuthentication noAuth = (DynamicAuthentication) authentication;
-		// server certificate is the first one in the chain
-		org.openecard.bouncycastle.crypto.tls.Certificate certificate = noAuth.getServerCertificate();
-		dynCtx.put(TR03112Keys.ESERVICE_CERTIFICATE, certificate);
-	    } else {
-		String msg = "eService Certificate not saved in DynamicContext.";
-		logger.debug(msg);
-	    }
-	} catch (IOException e) {
-	    logger.error("Certificate couldn't be encoded.", e);
-	}
     }
 
     /**

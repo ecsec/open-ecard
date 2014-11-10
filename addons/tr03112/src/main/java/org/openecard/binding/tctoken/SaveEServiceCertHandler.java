@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,26 +20,30 @@
  *
  ***************************************************************************/
 
-package org.openecard.crypto.tls;
+package org.openecard.binding.tctoken;
 
-import java.io.IOException;
+import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.common.DynamicContext;
+import org.openecard.crypto.tls.CertificateVerificationException;
+import org.openecard.crypto.tls.CertificateVerifier;
 
 
 /**
- * Exception indicating a failed certificate verification.
+ * Verifier saving the certificate in the dynamic context.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
-public class CertificateVerificationException extends IOException {
+public class SaveEServiceCertHandler implements CertificateVerifier {
 
-    private static final long serialVersionUID = 2579237912354L;
+    boolean firstCert = true;
 
-    public CertificateVerificationException(String message) {
-	super(message);
-    }
-
-    public CertificateVerificationException(String message, Throwable cause) {
-	super(message, cause);
+    @Override
+    public void isValid(Certificate chain, String hostOrIP) throws CertificateVerificationException {
+	if (firstCert) {
+	    firstCert = false;
+	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    dynCtx.put(TR03112Keys.ESERVICE_CERTIFICATE, chain);
+	}
     }
 
 }

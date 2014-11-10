@@ -44,6 +44,7 @@ import org.openecard.crypto.tls.ClientCertTlsClient;
 import org.openecard.crypto.tls.TlsPSKIdentityImpl;
 import org.openecard.crypto.tls.auth.CredentialFactory;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
+import org.openecard.crypto.tls.verify.SameCertVerifier;
 import org.openecard.crypto.tls.auth.SmartCardCredentialFactory;
 import org.openecard.crypto.tls.proxy.ProxySettings;
 
@@ -128,17 +129,17 @@ public class TlsConnectionHandler {
 		}
 
 		// Set up TLS connection
+		DynamicAuthentication tlsAuth = new DynamicAuthentication(serverHost);
+
 		switch (secProto) {
 		    case "urn:ietf:rfc:4279":
 		    case "urn:ietf:rfc:5487":
 			{
-			    DynamicAuthentication tlsAuth = new DynamicAuthentication(serverHost);
 			    // FIXME: verify certificate chain as soon as a usable solution exists for the trust problem
 			    //tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 			    byte[] psk = token.getPathSecurityParameters().getPSK();
 			    TlsPSKIdentity pskId = new TlsPSKIdentityImpl(sessionId.getBytes(), psk);
 			    tlsClient = new ClientCertPSKTlsClient(pskId, serverHost, doSni);
-			    tlsClient.setAuthentication(tlsAuth);
 			    tlsClient.setClientVersion(version);
 			    tlsClient.setMinimumVersion(minVersion);
 			    break;
@@ -146,13 +147,11 @@ public class TlsConnectionHandler {
 		    case "urn:ietf:rfc:4346":
 		    case "urn:ietf:rfc:5246":
 			{
-			    DynamicAuthentication tlsAuth = new DynamicAuthentication(serverHost);
 			    // use a smartcard for client authentication if needed
 			    tlsAuth.setCredentialFactory(makeSmartCardCredential());
 			    // FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
 			    //tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 			    tlsClient = new ClientCertDefaultTlsClient(serverHost, doSni);
-			    tlsClient.setAuthentication(tlsAuth);
 			    tlsClient.setClientVersion(version);
 			    tlsClient.setMinimumVersion(minVersion);
 			    break;
@@ -160,6 +159,14 @@ public class TlsConnectionHandler {
 		    default:
 			throw new ConnectionError(UNKNOWN_SEC_PROTOCOL, secProto);
 		}
+
+		// make sure nobody changes the server when the connection gets reestablished
+		tlsAuth.addCertificateVerifier(new SameCertVerifier());
+		// save eService certificate for use in EAC
+		tlsAuth.addCertificateVerifier(new SaveEServiceCertHandler());
+
+		// set the authentication class in the tls client
+		tlsClient.setAuthentication(tlsAuth);
 	    }
 
 	} catch (MalformedURLException ex) {

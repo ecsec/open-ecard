@@ -24,22 +24,27 @@ package org.openecard.sal.protocol.eac;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
+import java.io.IOException;
 import java.util.Map;
+import javax.xml.bind.JAXBException;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.sal.protocol.eac.anytype.EAC2OutputType;
 import org.openecard.sal.protocol.eac.anytype.EACAdditionalInputType;
+import org.openecard.common.util.SchemaValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 
 /**
- * Implements Chip Authentication protocol step according to BSI-TR-03112-7.
- * See BSI-TR-03112, version 1.1.2, part 7, section 4.6.6.
+ * Implements Chip Authentication protocol step according to BSI-TR-03112-7. See BSI-TR-03112, version 1.1.2, part 7,
+ * section 4.6.6.
  *
  * @author Moritz Horsch
  * @author Dirk Petrautzki
@@ -70,6 +75,23 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
 
 	try {
+	    try {
+		boolean messageValid = SchemaValidator.validateObject(didAuthenticate, "ISO24727-Protocols.xsd");
+		if (!messageValid) {
+		    String msg = "The validation of the EACAdditionalInputType message failed so there are missing or invalid elements.";
+		    logger.error(msg);
+		    String msg2 = "Missing or unknown parameter found while the validation of the EACAdditionalInputType message.";
+		    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg2));
+		    return response;
+		}
+	    } catch (SAXException | JAXBException | IOException ex) {
+		String msg = "The validation process of the EAC2InputType message was aborted because of the occurrence on"
+			+ " an exception.";
+		logger.error(msg, ex);
+		String msg2 = "EACAdditionalInputType message validation was not possible.";
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg2));
+		return response;
+	    }
 	    EACAdditionalInputType eacAdditionalInput = new EACAdditionalInputType(didAuthenticate.getAuthenticationProtocolData());
 	    EAC2OutputType eac2Output = eacAdditionalInput.getOutputType();
 

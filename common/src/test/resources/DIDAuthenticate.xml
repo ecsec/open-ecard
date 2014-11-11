@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns4:DIDAuthenticate xmlns:ns10="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#" xmlns:ns11="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:ns12="http://www.w3.org/2001/04/xmlenc#" xmlns:ns13="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:ns14="urn:oasis:names:tc:SAML:1.0:assertion" xmlns:ns15="http://www.w3.org/2001/04/xmldsig-more#" xmlns:ns16="http://paos.eidserver.openlimit.com/" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" xmlns:ns3="http://www.bsi.bund.de/ecard/api/1.1" xmlns:ns4="urn:iso:std:iso-iec:24727:tech:schema" xmlns:ns5="http://uri.etsi.org/02231/v3.1.2#" xmlns:ns6="http://uri.etsi.org/02231/v2.1.1#" xmlns:ns7="http://uri.etsi.org/02231/v2.x#" xmlns:ns8="http://www.setcce.org/schemas/ers" xmlns:ns9="http://uri.etsi.org/01903/v1.3.2#">
+    <ns4:ConnectionHandle>
+	<ns4:SlotHandle>E5E08F8AA3421592CADE749CFB4B7424</ns4:SlotHandle>
+    </ns4:ConnectionHandle>
+    <ns4:DIDName>PIN</ns4:DIDName>
+    <ns4:AuthenticationProtocolData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns4:EAC2InputType" Protocol="http://uri.bla.blub">
+	<ns4:Certificate>7F2181E77F4E81A05F290100420E44455445535465494430303030347F494F060A04007F000702020202038641048CA9D7206B36E19B1D78F7831E22F2457696380ACF1751C7E9C7275AFE37716D31C1B9E32EAD128B4BB203047E9FC1FF57F27CDFE9D19D4D21F1BA718597B1B75F2010444544565449444454523130313231387F4C12060904007F0007030102025305400513FF875F25060104010002035F24060105000102015F37403EE8B0E9158966577592A47EE24D20480D630B39A609A9A1169391A1211851732B5A3C17183F9390040C8AFA9D051EE1B789C2535F8404C2569130BCAEC9087E</ns4:Certificate>
+	<ns4:EphemeralPublicKey>67B757C3C287FB11EEFE8199BE0228D00DB478B0636451F8155C59B3C1B0D33B3CCA63921892CD20B2EF8FDF45DC3658C7D2F6F5C01BA266FC23908FF3869B70</ns4:EphemeralPublicKey>
+	<ns4:Signature>A4436072F294C6A25E92AD4D8F9DDBE4722E3B195B3152A19629EC191DBB26908E5443F2CD31991F326927297A5BF1AE494C5B9C2C63292AD566F259F43DAB72</ns4:Signature>
+    </ns4:AuthenticationProtocolData>
+</ns4:DIDAuthenticate>

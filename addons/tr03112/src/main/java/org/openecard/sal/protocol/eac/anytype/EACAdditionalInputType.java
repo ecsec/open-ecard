@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.common.anytype.AuthDataMap;
 import org.w3c.dom.Element;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 
 
 /**
@@ -39,8 +40,6 @@ public class EACAdditionalInputType {
 
     public static final String SIGNATURE = "Signature";
 
-    private static final String ERROR = "element.parsing.exception.invalid_signature_number";
-    //
     private final AuthDataMap authMap;
     private final byte[] signature;
 
@@ -88,13 +87,13 @@ public class EACAdditionalInputType {
 	    if (element.getLocalName().equals(SIGNATURE)) {
 		counter++;
 		if (counter > 1) {    
-		    throw new ElementParsingException(ERROR);
+		    throw new ElementParsingException(INVALID_SIGNATURE_NUMBER);
 		}
 	    }
 	}
 
 	if (counter == 0) {
-	    throw new ElementParsingException(ERROR);
+	    throw new ElementParsingException(INVALID_SIGNATURE_NUMBER);
 	}
     }
 

@@ -76,6 +76,7 @@ import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 
 
 /**
@@ -100,15 +101,6 @@ import org.slf4j.LoggerFactory;
 public class TCTokenHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(TCTokenHandler.class);
-    // Translation constants
-    private static final String ERROR_TITLE = "error";
-    private static final String ERROR_HEADER = "err_header";
-    private static final String ERROR_MSG_IND = "err_msg_indicator";
-    private static final String REMOVE_CARD = "remove_card_msg";
-    private static final String REFRESH_DETERMINATION_FAILED = "invalid.redirect.url.exception.refresh_address_determination_failed";
-    private static final String REFRESH_URL_ERROR = "illegal.state.exception.invalid_refresh_address_in_tctoken";
-    private static final String NO_RESPONSE_FROM_SERVER = "paos.exception.no_response_from_server";
-    private static final String UNKNOWN_ECARD_ERROR = "paos.exception.unknown_ecard_exception";
 
     private static final I18n langTr03112 = I18n.getTranslation("tr03112");
 
@@ -367,7 +359,7 @@ public class TCTokenHandler {
 		    errorMsg = langTr03112.translationForKey(UNKNOWN_ECARD_ERROR);
 		    break;
 	    }
-		
+
 	    showErrorMessage(errorMsg);
 
 	    if (innerException instanceof WSException) {
@@ -466,11 +458,11 @@ public class TCTokenHandler {
 	} catch (MalformedURLException ex) {
 	    throw new IllegalStateException(langTr03112.translationForKey(REFRESH_URL_ERROR), ex);
 	} catch (ResourceException | InvalidAddressException | ValidationError | IOException ex) {
-	    String communicationErrorAddress = 
-		    response.getTCToken().getComErrorAddressWithParams(ECardConstants.Minor.App.COMMUNICATION_ERROR);
+	    String code = ECardConstants.Minor.App.COMMUNICATION_ERROR;
+	    String communicationErrorAddress = response.getTCToken().getComErrorAddressWithParams(code);
 	    
 	    if (communicationErrorAddress != null && ! communicationErrorAddress.isEmpty()) {
-		throw new SecurityViolationException(communicationErrorAddress, ex);
+		throw new SecurityViolationException(communicationErrorAddress, REFRESH_DETERMINATION_FAILED, ex);
 	    }
 	    throw new InvalidRedirectUrlException(REFRESH_DETERMINATION_FAILED, ex);
 	}

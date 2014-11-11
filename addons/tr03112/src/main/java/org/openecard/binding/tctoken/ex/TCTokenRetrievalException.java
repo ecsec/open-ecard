@@ -23,6 +23,7 @@
 package org.openecard.binding.tctoken.ex;
 
 import org.openecard.addon.bind.BindingResultCode;
+import org.openecard.common.I18nKey;
 
 
 /**
@@ -33,11 +34,19 @@ import org.openecard.addon.bind.BindingResultCode;
 public class TCTokenRetrievalException extends InvalidTCTokenException {
 
     public TCTokenRetrievalException(String msg) {
-	this(msg, null);
+	super(BindingResultCode.RESOURCE_UNAVAILABLE, msg);
     }
 
     public TCTokenRetrievalException(String msg, Throwable ex) {
 	super(BindingResultCode.RESOURCE_UNAVAILABLE, msg, ex);
+    }
+
+    public TCTokenRetrievalException(I18nKey key, Object... params) {
+	super(BindingResultCode.RESOURCE_UNAVAILABLE, key, params);
+    }
+
+    public TCTokenRetrievalException(I18nKey key, Throwable cause, Object... params) {
+	super(BindingResultCode.RESOURCE_UNAVAILABLE, key, cause, params);
     }
 
 }

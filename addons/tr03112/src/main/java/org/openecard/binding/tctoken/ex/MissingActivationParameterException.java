@@ -22,7 +22,9 @@
 
 package org.openecard.binding.tctoken.ex;
 
+import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
+import org.openecard.common.I18nKey;
 
 
 /**
@@ -33,7 +35,19 @@ import org.openecard.addon.bind.BindingResultCode;
 public class MissingActivationParameterException extends FatalActivationError {
 
     public MissingActivationParameterException(String msg) {
-	super(BindingResultCode.MISSING_PARAMETER, msg);
+	super(new BindingResult(BindingResultCode.MISSING_PARAMETER), msg);
+    }
+
+    public MissingActivationParameterException(String msg, Throwable ex) {
+	super(new BindingResult(BindingResultCode.MISSING_PARAMETER), msg, ex);
+    }
+
+    public MissingActivationParameterException(I18nKey key, Object... params) {
+	super(new BindingResult(BindingResultCode.MISSING_PARAMETER), key, params);
+    }
+
+    public MissingActivationParameterException(I18nKey key, Throwable cause, Object... params) {
+	super(new BindingResult(BindingResultCode.MISSING_PARAMETER), key, cause, params);
     }
 
 }

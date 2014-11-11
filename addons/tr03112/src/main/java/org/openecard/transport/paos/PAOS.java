@@ -65,6 +65,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 
 
 /**
@@ -95,16 +96,6 @@ public class PAOS {
     public static final QName PAOS_METADATA = new QName(ECardConstants.PAOS_VERSION_20, "MetaData");
     public static final QName PAOS_SERVICETYPE = new QName(ECardConstants.PAOS_VERSION_20, "ServiceType");
 
-    // Translation constants
-    private static final String NO_MESSAGE_ID = "paos.exception.no_message_id";
-    private static final String MESSAGE_ID_MISSMATCH = "paos.exception.message_id_mismatch";
-    private static final String CONNECTION_CLOSED = "paos.exception.conncetion_closed";
-    private static final String INVALID_HTTP_STATUS = "paos.exception.invalid_http_status_code";
-    private static final String DELIVERY_FAILED = "paos.exception.failed_delivery";
-    private static final String SOAP_MESSAGE_FAILURE = "paos.exception.soap_message_creation_failed";
-    private static final String MARSHALLING_ERROR = "dispatcher.exception.failed_jaxb_object_marshaling";
-    private static final String DISPATCHER_ERROR = "dispatcher.exception.dispatched_method_exception";
-
     private final String headerValuePaos;
     private final MessageIdGenerator idGenerator;
     private final WSMarshaller m;
@@ -131,9 +122,9 @@ public class PAOS {
 	try {
 	    this.idGenerator = new MessageIdGenerator();
 	    this.m = WSMarshallerFactory.createInstance();
-	} catch (WSMarshallerException e) {
-	    logger.error(e.getMessage(), e);
-	    throw new PAOSException(e);
+	} catch (WSMarshallerException ex) {
+	    logger.error(ex.getMessage(), ex);
+	    throw new PAOSException(ex);
 	}
     }
 
@@ -360,9 +351,9 @@ public class PAOS {
 	} catch (SOAPException ex) {
 	    throw new PAOSException(SOAP_MESSAGE_FAILURE, ex);
 	} catch (MarshallingTypeException ex) {
-	    throw new DispatcherException(MARSHALLING_ERROR, ex);
+	    throw new PAOSDispatcherException(MARSHALLING_ERROR, ex);
 	} catch (InvocationTargetException ex) {
-	    throw new DispatcherException(DISPATCHER_ERROR, ex);
+	    throw new PAOSDispatcherException(DISPATCHER_ERROR, ex);
 	} catch (TransformerException ex) {
 	    throw new DispatcherException(ex);
 	} catch (WSException ex) {

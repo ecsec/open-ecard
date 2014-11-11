@@ -42,6 +42,7 @@ import org.openecard.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openecard.apache.http.protocol.BasicHttpContext;
 import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.apache.http.protocol.HttpRequestExecutor;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
@@ -74,12 +75,6 @@ public class ResourceContext {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceContext.class);
 
-    // translation constants
-    private static final String INVALID_ADDRESS = "invalid.address.exception.no_https";
-    private static final String MAX_REDIRECTS = "resource.exception.max_redirects_exceeded";
-    private static final String MISSING_LOCATION_HEADER = "resource.exception.no_location_header";
-    private static final String INVALID_RESULT_STATUS = "invalid.result.status.exception";
-    private static final String FAILED_PROXY = "io.exception.failed_proxy_initialization";
 
     private static final I18n lang = I18n.getTranslation("tr03112");
 

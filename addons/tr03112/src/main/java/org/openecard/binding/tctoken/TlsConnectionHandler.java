@@ -47,6 +47,7 @@ import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import org.openecard.crypto.tls.verify.SameCertVerifier;
 import org.openecard.crypto.tls.auth.SmartCardCredentialFactory;
 import org.openecard.crypto.tls.proxy.ProxySettings;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 
 
 /**
@@ -54,9 +55,6 @@ import org.openecard.crypto.tls.proxy.ProxySettings;
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
 public class TlsConnectionHandler {
-
-    // translation constants
-    private static final String UNKNOWN_SEC_PROTOCOL = "connection.error.unknown_sec_protocol";
 
     private final Dispatcher dispatcher;
     private final TCTokenRequest tokenRequest;
@@ -170,7 +168,7 @@ public class TlsConnectionHandler {
 	    }
 
 	} catch (MalformedURLException ex) {
-	    throw new ConnectionError(ex);
+	    throw new ConnectionError(MALFORMED_URL, ex, "ServerAddress");
 	}
     }
 

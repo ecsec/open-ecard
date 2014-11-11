@@ -20,32 +20,25 @@
  *
  ***************************************************************************/
 
-package org.openecard.binding.tctoken.ex;
+package org.openecard.common;
 
-import org.openecard.common.I18nKey;
+import javax.annotation.Nonnull;
 
 
 /**
- * Exception indicating an error received from the server.
+ * Interface for enums so that each element can be used as a language key.
+ * This little helper is needed to remove the ambiguousness from the exception constructors that need a translation.
  *
  * @author Tobias Wich
  */
-public class AuthServerException extends RedirectionBaseError {
+public interface I18nKey {
 
-    public AuthServerException(String errorUrl, String msg) {
-	super(errorUrl, msg);
-    }
-
-    public AuthServerException(String errorUrl, String msg, Throwable ex) {
-	super(errorUrl, msg, ex);
-    }
-
-    public AuthServerException(String errorUrl, I18nKey key, Object... params) {
-	super(errorUrl, key, params);
-    }
-
-    public AuthServerException(String errorUrl, I18nKey key, Throwable cause, Object... params) {
-	super(errorUrl, key, cause, params);
-    }
+    /**
+     * Gets the key which can be fed into the I18n class.
+     *
+     * @return Key which can be used for translation.
+     */
+    @Nonnull
+    String getKey();
 
 }

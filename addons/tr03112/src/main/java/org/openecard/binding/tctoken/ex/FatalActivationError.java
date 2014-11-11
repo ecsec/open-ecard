@@ -22,8 +22,9 @@
 
 package org.openecard.binding.tctoken.ex;
 
+import javax.annotation.Nonnull;
 import org.openecard.addon.bind.BindingResult;
-import org.openecard.addon.bind.BindingResultCode;
+import org.openecard.common.I18nKey;
 
 
 /**
@@ -33,12 +34,20 @@ import org.openecard.addon.bind.BindingResultCode;
  */
 public abstract class FatalActivationError extends ActivationError {
 
-    public FatalActivationError(BindingResultCode code, String msg, Object ... params) {
-	super(new BindingResult(code).setResultMessage(msg), msg, params);
+    public FatalActivationError(@Nonnull BindingResult result, @Nonnull String message) {
+	super(result, message);
     }
 
-    public FatalActivationError(BindingResultCode code, String msg, Throwable ex, Object ... params) {
-	super(new BindingResult(code).setResultMessage(msg), msg, ex, params);
+    public FatalActivationError(@Nonnull BindingResult result, @Nonnull String message, Throwable cause) {
+	super(result, message, cause);
+    }
+
+    public FatalActivationError(@Nonnull BindingResult result, I18nKey key, Object... params) {
+	super(result, key, params);
+    }
+
+    public FatalActivationError(@Nonnull BindingResult result, I18nKey key, Throwable cause, Object... params) {
+	super(result, key, cause, params);
     }
 
 }

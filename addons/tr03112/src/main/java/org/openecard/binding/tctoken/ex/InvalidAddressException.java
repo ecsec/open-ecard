@@ -22,7 +22,9 @@
 
 package org.openecard.binding.tctoken.ex;
 
+import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
+import org.openecard.common.I18nKey;
 
 
 /**
@@ -33,11 +35,19 @@ import org.openecard.addon.bind.BindingResultCode;
 public class InvalidAddressException extends FatalActivationError {
 
     public InvalidAddressException(String msg) {
-	super(BindingResultCode.WRONG_PARAMETER, msg);
+	super(new BindingResult(BindingResultCode.WRONG_PARAMETER), msg);
     }
 
     public InvalidAddressException(String msg, Throwable ex) {
-	super(BindingResultCode.WRONG_PARAMETER, msg, ex);
+	super(new BindingResult(BindingResultCode.WRONG_PARAMETER), msg, ex);
+    }
+
+    public InvalidAddressException(I18nKey key, Object... params) {
+	super(new BindingResult(BindingResultCode.WRONG_PARAMETER), key, params);
+    }
+
+    public InvalidAddressException(I18nKey key, Throwable cause, Object... params) {
+	super(new BindingResult(BindingResultCode.WRONG_PARAMETER), key, cause, params);
     }
 
 }

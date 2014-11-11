@@ -46,6 +46,7 @@ import org.openecard.transport.httpcore.HttpUtils;
 import org.openecard.transport.httpcore.StreamHttpClientConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 
 
 /**
@@ -55,9 +56,6 @@ import org.slf4j.LoggerFactory;
 public class HttpGetTask implements Callable<StartPAOSResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpGetTask.class);
-
-    // translation constants
-    private static final String WRONG_SERVER_RESULT = "connection.error.invalid_status_code";
 
     private final Dispatcher dispatcher;
     private final ConnectionHandleType connectionHandle;

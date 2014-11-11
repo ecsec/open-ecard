@@ -22,31 +22,34 @@
 
 package org.openecard.sal.protocol.eac.anytype;
 
+import javax.annotation.Nonnull;
 import org.openecard.common.I18n;
+import org.openecard.common.I18nException;
+import org.openecard.common.I18nKey;
 
 
 /**
  *
  * @author Hans-Martin Haase
  */
-public class ElementParsingException extends Exception {
+public class ElementParsingException extends I18nException {
 
     private static final I18n lang = I18n.getTranslation("tr03112");
 
-    private final String msg;
-
-    public ElementParsingException(String msg) {
-	super(msg);
-	this.msg = msg;
+    public ElementParsingException(@Nonnull String message) {
+	super(message);
     }
 
-    @Override
-    public String getMessage() {
-	return lang.getOriginalMessage(msg);
+    public ElementParsingException(@Nonnull String message, Throwable cause) {
+	super(message, cause);
     }
 
-    @Override
-    public String getLocalizedMessage() {
-	return lang.translationForKey(msg);
+    public ElementParsingException(I18nKey key, Object... params) {
+	super(lang, key, params);
     }
+
+    public ElementParsingException(I18nKey key, Throwable cause, Object... params) {
+	super(lang, key, cause, params);
+    }
+
 }

@@ -34,6 +34,7 @@ import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 
 
 /**
@@ -55,8 +56,6 @@ public class EAC1InputType {
     public static final String OPTIONAL_CHAT = "OptionalCHAT";
     public static final String AUTHENTICATED_AUXILIARY_DATA = "AuthenticatedAuxiliaryData";
     public static final String TRANSACTION_INFO = "TransactionInfo";
-
-    private static final String ERROR = "element.parsing.exception.invalid_cert_number";
 
     private final AuthDataMap authMap;
     private final ArrayList<CardVerifiableCertificate> certificates;
@@ -216,13 +215,13 @@ public class EAC1InputType {
 	    if (element.getLocalName().equals(CERTIFICATE_DESCRIPTION)) {
 		counter++;
 		if (counter > 1) {
-		    throw new ElementParsingException(ERROR);
+		    throw new ElementParsingException(INVALID_CERT);
 		}
 	    }
 	}
 
 	if (counter == 0) {
-	    throw new ElementParsingException(ERROR);
+	    throw new ElementParsingException(INVALID_CERT);
 	}
     }
 

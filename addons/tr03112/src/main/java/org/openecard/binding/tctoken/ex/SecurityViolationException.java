@@ -22,6 +22,8 @@
 
 package org.openecard.binding.tctoken.ex;
 
+import org.openecard.common.I18nKey;
+
 
 /**
  * Exception indicating a security violation.
@@ -31,16 +33,20 @@ package org.openecard.binding.tctoken.ex;
  */
 public class SecurityViolationException extends RedirectionBaseError {
 
-    public SecurityViolationException(String errorUrl, String message) {
-	super(errorUrl, message);
+    public SecurityViolationException(String errorUrl, String msg) {
+	super(errorUrl, msg);
     }
 
-    public SecurityViolationException(String errorUrl, String message, Throwable cause) {
-	super(errorUrl, message, cause);
+    public SecurityViolationException(String errorUrl, String msg, Throwable ex) {
+	super(errorUrl, msg, ex);
     }
 
-    public SecurityViolationException(String errorUrl, Throwable cause) {
-	super(errorUrl, cause);
+    public SecurityViolationException(String errorUrl, I18nKey key, Object... params) {
+	super(errorUrl, key, params);
+    }
+
+    public SecurityViolationException(String errorUrl, I18nKey key, Throwable cause, Object... params) {
+	super(errorUrl, key, cause, params);
     }
 
 }

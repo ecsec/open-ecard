@@ -22,6 +22,8 @@
 
 package org.openecard.binding.tctoken.ex;
 
+import org.openecard.common.I18nKey;
+
 
 /**
  * Exception indicating a missing or errornous element in the TCToken.
@@ -30,12 +32,20 @@ package org.openecard.binding.tctoken.ex;
  */
 public class InvalidTCTokenElement extends RedirectionBaseError {
 
-    public InvalidTCTokenElement(String errorUrl, String message, Object ... params) {
-	super(errorUrl, message, null, params);
+    public InvalidTCTokenElement(String errorUrl, String msg) {
+	super(errorUrl, msg);
     }
 
-    public InvalidTCTokenElement(String errorUrl, String message, Throwable cause, Object ... params) {
-	super(errorUrl, message, cause, params);
+    public InvalidTCTokenElement(String errorUrl, String msg, Throwable ex) {
+	super(errorUrl, msg, ex);
+    }
+
+    public InvalidTCTokenElement(String errorUrl, I18nKey key, Object... params) {
+	super(errorUrl, key, params);
+    }
+
+    public InvalidTCTokenElement(String errorUrl, I18nKey key, Throwable cause, Object... params) {
+	super(errorUrl, key, cause, params);
     }
 
 }

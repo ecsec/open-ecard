@@ -30,6 +30,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 
 
 /**
@@ -41,9 +42,6 @@ public class TCToken extends TCTokenType {
 
     private static final Logger logger = LoggerFactory.getLogger(TCToken.class);
 
-    // Translation constants
-    private static final String NO_URL = "invalid.redirect.url.exception.no_url";
-    private static final String NO_REDIRECT_AVAILABLE = "invalid.redirect.url.exception.no_url_available";
 
     /**
      * Gets the CoomunicationErrorAddress for use in error conditions.

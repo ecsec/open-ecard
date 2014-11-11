@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,14 +22,18 @@
 
 package org.openecard.common.interfaces;
 
+import org.openecard.common.I18n;
+import org.openecard.common.I18nException;
+import org.openecard.common.I18nKey;
+
 
 /**
  * Exception class indicating reflection or runtime errors in the dispatcher.
  * This exception indicates a failure to read webservice interface definitions and invocations with unknown types.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
-public class DispatcherException extends Exception {
+public class DispatcherException extends I18nException {
 
     private static final long serialVersionUID = 1L;
 
@@ -59,6 +63,29 @@ public class DispatcherException extends Exception {
      */
     public DispatcherException(String message, Throwable cause) {
 	super(message, cause);
+    }
+
+    /**
+     * Creates a DispatcherException.
+     *
+     * @param lang I18n instance providing the translation database.
+     * @param key Key which is fed into the translation database.
+     * @param params Optional parameters for the translation.
+     */
+    protected DispatcherException(I18n lang, I18nKey key, Object... params) {
+	super(lang, key, params);
+    }
+
+    /**
+     * Creates a DispatcherException.
+     *
+     * @param lang I18n instance providing the translation database.
+     * @param key Key which is fed into the translation database.
+     * @param params Optional parameters for the translation.
+     * @param cause Exception causing the problem.
+     */
+    protected DispatcherException(I18n lang, I18nKey key, Throwable cause, Object... params) {
+	super(lang, key, cause, params);
     }
 
 }

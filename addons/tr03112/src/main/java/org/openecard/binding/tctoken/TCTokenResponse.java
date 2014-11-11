@@ -34,6 +34,7 @@ import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 
 
 /**
@@ -44,9 +45,7 @@ import org.openecard.common.WSHelper;
  */
 public class TCTokenResponse extends BindingResult {
 
-    private static final String INVALID_URL = "illegal.argument.exception.invalid_url";
-
-    private I18n lang = I18n.getTranslation("tr03112");
+    private static final I18n lang = I18n.getTranslation("tr03112");
     private Result result;
     private TCToken token;
     private Future<StartPAOSResponse> bindingTask;
@@ -153,7 +152,8 @@ public class TCTokenResponse extends BindingResult {
 	    DynamicContext.remove();
 	} catch (MalformedURLException ex) {
 	    // this is a code failure as the URLs are verified upfront
-	    throw new IllegalArgumentException(lang.translationForKey(INVALID_URL), ex);
+	    // TODO: translate when exception changes
+	    throw new IllegalArgumentException(lang.getOriginalMessage(INVALID_URL), ex);
 	}
     }
 

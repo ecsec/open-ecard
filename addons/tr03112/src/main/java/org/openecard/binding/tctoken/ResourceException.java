@@ -22,45 +22,34 @@
 
 package org.openecard.binding.tctoken;
 
+import javax.annotation.Nonnull;
 import org.openecard.common.I18n;
+import org.openecard.common.I18nException;
+import org.openecard.common.I18nKey;
 
 
 /**
  *
  * @author Tobias Wich
  */
-public class ResourceException extends Exception {
+public class ResourceException extends I18nException {
 
-    private static final I18n lang = I18n.getTranslation("tr03112");
+    protected static final I18n lang = I18n.getTranslation("tr03112");
 
-    private final String msgCode;
-
-    public ResourceException(String msg) {
-	super(lang.getOriginalMessage(msg));
-	msgCode = msg;
+    public ResourceException(@Nonnull String message) {
+	super(message);
     }
 
-    public ResourceException(String msg, Throwable cause) {
-	super(lang.getOriginalMessage(msg), cause);
-	msgCode = msg;
+    public ResourceException(@Nonnull String message, Throwable cause) {
+	super(message, cause);
     }
 
-    @Override
-    public String getMessage() {
-	if (msgCode != null && ! msgCode.isEmpty()) {
-	    return lang.getOriginalMessage(msgCode);
-	} else {
-	    return super.getMessage();
-	}
+    public ResourceException(I18nKey key, Object... params) {
+	super(lang, key, params);
     }
 
-    @Override
-    public String getLocalizedMessage() {
-	if (msgCode != null && ! msgCode.isEmpty()) {
-	    return lang.translationForKey(msgCode);
-	} else {
-	    return super.getLocalizedMessage();
-	}
+    public ResourceException(I18nKey key, Throwable cause, Object... params) {
+	super(lang, key, cause, params);
     }
 
 }

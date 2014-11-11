@@ -25,6 +25,8 @@ package org.openecard.binding.tctoken.ex;
 import javax.annotation.Nonnull;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.common.I18n;
+import org.openecard.common.I18nException;
+import org.openecard.common.I18nKey;
 
 
 /**
@@ -33,57 +35,34 @@ import org.openecard.common.I18n;
  *
  * @author Tobias Wich
  */
-public abstract class ActivationError extends Exception {
+public abstract class ActivationError extends I18nException {
 
     private final BindingResult result;
-    private final Object[] params;
-    private final String msgCode;
 
-    protected final I18n lang = I18n.getTranslation("tr03112");
+    protected static final I18n lang = I18n.getTranslation("tr03112");
 
-    public ActivationError(@Nonnull BindingResult result, @Nonnull String message, Object ... params) {
-	this(result, message, null, params);
+    public ActivationError(@Nonnull BindingResult result, @Nonnull String message) {
+	super(message);
+	this.result = result.setResultMessage(getLocalizedMessage());
     }
 
-    public ActivationError(@Nonnull BindingResult result, @Nonnull String message, Throwable cause, Object ... params) {
+    public ActivationError(@Nonnull BindingResult result, @Nonnull String message, Throwable cause) {
 	super(message, cause);
-	this.result = result;
-	this.params = params;
-	this.msgCode = message;
+	this.result = result.setResultMessage(getLocalizedMessage());
+    }
+
+    public ActivationError(@Nonnull BindingResult result, I18nKey key, Object... params) {
+	super(lang, key, params);
+	this.result = result.setResultMessage(getLocalizedMessage());
+    }
+
+    public ActivationError(@Nonnull BindingResult result, I18nKey key, Throwable cause, Object... params) {
+	super(lang, key, cause, params);
+	this.result = result.setResultMessage(getLocalizedMessage());
     }
 
     public BindingResult getBindingResult() {
 	return result;
-    }
-
-    @Override
-    public String getMessage() {
-	if (msgCode == null || msgCode.isEmpty()) {
-	    if (super.getCause().getMessage() != null) {
-		return super.getCause().getMessage();
-	    } else {
-		return "";
-	    }
-	} else {
-	    if (params != null) {
-		return lang.getOriginalMessage(msgCode, params);
-	    } else {
-		return lang.getOriginalMessage(msgCode);
-	    }
-	}
-    }
-
-    @Override
-    public String getLocalizedMessage() {
-	if (msgCode == null || msgCode.isEmpty()) {
-	    return super.getCause().getLocalizedMessage();
-	} else {
-	    if (params != null) {
-		return lang.translationForKey(msgCode, params);
-	    } else {
-		return lang.translationForKey(msgCode);
-	    }
-	}
     }
 
 }

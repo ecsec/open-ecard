@@ -22,7 +22,10 @@
 
 package org.openecard.binding.tctoken.ex;
 
+import javax.annotation.Nonnull;
 import org.openecard.addon.bind.BindingResult;
+import org.openecard.common.I18nKey;
+
 
 /**
  *
@@ -30,12 +33,20 @@ import org.openecard.addon.bind.BindingResult;
  */
 public class NonGuiException extends ActivationError {
 
-    public NonGuiException(BindingResult result, String message, Throwable cause) {
+    public NonGuiException(@Nonnull BindingResult result, @Nonnull String message) {
+	super(result, message);
+    }
+
+    public NonGuiException(@Nonnull BindingResult result, @Nonnull String message, Throwable cause) {
 	super(result, message, cause);
     }
 
-    public NonGuiException(BindingResult result, String message) {
-	super(result, message);
+    public NonGuiException(@Nonnull BindingResult result, I18nKey key, Object... params) {
+	super(result, key, params);
+    }
+
+    public NonGuiException(@Nonnull BindingResult result, I18nKey key, Throwable cause, Object... params) {
+	super(result, key, cause, params);
     }
 
 }

@@ -19,35 +19,28 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+
 package org.openecard.transport.paos;
 
 import org.openecard.common.I18n;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.common.I18nException;
 
 
 /**
  *
  * @author Hans-Martin Haase
  */
-public class PAOSConnectionException extends Exception {
+public class PAOSConnectionException extends I18nException {
 
     private static final I18n lang = I18n.getTranslation("tr03112");
-    private static final String EXCEPTION = "paos.connection.exception";
 
     public PAOSConnectionException() {
-	super();
+	super(lang, PAOS_CONNECTION_EXCEPTION);
     }
 
-    public PAOSConnectionException(Throwable ex) {
-	super(ex);
+    public PAOSConnectionException(Throwable cause) {
+	super(lang, PAOS_CONNECTION_EXCEPTION, cause);
     }
 
-    @Override
-    public String getMessage() {
-	return lang.getOriginalMessage(EXCEPTION);
-    }
-
-    @Override
-    public String getLocalizedMessage() {
-	return lang.translationForKey(EXCEPTION);
-    }
 }

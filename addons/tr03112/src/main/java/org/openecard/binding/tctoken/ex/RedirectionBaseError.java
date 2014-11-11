@@ -25,6 +25,7 @@ package org.openecard.binding.tctoken.ex;
 import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
+import org.openecard.common.I18nKey;
 
 
 /**
@@ -34,18 +35,25 @@ import org.openecard.addon.bind.BindingResultCode;
  */
 public abstract class RedirectionBaseError extends ActivationError {
 
-    public RedirectionBaseError(String errorUrl, String message) {
-	this(errorUrl, message, null);
+    public RedirectionBaseError(String errorUrl, String msg) {
+	super(makeBindingResult(errorUrl), msg);
     }
 
-    public RedirectionBaseError(String errorUrl, Throwable cause) {
-	this(errorUrl, null, cause);
+    public RedirectionBaseError(String errorUrl, String msg, Throwable ex) {
+	super(makeBindingResult(errorUrl), msg, ex);
     }
 
-    public RedirectionBaseError(String errorUrl, String message, Throwable cause, Object ... params) {
-	super(new BindingResult(BindingResultCode.REDIRECT)
-		.addAuxResultData(AuxDataKeys.REDIRECT_LOCATION, errorUrl),
-		message, cause, params);
+    public RedirectionBaseError(String errorUrl, I18nKey key, Object... params) {
+	super(makeBindingResult(errorUrl), key, params);
+    }
+
+    public RedirectionBaseError(String errorUrl, I18nKey key, Throwable cause, Object... params) {
+	super(makeBindingResult(errorUrl), key, cause, params);
+    }
+
+    private static BindingResult makeBindingResult(String errorUrl) {
+	BindingResult result = new BindingResult(BindingResultCode.REDIRECT);
+	return result.addAuxResultData(AuxDataKeys.REDIRECT_LOCATION, errorUrl);
     }
 
 }

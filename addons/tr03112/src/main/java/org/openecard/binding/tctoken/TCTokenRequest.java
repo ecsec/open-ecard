@@ -41,6 +41,7 @@ import org.openecard.common.util.Pair;
 import org.openecard.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 
 
 /**
@@ -53,10 +54,6 @@ import org.slf4j.LoggerFactory;
 public class TCTokenRequest {
 
     private static final Logger logger = LoggerFactory.getLogger(TCTokenRequest.class);
-    // Translation constants
-    private static final String NO_PARAMS = "missing.activation.parameter.exception.no_suitable_parameters";
-    private static final String NO_TOKEN = "missing.activation.parameter.exception.no_valid_tctoken_available";
-    private static final String INVALID_URL = "invalid.tctoken.url.exception.invalid_tctoken_url";
 
     private TCToken token;
     private String ifdName;
@@ -125,7 +122,7 @@ public class TCTokenRequest {
 			    tcTokenRequest.tcTokenURL = tokenUrl;
 			} catch (MalformedURLException ex) {
 			    // TODO: check if the error type is correct, was WRONG_PARAMETER before
-			    throw new InvalidTCTokenUrlException(INVALID_URL, ex, v);
+			    throw new InvalidTCTokenUrlException(INVALID_TCTOKEN_URL, ex, v);
 			}
 			break;
 		    case "ifdName":

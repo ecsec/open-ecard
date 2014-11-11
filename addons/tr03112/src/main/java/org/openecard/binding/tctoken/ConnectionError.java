@@ -23,62 +23,33 @@
 package org.openecard.binding.tctoken;
 
 import org.openecard.common.I18n;
+import org.openecard.common.I18nException;
+import org.openecard.common.I18nKey;
 
 
 /**
  *
  * @author Tobias Wich <tobias.wich@ecsec.de>
  */
-public class ConnectionError extends Exception {
-
-    private static final I18n lang = I18n.getTranslation("tr03112");
-    private final String errMsg;
-    private Object[] params;
+public class ConnectionError extends I18nException {
 
     private static final long serialVersionUID = 1L;
+    private static final I18n lang = I18n.getTranslation("tr03112");
 
-    public ConnectionError(String message, Object ... params) {
-	super(message);
-	errMsg = message;
-	this.params = params;
+    public ConnectionError(String msg) {
+	super(lang, msg);
     }
 
-    public ConnectionError(Throwable cause) {
-	super(cause);
-	errMsg = "";
+    public ConnectionError(String msg, Throwable ex) {
+	super(lang, msg, ex);
     }
 
-    public ConnectionError(String message, Throwable cause, Object ... params) {
-	super(message, cause);
-	errMsg = message;
-	this.params = params;
-
+    public ConnectionError(I18nKey key, Object... params) {
+	super(lang, key, params);
     }
 
-    @Override
-    public String getMessage() {
-	if (! errMsg.isEmpty()) {
-	    if (params != null) {
-		return lang.getOriginalMessage(errMsg, params);
-	    } else {
-		return lang.getOriginalMessage(errMsg);
-	    }
-	} else {
-	    return super.getMessage();
-	}
-    }
-
-    @Override
-    public String getLocalizedMessage() {
-	if (errMsg.isEmpty()) {
-	    return super.getLocalizedMessage();
-	} else {
-	    if (params == null ) {
-		return lang.translationForKey(errMsg);
-	    } else {
-		return lang.translationForKey(errMsg, params);
-	    }
-	}
+    public ConnectionError(I18nKey key, Throwable cause, Object... params) {
+	super(lang, key, cause, params);
     }
 
 }

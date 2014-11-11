@@ -26,12 +26,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
-import org.openecard.common.I18n;
 import org.openecard.common.util.Promise;
 import org.openecard.common.util.TR03112Utils;
 import org.openecard.crypto.common.asn1.cvc.CertificateDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 
 
 /**
@@ -43,9 +43,6 @@ import org.slf4j.LoggerFactory;
 public class RedirectCertificateValidator implements CertificateValidator {
 
     private static final Logger logger = LoggerFactory.getLogger(RedirectCertificateValidator.class);
-    private static final String MALFORMED_URL = "redirect.cert.validator.malformed_subject_url";
-    private static final String INVALID_REDIRECT = "redirect.cert.validator.invalid_redirect";
-    private final I18n lang = I18n.getTranslation("tctoken");
 
     private final Promise<Object> descPromise;
     private final boolean redirectChecks;
@@ -118,7 +115,7 @@ public class RedirectCertificateValidator implements CertificateValidator {
 		return VerifierResult.FINISH;
 	    }
 	} catch (MalformedURLException ex) {
-	    throw new ValidationError(MALFORMED_URL, ex);
+	    throw new ValidationError(REDIRECT_MALFORMED_URL, ex);
 	}
     }
 

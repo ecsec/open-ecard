@@ -22,7 +22,9 @@
 
 package org.openecard.binding.tctoken.ex;
 
+import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
+import org.openecard.common.I18nKey;
 
 
 /**
@@ -33,11 +35,19 @@ import org.openecard.addon.bind.BindingResultCode;
 public class InvalidRedirectUrlException extends FatalActivationError {
 
     public InvalidRedirectUrlException(String msg) {
-	this(msg, null);
+	super(new BindingResult(BindingResultCode.WRONG_PARAMETER), msg);
     }
 
-    public InvalidRedirectUrlException(String msg, Throwable cause, Object ... params) {
-	super(BindingResultCode.WRONG_PARAMETER, msg, cause, params);
+    public InvalidRedirectUrlException(String msg, Throwable ex) {
+	super(new BindingResult(BindingResultCode.WRONG_PARAMETER), msg, ex);
+    }
+
+    public InvalidRedirectUrlException(I18nKey key, Object... params) {
+	super(new BindingResult(BindingResultCode.WRONG_PARAMETER), key, params);
+    }
+
+    public InvalidRedirectUrlException(I18nKey key, Throwable cause, Object... params) {
+	super(new BindingResult(BindingResultCode.WRONG_PARAMETER), key, cause, params);
     }
 
 }

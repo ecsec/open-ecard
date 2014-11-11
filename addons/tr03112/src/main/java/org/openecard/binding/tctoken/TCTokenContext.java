@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
@@ -50,11 +51,6 @@ import org.slf4j.LoggerFactory;
 public class TCTokenContext extends ResourceContext {
 
     private static final Logger logger = LoggerFactory.getLogger(TCTokenContext.class);
-
-    // translation constants
-    private static final String RETRIEVAL_FAILED = "tctoken.retrieval.exception";
-    private static final String NO_TCTOKEN_IN_DATA = "invalid.tctoken.exception.no_tctoken";
-    private static final String ESERVICE_ERROR = "auth.server.exception";
 
     private final TCToken token;
 

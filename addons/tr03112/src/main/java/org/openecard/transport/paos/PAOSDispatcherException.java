@@ -20,35 +20,41 @@
  *
  ***************************************************************************/
 
-package org.openecard.binding.tctoken;
+package org.openecard.transport.paos;
 
-import javax.annotation.Nonnull;
 import org.openecard.common.I18n;
-import org.openecard.common.I18nException;
 import org.openecard.common.I18nKey;
+import org.openecard.common.interfaces.DispatcherException;
 
 
 /**
+ * Localized DispatcherException.
  *
  * @author Tobias Wich
  */
-public class ValidationError extends I18nException {
+public class PAOSDispatcherException extends DispatcherException {
 
+    private static final long serialVersionUID = 1L;
     private static final I18n lang = I18n.getTranslation("tr03112");
 
-    public ValidationError(@Nonnull String message) {
-	super(message);
-    }
-
-    public ValidationError(@Nonnull String message, Throwable cause) {
-	super(message, cause);
-    }
-
-    public ValidationError(I18nKey key, Object... params) {
+    /**
+     * Creates an instance and initializes the exception with a localized message.
+     *
+     * @param key Translation key.
+     * @param params Parameters adding values into the translation.
+     */
+    public PAOSDispatcherException(I18nKey key, Object... params) {
 	super(lang, key, params);
     }
 
-    public ValidationError(I18nKey key, Throwable cause, Object... params) {
+    /**
+     * Creates an instance and initializes the exception with a localized message.
+     *
+     * @param key Translation key.
+     * @param cause The exception causing the error.
+     * @param params Parameters adding values into the translation.
+     */
+    public PAOSDispatcherException(I18nKey key, Throwable cause, Object... params) {
 	super(lang, key, cause, params);
     }
 

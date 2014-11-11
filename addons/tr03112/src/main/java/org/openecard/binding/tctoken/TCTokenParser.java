@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 
 
 /**
@@ -49,8 +50,6 @@ import org.xml.sax.SAXNotSupportedException;
 public class TCTokenParser {
 
     private static final Logger logger = LoggerFactory.getLogger(TCTokenParser.class);
-    private static final String MALFORMED_TOKEN = "invalid.tctoken.exception.malformed_tctoken";
-    private static final String UNSUPPORTED_FEATURE = "illegal.argument.exception.unsupported_parser_feature";
     private final I18n lang = I18n.getTranslation("tr03112");
     private SAXParserFactory saxFactory;
     private TCTokenSAXHandler saxHandler;
@@ -68,7 +67,8 @@ public class TCTokenParser {
 	    saxFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 	} catch (ParserConfigurationException | SAXNotRecognizedException | SAXNotSupportedException ex) {
 	    logger.error(ex.getMessage(), ex);
-	    throw new IllegalArgumentException(lang.translationForKey(UNSUPPORTED_FEATURE), ex);
+	    // TODO: translate when exception changes
+	    throw new IllegalArgumentException(lang.getOriginalMessage(UNSUPPORTED_FEATURE), ex);
 	}
     }
 

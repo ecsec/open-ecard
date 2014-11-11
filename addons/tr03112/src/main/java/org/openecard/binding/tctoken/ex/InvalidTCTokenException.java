@@ -22,7 +22,9 @@
 
 package org.openecard.binding.tctoken.ex;
 
+import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
+import org.openecard.common.I18nKey;
 
 
 /**
@@ -34,19 +36,35 @@ import org.openecard.addon.bind.BindingResultCode;
 public class InvalidTCTokenException extends FatalActivationError {
 
     public InvalidTCTokenException(String msg) {
-	super(BindingResultCode.RESOURCE_UNAVAILABLE, msg);
+	super(new BindingResult(BindingResultCode.RESOURCE_UNAVAILABLE), msg);
     }
 
-    public InvalidTCTokenException(String msg, Throwable ex, Object ... params) {
-	super(BindingResultCode.RESOURCE_UNAVAILABLE, msg, ex, params);
+    public InvalidTCTokenException(String msg, Throwable ex) {
+	super(new BindingResult(BindingResultCode.RESOURCE_UNAVAILABLE), msg, ex);
     }
 
-    protected InvalidTCTokenException(BindingResultCode code, String msg, Object ... params) {
-	super(code, msg, params);
+    public InvalidTCTokenException(I18nKey key, Object... params) {
+	super(new BindingResult(BindingResultCode.RESOURCE_UNAVAILABLE), key, params);
     }
 
-    protected InvalidTCTokenException(BindingResultCode code, String msg, Throwable ex, Object ... params) {
-	super(code, msg, ex, params);
+    public InvalidTCTokenException(I18nKey key, Throwable cause, Object... params) {
+	super(new BindingResult(BindingResultCode.RESOURCE_UNAVAILABLE), key, cause, params);
+    }
+
+    protected InvalidTCTokenException(BindingResultCode code, String msg) {
+	super(new BindingResult(code), msg);
+    }
+
+    protected InvalidTCTokenException(BindingResultCode code, String msg, Throwable ex) {
+	super(new BindingResult(code), msg, ex);
+    }
+
+    protected InvalidTCTokenException(BindingResultCode code, I18nKey key, Object... params) {
+	super(new BindingResult(code), key, params);
+    }
+
+    protected InvalidTCTokenException(BindingResultCode code, I18nKey key, Throwable cause, Object... params) {
+	super(new BindingResult(code), key, cause, params);
     }
 
 }

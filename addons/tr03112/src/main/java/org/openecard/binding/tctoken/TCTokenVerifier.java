@@ -38,6 +38,7 @@ import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.TR03112Utils;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 
 
 /**
@@ -48,17 +49,6 @@ import org.openecard.common.util.TR03112Utils;
  * @author Hans-Martin Haase
  */
 public class TCTokenVerifier {
-
-    // Translation constants
-    private static final String INVALID_ELEMENT = "invalid.tctoken.element.invalid_element";
-    private static final String MISSING_ELEMENT = "invalid.tctoken.element.missing_element";
-    private static final String MALFORMED_URL = "invalid.tctoken.url.exception.malformed_url";
-    private static final String NO_HTTPS_URL = "invalid.tctoken.url.exception.no_https_url";
-    private static final String FAILED_SOP = "security.violation.exception.no_sop_tls2";
-    private static final String ESERVICE_FAIL = "invalid.tctoken.element.eservice";
-    private static final String INVALID_REFRESH_ADDRESS = "invalid.tctoken.element.invalid_refresh_address";
-    private static final String NO_REFRESH_ADDRESS = "invalid.tctoken.element.no_refresh_address";
-    private static final String NO_SERVER_ADDRESS = "invalid.tctoken.element.no_server_address";
 
     private final TCToken token;
     private final ResourceContext ctx;

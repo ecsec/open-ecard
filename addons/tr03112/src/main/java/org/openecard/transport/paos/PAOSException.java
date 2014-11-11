@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,32 +23,20 @@
 package org.openecard.transport.paos;
 
 import org.openecard.common.I18n;
+import org.openecard.common.I18nException;
+import org.openecard.common.I18nKey;
 
 
 /**
  * Exception for the PAOS system.
  * This exception abstracts transport specific exceptions.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
-public class PAOSException extends Exception {
+public class PAOSException extends I18nException {
 
     private static final long serialVersionUID = 1L;
     private static final I18n lang = I18n.getTranslation("tr03112");
-    private String errMsg;
-    private Object[] params;
-
-    /**
-     * Creates an instance and initializes the exception with a message.
-     *
-     * @param msg The message describing the error.
-     * @param params
-     */
-    public PAOSException(String msg, Object ... params) {
-	super(msg);
-	errMsg = msg;
-	this.params = params;
-    }
 
     /**
      * Creates an instance and initializes the exception with a cause.
@@ -64,38 +52,30 @@ public class PAOSException extends Exception {
      *
      * @param msg The message describing the error.
      * @param cause The exception causing the error.
-     * @param params
      */
-    public PAOSException(String msg, Throwable cause, Object ... params) {
+    public PAOSException(String msg, Throwable cause) {
 	super(msg, cause);
-	errMsg = msg;
-	this.params = params;
     }
 
-    @Override
-    public String getMessage() {
-	if (errMsg == null || errMsg.isEmpty()) {
-	    return super.getCause().getMessage();
-	} else {
-	    if (params != null) {
-		return lang.getOriginalMessage(errMsg, params);
-	    } else {
-		return lang.getOriginalMessage(errMsg);
-	    }
-	}
+    /**
+     * Creates an instance and initializes the exception with a localized message.
+     *
+     * @param key Translation key.
+     * @param params Parameters adding values into the translation.
+     */
+    public PAOSException(I18nKey key, Object... params) {
+	super(lang, key, params);
     }
 
-    @Override
-    public String getLocalizedMessage() {
-	if (errMsg == null || errMsg.isEmpty()) {
-	    return super.getCause().getLocalizedMessage();
-	} else {
-	    if (params == null ) {
-		return lang.translationForKey(errMsg);
-	    } else {
-		return lang.translationForKey(errMsg, params);
-	    }
-	}
+    /**
+     * Creates an instance and initializes the exception with a localized message.
+     *
+     * @param key Translation key.
+     * @param cause The exception causing the error.
+     * @param params Parameters adding values into the translation.
+     */
+    public PAOSException(I18nKey key, Throwable cause, Object... params) {
+	super(lang, key, cause, params);
     }
 
 }

@@ -194,6 +194,21 @@ public class I18n {
 	}
     }
 
+    /**
+     * Get the translated value for the given key.
+     * The implementation tries to find the key in the requested language, then the default language and if nothing is
+     * specified at all, a special string in the form of &lt;No translation for key &lt;requested.key&gt;&gt;
+     * is returned.
+     *
+     * @param key Key as defined in language properties file.
+     * @param parameters If any parameters are given here, the string is interpreted as a template and the parameters
+     *   are applied. The template interpretation uses {@link String#format()} as the rendering method.
+     * @return Translation as specified in the translation, or default file.
+     */
+    public String translationForKey(I18nKey key, Object ... parameters) {
+	return translationForKey(key.getKey(), parameters);
+    }
+
 
     /**
      * Calls {@link #translationForFile(java.lang.String, java.lang.String)} with the second parameter set to null.
@@ -287,6 +302,16 @@ public class I18n {
 	} else {
 	    return result;
 	}
+    }
+
+    /**
+     * Get the original English text which is referenced by the key.
+     *
+     * @param key Reference to the requested text.
+     * @param parameters
+     * @return A {@link String} containing the original English text of the message.
+     */    public String getOriginalMessage(I18nKey key, Object ... parameters) {
+	return getOriginalMessage(key.getKey(), parameters);
     }
 
 }

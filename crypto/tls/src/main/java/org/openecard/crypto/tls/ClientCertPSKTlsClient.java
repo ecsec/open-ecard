@@ -80,7 +80,8 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 	return new int[] {
 	    // recommended ciphers from TR-02102-2 sec. 3.3.1
 	    CipherSuite.TLS_RSA_PSK_WITH_AES_256_GCM_SHA384,
-	    CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA384,
+	    // this cipher suite does not work with the governikus eID server, so it is excluded here
+//	    CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA384,
 	    CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
 	    CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256,
 	    // must have according to TR-03124-1 sec. 4.4

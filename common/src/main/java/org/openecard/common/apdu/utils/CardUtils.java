@@ -45,10 +45,12 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Utility class for elementary file operations with smart cards.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Simon Potzernheim <potzernheim@hs-coburg.de>
+ * @author Moritz Horsch
+ * @author Dirk Petrautzki
+ * @author Simon Potzernheim
+ * @author Tobias Wich
  */
 public class CardUtils {
 
@@ -148,7 +150,7 @@ public class CardUtils {
 	    if (responses == null) {
 		// not all cards, e.g. Estonian id card, support P1 = 00 and DataFile filled with MF Fid so work around this
 		if (i == 2 && fileIdOrPath[0] == (byte) 0x3F && fileIdOrPath[1] == (byte) 0x00) {
-		    responses = new ArrayList<byte[]>();
+		    responses = new ArrayList<>();
 		    responses.add(new byte[] {(byte) 0x90, (byte) 0x00});
 		    responses.add(new byte[] {(byte) 0x67, (byte) 0x00});
 		}
@@ -232,13 +234,14 @@ public class CardUtils {
 	// Read 255 bytes per APDU
 	byte length = (byte) 0xFF;
 	boolean isRecord = isRecordEF(fcp);
-	int i = isRecord ? 1 : 0; // records start at index 1
+	byte i = (byte) (isRecord ? 1 : 0); // records start at index 1
+	short numRead = 0;
 
 	try {
 	    CardResponseAPDU response;
 	    do {
 		if (! isRecord) {
-		    CardCommandAPDU readBinary = new ReadBinary((short) (i * (length & 0xFF)), length);
+		    CardCommandAPDU readBinary = new ReadBinary(numRead, length);
 		    // 0x6A84 code for the estonian identity card. The card returns this code
 		    // after the last read process.
 		    response = readBinary.transmit(dispatcher, slotHandle, CardCommandStatus.response(0x9000, 0x6282,
@@ -252,7 +255,9 @@ public class CardUtils {
 		if (! Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x6A, (byte) 0x84}) &&
 			! Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x6A, (byte) 0x83}) &&
 			! Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x6A, (byte) 0x86})) {
-		    baos.write(response.getData());
+		    byte[] data = response.getData();
+		    baos.write(data);
+		    numRead += data.length;
 		}
 		i++;
 	    } while (response.isNormalProcessed() ||

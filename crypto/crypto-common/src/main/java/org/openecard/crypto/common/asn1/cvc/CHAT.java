@@ -47,9 +47,9 @@ public final class CHAT {
 
     private static final Logger _logger = LoggerFactory.getLogger(CHAT.class);
 
-    private String oid;
-    private Role role;
-    private byte[] discretionaryData;
+    private final String oid;
+    private final Role role;
+    private final byte[] discretionaryData;
     private final TreeMap<DataGroup, Boolean> writeAccess;
     private final TreeMap<DataGroup, Boolean> readAccess;
     private final TreeMap<SpecialFunction, Boolean> specialFunctions;
@@ -96,6 +96,32 @@ public final class CHAT {
 	DG03, DG04, GENERATE_SIGNATURE, GENERATE_QUALIFIED_SIGNATURE;
     }
 
+
+    public CHAT() {
+	oid = CVCertificatesObjectIdentifier.id_AT;
+	role = Role.AUTHENTICATION_TERMINAL;
+	discretionaryData = null;
+
+	writeAccess = new TreeMap<>();
+	DataGroup[] writeData = DataGroup.values();
+	for (int i = 16; i < 21; i++) {
+	    writeAccess.put(writeData[i], false);
+	}
+	readAccess = new TreeMap<>();
+	DataGroup[] readData = DataGroup.values();
+	for (int i = 0; i < 21; i++) {
+	    readAccess.put(readData[i], false);
+	}
+	specialFunctions = new TreeMap<>();
+	for (SpecialFunction data : SpecialFunction.values()) {
+	    specialFunctions.put(data, false);
+	}
+	accessRights = new TreeMap<>();
+	for (AccessRight data : AccessRight.values()) {
+	    accessRights.put(data, false);
+	}
+    }
+
     /**
      * Creates a new CHAT.
      *
@@ -138,21 +164,23 @@ public final class CHAT {
 	switch (oid) {
 	    case CVCertificatesObjectIdentifier.id_IS:
 		// Inspection systems
-		parseRole(discretionaryData[0]);
+		role = parseRole(discretionaryData[0]);
 		parseAccessRights(discretionaryData[0]);
 		break;
 	    case CVCertificatesObjectIdentifier.id_AT:
 		// Authentication terminal
-		parseRole(discretionaryData[0]);
+		role = parseRole(discretionaryData[0]);
 		parseWriteAccess(discretionaryData);
 		parseReadAccess(discretionaryData);
 		parseSpecialFunctions(discretionaryData);
 		break;
 	    case CVCertificatesObjectIdentifier.id_ST:
 		// Signature terminal
-		parseRole(discretionaryData[0]);
+		role = parseRole(discretionaryData[0]);
 		parseAccessRights(discretionaryData[0]);
 		break;
+	    default:
+		role = null;
 	}
     }
 
@@ -166,34 +194,28 @@ public final class CHAT {
      *
      * @param roleByte Role
      */
-    private void parseRole(byte roleByte) {
+    private Role parseRole(byte roleByte) {
 	roleByte = (byte) (roleByte & (byte) 0xC0);
 
 	switch (roleByte) {
 	    case (byte) 0xC0:
-		role = Role.CVCA;
-		break;
+		return Role.CVCA;
 	    case (byte) 0x80:
-		role = Role.DV_OFFICIAL;
-		break;
+		return Role.DV_OFFICIAL;
 	    case (byte) 0x40:
-		role = Role.DV_NON_OFFICIAL;
-		break;
+		return Role.DV_NON_OFFICIAL;
 	    case (byte) 0x00:
 		switch (oid) {
 		    case CVCertificatesObjectIdentifier.id_IS:
-			role = Role.INSPECTION_TERMINAL;
-			break;
+			return Role.INSPECTION_TERMINAL;
 		    case CVCertificatesObjectIdentifier.id_AT:
-			role = Role.AUTHENTICATION_TERMINAL;
-			break;
+			return Role.AUTHENTICATION_TERMINAL;
 		    case CVCertificatesObjectIdentifier.id_ST:
-			role = Role.SIGNATURE_TERMINAL;
-			break;
+			return Role.SIGNATURE_TERMINAL;
 		}
-		break;
+		return null;
 	    default:
-		break;
+		return null;
 	}
     }
 

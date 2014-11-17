@@ -24,7 +24,6 @@ package org.openecard.sal.protocol.eac.anytype;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import java.util.ArrayList;
-import java.util.Arrays;
 import javax.annotation.Nullable;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.util.ByteUtils;
@@ -35,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.crypto.common.asn1.cvc.CHAT;
 
 
 /**
@@ -91,17 +91,17 @@ public class EAC1InputType {
 	byte[] requiredCHATtmp = authMap.getContentAsBytes(REQUIRED_CHAT);
 	byte[] optionalCHATtmp = authMap.getContentAsBytes(OPTIONAL_CHAT);
 	// HACK: this is only done because some eID Server vendors send raw CHAT values
-	// if not present use chat from CVC
+	// if not present use empty CHAT, so everything can be deselected
 	if (requiredCHATtmp == null) {
-	    CardVerifiableCertificateChain certChain = new CardVerifiableCertificateChain(certificates);
-	    CardVerifiableCertificate terminalCert = certChain.getTerminalCertificate();
-	    requiredCHATtmp = terminalCert.getCHAT().toByteArray();
+	    requiredCHATtmp = new CHAT().toByteArray();
 	} else {
 	    requiredCHATtmp = fixChatValue(requiredCHATtmp);
 	}
-	// if not present, use required as optional
+	// if not present, use terminal CHAT as optional
 	if (optionalCHATtmp == null) {
-	    optionalCHATtmp = Arrays.copyOf(requiredCHATtmp, requiredCHATtmp.length);
+	    CardVerifiableCertificateChain certChain = new CardVerifiableCertificateChain(certificates);
+	    CardVerifiableCertificate terminalCert = certChain.getTerminalCertificate();
+	    optionalCHATtmp = terminalCert.getCHAT().toByteArray();
 	} else {
 	    optionalCHATtmp = fixChatValue(optionalCHATtmp);
 	}

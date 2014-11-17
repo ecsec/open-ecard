@@ -138,9 +138,9 @@ public class EAC1OutputType {
 	    authResponse.addElement(RETRY_COUNTER, String.valueOf(retryCounter));
 	}
 	authResponse.addElement(CHAT, ByteUtils.toHexString(chat));
-	authResponse.addElement(CAR, new String(currentCar));
+	authResponse.addElement(CAR, ByteUtils.toHexString(currentCar));
 	if (previousCar != null) {
-	    authResponse.addElement(CAR, new String(previousCar));
+	    authResponse.addElement(CAR, ByteUtils.toHexString(previousCar));
 	}
 	authResponse.addElement(EF_CARDACCESS, ByteUtils.toHexString(efCardAccess));
 	authResponse.addElement(ID_PICC, ByteUtils.toHexString(idpicc));

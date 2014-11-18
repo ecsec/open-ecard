@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -37,9 +37,9 @@ import org.openecard.sal.protocol.eac.EACData;
 /**
  * CHAT GUI step for EAC.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Tobias Wich
+ * @author Moritz Horsch
+ * @author Dirk Petrautzki
  */
 public class CHATStep extends Step {
 
@@ -52,8 +52,11 @@ public class CHATStep extends Step {
     public static final String DESCRIPTION = "step_chat_description";
     public static final String NOTE = "step_chat_note";
     public static final String NOTE_CONTENT = "step_chat_note_content";
+    public static final String READ_ACCESS_DESC = "step_chat_read_access_description";
+    public static final String WRITE_ACCESS_DESC = "step_chat_write_access_description";
     // GUI element IDs
-    public static final String CHAT_BOXES = "CHATCheckBoxs";
+    public static final String READ_CHAT_BOXES = "ReadCHATCheckBoxes";
+    public static final String WRITE_CHAT_BOXES = "WriteCHATCheckBoxes";
 
     private final EACData eacData;
 
@@ -80,7 +83,10 @@ public class CHATStep extends Step {
 	decription.setText(decriptionText);
 	getInputInfoUnits().add(decription);
 
-	Checkbox readAccessCheckBox = new Checkbox(CHAT_BOXES);
+	// process read access and special functions
+	Checkbox readAccessCheckBox = new Checkbox(READ_CHAT_BOXES);
+	boolean displayReadAccessCheckBox = false;
+	readAccessCheckBox.setGroupText(lang.translationForKey(READ_ACCESS_DESC));
 	TreeMap<CHAT.DataGroup, Boolean> requiredReadAccess = eacData.requiredCHAT.getReadAccess();
 	TreeMap<CHAT.DataGroup, Boolean> optionalReadAccess = eacData.optionalCHAT.getReadAccess();
 	TreeMap<CHAT.SpecialFunction, Boolean> requiredSpecialFunctions = eacData.requiredCHAT.getSpecialFunctions();
@@ -93,8 +99,10 @@ public class CHATStep extends Step {
 	for (int i = 0; i < 21; i++) {
 	    CHAT.DataGroup dataGroup = dataGroups[i];
 	    if (requiredReadAccess.get(dataGroup)) {
+		displayReadAccessCheckBox = true;
 		readAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, true));
 	    } else if (optionalReadAccess.get(dataGroup)) {
+		displayReadAccessCheckBox = true;
 		readAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, false));
 	    }
 	}
@@ -114,13 +122,40 @@ public class CHATStep extends Step {
 	    }
 
 	    if (requiredSpecialFunctions.get(specialFunction)) {
+		displayReadAccessCheckBox = true;
 		readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, true, textData));
 	    } else if (optionalSpecialFunctions.get(specialFunction)) {
+		displayReadAccessCheckBox = true;
 		readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, false, textData));
 	    }
 	}
 
-	getInputInfoUnits().add(readAccessCheckBox);
+	if (displayReadAccessCheckBox) {
+	    getInputInfoUnits().add(readAccessCheckBox);
+	}
+
+	// process write access
+	Checkbox writeAccessCheckBox = new Checkbox(WRITE_CHAT_BOXES);
+	boolean displayWriteAccessCheckBox = false;
+	writeAccessCheckBox.setGroupText(lang.translationForKey(WRITE_ACCESS_DESC));
+	TreeMap<CHAT.DataGroup, Boolean> requiredWriteAccess = eacData.requiredCHAT.getWriteAccess();
+	TreeMap<CHAT.DataGroup, Boolean> optionalWriteAccess = eacData.optionalCHAT.getWriteAccess();
+
+	// iterate over DG17-DG21 of the eID application data groups
+	for (int i = 16; i < 21; i++) {
+	    CHAT.DataGroup dataGroup = dataGroups[i];
+	    if (requiredWriteAccess.get(dataGroup)) {
+		displayWriteAccessCheckBox = true;
+		writeAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, true));
+	    } else if (optionalWriteAccess.get(dataGroup)) {
+		displayWriteAccessCheckBox = true;
+		writeAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, false));
+	    }
+	}
+
+	if (displayWriteAccessCheckBox) {
+	    getInputInfoUnits().add(writeAccessCheckBox);
+	}
 
 	ToggleText requestedDataDescription = new ToggleText();
 	requestedDataDescription.setTitle(lang.translationForKey(NOTE));

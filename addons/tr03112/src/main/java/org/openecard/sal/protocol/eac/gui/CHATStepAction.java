@@ -86,13 +86,27 @@ public class CHATStepAction extends StepAction {
 	List<String> specialFunctionsNames = getSpecialFunctionNames();
 	ExecutionResults executionResults = results.get(getStepID());
 
-	Checkbox cb = (Checkbox) executionResults.getResult(CHATStep.CHAT_BOXES);
-	CHAT selectedCHAT = eacData.requiredCHAT;
-	for (BoxItem item : cb.getBoxItems()) {
-	    if (dataGroupsNames.contains(item.getName())) {
-		selectedCHAT.setReadAccess(item.getName(), item.isChecked());
-	    } else if (specialFunctionsNames.contains(item.getName())) {
-		selectedCHAT.setSpecialFunction(item.getName(), item.isChecked());
+	// process read access and special functions
+	Checkbox cbRead = (Checkbox) executionResults.getResult(CHATStep.READ_CHAT_BOXES);
+	if (cbRead != null) {
+	    CHAT selectedCHAT = eacData.requiredCHAT;
+	    for (BoxItem item : cbRead.getBoxItems()) {
+		if (dataGroupsNames.contains(item.getName())) {
+		    selectedCHAT.setReadAccess(item.getName(), item.isChecked());
+		} else if (specialFunctionsNames.contains(item.getName())) {
+		    selectedCHAT.setSpecialFunction(item.getName(), item.isChecked());
+		}
+	    }
+	}
+
+	// process write access
+	Checkbox cbWrite = (Checkbox) executionResults.getResult(CHATStep.WRITE_CHAT_BOXES);
+	if (cbWrite != null) {
+	    CHAT selectedCHAT = eacData.requiredCHAT;
+	    for (BoxItem item : cbWrite.getBoxItems()) {
+		if (dataGroupsNames.contains(item.getName())) {
+		    selectedCHAT.setWriteAccess(item.getName(), item.isChecked());
+		}
 	    }
 	}
     }

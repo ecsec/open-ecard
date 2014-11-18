@@ -26,14 +26,15 @@ import org.openecard.bouncycastle.crypto.tls.TlsPSKIdentity;
 
 
 /**
+ * Simple implementation of a PSK identity.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Simon Potzernheim <potzernheim@hs-coburg.de>
+ * @author Dirk Petrautzki
+ * @author Simon Potzernheim
  */
 public class TlsPSKIdentityImpl implements TlsPSKIdentity {
 
-    private byte[] identity;
-    private byte[] psk;
+    private final byte[] identity;
+    private final byte[] psk;
 
     public TlsPSKIdentityImpl(byte[] identity, byte[] psk) {
 	this.identity = identity;

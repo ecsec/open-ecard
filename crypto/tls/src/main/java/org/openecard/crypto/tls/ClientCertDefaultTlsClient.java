@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,14 +25,19 @@ package org.openecard.crypto.tls;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Vector;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.CipherSuite;
 import org.openecard.bouncycastle.crypto.tls.DefaultTlsClient;
+import org.openecard.bouncycastle.crypto.tls.HashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.NamedCurve;
+import org.openecard.bouncycastle.crypto.tls.SignatureAlgorithm;
+import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsCipherFactory;
 import org.openecard.bouncycastle.crypto.tls.TlsECCUtils;
 import org.openecard.bouncycastle.crypto.tls.TlsExtensionsUtils;
+import org.openecard.bouncycastle.crypto.tls.TlsUtils;
 import org.openecard.crypto.tls.auth.ContextAware;
 
 
@@ -41,7 +46,7 @@ import org.openecard.crypto.tls.auth.ContextAware;
  * If not modified, the TlsAuthentication instance returned by {@link #getAuthentication()} is of type
  * {@link DynamicAuthentication} without further modifications.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ClientCertDefaultTlsClient extends DefaultTlsClient implements ClientCertTlsClient {
 
@@ -149,6 +154,7 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
     public Hashtable getClientExtensions() throws IOException {
 	Hashtable clientExtensions = super.getClientExtensions();
 	clientExtensions = TlsExtensionsUtils.ensureExtensionsInitialised(clientExtensions);
+
 	// code taken from AbstractTlsClient, if that should ever change modify it here too
 	if (TlsECCUtils.containsECCCipherSuites(getCipherSuites())) {
             this.namedCurves = new int[] {
@@ -160,6 +166,33 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 
             TlsECCUtils.addSupportedEllipticCurvesExtension(clientExtensions, namedCurves);
 	}
+
+	// overwrite hash and signature algorithms
+        if (TlsUtils.isSignatureAlgorithmsExtensionAllowed(clientVersion)) {
+            short[] hashAlgorithms = new short[]{ HashAlgorithm.sha512, HashAlgorithm.sha384, HashAlgorithm.sha256,
+                HashAlgorithm.sha224, HashAlgorithm.sha1 };
+
+            short[] signatureAlgorithms = new short[]{ SignatureAlgorithm.rsa, SignatureAlgorithm.ecdsa };
+
+            this.supportedSignatureAlgorithms = new Vector();
+            for (int i = 0; i < hashAlgorithms.length; ++i) {
+                for (int j = 0; j < signatureAlgorithms.length; ++j) {
+                    this.supportedSignatureAlgorithms.addElement(new SignatureAndHashAlgorithm(hashAlgorithms[i],
+                        signatureAlgorithms[j]));
+                }
+            }
+
+            /*
+             * RFC 5264 7.4.3. Currently, DSA [DSS] may only be used with SHA-1.
+             */
+            this.supportedSignatureAlgorithms.addElement(new SignatureAndHashAlgorithm(HashAlgorithm.sha1,
+                SignatureAlgorithm.dsa));
+
+            clientExtensions = TlsExtensionsUtils.ensureExtensionsInitialised(clientExtensions);
+
+            TlsUtils.addSignatureAlgorithmsExtension(clientExtensions, supportedSignatureAlgorithms);
+        }
+
 
 	return clientExtensions;
     }

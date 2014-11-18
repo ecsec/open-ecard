@@ -92,8 +92,6 @@ public class TlsConnectionHandler {
 	    serverAddress = new URL(token.getServerAddress());
 	    String serverHost = serverAddress.getHost();
 
-	    serverAddress = fixServerAddress(serverAddress, sessionId);
-
 	    // extract connection parameters from endpoint
 	    hostname = serverAddress.getHost();
 	    port = serverAddress.getPort();
@@ -234,11 +232,6 @@ public class TlsConnectionHandler {
 	    // exact same channel
 	    return tokenRequest.getTokenContext().getTlsClientProto();
 	}
-    }
-
-    private static URL fixServerAddress(URL serverAddress, String sessionIdentifier) throws MalformedURLException {
-	// FIXME: remove this hilariously stupid bull*#@%&/ code which satisfies a mistake introduced by the AA
-	return TCTokenHacks.addParameterToUrl(serverAddress, "sessionid", sessionIdentifier);
     }
 
     private CredentialFactory makeSmartCardCredential() {

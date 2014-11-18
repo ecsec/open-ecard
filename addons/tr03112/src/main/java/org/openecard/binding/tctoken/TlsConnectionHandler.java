@@ -119,10 +119,10 @@ public class TlsConnectionHandler {
 			// no changes
 			break;
 		    case "urn:ietf:rfc:4279":
-			minVersion = ProtocolVersion.TLSv10;
+			minVersion = ProtocolVersion.TLSv11;
 			break;
 		    case "urn:ietf:rfc:5487":
-			minVersion = ProtocolVersion.TLSv10;
+			minVersion = ProtocolVersion.TLSv12;
 			break;
 		}
 

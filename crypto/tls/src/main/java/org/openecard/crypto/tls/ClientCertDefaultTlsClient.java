@@ -31,6 +31,7 @@ import org.openecard.bouncycastle.crypto.tls.CipherSuite;
 import org.openecard.bouncycastle.crypto.tls.DefaultTlsClient;
 import org.openecard.bouncycastle.crypto.tls.HashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.NamedCurve;
+import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.crypto.tls.SignatureAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
@@ -61,6 +62,7 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
      */
     public ClientCertDefaultTlsClient(@Nonnull String host, boolean doSni) {
 	super(doSni ? host : null);
+	setMinimumVersion(ProtocolVersion.TLSv11);
 	this.host = host;
     }
     /**
@@ -72,6 +74,7 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
      */
     public ClientCertDefaultTlsClient(@Nonnull TlsCipherFactory tcf, @Nonnull String host, boolean doSni) {
 	super(tcf, doSni ? host : null);
+	setMinimumVersion(ProtocolVersion.TLSv11);
 	this.host = host;
     }
 

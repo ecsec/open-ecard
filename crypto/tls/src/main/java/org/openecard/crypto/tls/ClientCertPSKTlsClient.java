@@ -31,6 +31,7 @@ import org.openecard.bouncycastle.crypto.tls.CipherSuite;
 import org.openecard.bouncycastle.crypto.tls.HashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.NamedCurve;
 import org.openecard.bouncycastle.crypto.tls.PSKTlsClient;
+import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.crypto.tls.SignatureAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
@@ -63,6 +64,7 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
      */
     public ClientCertPSKTlsClient(@Nonnull TlsPSKIdentity pskId, @Nonnull String host, boolean doSni) {
 	super(pskId, doSni ? host : null);
+	setMinimumVersion(ProtocolVersion.TLSv11);
 	this.host = host;
     }
     /**
@@ -76,6 +78,7 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
     public ClientCertPSKTlsClient(@Nonnull TlsCipherFactory tcf, @Nonnull TlsPSKIdentity pskId, @Nonnull String host,
 	    boolean doSni) {
 	super(tcf, pskId, host);
+	setMinimumVersion(ProtocolVersion.TLSv11);
 	this.host = host;
     }
 

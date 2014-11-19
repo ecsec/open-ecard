@@ -239,6 +239,8 @@ public class CardUtils {
 
 	try {
 	    CardResponseAPDU response;
+	    byte[] trailer;
+	    int lastNumRead = 0;
 	    do {
 		if (! isRecord) {
 		    CardCommandAPDU readBinary = new ReadBinary(numRead, length);
@@ -252,16 +254,19 @@ public class CardUtils {
 			    0x6A84, 0x6A83));
 		}
 
-		if (! Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x6A, (byte) 0x84}) &&
-			! Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x6A, (byte) 0x83}) &&
-			! Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x6A, (byte) 0x86})) {
+		trailer = response.getTrailer();
+		if (! Arrays.equals(trailer, new byte[] {(byte) 0x6A, (byte) 0x84}) &&
+			! Arrays.equals(trailer, new byte[] {(byte) 0x6A, (byte) 0x83}) &&
+			! Arrays.equals(trailer, new byte[] {(byte) 0x6A, (byte) 0x86})) {
 		    byte[] data = response.getData();
+		    // some cards are just pure shit and return 9000 when no bytes have been read
 		    baos.write(data);
-		    numRead += data.length;
+		    lastNumRead = data.length;
+		    numRead += lastNumRead;
 		}
 		i++;
-	    } while (response.isNormalProcessed() ||
-		    (Arrays.equals(response.getTrailer(), new byte[] {(byte) 0x62, (byte) 0x82}) && isRecord));
+	    } while (response.isNormalProcessed() && lastNumRead != 0 ||
+		    (Arrays.equals(trailer, new byte[] {(byte) 0x62, (byte) 0x82}) && isRecord));
 	    baos.close();
 	} catch (IOException e) {
 	    throw new APDUException(e);

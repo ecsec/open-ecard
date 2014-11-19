@@ -43,7 +43,7 @@ import org.openecard.common.util.ByteUtils;
 /**
  * Implements Secure Messaging according to ISO/IEC 7816-4.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class SecureMessaging {
 
@@ -51,9 +51,9 @@ public class SecureMessaging {
     // ISO/IEC 7816-4 padding tag
     private static final byte PAD = (byte) 0x80;
     // Send Sequence Counter. See BSI-TR-03110 section F.3.
-    private byte[] secureMessagingSSC;
+    private final byte[] secureMessagingSSC;
     // Keys for encryption and message authentication.
-    private byte[] keyMAC, keyENC;
+    private final byte[] keyMAC, keyENC;
 
     /**
      * Instantiates a new secure messaging.
@@ -104,7 +104,7 @@ public class SecureMessaging {
 	int lc = cAPDU.getLC();
 	int le = cAPDU.getLE();
 
-	if (data != null) {
+	if (data.length > 0) {
 	    data = pad(data, 16);
 
 	    // Encrypt data

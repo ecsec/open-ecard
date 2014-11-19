@@ -35,7 +35,8 @@ import org.slf4j.LoggerFactory;
  * Implements a response APDU.
  * See ISO/IEC 7816-4 Section 5.1.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public final class CardResponseAPDU extends CardAPDU {
 
@@ -103,7 +104,10 @@ public final class CardResponseAPDU extends CardAPDU {
      * @param trailer Trailer (SW1, SW2)
      */
     public void setTrailer(byte[] trailer) {
-	setTrailer(trailer);
+	if (trailer.length != 2) {
+	    throw new IllegalArgumentException("Given trailer is not exactly two bytes long.");
+	}
+	System.arraycopy(trailer, 0, this.trailer, 0, 2);
     }
 
     /**
@@ -267,8 +271,8 @@ public final class CardResponseAPDU extends CardAPDU {
      * @return True if the status bytes equals to a element of the list of positive responses, otherwise false
      */
     public boolean isPositiveResponse(List<byte[]> responses) {
-	for (int i = 0; i < responses.size(); i++) {
-	    if (Arrays.equals(responses.get(i), trailer)) {
+	for (byte[] response : responses) {
+	    if (Arrays.equals(response, trailer)) {
 		return true;
 	    }
 	}

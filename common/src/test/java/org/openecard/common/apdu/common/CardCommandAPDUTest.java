@@ -35,7 +35,7 @@ import static org.testng.Assert.*;
 
 
 /**
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class CardCommandAPDUTest {
 
@@ -101,13 +101,13 @@ public class CardCommandAPDUTest {
 	apdu.setBody(new byte[]{(byte) 0xFF});
 	assertEquals(apdu.getLE(), 255);
 	assertEquals(apdu.getLC(), -1);
-	assertNull(apdu.getData());
+	assertEquals(apdu.getData(), new byte[0]);
 
 	// Case 2.1: |CLA|INS|P1|P2|EXTLE|
 	apdu.setBody(new byte[]{(byte) 0x00, (byte) 0x01, (byte) 0xFF});
 	assertEquals(apdu.getLC(), -1);
 	assertEquals(apdu.getLE(), 511);
-	assertNull(apdu.getData());
+	assertEquals(apdu.getData(), new byte[0]);
 
 	// Case 3. : |CLA|INS|P1|P2|LC|DATA|
 	apdu.setBody(fillBytesWithLength(240));
@@ -166,7 +166,7 @@ public class CardCommandAPDUTest {
 	assertEquals((byte) 0xDE, capdu.getP2());
 	assertEquals(-1, capdu.getLC());
 	assertEquals(-1, capdu.getLE());
-	assertNull(capdu.getData());
+	assertEquals(capdu.getData(), new byte[0]);
 	assertEquals(new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE}, capdu.getHeader());
     }
 

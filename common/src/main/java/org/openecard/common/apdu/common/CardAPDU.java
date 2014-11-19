@@ -26,7 +26,7 @@ package org.openecard.common.apdu.common;
 /**
  * Base for all APDU types.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 class CardAPDU {
 
@@ -48,11 +48,11 @@ class CardAPDU {
     /**
      * Returns the data field of the APDU.
      *
-     * @return Data field
+     * @return Data field. May be empty if no data is available
      */
     public byte[] getData() {
 	if (data.length == 0) {
-	    return null;
+	    return new byte[0];
 	} else {
 	    byte[] ret = new byte[data.length];
 	    System.arraycopy(data, 0, ret, 0, data.length);

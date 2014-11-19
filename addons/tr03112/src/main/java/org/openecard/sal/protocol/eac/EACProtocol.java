@@ -25,7 +25,9 @@ package org.openecard.sal.protocol.eac;
 import org.openecard.addon.ActionInitializationException;
 import org.openecard.addon.Context;
 import org.openecard.addon.sal.SALProtocolBaseImpl;
+import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.util.Promise;
 
 
 /**
@@ -47,6 +49,7 @@ public class EACProtocol extends SALProtocolBaseImpl {
     public static final String SLOT_HANDLE = PREFIX + "slot_handle";
     public static final String DISPATCHER = PREFIX + "dispatcher";
     public static final String AUTHENTICATION_DONE = PREFIX + "authentication_done";
+    public static final String AUTHENTICATION_FAILED = PREFIX + "authentication_failed";
 
 
     @Override
@@ -59,6 +62,31 @@ public class EACProtocol extends SALProtocolBaseImpl {
     @Override
     public void destroy() {
 	// nothing to see here ... move along
+    }
+
+    @Override
+    public boolean isFinished() {
+	boolean finished = super.isFinished();
+	if (! finished) {
+	    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    Promise p = ctx.getPromise(EACProtocol.AUTHENTICATION_DONE);
+	    if (p.isDelivered()) {
+		try {
+		    finished = (boolean) p.deref();
+		} catch (InterruptedException ex) {
+		    // error would mean don't use the value, so this is ok to ignore
+		}
+	    }
+	    Promise p2 = ctx.getPromise(EACProtocol.AUTHENTICATION_FAILED);
+	    if (p2.isDelivered()) {
+		try {
+		    finished = (boolean) p2.deref();
+		} catch (InterruptedException ex) {
+		    // error would mean don't use the value, so this is ok to ignore
+		}
+	    }
+	}
+	return finished;
     }
 
 }

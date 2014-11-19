@@ -122,6 +122,8 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	} catch (Exception e) {
 	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
+	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	}
 
 	return response;

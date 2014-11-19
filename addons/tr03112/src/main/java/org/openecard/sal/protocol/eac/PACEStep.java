@@ -158,6 +158,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    Result activationChecksResult = performChecks(certDescription, dynCtx);
 	    if (! ECardConstants.Major.OK.equals(activationChecksResult.getResultMajor())) {
 		response.setResult(activationChecksResult);
+		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 		return response;
 	    }
 
@@ -275,6 +276,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		String msg = "Failure in PACE authentication.";
 		Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg);
 		response.setResult(r);
+		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 		return response;
 	    }
 
@@ -317,12 +319,15 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    logger.error(ex.getMessage(), ex);
 	    String msg = ex.getMessage();
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED, msg));
+	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	} catch (WSHelper.WSException e) {
 	    logger.error(e.getMessage(), e);
 	    response.setResult(e.getResult());
+	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	} catch (Exception e) {
 	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
+	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	}
 
 	return response;

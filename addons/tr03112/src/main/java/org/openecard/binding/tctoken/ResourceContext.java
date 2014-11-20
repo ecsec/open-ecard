@@ -192,6 +192,7 @@ public class ResourceContext {
 		port = url.getDefaultPort();
 	    }
 	    String resource = url.getFile();
+	    resource = resource.isEmpty() ? "/" : resource;
 
 	    if (! "https".equals(protocol)) {
 		throw new InvalidAddressException(INVALID_ADDRESS);

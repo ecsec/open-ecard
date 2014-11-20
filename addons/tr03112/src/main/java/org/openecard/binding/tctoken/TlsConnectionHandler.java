@@ -101,6 +101,7 @@ public class TlsConnectionHandler {
 		port = serverAddress.getDefaultPort();
 	    }
 	    resource = serverAddress.getFile();
+	    resource = resource.isEmpty() ? "/" : resource;
 
 	    String secProto = token.getPathSecurityProtocol();
 	    // use same channel as demanded in TR-03124 sec. 2.4.3

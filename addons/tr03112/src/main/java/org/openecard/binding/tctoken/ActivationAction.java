@@ -74,6 +74,14 @@ public class ActivationAction implements AppPluginAction {
     @Override
     public BindingResult execute(Body body, Map<String, String> parameters, List<Attachment> attachments) {
 	BindingResult response;
+
+	// only continue, when there are known parameters in the request
+	if (! (parameters.containsKey("tcTokenURL") || parameters.containsKey("activationObject"))) {
+	    response = new BindingResult(BindingResultCode.MISSING_PARAMETER);
+	    response.setResultMessage("A parameters containing the activation information is missing.");
+	    return response;
+	}
+
 	try {
 	    try {
 		TCTokenRequest tcTokenRequest = TCTokenRequest.convert(parameters);

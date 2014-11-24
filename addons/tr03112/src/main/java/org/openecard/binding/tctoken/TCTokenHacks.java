@@ -199,6 +199,10 @@ public class TCTokenHacks {
 		break;
 	    case ECardConstants.Minor.App.COMMUNICATION_ERROR:
 		minor = "communicationError";
+		break;
+	    case ECardConstants.Minor.App.INCORRECT_PARM:
+		minor = "incorrectParameter";
+		break;
 	    default:
 		// we're fine for things not mentioned in the spec
 	}

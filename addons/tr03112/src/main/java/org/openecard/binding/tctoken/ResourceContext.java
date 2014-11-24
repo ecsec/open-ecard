@@ -151,7 +151,7 @@ public class ResourceContext {
 	return getStream(url, new CertificateValidator() {
 	    @Override
 	    public CertificateValidator.VerifierResult validate(URL url, Certificate cert) throws ValidationError {
-		return CertificateValidator.VerifierResult.CONTINUE;
+		return CertificateValidator.VerifierResult.DONTCARE;
 	    }
 	});
     }
@@ -253,9 +253,13 @@ public class ResourceContext {
 		String msg = String.format("Received a result code %d '%s' from server.", statusCode, reason);
 		throw new InvalidResultStatus(lang.translationForKey(INVALID_RESULT_STATUS, new Object[] {statusCode, reason}));
 	    } else {
-		conn.receiveResponseEntity(response);
-		entity = response.getEntity();
-		finished = true;
+		if (verifyResult == CertificateValidator.VerifierResult.CONTINUE) {
+		    throw new InvalidAddressException(INVALID_REFRESH_ADDRESS_NOSOP);
+		} else {
+		    conn.receiveResponseEntity(response);
+		    entity = response.getEntity();
+		    finished = true;
+		}
 	    }
 
 	    // follow next redirect or finish?

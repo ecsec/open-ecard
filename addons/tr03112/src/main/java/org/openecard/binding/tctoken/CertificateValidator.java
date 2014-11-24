@@ -40,6 +40,7 @@ public interface CertificateValidator {
      */
     public static enum VerifierResult {
 	CONTINUE,
+	DONTCARE,
 	FINISH;
     }
 

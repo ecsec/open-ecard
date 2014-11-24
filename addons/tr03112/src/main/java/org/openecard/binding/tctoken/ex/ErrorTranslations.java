@@ -50,6 +50,7 @@ public enum ErrorTranslations implements I18nKey {
     INVALID_HTTP_STATUS("paos.exception.invalid_http_status_code"),
     INVALID_REDIRECT("redirect.cert.validator.invalid_redirect"),
     INVALID_REFRESH_ADDRESS("invalid.tctoken.element.invalid_refresh_address"),
+    INVALID_REFRESH_ADDRESS_NOSOP("invalid.tctoken.element.invalid_refresh_address_nosop"),
     INVALID_RESULT_STATUS("invalid.result.status.exception"),
     INVALID_SIGNATURE_NUMBER("element.parsing.exception.invalid_signature_number"),
     INVALID_TCTOKEN_URL("invalid.tctoken.url.exception.invalid_tctoken_url"),

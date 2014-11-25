@@ -327,7 +327,7 @@ public class TCTokenVerifier {
 
 	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMajor", "error");
 	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMinor", 
-		ECardConstants.Minor.App.COMMUNICATION_ERROR);
+		TCTokenHacks.fixResultMinor(ECardConstants.Minor.App.COMMUNICATION_ERROR));
 	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMessage", minorMessage);
 	return new URL(refreshAddress);
     }

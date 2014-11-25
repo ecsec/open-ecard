@@ -30,6 +30,7 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import org.openecard.gui.definition.BoxItem;
@@ -57,6 +58,14 @@ public class Checkbox implements StepComponent, Focusable {
 
 //	contentPanel.setBorder(new LineBorder(Color.GRAY));
 	panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+	// set group heading if it exists
+	if (checkbox.getGroupText() != null && ! checkbox.getGroupText().isEmpty()) {
+	    JLabel groupText = new JLabel(checkbox.getGroupText());
+	    groupText.setBorder(new EmptyBorder(5, 0, 10, 0));
+	    panel.add(groupText, BorderLayout.NORTH);
+	}
+
 
 	GridLayout layout = new GridLayout(0, 2);
 //	GridBagLayout layout = new GridBagLayout();

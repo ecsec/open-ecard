@@ -43,6 +43,10 @@ public abstract class RedirectionBaseError extends ActivationError {
 	super(makeBindingResult(errorUrl), msg, ex);
     }
 
+    public RedirectionBaseError(String errorUrl, Throwable ex) {
+        super(makeBindingResult(errorUrl), ex);
+    }
+
     public RedirectionBaseError(String errorUrl, I18nKey key, Object... params) {
 	super(makeBindingResult(errorUrl), key, params);
     }

@@ -51,6 +51,11 @@ public abstract class ActivationError extends I18nException {
 	this.result = result.setResultMessage(getLocalizedMessage());
     }
 
+    public ActivationError(@Nonnull BindingResult result, Throwable cause) {
+        super(cause);
+        this.result = result.setResultMessage(getLocalizedMessage());
+    }
+
     public ActivationError(@Nonnull BindingResult result, I18nKey key, Object... params) {
 	super(lang, key, params);
 	this.result = result.setResultMessage(getLocalizedMessage());

@@ -49,7 +49,7 @@ public abstract class I18nException extends Exception {
      */
     public I18nException(Throwable cause) {
 	super(cause);
-	this.localMsg = null;
+	this.localMsg = cause.getLocalizedMessage();
     }
 
     /**

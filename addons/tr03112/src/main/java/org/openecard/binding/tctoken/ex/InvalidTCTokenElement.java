@@ -40,6 +40,10 @@ public class InvalidTCTokenElement extends RedirectionBaseError {
 	super(errorUrl, msg, ex);
     }
 
+    public InvalidTCTokenElement(String errorUrl, Throwable ex) {
+        super(errorUrl, ex);
+    }
+
     public InvalidTCTokenElement(String errorUrl, I18nKey key, Object... params) {
 	super(errorUrl, key, params);
     }

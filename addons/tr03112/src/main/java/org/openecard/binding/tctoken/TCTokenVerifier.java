@@ -326,7 +326,7 @@ public class TCTokenVerifier {
     private URL createUrlWithErrorParams(String refreshAddress, String minorMessage) throws MalformedURLException {
 
 	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMajor", "error");
-	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMinor", 
+	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMinor",
 		TCTokenHacks.fixResultMinor(ECardConstants.Minor.App.COMMUNICATION_ERROR));
 	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMessage", minorMessage);
 	return new URL(refreshAddress);
@@ -370,7 +370,7 @@ public class TCTokenVerifier {
 		String refreshUrl = resAddr.toString();
 
 		URL refreshUrlAsUrl = createUrlWithErrorParams(refreshUrl, ex.getMessage());
-		throw new InvalidTCTokenElement(refreshUrlAsUrl.toString(), null, ex);
+		throw new InvalidTCTokenElement(refreshUrlAsUrl.toString(), ex);
 	    } catch (IOException | ResourceException | InvalidAddressException | ValidationError ex1) {
 		throw new InvalidTCTokenElement(token.getComErrorAddressWithParams(
 			ECardConstants.Minor.App.COMMUNICATION_ERROR), INVALID_REFRESH_ADDRESS, ex1);

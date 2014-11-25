@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,9 +22,12 @@
 
 package org.openecard.crypto.common.asn1.cvc;
 
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import javax.annotation.concurrent.Immutable;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
 import org.openecard.common.tlv.TagClass;
@@ -40,8 +43,9 @@ import org.slf4j.LoggerFactory;
  *
  * See BSI-TR-03110, version 2.10, part 3, section C.4.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch
+ * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public final class CHAT {
 
@@ -50,10 +54,10 @@ public final class CHAT {
     private final String oid;
     private final Role role;
     private final byte[] discretionaryData;
-    private final TreeMap<DataGroup, Boolean> writeAccess;
-    private final TreeMap<DataGroup, Boolean> readAccess;
-    private final TreeMap<SpecialFunction, Boolean> specialFunctions;
-    private final TreeMap<AccessRight, Boolean> accessRights;
+    private final EnumMap<DataGroup, Boolean> writeAccess;
+    private final EnumMap<DataGroup, Boolean> readAccess;
+    private final EnumMap<SpecialFunction, Boolean> specialFunctions;
+    private final EnumMap<AccessRight, Boolean> accessRights;
 
     /**
      * Represents the roles.
@@ -102,24 +106,11 @@ public final class CHAT {
 	role = Role.AUTHENTICATION_TERMINAL;
 	discretionaryData = null;
 
-	writeAccess = new TreeMap<>();
-	DataGroup[] writeData = DataGroup.values();
-	for (int i = 16; i < 21; i++) {
-	    writeAccess.put(writeData[i], false);
-	}
-	readAccess = new TreeMap<>();
-	DataGroup[] readData = DataGroup.values();
-	for (int i = 0; i < 21; i++) {
-	    readAccess.put(readData[i], false);
-	}
-	specialFunctions = new TreeMap<>();
-	for (SpecialFunction data : SpecialFunction.values()) {
-	    specialFunctions.put(data, false);
-	}
-	accessRights = new TreeMap<>();
-	for (AccessRight data : AccessRight.values()) {
-	    accessRights.put(data, false);
-	}
+	writeAccess = new EnumMap<>(DataGroup.class);
+	readAccess = new EnumMap<>(DataGroup.class);
+	specialFunctions = new EnumMap<>(SpecialFunction.class);
+	accessRights = new EnumMap<>(AccessRight.class);
+	initMaps();
     }
 
     /**
@@ -142,24 +133,11 @@ public final class CHAT {
 	oid = ObjectIdentifierUtils.toString(tlv.findChildTags(0x06).get(0).getValue());
 	discretionaryData = tlv.findChildTags(0x53).get(0).getValue();
 
-	writeAccess = new TreeMap<>();
-	DataGroup[] writeData = DataGroup.values();
-	for (int i = 16; i < 21; i++) {
-	    writeAccess.put(writeData[i], false);
-	}
-	readAccess = new TreeMap<>();
-	DataGroup[] readData = DataGroup.values();
-	for (int i = 0; i < 21; i++) {
-	    readAccess.put(readData[i], false);
-	}
-	specialFunctions = new TreeMap<>();
-	for (SpecialFunction data : SpecialFunction.values()) {
-	    specialFunctions.put(data, false);
-	}
-	accessRights = new TreeMap<>();
-	for (AccessRight data : AccessRight.values()) {
-	    accessRights.put(data, false);
-	}
+	writeAccess = new EnumMap<>(DataGroup.class);
+	readAccess = new EnumMap<>(DataGroup.class);
+	specialFunctions = new EnumMap<>(SpecialFunction.class);
+	accessRights = new EnumMap<>(AccessRight.class);
+	initMaps();
 
 	switch (oid) {
 	    case CVCertificatesObjectIdentifier.id_IS:
@@ -184,11 +162,25 @@ public final class CHAT {
 	}
     }
 
-    /**
-     * Parse the role of the CHAT.
-     *
-     * @param roleByte Role
-     */
+    private void initMaps() {
+	// eID rights
+	DataGroup[] dataGroups = DataGroup.values();
+	for (int i = 16; i < 21; i++) {
+	    writeAccess.put(dataGroups[i], false);
+	}
+	for (int i = 0; i < 21; i++) {
+	    readAccess.put(dataGroups[i], false);
+	}
+	// Special eID functions
+	for (SpecialFunction data : SpecialFunction.values()) {
+	    specialFunctions.put(data, false);
+	}
+	// Inspection Systems (passport)/ Signature Terminal rights
+	for (AccessRight data : AccessRight.values()) {
+	    accessRights.put(data, false);
+	}
+    }
+
     /**
      * Parse the role of the CHAT.
      *
@@ -225,24 +217,17 @@ public final class CHAT {
      * @param accessRightsByte Access rights
      */
     private void parseAccessRights(byte accessRightsByte) {
+	byte[] data = new byte[] { accessRightsByte };
 	if (role.equals(Role.INSPECTION_TERMINAL)) {
-	    if (ByteUtils.isBitSet(6, new byte[]{accessRightsByte})) {
-		// Read access to ePassport application: DG 4 (Iris)
-		accessRights.put(AccessRight.DG04, Boolean.TRUE);
-	    }
-	    if (ByteUtils.isBitSet(7, new byte[]{accessRightsByte})) {
-		// Read access to ePassport application: DG 3 (Fingerprint)
-		accessRights.put(AccessRight.DG03, Boolean.TRUE);
-	    }
+	    // Read access to ePassport application: DG 4 (Iris)
+	    accessRights.put(AccessRight.DG04, ByteUtils.isBitSet(6, data));
+	    // Read access to ePassport application: DG 3 (Fingerprint)
+	    accessRights.put(AccessRight.DG03, ByteUtils.isBitSet(7, data));
 	} else if (role.equals(Role.SIGNATURE_TERMINAL)) {
-	    if (ByteUtils.isBitSet(6, new byte[]{accessRightsByte})) {
-		// Generate qualified electronic signature
-		accessRights.put(AccessRight.GENERATE_QUALIFIED_SIGNATURE, Boolean.TRUE);
-	    }
-	    if (ByteUtils.isBitSet(7, new byte[]{accessRightsByte})) {
-		// Generate electronic signature
-		accessRights.put(AccessRight.GENERATE_SIGNATURE, Boolean.TRUE);
-	    }
+	    // Generate qualified electronic signature
+	    accessRights.put(AccessRight.GENERATE_QUALIFIED_SIGNATURE, ByteUtils.isBitSet(6, data));
+	    // Generate electronic signature
+	    accessRights.put(AccessRight.GENERATE_SIGNATURE, ByteUtils.isBitSet(7, data));
 	}
     }
 
@@ -296,11 +281,12 @@ public final class CHAT {
 
     /**
      * Returns the write access of the CHAT.
+     * The returned map is immutable.
      *
-     * @return Write access
+     * @return Write access map containing all write access values.
      */
-    public TreeMap<DataGroup, Boolean> getWriteAccess() {
-	return writeAccess;
+    public Map<DataGroup, Boolean> getWriteAccess() {
+	return Collections.unmodifiableMap(writeAccess);
     }
 
     /**
@@ -338,17 +324,20 @@ public final class CHAT {
 	Iterator<DataGroup> it = this.writeAccess.keySet().iterator();
 	while (it.hasNext()) {
 	    DataGroup item = it.next();
-	    this.writeAccess.put(item, writeAccess.get(item));
+	    if (this.writeAccess.containsKey(item)) {
+		this.writeAccess.put(item, writeAccess.get(item));
+	    }
 	}
     }
 
     /**
      * Returns the read access of the CHAT.
+     * The returned map is immutable.
      *
-     * @return Read access
+     * @return Read access map containing all read access values.
      */
-    public TreeMap<DataGroup, Boolean> getReadAccess() {
-	return readAccess;
+    public Map<DataGroup, Boolean> getReadAccess() {
+	return Collections.unmodifiableMap(readAccess);
     }
 
     /**
@@ -386,17 +375,20 @@ public final class CHAT {
 	Iterator<DataGroup> it = this.readAccess.keySet().iterator();
 	while (it.hasNext()) {
 	    DataGroup item = it.next();
-	    this.readAccess.put(item, readAccess.get(item));
+	    if (this.readAccess.containsKey(item)) {
+		this.readAccess.put(item, readAccess.get(item));
+	    }
 	}
     }
 
     /**
      * Returns the special function of the CHAT.
+     * The returned map is immutable.
      *
-     * @return Special functions
+     * @return Special functions map containing all special functions values.
      */
-    public TreeMap<SpecialFunction, Boolean> getSpecialFunctions() {
-	return specialFunctions;
+    public Map<SpecialFunction, Boolean> getSpecialFunctions() {
+	return Collections.unmodifiableMap(specialFunctions);
     }
 
     /**
@@ -434,17 +426,20 @@ public final class CHAT {
 	Iterator<SpecialFunction> it = this.specialFunctions.keySet().iterator();
 	while (it.hasNext()) {
 	    SpecialFunction item = it.next();
-	    this.specialFunctions.put(item, specialFunctions.get(item));
+	    if (this.specialFunctions.containsKey(item)) {
+		this.specialFunctions.put(item, specialFunctions.get(item));
+	    }
 	}
     }
 
     /**
      * Returns the access rights of the CHAT.
+     * The returned map is immutable.
      *
-     * @return Access rights
+     * @return Access rights map containg all access rights values.
      */
-    public TreeMap<AccessRight, Boolean> getAccessRights() {
-	return accessRights;
+    public Map<AccessRight, Boolean> getAccessRights() {
+	return Collections.unmodifiableMap(accessRights);
     }
 
     /**
@@ -478,11 +473,13 @@ public final class CHAT {
      *
      * @param accessRights Access right
      */
-    public void setAccessRights(TreeMap<AccessRight, Boolean> accessRights) {
+    public void setAccessRights(Map<AccessRight, Boolean> accessRights) {
 	Iterator<AccessRight> it = this.accessRights.keySet().iterator();
 	while (it.hasNext()) {
 	    AccessRight item = it.next();
-	    this.accessRights.put(item, accessRights.get(item));
+	    if (this.accessRights.containsKey(item)) {
+		this.accessRights.put(item, accessRights.get(item));
+	    }
 	}
     }
 
@@ -497,7 +494,7 @@ public final class CHAT {
 	removeRights(specialFunctions, mask.specialFunctions);
 	removeRights(accessRights, mask.accessRights);
     }
-    private static <T> void removeRights(TreeMap<T, Boolean> orig, final TreeMap<T, Boolean> mask) {
+    private static <T extends Enum<T>> void removeRights(EnumMap<T, Boolean> orig, final EnumMap<T, Boolean> mask) {
 	for (Map.Entry<T, Boolean> entry : mask.entrySet()) {
 	    if (entry.getValue() == false) {
 		orig.put(entry.getKey(), false);

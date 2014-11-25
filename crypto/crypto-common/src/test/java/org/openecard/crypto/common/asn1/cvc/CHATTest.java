@@ -23,7 +23,6 @@
 package org.openecard.crypto.common.asn1.cvc;
 
 import java.util.Map;
-import java.util.TreeMap;
 import org.openecard.common.tlv.TLVException;
 import org.openecard.common.util.StringUtils;
 import org.openecard.crypto.common.asn1.cvc.CHAT.DataGroup;
@@ -89,7 +88,7 @@ public class CHATTest {
 
     @Test(enabled = false)
     public void testtoString() throws TLVException {
-	TreeMap<CHAT.DataGroup, Boolean> readAccess = chat.getReadAccess();
+	Map<CHAT.DataGroup, Boolean> readAccess = chat.getReadAccess();
 
 	for (Map.Entry<CHAT.DataGroup, Boolean> entry : readAccess.entrySet()) {
 	    System.out.println(entry.getKey() + " " + entry.getValue());

@@ -23,7 +23,7 @@
 package org.openecard.sal.protocol.eac.gui;
 
 import java.util.Calendar;
-import java.util.TreeMap;
+import java.util.Map;
 import org.openecard.common.I18n;
 import org.openecard.crypto.common.asn1.cvc.CHAT;
 import org.openecard.gui.definition.BoxItem;
@@ -87,17 +87,13 @@ public class CHATStep extends Step {
 	Checkbox readAccessCheckBox = new Checkbox(READ_CHAT_BOXES);
 	boolean displayReadAccessCheckBox = false;
 	readAccessCheckBox.setGroupText(lang.translationForKey(READ_ACCESS_DESC));
-	TreeMap<CHAT.DataGroup, Boolean> requiredReadAccess = eacData.requiredCHAT.getReadAccess();
-	TreeMap<CHAT.DataGroup, Boolean> optionalReadAccess = eacData.optionalCHAT.getReadAccess();
-	TreeMap<CHAT.SpecialFunction, Boolean> requiredSpecialFunctions = eacData.requiredCHAT.getSpecialFunctions();
-	TreeMap<CHAT.SpecialFunction, Boolean> optionalSpecialFunctions = eacData.optionalCHAT.getSpecialFunctions();
-
-	CHAT.DataGroup[] dataGroups = CHAT.DataGroup.values();
-	CHAT.SpecialFunction[] specialFunctions = CHAT.SpecialFunction.values();
+	Map<CHAT.DataGroup, Boolean> requiredReadAccess = eacData.requiredCHAT.getReadAccess();
+	Map<CHAT.DataGroup, Boolean> optionalReadAccess = eacData.optionalCHAT.getReadAccess();
+	Map<CHAT.SpecialFunction, Boolean> requiredSpecialFunctions = eacData.requiredCHAT.getSpecialFunctions();
+	Map<CHAT.SpecialFunction, Boolean> optionalSpecialFunctions = eacData.optionalCHAT.getSpecialFunctions();
 
 	// iterate over all 21 eID application data groups
-	for (int i = 0; i < 21; i++) {
-	    CHAT.DataGroup dataGroup = dataGroups[i];
+	for (CHAT.DataGroup dataGroup : requiredReadAccess.keySet()) {
 	    if (requiredReadAccess.get(dataGroup)) {
 		displayReadAccessCheckBox = true;
 		readAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, true));
@@ -108,9 +104,7 @@ public class CHATStep extends Step {
 	}
 
 	// iterate over all 8 special functions
-	for (int i = 0; i < 8; i++) {
-	    CHAT.SpecialFunction specialFunction = specialFunctions[i];
-
+	for (CHAT.SpecialFunction specialFunction : requiredSpecialFunctions.keySet()) {
 	    // determine if extra data is necessary
 	    Object[] textData = new Object[0];
 	    if (CHAT.SpecialFunction.AGE_VERIFICATION == specialFunction) {
@@ -138,12 +132,11 @@ public class CHATStep extends Step {
 	Checkbox writeAccessCheckBox = new Checkbox(WRITE_CHAT_BOXES);
 	boolean displayWriteAccessCheckBox = false;
 	writeAccessCheckBox.setGroupText(lang.translationForKey(WRITE_ACCESS_DESC));
-	TreeMap<CHAT.DataGroup, Boolean> requiredWriteAccess = eacData.requiredCHAT.getWriteAccess();
-	TreeMap<CHAT.DataGroup, Boolean> optionalWriteAccess = eacData.optionalCHAT.getWriteAccess();
+	Map<CHAT.DataGroup, Boolean> requiredWriteAccess = eacData.requiredCHAT.getWriteAccess();
+	Map<CHAT.DataGroup, Boolean> optionalWriteAccess = eacData.optionalCHAT.getWriteAccess();
 
 	// iterate over DG17-DG21 of the eID application data groups
-	for (int i = 16; i < 21; i++) {
-	    CHAT.DataGroup dataGroup = dataGroups[i];
+	for (CHAT.DataGroup dataGroup : requiredWriteAccess.keySet()) {
 	    if (requiredWriteAccess.get(dataGroup)) {
 		displayWriteAccessCheckBox = true;
 		writeAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, true));

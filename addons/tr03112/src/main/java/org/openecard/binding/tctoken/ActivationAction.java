@@ -77,8 +77,10 @@ public class ActivationAction implements AppPluginAction {
 
 	// only continue, when there are known parameters in the request
 	if (! (parameters.containsKey("tcTokenURL") || parameters.containsKey("activationObject"))) {
+	    String errorMsg = lang.translationForKey(NO_ACTIVATION_PARAMETERS.getKey());
 	    response = new BindingResult(BindingResultCode.MISSING_PARAMETER);
-	    response.setResultMessage("A parameters containing the activation information is missing.");
+	    response.setResultMessage(errorMsg);
+	    showErrorMessage(errorMsg);
 	    return response;
 	}
 

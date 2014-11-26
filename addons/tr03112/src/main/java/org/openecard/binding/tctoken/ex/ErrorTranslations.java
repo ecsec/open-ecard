@@ -62,6 +62,7 @@ public enum ErrorTranslations implements I18nKey {
     MESSAGE_ID_MISSMATCH("paos.exception.message_id_mismatch"),
     MISSING_ELEMENT("invalid.tctoken.element.missing_element"),
     MISSING_LOCATION_HEADER("resource.exception.no_location_header"),
+    NO_ACTIVATION_PARAMETERS("missing.activation.parameter.exception.no_activation_parameters"),
     NO_HTTPS_URL("invalid.tctoken.url.exception.no_https_url"),
     NO_MESSAGE_ID("paos.exception.no_message_id"),
     NO_PARAMS("missing.activation.parameter.exception.no_suitable_parameters"),

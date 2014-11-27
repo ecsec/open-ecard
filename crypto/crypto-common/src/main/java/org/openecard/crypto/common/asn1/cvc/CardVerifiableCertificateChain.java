@@ -68,7 +68,7 @@ public class CardVerifiableCertificateChain {
     private void parseChain(List<CardVerifiableCertificate> certificates) throws CertificateException {
 	for (CardVerifiableCertificate cvc : certificates) {
 	    if (containsCertificate(cvc)) {
-		break;
+		continue;
 	    }
 
 	    CHAT.Role role = cvc.getCHAT().getRole();

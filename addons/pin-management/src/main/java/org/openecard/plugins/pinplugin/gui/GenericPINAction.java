@@ -46,6 +46,7 @@ import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.anytype.AuthDataResponse;
 import org.openecard.common.apdu.ResetRetryCounter;
 import org.openecard.common.apdu.common.CardResponseAPDU;
+import org.openecard.common.apdu.common.TrailerConstants;
 import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.interfaces.Dispatcher;
@@ -87,6 +88,7 @@ public class GenericPINAction extends StepAction {
     private static final String ERROR_INTERNAL = "action.error.internal";
     private static final String ERROR_TITLE = "action.error.title";
     private static final String SUCCESS_TITLE = "action.success.title";
+    private static final String ERROR_UNKNOWN = "action.error.unknown";
 
     private final I18n lang = I18n.getTranslation("pinplugin");
     private final boolean capturePin;
@@ -245,14 +247,16 @@ public class GenericPINAction extends StepAction {
 		byte[] pin2 = newPINRepeatValue.getBytes(ISO_8859_1);
 
 		if (! ByteUtils.compare(pin1, pin2)) {
+		    logger.warn("New PIN does not match the value from the confirmation field.");
 		    gPINStep.updateState(state); // to reset the text fields
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		}
 
 	    } catch (UnsupportedEncodingException ex) {
+		logger.error("ISO_8859_1 charset is not support.", ex);
+		gPINStep.updateState(state); // to reset the text fields
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
-
 	}
 
 	try {
@@ -263,7 +267,30 @@ public class GenericPINAction extends StepAction {
 		gPINStep.setWrongPINFormat(true);
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
-	    WSHelper.checkResult(pinResponse);
+
+	    if (pinResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
+		if (pinResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_ERROR)) {
+		    gPINStep.setFailedPINVerify(true);
+		    gPINStep.setWrongPINFormat(false);
+		    gPINStep.updateState(RecognizedState.PIN_activated_RC2);
+		    state = RecognizedState.PIN_activated_RC2;
+		    return new StepActionResult(StepActionResultStatus.REPEAT);
+		} else if (pinResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED)) {
+		    gPINStep.setFailedPINVerify(true);
+		    gPINStep.setWrongPINFormat(false);
+		    gPINStep.updateState(RecognizedState.PIN_suspended);
+		    state = RecognizedState.PIN_suspended;
+		    return new StepActionResult(StepActionResultStatus.REPEAT);
+		} else if (pinResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_BLOCKED)) {
+		    gPINStep.setFailedPINVerify(true);
+		    gPINStep.setWrongPINFormat(false);
+		    gPINStep.updateState(RecognizedState.PIN_blocked);
+		    state = RecognizedState.PIN_blocked;
+		    return new StepActionResult(StepActionResultStatus.REPEAT);
+		} else {
+		    WSHelper.checkResult(pinResponse);
+		}
+	    }
 
 	    if (capturePin) {
 		// pace with the old pin was successful now modify the pin
@@ -297,30 +324,15 @@ public class GenericPINAction extends StepAction {
 
 	    // for people which think they have to remove the card in the process
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
-		logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.");
+		logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateErrorStep(lang.translationForKey(ERROR_CARD_REMOVED)));
 	    }
 
-	    gPINStep.setFailedPINVerify(true);
-	    gPINStep.setWrongPINFormat(false);
-	    switch(state) {
-		case PIN_activated_RC3:
-		    gPINStep.updateState(RecognizedState.PIN_activated_RC2);
-		    state = RecognizedState.PIN_activated_RC2;
-		    return new StepActionResult(StepActionResultStatus.REPEAT);
-		case PIN_activated_RC2:
-		    gPINStep.updateState(RecognizedState.PIN_suspended);
-		    state = RecognizedState.PIN_suspended;
-		    return new StepActionResult(StepActionResultStatus.REPEAT);
-		case PIN_resumed:
-		    gPINStep.updateState(RecognizedState.PIN_blocked);
-		    state = RecognizedState.PIN_blocked;
-		    return new StepActionResult(StepActionResultStatus.REPEAT);
-		default:
-		    // This should never happen
-		    return new StepActionResult(StepActionResultStatus.CANCEL);
-	    }
+	    // We don't know what happend so just show an general error message
+	    logger.error("An unknown error occurred while trying to change the PIN.", ex);
+	    return new StepActionResult(StepActionResultStatus.REPEAT,
+		    generateErrorStep(lang.translationForKey(ERROR_UNKNOWN)));
 	}
     }
 

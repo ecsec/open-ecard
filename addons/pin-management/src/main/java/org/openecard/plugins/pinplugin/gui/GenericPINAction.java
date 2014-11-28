@@ -46,7 +46,6 @@ import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.anytype.AuthDataResponse;
 import org.openecard.common.apdu.ResetRetryCounter;
 import org.openecard.common.apdu.common.CardResponseAPDU;
-import org.openecard.common.apdu.common.TrailerConstants;
 import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.interfaces.Dispatcher;
@@ -269,26 +268,28 @@ public class GenericPINAction extends StepAction {
 	    }
 
 	    if (pinResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
-		if (pinResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_ERROR)) {
-		    gPINStep.setFailedPINVerify(true);
-		    gPINStep.setWrongPINFormat(false);
-		    gPINStep.updateState(RecognizedState.PIN_activated_RC2);
-		    state = RecognizedState.PIN_activated_RC2;
-		    return new StepActionResult(StepActionResultStatus.REPEAT);
-		} else if (pinResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED)) {
-		    gPINStep.setFailedPINVerify(true);
-		    gPINStep.setWrongPINFormat(false);
-		    gPINStep.updateState(RecognizedState.PIN_suspended);
-		    state = RecognizedState.PIN_suspended;
-		    return new StepActionResult(StepActionResultStatus.REPEAT);
-		} else if (pinResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_BLOCKED)) {
-		    gPINStep.setFailedPINVerify(true);
-		    gPINStep.setWrongPINFormat(false);
-		    gPINStep.updateState(RecognizedState.PIN_blocked);
-		    state = RecognizedState.PIN_blocked;
-		    return new StepActionResult(StepActionResultStatus.REPEAT);
-		} else {
-		    WSHelper.checkResult(pinResponse);
+		switch (pinResponse.getResult().getResultMinor()) {
+		    case ECardConstants.Minor.IFD.PASSWORD_ERROR:
+			gPINStep.setFailedPINVerify(true);
+			gPINStep.setWrongPINFormat(false);
+			gPINStep.updateState(RecognizedState.PIN_activated_RC2);
+			state = RecognizedState.PIN_activated_RC2;
+			return new StepActionResult(StepActionResultStatus.REPEAT);
+		    case ECardConstants.Minor.IFD.PASSWORD_SUSPENDED:
+			gPINStep.setFailedPINVerify(true);
+			gPINStep.setWrongPINFormat(false);
+			gPINStep.updateState(RecognizedState.PIN_suspended);
+			state = RecognizedState.PIN_suspended;
+			return new StepActionResult(StepActionResultStatus.REPEAT);
+		    case ECardConstants.Minor.IFD.PASSWORD_BLOCKED:
+			gPINStep.setFailedPINVerify(true);
+			gPINStep.setWrongPINFormat(false);
+			gPINStep.updateState(RecognizedState.PIN_blocked);
+			state = RecognizedState.PIN_blocked;
+			return new StepActionResult(StepActionResultStatus.REPEAT);
+		    default:
+			WSHelper.checkResult(pinResponse);
+			break;
 		}
 	    }
 
@@ -339,12 +340,26 @@ public class GenericPINAction extends StepAction {
     private StepActionResult performResumePIN(Map<String, ExecutionResults> oldResults) {
 	try {
 	    EstablishChannelResponse canResponse = performPACEWithCAN(oldResults);
+
 	    if (canResponse == null) {
 		gPINStep.setWrongCANFormat(true);
 		gPINStep.setFailedCANVerify(false);
+		gPINStep.updateState(state); // to reset the text fields
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
-	    WSHelper.checkResult(canResponse);
+
+	    if (canResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
+
+		if (canResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED)) {
+		    gPINStep.setWrongCANFormat(false);
+		    gPINStep.setFailedCANVerify(true);
+		    gPINStep.updateState(state); // to reset the text fields
+		    return new StepActionResult(StepActionResultStatus.REPEAT);
+		} else {
+		    WSHelper.checkResult(canResponse);
+		}
+	    }
+
 	    gPINStep.updateState(RecognizedState.PIN_resumed);
 	    state = RecognizedState.PIN_resumed;
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
@@ -365,10 +380,11 @@ public class GenericPINAction extends StepAction {
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateErrorStep(lang.translationForKey(ERROR_CARD_REMOVED)));
 	    }
+
+	    logger.error("An unknown error occurred while trying to verify the CAN.", ex);
+	    return new StepActionResult(StepActionResultStatus.REPEAT,
+		    generateErrorStep(lang.translationForKey(ERROR_UNKNOWN)));
 	    
-	    gPINStep.setWrongCANFormat(false);
-	    gPINStep.setFailedCANVerify(true);
-	    return new StepActionResult(StepActionResultStatus.REPEAT);
 	}
     }
 

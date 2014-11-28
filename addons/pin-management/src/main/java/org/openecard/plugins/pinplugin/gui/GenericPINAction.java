@@ -391,13 +391,27 @@ public class GenericPINAction extends StepAction {
     private StepActionResult performUnblockPIN(Map<String, ExecutionResults> oldResults) {
 	try {
 	    EstablishChannelResponse pukResponse = performPACEWithPUK(oldResults);
+
 	    if (pukResponse == null) {
 		gPINStep.setWrongPUKFormat(true);
 		gPINStep.setFailedPUKVerify(false);
+		gPINStep.updateState(state); // to reset the text fields
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
-	    WSHelper.checkResult(pukResponse);
 
+	    if (pukResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
+		if (pukResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED)) {
+		    // i think we should not display the counter
+		    //gPINStep.decreasePUKCounter();
+		    gPINStep.setWrongPUKFormat(false);
+		    gPINStep.setFailedPUKVerify(true);
+		    gPINStep.updateState(state); // to reset the text fields
+		    return new StepActionResult(StepActionResultStatus.REPEAT);
+		} else {
+		     WSHelper.checkResult(pukResponse);
+		}
+	    }
+	    
 	    // Here no exception is thrown so sent the ResetRetryCounter command
 	    ResetRetryCounter resetRetryCounter = new ResetRetryCounter((byte) 0x03);
 	    List<byte[]> responses = new ArrayList<>();
@@ -429,15 +443,15 @@ public class GenericPINAction extends StepAction {
 
 	    // for people which think they have to remove the card in the process
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
-		logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.");
+		logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateErrorStep(lang.translationForKey(ERROR_CARD_REMOVED)));
 	    }
-	    
-	    gPINStep.decreasePUKCounter();
-	    gPINStep.setWrongPUKFormat(false);
-	    gPINStep.setFailedPUKVerify(true);
-	    return new StepActionResult(StepActionResultStatus.REPEAT);
+
+	     // We don't know what happend so just show an general error message
+	    logger.error("An unknown error occurred while trying to verify the PUK.", ex);
+	    return new StepActionResult(StepActionResultStatus.REPEAT,
+		    generateErrorStep(lang.translationForKey(ERROR_UNKNOWN)));
 	}
 
     }

@@ -271,9 +271,9 @@ public class GenericPINStep extends Step {
 	getInputInfoUnits().add(pukField);
 
 	// show the puk try counter
-	Text pukTryCounter = new Text();
-	pukTryCounter.setText(lang.translationForKey(REMAINING_ATTEMPTS, retryCounterPUK));
-	getInputInfoUnits().add(pukTryCounter);
+//	Text pukTryCounter = new Text();
+//	pukTryCounter.setText(lang.translationForKey(REMAINING_ATTEMPTS, retryCounterPUK));
+//	getInputInfoUnits().add(pukTryCounter);
 
 	if (wrongPUKFormat) {
 	    // add note for mistyped PUK

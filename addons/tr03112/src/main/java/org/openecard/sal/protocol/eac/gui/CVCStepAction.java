@@ -27,6 +27,7 @@ import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.Step;
+import org.openecard.gui.executor.BackgroundTask;
 import org.openecard.gui.executor.ExecutionResults;
 import org.openecard.gui.executor.StepAction;
 import org.openecard.gui.executor.StepActionResult;
@@ -41,8 +42,11 @@ import org.openecard.sal.protocol.eac.EACProtocol;
  */
 public class CVCStepAction extends StepAction {
 
+    private final BackgroundTask bTask;
+
     public CVCStepAction(Step step) {
 	super(step);
+	bTask = step.getBackgroundTask();
     }
 
     @Override
@@ -53,8 +57,10 @@ public class CVCStepAction extends StepAction {
 	}
 
 	DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+
 	EACData eacData = (EACData) ctx.get(EACProtocol.EAC_DATA);
 	CHATStep chatStep = new CHATStep(eacData);
+	chatStep.setBackgroundTask(bTask);
 	StepAction chatAction = new CHATStepAction(eacData, chatStep);
 	chatStep.setAction(chatAction);
 	return new StepActionResult(StepActionResultStatus.NEXT, chatStep);

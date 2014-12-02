@@ -33,6 +33,7 @@ import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.BoxItem;
 import org.openecard.gui.definition.Checkbox;
 import org.openecard.gui.definition.Step;
+import org.openecard.gui.executor.BackgroundTask;
 import org.openecard.gui.executor.ExecutionResults;
 import org.openecard.gui.executor.StepAction;
 import org.openecard.gui.executor.StepActionResult;
@@ -50,10 +51,12 @@ import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
 public class CHATStepAction extends StepAction {
 
     private final EACData eacData;
+    private final BackgroundTask bTask;
 
     public CHATStepAction(EACData eacData, Step step) {
 	super(step);
 	this.eacData = eacData;
+	this.bTask = step.getBackgroundTask();
     }
 
 
@@ -70,6 +73,7 @@ public class CHATStepAction extends StepAction {
 	    Dispatcher dispatcher = (Dispatcher) ctx.get(EACProtocol.DISPATCHER);
 
 	    PINStep pinStep = new PINStep(eacData, ! nativePace, paceMarker);
+	    pinStep.setBackgroundTask(bTask);
 	    StepAction pinAction = new PINStepAction(eacData, ! nativePace, slotHandle, dispatcher, pinStep, status);
 	    pinStep.setAction(pinAction);
 

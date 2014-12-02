@@ -77,6 +77,7 @@ import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.common.util.HandlerUtils;
 
 
 /**
@@ -186,6 +187,10 @@ public class TCTokenHandler {
 	TCToken token = tokenRequest.getTCToken();
 	try {
 	    connectionHandle = prepareHandle(connectionHandle);
+
+	    // save handle for later use
+	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    dynCtx.put(TR03112Keys.CONNECTION_HANDLE, HandlerUtils.copyHandle(connectionHandle));
 
 	    TCTokenResponse response = new TCTokenResponse();
 	    response.setTCToken(token);

@@ -71,6 +71,12 @@ public class PINStepAction extends StepAction {
 
     private static final String PIN_ID_CAN = "2";
 
+    // Translation constants
+    private static final String ERROR_CARD_REMOVED = "action.error.card.removed";
+    private static final String ERROR_INTERNAL = "action.error.internal";
+    private static final String ERROR_TITLE = "action.error.title";
+    private static final String ERROR_UNKNOWN = "action.error.unknown";
+
     // did translations
     private final String pin;
     private final String puk;
@@ -81,6 +87,7 @@ public class PINStepAction extends StepAction {
     private final Dispatcher dispatcher;
     private final PINStep step;
     private final I18n lang = I18n.getTranslation("pace");
+    private final I18n langPin = I18n.getTranslation("pinplugin");
 
     private int retryCounter;
 
@@ -130,18 +137,68 @@ public class PINStepAction extends StepAction {
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		}
 
-		WSHelper.checkResult(response);
+		if (response.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
+		    if (response.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED)) {
+			logger.error("Failed to authenticate with the given CAN.");
+			return new StepActionResult(StepActionResultStatus.REPEAT);
+		    } else {
+			WSHelper.checkResult(response);
+		    }
+		}
 	    } catch (DispatcherException | InvocationTargetException ex) {
 		logger.error("Failed to dispatch the EstablishChannel request.", ex);
+		return new StepActionResult(StepActionResultStatus.REPEAT,
+		    new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_INTERNAL)));
 	    } catch (WSException ex) {
-		logger.error("Failed to authenticate with the given CAN.", ex);
-		return new StepActionResult(StepActionResultStatus.REPEAT);
+		// This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
+		if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
+		    logger.error("User canceled the authentication manually.", ex);
+		    return new StepActionResult(StepActionResultStatus.CANCEL);
+		}
+
+		// for people which think they have to remove the card in the process
+		if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
+		    logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
+		    return new StepActionResult(StepActionResultStatus.REPEAT, 
+			    new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_CARD_REMOVED)));
+		}
+		
 	    }
 	}
 
 	try {
 	    EstablishChannelResponse establishChannelResponse = performPACEWithPIN(oldResults);
-	    WSHelper.checkResult(establishChannelResponse);
+
+	    if (establishChannelResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
+		if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_ERROR)) {
+		    // increase counters and the related displays
+		    retryCounter++;
+		    step.updateAttemptsDisplay(3 - retryCounter);
+		    // repeat the step
+		    logger.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
+		    return new StepActionResult(StepActionResultStatus.REPEAT);
+		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED)) {
+		    // increase counters and the related displays
+		    retryCounter++;
+		    step.updateAttemptsDisplay(3 - retryCounter);
+		    logger.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
+
+		    if (capturePin) {
+			step.addCANEntry();
+		    } else {
+			step.addNativeCANNotice();
+		    }
+		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_BLOCKED)) {
+		    logger.warn("Wrong PIN entered. The PIN is blocked.");
+		    return new StepActionResult(StepActionResultStatus.REPEAT,
+			new ErrorStep(lang.translationForKey("step_error_title_blocked", pin),
+				lang.translationForKey("step_error_pin_blocked", pin, pin, puk, pin)));
+
+		} else {
+		    WSHelper.checkResult(establishChannelResponse);
+		}
+	    }
+
 	    eacData.paceResponse = establishChannelResponse;
 	    // PACE completed successfully, proceed with next step
 	    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
@@ -154,31 +211,21 @@ public class PINStepAction extends StepAction {
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
 
-	    // increase counters and the related displays
-	    retryCounter++;
-	    step.updateAttemptsDisplay(3 - retryCounter);
-
-	    // check whether the PIN is blocked
-	    if (retryCounter >= 3) {
-		logger.warn("Wrong PIN entered. The PIN is blocked.");
+	    // for people which think they have to remove the card in the process
+	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
+		logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
-			new ErrorStep(lang.translationForKey("step_error_title_blocked", pin),
-				lang.translationForKey("step_error_pin_blocked", pin, pin, puk, pin)));
-	    }
-
-	    // check whether entering the can is necessary
-	    if (retryCounter == 2 && capturePin) {
-		step.addCANEntry();
-	    } else if (retryCounter == 2) {
-		step.addNativeCANNotice();
+			new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_CARD_REMOVED)));
 	    }
 
 	    // repeat the step
-	    logger.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
-	    return new StepActionResult(StepActionResultStatus.REPEAT);
+	    logger.error("An unknown error occured while trying to verify the PIN.");
+	    return new StepActionResult(StepActionResultStatus.REPEAT,
+		    new ErrorStep(langPin.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_UNKNOWN)));
 	} catch (DispatcherException | InvocationTargetException ex) {
 	    logger.error("Failed to dispatch EstablishChannelCommand.", ex);
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
+	    return new StepActionResult(StepActionResultStatus.REPEAT,
+		    new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_INTERNAL)));
 	}
     }
 

@@ -52,7 +52,9 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.ifd.PACECapabilities;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.sal.state.CardStateEntry;
+import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.Promise;
 import org.openecard.common.util.TR03112Utils;
@@ -77,6 +79,8 @@ import org.openecard.sal.protocol.eac.anytype.PasswordID;
 import org.openecard.sal.protocol.eac.gui.CHATStep;
 import org.openecard.sal.protocol.eac.gui.CVCStep;
 import org.openecard.sal.protocol.eac.gui.CVCStepAction;
+import org.openecard.sal.protocol.eac.gui.CardMonitor;
+import org.openecard.sal.protocol.eac.gui.CardRemovedFilter;
 import org.openecard.sal.protocol.eac.gui.ErrorStep;
 import org.openecard.sal.protocol.eac.gui.PINStep;
 import org.openecard.sal.protocol.eac.gui.ProcessingStep;
@@ -105,16 +109,19 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
     private final Dispatcher dispatcher;
     private final UserConsent gui;
+    private final EventManager eventManager;
 
     /**
      * Creates a new PACE protocol step.
      *
      * @param dispatcher Dispatcher
      * @param gui GUI
+     * @param eventManager 
      */
-    public PACEStep(Dispatcher dispatcher, UserConsent gui) {
+    public PACEStep(Dispatcher dispatcher, UserConsent gui, EventManager eventManager) {
 	this.dispatcher = dispatcher;
 	this.gui = gui;
+	this.eventManager = eventManager;
     }
 
     @Override
@@ -129,7 +136,17 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 	DIDAuthenticate didAuthenticate = request;
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
-	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
+	ConnectionHandleType conHandle = (ConnectionHandleType) dynCtx.get(TR03112Keys.CONNECTION_HANDLE);
+
+	if (! ByteUtils.compare(conHandle.getSlotHandle(), didAuthenticate.getConnectionHandle().getSlotHandle())) {
+	    String msg = "Invalid connection handle given in DIDAuthenticate message.";
+	    Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, msg);
+	    response.setResult(r);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    return response;
+	}
+
+	byte[] slotHandle = conHandle.getSlotHandle();
 	dynCtx.put(EACProtocol.SLOT_HANDLE, slotHandle);
 	dynCtx.put(EACProtocol.DISPATCHER, dispatcher);
 
@@ -142,8 +159,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    final String passwordType = PasswordID.parse(pinID).getString();
 
 	    // determine PACE capabilities of the terminal
-	    CardStateEntry cardState = (CardStateEntry) internalData.get(EACConstants.IDATA_CARD_STATE_ENTRY);
-	    boolean nativePace = genericPACESupport(cardState.handleCopy());
+	    boolean nativePace = genericPACESupport(conHandle);
 	    dynCtx.put(EACProtocol.IS_NATIVE_PACE, nativePace);
 
 	    // Certificate chain
@@ -166,6 +182,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    CHAT optionalCHAT = new CHAT(eac1Input.getOptionalCHAT());
 
 	    // get the PACEMarker
+	    CardStateEntry cardState = (CardStateEntry) internalData.get(EACConstants.IDATA_CARD_STATE_ENTRY);
 	    PACEMarkerType paceMarker = getPaceMarker(cardState, passwordType);
 	    dynCtx.put(EACProtocol.PACE_MARKER, paceMarker);
 
@@ -222,7 +239,11 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    final UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE));
 	    if (pinUsable) {
 		// create GUI and init executor
+		CardMonitor cardMon = new CardMonitor();
+		CardRemovedFilter filter = new CardRemovedFilter(conHandle.getIFDName(), conHandle.getSlotIndex());
+		eventManager.register(cardMon, filter);
 		CVCStep cvcStep = new CVCStep(eacData);
+		cvcStep.setBackgroundTask(cardMon);
 		CVCStepAction cvcStepAction = new CVCStepAction(cvcStep);
 		cvcStep.setAction(cvcStepAction);
 		uc.getSteps().add(cvcStep);
@@ -271,8 +292,6 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    boolean paceSuccessful = (boolean) pPaceSuccessful.deref();
 	    if (! paceSuccessful) {
 		// TODO: differentiate between cancel and pin error
-		String protocol = didAuthenticate.getAuthenticationProtocolData().getProtocol();
-		cardState.removeProtocol(protocol);
 		String msg = "Failure in PACE authentication.";
 		Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg);
 		response.setResult(r);

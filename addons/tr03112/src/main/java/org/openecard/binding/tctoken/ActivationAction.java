@@ -72,21 +72,19 @@ public class ActivationAction implements AppPluginAction {
     }
 
     @Override
-    public BindingResult execute(Body body, Map<String, String> parameters, List<Attachment> attachments) {
+    public BindingResult execute(Body body, Map<String, String> params, List<Attachment> attachments) {
 	BindingResult response;
 
 	// only continue, when there are known parameters in the request
-	if (! (parameters.containsKey("tcTokenURL") || parameters.containsKey("activationObject"))) {
-	    String errorMsg = lang.translationForKey(NO_ACTIVATION_PARAMETERS.getKey());
+	if (! (params.isEmpty() || params.containsKey("tcTokenURL") || params.containsKey("activationObject"))) {
 	    response = new BindingResult(BindingResultCode.MISSING_PARAMETER);
-	    response.setResultMessage(errorMsg);
-	    showErrorMessage(errorMsg);
+	    response.setResultMessage("A parameters containing the activation information is missing.");
 	    return response;
 	}
 
 	try {
 	    try {
-		TCTokenRequest tcTokenRequest = TCTokenRequest.convert(parameters);
+		TCTokenRequest tcTokenRequest = TCTokenRequest.convert(params);
 		response = tokenHandler.handleActivate(tcTokenRequest);
 		// Show success message. If we get here we have a valid StartPAOSResponse and a valid refreshURL
 		showFinishMessage((TCTokenResponse) response);

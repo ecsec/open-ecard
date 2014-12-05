@@ -216,6 +216,9 @@ public class SwingNavigator implements UserConsentNavigator, ActionListener {
 	nextStep.updateFrame();
 	nextStep.unlockControls();
 	navBar.unlockControls();
+
+	boolean reversible = nextStep.getStep().isReversible();
+	navBar.setReversible(reversible);
     }
 
 

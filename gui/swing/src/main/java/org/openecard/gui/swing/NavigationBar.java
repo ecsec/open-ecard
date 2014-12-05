@@ -162,4 +162,14 @@ public class NavigationBar extends JPanel {
 	return backButton.hasFocus() || nextButton.hasFocus() || cancelButton.hasFocus();
     }
 
+    /**
+     * Makes the step reversible or not.
+     * This actually enables or disables the back button.
+     *
+     * @param reversible {@code true} if the button should be enabled, {@code false} otherwise.
+     */
+    void setReversible(boolean reversible) {
+	backButton.setEnabled(reversible);
+    }
+
 }

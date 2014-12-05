@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * This class is a helper to display the steps of a user consent. It displays one after the other and reacts differently
  * depending of the outcome of a step. It also executes actions associated with the steps after they are finished.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ExecutionEngine {
 
@@ -134,80 +134,80 @@ public class ExecutionEngine {
 			// fallthrough because CANCEL is already handled
 			break;
 		}
-	    }
-
-	    // perform action
-	    StepAction action = next.getStep().getAction();
-	    StepActionCallable actionCallable = new StepActionCallable(action, oldResults, next);
-	    // use separate thread or tasks running outside the JVM context, like PCSC calls, won't stop on cancellation
-	    ExecutorService execService = Executors.newSingleThreadExecutor();
-	    Future<StepActionResult> actionFuture = execService.submit(actionCallable);
-	    navigator.setRunningAction(actionFuture);
-	    StepActionResult actionResult;
-	    try {
-		actionResult = actionFuture.get();
-	    } catch (CancellationException ex) {
-		logger.info("StepAction was canceled.", ex);
-		navigator.close();
-		return ResultStatus.CANCEL;
-	    } catch (InterruptedException ex) {
-		logger.info("StepAction was interrupted.", ex);
-		navigator.close();
-		return ResultStatus.CANCEL;
-	    } catch (ExecutionException ex) {
-		logger.error("StepAction failed with error.", ex.getCause());
-		navigator.close();
-		return ResultStatus.CANCEL;
-	    }
-
-	    // break out if cancel was returned
-	    if (actionResult.getStatus() == StepActionResultStatus.CANCEL) {
-		logger.info("StepAction was canceled.");
-		navigator.close();
-		return ResultStatus.CANCEL;
-	    }
-
-	    // replace step if told by result value
-	    if (actionResult.getReplacement() != null) {
-		switch (actionResult.getStatus()) {
-		    case BACK:
-			next = navigator.replacePrevious(actionResult.getReplacement());
-			break;
-		    case NEXT:
-			if (navigator.hasNext()) {
-			    next = navigator.replaceNext(actionResult.getReplacement());
-			} else {
-			    navigator.close();
-			    return convertStatus(StepActionResultStatus.NEXT);
-			}
-			break;
-		    case REPEAT:
-			next = navigator.replaceCurrent(actionResult.getReplacement());
-			break;
-		    default:
-			// fallthrough because CANCEL is already handled
-			break;
-		}
 	    } else {
-		// no replacement just proceed
-		switch (actionResult.getStatus()) {
-		    case BACK:
-			next = navigator.previous();
-			break;
-		    case NEXT:
-			if (navigator.hasNext()) {
-			    next = navigator.next();
-			} else {
-			    navigator.close();
-			    return convertStatus(StepActionResultStatus.NEXT);
-			}
-			break;
-		    case REPEAT:
-			next = navigator.current();
-			break;
-		    default:
-			// fallthrough because CANCEL is already handled
-			break;
+		// step replacement did not happen, so we can execute the action
+		StepAction action = next.getStep().getAction();
+		StepActionCallable actionCallable = new StepActionCallable(action, oldResults, next);
+		// use separate thread or tasks running outside the JVM context, like PCSC calls, won't stop on cancellation
+		ExecutorService execService = Executors.newSingleThreadExecutor();
+		Future<StepActionResult> actionFuture = execService.submit(actionCallable);
+		navigator.setRunningAction(actionFuture);
+		StepActionResult actionResult;
+		try {
+		    actionResult = actionFuture.get();
+		} catch (CancellationException ex) {
+		    logger.info("StepAction was canceled.", ex);
+		    navigator.close();
+		    return ResultStatus.CANCEL;
+		} catch (InterruptedException ex) {
+		    logger.info("StepAction was interrupted.", ex);
+		    navigator.close();
+		    return ResultStatus.CANCEL;
+		} catch (ExecutionException ex) {
+		    logger.error("StepAction failed with error.", ex.getCause());
+		    navigator.close();
+		    return ResultStatus.CANCEL;
+		}
+
+		// break out if cancel was returned
+		if (actionResult.getStatus() == StepActionResultStatus.CANCEL) {
+		    logger.info("StepAction was canceled.");
+		    navigator.close();
+		    return ResultStatus.CANCEL;
+		}
+
+		// replace step if told by result value
+		if (actionResult.getReplacement() != null) {
+		    switch (actionResult.getStatus()) {
+			case BACK:
+			    next = navigator.replacePrevious(actionResult.getReplacement());
+			    break;
+			case NEXT:
+			    if (navigator.hasNext()) {
+				next = navigator.replaceNext(actionResult.getReplacement());
+			    } else {
+				navigator.close();
+				return convertStatus(StepActionResultStatus.NEXT);
+			    }
+			    break;
+			case REPEAT:
+			    next = navigator.replaceCurrent(actionResult.getReplacement());
+			    break;
+			default:
+			    // fallthrough because CANCEL is already handled
+			    break;
+		    }
+		} else {
+		    // no replacement just proceed
+		    switch (actionResult.getStatus()) {
+			case BACK:
+			    next = navigator.previous();
+			    break;
+			case NEXT:
+			    if (navigator.hasNext()) {
+				next = navigator.next();
+			    } else {
+				navigator.close();
+				return convertStatus(StepActionResultStatus.NEXT);
+			    }
+			    break;
+			case REPEAT:
+			    next = navigator.current();
+			    break;
+			default:
+			    // fallthrough because CANCEL is already handled
+			    break;
+		    }
 		}
 	    }
 	}

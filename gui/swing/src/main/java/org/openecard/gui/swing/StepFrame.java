@@ -48,9 +48,9 @@ import org.slf4j.LoggerFactory;
  * The StepFrame class represents a single step.
  * The actual layouting is however deferred to a layouting component.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Florian Feldmann <florian.feldmann@rub.de>
+ * @author Moritz Horsch
+ * @author Tobias Wich
+ * @author Florian Feldmann
  */
 public class StepFrame {
 
@@ -210,7 +210,7 @@ public class StepFrame {
 	}
 
 	try {
-	    logger.debug("Exchange result for step '{}", step.getTitle());
+	    logger.debug("Exchange result for step '{}'.", step.getTitle());
 	    stepResult.syncPoint.exchange(null);
 	} catch (InterruptedException ignore) {
 	}
@@ -238,15 +238,17 @@ public class StepFrame {
 	}
 
 	try {
-	    logger.debug("Exchange result for step '{}", step.getTitle());
+	    logger.debug("Exchange result from background task for step '{}'.", step.getTitle());
 	    stepResult.syncPoint.exchange(null);
 	} catch (InterruptedException ignore) {
 	}
     }
 
     public void killBackgroundTask() {
+	logger.debug("Trying to kill background task if it exists.");
 	// kill running thread
 	if (bgThread != null && bgThread.isAlive()) {
+	    logger.debug("Killing background task.");
 	    bgThread.interrupt();
 	}
     }
@@ -259,6 +261,7 @@ public class StepFrame {
 		public void run() {
 		    try {
 			StepActionResult result = task.call();
+			logger.debug("Background thread terminated before the GUI.");
 			forceResult(result);
 		    } catch (Exception ex) {
 			logger.error("Background task terminated with an exception.", ex);

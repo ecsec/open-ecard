@@ -47,9 +47,9 @@ import org.openecard.gui.swing.common.GUIConstants;
 /**
  * Swing implementation of the UserConsent interface.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Florian Feldmann <florian.feldmann@rub.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich
+ * @author Florian Feldmann
+ * @author Moritz Horsch
  */
 public class SwingUserConsent implements UserConsent {
 
@@ -97,7 +97,7 @@ public class SwingUserConsent implements UserConsent {
 		    KeyEvent keyEvent = (KeyEvent) event;
 		    if (KeyEvent.KEY_RELEASED == keyEvent.getID() && KeyEvent.VK_ENTER == keyEvent.getKeyCode()) {
 			// If the enter is pressed when perform a next step event
-			if (!navigationBar.hasFocus()) {
+			if (! navigationBar.hasFocus()) {
 			    navigator.actionPerformed(e);
 			}
 		    }

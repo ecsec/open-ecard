@@ -263,6 +263,8 @@ public class StepFrame {
 			StepActionResult result = task.call();
 			logger.debug("Background thread terminated before the GUI.");
 			forceResult(result);
+		    } catch (InterruptedException ex) {
+			logger.debug("Background task has been terminated from the Swing GUI.", ex);
 		    } catch (Exception ex) {
 			logger.error("Background task terminated with an exception.", ex);
 		    }

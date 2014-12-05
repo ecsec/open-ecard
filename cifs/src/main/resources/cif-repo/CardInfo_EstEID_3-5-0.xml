@@ -3,77 +3,54 @@
 	      xmlns:ns2="http://www.w3.org/2000/09/xmldsig#"
 	      xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
 	      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	      xsi:schemaLocation="urn:iso:std:iso-iec:24727:tech:schema http://repository.cardinfo.eu/schema/CardInfo.xsd">
+	      xsi:schemaLocation="urn:iso:std:iso-iec:24727:tech:schema http://ws.openecard.org/schema/CardInfo.xsd">
 
     <iso:CardType>
-	<iso:ObjectIdentifier>http://cif.id.ee/eid</iso:ObjectIdentifier>
-	<iso:CardTypeName xml:lang="EN">Estonian Identity Card</iso:CardTypeName>
-	<iso:CardTypeName xml:lang="DE">Estnischer Personalausweis</iso:CardTypeName>
+	<iso:ObjectIdentifier>http://cif.id.ee/eidV3.5</iso:ObjectIdentifier>
+	<iso:CardTypeName xml:lang="EN">Estonian Identity Card (v.3.5.x)</iso:CardTypeName>
+	<iso:CardTypeName xml:lang="DE">Estnischer Personalausweis (v.3.5.x)</iso:CardTypeName>
 	<iso:Version>
-		<!-- Version number corresponds to the version of the cif -->
-		<iso:Major>0</iso:Major>
-		<iso:Minor>0</iso:Minor>
-		<iso:SubMinor>1</iso:SubMinor>
+		<!-- Version number corresponds to the version of the estID Applet -->
+		<iso:Major>3</iso:Major>
+		<iso:Minor>5</iso:Minor>
+		<iso:SubMinor>0</iso:SubMinor>
 	</iso:Version>
-	<iso:Status>Draft</iso:Status>
+	<iso:Status>Final</iso:Status>
 	<iso:Date>2012-11-12</iso:Date>
     </iso:CardType>
 
     <iso:CardIdentification>
 	<iso:CharacteristicFeature>
-	    <!-- select MF -->
+	    <!-- select MF the AID should be unique -->
 	    <iso:CardCall>
-		<iso:CommandAPDU>00A4000C00</iso:CommandAPDU>
-		<iso:ResponseAPDU>
-		    <iso:Trailer>9000</iso:Trailer>
-		</iso:ResponseAPDU>
-	    </iso:CardCall>
-	    <!-- select EstEID DF -->
-	    <iso:CardCall>
-		<iso:CommandAPDU>00A4010C02EEEE</iso:CommandAPDU>
-		<iso:ResponseAPDU>
-		    <iso:Trailer>9000</iso:Trailer>
-		</iso:ResponseAPDU>
-	    </iso:CardCall>
-	    <!-- select EF_PD -->
-	    <iso:CardCall>
-		<iso:CommandAPDU>00A40200025044</iso:CommandAPDU>
-		<iso:ResponseAPDU>
-		    <iso:Body>
-			<iso:Tag>6F</iso:Tag>
-			<iso:DataObject>
-			    <iso:Tag>62</iso:Tag>
-			    <iso:DataObject>
-				<iso:Tag>62</iso:Tag>
-				<iso:DataObject>
-				    <iso:Tag>83</iso:Tag>
-				    <iso:DataObject>
-					<iso:MatchingData>
-					    <iso:Length>02</iso:Length>
-					    <iso:MatchingValue>5044</iso:MatchingValue>
-					</iso:MatchingData>
-				    </iso:DataObject>
-				</iso:DataObject>
-			    </iso:DataObject>
-			</iso:DataObject>
-		    </iso:Body>
-		    <iso:Trailer>9000</iso:Trailer>
-		</iso:ResponseAPDU>
-	    </iso:CardCall>
+	    <iso:CommandAPDU>00A4040C0FD23300000045737445494420763335</iso:CommandAPDU>
+	    <iso:ResponseAPDU>
+		<iso:Body>
+		    <iso:MatchingData>
+			<iso:Offset>00</iso:Offset>
+			<iso:Length>00</iso:Length>
+			<iso:MatchingValue/>
+		    </iso:MatchingData>
+		</iso:Body>
+		<iso:Trailer>9000</iso:Trailer>
+	    </iso:ResponseAPDU>
+	</iso:CardCall>
 	</iso:CharacteristicFeature>
     </iso:CardIdentification>
 
     <iso:ApplicationCapabilities>
 	<!-- for version 3 and higher cards -->
-	<iso:ImplicitlySelectedApplication>F04573744549442076657220312E30</iso:ImplicitlySelectedApplication>
+	<iso:ImplicitlySelectedApplication>D23300000045737445494420763335</iso:ImplicitlySelectedApplication>
 	<iso:CardApplication>
 	    <!--
 	    for version 1.0 and 1.1 it have to be
 	    <iso:ApplicationIdentifier>D2330000010000010000000000000000</iso:ApplicationIdentifier>
 	    Le have to be 27
-	    -->
-	    <iso:ApplicationName>MF</iso:ApplicationName>
+	    for version 3.0 to 3.4
 	    <iso:ApplicationIdentifier>F04573744549442076657220312E30</iso:ApplicationIdentifier>
+	    -->
+	    <iso:ApplicationIdentifier>D23300000045737445494420763335</iso:ApplicationIdentifier>
+	    <iso:ApplicationName>MF</iso:ApplicationName>
 	    <iso:CardApplicationACL>
 		<iso:AccessRule>
 		    <iso:CardApplicationServiceName>CardApplicationServiceAccess</iso:CardApplicationServiceName>
@@ -187,6 +164,7 @@
 				<iso:KeyRef>01</iso:KeyRef>
 			    </iso:PinRef>
 			    <iso:PasswordAttributes>
+				<iso:pwdFlags>initialized exchangeRefData</iso:pwdFlags>
 				<iso:pwdType>ascii-numeric</iso:pwdType>
 				<iso:minLength>4</iso:minLength>
 				<iso:storedLength>12</iso:storedLength>
@@ -297,6 +275,7 @@
 							    <iso:PinInput>
 								<iso:Index>0</iso:Index>
 								<iso:PasswordAttributes>
+								    <iso:pwdFlags>initialized exchangeRefData</iso:pwdFlags>
 								    <iso:pwdType>ascii-numeric</iso:pwdType>
 								    <iso:minLength>4</iso:minLength>
 								    <iso:storedLength>12</iso:storedLength>
@@ -405,6 +384,7 @@
 				<iso:KeyRef>02</iso:KeyRef>
 			    </iso:PinRef>
 			    <iso:PasswordAttributes>
+				<iso:pwdFlags>initialized exchangeRefData</iso:pwdFlags>
 				<iso:pwdType>ascii-numeric</iso:pwdType>
 				<iso:minLength>5</iso:minLength>
 				<iso:storedLength>12</iso:storedLength>
@@ -515,6 +495,7 @@
 							    <iso:PinInput>
 								<iso:Index>0</iso:Index>
 								<iso:PasswordAttributes>
+								    <iso:pwdFlags>initialized exchangeRefData</iso:pwdFlags>
 								    <iso:pwdType>ascii-numeric</iso:pwdType>
 								    <iso:minLength>5</iso:minLength>
 								    <iso:storedLength>12</iso:storedLength>
@@ -623,6 +604,7 @@
 				<iso:KeyRef>00</iso:KeyRef>
 			    </iso:PinRef>
 			    <iso:PasswordAttributes>
+				<iso:pwdFlags>initialized exchangeRefData</iso:pwdFlags>
 				<iso:pwdType>ascii-numeric</iso:pwdType>
 				<iso:minLength>8</iso:minLength>
 				<iso:storedLength>12</iso:storedLength>
@@ -840,7 +822,7 @@
 				<iso:AlgorithmIdentifier>
 				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
 				</iso:AlgorithmIdentifier>
-				<iso:SupportedOperations>Compute-signature Decipher Internal-authenticate</iso:SupportedOperations>
+				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 			    </iso:AlgorithmInfo>
 			    <iso:KeyInfo>
 				<iso:KeyRef>
@@ -876,69 +858,6 @@
 		    </iso:AccessRule>
 		</iso:DIDACL>
 	    </iso:DIDInfo>
-	    <!-- 3DesKey1, 3DesKey2 -->
-	    <iso:DataSetInfo>
-		<iso:DataSetName>EF.DesKeys</iso:DataSetName>
-		<iso:DataSetACL>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:always>true</iso:always>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		</iso:DataSetACL>
-		<iso:DataSetPath>
-		    <iso:efIdOrPath>0010</iso:efIdOrPath>
-		</iso:DataSetPath>
-	    </iso:DataSetInfo>
-	    <!-- PIN Codes -->
-	    <iso:DataSetInfo>
-		<iso:DataSetName>EF.PINS</iso:DataSetName>
-		<iso:DataSetACL>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:always>true</iso:always>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		</iso:DataSetACL>
-		<iso:DataSetPath>
-		    <iso:efIdOrPath>0012</iso:efIdOrPath>
-		</iso:DataSetPath>
-	    </iso:DataSetInfo>
-	    <!-- Passphrase retry counter -->
-	    <iso:DataSetInfo>
-		<iso:DataSetName>EF.Passphrase_Retry_Counter</iso:DataSetName>
-		<iso:DataSetACL>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:always>true</iso:always>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:always>true</iso:always>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		</iso:DataSetACL>
-		<iso:DataSetPath>
-		    <iso:efIdOrPath>0013</iso:efIdOrPath>
-		</iso:DataSetPath>
-	    </iso:DataSetInfo>
 	    <!-- Pin retry counters -->
 	    <iso:DataSetInfo>
 		<iso:DataSetName>EF.PIN_Retry_Counter</iso:DataSetName>

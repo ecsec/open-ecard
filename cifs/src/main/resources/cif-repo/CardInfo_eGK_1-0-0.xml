@@ -2,7 +2,7 @@
 <iso:CardInfo xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
 			  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			  xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
-			  xsi:schemaLocation="urn:iso:std:iso-iec:24727:tech:schema https://ws.openecard.org/schema/CardInfo.xsd">
+			  xsi:schemaLocation="urn:iso:std:iso-iec:24727:tech:schema http://ws.openecard.org/schema/CardInfo.xsd">
 	<iso:CardType>
 		<iso:ObjectIdentifier>http://ws.gematik.de/egk/1.0.0</iso:ObjectIdentifier>
 		<!-- The URI of the German eHealth-card (elektronische Gesundheitskarte, eGK) is structured as follows:

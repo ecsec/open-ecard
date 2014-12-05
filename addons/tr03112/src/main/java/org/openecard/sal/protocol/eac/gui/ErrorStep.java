@@ -41,6 +41,8 @@ public class ErrorStep extends Step {
 
     public ErrorStep(String title, String errorText) {
 	super(title);
+	// TODO: remove instantreturn to actually display an error
+	setInstantReturn(true);
 	setReversible(false);
 	Text pinBlockedNote = new Text(errorText);
 	getInputInfoUnits().add(pinBlockedNote);

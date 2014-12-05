@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ExecutePACEResponse {
 
@@ -78,17 +78,26 @@ public class ExecutePACEResponse {
 	    case 0xF0200002: return WSHelper.makeResultError(ECardConstants.Minor.IFD.TIMEOUT_ERROR, "Timeout.");
 	    // Response APDU of the card reports error
 	    default: {
+                byte[] sw = new byte[]{(byte) ((result >> 8) & 0xFF), (byte) (result & 0xFF)};
+		String msg = CardCommandStatus.getMessage(sw);
+		int type = (result >> 16) & 0xFFFF;
 		if ((result & 0xFFFC0000) == 0xF0000000) {
-		    byte[] sw = new byte[]{(byte) ((result >> 8) & 0xFF), (byte) (result & 0xFF)};
-		    String msg = CardCommandStatus.getMessage(sw);
-		    int type = (result >> 16) & 0xFFFF;
 		    switch (type) {
 			case 0xF000: return WSHelper.makeResultUnknownError("Select EF.CardAccess: " + msg);
 			case 0xF001: return WSHelper.makeResultUnknownError("Read Binary EF.CardAccess: " + msg);
 			case 0xF002: return WSHelper.makeResultUnknownError("MSE Set AT: " + msg);
 			case 0xF003: return WSHelper.makeResultUnknownError("General Authenticat Step 1-4: " + msg);
 		    }
-		}
+		} else if ((result & 0xFFFC0000) == 0xf0040000) {
+		    // codes for wrong PIN
+                    switch (ByteUtils.toInteger(sw))  {
+			case 0x6300: return WSHelper.makeResultError(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED, msg);
+                        case 0x63C0: return WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, msg);
+                        case 0x63C1: return WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED, msg);
+                        case 0x63C2: return WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_ERROR, msg);
+                    }
+                }
+
 		// unknown error
 		String hexStringResult = ByteUtils.toHexString(IntegerUtils.toByteArray(result));
 		logger.warn("Unknown error in ExecutePACEResponse: {}", hexStringResult);

@@ -557,7 +557,8 @@ public class IFD implements org.openecard.ws.IFD {
 		    // check if the code is present
 		    byte[] resultCommand = t.executeCtrlCode(ctrlCode, command);
 		    // TODO: evaluate result
-		    response = WSHelper.makeResponse(ControlIFDResponse.class, WSHelper.makeResultOK());
+		    Result result = evaluateControlIFDRAPDU(resultCommand);
+		    response = WSHelper.makeResponse(ControlIFDResponse.class, result);
 		    response.setResponse(resultCommand);
 		    return response;
 
@@ -970,6 +971,16 @@ public class IFD implements org.openecard.ws.IFD {
 	    return destroyChannelResponse;
 	} catch (Throwable t) {
 	    return WSHelper.makeResponse(DestroyChannelResponse.class, WSHelper.makeResult(t));
+	}
+    }
+
+    private Result evaluateControlIFDRAPDU(byte[] resultCommand) {
+	int result = ByteUtils.toInteger(resultCommand);
+	switch (result) {
+	    case 0x9000: return WSHelper.makeResultOK();
+	    case 0x6400: return WSHelper.makeResultError(ECardConstants.Minor.IFD.TIMEOUT_ERROR, "Timeout.");
+            default:
+                return WSHelper.makeResultUnknownError("Unknown return code from terminal.");
 	}
     }
 

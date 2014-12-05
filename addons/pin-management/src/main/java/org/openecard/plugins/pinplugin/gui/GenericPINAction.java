@@ -2,9 +2,9 @@
  * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
- * 
+ *
  * This file is part of the Open eCard App.
- * 
+ *
  * GNU General Public License Usage
  * This file may be used under the terms of the GNU General Public
  * License version 3.0 as published by the Free Software Foundation
@@ -12,12 +12,12 @@
  * this file. Please review the following information to ensure the
  * GNU General Public License version 3.0 requirements will be met:
  * http://www.gnu.org/copyleft/gpl.html.
- * 
+ *
  * Other Usage
  * Alternatively, this file may be used in accordance with the terms
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
- * 
+ *
  ***************************************************************************/
 
 package org.openecard.plugins.pinplugin.gui;
@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Hans-Martin Haase 
+ * @author Hans-Martin Haase
  */
 public class GenericPINAction extends StepAction {
 
@@ -85,7 +85,10 @@ public class GenericPINAction extends StepAction {
     private static final String CHANGE_SUCCESS = "action.changepin.userconsent.successstep.description";
     private static final String ERROR_CARD_REMOVED = "action.error.card.removed";
     private static final String ERROR_INTERNAL = "action.error.internal";
+    private static final String ERROR_NON_MATCHING_PASSWORDS = "action.error.missing_password_match";
+    private static final String ERROR_TIMEOUT = "action.error.timeout";
     private static final String ERROR_TITLE = "action.error.title";
+    private static final String ERROR_USER_CANCELLATION_OR_CARD_REMOVED = "action.error.user_cancellation";
     private static final String SUCCESS_TITLE = "action.success.title";
     private static final String ERROR_UNKNOWN = "action.error.unknown";
 
@@ -199,7 +202,7 @@ public class GenericPINAction extends StepAction {
 	DIDAuthenticationDataType paceInput = new DIDAuthenticationDataType();
 	paceInput.setProtocol(ECardConstants.Protocol.PACE);
 	AuthDataMap tmp = new AuthDataMap(paceInput);
-	
+
 	AuthDataResponse paceInputMap = tmp.createResponse(paceInput);
 	if (capturePin) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
@@ -302,11 +305,11 @@ public class GenericPINAction extends StepAction {
 		}
 	    } else {
 		ControlIFDResponse resp = sendModifyPIN();
-		WSHelper.checkResult(resp);
+		evaluateControlIFDResponse(resp);
 	    }
 
 	    // PIN modified successfully, proceed with next step
-	    return new StepActionResult(StepActionResultStatus.REPEAT, 
+	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateSuccessStep(lang.translationForKey(CHANGE_SUCCESS)));
 	} catch (InvocationTargetException | DispatcherException | APDUException | IFDException |
 		ParserConfigurationException ex) {
@@ -319,8 +322,9 @@ public class GenericPINAction extends StepAction {
 	} catch (WSHelper.WSException ex) {
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
-		logger.error("User canceled the authentication manually.", ex);
-		return new StepActionResult(StepActionResultStatus.CANCEL);
+		logger.error("User canceled the authentication manually or removed the card.", ex);
+		return new StepActionResult(StepActionResultStatus.REPEAT,
+			generateErrorStep(lang.translationForKey(ERROR_USER_CANCELLATION_OR_CARD_REMOVED)));
 	    }
 
 	    // for people which think they have to remove the card in the process
@@ -328,6 +332,20 @@ public class GenericPINAction extends StepAction {
 		logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateErrorStep(lang.translationForKey(ERROR_CARD_REMOVED)));
+	    }
+
+	    // for users which forgot to type in something
+	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.TIMEOUT_ERROR)) {
+		logger.error("The terminal timed out no password was entered.", ex);
+		return new StepActionResult(StepActionResultStatus.REPEAT,
+			generateErrorStep(lang.translationForKey(ERROR_TIMEOUT)));
+	    }
+
+	    // the verification of the new pin failed
+	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORDS_DONT_MATCH)) {
+		logger.error("The verification of the new PIN failed.", ex);
+		return new StepActionResult(StepActionResultStatus.REPEAT,
+			generateErrorStep(lang.translationForKey(ERROR_NON_MATCHING_PASSWORDS)));
 	    }
 
 	    // We don't know what happend so just show an general error message
@@ -370,8 +388,9 @@ public class GenericPINAction extends StepAction {
 	} catch (WSHelper.WSException ex) {
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
-		logger.error("User canceled the authentication manually.", ex);
-		return new StepActionResult(StepActionResultStatus.CANCEL);
+		logger.error("User canceled the authentication manually or removed the card.", ex);
+		return new StepActionResult(StepActionResultStatus.REPEAT,
+			generateErrorStep(lang.translationForKey(ERROR_USER_CANCELLATION_OR_CARD_REMOVED)));
 	    }
 
 	    // for people which think they have to remove the card in the process
@@ -381,10 +400,17 @@ public class GenericPINAction extends StepAction {
 			generateErrorStep(lang.translationForKey(ERROR_CARD_REMOVED)));
 	    }
 
+            // for users which forgot to type in something
+	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.TIMEOUT_ERROR)) {
+		logger.error("The terminal timed out no password was entered.", ex);
+		return new StepActionResult(StepActionResultStatus.REPEAT,
+			generateErrorStep(lang.translationForKey(ERROR_TIMEOUT)));
+	    }
+
 	    logger.error("An unknown error occurred while trying to verify the CAN.", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_UNKNOWN)));
-	    
+
 	}
     }
 
@@ -411,7 +437,7 @@ public class GenericPINAction extends StepAction {
 		     WSHelper.checkResult(pukResponse);
 		}
 	    }
-	    
+
 	    // Here no exception is thrown so sent the ResetRetryCounter command
 	    ResetRetryCounter resetRetryCounter = new ResetRetryCounter((byte) 0x03);
 	    List<byte[]> responses = new ArrayList<>();
@@ -424,7 +450,7 @@ public class GenericPINAction extends StepAction {
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    } else if (Arrays.equals(resetCounterResponse.getTrailer(), new byte[] {(byte) 0x90, (byte) 0x00})) {
 		gPINStep.updateState(RecognizedState.PIN_activated_RC3);
-		return new StepActionResult(StepActionResultStatus.REPEAT, 
+		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateSuccessStep(lang.translationForKey(PUK_SUCCESS)));
 	    } else {
 		gPINStep.updateState(RecognizedState.UNKNOWN);
@@ -437,8 +463,16 @@ public class GenericPINAction extends StepAction {
 	} catch (WSHelper.WSException ex) {
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
-		logger.error("User canceled the authentication manually.", ex);
-		return new StepActionResult(StepActionResultStatus.CANCEL);
+		logger.error("User canceled the authentication manually or removed the card.", ex);
+		return new StepActionResult(StepActionResultStatus.REPEAT,
+			generateErrorStep(lang.translationForKey(ERROR_USER_CANCELLATION_OR_CARD_REMOVED)));
+	    }
+
+            // for users which forgot to type in something
+	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.TIMEOUT_ERROR)) {
+		logger.error("The terminal timed out no password was entered.", ex);
+		return new StepActionResult(StepActionResultStatus.REPEAT,
+			generateErrorStep(lang.translationForKey(ERROR_TIMEOUT)));
 	    }
 
 	    // for people which think they have to remove the card in the process
@@ -513,6 +547,26 @@ public class GenericPINAction extends StepAction {
 	Text errorText = new Text(errorMessage);
 	errorStep.getInputInfoUnits().add(errorText);
 	return errorStep;
+    }
+
+    private void evaluateControlIFDResponse(ControlIFDResponse response) throws WSHelper.WSException {
+	byte[] resp = response.getResponse();
+	switch(ByteUtils.toInteger(resp)) {
+	    case 0x64A1:
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE,
+			"Card was removed."));
+		break;
+	    case 0x6402:
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORDS_DONT_MATCH,
+			"The entered passwords do not match."));
+		break;
+	    case 0x6401:
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER,
+			"The user aborted the password entry."));
+		break;
+	}
+
+	WSHelper.checkResult(response);
     }
 
 }

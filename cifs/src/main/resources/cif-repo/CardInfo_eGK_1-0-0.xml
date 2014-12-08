@@ -18,6 +18,7 @@
 			mbH
 		</iso:SpecificationBodyOrIssuer>
 		<iso:CardTypeName xml:lang="DE">Elektronische Gesundheitskarte</iso:CardTypeName>
+		<iso:CardTypeName xml:lang="EN">Electronic eHealth Card (Germany)</iso:CardTypeName>
 		<iso:Version>
 			<!--The version number corresponds to the version of the product description [eGK-PSB]. -->
 			<iso:Major>1</iso:Major>

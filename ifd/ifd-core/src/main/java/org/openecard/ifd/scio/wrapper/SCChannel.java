@@ -22,7 +22,6 @@
 
 package org.openecard.ifd.scio.wrapper;
 
-import java.util.Arrays;
 import java.util.List;
 import javax.smartcardio.CardChannel;
 import javax.smartcardio.CardException;
@@ -98,7 +97,9 @@ public class SCChannel {
 	    }
 	    // verify result
 	    for (byte[] expected : responses) {
-		if (Arrays.equals(expected, sw)) {
+		// one byte codes are used like mask values
+		// AcceptableStatusCode-elements containing only one byte match all status codes starting with this byte
+		if (ByteUtils.isPrefix(expected, sw)) {
 		    return result;
 		}
 	    }

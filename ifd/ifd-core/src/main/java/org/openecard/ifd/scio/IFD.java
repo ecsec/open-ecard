@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -109,7 +109,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 @WebService(endpointInterface = "org.openecard.ws.IFD")
 public class IFD implements org.openecard.ws.IFD {
@@ -361,7 +361,7 @@ public class IFD implements org.openecard.ws.IFD {
 		}
 
 		// request status for each ifd
-		ArrayList<IFDStatusType> statuss = new ArrayList<IFDStatusType>(ifds.size());
+		ArrayList<IFDStatusType> statuss = new ArrayList<>(ifds.size());
 		for (SCTerminal ifd : ifds) {
 		    try {
 			IFDStatusType s = ifd.getStatus();
@@ -746,6 +746,18 @@ public class IFD implements org.openecard.ws.IFD {
 
 	    byte[] handle = parameters.getSlotHandle();
 	    List<InputAPDUInfoType> apdus = parameters.getInputAPDUInfo();
+
+	    // check that the apdus contain sane values
+	    for (InputAPDUInfoType apdu : apdus) {
+		for (byte[] code : apdu.getAcceptableStatusCode()) {
+		    if (code.length == 0 || code.length > 2) {
+			String msg = "Invalid accepted status code given.";
+			Result r = WSHelper.makeResultError(ECardConstants.Minor.App.PARM_ERROR, msg);
+			response = WSHelper.makeResponse(TransmitResponse.class, r);
+			return response;
+		    }
+		}
+	    }
 
 	    response = WSHelper.makeResponse(TransmitResponse.class, null);
 	    Result result;

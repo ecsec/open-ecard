@@ -17,7 +17,6 @@
 
     <modules>
 	<module>http</module>
-	<module>javascript</module>
     </modules>
 
 </project>

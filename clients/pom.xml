@@ -33,12 +33,6 @@
 				<module>android</module>
 			</modules>
 		</profile>
-		<profile>
-			<id>legacy-clients</id>
-			<modules>
-				<module>applet</module>
-			</modules>
-		</profile>
 	</profiles>
 
 </project>

@@ -209,6 +209,42 @@ public class ByteUtils {
     }
 
     /**
+     * Determines whether the first value is a prefix of the second value.
+     * If any of the values is null, {@code false} is returned.
+     *
+     * @param prefix The value which is a potential prefix.
+     * @param data The value containing the prefix.
+     * @return {@code true} if the first value is a prefix, {@code false} if it is not, any of the values is null, or
+     *   the data value is shorter than the prefix.
+     */
+    public static boolean isPrefix(byte[] prefix, byte[] data) {
+	if (prefix == null || data == null) {
+	    return false;
+	}
+	if (prefix.length == 0 || prefix.length > data.length) {
+	    return false;
+	}
+	for (int i = 0; i < prefix.length; i++) {
+	    if (prefix[i] != data[i]) {
+		return false;
+	    }
+	}
+	return true;
+    }
+
+    /**
+     * Determines whether the first value is a prefix of the second value.
+     * If the data value is null, {@code false} is returned.
+     *
+     * @param prefix The value which is a potential prefix.
+     * @param data The value containing the prefix.
+     * @return {@code true} if the first value is a prefix, {@code false} if it is not, the data value is null or empty.
+     */
+    public static boolean isPrefix(byte prefix, byte[] data) {
+	return isPrefix(new byte[]{prefix}, data);
+    }
+
+    /**
      * Create a reversed version of the given array.
      * This function copies the value leaving the input untouched.
      *

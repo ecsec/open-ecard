@@ -105,7 +105,8 @@ public class SCChannel {
 	    }
 
 	    // not an expected result
-	    TransmitException tex = new TransmitException(result, CardCommandStatus.getMessage(sw));
+	    String msg = "The returned status code is not in the list of expected status codes. The returned code is:\n";
+	    TransmitException tex = new TransmitException(result, msg + CardCommandStatus.getMessage(sw));
 	    throw tex;
 	} catch (IllegalArgumentException ex) {
 	    IFDException ifdex = new IFDException(ex);

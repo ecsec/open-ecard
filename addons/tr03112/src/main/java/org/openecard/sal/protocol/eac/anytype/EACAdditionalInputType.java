@@ -25,8 +25,6 @@ package org.openecard.sal.protocol.eac.anytype;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.common.anytype.AuthDataMap;
-import org.w3c.dom.Element;
-import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 
 
 /**
@@ -52,7 +50,6 @@ public class EACAdditionalInputType {
      */
     public EACAdditionalInputType(DIDAuthenticationDataType baseType) throws ParserConfigurationException, 
 	    ElementParsingException {
-	parseSignatureElement(baseType);
 	authMap = new AuthDataMap(baseType);
 	signature = authMap.getContentAsBytes(SIGNATURE);
     }
@@ -73,28 +70,6 @@ public class EACAdditionalInputType {
      */
     public EAC2OutputType getOutputType() {
 	return new EAC2OutputType(authMap);
-    }
-
-    /**
-     * Parses the number of Signature elements.
-     *
-     * @param baseType The {@link DIDAuthenticationDataType} which contains the Signature elements in the Any element.
-     * @throws ElementParsingException Thrown if the is more or less than 1 occurrences of the Signature element.
-     */
-    private void parseSignatureElement(DIDAuthenticationDataType baseType) throws ElementParsingException {
-	int counter = 0;
-	for (Element element : baseType.getAny()) {
-	    if (element.getLocalName().equals(SIGNATURE)) {
-		counter++;
-		if (counter > 1) {    
-		    throw new ElementParsingException(INVALID_SIGNATURE_NUMBER);
-		}
-	    }
-	}
-
-	if (counter == 0) {
-	    throw new ElementParsingException(INVALID_SIGNATURE_NUMBER);
-	}
     }
 
 }

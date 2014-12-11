@@ -209,6 +209,15 @@ public class EAC1InputType {
 	}
     }
 
+    /**
+     * Parse the occurrences of the CertificateDescription.
+     *
+     * Note: The current schema says there could be several CertificateDescriptions. But the Technical Guideline says
+     * there have to be  one single CertificateDescription object.
+     *
+     * @param baseType
+     * @throws ElementParsingException
+     */
     private void parseCertificateDescriptionElement(DIDAuthenticationDataType baseType) throws ElementParsingException {
 	int counter = 0;
 	for (Element element : baseType.getAny()) {

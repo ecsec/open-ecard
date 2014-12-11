@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -33,14 +33,14 @@ import static org.testng.Assert.*;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 @Test(groups={"it"})
 public class JavaSecVerifierTest {
 
     @Test
     public void testVerificationNoError() throws IOException {
-	final String hostName = "www.heise.de";
+	final String hostName = "github.com";
 	TlsClientProtocol handler;
 	DefaultTlsClientImpl c;
 	try {
@@ -63,7 +63,7 @@ public class JavaSecVerifierTest {
     @Test(expectedExceptions=IOException.class)
     public void testVerificationError() throws IOException {
 	final String hostName = "www.google.com";
-	final String actualHostName = "www.heise.de";
+	final String actualHostName = "github.com";
 	TlsClientProtocol handler;
 	DefaultTlsClientImpl c;
 	try {

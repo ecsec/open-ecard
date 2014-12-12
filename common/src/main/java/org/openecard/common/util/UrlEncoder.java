@@ -39,18 +39,23 @@ import javax.annotation.Nullable;
  */
 public class UrlEncoder {
 
+    private static final Charset ASCII = Charset.forName("ASCII");
     private static final int RADIX = 16;
 
     // character classes according to RFC 2396
     private static final BitSet ALPHA = new BitSet(256);
     private static final BitSet DIGIT = new BitSet(256);
-    private static final BitSet ALPHANUM = new BitSet(256);
     private static final BitSet HEX = new BitSet(256);
-    private static final BitSet MARK = new BitSet(256);
     private static final BitSet UNRESERVED = new BitSet(256);
     private static final BitSet RESERVED = new BitSet(256);
-    private static final BitSet URIC = new BitSet(256);
-    private static final BitSet QUERY_CHARS = new BitSet(256);
+    private static final BitSet SUB_DELIM = new BitSet(256);
+    private static final BitSet GEN_DELIM = new BitSet(256);
+    private static final BitSet PCHAR = new BitSet(256);
+    private static final BitSet QUERY = new BitSet(256);
+    private static final BitSet FRAGMENT = new BitSet(256);
+
+    private static final BitSet QUERY_SAFE = new BitSet(256);
+    private static final BitSet FRAGMENT_SAFE = new BitSet(256);
 
     private final Charset charset;
 
@@ -58,22 +63,38 @@ public class UrlEncoder {
 	ALPHA.set('a', 'z' + 1);
 	ALPHA.set('A', 'Z' + 1);
 	DIGIT.set('0', '9' + 1);
-	ALPHANUM.or(ALPHA);
-	ALPHANUM.or(DIGIT);
 	HEX.or(DIGIT);
 	HEX.set('a', 'f');
 	HEX.set('A', 'F');
-	setBits(MARK, "_-!.~'()*".getBytes());
-	UNRESERVED.or(ALPHANUM);
-	UNRESERVED.or(MARK);
-	setBits(RESERVED, ";/?:@&=+$,".getBytes());
-	URIC.or(RESERVED);
-	URIC.or(UNRESERVED);
-	// URIC also contains escaped, but this has to be checked in another way
 
-	// allowed query characters are those in URIC without the ones in the list below
-	QUERY_CHARS.or(URIC);
-	unsetBits(QUERY_CHARS, ";/?:@&=+,$".getBytes());
+	setBits(SUB_DELIM, "!$&'()*+,;=");
+
+	setBits(GEN_DELIM, ":/?#[]@");
+
+	RESERVED.or(SUB_DELIM);
+	RESERVED.or(GEN_DELIM);
+
+	UNRESERVED.or(ALPHA);
+	UNRESERVED.or(DIGIT);
+	setBits(UNRESERVED, "-._~");
+
+	PCHAR.or(UNRESERVED);
+	PCHAR.or(SUB_DELIM);
+	setBits(PCHAR, ":@");
+	// and percent encoded, but this is handled in the encode function
+
+	QUERY.or(PCHAR);
+	setBits(QUERY, "/?");
+
+	FRAGMENT.or(PCHAR);
+	setBits(FRAGMENT, "/?");
+
+	// calculate safe character sets
+	QUERY_SAFE.or(QUERY);
+	QUERY_SAFE.andNot(RESERVED);
+
+	FRAGMENT_SAFE.or(FRAGMENT);
+	FRAGMENT_SAFE.andNot(RESERVED);
     }
 
 
@@ -96,22 +117,24 @@ public class UrlEncoder {
     }
 
 
-    private static void setBits(BitSet bs, byte[] chars) {
-	for (byte next : chars) {
-	    bs.set(next);
-	}
+    private static void setBits(BitSet bs, String chars) {
+	setBitsVal(bs, chars, true);
     }
 
-    private static void unsetBits(BitSet bs, byte[] chars) {
-	for (byte next : chars) {
-	    bs.set(next, false);
+    private static void unsetBits(BitSet bs, String chars) {
+	setBitsVal(bs, chars, false);
+    }
+
+    private static void setBitsVal(BitSet bs, String chars, boolean value) {
+	for (byte next : chars.getBytes(ASCII)) {
+	    bs.set(next, value);
 	}
     }
 
 
     /**
      * URL encodes the given string, so that it is usable in the query part of a URL.
-     * This method is based on RFC 2396.
+     * This method is based on RFC 3986.
      *
      * @param content Data which will be encoded. {@code null} is permitted.
      * @return Encoded data or {@code null} if {@code null} has been supplied as parameter.
@@ -120,12 +143,11 @@ public class UrlEncoder {
         if (content == null) {
             return null;
         }
-        return urlEncode(content, QUERY_CHARS, true, true);
+        return urlEncode(content, QUERY_SAFE, false, true);
     }
 
     /**
      * URL encodes the given string, so it is usable in an encoded form ({@code application/x-www-form-urlencoded}).
-     * This method is based on RFC 2396.
      *
      * @see URLEncoder
      * @param content Data which will be encoded. {@code null} is permitted.
@@ -145,7 +167,7 @@ public class UrlEncoder {
 
     /**
      * URL encodes the given string, so that it is usable in the fragment part of a URL.
-     * This method is based on RFC 2396.
+     * This method is based on RFC 3986.
      *
      * @param content Data which will be encoded. {@code null} is permitted.
      * @return Encoded data or {@code null} if {@code null} has been supplied as parameter.
@@ -154,7 +176,7 @@ public class UrlEncoder {
         if (content == null) {
             return null;
         }
-        return urlEncode(content, URIC, false, true);
+        return urlEncode(content, FRAGMENT_SAFE, false, true);
     }
 
     private String urlEncode(@Nonnull String content, BitSet safeChars, boolean wsPlus, boolean keepEscapes) {

@@ -326,7 +326,7 @@ public class TCTokenHandler {
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg));
 	    // fill in values, so it is usuable by the transport module
 	    response = determineRefreshURL(request, response);
-	    response.finishResponse();
+	    response.finishResponse(true);
 	    return response;
 	}
 
@@ -335,7 +335,7 @@ public class TCTokenHandler {
 	    response = processBinding(request, connectionHandle);
 	    // fill in values, so it is usuable by the transport module
 	    response = determineRefreshURL(request, response);
-	    response.finishResponse();
+	    response.finishResponse(isObjectActivation);
 	    return response;
 	} catch (DispatcherException w) {
 	    logger.error(w.getMessage(), w);
@@ -377,7 +377,7 @@ public class TCTokenHandler {
 	    try {
 		// fill in values, so it is usuable by the transport module
 		response = determineRefreshURL(request, response);
-		response.finishResponse();
+		response.finishResponse(true);
 	    } catch (InvalidRedirectUrlException ex) {
 		logger.error(ex.getMessage(), ex);
 		response.setResultCode(BindingResultCode.INTERNAL_ERROR);

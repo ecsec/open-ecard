@@ -128,7 +128,7 @@ public class PINStepAction extends StepAction {
 	if (result.isBack()) {
 	    return new StepActionResult(StepActionResultStatus.BACK);
 	}
-	
+
 	if (retryCounter == 2) {
 	    try {
 		EstablishChannelResponse response = performPACEWithCAN(oldResults);

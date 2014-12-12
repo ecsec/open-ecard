@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import java.util.Map;
 import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.binding.tctoken.TR03112Keys;
@@ -33,9 +34,12 @@ import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.sal.protocol.exception.ProtocolException;
+import org.openecard.common.tlv.TLVException;
 import org.openecard.sal.protocol.eac.anytype.EAC2OutputType;
 import org.openecard.sal.protocol.eac.anytype.EACAdditionalInputType;
 import org.openecard.common.util.JAXBSchemaValidator;
+import org.openecard.sal.protocol.eac.anytype.ElementParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author Moritz Horsch
  * @author Dirk Petrautzki
  * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
@@ -71,26 +76,29 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
 	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
+	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 	try {
-	    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	    JAXBSchemaValidator valid = (JAXBSchemaValidator) ctx.getPromise(EACProtocol.SCHEMA_VALIDATOR).deref();
+	    JAXBSchemaValidator valid = (JAXBSchemaValidator) dynCtx.getPromise(EACProtocol.SCHEMA_VALIDATOR).deref();
 
 	    boolean messageValid = valid.validateObject(didAuthenticate);
 	    if (! messageValid) {
 		String msg = "Validation of the EACAdditionalInputType message failed.";
 		logger.error(msg);
+		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 		return response;
 	    }
 	} catch (JAXBException ex) {
 	    String msg = "Validation of the EACAdditionalInputType message failed due to invalid input data.";
 	    logger.error(msg, ex);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    return response;
 	} catch (InterruptedException ex) {
 	    String msg = "Thread interrupted while waiting for schema validator instance.";
 	    logger.error(msg, ex);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    return response;
 	}
@@ -113,10 +121,9 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 
 	    response.setResult(WSHelper.makeResultOK());
 	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());
-	} catch (Exception e) {
+	} catch (ParserConfigurationException | ElementParsingException | ProtocolException | TLVException e) {
 	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
-	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	}
 

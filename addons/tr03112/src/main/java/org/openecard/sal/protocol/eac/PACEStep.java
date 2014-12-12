@@ -146,17 +146,20 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    if (! messageValid) {
 		String msg = "Validation of the EAC1InputType message failed.";
 		logger.error(msg);
+		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 		return response;
 	    }
  	} catch (JAXBException ex) {
 	    String msg = "Validation of the EAC1InputType message failed due to invalid input data.";
 	    logger.error(msg, ex);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    return response;
 	} catch (InterruptedException ex) {
 	    String msg = "Thread interrupted while waiting for schema validator instance.";
 	    logger.error(msg, ex);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    return response;
 	}

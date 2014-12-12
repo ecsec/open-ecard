@@ -31,7 +31,7 @@ import java.util.Map;
 /**
  * Utility class to transform various aspects of an HTTP request line into more usable data structures.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class HttpRequestLineUtils {
 
@@ -43,17 +43,19 @@ public class HttpRequestLineUtils {
      * @return Map with key value pairs of the query parameters.
      */
     public static Map<String, String> transformRaw(String queryStr) {
-	HashMap<String, String> result = new HashMap<String, String>();
+	HashMap<String, String> result = new HashMap<>();
 
-	String[] queries = queryStr.split("&");
-	for (String query : queries) {
-	    // split key value
-	    String[] kv = query.split("=");
-	    // check if there is a value
-	    if (kv.length == 1) {
-		result.put(kv[0], null);
-	    } else if (kv.length == 2) {
-		result.put(kv[0], kv[1]);
+	if (queryStr != null) {
+	    String[] queries = queryStr.split("&");
+	    for (String query : queries) {
+		// split key value
+		String[] kv = query.split("=");
+		// check if there is a value
+		if (kv.length == 1) {
+		    result.put(kv[0], null);
+		} else if (kv.length == 2) {
+		    result.put(kv[0], kv[1]);
+		}
 	    }
 	}
 
@@ -73,7 +75,7 @@ public class HttpRequestLineUtils {
     }
 
     /**
-     * Transform query parameters into a java map and BASE64 decode the values. The parameters are not decoded, but
+     * Transform query parameters into a java map and URL decode the values. The parameters are not decoded, but
      * taken as is. The query string has the form <pre>key(=value)?&key((=value)?)*</pre>. If a key does not have a
      * value, null is taken as value. The resulting values are encoded according to the given encoding
      *
@@ -84,17 +86,28 @@ public class HttpRequestLineUtils {
      *   encoding than the one defined in this function.
      */
     public static Map<String, String> transform(String queryStr, String encoding) throws UnsupportedEncodingException {
-	Map<String, String> result = transformRaw(queryStr);
-	for (Map.Entry<String, String> next : result.entrySet()) {
+	// copy the raw strings
+	Map<String, String> resultRaw = transformRaw(queryStr);
+	HashMap<String, String> result = new HashMap<>();
+	for (Map.Entry<String, String> next : resultRaw.entrySet()) {
+	    String k = next.getKey();
 	    String v = next.getValue();
-	    // parameter tuple may be key only
-	    if (v != null) {
-		v = URLDecoder.decode(v, encoding);
-		next.setValue(v);
-	    }
+	    // URL decode both values
+	    k = decodeValue(k, encoding);
+	    v = decodeValue(v, encoding);
+	    result.put(k, v);
 	}
 
 	return result;
+    }
+
+    private static String decodeValue(String v, String encoding) throws UnsupportedEncodingException {
+	if (v != null) {
+	    // handle + special, because the decoder does not perform this
+	    v = v.replace("+", " ");
+	    v = URLDecoder.decode(v, encoding);
+	}
+	return v;
     }
 
 }

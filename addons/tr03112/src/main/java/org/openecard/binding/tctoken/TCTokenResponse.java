@@ -23,7 +23,7 @@
 package org.openecard.binding.tctoken;
 
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.concurrent.Future;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.bind.AuxDataKeys;
@@ -35,6 +35,7 @@ import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.common.util.UrlBuilder;
 
 
 /**
@@ -124,9 +125,10 @@ public class TCTokenResponse extends BindingResult {
     public void finishResponse() throws InvalidRedirectUrlException {
 	try {
 	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    UrlBuilder ub = UrlBuilder.fromUrl(getRefreshAddress());
 	    if (ECardConstants.Major.OK.equals(result.getResultMajor())) {
 		setResultCode(BindingResultCode.REDIRECT);
-		String refreshURL = TCTokenHacks.addParameterToUrl(getRefreshAddress(), "ResultMajor", "ok");
+		String refreshURL = ub.queryParam("ResultMajor", "ok").build().toString();
 		getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, refreshURL);
 	    } else {
 		boolean isRefreshAddressValid = (Boolean) dynCtx.get(TR03112Keys.IS_REFRESH_URL_VALID);
@@ -134,8 +136,9 @@ public class TCTokenResponse extends BindingResult {
 		String refreshURL;
 		String fixedMinor = TCTokenHacks.fixResultMinor(result.getResultMinor());
 		if (isRefreshAddressValid) {
-		    refreshURL = TCTokenHacks.addParameterToUrl(getRefreshAddress(), "ResultMajor", "error");
-		    refreshURL = TCTokenHacks.addParameterToUrl(refreshURL, "ResultMinor", fixedMinor);
+		    refreshURL = ub.queryParam("ResultMajor", "error")
+			    .queryParamUrl("ResultMinor", fixedMinor)
+			    .build().toString();
 		} else {
 		    refreshURL = token.getComErrorAddressWithParams(result.getResultMinor());
 		}
@@ -150,7 +153,7 @@ public class TCTokenResponse extends BindingResult {
 	    // clear and remove the DynamicContext
 	    dynCtx.clear();
 	    DynamicContext.remove();
-	} catch (MalformedURLException ex) {
+	} catch (URISyntaxException ex) {
 	    // this is a code failure as the URLs are verified upfront
 	    // TODO: translate when exception changes
 	    throw new IllegalArgumentException(lang.getOriginalMessage(INVALID_URL), ex);

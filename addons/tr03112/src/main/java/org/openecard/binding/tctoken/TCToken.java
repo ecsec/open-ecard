@@ -24,13 +24,14 @@ package org.openecard.binding.tctoken;
 
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
 import generated.TCTokenType;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.common.util.UrlBuilder;
 
 
 /**
@@ -53,25 +54,30 @@ public class TCToken extends TCTokenType {
      */
     public String getComErrorAddressWithParams(@Nonnull String minor) throws InvalidRedirectUrlException {
 	try {
-	    String errorUrl = TCToken.this.getCommunicationErrorAddress();
-	    checkUrl(errorUrl);
-	    String result = TCTokenHacks.addParameterToUrl(errorUrl, "ResultMajor", "error");
-	    result = TCTokenHacks.addParameterToUrl(result, "ResultMinor", TCTokenHacks.fixResultMinor(minor));
+	    String errorUrl = getCommunicationErrorAddress();
+	    URI url = checkUrl(errorUrl);
+	    String result = UrlBuilder.fromUrl(url).queryParam("ResultMajor", "error")
+		    .queryParamUrl("ResultMinor", TCTokenHacks.fixResultMinor(minor))
+		    .build().toString();
 	    return result;
-	} catch (MalformedURLException ex) {
+	} catch (URISyntaxException ex) {
 	    // should not happen, but here it is anyways
+	    logger.error("Construction of redirect URL failed.", ex);
 	    throw new InvalidRedirectUrlException(NO_URL);
 	}
     }
 
-    private static void checkUrl(@Nullable String urlStr) throws InvalidRedirectUrlException {
+    private static URI checkUrl(@Nullable String urlStr) throws InvalidRedirectUrlException {
 	if (urlStr != null && ! urlStr.isEmpty()) {
 	    try {
-		URL url = new URL(urlStr);
-	    } catch (MalformedURLException ex) {
+		URI url = new URI(urlStr);
+		return url;
+	    } catch (URISyntaxException ex) {
+		logger.error("No valid CommunicationErrorAddress provided.");
 		throw new InvalidRedirectUrlException(NO_URL);
 	    }
 	} else {
+	    logger.error("No CommunicationErrorAddress to perform a redirect provided.");
 	    throw new InvalidRedirectUrlException(NO_REDIRECT_AVAILABLE);
 	}
     }

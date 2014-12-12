@@ -29,6 +29,8 @@ import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
 import generated.TCTokenType;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -39,6 +41,7 @@ import org.openecard.common.ECardConstants;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.TR03112Utils;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.common.util.UrlBuilder;
 
 
 /**
@@ -321,15 +324,15 @@ public class TCTokenVerifier {
      * @param refreshAddress The address which should get the error parameters.
      * @param minorMessage The result message.
      * @return An {@link URL} object containing the error query parameters.
-     * @throws MalformedURLException Thrown if the given {@code refreshAddress} is not a valid URL.
+     * @throws URISyntaxException Thrown if the given {@code refreshAddress} is not a valid URL.
      */
-    private URL createUrlWithErrorParams(String refreshAddress, String minorMessage) throws MalformedURLException {
-
-	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMajor", "error");
-	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMinor",
-		TCTokenHacks.fixResultMinor(ECardConstants.Minor.App.COMMUNICATION_ERROR));
-	refreshAddress = TCTokenHacks.addParameterToUrl(refreshAddress, "ResultMessage", minorMessage);
-	return new URL(refreshAddress);
+    private URI createUrlWithErrorParams(String refreshAddress, String minorMessage) throws URISyntaxException {
+	String minor = ECardConstants.Minor.App.COMMUNICATION_ERROR;
+	return UrlBuilder.fromUrl(refreshAddress)
+		.queryParam("ResultMajor", "error")
+		.queryParamUrl("ResultMinor", TCTokenHacks.fixResultMinor(minor))
+		.queryParam("ResultMessage", minorMessage)
+		.build();
     }
 
     /**
@@ -369,15 +372,15 @@ public class TCTokenVerifier {
 		URL resAddr = last.p1;
 		String refreshUrl = resAddr.toString();
 
-		URL refreshUrlAsUrl = createUrlWithErrorParams(refreshUrl, ex.getMessage());
+		URI refreshUrlAsUrl = createUrlWithErrorParams(refreshUrl, ex.getMessage());
 		throw new InvalidTCTokenElement(refreshUrlAsUrl.toString(), ex);
-	    } catch (IOException | ResourceException | InvalidAddressException | ValidationError ex1) {
-		throw new InvalidTCTokenElement(token.getComErrorAddressWithParams(
-			ECardConstants.Minor.App.COMMUNICATION_ERROR), INVALID_REFRESH_ADDRESS, ex1);
+	    } catch (IOException | ResourceException | InvalidAddressException | ValidationError | URISyntaxException ex1) {
+		String errorUrl = token.getComErrorAddressWithParams(ECardConstants.Minor.App.COMMUNICATION_ERROR);
+		throw new InvalidTCTokenElement(errorUrl, INVALID_REFRESH_ADDRESS, ex1);
 	    }
 	} else {
-	    throw new InvalidTCTokenElement(token.getComErrorAddressWithParams(ECardConstants.Minor.App.COMMUNICATION_ERROR),
-		    NO_REFRESH_ADDRESS);
+	    String errorUrl = token.getComErrorAddressWithParams(ECardConstants.Minor.App.COMMUNICATION_ERROR);
+	    throw new InvalidTCTokenElement(errorUrl, NO_REFRESH_ADDRESS);
 	}
     }
 

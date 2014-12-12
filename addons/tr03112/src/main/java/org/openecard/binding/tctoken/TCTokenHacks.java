@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2013 ecsec GmbH.
+ * Copyright (C) 2012-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,12 +23,7 @@
 package org.openecard.binding.tctoken;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.util.Pair;
 
@@ -38,9 +33,9 @@ import org.openecard.common.util.Pair;
  * TCToken provider may handle the TCToken generation in sloppy way. According to the specification, it is up to the
  * client to be as forgiving as possible. This class has fixes for the problems we have seen in the past.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
  */
 public class TCTokenHacks {
 
@@ -119,67 +114,6 @@ public class TCTokenHacks {
 	data = input.substring(y + value.length(), input.length());
 
 	return new Pair<>(out.toString(), data);
-    }
-
-    /**
-     * Adds the parameter to the URL taking already present parameters into account.
-     * Essentially this method determines whether to add the parameter with {@code &} or with {@code ?}. It only adds
-     * the parameter if it not already exists.
-     *
-     * @param url URL to add the parameter to.
-     * @param key Parameter without {@code &} or with {@code ?}.
-     * @param value Value belonging to {@code key}. This value may be {@code null} or empty.
-     * @return Newly constructed URL.
-     * @throws MalformedURLException Thrown in case the new URL is not a valid URL.
-     * @throws IllegalStateException Thrown in case UTF-8 is not supported on this system.
-     */
-    public static URL addParameterToUrl(@Nonnull URL url, @Nonnull String key, @Nullable String value)
-	    throws MalformedURLException {
-	try {
-	    value = URLDecoder.decode(value, "UTF-8");
-	} catch (UnsupportedEncodingException ex) {
-	    throw new IllegalStateException("UTF-8 encoding is not supported. This should never be the case.");
-	}
-	String queryPart = url.getQuery();
-	if (queryPart == null || ! (queryPart.contains("?" + key) || queryPart.contains("&" + key))) {
-	    String sAddr = url.toString();
-	    // fix path of url
-	    if (url.getPath().isEmpty()) {
-		sAddr += "/";
-	    }
-	    // add parameter
-	    String parameter = key + "=";
-	    if (value != null) {
-		parameter += value;
-	    }
-	    // add to url
-	    if (sAddr.endsWith("?")) {
-		sAddr += parameter;
-	    } else if (sAddr.contains("?")) {
-		sAddr += "&" + parameter;
-	    } else {
-		sAddr += "?" + parameter;
-	    }
-	    url = new URL(sAddr);
-	}
-	return url;
-    }
-
-    /**
-     * Adds the parameter to the URL taking already present parameters into account.
-     * Essentially this method determines whether to add the parameter with {@code &} or with {@code ?}. It only adds
-     * the parameter if it not already exists.
-     *
-     * @param url URL to add the parameter to.
-     * @param key Parameter without {@code &} or with {@code ?}.
-     * @param value Value belonging to {@code key}. This value may be {@code null} or empty.
-     * @return Newly constructed URL.
-     * @throws MalformedURLException Thrown in case the new URL is not a valid URL.
-     * @throws IllegalStateException Thrown in case UTF-8 is not supported on this system.
-     */
-    public static String addParameterToUrl(@Nonnull String url, @Nonnull String key, @Nullable String value)
-	    throws MalformedURLException {
-	return addParameterToUrl(new URL(url), key, value).toString();
     }
 
     /**

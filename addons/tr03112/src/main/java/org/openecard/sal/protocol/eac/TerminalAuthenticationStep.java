@@ -24,7 +24,6 @@ package org.openecard.sal.protocol.eac;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
-import java.io.IOException;
 import java.util.Map;
 import javax.xml.bind.JAXBException;
 import org.openecard.addon.sal.FunctionType;
@@ -38,10 +37,9 @@ import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
 import org.openecard.sal.protocol.eac.anytype.EAC2InputType;
 import org.openecard.sal.protocol.eac.anytype.EAC2OutputType;
-import org.openecard.common.util.SchemaValidator;
+import org.openecard.common.util.JAXBSchemaValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
 
 /**
@@ -77,20 +75,25 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
 	try {
-	    boolean messageValid = SchemaValidator.validateObject(didAuthenticate, "ISO24727-Protocols.xsd");
+	    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    JAXBSchemaValidator valid = (JAXBSchemaValidator) ctx.getPromise(EACProtocol.SCHEMA_VALIDATOR).deref();
+
+	    boolean messageValid = valid.validateObject(didAuthenticate);
 	    if (! messageValid) {
-		String msg = "The validation of the EAC2InputType message failed so there are missing or invalid elements.";
+		String msg = "Validation of the EAC2InputType message failed.";
 		logger.error(msg);
-		String msg2 = "Missing or unknown parameter found while the validation of the EAC2InputType message.";
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg2));
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 		return response;
 	    }
- 	} catch (SAXException | JAXBException | IOException ex) {
-	    String msg = "The validation process of the EAC2InputType message was aborted because of the occurrence on"
-		    + " an exception.";
+ 	} catch (JAXBException ex) {
+	    String msg = "Validation of the EAC2InputType message failed due to invalid input data.";
 	    logger.error(msg, ex);
-	    String msg2 = "EAC2InputType message validation was not possible.";
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg2));
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
+	    return response;
+	} catch (InterruptedException ex) {
+	    String msg = "Thread interrupted while waiting for schema validator instance.";
+	    logger.error(msg, ex);
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    return response;
 	}
 

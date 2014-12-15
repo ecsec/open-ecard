@@ -22,21 +22,16 @@
 
 package org.openecard.common.util;
 
-import org.openecard.common.util.SchemaValidator;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import java.io.IOException;
-import java.net.URL;
-import javax.xml.XMLConstants;
+import java.io.InputStream;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import org.openecard.common.util.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.w3c.dom.Document;
@@ -51,18 +46,18 @@ import org.xml.sax.SAXException;
 public class SchemaValidationTest {
 
     @Test
-    public void validatorTest1() throws JAXBException, SAXException, IOException, ParserConfigurationException {
-	SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+    public void testDIDAuth() throws JAXBException, SAXException, IOException, ParserConfigurationException {
+	JAXBSchemaValidator validator;
 	JAXBContext jc = JAXBContext.newInstance(DIDAuthenticate.class);
 	Unmarshaller unmarshaller = jc.createUnmarshaller();
-	URL schemaURL = FileUtils.resolveResourceAsURL(SchemaValidator.class, "ISO24727-Protocols.xsd");
-	Schema schema = sf.newSchema(schemaURL);
-	unmarshaller.setSchema(schema);
 
-	DIDAuthenticate didAuth = (DIDAuthenticate) unmarshaller.unmarshal(FileUtils.resolveResourceAsStream(this.getClass(), "DIDAuthenticate.xml"));
-	Assert.assertEquals(SchemaValidator.validateObject(didAuth, "ISO24727-Protocols.xsd"), true);
+	InputStream dataStream = FileUtils.resolveResourceAsStream(SchemaValidationTest.class, "DIDAuthenticate.xml");
+	DIDAuthenticate didAuth = (DIDAuthenticate) unmarshaller.unmarshal(dataStream);
+	validator = JAXBSchemaValidator.load(didAuth.getClass(), "ISO24727-Protocols.xsd");
+	Assert.assertEquals(validator.validateObject(didAuth), true);
 
-	DIDAuthenticate didAuth2 = (DIDAuthenticate) unmarshaller.unmarshal(FileUtils.resolveResourceAsStream(this.getClass(), "DIDAuthenticate.xml"));
+	dataStream = FileUtils.resolveResourceAsStream(SchemaValidationTest.class, "DIDAuthenticate.xml");
+	DIDAuthenticate didAuth2 = (DIDAuthenticate) unmarshaller.unmarshal(dataStream);
 	DIDAuthenticationDataType authData = didAuth2.getAuthenticationProtocolData();
 	DocumentBuilderFactory docFac = DocumentBuilderFactory.newInstance();
 	DocumentBuilder docBuilder = docFac.newDocumentBuilder();
@@ -71,7 +66,8 @@ public class SchemaValidationTest {
 	sigElem.setTextContent("1254786930AAD4A8");
 	authData.getAny().add(sigElem);
 	didAuth2.setAuthenticationProtocolData(authData);
-	Assert.assertEquals(SchemaValidator.validateObject(didAuth2, "ISO24727-Protocols.xsd"), false);
+	validator = JAXBSchemaValidator.load(didAuth2.getClass(), "ISO24727-Protocols.xsd");
+	Assert.assertEquals(validator.validateObject(didAuth2), false);
     }
 
 }

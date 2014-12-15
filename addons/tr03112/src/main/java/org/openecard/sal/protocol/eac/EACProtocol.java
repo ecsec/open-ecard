@@ -22,11 +22,15 @@
 
 package org.openecard.sal.protocol.eac;
 
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
+import java.util.concurrent.Callable;
 import org.openecard.addon.ActionInitializationException;
 import org.openecard.addon.Context;
 import org.openecard.addon.sal.SALProtocolBaseImpl;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.util.FuturePromise;
+import org.openecard.common.util.JAXBSchemaValidator;
 import org.openecard.common.util.Promise;
 
 
@@ -48,12 +52,22 @@ public class EACProtocol extends SALProtocolBaseImpl {
     public static final String GUI_RESULT = PREFIX + "gui_result";
     public static final String SLOT_HANDLE = PREFIX + "slot_handle";
     public static final String DISPATCHER = PREFIX + "dispatcher";
+    public static final String SCHEMA_VALIDATOR = PREFIX + "schema_validator";
     public static final String AUTHENTICATION_DONE = PREFIX + "authentication_done";
     public static final String AUTHENTICATION_FAILED = PREFIX + "authentication_failed";
 
 
     @Override
     public void init(Context ctx) throws ActionInitializationException {
+	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	dynCtx.putPromise(SCHEMA_VALIDATOR, new FuturePromise<>(new Callable<JAXBSchemaValidator>() {
+	    @Override
+	    public JAXBSchemaValidator call() throws Exception {
+		JAXBSchemaValidator v = JAXBSchemaValidator.load(DIDAuthenticate.class, "ISO24727-Protocols.xsd");
+		return v;
+	    }
+	}));
+
 	addOrderStep(new PACEStep(ctx.getDispatcher(), ctx.getUserConsent(), ctx.getEventManager()));
 	addOrderStep(new TerminalAuthenticationStep(ctx.getDispatcher()));
 	addOrderStep(new ChipAuthenticationStep(ctx.getDispatcher()));

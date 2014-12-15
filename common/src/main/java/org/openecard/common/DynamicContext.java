@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.openecard.common.util.FuturePromise;
 import org.openecard.common.util.Promise;
 
 
@@ -149,6 +150,23 @@ public class DynamicContext {
 	}
 	p.deliver(value);
 	return value;
+    }
+
+    /**
+     * Saves the given promise so that it its result is available for later use.
+     * This function does not use the default {@link Promise} class and allows to override the behaviour of the
+     * Promise. An example of such a modified behaviour can be found in {@link FuturePromise}.
+     *
+     * @see #put(java.lang.String, java.lang.Object)
+     * @param key Key for which the value should be saved.
+     * @param p Promise yielding the value which should be saved for the given key.
+     */
+    public synchronized void putPromise(@Nonnull String key, @Nonnull Promise p) {
+	if (context.get(key) != null) {
+	    throw new IllegalStateException("Promise already exists and can therefore not be delivered anymore.");
+	} else {
+	    context.put(key, p);
+	}
     }
 
     /**

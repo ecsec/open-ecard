@@ -93,6 +93,12 @@ public class AddonSelector {
     }
 
     public AppPluginAction getAppPluginAction(@Nonnull String resourceName) throws AddonNotFoundException {
+	// do a sub resource check before searching the addon
+	int subResourceIndex = resourceName.indexOf('/');
+	if (subResourceIndex > -1) {
+	    resourceName = resourceName.substring(0, subResourceIndex);
+	}
+
 	Set<AddonSpecification> addons = manager.getRegistry().searchByResourceName(resourceName);
 	if (addons.isEmpty()) {
 	    throw new AddonNotFoundException("No Add-on for resource '" + resourceName + "' found.");

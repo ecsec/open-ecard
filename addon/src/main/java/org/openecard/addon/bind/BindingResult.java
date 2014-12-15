@@ -39,7 +39,7 @@ import javax.annotation.Nullable;
 public class BindingResult {
 
     private BindingResultCode resultCode;
-    private Body body;
+    private ResponseBody body;
     private String resultMessage;
     private final Map<String, String> parameters = new HashMap<>();
     private final Map<String, String> auxData = new HashMap<>();
@@ -72,13 +72,13 @@ public class BindingResult {
 	return resultCode;
     }
 
-    public BindingResult setBody(@Nullable Body body) {
+    public BindingResult setBody(@Nullable ResponseBody body) {
 	this.body = body;
 	return this;
     }
 
     @Nullable
-    public Body getBody() {
+    public ResponseBody getBody() {
 	return this.body;
     }
 

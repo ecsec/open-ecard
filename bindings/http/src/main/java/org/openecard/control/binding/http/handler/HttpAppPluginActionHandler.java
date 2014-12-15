@@ -41,7 +41,8 @@ import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
-import org.openecard.addon.bind.Body;
+import org.openecard.addon.bind.RequestBody;
+import org.openecard.addon.bind.ResponseBody;
 import org.openecard.apache.http.HttpEntity;
 import org.openecard.apache.http.HttpEntityEnclosingRequest;
 import org.openecard.apache.http.HttpException;
@@ -119,10 +120,10 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 		if (rawQuery != null) {
 		    queries = HttpRequestLineUtils.transform(rawQuery);
 		}
-		Body body = null;
+		RequestBody body = null;
 		if (httpRequest instanceof HttpEntityEnclosingRequest) {
 		    logger.debug("Request contains an entity.");
-		    body = getRequestBody(httpRequest);
+		    body = getRequestBody(httpRequest, resourceName);
 		}
 		BindingResult bindingResult = action.execute(body, queries, null);
 		response = createHTTPResponseFromBindingResult(bindingResult);
@@ -142,7 +143,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
     }
 
     private HttpEntity createHTTPEntityFromBody(BindingResult bindingResult) {
-	Body responseBody = bindingResult.getBody();
+	ResponseBody responseBody = bindingResult.getBody();
 	if (responseBody != null) {
 	    logger.debug("BindingResult contains a body.");
 	    BasicHttpEntity entity = new BasicHttpEntity();
@@ -219,7 +220,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	return response;
     }
 
-    private Body getRequestBody(HttpRequest httpRequest) throws IOException {
+    private RequestBody getRequestBody(HttpRequest httpRequest, String resourceName) throws IOException {
 	HttpEntityEnclosingRequest entityRequest = (HttpEntityEnclosingRequest) httpRequest;
 	HttpEntity entity = entityRequest.getEntity();
 	InputStream is = entity.getContent();
@@ -230,7 +231,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	    Element elemBase64 = d.createElement("base64Content");
 	    elemBase64.setTextContent(FileUtils.toString(is));
 	    d.appendChild(elemBase64);
-	    return new Body(d, ContentType.get(entity).getMimeType());
+	    return new RequestBody(resourceName, d, ContentType.get(entity).getMimeType());
 	} catch (UnsupportedCharsetException e) {
 	    logger.error("Failed to create request body.", e);
 	} catch (ParseException e) {

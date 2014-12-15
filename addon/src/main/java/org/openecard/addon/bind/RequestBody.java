@@ -1,10 +1,10 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
- *
+ * 
  * This file is part of the Open eCard App.
- *
+ * 
  * GNU General Public License Usage
  * This file may be used under the terms of the GNU General Public
  * License version 3.0 as published by the Free Software Foundation
@@ -12,53 +12,49 @@
  * this file. Please review the following information to ensure the
  * GNU General Public License version 3.0 requirements will be met:
  * http://www.gnu.org/copyleft/gpl.html.
- *
+ * 
  * Other Usage
  * Alternatively, this file may be used in accordance with the terms
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
- *
+ * 
  ***************************************************************************/
 
 package org.openecard.addon.bind;
 
-import javax.xml.bind.JAXBElement;
 import org.w3c.dom.Node;
 
 
 /**
+ * This class extends the Body class by a path parameter.
  *
- * @author Tobias Wich
- * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
-public abstract class Body {
+public class RequestBody extends Body {
 
-    private final String mimeType;
-    private final Node value;
+    /**
+     * Full resource path of the incoming request.
+     */
+    private final String path;
 
-    public Body(Node value, String mimeType) {
-	this.value = value;
-	this.mimeType = mimeType;
+    /**
+     * Creates a new RequestBody object.
+     *
+     * @param path Full resource name of the in coming request.
+     * @param value Body of the in coming request as Node object.
+     * @param mimeType MimeType of {@code value}.
+     */
+    public RequestBody(String path, Node value, String mimeType) {
+	super(value, mimeType);
+	this.path = path;
     }
 
-    public Node getValue() {
-	return value;
+    /**
+     * Get the full resource path the in coming request.
+     *
+     * @return A String containing the full resource path.
+     */
+    public String getPath() {
+	return path;
     }
-
-    public void setValue(JAXBElement<?> jaxbElement) {
-	throw new UnsupportedOperationException();
-    }
-
-    public void setValue(String data) {
-	throw new UnsupportedOperationException();
-    }
-
-    public void setValue(Number num) {
-	throw new UnsupportedOperationException();
-    }
-
-    public String getMimeType() {
-	return mimeType;
-    }
-
 }

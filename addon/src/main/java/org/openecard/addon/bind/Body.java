@@ -58,7 +58,7 @@ public abstract class Body {
      * @throws WSMarshallerException Thrown in case the default marshaller could not be loaded.
      */
     protected Body() throws WSMarshallerException {
-	this(null);
+	this(loadEmptyMarshaller());
     }
 
     /**

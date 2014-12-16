@@ -25,7 +25,7 @@ package org.openecard.addons.status;
 import javax.annotation.Nullable;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
-import org.openecard.addon.bind.Body;
+import org.openecard.addon.bind.ResponseBody;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.marshal.WSMarshallerFactory;
@@ -36,9 +36,9 @@ import org.w3c.dom.Node;
 /**
  * Wrapper for status change response taking care of the marshalling of the status change message.
  *
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
- * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Johannes Schmölz
+ * @author Benedikt Biallowons
+ * @author Tobias Wich
  */
 public final class WaitForChangeResponse extends BindingResult {
 
@@ -53,7 +53,7 @@ public final class WaitForChangeResponse extends BindingResult {
 		m.addXmlTypeClass(StatusChange.class);
 
 		Node xml = m.marshal(status);
-		Body body = new Body(xml, "text/xml");
+		ResponseBody body = new ResponseBody(xml, "text/xml");
 		setBody(body);
 		setResultCode(BindingResultCode.OK);
 	    } catch (WSMarshallerException ex) {

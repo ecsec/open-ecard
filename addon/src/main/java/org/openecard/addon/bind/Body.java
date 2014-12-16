@@ -27,6 +27,9 @@ import org.w3c.dom.Node;
 
 
 /**
+ * Base for different Body types.
+ * A body instance contains a value and a MIME type. Request or response specific values are added by the respective
+ * subclasses.
  *
  * @author Tobias Wich
  * @author Dirk Petrautzki
@@ -39,6 +42,10 @@ public abstract class Body {
     public Body(Node value, String mimeType) {
 	this.value = value;
 	this.mimeType = mimeType;
+    }
+
+    public boolean hasValue() {
+	return value != null;
     }
 
     public Node getValue() {

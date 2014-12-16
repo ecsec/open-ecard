@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * This registry provides access to all add-ons in the plug-ins directory.
  * Adding and removing add-on-files at runtime is supported.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class FileRegistry implements AddonRegistry {
 
@@ -73,10 +73,10 @@ public class FileRegistry implements AddonRegistry {
 	try {
 	    addonPath = FileUtils.getAddonsDir() + File.separator;
 	} catch (SecurityException e) {
-	    logger.error("Failed to get add-on directory; FileRegistry won't work.", e);
+	    logger.error("Failed to access add-on directory due to missing privileges. FileRegistry not working.", e);
 	    return;
 	} catch (IOException e) {
-	    logger.error("Failed to get add-on directory; FileRegistry won't work.", e);
+	    logger.error("Failed to access add-on directory. FileRegistry not work.", e);
 	    return;
 	}
 	loadExistingAddons();

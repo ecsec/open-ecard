@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -34,8 +34,9 @@ import org.openecard.addon.sal.SALProtocol;
 
 
 /**
+ * Selector class for add-ons working on top of the registries of the systems AddonManager.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class AddonSelector {
 
@@ -93,12 +94,6 @@ public class AddonSelector {
     }
 
     public AppPluginAction getAppPluginAction(@Nonnull String resourceName) throws AddonNotFoundException {
-	// do a sub resource check before searching the addon
-	int subResourceIndex = resourceName.indexOf('/');
-	if (subResourceIndex > -1) {
-	    resourceName = resourceName.substring(0, subResourceIndex);
-	}
-
 	Set<AddonSpecification> addons = manager.getRegistry().searchByResourceName(resourceName);
 	if (addons.isEmpty()) {
 	    throw new AddonNotFoundException("No Add-on for resource '" + resourceName + "' found.");

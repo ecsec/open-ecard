@@ -26,7 +26,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nonnull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -40,10 +42,11 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Root element of an AddonSpecification (Manifest file).
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 @XmlRootElement(name = "AddonSpecification")
 @XmlType(propOrder = { "id", "version", "license", "licenseText", "localizedName", "localizedDescription", "about", "logo",
@@ -199,13 +202,35 @@ public class AddonSpecification implements Comparable<AddonSpecification> {
 	this.configDescription = configDescriptionNew;
     }
 
-    public AppPluginSpecification searchByResourceName(String resourceName) {
+    public AppPluginSpecification searchByResourceName(@Nonnull String resourceName) {
 	for (AppPluginSpecification desc : bindingActions) {
-	    if (resourceName.equals(desc.getResourceName())) {
-		return desc;
+	    // check the resource of the manifest against the prefixes derived from the resource
+	    // most specific comes first
+	    for (String prefix : prefixResourceList(resourceName)) {
+		// in case we have a match, return the specification
+		if (prefix.equals(desc.getResourceName())) {
+		    return desc;
+		}
 	    }
 	}
 	return null;
+    }
+
+    private List<String> prefixResourceList(String resourceName) {
+	String[] parts = resourceName.split("/");
+	ArrayList<String> result = new ArrayList<>(parts.length);
+	String nextResource = "";
+	
+	// construct list of prefixes
+	for (String part : parts) {
+	    nextResource += part;
+	    result.add(nextResource);
+	    nextResource += "/";
+	}
+
+	// reverse prefixes
+	Collections.reverse(result);
+	return result;
     }
 
     public AppExtensionSpecification searchByActionId(String id) {

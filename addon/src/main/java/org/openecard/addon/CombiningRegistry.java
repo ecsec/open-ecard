@@ -32,12 +32,12 @@ import org.openecard.ws.marshal.WSMarshallerException;
  * All calls to this registry are forwarded to the appropriate registry for a given addon.
  * In case of conflicts (e.g. same addon twice), the {@link ClasspathRegistry} has priority.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class CombiningRegistry implements AddonRegistry {
 
-    private ClasspathRegistry classpathRegistry;
-    private FileRegistry fileRegistry;
+    private final ClasspathRegistry classpathRegistry;
+    private final FileRegistry fileRegistry;
 
 
     public CombiningRegistry(AddonManager manager) throws WSMarshallerException {

@@ -32,6 +32,8 @@ import javax.annotation.Nullable;
 
 
 /**
+ * Result of a Plug-In invocation.
+ * This class contains everything the binding needs to create a binding specific response to the invoker.
  *
  * @author Tobias Wich
  * @author Dirk Petrautzki

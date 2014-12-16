@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,9 +30,12 @@ import org.openecard.addon.ActionInitializationException;
 
 
 /**
+ * Proxy class wrapping a AppPluginAction.
+ * The proxy loads the action and calls the actual execute function of the plug-in implementation. <br/>
+ * If the plug-in has a custom function and it is found by the proxy, then this one is called directly (not implemented).
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
  */
 public class AppPluginActionProxy  extends AbstractFactory<AppPluginAction> implements AppPluginAction {
 
@@ -47,7 +50,7 @@ public class AppPluginActionProxy  extends AbstractFactory<AppPluginAction> impl
     }
 
     @Override
-    public BindingResult execute(Body body, Map<String, String> parameters, List<Attachment> attachments) {
+    public BindingResult execute(RequestBody body, Map<String, String> parameters, List<Attachment> attachments) {
 	//TODO use annotations to find the right function
 	return c.execute(body, parameters, attachments);
     }

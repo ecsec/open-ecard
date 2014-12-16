@@ -29,7 +29,7 @@ import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.Attachment;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
-import org.openecard.addon.bind.Body;
+import org.openecard.addon.bind.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Action processing Status messages.
  * 
- * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public class StatusAction implements AppPluginAction {
 
@@ -57,7 +57,7 @@ public class StatusAction implements AppPluginAction {
     }
 
     @Override
-    public BindingResult execute(Body body, Map<String, String> parameters, List<Attachment> attachments) {
+    public BindingResult execute(RequestBody body, Map<String, String> parameters, List<Attachment> attachments) {
 	BindingResult response;
 	try {
 	    StatusRequest statusRequest = StatusRequest.convert(parameters);

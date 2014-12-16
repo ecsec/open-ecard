@@ -31,7 +31,7 @@ import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.Attachment;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
-import org.openecard.addon.bind.Body;
+import org.openecard.addon.bind.RequestBody;
 import org.openecard.binding.tctoken.ex.NonGuiException;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
@@ -72,7 +72,7 @@ public class ActivationAction implements AppPluginAction {
     }
 
     @Override
-    public BindingResult execute(Body body, Map<String, String> params, List<Attachment> attachments) {
+    public BindingResult execute(RequestBody body, Map<String, String> params, List<Attachment> attachments) {
 	BindingResult response;
 
 	// only continue, when there are known parameters in the request

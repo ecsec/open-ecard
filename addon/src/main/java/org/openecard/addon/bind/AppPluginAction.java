@@ -29,10 +29,10 @@ import org.openecard.addon.LifecycleTrait;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface AppPluginAction extends LifecycleTrait {
 
-    BindingResult execute(Body body, Map<String, String> parameters, List<Attachment> attachments);
+    BindingResult execute(RequestBody body, Map<String, String> parameters, List<Attachment> attachments);
 
 }

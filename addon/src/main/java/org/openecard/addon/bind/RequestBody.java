@@ -22,7 +22,8 @@
 
 package org.openecard.addon.bind;
 
-import org.w3c.dom.Node;
+import org.openecard.ws.marshal.WSMarshaller;
+import org.openecard.ws.marshal.WSMarshallerException;
 
 
 /**
@@ -30,30 +31,29 @@ import org.w3c.dom.Node;
  * Additionally to the base elements, a request contains the requested resource.
  *
  * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
 public class RequestBody extends Body {
 
     /**
-     * Full resource path of the incoming request.
+     * Resource path of the request.
      */
     private final String path;
 
-    /**
-     * Creates a new RequestBody object.
-     *
-     * @param path Full resource name of the in coming request.
-     * @param value Body of the in coming request as Node object.
-     * @param mimeType MimeType of the given {@code value}.
-     */
-    public RequestBody(String path, Node value, String mimeType) {
-	super(value, mimeType);
+    public RequestBody(String path) throws WSMarshallerException {
+	super();
+	this.path = path;
+    }
+
+    public RequestBody(String path, WSMarshaller m) {
+	super(m);
 	this.path = path;
     }
 
     /**
-     * Get the full resource path the in coming request.
+     * Get the resource path of this request.
      *
-     * @return A String containing the full resource path.
+     * @return A String containing the requests resource path.
      */
     public String getPath() {
 	return path;

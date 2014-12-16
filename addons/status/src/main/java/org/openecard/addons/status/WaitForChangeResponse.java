@@ -23,14 +23,12 @@
 package org.openecard.addons.status;
 
 import javax.annotation.Nullable;
+import javax.xml.transform.TransformerException;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.bind.ResponseBody;
-import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
-import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.openecard.ws.schema.StatusChange;
-import org.w3c.dom.Node;
 
 
 /**
@@ -48,15 +46,11 @@ public final class WaitForChangeResponse extends BindingResult {
 	    setResultMessage("The requested session does not exist.");
 	} else {
 	    try {
-		WSMarshaller m = WSMarshallerFactory.createInstance();
-		m.removeAllTypeClasses();
-		m.addXmlTypeClass(StatusChange.class);
-
-		Node xml = m.marshal(status);
-		ResponseBody body = new ResponseBody(xml, "text/xml");
+		ResponseBody body = new WaitForChangeResponseBody();
+		body.setJAXBObjectValue(status, "text/xml");
 		setBody(body);
 		setResultCode(BindingResultCode.OK);
-	    } catch (WSMarshallerException ex) {
+	    } catch (WSMarshallerException | TransformerException ex) {
 		setResultCode(BindingResultCode.INTERNAL_ERROR);
 		setResultMessage("Failed to marshal StatusChange message.\n  " + ex.getMessage());
 	    }

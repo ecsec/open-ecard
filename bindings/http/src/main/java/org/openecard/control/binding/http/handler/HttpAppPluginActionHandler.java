@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 HS Coburg.
+ * Copyright (C) 2013-2014 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,18 +22,13 @@
 
 package org.openecard.control.binding.http.handler;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashMap;
 import java.util.Map;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.AddonSelector;
@@ -50,7 +45,6 @@ import org.openecard.apache.http.HttpRequest;
 import org.openecard.apache.http.HttpResponse;
 import org.openecard.apache.http.HttpStatus;
 import org.openecard.apache.http.ParseException;
-import org.openecard.apache.http.entity.BasicHttpEntity;
 import org.openecard.apache.http.entity.ContentType;
 import org.openecard.apache.http.entity.StringEntity;
 import org.openecard.apache.http.protocol.HttpContext;
@@ -67,14 +61,12 @@ import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 
 /**
- * 
+ *
  * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public class HttpAppPluginActionHandler extends HttpControlHandler {
 
@@ -142,41 +134,27 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	}
     }
 
-    private HttpEntity createHTTPEntityFromBody(BindingResult bindingResult) {
-	ResponseBody responseBody = bindingResult.getBody();
-	if (responseBody != null) {
-	    logger.debug("BindingResult contains a body.");
-	    BasicHttpEntity entity = new BasicHttpEntity();
-	    try {
-		Node value = responseBody.getValue();
-		if (value.getFirstChild().getNodeName().equals("base64Content")) {
-		    byte[] bytes = value.getFirstChild().getFirstChild().getNodeValue().getBytes("UTF-8");
-		    entity.setContent(new ByteArrayInputStream(bytes));
-		} else {
-		    entity.setContent(new ByteArrayInputStream(marshaller.doc2str(value).getBytes("UTF-8")));
-		}
-	    } catch (TransformerException e) {
-		logger.error("Failed to set http entity", e);
-	    } catch (UnsupportedEncodingException e) {
-		logger.error("Failed to set http entity", e);
-	    }
-	    entity.setContentType(ContentType.create(responseBody.getMimeType()).toString());
-	    return entity;
-	}
-	logger.debug("BindingResult contains NO body.");
-	return null;
-    }
 
-    private HttpEntity createHTTPEntity(BindingResult bindingResult) {
-	HttpEntity entity = createHTTPEntityFromBody(bindingResult);
-	if (entity == null && bindingResult.getResultMessage() != null) {
-	    try {
-		entity = new StringEntity(bindingResult.getResultMessage());
-	    } catch (UnsupportedEncodingException e) {
-		logger.error("StringEntity creation failed. Returned entity will be null", e);
+    private void addHTTPEntity(HttpResponse response, BindingResult bindingResult) {
+	ResponseBody responseBody = bindingResult.getBody();
+	if (responseBody != null && responseBody.hasValue()) {
+	    logger.debug("BindingResult contains a body.");
+	    // determine content type
+	    ContentType ct = ContentType.create(responseBody.getMimeType(), Charset.forName("UTF-8"));
+	    StringEntity entity = new StringEntity(responseBody.getValue(), ct);
+	    response.setEntity(entity);
+	    // evaluate Base64 flag
+	    if (responseBody.isBase64()) {
+		response.setHeader("Content-Transfer-Encoding", "Base64");
+	    }
+	} else {
+	    logger.debug("BindingResult contains no body.");
+	    if (bindingResult.getResultMessage() != null) {
+		ContentType ct = ContentType.create("text/plain", Charset.forName("UTF-8"));
+		StringEntity entity = new StringEntity(bindingResult.getResultMessage(), ct);
+		response.setEntity(entity);
 	    }
 	}
-	return entity;
     }
 
     private HttpResponse createHTTPResponseFromBindingResult(BindingResult bindingResult) {
@@ -215,30 +193,32 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 		logger.error("Untreated result code: " + resultCode);
 		response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 	}
-	HttpEntity entity = createHTTPEntity(bindingResult);
-	response.setEntity(entity);
+
+	addHTTPEntity(response, bindingResult);
 	return response;
     }
 
     private RequestBody getRequestBody(HttpRequest httpRequest, String resourceName) throws IOException {
-	HttpEntityEnclosingRequest entityRequest = (HttpEntityEnclosingRequest) httpRequest;
-	HttpEntity entity = entityRequest.getEntity();
-	InputStream is = entity.getContent();
 	try {
-	    DocumentBuilderFactory fac = DocumentBuilderFactory.newInstance();
-	    DocumentBuilder builder = fac.newDocumentBuilder();
-	    Document d = builder.newDocument();
-	    Element elemBase64 = d.createElement("base64Content");
-	    elemBase64.setTextContent(FileUtils.toString(is));
-	    d.appendChild(elemBase64);
-	    return new RequestBody(resourceName, d, ContentType.get(entity).getMimeType());
+	    HttpEntityEnclosingRequest entityRequest = (HttpEntityEnclosingRequest) httpRequest;
+	    HttpEntity entity = entityRequest.getEntity();
+	    InputStream is = entity.getContent();
+
+	    // TODO: This assumes the content is UTF-8. Evaluate what is actually sent.
+	    String value = FileUtils.toString(is);
+	    String mimeType = ContentType.get(entity).getMimeType();
+	    // TODO: find out if we have a Base64 coded value
+	    boolean base64Content = false;
+
+	    RequestBody body = new RequestBody(resourceName, null);
+	    body.setValue(value, mimeType, base64Content);
+	    return body;
 	} catch (UnsupportedCharsetException e) {
 	    logger.error("Failed to create request body.", e);
 	} catch (ParseException e) {
 	    logger.error("Failed to create request body.", e);
-	} catch (ParserConfigurationException e) {
-	    logger.error("Failed to create request body.", e);
 	}
+
 	return null;
     }
 

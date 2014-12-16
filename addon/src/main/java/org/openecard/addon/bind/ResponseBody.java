@@ -22,18 +22,32 @@
 
 package org.openecard.addon.bind;
 
-import org.w3c.dom.Node;
+import org.openecard.ws.marshal.WSMarshaller;
+import org.openecard.ws.marshal.WSMarshallerException;
 
 
 /**
  * Response specific Body for use in Plug-Ins and Bindings.
  *
  * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
 public class ResponseBody extends Body {
 
-    public ResponseBody(Node value, String mimeType) {
-	super(value, mimeType);
+    public ResponseBody() throws WSMarshallerException {
+	super();
+    }
+
+    public ResponseBody(WSMarshaller m) {
+	super(m);
+    }
+
+    public ResponseBody(String value, String mimeType, boolean base64Encoded) throws WSMarshallerException {
+	super(value, mimeType, base64Encoded);
+    }
+
+    public ResponseBody(String value, String mimeType, boolean base64Encoded, WSMarshaller m) {
+	super(value, mimeType, base64Encoded, m);
     }
 
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,32 +22,23 @@
 
 package org.openecard.addons.status;
 
-import javax.xml.transform.TransformerException;
-import org.openecard.addon.bind.BindingResult;
-import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.bind.ResponseBody;
+import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.schema.Status;
 
 
 /**
- * Wrapper for status response taking care of the marshalling of the status message.
+ * Specialized ResponseBody capable of marshalling status messages.
  *
- * @author Moritz Horsch
  * @author Tobias Wich
  */
-public final class StatusResponse extends BindingResult {
+public class StatusResponseBody extends ResponseBody {
 
-    public StatusResponse(Status status) {
-	try {
-	    ResponseBody body = new StatusResponseBody();
-	    body.setJAXBObjectValue(status, "text/xml");
-	    setBody(body);
-	    setResultCode(BindingResultCode.OK);
-	} catch (WSMarshallerException | TransformerException ex) {
-	    setResultCode(BindingResultCode.INTERNAL_ERROR);
-	    setResultMessage("Failed to marshal Status message.\n  " + ex.getMessage());
-	}
+    public StatusResponseBody() throws WSMarshallerException {
+	WSMarshaller m = getMarshaller();
+	m.removeAllTypeClasses();
+	m.addXmlTypeClass(Status.class);
     }
 
 }

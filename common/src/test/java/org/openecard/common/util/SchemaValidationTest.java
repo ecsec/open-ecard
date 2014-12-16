@@ -62,7 +62,7 @@ public class SchemaValidationTest {
 	DocumentBuilderFactory docFac = DocumentBuilderFactory.newInstance();
 	DocumentBuilder docBuilder = docFac.newDocumentBuilder();
 	Document d = docBuilder.newDocument();
-	Element sigElem = d.createElement("ns4:Signature");
+	Element sigElem = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "Signature");
 	sigElem.setTextContent("1254786930AAD4A8");
 	authData.getAny().add(sigElem);
 	didAuth2.setAuthenticationProtocolData(authData);

@@ -217,6 +217,17 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    CardVerifiableCertificateVerifier.verify(taCert, certDescription);
 	    // Verify that the required CHAT matches the terminal certificate's CHAT
 	    CHAT taCHAT = taCert.getCHAT();
+	    
+	    // Check that we got an authentication terminal terminal certificate. We abort the process in case there is
+	    // an other role.
+	    if (taCHAT.getRole() != CHAT.Role.AUTHENTICATION_TERMINAL) {
+		String msg = "Unsupported terminal type in Terminal Certificate referenced. Refernced terminal type is " +
+			taCHAT.getRole().toString() + ".";
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.PARM_ERROR, msg));
+		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+		return response;
+	    }
+
 	    CHATVerifier.verfiy(taCHAT, requiredCHAT);
 	    // remove overlapping values from optional chat
 	    optionalCHAT.restrictAccessRights(taCHAT);

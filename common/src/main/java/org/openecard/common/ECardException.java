@@ -172,7 +172,7 @@ public abstract class ECardException extends Exception {
     @Override
     public final String getMessage() {
 	String minor = getResultMinor();
-	return (minor == null ? "" : (minor + " ==> ")) + getResultMessage();
+	return (minor == null ? "" : (minor + "\n  ==> ")) + getResultMessage();
     }
 
     @Override

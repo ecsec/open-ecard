@@ -58,9 +58,9 @@ import org.slf4j.LoggerFactory;
  * new add-ons, unloading of add-ons on shut down and removal and the uninstalling of an add-on. Furthermore the
  * AddonManager provides methods to retrieve specific parts of a add-on.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 public class AddonManager {
 
@@ -102,7 +102,12 @@ public class AddonManager {
 	this.eventManager = eventManager;
 	this.eventHandler = new EventHandler(eventManager);
 
-	loadLoadOnStartAddons();
+	new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+		loadLoadOnStartAddons();
+	    }
+	}, "Init-Addons").start();
     }
 
     /**
@@ -110,7 +115,7 @@ public class AddonManager {
      *
      * @throws WSMarshallerException
      */
-    private void loadLoadOnStartAddons() throws WSMarshallerException {
+    private void loadLoadOnStartAddons() {
 	// load plugins which have an loadOnStartup = true
 	Set<AddonSpecification> specs = protectedRegistry.listAddons();
 	for (AddonSpecification addonSpec : specs) {

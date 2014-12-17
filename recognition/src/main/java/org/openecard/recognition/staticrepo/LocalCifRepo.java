@@ -43,13 +43,13 @@ import org.xml.sax.SAXException;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class LocalCifRepo implements GetCardInfoOrACD {
 
-    private final HashMap<String,CardInfoType> cifs = new HashMap<String, CardInfoType>();
+    private final HashMap<String, CardInfoType> cifs = new HashMap<>();
 
-    public LocalCifRepo(WSMarshaller m) throws IOException, WSMarshallerException, SAXException {
+    public LocalCifRepo(final WSMarshaller m) throws IOException, WSMarshallerException, SAXException {
 	// load properties
 	InputStream propStream = getStream("repo-config.properties");
 	Properties conf = new Properties();
@@ -58,7 +58,7 @@ public class LocalCifRepo implements GetCardInfoOrACD {
 	String fileNames = conf.getProperty("cifFiles");
 	String[] files = fileNames.split(",");
 
-	for (String next : files) {
+	for (final String next : files) {
 	    // load and unmarshal
 	    InputStream cifStream = getStream(next.trim());
 	    Document cifDoc = m.str2doc(cifStream);
@@ -84,11 +84,11 @@ public class LocalCifRepo implements GetCardInfoOrACD {
     @Override
     public GetCardInfoOrACDResponse getCardInfoOrACD(iso.std.iso_iec._24727.tech.schema.GetCardInfoOrACD parameters) {
 	List<String> cardTypes = parameters.getCardTypeIdentifier();
-	ArrayList<CardInfoType> cifsResult = new ArrayList<CardInfoType>(cardTypes.size());
+	ArrayList<CardInfoType> cifsResult = new ArrayList<>(cardTypes.size());
 	Result result = WSHelper.makeResultOK();
 
 	if (ECardConstants.CIF.GET_SPECIFIED.equals(parameters.getAction())) {
-	    ArrayList<String> missingTypes = new ArrayList<String>();
+	    ArrayList<String> missingTypes = new ArrayList<>();
 	    for (String cardType : cardTypes) {
 		CardInfoType cif = cifs.get(cardType);
 		if (cif == null) {
@@ -106,7 +106,7 @@ public class LocalCifRepo implements GetCardInfoOrACD {
 		result = WSHelper.makeResultError(ECardConstants.Minor.SAL.UNKNOWN_CARDTYPE, error.toString());
 	    }
 	} else if (ECardConstants.CIF.GET_OTHER.equals(parameters.getAction())) {
-	    HashMap<String,CardInfoType> cifsTmp = new HashMap<String, CardInfoType>();
+	    HashMap<String,CardInfoType> cifsTmp = new HashMap<>();
 	    cifsTmp.putAll(cifs);
 	    for (String cardType : cardTypes) {
 		cifsTmp.remove(cardType);

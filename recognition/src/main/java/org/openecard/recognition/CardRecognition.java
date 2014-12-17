@@ -25,6 +25,7 @@ package org.openecard.recognition;
 import iso.std.iso_iec._24727.tech.schema.BeginTransaction;
 import iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse;
 import iso.std.iso_iec._24727.tech.schema.CardCall;
+import iso.std.iso_iec._24727.tech.schema.CardInfo;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
@@ -53,6 +54,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import javax.annotation.Nullable;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
@@ -84,12 +88,13 @@ import org.slf4j.LoggerFactory;
  */
 public class CardRecognition {
 
-    private static final Logger _logger = LoggerFactory.getLogger(CardRecognition.class);
-    private final I18n lang = I18n.getTranslation("recognition");
+    private static final Logger logger = LoggerFactory.getLogger(CardRecognition.class);
+    private static final I18n lang = I18n.getTranslation("recognition");
+    private static final String IMAGE_PROPERTIES = "/card-images/card-images.properties";
 
-    private final RecognitionTree tree;
+    private final FutureTask<RecognitionTree> tree;
 
-    private final org.openecard.ws.GetCardInfoOrACD cifRepo;
+    private final FutureTask<org.openecard.ws.GetCardInfoOrACD> cifRepo;
     private final TreeMap<String, CardInfoType> cifCache = new TreeMap<>();
 
     private final Properties cardImagesMap = new Properties();
@@ -109,39 +114,95 @@ public class CardRecognition {
 	this(ifd, ctx, null, null);
     }
 
-    public CardRecognition(IFD ifd, byte[] ctx, GetRecognitionTree treeRepo, org.openecard.ws.GetCardInfoOrACD cifRepo) throws Exception {
+    public CardRecognition(IFD ifd, byte[] ctx, final GetRecognitionTree treeRepo,
+	    final org.openecard.ws.GetCardInfoOrACD cifRepo) throws Exception {
 	this.ifd = ifd;
 	this.ctx = ByteUtils.clone(ctx);
 
-	// load alternative tree service if needed
-	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
-	if (treeRepo == null) {
-	    treeRepo = new LocalFileTree(marshaller);
-	}
-	if (cifRepo == null) {
-	    cifRepo = new LocalCifRepo(marshaller);
-	}
-	this.cifRepo = cifRepo;
+	cardImagesMap.load(FileUtils.resolveResourceAsStream(CardRecognition.class, IMAGE_PROPERTIES));
 
-	cardImagesMap.load(FileUtils.resolveResourceAsStream(CardRecognition.class, "/card-images/card-images.properties"));
+	this.cifRepo = new FutureTask<>(new Callable<org.openecard.ws.GetCardInfoOrACD>() {
+	    @Override
+	    public org.openecard.ws.GetCardInfoOrACD call() throws Exception {
+		final WSMarshaller cifMarshaller = WSMarshallerFactory.createInstance();
+		cifMarshaller.removeAllTypeClasses();
+		cifMarshaller.addXmlTypeClass(CardInfo.class);
+		cifMarshaller.addXmlTypeClass(GetCardInfoOrACD.class);
+		cifMarshaller.addXmlTypeClass(GetCardInfoOrACDResponse.class);
+		// protocols are used in the CIF, so add whole namespace containing protocols
+		cifMarshaller.addXmlTypeClass(iso.std.iso_iec._24727.tech.schema.ObjectFactory.class);
 
-	// request tree from service
-	iso.std.iso_iec._24727.tech.schema.GetRecognitionTree req = new iso.std.iso_iec._24727.tech.schema.GetRecognitionTree();
-	req.setAction(RecognitionProperties.getAction());
-	GetRecognitionTreeResponse resp = treeRepo.getRecognitionTree(req);
-	checkResult(resp.getResult());
-	this.tree = resp.getRecognitionTree();
+		org.openecard.ws.GetCardInfoOrACD cifRepoTmp = cifRepo;
+		if (cifRepoTmp == null) {
+		    cifRepoTmp = new LocalCifRepo(cifMarshaller);
+		}
+		return cifRepoTmp;
+	    }
+	});
+	new Thread(this.cifRepo, "Init-CardInfo-Repo").start();
+
+	this.tree = new FutureTask<>(new Callable<RecognitionTree>() {
+	    @Override
+	    public RecognitionTree call() throws Exception {
+		final WSMarshaller treeMarshaller = WSMarshallerFactory.createInstance();
+		treeMarshaller.removeAllTypeClasses();
+		treeMarshaller.addXmlTypeClass(iso.std.iso_iec._24727.tech.schema.GetRecognitionTree.class);
+		treeMarshaller.addXmlTypeClass(GetRecognitionTreeResponse.class);
+
+		GetRecognitionTree treeRepoTmp = treeRepo;
+		if (treeRepoTmp == null) {
+		    treeRepoTmp = new LocalFileTree(treeMarshaller);
+		}
+		// request tree from service
+		iso.std.iso_iec._24727.tech.schema.GetRecognitionTree req;
+		req = new iso.std.iso_iec._24727.tech.schema.GetRecognitionTree();
+		req.setAction(RecognitionProperties.getAction());
+		GetRecognitionTreeResponse resp = treeRepoTmp.getRecognitionTree(req);
+		checkResult(resp.getResult());
+
+		return resp.getRecognitionTree();
+	    }
+	});
+	new Thread(this.tree, "Init-RecognitionTree-Repo").start();
     }
 
     public void setGUI(UserConsent gui) {
 	this.gui = gui;
     }
 
+    private RecognitionTree getTree() {
+	try {
+	    return tree.get();
+	} catch (InterruptedException ex) {
+	    String msg = "Initialization of the RecognitionTree repository has been interrupted.";
+	    logger.warn(msg);
+	    throw new RuntimeException(msg);
+	} catch (ExecutionException ex) {
+	    String msg = "Initialization of the RecognitionTree repository yielded an error.";
+	    logger.error(msg, ex);
+	    throw new RuntimeException(msg, ex.getCause());
+	}
+    }
+
+    private org.openecard.ws.GetCardInfoOrACD getCifRepo() {
+	try {
+	    return cifRepo.get();
+	} catch (InterruptedException ex) {
+	    String msg = "Initialization of the CardInfo repository has been interrupted.";
+	    logger.warn(msg);
+	    throw new RuntimeException(msg);
+	} catch (ExecutionException ex) {
+	    String msg = "Initialization of the CardInfo repository yielded an error.";
+	    logger.error(msg, ex);
+	    throw new RuntimeException(msg, ex.getCause());
+	}
+    }
+
     public List<CardInfoType> getCardInfos() {
 	// TODO: add caching
 	GetCardInfoOrACD req = new GetCardInfoOrACD();
 	req.setAction(ECardConstants.CIF.GET_OTHER);
-	GetCardInfoOrACDResponse res = cifRepo.getCardInfoOrACD(req);
+	GetCardInfoOrACDResponse res = getCifRepo().getCardInfoOrACD(req);
 	// checkout response if it contains our cardinfo
 	List<Object> cifs = res.getCardInfoOrCapabilityInfo();
 	ArrayList<CardInfoType> result = new ArrayList<>();
@@ -162,7 +223,7 @@ public class CardRecognition {
 		GetCardInfoOrACD req = new GetCardInfoOrACD();
 		req.setAction(ECardConstants.CIF.GET_SPECIFIED);
 		req.getCardTypeIdentifier().add(type);
-		GetCardInfoOrACDResponse res = cifRepo.getCardInfoOrACD(req);
+		GetCardInfoOrACDResponse res = getCifRepo().getCardInfoOrACD(req);
 		// checkout response if it contains our cardinfo
 		List<Object> cifs = res.getCardInfoOrCapabilityInfo();
 		for (Object next : cifs) {
@@ -258,7 +319,7 @@ public class CardRecognition {
 	try {
 	    return FileUtils.resolveResourceAsStream(CardRecognition.class, "/card-images/" + filename);
 	} catch (IOException ex) {
-	    _logger.info("Failed to load card image '" + filename + "'.", ex);
+	    logger.info("Failed to load card image '" + filename + "'.", ex);
 	    return null;
 	}
     }
@@ -278,7 +339,7 @@ public class CardRecognition {
 	// connect card
 	byte[] slotHandle = connect(ifdName, slot);
 	// recognise card
-	String type = treeCalls(slotHandle, tree.getCardCall());
+	String type = treeCalls(slotHandle, getTree().getCardCall());
 	// disconnect and return
 	disconnect(slotHandle);
 	// build result or throw exception if it is null
@@ -361,7 +422,7 @@ public class CardRecognition {
 		try {
 		    long waitInSeconds = fibonacci(i);
 		    i++;
-		    _logger.debug("Could not get exclusive card access. Trying again in {} seconds.", waitInSeconds);
+		    logger.debug("Could not get exclusive card access. Trying again in {} seconds.", waitInSeconds);
 		    if (i == 6 && gui != null) {
 			MessageDialog dialog = gui.obtainMessageDialog();
 			String message = lang.translationForKey("message", ifdName);

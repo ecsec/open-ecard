@@ -41,8 +41,8 @@ import org.xml.sax.SAXException;
 /**
  * This class implements an extractor which extracts the AddonSpecification from an addon jar file.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 public class ManifestExtractor {
 

@@ -32,6 +32,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import org.apache.commons.jci.monitor.FilesystemAlterationMonitor;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.AppExtensionSpecification;
@@ -57,6 +61,7 @@ public class FileRegistry implements AddonRegistry {
     private static final HashMap<String, AddonSpecification> registeredAddons = new HashMap<>();
     private static final HashMap<String, File> files = new HashMap<>();
     private final AddonManager manager;
+    private final Future<Void> initComplete;
 
     /**
      * Creates a new FileRegistry.
@@ -65,22 +70,69 @@ public class FileRegistry implements AddonRegistry {
      * remove add-ons.
      *
      * @param manager {@link AddonManager} which takes care for the installed add-ons.
-     * @throws WSMarshallerException
      */
-    public FileRegistry(AddonManager manager) throws WSMarshallerException {
+    public FileRegistry(AddonManager manager) {
 	this.manager = manager;
-	String addonPath;
+
+	final String addonPath;
 	try {
 	    addonPath = FileUtils.getAddonsDir() + File.separator;
 	} catch (SecurityException e) {
-	    logger.error("Failed to access add-on directory due to missing privileges. FileRegistry not working.", e);
+	    String msg = "Failed to access add-on directory due to missing privileges. FileRegistry not working.";
+	    logger.error(msg, e);
+	    initComplete = getCompletedFuture();
 	    return;
 	} catch (IOException e) {
 	    logger.error("Failed to access add-on directory. FileRegistry not work.", e);
+	    initComplete = getCompletedFuture();
 	    return;
 	}
-	loadExistingAddons();
-	startFileMonitor(addonPath);
+
+	FutureTask<Void> initCompleteTmp = new FutureTask<>(new Callable<Void>() {
+	    @Override
+	    public Void call() throws Exception {
+		loadExistingAddons();
+		startFileMonitor(addonPath);
+		return null;
+	    }
+	});
+	this.initComplete = initCompleteTmp;
+	new Thread(initCompleteTmp, "Init-File-Addons").start();
+    }
+
+    private Future<Void> getCompletedFuture() {
+	FutureTask<Void> f = new FutureTask(new Callable<Void>() {
+	    @Override
+	    public Void call() throws Exception {
+		return null;
+	    }
+	});
+	f.run();
+	return f;
+    }
+
+    private void blockUntilInit() {
+	try {
+	    initComplete.get();
+	} catch (InterruptedException ex) {
+	    String msg = "Initialization of the file based Add-ons has been interrupted.";
+	    logger.warn(msg);
+	    throw new RuntimeException(msg);
+	} catch (ExecutionException ex) {
+	    String msg = "Initialization of the file based Add-ons yielded an error.";
+	    logger.error(msg, ex);
+	    throw new RuntimeException(msg, ex.getCause());
+	}
+    }
+
+    private HashMap<String, AddonSpecification> getAddons() {
+	blockUntilInit();
+	return registeredAddons;
+    }
+
+    private HashMap<String, File> getFiles() {
+	blockUntilInit();
+	return files;
     }
 
     /**
@@ -115,7 +167,7 @@ public class FileRegistry implements AddonRegistry {
      * @param file A {@link File} object which points to the jar file of the add-on.
      */
     public void unregister(File file) {
-	Set<Entry<String, File>> entrySet = files.entrySet();
+	Set<Entry<String, File>> entrySet = getFiles().entrySet();
 	Iterator<Entry<String, File>> iterator = entrySet.iterator();
 	while (iterator.hasNext()) {
 	    Entry<String, File> next = iterator.next();
@@ -132,13 +184,13 @@ public class FileRegistry implements AddonRegistry {
     @Override
     public Set<AddonSpecification> listAddons() {
 	Set<AddonSpecification> list = new HashSet<>();
-	list.addAll(registeredAddons.values());
+	list.addAll(getAddons().values());
 	return list;
     }
 
     @Override
     public AddonSpecification search(String id) {
-	for (AddonSpecification desc : registeredAddons.values()) {
+	for (AddonSpecification desc : getAddons().values()) {
 	    if (desc.getId().equals(id)) {
 		return desc;
 	    }
@@ -149,7 +201,7 @@ public class FileRegistry implements AddonRegistry {
     @Override
     public Set<AddonSpecification> searchByName(String name) {
 	Set<AddonSpecification> matchingAddons = new HashSet<>();
-	for (AddonSpecification desc : registeredAddons.values()) {
+	for (AddonSpecification desc : getAddons().values()) {
 	    for (LocalizedString s : desc.getLocalizedName()) {
 		if (s.getValue().equals(name)) {
 		    matchingAddons.add(desc);
@@ -162,7 +214,7 @@ public class FileRegistry implements AddonRegistry {
     @Override
     public Set<AddonSpecification> searchIFDProtocol(String uri) {
 	Set<AddonSpecification> matchingAddons = new HashSet<>();
-	for (AddonSpecification desc : registeredAddons.values()) {
+	for (AddonSpecification desc : getAddons().values()) {
 	    ProtocolPluginSpecification protocolDesc = desc.searchIFDActionByURI(uri);
 	    if (protocolDesc != null) {
 		matchingAddons.add(desc);
@@ -174,7 +226,7 @@ public class FileRegistry implements AddonRegistry {
     @Override
     public Set<AddonSpecification> searchSALProtocol(String uri) {
 	Set<AddonSpecification> matchingAddons = new HashSet<>();
-	for (AddonSpecification desc : registeredAddons.values()) {
+	for (AddonSpecification desc : getAddons().values()) {
 	    ProtocolPluginSpecification protocolDesc = desc.searchSALActionByURI(uri);
 	    if (protocolDesc != null) {
 		matchingAddons.add(desc);
@@ -201,7 +253,7 @@ public class FileRegistry implements AddonRegistry {
     @Override
     public Set<AddonSpecification> searchByResourceName(String resourceName) {
 	Set<AddonSpecification> matchingAddons = new HashSet<>();
-	for (AddonSpecification desc : registeredAddons.values()) {
+	for (AddonSpecification desc : getAddons().values()) {
 	    AppPluginSpecification actionDesc = desc.searchByResourceName(resourceName);
 	    if (actionDesc != null) {
 		matchingAddons.add(desc);
@@ -213,7 +265,7 @@ public class FileRegistry implements AddonRegistry {
     @Override
     public Set<AddonSpecification> searchByActionId(String actionId) {
 	Set<AddonSpecification> matchingAddons = new HashSet<>();
-	for (AddonSpecification desc : registeredAddons.values()) {
+	for (AddonSpecification desc : getAddons().values()) {
 	    AppExtensionSpecification actionDesc = desc.searchByActionId(actionId);
 	    if (actionDesc != null) {
 		matchingAddons.add(desc);
@@ -261,7 +313,7 @@ public class FileRegistry implements AddonRegistry {
      * @return The {@link AddonSpecification} of add-on with the name {@code fileName}.
      */
     protected AddonSpecification getAddonSpecByFileName(String fileName) {
-	return registeredAddons.get(fileName);
+	return getAddons().get(fileName);
     }
 
     /**

@@ -34,7 +34,7 @@ import org.xml.sax.SAXException;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class LocalFileTree implements org.openecard.ws.GetRecognitionTree {
 

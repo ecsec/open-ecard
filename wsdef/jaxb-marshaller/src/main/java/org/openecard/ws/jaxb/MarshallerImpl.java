@@ -32,6 +32,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -51,8 +54,8 @@ public class MarshallerImpl {
 
     private static final Logger logger = LoggerFactory.getLogger(MarshallerImpl.class);
 
-    private static final List<Class<?>> baseXmlElementClasses;
-    private static final JAXBContext baseJaxbContext;
+    private static final ArrayList<Class<?>> baseXmlElementClasses;
+    private static final FutureTask<JAXBContext> baseJaxbContext;
 
     private boolean userOverride;
     private final Set<Class<?>> userClasses;
@@ -62,16 +65,22 @@ public class MarshallerImpl {
 
     static {
 	// load predefined classes
-	Class<?>[] jaxbClasses = getJaxbClasses();
+	final Class<?>[] jaxbClasses = getJaxbClasses();
 	baseXmlElementClasses = new ArrayList<>(jaxbClasses.length);
 	baseXmlElementClasses.addAll(Arrays.asList(jaxbClasses));
 
-	try {
-	    baseJaxbContext = JAXBContext.newInstance(jaxbClasses);
-	} catch (JAXBException ex) {
-	    logger.error("Failed to create JAXBContext instance.", ex);
-	    throw new RuntimeException("Failed to create JAXBContext.");
-	}
+	baseJaxbContext = new FutureTask<>(new Callable<JAXBContext>() {
+	    @Override
+	    public JAXBContext call() throws Exception {
+		try {
+		    return JAXBContext.newInstance(jaxbClasses);
+		} catch (JAXBException ex) {
+		    logger.error("Failed to create JAXBContext instance.", ex);
+		    throw new RuntimeException("Failed to create JAXBContext.");
+		}
+	    }
+	});
+	new Thread(baseJaxbContext, "JAXB-Classload").start();
     }
 
 
@@ -148,7 +157,15 @@ public class MarshallerImpl {
 	if (userOverride) {
 	    jaxbCtx = JAXBContext.newInstance(userClasses.toArray(new Class<?>[userClasses.size()]));
 	} else {
-	    jaxbCtx = baseJaxbContext;
+	    try {
+		jaxbCtx = baseJaxbContext.get();
+	    } catch (ExecutionException ex) {
+		logger.error("Failed to create JAXBContext instance.", ex);
+		throw new RuntimeException("Failed to create JAXBContext.");
+	    } catch (InterruptedException ex) {
+		logger.error("Thread terminated waiting for the JAXBContext to be created..", ex);
+		throw new RuntimeException("Thread interrupted during waiting on the creation of the JAXBContext.");
+	    }
 	}
 	marshaller = jaxbCtx.createMarshaller();
 	unmarshaller = jaxbCtx.createUnmarshaller();

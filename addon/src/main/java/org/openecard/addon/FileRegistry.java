@@ -74,33 +74,32 @@ public class FileRegistry implements AddonRegistry {
     public FileRegistry(AddonManager manager) {
 	this.manager = manager;
 
-	final String addonPath;
+	FutureTask<Void> initCompleteTmp;
 	try {
-	    addonPath = FileUtils.getAddonsDir() + File.separator;
+	    final String addonPath = FileUtils.getAddonsDir() + File.separator;
+
+	    initCompleteTmp = new FutureTask<>(new Callable<Void>() {
+		@Override
+		public Void call() throws Exception {
+		    loadExistingAddons();
+		    startFileMonitor(addonPath);
+		    return null;
+		}
+	    });
+	    new Thread(initCompleteTmp, "Init-File-Addons").start();
 	} catch (SecurityException e) {
 	    String msg = "Failed to access add-on directory due to missing privileges. FileRegistry not working.";
 	    logger.error(msg, e);
-	    initComplete = getCompletedFuture();
-	    return;
+	    initCompleteTmp = getCompletedFuture();
 	} catch (IOException e) {
 	    logger.error("Failed to access add-on directory. FileRegistry not work.", e);
-	    initComplete = getCompletedFuture();
-	    return;
+	    initCompleteTmp = getCompletedFuture();
 	}
 
-	FutureTask<Void> initCompleteTmp = new FutureTask<>(new Callable<Void>() {
-	    @Override
-	    public Void call() throws Exception {
-		loadExistingAddons();
-		startFileMonitor(addonPath);
-		return null;
-	    }
-	});
 	this.initComplete = initCompleteTmp;
-	new Thread(initCompleteTmp, "Init-File-Addons").start();
     }
 
-    private Future<Void> getCompletedFuture() {
+    private FutureTask<Void> getCompletedFuture() {
 	FutureTask<Void> f = new FutureTask(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {

@@ -20,7 +20,14 @@
 	<iso:ObjectIdentifier>http://eid.belgium.be/en/find_out_more_about_the_eid/the_electronic_identity_documents/the_eid/v1.01</iso:ObjectIdentifier>
 	<iso:CardTypeName xml:lang="en">Belgian eID Card (v1.01)</iso:CardTypeName>
 	<iso:CardTypeName xml:lang="de">Belgischer Personalausweis (v1.01)</iso:CardTypeName>
-	<iso:Date>2014-03-31Z</iso:Date>
+	<iso:Version>
+	    <!-- Version number corresponds to the version of the eid applet -->
+	    <iso:Major>1</iso:Major>
+	    <iso:Minor>0</iso:Minor>
+	    <iso:SubMinor>1</iso:SubMinor>
+	</iso:Version>
+	<iso:Status>Final Release</iso:Status>
+	<iso:Date>2015-01-08</iso:Date>
     </iso:CardType>
     <iso:CardIdentification>
 	<iso:ATR>
@@ -49,6 +56,8 @@
 			<iso:Mask>FF</iso:Mask>
 		    </iso:TCi>
 		</iso:Tx2>
+		<iso:Tx3/>
+		<iso:Tx4/>
 	    </iso:InterfaceBytes>
 	    <iso:HistoricalBytes>
 		<iso:Ti>
@@ -86,6 +95,7 @@
 	    </iso:HistoricalBytes>
 	</iso:ATR>
 	<iso:CharacteristicFeature>
+	    <!-- Select EF.CIAInfo and look wheather the BELPIC label exists -->
 	    <iso:CardCall>
 		<iso:CommandAPDU>00A4080C063F00DF005032</iso:CommandAPDU>
 		<iso:ResponseAPDU>
@@ -104,6 +114,20 @@
 				<iso:MatchingValue>42454C504943</iso:MatchingValue>
 			    </iso:MatchingData>
 			</iso:DataObject>
+		    </iso:Body>
+		    <iso:Trailer>9000</iso:Trailer>
+		</iso:ResponseAPDU>
+	    </iso:CardCall>
+	    <!-- Now get the version of the applet -->
+	    <iso:CardCall>
+		<iso:CommandAPDU>80E400001C</iso:CommandAPDU>
+		<iso:ResponseAPDU>
+		    <iso:Body>
+			<iso:MatchingData>
+			    <iso:Offset>15</iso:Offset>
+			    <iso:Length>01</iso:Length>
+			    <iso:MatchingValue>11</iso:MatchingValue>
+			</iso:MatchingData>
 		    </iso:Body>
 		    <iso:Trailer>9000</iso:Trailer>
 		</iso:ResponseAPDU>
@@ -201,97 +225,12 @@
 			    <iso:PasswordAttributes>
 				<iso:pwdFlags>change-disabled initialized disable-allowed integrity-protected needs-padding</iso:pwdFlags>
 				<iso:pwdType>iso9564-1</iso:pwdType>
-				<iso:minLength>6</iso:minLength>
+				<iso:minLength>4</iso:minLength>
 				<iso:storedLength>8</iso:storedLength>
 				<iso:maxLength>10</iso:maxLength>
 				<iso:padChar>FF</iso:padChar>
 			    </iso:PasswordAttributes>
-			    <iso:StateInfo>
-				<iso:StateRecognition>
-				    <iso:CardCall>
-					<iso:CommandAPDU>00200001</iso:CommandAPDU>
-					<iso:ResponseAPDU>
-					    <iso:Trailer>6300</iso:Trailer>
-					    <iso:Conclusion>
-						<iso:RecognizedState>PIN1_BLOCKED</iso:RecognizedState>
-					    </iso:Conclusion>
-					</iso:ResponseAPDU>
-					<iso:ResponseAPDU>
-					    <iso:Trailer>63C1</iso:Trailer>
-					    <iso:Conclusion>
-						<iso:RecognizedState>PIN1_ACTIVATE_RC1</iso:RecognizedState>
-					    </iso:Conclusion>
-					</iso:ResponseAPDU>
-					<iso:ResponseAPDU>
-					    <iso:Trailer>63C2</iso:Trailer>
-					    <iso:Conclusion>
-						<iso:RecognizedState>PIN1_ACTIVATE_RC2</iso:RecognizedState>
-					    </iso:Conclusion>
-					</iso:ResponseAPDU>
-					<iso:ResponseAPDU>
-					    <iso:Trailer>63C3</iso:Trailer>
-					    <iso:Conclusion>
-						<iso:RecognizedState>PIN1_ACTIVATE_RC3</iso:RecognizedState>
-					    </iso:Conclusion>
-					</iso:ResponseAPDU>
-				    </iso:CardCall>
-				</iso:StateRecognition>
-				<iso:State StateClass="RecognitionNecessary" StateName="PIN1_START"/>
-				<iso:State StateClass="NotOperational" StateName="PIN1_BLOCKED">
-				    <iso:RetryCounter>0</iso:RetryCounter>
-				    <iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
-					<iso:DIDAuthenticationState>
-					    <iso:DIDName>SO-PIN</iso:DIDName>
-					    <iso:DIDState>true</iso:DIDState>
-					</iso:DIDAuthenticationState>
-				    </iso:StateTransition>
-				</iso:State>
-				<iso:State StateClass="Operational" StateName="PIN1_ACTIVATE_RC1">
-				    <iso:RetryCounter>1</iso:RetryCounter>
-				    <iso:StateTransition TargetState="PIN1_BLOCKED">
-					<iso:DIDAuthenticationState>
-					    <iso:DIDName>PIN</iso:DIDName>
-					    <iso:DIDState>false</iso:DIDState>
-					</iso:DIDAuthenticationState>
-				    </iso:StateTransition>
-				    <iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
-					<iso:DIDAuthenticationState>
-					    <iso:DIDName>PIN</iso:DIDName>
-					    <iso:DIDState>true</iso:DIDState>
-					</iso:DIDAuthenticationState>
-				    </iso:StateTransition>
-				</iso:State>
-				<iso:State StateClass="Operational" StateName="PIN1_ACTIVATE_RC2">
-				    <iso:RetryCounter>2</iso:RetryCounter>
-				    <iso:StateTransition TargetState="PIN1_ACTIVATE_RC1">
-					<iso:DIDAuthenticationState>
-					    <iso:DIDName>PIN</iso:DIDName>
-					    <iso:DIDState>false</iso:DIDState>
-					</iso:DIDAuthenticationState>
-				    </iso:StateTransition>
-				    <iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
-					<iso:DIDAuthenticationState>
-					    <iso:DIDName>PIN</iso:DIDName>
-					    <iso:DIDState>true</iso:DIDState>
-					</iso:DIDAuthenticationState>
-				    </iso:StateTransition>
-				</iso:State>
-				<iso:State StateClass="Operational" StateName="PIN1_ACTIVATE_RC3">
-				    <iso:RetryCounter>3</iso:RetryCounter>
-				    <iso:StateTransition TargetState="PIN1_ACTIVATE_RC2">
-					<iso:DIDAuthenticationState>
-					    <iso:DIDName>PIN</iso:DIDName>
-					    <iso:DIDState>false</iso:DIDState>
-					</iso:DIDAuthenticationState>
-				    </iso:StateTransition>
-				    <iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
-					<iso:DIDAuthenticationState>
-					    <iso:DIDName>PIN</iso:DIDName>
-					    <iso:DIDState>true</iso:DIDState>
-					</iso:DIDAuthenticationState>
-				    </iso:StateTransition>
-				</iso:State>
-			    </iso:StateInfo>
+			    <!-- A StateInfo is not possible for version 1.01 cards -->
 			</iso:PinCompareMarker>
 		    </iso:DIDMarker>
 		    <iso:DIDScope>global</iso:DIDScope>
@@ -352,86 +291,7 @@
 				<iso:maxLength>10</iso:maxLength>
 				<iso:padChar>FF</iso:padChar>
 			    </iso:PasswordAttributes>
-			    <iso:StateInfo>
-				<iso:StateRecognition>
-				    <iso:CardCall>
-					<iso:CommandAPDU>00200002</iso:CommandAPDU>
-					<iso:ResponseAPDU>
-					    <iso:Trailer>6300</iso:Trailer>
-					    <iso:Conclusion>
-						<iso:RecognizedState>PIN1_BLOCKED</iso:RecognizedState>
-					    </iso:Conclusion>
-					</iso:ResponseAPDU>
-					<iso:ResponseAPDU>
-					    <iso:Trailer>63C1</iso:Trailer>
-					    <iso:Conclusion>
-						<iso:RecognizedState>PIN1_ACTIVATE_RC1</iso:RecognizedState>
-					    </iso:Conclusion>
-					</iso:ResponseAPDU>
-					<iso:ResponseAPDU>
-					    <iso:Trailer>63C2</iso:Trailer>
-					    <iso:Conclusion>
-						<iso:RecognizedState>PIN1_ACTIVATE_RC2</iso:RecognizedState>
-					    </iso:Conclusion>
-					</iso:ResponseAPDU>
-					<iso:ResponseAPDU>
-					    <iso:Trailer>63C3</iso:Trailer>
-					    <iso:Conclusion>
-						<iso:RecognizedState>PIN1_ACTIVATE_RC3</iso:RecognizedState>
-					    </iso:Conclusion>
-					</iso:ResponseAPDU>
-				    </iso:CardCall>
-				</iso:StateRecognition>
-				<iso:State StateClass="RecognitionNecessary" StateName="PIN1_START"/>
-				<iso:State StateClass="NotOperational" StateName="PIN1_BLOCKED">
-				    <iso:RetryCounter>0</iso:RetryCounter>
-				</iso:State>
-				<iso:State StateClass="Operational" StateName="PIN1_ACTIVATE_RC1">
-				    <iso:RetryCounter>1</iso:RetryCounter>
-				    <iso:StateTransition TargetState="PIN1_BLOCKED">
-					<iso:DIDAuthenticationState>
-					    <iso:DIDName>SO-PIN</iso:DIDName>
-					    <iso:DIDState>false</iso:DIDState>
-					</iso:DIDAuthenticationState>
-				    </iso:StateTransition>
-				    <iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
-					<iso:DIDAuthenticationState>
-					    <iso:DIDName>SO-PIN</iso:DIDName>
-					    <iso:DIDState>true</iso:DIDState>
-					</iso:DIDAuthenticationState>
-				    </iso:StateTransition>
-				</iso:State>
-				<iso:State StateClass="Operational" StateName="PIN1_ACTIVATE_RC2">
-				    <iso:RetryCounter>2</iso:RetryCounter>
-				    <iso:StateTransition TargetState="PIN1_ACTIVATE_RC1">
-					<iso:DIDAuthenticationState>
-					    <iso:DIDName>SO-PIN</iso:DIDName>
-					    <iso:DIDState>false</iso:DIDState>
-					</iso:DIDAuthenticationState>
-				    </iso:StateTransition>
-				    <iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
-					<iso:DIDAuthenticationState>
-					    <iso:DIDName>SO-PIN</iso:DIDName>
-					    <iso:DIDState>true</iso:DIDState>
-					</iso:DIDAuthenticationState>
-				    </iso:StateTransition>
-				</iso:State>
-				<iso:State StateClass="Operational" StateName="PIN1_ACTIVATE_RC3">
-				    <iso:RetryCounter>3</iso:RetryCounter>
-				    <iso:StateTransition TargetState="PIN1_ACTIVATE_RC2">
-					<iso:DIDAuthenticationState>
-					    <iso:DIDName>SO-PIN</iso:DIDName>
-					    <iso:DIDState>false</iso:DIDState>
-					</iso:DIDAuthenticationState>
-				    </iso:StateTransition>
-				    <iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
-					<iso:DIDAuthenticationState>
-					    <iso:DIDName>SO-PIN</iso:DIDName>
-					    <iso:DIDState>true</iso:DIDState>
-					</iso:DIDAuthenticationState>
-				    </iso:StateTransition>
-				</iso:State>
-			    </iso:StateInfo>
+			     <!-- A StateInfo is not possible for version 1.01 cards -->
 			</iso:PinCompareMarker>
 		    </iso:DIDMarker>
 		    <iso:DIDScope>global</iso:DIDScope>
@@ -515,11 +375,13 @@
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		</iso:DataSetACL>
-		<iso:DataSetPath>3F002F00</iso:DataSetPath>
+		<iso:DataSetPath>
+		    <iso:efIdOrPath>3F002F00</iso:efIdOrPath>
+		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 	</iso:CardApplication>
 	<iso:CardApplication>
-	    <iso:ApplicationIdentifier>3F00DF00</iso:ApplicationIdentifier>
+	    <iso:ApplicationIdentifier>A000000177504B43532D3135</iso:ApplicationIdentifier>
 	    <iso:ApplicationName>BELPIC</iso:ApplicationName>
 	    <iso:CardApplicationACL>
 		<iso:AccessRule>
@@ -615,109 +477,54 @@
 	    </iso:CardApplicationACL>
 	    <iso:DIDInfo>
 		<iso:DifferentialIdentity>
-		    <iso:DIDName>Authentication</iso:DIDName>
-		    <iso:LocalDIDName xml:lang="de">Authentifizierungsschhlüssel</iso:LocalDIDName>
-		    <iso:LocalDIDName xml:lang="en">Authentication Key</iso:LocalDIDName>
+		    <iso:DIDName>Authentication_pureRSA</iso:DIDName>
+		    <iso:LocalDIDName xml:lang="de">Authentifizierungsschhlüssel (RSA_PKCS)</iso:LocalDIDName>
+		    <iso:LocalDIDName xml:lang="en">Authentication Key (RSA_PKCS)</iso:LocalDIDName>
 		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
 		    <iso:DIDMarker>
 			<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 			    <iso:AlgorithmInfo>
 				<iso:AlgorithmIdentifier>
-				    <iso:Algorithm>urn:oid:1.2.840.10045.4.3.2</iso:Algorithm>
+				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
 				</iso:AlgorithmIdentifier>
-				<iso:SupportedOperations></iso:SupportedOperations>
+				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
+				<iso:CardAlgRef>01</iso:CardAlgRef>
 			    </iso:AlgorithmInfo>
 			    <iso:KeyInfo>
 				<iso:KeyRef>
 				    <iso:KeyRef>02</iso:KeyRef>
-				    <iso:KeySize>1024</iso:KeySize>
 				</iso:KeyRef>
+				<iso:KeySize>1024</iso:KeySize>
 			    </iso:KeyInfo>
 			    <iso:LegacySignatureGenerationInfo>
-
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>002241B6</iso:HeaderTemplate>
+				    <iso:DataTemplate>0480{algorithmIdentifier}84{keyReference}</iso:DataTemplate>
+				</iso:CardCommand>
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>002A9E9A</iso:HeaderTemplate>
+				    <iso:DataTemplate>{hashToSign}</iso:DataTemplate>
+				    <iso:ExpectedLength>256</iso:ExpectedLength>
+				</iso:CardCommand>
 			    </iso:LegacySignatureGenerationInfo>
 			    <iso:CertificateRef>
-				<iso:DataSetName></iso:DataSetName>
+				<iso:DataSetName>Authentication</iso:DataSetName>
 			    </iso:CertificateRef>
 			    <iso:CertificateRef>
-				<iso:DataSetName></iso:DataSetName>
+				<iso:DataSetName>CA</iso:DataSetName>
+			    </iso:CertificateRef>
+			    <iso:CertificateRef>
+				<iso:DataSetName>Root</iso:DataSetName>
 			    </iso:CertificateRef>
 			</iso:CryptoMarker>
 		    </iso:DIDMarker>
 		    <iso:DIDScope>local</iso:DIDScope>
-		</iso:DifferentialIdentity>
-	    </iso:DIDInfo>
-	    <iso:DIDInfo>
-		<iso:DifferentialIdentity>
-		    <iso:DIDName>Signature</iso:DIDName>
-		    <iso:LocalDIDName xml:lang="de">Signaturschlüssel</iso:LocalDIDName>
-		    <iso:LocalDIDName xml:lang="en">Signature Key</iso:LocalDIDName>
-		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
-		    <iso:DIDMarker>
-			<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
-			    <iso:AlgorithmInfo>
-				<iso:AlgorithmIdentifier>
-				    <iso:Algorithm>urn:oid:1.2.840.10045.4.3.2</iso:Algorithm>
-				</iso:AlgorithmIdentifier>
-				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
-			    </iso:AlgorithmInfo>
-			    <iso:KeyInfo>
-				<iso:KeyRef>
-				    <iso:KeyRef>03</iso:KeyRef>
-				    <iso:KeySize>1024</iso:KeySize>
-				</iso:KeyRef>
-			    </iso:KeyInfo>
-			    <iso:LegacySignatureGenerationInfo>
-
-			    </iso:LegacySignatureGenerationInfo>
-			    <iso:CertificateRef>
-				<iso:DataSetName></iso:DataSetName>
-			    </iso:CertificateRef>
-			    <iso:CertificateRef>
-				<iso:DataSetName></iso:DataSetName>
-			    </iso:CertificateRef>
-			</iso:CryptoMarker>
-		    </iso:DIDMarker>
-		    <iso:DIDScope>local</iso:DIDScope>
-		</iso:DifferentialIdentity>
-	    </iso:DIDInfo>
-	    <iso:DIDInfo>
-		<iso:DifferentialIdentity>
-		    <iso:DIDName>Basic PIN</iso:DIDName>
-		    <iso:LocalDIDName xml:lang="de">Basis-PIN</iso:LocalDIDName>
-		    <iso:LocalDIDName xml:lang="en">Basic PIN</iso:LocalDIDName>
-		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.9</iso:DIDProtocol>
-		    <iso:DIDMarker>
-			<iso:PinCompareMarker Protocol="urn:oid:1.3.162.15480.3.0.9">
-			    <iso:PinRef>
-				<iso:KeyRef>01</iso:KeyRef>
-			    </iso:PinRef>
-			    <iso:PasswordAttributes>
-				<iso:pwdFlags>change-disabled unblock-disabled initialized needs-padding</iso:pwdFlags>
-				<iso:pwdType>iso9564-1</iso:pwdType>
-				<iso:minLength>4</iso:minLength>
-				<iso:storedLength>8</iso:storedLength>
-				<iso:maxLength>12</iso:maxLength>
-				<iso:padChar>FF</iso:padChar>
-			    </iso:PasswordAttributes>
-			</iso:PinCompareMarker>
-		    </iso:DIDMarker>
-		    <iso:DIDScope>global</iso:DIDScope>
 		</iso:DifferentialIdentity>
 		<iso:DIDACL>
 		    <iso:AccessRule>
 			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
 			<iso:Action>
 			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:always>true</iso:always>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:DifferentialIdentityServiceAction>DIDList</iso:DifferentialIdentityServiceAction>
 			</iso:Action>
 			<iso:SecurityCondition>
 			    <iso:always>true</iso:always>
@@ -733,12 +540,250 @@
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
 			<iso:Action>
-			    <iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+			    <iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:DIDAuthentication>
+				<iso:DIDName>PIN</iso:DIDName>
+				<iso:DIDState>true</iso:DIDState>
+			    </iso:DIDAuthentication>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		</iso:DIDACL>
+	    </iso:DIDInfo>
+	    <iso:DIDInfo>
+		<iso:DifferentialIdentity>
+		    <iso:DIDName>Authentication_sha1_rsa_pkcs</iso:DIDName>
+		    <iso:LocalDIDName xml:lang="de">Authentifizierungsschhlüssel (SHA1_RSA_PKCS)</iso:LocalDIDName>
+		    <iso:LocalDIDName xml:lang="en">Authentication Key (SHA1_RSA_PKCS)</iso:LocalDIDName>
+		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
+		    <iso:DIDMarker>
+			<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
+			    <iso:AlgorithmInfo>
+				<iso:AlgorithmIdentifier>
+				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.5</iso:Algorithm>
+				</iso:AlgorithmIdentifier>
+				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
+				<iso:CardAlgRef>02</iso:CardAlgRef>
+			    </iso:AlgorithmInfo>
+			    <iso:KeyInfo>
+				<iso:KeyRef>
+				    <iso:KeyRef>02</iso:KeyRef>
+				</iso:KeyRef>
+				<iso:KeySize>1024</iso:KeySize>
+			    </iso:KeyInfo>
+			    <iso:LegacySignatureGenerationInfo>
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>002241B6</iso:HeaderTemplate>
+				    <iso:DataTemplate>0480{algorithmIdentifier}84{keyReference}</iso:DataTemplate>
+				</iso:CardCommand>
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>002A9E9A</iso:HeaderTemplate>
+				    <iso:DataTemplate>{hashToSign}</iso:DataTemplate>
+				    <iso:ExpectedLength>256</iso:ExpectedLength>
+				</iso:CardCommand>
+			    </iso:LegacySignatureGenerationInfo>
+			    <iso:CertificateRef>
+				<iso:DataSetName>Authentication</iso:DataSetName>
+			    </iso:CertificateRef>
+			    <iso:CertificateRef>
+				<iso:DataSetName>CA</iso:DataSetName>
+			    </iso:CertificateRef>
+			    <iso:CertificateRef>
+				<iso:DataSetName>Root</iso:DataSetName>
+			    </iso:CertificateRef>
+			</iso:CryptoMarker>
+		    </iso:DIDMarker>
+		    <iso:DIDScope>local</iso:DIDScope>
+		</iso:DifferentialIdentity>
+		<iso:DIDACL>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
 			</iso:Action>
 			<iso:SecurityCondition>
 			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:DIDAuthentication>
+				<iso:DIDName>PIN</iso:DIDName>
+				<iso:DIDState>true</iso:DIDState>
+			    </iso:DIDAuthentication>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		</iso:DIDACL>
+	    </iso:DIDInfo>
+	    <!-- md5 + rsa + pkcs is also possible but not supported by the ecard API framework -->
+	    <iso:DIDInfo>
+		<iso:DifferentialIdentity>
+		    <iso:DIDName>Signature_pureRSA</iso:DIDName>
+		    <iso:LocalDIDName xml:lang="de">Signaturschlüssel (RSA_PKCS)</iso:LocalDIDName>
+		    <iso:LocalDIDName xml:lang="en">Signature Key (RSA_PKCS)</iso:LocalDIDName>
+		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
+		    <iso:DIDMarker>
+			<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
+			    <iso:AlgorithmInfo>
+				<iso:AlgorithmIdentifier>
+				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
+				</iso:AlgorithmIdentifier>
+				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
+				<iso:CardAlgRef>01</iso:CardAlgRef>
+			    </iso:AlgorithmInfo>
+			    <iso:KeyInfo>
+				<iso:KeyRef>
+				    <iso:KeyRef>03</iso:KeyRef>
+				</iso:KeyRef>
+				<iso:KeySize>1024</iso:KeySize>
+			    </iso:KeyInfo>
+			    <iso:LegacySignatureGenerationInfo>
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>002241B6</iso:HeaderTemplate>
+				    <iso:DataTemplate>0480{algorithmIdentifier}84{keyReference}</iso:DataTemplate>
+				</iso:CardCommand>
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>002A9E9A</iso:HeaderTemplate>
+				    <iso:DataTemplate>{hashToSign}</iso:DataTemplate>
+				    <iso:ExpectedLength>256</iso:ExpectedLength>
+				</iso:CardCommand>
+			    </iso:LegacySignatureGenerationInfo>
+			    <iso:CertificateRef>
+				<iso:DataSetName>Signature</iso:DataSetName>
+			    </iso:CertificateRef>
+			    <iso:CertificateRef>
+				<iso:DataSetName>CA</iso:DataSetName>
+			    </iso:CertificateRef>
+			    <iso:CertificateRef>
+				<iso:DataSetName>Root</iso:DataSetName>
+			    </iso:CertificateRef>
+			</iso:CryptoMarker>
+		    </iso:DIDMarker>
+		    <iso:DIDScope>local</iso:DIDScope>
+		</iso:DifferentialIdentity>
+		<iso:DIDACL>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:DIDAuthentication>
+				<iso:DIDName>PIN</iso:DIDName>
+				<iso:DIDState>true</iso:DIDState>
+			    </iso:DIDAuthentication>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		</iso:DIDACL>
+	    </iso:DIDInfo>
+	    <iso:DIDInfo>
+		<iso:DifferentialIdentity>
+		    <iso:DIDName>Signature_sha1_rsa_pkcs</iso:DIDName>
+		    <iso:LocalDIDName xml:lang="de">Signaturschlüssel (SHA1_RSA_PKCS)</iso:LocalDIDName>
+		    <iso:LocalDIDName xml:lang="en">Signature Key (SHA1_RSA_PKCS)</iso:LocalDIDName>
+		    <iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
+		    <iso:DIDMarker>
+			<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
+			    <iso:AlgorithmInfo>
+				<iso:AlgorithmIdentifier>
+				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.5</iso:Algorithm>
+				</iso:AlgorithmIdentifier>
+				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
+				<iso:CardAlgRef>01</iso:CardAlgRef>
+			    </iso:AlgorithmInfo>
+			    <iso:KeyInfo>
+				<iso:KeyRef>
+				    <iso:KeyRef>03</iso:KeyRef>
+				</iso:KeyRef>
+				<iso:KeySize>1024</iso:KeySize>
+			    </iso:KeyInfo>
+			    <iso:LegacySignatureGenerationInfo>
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>002241B6</iso:HeaderTemplate>
+				    <iso:DataTemplate>0480{algorithmIdentifier}84{keyReference}</iso:DataTemplate>
+				</iso:CardCommand>
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>002A9E9A</iso:HeaderTemplate>
+				    <iso:DataTemplate>{hashToSign}</iso:DataTemplate>
+				    <iso:ExpectedLength>256</iso:ExpectedLength>
+				</iso:CardCommand>
+			    </iso:LegacySignatureGenerationInfo>
+			    <iso:CertificateRef>
+				<iso:DataSetName>Signature</iso:DataSetName>
+			    </iso:CertificateRef>
+			    <iso:CertificateRef>
+				<iso:DataSetName>CA</iso:DataSetName>
+			    </iso:CertificateRef>
+			    <iso:CertificateRef>
+				<iso:DataSetName>Root</iso:DataSetName>
+			    </iso:CertificateRef>
+			</iso:CryptoMarker>
+		    </iso:DIDMarker>
+		    <iso:DIDScope>local</iso:DIDScope>
+		</iso:DifferentialIdentity>
+		<iso:DIDACL>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:DIDAuthentication>
+				<iso:DIDName>PIN</iso:DIDName>
+				<iso:DIDState>true</iso:DIDState>
+			    </iso:DIDAuthentication>
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		</iso:DIDACL>
@@ -783,7 +828,9 @@
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		</iso:DataSetACL>
-		<iso:DataSetPath>3F00DF005031</iso:DataSetPath>
+		<iso:DataSetPath>
+		    <iso:efIdOrPath>3F00DF005031</iso:efIdOrPath>
+		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 	    <iso:DataSetInfo>
 		<iso:DataSetName>EF.CIAInfo</iso:DataSetName>
@@ -825,7 +872,9 @@
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		</iso:DataSetACL>
-		<iso:DataSetPath>3F00DF005032</iso:DataSetPath>
+		<iso:DataSetPath>
+		    <iso:efIdOrPath>3F00DF005032</iso:efIdOrPath>
+		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 	    <iso:DataSetInfo>
 		<iso:DataSetName>EF.PRKD</iso:DataSetName>
@@ -867,7 +916,9 @@
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		</iso:DataSetACL>
-		<iso:DataSetPath>3F00DF005035</iso:DataSetPath>
+		<iso:DataSetPath>
+		    <iso:efIdOrPath>3F00DF005035</iso:efIdOrPath>
+		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 	    <iso:DataSetInfo>
 		<iso:DataSetName>EF.CD</iso:DataSetName>
@@ -909,7 +960,9 @@
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		</iso:DataSetACL>
-		<iso:DataSetPath>3F00DF005037</iso:DataSetPath>
+		<iso:DataSetPath>
+		    <iso:efIdOrPath>3F00DF005037</iso:efIdOrPath>
+		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 	    <iso:DataSetInfo>
 		<iso:DataSetName>EF.AOD</iso:DataSetName>
@@ -951,7 +1004,9 @@
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		</iso:DataSetACL>
-		<iso:DataSetPath>3F00DF005034</iso:DataSetPath>
+		<iso:DataSetPath>
+		    <iso:efIdOrPath>3F00DF005034</iso:efIdOrPath>
+		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 
 	    <iso:DataSetInfo>
@@ -996,7 +1051,9 @@
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		</iso:DataSetACL>
-		<iso:DataSetPath>3F00DF005038</iso:DataSetPath>
+		<iso:DataSetPath>
+		    <iso:efIdOrPath>3F00DF005038</iso:efIdOrPath>
+		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 	    <iso:DataSetInfo>
 		<iso:DataSetName>Signature</iso:DataSetName>
@@ -1040,7 +1097,9 @@
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		</iso:DataSetACL>
-		<iso:DataSetPath>3F00DF005039</iso:DataSetPath>
+		<iso:DataSetPath>
+		    <iso:efIdOrPath>3F00DF005039</iso:efIdOrPath>
+		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 	    <iso:DataSetInfo>
 		<iso:DataSetName>CA</iso:DataSetName>
@@ -1084,7 +1143,9 @@
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		</iso:DataSetACL>
-		<iso:DataSetPath>3F00DF00503A</iso:DataSetPath>
+		<iso:DataSetPath>
+		    <iso:efIdOrPath>3F00DF00503A</iso:efIdOrPath>
+		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 	    <iso:DataSetInfo>
 		<iso:DataSetName>Root</iso:DataSetName>
@@ -1128,13 +1189,15 @@
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		</iso:DataSetACL>
-		<iso:DataSetPath>3F00DF00503B</iso:DataSetPath>
+		<iso:DataSetPath>
+		    <iso:efIdOrPath>3F00DF00503B</iso:efIdOrPath>
+		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 	</iso:CardApplication>
 
 	<iso:CardApplication>
-	    <iso:ApplicationIdentifier>3F00DF01</iso:ApplicationIdentifier>
-	    <iso:ApplicationName>Unknown</iso:ApplicationName>
+	    <iso:ApplicationIdentifier>A00000003029057000AD13100101FF</iso:ApplicationIdentifier>
+	    <iso:ApplicationName>BEID_APPLET</iso:ApplicationName>
 	    <iso:CardApplicationACL>
 		<iso:AccessRule>
 		    <iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
@@ -1228,7 +1291,7 @@
 		</iso:AccessRule>
 	    </iso:CardApplicationACL>
 	    <iso:DataSetInfo>
-		<iso:DataSetName>Personal_data</iso:DataSetName>
+		<iso:DataSetName>EF.ID</iso:DataSetName>
 		<iso:LocalDataSetName xml:lang="de">Persönliche Daten</iso:LocalDataSetName>
 		<iso:LocalDataSetName xml:lang="en">Personal Data</iso:LocalDataSetName>
 		<iso:DataSetACL>
@@ -1269,10 +1332,12 @@
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		</iso:DataSetACL>
-		<iso:DataSetPath>3F00DF014031</iso:DataSetPath>
+		<iso:DataSetPath>
+		    <iso:efIdOrPath>3F00DF014031</iso:efIdOrPath>
+		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 	    <iso:DataSetInfo>
-		<iso:DataSetName>EF.4032</iso:DataSetName>
+		<iso:DataSetName>EF.SGN.ID</iso:DataSetName>
 		<iso:DataSetACL>
 		    <iso:AccessRule>
 			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
@@ -1311,11 +1376,13 @@
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		</iso:DataSetACL>
-		<iso:DataSetPath>3F00DF014032</iso:DataSetPath>
+		<iso:DataSetPath>
+		    <iso:efIdOrPath>3F00DF014032</iso:efIdOrPath>
+		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 
 	    <iso:DataSetInfo>
-		<iso:DataSetName>Address</iso:DataSetName>
+		<iso:DataSetName>EF.Address</iso:DataSetName>
 		<iso:LocalDataSetName xml:lang="de">Adresse</iso:LocalDataSetName>
 		<iso:LocalDataSetName xml:lang="en">Address</iso:LocalDataSetName>
 		<iso:DataSetACL>
@@ -1356,7 +1423,103 @@
 			</iso:SecurityCondition>
 		    </iso:AccessRule>
 		</iso:DataSetACL>
-		<iso:DataSetPath>3F00DF014033</iso:DataSetPath>
+		<iso:DataSetPath>
+		    <iso:efIdOrPath>3F00DF014033</iso:efIdOrPath>
+		</iso:DataSetPath>
+	    </iso:DataSetInfo>
+
+	    <iso:DataSetInfo>
+		<iso:DataSetName>EF.SGN.Address</iso:DataSetName>
+		<iso:LocalDataSetName xml:lang="de">SGN Adresse</iso:LocalDataSetName>
+		<iso:LocalDataSetName xml:lang="en">SGN Address</iso:LocalDataSetName>
+		<iso:DataSetACL>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:NamedDataServiceAction>DSIList</iso:NamedDataServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		</iso:DataSetACL>
+		<iso:DataSetPath>
+		    <iso:efIdOrPath>3F00DF014034</iso:efIdOrPath>
+		</iso:DataSetPath>
+	    </iso:DataSetInfo>
+
+	    <iso:DataSetInfo>
+		<iso:DataSetName>EF.Photo</iso:DataSetName>
+		<iso:LocalDataSetName xml:lang="de">Foto</iso:LocalDataSetName>
+		<iso:LocalDataSetName xml:lang="en">Photo</iso:LocalDataSetName>
+		<iso:DataSetACL>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:NamedDataServiceAction>DSIList</iso:NamedDataServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		</iso:DataSetACL>
+		<iso:DataSetPath>
+		    <iso:efIdOrPath>3F00DF014035</iso:efIdOrPath>
+		</iso:DataSetPath>
 	    </iso:DataSetInfo>
 	</iso:CardApplication>
     </iso:ApplicationCapabilities>

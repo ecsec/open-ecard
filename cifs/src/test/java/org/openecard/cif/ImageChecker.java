@@ -44,6 +44,9 @@ import org.testng.annotations.Test;
  *
  * @author Tobias Wich
  */
+// TODO: remove integration test as soon as OpenJDK 8 in Debian can handle JPEGs correctly
+// see also https://dev.openecard.org/issues/369
+@Test(groups={"it"})
 public class ImageChecker {
 
     private static final Logger logger = LoggerFactory.getLogger(ImageChecker.class);
@@ -73,9 +76,7 @@ public class ImageChecker {
 	}
     }
 
-    // TODO: remove integration test as soon as OpenJDK 8 in Debian can handle JPEGs correctly
-    // see also https://dev.openecard.org/issues/369
-    @Test(groups={"it"})
+    @Test(dependsOnMethods = {"testPresence"})
     public void testLoadImages() throws IOException {
 	for (URL url : imageUrls) {
 	    logger.info("Trying to load image '{}'.", url);

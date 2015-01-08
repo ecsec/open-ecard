@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,8 +24,12 @@ package org.openecard.common;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -33,9 +37,11 @@ import java.util.Properties;
  * When looking up a key, it is first searched in the system properties, then in the properties structure instantiated
  * in the constructor.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class OverridingProperties {
+
+    private static final Logger logger = LoggerFactory.getLogger(OverridingProperties.class);
 
     private final Properties properties;
 
@@ -47,14 +53,21 @@ public class OverridingProperties {
      * @throws IOException If loading of the resource failed.
      */
     public OverridingProperties(String fName) throws IOException {
-	InputStream in = this.getClass().getResourceAsStream("/" + fName);
-	if (in == null) {
-	    in = this.getClass().getResourceAsStream(fName);
-	}
-	properties = new Properties();
-	properties.load(in);
-	init();
+	this(getfileStream(OverridingProperties.class, fName));
     }
+
+    /**
+     * Loads properties from named resource.
+     * The resource must be located in the classpath.
+     *
+     * @param clazz Class used as reference to load the resource.
+     * @param fName Name of the properties file.
+     * @throws IOException If loading of the resource failed.
+     */
+    public OverridingProperties(Class clazz, String fName) throws IOException {
+	this(getfileStream(clazz, fName));
+    }
+
     /**
      * Load properties from InputStream.
      *
@@ -63,17 +76,18 @@ public class OverridingProperties {
      */
     public OverridingProperties(InputStream stream) throws IOException {
 	this(stream, null);
-	init();
     }
+
     /**
      * Load properties from property instance.
      *
      * @param props Properties instance.
+     * @throws IOException If the merge of the properties with the system defaults failed.
      */
-    public OverridingProperties(Properties props) {
-	properties = new Properties(props);
-	init();
+    public OverridingProperties(Properties props) throws IOException {
+	properties = mergeWithOverrides(props);
     }
+
     /**
      * Load properties from InputStreams.
      * The second properties stream takes precedence over the first one. This intended as a persistent default
@@ -87,50 +101,54 @@ public class OverridingProperties {
     public OverridingProperties(InputStream bundledConf, InputStream homeConf) throws IOException {
 	Properties baseProps = new Properties();
 	baseProps.load(bundledConf);
+	bundledConf.close();
 
 	try {
 	    if (homeConf != null) {
 		Properties homeProps = new Properties(baseProps);
 		homeProps.load(homeConf);
+		homeConf.close();
 		baseProps = homeProps;
 	    }
 	} catch (IOException ex) {
+	    logger.error("Failed to load given properties stream.", ex);
 	}
 
-	properties = baseProps;
-	init();
+	properties = mergeWithOverrides(baseProps);
     }
 
-    private void init() {
-	overrideFromSystem();
+
+    private static InputStream getfileStream(Class clazz, String fName) {
+	InputStream in = clazz.getResourceAsStream("/" + fName);
+	if (in == null) {
+	    in = clazz.getResourceAsStream(fName);
+	}
+	return in;
     }
 
-    private void overrideFromSystem() {
-	for (Object nextKey : properties.keySet()) {
-	    if (nextKey instanceof String) {
-		String next = (String) nextKey;
-		if (System.getProperties().containsKey(next)) {
-		    properties.setProperty(next, System.getProperties().getProperty(next));
-		}
+    private static Properties mergeWithOverrides(Properties reference) throws IOException {
+	Properties result = new Properties(reference);
+	result.load(propsToStream(getOverrides(reference)));
+	return result;
+    }
+
+    private static Reader propsToStream(Properties properties) throws IOException {
+	StringWriter w = new StringWriter();
+	properties.store(w, null);
+	String propsStr = w.toString();
+	return new StringReader(propsStr);
+    }
+
+    private static Properties getOverrides(Properties reference) {
+	Properties overrides = new Properties();
+	for (String nextKey : reference.stringPropertyNames()) {
+	    if (System.getProperties().containsKey(nextKey)) {
+		overrides.setProperty(nextKey, System.getProperties().getProperty(nextKey));
 	    }
 	}
+	return overrides;
     }
 
-
-    /**
-     * Gets URL to resource reachable by the classloader of this class.
-     * This convenience method tries the path with / prepended and without.
-     *
-     * @param fname Path to the file to load.
-     * @return URL instance pointing to the resource. A stream can be opened afterwards.
-     */
-    public URL getDependentResource(String fname) {
-	URL url = getClass().getResource("/" + fname);
-	if (url == null) {
-	    url = getClass().getResource(fname);
-	}
-	return url;
-    }
 
     /**
      * Gets the value for the given property key.
@@ -157,11 +175,12 @@ public class OverridingProperties {
 
     /**
      * Gets a copy of all defined properties.
+     * The values in the copy are all handled as defaults.
      *
      * @return Copy of the properties.
      */
     public final Properties properties() {
-	return (Properties) properties.clone();
+	return new Properties(properties);
     }
 
 }

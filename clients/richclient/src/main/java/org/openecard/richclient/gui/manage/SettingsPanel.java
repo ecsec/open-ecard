@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2013-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -38,8 +38,8 @@ import org.openecard.addon.AddonPropertiesException;
  * Panel aggregating several setting group entries.
  * The entries are of type {@link SettingsGroup}.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public abstract class SettingsPanel extends JPanel {
 
@@ -69,6 +69,16 @@ public abstract class SettingsPanel extends JPanel {
 	c.weighty = 1.0;
 	c.anchor = GridBagConstraints.NORTHWEST;
 	add(scrollPane, c);
+
+	// create a filler which is always at the end of the panel
+	c = new GridBagConstraints();
+	c.fill = GridBagConstraints.HORIZONTAL;
+	c.gridwidth = GridBagConstraints.REMAINDER;
+	c.weightx = 1.0;
+	c.weighty = 1.0;
+	c.anchor = GridBagConstraints.NORTHWEST;
+	c.insets = new Insets(10, 0, 0, 0);
+	contentPane.add(new JPanel(), c);
     }
 
     /**
@@ -77,15 +87,14 @@ public abstract class SettingsPanel extends JPanel {
      * @param item The group to add to the panel.
      */
     protected void addSettingsGroup(SettingsGroup item) {
-
 	GridBagConstraints c = new GridBagConstraints();
 	c.fill = GridBagConstraints.HORIZONTAL;
 	c.gridwidth = GridBagConstraints.REMAINDER;
 	c.weightx = 1.0;
-	c.weighty = 1.0;
+	c.weighty = 0.0;
 	c.anchor = GridBagConstraints.NORTHWEST;
 	c.insets = new Insets(10, 0, 0, 0);
-	contentPane.add(item, c);
+	contentPane.add(item, c, groups.size());
 	groups.add(item);
     }
 

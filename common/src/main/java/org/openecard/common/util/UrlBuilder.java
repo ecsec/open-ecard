@@ -230,28 +230,63 @@ public class UrlBuilder {
 
     /**
      * Adds a query parameter to the URL.
+     * <p>Any previously present value belonging to the given key gets overwritten.</p>
      *
      * @param key Key of the parameter.
      * @param value Value of the parameter.
      * @return A copy of the UrlBuilder with added query parameter.
      */
     public UrlBuilder queryParam(@Nonnull String key, @Nullable String value) {
-	UrlBuilder b = new UrlBuilder(this);
-	b.addQueryInt(key, value);
-	return b;
+	return queryParam(key, value, true);
     }
 
     /**
      * Adds a query parameter to the URL.
      * The parameter value is URL encoded as in forms ({@code application/x-www-form-urlencoded}).
+     * <p>Any previously present value belonging to the given key gets overwritten.</p>
      *
      * @param key Key of the parameter.
      * @param value Value of the parameter.
      * @return A copy of the UrlBuilder with added query parameter.
      */
     public UrlBuilder queryParamUrl(@Nonnull String key, @Nullable String value) {
+	return queryParamUrl(key, value, true);
+    }
+
+    /**
+     * Adds a query parameter to the URL.
+     * <p>Any previously present value belonging to the given key gets overwritten only when the boolean flag is
+     * set.</p>
+     *
+     * @param key Key of the parameter.
+     * @param value Value of the parameter.
+     * @param overwrite If {@code true}, overwrite any previously set query parameter with the given key.
+     * @return A copy of the UrlBuilder with added query parameter.
+     */
+    public UrlBuilder queryParam(@Nonnull String key, @Nullable String value, boolean overwrite) {
 	UrlBuilder b = new UrlBuilder(this);
-	b.addQueryInt(key, encoder.urlEncodeUrl(value));
+	if (overwrite || ! queryParams.containsKey(key)) {
+	    b.addQueryInt(key, value);
+	}
+	return b;
+    }
+
+    /**
+     * Adds a query parameter to the URL.
+     * The parameter value is URL encoded as in forms ({@code application/x-www-form-urlencoded}).
+     * <p>Any previously present value belonging to the given key gets overwritten only when the boolean flag is
+     * set.</p>
+     *
+     * @param key Key of the parameter.
+     * @param value Value of the parameter.
+     * @param overwrite If {@code true}, overwrite any previously set query parameter with the given key.
+     * @return A copy of the UrlBuilder with added query parameter.
+     */
+    public UrlBuilder queryParamUrl(@Nonnull String key, @Nullable String value, boolean overwrite) {
+	UrlBuilder b = new UrlBuilder(this);
+	if (overwrite || ! queryParams.containsKey(key)) {
+	    b.addQueryInt(key, encoder.urlEncodeUrl(value));
+	}
 	return b;
     }
 

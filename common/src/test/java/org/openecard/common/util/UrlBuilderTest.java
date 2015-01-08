@@ -39,6 +39,12 @@ public class UrlBuilderTest {
 	String base = "http://foo:12";
 	URI result = UrlBuilder.fromUrl(base).queryParam("foo", "http://bar/?query1=foo&query2=bar%20ui").build();
 	assertEquals(result, new URI("http://foo:12/?foo=http%3A%2F%2Fbar%2F%3Fquery1%3Dfoo%26query2%3Dbar%20ui"));
+
+	// test overwrite
+	result = UrlBuilder.fromUrl(base).queryParam("foo", "1").queryParam("foo", "2").build();
+	assertEquals(result, new URI("http://foo:12/?foo=2"));
+	result = UrlBuilder.fromUrl(base).queryParam("foo", "1").queryParam("foo", "2", false).build();
+	assertEquals(result, new URI("http://foo:12/?foo=1"));
     }
 
     @Test

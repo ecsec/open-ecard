@@ -35,7 +35,7 @@ import org.openecard.richclient.gui.manage.SettingsGroup;
  *
  * @author Tobias Wich
  */
-public class GeneralSettingsGroup extends SettingsGroup {
+public class GeneralSettingsNotificationGroup extends SettingsGroup {
 
     private static final long serialVersionUID = 1L;
     private static final I18n lang = I18n.getTranslation("addon");
@@ -44,7 +44,7 @@ public class GeneralSettingsGroup extends SettingsGroup {
     private static final String	REMOVE_CARD_DESC = "addon.list.core.general.notification.omit_show_remove_card.desc";
 
 
-    public GeneralSettingsGroup() {
+    public GeneralSettingsNotificationGroup() {
 	super(lang.translationForKey(GROUP), SettingsFactory.getInstance(OpenecardProperties.properties()));
 
 	addBoolItem(lang.translationForKey(REMOVE_CARD), lang.translationForKey(REMOVE_CARD_DESC),

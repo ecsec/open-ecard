@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,7 +22,6 @@
 
 package org.openecard.richclient.gui.manage.core;
 
-import org.openecard.richclient.gui.manage.SettingsGroup;
 import org.openecard.richclient.gui.manage.SettingsPanel;
 
 
@@ -31,6 +30,7 @@ import org.openecard.richclient.gui.manage.SettingsPanel;
  * This panel hosts the following groups:
  * <ul>
  * <li>Notification</li>
+ * <li>Legacy</li>
  * </ul>
  *
  * @author Tobias Wich
@@ -39,11 +39,9 @@ public class GeneralSettingsPanel extends SettingsPanel {
 
     private static final long serialVersionUID = 1L;
 
-    private final SettingsGroup notification;
-
     public GeneralSettingsPanel() {
-	notification = new GeneralSettingsGroup();
-	addSettingsGroup(notification);
+	addSettingsGroup(new GeneralSettingsNotificationGroup());
+	addSettingsGroup(new GeneralSettingsLegacyGroup());
     }
 
 }

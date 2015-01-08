@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2013-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -48,11 +48,13 @@ import org.openecard.crypto.tls.verify.SameCertVerifier;
 import org.openecard.crypto.tls.auth.SmartCardCredentialFactory;
 import org.openecard.crypto.tls.proxy.ProxySettings;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.common.OpenecardProperties;
+import org.openecard.common.util.UrlBuilder;
 
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class TlsConnectionHandler {
 
@@ -91,6 +93,10 @@ public class TlsConnectionHandler {
 	    sessionId = token.getSessionIdentifier();
 	    serverAddress = new URL(token.getServerAddress());
 	    String serverHost = serverAddress.getHost();
+
+	    if (Boolean.valueOf(OpenecardProperties.getProperty("legacy.session"))) {
+		serverAddress = fixServerAddress(serverAddress, sessionId);
+	    }
 
 	    // extract connection parameters from endpoint
 	    hostname = serverAddress.getHost();
@@ -232,6 +238,16 @@ public class TlsConnectionHandler {
 	    // if something fucks up the channel we are out of luck creating a new one as the TR demands to use the
 	    // exact same channel
 	    return tokenRequest.getTokenContext().getTlsClientProto();
+	}
+    }
+
+    private static URL fixServerAddress(URL serverAddress, String sessionIdentifier) throws MalformedURLException {
+	// FIXME: remove this hilariously stupid bull*#@%&/ code which satisfies a mistake introduced by the AA
+	try {
+	    UrlBuilder b = UrlBuilder.fromUrl(serverAddress);
+	    return b.queryParam("sessionid", sessionIdentifier, false).build().toURL();
+	} catch (URISyntaxException ex) {
+	    throw new MalformedURLException(ex.getMessage());
 	}
     }
 

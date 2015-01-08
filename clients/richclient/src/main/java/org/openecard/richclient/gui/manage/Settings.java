@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -27,11 +27,11 @@ import org.openecard.addon.AddonPropertiesException;
 
 
 /**
- * Wrapper class which provides access to the functions setProperty(), getProperty and store.
+ * Interface capable of wrapping Properties providing a store function.
  *
  * @author Hans-Martin Haase
  */
-public abstract class Settings {
+public interface Settings {
 
     /**
      * Set a property with the property name {@code key} and the value {@code value}.
@@ -39,7 +39,7 @@ public abstract class Settings {
      * @param key The key name of the property to set.
      * @param value The value of the property to set.
      */
-    public abstract void setProperty(String key, String value);
+    void setProperty(String key, String value);
 
     /**
      * Get a property by a key.
@@ -47,7 +47,7 @@ public abstract class Settings {
      * @param key The key to look for in the properties.
      * @return The value of the property which corresponds to the {@code key}.
      */
-    public abstract String getProperty(String key);
+    String getProperty(String key);
 
     /**
      * Save the currently set properties to a file.
@@ -56,6 +56,6 @@ public abstract class Settings {
      * wrapped AddonProeprties object.
      * @throws IOException Thrown in case of an error while writing the openecard.properties file.
      */
-    public abstract void store() throws AddonPropertiesException, IOException ;
+    void store() throws AddonPropertiesException, IOException ;
 
 }

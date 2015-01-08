@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Factory implementation which provides a Settings object which wraps a Properties or AddonProperties object.
+ * Factory implementation which provides a various Setting objects.
  *
  * @author Hans-Martin Haase
  */
@@ -49,6 +49,10 @@ public class SettingsFactory {
 	return new OpenecardPropertiesWrapper();
     }
 
+    public static Settings getInstance(Properties props) {
+	return new NonSavingProperties(props);
+    }
+
     /**
      * Get a Settings object from the given AddonProperties object.
      *
@@ -61,11 +65,11 @@ public class SettingsFactory {
 
 
     /**
-     * The class extends the Settings class and wraps an AddonProperties object.
+     * The class extends the Settings class wrapping an AddonProperties object.
      *
      * @author Hans-Martin Haase
      */
-    public static class AddonPropertiesWrapper extends Settings {
+    public static class AddonPropertiesWrapper implements Settings {
 
 	private final AddonProperties props;
 
@@ -96,16 +100,33 @@ public class SettingsFactory {
     }
 
     /**
-     * The class extends the Settings class and wraps a Properties object.
+     * The class extends the NonSavingProperties class and wraps OpenecardProperties.
      *
      * @author Hans-Martin Haase
      */
-    public static class OpenecardPropertiesWrapper extends Settings {
-
-	private final Properties props;
+    public static class OpenecardPropertiesWrapper extends NonSavingProperties {
 
 	private OpenecardPropertiesWrapper() {
-	    props = OpenecardProperties.properties();
+	    super(OpenecardProperties.properties());
+	}
+
+	@Override
+	public void store() throws IOException {
+	    OpenecardProperties.writeChanges(props);
+	}
+    }
+
+    /**
+     * This class wraps a properties object but is not able to save it.
+     *
+     * @author Tobias Wich
+     */
+    private static class NonSavingProperties implements Settings {
+
+	protected final Properties props;
+
+	public NonSavingProperties(Properties props) {
+	    this.props = props;
 	}
 
 	@Override

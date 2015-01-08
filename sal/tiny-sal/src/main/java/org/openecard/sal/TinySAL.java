@@ -163,6 +163,7 @@ import org.openecard.common.apdu.WriteBinary;
 import org.openecard.common.apdu.WriteRecord;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
+import org.openecard.common.apdu.common.TrailerConstants;
 import org.openecard.common.apdu.utils.CardUtils;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.interfaces.Environment;
@@ -181,6 +182,8 @@ import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.sal.util.SALUtils;
+import org.openecard.common.tlv.TLV;
+import org.openecard.common.tlv.TLVException;
 import org.openecard.common.tlv.iso7816.DataElements;
 import org.openecard.common.tlv.iso7816.FCP;
 import org.openecard.common.util.ByteUtils;
@@ -349,11 +352,21 @@ public class TinySAL implements SAL {
 	    // TODO: proper determination of path, file and app id
 	    if (applicationID.length == 2) {
 		select = new Select.File(applicationID);
+		List<byte[]> responses = new ArrayList<>();
+		responses.add(TrailerConstants.Success.OK);
+		responses.add(TrailerConstants.Error.WRONG_P1_P2);
+		CardResponseAPDU resp = select.transmit(env.getDispatcher(), connectResponse.getSlotHandle(), responses);
+
+		if (Arrays.equals(resp.getTrailer(), TrailerConstants.Error.WRONG_P1_P2)) {
+		    select = new Select.AbsolutePath(applicationID);
+		    select.transmit(env.getDispatcher(), connectResponse.getSlotHandle());
+		}
+
 	    } else {
 		select = new Select.Application(applicationID);
+		select.transmit(env.getDispatcher(), connectResponse.getSlotHandle());
 	    }
-	    select.transmit(env.getDispatcher(), connectResponse.getSlotHandle());
-
+	    
 	    cardStateEntry.setCurrentCardApplication(applicationID);
 	    cardStateEntry.setSlotHandle(connectResponse.getSlotHandle());
 	    // reset the ef FCP
@@ -837,8 +850,11 @@ public class TinySAL implements SAL {
 	    CardResponseAPDU result = CardUtils.selectFileWithOptions(env.getDispatcher(), slotHandle, fileID,
 		    null, CardUtils.FCP_RESPONSE_DATA);
 
-	    if (result != null) {
+	    if (result != null && result.getData().length > 0) {
 		cardStateEntry.setFCPOfSelectedEF(new FCP(result.getData()));
+	    } else {
+		cardStateEntry.setFCPOfSelectedEF(new FCP(createFakeFCP(Arrays.copyOfRange(fileID, fileID.length - 2,
+			fileID.length))));
 	    }
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
@@ -2062,6 +2078,21 @@ public class TinySAL implements SAL {
 	protocol.getInternalData().put("cardState", entry);
 
 	return protocol;
+    }
+
+    private byte[] createFakeFCP(byte[] fid) {
+	try {
+	    TLV fcp = new TLV();
+	    fcp.setTagNumWithClass((byte) 0x62);
+	    TLV fileID = new TLV();
+	    fileID.setTagNumWithClass((byte) 0x83);
+	    fileID.setValue(fid);
+	    fcp.setChild(fileID);
+	    return fcp.toBER();
+	} catch (TLVException ex) {
+	    logger.error(null, ex);
+	    return null;
+	}
     }
 
 }

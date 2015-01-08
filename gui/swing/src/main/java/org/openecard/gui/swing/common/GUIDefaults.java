@@ -28,7 +28,6 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 import javax.swing.ImageIcon;
@@ -129,13 +128,11 @@ public class GUIDefaults {
 	    GUIProperties guiProps = new GUIProperties();
 	    Properties props = guiProps.properties();
 
-	    for (Map.Entry<Object, Object> entry : props.entrySet()) {
-		String property = (String) entry.getKey();
-
+	    for (String property : props.stringPropertyNames()) {
 		try {
 		    String propertyName = property.substring(0, property.indexOf('.'));
 		    String propertyAttribute = property.substring(propertyName.length() + 1, property.length());
-		    String value = (String) entry.getValue();
+		    String value = (String) props.getProperty(property);
 
 		    // Parse color property
 		    if (colorProperties.contains(propertyAttribute)) {

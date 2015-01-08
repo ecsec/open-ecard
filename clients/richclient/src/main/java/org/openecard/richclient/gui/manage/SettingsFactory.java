@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,13 +22,11 @@
 
 package org.openecard.richclient.gui.manage;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
 import org.openecard.addon.AddonProperties;
 import org.openecard.addon.AddonPropertiesException;
-import org.openecard.common.util.FileUtils;
+import org.openecard.common.OpenecardProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,25 +34,19 @@ import org.slf4j.LoggerFactory;
 /**
  * Factory implementation which provides a Settings object which wraps a Properties or AddonProperties object.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class SettingsFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(AddonPropertiesWrapper.class);
 
     /**
-     * The instance of the factory.
-     */
-    private static SettingsFactory instance;
-
-    /**
-     * Get a Settings object from the given Properties object.
+     * Get a Settings object from a fresh Properties object obtained from OpenecardProperties.
      *
-     * @param props Properties object to wrap.
      * @return A Settings object which wraps the {@code pops} object.
      */
-    public static Settings getInstance(Properties props) {
-	return new OpenecardPropertiesWrapper(props);
+    public static Settings getInstance() {
+	return new OpenecardPropertiesWrapper();
     }
 
     /**
@@ -71,7 +63,7 @@ public class SettingsFactory {
     /**
      * The class extends the Settings class and wraps an AddonProperties object.
      *
-     * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+     * @author Hans-Martin Haase
      */
     public static class AddonPropertiesWrapper extends Settings {
 
@@ -101,20 +93,19 @@ public class SettingsFactory {
 	public void store() throws AddonPropertiesException{
 	    props.saveProperties();
 	}
-
     }
 
     /**
      * The class extends the Settings class and wraps a Properties object.
      *
-     * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+     * @author Hans-Martin Haase
      */
     public static class OpenecardPropertiesWrapper extends Settings {
 
 	private final Properties props;
 
-	private OpenecardPropertiesWrapper(Properties properties) {
-	    props = properties;
+	private OpenecardPropertiesWrapper() {
+	    props = OpenecardProperties.properties();
 	}
 
 	@Override
@@ -129,11 +120,8 @@ public class SettingsFactory {
 
 	@Override
 	public void store() throws IOException {
-	    File home = FileUtils.getHomeConfigDir();
-	    File config = new File(home, "openecard.properties");
-	    FileWriter writer = new FileWriter(config);
-	    props.store(writer, null);
+	    OpenecardProperties.writeChanges(props);
 	}
-
     }
+
 }

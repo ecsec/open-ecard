@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,28 +22,29 @@
 
 package org.openecard.richclient.gui.manage.core;
 
-import org.openecard.common.I18n;
+import java.io.IOException;
+import org.openecard.addon.AddonPropertiesException;
+import org.openecard.common.OpenecardProperties;
+import org.openecard.richclient.gui.manage.SettingsFactory;
+import org.openecard.richclient.gui.manage.SettingsGroup;
 
 
 /**
- * Custom settings group for general settings.
+ * Settings group taking its values from the global OpenecardProperties instance.
  *
  * @author Tobias Wich
  */
-public class GeneralSettingsNotificationGroup extends OpenecardPropertiesSettingsGroup {
+public class OpenecardPropertiesSettingsGroup extends SettingsGroup {
 
-    private static final long serialVersionUID = 1L;
-    private static final I18n lang = I18n.getTranslation("addon");
-    private static final String GROUP            = "addon.list.core.general.notification.group_name";
-    private static final String REMOVE_CARD      = "addon.list.core.general.notification.omit_show_remove_card";
-    private static final String	REMOVE_CARD_DESC = "addon.list.core.general.notification.omit_show_remove_card.desc";
+    public OpenecardPropertiesSettingsGroup(String title) {
+	super(title, SettingsFactory.getInstance());
+    }
 
-
-    public GeneralSettingsNotificationGroup() {
-	super(lang.translationForKey(GROUP));
-
-	addBoolItem(lang.translationForKey(REMOVE_CARD), lang.translationForKey(REMOVE_CARD_DESC),
-		"notification.omit_show_remove_card");
+    @Override
+    protected void saveProperties() throws IOException, SecurityException, AddonPropertiesException {
+	super.saveProperties();
+	// reload global Open eCard properties
+	OpenecardProperties.load();
     }
 
 }

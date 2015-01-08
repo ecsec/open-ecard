@@ -22,12 +22,7 @@
 
 package org.openecard.richclient.gui.manage.core;
 
-import java.io.IOException;
-import org.openecard.addon.AddonPropertiesException;
 import org.openecard.common.I18n;
-import org.openecard.common.OpenecardProperties;
-import org.openecard.richclient.gui.manage.SettingsFactory;
-import org.openecard.richclient.gui.manage.SettingsGroup;
 
 
 /**
@@ -35,7 +30,7 @@ import org.openecard.richclient.gui.manage.SettingsGroup;
  *
  * @author Tobias Wich
  */
-public class GeneralSettingsLegacyGroup extends SettingsGroup {
+public class GeneralSettingsLegacyGroup extends OpenecardPropertiesSettingsGroup {
 
     private static final long serialVersionUID = 1L;
     private static final I18n lang = I18n.getTranslation("addon");
@@ -49,18 +44,11 @@ public class GeneralSettingsLegacyGroup extends SettingsGroup {
 
 
     public GeneralSettingsLegacyGroup() {
-	super(lang.translationForKey(GROUP), SettingsFactory.getInstance(OpenecardProperties.properties()));
+	super(lang.translationForKey(GROUP));
 
 	addBoolItem(lang.translationForKey(TLS1), lang.translationForKey(TLS1_DESC), "legacy.tls1");
 	addBoolItem(lang.translationForKey(SESSION), lang.translationForKey(SESSION_DESC), "legacy.session");
 	addBoolItem(lang.translationForKey(CAR), lang.translationForKey(CAR_DESC), "legacy.car");
-    }
-
-    @Override
-    protected void saveProperties() throws IOException, SecurityException, AddonPropertiesException {
-	super.saveProperties();
-	// reload global properties
-	OpenecardProperties.load();
     }
 
 }

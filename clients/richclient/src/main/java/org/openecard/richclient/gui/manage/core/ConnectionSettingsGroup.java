@@ -30,10 +30,7 @@ import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import org.openecard.addon.AddonPropertiesException;
 import org.openecard.common.I18n;
-import org.openecard.common.OpenecardProperties;
 import org.openecard.crypto.tls.proxy.ProxySettings;
-import org.openecard.richclient.gui.manage.SettingsFactory;
-import org.openecard.richclient.gui.manage.SettingsGroup;
 
 
 /**
@@ -43,7 +40,7 @@ import org.openecard.richclient.gui.manage.SettingsGroup;
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
-public class ConnectionSettingsGroup extends SettingsGroup {
+public class ConnectionSettingsGroup extends OpenecardPropertiesSettingsGroup {
 
     private static final long serialVersionUID = 1L;
     private static final I18n lang = I18n.getTranslation("addon");
@@ -70,7 +67,7 @@ public class ConnectionSettingsGroup extends SettingsGroup {
 
 
     public ConnectionSettingsGroup() {
-	super(lang.translationForKey(GROUP), SettingsFactory.getInstance(OpenecardProperties.properties()));
+	super(lang.translationForKey(GROUP));
 
 	selection = addSelectionItem(lang.translationForKey(SCHEME), lang.translationForKey(SCHEME_DESC),
 		"proxy.scheme", "", "SOCKS", "HTTP", "HTTPS");
@@ -91,8 +88,7 @@ public class ConnectionSettingsGroup extends SettingsGroup {
     @Override
     protected void saveProperties() throws IOException, SecurityException, AddonPropertiesException {
 	super.saveProperties();
-	// reload global properties and proxy settings
-	OpenecardProperties.load();
+	// reload proxy settings
 	ProxySettings.load();
     }
 

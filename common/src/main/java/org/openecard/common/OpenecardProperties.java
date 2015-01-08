@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,8 +24,11 @@ package org.openecard.common;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Map;
 import java.util.Properties;
 import org.openecard.common.util.FileUtils;
 import org.slf4j.Logger;
@@ -41,36 +44,25 @@ import org.slf4j.LoggerFactory;
  *   <li>$classpath/openecard_config/openecard.properties</li>
  * </ol>
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class OpenecardProperties {
 
     private static final Logger _logger = LoggerFactory.getLogger(OpenecardProperties.class);
 
-    private static Internal properties;
-
-    private static class Internal extends OverridingProperties {
-	public Internal(InputStream bundledProps, InputStream homeProps) throws IOException {
-	    super(bundledProps, homeProps);
-	}
-    }
+    private static OverridingProperties properties;
 
     static {
 	load();
     }
+
     /**
      * Load properties from application bundle and disc.
      */
     public static synchronized void load() {
-	InputStream homeProps = null;
+	InputStream homeProps = loadHomeProps();
 	InputStream bundledProps = null;
-	try {
-	    File homePath = FileUtils.getHomeConfigDir();
-	    File cfgFile = new File(homePath, "openecard.properties");
-	    homeProps = new FileInputStream(cfgFile);
-	} catch (IOException ex) {
-	    _logger.info("Failed to load bundled properties.", ex);
-	}
+
 	try {
 	    String fileName = "openecard_config/openecard.properties";
 	    bundledProps = FileUtils.resolveResourceAsStream(OpenecardProperties.class, fileName);
@@ -78,11 +70,31 @@ public class OpenecardProperties {
 	    _logger.info("Failed to load properties from config dir.", ex);
 	}
 	try {
-	    properties = new Internal(bundledProps, homeProps);
+	    properties = new OverridingProperties(bundledProps, homeProps);
 	} catch (IOException ex) {
 	    // in that case a null pointer occurs when properties is accessed
 	    _logger.error(ex.getMessage(), ex);
 	}
+    }
+
+    private static InputStream loadHomeProps() {
+	try {
+	    File homePath = FileUtils.getHomeConfigDir();
+	    File cfgFile = new File(homePath, "openecard.properties");
+	    InputStream homeProps = new FileInputStream(cfgFile);
+	    return homeProps;
+	} catch (IOException ex) {
+	    _logger.info("Failed to load bundled properties.", ex);
+	    return null;
+	}
+    }
+
+    private static void saveHomeProps(Properties homeProps) throws IOException {
+	File homePath = FileUtils.getHomeConfigDir();
+	File cfgFile = new File(homePath, "openecard.properties");
+	OutputStream out = new FileOutputStream(cfgFile);
+	homeProps.store(out, null);
+	out.close();
     }
 
 
@@ -98,6 +110,27 @@ public class OpenecardProperties {
      */
     public static Properties properties() {
 	return properties.properties();
+    }
+
+    /**
+     * Writes the changes, not the defaults in the given Properties instance to the user's config file.
+     * This function preserves the property values already present in the config file.
+     *
+     * @param changes Properties to be written.
+     * @throws IOException Thrown in case there was a problem reading or writing the config file.
+     */
+    public static synchronized void writeChanges(Properties changes) throws IOException {
+	// load currently written properties
+	Properties homeProps = new Properties();
+	InputStream homeStream = loadHomeProps();
+	homeProps.load(homeStream);
+	homeStream.close();
+
+	for (Map.Entry<Object, Object> next : changes.entrySet()) {
+	    homeProps.put(next.getKey(), next.getValue());
+	}
+
+	saveHomeProps(homeProps);
     }
 
 }

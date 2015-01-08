@@ -39,6 +39,7 @@ import org.openecard.bouncycastle.crypto.tls.TlsCipherFactory;
 import org.openecard.bouncycastle.crypto.tls.TlsECCUtils;
 import org.openecard.bouncycastle.crypto.tls.TlsExtensionsUtils;
 import org.openecard.bouncycastle.crypto.tls.TlsUtils;
+import org.openecard.common.OpenecardProperties;
 import org.openecard.crypto.tls.auth.ContextAware;
 
 
@@ -62,7 +63,8 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
      */
     public ClientCertDefaultTlsClient(@Nonnull String host, boolean doSni) {
 	super(doSni ? host : null);
-	setMinimumVersion(ProtocolVersion.TLSv11);
+	boolean tls1 = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
+	setMinimumVersion(tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11);
 	this.host = host;
     }
     /**
@@ -74,7 +76,8 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
      */
     public ClientCertDefaultTlsClient(@Nonnull TlsCipherFactory tcf, @Nonnull String host, boolean doSni) {
 	super(tcf, doSni ? host : null);
-	setMinimumVersion(ProtocolVersion.TLSv11);
+	boolean tls1 = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
+	setMinimumVersion(tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11);
 	this.host = host;
     }
 

@@ -107,6 +107,7 @@ public class TlsConnectionHandler {
 		tlsClient = tokenRequest.getTokenContext().getTlsClient();
 	    } else {
 		// determine TLS version to use
+		boolean tls1 = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
 		ProtocolVersion version = ProtocolVersion.TLSv12;
 		ProtocolVersion minVersion = ProtocolVersion.TLSv12;
 		switch (secProto) {
@@ -118,10 +119,10 @@ public class TlsConnectionHandler {
 			// no changes
 			break;
 		    case "urn:ietf:rfc:4279":
-			minVersion = ProtocolVersion.TLSv11;
+			minVersion = tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11;
 			break;
 		    case "urn:ietf:rfc:5487":
-			minVersion = ProtocolVersion.TLSv12;
+			minVersion = tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv12;
 			break;
 		}
 

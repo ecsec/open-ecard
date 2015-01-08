@@ -526,6 +526,19 @@
 					    <iso:RecognizedCardType>http://eid.belgium.be/en/find_out_more_about_the_eid/the_electronic_identity_documents/the_eid/v1.01</iso:RecognizedCardType>
 					</iso:Conclusion>
 				    </iso:ResponseAPDU>
+				    <iso:ResponseAPDU>
+					<iso:Body>
+					    <iso:MatchingData>
+						<iso:Offset>15</iso:Offset>
+						<iso:Length>01</iso:Length>
+						<iso:MatchingValue>17</iso:MatchingValue>
+					    </iso:MatchingData>
+					</iso:Body>
+					<iso:Trailer>9000</iso:Trailer>
+					<iso:Conclusion>
+					    <iso:RecognizedCardType>http://eid.belgium.be/en/find_out_more_about_the_eid/the_electronic_identity_documents/the_eid/v1.7+</iso:RecognizedCardType>
+					</iso:Conclusion>
+				    </iso:ResponseAPDU>
 				</iso:CardCall>
 			    </iso:Conclusion>
 			</iso:ResponseAPDU>

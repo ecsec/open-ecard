@@ -127,9 +127,6 @@ public class TlsConnectionHandler {
 		    case "urn:ietf:rfc:4279":
 			minVersion = tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11;
 			break;
-		    case "urn:ietf:rfc:5487":
-			minVersion = tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv12;
-			break;
 		}
 
 		// Set up TLS connection
@@ -137,7 +134,6 @@ public class TlsConnectionHandler {
 
 		switch (secProto) {
 		    case "urn:ietf:rfc:4279":
-		    case "urn:ietf:rfc:5487":
 			{
 			    // FIXME: verify certificate chain as soon as a usable solution exists for the trust problem
 			    //tlsAuth.setCertificateVerifier(new JavaSecVerifier());
@@ -186,7 +182,7 @@ public class TlsConnectionHandler {
 	    return true;
 	}
 	// check PSK value
-	if (secProto.equals("urn:ietf:rfc:4279") || secProto.equals("urn:ietf:rfc:5487")) {
+	if (secProto.equals("urn:ietf:rfc:4279")) {
 	    TCTokenType.PathSecurityParameters pathsecParams = token.getPathSecurityParameters();
 	    return pathsecParams == null || pathsecParams.getPSK() == null || pathsecParams.getPSK().length == 0;
 	} else {

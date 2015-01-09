@@ -204,9 +204,9 @@ public class TCTokenVerifier {
 	}
 
 	assertRequired("PathSecurityProtocol", proto);
-	String[] protos = {"urn:ietf:rfc:4346", "urn:ietf:rfc:5246", "urn:ietf:rfc:4279", "urn:ietf:rfc:5487"};
+	String[] protos = {"urn:ietf:rfc:4346", "urn:ietf:rfc:5246", "urn:ietf:rfc:4279"};
 	checkEqualOR("PathSecurityProtocol", proto, protos);
-	if ("urn:ietf:rfc:4279".equals(proto) || "urn:ietf:rfc:5487".equals(proto)) {
+	if ("urn:ietf:rfc:4279".equals(proto)) {
 	    try {
 		assertRequired("PathSecurityParameters", psp);
 	    } catch (InvalidTCTokenElement ex) {

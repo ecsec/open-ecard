@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,25 +30,30 @@ import java.util.Properties;
 
 /**
  * Generic factory capable of creating instances for a type defined in a config file.
- * The config file must be present in Java properties form an the key naming the class of the type that is to be created
- * must be known.
+ * The config file must be present in Java properties form and the key naming the class of the type that is to be
+ * created must be known.
  *
  * @param <T> Type the factory creates instances for.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class GenericFactory <T> {
 
-    private final Constructor<T> constructor;
+    private final Class<T> typeClass;
+    private final Class<? extends T> actualClass;
+    private final Constructor<? extends T> constructor;
 
-    public GenericFactory(Properties properties, String key) throws GenericFactoryException {
+    public GenericFactory(Class<T> typeClass, Properties properties, String key) throws GenericFactoryException {
+	this.typeClass = typeClass;
+
 	final String className = properties.getProperty(key);
 	if (className == null) {
 	    throw new GenericFactoryException("No factory class defined for the specified key '" + key + "'.");
 	}
 
 	try {
-	    constructor = loadClass(className);
+	    actualClass = loadClass(className);
+	    constructor = getConstructor(actualClass);
 	} catch (ClassNotFoundException ex) {
 	    throw new GenericFactoryException(ex);
 	} catch (NoSuchMethodException ex) {
@@ -59,7 +64,7 @@ public class GenericFactory <T> {
 
     public T getInstance() throws GenericFactoryException {
 	try {
-	    T o = constructor.newInstance(); // null because it is static
+	    T o = constructor.newInstance(); // default constructor
 	    return o; // type is asserted by method definition
 	} catch (InstantiationException ex) {
 	    throw new GenericFactoryException(ex);
@@ -73,14 +78,24 @@ public class GenericFactory <T> {
     }
 
 
-    private Constructor<T> loadClass(String className) throws ClassNotFoundException, GenericFactoryException, NoSuchMethodException {
-	ClassLoader cl = this.getClass().getClassLoader();
-	Class<?> c = cl.loadClass(className);
-	Constructor<T> m = (Constructor<T>) c.getConstructor();
+    private Constructor<? extends T> getConstructor(Class<? extends T> clazz) throws GenericFactoryException, NoSuchMethodException {
+	Constructor<? extends T> m = clazz.getConstructor();
 	if (Modifier.isPublic(m.getModifiers())) {
 	    return m;
 	} else {
-	    throw new GenericFactoryException("Constructor of class " + className + " is not publicly available.");
+	    String msg = String.format("Constructor of class %s is not publicly available.", clazz.getName());
+	    throw new GenericFactoryException(msg);
+	}
+    }
+
+    private Class<? extends T> loadClass(String className) throws ClassNotFoundException, GenericFactoryException {
+	Class<?> c = Class.forName(className);
+	try {
+	    Class<? extends T> c2 = c.asSubclass(typeClass);
+	    return c2;
+	} catch (ClassCastException ex) {
+	    String msg = String.format("Referenced class %s is not a compatible subtype for this factory.", c.getName());
+	    throw new GenericFactoryException(msg);
 	}
     }
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,7 +32,7 @@ import org.openecard.common.GenericFactoryException;
  * to a class implementing the WSMarshaller interface. The class needs a default constructor or it can not be
  * instantiated.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class WSMarshallerFactory {
 
@@ -41,7 +41,7 @@ public class WSMarshallerFactory {
     private WSMarshallerFactory() throws WSMarshallerException {
 	try {
 	    String key = "org.openecard.ws.marshaller.impl";
-	    factory = new GenericFactory<WSMarshaller>(WsdefProperties.properties(), key);
+	    factory = new GenericFactory<>(WSMarshaller.class, WsdefProperties.properties(), key);
 	} catch (GenericFactoryException ex) {
 	    throw new WSMarshallerException(ex);
 	}
@@ -56,7 +56,7 @@ public class WSMarshallerFactory {
      * @return WSMarshaller implementation instance.
      * @throws WSMarshallerException In case the WSMarshaller instance could not be created.
      */
-    public static WSMarshaller createInstance() throws WSMarshallerException {
+    public static synchronized WSMarshaller createInstance() throws WSMarshallerException {
 	if (inst == null) {
 	    inst = new WSMarshallerFactory();
 	}

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -31,7 +31,7 @@ import org.openecard.ifd.scio.IFDProperties;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class IFDTerminalFactory {
 
@@ -41,7 +41,7 @@ public class IFDTerminalFactory {
 
     private IFDTerminalFactory() throws IFDException {
 	try {
-	    factory = new GenericFactory<TerminalFactory>(IFDProperties.properties(), FACTORY_KEY);
+	    factory = new GenericFactory<>(TerminalFactory.class, IFDProperties.properties(), FACTORY_KEY);
 	} catch (GenericFactoryException ex) {
 	    throw new IFDException(ex);
 	}
@@ -50,7 +50,7 @@ public class IFDTerminalFactory {
 
     private static IFDTerminalFactory factoryInst = null;
 
-    public static TerminalFactory getInstance() throws IFDException {
+    public static synchronized TerminalFactory getInstance() throws IFDException {
 	if (factoryInst == null) {
 	    factoryInst = new IFDTerminalFactory();
 	}

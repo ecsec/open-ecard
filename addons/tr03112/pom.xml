@@ -17,12 +17,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.openecard.wsdef</groupId>
-			<artifactId>wsdef-client</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.openecard.crypto</groupId>
 			<artifactId>tls</artifactId>
 			<version>${project.version}</version>

@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ControlIFD;
 import iso.std.iso_iec._24727.tech.schema.ControlIFDResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
+import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
@@ -352,6 +354,15 @@ public class GenericPINAction extends StepAction {
 	    logger.error("An unknown error occurred while trying to change the PIN.", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_UNKNOWN)));
+	} finally {
+	    try {
+		// destroy the pace channel
+		DestroyChannel destChannel = new DestroyChannel();
+		destChannel.setSlotHandle(slotHandle);
+		dispatcher.deliver(destChannel);
+	    } catch (DispatcherException | InvocationTargetException ex) {
+		logger.warn("Failed to destroy the PIN pace channel.", ex);
+	    }
 	}
     }
 
@@ -486,6 +497,15 @@ public class GenericPINAction extends StepAction {
 	    logger.error("An unknown error occurred while trying to verify the PUK.", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_UNKNOWN)));
+	} finally {
+	    try {
+		// destroy the pace channel
+		DestroyChannel destChannel = new DestroyChannel();
+		destChannel.setSlotHandle(slotHandle);
+		dispatcher.deliver(destChannel);
+	    } catch (DispatcherException | InvocationTargetException ex) {
+		logger.warn("Failed to destroy the PUK pace channel.", ex);
+	    }
 	}
 
     }

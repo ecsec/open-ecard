@@ -22,11 +22,13 @@
 
 package org.openecard.plugins.pinplugin.gui;
 
+import iso.std.iso_iec._24727.tech.schema.ActionType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ControlIFD;
 import iso.std.iso_iec._24727.tech.schema.ControlIFDResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
+import iso.std.iso_iec._24727.tech.schema.Disconnect;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
@@ -39,7 +41,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
@@ -360,6 +361,13 @@ public class GenericPINAction extends StepAction {
 		DestroyChannel destChannel = new DestroyChannel();
 		destChannel.setSlotHandle(slotHandle);
 		dispatcher.deliver(destChannel);
+
+		// Transaction based communication does not work on java 8 so the PACE channel is not closed after an 
+		// EndTransaction call. So do a reset of the card to close the PACE channel.
+		Disconnect disconnect = new Disconnect();
+		disconnect.setSlotHandle(slotHandle);
+		disconnect.setAction(ActionType.RESET);
+		dispatcher.deliver(disconnect);
 	    } catch (DispatcherException | InvocationTargetException ex) {
 		logger.warn("Failed to destroy the PIN pace channel.", ex);
 	    }
@@ -503,6 +511,12 @@ public class GenericPINAction extends StepAction {
 		DestroyChannel destChannel = new DestroyChannel();
 		destChannel.setSlotHandle(slotHandle);
 		dispatcher.deliver(destChannel);
+
+		// For readers which do not support DestroyChannel but have generic pace support
+		Disconnect disconnect = new Disconnect();
+		disconnect.setSlotHandle(slotHandle);
+		disconnect.setAction(ActionType.RESET);
+		dispatcher.deliver(disconnect);
 	    } catch (DispatcherException | InvocationTargetException ex) {
 		logger.warn("Failed to destroy the PUK pace channel.", ex);
 	    }

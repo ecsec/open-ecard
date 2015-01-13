@@ -22,6 +22,7 @@
 
 package org.openecard.ifd.scio;
 
+import iso.std.iso_iec._24727.tech.schema.ActionType;
 import iso.std.iso_iec._24727.tech.schema.BeginTransaction;
 import iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse;
 import iso.std.iso_iec._24727.tech.schema.Cancel;
@@ -643,8 +644,17 @@ public class IFD implements org.openecard.ws.IFD {
 	    byte[] handle = parameters.getSlotHandle();
 	    try {
 		SCCard c = scwrapper.getCard(handle);
-		// TODO: add support for actions
-		c.closeChannel(handle, false);
+		ActionType action = parameters.getAction();
+		if (action == ActionType.RESET) {
+		    c.closeChannel(handle, true);
+		} else {
+		    // * EJECT is a feature of PC/SC but it is not implemented because there are no known readers which
+		    //   provide the mechanical functionality to eject a card
+		    // * UNPOWER is supported by PC/SC but it is not available via the smartcard io
+		    // * CONFISCATE doesn't seem to be supported by PC/SC
+		    // so just do a disconnect without resetting the card.
+		    c.closeChannel(handle, false);
+		}
 		response = WSHelper.makeResponse(DisconnectResponse.class, WSHelper.makeResultOK());
 		return response;
 	    } catch (IFDException ex) {
@@ -960,14 +970,38 @@ public class IFD implements org.openecard.ws.IFD {
     @Override
     public DestroyChannelResponse destroyChannel(DestroyChannel parameters) {
 	try {
+	    DestroyChannelResponse destroyChannelResponse = new DestroyChannelResponse();
 	    byte[] slotHandle = parameters.getSlotHandle();
+	    SCTerminal term = this.scwrapper.getTerminal(slotHandle);
 	    SCCard card = this.scwrapper.getCard(slotHandle);
 	    SCChannel channel = card.getChannel(slotHandle);
+
+	    // check if it is PACE and try to perform native implementation
+	    // get pace capabilities
+	    List<PACECapabilities.PACECapability> paceCapabilities = term.getPACECapabilities();
+	    if (paceCapabilities.contains(PACECapabilities.PACECapability.DestroyPACEChannel)) {
+		ExecutePACERequest execPaceReq = new ExecutePACERequest(ExecutePACERequest.Function.DestroyPACEChannel);
+
+		byte[] reqData = execPaceReq.toBytes();
+		_logger.debug("executeCtrlCode request: {}", ByteUtils.toHexString(reqData));
+		// execute pace
+		byte[] resData = term.executeCtrlCode(PCSCFeatures.EXECUTE_PACE, reqData);
+		_logger.debug("Response of executeCtrlCode: {}", ByteUtils.toHexString(resData));
+		// evaluate response
+		ExecutePACEResponse execPaceRes = new ExecutePACEResponse(resData);
+		if (execPaceRes.isError()) {
+		    destroyChannelResponse =  WSHelper.makeResponse(DestroyChannelResponse.class, execPaceRes.getResult());
+		}
+	    }
+
 	    channel.removeSecureMessaging();
-	    DestroyChannelResponse destroyChannelResponse = new DestroyChannelResponse();
-	    Result r = new Result();
-	    r.setResultMajor(ECardConstants.Major.OK);
-	    destroyChannelResponse.setResult(r);
+
+	    if (destroyChannelResponse.getResult() == null) {
+		Result r = new Result();
+		r.setResultMajor(ECardConstants.Major.OK);
+		destroyChannelResponse.setResult(r);
+	    }
+	    
 	    return destroyChannelResponse;
 	} catch (Throwable t) {
 	    return WSHelper.makeResponse(DestroyChannelResponse.class, WSHelper.makeResult(t));

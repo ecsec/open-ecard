@@ -396,6 +396,10 @@ public class TinySAL implements SAL {
 
 	    Disconnect disconnect = new Disconnect();
 	    disconnect.setSlotHandle(slotHandle);
+	    if (request.getAction() != null) {
+		disconnect.setAction(request.getAction());
+	    }
+	    
 	    DisconnectResponse disconnectResponse = (DisconnectResponse) env.getDispatcher().deliver(disconnect);
 
 	    // remove entries associated with this handle

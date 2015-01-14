@@ -29,6 +29,7 @@ import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -37,18 +38,20 @@ import org.w3c.dom.Element;
 /**
  * Helper class to make life with DIDAuthenticationDataTypes much easier.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class AuthDataMap {
 
     private static final String isoNs = "urn:iso:std:iso-iec:24727:tech:schema";
 
+    private final boolean ignoreNs;
     private final String protocol;
-    private final HashMap<QName, Element> contentMap = new HashMap<QName, Element>();
+    private final HashMap<QName, Element> contentMap = new HashMap<>();
     private final HashMap<QName, String> attributeMap;
     private final Document xmlDoc;
 
     public AuthDataMap(DIDAuthenticationDataType data) throws ParserConfigurationException {
+	ignoreNs = Boolean.valueOf(OpenecardProperties.getProperty("legacy.ignore_ns"));
 	this.protocol = data.getProtocol();
 	// read content
 	List<Element> content = data.getAny();
@@ -56,10 +59,14 @@ public class AuthDataMap {
 	    String name = next.getLocalName();
 	    String ns = next.getNamespaceURI();
 	    QName qname = new QName(ns, name);
+	    // when ns should be ignored, always omit the ns part
+	    if (ignoreNs) {
+		qname = new QName(qname.getLocalPart());
+	    }
 	    contentMap.put(qname, next);
 	}
 	// read other attributes
-	attributeMap = new HashMap<QName, String>(data.getOtherAttributes());
+	attributeMap = new HashMap<>(data.getOtherAttributes());
 	// save document so new elements can be created -- there must always be an element, or this thing won't work
 	xmlDoc = content.isEmpty() ? loadXMLBuilder() : content.get(0).getOwnerDocument();
     }
@@ -81,6 +88,9 @@ public class AuthDataMap {
     }
 
     public boolean containsContent(QName qname) {
+	if (ignoreNs) {
+	    qname = new QName(qname.getLocalPart());
+	}
 	return contentMap.containsKey(qname);
     }
     public boolean containsContent(String ns, String localName) {
@@ -91,6 +101,9 @@ public class AuthDataMap {
     }
 
     public Element getContent(QName qname) {
+	if (ignoreNs) {
+	    qname = new QName(qname.getLocalPart());
+	}
 	return contentMap.get(qname);
     }
     public Element getContent(String ns, String localName) {

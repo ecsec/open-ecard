@@ -22,6 +22,8 @@
 
 package org.openecard.common.util;
 
+import org.openecard.common.interfaces.ObjectValidatorException;
+import org.openecard.common.interfaces.ObjectSchemaValidator;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.util.JAXBSource;
+import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
@@ -47,7 +50,7 @@ import org.xml.sax.SAXParseException;
  * @author Hans-Martin Haase
  * @author Tobias Wich
  */
-public class JAXBSchemaValidator {
+public class JAXBSchemaValidator implements ObjectSchemaValidator {
 
     private static final Logger logger = LoggerFactory.getLogger(JAXBSchemaValidator.class);
 
@@ -94,7 +97,7 @@ public class JAXBSchemaValidator {
 
 
     /**
-     * Validate an object which have to be a JAXB class against one or more schemas.
+     * Validates a JAXB object against the loaded XML schemas.
      *
      * Note: If you pass one single schema into the function the validator tries to load referenced schemas. If you
      * specify more than one schema you have to specify all other schemas which are referenced in the schemas. This has
@@ -102,11 +105,12 @@ public class JAXBSchemaValidator {
      *
      * @param obj The object to validate. This have to be an JAXB class.
      * @return TRUE if the object is valid against the schemas else FALSE.
-     * @throws JAXBException Thrown if the JAXBContext or the JAXBSource object could not be initialized.
+     * @throws ObjectValidatorException Thrown if the JAXBSource object could not be initialized.
      */
-    public boolean validateObject(@Nonnull Object obj) throws JAXBException {
-	JAXBSource source = new JAXBSource(ctx, obj);
+    @Override
+    public boolean validateObject(@Nonnull Object obj) throws ObjectValidatorException {
 	try {
+	    Source source = new JAXBSource(ctx, obj);
 	    Validator validator= schema.newValidator();
 	    validator.setErrorHandler(new CustomErrorHandler());
 	    validator.validate(source);
@@ -114,9 +118,13 @@ public class JAXBSchemaValidator {
 	} catch (SAXException ex) {
 	    logger.error("Validation of the input object failed.", ex);
 	    return false;
+	} catch (JAXBException ex) {
+	    String msg = "Failed to create Source instance from given object.";
+	    logger.error(msg, ex);
+	    throw new ObjectValidatorException(msg, ex);
 	} catch (IOException ex) {
 	    logger.error("No object given for validation.", ex);
-	    throw new JAXBException("No object given for validation.", ex);
+	    throw new ObjectValidatorException("No object given for validation.", ex);
 	}
     }
 

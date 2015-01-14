@@ -32,6 +32,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.openecard.common.interfaces.ObjectValidatorException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.w3c.dom.Document;
@@ -46,7 +47,8 @@ import org.xml.sax.SAXException;
 public class SchemaValidationTest {
 
     @Test
-    public void testDIDAuth() throws JAXBException, SAXException, IOException, ParserConfigurationException {
+    public void testDIDAuth() throws JAXBException, SAXException, IOException, ObjectValidatorException,
+	    ParserConfigurationException {
 	JAXBSchemaValidator validator;
 	JAXBContext jc = JAXBContext.newInstance(DIDAuthenticate.class);
 	Unmarshaller unmarshaller = jc.createUnmarshaller();

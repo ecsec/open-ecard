@@ -25,7 +25,6 @@ package org.openecard.sal.protocol.eac;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import java.util.Map;
-import javax.xml.bind.JAXBException;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.binding.tctoken.TR03112Keys;
@@ -33,11 +32,12 @@ import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.ObjectSchemaValidator;
+import org.openecard.common.interfaces.ObjectValidatorException;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
 import org.openecard.sal.protocol.eac.anytype.EAC2InputType;
 import org.openecard.sal.protocol.eac.anytype.EAC2OutputType;
-import org.openecard.common.util.JAXBSchemaValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +77,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	
 	try {
-	    JAXBSchemaValidator valid = (JAXBSchemaValidator) dynCtx.getPromise(EACProtocol.SCHEMA_VALIDATOR).deref();
+	    ObjectSchemaValidator valid = (ObjectSchemaValidator) dynCtx.getPromise(EACProtocol.SCHEMA_VALIDATOR).deref();
 
 	    boolean messageValid = valid.validateObject(didAuthenticate);
 	    if (! messageValid) {
@@ -87,7 +87,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 		return response;
 	    }
- 	} catch (JAXBException ex) {
+ 	} catch (ObjectValidatorException ex) {
 	    String msg = "Validation of the EAC2InputType message failed due to invalid input data.";
 	    logger.error(msg, ex);
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);

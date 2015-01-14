@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 HS Coburg.
+ * Copyright (C) 2012-2015 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,6 +29,9 @@ import org.openecard.addon.Context;
 import org.openecard.addon.sal.SALProtocolBaseImpl;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.OpenecardProperties;
+import org.openecard.common.interfaces.ObjectSchemaValidator;
+import org.openecard.common.interfaces.ObjectValidatorException;
 import org.openecard.common.util.FuturePromise;
 import org.openecard.common.util.JAXBSchemaValidator;
 import org.openecard.common.util.Promise;
@@ -39,6 +42,7 @@ import org.openecard.common.util.Promise;
  * This class also contains lookup keys for {@link DynamicContext}.
  *
  * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public class EACProtocol extends SALProtocolBaseImpl {
 
@@ -60,10 +64,22 @@ public class EACProtocol extends SALProtocolBaseImpl {
     @Override
     public void init(Context ctx) throws ActionInitializationException {
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	dynCtx.putPromise(SCHEMA_VALIDATOR, new FuturePromise<>(new Callable<JAXBSchemaValidator>() {
+	dynCtx.putPromise(SCHEMA_VALIDATOR, new FuturePromise<>(new Callable<ObjectSchemaValidator>() {
 	    @Override
-	    public JAXBSchemaValidator call() throws Exception {
-		JAXBSchemaValidator v = JAXBSchemaValidator.load(DIDAuthenticate.class, "ISO24727-Protocols.xsd");
+	    public ObjectSchemaValidator call() throws Exception {
+		boolean noValid = Boolean.valueOf(OpenecardProperties.getProperty("legacy.ignore_ns"));
+		ObjectSchemaValidator v;
+		if (! noValid) {
+		    v = JAXBSchemaValidator.load(DIDAuthenticate.class, "ISO24727-Protocols.xsd");
+		} else {
+		    // always valid
+		    v = new ObjectSchemaValidator() {
+			@Override
+			public boolean validateObject(Object obj) throws ObjectValidatorException {
+			    return true;
+			}
+		    };
+		}
 		return v;
 	    }
 	}));

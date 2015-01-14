@@ -40,7 +40,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.smartcardio.ResponseAPDU;
-import javax.xml.bind.JAXBException;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
@@ -54,9 +53,10 @@ import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.ifd.PACECapabilities;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.EventManager;
+import org.openecard.common.interfaces.ObjectSchemaValidator;
+import org.openecard.common.interfaces.ObjectValidatorException;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.util.ByteUtils;
-import org.openecard.common.util.JAXBSchemaValidator;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.Promise;
 import org.openecard.common.util.TR03112Utils;
@@ -141,7 +141,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	ConnectionHandleType conHandle = (ConnectionHandleType) dynCtx.get(TR03112Keys.CONNECTION_HANDLE);
 
 	try {
-	    JAXBSchemaValidator valid = (JAXBSchemaValidator) dynCtx.getPromise(EACProtocol.SCHEMA_VALIDATOR).deref();
+	    ObjectSchemaValidator valid = (ObjectSchemaValidator) dynCtx.getPromise(EACProtocol.SCHEMA_VALIDATOR).deref();
 	    boolean messageValid = valid.validateObject(request);
 	    if (! messageValid) {
 		String msg = "Validation of the EAC1InputType message failed.";
@@ -150,7 +150,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 		return response;
 	    }
- 	} catch (JAXBException ex) {
+ 	} catch (ObjectValidatorException ex) {
 	    String msg = "Validation of the EAC1InputType message failed due to invalid input data.";
 	    logger.error(msg, ex);
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);

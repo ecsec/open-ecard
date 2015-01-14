@@ -41,6 +41,8 @@ public class GeneralSettingsLegacyGroup extends OpenecardPropertiesSettingsGroup
     private static final String	SESSION_DESC = "addon.list.core.general.legacy.session.desc";
     private static final String CAR          = "addon.list.core.general.legacy.car";
     private static final String	CAR_DESC     = "addon.list.core.general.legacy.car.desc";
+    private static final String NS           = "addon.list.core.general.legacy.ignore_ns";
+    private static final String	NS_DESC      = "addon.list.core.general.legacy.ignore_ns.desc";
 
 
     public GeneralSettingsLegacyGroup() {
@@ -49,6 +51,7 @@ public class GeneralSettingsLegacyGroup extends OpenecardPropertiesSettingsGroup
 	addBoolItem(lang.translationForKey(TLS1), lang.translationForKey(TLS1_DESC), "legacy.tls1");
 	addBoolItem(lang.translationForKey(SESSION), lang.translationForKey(SESSION_DESC), "legacy.session");
 	addBoolItem(lang.translationForKey(CAR), lang.translationForKey(CAR_DESC), "legacy.car");
+	addBoolItem(lang.translationForKey(NS), lang.translationForKey(NS_DESC), "legacy.ignore_ns");
     }
 
 }

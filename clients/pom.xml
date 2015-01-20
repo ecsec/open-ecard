@@ -16,6 +16,7 @@
 	<name>Client Implementations</name>
 
 	<modules>
+		<module>java-version-check</module>
 		<module>richclient</module>
 	</modules>
 

@@ -371,10 +371,10 @@ public class TCTokenHandler {
 		response.setResult(WSHelper.makeResultError(((WSException) innerException).getResultMinor(), errorMsg));
 		
 	    } else if (innerException instanceof PAOSConnectionException) {
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.COMMUNICATION_ERROR, w.getMessage()));
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.COMMUNICATION_ERROR, w.getLocalizedMessage()));
 	    } else {
 		// TODO: check for better matching minor type
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getLocalizedMessage()));
 	    }
 
 	    showErrorMessage(errorMsg);

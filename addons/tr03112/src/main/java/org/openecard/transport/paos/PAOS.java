@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,6 +32,7 @@ import java.net.URISyntaxException;
 import javax.annotation.Nonnull;
 import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerException;
+import oasis.names.tc.dss._1_0.core.schema.ResponseBaseType;
 import org.openecard.apache.http.HttpEntity;
 import org.openecard.apache.http.HttpException;
 import org.openecard.apache.http.HttpResponse;
@@ -278,6 +279,7 @@ public class PAOS {
 	DefaultConnectionReuseStrategy reuse = new DefaultConnectionReuseStrategy();
 	boolean firstLoop = true;
 	boolean connectionDropped = false;
+	ResponseBaseType lastResponse = new ResponseBaseType();
 
 	try {
 	    // loop and send makes a computer happy
@@ -294,6 +296,10 @@ public class PAOS {
 		// send as long as connection is valid
 		try {
 		    do {
+			// save the last message we sent to the eID-Server.
+			if (msg instanceof ResponseBaseType) {
+			    lastResponse = (ResponseBaseType) msg;
+			}
 			// prepare request
 			String resource = tlsHandler.getResource();
 			BasicHttpEntityEnclosingRequest req = new BasicHttpEntityEnclosingRequest("POST", resource);
@@ -325,6 +331,10 @@ public class PAOS {
 			if (requestObj instanceof StartPAOSResponse) {
 			    StartPAOSResponse startPAOSResponse = (StartPAOSResponse) requestObj;
 			    WSHelper.checkResult(startPAOSResponse);
+			    // Some eID-Servers ignore error from previous steps so check whether our last message was ok.
+			    // This does not in case we sent a correct message with wrong content and the eID-Server returns
+			    // an ok.
+			    WSHelper.checkResult(lastResponse);
 			    return startPAOSResponse;
 			}
 
@@ -388,13 +398,13 @@ public class PAOS {
      * @param statusCode The status code we received from the server
      * @throws PAOSException If the server returned a HTTP error code
      */
-    private void checkHTTPStatusCode(int statusCode) throws PAOSException {
+    private void checkHTTPStatusCode(int statusCode) throws PAOSConnectionException {
 	// Check the result code. According to the PAOS Spec section 9.4 the server has to send 202
 	// All tested test servers return 200 so accept both but generate a warning message in case of 200
 	if (statusCode != 200 && statusCode != 202) {
-	    throw new PAOSException(INVALID_HTTP_STATUS, statusCode);
+	    throw new PAOSConnectionException(INVALID_HTTP_STATUS, statusCode);
 	} else if (statusCode == 200) {
-	    String msg2 = "The PAOS endpoint sent the http status code 200 which does not conform to the"
+	    String msg2 = "The PAOS endpoint sent the http status code 200 which does not conform to the "
 		    + "PAOS specification. (See section 9.4 Processing Rules of the PAOS Specification)";
 	    logger.warn(msg2);
 	}

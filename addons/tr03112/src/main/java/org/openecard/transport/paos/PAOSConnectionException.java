@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2014-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,9 +25,11 @@ package org.openecard.transport.paos;
 import org.openecard.common.I18n;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.common.I18nException;
+import org.openecard.common.I18nKey;
 
 
 /**
+ * Localized ConnectionException.
  *
  * @author Hans-Martin Haase
  */
@@ -35,12 +37,30 @@ public class PAOSConnectionException extends I18nException {
 
     private static final I18n lang = I18n.getTranslation("tr03112");
 
+    /**
+     * Creates an instance and initialize the exception with an static localized message.
+     */
     public PAOSConnectionException() {
 	super(lang, PAOS_CONNECTION_EXCEPTION);
     }
 
+    /**
+     * Creates an instance and initialize the exception with an previous exception and a static localized exception.
+     *
+     * @param cause The exception causing the error.
+     */
     public PAOSConnectionException(Throwable cause) {
 	super(lang, PAOS_CONNECTION_EXCEPTION, cause);
+    }
+
+    /**
+     * Creates an instance and initializes the exception with a localized message.
+     *
+     * @param key Translation key.
+     * @param params Parameters adding values into the translation.
+     */
+    public PAOSConnectionException(I18nKey key, Object... params) {
+	super(lang, key, params);
     }
 
 }

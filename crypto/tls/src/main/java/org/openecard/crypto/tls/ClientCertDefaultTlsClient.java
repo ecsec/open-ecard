@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Vector;
 import javax.annotation.Nonnull;
+import org.openecard.bouncycastle.crypto.tls.AlertLevel;
 import org.openecard.bouncycastle.crypto.tls.CipherSuite;
 import org.openecard.bouncycastle.crypto.tls.DefaultTlsClient;
 import org.openecard.bouncycastle.crypto.tls.HashAlgorithm;
@@ -41,6 +42,8 @@ import org.openecard.bouncycastle.crypto.tls.TlsExtensionsUtils;
 import org.openecard.bouncycastle.crypto.tls.TlsUtils;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.crypto.tls.auth.ContextAware;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -51,6 +54,8 @@ import org.openecard.crypto.tls.auth.ContextAware;
  * @author Tobias Wich
  */
 public class ClientCertDefaultTlsClient extends DefaultTlsClient implements ClientCertTlsClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(ClientCertDefaultTlsClient.class);
 
     private final String host;
     private TlsAuthentication tlsAuth;
@@ -201,6 +206,34 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 
 
 	return clientExtensions;
+    }
+
+    @Override
+    public void notifyAlertRaised(short alertLevel, short alertDescription, String message, Exception cause) {
+	TlsError error = new TlsError(alertLevel, alertDescription, message, cause);
+	if (alertLevel == AlertLevel.warning && logger.isInfoEnabled()) {
+	    logger.info("TLS warning sent.");
+	    logger.info(error.toString());
+	} else {
+	    logger.error("TLS error sent.");
+	    logger.error(error.toString(), cause);
+	}
+
+	super.notifyAlertRaised(alertLevel, alertDescription, message, cause);
+    }
+
+    @Override
+    public void notifyAlertReceived(short alertLevel, short alertDescription) {
+	TlsError error = new TlsError(alertLevel, alertDescription);
+	if (alertLevel == AlertLevel.warning && logger.isInfoEnabled()) {
+	    logger.info("TLS warning received.");
+	    logger.info(error.toString());
+	} else {
+	    logger.error("TLS error received.");
+	    logger.error(error.toString());
+	}
+
+	super.notifyAlertReceived(alertLevel, alertDescription);
     }
 
 }

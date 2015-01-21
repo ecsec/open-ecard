@@ -344,6 +344,15 @@
 		    <iso:AccessRule>
 			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
 			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDUpdate</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
 			    <iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
 			</iso:Action>
 			<iso:SecurityCondition>
@@ -564,6 +573,15 @@
 		    <iso:AccessRule>
 			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
 			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDUpdate</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
 			    <iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
 			</iso:Action>
 			<iso:SecurityCondition>
@@ -731,6 +749,15 @@
 			<iso:DIDScope>global</iso:DIDScope>
 		</iso:DifferentialIdentity>
 		<iso:DIDACL>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDUpdate</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
 		    <iso:AccessRule>
 			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
 			<iso:Action>

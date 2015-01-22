@@ -123,8 +123,10 @@ public class OpenecardProperties {
 	// load currently written properties
 	Properties homeProps = new Properties();
 	InputStream homeStream = loadHomeProps();
-	homeProps.load(homeStream);
-	homeStream.close();
+	if (homeStream != null) {
+	    homeProps.load(homeStream);
+	    homeStream.close();
+	}
 
 	for (Map.Entry<Object, Object> next : changes.entrySet()) {
 	    homeProps.put(next.getKey(), next.getValue());

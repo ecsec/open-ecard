@@ -7,7 +7,7 @@
 		<iso:ObjectIdentifier>http://bsi.bund.de/cif/npa.xml</iso:ObjectIdentifier>
 		<iso:SpecificationBodyOrIssuer>Federal Office for Information Security</iso:SpecificationBodyOrIssuer>
 		<iso:CardTypeName xml:lang="DE">Personalausweis</iso:CardTypeName>
-		<iso:CardTypeName xml:lang="EN">Electronic Identity Card</iso:CardTypeName>
+		<iso:CardTypeName xml:lang="EN">German Electronic Identity Card</iso:CardTypeName>
 		<iso:Version>
 			<!-- Version number corresponds to the version of the cif -->
 			<iso:Major>1</iso:Major>

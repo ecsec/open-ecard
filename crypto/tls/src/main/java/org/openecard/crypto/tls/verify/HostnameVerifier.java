@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.crypto.tls.auth;
+package org.openecard.crypto.tls.verify;
 
 import org.openecard.bouncycastle.asn1.ASN1Encodable;
 import org.openecard.bouncycastle.asn1.x500.RDN;
@@ -107,7 +107,9 @@ public class HostnameVerifier implements CertificateVerifier {
 	}
     }
 
-    private static boolean checkWildcardName(String givenHost, String wildcardHost) throws CertificateVerificationException {
+    private static boolean checkWildcardName(String givenHost, String wildcardHost)
+	    throws CertificateVerificationException {
+	logger.debug("Comparing connection hostname against certificate hostname: [{}] [{}]", givenHost, wildcardHost);
 	String[] givenToken = givenHost.split("\\.");
 	String[] wildToken = wildcardHost.split("\\.");
 	// error if number of token is different

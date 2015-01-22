@@ -22,6 +22,8 @@
 
 package org.openecard.crypto.tls.auth;
 
+import org.openecard.crypto.tls.verify.KeyLengthVerifier;
+import org.openecard.crypto.tls.verify.HostnameVerifier;
 import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nonnull;

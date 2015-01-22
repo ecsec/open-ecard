@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -67,9 +67,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Implements a grabber to fetch TCTokens from an URL.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Moritz Horsch
+ * @author Johannes Schmölz
+ * @author Tobias Wich
  */
 public class ResourceContext {
 
@@ -250,8 +250,8 @@ public class ResourceContext {
 		}
 	    } else if (statusCode >= 400) {
 		// according to the HTTP RFC, codes greater than 400 signal errors
-		String msg = String.format("Received a result code %d '%s' from server.", statusCode, reason);
-		throw new InvalidResultStatus(lang.translationForKey(INVALID_RESULT_STATUS, new Object[] {statusCode, reason}));
+		logger.debug("Received a result code {} '{}' from server.", statusCode, reason);
+		throw new InvalidResultStatus(lang.translationForKey(INVALID_RESULT_STATUS, statusCode, reason));
 	    } else {
 		if (verifyResult == CertificateValidator.VerifierResult.CONTINUE) {
 		    throw new InvalidAddressException(INVALID_REFRESH_ADDRESS_NOSOP);

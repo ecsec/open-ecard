@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -47,9 +47,8 @@ public class RedirectCertificateValidator implements CertificateValidator {
     private final Promise<Object> descPromise;
     private final boolean redirectChecks;
 
-    private boolean firstInvocation;
-    private boolean lastRedirect;
-    private boolean certDescribtionExists;
+    private boolean certDescExists;
+    private URL lastURL;
 
     /**
      * Creates an object of this class bound to the values in the current dynamic context.
@@ -60,8 +59,6 @@ public class RedirectCertificateValidator implements CertificateValidator {
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	descPromise = dynCtx.getPromise(TR03112Keys.ESERVICE_CERTIFICATE_DESC);
 	this.redirectChecks = redirectChecks;
-	firstInvocation = true;
-	lastRedirect = false;
     }
 
 
@@ -70,13 +67,11 @@ public class RedirectCertificateValidator implements CertificateValidator {
 	try {
 	    // disable certificate checks according to BSI TR03112-7 in some situations
 	    if (redirectChecks) {
-		CertificateDescription desc = null;
-		desc = (CertificateDescription) descPromise.derefNonblocking();
-
-		certDescribtionExists = desc != null;
+		CertificateDescription desc = (CertificateDescription) descPromise.derefNonblocking();
+		certDescExists = desc != null;
 
 		// check points certificate (but just in case we have a certificate description)
-		if (certDescribtionExists && ! TR03112Utils.isInCommCertificates(cert, desc.getCommCertificates())) {
+		if (certDescExists && ! TR03112Utils.isInCommCertificates(cert, desc.getCommCertificates())) {
 		    logger.error("The retrieved server certificate is NOT contained in the CommCertificates of "
 			    +	"the CertificateDescription extension of the eService certificate.");
 		    throw new ValidationError(INVALID_REDIRECT);
@@ -84,30 +79,27 @@ public class RedirectCertificateValidator implements CertificateValidator {
 
 		// check if we match the SOP
 		URL sopUrl;
-		if (certDescribtionExists && desc.getSubjectURL() != null && ! desc.getSubjectURL().isEmpty()) {
+		if (certDescExists && desc.getSubjectURL() != null && ! desc.getSubjectURL().isEmpty()) {
 		    sopUrl = new URL(desc.getSubjectURL());
 		} else {
 		    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 		    sopUrl = (URL) dynCtx.get(TR03112Keys.TCTOKEN_URL);
 		}
+		// determine the URL that has to be SOP checked (TR-03124 Determine refreshURL)
+		// on th efirst invocation this is the current URL, on the following invocations this is the last used
+		if (lastURL == null) {
+		    lastURL = url;
+		}
 
-		boolean SOP = TR03112Utils.checkSameOriginPolicy(url, sopUrl);
+		// check SOP for last URL and update the URL
+		boolean SOP = TR03112Utils.checkSameOriginPolicy(lastURL, sopUrl);
+		lastURL = url;
 		if (! SOP) {
-		    firstInvocation = false;
 		    // there is more to come
 		    return VerifierResult.CONTINUE;
 		} else {
-		    // if the refresh address is SOP, then no redirect is expected
-		    if (firstInvocation) {
-			return VerifierResult.FINISH;
-		    } else if (lastRedirect) {
-			// stop execution
-			return VerifierResult.FINISH;
-		    } else {
-			// same origin satisfied, memorize this state and stop execution in the next invocation
-			lastRedirect = true;
-			return VerifierResult.CONTINUE;
-		    }
+		    // SOP fulfilled
+		    return VerifierResult.FINISH;
 		}
 	    } else {
 		// without the nPA there is no sensible exit point and as a result the last call is executed twice

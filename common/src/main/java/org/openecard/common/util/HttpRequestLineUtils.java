@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -48,13 +48,15 @@ public class HttpRequestLineUtils {
 	if (queryStr != null) {
 	    String[] queries = queryStr.split("&");
 	    for (String query : queries) {
-		// split key value
-		String[] kv = query.split("=");
-		// check if there is a value
-		if (kv.length == 1) {
-		    result.put(kv[0], null);
-		} else if (kv.length == 2) {
-		    result.put(kv[0], kv[1]);
+		// everything in front of the equal sign is the key
+		// everything behind the equal sign is the value
+		int first = query.indexOf('=');
+		if (first == -1) {
+		    result.put(query, "");
+		} else {
+		    String key = query.substring(0, first);
+		    String value = query.substring(first + 1, query.length());
+		    result.put(key, value);
 		}
 	    }
 	}

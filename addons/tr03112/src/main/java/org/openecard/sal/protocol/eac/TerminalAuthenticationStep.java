@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
  * @author Moritz Horsch
  * @author Dirk Petrautzki
  * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
@@ -116,6 +117,13 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 
 	    byte[] currentCAR = (byte[]) internalData.get(EACConstants.IDATA_CURRENT_CAR);
 	    certificateChain = certificateChain.getCertificateChainFromCAR(currentCAR);
+
+	    if (certificateChain.getCertificates().isEmpty()) {
+                String msg = "Failed to create a valid certificate chain from the transmitted certificates.";
+                logger.error(msg);
+                response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.PARM_ERROR, msg));
+                return response;
+            }
 
 	    // TA: Step 1 - Verify certificates
 	    ta.verifyCertificates(certificateChain);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,6 +29,7 @@ import org.openecard.common.I18nKey;
  * Enum containing error translation keys for the TR-03112 addon.
  *
  * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public enum ErrorTranslations implements I18nKey {
 
@@ -39,6 +40,7 @@ public enum ErrorTranslations implements I18nKey {
     ERROR_HEADER("err_header"),
     ERROR_MSG_IND("err_msg_indicator"),
     ERROR_TITLE("error"),
+    ERROR_WHILE_AUTHENTICATION("authentication.failed"),
     ESERVICE_ERROR("auth.server.exception"),
     ESERVICE_FAIL("invalid.tctoken.element.eservice"),
     FAILED_PROXY("io.exception.failed_proxy_initialization"),

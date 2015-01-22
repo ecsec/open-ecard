@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 HS Coburg.
+ * Copyright (C) 2012-2015 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -78,6 +78,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.common.util.HandlerUtils;
+import org.openecard.transport.paos.PAOSConnectionException;
 
 
 /**
@@ -365,14 +366,18 @@ public class TCTokenHandler {
 		    break;
 	    }
 
-	    showErrorMessage(errorMsg);
-
 	    if (innerException instanceof WSException) {
-		response.setResult(((WSException) innerException).getResult());
+		errorMsg = langTr03112.translationForKey(ERROR_WHILE_AUTHENTICATION);
+		response.setResult(WSHelper.makeResultError(((WSException) innerException).getResultMinor(), errorMsg));
+		
+	    } else if (innerException instanceof PAOSConnectionException) {
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.COMMUNICATION_ERROR, w.getLocalizedMessage()));
 	    } else {
 		// TODO: check for better matching minor type
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getMessage()));
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getLocalizedMessage()));
 	    }
+
+	    showErrorMessage(errorMsg);
 
 	    try {
 		// fill in values, so it is usuable by the transport module

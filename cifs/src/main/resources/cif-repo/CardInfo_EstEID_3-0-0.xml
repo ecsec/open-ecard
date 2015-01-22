@@ -3,63 +3,38 @@
 	      xmlns:ns2="http://www.w3.org/2000/09/xmldsig#"
 	      xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
 	      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	      xsi:schemaLocation="urn:iso:std:iso-iec:24727:tech:schema http://repository.cardinfo.eu/schema/CardInfo.xsd">
+	      xsi:schemaLocation="urn:iso:std:iso-iec:24727:tech:schema http://ws.openecard.org/schema/CardInfo.xsd">
 
     <iso:CardType>
 	<iso:ObjectIdentifier>http://cif.id.ee/eid</iso:ObjectIdentifier>
-	<iso:CardTypeName xml:lang="EN">Estonian Identity Card</iso:CardTypeName>
-	<iso:CardTypeName xml:lang="DE">Estnischer Personalausweis</iso:CardTypeName>
+	<iso:CardTypeName xml:lang="EN">Estonian Identity Card (v.3.0)</iso:CardTypeName>
+	<iso:CardTypeName xml:lang="DE">Estnischer Personalausweis (v.3.0)</iso:CardTypeName>
 	<iso:Version>
-		<!-- Version number corresponds to the version of the cif -->
-		<iso:Major>0</iso:Major>
+		<!-- Version number corresponds to the version of the estID Applet version -->
+		<iso:Major>3</iso:Major>
 		<iso:Minor>0</iso:Minor>
-		<iso:SubMinor>1</iso:SubMinor>
+		<iso:SubMinor>0</iso:SubMinor>
 	</iso:Version>
-	<iso:Status>Draft</iso:Status>
+	<iso:Status>Final</iso:Status>
 	<iso:Date>2012-11-12</iso:Date>
     </iso:CardType>
 
     <iso:CardIdentification>
 	<iso:CharacteristicFeature>
-	    <!-- select MF -->
+	    <!-- select MF the AID should be unique -->
 	    <iso:CardCall>
-		<iso:CommandAPDU>00A4000C00</iso:CommandAPDU>
-		<iso:ResponseAPDU>
-		    <iso:Trailer>9000</iso:Trailer>
-		</iso:ResponseAPDU>
-	    </iso:CardCall>
-	    <!-- select EstEID DF -->
-	    <iso:CardCall>
-		<iso:CommandAPDU>00A4010C02EEEE</iso:CommandAPDU>
-		<iso:ResponseAPDU>
-		    <iso:Trailer>9000</iso:Trailer>
-		</iso:ResponseAPDU>
-	    </iso:CardCall>
-	    <!-- select EF_PD -->
-	    <iso:CardCall>
-		<iso:CommandAPDU>00A40200025044</iso:CommandAPDU>
-		<iso:ResponseAPDU>
-		    <iso:Body>
-			<iso:Tag>6F</iso:Tag>
-			<iso:DataObject>
-			    <iso:Tag>62</iso:Tag>
-			    <iso:DataObject>
-				<iso:Tag>62</iso:Tag>
-				<iso:DataObject>
-				    <iso:Tag>83</iso:Tag>
-				    <iso:DataObject>
-					<iso:MatchingData>
-					    <iso:Length>02</iso:Length>
-					    <iso:MatchingValue>5044</iso:MatchingValue>
-					</iso:MatchingData>
-				    </iso:DataObject>
-				</iso:DataObject>
-			    </iso:DataObject>
-			</iso:DataObject>
-		    </iso:Body>
-		    <iso:Trailer>9000</iso:Trailer>
-		</iso:ResponseAPDU>
-	    </iso:CardCall>
+	    <iso:CommandAPDU>00A4040C0FF04573744549442076657220312E30</iso:CommandAPDU>
+	    <iso:ResponseAPDU>
+		<iso:Body>
+		    <iso:MatchingData>
+			<iso:Offset>00</iso:Offset>
+			<iso:Length>00</iso:Length>
+			<iso:MatchingValue/>
+		    </iso:MatchingData>
+		</iso:Body>
+		<iso:Trailer>9000</iso:Trailer>
+	    </iso:ResponseAPDU>
+	</iso:CardCall>
 	</iso:CharacteristicFeature>
     </iso:CardIdentification>
 
@@ -72,8 +47,8 @@
 	    <iso:ApplicationIdentifier>D2330000010000010000000000000000</iso:ApplicationIdentifier>
 	    Le have to be 27
 	    -->
-	    <iso:ApplicationName>MF</iso:ApplicationName>
 	    <iso:ApplicationIdentifier>F04573744549442076657220312E30</iso:ApplicationIdentifier>
+	    <iso:ApplicationName>MF</iso:ApplicationName>
 	    <iso:CardApplicationACL>
 		<iso:AccessRule>
 		    <iso:CardApplicationServiceName>CardApplicationServiceAccess</iso:CardApplicationServiceName>
@@ -187,6 +162,7 @@
 				<iso:KeyRef>01</iso:KeyRef>
 			    </iso:PinRef>
 			    <iso:PasswordAttributes>
+				<iso:pwdFlags>initialized exchangeRefData</iso:pwdFlags>
 				<iso:pwdType>ascii-numeric</iso:pwdType>
 				<iso:minLength>4</iso:minLength>
 				<iso:storedLength>12</iso:storedLength>
@@ -297,6 +273,7 @@
 							    <iso:PinInput>
 								<iso:Index>0</iso:Index>
 								<iso:PasswordAttributes>
+								    <iso:pwdFlags>initialized exchangeRefData</iso:pwdFlags>
 								    <iso:pwdType>ascii-numeric</iso:pwdType>
 								    <iso:minLength>4</iso:minLength>
 								    <iso:storedLength>12</iso:storedLength>
@@ -367,6 +344,15 @@
 		    <iso:AccessRule>
 			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
 			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDUpdate</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
 			    <iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
 			</iso:Action>
 			<iso:SecurityCondition>
@@ -405,6 +391,7 @@
 				<iso:KeyRef>02</iso:KeyRef>
 			    </iso:PinRef>
 			    <iso:PasswordAttributes>
+				<iso:pwdFlags>initialized exchangeRefData</iso:pwdFlags>
 				<iso:pwdType>ascii-numeric</iso:pwdType>
 				<iso:minLength>5</iso:minLength>
 				<iso:storedLength>12</iso:storedLength>
@@ -515,6 +502,7 @@
 							    <iso:PinInput>
 								<iso:Index>0</iso:Index>
 								<iso:PasswordAttributes>
+								    <iso:pwdFlags>initialized exchangeRefData</iso:pwdFlags>
 								    <iso:pwdType>ascii-numeric</iso:pwdType>
 								    <iso:minLength>5</iso:minLength>
 								    <iso:storedLength>12</iso:storedLength>
@@ -585,6 +573,15 @@
 		    <iso:AccessRule>
 			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
 			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDUpdate</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
 			    <iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
 			</iso:Action>
 			<iso:SecurityCondition>
@@ -623,6 +620,7 @@
 				<iso:KeyRef>00</iso:KeyRef>
 			    </iso:PinRef>
 			    <iso:PasswordAttributes>
+				<iso:pwdFlags>initialized exchangeRefData</iso:pwdFlags>
 				<iso:pwdType>ascii-numeric</iso:pwdType>
 				<iso:minLength>8</iso:minLength>
 				<iso:storedLength>12</iso:storedLength>
@@ -751,6 +749,15 @@
 			<iso:DIDScope>global</iso:DIDScope>
 		</iso:DifferentialIdentity>
 		<iso:DIDACL>
+		    <iso:AccessRule>
+			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+			<iso:Action>
+			    <iso:DifferentialIdentityServiceAction>DIDUpdate</iso:DifferentialIdentityServiceAction>
+			</iso:Action>
+			<iso:SecurityCondition>
+			    <iso:always>true</iso:always>
+			</iso:SecurityCondition>
+		    </iso:AccessRule>
 		    <iso:AccessRule>
 			<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
 			<iso:Action>

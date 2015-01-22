@@ -7,7 +7,7 @@
 		<iso:ObjectIdentifier>http://bsi.bund.de/cif/npa.xml</iso:ObjectIdentifier>
 		<iso:SpecificationBodyOrIssuer>Federal Office for Information Security</iso:SpecificationBodyOrIssuer>
 		<iso:CardTypeName xml:lang="DE">Personalausweis</iso:CardTypeName>
-		<iso:CardTypeName xml:lang="EN">Electronic Identity Card</iso:CardTypeName>
+		<iso:CardTypeName xml:lang="EN">German Electronic Identity Card</iso:CardTypeName>
 		<iso:Version>
 			<!-- Version number corresponds to the version of the cif -->
 			<iso:Major>1</iso:Major>
@@ -771,35 +771,6 @@
 										</iso:DIDAuthenticationState>
 									</iso:StateTransition>
 
-									<!-- PIN may be deactivated -->
-									<iso:StateTransition TargetState="PIN_deactivated">
-										<iso:DIDAuthenticationState>
-											<iso:DIDName>TAKey</iso:DIDName>
-											<iso:DIDState>true</iso:DIDState>
-											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
-											<!--
-												The DIDStateQualifier contains the CHAT (including Tag and Length),
-												which consists of the following information (see [BSI-TR-03110], C.1.5, C.4, D.2):
-												7F4C - Tag for CHAT
-												12   - Length of CHAT
-												06   - Tag for OID
-												09   - Length of OID
-												04007F000703010202 - OID for Authentication Terminal Role (0.4.0.127.0.7.3.1.2.2)
-												53   - Tag for Discretionary Data
-												05	  - Length of Discretionary Data
-												0000000020 - Role (PIN Management Bit is set)
-											-->
-										</iso:DIDAuthenticationState>
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<!-- Deactivate (see [EAC-2], Section B.11.11) -->
-												<iso:CommandAPDU>0C041003</iso:CommandAPDU>
-												<iso:ResponseAPDU>
-													<iso:Trailer>9000</iso:Trailer>
-												</iso:ResponseAPDU>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-									</iso:StateTransition>
 								</iso:State>
 
 								<!-- (2) PIN_activated-RC2 (63C2) -->
@@ -820,66 +791,6 @@
 											<iso:DIDName>PIN</iso:DIDName>
 											<iso:DIDState>false</iso:DIDState>
 										</iso:DIDAuthenticationState>
-									</iso:StateTransition>
-
-									<!-- PIN may be deactivated -->
-									<iso:StateTransition TargetState="PIN_deactivated">
-										<iso:DIDAuthenticationState>
-											<iso:DIDName>TAKey</iso:DIDName>
-											<iso:DIDState>true</iso:DIDState>
-											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
-										</iso:DIDAuthenticationState>
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<!-- Deactivate (see [EAC-2], Section B.11.11) -->
-												<iso:CommandAPDU>0C041003</iso:CommandAPDU>
-												<iso:ResponseAPDU>
-													<iso:Trailer>9000</iso:Trailer>
-												</iso:ResponseAPDU>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-									</iso:StateTransition>
-
-									<!-- Retry counter may be reset to maximum (RC=3) using TA.
-										 In this case a new PIN is captured and set (case P1=02). -->
-									<iso:StateTransition TargetState="PIN_activated-RC3">
-										<iso:DIDAuthenticationState>
-											<iso:DIDName>TAKey</iso:DIDName>
-											<iso:DIDState>true</iso:DIDState>
-											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
-										</iso:DIDAuthenticationState>
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<iso:APICall>
-													<iso:ModifyVerificationData>
-														<iso:SlotHandle></iso:SlotHandle>
-														<iso:InputUnit>
-															<iso:PinInput>
-																<iso:Index>0</iso:Index>
-																<iso:PasswordAttributes>
-																	<iso:pwdFlags>initialized resetRetryCounter1</iso:pwdFlags>
-																	<iso:pwdType>ascii-numeric</iso:pwdType>
-																	<iso:minLength>6</iso:minLength>
-																	<iso:storedLength>6</iso:storedLength>
-																	<iso:maxLength>6</iso:maxLength>
-																</iso:PasswordAttributes>
-															</iso:PinInput>
-														</iso:InputUnit>
-														<!-- Reset Retry Counter (see [EAC-2], Section B.11.9)  -->
-														<iso:Template>002C0203</iso:Template>
-													</iso:ModifyVerificationData>
-												</iso:APICall>
-												<iso:APIResponse>
-													<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
-														<dss:Result>
-															<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
-														</dss:Result>
-														<iso:Response>9000</iso:Response>
-													</iso:ModifyVerificationDataResponse>
-												</iso:APIResponse>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-
 									</iso:StateTransition>
 
 									<!-- Retry counter may be reset to maximum (RC=3) using PUK.
@@ -924,65 +835,6 @@
 											<iso:DIDName>CAN</iso:DIDName>
 											<iso:DIDState>true</iso:DIDState>
 										</iso:DIDAuthenticationState>
-									</iso:StateTransition>
-
-									<!-- PIN may be deactivated -->
-									<iso:StateTransition TargetState="PIN_deactivated">
-										<iso:DIDAuthenticationState>
-											<iso:DIDName>TAKey</iso:DIDName>
-											<iso:DIDState>true</iso:DIDState>
-											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
-										</iso:DIDAuthenticationState>
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<!-- Deactivate (see [EAC-2], Section B11.11)  -->
-												<iso:CommandAPDU>0C041003</iso:CommandAPDU>
-												<iso:ResponseAPDU>
-													<iso:Trailer>9000</iso:Trailer>
-												</iso:ResponseAPDU>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-									</iso:StateTransition>
-
-									<!-- Retry counter may be reset to maximum (RC=3) using TA.
-										 In this case a new PIN is captured and set (case P1=02). -->
-									<iso:StateTransition TargetState="PIN_activated-RC3">
-										<iso:DIDAuthenticationState>
-											<iso:DIDName>TAKey</iso:DIDName>
-											<iso:DIDState>true</iso:DIDState>
-											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
-										</iso:DIDAuthenticationState>
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<iso:APICall>
-													<iso:ModifyVerificationData>
-														<iso:SlotHandle></iso:SlotHandle>
-														<iso:InputUnit>
-															<iso:PinInput>
-																<iso:Index>0</iso:Index>
-																<iso:PasswordAttributes>
-																	<iso:pwdFlags>initialized resetRetryCounter1</iso:pwdFlags>
-																	<iso:pwdType>ascii-numeric</iso:pwdType>
-																	<iso:minLength>6</iso:minLength>
-																	<iso:storedLength>6</iso:storedLength>
-																	<iso:maxLength>6</iso:maxLength>
-																</iso:PasswordAttributes>
-															</iso:PinInput>
-														</iso:InputUnit>
-														<!-- Reset Retry Counter (see [EAC-2], Section B.11.9)  -->
-														<iso:Template>002C0203</iso:Template>
-													</iso:ModifyVerificationData>
-												</iso:APICall>
-												<iso:APIResponse>
-													<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
-														<dss:Result>
-															<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
-														</dss:Result>
-														<iso:Response>9000</iso:Response>
-													</iso:ModifyVerificationDataResponse>
-												</iso:APIResponse>
-											</iso:CardCall>
-										</iso:FixedProcedure>
 									</iso:StateTransition>
 
 									<!-- Retry counter may be reset to maximum (RC=3) using PUK.
@@ -1031,23 +883,6 @@
 								<!-- (4) PIN_deactivated (6283) -->
 
 								<iso:State StateName="PIN_deactivated" StateClass="NotOperational">
-
-									<iso:StateTransition TargetState="PIN_start">
-										<iso:DIDAuthenticationState>
-											<iso:DIDName>TAKey</iso:DIDName>
-											<iso:DIDState>true</iso:DIDState>
-											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
-										</iso:DIDAuthenticationState>
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<!-- Activate (see [EAC-2], Section B.11.10)  -->
-												<iso:CommandAPDU>0C441003</iso:CommandAPDU>
-												<iso:ResponseAPDU>
-													<iso:Trailer>9000</iso:Trailer>
-												</iso:ResponseAPDU>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-									</iso:StateTransition>
 								</iso:State>
 
 
@@ -1055,50 +890,6 @@
 
 								<iso:State StateName="PIN_blocked" StateClass="NotOperational">
 									<iso:RetryCounter>0</iso:RetryCounter>
-									<!-- Retry counter may be reset to maximum (RC=3) using TA.
-										 In this case a new PIN is captured and set (case P1=02). -->
-									<iso:StateTransition>
-										<iso:DIDAuthenticationState>
-											<iso:DIDName>TAKey</iso:DIDName>
-											<iso:DIDState>true</iso:DIDState>
-											<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
-										</iso:DIDAuthenticationState>
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<iso:APICall>
-													<iso:ModifyVerificationData>
-														<iso:SlotHandle></iso:SlotHandle>
-														<iso:InputUnit>
-															<iso:PinInput>
-																<iso:Index>0</iso:Index>
-																<iso:PasswordAttributes>
-																	<iso:pwdFlags>initialized resetRetryCounter1</iso:pwdFlags>
-																	<iso:pwdType>ascii-numeric</iso:pwdType>
-																	<iso:minLength>6</iso:minLength>
-																	<iso:storedLength>6</iso:storedLength>
-																	<iso:maxLength>6</iso:maxLength>
-																</iso:PasswordAttributes>
-															</iso:PinInput>
-														</iso:InputUnit>
-														<!-- Reset Retry Counter (see [EAC-2], Section B.11.9)  -->
-														<iso:Template>002C0203</iso:Template>
-													</iso:ModifyVerificationData>
-												</iso:APICall>
-												<iso:APIResponse>
-													<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
-														<dss:Result>
-															<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
-														</dss:Result>
-														<!-- This result indicates the success of the resetting procedure. -->
-														<iso:Response>9000</iso:Response>
-													</iso:ModifyVerificationDataResponse>
-													<iso:Conlusion>
-														<iso:RecognizedState>PIN_activated-RC3</iso:RecognizedState>
-													</iso:Conlusion>
-												</iso:APIResponse>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-									</iso:StateTransition>
 
 									<!-- Retry counter may be reset to maximum (RC=3) using PUK.
 										 In this case no new PIN is set (case P1=03). -->
@@ -1157,21 +948,30 @@
 							-->
 						</iso:Action>
 						<iso:SecurityCondition>
-							<iso:or>
-								<iso:SecurityCondition>
-									<iso:DIDAuthentication>
-										<iso:DIDName>PIN</iso:DIDName>
-										<iso:DIDState>true</iso:DIDState>
-									</iso:DIDAuthentication>
-								</iso:SecurityCondition>
-								<iso:SecurityCondition>
-									<iso:DIDAuthentication>
-										<iso:DIDName>TAKey</iso:DIDName>
-										<iso:DIDState>true</iso:DIDState>
-										<iso:DIDStateQualifier>7F4C12060904007F00070301020253050000000020</iso:DIDStateQualifier>
-									</iso:DIDAuthentication>
-								</iso:SecurityCondition>
-							</iso:or>
+							<iso:DIDAuthentication>
+								<iso:DIDName>PIN</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
 						</iso:SecurityCondition>
 					</iso:AccessRule>
 				</iso:DIDACL>
@@ -1234,6 +1034,24 @@
 						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
 						<iso:Action>
 							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
 						</iso:Action>
 						<iso:SecurityCondition>
 							<iso:always>true</iso:always>

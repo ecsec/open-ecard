@@ -335,46 +335,34 @@
 	    </iso:ResponseAPDU>
 	</iso:CardCall>
 	<iso:CardCall>
-	    <iso:CommandAPDU>00A4000C00</iso:CommandAPDU>
+	    <iso:CommandAPDU>00A4040C0FF04573744549442076657220312E30</iso:CommandAPDU>
 	    <iso:ResponseAPDU>
+		<iso:Body>
+		    <iso:MatchingData>
+			<iso:Offset>00</iso:Offset>
+			<iso:Length>00</iso:Length>
+			<iso:MatchingValue/>
+		    </iso:MatchingData>
+		</iso:Body>
 		<iso:Trailer>9000</iso:Trailer>
 		<iso:Conclusion>
-		    <iso:CardCall>
-			<iso:CommandAPDU>00A4010C02EEEE</iso:CommandAPDU>
-			<iso:ResponseAPDU>
-			    <iso:Trailer>9000</iso:Trailer>
-			    <iso:Conclusion>
-				<iso:CardCall>
-				    <iso:CommandAPDU>00A40200025044</iso:CommandAPDU>
-				    <iso:ResponseAPDU>
-					<iso:Body>
-					    <iso:Tag>6F</iso:Tag>
-					    <iso:DataObject>
-						<iso:Tag>62</iso:Tag>
-						<iso:DataObject>
-						    <iso:Tag>62</iso:Tag>
-						    <iso:DataObject>
-							<iso:Tag>83</iso:Tag>
-							<iso:DataObject>
-							    <iso:MatchingData>
-								<iso:Offset>00</iso:Offset>
-								<iso:Length>02</iso:Length>
-								<iso:MatchingValue>5044</iso:MatchingValue>
-							    </iso:MatchingData>
-							</iso:DataObject>
-						    </iso:DataObject>
-						</iso:DataObject>
-					    </iso:DataObject>
-					</iso:Body>
-					<iso:Trailer>9000</iso:Trailer>
-					<iso:Conclusion>
-					    <iso:RecognizedCardType>http://cif.id.ee/eid</iso:RecognizedCardType>
-					</iso:Conclusion>
-				    </iso:ResponseAPDU>
-				</iso:CardCall>
-			    </iso:Conclusion>
-			</iso:ResponseAPDU>
-		    </iso:CardCall>
+		    <iso:RecognizedCardType>http://cif.id.ee/eid</iso:RecognizedCardType>
+		</iso:Conclusion>
+	    </iso:ResponseAPDU>
+	</iso:CardCall>
+	<iso:CardCall>
+	    <iso:CommandAPDU>00A4040C0FD23300000045737445494420763335</iso:CommandAPDU>
+	    <iso:ResponseAPDU>
+		<iso:Body>
+		    <iso:MatchingData>
+			<iso:Offset>00</iso:Offset>
+			<iso:Length>00</iso:Length>
+			<iso:MatchingValue/>
+		    </iso:MatchingData>
+		</iso:Body>
+		<iso:Trailer>9000</iso:Trailer>
+		<iso:Conclusion>    
+		    <iso:RecognizedCardType>http://cif.id.ee/eidV3.5</iso:RecognizedCardType>
 		</iso:Conclusion>
 	    </iso:ResponseAPDU>
 	</iso:CardCall>

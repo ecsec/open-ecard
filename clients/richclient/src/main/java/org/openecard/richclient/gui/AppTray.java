@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,6 +26,7 @@ import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.SystemTray;
@@ -50,8 +51,9 @@ import org.slf4j.LoggerFactory;
  * This class creates a tray icon on systems that do have a system tray.
  * Otherwise a normal window will be shown.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Moritz Horsch
+ * @author Johannes Schmölz
+ * @author Tobias Wich
  */
 public class AppTray {
 
@@ -66,10 +68,9 @@ public class AppTray {
     private SystemTray tray;
     private TrayIcon trayIcon;
     private Status status;
-    private JFrame frame;
-    private JLabel label;
-    private Boolean isLinux = null;
-    private Boolean isKde = null;
+    private InfoFrame frame;
+    private Boolean isLinux;
+    private Boolean isKde;
     private boolean trayAvailable;
 
     /**
@@ -101,14 +102,21 @@ public class AppTray {
      * @param manager
      */
     public void endSetup(CardRecognition rec, AddonManager manager) {
+	status = new Status(this, rec, manager);
+
 	if (trayAvailable) {
 	    trayIcon.setImage(getTrayIconImage(ICON_LOGO));
 	    trayIcon.setToolTip(lang.translationForKey("tray.title"));
 	} else {
-	    label.setIcon(new ImageIcon(GraphicsUtil.createImage(OecLogoBgWhite.class, 256, 256)));
-	}
+	    frame.setVisible(false);
+	    status.setInfoPanel(frame);
 
-	status = new Status(this, rec, manager);
+	    frame.pack();
+	    frame.setResizable(false);
+	    frame.setLocationRelativeTo(null);
+	    frame.setState(Frame.ICONIFIED);
+	    frame.setVisible(true);
+	}
     }
 
     /**
@@ -230,7 +238,7 @@ public class AppTray {
     private boolean isLinux() {
 	if (isLinux == null) {
 	    String os = System.getProperty("os.name").toLowerCase();
-	    isLinux = os.indexOf("nux") >= 0;
+	    isLinux = os.contains("nux");
 	}
 	return isLinux;
     }
@@ -254,18 +262,11 @@ public class AppTray {
     private void setupFrame() {
 	trayAvailable = false;
 
-	frame = new JFrame(lang.translationForKey("tray.title"));
+	frame = new InfoFrame(lang.translationForKey("tray.title"));
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	frame.setIconImage(GraphicsUtil.createImage(OecLogoBgWhite.class, 256, 256));
 
-	label = new JLabel(GuiUtils.getImageIcon("loader_icon_default_64.gif"));
-	label.addMouseListener(new MouseAdapter() {
-	    @Override
-	    public void mousePressed(MouseEvent e) {
-		status.showInfo(e.getLocationOnScreen());
-	    }
-	});
-
+	JLabel label = new JLabel(new ImageIcon(GraphicsUtil.createImage(OecLogoBgWhite.class, 256, 256)));
 	ImageIcon logo = new ImageIcon(GraphicsUtil.createImage(OecLogoBgWhite.class, 256, 256));
 	Container c = frame.getContentPane();
 	c.setPreferredSize(new Dimension(logo.getIconWidth(), logo.getIconHeight()));

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -36,9 +36,9 @@ import javax.swing.JDialog;
  * This class creats a InfoPopup showing different information about connected terminals and available cards.
  * It also contains the different controls of the application, e.g. the exit button.
  *
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Johannes Schmölz
  */
-public class InfoPopup extends JDialog {
+public class InfoPopup extends JDialog implements StatusContainer {
 
     private static final long serialVersionUID = 1L;
 
@@ -72,6 +72,7 @@ public class InfoPopup extends JDialog {
      *
      * @param c Container which will be set as ContentPane
      */
+    @Override
     public void updateContent(Container c) {
 	setContentPane(c);
 	pack();

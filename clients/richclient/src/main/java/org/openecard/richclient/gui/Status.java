@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,6 +32,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Point;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.InputStream;
@@ -65,7 +66,8 @@ import org.slf4j.LoggerFactory;
  * connected card terminals and available cards. It is also responsible for creating the InfoPopup which displays the
  * collected information.
  *
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Johannes Schmölz
+ * @author Tobias Wich
  */
 public class Status implements EventCallback {
 
@@ -79,7 +81,7 @@ public class Status implements EventCallback {
     private JPanel contentPane;
     private JPanel infoView;
     private JPanel noTerminal;
-    private InfoPopup popup;
+    private StatusContainer popup;
     private final AppTray appTray;
     private final CardRecognition recognition;
     private final AddonManager manager;
@@ -111,10 +113,15 @@ public class Status implements EventCallback {
      * @param p position
      */
     public void showInfo(Point p) {
-	if (popup != null) {
-	    popup.dispose();
+	if (popup != null && popup instanceof Window) {
+	    ((Window) popup).dispose();
 	}
 	popup = new InfoPopup(contentPane, p);
+    }
+
+    public void setInfoPanel(StatusContainer frame) {
+	popup = frame;
+	popup.setContentPane(contentPane);
     }
 
 

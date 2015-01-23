@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 HS Coburg.
+ * Copyright (C) 2012-2015 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,7 +30,6 @@ import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
-import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -38,6 +37,7 @@ import java.util.Map;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.bouncycastle.util.Arrays;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.GetResponse;
@@ -185,7 +185,7 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 
 	String[] signatureGenerationInfo = cryptoMarker.getSignatureGenerationInfo();
 	for (String command : signatureGenerationInfo) {
-	    HashSet<String> signGenInfo = new HashSet<String>(java.util.Arrays.asList(signatureGenerationInfo));
+	    HashSet<String> signGenInfo = new HashSet<>(java.util.Arrays.asList(signatureGenerationInfo));
 
 	    if (command.equals("MSE_KEY")) {
 		byte[] mseData = tagKeyReference.toBER();
@@ -247,10 +247,9 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    signedMessage = Arrays.concatenate(signedMessage, responseAPDU.getData());
 	}
 
-	if (!Arrays.areEqual(responseAPDU.getTrailer(), new byte[]{(byte) 0x90, (byte) 0x00})) {
-	    TransmitResponse tr = new TransmitResponse();
-	    tr.getOutputAPDU().add(responseAPDU.toByteArray());
-	    WSHelper.checkResult(response);
+	if (! Arrays.areEqual(responseAPDU.getTrailer(), new byte[]{(byte) 0x90, (byte) 0x00})) {
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.Disp.COMM_ERROR, responseAPDU.getStatusMessage()));
+	    return response;
 	}
 	
 	response.setSignature(signedMessage);
@@ -275,7 +274,7 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    BaseTemplateContext templateCTX) throws APDUTemplateException, APDUException, WSHelper.WSException {
 	SignResponse response = WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultOK());
 	List<CardCallTemplateType> legacyCommands = cryptoMarker.getLegacySignatureGenerationInfo();
-	CardCommandAPDU cmdAPDU = null;
+	CardCommandAPDU cmdAPDU;
 	CardResponseAPDU responseAPDU = null;
 	byte[] signedMessage;
 
@@ -296,9 +295,8 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	}
 
 	if (!Arrays.areEqual(responseAPDU.getTrailer(), new byte[]{(byte) 0x90, (byte) 0x00})) {
-	    TransmitResponse tr = new TransmitResponse();
-	    tr.getOutputAPDU().add(responseAPDU.toByteArray());
-	    WSHelper.checkResult(response);
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.Disp.COMM_ERROR, responseAPDU.getStatusMessage()));
+	    return response;
 	}
 
 	response.setSignature(signedMessage);

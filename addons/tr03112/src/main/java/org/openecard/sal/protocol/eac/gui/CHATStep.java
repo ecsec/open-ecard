@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -40,6 +40,7 @@ import org.openecard.sal.protocol.eac.EACData;
  * @author Tobias Wich
  * @author Moritz Horsch
  * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 public class CHATStep extends Step {
 
@@ -94,12 +95,16 @@ public class CHATStep extends Step {
 
 	// iterate over all 21 eID application data groups
 	for (CHAT.DataGroup dataGroup : requiredReadAccess.keySet()) {
-	    if (requiredReadAccess.get(dataGroup)) {
-		displayReadAccessCheckBox = true;
-		readAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, true));
-	    } else if (optionalReadAccess.get(dataGroup)) {
-		displayReadAccessCheckBox = true;
-		readAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, false));
+	    if (TR03119RightsFilter.isTr03119ConformReadRight(dataGroup)) {
+		if (requiredReadAccess.get(dataGroup)) {
+		    displayReadAccessCheckBox = true;
+		    readAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, true));
+		} else if (optionalReadAccess.get(dataGroup)) {
+		    displayReadAccessCheckBox = true;
+		    readAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, false));
+		}
+	    } else {
+		eacData.requiredCHAT.setReadAccess(dataGroup, false);
 	    }
 	}
 
@@ -115,12 +120,16 @@ public class CHATStep extends Step {
 		}
 	    }
 
-	    if (requiredSpecialFunctions.get(specialFunction)) {
-		displayReadAccessCheckBox = true;
-		readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, true, textData));
-	    } else if (optionalSpecialFunctions.get(specialFunction)) {
-		displayReadAccessCheckBox = true;
-		readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, false, textData));
+	    if (TR03119RightsFilter.isTr03119ConformSpecialFunction(specialFunction)) {
+		if (requiredSpecialFunctions.get(specialFunction)) {
+		    displayReadAccessCheckBox = true;
+		    readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, true, textData));
+		} else if (optionalSpecialFunctions.get(specialFunction)) {
+		    displayReadAccessCheckBox = true;
+		    readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, false, textData));
+		}
+	    } else {
+		eacData.requiredCHAT.setSpecialFunctions(specialFunction, false);
 	    }
 	}
 
@@ -137,12 +146,16 @@ public class CHATStep extends Step {
 
 	// iterate over DG17-DG21 of the eID application data groups
 	for (CHAT.DataGroup dataGroup : requiredWriteAccess.keySet()) {
-	    if (requiredWriteAccess.get(dataGroup)) {
-		displayWriteAccessCheckBox = true;
-		writeAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, true));
-	    } else if (optionalWriteAccess.get(dataGroup)) {
-		displayWriteAccessCheckBox = true;
-		writeAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, false));
+	    if (TR03119RightsFilter.isTr03119ConformWriteRight(dataGroup)) {
+		if (requiredWriteAccess.get(dataGroup)) {
+		    displayWriteAccessCheckBox = true;
+		    writeAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, true));
+		} else if (optionalWriteAccess.get(dataGroup)) {
+		    displayWriteAccessCheckBox = true;
+		    writeAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, false));
+		}
+	    } else {
+		eacData.requiredCHAT.setWriteAccess(dataGroup, false);
 	    }
 	}
 

@@ -98,7 +98,7 @@ public class CombiningRegistry implements AddonRegistry {
     }
 
     @Override
-    public ClassLoader downloadAddon(AddonSpecification addonSpec) {
+    public ClassLoader downloadAddon(AddonSpecification addonSpec) throws AddonException {
 	AddonSpecification desc = classpathRegistry.search(addonSpec.getId());
 	if (desc != null) {
 	    return classpathRegistry.downloadAddon(addonSpec);

@@ -47,6 +47,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import org.openecard.addon.AddonException;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonProperties;
 import org.openecard.addon.AddonRegistry;
@@ -345,8 +346,13 @@ public class ManagementDialog extends JFrame {
 	if (coreAddon) {
 	    logo = loadLogo(null, desc.getLogo());
 	} else {
-	    ClassLoader loader = manager.getRegistry().downloadAddon(desc);
-	    logo = loadLogo(loader, "META-INF/" + desc.getLogo());
+	    try {
+		ClassLoader loader = manager.getRegistry().downloadAddon(desc);
+		logo = loadLogo(loader, "META-INF/" + desc.getLogo());
+	    } catch (AddonException ex) {
+		logger.error("Failed to load logo from Add-on bundle.");
+		logo = null;
+	    }
 	}
 
 	// setup about panel but just if we don't have a core addon

@@ -268,9 +268,9 @@ public class AddonManager {
 
 	ProtocolPluginSpecification protoSpec = addonSpec.searchIFDActionByURI(uri);
 	String className = protoSpec.getClassName();
-	ClassLoader cl = registry.downloadAddon(addonSpec);
-	IFDProtocolProxy protoFactory = new IFDProtocolProxy(className, cl);
 	try {
+	    ClassLoader cl = registry.downloadAddon(addonSpec);
+	    IFDProtocolProxy protoFactory = new IFDProtocolProxy(className, cl);
 	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
 	    aCtx.setCardRecognition(recognition);
 	    aCtx.setCardStateMap(cardStates);
@@ -281,6 +281,8 @@ public class AddonManager {
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
 	    logger.error("Initialization of IFD Protocol failed", e);
+	} catch (AddonException ex) {
+	    logger.error("Failed to download Add-on.", ex);
 	}
 	return null;
     }
@@ -302,9 +304,9 @@ public class AddonManager {
 
 	ProtocolPluginSpecification protoSpec = addonSpec.searchSALActionByURI(uri);
 	String className = protoSpec.getClassName();
-	ClassLoader cl = registry.downloadAddon(addonSpec);
-	SALProtocolProxy protoFactory = new SALProtocolProxy(className, cl);
 	try {
+	    ClassLoader cl = registry.downloadAddon(addonSpec);
+	    SALProtocolProxy protoFactory = new SALProtocolProxy(className, cl);
 	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
 	    aCtx.setCardRecognition(recognition);
 	    aCtx.setCardStateMap(cardStates);
@@ -315,6 +317,8 @@ public class AddonManager {
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
 	    logger.error("Initialization of SAL Protocol failed", e);
+	} catch (AddonException ex) {
+	    logger.error("Failed to download Add-on.", ex);
 	}
 	return null;
     }
@@ -336,9 +340,9 @@ public class AddonManager {
 
 	AppExtensionSpecification protoSpec = addonSpec.searchByActionId(actionId);
 	String className = protoSpec.getClassName();
-	ClassLoader cl = registry.downloadAddon(addonSpec);
-	AppExtensionActionProxy protoFactory = new AppExtensionActionProxy(className, cl);
 	try {
+	    ClassLoader cl = registry.downloadAddon(addonSpec);
+	    AppExtensionActionProxy protoFactory = new AppExtensionActionProxy(className, cl);
 	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
 	    aCtx.setCardRecognition(recognition);
 	    aCtx.setCardStateMap(cardStates);
@@ -349,6 +353,8 @@ public class AddonManager {
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
 	    logger.error("Initialization of AppExtensionAction failed", e);
+	} catch (AddonException ex) {
+	    logger.error("Failed to download Add-on.", ex);
 	}
 	return null;
     }
@@ -371,9 +377,9 @@ public class AddonManager {
 
 	AppPluginSpecification protoSpec = addonSpec.searchByResourceName(resourceName);
 	String className = protoSpec.getClassName();
-	ClassLoader cl = registry.downloadAddon(addonSpec);
-	AppPluginActionProxy protoFactory = new AppPluginActionProxy(className, cl);
 	try {
+	    ClassLoader cl = registry.downloadAddon(addonSpec);
+	    AppPluginActionProxy protoFactory = new AppPluginActionProxy(className, cl);
 	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
 	    aCtx.setCardRecognition(recognition);
 	    aCtx.setCardStateMap(cardStates);
@@ -384,6 +390,8 @@ public class AddonManager {
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
 	    logger.error("Initialization of AppPluginAction failed", e);
+	} catch (AddonException ex) {
+	    logger.error("Failed to download Add-on.", ex);
 	}
 	return null;
     }

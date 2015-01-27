@@ -108,6 +108,23 @@ public class ResourceContext {
 	return stream;
     }
 
+    public void closeStream() {
+	if (stream != null) {
+	    try {
+		stream.close();
+	    } catch (IOException ex) {
+		logger.debug("Failed to close stream.", ex);
+	    }
+	}
+	if (tlsClientProto != null) {
+	    try {
+		tlsClientProto.close();
+	    } catch (IOException ex) {
+		logger.debug("Failed to close connection.", ex);
+	    }
+	}
+    }
+
     public List<Pair<URL, Certificate>> getCerts() {
 	return certs;
     }
@@ -115,17 +132,16 @@ public class ResourceContext {
     public synchronized String getData() throws IOException {
 	// load data from stream first
 	if (data == null) {
-	    LimitedInputStream is = null;
 	    try {
-		is = new LimitedInputStream(stream);
-		data = FileUtils.toString(is);
+		data = FileUtils.toString(stream);
 	    } catch (IOException ex) {
 		throw ex;
 	    } finally {
-		if (is != null) {
+		if (stream != null) {
 		    try {
-			is.close();
-		    } catch (IOException ignore) {
+			stream.close();
+		    } catch (IOException ex) {
+			logger.debug("Failed to close stream.", ex);
 		    }
 		}
 	    }
@@ -210,7 +226,9 @@ public class ResourceContext {
 	    tlsClient.setClientVersion(ProtocolVersion.TLSv12);
 	    Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
 	    h = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), new SecureRandom());
+	    logger.debug("Performing TLS handshake.");
 	    h.connect(tlsClient);
+	    logger.debug("TLS handshake performed.");
 
 	    serverCerts.add(new Pair<>(url, tlsAuth.getServerCertificate()));
 	    // check result
@@ -231,7 +249,9 @@ public class ResourceContext {
 	    req.setHeader("Accept", "text/xml, */*;q=0.8");
 	    req.setHeader("Accept-Charset", "utf-8, *;q=0.8");
 	    HttpUtils.dumpHttpRequest(logger, req);
+	    logger.debug("Sending HTTP request.");
 	    HttpResponse response = httpexecutor.execute(req, conn, ctx);
+	    logger.debug("HTTP response received.");
 	    StatusLine status = response.getStatusLine();
 	    int statusCode = status.getStatusCode();
 	    String reason = status.getReasonPhrase();
@@ -269,6 +289,7 @@ public class ResourceContext {
 		result.setStream(is);
 		return result;
 	    } else {
+		h.close();
 		return getStreamInt(url, v, serverCerts, maxRedirects);
 	    }
 	} catch (URISyntaxException ex) {

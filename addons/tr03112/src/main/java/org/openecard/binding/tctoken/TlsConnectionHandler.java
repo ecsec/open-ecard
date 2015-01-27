@@ -112,6 +112,11 @@ public class TlsConnectionHandler {
 	    if (isSameChannel()) {
 		tlsClient = tokenRequest.getTokenContext().getTlsClient();
 	    } else {
+		// kill open channel in tctoken request, it is not needed anymore
+		if (tokenRequest.getTokenContext() != null) {
+		    tokenRequest.getTokenContext().closeStream();
+		}
+
 		// determine TLS version to use
 		boolean tls1 = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
 		ProtocolVersion version = ProtocolVersion.TLSv12;

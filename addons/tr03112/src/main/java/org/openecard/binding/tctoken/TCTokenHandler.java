@@ -449,6 +449,7 @@ public class TCTokenHandler {
 	    boolean redirectChecks = isPerformTR03112Checks(request);
 	    RedirectCertificateValidator verifier = new RedirectCertificateValidator(redirectChecks);
 	    ResourceContext ctx = ResourceContext.getStream(endpoint, verifier);
+	    ctx.closeStream();
 
 	    // using this verifier no result must be present, meaning no status code different than a redirect occurred
 //	    if (result.p1 != null) {

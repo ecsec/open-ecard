@@ -316,7 +316,9 @@ public class PAOS {
 			req.setHeader(reqMsg.getContentType());
 			req.setHeader("Content-Length", Long.toString(reqMsg.getContentLength()));
 			// send request and receive response
+			logger.debug("Sending HTTP request.");
 			HttpResponse response = httpexecutor.execute(req, conn, ctx);
+			logger.debug("HTTP response received.");
 			int statusCode = response.getStatusLine().getStatusCode();
 			checkHTTPStatusCode(statusCode);
 
@@ -383,8 +385,10 @@ public class PAOS {
      private StreamHttpClientConnection openHttpStream() throws PAOSConnectionException {
         StreamHttpClientConnection conn;
 	try {
+	    logger.debug("Opening connection to PAOS server.");
             TlsClientProtocol handler = tlsHandler.createTlsConnection();
             conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());
+	    logger.debug("Connection to PAOS server established.");
             return conn;
         } catch (IOException | URISyntaxException ex) {
             throw new PAOSConnectionException(ex);

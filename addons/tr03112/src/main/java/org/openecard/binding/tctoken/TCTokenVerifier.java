@@ -367,6 +367,7 @@ public class TCTokenVerifier {
 	    try {
 		CertificateValidator validator = new RedirectCertificateValidator(true);
 		ResourceContext newResCtx = ResourceContext.getStream(new URL(token.getRefreshAddress()), validator);
+		newResCtx.closeStream();
 		List<Pair<URL, Certificate>> resultPoints = newResCtx.getCerts();
 		Pair<URL, Certificate> last = resultPoints.get(resultPoints.size() - 1);
 		URL resAddr = last.p1;

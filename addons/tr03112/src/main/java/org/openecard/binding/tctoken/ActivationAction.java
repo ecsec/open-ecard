@@ -83,8 +83,9 @@ public class ActivationAction implements AppPluginAction {
 	}
 
 	try {
+	    TCTokenRequest tcTokenRequest = null;
 	    try {
-		TCTokenRequest tcTokenRequest = TCTokenRequest.convert(params);
+		tcTokenRequest = TCTokenRequest.convert(params);
 		response = tokenHandler.handleActivate(tcTokenRequest);
 		// Show success message. If we get here we have a valid StartPAOSResponse and a valid refreshURL
 		showFinishMessage((TCTokenResponse) response);
@@ -107,6 +108,11 @@ public class ActivationAction implements AppPluginAction {
 		    logger.info("Authentication failed, redirecting to with errors attached to the URL.");
 		}
 		response = ex.getBindingResult();
+	    } finally {
+		if (tcTokenRequest != null && tcTokenRequest.getTokenContext() != null) {
+		    // close connection to tctoken server in case PAOS didn't already perform this action
+		    tcTokenRequest.getTokenContext().closeStream();
+		}
 	    }
 	} catch (RuntimeException e) {
 	    response = new BindingResult(BindingResultCode.INTERNAL_ERROR);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2013-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,6 +23,7 @@
 package org.openecard.addon;
 
 import java.util.Set;
+import javax.annotation.Nonnull;
 import org.openecard.addon.manifest.AddonSpecification;
 
 
@@ -33,9 +34,9 @@ import org.openecard.addon.manifest.AddonSpecification;
  * ClassLoader.
  * </p>
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 public interface AddonRegistry {
 
@@ -112,7 +113,10 @@ public interface AddonRegistry {
      *
      * @param addonSpec An {@link AddonSpecification} to search.
      * @return A {@link ClassLoader} for the corresponding {@link AddonSpecification}.
+     * @throws AddonException Thrown in case there is a problem loading the Add-on.
+     * @throws NullPointerException Thrown in case no specification was given or there are vital elemnts missing in the
+     *   Add-on specification.
      */
-    ClassLoader downloadAddon(AddonSpecification addonSpec);
+    ClassLoader downloadAddon(@Nonnull AddonSpecification addonSpec) throws AddonException, NullPointerException;
 
 }

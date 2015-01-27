@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 HS Coburg.
+ * Copyright (C) 2013-2015 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
  * Adding and removing add-on-files at runtime is supported.
  *
  * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public class FileRegistry implements AddonRegistry {
 
@@ -235,18 +236,18 @@ public class FileRegistry implements AddonRegistry {
     }
 
     @Override
-    public ClassLoader downloadAddon(AddonSpecification addonSpec) {
+    public ClassLoader downloadAddon(AddonSpecification addonSpec) throws AddonException {
 	String aId = addonSpec.getId();
-	// TODO use other own classloader impl with security features
-	URL[] url = new URL[1];
+	// TODO: use other own classloader impl with security features
+	ClassLoader cl = getClass().getClassLoader();
 	try {
-	    url[0] = files.get(aId).toURI().toURL();
+	    URL[] url = new URL[] { files.get(aId).toURI().toURL() };
+	    URLClassLoader ucl = new URLClassLoader(url, cl);
+	    return ucl;
 	} catch (MalformedURLException e) {
-	    // TODO will this ever happen?
 	    logger.error(e.getMessage(), e);
+	    throw new AddonException("Failed to convert Add-on location URI to URL.");
 	}
-	URLClassLoader ucl = new URLClassLoader(url);
-	return ucl;
     }
 
     @Override

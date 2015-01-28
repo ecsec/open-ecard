@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -47,11 +47,27 @@ import org.slf4j.LoggerFactory;
 /**
  * Implements an abstract key for chip authentication.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class CAKey {
 
-    private static final Logger logger = LoggerFactory.getLogger(CAKey.class);
+    private static final Logger logger;
+    private static final SecureRandom rand;
+    private static long counter;
+
+    static {
+	logger = LoggerFactory.getLogger(CAKey.class);
+	rand = new SecureRandom();
+	rand.setSeed(rand.generateSeed(32));
+	counter = 0;
+    }
+
+    private static void reseed() {
+	counter++;
+	rand.setSeed(counter);
+	rand.setSeed(System.nanoTime());
+    }
+
     private AsymmetricKeyParameter sk;
     private AsymmetricKeyParameter pk;
     private final CADomainParameter cdp;
@@ -105,10 +121,11 @@ public final class CAKey {
      * Generate a key pair.
      */
     public void generateKeyPair() {
+	reseed();
 	if (cdp.isDH()) {
 	    ElGamalParameterSpec p = (ElGamalParameterSpec) cdp.getParameter();
 	    int numBits = p.getG().bitLength();
-	    BigInteger d = new BigInteger(numBits, new SecureRandom());
+	    BigInteger d = new BigInteger(numBits, rand);
 	    ElGamalParameters egp = new ElGamalParameters(p.getP(), p.getG());
 
 	    sk = new ElGamalPrivateKeyParameters(d, egp);
@@ -117,7 +134,7 @@ public final class CAKey {
 	} else if (cdp.isECDH()) {
 	    ECParameterSpec p = (ECParameterSpec) cdp.getParameter();
 	    int numBits = p.getN().bitLength();
-	    BigInteger d = new BigInteger(numBits, new SecureRandom());
+	    BigInteger d = new BigInteger(numBits, rand);
 	    ECDomainParameters ecp = new ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH());
 
 	    sk = new ECPrivateKeyParameters(d, ecp);

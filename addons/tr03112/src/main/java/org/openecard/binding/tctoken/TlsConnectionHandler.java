@@ -50,6 +50,7 @@ import org.openecard.crypto.tls.proxy.ProxySettings;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.UrlBuilder;
+import org.openecard.crypto.tls.ReusableSecureRandom;
 
 
 /**
@@ -231,7 +232,8 @@ public class TlsConnectionHandler {
 	    // TLS
 	    InputStream sockIn = socket.getInputStream();
 	    OutputStream sockOut = socket.getOutputStream();
-	    TlsClientProtocol handler = new TlsClientProtocol(sockIn, sockOut, new SecureRandom());
+	    SecureRandom sr = ReusableSecureRandom.getInstance();
+	    TlsClientProtocol handler = new TlsClientProtocol(sockIn, sockOut, sr);
 	    handler.connect(tlsClient);
 
 	    return handler;

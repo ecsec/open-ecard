@@ -46,7 +46,7 @@ import org.testng.annotations.BeforeClass;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 @Test(groups = "it")
 public class StreamHttpClientConnectionTest {

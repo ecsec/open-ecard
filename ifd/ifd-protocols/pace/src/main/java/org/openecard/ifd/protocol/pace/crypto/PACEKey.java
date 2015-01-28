@@ -39,18 +39,32 @@ import org.openecard.bouncycastle.math.ec.ECPoint;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.asn1.eac.PACEDomainParameter;
-import org.openecard.ifd.protocol.pace.PACEImplementation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class PACEKey {
 
-    private static final Logger logger = LoggerFactory.getLogger(PACEImplementation.class);
+    private static final Logger logger;
+    private static final SecureRandom rand;
+    private static long counter;
+
+    static {
+	logger = LoggerFactory.getLogger(PACEKey.class);
+	rand = new SecureRandom();
+	rand.setSeed(rand.generateSeed(32));
+	counter = 0;
+    }
+
+    private static void reseed() {
+	counter++;
+	rand.setSeed(counter);
+	rand.setSeed(System.nanoTime());
+    }
 
     private AsymmetricKeyParameter sk;
     private AsymmetricKeyParameter pk;
@@ -103,10 +117,11 @@ public final class PACEKey {
      * Generate a key pair.
      */
     public void generateKeyPair() {
+	reseed();
 	if (pdp.isDH()) {
 	    ElGamalParameterSpec p = (ElGamalParameterSpec) pdp.getParameter();
 	    int numBits = p.getG().bitLength();
-	    BigInteger d = new BigInteger(numBits, new SecureRandom());
+	    BigInteger d = new BigInteger(numBits, rand);
 	    ElGamalParameters egp = new ElGamalParameters(p.getP(), p.getG());
 
 	    sk = new ElGamalPrivateKeyParameters(d, egp);
@@ -115,7 +130,7 @@ public final class PACEKey {
 	} else if (pdp.isECDH()) {
 	    ECParameterSpec p = (ECParameterSpec) pdp.getParameter();
 	    int numBits = p.getN().bitLength();
-	    BigInteger d = new BigInteger(numBits, new SecureRandom());
+	    BigInteger d = new BigInteger(numBits, rand);
 	    ECDomainParameters ecp = new ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH());
 
 	    sk = new ECPrivateKeyParameters(d, ecp);

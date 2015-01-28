@@ -40,6 +40,7 @@ import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
 import org.openecard.bouncycastle.util.encoders.Base64;
 import org.openecard.crypto.tls.CertificateVerifier;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
+import org.openecard.crypto.tls.ReusableSecureRandom;
 import org.openecard.crypto.tls.SocketWrapper;
 import org.openecard.crypto.tls.auth.CertificateVerifierBuilder;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
@@ -140,8 +141,8 @@ public final class HttpConnectProxy extends Proxy {
 		}
 	    }
 	    tlsClient.setAuthentication(tlsAuth);
-	    SecureRandom rand = new SecureRandom();
-	    TlsClientProtocol proto = new TlsClientProtocol(sock.getInputStream(), sock.getOutputStream(), rand);
+	    SecureRandom sr = ReusableSecureRandom.getInstance();
+	    TlsClientProtocol proto = new TlsClientProtocol(sock.getInputStream(), sock.getOutputStream(), sr);
 	    proto.connect(tlsClient);
 	    // wrap socket
 	    Socket tlsSock = new SocketWrapper(sock, proto.getInputStream(), proto.getOutputStream());

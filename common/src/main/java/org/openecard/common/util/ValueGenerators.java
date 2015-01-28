@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,9 +29,24 @@ import java.util.UUID;
 /**
  * Implements convenience methods to generates random values.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ValueGenerators {
+
+    private static final SecureRandom rand;
+    private static long counter;
+
+    static {
+	rand = new SecureRandom();
+	rand.setSeed(rand.generateSeed(32));
+	counter = 0;
+    }
+
+    private static void reseed() {
+	counter++;
+	rand.setSeed(counter);
+	rand.setSeed(System.nanoTime());
+    }
 
     /**
      * Generates a new pre-shared key (PSK).
@@ -138,7 +153,8 @@ public class ValueGenerators {
 
     /**
      * Generates a secure random value.
-     * Using 'java.security.SecureRandom'.
+     * Using 'java.security.SecureRandom'. The random instance is reseeded with a counter and the current system time in
+     * order to provide better random numbers.
      *
      * @param nibbleLength Length of the random in nibbles
      * @return Secure random value
@@ -150,8 +166,8 @@ public class ValueGenerators {
 
 	nibbleLength = (nibbleLength / 2 + nibbleLength % 2);
 
-	SecureRandom rand = new SecureRandom();
 	byte[] randomBytes = new byte[nibbleLength];
+	reseed();
 	rand.nextBytes(randomBytes);
 
 	return randomBytes;

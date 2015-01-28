@@ -55,6 +55,7 @@ import org.openecard.common.util.Pair;
 import org.openecard.common.util.TR03112Utils;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
+import org.openecard.crypto.tls.ReusableSecureRandom;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import org.openecard.transport.httpcore.HttpRequestHelper;
 import org.openecard.transport.httpcore.HttpUtils;
@@ -225,7 +226,8 @@ public class ResourceContext {
 	    // connect tls client
 	    tlsClient.setClientVersion(ProtocolVersion.TLSv12);
 	    Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
-	    h = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), new SecureRandom());
+	    SecureRandom sr = ReusableSecureRandom.getInstance();
+	    h = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), sr);
 	    logger.debug("Performing TLS handshake.");
 	    h.connect(tlsClient);
 	    logger.debug("TLS handshake performed.");

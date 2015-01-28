@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.security.SecureRandom;
 import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
+import org.openecard.crypto.tls.ReusableSecureRandom;
 import org.testng.SkipException;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -51,7 +52,8 @@ public class JavaSecVerifierTest {
 	    assertFalse(socket.isClosed());
 	    // connect client
 	    c = new DefaultTlsClientImpl(hostName);
-	    handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), new SecureRandom());
+	    SecureRandom sr = ReusableSecureRandom.getInstance();
+	    handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), sr);
 	} catch (Exception ex) {
 	    throw new SkipException("Unable to create TLS client.");
 	}
@@ -74,7 +76,8 @@ public class JavaSecVerifierTest {
 	    assertFalse(socket.isClosed());
 	    // connect client
 	    c = new DefaultTlsClientImpl(hostName);
-	    handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), new SecureRandom());
+	    SecureRandom sr = ReusableSecureRandom.getInstance();
+	    handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), sr);
 	} catch (Exception ex) {
 	    throw new SkipException("Unable to create TLS client.");
 	}

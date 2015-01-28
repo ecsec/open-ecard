@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,7 +22,6 @@
 
 package org.openecard.ifd.scio.wrapper;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -31,6 +30,7 @@ import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CardTerminals;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.util.ValueGenerators;
 import org.openecard.ifd.scio.IFDException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,20 +45,16 @@ public class SCWrapper {
     private static final Logger _logger = LoggerFactory.getLogger(SCWrapper.class);
 
     private final CardTerminals terminals;
-    private final SecureRandom secureRandom;
 
     private final ConcurrentSkipListMap<String,SCTerminal> scTerminals;
 
     public SCWrapper() throws IFDException {
 	terminals = new DeadAndAliveTerminals();
-	secureRandom =  new SecureRandom();
-	scTerminals = new ConcurrentSkipListMap<String, SCTerminal>();
+	scTerminals = new ConcurrentSkipListMap<>();
     }
 
     public byte[] createHandle(int size) {
-	byte[] handle = new byte[size];
-	secureRandom.nextBytes(handle);
-	return handle;
+	return ValueGenerators.generateRandom(size * 2);
     }
 
 
@@ -149,7 +145,7 @@ public class SCWrapper {
 	if (update) {
 	    updateTerminals();
 	}
-	ArrayList<SCTerminal> list = new ArrayList<SCTerminal>(scTerminals.values());
+	ArrayList<SCTerminal> list = new ArrayList<>(scTerminals.values());
 	return list;
     }
 
@@ -167,19 +163,19 @@ public class SCWrapper {
 	if (update) {
 	    updateTerminals();
 	}
-	ArrayList<String> list = new ArrayList<String>(scTerminals.keySet());
+	ArrayList<String> list = new ArrayList<>(scTerminals.keySet());
 	return list;
     }
 
     public synchronized void updateTerminals() {
-	ConcurrentSkipListSet<String> deleted = new ConcurrentSkipListSet<String>(scTerminals.keySet());
+	ConcurrentSkipListSet<String> deleted = new ConcurrentSkipListSet<>(scTerminals.keySet());
 
 	// get list and check all entries
 	List<CardTerminal> ts;
 	try {
 	    ts = terminals.list();
 	} catch (CardException ex) {
-	    ts = new ArrayList<CardTerminal>(0); // empty list because list call can fail with exception on some systems
+	    ts = new ArrayList<>(0); // empty list because list call can fail with exception on some systems
 	}
 	for (CardTerminal t : ts) {
 	    if (scTerminals.containsKey(t.getName())) {

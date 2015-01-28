@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -56,8 +56,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Moritz Horsch
+ * @author Johannes Schmölz
  */
 public final class RichClient {
 

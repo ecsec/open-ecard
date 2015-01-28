@@ -23,6 +23,7 @@
 package org.openecard.crypto.tls;
 
 import java.security.SecureRandom;
+import org.openecard.common.util.SecureRandomFactory;
 
 
 /**
@@ -30,16 +31,12 @@ import java.security.SecureRandom;
  *
  * @author Tobias Wich
  */
-public class ReusableSecureRandom extends SecureRandom {
+public class ReusableSecureRandom {
 
-    private static final ReusableSecureRandom instance;
+    private static final SecureRandom instance;
 
     static {
-	instance = new ReusableSecureRandom();
-    }
-
-    private ReusableSecureRandom() {
-	setSeed(this.generateSeed(32));
+	instance = SecureRandomFactory.create(32);
     }
 
     /**
@@ -51,5 +48,7 @@ public class ReusableSecureRandom extends SecureRandom {
     public static SecureRandom getInstance() {
 	return instance;
     }
+
+    private ReusableSecureRandom() { }
 
 }

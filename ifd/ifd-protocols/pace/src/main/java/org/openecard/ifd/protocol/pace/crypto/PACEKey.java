@@ -38,6 +38,7 @@ import org.openecard.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.openecard.bouncycastle.math.ec.ECPoint;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.common.util.SecureRandomFactory;
 import org.openecard.crypto.common.asn1.eac.PACEDomainParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +56,7 @@ public final class PACEKey {
 
     static {
 	logger = LoggerFactory.getLogger(PACEKey.class);
-	rand = new SecureRandom();
-	rand.setSeed(rand.generateSeed(32));
+	rand = SecureRandomFactory.create(32);
 	counter = 0;
     }
 

@@ -37,8 +37,7 @@ public class ValueGenerators {
     private static long counter;
 
     static {
-	rand = new SecureRandom();
-	rand.setSeed(rand.generateSeed(32));
+	rand = SecureRandomFactory.create(32);
 	counter = 0;
     }
 

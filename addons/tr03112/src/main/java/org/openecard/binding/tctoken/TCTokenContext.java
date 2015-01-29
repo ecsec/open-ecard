@@ -37,6 +37,7 @@ import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,8 +102,7 @@ public class TCTokenContext extends ResourceContext {
 	TCToken token = tokens.get(0);
 	TCTokenVerifier ver = new TCTokenVerifier(token, base);
 	if (ver.isErrorToken()) {
-	    // TODO: find out what is the correct minor type
-	    String minor = "";
+	    String minor = ECardConstants.Minor.App.PARM_ERROR;
 	    throw new AuthServerException(token.getComErrorAddressWithParams(minor), ESERVICE_ERROR);
 	}
 

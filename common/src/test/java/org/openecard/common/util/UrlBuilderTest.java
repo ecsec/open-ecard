@@ -37,8 +37,9 @@ public class UrlBuilderTest {
     @Test
     public void testAddUrlQuery() throws URISyntaxException {
 	String base = "http://foo:12";
-	URI result = UrlBuilder.fromUrl(base).queryParam("foo", "http://bar/?query1=foo&query2=bar%20ui").build();
-	assertEquals(result, new URI("http://foo:12/?foo=http%3A%2F%2Fbar%2F%3Fquery1%3Dfoo%26query2%3Dbar%20ui"));
+	URI result = UrlBuilder.fromUrl(base).queryParam("foo", "http://bar/?query1=foo&query2=bar%20ui#foo").build();
+	String resultUrl = "http://foo:12/?foo=http%3A%2F%2Fbar%2F%3Fquery1%3Dfoo%26query2%3Dbar%20ui%23foo";
+	assertEquals(result, new URI(resultUrl));
 
 	// test overwrite
 	result = UrlBuilder.fromUrl(base).queryParam("foo", "1").queryParam("foo", "2").build();

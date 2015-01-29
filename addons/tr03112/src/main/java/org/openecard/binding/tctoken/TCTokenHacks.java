@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,7 +24,6 @@ package org.openecard.binding.tctoken;
 
 import java.io.IOException;
 import javax.annotation.Nonnull;
-import org.openecard.common.ECardConstants;
 import org.openecard.common.util.Pair;
 
 
@@ -124,22 +123,34 @@ public class TCTokenHacks {
      * @return
      */
     public static String fixResultMinor(@Nonnull String minor) {
-	switch (minor) {
-	    case ECardConstants.Minor.App.UNKNOWN_ERROR:
-		minor = "unknownError";
-		break;
-	    case ECardConstants.Minor.App.INT_ERROR:
-		minor = "internalError";
-		break;
-	    case ECardConstants.Minor.App.COMMUNICATION_ERROR:
-		minor = "communicationError";
-		break;
-	    case ECardConstants.Minor.App.INCORRECT_PARM:
-		minor = "incorrectParameter";
-		break;
-	    default:
-		// we're fine for things not mentioned in the spec
+	// each URL should be in the form <prefix>#<code>. We must return only the code part
+	int idx = minor.lastIndexOf("#");
+	if (idx != -1) {
+	    idx++;
+	    if (idx < minor.length()) {
+		minor = minor.substring(idx);
+	    }
 	}
+
+	// TODO: the new version of the spec allows only certain types
+//	switch (minor) {
+//	    case ECardConstants.Minor.App.UNKNOWN_ERROR:
+//		minor = "unknownError";
+//		break;
+//	    case ECardConstants.Minor.App.INT_ERROR:
+//		minor = "internalError";
+//		break;
+//	    case ECardConstants.Minor.App.COMMUNICATION_ERROR:
+//		minor = "communicationError";
+//		break;
+//	    case ECardConstants.Minor.App.INCORRECT_PARM:
+//		minor = "incorrectParameter";
+//		break;
+//	    default:
+//		minor = "unkownError";
+//		// we're fine for things not mentioned in the spec
+//	}
+
 	return minor;
     }
 

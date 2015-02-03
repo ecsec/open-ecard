@@ -28,7 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
 import org.openecard.common.GenericFactoryException;
-import org.openecard.common.ifd.TerminalFactory;
+import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.util.ExceptionUtils;

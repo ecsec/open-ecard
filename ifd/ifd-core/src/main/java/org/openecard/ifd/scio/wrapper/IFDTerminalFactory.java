@@ -24,7 +24,7 @@ package org.openecard.ifd.scio.wrapper;
 
 import org.openecard.common.GenericFactory;
 import org.openecard.common.GenericFactoryException;
-import org.openecard.common.ifd.TerminalFactory;
+import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.ifd.scio.IFDException;
 import org.openecard.ifd.scio.IFDProperties;
 

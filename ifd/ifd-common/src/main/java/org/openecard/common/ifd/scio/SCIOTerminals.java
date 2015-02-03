@@ -24,7 +24,6 @@ package org.openecard.common.ifd.scio;
 
 import java.util.List;
 import javax.annotation.Nonnull;
-import org.openecard.common.ifd.TerminalFactory;
 
 
 /**

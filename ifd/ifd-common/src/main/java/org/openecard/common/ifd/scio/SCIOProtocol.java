@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2015 TU Darmstadt.
+ * Copyright (C) 2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,22 +24,39 @@ package org.openecard.common.ifd.scio;
 
 
 /**
- * Exception indicating problems in the ISO/IEC 7816 stack.
+ * ISO/IEC card protocol types.
  *
- * @author Moritz Horsch
+ * @author Tobias Wich
  */
-public class SCIOException extends Exception {
+public enum SCIOProtocol {
 
-    public SCIOException(Throwable cause) {
-	super(cause);
+    /**
+     * Byte oriented T=0 protocol.
+     */
+    T0("T=0"),
+    /**
+     * Block oriented T=1 protocol.
+     */
+    T1("T=1"),
+    /**
+     * Contactless protocol.
+     */
+    TCL("T=CL"),
+    /**
+     * Any protocol.
+     * This value may be used to connect cards and to indicate some unkown protocl type.
+     */
+    ANY("*");
+
+    private final String identifier;
+
+    private SCIOProtocol(String identifier) {
+	this.identifier = identifier;
     }
 
-    public SCIOException(String message) {
-	super(message);
-    }
-
-    public SCIOException(String message, Throwable cause) {
-	super(message, cause);
+    @Override
+    public String toString() {
+	return identifier;
     }
 
 }

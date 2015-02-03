@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2015 TU Darmstadt.
+ * Copyright (C) 2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,26 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.ifd.scio;
-
-
 /**
- * Exception indicating problems in the ISO/IEC 7816 stack.
- *
- * @author Moritz Horsch
+ * Low level interface for smart cards resembling the interface of the Java SmardcardIO.
  */
-public class SCIOException extends Exception {
-
-    public SCIOException(Throwable cause) {
-	super(cause);
-    }
-
-    public SCIOException(String message) {
-	super(message);
-    }
-
-    public SCIOException(String message, Throwable cause) {
-	super(message, cause);
-    }
-
-}
+package org.openecard.common.ifd.scio;

@@ -51,14 +51,6 @@ public interface SCIOTerminals {
 	 * Card is not present in the terminal.
 	 */
 	CARD_ABSENT,
-	/**
-	 * Card has been inserted into the terminal since the last invocation of {@link #list(SCIOTerminals.State)}.
-	 */
-	CARD_INSERTION,
-	/**
-	 * Card has been removed from the terminal since the last invocation of {@link #list(SCIOTerminals.State)}.
-	 */
-	CARD_REMOVAL,
     }
 
     /**
@@ -66,11 +58,6 @@ public interface SCIOTerminals {
      * <p>If state is {@link State#ALL}, this method returns all terminals encapsulated by this object. If state is
      * {@link State#CARD_PRESENT} or {@link State#CARD_ABSENT}, it returns all terminals where a card is currently
      * present or absent, respectively.</p>
-     * <p>If state is {@link State#CARD_INSERTION} or {@link State#CARD_REMOVAL}, it returns all terminals for which an
-     * insertion (or removal, respectively) was detected during the last call to {@link #waitForChange()}. If
-     * {@link #waitForChange()} has not been called on this object, {@code CARD_INSERTION} is equivalent to
-     * {@code CARD_PRESENT} and {@code CARD_REMOVAL} is equivalent to {@code CARD_ABSENT}. For an example of the use of
-     * {@code CARD_INSERTION}, see {@link #waitForChange()}.
      *
      * @param state State the terminals in the result must satisfy.
      * @return An unmodifiable list of terminals satisfying the given state. The returned list may be empty.
@@ -102,40 +89,13 @@ public interface SCIOTerminals {
     SCIOTerminal getTerminal(@Nonnull String name);
 
     /**
-     * Waits for a state change in the terminals managed by this instance.
-     * This function is the same as {@link #waitForChange(long)} with a timeout set to 0.
+     * Gets a TerminalWatcher instance so state changes can be observed.
+     * The watcher instance represents maintains its own state, so that it is possible to create several watchers in
+     * parallel.
      *
-     * @throws SCIOException Thrown in case the card operation failed.
+     * @return A new instance of TerminalWatcher.
+     * @throws SCIOException Thrown if the operation failed.
      */
-    void waitForChange() throws SCIOException;
-
-    /**
-     * Waits for a state change in the terminals managed by this instance.
-     * <p>This method examines each terminal of this object. If a card was inserted into or removed from a terminal
-     * since the previous call to {@code waitForChange()}, it returns immediately. Otherwise, or if this is the first
-     * call to {@code waitForChange()} on this object, it blocks until a card is inserted into or removed from a
-     * terminal.</p>
-     * <p>If timeout is greater than 0, the method returns after timeout milliseconds even if there is no change in
-     * state. In that case, this method returns {@code false}, otherwise it returns {@code true}.</p>
-     * <p>This method is often used in a loop in combination with list(State.CARD_INSERTION), for example:</p>
-     * <pre>
-     * TerminalFactory factory = ...;
-     * CardTerminals terminals = factory.terminals();
-     * while (true) {
-     *   for (CardTerminal terminal : terminals.list(CARD_INSERTION)) {
-     *     // examine Card in terminal, return if it matches
-     *   }
-     *   terminals.waitForChange();
-     * }</pre>
-     * <p>Note that in contrast to the Java SmartcardIO, this method does not throw an {@link IllegalStateException}
-     * when no terminal is present.</p>
-     *
-     * @param timeout If positive, wait at most for the given ammount of milliseconds, if 0 wait indefinitely. Must not
-     *   be negative.
-     * @return {@code true} if a change in the terminals occured, {@code false} if the timeout has been exceeded.
-     * @throws SCIOException Thrown in case the card operation failed.
-     * @throws IllegalArgumentException Thrown in case the timeout is negative.
-     */
-    boolean waitForChange(long timeout) throws SCIOException;
+    TerminalWatcher getWatcher() throws SCIOException;
 
 }

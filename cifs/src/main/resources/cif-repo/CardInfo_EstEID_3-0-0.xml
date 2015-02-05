@@ -183,7 +183,7 @@
 					</iso:ResponseAPDU>
 				    </iso:CardCall>
 				    <iso:CardCall>
-					<iso:CommandAPDU>00B20204FF</iso:CommandAPDU>
+					<iso:CommandAPDU>00B20104FF</iso:CommandAPDU>
 					<iso:ResponseAPDU>
 					    <iso:Body>
 						<iso:MatchingData>

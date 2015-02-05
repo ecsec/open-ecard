@@ -88,7 +88,9 @@ public class ActivationAction implements AppPluginAction {
 		tcTokenRequest = TCTokenRequest.convert(params);
 		response = tokenHandler.handleActivate(tcTokenRequest);
 		// Show success message. If we get here we have a valid StartPAOSResponse and a valid refreshURL
-		showFinishMessage((TCTokenResponse) response);
+		if (! tcTokenRequest.isTokenFromObject()) {
+		    showFinishMessage((TCTokenResponse) response);
+		}
 	    } catch (ActivationError ex) {
 		if (ex instanceof NonGuiException) {
 		    // error already displayed to the user so do not repeat it here

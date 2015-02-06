@@ -185,7 +185,7 @@
 					</iso:ResponseAPDU>
 				    </iso:CardCall>
 				    <iso:CardCall>
-					<iso:CommandAPDU>00B20104</iso:CommandAPDU>
+					<iso:CommandAPDU>00B2010400</iso:CommandAPDU>
 					<iso:ResponseAPDU>
 					    <iso:Body>
 						<iso:MatchingData>
@@ -414,7 +414,7 @@
 					</iso:ResponseAPDU>
 				    </iso:CardCall>
 				    <iso:CardCall>
-					<iso:CommandAPDU>00B20204</iso:CommandAPDU>
+					<iso:CommandAPDU>00B2020400</iso:CommandAPDU>
 					<iso:ResponseAPDU>
 					    <iso:Body>
 						<iso:MatchingData>
@@ -643,7 +643,7 @@
 					</iso:ResponseAPDU>
 				    </iso:CardCall>
 				    <iso:CardCall>
-					<iso:CommandAPDU>00B20304</iso:CommandAPDU>
+					<iso:CommandAPDU>00B2030400</iso:CommandAPDU>
 					<iso:ResponseAPDU>
 					    <iso:Body>
 						<iso:MatchingData>

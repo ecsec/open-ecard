@@ -50,6 +50,7 @@ public interface TerminalWatcher {
      *
      * @return Unmodifyable list containing the current status of all terminals.
      * @throws SCIOException Thrown if the operation failed.
+     * @throws IllegalStateException Thrown in case start has been called previously on this instance.
      */
     List<SCIOTerminal> start() throws SCIOException;
 
@@ -63,6 +64,8 @@ public interface TerminalWatcher {
      * @return The event that has occurred. May represent a timeout.
      * @throws SCIOException Thrown in case the card operation failed.
      * @throws IllegalArgumentException Thrown in case the timeout is negative.
+     * @throws IllegalStateException Thrown in case this method is called without initializing the watcher with
+     *   {@link #start()}.
      */
     @Nonnull
     StateChangeEvent waitForChange(long timeout) throws SCIOException;
@@ -75,6 +78,8 @@ public interface TerminalWatcher {
      *
      * @return The event that has occurred. May not represent a timeout.
      * @throws SCIOException Thrown in case the card operation failed.
+     * @throws IllegalStateException Thrown in case this method is called without initializing the watcher with
+     *   {@link #start()}.
      * @see #waitForChange(long)
      */
     @Nonnull
@@ -108,6 +113,10 @@ public interface TerminalWatcher {
 	    this.terminal = terminal;
 	}
 
+	/**
+	 * Creates an event representing no change.
+	 * This is used for indicating a timeout in the {@link #waitForChange(long)} method.
+	 */
 	public StateChangeEvent() {
 	    this.state = null;
 	    this.terminal = null;

@@ -62,9 +62,10 @@ public interface SCIOTerminals {
      * @param state State the terminals in the result must satisfy.
      * @return An unmodifiable list of terminals satisfying the given state. The returned list may be empty.
      * @throws SCIOException Thrown if the operation failed.
+     * @throws NullPointerException Thrown if no state instance has been given.
      */
     @Nonnull
-    List<SCIOTerminal> list(State state) throws SCIOException;
+    List<SCIOTerminal> list(@Nonnull State state) throws SCIOException;
 
     /**
      * Gets a list of all terminals.
@@ -83,10 +84,11 @@ public interface SCIOTerminals {
      * Gets the terminal with the specified name.
      *
      * @param name Name of the terminal to return.
-     * @return The terminal instance, or {@code null} if no terminal with the given name exists.
+     * @return The terminal instance.
+     * @throws NoSuchTerminal Thrown if no terminal with the given name exists.
      * @throws NullPointerException Thrown if the given terminal name is null.
      */
-    SCIOTerminal getTerminal(@Nonnull String name);
+    SCIOTerminal getTerminal(@Nonnull String name) throws NoSuchTerminal;
 
     /**
      * Gets a TerminalWatcher instance so state changes can be observed.

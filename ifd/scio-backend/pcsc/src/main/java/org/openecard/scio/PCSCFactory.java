@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2013 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -34,10 +34,10 @@ import org.openecard.scio.osx.SunOSXPCSC;
 /**
  * Proxy and abstracted Factory for SCIO PC/SC driver.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
+ * @author Tobias Wich
+ * @author Benedikt Biallowons
  */
-public class PCSCFactory implements org.openecard.common.ifd.TerminalFactory {
+public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactory {
 
     private static final String ALGORITHM = "PC/SC";
 
@@ -51,15 +51,16 @@ public class PCSCFactory implements org.openecard.common.ifd.TerminalFactory {
      */
     public PCSCFactory() throws FileNotFoundException, NoSuchAlgorithmException {
 	String osName = System.getProperty("os.name");
-	if (osName.startsWith("Linux")) {
-	    File libFile = LinuxLibraryFinder.getLibraryPath("pcsclite", "1");
-	    System.setProperty("sun.security.smartcardio.library", libFile.getAbsolutePath());
+	if (osName.contains("OS X")) {
 	    // see https://developer.apple.com/library/mac/technotes/tn2002/tn2110.html#FINDINGMAC
-	} else if (osName.contains("OS X")) {
 	    terminalFactory = TerminalFactory.getInstance(ALGORITHM, null, new SunOSXPCSC());
-	    return;
+	} else {
+	    if (osName.startsWith("Linux")) {
+		File libFile = LinuxLibraryFinder.getLibraryPath("pcsclite", "1");
+		System.setProperty("sun.security.smartcardio.library", libFile.getAbsolutePath());
+	    }
+	    terminalFactory = TerminalFactory.getInstance(ALGORITHM, null);
 	}
-	terminalFactory = TerminalFactory.getInstance(ALGORITHM, null);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class PCSCFactory implements org.openecard.common.ifd.TerminalFactory {
 
     @Override
     public SCIOTerminals terminals() {
-	return new PCSCTerminals(terminalFactory.terminals());
+	return new PCSCTerminals(terminalFactory);
     }
 
 }

@@ -1,3 +1,25 @@
+/****************************************************************************
+ * Copyright (C) 2014-2015 TU Darmstadt.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.scio;
 
 import javax.smartcardio.ATR;
@@ -6,47 +28,55 @@ import javax.smartcardio.CardException;
 import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openecard.common.ifd.scio.SCIOProtocol;
+import org.openecard.common.ifd.scio.SCIOTerminal;
+
 
 /**
  * PC/SC card implementation of the SCIOCard.
-
- * @author Wael Alkhatib <walkhatib@cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Wael Alkhatib
+ * @author Tobias Wich
  */
 public class PCSCCard implements SCIOCard {
 
-    private static final Logger logger = LoggerFactory.getLogger(PCSCCard.class);
+    private final PCSCTerminal terminal;
     private final Card card;
 
-    public PCSCCard(Card card) {
+    PCSCCard(PCSCTerminal terminal, Card card) {
+	this.terminal = terminal;
 	this.card = card;
     }
 
     @Override
-    public SCIOATR getATR() {
-	ATR result = card.getATR();
-	SCIOATR getRedult = new SCIOATR(result.getBytes());
-	return getRedult;
+    public SCIOTerminal getTerminal() {
+	return terminal;
     }
 
     @Override
-    public String getProtocol() {
-	return card.getProtocol();
+    public SCIOATR getATR() {
+	ATR atr = card.getATR();
+	return new SCIOATR(atr.getBytes());
+    }
+
+    @Override
+    public SCIOProtocol getProtocol() {
+	String proto = card.getProtocol();
+	return SCIOProtocol.getType(proto);
     }
 
     @Override
     public PCSCChannel getBasicChannel() {
-	return new PCSCChannel(card.getBasicChannel());
+	return new PCSCChannel(this, card.getBasicChannel());
     }
 
     @Override
     public PCSCChannel openLogicalChannel() throws SCIOException {
 	try {
-	    return new PCSCChannel(card.openLogicalChannel());
+	    return new PCSCChannel(this, card.openLogicalChannel());
 	} catch (CardException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw new SCIOException(ex);
+	    String msg = "Failed to open logical channel to card in terminal '%s'.";
+	    throw new SCIOException(String.format(msg, terminal.getName()), ex);
 	}
     }
 
@@ -55,8 +85,8 @@ public class PCSCCard implements SCIOCard {
 	try {
 	    card.beginExclusive();
 	} catch (CardException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw new SCIOException(ex);
+	    String msg = "Failed to get exclusive access to the card in terminal '%s'.";
+	    throw new SCIOException(String.format(msg, terminal.getName()), ex);
 	}
     }
 
@@ -65,8 +95,8 @@ public class PCSCCard implements SCIOCard {
 	try {
 	    card.endExclusive();
 	} catch (CardException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw new SCIOException(ex);
+	    String msg = "Failed to release exclusive access to the card in terminal '%s'.";
+	    throw new SCIOException(String.format(msg, terminal.getName()), ex);
 	}
     }
 
@@ -75,8 +105,8 @@ public class PCSCCard implements SCIOCard {
 	try {
 	    return card.transmitControlCommand(controlCode, command);
 	} catch (CardException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw new SCIOException(ex);
+	    String msg = "Failed to transmit control command to the terminal '%s'.";
+	    throw new SCIOException(String.format(msg, terminal.getName()), ex);
 	}
     }
 
@@ -85,8 +115,9 @@ public class PCSCCard implements SCIOCard {
 	try {
 	    card.disconnect(reset);
 	} catch (CardException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw new SCIOException(ex);
+	    String msg = "Failed to disconnect (reset=%b) the card in terminal '%s'.";
+	    throw new SCIOException(String.format(msg, reset, terminal.getName()), ex);
 	}
     }
+
 }

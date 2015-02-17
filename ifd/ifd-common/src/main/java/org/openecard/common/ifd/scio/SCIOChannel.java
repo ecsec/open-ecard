@@ -48,7 +48,7 @@ public interface SCIOChannel {
     /**
      * Gets the channel number of this channel.
      * The basic channel has number 0, all logical channels have postive values.
-     * <p>Contrary to the implementation of the Java SMartcard IO, this method does not throw an
+     * <p>Contrary to the implementation of the Java Smartcard IO, this method does not throw an
      * {@link IllegalStateException} when the card is not connected.</p>
      *
      * @return Number of the channel.
@@ -139,7 +139,6 @@ public interface SCIOChannel {
      * @return The number of bytes written to the response APDU buffer.
      * @throws SCIOException Thrown if the operation failed.
      * @throws IllegalStateException Thrown if the card is not connected anymore or the channel has been closed.
-     * @throws BufferOverflowException Thrown if the response buffer is not large enough for the response APDU.
      * @throws IllegalArgumentException Thrown if the APDU encodes a {@code MANAGE CHANNEL} command, if command and
      *   response are the same object, or when there is not enough space in the response buffer.
      * @throws NullPointerException Thrown in case one of the arguments is {@code null}.

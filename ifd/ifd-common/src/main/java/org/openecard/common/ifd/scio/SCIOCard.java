@@ -34,6 +34,15 @@ import javax.annotation.Nonnull;
 public interface SCIOCard {
 
     /**
+     * Gets the terminal which is responsible for this card.
+     * Even if the terminal is already disconnected, this method returns the terminal object.
+     *
+     * @return The terminal responsible for this card.
+     */
+    @Nonnull
+    SCIOTerminal getTerminal();
+
+    /**
      * Gets the ATR associated with this card instance.
      *
      * @return The ATR associated with the card.

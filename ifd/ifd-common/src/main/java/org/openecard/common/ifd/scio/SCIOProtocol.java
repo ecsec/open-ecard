@@ -22,6 +22,9 @@
 
 package org.openecard.common.ifd.scio;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 
 /**
  * ISO/IEC card protocol types.
@@ -44,14 +47,34 @@ public enum SCIOProtocol {
     TCL("T=CL"),
     /**
      * Any protocol.
-     * This value may be used to connect cards and to indicate some unkown protocl type.
+     * This value may be used to connect cards and to indicate some unkown protocol type.
      */
     ANY("*");
 
-    private final String identifier;
+    public final String identifier;
 
     private SCIOProtocol(String identifier) {
 	this.identifier = identifier;
+    }
+
+    /**
+     * Gets the element matching the given protocol.
+     * If the protocol is not known or can not be determined, {@link ANY} is returned.
+     *
+     * @param protocol The protocol string to translate to the enum.
+     * @return The enum closest to representing the given protocol string.
+     */
+    @Nonnull
+    public static SCIOProtocol getType(@Nullable String protocol) {
+	if (T0.identifier.equals(protocol)) {
+	    return T0;
+	} else if (T1.identifier.equals(protocol)) {
+	    return T1;
+	} else if (TCL.identifier.equals(protocol)) {
+	    return TCL;
+	} else {
+	    return ANY;
+	}
     }
 
     @Override

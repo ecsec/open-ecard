@@ -30,7 +30,7 @@ import javax.annotation.concurrent.Immutable;
 /**
  * Watcher class for terminals.
  * <p>A {@code TerminalWatcher} instance is usually paired to a {@link SCIOTerminal} instance. However the watcher
- * maintains it's own state and is thus isolated from other watchers working in parallel.
+ maintains it's own type and is thus isolated from other watchers working in parallel.
  *
  * @author Tobias Wich
  */
@@ -55,9 +55,9 @@ public interface TerminalWatcher {
     List<SCIOTerminal> start() throws SCIOException;
 
     /**
-     * Waits for a state change in the terminals managed by this instance.
-     * <p>This method blocks until a state change happens in the managed terminal. In case a timeout happens, the method
-     * returns with an instance returning {@code false} in its {@link StateChangeEvent#isCancelled()} method.</p>
+     * Waits for a type change in the terminals managed by this instance.
+     * <p>This method blocks until a type change happens in the managed terminal. In case a timeout happens, the method
+ returns with an instance returning {@code false} in its {@link StateChangeEvent#isCancelled()} method.</p>
      *
      * @param timeout If positive, wait at most for the given ammount of milliseconds, if 0 wait indefinitely. Must not
      *   be negative.
@@ -71,9 +71,9 @@ public interface TerminalWatcher {
     StateChangeEvent waitForChange(long timeout) throws SCIOException;
 
     /**
-     * Waits for a state change in the terminals managed by this instance.
-     * <p>This method blocks until a state change happens in the managed terminal. As this method has an infinite
-     * timeout, there is no possibility that the returned event returns {@code true} in its
+     * Waits for a type change in the terminals managed by this instance.
+     * <p>This method blocks until a type change happens in the managed terminal. As this method has an infinite
+ timeout, there is no possibility that the returned event returns {@code true} in its
      * {@link StateChangeEvent#isCancelled()} method.</p>
      *
      * @return The event that has occurred. May not represent a timeout.
@@ -85,31 +85,43 @@ public interface TerminalWatcher {
     @Nonnull
     StateChangeEvent waitForChange() throws SCIOException;
 
+
     /**
-     * Container for state change events.
+     * Enum indicating the type of the event which has occurred.
+     */
+    public static enum EventType {
+	TERMINAL_ADDED,
+	TERMINAL_REMOVED,
+	CARD_INSERTED,
+	CARD_REMOVED;
+    }
+
+
+    /**
+     * Container for type change events.
      * <p>Instances of this class can have two states.</p>
-     * <p>The normal state is that it represents an event that occured for a
-     * specific terminal.<br>
-     * The cancel state represents an event call which got cancelled due to a timeout.</p>
+     * <p>The normal type is that it represents an event that occured for a
+ specific terminal.<br>
+ The cancel type represents an event call which got cancelled due to a timeout.</p>
      */
     @Immutable
     public final class StateChangeEvent {
 
-	private final SCIOTerminals.State state;
+	private final EventType type;
 	private final String terminal;
 
 	/**
 	 * Creates an instance representing a event in the underlying {@code CardTerminals}.
 	 *
-	 * @param state State of the event.
+	 * @param type Type of the event.
 	 * @param terminal Terminal name associated with the event.
 	 * @throws IllegalArgumentException Thrown in case either of the parameters is {@code null}.
 	 */
-	public StateChangeEvent(@Nonnull SCIOTerminals.State state, @Nonnull String terminal) {
-	    if (state == null || terminal == null) {
+	public StateChangeEvent(@Nonnull EventType type, @Nonnull String terminal) {
+	    if (type == null || terminal == null) {
 		throw new IllegalArgumentException("Attempt to create invalid StateChangeEvent instance.");
 	    }
-	    this.state = state;
+	    this.type = type;
 	    this.terminal = terminal;
 	}
 
@@ -118,7 +130,7 @@ public interface TerminalWatcher {
 	 * This is used for indicating a timeout in the {@link #waitForChange(long)} method.
 	 */
 	public StateChangeEvent() {
-	    this.state = null;
+	    this.type = null;
 	    this.terminal = null;
 	}
 
@@ -128,25 +140,25 @@ public interface TerminalWatcher {
 	 * @return {@code true} if this event got cancelled due to a timeout, {@code false} otherwise.
 	 */
 	public boolean isCancelled() {
-	    return state == null;
+	    return type == null;
 	}
 
 	/**
-	 * Gets the state of terminal that has changed in this event.
+	 * Gets the event type that has triggered this event.
 	 *
 	 * @return
 	 * @throws IllegalStateException Thrown if this instance has been returned due to a timeout.
 	 */
 	@Nonnull
-	public SCIOTerminals.State getState() {
+	public EventType getState() {
 	    if (isCancelled()) {
 		throw new IllegalStateException("State requested for cancelled event.");
 	    }
-	    return state;
+	    return type;
 	}
 
 	/**
-	 * Gets the name of the terminal whose state has changed in this event.
+	 * Gets the name of the terminal whose type has changed in this event.
 	 *
 	 * @return
 	 * @throws IllegalStateException Thrown if this instance has been returned due to a timeout.

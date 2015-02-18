@@ -22,7 +22,6 @@
 
 package org.openecard.common.ifd.scio;
 
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnull;
 import org.openecard.common.apdu.common.CardResponseAPDU;
@@ -143,8 +142,7 @@ public interface SCIOChannel {
      *   response are the same object, or when there is not enough space in the response buffer.
      * @throws NullPointerException Thrown in case one of the arguments is {@code null}.
      */
-    int transmit(@Nonnull ByteBuffer command, @Nonnull ByteBuffer response) throws SCIOException, IllegalStateException,
-	    BufferOverflowException;
+    int transmit(@Nonnull ByteBuffer command, @Nonnull ByteBuffer response) throws SCIOException, IllegalStateException;
 
     /**
      * Closes this CardChannel.

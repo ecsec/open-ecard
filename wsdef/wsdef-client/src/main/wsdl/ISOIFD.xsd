@@ -343,9 +343,16 @@
 			<complexContent>
 				<extension base="iso:RequestType">
 					<sequence>
+						<!--
+							TODO: change the specification to use slot-handle, because the control commands are specific
+						          for the slot, not the terminal if you think of multislot terminals
+						-->
+						<!--
 						<element name="ContextHandle"
 							type="iso:ContextHandleType" maxOccurs="1" minOccurs="1" />
 						<element name="IFDName" type="string" />
+						-->
+						<element name="SlotHandle" type="iso:SlotHandleType" />
 						<element name="Command" type="hexBinary" />
 					</sequence>
 				</extension>

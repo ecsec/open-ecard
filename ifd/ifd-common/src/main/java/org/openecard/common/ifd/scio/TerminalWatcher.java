@@ -52,7 +52,7 @@ public interface TerminalWatcher {
      * @throws SCIOException Thrown if the operation failed.
      * @throws IllegalStateException Thrown in case start has been called previously on this instance.
      */
-    List<SCIOTerminal> start() throws SCIOException;
+    List<TerminalState> start() throws SCIOException;
 
     /**
      * Waits for a type change in the terminals managed by this instance.

@@ -153,7 +153,7 @@ public interface SCIOChannel {
      * <p>Note that the basic logical channel cannot be closed using this method. It can be closed by calling
      * {@link SCIOCard#disconnect(boolean)}.
      *
-     * @throws SCIOException
+     * @throws SCIOException Thrown if the operation failed.
      * @throws IllegalStateException Thrown if this channel represents a basic channel.
      */
     void close() throws SCIOException;

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,35 +22,19 @@
 
 package org.openecard.ifd.scio.wrapper;
 
-import java.util.Comparator;
-
 
 /**
- * Comparator for byte arrays.
- * It uses the ith different byte to calculate the distance and if one array is a prefix of the other, the length
- * difference between the two is used. <br/>
- * This has the effect, that only small numbers of values can be compared efficiently because of the small distance
- * values. However, for the number of channels and readers a system normally has, this is most probably sufficient.
  *
  * @author Tobias Wich
  */
-class ByteArrayComparator implements Comparator<byte[]> {
+public class NoSuchChannel extends Exception {
 
-    @Override
-    public int compare(byte[] o1, byte[] o2) {
-	int minLen = Math.min(o1.length, o2.length);
-	// compare elements
-	for (int i=0; i < minLen; i++) {
-	    if (o1[i] != o2[i]) {
-		return o1[i] - o2[i];
-	    }
-	}
-	// compare length of arrays
-	if (o1.length != o2.length) {
-	    return o1.length - o2.length;
-	}
-	// equal
-	return 0;
+    public NoSuchChannel(String message) {
+	super(message);
+    }
+
+    public NoSuchChannel(String message, Throwable cause) {
+	super(message, cause);
     }
 
 }

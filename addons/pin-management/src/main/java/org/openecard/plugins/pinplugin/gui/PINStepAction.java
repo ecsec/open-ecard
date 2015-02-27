@@ -219,8 +219,7 @@ public class PINStepAction extends StepAction {
 
 	ControlIFD controlIFD = new ControlIFD();
 	controlIFD.setCommand(ByteUtils.concatenate((byte) PCSCFeatures.MODIFY_PIN_DIRECT, structData));
-	controlIFD.setContextHandle(conHandle.getContextHandle());
-	controlIFD.setIFDName(conHandle.getIFDName());
+	controlIFD.setSlotHandle(conHandle.getSlotHandle());
 	dispatcher.deliver(controlIFD);
     }
 

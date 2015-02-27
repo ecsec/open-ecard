@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -43,6 +43,7 @@ import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.common.CardCommandStatus;
+import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.util.PINUtils;
 import org.openecard.common.util.UtilException;
 import org.openecard.gui.ResultStatus;
@@ -54,15 +55,16 @@ import org.openecard.gui.definition.Text;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
 import org.openecard.gui.executor.StepAction;
-import org.openecard.ifd.scio.wrapper.SCTerminal;
-import org.openecard.ifd.scio.wrapper.SCWrapper;
+import org.openecard.ifd.scio.wrapper.ChannelManager;
+import org.openecard.ifd.scio.wrapper.HandledChannel;
+import org.openecard.ifd.scio.wrapper.TerminalInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 class AbstractTerminal {
 
@@ -71,7 +73,9 @@ class AbstractTerminal {
     private final I18n lang = I18n.getTranslation("pace");
 
     private final IFD ifd;
-    private final SCWrapper scwrapper;
+    private final ChannelManager cm;
+    private final HandledChannel channel;
+    private final TerminalInfo terminalInfo;
     private final UserConsent gui;
     private final byte[] ctxHandle;
     private final BigInteger displayIdx;
@@ -83,16 +87,18 @@ class AbstractTerminal {
     private Boolean canEnter = null;
     private BigInteger keyIdx = null;
 
-    public AbstractTerminal(IFD ifd, SCWrapper scwrapper, UserConsent gui, byte[] ctxHandle, BigInteger displayIdx) {
+    public AbstractTerminal(IFD ifd, ChannelManager cm, HandledChannel channel, UserConsent gui, byte[] ctxHandle, BigInteger displayIdx) {
 	this.ifd = ifd;
-	this.scwrapper = scwrapper;
+	this.cm = cm;
+	this.channel = channel;
+	this.terminalInfo = new TerminalInfo(cm, channel);
 	this.gui = gui;
 	this.ctxHandle = ctxHandle;
 	this.displayIdx = displayIdx;
     }
 
     public void output(String ifdName, OutputInfoType outInfo) throws IFDException {
-	getCapabilities(ifdName);
+	getCapabilities();
 
 	// extract values from outInfo for convenience
 	BigInteger didx = outInfo.getDisplayIndex();
@@ -140,11 +146,10 @@ class AbstractTerminal {
     }
 
 
-    public VerifyUserResponse verifyUser(VerifyUser verify) throws IFDException {
+    public VerifyUserResponse verifyUser(VerifyUser verify) throws SCIOException, IFDException {
 	byte[] handle = verify.getSlotHandle();
 	// get capabilities
-	final SCTerminal term = scwrapper.getTerminal(handle);
-	getCapabilities(term.getName());
+	getCapabilities();
 
 	// check if is possible to perform PinCompare protocol
 	List<String> protoList = this.capabilities.getSlotCapability().get(0).getProtocol();
@@ -172,9 +177,9 @@ class AbstractTerminal {
 	    final PinInputType pinInput = inputUnit.getPinInput();
 
 	    // we have a sophisticated card reader
-	    if (canNativePinVerify(handle)) {
+	    if (terminalInfo.supportsPinCompare()) {
 		// create custom pinAction to submit pin to terminal
-		NativePinStepAction pinAction = new NativePinStepAction("enter-pin", pinInput, term, template);
+		NativePinStepAction pinAction = new NativePinStepAction("enter-pin", pinInput, channel, terminalInfo, template);
 		// display message instructing user what to do
 		UserConsentDescription uc = pinUserConsent("step_pin_userconsent", pinAction);
 		UserConsentNavigator ucr = gui.obtainNavigator(uc);
@@ -395,16 +400,6 @@ class AbstractTerminal {
 	return gui != null;
     }
 
-    private boolean canNativePinVerify(byte[] slotHandle) {
-	try {
-	    SCTerminal term = this.scwrapper.getTerminal(slotHandle);
-	    return term.supportsPinCompare();
-	} catch (IFDException ex) {
-	    return false;
-	}
-    }
-
-
 
     private static Result checkNativePinVerify(byte[] response) {
 	byte sw1 = response[0];
@@ -431,10 +426,10 @@ class AbstractTerminal {
 	return WSHelper.makeResultUnknownError(CardCommandStatus.getMessage(response));
     }
 
-    private void getCapabilities(String ifdName) throws IFDException {
+    private void getCapabilities() throws IFDException {
 	GetIFDCapabilities capabilitiesReq = new GetIFDCapabilities();
 	capabilitiesReq.setContextHandle(ctxHandle);
-	capabilitiesReq.setIFDName(ifdName);
+	capabilitiesReq.setIFDName(terminalInfo.getName());
 
 	GetIFDCapabilitiesResponse cap = ifd.getIFDCapabilities(capabilitiesReq);
 	Result r = cap.getResult();

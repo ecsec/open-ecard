@@ -539,8 +539,7 @@ public class GenericPINAction extends StepAction {
 
 	ControlIFD controlIFD = new ControlIFD();
 	controlIFD.setCommand(ByteUtils.concatenate((byte) PCSCFeatures.MODIFY_PIN_DIRECT, structData));
-	controlIFD.setContextHandle(cHandle.getContextHandle());
-	controlIFD.setIFDName(cHandle.getIFDName());
+	controlIFD.setSlotHandle(slotHandle);
 	return (ControlIFDResponse) dispatcher.deliver(controlIFD);
     }
 

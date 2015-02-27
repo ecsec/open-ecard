@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,11 +26,16 @@ import org.openecard.common.ifd.scio.SCIOTerminals;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import org.openecard.common.GenericFactoryException;
+import org.openecard.common.ifd.scio.NoSuchTerminal;
 import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOTerminal;
+import org.openecard.common.ifd.scio.TerminalState;
+import org.openecard.common.ifd.scio.TerminalWatcher;
 import org.openecard.common.util.ExceptionUtils;
 import org.openecard.ifd.scio.IFDException;
 import org.slf4j.Logger;
@@ -52,9 +57,9 @@ import org.slf4j.LoggerFactory;
  * state when observing the status. That means calls to these functions trigger the update of the factory's state.</p>
  * <p>Obviously PCSC on OS X only works when considering the laws of quantum mechanics,</p>
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
-public class DeadAndAliveTerminals extends SCIOTerminals {
+public class DeadAndAliveTerminals implements SCIOTerminals {
 
     private static final Logger logger = LoggerFactory.getLogger(DeadAndAliveTerminals.class);
 
@@ -117,7 +122,7 @@ public class DeadAndAliveTerminals extends SCIOTerminals {
     }
 
     private synchronized void tryReloadWhenError() {
-	// try to reload only if implementaion is errornous and we waited long enough
+	// try to reload only if implementation is errornous and we waited long enough
 	long now = System.currentTimeMillis();
 	if (error && (now - lastTry) > WAIT_DELTA) {
 	    try {
@@ -126,6 +131,11 @@ public class DeadAndAliveTerminals extends SCIOTerminals {
 		logger.error("The TerminalFactory has a serious problem.", ex);
 	    }
 	}
+    }
+
+    @Override
+    public List<SCIOTerminal> list() throws SCIOException {
+	return list(State.ALL);
     }
 
     @Override
@@ -138,31 +148,102 @@ public class DeadAndAliveTerminals extends SCIOTerminals {
     }
 
     @Override
-    public boolean waitForChange(long timeout) throws SCIOException {
-	if (timeout < 0) {
-	    throw new IllegalArgumentException("Timeout is negative.");
-	} else if (timeout == 0) {
-	    // fix timeout value, so the handcrufted wait works as expected
-	    timeout = Long.MAX_VALUE;
+    public synchronized SCIOTerminal getTerminal(String name) throws NoSuchTerminal {
+	if (isDead()) {
+	    throw new NoSuchTerminal("The SCIO subsystem is not working properly.");
+	} else {
+	    return terminals.getTerminal(name);
 	}
-	long start = System.currentTimeMillis();
-	// as long as the terminal is dead we have to take care of the wait for ourselves
-	// wait for a small time frame and check if the terminal is alive again
-	while (isDead() && (System.currentTimeMillis() - start) < timeout) {
-	    try {
-		Thread.sleep(WAIT_DELTA);
-	    } catch (InterruptedException ex) {
-		// TODO: how can we break execution completely here?
-	    }
+    }
+
+    @Override
+    public TerminalWatcher getWatcher() throws SCIOException {
+	return new DeadAndAliveWatcher();
+    }
+
+
+    private class DeadAndAliveWatcher implements TerminalWatcher {
+
+	private TerminalWatcher watcher;
+	private final Queue<StateChangeEvent> pendingEvents = new LinkedList<>();
+
+	private boolean isInit() {
+	    return watcher != null;
 	}
-	// either return false or perform the wait with the "alive" terminals
-	synchronized (this) {
-	    if (isDead()) {
-		return false;
+
+	@Override
+	public SCIOTerminals getTerminals() {
+	    return DeadAndAliveTerminals.this;
+	}
+
+	@Override
+	public List<TerminalState> start() throws SCIOException {
+	    if (isAlive()) {
+		watcher = terminals.getWatcher();
+		return watcher.start();
 	    } else {
-		return terminals.waitForChange(timeout);
+		return Collections.emptyList();
 	    }
 	}
+
+	@Override
+	public StateChangeEvent waitForChange(long timeout) throws SCIOException {
+	    if (timeout < 0) {
+		throw new IllegalArgumentException("The given timeout value is negative.");
+	    }
+
+	    if (isInit()) {
+		StateChangeEvent evt = pendingEvents.poll();
+		if (evt != null) {
+		    return evt;
+		} else {
+		    return watcher.waitForChange(timeout);
+		}
+	    } else {
+		// now things get tricky, wait until everything is alive first
+		long remainingTime = timeout == 0 ? Long.MAX_VALUE : timeout; // MAX_VALUE should be fine as infinite
+		while (remainingTime > 0 && isDead()) {
+		    try {
+			Thread.sleep(WAIT_DELTA);
+			remainingTime -= WAIT_DELTA;
+		    } catch (InterruptedException ex) {
+			// break execution with a timeout event, the caller should know that he must quit for himself
+			return new StateChangeEvent();
+		    }
+		}
+		// see if we are still dead
+		if (isDead()) {
+		    return new StateChangeEvent();
+		} else {
+		    // we are alive, now call start and transform its result into events
+		    List<TerminalState> initState = start();
+		    for (TerminalState next : initState) {
+			String name = next.getName();
+			pendingEvents.add(new StateChangeEvent(EventType.TERMINAL_ADDED, name));
+			if (next.isCardPresent()) {
+			    pendingEvents.add(new StateChangeEvent(EventType.CARD_INSERTED, name));
+			}
+		    }
+		    // return first event if present or just wait until no time is left
+		    StateChangeEvent evt = pendingEvents.poll();
+		    if (evt != null) {
+			return evt;
+		    } else {
+			if (remainingTime > 0) {
+			    return watcher.waitForChange(remainingTime);
+			} else {
+			    return new StateChangeEvent();
+			}
+		    }
+		}
+	    }
+	}
+
+	@Override
+	public StateChangeEvent waitForChange() throws SCIOException {
+	    return waitForChange(0);
+	}
+
     }
 
 }

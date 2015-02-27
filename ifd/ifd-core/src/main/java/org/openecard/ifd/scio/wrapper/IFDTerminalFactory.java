@@ -30,6 +30,7 @@ import org.openecard.ifd.scio.IFDProperties;
 
 
 /**
+ * Class to retrieve an SCIO based TerminalFactory implementation.
  *
  * @author Tobias Wich
  */

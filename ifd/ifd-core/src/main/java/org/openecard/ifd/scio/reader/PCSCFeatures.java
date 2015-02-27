@@ -30,7 +30,7 @@ import org.openecard.common.util.ByteUtils;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class PCSCFeatures {
 
@@ -70,12 +70,12 @@ public class PCSCFeatures {
 
     private static boolean isWindows() {
 	String osName = System.getProperty("os.name").toLowerCase();
-	return (osName.indexOf("windows") > -1);
+	return (osName.contains("windows"));
     }
 
 
     public static Map<Integer,Integer> featureMapFromRequest(byte[] featureResponse) {
-	HashMap<Integer,Integer> result = new HashMap<Integer, Integer>();
+	HashMap<Integer,Integer> result = new HashMap<>();
 
 	if ((featureResponse.length % 6) == 0) {
 	    int i = 0;

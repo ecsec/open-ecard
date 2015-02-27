@@ -209,8 +209,7 @@ public class PINTest {
 
 	ControlIFD controlIFD = new ControlIFD();
 	controlIFD.setCommand(ByteUtils.concatenate((byte) PCSCFeatures.MODIFY_PIN_DIRECT, structData));
-	controlIFD.setContextHandle(ctxHandle);
-	controlIFD.setIFDName(ifdName);
+	controlIFD.setSlotHandle(slotHandle);
 	ControlIFDResponse response = ifd.controlIFD(controlIFD);
     }
 

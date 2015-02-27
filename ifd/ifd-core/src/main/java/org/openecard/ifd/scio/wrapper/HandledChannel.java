@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,25 +20,27 @@
  *
  ***************************************************************************/
 
-package org.openecard.ifd.scio;
+package org.openecard.ifd.scio.wrapper;
 
-import java.math.BigInteger;
+import javax.annotation.Nonnull;
+import org.openecard.common.ifd.scio.SCIOChannel;
 
 
 /**
  *
- * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Tobias Wich
  */
-public class IFDUtils {
+public class HandledChannel extends SingleThreadChannel {
 
-    /**
-     * Extracts the slot index from the specified ifd name.
-     * @param name Name of IFD
-     * @return slot index
-     * @throws IFDException
-     */
-    public static BigInteger getSlotIndex(String name) throws IFDException {
-	return BigInteger.ZERO;
+    private final byte[] slotHandle;
+
+    public HandledChannel(@Nonnull byte[] slotHandle, @Nonnull SCIOChannel channel) {
+	super(channel);
+	this.slotHandle = slotHandle.clone();
+    }
+
+    public byte[] getSlotHandle() {
+	return slotHandle.clone();
     }
 
 }

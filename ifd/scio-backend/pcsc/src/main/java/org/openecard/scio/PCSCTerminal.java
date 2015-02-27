@@ -34,7 +34,7 @@ import org.openecard.common.ifd.scio.SCIOTerminal;
 
 /**
  * PC/SC terminal implementation of the SCIOTerminal.
- * 
+ *
  * @author Wael Alkhatib
  * @author Tobias Wich
  */

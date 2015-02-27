@@ -39,6 +39,7 @@ import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.ifd.scio.SCIOTerminals;
 import org.openecard.common.ifd.scio.SCIOTerminals.State;
+import org.openecard.common.ifd.scio.TerminalState;
 import org.openecard.common.ifd.scio.TerminalWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,7 +149,7 @@ public class PCSCTerminals implements SCIOTerminals {
 	}
 
 	@Override
-	public List<SCIOTerminal> start() throws SCIOException {
+	public List<TerminalState> start() throws SCIOException {
 	    if (pendingEvents != null) {
 		throw new IllegalStateException("Trying to initialize already initialized watcher instance.");
 	    }
@@ -161,16 +162,20 @@ public class PCSCTerminals implements SCIOTerminals {
 		// with a bit of luck no change has happened in between and the list is coherent
 		own.terminals.waitForChange(1);
 		List<CardTerminal> javaTerminals = own.terminals.list();
+		ArrayList<TerminalState> result = new ArrayList<>(javaTerminals.size());
 		// fill sets according to state of the terminals
 		for (CardTerminal next : javaTerminals) {
 		    String name = next.getName();
 		    terminals.add(name);
 		    if (next.isCardPresent()) {
 			cardPresent.add(name);
+			result.add(new TerminalState(name, true));
+		    } else {
+			result.add(new TerminalState(name, false));
 		    }
 		}
 		// return list of our terminals
-		return Collections.unmodifiableList(own.convertTerminals(javaTerminals));
+		return result;
 	    } catch (CardException ex) {
 		throw new SCIOException("Failed to retrieve status from the PCSC system.", ex);
 	    }

@@ -64,7 +64,7 @@
 		<maven.min.version>3.0.5</maven.min.version>
 		<license.licenseName>gpl_v3</license.licenseName>
 		<findbugs.packages>org.openecard.clients.-,org.openecard.android.-,org.openecard.richclient.-,org.openecard.common.-,org.openecard.control.-,org.openecard.crypto.-,org.openecard.esign.-,org.openecard.event.-,org.openecard.scio.-,org.openecard.management.-,org.openecard.recognition.-,org.openecard.sal.-,org.openecard.saml.-,org.openecard.transport.-,org.openecard.ws.android.-,org.openecard.ws.jaxb.-,org.openecard.ws.marshal.-,org.openecard.ws.common.-,org.openecard.ws.,org.openecard.i18n.-,org.openecard.gui.-,org.openecard.ifd.-,org.openecard.browser.-,org.openecard.maven.-</findbugs.packages>
-		<android.api.version>15</android.api.version>
+		<android.api.version>19</android.api.version>
 		<javadoc.check>-Xdoclint:none</javadoc.check>
 		<strip.debug.symbols>false</strip.debug.symbols>
 	</properties>
@@ -573,12 +573,12 @@
 			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
-				<version>6.8.17</version>
+				<version>6.8.21</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jmockit</groupId>
 				<artifactId>jmockit</artifactId>
-				<version>1.14</version>
+				<version>1.15</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.findbugs</groupId>

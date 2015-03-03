@@ -288,8 +288,8 @@ public final class CardResponseAPDU extends CardAPDU {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream(data.length + 2);
 
 	try {
-	    baos.write(trailer);
 	    baos.write(data);
+	    baos.write(trailer);
 	} catch (Exception e) {
 	    logger.error("Exception", e);
 	}

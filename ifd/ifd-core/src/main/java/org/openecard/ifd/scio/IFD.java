@@ -438,7 +438,6 @@ public class IFD implements org.openecard.ws.IFD {
 
 	try {
 	    EventWatcher watcher = new EventWatcher(cm, timeoutL, callback);
-	    watcher.setThreadPool(threadPool);
 	    List<IFDStatusType> initialState = watcher.start();
 
 	    // get expected status or initial status for all if none specified
@@ -758,7 +757,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    try {
 		byte[] handle = beginTransaction.getSlotHandle();
 		HandledChannel ch = cm.getChannel(handle);
-		ch.getChannel().getCard().beginExclusive();
+		ch.beginExclusive();
 	    } catch (NoSuchChannel | IllegalStateException ex) {
 		String msg = "No card available in the requested terminal.";
 		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);
@@ -798,7 +797,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    try {
 		byte[] handle = parameters.getSlotHandle();
 		HandledChannel ch = cm.getChannel(handle);
-		ch.getChannel().getCard().endExclusive();
+		ch.endExclusive();
 	    } catch (NoSuchChannel | IllegalStateException ex) {
 		String msg = "No card with transaction available in the requested terminal.";
 		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -27,16 +27,13 @@ import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
 import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
+import javax.annotation.Nonnull;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.enums.EventType;
-import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.HandlerBuilder;
-import org.openecard.common.util.IFDStatusDiff;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,122 +41,48 @@ import org.slf4j.LoggerFactory;
 /**
  * Thread implementation checking the IFD status for changes after waiting for changes in the IFD.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
-public class EventRunner implements Callable<Void> {
+public class EventRunner implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(EventRunner.class);
+    private static final long[] RECOVER_TIME = { 1, 500, 2000, 5000, 30000, 60000 };
 
     private final EventManager evtManager;
     private final HandlerBuilder builder;
 
-    private List<IFDStatusType> oldStati;
-    private Future<Boolean> wait;
+    private final List<IFDStatusType> initialState;
+    private final List<IFDStatusType> currentState;
 
-    public EventRunner(EventManager evtManager, HandlerBuilder builder) {
+    public EventRunner(EventManager evtManager, HandlerBuilder builder) throws WSException {
 	this.evtManager = evtManager;
 	this.builder = builder;
-	this.oldStati = new ArrayList<IFDStatusType>();
+	this.initialState = new ArrayList<>(evtManager.ifdStatus());
+	this.currentState = new ArrayList<>();
     }
 
 
     @Override
-    public Void call() throws Exception {
+    public void run() {
+	// fire events for current state
+	fireEvents(initialState);
 	try {
+	    int failCount = 0;
 	    while (true) {
-		wait = evtManager.threadPool.submit(new WaitFuture(evtManager));
 		try {
-		    List<IFDStatusType> newStati = evtManager.ifdStatus();
-		    IFDStatusDiff diff = new IFDStatusDiff(oldStati);
-		    diff.diff(newStati, true);
-		    if (diff.hasChanges()) {
-			logger.debug("Difference in status detected.");
-			analyzeEvent(oldStati, diff.result());
-		    }
-		    oldStati = newStati;
+		    List<IFDStatusType> diff = evtManager.wait(currentState);
+		    fireEvents(diff); // also updates current status
+		    failCount = 0;
 		} catch (WSException ex) {
-		    logger.warn("GetStatus returned with error.", ex);
-		} catch (Exception ex) {
-		    logger.error("Unexpected exception occurred.", ex);
-		    throw ex;
-		}
-		// wait for change if it hasn't already happened
-		wait.get();
-	    }
-	} finally {
-	    if (wait != null) {
-		wait.cancel(true);
-	    }
-	}
-    }
-
-    private void analyzeEvent(List<IFDStatusType> oldS, List<IFDStatusType> changed) {
-	logger.debug("Analyzing IFD event.");
-	for (IFDStatusType next : changed) {
-	    String ifdName = next.getIFDName();
-	    IFDStatusType counterPart = getCorresponding(ifdName, oldS);
-
-	    // next is completely new
-	    if (counterPart == null) {
-		ConnectionHandleType h = makeConnectionHandle(ifdName, null);
-		logger.debug("Found a terminal added event ({}).", ifdName);
-		evtManager.notify(EventType.TERMINAL_ADDED, h);
-		// create empty counterPart so all slots raise events
-		counterPart = new IFDStatusType();
-		counterPart.setIFDName(ifdName);
-	    }
-
-	    // inspect every slot
-	    for (SlotStatusType nextSlot : next.getSlotStatus()) {
-		SlotStatusType counterPartSlot = getCorresponding(nextSlot.getIndex(), counterPart.getSlotStatus());
-		if (counterPartSlot == null) {
-		    // slot is new, send event when card is present
-		    if (nextSlot.isCardAvailable()) {
-			logger.debug("Found a card insert event ({}).", ifdName);
-			ConnectionHandleType handle = makeUnknownCardHandle(ifdName, nextSlot);
-			evtManager.notify(EventType.CARD_INSERTED, handle);
-			if (evtManager.recognize) {
-			    evtManager.threadPool.submit(new Recognizer(evtManager, handle));
-			}
-		    }
-		} else {
-		    // compare slot for difference
-		    if (nextSlot.isCardAvailable() != counterPartSlot.isCardAvailable()) {
-			if (nextSlot.isCardAvailable()) {
-			    logger.debug("Found a card insert event ({}).", ifdName);
-			    ConnectionHandleType handle = makeUnknownCardHandle(ifdName, nextSlot);
-			    evtManager.notify(EventType.CARD_INSERTED, handle);
-			    if (evtManager.recognize) {
-				evtManager.threadPool.submit(new Recognizer(evtManager, handle));
-			    }
-			} else {
-			    logger.debug("Found a card removed event ({}).", ifdName);
-			    ConnectionHandleType h = makeConnectionHandle(ifdName, nextSlot.getIndex());
-			    evtManager.notify(EventType.CARD_REMOVED, h);
-			}
-		    } else {
-			// compare atr
-			if (nextSlot.isCardAvailable()) {
-			    if (! Arrays.equals(nextSlot.getATRorATS(), counterPartSlot.getATRorATS())) {
-				if (logger.isDebugEnabled()) {
-				    logger.debug("Ignoring: Found a card changed event ({}).", ifdName);
-				    String newATR = ByteUtils.toHexString(nextSlot.getATRorATS());
-				    String oldATR = ByteUtils.toHexString(counterPartSlot.getATRorATS());
-				    logger.debug("Dump ATR\nnew: {}\nold: {}", newATR, oldATR);
-				}
-				//evtManager.sendAsyncEvents(ifdName, nextSlot, EventType.CARD_RECOGNIZED);
-			    }
-			}
-		    }
+		    logger.warn("IFD Wait returned with error.", ex);
+		    // wait a bit and try again
+		    int sleepIdx = failCount < RECOVER_TIME.length ? failCount : RECOVER_TIME.length - 1;
+		    Thread.sleep(RECOVER_TIME[sleepIdx]);
+		    failCount++;
 		}
 	    }
-
-	    // remove terminal
-	    if (! next.isConnected()) {
-		ConnectionHandleType h = makeConnectionHandle(ifdName, null);
-		logger.debug("Found a terminal removed event ({}).", ifdName);
-		evtManager.notify(EventType.TERMINAL_REMOVED, h);
-	    }
+	} catch (InterruptedException ex) {
+	    logger.info("Event thread interrupted.", ex);
 	}
     }
 
@@ -180,6 +103,7 @@ public class EventRunner implements Callable<Void> {
 	return null;
     }
 
+
     private ConnectionHandleType makeConnectionHandle(String ifdName, BigInteger slotIdx) {
 	ConnectionHandleType h = builder.setIfdName(ifdName)
 		.setSlotIdx(slotIdx)
@@ -195,6 +119,89 @@ public class EventRunner implements Callable<Void> {
 		.setCardIdentifier(status.getATRorATS())
 		.buildConnectionHandle();
 	return h;
+    }
+
+    private void fireEvents(@Nonnull List<IFDStatusType> diff) {
+	for (IFDStatusType term : diff) {
+	    String ifdName = term.getIFDName();
+	    boolean terminalPresent = term.isConnected();
+
+	    if (! terminalPresent) {
+		// TERMINAL REMOVED
+		Iterator<IFDStatusType> it = currentState.iterator();
+		while (it.hasNext()) {
+		    IFDStatusType oldTerm = it.next();
+		    if (oldTerm.getIFDName().equals(term.getIFDName())) {
+			it.remove();
+		    }
+		}
+		ConnectionHandleType h = makeConnectionHandle(ifdName, null);
+		logger.debug("Found a terminal removed event ({}).", ifdName);
+		evtManager.notify(EventType.TERMINAL_REMOVED, h);
+
+	    } else {
+		// find out if the terminal is new, or only a slot got updated
+		IFDStatusType oldTerm = getCorresponding(ifdName, currentState);
+		boolean terminalAdded = oldTerm == null;
+
+		if (terminalAdded) {
+		    // TERMINAL ADDED
+		    currentState.add(term);
+		    // TODO: make copy of term
+		    oldTerm = new IFDStatusType();
+		    oldTerm.setIFDName(ifdName);
+		    oldTerm.setConnected(true);
+		    // create event
+		    ConnectionHandleType h = makeConnectionHandle(ifdName, null);
+		    logger.debug("Found a terminal added event ({}).", ifdName);
+		    evtManager.notify(EventType.TERMINAL_ADDED, h);
+		}
+
+		// check each slot
+		for (SlotStatusType slot : term.getSlotStatus()) {
+		    SlotStatusType oldSlot = getCorresponding(slot.getIndex(), oldTerm.getSlotStatus());
+		    boolean cardPresent = slot.isCardAvailable();
+		    boolean cardWasPresent = oldSlot != null && oldSlot.isCardAvailable();
+
+		    if (cardPresent && ! cardWasPresent) {
+			// CARD ADDED
+			// copy slot and add to list
+			SlotStatusType newSlot = oldSlot;
+			if (newSlot == null) {
+			    newSlot = new SlotStatusType();
+			    oldTerm.getSlotStatus().add(newSlot);
+			}
+			newSlot.setIndex(slot.getIndex());
+			newSlot.setCardAvailable(true);
+			newSlot.setATRorATS(slot.getATRorATS());
+			// create event
+			logger.debug("Found a card insert event ({}).", ifdName);
+			ConnectionHandleType handle = makeUnknownCardHandle(ifdName, newSlot);
+			evtManager.notify(EventType.CARD_INSERTED, handle);
+			if (evtManager.recognize) {
+			    evtManager.threadPool.submit(new Recognizer(evtManager, handle));
+			}
+
+		    } else if (! terminalAdded && ! cardPresent && cardWasPresent) {
+			// this makes only sense when the terminal was already there
+			// CARD REMOVED
+			// remove slot entry
+			BigInteger idx = oldSlot.getIndex();
+			Iterator<SlotStatusType> it = oldTerm.getSlotStatus().iterator();
+			while (it.hasNext()) {
+			    SlotStatusType next = it.next();
+			    if (idx.equals(next.getIndex())) {
+				it.remove();
+				break;
+			    }
+			}
+			logger.debug("Found a card removed event ({}).", ifdName);
+			ConnectionHandleType h = makeConnectionHandle(ifdName, idx);
+			evtManager.notify(EventType.CARD_REMOVED, h);
+		    }
+		}
+	    }
+	}
     }
 
 }

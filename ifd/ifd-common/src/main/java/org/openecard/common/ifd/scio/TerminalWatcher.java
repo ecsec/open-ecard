@@ -57,7 +57,7 @@ public interface TerminalWatcher {
     /**
      * Waits for a type change in the terminals managed by this instance.
      * <p>This method blocks until a type change happens in the managed terminal. In case a timeout happens, the method
- returns with an instance returning {@code false} in its {@link StateChangeEvent#isCancelled()} method.</p>
+     * returns with an instance returning {@code false} in its {@link StateChangeEvent#isCancelled()} method.</p>
      *
      * @param timeout If positive, wait at most for the given ammount of milliseconds, if 0 wait indefinitely. Must not
      *   be negative.
@@ -73,7 +73,7 @@ public interface TerminalWatcher {
     /**
      * Waits for a type change in the terminals managed by this instance.
      * <p>This method blocks until a type change happens in the managed terminal. As this method has an infinite
- timeout, there is no possibility that the returned event returns {@code true} in its
+     * timeout, there is no possibility that the returned event returns {@code true} in its
      * {@link StateChangeEvent#isCancelled()} method.</p>
      *
      * @return The event that has occurred. May not represent a timeout.

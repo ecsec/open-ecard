@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.common.ifd.scio.SCIOException;
@@ -50,7 +49,6 @@ public class EventWatcher implements Callable<List<IFDStatusType>> {
     private final ChannelHandleType callback;
     private final TerminalWatcher watcher;
 
-    private ExecutorService threadPool;
     private ArrayList<IFDStatusType> currentState;
     private List<IFDStatusType> expectedState;
 
@@ -68,10 +66,6 @@ public class EventWatcher implements Callable<List<IFDStatusType>> {
 	currentState = convert(initialState);
 	// convert again to be safe from manipulation from the outside
 	return convert(initialState);
-    }
-
-    public void setThreadPool(ExecutorService threadPool) {
-	this.threadPool = threadPool;
     }
 
     public void setExpectedState(@Nonnull List<IFDStatusType> expectedState) {
@@ -282,7 +276,7 @@ public class EventWatcher implements Callable<List<IFDStatusType>> {
 	if (a.isCardAvailable() != b.isCardAvailable()) {
 	    return false;
 	}
-	if (a.getIndex().equals(b.getIndex())) {
+	if (! a.getIndex().equals(b.getIndex())) {
 	    return false;
 	}
 	// ATR is ignored, because it is not read by the conversion function

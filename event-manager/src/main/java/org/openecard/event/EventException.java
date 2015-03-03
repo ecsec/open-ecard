@@ -29,7 +29,7 @@ import org.openecard.common.ECardException;
 /**
  * Exception describing an error in the event system.
  *
- * @author Johannes.Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Johannes Schmoelz
  */
 public class EventException extends ECardException {
 

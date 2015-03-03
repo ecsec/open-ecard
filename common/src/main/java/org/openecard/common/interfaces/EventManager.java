@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -28,11 +28,11 @@ import org.openecard.common.enums.EventType;
 
 /**
  *
- * @author Johannes.Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Johannes.Schmoelz
  */
 public interface EventManager {
 
-    Object initialize();
+    void initialize();
     void terminate();
 
     void register(EventCallback callback, EventFilter filter);

@@ -22,11 +22,11 @@
 
 package org.openecard.event;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.GetStatus;
 import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
-import java.util.ArrayList;
+import iso.std.iso_iec._24727.tech.schema.Wait;
+import iso.std.iso_iec._24727.tech.schema.WaitResponse;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * Main class of the event system.
  * Use this to create and operate an event manager.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class EventManager implements org.openecard.common.interfaces.EventManager {
 
@@ -81,12 +81,14 @@ public class EventManager implements org.openecard.common.interfaces.EventManage
     }
 
     @Override
-    public synchronized Object initialize() {
+    public synchronized void initialize() {
 	threadPool = Executors.newCachedThreadPool();
 	// start watcher thread
-	watcher = threadPool.submit(new EventRunner(this, builder));
-	// TODO: remove return value altogether
-	return new ArrayList<ConnectionHandleType>();
+	try {
+	    watcher = threadPool.submit(new EventRunner(this, builder));
+	} catch (WSException ex) {
+	    throw new RuntimeException("Failed to request initial status from IFD.");
+	}
     }
 
     @Override
@@ -96,6 +98,7 @@ public class EventManager implements org.openecard.common.interfaces.EventManage
     }
 
 
+    @Nonnull
     protected List<IFDStatusType> ifdStatus() throws WSException {
 	GetStatus status = new GetStatus();
 	status.setContextHandle(ctx);
@@ -104,6 +107,18 @@ public class EventManager implements org.openecard.common.interfaces.EventManage
 
 	WSHelper.checkResult(statusResponse);
 	result = statusResponse.getIFDStatus();
+	return result;
+    }
+
+    @Nonnull
+    protected List<IFDStatusType> wait(@Nonnull List<IFDStatusType> lastKnown) throws WSException {
+	Wait wait = new Wait();
+	wait.setContextHandle(ctx);
+	wait.getIFDStatus().addAll(lastKnown);
+	WaitResponse resp = env.getIFD().wait(wait);
+
+	WSHelper.checkResult(resp);
+	List<IFDStatusType> result = resp.getIFDEvent();
 	return result;
     }
 

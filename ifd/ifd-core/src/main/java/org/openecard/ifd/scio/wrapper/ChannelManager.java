@@ -100,7 +100,7 @@ public class ChannelManager {
 
     public void closeChannel(@Nonnull byte[] slotHandle) throws SCIOException {
 	HandledChannel ch = channels.remove(slotHandle);
-	if (ch != null) {
+	if (ch != null && ch.getChannel().isLogicalChannel()) {
 	    ch.shutdown();
 	}
     }

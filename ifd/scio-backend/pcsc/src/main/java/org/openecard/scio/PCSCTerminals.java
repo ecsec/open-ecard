@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -54,6 +55,7 @@ import org.slf4j.LoggerFactory;
 public class PCSCTerminals implements SCIOTerminals {
 
     private static final Logger logger = LoggerFactory.getLogger(PCSCTerminals.class);
+    private static final long WAIT_DELTA = 2000;
 
     private final TerminalFactory terminalFactory;
     private final CardTerminals terminals;
@@ -199,7 +201,7 @@ public class PCSCTerminals implements SCIOTerminals {
 	    } else {
 		boolean changed;
 		try {
-		    changed = own.terminals.waitForChange(timeout);
+		    changed = internalWait(timeout);
 		} catch (CardException ex) {
 		    throw new SCIOException("Error while waiting for a state change in the terminals.", ex);
 		}
@@ -246,6 +248,66 @@ public class PCSCTerminals implements SCIOTerminals {
 		    // use remove so we get an exception when no event has been recorded
 		    // this would mean our algorithm is corrupt
 		    return pendingEvents.remove();
+		}
+	    }
+	}
+
+	/**
+	 * Wait for events in the system.
+	 * The SmartcardIO wait function only reacts on card events, new and removed terminals go unseen. in order to
+	 * fix this, we wait only a short time and check the terminal list periodically.
+	 *
+	 * @param timeout Timeout values as in {@link #waitForChange(long)}.
+	 * @return {@code true} if a change the terminals happened, {@code false} if a timeout occurred.
+	 */
+	private boolean internalWait(long timeout) throws CardException {
+	    // the SmartcardIO wait function only reacts on card events, new and removed terminals go unseen
+	    // to fix this, we wait only a short time and check the terminal list periodically
+	    if (timeout < 0) {
+		throw new IllegalArgumentException("Negative timeout value given.");
+	    } else if (timeout == 0) {
+		timeout = Long.MAX_VALUE;
+	    }
+
+	    while (true) {
+		if (timeout == 0) {
+		    // waited for all time and nothing happened
+		    return false;
+		}
+		// calculate next wait slice
+		long waitTime;
+		if (timeout < WAIT_DELTA) {
+		    waitTime = timeout;
+		    timeout = 0;
+		} else {
+		    timeout = timeout - WAIT_DELTA;
+		    waitTime = WAIT_DELTA;
+		}
+
+		// check if there is something new on the card side
+		boolean change = own.terminals.waitForChange(waitTime);
+		if (change) {
+		    return true;
+		}
+
+		// check if there is something new on the terminal side
+		ArrayList<CardTerminal> currentTerms = new ArrayList<>(own.terminals.list());
+		if (currentTerms.size() != terminals.size()) {
+		    return true;
+		}
+		// same size, but still compare terminal names
+		HashSet<String> newTermNames = new HashSet<>();
+		for (CardTerminal next : currentTerms) {
+		    newTermNames.add(next.getName());
+		}
+		int sizeBefore = newTermNames.size();
+		if (sizeBefore != terminals.size()) {
+		    return false;
+		}
+		newTermNames.addAll(terminals);
+		int sizeAfter = newTermNames.size();
+		if (sizeBefore != sizeAfter) {
+		    return false;
 		}
 	    }
 	}

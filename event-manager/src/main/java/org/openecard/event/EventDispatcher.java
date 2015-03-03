@@ -35,9 +35,9 @@ import org.openecard.common.interfaces.EventFilter;
 
 /**
  * EventDispatcher class distributing the events to all registered listeners.
- * Filtering is applied as reequested at registration of the listenmer.
+ * Filtering is applied as requested at registration of the listenmer.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class EventDispatcher {
 
@@ -47,9 +47,9 @@ public class EventDispatcher {
 
 	public EventTypeFilter(EventType ... eventType) {
 	    if (eventType.length == 0) {
-		this.eventType = new ArrayList<EventType>(Arrays.asList(EventType.values()));
+		this.eventType = new ArrayList<>(Arrays.asList(EventType.values()));
 	    } else {
-		this.eventType = new ArrayList<EventType>(Arrays.asList(eventType));
+		this.eventType = new ArrayList<>(Arrays.asList(eventType));
 	    }
 	}
 
@@ -90,7 +90,7 @@ public class EventDispatcher {
     public EventDispatcher(EventManager manager) {
 	this.manager = manager;
 	this.guard = new Semaphore(1);
-	this.eventFilter = new ConcurrentHashMap<EventCallback, ArrayList<EventFilter>>();
+	this.eventFilter = new ConcurrentHashMap<>();
     }
 
 

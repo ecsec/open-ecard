@@ -124,82 +124,83 @@ public class EventRunner implements Runnable {
     private void fireEvents(@Nonnull List<IFDStatusType> diff) {
 	for (IFDStatusType term : diff) {
 	    String ifdName = term.getIFDName();
-	    boolean terminalPresent = term.isConnected();
 
+	    // find out if the terminal is new, or only a slot got updated
+	    IFDStatusType oldTerm = getCorresponding(ifdName, currentState);
+	    boolean terminalAdded = oldTerm == null;
+
+	    if (terminalAdded) {
+		// TERMINAL ADDED
+		// make copy of term
+		oldTerm = new IFDStatusType();
+		oldTerm.setIFDName(ifdName);
+		oldTerm.setConnected(true);
+		// add to current list
+		currentState.add(oldTerm);
+		// create event
+		ConnectionHandleType h = makeConnectionHandle(ifdName, null);
+		logger.debug("Found a terminal added event ({}).", ifdName);
+		evtManager.notify(EventType.TERMINAL_ADDED, h);
+	    }
+
+	    // check each slot
+	    for (SlotStatusType slot : term.getSlotStatus()) {
+		SlotStatusType oldSlot = getCorresponding(slot.getIndex(), oldTerm.getSlotStatus());
+		boolean cardPresent = slot.isCardAvailable();
+		boolean cardWasPresent = oldSlot != null && oldSlot.isCardAvailable();
+
+		if (cardPresent && ! cardWasPresent) {
+		    // CARD ADDED
+		    // copy slot and add to list
+		    SlotStatusType newSlot = oldSlot;
+		    if (newSlot == null) {
+			newSlot = new SlotStatusType();
+			oldTerm.getSlotStatus().add(newSlot);
+		    }
+		    newSlot.setIndex(slot.getIndex());
+		    newSlot.setCardAvailable(true);
+		    newSlot.setATRorATS(slot.getATRorATS());
+		    // create event
+		    logger.debug("Found a card insert event ({}).", ifdName);
+		    ConnectionHandleType handle = makeUnknownCardHandle(ifdName, newSlot);
+		    evtManager.notify(EventType.CARD_INSERTED, handle);
+		    if (evtManager.recognize) {
+			evtManager.threadPool.submit(new Recognizer(evtManager, handle));
+		    }
+
+		} else if (! terminalAdded && ! cardPresent && cardWasPresent) {
+		    // this makes only sense when the terminal was already there
+		    // CARD REMOVED
+		    // remove slot entry
+		    BigInteger idx = oldSlot.getIndex();
+		    Iterator<SlotStatusType> it = oldTerm.getSlotStatus().iterator();
+		    while (it.hasNext()) {
+			SlotStatusType next = it.next();
+			if (idx.equals(next.getIndex())) {
+			    it.remove();
+			    break;
+			}
+		    }
+		    logger.debug("Found a card removed event ({}).", ifdName);
+		    ConnectionHandleType h = makeConnectionHandle(ifdName, idx);
+		    evtManager.notify(EventType.CARD_REMOVED, h);
+		}
+	    }
+
+	    // terminal removed event comes after card removed events
+	    boolean terminalPresent = term.isConnected();
 	    if (! terminalPresent) {
 		// TERMINAL REMOVED
 		Iterator<IFDStatusType> it = currentState.iterator();
 		while (it.hasNext()) {
-		    IFDStatusType oldTerm = it.next();
-		    if (oldTerm.getIFDName().equals(term.getIFDName())) {
+		    IFDStatusType toDel = it.next();
+		    if (toDel.getIFDName().equals(term.getIFDName())) {
 			it.remove();
 		    }
 		}
 		ConnectionHandleType h = makeConnectionHandle(ifdName, null);
 		logger.debug("Found a terminal removed event ({}).", ifdName);
 		evtManager.notify(EventType.TERMINAL_REMOVED, h);
-
-	    } else {
-		// find out if the terminal is new, or only a slot got updated
-		IFDStatusType oldTerm = getCorresponding(ifdName, currentState);
-		boolean terminalAdded = oldTerm == null;
-
-		if (terminalAdded) {
-		    // TERMINAL ADDED
-		    currentState.add(term);
-		    // TODO: make copy of term
-		    oldTerm = new IFDStatusType();
-		    oldTerm.setIFDName(ifdName);
-		    oldTerm.setConnected(true);
-		    // create event
-		    ConnectionHandleType h = makeConnectionHandle(ifdName, null);
-		    logger.debug("Found a terminal added event ({}).", ifdName);
-		    evtManager.notify(EventType.TERMINAL_ADDED, h);
-		}
-
-		// check each slot
-		for (SlotStatusType slot : term.getSlotStatus()) {
-		    SlotStatusType oldSlot = getCorresponding(slot.getIndex(), oldTerm.getSlotStatus());
-		    boolean cardPresent = slot.isCardAvailable();
-		    boolean cardWasPresent = oldSlot != null && oldSlot.isCardAvailable();
-
-		    if (cardPresent && ! cardWasPresent) {
-			// CARD ADDED
-			// copy slot and add to list
-			SlotStatusType newSlot = oldSlot;
-			if (newSlot == null) {
-			    newSlot = new SlotStatusType();
-			    oldTerm.getSlotStatus().add(newSlot);
-			}
-			newSlot.setIndex(slot.getIndex());
-			newSlot.setCardAvailable(true);
-			newSlot.setATRorATS(slot.getATRorATS());
-			// create event
-			logger.debug("Found a card insert event ({}).", ifdName);
-			ConnectionHandleType handle = makeUnknownCardHandle(ifdName, newSlot);
-			evtManager.notify(EventType.CARD_INSERTED, handle);
-			if (evtManager.recognize) {
-			    evtManager.threadPool.submit(new Recognizer(evtManager, handle));
-			}
-
-		    } else if (! terminalAdded && ! cardPresent && cardWasPresent) {
-			// this makes only sense when the terminal was already there
-			// CARD REMOVED
-			// remove slot entry
-			BigInteger idx = oldSlot.getIndex();
-			Iterator<SlotStatusType> it = oldTerm.getSlotStatus().iterator();
-			while (it.hasNext()) {
-			    SlotStatusType next = it.next();
-			    if (idx.equals(next.getIndex())) {
-				it.remove();
-				break;
-			    }
-			}
-			logger.debug("Found a card removed event ({}).", ifdName);
-			ConnectionHandleType h = makeConnectionHandle(ifdName, idx);
-			evtManager.notify(EventType.CARD_REMOVED, h);
-		    }
-		}
 	    }
 	}
     }

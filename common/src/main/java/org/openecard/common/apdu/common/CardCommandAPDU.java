@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * Implements a command APDU.
  * See ISO/IEC 7816-4 Section 5.1.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class CardCommandAPDU extends CardAPDU {
 

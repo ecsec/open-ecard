@@ -126,33 +126,6 @@ public class SingleThreadChannel {
      */
     @Nonnull
     private CardResponseAPDU transmit(final @Nonnull byte[] command) throws SCIOException, IllegalStateException {
-	return transmit(new CardCommandAPDU(command));
-    }
-
-    /**
-     * Transmits the given command APDU to the card.
-     * <p>The CLA byte of the command APDU is automatically adjusted to match the channel number of this channel.</p>
-     * <p>Note that this method cannot be used to transmit {@code MANAGE CHANNEL} APDUs. Logical channels should be
-     * managed using the {@link SCIOCard#openLogicalChannel()} and {@link #close()} methods.</p>
-     * <p>Implementations must transparently handle artifacts of the transmission protocol. For example, when using the
-     * T=0 protocol, the following processing should occur as described in ISO/IEC 7816-4:</p>
-     * <ul>
-     * <li>if the response APDU has an SW1 of 61, the implementation should issue a {@code GET RESPONSE} command using
-     * SW2 as the Lefield. This process is repeated as long as an SW1 of 61 is received. The response body of these
-     * exchanges is concatenated to form the final response body.</li>
-     * <li>if the response APDU is 6C XX, the implementation should reissue the command using XX as the Le field.</li>
-     * </ul>
-     *
-     * @param command Command APDU, which should be sent to the card.
-     * @return The response APDU after the given command APDU is processed.
-     * @throws SCIOException Thrown if the operation failed.
-     * @throws IllegalStateException Thrown if the card is not connected anymore or the channel has been closed.
-     * @throws IllegalArgumentException Thrown if the APDU encodes a {@code MANAGE CHANNEL}..
-     * @throws NullPointerException Thrown in case the argument is {@code null}.
-     */
-    @Nonnull
-    private CardResponseAPDU transmit(final @Nonnull CardCommandAPDU command) throws SCIOException,
-	    IllegalStateException {
 	// send command
 	Future<CardResponseAPDU> result = exec.submit(new Callable<CardResponseAPDU>() {
 	    @Override
@@ -180,6 +153,33 @@ public class SingleThreadChannel {
 	} catch (InterruptedException ex) {
 	    throw new IllegalStateException("Running command cancelled during execution.");
 	}
+    }
+
+    /**
+     * Transmits the given command APDU to the card.
+     * <p>The CLA byte of the command APDU is automatically adjusted to match the channel number of this channel.</p>
+     * <p>Note that this method cannot be used to transmit {@code MANAGE CHANNEL} APDUs. Logical channels should be
+     * managed using the {@link SCIOCard#openLogicalChannel()} and {@link #close()} methods.</p>
+     * <p>Implementations must transparently handle artifacts of the transmission protocol. For example, when using the
+     * T=0 protocol, the following processing should occur as described in ISO/IEC 7816-4:</p>
+     * <ul>
+     * <li>if the response APDU has an SW1 of 61, the implementation should issue a {@code GET RESPONSE} command using
+     * SW2 as the Lefield. This process is repeated as long as an SW1 of 61 is received. The response body of these
+     * exchanges is concatenated to form the final response body.</li>
+     * <li>if the response APDU is 6C XX, the implementation should reissue the command using XX as the Le field.</li>
+     * </ul>
+     *
+     * @param command Command APDU, which should be sent to the card.
+     * @return The response APDU after the given command APDU is processed.
+     * @throws SCIOException Thrown if the operation failed.
+     * @throws IllegalStateException Thrown if the card is not connected anymore or the channel has been closed.
+     * @throws IllegalArgumentException Thrown if the APDU encodes a {@code MANAGE CHANNEL}..
+     * @throws NullPointerException Thrown in case the argument is {@code null}.
+     */
+    @Nonnull
+    private CardResponseAPDU transmit(final @Nonnull CardCommandAPDU command) throws SCIOException,
+	    IllegalStateException {
+	return transmit(command.toByteArray());
     }
 
     /**
@@ -217,8 +217,7 @@ public class SingleThreadChannel {
 	    inputAPDU = smProtocol.applySM(inputAPDU);
 	}
 	logger.debug("Send APDU: {}", ByteUtils.toHexString(inputAPDU, true));
-	CardCommandAPDU capdu = new CardCommandAPDU(inputAPDU);
-	CardResponseAPDU rapdu = transmit(capdu);
+	CardResponseAPDU rapdu = transmit(inputAPDU);
 	byte[] result = rapdu.toByteArray();
 	logger.debug("Receive APDU: {}", ByteUtils.toHexString(result, true));
 	if (isSM()) {

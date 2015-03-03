@@ -105,6 +105,8 @@ public interface SCIOChannel {
      * exchanges is concatenated to form the final response body.</li>
      * <li>if the response APDU is 6C XX, the implementation should reissue the command using XX as the Le field.</li>
      * </ul>
+     * <p>Note that this function should in general just call the byte array based version
+     * ({@link #transmit(byte[])}.</p>
      *
      * @param command Command APDU, which should be sent to the card.
      * @return The response APDU after the given command APDU is processed.

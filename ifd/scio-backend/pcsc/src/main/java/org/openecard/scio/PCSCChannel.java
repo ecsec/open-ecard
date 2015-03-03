@@ -87,19 +87,19 @@ public class PCSCChannel implements SCIOChannel {
 
     @Override
     public CardResponseAPDU transmit(byte[] command) throws SCIOException {
-	return transmit(new CardCommandAPDU(command));
-    }
-
-    @Override
-    public CardResponseAPDU transmit(CardCommandAPDU apdu) throws SCIOException {
         try {
-            CommandAPDU convertCommand = new CommandAPDU(apdu.toByteArray());
+            CommandAPDU convertCommand = new CommandAPDU(command);
             ResponseAPDU response = channel.transmit(convertCommand);
             return new CardResponseAPDU(response.getBytes());
 	} catch (CardException ex) {
 	    String msg = "Failed to transmit APDU to the card in terminal '%s'.";
 	    throw new SCIOException(String.format(msg, card.getTerminal().getName()), ex);
 	}
+    }
+
+    @Override
+    public CardResponseAPDU transmit(CardCommandAPDU apdu) throws SCIOException {
+	return transmit(apdu.toByteArray());
     }
 
     @Override

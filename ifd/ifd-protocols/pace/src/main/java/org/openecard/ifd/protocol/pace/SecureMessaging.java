@@ -182,7 +182,7 @@ public class SecureMessaging {
      */
     public byte[] decrypt(byte[] response) throws Exception {
 	if (response.length < 12) {
-	    throw new IllegalArgumentException("Malformed Secure Messaging APDU");
+	    throw new IllegalArgumentException("Malformed Secure Messaging APDU.");
 	}
 	return decrypt(response, secureMessagingSSC);
     }

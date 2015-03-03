@@ -79,7 +79,7 @@ public class ChannelManager {
     @Nonnull
     public byte[] openChannel(@Nonnull String ifdName) throws NoSuchTerminal, SCIOException,
 	    IllegalStateException {
-	SCIOTerminal t = terminals.getTerminal(ifdName);
+	SCIOTerminal t = getTerminals().getTerminal(ifdName);
 	SCIOCard card = t.connect(SCIOProtocol.ANY);
 	SCIOChannel channel = card.getBasicChannel();
 	byte[] slotHandle = createSlotHandle();

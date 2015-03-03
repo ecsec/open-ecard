@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -55,7 +54,7 @@ import org.slf4j.LoggerFactory;
 public class PCSCTerminals implements SCIOTerminals {
 
     private static final Logger logger = LoggerFactory.getLogger(PCSCTerminals.class);
-    private static final long WAIT_DELTA = 2000;
+    private static final long WAIT_DELTA = 1000;
 
     private final TerminalFactory terminalFactory;
     private final CardTerminals terminals;
@@ -285,7 +284,19 @@ public class PCSCTerminals implements SCIOTerminals {
 		}
 
 		// check if there is something new on the card side
-		boolean change = own.terminals.waitForChange(waitTime);
+		// due to the wait call blocking ever other smartcard operation, we only wait for the actual events
+		// very shortly and sleep for the rest of the time
+		boolean change = own.terminals.waitForChange(1);
+		if (change) {
+		    return true;
+		}
+		try {
+		    Thread.sleep(waitTime);
+		} catch (InterruptedException ex) {
+		    throw new CardException("Wait interrupted by another thread.");
+		}
+		// try again after sleeping
+		change = own.terminals.waitForChange(1);
 		if (change) {
 		    return true;
 		}

@@ -26,12 +26,9 @@ import android.app.Activity;
 import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.nfc.NfcAdapter;
-import android.nfc.NfcManager;
 import android.preference.PreferenceManager;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
@@ -43,7 +40,7 @@ import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.enums.EventType;
-import org.openecard.common.ifd.AndroidTerminalFactory;
+import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.sal.state.CardStateMap;
@@ -61,7 +58,6 @@ import org.openecard.ifd.scio.wrapper.IFDTerminalFactory;
 import org.openecard.management.TinyManagement;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.sal.TinySAL;
-import org.openecard.scio.NFCFactory;
 import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.marshal.WsdefProperties;
@@ -94,7 +90,7 @@ public class ApplicationContext extends Application implements EventCallback {
     private Dispatcher dispatcher;
     private boolean initialized;
     private UserConsent gui;
-    private AndroidTerminalFactory terminalFactory;
+    private TerminalFactory terminalFactory;
     private boolean usingNFC;
     private NotificationManager notificationManager;
     private AddonManager manager;
@@ -241,26 +237,11 @@ public class ApplicationContext extends Application implements EventCallback {
 	WsdefProperties.setProperty("org.openecard.ws.marshaller.impl", "org.openecard.ws.android.AndroidMarshaller");
 
 	try {
-	    terminalFactory = (AndroidTerminalFactory) IFDTerminalFactory.getInstance();
+	    terminalFactory = IFDTerminalFactory.getInstance();
 	} catch (IFDException e) {
 	    //TODO log
 	    System.exit(0);
 	}
-
-	usingNFC = terminalFactory instanceof NFCFactory;
-	if (usingNFC) {
-	    NfcManager nfcManager = (NfcManager) this.getSystemService(Context.NFC_SERVICE);
-	    NfcAdapter adapter = nfcManager.getDefaultAdapter();
-	    if (adapter == null || !adapter.isEnabled()) {
-		MessageDialog dialog = gui.obtainMessageDialog();
-		String message = lang.translationForKey("android.error.nfc_error");
-		String title = lang.translationForKey("error");
-		dialog.showMessageDialog(message, title, DialogType.ERROR_MESSAGE);
-		return;
-	    }
-	}
-
-	terminalFactory.start(this);
 
 	// Client environment
 	env = new ClientEnv();

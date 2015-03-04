@@ -93,4 +93,14 @@ public class NFCCardChannel implements SCIOChannel {
 	return lengthOfLastAPDU;
     }
 
+    @Override
+    public boolean isBasicChannel() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean isLogicalChannel() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

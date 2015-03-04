@@ -26,6 +26,7 @@ import android.nfc.tech.IsoDep;
 import java.io.IOException;
 import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOException;
+import org.openecard.common.ifd.scio.SCIOProtocol;
 import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * Implemented as singleton because we only have one nfc-interface. Only
  * activitys can react on a new intent, so they must set the tag via setTag()
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class NFCCardTerminal implements SCIOTerminal {
 
@@ -69,7 +70,7 @@ public class NFCCardTerminal implements SCIOTerminal {
     }
 
     @Override
-    public synchronized SCIOCard connect(String arg0) throws SCIOException {
+    public synchronized SCIOCard connect(SCIOProtocol protocol) throws SCIOException, IllegalStateException {
 	if (nfcCard == null || this.nfcCard.isodep == null) {
 	    logger.warn("No tag present.");
 	    throw new SCIOException("No tag present");

@@ -22,33 +22,39 @@
 
 package org.openecard.scio;
 
-import org.openecard.common.ifd.AndroidTerminalFactory;
+import java.security.NoSuchAlgorithmException;
 import org.openecard.common.ifd.scio.SCIOTerminals;
-
 
 /**
  * NFC specific implementation of the TerminalFactory
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki 
  */
-public class NFCFactory implements AndroidTerminalFactory {
+public class NFCFactory implements org.openecard.common.ifd.scio.TerminalFactory {
+    
+    private static final String ALGORITHM = "nfc";
+    
+    public NFCFactory() throws NoSuchAlgorithmException {
+ 
+    }
 
     @Override
-    public String getType() {
-	return "NFC";
+    public String getType() {              
+	return ALGORITHM;
     }
 
     @Override
     public SCIOTerminals terminals() {
 	return new NFCCardTerminals();
     }
-
+/*
     @Override
-	public void stop() {
+    public void stop() {
     }
 
     @Override
-	public void start(Object o) {
+    public void start(Object o) {
     }
+*/
 
 }

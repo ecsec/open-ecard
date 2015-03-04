@@ -28,6 +28,8 @@ import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOChannel;
 import org.openecard.common.ifd.scio.SCIOException;
+import org.openecard.common.ifd.scio.SCIOProtocol;
+import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,15 +37,15 @@ import org.slf4j.LoggerFactory;
 /**
  * NFC implementation of SCIO API card interface.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class NFCCard implements SCIOCard {
 
     private static final Logger logger = LoggerFactory.getLogger(NFCCard.class);
     private final NFCCardChannel nfcCardChannel = new NFCCardChannel(this);
     protected IsoDep isodep;
-
-    public NFCCard(IsoDep tag) {
+    
+    NFCCard(IsoDep tag) {
 	isodep = tag;
     }
 
@@ -79,10 +81,10 @@ public class NFCCard implements SCIOCard {
     }
 
     @Override
-    public String getProtocol() {
+    public SCIOProtocol getProtocol() {
 	logger.warn("getProtocol not supported");
 	// for now theres no way to get the used protocol in android nfc api
-	return "";
+        return null;
     }
 
     @Override
@@ -96,4 +98,8 @@ public class NFCCard implements SCIOCard {
 	return new byte[0];
     }
 
+    @Override
+    public SCIOTerminal getTerminal() {
+        return null;
+    }
 }

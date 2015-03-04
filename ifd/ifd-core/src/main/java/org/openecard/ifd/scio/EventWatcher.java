@@ -32,10 +32,16 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.openecard.common.ifd.scio.NoSuchTerminal;
+import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.TerminalState;
 import org.openecard.common.ifd.scio.TerminalWatcher;
 import org.openecard.ifd.scio.wrapper.ChannelManager;
+import org.openecard.ifd.scio.wrapper.HandledChannel;
+import org.openecard.ifd.scio.wrapper.NoSuchChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -43,6 +49,8 @@ import org.openecard.ifd.scio.wrapper.ChannelManager;
  * @author Tobias Wich
  */
 public class EventWatcher implements Callable<List<IFDStatusType>> {
+
+    private static final Logger logger = LoggerFactory.getLogger(EventWatcher.class);
 
     private final ChannelManager cm;
     private final long timeout;
@@ -121,6 +129,7 @@ public class EventWatcher implements Callable<List<IFDStatusType>> {
 		    switch (event.getState()) {
 			case CARD_INSERTED:
 			    slot.setCardAvailable(true);
+			    slot.setATRorATS(getATR(name));
 			    break;
 			case CARD_REMOVED:
 			    slot.setCardAvailable(false);
@@ -287,6 +296,20 @@ public class EventWatcher implements Callable<List<IFDStatusType>> {
 //	    // this method returns false when both are null, thatswhy the if before
 //	    return ByteUtils.compare(a.getATRorATS(), b.getATRorATS());
 //	}
+    }
+
+    @Nullable
+    private byte[] getATR(@Nonnull String ifdName) {
+	try {
+	    byte[] handle = cm.openChannel(ifdName);
+	    HandledChannel channel = cm.getChannel(handle);
+	    SCIOATR atr = channel.getChannel().getCard().getATR();
+	    channel.shutdown();
+	    return atr.getBytes();
+	} catch (IllegalStateException | NoSuchChannel | NoSuchTerminal | SCIOException ex) {
+	    logger.error("Failed to retrieve ATR from card.", ex);
+	    return null;
+	}
     }
 
 }

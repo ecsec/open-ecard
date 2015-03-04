@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2013-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -64,7 +64,6 @@ import org.openecard.bouncycastle.pqc.math.linearalgebra.ByteUtils;
 import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
-import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.util.HandlerUtils;
@@ -79,9 +78,9 @@ import org.slf4j.LoggerFactory;
  * The class is instantiated with a handle to a specific card in the system. Afterwards it can look for DIDs with
  * different search strategies.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 public class GenericCryptoSignerFinder {
 
@@ -115,6 +114,7 @@ public class GenericCryptoSignerFinder {
     );
 
     private final Dispatcher dispatcher;
+    private final SALFileUtils fileUtils;
     private final ConnectionHandleType handle;
     private final boolean filterAlwaysReadable;
 
@@ -122,6 +122,7 @@ public class GenericCryptoSignerFinder {
 	    boolean filterAlwaysReadable) {
 	this.filterAlwaysReadable = filterAlwaysReadable;
 	this.dispatcher = dispatcher;
+	this.fileUtils = new SALFileUtils(dispatcher);
 	this.handle = HandlerUtils.copyHandle(handle);
     }
 
@@ -156,7 +157,7 @@ public class GenericCryptoSignerFinder {
     @Nonnull
     public GenericCryptoSigner findFirstMatching(@Nonnull CertificateRequest cr)
 	    throws CredentialNotFound {
-	List<DIDCertificate> result = findDID(dispatcher, handle);
+	List<DIDCertificate> result = findDID(handle);
 	if (result.isEmpty()) {
 	    throw new CredentialNotFound("No suitable DID found.");
 	}
@@ -168,7 +169,7 @@ public class GenericCryptoSignerFinder {
 
     // TODO: add more useful search functions
 
-    private List<DIDCertificate>findDID(Dispatcher dispatcher, ConnectionHandleType handle) {
+    private List<DIDCertificate>findDID(ConnectionHandleType handle) {
 	List<DIDCertificate> result = new ArrayList<>();
 	// copy handle to be safe from spaghetti code
 	handle = HandlerUtils.copyHandle(handle);
@@ -184,8 +185,8 @@ public class GenericCryptoSignerFinder {
 
 	    for (byte[] appIdentifier : cardApplicationName) {
 		handle.setCardApplication(appIdentifier);
-		List<String> didNamesList = getSignatureCapableDIDs(dispatcher, handle);
-		List<DIDCertificate> certList  = filterTLSCapableDIDs(dispatcher, handle, didNamesList);
+		List<String> didNamesList = getSignatureCapableDIDs(handle);
+		List<DIDCertificate> certList  = filterTLSCapableDIDs(handle, didNamesList);
 
 		if (filterAlwaysReadable) {
 		    certList = filterAlwaysReadable(certList);
@@ -213,8 +214,8 @@ public class GenericCryptoSignerFinder {
      * @throws DispatcherException
      * @throws InvocationTargetException
      */
-    private List<DIDCertificate> filterTLSCapableDIDs(Dispatcher dispatcher, ConnectionHandleType handle,
-	    List<String> didNames) throws DispatcherException, InvocationTargetException, WSException {
+    private List<DIDCertificate> filterTLSCapableDIDs(ConnectionHandleType handle, List<String> didNames)
+	    throws DispatcherException, InvocationTargetException, WSException {
 	ConnectionHandleType handle2 = HandlerUtils.copyHandle(handle);
 	List<DIDCertificate> remainingDIDs = new ArrayList<>();
 	HashMap<String, Pair<byte[], Boolean>> dataSetWithCert = new HashMap<>();
@@ -264,8 +265,8 @@ public class GenericCryptoSignerFinder {
 			// add chain if available
 			byte[] certChain = readChain(cryptoMarker, dispatcher, handle);
 
-		    // cert contains the chain (if available) only because we can't read the certificate without using
-			// the pin
+			// cert contains the chain (if available) only because we can't read the certificate without
+			// using the pin
 			cert = certChain;
 			Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, false);
 			dataSetWithCert.put(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), certAndTLSAuth);
@@ -277,11 +278,11 @@ public class GenericCryptoSignerFinder {
 			cardCert.setRawCertificate(cert);
 			cardCert.setAlwaysReadable();
 
-			/**************************************************************************************************/
-			/***** TODO:										  *****/
-			/***** The following is just a workaround used for the eGK and should be reworked as soon as  *****/
-			/***** there is a better possibility to let the user choose between the certificates	  *****/
-			/**************************************************************************************************/
+			/*********************************************************************************************/
+			/*** TODO:                                                                                 ***/
+			/*** The following is just a workaround used for the eGK and should be reworked as soon as ***/
+			/*** there is a better possibility to let the user choose between the certificates         ***/
+			/*********************************************************************************************/
 
 			String certName = cryptoMarker.getCertificateRefs().get(0).getDataSetName();
 			ACLList certAcl = new ACLList();
@@ -296,7 +297,7 @@ public class GenericCryptoSignerFinder {
 			    if (rule.getAction().getNamedDataServiceAction() != null) {
 				if (rule.getAction().getNamedDataServiceAction().equals(NamedDataServiceActionName.DSI_READ)) {
 				    if (rule.getSecurityCondition().isAlways() != null &&
-					rule.getSecurityCondition().isAlways().booleanValue()) {
+					rule.getSecurityCondition().isAlways()) {
 					remainingDIDs.add(0, cardCert);
 					break;
 				    } else {
@@ -376,7 +377,7 @@ public class GenericCryptoSignerFinder {
      * @throws InvocationTargetException
      * @throws WSException
      */
-    private List<String> getSignatureCapableDIDs(Dispatcher dispatcher, ConnectionHandleType handle)
+    private List<String> getSignatureCapableDIDs(ConnectionHandleType handle)
 	    throws DispatcherException, InvocationTargetException, WSException {
 	DIDList didList = new DIDList();
 	didList.setConnectionHandle(handle);
@@ -465,8 +466,8 @@ public class GenericCryptoSignerFinder {
     private byte[] readCertificate(CryptoMarkerType cryptoMarker, int certNumber, Dispatcher dispatcher,
 	    ConnectionHandleType handle) throws DispatcherException, InvocationTargetException {
 	try {
-	    handle = SALFileUtils.selectApplicationByDataSetName(
-		    cryptoMarker.getCertificateRefs().get(certNumber).getDataSetName(), dispatcher, handle);
+	    String dataSetName = cryptoMarker.getCertificateRefs().get(certNumber).getDataSetName();
+	    handle = fileUtils.selectAppByDataSet(dataSetName, handle);
 	    // resolve acls of the certificate data set
 	    TargetNameType targetName = new TargetNameType();
 	    targetName.setDataSetName(cryptoMarker.getCertificateRefs().get(certNumber).getDataSetName());
@@ -494,9 +495,6 @@ public class GenericCryptoSignerFinder {
 	    logger.error("Result check of the ACLResolver failed.", ex);
 	} catch (SecurityConditionUnsatisfiable ex) {
 	    logger.error("The ACLList operation is not allowed for the certificate data set.", ex);
-	} catch (APDUException ex) {
-	    logger.error("Failed to select or read the DataSet: " +
-		    cryptoMarker.getCertificateRefs().get(0).getDataSetName(), ex);
 	}
 
 	return null;

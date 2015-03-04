@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2013-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -55,7 +55,6 @@ import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
 import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
-import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.util.SALFileUtils;
@@ -66,14 +65,16 @@ import org.slf4j.LoggerFactory;
 /**
  * Wrapper for the sign functionality of generic crypto DIDs.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 public class GenericCryptoSigner {
 
     private static final Logger logger = LoggerFactory.getLogger(GenericCryptoSigner.class);
+
     private final Dispatcher dispatcher;
+    private final SALFileUtils fileUtils;
     private final ConnectionHandleType handle;
     private final String didName;
     private final DIDCertificate didCert;
@@ -91,8 +92,9 @@ public class GenericCryptoSigner {
      */
     public GenericCryptoSigner(@Nonnull Dispatcher dispatcher, @Nonnull ConnectionHandleType handle,
 	    @Nonnull DIDCertificate cert) {
-	this.javaCerts = new HashMap<String, java.security.cert.Certificate[]>();
+	this.javaCerts = new HashMap<>();
 	this.dispatcher = dispatcher;
+	this.fileUtils = new SALFileUtils(dispatcher);
 	this.handle = handle;
 	didName = cert.getDIDName();
 	rawCertData = cert.getRawCertificate();
@@ -164,10 +166,20 @@ public class GenericCryptoSigner {
 	    CertificateFactory cf = CertificateFactory.getInstance(certType);
 	    Collection<? extends java.security.cert.Certificate> javaCert;
 	    javaCert = cf.generateCertificates(new ByteArrayInputStream(certs));
-	    javaCerts.put(certType, javaCert.toArray(new java.security.cert.Certificate[javaCert.size()]));
+	    javaCerts.put(certType, toArray(javaCert));
 	}
 
 	return javaCerts.get(certType);
+    }
+
+    private java.security.cert.Certificate[] toArray(Collection<? extends java.security.cert.Certificate> javaCert) {
+	java.security.cert.Certificate[] result = new java.security.cert.Certificate[javaCert.size()];
+	int i = 0;
+	for (java.security.cert.Certificate next : javaCert) {
+	    result[i] = next;
+	    i++;
+	}
+	return result;
     }
 
     /**
@@ -204,7 +216,7 @@ public class GenericCryptoSigner {
      */
     public byte[] sign(@Nonnull byte[] hash) throws SignatureException, CredentialPermissionDenied {
 	try {
-	    SALFileUtils.selectApplication(didCert.getApplicationIdentifier(), dispatcher, handle);
+	    fileUtils.selectApplication(didCert.getApplicationIdentifier(), handle);
 	    handle.setCardApplication(didCert.getApplicationIdentifier());
 	    TargetNameType target = new TargetNameType();
 	    target.setDIDName(didName);
@@ -263,7 +275,7 @@ public class GenericCryptoSigner {
 	    throws CredentialPermissionDenied {
 	byte[] content = null;
 	try {
-	    cHandle = SALFileUtils.selectApplicationByDataSetName(dsiName, dispatcher, cHandle);
+	    cHandle = fileUtils.selectAppByDataSet(dsiName, cHandle);
 	    TargetNameType target = new TargetNameType();
 	    target.setDataSetName(dsiName);
 	    performMissingAuthentication(target);
@@ -292,8 +304,6 @@ public class GenericCryptoSigner {
 	} catch (SecurityConditionUnsatisfiable e) {
 	    logger.error("Failed to read certificate data set for DSI: {}.", dsiName, e);
 	    throw new CredentialPermissionDenied(e);
-	} catch (APDUException e) {
-	    logger.error("Failed to read certificate data set for DSI: {}. The selection was not possible.", dsiName, e);
 	}
 
 	return content;

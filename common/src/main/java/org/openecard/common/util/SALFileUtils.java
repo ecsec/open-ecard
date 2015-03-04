@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  * 
@@ -26,8 +26,6 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationList;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationListResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDList;
@@ -36,9 +34,11 @@ import iso.std.iso_iec._24727.tech.schema.DataSetList;
 import iso.std.iso_iec._24727.tech.schema.DataSetListResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import javax.annotation.Nonnull;
+import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
-import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 
@@ -46,130 +46,134 @@ import org.openecard.common.interfaces.DispatcherException;
 /**
  * Utility class for easier selection of DataSets and Applications.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
 public class SALFileUtils {
 
+    private final Dispatcher dispatcher;
+
     /**
-     * The method connects a CardApplication by a DataSet name.
-     * 
+     * Creates a SALFileUtils instance with the given dispatcher instance.
+     *
+     * @param dispatcher The dispatcher which will be used to deliver the eCard messages.
+     */
+    public SALFileUtils(Dispatcher dispatcher) {
+	this.dispatcher = dispatcher;
+    }
+
+    /**
+     * The method connects the given card to the CardApplication containing the requested DataSet.
+     *
      * @param dataSetName Name of the DataSet which should be contained in the application to connect.
-     * @param dispatcher Dispatcher for message delivery.
-     * @param connectionHandle ConnectionHandle which identifies the card and terminal.
+     * @param handle ConnectionHandle which identifies the card and terminal.
+     * @return The handle describing the new state of the card.
      * @throws DispatcherException
      * @throws InvocationTargetException
-     * @throws org.openecard.common.WSHelper.WSException
-     * @throws APDUException
-     * @return 
+     * @throws WSException Thrown in case any of the requested eCard API methods returned an error, or no application of
+     *   the specified card contains the requested data set.
      */
-    public static ConnectionHandleType selectApplicationByDataSetName(String dataSetName, Dispatcher dispatcher,
-	    ConnectionHandleType connectionHandle) throws DispatcherException, InvocationTargetException, WSException,
-	    APDUException {
-	CardApplicationPath appPathReq = new CardApplicationPath();
-	CardApplicationPathType pType = new CardApplicationPathType();
-	pType.setIFDName(connectionHandle.getIFDName());
-	appPathReq.setCardAppPathRequest(pType);
-	CardApplicationPathResponse appPathResp = (CardApplicationPathResponse) dispatcher.deliver(appPathReq);
-	WSHelper.checkResult(appPathResp);
+    @Nonnull
+    public ConnectionHandleType selectAppByDataSet(@Nonnull String dataSetName, @Nonnull ConnectionHandleType handle)
+	    throws DispatcherException, InvocationTargetException, WSException {
+	// copy handle so that the given handle is not damaged
+	handle = HandlerUtils.copyHandle(handle);
 
-	connectionHandle.setCardApplication(
-		appPathResp.getCardAppPathResultSet().getCardApplicationPathResult().get(0).getCardApplication());
-	connectionHandle.setChannelHandle(
-		appPathResp.getCardAppPathResultSet().getCardApplicationPathResult().get(0).getChannelHandle());
-	connectionHandle.setContextHandle(
-		appPathResp.getCardAppPathResultSet().getCardApplicationPathResult().get(0).getContextHandle());
-	connectionHandle.setIFDName(
-		appPathResp.getCardAppPathResultSet().getCardApplicationPathResult().get(0).getIFDName());
-	connectionHandle.setSlotIndex(
-		appPathResp.getCardAppPathResultSet().getCardApplicationPathResult().get(0).getSlotIndex());
-
+	// get all card applications
 	CardApplicationList cardApps = new CardApplicationList();
-	cardApps.setConnectionHandle(connectionHandle);
+	cardApps.setConnectionHandle(handle);
 	CardApplicationListResponse cardAppsResp = (CardApplicationListResponse) dispatcher.deliver(cardApps);
 	WSHelper.checkResult(cardAppsResp);
-
-	ConnectionHandleType handle2 = HandlerUtils.copyHandle(connectionHandle);
-	appPathReq = new CardApplicationPath();
-	pType = new CardApplicationPathType();
-	pType.setIFDName(handle2.getIFDName());
-	pType.setChannelHandle(handle2.getChannelHandle());
-	pType.setContextHandle(handle2.getContextHandle());
-	pType.setSlotIndex(handle2.getSlotIndex());
-	appPathReq.setCardAppPathRequest(pType);
-	appPathResp = (CardApplicationPathResponse) dispatcher.deliver(appPathReq);
-	WSHelper.checkResult(appPathResp);
-
-	connectionHandle.setCardApplication(
-		appPathResp.getCardAppPathResultSet().getCardApplicationPathResult().get(0).getCardApplication());
-	connectionHandle.setChannelHandle(
-		appPathResp.getCardAppPathResultSet().getCardApplicationPathResult().get(0).getChannelHandle());
-	connectionHandle.setContextHandle(
-		appPathResp.getCardAppPathResultSet().getCardApplicationPathResult().get(0).getContextHandle());
-	connectionHandle.setIFDName(
-		appPathResp.getCardAppPathResultSet().getCardApplicationPathResult().get(0).getIFDName());
-	connectionHandle.setSlotIndex(
-		appPathResp.getCardAppPathResultSet().getCardApplicationPathResult().get(0).getSlotIndex());
-
 	List<byte[]> cardApplications = cardAppsResp.getCardApplicationNameList().getCardApplicationName();
+
+	// check if our data set is in any of the applications
 	for (byte[] app : cardApplications) {
 	    DataSetList dataSetListReq = new DataSetList();
-	    connectionHandle.setCardApplication(app);
-	    dataSetListReq.setConnectionHandle(connectionHandle);
+	    handle.setCardApplication(app);
+	    dataSetListReq.setConnectionHandle(handle);
 	    DataSetListResponse dataSetListResp = (DataSetListResponse) dispatcher.deliver(dataSetListReq);
 	    WSHelper.checkResult(dataSetListResp);
-	    
+
 	    if (dataSetListResp.getDataSetNameList().getDataSetName().contains(dataSetName)) {
-		connectionHandle = selectApplication(app, dispatcher, handle2);
-		break;
+		handle = selectApplication(app, handle);
+		return handle;
 	    }
 	}
 
-	return connectionHandle;
+	// data set not found
+	String msg = "Failed to find the requested data set (%s) in any of the applications of the specified card.";
+	msg = String.format(msg, dataSetName);
+	Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.FILE_NOT_FOUND, msg);
+	throw WSHelper.createException(r);
     }
-    
+
     /**
-     * The method connects a CardApplication by a DIDName.
-     * 
+     * The method connects the given card to the CardApplication containing the requested DID Name.
+     *
      * @param didName Name of the DID which is contained in the application to connect.
-     * @param dispatcher Dispatcher for message delivery.
-     * @param connectionHandle ConnectionHandle which identifies Card and Terminal.
+     * @param handle ConnectionHandle which identifies Card and Terminal.
+     * @return The handle describing the new state of the card.
      * @throws DispatcherException
      * @throws InvocationTargetException
-     * @throws org.openecard.common.WSHelper.WSException
-     * @throws APDUException
+     * @throws WSException Thrown in case any of the requested eCard API methods returned an error, or no application of
+     *   the specified card contains the requested DID name.
      */
-    public static void selectApplicationByDIDName(String didName, Dispatcher dispatcher,
-	    ConnectionHandleType connectionHandle) throws DispatcherException, InvocationTargetException, WSException, 
-	    APDUException {
+    @Nonnull
+    public ConnectionHandleType selectAppByDID(@Nonnull String didName, @Nonnull ConnectionHandleType handle)
+	    throws DispatcherException,
+	    InvocationTargetException, WSException {
+	// copy handle so that the given handle is not damaged
+	handle = HandlerUtils.copyHandle(handle);
+
+	// get all card applications
 	CardApplicationList cardApps = new CardApplicationList();
-	cardApps.setConnectionHandle(connectionHandle);
+	cardApps.setConnectionHandle(handle);
 	CardApplicationListResponse cardAppsResp = (CardApplicationListResponse) dispatcher.deliver(cardApps);
 	WSHelper.checkResult(cardAppsResp);
-
 	List<byte[]> cardApplications = cardAppsResp.getCardApplicationNameList().getCardApplicationName();
+
+	// check if our data set is in any of the applications
 	for (byte[] app : cardApplications) {
 	    DIDList didListReq = new DIDList();
-	    connectionHandle.setCardApplication(app);
-	    didListReq.setConnectionHandle(connectionHandle);
+	    handle.setCardApplication(app);
+	    didListReq.setConnectionHandle(handle);
 	    DIDListResponse didListResp = (DIDListResponse) dispatcher.deliver(didListReq);
 	    WSHelper.checkResult(didListResp);
 
 	    if (didListResp.getDIDNameList().getDIDName().contains(didName)) {
-		selectApplication(app, dispatcher, connectionHandle);
-		break;
+		handle = selectApplication(app, handle);
+		return handle;
 	    }
 	}
+
+	// data set not found
+	String msg = "Failed to find the requested DID (%s) in any of the applications of the specified card.";
+	msg = String.format(msg, didName);
+	Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.FILE_NOT_FOUND, msg);
+	throw WSHelper.createException(r);
     }
 
-    public static ConnectionHandleType selectApplication(byte[] applicationIdentifier, Dispatcher dispatcher, ConnectionHandleType handle)
+    /**
+     * Performs a CardApplicationConnect SAL call for the given handle.
+     * The path part of the handle is used as a basis to connect the card.
+     *
+     * @param appId
+     * @param handle
+     * @return The handle of the card after performing the connect.
+     * @throws DispatcherException
+     * @throws InvocationTargetException
+     * @throws org.openecard.common.WSHelper.WSException
+     */
+    public ConnectionHandleType selectApplication(@Nonnull byte[] appId, @Nonnull ConnectionHandleType handle)
 	    throws DispatcherException, InvocationTargetException, WSException {
 	CardApplicationConnect appConnectReq = new CardApplicationConnect();
-	CardApplicationPathType path = new CardApplicationPathType();
-	path.setCardApplication(applicationIdentifier);
+	// copy path part of the handle and use it to identify the card
+	CardApplicationPathType path = HandlerUtils.copyPath(handle);
+	path.setCardApplication(appId);
 	appConnectReq.setCardApplicationPath(path);
-	CardApplicationConnectResponse appConnectResp = (CardApplicationConnectResponse) dispatcher.deliver(appConnectReq);
-	WSHelper.checkResult(appConnectResp);
-	return appConnectResp.getConnectionHandle();
+	CardApplicationConnectResponse resp = (CardApplicationConnectResponse) dispatcher.deliver(appConnectReq);
+	WSHelper.checkResult(resp);
+	return resp.getConnectionHandle();
     }
 
 }

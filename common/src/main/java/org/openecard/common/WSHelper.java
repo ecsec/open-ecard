@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.util.List;
+import javax.annotation.Nonnull;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.ResponseBaseType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
@@ -50,7 +51,7 @@ public class WSHelper {
 	}
     }
 
-    public static ResponseBaseType checkResult(ResponseBaseType response) throws WSException {
+    public static ResponseBaseType checkResult(@Nonnull ResponseBaseType response) throws WSException {
 	Result r = response.getResult();
 	if (r.getResultMajor().equals(ECardConstants.Major.ERROR)) {
 	    if (response instanceof TransmitResponse) {
@@ -71,6 +72,16 @@ public class WSHelper {
 	return response;
     }
 
+    /**
+     * Creates a WSException instance based on the given Result instance.
+     * The result is not checked if it represents an error. The caller of this function should be aware of that fact.
+     *
+     * @param r The Result instance which is the foundation of the resulting exception.
+     * @return The exception instance which is built from the given Result instance.
+     */
+    public static WSException createException(@Nonnull Result r) {
+	return new WSException(r);
+    }
 
     ///
     /// functions to create OASIS Result messages

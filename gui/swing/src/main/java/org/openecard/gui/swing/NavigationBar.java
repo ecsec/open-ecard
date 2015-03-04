@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -42,8 +42,9 @@ import org.slf4j.LoggerFactory;
  *   <li>Cancel</li>
  * </ul>
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich
+ * @author Moritz Horsch
+ * @author Hans-Martin Haase
  */
 public class NavigationBar extends JPanel {
 
@@ -51,12 +52,11 @@ public class NavigationBar extends JPanel {
     private static final long serialVersionUID = 1L;
 
     private final I18n lang = I18n.getTranslation("gui");
+    private final int numSteps;
+    
     private JButton backButton;
     private JButton nextButton;
     private JButton cancelButton;
-
-    private int numSteps;
-
 
     /**
      * Create and initialize the navigation panel for the given number of steps.
@@ -117,7 +117,6 @@ public class NavigationBar extends JPanel {
 	layout.setVerticalGroup(vg);
     }
 
-
     /**
      * Locks buttons except the cancel button.
      */
@@ -126,6 +125,7 @@ public class NavigationBar extends JPanel {
 	backButton.setEnabled(false);
 	nextButton.setEnabled(false);
     }
+    
     /**
      * Unlocks all buttons.
      */
@@ -156,7 +156,6 @@ public class NavigationBar extends JPanel {
 	}
     }
 
-
     @Override
     public boolean hasFocus() {
 	return backButton.hasFocus() || nextButton.hasFocus() || cancelButton.hasFocus();
@@ -170,6 +169,20 @@ public class NavigationBar extends JPanel {
      */
     void setReversible(boolean reversible) {
 	backButton.setEnabled(reversible);
+    }
+
+    /**
+     * Indicates whether there is a visible next button which may be controlled by the enter key.
+     *
+     * @return {@code TRUE} if there is a visible next button on the gui which does not have the focus. In all other
+     * cases {@code FALSE} is returned.
+     */
+    boolean isNextButtonAccessible() {
+	if (nextButton.isEnabled() && ! nextButton.hasFocus()) {
+	    return true;
+	}
+	
+	return false;
     }
 
 }

@@ -814,13 +814,30 @@
 				</iso:KeyRef>
 				<iso:SecurityEnvironmentIdentifier>01</iso:SecurityEnvironmentIdentifier>
 			    </iso:KeyInfo>
-			    <iso:SignatureGenerationInfo>MSE_RESTORE INT_AUTH</iso:SignatureGenerationInfo>
+			    <iso:LegacySignatureGenerationInfo>
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>00A4000C</iso:HeaderTemplate>
+				</iso:CardCommand>
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>00A4010C</iso:HeaderTemplate>
+				    <iso:DataTemplate>EEEE</iso:DataTemplate>
+				</iso:CardCommand>
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>0022F301</iso:HeaderTemplate>
+				    <iso:Expectedlength>00</iso:Expectedlength>
+				</iso:CardCommand>
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>00880000</iso:HeaderTemplate>
+				    <iso:DataTemplate>{hashToSign}</iso:DataTemplate>
+				    <iso:ExpectedLength>256</iso:ExpectedLength>
+				</iso:CardCommand>
+			    </iso:LegacySignatureGenerationInfo>
 			    <iso:CertificateRef>
 				<iso:DataSetName>EF.CERT_AUT</iso:DataSetName>
 			    </iso:CertificateRef>
 			</iso:CryptoMarker>
 		    </iso:DIDMarker>
-			<iso:DIDScope>local</iso:DIDScope>
+		    <iso:DIDScope>local</iso:DIDScope>
 		</iso:DifferentialIdentity>
 		<iso:DIDACL>
 		    <iso:AccessRule>
@@ -862,7 +879,24 @@
 				</iso:KeyRef>
 				<iso:SecurityEnvironmentIdentifier>01</iso:SecurityEnvironmentIdentifier>
 			    </iso:KeyInfo>
-			    <iso:SignatureGenerationInfo>MSE_RESTORE PSO_CDS</iso:SignatureGenerationInfo>
+			    <iso:LegacySignatureGenerationInfo>
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>00A4000C</iso:HeaderTemplate>
+				</iso:CardCommand>
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>00A4010C</iso:HeaderTemplate>
+				    <iso:DataTemplate>EEEE</iso:DataTemplate>
+				</iso:CardCommand>
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>0022F301</iso:HeaderTemplate>
+				    <iso:Expectedlength>00</iso:Expectedlength>
+				</iso:CardCommand>
+				<iso:CardCommand>
+				    <iso:HeaderTemplate>002A9E9A</iso:HeaderTemplate>
+				    <iso:DataTemplate>{hashToSign}</iso:DataTemplate>
+				    <iso:ExpectedLength>256</iso:ExpectedLength>
+				</iso:CardCommand>
+			    </iso:LegacySignatureGenerationInfo>
 			    <iso:CertificateRef>
 				<iso:DataSetName>EF.CERT_DS</iso:DataSetName>
 			    </iso:CertificateRef>

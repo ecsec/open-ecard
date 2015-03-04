@@ -114,12 +114,15 @@ public class PCSCChannel implements SCIOChannel {
 
     @Override
     public void close() throws SCIOException {
-        try {
-	    channel.close();
-        } catch (CardException ex) {
-	    String msg = "Failed to close channel to card in terminal '%s'.";
-	    throw new SCIOException(String.format(msg, card.getTerminal().getName()), ex);
-        }
+	// only close logical channels
+	if (isLogicalChannel()) {
+	    try {
+		channel.close();
+	    } catch (CardException ex) {
+		String msg = "Failed to close channel to card in terminal '%s'.";
+		throw new SCIOException(String.format(msg, card.getTerminal().getName()), ex);
+	    }
+	}
     }
 
 }

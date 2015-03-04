@@ -153,10 +153,9 @@ public interface SCIOChannel {
      * channel and has all other bits set to 0. After this method returns, calling other methods in this class will
      * raise an IllegalStateException.
      * <p>Note that the basic logical channel cannot be closed using this method. It can be closed by calling
-     * {@link SCIOCard#disconnect(boolean)}.
+     * {@link SCIOCard#disconnect(boolean)}. Calling this method on a basic channel does nothing.
      *
      * @throws SCIOException Thrown if the operation failed.
-     * @throws IllegalStateException Thrown if this channel represents a basic channel.
      */
     void close() throws SCIOException;
 

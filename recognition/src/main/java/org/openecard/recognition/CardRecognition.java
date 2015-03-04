@@ -53,7 +53,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -93,9 +92,7 @@ public class CardRecognition {
     private static final String IMAGE_PROPERTIES = "/card-images/card-images.properties";
 
     private final FutureTask<RecognitionTree> tree;
-
     private final FutureTask<org.openecard.ws.GetCardInfoOrACD> cifRepo;
-    private final TreeMap<String, CardInfoType> cifCache = new TreeMap<>();
 
     private final Properties cardImagesMap = new Properties();
 
@@ -217,28 +214,19 @@ public class CardRecognition {
     public CardInfoType getCardInfo(String type) {
 	// only do something when a repo is specified
 	if (cifRepo != null) {
-	    if (cifCache.containsKey(type)) {
-		return cifCache.get(type);
-	    } else {
-		GetCardInfoOrACD req = new GetCardInfoOrACD();
-		req.setAction(ECardConstants.CIF.GET_SPECIFIED);
-		req.getCardTypeIdentifier().add(type);
-		GetCardInfoOrACDResponse res = getCifRepo().getCardInfoOrACD(req);
-		// checkout response if it contains our cardinfo
-		List<Object> cifs = res.getCardInfoOrCapabilityInfo();
-		for (Object next : cifs) {
-		    if (next instanceof CardInfoType) {
-			cifCache.put(type, (CardInfoType) next);
-			return (CardInfoType) next;
-		    }
+	    GetCardInfoOrACD req = new GetCardInfoOrACD();
+	    req.setAction(ECardConstants.CIF.GET_SPECIFIED);
+	    req.getCardTypeIdentifier().add(type);
+	    GetCardInfoOrACDResponse res = getCifRepo().getCardInfoOrACD(req);
+	    // checkout response if it contains our cardinfo
+	    List<Object> cifs = res.getCardInfoOrCapabilityInfo();
+	    for (Object next : cifs) {
+		if (next instanceof CardInfoType) {
+		    return (CardInfoType) next;
 		}
-		// no valid cardinfo save null to the map to prevent fetching the nonexistant cif again
-		cifCache.put(type, null);
-		return null;
 	    }
-	} else {
-	    return null;
 	}
+	return null;
     }
 
     /**

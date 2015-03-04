@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
@@ -37,19 +38,26 @@ import org.openecard.common.WSHelper;
 import org.openecard.ws.GetCardInfoOrACD;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 
 /**
+ * Classpath resource based CardInfo repository.
  *
  * @author Tobias Wich
  */
 public class LocalCifRepo implements GetCardInfoOrACD {
 
-    private final HashMap<String, CardInfoType> cifs = new HashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(LocalCifRepo.class);
+
+    private final WSMarshaller m;
+    private final HashMap<String, Document> cifs = new HashMap<>();
 
     public LocalCifRepo(final WSMarshaller m) throws IOException, WSMarshallerException, SAXException {
+	this.m = m;
 	// load properties
 	InputStream propStream = getStream("repo-config.properties");
 	Properties conf = new Properties();
@@ -65,7 +73,7 @@ public class LocalCifRepo implements GetCardInfoOrACD {
 	    CardInfoType cif = (CardInfoType) m.unmarshal(cifDoc);
 	    String cardType = cif.getCardType().getObjectIdentifier();
 	    // add file
-	    cifs.put(cardType, cif);
+	    cifs.put(cardType, cifDoc);
 	}
     }
 
@@ -87,38 +95,50 @@ public class LocalCifRepo implements GetCardInfoOrACD {
 	ArrayList<CardInfoType> cifsResult = new ArrayList<>(cardTypes.size());
 	Result result = WSHelper.makeResultOK();
 
-	if (ECardConstants.CIF.GET_SPECIFIED.equals(parameters.getAction())) {
-	    ArrayList<String> missingTypes = new ArrayList<>();
-	    for (String cardType : cardTypes) {
-		CardInfoType cif = cifs.get(cardType);
-		if (cif == null) {
-		    missingTypes.add(cardType);
-		} else {
-		    cifsResult.add(cif);
+	try {
+	    if (ECardConstants.CIF.GET_SPECIFIED.equals(parameters.getAction())) {
+		ArrayList<String> missingTypes = new ArrayList<>();
+		for (String cardType : cardTypes) {
+		    Document cif = cifs.get(cardType);
+		    if (cif == null) {
+			missingTypes.add(cardType);
+		    } else {
+			// marshal here to receive a copy of the CIF
+			cifsResult.add((CardInfoType) m.unmarshal(cif));
+		    }
 		}
+
+		if (! missingTypes.isEmpty()) {
+		    StringBuilder error = new StringBuilder("The following card types could not be found:");
+		    for (String type : missingTypes) {
+			error.append("\n  ").append(type);
+		    }
+		    result = WSHelper.makeResultError(ECardConstants.Minor.SAL.UNKNOWN_CARDTYPE, error.toString());
+		}
+	    } else if (ECardConstants.CIF.GET_OTHER.equals(parameters.getAction())) {
+		HashMap<String, Document> cifsTmp = new HashMap<>();
+		cifsTmp.putAll(cifs);
+		for (String cardType : cardTypes) {
+		    cifsTmp.remove(cardType);
+		}
+		for (Map.Entry<String, Document> e : cifsTmp.entrySet()) {
+		    Document next = e.getValue();
+		    cifsResult.add((CardInfoType) m.unmarshal(next));
+		}
+	    } else {
+		result = WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, "Given action is unsupported.");
 	    }
 
-	    if (! missingTypes.isEmpty()) {
-		StringBuilder error = new StringBuilder("The following card types could not be found:");
-		for (String type : missingTypes) {
-		    error.append("\n  ").append(type);
-		}
-		result = WSHelper.makeResultError(ECardConstants.Minor.SAL.UNKNOWN_CARDTYPE, error.toString());
-	    }
-	} else if (ECardConstants.CIF.GET_OTHER.equals(parameters.getAction())) {
-	    HashMap<String,CardInfoType> cifsTmp = new HashMap<>();
-	    cifsTmp.putAll(cifs);
-	    for (String cardType : cardTypes) {
-		cifsTmp.remove(cardType);
-	    }
-	    cifsResult.addAll(cifsTmp.values());
-	} else {
-	    result = WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, "Given action is unsupported.");
+	    GetCardInfoOrACDResponse res = WSHelper.makeResponse(GetCardInfoOrACDResponse.class, result);
+	    res.getCardInfoOrCapabilityInfo().addAll(cifsResult);
+	    return res;
+	} catch (WSMarshallerException ex) {
+	    String msg = "Failed to unmarshal a CIF document.";
+	    logger.error(msg, ex);
+	    result = WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg);
+	    GetCardInfoOrACDResponse res = WSHelper.makeResponse(GetCardInfoOrACDResponse.class, result);
+	    return res;
 	}
-
-	GetCardInfoOrACDResponse res = WSHelper.makeResponse(GetCardInfoOrACDResponse.class, result);
-	res.getCardInfoOrCapabilityInfo().addAll(cifsResult);
-	return res;
     }
 
 }

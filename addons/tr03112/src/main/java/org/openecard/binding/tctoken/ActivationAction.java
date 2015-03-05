@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 HS Coburg.
+ * Copyright (C) 2013-2015 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,6 +26,7 @@ import org.openecard.binding.tctoken.ex.ActivationError;
 import org.openecard.binding.tctoken.ex.FatalActivationError;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 import org.openecard.addon.Context;
 import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.Attachment;
@@ -54,6 +55,7 @@ import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 public class ActivationAction implements AppPluginAction {
 
     private static final Logger logger = LoggerFactory.getLogger(ActivationAction.class);
+    private static final Semaphore SEMAPHORE = new Semaphore(1);
 
     private final I18n lang = I18n.getTranslation("tr03112");
 
@@ -75,51 +77,62 @@ public class ActivationAction implements AppPluginAction {
     public BindingResult execute(RequestBody body, Map<String, String> params, List<Attachment> attachments) {
 	BindingResult response;
 
-	// only continue, when there are known parameters in the request
-	if (! (params.isEmpty() || params.containsKey("tcTokenURL") || params.containsKey("activationObject"))) {
-	    response = new BindingResult(BindingResultCode.MISSING_PARAMETER);
-	    response.setResultMessage("A parameters containing the activation information is missing.");
-	    return response;
+
+	if (SEMAPHORE.tryAcquire()) {
+	    try {
+		// only continue, when there are known parameters in the request
+		if (!(params.isEmpty() || params.containsKey("tcTokenURL") || params.containsKey("activationObject"))) {
+		    response = new BindingResult(BindingResultCode.MISSING_PARAMETER);
+		    response.setResultMessage("A parameters containing the activation information is missing.");
+		    return response;
+		}
+
+		try {
+		    TCTokenRequest tcTokenRequest = null;
+		    try {
+			tcTokenRequest = TCTokenRequest.convert(params);
+			response = tokenHandler.handleActivate(tcTokenRequest);
+			// Show success message. If we get here we have a valid StartPAOSResponse and a valid refreshURL
+			if (!tcTokenRequest.isTokenFromObject()) {
+			    showFinishMessage((TCTokenResponse) response);
+			}
+		    } catch (ActivationError ex) {
+			if (ex instanceof NonGuiException) {
+			    // error already displayed to the user so do not repeat it here
+			} else {
+			    if (ex.getMessage().equals("Invalid HTTP message received.")) {
+				showErrorMessage(lang.translationForKey(ACTIVATION_INVALID_REFRESH_ADDRESS));
+			    } else {
+				showErrorMessage(ex.getLocalizedMessage());
+			    }
+			}
+			logger.error(ex.getMessage());
+			logger.debug(ex.getMessage(), ex); // stack trace only in debug level
+			logger.debug("Returning result: \n{}", ex.getBindingResult());
+			if (ex instanceof FatalActivationError) {
+			    logger.info("Authentication failed, displaying error in Browser.");
+			} else {
+			    logger.info("Authentication failed, redirecting to with errors attached to the URL.");
+			}
+			response = ex.getBindingResult();
+		    } finally {
+			if (tcTokenRequest != null && tcTokenRequest.getTokenContext() != null) {
+			    // close connection to tctoken server in case PAOS didn't already perform this action
+			    tcTokenRequest.getTokenContext().closeStream();
+			}
+		    }
+		} catch (RuntimeException e) {
+		    response = new BindingResult(BindingResultCode.INTERNAL_ERROR);
+		    logger.error(e.getMessage(), e);
+		}
+	    } finally {
+		SEMAPHORE.release();
+	    }
+	} else {
+	    response = new BindingResult(BindingResultCode.RESOURCE_LOCKED);
+	    response.setResultMessage("An authentication process is already running.");
 	}
 
-	try {
-	    TCTokenRequest tcTokenRequest = null;
-	    try {
-		tcTokenRequest = TCTokenRequest.convert(params);
-		response = tokenHandler.handleActivate(tcTokenRequest);
-		// Show success message. If we get here we have a valid StartPAOSResponse and a valid refreshURL
-		if (! tcTokenRequest.isTokenFromObject()) {
-		    showFinishMessage((TCTokenResponse) response);
-		}
-	    } catch (ActivationError ex) {
-		if (ex instanceof NonGuiException) {
-		    // error already displayed to the user so do not repeat it here
-		} else {
-		    if (ex.getMessage().equals("Invalid HTTP message received.")) {
-			showErrorMessage(lang.translationForKey(ACTIVATION_INVALID_REFRESH_ADDRESS));
-		    } else {
-			showErrorMessage(ex.getLocalizedMessage());
-		    }
-		}
-		logger.error(ex.getMessage());
-		logger.debug(ex.getMessage(), ex); // stack trace only in debug level
-		logger.debug("Returning result: \n{}", ex.getBindingResult());
-		if (ex instanceof FatalActivationError) {
-		    logger.info("Authentication failed, displaying error in Browser.");
-		} else {
-		    logger.info("Authentication failed, redirecting to with errors attached to the URL.");
-		}
-		response = ex.getBindingResult();
-	    } finally {
-		if (tcTokenRequest != null && tcTokenRequest.getTokenContext() != null) {
-		    // close connection to tctoken server in case PAOS didn't already perform this action
-		    tcTokenRequest.getTokenContext().closeStream();
-		}
-	    }
-	} catch (RuntimeException e) {
-	    response = new BindingResult(BindingResultCode.INTERNAL_ERROR);
-	    logger.error(e.getMessage(), e);
-	}
 	return response;
     }
 

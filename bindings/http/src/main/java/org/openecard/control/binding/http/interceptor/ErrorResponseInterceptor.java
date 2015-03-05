@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -45,8 +45,14 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * An HttpResponseInterceptor implementation for errors.
+ * <br/>
+ * <br/>
+ * The interceptor handles just messages with defined HTTP status codes. If such a message is received than the content
+ * will be modified by using a given HTML template.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
+ * @author Hans-Martin Haase
  */
 public class ErrorResponseInterceptor implements HttpResponseInterceptor {
 
@@ -56,21 +62,26 @@ public class ErrorResponseInterceptor implements HttpResponseInterceptor {
     private final List<Integer> errorCodes;
 
     /**
-     * Create a new ErrorInterceptor.
+     * Create a new ErrorInterceptor from the given {@code documentRoot} and the given {@code template}.
+     * <br/>
+     * <br/>
+     * This constructor does not need a list of http status codes instead an predefined list is generated and used. This
+     * means that a so created ErrorResponseInterceptor handle messages with the http status codes 400 to 417, 423, 429
+     * and 500 to 505 in a special way.
      *
      * @param documentRoot Document root
-     * @param template Template
+     * @param template HTML template used to render the message content.
      */
     public ErrorResponseInterceptor(DocumentRoot documentRoot, String template) {
 	this(documentRoot, template, generateErrorCodes());
     }
 
     /**
-     * Create a new ErrorInterceptor.
+     * Create a new ErrorInterceptor form the given {@code documentRoot}, the {@code template} and the given {@code errorCodes}.
      *
      * @param documentRoot Document root
-     * @param template Template
-     * @param errorCodes Error codes
+     * @param template HTML template used to render the message content.
+     * @param errorCodes List of HTTP error status codes which shall be handled by this interceptor.
      */
     public ErrorResponseInterceptor(DocumentRoot documentRoot, String template, List<Integer> errorCodes) {
 	this.template = new HTTPTemplate(documentRoot, template);
@@ -121,10 +132,15 @@ public class ErrorResponseInterceptor implements HttpResponseInterceptor {
     }
 
     private static ArrayList<Integer> generateErrorCodes() {
-	ArrayList<Integer> result = new ArrayList<Integer>();
+	ArrayList<Integer> result = new ArrayList<>();
 	for (int i = 400; i <= 417; i++) {
 	    result.add(i);
 	}
+
+	// additional codes used by the HttpAppPluginActionHandler
+	result.add(423); // Locked
+	result.add(429); // Too many requests
+
 	for (int i = 500; i <= 505; i++) {
 	    result.add(i);
 	}

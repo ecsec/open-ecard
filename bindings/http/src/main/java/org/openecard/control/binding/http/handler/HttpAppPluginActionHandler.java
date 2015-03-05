@@ -56,9 +56,6 @@ import org.openecard.control.binding.http.common.Http11Response;
 import org.openecard.control.binding.http.handler.common.DefaultHandler;
 import org.openecard.control.binding.http.handler.common.FileHandler;
 import org.openecard.control.binding.http.handler.common.IndexHandler;
-import org.openecard.ws.marshal.WSMarshaller;
-import org.openecard.ws.marshal.WSMarshallerException;
-import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,18 +71,12 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 
     private final AddonManager addonManager;
     private final AddonSelector selector;
-    private final WSMarshaller marshaller;
 
     public HttpAppPluginActionHandler(AddonManager addonManager) {
 	super("*");
 
 	this.addonManager = addonManager;
 	this.selector = new AddonSelector(addonManager);
-	try {
-	    marshaller = WSMarshallerFactory.createInstance();
-	} catch (WSMarshallerException e) {
-	    throw new RuntimeException(e);
-	}
     }
 
     @Override

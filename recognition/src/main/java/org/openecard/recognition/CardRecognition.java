@@ -122,13 +122,6 @@ public class CardRecognition {
 	    @Override
 	    public org.openecard.ws.GetCardInfoOrACD call() throws Exception {
 		final WSMarshaller cifMarshaller = WSMarshallerFactory.createInstance();
-		cifMarshaller.removeAllTypeClasses();
-		cifMarshaller.addXmlTypeClass(CardInfo.class);
-		cifMarshaller.addXmlTypeClass(GetCardInfoOrACD.class);
-		cifMarshaller.addXmlTypeClass(GetCardInfoOrACDResponse.class);
-		// protocols are used in the CIF, so add whole namespace containing protocols
-		cifMarshaller.addXmlTypeClass(iso.std.iso_iec._24727.tech.schema.ObjectFactory.class);
-
 		org.openecard.ws.GetCardInfoOrACD cifRepoTmp = cifRepo;
 		if (cifRepoTmp == null) {
 		    cifRepoTmp = new LocalCifRepo(cifMarshaller);
@@ -142,10 +135,6 @@ public class CardRecognition {
 	    @Override
 	    public RecognitionTree call() throws Exception {
 		final WSMarshaller treeMarshaller = WSMarshallerFactory.createInstance();
-		treeMarshaller.removeAllTypeClasses();
-		treeMarshaller.addXmlTypeClass(iso.std.iso_iec._24727.tech.schema.GetRecognitionTree.class);
-		treeMarshaller.addXmlTypeClass(GetRecognitionTreeResponse.class);
-
 		GetRecognitionTree treeRepoTmp = treeRepo;
 		if (treeRepoTmp == null) {
 		    treeRepoTmp = new LocalFileTree(treeMarshaller);

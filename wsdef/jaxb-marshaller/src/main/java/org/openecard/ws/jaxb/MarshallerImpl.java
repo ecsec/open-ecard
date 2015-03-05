@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,15 +26,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import javax.annotation.Nonnull;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -48,7 +53,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Wrapper for JAXB marshaller and unmarshaller capable of modifying the supported JAXB types on the fly.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class MarshallerImpl {
 
@@ -56,9 +61,10 @@ public class MarshallerImpl {
 
     private static final ArrayList<Class<?>> baseXmlElementClasses;
     private static final FutureTask<JAXBContext> baseJaxbContext;
+    private static final HashMap<String, JAXBContext> specificContexts;
 
     private boolean userOverride;
-    private final Set<Class<?>> userClasses;
+    private final TreeSet<Class<?>> userClasses;
 
     private Marshaller marshaller;
     private Unmarshaller unmarshaller;
@@ -81,6 +87,8 @@ public class MarshallerImpl {
 	    }
 	});
 	new Thread(baseJaxbContext, "JAXB-Classload").start();
+
+	specificContexts = new HashMap<>();
     }
 
 
@@ -89,7 +97,7 @@ public class MarshallerImpl {
      */
     public MarshallerImpl() {
 	userOverride = false;
-	userClasses = new HashSet<>(baseXmlElementClasses);
+	userClasses = new TreeSet<>(new ClassComparator());
     }
 
 
@@ -100,12 +108,20 @@ public class MarshallerImpl {
      * @param c Class of the JAXB element type.
      */
     public synchronized void addXmlClass(Class<?> c) {
+	addBaseClasses();
 	if (! userClasses.contains(c)) {
 	    //addJaxbClasses(c);
 	    userClasses.add(c);
 	    // class added to set
 	    userOverride = true;
 	    resetMarshaller();
+	}
+    }
+
+    private void addBaseClasses() {
+	// add all base classes if the user did not delete them before
+	if (! userOverride) {
+	    userClasses.addAll(baseXmlElementClasses);
 	}
     }
 
@@ -126,7 +142,7 @@ public class MarshallerImpl {
      * @return The wrapped JAXB marshaller instance.
      * @throws JAXBException If the marshaller could not be created.
      */
-    public synchronized Marshaller getMarshaller() throws JAXBException {
+    public Marshaller getMarshaller() throws JAXBException {
 	if (marshaller == null) {
 	    loadInstances();
 	}
@@ -139,7 +155,7 @@ public class MarshallerImpl {
      * @return The wrapped JAXB unmarshaller instance.
      * @throws JAXBException If the unmarshaller could not be created.
      */
-    public synchronized Unmarshaller getUnmarshaller() throws JAXBException {
+    public Unmarshaller getUnmarshaller() throws JAXBException {
 	if (unmarshaller == null) {
 	    loadInstances();
 	}
@@ -152,10 +168,18 @@ public class MarshallerImpl {
 	unmarshaller = null;
     }
 
-    private void loadInstances() throws JAXBException {
+    private synchronized void loadInstances() throws JAXBException {
 	JAXBContext jaxbCtx;
 	if (userOverride) {
-	    jaxbCtx = JAXBContext.newInstance(userClasses.toArray(new Class<?>[userClasses.size()]));
+	    String classHash = calculateClassesHash();
+	    synchronized (specificContexts) {
+		if (! specificContexts.containsKey(classHash)) {
+		    jaxbCtx = JAXBContext.newInstance(userClasses.toArray(new Class<?>[userClasses.size()]));
+		    specificContexts.put(classHash, jaxbCtx);
+		} else {
+		    jaxbCtx = specificContexts.get(classHash);
+		}
+	    }
 	} else {
 	    try {
 		jaxbCtx = baseJaxbContext.get();
@@ -211,6 +235,30 @@ public class MarshallerImpl {
     private static boolean isJaxbClass(Class<?> c) {
 	return c.isAnnotationPresent(XmlType.class) ||
 		c.isAnnotationPresent(XmlRegistry.class);
+    }
+
+    private String calculateClassesHash() {
+	try {
+	    MessageDigest md = MessageDigest.getInstance("MD5");
+	    for (Class<?> c : userClasses) {
+		md.update(c.getName().getBytes());
+	    }
+	    byte[] digest = md.digest();
+	    return toHexString(digest);
+	} catch (NoSuchAlgorithmException ex) {
+	    throw new RuntimeException("MD5 hash algorithm is not supported on your platform.", ex);
+	}
+    }
+
+    private static String toHexString(@Nonnull byte[] bytes) {
+	StringWriter writer = new StringWriter(bytes.length * 2);
+	PrintWriter out = new PrintWriter(writer);
+
+	for (int i = 1; i <= bytes.length; i++) {
+	    out.printf("%02X", bytes[i - 1]);
+	}
+
+	return writer.toString();
     }
 
 }

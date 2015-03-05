@@ -29,9 +29,7 @@ import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.marshal.WSMarshallerFactory;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertTrue;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
@@ -59,6 +57,7 @@ public class AddonBundleDescriptionTest {
 
 	// unmarshal it and check fields of POJO
 	WSMarshaller marshaller = WSMarshallerFactory.createInstance();
+	marshaller.removeAllTypeClasses();
 	marshaller.addXmlTypeClass(AddonSpecification.class);
 	Object o = marshaller.unmarshal(marshaller.str2doc(s));
 	addonBundleDescription = (AddonSpecification) o;

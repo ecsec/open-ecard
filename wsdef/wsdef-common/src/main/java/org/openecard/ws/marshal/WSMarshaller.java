@@ -37,7 +37,7 @@ import org.xml.sax.SAXException;
  * Interface for a JAXB type based marshaller and unmarshaller, as well as XML document converters and SOAP helpers.
  * After its creation, the WSMarshaller instance supports a predefined classes it can marshal and unmarshal.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface WSMarshaller {
 

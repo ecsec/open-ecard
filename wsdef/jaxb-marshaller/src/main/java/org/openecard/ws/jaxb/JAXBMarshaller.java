@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -31,8 +31,10 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -57,7 +59,7 @@ import org.xml.sax.SAXException;
 /**
  * Implementation of a WSMarshaller utilizing JAXB and Javas default XML facilities.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public final class JAXBMarshaller implements WSMarshaller {
 
@@ -77,11 +79,11 @@ public final class JAXBMarshaller implements WSMarshaller {
      * resource classes.lst.
      */
     public JAXBMarshaller() {
-	MarshallerImpl tmpMarshaller = null;
-	DocumentBuilderFactory tmpW3Factory = null;
-	DocumentBuilder tmpW3Builder = null;
-	Transformer tmpSerializer = null;
-	MessageFactory tmpSoapFactory = null;
+	MarshallerImpl tmpMarshaller;
+	DocumentBuilderFactory tmpW3Factory;
+	DocumentBuilder tmpW3Builder;
+	Transformer tmpSerializer;
+	MessageFactory tmpSoapFactory;
 
 	try {
 	    tmpMarshaller = new MarshallerImpl();
@@ -101,9 +103,10 @@ public final class JAXBMarshaller implements WSMarshaller {
 
 	    // instantiate soap stuff
 	    tmpSoapFactory = MessageFactory.newInstance();
-	} catch (Exception ex) {
+	} catch (ParserConfigurationException | TransformerConfigurationException | IllegalArgumentException | SOAPException ex) {
 	    logger.error("Failed to initialize XML components.", ex);
 	    System.exit(1); // non recoverable
+	    throw new RuntimeException("Failed to initialize marshaller.", ex);
 	}
 
 	marshaller = tmpMarshaller;

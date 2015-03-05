@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,9 +23,8 @@
 package org.openecard.addons.status;
 
 import org.openecard.addon.bind.ResponseBody;
-import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
-import org.openecard.ws.schema.Status;
+import org.openecard.ws.marshal.WSMarshallerFactory;
 
 
 /**
@@ -36,9 +35,7 @@ import org.openecard.ws.schema.Status;
 public class StatusResponseBody extends ResponseBody {
 
     public StatusResponseBody() throws WSMarshallerException {
-	WSMarshaller m = getMarshaller();
-	m.removeAllTypeClasses();
-	m.addXmlTypeClass(Status.class);
+	super(WSMarshallerFactory.createInstance());
     }
 
 }

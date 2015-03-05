@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2015 ecsec GmbH.
+ * Copyright (C) 2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,22 +20,23 @@
  *
  ***************************************************************************/
 
-package org.openecard.addons.status;
+package org.openecard.ws.jaxb;
 
-import org.openecard.addon.bind.ResponseBody;
-import org.openecard.ws.marshal.WSMarshallerException;
-import org.openecard.ws.marshal.WSMarshallerFactory;
+import java.util.Comparator;
 
 
 /**
- * Specialized ResponseBody capable of marshalling wait for change messages.
+ * Comparator implementation using the full name of the classes to compare the difference.
  *
  * @author Tobias Wich
  */
-public class WaitForChangeResponseBody extends ResponseBody {
+public class ClassComparator implements Comparator<Class<?>> {
 
-    public WaitForChangeResponseBody() throws WSMarshallerException {
-	super(WSMarshallerFactory.createInstance());
+    @Override
+    public int compare(Class<?> c1, Class<?> c2) {
+	String n1 = c1.getName();
+	String n2 = c2.getName();
+	return n1.compareTo(n2);
     }
 
 }

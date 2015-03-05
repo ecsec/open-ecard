@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,18 +24,60 @@ package org.openecard.addon.bind;
 
 
 /**
+ * Class containing the available binding results which are mapped to HTTP status codes.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public enum BindingResultCode {
 
-    OK,
-    REDIRECT,
-    INTERNAL_ERROR,
-    WRONG_PARAMETER,
-    MISSING_PARAMETER,
-    TIMEOUT,
+    /**
+     * Indicates that an depending host is not available.
+     */
     DEPENDING_HOST_UNREACHABLE,
-    RESOURCE_UNAVAILABLE;
 
+    /**
+     * Indicates an internal error of the issuing component.
+     */
+    INTERNAL_ERROR,
+
+    /**
+     * Indicates the absence of a required parameter.
+     */
+    MISSING_PARAMETER,
+
+    /**
+     * Indicates that the request was processed successfully.
+     */
+    OK,
+
+    /**
+     * Indicates to redirect the caller.
+     */
+    REDIRECT,
+
+    /**
+     * Indicates that the resource is locked for example if a request arrives while an other one is currently processed.
+     */
+    RESOURCE_LOCKED,
+
+    /**
+     * Indicates that the requested resource is not available.
+     */
+    RESOURCE_UNAVAILABLE,
+
+    /**
+     * Indicates that the component has run into a timeout while the processing of the request.
+     */
+    TIMEOUT,
+
+    /**
+     * Indicates that there are to many requests to handle.
+     */
+    TOO_MANY_REQUESTS,
+
+    /**
+     * Indicates that a required parameter is wrong.
+     */
+    WRONG_PARAMETER;
 }

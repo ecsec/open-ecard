@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 HS Coburg.
+ * Copyright (C) 2013-2015 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -187,8 +187,16 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	    case DEPENDING_HOST_UNREACHABLE:
 		response = new Http11Response(HttpStatus.SC_NOT_FOUND);
 		break;
+	    case RESOURCE_LOCKED:
+		response = new Http11Response(HttpStatus.SC_LOCKED);
+		break;
 	    case TIMEOUT:
-		// TODO: find HTTP codes for these codes
+		response = new Http11Response(HttpStatus.SC_GATEWAY_TIMEOUT);
+		break;
+	    case TOO_MANY_REQUESTS:
+		// Code for TOO MANY REQUESTS is 429 according to RFC 6585
+		response = new Http11Response(429);
+		break;
 	    default:
 		logger.error("Untreated result code: " + resultCode);
 		response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -213,9 +221,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	    RequestBody body = new RequestBody(resourceName, null);
 	    body.setValue(value, mimeType, base64Content);
 	    return body;
-	} catch (UnsupportedCharsetException e) {
-	    logger.error("Failed to create request body.", e);
-	} catch (ParseException e) {
+	} catch (UnsupportedCharsetException | ParseException e) {
 	    logger.error("Failed to create request body.", e);
 	}
 

@@ -329,7 +329,7 @@
 					<artifactId>maven-dependency-plugin</artifactId>
 					<version>2.10</version>
 					<configuration>
-						<excludeGroupIds>org.openecard,org.openecard.*</excludeGroupIds>
+						<excludeGroupIds>org.openecard,org.openecard.wsdef,org.openecard.gui,org.openecard.clients,org.openecard.sal,org.openecard.ifd,org.openecard.ifd.scio-backend,org.openecard.ifd.protocols,org.openecard.bindings,org.openecard.addons,org.openecard.transport,org.openecard.crypto</excludeGroupIds>
 					</configuration>
 				</plugin>
 				<plugin>

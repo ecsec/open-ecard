@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class EventRunner implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(EventRunner.class);
-    private static final long[] RECOVER_TIME = { 1, 500, 2000, 5000, 30000, 60000 };
+    private static final long[] RECOVER_TIME = { 1, 500, 2000, 5000 };
 
     private final EventManager evtManager;
     private final HandlerBuilder builder;

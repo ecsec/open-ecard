@@ -35,12 +35,14 @@ import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CardTerminals;
 import javax.smartcardio.TerminalFactory;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
+import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.ifd.scio.SCIOTerminals;
 import org.openecard.common.ifd.scio.SCIOTerminals.State;
 import org.openecard.common.ifd.scio.TerminalState;
 import org.openecard.common.ifd.scio.TerminalWatcher;
+import org.openecard.common.util.Pair;
 import static org.openecard.scio.PCSCExceptionExtractor.getCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,14 +74,22 @@ public class PCSCTerminals implements SCIOTerminals {
 
     @Override
     public List<SCIOTerminal> list(State state) throws SCIOException {
+	logger.trace("Entering list().");
 	try {
 	    CardTerminals.State scState = convertState(state);
 	    // get terminals with the specified state from the SmartcardIO
 	    List<CardTerminal> scList = terminals.list(scState);
 	    ArrayList<SCIOTerminal> list = convertTerminals(scList);
+	    logger.trace("Leaving list().");
 	    return Collections.unmodifiableList(list);
 	} catch (CardException ex) {
-	    throw new SCIOException("Failed to retrieve list from terminals instance.", getCode(ex), ex);
+	    if (getCode(ex) == SCIOErrorCode.SCARD_E_NO_READERS_AVAILABLE) {
+		logger.debug("No reader available exception.", ex);
+		return Collections.emptyList();
+	    }
+	    String msg = "Failed to retrieve list from terminals instance.";
+	    logger.error(msg, ex);
+	    throw new SCIOException(msg, getCode(ex), ex);
 	}
     }
 
@@ -152,6 +162,7 @@ public class PCSCTerminals implements SCIOTerminals {
 
 	@Override
 	public List<TerminalState> start() throws SCIOException {
+	    logger.trace("Entering start().");
 	    if (pendingEvents != null) {
 		throw new IllegalStateException("Trying to initialize already initialized watcher instance.");
 	    }
@@ -166,10 +177,13 @@ public class PCSCTerminals implements SCIOTerminals {
 		List<CardTerminal> javaTerminals = own.terminals.list();
 		ArrayList<TerminalState> result = new ArrayList<>(javaTerminals.size());
 		// fill sets according to state of the terminals
+		logger.debug("Detecting initial terminal status.");
 		for (CardTerminal next : javaTerminals) {
 		    String name = next.getName();
+		    boolean cardInserted = next.isCardPresent();
+		    logger.debug("Terminal='{}' cardPresent={}", name, cardInserted);
 		    terminals.add(name);
-		    if (next.isCardPresent()) {
+		    if (cardInserted) {
 			cardPresent.add(name);
 			result.add(new TerminalState(name, true));
 		    } else {
@@ -177,9 +191,16 @@ public class PCSCTerminals implements SCIOTerminals {
 		    }
 		}
 		// return list of our terminals
+		logger.trace("Leaving start() with {} states.", result.size());
 		return result;
 	    } catch (CardException ex) {
-		throw new SCIOException("Failed to retrieve status from the PCSC system.", getCode(ex), ex);
+		if (getCode(ex) == SCIOErrorCode.SCARD_E_NO_READERS_AVAILABLE) {
+		    logger.debug("No reader available exception.", ex);
+		    return new ArrayList<>();
+		}
+		String msg = "Failed to retrieve status from the PCSC system.";
+		logger.error(msg, ex);
+		throw new SCIOException(msg, getCode(ex), ex);
 	    }
 	}
 
@@ -190,6 +211,7 @@ public class PCSCTerminals implements SCIOTerminals {
 
 	@Override
 	public StateChangeEvent waitForChange(long timeout) throws SCIOException {
+	    logger.trace("Entering waitForChange().");
 	    if (pendingEvents == null) {
 		throw new IllegalStateException("Calling wait on uninitialized watcher instance.");
 	    }
@@ -197,33 +219,43 @@ public class PCSCTerminals implements SCIOTerminals {
 	    // try to return any present events first
 	    StateChangeEvent nextEvent = pendingEvents.poll();
 	    if (nextEvent != null) {
+		logger.trace("Leaving waitForChange() with queued event.");
 		return nextEvent;
 	    } else {
-		boolean changed;
+		Pair<Boolean, Boolean> waitResult;
 		try {
-		    changed = internalWait(timeout);
+		    waitResult = internalWait(timeout);
 		} catch (CardException ex) {
 		    String msg = "Error while waiting for a state change in the terminals.";
+		    logger.error(msg, ex);
 		    throw new SCIOException(msg, getCode(ex), ex);
 		}
+		boolean changed = waitResult.p1;
+		boolean error = waitResult.p2;
+
 		if (! changed) {
+		    logger.trace("Leaving waitForChange() with no event.");
 		    return new StateChangeEvent();
 		} else {
 		    // something has changed, retrieve actual terminals from the system and see what has changed
 		    Collection<String> newTerminals = new HashSet<>();
 		    Collection<String> newCardPresent = new HashSet<>();
-		    try {
-			List<CardTerminal> newStates = own.terminals.list();
-			for (CardTerminal next : newStates) {
-			    String name = next.getName();
-			    newTerminals.add(name);
-			    if (next.isCardPresent()) {
-				newCardPresent.add(name);
+		    // only ask for terminals if there is no error
+		    if (! error) {
+			try {
+			    List<CardTerminal> newStates = own.terminals.list();
+			    for (CardTerminal next : newStates) {
+				String name = next.getName();
+				newTerminals.add(name);
+				if (next.isCardPresent()) {
+				    newCardPresent.add(name);
+				}
 			    }
+			} catch (CardException ex) {
+			    String msg = "Failed to retrieve status of the observed terminals.";
+			    logger.error(msg, ex);
+			    throw new SCIOException(msg, getCode(ex), ex);
 			}
-		    } catch (CardException ex) {
-			String msg = "Failed to retrieve status of the observed terminals.";
-			throw new SCIOException(msg, getCode(ex), ex);
 		    }
 
 		    // calculate what has actually happened
@@ -249,8 +281,18 @@ public class PCSCTerminals implements SCIOTerminals {
 		    pendingEvents.addAll(caEvents);
 		    // use remove so we get an exception when no event has been recorded
 		    // this would mean our algorithm is corrupt
+		    logger.trace("Leaving waitForChange() with fresh event.");
 		    return pendingEvents.remove();
 		}
+	    }
+	}
+
+	private void sleep(long millis) throws SCIOException {
+	    try {
+		Thread.sleep(millis);
+	    } catch (InterruptedException ex2) {
+		String msg = "Wait interrupted by another thread.";
+		throw new SCIOException(msg, SCIOErrorCode.SCARD_E_SERVICE_STOPPED);
 	    }
 	}
 
@@ -260,9 +302,15 @@ public class PCSCTerminals implements SCIOTerminals {
 	 * fix this, we wait only a short time and check the terminal list periodically.
 	 *
 	 * @param timeout Timeout values as in {@link #waitForChange(long)}.
-	 * @return {@code true} if a change the terminals happened, {@code false} if a timeout occurred.
+	 * @return The first value is the changed flag . It is {@code true} if a change the terminals happened,
+	 *   {@code false} if a timeout occurred. <br/>
+	 *   The second value is the error flag. It is {@code true} if an error was used to indicate that no terminals
+	 *   are connected, {@code false} otherwise.
+	 * @throws CardException Thrown if any error related to the SmartcardIO occured.
+	 * @throws SCIOException Thrown if the thread was interrupted. Contains the code
+	 *   {@link SCIOErrorCode#SCARD_E_SERVICE_STOPPED}.
 	 */
-	private boolean internalWait(long timeout) throws CardException {
+	private Pair<Boolean, Boolean> internalWait(long timeout) throws CardException, SCIOException {
 	    // the SmartcardIO wait function only reacts on card events, new and removed terminals go unseen
 	    // to fix this, we wait only a short time and check the terminal list periodically
 	    if (timeout < 0) {
@@ -274,7 +322,7 @@ public class PCSCTerminals implements SCIOTerminals {
 	    while (true) {
 		if (timeout == 0) {
 		    // waited for all time and nothing happened
-		    return false;
+		    return new Pair<>(false, false);
 		}
 		// calculate next wait slice
 		long waitTime;
@@ -286,28 +334,40 @@ public class PCSCTerminals implements SCIOTerminals {
 		    waitTime = WAIT_DELTA;
 		}
 
-		// check if there is something new on the card side
-		// due to the wait call blocking ever other smartcard operation, we only wait for the actual events
-		// very shortly and sleep for the rest of the time
-		boolean change = own.terminals.waitForChange(1);
-		if (change) {
-		    return true;
-		}
 		try {
-		    Thread.sleep(waitTime);
-		} catch (InterruptedException ex) {
-		    throw new CardException("Wait interrupted by another thread.");
-		}
-		// try again after sleeping
-		change = own.terminals.waitForChange(1);
-		if (change) {
-		    return true;
+		    // check if there is something new on the card side
+		    // due to the wait call blocking every other smartcard operation, we only wait for the actual events
+		    // very shortly and sleep for the rest of the time
+		    boolean change = own.terminals.waitForChange(1);
+		    if (change) {
+			return new Pair<>(true, false);
+		    }
+		    sleep(waitTime);
+		    // try again after sleeping
+		    change = own.terminals.waitForChange(1);
+		    if (change) {
+			return new Pair<>(true, false);
+		    }
+		} catch (CardException ex) {
+		    if (getCode(ex) == SCIOErrorCode.SCARD_E_NO_READERS_AVAILABLE) {
+			logger.debug("No reader available exception.", ex);
+			// send events that everything is removed if there are any terminals connected right now
+			if (! terminals.isEmpty()) {
+			    return new Pair<>(true, true);
+			} else {
+			    // if nothing changed, wait a bit and try again
+			    sleep(waitTime);
+			    continue;
+			}
+		    } else {
+			throw ex;
+		    }
 		}
 
 		// check if there is something new on the terminal side
 		ArrayList<CardTerminal> currentTerms = new ArrayList<>(own.terminals.list());
 		if (currentTerms.size() != terminals.size()) {
-		    return true;
+		    return new Pair<>(true, false);
 		}
 		// same size, but still compare terminal names
 		HashSet<String> newTermNames = new HashSet<>();
@@ -316,12 +376,12 @@ public class PCSCTerminals implements SCIOTerminals {
 		}
 		int sizeBefore = newTermNames.size();
 		if (sizeBefore != terminals.size()) {
-		    return false;
+		    return new Pair<>(false, false);
 		}
 		newTermNames.addAll(terminals);
 		int sizeAfter = newTermNames.size();
 		if (sizeBefore != sizeAfter) {
-		    return false;
+		    return new Pair<>(false, false);
 		}
 	    }
 	}

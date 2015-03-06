@@ -32,6 +32,7 @@ import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOProtocol;
 import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.ifd.scio.SCIOTerminals;
+import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.common.util.ValueGenerators;
 import org.openecard.ifd.scio.IFDException;
 
@@ -42,11 +43,12 @@ import org.openecard.ifd.scio.IFDException;
  */
 public class ChannelManager {
 
-    private final DeadAndAliveTerminals terminals;
+    private final SCIOTerminals terminals;
     private final ConcurrentSkipListMap<byte[], HandledChannel> channels;
 
     public ChannelManager() throws IFDException {
-	this.terminals = new DeadAndAliveTerminals();
+	TerminalFactory f = IFDTerminalFactory.getInstance();
+	this.terminals = f.terminals();
 	this.channels = new ConcurrentSkipListMap<>(new ByteArrayComparator());
     }
 

@@ -46,6 +46,7 @@ public enum ErrorTranslations implements I18nKey {
     FAILED_PROXY("io.exception.failed_proxy_initialization"),
     FAILED_SOP("security.violation.exception.no_sop_tls2"),
     FINISH_TITLE("finish"),
+    INTERNAL_TLS_ERROR("error.internal.tls"),
     INVALID_ADDRESS("invalid.address.exception.no_https"),
     INVALID_CERT("element.parsing.exception.invalid_cert_number"),
     INVALID_ELEMENT("invalid.tctoken.element.invalid_element"),

@@ -364,6 +364,9 @@ public class TCTokenHandler {
 		case ECardConstants.Minor.App.INT_ERROR + " ==> Unknown eCard exception occurred.":
 		    errorMsg = langTr03112.translationForKey(UNKNOWN_ECARD_ERROR);
 		    break;
+		case "Internal TLS error, this could be an attack":
+		    errorMsg = langTr03112.translationForKey(INTERNAL_TLS_ERROR);
+		    break;
 	    }
 
 	    if (innerException instanceof WSException) {

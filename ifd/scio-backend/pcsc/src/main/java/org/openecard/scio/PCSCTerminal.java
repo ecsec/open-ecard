@@ -30,6 +30,7 @@ import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOProtocol;
 import org.openecard.common.ifd.scio.SCIOTerminal;
+import static org.openecard.scio.PCSCExceptionExtractor.getCode;
 
 
 /**
@@ -62,7 +63,7 @@ public class PCSCTerminal implements SCIOTerminal {
 	    throw new IllegalArgumentException(String.format(msg, getName()));
 	} catch (CardException ex) {
 	    String msg = "Failed to connect the card in terminal '%s'.";
-	    throw new SCIOException(String.format(msg, getName()), ex);
+	    throw new SCIOException(String.format(msg, getName()), getCode(ex), ex);
 	}
     }
 
@@ -71,7 +72,7 @@ public class PCSCTerminal implements SCIOTerminal {
 	try {
 	    return terminal.isCardPresent();
 	} catch (CardException ex) {
-	    throw new SCIOException("Failed to determine whether card is present or not.", ex);
+	    throw new SCIOException("Failed to determine whether card is present or not.", getCode(ex), ex);
 	}
     }
 
@@ -81,7 +82,7 @@ public class PCSCTerminal implements SCIOTerminal {
 	    return terminal.waitForCardPresent(timeout);
 	} catch (CardException ex) {
 	    String msg = "Failed to wait for card present event in terminal '%s'.";
-	    throw new SCIOException(String.format(msg, getName()), ex);
+	    throw new SCIOException(String.format(msg, getName()), getCode(ex), ex);
 	}
     }
 
@@ -91,7 +92,7 @@ public class PCSCTerminal implements SCIOTerminal {
 	    return terminal.waitForCardAbsent(timeout);
 	} catch (CardException ex) {
 	    String msg = "Failed to wait for card absent event in terminal '%s'.";
-	    throw new SCIOException(String.format(msg, getName()), ex);
+	    throw new SCIOException(String.format(msg, getName()), getCode(ex), ex);
 	}
     }
 

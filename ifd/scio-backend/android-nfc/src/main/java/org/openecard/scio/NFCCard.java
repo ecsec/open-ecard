@@ -27,6 +27,7 @@ import java.io.IOException;
 import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOChannel;
+import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOProtocol;
 import org.openecard.common.ifd.scio.SCIOTerminal;
@@ -64,7 +65,8 @@ public class NFCCard implements SCIOCard {
 	try {
 	    isodep.close();
 	} catch (IOException e) {
-	    throw new SCIOException("Disconnect failed", e);
+	    // TODO: check if the error code can be chosen more specifically
+	    throw new SCIOException("Disconnect failed", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, e);
 	}
     }
 

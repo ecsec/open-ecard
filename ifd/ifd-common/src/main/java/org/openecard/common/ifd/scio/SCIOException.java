@@ -22,24 +22,32 @@
 
 package org.openecard.common.ifd.scio;
 
+import javax.annotation.Nonnull;
+
 
 /**
  * Exception indicating problems in the ISO/IEC 7816 stack.
  *
  * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class SCIOException extends Exception {
 
-    public SCIOException(Throwable cause) {
-	super(cause);
-    }
+    private final SCIOErrorCode code;
 
-    public SCIOException(String message) {
+    public SCIOException(String message, SCIOErrorCode code) {
 	super(message);
+	this.code = code;
     }
 
-    public SCIOException(String message, Throwable cause) {
+    public SCIOException(String message, SCIOErrorCode code, Throwable cause) {
 	super(message, cause);
+	this.code = code;
+    }
+
+    @Nonnull
+    public SCIOErrorCode getCode() {
+	return code;
     }
 
 }

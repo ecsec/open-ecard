@@ -25,6 +25,7 @@ package org.openecard.scio;
 import android.nfc.tech.IsoDep;
 import java.io.IOException;
 import org.openecard.common.ifd.scio.SCIOCard;
+import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOProtocol;
 import org.openecard.common.ifd.scio.SCIOTerminal;
@@ -72,17 +73,19 @@ public class NFCCardTerminal implements SCIOTerminal {
     @Override
     public synchronized SCIOCard connect(SCIOProtocol protocol) throws SCIOException, IllegalStateException {
 	if (nfcCard == null || this.nfcCard.isodep == null) {
-	    logger.warn("No tag present.");
-	    throw new SCIOException("No tag present");
+	    String msg = "No tag present.";
+	    logger.warn(msg);
+	    throw new SCIOException(msg, SCIOErrorCode.SCARD_E_NO_SMARTCARD);
 	}
 	try {
-	    if (!nfcCard.isodep.isConnected()) {
+	    if (! nfcCard.isodep.isConnected()) {
 		nfcCard.isodep.setTimeout(3000);
 		nfcCard.isodep.connect();
 	    }
 	} catch (IOException e) {
 	    nfcCard = null;
-	    throw new SCIOException("No connection could be established", e);
+	    // TODO: check if error code is correct
+	    throw new SCIOException("No connection could be established", SCIOErrorCode.SCARD_E_NO_SMARTCARD, e);
 	}
 	return nfcCard;
     }

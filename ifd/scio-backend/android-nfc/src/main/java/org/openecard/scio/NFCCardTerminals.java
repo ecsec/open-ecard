@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Queue;
 import javax.annotation.Nonnull;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
+import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.ifd.scio.SCIOTerminals;
@@ -116,9 +117,10 @@ public class NFCCardTerminals implements SCIOTerminals {
             terminals.add(name);
             
             if (adapter == null) {
-                throw new SCIOException("No NFC Adapter on this Android Device");
-            } else if (!isEnabled) {
-                throw new SCIOException("NFC Adapter not enabled");                
+		String msg = "No NFC Adapter on this Android Device";
+                throw new SCIOException(msg, SCIOErrorCode.SCARD_E_NO_READERS_AVAILABLE);
+            } else if (! isEnabled) {
+                throw new SCIOException("NFC Adapter not enabled", SCIOErrorCode.SCARD_E_NO_SERVICE);
             } else if (adapter != null && adapter.isEnabled()) {
                     if (nfcCard.isodep.isConnected()) {
                     //List<SCIOTerminal> androidTerm = terminal.list(State.ALL);

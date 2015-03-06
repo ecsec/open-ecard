@@ -30,6 +30,7 @@ import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOProtocol;
 import org.openecard.common.ifd.scio.SCIOTerminal;
+import static org.openecard.scio.PCSCExceptionExtractor.getCode;
 
 
 /**
@@ -76,7 +77,7 @@ public class PCSCCard implements SCIOCard {
 	    return new PCSCChannel(this, card.openLogicalChannel());
 	} catch (CardException ex) {
 	    String msg = "Failed to open logical channel to card in terminal '%s'.";
-	    throw new SCIOException(String.format(msg, terminal.getName()), ex);
+	    throw new SCIOException(String.format(msg, terminal.getName()), getCode(ex), ex);
 	}
     }
 
@@ -86,7 +87,7 @@ public class PCSCCard implements SCIOCard {
 	    card.beginExclusive();
 	} catch (CardException ex) {
 	    String msg = "Failed to get exclusive access to the card in terminal '%s'.";
-	    throw new SCIOException(String.format(msg, terminal.getName()), ex);
+	    throw new SCIOException(String.format(msg, terminal.getName()), getCode(ex), ex);
 	}
     }
 
@@ -96,7 +97,7 @@ public class PCSCCard implements SCIOCard {
 	    card.endExclusive();
 	} catch (CardException ex) {
 	    String msg = "Failed to release exclusive access to the card in terminal '%s'.";
-	    throw new SCIOException(String.format(msg, terminal.getName()), ex);
+	    throw new SCIOException(String.format(msg, terminal.getName()), getCode(ex), ex);
 	}
     }
 
@@ -106,7 +107,7 @@ public class PCSCCard implements SCIOCard {
 	    return card.transmitControlCommand(controlCode, command);
 	} catch (CardException ex) {
 	    String msg = "Failed to transmit control command to the terminal '%s'.";
-	    throw new SCIOException(String.format(msg, terminal.getName()), ex);
+	    throw new SCIOException(String.format(msg, terminal.getName()), getCode(ex), ex);
 	}
     }
 
@@ -116,7 +117,7 @@ public class PCSCCard implements SCIOCard {
 	    card.disconnect(reset);
 	} catch (CardException ex) {
 	    String msg = "Failed to disconnect (reset=%b) the card in terminal '%s'.";
-	    throw new SCIOException(String.format(msg, reset, terminal.getName()), ex);
+	    throw new SCIOException(String.format(msg, reset, terminal.getName()), getCode(ex), ex);
 	}
     }
 

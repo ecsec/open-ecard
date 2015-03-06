@@ -36,6 +36,7 @@ import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.ifd.Protocol;
 import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOChannel;
+import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.ifd.scio.TransmitException;
@@ -148,7 +149,8 @@ public class SingleThreadChannel {
 	    } else if (cause instanceof NullPointerException) {
 		throw (NullPointerException) cause;
 	    } else {
-		throw new SCIOException("Unknown error during APDU submission.", cause);
+		String msg = "Unknown error during APDU submission.";
+		throw new SCIOException(msg, SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, cause);
 	    }
 	} catch (InterruptedException ex) {
 	    throw new IllegalStateException("Running command cancelled during execution.");
@@ -281,7 +283,8 @@ public class SingleThreadChannel {
 	    } else if (cause instanceof NullPointerException) {
 		throw (NullPointerException) cause;
 	    } else {
-		throw new SCIOException("Unknown error during control command submission.", cause);
+		String msg = "Unknown error during control command submission.";
+		throw new SCIOException(msg, SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, cause);
 	    }
 	} catch (InterruptedException ex) {
 	    throw new IllegalStateException("Running command cancelled during execution.");
@@ -338,7 +341,7 @@ public class SingleThreadChannel {
 		throw (IllegalStateException) cause;
 	    } else {
 		String msg = String.format("Unknown error during transaction submission (start=%b).", start);
-		throw new SCIOException(msg, cause);
+		throw new SCIOException(msg, SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, cause);
 	    }
 	} catch (InterruptedException ex) {
 	    throw new IllegalStateException("Running command cancelled during execution.");

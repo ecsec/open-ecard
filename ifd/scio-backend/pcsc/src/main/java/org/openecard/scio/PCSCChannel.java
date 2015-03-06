@@ -32,6 +32,7 @@ import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.ifd.scio.SCIOChannel;
 import org.openecard.common.ifd.scio.SCIOException;
+import static org.openecard.scio.PCSCExceptionExtractor.getCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +94,7 @@ public class PCSCChannel implements SCIOChannel {
             return new CardResponseAPDU(response.getBytes());
 	} catch (CardException ex) {
 	    String msg = "Failed to transmit APDU to the card in terminal '%s'.";
-	    throw new SCIOException(String.format(msg, card.getTerminal().getName()), ex);
+	    throw new SCIOException(String.format(msg, card.getTerminal().getName()), getCode(ex), ex);
 	}
     }
 
@@ -108,7 +109,7 @@ public class PCSCChannel implements SCIOChannel {
             return channel.transmit(command, response);
         } catch (CardException ex) {
 	    String msg = "Failed to transmit APDU to the card in terminal '%s'.";
-	    throw new SCIOException(String.format(msg, card.getTerminal().getName()), ex);
+	    throw new SCIOException(String.format(msg, card.getTerminal().getName()), getCode(ex), ex);
         }
     }
 
@@ -120,7 +121,7 @@ public class PCSCChannel implements SCIOChannel {
 		channel.close();
 	    } catch (CardException ex) {
 		String msg = "Failed to close channel to card in terminal '%s'.";
-		throw new SCIOException(String.format(msg, card.getTerminal().getName()), ex);
+		throw new SCIOException(String.format(msg, card.getTerminal().getName()), getCode(ex), ex);
 	    }
 	}
     }

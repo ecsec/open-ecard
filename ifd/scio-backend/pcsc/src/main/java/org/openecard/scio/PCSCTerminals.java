@@ -41,6 +41,7 @@ import org.openecard.common.ifd.scio.SCIOTerminals;
 import org.openecard.common.ifd.scio.SCIOTerminals.State;
 import org.openecard.common.ifd.scio.TerminalState;
 import org.openecard.common.ifd.scio.TerminalWatcher;
+import static org.openecard.scio.PCSCExceptionExtractor.getCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +79,7 @@ public class PCSCTerminals implements SCIOTerminals {
 	    ArrayList<SCIOTerminal> list = convertTerminals(scList);
 	    return Collections.unmodifiableList(list);
 	} catch (CardException ex) {
-	    throw new SCIOException("Failed to retrieve list from terminals instance.", ex);
+	    throw new SCIOException("Failed to retrieve list from terminals instance.", getCode(ex), ex);
 	}
     }
 
@@ -178,7 +179,7 @@ public class PCSCTerminals implements SCIOTerminals {
 		// return list of our terminals
 		return result;
 	    } catch (CardException ex) {
-		throw new SCIOException("Failed to retrieve status from the PCSC system.", ex);
+		throw new SCIOException("Failed to retrieve status from the PCSC system.", getCode(ex), ex);
 	    }
 	}
 
@@ -202,7 +203,8 @@ public class PCSCTerminals implements SCIOTerminals {
 		try {
 		    changed = internalWait(timeout);
 		} catch (CardException ex) {
-		    throw new SCIOException("Error while waiting for a state change in the terminals.", ex);
+		    String msg = "Error while waiting for a state change in the terminals.";
+		    throw new SCIOException(msg, getCode(ex), ex);
 		}
 		if (! changed) {
 		    return new StateChangeEvent();
@@ -220,7 +222,8 @@ public class PCSCTerminals implements SCIOTerminals {
 			    }
 			}
 		    } catch (CardException ex) {
-			throw new SCIOException("Failed to retrieve status of the observed terminals.", ex);
+			String msg = "Failed to retrieve status of the observed terminals.";
+			throw new SCIOException(msg, getCode(ex), ex);
 		    }
 
 		    // calculate what has actually happened

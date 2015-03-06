@@ -42,6 +42,7 @@ import javax.annotation.Nullable;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ifd.PACECapabilities;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
+import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.ifd.scio.reader.ExecutePACERequest;
@@ -300,7 +301,7 @@ public class TerminalInfo {
 		    if (paceResponse.isError()) {
 			String msg = "PACE is advertised but the result iss errornous.\n";
 			msg += paceResponse.getResult().getResultMessage().getValue();
-			throw new SCIOException(msg);
+			throw new SCIOException(msg, SCIOErrorCode.SCARD_F_UNKNOWN_ERROR);
 		    }
 		    PACECapabilities cap = new PACECapabilities(paceResponse.getData());
 		    PACECapabilities = cap.getFeaturesEnum();

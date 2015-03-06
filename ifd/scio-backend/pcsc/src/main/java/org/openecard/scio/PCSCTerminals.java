@@ -33,7 +33,6 @@ import javax.annotation.Nonnull;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CardTerminals;
-import javax.smartcardio.TerminalFactory;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
@@ -57,14 +56,23 @@ import org.slf4j.LoggerFactory;
 public class PCSCTerminals implements SCIOTerminals {
 
     private static final Logger logger = LoggerFactory.getLogger(PCSCTerminals.class);
-    private static final long WAIT_DELTA = 1000;
+    private static final long WAIT_DELTA = 1500;
 
-    private final TerminalFactory terminalFactory;
-    private final CardTerminals terminals;
+    private final PCSCFactory terminalFactory;
+    private CardTerminals terminals;
 
-    PCSCTerminals(@Nonnull TerminalFactory terminalFactory) {
+    PCSCTerminals(@Nonnull PCSCFactory terminalFactory) {
 	this.terminalFactory = terminalFactory;
-	this.terminals = terminalFactory.terminals();
+	loadTerminals();
+    }
+
+    private void reloadFactory() {
+	terminalFactory.reloadPCSC();
+	loadTerminals();
+    }
+
+    private void loadTerminals() {
+	terminals = terminalFactory.getRawFactory().terminals();
     }
 
     @Override
@@ -74,6 +82,10 @@ public class PCSCTerminals implements SCIOTerminals {
 
     @Override
     public List<SCIOTerminal> list(State state) throws SCIOException {
+	return list(state, true);
+    }
+
+    public List<SCIOTerminal> list(State state, boolean firstTry) throws SCIOException {
 	logger.trace("Entering list().");
 	try {
 	    CardTerminals.State scState = convertState(state);
@@ -84,8 +96,17 @@ public class PCSCTerminals implements SCIOTerminals {
 	    return Collections.unmodifiableList(list);
 	} catch (CardException ex) {
 	    if (getCode(ex) == SCIOErrorCode.SCARD_E_NO_READERS_AVAILABLE) {
-		logger.debug("No reader available exception.", ex);
+		logger.debug("No reader available exception.");
 		return Collections.emptyList();
+	    } else if (getCode(ex) == SCIOErrorCode.SCARD_E_NO_SERVICE) {
+		if (firstTry) {
+		    logger.debug("No service available exception, reloading PCSC and trying again.");
+		    reloadFactory();
+		    return list(state, false);
+		} else {
+		    logger.debug("No service available exception, returning empty list.");
+		    return Collections.emptyList();
+		}
 	    }
 	    String msg = "Failed to retrieve list from terminals instance.";
 	    logger.error(msg, ex);
@@ -192,11 +213,16 @@ public class PCSCTerminals implements SCIOTerminals {
 		}
 		// return list of our terminals
 		logger.trace("Leaving start() with {} states.", result.size());
-		return result;
+		return Collections.unmodifiableList(result);
 	    } catch (CardException ex) {
 		if (getCode(ex) == SCIOErrorCode.SCARD_E_NO_READERS_AVAILABLE) {
-		    logger.debug("No reader available exception.", ex);
-		    return new ArrayList<>();
+		    logger.debug("No reader available exception.");
+		    return Collections.emptyList();
+		} else if (getCode(ex) == SCIOErrorCode.SCARD_E_NO_SERVICE) {
+		    logger.debug("No service available exception, reloading PCSC and returning empty list.");
+		    parent.reloadFactory();
+		    own.loadTerminals();
+		    return Collections.emptyList();
 		}
 		String msg = "Failed to retrieve status from the PCSC system.";
 		logger.error(msg, ex);
@@ -349,18 +375,23 @@ public class PCSCTerminals implements SCIOTerminals {
 			return new Pair<>(true, false);
 		    }
 		} catch (CardException ex) {
-		    if (getCode(ex) == SCIOErrorCode.SCARD_E_NO_READERS_AVAILABLE) {
-			logger.debug("No reader available exception.", ex);
-			// send events that everything is removed if there are any terminals connected right now
-			if (! terminals.isEmpty()) {
-			    return new Pair<>(true, true);
-			} else {
-			    // if nothing changed, wait a bit and try again
-			    sleep(waitTime);
-			    continue;
-			}
-		    } else {
-			throw ex;
+		    switch (getCode(ex)) {
+			case SCARD_E_NO_SERVICE:
+			    logger.debug("No service available exception, reloading PCSC.");
+			    parent.reloadFactory();
+			    own.loadTerminals();
+			case SCARD_E_NO_READERS_AVAILABLE:
+			    // send events that everything is removed if there are any terminals connected right now
+			    if (! terminals.isEmpty()) {
+				return new Pair<>(true, true);
+			    } else {
+				logger.debug("Waiting for PCSC system to become available again.");
+				// if nothing changed, wait a bit and try again
+				sleep(waitTime);
+				continue;
+			    }
+			default:
+			    throw ex;
 		    }
 		}
 

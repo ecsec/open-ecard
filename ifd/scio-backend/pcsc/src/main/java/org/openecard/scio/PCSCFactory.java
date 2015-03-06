@@ -24,11 +24,17 @@ package org.openecard.scio;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.NoSuchAlgorithmException;
+import javax.smartcardio.CardTerminals;
 import javax.smartcardio.TerminalFactory;
 import org.openecard.common.ifd.scio.SCIOTerminals;
 import org.openecard.common.util.LinuxLibraryFinder;
 import org.openecard.scio.osx.SunOSXPCSC;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -39,9 +45,11 @@ import org.openecard.scio.osx.SunOSXPCSC;
  */
 public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactory {
 
+    private static final Logger logger = LoggerFactory.getLogger(PCSCFactory.class);
     private static final String ALGORITHM = "PC/SC";
 
-    private final TerminalFactory terminalFactory;
+    private final String osName;
+    private TerminalFactory terminalFactory;
 
     /**
      * Default constructor with fixes for the faulty SmartcardIO library.
@@ -50,17 +58,12 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
      * @throws NoSuchAlgorithmException if no PC/SC provider can be found.
      */
     public PCSCFactory() throws FileNotFoundException, NoSuchAlgorithmException {
-	String osName = System.getProperty("os.name");
-	if (osName.contains("OS X")) {
-	    // see https://developer.apple.com/library/mac/technotes/tn2002/tn2110.html#FINDINGMAC
-	    terminalFactory = TerminalFactory.getInstance(ALGORITHM, null, new SunOSXPCSC());
-	} else {
-	    if (osName.startsWith("Linux")) {
-		File libFile = LinuxLibraryFinder.getLibraryPath("pcsclite", "1");
-		System.setProperty("sun.security.smartcardio.library", libFile.getAbsolutePath());
-	    }
-	    terminalFactory = TerminalFactory.getInstance(ALGORITHM, null);
+	osName = System.getProperty("os.name");
+	if (osName.startsWith("Linux")) {
+	    File libFile = LinuxLibraryFinder.getLibraryPath("pcsclite", "1");
+	    System.setProperty("sun.security.smartcardio.library", libFile.getAbsolutePath());
 	}
+	loadPCSC();
     }
 
     @Override
@@ -70,7 +73,60 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 
     @Override
     public SCIOTerminals terminals() {
-	return new PCSCTerminals(terminalFactory);
+	return new PCSCTerminals(this);
+    }
+
+    TerminalFactory getRawFactory() {
+	return terminalFactory;
+    }
+
+    final void loadPCSC() throws NoSuchAlgorithmException {
+	if (osName.contains("OS X")) {
+	    // see https://developer.apple.com/library/mac/technotes/tn2002/tn2110.html#FINDINGMAC
+	    terminalFactory = TerminalFactory.getInstance(ALGORITHM, null, new SunOSXPCSC());
+	} else {
+	    terminalFactory = TerminalFactory.getInstance(ALGORITHM, null);
+	}
+    }
+
+    void reloadPCSC() {
+	try {
+	    // code taken from http://stackoverflow.com/questions/16921785/
+	    Class pcscterminal = Class.forName("sun.security.smartcardio.PCSCTerminals");
+	    Field contextId = pcscterminal.getDeclaredField("contextId");
+	    contextId.setAccessible(true);
+
+	    if (contextId.getLong(pcscterminal) != 0L) {
+		// First get a new context value
+		Class pcsc = Class.forName("sun.security.smartcardio.PCSC");
+		Method SCardEstablishContext = pcsc.getDeclaredMethod("SCardEstablishContext", Integer.TYPE);
+		SCardEstablishContext.setAccessible(true);
+
+		Field SCARD_SCOPE_USER = pcsc.getDeclaredField("SCARD_SCOPE_USER");
+		SCARD_SCOPE_USER.setAccessible(true);
+
+		long newId = ((Long) SCardEstablishContext.invoke(pcsc, SCARD_SCOPE_USER.getInt(pcsc)));
+		contextId.setLong(pcscterminal, newId);
+
+		// Then clear the terminals in cache
+		loadPCSC();
+		CardTerminals terminals = terminalFactory.terminals();
+		Field fieldTerminals = pcscterminal.getDeclaredField("terminals");
+		fieldTerminals.setAccessible(true);
+		Class classMap = Class.forName("java.util.Map");
+		Method clearMap = classMap.getDeclaredMethod("clear");
+
+		clearMap.invoke(fieldTerminals.get(terminals));
+	    }
+	} catch (NoSuchAlgorithmException ex) {
+	    // if it worked once it will work again
+	    String msg = "PCSC changed it's algorithm. There is something really wrong.";
+	    logger.error(msg, ex);
+	    throw new RuntimeException("PCSC changed it's algorithm. There is something really wrong.");
+	} catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchFieldException
+		| NoSuchMethodException | SecurityException ex) {
+	    logger.error("Failed to perform reflection magic to reload TerminalFactory.", ex);
+	}
     }
 
 }

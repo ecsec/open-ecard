@@ -158,6 +158,7 @@ public class Status implements EventCallback {
 	btnExit.addActionListener(new ActionListener() {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
+		logger.debug("Shutdown button pressed.");
 		appTray.shutdown();
 	    }
 	});
@@ -166,6 +167,7 @@ public class Status implements EventCallback {
 	btnAbout.addActionListener(new ActionListener() {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
+		logger.debug("About button pressed.");
 		AboutDialog.showDialog();
 	    }
 	});
@@ -174,6 +176,7 @@ public class Status implements EventCallback {
 	btnSettings.addActionListener(new ActionListener() {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
+		logger.debug("Settings button pressed.");
 		ManagementDialog.showDialog(manager);
 	    }
 	});

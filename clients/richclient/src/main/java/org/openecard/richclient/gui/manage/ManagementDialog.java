@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2013-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -73,7 +73,7 @@ import org.slf4j.LoggerFactory;
  * The dialog hosts a sidebar where one can select the add-on or builtin item to display. The items are
  * {@link AddonPanel}s which are configured appropriately.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ManagementDialog extends JFrame {
 
@@ -103,6 +103,7 @@ public class ManagementDialog extends JFrame {
      */
     public static synchronized void showDialog(AddonManager manager) {
 	if (runningDialog == null) {
+	    logger.debug("Creating ManagementDialog.");
 	    ManagementDialog dialog = new ManagementDialog(manager);
 	    dialog.addWindowListener(new WindowListener() {
 		@Override
@@ -122,9 +123,11 @@ public class ManagementDialog extends JFrame {
 		@Override
 		public void windowDeactivated(WindowEvent e) { }
 	    });
+	    logger.debug("Displaying ManagementDialog.");
 	    dialog.setVisible(true);
 	    runningDialog = dialog;
 	} else {
+	    logger.debug("Not displaying ManagementDialog.");
 	    // dialog already shown, bring to front
 	    runningDialog.toFront();
 	}
@@ -139,6 +142,7 @@ public class ManagementDialog extends JFrame {
      * @param manager
      */
     public ManagementDialog(AddonManager manager) {
+	logger.debug("Creating ManagementDialog.");
 	this.manager = manager;
 	cpReg = manager.getBuiltinRegistry();
 	fileReg = manager.getExternalRegistry();
@@ -169,12 +173,17 @@ public class ManagementDialog extends JFrame {
 	selectionLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0};
 	selectionPanel.setLayout(selectionLayout);
 
+	logger.debug("Creating core list.");
 	createCoreList();
+	logger.debug("Creating addon list.");
 	createAddonList();
+	logger.debug("Setup core list.");
 	setupCoreList();
+	logger.debug("Setup addon list.");
 	setupAddonList();
 
 	setLocationRelativeTo(null);
+	logger.debug("Finished creating ManagementDialog.");
     }
 
     /**

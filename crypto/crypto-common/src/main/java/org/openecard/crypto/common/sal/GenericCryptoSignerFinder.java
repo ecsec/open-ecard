@@ -42,12 +42,15 @@ import iso.std.iso_iec._24727.tech.schema.DataSetSelectResponse;
 import iso.std.iso_iec._24727.tech.schema.NamedDataServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.TargetNameType;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -91,7 +94,7 @@ public class GenericCryptoSignerFinder {
 
     //@SafeVarargs
     private static <T> Set<T> set(T... ts) {
-	return new HashSet<>(Arrays.asList(ts));
+	return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ts)));
     }
 
     private static final Set<String> PRE_TLS12 = set(
@@ -157,22 +160,26 @@ public class GenericCryptoSignerFinder {
     @Nonnull
     public GenericCryptoSigner findFirstMatching(@Nonnull CertificateRequest cr)
 	    throws CredentialNotFound {
-	List<DIDCertificate> result = findDID(handle);
+	List<DIDCertificate> result = findDID();
 	if (result.isEmpty()) {
 	    throw new CredentialNotFound("No suitable DID found.");
 	}
 	// TODO check remaining DIDs to match CertificateRequest
 	DIDCertificate firstResult = result.get(0);
-	handle.setCardApplication(firstResult.getApplicationIdentifier());
+
+	try {
+	    updateConHandle(fileUtils.selectApplication(firstResult.getApplicationIdentifier(), handle));
+	} catch (DispatcherException | InvocationTargetException | WSException ex) {
+	    throw new CredentialNotFound("Failed to select the application containing the DID.", ex);
+	}
+	
 	return new GenericCryptoSigner(dispatcher, handle, firstResult);
     }
 
     // TODO: add more useful search functions
 
-    private List<DIDCertificate>findDID(ConnectionHandleType handle) {
+    private List<DIDCertificate> findDID() {
 	List<DIDCertificate> result = new ArrayList<>();
-	// copy handle to be safe from spaghetti code
-	handle = HandlerUtils.copyHandle(handle);
 
 	try {
 	    CardApplicationList listReq = new CardApplicationList();
@@ -186,7 +193,7 @@ public class GenericCryptoSignerFinder {
 	    for (byte[] appIdentifier : cardApplicationName) {
 		handle.setCardApplication(appIdentifier);
 		List<String> didNamesList = getSignatureCapableDIDs(handle);
-		List<DIDCertificate> certList  = filterTLSCapableDIDs(handle, didNamesList);
+		List<DIDCertificate> certList  = filterTLSCapableDIDs(didNamesList);
 
 		if (filterAlwaysReadable) {
 		    certList = filterAlwaysReadable(certList);
@@ -199,6 +206,8 @@ public class GenericCryptoSignerFinder {
 	    }
 	} catch (InvocationTargetException | DispatcherException | WSException e) {
 	    logger.error("Searching for DID failed", e);
+	} catch (IOException ex) {
+	    logger.error("Failed to read the certificates which are related to the DID.", ex);
 	}
 	return result;
     }
@@ -207,21 +216,22 @@ public class GenericCryptoSignerFinder {
      * The method filters a list with DID (names) for such DID which are able to perform a signature according to TLS1.1
      * and TLS1.2.
      *
-     * @param dispatcher Dispatcher for message delivery.
-     * @param handle ConnectionHandle which identifies the card.
      * @param didNames List of DID (names) to filter.
      * @return A list of DID (names) which are able to perform a signature according to the TLS1.1 and TLS1.2 standard.
      * @throws DispatcherException
+     * @throws IOException
      * @throws InvocationTargetException
+     * @throws WSException
      */
-    private List<DIDCertificate> filterTLSCapableDIDs(ConnectionHandleType handle, List<String> didNames)
-	    throws DispatcherException, InvocationTargetException, WSException {
+    private List<DIDCertificate> filterTLSCapableDIDs(List<String> didNames)
+	    throws DispatcherException, InvocationTargetException, WSException, IOException {
 	ConnectionHandleType handle2 = HandlerUtils.copyHandle(handle);
 	List<DIDCertificate> remainingDIDs = new ArrayList<>();
 	HashMap<String, Pair<byte[], Boolean>> dataSetWithCert = new HashMap<>();
 	for (String didName : didNames) {
+	    updateConHandle(handle2);
 	    DIDGet didGet = new DIDGet();
-	    didGet.setConnectionHandle(handle2);
+	    didGet.setConnectionHandle(handle);
 	    didGet.setDIDName(didName);
 	    DIDGetResponse didGetResponse = (DIDGetResponse) dispatcher.deliver(didGet);
 	    WSHelper.checkResult(didGetResponse);
@@ -246,32 +256,44 @@ public class GenericCryptoSignerFinder {
 		if (dataSetWithCert.containsKey(cryptoMarker.getCertificateRefs().get(0).getDataSetName())) {
 		    Pair<byte[], Boolean> certAndTlsAuth = dataSetWithCert.get(
 			    cryptoMarker.getCertificateRefs().get(0).getDataSetName());
+		    // use handle with the application identifier of the DID (may be different from the application
+		    // containing the certificates).
 		    cardCert.setApplicationID(handle2.getCardApplication());
 		    cardCert.setDIDName(didName);
 		    cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
 		    cardCert.setRawCertificate(certAndTlsAuth.p1);
 		    remainingDIDs.add(cardCert);
 		} else {
-		    byte[] cert = readCertificate(cryptoMarker, 0, dispatcher, handle);
+		    byte[] cert = readCertificate(cryptoMarker, 0, dispatcher);
+
 		    if (cert == null) {
 			// this means the certificate is not readable without authentication (or an error occured)
 			// so save this in the list for later if there exists the possibility to select a certificate for
 			// authentication.
+
+			// use handle with the application identifier of the DID (may be different from the application
+			// containing the certificates).
 			cardCert.setApplicationID(handle2.getCardApplication());
 			cardCert.setDIDName(didName);
 			cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
 			remainingDIDs.add(cardCert);
 
-			// add chain if available
-			byte[] certChain = readChain(cryptoMarker, dispatcher, handle);
+			try (
+			    // add chain if available
+			    ByteArrayOutputStream certChain = new ByteArrayOutputStream()) {
+			    readChain(cryptoMarker, dispatcher, certChain);
 
-			// cert contains the chain (if available) only because we can't read the certificate without
-			// using the pin
-			cert = certChain;
+			    // cert contains the chain (if available) only because we can't read the certificate without
+			    // using the pin
+			    cert = certChain.toByteArray();
+			}
 			Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, false);
 			dataSetWithCert.put(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), certAndTLSAuth);
 		    } else if (containsAuthenticationCertificate(cert)) {
 			// put certificates which are always readable always at the beginning of the list
+
+			// use handle with the application identifier of the DID (may be different from the application
+			// containing the certificates).
 			cardCert.setApplicationID(handle2.getCardApplication());
 			cardCert.setDIDName(didName);
 			cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
@@ -309,8 +331,12 @@ public class GenericCryptoSignerFinder {
 			}
 
 			// add chain if located in other files
-			byte[] certChain = readChain(cryptoMarker, dispatcher, handle);
-
+			byte[] certChain;
+			try (ByteArrayOutputStream bOutChain = new ByteArrayOutputStream()) {
+			    readChain(cryptoMarker, dispatcher, bOutChain);
+			    certChain = bOutChain.toByteArray();
+			}
+			
 			// concatenate with the certificate to use for TLS or signature creation
 			cert = ByteUtils.concatenate(cert, certChain);
 			Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, true);
@@ -328,23 +354,20 @@ public class GenericCryptoSignerFinder {
      *
      * @param cryptoMarker CryptoMarker which contains the certificate references to the certificates of the chain.
      * @param dispatcher Dispatcher object for message delivery.
-     * @param handle ConnectionHandleType object which identifies the card and terminal to use.
-     * @return A byte array containing the certificate chain.
+     * @param certChain {@link ByteArrayOutputStream} which will be filled with the certificates of the chain.
      * @throws DispatcherException
      * @throws InvocationTargetException
      */
-    private byte[] readChain(CryptoMarkerType cryptoMarker, Dispatcher dispatcher, ConnectionHandleType handle)
-	    throws DispatcherException, InvocationTargetException {
-	byte[] certChain = new byte[0];
+    private void readChain(CryptoMarkerType cryptoMarker, Dispatcher dispatcher,
+	    ByteArrayOutputStream certChain) throws DispatcherException,
+	    InvocationTargetException, IOException {
 
 	if (cryptoMarker.getCertificateRefs().size() > 1) {
 	    for (int i = 1; i < cryptoMarker.getCertificateRefs().size(); i++) {
-		byte[] certChainPart = readCertificate(cryptoMarker, i, dispatcher, handle);
-		certChain = ByteUtils.concatenate(certChain, certChainPart);
+		byte[] chainPart = readCertificate(cryptoMarker, i, dispatcher);
+		certChain.write(chainPart);
 	    }
 	}
-
-	return certChain;
     }
 
     /**
@@ -458,16 +481,15 @@ public class GenericCryptoSignerFinder {
      * @param certNumber Number of the certificate in the list of certificate references in the CryptoMarkerType. Note:
      * The list of certificate references starts with element 0.
      * @param dispatcher Dispatcher for message delivery.
-     * @param handle SlotHandle which identifies the card and the terminal to use.
      * @return A byte array containing the extracted certificate or NULL if an error occurred.
      * @throws DispatcherException
      * @throws InvocationTargetException
      */
-    private byte[] readCertificate(CryptoMarkerType cryptoMarker, int certNumber, Dispatcher dispatcher,
-	    ConnectionHandleType handle) throws DispatcherException, InvocationTargetException {
+    private byte[] readCertificate(CryptoMarkerType cryptoMarker, int certNumber, Dispatcher dispatcher)
+	    throws DispatcherException, InvocationTargetException {
 	try {
 	    String dataSetName = cryptoMarker.getCertificateRefs().get(certNumber).getDataSetName();
-	    handle = fileUtils.selectAppByDataSet(dataSetName, handle);
+	    updateConHandle(fileUtils.selectAppByDataSet(dataSetName, handle));
 	    // resolve acls of the certificate data set
 	    TargetNameType targetName = new TargetNameType();
 	    targetName.setDataSetName(cryptoMarker.getCertificateRefs().get(certNumber).getDataSetName());
@@ -498,6 +520,20 @@ public class GenericCryptoSignerFinder {
 	}
 
 	return null;
+    }
+
+    /**
+     * Updates the global connection handle against the given one.
+     *
+     * @param conHandle {@link ConnectionHandleType} object which is used to update the global connection handle.
+     */
+    private void updateConHandle(@Nonnull ConnectionHandleType conHandle) {
+	handle.setSlotHandle(conHandle.getSlotHandle());
+	handle.setSlotIndex(conHandle.getSlotIndex());
+	handle.setRecognitionInfo(conHandle.getRecognitionInfo());
+	handle.setIFDName(conHandle.getIFDName());
+	handle.setContextHandle(conHandle.getContextHandle());
+	handle.setCardApplication(conHandle.getCardApplication());
     }
 
 }

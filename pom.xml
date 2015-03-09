@@ -198,9 +198,8 @@
 					<configuration>
 						<signature>
 							<groupId>org.codehaus.mojo.signature</groupId>
-							<!-- use sun artifact, because java16 doesn't contain smartcardio -->
-							<artifactId>java16-sun</artifactId>
-							<version>1.10</version>
+							<artifactId>java-7-openjdk</artifactId>
+							<version>1.0</version>
 						</signature>
 					</configuration>
 				</plugin>

@@ -22,6 +22,7 @@
 
 package org.openecard.binding.tctoken;
 
+import iso.std.iso_iec._24727.tech.schema.ActionType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnect;
@@ -245,6 +246,7 @@ public class TCTokenHandler {
 	    // disconnect card after authentication
 	    CardApplicationDisconnect appDis = new CardApplicationDisconnect();
 	    appDis.setConnectionHandle(connectionHandle);
+	    appDis.setAction(ActionType.RESET);
 	    dispatcher.deliver(appDis);
 	} catch (InvocationTargetException ex) {
 	    logger.error(ex.getMessage(), ex);

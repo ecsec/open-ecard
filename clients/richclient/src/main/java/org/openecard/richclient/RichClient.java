@@ -29,7 +29,6 @@ import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
 import java.io.IOException;
 import java.net.BindException;
-import javax.swing.JOptionPane;
 import org.openecard.addon.AddonManager;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
@@ -39,6 +38,7 @@ import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
 import org.openecard.control.binding.http.HTTPBinding;
 import org.openecard.event.EventManager;
+import org.openecard.gui.message.DialogType;
 import org.openecard.gui.swing.SwingDialogWrapper;
 import org.openecard.gui.swing.SwingUserConsent;
 import org.openecard.gui.swing.common.GUIDefaults;
@@ -47,7 +47,6 @@ import org.openecard.ifd.scio.IFD;
 import org.openecard.management.TinyManagement;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.richclient.gui.AppTray;
-import org.openecard.richclient.gui.MessageDialog;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.slf4j.Logger;
@@ -58,6 +57,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Moritz Horsch
  * @author Johannes Schmölz
+ * @author Hans-Martin Haase
  */
 public final class RichClient {
 
@@ -89,9 +89,7 @@ public final class RichClient {
 	try {
 	    // load logger config from HOME if set
 	    LogbackConfig.load();
-	} catch (IOException ex) {
-	    _logger.error("Failed to load logback config from user config.", ex);
-	} catch (JoranException ex) {
+	} catch (IOException | JoranException ex) {
 	    _logger.error("Failed to load logback config from user config.", ex);
 	}
     }
@@ -104,9 +102,11 @@ public final class RichClient {
 
     public void setup() {
 	GUIDefaults.initialize();
-
-	MessageDialog dialog = new MessageDialog();
-	dialog.setHeadline(lang.translationForKey("client.startup.failed.headline"));
+	
+	String title = lang.translationForKey("client.startup.failed.headline");
+	String message = null;
+	// Set up GUI
+	SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper());
 
 	try {
 	    tray = new AppTray(this);
@@ -122,6 +122,7 @@ public final class RichClient {
 	    // Set up the IFD
 	    ifd = new IFD();
 	    ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
+	    ifd.setGUI(gui);
 	    env.setIFD(ifd);
 
 	    // Set up the Dispatcher
@@ -130,13 +131,19 @@ public final class RichClient {
 	    ifd.setDispatcher(dispatcher);
 
 	    // Perform an EstablishContext to get a ContextHandle
-	    EstablishContext establishContext = new EstablishContext();
-	    EstablishContextResponse establishContextResponse = ifd.establishContext(establishContext);
-	    WSHelper.checkResult(establishContextResponse);
-	    contextHandle = establishContextResponse.getContextHandle();
+	    try {
+		EstablishContext establishContext = new EstablishContext();
+		EstablishContextResponse establishContextResponse = ifd.establishContext(establishContext);
+		WSHelper.checkResult(establishContextResponse);
+		contextHandle = establishContextResponse.getContextHandle();
+	    } catch (WSHelper.WSException ex) {
+		message = lang.translationForKey("client.startup.failed.nocontext");
+		throw ex;
+	    }
 
 	    // Set up CardRecognition
 	    recognition = new CardRecognition(ifd, contextHandle);
+	    recognition.setGUI(gui);
 
 	    // Set up EventManager
 	    em = new EventManager(recognition, env, contextHandle);
@@ -149,13 +156,8 @@ public final class RichClient {
 
 	    // Set up SAL
 	    sal = new TinySAL(env, cardStates);
-	    env.setSAL(sal);
-
-	    // Set up GUI
-	    SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper());
 	    sal.setGUI(gui);
-	    ifd.setGUI(gui);
-	    recognition.setGUI(gui);
+	    env.setSAL(sal);
 
 	    // Start up control interface
 	    try {
@@ -165,7 +167,7 @@ public final class RichClient {
 		binding.setAddonManager(manager);
 		binding.start();
 	    } catch (BindException e) {
-		dialog.setMessage(lang.translationForKey("client.startup.failed.portinuse"));
+		message = lang.translationForKey("client.startup.failed.portinuse");
 		throw e;
 	    }
 
@@ -178,15 +180,26 @@ public final class RichClient {
 	} catch (Exception e) {
 	    _logger.error(e.getMessage(), e);
 
-	    if (dialog.getMessage() == null || dialog.getMessage().isEmpty()) {
+	    if (message == null || message.isEmpty()) {
 		// Add exception message if no custom message is set
-		dialog.setMessage(e.getMessage());
+		message = e.getMessage();
 	    }
 
 	    // Show dialog to the user and shut down the client
-	    JOptionPane.showMessageDialog(null, dialog, "Open eCard App", JOptionPane.PLAIN_MESSAGE);
+	    String msg = formatMessage(title, message);
+	    gui.obtainMessageDialog().showMessageDialog(msg, "Open eCard App", DialogType.ERROR_MESSAGE);
 	    teardown();
 	}
+    }
+
+    private String formatMessage(String headline, String message) {
+	StringBuilder builder = new StringBuilder();
+	builder.append("<html>");
+	builder.append(headline);
+	builder.append("<br/><br/>");
+	builder.append(message);
+	builder.append("</html>");
+	return builder.toString();
     }
 
     public void teardown() {

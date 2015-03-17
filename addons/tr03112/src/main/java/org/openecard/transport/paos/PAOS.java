@@ -425,7 +425,7 @@ public class PAOS {
 	    builder.append(";");
 	    builder.append('"');
 	    builder.append(service);
-	    builder.append("'");
+	    builder.append('"');
 	}
 	return builder.toString();
     }

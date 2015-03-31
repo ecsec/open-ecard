@@ -1,36 +1,48 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <AddonSpecification>
-  <ID>Status</ID>
-  <Version>1.0</Version>
-  <License>GPL v3 or proprietary License agreement</License>
-  <LocalizedName xml:lang="EN">Status Plugin</LocalizedName>
-  <LocalizedDescription xml:lang="EN">
-	  Capability status and status information of the available cards.
-  </LocalizedDescription>
-  <About xml:lang="EN">Status plugin built into the Open eCard core.</About>
-  <Logo/>
-  <ConfigDescription/>
-  <BindingActions>
-    <AppPluginSpecification>
-      <ClassName>org.openecard.addons.status.StatusAction</ClassName>
-      <LocalizedName xml:lang="EN">Status</LocalizedName>
-      <LocalizedDescription xml:lang="EN">
-		  Function returning the current status and possibly registering a session for wait for change messages.
-	  </LocalizedDescription>
-      <ResourceName>getStatus</ResourceName>
-      <ConfigDescription/>
-    </AppPluginSpecification>
-    <AppPluginSpecification>
-      <ClassName>org.openecard.addons.status.WaitForChangeAction</ClassName>
-      <LocalizedName xml:lang="EN">Wait for Change</LocalizedName>
-      <LocalizedDescription xml:lang="DE">
-		  Function blocking until an event occurs. This function needs a previously registered session.
-	  </LocalizedDescription>
-      <ResourceName>waitForChange</ResourceName>
-      <ConfigDescription/>
-    </AppPluginSpecification>
-  </BindingActions>
-  <ApplicationActions/>
-  <IFDActions/>
-  <SALActions/>
+    <ID>Status</ID>
+    <Version>1.0</Version>
+    <License>GPL v3 or proprietary License agreement</License>
+    <LocalizedName xml:lang="EN">Status Plugin</LocalizedName>
+    <LocalizedDescription xml:lang="EN">
+	Capability status and status information of the available cards.
+    </LocalizedDescription>
+    <About xml:lang="EN">Status plugin built into the Open eCard core.</About>
+    <Logo/>
+    <ConfigDescription/>
+    <BindingActions>
+	<AppPluginSpecification>
+	    <ClassName>org.openecard.addons.status.StatusAction</ClassName>
+	    <LocalizedName xml:lang="DE">Status</LocalizedName>
+	    <LocalizedName xml:lang="EN">Status</LocalizedName>
+	    <LocalizedDescription xml:lang="DE">
+		Funktion, die den aktuellen Status zurück gibt und die Möglichkeit bietet eine Session
+		für eine "wait for change"-Nachricht zu registrieren.
+	    </LocalizedDescription>
+	    <LocalizedDescription xml:lang="EN">
+		Function returning the current status and possibly registering a session for wait for
+		change messages.
+	    </LocalizedDescription>
+	    <ResourceName>getStatus</ResourceName>
+	    <ConfigDescription/>
+	</AppPluginSpecification>
+	<AppPluginSpecification>
+	    <ClassName>org.openecard.addons.status.WaitForChangeAction</ClassName>
+	    <LocalizedName xml:lang="DE">Warten auf Veränderung</LocalizedName>
+	    <LocalizedName xml:lang="EN">Wait for Change</LocalizedName>
+	    <LocalizedDescription xml:lang="DE">
+		Funktion, die blockiert, bis ein Ereignis auftritt. Diese Funktion benötigt eine zuvor
+		registrierte Session.
+	    </LocalizedDescription>
+	    <LocalizedDescription xml:lang="EN">
+		Function blocking until an event occurs. This function needs a previously registered
+		session.
+	    </LocalizedDescription>
+	    <ResourceName>waitForChange</ResourceName>
+	    <ConfigDescription/>
+	</AppPluginSpecification>
+    </BindingActions>
+    <ApplicationActions/>
+    <IFDActions/>
+    <SALActions/>
 </AddonSpecification>

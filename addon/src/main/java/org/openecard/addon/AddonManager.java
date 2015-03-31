@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2013-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -45,6 +45,7 @@ import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.FacadeInvocationHandler;
 import org.openecard.gui.UserConsent;
+import org.openecard.gui.definition.ViewController;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.slf4j.Logger;
@@ -74,6 +75,7 @@ public class AddonManager {
     private final CardRecognition recognition;
     private final EventManager eventManager;
     private final EventHandler eventHandler;
+    private final ViewController viewController;
     private final TreeMap<AddonSpecification, TreeMap<String, IFDProtocol>> ifdProtocolCache = new TreeMap<>();
     private final TreeMap<AddonSpecification, TreeMap<String, SALProtocol>> salProtocolCache = new TreeMap<>();
     private final TreeMap<AddonSpecification, TreeMap<String, AppExtensionAction>> appExtActionCache = new TreeMap<>();
@@ -88,10 +90,11 @@ public class AddonManager {
      * @param cardStates
      * @param recognition
      * @param eventManager
+     * @param view
      * @throws WSMarshallerException
      */
     public AddonManager(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates,
-	    CardRecognition recognition, EventManager eventManager) throws WSMarshallerException {
+	    CardRecognition recognition, EventManager eventManager, ViewController view) throws WSMarshallerException {
 
 	this.registry = new CombiningRegistry(this);
 	this.protectedRegistry = getProtectedRegistry(registry);
@@ -101,6 +104,7 @@ public class AddonManager {
 	this.recognition = recognition;
 	this.eventManager = eventManager;
 	this.eventHandler = new EventHandler(eventManager);
+	this.viewController = view;
 
 	new Thread(new Runnable() {
 	    @Override
@@ -271,7 +275,7 @@ public class AddonManager {
 	try {
 	    ClassLoader cl = registry.downloadAddon(addonSpec);
 	    IFDProtocolProxy protoFactory = new IFDProtocolProxy(className, cl);
-	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
+	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec, viewController);
 	    aCtx.setCardRecognition(recognition);
 	    aCtx.setCardStateMap(cardStates);
 	    aCtx.setEventHandle(eventHandler);
@@ -307,7 +311,7 @@ public class AddonManager {
 	try {
 	    ClassLoader cl = registry.downloadAddon(addonSpec);
 	    SALProtocolProxy protoFactory = new SALProtocolProxy(className, cl);
-	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
+	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec, viewController);
 	    aCtx.setCardRecognition(recognition);
 	    aCtx.setCardStateMap(cardStates);
 	    aCtx.setEventHandle(eventHandler);
@@ -343,7 +347,7 @@ public class AddonManager {
 	try {
 	    ClassLoader cl = registry.downloadAddon(addonSpec);
 	    AppExtensionActionProxy protoFactory = new AppExtensionActionProxy(className, cl);
-	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
+	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec, viewController);
 	    aCtx.setCardRecognition(recognition);
 	    aCtx.setCardStateMap(cardStates);
 	    aCtx.setEventHandle(eventHandler);
@@ -380,7 +384,7 @@ public class AddonManager {
 	try {
 	    ClassLoader cl = registry.downloadAddon(addonSpec);
 	    AppPluginActionProxy protoFactory = new AppPluginActionProxy(className, cl);
-	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec);
+	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec, viewController);
 	    aCtx.setCardRecognition(recognition);
 	    aCtx.setCardStateMap(cardStates);
 	    aCtx.setEventHandle(eventHandler);

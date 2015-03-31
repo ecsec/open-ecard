@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2013-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -28,14 +28,16 @@ import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.gui.UserConsent;
+import org.openecard.gui.definition.ViewController;
 import org.openecard.recognition.CardRecognition;
 
 
 /**
+ * This class implements a context object used for the exchange of information with addons.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 public class Context {
 
@@ -44,6 +46,7 @@ public class Context {
     private final Dispatcher dispatcher;
     private final EventManager eventManager;
     private final String id;
+    private final ViewController viewController;
 
     private CredentialManager credMan;
     private UserConsent userConsent;
@@ -51,49 +54,114 @@ public class Context {
     private CardRecognition recognition;
     private EventHandler eventHandler;
 
-    public Context(AddonManager manager, Dispatcher dispatcher, EventManager eventManager, AddonSpecification spec) {
+    /**
+     * Creates a new instance from the given parameters.
+     *
+     * @param manager {@link AddonManager} to use for this Context object.
+     * @param dispatcher {@link Dispatcher} to use for this Context object.
+     * @param eventManager {@link EventManager} to use for this Context object.
+     * @param spec {@link AddonSpecification} for the generation of the {@link AddonProperties} object.
+     * @param addView {@link ViewController} to use for this Context object.
+     */
+    public Context(AddonManager manager, Dispatcher dispatcher, EventManager eventManager, AddonSpecification spec,
+	    ViewController addView) {
 	this.manager = manager;
 	this.dispatcher = dispatcher;
 	this.eventManager = eventManager;
 	this.id = spec.getId();
 	addonProperties = new AddonProperties(spec);
+	viewController = addView;
     }
 
+    /**
+     * Sets the CardRecognition of this Context.
+     *
+     * @param cardRec The {@link CardRecognition} to set.
+     */
     public void setCardRecognition(CardRecognition cardRec) {
 	recognition = cardRec;
     }
 
+    /**
+     * Sets the EventHandler of for this Context.
+     *
+     * @param eventHandler The {@link EventHandler} to set.
+     */
     public void setEventHandle(EventHandler eventHandler) {
 	this.eventHandler = eventHandler;
     }
 
+    /**
+     * Sets the CardStateMap for this Context.
+     *
+     * @param cardStates The {@link CardStateMap} related to this Context.
+     */
     public void setCardStateMap(CardStateMap cardStates) {
 	this.cardStates = cardStates;
 	credMan = new CredentialManager(cardStates);
     }
 
+    /**
+     * Sets the UserConsent of this Context.
+     *
+     * @param uConsent The {@link UserConsent} to set.
+     */
     public void setUserConsent(UserConsent uConsent) {
 	userConsent = uConsent;
     }
 
+    /**
+     * Get the AddonManager of this Context.
+     *
+     * @return The {@link AddonManager} of this context.
+     */
     public AddonManager getManager() {
 	return manager;
     }
 
+    /**
+     * Get the Dispatcher of this Context.
+     *
+     * @return The {@link Dispatcher} of this Context.
+     */
     public Dispatcher getDispatcher() {
 	return dispatcher;
     }
 
+    /**
+     * Get the EventManager of this Context.
+     *
+     * @return The {@link EventManager} of this Context.
+     */
     public EventManager getEventManager() {
 	return eventManager;
     }
 
+    /**
+     * Get the UserConsent of this Context.
+     *
+     * @return The {@link UserConsent} of this Context.
+     */
     public UserConsent getUserConsent() {
 	return userConsent;
     }
 
+    /**
+     * Get the AddonProperties of this Context.
+     *
+     * @return The {@link AddonProperties} of this Context.
+     */
     public AddonProperties getAddonProperties() {
 	return addonProperties;
+    }
+
+    /**
+     * Get the ViewController object of this Context.
+     *
+     * @return The {@link ViewController} of this Context.
+     */
+    public ViewController getViewController() {
+	return viewController;
     }
 
     /**
@@ -108,18 +176,38 @@ public class Context {
 	return cardStates;
     }
 
+    /**
+     * Get the CardRecognition of this Context.
+     *
+     * @return The {@link CardRecognition} of this Context.
+     */
     public CardRecognition getRecognition() {
 	return recognition;
     }
 
+    /**
+     * Get the EventHandler of this Context.
+     *
+     * @return The {@link EventHandler} of this Context.
+     */
     public EventHandler getEventHandler() {
 	return eventHandler;
     }
 
+    /**
+     * Get the CredentialManager of this Context object.
+     *
+     * @return The {@link CredentialManager} of this Context.
+     */
     public CredentialManager getCredentialManager() {
 	return credMan;
     }
 
+    /**
+     * Get the ID of this Context object.
+     *
+     * @return The ID of the Context object.
+     */
     public String getId() {
 	return id;
     }

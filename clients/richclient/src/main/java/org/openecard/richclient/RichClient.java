@@ -47,6 +47,7 @@ import org.openecard.ifd.scio.IFD;
 import org.openecard.management.TinyManagement;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.richclient.gui.AppTray;
+import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.slf4j.Logger;
@@ -160,9 +161,11 @@ public final class RichClient {
 	    env.setSAL(sal);
 
 	    // Start up control interface
+	    SettingsAndDefaultViewWrapper guiWrapper = new SettingsAndDefaultViewWrapper();
 	    try {
 		binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
-		manager = new AddonManager(dispatcher, gui, cardStates, recognition, em);
+		manager = new AddonManager(dispatcher, gui, cardStates, recognition, em, guiWrapper);
+		guiWrapper.setAddonManager(manager);
 		sal.setAddonManager(manager);
 		binding.setAddonManager(manager);
 		binding.start();

@@ -179,7 +179,7 @@ public class GenericCryptographyProtocolTest {
 
 	// init AddonManager
 	UserConsent uc = new SwingUserConsent(new SwingDialogWrapper());
-	AddonManager manager = new AddonManager(d, uc, states, cr, null);
+	AddonManager manager = new AddonManager(d, uc, states, cr, null, null);
 	instance.setAddonManager(manager);
     }
 

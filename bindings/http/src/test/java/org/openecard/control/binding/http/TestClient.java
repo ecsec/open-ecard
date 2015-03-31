@@ -109,7 +109,7 @@ public final class TestClient {
 	// Initialize the EventManager
 	em.initialize();
 
-	AddonManager manager = new AddonManager(dispatcher, gui, cardStates, recognition, em);
+	AddonManager manager = new AddonManager(dispatcher, gui, cardStates, recognition, em, null);
 	sal.setAddonManager(manager);
 
 	HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);

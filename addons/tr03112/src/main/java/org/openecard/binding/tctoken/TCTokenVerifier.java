@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -41,6 +41,7 @@ import org.openecard.common.ECardConstants;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.TR03112Utils;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.binding.tctoken.ex.ResultMinor;
 import org.openecard.common.util.UrlBuilder;
 
 
@@ -376,11 +377,11 @@ public class TCTokenVerifier {
 		URI refreshUrlAsUrl = createUrlWithErrorParams(refreshUrl, ex.getMessage());
 		throw new InvalidTCTokenElement(refreshUrlAsUrl.toString(), ex);
 	    } catch (IOException | ResourceException | InvalidAddressException | ValidationError | URISyntaxException ex1) {
-		String errorUrl = token.getComErrorAddressWithParams(ECardConstants.Minor.App.COMMUNICATION_ERROR);
+		String errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR);
 		throw new InvalidTCTokenElement(errorUrl, INVALID_REFRESH_ADDRESS, ex1);
 	    }
 	} else {
-	    String errorUrl = token.getComErrorAddressWithParams(ECardConstants.Minor.App.COMMUNICATION_ERROR);
+	    String errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR);
 	    throw new InvalidTCTokenElement(errorUrl, NO_REFRESH_ADDRESS);
 	}
     }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -35,9 +35,9 @@ import java.util.Collections;
 import java.util.List;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
+import org.openecard.binding.tctoken.ex.ResultMinor;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
-import org.openecard.common.ECardConstants;
 import org.openecard.common.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +102,7 @@ public class TCTokenContext extends ResourceContext {
 	TCToken token = tokens.get(0);
 	TCTokenVerifier ver = new TCTokenVerifier(token, base);
 	if (ver.isErrorToken()) {
-	    String minor = ECardConstants.Minor.App.PARM_ERROR;
+	    String minor = ResultMinor.CLIENT_ERROR;
 	    throw new AuthServerException(token.getComErrorAddressWithParams(minor), ESERVICE_ERROR);
 	}
 

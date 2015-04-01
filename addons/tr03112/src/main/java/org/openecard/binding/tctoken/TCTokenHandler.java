@@ -78,6 +78,7 @@ import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.binding.tctoken.ex.ResultMinor;
 import org.openecard.common.util.HandlerUtils;
 import org.openecard.transport.paos.PAOSConnectionException;
 
@@ -326,7 +327,7 @@ public class TCTokenHandler {
 	if (connectionHandle == null) {
 	    String msg = lang.translationForKey("cancel");
 	    logger.error(msg);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg));
+	    response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, msg));
 	    // fill in values, so it is usuable by the transport module
 	    response = determineRefreshURL(request, response);
 	    response.finishResponse(true);
@@ -344,7 +345,7 @@ public class TCTokenHandler {
 	    logger.error(w.getMessage(), w);
 
 	    response.setResultCode(BindingResultCode.INTERNAL_ERROR);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, w.getMessage()));
+	    response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getMessage()));
 	    showErrorMessage(w.getMessage());
 	    throw new NonGuiException(response, w.getMessage(), w);
 	} catch (PAOSException w) {
@@ -373,13 +374,14 @@ public class TCTokenHandler {
 
 	    if (innerException instanceof WSException) {
 		errorMsg = langTr03112.translationForKey(ERROR_WHILE_AUTHENTICATION);
-		response.setResult(WSHelper.makeResultError(((WSException) innerException).getResultMinor(), errorMsg));
+		response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
 		
 	    } else if (innerException instanceof PAOSConnectionException) {
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.COMMUNICATION_ERROR, w.getLocalizedMessage()));
+		response.setResult(WSHelper.makeResultError(ResultMinor.TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED,
+			w.getLocalizedMessage()));
 	    } else {
 		// TODO: check for better matching minor type
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, w.getLocalizedMessage()));
+		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getLocalizedMessage()));
 	    }
 
 	    showErrorMessage(errorMsg);
@@ -391,12 +393,14 @@ public class TCTokenHandler {
 	    } catch (InvalidRedirectUrlException ex) {
 		logger.error(ex.getMessage(), ex);
 		response.setResultCode(BindingResultCode.INTERNAL_ERROR);
+		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, ex.getLocalizedMessage()));
 		throw new NonGuiException(response, ex.getMessage(), ex);
 	    } catch (SecurityViolationException ex) {
 		String msg2 = "The RefreshAddress contained in the TCToken is invalid. Redirecting to the "
 			+ "CommunicationErrorAddress.";
 		logger.error(msg2, ex);
 		response.setResultCode(BindingResultCode.REDIRECT);
+		response.setResult(WSHelper.makeResultError(ResultMinor.COMMUNICATION_ERROR, msg2));
 		response.addAuxResultData(AuxDataKeys.REDIRECT_LOCATION, ex.getBindingResult().getAuxResultData().get(
 			AuxDataKeys.REDIRECT_LOCATION));
 	    }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -33,14 +33,15 @@ import org.openecard.control.binding.http.common.DocumentRoot;
 import org.openecard.control.binding.http.handler.HttpAppPluginActionHandler;
 import org.openecard.control.binding.http.interceptor.CORSResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.ErrorResponseInterceptor;
+import org.openecard.control.binding.http.interceptor.ServerHeaderResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.StatusLineResponseInterceptor;
 
 
 /**
  * Implements a HTTP binding for the control interface.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch 
+ * @author Dirk Petrautzki
  */
 public class HTTPBinding {
 
@@ -111,6 +112,7 @@ public class HTTPBinding {
 	    respInterceptors.add(new StatusLineResponseInterceptor());
 	    respInterceptors.add(new ErrorResponseInterceptor(documentRoot, "/templates/error.html"));
 	    respInterceptors.add(new CORSResponseInterceptor());
+	    respInterceptors.add(new ServerHeaderResponseInterceptor());
 	    //FIXME the CORSRequestInterceptor consumes the request entity
 	    //interceptors.addInterceptor(new CORSRequestInterceptor());
 	}

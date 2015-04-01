@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -37,9 +37,16 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * HttpResponseInterceptor implementation which adds the CORS header to the response.
+ * <br/>
+ * <br/>
+ * The response is not modified with a CORS header in case the request uri contains a {@code ShowUI} or
+ * {@code tcTokenURL} parameter while calling the resource {@code /eID-Client}. Also if the request contained the
+ * parameter {@code disable-CORS-redirect} the CORS header is not added to the response.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
+ * @author Moritz Horsch 
+ * @author Benedikt Biallowons
+ * @author Hans-Martin Haase
  */
 public class CORSResponseInterceptor implements HttpResponseInterceptor {
 
@@ -47,19 +54,23 @@ public class CORSResponseInterceptor implements HttpResponseInterceptor {
 
     @Override
     public void process(HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
-	// enable CORS for all types of HTTP responses
-	httpResponse.setHeader(HeaderTypes.ACCESS_CONTROL_ALLOW_ORIGIN.fieldName(), "*");
+	// do not enable CORS for tcTokenURL and showUI action according to BSI-TR-03124-1 v1.2 sec 2.2.2.1.
+	BasicHttpRequest request = (BasicHttpRequest) httpContext.getAttribute("http.request");
+	String uri = request.getRequestLine().getUri();
+	if (! uri.contains("/eID-Client?ShowUI") && ! uri.contains("/eID-Client?tcTokenURL")) {
+	    httpResponse.setHeader(HeaderTypes.ACCESS_CONTROL_ALLOW_ORIGIN.fieldName(), "*");
 
-	if (((BasicHttpRequest) httpContext.getAttribute("http.request")).getParams().isParameterTrue("disable-CORS-redirect")
-		&& httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_SEE_OTHER) {
-	    _logger.debug("CORS redirect not supported");
+	    if (request.getParams().isParameterTrue("disable-CORS-redirect") &&
+		    httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_SEE_OTHER) {
+		_logger.debug("CORS redirect not supported");
 
-	    Header locationHeader = httpResponse.getLastHeader(HeaderTypes.LOCATION.fieldName());
+		Header locationHeader = httpResponse.getLastHeader(HeaderTypes.LOCATION.fieldName());
 
-	    if (locationHeader != null && locationHeader.getValue() != null) {
-		httpResponse.setEntity(new StringEntity(locationHeader.getValue()));
-		httpResponse.removeHeader(locationHeader);
-		httpResponse.setStatusLine(httpResponse.getStatusLine().getProtocolVersion(), HttpStatus.SC_OK);
+		if (locationHeader != null && locationHeader.getValue() != null) {
+		    httpResponse.setEntity(new StringEntity(locationHeader.getValue()));
+		    httpResponse.removeHeader(locationHeader);
+		    httpResponse.setStatusLine(httpResponse.getStatusLine().getProtocolVersion(), HttpStatus.SC_OK);
+		}
 	    }
 	}
     }

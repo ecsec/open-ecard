@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,6 +26,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -38,7 +41,7 @@ import org.openecard.common.util.FileUtils;
  * The version is loaded from the file VERSION in this module when the class is loaded.
  * The version string follows <a href="http://semver.org">semantic versioning</a>.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class Version {
 
@@ -46,17 +49,20 @@ public class Version {
     private static final String versionFile = "openecard/VERSION";
     private static final String unknownName = "UNKNOWN";
     private static final String unknownVersion = "UNKNOWN";
+    private static final String specFileName = "openecard/EID_CLIENT_SPECIFICATION";
+    private static final String versionsFile = "openecard/SUPPORTED_EID_CLIENT_SPEC_VERSIONS";
 
     private static final String version;
-
     private static final String name;
+    private static final String specName;
+    private static final ArrayList<String> specVersions;
     private static final int major;
     private static final int minor;
     private static final int patch;
     private static final String buildId;
 
     static {
-	InputStream inName, inVer;
+	InputStream inName, inVer, inSpecName, inSpecVer;
 	try {
 	    inName = FileUtils.resolveResourceAsStream(Version.class, appnameFile);
 	} catch (IOException ex) {
@@ -67,8 +73,21 @@ public class Version {
 	} catch (IOException ex) {
 	    inVer = null;
 	}
+	try {
+	    inSpecName = FileUtils.resolveResourceAsStream(Version.class, specFileName);
+	} catch (IOException ex) {
+	    inSpecName = null;
+	}
+	try {
+	    inSpecVer = FileUtils.resolveResourceAsStream(Version.class, versionsFile);
+	} catch (IOException ex) {
+	    inSpecVer = null;
+	}
+	
+	specName = loadName(inSpecName);
+	specVersions = loadVersionLine(inSpecVer);
 	name = loadName(inName);
-	version = loadVersionLine(inVer);
+	version = loadVersionLine(inVer).get(0);
 	String[] groups = splitVersion(version);
 	major = Integer.parseInt(groups[0]);
 	minor = Integer.parseInt(groups[1]);
@@ -90,23 +109,29 @@ public class Version {
 	    }
 	}
     }
-
-    private static String loadVersionLine(InputStream in) {
+    
+    private static ArrayList<String> loadVersionLine(InputStream in) {
+	ArrayList<String> versions = new ArrayList<>();
 	if (in == null) {
-	    return unknownVersion;
+	    versions.add(unknownVersion);
 	} else {
 	    BufferedReader r = new BufferedReader(new InputStreamReader(in));
 	    try {
 		String line = r.readLine();
-		if (line == null) {
-		    return unknownVersion;
-		} else {
-		    return line;
-		}
+		do {
+		    if (line == null) {
+			versions.add(unknownVersion);
+		    } else {
+			versions.add(line);
+		    }
+
+		    line = r.readLine();
+		} while (line != null);
 	    } catch (IOException ex) {
-		return unknownVersion;
+		versions.add(unknownVersion);
 	    }
 	}
+	return versions;
     }
 
     private static String[] splitVersion(String version) {
@@ -180,6 +205,33 @@ public class Version {
      */
     public static String getBuildId() {
 	return buildId;
+    }
+
+    /**
+     * Get the name of the specification.
+     *
+     * @return The name of the specification which is {@code BSI-TR-03124}.
+     */
+    public static String getSpecName() {
+	return specName;
+    }
+
+    /**
+     * Get the versions of specification this application is compatible to.
+     *
+     * @return A unmodifiable list containing all version this application is compatible to.
+     */
+    public static List<String> getSpecVersions() {
+	return Collections.unmodifiableList(specVersions);
+    }
+
+    /**
+     * Get the latest version of the specification which is compatible to the application.
+     *
+     * @return Latest compatible specification version.
+     */
+    public static String getLatestSpecVersion() {
+	return specVersions.get(specVersions.size() - 1);
     }
 
 }

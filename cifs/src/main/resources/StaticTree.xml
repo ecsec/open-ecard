@@ -6,6 +6,7 @@
 	<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
     </dss:Result>
     <iso:RecognitionTree>
+	<!-- Check OS Version -->
 	<iso:CardCall xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema">
 	    <iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
 	    <iso:ResponseAPDU>
@@ -16,61 +17,14 @@
 			<iso:ResponseAPDU>
 			    <iso:Trailer>9000</iso:Trailer>
 			    <iso:Conclusion>
-				<!-- Check institute and major industry identidier -->
 				<iso:CardCall>
 				    <iso:CommandAPDU>00B20104FF</iso:CommandAPDU>
 				    <iso:ResponseAPDU>
 					<iso:Body>
 					    <iso:MatchingData>
-						<iso:Offset>00</iso:Offset>
-						<iso:Length>03</iso:Length>
-						<iso:MatchingValue>672622</iso:MatchingValue>
-					    </iso:MatchingData>
-					</iso:Body>
-					<iso:Trailer>9000</iso:Trailer>
-					<iso:Conclusion>
-					    <!-- Check OS Version -->
-					    <iso:CardCall>
-						<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
-						<iso:ResponseAPDU>
-						    <iso:Trailer>9000</iso:Trailer>
-						    <iso:Conclusion>
-							<iso:CardCall>
-							    <iso:CommandAPDU>00A4020C020003</iso:CommandAPDU>
-							    <iso:ResponseAPDU>
-								<iso:Trailer>9000</iso:Trailer>
-								<iso:Conclusion>
-								    <iso:CardCall>
-									<iso:CommandAPDU>00B20104FF</iso:CommandAPDU>
-									<iso:ResponseAPDU>
-									    <iso:Body>
-										<iso:MatchingData>
-										    <iso:Offset>17</iso:Offset>
-										    <iso:Length>01</iso:Length>
-										    <iso:MatchingValue>06</iso:MatchingValue>
-										</iso:MatchingData>
-									    </iso:Body>
-									    <iso:Trailer>9000</iso:Trailer>
-									    <iso:Conclusion>
-										<!-- VR Bank Card -->
-										<iso:RecognizedCardType>urn:oid:1.3.6.1.4.1.17696.4.3.1.6.1</iso:RecognizedCardType>
-									    </iso:Conclusion>
-									</iso:ResponseAPDU>
-								    </iso:CardCall>
-								</iso:Conclusion>
-							    </iso:ResponseAPDU>
-							</iso:CardCall>
-						    </iso:Conclusion>
-						</iso:ResponseAPDU>
-					    </iso:CardCall>
-					</iso:Conclusion>
-				    </iso:ResponseAPDU>
-				    <iso:ResponseAPDU>
-					<iso:Body>
-					    <iso:MatchingData>
-						<iso:Offset>00</iso:Offset>
-						<iso:Length>02</iso:Length>
-						<iso:MatchingValue>6725</iso:MatchingValue>
+						<iso:Offset>17</iso:Offset>
+						<iso:Length>01</iso:Length>
+						<iso:MatchingValue>06</iso:MatchingValue>
 					    </iso:MatchingData>
 					</iso:Body>
 					<iso:Trailer>9000</iso:Trailer>
@@ -81,45 +35,46 @@
 						    <iso:Trailer>9000</iso:Trailer>
 						    <iso:Conclusion>
 							<iso:CardCall>
-							    <iso:CommandAPDU>00A4020C020003</iso:CommandAPDU>
+							    <iso:CommandAPDU>00A4010C02AB00</iso:CommandAPDU>
 							    <iso:ResponseAPDU>
 								<iso:Trailer>9000</iso:Trailer>
 								<iso:Conclusion>
 								    <iso:CardCall>
-									<iso:CommandAPDU>00B20104FF</iso:CommandAPDU>
+									<iso:CommandAPDU>00A4020C021F00</iso:CommandAPDU>
 									<iso:ResponseAPDU>
-									    <iso:Body>
-										<iso:MatchingData>
-										    <iso:Offset>17</iso:Offset>
-										    <iso:Length>01</iso:Length>
-										    <iso:MatchingValue>06</iso:MatchingValue>
-										</iso:MatchingData>
-									    </iso:Body>
 									    <iso:Trailer>9000</iso:Trailer>
 									    <iso:Conclusion>
 										<iso:CardCall>
-										    <iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
+										    <iso:CommandAPDU>00B00000FF</iso:CommandAPDU>
 										    <iso:ResponseAPDU>
+											<iso:Body>
+											    <iso:MatchingData>
+												<iso:Offset>00</iso:Offset>
+												<iso:Length>0D</iso:Length>
+												<iso:MatchingValue>A00B8004002000815F2F028010</iso:MatchingValue>
+											    </iso:MatchingData>
+											</iso:Body>
 											<iso:Trailer>9000</iso:Trailer>
 											<iso:Conclusion>
 											    <iso:CardCall>
-												<iso:CommandAPDU>00A4010C02AB00</iso:CommandAPDU>
+												<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
 												<iso:ResponseAPDU>
 												    <iso:Trailer>9000</iso:Trailer>
 												    <iso:Conclusion>
 													<iso:CardCall>
-													    <iso:CommandAPDU>00A4020C021F00</iso:CommandAPDU>
+													    <iso:CommandAPDU>00A4020C020003</iso:CommandAPDU>
 													    <iso:ResponseAPDU>
 														<iso:Trailer>9000</iso:Trailer>
 														<iso:Conclusion>
+														    <!-- Check institute and major industry identidier -->
 														    <iso:CardCall>
-															<iso:CommandAPDU>00B00000FF</iso:CommandAPDU>
+															<iso:CommandAPDU>00B20104FF</iso:CommandAPDU>
 															<iso:ResponseAPDU>
 															    <iso:Body>
 																<iso:MatchingData>
 																    <iso:Offset>00</iso:Offset>
-																    <iso:Length>0D</iso:Length>
-																    <iso:MatchingValue>A00B8004002000815F2F028010</iso:MatchingValue>
+																    <iso:Length>02</iso:Length>
+																    <iso:MatchingValue>6725</iso:MatchingValue>
 																</iso:MatchingData>
 															    </iso:Body>
 															    <iso:Trailer>9000</iso:Trailer>
@@ -127,17 +82,63 @@
 																<iso:RecognizedCardType>https://www.s-trust.de/produkte/strust_massensignaturkarte</iso:RecognizedCardType>
 															    </iso:Conclusion>
 															</iso:ResponseAPDU>
+														    </iso:CardCall>
+														</iso:Conclusion>
+													    </iso:ResponseAPDU>
+													</iso:CardCall>
+												    </iso:Conclusion>
+												</iso:ResponseAPDU>
+											    </iso:CardCall>
+											</iso:Conclusion>
+										    </iso:ResponseAPDU>
+										    <iso:ResponseAPDU>
+											<iso:Body>
+											    <iso:MatchingData>
+												<iso:Offset>00</iso:Offset>
+												<iso:Length>0D</iso:Length>
+												<iso:MatchingValue>A00B8004002000815F2F028011</iso:MatchingValue>
+											    </iso:MatchingData>
+											</iso:Body>
+											<iso:Trailer>9000</iso:Trailer>
+											<iso:Conclusion>
+											    <iso:CardCall>
+												<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
+												<iso:ResponseAPDU>
+												    <iso:Trailer>9000</iso:Trailer>
+												    <iso:Conclusion>
+													<iso:CardCall>
+													    <iso:CommandAPDU>00A4020C020003</iso:CommandAPDU>
+													    <iso:ResponseAPDU>
+														<iso:Trailer>9000</iso:Trailer>
+														<iso:Conclusion>
+														    <!-- Check institute and major industry identidier -->
+														    <iso:CardCall>
+															<iso:CommandAPDU>00B20104FF</iso:CommandAPDU>
 															<iso:ResponseAPDU>
 															    <iso:Body>
 																<iso:MatchingData>
 																    <iso:Offset>00</iso:Offset>
-																    <iso:Length>0D</iso:Length>
-																    <iso:MatchingValue>A00B8004002000815F2F028011</iso:MatchingValue>
+																    <iso:Length>02</iso:Length>
+																    <iso:MatchingValue>6725</iso:MatchingValue>
 																</iso:MatchingData>
 															    </iso:Body>
 															    <iso:Trailer>9000</iso:Trailer>
 															    <iso:Conclusion>
 																<iso:RecognizedCardType>https://www.s-trust.de/produkte/strust_einzelsignaturkarte</iso:RecognizedCardType>
+															    </iso:Conclusion>
+															</iso:ResponseAPDU>
+															<iso:ResponseAPDU>
+															    <iso:Body>
+																<iso:MatchingData>
+																    <iso:Offset>00</iso:Offset>
+																    <iso:Length>02</iso:Length>
+																    <iso:MatchingValue>6726</iso:MatchingValue>
+																</iso:MatchingData>
+															    </iso:Body>
+															    <iso:Trailer>9000</iso:Trailer>
+															    <iso:Conclusion>
+																<!-- VR Bank Card -->
+																<iso:RecognizedCardType>urn:oid:1.3.6.1.4.1.17696.4.3.1.6.1</iso:RecognizedCardType>
 															    </iso:Conclusion>
 															</iso:ResponseAPDU>
 														    </iso:CardCall>

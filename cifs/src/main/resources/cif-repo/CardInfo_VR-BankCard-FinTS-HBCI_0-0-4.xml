@@ -145,21 +145,6 @@
 		</iso:ATR>
 		<iso:CharacteristicFeature>
 			<iso:CardCall>
-				<iso:CommandAPDU>00A4010402AB00FF</iso:CommandAPDU>
-				<iso:ResponseAPDU>
-					<iso:Body>
-						<iso:MatchingData>
-							<iso:Offset>0B</iso:Offset>
-							<iso:Length>06</iso:Length>
-							<iso:MatchingValue>D27600006601</iso:MatchingValue>
-						</iso:MatchingData>
-					</iso:Body>
-					<iso:Trailer>9000</iso:Trailer>
-				</iso:ResponseAPDU>
-			</iso:CardCall>
-		</iso:CharacteristicFeature>
-		<iso:CharacteristicFeature>
-			<iso:CardCall>
 				<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
 				<iso:ResponseAPDU>
 					<iso:Trailer>9000</iso:Trailer>
@@ -177,8 +162,8 @@
 					<iso:Body>
 						<iso:MatchingData>
 							<iso:Offset>00</iso:Offset>
-							<iso:Length>03</iso:Length>
-							<iso:MatchingValue>672622</iso:MatchingValue>
+							<iso:Length>02</iso:Length>
+							<iso:MatchingValue>6726</iso:MatchingValue>
 						</iso:MatchingData>
 					</iso:Body>
 					<iso:Trailer>9000</iso:Trailer>

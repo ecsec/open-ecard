@@ -47,6 +47,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.gui.definition.ViewController;
+import org.openecard.common.DynamicContext;
+import org.openecard.transport.httpcore.cookies.CookieManager;
 
 
 /**
@@ -355,6 +357,9 @@ public class ActivationAction implements AppPluginAction {
      */
     private BindingResult processTcTokenOrActivationObject(Map<String, String> params) {
 	BindingResult response;
+	DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	ctx.put(TR03112Keys.COOKIE_MANAGER, new CookieManager());
+	
 	try {
 	    TCTokenRequest tcTokenRequest = null;
 	    try {

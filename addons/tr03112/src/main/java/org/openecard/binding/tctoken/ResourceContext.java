@@ -39,6 +39,7 @@ import org.openecard.apache.http.HttpException;
 import org.openecard.apache.http.HttpResponse;
 import org.openecard.apache.http.StatusLine;
 import org.openecard.apache.http.message.BasicHttpEntityEnclosingRequest;
+import org.openecard.apache.http.message.BasicHttpRequest;
 import org.openecard.apache.http.protocol.BasicHttpContext;
 import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.apache.http.protocol.HttpRequestExecutor;
@@ -47,12 +48,15 @@ import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
 import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.I18n;
 import org.openecard.common.io.LimitedInputStream;
 import org.openecard.crypto.tls.proxy.ProxySettings;
 import org.openecard.common.util.FileUtils;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.TR03112Utils;
+import org.openecard.transport.httpcore.cookies.CookieException;
+import org.openecard.transport.httpcore.cookies.CookieManager;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
 import org.openecard.crypto.tls.ReusableSecureRandom;
@@ -195,6 +199,8 @@ public class ResourceContext {
 	    Certificate>> serverCerts, int maxRedirects) throws IOException, ResourceException, ValidationError,
 	    InvalidAddressException {
 	try {
+	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    CookieManager cManager = (CookieManager) dynCtx.get(TR03112Keys.COOKIE_MANAGER);
 	    logger.info("Trying to load resource from: {}", url);
 
 	    if (maxRedirects == 0) {
@@ -250,9 +256,11 @@ public class ResourceContext {
 	    HttpRequestHelper.setDefaultHeader(req, url);
 	    req.setHeader("Accept", "text/xml, */*;q=0.8");
 	    req.setHeader("Accept-Charset", "utf-8, *;q=0.8");
+	    setCookieHeader(req, cManager, url);
 	    HttpUtils.dumpHttpRequest(logger, req);
 	    logger.debug("Sending HTTP request.");
 	    HttpResponse response = httpexecutor.execute(req, conn, ctx);
+	    storeCookies(response, cManager, url);
 	    logger.debug("HTTP response received.");
 	    StatusLine status = response.getStatusLine();
 	    int statusCode = status.getStatusCode();
@@ -299,6 +307,55 @@ public class ResourceContext {
 	} catch (HttpException ex) {
 	    // don't translate this, it is handled in the ActivationAction
 	    throw new IOException("Invalid HTTP message received.", ex);
+	}
+    }
+
+    /**
+     * Get the {@code Cookie} header for the given {@link URL} and from the given {@link CookieManager}.
+     *
+     * @param manager {@link CookieManager} used to manage the cookies and getting the value of the {@code Cookie} header.
+     * @param url {@link URL} for which the {@code Cookie} header shall be set.
+     * @return The value of the {@code Cookie} header or {@code NULL} if there exist not cookies for the given {@link URL}.
+     */
+    @Nullable
+    private static String setCookieHeader(@Nonnull BasicHttpRequest req, CookieManager manager, @Nonnull URL url) {
+	String cookieHeader = null;
+	try {
+	    if (manager != null) {
+		cookieHeader = manager.getCookieHeaderValue(url.toString());
+		if (cookieHeader != null && !cookieHeader.isEmpty()) {
+		    req.setHeader("Cookie", cookieHeader);
+		}
+	    }
+	} catch (CookieException ex) {
+	    // ignore because the input parameter is created from a valid URL.
+	}
+
+	return cookieHeader;
+    }
+
+    /**
+     * Stores the cookies contained in the given HttpResponse.
+     * If there are no {@code Set-Cookie} headers in the request nothing will be stored.
+     *
+     * @param response Http Response containing possible {@code Set-Cookie} headers.
+     * @param cManager {@link CookieManager} to use for managing the cookies.
+     * @param url URL which was called.
+     */
+    private static void storeCookies(@Nonnull HttpResponse response, CookieManager cManager, @Nonnull URL url) {
+	Header[] headers = response.getAllHeaders();
+	for (Header header : headers) {
+	    if (header.getName().toLowerCase().equals("set-cookie")) {
+		try {
+		    if (cManager != null) {
+			cManager.addCookie(url.toString(), header.getValue());
+		    }
+		} catch(CookieException ex) {
+		    String msg = "Received invalid cookie from: %s. The cookie is not stored.";
+		    msg = String.format(msg, url.toString());
+		    logger.warn(msg, ex);
+		}
+	    }
 	}
     }
 

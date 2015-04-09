@@ -49,6 +49,7 @@ import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.gui.definition.ViewController;
 import org.openecard.common.DynamicContext;
 import org.openecard.transport.httpcore.cookies.CookieManager;
+import org.openecard.common.interfaces.Dispatcher;
 
 
 /**
@@ -72,11 +73,15 @@ public class ActivationAction implements AppPluginAction {
     private UserConsent gui;
     private AddonManager manager;
     private ViewController settingsAndDefaultView;
+    private Dispatcher dispatcher;
+    private Context ctx;
 
     @Override
     public void init(Context ctx) {
 	tokenHandler = new TCTokenHandler(ctx);
+	this.ctx = ctx;
 	gui = ctx.getUserConsent();
+	dispatcher = ctx.getDispatcher();
 	manager = ctx.getManager();
 	settingsAndDefaultView = ctx.getViewController();
 	try {
@@ -363,7 +368,7 @@ public class ActivationAction implements AppPluginAction {
 	try {
 	    TCTokenRequest tcTokenRequest = null;
 	    try {
-		tcTokenRequest = TCTokenRequest.convert(params);
+		tcTokenRequest = TCTokenRequest.convert(params, this.ctx);
 		response = tokenHandler.handleActivate(tcTokenRequest);
 		// Show success message. If we get here we have a valid StartPAOSResponse and a valid refreshURL
 		if (!tcTokenRequest.isTokenFromObject()) {

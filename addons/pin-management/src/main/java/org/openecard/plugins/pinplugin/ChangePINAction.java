@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2015 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Action for changing the PIN.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class ChangePINAction extends AbstractPINAction {
 
@@ -84,6 +84,7 @@ public class ChangePINAction extends AbstractPINAction {
 	this.gui = ctx.getUserConsent();
 	this.recognition = ctx.getRecognition();
 	this.cardStates = ctx.getCardStates();
+	this.manager = ctx.getEventManager();
     }
 
     @Override

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2015 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,8 +23,13 @@
 package org.openecard.common.sal.util;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.openecard.common.I18n;
+import org.openecard.common.enums.EventType;
+import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.gui.ResultStatus;
@@ -41,7 +46,8 @@ import org.openecard.gui.executor.StepAction;
  * Implements a insert card dialog.
  * This dialog requests the user to insert a card of a specific type.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 public class InsertCardDialog {
 
@@ -50,23 +56,25 @@ public class InsertCardDialog {
     private final I18n lang = I18n.getTranslation("tctoken");
 
     private final UserConsent gui;
-    private final String cardType;
-    private final String cardName;
-    private CardStateMap cardStates;
+    private final Map<String, String> cardNameAndType;
+    private final CardStateMap cardStates;
+    private final EventManager manager;
 
     /**
      * Creates a new InsertCardDialog.
      *
      * @param gui The user consent implementation.
      * @param cardStates The card states instance managing all cards of this client.
-     * @param cardType Type URI of the card that must be inserted.
-     * @param cardName The localized name of the card type.
+     * @param cardNameAndType Map containing the mapping of localized card names to card type URIs of cards which may be
+     * inserted.
+     * @param manager EventManager to register the EventCallbacks.
      */
-    public InsertCardDialog(UserConsent gui, CardStateMap cardStates, String cardType, String cardName) {
+    public InsertCardDialog(UserConsent gui, CardStateMap cardStates, Map<String, String> cardNameAndType,
+	    EventManager manager) {
 	this.gui = gui;
-	this.cardType = cardType;
-	this.cardName = cardName;
+	this.cardNameAndType = cardNameAndType;
 	this.cardStates = cardStates;
+	this.manager = manager;
     }
 
     /**
@@ -74,16 +82,14 @@ public class InsertCardDialog {
      *
      * @return The ConnectionHandle of the inserted card or null if no card was inserted.
      */
-    public ConnectionHandleType show() {
-	ConnectionHandleType conHandle = new ConnectionHandleType();
-	ConnectionHandleType.RecognitionInfo recInfo = new ConnectionHandleType.RecognitionInfo();
-	recInfo.setCardType(cardType);
-	conHandle.setRecognitionInfo(recInfo);
-	Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
-	if (entries.size() == 1) {
-	    return entries.iterator().next().handleCopy();
+    public List<ConnectionHandleType> show() {
+	List<ConnectionHandleType> availableCards = checkAlreadyAvailable();
+	if (! availableCards.isEmpty()) {
+	    return availableCards;
 	} else {
-	    InsertCardStepAction insertCardAction = new InsertCardStepAction(STEP_ID, cardStates, cardType);
+	    InsertCardStepAction insertCardAction = new InsertCardStepAction(STEP_ID, cardStates, 
+		    cardNameAndType.values());
+	    manager.register(insertCardAction, EventType.CARD_RECOGNIZED);
 	    UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent(insertCardAction));
 	    ExecutionEngine exec = new ExecutionEngine(ucr);
 	    // run gui
@@ -92,10 +98,39 @@ public class InsertCardDialog {
 	    if (status == ResultStatus.CANCEL) {
 		return null;
 	    }
+	    manager.unregister(insertCardAction);
 	    return insertCardAction.getResponse();
 	}
     }
 
+    /**
+     * Check whether there are already cards with the required type(s) are available.
+     *
+     * @return A list containing {@link ConnectionHandleType} objects referencing the cards which fit the requirements or
+     * an empty list if there are no cards which met the requirements are present.
+     */
+    private List<ConnectionHandleType> checkAlreadyAvailable() {
+	List<ConnectionHandleType> handlesList = new ArrayList<>();
+	for (String type : cardNameAndType.values()) {
+	    ConnectionHandleType conHandle = new ConnectionHandleType();
+	    ConnectionHandleType.RecognitionInfo recInfo = new ConnectionHandleType.RecognitionInfo();
+	    recInfo.setCardType(type);
+	    conHandle.setRecognitionInfo(recInfo);
+	    Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
+	    if (! entries.isEmpty()) {
+		handlesList.add(entries.iterator().next().handleCopy());
+	    }
+	}
+
+	return handlesList;
+    }
+
+    /**
+     * Create the UI dialog.
+     *
+     * @param insertCardAction A action for this step.
+     * @return A {@link UserConsentDescription} which may be executed by the {@link ExecutionEngine}.
+     */
     private UserConsentDescription createInsertCardUserConsent(StepAction insertCardAction) {
 	UserConsentDescription uc = new UserConsentDescription(lang.translationForKey("title"));
 
@@ -106,8 +141,17 @@ public class InsertCardDialog {
 
 	// create and add text instructing user
 	Text i1 = new Text();
-	i1.setText(lang.translationForKey("step.message", cardName));
+	if (cardNameAndType.size() == 1) {
+	    i1.setText(lang.translationForKey("step.message.singletype"));
+	} else {
+	    i1.setText(lang.translationForKey("step.message.multipletypes"));
+	}
+
 	s.getInputInfoUnits().add(i1);
+	for (String key : cardNameAndType.keySet()) {
+	    Text item = new Text(" - " + key);
+	    s.getInputInfoUnits().add(item);
+	}
 
 	// add step
 	uc.getSteps().add(s);

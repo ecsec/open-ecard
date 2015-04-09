@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2015 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -34,7 +34,9 @@ import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.openecard.addon.bind.AppExtensionAction;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
@@ -42,6 +44,7 @@ import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.ifd.PACECapabilities;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
+import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
@@ -56,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * Common superclass for {@code ChangePINAction} and {@code UnblockPINAction}.
  * Bundles methods needed in both actions.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public abstract class AbstractPINAction implements AppExtensionAction {
 
@@ -77,6 +80,7 @@ public abstract class AbstractPINAction implements AppExtensionAction {
     protected UserConsent gui;
     protected CardRecognition recognition;
     protected CardStateMap cardStates;
+    protected EventManager manager;
 
     /**
      * Recognize the PIN state of the card given through the connection handle.
@@ -123,12 +127,16 @@ public abstract class AbstractPINAction implements AppExtensionAction {
      * Wait until a card of the specified card type was inserted.
      * 
      * @param cardType The type of the card that should be inserted.
+     * @param manager EventManager used for the InsertCardDialog.
      * @return The ConnectionHandle of the inserted card or null if no card was inserted.
      */
     protected ConnectionHandleType waitForCardType(String cardType) {
 	String cardName = recognition.getTranslatedCardName(cardType);
-	InsertCardDialog uc = new InsertCardDialog(gui, cardStates, cardType, cardName);
-	return uc.show();
+	Map<String, String> nameAndType = new HashMap<>();
+	nameAndType.put(cardName, cardType);
+	InsertCardDialog uc = new InsertCardDialog(gui, cardStates, nameAndType, manager);
+	// get(0) should be sufficient we a looking just for one card. i think the possibility to find 2 is very low.
+	return uc.show().get(0);
     }
 
     /**

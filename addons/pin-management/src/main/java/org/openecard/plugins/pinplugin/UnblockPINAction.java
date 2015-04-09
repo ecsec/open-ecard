@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2015 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Action for unblocking the PIN.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class UnblockPINAction extends AbstractPINAction {
 
@@ -83,6 +83,7 @@ public class UnblockPINAction extends AbstractPINAction {
 	this.gui = aCtx.getUserConsent();
 	this.recognition = aCtx.getRecognition();
 	this.cardStates = aCtx.getCardStates();
+	this.manager = aCtx.getEventManager();
     }
 
     @Override

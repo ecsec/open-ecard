@@ -37,7 +37,9 @@ import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
@@ -79,6 +81,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.ResultMinor;
+import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.util.HandlerUtils;
 import org.openecard.transport.paos.PAOSConnectionException;
 
@@ -115,6 +118,7 @@ public class TCTokenHandler {
     private final UserConsent gui;
     private final CardRecognition rec;
     private final AddonManager manager;
+    private final EventManager evManager;
 
     /**
      * Creates a TCToken handler instances and initializes it with the given parameters.
@@ -127,6 +131,7 @@ public class TCTokenHandler {
 	this.gui = ctx.getUserConsent();
 	this.rec = ctx.getRecognition();
 	this.manager = ctx.getManager();
+	this.evManager = ctx.getEventManager();
     }
 
 
@@ -144,8 +149,10 @@ public class TCTokenHandler {
 	conHandle.setRecognitionInfo(recInfo);
 	Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
 	if (entries.isEmpty()) {
-	    InsertCardDialog uc = new InsertCardDialog(gui, cardStates, type, cardName);
-	    return uc.show();
+	    Map<String, String> nameAndType = new HashMap<>();
+	    nameAndType.put(cardName, type);
+	    InsertCardDialog uc = new InsertCardDialog(gui, cardStates, nameAndType, evManager);
+	    return uc.show().get(0);
 	} else {
 	    return entries.iterator().next().handleCopy();
 	}

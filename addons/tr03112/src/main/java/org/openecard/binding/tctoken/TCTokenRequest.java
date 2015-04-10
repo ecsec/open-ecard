@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -68,6 +68,7 @@ import org.openecard.recognition.CardRecognition;
  *
  * @author Moritz Horsch
  * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 public class TCTokenRequest {
 
@@ -89,7 +90,7 @@ public class TCTokenRequest {
      * Check and evaluate the request parameters and wrap the result in a {@code TCTokenRequest} class.
      *
      * @param parameters The request parameters.
-     * @param ctx
+     * @param ctx Addon {@link Context} used for the communication with the core.
      * @return A TCTokenRequest wrapping the parameters.
      * @throws InvalidTCTokenException
      * @throws MissingActivationParameterException
@@ -118,15 +119,20 @@ public class TCTokenRequest {
 	throw new MissingActivationParameterException(NO_PARAMS);
     }
 
-
     private static TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries, Context ctx)
 	    throws InvalidTCTokenException, MissingActivationParameterException, AuthServerException,
 	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException,
 	    InvalidAddressException {
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 
-	if (queries.containsKey("cardTypes")) {
-	    String[] types = queries.get("cardTypes").split(",");
+	if (queries.containsKey("cardTypes") || queries.containsKey("cardType")) {
+	    String[] types;
+	    if (queries.containsKey("cardType")) {
+		types = new String[] {queries.get("cardType")};
+	    } else {
+		types = queries.get("cardTypes").split(",");
+	    }
+	    
 	    ConnectionHandleType handle = findCard(types, ctx);
 	    setIfdName(queries, handle.getIFDName());
 	    setContextHandle(queries, handle.getContextHandle());
@@ -308,7 +314,7 @@ public class TCTokenRequest {
 	    try {
 		UrlBuilder builder = UrlBuilder.fromUrl(tcTokenURL);
 		// url encoding is done by the builder
-		builder.queryParam("type", recInfo.getCardType());
+		builder = builder.queryParam("type", recInfo.getCardType(), true);
 		queries.put("tcTokenURL", builder.build().toString());
 		queries.put("cardType", recInfo.getCardType());
 	    } catch (URISyntaxException ex) {

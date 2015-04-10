@@ -34,6 +34,7 @@ import org.openecard.common.I18nKey;
 public enum ErrorTranslations implements I18nKey {
 
     ACTIVATION_INVALID_REFRESH_ADDRESS("activation.action.invalid_refresh_address"),
+    CARD_SELECTION_ABORT("missing.activation.parameter.exception.card.selection.canceled"),
     CONNECTION_CLOSED("paos.exception.conncetion_closed"),
     DELIVERY_FAILED("paos.exception.failed_delivery"),
     DISPATCHER_ERROR("dispatcher.exception.dispatched_method_exception"),

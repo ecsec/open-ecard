@@ -50,6 +50,7 @@ import org.openecard.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.common.I18n;
 import org.openecard.common.sal.util.InsertCardDialog;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.UrlBuilder;
@@ -71,6 +72,7 @@ import org.openecard.recognition.CardRecognition;
 public class TCTokenRequest {
 
     private static final Logger logger = LoggerFactory.getLogger(TCTokenRequest.class);
+    private static final I18n lang = I18n.getTranslation("tr03112");
 
     private TCToken token;
     private String ifdName;
@@ -217,10 +219,6 @@ public class TCTokenRequest {
 
     /**
      * Finds a card which matches one of the give types.
-     * <br/>
-     * <br/>
-     * NOTE: The current implementation returns the ConnectionHandleType object of the first match. This should be
-     * extended so that the user is asked to perform a selection.
      *
      * @param types String array containing valid card types.
      * @param disp Dispatcher used to query cards and terminals.
@@ -241,9 +239,9 @@ public class TCTokenRequest {
 
 	ConnectionHandleType handle;
 	if (usableCards.size() > 1) {
-	    // TODO translated messages
-	    UserConsentDescription ucd = new UserConsentDescription("Select Credential");
-	    CardSelectionStep step = new CardSelectionStep("Select a credential", usableCards, ctx.getRecognition());
+	    UserConsentDescription ucd = new UserConsentDescription(lang.translationForKey("card.selection.heading.uc"));
+	    String stepTitle = lang.translationForKey("card.selection.heading.step");
+	    CardSelectionStep step = new CardSelectionStep(stepTitle, usableCards, ctx.getRecognition());
 	    CardSelectionAction action = new CardSelectionAction(step, usableCards);
 	    step.setAction(action);
 	    ucd.getSteps().add(step);
@@ -253,7 +251,7 @@ public class TCTokenRequest {
 	    ExecutionEngine exec = new ExecutionEngine(ucNav);
 	    ResultStatus resStatus = exec.process();
 	    if (resStatus != ResultStatus.OK) {
-		throw new MissingActivationParameterException("User aborted selection of authentication device.");
+		throw new MissingActivationParameterException(CARD_SELECTION_ABORT);
 	    }
 
 	    handle = action.getResult();

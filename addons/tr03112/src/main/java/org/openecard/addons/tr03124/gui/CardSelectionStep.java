@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.List;
 import java.util.TreeMap;
 import javax.annotation.Nonnull;
+import org.openecard.common.I18n;
 import org.openecard.gui.definition.BoxItem;
 import org.openecard.gui.definition.Radiobox;
 import org.openecard.gui.definition.Step;
@@ -43,6 +44,7 @@ public class CardSelectionStep extends Step {
     private static final String ID = "CredentialSelection";
 
     private final TreeMap<String, ConnectionHandleType> avCardWithName = new TreeMap<>();
+    private final I18n lang = I18n.getTranslation("tr03112");
 
     /**
      * Creates a new CardSelectionStep from the given title, the available cards and the card recognition.
@@ -68,9 +70,7 @@ public class CardSelectionStep extends Step {
      */
     private void addElements() {
 	Text description = new Text();
-	String msg = "The service provider allows you to use several credential and you have currently more than one "
-		+ "valid credential available. Please select the credential to use in the selection box below.";
-	description.setText(msg);
+	description.setText(lang.translationForKey("card.selection.message"));
 	Radiobox radioBox = new Radiobox("credentialSelectionBox");
 	radioBox.setGroupText("Available Credentials");
 	for (String cardName : avCardWithName.keySet()) {

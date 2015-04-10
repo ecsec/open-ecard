@@ -41,6 +41,8 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import org.openecard.addon.Context;
+import org.openecard.addons.tr03124.gui.CardSelectionAction;
+import org.openecard.addons.tr03124.gui.CardSelectionStep;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.util.Pair;
@@ -51,6 +53,11 @@ import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.common.sal.util.InsertCardDialog;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.UrlBuilder;
+import org.openecard.gui.ResultStatus;
+import org.openecard.gui.UserConsent;
+import org.openecard.gui.UserConsentNavigator;
+import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.gui.executor.ExecutionEngine;
 import org.openecard.recognition.CardRecognition;
 
 
@@ -231,8 +238,29 @@ public class TCTokenRequest {
 	InsertCardDialog insCardDiag =
 		new InsertCardDialog(ctx.getUserConsent(), ctx.getCardStates(), namesAndType, ctx.getManager());
 	List<ConnectionHandleType> usableCards = insCardDiag.show();
-	// TODO: present seletion dialog to user
-	ConnectionHandleType handle = usableCards.get(0);
+
+	ConnectionHandleType handle;
+	if (usableCards.size() > 1) {
+	    // TODO translated messages
+	    UserConsentDescription ucd = new UserConsentDescription("Select Credential");
+	    CardSelectionStep step = new CardSelectionStep("Select a credential", usableCards, ctx.getRecognition());
+	    CardSelectionAction action = new CardSelectionAction(step, usableCards);
+	    step.setAction(action);
+	    ucd.getSteps().add(step);
+
+	    UserConsent uc = ctx.getUserConsent();
+	    UserConsentNavigator ucNav = uc.obtainNavigator(ucd);
+	    ExecutionEngine exec = new ExecutionEngine(ucNav);
+	    ResultStatus resStatus = exec.process();
+	    if (resStatus != ResultStatus.OK) {
+		throw new MissingActivationParameterException("User aborted selection of authentication device.");
+	    }
+
+	    handle = action.getResult();
+	} else {
+	    handle = usableCards.get(0);
+	}
+
 	return handle;
     }
 

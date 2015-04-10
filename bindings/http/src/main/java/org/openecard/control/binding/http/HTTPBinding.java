@@ -32,6 +32,7 @@ import org.openecard.apache.http.HttpResponseInterceptor;
 import org.openecard.control.binding.http.common.DocumentRoot;
 import org.openecard.control.binding.http.handler.HttpAppPluginActionHandler;
 import org.openecard.control.binding.http.interceptor.CORSResponseInterceptor;
+import org.openecard.control.binding.http.interceptor.CacheControlHeaderResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.ErrorResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.ServerHeaderResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.StatusLineResponseInterceptor;
@@ -113,6 +114,7 @@ public class HTTPBinding {
 	    respInterceptors.add(new ErrorResponseInterceptor(documentRoot, "/templates/error.html"));
 	    respInterceptors.add(new CORSResponseInterceptor());
 	    respInterceptors.add(new ServerHeaderResponseInterceptor());
+	    respInterceptors.add(new CacheControlHeaderResponseInterceptor());
 	    //FIXME the CORSRequestInterceptor consumes the request entity
 	    //interceptors.addInterceptor(new CORSRequestInterceptor());
 	}

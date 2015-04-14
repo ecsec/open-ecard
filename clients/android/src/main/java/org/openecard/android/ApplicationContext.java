@@ -313,7 +313,7 @@ public class ApplicationContext extends Application implements EventCallback {
 	em.initialize();
 
 	try {
-	    manager = new AddonManager(dispatcher, gui, cardStates, recognition, em);
+	    manager = new AddonManager(dispatcher, gui, cardStates, recognition, em, new StubViewController());
 	    sal.setAddonManager(manager);
 	    AddonManagerSingleton.setInstance(manager);
 	} catch (WSMarshallerException e) {

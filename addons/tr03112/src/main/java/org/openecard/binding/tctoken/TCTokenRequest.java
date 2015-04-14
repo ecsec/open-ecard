@@ -36,11 +36,13 @@ import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import org.openecard.addon.Context;
+import org.openecard.addons.tr03124.gui.CardMonitorTask;
 import org.openecard.addons.tr03124.gui.CardSelectionAction;
 import org.openecard.addons.tr03124.gui.CardSelectionStep;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
@@ -51,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.common.I18n;
+import org.openecard.common.enums.EventType;
 import org.openecard.common.sal.util.InsertCardDialog;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.UrlBuilder;
@@ -254,7 +257,15 @@ public class TCTokenRequest {
 	    UserConsentDescription ucd = new UserConsentDescription(lang.translationForKey("card.selection.heading.uc"));
 	    String stepTitle = lang.translationForKey("card.selection.heading.step");
 	    CardSelectionStep step = new CardSelectionStep(stepTitle, usableCards, ctx.getRecognition());
-	    CardSelectionAction action = new CardSelectionAction(step, usableCards);
+	    ArrayList<String> types2 = new ArrayList<>();
+	    types2.addAll(namesAndType.values());
+	    CardMonitorTask task = new CardMonitorTask(types2, step);
+	    List<EventType> events = new ArrayList<>();
+	    events.add(EventType.CARD_REMOVED);
+	    events.add(EventType.CARD_RECOGNIZED);
+	    ctx.getEventManager().register(task, events);
+	    step.setBackgroundTask(task);
+	    CardSelectionAction action = new CardSelectionAction(step, usableCards, types2, ctx);
 	    step.setAction(action);
 	    ucd.getSteps().add(step);
 
@@ -267,6 +278,7 @@ public class TCTokenRequest {
 	    }
 
 	    handle = action.getResult();
+	    ctx.getEventManager().unregister(task);
 	} else {
 	    handle = usableCards.get(0);
 	}

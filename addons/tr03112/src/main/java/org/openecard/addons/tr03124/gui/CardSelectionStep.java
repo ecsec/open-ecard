@@ -45,6 +45,7 @@ public class CardSelectionStep extends Step {
 
     private final TreeMap<String, ConnectionHandleType> avCardWithName = new TreeMap<>();
     private final I18n lang = I18n.getTranslation("tr03112");
+    private final CardRecognition rec;
 
     /**
      * Creates a new CardSelectionStep from the given title, the available cards and the card recognition.
@@ -61,7 +62,7 @@ public class CardSelectionStep extends Step {
 	for (ConnectionHandleType conHandle : availableCards) {
 	    avCardWithName.put(rec.getTranslatedCardName(conHandle.getRecognitionInfo().getCardType()), conHandle);
 	}
-
+	this.rec = rec;
 	addElements();
     }
 
@@ -82,6 +83,29 @@ public class CardSelectionStep extends Step {
 
 	getInputInfoUnits().add(description);
 	getInputInfoUnits().add(radioBox);
+    }
+
+    /**
+     * Update the step with a new list of connection handles.
+     *
+     * @param availableCards List of available cards represented by connection handles.
+     */
+    public void update(List<ConnectionHandleType> availableCards) {
+	this.avCardWithName.clear();
+	for (ConnectionHandleType handle : availableCards) {
+	    avCardWithName.put(rec.getTranslatedCardName(handle.getRecognitionInfo().getCardType()), handle);
+	}
+
+	CardMonitorTask task = (CardMonitorTask) getBackgroundTask();
+	if (task != null) {
+	    ConnectionHandleType handle = task.getResult();
+	    if (handle.getRecognitionInfo() != null && handle.getRecognitionInfo().getCardType() != null) {
+		avCardWithName.put(rec.getTranslatedCardName(handle.getRecognitionInfo().getCardType()), handle);
+	    }
+	}
+
+	getInputInfoUnits().clear();
+	addElements();
     }
 
 }

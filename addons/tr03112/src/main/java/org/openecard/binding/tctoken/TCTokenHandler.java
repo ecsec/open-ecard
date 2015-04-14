@@ -37,9 +37,7 @@ import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
@@ -68,7 +66,6 @@ import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.Pair;
-import org.openecard.common.sal.util.InsertCardDialog;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.message.DialogType;
@@ -132,30 +129,6 @@ public class TCTokenHandler {
 	this.rec = ctx.getRecognition();
 	this.manager = ctx.getManager();
 	this.evManager = ctx.getEventManager();
-    }
-
-
-    /**
-     * Gets the first handle of the given card type.
-     *
-     * @param type The card type to get the first handle for.
-     * @return Handle describing the given card type or null if none is present.
-     */
-    private ConnectionHandleType getFirstHandle(String type) {
-	String cardName = rec.getTranslatedCardName(type);
-	ConnectionHandleType conHandle = new ConnectionHandleType();
-	ConnectionHandleType.RecognitionInfo recInfo = new ConnectionHandleType.RecognitionInfo();
-	recInfo.setCardType(type);
-	conHandle.setRecognitionInfo(recInfo);
-	Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
-	if (entries.isEmpty()) {
-	    Map<String, String> nameAndType = new HashMap<>();
-	    nameAndType.put(cardName, type);
-	    InsertCardDialog uc = new InsertCardDialog(gui, cardStates, nameAndType, evManager);
-	    return uc.show().get(0);
-	} else {
-	    return entries.iterator().next().handleCopy();
-	}
     }
 
     private ConnectionHandleType prepareHandle(ConnectionHandleType connectionHandle) throws DispatcherException, InvocationTargetException, WSException {
@@ -314,22 +287,17 @@ public class TCTokenHandler {
 	String ifdName = request.getIFDName();
 	BigInteger requestedSlotIndex = request.getSlotIndex();
 
-	if (requestedContextHandle == null || ifdName == null || requestedSlotIndex == null) {
-	    // use dumb activation without explicitly specifying the card and terminal
-	    // see TR-03112-7 v 1.1.2 (2012-02-28) sec. 3.2
-	    connectionHandle = getFirstHandle(request.getCardType());
-	} else {
-	    // we know exactly which card we want
-	    ConnectionHandleType requestedHandle = new ConnectionHandleType();
-	    requestedHandle.setContextHandle(requestedContextHandle);
-	    requestedHandle.setIFDName(ifdName);
-	    requestedHandle.setSlotIndex(requestedSlotIndex);
+	// we know exactly which card we want
+	ConnectionHandleType requestedHandle = new ConnectionHandleType();
+	requestedHandle.setContextHandle(requestedContextHandle);
+	requestedHandle.setIFDName(ifdName);
+	requestedHandle.setSlotIndex(requestedSlotIndex);
 
-	    Set<CardStateEntry> matchingHandles = cardStates.getMatchingEntries(requestedHandle);
-	    if (! matchingHandles.isEmpty()) {
-		connectionHandle = matchingHandles.toArray(new CardStateEntry[] {})[0].handleCopy();
-	    }
+	Set<CardStateEntry> matchingHandles = cardStates.getMatchingEntries(requestedHandle);
+	if (!matchingHandles.isEmpty()) {
+	    connectionHandle = matchingHandles.toArray(new CardStateEntry[]{})[0].handleCopy();
 	}
+
 
 	if (connectionHandle == null) {
 	    String msg = lang.translationForKey("cancel");

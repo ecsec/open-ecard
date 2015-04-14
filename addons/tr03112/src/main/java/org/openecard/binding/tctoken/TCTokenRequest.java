@@ -138,6 +138,12 @@ public class TCTokenRequest {
 	    setContextHandle(queries, handle.getContextHandle());
 	    setSlotIndex(queries, handle.getSlotIndex());
 	    addTokenUrlParameter(queries, handle.getRecognitionInfo());
+	} else {
+	    String[] types = new String[] {tcTokenRequest.cardType};
+	    ConnectionHandleType handle = findCard(types, ctx);
+	    setIfdName(queries, handle.getIFDName());
+	    setContextHandle(queries, handle.getContextHandle());
+	    setSlotIndex(queries, handle.getSlotIndex());
 	}
 
 	for (Map.Entry<String, String> next : queries.entrySet()) {
@@ -240,7 +246,7 @@ public class TCTokenRequest {
 	}
 
 	InsertCardDialog insCardDiag =
-		new InsertCardDialog(ctx.getUserConsent(), ctx.getCardStates(), namesAndType, ctx.getManager());
+		new InsertCardDialog(ctx.getUserConsent(), ctx.getCardStates(), namesAndType, ctx.getEventManager());
 	List<ConnectionHandleType> usableCards = insCardDiag.show();
 
 	ConnectionHandleType handle;

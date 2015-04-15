@@ -169,7 +169,7 @@ public class CardUtils {
 			    fileIdOrPath.length > 2) {
 			selectFile = new Select.AbsolutePath(fileIdOrPath);
 			result = selectFile.transmit(dispatcher, slotHandle);
-			if (Arrays.equals(result.getTrailer(), TrailerConstants.Success.OK)) {
+			if (Arrays.equals(result.getTrailer(), TrailerConstants.Success.OK())) {
 			    return result;
 			}
 		    }

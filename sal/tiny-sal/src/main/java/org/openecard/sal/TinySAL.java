@@ -353,11 +353,11 @@ public class TinySAL implements SAL {
 	    if (applicationID.length == 2) {
 		select = new Select.File(applicationID);
 		List<byte[]> responses = new ArrayList<>();
-		responses.add(TrailerConstants.Success.OK);
-		responses.add(TrailerConstants.Error.WRONG_P1_P2);
+		responses.add(TrailerConstants.Success.OK());
+		responses.add(TrailerConstants.Error.WRONG_P1_P2());
 		CardResponseAPDU resp = select.transmit(env.getDispatcher(), connectResponse.getSlotHandle(), responses);
 
-		if (Arrays.equals(resp.getTrailer(), TrailerConstants.Error.WRONG_P1_P2)) {
+		if (Arrays.equals(resp.getTrailer(), TrailerConstants.Error.WRONG_P1_P2())) {
 		    select = new Select.AbsolutePath(applicationID);
 		    select.transmit(env.getDispatcher(), connectResponse.getSlotHandle());
 		}

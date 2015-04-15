@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  * 
@@ -26,7 +26,7 @@ package org.openecard.common.apdu.common;
 /**
  * Provides several subclasses for the different result trailers of an APDU.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class TrailerConstants {
 
@@ -38,9 +38,10 @@ public class TrailerConstants {
 	/**
 	 * Command processed normally. 
 	 * No further qualification.<br>
-	 * Code: 9000
+	 *
+	 * @return Code: 9000
 	 */
-	public static final byte[] OK = new byte[] {(byte) 0x90, (byte) 0x00};
+	public static byte[] OK() { return new byte[] {(byte) 0x90, (byte) 0x00}; }
     }
 
     /**
@@ -51,128 +52,146 @@ public class TrailerConstants {
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: No information given.<br>
-	 * Code: 6300
+	 *
+	 * @return @return Code: 6300
 	 */
-	public static final byte[] NON_VOLATILE_MEMORY_HAS_CHANGED_NO_INFO = new byte[] {(byte) 0x63, (byte) 0x00};
+	public static byte[] NON_VOLATILE_MEMORY_HAS_CHANGED_NO_INFO() { return new byte[] {(byte) 0x63, (byte) 0x00}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: File filled up by the last write.<br>
-	 * Code: 6381
+	 *
+	 * @return Code: 6381
 	 */
-	public static final byte[] FILE_FILLED_UP = new byte[] {(byte) 0x63, (byte) 0x81};
+	public static byte[] FILE_FILLED_UP() { return new byte[] {(byte) 0x63, (byte) 0x81}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 0.<br>
-	 * Code: 63C0
+	 *
+	 * @return Code: 63C0
 	 */
-	public static final byte[] COUNTER_0 = new byte[] {(byte) 0x63, (byte) 0xC0};
+	public static byte[] COUNTER_0() { return new byte[] {(byte) 0x63, (byte) 0xC0}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 1.<br>
-	 * Code: 63C1
+	 *
+	 * @return Code: 63C1
 	 */
-	public static final byte[] COUNTER_1 = new byte[] {(byte) 0x63, (byte) 0xC1};
+	public static byte[] COUNTER_1() { return new byte[] {(byte) 0x63, (byte) 0xC1}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 2.<br>
-	 * Code: 63C2
+	 *
+	 * @return Code: 63C2
 	 */
-	public static final byte[] COUNTER_2 = new byte[] {(byte) 0x63, (byte) 0xC2};
+	public static byte[] COUNTER_2() { return new byte[] {(byte) 0x63, (byte) 0xC2}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 3.<br>
-	 * Code: 63C3
+	 *
+	 * @return Code: 63C3
 	 */
-	public static final byte[] COUNTER_3 = new byte[] {(byte) 0x63, (byte) 0xC3};
+	public static byte[] COUNTER_3() { return new byte[] {(byte) 0x63, (byte) 0xC3}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 4.<br>
-	 * Code: 63C4
+	 *
+	 * @return Code: 63C4
 	 */
-	public static final byte[] COUNTER_4 = new byte[] {(byte) 0x63, (byte) 0xC4};
+	public static byte[] COUNTER_4() { return new byte[] {(byte) 0x63, (byte) 0xC4}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 5.<br>
-	 * Code: 63C5
+	 *
+	 * @return Code: 63C5
 	 */
-	public static final byte[] COUNTER_5 = new byte[] {(byte) 0x63, (byte) 0xC5};
+	public static byte[] COUNTER_5() { return new byte[] {(byte) 0x63, (byte) 0xC5}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 6.<br>
-	 * Code: 63C6
+	 *
+	 * @return Code: 63C6
 	 */
-	public static final byte[] COUNTER_6 = new byte[] {(byte) 0x63, (byte) 0xC6};
+	public static byte[] COUNTER_6() { return new byte[] {(byte) 0x63, (byte) 0xC6}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 7.<br>
-	 * Code: 63C7
+	 *
+	 * @return Code: 63C7
 	 */
-	public static final byte[] COUNTER_7 = new byte[] {(byte) 0x63, (byte) 0xC7};
+	public static byte[] COUNTER_7() { return new byte[] {(byte) 0x63, (byte) 0xC7}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 8.<br>
-	 * Code: 63C8
+	 *
+	 * @return Code: 63C8
 	 */
-	public static final byte[] COUNTER_8 = new byte[] {(byte) 0x63, (byte) 0xC8};
+	public static byte[] COUNTER_8() { return new byte[] {(byte) 0x63, (byte) 0xC8}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 9.<br>
-	 * Code: 63C9
+	 *
+	 * @return Code: 63C9
 	 */
-	public static final byte[] COUNTER_9 = new byte[] {(byte) 0x63, (byte) 0xC9};
+	public static byte[] COUNTER_9() { return new byte[] {(byte) 0x63, (byte) 0xC9}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 10.<br>
-	 * Code: 63CA
+	 *
+	 * @return Code: 63CA
 	 */
-	public static final byte[] COUNTER_10 = new byte[] {(byte) 0x63, (byte) 0xCA};
+	public static byte[] COUNTER_10() { return new byte[] {(byte) 0x63, (byte) 0xCA}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 11.<br>
-	 * Code: 63CB
+	 *
+	 * @return Code: 63CB
 	 */
-	public static final byte[] COUNTER_11 = new byte[] {(byte) 0x63, (byte) 0xCB};
+	public static byte[] COUNTER_11() { return new byte[] {(byte) 0x63, (byte) 0xCB}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 12.<br>
-	 * Code: 63CC
+	 *
+	 * @return Code: 63CC
 	 */
-	public static final byte[] COUNTER_12 = new byte[] {(byte) 0x63, (byte) 0xCC};
+	public static byte[] COUNTER_12() { return new byte[] {(byte) 0x63, (byte) 0xCC}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 13.<br>
-	 * Code: 63CD
+	 *
+	 * @return Code: 63CD
 	 */
-	public static final byte[] COUNTER_13 = new byte[] {(byte) 0x63, (byte) 0xCD};
+	public static byte[] COUNTER_13() { return new byte[] {(byte) 0x63, (byte) 0xCD}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 14.<br>
-	 * Code: 63CE
+	 *
+	 * @return Code: 63CE
 	 */
-	public static final byte[] COUNTER_14 = new byte[] {(byte) 0x63, (byte) 0xCE};
+	public static byte[] COUNTER_14() { return new byte[] {(byte) 0x63, (byte) 0xCE}; }
 
 	/**
 	 * State of non-volatile memory has changed.
 	 * P2 indicates: Counter has set to 15.<br>
-	 * Code: 63CF
+	 *
+	 * @return Code: 63CF
 	 */
-	public static final byte[] COUNTER_15 = new byte[] {(byte) 0x63, (byte) 0xCF};
+	public static byte[] COUNTER_15() { return new byte[] {(byte) 0x63, (byte) 0xCF}; }
     }
 
     /**
@@ -182,43 +201,49 @@ public class TrailerConstants {
 
 	/**
 	 * Wrong length without further indication.
-	 * Code: 6700
+	 *
+	 * @return Code: 6700
 	 */
-	public static final byte[] WRONG_LENGTH = new byte[] {(byte) 0x67, (byte) 0x00};
+	public static byte[] WRONG_LENGTH() { return new byte[] {(byte) 0x67, (byte) 0x00}; }
 
 	/**
 	 * Command not allowed.
 	 * P2 indicates: Security status not satisfied.<br>
-	 * Code: 6982
+	 *
+	 * @return Code: 6982
 	 */
-	public static final byte[] SECURITY_STATUS_NOT_SATISFIED = new byte[] {(byte) 0x69, (byte) 0x82};
+	public static byte[] SECURITY_STATUS_NOT_SATISFIED() { return new byte[] {(byte) 0x69, (byte) 0x82}; }
 
 	/**
 	 * Wrong parameters P1-P2.
 	 * P2 indicates: Incorrect parameters in the command data field.<br>
-	 * Code: 6A80
+	 *
+	 * @return Code: 6A80
 	 */
-	public static final byte[] INCORRECT_COMMAND_DATA = new byte[] {(byte) 0x6A, (byte) 0x80};
+	public static byte[] INCORRECT_COMMAND_DATA() { return new byte[] {(byte) 0x6A, (byte) 0x80}; }
 
 	/**
 	 * Wrong parameters P1-P2 further indication in SW2.
 	 * P2 indicates: Incorrect parameters P1-P2.<br>
-	 * Code: 6A86
+	 *
+	 * @return Code: 6A86
 	 */
-	public static final byte[] WRONG_P1_P2 = new byte[] {(byte) 0x6A, (byte) 0x86};
+	public static byte[] WRONG_P1_P2() { return new byte[] {(byte) 0x6A, (byte) 0x86}; }
 
 	/**
 	 * Wrong parameters P1-P2 no further indication.
-	 * Code: 6B00
+	 *
+	 * @return Code: 6B00
 	 */
-	public static final byte[] WRONG_PARAMETERS_P1_2 = new byte[] {(byte) 0x6B, (byte) 0x00};
+	public static byte[] WRONG_PARAMETERS_P1_2() { return new byte[] {(byte) 0x6B, (byte) 0x00}; }
 
 	/**
 	 * Instruction code not supported or invalid.
-	 * Code: 6D00
+	 *
+	 * @return Code: 6D00
 	 */
-	public static final byte[] INS_NOT_SUPPORTED_OR_INVALID = new byte[] {(byte) 0x6D, (byte) 0x00};
+	public static byte[] INS_NOT_SUPPORTED_OR_INVALID() { return new byte[] {(byte) 0x6D, (byte) 0x00}; }
 
     }
-    
+
 }

@@ -26,11 +26,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.openecard.common.enums.EventType;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -80,6 +85,8 @@ public class EventDispatcher {
 
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(EventDispatcher.class);
+    private static final long MAX_DISPATCH_MILLIS = 5 * 1000;
 
     // needed because threadPool must be accessible here
     private final EventManager manager;
@@ -133,15 +140,41 @@ public class EventDispatcher {
 	try {
 	    guard.acquire();
 	    // check every callback for a matching filter
+	    ArrayList<Future<?>> futures = new ArrayList<>();
 	    for (Map.Entry<EventCallback,ArrayList<EventFilter>> entry : eventFilter.entrySet()) {
 		EventCallback cb = entry.getKey();
 		for (EventFilter filter : entry.getValue()) {
 		    if (filter.matches(t, o)) {
-			fork(cb, t, o);
+			futures.add(fork(cb, t, o));
 			break;
 		    }
 		}
 	    }
+
+	    // wait until all events have been dispatched
+	    long remaining = MAX_DISPATCH_MILLIS;
+	    for (Future<?> next : futures) {
+		if (remaining > 0) {
+		    long start = System.currentTimeMillis();
+		    try {
+			next.get(remaining, TimeUnit.MILLISECONDS);
+		    } catch (ExecutionException ex) {
+			// I don't care
+		    } catch (InterruptedException ex) {
+			// someone wants us to stop as soon as possible, so omit waiting for anymore futures
+			break;
+		    } catch (TimeoutException ex) {
+			// time is up
+			remaining = -1;
+			continue;
+		    }
+		    long diff = System.currentTimeMillis() - start;
+		    remaining -= diff;
+		} else {
+		    logger.warn("Skipping wait for event notification thread.");
+		}
+	    }
+
 	    guard.release();
 	} catch (InterruptedException ex) {
 	    // ignore this bullshit

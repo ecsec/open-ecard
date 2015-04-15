@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,6 +24,8 @@ package org.openecard.crypto.tls;
 
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Vector;
 import javax.annotation.Nonnull;
@@ -89,60 +91,60 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 
     @Override
     public int[] getCipherSuites() {
-	return new int[] {
-	    // recommended ciphers from TR-02102-2 sec. 3.3.1
-	    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-	    CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
-	    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
-	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
-	    CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
-	    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-	    CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
-	    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
-	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-	    CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
-	    // acceptable in case DHE is not available
-	    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,
-	    CipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,
-	    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,
-	    CipherSuite.TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,
-	    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384,
-	    CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,
-	    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256,
-	    CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,
-	    CipherSuite.TLS_DH_RSA_WITH_AES_256_GCM_SHA384,
-	    CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256,
-	    CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256,
-	    CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256,
-	    // SHA1 is acceptable until 2015
-	    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
-	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-	    CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-	    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA,
-	    CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,
-	    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
-	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-	    CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
-	    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,
-	    CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
-	    CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
-	    CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA,
-	    // TODO: nobody likes DSS, so kick it out in the next release
-	    CipherSuite.TLS_DHE_DSS_WITH_AES_256_GCM_SHA384,
-	    CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256,
-	    CipherSuite.TLS_DHE_DSS_WITH_AES_128_GCM_SHA256,
-	    CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256,
-	    CipherSuite.TLS_DH_DSS_WITH_AES_256_GCM_SHA384,
-	    CipherSuite.TLS_DH_DSS_WITH_AES_128_GCM_SHA256,
-	    CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA256,
-	    CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA256,
-	    CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
-	    CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
-	    CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA,
-	    CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA,
-	};
+	ArrayList<Integer> ciphers = new ArrayList<>(Arrays.asList(
+		// recommended ciphers from TR-02102-2 sec. 3.3.1
+		CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+		CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+		CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
+		CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+		CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+		CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
+		CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+		CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+		CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+		CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+		CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+		CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
+		// acceptable in case DHE is not available
+		CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,
+		CipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,
+		CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,
+		CipherSuite.TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,
+		CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384,
+		CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,
+		CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256,
+		CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,
+		CipherSuite.TLS_DH_RSA_WITH_AES_256_GCM_SHA384,
+		CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256,
+		CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256,
+		CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256
+	));
+
+	// when doing TLS 1.0, we need the old SHA1 cipher suites
+	if (minClientVersion == ProtocolVersion.TLSv10) {
+	    ciphers.addAll(Arrays.asList(
+		    // SHA1 is acceptable until 2015
+		    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+		    CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+		    CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+		    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA,
+		    CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,
+		    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+		    CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+		    CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+		    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,
+		    CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
+		    CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
+		    CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA
+	    ));
+	}
+
+	int[] result = new int[ciphers.size()];
+	for (int i = 0; i < ciphers.size(); i++) {
+	    result[i] = ciphers.get(i);
+	}
+
+	return result;
     }
 
     @Override
@@ -181,7 +183,7 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	// overwrite hash and signature algorithms
         if (TlsUtils.isSignatureAlgorithmsExtensionAllowed(clientVersion)) {
             short[] hashAlgorithms = new short[]{ HashAlgorithm.sha512, HashAlgorithm.sha384, HashAlgorithm.sha256,
-                HashAlgorithm.sha224, HashAlgorithm.sha1 };
+                HashAlgorithm.sha224 };
 
             short[] signatureAlgorithms = new short[]{ SignatureAlgorithm.rsa, SignatureAlgorithm.ecdsa };
 
@@ -193,17 +195,10 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
                 }
             }
 
-            /*
-             * RFC 5264 7.4.3. Currently, DSA [DSS] may only be used with SHA-1.
-             */
-            this.supportedSignatureAlgorithms.addElement(new SignatureAndHashAlgorithm(HashAlgorithm.sha1,
-                SignatureAlgorithm.dsa));
-
             clientExtensions = TlsExtensionsUtils.ensureExtensionsInitialised(clientExtensions);
 
             TlsUtils.addSignatureAlgorithmsExtension(clientExtensions, supportedSignatureAlgorithms);
         }
-
 
 	return clientExtensions;
     }

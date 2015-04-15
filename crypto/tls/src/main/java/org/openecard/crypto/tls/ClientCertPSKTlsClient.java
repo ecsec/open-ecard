@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -141,7 +141,7 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 	// overwrite hash and signature algorithms
         if (TlsUtils.isSignatureAlgorithmsExtensionAllowed(clientVersion)) {
             short[] hashAlgorithms = new short[]{ HashAlgorithm.sha512, HashAlgorithm.sha384, HashAlgorithm.sha256,
-                HashAlgorithm.sha224, HashAlgorithm.sha1 };
+                HashAlgorithm.sha224 };
 
             short[] signatureAlgorithms = new short[]{ SignatureAlgorithm.rsa, SignatureAlgorithm.ecdsa };
 
@@ -152,12 +152,6 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
                         signatureAlgorithms[j]));
                 }
             }
-
-            /*
-             * RFC 5264 7.4.3. Currently, DSA [DSS] may only be used with SHA-1.
-             */
-            this.supportedSignatureAlgorithms.addElement(new SignatureAndHashAlgorithm(HashAlgorithm.sha1,
-                SignatureAlgorithm.dsa));
 
             clientExtensions = TlsExtensionsUtils.ensureExtensionsInitialised(clientExtensions);
 

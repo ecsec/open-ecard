@@ -149,7 +149,7 @@ public final class RichClient {
 	    // Set up EventManager
 	    em = new EventManager(recognition, env, contextHandle);
 	    env.setEventManager(em);
-
+	    ifd.setEventManager(em);
 	    // Set up SALStateCallback
 	    cardStates = new CardStateMap();
 	    SALStateCallback salCallback = new SALStateCallback(recognition, cardStates);

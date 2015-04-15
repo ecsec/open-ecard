@@ -28,6 +28,7 @@ import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
 import iso.std.iso_iec._24727.tech.schema.Wait;
 import iso.std.iso_iec._24727.tech.schema.WaitResponse;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -156,9 +157,17 @@ public class EventManager implements org.openecard.common.interfaces.EventManage
     @Override
     public void resetCard(ConnectionHandleType cHandleRm, ConnectionHandleType cHandleIn) {
 	notify(EventType.CARD_REMOVED, cHandleRm);
-	notify(EventType.CARD_INSERTED, cHandleIn);
+	HandlerBuilder chBuilder = HandlerBuilder.create();
+	ConnectionHandleType cInNew = chBuilder.setSessionId(sessionId)
+		.setCardType(cHandleIn.getRecognitionInfo())
+		.setContextHandle(cHandleIn.getContextHandle())
+		.setIfdName(cHandleIn.getIFDName())
+		.setSlotIdx(BigInteger.ZERO)
+		.setSlotHandle(cHandleIn.getSlotHandle())
+		.buildConnectionHandle();
+	notify(EventType.CARD_INSERTED, cInNew);
 	if (recognize) {
-	    Thread recThread = new Thread(new Recognizer(this, cHandleIn), "ResetRecoginitonThread");
+	    Thread recThread = new Thread(new Recognizer(this, cInNew), "ResetRecoginitonThread");
 	    recThread.start();
 	}
 

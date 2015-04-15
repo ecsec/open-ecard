@@ -31,6 +31,7 @@ import iso.std.iso_iec._24727.tech.schema.CancelResponse;
 import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ControlIFD;
 import iso.std.iso_iec._24727.tech.schema.ControlIFDResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
@@ -96,8 +97,10 @@ import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.interfaces.Publish;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.common.util.HandlerBuilder;
 import org.openecard.common.util.ValueGenerators;
 import org.openecard.gui.UserConsent;
 import org.openecard.ifd.scio.reader.EstablishPACERequest;
@@ -130,6 +133,7 @@ public class IFD implements org.openecard.ws.IFD {
     private Dispatcher dispatcher;
     private UserConsent gui = null;
     private final ProtocolFactories protocolFactories = new ProtocolFactories();
+    private EventManager evManager;
 
     private AtomicInteger numClients;
     private ExecutorService threadPool;
@@ -154,6 +158,10 @@ public class IFD implements org.openecard.ws.IFD {
 
     public void setDispatcher(Dispatcher dispatcher) {
 	this.dispatcher = dispatcher;
+    }
+
+    public void setEventManager(EventManager manager) {
+	this.evManager = manager;
     }
 
     public boolean addProtocol(String proto, ProtocolFactory factory) {
@@ -713,6 +721,18 @@ public class IFD implements org.openecard.ws.IFD {
 		SCIOCard card = ch.getChannel().getCard();
 		ActionType action = parameters.getAction();
 		if (ActionType.RESET == action) {
+		    HandlerBuilder builder = HandlerBuilder.create();
+		    ConnectionHandleType cHandleIn = builder.setCardType(ECardConstants.UNKNOWN_CARD)
+			    .setContextHandle(ctxHandle)
+			    .setIfdName(card.getTerminal().getName())
+			    .setSlotIdx(BigInteger.ZERO)
+			    .buildConnectionHandle();
+		    builder = HandlerBuilder.create();
+		    ConnectionHandleType cHandleRm = builder.setContextHandle(ctxHandle)
+			    .setIfdName(card.getTerminal().getName())
+			    .setSlotIdx(BigInteger.ZERO)
+			    .buildConnectionHandle();
+		    evManager.resetCard(cHandleRm, cHandleIn);
 		    card.disconnect(true);
 		}
 		// TODO: take care of other actions (probably over ControlIFD)

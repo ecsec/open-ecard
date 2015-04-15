@@ -22,6 +22,7 @@
 
 package org.openecard.event;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.GetStatus;
 import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
@@ -150,6 +151,17 @@ public class EventManager implements org.openecard.common.interfaces.EventManage
     @Override
     public void unregister(EventCallback callback) {
 	dispatcher.del(callback);
+    }
+
+    @Override
+    public void resetCard(ConnectionHandleType cHandleRm, ConnectionHandleType cHandleIn) {
+	notify(EventType.CARD_REMOVED, cHandleRm);
+	notify(EventType.CARD_INSERTED, cHandleIn);
+	if (recognize) {
+	    Thread recThread = new Thread(new Recognizer(this, cHandleIn), "ResetRecoginitonThread");
+	    recThread.start();
+	}
+
     }
 
 }

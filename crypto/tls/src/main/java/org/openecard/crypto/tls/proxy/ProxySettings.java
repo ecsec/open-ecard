@@ -30,6 +30,14 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Scanner;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.openecard.common.OpenecardProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +52,7 @@ import org.slf4j.LoggerFactory;
  *   <li>proxy.port</li>
  * </ul>
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ProxySettings {
 
@@ -52,7 +60,9 @@ public class ProxySettings {
 
     private static ProxySettings defaultInstance;
     private static Proxy systemProxy;
+
     private final Proxy proxy;
+    private final RegexProxySelector selector;
 
     static {
 	load();
@@ -73,6 +83,7 @@ public class ProxySettings {
 	String port = OpenecardProperties.getProperty("proxy.port");
 	String user = OpenecardProperties.getProperty("proxy.user");
 	String pass = OpenecardProperties.getProperty("proxy.pass");
+	String excl = OpenecardProperties.getProperty("proxy.excludes");
 
 	if ("SOCKS".equals(scheme)) {
 	    // try to load SOCKS proxy
@@ -99,24 +110,88 @@ public class ProxySettings {
 	    logger.warn("Unsupported proxy scheme {} used.", scheme);
 	}
 
+	// convert exclusion to regexes
+	List<Pattern> exclusions = parseExclusionHosts(excl);
+
 	systemProxy = p;
 	// instantiate default instance
-	defaultInstance = new ProxySettings();
+	defaultInstance = new ProxySettings(exclusions);
+    }
+
+    /**
+     * Converts a list of host exclusion entries to regexes.
+     * The list has the form {@code *.example.com;localhost:8080;}.
+     *
+     * @param excl Exclusion entries as defined above.
+     * @return Possibly empty list of patterns matching the given host patterns in the exclusion list.
+     */
+    public static List<Pattern> parseExclusionHosts(@Nullable String excl) {
+	if (excl == null) {
+	    return Collections.emptyList();
+	} else {
+	    try (Scanner s = new Scanner(excl).useDelimiter(";")) {
+		ArrayList<String> exclStrs = new ArrayList<>();
+
+		// read all items
+		while (s.hasNext()) {
+		    String next = s.next().trim();
+		    if (! next.isEmpty()) {
+			exclStrs.add(next);
+		    }
+		}
+
+		ArrayList<Pattern> result = new ArrayList<>(exclStrs.size());
+		for (String next : exclStrs) {
+		    try {
+			Pattern p = createPattern(next);
+			result.add(p);
+		    } catch (PatternSyntaxException ex) {
+			logger.error("Failed to parse proxy exclusion pattern '{}'.", next);
+		    }
+		}
+
+		return result;
+	    }
+	}
+    }
+
+    private static Pattern createPattern(String expr) throws PatternSyntaxException {
+	String[] hostPort = expr.split(":");
+	String host, port;
+	if (hostPort.length == 1) {
+	    host = hostPort[0];
+	    port = "(:*)?";
+	} else {
+	    // other combinations ignored, this is the users fault
+	    host = hostPort[0];
+	    port = ":" + hostPort[1];
+	}
+	return Pattern.compile(replaceMetaChars("^" + host + port + "$"));
+    }
+
+    private static String replaceMetaChars(String expr) {
+	String result = expr.replace(".", "\\.");
+	result = result.replace("*", ".*?");
+	return result;
     }
 
     /**
      * Create instance with default settings read from the system.
+     *
+     * @param exclusions List of exclusions for which no proxying will be performed.
      */
-    public ProxySettings() {
-	this.proxy = null;
+    public ProxySettings(@Nonnull List<Pattern> exclusions) {
+	this(null, exclusions);
     }
     /**
      * Create instance for the given proxy configuration.
      *
      * @param proxy Proxy to use when creating sockets.
+     * @param exclusions List of exclusions for which no proxying will be performed.
      */
-    private ProxySettings(Proxy proxy) {
+    private ProxySettings(@Nullable Proxy proxy, @Nonnull List<Pattern> exclusions) {
 	this.proxy = proxy;
+	this.selector = new RegexProxySelector(ProxySelector.getDefault(), exclusions);
     }
 
     /**
@@ -144,16 +219,27 @@ public class ProxySettings {
      */
     private Proxy getProxy(String hostname, int port) throws URISyntaxException {
 	Proxy p;
+	URI uri = new URI("socket://" + hostname + ":" + port);
 	if (proxy == null) {
 	    // try to use the one from the system settings
 	    if (systemProxy != null) {
-		p = systemProxy;
+		// we have a proxy defined in the config
+		if (selector.isExclusion(uri)) {
+		    p = Proxy.NO_PROXY;
+		} else {
+		    p = systemProxy;
+		}
 	    } else {
-		ProxySelector selector = ProxySelector.getDefault();
-		p = selector.select(new URI("socket://" + hostname + ":" + port)).get(0);
+		// ask Java for the proxy
+		p = selector.select(uri).get(0);
 	    }
 	} else {
-	    p = proxy;
+	    // proxy overridden by this class instance
+	    if (selector.isExclusion(uri)) {
+		p = Proxy.NO_PROXY;
+	    } else {
+		p = proxy;
+	    }
 	}
 	logger.debug("Selecting proxy: {}", p);
 

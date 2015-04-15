@@ -29,8 +29,10 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import org.openecard.addon.AddonPropertiesException;
+import org.openecard.addon.manifest.ScalarListEntryType;
 import org.openecard.common.I18n;
 import org.openecard.crypto.tls.proxy.ProxySettings;
+import org.openecard.richclient.gui.components.ScalarListItem;
 
 
 /**
@@ -57,6 +59,8 @@ public class ConnectionSettingsGroup extends OpenecardPropertiesSettingsGroup {
     private static final String	USER_DESC   = "addon.list.core.connection.proxy.user.desc";
     private static final String	PASS        = "addon.list.core.connection.proxy.pass";
     private static final String	PASS_DESC   = "addon.list.core.connection.proxy.pass.desc";
+    private static final String	EXCL        = "addon.list.core.connection.proxy.excludes";
+    private static final String	EXCL_DESC   = "addon.list.core.connection.proxy.excludes.desc";
 
     private final JComboBox selection;
     private final JTextField host;
@@ -64,6 +68,7 @@ public class ConnectionSettingsGroup extends OpenecardPropertiesSettingsGroup {
     private final JCheckBox vali;
     private final JTextField user;
     private final JTextField pass;
+    private final ScalarListItem excl;
 
 
     public ConnectionSettingsGroup() {
@@ -76,6 +81,8 @@ public class ConnectionSettingsGroup extends OpenecardPropertiesSettingsGroup {
 	vali = addBoolItem(lang.translationForKey(VALI), lang.translationForKey(VALI_DESC), "proxy.validate_tls");
 	user = addInputItem(lang.translationForKey(USER), lang.translationForKey(USER_DESC), "proxy.user");
 	pass = addInputItem(lang.translationForKey(PASS), lang.translationForKey(PASS_DESC), "proxy.pass");
+	excl = addScalarListItem(lang.translationForKey(EXCL), lang.translationForKey(EXCL_DESC), "proxy.excludes",
+		ScalarListEntryType.STRING);
 
 	// register event and trigger initial setup
 	ItemManager manager = new ItemManager();
@@ -105,24 +112,28 @@ public class ConnectionSettingsGroup extends OpenecardPropertiesSettingsGroup {
 		    setEnabledComponent(vali, false);
 		    setEnabledComponent(user, false);
 		    setEnabledComponent(pass, false);
+		    setEnabledComponent(excl, true);
 		} else if ("HTTP".equals(val)) {
 		    setEnabledComponent(host, true);
 		    setEnabledComponent(port, true);
 		    setEnabledComponent(vali, false);
 		    setEnabledComponent(user, true);
 		    setEnabledComponent(pass, true);
+		    setEnabledComponent(excl, true);
 		} else if ("HTTPS".equals(val)) {
 		    setEnabledComponent(host, true);
 		    setEnabledComponent(port, true);
 		    setEnabledComponent(vali, true);
 		    setEnabledComponent(user, true);
 		    setEnabledComponent(pass, true);
+		    setEnabledComponent(excl, true);
 		} else {
 		    setEnabledComponent(host, false);
 		    setEnabledComponent(port, false);
 		    setEnabledComponent(vali, false);
 		    setEnabledComponent(user, false);
 		    setEnabledComponent(pass, false);
+		    setEnabledComponent(excl, false);
 		}
 	    }
 	}

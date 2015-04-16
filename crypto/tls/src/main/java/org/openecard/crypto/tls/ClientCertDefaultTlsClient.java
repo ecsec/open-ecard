@@ -183,7 +183,7 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	// overwrite hash and signature algorithms
         if (TlsUtils.isSignatureAlgorithmsExtensionAllowed(clientVersion)) {
             short[] hashAlgorithms = new short[]{ HashAlgorithm.sha512, HashAlgorithm.sha384, HashAlgorithm.sha256,
-                HashAlgorithm.sha224 };
+                HashAlgorithm.sha224, HashAlgorithm.sha1 };
 
             short[] signatureAlgorithms = new short[]{ SignatureAlgorithm.rsa, SignatureAlgorithm.ecdsa };
 

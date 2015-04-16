@@ -121,7 +121,7 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	));
 
 	// when doing TLS 1.0, we need the old SHA1 cipher suites
-	if (minClientVersion == ProtocolVersion.TLSv10) {
+	if (minClientVersion == ProtocolVersion.TLSv10 || minClientVersion == ProtocolVersion.TLSv11) {
 	    ciphers.addAll(Arrays.asList(
 		    // SHA1 is acceptable until 2015
 		    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,

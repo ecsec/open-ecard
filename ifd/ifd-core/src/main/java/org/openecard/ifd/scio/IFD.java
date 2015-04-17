@@ -94,6 +94,7 @@ import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.ifd.anytype.PACEOutputType;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
 import org.openecard.common.ifd.scio.SCIOCard;
+import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.interfaces.Dispatcher;
@@ -378,11 +379,16 @@ public class IFD implements org.openecard.ws.IFD {
 		IFDStatusType s = termInfo.getStatus();
 		status.add(s);
 	    } catch (SCIOException ex) {
-		String msg = String.format("Failed to determine status of terminal '%s'.", ifd.getName());
-		logger.warn(msg, ex);
-		Result r = WSHelper.makeResultUnknownError(msg);
-		response = WSHelper.makeResponse(GetStatusResponse.class, r);
-		return response;
+		if (ex.getCode() != SCIOErrorCode.SCARD_W_UNPOWERED_CARD &&
+			ex.getCode() != SCIOErrorCode.SCARD_W_UNRESPONSIVE_CARD &&
+			ex.getCode() != SCIOErrorCode.SCARD_W_UNSUPPORTED_CARD) {
+		    String msg = String.format("Failed to determine status of terminal '%s'.", ifd.getName());
+		    logger.warn(msg, ex);
+		    Result r = WSHelper.makeResultUnknownError(msg);
+		    response = WSHelper.makeResponse(GetStatusResponse.class, r);
+		    return response;
+		}
+		// fall througth if there is a card which can not be connected
 	    } finally {
 		termInfo.disconnect();
 	    }

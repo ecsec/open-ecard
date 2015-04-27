@@ -37,7 +37,6 @@ import javax.annotation.Nonnull;
 import org.openecard.binding.tctoken.ex.ActivationError;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
-import org.openecard.common.ECardConstants;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.TR03112Utils;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
@@ -265,7 +264,7 @@ public class TCTokenVerifier {
 	    }
 	}
 
-	String minor = ECardConstants.Minor.App.PARM_ERROR;
+	String minor = ResultMinor.COMMUNICATION_ERROR;
 	String errorUrl = token.getComErrorAddressWithParams(minor);
 	throw new InvalidTCTokenElement(errorUrl, INVALID_ELEMENT, (Object) name);
     }
@@ -280,7 +279,7 @@ public class TCTokenVerifier {
      */
     private void assertRequired(String name, Object value) throws InvalidRedirectUrlException, InvalidTCTokenElement {
 	if (checkEmpty(value)) {
-	    String minor = ECardConstants.Minor.App.PARM_ERROR;
+	    String minor = ResultMinor.COMMUNICATION_ERROR;
 	    String errorUrl = token.getComErrorAddressWithParams(minor);
 	    throw new InvalidTCTokenElement(errorUrl, MISSING_ELEMENT, name);
 	}
@@ -312,7 +311,7 @@ public class TCTokenVerifier {
 	List<Pair<URL, Certificate>> urls = ctx.getCerts();
 	for (Pair<URL, Certificate> next : urls) {
 	    if (! TR03112Utils.checkSameOriginPolicy(paosUrl, next.p1)) {
-		String minor = ECardConstants.Minor.App.PARM_ERROR;
+		String minor = ResultMinor.COMMUNICATION_ERROR;
 		String errorUrl = token.getComErrorAddressWithParams(minor);
 		throw new SecurityViolationException(errorUrl, FAILED_SOP);
 	    }
@@ -328,7 +327,7 @@ public class TCTokenVerifier {
      * @throws URISyntaxException Thrown if the given {@code refreshAddress} is not a valid URL.
      */
     private URI createUrlWithErrorParams(String refreshAddress, String minorMessage) throws URISyntaxException {
-	String minor = ECardConstants.Minor.App.COMMUNICATION_ERROR;
+	String minor = ResultMinor.TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED;
 	return UrlBuilder.fromUrl(refreshAddress)
 		.queryParam("ResultMajor", "error")
 		.queryParamUrl("ResultMinor", TCTokenHacks.fixResultMinor(minor))
@@ -347,7 +346,7 @@ public class TCTokenVerifier {
 		token.getRefreshAddress().isEmpty() && token.getServerAddress().isEmpty() &&
 		token.getSessionIdentifier().isEmpty() && token.getBinding().isEmpty() &&
 		token.getPathSecurityProtocol().isEmpty()) {
-	    String errorUrl = token.getComErrorAddressWithParams(ECardConstants.Minor.App.COMMUNICATION_ERROR);
+	    String errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR);
 	    throw new InvalidTCTokenElement(errorUrl, ESERVICE_FAIL);
 	}
     }

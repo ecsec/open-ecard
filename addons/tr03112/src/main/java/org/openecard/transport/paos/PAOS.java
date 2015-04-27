@@ -320,7 +320,15 @@ public class PAOS {
 			HttpResponse response = httpexecutor.execute(req, conn, ctx);
 			logger.debug("HTTP response received.");
 			int statusCode = response.getStatusLine().getStatusCode();
-			checkHTTPStatusCode(statusCode);
+
+			try {
+			    checkHTTPStatusCode(statusCode);
+			} catch (PAOSConnectionException ex) {
+			    // The eID-Server or at least the test suite may have aborted the communication after an
+			    // response with error. So check the status of our last response to the eID-Server
+			    WSHelper.checkResult(lastResponse);
+			    throw ex;
+			}
 
 			conn.receiveResponseEntity(response);
 			HttpEntity entity = response.getEntity();

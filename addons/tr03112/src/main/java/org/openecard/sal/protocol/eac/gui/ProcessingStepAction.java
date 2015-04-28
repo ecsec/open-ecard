@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -35,27 +35,46 @@ import org.openecard.gui.executor.StepAction;
 import org.openecard.gui.executor.StepActionResult;
 import org.openecard.gui.executor.StepActionResultStatus;
 import org.openecard.sal.protocol.eac.EACProtocol;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * Action waiting for the EAC process to finish.
  *
  * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class ProcessingStepAction extends StepAction {
+    
+    private static final Logger logger = LoggerFactory.getLogger(ProcessingStepAction.class);
+
+    private final DynamicContext ctx;
+    private final Promise<Object> p = new Promise<>();
 
     public ProcessingStepAction(Step step) {
 	super(step);
+	ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	ctx.putPromise(TR03112Keys.PROCESSING_CANCALATION, p);
     }
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	if (result.isCancelled()) {
+	    p.deliver(true);
+	    return new StepActionResult(StepActionResultStatus.CANCEL);
+	}
+
 	Promise<Object> pAuthDone = ctx.getPromise(EACProtocol.AUTHENTICATION_DONE);
 	try {
 	    pAuthDone.deref(120, TimeUnit.SECONDS);
 	    return new StepActionResult(StepActionResultStatus.NEXT);
-	} catch (InterruptedException | TimeoutException ex) {
+	} catch (InterruptedException ex) {
+	    logger.error("ProcessingStepAction interrupted by the user or an other thread.", ex);
+	    p.deliver(true);
+	    return new StepActionResult(StepActionResultStatus.CANCEL);
+	} catch (TimeoutException ex) {
+	    logger.info("Timeout while waiting for the authentication to finish.", ex);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
     }

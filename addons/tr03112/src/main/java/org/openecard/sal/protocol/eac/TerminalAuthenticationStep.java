@@ -34,6 +34,7 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.ObjectSchemaValidator;
 import org.openecard.common.interfaces.ObjectValidatorException;
+import org.openecard.common.util.Promise;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
 import org.openecard.sal.protocol.eac.anytype.EAC2InputType;
@@ -54,7 +55,7 @@ import org.slf4j.LoggerFactory;
 public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(TerminalAuthenticationStep.class.getName());
-    
+
     private final Dispatcher dispatcher;
 
 
@@ -76,7 +77,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	
+
 	try {
 	    ObjectSchemaValidator valid = (ObjectSchemaValidator) dynCtx.getPromise(EACProtocol.SCHEMA_VALIDATOR).deref();
 
@@ -88,7 +89,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 		return response;
 	    }
- 	} catch (ObjectValidatorException ex) {
+	} catch (ObjectValidatorException ex) {
 	    String msg = "Validation of the EAC2InputType message failed due to invalid input data.";
 	    logger.error(msg, ex);
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
@@ -119,11 +120,11 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    certificateChain = certificateChain.getCertificateChainFromCAR(currentCAR);
 
 	    if (certificateChain.getCertificates().isEmpty()) {
-                String msg = "Failed to create a valid certificate chain from the transmitted certificates.";
-                logger.error(msg);
-                response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.PARM_ERROR, msg));
-                return response;
-            }
+		String msg = "Failed to create a valid certificate chain from the transmitted certificates.";
+		logger.error(msg);
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.PARM_ERROR, msg));
+		return response;
+	    }
 
 	    // TA: Step 1 - Verify certificates
 	    ta.verifyCertificates(certificateChain);
@@ -163,7 +164,15 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	}
 
-	return response;
+	Promise<Object> p = (Promise<Object>) dynCtx.getPromise(TR03112Keys.PROCESSING_CANCALATION);
+        if (p.derefNonblocking() == null) {
+            return response;
+        } else {
+            response = new DIDAuthenticateResponse();
+	    String msg = "Authentication Canceled by the user.";
+            response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg));
+            return response;
+        }
     }
 
 }

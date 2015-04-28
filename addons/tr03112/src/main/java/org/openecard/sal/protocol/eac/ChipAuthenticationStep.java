@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -37,6 +37,7 @@ import org.openecard.common.interfaces.ObjectSchemaValidator;
 import org.openecard.common.interfaces.ObjectValidatorException;
 import org.openecard.common.sal.protocol.exception.ProtocolException;
 import org.openecard.common.tlv.TLVException;
+import org.openecard.common.util.Promise;
 import org.openecard.sal.protocol.eac.anytype.EAC2OutputType;
 import org.openecard.sal.protocol.eac.anytype.EACAdditionalInputType;
 import org.openecard.sal.protocol.eac.anytype.ElementParsingException;
@@ -127,11 +128,19 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	}
 
-	// authentication finished, notify GUI
-	DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	ctx.put(EACProtocol.AUTHENTICATION_DONE, true);
-
-	return response;
+	Promise<Object> p = (Promise<Object>) dynCtx.getPromise(TR03112Keys.PROCESSING_CANCALATION);
+        if (p.derefNonblocking() == null) {
+            // authentication finished, notify GUI
+            dynCtx.put(EACProtocol.AUTHENTICATION_DONE, true);
+            return response;
+        } else {
+            // authentication finished, notify GUI
+            dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
+            response = new DIDAuthenticateResponse();
+	    String msg = "Authentication canceled by the user.";
+            response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg));
+            return response;
+        }
     }
 
 }

@@ -340,11 +340,11 @@ public class PAOS {
 			// break when message is startpaosresponse
 			if (requestObj instanceof StartPAOSResponse) {
 			    StartPAOSResponse startPAOSResponse = (StartPAOSResponse) requestObj;
-			    WSHelper.checkResult(startPAOSResponse);
 			    // Some eID-Servers ignore error from previous steps so check whether our last message was ok.
 			    // This does not in case we sent a correct message with wrong content and the eID-Server returns
 			    // an ok.
 			    WSHelper.checkResult(lastResponse);
+			    WSHelper.checkResult(startPAOSResponse);
 			    return startPAOSResponse;
 			}
 

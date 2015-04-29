@@ -279,7 +279,7 @@ public class PAOS {
 	DefaultConnectionReuseStrategy reuse = new DefaultConnectionReuseStrategy();
 	boolean firstLoop = true;
 	boolean connectionDropped = false;
-	ResponseBaseType lastResponse = new ResponseBaseType();
+	ResponseBaseType lastResponse = null;
 
 	try {
 	    // loop and send makes a computer happy
@@ -326,7 +326,9 @@ public class PAOS {
 			} catch (PAOSConnectionException ex) {
 			    // The eID-Server or at least the test suite may have aborted the communication after an
 			    // response with error. So check the status of our last response to the eID-Server
-			    WSHelper.checkResult(lastResponse);
+			    if (lastResponse != null) {
+				WSHelper.checkResult(lastResponse);
+			    }
 			    throw ex;
 			}
 
@@ -343,7 +345,9 @@ public class PAOS {
 			    // Some eID-Servers ignore error from previous steps so check whether our last message was ok.
 			    // This does not in case we sent a correct message with wrong content and the eID-Server returns
 			    // an ok.
-			    WSHelper.checkResult(lastResponse);
+			    if (lastResponse != null) {
+				WSHelper.checkResult(lastResponse);
+			    }
 			    WSHelper.checkResult(startPAOSResponse);
 			    return startPAOSResponse;
 			}

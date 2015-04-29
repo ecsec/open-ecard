@@ -75,6 +75,7 @@ import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
 import org.openecard.sal.protocol.eac.anytype.EAC1InputType;
 import org.openecard.sal.protocol.eac.anytype.EAC1OutputType;
+import org.openecard.sal.protocol.eac.anytype.ElementParsingException;
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
 import org.openecard.sal.protocol.eac.anytype.PACEOutputType;
 import org.openecard.sal.protocol.eac.anytype.PasswordID;
@@ -223,7 +224,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    if (taCHAT.getRole() != CHAT.Role.AUTHENTICATION_TERMINAL) {
 		String msg = "Unsupported terminal type in Terminal Certificate referenced. Refernced terminal type is " +
 			taCHAT.getRole().toString() + ".";
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.PARM_ERROR, msg));
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 		return response;
 	    }
@@ -379,6 +380,10 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	} catch (WSHelper.WSException e) {
 	    logger.error(e.getMessage(), e);
 	    response.setResult(e.getResult());
+	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	} catch (ElementParsingException ex) {
+	    logger.error(ex.getMessage(), ex);
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, ex.getMessage()));
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	} catch (Exception e) {
 	    logger.error(e.getMessage(), e);

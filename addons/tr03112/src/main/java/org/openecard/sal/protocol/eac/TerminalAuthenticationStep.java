@@ -122,7 +122,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    if (certificateChain.getCertificates().isEmpty()) {
 		String msg = "Failed to create a valid certificate chain from the transmitted certificates.";
 		logger.error(msg);
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.PARM_ERROR, msg));
+		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 		return response;
 	    }
 

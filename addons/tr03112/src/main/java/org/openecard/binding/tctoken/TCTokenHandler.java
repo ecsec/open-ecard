@@ -350,13 +350,19 @@ public class TCTokenHandler {
 	    if (innerException instanceof WSException) {
 		WSException ex = (WSException) innerException;
 
-		if (ex.getResultMinor().equals(ECardConstants.Minor.SAL.CANCELLATION_BY_USER)) {
-		    errorMsg = lang.translationForKey("cancel");
-		    response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
-		} else {
-		    errorMsg = langTr03112.translationForKey(ERROR_WHILE_AUTHENTICATION);
-		    response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
-		}
+		switch (ex.getResultMinor()) {
+                    case ECardConstants.Minor.SAL.CANCELLATION_BY_USER:
+                        errorMsg = lang.translationForKey("cancel");
+                        response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
+                        break;
+                    case ECardConstants.Minor.App.INCORRECT_PARM:
+                        errorMsg = langTr03112.translationForKey(ERROR_WHILE_AUTHENTICATION);
+                        response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));
+                        break;
+                    default:
+                        errorMsg = langTr03112.translationForKey(ERROR_WHILE_AUTHENTICATION);
+                        response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
+                }
 		
 	    } else if (innerException instanceof PAOSConnectionException) {
 		response.setResult(WSHelper.makeResultError(ResultMinor.TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED,

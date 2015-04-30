@@ -355,7 +355,9 @@ public class TCTokenHandler {
                         errorMsg = lang.translationForKey("cancel");
                         response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
                         break;
+		    case ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED:
                     case ECardConstants.Minor.App.INCORRECT_PARM:
+		    case ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED:
                         errorMsg = langTr03112.translationForKey(ERROR_WHILE_AUTHENTICATION);
                         response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));
                         break;

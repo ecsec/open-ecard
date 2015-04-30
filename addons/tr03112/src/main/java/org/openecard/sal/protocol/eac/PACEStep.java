@@ -428,7 +428,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    if (! checkPassed) {
 		String msg = "Hash of eService certificate is NOT contained in the CertificateDescription.";
 		// TODO check for the correct minor type
-		Result r = WSHelper.makeResultError(ECardConstants.Minor.App.UNKNOWN_ERROR, msg);
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED, msg);
 		return r;
 	    }
 
@@ -438,7 +438,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		if (! checkPassed) {
 		    String msg = "Hash of the TCToken server certificate is NOT contained in the CertificateDescription.";
 		    // TODO check for the correct minor type
-		    Result r = WSHelper.makeResultError(ECardConstants.Minor.App.UNKNOWN_ERROR, msg);
+		    Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED, msg);
 		    return r;
 		}
 
@@ -446,7 +446,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		if (! checkPassed) {
 		    String msg = "TCToken does not come from the server to which the authorization certificate was issued.";
 		    // TODO check for the correct minor type
-		    Result r = WSHelper.makeResultError(ECardConstants.Minor.App.UNKNOWN_ERROR, msg);
+		    Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED, msg);
 		    return r;
 		}
 	    } else {

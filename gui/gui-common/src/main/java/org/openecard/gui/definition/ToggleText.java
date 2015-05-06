@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,7 @@
 
 package org.openecard.gui.definition;
 
+import java.nio.charset.Charset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,14 +31,15 @@ import org.slf4j.LoggerFactory;
  * Definition class for a text element which can fold its content.
  * The ToggleText has a title which is always displayed and a text which can be folded.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
+ * @author Hans-Martin Haase
  */
 public final class ToggleText extends IDTrait implements InputInfoUnit {
 
     private static final Logger logger = LoggerFactory.getLogger(Text.class);
 
     private String title;
-    private String text;
+    private Document document;
     private boolean collapsed;
 
 
@@ -80,18 +82,56 @@ public final class ToggleText extends IDTrait implements InputInfoUnit {
     /**
      * Gets the text of this instance.
      *
-     * @return The text of this instance.
+     * @return The text of this instance or an empty string if the underlying {@link Document} is {@code NULL} or the
+     * value of the {@link Document} or the MimeType of the underlying {@link Document} is {@code NULL} or does not start
+     * with {@code text/}.
      */
     public String getText() {
-	return text;
+	if (document == null || document.getValue() == null || document.getValue().length == 0) {
+	    return "";
+	}
+
+	if (document.getMimeType() != null && document.getMimeType().startsWith("text/")) {
+	    return new String(document.getValue(), Charset.forName("UTF-8"));
+	} else {
+	    return "";
+	}
     }
+
     /**
      * Sets the text of this instance.
      *
      * @param text The text of this instance.
      */
     public void setText(String text) {
-	this.text = text;
+	if (document == null) {
+	    document = new Document();
+	}
+
+	document.setMimeType("text/plain");
+	document.setValue(text.getBytes(Charset.forName("UTF-8")));
+    }
+
+    /**
+     * Sets the Document of this ToggleText instance.
+     * <br/>
+     * <br/>
+     * Note: The {@link Document} type allows every mime type. The ability to render {@link Document}s of types other
+     * than text/plain depends on the GUI implementation and is not granted.
+     *
+     * @param doc {@link Document} to set for this ToggleText.
+     */
+    public void setDocument(Document doc) {
+	document = doc;
+    }
+
+    /**
+     * Get the underlying Document of this ToggleText instance.
+     *
+     * @return The {@link Document} used by this instance or null if there is currently no such document.
+     */
+    public Document getDocument() {
+	return document;
     }
 
 
@@ -109,7 +149,19 @@ public final class ToggleText extends IDTrait implements InputInfoUnit {
 	ToggleText other = (ToggleText) origin;
 	// do copy
 	this.title = other.title;
-	this.text = other.text;
+	if (other.document != null) {
+	    Document doc = new Document();
+	    if (other.document.getMimeType() != null) {
+		doc.setMimeType(other.document.getMimeType());
+	    }
+
+	    if (other.document.getValue() != null) {
+		byte[] contentBytes = new byte[other.document.getValue().length];
+		System.arraycopy(other.document.getValue(), 0, contentBytes, 0, other.document.getValue().length);
+		doc.setValue(contentBytes);
+	    }
+	    this.setDocument(doc);
+	}
 	this.collapsed = other.collapsed;
     }
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,6 +25,7 @@ package org.openecard.sal.protocol.eac.gui;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import org.openecard.common.I18n;
+import org.openecard.gui.definition.Document;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
 import org.openecard.gui.definition.ToggleText;
@@ -34,8 +35,9 @@ import org.openecard.sal.protocol.eac.EACData;
 /**
  * CVC GUI step for EAC.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich
+ * @author Moritz Horsch
+ * @author Hans-Martin Haase
  */
 public class CVCStep extends Step {
 
@@ -95,7 +97,10 @@ public class CVCStep extends Step {
 	// TermsofUsage
 	ToggleText termsOfUsage = new ToggleText();
 	termsOfUsage.setTitle(lang.translationForKey(TERMS_OF_USAGE));
-	termsOfUsage.setText(eacData.certificateDescription.getTermsOfUsage().toString());
+	Document doc = new Document();
+	doc.setMimeType(eacData.certificateDescription.getTermsOfUsageMimeType());
+	doc.setValue(eacData.certificateDescription.getTermsOfUsageBytes());
+	termsOfUsage.setDocument(doc);
 	termsOfUsage.setCollapsed(true);
 	getInputInfoUnits().add(termsOfUsage);
 

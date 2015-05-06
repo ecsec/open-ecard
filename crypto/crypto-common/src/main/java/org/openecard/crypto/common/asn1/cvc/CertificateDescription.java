@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2013 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,6 +23,7 @@
 package org.openecard.crypto.common.asn1.cvc;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -55,8 +56,9 @@ import org.slf4j.LoggerFactory;
  * }
  * </pre>
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Moritz Horsch
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class CertificateDescription {
 
@@ -67,10 +69,12 @@ public class CertificateDescription {
     private String issuerURL;
     private String subjectName;
     private String subjectURL;
-    private Object termsOfUsage;
+    private String termsOfUsage;
+    private byte[] termsOfUsageBytes;
     private String redirectURL;
     private ArrayList<byte[]> commCertificates;
     private byte[] encoded;
+    private String termsOfUsageMimeType;
 
     /**
      * Creates a new CertificateDescription.
@@ -125,12 +129,19 @@ public class CertificateDescription {
 			subjectURL = ((ASN1String) obj).getString();
 			break;
 		    case 5:
-			if (CVCertificatesObjectIdentifier.id_plainFormat.equals(descriptionType)) {
-			    termsOfUsage = ((ASN1String) obj).getString();
-			} else if (CVCertificatesObjectIdentifier.id_htmlFormat.equals(descriptionType)) {
-			    termsOfUsage = ((ASN1String) obj).getString();
-			} else if (CVCertificatesObjectIdentifier.id_pdfFormat.equals(descriptionType)) {
-			    termsOfUsage = ((ASN1OctetString) obj).getOctets();
+			switch (descriptionType) {
+			    case CVCertificatesObjectIdentifier.id_plainFormat:
+				termsOfUsageMimeType = "text/plain";
+				termsOfUsage = ((ASN1String) obj).getString();
+				break;
+			    case CVCertificatesObjectIdentifier.id_htmlFormat:
+				termsOfUsageMimeType = "text/html";
+				termsOfUsage = ((ASN1String) obj).getString();
+				break;
+			    case CVCertificatesObjectIdentifier.id_pdfFormat:
+				termsOfUsageMimeType = "application/pdf";
+				termsOfUsageBytes = ((ASN1OctetString) obj).getOctets();
+				break;
 			}
 			break;
 		    case 6:
@@ -138,7 +149,7 @@ public class CertificateDescription {
 			break;
 		    case 7:
 			Enumeration<?> commCerts = ((ASN1Set) obj).getObjects();
-			commCertificates = new ArrayList<byte[]>();
+			commCertificates = new ArrayList<>();
 
 			while (commCerts.hasMoreElements()) {
 			    commCertificates.add(((ASN1OctetString) commCerts.nextElement()).getOctets());
@@ -205,8 +216,40 @@ public class CertificateDescription {
      *
      * @return TermsOfUsage
      */
+    @Deprecated
     public Object getTermsOfUsage() {
 	return termsOfUsage;
+    }
+
+    /**
+     * Get the terms of usage as String.
+     *
+     * @return The terms of usage as string.
+     * @throws IllegalStateException If the mimeType of the terms of usage is application/pdf.
+     */
+    public String getTermsOfUsageString() {
+	if (termsOfUsage != null) {
+	    return termsOfUsage;
+	}
+
+	throw new IllegalStateException("Terms of usage are not available in a string type.");
+    }
+
+    /**
+     * Get the terms of usage as byte array.
+     * <br/>
+     * The intension of this method is to serve the bytes of the terms of usage in case they are in pdf format. If the
+     * terms of usage are in {@code plain text} or {@code HTML} format (represented by a String) the getBytes method of
+     * the String object is invoked with the UTF-8 charset.
+     *
+     * @return The terms of usage as byte array.
+     */
+    public byte[] getTermsOfUsageBytes() {
+	if (termsOfUsageBytes != null) {
+	    return termsOfUsageBytes;
+	} else {
+	    return termsOfUsage.getBytes(Charset.forName("UTF-8"));
+	}
     }
 
     /**
@@ -234,6 +277,48 @@ public class CertificateDescription {
      */
     public byte[] getEncoded() {
 	return encoded;
+    }
+
+    /**
+     * Get the MimeType of the Terms of Usage in the Certificate Description.
+     *
+     * @return The MimeType of the terms of usage. The possible values are:
+     * <br/>
+     * <ul>
+     *	<li>text/plain</li>
+     *	<li>text/html</li>
+     *	<li>application/pdf</li>
+     * </ul>
+     */
+    public String getTermsOfUsageMimeType() {
+	return termsOfUsageMimeType;
+    }
+
+    /**
+     * Indicates whether the Terms of Usage are in PDF format.
+     *
+     * @return {@code TRUE} if the Terms of Usage are in PDF format else {@code FALSE}.
+     */
+    public boolean isTermsOfUsagePdf() {
+	return termsOfUsageMimeType.equals("application/pdf");
+    }
+
+    /**
+     * Indicates whether the Terms of Usage are in HTML format.
+     *
+     * @return {@code TRUE} if the Terms of Usage are in HTML format else {@code FALSE}.
+     */
+    public boolean isTermsOfUsageHtml() {
+	return termsOfUsageMimeType.equals("text/html");
+    }
+
+    /**
+     * Indicates whether the Terms of Usage are in plain text format.
+     *
+     * @return {@code TRUE} if the Terms of Usage are in plain text format else {@code FALSE}.
+     */
+    public boolean isTermsOfUsageText() {
+	return termsOfUsageMimeType.equals("text/plain");
     }
 
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,25 +25,37 @@ package org.openecard.gui.swing.components;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Insets;
+import java.nio.charset.Charset;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.text.html.HTMLDocument;
+import org.openecard.gui.definition.Document;
 import org.openecard.gui.definition.OutputInfoUnit;
 
 
 /**
  * Implementation of a simple text component for use in a {@link org.openecard.gui.swing.StepFrame}.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class Text implements StepComponent {
 
     private final JTextPane textArea;
 
     public Text(org.openecard.gui.definition.Text text) {
-	String textValue = text.getText();
-	if (! (textValue.startsWith("<html>") && textValue.endsWith("</html>"))) {
-	    textValue = "<html><body>" + textValue + "</body></html>";
+	Document textValue = text.getDocument();
+	String textString;
+
+	switch (textValue.getMimeType()) {
+	    case "text/plain":
+		textString = "<html><body>" + new String(textValue.getValue(), Charset.forName("UTF-8")) + "</body></html>";
+		break;
+	    case "text/html":
+		// pray that the code is HTML 3.2 compliant
+		textString = new String(textValue.getValue(), Charset.forName("UTF-8"));
+		break;
+	    default:
+		throw new IllegalArgumentException("Content with the MimeType " + textValue.getMimeType() + " is not supported by the Swing Text implementation.");
 	}
 
 	textArea = new JTextPane();
@@ -56,7 +68,7 @@ public class Text implements StepComponent {
 	HTMLDocument doc = (HTMLDocument) textArea.getDocument();
 	doc.getStyleSheet().addRule(bodyRule);
 
-	textArea.setText(textValue);
+	textArea.setText(textString);
     }
 
     @Override

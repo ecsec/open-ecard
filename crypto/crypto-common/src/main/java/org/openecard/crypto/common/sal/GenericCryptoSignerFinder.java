@@ -341,6 +341,7 @@ public class GenericCryptoSignerFinder {
 			cert = ByteUtils.concatenate(cert, certChain);
 			Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, true);
 			dataSetWithCert.put(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), certAndTLSAuth);
+			cardCert.setRawCertificate(cert);
 		    }
 		}
 	    }

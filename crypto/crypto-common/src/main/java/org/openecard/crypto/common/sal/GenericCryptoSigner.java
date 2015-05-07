@@ -116,7 +116,8 @@ public class GenericCryptoSigner {
 	if (rawCertData == null) {
 	    String dataSetName = didCert.getDataSetName();
 	    if (dataSetName != null) {
-		rawCertData = readCertificateDataset(handle, dataSetName);
+		rawCertData = didCert.getRawCertificate();
+		//rawCertData = readCertificateDataset(handle, dataSetName);
 	    } else {
 		throw new IOException("Could not get the certificate data set name.");
 	    }
@@ -197,8 +198,8 @@ public class GenericCryptoSigner {
 	    CertificateException, IOException {
 	// is the certificate already available in BC form?
 	if (bcCert == null) {
-	    byte[] certs = getCertificateChain();
-	    bcCert = convertToCertificate(certs);
+	    //byte[] certs = getCertificateChain();
+	    bcCert = convertToCertificate();
 	}
 
 	return bcCert;
@@ -252,16 +253,25 @@ public class GenericCryptoSigner {
 	}
     }
 
-    private Certificate convertToCertificate(byte[] certificateBytes) throws CertificateException {
-	org.openecard.bouncycastle.asn1.x509.Certificate x509Certificate =
-		org.openecard.bouncycastle.asn1.x509.Certificate.getInstance(certificateBytes);
-	if(x509Certificate == null) {
-	    throw new CertificateException("Couldn't convert to x509Certificate.");
+    private Certificate convertToCertificate() throws CertificateException {
+	try {
+	    java.security.cert.Certificate[] jCertificates = getJavaSecCertificateChain();
+	    org.openecard.bouncycastle.asn1.x509.Certificate[] certs
+		    = new org.openecard.bouncycastle.asn1.x509.Certificate[jCertificates.length];
+	    for (int i = 0; i < jCertificates.length; i++) {
+		org.openecard.bouncycastle.asn1.x509.Certificate x509Certificate
+			= org.openecard.bouncycastle.asn1.x509.Certificate.getInstance(jCertificates[i].getEncoded());
+
+		if (x509Certificate == null) {
+		    throw new CertificateException("Couldn't convert to x509Certificate.");
+		}
+		certs[i] = x509Certificate;
+	    }
+	    Certificate cert = new Certificate(certs);
+	    return cert;
+	} catch (CredentialPermissionDenied | IOException ex) {
+	    throw new CertificateException(ex);
 	}
-	org.openecard.bouncycastle.asn1.x509.Certificate[] certs =
-		new org.openecard.bouncycastle.asn1.x509.Certificate[] { x509Certificate };
-	Certificate cert = new Certificate(certs);
-	return cert;
     }
 
     /**

@@ -744,6 +744,9 @@
 							<iso:CertificateRef>
 								<iso:DataSetName>DTRUSTAuthenticationKey</iso:DataSetName>
 							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.SCA.eSIGN</iso:DataSetName>
+							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
 				</iso:DifferentialIdentity>
@@ -840,6 +843,9 @@
 							<iso:CertificateRef>
 								<iso:DataSetName>DTRUSTAuthenticationKey</iso:DataSetName>
 							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.SCA.eSIGN</iso:DataSetName>
+							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
 				</iso:DifferentialIdentity>
@@ -933,6 +939,9 @@
 							</iso:LegacySignatureGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>DTRUSTAuthenticationKey</iso:DataSetName>
+							</iso:CertificateRef>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.SCA.eSIGN</iso:DataSetName>
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>

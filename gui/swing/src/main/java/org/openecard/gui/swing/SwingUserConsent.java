@@ -30,11 +30,14 @@ import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
+import org.openecard.common.I18n;
 import org.openecard.gui.FileDialog;
 import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsent;
@@ -55,6 +58,7 @@ import org.openecard.gui.swing.common.GUIConstants;
 public class SwingUserConsent implements UserConsent {
 
     private final DialogWrapper dialogWrapper;
+    private final I18n lang = I18n.getTranslation("addon");
 
     /**
      * Instantiate SwingUserConsent.
@@ -104,7 +108,24 @@ public class SwingUserConsent implements UserConsent {
 			    }
 			}
 		    }
+		} else if (event instanceof WindowEvent) {
+		    WindowEvent windowEvent = (WindowEvent) event;
+		    if (windowEvent.getID() == WindowEvent.WINDOW_CLOSING) {
+			// The user has closed the window by pressing the x of the window manager handle this event as
+			// cancelation. This is necessary to unlock the app in case of a running authentication.
+			Object source = event.getSource();
+			if (event.getSource() instanceof JFrame) {
+			    JFrame sourceFrame = (JFrame) source;
+			    if (! sourceFrame.getTitle().equals(lang.translationForKey("addon.title"))) {
+				ActionEvent ev = new ActionEvent(navigationBar, ActionEvent.ACTION_PERFORMED,
+					GUIConstants.BUTTON_CANCEL);
+				navigator.actionPerformed(ev);
+			    }
+			}
+		    }
 		}
+
+
 		super.dispatchEvent(event);
 	    }
 	};
@@ -153,5 +174,5 @@ public class SwingUserConsent implements UserConsent {
 	    panel.add(c);
 	}
     }
-
+    
 }

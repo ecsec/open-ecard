@@ -54,7 +54,7 @@ public class SwingDialogWrapper implements DialogWrapper {
 	dialog.setLocationRelativeTo(null);
 	dialog.setIconImage(GUIDefaults.getImage("Frame.icon", 45, 45).getImage());
 	dialog.setVisible(false);
-	dialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+	dialog.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
 	return dialog.getContentPane();
     }

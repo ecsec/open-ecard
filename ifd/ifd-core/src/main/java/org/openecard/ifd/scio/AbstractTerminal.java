@@ -166,6 +166,8 @@ class AbstractTerminal {
 	otherTimeout = (otherTimeout == null) ? BigInteger.valueOf(15000) : otherTimeout;
 	final byte[] template = verify.getTemplate();
 
+	VerifyUserResponse response;
+	Result result;
 	// check which type of authentication to perform
 	if (inputUnit.getBiometricInput() != null) {
 	    // TODO: implement
@@ -188,19 +190,23 @@ class AbstractTerminal {
 		ResultStatus status = exec.process();
 		if (status == ResultStatus.CANCEL) {
 		    String msg = "PIN entry cancelled by user.";
-		    IFDException ex = new IFDException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg);
-		    _logger.warn(ex.getMessage(), ex);
-		    throw ex;
+		    _logger.warn(msg);
+		    result = WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg);
+		    response = WSHelper.makeResponse(VerifyUserResponse.class, result);
 		} else if (pinAction.exception != null) {
 		    _logger.warn(pinAction.exception.getMessage(), pinAction.exception);
-		    throw pinAction.exception;
+		    result = WSHelper.makeResultError(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED,
+			    pinAction.exception.getMessage());
+		    response = WSHelper.makeResponse(VerifyUserResponse.class, result);
+		} else {
+		    // input by user
+		    byte[] verifyResponse = pinAction.response;
+		    // evaluate result
+		    result = checkNativePinVerify(verifyResponse);
+		    response = WSHelper.makeResponse(VerifyUserResponse.class, result);
+		    response.setResponse(verifyResponse);
 		}
-		// input by user
-		byte[] verifyResponse = pinAction.response;
-		// evaluate result
-		Result result = checkNativePinVerify(verifyResponse);
-		VerifyUserResponse response = WSHelper.makeResponse(VerifyUserResponse.class, result);
-		response.setResponse(verifyResponse);
+		
 		return response;
 
 	    } else if (isVirtual()) { // software method
@@ -213,9 +219,10 @@ class AbstractTerminal {
 		ResultStatus status = exec.process();
 		if (status == ResultStatus.CANCEL) {
 		    String msg = "PIN entry cancelled by user.";
-		    IFDException ex = new IFDException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg);
-		    _logger.warn(ex.getMessage(), ex);
-		    throw ex;
+		    _logger.warn(msg);
+		    result = WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg);
+		    response = WSHelper.makeResponse(VerifyUserResponse.class, result);
+		    return response;
 		}
 
 		String rawPIN = getPinFromUserConsent(exec);
@@ -225,8 +232,11 @@ class AbstractTerminal {
 		try {
 		    verifyTransmit = PINUtils.buildVerifyTransmit(rawPIN, attributes, template, handle);
 		} catch (UtilException e) {
-		    IFDException ex = new IFDException(e);
-		    throw ex;
+		    String msg = "Failed to create the verifyTransmit message.";
+		    _logger.error(msg, e);
+		    result = WSHelper.makeResultError(ECardConstants.Minor.IFD.UNKNOWN_ERROR, msg);
+		    response = WSHelper.makeResponse(VerifyUserResponse.class, result);
+		    return response;
 		}
 
 		// send to reader
@@ -235,16 +245,17 @@ class AbstractTerminal {
 		// produce messages
 		if (transResp.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
 		    if (transResp.getOutputAPDU().isEmpty()) {
-			IFDException ex = new IFDException(transResp.getResult());
-			_logger.warn(ex.getMessage(), ex);
-			throw ex;
+			result = WSHelper.makeResultError(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED, 
+				transResp.getResult().getResultMessage().getValue());
+			response = WSHelper.makeResponse(VerifyUserResponse.class, result);
+			return response;
 		    } else {
-			VerifyUserResponse response = WSHelper.makeResponse(VerifyUserResponse.class, transResp.getResult());
+			response = WSHelper.makeResponse(VerifyUserResponse.class, transResp.getResult());
 			response.setResponse(transResp.getOutputAPDU().get(0));
 			return response;
 		    }
 		} else {
-		    VerifyUserResponse response = WSHelper.makeResponse(VerifyUserResponse.class, transResp.getResult());
+		    response = WSHelper.makeResponse(VerifyUserResponse.class, transResp.getResult());
 		    response.setResponse(transResp.getOutputAPDU().get(0));
 		    return response;
 		}

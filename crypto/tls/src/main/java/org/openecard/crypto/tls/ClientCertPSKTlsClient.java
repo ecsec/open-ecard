@@ -69,7 +69,10 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
      * @param doSni Control whether the server should send the SNI Header in the Client Hello.
      */
     public ClientCertPSKTlsClient(@Nonnull TlsPSKIdentity pskId, @Nonnull String host, boolean doSni) {
-	super(pskId, doSni ? host : null);
+	super(pskId);
+	if (doSni) {
+	    setServerName(host);
+	}
 	boolean tls1 = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
 	setMinimumVersion(tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11);
 	this.host = host;
@@ -84,7 +87,10 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
      */
     public ClientCertPSKTlsClient(@Nonnull TlsCipherFactory tcf, @Nonnull TlsPSKIdentity pskId, @Nonnull String host,
 	    boolean doSni) {
-	super(tcf, pskId, host);
+	super(tcf, pskId);
+	if (doSni) {
+	    setServerName(host);
+	}
 	boolean tls1 = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
 	setMinimumVersion(tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11);
 	this.host = host;
@@ -162,7 +168,7 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
     }
 
     @Override
-    public void notifyAlertRaised(short alertLevel, short alertDescription, String message, Exception cause) {
+    public void notifyAlertRaised(short alertLevel, short alertDescription, String message, Throwable cause) {
 	TlsError error = new TlsError(alertLevel, alertDescription, message, cause);
 	if (alertLevel == AlertLevel.warning && logger.isInfoEnabled()) {
 	    logger.info("TLS warning sent.");

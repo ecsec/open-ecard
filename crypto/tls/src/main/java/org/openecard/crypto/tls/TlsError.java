@@ -40,13 +40,13 @@ public class TlsError {
     private final short alertLevel;
     private final short alertDescription;
     private final String message;
-    private final Exception cause;
+    private final Throwable cause;
 
     public TlsError(short alertLevel, short alertDescription) {
 	this(alertLevel, alertDescription, null, null);
     }
 
-    public TlsError(short alertLevel, short alertDescription, @Nullable String message, @Nullable Exception cause) {
+    public TlsError(short alertLevel, short alertDescription, @Nullable String message, @Nullable Throwable cause) {
 	this.alertLevel = alertLevel;
 	this.alertDescription = alertDescription;
 	this.message = message;
@@ -143,11 +143,11 @@ public class TlsError {
     @Nonnull
     public String getMessage() {
 	if (message == null) {
-	    Exception cause = getCause();
-	    if (cause == null) {
+	    Throwable causeTmp = getCause();
+	    if (causeTmp == null) {
 		return "Unknown error.";
 	    } else {
-		return cause.getMessage();
+		return causeTmp.getMessage();
 	    }
 	} else {
 	    return message;
@@ -155,7 +155,7 @@ public class TlsError {
     }
 
     @Nullable
-    public Exception getCause() {
+    public Throwable getCause() {
 	return cause;
     }
 

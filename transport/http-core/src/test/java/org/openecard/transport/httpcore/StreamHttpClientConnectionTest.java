@@ -76,7 +76,8 @@ public class StreamHttpClientConnectionTest {
 	// open connection
 	Socket socket = new Socket(hostName, 443);
 	assertTrue(socket.isConnected());
-	DefaultTlsClient tlsClient = new DefaultTlsClientImpl(hostName);
+	DefaultTlsClient tlsClient = new DefaultTlsClientImpl();
+	tlsClient.setServerName(hostName);
 	TlsClientProtocol handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), rand);
 	handler.connect(tlsClient);
 	StreamHttpClientConnection conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());

@@ -69,7 +69,9 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
      * @param doSni Control whether the server should send the SNI Header in the Client Hello.
      */
     public ClientCertDefaultTlsClient(@Nonnull String host, boolean doSni) {
-	super(doSni ? host : null);
+	if (doSni) {
+	    setServerName(host);
+	}
 	boolean tls1 = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
 	setMinimumVersion(tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11);
 	this.host = host;
@@ -82,7 +84,10 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
      * @param doSni Control whether the server should send the SNI Header in the Client Hello.
      */
     public ClientCertDefaultTlsClient(@Nonnull TlsCipherFactory tcf, @Nonnull String host, boolean doSni) {
-	super(tcf, doSni ? host : null);
+	super(tcf);
+	if (doSni) {
+	    setServerName(host);
+	}
 	boolean tls1 = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
 	setMinimumVersion(tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11);
 	this.host = host;
@@ -204,7 +209,7 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
     }
 
     @Override
-    public void notifyAlertRaised(short alertLevel, short alertDescription, String message, Exception cause) {
+    public void notifyAlertRaised(short alertLevel, short alertDescription, String message, Throwable cause) {
 	TlsError error = new TlsError(alertLevel, alertDescription, message, cause);
 	if (alertLevel == AlertLevel.warning && logger.isInfoEnabled()) {
 	    logger.info("TLS warning sent.");

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -33,13 +33,9 @@ import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
 /**
  * Implementation of BouncyCastle's abstract DefaultTlsClient.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class DefaultTlsClientImpl extends DefaultTlsClient {
-
-    public DefaultTlsClientImpl(String hostName) {
-	super(hostName);
-    }
 
     @Override
     public TlsAuthentication getAuthentication() throws IOException {

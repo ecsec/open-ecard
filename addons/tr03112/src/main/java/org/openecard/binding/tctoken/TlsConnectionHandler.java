@@ -50,7 +50,7 @@ import org.openecard.crypto.tls.proxy.ProxySettings;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.UrlBuilder;
-import org.openecard.crypto.tls.ReusableSecureRandom;
+import org.openecard.crypto.common.ReusableSecureRandom;
 
 
 /**

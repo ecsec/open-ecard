@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,10 +25,12 @@ package org.openecard.control.binding.http;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.util.List;
+import org.openecard.apache.http.ConnectionClosedException;
 import org.openecard.apache.http.ConnectionReuseStrategy;
 import org.openecard.apache.http.HttpRequestInterceptor;
 import org.openecard.apache.http.HttpResponseFactory;
@@ -39,7 +41,6 @@ import org.openecard.apache.http.impl.DefaultHttpResponseFactory;
 import org.openecard.apache.http.protocol.BasicHttpContext;
 import org.openecard.apache.http.protocol.HttpProcessor;
 import org.openecard.apache.http.protocol.HttpRequestHandler;
-import org.openecard.apache.http.protocol.HttpService;
 import org.openecard.apache.http.protocol.ImmutableHttpProcessor;
 import org.openecard.apache.http.protocol.UriHttpRequestHandlerMapper;
 import org.slf4j.Logger;
@@ -47,15 +48,17 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ *
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
-public class HTTPService implements Runnable {
+public class HttpService implements Runnable {
 
-    private static final Logger logger = LoggerFactory.getLogger(HTTPService.class);
+    private static final Logger logger = LoggerFactory.getLogger(HttpService.class);
     private static final int backlog = 10;
     private final Thread thread;
-    private final ServerSocket server;
-    private final HttpService service;
+    private final org.openecard.apache.http.protocol.HttpService service;
+    protected final ServerSocket server;
 
     /**
      * Creates a new HTTPService.
@@ -66,7 +69,7 @@ public class HTTPService implements Runnable {
      * @param respInterceptors
      * @throws Exception
      */
-    public HTTPService(int port, HttpRequestHandler handler, List<HttpRequestInterceptor> reqInterceptors,
+    public HttpService(int port, HttpRequestHandler handler, List<HttpRequestInterceptor> reqInterceptors,
 	    List<HttpResponseInterceptor> respInterceptors) throws Exception {
 	thread = new Thread(this, "Open-eCard Localhost-Binding");
 	server = new ServerSocket(port, backlog, InetAddress.getByName("127.0.0.1"));
@@ -85,7 +88,7 @@ public class HTTPService implements Runnable {
 	handlerRegistry.register("*", handler);
 
 	// create service instance
-	service = new HttpService(httpProcessor, connectionReuseStrategy, responseFactory, handlerRegistry);
+	service = new org.openecard.apache.http.protocol.HttpService(httpProcessor, connectionReuseStrategy, responseFactory, handlerRegistry);
     }
 
     /**
@@ -106,6 +109,10 @@ public class HTTPService implements Runnable {
 	}
     }
 
+    protected Socket accept() throws IOException, HttpServiceError {
+	return this.server.accept();
+    }
+
     @Override
     public void run() {
 	while (! Thread.interrupted()) {
@@ -114,17 +121,21 @@ public class HTTPService implements Runnable {
 		CharsetDecoder dec = Charset.forName("UTF-8").newDecoder();
 		CharsetEncoder enc = Charset.forName("UTF-8").newEncoder();
 		connection = new DefaultBHttpServerConnection(8192, dec, enc, null);
-		connection.bind(this.server.accept());
+		connection.bind(accept());
 
 		new Thread() {
 		    @Override
 		    public void run() {
 			try {
-			    if (connection.isOpen()) {
+			    while (connection.isOpen()) {
 				service.handleRequest(connection, new BasicHttpContext());
 			    }
-			} catch (Exception e) {
-			    logger.error(e.getMessage(), e);
+			} catch (ConnectionClosedException ex) {
+			    // connection closed by client, this is the expected outcome
+			} catch (org.openecard.apache.http.HttpException ex) {
+			    logger.error("Error processing HTTP request or response.", ex);
+			} catch (IOException ex) {
+			    logger.error("IO Error while processing HTTP request or response.", ex);
 			} finally {
 			    try {
 				connection.shutdown();
@@ -134,8 +145,12 @@ public class HTTPService implements Runnable {
 		    }
 
 		}.start();
-	    } catch (Exception e) {
-		logger.error(e.getMessage(), e);
+	    } catch (HttpsServiceError ex) {
+		logger.error("Failed to initialize TLS server socket.", ex);
+		// no chance this gets better, just close down the server
+		return;
+	    } catch (IOException | HttpServiceError ex) {
+		logger.error(ex.getMessage(), ex);
 	    }
 	}
     }

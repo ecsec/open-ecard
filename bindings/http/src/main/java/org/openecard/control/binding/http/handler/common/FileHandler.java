@@ -31,7 +31,7 @@ import org.openecard.apache.http.HttpStatus;
 import org.openecard.apache.http.RequestLine;
 import org.openecard.apache.http.entity.BasicHttpEntity;
 import org.openecard.apache.http.entity.ContentType;
-import org.openecard.control.binding.http.HTTPException;
+import org.openecard.control.binding.http.HttpException;
 import org.openecard.control.binding.http.common.DocumentRoot;
 import org.openecard.control.binding.http.common.Http11Response;
 import org.openecard.control.binding.http.common.MimeType;
@@ -61,7 +61,7 @@ public class FileHandler extends ControlCommonHandler {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws HTTPException, Exception {
+    public HttpResponse handle(HttpRequest httpRequest) throws HttpException, Exception {
 	// Return 404 Not Found in the default case
 	Http11Response httpResponse = new Http11Response(HttpStatus.SC_NOT_FOUND);
 	RequestLine requestLine = httpRequest.getRequestLine();

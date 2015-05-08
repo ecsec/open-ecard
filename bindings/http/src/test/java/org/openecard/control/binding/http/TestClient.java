@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -41,10 +41,10 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Implements a TestClient to test the HTTPBinding.
+ * Implements a TestClient to test the HttpBinding.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch
+ * @author Dirk Petrautzki
  */
 public final class TestClient {
 
@@ -112,9 +112,9 @@ public final class TestClient {
 	AddonManager manager = new AddonManager(dispatcher, gui, cardStates, recognition, em, null);
 	sal.setAddonManager(manager);
 
-	HTTPBinding binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
+	HttpBinding binding = new HttpBinding(HttpBinding.DEFAULT_PORT);
 	binding.setAddonManager(manager);
-	binding.start();
+	binding.start(false);
     }
 
 }

@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.security.SecureRandom;
 import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
-import org.openecard.crypto.tls.ReusableSecureRandom;
+import org.openecard.crypto.common.ReusableSecureRandom;
 import org.testng.SkipException;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;

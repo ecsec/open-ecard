@@ -25,7 +25,7 @@ package org.openecard.control.binding.http.handler.common;
 import org.openecard.apache.http.HttpRequest;
 import org.openecard.apache.http.HttpResponse;
 import org.openecard.apache.http.HttpStatus;
-import org.openecard.control.binding.http.HTTPException;
+import org.openecard.control.binding.http.HttpException;
 import org.openecard.control.binding.http.common.HeaderTypes;
 import org.openecard.control.binding.http.common.Http11Response;
 import org.openecard.control.binding.http.handler.ControlCommonHandler;
@@ -45,7 +45,7 @@ public class IndexHandler extends ControlCommonHandler {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws HTTPException, Exception {
+    public HttpResponse handle(HttpRequest httpRequest) throws HttpException, Exception {
 	HttpResponse httpResponse = new Http11Response(HttpStatus.SC_SEE_OTHER);
 	httpResponse.setHeader(HeaderTypes.LOCATION.fieldName(), "/index.html");
 

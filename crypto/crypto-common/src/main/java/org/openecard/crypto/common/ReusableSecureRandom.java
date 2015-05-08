@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,33 +20,35 @@
  *
  ***************************************************************************/
 
-package org.openecard.control.binding.http.handler.common;
+package org.openecard.crypto.common;
 
-import org.openecard.apache.http.HttpRequest;
-import org.openecard.apache.http.HttpResponse;
-import org.openecard.apache.http.HttpStatus;
-import org.openecard.control.binding.http.HttpException;
-import org.openecard.control.binding.http.common.Http11Response;
-import org.openecard.control.binding.http.handler.ControlCommonHandler;
+import java.security.SecureRandom;
+import org.openecard.common.util.SecureRandomFactory;
 
 
 /**
+ * SecureRandom singleton.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich
  */
-public class DefaultHandler extends ControlCommonHandler {
+public class ReusableSecureRandom {
+
+    private static final SecureRandom instance;
+
+    static {
+	instance = SecureRandomFactory.create(32);
+    }
 
     /**
-     * Creates a new default handler.
+     * Gets a singleton instance of the systems default SecureRandom.
+     * The instance is properly seeded and ready to use.
+     *
+     * @return Seeded {@link SecureRandom} instance.
      */
-    public DefaultHandler() {
-	super("*");
+    public static SecureRandom getInstance() {
+	return instance;
     }
 
-    @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws HttpException, Exception {
-	// Always return 404 Not Found
-	return new Http11Response(HttpStatus.SC_NOT_FOUND);
-    }
+    private ReusableSecureRandom() { }
 
 }

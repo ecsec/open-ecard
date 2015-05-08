@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -39,7 +39,7 @@ import org.openecard.bouncycastle.crypto.tls.Certificate;
 
 
 /**
- * Class with helper functions regarding cryptographic keys.+
+ * Class with helper functions regarding cryptographic keys.
  *
  * @author Tobias Wich
  */
@@ -110,6 +110,27 @@ public class KeyTools {
 	}
 
 	return cf.generateCertPath(result);
+    }
+
+    /**
+     * Converts the given certificate chain to a BouncyCastle Certificate chain.
+     *
+     * @param chain JCA list of certificates.
+     * @return BC Certificate instance.
+     * @throws CertificateException Thrown in case one of the given certificates could not be encoded.
+     */
+    public static Certificate convertCertificates(java.security.cert.Certificate... chain) throws CertificateException {
+	org.openecard.bouncycastle.asn1.x509.Certificate[] certs;
+	certs = new org.openecard.bouncycastle.asn1.x509.Certificate[chain.length];
+
+	for (int i = 0; i < chain.length; i++) {
+	    java.security.cert.Certificate next = chain[i];
+	    byte[] encCert = next.getEncoded();
+	    certs[i] = org.openecard.bouncycastle.asn1.x509.Certificate.getInstance(encCert);
+	}
+
+	Certificate cert = new Certificate(certs);
+	return cert;
     }
 
 }

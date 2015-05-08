@@ -40,7 +40,7 @@ import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
 import org.openecard.bouncycastle.util.encoders.Base64;
 import org.openecard.crypto.tls.CertificateVerifier;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
-import org.openecard.crypto.tls.ReusableSecureRandom;
+import org.openecard.crypto.common.ReusableSecureRandom;
 import org.openecard.crypto.tls.SocketWrapper;
 import org.openecard.crypto.tls.auth.CertificateVerifierBuilder;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;

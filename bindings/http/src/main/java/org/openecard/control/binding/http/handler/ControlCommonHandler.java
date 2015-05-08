@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,14 +29,13 @@ import org.openecard.apache.http.HttpResponse;
 import org.openecard.apache.http.HttpStatus;
 import org.openecard.apache.http.entity.StringEntity;
 import org.openecard.apache.http.protocol.HttpContext;
-import org.openecard.control.binding.http.HTTPException;
 import org.openecard.control.binding.http.common.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public abstract class ControlCommonHandler extends HttpControlHandler {
 
@@ -63,10 +62,10 @@ public abstract class ControlCommonHandler extends HttpControlHandler {
      *
      * @param httpRequest HTTPRequest
      * @return HTTPResponse
-     * @throws HTTPException
+     * @throws HttpException
      * @throws Exception
      */
-    public abstract HttpResponse handle(HttpRequest httpRequest) throws HTTPException, Exception;
+    public abstract HttpResponse handle(HttpRequest httpRequest) throws HttpException, Exception;
 
     /**
      * Handles a HTTP request.
@@ -87,7 +86,7 @@ public abstract class ControlCommonHandler extends HttpControlHandler {
 	    response.setParams(request.getParams());
 
 	    httpResponse = handle(request);
-	} catch (HTTPException e) {
+	} catch (org.openecard.control.binding.http.HttpException e) {
 	    httpResponse = new Http11Response(HttpStatus.SC_BAD_REQUEST);
 	    httpResponse.setEntity(new StringEntity(e.getMessage(), "UTF-8"));
 

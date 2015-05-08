@@ -36,7 +36,7 @@ import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
-import org.openecard.control.binding.http.HTTPBinding;
+import org.openecard.control.binding.http.HttpBinding;
 import org.openecard.event.EventManager;
 import org.openecard.gui.message.DialogType;
 import org.openecard.gui.swing.SwingDialogWrapper;
@@ -68,7 +68,8 @@ public final class RichClient {
     // Tray icon
     private AppTray tray;
     // Control interface
-    private HTTPBinding binding;
+    private HttpBinding httpBinding;
+    private HttpBinding httpsBinding;
     // Client environment
     private ClientEnv env = new ClientEnv();
     // Interface Device Layer (IFD)
@@ -163,12 +164,17 @@ public final class RichClient {
 	    // Start up control interface
 	    SettingsAndDefaultViewWrapper guiWrapper = new SettingsAndDefaultViewWrapper();
 	    try {
-		binding = new HTTPBinding(HTTPBinding.DEFAULT_PORT);
 		manager = new AddonManager(dispatcher, gui, cardStates, recognition, em, guiWrapper);
 		guiWrapper.setAddonManager(manager);
 		sal.setAddonManager(manager);
-		binding.setAddonManager(manager);
-		binding.start();
+
+		httpBinding = new HttpBinding(HttpBinding.DEFAULT_PORT);
+		httpBinding.setAddonManager(manager);
+		httpBinding.start(false);
+
+		httpsBinding = new HttpBinding(HttpBinding.DEFAULT_PORT + 1);
+		httpsBinding.setAddonManager(manager);
+		httpsBinding.start(true);
 	    } catch (BindException e) {
 		message = lang.translationForKey("client.startup.failed.portinuse");
 		throw e;
@@ -211,7 +217,8 @@ public final class RichClient {
 	    manager.shutdown();
 
 	    // shutdown control modules
-	    binding.stop();
+	    httpBinding.stop();
+	    httpsBinding.stop();
 
 	    // shutdwon event manager
 	    em.terminate();

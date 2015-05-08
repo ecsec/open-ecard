@@ -43,8 +43,9 @@ import org.openecard.control.binding.http.interceptor.StatusLineResponseIntercep
  *
  * @author Moritz Horsch 
  * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
-public class HTTPBinding {
+public class HttpBinding {
 
     /** Uses the default port 24727 according to BSI-TR-03112 */
     public static final int DEFAULT_PORT = 24727;
@@ -52,7 +53,7 @@ public class HTTPBinding {
     private final DocumentRoot documentRoot;
     private List<HttpRequestInterceptor> reqInterceptors;
     private List<HttpResponseInterceptor> respInterceptors;
-    private HTTPService service;
+    private HttpService service;
     private AddonManager addonManager;
 
     public void setAddonManager(AddonManager addonManager) {
@@ -64,7 +65,7 @@ public class HTTPBinding {
      * @throws IOException If the document root cannot be read
      * @throws Exception
      */
-    public HTTPBinding() throws IOException, Exception {
+    public HttpBinding() throws IOException, Exception {
 	this(DEFAULT_PORT);
     }
 
@@ -75,7 +76,7 @@ public class HTTPBinding {
      * @throws IOException If the document root cannot be read
      * @throws Exception
      */
-    public HTTPBinding(int port) throws IOException, Exception {
+    public HttpBinding(int port) throws IOException, Exception {
 	this(port, "/www", "/www-files");
     }
 
@@ -88,7 +89,7 @@ public class HTTPBinding {
      * @throws IOException If the document root cannot be read
      * @throws Exception
      */
-    public HTTPBinding(int port, String documentRootPath, String listFile) throws IOException, Exception {
+    public HttpBinding(int port, String documentRootPath, String listFile) throws IOException, Exception {
 	this.port = port;
 
 	// Create document root
@@ -103,7 +104,7 @@ public class HTTPBinding {
 	this.respInterceptors = respInterceptors;
     }
 
-    public void start() throws Exception {
+    public void start(boolean tls) throws Exception {
 	// Add default interceptors if none are given
 	if (reqInterceptors == null) {
 	    reqInterceptors = Collections.emptyList();
@@ -120,7 +121,11 @@ public class HTTPBinding {
 	}
 
 	HttpAppPluginActionHandler handler = new HttpAppPluginActionHandler(addonManager);
-	service = new HTTPService(port, handler, reqInterceptors, respInterceptors);
+	if (! tls) {
+	    service = new HttpService(port, handler, reqInterceptors, respInterceptors);
+	} else {
+	    service = new HttpsService(port, handler, reqInterceptors, respInterceptors);
+	}
 	service.start();
     }
 

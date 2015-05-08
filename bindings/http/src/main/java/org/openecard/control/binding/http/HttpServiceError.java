@@ -20,35 +20,22 @@
  *
  ***************************************************************************/
 
-package org.openecard.crypto.tls;
-
-import java.security.SecureRandom;
-import org.openecard.common.util.SecureRandomFactory;
+package org.openecard.control.binding.http;
 
 
 /**
- * SecureRandom singleton.
+ * Exception indicationg a problem while initializing the HttpServer.
  *
  * @author Tobias Wich
  */
-public class ReusableSecureRandom {
+public class HttpServiceError extends Exception {
 
-    private static final SecureRandom instance;
-
-    static {
-	instance = SecureRandomFactory.create(32);
+    public HttpServiceError(String message) {
+	super(message);
     }
 
-    /**
-     * Gets a singleton instance of the systems default SecureRandom.
-     * The instance is properly seeded and ready to use.
-     *
-     * @return Seeded {@link SecureRandom} instance.
-     */
-    public static SecureRandom getInstance() {
-	return instance;
+    public HttpServiceError(String message, Throwable cause) {
+	super(message, cause);
     }
-
-    private ReusableSecureRandom() { }
 
 }

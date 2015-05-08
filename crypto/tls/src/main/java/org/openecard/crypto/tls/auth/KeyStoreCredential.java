@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 HS Coburg.
+ * Copyright (C) 2013-2015 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -42,20 +42,25 @@ import org.slf4j.LoggerFactory;
  * Signer credential wrapping the given KeyStoreSigner.
  *
  * @see KeyStoreSigner
- * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public class KeyStoreCredential implements TlsSignerCredentials, ContextAware {
 
-    private static final Logger logger = LoggerFactory.getLogger(SmartCardSignerCredential.class);
+    private static final Logger logger = LoggerFactory.getLogger(KeyStoreCredential.class);
 
     private final KeyStoreSigner signer;
-    private final SignatureAndHashAlgorithm signatureAndHashAlgorithm;
+    private final SignatureAndHashAlgorithm sigHashAlg;
     private TlsContext context;
-    private Certificate certificate = Certificate.EMPTY_CHAIN;
+    private Certificate certificate = null;
 
     public KeyStoreCredential(@Nonnull KeyStoreSigner signer) {
+	this(signer, new SignatureAndHashAlgorithm(HashAlgorithm.sha1, SignatureAlgorithm.rsa));
+    }
+
+    public KeyStoreCredential(@Nonnull KeyStoreSigner signer, SignatureAndHashAlgorithm sigHashAlg) {
 	this.signer = signer;
-	signatureAndHashAlgorithm = new SignatureAndHashAlgorithm(HashAlgorithm.sha256, SignatureAlgorithm.rsa);
+	this.sigHashAlg = sigHashAlg;
     }
 
     @Override
@@ -65,15 +70,12 @@ public class KeyStoreCredential implements TlsSignerCredentials, ContextAware {
 
     @Override
     public Certificate getCertificate() {
-	if (certificate.equals(Certificate.EMPTY_CHAIN)) {
+	if (certificate == null) {
 	    try {
-		certificate = signer.getBCCertificateChain();
-	    } catch (IOException ex) {
-		logger.error("Failed to read certificate due to an unknown error.", ex);
-	    } catch (CredentialPermissionDenied ex) {
-		logger.error("Failed to get certificate because of missing permissions.", ex);
+		certificate = signer.getCertificateChain();
 	    } catch (CertificateException ex) {
 		logger.error("Failed to deserialize certificate.", ex);
+		certificate = Certificate.EMPTY_CHAIN;
 	    }
 	}
 	return certificate;
@@ -82,7 +84,7 @@ public class KeyStoreCredential implements TlsSignerCredentials, ContextAware {
     @Override
     public byte[] generateCertificateSignature(byte[] hash) throws IOException {
 	try {
-	    return signer.sign(hash);
+	    return signer.sign(sigHashAlg, hash);
 	}  catch (SignatureException ex) {
 	    throw new IOException("Failed to create signature because of an unknown error.", ex);
 	} catch (CredentialPermissionDenied ex) {
@@ -92,7 +94,7 @@ public class KeyStoreCredential implements TlsSignerCredentials, ContextAware {
 
     @Override
     public SignatureAndHashAlgorithm getSignatureAndHashAlgorithm() {
-	return signatureAndHashAlgorithm;
+	return sigHashAlg;
     }
 
 }

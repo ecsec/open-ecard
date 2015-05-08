@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,33 +20,22 @@
  *
  ***************************************************************************/
 
-package org.openecard.control.binding.http.handler.common;
-
-import org.openecard.apache.http.HttpRequest;
-import org.openecard.apache.http.HttpResponse;
-import org.openecard.apache.http.HttpStatus;
-import org.openecard.control.binding.http.HttpException;
-import org.openecard.control.binding.http.common.Http11Response;
-import org.openecard.control.binding.http.handler.ControlCommonHandler;
+package org.openecard.control.binding.http;
 
 
 /**
+ * Exception indicationg a problem while initializing the HttpsServer.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich
  */
-public class DefaultHandler extends ControlCommonHandler {
+public class HttpsServiceError extends HttpServiceError {
 
-    /**
-     * Creates a new default handler.
-     */
-    public DefaultHandler() {
-	super("*");
+    public HttpsServiceError(String message) {
+	super(message);
     }
 
-    @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws HttpException, Exception {
-	// Always return 404 Not Found
-	return new Http11Response(HttpStatus.SC_NOT_FOUND);
+    public HttpsServiceError(String message, Throwable cause) {
+	super(message, cause);
     }
 
 }

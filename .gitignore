@@ -19,3 +19,5 @@ test-output
 .libs/
 project.properties
 LICENSE.Open-eCard
+/bindings/http/src/main/resources/binding/server-keystore.p12
+/bindings/http/keypass

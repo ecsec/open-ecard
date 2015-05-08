@@ -209,7 +209,7 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	if (alertLevel == AlertLevel.warning && logger.isInfoEnabled()) {
 	    logger.info("TLS warning sent.");
 	    logger.info(error.toString());
-	} else {
+	} else if (alertLevel == AlertLevel.fatal) {
 	    logger.error("TLS error sent.");
 	    logger.error(error.toString(), cause);
 	}
@@ -223,7 +223,7 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	if (alertLevel == AlertLevel.warning && logger.isInfoEnabled()) {
 	    logger.info("TLS warning received.");
 	    logger.info(error.toString());
-	} else {
+	} else if (alertLevel == AlertLevel.fatal) {
 	    logger.error("TLS error received.");
 	    logger.error(error.toString());
 	}

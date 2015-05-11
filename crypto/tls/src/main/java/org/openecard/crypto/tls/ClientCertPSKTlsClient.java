@@ -172,7 +172,11 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 	TlsError error = new TlsError(alertLevel, alertDescription, message, cause);
 	if (alertLevel == AlertLevel.warning && logger.isInfoEnabled()) {
 	    logger.info("TLS warning sent.");
-	    logger.info(error.toString());
+	    if (logger.isDebugEnabled()) {
+		logger.info(error.toString(), cause);
+	    } else {
+		logger.info(error.toString());
+	    }
 	} else if (alertLevel == AlertLevel.fatal) {
 	    logger.error("TLS error sent.");
 	    logger.error(error.toString(), cause);

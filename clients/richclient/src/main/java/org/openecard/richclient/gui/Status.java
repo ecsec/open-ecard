@@ -159,7 +159,12 @@ public class Status implements EventCallback {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
 		logger.debug("Shutdown button pressed.");
-		appTray.shutdown();
+		try {
+		    appTray.shutdown();
+		} catch (Throwable ex) {
+		    logger.error("Exiting client threw an error.", ex);
+		    throw ex;
+		}
 	    }
 	});
 
@@ -168,7 +173,12 @@ public class Status implements EventCallback {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
 		logger.debug("About button pressed.");
-		AboutDialog.showDialog();
+		try {
+		    AboutDialog.showDialog();
+		} catch (Throwable ex) {
+		    logger.error("Show About dialog threw an error.", ex);
+		    throw ex;
+		}
 	    }
 	});
 
@@ -177,7 +187,12 @@ public class Status implements EventCallback {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
 		logger.debug("Settings button pressed.");
-		ManagementDialog.showDialog(manager);
+		try {
+		    ManagementDialog.showDialog(manager);
+		} catch (Throwable ex) {
+		    logger.error("Show Settings dialog threw an error.", ex);
+		    throw ex;
+		}
 	    }
 	});
 

@@ -24,15 +24,19 @@ package org.openecard.gui.swing.components;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.Box;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
+import org.openecard.common.util.FileUtils;
 import org.openecard.gui.definition.PasswordField;
 
 
@@ -62,16 +66,24 @@ public class VirtualPinPadDialog extends JDialog {
 	this.passDef = passDef;
 	this.inputField.setText("");
 
-	setSize(165, 165);
+	setSize(200, 200);
 	setResizable(false);
 	setLayout(new BorderLayout(3, 3));
 	setLocationRelativeTo(getOwningWindow(inputField));
 
-	JPanel buttons = new JPanel(new GridLayout(4, 3, 4, 4));
+	JPanel buttons = new JPanel(new GridLayout(4, 4, 4, 4));
 	add(buttons, BorderLayout.CENTER);
 	for (int i = 1; i <= 9; i++) {
+	    if (i == 4) {
+		buttons.add(createRemoveSingleElementButton());
+	    }
+
+	    if (i == 7) {
+		buttons.add(createClearButton());
+	    }
 	    buttons.add(createButton(i));
 	}
+	buttons.add(Box.createGlue());
 	buttons.add(Box.createGlue());
 	buttons.add(createButton(0));
     }
@@ -79,6 +91,22 @@ public class VirtualPinPadDialog extends JDialog {
     private JButton createButton(int num) {
 	JButton button = new JButton(Integer.toString(num));
 	button.addActionListener(new NumberProcessingListener());
+	return button;
+    }
+
+    private JButton createClearButton() {
+	JButton button = new JButton("CLR");
+	button.addActionListener(new ClearInputListener());
+	Insets marginInset = button.getMargin();
+	button.setMargin(new Insets(marginInset.top, 5, marginInset.bottom, 5));
+	return button;
+    }
+
+    private JButton createRemoveSingleElementButton() {
+	JButton button = new JButton();
+	button.addActionListener(new RemoveSingelElementListener());
+	Icon ico = new ImageIcon(FileUtils.resolveResourceAsURL(VirtualPinPadDialog.class, "arrow.png"));
+	button.setIcon(ico);
 	return button;
     }
 
@@ -100,6 +128,28 @@ public class VirtualPinPadDialog extends JDialog {
 	    numCharsEntered++;
 	    if (passDef.getMaxLength() > 0 && numCharsEntered >= passDef.getMaxLength()) {
 		setVisible(false);
+	    }
+	}
+    }
+
+    private class ClearInputListener implements ActionListener {
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+	    inputField.setText("");
+	    numCharsEntered = 0;
+	}
+    }
+
+    private class RemoveSingelElementListener implements ActionListener {
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+	    String data = inputField.getText();
+	    if (!data.isEmpty()) {
+		data = data.substring(0, data.length() - 1);
+		inputField.setText(data);
+		numCharsEntered--;
 	    }
 	}
     }

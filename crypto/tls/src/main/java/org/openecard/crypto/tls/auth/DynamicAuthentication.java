@@ -181,12 +181,7 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
 	    }
 	}
 	// fall back to no auth, when no credential is found
-	return new TlsCredentials() {
-	    @Override
-	    public Certificate getCertificate() {
-		return Certificate.EMPTY_CHAIN;
-	    }
-	};
+	return null;
     }
 
     /**

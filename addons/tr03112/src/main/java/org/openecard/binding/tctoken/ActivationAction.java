@@ -115,6 +115,8 @@ public class ActivationAction implements AppPluginAction {
 	    }
 	} finally {
 	    SEMAPHORE.release();
+	    // in some cases an error does not lead to a removal of the dynamic context so remove it here
+	    DynamicContext.remove();
 	}
 
 	return response;
@@ -205,7 +207,8 @@ public class ActivationAction implements AppPluginAction {
 	// only continue, when there are known parameters in the request
 	if (emptyParms || !(tokenUrl || activationObject || status || showUI)) {
 	    response = new BindingResult(BindingResultCode.MISSING_PARAMETER);
-	    response.setResultMessage("A parameters containing the activation information is missing.");
+	    response.setResultMessage(lang.translationForKey(NO_ACTIVATION_PARAMETERS));
+	    showErrorMessage(lang.translationForKey(NO_ACTIVATION_PARAMETERS));
 	    return response;
 	}
 
@@ -213,7 +216,8 @@ public class ActivationAction implements AppPluginAction {
 	if ((tokenUrl && activationObject) || (tokenUrl && showUI) || (tokenUrl && status) || (activationObject && showUI)
 		|| (activationObject && status) || (showUI && status)) {
 	    response = new BindingResult(BindingResultCode.WRONG_PARAMETER);
-	    response.setResultMessage("The request contains an invalid combination of valid parameters.");
+	    response.setResultMessage(lang.translationForKey(NO_PARAMS));
+	    showErrorMessage(lang.translationForKey(NO_PARAMS));
 	    return response;
 	}
 

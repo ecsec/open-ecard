@@ -251,6 +251,11 @@ public class TCTokenRequest {
 	InsertCardDialog insCardDiag =
 		new InsertCardDialog(ctx.getUserConsent(), ctx.getCardStates(), namesAndType, ctx.getEventManager());
 	List<ConnectionHandleType> usableCards = insCardDiag.show();
+	
+	if (usableCards == null) {
+	    // user aborted the card insertion dialog
+	    throw new MissingActivationParameterException(CARD_INSERTION_ABORT);
+	}
 
 	ConnectionHandleType handle;
 	if (usableCards.size() > 1) {

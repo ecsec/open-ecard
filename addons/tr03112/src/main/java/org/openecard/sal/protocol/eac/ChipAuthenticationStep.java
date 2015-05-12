@@ -128,7 +128,7 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	}
 
-	Promise<Object> p = (Promise<Object>) dynCtx.getPromise(TR03112Keys.PROCESSING_CANCALATION);
+	Promise<Object> p = (Promise<Object>) dynCtx.getPromise(TR03112Keys.PROCESSING_CANCELLATION);
         if (p.derefNonblocking() == null) {
             // authentication finished, notify GUI
             dynCtx.put(EACProtocol.AUTHENTICATION_DONE, true);

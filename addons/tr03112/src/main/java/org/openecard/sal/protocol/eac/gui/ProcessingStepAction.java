@@ -55,7 +55,7 @@ public class ProcessingStepAction extends StepAction {
     public ProcessingStepAction(Step step) {
 	super(step);
 	ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	ctx.putPromise(TR03112Keys.PROCESSING_CANCALATION, p);
+	ctx.putPromise(TR03112Keys.PROCESSING_CANCELLATION, p);
     }
 
     @Override

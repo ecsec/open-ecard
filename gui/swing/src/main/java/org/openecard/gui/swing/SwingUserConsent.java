@@ -27,16 +27,17 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
+import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import org.openecard.common.I18n;
 import org.openecard.gui.FileDialog;
 import org.openecard.gui.MessageDialog;
@@ -57,7 +58,7 @@ import org.openecard.gui.swing.common.GUIConstants;
  */
 public class SwingUserConsent implements UserConsent {
 
-    private final DialogWrapper dialogWrapper;
+    private final SwingDialogWrapper dialogWrapper;
     private final I18n lang = I18n.getTranslation("addon");
 
     /**
@@ -66,7 +67,7 @@ public class SwingUserConsent implements UserConsent {
      *
      * @param dialogWrapper
      */
-    public SwingUserConsent(DialogWrapper dialogWrapper) {
+    public SwingUserConsent(SwingDialogWrapper dialogWrapper) {
 	this.dialogWrapper = dialogWrapper;
     }
 
@@ -85,51 +86,36 @@ public class SwingUserConsent implements UserConsent {
 	JPanel sideBar = new JPanel();
 
 	StepBar stepBar = new StepBar(steps);
-	final NavigationBar navigationBar = new NavigationBar(steps.size());
+	final NavigationBar navBar = new NavigationBar(steps.size());
 
 	Logo l = new Logo();
 	initializeSidePanel(sideBar, l, stepBar);
 
-	final SwingNavigator navigator = new SwingNavigator(dialogWrapper, dialogType, steps, stepPanel, navigationBar, stepBar);
-	navigationBar.registerEvents(navigator);
+	final SwingNavigator navigator = new SwingNavigator(dialogWrapper, dialogType, steps, stepPanel, navBar, stepBar);
+	navBar.registerEvents(navigator);
 
-	// Add global key listener
-	EventQueue eventQueue = new EventQueue() {
-	    ActionEvent e = new ActionEvent(navigationBar, ActionEvent.ACTION_PERFORMED, GUIConstants.BUTTON_NEXT);
+	dialogWrapper.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+		.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "process-next-button");
+	dialogWrapper.getRootPane().getActionMap()
+		.put("process-next-button", new AbstractAction() {
 	    @Override
-	    protected void dispatchEvent(AWTEvent event) {
-		if (event instanceof KeyEvent) {
-		    KeyEvent keyEvent = (KeyEvent) event;
-		    if (KeyEvent.KEY_RELEASED == keyEvent.getID() && KeyEvent.VK_ENTER == keyEvent.getKeyCode()) {
-			// If the enter is pressed when perform a next step event
-			if (! navigationBar.hasFocus()) {
-			    if (navigationBar.isNextButtonAccessible()) {
-				navigator.actionPerformed(e);
-			    }
-			}
-		    }
-		} else if (event instanceof WindowEvent) {
-		    WindowEvent windowEvent = (WindowEvent) event;
-		    if (windowEvent.getID() == WindowEvent.WINDOW_CLOSING) {
-			// The user has closed the window by pressing the x of the window manager handle this event as
-			// cancelation. This is necessary to unlock the app in case of a running authentication.
-			Object source = event.getSource();
-			if (event.getSource() instanceof JFrame) {
-			    JFrame sourceFrame = (JFrame) source;
-			    if (! sourceFrame.getTitle().equals(lang.translationForKey("addon.title"))) {
-				ActionEvent ev = new ActionEvent(navigationBar, ActionEvent.ACTION_PERFORMED,
-					GUIConstants.BUTTON_CANCEL);
-				navigator.actionPerformed(ev);
-			    }
-			}
-		    }
+	    public void actionPerformed(ActionEvent event) {
+		if (navBar.isNextButtonAccessible()) {
+		    ActionEvent e = new ActionEvent(navBar, ActionEvent.ACTION_PERFORMED, GUIConstants.BUTTON_NEXT);
+		    navigator.actionPerformed(e);
 		}
-
-
-		super.dispatchEvent(event);
 	    }
-	};
-	Toolkit.getDefaultToolkit().getSystemEventQueue().push(eventQueue);
+	});
+
+	dialogWrapper.getDialog().addWindowListener(new WindowAdapter() {
+	    @Override
+	    public void windowClosing(WindowEvent event) {
+		// The user has closed the window by pressing the x of the window manager handle this event as
+		// cancelation. This is necessary to unlock the app in case of a running authentication.
+		ActionEvent e = new ActionEvent(navBar, ActionEvent.ACTION_PERFORMED, GUIConstants.BUTTON_CANCEL);
+		navigator.actionPerformed(e);
+	    }
+	});
 
 	// Config layout
 	GroupLayout layout = new GroupLayout(rootPanel);
@@ -143,13 +129,13 @@ public class SwingUserConsent implements UserConsent {
 		.addComponent(sideBar, 200, 200, 200)
 		.addGroup(layout.createParallelGroup()
 		.addComponent(stepPanel)
-		.addComponent(navigationBar)));
+		.addComponent(navBar)));
 	layout.setVerticalGroup(
 		layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 		.addComponent(sideBar)
 		.addGroup(layout.createSequentialGroup()
 		.addComponent(stepPanel)
-		.addComponent(navigationBar)));
+		.addComponent(navBar)));
 
 	rootPanel.validate();
 	rootPanel.repaint();

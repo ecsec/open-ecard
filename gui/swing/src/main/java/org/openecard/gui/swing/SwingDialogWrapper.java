@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,12 +24,13 @@ package org.openecard.gui.swing;
 
 import java.awt.Container;
 import javax.swing.JFrame;
+import javax.swing.JRootPane;
 import org.openecard.gui.swing.common.GUIDefaults;
 
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class SwingDialogWrapper implements DialogWrapper {
 
@@ -39,6 +40,14 @@ public class SwingDialogWrapper implements DialogWrapper {
     public SwingDialogWrapper() {
 	// Initialize Look and Feel
 	GUIDefaults.initialize();
+    }
+
+    JFrame getDialog() {
+	return dialog;
+    }
+
+    JRootPane getRootPane() {
+	return dialog.getRootPane();
     }
 
     @Override

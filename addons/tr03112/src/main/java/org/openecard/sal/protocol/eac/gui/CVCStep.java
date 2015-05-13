@@ -91,7 +91,11 @@ public class CVCStep extends Step {
 	// SubjectURL
 	ToggleText subjectURL = new ToggleText();
 	subjectURL.setTitle(lang.translationForKey(SUBJECT_URL));
-	subjectURL.setText(eacData.certificateDescription.getSubjectURL());
+	if (eacData.certificateDescription.getSubjectURL() != null) {
+	    subjectURL.setText(eacData.certificateDescription.getSubjectURL());
+	} else {
+	    subjectURL.setText("");
+	}
 	getInputInfoUnits().add(subjectURL);
 
 	// TermsofUsage
@@ -136,7 +140,12 @@ public class CVCStep extends Step {
 	// IssuerURL
 	ToggleText issuerURL = new ToggleText();
 	issuerURL.setTitle(lang.translationForKey(ISSUER_URL));
-	issuerURL.setText(eacData.certificateDescription.getIssuerURL());
+	// issuer url is optional so perform a null check
+	if (eacData.certificateDescription.getIssuerURL() != null) {
+	    issuerURL.setText(eacData.certificateDescription.getIssuerURL());
+	} else {
+	    issuerURL.setText("");
+	}
 	issuerURL.setCollapsed(true);
 	getInputInfoUnits().add(issuerURL);
     }

@@ -109,8 +109,10 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 		CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
 		CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
 		CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-		CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
+		CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
 		// acceptable in case DHE is not available
+		// there seems to be a problem with DH and besides that I don't like them anyways
+		/*
 		CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,
 		CipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,
 		CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,
@@ -123,6 +125,7 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 		CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256,
 		CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256,
 		CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256
+		*/
 	));
 
 	// when doing TLS 1.0, we need the old SHA1 cipher suites
@@ -132,15 +135,19 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 		    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
 		    CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
 		    CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-		    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA,
-		    CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,
 		    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
 		    CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-		    CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+		    CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA
+		    // acceptable in case DHE is not available
+		    // there seems to be a problem with DH and besides that I don't like them anyways
+		    /*
+		    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA,
+		    CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,
 		    CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,
 		    CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
 		    CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
 		    CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA
+		    */
 	    ));
 	}
 

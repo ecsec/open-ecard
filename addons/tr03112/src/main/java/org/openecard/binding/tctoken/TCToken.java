@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -43,6 +43,7 @@ public class TCToken extends TCTokenType {
 
     private static final Logger logger = LoggerFactory.getLogger(TCToken.class);
 
+    private boolean invalidPSK = false;
 
     /**
      * Gets the CoomunicationErrorAddress for use in error conditions.
@@ -65,6 +66,31 @@ public class TCToken extends TCTokenType {
 	    logger.error("Construction of redirect URL failed.", ex);
 	    throw new InvalidRedirectUrlException(NO_URL);
 	}
+    }
+
+    /**
+     * Indicates whether the original data of the TCToken contains a invalid PSK.
+     * <br/>
+     * Note: This method is just for the case there was PSK data in the original data received. If the original TCToken
+     * data does not contain the PathSecurity-Parameters or the PSK element than this method will return false.
+     *
+     * @return {@code TRUE} if the PSK contain in the TCToken is invalid else {@code FALSE}.
+     */
+    protected boolean isInvalidPSK() {
+	return invalidPSK;
+    }
+
+    /**
+     * Sets the indicator of an invalid PSK.
+     * <br/>
+     * Note: This method is just for the case there is a PSK in the original TCToken but it is invalid for some reason.
+     * If there is no PSK in the TCToken data this message should not be used.
+     *
+     * @param invalidPSK {@code TRUE} if the PSK should be marked as invalid else {@code FALSE}. The indicator is set to
+     * {@code FALSE} per default.
+     */
+    protected void setInvalidPSK(boolean invalidPSK) {
+	this.invalidPSK = invalidPSK;
     }
 
     private static URI checkUrl(@Nullable String urlStr) throws InvalidRedirectUrlException {

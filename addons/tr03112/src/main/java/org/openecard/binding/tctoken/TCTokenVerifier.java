@@ -198,7 +198,10 @@ public class TCTokenVerifier {
 	// TR-03124 sec. 2.4.3
 	// If no PathSecurity-Protocol/PSK is given in the TC Token, the same TLS channel as established to
 	// retrieve the TC Token MUST be used for the PAOS connection, i.e. a new channel MUST NOT be established.
-	if (checkEmpty(proto) && checkEmpty(psp)) {
+	if ((checkEmpty(proto) && checkEmpty(psp))) {
+	    assertSameChannel("ServerAddress", token.getServerAddress());
+	    return;
+	} else if ((! checkEmpty(proto)) && (! checkEmpty(psp)) && checkEmpty(psp.getPSK()) && ! token.isInvalidPSK()) {
 	    assertSameChannel("ServerAddress", token.getServerAddress());
 	    return;
 	}

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -116,9 +116,11 @@ public class TCTokenSAXHandler extends DefaultHandler {
 		if ((value.length() % 2) == 0) {
 		    byte[] b = StringUtils.toByteArray(value.toUpperCase());
 		    token.getPathSecurityParameters().setPSK(b);
+		} else {
+		    token.setInvalidPSK(true);
 		}
 	    } catch (NumberFormatException ex) {
-		// too bad, verifier will see the null value and react accordingly
+		token.setInvalidPSK(true);
 	    }
 	}
     }

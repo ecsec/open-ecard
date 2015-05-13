@@ -48,9 +48,7 @@ import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.TlsCipher;
 import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
 import org.openecard.bouncycastle.crypto.tls.TlsDHEKeyExchange;
-import org.openecard.bouncycastle.crypto.tls.TlsDHKeyExchange;
 import org.openecard.bouncycastle.crypto.tls.TlsECDHEKeyExchange;
-import org.openecard.bouncycastle.crypto.tls.TlsECDHKeyExchange;
 import org.openecard.bouncycastle.crypto.tls.TlsFatalAlert;
 import org.openecard.bouncycastle.crypto.tls.TlsKeyExchange;
 import org.openecard.bouncycastle.crypto.tls.TlsSignerCredentials;
@@ -153,17 +151,8 @@ public class LocalKeystoreTlsServer extends AbstractTlsServer {
         return DHStandardGroups.rfc5114_2048_256;
     }
 
-    protected TlsKeyExchange createDHKeyExchange(int keyExchange) {
-        return new TlsDHKeyExchange(keyExchange, supportedSignatureAlgorithms, getDHParameters());
-    }
-
     protected TlsKeyExchange createDHEKeyExchange(int keyExchange) {
         return new TlsDHEKeyExchange(keyExchange, supportedSignatureAlgorithms, getDHParameters());
-    }
-
-    protected TlsKeyExchange createECDHKeyExchange(int keyExchange) {
-        return new TlsECDHKeyExchange(keyExchange, supportedSignatureAlgorithms, namedCurves, clientECPointFormats,
-            serverECPointFormats);
     }
 
     protected TlsKeyExchange createECDHEKeyExchange(int keyExchange) {
@@ -228,24 +217,11 @@ public class LocalKeystoreTlsServer extends AbstractTlsServer {
 	    CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
 	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
 	    CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
-	    // acceptable in case DHE is not available
-	    CipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,
-	    CipherSuite.TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,
-	    CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,
-	    CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,
-	    CipherSuite.TLS_DH_RSA_WITH_AES_256_GCM_SHA384,
-	    CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256,
-	    CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256,
-	    CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256,
 	    // SHA1 is acceptable until 2015
 	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
 	    CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-	    CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,
 	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
 	    CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
-	    CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
-	    CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
-	    CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA
 	};
     }
 
@@ -259,40 +235,28 @@ public class LocalKeystoreTlsServer extends AbstractTlsServer {
 	    // AES 256 GCM
 	    case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:
 	    case CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384:
-	    case CipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384:
-	    case CipherSuite.TLS_DH_RSA_WITH_AES_256_GCM_SHA384:
 		return cipherFactory.createCipher(context, EncryptionAlgorithm.AES_256_GCM, MACAlgorithm._null);
 	    // AES 128 GCM
 	    case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:
 	    case CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256:
-	    case CipherSuite.TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256:
-	    case CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256:
 		return cipherFactory.createCipher(context, EncryptionAlgorithm.AES_128_GCM, MACAlgorithm._null);
 	    // AES 256 CBC SHA384
 	    case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384:
-	    case CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384:
 		return cipherFactory.createCipher(context, EncryptionAlgorithm.AES_256_CBC, MACAlgorithm.hmac_sha384);
 	    // AES 256 CBC SHA256
 	    case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256:
-	    case CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256:
 		return cipherFactory.createCipher(context, EncryptionAlgorithm.AES_256_CBC, MACAlgorithm.hmac_sha256);
 	    // AES 256 CBC SHA1
 	    case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:
 	    case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
-	    case CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA:
-	    case CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA:
 		return cipherFactory.createCipher(context, EncryptionAlgorithm.AES_256_CBC, MACAlgorithm.hmac_sha1);
 	    // AES 128 CBC SHA256
 	    case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256:
-	    case CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256:
 	    case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256:
-	    case CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256:
 		return cipherFactory.createCipher(context, EncryptionAlgorithm.AES_128_CBC, MACAlgorithm.hmac_sha256);
 	    // AES 128 CBC SHA1
 	    case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:
 	    case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
-	    case CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA:
-	    case CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA:
 		return cipherFactory.createCipher(context, EncryptionAlgorithm.AES_128_CBC, MACAlgorithm.hmac_sha1);
 	    default:
 		// Note: internal error here; selected a cipher suite we don't implement!
@@ -319,20 +283,6 @@ public class LocalKeystoreTlsServer extends AbstractTlsServer {
 	    case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
 	    case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
 		return createDHEKeyExchange(KeyExchangeAlgorithm.DHE_RSA);
-	    case CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256:
-	    case CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA:
-	    case CipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384:
-	    case CipherSuite.TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256:
-	    case CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384:
-	    case CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA:
-		return createECDHKeyExchange(KeyExchangeAlgorithm.ECDH_RSA);
-	    case CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256:
-	    case CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA:
-	    case CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256:
-	    case CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256:
-	    case CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA:
-	    case CipherSuite.TLS_DH_RSA_WITH_AES_256_GCM_SHA384:
-		return createDHKeyExchange(KeyExchangeAlgorithm.DH_RSA);
 
 	    default:
 		// Note: internal error here; selected a key exchange we don't implement!

@@ -41,6 +41,8 @@ import org.openecard.common.util.Pair;
 import org.openecard.common.util.TR03112Utils;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.ResultMinor;
+import org.openecard.binding.tctoken.ex.UserCancellationException;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.util.UrlBuilder;
 
 
@@ -88,12 +90,15 @@ public class TCTokenVerifier {
      * @throws InvalidTCTokenElement Thrown in case one of the values to test is errornous.
      * @throws InvalidTCTokenUrlException Thrown in case a tested URL does not conform to the specification.
      * @throws SecurityViolationException Thrown in case the same origin policy is violated.
+     * @throws UserCancellationException Thrown in case the user aborted the insert card dialog.
      */
-    public void verify() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException {
+    public void verify() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, 
+	    SecurityViolationException, UserCancellationException {
 	// ordering is important because of the raised errors in case the first two are not https URLs
 	initialCheck();
 	verifyRefreshAddress();
 	verifyCommunicationErrorAddress();
+	checkUserCancellation();
 	verifyServerAddress();
 	verifySessionIdentifier();
 	verifyBinding();
@@ -105,11 +110,11 @@ public class TCTokenVerifier {
      *
      * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      * @throws InvalidTCTokenElement Thrown in case one of the values to test is errornous.
-     * @throws InvalidTCTokenUrlException Thrown in case a tested URL does not conform to the specification.
-     * @throws SecurityViolationException
+     * @throws UserCancellationException Thrown in case the user aborted the insert card dialog but this should never
+     * happen in this case.
      */
-    public void verifyServerAddress() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException,
-	    SecurityViolationException {
+    public void verifyServerAddress() throws InvalidRedirectUrlException, InvalidTCTokenElement,
+	    UserCancellationException {
 	String value = token.getServerAddress();
 	try {
 	    assertRequired("ServerAddress", value);
@@ -140,11 +145,11 @@ public class TCTokenVerifier {
      *
      * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      * @throws InvalidTCTokenElement Thrown in case one of the values to test is errornous.
-     * @throws InvalidTCTokenUrlException Thrown in case a tested URL does not conform to the specification.
-     * @throws SecurityViolationException
+     * @throws UserCancellationException Thrown in case the user aborted the insert card dialog but this should never
+     * happen in this case.
      */
-    public void verifyRefreshAddress() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException,
-	    SecurityViolationException {
+    public void verifyRefreshAddress() throws InvalidRedirectUrlException, InvalidTCTokenElement,
+	    UserCancellationException {
 	String value = token.getRefreshAddress();
 	assertRequired("RefreshAddress", value);
 	try {
@@ -189,9 +194,11 @@ public class TCTokenVerifier {
      * @throws InvalidTCTokenElement Thrown in case one of the values to test is errornous.
      * @throws InvalidTCTokenUrlException Thrown in case a tested URL does not conform to the specification.
      * @throws SecurityViolationException Thrown in case the same origin policy is violated.
+     * @throws UserCancellationException Thrown in case the user aborted the insert card dialog but this should never
+     * happen in this case.
      */
     public void verifyPathSecurity() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException,
-	    SecurityViolationException {
+	    SecurityViolationException, UserCancellationException {
 	String proto = token.getPathSecurityProtocol();
 	TCTokenType.PathSecurityParameters psp = token.getPathSecurityParameters();
 
@@ -357,15 +364,13 @@ public class TCTokenVerifier {
     /**
      * Determines the refresh URL.
      *
-     * @param ex
-     * @param errorMsg
-     * @throws InvalidRedirectUrlException
-     * @throws InvalidTCTokenUrlException
-     * @throws SecurityViolationException
-     * @throws InvalidTCTokenElement
+     * @param ex The exception which caused the abort of the TCToken verification.
+     * @throws InvalidRedirectUrlException If the CommunicationErrorAddress cant be determined.
+     * @throws InvalidTCTokenElement If a determination of a refresh or CommunicationError address was successful.
+     * @throws UserCancellationException Thrown in case {@code ex} is an instance of {@link UserCancellationException}.
      */
     private void determineRefreshAddress(ActivationError ex) throws InvalidRedirectUrlException,
-	    InvalidTCTokenUrlException, SecurityViolationException, InvalidTCTokenElement {
+	    InvalidTCTokenElement, UserCancellationException {
 	if (token.getRefreshAddress() != null) {
 	    try {
 		CertificateValidator validator = new RedirectCertificateValidator(true);
@@ -377,6 +382,10 @@ public class TCTokenVerifier {
 		String refreshUrl = resAddr.toString();
 
 		URI refreshUrlAsUrl = createUrlWithErrorParams(refreshUrl, ex.getMessage());
+		if (ex instanceof UserCancellationException) {
+		    UserCancellationException uex = (UserCancellationException) ex;
+		    throw new UserCancellationException(refreshUrlAsUrl.toString(), ex);
+		}
 		throw new InvalidTCTokenElement(refreshUrlAsUrl.toString(), ex);
 	    } catch (IOException | ResourceException | InvalidAddressException | ValidationError | URISyntaxException ex1) {
 		String errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR);
@@ -385,6 +394,15 @@ public class TCTokenVerifier {
 	} else {
 	    String errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR);
 	    throw new InvalidTCTokenElement(errorUrl, NO_REFRESH_ADDRESS);
+	}
+    }
+
+    private void checkUserCancellation() throws InvalidRedirectUrlException, InvalidTCTokenElement,
+	    UserCancellationException {
+	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	UserCancellationException ex = (UserCancellationException) dynCtx.get(TR03112Keys.CARD_SELECTION_CANCELLATION);
+	if (ex != null) {
+	    determineRefreshAddress(ex);
 	}
     }
 

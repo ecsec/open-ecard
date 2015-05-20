@@ -44,5 +44,6 @@ public class TR03112Keys {
     public static final String OPEN_USER_CONSENT_NAVIGATOR = "user_consent_navigator";
     public static final String COOKIE_MANAGER = "cookie_mananger";
     public static final String PROCESSING_CANCELLATION = "processing_canceled";
+    public static final String CARD_SELECTION_CANCELLATION = "card_selection_canceld";
 
 }

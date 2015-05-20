@@ -36,6 +36,7 @@ import java.util.List;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.binding.tctoken.ex.ResultMinor;
+import org.openecard.binding.tctoken.ex.UserCancellationException;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.util.Pair;
@@ -66,7 +67,7 @@ public class TCTokenContext extends ResourceContext {
 
     public static TCTokenContext generateTCToken(URL tcTokenURL) throws InvalidTCTokenException, AuthServerException,
 	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException,
-	    InvalidAddressException {
+	    InvalidAddressException, UserCancellationException {
 	// Get TCToken from the given url
 	try {
 	    ResourceContext ctx = ResourceContext.getStream(tcTokenURL);
@@ -77,13 +78,14 @@ public class TCTokenContext extends ResourceContext {
     }
 
     public static TCTokenContext generateTCToken(String data) throws InvalidTCTokenException, AuthServerException,
-	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException {
+	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException,
+	    UserCancellationException {
 	return generateTCToken(data, new ResourceContext(null, null, Collections.EMPTY_LIST));
     }
 
     private static TCTokenContext generateTCToken(String data, ResourceContext base) throws InvalidTCTokenException,
 	    AuthServerException, InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException,
-	    SecurityViolationException {
+	    SecurityViolationException, UserCancellationException {
 	// FIXME: Hack
 	data = TCTokenHacks.fixObjectTag(data);
 	// FIXME: Hack

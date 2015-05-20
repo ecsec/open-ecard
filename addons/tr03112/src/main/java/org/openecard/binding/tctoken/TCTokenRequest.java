@@ -52,6 +52,8 @@ import org.openecard.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.binding.tctoken.ex.UserCancellationException;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.I18n;
 import org.openecard.common.enums.EventType;
 import org.openecard.common.sal.util.InsertCardDialog;
@@ -107,7 +109,7 @@ public class TCTokenRequest {
     public static TCTokenRequest convert(Map<String, String> parameters, Context ctx) throws
 	    InvalidTCTokenException, MissingActivationParameterException, AuthServerException,
 	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException,
-	    InvalidAddressException {
+	    InvalidAddressException, UserCancellationException {
 	TCTokenRequest result;
 	if (parameters.containsKey("tcTokenURL")) {
 	    result = parseTCTokenRequestURI(parameters, ctx);
@@ -125,28 +127,36 @@ public class TCTokenRequest {
     private static TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries, Context ctx)
 	    throws InvalidTCTokenException, MissingActivationParameterException, AuthServerException,
 	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException,
-	    InvalidAddressException {
+	    InvalidAddressException, UserCancellationException {
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
+	try {
+	    if (queries.containsKey("cardTypes") || queries.containsKey("cardType")) {
+		String[] types;
+		if (queries.containsKey("cardType")) {
+		    types = new String[]{queries.get("cardType")};
+		} else {
+		    types = queries.get("cardTypes").split(",");
+		}
 
-	if (queries.containsKey("cardTypes") || queries.containsKey("cardType")) {
-	    String[] types;
-	    if (queries.containsKey("cardType")) {
-		types = new String[] {queries.get("cardType")};
+		ConnectionHandleType handle = findCard(types, ctx);
+		setIfdName(queries, handle.getIFDName());
+		setContextHandle(queries, handle.getContextHandle());
+		setSlotIndex(queries, handle.getSlotIndex());
+		addTokenUrlParameter(queries, handle.getRecognitionInfo());
 	    } else {
-		types = queries.get("cardTypes").split(",");
+		String[] types = new String[]{tcTokenRequest.cardType};
+		ConnectionHandleType handle = findCard(types, ctx);
+		setIfdName(queries, handle.getIFDName());
+		setContextHandle(queries, handle.getContextHandle());
+		setSlotIndex(queries, handle.getSlotIndex());
 	    }
-	    
-	    ConnectionHandleType handle = findCard(types, ctx);
-	    setIfdName(queries, handle.getIFDName());
-	    setContextHandle(queries, handle.getContextHandle());
-	    setSlotIndex(queries, handle.getSlotIndex());
-	    addTokenUrlParameter(queries, handle.getRecognitionInfo());
-	} else {
-	    String[] types = new String[] {tcTokenRequest.cardType};
-	    ConnectionHandleType handle = findCard(types, ctx);
-	    setIfdName(queries, handle.getIFDName());
-	    setContextHandle(queries, handle.getContextHandle());
-	    setSlotIndex(queries, handle.getSlotIndex());
+	} catch (UserCancellationException ex) {
+	    if (queries.containsKey("cardTypes")) {
+		addTokenUrlParameter(queries, queries.get("cardTypes").split(",")[0]);
+	    }
+	    logger.warn("The user aborted the CardInsertion dialog.", ex);
+	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    dynCtx.put(TR03112Keys.CARD_SELECTION_CANCELLATION, ex);
 	}
 
 	for (Map.Entry<String, String> next : queries.entrySet()) {
@@ -199,7 +209,7 @@ public class TCTokenRequest {
 
     private static TCTokenRequest parseObjectURI(Map<String, String> queries) throws InvalidTCTokenException,
 	    MissingActivationParameterException, AuthServerException, InvalidRedirectUrlException, InvalidTCTokenElement,
-	    InvalidTCTokenUrlException, SecurityViolationException {
+	    InvalidTCTokenUrlException, SecurityViolationException, UserCancellationException {
 	// TODO: get rid of this crap as soon as possible
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 
@@ -241,7 +251,7 @@ public class TCTokenRequest {
      * @return ConnectionHandleType object of the chosen card.
      */
     private static ConnectionHandleType findCard(@Nonnull  String[] types, @Nonnull Context ctx) throws
-	    MissingActivationParameterException {
+	    MissingActivationParameterException, UserCancellationException {
 	CardRecognition rec = ctx.getRecognition();
 	Map<String, String> namesAndType = new HashMap<>();
 	for (String type : types) {
@@ -254,7 +264,7 @@ public class TCTokenRequest {
 	
 	if (usableCards == null) {
 	    // user aborted the card insertion dialog
-	    throw new MissingActivationParameterException(CARD_INSERTION_ABORT);
+	    throw new UserCancellationException(null, lang.translationForKey(CARD_INSERTION_ABORT));
 	}
 
 	ConnectionHandleType handle;
@@ -340,6 +350,27 @@ public class TCTokenRequest {
 		builder = builder.queryParam("type", recInfo.getCardType(), true);
 		queries.put("tcTokenURL", builder.build().toString());
 		queries.put("cardType", recInfo.getCardType());
+	    } catch (URISyntaxException ex) {
+		// ignore if this happens the authentication will fail at all.
+	    }
+	}
+    }
+
+    /**
+     * Adds the card type given in the given RecognitionInfo object as type to the tcTokenURL contained in the given map.
+     *
+     * @param queries Map which contains the tcTokenURL and shall contain the new cardType.
+     * @param recInfo RecognitionInfo object containing the cardType or type parameter.
+     */
+    private static void addTokenUrlParameter(@Nonnull Map<String, String> queries, @Nonnull String selectedCardType) {
+	if (queries.containsKey("tcTokenURL")) {
+	    String tcTokenURL = queries.get("tcTokenURL");
+	    try {
+		UrlBuilder builder = UrlBuilder.fromUrl(tcTokenURL);
+		// url encoding is done by the builder
+		builder = builder.queryParam("type", selectedCardType, true);
+		queries.put("tcTokenURL", builder.build().toString());
+		queries.put("cardType", selectedCardType);
 	    } catch (URISyntaxException ex) {
 		// ignore if this happens the authentication will fail at all.
 	    }

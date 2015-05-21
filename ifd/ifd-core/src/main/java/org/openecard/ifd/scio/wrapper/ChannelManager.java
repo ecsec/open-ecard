@@ -40,6 +40,7 @@ import org.openecard.ifd.scio.IFDException;
 /**
  *
  * @author Tobias Wich
+ * @author Benedikt Biallowons
  */
 public class ChannelManager {
 
@@ -82,7 +83,14 @@ public class ChannelManager {
     public byte[] openChannel(@Nonnull String ifdName) throws NoSuchTerminal, SCIOException,
 	    IllegalStateException {
 	SCIOTerminal t = getTerminals().getTerminal(ifdName);
-	SCIOCard card = t.connect(SCIOProtocol.ANY);
+	SCIOCard card;
+
+	try {
+	    card = t.connect(SCIOProtocol.T1);
+	} catch (SCIOException e) {
+	    card = t.connect(SCIOProtocol.ANY);
+	}
+
 	SCIOChannel channel = card.getBasicChannel();
 	byte[] slotHandle = createSlotHandle();
 	HandledChannel ch = new HandledChannel(slotHandle, channel);

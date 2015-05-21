@@ -38,7 +38,6 @@ import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.ifd.scio.SCIOTerminals;
-import org.openecard.common.ifd.scio.SCIOTerminals.State;
 import org.openecard.common.ifd.scio.TerminalState;
 import org.openecard.common.ifd.scio.TerminalWatcher;
 import org.openecard.common.util.Pair;
@@ -227,6 +226,9 @@ public class PCSCTerminals implements SCIOTerminals {
 		String msg = "Failed to retrieve status from the PCSC system.";
 		logger.error(msg, ex);
 		throw new SCIOException(msg, getCode(ex), ex);
+	    } catch (IllegalStateException ex) {
+		logger.debug("No reader available exception.");
+		return Collections.emptyList();
 	    }
 	}
 
@@ -392,6 +394,16 @@ public class PCSCTerminals implements SCIOTerminals {
 			    }
 			default:
 			    throw ex;
+		    }
+		} catch (IllegalStateException ex) {
+		    // send events that everything is removed if there are any terminals connected right now
+		    if (! terminals.isEmpty()) {
+			return new Pair<>(true, true);
+		    } else {
+			logger.debug("Waiting for PCSC system to become available again.");
+			// if nothing changed, wait a bit and try again
+			sleep(waitTime);
+			continue;
 		    }
 		}
 

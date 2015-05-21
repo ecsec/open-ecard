@@ -49,6 +49,7 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
     private static final String ALGORITHM = "PC/SC";
 
     private final String osName;
+    private final String osVersion;
     private TerminalFactory terminalFactory;
 
     /**
@@ -59,6 +60,7 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
      */
     public PCSCFactory() throws FileNotFoundException, NoSuchAlgorithmException {
 	osName = System.getProperty("os.name");
+	osVersion = System.getProperty("os.version");
 	if (osName.startsWith("Linux")) {
 	    File libFile = LinuxLibraryFinder.getLibraryPath("pcsclite", "1");
 	    System.setProperty("sun.security.smartcardio.library", libFile.getAbsolutePath());
@@ -80,8 +82,25 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 	return terminalFactory;
     }
 
+    private static Integer versionCompare(String str1, String str2) {
+	// code taken from http://stackoverflow.com/a/6702029
+	String[] vals1 = str1.split("\\.");
+	String[] vals2 = str2.split("\\.");
+	int i = 0;
+
+	while (i < vals1.length && i < vals2.length && vals1[i].equals(vals2[i])) {
+	    i++;
+	}
+
+	if (i < vals1.length && i < vals2.length) {
+	    return Integer.signum(Integer.valueOf(vals1[i]).compareTo(Integer.valueOf(vals2[i])));
+	}
+
+	return Integer.signum(vals1.length - vals2.length);
+    }
+
     final void loadPCSC() throws NoSuchAlgorithmException {
-	if (osName.contains("OS X")) {
+	if (osName.contains("OS X") && versionCompare(osVersion, "10.10") < 0) {
 	    // see https://developer.apple.com/library/mac/technotes/tn2002/tn2110.html#FINDINGMAC
 	    terminalFactory = TerminalFactory.getInstance(ALGORITHM, null, new SunOSXPCSC());
 	} else {

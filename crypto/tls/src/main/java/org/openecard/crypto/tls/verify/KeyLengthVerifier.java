@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.CertPath;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
@@ -66,7 +67,7 @@ public class KeyLengthVerifier implements CertificateVerifier {
 		    throw new CertificateVerificationException(msg);
 		}
 
-		assertKeyLength(reference, KeyTools.getKeySize(pk));
+		assertKeyLength(reference, KeyTools.getKeySize(pk), c);
 	    }
 	} catch (CertificateException | IOException ex) {
 	    String msg = "Failed to convert certificates to JCA format.";
@@ -75,9 +76,14 @@ public class KeyLengthVerifier implements CertificateVerifier {
 	}
     }
 
-    private void assertKeyLength(int reference, int numbits) throws CertificateVerificationException {
+    private void assertKeyLength(int reference, int numbits, java.security.cert.Certificate cert) throws CertificateVerificationException {
 	if (numbits < reference) {
 	    String msg = "The key size in the certificate does not meet the requirements ";
+	    if (cert instanceof X509Certificate) {
+	        msg = "The key size in the certificate \"" +
+	              ((X509Certificate)cert).getSubjectX500Principal() +
+	              "\" does not meet the requirements ";
+	    }
 	    msg += String.format("(%d < %d).", numbits, reference);
 	    throw new CertificateVerificationException(msg);
 	}

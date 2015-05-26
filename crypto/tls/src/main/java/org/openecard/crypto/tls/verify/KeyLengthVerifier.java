@@ -70,8 +70,8 @@ public class KeyLengthVerifier implements CertificateVerifier {
 	    }
 	} catch (CertificateException | IOException ex) {
 	    String msg = "Failed to convert certificates to JCA format.";
-	    logger.error(msg);
-	    throw new CertificateVerificationException(msg);
+	    logger.error(msg, ex);
+	    throw new CertificateVerificationException(msg, ex);
 	}
     }
 

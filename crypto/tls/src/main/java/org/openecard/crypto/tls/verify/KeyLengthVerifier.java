@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.CertPath;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
@@ -48,30 +49,47 @@ public class KeyLengthVerifier implements CertificateVerifier {
 
     @Override
     public void isValid(Certificate chain, String hostname) throws CertificateVerificationException {
+	CertPath path;
 	try {
-	    CertPath path = KeyTools.convertCertificates(chain);
-	    // check each certificate
-	    for (java.security.cert.Certificate c : path.getCertificates()) {
-		// get public key and determine minimum size for the actual type
-		PublicKey pk = c.getPublicKey();
-		int reference;
-		if (pk instanceof RSAPublicKey) {
-		    reference = 2048;
-		} else if (pk instanceof DSAPublicKey) {
-		    reference = 2048;
-		} else if (pk instanceof ECPublicKey) {
-		    reference = 224;
-		} else {
-		    String msg = String.format("Unsupported key type (%s) used in certificate.", pk.getAlgorithm());
-		    throw new CertificateVerificationException(msg);
-		}
-
-		assertKeyLength(reference, KeyTools.getKeySize(pk));
-	    }
+	    path = KeyTools.convertCertificates(chain);
 	} catch (CertificateException | IOException ex) {
 	    String msg = "Failed to convert certificates to JCA format.";
 	    logger.error(msg);
 	    throw new CertificateVerificationException(msg);
+	}
+
+	boolean firstCert = true;
+	// check each certificate
+	for (java.security.cert.Certificate c : path.getCertificates()) {
+	    if (c instanceof X509Certificate) {
+		X509Certificate x509 = (X509Certificate) c;
+		boolean selfSigned = x509.getIssuerX500Principal().equals(x509.getSubjectX500Principal());
+
+		// skip key comparison step if this is a root certificate, but still check self signed server certs
+		boolean isRootCert = selfSigned && ! firstCert;
+		if (! isRootCert) {
+		    // get public key and determine minimum size for the actual type
+		    PublicKey pk = c.getPublicKey();
+		    int reference;
+		    if (pk instanceof RSAPublicKey) {
+			reference = 2048;
+		    } else if (pk instanceof DSAPublicKey) {
+			reference = 2048;
+		    } else if (pk instanceof ECPublicKey) {
+			reference = 224;
+		    } else {
+			String alg = pk.getAlgorithm();
+			String msg = String.format("Unsupported key type (%s) used in certificate.", alg);
+			throw new CertificateVerificationException(msg);
+		    }
+
+		    assertKeyLength(reference, KeyTools.getKeySize(pk));
+		    firstCert = false;
+		}
+	    } else {
+		String msg = "One of the certificates in the chain is not of type X509v3.";
+		throw new CertificateVerificationException(msg);
+	    }
 	}
     }
 

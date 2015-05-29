@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,13 +23,9 @@
 package org.openecard.crypto.tls.verify;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
@@ -37,98 +33,29 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.PKIXParameters;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.crypto.tls.CertificateVerificationException;
 import org.openecard.crypto.tls.CertificateVerifier;
 
 
 /**
- * Java Security based certificate verifier. <br/>
+ * Java Security based certificate verifier.
  * This implementation converts the BouncyCastle certificates to java.security certificates and uses the Java-bundled
- * mechanisms to verify the certificate chain.
+ * PKIX mechanism to verify the certificate chain.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class JavaSecVerifier implements CertificateVerifier {
 
-    private final KeyStore keyStore;
     private final CertPathValidator certPathValidator;
 
     /**
-     * Create a JavaSecVerifier and load the system keystore.
+     * Create a JavaSecVerifier and load the internal certificate path validator.
      *
-     * @throws KeyStoreException Keystore type could not be instantiated.
-     * @throws FileNotFoundException Keystore was not found in standard locations.
-     * @throws IOException Error loading keystore from disc.
-     * @throws GeneralSecurityException Error processing loaded keystore.
+     * @throws NoSuchAlgorithmException Thrown in case the validator could not be loaded due to a missing algorithm.
      */
-    public JavaSecVerifier() throws IOException, GeneralSecurityException {
-	keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-	keyStore.load(null); // initialize keystore
-	KeyStore tmpKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+    public JavaSecVerifier() throws NoSuchAlgorithmException {
 	certPathValidator = CertPathValidator.getInstance(CertPathValidator.getDefaultType());
-
-	// determine system keystore
-	final String fSep = File.separator;
-	File keyStoreFile;
-	// try system property
-	keyStoreFile = getKeystore(System.getProperty("java.home"), "lib" + fSep + "security" + fSep + "cacerts");
-
-	// load file
-	if (keyStoreFile != null) {
-	    tmpKeyStore.load(new FileInputStream(keyStoreFile), null); // system keystore has no password protection
-	} else {
-	    // TODO: this is either on android or it doesn' work at all
-	    throw new FileNotFoundException("Unable to find system keystore in standard locations.");
-	}
-
-	addKeyStore(tmpKeyStore);
-    }
-
-
-    private File getKeystore(String prefix, String fileName) {
-	if (fileName == null) {
-	    return null;
-	}
-	if (prefix != null) {
-	    fileName = prefix + File.separator + fileName;
-	}
-	File f = new File(fileName);
-	if (! f.canRead()) {
-	    return null;
-	}
-	return f;
-    }
-
-
-    /**
-     * Merge the given keystore into the one enclosed in this verifier instance.
-     *
-     * @param keyStore Keystore to merge.
-     * @throws KeyStoreException In case access to the given keystore is not possible.
-     */
-    public final void addKeyStore(KeyStore keyStore) throws KeyStoreException {
-	Enumeration aliases = keyStore.aliases();
-	while(aliases.hasMoreElements()) {
-	    String alias = (String) aliases.nextElement();
-	    if (keyStore.isCertificateEntry(alias)) {
-		java.security.cert.Certificate cert = keyStore.getCertificate(alias);
-		this.keyStore.setCertificateEntry(alias, cert);
-	    }
-	}
-    }
-
-    /**
-     * Merge all given keystores into the one enclosed in this verifier instance.
-     * @param keyStores Keystores to merge.
-     * @throws KeyStoreException In case access to the given keystore is not possible.
-     */
-    public final void addKeyStore(List<KeyStore> keyStores) throws KeyStoreException {
-	for (KeyStore next : keyStores) {
-	    addKeyStore(next);
-	}
     }
 
 
@@ -138,8 +65,7 @@ public class JavaSecVerifier implements CertificateVerifier {
 	    CertPath certPath = convertChain(chain);
 
 	    // create the parameters for the validator
-	    PKIXParameters params = new PKIXParameters(keyStore);
-
+	    PKIXParameters params = new PKIXParameters(TrustStoreLoader.getTrustAnchors());
 	    // disable CRL checking since we are not supplying any CRLs yet
 	    params.setRevocationEnabled(false);
 

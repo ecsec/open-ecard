@@ -36,6 +36,7 @@ import java.util.Set;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.FileUtils;
 import org.slf4j.Logger;
@@ -108,7 +109,7 @@ public class TrustStoreLoader {
 		// get stream to keystore
 		InputStream is = FileUtils.resolveResourceAsStream(TrustStoreLoader.class, TRUSTSTORE_FILE);
 		if (is != null) {
-		    KeyStore ks = KeyStore.getInstance("PKCS12");
+		    KeyStore ks = KeyStore.getInstance("PKCS12", new BouncyCastleProvider());
 		    ks.load(is, TRUSTSTORE_PASS.toCharArray());
 		    return ks;
 		} else {

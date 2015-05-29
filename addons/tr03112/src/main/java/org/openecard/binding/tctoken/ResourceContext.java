@@ -54,6 +54,7 @@ import org.openecard.common.io.LimitedInputStream;
 import org.openecard.crypto.tls.proxy.ProxySettings;
 import org.openecard.common.util.FileUtils;
 import org.openecard.common.util.Pair;
+import org.openecard.common.util.Promise;
 import org.openecard.common.util.TR03112Utils;
 import org.openecard.crypto.common.ReusableSecureRandom;
 import org.openecard.transport.httpcore.cookies.CookieException;
@@ -61,6 +62,7 @@ import org.openecard.transport.httpcore.cookies.CookieManager;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
+import org.openecard.crypto.tls.verify.JavaSecVerifier;
 import org.openecard.transport.httpcore.HttpRequestHelper;
 import org.openecard.transport.httpcore.HttpUtils;
 import org.openecard.transport.httpcore.InvalidResultStatus;
@@ -224,6 +226,10 @@ public class ResourceContext {
 	    // open a TLS connection, retrieve the server certificate and save it
 	    TlsClientProtocol h;
 	    DynamicAuthentication tlsAuth = new DynamicAuthentication(hostname);
+	    // add PKIX validator if not doin nPA auth
+	    if (isPKIXVerify()) {
+		tlsAuth.addCertificateVerifier(new JavaSecVerifier());
+	    }
 	    // FIXME: validate certificate chain as soon as a usable solution exists for the trust problem
 	    // tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 	    ClientCertTlsClient tlsClient = new ClientCertDefaultTlsClient(hostname, true);
@@ -356,6 +362,18 @@ public class ResourceContext {
 		    logger.warn(msg, ex);
 		}
 	    }
+	}
+    }
+
+    private static boolean isPKIXVerify() {
+	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	Promise<Object> cardTypeP = dynCtx.getPromise(TR03112Keys.ACTIVATION_CARD_TYPE);
+	Object cardType = cardTypeP.derefNonblocking();
+	// verify when the value is not set or when no nPA is requested
+	if (cardType != null && ! "http://bsi.bund.de/cif/npa.xml".equals(cardType)) {
+	    return true;
+	} else {
+	    return false;
 	}
     }
 

@@ -366,13 +366,13 @@ public class ActivationAction implements AppPluginAction {
      */
     private BindingResult processTcTokenOrActivationObject(Map<String, String> params) {
 	BindingResult response;
-	DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	ctx.put(TR03112Keys.COOKIE_MANAGER, new CookieManager());
+	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	dynCtx.put(TR03112Keys.COOKIE_MANAGER, new CookieManager());
 	
 	try {
 	    TCTokenRequest tcTokenRequest = null;
 	    try {
-		tcTokenRequest = TCTokenRequest.convert(params, this.ctx);
+		tcTokenRequest = TCTokenRequest.convert(params, ctx);
 		response = tokenHandler.handleActivate(tcTokenRequest);
 		// Show success message. If we get here we have a valid StartPAOSResponse and a valid refreshURL
 		if (!tcTokenRequest.isTokenFromObject()) {

@@ -159,6 +159,7 @@ public class TCTokenRequest {
 	    dynCtx.put(TR03112Keys.CARD_SELECTION_CANCELLATION, ex);
 	}
 
+	String activationTokenUrl = null;
 	for (Map.Entry<String, String> next : queries.entrySet()) {
 	    String k = next.getKey();
 	    k = k == null ? "" : k;
@@ -169,17 +170,7 @@ public class TCTokenRequest {
 	    } else {
 		switch (k) {
 		    case "tcTokenURL":
-			try {
-			    URL tokenUrl = new URL(v);
-			    TCTokenContext tokenCtx = TCTokenContext.generateTCToken(tokenUrl);
-			    tcTokenRequest.tokenCtx = tokenCtx;
-			    tcTokenRequest.token = tokenCtx.getToken();
-			    tcTokenRequest.certificates = tokenCtx.getCerts();
-			    tcTokenRequest.tcTokenURL = tokenUrl;
-			} catch (MalformedURLException ex) {
-			    // TODO: check if the error type is correct, was WRONG_PARAMETER before
-			    throw new InvalidTCTokenUrlException(INVALID_TCTOKEN_URL, ex, v);
-			}
+			activationTokenUrl = v;
 			break;
 		    case "ifdName":
 			tcTokenRequest.ifdName = v;
@@ -197,6 +188,24 @@ public class TCTokenRequest {
 			logger.info("Unknown query element: {}", k);
 			break;
 		}
+	    }
+	}
+
+	// cardType determined! set in dynamic context, so the information is available in ResourceContext
+	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	dynCtx.put(TR03112Keys.ACTIVATION_CARD_TYPE, tcTokenRequest.cardType);
+
+	if (activationTokenUrl != null) {
+	    try {
+		URL tokenUrl = new URL(activationTokenUrl);
+		TCTokenContext tokenCtx = TCTokenContext.generateTCToken(tokenUrl);
+		tcTokenRequest.tokenCtx = tokenCtx;
+		tcTokenRequest.token = tokenCtx.getToken();
+		tcTokenRequest.certificates = tokenCtx.getCerts();
+		tcTokenRequest.tcTokenURL = tokenUrl;
+	    } catch (MalformedURLException ex) {
+		// TODO: check if the error type is correct, was WRONG_PARAMETER before
+		throw new InvalidTCTokenUrlException(INVALID_TCTOKEN_URL, ex, activationTokenUrl);
 	    }
 	}
 

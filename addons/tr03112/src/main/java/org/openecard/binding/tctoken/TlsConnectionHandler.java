@@ -51,6 +51,7 @@ import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.UrlBuilder;
 import org.openecard.crypto.common.ReusableSecureRandom;
+import org.openecard.crypto.tls.verify.JavaSecVerifier;
 
 
 /**
@@ -141,8 +142,6 @@ public class TlsConnectionHandler {
 		switch (secProto) {
 		    case "urn:ietf:rfc:4279":
 			{
-			    // FIXME: verify certificate chain as soon as a usable solution exists for the trust problem
-			    //tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 			    byte[] psk = token.getPathSecurityParameters().getPSK();
 			    TlsPSKIdentity pskId = new TlsPSKIdentityImpl(sessionId.getBytes(), psk);
 			    tlsClient = new ClientCertPSKTlsClient(pskId, serverHost, doSni);
@@ -155,11 +154,11 @@ public class TlsConnectionHandler {
 			{
 			    // use a smartcard for client authentication if needed
 			    tlsAuth.setCredentialFactory(makeSmartCardCredential());
-			    // FIXME: verify certificate chain as soon as a usable solution exists fpr the trust problem
-			    //tlsAuth.setCertificateVerifier(new JavaSecVerifier());
 			    tlsClient = new ClientCertDefaultTlsClient(serverHost, doSni);
 			    tlsClient.setClientVersion(version);
 			    tlsClient.setMinimumVersion(minVersion);
+			    // add PKIX verifier
+			    tlsAuth.addCertificateVerifier(new JavaSecVerifier());
 			    break;
 			}
 		    default:

@@ -31,6 +31,7 @@ import org.openecard.richclient.gui.manage.SettingsPanel;
  * This panel hosts the following settings groups:
  * <ul>
  * <li>Proxy</li>
+ * <li>Security</li>
  * </ul>
  *
  * @author Tobias Wich
@@ -44,6 +45,7 @@ public class ConnectionsSettingsPanel extends SettingsPanel {
     public ConnectionsSettingsPanel() {
 	proxy = new ConnectionSettingsGroup();
 	addSettingsGroup(proxy);
+	addSettingsGroup(new ConnectionSettingsSecurityGroup());
     }
 
 }

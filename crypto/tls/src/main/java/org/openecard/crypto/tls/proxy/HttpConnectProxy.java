@@ -29,7 +29,6 @@ import java.net.Proxy;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -129,16 +128,12 @@ public final class HttpConnectProxy extends Proxy {
 	    ClientCertDefaultTlsClient tlsClient = new ClientCertDefaultTlsClient(proxyHost, true);
 	    DynamicAuthentication tlsAuth = new DynamicAuthentication(proxyHost);
 	    if (proxyValidate) {
-		try {
-		    CertificateVerifier cv = new CertificateVerifierBuilder()
-			    .and(new HostnameVerifier())
-			    .and(new KeyLengthVerifier())
-			    .and(new JavaSecVerifier())
-			    .build();
-		    tlsAuth.setCertificateVerifier(cv);
-		} catch (GeneralSecurityException ex) {
-		    throw new IOException("Failed to load certificate verifier.", ex);
-		}
+		CertificateVerifier cv = new CertificateVerifierBuilder()
+			.and(new HostnameVerifier())
+			.and(new KeyLengthVerifier())
+			.and(new JavaSecVerifier())
+			.build();
+		tlsAuth.setCertificateVerifier(cv);
 	    }
 	    tlsClient.setAuthentication(tlsAuth);
 	    SecureRandom sr = ReusableSecureRandom.getInstance();

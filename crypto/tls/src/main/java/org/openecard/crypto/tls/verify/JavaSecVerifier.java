@@ -52,10 +52,14 @@ public class JavaSecVerifier implements CertificateVerifier {
     /**
      * Create a JavaSecVerifier and load the internal certificate path validator.
      *
-     * @throws NoSuchAlgorithmException Thrown in case the validator could not be loaded due to a missing algorithm.
+     * @throws RuntimeException Thrown in case the validator could not be loaded due to a missing algorithm.
      */
-    public JavaSecVerifier() throws NoSuchAlgorithmException {
-	certPathValidator = CertPathValidator.getInstance(CertPathValidator.getDefaultType());
+    public JavaSecVerifier() throws RuntimeException {
+	try {
+	    certPathValidator = CertPathValidator.getInstance(CertPathValidator.getDefaultType());
+	} catch (NoSuchAlgorithmException ex) {
+	    throw new RuntimeException("Failed to load CertPathValidator");
+	}
     }
 
 

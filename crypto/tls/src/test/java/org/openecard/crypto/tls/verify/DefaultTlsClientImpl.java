@@ -48,12 +48,8 @@ public class DefaultTlsClientImpl extends ClientCertDefaultTlsClient {
 	return new TlsAuthentication() {
 	    @Override
 	    public void notifyServerCertificate(Certificate crtfct) throws IOException {
-		JavaSecVerifier v = null;
-		try {
-		    v = new JavaSecVerifier();
-		} catch (Exception ex) {
-		    throw new IOException(ex);
-		}
+		JavaSecVerifier v = new JavaSecVerifier();
+
 		CertificateVerifier cv = new CertificateVerifierBuilder()
 			.and(new HostnameVerifier())
 			.and(v)

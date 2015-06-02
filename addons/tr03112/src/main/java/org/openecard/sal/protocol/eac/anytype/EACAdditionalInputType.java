@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2015 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -46,10 +46,8 @@ public class EACAdditionalInputType {
      *
      * @param baseType DIDAuthenticationDataType
      * @throws ParserConfigurationException
-     * @throws ElementParsingException
      */
-    public EACAdditionalInputType(DIDAuthenticationDataType baseType) throws ParserConfigurationException, 
-	    ElementParsingException {
+    public EACAdditionalInputType(DIDAuthenticationDataType baseType) throws ParserConfigurationException {
 	authMap = new AuthDataMap(baseType);
 	signature = authMap.getContentAsBytes(SIGNATURE);
     }

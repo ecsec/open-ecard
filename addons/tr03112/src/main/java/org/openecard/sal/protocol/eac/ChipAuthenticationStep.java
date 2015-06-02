@@ -40,7 +40,6 @@ import org.openecard.common.tlv.TLVException;
 import org.openecard.common.util.Promise;
 import org.openecard.sal.protocol.eac.anytype.EAC2OutputType;
 import org.openecard.sal.protocol.eac.anytype.EACAdditionalInputType;
-import org.openecard.sal.protocol.eac.anytype.ElementParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,7 +121,7 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 
 	    response.setResult(WSHelper.makeResultOK());
 	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());
-	} catch (ParserConfigurationException | ElementParsingException | ProtocolException | TLVException e) {
+	} catch (ParserConfigurationException | ProtocolException | TLVException e) {
 	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);

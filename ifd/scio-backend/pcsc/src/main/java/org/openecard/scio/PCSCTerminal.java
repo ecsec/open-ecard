@@ -53,8 +53,14 @@ public class PCSCTerminal implements SCIOTerminal {
     }
 
 
+    // method is synchronized only to prevent JVM crashes on linux which happens after nPA authentication
+    // C  [libpthread.so.0+0xb513]  __pthread_mutex_unlock_usercnt+0x3
+    // j  sun.security.smartcardio.PCSC.SCardStatus(J[B)[B+0
+    // j  sun.security.smartcardio.CardImpl.isValid()Z+19
+    // j  sun.security.smartcardio.TerminalImpl.connect(Ljava/lang/String;)Ljavax/smartcardio/Card;+36
+    // j  org.openecard.scio.PCSCTerminal.connect(Lorg/openecard/common/ifd/scio/SCIOProtocol;)Lorg/openecard/common/ifd/scio/SCIOCard;+8
     @Override
-    public SCIOCard connect(SCIOProtocol protocol) throws SCIOException, IllegalStateException {
+    public synchronized SCIOCard connect(SCIOProtocol protocol) throws SCIOException, IllegalStateException {
 	try {
 	    Card c = terminal.connect(protocol.identifier);
 	    return new PCSCCard(this, c);

@@ -349,23 +349,7 @@ public class TCTokenHandler {
 
 	    if (innerException instanceof WSException) {
 		WSException ex = (WSException) innerException;
-
-		switch (ex.getResultMinor()) {
-                    case ECardConstants.Minor.SAL.CANCELLATION_BY_USER:
-                        errorMsg = lang.translationForKey("cancel");
-                        response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
-                        break;
-		    case ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED:
-                    case ECardConstants.Minor.App.INCORRECT_PARM:
-		    case ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED:
-                        errorMsg = langTr03112.translationForKey(ERROR_WHILE_AUTHENTICATION);
-                        response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));
-                        break;
-                    default:
-                        errorMsg = langTr03112.translationForKey(ERROR_WHILE_AUTHENTICATION);
-                        response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
-                }
-		
+		errorMsg = createResponseFromWsEx(ex, response);
 	    } else if (innerException instanceof PAOSConnectionException) {
 		response.setResult(WSHelper.makeResultError(ResultMinor.TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED,
 			w.getLocalizedMessage()));
@@ -524,6 +508,45 @@ public class TCTokenHandler {
 	String removeCard = langTr03112.translationForKey(REMOVE_CARD);
 	String msg = String.format("%s\n\n%s\n%s\n\n%s", baseHeader, exceptionPart, errMsg, removeCard);
 	showBackgroundMessage(msg, title, DialogType.ERROR_MESSAGE);
+    }
+
+    private String createResponseFromWsEx(WSException ex, TCTokenResponse response) {
+	String errorMsg;
+	switch (ex.getResultMinor()) {
+	    case ECardConstants.Minor.SAL.CANCELLATION_BY_USER:
+		errorMsg = lang.translationForKey("cancel");
+		response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
+		break;
+	    case ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED:
+		errorMsg = langTr03112.translationForKey(CERT_ERROR);
+		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));
+		break;
+	    case ECardConstants.Minor.App.INCORRECT_PARM:
+		errorMsg = langTr03112.translationForKey(MESSAGE_CONTENT_INVALID);
+		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));
+		break;
+	    case ECardConstants.Minor.App.INT_ERROR:
+		errorMsg = langTr03112.translationForKey(INTERNAL_ERROR);
+		response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
+		break;
+	    case ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED:
+		errorMsg = langTr03112.translationForKey(CERT_DESCRIPTION_CHECK_FAILED);
+		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));
+		break;
+	    case ECardConstants.Minor.App.UNKNOWN_ERROR:
+		errorMsg = langTr03112.translationForKey(ERROR_WHILE_AUTHENTICATION);
+		response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
+		break;
+	    case ECardConstants.Minor.SAL.UNKNOWN_HANDLE:
+		errorMsg = langTr03112.translationForKey(UNKNOWN_CONNECTION_HANDLE);
+		response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
+		break;
+	    default:
+		errorMsg = langTr03112.translationForKey(ERROR_WHILE_AUTHENTICATION);
+		response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
+	}
+	return errorMsg;
+	
     }
 
 }

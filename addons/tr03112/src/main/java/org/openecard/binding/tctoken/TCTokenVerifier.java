@@ -332,12 +332,13 @@ public class TCTokenVerifier {
      * Creates an{@link URL} with a communication error as parameters and also a given error message.
      *
      * @param refreshAddress The address which should get the error parameters.
+     * @param minor The result minor to attach to the {@code refreshAddress}.
      * @param minorMessage The result message.
      * @return An {@link URL} object containing the error query parameters.
      * @throws URISyntaxException Thrown if the given {@code refreshAddress} is not a valid URL.
      */
-    private URI createUrlWithErrorParams(String refreshAddress, String minorMessage) throws URISyntaxException {
-	String minor = ResultMinor.TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED;
+    private URI createUrlWithErrorParams(String refreshAddress, String minor, String minorMessage)
+	    throws URISyntaxException {
 	return UrlBuilder.fromUrl(refreshAddress)
 		.queryParam("ResultMajor", "error")
 		.queryParamUrl("ResultMinor", TCTokenHacks.fixResultMinor(minor))
@@ -381,11 +382,15 @@ public class TCTokenVerifier {
 		URL resAddr = last.p1;
 		String refreshUrl = resAddr.toString();
 
-		URI refreshUrlAsUrl = createUrlWithErrorParams(refreshUrl, ex.getMessage());
 		if (ex instanceof UserCancellationException) {
 		    UserCancellationException uex = (UserCancellationException) ex;
+		    URI refreshUrlAsUrl = createUrlWithErrorParams(refreshUrl, ResultMinor.CANCELLATION_BY_USER,
+			    ex.getMessage());
 		    throw new UserCancellationException(refreshUrlAsUrl.toString(), ex);
 		}
+		
+		URI refreshUrlAsUrl = createUrlWithErrorParams(refreshUrl,
+			ResultMinor.TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED, ex.getMessage());
 		throw new InvalidTCTokenElement(refreshUrlAsUrl.toString(), ex);
 	    } catch (IOException | ResourceException | InvalidAddressException | ValidationError | URISyntaxException ex1) {
 		String errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR);

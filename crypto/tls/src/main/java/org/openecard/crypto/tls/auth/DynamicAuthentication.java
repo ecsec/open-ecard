@@ -35,7 +35,6 @@ import org.openecard.bouncycastle.crypto.tls.TlsContext;
 import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
 import org.openecard.crypto.tls.CertificateVerifier;
 import org.openecard.crypto.tls.verify.ExpirationVerifier;
-import org.openecard.crypto.tls.verify.SignatureVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +66,6 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
 		.and(new HostnameVerifier())
 		.and(new KeyLengthVerifier())
 		.and(new ExpirationVerifier())
-		.and(new SignatureVerifier())
 		.build(),
 		null);
     }

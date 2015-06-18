@@ -97,7 +97,6 @@ public class StreamHttpClientConnectionTest {
 	    i++;
 	    // send request and receive response
 	    HttpRequest request = new BasicHttpRequest("GET", "/");
-	    request.setParams(conn.getParams());
 	    HttpRequestHelper.setDefaultHeader(request, hostName);
 	    response = httpexecutor.execute(request, conn, ctx);
 	    conn.receiveResponseEntity(response);

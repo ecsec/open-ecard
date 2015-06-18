@@ -303,7 +303,6 @@ public class PAOS {
 			// prepare request
 			String resource = tlsHandler.getResource();
 			BasicHttpEntityEnclosingRequest req = new BasicHttpEntityEnclosingRequest("POST", resource);
-			req.setParams(conn.getParams());
 			HttpRequestHelper.setDefaultHeader(req, tlsHandler.getServerAddress());
 			req.setHeader(HEADER_KEY_PAOS, headerValuePaos);
 			req.setHeader("Accept", "text/xml, application/xml, application/vnd.paos+xml");

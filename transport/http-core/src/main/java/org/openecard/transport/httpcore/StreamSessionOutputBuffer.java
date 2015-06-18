@@ -23,8 +23,8 @@
 package org.openecard.transport.httpcore;
 
 import java.io.OutputStream;
-import org.openecard.apache.http.impl.io.AbstractSessionOutputBuffer;
-import org.openecard.apache.http.params.HttpParams;
+import org.openecard.apache.http.impl.io.HttpTransportMetricsImpl;
+import org.openecard.apache.http.impl.io.SessionOutputBufferImpl;
 
 
 /**
@@ -32,17 +32,17 @@ import org.openecard.apache.http.params.HttpParams;
  *
  * @author Tobias Wich
  */
-public class StreamSessionOutputBuffer extends AbstractSessionOutputBuffer {
+public class StreamSessionOutputBuffer extends SessionOutputBufferImpl {
 
     /**
      * Creates a StreamSessionOutputBuffer instance based on a given OutputStream.
      *
      * @param out The destination output stream.
      * @param bufsize The size of the internal buffer.
-     * @param params HTTP parameters.
      */
-    public StreamSessionOutputBuffer(OutputStream out, int bufsize, HttpParams params) {
-	init(out, bufsize, params);
+    public StreamSessionOutputBuffer(OutputStream out, int bufsize) {
+	super(new HttpTransportMetricsImpl(), bufsize);
+	bind(out);
     }
 
 }

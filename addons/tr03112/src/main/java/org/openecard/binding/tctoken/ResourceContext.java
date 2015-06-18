@@ -258,7 +258,6 @@ public class ResourceContext {
 	    HttpRequestExecutor httpexecutor = new HttpRequestExecutor();
 
 	    BasicHttpEntityEnclosingRequest req = new BasicHttpEntityEnclosingRequest("GET", resource);
-	    req.setParams(conn.getParams());
 	    HttpRequestHelper.setDefaultHeader(req, url);
 	    req.setHeader("Accept", "text/xml, */*;q=0.8");
 	    req.setHeader("Accept-Charset", "utf-8, *;q=0.8");

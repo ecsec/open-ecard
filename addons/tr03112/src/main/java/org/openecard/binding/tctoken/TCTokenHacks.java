@@ -120,8 +120,9 @@ public class TCTokenHacks {
      * BSI TR-03124-1 defines non URL versions of the ResultMinor codes from BSI TR-03112.
      *
      * @param minor
-     * @return
+     * @return Code part of the minor code URL.
      */
+    @Nonnull
     public static String fixResultMinor(@Nonnull String minor) {
 	// each URL should be in the form <prefix>#<code>. We must return only the code part
 	int idx = minor.lastIndexOf("#");

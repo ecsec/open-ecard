@@ -35,9 +35,10 @@ import org.openecard.common.util.Pair;
 /**
  * The class model an FMD as data type.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class FMD {
+
     private final TLV tlv;
     
     boolean content = true;
@@ -51,6 +52,7 @@ public class FMD {
     private List<TLV> proprietaryInformation;
     
     /**
+     * Creats an FMD object.
      *
      * @param tlv
      * @throws TLVException
@@ -69,7 +71,7 @@ public class FMD {
 
 	    if (child.getTagNumWithClass() == 0x61) {
 		Parser p = new Parser(child);
-		applicationTemplates = new LinkedList<ApplicationTemplate>();
+		applicationTemplates = new LinkedList<>();
 		while (p.match(0x61)) {
 		    if (p.match(0x61)) {
 			applicationTemplates.add(new ApplicationTemplate(p.next(0)));
@@ -87,7 +89,7 @@ public class FMD {
 		fileReference = child.getValue();
 	    } else if (child.getTagNumWithClass() == 0xA2) {
 		Parser p = new Parser(child);
-		references = new ArrayList<Pair<byte[], byte[]>>();
+		references = new ArrayList<>();
 		while (p.match(0x88) || p.match(0x51)) {
 		    byte[] shortRef = null;
 		    byte[] fileRef = null;
@@ -100,12 +102,12 @@ public class FMD {
 			fileRef = p.next(0).getValue();
 		    }
 
-		    Pair<byte[], byte[]> refPair = new Pair<byte[], byte[]>(shortRef, fileRef);
+		    Pair<byte[], byte[]> refPair = new Pair<>(shortRef, fileRef);
 		    references.add(refPair);
 		}
 	    } else if (child.getTagNumWithClass() == 0x85) {
 		Parser p = new Parser(child);
-		proprietaryInformation = new ArrayList<TLV>();
+		proprietaryInformation = new ArrayList<>();
 		while (p.match(0x85)) {
 		    proprietaryInformation.add(p.next(0));
 		}
@@ -114,10 +116,10 @@ public class FMD {
     }
     
     /**
-     * Get the uniform resource locator which points to part of the software required in the interface device to 
+     * Get the uniform resource locator which points to the part of the software required in the interface device to
      * communicate with the application in the card.
      * 
-     * @return 
+     * @return The URL contained in the FMD.
      */
     public String getURL() {
 	return uniformResourceLocator;

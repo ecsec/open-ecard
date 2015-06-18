@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import javax.annotation.Nullable;
 import org.openecard.common.io.LimitedInputStream;
 
 
@@ -180,11 +181,11 @@ public class FileUtils {
 
 
     /**
-     * List directory contents for a resource folder. This is basically a brute-force implementation.
-     * Works for regular files and also JARs. <p>Taken from
-     * {@link http://www.uofr.net/~greg/java/get-resource-listing.html} and modified for our needs.</p>
+     * List directory contents for a resource folder.
+     * This is basically a brute-force implementation. Works for regular files and also JARs.
+     * <p>Taken from <a href="http://www.uofr.net/~greg/java/get-resource-listing.html">
+     * http://www.uofr.net/~greg/java/get-resource-listing.html</a> and modified for our needs.</p>
      *
-     * @author Greg Briggs
      * @param clazz Any java class that lives in the same place as the resources you want.
      * @param path Should end with "/", but not start with one.
      * @return List of URLs pointing to all subentries including the specified one.
@@ -254,7 +255,7 @@ public class FileUtils {
      * E.g.
      * <code>/www/index.html</code> becomes <code>/index.html</code> -> <code>some-url-to-the-file</code>.
      *
-     * @param clazz Base for the {@link java.lang.Class#getResource()} operation.
+     * @param clazz Base for the {@link Class#getResource(String)} operation.
      * @param prefix Prefix common to all path entries.
      * @param listFile File with the path entries.
      * @return Mapping of all files without the classpath prefix to their respective URLs.
@@ -279,7 +280,7 @@ public class FileUtils {
 
 
     /**
-     * Same as {@link java.lang.Class#getResourceAsStream()} but works with and without jars reliably.
+     * Same as {@link Class#getResourceAsStream(String)} but works with and without jars reliably.
      * In fact the resource is tried to be loaded with and without / in front of the path.
      *
      * @param clazz Base for the <code>getResource()</code> operation.
@@ -296,7 +297,7 @@ public class FileUtils {
     }
 
     /**
-     * Same as {@link java.lang.Class#getResource()} but works with and without jars reliably.
+     * Same as {@link Class#getResource(String)} but works with and without jars reliably.
      * In fact the resource is tried to be loaded with and without / in front of the path.
      *
      * @param clazz Base for the <code>getResource()</code> operation.
@@ -313,7 +314,7 @@ public class FileUtils {
     }
 
     /**
-     * Same as {@link java.lang.Class#getResourceAsStream()} but works with and without jars reliably.
+     * Same as {@link Class#getResourceAsStream(String)} but works with and without jars reliably.
      * In fact the resource is tried to be loaded with and without / in front of the path. The method needs ClassLoader
      * to be able to load the resource. This is mainly intended for the usage with an add-on jar file.
      *
@@ -331,14 +332,15 @@ public class FileUtils {
     }
 
     /**
-     * Same as {@link java.lang.Class#getResource()} but works with and without jars reliably.
+     * Same as {@link Class#getResource(String)} but works with and without jars reliably.
      * In fact the resource is tried to be loaded with and without / in front of the path. The method needs ClassLoader
      * to be able to resolve the resource as URL. This is mainly intended for the usage with add-on jar file.
      *
      * @param loader
      * @param name
-     * @return
+     * @return URL to the resource, or {@code null} if the resource does not exist in the classpath.
      */
+    @Nullable
     public static URL resolveResourceAsURL(ClassLoader loader, String name) {
 	URL url = loader.getResource(name);
 	if (url == null ) {

@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * See BSI-TR-03110, version 2.10, part 3, section B.11.1.
  * See ISO/IEC 7816-4, section 7.5.11.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class MSESetATCA extends ManageSecurityEnvironment {
 

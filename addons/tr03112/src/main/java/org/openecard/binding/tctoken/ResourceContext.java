@@ -158,8 +158,8 @@ public class ResourceContext {
 
     /**
      * Opens a stream to the given URL.
-     * This function function uses {@link #getStream(java.net.URL, org.openecard.binding.tctoken.CertificateVerifier)}
-     * to get the stream. A verifier which is always true is used in the invocation.
+     * This function function uses {@link #getStream(URL, CertificateValidator)} to get the stream. A verifier which is
+     * always true is used in the invocation.
      *
      * @param url URL pointing to the TCToken.
      * @return Resource as a stream and the server certificates plus chain received while retrieving the TC Token.
@@ -300,6 +300,7 @@ public class ResourceContext {
 
 	    // follow next redirect or finish?
 	    if (finished) {
+		assert(entity != null);
 		ResourceContext result = new ResourceContext(tlsClient, h, serverCerts);
 		LimitedInputStream is = new LimitedInputStream(entity.getContent());
 		result.setStream(is);

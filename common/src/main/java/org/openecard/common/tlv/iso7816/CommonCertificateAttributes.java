@@ -32,7 +32,7 @@ import org.openecard.common.util.ByteUtils;
 
 /**
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class CommonCertificateAttributes extends TLVType {
 
@@ -116,9 +116,9 @@ public class CommonCertificateAttributes extends TLVType {
 
     /**
      * Get the value of the identifier property.
-     * The identifier is here a credential identifier.
+     * The identifier here is a credential identifier.
      *
-     * @return
+     * @return Identifier structure.
      */
     public TLV getIdentifier() {
 	return identifier;
@@ -135,7 +135,7 @@ public class CommonCertificateAttributes extends TLVType {
     /**
      * List of credential identifiers.
      *
-     * @return
+     * @return Identifiers structure.
      */
     public TLV getIdentifiers() {
 	return identifiers;

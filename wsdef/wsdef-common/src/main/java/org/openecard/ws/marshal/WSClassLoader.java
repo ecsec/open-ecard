@@ -43,7 +43,7 @@ import javax.xml.ws.WebServiceFeature;
  * Supply classloader responsible for all ws classes.
  * This functionality is needed to dynamically load and instantiate the ws clients.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public abstract class WSClassLoader {
 
@@ -54,8 +54,8 @@ public abstract class WSClassLoader {
 
     static {
 	// load service maps
-	serviceClasses = new HashMap<String, String>();
-	servicePorts = new HashMap<String, String>();
+	serviceClasses = new HashMap<>();
+	servicePorts = new HashMap<>();
 
 	serviceClasses.put("SAL", "org.openecard.ws.SAL_Service");
 	servicePorts  .put("SAL", "SALPort");
@@ -111,13 +111,13 @@ public abstract class WSClassLoader {
     /**
      * Gets a set of all available services implementation identifiers.
      * The identifiers are freely chosen by the developer and thus are not related to the services QName. The
-     * identifiers returned by this function may be used in the {@link #getClientService()} functions.
+     * identifiers returned by this function may be used in the {@link #getClientService(String)} functions.
      *
      * @return Set with all supported services.
      */
     @Nonnull
     public static Set<String> getSupportedServices() {
-	TreeSet<String> s = new TreeSet<String>(serviceClasses.keySet());
+	TreeSet<String> s = new TreeSet<>(serviceClasses.keySet());
 	Iterator<String> it = s.iterator();
 	while (it.hasNext()) {
 	    String nextService = it.next();
@@ -147,8 +147,8 @@ public abstract class WSClassLoader {
      * @throws IllegalAccessException In case the constructor call or the {@code getPort()} method failed.
      * @throws InvocationTargetException In case the constructor call or the {@code getPort()} method failed.
      * @throws ClassNotFoundException In case no such service is registered in this loader.
-     * @see #getClientService(java.lang.String, java.lang.String)
-     * @see #getClientService(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     * @see #getClientService(String, String)
+     * @see #getClientService(String, String, String, String, String)
      */
     public static Object getClientService(@Nonnull String serviceName)
 	    throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException,
@@ -175,7 +175,7 @@ public abstract class WSClassLoader {
 
     /**
      * Gets a client service instance of the given name and set the given endpoint address.
-     * A detailed explanation can be found in {@link #getClientService(java.lang.String).
+     * A detailed explanation can be found in {@link #getClientService(String)}.
      *
      * @param serviceName Name of the service. Must be one of the names returned by {@link #getSupportedServices()}.
      * @param schema Schema part of the URL (e.g. {@code https}).
@@ -202,7 +202,7 @@ public abstract class WSClassLoader {
 
     /**
      * Gets a client service instance of the given name and set the given endpoint address.
-     * A detailed explanation can be found in {@link #getClientService(java.lang.String).
+     * A detailed explanation can be found in {@link #getClientService(String)}.
      *
      * @param serviceName Name of the service. Must be one of the names returned by {@link #getSupportedServices()}.
      * @param address URL pointing to the service endpoint.
@@ -215,7 +215,8 @@ public abstract class WSClassLoader {
      * @throws ClassNotFoundException In case no such service is registered in this loader.
      */
     public static Object getClientService(String serviceName, String address)
-	    throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, ClassNotFoundException {
+	    throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException,
+	    ClassNotFoundException {
 	// get client
 	Object serviceInst = getClientService(serviceName);
 	// set endpoint

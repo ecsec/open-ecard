@@ -65,7 +65,7 @@ public class HttpRequestLineUtils {
     }
 
     /**
-     * Simplification of {@link #transform(java.lang.String, java.lang.String)} with the default encoding UTF-8.
+     * Simplification of {@link #transform(String, String)} with the default encoding UTF-8.
      *
      * @param queryStr Query string as found in the HTTP request line.
      * @return Map with key value pairs of the query parameters.
@@ -77,12 +77,13 @@ public class HttpRequestLineUtils {
     }
 
     /**
-     * Transform query parameters into a java map and URL decode the values. The parameters are not decoded, but
-     * taken as is. The query string has the form <pre>key(=value)?&key((=value)?)*</pre>. If a key does not have a
-     * value, null is taken as value. The resulting values are encoded according to the given encoding
+     * Transform query parameters into a java map and URL decode the values.
+     * The parameters are not decoded, but taken as is. The query string has the form
+     * <pre>key(=value)?&key((=value)?)*</pre>. If a key does not have a value, null is taken as value. The resulting
+     * values are encoded according to the given encoding
      *
      * @param queryStr Query string as found in the HTTP request line.
-     * @param encoding Encoding used in the {@link URLDecoder#decode(java.lang.String, java.lang.String) function.
+     * @param encoding Encoding used in the {@link URLDecoder#decode(String, String)} function.
      * @return Map with key value pairs of the query parameters.
      * @throws UnsupportedEncodingException Thrown if the strings decoded from the URL encoded value have a different
      *   encoding than the one defined in this function.

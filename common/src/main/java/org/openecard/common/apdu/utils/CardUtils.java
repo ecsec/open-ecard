@@ -222,10 +222,11 @@ public class CardUtils {
      * @param dispatcher
      * @param slotHandle
      * @param aid Application identifier
-     * @return
-     * @throws APDUException
+     * @return Response APDU of the select command.
+     * @throws APDUException Thrown in case there was an error while processing the command APDU.
      */
-    public static CardResponseAPDU selectApplicationByAID(Dispatcher dispatcher, byte[] slotHandle, byte[] aid) throws APDUException {
+    public static CardResponseAPDU selectApplicationByAID(Dispatcher dispatcher, byte[] slotHandle, byte[] aid)
+	    throws APDUException {
 	Select selectApp = new Select((byte) 0x04, (byte) 0x04);
 	selectApp.setData(aid);
 	selectApp.setLE((byte) 0xFF);

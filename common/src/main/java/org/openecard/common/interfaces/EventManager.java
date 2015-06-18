@@ -29,7 +29,7 @@ import org.openecard.common.enums.EventType;
 
 /**
  * Interface describing an EventManager.
- * The EventManager provides functions to register and unregister {@link EventCallbacks}. Furthermore the reset of a
+ * The EventManager provides functions to register and unregister {@link EventCallback}s. Furthermore the reset of a
  * card is may be propagated to the system.
  *
  * @author Johannes Schmoelz

@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import javax.annotation.Nonnull;
 import org.openecard.common.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -179,7 +180,7 @@ public class I18n {
      *
      * @param key Key as defined in language properties file.
      * @param parameters If any parameters are given here, the string is interpreted as a template and the parameters
-     *   are applied. The template interpretation uses {@link String#format()} as the rendering method.
+     *   are applied. The template interpretation uses {@link String#format(String, Object...)} as the rendering method.
      * @return Translation as specified in the translation, or default file.
      */
     public String translationForKey(String key, Object ... parameters) {
@@ -202,7 +203,7 @@ public class I18n {
      *
      * @param key Key as defined in language properties file.
      * @param parameters If any parameters are given here, the string is interpreted as a template and the parameters
-     *   are applied. The template interpretation uses {@link String#format()} as the rendering method.
+     *   are applied. The template interpretation uses {@link String#format(String, Object...)} as the rendering method.
      * @return Translation as specified in the translation, or default file.
      */
     public String translationForKey(I18nKey key, Object ... parameters) {
@@ -211,11 +212,13 @@ public class I18n {
 
 
     /**
-     * Calls {@link #translationForFile(java.lang.String, java.lang.String)} with the second parameter set to null.
-     * @param name
-     * @return
-     * @throws IOException
+     * Calls {@link #translationForFile(String, String)} with the second parameter set to null.
+     *
+     * @param name Name part of the file.
+     * @return URL pointing to the translated file.
+     * @throws IOException Thrown in case no resource is available.
      */
+    @Nonnull
     public URL translationForFile(String name) throws IOException {
 	return translationForFile(name, null);
     }
@@ -233,11 +236,12 @@ public class I18n {
      * // - openecard_i18n/gui/about_C.html</pre>
      * </p>
      *
-     * @param name Name part of the file
+     * @param name Name part of the file.
      * @param fileEnding File ending if available, null otherwise.
      * @return URL pointing to the translated, or default file.
      * @throws IOException Thrown in case no resource is available.
      */
+    @Nonnull
     public synchronized URL translationForFile(String name, String fileEnding) throws IOException {
 	// check if the url has already been found previously
 	fileEnding = fileEnding != null ? ("." + fileEnding) : "";
@@ -256,7 +260,7 @@ public class I18n {
 	String country = locale.getCountry();
 	String fnameBase = "/openecard_i18n/" + component + "/" + name;
 	// try to guess correct file to load
-	if (!lang.isEmpty() && !country.isEmpty()) {
+	if (! lang.isEmpty() && ! country.isEmpty()) {
 	    String fileName = fnameBase + "_" + lang + "_" + country + fileEnding;
 	    URL url = FileUtils.resolveResourceAsURL(loaderReference, fileName);
 	    if (url != null) {
@@ -264,7 +268,7 @@ public class I18n {
 		return url;
 	    }
 	}
-	if (!lang.isEmpty()) {
+	if (! lang.isEmpty()) {
 	    String fileName = fnameBase + "_" + lang + fileEnding;
 	    URL url = FileUtils.resolveResourceAsURL(loaderReference, fileName);
 	    if (url != null) {

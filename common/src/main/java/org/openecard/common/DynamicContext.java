@@ -84,7 +84,7 @@ public class DynamicContext {
     /**
      * Removes the value from this thread.
      * This does not clear the values saved in the context, but makes the context inaccessible for further invocations
-     * of the {@link #getInstance()} method.
+     * of the {@link #getInstance(String)} method.
      *
      * @see ThreadLocal#remove()
      */

@@ -34,9 +34,9 @@ import org.openecard.gui.definition.Radiobox;
 
 
 /**
- * Implementation of a radio button group for use in a {@link StepFrame}.
+ * Implementation of a radio button group for use in a {@link org.openecard.gui.swing.StepFrame}.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class Radiobutton implements StepComponent, Focusable {
 
@@ -52,7 +52,7 @@ public class Radiobutton implements StepComponent, Focusable {
 
 	// create buttons and add to label, also copy items to result
 	ButtonGroup bg = new ButtonGroup();
-	buttons = new ArrayList<JRadioButton>(radio.getBoxItems().size());
+	buttons = new ArrayList<>(radio.getBoxItems().size());
 	for (BoxItem next : radio.getBoxItems()) {
 	    // copy box item
 	    BoxItem copy = new BoxItem();

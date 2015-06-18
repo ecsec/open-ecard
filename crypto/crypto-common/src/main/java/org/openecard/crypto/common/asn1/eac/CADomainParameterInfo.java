@@ -30,7 +30,7 @@ import org.openecard.crypto.common.asn1.eac.oid.CAObjectIdentifier;
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class CADomainParameterInfo {
 

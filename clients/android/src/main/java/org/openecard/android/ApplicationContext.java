@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
  * This class is instantiated when the process of this application is created.
  * Therefore the global application state is maintained here.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class ApplicationContext extends Application implements EventCallback {
 

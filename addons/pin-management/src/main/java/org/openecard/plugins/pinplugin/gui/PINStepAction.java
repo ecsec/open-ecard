@@ -65,11 +65,11 @@ import static iso.std.iso_iec._24727.tech.schema.PasswordTypeType.ASCII_NUMERIC;
 
 /**
  * StepAction for performing PACE with the PIN and modify it.
- * <br/> This StepAction tries to perform PACE with the PIN as often as possible in dependence of the retry counter.
- * <br/> If PACE was executed successful the PIN is modified.
- * <br/> If the retry counter reaches 1 the CANEntryStep will be shown.
+ * <br> This StepAction tries to perform PACE with the PIN as often as possible in dependence of the retry counter.
+ * <br> If PACE was executed successful the PIN is modified.
+ * <br> If the retry counter reaches 1 the CANEntryStep will be shown.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class PINStepAction extends StepAction {
 

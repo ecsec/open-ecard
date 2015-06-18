@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Johannes Schmölz
  */
 public class GuiUtils {
 

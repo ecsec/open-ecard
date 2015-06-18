@@ -47,8 +47,8 @@ import org.openecard.common.util.HandlerUtils;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
  */
 public class CardStateEntry implements Comparable<CardStateEntry> {
 

@@ -48,7 +48,7 @@ import org.openecard.common.I18n;
 /**
  * Implements a about panel which contains basic information about the installed addon.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class AboutPanel extends JPanel {
 

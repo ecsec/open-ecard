@@ -34,8 +34,8 @@ import org.openecard.common.util.ByteUtils;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class CommonKeyAttributes extends TLVType {
 

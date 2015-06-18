@@ -37,7 +37,7 @@ import org.openecard.gui.definition.Step;
  * After the values are set, the {@link #synchronize()} method can be called, so that any listeners can proceed and
  * fetch the values.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class SwingStepResult implements StepResult {
 

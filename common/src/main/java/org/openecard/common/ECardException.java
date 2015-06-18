@@ -29,15 +29,15 @@ import oasis.names.tc.dss._1_0.core.schema.Result;
 
 
 /**
- * Exception class taking care of easy creation of Exceptions based on the oasis Result type.<br/>
+ * Exception class taking care of easy creation of Exceptions based on the oasis Result type.<br>
  * The usage is as follows.
  * <ol>
  * <li>Derive from this class and leave implementation empty.</li>
- * <li>Call <code>makeException</code> function to create the exception and hand over a freshly copied exception.<br/>
+ * <li>Call <code>makeException</code> function to create the exception and hand over a freshly copied exception.<br>
  * <code>throw MyExc.makeException(new MyExc(), "Major", "Minor", "Msg");</code>
  * </li>
  * </ol>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public abstract class ECardException extends Exception {
 

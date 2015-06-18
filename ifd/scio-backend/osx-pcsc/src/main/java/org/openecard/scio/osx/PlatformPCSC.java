@@ -33,9 +33,9 @@ import java.security.PrivilegedAction;
 
 /**
  * OS X specific PlatformPCSC.
- * For more information see {@link package-info}.
+ * For more information see {@link org.openecard.scio.osx}.
  *
- * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
+ * @author Benedikt Biallowons
  */
 public class PlatformPCSC {
 
@@ -58,6 +58,7 @@ public class PlatformPCSC {
 
     static {
 	INIT_EXCEPTION = AccessController.doPrivileged(new PrivilegedAction<Exception>() {
+	    @Override
 	    public Exception run() {
 		try {
 		    String[] parts = PCSC_JNI_LIBRARY_NAME.split("\\.");

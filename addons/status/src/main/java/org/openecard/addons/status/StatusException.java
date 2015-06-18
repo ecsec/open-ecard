@@ -26,8 +26,8 @@ package org.openecard.addons.status;
 /**
  * Implements an exception for connector errors.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class StatusException extends Exception {
 

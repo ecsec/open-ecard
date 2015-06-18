@@ -31,9 +31,9 @@ import org.openecard.bouncycastle.util.Arrays;
 /**
  * A set of utility functions for Byte and Byte Array.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
  */
 public class ByteUtils {
 

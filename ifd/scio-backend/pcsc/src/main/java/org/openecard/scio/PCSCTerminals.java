@@ -331,7 +331,7 @@ public class PCSCTerminals implements SCIOTerminals {
 	 *
 	 * @param timeout Timeout values as in {@link #waitForChange(long)}.
 	 * @return The first value is the changed flag . It is {@code true} if a change the terminals happened,
-	 *   {@code false} if a timeout occurred. <br/>
+	 *   {@code false} if a timeout occurred. <br>
 	 *   The second value is the error flag. It is {@code true} if an error was used to indicate that no terminals
 	 *   are connected, {@code false} otherwise.
 	 * @throws CardException Thrown if any error related to the SmartcardIO occured.

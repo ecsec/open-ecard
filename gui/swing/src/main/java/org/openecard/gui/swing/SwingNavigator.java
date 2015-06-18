@@ -42,8 +42,8 @@ import org.slf4j.LoggerFactory;
  * Implementation of the UserConsentNavigator interface for the Swing GUI.
  * This class receives button clicks and orchestrates the update of the steps and progress indication components.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich
+ * @author Moritz Horsch
  */
 public class SwingNavigator implements UserConsentNavigator, ActionListener {
 

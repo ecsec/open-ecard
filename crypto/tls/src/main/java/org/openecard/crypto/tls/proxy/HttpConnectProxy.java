@@ -53,7 +53,7 @@ import org.openecard.crypto.tls.verify.JavaSecVerifier;
  * This class is initialised with the proxy parameters and can then establish a tunnel with the getSocket method.
  * The authentication parameters are optional. Scheme must be one of http and https.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public final class HttpConnectProxy extends Proxy {
 

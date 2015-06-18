@@ -39,7 +39,7 @@ import javax.annotation.Nonnull;
  * desirable to operate on a socket, say because some API needs a socket, then this class can be used to bring the
  * tunneled streams and the originating socket together.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class SocketWrapper extends Socket {
 

@@ -29,7 +29,7 @@ import org.openecard.bouncycastle.asn1.DERIA5String;
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class CardInfoLocator {
 

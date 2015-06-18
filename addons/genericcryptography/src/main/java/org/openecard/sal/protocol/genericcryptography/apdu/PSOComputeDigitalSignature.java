@@ -29,7 +29,7 @@ import org.openecard.common.apdu.PerformSecurityOperation;
  * Implements a Compute Digital Signature operation.
  * See ISO/IEC 7816-8, section 11.7.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class PSOComputeDigitalSignature extends PerformSecurityOperation {
 

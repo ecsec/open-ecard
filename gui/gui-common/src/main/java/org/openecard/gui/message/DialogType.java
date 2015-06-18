@@ -27,7 +27,7 @@ package org.openecard.gui.message;
  * Type of the messagebox.
  * Controls the type of the messagebox such as error, or warning messages.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public enum DialogType {
 

@@ -33,7 +33,7 @@ import org.openecard.bouncycastle.jce.spec.ElGamalParameterSpec;
 /**
  * See RFC 5114, http://tools.ietf.org/html/rfc5114
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class StandardizedDomainParameters extends DomainParameters {
 

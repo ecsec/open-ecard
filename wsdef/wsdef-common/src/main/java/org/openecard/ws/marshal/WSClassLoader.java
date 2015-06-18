@@ -135,7 +135,7 @@ public abstract class WSClassLoader {
      * Gets a client service instance of the given name.
      * The name must be one of the names returned by {@link #getSupportedServices()}. The use of this method is
      * strongly encouraged, as it uses the WSDLs and XML schemas bundled with this class. This leads to lower load
-     * times.<br/>
+     * times.<br>
      * The service client is initialized with the values from the WSDL. In order to set other endpoints, use the other
      * {@code getClientService} functions.
      *

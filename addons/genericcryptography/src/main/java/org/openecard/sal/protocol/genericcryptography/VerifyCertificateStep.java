@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * Implements the VerifyCertificate step of the Generic cryptography protocol.
  * See TR-03112, version 1.1.2, part 7, section 4.9.11.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class VerifyCertificateStep implements ProtocolStep<VerifyCertificate, VerifyCertificateResponse> {
 

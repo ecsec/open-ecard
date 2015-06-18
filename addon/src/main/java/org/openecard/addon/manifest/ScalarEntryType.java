@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 @XmlType(name = "ScalarEntryType")
 @XmlEnum

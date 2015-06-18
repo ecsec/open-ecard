@@ -30,7 +30,7 @@ import org.openecard.richclient.gui.manage.SettingsPanel;
  * Settings panel that can be used as default. 
  * This panel hosts the given settings groups.
  *
- * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class DefaultSettingsPanel extends SettingsPanel {
 

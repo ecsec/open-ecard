@@ -33,7 +33,7 @@ import org.openecard.common.util.ByteUtils;
 /**
  * The class models the AuthReference data type from ISO7816-15.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class AuthReference extends TLVType {
 

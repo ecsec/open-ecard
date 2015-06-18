@@ -35,10 +35,10 @@ import javax.annotation.concurrent.Immutable;
 /**
  * Builder class for {@code CardApplicationPathType} and {@code ConnectionHandleType}.
  * The set methods always emit a copy of the builder with the respective value set. This makes it easy to supply
- * preconfigured builder instances.<br/>
+ * preconfigured builder instances.<br>
  * The builder instance is immutable making it safe to use in different threads.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 @Immutable
 public class HandlerBuilder {

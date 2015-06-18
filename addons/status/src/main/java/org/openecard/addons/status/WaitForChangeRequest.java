@@ -29,9 +29,9 @@ import javax.annotation.Nonnull;
 /**
  * Wrapper for the wait for change request message.
  *
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Johannes Schmölz
+ * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public final class WaitForChangeRequest {
 

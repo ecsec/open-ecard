@@ -29,7 +29,7 @@ import java.net.SocketException;
  * Exception indicating a failed attempt to open a HTTP proxy tunnel.
  * The exception contains the result code and the textual description of the error.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class HttpConnectProxyException extends SocketException {
 

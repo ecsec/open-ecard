@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2015 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -45,8 +45,8 @@ import org.w3c.dom.NodeList;
 /**
  * The class implements a CryptoMarkerType object according to BSI TR-0312 part 7.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 public class CryptoMarkerType {
 
@@ -68,96 +68,123 @@ public class CryptoMarkerType {
     public CryptoMarkerType(iso.std.iso_iec._24727.tech.schema.DIDAbstractMarkerType baseType) {
 	protocol = baseType.getProtocol();
 	for (Element elem : baseType.getAny()) {
-	    if (elem.getLocalName().equals("AlgorithmInfo")) {
-		algorithmInfo = new AlgorithmInfoType();
-		NodeList algorithmInfoNodes = elem.getChildNodes();
-		for (int i = 0; i < algorithmInfoNodes.getLength(); i++) {
-		    Node node = algorithmInfoNodes.item(i);
-		    if (node.getLocalName().equals("Algorithm")) {
+	    switch (elem.getLocalName()) {
+	    	case "AlgorithmInfo":
+		    algorithmInfo = new AlgorithmInfoType();
+		    NodeList algorithmInfoNodes = elem.getChildNodes();
+		    for (int i = 0; i < algorithmInfoNodes.getLength(); i++) {
+			Node node = algorithmInfoNodes.item(i);
+		switch (node.getLocalName()) {
+		    case "Algorithm":
 			algorithmInfo.setAlgorithm(node.getTextContent());
-		    } else if (node.getLocalName().equals("AlgorithmIdentifier")) {
+			break;
+		    case "AlgorithmIdentifier":
 			AlgorithmIdentifierType algorithmIdentifierType = new AlgorithmIdentifierType();
 			NodeList nodeList = node.getChildNodes();
 			for (int y = 0; y < nodeList.getLength(); y++) {
 			    Node n = nodeList.item(y);
-			    if (n.getLocalName().equals("Algorithm")) {
-				algorithmIdentifierType.setAlgorithm(n.getTextContent());
-			    } else if (n.getLocalName().equals("Parameters")) {
-				algorithmIdentifierType.setParameters(n);
+			    if (null != n.getLocalName()) switch (n.getLocalName()) {
+			    	case "Algorithm":
+				    algorithmIdentifierType.setAlgorithm(n.getTextContent());
+				    break;
+			    	case "Parameters":
+				    algorithmIdentifierType.setParameters(n);
+				    break;
 			    }
 			}
 			algorithmInfo.setAlgorithmIdentifier(algorithmIdentifierType);
-		    } else if (node.getLocalName().equals("SupportedOperations")) {
+			break;
+		    case "SupportedOperations":
 			String[] supportedOperations = node.getTextContent().split(" ");
 			algorithmInfo.getSupportedOperations().addAll(Arrays.asList(supportedOperations));
-		    } else if (node.getLocalName().equals("CardAlgRef")) {
+			break;
+		    case "CardAlgRef":
 			algorithmInfo.setCardAlgRef(StringUtils.toByteArray(node.getTextContent()));
-		    } else if (node.getLocalName().equals("HashAlgRef")) {
+			break;
+		    case "HashAlgRef":
 			algorithmInfo.setHashAlgRef(StringUtils.toByteArray(node.getTextContent()));
-		    }
+			break;
 		}
-	    } else if (elem.getLocalName().equals("KeyInfo")) {
-		cryptoKeyInfo = new CryptoKeyInfoType();
-		NodeList nodeList = elem.getChildNodes();
-		for (int i = 0; i < nodeList.getLength(); i++) {
-		    Node n = nodeList.item(i);
-		    if (n.getLocalName().equals("KeyRef")) {
-			KeyRefType keyRef = new KeyRefType();
-			keyRef.setKeyRef(StringUtils.toByteArray(n.getTextContent()));
-			cryptoKeyInfo.setKeyRef(keyRef);
-		    } else if (n.getLocalName().equals("KeySize")) {
-			cryptoKeyInfo.setKeySize(new BigInteger(n.getTextContent()));
-		    }
-		}
-	    } else if (elem.getLocalName().equals("SignatureGenerationInfo")) {
-		signatureGenerationInfo = elem.getTextContent().split(" ");
-	    } else if (elem.getLocalName().equals("LegacySignatureGenerationInfo")) {
-		NodeList nodeList = elem.getChildNodes();
-		legacySignatureGenerationInfo = new ArrayList<CardCallTemplateType>();
-		for (int i = 0; i < nodeList.getLength(); i++) {
-		    Node n = nodeList.item(i);
-		    if (n.getLocalName().equals("CardCommand")) {
-			NodeList nodeList2 = n.getChildNodes();
-			CardCallTemplateType cctt = new CardCallTemplateType();
-			for (int j = 0; j < nodeList2.getLength(); j++) {
-			    Node n2 = nodeList2.item(j);
-			    String localName = n2.getLocalName();
-			    if (localName.equals("HeaderTemplate")) {
-				cctt.setHeaderTemplate(n2.getTextContent());
-			    } else if (localName.equals("DataTemplate")) {
-				cctt.setDataTemplate(n2.getTextContent());
-			    } else if (localName.equals("ExpectedLength")) {
-				cctt.setExpectedLength(BigInteger.valueOf(Integer.parseInt(n2.getTextContent())));
-			    }
+		    }   break;
+		case "KeyInfo":
+		{
+		    cryptoKeyInfo = new CryptoKeyInfoType();
+		    NodeList nodeList = elem.getChildNodes();
+		    for (int i = 0; i < nodeList.getLength(); i++) {
+			Node n = nodeList.item(i);
+			switch (n.getLocalName()) {
+			    case "KeyRef":
+				KeyRefType keyRef = new KeyRefType();
+				keyRef.setKeyRef(StringUtils.toByteArray(n.getTextContent()));
+				cryptoKeyInfo.setKeyRef(keyRef);
+				break;
+			    case "KeySize":
+				cryptoKeyInfo.setKeySize(new BigInteger(n.getTextContent()));
+				break;
 			}
-			legacySignatureGenerationInfo.add(cctt);
+		}	break;
 		    }
-		}
-	    } else if (elem.getLocalName().equals("HashGenerationInfo")) {
-		hashGenerationInfo = HashGenerationInfoType.fromValue(elem.getTextContent());
-	    } else if (elem.getLocalName().equals("CertificateRef")) {
-		if (certificateRefs == null) {
-		    certificateRefs = new ArrayList<>();
-		}
-
-		CertificateRefType certificateRef = new CertificateRefType();
-		NodeList nodeList = elem.getChildNodes();
-		for (int i = 0; i < nodeList.getLength(); i++) {
-		    Node n = nodeList.item(i);
-		    if (n.getLocalName().equals("DataSetName")) {
-			certificateRef.setDataSetName(n.getTextContent());
-		    } else if (n.getLocalName().equals("DSIName")) {
-			certificateRef.setDSIName(n.getTextContent());
-		    } else if (n.getLocalName().equals("CertificateType")) {
-			certificateRef.setCertificateType(n.getTextContent());
+		case "SignatureGenerationInfo":
+		    signatureGenerationInfo = elem.getTextContent().split(" ");
+		    break;
+		case "LegacySignatureGenerationInfo":
+		{
+		    NodeList nodeList = elem.getChildNodes();
+		    legacySignatureGenerationInfo = new ArrayList<>();
+		    for (int i = 0; i < nodeList.getLength(); i++) {
+			Node n = nodeList.item(i);
+			if (n.getLocalName().equals("CardCommand")) {
+			    NodeList nodeList2 = n.getChildNodes();
+			    CardCallTemplateType cctt = new CardCallTemplateType();
+			    for (int j = 0; j < nodeList2.getLength(); j++) {
+				Node n2 = nodeList2.item(j);
+				String localName = n2.getLocalName();
+				switch (localName) {
+				    case "HeaderTemplate":
+					cctt.setHeaderTemplate(n2.getTextContent());
+					break;
+				    case "DataTemplate":
+					cctt.setDataTemplate(n2.getTextContent());
+					break;
+				    case "ExpectedLength":
+					cctt.setExpectedLength(BigInteger.valueOf(Integer.parseInt(n2.getTextContent())));
+					break;
+				}
+			    }
+			    legacySignatureGenerationInfo.add(cctt);
 		    }
-		}
-
-		certificateRefs.add(certificateRef);
-	    } else if (elem.getLocalName().equals("LegacyKeyName")) {
-		this.legacyKeyName = elem.getTextContent();
-	    } else if (elem.getLocalName().equals("StateInfo")) {
-		// TODO
+		}	break;
+		    }
+		case "HashGenerationInfo":
+		    hashGenerationInfo = HashGenerationInfoType.fromValue(elem.getTextContent());
+		    break;
+		case "CertificateRef":
+		{
+		    if (certificateRefs == null) {
+			certificateRefs = new ArrayList<>();
+		    }	CertificateRefType certificateRef = new CertificateRefType();
+		    NodeList nodeList = elem.getChildNodes();
+		    for (int i = 0; i < nodeList.getLength(); i++) {
+			Node n = nodeList.item(i);
+			switch (n.getLocalName()) {
+			    case "DataSetName":
+				certificateRef.setDataSetName(n.getTextContent());
+				break;
+			    case "DSIName":
+				certificateRef.setDSIName(n.getTextContent());
+				break;
+			    case "CertificateType":
+				certificateRef.setCertificateType(n.getTextContent());
+				break;
+			}
+		}	certificateRefs.add(certificateRef);
+			break;
+		    }
+		case "LegacyKeyName":
+		    this.legacyKeyName = elem.getTextContent();
+		    break;
+	    	case "StateInfo":
+		    break;
 	    }
 	}
     }
@@ -179,7 +206,7 @@ public class CryptoMarkerType {
      * Get the value of the property LegacySignatureGenerationIndo if it exists.
      *
      * @return A list of {@link CardCallTemplateType} objects which contain specific APDUs to generate a signature with
-     * the currently used card. If no such information is available NULL is returned.
+     *   the currently used card. If no such information is available {@code null} is returned.
      */
     public List<CardCallTemplateType> getLegacySignatureGenerationInfo() {
 	if (legacySignatureGenerationInfo == null) {
@@ -191,8 +218,8 @@ public class CryptoMarkerType {
     /**
      * Get the value of the property cryptoKeyInfo if it exists.
      *
-     * @return A {@link CryptokeyInfoType} object which contains all known information about a key. If no such
-     * information is available NULL is returned.
+     * @return A {@link CryptoKeyInfoType} object which contains all known information about a key. If no such
+     *   information is available {@code null} is returned.
      */
     public CryptoKeyInfoType getCryptoKeyInfo() {
 	return cryptoKeyInfo;
@@ -201,7 +228,7 @@ public class CryptoMarkerType {
     /**
      * Get the value of the property LegacyKeyName if it exists.
      *
-     * @return A string containing a key name. If no such key name is available NULL is returned.
+     * @return A string containing a key name. If no such key name is available {@code null} is returned.
      */
     public String getLegacyKeyName() {
 	return legacyKeyName;
@@ -220,8 +247,8 @@ public class CryptoMarkerType {
     /**
      * Get the value of the property HashGenetationInfo if it exists.
      *
-     * @return A {@link HashGenerationInfoType} object containing all necessary information about the creation of a hash.
-     * If no such information is available NULL is returned.
+     * @return A {@link HashGenerationInfoType} object containing all necessary information about the creation of a
+     *   hash. If no such information is available {@code null} is returned.
      */
     public HashGenerationInfoType getHashGenerationInfo() {
 	return hashGenerationInfo;
@@ -233,7 +260,7 @@ public class CryptoMarkerType {
      * all other certificates are part of the certificate chain for the validation.
      *
      * @return A list of {@link CertificateRefType} object which contains references to a certificate object and the
-     * possible chain. If no such object exists NULL is returned.
+     *   possible chain. If no such object exists {@code null} is returned.
      */
     public List<CertificateRefType> getCertificateRefs() {
 	return certificateRefs;
@@ -241,11 +268,12 @@ public class CryptoMarkerType {
 
     /**
      * Get the value of the property StateInfo if it exists.
+     * <br><br>
+     * NOTE: This method is currently not implemented and throws an UnsupportedOperationException if the method is
+     * called.
      *
      * @return A {@link StateInfo} object which contains information about the available states. If no such information
-     * exists NULL is returned.
-     *
-     * NOTE: This method is currently not implemented and throws an UnsupportedOperationException if the method is called.
+     *   exists {@code null} is returned.
      */
     public StateInfo getStateInfo() {
 	throw new UnsupportedOperationException("Not yet implemented");

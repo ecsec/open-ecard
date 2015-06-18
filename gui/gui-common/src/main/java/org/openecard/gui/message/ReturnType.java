@@ -27,7 +27,7 @@ package org.openecard.gui.message;
  * Return type of the messagebox.
  * Indicates which button was pressed to exit the message box.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public enum ReturnType {
 

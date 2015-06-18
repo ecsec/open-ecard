@@ -29,14 +29,14 @@ import org.openecard.gui.definition.OutputInfoUnit;
 
 
 /**
- * Implementation of a simple image component for use in a {@link StepFrame}.
+ * Implementation of a simple image component for use in a {@link org.openecard.gui.swing.StepFrame}.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ImageBox implements StepComponent {
 
-    private JLabel imageLabel;
-    private ImageIcon image;
+    private final JLabel imageLabel;
+    private final ImageIcon image;
 
     public ImageBox(org.openecard.gui.definition.ImageBox imageBox) {
 	this.image = new ImageIcon(imageBox.getImageData());

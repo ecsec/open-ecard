@@ -63,8 +63,8 @@ public final class Text extends IDTrait implements InputInfoUnit {
 
     /**
      * Creates a new instance from the given {@link Document} {@code doc}.
-     * <br/>
-     * <br/>
+     * <br>
+     * <br>
      * Note: The {@link Document} type allows every mime type. The ability to render {@link Document}s of types other
      * than text/plain depends on the GUI implementation and is not granted.
      *
@@ -109,8 +109,8 @@ public final class Text extends IDTrait implements InputInfoUnit {
 
     /**
      * Sets the Document of this Text instance.
-     * <br/>
-     * <br/>
+     * <br>
+     * <br>
      * Note: The {@link Document} type allows every mime type. The ability to render {@link Document}s of types other
      * than text/plain depends on the GUI implementation and is not granted.
      *

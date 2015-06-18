@@ -41,7 +41,7 @@ import org.openecard.common.I18n;
  * This Activity shows a list of available logging options. Logging types can be (de-)activated by (un-)checking the
  * corresponding checkbox.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class LoggingActivity extends Activity {
 

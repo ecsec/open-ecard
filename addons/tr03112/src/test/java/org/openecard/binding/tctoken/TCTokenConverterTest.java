@@ -29,7 +29,7 @@ import static org.testng.Assert.*;
 
 
 /**
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class TCTokenConverterTest {
 

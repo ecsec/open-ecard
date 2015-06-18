@@ -31,14 +31,14 @@ import org.openecard.common.Version;
 /**
  * Extension of BasicHttpParams with useful default values.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class OECBasicHttpParams extends BasicHttpParams {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * Create an instance with sensible defaults for clients. <br/>
+     * Create an instance with sensible defaults for clients. <br>
      * The parameters include charset, protocol version and a user agent identifier.
      */
     public OECBasicHttpParams() {

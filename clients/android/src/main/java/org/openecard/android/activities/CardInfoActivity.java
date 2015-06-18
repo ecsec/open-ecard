@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This Activity shows information about the currently used ecard.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class CardInfoActivity extends Activity implements EventCallback {
 
@@ -172,7 +172,7 @@ public class CardInfoActivity extends Activity implements EventCallback {
     /**
      * This Runnable updates the UI depending on the happended event.
      *
-     * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+     * @author Dirk Petrautzki
      */
     private final class UiUpdateRunnable implements Runnable {
 

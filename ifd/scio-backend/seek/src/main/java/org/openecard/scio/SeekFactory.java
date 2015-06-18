@@ -29,7 +29,7 @@ import org.openecard.common.ifd.scio.SCIOTerminals;
 /**
  * Seek specific implementation of the TerminalFactory
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class SeekFactory implements TerminalFactory {
 

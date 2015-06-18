@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 /**
  * Utility functions for Apache HTTP core.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class HttpUtils {
 

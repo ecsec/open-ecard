@@ -25,8 +25,6 @@ package org.openecard.richclient.gui.components;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.util.Locale;
-import java.util.ResourceBundle;
 import javax.swing.JFormattedTextField;
 import javax.swing.JSpinner;
 import javax.swing.JSpinner.DefaultEditor;
@@ -37,27 +35,24 @@ import javax.swing.text.NumberFormatter;
 
 /**
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class MathNumberEditor extends DefaultEditor {
 
         /**
-         * Construct a <code>JSpinner</code> editor that supports displaying
-         * and editing the value of a <code>SpinnerNumberModel</code>
-         * with a <code>JFormattedTextField</code>.  <code>This</code>
-         * <code>NumberEditor</code> becomes both a <code>ChangeListener</code>
-         * on the spinner and a <code>PropertyChangeListener</code>
-         * on the new <code>JFormattedTextField</code>.
+         * Construct a <code>JSpinner</code> editor that supports displaying and editing the value of a
+	 * <code>SpinnerNumberModel</code> with a <code>JFormattedTextField</code>.
+	 * This <code>NumberEditor</code> becomes both a <code>ChangeListener</code> on the spinner and a
+	 * <code>PropertyChangeListener</code> on the new <code>JFormattedTextField</code>.
          *
-         * @param spinner the spinner whose model <code>this</code> editor will monitor
-         * @param decimalFormatPattern the initial pattern for the
-         *     <code>DecimalFormat</code> object that's used to display
-         *     and parse the value of the text field.
-         * @exception IllegalArgumentException if the spinners model is not
-         *     an instance of <code>SpinnerNumberModel</code>
+         * @param spinner The spinner whose model this editor will monitor.
+         * @param format The initial pattern for the <code>DecimalFormat</code> object that's used to display and parse
+	 *   the value of the text field.
+         * @exception IllegalArgumentException Thrown if the spinners model is not an instance of
+	 *   <code>SpinnerNumberModel</code>.
          *
-         * @see #getTextField
-         * @see SpinnerNumberModel
+         * @see #getTextField()
+         * @see javax.swing.SpinnerNumberModel
          * @see java.text.DecimalFormat
          */
         public MathNumberEditor(JSpinner spinner, DecimalFormat format) {

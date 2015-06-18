@@ -42,10 +42,10 @@ public class PCSCExceptionExtractor {
     /**
      * Gets the actual error code from the given CardException.
      * This method uses reflections to access the actual error code which is hidden in the Java SmartcardIO. In case no
-     * error code can be found, {@link SCIOErrorCode.SCARD_F_UNKNOWN_ERROR} is returned.
+     * error code can be found, {@link SCIOErrorCode#SCARD_F_UNKNOWN_ERROR} is returned.
      *
      * @param mainException The exception coming from the Java SmartcardIO.
-     * @return The code extracted from the exception, or {@link SCIOErrorCode.SCARD_F_UNKNOWN_ERROR} if no code could be
+     * @return The code extracted from the exception, or {@link SCIOErrorCode#SCARD_F_UNKNOWN_ERROR} if no code could be
      *   extracted.
      */
     public static SCIOErrorCode getCode(@Nonnull CardException mainException) {

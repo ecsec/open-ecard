@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Standard TLS client also implementing the ClientCertTlsClient interface. <br/>
+ * Standard TLS client also implementing the ClientCertTlsClient interface. <br>
  * If not modified, the TlsAuthentication instance returned by {@link #getAuthentication()} is of type
  * {@link DynamicAuthentication} without further modifications.
  *

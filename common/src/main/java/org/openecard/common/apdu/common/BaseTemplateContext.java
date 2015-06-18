@@ -29,7 +29,7 @@ import java.util.HashMap;
  * Template context containing functions and values which may be helpful in all contexts.
  * Specialized contexts may derive from this class and add context specific values and functions.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class BaseTemplateContext extends HashMap<String, Object> {
 

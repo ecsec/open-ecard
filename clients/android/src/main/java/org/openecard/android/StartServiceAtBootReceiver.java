@@ -30,7 +30,7 @@ import android.content.Intent;
 /**
  * This BroadcastReceiver will receive the ACTION_BOOT_COMPLETED intent and start the TCTokenService
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class StartServiceAtBootReceiver extends BroadcastReceiver {
 

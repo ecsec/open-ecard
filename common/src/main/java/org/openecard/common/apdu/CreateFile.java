@@ -29,7 +29,7 @@ import org.openecard.common.apdu.common.CardCommandAPDU;
  * CREATE FILE Command.
  * See ISO/IEC 7816-9 Section 9.2.3.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class CreateFile extends CardCommandAPDU {
 

@@ -25,7 +25,7 @@ package org.openecard.common.interfaces;
 
 /**
  *
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Johannes Schmölz
  */
 public interface AsyncTransportCallback {
 

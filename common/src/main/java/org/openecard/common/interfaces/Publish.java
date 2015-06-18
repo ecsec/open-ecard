@@ -31,7 +31,7 @@ import java.lang.annotation.RetentionPolicy;
  * If the MessageDispatcher is invoked with the isFiler = true constructor than just services are stored which have the
  * Publish method. 
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Publish {

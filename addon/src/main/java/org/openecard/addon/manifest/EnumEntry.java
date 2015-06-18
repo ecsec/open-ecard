@@ -31,8 +31,8 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
  */
 @XmlRootElement(name = "EnumEntry")
 @XmlType(propOrder = { "key", "values", "localizedName", "localizedDescription" })

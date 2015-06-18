@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class PACECryptoSuite {
 

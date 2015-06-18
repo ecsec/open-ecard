@@ -31,7 +31,7 @@ import javax.xml.bind.annotation.XmlValue;
 
 /**
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 @XmlRootElement(name = "LocalizedString")
 @XmlAccessorType(XmlAccessType.FIELD)

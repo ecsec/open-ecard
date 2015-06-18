@@ -29,7 +29,7 @@ import static org.openecard.common.ECardException.makeException;
 
 /**
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class PrerequisitesNotSatisfiedException extends ECardException{
 

@@ -51,7 +51,7 @@ import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class HttpGetTask implements Callable<StartPAOSResponse> {
 

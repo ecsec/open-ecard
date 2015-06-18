@@ -28,7 +28,7 @@ import java.awt.Container;
 /**
  * Interface to give the swing GUI the ability to set a title, show and hide the dialog and get a drawing pane.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface DialogWrapper {
 

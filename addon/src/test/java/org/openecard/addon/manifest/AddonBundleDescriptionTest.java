@@ -39,7 +39,7 @@ import org.xml.sax.SAXException;
 /**
  * Test if an AddonSpecification is marshalled and unmarshalled properly.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class AddonBundleDescriptionTest {
 

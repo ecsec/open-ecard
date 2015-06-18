@@ -26,7 +26,7 @@ package org.openecard.crypto.common.sal;
 /**
  * Exception stating that a signing credential was not found for a SAL entity.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class CredentialNotFound extends Exception {
 

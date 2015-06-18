@@ -43,9 +43,9 @@ import org.openecard.common.util.ByteArrayWrapper;
  * This class wraps a single card info in order to make the access to attributes more efficient
  * and more user friendly.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 public class CardInfoWrapper {
 

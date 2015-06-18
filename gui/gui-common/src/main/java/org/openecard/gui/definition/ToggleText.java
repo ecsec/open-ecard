@@ -114,8 +114,8 @@ public final class ToggleText extends IDTrait implements InputInfoUnit {
 
     /**
      * Sets the Document of this ToggleText instance.
-     * <br/>
-     * <br/>
+     * <br>
+     * <br>
      * Note: The {@link Document} type allows every mime type. The ability to render {@link Document}s of types other
      * than text/plain depends on the GUI implementation and is not granted.
      *

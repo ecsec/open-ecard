@@ -27,14 +27,14 @@ import java.io.Serializable;
 
 
 /**
- * Class to filter out files in a {@link FileDialog}.
+ * Class to filter out files in a {@link org.openecard.gui.FileDialog}.
  * Filters have two usages in the file dialog.
  * <ol>
  * <li>Restrict the visibility of files in the dialog.</li>
  * <li>Present a selectable preset of visible files.</li>
  * </ol>
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface FileFilter extends Serializable {
 

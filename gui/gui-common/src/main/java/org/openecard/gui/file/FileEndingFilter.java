@@ -29,7 +29,7 @@ import java.io.File;
  * File filter checking only the ending (aka file type) of a file.
  * This filter class is suitable to handle most cases without the need to modify the implementation.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class FileEndingFilter implements FileFilter {
 

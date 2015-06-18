@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * Extends {@code SimpleExpandableListAdapter} and overrides the getChildView method to be able to add the
  * StartAction-Button below the PluginAction's description.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 final class PluginActionsExpandableListAdapter extends SimpleExpandableListAdapter {
 

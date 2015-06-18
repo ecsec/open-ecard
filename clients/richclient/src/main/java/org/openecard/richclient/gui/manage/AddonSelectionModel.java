@@ -42,7 +42,7 @@ import javax.swing.event.ListSelectionListener;
  * {@link #windowClosed(java.awt.event.WindowEvent)}. The listener then saves the currently open settings page and
  * changes the displayed add-on panel if applicable.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class AddonSelectionModel extends AbstractListModel implements ListSelectionListener, WindowListener {
 

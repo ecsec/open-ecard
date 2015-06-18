@@ -40,9 +40,9 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @editor Florian Feldmann <florian.feldmann@rub.de>
+ * @author Moritz Horsch
+ * @author Tobias Wich
+ * @author Florian Feldmann
  */
 public final class StepBar extends JPanel {
 

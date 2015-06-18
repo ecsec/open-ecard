@@ -27,12 +27,12 @@ import org.openecard.gui.definition.OutputInfoUnit;
 
 
 /**
- * Every component on a StepFrame must implement this interface.<br/>
+ * Every component on a StepFrame must implement this interface.<br>
  * It abstracts the verification logic like password length validation,
  * supplies a function to get the result for the UserConsentResponse and bundles
  * the swing components in a single component.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface StepComponent {
 
@@ -49,7 +49,7 @@ public interface StepComponent {
     boolean isValueType();
     /**
      * Validate the contents of this component. A meaningful result is only
-     * expected if StepComponent.isValueType() returns true.<br/>
+     * expected if StepComponent.isValueType() returns true.<br>
      * For example in case of a TextInput, this function checks if the text is
      * within the bounds of minLength and maxLength.
      * @return True if component is valid, false if not. Undefined behaviour

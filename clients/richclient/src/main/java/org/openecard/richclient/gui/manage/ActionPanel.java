@@ -35,7 +35,7 @@ import javax.swing.BorderFactory;
  * Panel aggregating several action entries.
  * The entries are of type {@link ActionEntryPanel}.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ActionPanel extends JPanel {
 

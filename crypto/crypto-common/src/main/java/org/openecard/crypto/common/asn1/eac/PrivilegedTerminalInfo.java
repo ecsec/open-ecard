@@ -29,7 +29,7 @@ import org.openecard.bouncycastle.asn1.ASN1Set;
 
 /**
  *
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class PrivilegedTerminalInfo {
 

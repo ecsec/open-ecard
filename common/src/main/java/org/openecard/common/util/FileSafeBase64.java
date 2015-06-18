@@ -23,15 +23,16 @@ import org.openecard.bouncycastle.util.encoders.Encoder;
 /**
  * This class is a Base64 encodeDataDatar/ decoder with a filename safe alphabet.
  * The following characters are different than in the original <a href="http://tools.ietf.org/html/rfc4648">Base64
- * specification (RFC 4648)</a>. This version is described in sec. 5 of the RFC.<br/>
+ * specification (RFC 4648)</a>. This version is described in sec. 5 of the RFC.<br>
  * <table>
+ * <caption>Character Replacement</caption>
  * <tr><td>+</td><td>-&gt;</td><td>-</td></tr>
  * <tr><td>/</td><td>-&gt;</td><td>_</td></tr>
  * </table>
  *
  * <p>This file also implements static methods which are derived from the BouncyCastle Base64 class.</p>
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class FileSafeBase64 extends Base64Encoder {
 

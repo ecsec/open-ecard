@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of CredentialFactory operating on generic crypto SAL DIDs.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
  */
 public class SmartCardCredentialFactory implements CredentialFactory {
 

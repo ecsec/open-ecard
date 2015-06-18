@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * HttpRequest wrapper to parse request parameters.
  *
- * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
+ * @author Benedikt Biallowons
  */
 public class HttpRequestWrapper {
 

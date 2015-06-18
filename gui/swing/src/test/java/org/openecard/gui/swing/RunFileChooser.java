@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
 /**
  * Test class for manual execution of the Swing based FileDialog.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class RunFileChooser {
 

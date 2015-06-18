@@ -70,7 +70,7 @@ public class TCToken extends TCTokenType {
 
     /**
      * Indicates whether the original data of the TCToken contains a invalid PSK.
-     * <br/>
+     * <br>
      * Note: This method is just for the case there was PSK data in the original data received. If the original TCToken
      * data does not contain the PathSecurity-Parameters or the PSK element than this method will return false.
      *
@@ -82,7 +82,7 @@ public class TCToken extends TCTokenType {
 
     /**
      * Sets the indicator of an invalid PSK.
-     * <br/>
+     * <br>
      * Note: This method is just for the case there is a PSK in the original TCToken but it is invalid for some reason.
      * If there is no PSK in the TCToken data this message should not be used.
      *

@@ -35,7 +35,7 @@ import org.openecard.common.tlv.TagClass;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public final class GenericPathOrObjects<KeyType extends TLVType> extends TLV {
 

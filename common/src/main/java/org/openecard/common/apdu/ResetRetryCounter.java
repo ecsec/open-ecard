@@ -30,7 +30,7 @@ import org.openecard.common.util.ByteUtils;
  * RESET RETRY COUNTER command
  * See ISO/IEC 7816-4 Section 7.5.10
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class ResetRetryCounter extends CardCommandAPDU {
 

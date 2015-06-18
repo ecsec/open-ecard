@@ -29,7 +29,7 @@ import org.openecard.common.util.IntegerUtils;
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class CardAPDUOutputStream extends ByteArrayOutputStream {
 

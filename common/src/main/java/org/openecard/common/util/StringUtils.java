@@ -28,8 +28,8 @@ import java.util.regex.Pattern;
 /**
  * A set of utility functions for Strings.
  *
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class StringUtils {
 
@@ -54,7 +54,7 @@ public class StringUtils {
     }
 
     /**
-     * Convert a hex string to a byte array.<br/>
+     * Convert a hex string to a byte array.<br>
      * Remove all whitespace characters if flag is set.
      *
      * @param hex string

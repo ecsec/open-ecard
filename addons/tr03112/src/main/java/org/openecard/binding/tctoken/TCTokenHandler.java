@@ -84,7 +84,7 @@ import org.openecard.transport.paos.PAOSConnectionException;
 
 
 /**
- * Transport binding agnostic TCToken handler. <br/>
+ * Transport binding agnostic TCToken handler. <br>
  * This handler supports the following transports:
  * <ul>
  * <li>PAOS</li>

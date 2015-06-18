@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * Hyperlink element for user consents.
  * This element should oben the address in the default browser when clicked.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public final class Hyperlink extends IDTrait implements InputInfoUnit {
 

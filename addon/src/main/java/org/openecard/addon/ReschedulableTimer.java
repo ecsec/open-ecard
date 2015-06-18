@@ -28,7 +28,7 @@ import java.util.TimerTask;
 
 /**
  * Extends Timer to make it reschedulable.
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  *
  */
 class ReschedulableTimer extends Timer {

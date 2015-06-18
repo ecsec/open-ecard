@@ -31,7 +31,7 @@ import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
 /**
  * Utility class which provides a mapping of an signature hash algorithm OID on a {@link SignatureAndHashAlgorithm} object.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class AlgorithmResolver {
 
@@ -40,7 +40,7 @@ public class AlgorithmResolver {
      */
     private static final HashMap<String, SignatureAndHashAlgorithm> MAPPER;
     static {
-	MAPPER = new HashMap<String, SignatureAndHashAlgorithm>();
+	MAPPER = new HashMap<>();
 	// The current SignerFinder resolves pure RSA with a wrong oid. To be compatible
 	// until the oid is corrected we have to add this wrong oid.
 	MAPPER.put("urn:oid:1.2.840.113549.1.1", new
@@ -88,25 +88,25 @@ public class AlgorithmResolver {
 
     /**
      * Get the SignatureAndHashAlgorithm object for a specific algorithm string.
-     * <br />
-     * <br />
-     * The currently supported OIDs are:<br /> <br />
+     * <br>
+     * <br>
+     * The currently supported OIDs are:<br> <br>
      * <ul type="square">
-     * <li>urn:oid:1.2.840.113549.1.1	 </ li>
-     * <li>urn:oid:1.2.840.113549.1.1.1	 </ li>
-     * <li>urn:oid:1.2.840.113549.1.1.5	 </ li>
-     * <li>urn:oid:1.2.840.113549.1.1.11 </ li>
-     * <li>urn:oid:1.2.840.113549.1.1.12 </ li>
-     * <li>urn:oid:1.2.840.113549.1.1.13 </ li>
-     * <li>urn:oid:1.2.840.113549.1.1.14 </ li>
-     * <li>urn:oid:1.2.840.10045.4.1	 </ li>
-     * <li>urn:oid:1.2.840.10045.4.3.1	 </ li>
-     * <li>urn:oid:1.2.840.10045.4.3.2	 </ li>
-     * <li>urn:oid:1.2.840.10045.4.3.3	 </ li>
-     * <li>urn:oid:1.2.840.10045.4.3.4	 </ li>
-     * <li>urn:oid:2.16.840.1.101.3.4.3.1</ li>
-     * <li>urn:oid:2.16.840.1.101.3.4.3.2</ li>
-     * </ ul>
+     * <li>urn:oid:1.2.840.113549.1.1	 </li>
+     * <li>urn:oid:1.2.840.113549.1.1.1	 </li>
+     * <li>urn:oid:1.2.840.113549.1.1.5	 </li>
+     * <li>urn:oid:1.2.840.113549.1.1.11 </li>
+     * <li>urn:oid:1.2.840.113549.1.1.12 </li>
+     * <li>urn:oid:1.2.840.113549.1.1.13 </li>
+     * <li>urn:oid:1.2.840.113549.1.1.14 </li>
+     * <li>urn:oid:1.2.840.10045.4.1	 </li>
+     * <li>urn:oid:1.2.840.10045.4.3.1	 </li>
+     * <li>urn:oid:1.2.840.10045.4.3.2	 </li>
+     * <li>urn:oid:1.2.840.10045.4.3.3	 </li>
+     * <li>urn:oid:1.2.840.10045.4.3.4	 </li>
+     * <li>urn:oid:2.16.840.1.101.3.4.3.1</li>
+     * <li>urn:oid:2.16.840.1.101.3.4.3.2</li>
+     * </ul>
      *
      * @param algorithm A string which contains the OID of an algorithm for signature creation for TLS 1.2.
      * @return A SignatureAndHashAlgorithm object which corresponds to the <b>algorithm</b> parameter or NULL if the

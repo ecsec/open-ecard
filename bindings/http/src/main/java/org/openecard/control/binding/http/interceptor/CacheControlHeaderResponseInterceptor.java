@@ -31,8 +31,8 @@ import org.openecard.apache.http.protocol.HttpContext;
 
 /**
  * HttpResponseInterceptor implementation which adds a {@code Cache-Control} header to the response.
- * <br/>
- * <br/>
+ * <br>
+ * <br>
  * The header sets the directive {@code no-store} to advise the user agent to do not cache the response.
  *
  * @author Hans-Martin Haase

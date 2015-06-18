@@ -31,7 +31,7 @@ import org.openecard.addon.ActionInitializationException;
 
 /**
  * Proxy class wrapping a AppPluginAction.
- * The proxy loads the action and calls the actual execute function of the plug-in implementation. <br/>
+ * The proxy loads the action and calls the actual execute function of the plug-in implementation. <br>
  * If the plug-in has a custom function and it is found by the proxy, then this one is called directly (not implemented).
  *
  * @author Tobias Wich

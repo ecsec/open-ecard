@@ -27,7 +27,7 @@ package org.openecard.gui.definition;
  * Base interface every info unit must implement.
  * This interface defines the type and ID portions of user consent elements.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface InfoUnit {
 

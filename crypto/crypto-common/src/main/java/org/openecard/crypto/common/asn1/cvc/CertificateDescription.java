@@ -237,7 +237,7 @@ public class CertificateDescription {
 
     /**
      * Get the terms of usage as byte array.
-     * <br/>
+     * <br>
      * The intension of this method is to serve the bytes of the terms of usage in case they are in pdf format. If the
      * terms of usage are in {@code plain text} or {@code HTML} format (represented by a String) the getBytes method of
      * the String object is invoked with the UTF-8 charset.
@@ -283,7 +283,7 @@ public class CertificateDescription {
      * Get the MimeType of the Terms of Usage in the Certificate Description.
      *
      * @return The MimeType of the terms of usage. The possible values are:
-     * <br/>
+     * <br>
      * <ul>
      *	<li>text/plain</li>
      *	<li>text/html</li>

@@ -28,7 +28,7 @@ import org.openecard.common.util.ByteUtils;
 /**
  * See BSI-TR-03110, version 2.10, part 3, section A.6.1.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class PublicKeyReference {
 

@@ -25,7 +25,7 @@ package org.openecard.crypto.common.sal;
 
 /**
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class DIDCertificate {
 
@@ -142,10 +142,10 @@ public class DIDCertificate {
 
     /**
      * Sets the minimal TLS version which is supported by the DID.
-     * <br />
-     * <br />
-     * The class provides the following public constants: <br />
-     * <br />
+     * <br>
+     * <br>
+     * The class provides the following public constants: <br>
+     * <br>
      * - TLS10 for TLS in version 1.0
      * - TLS11 for TLS in version 1.1
      * - TLS12 for TLS in version 1.2

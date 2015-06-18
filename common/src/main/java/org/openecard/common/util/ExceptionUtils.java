@@ -30,14 +30,14 @@ import java.util.Collections;
 /**
  * Collection of utility functions for exception processing.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ExceptionUtils {
 
     /**
      * Checks the given exception's cause path for the given types.
      * The types are checked in reverse order, meaning the last given type is the expected type of first cause. When the
-     * cause path is as expected, the returned object is cast to the expected type.<br/>
+     * cause path is as expected, the returned object is cast to the expected type.<br>
      * The function works when the given types are not {@code Throwable} classes, however in that case it will never
      * return an object.
      *

@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * NFC implementation of smartcardio's CardTerminal interface.<br/>
+ * NFC implementation of smartcardio's CardTerminal interface.<br>
  * Implemented as singleton because we only have one nfc-interface. Only
  * activitys can react on a new intent, so they must set the tag via setTag()
  *

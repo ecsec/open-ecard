@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Class capable of displaying and executing a user consent. <br/>
+ * Class capable of displaying and executing a user consent. <br>
  * This class is a helper to display the steps of a user consent. It displays one after the other and reacts differently
  * depending of the outcome of a step. It also executes actions associated with the steps after they are finished.
  *
@@ -68,7 +68,7 @@ public class ExecutionEngine {
     }
 
     /**
-     * Processes the user consent associated with this instance. <br/>
+     * Processes the user consent associated with this instance. <br>
      * The following algorithm is used to process the dialog.
      * <ol>
      * <li>Display the first step.</li>

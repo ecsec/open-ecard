@@ -25,7 +25,7 @@ package org.openecard.common.ifd;
 
 /**
  *
- * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Johannes Schmoelz
  */
 public enum MessageType {
 

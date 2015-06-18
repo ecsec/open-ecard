@@ -34,7 +34,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class CardCommandTemplateTest {
 

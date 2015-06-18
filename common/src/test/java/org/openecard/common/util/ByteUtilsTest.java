@@ -28,9 +28,9 @@ import static org.testng.Assert.*;
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Moritz Horsch
+ * @author Dirk Petrautzki
+ * @author Johannes Schmoelz
  */
 public class ByteUtilsTest {
 

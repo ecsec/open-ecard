@@ -32,11 +32,11 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Stream based HTTP client. <br/>
- * In contrast to the default client ({@link org.apache.http.impl.DefaultHttpClientConnection}, this implementation
- * uses an already existing connection instead of creating a new one.
+ * Stream based HTTP client. <br>
+ * In contrast to the default client ({@link org.openecard.apache.http.impl.DefaultHttpClientConnection}, this
+ * implementation uses an already existing connection instead of creating a new one.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class StreamHttpClientConnection extends AbstractHttpClientConnection {
 

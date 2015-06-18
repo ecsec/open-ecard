@@ -161,7 +161,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
  * used in the applet and the rich client since JAXB is not available on
  * Android.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class AndroidMarshaller implements WSMarshaller {
 

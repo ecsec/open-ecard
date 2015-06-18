@@ -21,9 +21,8 @@
  ***************************************************************************/
 
 /**
- * This package contains a OS X specific SmartcardIO implementation. We've to do
- * this, because the current PC/SC JNI libraries on OS X (jre6 & jre7) are too buggy
- * to be useful and the design of the sun.security.smartcardio package doesn't allow
- * to specify another JNI library path.
+ * This package contains a OS X specific SmartcardIO implementation.
+ * We've to do this, because the current PC/SC JNI libraries on OS X (jre6 &amp; jre7) are too buggy to be useful and
+ * the design of the sun.security.smartcardio package doesn't allow to specify another JNI library path.
  */
 package org.openecard.scio.osx;

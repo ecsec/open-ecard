@@ -30,7 +30,7 @@ import java.util.List;
  * Definition of a user consent.
  * This class is the parent element for steps.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class UserConsentDescription {
 

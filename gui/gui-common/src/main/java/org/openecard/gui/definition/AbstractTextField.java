@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @see TextField
  * @see PasswordField
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public abstract class AbstractTextField extends IDTrait implements InputInfoUnit, OutputInfoUnit {
 
@@ -134,7 +134,7 @@ public abstract class AbstractTextField extends IDTrait implements InputInfoUnit
      * The length of the value should be checked in the GUI implementation. If the length is wrong, the implementation
      * can notify the user and let him correct the value.
      *
-     * @see #setMinLength()
+     * @see #setMinLength(int)
      * @param maxLength The maximum length of the text value.
      */
     public void setMaxLength(int maxLength) {

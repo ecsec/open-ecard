@@ -37,7 +37,7 @@ import org.openecard.gui.message.ReturnType;
  * It returns a dummy OK result immediately. The real result is available in the onActivityResult callback of the
  * calling Activity.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class AndroidMessageDialog implements MessageDialog {
 

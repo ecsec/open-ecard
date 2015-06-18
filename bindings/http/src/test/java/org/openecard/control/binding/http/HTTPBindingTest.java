@@ -39,8 +39,8 @@ import org.testng.annotations.Test;
 
 
 /**
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch
+ * @author Dirk Petrautzki
  */
 public final class HTTPBindingTest {
 

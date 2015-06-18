@@ -27,7 +27,7 @@ import org.openecard.common.enums.EventType;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface EventFilter {
 

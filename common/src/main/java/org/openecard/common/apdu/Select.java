@@ -28,9 +28,9 @@ import org.openecard.common.util.ShortUtils;
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Moritz Horsch
+ * @author Johannes Schmoelz
+ * @author Tobias Wich
  */
 public class Select extends CardCommandAPDU {
 

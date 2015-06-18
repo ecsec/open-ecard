@@ -34,7 +34,7 @@ import org.openecard.common.util.Promise;
 /**
  * Thread local dynamic context implemented as a singleton.
  * Dynamic context information is needed at various places in the app. Perhaps the most important use case is the
- * eService certificate validation as defined in TR-03112-7.<br/>
+ * eService certificate validation as defined in TR-03112-7.<br>
  * The underlying datastructure does permit {@code null} values to be saved.
  *
  * @author Tobias Wich

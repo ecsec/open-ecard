@@ -34,8 +34,8 @@ import org.openecard.common.tlv.TagClass;
 /**
  * The class implements a data type which corresponds to the ASN.1 type AuthenticationObject in ISO7816-15.
  * 
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Hans-Martin Haase <hans-martin dot haase at ecsec dot de>
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  * @param <AuthAttributes>
  */
 public class GenericAuthenticationObject <AuthAttributes> {

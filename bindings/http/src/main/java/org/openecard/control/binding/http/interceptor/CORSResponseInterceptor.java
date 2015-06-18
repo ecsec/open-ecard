@@ -38,8 +38,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * HttpResponseInterceptor implementation which adds the CORS header to the response.
- * <br/>
- * <br/>
+ * <br>
+ * <br>
  * The response is not modified with a CORS header in case the request uri contains a {@code ShowUI} or
  * {@code tcTokenURL} parameter while calling the resource {@code /eID-Client}. Also if the request contained the
  * parameter {@code disable-CORS-redirect} the CORS header is not added to the response.

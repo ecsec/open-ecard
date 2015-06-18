@@ -36,7 +36,7 @@ import javax.annotation.concurrent.Immutable;
 /**
  * Simple URL builder class.
  * The URL builders available (e.g. Jersey, Apache httpclient, ...) all add large dependencies. This class provides a
- * limited subset of those URL builders. <br/>
+ * limited subset of those URL builders. <br>
  * The UrlBuilder is immutable meaning every function yields a new instance and leaves the original instance unmodified.
  *
  * @author Tobias Wich

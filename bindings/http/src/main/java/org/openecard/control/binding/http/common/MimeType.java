@@ -24,7 +24,7 @@ package org.openecard.control.binding.http.common;
 
 
 /**
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public enum MimeType {
 

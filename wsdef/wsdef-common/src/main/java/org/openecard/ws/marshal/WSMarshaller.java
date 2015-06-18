@@ -121,7 +121,7 @@ public interface WSMarshaller {
 
     /**
      * Converts a DOM document representing a SOAP message to a SOAPMessage instance.
-     * The SOAPMessage type is similar to the one in {@link <a href="http://saaj.java.net/">SAAJ</a>}.
+     * The SOAPMessage type is similar to the one in <a href="http://saaj.java.net/">SAAJ</a>.
      *
      * @param envDoc DOM document with a SOAP envelope element.
      * @return SOAPMessage instance representing the given SOAP document.
@@ -130,7 +130,7 @@ public interface WSMarshaller {
     SOAPMessage doc2soap(Document envDoc) throws SOAPException;
     /**
      * Creates a SOAPMessage instance and adds the given content wrapped in a SOAP body.
-     * The SOAPMessage type is similar to the one in {@link <a href="http://saaj.java.net/">SAAJ</a>}.
+     * The SOAPMessage type is similar to the one in <a href="http://saaj.java.net/">SAAJ</a>.
      *
      * @param content Document with the content that will be added to the SOAP body of the new SOAPMessage instance.
      * @return Freshly allocated SOAPMessage instance with the given document wrapped in the SOAP body.

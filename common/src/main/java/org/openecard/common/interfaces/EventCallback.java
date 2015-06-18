@@ -30,7 +30,7 @@ import org.openecard.common.enums.EventType;
  * This interface must be implemented by a callback registering itself in the event system.
  *
  * @see EventManager
- * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Johannes Schmoelz
  */
 public interface EventCallback {
 

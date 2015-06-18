@@ -41,7 +41,7 @@ import org.openecard.sal.protocol.eac.apdu.PSOVerifyCertificate;
  * See BSI-TR-03110, version 2.10, part 2, Section B.3.4.
  * See BSI-TR-03110, version 2.10, part 3, Section B.3.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class TerminalAuthentication {
 

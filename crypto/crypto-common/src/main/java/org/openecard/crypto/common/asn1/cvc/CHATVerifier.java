@@ -28,7 +28,7 @@ import org.openecard.common.util.ByteUtils;
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class CHATVerifier {
 

@@ -26,7 +26,7 @@ package org.openecard.addon.sal;
 /**
  * Enum with all functions that are protocol specific.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public enum FunctionType {
 

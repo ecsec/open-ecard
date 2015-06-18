@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * In order to use the component, at least an image must be set. The MIME type is optional, but may be needed by some
  * GUI implementations.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public final class ImageBox extends IDTrait implements InputInfoUnit {
 
@@ -72,8 +72,8 @@ public final class ImageBox extends IDTrait implements InputInfoUnit {
     /**
      * Sets the MIME type for the image represented by this instance.
      *
-     * @See <a href="https://www.iana.org/assignments/media-types/">IANA Registered MIME Types</a>
-     * @See <a href="https://www.iana.org/assignments/media-types/image/">IANA Registered Image MIME Types</a>
+     * @see <a href="https://www.iana.org/assignments/media-types/">IANA Registered MIME Types</a>
+     * @see <a href="https://www.iana.org/assignments/media-types/image/">IANA Registered Image MIME Types</a>
      * @param mimeType MIME type describing the image type.
      */
     public void setMimeType(String mimeType) {

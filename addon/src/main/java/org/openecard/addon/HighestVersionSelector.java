@@ -34,8 +34,8 @@ import org.openecard.addon.manifest.AddonSpecification;
  * This class implements a SelctionStrategy which selects always the {@link AddonSpecification} with the highest version
  * number.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Hans-Maritn Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Hans-Maritn Haase
  */
 public class HighestVersionSelector implements SelectionStrategy {
 
@@ -51,10 +51,10 @@ public class HighestVersionSelector implements SelectionStrategy {
 
     /**
      * This class implements a {@link Comparator} for {@link AddonSpecification} objects.
-     * <br />
+     * <br>
      * The comparison uses the contained version field.
      *
-     * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+     * @author Hans-Martin Haase
      */
     private class VersionComparator implements Comparator<AddonSpecification> {
 
@@ -159,7 +159,7 @@ public class HighestVersionSelector implements SelectionStrategy {
     /**
      * The class models a Semantic Versioning String.
      *
-     * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+     * @author Hans-Martin Haase
      */
     private class SemanticVersion {
 	/**
@@ -189,7 +189,7 @@ public class HighestVersionSelector implements SelectionStrategy {
 
 	/**
 	 * The constructor parses a string as semantic version.
-	 * <br />
+	 * <br>
 	 * If the string does not contain a semantic version major, minor and patch version are set to zero and the
 	 *
 	 *
@@ -252,7 +252,7 @@ public class HighestVersionSelector implements SelectionStrategy {
 
 	/**
 	 * Get the additional label.
-	 * <br />
+	 * <br>
 	 * This value might be null because it is optional.
 	 *
 	 * @return The additional label.

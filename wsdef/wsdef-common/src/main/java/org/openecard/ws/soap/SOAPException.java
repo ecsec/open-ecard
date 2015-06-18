@@ -27,7 +27,7 @@ import org.openecard.ws.marshal.WSMarshallerException;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class SOAPException extends WSMarshallerException {
 

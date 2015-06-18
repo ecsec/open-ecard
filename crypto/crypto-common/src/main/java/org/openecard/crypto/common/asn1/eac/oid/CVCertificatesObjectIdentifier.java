@@ -26,7 +26,7 @@ package org.openecard.crypto.common.asn1.eac.oid;
 /**
  * See BSI-TR-03110, version 2.10, part 3, section C.
  *
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class CVCertificatesObjectIdentifier extends EACObjectIdentifier {
 

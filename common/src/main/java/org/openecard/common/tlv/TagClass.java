@@ -25,7 +25,7 @@ package org.openecard.common.tlv;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public enum TagClass {
 

@@ -27,7 +27,7 @@ package org.openecard.gui.definition;
  * Definition class for text fields.
  * Text fields have a field where text can be input.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public final class TextField extends AbstractTextField {
 

@@ -29,7 +29,7 @@ import javax.annotation.Nonnull;
  * Interface for functions in CardCommandTemplates.
  * Functions can be used to compute a result over given values. The most obvious example is a TLV function.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface APDUTemplateFunction {
 

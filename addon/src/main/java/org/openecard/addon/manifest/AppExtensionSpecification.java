@@ -34,9 +34,9 @@ import org.openecard.addon.utils.LocalizedStringExtractor;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 @XmlRootElement(name = "AppExtensionSpecification")
 @XmlType(propOrder = { "id", "className", "loadOnStartup", "localizedName", "localizedDescription", "configDescription" })

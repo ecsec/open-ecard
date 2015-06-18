@@ -28,8 +28,8 @@ import static org.testng.Assert.*;
 
 /**
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Dirk Petrautzki
+ * @author Johannes Schmoelz
  */
 public class LongUtilsTest {
 

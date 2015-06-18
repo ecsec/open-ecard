@@ -22,7 +22,7 @@
 
 /**
  * PAOS transport module.
- * The PAOS transport abstracts TLS specific changes with the BouncyCastle TLS module.<br/>
+ * The PAOS transport abstracts TLS specific changes with the BouncyCastle TLS module.<br>
  * This module sends a {@link iso.std.iso_iec._24727.tech.schema.StartPAOS} message, the server takes over and sends
  * messages to the client until a {@link iso.std.iso_iec._24727.tech.schema.StartPAOSResponse} message is received. This
  * messages terminates the communication.

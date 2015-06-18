@@ -28,7 +28,7 @@ import java.util.Comparator;
 /**
  * Comparator for byte arrays.
  * It uses the ith different byte to calculate the distance and if one array is a prefix of the other, the length
- * difference between the two is used. <br/>
+ * difference between the two is used. <br>
  * This has the effect, that only small numbers of values can be compared efficiently because of the small distance
  * values. However, for the number of channels and readers a system normally has, this is most probably sufficient.
  *

@@ -26,7 +26,7 @@ package org.openecard.common.tlv.iso7816;
 /**
  * See ISO/IEC 7816-4 p.21 tab. 14
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class FileDescriptorByte {
 

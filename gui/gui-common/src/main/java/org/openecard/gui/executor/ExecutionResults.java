@@ -30,7 +30,7 @@ import org.openecard.gui.definition.OutputInfoUnit;
  * Class wrapping the results of one step.
  * The result contains the status as well as the elements results.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ExecutionResults {
 

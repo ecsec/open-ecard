@@ -34,7 +34,7 @@ import org.openecard.crypto.common.sal.CredentialNotFound;
  * The class is instantiated with a specific KeyStore. Afterwards it can look for entries with
  * different search strategies.
  *
- * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class KeyStoreSignerFinder {
 

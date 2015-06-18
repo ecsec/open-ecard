@@ -28,7 +28,7 @@ import org.openecard.common.OverridingProperties;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class GUIProperties extends OverridingProperties {
 

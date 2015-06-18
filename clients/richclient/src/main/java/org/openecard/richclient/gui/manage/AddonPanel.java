@@ -57,10 +57,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Base implementation of an add-on panel.
  * {@code AddonPanel}s are used to represent add-ons on the {@link ManagementDialog}. This implementation is complete,
- * however it should be subclassed to reflect the needs of the add-on or builtin item.<br/>
+ * however it should be subclassed to reflect the needs of the add-on or builtin item.<br>
  * {@code AddonPanel}s are either arranged as tabs, or as a single content panel, depending on the use case.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class AddonPanel extends JPanel {
 

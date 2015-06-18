@@ -31,7 +31,7 @@ import org.openecard.common.util.ByteUtils;
 
 /**
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class CommonAuthenticationObjectAttributes extends TLVType {
 

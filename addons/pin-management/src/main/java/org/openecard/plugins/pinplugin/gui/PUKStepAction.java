@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 /**
  * StepAction for performing PACE with the PUK.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class PUKStepAction extends StepAction {
 

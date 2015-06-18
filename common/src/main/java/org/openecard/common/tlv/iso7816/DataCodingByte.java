@@ -28,7 +28,7 @@ import org.openecard.common.util.ByteUtils;
 /**
  * See ISO/IEC 7816-4 p.60 tab. 87
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class DataCodingByte {
 

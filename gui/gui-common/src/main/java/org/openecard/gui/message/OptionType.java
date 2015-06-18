@@ -28,7 +28,7 @@ package org.openecard.gui.message;
  * Options can be either a yes, no question box, a yes, no question box with a cancel button or an OK, cancel question
  * box.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public enum OptionType {
 

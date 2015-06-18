@@ -29,7 +29,7 @@ import java.util.Comparator;
  * Comparator class for byte arrays.
  * Makes it possible to use byte arrays as keys in sorted data structures.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ByteComparator implements Comparator<byte[]> {
 

@@ -28,7 +28,7 @@ package org.openecard.gui.definition;
  * Password fields have a field where text can be input. The text is masked, so that other persons watching the user
  * enter his password can't see it.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public final class PasswordField extends AbstractTextField {
 

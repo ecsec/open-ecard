@@ -35,7 +35,7 @@ import org.openecard.ws.SAL;
 
 /**
  *
- * @author Johannes.Schmoelz <johannes.schmoelz@ecsec.de>
+ * @author Johannes.Schmoelz
  */
 public class ClientEnv implements Environment {
 

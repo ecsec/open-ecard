@@ -33,8 +33,8 @@ import org.openecard.common.util.ShortUtils;
  * READ RECORD Command.
  * See ISO/IEC 7816-4 Section 7.3.3
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Simon Potzernheim <potzernheim@hs-coburg.de>
+ * @author Dirk Petrautzki
+ * @author Simon Potzernheim
  */
 public class ReadRecord extends CardCommandAPDU {
 

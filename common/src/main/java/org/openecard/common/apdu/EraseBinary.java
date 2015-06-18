@@ -34,7 +34,7 @@ import org.openecard.common.util.ByteUtils;
  * ERASE BINARY command.
  * See ISO/IEC 7816-4 Section 7.2.7.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class EraseBinary extends CardCommandAPDU {
 

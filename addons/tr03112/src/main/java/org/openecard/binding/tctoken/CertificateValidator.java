@@ -30,7 +30,7 @@ import org.openecard.bouncycastle.crypto.tls.Certificate;
  * Validation interface for TLS certificate validation.
  * The interface can be used to add security checks like e.g. the ones defined in TR-03112.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface CertificateValidator {
 

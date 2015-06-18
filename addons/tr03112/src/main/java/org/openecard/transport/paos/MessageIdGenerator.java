@@ -29,7 +29,7 @@ import org.openecard.common.util.ValueGenerators;
  * The MessageIdGenerator keeps track of the message IDs of the PAOS messages.
  * The ID from the remote message is set and after that a new ID for the reply message can be obtained.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 final class MessageIdGenerator {
 

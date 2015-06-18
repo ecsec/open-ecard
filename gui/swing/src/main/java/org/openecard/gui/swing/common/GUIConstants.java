@@ -24,7 +24,7 @@ package org.openecard.gui.swing.common;
 
 
 /**
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class GUIConstants {
 

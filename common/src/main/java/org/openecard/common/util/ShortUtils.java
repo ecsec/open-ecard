@@ -26,8 +26,8 @@ package org.openecard.common.util;
 /**
  * A set of utility functions for Shorts.
  *
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class ShortUtils {
 

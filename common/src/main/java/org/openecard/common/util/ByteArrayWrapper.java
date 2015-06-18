@@ -28,7 +28,7 @@ import java.util.Arrays;
 /**
  * Makes it possible to use byte arrays as keys in hashmaps
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public final class ByteArrayWrapper {
 

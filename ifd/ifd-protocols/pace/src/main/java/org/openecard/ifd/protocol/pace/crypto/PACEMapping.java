@@ -27,7 +27,7 @@ import org.openecard.crypto.common.asn1.eac.PACEDomainParameter;
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public abstract class PACEMapping {
 

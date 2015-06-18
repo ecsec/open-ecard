@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This Runnable layouts the current step in the StepActivity on the UI-Thread.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  *
  */
 final class StepLayouterRunnable implements Runnable {

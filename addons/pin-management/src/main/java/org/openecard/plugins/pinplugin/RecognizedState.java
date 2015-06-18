@@ -26,7 +26,7 @@ package org.openecard.plugins.pinplugin;
 /**
  * Enumeration for recognized PIN states.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public enum RecognizedState {
 

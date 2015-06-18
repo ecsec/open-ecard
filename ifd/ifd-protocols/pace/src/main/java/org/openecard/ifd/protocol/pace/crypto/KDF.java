@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * Implements a Key Derivation Function (KDF).
  * See BSI-TR-03110, version 2.10, part 3, section A.2.3.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class KDF {
 

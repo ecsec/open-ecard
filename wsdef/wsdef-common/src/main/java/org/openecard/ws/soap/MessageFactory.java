@@ -30,7 +30,7 @@ import org.w3c.dom.Document;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class MessageFactory {
 

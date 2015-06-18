@@ -301,8 +301,8 @@ public class ToggleText implements StepComponent {
 
     /**
      * Creates the temp directory for the PDF, HTML and Java Script files.
-     * <br/>
-     * <br/>
+     * <br>
+     * <br>
      * Note: The directory is deleted as soon as the jvm terminates.
      *
      * @throws IOException
@@ -317,8 +317,8 @@ public class ToggleText implements StepComponent {
 
     /**
      * Creates a tmp PDF file containing the given content.
-     * <br/>
-     * <br/>
+     * <br>
+     * <br>
      * Note: The file is deleted as soon as the JVM terminates.
      *
      * @param content The content which shall be written to the PDF file.

@@ -30,7 +30,7 @@ import java.util.TreeMap;
  * Constants regarding the eCard-API-Framework.
  * Most of the values in here are defined in BSI TR-03112-1.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ECardConstants {
 

@@ -27,7 +27,7 @@ package org.openecard.ifd.protocol.pace.common;
  * Implements the different password identifier.
  * See BSI-TR-03110, version 2.10, part 3, section B.11.1.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public enum PasswordID {
 

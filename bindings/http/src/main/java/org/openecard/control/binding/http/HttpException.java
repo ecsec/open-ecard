@@ -24,7 +24,7 @@ package org.openecard.control.binding.http;
 
 
 /**
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class HttpException extends Exception {
 

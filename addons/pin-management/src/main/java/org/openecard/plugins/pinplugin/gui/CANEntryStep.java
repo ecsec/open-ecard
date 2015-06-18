@@ -33,7 +33,7 @@ import org.openecard.plugins.pinplugin.RecognizedState;
  * The Step for entering the CAN.
  * This step simply requests the user to enter the CAN.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class CANEntryStep extends Step {
 

@@ -22,8 +22,9 @@
 
 /**
  * Stream based extension to the Apache http-core library.
- * <p>Instead of being socket based, the {@link org.apache.http.HttpClientConnection} implementation in this package
- * can operate directly on Java's standard {@link java.io.InputStream} and {@link java.io.OutputStream} class.</p>
+ * <p>Instead of being socket based, the {@link org.openecard.apache.http.HttpClientConnection} implementation in this
+ * package can operate directly on Java's standard {@link java.io.InputStream} and {@link java.io.OutputStream}
+ * class.</p>
  *
  * @see <a href="https://hc.apache.org/httpcomponents-core-ga/tutorial/html/fundamentals.html">http-core Tutorial</a>
  */

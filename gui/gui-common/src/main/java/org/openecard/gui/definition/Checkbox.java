@@ -27,7 +27,7 @@ package org.openecard.gui.definition;
  * Checkbox element for user consents.
  * Checkbox items can be checked or unchecked. If one element is checked or unchecked it does not affect other items.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public final class Checkbox extends AbstractBox {
 

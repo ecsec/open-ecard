@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 /**
  * This is the Test for the JARFileFilter.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class JARFileFilterTest {
 

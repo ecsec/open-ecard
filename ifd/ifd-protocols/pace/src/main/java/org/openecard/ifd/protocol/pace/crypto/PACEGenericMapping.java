@@ -33,7 +33,7 @@ import org.openecard.crypto.common.asn1.eac.PACEDomainParameter;
  * Implements the Generic Mapping for PACE.
  * See BSI-TR-03110, version 2.10, part 3, section A.3.5.1.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class PACEGenericMapping extends PACEMapping {
 

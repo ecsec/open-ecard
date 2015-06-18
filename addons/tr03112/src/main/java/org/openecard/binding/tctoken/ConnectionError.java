@@ -29,7 +29,7 @@ import org.openecard.common.I18nKey;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ConnectionError extends I18nException {
 

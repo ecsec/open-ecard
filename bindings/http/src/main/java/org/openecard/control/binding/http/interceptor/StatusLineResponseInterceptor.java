@@ -36,7 +36,7 @@ import org.openecard.apache.http.protocol.HttpContext;
 /**
  * Interceptor to correct incomplete HTTP status line.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class StatusLineResponseInterceptor implements HttpResponseInterceptor {
 

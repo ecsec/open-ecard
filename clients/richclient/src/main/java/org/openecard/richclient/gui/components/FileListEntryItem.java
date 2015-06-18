@@ -46,7 +46,7 @@ import org.openecard.richclient.gui.manage.Settings;
 /**
  * Implements a dynamic gui element which is able to remove and add a file entry.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class FileListEntryItem extends JPanel {
 

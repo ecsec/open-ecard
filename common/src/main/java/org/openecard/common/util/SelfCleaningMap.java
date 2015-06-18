@@ -31,7 +31,7 @@ import java.util.Set;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class SelfCleaningMap<K extends Comparable, V> implements Map<K, V> {
 

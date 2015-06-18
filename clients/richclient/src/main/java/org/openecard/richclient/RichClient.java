@@ -205,7 +205,7 @@ public final class RichClient {
 	StringBuilder builder = new StringBuilder();
 	builder.append("<html>");
 	builder.append(headline);
-	builder.append("<br/><br/>");
+	builder.append("<br><br>");
 	builder.append(message);
 	builder.append("</html>");
 	return builder.toString();

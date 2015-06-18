@@ -25,7 +25,7 @@ package org.openecard.sal.protocol.genericcryptography;
 
 /**
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public final class GenericCryptoObjectIdentifier {
 

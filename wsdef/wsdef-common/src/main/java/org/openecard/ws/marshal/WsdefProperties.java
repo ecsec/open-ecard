@@ -31,7 +31,7 @@ import org.openecard.common.OverridingProperties;
  * Class loading properties with values for the webservice module.
  * Take a look at the resource file wsdef.properties for a complete list of the available keys.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public abstract class WsdefProperties {
 

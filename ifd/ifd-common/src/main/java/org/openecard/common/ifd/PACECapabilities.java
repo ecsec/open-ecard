@@ -31,7 +31,7 @@ import org.openecard.common.ECardConstants;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class PACECapabilities {
 

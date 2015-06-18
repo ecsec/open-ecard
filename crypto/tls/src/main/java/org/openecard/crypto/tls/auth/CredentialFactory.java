@@ -31,7 +31,7 @@ import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
 /**
  * Interface of a factory for TlsCredentials
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface CredentialFactory {
 

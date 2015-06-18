@@ -29,7 +29,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class ByteComparatorTest {
 

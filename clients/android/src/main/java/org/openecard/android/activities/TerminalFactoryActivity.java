@@ -46,7 +46,7 @@ import org.openecard.common.I18n;
  * This Activity shows a list of available plugins. By selecting an item on the list the corresponding Activity for the
  * plugin will be started.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class TerminalFactoryActivity extends Activity {
 

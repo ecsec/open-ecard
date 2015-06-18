@@ -30,7 +30,7 @@ import org.openecard.common.util.ByteUtils;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ApplicationTemplate extends TLVList {
 

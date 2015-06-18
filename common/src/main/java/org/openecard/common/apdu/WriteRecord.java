@@ -29,7 +29,7 @@ import org.openecard.common.apdu.common.CardCommandAPDU;
  * WRITE RECORD Command.
  * See ISO/IEC 7816-4 Section 7.3.4
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class WriteRecord extends CardCommandAPDU {
 

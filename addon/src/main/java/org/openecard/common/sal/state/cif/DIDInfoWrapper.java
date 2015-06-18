@@ -33,7 +33,7 @@ import java.util.Map;
  * This class wraps a single DID of a card application in order to make the access to attributes more efficient
  * and more user friendly.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class DIDInfoWrapper {
 

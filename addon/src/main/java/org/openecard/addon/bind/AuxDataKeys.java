@@ -28,7 +28,7 @@ package org.openecard.addon.bind;
  * Auxiliary data are open, but some of the sued keys share a common meaning. The constants here help to establish a
  * language common to both bindings and add-ons.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class AuxDataKeys {
 

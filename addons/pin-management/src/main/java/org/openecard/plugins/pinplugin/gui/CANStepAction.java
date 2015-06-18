@@ -52,10 +52,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * StepAction for performing PACE with the CAN.
- * <br/> If PACE fails the Step for entering CAN will be shown again.
- * <br/> If PACE succeeds the Step for PIN changing will be shown.
+ * <br> If PACE fails the Step for entering CAN will be shown again.
+ * <br> If PACE succeeds the Step for PIN changing will be shown.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class CANStepAction extends StepAction {
 

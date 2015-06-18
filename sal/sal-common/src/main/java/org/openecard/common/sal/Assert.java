@@ -32,7 +32,7 @@ import org.openecard.common.sal.state.CardStateEntry;
 /**
  * Assertion convenience class for the SAL.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class Assert {
 

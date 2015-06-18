@@ -30,7 +30,7 @@ import ch.qos.logback.core.rolling.RolloverFailure;
 /**
  * This policy will cause a rollover on every startup.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  *
  * @param <E> 
  */

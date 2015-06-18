@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A set of utility functions used in connection with the TC Token.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class TR03112Utils {
 

@@ -35,7 +35,7 @@ import org.openecard.gui.definition.Step;
 
 /**
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class AndroidNavigator implements UserConsentNavigator {
 

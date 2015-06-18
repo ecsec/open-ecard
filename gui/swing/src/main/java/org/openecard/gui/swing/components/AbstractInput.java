@@ -37,13 +37,13 @@ import org.openecard.gui.definition.TextField;
 
 
 /**
- * Common base for {@link Textinput} and {@link Passwordinput}. <br/>
+ * Common base for {@link TextField} and {@link PasswordField}. <br>
  * The casting is ugly, but in the short time no better solution occured to me.
  * Remind, the problem is that TextInput and PasswordInput are identical but
  * have no base class. C++ templates would help, but Java generics don't.
  * Feel free to get rid of this mess.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class AbstractInput implements StepComponent, Focusable {
 

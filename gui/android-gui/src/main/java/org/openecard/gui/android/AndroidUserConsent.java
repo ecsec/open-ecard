@@ -32,7 +32,7 @@ import org.openecard.gui.definition.UserConsentDescription;
 /**
  * Android implementation of the UserConsent interface.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class AndroidUserConsent implements org.openecard.gui.UserConsent {
 

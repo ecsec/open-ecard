@@ -33,13 +33,13 @@ import org.openecard.gui.file.FileFilter;
  * This and the interfaces used in this definition are modeled after Swings {@link javax.swing.JFileChooser}. However it
  * should be abstract enough to fit under other implementations as well.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface FileDialog {
 
     /**
      * Sets the title of the dialog.
-     * This function may be ignored by an implementation incapable of displaying a title bar.<br/>
+     * This function may be ignored by an implementation incapable of displaying a title bar.<br>
      * If the function is not called, a default value depending on the type of the dialog should be shown.
      *
      * @param title Text to set in the title of the dialog.

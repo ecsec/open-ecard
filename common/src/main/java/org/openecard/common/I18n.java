@@ -43,12 +43,12 @@ import org.slf4j.LoggerFactory;
  * <p>
  * All translation files must be located below the folder <pre>openecard_i18n</pre> plus a component name.
  * The special file Messages.properties is used to provide translated key value pairs. Completely translated files can
- * have any other name.<br/>
+ * have any other name.<br>
  * All translation files follow the same scheme to identify their language. The language is written in the form of
  * <a href="https://tools.ietf.org/html/bcp47">BCP 47</a> language tags. However instead of -, _ is used as a separator,
  * which is the common practice. This implementation only supports a subset of the BCP 47 specification, meaning only
  * language and country codes are allowed. The default language, which is English is described by C. The name of the
- * file and its language is separated by _. The file ending is optional for arbitrary files.<br/>
+ * file and its language is separated by _. The file ending is optional for arbitrary files.<br>
  * The following examples illustrate the scheme.
  * <pre> Messages_C.properties
  * Messages_de.properties
@@ -227,14 +227,13 @@ public class I18n {
      * Get translated version of a file depending on current locale.
      * <p>The file's base path equals the component directory. The language definition is enclosed between the filename
      * and the file ending plus a '.'.</p>
-     * <p>An example looks like this:<br/>
+     * <p>An example looks like this:</p>
      * <pre> I18n l = I18n.getTranslation("gui");
      * l.translationForFile("about", "html");
      * // this code in a german environment tries to load the following files until one is found
      * // - openecard_i18n/gui/about_de_DE.html
      * // - openecard_i18n/gui/about_de.html
      * // - openecard_i18n/gui/about_C.html</pre>
-     * </p>
      *
      * @param name Name part of the file.
      * @param fileEnding File ending if available, null otherwise.

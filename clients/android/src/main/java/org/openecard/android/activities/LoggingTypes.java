@@ -26,7 +26,7 @@ package org.openecard.android.activities;
 /**
  * Enumeration of the logging types that can be used in this App.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public enum LoggingTypes {
 

@@ -25,7 +25,7 @@ package org.openecard.addon;
 
 /**
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class ActionInitializationException extends AddonException {
 

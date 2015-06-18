@@ -29,13 +29,13 @@ import org.openecard.common.apdu.common.CardCommandAPDU;
  * GET DATA command
  * See ISO/IEC 7816-4 Section 7.6.1.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class GetResponse extends CardCommandAPDU {
 
     /**
      * Creates a new GET RESPONSE command.
-     * <br /><br />
+     * <br><br>
      * APDU: 0x00 0xC0 0x00 0x00 0x00
      */
     public GetResponse() {

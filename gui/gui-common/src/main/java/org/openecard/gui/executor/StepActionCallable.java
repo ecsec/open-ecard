@@ -32,7 +32,7 @@ import org.openecard.gui.StepResult;
  * This class is used only internally in the {@link ExecutionEngine} to be able to stop actions if the user cancels the
  * process.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 final class StepActionCallable implements Callable<StepActionResult> {
 

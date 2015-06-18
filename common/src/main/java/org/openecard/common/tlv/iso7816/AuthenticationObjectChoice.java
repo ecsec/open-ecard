@@ -32,8 +32,8 @@ import org.openecard.common.tlv.TagClass;
 /**
  * The class implements a data type which represents the ASN.1 notation of the AuthenticationObjectChoice in ISO7816-15.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class AuthenticationObjectChoice extends TLVType {
 

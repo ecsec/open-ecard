@@ -30,7 +30,7 @@ import org.openecard.crypto.common.asn1.eac.oid.CAObjectIdentifier;
 /**
  * See BSI-TR-03110, version 2.05, section A.1.1.2.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class CAInfo extends SecurityInfo {
 

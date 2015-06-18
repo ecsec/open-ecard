@@ -29,7 +29,7 @@ import java.io.FileFilter;
 /**
  * A {@code FileFilter} accepting only jar-files.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 final class JARFileFilter implements FileFilter {
 

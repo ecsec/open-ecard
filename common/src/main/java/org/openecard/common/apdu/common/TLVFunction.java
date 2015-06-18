@@ -32,7 +32,7 @@ import org.openecard.common.util.StringUtils;
 /**
  * APDU Template function capable of creating TLV BER data based on a tag and a value.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class TLVFunction implements APDUTemplateFunction {
 

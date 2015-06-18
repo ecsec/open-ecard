@@ -33,7 +33,7 @@ import org.openecard.gui.definition.OutputInfoUnit;
 /**
  * Implementation of a simple text view for use in a {@link StepActivity}.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class Text implements StepView {
 

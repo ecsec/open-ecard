@@ -25,7 +25,7 @@ package org.openecard.addon;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class AddonNotFoundException extends AddonException {
 

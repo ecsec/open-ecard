@@ -30,7 +30,7 @@ import org.openecard.apache.http.params.HttpParams;
 /**
  * Stream based output buffer for use in Apache httpcore.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class StreamSessionOutputBuffer extends AbstractSessionOutputBuffer {
 

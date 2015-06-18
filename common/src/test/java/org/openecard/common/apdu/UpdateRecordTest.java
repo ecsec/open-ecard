@@ -29,7 +29,7 @@ import org.testng.annotations.Test;
 /**
  * Test if the UPDATE RECORD commands are constructed as expected.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class UpdateRecordTest {
 

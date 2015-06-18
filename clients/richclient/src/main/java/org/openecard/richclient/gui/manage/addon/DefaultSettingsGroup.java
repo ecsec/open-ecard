@@ -44,8 +44,8 @@ import org.slf4j.LoggerFactory;
  * SettingsGroup that can be used as default.
  * For every ConfigurationEntry in the given AddonSpecification an according item will be added.
  *
- * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 public class DefaultSettingsGroup extends SettingsGroup {
 

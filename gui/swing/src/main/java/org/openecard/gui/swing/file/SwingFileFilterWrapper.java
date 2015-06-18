@@ -30,7 +30,7 @@ import org.openecard.gui.file.FileFilter;
  * Wrapper class for a Open eCard FileFilter.
  * It wraps the Open eCard FileFilter in Swing FileFilter, so that it can be used in a JFileChooser.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class SwingFileFilterWrapper extends javax.swing.filechooser.FileFilter {
 

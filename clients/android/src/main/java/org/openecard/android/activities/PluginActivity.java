@@ -50,7 +50,7 @@ import org.openecard.common.I18n;
  * This Activity shows the information for a plugin.
  * Furthermore PluginActions can be started and settings can be configured.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class PluginActivity extends Activity {
 

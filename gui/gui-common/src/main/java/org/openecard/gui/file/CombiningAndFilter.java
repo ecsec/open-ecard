@@ -32,7 +32,7 @@ import java.util.List;
  * File filter checking all wrapped FileFilters.
  * This FileFilter accepts a file only if all filters agree to accept the file.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class CombiningAndFilter implements FileFilter {
 

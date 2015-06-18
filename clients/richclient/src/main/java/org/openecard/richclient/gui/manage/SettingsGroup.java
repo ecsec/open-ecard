@@ -142,7 +142,7 @@ public class SettingsGroup extends JPanel {
      * @see #addInputItem(java.lang.String, java.lang.String, java.lang.String)
      * @see #addBoolItem(java.lang.String, java.lang.String, java.lang.String)
      * @see #addSelectionItem(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
-     * @see #addMultiSelectionItem(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
+     * @see #addMultiSelectionItem(java.lang.String, java.lang.String, java.lang.String, java.util.List)
      */
     protected void setEnabledComponent(Component element, boolean enabled) {
 	JLabel label = fieldLabels.get(element);

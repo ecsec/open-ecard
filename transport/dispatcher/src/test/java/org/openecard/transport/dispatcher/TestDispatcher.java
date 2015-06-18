@@ -34,7 +34,7 @@ import static org.testng.Assert.*;
  * Test of the dispatcher.
  * The test checks if a environment can be loaded and if a method can be dispatched successfully.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class TestDispatcher {
 

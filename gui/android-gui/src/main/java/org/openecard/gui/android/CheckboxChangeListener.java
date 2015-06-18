@@ -30,7 +30,7 @@ import org.openecard.gui.definition.BoxItem;
 /**
  * Alters the checked state of the Checkbox-BoxItem according to the new state of the Checkbox-view.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 final class CheckboxChangeListener implements OnCheckedChangeListener {
 

@@ -28,7 +28,7 @@ import org.openecard.common.ECardException;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public final class UnknownProtocolException extends ECardException {
 

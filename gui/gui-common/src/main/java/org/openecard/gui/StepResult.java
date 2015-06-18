@@ -32,7 +32,7 @@ import org.openecard.gui.definition.Step;
 /**
  * Interface for a step result with status and result values.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface StepResult {
 

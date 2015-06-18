@@ -29,7 +29,7 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 @XmlRootElement(name = "FileEntry")
 @XmlType(propOrder = { "key", "requiredBeforeAction", "fileType", "localizedName", "localizedDescription" })

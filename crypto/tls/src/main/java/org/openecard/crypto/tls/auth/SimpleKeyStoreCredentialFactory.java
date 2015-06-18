@@ -34,7 +34,7 @@ import org.openecard.crypto.common.keystore.KeyStoreSigner;
 /**
  * This factory simply returns the one credential it was given in the constructor.
  * 
- * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class SimpleKeyStoreCredentialFactory implements CredentialFactory {
 

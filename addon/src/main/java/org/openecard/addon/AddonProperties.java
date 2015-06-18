@@ -38,8 +38,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The class implements the AddonProperties which basically wrap a Properties object.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class AddonProperties {
     /**

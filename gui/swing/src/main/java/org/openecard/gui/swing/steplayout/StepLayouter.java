@@ -29,11 +29,11 @@ import org.openecard.gui.swing.components.StepComponent;
 
 
 /**
- * Abstract base class to retrieve layouted components. <br/>
+ * Abstract base class to retrieve layouted components. <br>
  * This class is also used to instantiate an implementation of a layouter
  * depending on the parameters (see static create function).
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public abstract class StepLayouter {
 

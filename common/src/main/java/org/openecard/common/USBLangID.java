@@ -28,7 +28,7 @@ import java.util.Locale;
 /**
  * Taken from http://www.usb.org/developers/docs/USB_LANGIDs.pdf
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public enum USBLangID {
 

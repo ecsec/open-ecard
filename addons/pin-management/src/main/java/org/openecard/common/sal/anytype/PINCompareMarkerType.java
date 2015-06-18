@@ -36,7 +36,7 @@ import org.w3c.dom.NodeList;
 
 /**
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class PINCompareMarkerType {
 

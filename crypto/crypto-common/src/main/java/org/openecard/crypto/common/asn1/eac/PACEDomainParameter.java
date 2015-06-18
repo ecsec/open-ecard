@@ -26,7 +26,7 @@ import java.security.spec.AlgorithmParameterSpec;
 
 
 /**
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class PACEDomainParameter {
 

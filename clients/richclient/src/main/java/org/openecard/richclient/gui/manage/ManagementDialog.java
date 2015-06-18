@@ -136,8 +136,8 @@ public class ManagementDialog extends JFrame {
 
     /**
      * Create a ManagementDialog instance.
-     * The preferred way of opening this dialog is the {@link #showDialog()} function which also makes the dialog
-     * visible and only permits one open instance at a time.
+     * The preferred way of opening this dialog is the {@link #showDialog(AddonManager)} function which also makes the
+     * dialog visible and only permits one open instance at a time.
      *
      * @param manager
      */

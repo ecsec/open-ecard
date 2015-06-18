@@ -28,7 +28,7 @@ import org.openecard.common.ECardException;
 
 /**
  * Exception class for utility classes.
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class UtilException extends ECardException {
 

@@ -27,7 +27,7 @@ import javax.xml.namespace.QName;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public abstract class SOAPConstants {
 

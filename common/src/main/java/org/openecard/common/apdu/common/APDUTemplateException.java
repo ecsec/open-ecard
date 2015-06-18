@@ -26,7 +26,7 @@ package org.openecard.common.apdu.common;
 /**
  * Exception for errors in the APDU template evaluation.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class APDUTemplateException extends Exception {
 

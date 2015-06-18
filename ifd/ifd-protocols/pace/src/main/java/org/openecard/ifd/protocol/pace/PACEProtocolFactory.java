@@ -30,7 +30,7 @@ import org.openecard.common.ifd.ProtocolFactory;
 /**
  * Implements a ProtocolFactory for the PACE protocol.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class PACEProtocolFactory implements ProtocolFactory {
 

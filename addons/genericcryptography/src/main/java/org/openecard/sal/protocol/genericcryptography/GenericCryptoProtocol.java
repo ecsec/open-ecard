@@ -31,7 +31,7 @@ import org.openecard.addon.sal.SALProtocolBaseImpl;
  * Implements the Generic cryptography protocol.
  * See BSI-TR-03112, version 1.1.2, part 7, section 4.9.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class GenericCryptoProtocol extends SALProtocolBaseImpl {
 

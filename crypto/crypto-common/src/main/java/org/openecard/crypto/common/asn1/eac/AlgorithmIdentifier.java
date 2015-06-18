@@ -29,7 +29,7 @@ import org.openecard.bouncycastle.asn1.ASN1Sequence;
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class AlgorithmIdentifier {
 

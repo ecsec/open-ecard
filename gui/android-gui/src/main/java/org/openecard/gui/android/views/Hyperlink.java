@@ -31,10 +31,10 @@ import org.openecard.gui.definition.OutputInfoUnit;
 
 
 /**
- * Implementation of a hyperlink for use in a {@link StepActivity}.<br/>
+ * Implementation of a hyperlink for use in a {@link org.openecard.gui.android.StepActivity}. <br>
  * If no text is supplied, the text of the url is displayed.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class Hyperlink implements StepView {
 

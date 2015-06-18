@@ -97,7 +97,7 @@ import org.openecard.ws.Management;
 
 /**
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class TinyManagement implements  Management {
 

@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Simple Activity used to show the About-Infos.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class AboutActivity extends ActivityGroup {
 

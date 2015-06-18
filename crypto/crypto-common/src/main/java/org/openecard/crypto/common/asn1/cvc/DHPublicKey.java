@@ -28,7 +28,7 @@ import org.openecard.common.tlv.TLV;
 /**
  * See BSI-TR-03110, version 2.10, part 3, section D.3.2.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class DHPublicKey extends PublicKey {
 

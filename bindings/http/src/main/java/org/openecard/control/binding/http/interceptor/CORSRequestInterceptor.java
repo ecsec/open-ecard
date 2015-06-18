@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
+ * @author Moritz Horsch
+ * @author Benedikt Biallowons
  */
 public class CORSRequestInterceptor implements HttpRequestInterceptor {
 

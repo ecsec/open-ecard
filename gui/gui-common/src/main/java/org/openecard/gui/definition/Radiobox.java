@@ -27,7 +27,7 @@ package org.openecard.gui.definition;
  * Radiobox element for user consents.
  * Any radio box item can be checked or unchecked, but only one at a time can be checked.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public final class Radiobox extends AbstractBox {
 

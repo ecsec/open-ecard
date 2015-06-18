@@ -32,8 +32,8 @@ import org.openecard.gui.message.OptionType;
  * This and the interfaces used in this definition are modeled after Swings {@link javax.swing.JOptionPane}. However it
  * should be abstract enough to fit under other implementations as well.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public interface MessageDialog {
 

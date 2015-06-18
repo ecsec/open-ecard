@@ -35,8 +35,8 @@ import org.openecard.common.tlv.Tag;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class EF_DIR {
 

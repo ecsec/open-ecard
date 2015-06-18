@@ -26,8 +26,8 @@ package org.openecard.common.enums;
 /**
  * Event types of the Open eCard event system.
  *
- * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
- * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
+ * @author Johannes Schmoelz
+ * @author Benedikt Biallowons
  */
 public enum EventType {
 

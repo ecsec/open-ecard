@@ -127,7 +127,6 @@ public abstract class AbstractPINAction implements AppExtensionAction {
      * Wait until a card of the specified card type was inserted.
      * 
      * @param cardType The type of the card that should be inserted.
-     * @param manager EventManager used for the InsertCardDialog.
      * @return The ConnectionHandle of the inserted card or null if no card was inserted.
      */
     protected ConnectionHandleType waitForCardType(String cardType) {

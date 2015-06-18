@@ -31,7 +31,7 @@ import javax.swing.JTextField;
 /**
  * ActionListener implementation which opens a FileChooser.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class OpenFileBrowserListener implements ActionListener {
 

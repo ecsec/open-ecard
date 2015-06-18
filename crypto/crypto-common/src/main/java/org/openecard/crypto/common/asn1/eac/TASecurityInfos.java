@@ -31,7 +31,7 @@ import org.openecard.crypto.common.asn1.eac.oid.TAObjectIdentifier;
  * Implements the SecurityInfos for Chip Authentication.
  * See BSI-TR-03110, version 2.10, part 3, section A.1.1.3.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class TASecurityInfos {
 

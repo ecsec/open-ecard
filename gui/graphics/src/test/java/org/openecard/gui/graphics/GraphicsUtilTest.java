@@ -30,7 +30,7 @@ import static org.testng.Assert.*;
 /**
  * Test of GraphicsUtil class.
  *
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Johannes Schmölz
  */
 public class GraphicsUtilTest {
 

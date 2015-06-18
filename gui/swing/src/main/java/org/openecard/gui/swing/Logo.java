@@ -40,8 +40,8 @@ import org.openecard.common.util.FileUtils;
  * Open eCard logo for the sidebar of the Swing GUI.
  * The logo is placed on a JPanel, so that it can be placed on any component conveniently.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch
+ * @author Dirk Petrautzki
  */
 public class Logo extends JPanel {
 

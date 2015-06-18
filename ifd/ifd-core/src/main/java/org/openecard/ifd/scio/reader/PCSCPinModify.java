@@ -34,8 +34,8 @@ import org.openecard.ifd.scio.IFDException;
 
 
 /**
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
  */
 public class PCSCPinModify {
 

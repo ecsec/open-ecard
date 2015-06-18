@@ -26,7 +26,7 @@ package org.openecard.control.binding.http.common;
 /**
  * HTTP/1.1 methods
  *
- * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
+ * @author Benedikt Biallowons
  */
 public enum Http11Method {
 

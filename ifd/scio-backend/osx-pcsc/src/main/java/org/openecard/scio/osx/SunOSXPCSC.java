@@ -31,9 +31,9 @@ import javax.smartcardio.TerminalFactorySpi;
 
 /**
  * OS X PC/SC provider.
- * For more information see {@link package-info}.
+ * For more information see {@link org.openecard.scio.osx}.
  *
- * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
+ * @author Benedikt Biallowons
  */
 public final class SunOSXPCSC extends Provider {
 
@@ -45,6 +45,7 @@ public final class SunOSXPCSC extends Provider {
     public SunOSXPCSC() {
 	super("SunOSXPCSC", 1.0d, "Sun OS X PC/SC provider");
 	AccessController.doPrivileged(new PrivilegedAction<Void>() {
+	    @Override
 	    public Void run() {
 		put("TerminalFactory.PC/SC", "org.openecard.scio.osx.SunOSXPCSC$Factory");
 		return null;
@@ -56,11 +57,11 @@ public final class SunOSXPCSC extends Provider {
      * Internal provider factory.
      * For more information see {@link TerminalFactorySpi}
      *
-     * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
+     * @author Benedikt Biallowons
      */
     public static final class Factory extends TerminalFactorySpi {
 	/**
-	 * Constructor checking availability & initializing context.
+	 * Constructor checking availability &amp; initializing context.
 	 *
 	 * @param obj provider parameters
 	 * @throws PCSCException if problems occur.

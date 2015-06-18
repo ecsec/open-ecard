@@ -31,7 +31,7 @@ import org.openecard.gui.definition.Step;
  * Abstract base for all step actions.
  * Actions are associated with a step and are executed by the {@link ExecutionEngine}.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public abstract class StepAction {
 

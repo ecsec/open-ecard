@@ -32,7 +32,7 @@ import org.openecard.common.ifd.ProtocolFactory;
 /**
  * Simple class to memorise different protocol factories.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ProtocolFactories {
 

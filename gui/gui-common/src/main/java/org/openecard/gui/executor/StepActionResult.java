@@ -29,7 +29,7 @@ import org.openecard.gui.definition.Step;
  * Result of a step action.
  * The result contains a status and if desired a replacement step for the next step that would be displayed.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class StepActionResult {
 

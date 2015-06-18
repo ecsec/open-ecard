@@ -36,10 +36,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Simple listener for changes in the plug-in directory.
- * <br/>It will add or unload a plug-in in the plug-in manager if it detects a file creation or removal.
+ * <br>It will add or unload a plug-in in the plug-in manager if it detects a file creation or removal.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Dirk Petrautzki
+ * @author Hans-Martin Haase
  */
 final class PluginDirectoryAlterationListener implements FilesystemAlterationListener {
 

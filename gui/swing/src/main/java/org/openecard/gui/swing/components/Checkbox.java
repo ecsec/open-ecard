@@ -40,9 +40,9 @@ import org.openecard.gui.definition.OutputInfoUnit;
 /**
  * Implementation of a checkbox group for use in a {@link org.openecard.gui.swing.StepFrame}.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Florian Feldmann <florian.feldmann@rub.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Tobias Wich
+ * @author Florian Feldmann
+ * @author Moritz Horsch
  */
 public class Checkbox implements StepComponent, Focusable {
 

@@ -28,7 +28,7 @@ import java.util.HashMap;
 /**
  * Provides a container to store data for the GUI and user interaction.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class GUIContentMap {
 

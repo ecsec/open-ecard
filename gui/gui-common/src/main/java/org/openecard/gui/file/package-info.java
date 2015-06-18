@@ -21,7 +21,7 @@
  ***************************************************************************/
 
 /**
- * Definition of file dialog related items. <br/>
+ * Definition of file dialog related items. <br>
  * The {@link FileFilter} interface can be used to filter out unwanted files in the file dialog. Additionally this
  * package contains some of the most frequently needed file filters.
  */

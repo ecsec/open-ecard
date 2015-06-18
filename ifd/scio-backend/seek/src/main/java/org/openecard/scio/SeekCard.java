@@ -33,7 +33,7 @@ import org.simalliance.openmobileapi.Session;
 /**
  * Seek implementation of smartcardio's Card interface.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class SeekCard implements SCIOCard {
 

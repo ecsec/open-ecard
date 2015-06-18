@@ -34,8 +34,8 @@ import org.openecard.addon.utils.LocalizedStringExtractor;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
  */
 @XmlRootElement(name = "ProtocolPluginSpecification")
 @XmlType(propOrder = { "uri", "className", "loadOnStartup", "localizedName", "localizedDescription", "configDescription" })

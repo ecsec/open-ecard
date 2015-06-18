@@ -31,7 +31,7 @@ import org.openecard.common.anytype.AuthDataMap;
  * Implements the PINCompareDIDAuthenticateInputType.
  * See TR-03112, version 1.1.2, part 7, section 4.1.5.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class PINCompareDIDAuthenticateInputType {
 

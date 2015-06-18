@@ -34,7 +34,7 @@ import org.openecard.common.util.ShortUtils;
  * Resolves RAPDU status words to human readable messages.
  * Cp. ISO-7816-4 sec. 5.1.3 Status Bytes
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class CardCommandStatus {
 

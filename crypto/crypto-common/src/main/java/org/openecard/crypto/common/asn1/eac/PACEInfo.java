@@ -30,7 +30,7 @@ import org.openecard.crypto.common.asn1.eac.oid.PACEObjectIdentifier;
 /**
  * See BSI-TR-03110, version 2.10, part 3, section A.1.1.1.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class PACEInfo extends SecurityInfo {
 

@@ -32,7 +32,7 @@ import org.w3c.dom.NodeList;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class SOAPMessage {
 

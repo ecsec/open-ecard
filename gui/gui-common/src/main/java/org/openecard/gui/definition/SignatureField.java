@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * Definition class for signature fields.
  * Signature fields provide a drawing canvas where the user can create a signature.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public final class SignatureField extends IDTrait implements InputInfoUnit, OutputInfoUnit {
 

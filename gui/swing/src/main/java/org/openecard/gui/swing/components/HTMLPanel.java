@@ -36,9 +36,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Panel implementation which is able to render HTML and PDF by using a Java FX WebView and pdf.js.
- * <br/>
- * <br/>
- * NOTE: <br/>
+ * <br>
+ * <br>
+ * NOTE: <br>
  * This class uses JavaFX components. JavaFX is available in Oracles JRE sind version 7 and in OpenJDK/JRE since version
  * 8. Because of the version differences this class should be access just by the reflection API until we have a minimum
  * requirement of Java 8 for the execution.

@@ -33,7 +33,7 @@ import org.openecard.android.R;
  * Activity for the demo tab.
  * It simply shows a button to start the demo process via an intent.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class DemoActivity extends Activity {
 

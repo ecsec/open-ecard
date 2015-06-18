@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * This Activity is used by {@link AndroidMessageDialog} to show a MessageDialog. It uses the parameters given in the
  * calling Intent to adapt the representation according to them.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class FileDialogActivity extends ListActivity {
 

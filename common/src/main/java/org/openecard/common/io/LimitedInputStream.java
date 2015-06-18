@@ -30,7 +30,7 @@ import java.io.InputStream;
 /**
  * Implements a input stream with a limit.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class LimitedInputStream extends FilterInputStream {
 

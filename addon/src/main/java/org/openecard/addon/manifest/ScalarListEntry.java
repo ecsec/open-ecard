@@ -29,9 +29,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
 *
-* @author Tobias Wich <tobias.wich@ecsec.de>
-* @author Dirk Petrautzki <petrautzki@hs-coburg.de>
-* @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+* @author Tobias Wich
+* @author Dirk Petrautzki
+* @author Hans-Martin Haase
 */
 @XmlRootElement(name = "ScalarListEntry")
 @XmlType(propOrder = { "key", "type", "localizedName", "localizedDescription" })

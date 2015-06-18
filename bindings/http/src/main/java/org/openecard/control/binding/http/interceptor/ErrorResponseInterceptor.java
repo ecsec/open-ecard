@@ -46,8 +46,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * An HttpResponseInterceptor implementation for errors.
- * <br/>
- * <br/>
+ * <br>
+ * <br>
  * The interceptor handles just messages with defined HTTP status codes. If such a message is received than the content
  * will be modified by using a given HTML template.
  *
@@ -63,8 +63,8 @@ public class ErrorResponseInterceptor implements HttpResponseInterceptor {
 
     /**
      * Create a new ErrorInterceptor from the given {@code documentRoot} and the given {@code template}.
-     * <br/>
-     * <br/>
+     * <br>
+     * <br>
      * This constructor does not need a list of http status codes instead an predefined list is generated and used. This
      * means that a so created ErrorResponseInterceptor handle messages with the http status codes 400 to 417, 423, 429
      * and 500 to 505 in a special way.

@@ -29,7 +29,7 @@ import org.openecard.common.apdu.common.CardCommandAPDU;
  * GET CHALLENGE command
  * See ISO/IEC 7816-4 Section 7.5.3
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class GetChallenge extends CardCommandAPDU {
 

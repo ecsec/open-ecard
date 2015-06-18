@@ -40,7 +40,7 @@ import org.openecard.gui.swing.file.SwingFileFilterWrapper;
  * Swing based FileDialog implementation.
  * This implementation wraps the {@link JFileChooser} class.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class SwingFileDialog implements FileDialog {
 

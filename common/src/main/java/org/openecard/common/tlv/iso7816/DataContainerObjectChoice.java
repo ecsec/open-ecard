@@ -31,7 +31,7 @@ import org.openecard.common.tlv.TagClass;
 
 /**
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class DataContainerObjectChoice extends TLVType {
 

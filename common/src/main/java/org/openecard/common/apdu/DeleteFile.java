@@ -30,7 +30,7 @@ import org.openecard.common.util.ShortUtils;
  * DELETE FILE command.
  * See ISO/IEC 7816-9 Section 9.3.3.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class DeleteFile extends CardCommandAPDU {
 

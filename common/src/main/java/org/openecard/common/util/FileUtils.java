@@ -45,15 +45,15 @@ import org.openecard.common.io.LimitedInputStream;
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class FileUtils {
 
     /**
      * Finds and returns the user specific config directory.
      * The config directory is defined as '$HOME/.openecard'. This function evaluates the system property 'user.home'
-     * and simply appends '.openecard'. <br/>
+     * and simply appends '.openecard'. <br>
      * The config directory can be used to save logging configs, logs, certificates and anything else one might think
      * of.
      *
@@ -78,7 +78,7 @@ public class FileUtils {
     /**
      * Finds and returns the user specific addons directory.
      * The addons directory is defined as '$HOME/.openecard/addons'. This function evaluates the system property 'user.home'
-     * and simply appends '.openecard/addons'. <br/>
+     * and simply appends '.openecard/addons'. <br>
      * The addons directory can be used to save addons, theire configuration and related stuff.
      *
      * @return File object pointing to the addons directory.
@@ -94,7 +94,7 @@ public class FileUtils {
     /**
      * Finds and returns the user specific addons configuration directory.
      * The addons directory is defined as '$HOME/.openecard/addons/conf'. This function evaluates the system property
-     * 'user.home' and simply appends '.openecard/addons/conf'. <br/>
+     * 'user.home' and simply appends '.openecard/addons/conf'. <br>
      * The addons conf directory can be used to save the configuration of the specific addon.
      *
      * @return File object pointing to the addons directory.
@@ -251,9 +251,9 @@ public class FileUtils {
     /**
      * Map list of files to resource URLs.
      * The list file must itself be present in the classpath and contain unix style path values separated by colons (:).
-     * These path values must be relative to the classpath. The map key is path without the given prefix.<br/>
+     * These path values must be relative to the classpath. The map key is path without the given prefix.<br>
      * E.g.
-     * <code>/www/index.html</code> becomes <code>/index.html</code> -> <code>some-url-to-the-file</code>.
+     * <code>/www/index.html</code> becomes <code>/index.html</code> -&gt; <code>some-url-to-the-file</code>.
      *
      * @param clazz Base for the {@link Class#getResource(String)} operation.
      * @param prefix Prefix common to all path entries.

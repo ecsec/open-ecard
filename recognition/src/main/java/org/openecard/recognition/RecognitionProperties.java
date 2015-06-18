@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Johannes Schmoelz
+ * @author Tobias Wich
  */
 public class RecognitionProperties {
 

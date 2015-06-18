@@ -25,7 +25,7 @@ package org.openecard.common;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class GenericFactoryException extends Exception {
 

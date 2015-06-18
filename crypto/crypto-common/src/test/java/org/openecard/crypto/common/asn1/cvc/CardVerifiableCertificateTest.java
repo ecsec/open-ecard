@@ -30,8 +30,8 @@ import static org.testng.Assert.*;
 
 /**
  *
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Moritz Horsch
+ * @author Dirk Petrautzki
  */
 public class CardVerifiableCertificateTest {
 

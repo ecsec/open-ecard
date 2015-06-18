@@ -37,7 +37,7 @@ import org.openecard.common.util.HandlerUtils;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class WSHelper {
 

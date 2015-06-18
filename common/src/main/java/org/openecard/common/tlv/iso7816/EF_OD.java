@@ -30,7 +30,7 @@ import org.openecard.common.tlv.TLVException;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class EF_OD {
 

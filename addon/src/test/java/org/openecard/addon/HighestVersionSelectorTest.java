@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 /**
  * The method tests the HighestVersionSelector class.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class HighestVersionSelectorTest {
 

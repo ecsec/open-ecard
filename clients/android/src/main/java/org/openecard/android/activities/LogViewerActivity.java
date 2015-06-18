@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This Activity shows the log in a scrollable textarea.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class LogViewerActivity extends Activity {
 

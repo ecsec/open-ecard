@@ -39,13 +39,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The class represents a Cookie manager used to manage cookies according to RFC 6265.
- * <br/>
- * <br/>
+ * <br>
+ * <br>
  * This implementation provides an in memory cookie storage but may be also used for on disk cookie storage with the
  * {@link CookieManager#CookieManager(java.util.Map) } constructor which may consume a custom map implementation which
  * may be capable for the on disk storage.
- * <br/>
- * <br/>
+ * <br>
+ * <br>
  * The implementation is protected against cookie overflow. The implementation is restricted to store 3000 cookies at all
  * and 50 cookies per domain.
  *
@@ -77,8 +77,8 @@ public class CookieManager {
 
     /**
      * Creates a CookieManager instance with a custom Map implementation which is used to store the cookies.
-     * <br/>
-     * <br/>
+     * <br>
+     * <br>
      * This constructor may be used in case there is a need for an on disk storage of the cookies. The storage of the
      * cookies on disk have to be handled by the {@link Map} implementation.
      *
@@ -350,8 +350,8 @@ public class CookieManager {
 
     /**
      * Updates the cookie.
-     * <br/>
-     * <br/>
+     * <br>
+     * <br>
      * This means expiration time update.
      *
      * @param domainKey The key which addresses the cookie, may be a full server address or just a domain.

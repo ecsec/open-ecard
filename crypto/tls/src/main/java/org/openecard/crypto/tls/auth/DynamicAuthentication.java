@@ -138,7 +138,7 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
     /**
      * Verify the server certificate of the TLS handshake.
      * In case no implementation is set (via {@link #setCertificateVerifier(CertificateVerifier)}), no action is
-     * performed.<br/>
+     * performed.<br>
      * The actual implementation is responsible for the types of verification that are performed. Besides the usual
      * hostname and certificate chain verification, those types could also include CRL and OCSP checking.
      *

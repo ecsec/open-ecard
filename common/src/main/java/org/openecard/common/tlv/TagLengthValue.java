@@ -109,7 +109,7 @@ class TagLengthValue {
 
 
     /**
-     * Get number of the bytes from which this TLV was created.<br/>
+     * Get number of the bytes from which this TLV was created.<br>
      * Only makes sense if created from bytes.
      * @return
      */

@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * GENERAL AUTHENTICATION Command
  * See ISO/IEC 7816-4 Section 7.5.2
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class GeneralAuthenticate extends CardCommandAPDU {
 

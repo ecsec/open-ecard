@@ -39,7 +39,7 @@ import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 /**
  * Convenience class for the SAL.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class SALUtils {
 

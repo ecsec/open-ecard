@@ -29,13 +29,13 @@ import org.openecard.bouncycastle.crypto.tls.Certificate;
 /**
  * Interface for certificate verification.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface CertificateVerifier {
 
     /**
      * Verify the given certificate chain.
-     * An invalid certificate is indicated by a CertificateVerificationException.<br/>
+     * An invalid certificate is indicated by a CertificateVerificationException.<br>
      * The verification must at least check the certificate chain and the hosts name.
      *
      * @param chain Certificate chain to be verified.

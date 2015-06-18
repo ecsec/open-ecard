@@ -27,12 +27,12 @@ import org.openecard.gui.definition.OutputInfoUnit;
 
 
 /**
- * Every component on a StepActivity must implement this interface. <br/>
+ * Every component on a StepActivity must implement this interface. <br>
  * It abstracts the verification logic like password length validation and
  * supplies a function to get the result for the UserConsentResponse.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
  */
 public interface StepView {
 
@@ -55,7 +55,7 @@ public interface StepView {
 
     /**
      * Validate the contents of this component. A meaningful result is only
-     * expected if StepComponent.isValueType() returns true.<br/>
+     * expected if StepComponent.isValueType() returns true.<br>
      * For example in case of a TextInput, this function checks if the text is
      * within the bounds of minLength and maxLength.
      *

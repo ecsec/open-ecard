@@ -28,7 +28,7 @@ import org.openecard.common.ECardException;
 
 /**
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class NameExistsException extends ECardException {
 

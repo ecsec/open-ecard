@@ -36,7 +36,7 @@ import static org.testng.Assert.*;
 
 /**
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class PinCompareMarkerTypeTest {
 

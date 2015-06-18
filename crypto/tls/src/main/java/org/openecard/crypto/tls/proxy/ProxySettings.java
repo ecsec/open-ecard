@@ -196,8 +196,9 @@ public class ProxySettings {
 
     /**
      * Gets default ProxySettings instance.
+     * The configuration for the default instance is loaded from the config file.
      *
-     * @see #ProxySettings()
+     * @see OpenecardProperties
      * @return Default ProxySettings instance.
      */
     public static ProxySettings getDefault() {
@@ -208,7 +209,7 @@ public class ProxySettings {
     /**
      * Gets proxy instance for the chosen proxy configuration.
      * This may either be a proxy specified when creating the instance, the proxy set via the
-     * {@link OpenecardProperties}, or the proxy selected by Java's {@link ProxySelector}.<br/>
+     * {@link OpenecardProperties}, or the proxy selected by Java's {@link ProxySelector}.<br>
      * In case the ProxySelector is used, the host and port are needed in order to select the correct proxy
      * (see {@link ProxySelector#select(java.net.URI)}).
      *

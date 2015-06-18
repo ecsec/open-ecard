@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  * Implements the Hash step of the Generic cryptography protocol.
  * See TR-03112, version 1.1.2, part 7, section 4.9.10.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class VerifySignatureStep implements ProtocolStep<VerifySignature, VerifySignatureResponse> {
 

@@ -35,7 +35,7 @@ import org.openecard.crypto.tls.auth.CertificateVerifierBuilder;
 /**
  * Implementation of BouncyCastle's abstract DefaultTlsClient.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class DefaultTlsClientImpl extends ClientCertDefaultTlsClient {
 

@@ -30,7 +30,7 @@ import org.openecard.common.Version;
 /**
  * Helper with functionality commonly needed when sending HTTP requests over Apache httpcore.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class HttpRequestHelper {
 
@@ -54,7 +54,7 @@ public class HttpRequestHelper {
      * Modify the given request and add a common set of headers.
      *
      * @param request Request which should be modified.
-     * @param host URL of the endpoint for the Host header.
+     * @param endpoint URL of the endpoint for the Host header.
      * @return Modified request instance for command chaining.
      */
     public static HttpRequest setDefaultHeader(HttpRequest request, URL endpoint) {

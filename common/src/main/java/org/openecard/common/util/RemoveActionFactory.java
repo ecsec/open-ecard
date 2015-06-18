@@ -25,7 +25,7 @@ package org.openecard.common.util;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface RemoveActionFactory<V> {
 

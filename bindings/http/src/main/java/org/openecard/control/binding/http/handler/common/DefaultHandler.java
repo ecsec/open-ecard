@@ -32,7 +32,7 @@ import org.openecard.control.binding.http.handler.ControlCommonHandler;
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class DefaultHandler extends ControlCommonHandler {
 

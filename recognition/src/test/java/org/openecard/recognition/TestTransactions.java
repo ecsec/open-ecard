@@ -40,7 +40,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class TestTransactions {
 
@@ -109,7 +109,7 @@ public class TestTransactions {
     /**
      * This runnable blocks access to the card for 15 seconds.
      *
-     * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+     * @author Dirk Petrautzki
      */
     private final class BlockingRunnable implements Runnable {
 	private final String ifdName;

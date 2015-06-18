@@ -180,8 +180,8 @@ public class Cookie {
 
     /**
      * Indicates whether the cookie is expired or not.
-     * <br/>
-     * <br/>
+     * <br>
+     * <br>
      * Note: This method evaluates the {@code Max-Age} attribute and {@code Expires} attribute while the {@code Max-Age}
      * attribute has precedence before the {@code Expires} attribute. If none of the above attributes is set than {@code
      * FALSE} so the cookie is hold for the complete session.
@@ -236,7 +236,7 @@ public class Cookie {
 
     /**
      * Sets the creation time of the cookie.
-     * <br/>
+     * <br>
      * Should be used with {@link System#currentTimeMillis()} or {@link Cookie#getCreationTime()}.
      *
      * @param time The creation time to set.

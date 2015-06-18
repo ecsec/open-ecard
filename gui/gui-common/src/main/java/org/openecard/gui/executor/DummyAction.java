@@ -28,15 +28,15 @@ import org.openecard.gui.definition.Step;
 
 
 /**
- * Dummy action to produce step results for the execution engine. <br/>
+ * Dummy action to produce step results for the execution engine. <br>
  * The DummyAction is a no-OP action, which always returns a result according to the following mapping:
  * <ul>
- * <li>{@link ResultStatus#BACK} → {@link StepActionResultStatus#BACK}</li>
- * <li>{@link ResultStatus#OK} → {@link StepActionResultStatus#NEXT}</li>
+ * <li>{@link org.openecard.gui.ResultStatus#BACK} → {@link StepActionResultStatus#BACK}</li>
+ * <li>{@link org.openecard.gui.ResultStatus#OK} → {@link StepActionResultStatus#NEXT}</li>
  * <li>* → {@link StepActionResultStatus#CANCEL}</li>
  * </ul>
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class DummyAction extends StepAction {
 

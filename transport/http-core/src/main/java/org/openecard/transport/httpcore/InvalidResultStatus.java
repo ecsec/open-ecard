@@ -30,7 +30,7 @@ import org.openecard.apache.http.HttpException;
  * Results with codes greater than 400 are errors. In some circumstances it is more convenient to raise an error to
  * signal the invalid result. This class helps to do so.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class InvalidResultStatus extends HttpException {
 

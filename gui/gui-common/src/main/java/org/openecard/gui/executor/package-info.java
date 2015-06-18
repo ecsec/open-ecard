@@ -21,7 +21,7 @@
  ***************************************************************************/
 
 /**
- * Executor implementation for user consents. <br/>
+ * Executor implementation for user consents. <br>
  * The {@link ExecutionEngine} is a helper to display the steps of a user consent. It displays one after the other
  * and reacts differently depending of the outcome of a step. The {@link StepAction} class adds the possibility to run
  * arbitrary code after a step.

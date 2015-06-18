@@ -32,7 +32,7 @@ import org.openecard.gui.definition.BoxItem;
  * Alters the checked state of the Radiobox-BoxItem according to the new state of the Radiobox-view.
  * All other Radiobox-BoxItems and their Views will be unchecked.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 final class RadioboxChangeListener implements OnCheckedChangeListener {
 

@@ -33,8 +33,8 @@ import org.openecard.common.tlv.TagClass;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Hans-Martin Haase <hans-martin dot haase at ecsec dot de>
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  * @param <KeyAttributes>
  */
 public class GenericPrivateKeyObject <KeyAttributes> {

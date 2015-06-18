@@ -56,8 +56,8 @@ import org.openecard.addon.ActionInitializationException;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
  */
 public class SALProtocolProxy extends AbstractFactory<SALProtocol> implements SALProtocol {
 

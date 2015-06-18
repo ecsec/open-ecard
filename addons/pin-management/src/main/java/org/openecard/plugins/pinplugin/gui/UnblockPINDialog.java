@@ -42,7 +42,7 @@ import org.openecard.plugins.pinplugin.RecognizedState;
  * Implements a dialog for unblocking the PIN.
  * This dialog guides the user through the process needed for unblocking the PIN.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class UnblockPINDialog {
 

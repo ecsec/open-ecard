@@ -37,7 +37,7 @@ import org.openecard.scio.NFCCardTerminal;
  * The ExtendedLengthAlertDialog shows an AlertDialog in it's run-method describing the extended length Problem and
  * gives the user the possibility to show more information or close the app.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 final class ExtendedLengthAlertDialog implements Runnable {
 

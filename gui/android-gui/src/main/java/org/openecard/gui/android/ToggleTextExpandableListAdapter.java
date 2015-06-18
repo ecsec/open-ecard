@@ -34,7 +34,7 @@ import org.openecard.gui.definition.ToggleText;
 /**
  * Adapter needed to fill View of StepActivity for ToggleTexts.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class ToggleTextExpandableListAdapter extends SimpleExpandableListAdapter {
 

@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  * Implements the Decipher step of the Generic cryptography protocol.
  * See TR-03112, version 1.1.2, part 7, section 4.9.6.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class DecipherStep implements ProtocolStep<Decipher, DecipherResponse> {
 

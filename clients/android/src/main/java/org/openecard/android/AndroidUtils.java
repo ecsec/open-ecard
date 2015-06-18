@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This Class provides util functions and constants especially for the Android App.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class AndroidUtils {
 

@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * Entry for the {@link ActionPanel} representing one action.
  * The action is represented as a button and description.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ActionEntryPanel extends JPanel {
 

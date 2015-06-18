@@ -27,7 +27,7 @@ package org.openecard.gui.android;
  * Type of the file dialog.
  * Controls the type of the messagebox such as error, or warning messages.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public enum FileDialogType {
 

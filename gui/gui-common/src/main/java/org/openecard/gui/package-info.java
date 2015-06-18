@@ -23,7 +23,7 @@
 /**
  * Main interfaces of the user consent (or GUI).
  * The user consent interfaces are an abstraction, so that user consent implementations can be implemented without
- * exposing platform specific portions of the code.<br/>
+ * exposing platform specific portions of the code.<br>
  * The user consent definition defines two kinds of dialogs:
  * <ul>
  * <li>Navigation based user consents (see {@link UserConsentNavigator})</li>

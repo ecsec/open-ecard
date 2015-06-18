@@ -39,9 +39,9 @@ import org.openecard.plugins.pinplugin.RecognizedState;
 
 /**
  * Implements a dialog for changing the PIN.
- * <br/> This dialog guides the user through the process needed for changing the PIN.
+ * <br> This dialog guides the user through the process needed for changing the PIN.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class ChangePINDialog {
 

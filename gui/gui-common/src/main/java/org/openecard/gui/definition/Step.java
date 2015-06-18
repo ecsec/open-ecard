@@ -36,7 +36,7 @@ import org.openecard.gui.executor.StepAction;
  * Description class for user consent steps.
  * Each step represents one dialog.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class Step {
 

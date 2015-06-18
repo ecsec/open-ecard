@@ -29,7 +29,7 @@ import org.openecard.common.apdu.common.CardCommandAPDU;
  * ERASE RECORD command.
  * See ISO/IEC 7816-4 Section 7.3.8.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class EraseRecord extends CardCommandAPDU {
 

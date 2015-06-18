@@ -32,7 +32,7 @@ import org.openecard.crypto.common.asn1.utils.ObjectIdentifierUtils;
 /**
  * See BSI-TR-03110, version 2.10, part 3, section D.3.3.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class ECPublicKey extends PublicKey {
 

@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class CardStateMap {
 
@@ -83,7 +83,7 @@ public class CardStateMap {
 
 
     /**
-     * Remove all references to the CardStateEntries matching this ConnectionHandle. <br/>
+     * Remove all references to the CardStateEntries matching this ConnectionHandle. <br>
      * If more than one entry exists, all occurrences are deleted.
      * @param handle
      */
@@ -99,7 +99,7 @@ public class CardStateMap {
     }
 
     /**
-     * Remove the entry reference in slotHandle index. <br/>
+     * Remove the entry reference in slotHandle index. <br>
      * This function is needed to update the index in CardApplicationDisconnect.
      *
      * @param slotHandle SlotHandle for which the entry reference should be deleted.
@@ -253,7 +253,7 @@ public class CardStateMap {
 
 
     /**
-     * Simplify returning a result from the map.<br/>
+     * Simplify returning a result from the map.<br>
      * If key is null or no key is present, the empty list is returned.
      *
      * @param <K>

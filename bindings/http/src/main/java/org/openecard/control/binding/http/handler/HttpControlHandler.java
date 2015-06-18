@@ -26,7 +26,7 @@ import org.openecard.apache.http.protocol.HttpRequestHandler;
 
 
 /**
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public abstract class HttpControlHandler implements HttpRequestHandler {
 

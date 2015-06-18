@@ -30,13 +30,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base definition for selection boxes.
- * The boxes form a Group of options that can be selected.<br/>
+ * The boxes form a Group of options that can be selected.<br>
  * An AbstractBox can be identified by an ID.
  *
  * @see Radiobox
  * @see Checkbox
  * @see BoxItem
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public abstract class AbstractBox extends IDTrait implements InputInfoUnit, OutputInfoUnit {
 

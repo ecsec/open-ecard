@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
  * The dialog is localized with the {@code about} properties from the i18n module and the HTML pages in this modules'
  * {@code openecard_i18n/about} directory.
  *
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Johannes Schmölz
  */
 public class AboutDialog extends JFrame {
 

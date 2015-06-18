@@ -28,7 +28,7 @@ package org.openecard.common.tlv;
  * This implementation works on the children of a given TLV object. If the parser is needed to evaluate deep structures,
  * then new instances of it have to be created for the respective substructures.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class Parser {
 

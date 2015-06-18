@@ -30,7 +30,7 @@ import org.openecard.bouncycastle.crypto.tls.TlsClient;
 /**
  * Interface extending the BouncyCastle TlsClient interface with externally settable TlsAuthentication implementations.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface ClientCertTlsClient extends TlsClient {
 

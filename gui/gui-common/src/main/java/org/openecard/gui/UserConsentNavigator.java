@@ -30,7 +30,7 @@ import org.openecard.gui.definition.Step;
  * Navigator interface to control the execution of the user consent.
  * This interface is used in the {@link org.openecard.gui.executor.ExecutionEngine}.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface UserConsentNavigator {
 

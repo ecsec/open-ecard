@@ -197,13 +197,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Implements a Service Access Layer (SAL).
  *
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Simon Potzernheim <potzernheim@hs-coburg.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Antonio de la Piedra <a.delapiedra@cs.ru.nl>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Johannes Schmölz
+ * @author Dirk Petrautzki
+ * @author Simon Potzernheim
+ * @author Tobias Wich
+ * @author Moritz Horsch
+ * @author Antonio de la Piedra
+ * @author Hans-Martin Haase
  */
 public class TinySAL implements SAL {
 

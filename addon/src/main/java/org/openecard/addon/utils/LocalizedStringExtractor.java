@@ -29,7 +29,7 @@ import org.openecard.addon.manifest.LocalizedString;
 /**
  * Utility class which provides operations related to lists containing LocalizedString objects.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class LocalizedStringExtractor {
 

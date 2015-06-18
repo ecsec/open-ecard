@@ -28,7 +28,7 @@ import org.openecard.common.ECardException;
 
 /**
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class InappropriateProtocolForActionException extends ECardException {
 

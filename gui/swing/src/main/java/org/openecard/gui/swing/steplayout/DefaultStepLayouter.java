@@ -56,8 +56,8 @@ import org.openecard.gui.swing.components.ToggleText;
  * This layouter provides a decent look and feel for most user consent tasks. If you need a specialised version,
  * create another layouter and register it for the respective URI.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Florian Feldmann <florian.feldmann@rub.de>
+ * @author Tobias Wich
+ * @author Florian Feldmann
  */
 public class DefaultStepLayouter extends StepLayouter {
 

@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * Implements the Hash step of the Generic cryptography protocol.
  * See TR-03112, version 1.1.2, part 7, section 4.9.8.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class HashStep implements ProtocolStep<Hash, HashResponse> {
 

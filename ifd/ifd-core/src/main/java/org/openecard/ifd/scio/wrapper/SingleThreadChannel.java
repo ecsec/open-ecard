@@ -188,7 +188,7 @@ public class SingleThreadChannel {
      * Transmits the given command APDU to the card and evaluates the response against the given response codes.
      * <p>The CLA byte of the command APDU is automatically adjusted to match the channel number of this channel.</p>
      * <p>Note that this method cannot be used to transmit {@code MANAGE CHANNEL} APDUs. Logical channels should be
-     * managed using the {@link SCIOCard#openLogicalChannel()} and {@link #close()} methods.</p>
+     * managed using the {@link SCIOCard#openLogicalChannel()} and {@link SCIOChannel#close()} methods.</p>
      * <p>Implementations must transparently handle artifacts of the transmission protocol. For example, when using the
      * T=0 protocol, the following processing should occur as described in ISO/IEC 7816-4:</p>
      * <ul>
@@ -257,7 +257,8 @@ public class SingleThreadChannel {
      * @param command The command data. The data may be empty.
      * @return The response of the command. Note that this is not necessarily an APDU.
      * @throws SCIOException Thrown if the operation failed.
-     * @throws IllegalStateException Thrown in case the card is already disconnected (see {@link #disconnect(boolean)}.
+     * @throws IllegalStateException Thrown in case the card is already disconnected (see 
+     *   {@link SCIOCard#disconnect(boolean)}.
      * @throws NullPointerException Thrown in case the command data is {@code null}.
      */
     @Nonnull
@@ -297,7 +298,8 @@ public class SingleThreadChannel {
      * exclusion mechanism.
      *
      * @throws SCIOException Thrown if exclusive access is already set or it could not be set due to some other problem.
-     * @throws IllegalStateException Thrown in case the card is already disconnected (see {@link #disconnect(boolean)}.
+     * @throws IllegalStateException Thrown in case the card is already disconnected (see
+     *   {@link SCIOCard#disconnect(boolean)}).
      */
     public void beginExclusive() throws SCIOException, IllegalStateException {
 	submitTransaction(true);
@@ -308,8 +310,8 @@ public class SingleThreadChannel {
      * Exclusive access must have been established previously with the {@link #beginExclusive()} method.
      *
      * @throws SCIOException Thrown in case the operation failed due to some unkown reason.
-     * @throws IllegalStateException Thrown in case the card is already disconnected (see {@link #disconnect(boolean)},
-     *   or no {@link #beginExclusive()} call has been issued before.
+     * @throws IllegalStateException Thrown in case the card is already disconnected (see
+     *   {@link SCIOCard#disconnect(boolean)}), or no {@link #beginExclusive()} call has been issued before.
      */
     public void endExclusive() throws SCIOException, IllegalStateException {
 	submitTransaction(false);

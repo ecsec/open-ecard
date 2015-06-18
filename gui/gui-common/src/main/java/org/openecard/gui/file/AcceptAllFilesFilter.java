@@ -29,7 +29,7 @@ import java.io.File;
  * File filter accepting all files.
  * The description is set to *.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class AcceptAllFilesFilter implements FileFilter {
 

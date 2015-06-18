@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * See BSI-TR-03110, version 2.10, part 2, Section B.3.3.
  * See BSI-TR-03110, version 2.10, part 3, Section B.2.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class ChipAuthentication {
 

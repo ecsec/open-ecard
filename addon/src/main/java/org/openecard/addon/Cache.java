@@ -38,7 +38,7 @@ import org.openecard.addon.sal.SALProtocol;
 /**
  * The class implements a cache which stores loaded Actions and Protocols.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class Cache {
 

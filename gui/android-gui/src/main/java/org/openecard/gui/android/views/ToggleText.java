@@ -33,7 +33,7 @@ import org.openecard.gui.definition.OutputInfoUnit;
 /**
  * Implementation of a view for ToggleText for use in a {@link StepActivity}.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class ToggleText implements StepView {
 

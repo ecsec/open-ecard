@@ -31,9 +31,9 @@ import org.openecard.gui.definition.OutputInfoUnit;
 
 
 /**
- * Implementation of a simple image view for use in a {@link StepActivity}.
+ * Implementation of a simple image view for use in a {@link org.openecard.gui.android.StepActivity}.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ImageBox implements StepView {
 

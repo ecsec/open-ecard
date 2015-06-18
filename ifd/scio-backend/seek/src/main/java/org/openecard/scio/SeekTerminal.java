@@ -32,7 +32,7 @@ import org.simalliance.openmobileapi.Reader;
 /**
  * Seek implementation of smartcardio's CardTerminal interface.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class SeekTerminal implements SCIOTerminal {
 

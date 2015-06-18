@@ -35,7 +35,7 @@ import org.simalliance.openmobileapi.Channel;
 /**
  * Seek implementation of smartcardio's cardChannel interface.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class SeekChannel implements SCIOChannel {
 

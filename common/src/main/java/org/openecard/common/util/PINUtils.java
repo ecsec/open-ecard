@@ -40,9 +40,9 @@ import org.slf4j.LoggerFactory;
 /**
 * Implements convenience methods for dealing with PINs.
 *
-* @author Johannes Schmoelz <johannes.schmoelz@ecsec.de>
-* @author Tobias Wich <tobias.wich@ecsec.de>
-* @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+* @author Johannes Schmoelz
+* @author Tobias Wich
+* @author Dirk Petrautzki
 */
 public class PINUtils {
 

@@ -31,8 +31,8 @@ import java.util.List;
  * The dispatcher receives an object which is a JAXB type parameter of a webservice method. The dispatcher the looks for
  * a webservice with a suitable method and executes it.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public interface Dispatcher {
 

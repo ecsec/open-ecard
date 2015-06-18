@@ -28,7 +28,7 @@ import org.openecard.gui.definition.UserConsentDescription;
 /**
  * Abstract entry interface of every GUI implementation.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface UserConsent {
 

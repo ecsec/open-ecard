@@ -29,7 +29,7 @@ import org.openecard.common.apdu.common.CardCommandAPDU;
  * GET DATA command
  * See ISO/IEC 7816-4 Section 7.4.2.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class GetData extends CardCommandAPDU {
 
@@ -56,14 +56,14 @@ public class GetData extends CardCommandAPDU {
 
     /**
      * Creates a new GET DATA command.
-     * This constructor creates a Get Data command apdu according to ISO 7816-4 section 7.4 Table 62.<br />
-     * The class provides two public variables for the instruction byte: <br />
-     * INS_DATA = 0xCA <br />
-     * INS_TAG_LIST = 0xCB <br /><br />
-     * Furthermore there are two public variables for P1 if P2 encodes a Simple-TLV or an one byte BER-TLV tag:<br />
-     * SIMPLE_TLV = 0x02 <br />
-     * BER_TLV_ONE_BYTE = 0x00 <br /> <br />
-     * <br />
+     * This constructor creates a Get Data command apdu according to ISO 7816-4 section 7.4 Table 62.<br>
+     * The class provides two public variables for the instruction byte: <br>
+     * INS_DATA = 0xCA <br>
+     * INS_TAG_LIST = 0xCB <br><br>
+     * Furthermore there are two public variables for P1 if P2 encodes a Simple-TLV or an one byte BER-TLV tag:<br>
+     * SIMPLE_TLV = 0x02 <br>
+     * BER_TLV_ONE_BYTE = 0x00 <br> <br>
+     * <br>
      * APDU: 0x00 INS P1 P2 0XFF
      *
      * @param ins Instruction byte for the Get Data command. According to ISO 7816-4 section 7.4.2 table 63 this value is

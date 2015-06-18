@@ -41,9 +41,9 @@ import org.openecard.gui.definition.TextField;
 
 
 /**
- * Common base for {@link Textinput} and {@link Passwordinput}.
+ * Common base for {@link TextField} and {@link PasswordField}.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class AbstractInput implements StepView {
 

@@ -30,7 +30,7 @@ import org.openecard.common.sal.state.HandlePrinter;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public final class UnknownConnectionHandleException extends ECardException {
 

@@ -33,7 +33,7 @@ import org.w3c.dom.NodeList;
  * Convenience class to convert {@link iso.std.iso_iec._24727.tech.schema.PACEMarkerType} with AnyTypes to a type
  * with attributes instead.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class PACEMarkerType {
 

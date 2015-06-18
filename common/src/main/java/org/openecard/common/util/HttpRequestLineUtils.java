@@ -37,7 +37,7 @@ public class HttpRequestLineUtils {
 
     /**
      * Transform query parameters into a java map. The parameters are not decoded, but taken as is. The query string has
-     * the form <pre>key(=value)?&key((=value)?)*</pre>. If a key does not have a value, null is taken as value.
+     * the form <pre>key(=value)?&amp;key((=value)?)*</pre>. If a key does not have a value, null is taken as value.
      *
      * @param queryStr Query string as found in the HTTP request line.
      * @return Map with key value pairs of the query parameters.
@@ -79,7 +79,7 @@ public class HttpRequestLineUtils {
     /**
      * Transform query parameters into a java map and URL decode the values.
      * The parameters are not decoded, but taken as is. The query string has the form
-     * <pre>key(=value)?&key((=value)?)*</pre>. If a key does not have a value, null is taken as value. The resulting
+     * <pre>key(=value)?&amp;key((=value)?)*</pre>. If a key does not have a value, null is taken as value. The resulting
      * values are encoded according to the given encoding
      *
      * @param queryStr Query string as found in the HTTP request line.

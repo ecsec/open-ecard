@@ -28,7 +28,7 @@ import org.openecard.common.util.LongUtils;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class Tag {
 

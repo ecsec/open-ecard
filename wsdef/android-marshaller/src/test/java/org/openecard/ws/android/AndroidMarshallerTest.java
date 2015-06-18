@@ -96,7 +96,7 @@ import static org.testng.Assert.assertTrue;
 
 /**
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class AndroidMarshallerTest {
 

@@ -410,10 +410,9 @@ public class AddonManager {
 
     /**
      * Uninstall an add-on.
-     * This i primarily a wrapper method for the
-     * {@link FileRegistry#uninstallAddon(org.openecard.addon.manifest.AddonSpecification)
+     * This is primarily a wrapper method for the {@link FileRegistry#uninstallAddon(AddonSpecification)}
      *
-     * @param addonSpec The {@link AddonSpecification} of the add-on to uninstall.
+     * @param addonSpec The specification of the add-on to uninstall.
      */
     public void uninstallAddon(@Nonnull AddonSpecification addonSpec) {
 	// unloading is done by the PluginDirectoryAlterationListener

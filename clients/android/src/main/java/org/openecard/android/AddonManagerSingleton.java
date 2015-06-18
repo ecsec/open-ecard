@@ -18,7 +18,7 @@ import org.openecard.addon.AddonManager;
 /**
  * TODO: revise if we can live without a singleton here.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class AddonManagerSingleton {
 

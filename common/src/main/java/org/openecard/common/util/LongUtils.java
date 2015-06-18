@@ -26,7 +26,7 @@ package org.openecard.common.util;
 /**
  * A set of utility functions for long integers.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class LongUtils {
 

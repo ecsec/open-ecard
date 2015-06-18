@@ -38,7 +38,7 @@ import static org.testng.Assert.*;
 
 /**
  *
- * @author Moritz Horsch <horsch at cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class CardVerifiableCertificateViewer {
 

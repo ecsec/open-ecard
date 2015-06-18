@@ -35,7 +35,7 @@ import org.simalliance.openmobileapi.SEService;
 /**
  * Seek implementation of smartcardio's CardTerminals interface.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class SeekTerminals extends SCIOTerminals implements SEService.CallBack {
 

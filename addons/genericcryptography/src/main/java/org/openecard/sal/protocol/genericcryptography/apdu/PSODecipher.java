@@ -29,7 +29,7 @@ import org.openecard.common.apdu.PerformSecurityOperation;
  * Implements a Deciper operation.
  * See ISO/IEC 7816-8, section 11.13.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public final class PSODecipher extends PerformSecurityOperation {
 

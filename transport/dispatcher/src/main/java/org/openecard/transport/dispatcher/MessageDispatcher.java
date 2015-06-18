@@ -42,8 +42,8 @@ import org.slf4j.LoggerFactory;
  * Implementation of the {@code Dispatcher} interface.
  * This implementation defers its actual reflection work to the {@link Service} class.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class MessageDispatcher implements Dispatcher {
 

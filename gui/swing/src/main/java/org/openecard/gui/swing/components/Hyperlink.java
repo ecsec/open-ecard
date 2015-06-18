@@ -36,12 +36,12 @@ import org.openecard.gui.definition.OutputInfoUnit;
 
 
 /**
- * Implementation of a hyperlink for use in a {@link StepFrame}.<br/>
+ * Implementation of a hyperlink for use in a {@link org.openecard.gui.swing.StepFrame}. <br>
  * The link also has a click event which launches a browser. When the mouse
- * is located over the link, it is emphasised by underlining it.<br/>
+ * is located over the link, it is emphasised by underlining it.<br>
  * If no text is supplied, the text of the url is displayed.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class Hyperlink implements StepComponent {
 

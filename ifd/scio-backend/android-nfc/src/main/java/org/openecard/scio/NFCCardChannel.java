@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 /**
  * NFC implementation of smartcardio's cardChannel interface.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class NFCCardChannel implements SCIOChannel {
 

@@ -30,7 +30,7 @@ import org.openecard.common.tlv.TLVException;
 /**
  * The class models a FCI data type (see also ISO 7816-4).
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class FCI {
 

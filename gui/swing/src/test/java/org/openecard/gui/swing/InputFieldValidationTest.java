@@ -35,7 +35,7 @@ import org.testng.annotations.Test;
 /**
  * Test class for manual test of the input field validation.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class InputFieldValidationTest {
 

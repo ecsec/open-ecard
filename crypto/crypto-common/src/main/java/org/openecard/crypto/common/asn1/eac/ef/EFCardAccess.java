@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * Implements a EF.CardAccess file.
  * See BSI-TR-03110, version 2.10, part 3, section A.1.2.1.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public final class EFCardAccess {
 

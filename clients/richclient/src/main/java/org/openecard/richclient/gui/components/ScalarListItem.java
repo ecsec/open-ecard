@@ -56,7 +56,7 @@ import org.openecard.richclient.gui.manage.Settings;
 /**
  * This class models a graphical representation of a ScalarListEntry from the add-on manifest specification.
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class ScalarListItem extends JPanel {
 

@@ -29,7 +29,7 @@ import org.openecard.common.util.ByteUtils;
 /**
  * See ISO/IEC 7816-4 p.20 tab. 12, Tag 82
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class DataElement {
 

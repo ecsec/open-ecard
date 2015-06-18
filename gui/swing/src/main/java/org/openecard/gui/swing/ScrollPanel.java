@@ -24,7 +24,7 @@ import javax.swing.Scrollable;
  * <a href="http://stackoverflow.com/questions/15783014/jtextarea-on-jpanel-inside-jscrollpane-does-not-resize-properly"
  * >article</a>. This is needed because The content produces odd resizing behaviour.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ScrollPanel extends JPanel implements Scrollable {
 

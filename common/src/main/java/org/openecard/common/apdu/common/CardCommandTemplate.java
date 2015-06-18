@@ -39,7 +39,7 @@ import org.openecard.common.util.StringUtils;
  * The template is defined by {@link CardCallTemplateType}. It's underlying type in the xsd document contains a detailed
  * description how template values are evaluated.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class CardCommandTemplate {
 

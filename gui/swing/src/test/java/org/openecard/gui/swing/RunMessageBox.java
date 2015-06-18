@@ -42,8 +42,8 @@ import org.testng.annotations.Test;
 /**
  * Test class for manual execution of the Swing based MessageDialog.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public class RunMessageBox {
 

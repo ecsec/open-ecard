@@ -154,7 +154,7 @@ public class OverridingProperties {
      * Gets the value for the given property key.
      *
      * @see Properties#getProperty(java.lang.String)
-     * @param key
+     * @param key Key of the property.
      * @return The value, or null if none is found.
      */
     public final String getProperty(String key) {

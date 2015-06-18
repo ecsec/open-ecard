@@ -26,7 +26,7 @@ package org.openecard.crypto.common.sal;
 /**
  * Exception stating that a signing credential has missing permissions to fulfil the operation.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class CredentialPermissionDenied extends Exception {
 

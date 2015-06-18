@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
 /**
  * Test for the ExceptionUtils class.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ExceptionUtilsTest {
 

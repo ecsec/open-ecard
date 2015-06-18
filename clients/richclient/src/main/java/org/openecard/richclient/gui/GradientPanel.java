@@ -34,7 +34,7 @@ import javax.swing.JPanel;
  * This class creates a Panel having a gradient as background. The gradient runs form left to right, with color1
  * being {@link java.awt.Color#LIGHT_GRAY LIGHT_GRAY} and color2 being {@link java.awt.Color#DARK_GRAY DARK_GRAY}.
  *
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
+ * @author Johannes Schmölz
  */
 public class GradientPanel extends JPanel {
 

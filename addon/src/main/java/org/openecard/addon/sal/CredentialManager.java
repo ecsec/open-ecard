@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The class implements a Credential manager which allows to add, get and remove credentials from a {@link CardStateMap}.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
 public class CredentialManager {
 
@@ -61,8 +61,8 @@ public class CredentialManager {
      * The method adds a new credential to the managed {@link CardStateMap}.
      *
      * @param handle A {@link ConnectionHandleType} object for the creation of a new {@link CardStateEntry} object.
-     * @param cif A {@link CardInfo} object for the creation of a new {@link CardStateEntry} object.
-     * @return The method returns TRUE if the credential was added successfully else FALSE.
+     * @param cif A {@link CardInfoType} object for the creation of a new {@link CardStateEntry} object.
+     * @return The method returns {@code true} if the credential was added successfully else {@code false}.
      */
     public boolean addCredential(ConnectionHandleType handle, CardInfoType cif) {
 	if (handle == null || cif == null) {
@@ -79,7 +79,7 @@ public class CredentialManager {
      * The method removes a credential from the managed {@link CardStateMap}.
      *
      * @param handle A {@link ConnectionHandleType} object identifying the credential.
-     * @return The method returns TRUE if the credential was successfully removed else false .
+     * @return The method returns {@code true} if the credential was successfully removed else {@code false} .
      */
     public boolean removeCredential(ConnectionHandleType handle) {
 	if (handle == null) {

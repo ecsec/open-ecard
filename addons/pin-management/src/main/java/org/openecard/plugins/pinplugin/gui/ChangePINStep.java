@@ -32,7 +32,7 @@ import org.openecard.gui.definition.Text;
  * The Step for changing the PIN.
  * This step simply requests the user to enter the old and the new PIN.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class ChangePINStep extends Step {
 

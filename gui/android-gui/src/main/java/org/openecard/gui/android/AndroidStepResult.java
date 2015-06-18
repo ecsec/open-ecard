@@ -35,8 +35,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 class AndroidStepResult implements StepResult {
 

@@ -141,8 +141,8 @@ import static org.testng.Assert.*;
 
 /**
  *
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Johannes Schmölz
+ * @author Dirk Petrautzki
  */
 public class TinySALTest {
 

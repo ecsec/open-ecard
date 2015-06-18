@@ -36,7 +36,7 @@ import javax.annotation.Nullable;
  *
  * @param <T> Type returned by the promise.
  * @see <tt><a href="http://clojuredocs.org/clojure_core/clojure.core/promise#source">clojure.core/promise</a></tt>
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class Promise <T> {
 

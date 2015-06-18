@@ -37,9 +37,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Johannes Schmölz <johannes.schmoelz@ecsec.de>
- * @author Benedikt Biallowons <benedikt.biallowons@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Johannes Schmölz
+ * @author Benedikt Biallowons
+ * @author Dirk Petrautzki
  */
 public class EventHandler implements EventCallback {
 

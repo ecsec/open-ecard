@@ -34,7 +34,7 @@ import org.openecard.ifd.protocol.pace.gui.PINStep;
 /**
  * Implements a user consent GUI for the PACE protocol.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class PACEUserConsent {
 

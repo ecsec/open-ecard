@@ -26,7 +26,7 @@ package org.openecard.gui.swing.components;
 /**
  * Interface which makes the component implementing it focusable.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface Focusable {
 

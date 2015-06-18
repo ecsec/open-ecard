@@ -66,7 +66,7 @@ import org.openecard.ws.IFD;
  * Most methods just return an UnsupportedOperationException. At the moment only EstablishContext returns a result
  * which itself is not a valid response object.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class TestIFD implements IFD {
 

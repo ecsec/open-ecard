@@ -24,7 +24,7 @@ package org.openecard.control.binding.http.common;
 
 
 /**
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public enum HeaderTypes {
 

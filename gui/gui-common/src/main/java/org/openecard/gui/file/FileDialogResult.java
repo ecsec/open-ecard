@@ -32,7 +32,7 @@ import java.util.List;
  * Result class of the file dialog.
  * This class indicates the type of action, the user performed and if applicable also contains a list of selected files.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class FileDialogResult implements Serializable {
 

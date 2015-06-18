@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * Implements the DIDUpdate step of the PIN Compare protocol.
  * See TR-03112, version 1.1.2, part 7, section 4.1.3.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class DIDUpdateStep implements ProtocolStep<DIDUpdate, DIDUpdateResponse> {
 

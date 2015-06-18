@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This activity displays a specific step when showStep is called.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class StepActivity extends Activity {
 

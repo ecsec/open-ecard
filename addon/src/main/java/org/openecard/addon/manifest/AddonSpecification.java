@@ -168,7 +168,7 @@ public class AddonSpecification implements Comparable<AddonSpecification> {
 
     /**
      * Get a byte array containing the logo.
-     * <br />
+     * <br>
      * Note: This method creates always a new input stream and does not store the byte array internally.
      *
      * @return A byte array containing the logo bytes or null if no logo is present or an error occurred.

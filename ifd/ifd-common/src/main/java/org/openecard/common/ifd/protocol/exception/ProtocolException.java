@@ -29,7 +29,7 @@ import org.openecard.common.ECardException;
 /**
  * Exception class for IFD protocols.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
+ * @author Moritz Horsch
  */
 public class ProtocolException extends ECardException {
 

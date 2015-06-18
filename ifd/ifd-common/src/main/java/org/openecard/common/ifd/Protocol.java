@@ -30,7 +30,7 @@ import org.openecard.gui.UserConsent;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface Protocol {
 
@@ -45,7 +45,7 @@ public interface Protocol {
     EstablishChannelResponse establish(EstablishChannel req, Dispatcher dispatcher, UserConsent gui);
 
     /**
-     * Filter function to perform secure messaging after the protocol has been established.<br/>
+     * Filter function to perform secure messaging after the protocol has been established.<br>
      * Apply secure messaging encryption to APDU.
      *
      * @param commandAPDU Command APDU which should be encrypted
@@ -54,7 +54,7 @@ public interface Protocol {
     byte[] applySM(byte[] commandAPDU);
 
     /**
-     * Filter function to perform secure messaging after the protocol has been established.<br/>
+     * Filter function to perform secure messaging after the protocol has been established.<br>
      * Remove secure messaging encryption from APDU.
      *
      * @param responseAPDU Response APDU which should be decrypted

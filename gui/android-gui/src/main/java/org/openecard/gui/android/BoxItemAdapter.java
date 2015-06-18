@@ -40,7 +40,7 @@ import org.openecard.gui.definition.Radiobox;
 /**
  * Adapter needed to fill View of StepActivity for boxitems.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class BoxItemAdapter extends BaseAdapter {
 

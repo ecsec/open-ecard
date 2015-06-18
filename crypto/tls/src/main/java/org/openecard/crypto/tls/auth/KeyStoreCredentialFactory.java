@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of CredentialFactory operating on key stores.
  *
- * @author Dirk Petrautzki <dirk.petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class KeyStoreCredentialFactory implements CredentialFactory {
 

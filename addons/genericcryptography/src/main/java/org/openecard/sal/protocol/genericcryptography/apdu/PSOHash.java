@@ -29,8 +29,8 @@ import org.openecard.common.apdu.PerformSecurityOperation;
  * Implements a Hash operation.
  * See ISO/IEC 7816-8, section 11.8.
  *
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Moritz Horsch
+ * @author Hans-Martin Haase
  */
 public final class PSOHash extends PerformSecurityOperation {
 

@@ -26,7 +26,7 @@ package org.openecard.common;
 /**
  * SAL exception stating that an element of the token could not be accessed due to security restrictions.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class SecurityConditionUnsatisfiable extends ECardException {
 

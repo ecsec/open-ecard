@@ -335,7 +335,7 @@ public class CardRecognition {
 	}
     }
     /**
-     * Special transmit check determining only whether a response is present or not and it contains at least a trailer.<br/>
+     * Special transmit check determining only whether a response is present or not and it contains at least a trailer.<br>
      * Unexpected result may be the wrong cause, because the command could represent multiple commands.
      *
      * @param r The response to check

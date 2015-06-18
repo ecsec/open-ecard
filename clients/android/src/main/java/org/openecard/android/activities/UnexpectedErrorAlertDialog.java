@@ -33,7 +33,7 @@ import org.openecard.common.I18n;
  * The UnexpectedErrorAlertDialog shows an AlertDialog in it's run-method describing that there was an unexpected
  * Problem and gives the user the possibility to view the log of the App.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 final class UnexpectedErrorAlertDialog implements Runnable {
 

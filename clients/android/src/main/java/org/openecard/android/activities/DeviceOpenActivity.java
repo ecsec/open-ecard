@@ -49,7 +49,7 @@ import org.xmlpull.v1.XmlPullParserException;
 /**
  * This Activity finds and opens usb devices and starts the socket communication with libusb.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class DeviceOpenActivity extends Activity {
 
@@ -242,7 +242,7 @@ public class DeviceOpenActivity extends Activity {
     /**
      * Opens an usb device after the user grants permission to use it.
      * 
-     * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+     * @author Dirk Petrautzki
      */
     private final class UsbPermissionReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
@@ -268,7 +268,7 @@ public class DeviceOpenActivity extends Activity {
     /**
      * Never ending Runnable implementing the socket communication with libusb.
      * 
-     * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+     * @author Dirk Petrautzki
      */
     private final class SocketCommunicationRunnable implements Runnable {
 

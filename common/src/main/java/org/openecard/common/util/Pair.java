@@ -27,7 +27,7 @@ package org.openecard.common.util;
  * Parameterized pair class.
  * This simple immutable pair (or tuple) can hold arbitrary values, whose types must be specified by generics.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class Pair <P1, P2> {
 

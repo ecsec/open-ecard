@@ -26,7 +26,7 @@ package org.openecard.gui.executor;
 /**
  * Result status of step actions.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public enum StepActionResultStatus {
 

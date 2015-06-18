@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * The algorithm to find the objects is the same as used in the dynamic loader ld. There is one exception to this rule,
  * the ELF variables DT_RPATH and DT_RUNPATH are not evaluated, because they are not available in java.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class LinuxLibraryFinder {
 
@@ -48,14 +48,14 @@ public class LinuxLibraryFinder {
     /**
      * Gets a file object pointing to the library which has been searched.
      * On success, the file points to first file found which is readable and thus can be used.
-     * <p>The algorithm to find the library can be found in the ld.so(8) manpage and is as follows:
+     * <p>The algorithm to find the library can be found in the ld.so(8) manpage and is as follows:</p>
      * <ol>
      * <li>Check paths in {@code LD_LIBRARY_PATH} environment variable.</li>
      * <li>Check for library in {@code /etc/ld.so.cache} by executing {@code ldconfig -p} and searching the output.</li>
      * <li>Check the base library paths {@code /lib} and {@code /usr/lib} or {@code /lib64} and {@code /usr/lib64}
      * depending on the architecture.</li>
      * </ol>
-     * </p>
+     *
      * @param name Name of the library, such as pcsclite.
      * @param version Version suffix such as 1, 1.0 or null if no suffix is desired.
      * @return The file object to the library.

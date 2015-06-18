@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * Service class encapsulating one webservice for the {@link MessageDispatcher}.
  * This class takes care of the actual interface analysis and reflection part.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 class Service implements Comparable<Service> {
 

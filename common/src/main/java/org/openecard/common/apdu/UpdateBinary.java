@@ -32,7 +32,7 @@ import org.openecard.common.tlv.TLVException;
  * UPDATE BINARY command.
  * See ISO/IEC 7816-4 Section 7.2.5.
  *
- * @author Hans-Martin Haase <hans-martin.haaase@ecsec.de
+ * @author Hans-Martin Haase
  */
 public class UpdateBinary extends CardCommandAPDU {
 

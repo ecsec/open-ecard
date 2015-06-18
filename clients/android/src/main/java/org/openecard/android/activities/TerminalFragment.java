@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A TerminalFragment shows a gui representation of the state of the terminal it belongs to.
  * 
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class TerminalFragment extends Fragment {
 

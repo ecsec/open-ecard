@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  * which are found are then loaded into the dispatcher, so that messages defined for them can be dispatched at a later
  * time.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

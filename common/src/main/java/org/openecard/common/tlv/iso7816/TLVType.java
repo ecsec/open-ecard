@@ -27,7 +27,7 @@ import org.openecard.common.tlv.TLV;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public abstract class TLVType {
 

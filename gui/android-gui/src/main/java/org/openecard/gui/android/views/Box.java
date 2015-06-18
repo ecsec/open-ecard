@@ -31,9 +31,9 @@ import org.openecard.gui.definition.OutputInfoUnit;
 
 
 /**
- * Implementation of a radio- and checkbox group for use in a {@link StepActivity}.
+ * Implementation of a radio- and checkbox group for use in a {@link org.openecard.gui.android.StepActivity}.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class Box implements StepView {
 

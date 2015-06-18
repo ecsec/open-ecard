@@ -46,8 +46,8 @@ import org.slf4j.LoggerFactory;
  * Signing credential delegating all calls to a wrapped GenericCryptoSigner.
  *
  * @see GenericCryptoSigner
- * @author Tobias Wich <tobias.wich@ecsec.de>
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Tobias Wich
+ * @author Dirk Petrautzki
  */
 public class SmartCardSignerCredential extends AbstractTlsSignerCredentials implements ContextAware {
 

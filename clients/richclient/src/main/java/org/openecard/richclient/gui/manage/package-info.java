@@ -22,8 +22,8 @@
 
 /**
  * Swing based management GUI for add-ons and core functionality.
- * The dialog elements can be customized depending on the particular use case.<br/>
- * For extensibility take a look at {@link AddonPanel}, {@link ActionPanel}, {@link SettingsPanel} and (TODO:)
- * <it>AboutPanel</it>.
+ * The dialog elements can be customized depending on the particular use case.<br>
+ * For extensibility take a look at {@link AddonPanel}, {@link ActionPanel}, {@link SettingsPanel} and
+ * {@link AboutPanel}.
  */
 package org.openecard.richclient.gui.manage;

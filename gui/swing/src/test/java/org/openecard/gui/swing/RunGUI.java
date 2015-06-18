@@ -49,7 +49,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  * @author Vladislav Mladenov
  */
 public class RunGUI {

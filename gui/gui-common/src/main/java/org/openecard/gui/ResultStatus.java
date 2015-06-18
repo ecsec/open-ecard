@@ -27,7 +27,7 @@ package org.openecard.gui;
  * Result status of a GUI step.
  * The statuses are equivalent to the buttons usually shown in the navigation section of the step.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public enum ResultStatus {
 

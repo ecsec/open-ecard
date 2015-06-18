@@ -28,7 +28,7 @@ import org.openecard.common.util.ShortUtils;
 
 /**
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class ExecutePACERequest {
 

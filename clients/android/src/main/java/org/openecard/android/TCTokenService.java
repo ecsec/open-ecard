@@ -37,10 +37,10 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * This Service starts the control interface. <br />
+ * This Service starts the control interface. <br>
  * It get's started when the app is opened or when the boot completed event is received.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
+ * @author Dirk Petrautzki
  */
 public class TCTokenService extends Service implements Runnable {
 

@@ -29,7 +29,7 @@ import org.openecard.common.apdu.common.CardCommandAPDU;
  * WRITE BINARY Command.
  * See ISO/IEC 7816-4 Section 7.2.4
  *
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Hans-Martin Haase
  */
 public class WriteBinary extends CardCommandAPDU {
 

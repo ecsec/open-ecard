@@ -28,7 +28,7 @@ import java.io.IOException;
 /**
  * Exception indicating a failed certificate verification.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public class CertificateVerificationException extends IOException {
 

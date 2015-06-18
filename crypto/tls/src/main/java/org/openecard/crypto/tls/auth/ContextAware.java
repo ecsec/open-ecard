@@ -18,7 +18,7 @@ import org.openecard.bouncycastle.crypto.tls.TlsContext;
 /**
  * Interface which can be added to a class when it is necessary to give it's instance the TLS context information.
  *
- * @author Tobias Wich <tobias.wich@ecsec.de>
+ * @author Tobias Wich
  */
 public interface ContextAware {
 

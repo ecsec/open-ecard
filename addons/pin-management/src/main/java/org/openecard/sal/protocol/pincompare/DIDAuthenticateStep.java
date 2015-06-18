@@ -58,9 +58,9 @@ import org.slf4j.LoggerFactory;
  * Implements the DIDAuthenticate step of the PIN Compare protocol.
  * See TR-03112, version 1.1.2, part 7, section 4.1.5.
  *
- * @author Dirk Petrautzki <petrautzki@hs-coburg.de>
- * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
- * @author Hans-Martin Haase <hans-martin.haase@ecsec.de>
+ * @author Dirk Petrautzki
+ * @author Moritz Horsch
+ * @author Hans-Martin Haase
  */
 public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 

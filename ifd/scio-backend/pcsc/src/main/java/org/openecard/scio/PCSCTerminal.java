@@ -60,16 +60,18 @@ public class PCSCTerminal implements SCIOTerminal {
     // j  sun.security.smartcardio.TerminalImpl.connect(Ljava/lang/String;)Ljavax/smartcardio/Card;+36
     // j  org.openecard.scio.PCSCTerminal.connect(Lorg/openecard/common/ifd/scio/SCIOProtocol;)Lorg/openecard/common/ifd/scio/SCIOCard;+8
     @Override
-    public synchronized SCIOCard connect(SCIOProtocol protocol) throws SCIOException, IllegalStateException {
-	try {
-	    Card c = terminal.connect(protocol.identifier);
-	    return new PCSCCard(this, c);
-	} catch (CardNotPresentException ex) {
-	    String msg = "Card has been removed before connect could be finished for terminal '%s'.";
-	    throw new IllegalArgumentException(String.format(msg, getName()));
-	} catch (CardException ex) {
-	    String msg = "Failed to connect the card in terminal '%s'.";
-	    throw new SCIOException(String.format(msg, getName()), getCode(ex), ex);
+    public SCIOCard connect(SCIOProtocol protocol) throws SCIOException, IllegalStateException {
+	synchronized (CardTerminal.class) {
+	    try {
+		Card c = terminal.connect(protocol.identifier);
+		return new PCSCCard(this, c);
+	    } catch (CardNotPresentException ex) {
+		String msg = "Card has been removed before connect could be finished for terminal '%s'.";
+		throw new IllegalArgumentException(String.format(msg, getName()));
+	    } catch (CardException ex) {
+		String msg = "Failed to connect the card in terminal '%s'.";
+		throw new SCIOException(String.format(msg, getName()), getCode(ex), ex);
+	    }
 	}
     }
 

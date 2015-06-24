@@ -45,7 +45,7 @@ public class EACAdditionalInputType {
      * Creates a new EACAdditionalInputType.
      *
      * @param baseType DIDAuthenticationDataType
-     * @throws ParserConfigurationException
+     * @throws ParserConfigurationException Thrown in case the parser couldn't be loaded.
      */
     public EACAdditionalInputType(DIDAuthenticationDataType baseType) throws ParserConfigurationException {
 	authMap = new AuthDataMap(baseType);

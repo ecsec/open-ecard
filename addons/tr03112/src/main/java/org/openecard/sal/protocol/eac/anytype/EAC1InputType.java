@@ -70,7 +70,7 @@ public class EAC1InputType {
      * Creates a new EAC1InputType.
      *
      * @param baseType DIDAuthenticationDataType
-     * @throws Exception
+     * @throws Exception Thrown in cause the type iss errornous.
      */
     public EAC1InputType(DIDAuthenticationDataType baseType) throws Exception {
 	parseCertificateDescriptionElement(baseType);

@@ -53,7 +53,7 @@ public final class EAC2InputType {
      * Creates a new EAC2InputType.
      *
      * @param baseType DIDAuthenticationDataType
-     * @throws Exception
+     * @throws Exception Thrown in cause the type iss errornous.
      */
     public EAC2InputType(DIDAuthenticationDataType baseType) throws Exception {
 	this.authMap = new AuthDataMap(baseType);

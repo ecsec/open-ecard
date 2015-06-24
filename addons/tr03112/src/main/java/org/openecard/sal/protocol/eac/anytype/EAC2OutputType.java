@@ -61,7 +61,7 @@ public class EAC2OutputType {
     /**
      * Sets the challenge.
      *
-     * @param challenge
+     * @param challenge Challenge value.
      */
     public void setChallenge(byte[] challenge) {
 	this.challenge = challenge;

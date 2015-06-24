@@ -50,7 +50,7 @@ public class PACEInputType {
      * Creates a new PACEInputType.
      *
      * @param baseType DIDAuthenticationDataType
-     * @throws ParserConfigurationException
+     * @throws ParserConfigurationException Thrown in case the parser couldn't be loaded.
      */
     public PACEInputType(DIDAuthenticationDataType baseType) throws ParserConfigurationException {
 	authMap = new AuthDataMap(baseType);

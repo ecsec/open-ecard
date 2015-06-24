@@ -143,11 +143,15 @@ public class FileRegistry implements AddonRegistry {
      * @param addonPath Path to the directory which shall be monitored.
      */
     private void startFileMonitor(String addonPath) {
-	File f = new File(addonPath);
-	logger.debug("Starting file alteration monitor on path: {}", f.getPath());
-	FilesystemAlterationMonitor fam = new FilesystemAlterationMonitor();
-	fam.addListener(f, new PluginDirectoryAlterationListener(this, manager));
-	fam.start();
+	try {
+	    File f = new File(addonPath);
+	    logger.debug("Starting file alteration monitor on path: {}", f.getPath());
+	    FilesystemAlterationMonitor fam = new FilesystemAlterationMonitor();
+	    fam.addListener(f, new PluginDirectoryAlterationListener(this, manager));
+	    fam.start();
+	} catch (SecurityException ex) {
+	    logger.error("SecurityException seems like you don't have permissions to access the addons directory.", ex);
+	}
     }
 
     /**
@@ -284,6 +288,7 @@ public class FileRegistry implements AddonRegistry {
 	try {
 	    File addonsDir = FileUtils.getAddonsDir();
 	    File[] addons = addonsDir.listFiles(new JARFileFilter());
+	    addons = addons == null ? new File[0] : addons;
 	    ManifestExtractor mEx = new ManifestExtractor();
 
 	    for (File addon : addons) {

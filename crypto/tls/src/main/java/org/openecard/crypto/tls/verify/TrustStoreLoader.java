@@ -22,21 +22,26 @@
 
 package org.openecard.crypto.tls.verify;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.FileUtils;
 import org.slf4j.Logger;
@@ -50,8 +55,7 @@ import org.slf4j.LoggerFactory;
 public class TrustStoreLoader {
 
     private static final Logger logger = LoggerFactory.getLogger(TrustStoreLoader.class);
-    private static final String TRUSTSTORE_FILE = "oec_cacerts.p12";
-    private static final String TRUSTSTORE_PASS = "changeit"; // same as default Java Truststore
+    private static final String TRUSTSTORE_FILE = "oec_cacerts.zip";
 
     private static Set<TrustAnchor> trustAnchors = Collections.emptySet();
 
@@ -105,20 +109,50 @@ public class TrustStoreLoader {
 
     private static KeyStore loadInternalStore() {
 	if (useInternalStore()) {
+	    // The internal keystore is a zip file containing DER encoded certificates.
+	    // This is due to the following problems:
+	    // - Java keystore not supported on Android
+	    // - PKCS12 can not be used as truststore in Desktop Java
+	    // - Bundled BC JCE has no Oracle signature and can thus not be used that way
 	    try {
-		// get stream to keystore
+		// create keystore object to be able to save the certificates later
+		KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+		ks.load(null);
+		CertificateFactory cf = CertificateFactory.getInstance("X.509");
+
+		// get stream to zip file containing the certificates
 		InputStream is = FileUtils.resolveResourceAsStream(TrustStoreLoader.class, TRUSTSTORE_FILE);
-		if (is != null) {
-		    KeyStore ks = KeyStore.getInstance("PKCS12", new BouncyCastleProvider());
-		    ks.load(is, TRUSTSTORE_PASS.toCharArray());
+		ZipInputStream zis = is != null ? new ZipInputStream(is) : null;
+		if (zis != null) {
+		    ZipEntry entry;
+		    while ((entry = zis.getNextEntry()) != null) {
+			// only read entry if it is not a directory
+			if (! entry.isDirectory()) {
+			    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			    // read entry (certificates can not be longer than int)
+			    byte[] data = new byte[4096];
+			    int numRead;
+			    do {
+				numRead = zis.read(data, 0, 4096);
+				if (numRead != -1) {
+				    baos.write(data, 0, numRead);
+				}
+			    } while (numRead != -1);
+			    // convert bytes to x509 cert
+			    ByteArrayInputStream dataStream = new ByteArrayInputStream(baos.toByteArray());
+			    Certificate cert = cf.generateCertificate(dataStream);
+			    ks.setCertificateEntry(entry.getName(), cert);
+			}
+		    }
+
 		    return ks;
 		} else {
 		    logger.error("Internal keystore not found, falling back to next available trust store.");
 		}
-	    } catch (IOException | NoSuchAlgorithmException | CertificateException ex) {
-		logger.error("Error reading internal keystore.", ex);
-	    } catch (KeyStoreException ex) {
-		logger.error("PKCS#12 keystore type not supported by system.", ex);
+	    } catch (IOException ex) {
+		logger.error("Error reading embedded keystore.", ex);
+	    } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException ex) {
+		logger.error("Failed to obtain keystore or save entry in it..", ex);
 	    }
 	}
 	// error or different keystore requested

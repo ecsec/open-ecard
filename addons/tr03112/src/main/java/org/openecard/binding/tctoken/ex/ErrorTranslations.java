@@ -89,6 +89,7 @@ public enum ErrorTranslations implements I18nKey {
     REMOVE_CARD("remove_card_msg"),
     RETRIEVAL_FAILED("tctoken.retrieval.exception"),
     SOAP_MESSAGE_FAILURE("paos.exception.soap_message_creation_failed"),
+    UNHANDLED_INNER_EXCEPTION("unhandled.inner.exception"),
     UNKNOWN_CONNECTION_HANDLE("unknown.connection_handle"),
     UNKNOWN_ECARD_ERROR("paos.exception.unknown_ecard_exception"),
     UNKNOWN_SEC_PROTOCOL("connection.error.unknown_sec_protocol"),

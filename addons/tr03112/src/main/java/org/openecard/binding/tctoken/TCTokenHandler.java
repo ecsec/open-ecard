@@ -43,6 +43,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import javax.annotation.Nonnull;
 import javax.xml.transform.TransformerException;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonRegistry;
@@ -354,8 +355,8 @@ public class TCTokenHandler {
 		response.setResult(WSHelper.makeResultError(ResultMinor.TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED,
 			w.getLocalizedMessage()));
 	    } else {
-		// TODO: check for better matching minor type
-		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getLocalizedMessage()));
+		errorMsg = createMessageFromUnknownError(w);
+		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getMessage()));
 	    }
 
 	    showErrorMessage(errorMsg);
@@ -547,6 +548,20 @@ public class TCTokenHandler {
 	}
 	return errorMsg;
 	
+    }
+
+    /**
+     * Creates an error message from an PAOSException which contains a not handled  inner exception.
+     *
+     * @param w An PAOSException containing a not handled inner exception.
+     * @return A sting containing an error message.
+     */
+    private String createMessageFromUnknownError(@Nonnull PAOSException w) {
+	String errorMsg = "\n";
+	errorMsg += langTr03112.translationForKey(UNHANDLED_INNER_EXCEPTION);
+	errorMsg += "\n";
+	errorMsg += w.getCause().getMessage();
+	return errorMsg;
     }
 
 }

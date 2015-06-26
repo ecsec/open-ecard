@@ -62,8 +62,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class RichClient {
 
-    private static final Logger _logger = LoggerFactory.getLogger(RichClient.class.getName());
-    private static final I18n lang = I18n.getTranslation("richclient");
+    private static final Logger _logger;
+    private static final I18n lang;
 
     // Tray icon
     private AppTray tray;
@@ -92,8 +92,11 @@ public final class RichClient {
 	    // load logger config from HOME if set
 	    LogbackConfig.load();
 	} catch (IOException | JoranException ex) {
-	    _logger.error("Failed to load logback config from user config.", ex);
+	    System.err.println("Failed to load logback config from user config.");
+	    ex.printStackTrace(System.err);
 	}
+	_logger = LoggerFactory.getLogger(RichClient.class.getName());
+	lang = I18n.getTranslation("richclient");
     }
 
 

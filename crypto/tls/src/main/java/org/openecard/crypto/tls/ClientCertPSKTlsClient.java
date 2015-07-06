@@ -24,7 +24,10 @@ package org.openecard.crypto.tls;
 
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.AlertLevel;
@@ -99,16 +102,31 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 
     @Override
     public int[] getCipherSuites() {
-	return new int[] {
-	    // recommended ciphers from TR-02102-2 sec. 3.3.1
-	    CipherSuite.TLS_RSA_PSK_WITH_AES_256_GCM_SHA384,
-	    // this cipher suite does not work with the governikus eID server, so it is excluded here
-//	    CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA384,
-	    CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
-	    CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256,
-	    // must have according to TR-03124-1 sec. 4.4
-	    CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA,
-	};
+	ArrayList<Integer> ciphers = new ArrayList<>(Arrays.asList(
+		// recommended ciphers from TR-02102-2 sec. 3.3.1
+		CipherSuite.TLS_RSA_PSK_WITH_AES_256_GCM_SHA384,
+		// this cipher suite does not work with the governikus eID server, so it is excluded here
+		// CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA384,
+		CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
+		CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256,
+		// must have according to TR-03124-1 sec. 4.4
+		CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA
+	));
+
+	// remove unsupported cipher suites
+	Iterator<Integer> it = ciphers.iterator();
+	while (it.hasNext()) {
+	    Integer cipher = it.next();
+	    if (! TlsUtils.isValidCipherSuiteForVersion(cipher, clientVersion)) {
+		it.remove();
+	    }
+	}
+	// copy to array
+	int[] result = new int[ciphers.size()];
+	for (int i = 0; i < ciphers.size(); i++) {
+	    result[i] = ciphers.get(i);
+	}
+	return result;
     }
 
     @Override

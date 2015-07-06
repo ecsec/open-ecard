@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.AlertLevel;
@@ -129,7 +130,7 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	));
 
 	// when doing TLS 1.0, we need the old SHA1 cipher suites
-	if (minClientVersion == ProtocolVersion.TLSv10 || minClientVersion == ProtocolVersion.TLSv11) {
+	if (minClientVersion.isEqualOrEarlierVersionOf(ProtocolVersion.TLSv11)) {
 	    ciphers.addAll(Arrays.asList(
 		    // SHA1 is acceptable until 2015
 		    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
@@ -151,11 +152,19 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	    ));
 	}
 
+	// remove unsupported cipher suites
+	Iterator<Integer> it = ciphers.iterator();
+	while (it.hasNext()) {
+	    Integer cipher = it.next();
+	    if (! TlsUtils.isValidCipherSuiteForVersion(cipher, clientVersion)) {
+		it.remove();
+	    }
+	}
+	// copy to array
 	int[] result = new int[ciphers.size()];
 	for (int i = 0; i < ciphers.size(); i++) {
 	    result[i] = ciphers.get(i);
 	}
-
 	return result;
     }
 

@@ -23,14 +23,14 @@
 package org.openecard.crypto.tls.verify;
 
 import java.io.IOException;
-import java.security.PublicKey;
-import java.security.cert.CertPath;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.DSAPublicKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
+import org.openecard.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.openecard.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.openecard.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.openecard.bouncycastle.crypto.params.DSAPublicKeyParameters;
+import org.openecard.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.openecard.bouncycastle.crypto.params.RSAKeyParameters;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.crypto.util.PublicKeyFactory;
 import org.openecard.crypto.common.keystore.KeyTools;
 import org.openecard.crypto.tls.CertificateVerificationException;
 import org.openecard.crypto.tls.CertificateVerifier;
@@ -49,47 +49,39 @@ public class KeyLengthVerifier implements CertificateVerifier {
 
     @Override
     public void isValid(Certificate chain, String hostname) throws CertificateVerificationException {
-	CertPath path;
 	try {
-	    path = KeyTools.convertCertificates(chain);
-	} catch (CertificateException | IOException ex) {
-	    String msg = "Failed to convert certificates to JCA format.";
-	    logger.error(msg);
-	    throw new CertificateVerificationException(msg);
-	}
-
-	boolean firstCert = true;
-	// check each certificate
-	for (java.security.cert.Certificate c : path.getCertificates()) {
-	    if (c instanceof X509Certificate) {
-		X509Certificate x509 = (X509Certificate) c;
-		boolean selfSigned = x509.getIssuerX500Principal().equals(x509.getSubjectX500Principal());
+	    boolean firstCert = true;
+	    // check each certificate
+	    for (org.openecard.bouncycastle.asn1.x509.Certificate x509 : chain.getCertificateList()) {
+		boolean selfSigned = x509.getIssuer().equals(x509.getSubject());
 
 		// skip key comparison step if this is a root certificate, but still check self signed server certs
 		boolean isRootCert = selfSigned && ! firstCert;
 		if (! isRootCert) {
 		    // get public key and determine minimum size for the actual type
-		    PublicKey pk = c.getPublicKey();
+		    SubjectPublicKeyInfo pkInfo = x509.getSubjectPublicKeyInfo();
+		    AlgorithmIdentifier pkAlg = pkInfo.getAlgorithm();
+		    AsymmetricKeyParameter key = PublicKeyFactory.createKey(pkInfo);
 		    int reference;
-		    if (pk instanceof RSAPublicKey) {
+		    if (key instanceof RSAKeyParameters) {
 			reference = 2048;
-		    } else if (pk instanceof DSAPublicKey) {
+		    } else if (key instanceof DSAPublicKeyParameters) {
 			reference = 2048;
-		    } else if (pk instanceof ECPublicKey) {
+		    } else if (key instanceof ECPublicKeyParameters) {
 			reference = 224;
 		    } else {
-			String alg = pk.getAlgorithm();
+			String alg = pkAlg.getAlgorithm().getId();
 			String msg = String.format("Unsupported key type (%s) used in certificate.", alg);
 			throw new CertificateVerificationException(msg);
 		    }
 
-		    assertKeyLength(reference, KeyTools.getKeySize(pk));
+		    assertKeyLength(reference, KeyTools.getKeySize(key));
 		    firstCert = false;
 		}
-	    } else {
-		String msg = "One of the certificates in the chain is not of type X509v3.";
-		throw new CertificateVerificationException(msg);
 	    }
+	} catch (IOException ex) {
+	    String msg = "Failed to extract public key from certificate.";
+	    throw new CertificateVerificationException(msg, ex);
 	}
     }
 

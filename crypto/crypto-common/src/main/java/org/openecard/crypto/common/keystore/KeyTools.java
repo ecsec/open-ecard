@@ -35,6 +35,12 @@ import java.security.interfaces.RSAKey;
 import java.util.ArrayList;
 import javax.crypto.SecretKey;
 import javax.crypto.interfaces.DHKey;
+import org.openecard.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.openecard.bouncycastle.crypto.params.DHKeyParameters;
+import org.openecard.bouncycastle.crypto.params.DSAKeyParameters;
+import org.openecard.bouncycastle.crypto.params.ECKeyParameters;
+import org.openecard.bouncycastle.crypto.params.ElGamalKeyParameters;
+import org.openecard.bouncycastle.crypto.params.RSAKeyParameters;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 
 
@@ -72,6 +78,32 @@ public class KeyTools {
 	    }
 	}
 	// unkown or inaccessible key (e.g. on secure storage device)
+	return -1;
+    }
+
+    public static int getKeySize(AsymmetricKeyParameter key) {
+	if (key instanceof RSAKeyParameters) {
+	    RSAKeyParameters rsaKey = (RSAKeyParameters) key;
+	    BigInteger mod = rsaKey.getModulus();
+	    return mod.bitLength();
+	} else if (key instanceof DSAKeyParameters) {
+	    DSAKeyParameters dsaKey = (DSAKeyParameters) key;
+	    BigInteger p = dsaKey.getParameters().getP();
+	    return p.bitLength();
+	} else if (key instanceof ECKeyParameters) {
+	    ECKeyParameters ecKey = (ECKeyParameters) key;
+	    BigInteger order = ecKey.getParameters().getCurve().getOrder();
+	    return order.bitLength();
+	} else if (key instanceof DHKeyParameters) {
+	    DHKeyParameters dhKey = (DHKeyParameters) key;
+	    BigInteger p = dhKey.getParameters().getP();
+	    return p.bitLength();
+	} else if (key instanceof ElGamalKeyParameters) {
+	    ElGamalKeyParameters egKey = (ElGamalKeyParameters) key;
+	    BigInteger p = egKey.getParameters().getP();
+	    return p.bitLength();
+	}
+
 	return -1;
     }
 

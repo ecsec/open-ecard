@@ -560,7 +560,7 @@ public class TCTokenHandler {
 	String errorMsg = "\n";
 	errorMsg += langTr03112.translationForKey(UNHANDLED_INNER_EXCEPTION);
 	errorMsg += "\n";
-	errorMsg += w.getCause().getMessage();
+	errorMsg += w.getMessage();
 	return errorMsg;
     }
 

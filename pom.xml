@@ -336,7 +336,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.1</version>
+					<version>2.10.3</version>
 					<configuration>
 						<show>protected</show>
 						<linksource>true</linksource>
@@ -346,16 +346,21 @@
 								<title>Open eCard Client Classes</title>
 								<packages>org.openecard.*</packages>
 							</group>
+							<!-- Removed due to faulty Javadoc comments in the generated files
 							<group>
 								<title>JAXB and JAX-WS</title>
 								<packages>generated:de.bund.bsi.ecard.api._1:iso.std.iso_iec._24727.tech.schema:oasis.names.tc.*:org.etsi.uri.*:org.setcce.schemas.ers:org.w3._*:org.openecard.ws:org.openecard.ws.schema</packages>
 							</group>
+							-->
 							<group>
 								<title>Support Plugins</title>
 								<packages>org.openecard.maven.classlist</packages>
 							</group>
 						</groups>
-						<excludePackageNames>org.openecard.bouncycastle:org.openecard.bouncycastle.*:org.openecard.apache.http.*:javax.smartcardio:sun.security.smartcardio</excludePackageNames>
+						<excludePackageNames>
+							generated:de.bund.bsi.ecard.api._1:iso.std.iso_iec._24727.tech.schema:oasis.names.tc.*:org.etsi.uri.*:org.setcce.schemas.ers:org.w3._*:org.openecard.ws:org.openecard.ws.schema:
+							org.openecard.bouncycastle:org.openecard.bouncycastle.*:org.openecard.apache.http.*:javax.smartcardio:sun.security.smartcardio
+						</excludePackageNames>
 					</configuration>
 				</plugin>
 				<plugin>

@@ -23,14 +23,11 @@
 package org.openecard.crypto.tls.verify;
 
 import java.io.IOException;
-import org.openecard.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.openecard.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.openecard.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.openecard.bouncycastle.crypto.params.DSAPublicKeyParameters;
-import org.openecard.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.openecard.bouncycastle.crypto.params.RSAKeyParameters;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.util.PublicKeyFactory;
+import org.openecard.crypto.common.keystore.KeyLengthException;
 import org.openecard.crypto.common.keystore.KeyTools;
 import org.openecard.crypto.tls.CertificateVerificationException;
 import org.openecard.crypto.tls.CertificateVerifier;
@@ -60,36 +57,18 @@ public class KeyLengthVerifier implements CertificateVerifier {
 		if (! isRootCert) {
 		    // get public key and determine minimum size for the actual type
 		    SubjectPublicKeyInfo pkInfo = x509.getSubjectPublicKeyInfo();
-		    AlgorithmIdentifier pkAlg = pkInfo.getAlgorithm();
 		    AsymmetricKeyParameter key = PublicKeyFactory.createKey(pkInfo);
-		    int reference;
-		    if (key instanceof RSAKeyParameters) {
-			reference = 2048;
-		    } else if (key instanceof DSAPublicKeyParameters) {
-			reference = 2048;
-		    } else if (key instanceof ECPublicKeyParameters) {
-			reference = 224;
-		    } else {
-			String alg = pkAlg.getAlgorithm().getId();
-			String msg = String.format("Unsupported key type (%s) used in certificate.", alg);
-			throw new CertificateVerificationException(msg);
-		    }
+		    KeyTools.assertKeyLength(key);
 
-		    assertKeyLength(reference, KeyTools.getKeySize(key));
 		    firstCert = false;
 		}
 	    }
 	} catch (IOException ex) {
 	    String msg = "Failed to extract public key from certificate.";
 	    throw new CertificateVerificationException(msg, ex);
-	}
-    }
-
-    private void assertKeyLength(int reference, int numbits) throws CertificateVerificationException {
-	if (numbits < reference) {
-	    String msg = "The key size in the certificate does not meet the requirements ";
-	    msg += String.format("(%d < %d).", numbits, reference);
-	    throw new CertificateVerificationException(msg);
+	} catch (KeyLengthException ex) {
+	    String msg = "The key in the certificate does not satisfy the length requirements.";
+	    throw new CertificateVerificationException(msg, ex);
 	}
     }
 

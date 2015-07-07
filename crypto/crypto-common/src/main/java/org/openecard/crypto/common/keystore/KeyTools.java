@@ -33,12 +33,15 @@ import java.security.interfaces.DSAKey;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
 import java.util.ArrayList;
+import javax.annotation.Nonnull;
 import javax.crypto.SecretKey;
 import javax.crypto.interfaces.DHKey;
 import org.openecard.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.openecard.bouncycastle.crypto.params.DHKeyParameters;
 import org.openecard.bouncycastle.crypto.params.DSAKeyParameters;
+import org.openecard.bouncycastle.crypto.params.DSAPublicKeyParameters;
 import org.openecard.bouncycastle.crypto.params.ECKeyParameters;
+import org.openecard.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.openecard.bouncycastle.crypto.params.ElGamalKeyParameters;
 import org.openecard.bouncycastle.crypto.params.RSAKeyParameters;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
@@ -107,6 +110,39 @@ public class KeyTools {
 	return -1;
     }
 
+    public static int getReferenceKeySize(AsymmetricKeyParameter key) {
+	int reference = -1;
+	if (key instanceof RSAKeyParameters) {
+	    reference = 2048;
+	} else if (key instanceof DSAPublicKeyParameters) {
+	    reference = 2048;
+	} else if (key instanceof ECPublicKeyParameters) {
+	    reference = 224;
+	}
+	return reference;
+    }
+
+    /**
+     * Checks the given key if it satisfies the key length requirements defined in BSI TR-03116-4.
+     *
+     * @param key The key to test.
+     * @throws KeyLengthException Thrown in case the key is too short.
+     * @throws UnsupportedOperationException Thrown in case no reference value could be obtained for the given keytype.
+     */
+    public static void assertKeyLength(@Nonnull AsymmetricKeyParameter key) throws KeyLengthException {
+	int reference = getReferenceKeySize(key);
+	int numbits = getKeySize(key);
+
+	if (reference == -1) {
+	    throw new UnsupportedOperationException("The key type " + key.getClass().getName() + " is unsupported.");
+	}
+
+	if (numbits < reference) {
+	    String msg = "The key size does not meet the requirements ";
+	    msg += String.format("(%d < %d).", numbits, reference);
+	    throw new KeyLengthException(msg);
+	}
+    }
 
     /**
      * Converts the given certificate chain to a JCA CertPath.

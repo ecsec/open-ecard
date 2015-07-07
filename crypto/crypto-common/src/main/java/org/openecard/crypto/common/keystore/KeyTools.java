@@ -114,9 +114,13 @@ public class KeyTools {
 	int reference = -1;
 	if (key instanceof RSAKeyParameters) {
 	    reference = 2048;
-	} else if (key instanceof DSAPublicKeyParameters) {
+	} else if (key instanceof DSAKeyParameters) {
 	    reference = 2048;
-	} else if (key instanceof ECPublicKeyParameters) {
+	} else if (key instanceof DHKeyParameters) {
+	    reference = 2048;
+	} else if (key instanceof ElGamalKeyParameters) {
+	    reference = 2048;
+	} else if (key instanceof ECKeyParameters) {
 	    reference = 224;
 	}
 	return reference;

@@ -42,7 +42,9 @@ import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsCipherFactory;
 import org.openecard.bouncycastle.crypto.tls.TlsECCUtils;
 import org.openecard.bouncycastle.crypto.tls.TlsExtensionsUtils;
+import org.openecard.bouncycastle.crypto.tls.TlsKeyExchange;
 import org.openecard.bouncycastle.crypto.tls.TlsPSKIdentity;
+import org.openecard.bouncycastle.crypto.tls.TlsPSKKeyExchange;
 import org.openecard.bouncycastle.crypto.tls.TlsUtils;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.crypto.tls.auth.ContextAware;
@@ -127,6 +129,12 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 	    result[i] = ciphers.get(i);
 	}
 	return result;
+    }
+
+    @Override
+    protected TlsKeyExchange createPSKKeyExchange(int keyExchange) {
+        return new TlsPSKKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, pskIdentity, null, null,
+		namedCurves, clientECPointFormats, serverECPointFormats);
     }
 
     @Override

@@ -42,6 +42,7 @@ import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsCipherFactory;
 import org.openecard.bouncycastle.crypto.tls.TlsECCUtils;
 import org.openecard.bouncycastle.crypto.tls.TlsExtensionsUtils;
+import org.openecard.bouncycastle.crypto.tls.TlsKeyExchange;
 import org.openecard.bouncycastle.crypto.tls.TlsUtils;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.crypto.tls.auth.ContextAware;
@@ -166,6 +167,28 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	    result[i] = ciphers.get(i);
 	}
 	return result;
+    }
+
+    @Override
+    protected TlsKeyExchange createDHKeyExchange(int keyExchange) {
+        return new TlsDHKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, null);
+    }
+
+    @Override
+    protected TlsKeyExchange createDHEKeyExchange(int keyExchange) {
+        return new TlsDHEKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, null);
+    }
+
+    @Override
+    protected TlsKeyExchange createECDHKeyExchange(int keyExchange) {
+        return new TlsECDHKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, namedCurves,
+		clientECPointFormats, serverECPointFormats);
+    }
+
+    @Override
+    protected TlsKeyExchange createECDHEKeyExchange(int keyExchange) {
+        return new TlsECDHEKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, namedCurves,
+		clientECPointFormats, serverECPointFormats);
     }
 
     @Override

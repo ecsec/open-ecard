@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,6 +23,12 @@
 package org.openecard.plugins.pinplugin.gui;
 
 import iso.std.iso_iec._24727.tech.schema.ActionType;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnect;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ControlIFD;
 import iso.std.iso_iec._24727.tech.schema.ControlIFDResponse;
@@ -97,13 +103,12 @@ public class GenericPINAction extends StepAction {
 
     private final I18n lang = I18n.getTranslation("pinplugin");
     private final boolean capturePin;
-    private final ConnectionHandleType cHandle;
     private final Dispatcher dispatcher;
-    private final byte[] slotHandle;
-
     private final GenericPINStep gPINStep;
 
+    private ConnectionHandleType cHandle;
     private RecognizedState state;
+    private byte[] slotHandle;
 
 
     public GenericPINAction(String stepID, RecognizedState state, ConnectionHandleType cHandle, Dispatcher dispatcher,
@@ -121,6 +126,14 @@ public class GenericPINAction extends StepAction {
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
 	if (result.isCancelled()) {
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
+	}
+
+	try {
+	    updateConnectionHandle();
+	} catch (DispatcherException | InvocationTargetException ex) {
+	    logger.error("An internal error occurred while trying to perform an PIN operation.", ex);
+	    return new StepActionResult(StepActionResultStatus.REPEAT,
+		    generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
 	}
 
 
@@ -316,7 +329,7 @@ public class GenericPINAction extends StepAction {
 		    generateSuccessStep(lang.translationForKey(CHANGE_SUCCESS)));
 	} catch (InvocationTargetException | DispatcherException | APDUException | IFDException |
 		ParserConfigurationException ex) {
-	    logger.error("An internal error occured while trying to change the PIN", ex);
+	    logger.error("An internal error occurred while trying to change the PIN", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
 	}  catch (UnsupportedEncodingException ex) {
@@ -401,7 +414,7 @@ public class GenericPINAction extends StepAction {
 	    state = RecognizedState.PIN_resumed;
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
 	} catch (DispatcherException | InvocationTargetException | ParserConfigurationException ex) {
-	    logger.error("An internal error occured while trying to resume the PIN.", ex);
+	    logger.error("An internal error occurred while trying to resume the PIN.", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
 	} catch (WSHelper.WSException ex) {
@@ -476,7 +489,7 @@ public class GenericPINAction extends StepAction {
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
 	} catch (DispatcherException | InvocationTargetException | APDUException | ParserConfigurationException ex) {
-	    logger.error("An internal error occured while trying to unblock the PIN.", ex);
+	    logger.error("An internal error occurred while trying to unblock the PIN.", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
 	} catch (WSHelper.WSException ex) {
@@ -600,6 +613,54 @@ public class GenericPINAction extends StepAction {
 	}
 
 	WSHelper.checkResult(response);
+    }
+
+    /**
+     * Update the connection handle.
+     *
+     * This is necessary after every step because we Disconnect the card with a reset if we have success or not.
+     *
+     * @throws DispatcherException
+     * @throws InvocationTargetException
+     */
+    private void updateConnectionHandle() throws DispatcherException, InvocationTargetException {
+	CardApplicationPath cPath = new CardApplicationPath();
+	CardApplicationPathType cPathType = new CardApplicationPathType();
+	cPath.setCardAppPathRequest(cPathType);
+
+	CardApplicationPathResponse cPathResp = (CardApplicationPathResponse) dispatcher.deliver(cPath);
+	List<CardApplicationPathType> cRes = cPathResp.getCardAppPathResultSet().getCardApplicationPathResult();
+	for (CardApplicationPathType capt : cRes) {
+	    CardApplicationConnect cConn = new CardApplicationConnect();
+	    cConn.setCardApplicationPath(capt);
+	    CardApplicationConnectResponse conRes = (CardApplicationConnectResponse) dispatcher.deliver(cConn);
+
+	    String cardType = conRes.getConnectionHandle().getRecognitionInfo().getCardType();
+	    ConnectionHandleType cHandleNew = conRes.getConnectionHandle();
+	    if (cardType.equals("http://bsi.bund.de/cif/npa.xml")) {
+		// ensure same terminal and get the new slothandle
+		if (cHandleNew.getIFDName().equals(cHandle.getIFDName())
+			&& ! Arrays.equals(cHandleNew.getSlotHandle(), slotHandle)) {
+		    cHandle = cHandleNew;
+		    slotHandle = cHandle.getSlotHandle();
+		    break;
+		  // also end if the connection handle found as before than it is still valid
+		} else if (cHandleNew.getIFDName().equals(cHandle.getIFDName()) &&
+			Arrays.equals(cHandleNew.getSlotHandle(), slotHandle)) {
+		    break;
+		}
+	    } else {
+		try {
+		CardApplicationDisconnect disconnect = new CardApplicationDisconnect();
+		disconnect.setConnectionHandle(conRes.getConnectionHandle());
+		disconnect.setAction(ActionType.RESET);
+		dispatcher.deliver(disconnect);
+		} catch (DispatcherException | InvocationTargetException ex) {
+		    logger.warn("Failed to disconnect card in terminal:" + conRes.getConnectionHandle().getIFDName(), ex);
+		}
+	    }
+	}
+
     }
 
 }

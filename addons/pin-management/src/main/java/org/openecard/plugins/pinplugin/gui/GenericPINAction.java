@@ -128,14 +128,17 @@ public class GenericPINAction extends StepAction {
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
 
-	try {
-	    updateConnectionHandle();
-	} catch (DispatcherException | InvocationTargetException ex) {
-	    logger.error("An internal error occurred while trying to perform an PIN operation.", ex);
-	    return new StepActionResult(StepActionResultStatus.REPEAT,
-		    generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
+	// do not update in case of status resumed, it destroys the the pace channel and there is no disconnect after
+	// the verification of the CAN so the handle stays the same
+	if (state != RecognizedState.PIN_resumed) {
+	    try {
+		updateConnectionHandle();
+	    } catch (DispatcherException | InvocationTargetException ex) {
+		logger.error("An internal error occurred while trying to perform an PIN operation.", ex);
+		return new StepActionResult(StepActionResultStatus.REPEAT,
+			generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
+	    }
 	}
-
 
 	switch (state) {
 	    case PIN_activated_RC3:

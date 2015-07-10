@@ -66,7 +66,6 @@ public class TR03119RightsFilter {
 	readRights.add(CHAT.DataGroup.DG13);
 	readRights.add(CHAT.DataGroup.DG17);
 	readRights.add(CHAT.DataGroup.DG19);
-	readRights.add(CHAT.DataGroup.DG20);
 
 	// allowed write rights
 	// none so far ;-)

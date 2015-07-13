@@ -171,24 +171,40 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 
     @Override
     protected TlsKeyExchange createDHKeyExchange(int keyExchange) {
-        return new TlsDHKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, null);
+	if (! Boolean.valueOf(OpenecardProperties.getProperty("legacy.weak_crypto"))) {
+	    return new TlsDHKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, null);
+	} else {
+	    return super.createDHKeyExchange(keyExchange);
+	}
     }
 
     @Override
     protected TlsKeyExchange createDHEKeyExchange(int keyExchange) {
-        return new TlsDHEKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, null);
+	if (! Boolean.valueOf(OpenecardProperties.getProperty("legacy.weak_crypto"))) {
+	    return new TlsDHEKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, null);
+	} else {
+	    return super.createDHEKeyExchange(keyExchange);
+	}
     }
 
     @Override
     protected TlsKeyExchange createECDHKeyExchange(int keyExchange) {
-        return new TlsECDHKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, namedCurves,
-		clientECPointFormats, serverECPointFormats);
+	if (! Boolean.valueOf(OpenecardProperties.getProperty("legacy.weak_crypto"))) {
+	    return new TlsECDHKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, namedCurves,
+		    clientECPointFormats, serverECPointFormats);
+	} else {
+	    return super.createECDHKeyExchange(keyExchange);
+	}
     }
 
     @Override
     protected TlsKeyExchange createECDHEKeyExchange(int keyExchange) {
-        return new TlsECDHEKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, namedCurves,
-		clientECPointFormats, serverECPointFormats);
+	if (! Boolean.valueOf(OpenecardProperties.getProperty("legacy.weak_crypto"))) {
+	    return new TlsECDHEKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, namedCurves,
+		    clientECPointFormats, serverECPointFormats);
+	} else {
+	    return super.createECDHEKeyExchange(keyExchange);
+	}
     }
 
     @Override

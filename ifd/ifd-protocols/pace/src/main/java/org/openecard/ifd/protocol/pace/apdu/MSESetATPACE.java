@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,6 +23,7 @@
 package org.openecard.ifd.protocol.pace.apdu;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import org.openecard.common.apdu.ManageSecurityEnvironment;
 import org.openecard.common.apdu.common.CardAPDUOutputStream;
 import org.slf4j.Logger;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * See ISO/IEC 7816-4, section 7.5.11.
  *
  * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public final class MSESetATPACE extends ManageSecurityEnvironment.Set {
 
@@ -52,9 +54,10 @@ public final class MSESetATPACE extends ManageSecurityEnvironment.Set {
      *
      * @param oID PACE object identifier
      * @param passwordID Password type (PIN, PUK, CAN, MRZ)
+     * @param domainParamId Id of the domain parameter, or -1 if none is defined.
      */
-    public MSESetATPACE(byte[] oID, byte passwordID) {
-	this(oID, passwordID, null);
+    public MSESetATPACE(byte[] oID, byte passwordID, int domainParamId) {
+	this(oID, passwordID, domainParamId, null);
     }
 
     /**
@@ -62,15 +65,20 @@ public final class MSESetATPACE extends ManageSecurityEnvironment.Set {
      *
      * @param oID PACE object identifier
      * @param passwordID Password type (PIN, PUK, CAN, MRZ)
+     * @param domainParamId Id of the domain parameter, or -1 if none is defined.
      * @param chat Certificate Holder Authentication Template
      */
-    public MSESetATPACE(byte[] oID, byte passwordID, byte[] chat) {
+    public MSESetATPACE(byte[] oID, byte passwordID, int domainParamId, byte[] chat) {
 	super((byte) 0xC1, AT);
 
 	CardAPDUOutputStream caos = new CardAPDUOutputStream();
 	try {
 	    caos.writeTLV((byte) 0x80, oID);
 	    caos.writeTLV((byte) 0x83, passwordID);
+	    if (domainParamId != -1) {
+		byte[] domainParamVal = BigInteger.valueOf(domainParamId).toByteArray();
+		caos.writeTLV((byte) 0x84, domainParamVal);
+	    }
 
 	    if (chat != null) {
 		caos.write(chat);

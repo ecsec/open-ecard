@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -31,30 +31,32 @@ import org.openecard.bouncycastle.jce.spec.ECParameterSpec;
 import org.openecard.bouncycastle.math.ec.ECPoint;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.asn1.eac.PACEDomainParameter;
-import org.openecard.crypto.common.asn1.eac.PACESecurityInfos;
+import org.openecard.crypto.common.asn1.eac.PACEInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
+ *
  * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public final class PACECryptoSuite {
 
     private static final Logger logger = LoggerFactory.getLogger(PACECryptoSuite.class.getName());
 
-    private final PACESecurityInfos psi;
+    private final PACEInfo pi;
     private final PACEDomainParameter domainParameter;
 
     /**
      * Create a new crypto suite for PACE.
      *
-     * @param psi PACESecurityInfos
+     * @param pi PACEInfo
      * @param pdp PACEDomainParameter
      * @throws GeneralSecurityException
      */
-    public PACECryptoSuite(PACESecurityInfos psi, PACEDomainParameter pdp) throws GeneralSecurityException {
-	this.psi = psi;
+    public PACECryptoSuite(PACEInfo pi, PACEDomainParameter pdp) throws GeneralSecurityException {
+	this.pi = pi;
 	this.domainParameter = pdp;
     }
 
@@ -114,9 +116,9 @@ public final class PACECryptoSuite {
      * @return PACE mapping
      */
     public PACEMapping getMapping() {
-	if (psi.getPACEInfo().isGM()) {
+	if (pi.isGM()) {
 	    return new PACEGenericMapping(domainParameter);
-	} else if (psi.getPACEInfo().isIM()) {
+	} else if (pi.isIM()) {
 	    return new PACEIntegratedMapping(domainParameter);
 	} else {
 	    throw new IllegalArgumentException();

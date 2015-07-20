@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,6 +32,7 @@ import org.openecard.common.ifd.protocol.exception.ProtocolException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.asn1.eac.PACEDomainParameter;
+import org.openecard.crypto.common.asn1.eac.PACESecurityInfoPair;
 import org.openecard.crypto.common.asn1.eac.PACESecurityInfos;
 import org.openecard.crypto.common.asn1.utils.ObjectIdentifierUtils;
 import org.openecard.ifd.protocol.pace.apdu.MSESetATPACE;
@@ -49,19 +50,20 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class PACEImplementation {
 
     private static final Logger logger = LoggerFactory.getLogger(PACEImplementation.class);
     // Communication
-    private Dispatcher dispatcher;
-    private KDF kdf;
-    private byte[] slotHandle;
+    private final Dispatcher dispatcher;
+    private final KDF kdf;
+    private final byte[] slotHandle;
     private CardResponseAPDU response;
     // Crypto
+    private final PACESecurityInfoPair psip;
+    private final PACECryptoSuite cryptoSuite;
     private PACEDomainParameter domainParameter;
-    private PACESecurityInfos psi;
-    private PACECryptoSuite cryptoSuite;
     // Keys
     private PACEKey keyPCD, keyPICC;
     private byte[] keyMAC, keyENC;
@@ -83,10 +85,10 @@ public class PACEImplementation {
     public PACEImplementation(Dispatcher dispatcher, byte[] slotHandle, PACESecurityInfos paceSecurityInfos) throws Exception {
 	this.dispatcher = dispatcher;
 	this.slotHandle = slotHandle;
-	this.psi = paceSecurityInfos;
+	this.psip = paceSecurityInfos.getPACEInfoPairs().get(0);
 
-	domainParameter = new PACEDomainParameter(psi);
-	cryptoSuite = new PACECryptoSuite(psi, domainParameter);
+	domainParameter = new PACEDomainParameter(this.psip);
+	cryptoSuite = new PACECryptoSuite(this.psip.getPACEInfo(), domainParameter);
 	kdf = new KDF();
     }
 
@@ -111,8 +113,8 @@ public class PACEImplementation {
      * See BSI-TR-03110, version 2.10, part 3, B.11.1.
      */
     private void mseSetAT(byte passwordID, byte[] chat) throws Exception {
-	byte[] oID = ObjectIdentifierUtils.getValue(psi.getPACEInfo().getProtocol());
-	CardCommandAPDU mseSetAT = new MSESetATPACE(oID, passwordID, chat);
+	byte[] oID = ObjectIdentifierUtils.getValue(psip.getPACEInfo().getProtocol());
+	CardCommandAPDU mseSetAT = new MSESetATPACE(oID, passwordID, psip.getPACEInfo().getParameterID(), chat);
 
 	try {
 	    response = mseSetAT.transmit(dispatcher, slotHandle);
@@ -278,13 +280,13 @@ public class PACEImplementation {
 	keyENC = kdf.deriveENC(k);
 
 	// Calculate token T_PCD
-	AuthenticationToken tokenPCD = new AuthenticationToken(psi);
+	AuthenticationToken tokenPCD = new AuthenticationToken(psip.getPACEInfo());
 	tokenPCD.generateToken(keyMAC, keyPICC.getEncodedPublicKey());
 
 	CardCommandAPDU gaMutualAuth = new GeneralAuthenticate((byte) 0x85, tokenPCD.toByteArray());
 
 	// Calculate token T_PICC
-	AuthenticationToken tokenPICC = new AuthenticationToken(psi);
+	AuthenticationToken tokenPICC = new AuthenticationToken(psip.getPACEInfo());
 	tokenPICC.generateToken(keyMAC, keyPCD.getEncodedPublicKey());
 
 	try {

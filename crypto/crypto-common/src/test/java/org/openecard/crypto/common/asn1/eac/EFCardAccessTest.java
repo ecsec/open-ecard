@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -38,6 +38,7 @@ import static org.testng.Assert.*;
 /**
  *
  * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class EFCardAccessTest {
 
@@ -77,8 +78,9 @@ public class EFCardAccessTest {
     @Test
     public void testPACESecurityInfos() throws Exception {
 	PACESecurityInfos psi = efcaA.getPACESecurityInfos();
-	PACEInfo pi = psi.getPACEInfos().get(0);
-	PACEDomainParameter pdp = new PACEDomainParameter(psi);
+	PACESecurityInfoPair pip = psi.getPACEInfoPairs().get(0);
+	PACEInfo pi = pip.getPACEInfo();
+	PACEDomainParameter pdp = pip.createPACEDomainParameter();
 
 	assertEquals(pi.getProtocol(), "0.4.0.127.0.7.2.2.4.2.2");
 	assertEquals(pi.getProtocol(), PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128);
@@ -119,18 +121,18 @@ public class EFCardAccessTest {
 	assertEquals(ci.getKeyID(), 69);
 
 	CADomainParameterInfo cdpi = csi.getCADomainParameterInfos().get(0);
-	assertEquals(cdpi.getProtocol().toString(), "0.4.0.127.0.7.2.2.3.2");
-	assertEquals(cdpi.getProtocol().toString(), CAObjectIdentifier.id_CA_ECDH.toString());
-	assertEquals(cdpi.getDomainParameter().getObjectIdentifier().toString(), "0.4.0.127.0.7.1.2");
-	assertEquals(cdpi.getDomainParameter().getObjectIdentifier().toString(), EACObjectIdentifier.standardized_Domain_Parameters.toString());
+	assertEquals(cdpi.getProtocol(), "0.4.0.127.0.7.2.2.3.2");
+	assertEquals(cdpi.getProtocol(), CAObjectIdentifier.id_CA_ECDH);
+	assertEquals(cdpi.getDomainParameter().getObjectIdentifier(), "0.4.0.127.0.7.1.2");
+	assertEquals(cdpi.getDomainParameter().getObjectIdentifier(), EACObjectIdentifier.standardized_Domain_Parameters);
 	assertEquals(cdpi.getDomainParameter().getParameters().toString(), "13");
 	assertEquals(cdpi.getKeyID(), 65);
 
 	cdpi = csi.getCADomainParameterInfos().get(1);
-	assertEquals(cdpi.getProtocol().toString(), "0.4.0.127.0.7.2.2.3.2");
-	assertEquals(cdpi.getProtocol().toString(), CAObjectIdentifier.id_CA_ECDH.toString());
-	assertEquals(cdpi.getDomainParameter().getObjectIdentifier().toString(), "0.4.0.127.0.7.1.2");
-	assertEquals(cdpi.getDomainParameter().getObjectIdentifier().toString(), EACObjectIdentifier.standardized_Domain_Parameters.toString());
+	assertEquals(cdpi.getProtocol(), "0.4.0.127.0.7.2.2.3.2");
+	assertEquals(cdpi.getProtocol(), CAObjectIdentifier.id_CA_ECDH);
+	assertEquals(cdpi.getDomainParameter().getObjectIdentifier(), "0.4.0.127.0.7.1.2");
+	assertEquals(cdpi.getDomainParameter().getObjectIdentifier(), EACObjectIdentifier.standardized_Domain_Parameters);
 	assertEquals(cdpi.getDomainParameter().getParameters().toString(), "13");
 	assertEquals(cdpi.getKeyID(), 69);
 
@@ -144,9 +146,9 @@ public class EFCardAccessTest {
 	assertEquals(ci.getVersion(), 2);
 	assertEquals(ci.getKeyID(), 0);
 
-	assertEquals(cdpi.getProtocol().toString(), "0.4.0.127.0.7.2.2.3.2");
-	assertEquals(cdpi.getProtocol().toString(), CAObjectIdentifier.id_CA_ECDH.toString());
-	assertEquals(cdpi.getDomainParameter().getObjectIdentifier().toString(), "0.4.0.127.0.7.1.1.5.2.2.2");
+	assertEquals(cdpi.getProtocol(), "0.4.0.127.0.7.2.2.3.2");
+	assertEquals(cdpi.getProtocol(), CAObjectIdentifier.id_CA_ECDH);
+	assertEquals(cdpi.getDomainParameter().getObjectIdentifier(), "0.4.0.127.0.7.1.1.5.2.2.2");
     }
 
     @Test
@@ -154,15 +156,15 @@ public class EFCardAccessTest {
 	TASecurityInfos tsi = efcaA.getTASecurityInfos();
 	TAInfo ti = tsi.getTAInfos().get(0);
 
-	assertEquals(ti.getProtocol().toString(), "0.4.0.127.0.7.2.2.2");
-	assertEquals(ti.getProtocol().toString(), EACObjectIdentifier.id_TA);
+	assertEquals(ti.getProtocol(), "0.4.0.127.0.7.2.2.2");
+	assertEquals(ti.getProtocol(), EACObjectIdentifier.id_TA);
 	assertEquals(ti.getVersion(), 2);
 
 	tsi = efcaB.getTASecurityInfos();
 	ti = tsi.getTAInfos().get(0);
 
-	assertEquals(ti.getProtocol().toString(), "0.4.0.127.0.7.2.2.2");
-	assertEquals(ti.getProtocol().toString(), EACObjectIdentifier.id_TA);
+	assertEquals(ti.getProtocol(), "0.4.0.127.0.7.2.2.2");
+	assertEquals(ti.getProtocol(), EACObjectIdentifier.id_TA);
 	assertEquals(ti.getVersion(), 2);
     }
 
@@ -170,15 +172,15 @@ public class EFCardAccessTest {
     public void testCardInfoLocator() throws Exception {
 	CardInfoLocator cil = efcaA.getCardInfoLocator();
 
-	assertEquals(cil.getProtocol().toString(), "0.4.0.127.0.7.2.2.6");
-	assertEquals(cil.getProtocol().toString(), EACObjectIdentifier.id_CI.toString());
+	assertEquals(cil.getProtocol(), "0.4.0.127.0.7.2.2.6");
+	assertEquals(cil.getProtocol(), EACObjectIdentifier.id_CI);
 	assertEquals(cil.getURL(), "http://bsi.bund.de/cif/npa.xml");
 	assertNull(cil.getEFCardInfo());
 
 	cil = efcaB.getCardInfoLocator();
 
-	assertEquals(cil.getProtocol().toString(), "0.4.0.127.0.7.2.2.6");
-	assertEquals(cil.getProtocol().toString(), EACObjectIdentifier.id_CI.toString());
+	assertEquals(cil.getProtocol(), "0.4.0.127.0.7.2.2.6");
+	assertEquals(cil.getProtocol(), EACObjectIdentifier.id_CI);
 	assertEquals(cil.getURL(), "AwT ePA - BDr GmbH - Testkarte v1.0");
 	assertNull(cil.getEFCardInfo());
     }

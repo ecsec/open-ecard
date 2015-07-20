@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,22 +26,25 @@ import java.security.spec.AlgorithmParameterSpec;
 
 
 /**
+ * Wrapper for {@link PACEDomainParameterInfo} with some convenience functions.
+ *
  * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public final class PACEDomainParameter {
 
     private AlgorithmParameterSpec domainParameter;
-    private PACESecurityInfos psi;
-    private PACEInfo pi;
+    private final PACESecurityInfoPair pip;
+    private final PACEInfo pi;
 
     /**
      * Create new PACEDomainParameter. Loads parameter as defined in the PACEInfo.
      *
-     * @param psi PACESecurityInfos
+     * @param pip PACESecurityInfoPair
      */
-    public PACEDomainParameter(PACESecurityInfos psi) {
-	this.psi = psi;
-	this.pi = psi.getPACEInfo();
+    public PACEDomainParameter(PACESecurityInfoPair pip) {
+	this.pip = pip;
+	this.pi = pip.getPACEInfo();
 
 	loadParameters();
     }
@@ -49,12 +52,12 @@ public final class PACEDomainParameter {
     /**
      * Create new PACEDomainParameter.
      *
-     * @param psi PACESecurityInfos
+     * @param pip PACESecurityInfoPair
      * @param domainParameter AlgorithmParameterSpec
      */
-    public PACEDomainParameter(PACESecurityInfos psi, AlgorithmParameterSpec domainParameter) {
-	this.psi = psi;
-	this.pi = psi.getPACEInfo();
+    public PACEDomainParameter(PACESecurityInfoPair pip, AlgorithmParameterSpec domainParameter) {
+	this.pip = pip;
+	this.pi = pip.getPACEInfo();
 	this.domainParameter = domainParameter;
     }
 
@@ -95,13 +98,13 @@ public final class PACEDomainParameter {
     }
 
     private void loadParameters() {
-	// If PACEInfo parameterID is present use standardized domain parameters
-	if (pi.getParameterID() != -1) {
+	// if parameter info is not present use standard parameters
+	if (! pip.hasPACEDomainParameterInfo()) {
 	    int index = pi.getParameterID();
 	    domainParameter = new StandardizedDomainParameters(index).getParameter();
-	} // else load proprietary domain parameters from PACEDomainParameterInfo
-	else {
-	    PACEDomainParameterInfo pdp = psi.getPACEDomainParameterInfo();
+	} else {
+	    // use explicit domain parameters
+	    PACEDomainParameterInfo pdp = pip.getPACEDomainParameterInfo();
 	    domainParameter = new ExplicitDomainParameters(pdp.getDomainParameter()).getParameter();
 	}
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -31,31 +31,20 @@ import java.util.List;
  * See BSI-TR-03110, version 2.10, part 3, section A.1.1.1.
  *
  * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public final class PACESecurityInfos {
 
     private List<PACEDomainParameterInfo> pdpiList;
     private List<PACEInfo> piList;
-    private int pdpiIndex;
-    private int piIndex;
+    private List<PACESecurityInfoPair> pipList;
 
     /**
      * Creates a new set of PACESecurityInfos.
      */
     public PACESecurityInfos() {
-	pdpiList = new ArrayList<PACEDomainParameterInfo>();
-	piList = new ArrayList<PACEInfo>();
-	pdpiIndex = 0;
-	piIndex = 0;
-    }
-
-    /**
-     * Returns the selected PACEDomainParameterInfo.
-     *
-     * @return PACEDomainParameterInfo
-     */
-    public PACEDomainParameterInfo getPACEDomainParameterInfo() {
-	return pdpiList.get(pdpiIndex);
+	pdpiList = new ArrayList<>();
+	piList = new ArrayList<>();
     }
 
     /**
@@ -86,26 +75,6 @@ public final class PACESecurityInfos {
     }
 
     /**
-     * Selects a PACEDomainParameterInfo.
-     * @param index Index
-     */
-    public void selectPACEDomainParameterInfo(int index) {
-	if (index < 0 || index > pdpiList.size() - 1) {
-	    throw new IllegalArgumentException("Index out of range.");
-	}
-	this.pdpiIndex = index;
-    }
-
-    /**
-     * Returns the selected PACEInfo.
-     *
-     * @return PACEInfo
-     */
-    public PACEInfo getPACEInfo() {
-	return piList.get(piIndex);
-    }
-
-    /**
      * Returns the PACEInfos.
      *
      * @return PACEInfos
@@ -133,15 +102,48 @@ public final class PACESecurityInfos {
     }
 
     /**
-     * Selects a PACEInfo.
+     * Gets the PACEInfo pairs that are contained in SecurityInfos object.
      *
-     * @param index Index
+     * @return List containing all PACEInfo pairs.
      */
-    public void selectPACEInfo(int index) {
-	if (index < 0 || index > piList.size() - 1) {
-	    throw new IllegalArgumentException("Index out of range.");
+    public List<PACESecurityInfoPair> getPACEInfoPairs() {
+	if (pipList == null) {
+	    pipList = createPACEInfoPairs();
 	}
-	this.piIndex = index;
+	return pipList;
+    }
+
+    private List<PACESecurityInfoPair> createPACEInfoPairs() {
+	ArrayList<PACESecurityInfoPair> result = new ArrayList<>();
+
+	// special case when there is only one element
+	// in that case the parameter id is optional because a binding of explicit Domain Parameters is implicit
+	if (piList.size() == 1) {
+	    if (pdpiList.isEmpty()) {
+		result.add(new PACESecurityInfoPair(piList.get(0), null));
+	    } else {
+		result.add(new PACESecurityInfoPair(piList.get(0), pdpiList.get(0)));
+	    }
+	    return result;
+	}
+
+	for (PACEInfo pi : piList) {
+	    int id = pi.getParameterID();
+	    boolean found = false;
+	    if (id != -1) {
+		for (PACEDomainParameterInfo dpi : pdpiList) {
+		    if (id == dpi.getParameterID()) {
+			found = true;
+			result.add(new PACESecurityInfoPair(pi, dpi));
+			break;
+		    }
+		}
+	    }
+	    if (! found) {
+		result.add(new PACESecurityInfoPair(pi, null));
+	    }
+	}
+	return result;
     }
 
 }

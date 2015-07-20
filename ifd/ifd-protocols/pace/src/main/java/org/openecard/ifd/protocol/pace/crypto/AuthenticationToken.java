@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -31,7 +31,7 @@ import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
 import org.openecard.common.tlv.TagClass;
 import org.openecard.common.util.ByteUtils;
-import org.openecard.crypto.common.asn1.eac.PACESecurityInfos;
+import org.openecard.crypto.common.asn1.eac.PACEInfo;
 import org.openecard.crypto.common.asn1.utils.ObjectIdentifierUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ public final class AuthenticationToken {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationToken.class.getName());
 
-    private final PACESecurityInfos psi;
+    private final PACEInfo pi;
     // Byte encoded token
     private final byte[] token = new byte[8];
     // Certificate Authority Reference (CAR)
@@ -56,10 +56,10 @@ public final class AuthenticationToken {
     /**
      * Creates a new AuthenticationToken.
      *
-     * @param psi PACESecurityInfos
+     * @param pi PACEInfo
      */
-    public AuthenticationToken(PACESecurityInfos psi) {
-	this.psi = psi;
+    public AuthenticationToken(PACEInfo pi) {
+	this.pi = pi;
     }
 
     /**
@@ -198,7 +198,7 @@ public final class AuthenticationToken {
 
 	    TLV oidObject = new TLV();
 	    oidObject.setTagNumWithClass((byte) 0x06);
-	    oidObject.setValue(ObjectIdentifierUtils.getValue(psi.getPACEInfo().getProtocol()));
+	    oidObject.setValue(ObjectIdentifierUtils.getValue(pi.getProtocol()));
 	    oidObject.addToEnd(keyObject);
 
 	    TLV macObject = new TLV();

@@ -97,8 +97,8 @@ public final class PACEDomainParameterInfo {
      * @return true if oid is a PACE object identifier, otherwise false
      */
     public static boolean isPACEObjectIdentifer(String oid) {
-	for (int i = 0; i < protocols.length; i++) {
-	    if (protocols[i].equals(oid)) {
+	for (String p : protocols) {
+	    if (p.equals(oid)) {
 		return true;
 	    }
 	}

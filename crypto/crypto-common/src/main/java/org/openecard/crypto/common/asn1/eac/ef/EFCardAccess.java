@@ -50,7 +50,7 @@ public final class EFCardAccess {
 
     private static final Logger _logger = LoggerFactory.getLogger(EFCardAccess.class);
 
-    private SecurityInfos sis;
+    private final SecurityInfos sis;
     private PACESecurityInfos psi;
     private TASecurityInfos tsi;
     private CASecurityInfos csi;

@@ -294,7 +294,7 @@ public class PACEImplementation {
 
 	    if (tokenPICC.verifyToken(response.getData(), specifiedCHAT)) {
 		currentCAR = tokenPICC.getCurrentCAR();
-		previousCAR = tokenPCD.getPreviousCAR();
+		previousCAR = tokenPICC.getPreviousCAR();
 	    } else {
 		throw new GeneralSecurityException("Cannot verify authentication token.");
 	    }

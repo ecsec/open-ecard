@@ -117,7 +117,12 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    certificateChain.addCertificates(eac2Input.getCertificates());
 
 	    byte[] currentCAR = (byte[]) internalData.get(EACConstants.IDATA_CURRENT_CAR);
+	    byte[] previousCAR = (byte[]) internalData.get(EACConstants.IDATA_PREVIOUS_CAR);
 	    certificateChain = certificateChain.getCertificateChainFromCAR(currentCAR);
+	    // try again with previous car if it didn't work
+	    if (certificateChain.getCertificates().isEmpty() && previousCAR != null) {
+		certificateChain = certificateChain.getCertificateChainFromCAR(previousCAR);
+	    }
 
 	    if (certificateChain.getCertificates().isEmpty()) {
 		String msg = "Failed to create a valid certificate chain from the transmitted certificates.";

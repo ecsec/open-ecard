@@ -358,6 +358,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    internalData.put(EACConstants.IDATA_AUTHENTICATED_AUXILIARY_DATA, aad);
 	    internalData.put(EACConstants.IDATA_CERTIFICATES, certChain);
 	    internalData.put(EACConstants.IDATA_CURRENT_CAR, currentCAR);
+	    internalData.put(EACConstants.IDATA_PREVIOUS_CAR, previousCAR);
 	    internalData.put(EACConstants.IDATA_CHALLENGE, challenge);
 
 	    // Create response

@@ -188,6 +188,7 @@ public class PINStepAction extends StepAction {
 		    } else {
 			step.addNativeCANNotice();
 		    }
+		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_BLOCKED)) {
 		    logger.warn("Wrong PIN entered. The PIN is blocked.");
 		    return new StepActionResult(StepActionResultStatus.REPEAT,

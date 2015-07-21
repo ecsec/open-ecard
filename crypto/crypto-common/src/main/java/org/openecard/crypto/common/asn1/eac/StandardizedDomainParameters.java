@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -37,7 +37,7 @@ import org.openecard.bouncycastle.jce.spec.ElGamalParameterSpec;
  */
 public final class StandardizedDomainParameters extends DomainParameters {
 
-    private final static Map<Integer, Object> map = new HashMap<Integer, Object>();
+    private final static Map<Integer, Object> map = new HashMap<>();
 
     // See RFC 5114, Section 2.1. 1024-bit MODP Group with 160-bit Prime Order Subgroup
     static {

@@ -85,7 +85,7 @@ public class PACEImplementation {
     public PACEImplementation(Dispatcher dispatcher, byte[] slotHandle, PACESecurityInfos paceSecurityInfos) throws Exception {
 	this.dispatcher = dispatcher;
 	this.slotHandle = slotHandle;
-	this.psip = paceSecurityInfos.getPACEInfoPairs().get(0);
+	this.psip = paceSecurityInfos.getPACEInfoPairs(PACEConstants.SUPPORTED_PACE_PROTOCOLS).get(0);
 
 	domainParameter = new PACEDomainParameter(this.psip);
 	cryptoSuite = new PACECryptoSuite(this.psip.getPACEInfo(), domainParameter);

@@ -22,6 +22,10 @@
 
 package org.openecard.ifd.protocol.pace;
 
+import java.util.Arrays;
+import java.util.List;
+import org.openecard.crypto.common.asn1.eac.oid.PACEObjectIdentifier;
+
 
 /**
  * Defines constants for the PACE protocol.
@@ -50,5 +54,9 @@ class PACEConstants {
     public static final short CONDITIONS_OF_USE_NOT_SATISFIED = (short) 0x6985;
     public static final short CMD_FAILED = (short) 0x6300;
     public static final short INCORRECT_PARA = (short) 0x6300;
+
+    public static final List<String> SUPPORTED_PACE_PROTOCOLS = Arrays.asList(
+	    PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128
+    );
 
 }

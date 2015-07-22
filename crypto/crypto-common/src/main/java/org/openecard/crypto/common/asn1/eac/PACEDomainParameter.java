@@ -98,8 +98,8 @@ public final class PACEDomainParameter {
     }
 
     private void loadParameters() {
-	// if parameter info is not present use standard parameters
-	if (! pip.hasPACEDomainParameterInfo()) {
+	// see if this is a standardized parameter or not
+	if (pip.isStandardizedParameter()) {
 	    int index = pi.getParameterID();
 	    domainParameter = new StandardizedDomainParameters(index).getParameter();
 	} else {

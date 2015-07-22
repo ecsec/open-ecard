@@ -57,14 +57,9 @@ public class PACESecurityInfoPair {
 	return dpi;
     }
 
-    /**
-     * Checks if there is a PACEDomainParameterInfo object associated with the PACEInfo object.
-     * This also indicates whether the PACEInfo object uses standard domain paramaters or not.
-     *
-     * @return Returns true if there is a PACEDomainParameterInfo object, false otherwise.
-     */
-    public boolean hasPACEDomainParameterInfo() {
-	return dpi != null;
+    public boolean isStandardizedParameter() {
+	int id = pi.getParameterID();
+	return id >= 0 && id <= 31;
     }
 
     /**

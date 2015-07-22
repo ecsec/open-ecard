@@ -113,6 +113,16 @@ public final class PACESecurityInfos {
 	return pipList;
     }
 
+    public List<PACESecurityInfoPair> getPACEInfoPairs(List<String> supportedProtocols, List<Integer> supportedParams) {
+	List<PACESecurityInfoPair> result = new ArrayList<>();
+	for (PACESecurityInfoPair next : getPACEInfoPairs(supportedProtocols)) {
+	    if (supportedParams.contains(next.getPACEInfo().getParameterID())) {
+		result.add(next);
+	    }
+	}
+	return result;
+    }
+
     public List<PACESecurityInfoPair> getPACEInfoPairs(List<String> supportedProtocols) {
 	List<PACESecurityInfoPair> result = new ArrayList<>();
 	for (PACESecurityInfoPair next : getPACEInfoPairs()) {

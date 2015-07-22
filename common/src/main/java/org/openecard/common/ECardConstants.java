@@ -506,7 +506,7 @@ public class ECardConstants {
 
     };
 
-    private static final TreeMap<String,String> msgMap = new TreeMap<String, String>();
+    private static final TreeMap<String,String> msgMap = new TreeMap<>();
 
     static {
 	// major types

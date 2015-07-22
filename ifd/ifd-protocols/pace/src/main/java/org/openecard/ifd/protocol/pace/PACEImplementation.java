@@ -23,6 +23,7 @@
 package org.openecard.ifd.protocol.pace;
 
 import java.security.GeneralSecurityException;
+import java.util.List;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.apdu.GeneralAuthenticate;
 import org.openecard.common.apdu.common.CardCommandAPDU;
@@ -82,10 +83,19 @@ public class PACEImplementation {
      * @param paceSecurityInfos PACESecurityInfos
      * @throws Exception Exception
      */
-    public PACEImplementation(Dispatcher dispatcher, byte[] slotHandle, PACESecurityInfos paceSecurityInfos) throws Exception {
+    public PACEImplementation(Dispatcher dispatcher, byte[] slotHandle, PACESecurityInfos paceSecurityInfos)
+	    throws Exception {
 	this.dispatcher = dispatcher;
 	this.slotHandle = slotHandle;
-	this.psip = paceSecurityInfos.getPACEInfoPairs(PACEConstants.SUPPORTED_PACE_PROTOCOLS).get(0);
+	List<PACESecurityInfoPair> paceInfoPairs = paceSecurityInfos.getPACEInfoPairs(
+		PACEConstants.SUPPORTED_PACE_PROTOCOLS,
+		PACEConstants.SUPPORTED_PACE_DOMAIN_PARAMS);
+	if (paceInfoPairs.isEmpty()) {
+	    String msg = "No supported PACE keys found on the card.";
+	    logger.error(msg);
+	    throw new ProtocolException(ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION, msg);
+	}
+	this.psip = paceInfoPairs.get(0);
 
 	domainParameter = new PACEDomainParameter(this.psip);
 	cryptoSuite = new PACECryptoSuite(this.psip.getPACEInfo(), domainParameter);

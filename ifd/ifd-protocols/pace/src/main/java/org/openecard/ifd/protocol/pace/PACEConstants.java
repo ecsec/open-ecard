@@ -59,9 +59,9 @@ class PACEConstants {
 	    PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128
     );
     public static final List<Integer> SUPPORTED_PACE_DOMAIN_PARAMS = Arrays.asList(
-	    10, // NIST P-192 (secp192r1)
-	    11, // BrainpoolP192r1
-	    12, // NIST P-224 (secp224r1)
+	    10, // NIST P-224 (secp224r1)
+	    11, // BrainpoolP224r1
+	    12, // NIST P-256 (secp256r1)
 	    13, // BrainpoolP256r1
 	    14, // BrainpoolP320r1
 	    15, // NIST P-384 (secp384r1)

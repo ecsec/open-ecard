@@ -108,9 +108,15 @@ public class TCTokenHandler {
     private static final Logger logger = LoggerFactory.getLogger(TCTokenHandler.class);
 
     private static final I18n langTr03112 = I18n.getTranslation("tr03112");
+    private static final I18n lang = I18n.getTranslation("tctoken");
+    private static final I18n langPin = I18n.getTranslation("pinplugin");
+    private static final I18n langPace = I18n.getTranslation("pace");
 
-    private final I18n lang = I18n.getTranslation("tctoken");
-
+    // Translation constants
+    private static final String ERROR_CARD_REMOVED = "action.error.card.removed";
+    
+    private final String pin;
+    private final String puk;
     private final CardStateMap cardStates;
     private final Dispatcher dispatcher;
     private final UserConsent gui;
@@ -130,6 +136,8 @@ public class TCTokenHandler {
 	this.rec = ctx.getRecognition();
 	this.manager = ctx.getManager();
 	this.evManager = ctx.getEventManager();
+	pin = langPace.translationForKey("pin");
+	puk = langPace.translationForKey("puk");
     }
 
     private ConnectionHandleType prepareHandle(ConnectionHandleType connectionHandle) throws DispatcherException, InvocationTargetException, WSException {
@@ -541,6 +549,14 @@ public class TCTokenHandler {
 	    case ECardConstants.Minor.SAL.UNKNOWN_HANDLE:
 		errorMsg = langTr03112.translationForKey(UNKNOWN_CONNECTION_HANDLE);
 		response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
+		break;
+	    case ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE:
+		errorMsg = langPin.translationForKey(ERROR_CARD_REMOVED);
+		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));
+		break;
+	    case ECardConstants.Minor.IFD.PASSWORD_BLOCKED:
+		errorMsg = langPace.translationForKey("step_error_pin_blocked", pin, pin, puk, pin);
+		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));
 		break;
 	    default:
 		errorMsg = langTr03112.translationForKey(ERROR_WHILE_AUTHENTICATION);

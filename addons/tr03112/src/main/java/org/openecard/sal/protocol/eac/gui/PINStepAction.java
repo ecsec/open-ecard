@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -88,6 +88,7 @@ public class PINStepAction extends StepAction {
     private final PINStep step;
     private final I18n lang = I18n.getTranslation("pace");
     private final I18n langPin = I18n.getTranslation("pinplugin");
+    private final DynamicContext ctx;
 
     private int retryCounter;
 
@@ -99,6 +100,7 @@ public class PINStepAction extends StepAction {
 	this.slotHandle = slotHandle;
 	this.dispatcher = dispatcher;
 	this.step = step;
+	this.ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 	// check pin status
 	if (Arrays.equals(status, RC3)) {
@@ -147,18 +149,21 @@ public class PINStepAction extends StepAction {
 		}
 	    } catch (DispatcherException | InvocationTargetException ex) {
 		logger.error("Failed to dispatch the EstablishChannel request.", ex);
+		ctx.put(EACProtocol.PACE_EXCEPTION, ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 		    new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_INTERNAL)));
 	    } catch (WSException ex) {
 		// This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 		if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
 		    logger.error("User canceled the authentication manually.", ex);
+		    ctx.put(EACProtocol.PACE_EXCEPTION, ex);
 		    return new StepActionResult(StepActionResultStatus.CANCEL);
 		}
 
 		// for people which think they have to remove the card in the process
 		if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
 		    logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
+		    ctx.put(EACProtocol.PACE_EXCEPTION, ex);
 		    return new StepActionResult(StepActionResultStatus.REPEAT, 
 			    new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_CARD_REMOVED)));
 		}
@@ -191,6 +196,7 @@ public class PINStepAction extends StepAction {
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_BLOCKED)) {
 		    logger.warn("Wrong PIN entered. The PIN is blocked.");
+		    ctx.put(EACProtocol.PACE_EXCEPTION, WSHelper.createException(establishChannelResponse.getResult()));
 		    return new StepActionResult(StepActionResultStatus.REPEAT,
 			new ErrorStep(lang.translationForKey("step_error_title_blocked", pin),
 				lang.translationForKey("step_error_pin_blocked", pin, pin, puk, pin)));
@@ -202,29 +208,32 @@ public class PINStepAction extends StepAction {
 
 	    eacData.paceResponse = establishChannelResponse;
 	    // PACE completed successfully, proceed with next step
-	    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	    ctx.put(EACProtocol.PACE_SUCCESSFUL, true);
+	    ctx.put(EACProtocol.PACE_EXCEPTION, null);
 	    return new StepActionResult(StepActionResultStatus.NEXT);
 	} catch (WSException ex) {
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
 		logger.error("User canceled the authentication manually.", ex);
+		ctx.put(EACProtocol.PACE_EXCEPTION, ex);
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
 
 	    // for people which think they have to remove the card in the process
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
 		logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
+		ctx.put(EACProtocol.PACE_EXCEPTION, ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_CARD_REMOVED)));
 	    }
 
 	    // repeat the step
 	    logger.error("An unknown error occured while trying to verify the PIN.");
+	    ctx.put(EACProtocol.PACE_EXCEPTION, ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    new ErrorStep(langPin.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_UNKNOWN)));
 	} catch (DispatcherException | InvocationTargetException ex) {
 	    logger.error("Failed to dispatch EstablishChannelCommand.", ex);
+	    ctx.put(EACProtocol.PACE_EXCEPTION, ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_INTERNAL)));
 	}

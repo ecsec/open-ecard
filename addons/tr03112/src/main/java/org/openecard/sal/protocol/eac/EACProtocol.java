@@ -52,7 +52,7 @@ public class EACProtocol extends SALProtocolBaseImpl {
     public static final String PIN_STATUS_BYTES = PREFIX + "pin_status_bytes";
     public static final String IS_NATIVE_PACE = PREFIX + "is_native_pace";
     public static final String PACE_MARKER = PREFIX + "pace_marker";
-    public static final String PACE_SUCCESSFUL = PREFIX + "pace_successful";
+    public static final String PACE_EXCEPTION = PREFIX + "pace_successful";
     public static final String GUI_RESULT = PREFIX + "gui_result";
     public static final String SLOT_HANDLE = PREFIX + "slot_handle";
     public static final String DISPATCHER = PREFIX + "dispatcher";

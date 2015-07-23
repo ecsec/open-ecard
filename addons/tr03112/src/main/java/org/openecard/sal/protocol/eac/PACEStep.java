@@ -33,6 +33,7 @@ import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
 import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.CertificateException;
@@ -52,6 +53,7 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.ifd.PACECapabilities;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.interfaces.ObjectSchemaValidator;
 import org.openecard.common.interfaces.ObjectValidatorException;
@@ -84,7 +86,6 @@ import org.openecard.sal.protocol.eac.gui.CVCStep;
 import org.openecard.sal.protocol.eac.gui.CVCStepAction;
 import org.openecard.sal.protocol.eac.gui.CardMonitor;
 import org.openecard.sal.protocol.eac.gui.CardRemovedFilter;
-import org.openecard.sal.protocol.eac.gui.ErrorStep;
 import org.openecard.sal.protocol.eac.gui.PINStep;
 import org.openecard.sal.protocol.eac.gui.ProcessingStep;
 import org.openecard.sal.protocol.eac.gui.ProcessingStepAction;
@@ -292,14 +293,17 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		procStep.setAction(procStepAction);
 		uc.getSteps().add(procStep);
 	    } else {
-		String pin = langPace.translationForKey("pin");
-		String puk = langPace.translationForKey("puk");
-		String title = langPace.translationForKey("step_error_title_blocked", pin);
-		String errorMsg = langPace.translationForKey("step_error_pin_blocked", pin, pin, puk, pin);
-		ErrorStep eStep = new ErrorStep(title, errorMsg);
-		uc.getSteps().add(eStep);
+		// ErrorStep is currently not used and needs to be reworked in 1.3.X
+		// disable the step here completely to avoid flashing of the step ui.
+//		String pin = langPace.translationForKey("pin");
+//		String puk = langPace.translationForKey("puk");
+//		String title = langPace.translationForKey("step_error_title_blocked", pin);
+//		String errorMsg = langPace.translationForKey("step_error_pin_blocked", pin, pin, puk, pin);
+//		ErrorStep eStep = new ErrorStep(title, errorMsg);
+//		uc.getSteps().add(eStep);
 
-		dynCtx.put(EACProtocol.PACE_SUCCESSFUL, false);
+		dynCtx.put(EACProtocol.PACE_EXCEPTION, WSHelper.createException(WSHelper.makeResultError(
+			ECardConstants.Minor.IFD.PASSWORD_BLOCKED, "The PIN is blocked.")));
 	    }
 
 	    Thread guiThread = new Thread(new Runnable() {
@@ -307,18 +311,20 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		public void run() {
 		    // get context here because it is thread local
 		    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+		    if (!uc.getSteps().isEmpty()) {
+			UserConsentNavigator navigator = gui.obtainNavigator(uc);
+			dynCtx.put(TR03112Keys.OPEN_USER_CONSENT_NAVIGATOR, navigator);
+			ExecutionEngine exec = new ExecutionEngine(navigator);
+			ResultStatus guiResult = exec.process();
 
-		    UserConsentNavigator navigator = gui.obtainNavigator(uc);
-		    dynCtx.put(TR03112Keys.OPEN_USER_CONSENT_NAVIGATOR, navigator);
-		    ExecutionEngine exec = new ExecutionEngine(navigator);
-		    ResultStatus guiResult = exec.process();
+			dynCtx.put(EACProtocol.GUI_RESULT, guiResult);
 
-		    dynCtx.put(EACProtocol.GUI_RESULT, guiResult);
-
-		    if (guiResult == ResultStatus.CANCEL) {
-			Promise<Object> pPaceSuccessful = dynCtx.getPromise(EACProtocol.PACE_SUCCESSFUL);
-			if (! pPaceSuccessful.isDelivered()) {
-			    pPaceSuccessful.deliver(false);
+			if (guiResult == ResultStatus.CANCEL) {
+			    Promise<Object> pPaceSuccessful = dynCtx.getPromise(EACProtocol.PACE_EXCEPTION);
+			    if (!pPaceSuccessful.isDelivered()) {
+				pPaceSuccessful.deliver(WSHelper.createException(WSHelper.makeResultError(
+					ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the PACE dialog.")));
+			    }
 			}
 		    }
 		}
@@ -326,15 +332,23 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    guiThread.start();
 
 	    // wait for PACE to finish
-	    Promise<Object> pPaceSuccessful = dynCtx.getPromise(EACProtocol.PACE_SUCCESSFUL);
-	    boolean paceSuccessful = (boolean) pPaceSuccessful.deref();
-	    if (! paceSuccessful) {
-		// TODO: differentiate between cancel and pin error
-		String msg = "Failure in PACE authentication.";
-		Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg);
-		response.setResult(r);
-		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
-		return response;
+	    Promise<Object> pPaceException = dynCtx.getPromise(EACProtocol.PACE_EXCEPTION);
+	    Object pPaceError = pPaceException.deref();
+	    if (pPaceError != null) {
+		if (pPaceError instanceof WSHelper.WSException) {
+		    response.setResult(((WSHelper.WSException) pPaceError).getResult());
+		    return response;
+		} else if (pPaceError instanceof DispatcherException | pPaceError instanceof InvocationTargetException) {
+		    String msg = "Internal error while PACE authentication.";
+		    Result r = WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg);
+		    response.setResult(r);
+		    return response;
+		} else {
+		    String msg = "Unknown error while PACE authentication.";
+		    Result r = WSHelper.makeResultError(ECardConstants.Minor.App.UNKNOWN_ERROR, msg);
+		    response.setResult(r);
+		    return response;
+		}
 	    }
 
 	    // get challenge from card

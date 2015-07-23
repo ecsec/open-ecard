@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,13 +22,18 @@
 
 package org.openecard.sal.protocol.eac.gui;
 
+import org.openecard.binding.tctoken.TR03112Keys;
+import org.openecard.common.DynamicContext;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
+import org.openecard.common.WSHelper;
 import org.openecard.common.enums.EventType;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.executor.BackgroundTask;
 import org.openecard.gui.executor.StepActionResult;
 import org.openecard.gui.executor.StepActionResultStatus;
+import org.openecard.sal.protocol.eac.EACProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +67,9 @@ public class CardMonitor implements BackgroundTask, EventCallback {
 	    String title = langPin.translationForKey(ERROR_TITLE);
 	    String desc = langPin.translationForKey(ERROR_CARD_REMOVED);
 	    ErrorStep replacement = new ErrorStep(title, desc);
+	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    dynCtx.put(EACProtocol.PACE_EXCEPTION, WSHelper.createException(WSHelper.makeResultError(
+		    ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Card has been removed.")));
 	    return new StepActionResult(StepActionResultStatus.REPEAT, replacement);
 	} catch (InterruptedException ex) {
 	    logger.debug("Card has not been removed.");

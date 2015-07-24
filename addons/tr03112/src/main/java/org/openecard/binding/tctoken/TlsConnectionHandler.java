@@ -132,7 +132,7 @@ public class TlsConnectionHandler {
 			// no changes
 			break;
 		    case "urn:ietf:rfc:4279":
-			minVersion = tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11;
+			minVersion = ProtocolVersion.TLSv11;
 			break;
 		}
 

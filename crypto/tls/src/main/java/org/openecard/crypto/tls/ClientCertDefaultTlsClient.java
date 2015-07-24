@@ -33,6 +33,7 @@ import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.AlertLevel;
 import org.openecard.bouncycastle.crypto.tls.CipherSuite;
 import org.openecard.bouncycastle.crypto.tls.DefaultTlsClient;
+import org.openecard.bouncycastle.crypto.tls.ECPointFormat;
 import org.openecard.bouncycastle.crypto.tls.HashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.NamedCurve;
 import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
@@ -255,9 +256,14 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
                 }
             }
 
+            this.clientECPointFormats = new short[]{
+		ECPointFormat.ansiX962_compressed_prime, ECPointFormat.uncompressed
+            };
+
             clientExtensions = TlsExtensionsUtils.ensureExtensionsInitialised(clientExtensions);
 
             TlsUtils.addSignatureAlgorithmsExtension(clientExtensions, supportedSignatureAlgorithms);
+	    TlsECCUtils.addSupportedPointFormatsExtension(clientExtensions, clientECPointFormats);
         }
 
 	return clientExtensions;

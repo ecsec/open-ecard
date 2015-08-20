@@ -13,33 +13,17 @@
 package org.openecard.crypto.common.sal;
 
 import java.security.cert.X509Certificate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
-
+/**
+ *
+ * @author René Lottes
+ */
 public class SignatureUsageWrapper {
     
-    public enum SignatureUsage {
-        DIGITAL_SIGNATURE,
-        NON_REPUDIATION,
-        KEY_CERT_SIGN,
-        CRL_SIGN;
-        
-        public boolean hasUsage(X509Certificate cert) {
-            throw new UnsupportedOperationException("Not implemented yet");
-        }
-    }
-    
-    public enum ExtendedKeyUsage {
-        SERVER_AUTH,
-        CLIENT_AUTH,
-        CODE_SIGNING,
-        EMAIL_PROTECTION,
-        OCSP_SIGNING;
-        
-        public boolean hasUsage(X509Certificate cert) {
-            throw new UnsupportedOperationException("Not implemented yet");
-        }
-    }
+    private static final Logger logger = LoggerFactory.getLogger(SignatureUsageWrapper.class);
     
     private SignatureUsage keyUsage;
     private ExtendedKeyUsage extendedKeyUsage;
@@ -57,8 +41,15 @@ public class SignatureUsageWrapper {
         this.extendedKeyUsage = extUsage;
     }
     
-    public boolean hasUsage(X509Certificate cert) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public boolean hasUsage(X509Certificate x509cert) {
+        if (keyUsage != null && extendedKeyUsage != null) {
+            return (keyUsage.hasUsage(x509cert) & extendedKeyUsage.hasUsage(x509cert));
+        } else if (keyUsage != null) {
+            return keyUsage.hasUsage(x509cert);
+        } else if (extendedKeyUsage != null) {
+            return extendedKeyUsage.hasUsage(x509cert);
+        }
+        return false;
     }
     
 }

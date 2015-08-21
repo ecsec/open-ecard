@@ -43,6 +43,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.HashAlgorithm;
@@ -209,6 +210,25 @@ public class GenericCryptoSigner {
 	return bcCert;
     }
 
+    public String getAlgorithm() {
+        String algorithm = null;
+        
+        try {
+            DIDGet didGet = new DIDGet();
+            didGet.setConnectionHandle(handle);
+            didGet.setDIDName(didName);
+            DIDGetResponse didGetResponse = (DIDGetResponse) dispatcher.deliver(didGet);
+            WSHelper.checkResult(didGetResponse);
+            CryptoMarkerType cryptoMarker = new CryptoMarkerType(didGetResponse.getDIDStructure().getDIDMarker());
+
+            algorithm = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
+        } catch (WSException | DispatcherException | InvocationTargetException ex) {
+            logger.error("Error getting algorithm.", ex);
+        }
+        
+        return algorithm;
+    }
+    
     /**
      * Signs the given hash with the DID represented by this instance.
      *

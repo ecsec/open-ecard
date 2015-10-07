@@ -72,7 +72,7 @@ public final class StandardizedDomainParameters extends DomainParameters {
 	map.put(8, "secp192r1");
 	map.put(9, "BrainpoolP192r1");
 	map.put(10, "secp224r1");
-	map.put(11, "BrainpoolP256r1");
+	map.put(11, "BrainpoolP224r1");
 	map.put(12, "secp256r1");
 	map.put(13, "BrainpoolP256r1");
 	map.put(14, "BrainpoolP320r1");

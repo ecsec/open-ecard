@@ -237,8 +237,12 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 		// other possible parameters TR-02102-2 sec. 3.6
 		NamedCurve.secp384r1, NamedCurve.brainpoolP384r1, NamedCurve.brainpoolP512r1,
 	    };
+	    this.clientECPointFormats = new short[]{
+		ECPointFormat.ansiX962_compressed_prime, ECPointFormat.uncompressed
+	    };
 
             TlsECCUtils.addSupportedEllipticCurvesExtension(clientExtensions, namedCurves);
+	    TlsECCUtils.addSupportedPointFormatsExtension(clientExtensions, clientECPointFormats);
 	}
 
 	// overwrite hash and signature algorithms
@@ -256,14 +260,9 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
                 }
             }
 
-            this.clientECPointFormats = new short[]{
-		ECPointFormat.ansiX962_compressed_prime, ECPointFormat.uncompressed
-            };
-
             clientExtensions = TlsExtensionsUtils.ensureExtensionsInitialised(clientExtensions);
 
             TlsUtils.addSignatureAlgorithmsExtension(clientExtensions, supportedSignatureAlgorithms);
-	    TlsECCUtils.addSupportedPointFormatsExtension(clientExtensions, clientECPointFormats);
         }
 
 	return clientExtensions;

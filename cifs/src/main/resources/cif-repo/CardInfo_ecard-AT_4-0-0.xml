@@ -1461,7 +1461,7 @@
 				<iso:AlgorithmIdentifier>
 				    <iso:Algorithm>urn:oid:1.2.840.10045.4.1</iso:Algorithm>
 				</iso:AlgorithmIdentifier>
-				<iso:SupportedOperations>Compute-signature Generate-key</iso:SupportedOperations>
+				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 				<iso:CardAlgRef>01</iso:CardAlgRef>
 			    </iso:AlgorithmInfo>
 			    <iso:KeyInfo>
@@ -2107,7 +2107,7 @@
 				<iso:AlgorithmIdentifier>
 				    <iso:Algorithm>urn:oid:1.2.840.10045.4.1</iso:Algorithm>
 				</iso:AlgorithmIdentifier>
-				<iso:SupportedOperations>Compute-signature Generate-key</iso:SupportedOperations>
+				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 				<iso:CardAlgRef>01</iso:CardAlgRef>
 			    </iso:AlgorithmInfo>
 			    <iso:KeyInfo>

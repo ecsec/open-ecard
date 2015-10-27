@@ -6374,7 +6374,7 @@
 										 id-RSASSA-PSS OBJECT IDENTIFIER ::= { pkcs-1 10 } -->
 									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.10</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
-								<iso:SupportedOperations>Internal-authenticate</iso:SupportedOperations>
+								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>05</iso:CardAlgRef>
 							</iso:AlgorithmInfo>
 							<iso:KeyInfo>
@@ -7228,7 +7228,7 @@
 										 id-RSASSA-PSS OBJECT IDENTIFIER ::= { pkcs-1 10 } -->
 									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.10</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
-								<iso:SupportedOperations>Internal-authenticate</iso:SupportedOperations>
+								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>05</iso:CardAlgRef>
 							</iso:AlgorithmInfo>
 							<iso:KeyInfo>

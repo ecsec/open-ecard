@@ -16,7 +16,6 @@
 	<name>Open eCard Webservice Definitions</name>
 
 	<modules>
-		<module>class-list-plugin</module>
 		<module>wsdef-common</module>
 		<module>wsdef-client</module>
 		<module>jaxb-marshaller</module>

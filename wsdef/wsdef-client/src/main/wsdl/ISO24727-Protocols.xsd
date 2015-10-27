@@ -100,7 +100,8 @@
 					<sequence>
 						<element name="SessionIdentifier" type="string" />
 						<element name="ConnectionHandle"
-							type="iso:ConnectionHandleType" maxOccurs="unbounded">
+								 type="iso:ConnectionHandleType" maxOccurs="unbounded"
+								 minOccurs="0">
 						</element>
 						<element name="UserAgent">
 							<complexType>
@@ -727,10 +728,7 @@
 					<element name="Certificate" type="hexBinary"
 						maxOccurs="unbounded" minOccurs="1" />
 					<element name="CertificateDescription"
-						type="hexBinary" maxOccurs="unbounded" minOccurs="0" />
-					<element name="ProviderInfo" type="hexBinary"
-						maxOccurs="1" minOccurs="0">
-					</element>
+						type="hexBinary" />
 					<element name="RequiredCHAT" type="hexBinary"
 						maxOccurs="1" minOccurs="0" />
 					<element name="OptionalCHAT" type="hexBinary"
@@ -747,21 +745,14 @@
 		<complexContent>
 			<restriction base="iso:DIDAuthenticationDataType">
 				<sequence>
-					<element name="RetryCounter"
-						type="nonNegativeInteger" maxOccurs="1" minOccurs="0" />
 					<element
 						name="CertificateHolderAuthorizationTemplate" type="hexBinary"
 						maxOccurs="1" minOccurs="0" />
 					<element name="CertificationAuthorityReference"
-						 type="iso:DIDNameType" maxOccurs="2" minOccurs="0" />
-					<element name="EFCardAccess" type="hexBinary"
-						maxOccurs="1" minOccurs="0" />
-
-					<element name="IDPICC" type="hexBinary"
-						maxOccurs="1" minOccurs="0" />
-
-					<element name="Challenge" type="hexBinary"
-						maxOccurs="1" minOccurs="0" />
+						 type="string" maxOccurs="2" minOccurs="0" />
+					<element name="EFCardAccess" type="hexBinary" />
+					<element name="IDPICC" type="hexBinary" />
+					<element name="Challenge" type="hexBinary" />
 				</sequence>
 			</restriction>
 		</complexContent>
@@ -778,8 +769,7 @@
 					<element name="EphemeralPublicKey" type="hexBinary"
 						maxOccurs="1" minOccurs="1" />
 
-					<element name="Signature" type="hexBinary"
-						maxOccurs="1" minOccurs="0" />
+					<element name="Signature" type="hexBinary" />
 
 				</sequence>
 			</restriction>
@@ -905,7 +895,7 @@
 						name="CertificateHolderAuthorizationTemplate" type="hexBinary"
 						maxOccurs="1" minOccurs="0" />
 					<element name="CertificationAuthorityReference"
-						type="iso:DIDNameType" maxOccurs="2" minOccurs="0" />
+						type="string" maxOccurs="2" minOccurs="0" />
 					<element name="EFCardAccess" type="hexBinary"
 						maxOccurs="1" minOccurs="0" />
 				</sequence>
@@ -1364,20 +1354,14 @@
 				<list>
 					<simpleType>
 						<restriction base="token">
-							<enumeration value="Compute-checksum" />
-							<enumeration value="Compute-signature" />
-							<enumeration value="Verify-checksum" />
-							<enumeration value="Verify-signature" />
-							<enumeration value="Verify-certificate" />
-							<enumeration value="Encipher" />
-							<enumeration value="Decipher" />
-							<enumeration value="Hash" />
-							<enumeration value="Generate-key" />
-							<enumeration value="Internal-authenticate" />
-							<enumeration value="External-authenticate" />
-							<enumeration value="Mutual-authenticate" />
-							<enumeration value="General-authenticate" />
-							<enumeration value="Secure-messaging" />
+							<enumeration value = "Compute-checksum" />
+							<enumeration value = "Compute-signature" />
+							<enumeration value = "Verify-checksum" />
+							<enumeration value = "Verify-signature" />
+							<enumeration value = "Encipher" />
+							<enumeration value = "Decipher" />
+							<enumeration value = "Hash" />
+							<enumeration value = "Derive-key" />
 						</restriction>
 					</simpleType>
 				</list>

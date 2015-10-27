@@ -93,6 +93,7 @@
 				maxOccurs="unbounded" minOccurs="0" />
 		</sequence>
 		<attribute name="Id" type="ID" use="optional" />
+		<attribute name="schemaVersion" type="token" use="optional" />
 	</complexType>
 
 

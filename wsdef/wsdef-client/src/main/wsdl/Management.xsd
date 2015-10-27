@@ -6,8 +6,6 @@
 	xmlns:XAdES="http://uri.etsi.org/01903/v1.3.2#"
 	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
 	xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
-	xmlns:tsl2="http://uri.etsi.org/02231/v2.1.1#"
-	xmlns:tslg="http://uri.etsi.org/02231/v2.x#"
 	xmlns:tsl="http://uri.etsi.org/02231/v3.1.2#"
 
 	xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
@@ -16,13 +14,6 @@
 
 	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
 		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
-
-<!-- 
-     Because the "standard" XAdES.xsd at http://uri.etsi.org/01903/v1.3.2/XAdES.xsd 
-     refers to a seemingly different version of the xmldsig-core-schema.xsd (at http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd)
-     it is necessary to import the local version, which is slightly modified to include the 
-     schema from http://www.w3.org/TR/xmldsig-core/xmldsig-core-schema.xsd.     
- -->
 
 	<import namespace="http://uri.etsi.org/01903/v1.3.2#"
 		schemaLocation="XAdES-1-3-2.xsd" />
@@ -34,58 +25,10 @@
 	<import namespace="http://www.w3.org/2000/09/xmldsig#"
 		schemaLocation="xmldsig-core-schema.xsd" />
 
-	<!-- The XML-schema for the Trust-Service Status list according to 
-		ETSI TS 102231 Version 2.1.1 has been distributed as attachment
-		of the standard document (in a file draft_ts102231v020101xsd.xsd,
-		which is included in a file ts_102231v020101p0.zip, which may be 
-		downloaded from the ETSI web site http://www.etsi.org/). For easier
-		handling of this schema document, a copy of it may also be downloaded from
-		http://sdre.es/mirror/draft/ETSI/TS/102231/v2.1.1/schema.xsd.
-
-		As this version of the schema refers to a seemingly different version of the 
-		xmldsig-core-schema.xsd (at http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd)
-        it is necessary to import the local version, which is slightly modified to include the 
-        current xmldsig-core-schema.xsd. 
-	-->
-
-	<import namespace="http://uri.etsi.org/02231/v2.1.1#"
-		schemaLocation="draft_ts102231v020101xsd.xsd">
-	</import>
-
-	<!-- In order to support the TSLs issued by gematik (cf. http://www.d-trust.de/internet/content/gematik-tsl.html)
-	     it is necessary to import this schema. 
-	     
-		As the online version of the schema at http://www.d-trust.net/internet/files/02231v2.xsd 
-		refers to a seemingly different version of the xmldsig-core-schema.xsd (at http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd)
-        it is necessary to import the local version, which is slightly modified to include the 
-        current xmldsig-core-schema.xsd. 	     
-	-->
-
-	<import namespace="http://uri.etsi.org/02231/v2.x#"
-		schemaLocation="gematik-TSL-02231v2.xsd">
-	</import>
-
-
-	<!-- In order to support the TSLs issued by BNetzA (cf. http://www.nrca-ds.de/st/TSL_DE.XML.tsr.zip)
-	     it is necessary to import the schema for version 3.1.2. 
-	     
-		As the online version of the schema at http://uri.etsi.org/02231/v3.1.2/ts_102231v030102_xsd.xsd
-		refers to a seemingly different version of the xmldsig-core-schema.xsd (at http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd)
-        it is necessary to import the local version, which is slightly modified to include the 
-        current xmldsig-core-schema.xsd. 	     
-	-->
-
 	<import namespace="http://uri.etsi.org/02231/v3.1.2#"
 		schemaLocation="ts_102231v030102_xsd.xsd">
 	</import>
 
-
-<!-- 
-     Because the "standard" xenc-schema.xsd at http://www.w3.org/TR/xmlenc-core/xenc-schema.xsd 
-     refers to a seemingly different version of the xmldsig-core-schema.xsd (at http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd)
-     it is necessary to import the local version, which is slightly modified to include the 
-     current xmldsig-core-schema.xsd .     
- -->
 
 	<import namespace="http://www.w3.org/2001/04/xmlenc#"
 		schemaLocation="xenc-schema.xsd">
@@ -811,8 +754,6 @@
 
 	<complexType name="TSLType">
 		<choice>
-			<element name="TSLv2.1.1" type="tsl2:TrustStatusListType" />
-			<element name="TSLv2.x-gematik" type="tslg:TrustStatusListType" />
 			<element name="TSLv3.1.2" type="tsl:TrustStatusListType" />
 			<element name="Other" type="dss:AnyType"></element>
 		</choice>
@@ -1058,7 +999,12 @@
 	<!--     Service Management         -->
 	<!--         Section 3.6            -->
 	<!-- 3.6.1 GetOCSPServices          -->
-	<element name="GetOCSPServices">		<complexType>			<complexContent>				<extension base="iso:RequestType">					<sequence>						<element name="ChannelHandle"
+	<element name="GetOCSPServices">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ChannelHandle"
 							type="iso:ChannelHandleType" maxOccurs="1" minOccurs="0" />
 					</sequence>
 				</extension>

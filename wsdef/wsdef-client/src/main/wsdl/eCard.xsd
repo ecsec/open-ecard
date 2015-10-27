@@ -100,15 +100,7 @@
 	<!-- 3.2.1 SignRequest               -->
 	<!-- =============================== -->
 
-	<element name="SignRequest">
-		<complexType>
-			<complexContent>
-				<extension base="dss:RequestBaseType">
-					<sequence />
-				</extension>
-			</complexContent>
-		</complexType>
-	</element>
+	<element name="SignRequest" type="dss:RequestBaseType"></element>
 
 	<!-- =============================== -->
 	<!-- optional inputs for SignRequest -->
@@ -139,15 +131,8 @@
 
 	<!-- <Properties> is defined in [OASIS-DSS] -->
 	<!-- new child element of <SignedProperties> within <Properties> -->
-	<element name="PreviousTimeStampHash">
-		<complexType>
-			<complexContent>
-				<extension base="XAdES:DigestAlgAndValueType">
-					<sequence />
-				</extension>
-			</complexContent>
-		</complexType>
-	</element>
+	<element name="PreviousTimeStampHash"
+		type="XAdES:DigestAlgAndValueType" />
 
 	<element name="IncludeEContent" />
 
@@ -157,15 +142,7 @@
 
 	<!-- <Schemas> is defined in [OASIS-DSS] -->
 
-	<element name="TrustedViewerInfo">
-		<complexType>
-			<complexContent>
-				<extension base="ec:TrustedViewerInfoType">
-					<sequence />
-				</extension>
-			</complexContent>
-		</complexType>
-	</element>
+	<element name="TrustedViewerInfo" type="ec:TrustedViewerInfoType" />
 
 	<complexType name="TrustedViewerInfoType">
 		<sequence>
@@ -268,15 +245,8 @@
 	<element name="VerifyManifests" />
 	<!-- while <VerifyManifests> is explained in [OASIS-DSS] it is not included in the schema -->
 
-	<element name="UseVerificationTime">
-		<complexType>
-			<complexContent>
-				<extension base="dss:UseVerificationTimeType">
-					<sequence />
-				</extension>
-			</complexContent>
-		</complexType>
-	</element>
+	<element name="UseVerificationTime"
+		type="dss:UseVerificationTimeType" />
 	<!-- while <UseVerificationTime> is explained in [OASIS-DSS] it is not included in the schema -->
 
 	<!-- <AdditionalKeyInfo> is defined in [OASIS-DSS] -->
@@ -292,15 +262,7 @@
 	<!-- new child-element of dss:SignatureObject/Other -->
 	<!-- ============================================== -->
 
-	<element name="EvidenceRecord">
-		<complexType>
-			<complexContent>
-				<extension base="ec:EvidenceRecordType">
-					<sequence />
-				</extension>
-			</complexContent>
-		</complexType>
-	</element>
+	<element name="EvidenceRecord" type="ec:EvidenceRecordType" />
 
 	<complexType name="EvidenceRecordType">
 		<choice>
@@ -315,14 +277,7 @@
 	<!-- 3.2.2 VerifyResponse            -->
 	<!-- =============================== -->
 
-	<element name="VerifyResponse">
-		<complexType>
-			<complexContent>
-				<extension base="dss:ResponseBaseType">
-					<sequence />
-				</extension>
-			</complexContent>
-		</complexType>
+	<element name="VerifyResponse" type="dss:ResponseBaseType">
 	</element>
 
 	<!-- =================================== -->
@@ -382,14 +337,7 @@
 	<!-- 3.2.3 ShowViewerResponse        -->
 	<!-- =============================== -->
 
-	<element name="ShowViewerResponse">
-		<complexType>
-			<complexContent>
-				<extension base="iso:ResponseType">
-					<sequence />
-				</extension>
-			</complexContent>
-		</complexType>
+	<element name="ShowViewerResponse" type="iso:ResponseType">
 	</element>
 
 	<!-- =============================== -->

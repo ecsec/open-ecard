@@ -127,7 +127,7 @@
 				</pluginManagement>
 				<plugins>
 					<plugin>
-						<groupId>de.ecsec.maven.plugins</groupId>
+						<groupId>org.openecard.tools</groupId>
 						<artifactId>pack200-maven-plugin</artifactId>
 						<configuration>
 							<includeClassifiers>
@@ -205,7 +205,7 @@
 				</pluginManagement>
 				<plugins>
 					<plugin>
-						<groupId>de.ecsec.maven.plugins</groupId>
+						<groupId>org.openecard.tools</groupId>
 						<artifactId>pack200-maven-plugin</artifactId>
 						<configuration>
 							<includeClassifiers>

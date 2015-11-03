@@ -25,7 +25,6 @@ package org.openecard.recognition;
 import iso.std.iso_iec._24727.tech.schema.BeginTransaction;
 import iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse;
 import iso.std.iso_iec._24727.tech.schema.CardCall;
-import iso.std.iso_iec._24727.tech.schema.CardInfo;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
@@ -46,6 +45,7 @@ import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -190,9 +190,9 @@ public class CardRecognition {
 	req.setAction(ECardConstants.CIF.GET_OTHER);
 	GetCardInfoOrACDResponse res = getCifRepo().getCardInfoOrACD(req);
 	// checkout response if it contains our cardinfo
-	List<Object> cifs = res.getCardInfoOrCapabilityInfo();
+	List<Serializable> cifs = res.getCardInfoOrCapabilityInfo();
 	ArrayList<CardInfoType> result = new ArrayList<>();
-	for (Object next : cifs) {
+	for (Serializable next : cifs) {
 	    if (next instanceof CardInfoType) {
 		result.add((CardInfoType) next);
 	    }
@@ -208,8 +208,8 @@ public class CardRecognition {
 	    req.getCardTypeIdentifier().add(type);
 	    GetCardInfoOrACDResponse res = getCifRepo().getCardInfoOrACD(req);
 	    // checkout response if it contains our cardinfo
-	    List<Object> cifs = res.getCardInfoOrCapabilityInfo();
-	    for (Object next : cifs) {
+	    List<Serializable> cifs = res.getCardInfoOrCapabilityInfo();
+	    for (Serializable next : cifs) {
 		if (next instanceof CardInfoType) {
 		    return (CardInfoType) next;
 		}

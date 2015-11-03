@@ -60,6 +60,9 @@
 								<wsdlFile>ALL.wsdl</wsdlFile>
 							</wsdlFiles>
 							<wsdlLocation>ALL.wsdl</wsdlLocation>
+							<bindingFiles>
+								<bindingFile>${basedir}/src/main/wsdl/serialization.xjc</bindingFile>
+							</bindingFiles>
 							<!-- <keep>true</keep> -->
 							<!-- <verbose>true</verbose> -->
 						</configuration>

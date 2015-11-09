@@ -381,14 +381,18 @@ public class IFD implements org.openecard.ws.IFD {
 	    } catch (SCIOException ex) {
 		if (ex.getCode() != SCIOErrorCode.SCARD_W_UNPOWERED_CARD &&
 			ex.getCode() != SCIOErrorCode.SCARD_W_UNRESPONSIVE_CARD &&
-			ex.getCode() != SCIOErrorCode.SCARD_W_UNSUPPORTED_CARD) {
+			ex.getCode() != SCIOErrorCode.SCARD_W_UNSUPPORTED_CARD &&
+			ex.getCode() != SCIOErrorCode.SCARD_E_PROTO_MISMATCH) {
 		    String msg = String.format("Failed to determine status of terminal '%s'.", ifd.getName());
 		    logger.warn(msg, ex);
 		    Result r = WSHelper.makeResultUnknownError(msg);
 		    response = WSHelper.makeResponse(GetStatusResponse.class, r);
 		    return response;
+		} else {
+		    // fall througth if there is a card which can not be connected
+		    logger.info("Ignoring failed status request from terminal.", ex);
 		}
-		// fall througth if there is a card which can not be connected
+		
 	    } finally {
 		termInfo.disconnect();
 	    }

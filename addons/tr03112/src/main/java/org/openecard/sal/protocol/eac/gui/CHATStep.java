@@ -117,6 +117,10 @@ public class CHATStep extends Step {
 		if (c != null) {
 		    int yearDiff = getYearDifference(c);
 		    textData = new Object[] { yearDiff };
+		} else {
+		    // disable this function as no working reference value is given
+		    eacData.requiredCHAT.setSpecialFunctions(specialFunction, false);
+		    continue;
 		}
 	    }
 

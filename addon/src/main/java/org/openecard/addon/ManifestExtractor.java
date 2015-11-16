@@ -61,7 +61,7 @@ public class ManifestExtractor {
      * Get an AddonSpecification object from the jar file containing the addon.
      *
      * @param file jar file to get the AddonSpecification from.
-     * @return An {@link AddonSpecification} object corresponding to addon.
+     * @return The {@link AddonSpecification} of the addon, or {@code null} if it could not be extracted.
      */
     public AddonSpecification getAddonSpecificationFromFile(File file) {
 	String name = file.getName();
@@ -70,31 +70,22 @@ public class ManifestExtractor {
 	try {
 	    jarFile = new JarFile(file);
 	} catch (IOException e) {
-	    logger.error("File {} will not be registered as plugin because it's not a JarFile.", name);
+	    logger.debug("File {} will not be registered as plugin because it's not a JarFile.", name);
 	    return null;
 	}
 	try {
 	    InputStream manifestStream = getPluginEntryClass(jarFile);
 
 	    if (manifestStream == null) {
-		logger.error("File {} will not be registered as plugin because it doesn't contain a addon.xml.", name);
+		logger.debug("File {} will not be registered as plugin because it doesn't contain a addon.xml.", name);
 		return null;
 	    } else {
 		marshaller.addXmlTypeClass(AddonSpecification.class);
 		Document manifestDoc = marshaller.str2doc(manifestStream);
 		abd = (AddonSpecification) marshaller.unmarshal(manifestDoc);
 	    }
-	} catch (IOException ex) {
-	    logger.error("Failed to process addon.xml entry for file " + name, ex);
-	    return null;
-	} catch (MarshallingTypeException e) {
-	    logger.error("Failed to process addon.xml entry for file " + name, e);
-	    return null;
-	} catch (SAXException e) {
-	    logger.error("Failed to process addon.xml entry for file " + name, e);
-	    return null;
-	} catch (WSMarshallerException e) {
-	    logger.error("Failed to process addon.xml entry for file " + name, e);
+	} catch (IOException | SAXException | WSMarshallerException ex) {
+	    logger.error("Failed to process addon.xml entry for file " + name + ".", ex);
 	    return null;
 	} finally {
 	    try {
@@ -121,4 +112,5 @@ public class ManifestExtractor {
 	    return jarFile.getInputStream(manifest);
 	}
     }
+
 }

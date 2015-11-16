@@ -79,7 +79,7 @@ public class FileUtils {
      * Finds and returns the user specific addons directory.
      * The addons directory is defined as '$HOME/.openecard/addons'. This function evaluates the system property 'user.home'
      * and simply appends '.openecard/addons'. <br>
-     * The addons directory can be used to save addons, theire configuration and related stuff.
+     * The addons directory can be used to save addons, their configuration and related stuff.
      *
      * @return File object pointing to the addons directory.
      * @throws IOException In case the directory can not be found.

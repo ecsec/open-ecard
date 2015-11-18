@@ -22,6 +22,18 @@
 
 package org.openecard.crypto.common.sal;
 
+import java.io.ByteArrayInputStream;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 
 /**
  *
@@ -65,16 +77,73 @@ public class DIDCertificate {
     private byte[] applicationIdentifier;
 
     /**
-     * A byte array containing the certificate.
-     */
-    private byte[] rawCertificate;
-
-    /**
      * A integer variable which indicates the minimal TLS version which can be used with the DID.
      */
     private int minTlsVerion = TLSv10;
 
-    public DIDCertificate() {
+    // certificate on index 0 is always the client certificate. All other certificates are parts of the chain.
+    private final ArrayList<Certificate> certChain;
+    private final CertificateFactory certFactory;
+
+    /**
+     * Creates a new DIDCertificae object from the given array containing a certificate.
+     *
+     * @param certificate Certificate which is represented by this instance.
+     * @throws CertificateException If the input byte array is empty or the content could not be parsed as X509
+     * certificate.
+     */
+    public DIDCertificate(@Nullable byte[] certificate) throws CertificateException {
+	certChain = new ArrayList<>();
+	certFactory = CertificateFactory.getInstance("X.509");
+	if (certificate != null) {
+	    parseAndAddCertificate(certificate);
+	} else {
+	    certChain.add(0, null);
+	}
+    }
+
+    /**
+     * Adds a certificate of the certificate chain to the instance.
+     *
+     * @param certificate Certificate to add as byte array.
+     * @throws CertificateException If the input byte array is empty or the content could not be parsed as X509
+     * certificate.
+     */
+    public void addChainCertificate(@Nonnull byte[] certificate) throws CertificateException {
+	parseAndAddCertificate(certificate);
+    }
+
+    /**
+     * Parses the given byte array to find an X509 certificate.
+     *
+     * @param certificate The byte array to parse.
+     * @throws CertificateException If the input byte array is empty or the content could not be parsed as X509
+     * certificate.
+     */
+    private void parseAndAddCertificate(byte[] certificate) throws CertificateException {
+	if (certificate.length == 0) {
+	    throw new CertificateException("Transformation of an empty array to Certificate not possible.");
+	}
+
+	ByteArrayInputStream certBytes = new ByteArrayInputStream(certificate);
+	Collection<? extends Certificate> jCertificates = certFactory.generateCertificates(certBytes);
+	Certificate[] certs = jCertificates.toArray(new Certificate[0]);
+	certChain.addAll(Arrays.asList(certs));
+    }
+
+    /**
+     * Gets the certificate which is supposed to be the end user certificate.
+     *
+     * @return A {@link Certificate} with the end user certificate or {@code NULL} if no such certificate exists.
+     */
+    @Nullable
+    public Certificate getCertificate() {
+	return certChain.get(0);
+    }
+
+    @Nonnull
+    public List<Certificate> getCertificateChain() {
+	return Collections.unmodifiableList(certChain);
     }
 
     /**
@@ -105,15 +174,6 @@ public class DIDCertificate {
     }
 
     /**
-     * Get the card certificate as raw byte array.
-     *
-     * @return A byte array containing the certificate from the card or null if the certificate is not always readable.
-     */
-    public byte[] getRawCertificate() {
-	return rawCertificate;
-    }
-
-    /**
      * Get the minimal TLS version which is supported by the DID.
      *
      * @return The method returns 0 for TLS 1.0, 1 for TLS 1.1 and 2 for TLS 1.2.
@@ -129,15 +189,6 @@ public class DIDCertificate {
      */
     public boolean isAlwaysReadable() {
 	return alwaysReadable;
-    }
-
-    /**
-     * Set the raw certificate.
-     *
-     * @param rawCert A byte array containing a certificate.
-     */
-    public void setRawCertificate(byte[] rawCert) {
-	this.rawCertificate = rawCert;
     }
 
     /**

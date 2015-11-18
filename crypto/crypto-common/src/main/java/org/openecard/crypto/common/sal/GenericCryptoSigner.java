@@ -30,19 +30,15 @@ import iso.std.iso_iec._24727.tech.schema.DIDGet;
 import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
-import iso.std.iso_iec._24727.tech.schema.DSIRead;
-import iso.std.iso_iec._24727.tech.schema.DSIReadResponse;
-import iso.std.iso_iec._24727.tech.schema.DataSetSelect;
-import iso.std.iso_iec._24727.tech.schema.DataSetSelectResponse;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
 import iso.std.iso_iec._24727.tech.schema.TargetNameType;
-import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -97,7 +93,6 @@ public class GenericCryptoSigner {
 	this.fileUtils = new SALFileUtils(dispatcher);
 	this.handle = handle;
 	didName = cert.getDIDName();
-	rawCertData = cert.getRawCertificate();
 	this.didCert = cert;
 	this.handle.setCardApplication(cert.getApplicationIdentifier());
     }
@@ -116,7 +111,16 @@ public class GenericCryptoSigner {
 	if (rawCertData == null) {
 	    String dataSetName = didCert.getDataSetName();
 	    if (dataSetName != null) {
-		rawCertData = didCert.getRawCertificate();
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		for (java.security.cert.Certificate cert : didCert.getCertificateChain()) {
+		    try {
+			bout.write(cert.getEncoded());
+		    } catch (CertificateEncodingException ex) {
+			String msg = "Failed to create byte array representation of certificate.";
+			throw new IOException(msg, ex);
+		    }
+		}
+		rawCertData = bout.toByteArray();
 		//rawCertData = readCertificateDataset(handle, dataSetName);
 	    } else {
 		throw new IOException("Could not get the certificate data set name.");
@@ -163,11 +167,7 @@ public class GenericCryptoSigner {
 	    throws CredentialPermissionDenied, CertificateException, IOException {
 	// is the certificate already available in java.security form?
 	if (! javaCerts.containsKey(certType)) {
-	    byte[] certs = getCertificateChain();
-	    CertificateFactory cf = CertificateFactory.getInstance(certType);
-	    Collection<? extends java.security.cert.Certificate> javaCert;
-	    javaCert = cf.generateCertificates(new ByteArrayInputStream(certs));
-	    javaCerts.put(certType, toArray(javaCert));
+	    javaCerts.put(certType, toArray(didCert.getCertificateChain()));
 	}
 
 	return javaCerts.get(certType);
@@ -272,51 +272,6 @@ public class GenericCryptoSigner {
 	} catch (CredentialPermissionDenied | IOException ex) {
 	    throw new CertificateException(ex);
 	}
-    }
-
-    /**
-     * Read the given DSI from the card application and card identified through the given connection handle.
-     *
-     * @param cHandle connection handle identifying the card and card application
-     * @param dsiName name of the DSI to read
-     * @return the contents of the DSI, or null if an error occurred
-     */
-    private byte[] readCertificateDataset(ConnectionHandleType cHandle, String dsiName)
-	    throws CredentialPermissionDenied {
-	byte[] content = null;
-	try {
-	    cHandle = fileUtils.selectAppByDataSet(dsiName, cHandle);
-	    TargetNameType target = new TargetNameType();
-	    target.setDataSetName(dsiName);
-	    performMissingAuthentication(target);
-
-	    // select the dataset which contains the dsi
-	    DataSetSelect dataSetSelect = new DataSetSelect();
-	    dataSetSelect.setConnectionHandle(cHandle);
-	    dataSetSelect.setDataSetName(dsiName);
-	    DataSetSelectResponse dataSetSelectResponse = (DataSetSelectResponse) dispatcher.deliver(dataSetSelect);
-	    WSHelper.checkResult(dataSetSelectResponse);
-
-	    // read dsi
-	    DSIRead dsiRead = new DSIRead();
-	    dsiRead.setConnectionHandle(cHandle);
-	    dsiRead.getConnectionHandle().setCardApplication(cHandle.getCardApplication());
-	    dsiRead.setDSIName(dsiName);
-	    DSIReadResponse dsiReadResponse = (DSIReadResponse) dispatcher.deliver(dsiRead);
-	    WSHelper.checkResult(dsiReadResponse);
-	    content = dsiReadResponse.getDSIContent();
-	} catch (WSException e) {
-	    logger.error("Failed to read certificate data set for DSI: {}.", dsiName, e);
-	} catch (InvocationTargetException e) {
-	    logger.error("Failed to read certificate data set for DSI: {}.", dsiName, e);
-	} catch (DispatcherException e) {
-	    logger.error("Failed to read certificate data set for DSI: {}.", dsiName, e);
-	} catch (SecurityConditionUnsatisfiable e) {
-	    logger.error("Failed to read certificate data set for DSI: {}.", dsiName, e);
-	    throw new CredentialPermissionDenied(e);
-	}
-
-	return content;
     }
 
     private void performMissingAuthentication(TargetNameType target) throws DispatcherException, WSException,

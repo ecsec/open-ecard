@@ -112,13 +112,17 @@ public class GenericCryptoSigner {
 	    String dataSetName = didCert.getDataSetName();
 	    if (dataSetName != null) {
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		for (java.security.cert.Certificate cert : didCert.getCertificateChain()) {
-		    try {
-			bout.write(cert.getEncoded());
-		    } catch (CertificateEncodingException ex) {
-			String msg = "Failed to create byte array representation of certificate.";
-			throw new IOException(msg, ex);
+		try {
+		    for (java.security.cert.Certificate cert : didCert.buildPath()) {
+			try {
+			    bout.write(cert.getEncoded());
+			} catch (CertificateEncodingException ex) {
+			    String msg = "Failed to create byte array representation of certificate.";
+			    throw new IOException(msg, ex);
+			}
 		    }
+		} catch (CertificateException ex) {
+		    throw new IOException(ex);
 		}
 		rawCertData = bout.toByteArray();
 		//rawCertData = readCertificateDataset(handle, dataSetName);
@@ -167,7 +171,7 @@ public class GenericCryptoSigner {
 	    throws CredentialPermissionDenied, CertificateException, IOException {
 	// is the certificate already available in java.security form?
 	if (! javaCerts.containsKey(certType)) {
-	    javaCerts.put(certType, toArray(didCert.getCertificateChain()));
+	    javaCerts.put(certType, toArray(didCert.buildPath()));
 	}
 
 	return javaCerts.get(certType);

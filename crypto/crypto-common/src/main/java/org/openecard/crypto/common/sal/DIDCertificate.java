@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  * 
@@ -23,9 +23,12 @@
 package org.openecard.crypto.common.sal;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URL;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,6 +36,14 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.openecard.bouncycastle.asn1.ASN1OctetString;
+import org.openecard.bouncycastle.asn1.ASN1String;
+import org.openecard.bouncycastle.asn1.x509.AccessDescription;
+import org.openecard.bouncycastle.asn1.x509.AuthorityInformationAccess;
+import org.openecard.bouncycastle.asn1.x509.Extension;
+import org.openecard.bouncycastle.asn1.x509.GeneralName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -40,6 +51,8 @@ import javax.annotation.Nullable;
  * @author Hans-Martin Haase
  */
 public class DIDCertificate {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DIDCertificate.class);
 
     /**
      * Constant for TLS version 1.0.
@@ -141,9 +154,138 @@ public class DIDCertificate {
 	return certChain.get(0);
     }
 
+    /**
+     * Get a list of all certificates associated with this instance.
+     *
+     * @return An unmodifiable list of certificates containing all certificates associated with this instance.
+     */
     @Nonnull
-    public List<Certificate> getCertificateChain() {
+    public List<Certificate> getCertificates() {
 	return Collections.unmodifiableList(certChain);
+    }
+
+    /**
+     * Builds the path of certificates.
+     * The first element of the returned list is always the end user certificate the chain follows as far as the chain
+     * certificates are available.
+     *
+     * @return A list of Certificate object containing the certificate chain (including the end user certificate).
+     * @throws CertificateException If the first element of the internal certificate store is empty or there occurred an
+     * error while trying to download a certificate of the chain.
+     */
+    @Nonnull
+    public List<Certificate> buildPath() throws CertificateException {
+	List<Certificate> newChain = new ArrayList();
+
+	if (certChain.get(0) == null) {
+	    throw new CertificateException("End user certificate missing in the current set of certificates.");
+	}
+
+	if (certChain.size() == 1) {
+	    newChain.add(certChain.get(0));
+	    // we just have the client certificate check whether we get a ca via authorityinfoaccess extension
+	    try {
+		Certificate ca = checkAuthorityInfoAccess(certChain.get(0));
+		if (ca != null) {
+		    newChain.add(ca);
+		}
+	    } catch (IOException ex) {
+		String msg = "Failed to retrieve CA certificate.";
+		LOGGER.warn(msg, ex);
+	    }
+	} else {
+	    int i = 0;
+	    boolean finished = false;
+	    while (!finished) {
+		if (i + 1 == certChain.size()) {
+		    finished = true;
+		} else {
+		    X509Certificate cert1 = (X509Certificate) certChain.get(i);
+		    X509Certificate cert2 = (X509Certificate) certChain.get(i + 1);
+
+		    if (checkIssuer(cert1, cert2)) {
+			newChain.add(cert1);
+			// add cert2 if we reached the end of the certificates list
+			if ((i + 1) == (certChain.size() - 1)) {
+			    newChain.add(cert2);
+			}
+		    } else {
+			// issuer of cert1 does not match subject of cert2 so check whether we get more ca
+			// information via the authorityinfoaccess extension
+			try {
+			    Certificate cert3 = checkAuthorityInfoAccess(cert1);
+			    if (cert3 != null) {
+				if (checkIssuer(cert1, cert3)) {
+				    // add received certificate to global chain and place it at the position of cert2
+				    certChain.add(i + 1, cert3);
+				}
+			    } else {
+				finished = true;
+			    }
+
+			    // add cert1 to local chain it is currently the last on in the chain
+			    newChain.add(cert1);
+			} catch (IOException ex) {
+			    String msg = "Failed to retrieve CA certificate.";
+			    LOGGER.warn(msg, ex);
+			    // abort the loop we can't complete the chain
+			    finished = true;
+			    // add cert1 which is still part of the chain.
+			    newChain.add(cert1);
+			}
+		    }
+		}
+		i++;
+	    }
+	}
+
+	return newChain;
+    }
+
+    /**
+     * Checks whether the issuer of the first input certificate matches the subject of the second certificate.
+     *
+     * @param cert1 The issuer of this certificate is compared against the subject of the second certificate.
+     * @param cert2 The subject of this certificate is compared against the issuer of the first certificate.
+     * @return {@code TRUE} if issuer and subject match else {@code FALSE}.
+     */
+    private boolean checkIssuer(Certificate cert1, Certificate cert2) {
+	X509Certificate certX509_1 = (X509Certificate) cert1;
+	X509Certificate certX509_2 = (X509Certificate) cert2;
+
+	return certX509_1.getIssuerX500Principal().getName().equals(certX509_2.getSubjectX500Principal().getName());
+    }
+
+    /**
+     * Checks whether the given certificate contains an AuthorityInfoAccess extension of the X509 standard.
+     *
+     * @param certIn Certificate to check for an AuthorityInfoAccess extension.
+     * @return The certificate referenced in the AuthorityInfoAccess extension or {@code NULL} if no such extension
+     * exists or the extension does not contain a caIssuer.
+     * @throws IOException If an error occurred while the retrieval of the certificate.
+     * @throws CertificateException If an error occurred while the instantiation of the new Certificate object.
+     */
+    @Nullable
+    private Certificate checkAuthorityInfoAccess(Certificate certIn) throws IOException, CertificateException {
+	X509Certificate x509CertForm = (X509Certificate) certIn;
+	byte[] extValue = x509CertForm.getExtensionValue(Extension.authorityInfoAccess.getId());
+	if (extValue != null) {
+	    ASN1OctetString aiaOc = ASN1OctetString.getInstance(extValue);
+	    AuthorityInformationAccess authInfoAccess = AuthorityInformationAccess.getInstance(aiaOc.getOctets());
+
+	    for (AccessDescription desc : authInfoAccess.getAccessDescriptions()) {
+		if (desc.getAccessMethod().getId().equals(AccessDescription.id_ad_caIssuers.getId())) {
+		    if (desc.getAccessLocation().getTagNo() == GeneralName.uniformResourceIdentifier) {
+			String uri = ((ASN1String) desc.getAccessLocation().getName()).getString();
+			URL caUrl = new URL(uri);
+			Certificate cert = certFactory.generateCertificate(caUrl.openStream());
+			return cert;
+		    }
+		}
+	    }
+	}
+
+	return null;
     }
 
     /**

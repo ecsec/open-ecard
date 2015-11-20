@@ -47,13 +47,18 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.security.auth.x500.X500Principal;
 import org.openecard.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.openecard.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.openecard.bouncycastle.asn1.x500.X500Name;
 import org.openecard.bouncycastle.asn1.x509.Certificate;
 import org.openecard.bouncycastle.asn1.x509.KeyPurposeId;
 import org.openecard.bouncycastle.asn1.x9.X9ObjectIdentifiers;
@@ -157,6 +162,8 @@ public class GenericCryptoSignerFinder {
 	if (result.isEmpty()) {
 	    throw new CredentialNotFound("No suitable DID found.");
 	}
+
+	result = filterDidCertsByCertRequest(cr, result);
 	// TODO check remaining DIDs to match CertificateRequest
 	DIDCertificate firstResult = result.get(0);
 
@@ -213,9 +220,6 @@ public class GenericCryptoSignerFinder {
 	WSHelper.checkResult(didGetResponse);
 	return didGetResponse;
     }
-
-
-
 
     /**
      * The method filters a list with DID (names) for such DID which are able to perform a signature according to TLS1.1
@@ -476,5 +480,128 @@ public class GenericCryptoSignerFinder {
 	handle.setContextHandle(conHandle.getContextHandle());
 	handle.setCardApplication(conHandle.getCardApplication());
     }
+
+    /**
+     * Filter the given list of DIDCertificate's by using the given CertificateRequest.
+     * Note: If there is no match of an certificate and the certificate request than the given input list is returned.
+     *
+     * @param cr A CertificateRequest containing issuer for the requested certificate.
+     * @param certs A list of DIDCertificates which shall be filtered.
+     * @return A list of filtered DIDCertificates, all elements in the list match the request. Note: If there is no
+     * match of an certificate and the certificate request than the given input list is returned.
+     */
+    private List<DIDCertificate> filterDidCertsByCertRequest(CertificateRequest cr, List<DIDCertificate> certs) {
+	Vector<X500Name> authorities = cr.getCertificateAuthorities();
+
+	// log the authorities named in the certificate request
+	if (logger.isDebugEnabled()) {
+	    String start = "The following certificate authorities are available in the certificate request: ";
+	    StringBuilder builder = new StringBuilder(start);
+	    for (X500Name name : authorities) {
+		builder.append("\n");
+		builder.append(name.toString());
+	    }
+	    builder.append('\n');
+	    logger.debug(builder.toString());
+	}
+
+	HashMap<DIDCertificate, List<java.security.cert.Certificate>> didCertAndChain = new HashMap<>();
+	// Check for every DIDCertificate whether the chain contains an authority from the certificate request
+	// loop over all available DIDCertificate's
+	for (DIDCertificate cert : certs) {
+	    try {
+		List<java.security.cert.Certificate> jCerts = cert.buildPath();
+		// loop over the certificate chain of a single DIDCertificate
+		ArrayList<java.security.cert.Certificate> currentChain = new ArrayList<>();
+		boolean match = false;
+		for (java.security.cert.Certificate jCert : jCerts) {
+		    X509Certificate jCertX509 = (X509Certificate) jCert;
+		    // loop over all certificate authorities in the Certificate Request
+		    for (X500Name authority : authorities) {
+			try {
+			    X500Principal requestPrincipal = new X500Principal(authority.toASN1Primitive().getEncoded());
+			    X500Principal certPrincipal = jCertX509.getIssuerX500Principal();
+			    // compare Issuer of the certificate with the principal created from the current X500Name
+			    if (requestPrincipal.toString().equals(certPrincipal.toString())) {
+				match = true;
+				break;
+			    }
+			} catch (IOException ex) {
+			    String msg = "Failed to create X500Principal from X500Nmae " + authority.toString();
+			    logger.warn(msg, ex);
+			}
+		    }
+
+		    // put the current certificate in the current chain
+		    currentChain.add(jCert);
+
+		    if (match) {
+			break;
+		    }
+		}
+
+		// if there is a match in the certificate chain than store it for later
+		if (match) {
+		    didCertAndChain.put(cert, currentChain);
+		}
+	    } catch (CertificateException ex) {
+		 String msg = "Failed to build certificate chain for DIDCertificate of DID " + cert.getDIDName();
+		 logger.warn(msg, ex);
+		 // process the next entry
+	    }
+	}
+
+	if (didCertAndChain.isEmpty()) {
+	    // return the input list if there is no match to have the same behavior as befor
+	    return certs;
+	} else {
+	    List<DIDCertificate> newCerts = buildNewDidCerts(didCertAndChain);
+	    if (newCerts == null) {
+		return certs;
+	    } else {
+		return newCerts;
+	    }
+	}
+    }
+
+    @Nullable
+    private List<DIDCertificate> buildNewDidCerts(
+	    HashMap<DIDCertificate, List<java.security.cert.Certificate>> didCertAndNewChain) {
+	try {
+	    // create new DIDCertificates with a chain that fits the Request
+	    List<DIDCertificate> newCertList = new ArrayList<>();
+	    for (Map.Entry<DIDCertificate, List<java.security.cert.Certificate>> entry : didCertAndNewChain.entrySet()) {
+		DIDCertificate newDidCert = null;
+		for (java.security.cert.Certificate chainCert : entry.getValue()) {
+		    if (newDidCert == null) {
+			newDidCert = new DIDCertificate(chainCert.getEncoded());
+		    } else {
+			newDidCert.addChainCertificate(chainCert.getEncoded());
+		    }
+		}
+
+		if (newDidCert != null) {
+		    newDidCert.setApplicationID(entry.getKey().getApplicationIdentifier());
+		    newDidCert.setDIDName(entry.getKey().getDIDName());
+		    newDidCert.setDataSetName(entry.getKey().getDataSetName());
+		    newDidCert.setMinTLSVersion(entry.getKey().getMinTLSVersion());
+		    if (entry.getKey().isAlwaysReadable()) {
+			newDidCert.setAlwaysReadable();
+		    }
+		} else {
+		    throw new CertificateException();
+		}
+
+		newCertList.add(newDidCert);
+	    }
+
+	    return newCertList;
+
+	} catch (CertificateException ex) {
+	    // error occurred while the creation of the new DIDCertificates return null
+	    return null;
+	}
+    }
+
 
 }

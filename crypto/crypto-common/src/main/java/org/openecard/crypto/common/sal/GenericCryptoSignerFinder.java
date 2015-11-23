@@ -47,10 +47,8 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 import javax.annotation.Nonnull;
@@ -505,7 +503,8 @@ public class GenericCryptoSignerFinder {
 	    logger.debug(builder.toString());
 	}
 
-	HashMap<DIDCertificate, List<java.security.cert.Certificate>> didCertAndChain = new HashMap<>();
+	ArrayList<DIDCertificate> didCerts = new ArrayList<>();
+	ArrayList<ArrayList<java.security.cert.Certificate>> newCertChains = new ArrayList<>();
 	// Check for every DIDCertificate whether the chain contains an authority from the certificate request
 	// loop over all available DIDCertificate's
 	for (DIDCertificate cert : certs) {
@@ -542,7 +541,8 @@ public class GenericCryptoSignerFinder {
 
 		// if there is a match in the certificate chain than store it for later
 		if (match) {
-		    didCertAndChain.put(cert, currentChain);
+		    didCerts.add(cert);
+		    newCertChains.add(currentChain);
 		}
 	    } catch (CertificateException ex) {
 		 String msg = "Failed to build certificate chain for DIDCertificate of DID " + cert.getDIDName();
@@ -551,11 +551,11 @@ public class GenericCryptoSignerFinder {
 	    }
 	}
 
-	if (didCertAndChain.isEmpty()) {
-	    // return the input list if there is no match to have the same behavior as befor
+	if (didCerts.isEmpty()) {
+	    // return the input list if there is no match to have the same behavior as before
 	    return certs;
 	} else {
-	    List<DIDCertificate> newCerts = buildNewDidCerts(didCertAndChain);
+	    List<DIDCertificate> newCerts = buildNewDidCerts(didCerts, newCertChains);
 	    if (newCerts == null) {
 		return certs;
 	    } else {
@@ -565,14 +565,14 @@ public class GenericCryptoSignerFinder {
     }
 
     @Nullable
-    private List<DIDCertificate> buildNewDidCerts(
-	    HashMap<DIDCertificate, List<java.security.cert.Certificate>> didCertAndNewChain) {
+    private List<DIDCertificate> buildNewDidCerts(ArrayList<DIDCertificate> didCerts,
+	    ArrayList<ArrayList<java.security.cert.Certificate>> newChains) {
 	try {
 	    // create new DIDCertificates with a chain that fits the Request
 	    List<DIDCertificate> newCertList = new ArrayList<>();
-	    for (Map.Entry<DIDCertificate, List<java.security.cert.Certificate>> entry : didCertAndNewChain.entrySet()) {
+	    for (int i = 0; i < didCerts.size(); i++) {
 		DIDCertificate newDidCert = null;
-		for (java.security.cert.Certificate chainCert : entry.getValue()) {
+		for (java.security.cert.Certificate chainCert : newChains.get(i)) {
 		    if (newDidCert == null) {
 			newDidCert = new DIDCertificate(chainCert.getEncoded());
 		    } else {
@@ -581,11 +581,11 @@ public class GenericCryptoSignerFinder {
 		}
 
 		if (newDidCert != null) {
-		    newDidCert.setApplicationID(entry.getKey().getApplicationIdentifier());
-		    newDidCert.setDIDName(entry.getKey().getDIDName());
-		    newDidCert.setDataSetName(entry.getKey().getDataSetName());
-		    newDidCert.setMinTLSVersion(entry.getKey().getMinTLSVersion());
-		    if (entry.getKey().isAlwaysReadable()) {
+		    newDidCert.setApplicationID(didCerts.get(i).getApplicationIdentifier());
+		    newDidCert.setDIDName(didCerts.get(i).getDIDName());
+		    newDidCert.setDataSetName(didCerts.get(i).getDataSetName());
+		    newDidCert.setMinTLSVersion(didCerts.get(i).getMinTLSVersion());
+		    if (didCerts.get(i).isAlwaysReadable()) {
 			newDidCert.setAlwaysReadable();
 		    }
 		} else {

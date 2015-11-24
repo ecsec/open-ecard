@@ -245,7 +245,6 @@ public class GenericCryptoSignerFinder {
 
     private List<DIDCertificate> findAllDIDCerts() {
         List<DIDCertificate> result = new ArrayList<>();
-        
         try {
 	    CardApplicationList listReq = new CardApplicationList();
 	    handle.setCardApplication(null);
@@ -257,31 +256,9 @@ public class GenericCryptoSignerFinder {
 
 	    for (byte[] appIdentifier : cardApplicationName) {
 		handle.setCardApplication(appIdentifier);
-                List<DIDCertificate> certList = new ArrayList<>();
-                
                 //get all relevant DIDs
                 List<String> didNamesList = getSignatureCapableDIDs(handle);
-                
-                for (String didName : didNamesList) {
-                    DIDGetResponse did = getDid(didName);
-                    CryptoMarkerType cryptoMarker = new CryptoMarkerType(did.getDIDStructure().getDIDMarker());
-
-                    byte[] cert = readCertificate(cryptoMarker, 0, dispatcher);
-		    if (cert != null) {
-			// create a did certificate just if we have a readable certificate
-			try {
-			    DIDCertificate cardCert= new DIDCertificate(cert);
-			    readChain(cryptoMarker, dispatcher, cardCert);
-			    cardCert.setApplicationID(handle.getCardApplication());
-			    cardCert.setDIDName(didName);
-			    cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
-			    certList.add(cardCert);
-			} catch (CertificateException ex) {
-			    logger.warn("Could not create DIDCertificate for DID " + didName, ex);
-			    // process next name
- 			}
-                    }
-		}
+		List<DIDCertificate> certList = getCertsForDidName(didNamesList);
 
 		if (! certList.isEmpty()) {
  		    result.addAll(certList);
@@ -336,6 +313,59 @@ public class GenericCryptoSignerFinder {
 	DIDGetResponse didGetResponse = (DIDGetResponse) dispatcher.deliver(didGet);
 	WSHelper.checkResult(didGetResponse);
 	return didGetResponse;
+    }
+
+    /**
+     * Generates a list with all available DIDCertificate's.
+     *
+     * @param didNames List of DIDNames which shall be checked for certificates.
+     * @return A list of {@link DIDCertificate}'s. The list may be empty in case there are no DIDs with a referenced
+     * client certificate.
+     * @throws org.openecard.common.WSHelper.WSException
+     * @throws DispatcherException
+     * @throws InvocationTargetException
+     * @throws IOException
+     */
+    private List<DIDCertificate> getCertsForDidName(List<String> didNames) throws WSException, DispatcherException,
+	    InvocationTargetException, IOException {
+	List<DIDCertificate> remainingDIDs = new ArrayList<>();
+	ConnectionHandleType handle2 = HandlerUtils.copyHandle(handle);
+
+	for (String didName : didNames) {
+	    updateConHandle(handle2);
+	    // get the DID and extract the CryptoMarker
+	    DIDGetResponse didGetResponse = getDid(didName);
+	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didGetResponse.getDIDStructure().getDIDMarker());
+	    DIDCertificate cardCert;
+
+	    // check whether the did is associated with certificates. If not go to the next name
+	    if (cryptoMarker.getCertificateRefs() != null && ! cryptoMarker.getCertificateRefs().isEmpty()) {
+		byte[] certificate = readCertificate(cryptoMarker, 0, dispatcher);
+
+		// check whether we have a certificate and if it is usable for authentication
+		if (certificate != null) {
+		    // create a new DIDCertificate instance
+		    try {
+			cardCert = new DIDCertificate(certificate);
+			cardCert.setApplicationID(handle2.getCardApplication());
+			cardCert.setDIDName(didName);
+			cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
+			cardCert.setAlwaysReadable();
+
+			// add chain if located in other files
+			readChain(cryptoMarker, dispatcher, cardCert);
+			remainingDIDs.add(cardCert);
+		    } catch (CertificateException ex) {
+			String msg = "Failed to create a new DIDCertificate instance.";
+			logger.warn(msg, ex);
+			// don't do anything more we just process the next name
+		    }
+		}
+
+	    }
+	}
+
+	return remainingDIDs;
     }
 
     /**

@@ -55,8 +55,8 @@ public class AuthenticationHelper {
 	this.ca = ca;
     }
 
-    public EAC2OutputType performAuth(EAC2OutputType eac2Output, Map<String, Object> internalData) throws ProtocolException,
-	    TLVException {
+    public EAC2OutputType performAuth(EAC2OutputType eac2Output, Map<String, Object> internalData)
+	    throws ProtocolException, TLVException {
 	// get needed values from context
 	CardVerifiableCertificate terminalCertificate;
 	terminalCertificate = (CardVerifiableCertificate) internalData.get(EACConstants.IDATA_TERMINAL_CERTIFICATE);

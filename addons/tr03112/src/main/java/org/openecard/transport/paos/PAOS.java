@@ -216,9 +216,14 @@ public class PAOS {
 	} catch (MarshallingTypeException ex) {
 	    logger.error(ex.getMessage(), ex);
 	    throw new PAOSException(ex.getMessage(), ex);
-	} catch (WSMarshallerException | IOException | SAXException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw new PAOSException(ex.getMessage(), ex);
+	} catch (WSMarshallerException ex) {
+	    String msg = "Failed to read/process message from PAOS server.";
+	    logger.error(msg, ex);
+	    throw new PAOSException(MARSHALLING_ERROR, ex);
+	} catch (IOException | SAXException ex) {
+	    String msg = "Failed to read/process message from PAOS server.";
+	    logger.error(msg, ex);
+	    throw new PAOSException(SOAP_MESSAGE_FAILURE, ex);
 	}
     }
 

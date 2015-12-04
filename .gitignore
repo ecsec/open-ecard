@@ -22,3 +22,4 @@ LICENSE.Open-eCard
 /bindings/http/src/main/resources/binding/server-keystore.p12
 /bindings/http/keypass
 nbactions.xml
+pom.xml.versionsBackup

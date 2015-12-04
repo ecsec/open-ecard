@@ -32,6 +32,7 @@ import java.util.Vector;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.AlertLevel;
 import org.openecard.bouncycastle.crypto.tls.CipherSuite;
+import org.openecard.bouncycastle.crypto.tls.ECPointFormat;
 import org.openecard.bouncycastle.crypto.tls.HashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.NamedCurve;
 import org.openecard.bouncycastle.crypto.tls.PSKTlsClient;
@@ -169,14 +170,18 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 		// required parameters TR-03116-4 sec. 4.1.4
 		NamedCurve.brainpoolP256r1, NamedCurve.secp256r1, NamedCurve.secp224r1,
 	    };
+	    this.clientECPointFormats = new short[]{
+		ECPointFormat.ansiX962_compressed_prime, ECPointFormat.uncompressed
+	    };
 
             TlsECCUtils.addSupportedEllipticCurvesExtension(clientExtensions, namedCurves);
+	    TlsECCUtils.addSupportedPointFormatsExtension(clientExtensions, clientECPointFormats);
 	}
 
 	// overwrite hash and signature algorithms
         if (TlsUtils.isSignatureAlgorithmsExtensionAllowed(clientVersion)) {
             short[] hashAlgorithms = new short[]{ HashAlgorithm.sha512, HashAlgorithm.sha384, HashAlgorithm.sha256,
-                HashAlgorithm.sha224, HashAlgorithm.sha1 };
+                HashAlgorithm.sha224 };
 
             short[] signatureAlgorithms = new short[]{ SignatureAlgorithm.rsa, SignatureAlgorithm.ecdsa };
 

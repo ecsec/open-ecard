@@ -427,7 +427,7 @@
 				<plugin>
 					<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 					<artifactId>android-maven-plugin</artifactId>
-					<version>3.8.2</version>
+					<version>4.0.0-rc.2</version>
 					<configuration>
 						<extractDuplicates>true</extractDuplicates>
 					</configuration>
@@ -564,7 +564,7 @@
 			<dependency>
 				<groupId>com.github.tony19</groupId>
 				<artifactId>logback-android-classic</artifactId>
-				<version>1.2.0-3</version>
+				<version>1.1.1-4</version>
 			</dependency>
 			<!-- testing -->
 			<dependency>

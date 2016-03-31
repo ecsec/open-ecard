@@ -122,7 +122,7 @@ public class HostnameVerifier implements CertificateVerifier {
 		// skip wildcard part
 		continue;
 	    }
-	    if (! givenToken[i].equals(wildToken[i])) {
+	    if (! givenToken[i].equalsIgnoreCase(wildToken[i])) {
 		return false;
 	    }
 	}

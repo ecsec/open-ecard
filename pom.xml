@@ -66,6 +66,13 @@
 		<findbugs.packages>org.openecard.clients.-,org.openecard.android.-,org.openecard.richclient.-,org.openecard.common.-,org.openecard.control.-,org.openecard.crypto.-,org.openecard.esign.-,org.openecard.event.-,org.openecard.scio.-,org.openecard.management.-,org.openecard.recognition.-,org.openecard.sal.-,org.openecard.saml.-,org.openecard.transport.-,org.openecard.ws.android.-,org.openecard.ws.jaxb.-,org.openecard.ws.marshal.-,org.openecard.ws.common.-,org.openecard.ws.,org.openecard.i18n.-,org.openecard.gui.-,org.openecard.ifd.-,org.openecard.browser.-,org.openecard.maven.-</findbugs.packages>
 		<android.api.version>19</android.api.version>
 		<strip.debug.symbols>false</strip.debug.symbols>
+
+		<!-- These properties can be set from the commandline to override the selected certificate -->
+		<sign.keystore>src/package/resources/keystore/keystore.jks</sign.keystore>
+		<sign.storepass>123456</sign.storepass>
+		<sign.keypass>123456</sign.keypass>
+		<sign.alias>selfsigned</sign.alias>
+		<sign.tsa>http://tsa.starfieldtech.com</sign.tsa>
 	</properties>
 
 	<distributionManagement>
@@ -460,6 +467,13 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jarsigner-plugin</artifactId>
 					<version>1.4</version>
+					<configuration>
+						<keystore>${sign.keystore}</keystore>
+						<storepass>${sign.storepass}</storepass>
+						<alias>${sign.alias}</alias>
+						<keypass>${sign.keypass}</keypass>
+						<tsa>${sign.tsa}</tsa>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>de.ecsec.maven.plugins</groupId>
@@ -555,6 +569,18 @@
 						<id>add-license</id>
 						<goals>
 							<goal>update-project-license</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jarsigner-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>sign</id>
+						<goals>
+							<goal>sign</goal>
 						</goals>
 					</execution>
 				</executions>

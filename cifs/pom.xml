@@ -15,14 +15,6 @@
 	<packaging>signed-packed-jar</packaging>
 	<name>CardInfo files</name>
 
-	<properties>
-		<!-- These properties can be set from the commandline to override the selected certificate -->
-		<sign.keystore>../src/package/resources/keystore/keystore.jks</sign.keystore>
-		<sign.storepass>123456</sign.storepass>
-		<sign.keypass>123456</sign.keypass>
-		<sign.alias>selfsigned</sign.alias>
-	</properties>
-
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -35,17 +27,6 @@
 								<include>${project.groupId}:cifs</include>
 							</includes>
 						</artifactSet>
-					</configuration>
-				</plugin>
-
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-jarsigner-plugin</artifactId>
-					<configuration>
-						<keystore>${sign.keystore}</keystore>
-						<storepass>${sign.storepass}</storepass>
-						<alias>${sign.alias}</alias>
-						<keypass>${sign.keypass}</keypass>
 					</configuration>
 				</plugin>
 			</plugins>

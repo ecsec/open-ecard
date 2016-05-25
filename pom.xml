@@ -72,7 +72,7 @@
 		<sign.storepass>123456</sign.storepass>
 		<sign.keypass>123456</sign.keypass>
 		<sign.alias>selfsigned</sign.alias>
-		<sign.tsa>http://tsa.starfieldtech.com</sign.tsa>
+		<sign.tsa>https://timestamp.geotrust.com/tsa</sign.tsa>
 	</properties>
 
 	<distributionManagement>

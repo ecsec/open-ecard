@@ -27,6 +27,7 @@ import javax.smartcardio.CardException;
 import javax.smartcardio.CardNotPresentException;
 import javax.smartcardio.CardTerminal;
 import org.openecard.common.ifd.scio.SCIOCard;
+import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOProtocol;
 import org.openecard.common.ifd.scio.SCIOTerminal;
@@ -67,7 +68,7 @@ public class PCSCTerminal implements SCIOTerminal {
 		return new PCSCCard(this, c);
 	    } catch (CardNotPresentException ex) {
 		String msg = "Card has been removed before connect could be finished for terminal '%s'.";
-		throw new IllegalArgumentException(String.format(msg, getName()));
+		throw new SCIOException(String.format(msg, getName()), SCIOErrorCode.SCARD_W_REMOVED_CARD);
 	    } catch (CardException ex) {
 		String msg = "Failed to connect the card in terminal '%s'.";
 		throw new SCIOException(String.format(msg, getName()), getCode(ex), ex);

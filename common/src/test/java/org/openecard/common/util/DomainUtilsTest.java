@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 HS Coburg.
+ * Copyright (C) 2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,37 +22,25 @@
 
 package org.openecard.common.util;
 
-import oasis.names.tc.dss._1_0.core.schema.Result;
-import org.openecard.common.ECardException;
+import java.net.IDN;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 
 /**
- * Exception class for utility classes.
  *
- * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
-    public class UtilException extends ECardException {
+public class DomainUtilsTest {
 
-    private static final long serialVersionUID = 1L;
-
-    public UtilException(String msg) {
-	makeException(this, msg);
-    }
-
-    public UtilException(String msg, Throwable cause) {
-	makeException(this, cause, msg);
-    }
-
-    public UtilException(String minor, String msg) {
-	makeException(this, minor, msg);
-    }
-
-    public UtilException(Result r) {
-	makeException(this, r);
-    }
-
-    public UtilException(Throwable cause) {
-	makeException(this, cause);
+    @Test
+    public void compareWildcardDomains() {
+	Assert.assertTrue(DomainUtils.checkWildcardHostName("foö.bär.com", "foö.bär.com"));
+	Assert.assertTrue(DomainUtils.checkWildcardHostName("foö.bär.com", IDN.toASCII("foö.bär.com")));
+	Assert.assertTrue(DomainUtils.checkWildcardHostName("*.bär.com", "foö.bär.com"));
+	Assert.assertFalse(DomainUtils.checkWildcardHostName("*.bär.com", "bar.com"));
+	Assert.assertFalse(DomainUtils.checkWildcardHostName("bär.com", "foö.bar.com"));
+	Assert.assertFalse(DomainUtils.checkWildcardHostName("*.com", "foö.bar.com"));
     }
 
 }

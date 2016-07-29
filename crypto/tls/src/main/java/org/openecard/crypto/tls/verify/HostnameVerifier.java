@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -31,6 +31,7 @@ import org.openecard.bouncycastle.asn1.x509.GeneralName;
 import org.openecard.bouncycastle.asn1.x509.GeneralNames;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.util.IPAddress;
+import org.openecard.common.util.DomainUtils;
 import org.openecard.crypto.tls.CertificateVerificationException;
 import org.openecard.crypto.tls.CertificateVerifier;
 import org.slf4j.Logger;
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HostnameVerifier implements CertificateVerifier {
 
-    private static final Logger logger = LoggerFactory.getLogger(HostnameVerifier.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HostnameVerifier.class);
 
     @Override
     public void isValid(Certificate chain, String hostOrIp) throws CertificateVerificationException {
@@ -62,7 +63,7 @@ public class HostnameVerifier implements CertificateVerifier {
 	    String hostNameReference = cn[0].getFirst().getValue().toString();
 	    success = checkWildcardName(hostOrIp, hostNameReference);
 	} else {
-	    logger.debug("Given name is an IP Address. Validation relies solely on the SubjectAlternativeName.");
+	    LOG.debug("Given name is an IP Address. Validation relies solely on the SubjectAlternativeName.");
 	}
 	// stop execution when we found a valid name
 	if (success) {
@@ -87,11 +88,11 @@ public class HostnameVerifier implements CertificateVerifier {
 		    case GeneralName.iPAddress:
 			if (isIPAddr) {
 			    // TODO: validate IP Addresses
-			    logger.warn("IP Address verification not supported.");
+			    LOG.warn("IP Address verification not supported.");
 			}
 			break;
 		    default:
-			logger.debug("Unsupported GeneralName ({}) tag in SubjectAlternativeName.", name.getTagNo());
+			LOG.debug("Unsupported GeneralName ({}) tag in SubjectAlternativeName.", name.getTagNo());
 		}
 		// stop execution when we found a valid name
 		if (success) {
@@ -109,25 +110,13 @@ public class HostnameVerifier implements CertificateVerifier {
 
     private static boolean checkWildcardName(String givenHost, String wildcardHost)
 	    throws CertificateVerificationException {
-	logger.debug("Comparing connection hostname against certificate hostname: [{}] [{}]", givenHost, wildcardHost);
-	String[] givenToken = givenHost.split("\\.");
-	String[] wildToken = wildcardHost.split("\\.");
-	// error if number of token is different
-	if (givenToken.length != wildToken.length) {
-	    return false;
+	LOG.debug("Comparing connection hostname against certificate hostname: [{}] [{}]", givenHost, wildcardHost);
+	try {
+	    return DomainUtils.checkHostName(wildcardHost, givenHost, true);
+	} catch (IllegalArgumentException ex) {
+	    String msg = "Invalid domain name found in certificate or requested hostname.";
+	    throw new CertificateVerificationException(msg, ex);
 	}
-	// compare entries
-	for (int i = 0; i < givenToken.length; i++) {
-	    if (wildToken[i].equals("*")) {
-		// skip wildcard part
-		continue;
-	    }
-	    if (! givenToken[i].equalsIgnoreCase(wildToken[i])) {
-		return false;
-	    }
-	}
-	// each part processed and no error -> success
-	return true;
     }
 
 }

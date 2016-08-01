@@ -61,7 +61,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<maven.min.version>3.0.5</maven.min.version>
+		<maven.min.version>3.3.3</maven.min.version>
 		<license.licenseName>gpl_v3</license.licenseName>
 		<findbugs.packages>org.openecard.clients.-,org.openecard.android.-,org.openecard.richclient.-,org.openecard.common.-,org.openecard.control.-,org.openecard.crypto.-,org.openecard.esign.-,org.openecard.event.-,org.openecard.scio.-,org.openecard.management.-,org.openecard.recognition.-,org.openecard.sal.-,org.openecard.saml.-,org.openecard.transport.-,org.openecard.ws.android.-,org.openecard.ws.jaxb.-,org.openecard.ws.marshal.-,org.openecard.ws.common.-,org.openecard.ws.,org.openecard.i18n.-,org.openecard.gui.-,org.openecard.ifd.-,org.openecard.browser.-,org.openecard.maven.-</findbugs.packages>
 		<android.api.version>19</android.api.version>
@@ -110,7 +110,7 @@
 				</property>
 			</activation>
 			<properties>
-				<maven.min.version>3.1.1</maven.min.version>
+				<maven.min.version>${maven.min.version}</maven.min.version>
 			</properties>
 		</profile>
 		<profile>
@@ -184,7 +184,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<version>1.13</version>
+					<version>1.15</version>
 					<configuration>
 						<signature>
 							<groupId>org.codehaus.mojo.signature</groupId>
@@ -196,7 +196,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>1.4</version>
+					<version>1.4.1</version>
 					<configuration>
 						<rules>
 							<requireMavenVersion>
@@ -208,7 +208,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>1.8</version>
+					<version>1.9</version>
 					<configuration>
 						<licenseFile>LICENSE.Open-eCard</licenseFile>
 						<generateBundle>true</generateBundle>
@@ -218,7 +218,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.2</version>
+					<version>3.5.1</version>
 					<configuration>
 						<source>1.7</source>
 						<target>1.7</target>
@@ -233,7 +233,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>2.7</version>
+					<version>3.0.1</version>
 					<configuration>
 						<encoding>${project.build.sourceEncoding}</encoding>
 					</configuration>
@@ -241,7 +241,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>2.5</version>
+					<version>3.0.2</version>
 					<configuration>
 						<excludes>
 							<exclude>LICENSE.Open-eCard</exclude>
@@ -256,7 +256,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>2.6.1</version>
+					<version>3.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -276,12 +276,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.18.1</version>
+					<version>2.19.1</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.apache.maven.surefire</groupId>
 							<artifactId>surefire-testng</artifactId>
-							<version>2.18.1</version>
+							<version>2.19.1</version>
 						</dependency>
 					</dependencies>
 					<configuration>
@@ -292,12 +292,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.18.1</version>
+					<version>2.19.1</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.apache.maven.surefire</groupId>
 							<artifactId>surefire-testng</artifactId>
-							<version>2.18.1</version>
+							<version>2.19.1</version>
 						</dependency>
 					</dependencies>
 					<configuration>
@@ -311,7 +311,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>3.4</version>
+					<version>3.5.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -321,22 +321,22 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-report-plugin</artifactId>
-					<version>2.18.1</version>
+					<version>2.19.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-project-info-reports-plugin</artifactId>
-					<version>2.8</version>
+					<version>2.9</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>2.4</version>
+					<version>3.0.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.3</version>
+					<version>2.10.4</version>
 					<configuration>
 						<show>protected</show>
 						<linksource>true</linksource>
@@ -372,7 +372,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>2.15</version>
+					<version>2.17</version>
 					<configuration>
 						<configLocation>src/qa/checkstyle/openecard-checkstyle.xml</configLocation>
 						<headerLocation>src/qa/checkstyle/openecard-checkstyle-header.txt</headerLocation>
@@ -388,7 +388,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>cobertura-maven-plugin</artifactId>
-					<version>2.6</version>
+					<version>2.7</version>
 					<configuration>
 						<aggregate>true</aggregate>
 						<quiet>true</quiet>
@@ -412,7 +412,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>findbugs-maven-plugin</artifactId>
-					<version>3.0.1</version>
+					<version>3.0.4</version>
 					<configuration>
 						<effort>Max</effort>
 						<threshold>Low</threshold>
@@ -444,7 +444,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>1.9.1</version>
+					<version>1.11</version>
 				</plugin>
 				<plugin>
 					<groupId>com.google.code.maven-replacer-plugin</groupId>
@@ -454,7 +454,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>2.3</version>
+					<version>2.4.3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -467,9 +467,22 @@
 					<version>1.0.1</version>
 				</plugin>
 				<plugin>
-					<groupId>net.trajano.mojo</groupId>
+					<groupId>org.jvnet.jax-ws-commons</groupId>
 					<artifactId>jaxws-maven-plugin</artifactId>
-					<version>2.3.8</version>
+					<version>2.3.1-b20150201.1248</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.glassfish.metro</groupId>
+							<artifactId>webservices-tools</artifactId>
+							<version>2.3.1-jsfix</version>
+						</dependency>
+						<!-- see https://java.net/jira/browse/WSIT-1672 -->
+						<dependency>
+							<groupId>org.glassfish.metro</groupId>
+							<artifactId>webservices-rt</artifactId>
+							<version>2.3.1</version>
+						</dependency>
+					</dependencies>
 					<configuration>
 						<sourceDestDir>${project.build.directory}/generated-sources/jaxws</sourceDestDir>
 						<target>2.2</target>
@@ -555,27 +568,27 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>1.7.10</version>
+				<version>1.7.21</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-ext</artifactId>
-				<version>1.7.10</version>
+				<version>1.7.21</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-jdk14</artifactId>
-				<version>1.7.10</version>
+				<version>1.7.21</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-android</artifactId>
-				<version>1.7.10</version>
+				<version>1.7.21</version>
 			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.1.2</version>
+				<version>1.1.7</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.tony19</groupId>
@@ -586,23 +599,23 @@
 			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
-				<version>6.8.21</version>
+				<version>6.9.10</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jmockit</groupId>
 				<artifactId>jmockit</artifactId>
-				<version>1.15</version>
+				<version>1.26</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.findbugs</groupId>
 				<artifactId>annotations</artifactId>
-				<version>3.0.0</version>
+				<version>3.0.1u2</version>
 			</dependency>
 			<!-- maven -->
 			<dependency>
 				<groupId>org.apache.maven</groupId>
 				<artifactId>maven-plugin-api</artifactId>
-				<version>3.2.5</version>
+				<version>3.3.9</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.plugin-tools</groupId>
@@ -613,7 +626,7 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
-				<version>4.4.1</version>
+				<version>4.4.5</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.android</groupId>
@@ -626,11 +639,6 @@
 				<version>2.3.0</version>
 			</dependency>
 			<dependency>
-				<groupId>openjdk</groupId>
-				<artifactId>java-plugin</artifactId>
-				<version>1.6.0.26</version>
-			</dependency>
-			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-jci-fam</artifactId>
 				<version>1.1</version>
@@ -638,7 +646,7 @@
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
-				<version>2.3.1</version>
+				<version>2.7</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

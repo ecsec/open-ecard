@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -38,9 +38,12 @@ import javax.swing.JOptionPane;
  */
 public class MainLoader {
 
-    public static void main(String[] args) throws IllegalArgumentException, InvocationTargetException, ClassNotFoundException, NoSuchMethodException {
+    private static final float VERSION_REFERENCE_VAL = 1.7f;
+
+    public static void main(String[] args) throws IllegalArgumentException, InvocationTargetException,
+            ClassNotFoundException, NoSuchMethodException {
 	// check if java version is sufficient
-	if (! checkJavaVersion()) {
+	if (! checkJavaVersion(VERSION_REFERENCE_VAL)) {
 	    String msg = getBundle().getString("MainLoader.invalid_java_version");
 	    String title = getBundle().getString("MainLoader.invalid_java_version.title");
 	    msg(title, msg, System.getProperty("java.version"));
@@ -138,17 +141,14 @@ public class MainLoader {
 	throw new NoSuchMethodException("Failed to find main method.");
     }
 
-    private static boolean checkJavaVersion() {
-	String[] javaVersionElements = System.getProperty("java.version").split("\\.");
-	int major1 = Integer.parseInt(javaVersionElements[0]);
-	int major2 = Integer.parseInt(javaVersionElements[1]);
-	if (major1 == 1 && major2 >= 7) {
-	    return true;
-	} else if (major1 > 1) {
-	    return true;
-	} else {
-	    return false;
-	}
+    public static boolean checkJavaVersion(float versionReference) {
+	String fullVersion = System.getProperty("java.version");
+	String[] javaVersionElements = fullVersion.split("\\.|_|-b|\\+");
+	String major1 = javaVersionElements[0];
+	String major2 = javaVersionElements.length < 2 ? "0" : javaVersionElements[1];
+	float javaVersion = Float.valueOf(major1 + "." + major2 + "f");
+	// check if version is bigger or equal than reference value
+	return javaVersion >= versionReference;
     }
 
     private static void msg(String title, String msg, Object... obj) {

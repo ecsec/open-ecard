@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,8 +22,12 @@
 
 package org.openecard.crypto.common.asn1.eac;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import org.openecard.bouncycastle.asn1.ASN1Encodable;
 import org.openecard.bouncycastle.asn1.ASN1Set;
+import org.openecard.bouncycastle.asn1.ASN1StreamParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,12 +35,13 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class SecurityInfos {
 
-    private static final Logger _logger = LoggerFactory.getLogger(SecurityInfos.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SecurityInfos.class);
 
-    private ASN1Set securityInfos;
+    private final ASN1Set securityInfos;
 
     /**
      * Gets the single instance of SecurityInfos.
@@ -50,13 +55,17 @@ public class SecurityInfos {
 	} else if (obj instanceof ASN1Set) {
 	    return new SecurityInfos((ASN1Set) obj);
 	} else if (obj instanceof byte[]) {
+	    return getInstance(new ByteArrayInputStream((byte[]) obj));
+	} else if (obj instanceof InputStream) {
 	    try {
-		return new SecurityInfos((ASN1Set) ASN1Set.fromByteArray((byte[]) obj));
+		ASN1StreamParser sp = new ASN1StreamParser((InputStream) obj);
+		ASN1Encodable enc = sp.readObject();
+		return getInstance(enc.toASN1Primitive());
 	    } catch (IOException e) {
-		_logger.error("Cannot parse SecurityInfos", e);
+		LOG.error("Cannot parse SecurityInfos", e);
 	    }
 	}
-	throw new IllegalArgumentException("unknown object in factory: " + obj.getClass());
+	throw new IllegalArgumentException("Unknown object in factory: " + obj.getClass());
     }
 
     /**

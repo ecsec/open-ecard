@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CardUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(CardUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CardUtils.class);
 
     public static final int NO_RESPONSE_DATA = 0;
     public static final int FCP_RESPONSE_DATA = 1;
@@ -247,6 +247,19 @@ public class CardUtils {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	// Read 255 bytes per APDU
 	byte length = (byte) 0xFF;
+	short numToRead = -1; // -1 indicates I don't know
+	if (fcp != null) {
+	    Long fcpNumBytes = fcp.getNumBytes();
+	    if (fcpNumBytes != null) {
+		// more than short is not possible and besides that very unrealistic
+		numToRead = fcpNumBytes.shortValue();
+		// reduce readout size
+		if (numToRead < 255) {
+		    length = (byte) numToRead;
+		}
+	    }
+	}
+
 	boolean isRecord = isRecordEF(fcp);
 	byte i = (byte) (isRecord ? 1 : 0); // records start at index 1
 	short numRead = 0;
@@ -255,6 +268,7 @@ public class CardUtils {
 	    CardResponseAPDU response;
 	    byte[] trailer;
 	    int lastNumRead = 0;
+	    boolean goAgain;
 	    do {
 		if (! isRecord) {
 		    CardCommandAPDU readBinary = new ReadBinary(numRead, length);
@@ -279,8 +293,21 @@ public class CardUtils {
 		    numRead += lastNumRead;
 		}
 		i++;
-	    } while (response.isNormalProcessed() && lastNumRead != 0 ||
-		    (Arrays.equals(trailer, new byte[] {(byte) 0x62, (byte) 0x82}) && isRecord));
+
+		// update length value
+		goAgain = response.isNormalProcessed() && lastNumRead != 0
+			|| (Arrays.equals(trailer, new byte[]{(byte) 0x62, (byte) 0x82}) && isRecord);
+		if (goAgain && numToRead != -1) {
+		    // we have a limit, enforce it
+		    short remainingBytes = (short) (numToRead - numRead);
+		    if (remainingBytes <= 0) {
+			goAgain = false;
+		    } else if (remainingBytes < 255) {
+			// update length when we reached the area below 255
+			length = (byte) remainingBytes;
+		    }
+		}
+	    } while (goAgain);
 	    baos.close();
 	} catch (IOException e) {
 	    throw new APDUException(e);
@@ -319,7 +346,7 @@ public class CardUtils {
 	try {
 	    fcp = new FCP(selectResponse.getData());
 	} catch (TLVException e) {
-	    logger.warn("Couldn't get File Control Parameters from Select response.", e);
+	    LOG.warn("Couldn't get File Control Parameters from Select response.", e);
 	}
 	return readFile(fcp, dispatcher, slotHandle);
     }
@@ -352,7 +379,7 @@ public class CardUtils {
 	try {
 	    fcp = new FCP(selectResponse.getData());
 	} catch (TLVException e) {
-	    logger.warn("Couldn't get File Control Parameters from Select response.", e);
+	    LOG.warn("Couldn't get File Control Parameters from Select response.", e);
 	}
 	writeFile(fcp, dispatcher, slotHandle, data);
     }

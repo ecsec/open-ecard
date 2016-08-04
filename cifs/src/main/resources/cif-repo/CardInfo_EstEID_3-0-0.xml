@@ -799,7 +799,7 @@
 				<iso:AlgorithmIdentifier>
 				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
 				</iso:AlgorithmIdentifier>
-				<iso:SupportedOperations>Compute-signature Decipher Internal-authenticate</iso:SupportedOperations>
+				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 			    </iso:AlgorithmInfo>
 			    <iso:KeyInfo>
 				<iso:KeyRef>
@@ -847,7 +847,7 @@
 				<iso:AlgorithmIdentifier>
 				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
 				</iso:AlgorithmIdentifier>
-				<iso:SupportedOperations>Compute-signature Decipher Internal-authenticate</iso:SupportedOperations>
+				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 			    </iso:AlgorithmInfo>
 			    <iso:KeyInfo>
 				<iso:KeyRef>

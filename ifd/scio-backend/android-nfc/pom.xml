@@ -2,35 +2,35 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-	<groupId>org.openecard.ifd</groupId>
-	<artifactId>scio-backend</artifactId>
-	<version>1.2.1</version>
-    </parent>
+	<parent>
+		<groupId>org.openecard.ifd</groupId>
+		<artifactId>scio-backend</artifactId>
+		<version>1.3.0-SNAPSHOT</version>
+	</parent>
 
-    <groupId>org.openecard.ifd.scio-backend</groupId>
-    <artifactId>android-nfc</artifactId>
-    <packaging>jar</packaging>
-    <name>NFC SmartcardIO</name>
+	<groupId>org.openecard.ifd.scio-backend</groupId>
+	<artifactId>android-nfc</artifactId>
+	<packaging>jar</packaging>
+	<name>NFC SmartcardIO</name>
 
-    <dependencies>
-	<dependency>
-	    <groupId>com.google.android</groupId>
-	    <artifactId>android</artifactId>
-	    <scope>provided</scope>
-	</dependency>
-	<dependency>
-	    <artifactId>common</artifactId>
-	    <groupId>org.openecard</groupId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.wsdef</groupId>
-	    <artifactId>wsdef-client</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-    </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>com.google.android</groupId>
+			<artifactId>android</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<artifactId>common</artifactId>
+			<groupId>org.openecard</groupId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.wsdef</groupId>
+			<artifactId>wsdef-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 
 </project>

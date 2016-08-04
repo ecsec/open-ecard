@@ -212,6 +212,19 @@
 				    </iso:ResponseAPDU>
 				    <iso:ResponseAPDU>
 					<iso:Body>
+					    <iso:MatchingData>
+						<iso:Offset>00</iso:Offset>
+						<iso:Length>1B</iso:Length>
+						<iso:MatchingValue>61194F08D0400000170018015009496E666F626F78656E51023F06</iso:MatchingValue>
+					    </iso:MatchingData>
+					</iso:Body>
+					<iso:Trailer>6282</iso:Trailer>
+					<iso:Conclusion>
+					    <iso:RecognizedCardType>http://cif.chipkarte.at/e-card/g4</iso:RecognizedCardType>
+					</iso:Conclusion>
+				    </iso:ResponseAPDU>
+				    <iso:ResponseAPDU>
+					<iso:Body>
 					    <iso:Tag>61</iso:Tag>
 					    <iso:DataObject>
 						<iso:MatchingData>

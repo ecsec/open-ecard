@@ -165,10 +165,10 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 	// code taken from AbstractTlsClient, if that should ever change modify it here too
 	if (TlsECCUtils.containsECCCipherSuites(getCipherSuites())) {
             this.namedCurves = new int[] {
-		// required parameters TR-03116-4 sec. 4.1.4
-		NamedCurve.secp224r1, NamedCurve.secp256r1, NamedCurve.brainpoolP256r1,
 		// other possible parameters TR-02102-2 sec. 3.6
-		NamedCurve.secp384r1, NamedCurve.brainpoolP384r1, NamedCurve.brainpoolP512r1,
+		NamedCurve.brainpoolP512r1, NamedCurve.brainpoolP384r1, NamedCurve.secp384r1,
+		// required parameters TR-03116-4 sec. 4.1.4
+		NamedCurve.brainpoolP256r1, NamedCurve.secp256r1, NamedCurve.secp224r1,
 	    };
 	    this.clientECPointFormats = new short[]{
 		ECPointFormat.ansiX962_compressed_prime, ECPointFormat.uncompressed

@@ -2,23 +2,23 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
+	<parent>
+		<groupId>org.openecard</groupId>
+		<artifactId>app</artifactId>
+		<version>1.3.0-SNAPSHOT</version>
+	</parent>
+
 	<groupId>org.openecard</groupId>
-	<artifactId>app</artifactId>
-	<version>1.2.1</version>
-    </parent>
+	<artifactId>transport</artifactId>
+	<name>Transport</name>
+	<packaging>pom</packaging>
 
-    <groupId>org.openecard</groupId>
-    <artifactId>transport</artifactId>
-    <name>Transport</name>
-    <packaging>pom</packaging>
-
-    <modules>
-	<module>dispatcher</module>
-	<module>http-core-shade</module>
-	<module>http-core</module>
-    </modules>
+	<modules>
+		<module>dispatcher</module>
+		<module>http-core-shade</module>
+		<module>http-core</module>
+	</modules>
 
 </project>

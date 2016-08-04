@@ -36,7 +36,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import org.apache.commons.jci.monitor.FilesystemAlterationMonitor;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.AppExtensionSpecification;
 import org.openecard.addon.manifest.AppPluginSpecification;
@@ -64,10 +63,12 @@ public class FileRegistry implements AddonRegistry {
     private final AddonManager manager;
     private final Future<Void> initComplete;
 
+    private AddonFileSystemMonitor fsMonitor;
+
     /**
      * Creates a new FileRegistry.
      * On the creation of the registry the add-on directory is retrieved and all existing add-ons are loaded.
-     * Furthermore a {@link FilesystemAlterationMonitor} is started to be able to register newly added add-ons and
+     * Furthermore a {@link AddonFileSystemMonitor} is started to be able to register newly added add-ons and
      * remove add-ons.
      *
      * @param manager {@link AddonManager} which takes care for the installed add-ons.
@@ -77,13 +78,11 @@ public class FileRegistry implements AddonRegistry {
 
 	FutureTask<Void> initCompleteTmp;
 	try {
-	    final String addonPath = FileUtils.getAddonsDir() + File.separator;
-
 	    initCompleteTmp = new FutureTask<>(new Callable<Void>() {
 		@Override
 		public Void call() throws Exception {
 		    loadExistingAddons();
-		    startFileMonitor(addonPath);
+		    startFileMonitor();
 		    return null;
 		}
 	    });
@@ -91,9 +90,6 @@ public class FileRegistry implements AddonRegistry {
 	} catch (SecurityException e) {
 	    String msg = "Failed to access add-on directory due to missing privileges. FileRegistry not working.";
 	    logger.error(msg, e);
-	    initCompleteTmp = getCompletedFuture();
-	} catch (IOException e) {
-	    logger.error("Failed to access add-on directory. FileRegistry not work.", e);
 	    initCompleteTmp = getCompletedFuture();
 	}
 
@@ -136,21 +132,22 @@ public class FileRegistry implements AddonRegistry {
     }
 
     /**
-     * Starts the FilesystemAlterationMonitor.
-     * The method sets up a {@link FilesystemAlterationMonitor} and registers a {@link PluginDirectoryAlterationListener}.
+     * Starts the addon filesystem monitor.
+     * The method sets up a {@link AddonFileSystemMonitor} instance for the addon directory.
      * After the setup the monitor is started.
      *
      * @param addonPath Path to the directory which shall be monitored.
      */
-    private void startFileMonitor(String addonPath) {
+    private void startFileMonitor() {
 	try {
-	    File f = new File(addonPath);
-	    logger.debug("Starting file alteration monitor on path: {}", f.getPath());
-	    FilesystemAlterationMonitor fam = new FilesystemAlterationMonitor();
-	    fam.addListener(f, new PluginDirectoryAlterationListener(this, manager));
-	    fam.start();
+	    File addonPath = FileUtils.getAddonsDir();
+	    logger.debug("Starting addon filesystem monitor on path: {}", addonPath.getPath());
+	    fsMonitor = new AddonFileSystemMonitor(this, manager);
+	    fsMonitor.start();
 	} catch (SecurityException ex) {
 	    logger.error("SecurityException seems like you don't have permissions to access the addons directory.", ex);
+	} catch (IOException ex) {
+	    logger.warn("Failed to start file watcher on addon directory.");
 	}
     }
 

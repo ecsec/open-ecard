@@ -2,49 +2,49 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-	<groupId>org.openecard</groupId>
-	<artifactId>ifd</artifactId>
-	<version>1.2.1</version>
-    </parent>
+	<parent>
+		<groupId>org.openecard</groupId>
+		<artifactId>ifd</artifactId>
+		<version>1.3.0-SNAPSHOT</version>
+	</parent>
 
-    <groupId>org.openecard.ifd</groupId>
-    <artifactId>ifd-core</artifactId>
-    <packaging>jar</packaging>
-    <name>IFD core</name>
+	<groupId>org.openecard.ifd</groupId>
+	<artifactId>ifd-core</artifactId>
+	<packaging>jar</packaging>
+	<name>IFD core</name>
 
-    <dependencies>
-	<dependency>
-	    <groupId>org.openecard.ifd</groupId>
-	    <artifactId>ifd-common</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.wsdef</groupId>
-	    <artifactId>wsdef-client</artifactId>
-	    <version>${project.version}</version>
-	    <scope>provided</scope>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.ifd.scio-backend</groupId>
-	    <artifactId>pcsc</artifactId>
-	    <version>${project.version}</version>
-	    <scope>test</scope>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.gui</groupId>
-	    <artifactId>swing</artifactId>
-	    <version>${project.version}</version>
-	    <scope>test</scope>
-	</dependency>
-	<dependency>
-	    <groupId>org.openecard.wsdef</groupId>
-	    <artifactId>jaxb-marshaller</artifactId>
-	    <version>${project.version}</version>
-	    <scope>test</scope>
-	</dependency>
-    </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>org.openecard.ifd</groupId>
+			<artifactId>ifd-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.wsdef</groupId>
+			<artifactId>wsdef-client</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.ifd.scio-backend</groupId>
+			<artifactId>pcsc</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.gui</groupId>
+			<artifactId>swing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.wsdef</groupId>
+			<artifactId>jaxb-marshaller</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
 </project>

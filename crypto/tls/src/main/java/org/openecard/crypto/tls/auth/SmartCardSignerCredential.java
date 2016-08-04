@@ -23,6 +23,7 @@
 package org.openecard.crypto.tls.auth;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import javax.annotation.Nonnull;
@@ -36,6 +37,8 @@ import org.openecard.bouncycastle.crypto.tls.SignatureAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.TlsContext;
 import org.openecard.bouncycastle.crypto.tls.TlsUtils;
+import org.openecard.bouncycastle.util.io.pem.PemObject;
+import org.openecard.bouncycastle.util.io.pem.PemWriter;
 import org.openecard.crypto.common.sal.CredentialPermissionDenied;
 import org.openecard.crypto.common.sal.GenericCryptoSigner;
 import org.slf4j.Logger;
@@ -107,6 +110,26 @@ public class SmartCardSignerCredential extends AbstractTlsSignerCredentials impl
 		logger.error("Failed to deserialize certificate.", ex);
 	    }
 	}
+
+	if (logger.isDebugEnabled()) {
+	    StringWriter sw = new StringWriter();
+	    sw.write("Using the following certificate for authentication:\n");
+	    for (org.openecard.bouncycastle.asn1.x509.Certificate c : certificate.getCertificateList()) {
+		try (PemWriter pw = new PemWriter(sw)) {
+		    sw.append("\nSubject: ")
+			    .append(c.getSubject().toString())
+			    .append("\n");
+		    sw.append("Issuer:  ")
+			    .append(c.getIssuer().toString());
+		    pw.writeObject(new PemObject("CERTIFICATE", c.getEncoded()));
+		    sw.write("\n");
+		} catch (IOException ex) {
+		    logger.error("Failed to encode certificate in PEM format.");
+		}
+	    }
+	    logger.debug(sw.toString());
+	}
+
 	return certificate;
     }
 

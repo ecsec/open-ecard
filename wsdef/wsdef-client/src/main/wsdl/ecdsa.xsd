@@ -7,15 +7,7 @@
 
 	<!--ECDSA key value root element-->
 
-	<xs:element name="ECDSAKeyValue">
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="ecdsa:ECDSAKeyValueType">
-					<xs:sequence />
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
+	<xs:element name="ECDSAKeyValue" type="ecdsa:ECDSAKeyValueType" />
 	<xs:complexType name="ECDSAKeyValueType">
 		<xs:sequence>
 			<xs:element name="DomainParameters"

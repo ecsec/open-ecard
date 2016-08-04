@@ -104,7 +104,7 @@ public class HttpUtils {
 		pw.format("  %s: %s%n", h.getName(), h.getValue());
 	    }
 	    if (entityData != null) {
-		pw.format(new String(entityData));
+		pw.print(new String(entityData));
 	    }
 	    pw.println();
 	    pw.flush();

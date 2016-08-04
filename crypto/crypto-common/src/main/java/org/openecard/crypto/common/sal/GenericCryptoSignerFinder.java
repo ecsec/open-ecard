@@ -22,9 +22,6 @@
 
 package org.openecard.crypto.common.sal;
 
-import iso.std.iso_iec._24727.tech.schema.ACLList;
-import iso.std.iso_iec._24727.tech.schema.ACLListResponse;
-import iso.std.iso_iec._24727.tech.schema.AccessRuleType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationList;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationListResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationListResponse.CardApplicationNameList;
@@ -39,7 +36,6 @@ import iso.std.iso_iec._24727.tech.schema.DSIRead;
 import iso.std.iso_iec._24727.tech.schema.DSIReadResponse;
 import iso.std.iso_iec._24727.tech.schema.DataSetSelect;
 import iso.std.iso_iec._24727.tech.schema.DataSetSelectResponse;
-import iso.std.iso_iec._24727.tech.schema.NamedDataServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.TargetNameType;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -51,26 +47,25 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.security.auth.x500.X500Principal;
 import org.openecard.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.openecard.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.openecard.bouncycastle.asn1.x509.Certificate;
+import org.openecard.bouncycastle.asn1.x500.X500Name;
 import org.openecard.bouncycastle.asn1.x509.KeyPurposeId;
 import org.openecard.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
-import org.openecard.bouncycastle.pqc.math.linearalgebra.ByteUtils;
 import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.util.HandlerUtils;
-import org.openecard.common.util.Pair;
 import org.openecard.common.util.SALFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +76,7 @@ import org.slf4j.LoggerFactory;
  * The class is instantiated with a handle to a specific card in the system. Afterwards it can look for DIDs with
  * different search strategies.
  *
+ * @author René Lottes
  * @author Tobias Wich
  * @author Dirk Petrautzki
  * @author Hans-Martin Haase
@@ -131,17 +127,52 @@ public class GenericCryptoSignerFinder {
 
     @Nonnull
     public GenericCryptoSigner findDid(@Nonnull String didName) throws CredentialNotFound {
-	throw new UnsupportedOperationException("Not implemented yet");
+	List<DIDCertificate> dids = findAllDIDCerts();
+
+        for (DIDCertificate c : dids) {
+            if (c.getDIDName().equals(didName)) {
+		try {
+		    updateConHandle(fileUtils.selectApplication(c.getApplicationIdentifier(), handle));
+		} catch (DispatcherException | InvocationTargetException | WSException ex) {
+		    throw new CredentialNotFound("Failed to select the application containing the DID.", ex);
+		}
+                return new GenericCryptoSigner(dispatcher, handle, c);
+            }
+        }
+
+ 	throw new CredentialNotFound("No suitable DID found.");
     }
 
     @Nonnull
     public GenericCryptoSigner findDid(@Nonnull String didName, @Nullable String algorithmUri)
 	    throws CredentialNotFound {
-	throw new UnsupportedOperationException("Not implemented yet");
+	List<DIDCertificate> dids = findAllDIDCerts();
+
+        try {
+            for (DIDCertificate c : dids) {
+                if (c.getDIDName().equals(didName)) {
+		    DIDGetResponse did = getDid(didName);
+                    CryptoMarkerType cryptoMarker = new CryptoMarkerType(did.getDIDStructure().getDIDMarker());
+                    String algorithm = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
+                    if (algorithm.equals(algorithmUri)) {
+			try {
+			    updateConHandle(fileUtils.selectApplication(c.getApplicationIdentifier(), handle));
+			} catch (DispatcherException | InvocationTargetException | WSException ex) {
+			    throw new CredentialNotFound("Failed to select the application containing the DID.", ex);
+			}
+                        return new GenericCryptoSigner(dispatcher, handle, c);
+                    }
+                }
+            }
+        } catch (WSException | DispatcherException | InvocationTargetException ex) {
+            logger.error("Error finding DID.", ex);
+        }
+
+	throw new CredentialNotFound("No suitable DID found.");
     }
 
     @Nonnull
-    public GenericCryptoSigner findFirstMatching(@Nonnull Certificate[] caChain) {
+    public GenericCryptoSigner findFirstMatching(@Nonnull org.openecard.bouncycastle.asn1.x509.Certificate[] caChain) {
 	throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -160,10 +191,12 @@ public class GenericCryptoSignerFinder {
     @Nonnull
     public GenericCryptoSigner findFirstMatching(@Nonnull CertificateRequest cr)
 	    throws CredentialNotFound {
-	List<DIDCertificate> result = findDID();
+	List<DIDCertificate> result = findTLSCapableDID();
 	if (result.isEmpty()) {
 	    throw new CredentialNotFound("No suitable DID found.");
 	}
+
+	result = filterDidCertsByCertRequest(cr, result);
 	// TODO check remaining DIDs to match CertificateRequest
 	DIDCertificate firstResult = result.get(0);
 
@@ -176,9 +209,70 @@ public class GenericCryptoSignerFinder {
 	return new GenericCryptoSigner(dispatcher, handle, firstResult);
     }
 
+    /**
+     * Finds the first DID containing a client certificate which has the key usage given in the SignatureUsageWrapper.
+     *
+     * @param wrapper A {@link SignatureUsageWrapper} covering the usage conditions of the client certificate of the DID.
+     * @return A new GenericCryptoSigner for the given DID.
+     * @throws CredentialNotFound If there is no DID with a certificate that fulfills the conditions of the given
+     * {@link SignatureUsageWrapper}.
+     */
+    @Nonnull
+    public GenericCryptoSigner findFirstMatching(@Nonnull SignatureUsageWrapper wrapper)
+            throws CredentialNotFound {
+        List<DIDCertificate> result = findAllDIDCerts();
+        if (result.isEmpty()) {
+	    throw new CredentialNotFound("No suitable DID found.");
+	}
+
+        for (DIDCertificate c : result) {
+            X509Certificate x509cert = (X509Certificate) c.getCertificate();
+
+            if (x509cert != null && wrapper.hasUsage(x509cert)) {
+		try {
+		    updateConHandle(fileUtils.selectApplication(c.getApplicationIdentifier(), handle));
+		} catch (DispatcherException | InvocationTargetException | WSException ex) {
+		    throw new CredentialNotFound("Failed to select the application containing the DID.", ex);
+		}
+		return new GenericCryptoSigner(dispatcher, handle, c);
+	    }
+	}
+
+        throw new CredentialNotFound("No suitable DID found.");
+    }
+
     // TODO: add more useful search functions
 
-    private List<DIDCertificate> findDID() {
+    private List<DIDCertificate> findAllDIDCerts() {
+        List<DIDCertificate> result = new ArrayList<>();
+        try {
+	    CardApplicationList listReq = new CardApplicationList();
+	    handle.setCardApplication(null);
+	    listReq.setConnectionHandle(handle);
+	    CardApplicationListResponse listRes = (CardApplicationListResponse) dispatcher.deliver(listReq);
+	    WSHelper.checkResult(listRes);
+	    CardApplicationNameList cardApplicationNameList = listRes.getCardApplicationNameList();
+	    List<byte[]> cardApplicationName = cardApplicationNameList.getCardApplicationName();
+
+	    for (byte[] appIdentifier : cardApplicationName) {
+		handle.setCardApplication(appIdentifier);
+                //get all relevant DIDs
+                List<String> didNamesList = getSignatureCapableDIDs(handle);
+		List<DIDCertificate> certList = getCertsForDidName(didNamesList);
+
+		if (! certList.isEmpty()) {
+ 		    result.addAll(certList);
+ 		}
+ 	    }
+ 	} catch (InvocationTargetException | DispatcherException | WSException e) {
+ 	    logger.error("Searching for DID failed", e);
+ 	} catch (IOException ex) {
+ 	    logger.error("Failed to read the certificates which are related to the DID.", ex);
+ 	}
+         return result;
+    }
+
+    private List<DIDCertificate> findTLSCapableDID() {
 	List<DIDCertificate> result = new ArrayList<>();
 
 	try {
@@ -212,6 +306,68 @@ public class GenericCryptoSignerFinder {
 	return result;
     }
 
+    private DIDGetResponse getDid(String name) throws WSException, DispatcherException, InvocationTargetException {
+	DIDGet didGet = new DIDGet();
+	didGet.setConnectionHandle(handle);
+	didGet.setDIDName(name);
+	DIDGetResponse didGetResponse = (DIDGetResponse) dispatcher.deliver(didGet);
+	WSHelper.checkResult(didGetResponse);
+	return didGetResponse;
+    }
+
+    /**
+     * Generates a list with all available DIDCertificate's.
+     *
+     * @param didNames List of DIDNames which shall be checked for certificates.
+     * @return A list of {@link DIDCertificate}'s. The list may be empty in case there are no DIDs with a referenced
+     * client certificate.
+     * @throws org.openecard.common.WSHelper.WSException
+     * @throws DispatcherException
+     * @throws InvocationTargetException
+     * @throws IOException
+     */
+    private List<DIDCertificate> getCertsForDidName(List<String> didNames) throws WSException, DispatcherException,
+	    InvocationTargetException, IOException {
+	List<DIDCertificate> remainingDIDs = new ArrayList<>();
+	ConnectionHandleType handle2 = HandlerUtils.copyHandle(handle);
+
+	for (String didName : didNames) {
+	    updateConHandle(handle2);
+	    // get the DID and extract the CryptoMarker
+	    DIDGetResponse didGetResponse = getDid(didName);
+	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didGetResponse.getDIDStructure().getDIDMarker());
+	    DIDCertificate cardCert;
+
+	    // check whether the did is associated with certificates. If not go to the next name
+	    if (cryptoMarker.getCertificateRefs() != null && ! cryptoMarker.getCertificateRefs().isEmpty()) {
+		byte[] certificate = readCertificate(cryptoMarker, 0, dispatcher);
+
+		// check whether we have a certificate and if it is usable for authentication
+		if (certificate != null) {
+		    // create a new DIDCertificate instance
+		    try {
+			cardCert = new DIDCertificate(certificate);
+			cardCert.setApplicationID(handle2.getCardApplication());
+			cardCert.setDIDName(didName);
+			cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
+			cardCert.setAlwaysReadable();
+
+			// add chain if located in other files
+			readChain(cryptoMarker, dispatcher, cardCert);
+			remainingDIDs.add(cardCert);
+		    } catch (CertificateException ex) {
+			String msg = "Failed to create a new DIDCertificate instance.";
+			logger.warn(msg, ex);
+			// don't do anything more we just process the next name
+		    }
+		}
+
+	    }
+	}
+
+	return remainingDIDs;
+    }
+
     /**
      * The method filters a list with DID (names) for such DID which are able to perform a signature according to TLS1.1
      * and TLS1.2.
@@ -227,123 +383,53 @@ public class GenericCryptoSignerFinder {
 	    throws DispatcherException, InvocationTargetException, WSException, IOException {
 	ConnectionHandleType handle2 = HandlerUtils.copyHandle(handle);
 	List<DIDCertificate> remainingDIDs = new ArrayList<>();
-	HashMap<String, Pair<byte[], Boolean>> dataSetWithCert = new HashMap<>();
+	//HashMap<String, Pair<byte[], Boolean>> dataSetWithCert = new HashMap<>();
 	for (String didName : didNames) {
 	    updateConHandle(handle2);
-	    DIDGet didGet = new DIDGet();
-	    didGet.setConnectionHandle(handle);
-	    didGet.setDIDName(didName);
-	    DIDGetResponse didGetResponse = (DIDGetResponse) dispatcher.deliver(didGet);
-	    WSHelper.checkResult(didGetResponse);
+	    // get the DID and extract the CryptoMarker
+	    DIDGetResponse didGetResponse = getDid(didName);
 	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didGetResponse.getDIDStructure().getDIDMarker());
 	    String algorithm = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
-	    DIDCertificate cardCert= new DIDCertificate();
+	    DIDCertificate cardCert;
+	    int tlsVersion;
 
-	    // just do the certificate magic if we have certificates in the did
+	    // determine possible TLS versions
+	    if (PRE_TLS12.contains(algorithm)) {
+		logger.debug("{} is usable for TLSv1.1 and TLS1.2 signatures.", didName);
+		tlsVersion = DIDCertificate.TLSv10;
+	    } else if (POST_TLS12.contains(algorithm)) {
+		logger.debug("{} is usable for TLSv1.2 signatures.", didName);
+		tlsVersion = DIDCertificate.TLSv12;
+	    } else {
+		// no tls signature possible with the did so go to the next name
+		logger.debug("{} is not usable for TLS signatures.", didName);
+		continue;
+	    }
+
+	    // check whether the did is associated with certificates. If not go to the next name
 	    if (cryptoMarker.getCertificateRefs() != null && ! cryptoMarker.getCertificateRefs().isEmpty()) {
-		// determine possible TLS versions
-		if (PRE_TLS12.contains(algorithm)) {
-		    logger.debug("{} is usable for TLSv1.1 and TLS1.2 signatures.", didName);
-		    cardCert.setMinTLSVersion(DIDCertificate.TLSv10);
-		} else if (POST_TLS12.contains(algorithm)) {
-		    logger.debug("{} is usable for TLSv1.2 signatures.", didName);
-		    cardCert.setMinTLSVersion(DIDCertificate.TLSv12);
-		} else {
-		    logger.debug("{} is not usable for TLS signatures.", didName);
-		    continue;
-		}
+		byte[] certificate = readCertificate(cryptoMarker, 0, dispatcher);
 
-		if (dataSetWithCert.containsKey(cryptoMarker.getCertificateRefs().get(0).getDataSetName())) {
-		    Pair<byte[], Boolean> certAndTlsAuth = dataSetWithCert.get(
-			    cryptoMarker.getCertificateRefs().get(0).getDataSetName());
-		    // use handle with the application identifier of the DID (may be different from the application
-		    // containing the certificates).
-		    cardCert.setApplicationID(handle2.getCardApplication());
-		    cardCert.setDIDName(didName);
-		    cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
-		    cardCert.setRawCertificate(certAndTlsAuth.p1);
-		    remainingDIDs.add(cardCert);
-		} else {
-		    byte[] cert = readCertificate(cryptoMarker, 0, dispatcher);
-
-		    if (cert == null) {
-			// this means the certificate is not readable without authentication (or an error occured)
-			// so save this in the list for later if there exists the possibility to select a certificate for
-			// authentication.
-
-			// use handle with the application identifier of the DID (may be different from the application
-			// containing the certificates).
+		// check whether we have a certificate and if it is usable for authentication
+		if (certificate != null && containsAuthenticationCertificate(certificate)) {
+		    // create a new DIDCertificate instance
+		    try {
+			cardCert = new DIDCertificate(certificate);
 			cardCert.setApplicationID(handle2.getCardApplication());
 			cardCert.setDIDName(didName);
 			cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
-			remainingDIDs.add(cardCert);
-
-			try (
-			    // add chain if available
-			    ByteArrayOutputStream certChain = new ByteArrayOutputStream()) {
-			    readChain(cryptoMarker, dispatcher, certChain);
-
-			    // cert contains the chain (if available) only because we can't read the certificate without
-			    // using the pin
-			    cert = certChain.toByteArray();
-			}
-			Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, false);
-			dataSetWithCert.put(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), certAndTLSAuth);
-		    } else if (containsAuthenticationCertificate(cert)) {
-			// put certificates which are always readable always at the beginning of the list
-
-			// use handle with the application identifier of the DID (may be different from the application
-			// containing the certificates).
-			cardCert.setApplicationID(handle2.getCardApplication());
-			cardCert.setDIDName(didName);
-			cardCert.setDataSetName(cryptoMarker.getCertificateRefs().get(0).getDataSetName());
-			cardCert.setRawCertificate(cert);
 			cardCert.setAlwaysReadable();
-
-			/*********************************************************************************************/
-			/*** TODO:                                                                                 ***/
-			/*** The following is just a workaround used for the eGK and should be reworked as soon as ***/
-			/*** there is a better possibility to let the user choose between the certificates         ***/
-			/*********************************************************************************************/
-
-			String certName = cryptoMarker.getCertificateRefs().get(0).getDataSetName();
-			ACLList certAcl = new ACLList();
-			TargetNameType targetName = new TargetNameType();
-			targetName.setDataSetName(certName);
-			certAcl.setTargetName(targetName);
-			certAcl.setConnectionHandle(handle);
-			ACLListResponse resp = (ACLListResponse) dispatcher.deliver(certAcl);
-			WSHelper.checkResult(resp);
-
-			for (AccessRuleType rule : resp.getTargetACL().getAccessRule()) {
-			    if (rule.getAction().getNamedDataServiceAction() != null) {
-				if (rule.getAction().getNamedDataServiceAction().equals(NamedDataServiceActionName.DSI_READ)) {
-				    if (rule.getSecurityCondition().isAlways() != null &&
-					rule.getSecurityCondition().isAlways()) {
-					remainingDIDs.add(0, cardCert);
-					break;
-				    } else {
-					remainingDIDs.add(cardCert);
-					break;
-				    }
-				}
-			    }
-			}
-
+			cardCert.setMinTLSVersion(tlsVersion);
 			// add chain if located in other files
-			byte[] certChain;
-			try (ByteArrayOutputStream bOutChain = new ByteArrayOutputStream()) {
-			    readChain(cryptoMarker, dispatcher, bOutChain);
-			    certChain = bOutChain.toByteArray();
-			}
-			
-			// concatenate with the certificate to use for TLS or signature creation
-			cert = ByteUtils.concatenate(cert, certChain);
-			Pair<byte[], Boolean> certAndTLSAuth = new Pair<>(cert, true);
-			dataSetWithCert.put(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), certAndTLSAuth);
-			cardCert.setRawCertificate(cert);
+			readChain(cryptoMarker, dispatcher, cardCert);
+			remainingDIDs.add(cardCert);
+		    } catch (CertificateException ex) {
+			String msg = "Failed to create a new DIDCertificate instance.";
+			logger.warn(msg, ex);
+			// don't do anything more we just process the next name
 		    }
 		}
+
 	    }
 	}
 
@@ -360,14 +446,19 @@ public class GenericCryptoSignerFinder {
      * @throws InvocationTargetException
      */
     private void readChain(CryptoMarkerType cryptoMarker, Dispatcher dispatcher,
-	    ByteArrayOutputStream certChain) throws DispatcherException,
+	    DIDCertificate didCert) throws DispatcherException,
 	    InvocationTargetException, IOException {
-
-	if (cryptoMarker.getCertificateRefs().size() > 1) {
-	    for (int i = 1; i < cryptoMarker.getCertificateRefs().size(); i++) {
-		byte[] chainPart = readCertificate(cryptoMarker, i, dispatcher);
-		certChain.write(chainPart);
+	try {
+	    if (cryptoMarker.getCertificateRefs().size() > 1) {
+		for (int i = 1; i < cryptoMarker.getCertificateRefs().size(); i++) {
+		    byte[] chainPart = readCertificate(cryptoMarker, i, dispatcher);
+		    didCert.addChainCertificate(chainPart);
+		}
 	    }
+	} catch (CertificateException ex) {
+	    String msg = "Failed to read certificate of the certificate chain.";
+	    logger.error(msg, ex);
+	    throw new IOException(msg, ex);
 	}
     }
 
@@ -443,9 +534,6 @@ public class GenericCryptoSignerFinder {
 		}
 
 		if (counter != rawCert.length) {
-		    // transform the byte array into an certificate object
-		    Certificate cert = Certificate.getInstance(rawCert);
-		    cert.getTBSCertificate();
 		    CertificateFactory cf = CertificateFactory.getInstance("X509");
 		    ByteArrayInputStream bIn = new ByteArrayInputStream(rawCert);
 		    X509Certificate x509cert = (X509Certificate) cf.generateCertificate(bIn);
@@ -536,5 +624,130 @@ public class GenericCryptoSignerFinder {
 	handle.setContextHandle(conHandle.getContextHandle());
 	handle.setCardApplication(conHandle.getCardApplication());
     }
+
+    /**
+     * Filter the given list of DIDCertificate's by using the given CertificateRequest.
+     * Note: If there is no match of an certificate and the certificate request than the given input list is returned.
+     *
+     * @param cr A CertificateRequest containing issuer for the requested certificate.
+     * @param certs A list of DIDCertificates which shall be filtered.
+     * @return A list of filtered DIDCertificates, all elements in the list match the request. Note: If there is no
+     * match of an certificate and the certificate request than the given input list is returned.
+     */
+    private List<DIDCertificate> filterDidCertsByCertRequest(CertificateRequest cr, List<DIDCertificate> certs) {
+	Vector<X500Name> authorities = cr.getCertificateAuthorities();
+
+	// log the authorities named in the certificate request
+	if (logger.isDebugEnabled()) {
+	    String start = "The following certificate authorities are available in the certificate request: ";
+	    StringBuilder builder = new StringBuilder(start);
+	    for (X500Name name : authorities) {
+		builder.append("\n");
+		builder.append(name.toString());
+	    }
+	    builder.append('\n');
+	    logger.debug(builder.toString());
+	}
+
+	ArrayList<DIDCertificate> didCerts = new ArrayList<>();
+	ArrayList<ArrayList<java.security.cert.Certificate>> newCertChains = new ArrayList<>();
+	// Check for every DIDCertificate whether the chain contains an authority from the certificate request
+	// loop over all available DIDCertificate's
+	for (DIDCertificate cert : certs) {
+	    try {
+		List<java.security.cert.Certificate> jCerts = cert.buildPath();
+		// loop over the certificate chain of a single DIDCertificate
+		ArrayList<java.security.cert.Certificate> currentChain = new ArrayList<>();
+		boolean match = false;
+		for (java.security.cert.Certificate jCert : jCerts) {
+		    X509Certificate jCertX509 = (X509Certificate) jCert;
+		    // loop over all certificate authorities in the Certificate Request
+		    for (X500Name authority : authorities) {
+			try {
+			    X500Principal requestPrincipal = new X500Principal(authority.toASN1Primitive().getEncoded());
+			    X500Principal certPrincipal = jCertX509.getIssuerX500Principal();
+			    // compare Issuer of the certificate with the principal created from the current X500Name
+			    if (requestPrincipal.toString().equals(certPrincipal.toString())) {
+				match = true;
+				break;
+			    }
+			} catch (IOException ex) {
+			    String msg = "Failed to create X500Principal from X500Nmae " + authority.toString();
+			    logger.warn(msg, ex);
+			}
+		    }
+
+		    // put the current certificate in the current chain
+		    currentChain.add(jCert);
+
+		    if (match) {
+			break;
+		    }
+		}
+
+		// if there is a match in the certificate chain than store it for later
+		if (match) {
+		    didCerts.add(cert);
+		    newCertChains.add(currentChain);
+		}
+	    } catch (CertificateException ex) {
+		 String msg = "Failed to build certificate chain for DIDCertificate of DID " + cert.getDIDName();
+		 logger.warn(msg, ex);
+		 // process the next entry
+	    }
+	}
+
+	if (didCerts.isEmpty()) {
+	    // return the input list if there is no match to have the same behavior as before
+	    return certs;
+	} else {
+	    List<DIDCertificate> newCerts = buildNewDidCerts(didCerts, newCertChains);
+	    if (newCerts == null) {
+		return certs;
+	    } else {
+		return newCerts;
+	    }
+	}
+    }
+
+    @Nullable
+    private List<DIDCertificate> buildNewDidCerts(ArrayList<DIDCertificate> didCerts,
+	    ArrayList<ArrayList<java.security.cert.Certificate>> newChains) {
+	try {
+	    // create new DIDCertificates with a chain that fits the Request
+	    List<DIDCertificate> newCertList = new ArrayList<>();
+	    for (int i = 0; i < didCerts.size(); i++) {
+		DIDCertificate newDidCert = null;
+		for (java.security.cert.Certificate chainCert : newChains.get(i)) {
+		    if (newDidCert == null) {
+			newDidCert = new DIDCertificate(chainCert.getEncoded());
+		    } else {
+			newDidCert.addChainCertificate(chainCert.getEncoded());
+		    }
+		}
+
+		if (newDidCert != null) {
+		    newDidCert.setApplicationID(didCerts.get(i).getApplicationIdentifier());
+		    newDidCert.setDIDName(didCerts.get(i).getDIDName());
+		    newDidCert.setDataSetName(didCerts.get(i).getDataSetName());
+		    newDidCert.setMinTLSVersion(didCerts.get(i).getMinTLSVersion());
+		    if (didCerts.get(i).isAlwaysReadable()) {
+			newDidCert.setAlwaysReadable();
+		    }
+		} else {
+		    throw new CertificateException();
+		}
+
+		newCertList.add(newDidCert);
+	    }
+
+	    return newCertList;
+
+	} catch (CertificateException ex) {
+	    // error occurred while the creation of the new DIDCertificates return null
+	    return null;
+	}
+    }
+
 
 }

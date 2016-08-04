@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			  android:id="@+id/linearLayoutMainActivity"
+			  android:layout_width="fill_parent"
+			  android:layout_height="fill_parent"
+			  android:orientation="vertical" >
+
+	<TabHost
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/my_tabhost"
+		android:layout_width="match_parent"
+		android:layout_height="0dip"
+		android:layout_weight="1.0" >
+
+		<LinearLayout android:orientation="vertical"
+					  android:layout_width="fill_parent"
+					  android:layout_height="fill_parent" >
+
+			<HorizontalScrollView
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:fadingEdge="horizontal"
+				android:fillViewport="true"
+				android:scrollbars="none" >
+
+				<TabWidget
+					android:id="@android:id/tabs"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content" />
+
+			</HorizontalScrollView>
+
+			<FrameLayout
+				android:id="@android:id/tabcontent"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent" />
+
+		</LinearLayout>
+
+	</TabHost>
+
+	<Button
+		android:id="@+id/button_back"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_horizontal" />
+
+</LinearLayout>

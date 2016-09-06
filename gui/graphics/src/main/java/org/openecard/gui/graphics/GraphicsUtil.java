@@ -28,6 +28,7 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Method;
+import javax.swing.Icon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GraphicsUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(GraphicsUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GraphicsUtil.class);
 
     /**
      * Creates an image with the specified width and height. <br><br>
@@ -54,7 +55,7 @@ public class GraphicsUtil {
      * @param imageHeight image height (must be &gt; 0)
      * @return java.awt.Image
      */
-    public static Image createImage(Class<?> clazz, int imageWidth, int imageHeight) {
+    public static Image createImage(Class<? extends Icon> clazz, int imageWidth, int imageHeight) {
 	return createImage(clazz, imageWidth, imageHeight, imageWidth, imageHeight, 0, 0);
     }
 
@@ -79,24 +80,24 @@ public class GraphicsUtil {
      * @param posY Y coordinate of the upper left corner of the image
      * @return java.awt.Image
      */
-    public static Image createImage(Class<?> clazz, int imageWidth, int imageHeight, int canvasWidth, int canvasHeight, int posX, int posY) {
+    public static Image createImage(Class<? extends Icon> clazz, int imageWidth, int imageHeight, int canvasWidth,
+	    int canvasHeight, int posX, int posY) {
 	BufferedImage image = new BufferedImage(canvasWidth, canvasHeight, BufferedImage.TYPE_INT_ARGB);
-	Graphics g = image.createGraphics();
 
 	// The methods used in the following try-catch-block throw a lot of different exceptions, which should be
 	// handled separately. If an exception is thrown, regardless of its specific type, the result is always the
 	// same: the image doesn't get painted onto the canvas. Hence catching Exception is acceptable.
 	try {
-	    Object svgIcon = clazz.newInstance();
+	    Icon svgIcon = clazz.newInstance();
 
 	    Method method = clazz.getMethod("setDimension", Dimension.class);
 	    method.invoke(svgIcon, new Dimension(imageWidth, imageHeight));
 
 	    method = clazz.getMethod("paintIcon", Component.class, Graphics.class, int.class, int.class);
-	    method.invoke(svgIcon, null, g, posX, posY);
+	    method.invoke(svgIcon, null, image.createGraphics(), posX, posY);
 
 	} catch (Exception ex) {
-	    logger.error(ex.getMessage(), ex);
+	    LOG.error(ex.getMessage(), ex);
 	}
 
 	return image;

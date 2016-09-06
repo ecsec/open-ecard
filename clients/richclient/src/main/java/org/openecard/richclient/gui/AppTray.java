@@ -33,6 +33,12 @@ import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -41,6 +47,7 @@ import org.openecard.common.I18n;
 import org.openecard.gui.graphics.GraphicsUtil;
 import org.openecard.gui.graphics.OecLogoBgWhite;
 import org.openecard.gui.graphics.OecLogoBlackBgTransparent;
+import org.openecard.gui.graphics.OecLogoWhiteBgTransparent;
 import org.openecard.recognition.CardRecognition;
 import org.openecard.richclient.RichClient;
 import org.slf4j.Logger;
@@ -57,7 +64,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AppTray {
 
-    private static final Logger logger = LoggerFactory.getLogger(AppTray.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AppTray.class);
 
     private static final String ICON_LOADER = "loader";
     private static final String ICON_LOGO = "logo";
@@ -165,7 +172,7 @@ public class AppTray {
 	try {
 	    tray.add(trayIcon);
 	} catch (AWTException ex) {
-	    logger.error("TrayIcon could not be added to the system tray.", ex);
+	    LOG.error("TrayIcon could not be added to the system tray.", ex);
 
 	    // tray and trayIcon are not needed anymore
 	    tray = null;
@@ -179,37 +186,13 @@ public class AppTray {
 	Dimension dim = tray.getTrayIconSize();
 
 	if (isLinux()) {
-	    if (isKde()) {
-		return getImageKde(name, dim);
-	    } else {
-		return getImageLinux(name, dim);
-	    }
+	    return getImageLinux(name, dim);
 	} else if (isMacOSX()) {
 	    return getImageMacOSX(name, dim);
 	} else {
 	    return getImageDefault(name, dim);
 	}
     }
-
-    private Image getImageKde(String name, Dimension dim) {
-	if (name.equals(ICON_LOADER)) {
-	    switch(dim.width) {
-		case 24:
-		    return GuiUtils.getImage("loader_icon_linux_kde_24.gif");
-		default:
-		    return GuiUtils.getImage("loader_icon_linux_default_256.gif");
-	    }
-	} else {
-	    // KDE uses tray icon images with the size of 24 x 24 pixels, but only 22 x 22 pixels are shown. The images
-	    // are not scaled, but simply get cropped on the right side and the bottom by 2 pixels. If a smaller image
-	    // is used (e.g. 22 x 22 pixels), it will be first scaled to 24 x 24 pixels and then it will be cropped.
-	    // So an image must be used which is 24 x 24 pixels in size and can be cropped by 2 pixels without loosing
-	    // any information.
-	    // Attention: This may change in future version of KDE!
-	    return GraphicsUtil.createImage(OecLogoBgWhite.class, dim.width - 2, dim.height - 2, dim.width, dim.height, 0, 0);
-	}
-    }
-
 
     private Image getImageLinux(String name, Dimension dim) {
 	if (name.equals(ICON_LOADER)) {
@@ -220,7 +203,13 @@ public class AppTray {
     }
 
     private Image getImageMacOSX(String name, Dimension dim) {
-	return GraphicsUtil.createImage(OecLogoBlackBgTransparent.class, dim.width - 2, dim.height - 2, dim.width, dim.height, 1, 1);
+	Class<? extends Icon> c;
+	if (isMacMenuBarDarkMode()) {
+	    c = OecLogoWhiteBgTransparent.class;
+	} else {
+	    c = OecLogoBlackBgTransparent.class;
+	}
+	return GraphicsUtil.createImage(c, dim.width - 2, dim.height - 2, dim.width, dim.height, 1, 1);
     }
 
     private Image getImageDefault(String name, Dimension dim) {
@@ -233,6 +222,37 @@ public class AppTray {
 
     private boolean isMacOSX() {
 	return System.getProperty("os.name").contains("OS X");
+    }
+
+    private boolean isMacMenuBarDarkMode() {
+	// code inspired by https://stackoverflow.com/questions/33477294/menubar-icon-for-dark-mode-on-os-x-in-java
+	final FutureTask<Integer> f = new FutureTask<>(new Callable<Integer>() {
+	    @Override
+	    public Integer call() throws Exception {
+		// check for exit status only. Once there are more modes than "dark" and "default", we might need to
+		// analyze string contents..
+		Process proc = Runtime.getRuntime().exec(new String[]{"defaults", "read", "-g", "AppleInterfaceStyle"});
+		proc.waitFor();
+		return proc.exitValue();
+	    }
+	});
+	try {
+	    Thread t = new Thread(new Runnable() {
+		@Override
+		public void run() {
+		    f.run();
+		}
+	    });
+	    t.setDaemon(true);
+	    t.start();
+	    Integer result = f.get(100, TimeUnit.MILLISECONDS);
+	    return result == 0;
+	} catch (InterruptedException | TimeoutException | ExecutionException ex) {
+	    // TimeoutException thrown if process didn't terminate
+	    LOG.warn("Could not determine, whether 'dark mode' is being used. Falling back to default (light) mode.", ex);
+	    f.cancel(true); // make sure the thread is dead
+	    return false;
+	}
     }
 
     private boolean isLinux() {

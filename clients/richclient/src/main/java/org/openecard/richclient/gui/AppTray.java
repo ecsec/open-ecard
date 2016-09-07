@@ -87,7 +87,7 @@ public class AppTray {
      * A loading icon is displayed.
      */
     public void beginSetup() {
-	if (SystemTray.isSupported()) {
+	if (isTraySupported()) {
 	    setupTrayIcon();
 	} else {
 	    setupFrame();
@@ -257,6 +257,19 @@ public class AppTray {
 	    }
 	}
 	return isKde;
+    }
+
+    private boolean isPlasma() {
+	if (isKde()) {
+	    return "5".equals(System.getenv("KDE_SESSION_VERSION"));
+	} else {
+	    return false;
+	}
+    }
+
+    private boolean isTraySupported() {
+	return SystemTray.isSupported()
+		&& ! isPlasma();
     }
 
     private void setupFrame() {

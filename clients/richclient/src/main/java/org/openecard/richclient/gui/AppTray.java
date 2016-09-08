@@ -259,6 +259,11 @@ public class AppTray {
 	return isKde;
     }
 
+    private boolean isGnome() {
+	return "GNOME".equals(System.getenv("XDM_CURRENT_DESKTOP"))
+		|| "GNOME".equals(System.getenv("XDG_CURRENT_DESKTOP"));
+    }
+
     private boolean isPlasma() {
 	if (isKde()) {
 	    return "5".equals(System.getenv("KDE_SESSION_VERSION"));
@@ -269,7 +274,8 @@ public class AppTray {
 
     private boolean isTraySupported() {
 	return SystemTray.isSupported()
-		&& ! isPlasma();
+		&& ! isPlasma()
+		&& ! isGnome();
     }
 
     private void setupFrame() {

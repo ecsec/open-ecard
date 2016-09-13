@@ -28,7 +28,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
@@ -149,10 +148,20 @@ public class StepFrame {
     }
 
 
-    private void revalidate(JComponent c) {
+    private void revalidate(Container c) {
 	for (int i = 0; i < c.getComponentCount(); i++) {
-	    this.revalidate((JComponent) c.getComponent(i));
+	    Component next = c.getComponent(i);
+	    if (next instanceof Container) {
+		this.revalidate((Container) next);
+	    } else {
+		this.revalidate(next);
+	    }
 	}
+	c.revalidate();
+	c.repaint();
+    }
+
+    private void revalidate(Component c) {
 	c.revalidate();
 	c.repaint();
     }

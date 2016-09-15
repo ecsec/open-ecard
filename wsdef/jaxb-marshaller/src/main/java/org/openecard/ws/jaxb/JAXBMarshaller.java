@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
@@ -63,7 +64,7 @@ import org.xml.sax.SAXException;
  */
 public final class JAXBMarshaller implements WSMarshaller {
 
-    private static final Logger logger = LoggerFactory.getLogger(JAXBMarshaller.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JAXBMarshaller.class);
 
     // Marshaller and Unmarshaller
     private final MarshallerImpl marshaller;
@@ -92,9 +93,32 @@ public final class JAXBMarshaller implements WSMarshaller {
 	    tmpW3Factory = DocumentBuilderFactory.newInstance();
 	    tmpW3Factory.setNamespaceAware(true);
 	    tmpW3Factory.setIgnoringComments(true);
+	    tmpW3Factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+	    // XXE countermeasures
+	    tmpW3Factory.setExpandEntityReferences(false);
+	    tmpW3Factory.setXIncludeAware(false);
+	    tmpW3Factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+	    try {
+		tmpW3Factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+	    } catch (ParserConfigurationException ex) {
+		LOG.warn("Failed to disallow DTDs entirely.");
+	    }
+	    tmpW3Factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+	    tmpW3Factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+
 	    tmpW3Builder = tmpW3Factory.newDocumentBuilder();
 
 	    TransformerFactory tfactory = TransformerFactory.newInstance();
+	    tfactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+	    // XXE countermeasures
+	    tfactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+	    tfactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+	    try {
+		tfactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+	    } catch (TransformerConfigurationException ex) {
+		LOG.warn("Failed to disallow DTDs entirely.");
+	    }
+
 	    tmpSerializer = tfactory.newTransformer();
 	    tmpSerializer.setOutputProperty(OutputKeys.INDENT, "yes");
 	    tmpSerializer.setOutputProperty(OutputKeys.STANDALONE, "yes");
@@ -104,7 +128,7 @@ public final class JAXBMarshaller implements WSMarshaller {
 	    // instantiate soap stuff
 	    tmpSoapFactory = MessageFactory.newInstance();
 	} catch (ParserConfigurationException | TransformerConfigurationException | IllegalArgumentException | SOAPException ex) {
-	    logger.error("Failed to initialize XML components.", ex);
+	    LOG.error("Failed to initialize XML components.", ex);
 	    System.exit(1); // non recoverable
 	    throw new RuntimeException("Failed to initialize marshaller.", ex);
 	}

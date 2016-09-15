@@ -22,9 +22,12 @@
 
 package org.openecard.ws.soap;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 
@@ -33,6 +36,8 @@ import org.w3c.dom.Document;
  * @author Tobias Wich
  */
 public class MessageFactory {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MessageFactory.class);
 
     private final String protocol;
     private final DocumentBuilder domBuilder;
@@ -56,6 +61,19 @@ public class MessageFactory {
 	    final DocumentBuilderFactory tmpW3Factory = DocumentBuilderFactory.newInstance();
 	    tmpW3Factory.setNamespaceAware(true);
 	    tmpW3Factory.setIgnoringComments(true);
+	    tmpW3Factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+	    // XXE countermeasures
+	    tmpW3Factory.setExpandEntityReferences(false);
+	    tmpW3Factory.setXIncludeAware(false);
+	    tmpW3Factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+	    try {
+		tmpW3Factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+	    } catch (ParserConfigurationException ex) {
+		LOG.warn("Failed to disallow DTDs entirely.");
+	    }
+	    tmpW3Factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+	    tmpW3Factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+
 	    final DocumentBuilder tmpW3Builder = tmpW3Factory.newDocumentBuilder();
 
 	    return newInstance(protocol, tmpW3Builder);

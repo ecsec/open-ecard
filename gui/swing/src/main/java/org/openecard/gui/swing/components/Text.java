@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,6 +29,7 @@ import java.nio.charset.Charset;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
 import org.openecard.gui.definition.Document;
 import org.openecard.gui.definition.OutputInfoUnit;
 
@@ -59,6 +60,7 @@ public class Text implements StepComponent {
 	}
 
 	textArea = new JTextPane();
+	textArea.setEditorKitForContentType("text/html", new HTMLEditorKit());
 	textArea.setContentType("text/html");
 	textArea.setMargin(new Insets(0, 0, 0, 0));
 	textArea.setEditable(false);

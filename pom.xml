@@ -613,7 +613,7 @@
 			<dependency>
 				<groupId>com.github.tony19</groupId>
 				<artifactId>logback-android-classic</artifactId>
-				<version>1.1.1-5</version>
+				<version>1.1.1-6</version>
 			</dependency>
 			<!-- testing -->
 			<dependency>
@@ -624,7 +624,7 @@
 			<dependency>
 				<groupId>org.jmockit</groupId>
 				<artifactId>jmockit</artifactId>
-				<version>1.26</version>
+				<version>1.27</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.findbugs</groupId>

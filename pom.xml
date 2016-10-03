@@ -121,9 +121,6 @@
 					<name>env.ANDROID_HOME</name>
 				</property>
 			</activation>
-			<properties>
-				<maven.min.version>${maven.min.version}</maven.min.version>
-			</properties>
 		</profile>
 		<profile>
 			<id>ci</id>

@@ -56,12 +56,13 @@ public class HostnameVerifier implements CertificateVerifier {
 	// check hostname against Subject CN
 	if (! isIPAddr) {
 	    RDN[] cn = cert.getSubject().getRDNs(BCStrictStyle.CN);
-	    if (cn.length == 0) {
-		throw new CertificateVerificationException("No CN entry in certificate's Subject.");
+	    if (cn.length != 0) {
+		// CN is always a string type
+		String hostNameReference = cn[0].getFirst().getValue().toString();
+		success = checkWildcardName(hostOrIp, hostNameReference);
+	    } else {
+		LOG.debug("No CN entry in certificate's Subject.");
 	    }
-	    // CN is always a string type
-	    String hostNameReference = cn[0].getFirst().getValue().toString();
-	    success = checkWildcardName(hostOrIp, hostNameReference);
 	} else {
 	    LOG.debug("Given name is an IP Address. Validation relies solely on the SubjectAlternativeName.");
 	}

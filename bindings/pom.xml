@@ -7,7 +7,7 @@
     <parent>
 	<artifactId>app</artifactId>
 	<groupId>org.openecard</groupId>
-	<version>1.2.3</version>
+	<version>1.2.4</version>
     </parent>
 
     <groupId>org.openecard</groupId>

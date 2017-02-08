@@ -1,0 +1,3 @@
+# Allowed subjects for the TLS server certificates, one per line
+CN=orely.test.luxtrust.com, serialNumber=B112233, 2.5.4.15=Private Organization, O=LuxTrust S.A., 1.3.6.1.4.1.311.60.2.1.3=LU, L=Capellen, C=LU
+CN=orely.luxtrust.com, serialNumber=B112233, 2.5.4.15=Private Organization, O=LuxTrust S.A., 1.3.6.1.4.1.311.60.2.1.3=LU, L=Capellen, C=LU

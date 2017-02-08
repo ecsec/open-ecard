@@ -117,6 +117,9 @@ public class LogSettingsGroup extends SettingsGroup {
     private static final String MDLW_EVENT_NAME  = "addon.core.logging.middleware-event";
     private static final String MDLW_EVENT_DESC  = "addon.core.logging.middleware-event.desc";
     private static final String MDLW_EVENT_KEY   = "org.openecard.mdlw.event";
+    private static final String CG_NAME          = "addon.core.logging.chipgateway";
+    private static final String CG_DESC          = "addon.core.logging.chipgateway.desc";
+    private static final String CG_KEY           = "org.openecard.addons.cg";
 
     public LogSettingsGroup() {
 	super(lang.translationForKey(GROUP), SettingsFactory.getInstance(loadProperties()));
@@ -134,6 +137,20 @@ public class LogSettingsGroup extends SettingsGroup {
 	addLogLevelBox(lang.translationForKey(SALSTATE_NAME), lang.translationForKey(SALSTATE_DESC), SALSTATE_KEY);
 	addLogLevelBox(lang.translationForKey(MDLW_NAME), lang.translationForKey(MDLW_DESC), MDLW_KEY);
 	addLogLevelBox(lang.translationForKey(MDLW_EVENT_NAME), lang.translationForKey(MDLW_EVENT_DESC), MDLW_EVENT_KEY);
+	addLogLevelBox(lang.translationForKey(CG_NAME), lang.translationForKey(CG_DESC), CG_KEY);
+
+	// add support text
+	JComponent panel = createSupportPanel();
+
+	GridBagConstraints constraints = new GridBagConstraints();
+	constraints.insets = new Insets(5, 10, 0, 5);
+	constraints.fill = GridBagConstraints.NONE;
+	constraints.gridheight = GridBagConstraints.RELATIVE;
+	constraints.gridwidth = GridBagConstraints.RELATIVE;
+	constraints.gridx = 0;
+	constraints.gridy = itemIdx++;
+	constraints.anchor = GridBagConstraints.WEST;
+	getContainer().add(panel, constraints);
     }
 
     private JComboBox addLogLevelBox(String name, String desc, String key) {
@@ -202,6 +219,9 @@ public class LogSettingsGroup extends SettingsGroup {
 	    val = properties.getProperty(MDLW_EVENT_KEY);
 	    val = (val != null) ? val : "";
 	    setLoglevel(conf, MDLW_EVENT_KEY, val);
+	    val = properties.getProperty(CG_KEY);
+	    val = (val != null) ? val : "";
+	    setLoglevel(conf, CG_KEY, val);
 	    try ( // write log to file
 		    FileWriter w = new FileWriter(confFile)) {
 		String confStr = m.doc2str(conf);
@@ -242,6 +262,7 @@ public class LogSettingsGroup extends SettingsGroup {
 		p.setProperty(SALSTATE_KEY, getLoglevel(conf, SALSTATE_KEY));
 		p.setProperty(MDLW_KEY, getLoglevel(conf, MDLW_KEY));
 		p.setProperty(MDLW_EVENT_KEY, getLoglevel(conf, MDLW_EVENT_KEY));
+		p.setProperty(CG_KEY, getLoglevel(conf, CG_KEY));
 		return p;
 	    }
 	} catch (IOException | SAXException | WSMarshallerException | AddonPropertiesException ex) {

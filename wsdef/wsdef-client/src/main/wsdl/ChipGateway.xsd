@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://ws.openecard.org/chipgateway" xmlns="http://www.w3.org/2001/XMLSchema"
+		xmlns:cg="http://ws.openecard.org/chipgateway"
+		elementFormDefault="qualified" attributeFormDefault="unqualified" version="1.0.0">
+
+	<!-- =============================== -->
+	<!--        Version / Date           -->
+	<!-- =============================== -->
+	<!--           27.02.2016            -->
+	<!-- =============================== -->
+
+
+	<!-- =============================== -->
+	<!--     Basic Types and Elements    -->
+	<!-- =============================== -->
+
+
+	<element name="CertificateFilter" type="cg:CertificateFilterType"/>
+
+	<complexType name="CertificateFilterType">
+		<sequence>
+			<element name="Policy" type="string" maxOccurs="1" minOccurs="0"/>
+			<element name="Issuer" type="string" maxOccurs="1" minOccurs="0"/>
+			<element name="KeyUsage" type="cg:KeyUsageType" maxOccurs="1" minOccurs="0"/>
+		</sequence>
+	</complexType>
+
+	<element name="CertificateInfo" type="cg:CertificateInfoType"/>
+
+	<complexType name="CertificateInfoType">
+		<sequence>
+			<element name="DIDName" type="cg:NameType"/>
+			<element name="Algorithm" type="string"/>
+			<element name="Certificate" type="base64Binary"
+				maxOccurs="unbounded" minOccurs="1"/>
+			<element name="UniqueSSN" type="string"/>
+		</sequence>
+	</complexType>
+
+	<element name="ConnectionHandle" type="cg:ConnectionHandleType"/>
+
+	<complexType name="ConnectionHandleType">
+		<sequence>
+			<element name="CardType" type="anyURI"/>
+			<element name="SlotHandle" type="hexBinary" maxOccurs="1" minOccurs="0"/>
+		</sequence>
+	</complexType>
+
+	<simpleType name="KeyUsageType">
+		<restriction base="string">
+			<enumeration value="AUTHENTICATION"/>
+			<enumeration value="SIGNATURE"/>
+			<enumeration value="ENCRYPTION"/>
+		</restriction>
+	</simpleType>
+
+	<simpleType name="NameType">
+		<restriction base="normalizedString">
+			<minLength value="1"/>
+			<maxLength value="255"/>
+			<whiteSpace value="collapse"/>
+		</restriction>
+	</simpleType>
+
+	<complexType name="ResponseType">
+		<sequence>
+			<element name="Result" type="anyURI"/>
+		</sequence>
+	</complexType>
+
+	<element name="TokenInfo" type="cg:TokenInfoType"/>
+
+	<complexType name="TokenInfoType">
+		<sequence>
+			<element ref="cg:ConnectionHandle" maxOccurs="1" minOccurs="0"/>
+			<element name="HasProtectedAuthPath" type="boolean" maxOccurs="1" minOccurs="0"/>
+			<element name="NeedsPinForCertAccess" type="boolean" maxOccurs="1" minOccurs="0"/>
+			<element name="NeedsPinForPrivateKeyAccess" type="boolean"
+				maxOccurs="1" minOccurs="0" />
+			<element name="Algorithm" type="string"
+				maxOccurs="unbounded" minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+
+
+	<!-- =============================== -->
+	<!--    HelloRequest / -Response     -->
+	<!-- =============================== -->
+
+	<element name="HelloRequest" type="cg:HelloRequestType"/>
+
+	<complexType name="HelloRequestType">
+		<sequence>
+			<element name="Challenge" type="hexBinary"/>
+			<element name="Version" type="string"/>
+			<element name="SessionIdentifier" type="string"/>
+		</sequence>
+	</complexType>
+
+
+	<element name="HelloResponse" type="cg:HelloResponseType"/>
+
+	<complexType name="HelloResponseType">
+		<complexContent>
+			<extension base="cg:ResponseType">
+				<sequence maxOccurs="1" minOccurs="0">
+					<element name="Signature" type="base64Binary"/>
+					<element name="MinimumVersion" type="string" maxOccurs="1" minOccurs="0"/>
+					<element name="DownloadAddress" type="anyURI" maxOccurs="1" minOccurs="0"/>
+					<element name="WebOrigin" type="string" maxOccurs="unbounded" minOccurs="0"></element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<!-- =============================== -->
+	<!--      GetCommand / -Response     -->
+	<!-- =============================== -->
+
+	<element name="GetCommand" type="cg:GetCommandType"/>
+
+	<complexType name="GetCommandType">
+		<sequence>
+			<element name="SessionIdentifier" type="string"/>
+			<element ref="cg:TokenInfo" maxOccurs="unbounded" minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<element name="Command" type="cg:CommandType"/>
+
+	<complexType name="CommandType">
+		<choice>
+			<element ref="cg:ListTokensRequest"/>
+			<element ref="cg:ListCertificatesRequest"/>
+			<element ref="cg:SignRequest"/>
+			<element ref="cg:Terminate"/>
+		</choice>
+	</complexType>
+
+
+	<!-- =============================== -->
+	<!--          ListTokens             -->
+	<!-- =============================== -->
+
+	<element name="ListTokensRequest" type="cg:ListTokensRequestType"/>
+
+	<complexType name="ListTokensRequestType">
+		<sequence>
+			<element name="MaxWaitSeconds" type="positiveInteger"/>
+			<element name="TokenInfo" type="cg:TokenInfoType" maxOccurs="unbounded" minOccurs="1"/>
+		</sequence>
+	</complexType>
+
+	<element name="ListTokensResponse" type="cg:ListTokensResponseType"/>
+
+	<complexType name="ListTokensResponseType">
+		<complexContent>
+			<extension base="cg:ResponseType">
+				<sequence>
+					<element name="SessionIdentifier" type="string"/>
+					<element name="TokenInfo" type="cg:TokenInfoType" maxOccurs="unbounded" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+
+	<!-- =============================== -->
+	<!--         ListCertificates        -->
+	<!-- =============================== -->
+
+	<element name="ListCertificatesRequest" type="cg:ListCertificatesRequestType"/>
+
+	<complexType name="ListCertificatesRequestType">
+		<sequence>
+			<element name="MaxWaitSeconds" type="positiveInteger"/>
+			<element name="SlotHandle" type="hexBinary"/>
+			<element name="PIN" type="string" maxOccurs="1" minOccurs="0"/>
+			<element name="CertificateFilter" type="cg:CertificateFilterType" maxOccurs="unbounded" minOccurs="0"/>
+		</sequence>
+	</complexType>
+
+	<element name="ListCertificatesResponse" type="cg:ListCertificatesResponseType"/>
+
+	<complexType name="ListCertificatesResponseType">
+		<complexContent>
+			<extension base="cg:ResponseType">
+				<sequence maxOccurs="1" minOccurs="1">
+					<element name="SessionIdentifier" type="string"/>
+					<element name="RetryCounter" type="nonNegativeInteger" maxOccurs="1" minOccurs="0"/>
+					<element ref="cg:CertificateInfo" maxOccurs="unbounded" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<!-- =============================== -->
+	<!--              Sign               -->
+	<!-- =============================== -->
+
+	<element name="SignRequest" type="cg:SignRequestType"/>
+
+	<complexType name="SignRequestType">
+		<sequence>
+			<element name="MaxWaitSeconds" type="positiveInteger"/>
+			<element name="SlotHandle" type="hexBinary"/>
+			<element name="DIDName" type="cg:NameType"/>
+			<element name="PIN" type="string" maxOccurs="1" minOccurs="0"/>				
+			<element name="Message" type="hexBinary"/>
+		</sequence>
+	</complexType>
+
+	<element name="SignResponse" type="cg:SignResponseType"/>
+
+	<complexType name="SignResponseType">
+		<complexContent>
+			<extension base="cg:ResponseType">
+				<sequence>
+					<element name="SessionIdentifier" type="string"/>
+					<element name="RetryCounter" type="nonNegativeInteger" maxOccurs="1" minOccurs="0"/>
+					<element name="Signature" type="base64Binary" maxOccurs="1" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<!-- =============================== -->
+	<!--           Terminate             -->
+	<!-- =============================== -->
+
+	<element name="Terminate" type="cg:TerminateType"/>
+
+	<complexType name="TerminateType">
+		<complexContent>
+			<extension base="cg:ResponseType">
+				<sequence>
+					<element name="SessionIdentifier" type="string"  maxOccurs="1" minOccurs="0" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+</schema>

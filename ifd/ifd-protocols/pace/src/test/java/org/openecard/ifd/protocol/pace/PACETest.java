@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -51,7 +51,7 @@ import org.xml.sax.SAXException;
  */
 public class PACETest {
 
-    private static final Logger logger = LoggerFactory.getLogger(PACETest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PACETest.class);
 
     @Test(enabled = false)
     public void executePACE_PIN() throws UnsupportedDataTypeException, JAXBException, SAXException, WSMarshallerException {
@@ -64,7 +64,6 @@ public class PACETest {
 
 	env.setIFD(ifd);
 	env.setDispatcher(dispatcher);
-	ifd.setDispatcher(dispatcher);
 	ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
 
 	EstablishContext eCtx = new EstablishContext();
@@ -97,10 +96,10 @@ public class PACETest {
 
 	EstablishChannelResponse eChR = ifd.establishChannel(eCh);
 
-	logger.info("PACE result: {}", eChR.getResult().getResultMajor());
+	LOG.info("PACE result: {}", eChR.getResult().getResultMajor());
 	try {
-	    logger.info("{}", eChR.getResult().getResultMinor());
-	    logger.info("{}", eChR.getResult().getResultMessage().getValue());
+	    LOG.info("{}", eChR.getResult().getResultMinor());
+	    LOG.info("{}", eChR.getResult().getResultMessage().getValue());
 	} catch (Exception ignore) {
 	}
     }

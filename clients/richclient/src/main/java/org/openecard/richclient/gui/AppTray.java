@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -43,12 +43,13 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import org.openecard.addon.AddonManager;
+import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
+import org.openecard.common.interfaces.Environment;
 import org.openecard.gui.graphics.GraphicsUtil;
 import org.openecard.gui.graphics.OecLogoBgWhite;
 import org.openecard.gui.graphics.OecLogoBlackBgTransparent;
 import org.openecard.gui.graphics.OecLogoWhiteBgTransparent;
-import org.openecard.recognition.CardRecognition;
 import org.openecard.richclient.RichClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,15 +106,15 @@ public class AppTray {
      * Finishes the setup process.
      * The loading icon is replaced with the eCard logo.
      *
-     * @param rec
+     * @param env
      * @param manager
      */
-    public void endSetup(CardRecognition rec, AddonManager manager) {
-	status = new Status(this, rec, manager);
+    public void endSetup(Environment env, AddonManager manager) {
+	status = new Status(this, env, manager);
 
 	if (trayAvailable) {
 	    trayIcon.setImage(getTrayIconImage(ICON_LOGO));
-	    trayIcon.setToolTip(lang.translationForKey("tray.title"));
+	    trayIcon.setToolTip(lang.translationForKey("tray.title", AppVersion.getName()));
 	} else {
 	    frame.setVisible(false);
 	    status.setInfoPanel(frame);
@@ -141,8 +142,8 @@ public class AppTray {
     public void shutdown() {
 	if (trayAvailable) {
 	    if (! isMacOSX()) {
-		String desc = lang.translationForKey("tray.message.shutdown");
-		trayIcon.displayMessage("Open eCard App", desc, TrayIcon.MessageType.INFO);
+		String desc = lang.translationForKey("tray.message.shutdown", AppVersion.getName());
+		trayIcon.displayMessage(AppVersion.getName(), desc, TrayIcon.MessageType.INFO);
 	    }
 	    client.teardown();
 	    tray.remove(trayIcon);
@@ -158,7 +159,8 @@ public class AppTray {
 
 	tray = SystemTray.getSystemTray();
 
-	trayIcon = new TrayIcon(getTrayIconImage(ICON_LOADER), lang.translationForKey("tray.message.loading"), null);
+	trayIcon = new TrayIcon(getTrayIconImage(ICON_LOADER),
+		lang.translationForKey("tray.message.loading", AppVersion.getName()), null);
 	trayIcon.setImageAutoSize(true);
 	trayIcon.addMouseListener(new MouseAdapter() {
 	    @Override
@@ -295,13 +297,14 @@ public class AppTray {
     private boolean isTraySupported() {
 	return SystemTray.isSupported()
 		&& ! isPlasma()
-		&& ! isGnome();
+		&& ! isGnome()
+		&& ! isMacOSX();
     }
 
     private void setupFrame() {
 	trayAvailable = false;
 
-	frame = new InfoFrame(lang.translationForKey("tray.title"));
+	frame = new InfoFrame(lang.translationForKey("tray.title", AppVersion.getName()));
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	frame.setIconImage(GraphicsUtil.createImage(OecLogoBgWhite.class, 256, 256));
 

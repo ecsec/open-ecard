@@ -41,7 +41,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ifd.PACECapabilities;
-import org.openecard.common.ifd.scio.NoSuchTerminal;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.util.ByteUtils;
@@ -58,12 +57,12 @@ import org.slf4j.LoggerFactory;
  */
 public class TerminalInfo {
 
-    private static final Logger logger = LoggerFactory.getLogger(TerminalInfo.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TerminalInfo.class);
 
     private final ChannelManager cm;
     private final SCIOTerminal term;
     private final boolean externalChannel;
-    private HandledChannel channel = null;
+    private SingleThreadChannel channel = null;
 
     private Map<Integer, Integer> featureCodes;
 
@@ -86,7 +85,7 @@ public class TerminalInfo {
 	this.externalChannel = false;
     }
 
-    public TerminalInfo(ChannelManager cm, HandledChannel channel) {
+    public TerminalInfo(ChannelManager cm, SingleThreadChannel channel) {
 	this.cm = cm;
 	this.term = channel.getChannel().getCard().getTerminal();
 	this.externalChannel = true;
@@ -110,32 +109,6 @@ public class TerminalInfo {
 	return channel != null;
     }
 
-    private boolean tryConnect() throws SCIOException {
-	if (! isConnected()) {
-	    // try to connect in any case, if no card is present IllegalStateException is thrown and false is returned
-	    try {
-		byte[] slotHandle = cm.openChannel(term.getName());
-		this.channel = cm.getChannel(slotHandle);
-		return true;
-	    } catch (NoSuchTerminal | NoSuchChannel | IllegalStateException ex) {
-		logger.warn("Channel could not be established due to missing card.");
-		return false;
-	    }
-	} else {
-	    return true;
-	}
-    }
-
-    public void disconnect() {
-	if (! externalChannel && isConnected()) {
-	    try {
-		cm.closeChannel(channel.getSlotHandle());
-	    } catch (SCIOException ex) {
-		logger.warn("Failed to close channel.");
-	    }
-	}
-    }
-
 
     @Nonnull
     public IFDStatusType getStatus() throws SCIOException {
@@ -150,16 +123,19 @@ public class TerminalInfo {
 	stype.setCardAvailable(cardPresent);
 	stype.setIndex(BigInteger.ZERO);
 	// get card status and stuff
-	if (cardPresent) {
-	    if (tryConnect()) {
-		SCIOATR atr = channel.getChannel().getCard().getATR();
-		stype.setATRorATS(atr.getBytes());
-	    }
+	if (isConnected()) {
+	    SCIOATR atr = channel.getChannel().getCard().getATR();
+	    stype.setATRorATS(atr.getBytes());
+	} else if (cardPresent) {
+	    // not connected, but card is present
+	    SingleThreadChannel ch = new SingleThreadChannel(term, true);
+	    SCIOATR atr = ch.getChannel().getCard().getATR();
+	    stype.setATRorATS(atr.getBytes());
+	    ch.shutdown();
 	}
 	// ifd status completely constructed
 	return status;
     }
-
 
     public SlotCapabilityType getSlotCapability() throws SCIOException {
 	if (! slotCapRead) {
@@ -210,8 +186,8 @@ public class TerminalInfo {
     @Nullable
     public DisplayCapabilityType getDisplayCapability() throws SCIOException {
 	if (! dispCapRead) {
-	    if (tryConnect()) {
-		Map<Integer,Integer> features = getFeatureCodes();
+	    if (isConnected()) {
+		Map<Integer, Integer> features = getFeatureCodes();
 		if (features.containsKey(PCSCFeatures.IFD_DISPLAY_PROPERTIES)) {
 		    Integer displayFeature = features.get(PCSCFeatures.IFD_DISPLAY_PROPERTIES);
 		    byte[] data = channel.transmitControlCommand(displayFeature, new byte[0]);
@@ -236,9 +212,9 @@ public class TerminalInfo {
     @Nullable
     public KeyPadCapabilityType getKeypadCapability() throws SCIOException {
 	if (! keyCapRead) {
-	    if (tryConnect()) {
+	    if (isConnected()) {
 		// try to get the properties from the reader
-		Map<Integer,Integer> features = getFeatureCodes();
+		Map<Integer, Integer> features = getFeatureCodes();
 		if (features.containsKey(PCSCFeatures.IFD_PIN_PROPERTIES)) {
 		    Integer pinFeature = features.get(PCSCFeatures.IFD_PIN_PROPERTIES);
 		    byte[] data = channel.transmitControlCommand(pinFeature, new byte[0]);
@@ -276,11 +252,12 @@ public class TerminalInfo {
 
 
     private Integer getPaceCtrlCode() throws SCIOException {
-	if (tryConnect()) {
-	    Map<Integer,Integer> features = getFeatureCodes();
+	if (isConnected()) {
+	    Map<Integer, Integer> features = getFeatureCodes();
 	    return features.get(PCSCFeatures.EXECUTE_PACE);
+	} else {
+	    return null;
 	}
-	return null;
     }
 
     public boolean supportsPace() throws SCIOException {
@@ -291,7 +268,7 @@ public class TerminalInfo {
 	List<PACECapabilities.PACECapability> result = new LinkedList<>();
 
 	if (PACECapabilities == null) {
-	    if (tryConnect()) {
+	    if (isConnected()) {
 		if (supportsPace()) {
 		    int ctrlCode = getPaceCtrlCode();
 		    ExecutePACERequest.Function paceFunc = ExecutePACERequest.Function.GetReaderPACECapabilities;
@@ -317,8 +294,8 @@ public class TerminalInfo {
 
 
     private Integer getPinCompareCtrlCode() throws SCIOException {
-	if (tryConnect()) {
-	    Map<Integer,Integer> features = getFeatureCodes();
+	if (isConnected()) {
+	    Map<Integer, Integer> features = getFeatureCodes();
 	    return features.get(PCSCFeatures.VERIFY_PIN_DIRECT);
 	}
 	return null;
@@ -330,7 +307,7 @@ public class TerminalInfo {
 
     @Nonnull
     public Map<Integer, Integer> getFeatureCodes() throws SCIOException {
-	if (tryConnect()) {
+	if (isConnected()) {
 	    if (featureCodes == null) {
 		int code = PCSCFeatures.GET_FEATURE_REQUEST_CTLCODE();
 		try {
@@ -338,10 +315,10 @@ public class TerminalInfo {
 		    featureCodes = PCSCFeatures.featureMapFromRequest(response);
 		} catch (SCIOException ex) {
 		    // TODO: remove this workaround by supporting feature requests under all systems and all readers
-		    logger.warn("Unable to request features from reader.", ex);
+		    LOG.warn("Unable to request features from reader.", ex);
 		    featureCodes = new HashMap<>();
 		} catch (IllegalStateException ex) {
-		    logger.warn("Transmit control command failed due to missing card connection.", ex);
+		    LOG.warn("Transmit control command failed due to missing card connection.", ex);
 		    return Collections.emptyMap();
 		}
 	    }

@@ -43,7 +43,7 @@ public class ByteUtils {
      * @param input the byte array to clone
      * @return new byte array, or null if input is null
      */
-    public static byte[] clone(byte[] input) {
+    public static byte[] clone(@Nullable byte[] input) {
 	if (input == null) {
 	    return null;
 	}

@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MarshallerImpl {
 
-    private static final Logger logger = LoggerFactory.getLogger(MarshallerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MarshallerImpl.class);
 
     private static final ArrayList<Class<?>> baseXmlElementClasses;
     private static final FutureTask<JAXBContext> baseJaxbContext;
@@ -81,7 +81,7 @@ public class MarshallerImpl {
 		try {
 		    return JAXBContext.newInstance(jaxbClasses);
 		} catch (JAXBException ex) {
-		    logger.error("Failed to create JAXBContext instance.", ex);
+		    LOG.error("Failed to create JAXBContext instance.", ex);
 		    throw new RuntimeException("Failed to create JAXBContext.");
 		}
 	    }
@@ -184,10 +184,10 @@ public class MarshallerImpl {
 	    try {
 		jaxbCtx = baseJaxbContext.get();
 	    } catch (ExecutionException ex) {
-		logger.error("Failed to create JAXBContext instance.", ex);
+		LOG.error("Failed to create JAXBContext instance.", ex);
 		throw new RuntimeException("Failed to create JAXBContext.");
 	    } catch (InterruptedException ex) {
-		logger.error("Thread terminated waiting for the JAXBContext to be created..", ex);
+		LOG.error("Thread terminated waiting for the JAXBContext to be created..", ex);
 		throw new RuntimeException("Thread interrupted during waiting on the creation of the JAXBContext.");
 	    }
 	}
@@ -221,12 +221,12 @@ public class MarshallerImpl {
 			    classes.add(c);
 			}
 		    } catch (ClassNotFoundException ex) {
-			logger.error("Failed to load class: " + next, ex);
+			LOG.error("Failed to load class: " + next, ex);
 		    }
 		}
 	    }
 	} catch (IOException ex) {
-	    logger.error("Failed to read classes from file classes.lst.", ex);
+	    LOG.error("Failed to read classes from file classes.lst.", ex);
 	}
 
 	return classes.toArray(new Class<?>[classes.size()]);

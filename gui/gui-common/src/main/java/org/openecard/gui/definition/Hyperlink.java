@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Hyperlink element for user consents.
- * This element should oben the address in the default browser when clicked.
+ * This element should open the address in the default browser when clicked.
  *
  * @author Tobias Wich
  */

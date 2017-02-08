@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PCSCTerminals implements SCIOTerminals {
 
-    private static final Logger logger = LoggerFactory.getLogger(PCSCTerminals.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PCSCTerminals.class);
     private static final long WAIT_DELTA = 1500;
 
     private final PCSCFactory terminalFactory;
@@ -85,31 +85,32 @@ public class PCSCTerminals implements SCIOTerminals {
     }
 
     public List<SCIOTerminal> list(State state, boolean firstTry) throws SCIOException {
-	logger.trace("Entering list().");
+	LOG.trace("Entering list().");
 	try {
 	    CardTerminals.State scState = convertState(state);
 	    // get terminals with the specified state from the SmartcardIO
 	    List<CardTerminal> scList = terminals.list(scState);
 	    ArrayList<SCIOTerminal> list = convertTerminals(scList);
-	    logger.trace("Leaving list().");
+	    LOG.trace("Leaving list().");
 	    return Collections.unmodifiableList(list);
 	} catch (CardException ex) {
-	    if (getCode(ex) == SCIOErrorCode.SCARD_E_NO_READERS_AVAILABLE) {
-		logger.debug("No reader available exception.");
+	    SCIOErrorCode code = getCode(ex);
+	    if (code == SCIOErrorCode.SCARD_E_NO_READERS_AVAILABLE) {
+		LOG.debug("No reader available exception.");
 		return Collections.emptyList();
-	    } else if (getCode(ex) == SCIOErrorCode.SCARD_E_NO_SERVICE) {
+	    } else if (code == SCIOErrorCode.SCARD_E_NO_SERVICE || code == SCIOErrorCode.SCARD_E_SERVICE_STOPPED) {
 		if (firstTry) {
-		    logger.debug("No service available exception, reloading PCSC and trying again.");
+		    LOG.debug("No service available exception, reloading PCSC and trying again.");
 		    reloadFactory();
 		    return list(state, false);
 		} else {
-		    logger.debug("No service available exception, returning empty list.");
+		    LOG.debug("No service available exception, returning empty list.");
 		    return Collections.emptyList();
 		}
 	    }
 	    String msg = "Failed to retrieve list from terminals instance.";
-	    logger.error(msg, ex);
-	    throw new SCIOException(msg, getCode(ex), ex);
+	    LOG.error(msg, ex);
+	    throw new SCIOException(msg, code, ex);
 	}
     }
 
@@ -122,7 +123,7 @@ public class PCSCTerminals implements SCIOTerminals {
 	    case CARD_ABSENT:
 		return CardTerminals.State.CARD_ABSENT;
 	    default:
-		logger.error("Unknown state type requested: {}", state);
+		LOG.error("Unknown state type requested: {}", state);
 		throw new IllegalArgumentException("Invalid state type requested.");
 	}
     }
@@ -182,7 +183,7 @@ public class PCSCTerminals implements SCIOTerminals {
 
 	@Override
 	public List<TerminalState> start() throws SCIOException {
-	    logger.trace("Entering start().");
+	    LOG.trace("Entering start().");
 	    if (pendingEvents != null) {
 		throw new IllegalStateException("Trying to initialize already initialized watcher instance.");
 	    }
@@ -197,11 +198,11 @@ public class PCSCTerminals implements SCIOTerminals {
 		List<CardTerminal> javaTerminals = own.terminals.list();
 		ArrayList<TerminalState> result = new ArrayList<>(javaTerminals.size());
 		// fill sets according to state of the terminals
-		logger.debug("Detecting initial terminal status.");
+		LOG.debug("Detecting initial terminal status.");
 		for (CardTerminal next : javaTerminals) {
 		    String name = next.getName();
 		    boolean cardInserted = next.isCardPresent();
-		    logger.debug("Terminal='{}' cardPresent={}", name, cardInserted);
+		    LOG.debug("Terminal='{}' cardPresent={}", name, cardInserted);
 		    terminals.add(name);
 		    if (cardInserted) {
 			cardPresent.add(name);
@@ -211,23 +212,24 @@ public class PCSCTerminals implements SCIOTerminals {
 		    }
 		}
 		// return list of our terminals
-		logger.trace("Leaving start() with {} states.", result.size());
+		LOG.trace("Leaving start() with {} states.", result.size());
 		return Collections.unmodifiableList(result);
 	    } catch (CardException ex) {
-		if (getCode(ex) == SCIOErrorCode.SCARD_E_NO_READERS_AVAILABLE) {
-		    logger.debug("No reader available exception.");
+		SCIOErrorCode code = getCode(ex);
+		if (code == SCIOErrorCode.SCARD_E_NO_READERS_AVAILABLE) {
+		    LOG.debug("No reader available exception.");
 		    return Collections.emptyList();
-		} else if (getCode(ex) == SCIOErrorCode.SCARD_E_NO_SERVICE) {
-		    logger.debug("No service available exception, reloading PCSC and returning empty list.");
+		} else if (code == SCIOErrorCode.SCARD_E_NO_SERVICE || code == SCIOErrorCode.SCARD_E_SERVICE_STOPPED) {
+		    LOG.debug("No service available exception, reloading PCSC and returning empty list.");
 		    parent.reloadFactory();
 		    own.loadTerminals();
 		    return Collections.emptyList();
 		}
 		String msg = "Failed to retrieve status from the PCSC system.";
-		logger.error(msg, ex);
-		throw new SCIOException(msg, getCode(ex), ex);
+		LOG.error(msg, ex);
+		throw new SCIOException(msg, code, ex);
 	    } catch (IllegalStateException ex) {
-		logger.debug("No reader available exception.");
+		LOG.debug("No reader available exception.");
 		return Collections.emptyList();
 	    }
 	}
@@ -239,80 +241,99 @@ public class PCSCTerminals implements SCIOTerminals {
 
 	@Override
 	public StateChangeEvent waitForChange(long timeout) throws SCIOException {
-	    logger.trace("Entering waitForChange().");
+	    LOG.trace("Entering waitForChange() with timeout={}.", timeout);
 	    if (pendingEvents == null) {
 		throw new IllegalStateException("Calling wait on uninitialized watcher instance.");
 	    }
 
-	    // try to return any present events first
-	    StateChangeEvent nextEvent = pendingEvents.poll();
-	    if (nextEvent != null) {
-		logger.trace("Leaving waitForChange() with queued event.");
-		return nextEvent;
-	    } else {
-		Pair<Boolean, Boolean> waitResult;
-		try {
-		    waitResult = internalWait(timeout);
-		} catch (CardException ex) {
-		    String msg = "Error while waiting for a state change in the terminals.";
-		    logger.error(msg, ex);
-		    throw new SCIOException(msg, getCode(ex), ex);
-		}
-		boolean changed = waitResult.p1;
-		boolean error = waitResult.p2;
+	    // set timeout to maximum when value says wait indefinitely
+	    if (timeout == 0) {
+		timeout = Long.MAX_VALUE;
+	    }
 
-		if (! changed) {
-		    logger.trace("Leaving waitForChange() with no event.");
-		    return new StateChangeEvent();
+	    while (timeout > 0) {
+		long startTime = System.nanoTime();
+		// try to return any present events first
+		StateChangeEvent nextEvent = pendingEvents.poll();
+		if (nextEvent != null) {
+		    LOG.trace("Leaving waitForChange() with queued event.");
+		    return nextEvent;
 		} else {
-		    // something has changed, retrieve actual terminals from the system and see what has changed
-		    Collection<String> newTerminals = new HashSet<>();
-		    Collection<String> newCardPresent = new HashSet<>();
-		    // only ask for terminals if there is no error
-		    if (! error) {
-			try {
-			    List<CardTerminal> newStates = own.terminals.list();
-			    for (CardTerminal next : newStates) {
-				String name = next.getName();
-				newTerminals.add(name);
-				if (next.isCardPresent()) {
-				    newCardPresent.add(name);
+		    Pair<Boolean, Boolean> waitResult;
+		    try {
+			waitResult = internalWait(timeout);
+		    } catch (CardException ex) {
+			String msg = "Error while waiting for a state change in the terminals.";
+			LOG.error(msg, ex);
+			throw new SCIOException(msg, getCode(ex), ex);
+		    }
+		    boolean changed = waitResult.p1;
+		    boolean error = waitResult.p2;
+
+		    if (! changed) {
+			LOG.trace("Leaving waitForChange() with no event.");
+			return new StateChangeEvent();
+		    } else {
+			// something has changed, retrieve actual terminals from the system and see what has changed
+			Collection<String> newTerminals = new HashSet<>();
+			Collection<String> newCardPresent = new HashSet<>();
+			// only ask for terminals if there is no error
+			if (! error) {
+			    try {
+				List<CardTerminal> newStates = own.terminals.list();
+				for (CardTerminal next : newStates) {
+				    String name = next.getName();
+				    newTerminals.add(name);
+				    if (next.isCardPresent()) {
+					newCardPresent.add(name);
+				    }
 				}
+			    } catch (CardException ex) {
+				String msg = "Failed to retrieve status of the observed terminals.";
+				LOG.error(msg, ex);
+				throw new SCIOException(msg, getCode(ex), ex);
 			    }
-			} catch (CardException ex) {
-			    String msg = "Failed to retrieve status of the observed terminals.";
-			    logger.error(msg, ex);
-			    throw new SCIOException(msg, getCode(ex), ex);
+			}
+
+			// calculate what has actually happened
+			// removed cards
+			Collection<String> cardRemoved = subtract(cardPresent, newCardPresent);
+			Collection<StateChangeEvent> crEvents = createEvents(EventType.CARD_REMOVED, cardRemoved);
+			// removed terminals
+			Collection<String> termRemoved = subtract(terminals, newTerminals);
+			Collection<StateChangeEvent> trEvents = createEvents(EventType.TERMINAL_REMOVED, termRemoved);
+			// added terminals
+			Collection<String> termAdded = subtract(newTerminals, terminals);
+			Collection<StateChangeEvent> taEvents = createEvents(EventType.TERMINAL_ADDED, termAdded);
+			// added cards
+			Collection<String> cardAdded = subtract(newCardPresent, cardPresent);
+			Collection<StateChangeEvent> caEvents = createEvents(EventType.CARD_INSERTED, cardAdded);
+
+			// update internal status with the calculated state
+			terminals = newTerminals;
+			cardPresent = newCardPresent;
+			pendingEvents.addAll(crEvents);
+			pendingEvents.addAll(trEvents);
+			pendingEvents.addAll(taEvents);
+			pendingEvents.addAll(caEvents);
+			// use remove so we get an exception when no event has been recorded
+			// this would mean our algorithm is corrupt
+			if (! pendingEvents.isEmpty()) {
+			LOG.trace("Leaving waitForChange() with fresh event.");
+			    return pendingEvents.remove();
 			}
 		    }
-
-		    // calculate what has actually happened
-		    // removed cards
-		    Collection<String> cardRemoved = subtract(cardPresent, newCardPresent);
-		    Collection<StateChangeEvent> crEvents = createEvents(EventType.CARD_REMOVED, cardRemoved);
-		    // removed terminals
-		    Collection<String> termRemoved = subtract(terminals, newTerminals);
-		    Collection<StateChangeEvent> trEvents = createEvents(EventType.TERMINAL_REMOVED, termRemoved);
-		    // added terminals
-		    Collection<String> termAdded = subtract(newTerminals, terminals);
-		    Collection<StateChangeEvent> taEvents = createEvents(EventType.TERMINAL_ADDED, termAdded);
-		    // added cards
-		    Collection<String> cardAdded = subtract(newCardPresent, cardPresent);
-		    Collection<StateChangeEvent> caEvents = createEvents(EventType.CARD_INSERTED, cardAdded);
-
-		    // update internal status with the calculated state
-		    terminals = newTerminals;
-		    cardPresent = newCardPresent;
-		    pendingEvents.addAll(crEvents);
-		    pendingEvents.addAll(trEvents);
-		    pendingEvents.addAll(taEvents);
-		    pendingEvents.addAll(caEvents);
-		    // use remove so we get an exception when no event has been recorded
-		    // this would mean our algorithm is corrupt
-		    logger.trace("Leaving waitForChange() with fresh event.");
-		    return pendingEvents.remove();
 		}
+
+		// calculate new timeout value
+		long finishTime = System.nanoTime();
+		long delta = finishTime - startTime;
+		timeout = timeout - (delta / 1000_000);
+		LOG.trace("Start wait loop again with reduced timeout value ({} ms).", timeout);
 	    }
+
+	    LOG.trace("Leaving waitForChange() with no event.");
+	    return new StateChangeEvent();
 	}
 
 	private void sleep(long millis) throws SCIOException {
@@ -379,7 +400,8 @@ public class PCSCTerminals implements SCIOTerminals {
 		} catch (CardException ex) {
 		    switch (getCode(ex)) {
 			case SCARD_E_NO_SERVICE:
-			    logger.debug("No service available exception, reloading PCSC.");
+			case SCARD_E_SERVICE_STOPPED:
+			    LOG.debug("No service available exception, reloading PCSC.");
 			    parent.reloadFactory();
 			    own.loadTerminals();
 			case SCARD_E_NO_READERS_AVAILABLE:
@@ -387,7 +409,7 @@ public class PCSCTerminals implements SCIOTerminals {
 			    if (! terminals.isEmpty()) {
 				return new Pair<>(true, true);
 			    } else {
-				logger.debug("Waiting for PCSC system to become available again.");
+				LOG.debug("Waiting for PCSC system to become available again.");
 				// if nothing changed, wait a bit and try again
 				sleep(waitTime);
 				continue;
@@ -400,7 +422,7 @@ public class PCSCTerminals implements SCIOTerminals {
 		    if (! terminals.isEmpty()) {
 			return new Pair<>(true, true);
 		    } else {
-			logger.debug("Waiting for PCSC system to become available again.");
+			LOG.debug("Waiting for PCSC system to become available again.");
 			// if nothing changed, wait a bit and try again
 			sleep(waitTime);
 			continue;

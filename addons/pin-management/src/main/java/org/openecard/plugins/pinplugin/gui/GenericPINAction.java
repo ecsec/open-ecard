@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2015 ecsec GmbH.
+ * Copyright (C) 2014-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -41,7 +41,6 @@ import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
 import iso.std.iso_iec._24727.tech.schema.PasswordTypeType;
 import static iso.std.iso_iec._24727.tech.schema.PasswordTypeType.ASCII_NUMERIC;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,7 +57,6 @@ import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
 import org.openecard.gui.StepResult;
@@ -83,7 +81,8 @@ import org.slf4j.LoggerFactory;
  */
 public class GenericPINAction extends StepAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(GenericPINAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GenericPINAction.class);
+
     private static final String PIN_ID_CAN = "2";
     private static final String PIN_ID_PIN = "3";
     private static final String PIN_ID_PUK = "4";
@@ -131,13 +130,7 @@ public class GenericPINAction extends StepAction {
 	// do not update in case of status resumed, it destroys the the pace channel and there is no disconnect after
 	// the verification of the CAN so the handle stays the same
 	if (state != RecognizedState.PIN_resumed) {
-	    try {
-		updateConnectionHandle();
-	    } catch (DispatcherException | InvocationTargetException ex) {
-		logger.error("An internal error occurred while trying to perform an PIN operation.", ex);
-		return new StepActionResult(StepActionResultStatus.REPEAT,
-			generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
-	    }
+	    updateConnectionHandle();
 	}
 
 	switch (state) {
@@ -165,7 +158,7 @@ public class GenericPINAction extends StepAction {
     }
 
     private EstablishChannelResponse performPACEWithPIN(Map<String, ExecutionResults> oldResults)
-	    throws DispatcherException, InvocationTargetException, ParserConfigurationException {
+	    throws ParserConfigurationException {
 	DIDAuthenticationDataType paceInput = new DIDAuthenticationDataType();
 	paceInput.setProtocol(ECardConstants.Protocol.PACE);
 	AuthDataMap tmp = new AuthDataMap(paceInput);
@@ -174,24 +167,24 @@ public class GenericPINAction extends StepAction {
 	if (capturePin) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField oldPINField = (PasswordField) executionResults.getResult(GenericPINStep.OLD_PIN_FIELD);
-	    String oldPINValue = oldPINField.getValue();
+	    char[] oldPINValue = oldPINField.getValue();
 
-	    if (oldPINValue.length() > 6 && oldPINValue.length() < 5) {
+	    if (oldPINValue.length > 6 && oldPINValue.length < 5) {
 		// let the user enter the can again, when input verification failed
 		return null;
 	    } else {
-		paceInputMap.addElement(PACEInputType.PIN, oldPINValue);
+		paceInputMap.addElement(PACEInputType.PIN, new String(oldPINValue));
 	    }
 	}
 	paceInputMap.addElement(PACEInputType.PIN_ID, PIN_ID_PIN);
 
 	// perform PACE by EstablishChannelCommand
 	EstablishChannel eChannel = createEstablishChannelStructure(paceInputMap);
-	return (EstablishChannelResponse) dispatcher.deliver(eChannel);
+	return (EstablishChannelResponse) dispatcher.safeDeliver(eChannel);
     }
 
     private EstablishChannelResponse performPACEWithCAN(Map<String, ExecutionResults> oldResults)
-	    throws DispatcherException, InvocationTargetException, ParserConfigurationException {
+	    throws ParserConfigurationException {
 	DIDAuthenticationDataType paceInput = new DIDAuthenticationDataType();
 	paceInput.setProtocol(ECardConstants.Protocol.PACE);
 	AuthDataMap tmp = new AuthDataMap(paceInput);
@@ -200,7 +193,7 @@ public class GenericPINAction extends StepAction {
 	if (capturePin) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField canField = (PasswordField) executionResults.getResult(GenericPINStep.CAN_FIELD);
-	    String canValue = canField.getValue();
+	    String canValue = new String(canField.getValue());
 
 	    if (canValue.length() != 6) {
 		// let the user enter the can again, when input verification failed
@@ -213,11 +206,11 @@ public class GenericPINAction extends StepAction {
 
 	// perform PACE by EstablishChannelCommand
 	EstablishChannel eChannel = createEstablishChannelStructure(paceInputMap);
-	return (EstablishChannelResponse) dispatcher.deliver(eChannel);
+	return (EstablishChannelResponse) dispatcher.safeDeliver(eChannel);
     }
 
     private EstablishChannelResponse performPACEWithPUK(Map<String, ExecutionResults> oldResults)
-	    throws DispatcherException, InvocationTargetException, ParserConfigurationException {
+	    throws ParserConfigurationException {
 	DIDAuthenticationDataType paceInput = new DIDAuthenticationDataType();
 	paceInput.setProtocol(ECardConstants.Protocol.PACE);
 	AuthDataMap tmp = new AuthDataMap(paceInput);
@@ -226,7 +219,7 @@ public class GenericPINAction extends StepAction {
 	if (capturePin) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField pukField = (PasswordField) executionResults.getResult(GenericPINStep.PUK_FIELD);
-	    String pukValue = pukField.getValue();
+	    String pukValue = new String(pukField.getValue());
 
 	    if (pukValue.length() != 10) {
 		// let the user enter the pin again, when there is none entered
@@ -240,7 +233,7 @@ public class GenericPINAction extends StepAction {
 	paceInputMap.addElement(PACEInputType.PIN_ID, PIN_ID_PUK);
 
 	EstablishChannel eChannel = createEstablishChannelStructure(paceInputMap);
-	return (EstablishChannelResponse) dispatcher.deliver(eChannel);
+	return (EstablishChannelResponse) dispatcher.safeDeliver(eChannel);
     }
 
     private EstablishChannel createEstablishChannelStructure(AuthDataResponse paceInputMap) {
@@ -259,22 +252,22 @@ public class GenericPINAction extends StepAction {
 	    try {
 		ExecutionResults executionResults = oldResults.get(getStepID());
 		PasswordField newPINField = (PasswordField) executionResults.getResult(GenericPINStep.NEW_PIN_FIELD);
-		newPINValue = newPINField.getValue();
+		newPINValue = new String(newPINField.getValue());
 
 		PasswordField newPINRepeatField = (PasswordField) executionResults.getResult(GenericPINStep.NEW_PIN_REPEAT_FIELD);
-		newPINRepeatValue = newPINRepeatField.getValue();
+		newPINRepeatValue = new String(newPINRepeatField.getValue());
 
 		byte[] pin1 = newPINValue.getBytes(ISO_8859_1);
 		byte[] pin2 = newPINRepeatValue.getBytes(ISO_8859_1);
 
 		if (! ByteUtils.compare(pin1, pin2)) {
-		    logger.warn("New PIN does not match the value from the confirmation field.");
+		    LOG.warn("New PIN does not match the value from the confirmation field.");
 		    gPINStep.updateState(state); // to reset the text fields
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		}
 
 	    } catch (UnsupportedEncodingException ex) {
-		logger.error("ISO_8859_1 charset is not support.", ex);
+		LOG.error("ISO_8859_1 charset is not support.", ex);
 		gPINStep.updateState(state); // to reset the text fields
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
@@ -330,63 +323,58 @@ public class GenericPINAction extends StepAction {
 	    // PIN modified successfully, proceed with next step
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateSuccessStep(lang.translationForKey(CHANGE_SUCCESS)));
-	} catch (InvocationTargetException | DispatcherException | APDUException | IFDException |
-		ParserConfigurationException ex) {
-	    logger.error("An internal error occurred while trying to change the PIN", ex);
+	} catch (APDUException | IFDException | ParserConfigurationException ex) {
+	    LOG.error("An internal error occurred while trying to change the PIN", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
 	}  catch (UnsupportedEncodingException ex) {
-	    logger.warn("The encoding of the PIN is wrong.", ex);
+	    LOG.warn("The encoding of the PIN is wrong.", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
 	} catch (WSHelper.WSException ex) {
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
-		logger.error("User canceled the authentication manually or removed the card.", ex);
+		LOG.error("User canceled the authentication manually or removed the card.", ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateErrorStep(lang.translationForKey(ERROR_USER_CANCELLATION_OR_CARD_REMOVED)));
 	    }
 
 	    // for people which think they have to remove the card in the process
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
-		logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
+		LOG.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateErrorStep(lang.translationForKey(ERROR_CARD_REMOVED)));
 	    }
 
 	    // for users which forgot to type in something
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.TIMEOUT_ERROR)) {
-		logger.error("The terminal timed out no password was entered.", ex);
+		LOG.error("The terminal timed out no password was entered.", ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateErrorStep(lang.translationForKey(ERROR_TIMEOUT)));
 	    }
 
 	    // the verification of the new pin failed
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORDS_DONT_MATCH)) {
-		logger.error("The verification of the new PIN failed.", ex);
+		LOG.error("The verification of the new PIN failed.", ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateErrorStep(lang.translationForKey(ERROR_NON_MATCHING_PASSWORDS)));
 	    }
 
 	    // We don't know what happend so just show an general error message
-	    logger.error("An unknown error occurred while trying to change the PIN.", ex);
+	    LOG.error("An unknown error occurred while trying to change the PIN.", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_UNKNOWN)));
 	} finally {
-	    try {
-		// destroy the pace channel
-		DestroyChannel destChannel = new DestroyChannel();
-		destChannel.setSlotHandle(slotHandle);
-		dispatcher.deliver(destChannel);
+	    // destroy the pace channel
+	    DestroyChannel destChannel = new DestroyChannel();
+	    destChannel.setSlotHandle(slotHandle);
+	    dispatcher.safeDeliver(destChannel);
 
-		// Transaction based communication does not work on java 8 so the PACE channel is not closed after an 
-		// EndTransaction call. So do a reset of the card to close the PACE channel.
-		Disconnect disconnect = new Disconnect();
-		disconnect.setSlotHandle(slotHandle);
-		disconnect.setAction(ActionType.RESET);
-		dispatcher.deliver(disconnect);
-	    } catch (DispatcherException | InvocationTargetException ex) {
-		logger.warn("Failed to destroy the PIN pace channel.", ex);
-	    }
+	    // Transaction based communication does not work on java 8 so the PACE channel is not closed after an
+	    // EndTransaction call. So do a reset of the card to close the PACE channel.
+	    Disconnect disconnect = new Disconnect();
+	    disconnect.setSlotHandle(slotHandle);
+	    disconnect.setAction(ActionType.RESET);
+	    dispatcher.safeDeliver(disconnect);
 	}
     }
 
@@ -416,33 +404,33 @@ public class GenericPINAction extends StepAction {
 	    gPINStep.updateState(RecognizedState.PIN_resumed);
 	    state = RecognizedState.PIN_resumed;
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
-	} catch (DispatcherException | InvocationTargetException | ParserConfigurationException ex) {
-	    logger.error("An internal error occurred while trying to resume the PIN.", ex);
+	} catch (ParserConfigurationException ex) {
+	    LOG.error("An internal error occurred while trying to resume the PIN.", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
 	} catch (WSHelper.WSException ex) {
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
-		logger.error("User canceled the authentication manually or removed the card.", ex);
+		LOG.error("User canceled the authentication manually or removed the card.", ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateErrorStep(lang.translationForKey(ERROR_USER_CANCELLATION_OR_CARD_REMOVED)));
 	    }
 
 	    // for people which think they have to remove the card in the process
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
-		logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.");
+		LOG.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.");
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateErrorStep(lang.translationForKey(ERROR_CARD_REMOVED)));
 	    }
 
             // for users which forgot to type in something
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.TIMEOUT_ERROR)) {
-		logger.error("The terminal timed out no password was entered.", ex);
+		LOG.error("The terminal timed out no password was entered.", ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateErrorStep(lang.translationForKey(ERROR_TIMEOUT)));
 	    }
 
-	    logger.error("An unknown error occurred while trying to verify the CAN.", ex);
+	    LOG.error("An unknown error occurred while trying to verify the CAN.", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_UNKNOWN)));
 
@@ -491,51 +479,47 @@ public class GenericPINAction extends StepAction {
 		gPINStep.updateState(RecognizedState.UNKNOWN);
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
-	} catch (DispatcherException | InvocationTargetException | APDUException | ParserConfigurationException ex) {
-	    logger.error("An internal error occurred while trying to unblock the PIN.", ex);
+	} catch (APDUException | ParserConfigurationException ex) {
+	    LOG.error("An internal error occurred while trying to unblock the PIN.", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
 	} catch (WSHelper.WSException ex) {
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
-		logger.error("User canceled the authentication manually or removed the card.", ex);
+		LOG.error("User canceled the authentication manually or removed the card.", ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateErrorStep(lang.translationForKey(ERROR_USER_CANCELLATION_OR_CARD_REMOVED)));
 	    }
 
             // for users which forgot to type in something
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.TIMEOUT_ERROR)) {
-		logger.error("The terminal timed out no password was entered.", ex);
+		LOG.error("The terminal timed out no password was entered.", ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateErrorStep(lang.translationForKey(ERROR_TIMEOUT)));
 	    }
 
 	    // for people which think they have to remove the card in the process
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
-		logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
+		LOG.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateErrorStep(lang.translationForKey(ERROR_CARD_REMOVED)));
 	    }
 
 	     // We don't know what happend so just show an general error message
-	    logger.error("An unknown error occurred while trying to verify the PUK.", ex);
+	    LOG.error("An unknown error occurred while trying to verify the PUK.", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_UNKNOWN)));
 	} finally {
-	    try {
-		// destroy the pace channel
-		DestroyChannel destChannel = new DestroyChannel();
-		destChannel.setSlotHandle(slotHandle);
-		dispatcher.deliver(destChannel);
+	    // destroy the pace channel
+	    DestroyChannel destChannel = new DestroyChannel();
+	    destChannel.setSlotHandle(slotHandle);
+	    dispatcher.safeDeliver(destChannel);
 
-		// For readers which do not support DestroyChannel but have generic pace support
-		Disconnect disconnect = new Disconnect();
-		disconnect.setSlotHandle(slotHandle);
-		disconnect.setAction(ActionType.RESET);
-		dispatcher.deliver(disconnect);
-	    } catch (DispatcherException | InvocationTargetException ex) {
-		logger.warn("Failed to destroy the PUK pace channel.", ex);
-	    }
+	    // For readers which do not support DestroyChannel but have generic pace support
+	    Disconnect disconnect = new Disconnect();
+	    disconnect.setSlotHandle(slotHandle);
+	    disconnect.setAction(ActionType.RESET);
+	    dispatcher.safeDeliver(disconnect);
 	}
 
     }
@@ -544,10 +528,8 @@ public class GenericPINAction extends StepAction {
      * Send a ModifyPIN-PCSC-Command to the Terminal.
      *
      * @throws IFDException If building the Command fails.
-     * @throws InvocationTargetException If the ControlIFD command fails.
-     * @throws DispatcherException If an error in the dispatcher occurs.
      */
-    private ControlIFDResponse sendModifyPIN() throws IFDException, InvocationTargetException, DispatcherException {
+    private ControlIFDResponse sendModifyPIN() throws IFDException {
 	PasswordAttributesType pwdAttr = create(true, ASCII_NUMERIC, 6, 6, 6);
 	pwdAttr.setPadChar(new byte[] { (byte) 0x3F });
 	PCSCPinModify ctrlStruct = new PCSCPinModify(pwdAttr, StringUtils.toByteArray("002C0203"));
@@ -556,7 +538,7 @@ public class GenericPINAction extends StepAction {
 	ControlIFD controlIFD = new ControlIFD();
 	controlIFD.setCommand(ByteUtils.concatenate((byte) PCSCFeatures.MODIFY_PIN_DIRECT, structData));
 	controlIFD.setSlotHandle(slotHandle);
-	return (ControlIFDResponse) dispatcher.deliver(controlIFD);
+	return (ControlIFDResponse) dispatcher.safeDeliver(controlIFD);
     }
 
     /**
@@ -620,23 +602,19 @@ public class GenericPINAction extends StepAction {
 
     /**
      * Update the connection handle.
-     *
      * This is necessary after every step because we Disconnect the card with a reset if we have success or not.
-     *
-     * @throws DispatcherException
-     * @throws InvocationTargetException
      */
-    private void updateConnectionHandle() throws DispatcherException, InvocationTargetException {
+    private void updateConnectionHandle() {
 	CardApplicationPath cPath = new CardApplicationPath();
 	CardApplicationPathType cPathType = new CardApplicationPathType();
 	cPath.setCardAppPathRequest(cPathType);
 
-	CardApplicationPathResponse cPathResp = (CardApplicationPathResponse) dispatcher.deliver(cPath);
+	CardApplicationPathResponse cPathResp = (CardApplicationPathResponse) dispatcher.safeDeliver(cPath);
 	List<CardApplicationPathType> cRes = cPathResp.getCardAppPathResultSet().getCardApplicationPathResult();
 	for (CardApplicationPathType capt : cRes) {
 	    CardApplicationConnect cConn = new CardApplicationConnect();
 	    cConn.setCardApplicationPath(capt);
-	    CardApplicationConnectResponse conRes = (CardApplicationConnectResponse) dispatcher.deliver(cConn);
+	    CardApplicationConnectResponse conRes = (CardApplicationConnectResponse) dispatcher.safeDeliver(cConn);
 
 	    String cardType = conRes.getConnectionHandle().getRecognitionInfo().getCardType();
 	    ConnectionHandleType cHandleNew = conRes.getConnectionHandle();
@@ -653,17 +631,12 @@ public class GenericPINAction extends StepAction {
 		    break;
 		}
 	    } else {
-		try {
 		CardApplicationDisconnect disconnect = new CardApplicationDisconnect();
 		disconnect.setConnectionHandle(conRes.getConnectionHandle());
 		disconnect.setAction(ActionType.RESET);
-		dispatcher.deliver(disconnect);
-		} catch (DispatcherException | InvocationTargetException ex) {
-		    logger.warn("Failed to disconnect card in terminal:" + conRes.getConnectionHandle().getIFDName(), ex);
-		}
+		dispatcher.safeDeliver(disconnect);
 	    }
 	}
-
     }
 
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
+import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -51,11 +52,13 @@ import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import org.openecard.addon.AddonManager;
+import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
-import org.openecard.common.enums.EventType;
+import org.openecard.common.event.EventType;
+import org.openecard.common.event.EventObject;
+import org.openecard.common.interfaces.Environment;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.gui.about.AboutDialog;
-import org.openecard.recognition.CardRecognition;
 import org.openecard.richclient.gui.manage.ManagementDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,31 +74,32 @@ import org.slf4j.LoggerFactory;
  */
 public class Status implements EventCallback {
 
-    private static final Logger logger = LoggerFactory.getLogger(Status.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Status.class);
     private static final String NO_TERMINAL_CONNECTED = "noTerminalConnected";
 
     private final I18n lang = I18n.getTranslation("richclient");
 
     private final Map<String, JPanel> infoMap = new ConcurrentSkipListMap<>();
+    private final Map<String, EventType> cardStatus = new ConcurrentSkipListMap<>();
     private final HashMap<String, ImageIcon> cardIcons = new HashMap<>();
     private JPanel contentPane;
     private JPanel infoView;
     private JPanel noTerminal;
     private StatusContainer popup;
     private final AppTray appTray;
-    private final CardRecognition recognition;
+    private final Environment env;
     private final AddonManager manager;
 
     /**
      * Constructor of Status class.
      *
      * @param appTray tray icon
-     * @param recognition card recognition
+     * @param env The environment object.
      * @param manager 
      */
-    public Status(AppTray appTray, CardRecognition recognition, AddonManager manager) {
+    public Status(AppTray appTray, Environment env, AddonManager manager) {
 	this.appTray = appTray;
-	this.recognition = recognition;
+	this.env = env;
 	this.manager = manager;
 	setupBaseUI();
     }
@@ -143,7 +147,7 @@ public class Status implements EventCallback {
 	infoView.add(Box.createRigidArea(new Dimension(0, 5)));
 	infoView.add(noTerminal);
 
-	JLabel label = new JLabel(" " + lang.translationForKey("tray.title") + " ");
+	JLabel label = new JLabel(" " + lang.translationForKey("tray.title", AppVersion.getName()) + " ");
 	label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
 
 	GradientPanel panel = new GradientPanel(new Color(106, 163, 213), new Color(80, 118, 177));
@@ -158,11 +162,11 @@ public class Status implements EventCallback {
 	btnExit.addActionListener(new ActionListener() {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
-		logger.debug("Shutdown button pressed.");
+		LOG.debug("Shutdown button pressed.");
 		try {
 		    appTray.shutdown();
 		} catch (Throwable ex) {
-		    logger.error("Exiting client threw an error.", ex);
+		    LOG.error("Exiting client threw an error.", ex);
 		    throw ex;
 		}
 	    }
@@ -172,11 +176,11 @@ public class Status implements EventCallback {
 	btnAbout.addActionListener(new ActionListener() {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
-		logger.debug("About button pressed.");
+		LOG.debug("About button pressed.");
 		try {
 		    AboutDialog.showDialog();
 		} catch (Throwable ex) {
-		    logger.error("Show About dialog threw an error.", ex);
+		    LOG.error("Show About dialog threw an error.", ex);
 		    throw ex;
 		}
 	    }
@@ -186,11 +190,11 @@ public class Status implements EventCallback {
 	btnSettings.addActionListener(new ActionListener() {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
-		logger.debug("Settings button pressed.");
+		LOG.debug("Settings button pressed.");
 		try {
 		    ManagementDialog.showDialog(manager);
 		} catch (Throwable ex) {
-		    logger.error("Show Settings dialog threw an error.", ex);
+		    LOG.error("Show Settings dialog threw an error.", ex);
 		    throw ex;
 		}
 	    }
@@ -205,10 +209,15 @@ public class Status implements EventCallback {
 	contentPane.add(btnPanel, BorderLayout.SOUTH);
     }
 
-    private synchronized void addInfo(String ifdName, RecognitionInfo info) {
+    private synchronized void addInfo(String ifdName, @Nullable RecognitionInfo info) {
 	if (infoMap.containsKey(NO_TERMINAL_CONNECTED)) {
 	    infoMap.remove(NO_TERMINAL_CONNECTED);
 	    infoView.removeAll();
+	}
+
+	// only add if there is no terminal with an identical name already
+	if (infoMap.containsKey(ifdName)) {
+	    return;
 	}
 
 	JPanel panel = new JPanel();
@@ -222,11 +231,12 @@ public class Status implements EventCallback {
 	}
     }
 
-    private synchronized void updateInfo(String ifdName, RecognitionInfo info) {
+    private synchronized void updateInfo(String ifdName, @Nullable RecognitionInfo info) {
 	JPanel panel = infoMap.get(ifdName);
 	if (panel != null) {
 	    panel.removeAll();
 	    panel.add(createInfoLabel(ifdName, info));
+	    panel.repaint();
 
 	    if (popup != null) {
 		popup.updateContent(contentPane);
@@ -257,9 +267,9 @@ public class Status implements EventCallback {
 	}
 
 	if (! cardIcons.containsKey(cardType)) {
-	    InputStream is = recognition.getCardImage(cardType);
+	    InputStream is = env.getRecognition().getCardImage(cardType);
 	    if (is == null) {
-		is = recognition.getUnknownCardImage();
+		is = env.getRecognition().getUnknownCardImage();
 	    }
 	    ImageIcon icon = GuiUtils.getImageIcon(is);
 	    cardIcons.put(cardType, icon);
@@ -287,7 +297,7 @@ public class Status implements EventCallback {
 	    return lang.translationForKey("status.unknowncard");
 	} else {
 	    // read CardTypeName from CardInfo file
-	    CardInfoType cif = recognition.getCardInfo(cardType);
+	    CardInfoType cif = env.getRecognition().getCardInfo(cardType);
 	    String cardTypeName = cardType;
 
 	    if (cif != null) {
@@ -322,7 +332,7 @@ public class Status implements EventCallback {
 	return createInfoLabel(null, null);
     }
 
-    private JLabel createInfoLabel(String ifdName, RecognitionInfo info) {
+    private JLabel createInfoLabel(String ifdName, @Nullable RecognitionInfo info) {
 	JLabel label = new JLabel();
 
 	if (ifdName != null) {
@@ -347,23 +357,46 @@ public class Status implements EventCallback {
     }
 
     @Override
-    public void signalEvent(EventType eventType, Object eventData) {
-	logger.debug("Event: {}", eventType);
+    public void signalEvent(EventType eventType, EventObject eventData) {
+	LOG.debug("Event: {}", eventType);
 
-	if (eventData instanceof ConnectionHandleType) {
-	    ConnectionHandleType ch = (ConnectionHandleType) eventData;
-	    logger.debug("ConnectionHandle: {}", ch);
-	    RecognitionInfo info = ch.getRecognitionInfo();
-	    logger.debug("RecognitionInfo: {}", info);
-	    String ifdName = ch.getIFDName();
-	    logger.debug("IFDName: {}", ifdName);
+	ConnectionHandleType ch = eventData.getHandle();
+	if (ch == null) {
+	    LOG.error("No handle provided in event {}.", eventType);
+	    return;
+	}
 
-	    if (eventType.equals(EventType.TERMINAL_ADDED)) {
-		addInfo(ifdName, info);
-	    } else if (eventType.equals(EventType.TERMINAL_REMOVED)) {
-		removeInfo(ifdName);
-	    } else {
-		updateInfo(ifdName, info);
+	LOG.debug("ConnectionHandle: {}", ch);
+	RecognitionInfo info = ch.getRecognitionInfo();
+	LOG.debug("RecognitionInfo: {}", info);
+	String ifdName = ch.getIFDName();
+	LOG.debug("IFDName: {}", ifdName);
+
+	if (null != eventType) {
+	    switch (eventType) {
+		case TERMINAL_ADDED:
+		    addInfo(ifdName, info);
+		    break;
+		case TERMINAL_REMOVED:
+		    removeInfo(ifdName);
+		    break;
+		default:
+		    // track status of the events to prevent double events to overwrite the actual status
+		    EventType lastStatus = cardStatus.get(ifdName);
+		    // only update status for recognized cards in case it is a card removed
+		    if (EventType.CARD_RECOGNIZED == lastStatus) {
+			if (EventType.CARD_REMOVED == eventType) {
+			    cardStatus.remove(ifdName);
+			    updateInfo(ifdName, info);
+			}
+		    } else {
+			if (EventType.CARD_REMOVED == eventType) {
+			    cardStatus.remove(ifdName);
+			} else {
+			    cardStatus.put(ifdName, eventType);
+			}
+			updateInfo(ifdName, info);
+		    }
 	    }
 	}
     }

@@ -76,7 +76,7 @@ public class TerminalFactoryActivity extends Activity {
 	    AlertDialog ad = new AlertDialog.Builder(this).create();
 
 	    // add description of the error
-	    ad.setMessage(lang.translationForKey("android.dialogs.terminal_selection"));
+	    ad.setMessage(lang.translationForKey("android.dialogs.terminal_selection", AppVersion.getName()));
 
 	    // Add close button
 	    ad.setButton(lang.translationForKey("android.dialogs.quit"), new DialogInterface.OnClickListener() {

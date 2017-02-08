@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,11 +25,12 @@ package org.openecard.common.sal.anytype;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
 import java.math.BigInteger;
+import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
-import org.openecard.common.sal.anytype.PINCompareMarkerType;
+import org.openecard.common.interfaces.Environment;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.util.StringUtils;
-import org.openecard.recognition.CardRecognition;
+import org.openecard.recognition.CardRecognitionImpl;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
@@ -52,7 +53,8 @@ public class PinCompareMarkerTypeTest {
      */
     @Test
     public void testPinCompareMarkerType() throws Exception {
-	CardRecognition recognition = new CardRecognition(null, null);
+	Environment env = new ClientEnv();
+	CardRecognitionImpl recognition = new CardRecognitionImpl(env);
 	CardInfoType cardInfo = recognition.getCardInfo(cardType);
 	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo);
 

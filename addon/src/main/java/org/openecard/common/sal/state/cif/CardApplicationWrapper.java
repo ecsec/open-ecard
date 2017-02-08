@@ -43,11 +43,11 @@ import java.util.Map;
  */
 public class CardApplicationWrapper {
 
-    private Map<Enum<?>, SecurityConditionType> securityConditions = new HashMap<Enum<?>, SecurityConditionType>();
-    private HashMap<String, DIDInfoWrapper> didInfos = new HashMap<String, DIDInfoWrapper>();
+    private final Map<Enum<?>, SecurityConditionType> securityConditions = new HashMap<>();
+    private final HashMap<String, DIDInfoWrapper> didInfos = new HashMap<>();
     private final CardApplicationType cardApplication;
-    private DataSetNameListType dataSetNameList = new DataSetNameListType();
-    private HashMap<String, DataSetInfoWrapper> dataSetInfos = new HashMap<String, DataSetInfoWrapper>();
+    private final DataSetNameListType dataSetNameList = new DataSetNameListType();
+    private final HashMap<String, DataSetInfoWrapper> dataSetInfos = new HashMap<>();
 
     /**
      *

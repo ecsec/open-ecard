@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 HS Coburg.
+ * Copyright (C) 2012-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -42,7 +42,7 @@ import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.crypto.common.sal.CryptoMarkerType;
+import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.openecard.common.sal.exception.IncorrectParameterException;
 import org.openecard.common.sal.exception.InvalidSignatureException;
 import org.openecard.common.sal.state.CardStateEntry;
@@ -59,8 +59,8 @@ import org.slf4j.LoggerFactory;
  */
 public class VerifySignatureStep implements ProtocolStep<VerifySignature, VerifySignatureResponse> {
 
-    private static final Logger logger = LoggerFactory.getLogger(VerifySignatureStep.class);
-    private Dispatcher dispatcher;
+    private static final Logger LOG = LoggerFactory.getLogger(VerifySignatureStep.class);
+    private final Dispatcher dispatcher;
 
     /**
      * Creates a new VerifySignatureStep.
@@ -100,21 +100,21 @@ public class VerifySignatureStep implements ProtocolStep<VerifySignature, Verify
 	    dsiRead.setConnectionHandle(connectionHandle);
 	    dsiRead.setDSIName(dataSetNameCertificate);
 
-	    DSIReadResponse dsiReadResponse = (DSIReadResponse) dispatcher.deliver(dsiRead);
+	    DSIReadResponse dsiReadResponse = (DSIReadResponse) dispatcher.safeDeliver(dsiRead);
 	    WSHelper.checkResult(dsiReadResponse);
 
 	    CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
 	    Certificate cert = (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(dsiReadResponse.getDSIContent()));
 
 	    Signature signatureAlgorithm;
-	    if (algorithmIdentifier.equals(GenericCryptoObjectIdentifier.pkcs_1)) {
+	    if (algorithmIdentifier.equals(GenericCryptoUris.RSA_ENCRYPTION)) {
 		signatureAlgorithm = Signature.getInstance("RSA", new BouncyCastleProvider());
-	    } else if (algorithmIdentifier.equals(GenericCryptoObjectIdentifier.id_RSASSA_PSS)) {
+	    } else if (algorithmIdentifier.equals(GenericCryptoUris.RSASSA_PSS_SHA256)) {
 		signatureAlgorithm = Signature.getInstance("RAWRSASSA-PSS", new BouncyCastleProvider());
 		signatureAlgorithm.setParameter(new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 32, 1));
-	    } else if (algorithmIdentifier.equals(GenericCryptoObjectIdentifier.sigS_ISO9796_2)) {
+	    } else if (algorithmIdentifier.equals(GenericCryptoUris.sigS_ISO9796_2)) {
 		return WSHelper.makeResponse(VerifySignatureResponse.class, WSHelper.makeResultUnknownError(algorithmIdentifier + " Not supported yet."));
-	    } else if (algorithmIdentifier.equals(GenericCryptoObjectIdentifier.sigS_ISO9796_2rnd)) {
+	    } else if (algorithmIdentifier.equals(GenericCryptoUris.sigS_ISO9796_2rnd)) {
 		return WSHelper.makeResponse(VerifySignatureResponse.class, WSHelper.makeResultUnknownError(algorithmIdentifier + " Not supported yet."));
 	    } else {
 		throw new IncorrectParameterException("Unknown signature algorithm.");
@@ -128,7 +128,7 @@ public class VerifySignatureStep implements ProtocolStep<VerifySignature, Verify
 		throw new InvalidSignatureException();
 	    }
 	} catch (ECardException e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
 	    response.setResult(WSHelper.makeResult(e));

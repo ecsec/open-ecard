@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -55,6 +56,7 @@ import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.AppExtensionSpecification;
 import org.openecard.addon.manifest.AppPluginSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
+import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
 import org.openecard.common.util.FileUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
@@ -149,10 +151,10 @@ public class ManagementDialog extends JFrame {
 
 	Image logo = GraphicsUtil.createImage(OecLogoBgWhite.class, 147, 147);
 	setIconImage(logo);
-	setTitle(lang.translationForKey("addon.title"));
+	setTitle(lang.translationForKey("addon.title", AppVersion.getName()));
 	setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 	setMinimumSize(new Dimension(640, 420));
-	setSize(730, 480);
+	setSize(780, 480);
 	contentPane = new JPanel();
 	contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 	contentPane.setLayout(new BorderLayout(0, 0));
@@ -208,7 +210,7 @@ public class ManagementDialog extends JFrame {
     }
 
     private void createCoreList() {
-	JLabel label = new JLabel(lang.translationForKey("addon.list.core"));
+	JLabel label = new JLabel(lang.translationForKey("addon.list.core", AppVersion.getName()));
 	label.setFont(label.getFont().deriveFont(Font.BOLD));
 	GridBagConstraints labelConstraints = new GridBagConstraints();
 	labelConstraints.insets = new Insets(5, 0, 5, 10);
@@ -331,17 +333,19 @@ public class ManagementDialog extends JFrame {
     private class ClearSelectionListener implements ListSelectionListener {
 	private final JList otherList;
 
-	public ClearSelectionListener(JList otherList) {
+	public ClearSelectionListener(@Nullable JList otherList) {
 	    this.otherList = otherList;
 	}
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-	    Object source = e.getSource();
-	    if (source instanceof JComponent) {
-		JComponent component = (JComponent) source;
-		// only do this when we have the focus
-		if (! e.getValueIsAdjusting() && component.hasFocus()) {
-		    otherList.clearSelection();
+	    if (otherList != null) {
+		Object source = e.getSource();
+		if (source instanceof JComponent) {
+		    JComponent component = (JComponent) source;
+		    // only do this when we have the focus
+		    if (! e.getValueIsAdjusting() && component.hasFocus()) {
+			otherList.clearSelection();
+		    }
 		}
 	    }
 	}

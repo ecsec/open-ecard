@@ -35,7 +35,7 @@ import java.io.InputStream;
 import org.openecard.android.ApplicationContext;
 import org.openecard.android.R;
 import org.openecard.common.I18n;
-import org.openecard.recognition.CardRecognition;
+import org.openecard.common.interfaces.CardRecognition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2015 ecsec GmbH.
+ * Copyright (C) 2013-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,7 @@
 
 package org.openecard.crypto.common.sal;
 
+import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationList;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationListResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationListResponse.CardApplicationNameList;
@@ -40,17 +41,16 @@ import iso.std.iso_iec._24727.tech.schema.TargetNameType;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.security.auth.x500.X500Principal;
@@ -64,7 +64,6 @@ import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.util.HandlerUtils;
 import org.openecard.common.util.SALFileUtils;
 import org.slf4j.Logger;
@@ -83,7 +82,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GenericCryptoSignerFinder {
 
-    private static final Logger logger = LoggerFactory.getLogger(GenericCryptoSignerFinder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GenericCryptoSignerFinder.class);
 
     private static final String OID_GENERIC_CRYPTO = "urn:oid:1.3.162.15480.3.0.25";
     private static final String COMPUTE_SIGNATURE = "Compute-signature";
@@ -129,18 +128,18 @@ public class GenericCryptoSignerFinder {
     public GenericCryptoSigner findDid(@Nonnull String didName) throws CredentialNotFound {
 	List<DIDCertificate> dids = findAllDIDCerts();
 
-        for (DIDCertificate c : dids) {
-            if (c.getDIDName().equals(didName)) {
+	for (DIDCertificate c : dids) {
+	    if (c.getDIDName().equals(didName)) {
 		try {
 		    updateConHandle(fileUtils.selectApplication(c.getApplicationIdentifier(), handle));
-		} catch (DispatcherException | InvocationTargetException | WSException ex) {
+		} catch (WSException ex) {
 		    throw new CredentialNotFound("Failed to select the application containing the DID.", ex);
 		}
-                return new GenericCryptoSigner(dispatcher, handle, c);
-            }
-        }
+		return new GenericCryptoSigner(dispatcher, handle, c);
+	    }
+	}
 
- 	throw new CredentialNotFound("No suitable DID found.");
+	throw new CredentialNotFound("No suitable DID found.");
     }
 
     @Nonnull
@@ -148,25 +147,25 @@ public class GenericCryptoSignerFinder {
 	    throws CredentialNotFound {
 	List<DIDCertificate> dids = findAllDIDCerts();
 
-        try {
-            for (DIDCertificate c : dids) {
-                if (c.getDIDName().equals(didName)) {
+	try {
+	    for (DIDCertificate c : dids) {
+		if (c.getDIDName().equals(didName)) {
 		    DIDGetResponse did = getDid(didName);
-                    CryptoMarkerType cryptoMarker = new CryptoMarkerType(did.getDIDStructure().getDIDMarker());
-                    String algorithm = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
-                    if (algorithm.equals(algorithmUri)) {
+		    CryptoMarkerType cryptoMarker = new CryptoMarkerType(did.getDIDStructure().getDIDMarker());
+		    String algorithm = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
+		    if (algorithm.equals(algorithmUri)) {
 			try {
 			    updateConHandle(fileUtils.selectApplication(c.getApplicationIdentifier(), handle));
-			} catch (DispatcherException | InvocationTargetException | WSException ex) {
+			} catch (WSException ex) {
 			    throw new CredentialNotFound("Failed to select the application containing the DID.", ex);
 			}
-                        return new GenericCryptoSigner(dispatcher, handle, c);
-                    }
-                }
-            }
-        } catch (WSException | DispatcherException | InvocationTargetException ex) {
-            logger.error("Error finding DID.", ex);
-        }
+			return new GenericCryptoSigner(dispatcher, handle, c);
+		    }
+		}
+	    }
+	} catch (WSException ex) {
+	    LOG.error("Error finding DID.", ex);
+	}
 
 	throw new CredentialNotFound("No suitable DID found.");
     }
@@ -202,10 +201,10 @@ public class GenericCryptoSignerFinder {
 
 	try {
 	    updateConHandle(fileUtils.selectApplication(firstResult.getApplicationIdentifier(), handle));
-	} catch (DispatcherException | InvocationTargetException | WSException ex) {
+	} catch (WSException ex) {
 	    throw new CredentialNotFound("Failed to select the application containing the DID.", ex);
 	}
-	
+
 	return new GenericCryptoSigner(dispatcher, handle, firstResult);
     }
 
@@ -219,57 +218,57 @@ public class GenericCryptoSignerFinder {
      */
     @Nonnull
     public GenericCryptoSigner findFirstMatching(@Nonnull SignatureUsageWrapper wrapper)
-            throws CredentialNotFound {
-        List<DIDCertificate> result = findAllDIDCerts();
-        if (result.isEmpty()) {
+	    throws CredentialNotFound {
+	List<DIDCertificate> result = findAllDIDCerts();
+	if (result.isEmpty()) {
 	    throw new CredentialNotFound("No suitable DID found.");
 	}
 
-        for (DIDCertificate c : result) {
-            X509Certificate x509cert = (X509Certificate) c.getCertificate();
+	for (DIDCertificate c : result) {
+	    X509Certificate x509cert = (X509Certificate) c.getCertificate();
 
-            if (x509cert != null && wrapper.hasUsage(x509cert)) {
+	    if (x509cert != null && wrapper.hasUsage(x509cert)) {
 		try {
 		    updateConHandle(fileUtils.selectApplication(c.getApplicationIdentifier(), handle));
-		} catch (DispatcherException | InvocationTargetException | WSException ex) {
+		} catch (WSException ex) {
 		    throw new CredentialNotFound("Failed to select the application containing the DID.", ex);
 		}
 		return new GenericCryptoSigner(dispatcher, handle, c);
 	    }
 	}
 
-        throw new CredentialNotFound("No suitable DID found.");
+	throw new CredentialNotFound("No suitable DID found.");
     }
 
     // TODO: add more useful search functions
 
     private List<DIDCertificate> findAllDIDCerts() {
-        List<DIDCertificate> result = new ArrayList<>();
-        try {
+	List<DIDCertificate> result = new ArrayList<>();
+	try {
 	    CardApplicationList listReq = new CardApplicationList();
 	    handle.setCardApplication(null);
 	    listReq.setConnectionHandle(handle);
-	    CardApplicationListResponse listRes = (CardApplicationListResponse) dispatcher.deliver(listReq);
+	    CardApplicationListResponse listRes = (CardApplicationListResponse) dispatcher.safeDeliver(listReq);
 	    WSHelper.checkResult(listRes);
 	    CardApplicationNameList cardApplicationNameList = listRes.getCardApplicationNameList();
 	    List<byte[]> cardApplicationName = cardApplicationNameList.getCardApplicationName();
 
 	    for (byte[] appIdentifier : cardApplicationName) {
 		handle.setCardApplication(appIdentifier);
-                //get all relevant DIDs
-                List<String> didNamesList = getSignatureCapableDIDs(handle);
+		//get all relevant DIDs
+		List<String> didNamesList = getSignatureCapableDIDs(handle);
 		List<DIDCertificate> certList = getCertsForDidName(didNamesList);
 
 		if (! certList.isEmpty()) {
- 		    result.addAll(certList);
- 		}
- 	    }
- 	} catch (InvocationTargetException | DispatcherException | WSException e) {
- 	    logger.error("Searching for DID failed", e);
- 	} catch (IOException ex) {
- 	    logger.error("Failed to read the certificates which are related to the DID.", ex);
- 	}
-         return result;
+		    result.addAll(certList);
+		}
+	    }
+	} catch (WSException e) {
+	    LOG.error("Searching for DID failed", e);
+	} catch (IOException ex) {
+	    LOG.error("Failed to read the certificates which are related to the DID.", ex);
+	}
+	 return result;
     }
 
     private List<DIDCertificate> findTLSCapableDID() {
@@ -279,7 +278,7 @@ public class GenericCryptoSignerFinder {
 	    CardApplicationList listReq = new CardApplicationList();
 	    handle.setCardApplication(null);
 	    listReq.setConnectionHandle(handle);
-	    CardApplicationListResponse listRes = (CardApplicationListResponse) dispatcher.deliver(listReq);
+	    CardApplicationListResponse listRes = (CardApplicationListResponse) dispatcher.safeDeliver(listReq);
 	    WSHelper.checkResult(listRes);
 	    CardApplicationNameList cardApplicationNameList = listRes.getCardApplicationNameList();
 	    List<byte[]> cardApplicationName = cardApplicationNameList.getCardApplicationName();
@@ -298,19 +297,19 @@ public class GenericCryptoSignerFinder {
 		    result.addAll(certList);
 		}
 	    }
-	} catch (InvocationTargetException | DispatcherException | WSException e) {
-	    logger.error("Searching for DID failed", e);
+	} catch (WSException e) {
+	    LOG.error("Searching for DID failed", e);
 	} catch (IOException ex) {
-	    logger.error("Failed to read the certificates which are related to the DID.", ex);
+	    LOG.error("Failed to read the certificates which are related to the DID.", ex);
 	}
 	return result;
     }
 
-    private DIDGetResponse getDid(String name) throws WSException, DispatcherException, InvocationTargetException {
+    private DIDGetResponse getDid(String name) throws WSException {
 	DIDGet didGet = new DIDGet();
 	didGet.setConnectionHandle(handle);
 	didGet.setDIDName(name);
-	DIDGetResponse didGetResponse = (DIDGetResponse) dispatcher.deliver(didGet);
+	DIDGetResponse didGetResponse = (DIDGetResponse) dispatcher.safeDeliver(didGet);
 	WSHelper.checkResult(didGetResponse);
 	return didGetResponse;
     }
@@ -326,8 +325,7 @@ public class GenericCryptoSignerFinder {
      * @throws InvocationTargetException
      * @throws IOException
      */
-    private List<DIDCertificate> getCertsForDidName(List<String> didNames) throws WSException, DispatcherException,
-	    InvocationTargetException, IOException {
+    private List<DIDCertificate> getCertsForDidName(List<String> didNames) throws WSException, IOException {
 	List<DIDCertificate> remainingDIDs = new ArrayList<>();
 	ConnectionHandleType handle2 = HandlerUtils.copyHandle(handle);
 
@@ -357,7 +355,7 @@ public class GenericCryptoSignerFinder {
 			remainingDIDs.add(cardCert);
 		    } catch (CertificateException ex) {
 			String msg = "Failed to create a new DIDCertificate instance.";
-			logger.warn(msg, ex);
+			LOG.warn(msg, ex);
 			// don't do anything more we just process the next name
 		    }
 		}
@@ -374,13 +372,10 @@ public class GenericCryptoSignerFinder {
      *
      * @param didNames List of DID (names) to filter.
      * @return A list of DID (names) which are able to perform a signature according to the TLS1.1 and TLS1.2 standard.
-     * @throws DispatcherException
      * @throws IOException
-     * @throws InvocationTargetException
      * @throws WSException
      */
-    private List<DIDCertificate> filterTLSCapableDIDs(List<String> didNames)
-	    throws DispatcherException, InvocationTargetException, WSException, IOException {
+    private List<DIDCertificate> filterTLSCapableDIDs(List<String> didNames) throws WSException, IOException {
 	ConnectionHandleType handle2 = HandlerUtils.copyHandle(handle);
 	List<DIDCertificate> remainingDIDs = new ArrayList<>();
 	//HashMap<String, Pair<byte[], Boolean>> dataSetWithCert = new HashMap<>();
@@ -395,14 +390,14 @@ public class GenericCryptoSignerFinder {
 
 	    // determine possible TLS versions
 	    if (PRE_TLS12.contains(algorithm)) {
-		logger.debug("{} is usable for TLSv1.1 and TLS1.2 signatures.", didName);
+		LOG.debug("{} is usable for TLSv1.1 and TLS1.2 signatures.", didName);
 		tlsVersion = DIDCertificate.TLSv10;
 	    } else if (POST_TLS12.contains(algorithm)) {
-		logger.debug("{} is usable for TLSv1.2 signatures.", didName);
+		LOG.debug("{} is usable for TLSv1.2 signatures.", didName);
 		tlsVersion = DIDCertificate.TLSv12;
 	    } else {
 		// no tls signature possible with the did so go to the next name
-		logger.debug("{} is not usable for TLS signatures.", didName);
+		LOG.debug("{} is not usable for TLS signatures.", didName);
 		continue;
 	    }
 
@@ -425,7 +420,7 @@ public class GenericCryptoSignerFinder {
 			remainingDIDs.add(cardCert);
 		    } catch (CertificateException ex) {
 			String msg = "Failed to create a new DIDCertificate instance.";
-			logger.warn(msg, ex);
+			LOG.warn(msg, ex);
 			// don't do anything more we just process the next name
 		    }
 		}
@@ -442,12 +437,9 @@ public class GenericCryptoSignerFinder {
      * @param cryptoMarker CryptoMarker which contains the certificate references to the certificates of the chain.
      * @param dispatcher Dispatcher object for message delivery.
      * @param certChain {@link ByteArrayOutputStream} which will be filled with the certificates of the chain.
-     * @throws DispatcherException
-     * @throws InvocationTargetException
      */
-    private void readChain(CryptoMarkerType cryptoMarker, Dispatcher dispatcher,
-	    DIDCertificate didCert) throws DispatcherException,
-	    InvocationTargetException, IOException {
+    private void readChain(CryptoMarkerType cryptoMarker, Dispatcher dispatcher, DIDCertificate didCert)
+	    throws IOException {
 	try {
 	    if (cryptoMarker.getCertificateRefs().size() > 1) {
 		for (int i = 1; i < cryptoMarker.getCertificateRefs().size(); i++) {
@@ -457,7 +449,7 @@ public class GenericCryptoSignerFinder {
 	    }
 	} catch (CertificateException ex) {
 	    String msg = "Failed to read certificate of the certificate chain.";
-	    logger.error(msg, ex);
+	    LOG.error(msg, ex);
 	    throw new IOException(msg, ex);
 	}
     }
@@ -472,10 +464,10 @@ public class GenericCryptoSignerFinder {
 	List<DIDCertificate> remainingDIDs = new ArrayList<>();
 	for (DIDCertificate certList1 : certList) {
 	    if (certList1.isAlwaysReadable()) {
-		logger.debug("Certificate is always readable.");
+		LOG.debug("Certificate is always readable.");
 		remainingDIDs.add(certList1);
 	    } else {
-		logger.debug("Certificate needs did authentication to be readable.");
+		LOG.debug("Certificate needs did authentication to be readable.");
 	    }
 	}
 
@@ -492,8 +484,7 @@ public class GenericCryptoSignerFinder {
      * @throws InvocationTargetException
      * @throws WSException
      */
-    private List<String> getSignatureCapableDIDs(ConnectionHandleType handle)
-	    throws DispatcherException, InvocationTargetException, WSException {
+    private List<String> getSignatureCapableDIDs(ConnectionHandleType handle) throws WSException {
 	DIDList didList = new DIDList();
 	didList.setConnectionHandle(handle);
 	DIDQualifierType filter = new DIDQualifierType();
@@ -501,7 +492,7 @@ public class GenericCryptoSignerFinder {
 	filter.setObjectIdentifier(OID_GENERIC_CRYPTO);
 	filter.setApplicationIdentifier(handle.getCardApplication());
 	didList.setFilter(filter);
-	DIDListResponse didListResponse = (DIDListResponse) dispatcher.deliver(didList);
+	DIDListResponse didListResponse = (DIDListResponse) dispatcher.safeDeliver(didList);
 	WSHelper.checkResult(didListResponse);
 	List<String> didNames = didListResponse.getDIDNameList().getDIDName();
 	return didNames;
@@ -515,11 +506,9 @@ public class GenericCryptoSignerFinder {
      * @param handle ConnectionHandle for identification of the terminal to use.
      * @param cryptoMarker CryptoMarker object of the DID which contains the certificate to check.
      * @return The value of the input parameter didName if the certificate referenced in the DID contains the client
-     * authentication extension. If the extension is not part of the certificate null is returned.
-     * @throws DispatcherException
-     * @throws InvocationTargetException
+     *   authentication extension. If the extension is not part of the certificate null is returned.
      */
-    private boolean containsAuthenticationCertificate(byte[] rawCert) throws DispatcherException, InvocationTargetException {
+    private boolean containsAuthenticationCertificate(byte[] rawCert) {
 	try {
 	    boolean hasAuthCert = false;
 	    // check whether certificate EF was empty or contains just 0
@@ -558,7 +547,7 @@ public class GenericCryptoSignerFinder {
 		}
 	    }
 	} catch (CertificateException ex) {
-	    logger.error("Failed to instantiate or parse the certificate.", ex);
+	    LOG.error("Failed to instantiate or parse the certificate.", ex);
 	}
 	return false;
     }
@@ -571,11 +560,8 @@ public class GenericCryptoSignerFinder {
      * The list of certificate references starts with element 0.
      * @param dispatcher Dispatcher for message delivery.
      * @return A byte array containing the extracted certificate or NULL if an error occurred.
-     * @throws DispatcherException
-     * @throws InvocationTargetException
      */
-    private byte[] readCertificate(CryptoMarkerType cryptoMarker, int certNumber, Dispatcher dispatcher)
-	    throws DispatcherException, InvocationTargetException {
+    private byte[] readCertificate(CryptoMarkerType cryptoMarker, int certNumber, Dispatcher dispatcher) {
 	try {
 	    String dataSetName = cryptoMarker.getCertificateRefs().get(certNumber).getDataSetName();
 	    updateConHandle(fileUtils.selectAppByDataSet(dataSetName, handle));
@@ -590,22 +576,22 @@ public class GenericCryptoSignerFinder {
 		DataSetSelect dSelect = new DataSetSelect();
 		dSelect.setConnectionHandle(handle);
 		dSelect.setDataSetName(cryptoMarker.getCertificateRefs().get(certNumber).getDataSetName());
-		DataSetSelectResponse selResp = (DataSetSelectResponse) dispatcher.deliver(dSelect);
+		DataSetSelectResponse selResp = (DataSetSelectResponse) dispatcher.safeDeliver(dSelect);
 		WSHelper.checkResult(selResp);
 		// read the certificate
 		String dsiName = cryptoMarker.getCertificateRefs().get(certNumber).getDataSetName();
 		DSIRead dsiRead = new DSIRead();
 		dsiRead.setDSIName(dsiName);
 		dsiRead.setConnectionHandle(handle);
-		DSIReadResponse readResponse = (DSIReadResponse) dispatcher.deliver(dsiRead);
+		DSIReadResponse readResponse = (DSIReadResponse) dispatcher.safeDeliver(dsiRead);
 		WSHelper.checkResult(readResponse);
 
 		return readResponse.getDSIContent();
 	    }
 	} catch (WSException ex) {
-	    logger.error("Result check of the ACLResolver failed.", ex);
+	    LOG.error("Result check of the ACLResolver failed.", ex);
 	} catch (SecurityConditionUnsatisfiable ex) {
-	    logger.error("The ACLList operation is not allowed for the certificate data set.", ex);
+	    LOG.error("The ACLList operation is not allowed for the certificate data set.", ex);
 	}
 
 	return null;
@@ -635,10 +621,10 @@ public class GenericCryptoSignerFinder {
      * match of an certificate and the certificate request than the given input list is returned.
      */
     private List<DIDCertificate> filterDidCertsByCertRequest(CertificateRequest cr, List<DIDCertificate> certs) {
-	Vector<X500Name> authorities = cr.getCertificateAuthorities();
+	Collection<X500Name> authorities = cr.getCertificateAuthorities();
 
 	// log the authorities named in the certificate request
-	if (logger.isDebugEnabled()) {
+	if (LOG.isDebugEnabled()) {
 	    String start = "The following certificate authorities are available in the certificate request: ";
 	    StringBuilder builder = new StringBuilder(start);
 	    for (X500Name name : authorities) {
@@ -646,7 +632,7 @@ public class GenericCryptoSignerFinder {
 		builder.append(name.toString());
 	    }
 	    builder.append('\n');
-	    logger.debug(builder.toString());
+	    LOG.debug(builder.toString());
 	}
 
 	ArrayList<DIDCertificate> didCerts = new ArrayList<>();
@@ -673,7 +659,7 @@ public class GenericCryptoSignerFinder {
 			    }
 			} catch (IOException ex) {
 			    String msg = "Failed to create X500Principal from X500Nmae " + authority.toString();
-			    logger.warn(msg, ex);
+			    LOG.warn(msg, ex);
 			}
 		    }
 
@@ -692,7 +678,7 @@ public class GenericCryptoSignerFinder {
 		}
 	    } catch (CertificateException ex) {
 		 String msg = "Failed to build certificate chain for DIDCertificate of DID " + cert.getDIDName();
-		 logger.warn(msg, ex);
+		 LOG.warn(msg, ex);
 		 // process the next entry
 	    }
 	}

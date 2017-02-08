@@ -22,6 +22,7 @@
 
 package org.openecard.common;
 
+import org.openecard.ws.common.OverridingProperties;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

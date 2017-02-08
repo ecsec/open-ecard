@@ -45,7 +45,6 @@ import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
-import org.openecard.event.EventManager;
 import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.android.AndroidUserConsent;
@@ -56,7 +55,7 @@ import org.openecard.ifd.scio.IFDException;
 import org.openecard.ifd.scio.IFDProperties;
 import org.openecard.ifd.scio.wrapper.IFDTerminalFactory;
 import org.openecard.management.TinyManagement;
-import org.openecard.recognition.CardRecognition;
+import org.openecard.recognition.CardRecognitionImpl;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.openecard.ws.marshal.WSMarshallerException;
@@ -82,7 +81,7 @@ public class ApplicationContext extends Application implements EventCallback {
     private ClientEnv env;
     private TinySAL sal;
     private IFD ifd;
-    private CardRecognition recognition;
+    private CardRecognitionImpl recognition;
     private CardStateMap cardStates;
     private EventManager em;
     private TinyManagement management;
@@ -103,7 +102,7 @@ public class ApplicationContext extends Application implements EventCallback {
 	return initialized;
     }
 
-    public CardRecognition getRecognition() {
+    public CardRecognitionImpl getRecognition() {
 	return recognition;
     }
 
@@ -284,7 +283,7 @@ public class ApplicationContext extends Application implements EventCallback {
 	}
 
 	try {
-	    recognition = new CardRecognition(ifd, contextHandle);
+	    recognition = new CardRecognitionImpl(ifd, contextHandle);
 	    recognition.setGUI(gui);
 	} catch (Exception ex) {
 	    logger.error(ex.getMessage(), ex);

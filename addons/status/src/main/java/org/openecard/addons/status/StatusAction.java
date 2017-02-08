@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 HS Coburg.
+ * Copyright (C) 2013-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,6 +29,7 @@ import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.Attachment;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
+import org.openecard.addon.bind.Headers;
 import org.openecard.addon.bind.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public class StatusAction implements AppPluginAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(StatusAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StatusAction.class);
 
     private StatusHandler statusHandler;
 
@@ -57,14 +58,14 @@ public class StatusAction implements AppPluginAction {
     }
 
     @Override
-    public BindingResult execute(RequestBody body, Map<String, String> parameters, List<Attachment> attachments) {
+    public BindingResult execute(RequestBody body, Map<String, String> parameters, Headers headers, List<Attachment> attachments) {
 	BindingResult response;
 	try {
 	    StatusRequest statusRequest = StatusRequest.convert(parameters);
 	    response = statusHandler.handleRequest(statusRequest);
 	} catch (Exception e) {
 	    response = new BindingResult(BindingResultCode.INTERNAL_ERROR);
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	}
 	return response;
     }

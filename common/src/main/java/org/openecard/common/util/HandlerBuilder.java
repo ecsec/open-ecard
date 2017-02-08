@@ -55,15 +55,18 @@ public class HandlerBuilder {
     private final String protocolEndpoint;
     private final String sessionId;
     private final String binding;
+    // slot info
+    private final Boolean protectedAuthPath;
     // TODO: path security
 
 
     private HandlerBuilder() {
-	this(null, null, null, null, null, null, null, null, null, null);
+	this(null, null, null, null, null, null, null, null, null, null, null);
     }
 
     private HandlerBuilder(byte[] contextHandle, String ifdName, BigInteger slotIdx, byte[] cardApp, byte[] slotHandle,
-	    String cardType, byte[] cardIdentifier, String protocolEndpoint, String sessionId, String binding) {
+	    String cardType, byte[] cardIdentifier, String protocolEndpoint, String sessionId, String binding,
+	    Boolean protectedAuthPath) {
 	this.contextHandle = contextHandle;
 	this.ifdName = ifdName;
 	this.slotIdx = slotIdx;
@@ -74,6 +77,7 @@ public class HandlerBuilder {
 	this.protocolEndpoint = protocolEndpoint;
 	this.sessionId = sessionId;
 	this.binding = binding;
+	this.protectedAuthPath = protectedAuthPath;
     }
 
 
@@ -117,6 +121,11 @@ public class HandlerBuilder {
 	ConnectionHandleType handle = buildAppPath(new ConnectionHandleType());
 	handle.setSlotHandle(slotHandle);
 	handle.setRecognitionInfo(buildRecognitionInfo());
+	if (protectedAuthPath != null) {
+	    ConnectionHandleType.SlotInfo slotInfo = new ConnectionHandleType.SlotInfo();
+	    slotInfo.setProtectedAuthPath(protectedAuthPath);
+	    handle.setSlotInfo(slotInfo);
+	}
 	return handle;
     }
 
@@ -158,38 +167,38 @@ public class HandlerBuilder {
 
     public HandlerBuilder setContextHandle(byte[] contextHandle) {
 	HandlerBuilder b = new HandlerBuilder(contextHandle, ifdName, slotIdx, cardApp, slotHandle, cardType,
-		cardIdentifier, protocolEndpoint, sessionId, binding);
+		cardIdentifier, protocolEndpoint, sessionId, binding, protectedAuthPath);
 	return b;
     }
 
     public HandlerBuilder setIfdName(String ifdName) {
 	HandlerBuilder b = new HandlerBuilder(contextHandle, ifdName, slotIdx, cardApp, slotHandle, cardType,
-		cardIdentifier, protocolEndpoint, sessionId, binding);
+		cardIdentifier, protocolEndpoint, sessionId, binding, protectedAuthPath);
 	return b;
     }
 
     public HandlerBuilder setSlotIdx(BigInteger slotIdx) {
 	HandlerBuilder b = new HandlerBuilder(contextHandle, ifdName, slotIdx, cardApp, slotHandle, cardType,
-		cardIdentifier, protocolEndpoint, sessionId, binding);
+		cardIdentifier, protocolEndpoint, sessionId, binding, protectedAuthPath);
 	return b;
     }
 
     public HandlerBuilder setCardApp(byte[] cardApp) {
 	HandlerBuilder b = new HandlerBuilder(contextHandle, ifdName, slotIdx, cardApp, slotHandle, cardType,
-		cardIdentifier, protocolEndpoint, sessionId, binding);
+		cardIdentifier, protocolEndpoint, sessionId, binding, protectedAuthPath);
 	return b;
     }
 
     public HandlerBuilder setSlotHandle(byte[] slotHandle) {
 	HandlerBuilder b = new HandlerBuilder(contextHandle, ifdName, slotIdx, cardApp, slotHandle, cardType,
-		cardIdentifier, protocolEndpoint, sessionId, binding);
+		cardIdentifier, protocolEndpoint, sessionId, binding, protectedAuthPath);
 	return b;
     }
 
     public HandlerBuilder setRecognitionInfo(RecognitionInfo info) {
 	if (info != null) {
 	    HandlerBuilder b = new HandlerBuilder(contextHandle, ifdName, slotIdx, cardApp, slotHandle,
-		info.getCardType(), info.getCardIdentifier(), protocolEndpoint, sessionId, binding);
+		info.getCardType(), info.getCardIdentifier(), protocolEndpoint, sessionId, binding, protectedAuthPath);
 	return b;
 	} else {
 	    return this;
@@ -205,7 +214,7 @@ public class HandlerBuilder {
     }
     public HandlerBuilder setCardType(String cardType) {
 	HandlerBuilder b = new HandlerBuilder(contextHandle, ifdName, slotIdx, cardApp, slotHandle, cardType,
-		cardIdentifier, protocolEndpoint, sessionId, binding);
+		cardIdentifier, protocolEndpoint, sessionId, binding, protectedAuthPath);
 	return b;
     }
 
@@ -218,7 +227,7 @@ public class HandlerBuilder {
     }
     public HandlerBuilder setCardIdentifier(byte[] cardIdentifier) {
 	HandlerBuilder b = new HandlerBuilder(contextHandle, ifdName, slotIdx, cardApp, slotHandle, cardType,
-		cardIdentifier, protocolEndpoint, sessionId, binding);
+		cardIdentifier, protocolEndpoint, sessionId, binding, protectedAuthPath);
 	return b;
     }
 
@@ -226,7 +235,7 @@ public class HandlerBuilder {
 	if (channel != null) {
 	    HandlerBuilder b = new HandlerBuilder(contextHandle, ifdName, slotIdx, cardApp, slotHandle, cardType,
 		cardIdentifier, channel.getProtocolTerminationPoint(), channel.getSessionIdentifier(),
-		channel.getBinding());
+		channel.getBinding(), protectedAuthPath);
 	return b;
 	} else {
 	    return this;
@@ -235,19 +244,25 @@ public class HandlerBuilder {
 
     public HandlerBuilder setProtocolEndpoint(String protocolEndpoint) {
 	HandlerBuilder b = new HandlerBuilder(contextHandle, ifdName, slotIdx, cardApp, slotHandle, cardType,
-		cardIdentifier, protocolEndpoint, sessionId, binding);
+		cardIdentifier, protocolEndpoint, sessionId, binding, protectedAuthPath);
 	return b;
     }
 
     public HandlerBuilder setSessionId(String sessionId) {
 	HandlerBuilder b = new HandlerBuilder(contextHandle, ifdName, slotIdx, cardApp, slotHandle, cardType,
-		cardIdentifier, protocolEndpoint, sessionId, binding);
+		cardIdentifier, protocolEndpoint, sessionId, binding, protectedAuthPath);
 	return b;
     }
 
     public HandlerBuilder setBinding(String binding) {
 	HandlerBuilder b = new HandlerBuilder(contextHandle, ifdName, slotIdx, cardApp, slotHandle, cardType,
-		cardIdentifier, protocolEndpoint, sessionId, binding);
+		cardIdentifier, protocolEndpoint, sessionId, binding, protectedAuthPath);
+	return b;
+    }
+
+    public HandlerBuilder setProtectedAuthPath(Boolean protectedAuthPath) {
+	HandlerBuilder b = new HandlerBuilder(contextHandle, ifdName, slotIdx, cardApp, slotHandle, cardType,
+		cardIdentifier, protocolEndpoint, sessionId, binding, protectedAuthPath);
 	return b;
     }
 

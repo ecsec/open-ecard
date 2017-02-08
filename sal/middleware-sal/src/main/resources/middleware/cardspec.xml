@@ -1,0 +1,13 @@
+<CardConfig>
+	<CardSpec>
+		<MiddlewareName>Gemalto S.A._Classic V3</MiddlewareName>
+		<Type>http://luxtrust.lu/cif/LuxTrust-V3</Type>
+		<ATR>3B7D94000080318065B0831100C883009000</ATR>
+	</CardSpec>
+
+	<CardSpec>
+		<MiddlewareName>Gemalto S.A._Classic V4</MiddlewareName>
+		<Type>http://public.lu/cif/Lux-eID</Type>
+		<ATR>3B8F800180318065B0850300EF120FFF82900073</ATR>
+	</CardSpec>
+</CardConfig>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -36,6 +36,7 @@ import org.openecard.apache.http.entity.ContentType;
 import org.openecard.apache.http.entity.StringEntity;
 import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.common.I18n;
+import org.openecard.common.util.HTMLUtils;
 import org.openecard.control.binding.http.common.DocumentRoot;
 import org.openecard.control.binding.http.common.HTTPTemplate;
 import org.openecard.control.binding.http.common.HeaderTypes;
@@ -53,10 +54,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Moritz Horsch
  * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
 public class ErrorResponseInterceptor implements HttpResponseInterceptor {
 
-    private static final Logger _logger = LoggerFactory.getLogger(ErrorResponseInterceptor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ErrorResponseInterceptor.class);
     private static I18n lang = I18n.getTranslation("http");
     private final HTTPTemplate template;
     private final List<Integer> errorCodes;
@@ -94,7 +96,7 @@ public class ErrorResponseInterceptor implements HttpResponseInterceptor {
 	int statusCode = statusLine.getStatusCode();
 
 	if (errorCodes.contains(statusCode)) {
-	    _logger.debug("HTTP response intercepted");
+	    LOG.debug("HTTP response intercepted");
 	    Header contentType = httpResponse.getFirstHeader(HeaderTypes.CONTENT_TYPE.fieldName());
 	    if (contentType != null) {
 		// Intercept response with the content type "text/plain"
@@ -105,6 +107,8 @@ public class ErrorResponseInterceptor implements HttpResponseInterceptor {
 
 		    // Read message body
 		    String content = readEntity(httpResponse.getEntity());
+		    // escape string to prevent script content to be injected into the template (XSS)
+		    content = HTMLUtils.escapeHtml(content);
 
 		    template.setProperty("%%%MESSAGE%%%", content);
 		}

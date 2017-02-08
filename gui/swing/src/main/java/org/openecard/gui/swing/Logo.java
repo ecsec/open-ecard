@@ -51,21 +51,11 @@ public class Logo extends JPanel {
      * Load logo from classpath and instantiate panel.
      */
     public Logo() {
-	ImageIcon logo = new ImageIcon();
-	URL url = FileUtils.resolveResourceAsURL(Logo.class, "openecard_logo.png");
-
-	if (url != null) {
-	    Toolkit toolkit = Toolkit.getDefaultToolkit();
-	    Image image = toolkit.getImage(url);
-	    image = image.getScaledInstance(60, 60, Image.SCALE_SMOOTH);
-	    logo.setImage(image);
-	}
+	ImageIcon logo = loadLogoIcon();
+	JLabel lbl = new JLabel(logo);
 
 	// set a horizontal box layout (logo on the left, separator on the right)
 	setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-
-	// add the logo
-	JLabel lbl = new JLabel(logo);
 	add(lbl);
 
 	// add the panel containing the separator
@@ -81,6 +71,20 @@ public class Logo extends JPanel {
 
 	// add a space of 10 at the bottom
 	setBorder(new EmptyBorder(0, 0, 10, 0));
+    }
+
+    public static ImageIcon loadLogoIcon() {
+	ImageIcon logo = new ImageIcon();
+	URL url = FileUtils.resolveResourceAsURL(Logo.class, "openecard_logo.png");
+
+	if (url != null) {
+	    Toolkit toolkit = Toolkit.getDefaultToolkit();
+	    Image image = toolkit.getImage(url);
+	    image = image.getScaledInstance(60, 60, Image.SCALE_SMOOTH);
+	    logo.setImage(image);
+	}
+
+	return logo;
     }
 
 }

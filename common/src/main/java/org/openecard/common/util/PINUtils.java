@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,6 +30,8 @@ import iso.std.iso_iec._24727.tech.schema.Transmit;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import org.openecard.common.ECardConstants;
@@ -46,7 +48,7 @@ import org.slf4j.LoggerFactory;
 */
 public class PINUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(PINUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PINUtils.class);
 
     /**
      * Build a Transmit containing a verify APDU.
@@ -58,12 +60,13 @@ public class PINUtils {
      * @return Transmit containing the built verify APDU
      * @throws UtilException if an pin related error occurs (e.g. wrong PIN length)
      */
-    public static Transmit buildVerifyTransmit(String rawPIN, PasswordAttributesType attributes, byte[] template,
+    public static Transmit buildVerifyTransmit(char[] rawPIN, PasswordAttributesType attributes, byte[] template,
 	    byte[] slotHandle) throws UtilException {
 	// concatenate template with encoded pin
     	byte[] pin = PINUtils.encodePin(rawPIN, attributes);
 	byte[] pinCmd = ByteUtils.concatenate(template, (byte) pin.length);
 	pinCmd = ByteUtils.concatenate(pinCmd, pin);
+	Arrays.fill(pin, (byte) 0);
 
 	Transmit transmit = new Transmit();
 	transmit.setSlotHandle(slotHandle);
@@ -74,7 +77,7 @@ public class PINUtils {
 	return transmit;
     }
 
-    public static byte[] encodePin(String rawPin, PasswordAttributesType attributes) throws UtilException {
+    public static byte[] encodePin(char[] rawPin, PasswordAttributesType attributes) throws UtilException {
 	// extract attributes
 	PasswordTypeType pwdType = attributes.getPwdType();
 	int minLen = attributes.getMinLength().intValue();
@@ -103,7 +106,7 @@ public class PINUtils {
 		default:
 		    String msg = "Unsupported PIN encoding requested.";
 		    UtilException ex = new UtilException(ECardConstants.Minor.IFD.IO.UNKNOWN_PIN_FORMAT, msg);
-		    logger.error(ex.getMessage(), ex);
+		    LOG.error(ex.getMessage(), ex);
 		    throw ex;
 	    }
 	} catch (UnsupportedEncodingException ex) {
@@ -148,27 +151,35 @@ public class PINUtils {
 	return mask;
     }
 
-    public static byte[] encodeTextPin(String encoding, String rawPin, int minLen, int storedLen, int maxLen,
+    public static byte[] encodeTextPin(String encoding, char[] rawPin, int minLen, int storedLen, int maxLen,
 	    boolean needsPadding, byte padChar) throws UnsupportedEncodingException, UtilException {
 	// perform some basic checks
 	if (needsPadding && storedLen <= 0) {
 	    String msg = "Padding is required, but no stored length is given.";
 	    throw new UtilException(msg);
 	}
-	if (rawPin.length() < minLen) {
+	if (rawPin.length < minLen) {
 	    String msg = String.format("Entered PIN is too short, enter at least %d characters.", minLen);
 	    throw new UtilException(msg);
 	    //throw new UtilException("PIN contains invalid symbols.");
 	}
-	if (maxLen > 0 && rawPin.length() > maxLen) {
+	if (maxLen > 0 && rawPin.length > maxLen) {
 	    String msg = String.format("Entered PIN is too long, enter at most %d characters.", maxLen);
 	    throw new UtilException(msg);
 	}
 
 	// get the pin string and validate it is within stored length
 	Charset charset = Charset.forName(encoding);
-	byte[] pinBytes = rawPin.getBytes(charset);
+	ByteBuffer bb = charset.encode(CharBuffer.wrap(rawPin));
+	byte[] pinBytes = new byte[bb.remaining()];
+	bb.get(pinBytes);
+	// blank out buffer array
+	if (bb.hasArray()) {
+	    Arrays.fill(bb.array(), (byte) 0);
+	}
+
 	if (storedLen > 0 && pinBytes.length > storedLen) {
+	    Arrays.fill(pinBytes, (byte) 0);
 	    String msg = String.format("Storage size for PIN exceeded, only %d bytes are allowed.", storedLen);
 	    throw new UtilException(msg);
 	}
@@ -177,16 +188,19 @@ public class PINUtils {
 	    int missingBytes = storedLen - pinBytes.length;
 	    byte[] filler = new byte[missingBytes];
 	    Arrays.fill(filler, padChar);
-	    pinBytes = ByteUtils.concatenate(pinBytes, filler);
+	    byte[] pinBytesTmp = ByteUtils.concatenate(pinBytes, filler);
+	    // blank array before it was copied
+	    Arrays.fill(pinBytes, (byte) 0);
+	    pinBytes = pinBytesTmp;
 	}
 
 	return pinBytes;
     }
 
-    public static byte[] encodeBcdPin(PasswordTypeType pwdType, String rawPin, int minLen, int storedLen, int maxLen,
+    public static byte[] encodeBcdPin(PasswordTypeType pwdType, char[] rawPin, int minLen, int storedLen, int maxLen,
 	    boolean needsPadding, byte padChar) throws UtilException, IOException {
 	ByteArrayOutputStream o = new ByteArrayOutputStream();
-	int pinSize = rawPin.length();
+	int pinSize = rawPin.length;
 
 	if (ISO_9564_1 == pwdType) {
 	    byte head = (byte) (0x20 | (0x0F & pinSize));
@@ -195,17 +209,17 @@ public class PINUtils {
 
 	if (HALF_NIBBLE_BCD == pwdType) {
 	    for (int i = 0; i < pinSize; i++) {
-		char nextChar = rawPin.charAt(i);
+		char nextChar = rawPin[i];
 		byte digit = (byte) (0xF0 | getByte(nextChar));
 		o.write(digit);
 	    }
 	} else if (BCD == pwdType || ISO_9564_1 == pwdType) {
 	    for (int i = 0; i < pinSize; i += 2) {
-		byte b1 = (byte) (getByte(rawPin.charAt(i)) << 4);
+		byte b1 = (byte) (getByte(rawPin[i]) << 4);
 		byte b2 = (byte) (padChar & 0x0F); // lower nibble set to pad byte
 		// one char left, replace pad nibble with it
 		if (i + 1 < pinSize) {
-		    b2 = (byte) (getByte(rawPin.charAt(i + 1)) & 0x0F);
+		    b2 = (byte) (getByte(rawPin[i + 1]) & 0x0F);
 		}
 		byte b = (byte) (b1 | b2);
 		o.write(b);
@@ -228,7 +242,7 @@ public class PINUtils {
 	    return (byte) (c - '0');
 	} else {
 	    UtilException ex = new UtilException("Entered PIN contains invalid characters.");
-	    logger.error(ex.getMessage(), ex);
+	    LOG.error(ex.getMessage(), ex);
 	    throw ex;
 	}
     }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LocalKeystoreTlsServer extends AbstractTlsServer {
 
-    private static final Logger logger = LoggerFactory.getLogger(LocalKeystoreTlsServer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LocalKeystoreTlsServer.class);
 
     private static final String KEYSTORE_FILE = "binding/server-keystore.p12";
     private static final String KEY_ALIAS = "www.localhost-ecard-client.de";
@@ -80,7 +80,7 @@ public class LocalKeystoreTlsServer extends AbstractTlsServer {
 	    DEFAULT_KEYSTORE = loadKeyStore(KEYSTORE_FILE, getKeyPass(), "PKCS12", null);
 	} catch (CertificateException | IOException | KeyStoreException | NoSuchAlgorithmException
 		| NoSuchProviderException ex) {
-	    logger.error("Failed to load default keystore.", ex);
+	    LOG.error("Failed to load default keystore.", ex);
 	}
     }
 
@@ -207,9 +207,9 @@ public class LocalKeystoreTlsServer extends AbstractTlsServer {
 	// only list RSA based ciphers, we won't use ECDSA certificates
         return new int[] {
 	    // recommended ciphers from TR-02102-2 sec. 3.3.1
-	    CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+	    CipherSuite.DRAFT_TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
 	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-	    CipherSuite.TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+	    CipherSuite.DRAFT_TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
 	    CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
 	    CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
 	    CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
@@ -229,9 +229,9 @@ public class LocalKeystoreTlsServer extends AbstractTlsServer {
     public TlsCipher getCipher() throws IOException {
 	switch (selectedCipherSuite) {
 	    // CHACHA20
-	    case CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:
-	    case CipherSuite.TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256:
-		return cipherFactory.createCipher(context, EncryptionAlgorithm.AEAD_CHACHA20_POLY1305, MACAlgorithm._null);
+	    case CipherSuite.DRAFT_TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:
+	    case CipherSuite.DRAFT_TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256:
+		return cipherFactory.createCipher(context, EncryptionAlgorithm.CHACHA20_POLY1305, MACAlgorithm._null);
 	    // AES 256 GCM
 	    case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:
 	    case CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384:
@@ -267,7 +267,7 @@ public class LocalKeystoreTlsServer extends AbstractTlsServer {
     @Override
     public TlsKeyExchange getKeyExchange() throws IOException {
 	switch (selectedCipherSuite) {
-	    case CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:
+	    case CipherSuite.DRAFT_TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:
 	    case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:
 	    case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:
 	    case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384:
@@ -275,7 +275,7 @@ public class LocalKeystoreTlsServer extends AbstractTlsServer {
 	    case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:
 	    case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256:
 		return createECDHEKeyExchange(KeyExchangeAlgorithm.ECDHE_RSA);
-	    case CipherSuite.TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256:
+	    case CipherSuite.DRAFT_TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256:
 	    case CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384:
 	    case CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256:
 	    case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256:
@@ -293,12 +293,12 @@ public class LocalKeystoreTlsServer extends AbstractTlsServer {
     @Override
     public void notifyAlertRaised(short alertLevel, short alertDescription, String message, Throwable cause) {
 	TlsError error = new TlsError(alertLevel, alertDescription, message, cause);
-	if (alertLevel == AlertLevel.warning && logger.isInfoEnabled()) {
-	    logger.info("TLS warning sent.");
-	    logger.info(error.toString());
+	if (alertLevel == AlertLevel.warning && LOG.isInfoEnabled()) {
+	    LOG.info("TLS warning sent.");
+	    LOG.info(error.toString());
 	} else if (alertLevel == AlertLevel.fatal) {
-	    logger.error("TLS error sent.");
-	    logger.error(error.toString(), cause);
+	    LOG.error("TLS error sent.");
+	    LOG.error(error.toString(), cause);
 	}
 
 	super.notifyAlertRaised(alertLevel, alertDescription, message, cause);
@@ -307,12 +307,12 @@ public class LocalKeystoreTlsServer extends AbstractTlsServer {
     @Override
     public void notifyAlertReceived(short alertLevel, short alertDescription) {
 	TlsError error = new TlsError(alertLevel, alertDescription);
-	if (alertLevel == AlertLevel.warning && logger.isInfoEnabled()) {
-	    logger.info("TLS warning received.");
-	    logger.info(error.toString());
+	if (alertLevel == AlertLevel.warning && LOG.isInfoEnabled()) {
+	    LOG.info("TLS warning received.");
+	    LOG.info(error.toString());
 	} else if (alertLevel == AlertLevel.fatal) {
-	    logger.error("TLS error received.");
-	    logger.error(error.toString());
+	    LOG.error("TLS error received.");
+	    LOG.error(error.toString());
 	}
 
 	super.notifyAlertReceived(alertLevel, alertDescription);

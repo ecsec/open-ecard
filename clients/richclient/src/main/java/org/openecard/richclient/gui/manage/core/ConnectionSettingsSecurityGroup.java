@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -36,16 +36,16 @@ import org.openecard.crypto.tls.verify.TrustStoreLoader;
 public class ConnectionSettingsSecurityGroup extends OpenecardPropertiesSettingsGroup {
 
     private static final long serialVersionUID = 1L;
-    private static final I18n lang = I18n.getTranslation("addon");
+    private static final I18n LANG = I18n.getTranslation("addon");
     private static final String GROUP            = "addon.list.core.general.security.group_name";
     private static final String SYS_TRUSTSTORE      = "addon.list.core.general.security.truststore-use-system";
     private static final String	SYS_TRUSTSTORE_DESC=  "addon.list.core.general.security.truststore-use-system.desc";
 
 
     public ConnectionSettingsSecurityGroup() {
-	super(lang.translationForKey(GROUP));
+	super(LANG.translationForKey(GROUP));
 
-	addBoolItem(lang.translationForKey(SYS_TRUSTSTORE), lang.translationForKey(SYS_TRUSTSTORE_DESC),
+	addBoolItem(LANG.translationForKey(SYS_TRUSTSTORE), LANG.translationForKey(SYS_TRUSTSTORE_DESC),
 		"tls.truststore.use-system");
     }
 
@@ -53,7 +53,7 @@ public class ConnectionSettingsSecurityGroup extends OpenecardPropertiesSettings
     protected void saveProperties() throws IOException, SecurityException, AddonPropertiesException {
 	super.saveProperties();
 	// reload truststore
-	TrustStoreLoader.load();
+	TrustStoreLoader.reset();
     }
 
 }

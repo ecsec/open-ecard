@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>bindings</artifactId>
-		<version>1.2.4</version>
+		<version>1.3.0</version>
 	</parent>
 
 	<groupId>org.openecard.bindings</groupId>
@@ -45,14 +45,14 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.openecard.ifd</groupId>
-			<artifactId>ifd-core</artifactId>
+			<groupId>org.openecard</groupId>
+			<artifactId>recognition</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.openecard</groupId>
-			<artifactId>event-manager</artifactId>
+			<groupId>org.openecard.ifd</groupId>
+			<artifactId>ifd-core</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>

@@ -39,11 +39,17 @@ public interface Environment {
     void setSAL(SAL sal);
     SAL getSAL();
 
-    void setEventManager(EventManager manager);
-    EventManager getEventManager();
+    void setEventDispatcher(EventDispatcher manager);
+    EventDispatcher getEventDispatcher();
 
     void setDispatcher(Dispatcher dispatcher);
     Dispatcher getDispatcher();
+
+    void setRecognition(CardRecognition recognition);
+    CardRecognition getRecognition();
+
+    void setCIFProvider(CIFProvider provider);
+    CIFProvider getCIFProvider();
 
     void setGenericComponent(String id, Object component);
     Object getGenericComponent(String id);

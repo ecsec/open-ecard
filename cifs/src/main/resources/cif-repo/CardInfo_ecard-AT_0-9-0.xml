@@ -782,7 +782,7 @@
 						<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.10045.4.3.2</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 							</iso:AlgorithmInfo>
@@ -798,11 +798,11 @@
 								</iso:CardCommand>
 								<iso:CardCommand>
 									<iso:HeaderTemplate>002241AA</iso:HeaderTemplate>
-									<iso:DataTemplate>{hashToSign}</iso:DataTemplate>
 									<iso:DataTemplate>{tlv 0x80 0x40}</iso:DataTemplate>
 								</iso:CardCommand>
 								<iso:CardCommand>
 									<iso:HeaderTemplate>002A9E9A</iso:HeaderTemplate>
+									<iso:DataTemplate>{hashToSign}</iso:DataTemplate>
 									<iso:ExpectedLength>256</iso:ExpectedLength>
 								</iso:CardCommand>
 							</iso:LegacySignatureGenerationInfo>
@@ -1170,7 +1170,7 @@
 						<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.10045.4.3.2</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>14</iso:CardAlgRef>
@@ -1202,60 +1202,60 @@
 								<iso:DataSetName>CA-QS-Zertifikat</iso:DataSetName>
 							</iso:CertificateRef>
 							<iso:StateInfo>
-							    <iso:State StateName="QS-KEY_Start" StateClass="NotOperational">
-								<iso:UsageCounter>0</iso:UsageCounter>
-								<iso:StateTransition TargetState="QS-KEY_Operational">
-								    <iso:DIDAuthenticationState>
-									<iso:DIDName>QS-PIN</iso:DIDName>
-								    </iso:DIDAuthenticationState>
-								    <iso:UsageCounter>0</iso:UsageCounter>
-								</iso:StateTransition>
-							    </iso:State>
-							    <iso:State StateName="QS-KEY_Operational" StateClass="Operational">
-								<iso:StateTransition TargetState="QS-KEY_PIN_REQUIRED">
-								    <iso:FixedProcedure>
-									<iso:CardCall>
-									    <iso:APICall>
-										<iso:Sign>
-										    <iso:DIDScope>local</iso:DIDScope>
-										    <iso:DIDName>QS-Schlüssel</iso:DIDName>
-										</iso:Sign>
-									    </iso:APICall>
-									    <iso:APIResponse>
-										<iso:SignResponse>
-										    <dss:Result>
-											<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
-										    </dss:Result>
-										</iso:SignResponse>
-									    </iso:APIResponse>
-									</iso:CardCall>
-								    </iso:FixedProcedure>
-								    <iso:UpdateCounter operation="add" variable="UsageCounter">1</iso:UpdateCounter>
-								</iso:StateTransition>
-							    </iso:State>
-							    <iso:State StateName="QS-KEY_PIN_REQUIRED" StateClass="NotOperational">
-								<iso:UsageCounter>1</iso:UsageCounter>
-								<iso:StateTransition TargetState="QS-KEY_Start">
-								    <iso:FixedProcedure>
-									<iso:CardCall>
-									    <iso:APICall>
-										<iso:DIDAuthenticate>
-										    <iso:DIDScope>local</iso:DIDScope>
-										    <iso:DIDName>QS-PIN</iso:DIDName>
-										</iso:DIDAuthenticate>
-									    </iso:APICall>
-									    <iso:APIResponse>
-										<iso:DIDAuthenticateResponse>
-										    <dss:Result>
-											<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
-										    </dss:Result>
-										</iso:DIDAuthenticateResponse>
-									    </iso:APIResponse>
-									</iso:CardCall>
-								    </iso:FixedProcedure>
-								    <iso:UpdateCounter operation="set" variable="UsageCounter">0</iso:UpdateCounter>
-								</iso:StateTransition>
-							    </iso:State>
+								<iso:State StateName="QS-KEY_Start" StateClass="NotOperational">
+									<iso:UsageCounter>0</iso:UsageCounter>
+									<iso:StateTransition TargetState="QS-KEY_Operational">
+										<iso:DIDAuthenticationState>
+											<iso:DIDName>QS-PIN</iso:DIDName>
+										</iso:DIDAuthenticationState>
+										<iso:UsageCounter>0</iso:UsageCounter>
+									</iso:StateTransition>
+								</iso:State>
+								<iso:State StateName="QS-KEY_Operational" StateClass="Operational">
+									<iso:StateTransition TargetState="QS-KEY_PIN_REQUIRED">
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<iso:APICall>
+													<iso:Sign>
+														<iso:DIDScope>local</iso:DIDScope>
+														<iso:DIDName>QS-Schlüssel</iso:DIDName>
+													</iso:Sign>
+												</iso:APICall>
+												<iso:APIResponse>
+													<iso:SignResponse>
+														<dss:Result>
+															<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+														</dss:Result>
+													</iso:SignResponse>
+												</iso:APIResponse>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+										<iso:UpdateCounter operation="add" variable="UsageCounter">1</iso:UpdateCounter>
+									</iso:StateTransition>
+								</iso:State>
+								<iso:State StateName="QS-KEY_PIN_REQUIRED" StateClass="NotOperational">
+									<iso:UsageCounter>1</iso:UsageCounter>
+									<iso:StateTransition TargetState="QS-KEY_Start">
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<iso:APICall>
+													<iso:DIDAuthenticate>
+														<iso:DIDScope>local</iso:DIDScope>
+														<iso:DIDName>QS-PIN</iso:DIDName>
+													</iso:DIDAuthenticate>
+												</iso:APICall>
+												<iso:APIResponse>
+													<iso:DIDAuthenticateResponse>
+														<dss:Result>
+															<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+														</dss:Result>
+													</iso:DIDAuthenticateResponse>
+												</iso:APIResponse>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+										<iso:UpdateCounter operation="set" variable="UsageCounter">0</iso:UpdateCounter>
+									</iso:StateTransition>
+								</iso:State>
 							</iso:StateInfo>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
@@ -1935,7 +1935,7 @@
 						<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.11</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Decipher Compute-signature</iso:SupportedOperations>
 							</iso:AlgorithmInfo>
@@ -2043,7 +2043,7 @@
 						<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.10045.4.3.2</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 							</iso:AlgorithmInfo>

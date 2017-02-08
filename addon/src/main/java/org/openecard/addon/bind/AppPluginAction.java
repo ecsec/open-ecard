@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -33,6 +33,6 @@ import org.openecard.addon.LifecycleTrait;
  */
 public interface AppPluginAction extends LifecycleTrait {
 
-    BindingResult execute(RequestBody body, Map<String, String> parameters, List<Attachment> attachments);
+    BindingResult execute(RequestBody body, Map<String, String> parameters, Headers headers, List<Attachment> attachments);
 
 }

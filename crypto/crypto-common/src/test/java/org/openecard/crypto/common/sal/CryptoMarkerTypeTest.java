@@ -22,6 +22,7 @@
 
 package org.openecard.crypto.common.sal;
 
+import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import iso.std.iso_iec._24727.tech.schema.AlgorithmIdentifierType;
 import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType;
 import iso.std.iso_iec._24727.tech.schema.CertificateRefType;
@@ -66,7 +67,7 @@ public class CryptoMarkerTypeTest {
 	AlgorithmInfoType algType = new AlgorithmInfoType();
 	algType.setAlgorithm("signPKCS1_V1_5");
 	AlgorithmIdentifierType aIdType = new AlgorithmIdentifierType();
-	aIdType.setAlgorithm("urn:oid:1.2.840.113549.1.1");
+	aIdType.setAlgorithm("http://www.w3.org/2001/04/xmlenc#rsa-1_5");
 	algType.setAlgorithmIdentifier(aIdType);
 	algType.getSupportedOperations().add("Compute-signature");
 	algType.setCardAlgRef(new byte[] {(byte) 0x02});
@@ -105,7 +106,7 @@ public class CryptoMarkerTypeTest {
 	assertEquals(cryptoMarkerNew.getSignatureGenerationInfo(), new String[] { "MSE_KEY_DS", "PSO_CDS" });
 	assertEquals(cryptoMarkerNew.getCryptoKeyInfo().getKeyRef().getKeyRef(), new byte[] { 0x02 });
 	assertEquals(cryptoMarkerNew.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm(),
-		"urn:oid:1.2.840.113549.1.1");
+		"http://www.w3.org/2001/04/xmlenc#rsa-1_5");
 	assertNull(cryptoMarkerNew.getLegacyKeyName());
 	assertNull(cryptoMarkerNew.getHashGenerationInfo());
 	assertEquals(cryptoMarkerNew.getCertificateRefs().get(0).getDataSetName(), "EF.C.CH.AUT");

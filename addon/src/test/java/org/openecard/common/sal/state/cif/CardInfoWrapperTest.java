@@ -23,8 +23,10 @@
 package org.openecard.common.sal.state.cif;
 
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
+import org.openecard.common.ClientEnv;
+import org.openecard.common.interfaces.Environment;
 import org.openecard.common.util.StringUtils;
-import org.openecard.recognition.CardRecognition;
+import org.openecard.recognition.CardRecognitionImpl;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
@@ -45,7 +47,8 @@ public class CardInfoWrapperTest {
      */
     @Test
     public void test() throws Exception {
-	CardRecognition recognition = new CardRecognition(null, null);
+	Environment env = new ClientEnv();
+	CardRecognitionImpl recognition = new CardRecognitionImpl(env);
 	CardInfoType cardInfo = recognition.getCardInfo("http://bsi.bund.de/cif/npa.xml");
 	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo);
 	assertEquals(cardInfoWrapper.getCardType(), "http://bsi.bund.de/cif/npa.xml");

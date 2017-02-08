@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,19 +22,23 @@
 
 package org.openecard.ifd.scio.wrapper;
 
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import javax.annotation.Nonnull;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
-import org.openecard.common.ifd.scio.SCIOCard;
-import org.openecard.common.ifd.scio.SCIOChannel;
 import org.openecard.common.ifd.scio.SCIOException;
-import org.openecard.common.ifd.scio.SCIOProtocol;
 import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.ifd.scio.SCIOTerminals;
 import org.openecard.common.ifd.scio.TerminalFactory;
+import org.openecard.common.util.ByteUtils;
+import org.openecard.common.util.Pair;
 import org.openecard.common.util.ValueGenerators;
 import org.openecard.ifd.scio.IFDException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -44,13 +48,20 @@ import org.openecard.ifd.scio.IFDException;
  */
 public class ChannelManager {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ChannelManager.class);
+
     private final SCIOTerminals terminals;
-    private final ConcurrentSkipListMap<byte[], HandledChannel> channels;
+
+    private final HashMap<String, SingleThreadChannel> baseChannels;
+    private final TreeMap<byte[], SingleThreadChannel> handledChannels;
+    private final HashMap<String, Set<byte[]>> ifdNameToHandles;
 
     public ChannelManager() throws IFDException {
 	TerminalFactory f = IFDTerminalFactory.getInstance();
 	this.terminals = f.terminals();
-	this.channels = new ConcurrentSkipListMap<>(new ByteArrayComparator());
+	this.baseChannels = new HashMap<>();
+	this.handledChannels = new TreeMap<>(new ByteArrayComparator());
+	this.ifdNameToHandles = new HashMap<>();
     }
 
     public static byte[] createHandle(int size) {
@@ -69,48 +80,80 @@ public class ChannelManager {
 	return terminals;
     }
 
-    /**
-     *
-     * @param ifdName
-     * @return
-     * @throws NoSuchTerminal
-     * @throws SCIOException
-     * @throws IllegalStateException
-     * @throws NullPointerException
-     * @throws SecurityException
-     */
-    @Nonnull
-    public byte[] openChannel(@Nonnull String ifdName) throws NoSuchTerminal, SCIOException,
-	    IllegalStateException {
-	SCIOTerminal t = getTerminals().getTerminal(ifdName);
-	SCIOCard card;
-
-	try {
-	    card = t.connect(SCIOProtocol.T1);
-	} catch (SCIOException e) {
-	    card = t.connect(SCIOProtocol.ANY);
+    public synchronized SingleThreadChannel openMasterChannel(@Nonnull String ifdName) throws NoSuchTerminal,
+	    SCIOException {
+	if (baseChannels.containsKey(ifdName)) {
+	    LOG.warn("Terminal '" + ifdName + "' is already connected.");
+	    return baseChannels.get(ifdName);
 	}
-
-	SCIOChannel channel = card.getBasicChannel();
-	byte[] slotHandle = createSlotHandle();
-	HandledChannel ch = new HandledChannel(slotHandle, channel);
-	channels.put(slotHandle, ch);
-	return slotHandle.clone();
+	SCIOTerminal t = getTerminals().getTerminal(ifdName);
+	SingleThreadChannel ch = new SingleThreadChannel(t, true);
+	baseChannels.put(ifdName, ch);
+	ifdNameToHandles.put(ifdName, new TreeSet<>(new ByteArrayComparator()));
+	return ch;
     }
 
-    @Nonnull
-    public HandledChannel getChannel(@Nonnull byte[] slotHandle) throws NoSuchChannel {
-	HandledChannel ch = channels.get(slotHandle);
+    public synchronized Pair<byte[], SingleThreadChannel> openSlaveChannel(@Nonnull String ifdName)
+	    throws NoSuchTerminal, SCIOException {
+	SingleThreadChannel baseCh = getMasterChannel(ifdName);
+	SCIOTerminal term = baseCh.getChannel().getCard().getTerminal();
+	SingleThreadChannel slaveCh = new SingleThreadChannel(term, true);
+	byte[] slotHandle = createSlotHandle();
+	handledChannels.put(slotHandle, slaveCh);
+	ifdNameToHandles.get(ifdName).add(slotHandle);
+	return new Pair<>(slotHandle, slaveCh);
+    }
+
+    public synchronized SingleThreadChannel getMasterChannel(@Nonnull String ifdName) throws NoSuchTerminal {
+	SingleThreadChannel ch = baseChannels.get(ifdName);
 	if (ch == null) {
-	    throw new NoSuchChannel("No channel available for the requested slot handle.");
+	    throw new NoSuchTerminal("No terminal with name '" + ifdName + "' available.");
 	} else {
 	    return ch;
 	}
     }
 
-    public void closeChannel(@Nonnull byte[] slotHandle) throws SCIOException {
-	HandledChannel ch = channels.remove(slotHandle);
-	if (ch != null && ch.getChannel().isLogicalChannel()) {
+    public synchronized SingleThreadChannel getSlaveChannel(@Nonnull byte[] slotHandle) throws NoSuchChannel {
+	SingleThreadChannel ch = handledChannels.get(slotHandle);
+	if (ch == null) {
+	    throw new NoSuchChannel("No channel for slot '" + ByteUtils.toHexString(slotHandle) + "' available.");
+	} else {
+	    return ch;
+	}
+    }
+
+    public synchronized void closeMasterChannel(String ifdName) {
+	Set<byte[]> slotHandles = ifdNameToHandles.get(ifdName);
+	if (slotHandles != null) {
+	    for (byte[] slotHandle : slotHandles) {
+		try {
+		    closeSlaveChannel(slotHandle);
+		} catch (NoSuchChannel | SCIOException ex) {
+		    LOG.warn("Failed to close channel for terminal '" + ifdName + "'.", ex);
+		}
+	    }
+	    ifdNameToHandles.remove(ifdName);
+	}
+
+	SingleThreadChannel ch = baseChannels.remove(ifdName);
+	if (ch == null) {
+	    LOG.error("No master channel for terminal '" + ifdName + "' available.");
+	} else {
+	    try {
+		ch.shutdown();
+	    } catch (SCIOException ex) {
+		LOG.warn("Failed to shut down master channel for terminal '" + ifdName + "'.");
+	    }
+	}
+    }
+
+    public synchronized void closeSlaveChannel(@Nonnull byte[] slotHandle) throws NoSuchChannel, SCIOException {
+	SingleThreadChannel ch = handledChannels.remove(slotHandle);
+	if (ch == null) {
+	    throw new NoSuchChannel("No channel for slot '" + ByteUtils.toHexString(slotHandle) + "' available.");
+	} else {
+	    String ifdName = ch.getChannel().getCard().getTerminal().getName();
+	    ifdNameToHandles.get(ifdName).remove(slotHandle);
 	    ch.shutdown();
 	}
     }

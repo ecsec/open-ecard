@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2013-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -54,7 +54,7 @@ import org.xml.sax.SAXException;
  */
 public class ClasspathRegistry implements AddonRegistry {
 
-    private static final Logger logger = LoggerFactory.getLogger(ClasspathRegistry.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClasspathRegistry.class);
 
     private final FutureTask<ArrayList<AddonSpecification>> registeredAddons;
 
@@ -85,18 +85,18 @@ public class ClasspathRegistry implements AddonRegistry {
 	try {
 	    InputStream manifestStream = FileUtils.resolveResourceAsStream(ClasspathRegistry.class, fileName);
 	    if (manifestStream == null) {
-		logger.warn("Skipped loading internal add-on {}, because it is not available.", addonName);
+		LOG.warn("Skipped loading internal add-on {}, because it is not available.", addonName);
 		return;
 	    }
 	    Document manifestDoc = m.str2doc(manifestStream);
 	    registerInt(addons, (AddonSpecification) m.unmarshal(manifestDoc));
-	    logger.info("Loaded internal {} add-on.", addonName);
+	    LOG.info("Loaded internal {} add-on.", addonName);
 	} catch (IOException ex) {
-	    logger.warn(String.format("Failed to load internal %s add-on.", addonName), ex);
+	    LOG.warn(String.format("Failed to load internal %s add-on.", addonName), ex);
 	} catch (SAXException ex) {
-	    logger.warn(String.format("Failed to load internal %s add-on.", addonName), ex);
+	    LOG.warn(String.format("Failed to load internal %s add-on.", addonName), ex);
 	} catch (WSMarshallerException ex) {
-	    logger.warn(String.format("Failed to load internal %s add-on.", addonName), ex);
+	    LOG.warn(String.format("Failed to load internal %s add-on.", addonName), ex);
 	}
     }
 
@@ -105,11 +105,11 @@ public class ClasspathRegistry implements AddonRegistry {
 	    return registeredAddons.get();
 	} catch (InterruptedException ex) {
 	    String msg = "Initialization of the built-in Add-ons has been interrupted.";
-	    logger.warn(msg);
+	    LOG.warn(msg);
 	    throw new RuntimeException(msg);
 	} catch (ExecutionException ex) {
 	    String msg = "Initialization of the built-in Add-ons yielded an error.";
-	    logger.error(msg, ex);
+	    LOG.error(msg, ex);
 	    throw new RuntimeException(msg, ex.getCause());
 	}
     }

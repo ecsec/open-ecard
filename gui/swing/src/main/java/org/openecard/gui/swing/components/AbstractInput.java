@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,11 +25,15 @@ package org.openecard.gui.swing.components;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.util.Arrays;
+import javax.annotation.Nonnull;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.text.JTextComponent;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.Segment;
 import org.openecard.gui.definition.AbstractTextField;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.PasswordField;
@@ -53,7 +57,7 @@ public class AbstractInput implements StepComponent, Focusable {
 
     private final JPanel panel;
     private final JLabel label;
-    private final JTextComponent textField;
+    private final JTextField textField;
 
     private final AbstractTextField result;
 
@@ -62,11 +66,11 @@ public class AbstractInput implements StepComponent, Focusable {
     }
     public AbstractInput(PasswordField input) {
 	this(input, new PasswordField(input.getID()), new JPasswordField(12));
-	this.panel.add(new VirtualPinPadButton(textField, input));
+	this.panel.add(new VirtualPinPadButton(textField, input), 1);
     }
 
-    private AbstractInput(AbstractTextField input, AbstractTextField output, JTextComponent textFieldImpl) {
-	String value;
+    private AbstractInput(AbstractTextField input, AbstractTextField output, JTextField textFieldImpl) {
+	char[] value;
 	String labelText;
 
 	// extract values from input and write to output (depending on actual type)
@@ -83,8 +87,10 @@ public class AbstractInput implements StepComponent, Focusable {
 
 	// correct values
 	this.textField = textFieldImpl;
-	if (value != null) {
-	    this.textField.setText(value);
+	if (this.textField instanceof JPasswordField) {
+
+	} else {
+	    this.textField.setText(new String(value));
 	    this.textField.selectAll();
 	}
 
@@ -100,10 +106,23 @@ public class AbstractInput implements StepComponent, Focusable {
 	this.panel = new JPanel();
 	FlowLayout panelLayout = new FlowLayout(FlowLayout.LEFT);
 	this.panel.setLayout(panelLayout);
-	this.panel.add(this.label);
 	this.panel.add(this.textField);
+	this.panel.add(this.label);
     }
 
+    @Nonnull
+    private char[] getFieldValue() {
+        Document doc = textField.getDocument();
+        Segment txt = new Segment();
+        try {
+            doc.getText(0, doc.getLength(), txt); // use the non-String API
+        } catch (BadLocationException e) {
+            return new char[0];
+        }
+        char[] retValue = new char[txt.count];
+        System.arraycopy(txt.array, txt.offset, retValue, 0, txt.count);
+        return retValue;
+    }
 
     @Override
     public Component getComponent() {
@@ -132,12 +151,9 @@ public class AbstractInput implements StepComponent, Focusable {
 
     @Override
     public OutputInfoUnit getValue() {
-	String textValue = this.textField.getText();
-	if (textValue == null) {
-	    textValue = "";
-	}
-
+	char[] textValue = getFieldValue();
 	result.setValue(textValue);
+	Arrays.fill(textValue, ' ');
 	return result;
     }
 

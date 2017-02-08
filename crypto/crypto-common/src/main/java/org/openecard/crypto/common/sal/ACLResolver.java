@@ -36,7 +36,6 @@ import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.SecurityConditionType;
 import iso.std.iso_iec._24727.tech.schema.TargetNameType;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -45,7 +44,6 @@ import java.util.TreeSet;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.util.HandlerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +55,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ACLResolver {
 
-    private static final Logger logger = LoggerFactory.getLogger(ACLResolver.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ACLResolver.class);
     private final Dispatcher dispatcher;
     private final ConnectionHandleType handle;
 
@@ -66,13 +64,13 @@ public class ACLResolver {
 	this.handle = HandlerUtils.copyHandle(handle);
     }
 
-    public List<DIDStructureType> getUnsatisfiedDIDs(TargetNameType target) throws DispatcherException, WSException,
-	    InvocationTargetException, SecurityConditionUnsatisfiable {
+    public List<DIDStructureType> getUnsatisfiedDIDs(TargetNameType target) throws WSException,
+	    SecurityConditionUnsatisfiable {
 	// get the ACL first
 	ACLList aclReq = new ACLList();
 	aclReq.setConnectionHandle(handle);
 	aclReq.setTargetName(target);
-	ACLListResponse aclRes = (ACLListResponse) dispatcher.deliver(aclReq);
+	ACLListResponse aclRes = (ACLListResponse) dispatcher.safeDeliver(aclReq);
 	WSHelper.checkResult(aclRes);
 	List<AccessRuleType> acls = aclRes.getTargetACL().getAccessRule();
 
@@ -81,8 +79,15 @@ public class ACLResolver {
 	return dids;
     }
 
+    public List<DIDStructureType> getUnsatisfiedDIDs(TargetNameType target, List<AccessRuleType> acls)
+	    throws WSException, SecurityConditionUnsatisfiable {
+	List<DIDStructureType> dids = getMissingDids(acls, target);
+
+	return dids;
+    }
+
     private List<DIDStructureType> getMissingDids(List<AccessRuleType> acls, TargetNameType target)
-	    throws DispatcherException, InvocationTargetException, SecurityConditionUnsatisfiable, WSException {
+	    throws WSException, SecurityConditionUnsatisfiable {
 	// find the sign acl
 	ArrayList<AccessRuleType> tmpAcls = new ArrayList<>();
 	for (AccessRuleType next : acls) {
@@ -184,8 +189,7 @@ public class ACLResolver {
 	throw new SecurityConditionUnsatisfiable(msg);
     }
 
-    private List<DIDStructureType> filterSatisfiedDIDs(List<DIDAuthenticationStateType> states)
-	    throws DispatcherException, InvocationTargetException, WSException {
+    private List<DIDStructureType> filterSatisfiedDIDs(List<DIDAuthenticationStateType> states) throws WSException {
 	ArrayList<DIDStructureType> result = new ArrayList<>(states.size());
 
 	for (DIDAuthenticationStateType state : states) {
@@ -195,7 +199,7 @@ public class ACLResolver {
 		req.setConnectionHandle(handle);
 		req.setDIDName(state.getDIDName());
 		req.setDIDScope(DIDScopeType.GLOBAL); // search everywhere
-		DIDGetResponse res = (DIDGetResponse) dispatcher.deliver(req);
+		DIDGetResponse res = (DIDGetResponse) dispatcher.safeDeliver(req);
 		WSHelper.checkResult(res);
 
 		// add it if not authenticated

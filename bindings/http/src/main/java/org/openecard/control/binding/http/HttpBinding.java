@@ -23,7 +23,7 @@
 package org.openecard.control.binding.http;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.openecard.addon.AddonManager;
@@ -31,9 +31,9 @@ import org.openecard.apache.http.HttpRequestInterceptor;
 import org.openecard.apache.http.HttpResponseInterceptor;
 import org.openecard.control.binding.http.common.DocumentRoot;
 import org.openecard.control.binding.http.handler.HttpAppPluginActionHandler;
-import org.openecard.control.binding.http.interceptor.CORSResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.CacheControlHeaderResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.ErrorResponseInterceptor;
+import org.openecard.control.binding.http.interceptor.SecurityHeaderResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.ServerHeaderResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.StatusLineResponseInterceptor;
 
@@ -110,14 +110,12 @@ public class HttpBinding {
 	    reqInterceptors = Collections.emptyList();
 	}
 	if (respInterceptors == null) {
-	    respInterceptors = new ArrayList<>(3);
-	    respInterceptors.add(new StatusLineResponseInterceptor());
-	    respInterceptors.add(new ErrorResponseInterceptor(documentRoot, "/templates/error.html"));
-	    respInterceptors.add(new CORSResponseInterceptor());
-	    respInterceptors.add(new ServerHeaderResponseInterceptor());
-	    respInterceptors.add(new CacheControlHeaderResponseInterceptor());
-	    //FIXME the CORSRequestInterceptor consumes the request entity
-	    //interceptors.addInterceptor(new CORSRequestInterceptor());
+	    respInterceptors = Arrays.asList(
+		    new StatusLineResponseInterceptor(),
+		    new ErrorResponseInterceptor(documentRoot, "/templates/error.html"),
+		    new ServerHeaderResponseInterceptor(),
+		    new SecurityHeaderResponseInterceptor(),
+		    new CacheControlHeaderResponseInterceptor());
 	}
 
 	HttpAppPluginActionHandler handler = new HttpAppPluginActionHandler(addonManager);

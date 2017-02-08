@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
+import javax.annotation.Nullable;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -52,7 +54,8 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import org.openecard.common.I18n;
-import org.openecard.common.Version;
+import org.openecard.common.AppVersion;
+import org.openecard.common.util.StringUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
 import org.openecard.gui.graphics.OecLogoBgWhite;
 import org.slf4j.Logger;
@@ -65,29 +68,40 @@ import org.slf4j.LoggerFactory;
  * {@code openecard_i18n/about} directory.
  *
  * @author Johannes Schmölz
+ * @author Tobias Wich
  */
 public class AboutDialog extends JFrame {
 
-    private static final Logger logger = LoggerFactory.getLogger(AboutDialog.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AboutDialog.class);
     private static final long serialVersionUID = 1L;
+    private static final I18n LANG = I18n.getTranslation("about");
+
+    public static final String ABOUT_TAB = "about";
+    public static final String FEEDBACK_TAB = "feedback";
+    public static final String LICENSE_TAB = "license";
+    public static final String SUPPORT_TAB = "support";
 
     private static AboutDialog runningDialog;
 
-    private final transient I18n lang = I18n.getTranslation("about");
+    private final HashMap<String, Integer> tabIndices = new HashMap<>();
+    private JTabbedPane tabbedPane;
 
     /**
      * Creates a new instance of this class.
      */
-    public AboutDialog() {
+    private AboutDialog() {
 	super();
 	setupUI();
     }
 
     /**
-     * Convenience method for showing an about dialog.
-     * Since this method is static, there is no need to create an instance of AboutDialog to call it.
+     * Shows an about dialog and selects the specified index.
+     * This method makes sure, that there is only one about dialog.
+     *
+     * @param selectedTab The identifier of the tab which should be selected. Valid identifiers are defined as constants
+     *   in this class.
      */
-    public static void showDialog() {
+    public static void showDialog(@Nullable String selectedTab) {
 	if (runningDialog == null) {
 	    AboutDialog dialog = new AboutDialog();
 	    dialog.addWindowListener(new WindowListener() {
@@ -113,6 +127,24 @@ public class AboutDialog extends JFrame {
 	} else {
 	    runningDialog.toFront();
 	}
+
+	// select tab if it exists
+	Integer idx = runningDialog.tabIndices.get(StringUtils.nullToEmpty(selectedTab));
+	if (idx != null) {
+	    try {
+		runningDialog.tabbedPane.setSelectedIndex(idx);
+	    } catch (ArrayIndexOutOfBoundsException ex) {
+		LOG.error("Invalid index selected.");
+	    }
+	}
+    }
+
+    /**
+     * Shows an about dialog.
+     * This method makes sure, that there is only one about dialog.
+     */
+    public static void showDialog() {
+	showDialog(ABOUT_TAB);
     }
 
     private void setupUI() {
@@ -126,14 +158,14 @@ public class AboutDialog extends JFrame {
 	JTextPane txtpnHeading = new JTextPane();
 	txtpnHeading.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
 	txtpnHeading.setEditable(false);
-	txtpnHeading.setText(lang.translationForKey("about.heading"));
+	txtpnHeading.setText(LANG.translationForKey("about.heading", AppVersion.getName()));
 	txtpnHeading.setBounds(12, 12, 692, 30);
 	getContentPane().add(txtpnHeading);
 
 	JTextPane txtpnVersion = new JTextPane();
 	txtpnVersion.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 9));
 	txtpnVersion.setEditable(false);
-	txtpnVersion.setText(lang.translationForKey("about.version", Version.getVersion()));
+	txtpnVersion.setText(LANG.translationForKey("about.version", AppVersion.getVersion()));
 	txtpnVersion.setBounds(12, 54, 692, 18);
 	getContentPane().add(txtpnVersion);
 
@@ -143,16 +175,21 @@ public class AboutDialog extends JFrame {
 	label.setBounds(12, 84, 155, 320);
 	getContentPane().add(label);
 
-	JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+	tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	tabbedPane.setBounds(185, 84, 529, 320);
 	tabbedPane.setBackground(Color.white);
-	tabbedPane.addTab(lang.translationForKey("about.tab.about"), createTabContent("about"));
-	tabbedPane.addTab(lang.translationForKey("about.tab.feedback"), createTabContent("feedback"));
-	tabbedPane.addTab(lang.translationForKey("about.tab.join"), createTabContent("join"));
-	tabbedPane.addTab(lang.translationForKey("about.tab.license"), createTabContent("gpl-v3"));
+	int tabIdx = 0;
+	tabbedPane.addTab(LANG.translationForKey("about.tab.about"), createTabContent(ABOUT_TAB));
+	tabIndices.put(ABOUT_TAB, tabIdx++);
+	tabbedPane.addTab(LANG.translationForKey("about.tab.feedback"), createTabContent(FEEDBACK_TAB));
+	tabIndices.put(FEEDBACK_TAB, tabIdx++);
+	tabbedPane.addTab(LANG.translationForKey("about.tab.support"), createTabContent(SUPPORT_TAB));
+	tabIndices.put(SUPPORT_TAB, tabIdx++);
+	tabbedPane.addTab(LANG.translationForKey("about.tab.license"), createTabContent(LICENSE_TAB));
+	tabIndices.put(LICENSE_TAB, tabIdx++);
 	getContentPane().add(tabbedPane);
 
-	JButton btnClose = new JButton(lang.translationForKey("about.button.close"));
+	JButton btnClose = new JButton(LANG.translationForKey("about.button.close"));
 	btnClose.setBounds(587, 416, 117, 25);
 	btnClose.addActionListener(new ActionListener() {
 	    @Override
@@ -163,7 +200,7 @@ public class AboutDialog extends JFrame {
 	getContentPane().add(btnClose);
 
 	setIconImage(logo);
-	setTitle(lang.translationForKey("about.title"));
+	setTitle(LANG.translationForKey("about.title", AppVersion.getName()));
 	setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 	setResizable(false);
 	setLocationRelativeTo(null);
@@ -179,7 +216,7 @@ public class AboutDialog extends JFrame {
 	editorPane.setDocument(doc);
 
 	try {
-	    URL url = lang.translationForFile(resourceName, "html");
+	    URL url = LANG.translationForFile(resourceName, "html");
 	    editorPane.setPage(url);
 	} catch (IOException ex) {
 	    editorPane.setText("Page not found.");
@@ -214,7 +251,7 @@ public class AboutDialog extends JFrame {
 			browserOpened = true;
 		    } catch (IOException ex) {
 			// failed to open browser
-			logger.debug(ex.getMessage(), ex);
+			LOG.debug(ex.getMessage(), ex);
 		    }
 		}
 		if (! browserOpened) {
@@ -223,12 +260,12 @@ public class AboutDialog extends JFrame {
 			pb.start();
 		    } catch (IOException ex) {
 			// failed to execute command
-			logger.debug(ex.getMessage(), ex);
+			LOG.debug(ex.getMessage(), ex);
 		    }
 		}
 	    } catch (URISyntaxException ex) {
 		// wrong syntax
-		logger.debug(ex.getMessage(), ex);
+		LOG.debug(ex.getMessage(), ex);
 	    }
 	}
     }

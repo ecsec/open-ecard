@@ -22,6 +22,9 @@
 
 package org.openecard.transport.dispatcher;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.RequestType;
+import iso.std.iso_iec._24727.tech.schema.ResponseType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -30,10 +33,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import org.openecard.common.event.ApiCallEventObject;
+import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.Dispatchable;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
+import org.openecard.common.interfaces.DispatcherExceptionUnchecked;
 import org.openecard.common.interfaces.Environment;
+import org.openecard.common.interfaces.EventDispatcher;
+import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
+import org.openecard.common.util.HandlerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +56,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MessageDispatcher implements Dispatcher {
 
-    private static final Logger logger = LoggerFactory.getLogger(MessageDispatcher.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MessageDispatcher.class);
 
     private final Environment environment;
     /** Key is parameter classname */
@@ -88,17 +97,46 @@ public class MessageDispatcher implements Dispatcher {
 
     @Override
     public Object deliver(Object req) throws DispatcherException, InvocationTargetException {
+	EventDispatcher disp = environment.getEventDispatcher();
+	// send API CALL STARTED event
+	ConnectionHandleType handle = HandlerUtils.extractHandle(req);
+	if (disp != null && req instanceof RequestType) {
+	    ApiCallEventObject startEvt = new ApiCallEventObject(handle, (RequestType) req);
+	    LOG.debug("Sending API_CALL_STARTED event.");
+	    disp.notify(EventType.API_CALL_STARTED, startEvt);
+	}
+
 	try {
 	    Class<?> reqClass = req.getClass();
 	    Service s = getService(reqClass);
 	    Object serviceImpl = getServiceImpl(s);
 
-	    logger.debug("Delivering message of type: {}", req.getClass().getName());
+	    LOG.debug("Delivering message of type: {}", req.getClass().getName());
 
 	    Object result =  s.invoke(serviceImpl, req);
+
+	    // send API CALL FINISHED event
+	    if (disp != null && req instanceof RequestType && result instanceof ResponseType) {
+		ApiCallEventObject finEvt = new ApiCallEventObject(handle, (RequestType) req);
+		finEvt.setResponse((ResponseType) result);
+		LOG.debug("Sending API_CALL_FINISHED event.");
+		disp.notify(EventType.API_CALL_FINISHED, finEvt);
+	    }
+
 	    return result;
 	} catch (IllegalAccessException | IllegalArgumentException ex) {
 	    throw new DispatcherException(ex);
+	}
+    }
+
+    @Override
+    public Object safeDeliver(Object request) throws DispatcherExceptionUnchecked, InvocationTargetExceptionUnchecked {
+	try {
+	    return deliver(request);
+	} catch (DispatcherException ex) {
+	    throw new DispatcherExceptionUnchecked(ex.getMessage(), ex.getCause());
+	} catch (InvocationTargetException ex) {
+	    throw new InvocationTargetExceptionUnchecked(ex.getMessage(), ex.getCause());
 	}
     }
 
@@ -147,7 +185,7 @@ public class MessageDispatcher implements Dispatcher {
 		// check if the service is already defined
 		if (this.serviceInstMap.containsKey(returnType.getName())) {
 		    String msg = "Omitting service type {}, because its type already associated with another service.";
-		    logger.warn(msg, returnType.getName());
+		    LOG.warn(msg, returnType.getName());
 		    continue;
 		}
 
@@ -162,7 +200,7 @@ public class MessageDispatcher implements Dispatcher {
 			returnTypeImpl = result.getClass();
 		    }
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-		    logger.error("Actual type could not be retrieved from method " + nextAccessor + ".", ex);
+		    LOG.error("Actual type could not be retrieved from method " + nextAccessor + ".", ex);
 		    continue;
 		}
 
@@ -173,7 +211,7 @@ public class MessageDispatcher implements Dispatcher {
 		    if (serviceMap.containsKey(reqClass.getName())) {
 			String msg = "Omitting method with parameter type {} in service interface {} because its ";
 			msg += "type already associated with another service.";
-			logger.warn(msg, reqClass.getName(), returnType.getName());
+			LOG.warn(msg, reqClass.getName(), returnType.getName());
 		    } else {
 			serviceMap.put(reqClass.getName(), service);
 		    }

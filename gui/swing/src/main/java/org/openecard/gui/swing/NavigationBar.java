@@ -27,6 +27,8 @@ import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import org.openecard.common.I18n;
+import org.openecard.gui.definition.Step;
+import org.openecard.gui.executor.DummyAction;
 import org.openecard.gui.swing.common.GUIConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,7 +127,7 @@ public class NavigationBar extends JPanel {
 	backButton.setEnabled(false);
 	nextButton.setEnabled(false);
     }
-    
+
     /**
      * Unlocks all buttons.
      */
@@ -139,8 +141,9 @@ public class NavigationBar extends JPanel {
      * Updates the buttons according to the position of the user consent.
      *
      * @param nextIdx Index of the step that is to be displayed.
+     * @param nextStep Step that will be displayed next.
      */
-    public void selectIdx(int nextIdx) {
+    public void selectIdx(int nextIdx, Step nextStep) {
 	// Don't show the back button on the first step
 	if (nextIdx == 0) {
 	    backButton.setVisible(false);
@@ -153,6 +156,13 @@ public class NavigationBar extends JPanel {
 	    nextButton.setText(lang.translationForKey(GUIConstants.BUTTON_FINISH));
 	} else {
 	    nextButton.setText(lang.translationForKey(GUIConstants.BUTTON_NEXT));
+	}
+
+	// Hide cancel if this is the last step and there is no action to perform
+	if (nextIdx == (numSteps - 1) && nextStep.getAction() instanceof DummyAction) {
+	    cancelButton.setVisible(false);
+	} else {
+	    cancelButton.setVisible(true);
 	}
     }
 

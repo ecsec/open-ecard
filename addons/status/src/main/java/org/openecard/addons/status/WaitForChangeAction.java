@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 HS Coburg.
+ * Copyright (C) 2013-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,6 +30,7 @@ import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.Attachment;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
+import org.openecard.addon.bind.Headers;
 import org.openecard.addon.bind.RequestBody;
 import org.openecard.ws.schema.StatusChange;
 import org.slf4j.Logger;
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 public class WaitForChangeAction implements AppPluginAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(WaitForChangeAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WaitForChangeAction.class);
 
     private EventHandler eventHandler;
 
@@ -59,7 +60,7 @@ public class WaitForChangeAction implements AppPluginAction {
     }
 
     @Override
-    public BindingResult execute(RequestBody body, Map<String, String> parameters, List<Attachment> attachments) {
+    public BindingResult execute(RequestBody body, Map<String, String> parameters, Headers headers, List<Attachment> attachments) {
 	BindingResult response;
 	try {
 	    WaitForChangeRequest statusRequest = WaitForChangeRequest.convert(parameters);
@@ -70,7 +71,7 @@ public class WaitForChangeAction implements AppPluginAction {
 	    response.setResultMessage(e.getMessage());
 	} catch (Exception e) {
 	    response = new BindingResult(BindingResultCode.INTERNAL_ERROR);
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	}
 	return response;
     }

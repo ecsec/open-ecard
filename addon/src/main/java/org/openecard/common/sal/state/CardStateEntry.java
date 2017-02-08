@@ -76,6 +76,17 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	this.handle.setCardApplication(getImplicitlySelectedApplicationIdentifier());
     }
 
+    private CardStateEntry(ConnectionHandleType handle, CardInfoWrapper cifWrapper) {
+	serialNumber = nextNumber();
+	infoObject = new CardInfoWrapper(cifWrapper);
+	this.handle = handle;
+	this.handle.setCardApplication(getImplicitlySelectedApplicationIdentifier());
+    }
+
+    public CardStateEntry derive(ConnectionHandleType handle) {
+	return new CardStateEntry(handle, infoObject);
+    }
+
 
     public String getCardType() {
 	return infoObject.getCardType();
@@ -95,11 +106,11 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	return authenticatedDIDs;
     }
 
-    public void addAuthenticated(String didName, byte[] cardApplication){
+    public void addAuthenticated(String didName, byte[] cardApplication) {
 	this.authenticatedDIDs.add(this.infoObject.getDIDInfo(didName, cardApplication));
     }
 
-    public void removeAuthenticated(DIDInfoType didInfo){
+    public void removeAuthenticated(DIDInfoType didInfo) {
 	this.authenticatedDIDs.remove(didInfo);
     }
 
@@ -202,7 +213,7 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	return getAuthenticatedDIDs().contains(didInfo);
     }
 
-     public boolean isAuthenticated(String didName, DIDScopeType didScope) {
+    public boolean isAuthenticated(String didName, DIDScopeType didScope) {
 	DIDInfoType didInfo = infoObject.getDIDInfo(didName, didScope);
 	return getAuthenticatedDIDs().contains(didInfo);
     }

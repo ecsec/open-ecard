@@ -32,12 +32,16 @@ import org.openecard.common.sal.state.HandlePrinter;
  *
  * @author Tobias Wich
  */
-public final class UnknownConnectionHandleException extends ECardException {
+public class UnknownConnectionHandleException extends ECardException {
 
     private static final long serialVersionUID = 1L;
 
     public UnknownConnectionHandleException(ConnectionHandleType handle) {
 	makeException(this, ECardConstants.Minor.App.INCORRECT_PARM, HandlePrinter.printHandle(handle));
+    }
+
+    protected UnknownConnectionHandleException(String minor, ConnectionHandleType handle) {
+	makeException(this, minor, HandlePrinter.printHandle(handle));
     }
 
 }

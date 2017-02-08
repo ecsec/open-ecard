@@ -24,10 +24,12 @@ package org.openecard.common;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
+import org.openecard.common.interfaces.CardRecognition;
+import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.common.interfaces.Dispatchable;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.Environment;
-import org.openecard.common.interfaces.EventManager;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.ws.IFD;
 import org.openecard.ws.Management;
 import org.openecard.ws.SAL;
@@ -41,9 +43,11 @@ public class ClientEnv implements Environment {
 
     private IFD ifd;
     private SAL sal;
-    private EventManager manager;
+    private EventDispatcher manager;
     private Dispatcher dispatcher;
     private Management management;
+    private CardRecognition recognition;
+    private CIFProvider cifProvider;
     private final Map<String, Object> genericComponents;
 
     public ClientEnv() {
@@ -63,12 +67,12 @@ public class ClientEnv implements Environment {
     }
 
     @Override
-    public void setEventManager(EventManager manager) {
+    public void setEventDispatcher(EventDispatcher manager) {
 	this.manager = manager;
     }
 
     @Override
-    public EventManager getEventManager() {
+    public EventDispatcher getEventDispatcher() {
 	return manager;
     }
 
@@ -112,6 +116,26 @@ public class ClientEnv implements Environment {
     @Dispatchable(interfaceClass = Management.class)
     public Management getManagement() {
 	return management;
+    }
+
+    @Override
+    public void setRecognition(CardRecognition recognition) {
+	this.recognition = recognition;
+    }
+
+    @Override
+    public CardRecognition getRecognition() {
+	return recognition;
+    }
+
+    @Override
+    public void setCIFProvider(CIFProvider provider) {
+	this.cifProvider = provider;
+    }
+
+    @Override
+    public CIFProvider getCIFProvider() {
+	return cifProvider;
     }
 
 }

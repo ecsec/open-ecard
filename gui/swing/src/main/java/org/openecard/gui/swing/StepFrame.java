@@ -53,8 +53,8 @@ import org.slf4j.LoggerFactory;
  */
 public class StepFrame {
 
-    private static final Logger logger = LoggerFactory.getLogger(StepFrame.class);
     private static final long serialVersionUID = 1L;
+    private static final Logger LOG = LoggerFactory.getLogger(StepFrame.class);
 
     private final JPanel panel;
     private final Step step;
@@ -219,7 +219,7 @@ public class StepFrame {
 	}
 
 	try {
-	    logger.debug("Exchange result for step '{}'.", step.getTitle());
+	    LOG.debug("Exchange result for step '{}'.", step.getTitle());
 	    stepResult.syncPoint.exchange(null);
 	} catch (InterruptedException ignore) {
 	}
@@ -247,17 +247,17 @@ public class StepFrame {
 	}
 
 	try {
-	    logger.debug("Exchange result from background task for step '{}'.", step.getTitle());
+	    LOG.debug("Exchange result from background task for step '{}'.", step.getTitle());
 	    stepResult.syncPoint.exchange(null);
 	} catch (InterruptedException ignore) {
 	}
     }
 
     public void killBackgroundTask() {
-	logger.debug("Trying to kill background task if it exists.");
+	LOG.debug("Trying to kill background task if it exists.");
 	// kill running thread
 	if (bgThread != null && bgThread.isAlive()) {
-	    logger.debug("Killing background task.");
+	    LOG.debug("Killing background task.");
 	    bgThread.interrupt();
 	}
     }
@@ -270,12 +270,12 @@ public class StepFrame {
 		public void run() {
 		    try {
 			StepActionResult result = task.call();
-			logger.debug("Background thread terminated before the GUI.");
+			LOG.debug("Background thread terminated before the GUI.");
 			forceResult(result);
 		    } catch (InterruptedException ex) {
-			logger.debug("Background task has been terminated from the Swing GUI.", ex);
+			LOG.debug("Background task has been terminated from the Swing GUI.", ex);
 		    } catch (Exception ex) {
-			logger.error("Background task terminated with an exception.", ex);
+			LOG.error("Background task terminated with an exception.", ex);
 		    }
 		}
 	    }, "Swing-GUI-BG-Task");

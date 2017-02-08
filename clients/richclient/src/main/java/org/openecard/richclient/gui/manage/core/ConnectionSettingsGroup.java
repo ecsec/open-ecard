@@ -75,12 +75,12 @@ public class ConnectionSettingsGroup extends OpenecardPropertiesSettingsGroup {
 	super(lang.translationForKey(GROUP));
 
 	selection = addSelectionItem(lang.translationForKey(SCHEME), lang.translationForKey(SCHEME_DESC),
-		"proxy.scheme", "", "SOCKS", "HTTP", "HTTPS");
+		"proxy.scheme", "System Proxy", "SOCKS", "HTTP", "HTTPS", "No Proxy");
 	host = addInputItem(lang.translationForKey(HOST), lang.translationForKey(HOST_DESC), "proxy.host");
 	port = addInputItem(lang.translationForKey(PORT), lang.translationForKey(PORT_DESC), "proxy.port");
 	vali = addBoolItem(lang.translationForKey(VALI), lang.translationForKey(VALI_DESC), "proxy.validate_tls");
 	user = addInputItem(lang.translationForKey(USER), lang.translationForKey(USER_DESC), "proxy.user");
-	pass = addInputItem(lang.translationForKey(PASS), lang.translationForKey(PASS_DESC), "proxy.pass");
+	pass = addInputItem(lang.translationForKey(PASS), lang.translationForKey(PASS_DESC), "proxy.pass", true);
 	excl = addScalarListItem(lang.translationForKey(EXCL), lang.translationForKey(EXCL_DESC), "proxy.excludes",
 		ScalarListEntryType.STRING);
 

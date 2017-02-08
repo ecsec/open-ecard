@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,6 +32,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import org.openecard.common.ThreadTerminateException;
+import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsentNavigator;
@@ -51,7 +53,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ExecutionEngine {
 
-    private static final Logger logger = LoggerFactory.getLogger(ExecutionEngine.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExecutionEngine.class);
 
     private final UserConsentNavigator navigator;
     private final TreeMap<String, ExecutionResults> results = new TreeMap<>();
@@ -79,14 +81,18 @@ public class ExecutionEngine {
      * </ol>
      *
      * @return Overall result of the execution.
+     * @throws ThreadTerminateException Thrown in case the GUI has been closed externally (interrupted).
      */
-    public ResultStatus process() {
+    public ResultStatus process() throws ThreadTerminateException {
 	StepResult next = navigator.next(); // get first step
 	// loop over steps. break inside loop
 	while (true) {
 	    ResultStatus result = next.getStatus();
-	    // close dialog on cancel
-	    if (result == ResultStatus.CANCEL) {
+	    // close dialog on cancel and interrupt
+	    if (result == ResultStatus.INTERRUPTED || Thread.currentThread().isInterrupted()) {
+		navigator.close();
+		throw new ThreadTerminateException("GUI has been interrupted.");
+	    } else if (result == ResultStatus.CANCEL) {
 		navigator.close();
 		return result;
 	    }
@@ -131,7 +137,7 @@ public class ExecutionEngine {
 			next = navigator.replaceCurrent(next.getReplacement());
 			break;
 		    default:
-			// fallthrough because CANCEL is already handled
+			// fallthrough because CANCEL and INTERRUPTED are already handled
 			break;
 		}
 	    } else {
@@ -146,22 +152,32 @@ public class ExecutionEngine {
 		try {
 		    actionResult = actionFuture.get();
 		} catch (CancellationException ex) {
-		    logger.info("StepAction was canceled.", ex);
+		    LOG.info("StepAction was canceled.", ex);
 		    navigator.close();
 		    return ResultStatus.CANCEL;
 		} catch (InterruptedException ex) {
-		    logger.info("StepAction was interrupted.", ex);
+		    LOG.info("StepAction was interrupted.", ex);
 		    navigator.close();
-		    return ResultStatus.CANCEL;
+		    throw new ThreadTerminateException("GUI has been interrupted.");
 		} catch (ExecutionException ex) {
-		    logger.error("StepAction failed with error.", ex.getCause());
+		    // there are some special kinds we need to handle here
+		    if (ex.getCause() instanceof InvocationTargetExceptionUnchecked) {
+			InvocationTargetExceptionUnchecked iex = (InvocationTargetExceptionUnchecked) ex.getCause();
+			if (iex.getCause() instanceof ThreadTerminateException) {
+			    LOG.info("StepAction was interrupted.", ex);
+			    navigator.close();
+			    throw new ThreadTerminateException("GUI has been interrupted.");
+			}
+		    }
+		    // all other types
+		    LOG.error("StepAction failed with error.", ex.getCause());
 		    navigator.close();
 		    return ResultStatus.CANCEL;
 		}
 
 		// break out if cancel was returned
 		if (actionResult.getStatus() == StepActionResultStatus.CANCEL) {
-		    logger.info("StepAction was canceled.");
+		    LOG.info("StepAction was canceled.");
 		    navigator.close();
 		    return ResultStatus.CANCEL;
 		}

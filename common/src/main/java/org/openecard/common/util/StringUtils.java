@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,6 +23,8 @@
 package org.openecard.common.util;
 
 import java.util.regex.Pattern;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 
 /**
@@ -33,7 +35,7 @@ import java.util.regex.Pattern;
  */
 public class StringUtils {
 
-    private static final Pattern wsPattern = Pattern.compile("\\s");
+    private static final Pattern WS_PATTERN = Pattern.compile("\\s");
 
     /**
      * Convert a hex string to a byte array.
@@ -42,7 +44,7 @@ public class StringUtils {
      * @return Byte array
      * @throws NumberFormatException Thrown in case the hex string contains invalid characters.
      */
-    public static byte[] toByteArray(String hex) {
+    public static byte[] toByteArray(@Nonnull String hex) {
 	if ((hex.length() % 2) != 0) {
 	    hex = "0" + hex;
 	}
@@ -61,11 +63,43 @@ public class StringUtils {
      * @param removeWhitespace
      * @return Byte array
      */
-    public static byte[] toByteArray(String hex, boolean removeWhitespace) {
+    public static byte[] toByteArray(@Nonnull String hex, boolean removeWhitespace) {
 	if (removeWhitespace) {
-	    hex = wsPattern.matcher(hex).replaceAll("");
+	    hex = WS_PATTERN.matcher(hex).replaceAll("");
 	}
 	return toByteArray(hex);
+    }
+
+    /**
+     * Checks if the given string is null or empty.
+     *
+     * @param value String to check.
+     * @return {@code true} if string is {@code null} or empty, {@code false} otherwise.
+     */
+    public static boolean isNullOrEmpty(@Nullable String value) {
+	return value == null || value.isEmpty();
+    }
+
+    /**
+     * Converts the given string to the empty string if it is null.
+     *
+     * @param s String to normalize.
+     * @return The empty string if the given string was {@code null} or empty, the given string otherwise.
+     */
+    @Nonnull
+    public static String nullToEmpty(@Nullable String s) {
+	return s == null ? "" : s;
+    }
+
+    /**
+     * Converts the given string to null if it is empty.
+     *
+     * @param s String to normalize.
+     * @return {@code null} if the given string was {@code null} or empty, the given string otherwise.
+     */
+    @Nullable
+    public static String emptyToNull(@Nullable String s) {
+	return s != null && s.isEmpty() ? null : s;
     }
 
 }

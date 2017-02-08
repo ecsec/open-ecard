@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2015 ecsec GmbH.
+ * Copyright (C) 2013-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -40,13 +40,11 @@ import org.openecard.addon.manifest.AppPluginSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.addon.sal.SALProtocol;
 import org.openecard.addon.sal.SALProtocolProxy;
-import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.FacadeInvocationHandler;
+import org.openecard.common.interfaces.Environment;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.definition.ViewController;
-import org.openecard.recognition.CardRecognition;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,15 +63,13 @@ import org.slf4j.LoggerFactory;
  */
 public class AddonManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(AddonManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AddonManager.class);
 
     private final CombiningRegistry registry;
     private final AddonRegistry protectedRegistry;
-    private final Dispatcher dispatcher;
+    private final Environment env;
     private final UserConsent userConsent;
     private final CardStateMap cardStates;
-    private final CardRecognition recognition;
-    private final EventManager eventManager;
     private final EventHandler eventHandler;
     private final ViewController viewController;
     private final TreeMap<AddonSpecification, TreeMap<String, IFDProtocol>> ifdProtocolCache = new TreeMap<>();
@@ -85,25 +81,22 @@ public class AddonManager {
     /**
      * Creates a new AddonManager.
      *
-     * @param dispatcher
+     * @param env
      * @param userConsent
      * @param cardStates
-     * @param recognition
-     * @param eventManager
      * @param view
      * @throws WSMarshallerException
      */
-    public AddonManager(Dispatcher dispatcher, UserConsent userConsent, CardStateMap cardStates,
-	    CardRecognition recognition, EventManager eventManager, ViewController view) throws WSMarshallerException {
+    public AddonManager(Environment env, UserConsent userConsent, CardStateMap cardStates, ViewController view)
+	    throws WSMarshallerException {
 
 	this.registry = new CombiningRegistry(this);
 	this.protectedRegistry = getProtectedRegistry(registry);
-	this.dispatcher = dispatcher;
+	this.env = env;
 	this.userConsent = userConsent;
 	this.cardStates = cardStates;
-	this.recognition = recognition;
-	this.eventManager = eventManager;
-	this.eventHandler = new EventHandler(eventManager);
+	this.eventHandler = new EventHandler();
+	this.env.getEventDispatcher().add(eventHandler);
 	this.viewController = view;
 
 	new Thread(new Runnable() {
@@ -193,7 +186,7 @@ public class AddonManager {
 	    } else if (obj instanceof AppPluginAction) {
 		((AppPluginAction) obj).destroy();
 	    } else {
-		logger.warn("The cache contains invalid objects.");
+		LOG.warn("The cache contains invalid objects.");
 	    }
 	}
 
@@ -275,8 +268,8 @@ public class AddonManager {
 	try {
 	    ClassLoader cl = registry.downloadAddon(addonSpec);
 	    IFDProtocolProxy protoFactory = new IFDProtocolProxy(className, cl);
-	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec, viewController);
-	    aCtx.setCardRecognition(recognition);
+	    Context aCtx = new Context(this, env.getDispatcher(), env.getEventDispatcher(), addonSpec, viewController);
+	    aCtx.setCardRecognition(env.getRecognition());
 	    aCtx.setCardStateMap(cardStates);
 	    aCtx.setEventHandle(eventHandler);
 	    aCtx.setUserConsent(userConsent);
@@ -284,9 +277,9 @@ public class AddonManager {
 	    cache.addIFDProtocol(addonSpec, uri, protoFactory);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
-	    logger.error("Initialization of IFD Protocol failed", e);
+	    LOG.error("Initialization of IFD Protocol failed", e);
 	} catch (AddonException ex) {
-	    logger.error("Failed to download Add-on.", ex);
+	    LOG.error("Failed to download Add-on.", ex);
 	}
 	return null;
     }
@@ -311,8 +304,8 @@ public class AddonManager {
 	try {
 	    ClassLoader cl = registry.downloadAddon(addonSpec);
 	    SALProtocolProxy protoFactory = new SALProtocolProxy(className, cl);
-	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec, viewController);
-	    aCtx.setCardRecognition(recognition);
+	    Context aCtx = new Context(this, env.getDispatcher(), env.getEventDispatcher(), addonSpec, viewController);
+	    aCtx.setCardRecognition(env.getRecognition());
 	    aCtx.setCardStateMap(cardStates);
 	    aCtx.setEventHandle(eventHandler);
 	    aCtx.setUserConsent(userConsent);
@@ -320,9 +313,9 @@ public class AddonManager {
 	    cache.addSALProtocol(addonSpec, uri, protoFactory);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
-	    logger.error("Initialization of SAL Protocol failed", e);
+	    LOG.error("Initialization of SAL Protocol failed", e);
 	} catch (AddonException ex) {
-	    logger.error("Failed to download Add-on.", ex);
+	    LOG.error("Failed to download Add-on.", ex);
 	}
 	return null;
     }
@@ -347,8 +340,8 @@ public class AddonManager {
 	try {
 	    ClassLoader cl = registry.downloadAddon(addonSpec);
 	    AppExtensionActionProxy protoFactory = new AppExtensionActionProxy(className, cl);
-	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec, viewController);
-	    aCtx.setCardRecognition(recognition);
+	    Context aCtx = new Context(this, env.getDispatcher(), env.getEventDispatcher(), addonSpec, viewController);
+	    aCtx.setCardRecognition(env.getRecognition());
 	    aCtx.setCardStateMap(cardStates);
 	    aCtx.setEventHandle(eventHandler);
 	    aCtx.setUserConsent(userConsent);
@@ -356,9 +349,9 @@ public class AddonManager {
 	    cache.addAppExtensionAction(addonSpec, actionId, protoFactory);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
-	    logger.error("Initialization of AppExtensionAction failed", e);
+	    LOG.error("Initialization of AppExtensionAction failed", e);
 	} catch (AddonException ex) {
-	    logger.error("Failed to download Add-on.", ex);
+	    LOG.error("Failed to download Add-on.", ex);
 	}
 	return null;
     }
@@ -384,8 +377,8 @@ public class AddonManager {
 	try {
 	    ClassLoader cl = registry.downloadAddon(addonSpec);
 	    AppPluginActionProxy protoFactory = new AppPluginActionProxy(className, cl);
-	    Context aCtx = new Context(this, dispatcher, eventManager, addonSpec, viewController);
-	    aCtx.setCardRecognition(recognition);
+	    Context aCtx = new Context(this, env.getDispatcher(), env.getEventDispatcher(), addonSpec, viewController);
+	    aCtx.setCardRecognition(env.getRecognition());
 	    aCtx.setCardStateMap(cardStates);
 	    aCtx.setEventHandle(eventHandler);
 	    aCtx.setUserConsent(userConsent);
@@ -393,9 +386,9 @@ public class AddonManager {
 	    cache.addAppPluginAction(addonSpec, resourceName, protoFactory);
 	    return protoFactory;
 	} catch (ActionInitializationException e) {
-	    logger.error("Initialization of AppPluginAction failed", e);
+	    LOG.error("Initialization of AppPluginAction failed", e);
 	} catch (AddonException ex) {
-	    logger.error("Failed to download Add-on.", ex);
+	    LOG.error("Failed to download Add-on.", ex);
 	}
 	return null;
     }

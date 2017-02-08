@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,6 +29,7 @@ import static org.testng.Assert.*;
 /**
  *
  * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public class StringUtilsTest {
 
@@ -47,6 +48,24 @@ public class StringUtilsTest {
 	array = StringUtils.toByteArray(hex, false);
 	expected = new byte[] { 0x00, 0x11, 0x22, 0x33 };
 	assertEquals(expected, array);
+    }
+
+    @Test
+    public void testNullFunctions() {
+	assertTrue(StringUtils.isNullOrEmpty(""));
+	assertTrue(StringUtils.isNullOrEmpty(null));
+	assertFalse(StringUtils.isNullOrEmpty(" "));
+	assertFalse(StringUtils.isNullOrEmpty("foo"));
+
+	assertNull(StringUtils.emptyToNull(""));
+	assertNull(StringUtils.emptyToNull(null));
+	assertEquals(StringUtils.emptyToNull(" "), " ");
+	assertEquals(StringUtils.emptyToNull("foo"), "foo");
+
+	assertEquals(StringUtils.nullToEmpty(null), "");
+	assertEquals(StringUtils.nullToEmpty(""), "");
+	assertEquals(StringUtils.nullToEmpty(" "), " ");
+	assertEquals(StringUtils.nullToEmpty("foo"), "foo");
     }
 
 }

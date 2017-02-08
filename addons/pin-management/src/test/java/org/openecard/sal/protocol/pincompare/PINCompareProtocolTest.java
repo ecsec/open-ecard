@@ -27,6 +27,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
+import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
@@ -51,7 +52,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.addon.AddonManager;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
-import org.openecard.common.enums.EventType;
+import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.anytype.PINCompareMarkerType;
 import org.openecard.common.sal.state.CardStateMap;
@@ -62,9 +63,11 @@ import org.openecard.gui.UserConsent;
 import org.openecard.gui.swing.SwingDialogWrapper;
 import org.openecard.gui.swing.SwingUserConsent;
 import org.openecard.ifd.scio.IFD;
-import org.openecard.recognition.CardRecognition;
+import org.openecard.recognition.CardRecognitionImpl;
 import org.openecard.sal.TinySAL;
-import org.openecard.sal.protocol.pincompare.anytype.PINCompareDIDAuthenticateInputType;
+import org.openecard.common.anytype.pin.PINCompareDIDAuthenticateInputType;
+import org.openecard.common.event.IfdEventObject;
+import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
@@ -102,31 +105,42 @@ public class PINCompareProtocolTest {
 	states = new CardStateMap();
 
 	EstablishContextResponse ecr = env.getIFD().establishContext(new EstablishContext());
-	CardRecognition cr = new CardRecognition(ifd, ecr.getContextHandle());
+	final CardRecognitionImpl cr = new CardRecognitionImpl(env);
 	ListIFDs listIFDs = new ListIFDs();
+	CIFProvider cp = new CIFProvider() {
+	    @Override
+	    public CardInfoType getCardInfo(ConnectionHandleType type, String cardType) {
+		return cr.getCardInfo(cardType);
+	    }
+	    @Override
+	    public boolean needsRecognition(byte[] atr) {
+		return true;
+	    }
+	};
+	env.setCIFProvider(cp);
 
 	listIFDs.setContextHandle(ecr.getContextHandle());
 	ListIFDsResponse listIFDsResponse = ifd.listIFDs(listIFDs);
-	RecognitionInfo recognitionInfo = cr.recognizeCard(listIFDsResponse.getIFDName().get(0), new BigInteger("0"));
-	SALStateCallback salCallback = new SALStateCallback(cr, states);
+	RecognitionInfo recognitionInfo = cr.recognizeCard(ecr.getContextHandle(), listIFDsResponse.getIFDName().get(0), BigInteger.ZERO);
+	SALStateCallback salCallback = new SALStateCallback(env, states);
 	Connect c = new Connect();
 	c.setContextHandle(ecr.getContextHandle());
 	c.setIFDName(listIFDsResponse.getIFDName().get(0));
-	c.setSlot(new BigInteger("0"));
+	c.setSlot(BigInteger.ZERO);
 	ConnectResponse connectResponse = env.getIFD().connect(c);
 
 	ConnectionHandleType connectionHandleType = new ConnectionHandleType();
 	connectionHandleType.setContextHandle(ecr.getContextHandle());
 	connectionHandleType.setRecognitionInfo(recognitionInfo);
 	connectionHandleType.setIFDName(listIFDsResponse.getIFDName().get(0));
-	connectionHandleType.setSlotIndex(new BigInteger("0"));
+	connectionHandleType.setSlotIndex(BigInteger.ZERO);
 	connectionHandleType.setSlotHandle(connectResponse.getSlotHandle());
-	salCallback.signalEvent(EventType.CARD_RECOGNIZED, connectionHandleType);
+	salCallback.signalEvent(EventType.CARD_RECOGNIZED, new IfdEventObject(connectionHandleType));
 	instance = new TinySAL(env, states);
 
 	// init AddonManager
 	UserConsent uc = new SwingUserConsent(new SwingDialogWrapper());
-	AddonManager manager = new AddonManager(d, uc, states, cr, null, null);
+	AddonManager manager = new AddonManager(env, uc, states, null);
 	instance.setAddonManager(manager);
     }
 

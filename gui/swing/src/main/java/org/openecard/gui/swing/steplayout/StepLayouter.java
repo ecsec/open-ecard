@@ -49,14 +49,19 @@ public abstract class StepLayouter {
     public static StepLayouter create(List<InputInfoUnit> infoUnits, String dialogType, String stepName) {
 	StepLayouter layouter = null;
 
-	// select method to create components
-	// it is even possible to use different layouters for the individual steps (see stepName)
-	if (dialogType.equals("somefancy dialog type like nPa-eID")) {
-	    // TODO: create and return
-	}
+//	// select method to create components
+//	// it is even possible to use different layouters for the individual steps (see stepName)
+//	if (dialogType.equals("somefancy dialog type like nPa-eID")) {
+//	    // TODO: create and return
+//	}
+//
+//	if (stepName.equals("some step with special layout needs")) {
+//	    // TODO: create and return
+//	}
 
-	if (stepName.equals("some step with special layout needs")) {
-	    // TODO: create and return
+	// chipgateway PIN or Update dialog
+	if (dialogType.equals("pin_entry_dialog") || dialogType.equals("pin_change_dialog") || dialogType.equals("update_dialog")) {
+	    layouter = new PinEntryStepLayouter(infoUnits, stepName);
 	}
 
 	// default type if nothing happened so far

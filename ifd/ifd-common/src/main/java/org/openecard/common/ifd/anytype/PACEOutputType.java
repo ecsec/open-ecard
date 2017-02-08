@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,7 +22,6 @@
 
 package org.openecard.common.ifd.anytype;
 
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.anytype.AuthDataResponse;
 import org.openecard.common.util.ByteUtils;
@@ -108,8 +107,9 @@ public class PACEOutputType {
      *
      * @return DIDAuthenticationDataType
      */
-    public DIDAuthenticationDataType getAuthDataType() {
-	AuthDataResponse authResponse = authMap.createResponse(new iso.std.iso_iec._24727.tech.schema.PACEOutputType());
+    public iso.std.iso_iec._24727.tech.schema.PACEOutputType getAuthDataType() {
+	AuthDataResponse<iso.std.iso_iec._24727.tech.schema.PACEOutputType> authResponse;
+	authResponse = authMap.createResponse(new iso.std.iso_iec._24727.tech.schema.PACEOutputType());
 	authResponse.addElement(RETRY_COUNTER, String.valueOf(retryCounter));
 	authResponse.addElement(EF_CARD_ACCESS, ByteUtils.toHexString(efCardAccess));
 	if (currentCAR != null) {

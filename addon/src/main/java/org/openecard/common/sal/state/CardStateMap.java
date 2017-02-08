@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CardStateMap {
 
-    private static final Logger _logger = LoggerFactory.getLogger(CardStateMap.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CardStateMap.class);
 
     private final TreeSet<CardStateEntry> allEntries = new TreeSet<>();
     private final ConcurrentSkipListMap<String,Set<CardStateEntry>> sessionMap = new ConcurrentSkipListMap<>();
@@ -58,13 +58,15 @@ public class CardStateMap {
     }
     public synchronized CardStateEntry getEntry(ConnectionHandleType handle, boolean filterAppId) {
 	Set<CardStateEntry> entry = getMatchingEntries(handle, filterAppId);
-	int size = entry.size();
-	if (size == 1) {
-	    return entry.iterator().next();
-	} else if (size == 0) {
-	    _logger.warn("No state entry found for the given ConnectionHandle.");
-	} else {
-	    _logger.warn("More than one state entry found for the given ConnectionHandle.");
+	switch (entry.size()) {
+	    case 1:
+		return entry.iterator().next();
+	    case 0:
+		LOG.warn("No state entry found for the given ConnectionHandle.");
+		break;
+	    default:
+		LOG.warn("More than one state entry found for the given ConnectionHandle.");
+		break;
 	}
 	return null;
     }

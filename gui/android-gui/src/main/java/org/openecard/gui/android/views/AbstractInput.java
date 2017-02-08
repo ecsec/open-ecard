@@ -79,7 +79,7 @@ public class AbstractInput implements StepView {
 	    et.setFilters(FilterArray);
 	}
 	if (input.getValue() != null) {
-	    et.setText(input.getValue());
+	    et.setText(new String(input.getValue()));
 	}
 	tbl = new TableLayout(ctx);
 	TableRow tbr = new TableRow(ctx);
@@ -130,7 +130,7 @@ public class AbstractInput implements StepView {
 	    textValue = this.et.getText().toString();
 	}
 
-	result.setValue(textValue);
+	result.setValue(textValue.toCharArray());
 	return result;
     }
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -676,7 +676,7 @@ public class CardCommandAPDU extends CardAPDU {
 		t = makeTransmit(slotHandle);
 	    }
 
-	    tr = (TransmitResponse) dispatcher.deliver(t);
+	    tr = (TransmitResponse) dispatcher.safeDeliver(t);
 	    WSHelper.checkResult(tr);
 	    CardResponseAPDU responseAPDU = new CardResponseAPDU(tr);
 

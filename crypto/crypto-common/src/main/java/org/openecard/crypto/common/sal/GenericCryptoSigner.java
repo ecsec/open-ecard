@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2015 ecsec GmbH.
+ * Copyright (C) 2013-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,7 @@
 
 package org.openecard.crypto.common.sal;
 
+import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
@@ -35,7 +36,6 @@ import iso.std.iso_iec._24727.tech.schema.SignResponse;
 import iso.std.iso_iec._24727.tech.schema.TargetNameType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -43,7 +43,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.HashAlgorithm;
@@ -53,7 +52,6 @@ import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.util.SALFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +66,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GenericCryptoSigner {
 
-    private static final Logger logger = LoggerFactory.getLogger(GenericCryptoSigner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GenericCryptoSigner.class);
 
     private final Dispatcher dispatcher;
     private final SALFileUtils fileUtils;
@@ -211,24 +209,24 @@ public class GenericCryptoSigner {
     }
 
     public String getAlgorithm() {
-        String algorithm = null;
+	String algorithm = null;
 
-        try {
-            DIDGet didGet = new DIDGet();
-            didGet.setConnectionHandle(handle);
-            didGet.setDIDName(didName);
-            DIDGetResponse didGetResponse = (DIDGetResponse) dispatcher.deliver(didGet);
-            WSHelper.checkResult(didGetResponse);
-            CryptoMarkerType cryptoMarker = new CryptoMarkerType(didGetResponse.getDIDStructure().getDIDMarker());
+	try {
+	    DIDGet didGet = new DIDGet();
+	    didGet.setConnectionHandle(handle);
+	    didGet.setDIDName(didName);
+	    DIDGetResponse didGetResponse = (DIDGetResponse) dispatcher.safeDeliver(didGet);
+	    WSHelper.checkResult(didGetResponse);
+	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didGetResponse.getDIDStructure().getDIDMarker());
 
-            algorithm = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
-        } catch (WSException | DispatcherException | InvocationTargetException ex) {
-            logger.error("Error getting algorithm.", ex);
-        }
+	    algorithm = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
+	} catch (WSException ex) {
+	    LOG.error("Error getting algorithm.", ex);
+	}
 
-        return algorithm;
+	return algorithm;
     }
-    
+
     /**
      * Signs the given hash with the DID represented by this instance.
      *
@@ -252,27 +250,21 @@ public class GenericCryptoSigner {
 	    sign.setDIDName(didName);
 	    sign.setDIDScope(DIDScopeType.LOCAL);
 	    sign.setConnectionHandle(handle);
-	    SignResponse res = (SignResponse) dispatcher.deliver(sign);
+	    SignResponse res = (SignResponse) dispatcher.safeDeliver(sign);
 	    WSHelper.checkResult(res);
 
 	    byte[] sig = res.getSignature();
 	    if (sig == null) {
-		logger.error("Failed to create signature for TLS connection.");
+		LOG.error("Failed to create signature for TLS connection.");
 		return new byte[] {};
 	    } else {
 		return sig;
 	    }
-	} catch (InvocationTargetException e) {
-	    logger.error("Signature generation failed.", e);
-	    throw new SignatureException(e);
-	} catch (DispatcherException e) {
-	   logger.error("Signature generation failed.", e);
-	    throw new SignatureException(e);
 	} catch (WSException e) {
-	    logger.error("Signature generation failed.", e);
+	    LOG.error("Signature generation failed.", e);
 	    throw new SignatureException(e);
 	} catch (SecurityConditionUnsatisfiable e) {
-	    logger.error("Signature generation failed.", e);
+	    LOG.error("Signature generation failed.", e);
 	    throw new CredentialPermissionDenied(e);
 	}
     }
@@ -298,8 +290,7 @@ public class GenericCryptoSigner {
 	}
     }
 
-    private void performMissingAuthentication(TargetNameType target) throws DispatcherException, WSException,
-	    InvocationTargetException, SecurityConditionUnsatisfiable {
+    private void performMissingAuthentication(TargetNameType target) throws WSException, SecurityConditionUnsatisfiable {
 	// get unauthenticated DID
 	ACLResolver resolver = new ACLResolver(dispatcher, handle);
 	List<DIDStructureType> missingDIDs = resolver.getUnsatisfiedDIDs(target);
@@ -317,7 +308,7 @@ public class GenericCryptoSigner {
 	    // however it does work for PIN Compare, which seems enough so far
 	    req.setAuthenticationProtocolData(authData);
 
-	    DIDAuthenticateResponse res = (DIDAuthenticateResponse) dispatcher.deliver(req);
+	    DIDAuthenticateResponse res = (DIDAuthenticateResponse) dispatcher.safeDeliver(req);
 	    WSHelper.checkResult(res);
 	}
     }
@@ -329,7 +320,7 @@ public class GenericCryptoSigner {
 	    didGet.setConnectionHandle(handle);
 	    didGet.setDIDName(didName);
 	    didGet.setDIDScope(DIDScopeType.LOCAL);
-	    DIDGetResponse response = (DIDGetResponse) dispatcher.deliver(didGet);
+	    DIDGetResponse response = (DIDGetResponse) dispatcher.safeDeliver(didGet);
 	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(response.getDIDStructure().getDIDMarker());
 	    String algorithm = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
 	    sigAndHash = AlgorithmResolver.getSignatureAndHashFromAlgorithm(algorithm);
@@ -337,12 +328,8 @@ public class GenericCryptoSigner {
 	    if (sigAndHash == null) {
 		throw new IllegalArgumentException("Illegal oid for the signature algorithm.");
 	    }
-	} catch (DispatcherException ex) {
-	    logger.error("Failed to get DID for DIDName: {}.", didName, ex);
-	} catch (InvocationTargetException ex) {
-	    logger.error("Failed to get DID for DIDName: {}.", didName, ex);
 	} catch (IllegalArgumentException ex) {
-	    logger.error("Failed to find a valid SignatureAndHashAlgorithm object for the OID used in the CryptoMarker "
+	    LOG.error("Failed to find a valid SignatureAndHashAlgorithm object for the OID used in the CryptoMarker "
 		    + "of the DID with the DIDName: {}.", didName, ex);
 	}
 

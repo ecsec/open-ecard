@@ -80,7 +80,7 @@ public final class StepBar extends JPanel {
      */
     public void updateStepBar(List<Step> steps) {
 	this.steps = steps;
-	this.labels = new ArrayList<JLabel>(steps.size());
+	this.labels = new ArrayList<>(steps.size());
 	removeAll();
 	initializeLayout();
 	initializeComponents();
@@ -155,7 +155,7 @@ public final class StepBar extends JPanel {
     }
 
     private static String[] getStepNames(List<Step> steps) {
-	ArrayList<String> stepNames = new ArrayList<String>(steps.size());
+	ArrayList<String> stepNames = new ArrayList<>(steps.size());
 	for (Step s : steps) {
 	    stepNames.add(s.getTitle());
 	}

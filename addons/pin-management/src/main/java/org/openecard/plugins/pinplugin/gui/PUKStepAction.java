@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,7 +26,6 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.common.ECardConstants;
@@ -36,7 +35,6 @@ import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.anytype.AuthDataResponse;
 import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
@@ -55,7 +53,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PUKStepAction extends StepAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(PUKStepAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PUKStepAction.class);
 
     private static final String PIN_ID_PUK = "4";
 
@@ -92,7 +90,7 @@ public class PUKStepAction extends StepAction {
 	try {
 	    tmp = new AuthDataMap(paceInput);
 	} catch (ParserConfigurationException ex) {
-	    logger.error("Failed to read empty Protocol data.", ex);
+	    LOG.error("Failed to read empty Protocol data.", ex);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
 
@@ -118,33 +116,19 @@ public class PUKStepAction extends StepAction {
 	establishChannel.getAuthenticationProtocolData().setProtocol(ECardConstants.Protocol.PACE);
 
 	try {
-	    EstablishChannelResponse establishChannelResponse = (EstablishChannelResponse) dispatcher.deliver(establishChannel);
+	    EstablishChannelResponse establishChannelResponse = (EstablishChannelResponse) dispatcher.safeDeliver(establishChannel);
 	    WSHelper.checkResult(establishChannelResponse);
 
 	    // pace was successfully performed, so get to the next step
 	    return new StepActionResult(StepActionResultStatus.NEXT);
 	} catch (WSException ex) {
-	    logger.info("Wrong PUK entered, trying again");
+	    LOG.info("Wrong PUK entered, trying again");
 	    //TODO update the step to inform the user that he entered the puk wrong
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
-	} catch (InvocationTargetException ex) {
-	    logger.error("Exception while dispatching EstablishChannelCommand.", ex);
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
-	} catch (DispatcherException ex) {
-	    logger.error("Failed to dispatch EstablishChannelCommand.", ex);
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	} finally {
 	    DestroyChannel destroyChannel = new DestroyChannel();
 	    destroyChannel.setSlotHandle(slotHandle);
-	    try {
-		dispatcher.deliver(destroyChannel);
-	    } catch (InvocationTargetException ex) {
-		logger.error("Exception while dispatching DestroyChannelCommand.", ex);
-		return new StepActionResult(StepActionResultStatus.CANCEL);
-	    } catch (DispatcherException ex) {
-		logger.error("Failed to dispatch DestroyChannelCommand.", ex);
-		return new StepActionResult(StepActionResultStatus.CANCEL);
-	    }
+	    dispatcher.safeDeliver(destroyChannel);
 	}
     }
 
@@ -159,12 +143,8 @@ public class PUKStepAction extends StepAction {
 
 	PasswordField pukField = (PasswordField) executionResults.getResult(UnblockPINDialog.PUK_FIELD);
 
-	puk = pukField.getValue();
-	if (puk.isEmpty()) {
-	    return false;
-	}
-
-	return true;
+	puk = new String(pukField.getValue());
+	return ! puk.isEmpty();
     }
 
 }

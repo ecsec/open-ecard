@@ -46,7 +46,7 @@ public interface SCIOChannel {
 
     /**
      * Gets the channel number of this channel.
-     * The basic channel has number 0, all logical channels have postive values.
+     * The basic channel has number 0, all logical channels have positive values.
      * <p>Contrary to the implementation of the Java Smartcard IO, this method does not throw an
      * {@link IllegalStateException} when the card is not connected.</p>
      *

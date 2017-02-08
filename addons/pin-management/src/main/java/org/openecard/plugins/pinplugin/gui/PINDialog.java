@@ -30,6 +30,7 @@ import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
 import org.openecard.plugins.pinplugin.RecognizedState;
 
+
 /**
  *
  * @author Hans-Martin Haase
@@ -61,7 +62,7 @@ public class PINDialog {
     }
 
     private UserConsentDescription createUserConsentDescription() {
-	UserConsentDescription uc = new UserConsentDescription("PIN Operation");
+	UserConsentDescription uc = new UserConsentDescription("PIN Operation", "pin_entry_dialog");
 	GenericPINStep gPINStep = new GenericPINStep("GenericPINStepID", "GenericPINStep", capturePin, state);
 	gPINStep.setAction(new GenericPINAction("PIN Management", state, conHandle, dispatcher, gPINStep, capturePin));
 	uc.getSteps().add(gPINStep);

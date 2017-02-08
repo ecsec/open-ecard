@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>app</artifactId>
-		<version>1.2.4</version>
+		<version>1.3.0</version>
 	</parent>
 
 	<groupId>org.openecard</groupId>
@@ -27,9 +27,11 @@
 			<id>android</id>
 			<activation>
 				<!-- activate android when sdk path is defined -->
+				<!--
 				<property>
 					<name>env.ANDROID_HOME</name>
 				</property>
+				-->
 			</activation>
 			<modules>
 				<module>android-gui</module>

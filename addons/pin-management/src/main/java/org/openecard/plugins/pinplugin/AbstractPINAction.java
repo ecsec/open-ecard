@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 HS Coburg.
+ * Copyright (C) 2012-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -33,7 +33,6 @@ import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
 import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,14 +42,13 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.ifd.PACECapabilities;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
 import org.openecard.common.sal.util.InsertCardDialog;
+import org.openecard.common.interfaces.CardRecognition;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.gui.UserConsent;
-import org.openecard.recognition.CardRecognition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,11 +63,11 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 
     // translation and logger
     protected final I18n lang = I18n.getTranslation("pinplugin");
-    private static final Logger logger = LoggerFactory.getLogger(AbstractPINAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractPINAction.class);
 
     // constants
     protected static final String GERMAN_IDENTITY_CARD = "http://bsi.bund.de/cif/npa.xml";
-    private static final byte[] recognizeCommandAPDU = StringUtils.toByteArray("0022C1A40F800A04007F00070202040202830103");
+    private static final byte[] RECOGNIZE_APDU = StringUtils.toByteArray("0022C1A40F800A04007F00070202040202830103");
     private static final byte[] RESPONSE_RC3 = new byte[] { (byte) 0x90, 0x00 };
     private static final byte[] RESPONSE_BLOCKED = new byte[] { (byte) 0x63, (byte) 0xC0 };
     private static final byte[] RESPONSE_SUSPENDED = new byte[] { (byte) 0x63, (byte) 0xC1 };
@@ -80,26 +78,22 @@ public abstract class AbstractPINAction implements AppExtensionAction {
     protected UserConsent gui;
     protected CardRecognition recognition;
     protected CardStateMap cardStates;
-    protected EventManager manager;
+    protected EventDispatcher evDispatcher;
 
     /**
      * Recognize the PIN state of the card given through the connection handle.
      * 
-     * @param cHandle
-     *            The connection handle for the card for which the pin state should be recognized.
+     * @param cHandle The connection handle for the card for which the pin state should be recognized.
      * @return The recognized State (may be {@code RecognizedState.UNKNOWN}).
-     * @throws InvocationTargetException In case the dispatched method throws an exception.
-     * @throws DispatcherException In case a reflection error in the dispatcher occurs.
      */
-    protected RecognizedState recognizeState(ConnectionHandleType cHandle) throws InvocationTargetException,
-	    DispatcherException {
+    protected RecognizedState recognizeState(ConnectionHandleType cHandle) {
 
 	Transmit t = new Transmit();
 	t.setSlotHandle(cHandle.getSlotHandle());
 	InputAPDUInfoType inputAPDU = new InputAPDUInfoType();
-	inputAPDU.setInputAPDU(recognizeCommandAPDU);
+	inputAPDU.setInputAPDU(RECOGNIZE_APDU);
 	t.getInputAPDUInfo().add(inputAPDU);
-	TransmitResponse response = (TransmitResponse) dispatcher.deliver(t);
+	TransmitResponse response = (TransmitResponse) dispatcher.safeDeliver(t);
 
 	byte[] responseAPDU = response.getOutputAPDU().get(0);
 
@@ -115,11 +109,11 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 	} else if (ByteUtils.compare(RESPONSE_BLOCKED, responseAPDU)) {
 	    state = RecognizedState.PIN_blocked;
 	} else {
-	    logger.error("Unhandled response to the PIN state recognition APDU: {}\n");
+	    LOG.error("Unhandled response to the PIN state recognition APDU: {}\n");
 	    state = RecognizedState.UNKNOWN;
 	}
 
-	logger.info("State of the PIN: {}.", state);
+	LOG.info("State of the PIN: {}.", state);
 	return state;
     }
 
@@ -133,7 +127,7 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 	String cardName = recognition.getTranslatedCardName(cardType);
 	Map<String, String> nameAndType = new HashMap<>();
 	nameAndType.put(cardName, cardType);
-	InsertCardDialog uc = new InsertCardDialog(gui, cardStates, nameAndType, manager);
+	InsertCardDialog uc = new InsertCardDialog(gui, cardStates, nameAndType, evDispatcher);
 	// get(0) should be sufficient we a looking just for one card. i think the possibility to find 2 is very low.
 	return uc.show().get(0);
     }
@@ -145,23 +139,20 @@ public abstract class AbstractPINAction implements AppExtensionAction {
      * @param cHandle
      *            The connection handle for the card to connect to root application.
      * @return The updated connection handle (now including a SlotHandle) or null if connecting went wrong.
-     * @throws InvocationTargetException In case the dispatched method throws an exception.
-     * @throws DispatcherException In case a reflection error in the dispatcher occurs.
      */
-    protected ConnectionHandleType connectToRootApplication(ConnectionHandleType cHandle)
-	throws InvocationTargetException, DispatcherException {
+    protected ConnectionHandleType connectToRootApplication(ConnectionHandleType cHandle) {
 
 	// Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	cardApplicationPath.setCardAppPathRequest(cHandle);
 	CardApplicationPathResponse cardApplicationPathResponse = 
-		(CardApplicationPathResponse) dispatcher.deliver(cardApplicationPath);
+		(CardApplicationPathResponse) dispatcher.safeDeliver(cardApplicationPath);
 
 	// Check CardApplicationPathResponse
 	try {
 	    WSHelper.checkResult(cardApplicationPathResponse);
 	} catch (WSException ex) {
-	    logger.error("CardApplicationPath failed.", ex);
+	    LOG.error("CardApplicationPath failed.", ex);
 	    return null;
 	}
 
@@ -169,13 +160,13 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 	cardApplicationConnect.setCardApplicationPath(
 		cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
 	CardApplicationConnectResponse cardApplicationConnectResponse = 
-		(CardApplicationConnectResponse) dispatcher.deliver(cardApplicationConnect);
+		(CardApplicationConnectResponse) dispatcher.safeDeliver(cardApplicationConnect);
 
 	// Check CardApplicationConnectResponse
 	try {
 	    WSHelper.checkResult(cardApplicationConnectResponse);
 	} catch (WSException ex) {
-	    logger.error("CardApplicationConnect failed.", ex);
+	    LOG.error("CardApplicationConnect failed.", ex);
 	    return null;
 	}
 
@@ -191,17 +182,14 @@ public abstract class AbstractPINAction implements AppExtensionAction {
      *
      * @param connectionHandle Handle describing the IFD and reader.
      * @return true when card reader supports genericPACE, false otherwise.
-     * @throws InvocationTargetException In case the dispatched method throws an exception.
-     * @throws DispatcherException In case a reflection error in the dispatcher occurs.
      * @throws WSException In case request for the terminal capabilities returned an error.
      */
-    protected boolean genericPACESupport(ConnectionHandleType connectionHandle) throws InvocationTargetException,
-	    DispatcherException, WSException {
+    protected boolean genericPACESupport(ConnectionHandleType connectionHandle) throws WSException {
 	// Request terminal capabilities
 	GetIFDCapabilities capabilitiesRequest = new GetIFDCapabilities();
 	capabilitiesRequest.setContextHandle(connectionHandle.getContextHandle());
 	capabilitiesRequest.setIFDName(connectionHandle.getIFDName());
-	GetIFDCapabilitiesResponse capabilitiesResponse = (GetIFDCapabilitiesResponse) dispatcher.deliver(capabilitiesRequest);
+	GetIFDCapabilitiesResponse capabilitiesResponse = (GetIFDCapabilitiesResponse) dispatcher.safeDeliver(capabilitiesRequest);
 	WSHelper.checkResult(capabilitiesResponse);
 
 	if (capabilitiesResponse.getIFDCapabilities() != null) {

@@ -24,7 +24,7 @@ package org.openecard.recognition;
 
 import java.io.IOException;
 import java.util.Properties;
-import org.openecard.common.OverridingProperties;
+import org.openecard.ws.common.OverridingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

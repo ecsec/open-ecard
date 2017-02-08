@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2015 HS Coburg.
+ * Copyright (C) 2013-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,6 +29,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nonnull;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.AddonSelector;
@@ -36,8 +37,11 @@ import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
+import org.openecard.addon.bind.Headers;
 import org.openecard.addon.bind.RequestBody;
 import org.openecard.addon.bind.ResponseBody;
+import org.openecard.apache.http.Header;
+import org.openecard.apache.http.HeaderIterator;
 import org.openecard.apache.http.HttpEntity;
 import org.openecard.apache.http.HttpEntityEnclosingRequest;
 import org.openecard.apache.http.HttpException;
@@ -53,9 +57,6 @@ import org.openecard.common.util.HttpRequestLineUtils;
 import org.openecard.control.binding.http.common.DocumentRoot;
 import org.openecard.control.binding.http.common.HeaderTypes;
 import org.openecard.control.binding.http.common.Http11Response;
-import org.openecard.control.binding.http.handler.common.DefaultHandler;
-import org.openecard.control.binding.http.handler.common.FileHandler;
-import org.openecard.control.binding.http.handler.common.IndexHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +68,9 @@ import org.slf4j.LoggerFactory;
  */
 public class HttpAppPluginActionHandler extends HttpControlHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(HttpAppPluginActionHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpAppPluginActionHandler.class);
+
+    public static final String METHOD_HDR = "X-OeC-Method";
 
     private final AddonManager addonManager;
     private final AddonSelector selector;
@@ -82,7 +85,18 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
     @Override
     public void handle(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext context) throws HttpException,
 	    IOException {
-	logger.debug("HTTP request: {}", httpRequest.toString());
+	LOG.debug("HTTP request: {}", httpRequest.toString());
+
+	CORSFilter corsFilter = new CORSFilter();
+	HttpResponse corsResp = corsFilter.preProcess(httpRequest, context);
+	if (corsResp != null) {
+	    // CORS Response created, return it to the caller
+	    // This is either a preflight response, or a block, because the Origin mismatched
+	    LOG.debug("HTTP response: {}", corsResp);
+	    Http11Response.copyHttpResponse(corsResp, httpResponse);
+	    return;
+	}
+
 	// deconstruct request uri
 	String uri = httpRequest.getRequestLine().getUri();
 	URI requestURI = URI.create(uri);
@@ -103,17 +117,27 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 		if (rawQuery != null) {
 		    queries = HttpRequestLineUtils.transform(rawQuery);
 		}
+
 		RequestBody body = null;
 		if (httpRequest instanceof HttpEntityEnclosingRequest) {
-		    logger.debug("Request contains an entity.");
+		    LOG.debug("Request contains an entity.");
 		    body = getRequestBody(httpRequest, resourceName);
 		}
-		BindingResult bindingResult = action.execute(body, queries, null);
+
+		Headers headers = readReqHeaders(httpRequest);
+		// and add some special values to the header section
+		headers.setHeader(METHOD_HDR, httpRequest.getRequestLine().getMethod());
+
+		BindingResult bindingResult = action.execute(body, queries, headers, null);
+
 		response = createHTTPResponseFromBindingResult(bindingResult);
 	    }
 	    response.setParams(httpRequest.getParams());
-	    logger.debug("HTTP response: {}", response);
+	    LOG.debug("HTTP response: {}", response);
 	    Http11Response.copyHttpResponse(response, httpResponse);
+
+	    // CORS post processing
+	    corsFilter.postProcess(httpRequest, httpResponse, context);
 	} catch (AddonNotFoundException ex) {
 	    if (path.equals("/")) {
 		new IndexHandler().handle(httpRequest, httpResponse, context);
@@ -126,10 +150,45 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
     }
 
 
+    private Headers readReqHeaders(HttpRequest httpRequest) {
+	Headers headers = new Headers();
+
+	// loop over all headers in the request
+	HeaderIterator it = httpRequest.headerIterator();
+	while (it.hasNext()) {
+	    Header next = it.nextHeader();
+	    String name = next.getName();
+	    String value = next.getValue();
+
+	    if (isMultiValueHeaderType(name)) {
+		for (String part : value.split(",")) {
+		    headers.addHeader(name, part.trim());
+		}
+	    } else {
+		headers.addHeader(name, value);
+	    }
+	}
+
+	return headers;
+    }
+
+    private boolean isMultiValueHeaderType(@Nonnull String name) {
+	// TODO: add further header types
+	switch (name) {
+	    case "Accept":
+	    case "Accept-Language":
+	    case "Accept-Encoding":
+		return true;
+	    default:
+		return false;
+	}
+    }
+
+
     private void addHTTPEntity(HttpResponse response, BindingResult bindingResult) {
 	ResponseBody responseBody = bindingResult.getBody();
 	if (responseBody != null && responseBody.hasValue()) {
-	    logger.debug("BindingResult contains a body.");
+	    LOG.debug("BindingResult contains a body.");
 	    // determine content type
 	    ContentType ct = ContentType.create(responseBody.getMimeType(), Charset.forName("UTF-8"));
 	    StringEntity entity = new StringEntity(responseBody.getValue(), ct);
@@ -139,7 +198,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 		response.setHeader("Content-Transfer-Encoding", "Base64");
 	    }
 	} else {
-	    logger.debug("BindingResult contains no body.");
+	    LOG.debug("BindingResult contains no body.");
 	    if (bindingResult.getResultMessage() != null) {
 		ContentType ct = ContentType.create("text/plain", Charset.forName("UTF-8"));
 		StringEntity entity = new StringEntity(bindingResult.getResultMessage(), ct);
@@ -150,7 +209,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 
     private HttpResponse createHTTPResponseFromBindingResult(BindingResult bindingResult) {
 	BindingResultCode resultCode = bindingResult.getResultCode();
-	logger.debug("Recieved BindingResult with ResultCode {}", resultCode);
+	LOG.debug("Recieved BindingResult with ResultCode {}", resultCode);
 	HttpResponse response;
 	switch (resultCode) {
 	    case OK:
@@ -163,7 +222,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 		    response.addHeader(HeaderTypes.LOCATION.fieldName(), location);
 		} else {
 		    // redirect requires a location field
-		    logger.error("No redirect address available in given BindingResult instance.");
+		    LOG.error("No redirect address available in given BindingResult instance.");
 		    response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 		}
 		break;
@@ -189,7 +248,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 		response = new Http11Response(429);
 		break;
 	    default:
-		logger.error("Untreated result code: " + resultCode);
+		LOG.error("Untreated result code: " + resultCode);
 		response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 	}
 
@@ -213,7 +272,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	    body.setValue(value, mimeType, base64Content);
 	    return body;
 	} catch (UnsupportedCharsetException | ParseException e) {
-	    logger.error("Failed to create request body.", e);
+	    LOG.error("Failed to create request body.", e);
 	}
 
 	return null;

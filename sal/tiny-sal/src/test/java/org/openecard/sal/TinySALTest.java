@@ -55,6 +55,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceLoad;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceLoadResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSession;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSessionResponse;
+import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
@@ -117,20 +118,21 @@ import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
 import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
-import org.openecard.common.enums.EventType;
+import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.event.IfdEventObject;
+import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.ifd.scio.IFD;
-import org.openecard.recognition.CardRecognition;
+import org.openecard.recognition.CardRecognitionImpl;
 import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.testng.Assert;
 import org.testng.SkipException;
@@ -168,13 +170,24 @@ public class TinySALTest {
 	states = new CardStateMap();
 
 	EstablishContextResponse ecr = env.getIFD().establishContext(new EstablishContext());
-	CardRecognition cr = new CardRecognition(ifd, ecr.getContextHandle());
+	final CardRecognitionImpl cr = new CardRecognitionImpl(env);
 	ListIFDs listIFDs = new ListIFDs();
 	contextHandle = ecr.getContextHandle();
 	listIFDs.setContextHandle(ecr.getContextHandle());
 	ListIFDsResponse listIFDsResponse = ifd.listIFDs(listIFDs);
-	RecognitionInfo recognitionInfo = cr.recognizeCard(listIFDsResponse.getIFDName().get(0), new BigInteger("0"));
-	SALStateCallback salCallback = new SALStateCallback(cr, states);
+	RecognitionInfo recognitionInfo = cr.recognizeCard(contextHandle, listIFDsResponse.getIFDName().get(0), BigInteger.ZERO);
+	CIFProvider cp = new CIFProvider() {
+	    @Override
+	    public CardInfoType getCardInfo(ConnectionHandleType type, String cardType) {
+		return cr.getCardInfo(cardType);
+	    }
+	    @Override
+	    public boolean needsRecognition(byte[] atr) {
+		return true;
+	    }
+	};
+	env.setCIFProvider(cp);
+	SALStateCallback salCallback = new SALStateCallback(env, states);
 
 	ConnectionHandleType connectionHandleType = new ConnectionHandleType();
 	connectionHandleType.setContextHandle(ecr.getContextHandle());
@@ -182,7 +195,7 @@ public class TinySALTest {
 	connectionHandleType.setIFDName(listIFDsResponse.getIFDName().get(0));
 	connectionHandleType.setSlotIndex(new BigInteger("0"));
 
-	salCallback.signalEvent(EventType.CARD_RECOGNIZED, connectionHandleType);
+	salCallback.signalEvent(EventType.CARD_RECOGNIZED, new IfdEventObject(connectionHandleType));
 	instance = new TinySAL(env, states);
 	env.setSAL(instance);
     }
@@ -1085,7 +1098,7 @@ public class TinySALTest {
 	dsiRead.setDSIName("EF.C.CH.AUTN");
 	dsiReadResponse = instance.dsiRead(dsiRead);
 	assertEquals(ECardConstants.Major.ERROR, dsiReadResponse.getResult().getResultMajor());
-	assertEquals(ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, dsiReadResponse.getResult().getResultMinor());
+	assertEquals(ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED, dsiReadResponse.getResult().getResultMinor());
 
 	// test invalid connectionhandle
 	dsiRead = new DSIRead();

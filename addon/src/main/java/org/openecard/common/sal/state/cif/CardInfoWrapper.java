@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 HS Coburg.
+ * Copyright (C) 2012-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -50,9 +50,8 @@ import org.openecard.common.util.ByteArrayWrapper;
 public class CardInfoWrapper {
 
     private final CardInfoType cif;
-    private Map<ByteArrayWrapper, CardApplicationWrapper> cardApplications =
-	    new HashMap<ByteArrayWrapper, CardApplicationWrapper>();
-    List<byte[]> cardApplicationNames = new ArrayList<byte[]>();
+    private final Map<ByteArrayWrapper, CardApplicationWrapper> cardApplications = new HashMap<>();
+    private final List<byte[]> cardApplicationNames = new ArrayList<>();
 
     /**
      *
@@ -60,6 +59,10 @@ public class CardInfoWrapper {
      */
     public CardInfoWrapper(CardInfoType cif) {
 	this.cif = cif;
+    }
+
+    public CardInfoWrapper(CardInfoWrapper other) {
+	this(other.cif);
     }
 
     /**

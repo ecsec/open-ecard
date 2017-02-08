@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,9 +25,11 @@ package org.openecard.common.sal.state;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import org.openecard.addon.sal.CredentialManager;
-import org.openecard.common.enums.EventType;
+import org.openecard.common.event.EventType;
+import org.openecard.common.event.IfdEventObject;
 import org.openecard.common.interfaces.EventCallback;
-import org.openecard.recognition.CardRecognition;
+import org.openecard.common.event.EventObject;
+import org.openecard.common.interfaces.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,35 +40,37 @@ import org.slf4j.LoggerFactory;
  */
 public class SALStateCallback implements EventCallback {
 
-    private static final Logger logger = LoggerFactory.getLogger(SALStateCallback.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SALStateCallback.class);
 
-    private final CardRecognition recognition;
+    private final Environment env;
     private final CredentialManager manager;
 
 
-    public SALStateCallback(CardRecognition recognition, CardStateMap cardState) {
-	this.recognition = recognition;
+    public SALStateCallback(Environment env, CardStateMap cardState) {
+	this.env = env;
 	this.manager = new CredentialManager(cardState);
     }
 
 
     @Override
-    public void signalEvent(EventType eventType, Object eventData) {
-	if (eventData instanceof ConnectionHandleType) {
-	    ConnectionHandleType handle = (ConnectionHandleType) eventData;
+    public void signalEvent(EventType eventType, EventObject eventData) {
+	if (eventData instanceof IfdEventObject) {
+	    IfdEventObject ifdEvtData = (IfdEventObject) eventData;
+	    ConnectionHandleType handle = ifdEvtData.getHandle();
 	    switch (eventType) {
 		// only add cards with a cardinfo file
 		case CARD_RECOGNIZED:
-		    logger.info("Add ConnectionHandle to SAL:\n{}", HandlePrinter.printHandle(handle));
-		    CardInfoType cif = recognition.getCardInfo(handle.getRecognitionInfo().getCardType());
+		    LOG.info("Add ConnectionHandle to SAL:\n{}", HandlePrinter.printHandle(handle));
+		    String cardType = handle.getRecognitionInfo().getCardType();
+		    CardInfoType cif = env.getCIFProvider().getCardInfo(handle, cardType);
 		    if (cif != null) {
 			manager.addCredential(handle, cif);
 		    } else {
-			logger.info("Not adding card to SAL, because it has no CardInfo file.");
+			LOG.info("Not adding card to SAL, because it has no CardInfo file.");
 		    }
 		    break;
 		case CARD_REMOVED:
-		    logger.info("Remove ConnectionHandle from SAL.\n{}", HandlePrinter.printHandle(handle));
+		    LOG.info("Remove ConnectionHandle from SAL.\n{}", HandlePrinter.printHandle(handle));
 		    manager.removeCredential(handle);
 		    break;
 		default:

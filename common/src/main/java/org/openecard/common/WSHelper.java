@@ -51,7 +51,7 @@ public class WSHelper {
 	}
     }
 
-    public static ResponseBaseType checkResult(@Nonnull ResponseBaseType response) throws WSException {
+    public static <T extends ResponseBaseType> T checkResult(@Nonnull T response) throws WSException {
 	Result r = response.getResult();
 	if (r.getResultMajor().equals(ECardConstants.Major.ERROR)) {
 	    if (response instanceof TransmitResponse) {

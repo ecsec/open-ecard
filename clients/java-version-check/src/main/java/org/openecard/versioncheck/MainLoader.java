@@ -82,8 +82,10 @@ public class MainLoader {
 	    msg(title, msg);
 	    System.exit(1);
 	} catch (InvocationTargetException ex) {
-	    System.out.println("Main method threw an exception.");
-	    // it is the duty of the actual program to kill it's threads so the program can terminate
+	    String msg = getBundle().getString("MainLoader.unhandled_error");
+	    String title = getBundle().getString("MainLoader.unhandled_error");
+	    msg(title, msg);
+	    System.exit(1);
 	}
     }
 

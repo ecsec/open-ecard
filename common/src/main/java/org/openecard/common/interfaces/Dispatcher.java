@@ -47,6 +47,17 @@ public interface Dispatcher {
     Object deliver(Object request) throws DispatcherException, InvocationTargetException;
 
     /**
+     * Invokes the service which is responsible for messages of the type of the given request object.
+     * This is a version of the {@link #deliver(Object)} method which throws unchecked instead of checked exceptions.
+     *
+     * @param request Object to dispatch to related service.
+     * @return The result of the method invocation.
+     * @throws DispatcherExceptionUnchecked In case an error happens in the reflections part of the dispatcher.
+     * @throws InvocationTargetExceptionUnchecked In case the dispatched method throws en exception.
+     */
+    Object safeDeliver(Object request) throws DispatcherExceptionUnchecked, InvocationTargetExceptionUnchecked;
+
+    /**
      * Get a list of String with the available services.
      * The format of the name depends on the name space of the service so the service name has either the prefix
      * {@code urn:iso:std:iso-iec:24727:tech:schema} or {@code http://www.bsi.bund.de/ecard/api/1.0}. A valid example

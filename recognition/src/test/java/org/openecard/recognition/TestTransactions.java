@@ -33,10 +33,13 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
 import java.math.BigInteger;
+import org.openecard.common.ClientEnv;
+import org.openecard.common.interfaces.Environment;
 import org.openecard.gui.swing.SwingDialogWrapper;
 import org.openecard.gui.swing.SwingUserConsent;
 import org.openecard.ws.IFD;
 import org.testng.annotations.Test;
+
 
 /**
  *
@@ -55,14 +58,16 @@ public class TestTransactions {
     @Test(enabled = false) // a reader with an inserted card is needed
     public void testExecute() throws Exception {
 	// set up ifd and establish context
+	Environment env = new ClientEnv();
 	final IFD ifd = new org.openecard.ifd.scio.IFD();
+	env.setIFD(ifd);
 	EstablishContext eCtx = new EstablishContext();
 	EstablishContextResponse eCtxR = ifd.establishContext(eCtx);
 	final byte[] ctx = eCtxR.getContextHandle();
 
 	// Set up GUI and card recognition
 	SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper());
-	final CardRecognition recog = new CardRecognition(ifd, ctx);
+	final CardRecognitionImpl recog = new CardRecognitionImpl(env);
 	recog.setGUI(gui);
 
 	// get the first reader
@@ -71,10 +76,10 @@ public class TestTransactions {
 	ListIFDsResponse listIFDsResponse = ifd.listIFDs(listIFDs);
 	final String ifdName = listIFDsResponse.getIFDName().get(0);
 
-	Thread t1 = new Thread(new BlockingRunnable(ifdName, ctx, ifd));
+	Thread t1 = new Thread(new BlockingRunnable(ctx, ifdName, ifd));
 	t1.start();
 
-	Thread t2 = new Thread(new RecognizeRunnable(ifdName, recog));
+	Thread t2 = new Thread(new RecognizeRunnable(ctx, ifdName, recog));
 	t2.start();
 
 	t2.join();
@@ -83,13 +88,16 @@ public class TestTransactions {
     /**
      * This runnable simply tries to recognize the card in the given ifd.
      *
-     * @author Dirk Petrautzki <petrauzki@hs-coburg.de>
+     * @author Dirk Petrautzki
      */
     private final class RecognizeRunnable implements Runnable {
-	private final String ifdName;
-	private final CardRecognition recognition;
 
-	private RecognizeRunnable(String ifdName, CardRecognition recognition) {
+	private final byte[] ctx;
+	private final String ifdName;
+	private final CardRecognitionImpl recognition;
+
+	private RecognizeRunnable(byte[] ctx, String ifdName, CardRecognitionImpl recognition) {
+	    this.ctx = ctx;
 	    this.ifdName = ifdName;
 	    this.recognition = recognition;
 	}
@@ -98,7 +106,7 @@ public class TestTransactions {
 	public void run() {
 	    try {
 		System.out.println("Thread 2 tries to recognize card.");
-		RecognitionInfo info = recognition.recognizeCard(ifdName, BigInteger.ZERO);
+		RecognitionInfo info = recognition.recognizeCard(ctx, ifdName, BigInteger.ZERO);
 		System.out.println("Thread 2 recognized: " + info.getCardType());
 	    } catch (Exception e) {
 		e.printStackTrace();
@@ -112,13 +120,13 @@ public class TestTransactions {
      * @author Dirk Petrautzki
      */
     private final class BlockingRunnable implements Runnable {
-	private final String ifdName;
 	private final byte[] ctx;
+	private final String ifdName;
 	private final IFD ifd;
 
-	private BlockingRunnable(String ifdName, byte[] ctx, IFD ifd) {
-	    this.ifdName = ifdName;
+	private BlockingRunnable(byte[] ctx, String ifdName, IFD ifd) {
 	    this.ctx = ctx;
+	    this.ifdName = ifdName;
 	    this.ifd = ifd;
 	}
 

@@ -39,11 +39,11 @@ import org.openecard.addon.EventHandler;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.common.ECardConstants;
-import org.openecard.common.Version;
+import org.openecard.common.AppVersion;
+import org.openecard.common.interfaces.CardRecognition;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
-import org.openecard.recognition.CardRecognition;
 import org.openecard.ws.schema.Status;
 import org.openecard.ws.schema.StatusType;
 import org.slf4j.Logger;
@@ -86,10 +86,10 @@ public class StatusHandler {
 
 	// user agent
 	StatusType.UserAgent ua = new StatusType.UserAgent();
-	ua.setName(Version.getName());
-	ua.setVersionMajor(BigInteger.valueOf(Version.getMajor()));
-	ua.setVersionMinor(BigInteger.valueOf(Version.getMinor()));
-	ua.setVersionSubminor(BigInteger.valueOf(Version.getPatch()));
+	ua.setName(AppVersion.getName());
+	ua.setVersionMajor(BigInteger.valueOf(AppVersion.getMajor()));
+	ua.setVersionMinor(BigInteger.valueOf(AppVersion.getMinor()));
+	ua.setVersionSubminor(BigInteger.valueOf(AppVersion.getPatch()));
 	status.setUserAgent(ua);
 
 	// API versions

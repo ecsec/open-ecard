@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -44,11 +44,11 @@ import org.openecard.android.ApplicationContext;
 import org.openecard.android.R;
 import org.openecard.common.I18n;
 import org.openecard.common.enums.EventType;
+import org.openecard.common.interfaces.CardRecognition;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.sal.state.CardStateEntry;
-import org.openecard.recognition.CardRecognition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 public class CardInfoActivity extends Activity implements EventCallback {
 
     // logger and translation
-    private static final Logger logger = LoggerFactory.getLogger(CardInfoActivity.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CardInfoActivity.class);
     private final I18n lang = I18n.getTranslation("android");
 
     // gui constants
@@ -71,7 +71,7 @@ public class CardInfoActivity extends Activity implements EventCallback {
 
     private ApplicationContext appContext;
     private CardRecognition recognition;
-    private HashMap<String, TerminalFragment> fragments = new HashMap<String, TerminalFragment>();
+    private HashMap<String, TerminalFragment> fragments = new HashMap<>();
     private TextView textInfo;
     private LinearLayout linearLayoutCardInfoActivity;
     private int numTerminals;
@@ -114,12 +114,12 @@ public class CardInfoActivity extends Activity implements EventCallback {
 		}
 	    }
 	} catch (DispatcherException e) {
-	    logger.error("Couldn't get initial state of IFDs.", e);
+	    LOG.error("Couldn't get initial state of IFDs.", e);
 	} catch (InvocationTargetException e) {
-	    logger.error("Couldn't get initial state of IFDs.", e);
+	    LOG.error("Couldn't get initial state of IFDs.", e);
 	}
 	fragmentManager.executePendingTransactions();
-	appContext.getEnv().getEventManager().registerAllEvents(this);
+	appContext.getEnv().getEventDispatcher().add(this);
     }
 
     @Override
@@ -202,7 +202,7 @@ public class CardInfoActivity extends Activity implements EventCallback {
 		    try {
 			drawable = Drawable.createFromStream(getAssets().open("NFC-logo.png"), null);
 		    } catch (IOException e) {
-			logger.error("Coudn't load nfc logo; using default no card image.", e);
+			LOG.error("Coudn't load nfc logo; using default no card image.", e);
 			InputStream is = recognition.getNoCardImage();
 			drawable = Drawable.createFromStream(is, null);
 		    }

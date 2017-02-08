@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -27,6 +27,7 @@ import iso.std.iso_iec._24727.tech.schema.DisplayCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse;
 import iso.std.iso_iec._24727.tech.schema.IFDCapabilitiesType;
+import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
 import iso.std.iso_iec._24727.tech.schema.InputUnitType;
 import iso.std.iso_iec._24727.tech.schema.KeyPadCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.OutputInfoType;
@@ -37,12 +38,14 @@ import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifyUser;
 import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.common.CardCommandStatus;
+import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.util.PINUtils;
 import org.openecard.common.util.UtilException;
@@ -56,7 +59,7 @@ import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
 import org.openecard.gui.executor.StepAction;
 import org.openecard.ifd.scio.wrapper.ChannelManager;
-import org.openecard.ifd.scio.wrapper.HandledChannel;
+import org.openecard.ifd.scio.wrapper.SingleThreadChannel;
 import org.openecard.ifd.scio.wrapper.TerminalInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,13 +71,13 @@ import org.slf4j.LoggerFactory;
  */
 class AbstractTerminal {
 
-    private static final Logger _logger = LoggerFactory.getLogger(AbstractTerminal.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractTerminal.class);
 
-    private final I18n lang = I18n.getTranslation("pace");
+    private static final I18n LANG = I18n.getTranslation("pinplugin");
 
     private final IFD ifd;
     private final ChannelManager cm;
-    private final HandledChannel channel;
+    private final SingleThreadChannel channel;
     private final TerminalInfo terminalInfo;
     private final UserConsent gui;
     private final byte[] ctxHandle;
@@ -87,7 +90,8 @@ class AbstractTerminal {
     private Boolean canEnter = null;
     private BigInteger keyIdx = null;
 
-    public AbstractTerminal(IFD ifd, ChannelManager cm, HandledChannel channel, UserConsent gui, byte[] ctxHandle, BigInteger displayIdx) {
+    public AbstractTerminal(IFD ifd, ChannelManager cm, SingleThreadChannel channel, UserConsent gui, byte[] ctxHandle,
+	    BigInteger displayIdx) {
 	this.ifd = ifd;
 	this.cm = cm;
 	this.channel = channel;
@@ -116,21 +120,21 @@ class AbstractTerminal {
 	    optic = Boolean.FALSE;
 	}
 
-	if (acoustic.booleanValue()) {
+	if (acoustic) {
 	    if (canBeep() || isVirtual()) {
 		beep();
 	    } else {
 		IFDException ex = new IFDException("No device to output a beep available.");
-		_logger.warn(ex.getMessage(), ex);
+		LOG.warn(ex.getMessage(), ex);
 		throw ex;
 	    }
 	}
-	if (optic.booleanValue()) {
+	if (optic) {
 	    if (canBlink() || isVirtual()) {
 		blink();
 	    } else {
 		IFDException ex = new IFDException("No device to output a blink available.");
-		_logger.warn(ex.getMessage(), ex);
+		LOG.warn(ex.getMessage(), ex);
 		throw ex;
 	    }
 	}
@@ -139,7 +143,7 @@ class AbstractTerminal {
 		display(msg, timeout);
 	    } else {
 		IFDException ex = new IFDException("No device to output a message available.");
-		_logger.warn(ex.getMessage(), ex);
+		LOG.warn(ex.getMessage(), ex);
 		throw ex;
 	    }
 	}
@@ -173,7 +177,7 @@ class AbstractTerminal {
 	    // TODO: implement
 	    String msg = "Biometric authentication not supported by IFD.";
 	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.IO.UNKNOWN_INPUT_UNIT, msg);
-	    _logger.warn(ex.getMessage(), ex);
+	    LOG.warn(ex.getMessage(), ex);
 	    throw ex;
 	} else if (inputUnit.getPinInput() != null) {
 	    final PinInputType pinInput = inputUnit.getPinInput();
@@ -183,18 +187,18 @@ class AbstractTerminal {
 		// create custom pinAction to submit pin to terminal
 		NativePinStepAction pinAction = new NativePinStepAction("enter-pin", pinInput, channel, terminalInfo, template);
 		// display message instructing user what to do
-		UserConsentDescription uc = pinUserConsent("step_pin_userconsent", pinAction);
+		UserConsentDescription uc = pinUserConsent("action.changepin.userconsent.pinstep.title", pinAction);
 		UserConsentNavigator ucr = gui.obtainNavigator(uc);
 		ExecutionEngine exec = new ExecutionEngine(ucr);
 		// run gui
 		ResultStatus status = exec.process();
 		if (status == ResultStatus.CANCEL) {
 		    String msg = "PIN entry cancelled by user.";
-		    _logger.warn(msg);
+		    LOG.warn(msg);
 		    result = WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg);
 		    response = WSHelper.makeResponse(VerifyUserResponse.class, result);
 		} else if (pinAction.exception != null) {
-		    _logger.warn(pinAction.exception.getMessage(), pinAction.exception);
+		    LOG.warn(pinAction.exception.getMessage(), pinAction.exception);
 		    result = WSHelper.makeResultError(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED,
 			    pinAction.exception.getMessage());
 		    response = WSHelper.makeResponse(VerifyUserResponse.class, result);
@@ -213,19 +217,19 @@ class AbstractTerminal {
 		// get pin, encode and send
 		int minLength = pinInput.getPasswordAttributes().getMinLength().intValue();
 		int maxLength = pinInput.getPasswordAttributes().getMaxLength().intValue();
-		UserConsentDescription uc = pinUserConsent("step_pin_userconsent", minLength, maxLength);
+		UserConsentDescription uc = pinUserConsent("action.changepin.userconsent.pinstep.title", minLength, maxLength);
 		UserConsentNavigator ucr = gui.obtainNavigator(uc);
 		ExecutionEngine exec = new ExecutionEngine(ucr);
 		ResultStatus status = exec.process();
 		if (status == ResultStatus.CANCEL) {
 		    String msg = "PIN entry cancelled by user.";
-		    _logger.warn(msg);
+		    LOG.warn(msg);
 		    result = WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg);
 		    response = WSHelper.makeResponse(VerifyUserResponse.class, result);
 		    return response;
 		}
 
-		String rawPIN = getPinFromUserConsent(exec);
+		char[] rawPIN = getPinFromUserConsent(exec);
 		PasswordAttributesType attributes = pinInput.getPasswordAttributes();
 		Transmit verifyTransmit;
 
@@ -233,14 +237,27 @@ class AbstractTerminal {
 		    verifyTransmit = PINUtils.buildVerifyTransmit(rawPIN, attributes, template, handle);
 		} catch (UtilException e) {
 		    String msg = "Failed to create the verifyTransmit message.";
-		    _logger.error(msg, e);
+		    LOG.error(msg, e);
 		    result = WSHelper.makeResultError(ECardConstants.Minor.IFD.UNKNOWN_ERROR, msg);
 		    response = WSHelper.makeResponse(VerifyUserResponse.class, result);
 		    return response;
+		} finally {
+		    Arrays.fill(rawPIN, ' ');
 		}
 
 		// send to reader
-		TransmitResponse transResp = ifd.transmit(verifyTransmit);
+		TransmitResponse transResp;
+		try {
+		    transResp = ifd.transmit(verifyTransmit);
+		} finally {
+		    // blank PIN APDU
+		    for (InputAPDUInfoType apdu : verifyTransmit.getInputAPDUInfo()) {
+			byte[] rawApdu = apdu.getInputAPDU();
+			if (rawApdu != null) {
+			    Arrays.fill(rawApdu, (byte) 0);
+			}
+		    }
+		}
 
 		// produce messages
 		if (transResp.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
@@ -252,6 +269,21 @@ class AbstractTerminal {
 		    } else {
 			response = WSHelper.makeResponse(VerifyUserResponse.class, transResp.getResult());
 			response.setResponse(transResp.getOutputAPDU().get(0));
+
+			// repeat if the response apdu signals that there are tries left
+			// TODO: move this code to the PIN Compare protocol
+			if (response.getResponse() != null) {
+			    CardResponseAPDU resApdu = new CardResponseAPDU(response.getResponse());
+			    byte[] statusBytes = resApdu.getStatusBytes();
+			    boolean isMainStatus = statusBytes[0] == (byte) 0x63;
+			    boolean isMinorStatus = (statusBytes[1] & (byte) 0xF0) == (byte) 0xC0;
+			    int triesLeft = statusBytes[1] & 0x0F;
+			    if (isMainStatus && isMinorStatus && triesLeft > 0) {
+				LOG.info("PIN not entered successful. There are {} tries left.", statusBytes[1] & 0x0F);
+				return verifyUser(verify);
+			    }
+			}
+
 			return response;
 		    }
 		} else {
@@ -261,12 +293,13 @@ class AbstractTerminal {
 		}
 	    } else {
 		IFDException ex = new IFDException("No input unit available to perform PinCompare protocol.");
-		_logger.warn(ex.getMessage(), ex);
+		LOG.warn(ex.getMessage(), ex);
 		throw ex;
 	    }
 	} else {
-	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.IO.UNKNOWN_INPUT_UNIT, "Unsupported authentication input method requested.");
-	    _logger.warn(ex.getMessage(), ex);
+	    String msg = "Unsupported authentication input method requested.";
+	    IFDException ex = new IFDException(ECardConstants.Minor.IFD.IO.UNKNOWN_INPUT_UNIT, msg);
+	    LOG.warn(ex.getMessage(), ex);
 	    throw ex;
 	}
     }
@@ -327,14 +360,14 @@ class AbstractTerminal {
 	if (canBeep == null) {
 	    canBeep = capabilities.isAcousticSignalUnit();
 	}
-	return canBeep.booleanValue();
+	return canBeep;
     }
 
     private boolean canBlink() {
 	if (canBlink == null) {
 	    canBlink = capabilities.isOpticalSignalUnit();
 	}
-	return canBlink.booleanValue();
+	return canBlink;
     }
 
     private boolean canDisplay() {
@@ -351,7 +384,7 @@ class AbstractTerminal {
 		}
 	    }
 	}
-	return canDisplay.booleanValue();
+	return canDisplay;
     }
 
     private DisplayCapabilityType getDisplayCapabilities() {
@@ -386,7 +419,7 @@ class AbstractTerminal {
 		}
 	    }
 	}
-	return canEnter.booleanValue();
+	return canEnter;
     }
 
     private KeyPadCapabilityType getKeypadCapabilities() {
@@ -446,7 +479,7 @@ class AbstractTerminal {
 	Result r = cap.getResult();
 	if (r.getResultMajor().equals(ECardConstants.Major.ERROR)) {
 	    IFDException ex = new IFDException(r);
-	    _logger.warn(ex.getMessage(), ex);
+	    LOG.warn(ex.getMessage(), ex);
 	    throw ex;
 	}
 	this.capabilities = cap.getIFDCapabilities();
@@ -454,35 +487,40 @@ class AbstractTerminal {
 
 
     private UserConsentDescription pinUserConsent(String title, int minLength, int maxLength) {
-	UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(title));
+	UserConsentDescription uc = new UserConsentDescription(LANG.translationForKey(title), "pin_entry_dialog");
 	// create step
-	Step s = new Step("enter-pin", lang.translationForKey("step_pace_title", "PIN"));
+	Step s = new Step("enter-pin", LANG.translationForKey("action.changepin.userconsent.pinstep.title"));
 	uc.getSteps().add(s);
 	// add text instructing user
-	PasswordField i1 = new PasswordField("pin");
+	// add text instructing user
+	Text i1 = new Text();
 	s.getInputInfoUnits().add(i1);
-	i1.setDescription("PIN:");
-	i1.setMinLength(minLength);
-	i1.setMaxLength(maxLength);
+	i1.setText(LANG.translationForKey("action.pinentry.userconsent.pinstep.enter_pin"));
+
+	PasswordField i2 = new PasswordField("pin");
+	s.getInputInfoUnits().add(i2);
+	i2.setDescription("PIN");
+	i2.setMinLength(minLength);
+	i2.setMaxLength(maxLength);
 
 	return uc;
     }
     private UserConsentDescription pinUserConsent(String title, StepAction action) {
-	UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(title));
+	UserConsentDescription uc = new UserConsentDescription(LANG.translationForKey(title), "pin_entry_dialog");
 	// create step
-	Step s = new Step("enter-pin", lang.translationForKey("step_pace_title", "PIN"));
+	Step s = new Step("enter-pin", LANG.translationForKey("action.changepin.userconsent.pinstep.title"));
 	s.setAction(action);
 	uc.getSteps().add(s);
 	s.setInstantReturn(true);
 	// add text instructing user
 	Text i1 = new Text();
 	s.getInputInfoUnits().add(i1);
-	i1.setText(lang.translationForKey("step_pace_native_description", "PIN"));
+	i1.setText(LANG.translationForKey("action.pinentry.userconsent.pinstep.enter_pin_term"));
 
 	return uc;
     }
 
-    private static String getPinFromUserConsent(ExecutionEngine response) {
+    private static char[] getPinFromUserConsent(ExecutionEngine response) {
 	PasswordField p = (PasswordField) response.getResults().get("enter-pin").getResult("pin");
 	return p.getValue();
     }

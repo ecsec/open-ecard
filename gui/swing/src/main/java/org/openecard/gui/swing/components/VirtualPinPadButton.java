@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -89,7 +89,7 @@ public class VirtualPinPadButton extends JLabel {
     private class VirtualPinPadDialogHandler implements MouseListener {
 	@Override
 	public void mouseClicked(MouseEvent e) {
-	    VirtualPinPadDialog dialog = new VirtualPinPadDialog(inputField, passDef);
+	    VirtualPinPadDialog dialog = new VirtualPinPadDialog(VirtualPinPadButton.this, inputField, passDef);
 	    dialog.setVisible(true);
 	}
 	@Override

@@ -25,6 +25,7 @@ package org.openecard.plugins.pinplugin.gui;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.ArrayList;
 import java.util.List;
+import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.gui.UserConsent;
@@ -86,7 +87,7 @@ public class UnblockPINDialog {
     }
 
     private UserConsentDescription createUserConsentDescription() {
-	UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE));
+	UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE, AppVersion.getName()));
 
 	uc.getSteps().addAll(createSteps());
 

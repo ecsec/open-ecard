@@ -28,6 +28,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsentNavigator;
@@ -47,9 +48,11 @@ import org.slf4j.LoggerFactory;
  */
 public class SwingNavigator implements UserConsentNavigator, ActionListener {
 
-    public static final Logger logger = LoggerFactory.getLogger(SwingNavigator.class);
+    public static final Logger LOG = LoggerFactory.getLogger(SwingNavigator.class);
 
-    private final DialogWrapper dialogWrapper;
+    private static final AtomicInteger THREAD_NUM = new AtomicInteger(1);
+
+    private final SwingDialogWrapper dialogWrapper;
     private final Container stepContainer;
 
     private final ArrayList<StepFrame> stepFrames;
@@ -61,7 +64,7 @@ public class SwingNavigator implements UserConsentNavigator, ActionListener {
     private Future<?> action;
 
 
-    public SwingNavigator(DialogWrapper dialogWrapper, String dialogType, List<Step> steps, Container stepContainer,
+    public SwingNavigator(SwingDialogWrapper dialogWrapper, String dialogType, List<Step> steps, Container stepContainer,
 	    NavigationBar navPanel, StepBar stepBar) {
 	this.stepPointer = -1;
 	this.dialogWrapper = dialogWrapper;
@@ -202,7 +205,7 @@ public class SwingNavigator implements UserConsentNavigator, ActionListener {
 	// Content replacement
 	StepFrame nextStep = stepFrames.get(idx);
 	stepBar.selectIdx(idx);
-	navBar.selectIdx(idx);
+	navBar.selectIdx(idx, nextStep.getStep());
 	Container nextPanel = nextStep.getPanel();
 	nextStep.resetResult();
 
@@ -227,7 +230,7 @@ public class SwingNavigator implements UserConsentNavigator, ActionListener {
 	    String command = GUIConstants.BUTTON_NEXT;
 	    final ActionEvent e = new ActionEvent(frame.getStep(), ActionEvent.ACTION_PERFORMED, command);
 	    // create async invocation of the action
-	    new Thread("Instant-Return-Thread") {
+	    new Thread("Instant-Return-Thread-" + THREAD_NUM.getAndIncrement()) {
 		@Override
 		public void run() {
 		    actionPerformed(e);
@@ -238,24 +241,24 @@ public class SwingNavigator implements UserConsentNavigator, ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-	logger.debug("Received event: {}", e.getActionCommand());
+	LOG.debug("Received event: {}", e.getActionCommand());
 
 	NavigationEvent event = NavigationEvent.fromEvent(e);
 	if (event == null) {
-	    logger.error("Unknown event received: {}", e.getActionCommand());
+	    LOG.error("Unknown event received: {}", e.getActionCommand());
 	    return;
 	}
 
 	// in case the user wants to proceed check if all components are valid
 	StepFrame curStep = stepFrames.get(stepPointer);
 	if (event == NavigationEvent.NEXT && ! curStep.validateComponents()) {
-	    logger.debug("Validation of components failed.");
+	    LOG.debug("Validation of components failed.");
 	    return;
 	}
 
 	// in case there is a running action, kill it and bail out
 	if (action != null && ! action.isDone()) {
-	    logger.debug("Canceling execution of the currently running StepAction.");
+	    LOG.debug("Canceling execution of the currently running StepAction.");
 	    action.cancel(true);
 	    return;
 	}

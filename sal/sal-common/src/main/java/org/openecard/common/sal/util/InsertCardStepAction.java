@@ -29,8 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
-import org.openecard.common.enums.EventType;
+import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
+import org.openecard.common.event.EventObject;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.Promise;
@@ -141,9 +142,9 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
     }
 
     @Override
-    public void signalEvent(EventType eventType, Object eventData) {
+    public void signalEvent(EventType eventType, EventObject eventData) {
 	if (eventType == EventType.CARD_RECOGNIZED) {
-	    ConnectionHandleType handle = (ConnectionHandleType) eventData;
+	    ConnectionHandleType handle = eventData.getHandle();
 	    for (String cardType : cardTypes) {
 		if (cardType.equals(handle.getRecognitionInfo().getCardType())) {
 		    promise.deliver(handle);

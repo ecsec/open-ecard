@@ -161,7 +161,7 @@ public class UrlBuilder {
 	    sb.append("#").append(fragment);
 	}
 
-	return new URI(sb.toString());
+	return new URI(sb.toString()).normalize();
     }
 
 
@@ -224,7 +224,28 @@ public class UrlBuilder {
 	if (path == null) {
 	    path = "/";
 	}
+	if (! path.startsWith("/")) {
+	    path = "/" + path;
+	}
 	b.path = path;
+	return b;
+    }
+
+    /**
+     * Adds a path segment to the current path of the URL.
+     * The segment can be composed of several segments. The segment must not start with /, as this is added in between
+     * when needed.
+     *
+     * @param segment The segment to add.
+     * @return A copy of the UrlBuilder with the path part modified.
+     */
+    public UrlBuilder addPathSegment(@Nonnull String segment) {
+	UrlBuilder b = new UrlBuilder(this);
+	// add / if none is currently present
+	if (! path.endsWith("/") && ! segment.startsWith("/")) {
+	    segment = "/" + segment;
+	}
+	b.path = path + segment;
 	return b;
     }
 

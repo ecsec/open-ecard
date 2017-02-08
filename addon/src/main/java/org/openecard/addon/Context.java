@@ -25,11 +25,12 @@ package org.openecard.addon;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.sal.CredentialManager;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.sal.state.CardStateMap;
+import org.openecard.common.event.EventDispatcherImpl;
+import org.openecard.common.interfaces.CardRecognition;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.definition.ViewController;
-import org.openecard.recognition.CardRecognition;
 
 
 /**
@@ -44,7 +45,7 @@ public class Context {
     private final AddonProperties addonProperties;
     private final AddonManager manager;
     private final Dispatcher dispatcher;
-    private final EventManager eventManager;
+    private final EventDispatcher eventDispatcher;
     private final String id;
     private final ViewController viewController;
 
@@ -59,24 +60,24 @@ public class Context {
      *
      * @param manager {@link AddonManager} to use for this Context object.
      * @param dispatcher {@link Dispatcher} to use for this Context object.
-     * @param eventManager {@link EventManager} to use for this Context object.
+     * @param eventManager {@link EventDispatcherImpl} to use for this Context object.
      * @param spec {@link AddonSpecification} for the generation of the {@link AddonProperties} object.
      * @param addView {@link ViewController} to use for this Context object.
      */
-    public Context(AddonManager manager, Dispatcher dispatcher, EventManager eventManager, AddonSpecification spec,
+    public Context(AddonManager manager, Dispatcher dispatcher, EventDispatcher eventManager, AddonSpecification spec,
 	    ViewController addView) {
 	this.manager = manager;
 	this.dispatcher = dispatcher;
-	this.eventManager = eventManager;
+	this.eventDispatcher = eventManager;
 	this.id = spec.getId();
 	addonProperties = new AddonProperties(spec);
 	viewController = addView;
     }
 
     /**
-     * Sets the CardRecognition of this Context.
+     * Sets the CardRecognitionImpl of this Context.
      *
-     * @param cardRec The {@link CardRecognition} to set.
+     * @param cardRec The {@link CardRecognitionImpl} to set.
      */
     public void setCardRecognition(CardRecognition cardRec) {
 	recognition = cardRec;
@@ -131,10 +132,10 @@ public class Context {
     /**
      * Get the EventManager of this Context.
      *
-     * @return The {@link EventManager} of this Context.
+     * @return The {@link EventDispatcherImpl} of this Context.
      */
-    public EventManager getEventManager() {
-	return eventManager;
+    public EventDispatcher getEventDispatcher() {
+	return eventDispatcher;
     }
 
     /**
@@ -177,9 +178,9 @@ public class Context {
     }
 
     /**
-     * Get the CardRecognition of this Context.
+     * Get the CardRecognitionImpl of this Context.
      *
-     * @return The {@link CardRecognition} of this Context.
+     * @return The {@link CardRecognitionImpl} of this Context.
      */
     public CardRecognition getRecognition() {
 	return recognition;

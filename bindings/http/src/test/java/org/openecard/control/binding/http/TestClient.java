@@ -22,18 +22,22 @@
 
 package org.openecard.control.binding.http;
 
+import iso.std.iso_iec._24727.tech.schema.CardInfoType;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import org.openecard.addon.AddonManager;
 import org.openecard.common.ClientEnv;
+import org.openecard.common.event.EventDispatcherImpl;
+import org.openecard.common.interfaces.CIFProvider;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
-import org.openecard.event.EventManager;
 import org.openecard.gui.swing.SwingDialogWrapper;
 import org.openecard.gui.swing.SwingUserConsent;
 import org.openecard.ifd.scio.IFD;
 import org.openecard.management.TinyManagement;
-import org.openecard.recognition.CardRecognition;
+import org.openecard.recognition.CardRecognitionImpl;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.slf4j.Logger;
@@ -48,7 +52,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class TestClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TestClient.class);
 
     // Service Access Layer (SAL)
     private TinySAL sal;
@@ -59,7 +63,7 @@ public final class TestClient {
 	try {
 	    setup();
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	}
     }
 
@@ -78,7 +82,6 @@ public final class TestClient {
 	// Set up the Dispatcher
 	MessageDispatcher dispatcher = new MessageDispatcher(env);
 	env.setDispatcher(dispatcher);
-	ifd.setDispatcher(dispatcher);
 
 	// Perform an EstablishContext to get a ContextHandle
 	EstablishContext establishContext = new EstablishContext();
@@ -86,16 +89,28 @@ public final class TestClient {
 
 	byte[] contextHandle = ifd.establishContext(establishContext).getContextHandle();
 
-	CardRecognition recognition = new CardRecognition(ifd, contextHandle);
+	final CardRecognitionImpl recognition = new CardRecognitionImpl(env);
+	env.setRecognition(recognition);
+
+	env.setCIFProvider(new CIFProvider() {
+	    @Override
+	    public CardInfoType getCardInfo(ConnectionHandleType type, String cardType) {
+		return recognition.getCardInfo(cardType);
+	    }
+	    @Override
+	    public boolean needsRecognition(byte[] atr) {
+		return true;
+	    }
+	});
 
 	// Set up EventManager
-	EventManager em = new EventManager(recognition, env, contextHandle);
-	env.setEventManager(em);
+	EventDispatcher ed = new EventDispatcherImpl();
+	env.setEventDispatcher(ed);
 
 	// Set up SALStateCallback
 	cardStates = new CardStateMap();
-	SALStateCallback salCallback = new SALStateCallback(recognition, cardStates);
-	em.registerAllEvents(salCallback);
+	SALStateCallback salCallback = new SALStateCallback(env, cardStates);
+	ed.add(salCallback);
 
 	// Set up SAL
 	sal = new TinySAL(env, cardStates);
@@ -107,9 +122,9 @@ public final class TestClient {
 	ifd.setGUI(gui);
 
 	// Initialize the EventManager
-	em.initialize();
+	ed.start();
 
-	AddonManager manager = new AddonManager(dispatcher, gui, cardStates, recognition, em, null);
+	AddonManager manager = new AddonManager(env, gui, cardStates, null);
 	sal.setAddonManager(manager);
 
 	HttpBinding binding = new HttpBinding(HttpBinding.DEFAULT_PORT);

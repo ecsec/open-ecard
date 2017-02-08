@@ -32,7 +32,7 @@ import org.openecard.gui.swing.common.GUIDefaults;
  *
  * @author Moritz Horsch
  */
-public class SwingDialogWrapper implements DialogWrapper {
+public class SwingDialogWrapper {
 
     private JFrame dialog;
     private String title;
@@ -40,6 +40,11 @@ public class SwingDialogWrapper implements DialogWrapper {
     public SwingDialogWrapper() {
 	// Initialize Look and Feel
 	GUIDefaults.initialize();
+    }
+
+    private SwingDialogWrapper(SwingDialogWrapper other) {
+	this.title = other.title;
+	getContentPane();
     }
 
     JFrame getDialog() {
@@ -50,13 +55,21 @@ public class SwingDialogWrapper implements DialogWrapper {
 	return dialog.getRootPane();
     }
 
-    @Override
+    /**
+     * Set title of the user consent dialog.
+     *
+     * @param title Title to set in the dialog.
+     */
     public void setTitle(String title) {
 	this.title = title;
     }
 
-    @Override
-    public Container getContentPane() {
+    /**
+     * A content panel is needed so the user consent can be embedded in the actual application.
+     *
+     * @return Container the GUI can draw its content on.
+     */
+    public final Container getContentPane() {
 	dialog = new JFrame();
 	dialog.setTitle(title);
 	dialog.setSize(690, 500);
@@ -68,7 +81,13 @@ public class SwingDialogWrapper implements DialogWrapper {
 	return dialog.getContentPane();
     }
 
-    @Override
+    public void setSize(int width, int height) {
+	getDialog().setSize(width, height);
+    }
+
+    /**
+     * This function is executed after the root panel has been set up with the contents of the user consent.
+     */
     public void show() {
 	dialog.setVisible(true);
 	dialog.toFront();
@@ -76,9 +95,15 @@ public class SwingDialogWrapper implements DialogWrapper {
 	dialog.setAlwaysOnTop(true);
     }
 
-    @Override
+    /**
+     * This function is executed after the user consent is finished or canceled.
+     */
     public void hide() {
 	dialog.setVisible(false);
+    }
+
+    public SwingDialogWrapper derive() {
+	return new SwingDialogWrapper(this);
     }
 
 }

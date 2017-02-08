@@ -27,7 +27,7 @@ import org.openecard.apache.http.HttpException;
 import org.openecard.apache.http.HttpResponse;
 import org.openecard.apache.http.HttpResponseInterceptor;
 import org.openecard.apache.http.protocol.HttpContext;
-import org.openecard.common.Version;
+import org.openecard.common.AppVersion;
 
 
 /**
@@ -49,19 +49,25 @@ public class ServerHeaderResponseInterceptor implements HttpResponseInterceptor 
      */
     public String buildServerHeaderValue() {
 	StringBuilder builder = new StringBuilder();
-	builder.append(Version.getName());
+
+	builder.append(AppVersion.getName());
 	builder.append("/");
-	builder.append(Version.getVersion());
+	builder.append(AppVersion.getVersion());
+
 	builder.append(" (");
-	for (String version : Version.getSpecVersions()) {
-	    builder.append(Version.getSpecName());
+	boolean firstSpec = true;
+	for (String version : AppVersion.getSpecVersions()) {
+	    if (! firstSpec) {
+		builder.append(" ");
+	    } else {
+		firstSpec = false;
+	    }
+	    builder.append(AppVersion.getSpecName());
 	    builder.append("/");
 	    builder.append(version);
-	    builder.append(" ");
 	}
-	// remove last white space
-	builder.deleteCharAt(builder.lastIndexOf(" "));
 	builder.append(")");
+
 	return builder.toString();
     }
     

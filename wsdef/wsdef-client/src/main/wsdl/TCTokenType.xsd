@@ -16,9 +16,11 @@
 				<xs:complexType>
 					<xs:choice>
 						<xs:element name="PSK" type="xs:hexBinary" />
+						<xs:element name="JWK" type="xs:normalizedString" />
 					</xs:choice>
 				</xs:complexType>
 			</xs:element>
+			<xs:element name="ForceProcessing" type="xs:boolean" default="true" minOccurs="0" />
 		</xs:sequence>
 	</xs:complexType>
 

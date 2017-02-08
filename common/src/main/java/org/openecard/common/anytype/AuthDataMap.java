@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -42,7 +42,7 @@ import org.w3c.dom.Element;
  */
 public class AuthDataMap {
 
-    private static final String isoNs = "urn:iso:std:iso-iec:24727:tech:schema";
+    private static final String ISONS = "urn:iso:std:iso-iec:24727:tech:schema";
 
     private final boolean ignoreNs;
     private final String protocol;
@@ -78,9 +78,9 @@ public class AuthDataMap {
 	return builder.newDocument();
     }
 
-    public AuthDataResponse createResponse(DIDAuthenticationDataType responseObj) {
+    public <T extends DIDAuthenticationDataType> AuthDataResponse<T> createResponse(T responseObj) {
 	responseObj.setProtocol(protocol);
-	return new AuthDataResponse(xmlDoc, responseObj);
+	return new AuthDataResponse<>(xmlDoc, responseObj);
     }
 
     public String getProtocol() {
@@ -97,7 +97,7 @@ public class AuthDataMap {
 	return containsContent(new QName(ns, localName));
     }
     public boolean containsContent(String localName) {
-	return containsContent(new QName(isoNs, localName));
+	return containsContent(new QName(ISONS, localName));
     }
 
     public Element getContent(QName qname) {
@@ -110,7 +110,7 @@ public class AuthDataMap {
 	return getContent(new QName(ns, localName));
     }
     public Element getContent(String localName) {
-	return getContent(new QName(isoNs, localName));
+	return getContent(new QName(ISONS, localName));
     }
 
     public String getContentAsString(QName qname) {
@@ -126,7 +126,7 @@ public class AuthDataMap {
 	return getContentAsString(new QName(ns, localName));
     }
     public String getContentAsString(String localName) {
-	return getContentAsString(new QName(isoNs, localName));
+	return getContentAsString(new QName(ISONS, localName));
     }
 
     public byte[] getContentAsBytes(QName qname) {
@@ -142,7 +142,7 @@ public class AuthDataMap {
 	return getContentAsBytes(new QName(ns, localName));
     }
     public byte[] getContentAsBytes(String localName) {
-	return getContentAsBytes(new QName(isoNs, localName));
+	return getContentAsBytes(new QName(ISONS, localName));
     }
 
     public boolean containsAttribute(QName qname) {
@@ -152,7 +152,7 @@ public class AuthDataMap {
 	return containsAttribute(new QName(ns, name));
     }
     public boolean containsAttribute(String name) {
-	return containsAttribute(new QName(isoNs, name));
+	return containsAttribute(new QName(ISONS, name));
     }
 
     public String getAttribute(QName qname) {
@@ -162,7 +162,7 @@ public class AuthDataMap {
 	return getAttribute(new QName(ns, name));
     }
     public String getAttribute(String name) {
-	return getAttribute(new QName(isoNs, name));
+	return getAttribute(new QName(ISONS, name));
     }
 
 }

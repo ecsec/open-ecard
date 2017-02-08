@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,103 +24,62 @@ package org.openecard.common;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.openecard.common.util.FileUtils;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 
 /**
- * Version of the Open eCard Framework.
- * The version is loaded from the file VERSION in this module when the class is loaded.
- * The version string follows <a href="http://semver.org">semantic versioning</a>.
+ * Version class capable of parsing given name and version strings.
  *
  * @author Tobias Wich
  */
 public class Version {
 
-    private static final String appnameFile = "openecard/APPNAME";
-    private static final String versionFile = "openecard/VERSION";
-    private static final String unknownName = "UNKNOWN";
-    private static final String unknownVersion = "UNKNOWN";
-    private static final String specFileName = "openecard/EID_CLIENT_SPECIFICATION";
-    private static final String versionsFile = "openecard/SUPPORTED_EID_CLIENT_SPEC_VERSIONS";
+    private static final String UNKNOWN_NAME = "UNKNOWN";
+    private static final String UNKNOWN_VERSION = "UNKNOWN";
 
-    private static final String version;
-    private static final String name;
-    private static final String specName;
-    private static final ArrayList<String> specVersions;
-    private static final int major;
-    private static final int minor;
-    private static final int patch;
-    private static final String buildId;
+    private final String version;
+    private final String name;
+    private final String specName;
+    private final ArrayList<String> specVersions;
+    private final int major;
+    private final int minor;
+    private final int patch;
+    private final String buildId;
 
-    static {
-	InputStream inName, inVer, inSpecName, inSpecVer;
-	try {
-	    inName = FileUtils.resolveResourceAsStream(Version.class, appnameFile);
-	} catch (IOException ex) {
-	    inName = null;
-	}
-	try {
-	    inVer = FileUtils.resolveResourceAsStream(Version.class, versionFile);
-	} catch (IOException ex) {
-	    inVer = null;
-	}
-	try {
-	    inSpecName = FileUtils.resolveResourceAsStream(Version.class, specFileName);
-	} catch (IOException ex) {
-	    inSpecName = null;
-	}
-	try {
-	    inSpecVer = FileUtils.resolveResourceAsStream(Version.class, versionsFile);
-	} catch (IOException ex) {
-	    inSpecVer = null;
-	}
-	
-	specName = loadName(inSpecName);
-	specVersions = loadVersionLine(inSpecVer);
-	name = loadName(inName);
-	version = loadVersionLine(inVer).get(0);
+    public Version(@Nullable String name, @Nullable String ver, @Nullable String specName, @Nullable String specVer) {
+	this.specName = fixName(specName);
+	this.specVersions = loadVersionLine(specVer);
+	this.name = fixName(name);
+	this.version = loadVersionLine(ver).get(0);
 	String[] groups = splitVersion(version);
-	major = Integer.parseInt(groups[0]);
-	minor = Integer.parseInt(groups[1]);
-	patch = Integer.parseInt(groups[2]);
-	buildId = groups[3];
+	this.major = Integer.parseInt(groups[0]);
+	this.minor = Integer.parseInt(groups[1]);
+	this.patch = Integer.parseInt(groups[2]);
+	this.buildId = groups[3];
     }
 
-    private static String loadName(InputStream in) {
-	if (in == null) {
-	    return unknownName;
-	} else {
-	    Scanner s = new Scanner(in, "UTF-8").useDelimiter("\\A");
-	    try {
-		String nameStr = s.next();
-		return nameStr.trim();
-	    } catch (NoSuchElementException ex) {
-		// empty file
-		return unknownName;
-	    }
-	}
+    private String fixName(String name) {
+	return name == null ? UNKNOWN_NAME : name;
     }
-    
-    private static ArrayList<String> loadVersionLine(InputStream in) {
+
+    private static ArrayList<String> loadVersionLine(String in) {
 	ArrayList<String> versions = new ArrayList<>();
 	if (in == null) {
-	    versions.add(unknownVersion);
+	    versions.add(UNKNOWN_VERSION);
 	} else {
-	    BufferedReader r = new BufferedReader(new InputStreamReader(in));
+	    BufferedReader r = new BufferedReader(new StringReader(in));
 	    try {
 		String line = r.readLine();
 		do {
 		    if (line == null) {
-			versions.add(unknownVersion);
+			versions.add(UNKNOWN_VERSION);
 		    } else {
 			versions.add(line);
 		    }
@@ -128,13 +87,14 @@ public class Version {
 		    line = r.readLine();
 		} while (line != null);
 	    } catch (IOException ex) {
-		versions.add(unknownVersion);
+		versions.clear();
+		versions.add(UNKNOWN_VERSION);
 	    }
 	}
 	return versions;
     }
 
-    private static String[] splitVersion(String version) {
+    private String[] splitVersion(String version) {
 	String[] groups = new String[4];
 	Pattern p = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(-.+)?");
 	Matcher m = p.matcher(version);
@@ -162,16 +122,16 @@ public class Version {
      * Gets the name of the application.
      * @return Name of the app or the UNKNOWN if the name is unavailable.
      */
-    public static String getName() {
+    public String getName() {
 	return name;
     }
 
     /**
      * Get complete version string with major, minor and patch version separated by dots.
      * If available, the build ID is appended with a dash as seperator.
-     * @return Version string or the string UNKNOWN if version is invalid or unavailable.
+     * @return AppVersion string or the string UNKNOWN if version is invalid or unavailable.
      */
-    public static String getVersion() {
+    public String getVersion() {
 	return version;
     }
 
@@ -179,7 +139,7 @@ public class Version {
      * Major version.
      * @return Major version number or 0 if version is invalid or unavailable.
      */
-    public static int getMajor() {
+    public int getMajor() {
 	return major;
     }
 
@@ -187,7 +147,7 @@ public class Version {
      * Minor version.
      * @return Major version number or 0 if version is invalid or unavailable.
      */
-    public static int getMinor() {
+    public int getMinor() {
 	return minor;
     }
 
@@ -195,7 +155,7 @@ public class Version {
      * Patch version.
      * @return Major version number or 0 if version is invalid or unavailable.
      */
-    public static int getPatch() {
+    public int getPatch() {
 	return patch;
     }
 
@@ -203,8 +163,70 @@ public class Version {
      * Build ID suffix.
      * @return Build ID without suffix or null when no build suffix is used.
      */
-    public static String getBuildId() {
+    public String getBuildId() {
 	return buildId;
+    }
+
+    /**
+     * Checks if this version is newer than the given version.
+     *
+     * @param v
+     * @return
+     */
+    public boolean isNewer(@Nonnull Version v) {
+	// check if both are unknown or equal
+	if (UNKNOWN_VERSION.equals(getVersion()) && UNKNOWN_VERSION.equals(v.getVersion())) {
+	    return false;
+	} else if (getVersion().equals(v.getVersion())) {
+	    return false;
+	}
+
+	// see if any of the versions is unknown
+	if (UNKNOWN_VERSION.equals(getVersion())) {
+	    return false;
+	} else if (UNKNOWN_VERSION.equals(v.getVersion())) {
+	    return true;
+	}
+
+	// compare major
+	if (getMajor() > v.getMajor()) {
+	    return true;
+	} else if (getMajor() < v.getMajor()) {
+	    return false;
+	}
+
+	// compare minor
+	if (getMinor() > v.getMinor()) {
+	    return true;
+	} else if (getMinor() < v.getMinor()) {
+	    return false;
+	}
+
+	// compare patch
+	if (getPatch() > v.getPatch()) {
+	    return true;
+	} else if (getPatch() < v.getPatch()) {
+	    return false;
+	}
+
+	// compare build
+	if (getBuildId() == null && v.getBuildId() == null) {
+	    return false;
+	} else if (getBuildId() == null && v.getBuildId() != null) {
+	    return true;
+	} else if (getBuildId() != null && v.getBuildId() == null) {
+	    return false;
+	} else {
+	    return getBuildId().compareTo(v.getBuildId()) < 0;
+	}
+    }
+
+    public boolean isOlder(@Nonnull Version v) {
+	return v.isNewer(this);
+    }
+
+    public boolean isSame(@Nonnull Version v) {
+	return ! this.isNewer(v) && ! v.isNewer(this);
     }
 
     /**
@@ -212,7 +234,7 @@ public class Version {
      *
      * @return The name of the specification which is {@code BSI-TR-03124}.
      */
-    public static String getSpecName() {
+    public String getSpecName() {
 	return specName;
     }
 
@@ -221,7 +243,7 @@ public class Version {
      *
      * @return A unmodifiable list containing all version this application is compatible to.
      */
-    public static List<String> getSpecVersions() {
+    public List<String> getSpecVersions() {
 	return Collections.unmodifiableList(specVersions);
     }
 
@@ -230,7 +252,7 @@ public class Version {
      *
      * @return Latest compatible specification version.
      */
-    public static String getLatestSpecVersion() {
+    public String getLatestSpecVersion() {
 	return specVersions.get(specVersions.size() - 1);
     }
 

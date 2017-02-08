@@ -23,7 +23,7 @@
 package org.openecard.gui.swing.common;
 
 import java.io.IOException;
-import org.openecard.common.OverridingProperties;
+import org.openecard.ws.common.OverridingProperties;
 
 
 /**

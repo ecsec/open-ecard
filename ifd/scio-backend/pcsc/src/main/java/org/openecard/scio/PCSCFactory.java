@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,7 +32,6 @@ import javax.smartcardio.CardTerminals;
 import javax.smartcardio.TerminalFactory;
 import org.openecard.common.ifd.scio.SCIOTerminals;
 import org.openecard.common.util.LinuxLibraryFinder;
-import org.openecard.scio.osx.SunOSXPCSC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,11 +44,10 @@ import org.slf4j.LoggerFactory;
  */
 public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactory {
 
-    private static final Logger logger = LoggerFactory.getLogger(PCSCFactory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PCSCFactory.class);
     private static final String ALGORITHM = "PC/SC";
 
     private final String osName;
-    private final String osVersion;
     private TerminalFactory terminalFactory;
 
     /**
@@ -60,7 +58,6 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
      */
     public PCSCFactory() throws FileNotFoundException, NoSuchAlgorithmException {
 	osName = System.getProperty("os.name");
-	osVersion = System.getProperty("os.version");
 	if (osName.startsWith("Linux")) {
 	    File libFile = LinuxLibraryFinder.getLibraryPath("pcsclite", "1");
 	    System.setProperty("sun.security.smartcardio.library", libFile.getAbsolutePath());
@@ -100,12 +97,7 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
     }
 
     final void loadPCSC() throws NoSuchAlgorithmException {
-	if (osName.contains("OS X") && versionCompare(osVersion, "10.10") < 0) {
-	    // see https://developer.apple.com/library/mac/technotes/tn2002/tn2110.html#FINDINGMAC
-	    terminalFactory = TerminalFactory.getInstance(ALGORITHM, null, new SunOSXPCSC());
-	} else {
-	    terminalFactory = TerminalFactory.getInstance(ALGORITHM, null);
-	}
+	terminalFactory = TerminalFactory.getInstance(ALGORITHM, null);
     }
 
     void reloadPCSC() {
@@ -140,11 +132,11 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 	} catch (NoSuchAlgorithmException ex) {
 	    // if it worked once it will work again
 	    String msg = "PCSC changed it's algorithm. There is something really wrong.";
-	    logger.error(msg, ex);
+	    LOG.error(msg, ex);
 	    throw new RuntimeException("PCSC changed it's algorithm. There is something really wrong.");
 	} catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchFieldException
 		| NoSuchMethodException | SecurityException ex) {
-	    logger.error("Failed to perform reflection magic to reload TerminalFactory.", ex);
+	    LOG.error("Failed to perform reflection magic to reload TerminalFactory.", ex);
 	}
     }
 

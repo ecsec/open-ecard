@@ -22,7 +22,8 @@
 
 package org.openecard.common.interfaces;
 
-import org.openecard.common.enums.EventType;
+import org.openecard.common.event.EventObject;
+import org.openecard.common.event.EventType;
 
 
 /**
@@ -41,6 +42,6 @@ public interface EventCallback {
      * @param eventType Type of the event.
      * @param eventData Data describing the event further.
      */
-    void signalEvent(EventType eventType, Object eventData);
+    void signalEvent(EventType eventType, EventObject eventData);
 
 }

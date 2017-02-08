@@ -22,7 +22,7 @@
 
 package org.openecard.common.interfaces;
 
-import org.openecard.common.enums.EventType;
+import org.openecard.common.event.EventType;
 
 
 /**

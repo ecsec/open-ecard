@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,7 +30,6 @@ import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
 import iso.std.iso_iec._24727.tech.schema.PasswordTypeType;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
@@ -44,7 +43,6 @@ import org.openecard.common.apdu.ResetRetryCounter;
 import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
 import org.openecard.gui.StepResult;
@@ -74,7 +72,7 @@ import static iso.std.iso_iec._24727.tech.schema.PasswordTypeType.ASCII_NUMERIC;
 public class PINStepAction extends StepAction {
 
     // translation and logger
-    private static final Logger logger = LoggerFactory.getLogger(PINStepAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PINStepAction.class);
     private final I18n lang = I18n.getTranslation("pinplugin");
 
     // translation constants
@@ -122,7 +120,7 @@ public class PINStepAction extends StepAction {
 	try {
 	    tmp = new AuthDataMap(paceInput);
 	} catch (ParserConfigurationException ex) {
-	    logger.error("Failed to read empty Protocol data.", ex);
+	    LOG.error("Failed to read empty Protocol data.", ex);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
 
@@ -147,7 +145,7 @@ public class PINStepAction extends StepAction {
 
 	try {
 	    EstablishChannelResponse establishChannelResponse = 
-		    (EstablishChannelResponse) dispatcher.deliver(establishChannel);
+		    (EstablishChannelResponse) dispatcher.safeDeliver(establishChannel);
 	    WSHelper.checkResult(establishChannelResponse);
 	    // PACE completed successfully, we now modify the pin
 	    if (capturePin) {
@@ -160,7 +158,7 @@ public class PINStepAction extends StepAction {
 	} catch (WSException ex) {
 	    if (capturePin) {
 		retryCounter--;
-		logger.info("Wrong PIN entered, trying again (remaining tries {}).", retryCounter);
+		LOG.info("Wrong PIN entered, trying again (remaining tries {}).", retryCounter);
 		if (retryCounter == 1) {
 		    Step replacementStep = createCANReplacementStep();
 		    return new StepActionResult(StepActionResultStatus.BACK, replacementStep);
@@ -169,23 +167,17 @@ public class PINStepAction extends StepAction {
 		    return new StepActionResult(StepActionResultStatus.REPEAT, replacementStep);
 		}
 	    } else {
-		logger.warn("PIN not entered successfully in terminal.");
+		LOG.warn("PIN not entered successfully in terminal.");
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
-	} catch (InvocationTargetException ex) {
-	    logger.error("Failed to dispatch EstablishChannelCommand.", ex);
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	} catch (APDUException ex) {
-	    logger.error("Failed to transmit Reset Retry Counter APDU.", ex);
+	    LOG.error("Failed to transmit Reset Retry Counter APDU.", ex);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	} catch (IllegalArgumentException ex) {
-	    logger.error("Failed to transmit Reset Retry Counter APDU.", ex);
+	    LOG.error("Failed to transmit Reset Retry Counter APDU.", ex);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	} catch (IFDException ex) {
-	    logger.error("Failed to transmit Reset Retry Counter APDU.", ex);
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
-	} catch (DispatcherException ex) {
-	    logger.error("Failed to transmit Reset Retry Counter APDU.", ex);
+	    LOG.error("Failed to transmit Reset Retry Counter APDU.", ex);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
     }
@@ -208,10 +200,8 @@ public class PINStepAction extends StepAction {
      * Send a ModifyPIN-PCSC-Command to the Terminal.
      * 
      * @throws IFDException If building the Command fails.
-     * @throws InvocationTargetException If the ControlIFD command fails.
-     * @throws DispatcherException If an error in the dispatcher occurs.
      */
-    private void sendModifyPIN() throws IFDException, InvocationTargetException, DispatcherException {
+    private void sendModifyPIN() throws IFDException {
 	PasswordAttributesType pwdAttr = create(true, ASCII_NUMERIC, 6, 6, 6);
 	pwdAttr.setPadChar(new byte[] { (byte) 0x3F });
 	PCSCPinModify ctrlStruct = new PCSCPinModify(pwdAttr, StringUtils.toByteArray("002C0203"));
@@ -220,7 +210,7 @@ public class PINStepAction extends StepAction {
 	ControlIFD controlIFD = new ControlIFD();
 	controlIFD.setCommand(ByteUtils.concatenate((byte) PCSCFeatures.MODIFY_PIN_DIRECT, structData));
 	controlIFD.setSlotHandle(conHandle.getSlotHandle());
-	dispatcher.deliver(controlIFD);
+	dispatcher.safeDeliver(controlIFD);
     }
 
     /**
@@ -259,34 +249,31 @@ public class PINStepAction extends StepAction {
 	PasswordField fieldNewPIN = (PasswordField) executionResults.getResult(ChangePINStep.NEW_PIN_FIELD);
 	PasswordField fieldNewPINRepeat = (PasswordField) executionResults.getResult(ChangePINStep.NEW_PIN_REPEAT_FIELD);
 
-	oldPIN = fieldOldPIN.getValue();
+	oldPIN = new String(fieldOldPIN.getValue());
 
 	if (oldPIN.isEmpty()) {
 	    return false;
 	}
-	if (fieldNewPIN.getValue().isEmpty()) {
+	if (new String(fieldNewPIN.getValue()).isEmpty()) {
 	    return false;
 	} else {
 	    try {
-		newPIN = fieldNewPIN.getValue().getBytes(ISO_8859_1);
+		newPIN = new String(fieldNewPIN.getValue()).getBytes(ISO_8859_1);
 	    } catch (UnsupportedEncodingException e) {
 		return false;
 	    }
 	}
-	if (fieldNewPINRepeat.getValue().isEmpty()) {
+	if (new String(fieldNewPINRepeat.getValue()).isEmpty()) {
 	    return false;
 	} else {
 	    try {
-		newPINRepeat = fieldNewPINRepeat.getValue().getBytes(ISO_8859_1);
+		newPINRepeat = new String(fieldNewPINRepeat.getValue()).getBytes(ISO_8859_1);
 	    } catch (UnsupportedEncodingException e) {
 		return false;
 	    }
 	}
 
-	if (!ByteUtils.compare(newPIN, newPINRepeat)) {
-	    return false;
-	}
-	return true;
+	return ByteUtils.compare(newPIN, newPINRepeat);
     }
 
     /**

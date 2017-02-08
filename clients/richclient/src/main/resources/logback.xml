@@ -8,9 +8,10 @@
 		<file>${destination}/richclient_info.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- daily rollover -->
-			<fileNamePattern>${destination}/richclient_info.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+			<fileNamePattern>${destination}/richclient_info.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
 			<!-- keep 30 days' worth of history -->
 			<maxHistory>30</maxHistory>
+			<cleanHistoryOnStart>true</cleanHistoryOnStart>
 		</rollingPolicy>
 		<encoder>
 			<pattern>%date{ISO8601} [%thread] %-5level %class{35}:%line - %msg%n</pattern>

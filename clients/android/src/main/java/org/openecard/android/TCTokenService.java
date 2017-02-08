@@ -27,11 +27,11 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import org.openecard.addon.AddonManager;
+import org.openecard.common.interfaces.CardRecognition;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.control.binding.http.HttpBinding;
 import org.openecard.gui.UserConsent;
-import org.openecard.recognition.CardRecognition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

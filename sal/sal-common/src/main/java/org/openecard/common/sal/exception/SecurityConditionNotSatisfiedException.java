@@ -39,7 +39,7 @@ public final class SecurityConditionNotSatisfiedException extends ECardException
     }
 
     public SecurityConditionNotSatisfiedException(String message) {
-	makeException(this, ECardConstants.Minor.SAL.SECURITY_CONDITINON_NOT_SATISFIED, message);
+	makeException(this, ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED, message);
     }
 
 }

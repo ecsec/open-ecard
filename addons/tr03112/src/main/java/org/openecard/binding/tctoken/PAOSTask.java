@@ -31,7 +31,7 @@ import java.net.MalformedURLException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import org.openecard.common.ECardConstants;
-import org.openecard.common.Version;
+import org.openecard.common.AppVersion;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.gui.UserConsent;
@@ -81,10 +81,10 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    sp.setSessionIdentifier(tlsHandler.getSessionId());
 
 	    StartPAOS.UserAgent ua = new StartPAOS.UserAgent();
-	    ua.setName(Version.getName());
-	    ua.setVersionMajor(BigInteger.valueOf(Version.getMajor()));
-	    ua.setVersionMinor(BigInteger.valueOf(Version.getMinor()));
-	    ua.setVersionSubminor(BigInteger.valueOf(Version.getPatch()));
+	    ua.setName(AppVersion.getName());
+	    ua.setVersionMajor(BigInteger.valueOf(AppVersion.getMajor()));
+	    ua.setVersionMinor(BigInteger.valueOf(AppVersion.getMinor()));
+	    ua.setVersionSubminor(BigInteger.valueOf(AppVersion.getPatch()));
 	    sp.setUserAgent(ua);
 
 	    StartPAOS.SupportedAPIVersions sv = new StartPAOS.SupportedAPIVersions();

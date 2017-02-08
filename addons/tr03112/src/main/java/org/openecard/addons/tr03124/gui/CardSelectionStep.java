@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.TreeMap;
 import javax.annotation.Nonnull;
 import org.openecard.common.I18n;
+import org.openecard.common.interfaces.CardRecognition;
 import org.openecard.gui.definition.BoxItem;
 import org.openecard.gui.definition.Radiobox;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
-import org.openecard.recognition.CardRecognition;
 
 
 /**
@@ -52,7 +52,7 @@ public class CardSelectionStep extends Step {
      *
      * @param title Title of this step.
      * @param availableCards List of {@link ConnectionHandleType} objects representing the available credentials.
-     * @param rec {@link CardRecognition} object used to translate cardTypeNames into human understandable strings.
+     * @param rec {@link CardRecognitionImpl} object used to translate cardTypeNames into human understandable strings.
      */
     public CardSelectionStep(@Nonnull String title, @Nonnull List<ConnectionHandleType> availableCards,
 	    @Nonnull CardRecognition rec) {

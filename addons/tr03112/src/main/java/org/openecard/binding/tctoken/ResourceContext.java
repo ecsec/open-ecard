@@ -237,7 +237,7 @@ public class ResourceContext {
 
 	    // connect tls client
 	    tlsClient.setClientVersion(ProtocolVersion.TLSv12);
-	    Socket socket = ProxySettings.getDefault().getSocket(hostname, port);
+	    Socket socket = ProxySettings.getDefault().getSocket(protocol, hostname, port);
 	    SecureRandom sr = ReusableSecureRandom.getInstance();
 	    h = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), sr);
 	    logger.debug("Performing TLS handshake.");

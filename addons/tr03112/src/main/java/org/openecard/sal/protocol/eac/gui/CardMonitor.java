@@ -27,8 +27,9 @@ import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
-import org.openecard.common.enums.EventType;
 import org.openecard.common.interfaces.EventCallback;
+import org.openecard.common.event.EventObject;
+import org.openecard.common.event.EventType;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.executor.BackgroundTask;
 import org.openecard.gui.executor.StepActionResult;
@@ -79,7 +80,7 @@ public class CardMonitor implements BackgroundTask, EventCallback {
     }
 
     @Override
-    public void signalEvent(EventType eventType, Object eventData) {
+    public void signalEvent(EventType eventType, EventObject eventData) {
 	cardRemoved.deliver(null);
     }
 

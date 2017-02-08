@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2015 HS Coburg.
+ * Copyright (C) 2013-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.binding.tctoken;
+package org.openecard.addons.activate;
 
 import org.openecard.binding.tctoken.ex.ActivationError;
 import org.openecard.binding.tctoken.ex.FatalActivationError;
@@ -35,8 +35,13 @@ import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.Attachment;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
+import org.openecard.addon.bind.Headers;
 import org.openecard.addon.bind.RequestBody;
 import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.binding.tctoken.TCTokenHandler;
+import org.openecard.binding.tctoken.TCTokenRequest;
+import org.openecard.binding.tctoken.TCTokenResponse;
+import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.binding.tctoken.ex.NonGuiException;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
@@ -60,9 +65,9 @@ import org.openecard.common.interfaces.Dispatcher;
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
-public class ActivationAction implements AppPluginAction {
+public class ActivateAction implements AppPluginAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(ActivationAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ActivateAction.class);
     private static final Semaphore SEMAPHORE = new Semaphore(1);
 
     private final I18n lang = I18n.getTranslation("tr03112");
@@ -92,7 +97,7 @@ public class ActivationAction implements AppPluginAction {
 	} catch (AddonNotFoundException ex) {
 	    // this should never happen because the status and pin plugin are always available
 	    String msg = "Failed to get Status or PIN Plugin.";
-	    logger.error(msg, ex);
+	    LOG.error(msg, ex);
 	    throw new RuntimeException(msg, ex);
 	}
     }
@@ -103,12 +108,12 @@ public class ActivationAction implements AppPluginAction {
     }
 
     @Override
-    public BindingResult execute(RequestBody body, Map<String, String> params, List<Attachment> attachments) {
+    public BindingResult execute(RequestBody body, Map<String, String> params, Headers headers, List<Attachment> attachments) {
 	BindingResult response;
 
 	try {
 	    if (SEMAPHORE.tryAcquire()) {
-		response = checkRequestParameters(body, params, attachments);
+		response = checkRequestParameters(body, params, headers, attachments);
 	    } else {
 		response = new BindingResult(BindingResultCode.RESOURCE_LOCKED);
 		response.setResultMessage("An authentication process is already running.");
@@ -178,11 +183,11 @@ public class ActivationAction implements AppPluginAction {
      * @return A {@link BindingResult} with an error if the parameters are not correct or one depending on the processing
      * of the parameters.
      */
-    private BindingResult checkRequestParameters(RequestBody body, Map<String, String> params,
+    private BindingResult checkRequestParameters(RequestBody body, Map<String, String> params, Headers headers,
 	    List<Attachment> attachments) {
 	BindingResult response;
-	boolean emptyParms, tokenUrl, activationObject, status, showUI;
-	emptyParms = tokenUrl = activationObject = status = showUI = false;
+	boolean emptyParms, tokenUrl, status, showUI;
+	emptyParms = tokenUrl = status = showUI = false;
 
 	if (params.isEmpty()) {
 	    emptyParms = true;
@@ -190,10 +195,6 @@ public class ActivationAction implements AppPluginAction {
 
 	if (params.containsKey("tcTokenURL")) {
 	    tokenUrl = true;
-	}
-
-	if (params.containsKey("activationObject")) {
-	    activationObject = true;
 	}
 
 	if (params.containsKey("Status")) {
@@ -205,7 +206,7 @@ public class ActivationAction implements AppPluginAction {
 	}
 
 	// only continue, when there are known parameters in the request
-	if (emptyParms || !(tokenUrl || activationObject || status || showUI)) {
+	if (emptyParms || !(tokenUrl || status || showUI)) {
 	    response = new BindingResult(BindingResultCode.MISSING_PARAMETER);
 	    response.setResultMessage(lang.translationForKey(NO_ACTIVATION_PARAMETERS));
 	    showErrorMessage(lang.translationForKey(NO_ACTIVATION_PARAMETERS));
@@ -213,15 +214,14 @@ public class ActivationAction implements AppPluginAction {
 	}
 
 	// check illegal parameter combination
-	if ((tokenUrl && activationObject) || (tokenUrl && showUI) || (tokenUrl && status) || (activationObject && showUI)
-		|| (activationObject && status) || (showUI && status)) {
+	if ((tokenUrl && showUI) || (tokenUrl && status) || (showUI && status)) {
 	    response = new BindingResult(BindingResultCode.WRONG_PARAMETER);
 	    response.setResultMessage(lang.translationForKey(NO_PARAMS));
 	    showErrorMessage(lang.translationForKey(NO_PARAMS));
 	    return response;
 	}
 
-	return processRequest(body, params, attachments, tokenUrl, activationObject, showUI, status);
+	return processRequest(body, params, headers, attachments, tokenUrl, showUI, status);
     }
 
     /**
@@ -231,22 +231,21 @@ public class ActivationAction implements AppPluginAction {
      * @param params Query parameters of the request.
      * @param attachments Attachments of the request.
      * @param tokenUrl {@code TRUE} if {@code params} contains a TCTokenURL.
-     * @param activationObject {@code TRUE} if {@code params} contains an activationObject.
      * @param showUI {@code TRUE} if {@code params} contains a ShowUI parameter.
      * @param status {@code TRUE} if {@code params} contains a Status parameter.
      * @return A {@link BindingResult} representing the result of the request processing.
      */
-    private BindingResult processRequest(RequestBody body, Map<String, String> params, List<Attachment> attachments,
-	    boolean tokenUrl, boolean activationObject, boolean showUI, boolean status) {
+    private BindingResult processRequest(RequestBody body, Map<String, String> params, Headers headers,
+	    List<Attachment> attachments, boolean tokenUrl, boolean showUI, boolean status) {
 	BindingResult response = null;
 
-	if (tokenUrl || activationObject) {
-	    response = processTcTokenOrActivationObject(params);
+	if (tokenUrl) {
+	    response = processTcToken(params);
 	    return response;
 	}
 
 	if (status) {
-	    response = processStatus(body, params, attachments);
+	    response = processStatus(body, params, headers, attachments);
 	    return response;
 	}
 
@@ -353,8 +352,8 @@ public class ActivationAction implements AppPluginAction {
      * @param attachments Original list of Attachment object.
      * @return A {@link BindingResult} object containing the current status of the App as XML structure.
      */
-    private BindingResult processStatus(RequestBody body, Map<String, String> params, List<Attachment> attachments) {
-	BindingResult response = statusAction.execute(body, params, attachments);
+    private BindingResult processStatus(RequestBody body, Map<String, String> params, Headers headers, List<Attachment> attachments) {
+	BindingResult response = statusAction.execute(body, params, headers, attachments);
 	return response;
     }
 
@@ -364,7 +363,7 @@ public class ActivationAction implements AppPluginAction {
      * @param params Parameters of the request.
      * @return A {@link BindingResult} representing the result of the authentication.
      */
-    private BindingResult processTcTokenOrActivationObject(Map<String, String> params) {
+    private BindingResult processTcToken(Map<String, String> params) {
 	BindingResult response;
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	dynCtx.put(TR03112Keys.COOKIE_MANAGER, new CookieManager());
@@ -375,9 +374,7 @@ public class ActivationAction implements AppPluginAction {
 		tcTokenRequest = TCTokenRequest.convert(params, ctx);
 		response = tokenHandler.handleActivate(tcTokenRequest);
 		// Show success message. If we get here we have a valid StartPAOSResponse and a valid refreshURL
-		if (!tcTokenRequest.isTokenFromObject()) {
-		    showFinishMessage((TCTokenResponse) response);
-		}
+		showFinishMessage((TCTokenResponse) response);
 	    } catch (ActivationError ex) {
 		if (ex instanceof NonGuiException) {
 		    // error already displayed to the user so do not repeat it here
@@ -388,13 +385,13 @@ public class ActivationAction implements AppPluginAction {
 			showErrorMessage(ex.getLocalizedMessage());
 		    }
 		}
-		logger.error(ex.getMessage());
-		logger.debug(ex.getMessage(), ex); // stack trace only in debug level
-		logger.debug("Returning result: \n{}", ex.getBindingResult());
+		LOG.error(ex.getMessage());
+		LOG.debug(ex.getMessage(), ex); // stack trace only in debug level
+		LOG.debug("Returning result: \n{}", ex.getBindingResult());
 		if (ex instanceof FatalActivationError) {
-		    logger.info("Authentication failed, displaying error in Browser.");
+		    LOG.info("Authentication failed, displaying error in Browser.");
 		} else {
-		    logger.info("Authentication failed, redirecting to with errors attached to the URL.");
+		    LOG.info("Authentication failed, redirecting to with errors attached to the URL.");
 		}
 		response = ex.getBindingResult();
 	    } finally {
@@ -405,7 +402,7 @@ public class ActivationAction implements AppPluginAction {
 	    }
 	} catch (RuntimeException e) {
 	    response = new BindingResult(BindingResultCode.INTERNAL_ERROR);
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	}
 
 	return response;

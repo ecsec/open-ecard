@@ -22,7 +22,6 @@
 
 package org.openecard.binding.tctoken;
 
-import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.net.URISyntaxException;
 import java.util.concurrent.Future;
 import oasis.names.tc.dss._1_0.core.schema.Result;
@@ -49,7 +48,7 @@ public class TCTokenResponse extends BindingResult {
     private static final I18n lang = I18n.getTranslation("tr03112");
     private Result result;
     private TCToken token;
-    private Future<StartPAOSResponse> bindingTask;
+    private Future<?> bindingTask;
 
     /**
      * Returns the result of the client request.
@@ -108,11 +107,11 @@ public class TCTokenResponse extends BindingResult {
 	token.setRefreshAddress(addr);
     }
 
-    public void setBindingTask(Future<StartPAOSResponse> bindingTask) {
+    public void setBindingTask(Future<?> bindingTask) {
 	this.bindingTask = bindingTask;
     }
 
-    public Future<StartPAOSResponse> getBindingTask() {
+    public Future<?> getBindingTask() {
 	return bindingTask;
     }
 

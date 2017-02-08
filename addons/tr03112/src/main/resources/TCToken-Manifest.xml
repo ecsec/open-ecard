@@ -20,7 +20,7 @@
 	<ConfigDescription/>
 	<BindingActions>
 		<AppPluginSpecification>
-			<ClassName>org.openecard.binding.tctoken.ActivationAction</ClassName>
+			<ClassName>org.openecard.addons.activate.ActivateAction</ClassName>
 			<LocalizedName xml:lang="DE">Aktivierungsendpunkt</LocalizedName>
 			<LocalizedName xml:lang="EN">Activation Endpoint</LocalizedName>
 			<LocalizedDescription xml:lang="DE">

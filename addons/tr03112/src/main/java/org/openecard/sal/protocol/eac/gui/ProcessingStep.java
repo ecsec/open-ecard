@@ -23,7 +23,7 @@
 package org.openecard.sal.protocol.eac.gui;
 
 import org.openecard.common.I18n;
-import org.openecard.common.Version;
+import org.openecard.common.AppVersion;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
 
@@ -51,7 +51,7 @@ public class ProcessingStep extends Step {
 	setReversible(false);
 
 	Text desc = new Text();
-	desc.setText(lang.translationForKey(DESCRIPTION, Version.getName()));
+	desc.setText(lang.translationForKey(DESCRIPTION, AppVersion.getName()));
 	getInputInfoUnits().add(desc);
     }
 

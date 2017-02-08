@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 HS Coburg.
+ * Copyright (C) 2012-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,7 +32,6 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -44,6 +43,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.xml.transform.TransformerException;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonRegistry;
@@ -70,7 +70,6 @@ import org.openecard.common.util.Pair;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.message.DialogType;
-import org.openecard.recognition.CardRecognition;
 import org.openecard.transport.paos.PAOSException;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
@@ -79,8 +78,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.ResultMinor;
-import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.util.HandlerUtils;
+import org.openecard.common.interfaces.CardRecognition;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.transport.paos.PAOSConnectionException;
 
 
@@ -105,7 +105,7 @@ import org.openecard.transport.paos.PAOSConnectionException;
  */
 public class TCTokenHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(TCTokenHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TCTokenHandler.class);
 
     private static final I18n langTr03112 = I18n.getTranslation("tr03112");
     private static final I18n lang = I18n.getTranslation("tctoken");
@@ -122,7 +122,7 @@ public class TCTokenHandler {
     private final UserConsent gui;
     private final CardRecognition rec;
     private final AddonManager manager;
-    private final EventManager evManager;
+    private final EventDispatcher evManager;
 
     /**
      * Creates a TCToken handler instances and initializes it with the given parameters.
@@ -135,16 +135,16 @@ public class TCTokenHandler {
 	this.gui = ctx.getUserConsent();
 	this.rec = ctx.getRecognition();
 	this.manager = ctx.getManager();
-	this.evManager = ctx.getEventManager();
+	this.evManager = ctx.getEventDispatcher();
 	pin = langPace.translationForKey("pin");
 	puk = langPace.translationForKey("puk");
     }
 
-    private ConnectionHandleType prepareHandle(ConnectionHandleType connectionHandle) throws DispatcherException, InvocationTargetException, WSException {
+    private ConnectionHandleType prepareHandle(ConnectionHandleType connectionHandle) throws WSException {
 	// Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
 	CardApplicationPath appPath = new CardApplicationPath();
 	appPath.setCardAppPathRequest(connectionHandle);
-	CardApplicationPathResponse appPathRes = (CardApplicationPathResponse) dispatcher.deliver(appPath);
+	CardApplicationPathResponse appPathRes = (CardApplicationPathResponse) dispatcher.safeDeliver(appPath);
 
 	// Check CardApplicationPathResponse
 	WSHelper.checkResult(appPathRes);
@@ -154,12 +154,22 @@ public class TCTokenHandler {
 	pathRes = appPathRes.getCardAppPathResultSet().getCardApplicationPathResult();
 	appConnect.setCardApplicationPath(pathRes.get(0));
 	CardApplicationConnectResponse appConnectRes;
-	appConnectRes = (CardApplicationConnectResponse) dispatcher.deliver(appConnect);
+	appConnectRes = (CardApplicationConnectResponse) dispatcher.safeDeliver(appConnect);
 	// Update ConnectionHandle. It now includes a SlotHandle.
 	connectionHandle = appConnectRes.getConnectionHandle();
 
 	// Check CardApplicationConnectResponse
 	WSHelper.checkResult(appConnectRes);
+
+	return connectionHandle;
+    }
+
+    private ConnectionHandleType ensureHandleIsUsable(ConnectionHandleType connectionHandle) throws WSException {
+	connectionHandle = prepareHandle(connectionHandle);
+
+	// save handle for later use
+	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	dynCtx.put(TR03112Keys.CONNECTION_HANDLE, HandlerUtils.copyHandle(connectionHandle));
 
 	return connectionHandle;
     }
@@ -174,16 +184,10 @@ public class TCTokenHandler {
      * @throws DispatcherException If there was a problem dispatching a request from the server.
      * @throws PAOSException If there was a transport error.
      */
-    private TCTokenResponse processBinding(TCTokenRequest tokenRequest, ConnectionHandleType connectionHandle)
+    private TCTokenResponse processBinding(TCTokenRequest tokenRequest, @Nullable ConnectionHandleType connectionHandle)
 	    throws PAOSException, DispatcherException {
 	TCToken token = tokenRequest.getTCToken();
 	try {
-	    connectionHandle = prepareHandle(connectionHandle);
-
-	    // save handle for later use
-	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	    dynCtx.put(TR03112Keys.CONNECTION_HANDLE, HandlerUtils.copyHandle(connectionHandle));
-
 	    TCTokenResponse response = new TCTokenResponse();
 	    response.setTCToken(token);
 	    response.setResult(WSHelper.makeResultOK());
@@ -192,6 +196,7 @@ public class TCTokenHandler {
 	    switch (binding) {
 	    	case "urn:liberty:paos:2006-08": {
 		    // send StartPAOS
+		    connectionHandle = ensureHandleIsUsable(connectionHandle);
 		    List<String> supportedDIDs = getSupportedDIDs();
 		    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest, gui);
 		    FutureTask<StartPAOSResponse> paosTask = new FutureTask<>(task);
@@ -204,8 +209,9 @@ public class TCTokenHandler {
 		    response.setBindingTask(paosTask);
 		    break;
 		}
-		case "urn:ietf:rfc:2616":{
+		case "urn:ietf:rfc:2616": {
 		    // no actual binding, just connect via tls and authenticate the user with that connection
+		    connectionHandle = ensureHandleIsUsable(connectionHandle);
 		    HttpGetTask task = new HttpGetTask(dispatcher, connectionHandle, tokenRequest);
 		    FutureTask<StartPAOSResponse> tlsTask = new FutureTask<>(task);
 		    Thread tlsThread = new Thread(tlsTask, "TLS Auth");
@@ -222,26 +228,17 @@ public class TCTokenHandler {
 	    return response;
 	} catch (WSException ex) {
 	    String msg = "Failed to connect to card.";
-	    logger.error(msg, ex);
+	    LOG.error(msg, ex);
 	    throw new DispatcherException(msg, ex);
-	} catch (InvocationTargetException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw new DispatcherException(ex);
 	}
     }
 
-    public static void disconnectHandle(Dispatcher dispatcher, ConnectionHandleType connectionHandle)
-	   throws DispatcherException {
-	try {
-	    // disconnect card after authentication
-	    CardApplicationDisconnect appDis = new CardApplicationDisconnect();
-	    appDis.setConnectionHandle(connectionHandle);
-	    appDis.setAction(ActionType.RESET);
-	    dispatcher.deliver(appDis);
-	} catch (InvocationTargetException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw new DispatcherException(ex);
-	}
+    public static void disconnectHandle(Dispatcher dispatcher, ConnectionHandleType connectionHandle) {
+	// disconnect card after authentication
+	CardApplicationDisconnect appDis = new CardApplicationDisconnect();
+	appDis.setConnectionHandle(connectionHandle);
+	appDis.setAction(ActionType.RESET);
+	dispatcher.safeDeliver(appDis);
     }
 
     public static void killUserConsent() {
@@ -266,10 +263,10 @@ public class TCTokenHandler {
     public TCTokenResponse handleActivate(TCTokenRequest request) throws InvalidRedirectUrlException,
 	    SecurityViolationException, NonGuiException {
 	TCToken token = request.getTCToken();
-	if (logger.isDebugEnabled()) {
+	if (LOG.isDebugEnabled()) {
 	    try {
 		WSMarshaller m = WSMarshallerFactory.createInstance();
-		logger.debug("TCToken:\n{}", m.doc2str(m.marshal(token)));
+		LOG.debug("TCToken:\n{}", m.doc2str(m.marshal(token)));
 	    } catch (TransformerException | WSMarshallerException ex) {
 		// it's no use
 	    }
@@ -278,11 +275,11 @@ public class TCTokenHandler {
 	final DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	boolean performChecks = isPerformTR03112Checks(request);
 	if (! performChecks) {
-	    logger.warn("Checks according to BSI TR03112 3.4.2, 3.4.4 (TCToken specific) and 3.4.5 are disabled.");
+	    LOG.warn("Checks according to BSI TR03112 3.4.2, 3.4.4 (TCToken specific) and 3.4.5 are disabled.");
 	}
 	boolean isObjectActivation = request.getTCTokenURL() == null;
 	if (isObjectActivation) {
-	    logger.warn("Checks according to BSI TR03112 3.4.4 (TCToken specific) are disabled.");
+	    LOG.warn("Checks according to BSI TR03112 3.4.4 (TCToken specific) are disabled.");
 	}
 	dynCtx.put(TR03112Keys.TCTOKEN_CHECKS, performChecks);
 	dynCtx.put(TR03112Keys.OBJECT_ACTIVATION, isObjectActivation);
@@ -310,7 +307,7 @@ public class TCTokenHandler {
 
 	if (connectionHandle == null) {
 	    String msg = lang.translationForKey("cancel");
-	    logger.error(msg);
+	    LOG.error(msg);
 	    response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, msg));
 	    // fill in values, so it is usuable by the transport module
 	    response = determineRefreshURL(request, response);
@@ -326,14 +323,14 @@ public class TCTokenHandler {
 	    response.finishResponse(isObjectActivation);
 	    return response;
 	} catch (DispatcherException w) {
-	    logger.error(w.getMessage(), w);
+	    LOG.error(w.getMessage(), w);
 
 	    response.setResultCode(BindingResultCode.INTERNAL_ERROR);
 	    response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getMessage()));
 	    showErrorMessage(w.getMessage());
 	    throw new NonGuiException(response, w.getMessage(), w);
 	} catch (PAOSException w) {
-	    logger.error(w.getMessage(), w);
+	    LOG.error(w.getMessage(), w);
 
 	    // find actual error to display to the user
 	    Throwable innerException = w.getCause();
@@ -374,14 +371,14 @@ public class TCTokenHandler {
 		response = determineRefreshURL(request, response);
 		response.finishResponse(true);
 	    } catch (InvalidRedirectUrlException ex) {
-		logger.error(ex.getMessage(), ex);
+		LOG.error(ex.getMessage(), ex);
 		response.setResultCode(BindingResultCode.INTERNAL_ERROR);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, ex.getLocalizedMessage()));
 		throw new NonGuiException(response, ex.getMessage(), ex);
 	    } catch (SecurityViolationException ex) {
 		String msg2 = "The RefreshAddress contained in the TCToken is invalid. Redirecting to the "
 			+ "CommunicationErrorAddress.";
-		logger.error(msg2, ex);
+		LOG.error(msg2, ex);
 		response.setResultCode(BindingResultCode.REDIRECT);
 		response.setResult(WSHelper.makeResultError(ResultMinor.COMMUNICATION_ERROR, msg2));
 		response.addAuxResultData(AuxDataKeys.REDIRECT_LOCATION, ex.getBindingResult().getAuxResultData().get(
@@ -396,10 +393,10 @@ public class TCTokenHandler {
 	try {
 	    task.get();
 	} catch (InterruptedException ex) {
-	    logger.error(ex.getMessage(), ex);
+	    LOG.error(ex.getMessage(), ex);
 	    throw new PAOSException(ex);
 	} catch (ExecutionException ex) {
-	    logger.error(ex.getMessage(), ex);
+	    LOG.error(ex.getMessage(), ex);
 	    // perform conversion of ExecutionException from the Future to the really expected exceptions
 	    if (ex.getCause() instanceof PAOSException) {
 		throw (PAOSException) ex.getCause();
@@ -455,7 +452,7 @@ public class TCTokenHandler {
 	    Pair<URL, Certificate> last = resultPoints.get(resultPoints.size() - 1);
 	    endpoint = last.p1;
 	    dynCtx.put(TR03112Keys.IS_REFRESH_URL_VALID, true);
-	    logger.debug("Setting redirect address to '{}'.", endpoint);
+	    LOG.debug("Setting redirect address to '{}'.", endpoint);
 	    response.setRefreshAddress(endpoint.toString());
 	    return response;
 	} catch (MalformedURLException ex) {

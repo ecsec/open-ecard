@@ -59,7 +59,7 @@ public class TCTokenVerifier {
     private final ResourceContext ctx;
 
     /**
-     * Creates a new TCTokenVerifier to verify a TCToken.
+     * Creates a new TCTokenVerifier to verifyUrlToken a TCToken.
      *
      * @param token Token
      * @param ctx Context over which the token has been received.
@@ -92,10 +92,10 @@ public class TCTokenVerifier {
      * @throws SecurityViolationException Thrown in case the same origin policy is violated.
      * @throws UserCancellationException Thrown in case the user aborted the insert card dialog.
      */
-    public void verify() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, 
+    public void verifyUrlToken() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException,
 	    SecurityViolationException, UserCancellationException {
 	// ordering is important because of the raised errors in case the first two are not https URLs
-	initialCheck();
+	initialUrlTokenCheck();
 	verifyRefreshAddress();
 	verifyCommunicationErrorAddress();
 	checkUserCancellation();
@@ -214,7 +214,7 @@ public class TCTokenVerifier {
 	}
 
 	assertRequired("PathSecurityProtocol", proto);
-	String[] protos = {"urn:ietf:rfc:4346", "urn:ietf:rfc:5246", "urn:ietf:rfc:4279"};
+	String[] protos = {"urn:ietf:rfc:5246", "urn:ietf:rfc:4279"};
 	checkEqualOR("PathSecurityProtocol", proto, protos);
 	if ("urn:ietf:rfc:4279".equals(proto)) {
 	    try {
@@ -352,7 +352,7 @@ public class TCTokenVerifier {
      * @throws InvalidRedirectUrlException
      * @throws InvalidTCTokenElement
      */
-    private void initialCheck() throws InvalidRedirectUrlException, InvalidTCTokenElement {
+    private void initialUrlTokenCheck() throws InvalidRedirectUrlException, InvalidTCTokenElement {
 	if (token.getCommunicationErrorAddress() != null && ! token.getCommunicationErrorAddress().isEmpty() &&
 		token.getRefreshAddress().isEmpty() && token.getServerAddress().isEmpty() &&
 		token.getSessionIdentifier().isEmpty() && token.getBinding().isEmpty() &&

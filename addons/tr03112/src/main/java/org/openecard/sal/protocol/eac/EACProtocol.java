@@ -84,7 +84,7 @@ public class EACProtocol extends SALProtocolBaseImpl {
 	    }
 	}));
 
-	addOrderStep(new PACEStep(ctx.getDispatcher(), ctx.getUserConsent(), ctx.getEventManager()));
+	addOrderStep(new PACEStep(ctx.getDispatcher(), ctx.getUserConsent(), ctx.getEventDispatcher()));
 	addOrderStep(new TerminalAuthenticationStep(ctx.getDispatcher()));
 	addOrderStep(new ChipAuthenticationStep(ctx.getDispatcher()));
     }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TCTokenContext extends ResourceContext {
 
-    private static final Logger logger = LoggerFactory.getLogger(TCTokenContext.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TCTokenContext.class);
 
     private final TCToken token;
 
@@ -86,11 +86,9 @@ public class TCTokenContext extends ResourceContext {
     private static TCTokenContext generateTCToken(String data, ResourceContext base) throws InvalidTCTokenException,
 	    AuthServerException, InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException,
 	    SecurityViolationException, UserCancellationException {
-	// FIXME: Hack
-	data = TCTokenHacks.fixObjectTag(data);
-	// FIXME: Hack
+	// correct common TCToken shortcomings
 	data = TCTokenHacks.fixPathSecurityParameters(data);
-	logger.debug("Cleaned up TCToken:\n{}", data);
+	LOG.debug("Cleaned up TCToken:\n{}", data);
 
 	// Parse the TCToken
 	TCTokenParser parser = new TCTokenParser();
@@ -116,7 +114,7 @@ public class TCTokenContext extends ResourceContext {
 	    dynCtx.put(TR03112Keys.TCTOKEN_URL, last.p1);
 	}
 
-	ver.verify();
+	ver.verifyUrlToken();
 
 	return new TCTokenContext(token, base);
     }

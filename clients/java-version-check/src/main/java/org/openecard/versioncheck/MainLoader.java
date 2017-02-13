@@ -40,50 +40,60 @@ public class MainLoader {
 
     private static final float VERSION_REFERENCE_VAL = 1.7f;
 
-    public static void main(String[] args) throws IllegalArgumentException, InvocationTargetException,
-            ClassNotFoundException, NoSuchMethodException {
-	// check if java version is sufficient
-	if (! checkJavaVersion(VERSION_REFERENCE_VAL)) {
-	    String msg = getBundle().getString("MainLoader.invalid_java_version");
-	    String title = getBundle().getString("MainLoader.invalid_java_version.title");
-	    msg(title, msg, System.getProperty("java.version"));
-	    System.exit(1);
-	}
-
-	// get main method
-	Method m = null;
+    public static void main(String[] args) {
 	try {
-	    String className = getMainClassName();
-	    Class<?> clazz = getMainClass(className);
-	    m = getMainMethod(clazz);
-	} catch (ClassNotFoundException ex) {
-	    System.err.println("Main class not found.");
-	} catch (NoSuchMethodException ex) {
-	    System.err.println("Main method not found.");
-	}
+	    // check if java version is sufficient
+	    if (! checkJavaVersion(VERSION_REFERENCE_VAL)) {
+		String msg = getBundle().getString("MainLoader.invalid_java_version");
+		String title = getBundle().getString("MainLoader.invalid_java_version.title");
+		msg(title, msg, System.getProperty("java.version"));
+		System.exit(1);
+	    }
 
-	// do we have a function?
-	if (m == null) {
-	    String msg = getBundle().getString("MainLoader.no_method");
-	    String title = getBundle().getString("MainLoader.no_method.title");
-	    msg(title, msg);
-	    System.exit(1);
-	}
-	try {
-	    m.invoke(null, (Object) args);
-	} catch (IllegalArgumentException ex) {
-	    String msg = getBundle().getString("MainLoader.wrong_args");
-	    String title = getBundle().getString("MainLoader.wrong_args.title");
-	    msg(title, msg);
-	    System.exit(1);
-	} catch (IllegalAccessException ex) {
-	    String msg = getBundle().getString("MainLoader.missing_rights");
-	    String title = getBundle().getString("MainLoader.missing_rights");
-	    msg(title, msg);
-	    System.exit(1);
-	} catch (InvocationTargetException ex) {
-	    String msg = getBundle().getString("MainLoader.unhandled_error");
-	    String title = getBundle().getString("MainLoader.unhandled_error");
+	    // get main method
+	    Method m = null;
+	    try {
+		String className = getMainClassName();
+		Class<?> clazz = getMainClass(className);
+		m = getMainMethod(clazz);
+	    } catch (ClassNotFoundException ex) {
+		System.err.println("Main class not found.");
+	    } catch (NoSuchMethodException ex) {
+		System.err.println("Main method not found.");
+	    }
+
+	    // do we have a function?
+	    if (m == null) {
+		String msg = getBundle().getString("MainLoader.no_method");
+		String title = getBundle().getString("MainLoader.no_method.title");
+		msg(title, msg);
+		System.exit(1);
+	    }
+	    try {
+		m.invoke(null, (Object) args);
+	    } catch (IllegalArgumentException ex) {
+		String msg = getBundle().getString("MainLoader.wrong_args");
+		String title = getBundle().getString("MainLoader.wrong_args.title");
+		msg(title, msg);
+		System.exit(1);
+	    } catch (IllegalAccessException ex) {
+		String msg = getBundle().getString("MainLoader.missing_rights");
+		String title = getBundle().getString("MainLoader.missing_rights");
+		msg(title, msg);
+		System.exit(1);
+	    } catch (InvocationTargetException ex) {
+		String msg = getBundle().getString("MainLoader.unhandled_error");
+		String title = getBundle().getString("MainLoader.unhandled_error");
+		msg(title, msg);
+		System.exit(1);
+	    }
+	} catch (Throwable ex) {
+	    // print stacktrace just to make sure we don't miss it
+	    ex.printStackTrace(System.err);
+
+	    String msg = "An unhandled error occured.\n\n";
+	    msg += ex.getClass().getName() + ": " + ex.getMessage();
+	    String title = "Error starting the application";
 	    msg(title, msg);
 	    System.exit(1);
 	}

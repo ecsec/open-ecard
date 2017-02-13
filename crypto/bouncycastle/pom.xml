@@ -55,6 +55,7 @@
 							</excludes>
 						</configuration>
 					</execution>
+					<!-- disable new TLS interface until it is stable
 					<execution>
 						<id>bc-tls</id>
 						<phase>generate-sources</phase>
@@ -65,6 +66,7 @@
 							<basedir>${basedir}/src/bc/tls/src/main/java/org/bouncycastle</basedir>
 						</configuration>
 					</execution>
+					-->
 				</executions>
 				<configuration>
 					<outputBasedir>${basedir}/target/generated-sources/bc</outputBasedir>

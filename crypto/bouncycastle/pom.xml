@@ -40,15 +40,6 @@
 						</goals>
 						<configuration>
 							<basedir>${basedir}/src/bc/prov/src/main/java/org/bouncycastle</basedir>
-							<includes>
-								<include>**/*.java</include>
-							</includes>
-							<excludes>
-								<!-- we do not want jca in this build -->
-								<!-- <exclude>jcajce/**/*.java</exclude> -->
-								<!-- <exclude>**/jcajce/**</exclude> -->
-								<!-- <exclude>**/jce/**</exclude> -->
-							</excludes>
 						</configuration>
 					</execution>
 					<execution>
@@ -59,15 +50,19 @@
 						</goals>
 						<configuration>
 							<basedir>${basedir}/src/bc/pkix/src/main/java/org/bouncycastle</basedir>
-							<includes>
-								<include>**/*.java</include>
-							</includes>
 							<excludes>
-								<!-- we do not want jca in this build -->
-								<!-- <exclude>jcajce/**/*.java</exclude> -->
-								<!--<exclude>**/jcajce/**</exclude>-->
 								<exclude>**/openssl/**</exclude>
 							</excludes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>bc-tls</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+						<configuration>
+							<basedir>${basedir}/src/bc/tls/src/main/java/org/bouncycastle</basedir>
 						</configuration>
 					</execution>
 				</executions>

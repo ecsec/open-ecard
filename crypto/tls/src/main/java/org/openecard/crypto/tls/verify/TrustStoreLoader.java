@@ -102,11 +102,25 @@ public class TrustStoreLoader {
 		LOG.error("No trusted CAs found.");
 	    }
 
+	    // make sure that we set a keystore object for this file
+	    if (ks == null) {
+		ks = KeyStore.getInstance(KeyStore.getDefaultType());
+		ks.load(null);
+
+		// add anchors to the file
+		for (TrustAnchor a : anchors) {
+		    X509Certificate cert = a.getTrustedCert();
+		    if (ks.getCertificateAlias(cert) == null) {
+			ks.setCertificateEntry(cert.getSubjectX500Principal().getName(), cert);
+		    }
+		}
+	    }
+
 	    synchronized (TrustStoreLoader.class) {
 		TRUST_STORES.put(getStoreFileName(), ks);
 		TRUST_ANCHORS.put(getStoreFileName(), Collections.unmodifiableSet(anchors));
 	    }
-	} catch (NoSuchAlgorithmException | KeyStoreException ex) {
+	} catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException ex) {
 	    String msg = "Failed to create or initialize TrustManagerFactory.";
 	    LOG.error(msg, ex);
 	    throw new RuntimeException(msg, ex);

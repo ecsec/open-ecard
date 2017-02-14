@@ -41,11 +41,14 @@ import org.openecard.bouncycastle.crypto.tls.SignatureAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsCipherFactory;
+import org.openecard.bouncycastle.crypto.tls.TlsClientContext;
 import org.openecard.bouncycastle.crypto.tls.TlsECCUtils;
 import org.openecard.bouncycastle.crypto.tls.TlsExtensionsUtils;
 import org.openecard.bouncycastle.crypto.tls.TlsKeyExchange;
+import org.openecard.bouncycastle.crypto.tls.TlsSession;
 import org.openecard.bouncycastle.crypto.tls.TlsUtils;
 import org.openecard.common.OpenecardProperties;
+import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.tls.auth.ContextAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,10 +63,11 @@ import org.slf4j.LoggerFactory;
  */
 public class ClientCertDefaultTlsClient extends DefaultTlsClient implements ClientCertTlsClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(ClientCertDefaultTlsClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientCertDefaultTlsClient.class);
 
     private final String host;
     private TlsAuthentication tlsAuth;
+    private boolean enforceSameSession = false;
 
     /**
      * Create a ClientCertDefaultTlsClient for the given parameters.
@@ -94,6 +98,16 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	boolean tls1 = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
 	setMinimumVersion(tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11);
 	this.host = host;
+    }
+
+    public void setEnforceSameSession(boolean enforceSameSession) {
+	this.enforceSameSession = enforceSameSession;
+    }
+
+
+    @Override
+    public void init(TlsClientContext context) {
+	super.init(context);
     }
 
 
@@ -278,16 +292,16 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
     @Override
     public void notifyAlertRaised(short alertLevel, short alertDescription, String message, Throwable cause) {
 	TlsError error = new TlsError(alertLevel, alertDescription, message, cause);
-	if (alertLevel == AlertLevel.warning && logger.isInfoEnabled()) {
-	    logger.info("TLS warning sent.");
-	    if (logger.isDebugEnabled()) {
-		logger.info(error.toString(), cause);
+	if (alertLevel == AlertLevel.warning && LOG.isInfoEnabled()) {
+	    LOG.info("TLS warning sent.");
+	    if (LOG.isDebugEnabled()) {
+		LOG.info(error.toString(), cause);
 	    } else {
-		logger.info(error.toString());
+		LOG.info(error.toString());
 	    }
 	} else if (alertLevel == AlertLevel.fatal) {
-	    logger.error("TLS error sent.");
-	    logger.error(error.toString(), cause);
+	    LOG.error("TLS error sent.");
+	    LOG.error(error.toString(), cause);
 	}
 
 	super.notifyAlertRaised(alertLevel, alertDescription, message, cause);
@@ -296,12 +310,12 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
     @Override
     public void notifyAlertReceived(short alertLevel, short alertDescription) {
 	TlsError error = new TlsError(alertLevel, alertDescription);
-	if (alertLevel == AlertLevel.warning && logger.isInfoEnabled()) {
-	    logger.info("TLS warning received.");
-	    logger.info(error.toString());
+	if (alertLevel == AlertLevel.warning && LOG.isInfoEnabled()) {
+	    LOG.info("TLS warning received.");
+	    LOG.info(error.toString());
 	} else if (alertLevel == AlertLevel.fatal) {
-	    logger.error("TLS error received.");
-	    logger.error(error.toString());
+	    LOG.error("TLS error received.");
+	    LOG.error(error.toString());
 	}
 
 	super.notifyAlertReceived(alertLevel, alertDescription);
@@ -310,6 +324,34 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
     @Override
     public void notifySecureRenegotiation(boolean secureRenegotiation) throws IOException {
 	// allow renegotiation
+    }
+
+
+    @Override
+    public TlsSession getSessionToResume() {
+	return context != null ? context.getResumableSession() : null;
+    }
+
+    @Override
+    public void notifySessionID(byte[] sessionID) {
+	if (enforceSameSession) {
+	    // check if someone tries to resume and raise error
+	    TlsSession s = getSessionToResume();
+	    if (s != null) {
+		if (ByteUtils.compare(s.getSessionID(), sessionID)) {
+		    // the session id is the same meaning the protocol implementation will reject the handshake if the
+		    // secrets don't match
+		    LOG.info("Trying to resume previous TLS session.");
+		    return;
+		}
+	    }
+
+	    // resumption not initiated properly
+	    // terminate connection with RuntimeException as BC will handle this error
+	    String msg = "TLS Session resumption not successful.";
+	    LOG.error(msg);
+	    throw new RuntimeException(msg);
+	}
     }
 
 }

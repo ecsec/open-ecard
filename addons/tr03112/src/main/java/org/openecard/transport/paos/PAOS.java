@@ -282,19 +282,14 @@ public class PAOS {
 	HttpContext ctx = new BasicHttpContext();
 	HttpRequestExecutor httpexecutor = new HttpRequestExecutor();
 	DefaultConnectionReuseStrategy reuse = new DefaultConnectionReuseStrategy();
-	boolean firstLoop = true;
 	boolean connectionDropped = false;
 	ResponseBaseType lastResponse = null;
 
 	try {
 	    // loop and send makes a computer happy
 	    while (true) {
-		if (! firstLoop && tlsHandler.isSameChannel()) {
-		    throw new PAOSException(CONNECTION_CLOSED);
-		}
-		firstLoop = false;
-
 		// set up connection to PAOS endpoint
+		// if this one fails we may not continue
 		conn = openHttpStream();
 
 		boolean isReusable;
@@ -398,7 +393,7 @@ public class PAOS {
     }
 
 
-     private StreamHttpClientConnection openHttpStream() throws PAOSConnectionException {
+    private StreamHttpClientConnection openHttpStream() throws PAOSConnectionException {
         StreamHttpClientConnection conn;
 	try {
 	    LOG.debug("Opening connection to PAOS server.");

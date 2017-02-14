@@ -122,6 +122,9 @@ public class TlsConnectionHandler {
 	    // use same channel as demanded in TR-03124 sec. 2.4.3
 	    if (isSameChannel()) {
 		tlsClient = tokenRequest.getTokenContext().getTlsClient();
+		if (tlsClient instanceof ClientCertDefaultTlsClient) {
+		    ((ClientCertDefaultTlsClient) tlsClient).setEnforceSameSession(true);
+		}
 	    } else {
 		// kill open channel in tctoken request, it is not needed anymore
 		if (tokenRequest.getTokenContext() != null) {
@@ -235,21 +238,29 @@ public class TlsConnectionHandler {
 	    throws IOException, URISyntaxException {
 	if (! isSameChannel()) {
 	    // normal procedure, create a new channel
-	    Socket socket = ProxySettings.getDefault().getSocket("https", hostname, port);
-	    tlsClient.setClientVersion(tlsVersion);
-	    // TLS
-	    InputStream sockIn = socket.getInputStream();
-	    OutputStream sockOut = socket.getOutputStream();
-	    SecureRandom sr = ReusableSecureRandom.getInstance();
-	    TlsClientProtocol handler = new TlsClientProtocol(sockIn, sockOut, sr);
-	    handler.connect(tlsClient);
-
-	    return handler;
+	    return createNewTlsConnection(tlsVersion);
 	} else {
-	    // if something fucks up the channel we are out of luck creating a new one as the TR demands to use the
-	    // exact same channel
-	    return tokenRequest.getTokenContext().getTlsClientProto();
+	    // if something fucks up the channel we may try session resumption
+	    TlsClientProtocol proto = tokenRequest.getTokenContext().getTlsClientProto();
+	    if (proto.isClosed()) {
+		return createNewTlsConnection(tlsVersion);
+	    } else {
+		return proto;
+	    }
 	}
+    }
+
+    private TlsClientProtocol createNewTlsConnection(ProtocolVersion tlsVersion) throws IOException, URISyntaxException {
+	Socket socket = ProxySettings.getDefault().getSocket("https", hostname, port);
+	tlsClient.setClientVersion(tlsVersion);
+	// TLS
+	InputStream sockIn = socket.getInputStream();
+	OutputStream sockOut = socket.getOutputStream();
+	SecureRandom sr = ReusableSecureRandom.getInstance();
+	TlsClientProtocol handler = new TlsClientProtocol(sockIn, sockOut, sr);
+	handler.connect(tlsClient);
+
+	return handler;
     }
 
     private static URL fixServerAddress(URL serverAddress, String sessionIdentifier) throws MalformedURLException {

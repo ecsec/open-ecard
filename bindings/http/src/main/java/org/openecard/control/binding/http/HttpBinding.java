@@ -124,7 +124,9 @@ public class HttpBinding {
     }
 
     public void stop() throws Exception {
-	service.interrupt();
+	if (service != null) {
+	    service.interrupt();
+	}
     }
 
     /**

@@ -243,6 +243,9 @@ public final class RichClient {
 	    String msg = String.format("%s%n%n%s", title, message);
 	    gui.obtainMessageDialog().showMessageDialog(msg, AppVersion.getName(), DialogType.ERROR_MESSAGE);
 	    teardown();
+	} catch (Throwable ex) {
+	    LOG.error("Unexpected error occurred. Exiting client.");
+	    System.exit(1);
 	}
     }
 
@@ -259,10 +262,14 @@ public final class RichClient {
 
     public void teardown() {
 	try {
-	    eventDispatcher.terminate();
+	    if (eventDispatcher != null) {
+		eventDispatcher.terminate();
+	    }
 
 	    // TODO: shutdown addon manager and related components?
-	    manager.shutdown();
+	    if (manager != null) {
+		manager.shutdown();
+	    }
 
 	    // shutdown control modules
 	    if (httpBinding != null) {
@@ -270,13 +277,17 @@ public final class RichClient {
 	    }
 
 	    // shutdown SAL
-	    Terminate terminate = new Terminate();
-	    sal.terminate(terminate);
+	    if (sal != null) {
+		Terminate terminate = new Terminate();
+		sal.terminate(terminate);
+	    }
 
 	    // shutdown IFD
-	    ReleaseContext releaseContext = new ReleaseContext();
-	    releaseContext.setContextHandle(contextHandle);
-	    ifd.releaseContext(releaseContext);
+	    if (ifd != null && contextHandle != null) {
+		ReleaseContext releaseContext = new ReleaseContext();
+		releaseContext.setContextHandle(contextHandle);
+		ifd.releaseContext(releaseContext);
+	    }
 	} catch (Exception ex) {
 	    LOG.error("Failed to stop Richclient.", ex);
 	}

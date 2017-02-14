@@ -85,7 +85,9 @@ public class EventDispatcherImpl implements EventDispatcher {
 
     @Override
     public synchronized void terminate() {
-	threadPool.shutdownNow();
+	if (threadPool != null) {
+	    threadPool.shutdownNow();
+	}
     }
 
 

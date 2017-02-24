@@ -12,7 +12,6 @@
 	<ConfigDescription/>
 	<BindingActions/>
 	<ApplicationActions>
-		<!--
 		<AppExtensionSpecification>
 			<ID>GetCardsAndPINStatusAction</ID>
 			<ClassName>org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction</ClassName>
@@ -22,7 +21,6 @@
 			<LocalizedDescription xml:lang="DE">Mit dieser Aktion können Sie die PIN-Verwaltung öffnen.</LocalizedDescription>
 			<ConfigDescription/>
 		</AppExtensionSpecification>
-		-->
 
 		<!--
 		<AppExtensionSpecification>

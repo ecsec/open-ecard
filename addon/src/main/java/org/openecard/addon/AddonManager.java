@@ -264,22 +264,22 @@ public class AddonManager {
 //	}
 
 	ProtocolPluginSpecification protoSpec = addonSpec.searchIFDActionByURI(uri);
-	String className = protoSpec.getClassName();
-	try {
-	    ClassLoader cl = registry.downloadAddon(addonSpec);
-	    IFDProtocolProxy protoFactory = new IFDProtocolProxy(className, cl);
-	    Context aCtx = new Context(this, env.getDispatcher(), env.getEventDispatcher(), addonSpec, viewController);
-	    aCtx.setCardRecognition(env.getRecognition());
-	    aCtx.setCardStateMap(cardStates);
-	    aCtx.setEventHandle(eventHandler);
-	    aCtx.setUserConsent(userConsent);
-	    protoFactory.init(aCtx);
-	    cache.addIFDProtocol(addonSpec, uri, protoFactory);
-	    return protoFactory;
-	} catch (ActionInitializationException e) {
-	    LOG.error("Initialization of IFD Protocol failed", e);
-	} catch (AddonException ex) {
-	    LOG.error("Failed to download Add-on.", ex);
+	if (protoSpec == null) {
+	    LOG.error("Requested IFD Protocol {} does not exist in Add-on {}.", uri, addonSpec.getId());
+	} else {
+	    String className = protoSpec.getClassName();
+	    try {
+		ClassLoader cl = registry.downloadAddon(addonSpec);
+		IFDProtocolProxy protoFactory = new IFDProtocolProxy(className, cl);
+		Context aCtx = createContext(addonSpec);
+		protoFactory.init(aCtx);
+		cache.addIFDProtocol(addonSpec, uri, protoFactory);
+		return protoFactory;
+	    } catch (ActionInitializationException e) {
+		LOG.error("Initialization of IFD Protocol failed", e);
+	    } catch (AddonException ex) {
+		LOG.error("Failed to download Add-on.", ex);
+	    }
 	}
 	return null;
     }
@@ -300,22 +300,22 @@ public class AddonManager {
 //	}
 
 	ProtocolPluginSpecification protoSpec = addonSpec.searchSALActionByURI(uri);
-	String className = protoSpec.getClassName();
-	try {
-	    ClassLoader cl = registry.downloadAddon(addonSpec);
-	    SALProtocolProxy protoFactory = new SALProtocolProxy(className, cl);
-	    Context aCtx = new Context(this, env.getDispatcher(), env.getEventDispatcher(), addonSpec, viewController);
-	    aCtx.setCardRecognition(env.getRecognition());
-	    aCtx.setCardStateMap(cardStates);
-	    aCtx.setEventHandle(eventHandler);
-	    aCtx.setUserConsent(userConsent);
-	    protoFactory.init(aCtx);
-	    cache.addSALProtocol(addonSpec, uri, protoFactory);
-	    return protoFactory;
-	} catch (ActionInitializationException e) {
-	    LOG.error("Initialization of SAL Protocol failed", e);
-	} catch (AddonException ex) {
-	    LOG.error("Failed to download Add-on.", ex);
+	if (protoSpec == null) {
+	    LOG.error("Requested SAL Protocol {} does not exist in Add-on {}.", uri, addonSpec.getId());
+	} else {
+	    String className = protoSpec.getClassName();
+	    try {
+		ClassLoader cl = registry.downloadAddon(addonSpec);
+		SALProtocolProxy protoFactory = new SALProtocolProxy(className, cl);
+		Context aCtx = createContext(addonSpec);
+		protoFactory.init(aCtx);
+		cache.addSALProtocol(addonSpec, uri, protoFactory);
+		return protoFactory;
+	    } catch (ActionInitializationException e) {
+		LOG.error("Initialization of SAL Protocol failed", e);
+	    } catch (AddonException ex) {
+		LOG.error("Failed to download Add-on.", ex);
+	    }
 	}
 	return null;
     }
@@ -329,29 +329,30 @@ public class AddonManager {
      * the given {@code actionId} exists.
      */
     public AppExtensionAction getAppExtensionAction(@Nonnull AddonSpecification addonSpec, @Nonnull String actionId) {
-	    AppExtensionAction appExtAction = cache.getAppExtensionAction(addonSpec, actionId);
-	    if (appExtAction != null) {
-		// AppExtensionAction cached so return it
-		return appExtAction;
-	    }
+	// get extension from cache
+	AppExtensionAction appExtAction = cache.getAppExtensionAction(addonSpec, actionId);
+	if (appExtAction != null) {
+	    // AppExtensionAction cached so return it
+	    return appExtAction;
+	}
 
 	AppExtensionSpecification protoSpec = addonSpec.searchByActionId(actionId);
-	String className = protoSpec.getClassName();
-	try {
-	    ClassLoader cl = registry.downloadAddon(addonSpec);
-	    AppExtensionActionProxy protoFactory = new AppExtensionActionProxy(className, cl);
-	    Context aCtx = new Context(this, env.getDispatcher(), env.getEventDispatcher(), addonSpec, viewController);
-	    aCtx.setCardRecognition(env.getRecognition());
-	    aCtx.setCardStateMap(cardStates);
-	    aCtx.setEventHandle(eventHandler);
-	    aCtx.setUserConsent(userConsent);
-	    protoFactory.init(aCtx);
-	    cache.addAppExtensionAction(addonSpec, actionId, protoFactory);
-	    return protoFactory;
-	} catch (ActionInitializationException e) {
-	    LOG.error("Initialization of AppExtensionAction failed", e);
-	} catch (AddonException ex) {
-	    LOG.error("Failed to download Add-on.", ex);
+	if (protoSpec == null) {
+	    LOG.error("Requested Extension {} does not exist in Add-on {}.", actionId, addonSpec.getId());
+	} else {
+	    String className = protoSpec.getClassName();
+	    try {
+		ClassLoader cl = registry.downloadAddon(addonSpec);
+		AppExtensionActionProxy protoFactory = new AppExtensionActionProxy(className, cl);
+		Context aCtx = createContext(addonSpec);
+		protoFactory.init(aCtx);
+		cache.addAppExtensionAction(addonSpec, actionId, protoFactory);
+		return protoFactory;
+	    } catch (ActionInitializationException e) {
+		LOG.error("Initialization of AppExtensionAction failed", e);
+	    } catch (AddonException ex) {
+		LOG.error("Failed to download Add-on.", ex);
+	    }
 	}
 	return null;
     }
@@ -373,24 +374,34 @@ public class AddonManager {
 	}
 
 	AppPluginSpecification protoSpec = addonSpec.searchByResourceName(resourceName);
-	String className = protoSpec.getClassName();
-	try {
-	    ClassLoader cl = registry.downloadAddon(addonSpec);
-	    AppPluginActionProxy protoFactory = new AppPluginActionProxy(className, cl);
-	    Context aCtx = new Context(this, env.getDispatcher(), env.getEventDispatcher(), addonSpec, viewController);
-	    aCtx.setCardRecognition(env.getRecognition());
-	    aCtx.setCardStateMap(cardStates);
-	    aCtx.setEventHandle(eventHandler);
-	    aCtx.setUserConsent(userConsent);
-	    protoFactory.init(aCtx);
-	    cache.addAppPluginAction(addonSpec, resourceName, protoFactory);
-	    return protoFactory;
-	} catch (ActionInitializationException e) {
-	    LOG.error("Initialization of AppPluginAction failed", e);
-	} catch (AddonException ex) {
-	    LOG.error("Failed to download Add-on.", ex);
+	if (protoSpec == null) {
+	    LOG.error("Plugin for resource {} does not exist in Add-on {}.", resourceName, addonSpec.getId());
+	} else {
+	    String className = protoSpec.getClassName();
+	    try {
+		ClassLoader cl = registry.downloadAddon(addonSpec);
+		AppPluginActionProxy protoFactory = new AppPluginActionProxy(className, cl);
+		Context aCtx = createContext(addonSpec);
+		protoFactory.init(aCtx);
+		cache.addAppPluginAction(addonSpec, resourceName, protoFactory);
+		return protoFactory;
+	    } catch (ActionInitializationException e) {
+		LOG.error("Initialization of AppPluginAction failed", e);
+	    } catch (AddonException ex) {
+		LOG.error("Failed to download Add-on.", ex);
+	    }
 	}
 	return null;
+    }
+
+    private Context createContext(@Nonnull AddonSpecification addonSpec) {
+	Context aCtx = new Context(this, env.getDispatcher(), env.getEventDispatcher(), addonSpec, viewController);
+	aCtx.setCardRecognition(env.getRecognition());
+	aCtx.setCardStateMap(cardStates);
+	aCtx.setEventHandle(eventHandler);
+	aCtx.setUserConsent(userConsent);
+
+	return aCtx;
     }
 
     /**

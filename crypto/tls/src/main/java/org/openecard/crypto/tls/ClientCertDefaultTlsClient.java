@@ -68,6 +68,8 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
     private final String host;
     private TlsAuthentication tlsAuth;
     private boolean enforceSameSession = false;
+    private TlsSession firstSession;
+    private TlsSession lastSession;
 
     /**
      * Create a ClientCertDefaultTlsClient for the given parameters.
@@ -107,6 +109,11 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 
     @Override
     public void init(TlsClientContext context) {
+	// save first session so resumption only works with the exact same session
+	if (enforceSameSession && firstSession == null && lastSession != null) {
+	    this.firstSession = lastSession;
+	}
+
 	super.init(context);
     }
 
@@ -329,7 +336,11 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 
     @Override
     public TlsSession getSessionToResume() {
-	return context != null ? context.getResumableSession() : null;
+	if (firstSession != null) {
+	    return firstSession;
+	} else {
+	    return super.getSessionToResume();
+	}
     }
 
     @Override
@@ -352,6 +363,16 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	    LOG.error(msg);
 	    throw new RuntimeException(msg);
 	}
+    }
+
+    @Override
+    public void notifyHandshakeComplete() throws IOException {
+	lastSession = context != null ? context.getResumableSession() : null;
+	if (lastSession != null) {
+	    lastSession = new TlsSessionImpl(lastSession.getSessionID(), lastSession.exportSessionParameters());
+	}
+
+	super.notifyHandshakeComplete();
     }
 
 }

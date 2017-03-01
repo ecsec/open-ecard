@@ -130,8 +130,18 @@ public class PinEntryStep extends Step {
 
     protected final void updateState() throws CryptokiException {
 	pinState = PinState.getUserPinState(session.getSlot().getTokenInfo());
+	setStatusFlags();
 	getInputInfoUnits().clear();
 	generateGui();
+    }
+
+    private void setStatusFlags() {
+	switch (pinState) {
+	    case PIN_LOCKED:
+	    case PIN_NOT_INITIALIZED:
+	    case PIN_NEEDS_CHANGE:
+		setPinBlocked();
+	}
     }
 
     private void createPinEntryGui() {
@@ -210,6 +220,10 @@ public class PinEntryStep extends Step {
 
     boolean isPinAuthenticated() {
 	return pinAuthenticated;
+    }
+
+    boolean isPinBlocked() {
+	return pinBlocked;
     }
 
 }

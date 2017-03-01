@@ -42,7 +42,7 @@ public class PinEntryDialog {
     private final UserConsent gui;
     private final boolean protectedAuthPath;
     private final MwSession session;
-    PinEntryStep pinStep;
+    private PinEntryStep pinStep;
 
     public PinEntryDialog(UserConsent gui, boolean protectedAuthPath, MwSession session) {
 	this.gui = gui;
@@ -68,6 +68,10 @@ public class PinEntryDialog {
 
     boolean isPinAuthenticated() {
 	return pinStep.isPinAuthenticated();
+    }
+
+    boolean isPinBlocked() {
+	return pinStep.isPinBlocked();
     }
 
 }

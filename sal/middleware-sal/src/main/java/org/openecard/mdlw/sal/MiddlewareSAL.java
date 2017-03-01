@@ -157,6 +157,7 @@ import org.openecard.mdlw.sal.enums.UserType;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.exceptions.FinalizationException;
 import org.openecard.mdlw.sal.exceptions.InitializationException;
+import org.openecard.mdlw.sal.exceptions.PinBlockedException;
 import org.openecard.mdlw.sal.exceptions.PinIncorrectException;
 import org.openecard.mdlw.sal.exceptions.TokenException;
 import org.openecard.ws.marshal.WSMarshallerException;
@@ -839,7 +840,8 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 
             MwSession session = managedSessions.get(slotHandle);
 	    boolean protectedAuthPath = connectionHandle.getSlotInfo().isProtectedAuthPath();
-	    boolean pinAuthenticated = false;
+	    boolean pinAuthenticated;
+	    boolean pinBlocked = false;
 	    if (! (pinValue == null || pinValue.length == 0) && ! protectedAuthPath) {
 		// we don't need a GUI if the PIN is known
 		try {
@@ -858,11 +860,16 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 		    PinEntryDialog dialog = new PinEntryDialog(gui, protectedAuthPath, session);
 		    dialog.show();
 		    pinAuthenticated = dialog.isPinAuthenticated();
+		    pinBlocked = dialog.isPinBlocked();
 		}
 	    }
 
 	    if (pinAuthenticated) {
 		cardStateEntry.addAuthenticated(didName, application);
+	    } else if (pinBlocked) {
+		String msg = "PIN is blocked.";
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, msg);
+		response.setResult(r);
 	    } else {
 		String msg = "Failed to enter PIN.";
 		Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg);
@@ -872,6 +879,11 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
             // create did authenticate response
             response.setAuthenticationProtocolData(pinCompareOutput.getAuthDataType());
 
+	} catch (PinBlockedException ex) {
+	    // TODO: set retry counter
+	    String minor = ECardConstants.Minor.IFD.PASSWORD_BLOCKED;
+	    Result r = WSHelper.makeResultError(minor, ex.getMessage());
+	    response.setResult(r);
 	} catch (PinIncorrectException ex) {
 	    // TODO: set retry counter
 	    String minor = ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED;

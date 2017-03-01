@@ -22,6 +22,7 @@
 
 package org.openecard.mdlw.sal;
 
+import java.util.Arrays;
 import java.util.Map;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.InputInfoUnit;
@@ -30,10 +31,10 @@ import org.openecard.gui.executor.ExecutionResults;
 import org.openecard.gui.executor.StepAction;
 import org.openecard.gui.executor.StepActionResult;
 import org.openecard.gui.executor.StepActionResultStatus;
-import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.enums.UserType;
 import org.openecard.mdlw.sal.exceptions.AuthenticationException;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
+import org.openecard.mdlw.sal.exceptions.PinBlockedException;
 import org.openecard.mdlw.sal.exceptions.PinIncorrectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,24 +104,27 @@ public class PinChangeStepAction extends StepAction {
 		// I suspect user removed card
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
+	} catch (PinBlockedException ex) {
+	    // let the UI take care of producing a blocked error
+	    try  {
+		pinStep.updateState();
+		return new StepActionResult(StepActionResultStatus.REPEAT);
+	    } catch (CryptokiException ex2) {
+		// I suspect user removed card
+		return new StepActionResult(StepActionResultStatus.CANCEL);
+	    }
 	} catch (AuthenticationException ex) {
 	    LOG.error("Authentication error while entering the PIN.", ex);
-	    long code = ex.getErrorCode();
 	    try  {
-		if (code == CryptokiLibrary.CKR_PIN_LOCKED || code == CryptokiLibrary.CKR_PIN_EXPIRED) {
-		    pinStep.updateState();
-		    return new StepActionResult(StepActionResultStatus.REPEAT);
-		} else {
-		    pinStep.setUnkownError();
-		    pinStep.updateState();
-		    return new StepActionResult(StepActionResultStatus.REPEAT);
-		}
+		pinStep.setUnkownError();
+		pinStep.updateState();
+		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    } catch (CryptokiException ex2) {
 		// I suspect user removed card
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
 	} catch (CryptokiException ex) {
-	    LOG.error("Unkonw error while entering the PIN.", ex);
+	    LOG.error("Unknown error while entering the PIN.", ex);
 	    try {
 		pinStep.setUnkownError();
 		pinStep.updateState();
@@ -153,7 +157,7 @@ public class PinChangeStepAction extends StepAction {
 	    }
 	}
 
-	if (pin1 != null && pin1.equals(pin2)) {
+	if (pin1 != null && Arrays.equals(pin1, pin2)) {
 	    return pin1;
 	} else {
 	    throw new PinsDoNotMatchException("The PINs entered in the UI do not match.");

@@ -30,10 +30,10 @@ import org.openecard.gui.executor.ExecutionResults;
 import org.openecard.gui.executor.StepAction;
 import org.openecard.gui.executor.StepActionResult;
 import org.openecard.gui.executor.StepActionResultStatus;
-import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.enums.UserType;
 import org.openecard.mdlw.sal.exceptions.AuthenticationException;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
+import org.openecard.mdlw.sal.exceptions.PinBlockedException;
 import org.openecard.mdlw.sal.exceptions.PinIncorrectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,15 +78,20 @@ public class PinEntryStepAction extends StepAction {
 		// I suspect user removed card
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
+	} catch (PinBlockedException ex) {
+	    // let the UI take care of producing a blocked error
+	    try  {
+		pinStep.setPinBlocked();
+		pinStep.updateState();
+		return new StepActionResult(StepActionResultStatus.REPEAT);
+	    } catch (CryptokiException ex2) {
+		// I suspect user removed card
+		return new StepActionResult(StepActionResultStatus.CANCEL);
+	    }
 	} catch (AuthenticationException ex) {
 	    LOG.error("Authentication error while entering the PIN.", ex);
 	    pinStep.setLastTryFailed();
-	    long code = ex.getErrorCode();
-	    if (code == CryptokiLibrary.CKR_PIN_LOCKED || code == CryptokiLibrary.CKR_PIN_EXPIRED) {
-		pinStep.setPinBlocked();
-	    } else {
-		pinStep.setUnkownError();
-	    }
+	    pinStep.setUnkownError();
 	    try {
 		pinStep.updateState();
 		return new StepActionResult(StepActionResultStatus.REPEAT);

@@ -65,6 +65,7 @@ import org.openecard.mdlw.sal.exceptions.AlreadyInitializedException;
 import org.openecard.mdlw.sal.exceptions.CancellationException;
 import org.openecard.mdlw.sal.exceptions.CryptographicException;
 import org.openecard.mdlw.sal.exceptions.GeneralError;
+import org.openecard.mdlw.sal.exceptions.PinBlockedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -605,10 +606,10 @@ public class MiddleWareWrapper {
 		throw new AuthenticationException(msg, errorCode);
 	    case CryptokiLibrary.CKR_PIN_LOCKED:
 		msg = "The PIN is locked.";
-		throw new AuthenticationException(msg, errorCode);
+		throw new PinBlockedException(msg, errorCode);
 	    case CryptokiLibrary.CKR_PIN_EXPIRED:
 		msg = "The PIN is expired.";
-		throw new AuthenticationException(msg, errorCode);
+		throw new PinBlockedException(msg, errorCode);
 
 	    // CryptographicException
 	    case CryptokiLibrary.CKR_KEY_FUNCTION_NOT_PERMITTED:

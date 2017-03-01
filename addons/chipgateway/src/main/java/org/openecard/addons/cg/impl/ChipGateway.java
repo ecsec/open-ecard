@@ -771,9 +771,8 @@ public class ChipGateway {
 		LOG.error("DID does not exist.", cause);
 		signResp.setResult(ChipGatewayStatusCodes.UNKNOWN_DID);
 	    } else if (cause instanceof PinBlocked) {
-		LOG.error("PIN is blocked.", cause);
-		// TODO: return blocked status
-		signResp.setResult(ChipGatewayStatusCodes.SECURITY_NOT_SATISFIED);
+		LOG.error("PIN is blocked.", ex);
+		signResp.setResult(ChipGatewayStatusCodes.PIN_BLOCKED);
 	    } else if (cause instanceof SecurityConditionUnsatisfiable) {
 		LOG.error("DID can not be authenticated.", cause);
 		signResp.setResult(ChipGatewayStatusCodes.SECURITY_NOT_SATISFIED);

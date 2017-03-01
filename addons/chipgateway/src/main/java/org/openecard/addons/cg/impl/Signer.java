@@ -33,6 +33,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addons.cg.ex.ParameterInvalid;
+import org.openecard.addons.cg.ex.PinBlocked;
 import org.openecard.addons.cg.ex.SlotHandleInvalid;
 import org.openecard.bouncycastle.asn1.ASN1Encoding;
 import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -47,6 +48,7 @@ import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.common.util.StringUtils;
 import org.openecard.crypto.common.HashAlgorithms;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
@@ -82,7 +84,7 @@ public class Signer {
     }
 
     public byte[] sign(byte[] data) throws NoSuchDid, WSHelper.WSException, SecurityConditionUnsatisfiable,
-	    ParameterInvalid, SlotHandleInvalid {
+	    ParameterInvalid, SlotHandleInvalid, PinBlocked {
 	Semaphore s = getLock(handle.getIFDName());
 	boolean acquired = false;
 	try {
@@ -130,14 +132,20 @@ public class Signer {
 		throw WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    }
 	} catch (WSHelper.WSException ex) {
-	    if (ECardConstants.Minor.App.INCORRECT_PARM.equals(ex.getResultMinor())) {
-		throw new ParameterInvalid(ex.getMessage(), ex);
-	    } else if (ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE.equals(ex.getResultMinor())) {
-		throw new SlotHandleInvalid(ex.getMessage(), ex);
-	    } else if (ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED.equals(ex.getResultMinor())) {
-		throw new SecurityConditionUnsatisfiable(ex.getMessage(), ex);
-	    } else {
-		throw ex;
+	    String minor = StringUtils.nullToEmpty(ex.getResultMinor());
+	    switch (minor) {
+	    	case ECardConstants.Minor.App.INCORRECT_PARM:
+		    throw new ParameterInvalid(ex.getMessage(), ex);
+	    	case ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE:
+		    throw new SlotHandleInvalid(ex.getMessage(), ex);
+	    	case ECardConstants.Minor.IFD.PASSWORD_BLOCKED:
+		case ECardConstants.Minor.IFD.PASSWORD_SUSPENDED:
+		case ECardConstants.Minor.IFD.PASSWORD_DEACTIVATED:
+		    throw new PinBlocked(ex.getMessage(), ex);
+	    	case ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED:
+		    throw new SecurityConditionUnsatisfiable(ex.getMessage(), ex);
+	    	default:
+		    throw ex;
 	    }
 	} catch (InvocationTargetExceptionUnchecked ex) {
 	    if (ex.getCause() instanceof InterruptedException || ex.getCause() instanceof ThreadTerminateException) {

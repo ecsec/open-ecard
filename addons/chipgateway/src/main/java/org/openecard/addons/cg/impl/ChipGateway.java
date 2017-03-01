@@ -73,6 +73,7 @@ import org.openecard.addons.cg.ex.InvalidRedirectUrlException;
 import org.openecard.addons.cg.ex.ChipGatewayDataError;
 import org.openecard.addons.cg.ex.InvalidTCTokenElement;
 import org.openecard.addons.cg.ex.ParameterInvalid;
+import org.openecard.addons.cg.ex.PinBlocked;
 import org.openecard.addons.cg.ex.RemotePinException;
 import org.openecard.addons.cg.ex.ResultMinor;
 import org.openecard.addons.cg.ex.SlotHandleInvalid;
@@ -706,6 +707,10 @@ public class ChipGateway {
 		} catch (NoSuchDid ex) {
 		    LOG.error("DID does not exist.", ex);
 		    signResp.setResult(ChipGatewayStatusCodes.UNKNOWN_DID);
+		    return sendMessageInterruptable(getResource(signUrl), mapper.writeValueAsString(signResp), CommandType.class);
+		} catch (PinBlocked ex) {
+		    LOG.error("PIN is blocked.", ex);
+		    signResp.setResult(ChipGatewayStatusCodes.PIN_BLOCKED);
 		    return sendMessageInterruptable(getResource(signUrl), mapper.writeValueAsString(signResp), CommandType.class);
 		} catch (SecurityConditionUnsatisfiable ex) {
 		    LOG.error("DID can not be authenticated.", ex);

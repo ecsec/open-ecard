@@ -48,6 +48,7 @@ public class ChipGatewayStatusCodes {
     public static final String TIMEOUT = PREFIX_ERR + "timeout";
     public static final String UNKNOWN_SLOT = PREFIX_ERR + "unknownSlotHandle";
     public static final String SECURITY_NOT_SATISFIED = PREFIX_ERR + "securityConditionNotSatisfied";
+    public static final String PIN_BLOCKED = PREFIX_ERR + "pinBlocked";
     public static final String UNKNOWN_DID = PREFIX_ERR + "unknownDIDName";
 
     public static boolean isOk(@Nullable String code) {

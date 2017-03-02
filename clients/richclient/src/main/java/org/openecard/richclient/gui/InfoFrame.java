@@ -23,6 +23,7 @@
 package org.openecard.richclient.gui;
 
 import java.awt.Container;
+import java.awt.Frame;
 import java.awt.HeadlessException;
 import javax.swing.JFrame;
 
@@ -34,6 +35,8 @@ import javax.swing.JFrame;
  */
 public class InfoFrame extends JFrame implements StatusContainer {
 
+    private boolean isShown = false;
+
     public InfoFrame(String title) throws HeadlessException {
 	super(title);
     }
@@ -41,6 +44,24 @@ public class InfoFrame extends JFrame implements StatusContainer {
     @Override
     public void updateContent(Container c) {
 	pack();
+    }
+
+    @Override
+    public void setVisible(boolean b) {
+	if (isShown) {
+	    if (b) {
+		setState(Frame.NORMAL);
+	    } else {
+		setState(Frame.ICONIFIED);
+	    }
+	} else {
+	    super.setVisible(b);
+
+	    // set after first setVisable(true) call
+	    if (b) {
+		isShown = true;
+	    }
+	}
     }
 
 }

@@ -710,7 +710,8 @@ public class ChipGateway {
 		    return sendMessageInterruptable(getResource(signUrl), mapper.writeValueAsString(signResp), CommandType.class);
 		} catch (PinBlocked ex) {
 		    LOG.error("PIN is blocked.", ex);
-		    signResp.setResult(ChipGatewayStatusCodes.PIN_BLOCKED);
+		    // TODO: return blocked status
+		    signResp.setResult(ChipGatewayStatusCodes.SECURITY_NOT_SATISFIED);
 		    return sendMessageInterruptable(getResource(signUrl), mapper.writeValueAsString(signResp), CommandType.class);
 		} catch (SecurityConditionUnsatisfiable ex) {
 		    LOG.error("DID can not be authenticated.", ex);

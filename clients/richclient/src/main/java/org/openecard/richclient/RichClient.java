@@ -119,6 +119,8 @@ public final class RichClient {
 
 
     public static void main(String[] args) {
+	LOG.info("Starting {} {} ...", AppVersion.getName(), AppVersion.getVersion());
+
 	RichClient client = new RichClient();
 	client.setup();
     }

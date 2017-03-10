@@ -242,9 +242,7 @@ public class ChipGateway {
 	    } else if (cause instanceof InvalidRedirectUrlException) {
 		throw (InvalidRedirectUrlException) cause;
 	    } else if (cause instanceof ChipGatewayDataError) {
-		throw (ConnectionError) cause;
-	    } else if (cause instanceof ChipGatewayDataError) {
-		throw (ConnectionError) cause;
+		throw (ChipGatewayDataError) cause;
 	    } else if (cause instanceof RuntimeException) {
 		throw (RuntimeException) cause;
 	    } else {

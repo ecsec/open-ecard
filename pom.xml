@@ -70,6 +70,10 @@
 		<jarsigner.tsa>https://timestamp.geotrust.com/tsa</jarsigner.tsa>
 	</properties>
 
+    <prerequisites>
+		<maven>${maven.min.version}</maven>
+    </prerequisites>
+
 	<distributionManagement>
 		<site>
 			<id>Open eCard Website</id>

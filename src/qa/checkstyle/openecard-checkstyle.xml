@@ -237,11 +237,6 @@
 	    <property name="severity" value="warning"/>
 	    <property name="id" value="package_declaration"/>
 	</module>
-	<module name="RedundantThrows">
-	    <property name="severity" value="warning"/>
-	    <property name="id" value="redundant_throws"/>
-	    <property name="suppressLoadErrors" value="true"/>
-	</module>
 	<module name="StringLiteralEquality">
 	    <property name="severity" value="error"/>
 	    <property name="id" value="string_compare"/>

@@ -102,7 +102,8 @@ public class HttpGetTask implements Callable<StartPAOSResponse> {
 	String resource = tlsHandler.getResource();
 	BasicHttpEntityEnclosingRequest req = new BasicHttpEntityEnclosingRequest("GET", resource);
 	HttpRequestHelper.setDefaultHeader(req, tlsHandler.getServerAddress());
-	req.setHeader("Accept", "text/html; */*");
+	req.setHeader("Accept", "text/html, */*;q=0.8");
+	req.setHeader("Accept-Charset", "utf-8, *;q=0.8");
 	HttpUtils.dumpHttpRequest(logger, req);
 
 	// send request and receive response

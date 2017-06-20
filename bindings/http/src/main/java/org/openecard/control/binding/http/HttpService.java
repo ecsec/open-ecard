@@ -146,10 +146,6 @@ public class HttpService implements Runnable {
 		    }
 
 		}.start();
-	    } catch (HttpsServiceError ex) {
-		LOG.error("Failed to initialize TLS server socket.", ex);
-		// no chance this gets better, just close down the server
-		return;
 	    } catch (IOException | HttpServiceError ex) {
 		// if interrupted the error is intentionally (SocketClosedException)
 		if (! Thread.interrupted()) {

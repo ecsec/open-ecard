@@ -104,7 +104,7 @@ public class HttpBinding {
 	this.respInterceptors = respInterceptors;
     }
 
-    public void start(boolean tls) throws Exception {
+    public void start() throws Exception {
 	// Add default interceptors if none are given
 	if (reqInterceptors == null) {
 	    reqInterceptors = Collections.emptyList();
@@ -119,11 +119,7 @@ public class HttpBinding {
 	}
 
 	HttpAppPluginActionHandler handler = new HttpAppPluginActionHandler(addonManager);
-	if (! tls) {
-	    service = new HttpService(port, handler, reqInterceptors, respInterceptors);
-	} else {
-	    service = new HttpsService(port, handler, reqInterceptors, respInterceptors);
-	}
+	service = new HttpService(port, handler, reqInterceptors, respInterceptors);
 	service.start();
     }
 

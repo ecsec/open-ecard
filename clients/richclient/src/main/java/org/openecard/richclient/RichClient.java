@@ -79,7 +79,6 @@ public final class RichClient {
     private AppTray tray;
     // Control interface
     private HttpBinding httpBinding;
-    private HttpBinding httpsBinding;
     // Client environment
     private ClientEnv env = new ClientEnv();
     // Interface Device Layer (IFD)
@@ -189,11 +188,7 @@ public final class RichClient {
 
 		httpBinding = new HttpBinding(HttpBinding.DEFAULT_PORT);
 		httpBinding.setAddonManager(manager);
-		httpBinding.start(false);
-
-		httpsBinding = new HttpBinding(HttpBinding.DEFAULT_PORT + 1);
-		httpsBinding.setAddonManager(manager);
-		httpsBinding.start(true);
+		httpBinding.start();
 	    } catch (BindException e) {
 		message = LANG.translationForKey("client.startup.failed.portinuse", AppVersion.getName());
 		throw e;
@@ -262,9 +257,6 @@ public final class RichClient {
 	    // shutdown control modules
 	    if (httpBinding != null) {
 		httpBinding.stop();
-	    }
-	    if (httpsBinding != null) {
-		httpsBinding.stop();
 	    }
 
 	    // shutdown SAL

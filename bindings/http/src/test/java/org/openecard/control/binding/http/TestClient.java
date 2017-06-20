@@ -129,7 +129,7 @@ public final class TestClient {
 
 	HttpBinding binding = new HttpBinding(HttpBinding.DEFAULT_PORT);
 	binding.setAddonManager(manager);
-	binding.start(false);
+	binding.start();
     }
 
 }

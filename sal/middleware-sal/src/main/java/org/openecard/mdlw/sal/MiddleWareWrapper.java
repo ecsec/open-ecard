@@ -82,23 +82,26 @@ public class MiddleWareWrapper {
 
     private final Semaphore threadLock;
 
-    public MiddleWareWrapper() throws UnsatisfiedLinkError {
-        String libName = "gclib";
+    public MiddleWareWrapper(MiddlewareSALConfig mwSALConfig) throws UnsatisfiedLinkError {
+        String libName = mwSALConfig.getMiddlewareSpec().getLibName();
 
 	String osName = System.getProperty("os.name", "");
 	String arch = System.getProperty("os.arch", "");
-	// paths on linux
-        NativeLibrary.addSearchPath(libName, "/usr/lib/ClassicClient");
-        NativeLibrary.addSearchPath(libName, "/usr/lib/pkcs11");
-	// paths on mac
-	NativeLibrary.addSearchPath(libName, "/usr/local/lib/ClassicClient");
-	//NativeLibrary.addSearchPath(libName, "/Library/Frameworks/GemaltoClassicClient.framework");
+
+        for (String searchPath : mwSALConfig.getSearchPaths()) {
+            NativeLibrary.addSearchPath(libName, searchPath);
+        }
+
 	// paths on windows
 	if (osName.startsWith("Windows")) {
 	    if ("x86".equals(arch)) {
-		NativeLibrary.addSearchPath(libName, "C:\\Program Files (x86)\\Gemalto\\Classic Client\\BIN");
+                for (String x32SearchPath : mwSALConfig.getX32SearchPaths()) {
+                    NativeLibrary.addSearchPath(libName, x32SearchPath);
+                }
 	    } else if ("amd64".equals(arch)) {
-		NativeLibrary.addSearchPath(libName, "C:\\Program Files\\Gemalto\\Classic Client\\BIN");
+                for (String x64SearchPath : mwSALConfig.getX64SearchPaths()) {
+                    NativeLibrary.addSearchPath(libName, x64SearchPath);
+                }
 	    }
 	}
 

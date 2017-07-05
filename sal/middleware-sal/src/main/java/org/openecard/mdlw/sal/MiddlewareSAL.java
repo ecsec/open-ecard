@@ -115,6 +115,7 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificate;
 import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
@@ -149,7 +150,6 @@ import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.openecard.gui.UserConsent;
-import org.openecard.mdlw.event.CardConfig;
 import org.openecard.mdlw.event.MwEventManager;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.enums.UserType;
@@ -183,23 +183,26 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
     private final TreeMap<byte[], MwSession> managedSessions;
 
     private final MwModule mwModule;
+    private final MiddlewareSALConfig mwSALConfig;
 
     /**
      * Creates a new TinySAL.
      *
      * @param env Environment
      * @param states CardStateMap
+     * @param mwSALConfig MiddlewareSALConfig
      */
-    public MiddlewareSAL(Environment env, CardStateMap states) {
+    public MiddlewareSAL(Environment env, CardStateMap states, MiddlewareSALConfig mwSALConfig) {
         this.env = env;
         this.states = states;
+        this.mwSALConfig = mwSALConfig;
         this.ctxHandle = ValueGenerators.generateRandom(32);
         this.eventMan = new MwEventManager(env, this, ctxHandle);
 
         managedSlots = new TreeMap<>(new ByteComparator());
         managedSessions = new TreeMap<>(new ByteComparator());
 
-        mwModule = new MwModule();
+        mwModule = new MwModule(mwSALConfig);
     }
 
 
@@ -209,6 +212,15 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 
     public MwModule getMwModule() {
         return this.mwModule;
+    }
+
+    public MiddlewareSALConfig getMiddlewareSALConfig() {
+        return this.mwModule.getMiddlewareSALConfig();
+    }
+
+    @Override
+    public String getMiddlewareSALName() {
+        return mwSALConfig.getMiddlewareSpec().getMiddlewareName();
     }
 
     @Override
@@ -223,15 +235,31 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
     }
 
     @Override
+    public boolean specializedFor(String cardType) {
+        return mwSALConfig.isCardTypeKnown(cardType);
+    }
+
+    @Override
     public boolean needsRecognition(byte[] atr) {
-	return ! CardConfig.isATRKnown(atr);
+	return ! mwSALConfig.isATRKnown(atr);
+    }
+
+
+    @Override
+    public CardInfoType getCardInfo(String cardType) throws RuntimeException {
+        return mwSALConfig.getCardInfo(cardType);
+    }
+
+    @Override
+    public InputStream getCardImage(String cardType) {
+        return mwSALConfig.getCardImage(cardType);
     }
 
 
     @Override
     public CardInfoType getCardInfo(@Nonnull ConnectionHandleType handle, @Nonnull String cardType)
 	    throws RuntimeException {
-	CardInfoType cif = env.getRecognition().getCardInfo(cardType);
+        CardInfoType cif = mwSALConfig.getCardInfo(cardType);
 	if (cif != null) {
 	    cif = augmentCardInfo(handle, cif);
 	    return cif;
@@ -283,9 +311,16 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 		throw new InternalAppError("GUI is not initialized.");
 	    }
 	} catch (UnsatisfiedLinkError | InitializationException ex) {
-            String msg = "Failed to initialize Middleware.";
-            LOG.error(msg, ex);
-            resp.setResult(WSHelper.makeResultError(ECardConstants.Minor.Disp.COMM_ERROR, msg));
+            String mwSALName = mwSALConfig.getMiddlewareSpec().getMiddlewareName();
+            String msg = String.format("Failed to initialize Middleware for '%s'-SAL.", mwSALName);
+	    if (mwSALConfig.isSALRequired()) {
+		LOG.error(msg, ex);
+		resp.setResult(WSHelper.makeResultError(ECardConstants.Minor.Disp.COMM_ERROR, msg));
+	    } else {
+		LOG.warn(msg, ex);
+		resp.setResult(WSHelper.makeResult(ECardConstants.Major.WARN,
+			ECardConstants.Minor.App.NOT_INITIALIZED, msg));
+	    }
         } catch (InternalAppError ex) {
 	    LOG.error(ex.getMessage());
 	    resp.setResult(ex.getResult());

@@ -115,6 +115,7 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificate;
 import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.Arrays;
@@ -185,6 +186,16 @@ public class TinySALTest {
 	    public boolean needsRecognition(byte[] atr) {
 		return true;
 	    }
+
+            @Override
+            public CardInfoType getCardInfo(String cardType) throws RuntimeException {
+                return cr.getCardInfo(cardType);
+            }
+
+            @Override
+            public InputStream getCardImage(String cardType) {
+                return null;
+            }
 	};
 	env.setCIFProvider(cp);
 	SALStateCallback salCallback = new SALStateCallback(env, states);

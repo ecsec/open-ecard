@@ -39,7 +39,13 @@ import java.util.Collections;
  */
 public class MwModule {
 
+    private final MiddlewareSALConfig mwSALConfig;
+
     private MiddleWareWrapper mw;
+
+    public MwModule(MiddlewareSALConfig mwSALConfig) {
+        this.mwSALConfig = mwSALConfig;
+    }
 
     /**
      * Initializes the Cryptoki library.
@@ -49,7 +55,7 @@ public class MwModule {
      */
     public void initialize() throws UnsatisfiedLinkError, InitializationException {
 	try {
-	    mw = new MiddleWareWrapper();
+	    mw = new MiddleWareWrapper(mwSALConfig);
 	    mw.initialize();
 	} catch (CryptokiException ex) {
 	    throw new InitializationException("Failed to initalize PKCS#11 middleware.", ex.getErrorCode());
@@ -106,6 +112,15 @@ public class MwModule {
         }
 
         return Collections.unmodifiableList(slots);
+    }
+
+    /**
+     * Obtains the MiddlewareSALConfig which is used for the PKCS#11 middleware and specified cards.
+     * 
+     * @return MiddlewareSALConfig
+     */
+    public MiddlewareSALConfig getMiddlewareSALConfig() {
+        return mwSALConfig;
     }
 
     /**

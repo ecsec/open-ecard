@@ -30,6 +30,7 @@ import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
 import java.io.IOException;
 import java.net.BindException;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.openecard.addon.AddonManager;
@@ -55,6 +56,8 @@ import org.openecard.richclient.gui.AppTray;
 import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper;
 import org.openecard.mdlw.sal.MiddlewareSAL;
 import org.openecard.mdlw.event.MwStateCallback;
+import org.openecard.mdlw.sal.MiddlewareConfigLoader;
+import org.openecard.mdlw.sal.MiddlewareSALConfig;
 import org.openecard.sal.SelectorSAL;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
@@ -147,6 +150,10 @@ public final class RichClient {
 	    TinyManagement management = new TinyManagement(env);
 	    env.setManagement(management);
 
+            // Set up MiddlewareConfig with standard resource folder path and properties filename
+	    MiddlewareConfigLoader mwConfigLoader = new MiddlewareConfigLoader(null);
+            List<MiddlewareSALConfig> mwSALConfigs = mwConfigLoader.getMiddlewareSALConfigs();
+
 	    // Set up CardRecognitionImpl
 	    recognition = new CardRecognitionImpl(env);
 	    recognition.setGUI(gui);
@@ -156,7 +163,7 @@ public final class RichClient {
 	    cardStates = new CardStateMap();
 	    SALStateCallback salCallback = new SALStateCallback(env, cardStates);
 	    eventDispatcher.add(salCallback);
-	    MwStateCallback mwCallback = new MwStateCallback(env, cardStates);
+	    MwStateCallback mwCallback = new MwStateCallback(env, cardStates, mwConfigLoader);
 	    eventDispatcher.add(mwCallback);
 
 
@@ -175,9 +182,12 @@ public final class RichClient {
 	    env.setSAL(sal);
 	    env.setCIFProvider(sal);
 
-	    MiddlewareSAL mwSal = new MiddlewareSAL(env, cardStates);
-	    mwSal.setGui(gui);
-	    sal.addSpecializedSAL(mwSal);
+            // Set up Middleware SAL
+            for (MiddlewareSALConfig mwSALConfig : mwSALConfigs) {
+                MiddlewareSAL mwSal = new MiddlewareSAL(env, cardStates, mwSALConfig);
+                mwSal.setGui(gui);
+                sal.addSpecializedSAL(mwSal);
+            }
 
 	    // Start up control interface
 	    SettingsAndDefaultViewWrapper guiWrapper = new SettingsAndDefaultViewWrapper();

@@ -51,4 +51,19 @@ public interface SpecializedSAL extends SAL {
      */
     boolean specializedFor(ConnectionHandleType handle);
 
+    /**
+     * Evaluates if the instance of the SAL is specialized for the given card type.
+     * 
+     * @param cardType cardType, oidentifier of the card.
+     * @return {@code true} if the SAL is responsible for this card, {@code false} otherwise.
+     */
+    boolean specializedFor(String cardType);
+
+    /**
+     * Returns the name of the specialized Middleware SAL, for example 'LuxTrust'.
+     * 
+     * @return the Name of the Middleware-SAL.
+     */
+    String getMiddlewareSALName();
+
 }

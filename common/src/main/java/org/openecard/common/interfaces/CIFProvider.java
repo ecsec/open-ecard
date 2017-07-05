@@ -24,6 +24,7 @@ package org.openecard.common.interfaces;
 
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import java.io.InputStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -48,6 +49,24 @@ public interface CIFProvider {
     @Nullable
     CardInfoType getCardInfo(@Nullable ConnectionHandleType handle, @Nonnull String cardType)
 	    throws RuntimeException;
+
+    /**
+     * Gets the CardInfo file for a given cardType enriched with information of the card.
+     * 
+     * @param cardType Type of the card.
+     * @return The CIF or {@code null} in case there is no CIF or the CIF could not be created correctly.
+     */
+    @Nullable
+    CardInfoType getCardInfo(@Nonnull String cardType) throws RuntimeException;
+
+    /**
+     * Gets the CardImage for a given cardType. Returns null if the card type is not known to the CIF-Provider.
+     * 
+     * @param cardType Type of the card.
+     * @return The Card Image as InputStream or {@code null} in case there is no Card Image.
+     */
+    @Nullable
+    InputStream getCardImage(@Nonnull String cardType);
 
     /**
      * Evaluates whether recognition is necessary for cards with the given ATR.

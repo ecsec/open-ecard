@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
+import java.io.InputStream;
 import org.openecard.addon.AddonManager;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.event.EventDispatcherImpl;
@@ -101,6 +102,14 @@ public final class TestClient {
 	    public boolean needsRecognition(byte[] atr) {
 		return true;
 	    }
+            @Override
+            public CardInfoType getCardInfo(String cardType) throws RuntimeException {
+                return recognition.getCardInfo(cardType);
+            }
+            @Override
+            public InputStream getCardImage(String cardType) {
+                return recognition.getCardImage(cardType);
+            }
 	});
 
 	// Set up EventManager

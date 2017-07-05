@@ -22,8 +22,10 @@
 
 package org.openecard.mdlw.sal;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import javax.xml.bind.JAXBException;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
@@ -32,6 +34,7 @@ import org.openecard.mdlw.sal.exceptions.InitializationException;
 import org.openecard.mdlw.sal.enums.Flag;
 import org.openecard.mdlw.sal.enums.TokenState;
 import org.openecard.mdlw.sal.enums.UserType;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 
@@ -44,16 +47,23 @@ public class TestMwModule {
 
     final byte[] dummyData = "test".getBytes();
 
+    private MiddlewareSALConfig mwConfig;
+
+    @BeforeClass
+    public void init() throws IOException, FileNotFoundException, JAXBException {
+        mwConfig = new MiddlewareConfigLoader(null).getMiddlewareSALConfigs().get(0);
+    }
+
     @Test
     public void testInit() throws CryptokiException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
         module.destroy();
     }
 
     @Test
     public void testGetInfo() throws CryptokiException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
         module.getInfo();
         module.destroy();
@@ -61,14 +71,14 @@ public class TestMwModule {
 
     @Test
     public void testFinalize() throws CryptokiException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
         module.destroy();
     }
 
     @Test
     public void testGetSlots() throws CryptokiException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
         List<MwSlot> list = module.getSlotList(false);
         module.destroy();
@@ -76,7 +86,7 @@ public class TestMwModule {
 
     @Test
     public void testGetSlotToken() throws CryptokiException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
         List<MwSlot> list = module.getSlotList(true);
         MwSession session = list.get(0).openSession();
@@ -101,7 +111,7 @@ public class TestMwModule {
 
     @Test
     public void testMechanismsInfos() throws CryptokiException, IOException, UnsupportedAlgorithmException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
         List<MwSlot> list = module.getSlotList(true);
         MwSlot slot = list.get(0);
@@ -118,7 +128,7 @@ public class TestMwModule {
 
     @Test
     public void testSign() throws CryptokiException, IOException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
         List<MwSlot> list = module.getSlotList(true);
         MwSlot slot = list.get(0);
@@ -146,7 +156,7 @@ public class TestMwModule {
 
     @Test
     public void testTokenInfo() throws CryptokiException, IOException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
         List<MwSlot> list = module.getSlotList(true);
         MwSlot slot = list.get(0);
@@ -163,7 +173,7 @@ public class TestMwModule {
 
     @Test
     public void testKeys() throws CryptokiException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
         List<MwSlot> list = module.getSlotList(true);
         MwSlot slot = list.get(0);
@@ -212,21 +222,21 @@ public class TestMwModule {
     }
 
     /*
-     * 
+     *
      * NEW TESTS
      *
      */
 
     @Test
     public void testMwBasic() throws InitializationException, FinalizationException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
         module.destroy();
     }
 
     @Test
     public void testMwSlots() throws CryptokiException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
 
         List<MwSlot> list = module.getSlotList(TokenState.Present);
@@ -241,7 +251,7 @@ public class TestMwModule {
 
     @Test
     public void testMwToken() throws CryptokiException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
 
         List<MwSlot> list = module.getSlotList(TokenState.Present);
@@ -255,7 +265,7 @@ public class TestMwModule {
 
     @Test
     public void testMwSession() throws CryptokiException, IOException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
 
         List<MwSlot> list = module.getSlotList(TokenState.Present);
@@ -271,7 +281,7 @@ public class TestMwModule {
 
     @Test
     public void testReadCertificate() throws InitializationException, CryptokiException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
 
         List<MwSlot> list = module.getSlotList(TokenState.Present);
@@ -286,7 +296,7 @@ public class TestMwModule {
 
     @Test
     public void testTokenFlags() throws CryptokiException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
 
         List<MwSlot> list = module.getSlotList(TokenState.Present);
@@ -304,7 +314,7 @@ public class TestMwModule {
 
     @Test
     public void testFlags() throws CryptokiException {
-        MwModule module = new MwModule();
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
 
         List<MwSlot> list = module.getSlotList(TokenState.Present);

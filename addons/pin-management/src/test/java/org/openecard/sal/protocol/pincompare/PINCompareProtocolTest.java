@@ -45,6 +45,7 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
 import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
+import java.io.InputStream;
 import java.math.BigInteger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -116,6 +117,14 @@ public class PINCompareProtocolTest {
 	    public boolean needsRecognition(byte[] atr) {
 		return true;
 	    }
+            @Override
+            public CardInfoType getCardInfo(String cardType) throws RuntimeException {
+                return cr.getCardInfo(cardType);
+            }
+            @Override
+            public InputStream getCardImage(String cardType) {
+                return cr.getCardImage(cardType);
+            }
 	};
 	env.setCIFProvider(cp);
 

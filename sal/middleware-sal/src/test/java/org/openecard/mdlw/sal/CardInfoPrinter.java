@@ -22,10 +22,15 @@
 
 package org.openecard.mdlw.sal;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
+import javax.xml.bind.JAXBException;
 import org.openecard.mdlw.sal.enums.UserType;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 
 /**
@@ -36,9 +41,17 @@ public class CardInfoPrinter {
 
     private static final String PIN_VALUE = "123123";
 
-    public static void main(String[] args) throws CryptokiException, InterruptedException {
+    private MiddlewareSALConfig mwConfig;
 
-        MwModule module = new MwModule();
+    @BeforeClass
+    public void init() throws IOException, FileNotFoundException, JAXBException {
+        mwConfig = new MiddlewareConfigLoader(null).getMiddlewareSALConfigs().get(0);
+    }
+
+    @Test
+    public void test() throws CryptokiException, InterruptedException {
+
+        MwModule module = new MwModule(mwConfig);
         module.initialize();
         List<MwSlot> list = module.getSlotList(true);
 
@@ -73,7 +86,7 @@ public class CardInfoPrinter {
         session.login(UserType.User, PIN_VALUE.toCharArray());
 
         List<MwData> datas = session.getData();
-        
+
         List<MwPrivateKey> keys = session.getPrivateKeys();
 
         for (MwPrivateKey key : keys) {

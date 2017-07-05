@@ -109,7 +109,7 @@ public class CardRecognitionImpl implements CardRecognition {
      * @throws Exception
      */
     public CardRecognitionImpl(Environment env) throws Exception {
-	this(env, null, null);
+        this(env, null, null);
     }
 
     public CardRecognitionImpl(Environment env, final GetRecognitionTree treeRepo,
@@ -203,8 +203,9 @@ public class CardRecognitionImpl implements CardRecognition {
 
     @Override
     public CardInfoType getCardInfo(String type) {
-	// only do something when a repo is specified
-	if (cifRepo != null) {
+        CardInfoType cif = env.getCIFProvider().getCardInfo(type);
+        // only do something when a repo is specified
+	if (cif == null && cifRepo != null) {
 	    GetCardInfoOrACD req = new GetCardInfoOrACD();
 	    req.setAction(ECardConstants.CIF.GET_SPECIFIED);
 	    req.getCardTypeIdentifier().add(type);
@@ -217,7 +218,7 @@ public class CardRecognitionImpl implements CardRecognition {
 		}
 	    }
 	}
-	return null;
+	return cif;
     }
 
     /**
@@ -259,8 +260,10 @@ public class CardRecognitionImpl implements CardRecognition {
     @Override
     public InputStream getCardImage(String objectid) {
 	String fname = cardImagesMap.getProperty(objectid);
-	InputStream fs = null;
-	if (fname != null) {
+	// Get the card image as inputstream from the responsible Middleware SAL
+	InputStream fs = env.getCIFProvider().getCardImage(objectid);
+	// If null is returned, load the Image from the local cif repo
+	if (fs == null && fname != null) {
 	    fs = loadCardImage(fname);
 	}
 	if (fs == null) {

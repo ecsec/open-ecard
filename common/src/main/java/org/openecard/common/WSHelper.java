@@ -72,6 +72,11 @@ public class WSHelper {
 	return response;
     }
 
+    public static <T extends ResponseBaseType> boolean resultsInWarn(@Nonnull T response) throws WSException {
+	Result r = response.getResult();
+	return r.getResultMajor().equals(ECardConstants.Major.WARN);
+    }
+
     /**
      * Creates a WSException instance based on the given Result instance.
      * The result is not checked if it represents an error. The caller of this function should be aware of that fact.

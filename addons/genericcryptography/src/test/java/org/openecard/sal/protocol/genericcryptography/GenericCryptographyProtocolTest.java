@@ -174,6 +174,14 @@ public class GenericCryptographyProtocolTest {
 	    public boolean needsRecognition(byte[] atr) {
 		return true;
 	    }
+            @Override
+            public CardInfoType getCardInfo(String cardType) throws RuntimeException {
+                return cr.getCardInfo(cardType);
+            }
+            @Override
+            public InputStream getCardImage(String cardType) {
+                return cr.getCardImage(cardType);
+            }
 	};
 	env.setCIFProvider(cp);
 

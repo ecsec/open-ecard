@@ -29,10 +29,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import java.util.List;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.sal.state.CardStateEntry;
+import org.openecard.mdlw.sal.MiddlewareConfig;
+import org.openecard.mdlw.sal.MiddlewareConfigLoader;
 import org.openecard.mdlw.sal.MwSlot;
 import org.openecard.mdlw.sal.MwToken;
 
@@ -47,10 +50,12 @@ public class MwStateCallback implements EventCallback {
 
     private final Environment env;
     private final CardStateMap states;
+    private final List<MiddlewareConfig> mwConfigs;
 
-    public MwStateCallback(Environment env, CardStateMap cardState) {
+    public MwStateCallback(Environment env, CardStateMap cardState, MiddlewareConfigLoader mwConfigLoader) {
         this.env = env;
         this.states = cardState;
+        this.mwConfigs = mwConfigLoader.getMiddlewareConfigs();
     }
 
     @Override
@@ -63,11 +68,17 @@ public class MwStateCallback implements EventCallback {
 		switch (eventType) {
 		    case CARD_RECOGNIZED:
 			MwToken token = ((MwSlot) slot).getTokenInfo();
-			String cardType = String.format("%s_%s", token.getManufacturerID(), token.getModel());
-			cardType = CardConfig.mapMiddlewareType(cardType);
+			String cardType = null;
+			String type = String.format("%s_%s", token.getManufacturerID(), token.getModel());
+			for (MiddlewareConfig mwConfig : mwConfigs) {
+			    cardType = mwConfig.mapMiddlewareType(type);
+			    if (cardType != null) {
+				break;
+			    }
+			}
 			CardInfoType cif = null;
 			if (cardType != null) {
-			    cif = env.getCIFProvider().getCardInfo(handle, cardType);
+			    cif = env.getCIFProvider().getCardInfo(handle, type);
 			}
 			if (cif == null) {
 			    LOG.warn("Unknown card recognized by Middleware.");

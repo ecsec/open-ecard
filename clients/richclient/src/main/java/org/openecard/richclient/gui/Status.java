@@ -267,7 +267,7 @@ public class Status implements EventCallback {
 	}
 
 	if (! cardIcons.containsKey(cardType)) {
-	    InputStream is = env.getRecognition().getCardImage(cardType);
+            InputStream is = env.getRecognition().getCardImage(cardType);
 	    if (is == null) {
 		is = env.getRecognition().getUnknownCardImage();
 	    }

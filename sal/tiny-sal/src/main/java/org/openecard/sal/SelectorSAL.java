@@ -107,6 +107,7 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificate;
 import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
+import java.io.InputStream;
 import java.util.LinkedList;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
@@ -130,12 +131,14 @@ public class SelectorSAL implements SAL, CIFProvider {
     private final CardRecognition recognition;
     private final SAL main;
     private final LinkedList<SpecializedSAL> special;
+    private final LinkedList<SpecializedSAL> initializedSpecializedSals;
     private final LinkedList<SAL> initializedSals;
 
     public SelectorSAL(SAL mainSal, Environment env) {
 	this.recognition = env.getRecognition();
 	this.main = mainSal;
 	this.special = new LinkedList<>();
+        this.initializedSpecializedSals = new LinkedList<>();
 	this.initializedSals = new LinkedList<>();
     }
 
@@ -144,7 +147,7 @@ public class SelectorSAL implements SAL, CIFProvider {
     }
 
     private SAL getResponsibleSAL(CardApplicationPathType path) {
-	for (SpecializedSAL sal : special) {
+	for (SpecializedSAL sal : initializedSpecializedSals) {
 	    if (sal.specializedFor(path)) {
 		return sal;
 	    }
@@ -153,12 +156,21 @@ public class SelectorSAL implements SAL, CIFProvider {
     }
 
     private SAL getResponsibleSAL(ConnectionHandleType handle) {
-	for (SpecializedSAL sal : special) {
+	for (SpecializedSAL sal : initializedSpecializedSals) {
 	    if (sal.specializedFor(handle)) {
 		return sal;
 	    }
 	}
 	return main;
+    }
+
+    private SAL getResponsibleSAL(String cardType) {
+        for (SpecializedSAL sal : initializedSpecializedSals) {
+            if (sal.specializedFor(cardType)) {
+                return sal;
+            }
+        }
+        return main;
     }
 
 
@@ -174,8 +186,28 @@ public class SelectorSAL implements SAL, CIFProvider {
     }
 
     @Override
+    public CardInfoType getCardInfo(String cardType) throws RuntimeException {
+        SAL sal = getResponsibleSAL(cardType);
+        if (sal instanceof CIFProvider) {
+            return ((CIFProvider) sal).getCardInfo(cardType);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public InputStream getCardImage(String cardType) {
+        SAL sal = getResponsibleSAL(cardType);
+        if (sal instanceof CIFProvider) {
+            return ((CIFProvider) sal).getCardImage(cardType);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public boolean needsRecognition(byte[] atr) {
-	for (SpecializedSAL next : special) {
+	for (SpecializedSAL next : initializedSpecializedSals) {
 	    if (next instanceof CIFProvider) {
 		CIFProvider cp = (CIFProvider) next;
 		if (! cp.needsRecognition(atr)) {
@@ -206,12 +238,18 @@ public class SelectorSAL implements SAL, CIFProvider {
 		try {
 		    InitializeResponse res = next.initialize(init);
 		    WSHelper.checkResult(res);
-		    initializedSals.add(next);
+		    if (! WSHelper.resultsInWarn(res)) {
+			if (next instanceof SpecializedSAL) {
+			    initializedSpecializedSals.add((SpecializedSAL) next);
+			} else {
+			    initializedSals.add(next);
+			}
+		    }
 		} catch (WSHelper.WSException ex) {
-		    // terminate all already initialized SALs
-		    terminate(new Terminate());
 		    String msg = "One of the SAL instances failed to initialize:\n" + ex.getMessage();
+		    terminate(new Terminate());
 		    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.Disp.COMM_ERROR, msg));
+		    return response;
 		}
 	    }
 	}

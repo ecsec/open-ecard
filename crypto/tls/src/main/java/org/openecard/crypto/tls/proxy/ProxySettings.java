@@ -209,6 +209,13 @@ public class ProxySettings {
 		    LOG.warn("Unsupported proxy scheme {} used.", scheme);
 		}
 
+		// get proxy for a common host and set system properties
+		ProxySelector ps = ProxySearch.getDefaultProxySearch()
+			.getProxySelector();
+		List<Proxy> proxies = ps != null ? ps.select(URI.create("https://google.com/")) : Collections.EMPTY_LIST;
+		setSocksProperties(proxies);
+		setHttpProperties(proxies);
+
 		selector = new UpdatingProxySelector(new SelectorSupplier() {
 		    @Override
 		    public ProxySelector find() {
@@ -306,6 +313,45 @@ public class ProxySettings {
 		LOG.warn("Failed to set system property '{}'.", key);
 	    }
 	}
+    }
+
+    private static void setSocksProperties(List<Proxy> proxies) {
+	InetSocketAddress addr = getProxyAddress(Proxy.Type.SOCKS, proxies);
+
+	if (addr != null) {
+	    LOG.debug("Setting proxy properties to SOCKS@{}", addr);
+	    setSystemProperty("socksProxyHost", addr.getHostString());
+	    if (addr.getPort() > 0) {
+		setSystemProperty("socksProxyPort", Integer.toString(addr.getPort()));
+	    }
+	    setSystemProperty("socksProxyVersion", "5");
+	}
+    }
+
+    private static void setHttpProperties(List<Proxy> proxies) {
+	InetSocketAddress addr = getProxyAddress(Proxy.Type.SOCKS, proxies);
+
+	if (addr != null) {
+	    LOG.debug("Setting proxy properties to HTTP@{}", addr);
+	    setSystemProperty("http.proxyHost", addr.getHostString());
+	    if (addr.getPort() > 0) {
+		setSystemProperty("http.proxyPort", Integer.toString(addr.getPort()));
+	    }
+	}
+    }
+
+    @Nullable
+    private static InetSocketAddress getProxyAddress(Proxy.Type type, List<Proxy> proxies) {
+	InetSocketAddress addr = null;
+	for (Proxy next : proxies) {
+	    if (next.type() == Proxy.Type.SOCKS) {
+		SocketAddress sa = next.address();
+		if (sa instanceof InetSocketAddress) {
+		    return (InetSocketAddress) sa;
+		}
+	    }
+	}
+	return null;
     }
 
     private static Authenticator createAuthenticator(final @Nonnull String user, final @Nonnull String pass) {

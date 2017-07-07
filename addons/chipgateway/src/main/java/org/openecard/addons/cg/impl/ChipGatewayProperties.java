@@ -102,4 +102,9 @@ public class ChipGatewayProperties {
 	return Boolean.parseBoolean(devTrustStoreStr);
     }
 
+    public static boolean isHideUpdateDialog() {
+	String hideUpdateDialog = getInstance().props.getProperty("hide-update-dialog", "false");
+	return Boolean.parseBoolean(hideUpdateDialog);
+    }
+
 }

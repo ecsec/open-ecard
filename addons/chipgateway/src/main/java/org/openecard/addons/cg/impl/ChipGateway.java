@@ -822,6 +822,11 @@ public class ChipGateway {
 
     private void createUpdateDialog(String dlUrl, boolean updateRequired) throws ChipGatewayDataError,
 	    InvalidRedirectUrlException {
+	// stop here when hide dialog system property is set and the update is optional
+	if (! updateRequired && ChipGatewayProperties.isHideUpdateDialog()) {
+	    return;
+	}
+
 	// check that dlUrl conforms to the spec
 
 	// only show if we have a download URL

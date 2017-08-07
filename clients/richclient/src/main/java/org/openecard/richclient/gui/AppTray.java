@@ -49,7 +49,6 @@ import org.openecard.common.interfaces.Environment;
 import org.openecard.common.util.SysUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
 import org.openecard.gui.graphics.OecLogoBgTransparent;
-import org.openecard.gui.graphics.OecLogoBgWhite;
 import org.openecard.gui.graphics.OecLogoBlackBgTransparent;
 import org.openecard.gui.graphics.OecLogoWhiteBgTransparent;
 import org.openecard.richclient.RichClient;
@@ -202,7 +201,7 @@ public class AppTray {
 	if (name.equals(ICON_LOADER)) {
 	    return GuiUtils.getImage("loader_icon_linux_default_256.gif");
 	} else {
-	    return GraphicsUtil.createImage(OecLogoBgWhite.class, dim.width, dim.height);
+	    return GraphicsUtil.createImage(OecLogoBgTransparent.class, dim.width, dim.height);
 	}
     }
 
@@ -220,7 +219,7 @@ public class AppTray {
 	if (name.equals(ICON_LOADER)) {
 	    return GuiUtils.getImage("loader_icon_default_256.gif");
 	} else {
-	    return GraphicsUtil.createImage(OecLogoBgWhite.class, dim.width, dim.height);
+	    return GraphicsUtil.createImage(OecLogoBgTransparent.class, dim.width, dim.height);
 	}
     }
 

@@ -48,6 +48,7 @@ import org.openecard.common.I18n;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.util.SysUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
+import org.openecard.gui.graphics.OecLogoBgTransparent;
 import org.openecard.gui.graphics.OecLogoBgWhite;
 import org.openecard.gui.graphics.OecLogoBlackBgTransparent;
 import org.openecard.gui.graphics.OecLogoWhiteBgTransparent;
@@ -295,10 +296,10 @@ public class AppTray {
 
 	frame = new InfoFrame(lang.translationForKey("tray.title", AppVersion.getName()));
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	frame.setIconImage(GraphicsUtil.createImage(OecLogoBgWhite.class, 256, 256));
+	frame.setIconImage(GraphicsUtil.createImage(OecLogoBgTransparent.class, 256, 256));
 
-	JLabel label = new JLabel(new ImageIcon(GraphicsUtil.createImage(OecLogoBgWhite.class, 256, 256)));
-	ImageIcon logo = new ImageIcon(GraphicsUtil.createImage(OecLogoBgWhite.class, 256, 256));
+	ImageIcon logo = new ImageIcon(GraphicsUtil.createImage(OecLogoBgTransparent.class, 256, 256));
+	JLabel label = new JLabel(logo);
 	Container c = frame.getContentPane();
 	c.setPreferredSize(new Dimension(logo.getIconWidth(), logo.getIconHeight()));
 	c.setBackground(Color.white);

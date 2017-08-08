@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,8 @@
 
 package org.openecard.gui.definition;
 
+import java.util.Arrays;
+
 
 /**
  * Implementation of a simple document type.
@@ -29,7 +31,7 @@ package org.openecard.gui.definition;
  *
  * @author Hans-Martin Haase
  */
-public class Document {
+public class Document implements Cloneable {
 
     private String mimeType;
     private byte[] documentContent;
@@ -86,4 +88,16 @@ public class Document {
     public byte[] getValue() {
 	return documentContent;
     }
+
+    @Override
+    public Document clone() throws CloneNotSupportedException {
+	Document result = (Document) super.clone();
+	// deep copy data object
+	byte[] data = result.getValue();
+	if (data != null) {
+	    result.setValue(Arrays.copyOf(data, data.length));
+	}
+	return result;
+    }
+
 }

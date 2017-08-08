@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -36,10 +36,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class ImageBox extends IDTrait implements InputInfoUnit {
 
-    private static final Logger logger = LoggerFactory.getLogger(ImageBox.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImageBox.class);
 
-    private byte[] imageData;
-    private String mimeType;
+    private Document doc;
 
     /**
      * Get the raw data of the image.
@@ -48,6 +47,7 @@ public final class ImageBox extends IDTrait implements InputInfoUnit {
      * @return The raw image data.
      */
     public byte[] getImageData() {
+	byte[] imageData = doc.getValue();
 	return Arrays.copyOf(imageData, imageData.length);
     }
     /**
@@ -57,7 +57,7 @@ public final class ImageBox extends IDTrait implements InputInfoUnit {
      * @param imageData The raw image data.
      */
     public void setImageData(byte[] imageData) {
-	this.imageData = Arrays.copyOf(imageData, imageData.length);
+	this.doc.setValue(Arrays.copyOf(imageData, imageData.length));
     }
 
     /**
@@ -67,7 +67,7 @@ public final class ImageBox extends IDTrait implements InputInfoUnit {
      * @return String containing the MIME type.
      */
     public String getMimeType() {
-	return mimeType;
+	return doc.getMimeType();
     }
     /**
      * Sets the MIME type for the image represented by this instance.
@@ -77,7 +77,15 @@ public final class ImageBox extends IDTrait implements InputInfoUnit {
      * @param mimeType MIME type describing the image type.
      */
     public void setMimeType(String mimeType) {
-	this.mimeType = mimeType;
+	this.doc.setMimeType(mimeType);
+    }
+
+    public Document getDocument() {
+	return doc;
+    }
+
+    public void setDocument(Document doc) {
+	this.doc = doc;
     }
 
 
@@ -89,15 +97,18 @@ public final class ImageBox extends IDTrait implements InputInfoUnit {
     @Override
     public void copyContentFrom(InfoUnit origin) {
 	if (! (this.getClass().equals(origin.getClass()))) {
-	    logger.warn("Trying to copy content from type {} to type {}.", origin.getClass(), this.getClass());
+	    LOG.warn("Trying to copy content from type {} to type {}.", origin.getClass(), this.getClass());
 	    return;
 	}
 	ImageBox other = (ImageBox) origin;
-	// do copy
-	if (other.imageData != null) {
-	    this.imageData = Arrays.copyOf(other.imageData, other.imageData.length);
+	// copy document
+	if (other.getDocument() != null) {
+	    try {
+		this.setDocument(other.getDocument().clone());
+	    } catch (CloneNotSupportedException ex) {
+		throw new AssertionError("Clone not implemented correctly in Document class.");
+	    }
 	}
-	this.mimeType = other.mimeType;
     }
 
 }

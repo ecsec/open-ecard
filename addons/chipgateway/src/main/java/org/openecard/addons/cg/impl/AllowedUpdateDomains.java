@@ -24,9 +24,8 @@ package org.openecard.addons.cg.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
 import org.openecard.common.util.DomainUtils;
 import org.openecard.common.util.FileUtils;
 import org.slf4j.Logger;
@@ -69,21 +68,13 @@ public class AllowedUpdateDomains {
     }
 
     private List<String> readFile(String fname) {
-	ArrayList<String> result = new ArrayList<>();
 	try (InputStream in = FileUtils.resolveResourceAsStream(getClass(), fname)) {
-	    Scanner s = new Scanner(in, "UTF-8");
-
-	    while (s.hasNextLine()) {
-		String next = s.nextLine().trim();
-		if (! next.isEmpty() && ! next.startsWith("#")) {
-		    result.add(next);
-		}
-	    }
+	    return FileUtils.readLinesFromConfig(in);
 	} catch (IOException ex) {
 	    LOG.error("Failed to read allowed update domains file.", ex);
 	}
 
-	return result;
+	return Collections.emptyList();
     }
 
 }

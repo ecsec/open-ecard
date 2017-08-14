@@ -26,8 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
 import javax.security.auth.x500.X500Principal;
 import org.openecard.bouncycastle.asn1.x500.X500Name;
 import org.openecard.common.util.FileUtils;
@@ -61,21 +61,13 @@ public abstract class X500NameStore {
     }
 
     private List<String> readFile(String fname) {
-	ArrayList<String> result = new ArrayList<>();
 	try (InputStream in = FileUtils.resolveResourceAsStream(getClass(), fname)) {
-	    Scanner s = new Scanner(in, "UTF-8");
-
-	    while (s.hasNextLine()) {
-		String next = s.nextLine().trim();
-		if (! next.isEmpty() && ! next.startsWith("#")) {
-		    result.add(next);
-		}
-	    }
+	    return FileUtils.readLinesFromConfig(in);
 	} catch (IOException ex) {
 	    LOG.error("Failed to read allowed subjects file.", ex);
 	}
 
-	return result;
+	return Collections.emptyList();
     }
 
     private List<X500Name> convertX500Names(Collection<String> subjectNameStrs) {

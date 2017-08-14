@@ -28,6 +28,8 @@ import org.openecard.bouncycastle.asn1.eac.EACTags;
 import org.openecard.common.tlv.Parser;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
+import org.openecard.common.tlv.Tag;
+import org.openecard.common.tlv.TagClass;
 import org.openecard.common.tlv.iso7816.TLVList;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.asn1.utils.ObjectIdentifierUtils;
@@ -44,10 +46,10 @@ public class DiscretionaryDataTemplate extends TLVList {
     private final byte[] data;
 
     public DiscretionaryDataTemplate(@Nonnull TLV tlv) throws TLVException {
-	super(tlv, EACTags.DISCRETIONARY_DATA_OBJECTS);
+	super(tlv, new Tag(TagClass.APPLICATION, false, EACTags.DISCRETIONARY_DATA_OBJECTS));
 
 	Parser p = new Parser(tlv.getChild());
-	if (p.match(EACTags.OBJECT_IDENTIFIER)) {
+	if (p.match(Tag.OID_TAG)) {
 	    try {
 		String oidStr = ObjectIdentifierUtils.toString(p.next(0).getValue());
 		objId = new ASN1ObjectIdentifier(oidStr);
@@ -57,7 +59,7 @@ public class DiscretionaryDataTemplate extends TLVList {
 	} else {
 	    throw new TLVException("Object Identifier is missing in DiscretionaryDataTemplate.");
 	}
-	if (p.match(EACTags.DISCRETIONARY_DATA)) {
+	if (p.match(new Tag(TagClass.APPLICATION, true, EACTags.DISCRETIONARY_DATA))) {
 	    data = p.next(0).getValue();
 	} else {
 	    throw new TLVException("Discretionary Data is missing in DiscretionaryDataTemplate.");

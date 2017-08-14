@@ -37,6 +37,10 @@ public class TLVList {
 
     protected final TLV tlv;
 
+    protected TLVList(TLV tlv, Tag expectedTag) throws TLVException {
+	this(tlv, expectedTag.getTagNumWithClass());
+    }
+
     protected TLVList(TLV tlv, long expectedTagNum) throws TLVException {
 	if (tlv.getTagNumWithClass() != expectedTagNum) {
 	    throw new TLVException("Not of type TLVList.");
@@ -66,7 +70,7 @@ public class TLVList {
     }
 
 
-    public List<TLV> getContent() {
+    public final List<TLV> getContent() {
 	if (tlv.hasChild()) {
 	    return tlv.getChild().asList();
 	}

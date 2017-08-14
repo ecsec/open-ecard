@@ -57,6 +57,13 @@ public class TLV {
     /// deferred setters for TLV container
     ///
 
+    public Tag getTag() {
+	return this.tag.getTag();
+    }
+    public void setTag(Tag tag) {
+	this.tag.setTag(tag);
+    }
+
     public TagClass getTagClass() {
 	return tag.getTagClass();
     }

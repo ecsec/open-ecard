@@ -64,6 +64,12 @@ class TagLengthValue {
     }
 
 
+    public Tag getTag() {
+	return new Tag(this.tag);
+    }
+    public void setTag(Tag tag) {
+	this. tag = new Tag(tag);
+    }
 
     public TagClass getTagClass() {
 	return this.tag.getTagClass();

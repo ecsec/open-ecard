@@ -486,13 +486,19 @@ public class ChipGateway {
     }
 
     private ThreadTerminateException performProcessCancelled() {
-	try {
-	    TerminateType resp = new TerminateType();
-	    resp.setSessionIdentifier(sessionId);
-	    resp.setResult(ChipGatewayStatusCodes.STOPPED);
-	    sendMessage(getResource(terminateUrl), mapper.writeValueAsString(resp), CommandType.class);
-	} catch (JsonProcessingException | ConnectionError | InvalidRedirectUrlException | ChipGatewayDataError ex) {
-	}
+	Thread t = new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+		try {
+		    TerminateType resp = new TerminateType();
+		    resp.setSessionIdentifier(sessionId);
+		    resp.setResult(ChipGatewayStatusCodes.STOPPED);
+		    sendMessage(getResource(terminateUrl), mapper.writeValueAsString(resp), CommandType.class);
+		} catch (JsonProcessingException | ConnectionError | InvalidRedirectUrlException | ChipGatewayDataError ex) {
+		}
+	    }
+	}, "ChipGateway-terminate");
+	t.start();
 
 	return new ThreadTerminateException("ChipGateway protocol interrupted.");
     }

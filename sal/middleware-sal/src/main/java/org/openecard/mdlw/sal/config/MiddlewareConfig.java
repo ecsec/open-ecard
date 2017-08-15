@@ -20,12 +20,11 @@
  *
  ***************************************************************************/
 
-package org.openecard.mdlw.sal;
+package org.openecard.mdlw.sal.config;
 
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.CardTypeType;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +33,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.annotation.Nonnull;
@@ -41,9 +41,11 @@ import javax.annotation.Nullable;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import org.openecard.common.util.FileUtils;
-import org.openecard.mdlw.event.CardConfigType;
+import org.openecard.common.util.FuturePromise;
+import org.openecard.common.util.Promise;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
+import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -55,40 +57,47 @@ import org.w3c.dom.Document;
  * stored in the "card-images"-folder.
  *
  * @author Mike Prechtl
+ * @author Tobias Wich
  */
 public class MiddlewareConfig {
 
     private static final Logger LOG = LoggerFactory.getLogger(MiddlewareConfig.class);
 
-    private static final String NAME_OF_MIDDLEWARE_CONFIG_XML = "mwconfig.xml";
-    private static final String NAME_OF_ROOT_FOLDER = "middleware/";
-    private static final String PATH_TO_CARD_IMAGES = "card-images/";
-    private static final String NAME_OF_CARD_INFO_TEMPLATE = "mw_cif_template.xml";
+    private static final String MIDDLEWARE_CONFIG_PATH = "mwconfig.xml";
+    private static final String CARD_IMAGE_PATH = "card-images/";
+    private static final String CIF_TEMPLATE_PATH = "/middleware/mw_cif_template.xml";
 
-    private static List<MiddlewareSALConfig> mwSALConfigs;
-    private static final Map<String, byte[]> CARD_IMAGES = new HashMap<>();
+    private static final Promise<Document> CIF_DOC;
+    private static final Promise<WSMarshaller> MARSHALLER;
 
-    private MiddlewareConfigType middlewareConfigXml;
-    private Document cifDocument;
-    private WSMarshaller cifMarshaller;
-    private String resFolder;
-
-    public MiddlewareConfig(@Nonnull String mwConfigPath) throws IOException, FileNotFoundException, JAXBException {
-	LOG.info("Path of Middleware Config: '{}'", mwConfigPath);
-	this.resFolder = mwConfigPath.substring(0, mwConfigPath.lastIndexOf('/') + 1);
-	String nameOfMiddlewareConfig = mwConfigPath.substring(mwConfigPath.lastIndexOf('/') + 1);
-        String pathToMwConfigXml = NAME_OF_ROOT_FOLDER + NAME_OF_MIDDLEWARE_CONFIG_XML;
-        String pathToCardImages = NAME_OF_ROOT_FOLDER + PATH_TO_CARD_IMAGES;
-
-        try (InputStream is = getStream(resFolder, nameOfMiddlewareConfig)) {
-	    loadMwZIPConfig(is, NAME_OF_ROOT_FOLDER, pathToMwConfigXml, pathToCardImages);
-        } catch (FileNotFoundException ex) {
-	    InputStream is = getStream(mwConfigPath);
-	    loadMwZIPConfig(is, NAME_OF_ROOT_FOLDER, pathToMwConfigXml, pathToCardImages);
-	}
+    static {
+	MARSHALLER = new FuturePromise<>(new Callable<WSMarshaller>() {
+	    @Override
+	    public WSMarshaller call() throws Exception {
+		return WSMarshallerFactory.createInstance();
+	    }
+	});
+	CIF_DOC = new FuturePromise<>(new Callable<Document>() {
+	    @Override
+	    public Document call() throws Exception {
+		InputStream in = FileUtils.resolveResourceAsStream(MiddlewareConfig.class, CIF_TEMPLATE_PATH);
+		return MARSHALLER.deref().str2doc(in);
+	    }
+	});
     }
 
-    private void loadMwZIPConfig(InputStream is, String rootFolder, String pathToMwConfigXml, String pathToCardImages)
+
+    private static List<MiddlewareSALConfig> mwSALConfigs;
+    private final Map<String, byte[]> CARD_IMAGES = new HashMap<>();
+
+    private MiddlewareConfigType middlewareConfigXml;
+
+    public MiddlewareConfig(@Nonnull InputStream bundleStream) throws IOException, FileNotFoundException, JAXBException {
+	LOG.debug("Loading middleware config.");
+	loadMwZIPConfig(bundleStream);
+    }
+
+    private void loadMwZIPConfig(InputStream is)
 	    throws JAXBException {
 	JAXBContext ctx = JAXBContext.newInstance(MiddlewareConfigType.class);
 	middlewareConfigXml = new MiddlewareConfigType();
@@ -98,13 +107,12 @@ public class MiddlewareConfig {
 	    while ((zipEntry = zipIn.getNextEntry()) != null) {
 		if (! zipEntry.isDirectory()) {
 		    String name = zipEntry.getName();
-		    if (name.startsWith(pathToMwConfigXml)) {
-			String middlewareConfigXmlName = name.replace(rootFolder, "");
-			LOG.debug("Name of Middleware Config XML: " + middlewareConfigXmlName);
+		    if (name.equals(MIDDLEWARE_CONFIG_PATH)) {
+			LOG.debug("Reading middleware config from XML file.");
 			middlewareConfigXml = (MiddlewareConfigType) ctx.createUnmarshaller().unmarshal(zipIn);
 		    }
-		    if (name.startsWith(pathToCardImages)) {
-			String cardImageName = name.replace(pathToCardImages, "");
+		    if (name.startsWith(CARD_IMAGE_PATH)) {
+			String cardImageName = name.replace(CARD_IMAGE_PATH, "");
 			LOG.debug("CardImageName: " + cardImageName);
 			CARD_IMAGES.put(cardImageName, FileUtils.toByteArray(zipIn));
 		    }
@@ -114,38 +122,6 @@ public class MiddlewareConfig {
 	} catch (IOException ex) {
 	    LOG.debug("Stream closed.");
 	}
-    }
-
-    /**
-     * Loads a resource which is within the middleware-resource folder.
-     *
-     * @param resFolder Name of the resource folder.
-     * @param resname Name of the resource.
-     * @return
-     * @throws FileNotFoundException
-     */
-    private InputStream getStream(String resFolder, String resname) throws FileNotFoundException {
-        InputStream in = getClass().getResourceAsStream(resFolder + resname);
-        if (in == null) {
-            in = getClass().getResourceAsStream("/" + resFolder + resname);
-        }
-        if (in == null) {
-	    throw new FileNotFoundException("Unable to load file '" + resname + "'.");
-	}
-        return in;
-    }
-
-    /**
-     * Loads a resource above an absolute path.
-     *
-     * @param absPath path to the Middleware Config ZIP.
-     * @return
-     * @throws FileNotFoundException
-     */
-    private InputStream getStream(String absPath) throws FileNotFoundException {
-	File file = new File(absPath);
-        InputStream in = new FileInputStream(file);
-        return in;
     }
 
     /**
@@ -170,15 +146,6 @@ public class MiddlewareConfig {
 	    return mwSALConfigs;
 	}
         return Collections.EMPTY_LIST;
-    }
-
-    /**
-     * Returns the name of the CardInfo-Template.
-     *
-     * @return
-     */
-    public String getCardInfoTemplateName() {
-        return NAME_OF_CARD_INFO_TEMPLATE;
     }
 
     /**
@@ -207,8 +174,8 @@ public class MiddlewareConfig {
      * @return Card Image as InputStream or {@code null} if card is not known by Middleware Config.
      */
     @Nullable
-    public byte[] getCardImage(String imageName) {
-	return CARD_IMAGES.get(imageName);
+    public InputStream getCardImage(String imageName) {
+	return new ByteArrayInputStream(CARD_IMAGES.get(imageName));
     }
 
     /**
@@ -216,20 +183,27 @@ public class MiddlewareConfig {
      *
      * @return CardInfo-Template or {@code null} if template can not be parsed.
      */
-    @Nullable
-    private CardInfoType getCardInfoTemplate() {
-        if (cifDocument != null && cifMarshaller != null) {
-            CardInfoType cardInfo;
-            try {
-                cardInfo = (CardInfoType) cifMarshaller.unmarshal(cifDocument);
-                return cardInfo;
-            } catch (WSMarshallerException ex) {
-                LOG.warn("Can not parse CardInfo-Document.");
-            }
-        }
-
-        // return nothing
-        return null;
+    @Nonnull
+    private synchronized CardInfoType getCardInfoTemplate() {
+	CardInfoType cardInfo;
+	try {
+	    WSMarshaller m = MARSHALLER.deref();
+	    Document doc = CIF_DOC.deref();
+	    cardInfo = m.unmarshal(doc, CardInfoType.class).getValue();
+	    return cardInfo;
+	} catch (WSMarshallerException ex) {
+	    String msg = "Can not parse CardInfo-Document.";
+	    LOG.error(msg, ex);
+	    throw new RuntimeException(CARD_IMAGE_PATH, ex);
+	} catch (InterruptedException ex) {
+	    String msg = "Shutdown requested while retrieving CIF template.";
+	    LOG.debug(msg);
+	    throw new RuntimeException(msg);
+	} catch (NullPointerException ex) {
+	    String msg = "Marshaller and/ or CIF Template could not be loaded correctly.";
+	    LOG.error(msg, ex);
+	    throw new RuntimeException(msg);
+	}
     }
 
     @Nonnull
@@ -251,13 +225,8 @@ public class MiddlewareConfig {
      */
     public CardInfoType getCardInfoByCardSpec(CardConfigType.CardSpec cardSpec) {
 	CardInfoType cardInfo = getCardInfoTemplate();
-	if (cardInfo != null) {
-	    cardInfo.setCardType(mapCardSpecToCardType(cardSpec));
-	    return cardInfo;
-	}
-
-	// return nothing
-	return null;
+	cardInfo.setCardType(mapCardSpecToCardType(cardSpec));
+	return cardInfo;
     }
 
 }

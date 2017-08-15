@@ -22,6 +22,8 @@
 
 package org.openecard.mdlw.sal;
 
+import org.openecard.mdlw.sal.config.MiddlewareConfigLoader;
+import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
 import iso.std.iso_iec._24727.tech.schema.Initialize;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -45,7 +47,7 @@ public class TestEventManager {
 
     @BeforeClass
     public void init() throws IOException, FileNotFoundException, JAXBException {
-        mwConfig = new MiddlewareConfigLoader(null).getMiddlewareSALConfigs().get(0);
+        mwConfig = new MiddlewareConfigLoader().getMiddlewareSALConfigs().get(0);
     }
 
     @Test(enabled = false)

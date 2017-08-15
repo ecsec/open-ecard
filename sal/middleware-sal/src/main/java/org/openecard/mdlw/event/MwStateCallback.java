@@ -34,8 +34,8 @@ import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.sal.state.CardStateEntry;
-import org.openecard.mdlw.sal.MiddlewareConfig;
-import org.openecard.mdlw.sal.MiddlewareConfigLoader;
+import org.openecard.mdlw.sal.config.MiddlewareConfig;
+import org.openecard.mdlw.sal.config.MiddlewareConfigLoader;
 import org.openecard.mdlw.sal.MwSlot;
 import org.openecard.mdlw.sal.MwToken;
 

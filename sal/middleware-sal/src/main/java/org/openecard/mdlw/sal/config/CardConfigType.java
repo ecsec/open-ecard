@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.mdlw.event;
+package org.openecard.mdlw.sal.config;
 
 import iso.std.iso_iec._24727.tech.schema.CardTypeType;
 import java.util.ArrayList;

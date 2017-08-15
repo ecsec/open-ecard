@@ -22,6 +22,7 @@
 
 package org.openecard.mdlw.sal;
 
+import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
 import org.openecard.mdlw.sal.struct.CkInfo;
 import org.openecard.mdlw.sal.struct.CkSlot;
 import java.util.ArrayList;

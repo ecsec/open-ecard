@@ -6,7 +6,7 @@
 
     <iso:CardType>
 	<!-- {ManufacturerID}_{Model} -->
-	<iso:ObjectIdentifier>http://public.lu/cif/template</iso:ObjectIdentifier>
+	<iso:ObjectIdentifier>http://openecard.org/cif/template</iso:ObjectIdentifier>
     </iso:CardType>
 
     <iso:CardIdentification>

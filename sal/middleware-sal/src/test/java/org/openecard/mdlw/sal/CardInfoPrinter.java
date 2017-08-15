@@ -22,6 +22,8 @@
 
 package org.openecard.mdlw.sal;
 
+import org.openecard.mdlw.sal.config.MiddlewareConfigLoader;
+import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
@@ -45,7 +47,7 @@ public class CardInfoPrinter {
 
     @BeforeClass
     public void init() throws IOException, FileNotFoundException, JAXBException {
-        mwConfig = new MiddlewareConfigLoader(null).getMiddlewareSALConfigs().get(0);
+        mwConfig = new MiddlewareConfigLoader().getMiddlewareSALConfigs().get(0);
     }
 
     @Test

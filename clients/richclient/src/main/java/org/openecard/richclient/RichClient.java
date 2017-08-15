@@ -56,8 +56,8 @@ import org.openecard.richclient.gui.AppTray;
 import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper;
 import org.openecard.mdlw.sal.MiddlewareSAL;
 import org.openecard.mdlw.event.MwStateCallback;
-import org.openecard.mdlw.sal.MiddlewareConfigLoader;
-import org.openecard.mdlw.sal.MiddlewareSALConfig;
+import org.openecard.mdlw.sal.config.MiddlewareConfigLoader;
+import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
 import org.openecard.sal.SelectorSAL;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
@@ -150,8 +150,8 @@ public final class RichClient {
 	    TinyManagement management = new TinyManagement(env);
 	    env.setManagement(management);
 
-            // Set up MiddlewareConfig with standard resource folder path and properties filename
-	    MiddlewareConfigLoader mwConfigLoader = new MiddlewareConfigLoader(null);
+            // Set up MiddlewareConfig
+	    MiddlewareConfigLoader mwConfigLoader = new MiddlewareConfigLoader();
             List<MiddlewareSALConfig> mwSALConfigs = mwConfigLoader.getMiddlewareSALConfigs();
 
 	    // Set up CardRecognitionImpl

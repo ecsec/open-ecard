@@ -22,6 +22,8 @@
 
 package org.openecard.mdlw.sal;
 
+import org.openecard.mdlw.sal.config.MiddlewareConfigLoader;
+import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
@@ -38,7 +40,7 @@ public class TestMiddlewareConfigLoader {
 
     @Test
     public void testMiddlewareConfigLoading() throws IOException, FileNotFoundException, JAXBException {
-        List<MiddlewareSALConfig> mwConfigs = new MiddlewareConfigLoader(null).getMiddlewareSALConfigs();
+        List<MiddlewareSALConfig> mwConfigs = new MiddlewareConfigLoader().getMiddlewareSALConfigs();
         JAXB.marshal(mwConfigs.get(0).getMiddlewareSpec(), System.out);
     }
 

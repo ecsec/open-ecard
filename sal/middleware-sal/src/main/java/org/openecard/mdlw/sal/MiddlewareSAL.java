@@ -22,6 +22,7 @@
 
 package org.openecard.mdlw.sal;
 
+import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
 import iso.std.iso_iec._24727.tech.schema.ACLList;
 import iso.std.iso_iec._24727.tech.schema.ACLListResponse;
 import iso.std.iso_iec._24727.tech.schema.ACLModify;

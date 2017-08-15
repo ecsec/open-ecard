@@ -20,20 +20,17 @@
  *
  ***************************************************************************/
 
-package org.openecard.mdlw.sal;
+package org.openecard.mdlw.sal.config;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.xml.bind.JAXBException;
+import org.openecard.common.util.FileUtils;
 
 
 /**
@@ -49,70 +46,45 @@ public class MiddlewareConfigLoader {
     private final List<MiddlewareSALConfig> mwSALConfigs = new ArrayList<>();
 
     /**
-     * Creates an instance of the MiddlewareConfigLoader. The MiddlewareConfigLoader loads the 'mw_configs.conf'-file.
-     * This file contains the paths to the Middleware Config files. A Middleware Config file is a ZIP-File which contains
-     * an xml-file, which specifies Middleware SAL instances, and the card images, which belongs to the cards which are
-     * supported by the Middleware.
-     * The path parameter can be null, then the standard middleware config file from the classpath will be
-     * used ('mw_configs.conf').
+     * Creates an instance of the MiddlewareConfigLoader.
+     * The MiddlewareConfigLoader loads the 'mw_configs.conf'-file. This file contains the paths to the Middleware
+     * Config files. A Middleware Config file is a ZIP-File which contains an xml-file, which specifies Middleware SAL
+     * instances, and the card images, which belongs to the cards which are supported by the Middleware.
      *
-     * @param path to the conf-file which contains the paths to the Middleware Configs.
      * @throws IOException
      * @throws FileNotFoundException
      * @throws JAXBException
      */
-    public MiddlewareConfigLoader(@Nullable String path) throws IOException, FileNotFoundException, JAXBException {
-	loadMiddlewareSALConfigs(path);
+    public MiddlewareConfigLoader() throws IOException, FileNotFoundException, JAXBException {
+	loadMiddlewareSALConfigs();
     }
 
-    private void loadMiddlewareSALConfigs(@Nullable String path) throws IOException,
+    private void loadMiddlewareSALConfigs() throws IOException,
 	    FileNotFoundException, JAXBException {
-	List<String> middlewareConfigPaths;
-	if (path == null) {
-	    middlewareConfigPaths = getMiddlewareConfigPaths();
-	} else {
-	    middlewareConfigPaths = getMiddlewareConfigPaths(path);
-	}
+	// load bundled Middleware config
+	List<String> middlewareConfigPaths = getBundledConfigPaths();
 	for (String mwConfigPath : middlewareConfigPaths) {
-	    MiddlewareConfig mwConfig = new MiddlewareConfig(mwConfigPath);
+	    InputStream bundleStream = FileUtils.resolveResourceAsStream(getClass(), mwConfigPath);
+	    MiddlewareConfig mwConfig = new MiddlewareConfig(bundleStream);
 	    mwConfigs.add(mwConfig);
 	    mwSALConfigs.addAll(mwConfig.getMiddlewareSALConfigs());
 	}
+
+	// TODO: load config from home directory based on property mw.sals.scan_home
+	// TODO: consider renaming the property before implementing this
     }
 
     @Nonnull
-    private List<String> getMiddlewareConfigPaths() throws FileNotFoundException {
-	try (InputStream is = getClass().getResourceAsStream(MIDDLEWARE_CONFIG_PATHS_FILE)) {
+    private List<String> getBundledConfigPaths() throws FileNotFoundException {
+	try (InputStream is = FileUtils.resolveResourceAsStream(getClass(), MIDDLEWARE_CONFIG_PATHS_FILE)) {
 	    if (is != null) {
-		return readMiddlewareConfigPaths(is);
+		return FileUtils.readLinesFromConfig(is);
 	    }
 	} catch (IOException ex) {
 	    String msg = "Unable to load Middleware Config Paths.";
 	    throw new FileNotFoundException(msg);
 	}
 	return Collections.EMPTY_LIST;
-    }
-
-    @Nonnull
-    private List<String> getMiddlewareConfigPaths(String pathToFile) throws FileNotFoundException {
-	File file = new File(pathToFile);
-	try (InputStream fis = new FileInputStream(file)) {
-	    return readMiddlewareConfigPaths(fis);
-	} catch (IOException ex) {
-	    String msg = "Unable to load Middleware Config Paths.";
-	    throw new FileNotFoundException(msg);
-	}
-    }
-
-    @Nonnull
-    private List<String> readMiddlewareConfigPaths(InputStream is) {
-	Scanner scanner = new Scanner(is, "UTF-8");
-	List<String> mwConfigPaths = new ArrayList<>();
-	while (scanner.hasNextLine()) {
-	    String mwConfigPath = scanner.nextLine();
-	    mwConfigPaths.add(mwConfigPath);
-	}
-	return mwConfigPaths;
     }
 
     public List<MiddlewareConfig> getMiddlewareConfigs() {

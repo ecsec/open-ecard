@@ -20,17 +20,15 @@
  *
  ***************************************************************************/
 
-package org.openecard.mdlw.sal;
+package org.openecard.mdlw.sal.config;
 
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.openecard.mdlw.event.CardConfigType;
 
 
 /**
@@ -138,7 +136,7 @@ public class MiddlewareSALConfig {
     public InputStream getCardImage(String oIdentifier) {
         for (CardConfigType.CardSpec cardSpec : mwSpec.getCardConfig().getCardSpecs()) {
             if (cardSpec.getObjectIdentifier().equals(oIdentifier)) {
-                return new ByteArrayInputStream(mwConfig.getCardImage(cardSpec.getCardImageName()));
+                return mwConfig.getCardImage(cardSpec.getCardImageName());
             }
         }
 

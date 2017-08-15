@@ -46,7 +46,7 @@ public class SimpleKeyStoreCredentialFactory implements CredentialFactory {
      * @param signer Keystore base signer that will be wrapped in the credential.
      */
     public SimpleKeyStoreCredentialFactory(KeyStoreSigner signer) {
-	ArrayList<TlsCredentials> c = new ArrayList<TlsCredentials>(1);
+	ArrayList<TlsCredentials> c = new ArrayList<>(1);
     	c.add(new KeyStoreCredential(signer));
 	credentials = Collections.unmodifiableList(c);
     }

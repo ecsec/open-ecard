@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public class KeyStoreCredential implements TlsSignerCredentials, ContextAware {
 
-    private static final Logger logger = LoggerFactory.getLogger(KeyStoreCredential.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KeyStoreCredential.class);
 
     private final KeyStoreSigner signer;
     private final SignatureAndHashAlgorithm sigHashAlg;
@@ -74,7 +74,7 @@ public class KeyStoreCredential implements TlsSignerCredentials, ContextAware {
 	    try {
 		certificate = signer.getCertificateChain();
 	    } catch (CertificateException ex) {
-		logger.error("Failed to deserialize certificate.", ex);
+		LOG.error("Failed to deserialize certificate.", ex);
 		certificate = Certificate.EMPTY_CHAIN;
 	    }
 	}

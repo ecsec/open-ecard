@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DynamicAuthentication implements TlsAuthentication, ContextAware {
 
-    private static final Logger logger = LoggerFactory.getLogger(DynamicAuthentication.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DynamicAuthentication.class);
 
     private String hostname;
     private CertificateVerifier certVerifier;
@@ -156,7 +156,7 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
 	    certVerifier.isValid(crtfct, hostname);
 	} else {
 	    // no verifier available
-	    logger.warn("No certificate verifier available, skipping certificate verification.");
+	    LOG.warn("No certificate verifier available, skipping certificate verification.");
 	}
     }
 

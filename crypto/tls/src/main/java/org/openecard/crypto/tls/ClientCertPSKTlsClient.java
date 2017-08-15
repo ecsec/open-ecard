@@ -202,11 +202,6 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
     }
 
     @Override
-    public void notifySecureRenegotiation(boolean secureRenegotiation) throws IOException {
-	// allow renegotiation
-    }
-
-    @Override
     public void notifyAlertRaised(short alertLevel, short alertDescription, String message, Throwable cause) {
 	TlsError error = new TlsError(alertLevel, alertDescription, message, cause);
 	if (alertLevel == AlertLevel.warning && logger.isInfoEnabled()) {

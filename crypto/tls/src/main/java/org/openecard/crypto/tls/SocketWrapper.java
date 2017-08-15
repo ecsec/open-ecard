@@ -115,167 +115,167 @@ public class SocketWrapper extends Socket {
 
     @Override
     public boolean getKeepAlive() throws SocketException {
-	return parent.getKeepAlive(); //To change body of generated methods, choose Tools | Templates.
+	return parent.getKeepAlive();
     }
 
     @Override
     public InetAddress getLocalAddress() {
-	return parent.getLocalAddress(); //To change body of generated methods, choose Tools | Templates.
+	return parent.getLocalAddress();
     }
 
     @Override
     public int getLocalPort() {
-	return parent.getLocalPort(); //To change body of generated methods, choose Tools | Templates.
+	return parent.getLocalPort();
     }
 
     @Override
     public SocketAddress getLocalSocketAddress() {
-	return parent.getLocalSocketAddress(); //To change body of generated methods, choose Tools | Templates.
+	return parent.getLocalSocketAddress();
     }
 
     @Override
     public boolean getOOBInline() throws SocketException {
-	return parent.getOOBInline(); //To change body of generated methods, choose Tools | Templates.
+	return parent.getOOBInline();
     }
 
     @Override
     public int getPort() {
-	return parent.getPort(); //To change body of generated methods, choose Tools | Templates.
+	return parent.getPort();
     }
 
     @Override
     public synchronized int getReceiveBufferSize() throws SocketException {
-	return parent.getReceiveBufferSize(); //To change body of generated methods, choose Tools | Templates.
+	return parent.getReceiveBufferSize();
     }
 
     @Override
     public SocketAddress getRemoteSocketAddress() {
-	return parent.getRemoteSocketAddress(); //To change body of generated methods, choose Tools | Templates.
+	return parent.getRemoteSocketAddress();
     }
 
     @Override
     public boolean getReuseAddress() throws SocketException {
-	return parent.getReuseAddress(); //To change body of generated methods, choose Tools | Templates.
+	return parent.getReuseAddress();
     }
 
     @Override
     public synchronized int getSendBufferSize() throws SocketException {
-	return parent.getSendBufferSize(); //To change body of generated methods, choose Tools | Templates.
+	return parent.getSendBufferSize();
     }
 
     @Override
     public int getSoLinger() throws SocketException {
-	return parent.getSoLinger(); //To change body of generated methods, choose Tools | Templates.
+	return parent.getSoLinger();
     }
 
     @Override
     public synchronized int getSoTimeout() throws SocketException {
-	return parent.getSoTimeout(); //To change body of generated methods, choose Tools | Templates.
+	return parent.getSoTimeout();
     }
 
     @Override
     public boolean getTcpNoDelay() throws SocketException {
-	return parent.getTcpNoDelay(); //To change body of generated methods, choose Tools | Templates.
+	return parent.getTcpNoDelay();
     }
 
     @Override
     public int getTrafficClass() throws SocketException {
-	return parent.getTrafficClass(); //To change body of generated methods, choose Tools | Templates.
+	return parent.getTrafficClass();
     }
 
     @Override
     public boolean isBound() {
-	return parent.isBound(); //To change body of generated methods, choose Tools | Templates.
+	return parent.isBound();
     }
 
     @Override
     public boolean isClosed() {
-	return parent.isClosed(); //To change body of generated methods, choose Tools | Templates.
+	return parent.isClosed();
     }
 
     @Override
     public boolean isConnected() {
-	return parent.isConnected(); //To change body of generated methods, choose Tools | Templates.
+	return parent.isConnected();
     }
 
     @Override
     public boolean isInputShutdown() {
-	return parent.isInputShutdown(); //To change body of generated methods, choose Tools | Templates.
+	return parent.isInputShutdown();
     }
 
     @Override
     public boolean isOutputShutdown() {
-	return parent.isOutputShutdown(); //To change body of generated methods, choose Tools | Templates.
+	return parent.isOutputShutdown();
     }
 
     @Override
     public void sendUrgentData(int data) throws IOException {
-	parent.sendUrgentData(data); //To change body of generated methods, choose Tools | Templates.
+	parent.sendUrgentData(data);
     }
 
     @Override
     public void setKeepAlive(boolean on) throws SocketException {
-	parent.setKeepAlive(on); //To change body of generated methods, choose Tools | Templates.
+	parent.setKeepAlive(on);
     }
 
     @Override
     public void setOOBInline(boolean on) throws SocketException {
-	parent.setOOBInline(on); //To change body of generated methods, choose Tools | Templates.
+	parent.setOOBInline(on);
     }
 
     @Override
     public void setPerformancePreferences(int connectionTime, int latency, int bandwidth) {
-	parent.setPerformancePreferences(connectionTime, latency, bandwidth); //To change body of generated methods, choose Tools | Templates.
+	parent.setPerformancePreferences(connectionTime, latency, bandwidth);
     }
 
     @Override
     public synchronized void setReceiveBufferSize(int size) throws SocketException {
-	parent.setReceiveBufferSize(size); //To change body of generated methods, choose Tools | Templates.
+	parent.setReceiveBufferSize(size);
     }
 
     @Override
     public void setReuseAddress(boolean on) throws SocketException {
-	parent.setReuseAddress(on); //To change body of generated methods, choose Tools | Templates.
+	parent.setReuseAddress(on);
     }
 
     @Override
     public synchronized void setSendBufferSize(int size) throws SocketException {
-	parent.setSendBufferSize(size); //To change body of generated methods, choose Tools | Templates.
+	parent.setSendBufferSize(size);
     }
 
     @Override
     public void setSoLinger(boolean on, int linger) throws SocketException {
-	parent.setSoLinger(on, linger); //To change body of generated methods, choose Tools | Templates.
+	parent.setSoLinger(on, linger);
     }
 
     @Override
     public synchronized void setSoTimeout(int timeout) throws SocketException {
-	parent.setSoTimeout(timeout); //To change body of generated methods, choose Tools | Templates.
+	parent.setSoTimeout(timeout);
     }
 
     @Override
     public void setTcpNoDelay(boolean on) throws SocketException {
-	parent.setTcpNoDelay(on); //To change body of generated methods, choose Tools | Templates.
+	parent.setTcpNoDelay(on);
     }
 
     @Override
     public void setTrafficClass(int tc) throws SocketException {
-	parent.setTrafficClass(tc); //To change body of generated methods, choose Tools | Templates.
+	parent.setTrafficClass(tc);
     }
 
     @Override
     public void shutdownInput() throws IOException {
-	parent.shutdownInput(); //To change body of generated methods, choose Tools | Templates.
+	parent.shutdownInput();
     }
 
     @Override
     public void shutdownOutput() throws IOException {
-	parent.shutdownOutput(); //To change body of generated methods, choose Tools | Templates.
+	parent.shutdownOutput();
     }
 
     @Override
     public String toString() {
-	return parent.toString(); //To change body of generated methods, choose Tools | Templates.
+	return parent.toString();
     }
 
 }

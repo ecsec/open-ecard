@@ -328,11 +328,6 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	super.notifyAlertReceived(alertLevel, alertDescription);
     }
 
-    @Override
-    public void notifySecureRenegotiation(boolean secureRenegotiation) throws IOException {
-	// allow renegotiation
-    }
-
 
     @Override
     public TlsSession getSessionToResume() {

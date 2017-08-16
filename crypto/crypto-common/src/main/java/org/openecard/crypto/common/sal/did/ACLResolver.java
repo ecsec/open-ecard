@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.crypto.common.sal;
+package org.openecard.crypto.common.sal.did;
 
 import org.openecard.common.SecurityConditionUnsatisfiable;
 import iso.std.iso_iec._24727.tech.schema.ACLList;

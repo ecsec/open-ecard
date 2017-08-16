@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2015 HS Coburg.
+ * Copyright (C) 2013-2017 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,10 +30,9 @@ import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.tls.HashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.SignatureAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
-import org.openecard.bouncycastle.crypto.tls.TlsContext;
 import org.openecard.bouncycastle.crypto.tls.TlsSignerCredentials;
 import org.openecard.crypto.common.keystore.KeyStoreSigner;
-import org.openecard.crypto.common.sal.CredentialPermissionDenied;
+import org.openecard.crypto.common.sal.did.CredentialPermissionDenied;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,13 +44,12 @@ import org.slf4j.LoggerFactory;
  * @author Dirk Petrautzki
  * @author Tobias Wich
  */
-public class KeyStoreCredential implements TlsSignerCredentials, ContextAware {
+public class KeyStoreCredential implements TlsSignerCredentials {
 
     private static final Logger LOG = LoggerFactory.getLogger(KeyStoreCredential.class);
 
     private final KeyStoreSigner signer;
     private final SignatureAndHashAlgorithm sigHashAlg;
-    private TlsContext context;
     private Certificate certificate = null;
 
     public KeyStoreCredential(@Nonnull KeyStoreSigner signer) {
@@ -61,11 +59,6 @@ public class KeyStoreCredential implements TlsSignerCredentials, ContextAware {
     public KeyStoreCredential(@Nonnull KeyStoreSigner signer, SignatureAndHashAlgorithm sigHashAlg) {
 	this.signer = signer;
 	this.sigHashAlg = sigHashAlg;
-    }
-
-    @Override
-    public void setContext(TlsContext context) {
-	this.context = context;
     }
 
     @Override

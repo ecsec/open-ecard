@@ -67,7 +67,7 @@ public class CryptoMarkerTypeTest {
 	AlgorithmInfoType algType = new AlgorithmInfoType();
 	algType.setAlgorithm("signPKCS1_V1_5");
 	AlgorithmIdentifierType aIdType = new AlgorithmIdentifierType();
-	aIdType.setAlgorithm("http://www.w3.org/2001/04/xmlenc#rsa-1_5");
+	aIdType.setAlgorithm("http://ws.openecard.org/alg/rsa");
 	algType.setAlgorithmIdentifier(aIdType);
 	algType.getSupportedOperations().add("Compute-signature");
 	algType.setCardAlgRef(new byte[] {(byte) 0x02});
@@ -106,7 +106,7 @@ public class CryptoMarkerTypeTest {
 	assertEquals(cryptoMarkerNew.getSignatureGenerationInfo(), new String[] { "MSE_KEY_DS", "PSO_CDS" });
 	assertEquals(cryptoMarkerNew.getCryptoKeyInfo().getKeyRef().getKeyRef(), new byte[] { 0x02 });
 	assertEquals(cryptoMarkerNew.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm(),
-		"http://www.w3.org/2001/04/xmlenc#rsa-1_5");
+		"http://ws.openecard.org/alg/rsa");
 	assertNull(cryptoMarkerNew.getLegacyKeyName());
 	assertNull(cryptoMarkerNew.getHashGenerationInfo());
 	assertEquals(cryptoMarkerNew.getCertificateRefs().get(0).getDataSetName(), "EF.C.CH.AUT");

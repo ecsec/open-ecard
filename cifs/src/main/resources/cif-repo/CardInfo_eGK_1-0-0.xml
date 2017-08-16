@@ -6794,7 +6794,7 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>signPKCS1_V1_5</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-1_5</iso:Algorithm>
+									<iso:Algorithm>http://ws.openecard.org/alg/rsa</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>02</iso:CardAlgRef>
@@ -7438,7 +7438,7 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>rsaClientAuthentication</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-1_5</iso:Algorithm>
+									<iso:Algorithm>http://ws.openecard.org/alg/rsa</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>02</iso:CardAlgRef>

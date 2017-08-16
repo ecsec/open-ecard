@@ -49,7 +49,7 @@ import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.TlsUtils;
 import org.openecard.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.openecard.crypto.common.ReusableSecureRandom;
-import org.openecard.crypto.common.sal.CredentialPermissionDenied;
+import org.openecard.crypto.common.sal.did.CredentialPermissionDenied;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

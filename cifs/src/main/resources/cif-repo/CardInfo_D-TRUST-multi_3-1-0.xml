@@ -712,7 +712,7 @@
 						<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-1_5</iso:Algorithm>
+									<iso:Algorithm>http://ws.openecard.org/alg/rsa</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Decipher Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>1323</iso:CardAlgRef>
@@ -2224,7 +2224,7 @@
 						<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-1_5</iso:Algorithm>
+									<iso:Algorithm>http://ws.openecard.org/alg/rsa</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>1323</iso:CardAlgRef>

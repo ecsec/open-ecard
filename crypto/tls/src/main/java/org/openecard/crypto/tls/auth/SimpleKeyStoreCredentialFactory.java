@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
-import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
+import org.openecard.bouncycastle.crypto.tls.TlsSignerCredentials;
 import org.openecard.crypto.common.keystore.KeyStoreSigner;
 
 
@@ -38,7 +38,7 @@ import org.openecard.crypto.common.keystore.KeyStoreSigner;
  */
 public class SimpleKeyStoreCredentialFactory implements CredentialFactory {
 
-    private final List<TlsCredentials> credentials;
+    private final List<TlsSignerCredentials> credentials;
 
     /**
      * Create a new factory for the given signer.
@@ -46,14 +46,14 @@ public class SimpleKeyStoreCredentialFactory implements CredentialFactory {
      * @param signer Keystore base signer that will be wrapped in the credential.
      */
     public SimpleKeyStoreCredentialFactory(KeyStoreSigner signer) {
-	ArrayList<TlsCredentials> c = new ArrayList<>(1);
+	ArrayList<TlsSignerCredentials> c = new ArrayList<>(1);
     	c.add(new KeyStoreCredential(signer));
 	credentials = Collections.unmodifiableList(c);
     }
 
     @Override
     @Nonnull
-    public List<TlsCredentials> getClientCredentials(CertificateRequest cr) {
+    public List<TlsSignerCredentials> getClientCredentials(CertificateRequest cr) {
 	return credentials;
     }
 

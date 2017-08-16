@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,23 +24,20 @@ package org.openecard.crypto.tls.auth;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.security.SignatureException;
-import java.security.cert.CertificateException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.List;
 import javax.annotation.Nonnull;
-import org.openecard.bouncycastle.asn1.ASN1Encoding;
-import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.openecard.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.openecard.bouncycastle.asn1.x509.DigestInfo;
 import org.openecard.bouncycastle.crypto.tls.AbstractTlsSignerCredentials;
 import org.openecard.bouncycastle.crypto.tls.Certificate;
-import org.openecard.bouncycastle.crypto.tls.SignatureAlgorithm;
 import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
-import org.openecard.bouncycastle.crypto.tls.TlsContext;
-import org.openecard.bouncycastle.crypto.tls.TlsUtils;
 import org.openecard.bouncycastle.util.io.pem.PemObject;
 import org.openecard.bouncycastle.util.io.pem.PemWriter;
-import org.openecard.crypto.common.sal.CredentialPermissionDenied;
-import org.openecard.crypto.common.sal.GenericCryptoSigner;
+import org.openecard.common.SecurityConditionUnsatisfiable;
+import org.openecard.common.WSHelper;
+import org.openecard.common.util.ByteUtils;
+import org.openecard.crypto.common.sal.did.DidInfo;
+import org.openecard.crypto.common.sal.did.NoSuchDid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,86 +45,88 @@ import org.slf4j.LoggerFactory;
 /**
  * Signing credential delegating all calls to a wrapped GenericCryptoSigner.
  *
- * @see GenericCryptoSigner
  * @author Tobias Wich
  * @author Dirk Petrautzki
  */
-public class SmartCardSignerCredential extends AbstractTlsSignerCredentials implements ContextAware {
+public class SmartCardSignerCredential extends AbstractTlsSignerCredentials {
 
-    private static final Logger logger = LoggerFactory.getLogger(SmartCardSignerCredential.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SmartCardSignerCredential.class);
 
-    private final GenericCryptoSigner signerImpl;
-    private TlsContext context;
-    private Certificate certificate = Certificate.EMPTY_CHAIN;
+    private final DidInfo did;
+    private final List<X509Certificate> chain;
+    private final SignatureAndHashAlgorithm sigAlg;
 
-    public SmartCardSignerCredential(@Nonnull GenericCryptoSigner signerImpl) {
-	this.signerImpl = signerImpl;
-    }
+    private Certificate certificate;
 
-    @Override
-    public void setContext(TlsContext context) {
-	this.context = context;
+    public SmartCardSignerCredential(@Nonnull DidInfo info, List<X509Certificate> chain,
+	    SignatureAndHashAlgorithm sigAlg) {
+	this.did = info;
+	this.chain = chain;
+	this.sigAlg = sigAlg;
     }
 
     @Override
     public byte[] generateCertificateSignature(@Nonnull byte[] hash) throws IOException {
-	// Note: this check is necessary to avoid the pin dialog when the certificate is
-	//       Certificate.EMPTY_CHAIN
-	if (! certificate.equals(Certificate.EMPTY_CHAIN)) {
-	    // When using TLS 1.2, a real PKCs#1 1.5 signature must be made, no raw RSA signature as in older versions
-	    // see http://tools.ietf.org/html/rfc5246#section-4.7
-	    if (TlsUtils.isTLSv12(context)) {
-		SignatureAndHashAlgorithm sigAlg = getSignatureAndHashAlgorithm();
-		if (sigAlg.getSignature() == SignatureAlgorithm.rsa) {
-		    ASN1ObjectIdentifier hashAlgId = TlsUtils.getOIDForHashAlgorithm(sigAlg.getHash());
-		    DigestInfo digestInfo = new DigestInfo(new AlgorithmIdentifier(hashAlgId), hash);
-		    hash = digestInfo.getEncoded(ASN1Encoding.DER);
-		}
-	    }
-	    // perform the signature on the card
-	    try {
-		return signerImpl.sign(hash);
-	    } catch (SignatureException ex) {
-		throw new IOException("Failed to create signature because of an unknown error.", ex);
-	    } catch (CredentialPermissionDenied ex) {
-		throw new IOException("Failed to create signature because of missing permissions.", ex);
-	    }
-	} else {
-	    return new byte[]{};
+	LOG.debug("Signing hash={}.", ByteUtils.toHexString(hash));
+	try {
+	    did.authenticateMissing();
+	    byte[] sigData = did.sign(hash);
+	    return sigData;
+	} catch (WSHelper.WSException ex) {
+	    String msg = "Failed to create signature because of an unknown error.";
+	    LOG.warn(msg, ex);
+	    throw new IOException(msg, ex);
+	} catch (SecurityConditionUnsatisfiable ex) {
+	    String msg = "Access to the signature DID could not be obtained.";
+	    LOG.warn(msg, ex);
+	    throw new IOException(msg, ex);
+	} catch (NoSuchDid ex) {
+	    String msg = "Signing DID not available anymore.";
+	    LOG.warn(msg, ex);
+	    throw new IOException(msg, ex);
 	}
     }
 
     @Override
     public synchronized Certificate getCertificate() {
-	if (certificate.equals(Certificate.EMPTY_CHAIN)) {
-	    try {
-		certificate = signerImpl.getBCCertificateChain();
-	    } catch (IOException ex) {
-		logger.error("Failed to read certificate due to an unknown error.", ex);
-	    } catch (CredentialPermissionDenied ex) {
-		logger.error("Failed to get certificate because of missing permissions.", ex);
-	    } catch (CertificateException ex) {
-		logger.error("Failed to deserialize certificate.", ex);
-	    }
-	}
+	if (certificate == null) {
+	    certificate = Certificate.EMPTY_CHAIN;
 
-	if (logger.isDebugEnabled()) {
-	    StringWriter sw = new StringWriter();
-	    sw.write("Using the following certificate for authentication:\n");
-	    for (org.openecard.bouncycastle.asn1.x509.Certificate c : certificate.getCertificateList()) {
-		try (PemWriter pw = new PemWriter(sw)) {
-		    sw.append("\nSubject: ")
-			    .append(c.getSubject().toString())
-			    .append("\n");
-		    sw.append("Issuer:  ")
-			    .append(c.getIssuer().toString());
-		    pw.writeObject(new PemObject("CERTIFICATE", c.getEncoded()));
-		    sw.write("\n");
-		} catch (IOException ex) {
-		    logger.error("Failed to encode certificate in PEM format.");
+	    try {
+		org.openecard.bouncycastle.asn1.x509.Certificate[] bcCerts;
+		bcCerts = new org.openecard.bouncycastle.asn1.x509.Certificate[chain.size()];
+		int i = 0;
+		for (X509Certificate next : chain) {
+		    byte[] encCert = next.getEncoded();
+		    org.openecard.bouncycastle.asn1.x509.Certificate bcCert;
+		    bcCert = org.openecard.bouncycastle.asn1.x509.Certificate.getInstance(encCert);
+		    bcCerts[i] = bcCert;
+		    i++;
 		}
+
+		certificate = new Certificate(bcCerts);
+	    } catch (CertificateEncodingException ex) {
+		LOG.error("Failed to deserialize certificate.", ex);
 	    }
-	    logger.debug(sw.toString());
+
+	    if (LOG.isDebugEnabled()) {
+		StringWriter sw = new StringWriter();
+		sw.write("Using the following certificate for authentication:\n");
+		for (org.openecard.bouncycastle.asn1.x509.Certificate c : certificate.getCertificateList()) {
+		    try (PemWriter pw = new PemWriter(sw)) {
+			sw.append("\nSubject: ")
+				.append(c.getSubject().toString())
+				.append("\n");
+			sw.append("Issuer:  ")
+				.append(c.getIssuer().toString());
+			pw.writeObject(new PemObject("CERTIFICATE", c.getEncoded()));
+			sw.write("\n");
+		    } catch (IOException ex) {
+			LOG.error("Failed to encode certificate in PEM format.");
+		    }
+		}
+		LOG.debug(sw.toString());
+	    }
 	}
 
 	return certificate;
@@ -135,7 +134,7 @@ public class SmartCardSignerCredential extends AbstractTlsSignerCredentials impl
 
     @Override
     public SignatureAndHashAlgorithm getSignatureAndHashAlgorithm() {
-	return signerImpl.getSignatureAndHashAlgorithm();
+	return sigAlg;
     }
 
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2016 ecsec GmbH.
+ * Copyright (C) 2013-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -38,7 +38,6 @@ import org.openecard.bouncycastle.crypto.tls.TlsClient;
 import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
 import org.openecard.bouncycastle.crypto.tls.TlsPSKIdentity;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.crypto.common.sal.GenericCryptoSignerFinder;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertPSKTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
@@ -276,8 +275,7 @@ public class TlsConnectionHandler {
     @Nullable
     private CredentialFactory makeSmartCardCredential() {
 	if (handle != null) {
-	    GenericCryptoSignerFinder finder = new GenericCryptoSignerFinder(dispatcher, handle, false);
-	    SmartCardCredentialFactory scFac = new SmartCardCredentialFactory(finder);
+	    SmartCardCredentialFactory scFac = new SmartCardCredentialFactory(dispatcher, handle, true);
 	    return scFac;
 	} else {
 	    return null;

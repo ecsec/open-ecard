@@ -41,7 +41,7 @@ import org.openecard.crypto.tls.CertificateVerifier;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.common.ReusableSecureRandom;
 import org.openecard.crypto.tls.SocketWrapper;
-import org.openecard.crypto.tls.auth.CertificateVerifierBuilder;
+import org.openecard.crypto.tls.verify.CertificateVerifierBuilder;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import org.openecard.crypto.tls.verify.HostnameVerifier;
 import org.openecard.crypto.tls.verify.KeyLengthVerifier;

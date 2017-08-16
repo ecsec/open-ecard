@@ -22,6 +22,7 @@
 
 package org.openecard.crypto.tls.auth;
 
+import org.openecard.crypto.tls.verify.CertificateVerifierBuilder;
 import org.openecard.crypto.tls.verify.KeyLengthVerifier;
 import org.openecard.crypto.tls.verify.HostnameVerifier;
 import java.io.IOException;
@@ -33,6 +34,7 @@ import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
 import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsContext;
 import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
+import org.openecard.bouncycastle.crypto.tls.TlsSignerCredentials;
 import org.openecard.crypto.tls.CertificateVerifier;
 import org.openecard.crypto.tls.verify.ExpirationVerifier;
 import org.slf4j.Logger;
@@ -172,7 +174,7 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
     @Override
     public TlsCredentials getClientCredentials(CertificateRequest cr) {
 	if (credentialFactory != null) {
-	    List<TlsCredentials> credentials = credentialFactory.getClientCredentials(cr);
+	    List<TlsSignerCredentials> credentials = credentialFactory.getClientCredentials(cr);
 	    if (! credentials.isEmpty()) {
 		TlsCredentials cred = credentials.get(0);
 		// in case the credential understands the context supply it

@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.crypto.tls.auth;
+package org.openecard.crypto.tls.verify;
 
 import java.util.ArrayList;
 import java.util.Arrays;

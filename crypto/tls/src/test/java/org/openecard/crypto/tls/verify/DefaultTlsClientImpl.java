@@ -29,7 +29,6 @@ import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
 import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
 import org.openecard.crypto.tls.CertificateVerifier;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
-import org.openecard.crypto.tls.auth.CertificateVerifierBuilder;
 
 
 /**

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,7 +25,7 @@ package org.openecard.crypto.tls.auth;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
-import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
+import org.openecard.bouncycastle.crypto.tls.TlsSignerCredentials;
 
 
 /**
@@ -43,6 +43,6 @@ public interface CredentialFactory {
      * @return Possibly empty list of all credentials which could answer the given request.
      */
     @Nonnull
-    List<TlsCredentials> getClientCredentials(CertificateRequest cr);
+    List<TlsSignerCredentials> getClientCredentials(CertificateRequest cr);
 
 }

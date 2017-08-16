@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.crypto.common.sal;
+package org.openecard.crypto.common.sal.did;
 
 
 /**

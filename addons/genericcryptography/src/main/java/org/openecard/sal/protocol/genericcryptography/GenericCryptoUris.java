@@ -34,7 +34,7 @@ public final class GenericCryptoUris {
      * 1.2.840.113549.1.1.1.
      * RSA_ENCRYPTION OBJECT IDENTIFIER ::= { pkcs-1 1 }
      */
-    public static final String RSA_ENCRYPTION = "http://www.w3.org/2001/04/xmlenc#rsa-1_5";
+    public static final String RSA_ENCRYPTION = "http://ws.openecard.org/alg/rsa";
     /**
      * 1.2.840.113549.1.1.7.
      * id-RSAES-OAEP OBJECT IDENTIFIER ::= { pkcs-1 7 }

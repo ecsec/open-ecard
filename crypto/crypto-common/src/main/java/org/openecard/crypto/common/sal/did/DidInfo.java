@@ -59,7 +59,6 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.pin.PINCompareDIDAuthenticateInputType;
 import org.openecard.common.anytype.pin.PINCompareDIDAuthenticateOutputType;
 import org.openecard.common.util.ByteUtils;
-import org.openecard.crypto.common.sal.ACLResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

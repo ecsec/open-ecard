@@ -13,7 +13,7 @@
 	<groupId>org.openecard</groupId>
 	<artifactId>addons</artifactId>
 	<packaging>pom</packaging>
-	<name>Integrated Add-ons</name>
+	<name>Add-on Modules</name>
 
 	<modules>
 		<module>pin-management</module>

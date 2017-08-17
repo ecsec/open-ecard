@@ -36,6 +36,7 @@ import java.nio.CharBuffer;
 import java.util.Arrays;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.openecard.common.ThreadTerminateException;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -308,7 +309,7 @@ public class MwSession {
 	    lmw.findObjectsFinalize(sessionHandle);
 	    return res;
 	} catch (InterruptedException ex) {
-	    throw new RuntimeException("Thread interrupted while waiting for Middleware lock.", ex);
+	    throw new ThreadTerminateException("Thread interrupted while waiting for Middleware lock.", ex);
 	}
     }
 

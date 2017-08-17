@@ -27,6 +27,7 @@ import org.openecard.mdlw.sal.cryptoki.CK_MECHANISM;
 import org.openecard.mdlw.sal.struct.CkAttribute;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
+import org.openecard.common.ThreadTerminateException;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.mdlw.sal.cryptoki.CK_RSA_PKCS_PSS_PARAMS;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
@@ -249,7 +250,7 @@ public class MwPrivateKey extends MwAbstractKey {
 	    lmw.signInit(session.getSessionId(), pMechanism, objectHandle);
 	    return lmw.sign(session.getSessionId(), data);
 	} catch (InterruptedException ex) {
-	    throw new RuntimeException("Thread interrupted while waiting for Middleware lock.", ex);
+	    throw new ThreadTerminateException("Thread interrupted while waiting for Middleware lock.", ex);
 	}
     }
 

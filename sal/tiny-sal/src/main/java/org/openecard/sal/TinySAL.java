@@ -2210,7 +2210,7 @@ public class TinySAL implements SAL {
 	}
 
 	if (cause instanceof ThreadTerminateException) {
-	    throw (RuntimeException) cause;
+	    throw (ThreadTerminateException) cause;
 	} else if (cause instanceof InterruptedException) {
 	    throw new ThreadTerminateException("Thread running inside SAL interrupted.", cause);
 	} else if (cause instanceof RuntimeException) {

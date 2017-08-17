@@ -107,6 +107,7 @@ import org.openecard.ws.chipgateway.ListCertificatesRequestType;
 import org.openecard.ws.chipgateway.ListCertificatesResponseType;
 import org.openecard.ws.chipgateway.ListTokensRequestType;
 import org.openecard.ws.chipgateway.ListTokensResponseType;
+import org.openecard.ws.chipgateway.ResponseType;
 import org.openecard.ws.chipgateway.SignRequestType;
 import org.openecard.ws.chipgateway.SignResponseType;
 import org.openecard.ws.chipgateway.TokenInfoType;
@@ -127,7 +128,7 @@ public class ChipGateway {
     private static final I18n LANG = I18n.getTranslation("chipgateway");
     private static final AtomicInteger TASK_THREAD_NUM = new AtomicInteger(1);
     private static final AtomicInteger HTTP_THREAD_NUM = new AtomicInteger(1);
-    private static final boolean LOG_HTTP_MESSAGES = false;
+    private static final boolean LOG_HTTP_MESSAGES = true;
 
     private final TlsConnectionHandler tlsHandler;
     private final TCToken token;
@@ -151,6 +152,7 @@ public class ChipGateway {
     private final DefaultConnectionReuseStrategy reuseStrategy = new DefaultConnectionReuseStrategy();
     private StreamHttpClientConnection conn;
     private boolean canReuse = false;
+    private volatile boolean isInterrupted = false;
 
     private HelloRequestType helloReq;
     private Thread showDialogThread;
@@ -223,6 +225,63 @@ public class ChipGateway {
 	}
     }
 
+
+    private void checkProcessCancelled() {
+	if (Thread.currentThread().isInterrupted()) {
+	    throw performProcessCancelled();
+	}
+    }
+
+    private ThreadTerminateException performProcessCancelled() {
+	TerminateType resp = new TerminateType();
+	resp.setSessionIdentifier(sessionId);
+	resp.setResult(ChipGatewayStatusCodes.STOPPED);
+	return performProcessCancelled(getResource(terminateUrl), resp);
+    }
+
+    private ThreadTerminateException performProcessCancelled(final String resource, final ResponseType msg) {
+	LOG.debug("Sending terminate message due to process cancellation.");
+	this.isInterrupted = true;
+	Thread t = new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+		try {
+		    sendMessage(resource, mapper.writeValueAsString(msg), CommandType.class);
+		} catch (JsonProcessingException | ConnectionError | InvalidRedirectUrlException | ChipGatewayDataError ex) {
+		    LOG.debug("Error sending terminating message.", ex);
+		} finally {
+		    // close connection as nobody will send a message after termination
+		    try {
+			if (conn != null) {
+			    conn.close();
+			}
+		    } catch (IOException ex) {
+			LOG.error("Failed to close connection to server.", ex);
+		    }
+		}
+	    }
+	}, "ChipGateway-terminate");
+	t.start();
+
+	return new ThreadTerminateException("ChipGateway protocol interrupted.");
+    }
+
+    private CommandType sendMessageInterruptableAndCheckTermination(final String resource, final ResponseType resp)
+	    throws ConnectionError, InvalidRedirectUrlException, ChipGatewayDataError, ThreadTerminateException, JsonProcessingException {
+	// stop messages are sent in the background
+	if (ChipGatewayStatusCodes.STOPPED.equals(resp.getResult())) {
+	    throw performProcessCancelled(resource, resp);
+	}
+	// all other messages are sent normally and if an interrupt is hit, send terminate in background thread
+	try {
+	    String msg = mapper.writeValueAsString(resp);
+	    return sendMessageInterruptable(resource, msg, CommandType.class);
+	} catch (ThreadTerminateException ex) {
+	    LOG.info("Sending message {} interrupted. Shutting down.", resp.getClass().getSimpleName());
+	    throw performProcessCancelled();
+	}
+    }
+
     private <T> T sendMessageInterruptable(final String resource, final String msg, final Class<T> resClass)
 	    throws ConnectionError, InvalidRedirectUrlException, ChipGatewayDataError, ThreadTerminateException {
 	FutureTask<T> task = new FutureTask<>(new Callable<T>() {
@@ -249,7 +308,10 @@ public class ChipGateway {
 		throw new RuntimeException("Unexpected exception raised by HTTP message sending thread.", cause);
 	    }
 	} catch (InterruptedException ex) {
+	    LOG.debug("Sending HTTP message interrupted.");
 	    task.cancel(true);
+
+	    // force new connection because this one may be unfinished and thus unusable
 	    try {
 		conn.shutdown();
 	    } catch (IOException ignore) {
@@ -409,7 +471,8 @@ public class ChipGateway {
 	    }
 
 	    try {
-		if (conn != null) {
+		// in case we are interrupted, terminate is sent in the background, so don't close just yet
+		if (conn != null && ! isInterrupted) {
 		    conn.close();
 		}
 	    } catch (IOException ex) {
@@ -479,30 +542,6 @@ public class ChipGateway {
 	return cmd;
     }
 
-    private void checkProcessCancelled() {
-	if (Thread.currentThread().isInterrupted()) {
-	    throw performProcessCancelled();
-	}
-    }
-
-    private ThreadTerminateException performProcessCancelled() {
-	Thread t = new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		try {
-		    TerminateType resp = new TerminateType();
-		    resp.setSessionIdentifier(sessionId);
-		    resp.setResult(ChipGatewayStatusCodes.STOPPED);
-		    sendMessage(getResource(terminateUrl), mapper.writeValueAsString(resp), CommandType.class);
-		} catch (JsonProcessingException | ConnectionError | InvalidRedirectUrlException | ChipGatewayDataError ex) {
-		}
-	    }
-	}, "ChipGateway-terminate");
-	t.start();
-
-	return new ThreadTerminateException("ChipGateway protocol interrupted.");
-    }
-
     private CommandType processTokensRequest(ListTokensRequestType tokensReq) throws ConnectionError,
 	    JsonProcessingException, InvalidRedirectUrlException, ChipGatewayDataError {
 	// check if we have been interrupted
@@ -511,53 +550,55 @@ public class ChipGateway {
 	ListTokensResponseType tokensResp = new ListTokensResponseType();
 	tokensResp.setSessionIdentifier(sessionId);
 
+	try {
+	    tokensResp = waitForTokens(tokensReq);
+	} catch (UnsupportedAlgorithmException ex) {
+	    LOG.error("Unsupported algorithm used.", ex);
+	    tokensResp.setResult(ChipGatewayStatusCodes.INCORRECT_PARAMETER);
+	} catch (WSHelper.WSException ex) {
+	    LOG.error("Unknown error.", ex);
+	    tokensResp.setResult(ChipGatewayStatusCodes.OTHER);
+	} catch (ThreadTerminateException | InterruptedException ex) {
+	    LOG.info("Chipgateway process interrupted.", ex);
+	    tokensResp.setResult(ChipGatewayStatusCodes.STOPPED);
+	} catch (TimeoutException ex) {
+	    LOG.info("Waiting for new tokens timed out.", ex);
+	    tokensResp.setResult(ChipGatewayStatusCodes.TIMEOUT);
+	}
+
+	return sendMessageInterruptableAndCheckTermination(getResource(listTokensUrl), tokensResp);
+    }
+
+    private ListTokensResponseType waitForTokens(ListTokensRequestType tokensReq) throws UnsupportedAlgorithmException,
+	    WSHelper.WSException, InterruptedException, TimeoutException {
 	BigInteger waitSecondsBig = tokensReq.getMaxWaitSeconds();
 	long waitMillis = getWaitMillis(waitSecondsBig);
 
 	Date startTime = new Date();
 
-	try {
-	    ListTokens helper = new ListTokens(tokensReq.getTokenInfo(), dispatcher);
-	    do {
-		// build list of matching tokens
-		List<TokenInfoType> matchedTokens = helper.findTokens();
+	ListTokens helper = new ListTokens(tokensReq.getTokenInfo(), dispatcher);
+	do {
+	    // build list of matching tokens
+	    List<TokenInfoType> matchedTokens = helper.findTokens();
 
-		// save handles of connected cards
-		connectedSlots.addAll(helper.getConnectedSlots());
+	    // save handles of connected cards
+	    connectedSlots.addAll(helper.getConnectedSlots());
 
-		if (! matchedTokens.isEmpty()) {
-		    tokensResp.setResult(ChipGatewayStatusCodes.OK);
-		    tokensResp.getTokenInfo().addAll(matchedTokens);
-		    return sendMessageInterruptable(getResource(listTokensUrl), mapper.writeValueAsString(tokensResp), CommandType.class);
-		}
-
-		// TODO: use real wait mechanism on the SAL implementation
-		Thread.sleep(1000);
-	    } while ((new Date().getTime() - startTime.getTime()) < waitMillis);
-	} catch (UnsupportedAlgorithmException ex) {
-	    LOG.error("Unsuppoorted algorithm used.", ex);
-	    tokensResp.setResult(ChipGatewayStatusCodes.INCORRECT_PARAMETER);
-	    return sendMessageInterruptable(getResource(listTokensUrl), mapper.writeValueAsString(tokensResp), CommandType.class);
-	} catch (WSHelper.WSException ex) {
-	    LOG.error("Unknown error.", ex);
-	    tokensResp.setResult(ChipGatewayStatusCodes.OTHER);
-	    return sendMessageInterruptable(getResource(listTokensUrl), mapper.writeValueAsString(tokensResp), CommandType.class);
-	} catch (ThreadTerminateException ex) {
-	    performProcessCancelled();
-	    throw ex;
-	} catch (InterruptedException ex) {
-	    String msg = "Interrupted while waiting for new tokens.";
-	    if (LOG.isDebugEnabled()) {
-		LOG.debug(msg, ex);
-	    } else {
-		LOG.info(msg);
+	    if (! matchedTokens.isEmpty()) {
+		ListTokensResponseType tokensResp = new ListTokensResponseType();
+		tokensResp.setSessionIdentifier(sessionId);
+		tokensResp.setResult(ChipGatewayStatusCodes.OK);
+		tokensResp.getTokenInfo().addAll(matchedTokens);
+		return tokensResp;
 	    }
-	    throw performProcessCancelled();
-	}
 
-	tokensResp.setResult(ChipGatewayStatusCodes.TIMEOUT);
-	return sendMessageInterruptable(getResource(listTokensUrl), mapper.writeValueAsString(tokensResp), CommandType.class);
+	    // TODO: use real wait mechanism on the SAL implementation
+	    Thread.sleep(1000);
+	} while ((new Date().getTime() - startTime.getTime()) < waitMillis);
+
+	throw new TimeoutException("Waiting for ListTokens timed out.");
     }
+
 
     private CommandType processCertificatesRequest(final ListCertificatesRequestType certReq) throws ConnectionError,
 	    JsonProcessingException, InvalidRedirectUrlException, ChipGatewayDataError {
@@ -568,9 +609,9 @@ public class ChipGateway {
 	long waitMillis = getWaitMillis(waitSecondsBig);
 
 	// run the actual stuff in the background, so we can wait and terminate if needed
-	FutureTask<CommandType> action = new FutureTask<>(new Callable<CommandType>() {
+	FutureTask<ListCertificatesResponseType> action = new FutureTask<>(new Callable<ListCertificatesResponseType>() {
 	    @Override
-	    public CommandType call() throws Exception {
+	    public ListCertificatesResponseType call() throws Exception {
 		ListCertificatesResponseType certResp = new ListCertificatesResponseType();
 		certResp.setSessionIdentifier(sessionId);
 
@@ -583,35 +624,7 @@ public class ChipGateway {
 
 		    certResp.getCertificateInfo().addAll(certInfos);
 		    certResp.setResult(ChipGatewayStatusCodes.OK);
-		    return sendMessageInterruptable(getResource(listCertsUrl), mapper.writeValueAsString(certResp), CommandType.class);
-		} catch (RemotePinException ex) {
-		    LOG.error("Error getting encrypted PIN.", ex);
-		    certResp.setResult(ChipGatewayStatusCodes.INCORRECT_PARAMETER);
-		    return sendMessageInterruptable(getResource(listCertsUrl), mapper.writeValueAsString(certResp), CommandType.class);
-		} catch (ParameterInvalid ex) {
-		    LOG.error("Error while processing the certificate filter parameters.", ex);
-		    certResp.setResult(ChipGatewayStatusCodes.INCORRECT_PARAMETER);
-		    return sendMessageInterruptable(getResource(listCertsUrl), mapper.writeValueAsString(certResp), CommandType.class);
-		} catch (SlotHandleInvalid ex) {
-		    LOG.error("No token for the given slot handle found.", ex);
-		    certResp.setResult(ChipGatewayStatusCodes.UNKNOWN_SLOT);
-		    return sendMessageInterruptable(getResource(listCertsUrl), mapper.writeValueAsString(certResp), CommandType.class);
-		} catch (NoSuchDid ex) {
-		    LOG.error("DID does not exist.", ex);
-		    certResp.setResult(ChipGatewayStatusCodes.UNKNOWN_DID);
-		    return sendMessageInterruptable(getResource(listCertsUrl), mapper.writeValueAsString(certResp), CommandType.class);
-		} catch (SecurityConditionUnsatisfiable ex) {
-		    LOG.error("DID can not be authenticated.", ex);
-		    certResp.setResult(ChipGatewayStatusCodes.SECURITY_NOT_SATISFIED);
-		    return sendMessageInterruptable(getResource(listCertsUrl), mapper.writeValueAsString(certResp), CommandType.class);
-		} catch (CertificateException ex) {
-		    LOG.error("Certificate could not be processed.", ex);
-		    certResp.setResult(ChipGatewayStatusCodes.OTHER);
-		    return sendMessageInterruptable(getResource(listCertsUrl), mapper.writeValueAsString(certResp), CommandType.class);
-		} catch (WSHelper.WSException ex) {
-		    LOG.error("Unknown error.", ex);
-		    certResp.setResult(ChipGatewayStatusCodes.OTHER);
-		    return sendMessageInterruptable(getResource(listCertsUrl), mapper.writeValueAsString(certResp), CommandType.class);
+		    return certResp;
 		} finally {
 		    if (pin != null) {
 			Arrays.fill(pin, ' ');
@@ -625,48 +638,65 @@ public class ChipGateway {
 
 	ListCertificatesResponseType certResp = new ListCertificatesResponseType();
 	certResp.setSessionIdentifier(sessionId);
+
 	try {
 	    // wait for thread to finish
-	    return action.get(waitMillis, TimeUnit.MILLISECONDS);
-	} catch (InterruptedException ex) {
+	    certResp = action.get(waitMillis, TimeUnit.MILLISECONDS);
+	} catch (TimeoutException ex) {
+	    LOG.info("Background task took longer than the timeout value permitted.", ex);
 	    action.cancel(true); // cancel task
+	    // wait for task to finish, so the SC stack can not get confused
 	    try {
 		t.join();
+		certResp.setResult(ChipGatewayStatusCodes.TIMEOUT);
 	    } catch (InterruptedException ignore) {
-		// ignore
+		// send stop message
+		certResp.setResult(ChipGatewayStatusCodes.STOPPED);
 	    }
+	} catch (ExecutionException ex) {
+	    LOG.error("Background task produced an exception.", ex);
+	    Throwable cause = ex.getCause();
+	    if (cause instanceof RemotePinException) {
+		LOG.error("Error getting encrypted PIN.", ex);
+		certResp.setResult(ChipGatewayStatusCodes.INCORRECT_PARAMETER);
+	    } else if (cause instanceof ParameterInvalid) {
+		LOG.error("Error while processing the certificate filter parameters.", ex);
+		certResp.setResult(ChipGatewayStatusCodes.INCORRECT_PARAMETER);
+	    } else if (cause instanceof SlotHandleInvalid) {
+		LOG.error("No token for the given slot handle found.", cause);
+		certResp.setResult(ChipGatewayStatusCodes.UNKNOWN_SLOT);
+	    } else if (cause instanceof NoSuchDid) {
+		LOG.error("DID does not exist.", cause);
+		certResp.setResult(ChipGatewayStatusCodes.UNKNOWN_DID);
+	    } else if (cause instanceof SecurityConditionUnsatisfiable) {
+		LOG.error("DID can not be authenticated.", cause);
+		certResp.setResult(ChipGatewayStatusCodes.SECURITY_NOT_SATISFIED);
+	    } else if (cause instanceof CertificateException) {
+		LOG.error("Certificate could not be processed.", cause);
+		certResp.setResult(ChipGatewayStatusCodes.OTHER);
+	    } else if (cause instanceof WSHelper.WSException) {
+		LOG.error("Unknown error.", cause);
+		certResp.setResult(ChipGatewayStatusCodes.OTHER);
+	    } else if (cause instanceof ThreadTerminateException) {
+		LOG.error("Chipgateway process interrupted.", cause);
+		certResp.setResult(ChipGatewayStatusCodes.STOPPED);
+	    } else {
+		LOG.error("Unknown error during list certificate operation.", cause);
+		certResp.setResult(ChipGatewayStatusCodes.OTHER);
+	    }
+	} catch (InterruptedException ex) {
 	    String msg = "Interrupted while waiting for background task.";
 	    if (LOG.isDebugEnabled()) {
 		LOG.debug(msg, ex);
 	    } else {
 		LOG.info(msg);
 	    }
-	    throw performProcessCancelled();
-	} catch (ExecutionException ex) {
-	    LOG.error("Background task produced an exception.", ex);
-	    Throwable cause = ex.getCause();
-	    if (cause instanceof ConnectionError) {
-		throw (ConnectionError) cause;
-	    } else if (cause instanceof InvalidRedirectUrlException) {
-		throw (InvalidRedirectUrlException) cause;
-	    } else if (cause instanceof ChipGatewayDataError) {
-		throw (ChipGatewayDataError) cause;
-	    } else if (cause instanceof RuntimeException) {
-		throw (RuntimeException) cause;
-	    } else {
-		throw new RuntimeException("Unknow error in list certificates thread.", cause);
-	    }
-	} catch (TimeoutException ex) {
 	    action.cancel(true); // cancel task
-	    try {
-		t.join();
-	    } catch (InterruptedException ignore) {
-		// ignore
-	    }
-	    LOG.error("Background task took longer than the timeout value permitted.", ex);
-	    certResp.setResult(ChipGatewayStatusCodes.TIMEOUT);
-	    return sendMessageInterruptable(getResource(listCertsUrl), mapper.writeValueAsString(certResp), CommandType.class);
+	    // send stop message
+	    certResp.setResult(ChipGatewayStatusCodes.STOPPED);
 	}
+
+	return sendMessageInterruptableAndCheckTermination(getResource(listCertsUrl), certResp);
     }
 
     private CommandType processSignRequest(final SignRequestType signReq) throws ConnectionError,
@@ -678,9 +708,9 @@ public class ChipGateway {
 	long waitMillis = getWaitMillis(waitSecondsBig);
 
 	// run the actual stuff in the background, so we can wait and terminate if needed
-	FutureTask<CommandType> action = new FutureTask<>(new Callable<CommandType>() {
+	FutureTask<SignResponseType> action = new FutureTask<>(new Callable<SignResponseType>() {
 	    @Override
-	    public CommandType call() throws Exception {
+	    public SignResponseType call() throws Exception {
 		SignResponseType signResp = new SignResponseType();
 		signResp.setSessionIdentifier(sessionId);
 
@@ -695,36 +725,8 @@ public class ChipGateway {
 
 		    signResp.setSignature(signature);
 		    signResp.setResult(ChipGatewayStatusCodes.OK);
-		    return sendMessageInterruptable(getResource(signUrl), mapper.writeValueAsString(signResp), CommandType.class);
-		} catch (RemotePinException ex) {
-		    LOG.error("Error getting encrypted PIN.", ex);
-		    signResp.setResult(ChipGatewayStatusCodes.INCORRECT_PARAMETER);
-		    return sendMessageInterruptable(getResource(signUrl), mapper.writeValueAsString(signResp), CommandType.class);
-		} catch (ParameterInvalid ex) {
-		    LOG.error("Error while processing the certificate filter parameters.", ex);
-		    signResp.setResult(ChipGatewayStatusCodes.INCORRECT_PARAMETER);
-		    return sendMessageInterruptable(getResource(signUrl), mapper.writeValueAsString(signResp), CommandType.class);
-		} catch (SlotHandleInvalid ex) {
-		    LOG.error("No token for the given slot handle found.", ex);
-		    signResp.setResult(ChipGatewayStatusCodes.UNKNOWN_SLOT);
-		    return sendMessageInterruptable(getResource(signUrl), mapper.writeValueAsString(signResp), CommandType.class);
-		} catch (NoSuchDid ex) {
-		    LOG.error("DID does not exist.", ex);
-		    signResp.setResult(ChipGatewayStatusCodes.UNKNOWN_DID);
-		    return sendMessageInterruptable(getResource(signUrl), mapper.writeValueAsString(signResp), CommandType.class);
-		} catch (PinBlocked ex) {
-		    LOG.error("PIN is blocked.", ex);
-		    // TODO: return blocked status
-		    signResp.setResult(ChipGatewayStatusCodes.SECURITY_NOT_SATISFIED);
-		    return sendMessageInterruptable(getResource(signUrl), mapper.writeValueAsString(signResp), CommandType.class);
-		} catch (SecurityConditionUnsatisfiable ex) {
-		    LOG.error("DID can not be authenticated.", ex);
-		    signResp.setResult(ChipGatewayStatusCodes.SECURITY_NOT_SATISFIED);
-		    return sendMessageInterruptable(getResource(signUrl), mapper.writeValueAsString(signResp), CommandType.class);
-		} catch (WSHelper.WSException ex) {
-		    LOG.error("Unknown error.", ex);
-		    signResp.setResult(ChipGatewayStatusCodes.OTHER);
-		    return sendMessageInterruptable(getResource(signUrl), mapper.writeValueAsString(signResp), CommandType.class);
+
+		    return signResp;
 		} finally {
 		    if (pin != null) {
 			Arrays.fill(pin, ' ');
@@ -738,48 +740,66 @@ public class ChipGateway {
 
 	SignResponseType signResp = new SignResponseType();
 	signResp.setSessionIdentifier(sessionId);
+
 	try {
 	    // wait for thread to finish
-	    return action.get(waitMillis, TimeUnit.MILLISECONDS);
-	} catch (InterruptedException ex) {
+	    signResp = action.get(waitMillis, TimeUnit.MILLISECONDS);
+	} catch (TimeoutException ex) {
+	    LOG.info("Background task took longer than the timeout value permitted.", ex);
 	    action.cancel(true); // cancel task
+	    // wait for task to finish, so the SC stack can not get confused
 	    try {
 		t.join();
+		signResp.setResult(ChipGatewayStatusCodes.TIMEOUT);
 	    } catch (InterruptedException ignore) {
-		// ignore
+		// send stop message
+		signResp.setResult(ChipGatewayStatusCodes.STOPPED);
 	    }
+	} catch (ExecutionException ex) {
+	    LOG.error("Background task produced an exception.", ex);
+	    Throwable cause = ex.getCause();
+	    if (cause instanceof RemotePinException) {
+		LOG.error("Error getting encrypted PIN.", cause);
+		signResp.setResult(ChipGatewayStatusCodes.INCORRECT_PARAMETER);
+	    } else if (cause instanceof ParameterInvalid) {
+		LOG.error("Error while processing the certificate filter parameters.", cause);
+		signResp.setResult(ChipGatewayStatusCodes.INCORRECT_PARAMETER);
+	    } else if (cause instanceof SlotHandleInvalid) {
+		LOG.error("No token for the given slot handle found.", cause);
+		signResp.setResult(ChipGatewayStatusCodes.UNKNOWN_SLOT);
+	    } else if (cause instanceof NoSuchDid) {
+		LOG.error("DID does not exist.", cause);
+		signResp.setResult(ChipGatewayStatusCodes.UNKNOWN_DID);
+	    } else if (cause instanceof PinBlocked) {
+		LOG.error("PIN is blocked.", cause);
+		// TODO: return blocked status
+		signResp.setResult(ChipGatewayStatusCodes.SECURITY_NOT_SATISFIED);
+	    } else if (cause instanceof SecurityConditionUnsatisfiable) {
+		LOG.error("DID can not be authenticated.", cause);
+		signResp.setResult(ChipGatewayStatusCodes.SECURITY_NOT_SATISFIED);
+	    } else if (cause instanceof WSHelper.WSException) {
+		LOG.error("Unknown error.", cause);
+		signResp.setResult(ChipGatewayStatusCodes.OTHER);
+	    } else if (cause instanceof ThreadTerminateException) {
+		LOG.error("Chipgateway process interrupted.", cause);
+		signResp.setResult(ChipGatewayStatusCodes.STOPPED);
+	    } else {
+		LOG.error("Unknown error during sign operation.", cause);
+		signResp.setResult(ChipGatewayStatusCodes.OTHER);
+	    }
+	} catch (InterruptedException ex) {
 	    String msg = "Interrupted while waiting for background task.";
 	    if (LOG.isDebugEnabled()) {
 		LOG.debug(msg, ex);
 	    } else {
 		LOG.info(msg);
 	    }
-	    throw performProcessCancelled();
-	} catch (ExecutionException ex) {
-	    LOG.error("Background task produced an exception.", ex);
-	    Throwable cause = ex.getCause();
-	    if (cause instanceof ConnectionError) {
-		throw (ConnectionError) cause;
-	    } else if (cause instanceof InvalidRedirectUrlException) {
-		throw (InvalidRedirectUrlException) cause;
-	    } else if (cause instanceof ChipGatewayDataError) {
-		throw (ChipGatewayDataError) cause;
-	    } else if (cause instanceof RuntimeException) {
-		throw (RuntimeException) cause;
-	    } else {
-		throw new RuntimeException("Unknow error in signature thread.", cause);
-	    }
-	} catch (TimeoutException ex) {
 	    action.cancel(true); // cancel task
-	    try {
-		t.join();
-	    } catch (InterruptedException ignore) {
-		// ignore
-	    }
-	    LOG.error("Background task took longer than the timeout value permitted.", ex);
-	    signResp.setResult(ChipGatewayStatusCodes.TIMEOUT);
-	    return sendMessageInterruptable(getResource(signUrl), mapper.writeValueAsString(signResp), CommandType.class);
+	    // send stop message
+	    signResp.setResult(ChipGatewayStatusCodes.STOPPED);
 	}
+
+	return sendMessageInterruptableAndCheckTermination(getResource(signUrl), signResp);
     }
 
     private void validateSignature(HelloResponseType helloResp) throws AuthServerException,

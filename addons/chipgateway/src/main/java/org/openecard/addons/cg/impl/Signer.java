@@ -144,6 +144,9 @@ public class Signer {
 		    throw new PinBlocked(ex.getMessage(), ex);
 	    	case ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED:
 		    throw new SecurityConditionUnsatisfiable(ex.getMessage(), ex);
+		case ECardConstants.Minor.IFD.CANCELLATION_BY_USER:
+		case ECardConstants.Minor.SAL.CANCELLATION_BY_USER:
+		    throw new ThreadTerminateException("Signature generation cancelled.", ex);
 	    	default:
 		    throw ex;
 	    }

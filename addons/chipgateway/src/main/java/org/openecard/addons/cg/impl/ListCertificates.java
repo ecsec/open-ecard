@@ -54,6 +54,7 @@ import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.common.util.StringUtils;
 import org.openecard.crypto.common.sal.did.DidInfo;
 import org.openecard.crypto.common.sal.did.DidInfos;
 import org.openecard.crypto.common.sal.did.NoSuchDid;
@@ -127,18 +128,25 @@ public class ListCertificates {
 
 	    return result;
 	} catch (WSHelper.WSException ex) {
-	    if (ECardConstants.Minor.App.INCORRECT_PARM.equals(ex.getResultMinor())) {
-		throw new ParameterInvalid(ex.getMessage(), ex);
-	    } else if (ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE.equals(ex.getResultMinor())) {
-		throw new SlotHandleInvalid(ex.getMessage(), ex);
-	    } else if (ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED.equals(ex.getResultMinor())) {
-		throw new SecurityConditionUnsatisfiable(ex.getMessage(), ex);
-	    } else {
-		throw ex;
+	    String minor = StringUtils.nullToEmpty(ex.getResultMinor());
+	    switch (minor) {
+	    	case ECardConstants.Minor.App.INCORRECT_PARM:
+		    throw new ParameterInvalid(ex.getMessage(), ex);
+	    	case ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE:
+		    throw new SlotHandleInvalid(ex.getMessage(), ex);
+	    	case ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED:
+		    throw new SecurityConditionUnsatisfiable(ex.getMessage(), ex);
+		case ECardConstants.Minor.IFD.CANCELLATION_BY_USER:
+		case ECardConstants.Minor.SAL.CANCELLATION_BY_USER:
+		    throw new ThreadTerminateException("Certificate retrieval interrupted.", ex);
+	    	default:
+		    throw ex;
 	    }
 	} catch (InvocationTargetExceptionUnchecked ex) {
 	    if (ex.getCause() instanceof InterruptedException || ex.getCause() instanceof ThreadTerminateException) {
-		throw new ThreadTerminateException("Signature creation interrupted.");
+		String msg = "Certificate retrieval interrupted.";
+		LOG.debug(msg, ex);
+		throw new ThreadTerminateException(msg);
 	    } else {
 		String msg = ex.getCause().getMessage();
 		throw WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));

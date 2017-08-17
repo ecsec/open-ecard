@@ -40,6 +40,7 @@ import org.openecard.addons.cg.tctoken.TCToken;
 import org.openecard.addons.cg.ex.InvalidRedirectUrlException;
 import org.openecard.addons.cg.ex.InvalidTCTokenElement;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.ThreadTerminateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,6 +91,10 @@ public class ActivateCGAction implements AppPluginAction {
 			System.gc();
 			System.runFinalization();
 			System.gc();
+		    } catch (ThreadTerminateException ex) {
+			LOG.debug("Activation task terminated by an interrupt.", ex);
+		    } catch (RuntimeException ex) {
+			LOG.error("Unhandled exception in activation process.", ex);
 		    } finally {
 			currentTaskThread = null;
 			// in some cases an error does not lead to a removal of the dynamic context so remove it here

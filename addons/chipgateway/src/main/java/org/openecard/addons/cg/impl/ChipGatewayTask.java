@@ -56,7 +56,7 @@ public class ChipGatewayTask implements Callable<TerminateType> {
     }
 
     @Override
-    public TerminateType call() throws InterruptedException, ConnectionError, VersionTooOld, InvalidTCTokenElement,
+    public TerminateType call() throws ConnectionError, VersionTooOld, InvalidTCTokenElement,
 	ChipGatewayDataError, InvalidRedirectUrlException, AuthServerException, ChipGatewayUnknownError {
 	TlsConnectionHandler tlsHandler = new TlsConnectionHandler(token);
 	tlsHandler.setUpClient();

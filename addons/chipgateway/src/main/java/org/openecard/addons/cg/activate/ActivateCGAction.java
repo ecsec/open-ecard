@@ -76,6 +76,7 @@ public class ActivateCGAction implements AppPluginAction {
     @Override
     public BindingResult execute(RequestBody body, Map<String, String> params, Headers headers, List<Attachment> att) {
 	BindingResult response;
+	boolean aquired = false;
 
 	try {
 	    checkMethod(headers);
@@ -105,6 +106,7 @@ public class ActivateCGAction implements AppPluginAction {
 
 	    // guard thread creation
 	    MUTEX.acquire();
+	    aquired = true;
 
 	    Thread t = currentTaskThread;
 	    if (t != null) {
@@ -127,8 +129,6 @@ public class ActivateCGAction implements AppPluginAction {
 	    currentTaskThread.setName("ChipGateway-Activation-" + THREAD_NUM.getAndIncrement());
 	    currentTaskThread.start();
 
-	    MUTEX.release();
-
 	    // create redirect
 	    response = new BindingResult(BindingResultCode.REDIRECT);
 	    response.getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, token.finalizeOkAddress());
@@ -147,6 +147,10 @@ public class ActivateCGAction implements AppPluginAction {
 	    LOG.info("ChipGateway activation interrupted.");
 	    response = new BindingResult(BindingResultCode.INTERNAL_ERROR);
 	    response.setResultMessage(ex.getMessage());
+	} finally {
+	    if (aquired) {
+		MUTEX.release();
+	    }
 	}
 
 	return response;

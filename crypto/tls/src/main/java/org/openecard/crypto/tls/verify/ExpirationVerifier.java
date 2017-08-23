@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,8 +22,11 @@
 
 package org.openecard.crypto.tls.verify;
 
+import java.io.IOException;
 import java.util.Date;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.asn1.x509.Certificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.bouncycastle.tls.crypto.TlsCertificate;
 import org.openecard.crypto.tls.CertificateVerificationException;
 import org.openecard.crypto.tls.CertificateVerifier;
 
@@ -36,14 +39,19 @@ import org.openecard.crypto.tls.CertificateVerifier;
 public class ExpirationVerifier implements CertificateVerifier {
 
     @Override
-    public void isValid(Certificate chain, String hostOrIP) throws CertificateVerificationException {
-	Date now = new Date();
-	for (org.openecard.bouncycastle.asn1.x509.Certificate c : chain.getCertificateList()) {
-	    Date expDate = c.getEndDate().getDate();
-	    if (now.after(expDate)) {
-		String msg = String.format("The certificate '%s' expired at %s.", c.getSubject(), expDate);
-		throw new CertificateVerificationException(msg);
+    public void isValid(TlsServerCertificate chain, String hostOrIP) throws CertificateVerificationException {
+	try {
+	    Date now = new Date();
+	    for (TlsCertificate next : chain.getCertificate().getCertificateList()) {
+		Certificate c = Certificate.getInstance(next.getEncoded());
+		Date expDate = c.getEndDate().getDate();
+		if (now.after(expDate)) {
+		    String msg = String.format("The certificate '%s' expired at %s.", c.getSubject(), expDate);
+		    throw new CertificateVerificationException(msg);
+		}
 	    }
+	} catch (IOException ex) {
+	    throw new CertificateVerificationException("Invalid certificate received from server.", ex);
 	}
     }
 

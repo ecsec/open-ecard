@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 HS Coburg.
+ * Copyright (C) 2012-2017 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -56,7 +56,6 @@ import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
 import org.openecard.binding.tctoken.ex.NonGuiException;
 import org.openecard.binding.tctoken.ex.SecurityViolationException;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
@@ -78,6 +77,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.ResultMinor;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.util.HandlerUtils;
 import org.openecard.common.interfaces.CardRecognition;
 import org.openecard.common.interfaces.EventDispatcher;
@@ -107,10 +107,10 @@ public class TCTokenHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(TCTokenHandler.class);
 
-    private static final I18n langTr03112 = I18n.getTranslation("tr03112");
-    private static final I18n lang = I18n.getTranslation("tctoken");
-    private static final I18n langPin = I18n.getTranslation("pinplugin");
-    private static final I18n langPace = I18n.getTranslation("pace");
+    private static final I18n LANG_TR = I18n.getTranslation("tr03112");
+    private static final I18n LANG_TOKEN = I18n.getTranslation("tctoken");
+    private static final I18n LANG_PIN = I18n.getTranslation("pinplugin");
+    private static final I18n LANG_PACE = I18n.getTranslation("pace");
 
     // Translation constants
     private static final String ERROR_CARD_REMOVED = "action.error.card.removed";
@@ -136,8 +136,8 @@ public class TCTokenHandler {
 	this.rec = ctx.getRecognition();
 	this.manager = ctx.getManager();
 	this.evManager = ctx.getEventDispatcher();
-	pin = langPace.translationForKey("pin");
-	puk = langPace.translationForKey("puk");
+	pin = LANG_PACE.translationForKey("pin");
+	puk = LANG_PACE.translationForKey("puk");
     }
 
     private ConnectionHandleType prepareHandle(ConnectionHandleType connectionHandle) throws WSException {
@@ -306,7 +306,7 @@ public class TCTokenHandler {
 
 
 	if (connectionHandle == null) {
-	    String msg = lang.translationForKey("cancel");
+	    String msg = LANG_TOKEN.translationForKey("cancel");
 	    LOG.error(msg);
 	    response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, msg));
 	    // fill in values, so it is usuable by the transport module
@@ -343,13 +343,13 @@ public class TCTokenHandler {
 	    String errorMsg = innerException.getLocalizedMessage();
 	    switch (errorMsg) {
 		case "The target server failed to respond":
-		    errorMsg = langTr03112.translationForKey(NO_RESPONSE_FROM_SERVER);
+		    errorMsg = LANG_TR.translationForKey(NO_RESPONSE_FROM_SERVER);
 		    break;
 		case ECardConstants.Minor.App.INT_ERROR + " ==> Unknown eCard exception occurred.":
-		    errorMsg = langTr03112.translationForKey(UNKNOWN_ECARD_ERROR);
+		    errorMsg = LANG_TR.translationForKey(UNKNOWN_ECARD_ERROR);
 		    break;
 		case "Internal TLS error, this could be an attack":
-		    errorMsg = langTr03112.translationForKey(INTERNAL_TLS_ERROR);
+		    errorMsg = LANG_TR.translationForKey(INTERNAL_TLS_ERROR);
 		    break;
 	    }
 
@@ -448,15 +448,15 @@ public class TCTokenHandler {
 //	    }
 
 	    // determine redirect
-	    List<Pair<URL, Certificate>> resultPoints = ctx.getCerts();
-	    Pair<URL, Certificate> last = resultPoints.get(resultPoints.size() - 1);
+	    List<Pair<URL, TlsServerCertificate>> resultPoints = ctx.getCerts();
+	    Pair<URL, TlsServerCertificate> last = resultPoints.get(resultPoints.size() - 1);
 	    endpoint = last.p1;
 	    dynCtx.put(TR03112Keys.IS_REFRESH_URL_VALID, true);
 	    LOG.debug("Setting redirect address to '{}'.", endpoint);
 	    response.setRefreshAddress(endpoint.toString());
 	    return response;
 	} catch (MalformedURLException ex) {
-	    throw new IllegalStateException(langTr03112.translationForKey(REFRESH_URL_ERROR), ex);
+	    throw new IllegalStateException(LANG_TR.translationForKey(REFRESH_URL_ERROR), ex);
 	} catch (ResourceException | InvalidAddressException | ValidationError | IOException ex) {
 	    String code = ECardConstants.Minor.App.COMMUNICATION_ERROR;
 	    String communicationErrorAddress = response.getTCToken().getComErrorAddressWithParams(code);
@@ -508,10 +508,10 @@ public class TCTokenHandler {
     }
 
     private void showErrorMessage(String errMsg) {
-	String title = langTr03112.translationForKey(ERROR_TITLE);
-	String baseHeader = langTr03112.translationForKey(ERROR_HEADER);
-	String exceptionPart = langTr03112.translationForKey(ERROR_MSG_IND);
-	String removeCard = langTr03112.translationForKey(REMOVE_CARD);
+	String title = LANG_TR.translationForKey(ERROR_TITLE);
+	String baseHeader = LANG_TR.translationForKey(ERROR_HEADER);
+	String exceptionPart = LANG_TR.translationForKey(ERROR_MSG_IND);
+	String removeCard = LANG_TR.translationForKey(REMOVE_CARD);
 	String msg = String.format("%s\n\n%s\n%s\n\n%s", baseHeader, exceptionPart, errMsg, removeCard);
 	showBackgroundMessage(msg, title, DialogType.ERROR_MESSAGE);
     }
@@ -520,43 +520,43 @@ public class TCTokenHandler {
 	String errorMsg;
 	switch (ex.getResultMinor()) {
 	    case ECardConstants.Minor.SAL.CANCELLATION_BY_USER:
-		errorMsg = lang.translationForKey("cancel");
+		errorMsg = LANG_TOKEN.translationForKey("cancel");
 		response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
 		break;
 	    case ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED:
-		errorMsg = langTr03112.translationForKey(CERT_ERROR);
+		errorMsg = LANG_TR.translationForKey(CERT_ERROR);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));
 		break;
 	    case ECardConstants.Minor.App.INCORRECT_PARM:
-		errorMsg = langTr03112.translationForKey(MESSAGE_CONTENT_INVALID);
+		errorMsg = LANG_TR.translationForKey(MESSAGE_CONTENT_INVALID);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));
 		break;
 	    case ECardConstants.Minor.App.INT_ERROR:
-		errorMsg = langTr03112.translationForKey(INTERNAL_ERROR);
+		errorMsg = LANG_TR.translationForKey(INTERNAL_ERROR);
 		response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
 		break;
 	    case ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED:
-		errorMsg = langTr03112.translationForKey(CERT_DESCRIPTION_CHECK_FAILED);
+		errorMsg = LANG_TR.translationForKey(CERT_DESCRIPTION_CHECK_FAILED);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));
 		break;
 	    case ECardConstants.Minor.App.UNKNOWN_ERROR:
-		errorMsg = langTr03112.translationForKey(ERROR_WHILE_AUTHENTICATION);
+		errorMsg = LANG_TR.translationForKey(ERROR_WHILE_AUTHENTICATION);
 		response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
 		break;
 	    case ECardConstants.Minor.SAL.UNKNOWN_HANDLE:
-		errorMsg = langTr03112.translationForKey(UNKNOWN_CONNECTION_HANDLE);
+		errorMsg = LANG_TR.translationForKey(UNKNOWN_CONNECTION_HANDLE);
 		response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
 		break;
 	    case ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE:
-		errorMsg = langPin.translationForKey(ERROR_CARD_REMOVED);
+		errorMsg = LANG_PIN.translationForKey(ERROR_CARD_REMOVED);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));
 		break;
 	    case ECardConstants.Minor.IFD.PASSWORD_BLOCKED:
-		errorMsg = langPace.translationForKey("step_error_pin_blocked", pin, pin, puk, pin);
+		errorMsg = LANG_PACE.translationForKey("step_error_pin_blocked", pin, pin, puk, pin);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));
 		break;
 	    default:
-		errorMsg = langTr03112.translationForKey(ERROR_WHILE_AUTHENTICATION);
+		errorMsg = LANG_TR.translationForKey(ERROR_WHILE_AUTHENTICATION);
 		response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
 	}
 	return errorMsg;
@@ -571,7 +571,7 @@ public class TCTokenHandler {
      */
     private String createMessageFromUnknownError(@Nonnull PAOSException w) {
 	String errorMsg = "\n";
-	errorMsg += langTr03112.translationForKey(UNHANDLED_INNER_EXCEPTION);
+	errorMsg += LANG_TR.translationForKey(UNHANDLED_INNER_EXCEPTION);
 	errorMsg += "\n";
 	errorMsg += w.getMessage();
 	return errorMsg;

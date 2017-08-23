@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -37,7 +37,7 @@ import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.binding.tctoken.ex.ResultMinor;
 import org.openecard.binding.tctoken.ex.UserCancellationException;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.util.Pair;
 import org.slf4j.Logger;
@@ -107,10 +107,10 @@ public class TCTokenContext extends ResourceContext {
 	}
 
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	List<Pair<URL, Certificate>> resultPoints = base.getCerts();
+	List<Pair<URL, TlsServerCertificate>> resultPoints = base.getCerts();
 	// probably just for tests
 	if (! resultPoints.isEmpty()) {
-	    Pair<URL, Certificate> last = resultPoints.get(0);
+	    Pair<URL, TlsServerCertificate> last = resultPoints.get(0);
 	    dynCtx.put(TR03112Keys.TCTOKEN_URL, last.p1);
 	}
 

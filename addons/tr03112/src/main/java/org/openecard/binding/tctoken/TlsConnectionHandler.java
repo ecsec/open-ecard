@@ -31,23 +31,24 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.SecureRandom;
 import javax.annotation.Nullable;
-import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
-import org.openecard.bouncycastle.crypto.tls.TlsClient;
-import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
-import org.openecard.bouncycastle.crypto.tls.TlsPSKIdentity;
+import org.openecard.bouncycastle.tls.ProtocolVersion;
+import org.openecard.bouncycastle.tls.TlsClient;
+import org.openecard.bouncycastle.tls.TlsClientProtocol;
+import org.openecard.bouncycastle.tls.TlsPSKIdentity;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertPSKTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
-import org.openecard.crypto.tls.TlsPSKIdentityImpl;
 import org.openecard.crypto.tls.auth.CredentialFactory;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import org.openecard.crypto.tls.verify.SameCertVerifier;
 import org.openecard.crypto.tls.auth.SmartCardCredentialFactory;
 import org.openecard.crypto.tls.proxy.ProxySettings;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.bouncycastle.tls.BasicTlsPSKIdentity;
+import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
+import org.openecard.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.UrlBuilder;
 import org.openecard.crypto.common.ReusableSecureRandom;
@@ -145,12 +146,13 @@ public class TlsConnectionHandler {
 		// Set up TLS connection
 		DynamicAuthentication tlsAuth = new DynamicAuthentication(serverHost);
 
+		TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.getInstance());
 		switch (secProto) {
 		    case "urn:ietf:rfc:4279":
 			{
 			    byte[] psk = token.getPathSecurityParameters().getPSK();
-			    TlsPSKIdentity pskId = new TlsPSKIdentityImpl(sessionId.getBytes(), psk);
-			    tlsClient = new ClientCertPSKTlsClient(pskId, serverHost, doSni);
+			    TlsPSKIdentity pskId = new BasicTlsPSKIdentity(sessionId, psk);
+			    tlsClient = new ClientCertPSKTlsClient(crypto, pskId, serverHost, doSni);
 			    tlsClient.setClientVersion(version);
 			    tlsClient.setMinimumVersion(minVersion);
 			    break;
@@ -159,7 +161,7 @@ public class TlsConnectionHandler {
 			{
 			    // use a smartcard for client authentication if needed
 			    tlsAuth.setCredentialFactory(makeSmartCardCredential());
-			    tlsClient = new ClientCertDefaultTlsClient(serverHost, doSni);
+			    tlsClient = new ClientCertDefaultTlsClient(crypto, serverHost, doSni);
 			    tlsClient.setClientVersion(version);
 			    tlsClient.setMinimumVersion(minVersion);
 			    // add PKIX verifier
@@ -255,8 +257,7 @@ public class TlsConnectionHandler {
 	// TLS
 	InputStream sockIn = socket.getInputStream();
 	OutputStream sockOut = socket.getOutputStream();
-	SecureRandom sr = ReusableSecureRandom.getInstance();
-	TlsClientProtocol handler = new TlsClientProtocol(sockIn, sockOut, sr);
+	TlsClientProtocol handler = new TlsClientProtocol(sockIn, sockOut);
 	handler.connect(tlsClient);
 
 	return handler;

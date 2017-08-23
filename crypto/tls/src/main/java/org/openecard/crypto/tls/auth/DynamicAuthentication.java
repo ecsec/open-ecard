@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,12 +29,14 @@ import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
-import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
-import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
-import org.openecard.bouncycastle.crypto.tls.TlsContext;
-import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
-import org.openecard.bouncycastle.crypto.tls.TlsSignerCredentials;
+import org.openecard.bouncycastle.tls.AlertDescription;
+import org.openecard.bouncycastle.tls.CertificateRequest;
+import org.openecard.bouncycastle.tls.TlsAuthentication;
+import org.openecard.bouncycastle.tls.TlsContext;
+import org.openecard.bouncycastle.tls.TlsCredentialedSigner;
+import org.openecard.bouncycastle.tls.TlsCredentials;
+import org.openecard.bouncycastle.tls.TlsFatalAlert;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.crypto.tls.CertificateVerifier;
 import org.openecard.crypto.tls.verify.ExpirationVerifier;
 import org.slf4j.Logger;
@@ -53,7 +55,7 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
     private String hostname;
     private CertificateVerifier certVerifier;
     private CredentialFactory credentialFactory;
-    private Certificate lastCertChain;
+    private TlsServerCertificate lastCertChain;
     private TlsContext context;
 
     /**
@@ -145,20 +147,26 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
      * hostname and certificate chain verification, those types could also include CRL and OCSP checking.
      *
      * @see CertificateVerifier
-     * @param crtfct Certificate chain of the server as transmitted in the TLS handshake.
+     * @param serverCert Certificate chain of the server as transmitted in the TLS handshake.
      * @throws IOException when certificate verification failed.
      */
     @Override
-    public void notifyServerCertificate(Certificate crtfct) throws IOException {
-	// save server certificate
-	this.lastCertChain = crtfct;
-	// try to validate
-	if (certVerifier != null) {
-	    // perform validation depending on the available parameters
-	    certVerifier.isValid(crtfct, hostname);
+    public void notifyServerCertificate(TlsServerCertificate serverCert) throws IOException {
+	boolean noServerCert = serverCert == null || serverCert.getCertificate() == null
+		|| serverCert.getCertificate().isEmpty();
+	if (noServerCert) {
+	    throw new TlsFatalAlert(AlertDescription.handshake_failure);
 	} else {
-	    // no verifier available
-	    LOG.warn("No certificate verifier available, skipping certificate verification.");
+	    // save server certificate
+	    this.lastCertChain = serverCert;
+	    // try to validate
+	    if (certVerifier != null) {
+		// perform validation depending on the available parameters
+		certVerifier.isValid(serverCert, hostname);
+	    } else {
+		// no verifier available
+		LOG.warn("No certificate verifier available, skipping certificate verification.");
+	    }
 	}
     }
 
@@ -174,7 +182,10 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
     @Override
     public TlsCredentials getClientCredentials(CertificateRequest cr) {
 	if (credentialFactory != null) {
-	    List<TlsSignerCredentials> credentials = credentialFactory.getClientCredentials(cr);
+	    if (credentialFactory instanceof ContextAware) {
+		((ContextAware) credentialFactory).setContext(context);
+	    }
+	    List<TlsCredentialedSigner> credentials = credentialFactory.getClientCredentials(cr);
 	    if (! credentials.isEmpty()) {
 		TlsCredentials cred = credentials.get(0);
 		// in case the credential understands the context supply it
@@ -194,7 +205,7 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
      * @return The certificate chain of the last certificate validation or null if none is available.
      */
     @Nullable
-    public Certificate getServerCertificate() {
+    public TlsServerCertificate getServerCertificate() {
 	return lastCertChain;
     }
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -44,7 +44,7 @@ import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.binding.tctoken.TR03112Keys;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
@@ -105,8 +105,8 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
     private static final Logger LOG = LoggerFactory.getLogger(PACEStep.class.getName());
 
-    private static final I18n lang = I18n.getTranslation("eac");
-    private static final I18n langPace = I18n.getTranslation("pace");
+    private static final I18n LANG = I18n.getTranslation("eac");
+    private static final I18n LANG_PACE = I18n.getTranslation("pace");
 
     // GUI translation constants
     private static final String TITLE = "eac_user_consent_title";
@@ -275,7 +275,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    boolean pinUsable = ! Arrays.equals(status, new byte[]{(byte) 0x63, (byte) 0xC0});
 
 	    // define GUI depending on the PIN status
-	    final UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE));
+	    final UserConsentDescription uc = new UserConsentDescription(LANG.translationForKey(TITLE));
 	    if (pinUsable) {
 		// create GUI and init executor
 		CardMonitor cardMon = new CardMonitor();
@@ -476,9 +476,8 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     }
 
     private boolean checkTCTokenAndSubjectURL(CertificateDescription certDescription, DynamicContext dynCtx) {
-	Object o = dynCtx.get(TR03112Keys.TCTOKEN_URL);
-	if (o instanceof URL) {
-	    URL tcTokenURL = (URL) o;
+	URL tcTokenURL = (URL) dynCtx.get(TR03112Keys.TCTOKEN_URL);
+	if (tcTokenURL != null) {
 	    try {
 		URL subjectURL = new URL(certDescription.getSubjectURL());
 		return TR03112Utils.checkSameOriginPolicy(tcTokenURL, subjectURL);
@@ -493,9 +492,8 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     }
 
     private boolean checkEserviceCertificate(CertificateDescription certDescription, DynamicContext dynCtx) {
-	Object o = dynCtx.get(TR03112Keys.ESERVICE_CERTIFICATE);
-	if (o instanceof Certificate) {
-	    Certificate certificate = (Certificate) o;
+	TlsServerCertificate certificate = (TlsServerCertificate) dynCtx.get(TR03112Keys.ESERVICE_CERTIFICATE);
+	if (certificate != null) {
 	    return TR03112Utils.isInCommCertificates(certificate, certDescription.getCommCertificates());
 	} else {
 	    LOG.error("No eService TLS Certificate set in Dynamic Context.");
@@ -504,17 +502,14 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     }
 
     private boolean checkTCTokenServerCertificates(CertificateDescription certDescription, DynamicContext dynCtx) {
-	Object o = dynCtx.get(TR03112Keys.TCTOKEN_SERVER_CERTIFICATES);
-	if (o instanceof List) {
-	    List<?> certificates = (List<?>) o;
-	    for (Object cert : certificates) {
+	List<Pair<URL, TlsServerCertificate>> certificates;
+	certificates = (List<Pair<URL, TlsServerCertificate>>) dynCtx.get(TR03112Keys.TCTOKEN_SERVER_CERTIFICATES);
+	if (certificates != null) {
+	    for (Pair<URL, TlsServerCertificate> cert : certificates) {
 		if (cert instanceof Pair) {
-		    Pair<?, ?> p = (Pair<?, ?>) cert;
-		    if (p.p2 instanceof Certificate) {
-			Certificate bcCert = (Certificate) p.p2;
-			if (! TR03112Utils.isInCommCertificates(bcCert, certDescription.getCommCertificates())) {
-			    return false;
-			}
+		    TlsServerCertificate bcCert = cert.p2;
+		    if (!TR03112Utils.isInCommCertificates(bcCert, certDescription.getCommCertificates())) {
+			return false;
 		    }
 		}
 	    }

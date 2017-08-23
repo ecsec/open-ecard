@@ -25,18 +25,28 @@ package org.openecard.crypto.tls.auth;
 import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.io.IOException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.security.auth.x500.X500Principal;
 import org.openecard.bouncycastle.asn1.x500.X500Name;
-import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
-import org.openecard.bouncycastle.crypto.tls.HashAlgorithm;
-import org.openecard.bouncycastle.crypto.tls.SignatureAlgorithm;
-import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
-import org.openecard.bouncycastle.crypto.tls.TlsSignerCredentials;
+import org.openecard.bouncycastle.tls.Certificate;
+import org.openecard.bouncycastle.tls.CertificateRequest;
+import org.openecard.bouncycastle.tls.DefaultTlsCredentialedSigner;
+import org.openecard.bouncycastle.tls.HashAlgorithm;
+import org.openecard.bouncycastle.tls.SignatureAlgorithm;
+import org.openecard.bouncycastle.tls.SignatureAndHashAlgorithm;
+import org.openecard.bouncycastle.tls.TlsContext;
+import org.openecard.bouncycastle.tls.TlsCredentialedSigner;
+import org.openecard.bouncycastle.tls.crypto.TlsCertificate;
+import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
+import org.openecard.bouncycastle.tls.crypto.TlsCryptoParameters;
+import org.openecard.bouncycastle.tls.crypto.TlsSigner;
 import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
@@ -59,13 +69,15 @@ import org.slf4j.LoggerFactory;
  * @author Tobias Wich
  * @author Dirk Petrautzki
  */
-public class SmartCardCredentialFactory implements CredentialFactory {
+public class SmartCardCredentialFactory implements CredentialFactory, ContextAware {
 
     private static final Logger LOG = LoggerFactory.getLogger(SmartCardCredentialFactory.class);
 
     private final TokenCache tokenCache;
     private final ConnectionHandleType handle;
     private final boolean filterAlwaysReadable;
+
+    private TlsContext context;
 
     public SmartCardCredentialFactory(@Nonnull Dispatcher dispatcher, @Nonnull ConnectionHandleType handle,
 	    boolean filterAlwaysReadable) {
@@ -75,8 +87,14 @@ public class SmartCardCredentialFactory implements CredentialFactory {
     }
 
     @Override
-    public List<TlsSignerCredentials> getClientCredentials(CertificateRequest cr) {
-	ArrayList<TlsSignerCredentials> credentials = new ArrayList<>();
+    public void setContext(TlsContext context) {
+	this.context = context;
+    }
+
+    @Override
+    public List<TlsCredentialedSigner> getClientCredentials(CertificateRequest cr) {
+	ArrayList<TlsCredentialedSigner> credentials = new ArrayList<>();
+	TlsCryptoParameters tlsCrypto = new TlsCryptoParameters(context);
 
 	try {
 	    DidInfos didInfos = tokenCache.getInfo(null, handle);
@@ -89,46 +107,38 @@ public class SmartCardCredentialFactory implements CredentialFactory {
 			continue;
 		    }
 
-		    AlgorithmInfoType algInfo = info.getGenericCryptoMarker().getAlgorithmInfo();
-		    SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algInfo.getAlgorithmIdentifier().getAlgorithm());
-		    SignatureAndHashAlgorithm bcAlg = convertSignatureAlgorithm(alg);
-
+		    TlsCredentialedSigner cred;
 		    List<X509Certificate> chain = info.getRelatedCertificateChain();
-		    if (isAlgAllowed(cr, info) && matchesCertReq(cr, chain) && isAuthCert(info, chain)) {
-			SmartCardSignerCredential cred;
-			// raw rsa signatures need special handling
+		    Certificate clientCert = convertCert(context.getCrypto(), chain);
+
+		    if (! matchesCertReq(cr, chain) || ! isAuthCert(info, chain)) {
+			continue;
+		    }
+
+		    if (cr.getSupportedSignatureAlgorithms() == null) {
+			// TLS < 1.2
 			if (isRawRSA(info)) {
-			    if (cr.getSupportedSignatureAlgorithms() == null) {
-				// TLS < 1.2
-				LOG.debug("Adding raw RSA signer.");
-				cred = new RawRsaSmartCardSignerCredential(info, chain, bcAlg);
-				credentials.add(cred);
-			    } else {
-				// TLS >= 1.2
-				for (Object algObj : cr.getSupportedSignatureAlgorithms()) {
-				    SignatureAndHashAlgorithm reqAlg = (SignatureAndHashAlgorithm) algObj;
-				    if (reqAlg.getSignature() == SignatureAlgorithm.rsa) {
-					switch (reqAlg.getHash()) {
-					    case HashAlgorithm.sha1:
-					    case HashAlgorithm.sha224:
-					    case HashAlgorithm.sha256:
-					    case HashAlgorithm.sha384:
-					    case HashAlgorithm.sha512:
-						LOG.debug("Adding raw {}withRSA signer.", HashAlgorithm.getName(reqAlg.getHash()).toUpperCase());
-						cred = new RawRsaSmartCardSignerCredential(info, chain, reqAlg);
-						credentials.add(cred);
-					}
-				    }
-				}
-			    }
-			} else {
-			    // DID names a specific algorithm
-			    LOG.debug("Adding specific {} signer.", alg.getJcaAlg());
-			    cred = new SmartCardSignerCredential(info, chain, bcAlg);
+			    LOG.debug("Adding raw RSA signer.");
+			    TlsSigner signer = new SmartCardSignerCredential(info);
+			    cred = new DefaultTlsCredentialedSigner(tlsCrypto, signer, clientCert, null);
 			    credentials.add(cred);
 			}
+		    } else {
+			// TLS >= 1.2
+			for (Object algObj : cr.getSupportedSignatureAlgorithms()) {
+			    SignatureAndHashAlgorithm reqAlg = (SignatureAndHashAlgorithm) algObj;
+			    AlgorithmInfoType algInfo = info.getGenericCryptoMarker().getAlgorithmInfo();
+			    SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algInfo.getAlgorithmIdentifier().getAlgorithm());
+
+			    if (matchesAlg(reqAlg, alg)) {
+				LOG.debug("Adding {} signer.", alg.getJcaAlg());
+				TlsSigner signer = new SmartCardSignerCredential(info);
+				cred = new DefaultTlsCredentialedSigner(tlsCrypto, signer, clientCert, reqAlg);
+				credentials.add(cred);
+			    }
+			}
 		    }
-		} catch (SecurityConditionUnsatisfiable | NoSuchDid | CertificateException ex) {
+		} catch (SecurityConditionUnsatisfiable | NoSuchDid | CertificateException | IOException ex) {
 		    LOG.error("Failed to read certificates from card. Skipping DID " + info.getDidName() + ".", ex);
 		} catch (UnsupportedAlgorithmException ex) {
 		    LOG.error("Unsupported algorithm used in CIF. Skipping DID " + info.getDidName() + ".", ex);
@@ -197,45 +207,39 @@ public class SmartCardCredentialFactory implements CredentialFactory {
 	return true;
     }
 
-    private boolean isAlgAllowed(CertificateRequest cr, DidInfo did) throws WSHelper.WSException,
-	    UnsupportedAlgorithmException {
-	boolean preTls12 = cr.getSupportedSignatureAlgorithms() == null;
 
-	AlgorithmInfoType algInfo = did.getGenericCryptoMarker().getAlgorithmInfo();
-	SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algInfo.getAlgorithmIdentifier().getAlgorithm());
-	SignatureAndHashAlgorithm bcAlg = convertSignatureAlgorithm(alg);
-
-	if (preTls12) {
-	    return alg == SignatureAlgorithms.CKM_RSA_PKCS;
-	}
-
-	// match against whitelist
+    private boolean matchesAlg(SignatureAndHashAlgorithm reqAlg, SignatureAlgorithms alg) {
+	// only use PKCS#1 1.5 and ECDSA, not PKCS#1 2.0
 	switch (alg) {
-	    case CKM_RSA_PKCS:
+	    //case CKM_ECDSA:
 	    case CKM_ECDSA_SHA1:
 	    case CKM_ECDSA_SHA224:
 	    case CKM_ECDSA_SHA256:
 	    case CKM_ECDSA_SHA384:
 	    case CKM_ECDSA_SHA512:
+	    case CKM_RSA_PKCS:
 	    case CKM_SHA1_RSA_PKCS:
 	    case CKM_SHA224_RSA_PKCS:
 	    case CKM_SHA256_RSA_PKCS:
 	    case CKM_SHA384_RSA_PKCS:
 	    case CKM_SHA512_RSA_PKCS:
 		break;
-	    default:
-		return false;
+	    default: return false;
 	}
 
-	// match against negotiated algorithms
-	for (Object algObj : cr.getSupportedSignatureAlgorithms()) {
-	    SignatureAndHashAlgorithm negAlg = (SignatureAndHashAlgorithm) algObj;
-	    if (bcAlg.equals(algObj)) {
-		return true;
+	try {
+	    SignatureAndHashAlgorithm bcAlg = convertSignatureAlgorithm(alg);
+
+	    if (bcAlg == null) {
+		// RAW RSA
+		return reqAlg.getSignature() == SignatureAlgorithm.rsa;
+	    } else {
+		// match everything else
+		return reqAlg.equals(bcAlg);
 	    }
+	} catch (IllegalArgumentException ex) {
+	    return false;
 	}
-
-	return false;
     }
 
     private boolean isRawRSA(DidInfo info) throws WSHelper.WSException, UnsupportedAlgorithmException {
@@ -244,33 +248,39 @@ public class SmartCardCredentialFactory implements CredentialFactory {
 	return SignatureAlgorithms.CKM_RSA_PKCS == alg;
     }
 
-    public static SignatureAndHashAlgorithm convertSignatureAlgorithm(SignatureAlgorithms alg) {
-	    HashAlgorithms hashAlg = alg.getHashAlg();
-	    KeyTypes keyType = alg.getKeyType();
+    @Nullable
+    private static SignatureAndHashAlgorithm convertSignatureAlgorithm(SignatureAlgorithms alg) {
+	HashAlgorithms hashAlg = alg.getHashAlg();
+	KeyTypes keyType = alg.getKeyType();
 
-	    short hash;
-	    if (hashAlg != null) {
-		switch (hashAlg) {
-		    case CKM_SHA_1: hash = HashAlgorithm.sha1; break;
-		    case CKM_SHA224: hash = HashAlgorithm.sha224; break;
-		    case CKM_SHA256: hash = HashAlgorithm.sha256; break;
-		    case CKM_SHA384: hash = HashAlgorithm.sha384; break;
-		    case CKM_SHA512: hash = HashAlgorithm.sha512; break;
-		    default: throw new IllegalArgumentException("Unsupported hash algorithm selected.");
-		}
-	    } else {
-		hash = HashAlgorithm.none;
+	short hash;
+	if (hashAlg != null) {
+	    switch (hashAlg) {
+		case CKM_SHA_1: hash = HashAlgorithm.sha1; break;
+		case CKM_SHA224: hash = HashAlgorithm.sha224; break;
+		case CKM_SHA256: hash = HashAlgorithm.sha256; break;
+		case CKM_SHA384: hash = HashAlgorithm.sha384; break;
+		case CKM_SHA512: hash = HashAlgorithm.sha512; break;
+		default: throw new IllegalArgumentException("Unsupported hash algorithm selected.");
 	    }
+	} else {
+	    return null;
+	}
 
-	    short sig;
-	    switch (keyType) {
-		case CKK_RSA: sig = SignatureAlgorithm.rsa; break;
-		case CKK_EC: sig = SignatureAlgorithm.ecdsa; break;
-		default: throw new IllegalArgumentException("Unsupported signature algorithm selected.");
-	    }
+	short sig;
+	switch (keyType) {
+	    case CKK_RSA: sig = SignatureAlgorithm.rsa; break;
+	    case CKK_EC: sig = SignatureAlgorithm.ecdsa; break;
+	    default: throw new IllegalArgumentException("Unsupported signature algorithm selected.");
+	}
 
-	    return new SignatureAndHashAlgorithm(hash, sig);
+	return new SignatureAndHashAlgorithm(hash, sig);
+    }
 
+    private Certificate convertCert(TlsCrypto crypto, List<X509Certificate> chain) throws IOException,
+	    CertificateEncodingException {
+	TlsCertificate cert = crypto.createCertificate(chain.get(0).getEncoded());
+	return new Certificate(new TlsCertificate[]{ cert });
     }
 
 }

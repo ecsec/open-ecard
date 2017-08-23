@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 HS Coburg.
+ * Copyright (C) 2013-2017 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,11 +22,15 @@
 
 package org.openecard.common.util;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import javax.security.cert.CertificateException;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
+import mockit.Expectations;
+import mockit.Mocked;
+import org.openecard.bouncycastle.tls.Certificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -62,17 +66,20 @@ public class TR03112UtilsTest {
     }
 
     @Test
-    public void testInCommCertificates() throws CertificateException {
-	org.openecard.bouncycastle.asn1.x509.Certificate[] c = new org.openecard.bouncycastle.asn1.x509.Certificate[1];
-	c[0] = org.openecard.bouncycastle.asn1.x509.Certificate.getInstance(x509Certificate);
-	Certificate cert = new Certificate(c);
-	ArrayList<byte[]> listOfHashes = new ArrayList<byte[]>();
+    public void testInCommCertificates(@Mocked final TlsServerCertificate tlsCert) throws CertificateException,
+	    IOException {
+	new Expectations() {{
+	    tlsCert.getCertificate().getCertificateAt(0).getEncoded(); result = x509Certificate;
+	    tlsCert.getCertificate().getCertificateAt(0).getEncoded(); result = x509Certificate;
+	}};
+
+	ArrayList<byte[]> listOfHashes = new ArrayList<>();
 	listOfHashes.add(correctHash);
-	boolean result = TR03112Utils.isInCommCertificates(cert, listOfHashes);
+	boolean result = TR03112Utils.isInCommCertificates(tlsCert, listOfHashes);
 	Assert.assertTrue(result);
 	listOfHashes.clear();
 	listOfHashes.add(incorrectHash);
-	result = TR03112Utils.isInCommCertificates(cert, listOfHashes);
+	result = TR03112Utils.isInCommCertificates(tlsCert, listOfHashes);
 	Assert.assertFalse(result);
     }
 

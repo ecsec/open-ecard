@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,9 +32,9 @@ import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.SecureRandom;
-import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
-import org.openecard.bouncycastle.crypto.tls.TlsClient;
-import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
+import org.openecard.bouncycastle.tls.ProtocolVersion;
+import org.openecard.bouncycastle.tls.TlsClient;
+import org.openecard.bouncycastle.tls.TlsClientProtocol;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
@@ -43,6 +43,8 @@ import org.openecard.crypto.tls.proxy.ProxySettings;
 import static org.openecard.addons.cg.ex.ErrorTranslations.*;
 import org.openecard.addons.cg.ex.InvalidTCTokenElement;
 import org.openecard.addons.cg.impl.ChipGatewayProperties;
+import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
+import org.openecard.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
 import org.openecard.crypto.common.ReusableSecureRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +107,8 @@ public class TlsConnectionHandler {
 		case "http://ws.openecard.org/pathsecurity/tlsv12-with-pin-encryption":
 		    {
 			// use a smartcard for client authentication if needed
-			tlsClient = new ClientCertDefaultTlsClient(serverHost, true);
+			TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.getInstance());
+			tlsClient = new ClientCertDefaultTlsClient(crypto, serverHost, true);
 			tlsClient.setClientVersion(version);
 			tlsClient.setMinimumVersion(minVersion);
 			// add PKIX verifier
@@ -166,8 +169,7 @@ public class TlsConnectionHandler {
 	// TLS
 	InputStream sockIn = socket.getInputStream();
 	OutputStream sockOut = socket.getOutputStream();
-	SecureRandom sr = ReusableSecureRandom.getInstance();
-	TlsClientProtocol handler = new TlsClientProtocol(sockIn, sockOut, sr);
+	TlsClientProtocol handler = new TlsClientProtocol(sockIn, sockOut);
 	handler.connect(tlsClient);
 
 	return handler;

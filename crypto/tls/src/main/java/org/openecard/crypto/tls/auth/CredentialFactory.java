@@ -24,8 +24,8 @@ package org.openecard.crypto.tls.auth;
 
 import java.util.List;
 import javax.annotation.Nonnull;
-import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
-import org.openecard.bouncycastle.crypto.tls.TlsSignerCredentials;
+import org.openecard.bouncycastle.tls.CertificateRequest;
+import org.openecard.bouncycastle.tls.TlsCredentialedSigner;
 
 
 /**
@@ -43,6 +43,6 @@ public interface CredentialFactory {
      * @return Possibly empty list of all credentials which could answer the given request.
      */
     @Nonnull
-    List<TlsSignerCredentials> getClientCredentials(CertificateRequest cr);
+    List<TlsCredentialedSigner> getClientCredentials(CertificateRequest cr);
 
 }

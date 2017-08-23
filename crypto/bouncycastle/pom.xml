@@ -30,6 +30,9 @@
 						</goals>
 						<configuration>
 							<basedir>${basedir}/src/bc/core/src/main/java/org/bouncycastle</basedir>
+							<excludes>
+								<exclude>crypto/tls/*</exclude>
+							</excludes>
 						</configuration>
 					</execution>
 					<execution>
@@ -55,7 +58,7 @@
 							</excludes>
 						</configuration>
 					</execution>
-					<!-- disable new TLS interface until it is stable
+					<!-- TLS interface -->
 					<execution>
 						<id>bc-tls</id>
 						<phase>generate-sources</phase>
@@ -66,7 +69,6 @@
 							<basedir>${basedir}/src/bc/tls/src/main/java/org/bouncycastle</basedir>
 						</configuration>
 					</execution>
-					-->
 				</executions>
 				<configuration>
 					<outputBasedir>${basedir}/target/generated-sources/bc</outputBasedir>

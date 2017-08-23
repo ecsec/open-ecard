@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,8 +24,8 @@ package org.openecard.crypto.tls;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.openecard.bouncycastle.crypto.tls.AlertDescription;
-import org.openecard.bouncycastle.crypto.tls.AlertLevel;
+import org.openecard.bouncycastle.tls.AlertDescription;
+import org.openecard.bouncycastle.tls.AlertLevel;
 
 
 /**

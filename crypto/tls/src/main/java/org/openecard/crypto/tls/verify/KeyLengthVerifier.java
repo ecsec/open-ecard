@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2015 ecsec GmbH.
+ * Copyright (C) 2014-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,10 +23,12 @@
 package org.openecard.crypto.tls.verify;
 
 import java.io.IOException;
+import org.openecard.bouncycastle.asn1.x509.Certificate;
 import org.openecard.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.openecard.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.bouncycastle.crypto.util.PublicKeyFactory;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.bouncycastle.tls.crypto.TlsCertificate;
 import org.openecard.crypto.common.keystore.KeyLengthException;
 import org.openecard.crypto.common.keystore.KeyTools;
 import org.openecard.crypto.tls.CertificateVerificationException;
@@ -42,14 +44,16 @@ import org.slf4j.LoggerFactory;
  */
 public class KeyLengthVerifier implements CertificateVerifier {
 
-    private static final Logger logger = LoggerFactory.getLogger(KeyLengthVerifier.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KeyLengthVerifier.class);
 
     @Override
-    public void isValid(Certificate chain, String hostname) throws CertificateVerificationException {
+    public void isValid(TlsServerCertificate chain, String hostname) throws CertificateVerificationException {
 	try {
 	    boolean firstCert = true;
 	    // check each certificate
-	    for (org.openecard.bouncycastle.asn1.x509.Certificate x509 : chain.getCertificateList()) {
+
+	    for (TlsCertificate next : chain.getCertificate().getCertificateList()) {
+		Certificate x509 = Certificate.getInstance(next.getEncoded());
 		boolean selfSigned = x509.getIssuer().equals(x509.getSubject());
 
 		// skip key comparison step if this is a root certificate, but still check self signed server certs

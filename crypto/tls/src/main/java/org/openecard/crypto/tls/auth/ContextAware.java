@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -12,7 +12,7 @@
 
 package org.openecard.crypto.tls.auth;
 
-import org.openecard.bouncycastle.crypto.tls.TlsContext;
+import org.openecard.bouncycastle.tls.TlsContext;
 
 
 /**

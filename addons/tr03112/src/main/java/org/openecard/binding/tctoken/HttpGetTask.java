@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -37,7 +37,7 @@ import org.openecard.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openecard.apache.http.protocol.BasicHttpContext;
 import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.apache.http.protocol.HttpRequestExecutor;
-import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
+import org.openecard.bouncycastle.tls.TlsClientProtocol;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.util.FileUtils;
@@ -55,7 +55,7 @@ import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
  */
 public class HttpGetTask implements Callable<StartPAOSResponse> {
 
-    private static final Logger logger = LoggerFactory.getLogger(HttpGetTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpGetTask.class);
 
     private final Dispatcher dispatcher;
     private final ConnectionHandleType connectionHandle;
@@ -104,7 +104,7 @@ public class HttpGetTask implements Callable<StartPAOSResponse> {
 	HttpRequestHelper.setDefaultHeader(req, tlsHandler.getServerAddress());
 	req.setHeader("Accept", "text/html, */*;q=0.8");
 	req.setHeader("Accept-Charset", "utf-8, *;q=0.8");
-	HttpUtils.dumpHttpRequest(logger, req);
+	HttpUtils.dumpHttpRequest(LOG, req);
 
 	// send request and receive response
 	HttpResponse response = httpexecutor.execute(req, conn, ctx);
@@ -112,7 +112,7 @@ public class HttpGetTask implements Callable<StartPAOSResponse> {
 	conn.receiveResponseEntity(response);
 	HttpEntity entity = response.getEntity();
 	byte[] entityData = FileUtils.toByteArray(entity.getContent());
-	HttpUtils.dumpHttpResponse(logger, response, entityData);
+	HttpUtils.dumpHttpResponse(LOG, response, entityData);
 	conn.close();
 
 	if (statusCode < 200 || statusCode > 299) {

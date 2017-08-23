@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -28,7 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import javax.annotation.Nonnull;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.crypto.tls.CertificateVerificationException;
 import org.openecard.crypto.tls.CertificateVerifier;
 
@@ -137,7 +137,7 @@ public class CertificateVerifierBuilder {
 
 	return new CertificateVerifier() {
 	    @Override
-	    public void isValid(Certificate chain, String hostname) throws CertificateVerificationException {
+	    public void isValid(TlsServerCertificate chain, String hostname) throws CertificateVerificationException {
 		if (! andCopy.isEmpty()) {
 		    // process each AND check and pass if none failed
 		    for (CertificateVerifier cv : andCopy) {

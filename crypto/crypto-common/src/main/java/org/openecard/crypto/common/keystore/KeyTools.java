@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2015 ecsec GmbH.
+ * Copyright (C) 2014-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -42,7 +42,8 @@ import org.openecard.bouncycastle.crypto.params.DSAKeyParameters;
 import org.openecard.bouncycastle.crypto.params.ECKeyParameters;
 import org.openecard.bouncycastle.crypto.params.ElGamalKeyParameters;
 import org.openecard.bouncycastle.crypto.params.RSAKeyParameters;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.tls.Certificate;
+import org.openecard.bouncycastle.tls.crypto.TlsCertificate;
 
 
 /**
@@ -166,13 +167,13 @@ public class KeyTools {
      * @throws CertificateException Thrown in case the JCA has problems supporting X509 or one of the certificates.
      * @throws IOException Thrown in case there is en encoding error.
      */
-    public static CertPath convertCertificates(org.openecard.bouncycastle.asn1.x509.Certificate... chain)
+    public static CertPath convertCertificates(TlsCertificate... chain)
 	    throws CertificateException, IOException {
 	final int numCerts = chain.length;
 	ArrayList<java.security.cert.Certificate> result = new ArrayList<>(numCerts);
 	CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
-	for (org.openecard.bouncycastle.asn1.x509.Certificate next : chain) {
+	for (TlsCertificate next : chain) {
 	    byte[] nextData = next.getEncoded();
 	    ByteArrayInputStream nextDataStream = new ByteArrayInputStream(nextData);
 	    java.security.cert.Certificate nextConverted = cf.generateCertificate(nextDataStream);
@@ -181,26 +182,26 @@ public class KeyTools {
 
 	return cf.generateCertPath(result);
     }
-
-    /**
-     * Converts the given certificate chain to a BouncyCastle Certificate chain.
-     *
-     * @param chain JCA list of certificates.
-     * @return BC Certificate instance.
-     * @throws CertificateException Thrown in case one of the given certificates could not be encoded.
-     */
-    public static Certificate convertCertificates(java.security.cert.Certificate... chain) throws CertificateException {
-	org.openecard.bouncycastle.asn1.x509.Certificate[] certs;
-	certs = new org.openecard.bouncycastle.asn1.x509.Certificate[chain.length];
-
-	for (int i = 0; i < chain.length; i++) {
-	    java.security.cert.Certificate next = chain[i];
-	    byte[] encCert = next.getEncoded();
-	    certs[i] = org.openecard.bouncycastle.asn1.x509.Certificate.getInstance(encCert);
-	}
-
-	Certificate cert = new Certificate(certs);
-	return cert;
-    }
+//
+//    /**
+//     * Converts the given certificate chain to a BouncyCastle Certificate chain.
+//     *
+//     * @param chain JCA list of certificates.
+//     * @return BC Certificate instance.
+//     * @throws CertificateException Thrown in case one of the given certificates could not be encoded.
+//     */
+//    public static Certificate convertCertificates(java.security.cert.Certificate... chain) throws CertificateException {
+//	org.openecard.bouncycastle.asn1.x509.Certificate[] certs;
+//	certs = new org.openecard.bouncycastle.asn1.x509.Certificate[chain.length];
+//
+//	for (int i = 0; i < chain.length; i++) {
+//	    java.security.cert.Certificate next = chain[i];
+//	    byte[] encCert = next.getEncoded();
+//	    certs[i] = org.openecard.bouncycastle.asn1.x509.Certificate.getInstance(encCert);
+//	}
+//
+//	Certificate cert = new Certificate(certs);
+//	return cert;
+//    }
 
 }

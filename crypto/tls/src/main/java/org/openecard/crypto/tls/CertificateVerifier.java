@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,7 +23,7 @@
 package org.openecard.crypto.tls;
 
 import javax.annotation.Nonnull;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 
 
 /**
@@ -42,6 +42,6 @@ public interface CertificateVerifier {
      * @param hostOrIP Name of the host or its IP address used in the validation.
      * @throws CertificateVerificationException Thrown in case the verification failed.
      */
-    void isValid(@Nonnull Certificate chain, @Nonnull String hostOrIP) throws CertificateVerificationException;
+    void isValid(@Nonnull TlsServerCertificate chain, @Nonnull String hostOrIP) throws CertificateVerificationException;
 
 }

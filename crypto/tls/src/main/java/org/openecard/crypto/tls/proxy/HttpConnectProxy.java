@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2013-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,17 +29,18 @@ import java.net.Proxy;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.security.SecureRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
+import org.openecard.bouncycastle.tls.TlsClientProtocol;
+import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
+import org.openecard.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
 import org.openecard.bouncycastle.util.encoders.Base64;
+import org.openecard.crypto.common.ReusableSecureRandom;
 import org.openecard.crypto.tls.CertificateVerifier;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
-import org.openecard.crypto.common.ReusableSecureRandom;
 import org.openecard.crypto.tls.SocketWrapper;
 import org.openecard.crypto.tls.verify.CertificateVerifierBuilder;
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
@@ -125,7 +126,8 @@ public final class HttpConnectProxy extends Proxy {
 
 	// evaluate scheme
 	if ("HTTPS".equals(proxyScheme)) {
-	    ClientCertDefaultTlsClient tlsClient = new ClientCertDefaultTlsClient(proxyHost, true);
+	    TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.getInstance());
+	    ClientCertDefaultTlsClient tlsClient = new ClientCertDefaultTlsClient(crypto, proxyHost, true);
 	    DynamicAuthentication tlsAuth = new DynamicAuthentication(proxyHost);
 	    if (proxyValidate) {
 		CertificateVerifier cv = new CertificateVerifierBuilder()
@@ -136,8 +138,7 @@ public final class HttpConnectProxy extends Proxy {
 		tlsAuth.setCertificateVerifier(cv);
 	    }
 	    tlsClient.setAuthentication(tlsAuth);
-	    SecureRandom sr = ReusableSecureRandom.getInstance();
-	    TlsClientProtocol proto = new TlsClientProtocol(sock.getInputStream(), sock.getOutputStream(), sr);
+	    TlsClientProtocol proto = new TlsClientProtocol(sock.getInputStream(), sock.getOutputStream());
 	    proto.connect(tlsClient);
 	    // wrap socket
 	    Socket tlsSock = new SocketWrapper(sock, proto.getInputStream(), proto.getOutputStream());

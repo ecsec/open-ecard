@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -36,7 +36,7 @@ import java.util.Set;
 import javax.security.auth.x500.X500Principal;
 import org.openecard.addons.cg.impl.AllowedApiEndpoints;
 import org.openecard.addons.cg.impl.ChipGatewayProperties;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.crypto.tls.CertificateVerificationException;
 import org.openecard.crypto.tls.verify.JavaSecVerifier;
 import org.slf4j.Logger;
@@ -61,7 +61,7 @@ public class CGJavaSecVerifier extends JavaSecVerifier {
     }
 
     @Override
-    public void isValid(Certificate chain, String hostname) throws CertificateVerificationException {
+    public void isValid(TlsServerCertificate chain, String hostname) throws CertificateVerificationException {
 	try {
 	    CertPath certPath = convertChain(chain);
 

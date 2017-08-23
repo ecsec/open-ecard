@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,9 +44,11 @@ import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.apache.http.protocol.HttpRequestExecutor;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
-import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
-import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
+import org.openecard.bouncycastle.tls.ProtocolVersion;
+import org.openecard.bouncycastle.tls.TlsClientProtocol;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
+import org.openecard.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.I18n;
 import org.openecard.common.io.LimitedInputStream;
@@ -80,20 +81,20 @@ import org.slf4j.LoggerFactory;
  */
 public class ResourceContext {
 
-    private static final Logger logger = LoggerFactory.getLogger(ResourceContext.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ResourceContext.class);
 
 
-    private static final I18n lang = I18n.getTranslation("tr03112");
+    private static final I18n LANG = I18n.getTranslation("tr03112");
 
     private final ClientCertTlsClient tlsClient;
     private final TlsClientProtocol tlsClientProto;
-    private final List<Pair<URL, Certificate>> certs;
+    private final List<Pair<URL, TlsServerCertificate>> certs;
 
     private InputStream stream;
     private String data;
 
     protected ResourceContext(@Nullable ClientCertTlsClient tlsClient, @Nullable TlsClientProtocol tlsClientProto,
-	    @Nonnull List<Pair<URL, Certificate>> certs) {
+	    @Nonnull List<Pair<URL, TlsServerCertificate>> certs) {
 	this.tlsClient = tlsClient;
 	this.tlsClientProto = tlsClientProto;
 	this.certs = certs;
@@ -120,19 +121,19 @@ public class ResourceContext {
 	    try {
 		stream.close();
 	    } catch (IOException ex) {
-		logger.debug("Failed to close stream.", ex);
+		LOG.debug("Failed to close stream.", ex);
 	    }
 	}
 	if (tlsClientProto != null) {
 	    try {
 		tlsClientProto.close();
 	    } catch (IOException ex) {
-		logger.debug("Failed to close connection.", ex);
+		LOG.debug("Failed to close connection.", ex);
 	    }
 	}
     }
 
-    public List<Pair<URL, Certificate>> getCerts() {
+    public List<Pair<URL, TlsServerCertificate>> getCerts() {
 	return certs;
     }
 
@@ -148,7 +149,7 @@ public class ResourceContext {
 		    try {
 			stream.close();
 		    } catch (IOException ex) {
-			logger.debug("Failed to close stream.", ex);
+			LOG.debug("Failed to close stream.", ex);
 		    }
 		}
 	    }
@@ -173,7 +174,7 @@ public class ResourceContext {
 	// use verifier which always returns
 	return getStream(url, new CertificateValidator() {
 	    @Override
-	    public CertificateValidator.VerifierResult validate(URL url, Certificate cert) throws ValidationError {
+	    public CertificateValidator.VerifierResult validate(URL url, TlsServerCertificate cert) throws ValidationError {
 		return CertificateValidator.VerifierResult.DONTCARE;
 	    }
 	});
@@ -193,17 +194,17 @@ public class ResourceContext {
      */
     public static ResourceContext getStream(URL url, CertificateValidator v) throws IOException, ResourceException,
 	    ValidationError, InvalidAddressException {
-	ArrayList<Pair<URL, Certificate>> serverCerts = new ArrayList<>();
+	ArrayList<Pair<URL, TlsServerCertificate>> serverCerts = new ArrayList<>();
 	return getStreamInt(url, v, serverCerts, 10);
     }
 
     private static ResourceContext getStreamInt(URL url, CertificateValidator v, List<Pair<URL,
-	    Certificate>> serverCerts, int maxRedirects) throws IOException, ResourceException, ValidationError,
+	    TlsServerCertificate>> serverCerts, int maxRedirects) throws IOException, ResourceException, ValidationError,
 	    InvalidAddressException {
 	try {
 	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	    CookieManager cManager = (CookieManager) dynCtx.get(TR03112Keys.COOKIE_MANAGER);
-	    logger.info("Trying to load resource from: {}", url);
+	    LOG.info("Trying to load resource from: {}", url);
 
 	    if (maxRedirects == 0) {
 		throw new ResourceException(MAX_REDIRECTS);
@@ -232,23 +233,23 @@ public class ResourceContext {
 	    }
 	    // FIXME: validate certificate chain as soon as a usable solution exists for the trust problem
 	    // tlsAuth.setCertificateVerifier(new JavaSecVerifier());
-	    ClientCertTlsClient tlsClient = new ClientCertDefaultTlsClient(hostname, true);
+	    TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.getInstance());
+	    ClientCertTlsClient tlsClient = new ClientCertDefaultTlsClient(crypto, hostname, true);
 	    tlsClient.setAuthentication(tlsAuth);
 
 	    // connect tls client
 	    tlsClient.setClientVersion(ProtocolVersion.TLSv12);
 	    Socket socket = ProxySettings.getDefault().getSocket(protocol, hostname, port);
-	    SecureRandom sr = ReusableSecureRandom.getInstance();
-	    h = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), sr);
-	    logger.debug("Performing TLS handshake.");
+	    h = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream());
+	    LOG.debug("Performing TLS handshake.");
 	    h.connect(tlsClient);
-	    logger.debug("TLS handshake performed.");
+	    LOG.debug("TLS handshake performed.");
 
 	    serverCerts.add(new Pair<>(url, tlsAuth.getServerCertificate()));
 	    // check result
 	    CertificateValidator.VerifierResult verifyResult = v.validate(url, tlsAuth.getServerCertificate());
 	    if (verifyResult == CertificateValidator.VerifierResult.FINISH) {
-		List<Pair<URL, Certificate>> pairs = Collections.unmodifiableList(serverCerts);
+		List<Pair<URL, TlsServerCertificate>> pairs = Collections.unmodifiableList(serverCerts);
 		return new ResourceContext(tlsClient, h, pairs);
 	    }
 
@@ -262,15 +263,15 @@ public class ResourceContext {
 	    req.setHeader("Accept", "text/xml, */*;q=0.8");
 	    req.setHeader("Accept-Charset", "utf-8, *;q=0.8");
 	    setCookieHeader(req, cManager, url);
-	    HttpUtils.dumpHttpRequest(logger, req);
-	    logger.debug("Sending HTTP request.");
+	    HttpUtils.dumpHttpRequest(LOG, req);
+	    LOG.debug("Sending HTTP request.");
 	    HttpResponse response = httpexecutor.execute(req, conn, ctx);
 	    storeCookies(response, cManager, url);
-	    logger.debug("HTTP response received.");
+	    LOG.debug("HTTP response received.");
 	    StatusLine status = response.getStatusLine();
 	    int statusCode = status.getStatusCode();
 	    String reason = status.getReasonPhrase();
-	    HttpUtils.dumpHttpResponse(logger, response, null);
+	    HttpUtils.dumpHttpResponse(LOG, response, null);
 
 	    HttpEntity entity = null;
 	    boolean finished = false;
@@ -285,8 +286,8 @@ public class ResourceContext {
 		}
 	    } else if (statusCode >= 400) {
 		// according to the HTTP RFC, codes greater than 400 signal errors
-		logger.debug("Received a result code {} '{}' from server.", statusCode, reason);
-		throw new InvalidResultStatus(lang.translationForKey(INVALID_RESULT_STATUS, statusCode, reason));
+		LOG.debug("Received a result code {} '{}' from server.", statusCode, reason);
+		throw new InvalidResultStatus(LANG.translationForKey(INVALID_RESULT_STATUS, statusCode, reason));
 	    } else {
 		if (verifyResult == CertificateValidator.VerifierResult.CONTINUE) {
 		    throw new InvalidAddressException(INVALID_REFRESH_ADDRESS_NOSOP);
@@ -309,7 +310,7 @@ public class ResourceContext {
 		return getStreamInt(url, v, serverCerts, maxRedirects);
 	    }
 	} catch (URISyntaxException ex) {
-	    throw new IOException(lang.translationForKey(FAILED_PROXY), ex);
+	    throw new IOException(LANG.translationForKey(FAILED_PROXY), ex);
 	} catch (HttpException ex) {
 	    // don't translate this, it is handled in the ActivationAction
 	    throw new IOException("Invalid HTTP message received.", ex);
@@ -359,7 +360,7 @@ public class ResourceContext {
 		} catch(CookieException ex) {
 		    String msg = "Received invalid cookie from: %s. The cookie is not stored.";
 		    msg = String.format(msg, url.toString());
-		    logger.warn(msg, ex);
+		    LOG.warn(msg, ex);
 		}
 	    }
 	}

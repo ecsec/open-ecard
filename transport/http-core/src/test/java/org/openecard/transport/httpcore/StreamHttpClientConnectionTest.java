@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,6 +25,8 @@ package org.openecard.transport.httpcore;
 import java.io.IOException;
 import java.net.Socket;
 import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.Vector;
 import org.openecard.apache.http.Header;
 import org.openecard.apache.http.HttpEntity;
 import org.openecard.apache.http.HttpException;
@@ -36,8 +38,9 @@ import org.openecard.apache.http.protocol.BasicHttpContext;
 import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.apache.http.protocol.HttpRequestExecutor;
 import org.openecard.apache.http.util.EntityUtils;
-import org.openecard.bouncycastle.crypto.tls.DefaultTlsClient;
-import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
+import org.openecard.bouncycastle.tls.DefaultTlsClient;
+import org.openecard.bouncycastle.tls.TlsClientProtocol;
+import org.openecard.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
 import org.openecard.common.util.FileUtils;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -76,9 +79,13 @@ public class StreamHttpClientConnectionTest {
 	// open connection
 	Socket socket = new Socket(hostName, 443);
 	assertTrue(socket.isConnected());
-	DefaultTlsClient tlsClient = new DefaultTlsClientImpl();
-	tlsClient.setServerName(hostName);
-	TlsClientProtocol handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), rand);
+	DefaultTlsClient tlsClient = new DefaultTlsClientImpl(new BcTlsCrypto(rand)) {
+	    @Override
+	    protected Vector getSNIServerNames() {
+		return new Vector(Collections.singletonList(hostName));
+	    }
+	};
+	TlsClientProtocol handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream());
 	handler.connect(tlsClient);
 	StreamHttpClientConnection conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());
 	assertTrue(conn.isOpen());

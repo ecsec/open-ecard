@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -46,13 +46,13 @@ import org.openecard.addons.tr03124.gui.CardMonitorTask;
 import org.openecard.addons.tr03124.gui.CardSelectionAction;
 import org.openecard.addons.tr03124.gui.CardSelectionStep;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.UserCancellationException;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.AppVersion;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.I18n;
@@ -87,7 +87,7 @@ public class TCTokenRequest {
     private byte[] contextHandle;
     private String cardType = "http://bsi.bund.de/cif/npa.xml";
     private boolean tokenFromObject;
-    private List<Pair<URL, Certificate>> certificates;
+    private List<Pair<URL, TlsServerCertificate>> certificates;
     private URL tcTokenURL;
     private TCTokenContext tokenCtx;
 
@@ -412,7 +412,7 @@ public class TCTokenRequest {
      * @return List of the X509 server certificates and the requested URLs. May be null under certain circumstances
      *   (e.g. legacy activation).
      */
-    public List<Pair<URL, Certificate>> getCertificates() {
+    public List<Pair<URL, TlsServerCertificate>> getCertificates() {
 	return certificates;
     }
 

@@ -232,7 +232,18 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 
 	    if (bcAlg == null) {
 		// RAW RSA
-		return reqAlg.getSignature() == SignatureAlgorithm.rsa;
+		if (reqAlg.getSignature() == SignatureAlgorithm.rsa) {
+		    // Only allow a certain set of Hash algs. Some hashes are too large for the cards.
+		    switch (reqAlg.getHash()) {
+			case HashAlgorithm.sha1:
+			case HashAlgorithm.sha224:
+			case HashAlgorithm.sha256:
+			//case HashAlgorithm.sha384:
+			//case HashAlgorithm.sha512:
+			    return true;
+		    }
+		}
+		return false;
 	    } else {
 		// match everything else
 		return reqAlg.equals(bcAlg);

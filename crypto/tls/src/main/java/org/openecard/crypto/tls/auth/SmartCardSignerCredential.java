@@ -27,6 +27,7 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.asn1.ASN1Encoding;
 import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.openecard.bouncycastle.asn1.DERNull;
 import org.openecard.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.openecard.bouncycastle.asn1.x509.DigestInfo;
 import org.openecard.bouncycastle.tls.SignatureAndHashAlgorithm;
@@ -67,7 +68,7 @@ public class SmartCardSignerCredential implements TlsSigner {
 	if (algorithm != null && isRawSignature()) {
 	    // TLS >= 1.2 needs a PKCS#1 v1.5 signature and no raw RSA signature
 	    ASN1ObjectIdentifier hashAlgId = TlsUtils.getOIDForHashAlgorithm(algorithm.getHash());
-	    DigestInfo digestInfo = new DigestInfo(new AlgorithmIdentifier(hashAlgId), hash);
+	    DigestInfo digestInfo = new DigestInfo(new AlgorithmIdentifier(hashAlgId, DERNull.INSTANCE), hash);
 	    hash = digestInfo.getEncoded(ASN1Encoding.DER);
 	    LOG.debug("Signing DigestInfo with algorithm={}.", hashAlgId);
 	}

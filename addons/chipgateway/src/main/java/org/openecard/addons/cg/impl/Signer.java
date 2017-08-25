@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,18 +24,30 @@ package org.openecard.addons.cg.impl;
 
 import org.openecard.crypto.common.sal.did.TokenCache;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addons.cg.ex.ParameterInvalid;
 import org.openecard.addons.cg.ex.SlotHandleInvalid;
+import org.openecard.bouncycastle.asn1.ASN1Encoding;
+import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.openecard.bouncycastle.asn1.DERNull;
+import org.openecard.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.openecard.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.openecard.bouncycastle.asn1.x509.DigestInfo;
+import org.openecard.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.crypto.common.HashAlgorithms;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.crypto.common.sal.did.DidInfo;
@@ -85,10 +97,30 @@ public class Signer {
 
 	    String algUri = didInfo.getGenericCryptoMarker().getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
 	    try {
-		boolean calculateHash = SignatureAlgorithms.fromAlgId(algUri).getHashAlg() != null;
+		SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algUri);
+
+		// calculate hash if needed
 		byte[] digest = data;
-		if (calculateHash) {
-		    digest = didInfo.hash(data);
+		if (alg.getHashAlg() != null) {
+		    digest = didInfo.hash(digest);
+		}
+
+		// wrap hash in DigestInfo if needed
+		if (alg == SignatureAlgorithms.CKM_RSA_PKCS) {
+		    try {
+			ASN1ObjectIdentifier digestOid = getHashAlgOid(data);
+			DigestInfo di = new DigestInfo(new AlgorithmIdentifier(digestOid, DERNull.INSTANCE), digest);
+			byte[] sigMsg = di.getEncoded(ASN1Encoding.DER);
+			digest = sigMsg;
+		    } catch (IOException ex) {
+			String msg = "Error encoding DigestInfo object.";
+			Result r = WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg);
+			throw WSHelper.createException(r);
+		    } catch (InvalidParameterException ex) {
+			String msg = "Hash algorithm could not be determined for the given hash.";
+			Result r = WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg);
+			throw WSHelper.createException(r);
+		    }
 		}
 
 		byte[] signature = didInfo.sign(digest);
@@ -130,6 +162,37 @@ public class Signer {
 	    IFD_LOCKS.put(ifdName, s);
 	}
 	return s;
+    }
+
+    private ASN1ObjectIdentifier getHashAlgOid(byte[] hash) throws UnsupportedAlgorithmException, InvalidParameterException {
+	switch (getHashAlg(hash)) {
+	    case CKM_SHA_1:
+		return X509ObjectIdentifiers.id_SHA1;
+	    case CKM_SHA224:
+		return NISTObjectIdentifiers.id_sha224;
+	    case CKM_SHA256:
+		return NISTObjectIdentifiers.id_sha256;
+	    case CKM_SHA384:
+		return NISTObjectIdentifiers.id_sha384;
+	    case CKM_SHA512:
+		return NISTObjectIdentifiers.id_sha512;
+	    default:
+		String msg = "Hash algorithm is not supported.";
+		throw new UnsupportedAlgorithmException(msg);
+	}
+    }
+
+    private HashAlgorithms getHashAlg(@Nonnull byte[] hash) throws InvalidParameterException {
+	switch (hash.length) {
+	    case 20: return HashAlgorithms.CKM_SHA_1;
+	    case 28: return HashAlgorithms.CKM_SHA224;
+	    case 32: return HashAlgorithms.CKM_SHA256;
+	    case 48: return HashAlgorithms.CKM_SHA384;
+	    case 64: return HashAlgorithms.CKM_SHA512;
+	    default:
+		String msg = "Size of the Hash does not match any supported algorithm.";
+		throw new InvalidParameterException(msg);
+	}
     }
 
 }

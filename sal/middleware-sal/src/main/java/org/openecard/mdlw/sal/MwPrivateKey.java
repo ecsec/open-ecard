@@ -27,14 +27,6 @@ import org.openecard.mdlw.sal.cryptoki.CK_MECHANISM;
 import org.openecard.mdlw.sal.struct.CkAttribute;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
-import com.sun.jna.Structure;
-import java.io.IOException;
-import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.openecard.bouncycastle.asn1.DERNull;
-import org.openecard.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.openecard.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.openecard.bouncycastle.asn1.x509.DigestInfo;
-import org.openecard.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.mdlw.sal.cryptoki.CK_RSA_PKCS_PSS_PARAMS;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
@@ -251,19 +243,6 @@ public class MwPrivateKey extends MwAbstractKey {
 	    paramsPtrSize = new NativeLong(0, true);
 	}
 
-	if (mechanism == CryptokiLibrary.CKM_RSA_PKCS) {
-	    // in that case we have to add DigestInfo manually
-	    try {
-		ASN1ObjectIdentifier digestOid = getHashAlgOid(data);
-		DigestInfo di = new DigestInfo(new AlgorithmIdentifier(digestOid, DERNull.INSTANCE), data);
-		byte[] sigMsg = di.getEncoded();
-		data = sigMsg;
-	    } catch (IOException ex) {
-		String msg = "Error encoding DigestInfo object.";
-		throw new InvalidArgumentsException(msg, CryptokiLibrary.CKR_ARGUMENTS_BAD);
-	    }
-	}
-
         CK_MECHANISM pMechanism = new CK_MECHANISM(new NativeLong(mechanism, true), paramsPtr, paramsPtrSize);
 
 	try (MiddleWareWrapper.LockedMiddlewareWrapper lmw = mw.lock()) {
@@ -309,24 +288,6 @@ public class MwPrivateKey extends MwAbstractKey {
 	    case 64: return CryptokiLibrary.CKM_SHA512;
 	    default:
 		String msg = "Size of the Hash does not match any supported algorithm.";
-		throw new InvalidArgumentsException(msg, CryptokiLibrary.CKR_MECHANISM_PARAM_INVALID);
-	}
-    }
-
-    private ASN1ObjectIdentifier getHashAlgOid(byte[] hash) throws CryptokiException {
-	switch (getHashAlg(hash)) {
-	    case CryptokiLibrary.CKM_SHA_1:
-		return X509ObjectIdentifiers.id_SHA1;
-	    case CryptokiLibrary.CKM_SHA224:
-		return NISTObjectIdentifiers.id_sha224;
-	    case CryptokiLibrary.CKM_SHA256:
-		return NISTObjectIdentifiers.id_sha256;
-	    case CryptokiLibrary.CKM_SHA384:
-		return NISTObjectIdentifiers.id_sha384;
-	    case CryptokiLibrary.CKM_SHA512:
-		return NISTObjectIdentifiers.id_sha512;
-	    default:
-		String msg = "Hash algorithm is not supported.";
 		throw new InvalidArgumentsException(msg, CryptokiLibrary.CKR_MECHANISM_PARAM_INVALID);
 	}
     }

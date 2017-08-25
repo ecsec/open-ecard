@@ -16,44 +16,7 @@
 	<name>Rich Client</name>
 
 
-	<properties>
-		<application.name>Open eCard App</application.name>
-	</properties>
-
-
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-jar-plugin</artifactId>
-					<configuration>
-						<archive>
-							<index>true</index>
-							<manifest>
-								<addClasspath>true</addClasspath>
-								<useUniqueVersions>false</useUniqueVersions>
-								<mainClass>org.openecard.versioncheck.MainLoader</mainClass>
-							</manifest>
-							<manifestEntries>
-								<Permissions>all-permissions</Permissions>
-								<Codebase>*</Codebase>
-								<Application-Name>${application.name}</Application-Name>
-								<Trusted-Only>true</Trusted-Only>
-							</manifestEntries>
-						</archive>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
-
 	<dependencies>
-		<dependency>
-			<groupId>org.openecard.clients</groupId>
-			<artifactId>java-version-check</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>org.openecard.sal</groupId>
 			<artifactId>tiny-sal</artifactId>

@@ -109,6 +109,11 @@
 			<artifactId>richclient</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.openecard.clients</groupId>
+			<artifactId>java-version-check</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<!-- These must be named explicitly because the parent pom interferes with the dependency resolution -->
 		<dependency>

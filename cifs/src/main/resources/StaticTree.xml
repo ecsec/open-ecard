@@ -51,51 +51,6 @@
 																							<iso:MatchingData>
 																								<iso:Offset>00</iso:Offset>
 																								<iso:Length>0D</iso:Length>
-																								<iso:MatchingValue>A00B8004002000815F2F028010</iso:MatchingValue>
-																							</iso:MatchingData>
-																						</iso:Body>
-																						<iso:Trailer>9000</iso:Trailer>
-																						<iso:Conclusion>
-																							<iso:CardCall>
-																								<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
-																								<iso:ResponseAPDU>
-																									<iso:Trailer>9000</iso:Trailer>
-																									<iso:Conclusion>
-																										<iso:CardCall>
-																											<iso:CommandAPDU>00A4020C020003</iso:CommandAPDU>
-																											<iso:ResponseAPDU>
-																												<iso:Trailer>9000</iso:Trailer>
-																												<iso:Conclusion>
-																													<!-- Check institute and major industry identidier -->
-																													<iso:CardCall>
-																														<iso:CommandAPDU>00B20104FF</iso:CommandAPDU>
-																														<iso:ResponseAPDU>
-																															<iso:Body>
-																																<iso:MatchingData>
-																																	<iso:Offset>00</iso:Offset>
-																																	<iso:Length>02</iso:Length>
-																																	<iso:MatchingValue>6725</iso:MatchingValue>
-																																</iso:MatchingData>
-																															</iso:Body>
-																															<iso:Trailer>9000</iso:Trailer>
-																															<iso:Conclusion>
-																																<iso:RecognizedCardType>https://www.s-trust.de/produkte/strust_massensignaturkarte</iso:RecognizedCardType>
-																															</iso:Conclusion>
-																														</iso:ResponseAPDU>
-																													</iso:CardCall>
-																												</iso:Conclusion>
-																											</iso:ResponseAPDU>
-																										</iso:CardCall>
-																									</iso:Conclusion>
-																								</iso:ResponseAPDU>
-																							</iso:CardCall>
-																						</iso:Conclusion>
-																					</iso:ResponseAPDU>
-																					<iso:ResponseAPDU>
-																						<iso:Body>
-																							<iso:MatchingData>
-																								<iso:Offset>00</iso:Offset>
-																								<iso:Length>0D</iso:Length>
 																								<iso:MatchingValue>A00B8004002000815F2F028011</iso:MatchingValue>
 																							</iso:MatchingData>
 																						</iso:Body>
@@ -114,19 +69,6 @@
 																													<!-- Check institute and major industry identidier -->
 																													<iso:CardCall>
 																														<iso:CommandAPDU>00B20104FF</iso:CommandAPDU>
-																														<iso:ResponseAPDU>
-																															<iso:Body>
-																																<iso:MatchingData>
-																																	<iso:Offset>00</iso:Offset>
-																																	<iso:Length>02</iso:Length>
-																																	<iso:MatchingValue>6725</iso:MatchingValue>
-																																</iso:MatchingData>
-																															</iso:Body>
-																															<iso:Trailer>9000</iso:Trailer>
-																															<iso:Conclusion>
-																																<iso:RecognizedCardType>https://www.s-trust.de/produkte/strust_einzelsignaturkarte</iso:RecognizedCardType>
-																															</iso:Conclusion>
-																														</iso:ResponseAPDU>
 																														<iso:ResponseAPDU>
 																															<iso:Body>
 																																<iso:MatchingData>
@@ -252,79 +194,12 @@
 				<iso:Trailer>9000</iso:Trailer>
 				<iso:Conclusion>
 					<iso:CardCall>
-						<iso:CommandAPDU>00A4020C022F02</iso:CommandAPDU>
-						<iso:ResponseAPDU>
-							<iso:Trailer>9000</iso:Trailer>
-							<iso:Conclusion>
-								<iso:CardCall>
-									<iso:CommandAPDU>00B00000FF</iso:CommandAPDU>
-									<iso:ResponseAPDU>
-										<iso:Body>
-											<iso:Tag>5A</iso:Tag>
-											<iso:DataObject>
-												<iso:MatchingData>
-													<iso:Offset>00</iso:Offset>
-													<iso:Length>06</iso:Length>
-													<iso:MatchingValue>642090011016</iso:MatchingValue>
-												</iso:MatchingData>
-											</iso:DataObject>
-										</iso:Body>
-										<iso:Trailer>6282</iso:Trailer>
-										<iso:Conclusion>
-											<iso:RecognizedCardType>http://www.signtrust.de/SigntrustCard</iso:RecognizedCardType>
-										</iso:Conclusion>
-									</iso:ResponseAPDU>
-									<iso:ResponseAPDU>
-										<iso:Body>
-											<iso:Tag>5A</iso:Tag>
-											<iso:DataObject>
-												<iso:MatchingData>
-													<iso:Offset>00</iso:Offset>
-													<iso:Length>06</iso:Length>
-													<iso:MatchingValue>642090011014</iso:MatchingValue>
-												</iso:MatchingData>
-											</iso:DataObject>
-										</iso:Body>
-										<iso:Trailer>6282</iso:Trailer>
-										<iso:Conclusion>
-											<iso:RecognizedCardType>http://www.datev.de/DatevCard</iso:RecognizedCardType>
-										</iso:Conclusion>
-									</iso:ResponseAPDU>
-								</iso:CardCall>
-							</iso:Conclusion>
-						</iso:ResponseAPDU>
-					</iso:CardCall>
-				</iso:Conclusion>
-			</iso:ResponseAPDU>
-		</iso:CardCall>
-		<iso:CardCall>
-			<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
-			<iso:ResponseAPDU>
-				<iso:Trailer>9000</iso:Trailer>
-				<iso:Conclusion>
-					<iso:CardCall>
 						<iso:CommandAPDU>00A4020C022F00</iso:CommandAPDU>
 						<iso:ResponseAPDU>
 							<iso:Trailer>9000</iso:Trailer>
 							<iso:Conclusion>
 								<iso:CardCall>
 									<iso:CommandAPDU>00B20304FF</iso:CommandAPDU>
-									<iso:ResponseAPDU>
-										<iso:Body>
-											<iso:Tag>61</iso:Tag>
-											<iso:DataObject>
-												<iso:MatchingData>
-													<iso:Offset>00</iso:Offset>
-													<iso:Length>09</iso:Length>
-													<iso:MatchingValue>4F07D2760000030202</iso:MatchingValue>
-												</iso:MatchingData>
-											</iso:DataObject>
-										</iso:Body>
-										<iso:Trailer>6282</iso:Trailer>
-										<iso:Conclusion>
-											<iso:RecognizedCardType>http://www.openlimit.com/E4NetKey</iso:RecognizedCardType>
-										</iso:Conclusion>
-									</iso:ResponseAPDU>
 									<iso:ResponseAPDU>
 										<iso:Body>
 											<iso:Tag>61</iso:Tag>
@@ -377,22 +252,6 @@
 				<iso:Trailer>9000</iso:Trailer>
 				<iso:Conclusion>
 					<iso:RecognizedCardType>http://cif.id.ee/eidV3.5</iso:RecognizedCardType>
-				</iso:Conclusion>
-			</iso:ResponseAPDU>
-		</iso:CardCall>
-		<iso:CardCall>
-			<iso:CommandAPDU>00A4040008276000121F000001</iso:CommandAPDU>
-			<iso:ResponseAPDU>
-				<iso:Body>
-					<iso:MatchingData>
-						<iso:Offset>00</iso:Offset>
-						<iso:Length>00</iso:Length>
-						<iso:MatchingValue/>
-					</iso:MatchingData>
-				</iso:Body>
-				<iso:Trailer>9000</iso:Trailer>
-				<iso:Conclusion>
-					<iso:RecognizedCardType>http://www.reiner-sct.com/owok/</iso:RecognizedCardType>
 				</iso:Conclusion>
 			</iso:ResponseAPDU>
 		</iso:CardCall>
@@ -482,19 +341,6 @@
 													<iso:Trailer>6282</iso:Trailer>
 													<iso:Conclusion>
 														<iso:RecognizedCardType>https://www.d-trust.net/produkte/d-trust-signaturkarten/d-trust-card/batch_v3</iso:RecognizedCardType>
-													</iso:Conclusion>
-												</iso:ResponseAPDU>
-												<iso:ResponseAPDU>
-													<iso:Body>
-														<iso:MatchingData>
-															<iso:Offset>1B</iso:Offset>
-															<iso:Length>1E</iso:Length>
-															<iso:MatchingValue>44415445562043617264202056332E30207374616E646172642020326761</iso:MatchingValue>
-														</iso:MatchingData>
-													</iso:Body>
-													<iso:Trailer>6282</iso:Trailer>
-													<iso:Conclusion>
-														<iso:RecognizedCardType>http://www.datev.de/smartcard</iso:RecognizedCardType>
 													</iso:Conclusion>
 												</iso:ResponseAPDU>
 											</iso:CardCall>

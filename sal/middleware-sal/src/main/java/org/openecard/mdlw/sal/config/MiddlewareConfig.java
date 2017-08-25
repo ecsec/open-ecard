@@ -29,7 +29,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,10 +86,9 @@ public class MiddlewareConfig {
     }
 
 
-    private static List<MiddlewareSALConfig> mwSALConfigs;
     private final Map<String, byte[]> CARD_IMAGES = new HashMap<>();
-
     private MiddlewareConfigType middlewareConfigXml;
+    private final List<MiddlewareSALConfig> mwSALConfigs = new ArrayList<>();
 
     public MiddlewareConfig(@Nonnull InputStream bundleStream) throws IOException, FileNotFoundException, JAXBException {
 	LOG.debug("Loading middleware config.");
@@ -120,7 +118,13 @@ public class MiddlewareConfig {
 		zipIn.closeEntry();
 	    }
 	} catch (IOException ex) {
-	    LOG.debug("Stream closed.");
+	    LOG.error("Stream ended unexpectedly.", ex);
+	}
+
+	ArrayList<MiddlewareConfigType.MiddlewareSpec> mwSpecs = middlewareConfigXml.getMiddlewareSpecs();
+	for (MiddlewareConfigType.MiddlewareSpec mwSpec : mwSpecs) {
+	    MiddlewareSALConfig mwSALConfig = new MiddlewareSALConfig(this, mwSpec);
+	    mwSALConfigs.add(mwSALConfig);
 	}
     }
 
@@ -131,21 +135,7 @@ public class MiddlewareConfig {
      */
     @Nonnull
     public List<MiddlewareSALConfig> getMiddlewareSALConfigs() {
-	if (mwSALConfigs == null) {
-	    if (middlewareConfigXml != null) {
-		mwSALConfigs = new ArrayList<>();
-		ArrayList<MiddlewareConfigType.MiddlewareSpec> mwSpecs = middlewareConfigXml
-			.getMiddlewareSpecs();
-		for (MiddlewareConfigType.MiddlewareSpec mwSpec : mwSpecs) {
-		    MiddlewareSALConfig mwSALConfig = new MiddlewareSALConfig(this, mwSpec);
-		    MiddlewareConfig.mwSALConfigs.add(mwSALConfig);
-		}
-		return MiddlewareConfig.mwSALConfigs;
-	    }
-	} else {
-	    return mwSALConfigs;
-	}
-        return Collections.EMPTY_LIST;
+	return mwSALConfigs;
     }
 
     /**
@@ -159,9 +149,9 @@ public class MiddlewareConfig {
         for (MiddlewareSALConfig mwSALConfig : getMiddlewareSALConfigs()) {
             String mwType = mwSALConfig.mapMiddlewareType(middlewareCardType);
             if (mwType != null) {
-                return mwType;
-            }
-        }
+		return mwType;
+	    }
+	}
 
 	// nothing found
 	return null;
@@ -188,6 +178,7 @@ public class MiddlewareConfig {
 	CardInfoType cardInfo;
 	try {
 	    WSMarshaller m = MARSHALLER.deref();
+	    assert(m != null);
 	    Document doc = CIF_DOC.deref();
 	    cardInfo = m.unmarshal(doc, CardInfoType.class).getValue();
 	    return cardInfo;
@@ -218,7 +209,8 @@ public class MiddlewareConfig {
     }
 
     /**
-     * Stores the CardType-Spec in the CardInfo Template. The filled CardInfo Template will be returned.
+     * Stores the CardType-Spec in a freshly allocated CardInfo Template.
+     * The filled CardInfo Template will be returned.
      *
      * @param cardSpec specification of the card.
      * @return {@code CardInfoType} or {@code null} if there is no available CardInfo Template.

@@ -153,7 +153,8 @@ public class MiddlewareSALConfig {
     @Nullable
     public String mapMiddlewareType(@Nonnull String middlewareCardType) {
 	for (CardConfigType.CardSpec spec : mwSpec.getCardConfig().getCardSpecs()) {
-	    if (middlewareCardType.equals(spec.getMiddlewareName())) {
+	    String mwName = spec.getMiddlewareName();
+	    if (middlewareCardType.equals(mwName)) {
 		return spec.getObjectIdentifier();
 	    }
 	}

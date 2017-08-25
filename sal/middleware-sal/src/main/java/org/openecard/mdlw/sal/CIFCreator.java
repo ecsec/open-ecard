@@ -54,9 +54,7 @@ import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.mdlw.sal.didfactory.CryptoMarkerBuilder;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.exceptions.NoCertificateChainException;
-import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
-import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,26 +67,23 @@ public class CIFCreator {
 
     private static final Logger LOG = LoggerFactory.getLogger(CIFCreator.class);
 
-    private final WSMarshaller wsm;
     private final MwSession session;
-    private final CardInfoType cifTemplate;
+    private final CardInfoType cif;
 
     private String PIN_NAME;
 
-    public CIFCreator(MwSession session, CardInfoType cifTemplate) throws WSMarshallerException {
-	this.wsm = WSMarshallerFactory.createInstance();
+    public CIFCreator(MwSession session, CardInfoType cifTemplate) {
 	this.session = session;
-	this.cifTemplate = cifTemplate;
+	this.cif = cifTemplate;
     }
 
     public CardInfoType addTokenInfo() throws WSMarshallerException, CryptokiException {
-	LOG.debug("Adding information to CardInfo file for card type {}.", cifTemplate.getCardType().getObjectIdentifier());
+	LOG.debug("Adding information to CardInfo file for card type {}.", cif.getCardType().getObjectIdentifier());
 
 	DIDInfoType pinDid = getPinDID();
 	List<DIDInfoType> cryptoDids = getSignatureCryptoDIDs();
 	List<DataSetInfoType> datasets = getCertificateDatasets();
 
-	CardInfoType cif = (CardInfoType) wsm.unmarshal(wsm.marshal(cifTemplate));
 	CardApplicationType app = cif.getApplicationCapabilities().getCardApplication().get(0);
 	//app.getDIDInfo().add(pinDid);
 	app.getDIDInfo().addAll(cryptoDids);

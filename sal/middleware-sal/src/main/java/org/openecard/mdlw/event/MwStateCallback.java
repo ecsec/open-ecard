@@ -78,7 +78,7 @@ public class MwStateCallback implements EventCallback {
 			}
 			CardInfoType cif = null;
 			if (cardType != null) {
-			    cif = env.getCIFProvider().getCardInfo(handle, type);
+			    cif = env.getCIFProvider().getCardInfo(handle, cardType);
 			}
 			if (cif == null) {
 			    LOG.warn("Unknown card recognized by Middleware.");

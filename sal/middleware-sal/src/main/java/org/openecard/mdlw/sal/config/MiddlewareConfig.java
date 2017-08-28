@@ -68,6 +68,7 @@ public class MiddlewareConfig {
 
     private static final Promise<Document> CIF_DOC;
     private static final Promise<WSMarshaller> MARSHALLER;
+    private static final JAXBContext MW_CFG_CTX;
 
     static {
 	MARSHALLER = new FuturePromise<>(new Callable<WSMarshaller>() {
@@ -83,6 +84,11 @@ public class MiddlewareConfig {
 		return MARSHALLER.deref().str2doc(in);
 	    }
 	});
+	try {
+	    MW_CFG_CTX = JAXBContext.newInstance(MiddlewareConfigType.class);
+	} catch (JAXBException ex) {
+	    throw new RuntimeException("Failed to initalize JAXB Marshaller", ex);
+	}
     }
 
 
@@ -90,14 +96,14 @@ public class MiddlewareConfig {
     private MiddlewareConfigType middlewareConfigXml;
     private final List<MiddlewareSALConfig> mwSALConfigs = new ArrayList<>();
 
-    public MiddlewareConfig(@Nonnull InputStream bundleStream) throws IOException, FileNotFoundException, JAXBException {
+    public MiddlewareConfig(@Nonnull InputStream bundleStream) throws IOException, FileNotFoundException,
+	    JAXBException {
 	LOG.debug("Loading middleware config.");
 	loadMwZIPConfig(bundleStream);
     }
 
     private void loadMwZIPConfig(InputStream is)
-	    throws JAXBException {
-	JAXBContext ctx = JAXBContext.newInstance(MiddlewareConfigType.class);
+	    throws JAXBException, IOException {
 	middlewareConfigXml = new MiddlewareConfigType();
 
 	try (ZipInputStream zipIn = new ZipInputStream(is)) {
@@ -107,7 +113,8 @@ public class MiddlewareConfig {
 		    String name = zipEntry.getName();
 		    if (name.equals(MIDDLEWARE_CONFIG_PATH)) {
 			LOG.debug("Reading middleware config from XML file.");
-			middlewareConfigXml = (MiddlewareConfigType) ctx.createUnmarshaller().unmarshal(zipIn);
+			ByteArrayInputStream tmpIn = new ByteArrayInputStream(FileUtils.toByteArray(zipIn));
+			middlewareConfigXml = (MiddlewareConfigType) MW_CFG_CTX.createUnmarshaller().unmarshal(tmpIn);
 		    }
 		    if (name.startsWith(CARD_IMAGE_PATH)) {
 			String cardImageName = name.replace(CARD_IMAGE_PATH, "");
@@ -118,7 +125,9 @@ public class MiddlewareConfig {
 		zipIn.closeEntry();
 	    }
 	} catch (IOException ex) {
-	    LOG.error("Stream ended unexpectedly.", ex);
+	    String msg = "Failed to read middleware config bundle.";
+	    LOG.error(msg, ex);
+	    throw new IOException(msg, ex);
 	}
 
 	ArrayList<MiddlewareConfigType.MiddlewareSpec> mwSpecs = middlewareConfigXml.getMiddlewareSpecs();

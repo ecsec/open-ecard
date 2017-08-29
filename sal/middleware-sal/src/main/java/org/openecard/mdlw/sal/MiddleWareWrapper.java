@@ -85,32 +85,30 @@ public class MiddleWareWrapper {
     private final Semaphore threadLock;
 
     public MiddleWareWrapper(MiddlewareSALConfig mwSALConfig) throws UnsatisfiedLinkError {
-        String libName = mwSALConfig.getMiddlewareSpec().getLibName();
+        String libName = mwSALConfig.getLibName();
+	LOG.info("Loading Middleware {}: Library={}", mwSALConfig.getMiddlewareName(), libName);
 
-	String osName = System.getProperty("os.name", "");
 	String arch = System.getProperty("os.arch", "");
 
         for (String searchPath : mwSALConfig.getSearchPaths()) {
             NativeLibrary.addSearchPath(libName, searchPath);
         }
 
-	// paths on windows
-	if (osName.startsWith("Windows")) {
-	    if ("x86".equals(arch)) {
-                for (String x32SearchPath : mwSALConfig.getX32SearchPaths()) {
-                    NativeLibrary.addSearchPath(libName, x32SearchPath);
-                }
-	    } else if ("amd64".equals(arch)) {
-                for (String x64SearchPath : mwSALConfig.getX64SearchPaths()) {
-                    NativeLibrary.addSearchPath(libName, x64SearchPath);
-                }
+	// add arch specific paths
+	if ("x86".equals(arch) || "i386".equals(arch)) {
+	    for (String x32SearchPath : mwSALConfig.getX32SearchPaths()) {
+		NativeLibrary.addSearchPath(libName, x32SearchPath);
+	    }
+	} else if ("amd64".equals(arch) || "ia64".equals(arch)) {
+	    for (String x64SearchPath : mwSALConfig.getX64SearchPaths()) {
+		NativeLibrary.addSearchPath(libName, x64SearchPath);
 	    }
 	}
 
 	HashMap<String, Object> options = new HashMap<>();
 	options.put("lib-index", libIdx++);
 
-        lib = (CryptokiLibrary) Native.loadLibrary(libName, CryptokiLibrary.class, options);
+	lib = (CryptokiLibrary) Native.loadLibrary(libName, CryptokiLibrary.class, options);
 
 	threadLock = new Semaphore(1, true);
     }

@@ -222,7 +222,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 
     @Override
     public String getMiddlewareSALName() {
-        return mwSALConfig.getMiddlewareSpec().getMiddlewareName();
+        return mwSALConfig.getMiddlewareName();
     }
 
     @Override
@@ -313,7 +313,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 		throw new InternalAppError("GUI is not initialized.");
 	    }
 	} catch (UnsatisfiedLinkError | InitializationException ex) {
-            String mwSALName = mwSALConfig.getMiddlewareSpec().getMiddlewareName();
+            String mwSALName = mwSALConfig.getMiddlewareName();
             String msg = String.format("Failed to initialize Middleware for '%s'-SAL.", mwSALName);
 	    if (mwSALConfig.isSALRequired()) {
 		LOG.error(msg, ex);

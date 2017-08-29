@@ -23,31 +23,69 @@
 package org.openecard.mdlw.sal.config;
 
 import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * XML-Schema for the Middleware Configuration
  *
  * @author Tobias Wich
  * @author Mike Prechtl
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "MiddlewareConfig")
-@XmlType(name = "MiddlewareConfigType", propOrder = {
-    "middlewareSpecs"
+@XmlType(name = "MiddlewareSpecType", propOrder = {
+    "middlewareName",
+    "libSpec",
+    "cardConfig"
 })
-public class MiddlewareConfigType {
+public class MiddlewareSpecType {
 
-    @XmlElement(name = "MiddlewareSpec")
-    private final ArrayList<MiddlewareSpecType> middlewareSpecs = new ArrayList<>();
+    @XmlAttribute(name="required")
+    private boolean required = false;
 
-    public ArrayList<MiddlewareSpecType> getMiddlewareSpecs() {
-        return middlewareSpecs;
+    @XmlElement(name="MiddlewareName", required = true)
+    private String middlewareName;
+
+    @XmlElement(name="LibSpec", required = true)
+    private List<LibSpecType> libSpec;
+
+    @XmlElement(name = "CardConfig", required = true)
+    private CardConfigType cardConfig;
+
+
+    public boolean isRequired() {
+	return required;
+    }
+
+    public void setRequired(boolean required) {
+	this.required = required;
+    }
+
+    public String getMiddlewareName() {
+	return middlewareName;
+    }
+
+    public void setMiddlewareName(String middlewareSALName) {
+	this.middlewareName = middlewareSALName;
+    }
+
+    public List<LibSpecType> getLibSpec() {
+	if (libSpec == null) {
+	    libSpec = new ArrayList<>();
+	}
+	return libSpec;
+    }
+
+    public CardConfigType getCardConfig() {
+	return cardConfig;
+    }
+
+    public void setCardConfig(CardConfigType cardConfig) {
+	this.cardConfig = cardConfig;
     }
 
 }

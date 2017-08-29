@@ -41,12 +41,16 @@ import javax.annotation.Nullable;
  */
 public class MiddlewareSALConfig {
 
-    private final MiddlewareConfigType.MiddlewareSpec mwSpec;
+    private final MiddlewareSpecType mwSpec;
     private final MiddlewareConfig mwConfig;
 
-    public MiddlewareSALConfig(MiddlewareConfig mwConfig, MiddlewareConfigType.MiddlewareSpec mwSpec) {
+    public MiddlewareSALConfig(MiddlewareConfig mwConfig, MiddlewareSpecType mwSpec) {
 	this.mwConfig = mwConfig;
         this.mwSpec = mwSpec;
+    }
+
+    public String getMiddlewareName() {
+	return mwSpec.getMiddlewareName();
     }
 
     /**
@@ -58,13 +62,17 @@ public class MiddlewareSALConfig {
 	return mwSpec.isRequired();
     }
 
+    public String getLibName() {
+	return getLibSpec().getLibName();
+    }
+
     /**
      * Returns the search paths of the pkcs#11 module.
      *
      * @return
      */
     public List<String> getSearchPaths() {
-	return Collections.unmodifiableList(mwSpec.getSearchPath());
+	return Collections.unmodifiableList(getLibSpec().getSearchPath());
     }
 
     /**
@@ -73,7 +81,7 @@ public class MiddlewareSALConfig {
      * @return
      */
     public List<String> getX32SearchPaths() {
-	return Collections.unmodifiableList(mwSpec.getX32searchPath());
+	return Collections.unmodifiableList(getLibSpec().getX32searchPath());
     }
 
     /**
@@ -82,7 +90,25 @@ public class MiddlewareSALConfig {
      * @return
      */
     public List<String> getX64SearchPaths() {
-	return Collections.unmodifiableList(mwSpec.getX64searchPath());
+	return Collections.unmodifiableList(getLibSpec().getX64searchPath());
+    }
+
+    @Nonnull
+    protected LibSpecType getLibSpec() {
+	LibSpecType defaultSpec = null;
+	String osName = System.getProperty("os.name", "");
+	for (LibSpecType spec : mwSpec.getLibSpec()) {
+	    if (spec.getOperatingSystem() == null) {
+		defaultSpec = spec;
+	    } else if (osName.startsWith(spec.getOperatingSystem())) {
+		return spec;
+	    }
+	}
+
+	if (defaultSpec == null) {
+	    throw new NullPointerException("No default LibSpec defined in the XML config.");
+	}
+	return defaultSpec;
     }
 
     /**
@@ -92,7 +118,7 @@ public class MiddlewareSALConfig {
      * @return {@code true} if card is known to Middleware SAL.
      */
     public boolean isCardTypeKnown(String cardType) {
-        for (CardConfigType.CardSpec cardSpec : mwSpec.getCardConfig().getCardSpecs()) {
+        for (CardSpecType cardSpec : mwSpec.getCardConfig().getCardSpecs()) {
             if (cardSpec.getObjectIdentifier().equals(cardType)) {
                 return true;
             }
@@ -108,22 +134,12 @@ public class MiddlewareSALConfig {
      */
     @Nullable
     public CardInfoType getCardInfo(String oIdentifier) {
-	for (CardConfigType.CardSpec cardSpec : mwSpec.getCardConfig().getCardSpecs()) {
+	for (CardSpecType cardSpec : mwSpec.getCardConfig().getCardSpecs()) {
 	    if (cardSpec.getObjectIdentifier().equals(oIdentifier)) {
 		return mwConfig.getCardInfoByCardSpec(cardSpec);
 	    }
 	}
         return null;
-    }
-
-    /**
-     * Returns the Middleware SAL specification.
-     *
-     * @return specification of the Middleware SAL component.
-     */
-    @Nonnull
-    public MiddlewareConfigType.MiddlewareSpec getMiddlewareSpec() {
-        return mwSpec;
     }
 
     /**
@@ -134,7 +150,7 @@ public class MiddlewareSALConfig {
      */
     @Nullable
     public InputStream getCardImage(String oIdentifier) {
-        for (CardConfigType.CardSpec cardSpec : mwSpec.getCardConfig().getCardSpecs()) {
+        for (CardSpecType cardSpec : mwSpec.getCardConfig().getCardSpecs()) {
             if (cardSpec.getObjectIdentifier().equals(oIdentifier)) {
                 return mwConfig.getCardImage(cardSpec.getCardImageName());
             }
@@ -152,7 +168,7 @@ public class MiddlewareSALConfig {
      */
     @Nullable
     public String mapMiddlewareType(@Nonnull String middlewareCardType) {
-	for (CardConfigType.CardSpec spec : mwSpec.getCardConfig().getCardSpecs()) {
+	for (CardSpecType spec : mwSpec.getCardConfig().getCardSpecs()) {
 	    String mwName = spec.getMiddlewareName();
 	    if (middlewareCardType.equals(mwName)) {
 		return spec.getObjectIdentifier();
@@ -171,7 +187,7 @@ public class MiddlewareSALConfig {
      */
     public boolean isATRKnown(@Nullable byte[] atr) {
 	if (atr != null) {
-	    for (CardConfigType.CardSpec spec : mwSpec.getCardConfig().getCardSpecs()) {
+	    for (CardSpecType spec : mwSpec.getCardConfig().getCardSpecs()) {
 		boolean matches = compareATR(atr, spec.getAtr(), spec.getMask());
 		if (matches) {
 		    return true;

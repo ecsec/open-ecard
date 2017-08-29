@@ -130,8 +130,8 @@ public class MiddlewareConfig {
 	    throw new IOException(msg, ex);
 	}
 
-	ArrayList<MiddlewareConfigType.MiddlewareSpec> mwSpecs = middlewareConfigXml.getMiddlewareSpecs();
-	for (MiddlewareConfigType.MiddlewareSpec mwSpec : mwSpecs) {
+	ArrayList<MiddlewareSpecType> mwSpecs = middlewareConfigXml.getMiddlewareSpecs();
+	for (MiddlewareSpecType mwSpec : mwSpecs) {
 	    MiddlewareSALConfig mwSALConfig = new MiddlewareSALConfig(this, mwSpec);
 	    mwSALConfigs.add(mwSALConfig);
 	}
@@ -207,7 +207,7 @@ public class MiddlewareConfig {
     }
 
     @Nonnull
-    private CardTypeType mapCardSpecToCardType(CardConfigType.CardSpec cardSpec) {
+    private CardTypeType mapCardSpecToCardType(CardSpecType cardSpec) {
         CardTypeType cardType = new CardTypeType();
         cardType.setObjectIdentifier(cardSpec.getObjectIdentifier());
         cardType.setDate(cardSpec.getDate());
@@ -224,7 +224,7 @@ public class MiddlewareConfig {
      * @param cardSpec specification of the card.
      * @return {@code CardInfoType} or {@code null} if there is no available CardInfo Template.
      */
-    public CardInfoType getCardInfoByCardSpec(CardConfigType.CardSpec cardSpec) {
+    public CardInfoType getCardInfoByCardSpec(CardSpecType cardSpec) {
 	CardInfoType cardInfo = getCardInfoTemplate();
 	cardInfo.setCardType(mapCardSpecToCardType(cardSpec));
 	return cardInfo;

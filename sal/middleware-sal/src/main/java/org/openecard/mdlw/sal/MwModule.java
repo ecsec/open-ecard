@@ -32,6 +32,7 @@ import org.openecard.mdlw.sal.exceptions.FinalizationException;
 import org.openecard.mdlw.sal.exceptions.InitializationException;
 import org.openecard.mdlw.sal.enums.TokenState;
 import java.util.Collections;
+import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 
 
 /**
@@ -127,14 +128,21 @@ public class MwModule {
     /**
      * Waits for a slot event (token insertion, removal, etc.) to occur.
      *
-     * @param flag
-     *            0 = blocking, 1 = nonblocking
-     * @return changed slotID
-     * @throws CryptokiException
+     * @param flag 0 = blocking, 1 = nonblocking
+     * @return changed slotID or -1 in case mode is non-blocking and nothing happened.
+     * @throws CryptokiException Thrown in case an error happened.
      */
     // TODO return slot
     public long waitForSlotEvent(int flag) throws CryptokiException {
-        return mw.waitForSlotEvent(flag);
+	try {
+	    return mw.waitForSlotEvent(flag);
+	} catch (CryptokiException ex) {
+	    if (flag == 1 && ex.getErrorCode() == CryptokiLibrary.CKR_NO_EVENT) {
+		return -1;
+	    } else {
+		throw ex;
+	    }
+	}
     }
 
 }

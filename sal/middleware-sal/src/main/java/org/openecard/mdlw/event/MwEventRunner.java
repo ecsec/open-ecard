@@ -36,6 +36,7 @@ import org.openecard.common.util.HandlerBuilder;
 import org.openecard.mdlw.sal.MwModule;
 import org.openecard.mdlw.sal.MwSlot;
 import org.openecard.mdlw.sal.MwToken;
+import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.enums.Flag;
 import org.openecard.mdlw.sal.enums.TokenState;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
@@ -59,6 +60,9 @@ class MwEventRunner implements Runnable {
     private final DatatypeFactory dataFactory;
     private final MwModule mwModule;
     private final Map<Long, SlotInfo> slots;
+
+    private boolean supportsBlockingWait = true;
+    private boolean supportsNonBlockingWait = true;
 
     MwEventRunner(Environment env, HandlerBuilder builder, DatatypeFactory dataFactory, MwModule mwModule) {
 	this.env = env;
@@ -91,7 +95,25 @@ class MwEventRunner implements Runnable {
 	while (true) {
 	    try {
 		LOG.debug("Waiting for Middleware event.");
-		long slotId = mwModule.waitForSlotEvent(0);
+		long slotId;
+		if (supportsBlockingWait) {
+		    slotId = mwModule.waitForSlotEvent(1);
+		} else if (supportsNonBlockingWait) {
+		    // TODO: this polling causes to flood logs in case debug is enabled for the wait call
+		    slotId = mwModule.waitForSlotEvent(0);
+		    if (slotId == -1) {
+			// nothing changed
+			try {
+			    Thread.sleep(200);
+			    continue;
+			} catch (InterruptedException ex) {
+			    LOG.debug("Middleware Event Runner interrupted.");
+			    return;
+			}
+		    }
+		} else {
+		    throw new IllegalStateException("This point should never be reached");
+		}
 		LOG.debug("Middleware event detected.");
 
 		//Flag to check if Terminal was removed
@@ -121,6 +143,19 @@ class MwEventRunner implements Runnable {
 		    this.sendTerminalRemoved(slotId);
 		}
 	    } catch (CryptokiException ex) {
+		// handle downgrade of the wait method
+		if (ex.getErrorCode() == CryptokiLibrary.CKR_FUNCTION_NOT_SUPPORTED) {
+		    if (supportsBlockingWait) {
+			LOG.info("Blocking wait is not supported. Falling back to non-blocking wait.");
+			supportsBlockingWait = false;
+			continue;
+		    } else if (supportsNonBlockingWait) {
+			LOG.info("Non-blocking wait is not supported. Terminating event thread.");
+			supportsNonBlockingWait = false;
+			return;
+		    }
+		}
+
 		LOG.error("Unrecoverable error during operation on the token list.", ex);
 		try {
 		    Thread.sleep(10000);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,7 +29,6 @@ import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.cryptoki.CK_ATTRIBUTE;
 import org.openecard.mdlw.sal.enums.UserType;
 import com.sun.jna.NativeLong;
-import com.sun.jna.Structure;
 import com.sun.jna.ptr.NativeLongByReference;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -112,10 +111,14 @@ public class MwSession {
 
 	List<MwPrivateKey> keyList = new ArrayList<>();
         for (long l : res) {
-	    MwPrivateKey key = new MwPrivateKey(l, mw, this);
-	    LOG.debug("Found private key {} (handle={}).", key, l);
-            keyList.add(key);
-        }
+	    try {
+		MwPrivateKey key = new MwPrivateKey(l, mw, this);
+		LOG.debug("Found private key {} (handle={}).", key, l);
+		keyList.add(key);
+	    } catch (CryptokiException ex) {
+		LOG.warn("Skipping private key due to error.", ex);
+	    }
+	}
 
         return keyList;
     }
@@ -139,8 +142,12 @@ public class MwSession {
 
         List<MwData> dataList = new ArrayList<>();
         for (long l : res) {
-            dataList.add(new MwData(l, mw, this));
-        }
+	    try {
+		dataList.add(new MwData(l, mw, this));
+	    } catch (CryptokiException ex) {
+		LOG.warn("Skipping data object due to error.", ex);
+	    }
+	}
 
         return dataList;
     }
@@ -164,8 +171,12 @@ public class MwSession {
 
         List<MwCertificate> cerList = new ArrayList<>();
         for (long l : res) {
-            cerList.add(new MwCertificate(l, mw, this));
-        }
+	    try {
+		cerList.add(new MwCertificate(l, mw, this));
+	    } catch (CryptokiException ex) {
+		LOG.warn("Skipping certificate due to error.", ex);
+	    }
+	}
 
         return cerList;
     }
@@ -177,6 +188,7 @@ public class MwSession {
      * @throws CryptokiException
      */
     public List<MwPublicKey> getPublicKeys() throws CryptokiException {
+        List<MwPublicKey> keyList = new ArrayList<>();
         NativeLongByReference temp = new NativeLongByReference(new NativeLong(CryptokiLibrary.CKO_PUBLIC_KEY, true));
 
         CK_ATTRIBUTE pTemplate = new CK_ATTRIBUTE();
@@ -187,9 +199,12 @@ public class MwSession {
 
         List<Long> res = findObjects(pTemplate);
 
-        List<MwPublicKey> keyList = new ArrayList<>();
         for (long l : res) {
-            keyList.add(new MwPublicKey(l, mw, this));
+	    try {
+		keyList.add(new MwPublicKey(l, mw, this));
+	    } catch (CryptokiException ex) {
+		LOG.warn("Skipping public key due to error.", ex);
+	    }
         }
 
         return keyList;

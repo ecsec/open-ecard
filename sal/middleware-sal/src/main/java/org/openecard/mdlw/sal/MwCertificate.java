@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,19 +22,28 @@
 
 package org.openecard.mdlw.sal;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+import javax.annotation.Nonnull;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.cryptoki.CK_DATE;
 import org.openecard.mdlw.sal.struct.CkAttribute;
 import javax.annotation.Nullable;
+import org.openecard.bouncycastle.util.Arrays;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
- * 
+ *
  * @author Jan Mannsbart
  * @author Tobias Wich
  */
 public class MwCertificate {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(MwCertificate.class);
 
     private final long objectHandle;
     private final MiddleWareWrapper mw;
@@ -49,12 +58,12 @@ public class MwCertificate {
     private final Boolean trusted;
     private final long certCategory;
     private final byte[] checkValue;
-    private final CK_DATE startDate;
-    private final CK_DATE endDate;
+    private final Calendar startDate;
+    private final Calendar endDate;
 
     /**
      * Creates a MwCertificate Object from the given Objecthandle.
-     * 
+     *
      * @param objectHandle
      * @param mw
      * @param mwSession
@@ -77,6 +86,21 @@ public class MwCertificate {
         this.endDate = loadAttrValEndDate();
     }
 
+    @Nullable
+    private CkAttribute getAttributeChecked(int type) throws CryptokiException {
+	try {
+	    return mw.getAttributeValue(session.getSessionId(), objectHandle, type);
+	} catch (CryptokiException ex) {
+	    switch ((int) ex.getErrorCode()) {
+		case CryptokiLibrary.CKR_ATTRIBUTE_TYPE_INVALID:
+		    LOG.debug("Error retrieving attribute value, but ignoring it.", ex);
+		    return null;
+	    }
+
+	    throw ex;
+	}
+    }
+
     private byte[] loadByteArray(int type) throws CryptokiException {
         CkAttribute raw = mw.getAttributeValue(session.getSessionId(), objectHandle, type);
 	return AttributeUtils.getBytes(raw);
@@ -84,7 +108,7 @@ public class MwCertificate {
 
     /**
      * Loading the Attribute Value for CKA_VALUE
-     * 
+     *
      * @return byte []
      * @throws CryptokiException
      */
@@ -95,7 +119,7 @@ public class MwCertificate {
 
     /**
      * Loading the Attribute Value for CKA_LABEL
-     * 
+     *
      * @return String
      * @throws CryptokiException
      */
@@ -106,7 +130,7 @@ public class MwCertificate {
 
     /**
      * Loading the Attribute Value for CKA_ID
-     * 
+     *
      * @return byte []
      * @throws CryptokiException
      */
@@ -117,7 +141,7 @@ public class MwCertificate {
 
     /**
      * Loading the Attribute Value for CKA_CERTIFICATE_TYPE
-     * 
+     *
      * @return NativeLong
      * @throws CryptokiException
      */
@@ -128,7 +152,7 @@ public class MwCertificate {
 
     /**
      * Loading the Attribute Value for CKA_TRUSTED
-     * 
+     *
      * @return Boolean
      * @throws CryptokiException
      */
@@ -139,13 +163,14 @@ public class MwCertificate {
 
     /**
      * Loading the Attribute Value for CKA_CERTIFICATE_CATEGORY
-     * 
+     *
      * @return NativeLong
      * @throws CryptokiException
      */
     private long loadAttrValCertificateCategory() throws CryptokiException {
-        CkAttribute raw = mw.getAttributeValue(session.getSessionId(), objectHandle, CryptokiLibrary.CKA_CERTIFICATE_CATEGORY);
-	return AttributeUtils.getLong(raw);
+	CkAttribute raw = getAttributeChecked(CryptokiLibrary.CKA_CERTIFICATE_CATEGORY);
+	// default is 0 meaning undefined type
+	return raw != null ? AttributeUtils.getLong(raw) : 0;
     }
 
     /**
@@ -155,21 +180,27 @@ public class MwCertificate {
      * @throws CryptokiException
      */
     private byte[] loadAttrValCheckValue() throws CryptokiException {
-        CkAttribute raw = mw.getAttributeValue(session.getSessionId(), objectHandle, CryptokiLibrary.CKA_CHECK_VALUE);
-	return AttributeUtils.getBytes(raw);
+        CkAttribute raw = getAttributeChecked(CryptokiLibrary.CKA_CHECK_VALUE);
+	return raw != null ? AttributeUtils.getBytes(raw) : null;
     }
 
     /**
      * Loading the Attribute Value for CKA_START_DATE
      * 
-     * @return CK_DATE
+     * @return Calendar object with UTC based timezone.
      * @throws CryptokiException
      */
-    private CK_DATE loadAttrValStartDate() throws CryptokiException {
-        CkAttribute raw = mw.getAttributeValue(session.getSessionId(), objectHandle, CryptokiLibrary.CKA_START_DATE);
-	int dataLen = raw.getLength().intValue();
+    private Calendar loadAttrValStartDate() throws CryptokiException {
+        CkAttribute raw = getAttributeChecked(CryptokiLibrary.CKA_START_DATE);
+	int dataLen = raw != null ? raw.getLength().intValue() : 0;
 	if (dataLen > 0) {
-	    return new CK_DATE(raw.getData());
+	    assert(raw != null);
+	    CK_DATE d = new CK_DATE(raw.getData());
+	    GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+	    cal.set(Integer.parseInt(new String(d.getYear())),
+		    Integer.parseInt(new String(d.getMonth())) - 1, // 0 based
+		    Integer.parseInt(new String(d.getDay())));
+	    return cal;
 	} else {
 	    return null;
 	}
@@ -178,14 +209,20 @@ public class MwCertificate {
     /**
      * Loading the Attribute Value for CKA_END_DATE
      * 
-     * @return CK_DATE
+     * @return Calendar object with UTC based timezone.
      * @throws CryptokiException
      */
-    private CK_DATE loadAttrValEndDate() throws CryptokiException {
-        CkAttribute raw = mw.getAttributeValue(session.getSessionId(), objectHandle, CryptokiLibrary.CKA_END_DATE);
-	int dataLen = raw.getLength().intValue();
+    private Calendar loadAttrValEndDate() throws CryptokiException {
+        CkAttribute raw = getAttributeChecked(CryptokiLibrary.CKA_END_DATE);
+	int dataLen = raw != null ? raw.getLength().intValue() : 0;
 	if (dataLen > 0) {
-	    return new CK_DATE(raw.getData().getPointer(0));
+	    assert(raw != null);
+	    CK_DATE d = new CK_DATE(raw.getData());
+	    GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+	    cal.set(Integer.parseInt(new String(d.getYear())),
+		    Integer.parseInt(new String(d.getMonth())) - 1, // 0 based
+		    Integer.parseInt(new String(d.getDay())));
+	    return cal;
 	} else {
 	    return null;
 	}
@@ -280,27 +317,11 @@ public class MwCertificate {
 
     /**
      * Return the Category of Certificate
-     * 
-     * @return String
-     * 
-     *         Return Options: CK_CERTIFICATE_CATEGORY_UNSPECIFIED,
-     *         CK_CERTIFICATE_CATEGORY_TOKEN_USER,
-     *         CK_CERTIFICATE_CATEGORY_AUTHORITY,
-     *         CK_CERTIFICATE_CATEGORY_OTHER_ENTITY or UNKNOWN
+     *
+     * @return CertCategory
      */
-    public String getCertificateCategory() {
-	switch ((int) certCategory) {
-	    case (int) 0x00000000L:
-		return "CK_CERTIFICATE_CATEGORY_UNSPECIFIED";
-	    case (int) 0x00000001L:
-		return "CK_CERTIFICATE_CATEGORY_TOKEN_USER";
-	    case (int) 0x00000002L:
-		return "CK_CERTIFICATE_CATEGORY_AUTHORITY";
-	    case (int) 0x80000000L:
-		return "CK_CERTIFICATE_CATEGORY_OTHER_ENTITY";
-	    default:
-		return "UNKNOWN";
-	}
+    public CertCategory getCertificateCategory() {
+	return CertCategory.forCategoryType(certCategory);
     }
 
     /**
@@ -318,7 +339,8 @@ public class MwCertificate {
      * 
      * @return CK_DATE
      */
-    public CK_DATE getStartDate() {
+    @Nullable
+    public Calendar getStartDate() {
         return startDate;
     }
 
@@ -327,7 +349,7 @@ public class MwCertificate {
      * 
      * @return CK_DATE
      */
-    public CK_DATE getEndDate() {
+    public Calendar getEndDate() {
         return endDate;
     }
 
@@ -336,8 +358,9 @@ public class MwCertificate {
      * 
      * @return byte[]
      */
+    @Nonnull
     public byte[] getValue() {
-        return value;
+        return Arrays.clone(value);
     }
 
 }

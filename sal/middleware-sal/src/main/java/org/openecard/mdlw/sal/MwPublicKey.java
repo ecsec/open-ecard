@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,6 +23,8 @@
 package org.openecard.mdlw.sal;
 
 import java.io.IOException;
+import javax.annotation.Nullable;
+import org.openecard.bouncycastle.util.Arrays;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.struct.CkAttribute;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
@@ -113,8 +115,8 @@ public class MwPublicKey extends MwAbstractKey {
      * @throws CryptokiException
      */
     private Boolean loadAttrValueTrusted() throws CryptokiException {
-        CkAttribute raw = mw.getAttributeValue(session.getSessionId(), objectHandle, CryptokiLibrary.CKA_TRUSTED);
-	return AttributeUtils.getBool(raw);
+        CkAttribute raw = getAttributeChecked(CryptokiLibrary.CKA_TRUSTED);
+	return raw != null ? AttributeUtils.getBool(raw) : false;
     }
 
     /**
@@ -136,8 +138,8 @@ public class MwPublicKey extends MwAbstractKey {
      * @throws IOException
      */
     private byte[] loadAttrValueSubject() throws CryptokiException {
-        CkAttribute raw = mw.getAttributeValue(session.getSessionId(), objectHandle, CryptokiLibrary.CKA_SUBJECT);
-	return AttributeUtils.getBytes(raw);
+        CkAttribute raw = getAttributeChecked(CryptokiLibrary.CKA_SUBJECT);
+	return raw != null ? AttributeUtils.getBytes(raw) : null;
     }
 
     /**
@@ -219,6 +221,11 @@ public class MwPublicKey extends MwAbstractKey {
      */
     public String getKeyLabel() {
         return keyLabel;
+    }
+
+    @Nullable
+    public byte[] getSubject() {
+	return Arrays.clone(subject);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,9 +22,12 @@
 
 package org.openecard.mdlw.sal;
 
+import javax.annotation.Nullable;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.struct.CkAttribute;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -32,6 +35,8 @@ import org.openecard.mdlw.sal.struct.CkAttribute;
  * @author Tobias Wich
  */
 public class MwAbstractKey {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MwAbstractKey.class);
 
     protected final long objectHandle;
     protected final MiddleWareWrapper mw;
@@ -49,6 +54,21 @@ public class MwAbstractKey {
         this.keyType = loadAttrValueKeyType();
 	this.keyId = loadAttrValueKeyID();
 	this.allowedMechanisms = loadAttrValAllowedMechanisms();
+    }
+
+    @Nullable
+    protected CkAttribute getAttributeChecked(int type) throws CryptokiException {
+	try {
+	    return mw.getAttributeValue(session.getSessionId(), objectHandle, type);
+	} catch (CryptokiException ex) {
+	    switch ((int) ex.getErrorCode()) {
+		case CryptokiLibrary.CKR_ATTRIBUTE_TYPE_INVALID:
+		    LOG.debug("Error retrieving attribute value, but ignoring it.", ex);
+		    return null;
+	    }
+
+	    throw ex;
+	}
     }
 
     /**
@@ -74,8 +94,13 @@ public class MwAbstractKey {
     }
 
     private long[] loadAttrValAllowedMechanisms() throws CryptokiException {
-	CkAttribute raw = mw.getAttributeValue(session.getSessionId(), objectHandle, CryptokiLibrary.CKA_ALLOWED_MECHANISMS);
-	return AttributeUtils.getLongs(raw);
+	CkAttribute raw = getAttributeChecked(CryptokiLibrary.CKA_ALLOWED_MECHANISMS);
+	if (raw != null) {
+	    return AttributeUtils.getLongs(raw);
+	} else {
+	    LOG.warn("Failed to read allowed mechanisms from key object.");
+	    return new long[0];
+	}
     }
 
     public long getKeyType() {

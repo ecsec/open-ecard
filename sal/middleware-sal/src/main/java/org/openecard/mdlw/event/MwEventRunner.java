@@ -97,14 +97,14 @@ class MwEventRunner implements Runnable {
 		LOG.debug("Waiting for Middleware event.");
 		long slotId;
 		if (supportsBlockingWait) {
-		    slotId = mwModule.waitForSlotEvent(1);
+		    slotId = mwModule.waitForSlotEvent(0);
 		} else if (supportsNonBlockingWait) {
 		    // TODO: this polling causes to flood logs in case debug is enabled for the wait call
-		    slotId = mwModule.waitForSlotEvent(0);
+		    slotId = mwModule.waitForSlotEvent(1);
 		    if (slotId == -1) {
 			// nothing changed
 			try {
-			    Thread.sleep(200);
+			    Thread.sleep(1000);
 			    continue;
 			} catch (InterruptedException ex) {
 			    LOG.debug("Middleware Event Runner interrupted.");

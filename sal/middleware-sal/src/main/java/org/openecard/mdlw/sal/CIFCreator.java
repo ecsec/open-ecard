@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -46,6 +46,11 @@ import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityType;
 import iso.std.iso_iec._24727.tech.schema.NamedDataServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.PathType;
 import iso.std.iso_iec._24727.tech.schema.SecurityConditionType;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import org.openecard.common.util.ByteUtils;
@@ -71,6 +76,8 @@ public class CIFCreator {
     private final CardInfoType cif;
 
     private String PIN_NAME;
+
+    private CertificateFactory certFactory;
 
     public CIFCreator(MwSession session, CardInfoType cifTemplate) {
 	this.session = session;
@@ -114,6 +121,26 @@ public class CIFCreator {
 	    // look up certificates
 	    try {
 		List<MwCertificate> mwCerts = createChain(session.getCertificates(), pubKey.getKeyID());
+
+		if (mwCerts.isEmpty()) {
+		    LOG.info("No certificates available for the key object.");
+		    continue;
+		}
+
+		MwCertificate eeCert = mwCerts.get(0);
+		// check certType
+		switch (eeCert.getCertificateCategory()) {
+		    case CK_CERTIFICATE_CATEGORY_TOKEN_USER:
+		    case CK_CERTIFICATE_CATEGORY_UNSPECIFIED:
+			break;
+		    default:
+			LOG.info("Skipping key '{}' as certificate has wrong category.", pubKey.getKeyLabel());
+		}
+		// check certificate usage flags
+		if (! canSign(eeCert)) {
+		    LOG.info("Certificate '{}' can not be used to perform a signature.", eeCert.getLabel());
+		    continue;
+		}
 
 		// determine available algorithms
 		List<MwMechanism> allMechanisms = session.getSlot().getMechanismList();
@@ -366,6 +393,39 @@ public class CIFCreator {
 	ActionNameType action = new ActionNameType();
 	action.setLoadedAction(actionName);
 	return action;
+    }
+
+    private boolean canSign(MwCertificate eeCert) {
+	try {
+	    InputStream in = new ByteArrayInputStream(eeCert.getValue());
+	    X509Certificate cert = (X509Certificate) getCertFactory().generateCertificate(in);
+
+	    // is this a CA certificate?
+	    if (cert.getBasicConstraints() != -1) {
+		return false;
+	    }
+
+	    // check keyusage flags
+	    boolean[] certUsage = cert.getKeyUsage();
+	    boolean authCert = certUsage[0];
+	    boolean signCert = certUsage[1];
+	    if (! authCert && ! signCert) {
+		return false;
+	    }
+
+	    // looks good so far, add more checks if needed
+	    return true;
+	} catch (CertificateException | NullPointerException ex) {
+	    LOG.error("Failed to parse certificate.");
+	    return false;
+	}
+    }
+
+    private CertificateFactory getCertFactory() throws CertificateException {
+	if (certFactory == null) {
+	    certFactory = CertificateFactory.getInstance("X.509");
+	}
+	return certFactory;
     }
 
 }

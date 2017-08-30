@@ -1,0 +1,1755 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<iso:CardInfo xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema" 
+  xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="urn:iso:std:iso-iec:24727:tech:schema http://ws.openecard.org/schema/CardInfo.xsd">
+
+	<iso:CardType>
+		<iso:ObjectIdentifier>http://www.dgn.de/cif/HPCqSIG</iso:ObjectIdentifier>
+		<iso:SpecificationBodyOrIssuer>DGN Deutsches Gesundheitsnetz</iso:SpecificationBodyOrIssuer>
+		<iso:CardTypeName xml:lang="en">HPCqSIG</iso:CardTypeName>
+		<!-- Note: This card should comply to HPC 2.1.1
+			 [HPC-1] https://ps.ecsec.de/dmsf/files/6479/view
+			 [HPC-2] https://ps.ecsec.de/dmsf/files/6480/view
+			 However there are some minor deviations, such as
+			 - missing C2C-functionality
+			 - only partly ISO/IEC 7816-15 compliance and
+			 - proprietary commands for determining the PIN status and supported batch size
+			   (see [DGN-StarCOS] https://ps.ecsec.de/dmsf/files/6603/view)
+		-->
+		<iso:Version>
+			<iso:Major>0</iso:Major>
+			<iso:Minor>99</iso:Minor>
+			<iso:SubMinor>0</iso:SubMinor>
+		</iso:Version>
+		<iso:Status>Draft</iso:Status>
+		<iso:Date>2017-08-28</iso:Date>
+	</iso:CardType>
+
+	<iso:CardIdentification>
+		<iso:ATR>
+			<iso:TS>
+				<iso:Value>3B</iso:Value>
+				<iso:Mask>FF</iso:Mask>
+			</iso:TS>
+			<iso:T0>
+				<iso:Value>D9</iso:Value>
+				<iso:Mask>FF</iso:Mask>
+			</iso:T0>
+			<iso:InterfaceBytes>
+				<iso:Tx1>
+					<iso:TAi>
+						<iso:Value>FE</iso:Value>
+						<iso:Mask>FF</iso:Mask>
+					</iso:TAi>
+					<iso:TBi>
+						<iso:Value>45</iso:Value>
+						<iso:Mask>FF</iso:Mask>
+					</iso:TBi>
+					<iso:TCi>
+						<iso:Value>FF</iso:Value>
+						<iso:Mask>FF</iso:Mask>
+					</iso:TCi>
+					<iso:TDi>
+						<iso:Value>31</iso:Value>
+						<iso:Mask>FF</iso:Mask>
+					</iso:TDi>
+				</iso:Tx1>
+				<iso:Tx2>
+					<iso:TAi>
+						<iso:Value>FE</iso:Value>
+						<iso:Mask>FF</iso:Mask>
+					</iso:TAi>
+					<iso:TBi>
+						<iso:Value>45</iso:Value>
+						<iso:Mask>FF</iso:Mask>
+					</iso:TBi>
+					<iso:TCi>
+						<iso:Value>FF</iso:Value>
+						<iso:Mask>FF</iso:Mask>
+					</iso:TCi>
+					<iso:TDi>
+						<iso:Value>31</iso:Value>
+						<iso:Mask>FF</iso:Mask>
+					</iso:TDi>
+				</iso:Tx2>
+				<iso:Tx3>
+					<iso:TAi>
+						<iso:Value>FE</iso:Value>
+						<iso:Mask>FF</iso:Mask>
+					</iso:TAi>
+					<iso:TBi>
+						<iso:Value>45</iso:Value>
+						<iso:Mask>FF</iso:Mask>
+					</iso:TBi>
+					<iso:TCi>
+						<iso:Value>FF</iso:Value>
+						<iso:Mask>FF</iso:Mask>
+					</iso:TCi>
+					<iso:TDi>
+						<iso:Value>31</iso:Value>
+						<iso:Mask>FF</iso:Mask>
+					</iso:TDi>
+				</iso:Tx3>
+				<iso:Tx4/>
+			</iso:InterfaceBytes>
+			<iso:HistoricalBytes>
+				<iso:Ti>
+					<iso:Value>80</iso:Value>
+					<iso:Mask>00</iso:Mask>
+				</iso:Ti>
+				<iso:Ti>
+					<iso:Value>31</iso:Value>
+					<iso:Mask>FF</iso:Mask>
+				</iso:Ti>
+				<iso:Ti>
+					<iso:Value>B8</iso:Value>
+					<iso:Mask>FF</iso:Mask>
+				</iso:Ti>
+				<iso:Ti>
+					<iso:Value>73</iso:Value>
+					<iso:Mask>FF</iso:Mask>
+				</iso:Ti>
+				<iso:Ti>
+					<iso:Value>86</iso:Value>
+					<iso:Mask>FF</iso:Mask>
+				</iso:Ti>
+				<iso:Ti>
+					<iso:Value>01</iso:Value>
+					<iso:Mask>FF</iso:Mask>
+				</iso:Ti>
+				<iso:Ti>
+					<iso:Value>E0</iso:Value>
+					<iso:Mask>FF</iso:Mask>
+				</iso:Ti>
+				<iso:Ti>
+					<iso:Value>81</iso:Value>
+					<iso:Mask>FF</iso:Mask>
+				</iso:Ti>
+				<iso:Ti>
+					<iso:Value>05</iso:Value>
+					<iso:Mask>FF</iso:Mask>
+				</iso:Ti>
+			</iso:HistoricalBytes>
+		</iso:ATR>
+
+		<!-- Check, whether DF.HPA (G1) is present according to EF.DIR.
+		If it is present, it is clear that it is some HPC (G1). -->
+		<iso:CharacteristicFeature>
+			<!-- select MF -->
+			<iso:CardCall>
+				<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<iso:Trailer>9000</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+			<!-- select EF.DIR -->
+			<iso:CardCall>
+				<iso:CommandAPDU>00A4020C022F00</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<iso:Trailer>9000</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+			<iso:CardCall>
+				<!-- EF.DIR-Rec#1: CL='00', INS='B0'=READ BINARY, P1=00, P2=00, Le='FF' restriction in ResponseAPDU -->
+				<iso:CommandAPDU>00B00000FF</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<!-- 4F 6 D27600004002 -->
+					<iso:Body>
+						<iso:DataObject>
+							<iso:Tag>61</iso:Tag>
+							<iso:DataObject>
+								<iso:MatchingData>
+									<iso:Length>08</iso:Length>
+									<iso:MatchingValue>4F06D27600004002</iso:MatchingValue>
+								</iso:MatchingData>
+							</iso:DataObject>
+						</iso:DataObject>
+					</iso:Body>
+					<iso:Trailer>6282</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+		</iso:CharacteristicFeature>
+	</iso:CardIdentification>
+
+	<iso:ApplicationCapabilities>
+		<!-- MF is implicitly selected -->
+		<iso:ImplicitlySelectedApplication>3F00</iso:ImplicitlySelectedApplication>
+		<!-- =================== -->
+		<!-- CardApplication: MF -->
+		<!-- =================== -->
+		<iso:CardApplication>
+			<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:protocols:T-equals-1</iso:InterfaceProtocol>
+			<iso:ApplicationIdentifier>3F00</iso:ApplicationIdentifier>
+			<iso:ApplicationName>MF</iso:ApplicationName>
+
+			<!-- As there are only standardized card application services, there are no
+			CardApplicationServiceInfo elements. -->
+
+			<!-- ====================== -->
+			<!-- MF: CardApplicationACL -->
+			<!-- ====================== -->
+			<iso:CardApplicationACL>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationConnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationDisconnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationStartSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationEndSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationList</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetList</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDList</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+			</iso:CardApplicationACL>
+
+
+
+			<!-- ============================= -->
+			<!-- root: Differential Identities -->
+			<!-- ============================= -->
+			<!--PIN.CH-->
+			<iso:DIDInfo>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>PIN.CH</iso:DIDName>
+					<iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.9</iso:DIDProtocol>
+					<!--PIN Compare-->
+					<iso:DIDMarker>
+						<iso:PinCompareMarker Protocol="urn:oid:1.3.162.15480.3.0.9">
+							<iso:PinRef>
+								<iso:KeyRef>01</iso:KeyRef>
+							</iso:PinRef>
+							<iso:PasswordAttributes>
+								<!-- See [eGK-1#9.1.7] + [HPC-2#7]. -->
+								<iso:pwdFlags>needs-padding</iso:pwdFlags>
+								<iso:pwdType>iso9564-1</iso:pwdType>
+								<iso:minLength>6</iso:minLength> <!-- See [eGK-2#6.2.7] -->
+								<iso:storedLength>8</iso:storedLength>
+								<iso:maxLength>8</iso:maxLength>
+								<iso:padChar>FF</iso:padChar>
+							</iso:PasswordAttributes>
+							<!--
+							The different states may be distinguished by calling 
+							Select EF.KeyD in MF and then Read Record 17 (=PIN.CH.Admin (global)) -->
+							<iso:StateInfo>
+								<iso:StateRecognition>
+									<iso:CardCall>
+										<!-- Select EF.KeyD in MF -->
+										<iso:CommandAPDU>00A4020C020013</iso:CommandAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>9000</iso:Trailer>
+										</iso:ResponseAPDU>
+									</iso:CardCall>
+									<iso:CardCall>
+										<!-- Read Record 17 (=PIN.CH.Admin (global)) -->
+										<iso:CommandAPDU>00B2110400</iso:CommandAPDU>
+										<iso:ResponseAPDU>
+											<iso:Body>
+												<iso:MatchingData>
+													<iso:Offset>12</iso:Offset>
+													<iso:Length>01</iso:Length>
+													<iso:MatchingValue>23</iso:MatchingValue>
+												</iso:MatchingData>
+											</iso:Body>
+											<iso:Trailer>9000</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>PIN.CH_transport</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Body>
+												<iso:MatchingData>
+													<iso:Offset>16</iso:Offset>
+													<iso:Length>01</iso:Length>
+													<iso:MatchingValue>03</iso:MatchingValue>
+												</iso:MatchingData>
+											</iso:Body>
+											<iso:Trailer>9000</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>PIN.CH_operational-RC3</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Body>
+												<iso:MatchingData>
+													<iso:Offset>16</iso:Offset>
+													<iso:Length>01</iso:Length>
+													<iso:MatchingValue>02</iso:MatchingValue>
+											</iso:MatchingData>											
+										</iso:Body>
+										<iso:Trailer>9000</iso:Trailer>
+										<iso:Conclusion>
+											<iso:RecognizedState>PIN.CH_operational-RC2</iso:RecognizedState>
+										</iso:Conclusion>
+									</iso:ResponseAPDU>
+									<iso:ResponseAPDU>
+										<iso:Body>
+											<iso:MatchingData>
+												<iso:Offset>16</iso:Offset>
+												<iso:Length>01</iso:Length>
+												<iso:MatchingValue>01</iso:MatchingValue>
+											</iso:MatchingData>											
+										</iso:Body>
+										<iso:Trailer>9000</iso:Trailer>
+										<iso:Conclusion>
+											<iso:RecognizedState>PIN.CH_operational-RC1</iso:RecognizedState>
+										</iso:Conclusion>
+									</iso:ResponseAPDU>
+									<iso:ResponseAPDU>
+										<iso:Body>
+											<iso:MatchingData>
+												<iso:Offset>16</iso:Offset>
+												<iso:Length>01</iso:Length>
+												<iso:MatchingValue>00</iso:MatchingValue>
+											</iso:MatchingData>											
+										</iso:Body>
+										<iso:Trailer>9000</iso:Trailer>
+										<iso:Conclusion>
+											<iso:RecognizedState>PIN.CH_blocked</iso:RecognizedState>
+										</iso:Conclusion>
+									</iso:ResponseAPDU>
+								</iso:CardCall>
+							</iso:StateRecognition>
+							<!-- Start state to trigger recognition -->
+							<!-- PIN.CH_start - RecognitionNecessary -->
+							<iso:State StateName="PIN.CH_start" StateClass="RecognitionNecessary" />
+							
+							<!-- PIN.CH_transport - NotOperational -->
+							<iso:State StateName="PIN.CH_transport" StateClass="NotOperational">
+								<iso:StateTransition TargetState="PIN.CH_operational-RC3">
+									<!-- As specified in [HPC-2#5.5.2] the transition from the transport state to the operational
+										 state (operational) is performed using a CHANGE REFERENCE DATA with P1='00' (cf. [HPC-2#5.5.2]):
+										 CL ='00' -
+										 INS='24' - CHANGE REFERENCE DATA
+										 P1 ='00' -
+										 P2 ='01' - Key Reference of the PIN (as <iso:KeyRef>01</iso:KeyRef> is specified above)
+										 Data = operational PIN, which must be captured and appended to CommandAPDU below
+
+										 This step is realized by invoking the ModifyVerificationData-function defined in [eCard-6].
+									-->
+									<iso:FixedProcedure>
+										<iso:CardCall>
+											<iso:APICall>
+												<iso:ModifyVerificationData>
+													<iso:SlotHandle></iso:SlotHandle>
+													<iso:InputUnit>
+														<iso:PinInput>
+															<iso:Index>0</iso:Index>
+															<iso:PasswordAttributes>
+																<!-- See [eGK-1#9.1.7]. -->
+																<iso:pwdFlags>needs-padding</iso:pwdFlags>
+																<iso:pwdType>iso9564-1</iso:pwdType>
+																<iso:minLength>6</iso:minLength> <!-- See [eGK-2#6.2.7] -->
+																<iso:storedLength>8</iso:storedLength>
+																<iso:maxLength>8</iso:maxLength>
+																<iso:padChar>FF</iso:padChar>
+															</iso:PasswordAttributes>
+														</iso:PinInput>
+													</iso:InputUnit>
+													<iso:Template>00240001</iso:Template>
+												</iso:ModifyVerificationData>
+											</iso:APICall>
+											<iso:APIResponse>
+												<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+													<dss:Result>
+														<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+													</dss:Result>
+													<iso:Response>9000</iso:Response>
+												</iso:ModifyVerificationDataResponse>
+											</iso:APIResponse>
+										</iso:CardCall>
+									</iso:FixedProcedure>
+								</iso:StateTransition>
+							</iso:State>
+
+
+							<!-- PIN.CH_operational-RC3 - Operational -->
+							<iso:State StateName="PIN.CH_operational-RC3" StateClass="Operational">
+								<iso:RetryCounter>3</iso:RetryCounter>
+							</iso:State>
+
+							<!-- PIN.CH_operational-RC2 - Operational -->
+							<iso:State StateName="PIN.CH_operational-RC2" StateClass="Operational">
+								<iso:RetryCounter>2</iso:RetryCounter>
+							</iso:State>
+
+							<!-- PIN.CH_operational-RC1 - Operational -->
+							<iso:State StateName="PIN.CH_operational-RC1" StateClass="Operational">
+								<iso:RetryCounter>1</iso:RetryCounter>
+							</iso:State>
+
+							<!-- PIN.CH_blocked - NotOperational -->
+							<iso:State StateName="PIN.CH_blocked" StateClass="NotOperational">
+								<iso:RetryCounter>0</iso:RetryCounter>
+
+								<!-- As specified in [HPC-2#5.5.3] the command RESET RETRY COUNTER may be used with P1='00' and P1='01'. 
+								     However only the option P1='00' (which allows to set the new PIN) is specified here:
+									 CL ='00' -
+									 INS='2C' - RESET RETRY COUNTER
+									 P1 = either
+									 '00' - Data contains PUK and new PIN
+									 '01' - Data contains PUK only (not specified here)
+									 P2 ='01' - Key Reference of the PIN (as <iso:KeyRef>01</iso:KeyRef> is specified above)
+									 Data = either
+									 PUK | NewPIN, if P1='00'
+									 PUK         , if P1='01' (not specified here)
+
+										 This step is realized by invoking the ModifyVerificationData-function defined in [eCard-6].
+									-->
+
+									<iso:StateTransition TargetState="PIN.CH_operational-RC3">
+										<iso:FixedProcedure>
+											<!-- Case P1='00' (PUK and PIN) -->
+											<iso:CardCall>
+												<iso:APICall>
+													<iso:ModifyVerificationData>
+														<iso:SlotHandle></iso:SlotHandle>
+														<iso:InputUnit>
+															<iso:PinInput>
+																<iso:Index>0</iso:Index>
+																<iso:PasswordAttributes>
+																	<!-- See [eGK-1#9.1.7]. -->
+																	<iso:pwdFlags>needs-padding</iso:pwdFlags>
+																	<iso:pwdType>iso9564-1</iso:pwdType>
+																	<iso:minLength>6</iso:minLength> <!-- See [eGK-2#6.2.7] -->
+																	<iso:storedLength>8</iso:storedLength>
+																	<iso:maxLength>8</iso:maxLength>
+																	<iso:padChar>FF</iso:padChar>
+																</iso:PasswordAttributes>
+															</iso:PinInput>
+														</iso:InputUnit>
+														<iso:Template>002C0001</iso:Template>
+													</iso:ModifyVerificationData>
+												</iso:APICall>
+												<iso:APIResponse>
+													<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+														<dss:Result>
+															<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+														</dss:Result>
+														<iso:Response>9000</iso:Response>
+													</iso:ModifyVerificationDataResponse>
+												</iso:APIResponse>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
+								</iso:State>
+							</iso:StateInfo>
+						</iso:PinCompareMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>global</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDUpdate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>PIN.CH</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+
+			<!-- PrK.HPC.AUT is currently not specified -->
+			<!-- PuK.RCA.CS is currently not specified -->
+			<!-- PuK.CAMS_HPC.AUT is currently not specified -->
+
+			<!-- ================ -->
+			<!-- root: Data Sets  -->
+			<!-- ================ -->
+
+			<!-- EF.ATR (cf. [HPC-2#B.2]) -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.ATR</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>2F01</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+
+			<!-- EF.DIR (cf. [HPC-2#B.2]) -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.DIR</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIList</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>2F00</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- EF.GDO (cf. [HPC-2#B.2]) -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.GDO</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>2F02</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- EF.C.CA_HPC.CS (cf. [HPC-2#B.2]) -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.C.CA_HPC.CS</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>2F04</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- EF.C.HPC.AUT (cf. [HPC-2#B.2]) -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.C.HPC.AUT_CVC</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>2F03</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+		</iso:CardApplication>
+
+		<!-- ======================= -->
+		<!-- CardApplication: DF HPA -->
+		<!-- ======================= -->
+		<iso:CardApplication>
+			<!-- DF HPA -->
+			<iso:ApplicationIdentifier>D27600004002</iso:ApplicationIdentifier>
+			<iso:ApplicationName>DF HPA</iso:ApplicationName>
+			<iso:CardApplicationACL>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetCreate</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationConnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationDisconnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationStartSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationEndSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationList</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetList</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDList</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+			</iso:CardApplicationACL>
+
+			<!-- EF.HPD (cf. [HPC-2#B.2]) -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.HPD</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>PIN.CH</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>D001</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+		</iso:CardApplication>
+
+		<!-- ================================ -->
+		<!-- CardApplication: DF QES (DINSIG) -->
+		<!-- ================================ -->
+		<iso:CardApplication>
+			<!-- DF QES (DINSIG) -->
+			<iso:ApplicationIdentifier>D27600006601</iso:ApplicationIdentifier>
+			<iso:ApplicationName>DF QES</iso:ApplicationName>
+			<iso:CardApplicationACL>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationConnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationDisconnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationStartSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationEndSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationList</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetList</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDList</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+			</iso:CardApplicationACL>
+
+			<!-- =============================== -->
+			<!-- DF QES: Differential Identities -->
+			<!-- =============================== -->
+
+			<!-- PrK.HP.QES (cf. [HPC-2#8.1.2]) -->
+			<iso:DIDInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>PrK.HP.QES</iso:DIDName>
+					<iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
+					<iso:DIDMarker>
+						<!-- According to [HPC-2#8.1.2] the key PrK.CH.AUT has KeyId='84' and may be used with
+							 different algorithms. However only SHA-256 and RSA with DSI according to PKCS #1
+							 {1.2.840.113549.1.1.11} (sha256WithRSAEncryption) with AlgId='42' is used.
+						-->
+						<iso:CryptoMarker
+							Protocol="urn:oid:1.3.162.15480.3.0.25">
+							<iso:AlgorithmInfo>
+								<iso:Algorithm>SHA256withRSA</iso:Algorithm>
+								<iso:AlgorithmIdentifier>
+									<iso:Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</iso:Algorithm>
+								</iso:AlgorithmIdentifier>
+								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
+								<iso:CardAlgRef>42</iso:CardAlgRef>
+							</iso:AlgorithmInfo>
+							<iso:KeyInfo>
+								<iso:KeyRef>
+									<iso:KeyRef>84</iso:KeyRef>
+								</iso:KeyRef>
+								<iso:KeySize>2048</iso:KeySize>
+							</iso:KeyInfo>
+							<iso:SignatureGenerationInfo>MSE_HASH MSE_KEY_DS PSO_CDS</iso:SignatureGenerationInfo>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.CH.AUT</iso:DataSetName>
+							</iso:CertificateRef>
+						</iso:CryptoMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>PIN.QES</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+
+			<!--PIN.QES-->
+			<iso:DIDInfo>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>PIN.QES</iso:DIDName>
+					<iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.9</iso:DIDProtocol>
+					<!--PIN Compare-->
+					<iso:DIDMarker>
+						<iso:PinCompareMarker Protocol="urn:oid:1.3.162.15480.3.0.9">
+							<iso:PinRef>
+								<iso:KeyRef>81</iso:KeyRef>
+							</iso:PinRef>
+							<iso:PasswordAttributes>
+								<!-- See [eGK-1#9.1.7] + [HPC-2#7]. -->
+								<iso:pwdFlags>needs-padding</iso:pwdFlags>
+								<iso:pwdType>iso9564-1</iso:pwdType>
+								<iso:minLength>6</iso:minLength> <!-- See [eGK-2#6.2.7] -->
+								<iso:storedLength>8</iso:storedLength>
+								<iso:maxLength>8</iso:maxLength>
+								<iso:padChar>FF</iso:padChar>
+							</iso:PasswordAttributes>
+							<!--
+							The different states may be distinguished by calling 
+							Select EF.KeyD in DF QES and then Read Record 03 (=PIN.QES (local)) -->
+							<iso:StateInfo>
+								<iso:StateRecognition>
+									<iso:CardCall>
+										<!-- Select DF.QES -->
+										<iso:CommandAPDU>00A4040C06D27600006601</iso:CommandAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>9000</iso:Trailer>
+										</iso:ResponseAPDU>
+									</iso:CardCall>
+									<iso:CardCall>
+										<!-- Select EF.KeyD in DF.QES -->
+										<iso:CommandAPDU>00A4020C020013</iso:CommandAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>9000</iso:Trailer>
+										</iso:ResponseAPDU>
+									</iso:CardCall>
+									<iso:CardCall>
+										<!-- Read Record 03 (=PIN.QES (local)) -->
+										<iso:CommandAPDU>00B2030400</iso:CommandAPDU>
+										<iso:ResponseAPDU>
+											<iso:Body>
+												<iso:MatchingData>
+													<iso:Offset>0D</iso:Offset>
+													<iso:Length>01</iso:Length>
+													<iso:MatchingValue>23</iso:MatchingValue>
+												</iso:MatchingData>
+											</iso:Body>
+											<iso:Trailer>9000</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>PIN.QES_transport</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Body>
+												<iso:MatchingData>
+													<iso:Offset>11</iso:Offset>
+													<iso:Length>01</iso:Length>
+													<iso:MatchingValue>03</iso:MatchingValue>
+												</iso:MatchingData>
+											</iso:Body>
+											<iso:Trailer>9000</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>PIN.QES_operational-RC3</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Body>
+												<iso:MatchingData>
+													<iso:Offset>11</iso:Offset>
+													<iso:Length>01</iso:Length>
+													<iso:MatchingValue>02</iso:MatchingValue>
+												</iso:MatchingData>
+											</iso:Body>
+											<iso:Trailer>9000</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>PIN.QES_operational-RC2</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Body>
+												<iso:MatchingData>
+												<iso:Offset>11</iso:Offset>
+												<iso:Length>01</iso:Length>
+												<iso:MatchingValue>01</iso:MatchingValue>
+											</iso:MatchingData>											
+										</iso:Body>
+										<iso:Trailer>9000</iso:Trailer>
+										<iso:Conclusion>
+											<iso:RecognizedState>PIN.QES_operational-RC1</iso:RecognizedState>
+										</iso:Conclusion>
+									</iso:ResponseAPDU>
+									<iso:ResponseAPDU>
+										<iso:Body>
+											<iso:MatchingData>
+												<iso:Offset>11</iso:Offset>
+												<iso:Length>01</iso:Length>
+												<iso:MatchingValue>00</iso:MatchingValue>
+											</iso:MatchingData>											
+										</iso:Body>
+										<iso:Trailer>9000</iso:Trailer>
+										<iso:Conclusion>
+											<iso:RecognizedState>PIN.QES_blocked</iso:RecognizedState>
+										</iso:Conclusion>
+									</iso:ResponseAPDU>
+								</iso:CardCall>
+							</iso:StateRecognition>
+							<!-- Start state to trigger recognition -->
+							<!-- PIN.QES_start - RecognitionNecessary -->
+							<iso:State StateName="PIN.QES_start" StateClass="RecognitionNecessary" />
+							<!-- PIN.QES_transport - NotOperational -->
+							<iso:State StateName="PIN.QES_transport" StateClass="NotOperational">
+								<iso:StateTransition TargetState="PIN.QES_operational-RC3">
+									<!-- As specified in [HPC-2#5.5.2] the transition from the transport state to the operational
+										 state (operational) is performed using a CHANGE REFERENCE DATA with P1='00' (cf. [HPC-2#5.5.2]):
+										 CL ='00' -
+										 INS='24' - CHANGE REFERENCE DATA
+										 P1 ='00' -
+										 P2 ='81' - Key Reference of the PIN (as <iso:KeyRef>81</iso:KeyRef> is specified above)
+										 Data = operational PIN, which must be captured and appended to CommandAPDU below
+
+										 This step is realized by invoking the ModifyVerificationData-function defined in [eCard-6].
+									-->
+									<iso:FixedProcedure>
+										<iso:CardCall>
+											<iso:APICall>
+												<iso:ModifyVerificationData>
+													<iso:SlotHandle></iso:SlotHandle>
+													<iso:InputUnit>
+														<iso:PinInput>
+															<iso:Index>0</iso:Index>
+															<iso:PasswordAttributes>
+																<!-- See [eGK-1#9.1.7]. -->
+																<iso:pwdFlags>needs-padding</iso:pwdFlags>
+																<iso:pwdType>iso9564-1</iso:pwdType>
+																<iso:minLength>6</iso:minLength> <!-- See [eGK-2#6.2.7] -->
+																<iso:storedLength>8</iso:storedLength>
+																<iso:maxLength>8</iso:maxLength>
+																<iso:padChar>FF</iso:padChar>
+															</iso:PasswordAttributes>
+														</iso:PinInput>
+													</iso:InputUnit>
+													<iso:Template>00240081</iso:Template>
+												</iso:ModifyVerificationData>
+											</iso:APICall>
+											<iso:APIResponse>
+												<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+													<dss:Result>
+														<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+													</dss:Result>
+													<iso:Response>9000</iso:Response>
+												</iso:ModifyVerificationDataResponse>
+											</iso:APIResponse>
+										</iso:CardCall>
+									</iso:FixedProcedure>
+								</iso:StateTransition>
+							</iso:State>
+
+							<!-- PIN.QES_operational-RC3 - Operational -->
+							<iso:State StateName="PIN.QES_operational-RC3" StateClass="Operational">
+								<iso:RetryCounter>3</iso:RetryCounter>
+							</iso:State>
+
+							<!-- PIN.QES_operational-RC2 - Operational -->
+							<iso:State StateName="PIN.QES_operational-RC2" StateClass="Operational">
+								<iso:RetryCounter>2</iso:RetryCounter>
+							</iso:State>
+
+							<!-- PIN.QES_operational-RC1 - Operational -->
+							<iso:State StateName="PIN.QES_operational-RC1" StateClass="Operational">
+								<iso:RetryCounter>1</iso:RetryCounter>
+							</iso:State>
+
+							<!-- PIN.QES_blocked - NotOperational -->
+							<iso:State StateName="PIN.QES_blocked" StateClass="NotOperational">
+								<iso:RetryCounter>0</iso:RetryCounter>
+								<!-- As specified in [HPC-2#5.5.3] the command RESET RETRY COUNTER may be used with P1='01' and P2='01':
+									 CL ='00' -
+									 INS='2C' - RESET RETRY COUNTER
+									 P1 ='01' - Data contains PUK only
+									 P2 ='01' - Key Reference of the PIN (as <iso:KeyRef>81</iso:KeyRef> is specified above)
+									 Data = PUK
+
+										 This step is realized by invoking the ModifyVerificationData-function defined in [eCard-6].
+									-->
+									<iso:StateTransition TargetState="PIN.CH_operational-RC3">
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<iso:APICall>
+													<iso:ModifyVerificationData>
+														<iso:SlotHandle></iso:SlotHandle>
+														<iso:InputUnit>
+															<iso:PinInput>
+																<iso:Index>0</iso:Index>
+																<iso:PasswordAttributes>
+																	<!-- See [eGK-1#9.1.7]. -->
+																	<iso:pwdFlags>needs-padding</iso:pwdFlags>
+																	<iso:pwdType>iso9564-1</iso:pwdType>
+																	<iso:minLength>6</iso:minLength> <!-- See [eGK-2#6.2.7] -->
+																	<iso:storedLength>8</iso:storedLength>
+																	<iso:maxLength>8</iso:maxLength>
+																	<iso:padChar>FF</iso:padChar>
+																</iso:PasswordAttributes>
+															</iso:PinInput>
+														</iso:InputUnit>
+														<iso:Template>002C0181</iso:Template>
+													</iso:ModifyVerificationData>
+												</iso:APICall>
+												<iso:APIResponse>
+													<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+														<dss:Result>
+															<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+														</dss:Result>
+														<iso:Response>9000</iso:Response>
+													</iso:ModifyVerificationDataResponse>
+												</iso:APIResponse>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
+								</iso:State>
+							</iso:StateInfo>
+						</iso:PinCompareMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDUpdate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>PIN.QES</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+		
+			<!-- EF.DM (cf. [HPC-2#B.4]) -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.DM</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>PIN.QES</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>D004</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- EF.C.HP.QES (cf. [HPC-2#B.4]) -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.C.HP.QES</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>C000</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+		</iso:CardApplication>
+
+		<!-- ========================= -->
+		<!-- CardApplication: DF ESIGN -->
+		<!-- ========================= -->
+		<iso:CardApplication>
+			<!-- DF ESIGN -->
+			<iso:ApplicationIdentifier>A000000167455349474E</iso:ApplicationIdentifier>
+			<iso:CardApplicationACL>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationConnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationDisconnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationEndSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationList</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationStartSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetList</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDList</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationServiceAccess</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:APIAccessEntryPoint>Initialize</iso:APIAccessEntryPoint>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationServiceAccess</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:APIAccessEntryPoint>Terminate</iso:APIAccessEntryPoint>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+			</iso:CardApplicationACL>
+
+
+			<!-- ================================= -->
+			<!-- DF ESIGN: Differential Identities -->
+			<!-- ================================= -->
+
+
+
+			<!-- PrK.HP.AUT (cf. [HPC-2#9.1.2]) -->
+			<iso:DIDInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>PrK.HP.AUT</iso:DIDName>
+					<iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
+					<iso:DIDMarker>
+						<!-- According to [HPC-2#8.1.2] the key PrK.HP.AUT has KeyId='82' and may be used with
+							 different algorithms. However only SHA-256 and RSA with DSI according to PKCS #1
+								 {1.2.840.113549.1.1.11} (sha256WithRSAEncryption) with AlgId='42' is used.
+								 According to Annex E.6, Client-Server-Authentication is to be performed with INTERNAL_AUTHENTICATE.
+						-->
+						<iso:CryptoMarker
+							Protocol="urn:oid:1.3.162.15480.3.0.25">
+							<iso:AlgorithmInfo>
+								<iso:Algorithm>SHA256withRSA</iso:Algorithm>
+								<iso:AlgorithmIdentifier>
+									<iso:Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</iso:Algorithm>
+								</iso:AlgorithmIdentifier>
+								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
+								<iso:CardAlgRef>42</iso:CardAlgRef>
+							</iso:AlgorithmInfo>
+							<iso:KeyInfo>
+								<iso:KeyRef>
+									<iso:KeyRef>82</iso:KeyRef>
+								</iso:KeyRef>
+								<iso:KeySize>2048</iso:KeySize>
+							</iso:KeyInfo>
+							<iso:SignatureGenerationInfo>MSE_HASH MSE_KEY_DS INT_AUTH</iso:SignatureGenerationInfo>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.HP.AUT</iso:DataSetName>
+							</iso:CertificateRef>
+						</iso:CryptoMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>PIN.CH</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+			<!-- PrK.HP.ENC (cf. [HPC-2#9.1.2]) -->
+			<iso:DIDInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>PrK.HP.ENC</iso:DIDName>
+					<iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
+					<iso:DIDMarker>
+						<!-- According to [HPC-2#8.1.2] the key PrK.HP.ENC has KeyId='83' and may be
+							 used with [PKCS#1], Clause 7.1.2, "EME-PKCS1v1_5" (see [HPC-1#Table 8]).
+						-->
+						<iso:CryptoMarker
+							Protocol="urn:oid:1.3.162.15480.3.0.25">
+							<iso:AlgorithmInfo>
+								<iso:Algorithm>RSA/NONE/PKCS1Padding</iso:Algorithm>
+								<iso:AlgorithmIdentifier>
+									<!-- urn:oid:1.2.840.113549.1.1.1 -->
+									<iso:Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-1_5</iso:Algorithm>
+								</iso:AlgorithmIdentifier>
+								<iso:SupportedOperations>Decipher</iso:SupportedOperations>
+							</iso:AlgorithmInfo>
+							<iso:KeyInfo>
+								<iso:KeyRef>
+									<iso:KeyRef>83</iso:KeyRef>
+								</iso:KeyRef>
+								<iso:KeySize>2048</iso:KeySize>
+							</iso:KeyInfo>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.HP.ENC</iso:DataSetName>
+							</iso:CertificateRef>
+						</iso:CryptoMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:CryptographicServiceAction>Decipher</iso:CryptographicServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>PIN.CH</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+
+			<!-- EF.DM (cf. [HPC-2#B.5]) -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.DM</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>PIN.CH</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>D004</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- EF.C.HP.AUT (cf. [HPC-2#B.5]) -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.C.HP.AUT</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>C500</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- EF.C.HP.ENC (cf. [HPC-2#B.5]) -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
+				<iso:DataSetName>EF.C.HP.ENC</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>C200</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+		</iso:CardApplication>
+
+		<!-- ============================= -->
+		<!-- CardApplication: DF CIA.ESIGN -->
+		<!-- ============================= -->
+		<iso:CardApplication>
+			<!-- DF CIA.ESIGN (only partially present on DGN-card) -->
+			<iso:ApplicationIdentifier>E828BD080FA000000167455349474E</iso:ApplicationIdentifier>
+			<iso:CardApplicationACL>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationConnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationDisconnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationEndSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationList</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationStartSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetList</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDList</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationServiceAccess</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:APIAccessEntryPoint>Initialize</iso:APIAccessEntryPoint>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationServiceAccess</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:APIAccessEntryPoint>Terminate</iso:APIAccessEntryPoint>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+			</iso:CardApplicationACL>
+
+			<!-- EF.CIAInfo not present on DGN-Card -->
+
+			<!-- EF.OD -->
+			<iso:DataSetInfo>
+				<iso:DataSetName>EF.OD</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>5031</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<!-- EF.AOD not present on DGN-Card -->
+			<!-- EF.PrKD not present on DGN-Card -->
+			<!-- EF.CD not present on DGN-Card -->
+
+		</iso:CardApplication>
+	</iso:ApplicationCapabilities>
+
+</iso:CardInfo>

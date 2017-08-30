@@ -286,6 +286,23 @@
 											<iso:RecognizedCardType>http://bsi.bund.de/cif/npa.xml</iso:RecognizedCardType>
 										</iso:Conclusion>
 									</iso:ResponseAPDU>
+									<iso:ResponseAPDU>
+										<iso:Body>
+											<iso:DataObject>
+												<iso:Tag>61</iso:Tag>
+												<iso:DataObject>
+													<iso:MatchingData>
+														<iso:Length>08</iso:Length>
+														<iso:MatchingValue>4F06D27600004002</iso:MatchingValue>
+													</iso:MatchingData>
+												</iso:DataObject>
+											</iso:DataObject>
+										</iso:Body>
+										<iso:Trailer>6282</iso:Trailer>
+										<iso:Conclusion>
+											<iso:RecognizedCardType>http://www.dgn.de/cif/HPCqSIG</iso:RecognizedCardType>
+										</iso:Conclusion>
+									</iso:ResponseAPDU>
 								</iso:CardCall>
 							</iso:Conclusion>
 						</iso:ResponseAPDU>
@@ -408,6 +425,33 @@
 							</iso:Conclusion>
 						</iso:ResponseAPDU>
 					</iso:CardCall>
+				</iso:Conclusion>
+			</iso:ResponseAPDU>
+		</iso:CardCall>
+		<iso:CardCall>
+			<iso:CommandAPDU>00A4040400</iso:CommandAPDU>
+			<iso:ResponseAPDU>
+				<iso:Body>
+					<!--
+					<iso:Tag>62</iso:Tag>
+					<iso:DataObject>
+						<iso:Tag>84</iso:Tag>
+						<iso:DataObject>
+							<iso:MatchingData>
+								<iso:MatchingValue>D27600014601</iso:MatchingValue>
+							</iso:MatchingData>
+						</iso:DataObject>
+					</iso:DataObject>
+					-->
+					<iso:MatchingData>
+						<iso:Offset>10</iso:Offset>
+						<iso:Length>06</iso:Length>
+						<iso:MatchingValue>D27600014601</iso:MatchingValue>
+					</iso:MatchingData>
+				</iso:Body>
+				<iso:Trailer>9000</iso:Trailer>
+				<iso:Conclusion>
+					<iso:RecognizedCardType>http://www.baek.de/cif/HPC-G2</iso:RecognizedCardType>
 				</iso:Conclusion>
 			</iso:ResponseAPDU>
 		</iso:CardCall>

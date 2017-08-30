@@ -33,6 +33,8 @@ import org.openecard.mdlw.sal.exceptions.InitializationException;
 import org.openecard.mdlw.sal.enums.TokenState;
 import java.util.Collections;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -40,6 +42,8 @@ import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
  * @author Tobias Wich
  */
 public class MwModule {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MwModule.class);
 
     private final MiddlewareSALConfig mwSALConfig;
 
@@ -108,9 +112,20 @@ public class MwModule {
     public List<MwSlot> getSlotList(boolean tokenPresent) throws CryptokiException {
         ArrayList<MwSlot> slots = new ArrayList<>();
         for (long slotId : mw.getSlotList(tokenPresent)) {
-            CkSlot slotInfo = mw.getSlotInfo(slotId);
-            MwSlot slot = new MwSlot(mw, this, slotInfo);
-            slots.add(slot);
+	    try {
+		CkSlot slotInfo = mw.getSlotInfo(slotId);
+		MwSlot slot = new MwSlot(mw, this, slotInfo);
+		slots.add(slot);
+	    } catch (CryptokiException ex) {
+		long code = ex.getErrorCode();
+		if (!( code == CryptokiLibrary.CKR_DEVICE_ERROR
+			|| code == CryptokiLibrary.CKR_TOKEN_NOT_PRESENT
+			|| code == CryptokiLibrary.CKR_DEVICE_REMOVED)) {
+		    // unrecoverable error
+		    throw ex;
+		}
+		LOG.info("Skipping slot {} due to recoverable error {}.", slotId, code);
+	    }
         }
 
         return Collections.unmodifiableList(slots);

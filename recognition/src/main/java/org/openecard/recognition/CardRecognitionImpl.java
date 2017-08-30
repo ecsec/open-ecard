@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -494,10 +494,10 @@ public class CardRecognitionImpl implements CardRecognition {
 		byte[] result = CardResponseAPDU.getData(resultBytes);
 		byte[] trailer = CardResponseAPDU.getTrailer(resultBytes);
 		// if select, only one response exists
-		if (!matcher && ! Arrays.equals(next.getResponseAPDU().get(0).getTrailer(), trailer)) {
+		if (! matcher && ! Arrays.equals(next.getResponseAPDU().get(0).getTrailer(), trailer)) {
 		    // break when outcome is wrong
 		    break;
-		} else if (!matcher) {
+		} else if (! matcher) {
 		    // trailer matches expected response from select, continue
 		    continue;
 		} else {
@@ -508,7 +508,7 @@ public class CardRecognitionImpl implements CardRecognition {
 			    continue;
 			}
 			// check internals for match
-			if (checkDataObject(r.getBody(), result)) {
+			if (checkBody(r.getBody(), result)) {
 			    if (r.getConclusion().getRecognizedCardType() != null) {
 				// type recognised
 				return r.getConclusion().getRecognizedCardType();
@@ -523,6 +523,23 @@ public class CardRecognitionImpl implements CardRecognition {
 	}
 
 	return null;
+    }
+
+    private boolean checkBody(DataMaskType body, byte[] result) {
+	// tag in body has a special meaning
+	if (body.getTag() != null && body.getDataObject() != null) {
+	    byte[] tag = body.getTag();
+	    if (ByteUtils.isPrefix(tag, result)) {
+		result = ByteUtils.copy(result, tag.length, result.length - tag.length);
+		return checkDataObject(body.getDataObject(), result);
+	    } else {
+		return false;
+	    }
+	} else if (body.getDataObject() != null) {
+	    return checkDataObject(body.getDataObject(), result);
+	} else {
+	    return checkMatchingData(body.getMatchingData(), result);
+	}
     }
 
 

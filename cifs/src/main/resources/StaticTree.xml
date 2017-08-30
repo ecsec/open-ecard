@@ -169,13 +169,15 @@
 									</iso:ResponseAPDU>
 									<iso:ResponseAPDU>
 										<iso:Body>
-											<iso:Tag>61</iso:Tag>
 											<iso:DataObject>
-												<iso:MatchingData>
-													<iso:Offset>00</iso:Offset>
-													<iso:Length>11</iso:Length>
-													<iso:MatchingValue>4F0FE828BD080FA000000167455349474E</iso:MatchingValue>
-												</iso:MatchingData>
+												<iso:Tag>61</iso:Tag>
+												<iso:DataObject>
+													<iso:MatchingData>
+														<iso:Offset>00</iso:Offset>
+														<iso:Length>11</iso:Length>
+														<iso:MatchingValue>4F0FE828BD080FA000000167455349474E</iso:MatchingValue>
+													</iso:MatchingData>
+												</iso:DataObject>
 											</iso:DataObject>
 										</iso:Body>
 										<iso:Trailer>6282</iso:Trailer>
@@ -204,13 +206,15 @@
 									<iso:CommandAPDU>00B20304FF</iso:CommandAPDU>
 									<iso:ResponseAPDU>
 										<iso:Body>
-											<iso:Tag>61</iso:Tag>
 											<iso:DataObject>
-												<iso:MatchingData>
-													<iso:Offset>00</iso:Offset>
-													<iso:Length>0E</iso:Length>
-													<iso:MatchingValue>4F0CA000000063504B43532D3135</iso:MatchingValue>
-												</iso:MatchingData>
+												<iso:Tag>61</iso:Tag>
+												<iso:DataObject>
+													<iso:MatchingData>
+														<iso:Offset>00</iso:Offset>
+														<iso:Length>0E</iso:Length>
+														<iso:MatchingValue>4F0CA000000063504B43532D3135</iso:MatchingValue>
+													</iso:MatchingData>
+												</iso:DataObject>
 											</iso:DataObject>
 										</iso:Body>
 										<iso:Trailer>9000</iso:Trailer>

@@ -123,6 +123,7 @@
 							<iso:Conclusion>
 								<iso:CardCall>
 									<iso:CommandAPDU>00B20404FF</iso:CommandAPDU>
+									<!--
 									<iso:ResponseAPDU>
 										<iso:Body>
 											<iso:Tag>61</iso:Tag>
@@ -139,6 +140,7 @@
 											<iso:RecognizedCardType>http://www.baek.de/HBA</iso:RecognizedCardType>
 										</iso:Conclusion>
 									</iso:ResponseAPDU>
+									-->
 									<iso:ResponseAPDU>
 										<iso:Body>
 											<iso:MatchingData>

@@ -125,7 +125,7 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 
 		    Certificate clientCert = convertCert(context.getCrypto(), chain);
 
-		    if (! matchesCertReq(cr, chain) || ! isAuthCert(info, chain)) {
+		    if (! (matchesCertReq(cr, chain) && isAuthCert(info, chain))) {
 			continue;
 		    }
 
@@ -213,7 +213,9 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 
 	// check authentication (digital signature) flag
 	X509Certificate cert = chain.get(0);
-	if (! cert.getKeyUsage()[0]) {
+	boolean isAuthCert = cert.getKeyUsage()[0];
+	boolean isSigCert = cert.getKeyUsage()[1];
+	if (! isAuthCert || isSigCert) {
 	    LOG.debug("DID ({}): Certificate key usage does not permit authentication signatures.", info.getDidName());
 	    return false;
 	}

@@ -186,9 +186,11 @@ public final class RichClient {
 
             // Set up Middleware SAL
             for (MiddlewareSALConfig mwSALConfig : mwSALConfigs) {
-                MiddlewareSAL mwSal = new MiddlewareSAL(env, cardStates, mwSALConfig);
-                mwSal.setGui(gui);
-                sal.addSpecializedSAL(mwSal);
+		if (! mwSALConfig.isDisabled()) {
+		    MiddlewareSAL mwSal = new MiddlewareSAL(env, cardStates, mwSALConfig);
+		    mwSal.setGui(gui);
+		    sal.addSpecializedSAL(mwSal);
+		}
             }
 
 	    // Start up control interface

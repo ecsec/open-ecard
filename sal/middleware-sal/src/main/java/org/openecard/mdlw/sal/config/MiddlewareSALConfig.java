@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.openecard.common.OpenecardProperties;
 
 
 /**
@@ -43,10 +44,12 @@ public class MiddlewareSALConfig {
 
     private final MiddlewareSpecType mwSpec;
     private final MiddlewareConfig mwConfig;
+    private final boolean internal;
 
-    public MiddlewareSALConfig(MiddlewareConfig mwConfig, MiddlewareSpecType mwSpec) {
+    public MiddlewareSALConfig(MiddlewareConfig mwConfig, MiddlewareSpecType mwSpec, boolean internal) {
 	this.mwConfig = mwConfig;
         this.mwSpec = mwSpec;
+	this.internal = internal;
     }
 
     public String getMiddlewareName() {
@@ -60,6 +63,14 @@ public class MiddlewareSALConfig {
      */
     public boolean isSALRequired() {
 	return mwSpec.isRequired();
+    }
+
+    public boolean isDisabled() {
+	String key = mwSpec.getMiddlewareName() + ".enabled";
+	boolean enabledProp = Boolean.parseBoolean(OpenecardProperties.properties().getProperty(key, "false"));
+	boolean forceEnable = MiddlewareProperties.isForceLoadInternalModules() && internal;
+	boolean enabled = enabledProp || forceEnable;
+	return mwSpec.isDisabled() || ! enabled;
     }
 
     public String getLibName() {

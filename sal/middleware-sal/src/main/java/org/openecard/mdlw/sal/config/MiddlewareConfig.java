@@ -92,7 +92,7 @@ public class MiddlewareConfig {
     }
 
 
-    private final Map<String, byte[]> CARD_IMAGES = new HashMap<>();
+    private final Map<String, byte[]> cardImages = new HashMap<>();
     private MiddlewareConfigType middlewareConfigXml;
     private final List<MiddlewareSALConfig> mwSALConfigs = new ArrayList<>();
 
@@ -100,6 +100,13 @@ public class MiddlewareConfig {
 	    JAXBException {
 	LOG.debug("Loading middleware config.");
 	loadMwZIPConfig(bundleStream);
+	addSALConfigs(false);
+    }
+
+    public MiddlewareConfig(@Nonnull String baseResPath) throws IOException, JAXBException {
+	LOG.debug("Loading middleware config.");
+	loadMwResourceConfig(baseResPath);
+	addSALConfigs(true);
     }
 
     private void loadMwZIPConfig(InputStream is)
@@ -119,7 +126,7 @@ public class MiddlewareConfig {
 		    if (name.startsWith(CARD_IMAGE_PATH)) {
 			String cardImageName = name.replace(CARD_IMAGE_PATH, "");
 			LOG.debug("CardImageName: " + cardImageName);
-			CARD_IMAGES.put(cardImageName, FileUtils.toByteArray(zipIn));
+			cardImages.put(cardImageName, FileUtils.toByteArray(zipIn));
 		    }
 		}
 		zipIn.closeEntry();
@@ -129,10 +136,41 @@ public class MiddlewareConfig {
 	    LOG.error(msg, ex);
 	    throw new IOException(msg, ex);
 	}
+    }
 
+    private void loadMwResourceConfig(String baseResPath) throws IOException, JAXBException {
+	String imageBasePath = baseResPath + CARD_IMAGE_PATH;
+
+	LOG.debug("Reading middleware config from XML file.");
+	InputStream cfgIn = FileUtils.resolveResourceAsStream(getClass(), baseResPath + MIDDLEWARE_CONFIG_PATH);
+	if (cfgIn != null) {
+	    middlewareConfigXml = (MiddlewareConfigType) MW_CFG_CTX.createUnmarshaller().unmarshal(cfgIn);
+	} else {
+	    throw new FileNotFoundException("Middleware config is not available.");
+	}
+
+	// get image names for all cards
+	for (MiddlewareSpecType mSpec : middlewareConfigXml.getMiddlewareSpecs()) {
+	    for (CardSpecType cSpec : mSpec.getCardConfig().getCardSpecs()) {
+		String cardImageName = cSpec.getCardImageName();
+		// load if not already loaded
+		if (! cardImages.containsKey(cardImageName)) {
+		    LOG.debug("CardImageName: " + cardImageName);
+		    InputStream in = FileUtils.resolveResourceAsStream(getClass(), imageBasePath + cardImageName);
+		    if (in != null) {
+			cardImages.put(cardImageName, FileUtils.toByteArray(in));
+		    } else {
+			LOG.error("Failed to load image {}.", cardImageName);
+		    }
+		}
+	    }
+	}
+    }
+
+    private void addSALConfigs(boolean internal) {
 	ArrayList<MiddlewareSpecType> mwSpecs = middlewareConfigXml.getMiddlewareSpecs();
 	for (MiddlewareSpecType mwSpec : mwSpecs) {
-	    MiddlewareSALConfig mwSALConfig = new MiddlewareSALConfig(this, mwSpec);
+	    MiddlewareSALConfig mwSALConfig = new MiddlewareSALConfig(this, mwSpec, internal);
 	    mwSALConfigs.add(mwSALConfig);
 	}
     }
@@ -174,7 +212,7 @@ public class MiddlewareConfig {
      */
     @Nullable
     public InputStream getCardImage(String imageName) {
-	return new ByteArrayInputStream(CARD_IMAGES.get(imageName));
+	return new ByteArrayInputStream(cardImages.get(imageName));
     }
 
     /**

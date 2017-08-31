@@ -24,13 +24,9 @@ package org.openecard.mdlw.sal.config;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nonnull;
 import javax.xml.bind.JAXBException;
-import org.openecard.common.util.FileUtils;
 
 
 /**
@@ -40,7 +36,7 @@ import org.openecard.common.util.FileUtils;
  */
 public class MiddlewareConfigLoader {
 
-    private static final String MIDDLEWARE_CONFIG_PATHS_FILE = "/middleware/mw_configs.conf";
+    private static final String MIDDLEWARE_CONFIG_PATH = "/middleware/module/";
 
     private final List<MiddlewareConfig> mwConfigs = new ArrayList<>();
     private final List<MiddlewareSALConfig> mwSALConfigs = new ArrayList<>();
@@ -62,29 +58,13 @@ public class MiddlewareConfigLoader {
     private void loadMiddlewareSALConfigs() throws IOException,
 	    FileNotFoundException, JAXBException {
 	// load bundled Middleware config
-	List<String> middlewareConfigPaths = getBundledConfigPaths();
-	for (String mwConfigPath : middlewareConfigPaths) {
-	    InputStream bundleStream = FileUtils.resolveResourceAsStream(getClass(), mwConfigPath);
-	    MiddlewareConfig mwConfig = new MiddlewareConfig(bundleStream);
-	    mwConfigs.add(mwConfig);
-	    mwSALConfigs.addAll(mwConfig.getMiddlewareSALConfigs());
-	}
+	MiddlewareConfig mwConfig = new MiddlewareConfig(MIDDLEWARE_CONFIG_PATH);
+	mwConfigs.add(mwConfig);
+	mwSALConfigs.addAll(mwConfig.getMiddlewareSALConfigs());
 
-	// TODO: load config from home directory based on property mw.sals.scan_home
-	// TODO: consider renaming the property before implementing this
-    }
-
-    @Nonnull
-    private List<String> getBundledConfigPaths() throws FileNotFoundException {
-	try (InputStream is = FileUtils.resolveResourceAsStream(getClass(), MIDDLEWARE_CONFIG_PATHS_FILE)) {
-	    if (is != null) {
-		return FileUtils.readLinesFromConfig(is);
-	    }
-	} catch (IOException ex) {
-	    String msg = "Unable to load Middleware Config Paths.";
-	    throw new FileNotFoundException(msg);
+	if (MiddlewareProperties.isLoadExternalModules()) {
+	    // TODO: load middleware modules from home directory
 	}
-	return Collections.EMPTY_LIST;
     }
 
     public List<MiddlewareConfig> getMiddlewareConfigs() {

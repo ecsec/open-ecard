@@ -44,8 +44,11 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class MiddlewareSpecType {
 
-    @XmlAttribute(name="required")
+    @XmlAttribute(name="required", required = false)
     private boolean required = false;
+
+    @XmlAttribute(name="disabled", required = false)
+    private boolean disabled = false;
 
     @XmlElement(name="MiddlewareName", required = true)
     private String middlewareName;
@@ -63,6 +66,14 @@ public class MiddlewareSpecType {
 
     public void setRequired(boolean required) {
 	this.required = required;
+    }
+
+    public boolean isDisabled() {
+	return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+	this.disabled = disabled;
     }
 
     public String getMiddlewareName() {

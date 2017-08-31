@@ -25,12 +25,12 @@ package org.openecard.crypto.tls.auth;
 import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.security.auth.x500.X500Principal;
@@ -47,6 +47,8 @@ import org.openecard.bouncycastle.tls.crypto.TlsCertificate;
 import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
 import org.openecard.bouncycastle.tls.crypto.TlsCryptoParameters;
 import org.openecard.bouncycastle.tls.crypto.TlsSigner;
+import org.openecard.bouncycastle.util.io.pem.PemObject;
+import org.openecard.bouncycastle.util.io.pem.PemWriter;
 import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
@@ -109,6 +111,18 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 
 		    TlsCredentialedSigner cred;
 		    List<X509Certificate> chain = info.getRelatedCertificateChain();
+
+		    if (LOG.isDebugEnabled()) {
+			for (X509Certificate cert : chain) {
+			    StringWriter out = new StringWriter();
+			    PemWriter pw = new PemWriter(out);
+			    pw.writeObject(new PemObject("CERTIFICATE", cert.getEncoded()));
+			    pw.close();
+			    LOG.debug("Certificate for DID {}\n{}", info.getDidName(), out);
+			    LOG.debug("Certificate details\n{}", cert);
+			}
+		    }
+
 		    Certificate clientCert = convertCert(context.getCrypto(), chain);
 
 		    if (! matchesCertReq(cr, chain) || ! isAuthCert(info, chain)) {

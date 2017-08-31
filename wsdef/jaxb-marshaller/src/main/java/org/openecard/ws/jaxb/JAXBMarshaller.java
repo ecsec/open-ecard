@@ -101,7 +101,7 @@ public final class JAXBMarshaller implements WSMarshaller {
 	    try {
 		tmpW3Factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
 	    } catch (ParserConfigurationException ex) {
-		LOG.warn("Failed to disallow DTDs entirely.");
+		//LOG.debug("Failed to disallow DTDs entirely.");
 	    }
 	    tmpW3Factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
 	    tmpW3Factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
@@ -116,7 +116,7 @@ public final class JAXBMarshaller implements WSMarshaller {
 	    try {
 		tfactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
 	    } catch (TransformerConfigurationException ex) {
-		LOG.warn("Failed to disallow DTDs entirely.");
+		//LOG.debug("Failed to disallow DTDs entirely.");
 	    }
 
 	    tmpSerializer = tfactory.newTransformer();

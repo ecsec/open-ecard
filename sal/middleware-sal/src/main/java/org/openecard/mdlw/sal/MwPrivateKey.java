@@ -27,6 +27,8 @@ import org.openecard.mdlw.sal.cryptoki.CK_MECHANISM;
 import org.openecard.mdlw.sal.struct.CkAttribute;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.openecard.common.ThreadTerminateException;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.mdlw.sal.cryptoki.CK_RSA_PKCS_PSS_PARAMS;
@@ -55,7 +57,7 @@ public class MwPrivateKey extends MwAbstractKey {
     private final Boolean alwaysSensitive;
     private final Boolean neverExtractable;
     private final Boolean wrapWithTrusted;
-    private final long unwrapTemplate;
+    private final Long unwrapTemplate;
     private final Boolean alwaysAuthenticate;
 
     /**
@@ -89,8 +91,8 @@ public class MwPrivateKey extends MwAbstractKey {
      * @throws CryptokiException
      */
     private Boolean loadAttrValueAlwaysAuthenticate() throws CryptokiException {
-        CkAttribute raw = mw.getAttributeValue(session.getSessionId(), objectHandle, CryptokiLibrary.CKA_ALWAYS_AUTHENTICATE);
-	return AttributeUtils.getBool(raw);
+        CkAttribute raw = getAttributeChecked(CryptokiLibrary.CKA_ALWAYS_AUTHENTICATE);
+	return raw != null ? AttributeUtils.getBool(raw) : false;
     }
 
     /**
@@ -99,9 +101,9 @@ public class MwPrivateKey extends MwAbstractKey {
      * @return long
      * @throws CryptokiException
      */
-    private long loadAttrValueUnwrapTemplate() throws CryptokiException {
-        CkAttribute raw = mw.getAttributeValue(session.getSessionId(), objectHandle, CryptokiLibrary.CKA_UNWRAP_TEMPLATE);
-	return AttributeUtils.getLong(raw);
+    private Long loadAttrValueUnwrapTemplate() throws CryptokiException {
+        CkAttribute raw = getAttributeChecked(CryptokiLibrary.CKA_UNWRAP_TEMPLATE);
+	return raw != null ? AttributeUtils.getLong(raw) : null;
     }
 
     /**
@@ -111,8 +113,8 @@ public class MwPrivateKey extends MwAbstractKey {
      * @throws CryptokiException
      */
     private Boolean loadAttrValueWrapWithTrusted() throws CryptokiException {
-        CkAttribute raw = mw.getAttributeValue(session.getSessionId(), objectHandle, CryptokiLibrary.CKA_WRAP_WITH_TRUSTED);
-	return AttributeUtils.getBool(raw);
+        CkAttribute raw = getAttributeChecked(CryptokiLibrary.CKA_WRAP_WITH_TRUSTED);
+	return raw != null ? AttributeUtils.getBool(raw) : false;
     }
 
     /**
@@ -442,6 +444,7 @@ public class MwPrivateKey extends MwAbstractKey {
      * 
      * @return boolean
      */
+    @Nonnull
     public Boolean getWrapWithTrusted() {
         return wrapWithTrusted;
     }
@@ -451,7 +454,8 @@ public class MwPrivateKey extends MwAbstractKey {
      * 
      * @return
      */
-    public long getUnwrapTemplate() {
+    @Nullable
+    public Long getUnwrapTemplate() {
         return unwrapTemplate;
     }
 
@@ -460,6 +464,7 @@ public class MwPrivateKey extends MwAbstractKey {
      * 
      * @return boolean
      */
+    @Nonnull
     public Boolean getAlwaysAuthenticate() {
         return alwaysAuthenticate;
     }

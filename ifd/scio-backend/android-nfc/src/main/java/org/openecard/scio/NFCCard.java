@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2017 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class NFCCard implements SCIOCard {
 
-    private static final Logger logger = LoggerFactory.getLogger(NFCCard.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NFCCard.class);
     private final NFCCardChannel nfcCardChannel = new NFCCardChannel(this);
     protected IsoDep isodep;
     
@@ -52,12 +52,12 @@ public class NFCCard implements SCIOCard {
 
     @Override
     public void beginExclusive() throws SCIOException {
-	logger.warn("beginExclusive not supported");
+	LOG.warn("beginExclusive not supported");
     }
 
     @Override
     public void endExclusive() throws SCIOException {
-	logger.warn("endExclusive not supported");
+	LOG.warn("endExclusive not supported");
     }
 
     @Override
@@ -72,7 +72,7 @@ public class NFCCard implements SCIOCard {
 
     @Override
     public SCIOATR getATR() {
-	logger.warn("getATR not supported");
+	LOG.warn("getATR not supported");
 	// for now there is no way to get the ATR in android nfc api
 	return new SCIOATR(new byte[0]);
     }
@@ -84,9 +84,8 @@ public class NFCCard implements SCIOCard {
 
     @Override
     public SCIOProtocol getProtocol() {
-	logger.warn("getProtocol not supported");
-	// for now theres no way to get the used protocol in android nfc api
-        return null;
+	// NFC is contactless
+        return SCIOProtocol.TCL;
     }
 
     @Override
@@ -96,7 +95,7 @@ public class NFCCard implements SCIOCard {
 
     @Override
     public byte[] transmitControlCommand(int arg0, byte[] arg1) throws SCIOException {
-	logger.warn("transmitControlCommand not supported");
+	LOG.warn("transmitControlCommand not supported");
 	return new byte[0];
     }
 
@@ -104,4 +103,5 @@ public class NFCCard implements SCIOCard {
     public SCIOTerminal getTerminal() {
         return null;
     }
+
 }

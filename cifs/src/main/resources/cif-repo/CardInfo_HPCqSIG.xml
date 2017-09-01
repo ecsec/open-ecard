@@ -180,7 +180,6 @@
 		<!-- =================== -->
 		<iso:CardApplication>
 			<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
-			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:protocols:T-equals-1</iso:InterfaceProtocol>
 			<iso:ApplicationIdentifier>3F00</iso:ApplicationIdentifier>
 			<iso:ApplicationName>MF</iso:ApplicationName>
 

@@ -160,7 +160,8 @@
 		<!-- ======================================= -->
 		<iso:CardApplication>
 			<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
-			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:protocols:T-equals-1</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:tech:protocols:T-equals-0</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:tech:protocols:T-equals-1</iso:InterfaceProtocol>
 			<iso:ApplicationIdentifier>D27600014601</iso:ApplicationIdentifier>
 			<iso:ApplicationName>MF</iso:ApplicationName>
 
@@ -732,7 +733,8 @@
 		<iso:CardApplication>
 			<!-- DF.HPA -->
 			<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
-			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:protocols:T-equals-1</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:tech:protocols:T-equals-0</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:tech:protocols:T-equals-1</iso:InterfaceProtocol>
 			<iso:ApplicationIdentifier>D27600014602</iso:ApplicationIdentifier>
 			<!-- Note that the AID of DF HPA for HPCqSIG was D27600004002 !  -->
 			<iso:ApplicationName>DF.HPA</iso:ApplicationName>
@@ -869,7 +871,8 @@
 		<iso:CardApplication>
 			<!-- DF.QES (DINSIG) -->
 			<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
-			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:protocols:T-equals-1</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:tech:protocols:T-equals-0</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:tech:protocols:T-equals-1</iso:InterfaceProtocol>
 			<iso:ApplicationIdentifier>D27600006601</iso:ApplicationIdentifier>
 			<iso:ApplicationName>DF.QES</iso:ApplicationName>
 			<iso:CardApplicationACL>
@@ -1469,7 +1472,8 @@
 		<iso:CardApplication>
 			<!-- DF ESIGN -->
 			<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
-			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:protocols:T-equals-1</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:tech:protocols:T-equals-0</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:tech:protocols:T-equals-1</iso:InterfaceProtocol>
 			<iso:ApplicationIdentifier>A000000167455349474E</iso:ApplicationIdentifier>
 			<iso:CardApplicationACL>
 				<iso:AccessRule>
@@ -1906,7 +1910,8 @@
 		<!-- =========================================== -->
 		<iso:CardApplication>
 			<iso:RequirementLevel>PersonalizationOptional</iso:RequirementLevel>
-			<iso:InterfaceProtocol>urn:iso:std:iso-iec:14443</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:14443:-2:tech:protocols:Type-A</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:14443:-2:tech:protocols:Type-B</iso:InterfaceProtocol>
 			<iso:ApplicationIdentifier>D27600014601</iso:ApplicationIdentifier>
 			<iso:ApplicationName>MF-CL</iso:ApplicationName>
 
@@ -2284,7 +2289,8 @@
 		<iso:CardApplication>
 			<!-- DF.HPA -->
 			<iso:RequirementLevel>PersonalizationOptional</iso:RequirementLevel>
-			<iso:InterfaceProtocol>urn:iso:std:iso-iec:14443</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:14443:-2:tech:protocols:Type-A</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:14443:-2:tech:protocols:Type-B</iso:InterfaceProtocol>
 			<iso:ApplicationIdentifier>D27600014602</iso:ApplicationIdentifier>
 			<!-- Note that the AID of DF HPA for HPCqSIG was D27600004002 !  -->
 			<iso:ApplicationName>DF.HPA-CL</iso:ApplicationName>
@@ -2420,7 +2426,8 @@
 		<iso:CardApplication>
 			<!-- DF QES (DINSIG) -->
 			<iso:RequirementLevel>PersonalizationOptional</iso:RequirementLevel>
-			<iso:InterfaceProtocol>urn:iso:std:iso-iec:14443</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:14443:-2:tech:protocols:Type-A</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:14443:-2:tech:protocols:Type-B</iso:InterfaceProtocol>
 			<iso:ApplicationIdentifier>D27600006601</iso:ApplicationIdentifier>
 			<iso:ApplicationName>DF.QES-CL</iso:ApplicationName>
 			<iso:CardApplicationACL>
@@ -2774,7 +2781,8 @@
 		<iso:CardApplication>
 			<!-- DF ESIGN -->
 			<iso:RequirementLevel>PersonalizationOptional</iso:RequirementLevel>
-			<iso:InterfaceProtocol>urn:iso:std:iso-iec:14443</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:14443:-2:tech:protocols:Type-A</iso:InterfaceProtocol>
+			<iso:InterfaceProtocol>urn:iso:std:iso-iec:14443:-2:tech:protocols:Type-B</iso:InterfaceProtocol>
 			<iso:ApplicationIdentifier>A000000167455349474E</iso:ApplicationIdentifier>
 			<iso:CardApplicationACL>
 				<iso:AccessRule>

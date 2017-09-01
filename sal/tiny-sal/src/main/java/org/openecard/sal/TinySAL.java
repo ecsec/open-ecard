@@ -918,12 +918,19 @@ public class TinySAL implements SAL {
 	    CardResponseAPDU result = CardUtils.selectFileWithOptions(env.getDispatcher(), slotHandle, fileID,
 		    null, CardUtils.FCP_RESPONSE_DATA);
 
+	    FCP fcp = null;
 	    if (result != null && result.getData().length > 0) {
-		cardStateEntry.setFCPOfSelectedEF(new FCP(result.getData()));
-	    } else {
-		cardStateEntry.setFCPOfSelectedEF(new FCP(createFakeFCP(Arrays.copyOfRange(fileID, fileID.length - 2,
-			fileID.length))));
+		try {
+		    fcp = new FCP(result.getData());
+		} catch (TLVException ex) {
+		    LOG.warn("Invalid FCP received.");
+		}
 	    }
+	    if (fcp == null) {
+		LOG.info("Using fake FCP.");
+		fcp = new FCP(createFakeFCP(Arrays.copyOfRange(fileID, fileID.length - 2, fileID.length)));
+	    }
+	    cardStateEntry.setFCPOfSelectedEF(fcp);
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 HS Coburg.
+ * Copyright (C) 2012-2017 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -56,7 +56,7 @@ public class PinCompareMarkerTypeTest {
 	Environment env = new ClientEnv();
 	CardRecognitionImpl recognition = new CardRecognitionImpl(env);
 	CardInfoType cardInfo = recognition.getCardInfo(cardType);
-	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo);
+	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo, null);
 
 	DIDInfoType didInfoWrapper = cardInfoWrapper.getDIDInfo(didName, rootApplication);
 	PINCompareMarkerType pinCompareMarker = new PINCompareMarkerType(

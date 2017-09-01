@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import javax.annotation.Nullable;
 import org.openecard.addon.sal.SALProtocol;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
@@ -69,11 +70,8 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
     private final Map<String, SALProtocol> protoObjects = new TreeMap<>();
     private FCP lastSelectedEfFCP;
 
-    public CardStateEntry(ConnectionHandleType handle, CardInfoType cif) {
-	serialNumber = nextNumber();
-	infoObject = new CardInfoWrapper(cif);
-	this.handle = handle;
-	this.handle.setCardApplication(getImplicitlySelectedApplicationIdentifier());
+    public CardStateEntry(ConnectionHandleType handle, CardInfoType cif, @Nullable String interfaceProtocol) {
+	this(handle, new CardInfoWrapper(cif, interfaceProtocol));
     }
 
     private CardStateEntry(ConnectionHandleType handle, CardInfoWrapper cifWrapper) {

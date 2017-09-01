@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -64,7 +64,7 @@ public class SALStateCallback implements EventCallback {
 		    String cardType = handle.getRecognitionInfo().getCardType();
 		    CardInfoType cif = env.getCIFProvider().getCardInfo(handle, cardType);
 		    if (cif != null) {
-			manager.addCredential(handle, cif);
+			manager.addCredential(handle, ifdEvtData.getIfaceProtocol(), cif);
 		    } else {
 			LOG.info("Not adding card to SAL, because it has no CardInfo file.");
 		    }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -140,9 +140,10 @@ public class IfdEventManager {
      *
      * @param cHandleRm {@link ConnectionHandleType} object representing a card which shall be removed.
      * @param cHandleIn {@link ConnectionHandleType} object representing a card which shall be inserted.
+     * @param ifaceProtocol Interface protocol of the connected card.
      */
-    public void resetCard(ConnectionHandleType cHandleRm, ConnectionHandleType cHandleIn) {
-	env.getEventDispatcher().notify(EventType.CARD_REMOVED, new IfdEventObject(cHandleRm));
+    public void resetCard(ConnectionHandleType cHandleRm, ConnectionHandleType cHandleIn, String ifaceProtocol) {
+	env.getEventDispatcher().notify(EventType.CARD_REMOVED, new IfdEventObject(cHandleRm, null));
 
 	// determine if the reader has a protected auth path
 	IFDCapabilitiesType slotCapabilities = getCapabilities(cHandleRm.getContextHandle(), cHandleRm.getIFDName());
@@ -160,7 +161,7 @@ public class IfdEventManager {
 	env.getEventDispatcher().notify(EventType.CARD_INSERTED, new IfdEventObject(cInNew));
 
 	if (isRecognize()) {
-	    Recognizer rec = new Recognizer(env, cInNew);
+	    Recognizer rec = new Recognizer(env, cInNew, ifaceProtocol);
 	    Thread recThread = new Thread(rec, "Recoginiton-" + THREAD_NUM.getAndIncrement());
 	    recThread.start();
 	}

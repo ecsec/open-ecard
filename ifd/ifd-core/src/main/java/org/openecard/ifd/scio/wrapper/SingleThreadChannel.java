@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -120,6 +120,7 @@ public class SingleThreadChannel implements IfdChannel {
 		}
 	    }
 	}
+	LOG.info("Card connected with protocol {}.", card.getProtocol());
 	return card;
     }
 

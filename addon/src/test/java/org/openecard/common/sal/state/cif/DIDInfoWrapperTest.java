@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2017 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -52,7 +52,7 @@ public class DIDInfoWrapperTest {
 	Environment env = new ClientEnv();
 	CardRecognitionImpl recognition = new CardRecognitionImpl(env);
 	CardInfoType cardInfo = recognition.getCardInfo("http://bsi.bund.de/cif/npa.xml");
-	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo);
+	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo, null);
 
 	CardApplicationWrapper cardApplicationWrapper = cardInfoWrapper.getCardApplication(rootApplication);
 

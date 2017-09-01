@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -751,7 +751,7 @@ public class IFD implements org.openecard.ws.IFD {
 			    .setIfdName(card.getTerminal().getName())
 			    .setSlotIdx(BigInteger.ZERO)
 			    .buildConnectionHandle();
-		    evManager.resetCard(cHandleRm, cHandleIn);
+		    evManager.resetCard(cHandleRm, cHandleIn, card.getProtocol().toUri());
 		    card.disconnect(true);
 		}
 		// TODO: take care of other actions (probably over ControlIFD)

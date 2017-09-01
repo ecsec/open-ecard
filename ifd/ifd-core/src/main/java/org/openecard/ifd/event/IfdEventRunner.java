@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -44,6 +44,7 @@ import org.openecard.common.ifd.scio.NoSuchTerminal;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.util.HandlerBuilder;
 import org.openecard.ifd.scio.wrapper.ChannelManager;
+import org.openecard.ifd.scio.wrapper.SingleThreadChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -187,12 +188,13 @@ public class IfdEventRunner implements Runnable {
 		    ConnectionHandleType handle = makeUnknownCardHandle(ifdName, newSlot, slotCapabilities);
 		    env.getEventDispatcher().notify(EventType.CARD_INSERTED, new IfdEventObject(handle));
 		    try {
-			cm.openMasterChannel(ifdName);
+			SingleThreadChannel ch = cm.openMasterChannel(ifdName);
+			if (evtManager.isRecognize()) {
+			    String proto = ch.getChannel().getCard().getProtocol().toUri();
+			    evtManager.threadPool.submit(new Recognizer(env, handle, proto));
+			}
 		    } catch (NoSuchTerminal | SCIOException ex) {
 			LOG.error("Failed to connect card, nevertheless sending CARD_INSERTED event.", ex);
-		    }
-		    if (evtManager.isRecognize()) {
-			evtManager.threadPool.submit(new Recognizer(env, handle));
 		    }
 
 		} else if (! terminalAdded && ! cardPresent && cardWasPresent) {

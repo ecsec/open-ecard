@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -45,10 +45,12 @@ public class Recognizer implements Runnable {
 
     private final Environment env;
     private final ConnectionHandleType handle;
+    private final String ifaceProtocol;
 
-    public Recognizer(Environment env, ConnectionHandleType handle) {
+    public Recognizer(Environment env, ConnectionHandleType handle, String ifaceProtocol) {
 	this.env = env;
 	this.handle = handle;
+	this.ifaceProtocol = ifaceProtocol;
     }
 
     @Override
@@ -56,7 +58,7 @@ public class Recognizer implements Runnable {
 	ConnectionHandleType newHandle = recognizeSlot();
 	if (newHandle != null) {
 	    LOG.debug("Found a recognized card event ({}).", handle.getIFDName());
-	    env.getEventDispatcher().notify(EventType.CARD_RECOGNIZED, new IfdEventObject(newHandle));
+	    env.getEventDispatcher().notify(EventType.CARD_RECOGNIZED, new IfdEventObject(newHandle, ifaceProtocol));
 	}
     }
 

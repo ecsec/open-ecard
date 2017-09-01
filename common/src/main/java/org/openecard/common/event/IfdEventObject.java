@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,6 +24,7 @@ package org.openecard.common.event;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 
 /**
@@ -32,10 +33,17 @@ import javax.annotation.Nonnull;
  */
 public class IfdEventObject extends EventObject {
 
+    private final String ifaceProtocol;
+
     // TODO: move this class to IFD package, but this needs refactoring of StateMap as well
 
     public IfdEventObject(@Nonnull ConnectionHandleType handle) {
+	this(handle, null);
+    }
+
+    public IfdEventObject(@Nonnull ConnectionHandleType handle, @Nullable String ifaceProtocol) {
 	super(handle);
+	this.ifaceProtocol = ifaceProtocol;
     }
 
     @Override
@@ -43,6 +51,11 @@ public class IfdEventObject extends EventObject {
     @SuppressWarnings("null")
     public ConnectionHandleType getHandle() {
 	return super.getHandle();
+    }
+
+    @Nullable
+    public String getIfaceProtocol() {
+	return ifaceProtocol;
     }
 
 }

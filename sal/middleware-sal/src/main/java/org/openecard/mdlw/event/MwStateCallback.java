@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -86,7 +86,7 @@ public class MwStateCallback implements EventCallback {
 			}
 
 			// create new entry in card states
-			CardStateEntry entry = new CardStateEntry(handle, cif);
+			CardStateEntry entry = new CardStateEntry(handle, cif, null);
 			states.addEntry(entry);
 
 			break;

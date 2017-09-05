@@ -287,4 +287,9 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 	super.notifyAlertReceived(alertLevel, alertDescription);
     }
 
+    @Override
+    public void notifySecureRenegotiation(boolean secureRenegotiation) throws IOException {
+	// pretend we accept it
+    }
+
 }

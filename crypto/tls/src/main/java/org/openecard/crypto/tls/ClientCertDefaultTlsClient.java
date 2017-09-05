@@ -388,4 +388,9 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	super.notifyHandshakeComplete();
     }
 
+    @Override
+    public void notifySecureRenegotiation(boolean secureRenegotiation) throws IOException {
+	// pretend we accept it
+    }
+
 }

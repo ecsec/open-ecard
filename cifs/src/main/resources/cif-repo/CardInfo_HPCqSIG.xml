@@ -943,7 +943,12 @@
 								</iso:KeyRef>
 								<iso:KeySize>2048</iso:KeySize>
 							</iso:KeyInfo>
-							<iso:SignatureGenerationInfo>MSE_HASH MSE_KEY_DS PSO_CDS</iso:SignatureGenerationInfo>
+							<!-- Spec says for PSO_CDS Data Field:
+								- Digestinfo in case padding according to PKCS#1 Clause 9.2, see Annex E.1.2
+								- Hash field in case of ISO 9796-2 padding with RND, see Annex E.1.1
+								However for this Algorithm usually the raw hash is sent to the card.
+							-->
+							<iso:SignatureGenerationInfo>MSE_KEY_DS PSO_CDS</iso:SignatureGenerationInfo>
 							<iso:CertificateRef>
 								<iso:DataSetName>EF.C.HP.QES</iso:DataSetName>
 							</iso:CertificateRef>

@@ -742,6 +742,7 @@ public class IFD implements org.openecard.ws.IFD {
 		if (ActionType.RESET == action) {
 		    HandlerBuilder builder = HandlerBuilder.create();
 		    ConnectionHandleType cHandleIn = builder.setCardType(ECardConstants.UNKNOWN_CARD)
+			    .setCardIdentifier(card.getATR().getBytes())
 			    .setContextHandle(ctxHandle)
 			    .setIfdName(card.getTerminal().getName())
 			    .setSlotIdx(BigInteger.ZERO)

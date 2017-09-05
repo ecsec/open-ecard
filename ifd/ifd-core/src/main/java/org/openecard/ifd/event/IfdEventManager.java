@@ -152,6 +152,7 @@ public class IfdEventManager {
 	HandlerBuilder chBuilder = HandlerBuilder.create();
 	ConnectionHandleType cInNew = chBuilder.setSessionId(sessionId)
 		.setCardType(cHandleIn.getRecognitionInfo())
+		.setCardIdentifier(cHandleIn.getRecognitionInfo())
 		.setContextHandle(cHandleIn.getContextHandle())
 		.setIfdName(cHandleIn.getIFDName())
 		.setSlotIdx(BigInteger.ZERO)
